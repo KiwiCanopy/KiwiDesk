@@ -9,10 +9,12 @@ private final class FakeHost {
     var mapping: Set<HyperKeyRemap.Pair> = []
     var written: HyperKeyRemap.Pair?
     var answers = true
+    var runs = 0
 
     var host: HyperKeyRemap.Host {
         HyperKeyRemap.Host(
             run: { [unowned self] arguments in
+                runs += 1
                 guard answers else { return nil }
                 if arguments.contains("--get") { return listing }
                 let json = arguments.last ?? ""
@@ -54,6 +56,7 @@ struct HyperKeyCommandTests {
         let reply = core.execute("set_hyper_key", args: [.string("caps_lock")])
         #expect(reply.isSuccess)
         #expect(core.keys.hyperEnabled)
+        #expect(core.keys.hyperStatus == .on)
         #expect(fake.written == HyperKeyRemap.pair(for: .capsLock))
         core.retireHyperKey()
         #expect(!core.keys.hyperEnabled)
@@ -71,6 +74,7 @@ struct HyperKeyCommandTests {
         let reply = core.execute("set_hyper_key", args: [.string("caps_lock")])
         #expect(!reply.isSuccess)
         #expect(!core.keys.hyperEnabled)
+        #expect(core.keys.hyperStatus == .refused)
         core.retireHyperKey()
         #expect(!fake.mapping.isEmpty)  // never cleared
     }
@@ -88,6 +92,7 @@ struct HyperKeyCommandTests {
         let bad = core.execute("set_hyper_key", args: [.string("a")])
         #expect(!bad.isSuccess)
         #expect(bad.error?.contains("caps_lock") == true)
+        #expect(bad.error?.contains("off") == true)
     }
 
     @Test("a silent hidutil leaves Hyper off")
@@ -99,5 +104,30 @@ struct HyperKeyCommandTests {
         let reply = core.execute("set_hyper_key", args: [.string("f13")])
         #expect(!reply.isSuccess)
         #expect(!core.keys.hyperEnabled)
+    }
+
+    @Test("a stale record dies with an empty mapping")
+    func staleRecordIsDropped() {
+        let core = makeTestCore()
+        let fake = FakeHost()
+        let caps = HyperKeyRemap.pair(for: .capsLock)
+        fake.written = caps  // left by a crash; the restart cleared
+        core.hyperRemapHost = fake.host
+        core.applyHyperKey()
+        #expect(fake.written == nil)
+        fake.mapping = [caps]  // another tool's, the same shape
+        core.applyHyperKey()
+        core.retireHyperKey()
+        #expect(fake.mapping == [caps])  // never cleared
+    }
+
+    @Test("nothing chosen and nothing recorded spawns nothing")
+    func idleBootSpawnsNothing() {
+        let core = makeTestCore()
+        let fake = FakeHost()
+        core.hyperRemapHost = fake.host
+        core.applyHyperKey()
+        #expect(fake.runs == 0)
+        #expect(core.keys.hyperStatus == .off)
     }
 }

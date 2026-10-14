@@ -131,13 +131,16 @@ extension HyperKeyRemap {
     static func apply(
         _ want: HyperSourceKey?,
         on host: Host
-    ) -> Outcome {
+    ) -> HyperKeyStatus {
         guard
             let listing = host.run(
                 ["property", "--get", "UserKeyMapping"]
             )
         else { return .failed }
         let current = pairs(inHidutilOutput: listing)
+        // An empty mapping holds nothing of ours: a record beside
+        // it would later claim another tool's identical entry.
+        if current.isEmpty { host.writeWritten(nil) }
         let plan = plan(
             current: current,
             written: host.readWritten(),
@@ -158,14 +161,42 @@ extension HyperKeyRemap {
         return want == nil ? .off : .on
     }
 
-    /// What `apply` did, as structure for the GUI (#96).
-    enum Outcome: Equatable {
-        case on, off
-        /// A mapping KiwiDesk did not write is in place.
-        case refused
-        /// `hidutil` did not answer.
-        case failed
+}
+
+extension HyperKeyRemap {
+    /// The stored record: the entry and the boot it was written
+    /// in. A `hidutil` mapping dies at a restart and the record
+    /// does not, so a record from another boot names a mapping
+    /// that is gone — and a mapping with its shape now is another
+    /// tool's, never KiwiDesk's.
+    static func record(_ pair: Pair, bootedAt boot: Date) -> [Double] {
+        [
+            Double(pair.source), Double(pair.destination),
+            boot.timeIntervalSince1970,
+        ]
     }
+
+    /// The entry a stored record names, nil where it is from
+    /// another boot or unreadable.
+    static func recorded(_ raw: [Any]?, bootedAt boot: Date) -> Pair? {
+        guard let values = raw as? [Double], values.count == 3,
+            abs(values[2] - boot.timeIntervalSince1970) < 1
+        else { return nil }
+        return Pair(
+            source: UInt64(values[0]),
+            destination: UInt64(values[1])
+        )
+    }
+}
+
+/// What the Hyper key's remap last did, as structure for the GUI
+/// (#96, #1870).
+public enum HyperKeyStatus: Sendable, Equatable {
+    case on, off
+    /// A key mapping KiwiDesk did not write is in place.
+    case refused
+    /// `hidutil` did not answer.
+    case failed
 }
 
 extension HyperKeyRemap.Host {
@@ -181,19 +212,31 @@ extension HyperKeyRemap.Host {
             let out = Pipe()
             process.standardOutput = out
             process.standardError = FileHandle.nullDevice
+            let exited = DispatchSemaphore(value: 0)
+            process.terminationHandler = { _ in exited.signal() }
             guard (try? process.run()) != nil else { return nil }
-            let data = out.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
+            // Drained beside the wait, so a long listing cannot
+            // fill the pipe and stall the exit.
+            nonisolated(unsafe) var data = Data()
+            let drained = DispatchGroup()
+            drained.enter()
+            DispatchQueue.global(qos: .userInitiated).async {
+                data = out.fileHandleForReading.readDataToEndOfFile()
+                drained.leave()
+            }
+            // A wedged hidd must not freeze boot or quit.
+            guard exited.wait(timeout: .now() + 2) == .success else {
+                process.terminate()
+                return nil
+            }
+            drained.wait()
             guard process.terminationStatus == 0 else { return nil }
             return String(decoding: data, as: UTF8.self)
         },
         readWritten: {
-            let raw = UserDefaults.standard.array(forKey: recordKey)
-            guard let values = raw as? [UInt64], values.count == 2
-            else { return nil }
-            return HyperKeyRemap.Pair(
-                source: values[0],
-                destination: values[1]
+            HyperKeyRemap.recorded(
+                UserDefaults.standard.array(forKey: recordKey),
+                bootedAt: SystemBoot.time()
             )
         },
         writeWritten: { pair in
@@ -202,7 +245,10 @@ extension HyperKeyRemap.Host {
                 return
             }
             UserDefaults.standard.set(
-                [pair.source, pair.destination],
+                HyperKeyRemap.record(
+                    pair,
+                    bootedAt: SystemBoot.time()
+                ),
                 forKey: recordKey
             )
         }

@@ -68,12 +68,28 @@ public final class KeybindingManager {
     let holdGlide = HoldGlide()
     /// The Hyper layer's trigger and held registrations (#1870).
     var hyper = HyperLayer()
+    /// Schedules the Hyper hold's watchdog; returns its cancel.
+    var hyperSchedule:
+        @MainActor (
+            TimeInterval, @escaping @MainActor () -> Void
+        ) -> () -> Void = { delay, work in
+            let item = DispatchWorkItem {
+                MainActor.assumeIsolated { work() }
+            }
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + delay,
+                execute: item
+            )
+            return { item.cancel() }
+        }
     /// The key the user chose as Hyper, nil for none; KiwiCore
     /// owns its remap (`KiwiCore+HyperKey`).
     public internal(set) var hyperSource: HyperSourceKey?
+    /// What the last remap did, for the Settings row (#96).
+    public internal(set) var hyperStatus = HyperKeyStatus.off
     /// Whether the Hyper key is on: its remap is in place, so F18
     /// arrives when it is pressed (`KiwiCore.applyHyperKey`).
-    public var hyperEnabled = false {
+    public internal(set) var hyperEnabled = false {
         didSet {
             guard hyperEnabled != oldValue else { return }
             activate(currentLayer)

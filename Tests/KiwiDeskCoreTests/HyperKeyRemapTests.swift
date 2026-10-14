@@ -140,3 +140,27 @@ struct HyperKeyRemapTests {
         #expect(HyperSourceKey.f13.kind == .spare)
     }
 }
+
+/// The ownership record outlives a crash but not the mapping it
+/// names: a record from another boot is no record (#1870).
+@Suite("Hyper key remap record")
+struct HyperKeyRemapRecordTests {
+    private let caps = HyperKeyRemap.pair(for: .capsLock)
+
+    @Test("a record from this boot names its entry")
+    func sameBootReads() {
+        let boot = Date(timeIntervalSince1970: 1_000_000)
+        let stored = HyperKeyRemap.record(caps, bootedAt: boot)
+        #expect(HyperKeyRemap.recorded(stored, bootedAt: boot) == caps)
+    }
+
+    @Test("a record from another boot names nothing")
+    func otherBootIsAbsent() {
+        let then = Date(timeIntervalSince1970: 1_000_000)
+        let stored = HyperKeyRemap.record(caps, bootedAt: then)
+        let now = then.addingTimeInterval(3600)
+        #expect(HyperKeyRemap.recorded(stored, bootedAt: now) == nil)
+        #expect(HyperKeyRemap.recorded(nil, bootedAt: now) == nil)
+        #expect(HyperKeyRemap.recorded([1.0], bootedAt: now) == nil)
+    }
+}

@@ -5040,8 +5040,10 @@ end)
 
 :::unreleased
 `hyper` is KiwiDesk's own Hyper modifier, live once
-[`set_hyper_key`](#set_hyper_key) names a key; it pairs with
-`shift`.
+[`set_hyper_key`](#set_hyper_key) names a key; it combines with
+any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
+its chord without `hyper`, so an enabled macOS shortcut on that
+chord (`hyper+cmd+space` is Spotlight's) still wins.
 :::
 
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,

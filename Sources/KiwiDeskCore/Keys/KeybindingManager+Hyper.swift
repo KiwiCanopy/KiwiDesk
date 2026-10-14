@@ -5,55 +5,72 @@ import Foundation
 /// the layer's `hyper+…` combos are registered BARE only while
 /// it is held. No keyboard tap, so no Input Monitoring.
 struct HyperLayer {
-    /// The armed layer's rows, registered on each press.
+    /// The active layer's rows, registered on each press.
     var rows: [(KeyCombo, Int32)] = []
-    /// The F18 registrations, one per modifier set, so a press
-    /// made while another modifier is down still arrives.
+    /// The F18 registrations. They outlive a layer change: a
+    /// re-activation mid-hold must not lose the release.
     var triggerIDs: Set<UInt32> = []
     /// The bare registrations of the current hold.
     var heldIDs: [UInt32] = []
     var isHeld = false
-    /// Ends a hold whose release never arrived.
-    var watchdog: DispatchWorkItem?
+    /// Cancels the watchdog of the current hold.
+    var cancelWatchdog: (() -> Void)?
 
     /// A hold past this ends as if released and is logged — a
     /// stuck layer would swallow its keys system-wide.
     static let maxHoldSeconds: TimeInterval = 30
+
+    /// Every set of the four modifiers, the empty one first:
+    /// Hyper combines with any of them (#1870), so the key arrives
+    /// whichever are already down.
+    static let triggerMasks: [HotkeyModifiers] = (0..<16).map { bits in
+        var mask: HotkeyModifiers = []
+        if bits & 1 != 0 { mask.insert(.command) }
+        if bits & 2 != 0 { mask.insert(.option) }
+        if bits & 4 != 0 { mask.insert(.control) }
+        if bits & 8 != 0 { mask.insert(.shift) }
+        return mask
+    }
 }
 
 extension KeybindingManager {
-    /// Registers the trigger for `rows` when the Hyper key is on;
-    /// called at the end of every `activate`.
-    /// A registrar with no release channel arms nothing: a held
-    /// layer that never hears its release swallows its keys.
+    /// Takes the active layer's Hyper rows at the end of every
+    /// `activate`. A registrar with no release channel arms
+    /// nothing: a held layer that never hears its release
+    /// swallows its keys.
     func armHyper(_ rows: [(KeyCombo, Int32)]) {
-        guard hyperEnabled, !rows.isEmpty else { return }
+        hyper.rows = rows
+        guard hyperEnabled, !rows.isEmpty else {
+            disarmHyperTrigger()
+            return
+        }
         guard holdGlide.releaseCapable else {
             activationFailures.formUnion(rows.map(\.0))
             onLog("hyper: registrar reports no releases")
             return
         }
-        hyper.rows = rows
-        for mask in Self.triggerMasks {
-            let id = registrar.register(
-                keyCode: HyperSourceKey.triggerKeyCode,
-                modifiers: mask
-            ) { [weak self] in
-                self?.hyperPressed()
-            }
-            if let id { hyper.triggerIDs.insert(id) }
-        }
+        if hyper.triggerIDs.isEmpty { registerHyperTrigger() }
         if hyper.triggerIDs.isEmpty {
             activationFailures.formUnion(rows.map(\.0))
             onLog("hyper: could not register the Hyper key")
+        } else if hyper.isHeld {
+            registerHeldRows()
         }
     }
 
-    /// Drops the trigger and any held layer; part of `deactivate`.
-    func disarmHyper() {
+    /// The `deactivate` half: the held bare keys go (their refs
+    /// may be released), the trigger stays unless Hyper is off or
+    /// the hotkeys are suspended for the recorder.
+    func dropHyperRows() {
+        unregisterHeldRows()
+        hyper.rows = []
+        if isSuspended || !hyperEnabled { disarmHyperTrigger() }
+    }
+
+    func disarmHyperTrigger() {
         hyperReleased()
         for id in hyper.triggerIDs { registrar.unregister(id: id) }
-        hyper = HyperLayer()
+        hyper.triggerIDs = []
     }
 
     /// Hears every release: the trigger's ends the hold, any other
@@ -69,6 +86,37 @@ extension KeybindingManager {
     func hyperPressed() {
         guard !hyper.isHeld, !isSuspended else { return }
         hyper.isHeld = true
+        registerHeldRows()
+        hyper.cancelWatchdog = hyperSchedule(HyperLayer.maxHoldSeconds) {
+            [weak self] in
+            guard let self, hyper.isHeld else { return }
+            onLog("hyper: held past its bound, released")
+            hyperReleased()
+        }
+    }
+
+    func hyperReleased() {
+        guard hyper.isHeld else { return }
+        hyper.isHeld = false
+        hyper.cancelWatchdog?()
+        hyper.cancelWatchdog = nil
+        unregisterHeldRows()
+    }
+
+    private func registerHyperTrigger() {
+        for mask in HyperLayer.triggerMasks {
+            let id = registrar.register(
+                keyCode: HyperSourceKey.triggerKeyCode,
+                modifiers: mask
+            ) { [weak self] in
+                self?.hyperPressed()
+            }
+            if let id { hyper.triggerIDs.insert(id) }
+        }
+    }
+
+    private func registerHeldRows() {
+        unregisterHeldRows()
         let before = Set(activeBindings.keys)
         for (combo, ref) in hyper.rows {
             if !registerPhysical(
@@ -85,40 +133,16 @@ extension KeybindingManager {
         hyper.heldIDs = activeBindings.keys.filter {
             !before.contains($0)
         }
-        let watchdog = DispatchWorkItem { [weak self] in
-            guard let self, hyper.isHeld else { return }
-            onLog("hyper: held past its bound, released")
-            hyperReleased()
-        }
-        hyper.watchdog = watchdog
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + HyperLayer.maxHoldSeconds,
-            execute: watchdog
-        )
     }
 
-    func hyperReleased() {
-        guard hyper.isHeld else { return }
-        hyper.isHeld = false
-        hyper.watchdog?.cancel()
-        hyper.watchdog = nil
-        // The bare keys vanish, so their own releases never come:
-        // end a glide on one here, as a release would.
+    /// The bare keys vanish, so their own releases never come:
+    /// end a glide on one here, as a release would.
+    private func unregisterHeldRows() {
         for id in hyper.heldIDs {
             holdGlide.released(id: id)
             registrar.unregister(id: id)
             activeBindings[id] = nil
         }
         hyper.heldIDs = []
-    }
-
-    /// Every set of the four modifiers, the empty one first.
-    static let triggerMasks: [HotkeyModifiers] = (0..<16).map { bits in
-        var mask: HotkeyModifiers = []
-        if bits & 1 != 0 { mask.insert(.command) }
-        if bits & 2 != 0 { mask.insert(.option) }
-        if bits & 4 != 0 { mask.insert(.control) }
-        if bits & 8 != 0 { mask.insert(.shift) }
-        return mask
     }
 }

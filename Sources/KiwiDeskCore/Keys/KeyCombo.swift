@@ -44,6 +44,15 @@ public struct KeyCombo: Hashable, Sendable {
         )
     }
 
+    /// The chord Carbon registers: a Hyper combo is registered
+    /// bare while the Hyper key is held (#1870).
+    public var registered: KeyCombo {
+        KeyCombo(
+            keyCode: keyCode,
+            modifiers: modifiers.subtracting(.hyper)
+        )
+    }
+
     /// Tests equivalence of two shortcut strings.
     public static func equivalent(
         _ lhs: String,

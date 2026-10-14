@@ -7,7 +7,7 @@ extension KeybindingManager {
         // The ids are about to vanish, so no release can ever
         // arrive to stop a live glide — end it here (#1056).
         holdGlide.cancelRun()
-        disarmHyper()
+        dropHyperRows()
         for id in activeBindings.keys {
             registrar.unregister(id: id)
         }

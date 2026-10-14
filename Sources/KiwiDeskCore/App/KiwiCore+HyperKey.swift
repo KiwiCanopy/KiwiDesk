@@ -17,7 +17,7 @@ extension KiwiCore {
         } else if let key = HyperSourceKey(rawValue: name) {
             want = key
         } else {
-            return CommandResponse.expected(HyperSourceKey.self)
+            return .fail("expected off|\(HyperSourceKey.expectedList)")
         }
         keys.hyperSource = want
         switch applyHyperKey() {
@@ -37,13 +37,22 @@ extension KiwiCore {
     /// `keys.hyperSource`: at `start()`, which also clears a
     /// mapping a crash left behind, and on the verb.
     @discardableResult
-    func applyHyperKey() -> HyperKeyRemap.Outcome {
+    func applyHyperKey() -> HyperKeyStatus {
+        // Nothing chosen and nothing of ours to clear: no spawn.
+        if keys.hyperSource == nil, hyperRemapHost.readWritten() == nil {
+            keys.hyperStatus = .off
+            keys.hyperEnabled = false
+            return .off
+        }
         let outcome = HyperKeyRemap.apply(
             keys.hyperSource,
             on: hyperRemapHost
         )
+        keys.hyperStatus = outcome
         keys.hyperEnabled = outcome == .on
-        if outcome == .refused || outcome == .failed {
+        if keys.hyperSource != nil,
+            outcome == .refused || outcome == .failed
+        {
             onLog("hyper: remap \(outcome), Hyper key off")
         }
         return outcome
@@ -53,6 +62,7 @@ extension KiwiCore {
     /// next `start()` remaps it again.
     func retireHyperKey() {
         keys.hyperEnabled = false
+        keys.hyperStatus = .off
         guard keys.hyperSource != nil else { return }
         _ = HyperKeyRemap.apply(nil, on: hyperRemapHost)
     }

@@ -106,15 +106,59 @@ struct HyperLayerTests {
         #expect(!registrar.has(f18))
     }
 
-    @Test("the trigger answers with any modifier held")
+    @Test("the trigger answers whichever modifiers are down")
     func triggerCoversEveryMask() throws {
         let registrar = LiveRegistrar()
         let keys = try manager(registrar)
         keys.hyperEnabled = true
         #expect(registrar.has(f18, mask: UInt32(shiftKey)))
         #expect(
-            registrar.has(f18, mask: UInt32(cmdKey | optionKey))
+            registrar.has(f18, mask: UInt32(cmdKey | controlKey))
         )
+        #expect(
+            registrar.live.values.filter { $0.code == f18 }.count
+                == 16
+        )
+    }
+
+    @Test("a layer change mid-hold keeps the trigger and the hold")
+    func activateMidHoldKeepsTheHold() throws {
+        let registrar = LiveRegistrar()
+        let keys = try manager(registrar)
+        keys.hyperEnabled = true
+        registrar.press(f18)
+        let hyperK = try #require(KeyCombo.parse("hyper+k"))
+        keys.replaceLayers(
+            [KeybindingManager.defaultLayer: [hyperK: 3]],
+            icons: [:],
+            preferredLayer: KeybindingManager.defaultLayer
+        )
+        let k = UInt32(kVK_ANSI_K)
+        #expect(registrar.has(k))  // the new layer, still held
+        #expect(!registrar.has(h))
+        registrar.release(f18)  // the trigger survived: it arrives
+        #expect(!registrar.has(k))
+    }
+
+    @Test("the watchdog ends a hold whose release never came")
+    func watchdogEndsTheHold() throws {
+        let registrar = LiveRegistrar()
+        let keys = try manager(registrar)
+        var fire: (@MainActor () -> Void)?
+        var delay: TimeInterval?
+        keys.hyperSchedule = { seconds, work in
+            delay = seconds
+            fire = work
+            return {}
+        }
+        keys.hyperEnabled = true
+        registrar.press(f18)
+        #expect(registrar.has(h))
+        #expect(delay == HyperLayer.maxHoldSeconds)
+        let work = try #require(fire)
+        work()
+        #expect(!registrar.has(h))
+        #expect(registrar.has(f18))
     }
 
     @Test("other releases still reach the glide")
