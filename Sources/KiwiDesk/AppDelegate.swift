@@ -234,6 +234,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onShortcutsAdded = { [weak self] rows in
             self?.dashboardIfCreated?.adoptShortcutAdd(rows)
         }
+        core.onLookLibraryChanged = { [weak self] in
+            self?.dashboardIfCreated?.refreshLooks()
+        }
         wireBarMenus()
         wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in

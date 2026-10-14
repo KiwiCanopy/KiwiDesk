@@ -188,6 +188,10 @@ extension KiwiCore {
         case let vision where vision.hasPrefix("kiwivision."):
             // No window moves: the plates re-draw, nothing else.
             return visionCommand(command, args)
+        case let look where look.hasPrefix("look."):
+            // Its own retile where a look is worn; the rest move
+            // nothing (#1685).
+            return lookCommand(command, args)
         case let gesture where gesture.hasPrefix("scroll_gesture."):
             // No window moves: the tap's chords change, nothing
             // else, so no retile trailer (#1656).

@@ -95,6 +95,12 @@ extension KiwiCore {
         }
     }
 
+    /// Whether the live screen wears the shared look: a following
+    /// profile or a built-in, in a config the GUI manages.
+    var liveWearsSharedLook: Bool {
+        isGuiManaged && sharedLook != nil && liveLookReference == nil
+    }
+
     /// The live screen's look re-read where it follows — a
     /// following profile or a built-in — through the look alone,
     /// never a whole-profile re-apply, which would reach a standing

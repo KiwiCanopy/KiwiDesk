@@ -46,6 +46,13 @@ struct FocusedCommandPolicyTests {
         // Opens a KiwiHub side, moving no window (#2265); a focus
         // command here would refuse ⌃⌥J/K/L under an ignored panel.
         "kiwihub.show",
+        // The look library and the live look: no window is
+        // named or moved between Spaces (#1685).
+        "look.list",
+        "look.current",
+        "look.apply",
+        "look.save",
+        "look.delete",
         "get_state",
         "get_layout_info",
         "list_monitors",
