@@ -31,6 +31,8 @@ struct RuleKeepDraftTests {
         var draft = old
         draft.appRules["com.d"] = "3"
         draft.floatRules.append("com.h")
+        // The user's own spelling of the rule the keep adds.
+        draft.floatRules.append("Com.N")
         SettingsModel.takeKeptRules(
             stored,
             page: "Work",
@@ -41,7 +43,9 @@ struct RuleKeepDraftTests {
             draft.appRules
                 == ["com.a": "1", "com.b": "4", "com.k": "1", "com.d": "3"]
         )
-        #expect(Set(draft.floatRules) == ["com.f", "com.h", "com.n"])
+        let normalized = draft.floatRules.map(FloatRules.normalizedRule)
+        #expect(Set(normalized) == ["com.f", "com.h", "com.n"])
+        #expect(normalized.count == 3)
         #expect(draft.floatAutomatically == false)
         var clean = old
         SettingsModel.takeKeptRules(
@@ -85,7 +89,10 @@ struct RuleKeepDraftTests {
         model.adoptRuleKeep()
         #expect(model.config.appRules["com.x"] == "1")
         #expect(model.encodedReach?.appRules.base["com.x"] == "1")
+        // The keep is on both sides: only the user's edit is pending.
         #expect(model.isDirty)
+        model.config.floatRules.removeAll { $0 == "com.dirty" }
+        #expect(!model.isDirty)
     }
 
     /// The hook, its route to the model, and the keep firing it —

@@ -144,7 +144,9 @@ struct AppRuleKeepTests {
     func leftOutRuleIsShared() throws {
         let core = try KeepFixture.core()
         var base = try #require(core.guiConfigStore.load())
-        base.appRules = ["com.x": "1"]
+        // Another value than the keep's, so a shared write and a
+        // page-only one end apart; Work follows the base.
+        base.appRules = ["com.x": "2"]
         try core.guiConfigStore.save(base)
         var odd = KeepFixture.profile("Odd")
         let leftOut: [String: SpaceID?] = ["com.x": SpaceID?.none]
@@ -161,7 +163,11 @@ struct AppRuleKeepTests {
         let response = keep(core, ids(set))
         #expect(kept(response) == ["/app_rules/com.x"])
         guard case .object(let fields)? = response.data else { return }
-        #expect(fields["rule_profiles"] == .array([.string("Odd")]))
+        #expect(
+            fields["rule_profiles"]
+                == .array([.string("Odd"), .string("Work")])
+        )
+        #expect(core.guiConfigStore.load()?.appRules["com.x"] == "1")
         #expect(
             try core.profiles.read(name: "Odd").appRules?
                 .normalizedRules["com.x"] == nil
