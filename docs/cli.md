@@ -361,7 +361,7 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 `look.list`, `look.current`, `look.apply <name>`, `look.save
 <name>` and `look.delete <name>` reach the look library
 ([Looks](lua-reference.md#looks)). `look.apply` wears a look
-without writing it, and `look.save` refuses a name already taken.
+without writing it.
 :::
 
 | Category | Command | Arguments |

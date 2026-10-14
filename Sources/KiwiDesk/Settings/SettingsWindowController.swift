@@ -201,6 +201,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptShortcutDrop(spaces)
     }
 
+    /// Re-reads the look library a verb changed (#1685).
+    func refreshLooks() {
+        model.refreshLooks()
+    }
+
     /// Routes a top-up's appended base rows to the draft.
     func adoptShortcutAdd(_ rows: [KeyBinding]) {
         model.adoptShortcutAdd(rows)

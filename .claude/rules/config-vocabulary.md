@@ -160,8 +160,10 @@ synonym:
   register. It is not the palette picker's source-only
   `PaletteShelf` type: do not name a bar concept after that type,
   or a palette concept after KiwiShelf.
-- **look** — a named set of KiwiShelf STYLING and the colours
-  it wears (#1684, #1752, `LookKeys` and `ColorPaletteKeys`); a
+- **look** — a named set of presentation STYLING — the bars,
+  Liquid Glass, the focus border's shape, the global gaps and, in
+  a saved look, the animations — and the colours it wears (#1684,
+  #1752, `LookKeys` and `ColorPaletteKeys`); a
   palette is a colour recipe painted into it.
   Never a *theme* or *skin*, and never a *preset*, which names
   a layout arrangement — in English copy and, by owner ruling

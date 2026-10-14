@@ -8,7 +8,8 @@ extension APIReference {
         ),
         "current": APIRecord(
             "Returns the worn look's styling and colours, and the "
-                + "setter of each."
+                + "setter of each path; ask help for a setter's own "
+                + "argument form."
         ),
         "apply": APIRecord(
             "Wears a look live; keep_settings or save_profile "

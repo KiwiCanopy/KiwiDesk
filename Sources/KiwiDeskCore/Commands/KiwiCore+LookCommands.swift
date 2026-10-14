@@ -2,8 +2,10 @@ import Foundation
 
 /// The `look.*` verbs (#1685 ▸ Ruling 6b): list, read, wear, save
 /// and delete looks from Lua, the CLI and `kiwidesk mcp`. A wear is
-/// live only — `keep_settings` or a Settings Save writes it, through
+/// live only — `save_profile` or `keep_settings` stores it, through
 /// the shared-look doors (Ruling 4) — and a save never overwrites.
+/// A wear that must also WRITE takes `writeThroughLiveProfile`, as
+/// the tour's paint does, never a grown `wearLook`.
 extension KiwiCore {
     func lookCommand(
         _ command: String,
@@ -16,11 +18,13 @@ extension KiwiCore {
             return .ok(currentLook())
         case "look.apply":
             guard let name = lookName(args) else { return noName }
-            guard let look = libraryLook(named: name) else {
-                return .fail("unknown look: \(name)")
+            switch libraryLook(named: name) {
+            case .success(let look):
+                wearLook(look)
+                return .ok()
+            case .failure(let refusal):
+                return refusal.response
             }
-            wearLook(look)
-            return .ok()
         case "look.save":
             return saveLiveLook(args)
         case "look.delete":
@@ -55,10 +59,7 @@ extension KiwiCore {
     /// every follower.
     private func currentLook() -> JSONValue {
         let body = LookBody(of: tiler.settings)
-        let live = profiles.currentName.flatMap {
-            try? profiles.read(name: $0)
-        }
-        let follows = live.map(followsSharedLook) ?? false
+        let follows = liveWearsSharedLook
         var setters: [String: JSONValue] = [:]
         for path in LookKeys.all + ColorPaletteKeys.all {
             if let command = APIReference.lookSetter(for: path) {
@@ -79,10 +80,21 @@ extension KiwiCore {
         ])
     }
 
-    /// A bundled look, else a saved one, by exact name.
-    private func libraryLook(named name: String) -> ShelfLook? {
-        bundledLooks.first { $0.name == name }
-            ?? lookLibrary.userLooks().first { $0.name == name }
+    /// A bundled look, else a saved one, by exact name; a library
+    /// that cannot be read says so rather than naming no look.
+    private func libraryLook(
+        named name: String
+    ) -> Result<ShelfLook, LookRefusal> {
+        if let bundled = bundledLooks.first(where: { $0.name == name }) {
+            return .success(bundled)
+        }
+        guard let saved = try? lookLibrary.libraryLooks() else {
+            return .failure(.unreadable)
+        }
+        guard let look = saved.first(where: { $0.name == name }) else {
+            return .failure(.unknown(name))
+        }
+        return .success(look.admitted)
     }
 
     /// Paints `look` over the live settings and nothing else: no
@@ -107,6 +119,7 @@ extension KiwiCore {
         }
         do {
             try saveLook(named: name, from: tiler.settings)
+            onLookLibraryChanged()
             return .ok()
         } catch {
             return .fail("could not save look: \(error)")
@@ -119,12 +132,14 @@ extension KiwiCore {
         if library.isBuiltinName(name) {
             return .fail("a bundled look cannot be deleted")
         }
-        guard library.hasUserLook(name) else {
-            return .fail("unknown look: \(name)")
-        }
         do {
             try library.delete(name)
+            onLookLibraryChanged()
             return .ok()
+        } catch LookStore.StoreError.notFound {
+            return LookRefusal.unknown(name).response
+        } catch LookStore.StoreError.unreadableLibrary {
+            return LookRefusal.unreadable.response
         } catch {
             return .fail("could not delete look: \(error)")
         }
@@ -138,4 +153,17 @@ extension KiwiCore {
     }
 
     private var noName: CommandResponse { .fail("expected a look name") }
+}
+
+/// Why a look verb found no look to act on.
+enum LookRefusal: Error {
+    case unknown(String)
+    case unreadable
+
+    var response: CommandResponse {
+        switch self {
+        case .unknown(let name): .fail("unknown look: \(name)")
+        case .unreadable: .fail("the look library cannot be read")
+        }
+    }
 }

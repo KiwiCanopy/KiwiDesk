@@ -192,4 +192,36 @@ struct LookCommandsTests {
         )
         #expect(APIReference.destructive.contains("look.delete"))
     }
+
+    @Test("a save and a delete tell an open Settings")
+    func libraryChangeIsAnnounced() throws {
+        let core = try KeepFixture.core()
+        var told = 0
+        core.onLookLibraryChanged = { told += 1 }
+        #expect(core.execute("look.save", args: [.string("Mine")]).isSuccess)
+        #expect(core.execute("look.delete", args: [.string("Mine")]).isSuccess)
+        #expect(told == 2)
+        #expect(
+            !core.execute("look.delete", args: [.string("Mine")]).isSuccess
+        )
+        #expect(told == 2)
+    }
+
+    @Test("an unreadable library says so rather than naming no look")
+    func unreadableLibraryIsNamed() throws {
+        let core = try KeepFixture.core()
+        try Data("not json".utf8).write(to: core.lookLibrary.url)
+        let apply = core.execute("look.apply", args: [.string("Mine")])
+        #expect(apply.error == "the look library cannot be read")
+        let delete = core.execute("look.delete", args: [.string("Mine")])
+        #expect(delete.error == "the look library cannot be read")
+        #expect(
+            core.execute(
+                "look.apply",
+                args: [
+                    .string(LookCatalog.defaultName)
+                ]
+            ).isSuccess
+        )
+    }
 }
