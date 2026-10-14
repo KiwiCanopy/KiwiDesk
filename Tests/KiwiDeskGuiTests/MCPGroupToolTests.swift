@@ -72,14 +72,74 @@ struct MCPGroupToolTests {
             for argument in arguments {
                 let first = arguments.first { $0.name == argument.name }
                 #expect(first?.kind == argument.kind, "\(argument.name)")
-                let built = MCPToolSchema.property(for: argument, "")
                 #expect(
                     Self.member(properties[argument.name], "type")
-                        == Self.member(built, "type"),
+                        == Self.jsonType(of: argument.kind),
                     "\(spec.name).\(argument.name)"
                 )
             }
         }
+    }
+
+    /// The JSON type each kind's property carries, stated here
+    /// rather than read off `MCPToolSchema.property`, the code the
+    /// clause checks; a new kind fails to compile until it is
+    /// listed.
+    static func jsonType(of kind: APIArgumentKind) -> JSONValue? {
+        switch kind {
+        case .number: return .string("number")
+        case .integer, .desktop, .window: return .string("integer")
+        case .boolean: return .string("boolean")
+        case .text, .color, .choice: return .string("string")
+        case .space: return .array([.string("string"), .string("integer")])
+        case .callback, .table: return nil
+        }
+    }
+
+    /// A distinct value for the argument at `index`, of its kind.
+    static func sample(_ argument: APIArgument, _ index: Int) -> JSONValue {
+        switch argument.kind {
+        case .number, .integer, .desktop, .window:
+            return .number(Double(index + 1))
+        case .boolean: return .bool(index % 2 == 0)
+        case .choice(let choice):
+            return .string(choice.values[index % choice.values.count])
+        default: return .string("\(argument.name)-\(index)")
+        }
+    }
+
+    /// A call naming every argument sends them in the record's
+    /// positional order, never the call's key order.
+    @Test("arguments are sent in the record's order")
+    func argumentsKeepTheirOrder() {
+        var checked = 0
+        for spec in MCPTools.groupTools {
+            for entry in MCPTools.offered(group: spec.group)
+            where entry.record.arguments.count > 1 {
+                let app = MCPKeepTests.FakeApp()
+                let arguments = entry.record.arguments
+                var call: [String: JSONValue] = [
+                    "action": .string(entry.name)
+                ]
+                for (index, argument) in arguments.enumerated() {
+                    call[argument.name] = Self.sample(argument, index)
+                }
+                _ = app.tools.runGroupAction(group: spec.group, call)
+                let expected = arguments.enumerated().map {
+                    Self.sample($0.element, $0.offset)
+                }
+                #expect(
+                    app.sent.last?.command == entry.qualifiedName,
+                    "\(entry.qualifiedName)"
+                )
+                #expect(
+                    app.sent.last?.args == expected,
+                    "\(entry.qualifiedName)"
+                )
+                checked += 1
+            }
+        }
+        #expect(checked > 0)
     }
 
     @Test("a window argument is an integer id")
