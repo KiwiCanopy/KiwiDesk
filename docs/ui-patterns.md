@@ -826,7 +826,7 @@ and its menu.
 
 **"+N" governs a bounded container that cannot scroll; content
 past the fold of a SCROLLING container is cued in words
-instead** (#1292). The key panel's Shortcuts side is the case
+instead** (#1292). KiwiHub's Shortcuts side is the case
 (#2246): its sections are non-uniform (titles, a caption), the
 fold cuts *through* a row, and the sheet knows heights rather
 than rows, so any N would be an estimate wearing a precise

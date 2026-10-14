@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 
 /// Jump to window's key window (#1875). Borderless, so it opts
 /// into key status and answers File ▸ Close itself (#1533). The

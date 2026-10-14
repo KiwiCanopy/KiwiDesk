@@ -5,10 +5,9 @@ import Testing
 /// calls the panel when it points AT it, the panel's own
 /// accessibility name uses (#1316,
 /// `.claude/rules/config-vocabulary.md` ▸ shortcuts panel). The
-/// pairing covers every panel a shortcut row shows: the ⌃⌥K
-/// panel, and each side of the ⌃⌥J / ⌃⌥L panel, whose row reads
-/// "Show" and that side's VoiceOver name (#2245,
-/// `.claude/rules/gui.md` ▸ a row's title).
+/// pairing covers every panel a shortcut row shows: each side of
+/// KiwiHub, whose row reads "Show" and that side's VoiceOver name
+/// (#2245, `.claude/rules/gui.md` ▸ a row's title).
 ///
 /// The defect this reds on is not inconsistency in the abstract.
 /// `shortcuts.panel.ax_label` shipped as "Shortcuts reference"

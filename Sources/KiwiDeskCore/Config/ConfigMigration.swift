@@ -43,6 +43,7 @@ public enum ConfigMigration {
         migratingRetiredAppBarContent,
         migratingDuplicateSpaceChords,
         migratingRetiredPullOrSpawn,
+        migratingRetiredPanelVerbs,
     ]
 
     /// The file shapes a config root can take.

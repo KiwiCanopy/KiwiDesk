@@ -19,6 +19,7 @@ struct ShortcutsJumpTests {
         #expect(
             ShortcutsJumpGroup.allCases.map(\.control.id) == [
                 SettingsCatalog.shortcuts.gestures.control.id,
+                SettingsCatalog.shortcuts.kiwiHubKeys.id,
                 SettingsCatalog.shortcuts.focusKeys.id,
                 SettingsCatalog.shortcuts.moveWindows.id,
                 SettingsCatalog.shortcuts.layoutKeys.id,

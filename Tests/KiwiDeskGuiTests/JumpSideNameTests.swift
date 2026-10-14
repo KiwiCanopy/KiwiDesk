@@ -90,6 +90,33 @@ struct JumpSideNameTests {
         )
     }
 
+    /// The product name is the OUTER container, around the side's
+    /// own, so a side announces "KiwiHub, window switcher" (#2265).
+    @Test("KiwiHub's name is spoken around the side's")
+    func kiwiHubWrapsTheSide() throws {
+        LocalizationManager.shared.select("en")
+        #expect(JumpScope.panelName == "KiwiHub")
+        let view = try Self.source("JumpPanelView.swift")
+            .split(whereSeparator: \.isWhitespace).joined()
+        let body = try #require(
+            SourceScan.declarationBody(after: "varbody:someView", in: view)
+        )
+        #expect(
+            body.contains(
+                "VStack(spacing:0){side}"
+                    + ".accessibilityElement(children:.contain)"
+                    + ".accessibilityLabel(JumpScope.panelName)"
+            )
+        )
+        let side = try #require(
+            SourceScan.declarationBody(
+                after: "privatevarside:someView",
+                in: view
+            )
+        )
+        #expect(side.contains(".accessibilityLabel(model.scope.panelName)"))
+    }
+
     @Test("a chord is the segment's hint, never its name")
     func chordIsAHint() throws {
         let picker = SourceScan.stripComments(

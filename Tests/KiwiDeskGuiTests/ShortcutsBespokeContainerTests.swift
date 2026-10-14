@@ -34,6 +34,11 @@ struct ShortcutsBespokeContainerTests {
         }
         // Each order list, and the container it serves.
         let lists: [(String, SettingsContainer, [SettingKey])] = [
+            // KiwiHub's three sides (#2265).
+            (
+                "kiwiHubAtRest", .kiwiHub,
+                ShortcutsRowOrder.kiwiHubAtRest
+            ),
             (
                 "focusAtRest", .focus,
                 ShortcutsRowOrder.focusAtRest

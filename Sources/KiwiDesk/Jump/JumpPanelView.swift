@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Jump to window panel (#1875): a search field, then either
-/// scope (#2229) — the ranked windows with the hidden apps below
+/// KiwiHub, the key panel (#1875, #2265): a search field, then a
+/// side (#2229) — the ranked windows with the hidden apps below
 /// them, or the layout tiles — and a footer of the scope's keys.
 /// Native like the shortcuts panel — system font, untinted glass.
 struct JumpPanelView: View {
@@ -29,6 +29,31 @@ struct JumpPanelView: View {
     static let listPadding: CGFloat = 6
 
     var body: some View {
+        // The product name around the side's, so a side announces
+        // "KiwiHub, window switcher" (#2265).
+        VStack(spacing: 0) { side }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(JumpScope.panelName)
+            // The field stays put; only what is below it changes.
+            .animation(
+                reduceMotion
+                    ? nil : .easeInOut(duration: Self.scopeFade),
+                value: model.scope
+            )
+            .frame(maxHeight: .infinity, alignment: .top)
+            .panelContentFade(presence)
+            .frame(width: width)
+            .tint(SettingsTheme.accent)
+            .glassChrome(
+                in: KeyPanelStyle.shape,
+                enabled: liquidGlass,
+                variant: .regular,
+                fallback: AnyShapeStyle(.regularMaterial)
+            )
+            .panelEntrance(presence)
+    }
+
+    private var side: some View {
         VStack(spacing: 0) {
             field
             Divider()
@@ -44,22 +69,6 @@ struct JumpPanelView: View {
         // The side's own name, which its shortcut row shows (#2245).
         .accessibilityElement(children: .contain)
         .accessibilityLabel(model.scope.panelName)
-        // The field stays put; only what is below it changes.
-        .animation(
-            reduceMotion ? nil : .easeInOut(duration: Self.scopeFade),
-            value: model.scope
-        )
-        .frame(maxHeight: .infinity, alignment: .top)
-        .panelContentFade(presence)
-        .frame(width: width)
-        .tint(SettingsTheme.accent)
-        .glassChrome(
-            in: KeyPanelStyle.shape,
-            enabled: liquidGlass,
-            variant: .regular,
-            fallback: AnyShapeStyle(.regularMaterial)
-        )
-        .panelEntrance(presence)
     }
 
     private var field: some View {

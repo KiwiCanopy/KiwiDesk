@@ -64,7 +64,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#2228).
     /// 25 = #2143's `space_change` step, withdrawn unreleased by
     /// #2228; kept so a development build's bundle still loads.
-    public static let currentFormat = 25
+    /// 26 = KiwiHub's sides open through `kiwihub.show` (#2265),
+    /// which reaches a bundle's `config` and its `[Profile]` alike.
+    public static let currentFormat = 26
 
     public let format: Int
 

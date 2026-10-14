@@ -18,22 +18,6 @@ struct LayoutPickerTests {
         return core
     }
 
-    @Test("KiwiDesk.show_layout_picker() fires the UI hook")
-    func verbOpensThePanel() throws {
-        let core = makeCore()
-        let lua = try #require(LuaInterpreter())
-        core.registerLuaAPI(on: lua)
-        var opened = 0
-        core.uiBridge.onShowLayoutPicker = { opened += 1 }
-        guard case .success = lua.run("KiwiDesk.show_layout_picker()")
-        else {
-            Issue.record("show_layout_picker run failed")
-            return
-        }
-        #expect(opened == 1)
-        #expect(APIReference.luaOnly.contains("show_layout_picker"))
-    }
-
     @Test("the picker reads the Space's live layout")
     func stateReadsTheSpace() throws {
         let core = makeCore()

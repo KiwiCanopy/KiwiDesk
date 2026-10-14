@@ -43,6 +43,9 @@ struct FocusedCommandPolicyTests {
         // Dims every screen around the focus, moving no window
         // (#2103).
         "kiwivision.toggle",
+        // Opens a KiwiHub side, moving no window (#2265); a focus
+        // command here would refuse ⌃⌥J/K/L under an ignored panel.
+        "kiwihub.show",
         "get_state",
         "get_layout_info",
         "list_monitors",

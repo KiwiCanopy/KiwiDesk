@@ -4,7 +4,7 @@ import Foundation
 /// shelf, #1674's `set_float_nudge`, #1713's item padding and
 /// #1731's shelf edge, which each bar took back, #1528's App Bar
 /// content, #1810's `make_auto`, #1511's `pull_or_spawn`,
-/// #2228's slide and #2099's Monocle flip.
+/// #2228's slide, #2099's Monocle flip and #2265's panel verbs.
 /// No aliases (AGENTS.md §5): a retired name fails, and the
 /// failure names what replaces it — in Lua as a
 /// `ConfigIssue.Kind.retiredCall`, over IPC through
@@ -65,6 +65,12 @@ extension APIReference {
         map["drag.set_drop_zone_border_width"] = "border.set_width"
         map["drag.set_corner_radius"] = "border.set_corner_style"
         map["pull_or_spawn"] = "focus_or_spawn"
+        // KiwiHub's sides open through one verb (#2265).
+        for verb in [
+            "show_jump_to_window", "show_shortcuts", "show_layout_picker",
+        ] {
+            map[verb] = "kiwihub.show"
+        }
         for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()

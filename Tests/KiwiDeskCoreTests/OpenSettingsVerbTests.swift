@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The `KiwiDesk.open_settings()` UI-bridge verb (#678 item 18):
-/// the bindable "Open Settings" action, same shape as
-/// `show_shortcuts` — a Lua action raising a Core hook the GUI
+/// the bindable "Open Settings" action — a Lua action raising a
+/// Core hook the GUI
 /// wires to the Settings window. It carries no dispatcher
 /// response, so it lives in `luaOnly`, not
 /// `APIReference.commands`. Seeded on `⌃⌥,` since #1381

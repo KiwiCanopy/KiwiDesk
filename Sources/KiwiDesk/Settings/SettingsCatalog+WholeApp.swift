@@ -52,6 +52,11 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.layers",
         "Layers"
     )
+    /// The KiwiHub group (#2265), titled by the product name.
+    let kiwiHubKeys = SettingsControl(
+        "kiwihub.name",
+        "KiwiHub"
+    )
     let focusKeys = SettingsControl(
         "shortcuts.section.focus",
         "Focus"
@@ -101,9 +106,10 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.open_applications",
         "Open applications"
     )
-    /// Open applications ▸ KiwiDesk's two rows, keyed on their
-    /// census label keys (the `L()` sites are `KeybindingCatalog`'s)
-    /// so a hit lands on the row (#1520).
+    /// KiwiHub's shortcuts-panel row and Open applications ▸
+    /// KiwiDesk's row, keyed on their census label keys (the `L()`
+    /// sites are `KeybindingCatalog`'s) so a hit lands on the row
+    /// (#1520, #2265).
     let showShortcutsBinding = SettingsControl(
         "keybinding.show_shortcuts",
         "Show shortcuts panel"
