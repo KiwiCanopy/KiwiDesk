@@ -312,9 +312,7 @@ public final class KiwiCore {
     /// inside a keybinding closure) to log-only.
     var typoIssues: [ConfigIssue]?
     /// Fired whenever `configIssues` changes, back to empty too.
-    public var onConfigIssuesChange: @MainActor ([ConfigIssue]) -> Void = {
-        _ in
-    }
+    public var onConfigIssuesChange: ConfigIssuesChanged = { _ in }
     /// Fired on every live-profile write from outside Settings.
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
