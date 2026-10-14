@@ -71,8 +71,11 @@ extension ShortcutsKey {
                 gate: .runtime(.layersExist)
             )
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
-            .goToSpace, .jumpToWindow, .toggleKiwiVision:
+            .goToSpace, .toggleKiwiVision:
             return .row(.shortcuts, .focus, .atRest)
+        // KiwiHub's three sides, one group for one panel (#2265).
+        case .jumpToWindow, .showShortcuts, .layoutPicker:
+            return .row(.shortcuts, .kiwiHub, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
         // An OFFER until the Track layout is in play (#1440).
@@ -102,7 +105,7 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.desktopBindingsExist)
             )
-        case .layoutCycle, .layoutPicker, .modeCycle:
+        case .layoutCycle, .modeCycle:
             return .row(.shortcuts, .layout, .atRest)
         case .modeCue:
             // Written at once; greys where init.lua owns the
@@ -118,9 +121,9 @@ extension ShortcutsKey {
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
-        // KiwiDesk's own two chords, under the group's "KiwiDesk"
+        // KiwiDesk's own chord, under the group's "KiwiDesk"
         // subheading since the General drawer folded in (#1520).
-        case .showShortcuts, .openSettings:
+        case .openSettings:
             return .row(.shortcuts, .openApplications, .atRest)
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)

@@ -24,6 +24,9 @@ enum SettingsContainer: CaseIterable, Hashable {
     case glass
     case grid
     case habits
+    /// Shortcuts' KiwiHub group: the key panel's three sides
+    /// (#2265).
+    case kiwiHub
     case kiwishelf
     case appliesImmediately
     case layers
@@ -82,7 +85,7 @@ enum SettingsContainer: CaseIterable, Hashable {
         case .accent, .advanced, .aiSetup, .readyMadePrompts,
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
-            .focus, .gaps, .general, .grid,
+            .focus, .gaps, .general, .grid, .kiwiHub,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .layout,
             .looks, .luaBindings,

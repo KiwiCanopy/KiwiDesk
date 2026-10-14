@@ -37,6 +37,7 @@ extension APIReference {
         "sticky": stickyRecords,
         "floating": floatingRecords,
         "kiwivision": kiwivisionRecords,
+        "kiwihub": kiwihubRecords,
     ]
 }
 

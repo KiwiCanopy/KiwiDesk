@@ -10931,11 +10931,38 @@ real pointer move. A row that slides under a still pointer, as
 the panel opens there or the list re-ranks while typing, is not a
 choice the user made, and selecting it would steal the keyboard's
 selection. The ✓ never moves with it: the pill marks where ↩
-goes, the ✓ what the Space shows. `show_layout_picker` is a
-Lua-only verb like the other panels' (`show_jump_to_window`,
-`show_shortcuts`): it opens a window and returns nothing a CLI
-caller could read, so a launcher reaches it through a keybinding. `JumpScopeModelTests`, `LayoutPickListTests` and
+goes, the ✓ what the Space shows. One verb opens every side,
+`kiwihub.show`, and the CLI reaches it (▸ *The key panel is
+KiwiHub*). `JumpScopeModelTests`, `LayoutPickListTests` and
 `JumpKeyTests` hold the keys. (#2229)
+:::
+
+:::unreleased
+**The key panel is KiwiHub, and one verb opens its sides
+(#2265).** Since the three panels became one, a user met three
+names and no parent: the Shortcuts page filed the window switcher
+under Focus, the layout picker under Layout and ⌃⌥K with the app
+chrome. A product name, like KiwiShelf's for the bars, lets copy
+talk about the panel as one thing; *Jump* stays its verb and
+never its name. The sides keep their own names, which their rows
+and VoiceOver already use, and the panel's container speaks the
+product name around them, so a side announces "KiwiHub, window
+switcher". The Shortcuts page groups the three rows under one
+KiwiHub card, J K L in key order, because the panel is the topic
+and the trio reads as one.
+
+The three `show_*` verbs became `kiwihub.show(side)`, the side a
+typed argument read off `KiwiHubSide`. Only `show_shortcuts` had
+shipped, and Settings writes its exact call into stored bindings,
+so a one-shot migration renames that call — and the two 3.0.0
+development spellings, which development builds wrote into real
+files — while hand-written Lua is refused with a Config Issue
+naming the new verb. The verb is dispatched rather than Lua-only,
+reversing what #2229 ruled for the picker: it answers a refusal
+for a side it does not know, which is something a CLI caller can
+read, and a launcher (Raycast, Shortcuts, skhd) then opens KiwiHub
+without a keybinding. It moves no window, so it is no focused
+command for the #292 preflight.
 :::
 
 **An accessibility steal is returned, not refused (#958).**

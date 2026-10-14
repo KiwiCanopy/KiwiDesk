@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "No modifier",
   "keyboard.scope.all": "All",
   "keyboard.tally": "Keys taken: %1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "Alignment",
   "kiwishelf.alignment.label.help": "Where the bars sit along the edge — a lone bar, both as one run, or each bar on its own edge. “%1$@” and “%2$@” follow the edge, so on a left edge the start is the top.",
   "kiwishelf.alignment.note": "When the App Bar shows, the two bars join into one run, so the Space Bar moves. “%1$@” keeps it still.",

@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "無變更鍵",
   "keyboard.scope.all": "全部",
   "keyboard.tally": "已綁定按鍵：%1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "對齊",
   "kiwishelf.alignment.label.help": "列沿著邊緣所在的位置 — 單一列、兩個列連成一排，或每個列各佔一個邊緣。「%1$@」和「%2$@」會隨邊緣而定，因此在左側邊緣上，起始就是頂端。",
   "kiwishelf.alignment.note": "顯示 App Bar 時，兩個列會連成一排，因此 Space Bar 會移動。選擇「%1$@」可讓它保持不動。",

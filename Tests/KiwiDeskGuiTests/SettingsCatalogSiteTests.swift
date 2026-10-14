@@ -106,7 +106,8 @@ struct SettingsCatalogSiteTests {
         // 127 since #2173: App Rules ▸ Automatic floating.
         // 128 since #2228: KiwiShelf's Show the Space switch.
         // 133 since #1685: the AI page's five declarations.
-        #expect(names.count == 133)
+        // 134 since #2265: Shortcuts' KiwiHub group.
+        #expect(names.count == 134)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

@@ -150,16 +150,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onShowShortcuts = { [weak jumpPanel] in
             jumpPanel?.toggle(.shortcuts)
         }
-        // ⌃⌥K opens the panel on its Shortcuts side (#330, #2246).
-        core.uiBridge.onShowShortcuts = { [weak jumpPanel] in
-            jumpPanel?.toggle(.shortcuts)
-        }
-        core.uiBridge.onShowJumpToWindow = { [weak jumpPanel] in
-            jumpPanel?.toggle(.windows)
-        }
-        // ⌃⌥L opens the same panel on its Layouts scope (#2229).
-        core.uiBridge.onShowLayoutPicker = { [weak jumpPanel] in
-            jumpPanel?.toggle(.layouts)
+        // ⌃⌥J/K/L open KiwiHub on a side (#2246, #2265).
+        core.uiBridge.onKiwihubShow = { [weak jumpPanel] side in
+            jumpPanel?.toggle(JumpScope(side))
         }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in

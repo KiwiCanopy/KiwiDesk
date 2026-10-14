@@ -99,7 +99,7 @@ public enum DefaultKeybindings {
     public static func showShortcutsRow() -> KeyBinding {
         KeyBinding(
             combo: "control+option+k",
-            lua: "KiwiDesk.show_shortcuts()",
+            lua: KiwiHubSide.shortcuts.lua,
             kind: .navigation,
             label: "Show shortcuts panel"
         )

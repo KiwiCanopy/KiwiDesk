@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "Sans modificateur",
   "keyboard.scope.all": "Tout",
   "keyboard.tally": "Touches assignées : %1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "Alignement",
   "kiwishelf.alignment.label.help": "Où se placent les barres le long du bord — une barre seule, les deux en une seule rangée, ou chaque barre sur son propre bord. « %1$@ » et « %2$@ » suivent le bord : sur un bord gauche, le début est en haut.",
   "kiwishelf.alignment.note": "Quand l'App Bar s'affiche, les deux barres se rejoignent en une seule rangée, la Space Bar se déplace donc. « %1$@ » la garde immobile.",

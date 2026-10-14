@@ -17,7 +17,7 @@ struct JumpToWindowSeedTests {
     func seedsJump() {
         let row = DefaultKeybindings.jumpToWindowRow()
         #expect(row.combo == "control+option+j")
-        #expect(row.lua == "KiwiDesk.show_jump_to_window()")
+        #expect(row.lua == "kiwihub.show(\"windows\")")
         #expect(row.kind == .navigation)
         #expect(
             seeded.filter { $0.lua == row.lua } == [row]
@@ -43,7 +43,7 @@ struct JumpToWindowSeedTests {
     func notChrome() {
         #expect(
             !DefaultKeybindings.appChromeRows().contains {
-                $0.lua.hasPrefix("KiwiDesk.show_jump_to_window")
+                $0.lua == KiwiHubSide.windows.lua
             }
         )
     }

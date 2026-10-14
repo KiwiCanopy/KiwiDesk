@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "Без модификатора",
   "keyboard.scope.all": "Все",
   "keyboard.tally": "Назначено клавиш: %1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "Выравнивание",
   "kiwishelf.alignment.label.help": "Где панели стоят вдоль края — одна панель, обе единым рядом или каждая у своего края. «%1$@» и «%2$@» следуют за краем, так что у левого края начало — это верх.",
   "kiwishelf.alignment.note": "Когда показывается App Bar, обе панели выстраиваются в один ряд, поэтому Space Bar сдвигается. «%1$@» оставляет её на месте.",

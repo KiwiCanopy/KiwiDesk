@@ -29,5 +29,11 @@ extension GuiConfig {
     ///
     /// **6 (#1511)**: a stored app shortcut calls `focus_or_spawn`,
     /// so a GUI-written `pull_or_spawn` call is renamed.
-    public static let currentFormat = 6
+    ///
+    /// **7 (#2265)**: KiwiHub's sides open through `kiwihub.show`,
+    /// so a stored `show_*` panel call is renamed. First number
+    /// release/3.0.0 holds that main does not: each main → release
+    /// sync keeps release's above main's, or a file a 2.x patch
+    /// stamps 7 skips this step and ⌃⌥K stops working.
+    public static let currentFormat = 7
 }

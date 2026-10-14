@@ -877,16 +877,14 @@ reach it, and Shortcuts & Gestures can give it a key of its own.
 :::unreleased
 `⌃⌥C` moves the focused space to its next layout
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
-previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J` opens
-the **window switcher**
-([`show_jump_to_window`](lua-reference.md#show_jump_to_window)),
-listed under Shortcuts & Gestures ▸ Focus, and `⌃⌥L` opens the same
-panel on its Layouts side, the **layout picker**
-([`show_layout_picker`](lua-reference.md#show_layout_picker)), for
-the space on the screen under the pointer. `⌃⌥K` opens its
-Shortcuts side between the two
-([`show_shortcuts`](lua-reference.md#show_shortcuts)), where typing
-searches your shortcuts; `Tab` and `⇧Tab` step through the three sides.
+previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J`, `⌃⌥K`
+and `⌃⌥L` open **KiwiHub**
+([`kiwihub.show`](lua-reference.md#kiwihubshow)), one panel with
+three sides, listed together under Shortcuts & Gestures ▸ KiwiHub:
+`⌃⌥J` the **window switcher**, `⌃⌥K` the **shortcuts panel**, where
+typing searches your shortcuts, and `⌃⌥L` the **layout picker**,
+for the space on the screen under the pointer. `Tab` and `⇧Tab`
+step through the three sides.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

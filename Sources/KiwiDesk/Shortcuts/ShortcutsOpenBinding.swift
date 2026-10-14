@@ -7,7 +7,7 @@ import KiwiDeskCore
 /// (#2245).
 enum ShortcutsOpenBinding {
     /// Lua statement for opening shortcuts panel.
-    static let lua = "KiwiDesk.show_shortcuts()"
+    static let lua = KiwiHubSide.shortcuts.lua
 
     /// Formatted glyphs for the panel hotkey (`ComboSymbols`,
     /// #330), read from the RESOLVED active layer, never raw

@@ -146,11 +146,12 @@ enum KeybindingCatalog {
         spaces: [SpaceID]
     ) -> [NavGroup] {
         [
+            NavGroup(title: "KiwiHub", commands: kiwiHubRows),
             NavGroup(
                 title: "Focus",
                 commands: focusDirections + spaceStepRows
                     + spaceHistoryRows + goToSpace(spaces)
-                    + [jumpToWindow, toggleKiwiVision]
+                    + [toggleKiwiVision]
             ),
             NavGroup(
                 title: "Window Management",
@@ -172,12 +173,17 @@ enum KeybindingCatalog {
         SpaceLuaArg.quote(raw)
     }
 
+    /// KiwiHub's sides in the order of their keys, J K L (#2265).
+    static var kiwiHubRows: [NavCommand] {
+        [jumpToWindow, showShortcuts, showLayoutPicker]
+    }
+
     /// The window switcher (#1875): "Show" and the side's
     /// VoiceOver name (#2245). The stored label stays the identity
     /// a binding is matched by.
     static let jumpToWindow = NavCommand(
         label: "Jump to window",
-        lua: "KiwiDesk.show_jump_to_window()",
+        lua: KiwiHubSide.windows.lua,
         displayLabel: {
             L("keybinding.show_window_switcher", "Show window switcher")
         }

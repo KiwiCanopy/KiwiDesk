@@ -158,14 +158,14 @@ struct DefaultKeybindingsTests {
         #expect(
             rows.contains {
                 $0.combo == "control+option+k"
-                    && $0.lua == "KiwiDesk.show_shortcuts()"
+                    && $0.lua == "kiwihub.show(\"shortcuts\")"
             }
         )
         // The shared helper the GUI's addMode reuses for every
         // new mode — one authority for the combo/lua/label.
         let row = DefaultKeybindings.showShortcutsRow()
         #expect(row.combo == "control+option+k")
-        #expect(row.lua == "KiwiDesk.show_shortcuts()")
+        #expect(row.lua == "kiwihub.show(\"shortcuts\")")
         #expect(row.kind == .navigation)
         #expect(row.label == "Show shortcuts panel")
     }

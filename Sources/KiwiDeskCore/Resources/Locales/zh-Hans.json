@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "无修饰键",
   "keyboard.scope.all": "全部",
   "keyboard.tally": "已绑定按键：%1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "对齐方式",
   "kiwishelf.alignment.label.help": "栏沿边缘所处的位置——单个栏、两个栏连成一排，或每个栏各占一条边缘。“%1$@”和“%2$@”随边缘而定，因此在左边缘上，开头就是顶部。",
   "kiwishelf.alignment.note": "显示 App Bar 时，两个栏会连成一排，因此 Space Bar 会移动。选择“%1$@”可让它保持不动。",

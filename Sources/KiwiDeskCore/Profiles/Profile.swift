@@ -30,12 +30,13 @@ public struct Profile: Codable, Sendable, Equatable {
     /// with the slide, #2228), 20 since #2143's `space_change` step
     /// — withdrawn unreleased by #2228, the number kept so a file a
     /// 3.0.0 development build stamped still loads; no step, as
-    /// for 7.
+    /// for 7 — 21 since a stored `show_*` panel call opens KiwiHub
+    /// through `kiwihub.show` (#2265).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 20
+    public static let currentFormat = 21
 
     public var format: Int
     public var name: String

@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "Sin modificador",
   "keyboard.scope.all": "Todas",
   "keyboard.tally": "Teclas asignadas: %1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "Alineación",
   "kiwishelf.alignment.label.help": "Dónde se sitúan las barras a lo largo del borde: una barra sola, ambas como una sola fila o cada barra en su propio borde. «%1$@» y «%2$@» siguen el borde, así que en un borde izquierdo el inicio es arriba.",
   "kiwishelf.alignment.note": "Cuando se muestra la App Bar, las dos barras se unen en una sola fila, así que la Space Bar se desplaza. «%1$@» la mantiene quieta.",

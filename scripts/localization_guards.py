@@ -328,6 +328,9 @@ PRODUCT_NAMES = (
     # The focus mode (#2103, ruling 8): a coined brand word like
     # KiwiShelf, kept verbatim in every locale.
     "KiwiVision",
+    # The key panel (#2265): a coined brand word like KiwiShelf,
+    # kept verbatim in every locale; its sides' names translate.
+    "KiwiHub",
     # Apple's material, named as Apple ships it (owner ruling
     # 2026-09-29): `colors.liquid_glass` is Latin in every catalog.
     "Liquid Glass",

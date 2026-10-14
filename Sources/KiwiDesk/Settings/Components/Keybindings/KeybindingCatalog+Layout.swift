@@ -1,9 +1,8 @@
 import KiwiDeskCore
 
-/// The Layout group's shortcut rows: the cycle through the
-/// `mode_cycle` list (#453) and the layout picker (#762). Written
-/// out per row so each key stays a literal `scripts/extract-keys`
-/// can see.
+/// The layout cycle's rows through the `mode_cycle` list (#453)
+/// and KiwiHub's layout picker (#762, #2265). Written out per row
+/// so each key stays a literal `scripts/extract-keys` can see.
 extension KeybindingCatalog {
     static let nextLayout = NavCommand(
         label: "Next layout",
@@ -21,10 +20,10 @@ extension KeybindingCatalog {
         }
     )
 
-    /// The layout picker, the Jump panel's Layouts side (#2229).
+    /// The layout picker, KiwiHub's Layouts side (#2229, #2265).
     static let showLayoutPicker = NavCommand(
         label: "Show layout picker",
-        lua: "KiwiDesk.show_layout_picker()",
+        lua: KiwiHubSide.layouts.lua,
         displayLabel: {
             L("keybinding.show_layout_picker", "Show layout picker")
         }
@@ -37,7 +36,5 @@ extension KeybindingCatalog {
     ]
 
     /// Every Layout group row, one copy for every reader.
-    static var layoutRows: [NavCommand] {
-        layoutCycleRows + [showLayoutPicker]
-    }
+    static var layoutRows: [NavCommand] { layoutCycleRows }
 }

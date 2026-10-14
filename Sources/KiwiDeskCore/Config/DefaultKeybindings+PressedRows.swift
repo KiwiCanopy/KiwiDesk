@@ -18,17 +18,17 @@ extension DefaultKeybindings {
     public static func layoutPickerRow() -> KeyBinding {
         KeyBinding(
             combo: "control+option+l",
-            lua: "KiwiDesk.show_layout_picker()",
+            lua: KiwiHubSide.layouts.lua,
             kind: .navigation,
             label: "Show layout picker"
         )
     }
 
-    /// Jump to window on `⌃⌥J` (#1875), J for jump.
+    /// The window switcher on `⌃⌥J` (#1875), J for jump.
     public static func jumpToWindowRow() -> KeyBinding {
         KeyBinding(
             combo: "control+option+j",
-            lua: "KiwiDesk.show_jump_to_window()",
+            lua: KiwiHubSide.windows.lua,
             kind: .navigation,
             label: "Jump to window"
         )

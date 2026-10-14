@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "修飾キーなし",
   "keyboard.scope.all": "すべて",
   "keyboard.tally": "割り当て済みのキー：%1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "配置",
   "kiwishelf.alignment.label.help": "端に沿ったバーの位置です。バーが1本のときも、2本がひと続きになったときも、それぞれ別の端に置いたときも対象です。「%1$@」と「%2$@」は端の向きに従うため、左端では先頭が上になります。",
   "kiwishelf.alignment.note": "App Barを表示すると2つのバーがひと続きになるため、Space Barが移動します。「%1$@」にするとSpace Barは動きません。",

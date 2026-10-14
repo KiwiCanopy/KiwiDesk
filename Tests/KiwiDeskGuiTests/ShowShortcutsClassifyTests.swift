@@ -3,14 +3,14 @@ import Testing
 
 @testable import KiwiDesk
 
-/// A recovered `KiwiDesk.show_shortcuts()` binding must classify
+/// A recovered `kiwihub.show("shortcuts")` binding must classify
 /// as navigation with its catalog label, not demote to Custom
 /// (#330) — the catalog, the classifier, and the Core verb all
 /// speak of one Lua body.
-@Suite("show_shortcuts import classification")
+@Suite("Shortcuts-side import classification")
 @MainActor
 struct ShowShortcutsClassifyTests {
-    @Test("A show_shortcuts row upgrades out of Custom")
+    @Test("A shortcuts-side row upgrades out of Custom")
     func classifies() {
         var config = GuiConfig()
         config.layers = [
@@ -34,7 +34,7 @@ struct ShowShortcutsClassifyTests {
     @Test("The catalog row and the Core verb share one Lua body")
     func luaMatchesCoreVerb() {
         #expect(
-            ShortcutsOpenBinding.lua == "KiwiDesk.show_shortcuts()"
+            ShortcutsOpenBinding.lua == KiwiHubSide.shortcuts.lua
         )
         #expect(
             KeybindingCatalog.showShortcuts.lua

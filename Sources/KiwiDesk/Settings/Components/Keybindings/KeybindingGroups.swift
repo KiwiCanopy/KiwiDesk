@@ -305,11 +305,6 @@ struct KiwiDeskKeyRows: View {
         @ViewBuilder family: () -> Family
     ) -> some View {
         switch key {
-        case .shortcuts(.showShortcuts):
-            VStack(alignment: .leading, spacing: 8) { family() }
-                .searchAnchored(
-                    SettingsCatalog.shortcuts.showShortcutsBinding
-                )
         case .shortcuts(.openSettings):
             VStack(alignment: .leading, spacing: 8) { family() }
                 .searchAnchored(

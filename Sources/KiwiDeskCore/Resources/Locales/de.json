@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "Ohne Sondertaste",
   "keyboard.scope.all": "Alle",
   "keyboard.tally": "Belegte Tasten: %1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "Ausrichtung",
   "kiwishelf.alignment.label.help": "Wo die Leisten entlang der Kante sitzen — eine einzelne Leiste, beide als eine Reihe oder jede an ihrer eigenen Kante. „%1$@“ und „%2$@“ folgen der Kante, an einer linken Kante ist der Anfang also oben.",
   "kiwishelf.alignment.note": "Wenn die App Bar angezeigt wird, verbinden sich beide Leisten zu einer Reihe, daher verschiebt sich die Space Bar. „%1$@“ hält sie an ihrem Platz.",

@@ -28,9 +28,16 @@ enum ShortcutsRowOrder {
         .behaviour(.mouseFollowsFocus),
     ]
 
+    /// KiwiHub group order: its sides in the order of their keys,
+    /// J K L (#2246, #2265).
+    static let kiwiHubAtRest: [SettingKey] = [
+        .shortcuts(.jumpToWindow),
+        .shortcuts(.showShortcuts),
+        .shortcuts(.layoutPicker),
+    ]
+
     /// Focus group order: directions, the Space steps, the
     /// history setting above its two rows (#1655), live spaces,
-    /// then the window switcher, which reaches any of them (#1875),
     /// and KiwiVision, which keeps the focused one clear (#2103).
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
@@ -38,7 +45,6 @@ enum ShortcutsRowOrder {
         .shortcuts(.spaceHistory),
         .shortcuts(.spaceHistoryStep),
         .shortcuts(.goToSpace),
-        .shortcuts(.jumpToWindow),
         .shortcuts(.toggleKiwiVision),
     ]
 
@@ -106,12 +112,10 @@ enum ShortcutsRowOrder {
         .shortcuts(.modeCue),
     ]
 
-    /// Layout group order (#453, #762): this list orders the
-    /// families; `KeybindingCatalog.layoutCycleRows` orders the
-    /// rows inside the cycle family.
+    /// Layout group order (#453): `KeybindingCatalog
+    /// .layoutCycleRows` orders the rows inside the cycle family.
     static let layoutAtRest: [SettingKey] = [
-        .shortcuts(.layoutCycle),
-        .shortcuts(.layoutPicker),
+        .shortcuts(.layoutCycle)
     ]
 
     /// Size & float order: resize pairs followed by state toggles.
@@ -141,8 +145,7 @@ enum ShortcutsRowOrder {
 
     /// Open applications ▸ KiwiDesk, below the app list (#1520).
     static let openApplicationsKiwiDesk: [SettingKey] = [
-        .shortcuts(.showShortcuts),
-        .shortcuts(.openSettings),
+        .shortcuts(.openSettings)
     ]
 
     /// Layers group order behind disclosure.

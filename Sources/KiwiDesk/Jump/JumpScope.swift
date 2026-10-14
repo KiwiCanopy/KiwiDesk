@@ -2,7 +2,7 @@ import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// The key panel's three sides (#2229, #2246): the window
+/// KiwiHub's three sides (#2229, #2246, #2265): the window
 /// switcher's list, the shortcuts sheet and the layout picker's
 /// tiles, one field above all three, in the order of their keys
 /// J K L. ⇥ steps forward and ⇧⇥ back, wrapping, and each side's
@@ -35,6 +35,12 @@ enum JumpScope: CaseIterable, Equatable {
         }
     }
 
+    /// The whole panel's VoiceOver name, the product name around
+    /// every side's (#2265).
+    @MainActor static var panelName: String {
+        L("kiwihub.name", "KiwiHub")
+    }
+
     /// The side's VoiceOver name, and the noun its shortcut row
     /// shows (#2245, `ShortcutsPanelNounTests`).
     @MainActor var panelName: String {
@@ -47,15 +53,24 @@ enum JumpScope: CaseIterable, Equatable {
         }
     }
 
-    /// The Lua the side's own shortcut runs, whose live chord the
-    /// switch prints (#2245).
-    var lua: String {
+    /// The Core side this scope is — the one copy of the mapping
+    /// (#2265).
+    var side: KiwiHubSide {
         switch self {
-        case .windows: return KeybindingCatalog.jumpToWindow.lua
-        case .shortcuts: return ShortcutsOpenBinding.lua
-        case .layouts: return KeybindingCatalog.showLayoutPicker.lua
+        case .windows: return .windows
+        case .shortcuts: return .shortcuts
+        case .layouts: return .layouts
         }
     }
+
+    /// The scope `kiwihub.show` names, read off `side`.
+    init(_ side: KiwiHubSide) {
+        self = Self.allCases.first { $0.side == side } ?? .windows
+    }
+
+    /// The Lua the side's own shortcut runs, whose live chord the
+    /// switch prints (#2245).
+    var lua: String { side.lua }
 
     /// The field's placeholder and its VoiceOver name.
     @MainActor var fieldName: String {

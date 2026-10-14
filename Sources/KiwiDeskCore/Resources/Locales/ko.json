@@ -756,6 +756,7 @@
   "keyboard.modifier.bare": "보조 키 없음",
   "keyboard.scope.all": "전체",
   "keyboard.tally": "할당된 키: %1$d",
+  "kiwihub.name": "KiwiHub",
   "kiwishelf.alignment.label": "정렬",
   "kiwishelf.alignment.label.help": "가장자리를 따라 바가 놓이는 위치입니다 — 바 하나일 때도, 두 바가 하나로 이어질 때도, 각 바가 서로 다른 가장자리에 있을 때도 적용됩니다. ‘%1$@’, ‘%2$@’은(는) 가장자리를 따르므로 왼쪽 가장자리에서는 시작이 위쪽입니다.",
   "kiwishelf.alignment.note": "App Bar가 표시되면 두 바가 하나로 이어지므로 Space Bar가 움직입니다. ‘%1$@’을(를) 선택하면 제자리에 머뭅니다.",
