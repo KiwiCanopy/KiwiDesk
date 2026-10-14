@@ -5,23 +5,27 @@ import Foundation
 /// each would be kept, and the epoch a load or reload moves. Core
 /// names; the caller narrates (#96).
 public struct ChangeReport: Codable, Sendable, Equatable {
-    /// Moves whenever the live settings are replaced wholesale — a
-    /// config load, a profile or layout apply — so a caller holding
-    /// unkept leaves learns they are gone.
-    public var epoch: Int
+    /// Moves whenever the live settings are replaced wholesale,
+    /// and differs in every process; compared for equality only.
+    public var epoch: String
     /// The saved profile that is live, if any.
     public var profile: String?
     /// The leaves the request changed, in id order.
     public var touched: [TouchedLeaf]
+    /// The leaves the request asked about (`keep_watch`), judged
+    /// after it ran, in id order.
+    public var watched: [TouchedLeaf]
 
     public init(
-        epoch: Int,
+        epoch: String,
         profile: String?,
-        touched: [TouchedLeaf] = []
+        touched: [TouchedLeaf] = [],
+        watched: [TouchedLeaf] = []
     ) {
         self.epoch = epoch
         self.profile = profile
         self.touched = touched
+        self.watched = watched
     }
 }
 
@@ -33,15 +37,25 @@ public struct TouchedLeaf: Codable, Sendable, Equatable {
     public var owner: KeepOwner
     /// Nil when `keep_settings` can write the leaf.
     public var notKeepable: NotKeepable?
+    /// Whether the live value is the one its owner stores — kept,
+    /// by a keep, a Save or a value set back. False for a leaf no
+    /// keep can write.
+    public var stored: Bool
 
-    public init(id: String, owner: KeepOwner, notKeepable: NotKeepable?) {
+    public init(
+        id: String,
+        owner: KeepOwner,
+        notKeepable: NotKeepable?,
+        stored: Bool = false
+    ) {
         self.id = id
         self.owner = owner
         self.notKeepable = notKeepable
+        self.stored = stored
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, owner
+        case id, owner, stored
         case notKeepable = "not_keepable"
     }
 }
@@ -69,18 +83,24 @@ public enum NotKeepable: String, Codable, Sendable, CaseIterable {
     case appWide = "app_wide"
     /// A Space the live profile does not declare.
     case temporarySpace = "temporary_space"
+    /// The write did not land: the file, or the shared look, was
+    /// not written, or the leaves could not be decoded together.
+    case notWritten = "not_written"
     /// Not a leaf of the keep document.
     case unknown
 }
 
 extension CommandRequest {
-    /// A request that asks for a `ChangeReport` with its answer.
+    /// A request that asks for a `ChangeReport` with its answer,
+    /// judging `watch` — the leaf ids a caller holds — as well.
     public static func reporting(
         _ command: String,
-        args: [JSONValue]? = nil
+        args: [JSONValue]? = nil,
+        watch: [String] = []
     ) -> CommandRequest {
         var request = CommandRequest(command: command, args: args)
         request.reportChanges = true
+        request.keepWatch = watch.isEmpty ? nil : watch
         return request
     }
 }

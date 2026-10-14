@@ -60,10 +60,12 @@ extension MCPTools {
                 Self.result(MCPWording.nothingToKeep, structured: .object([:]))
             )
         }
+        // Core refuses a keep whose epoch a load has moved past.
+        let epoch = ledger.epoch ?? ""
         let outcome = outcome(
             of: CommandRequest(
                 command: Self.keepCommand,
-                args: ids.map(JSONValue.string)
+                args: ([epoch] + ids).map(JSONValue.string)
             )
         )
         guard outcome.ok, let data = outcome.data else {
@@ -82,9 +84,10 @@ extension MCPTools {
         return decorated(Self.result(text, structured: data))
     }
 
-    /// The Core verb `keep` sends; `run` refuses it, so every keep
-    /// passes through the ledger.
-    static let keepCommand = "keep_settings"
+    /// The Core verb `keep` sends; `run` refuses it and
+    /// `list_commands` leaves it out, so every keep passes through
+    /// the ledger.
+    static let keepCommand = KiwiCore.keepSettingsCommand
 
     /// `result` with the ledger's status appended, while there is
     /// one: a line the model reads and `keep_status` beside the

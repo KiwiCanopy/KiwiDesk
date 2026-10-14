@@ -1317,6 +1317,34 @@ in the profile*. The obligations:
   (`SpaceShortcutDropTests`, `SpaceShortcutDropOwedTests`,
   `LiveOnlyShortcutRowsTests`, `LayerRowWriterCensusTests`).
 
+## A change report reads one judgement (#1685)
+
+`kiwidesk mcp` learns what a command changed, and whether it is
+still unkept, from Core's change report alone. The argument is
+`docs/design-decisions.md` ▸ *Whether a setting lasts is not a
+fact about its command*. The obligations:
+
+- **Replace the live settings wholesale only through
+  `replaceLiveSettings`**, which moves the epoch the report
+  carries; a write beside it drops a session's unkept changes
+  with nothing told (`LiveSettingsReplaceCensusTests`, whose
+  `allowed` map is the one copy of who may).
+- **Answer where a leaf would be kept, why it cannot be, and
+  whether it already is through the one `KeepJudge`** — the
+  report and `keep_settings` both read it, so a keep and the
+  report it follows never disagree (`ChangeReportTests`,
+  `KeepSettingsEdgeTests`).
+- **A value a verb changes live is reported only where the keep
+  document carries it** (`KiwiCore.keepDocument`'s roots). A new
+  live store a verb writes joins one of those roots, or its verb
+  reports nothing and the AI app is never told the change is
+  unkept; nothing scans for a store left out, so that is
+  review's.
+- **`keep_settings` is the second writer of a Space's layout**
+  beside the quick menu's `keepLayouts`: it writes only Spaces
+  the live profile declares, through `writeThroughLiveProfile`,
+  so an open draft takes the edit as it takes a bar row's.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by
@@ -1461,8 +1489,8 @@ and the tour owns its undo*.
 bar menu's row (#1518), a Space added to or removed from the
 profile (#1790: the bar's confirmed Delete, `create_space` /
 `delete_space` with `profile`, Settings ▸ Spaces' add button,
-which is the one in-Settings caller; `keep_settings`, #1685) —
-carrying one
+which is the one in-Settings caller), and `keep_settings` (#1685)
+— carrying one
 `LiveProfileEdit` that the file and the draft each apply — which
 writes the file non-adopting and
 then hands the SAME edit to an open draft through

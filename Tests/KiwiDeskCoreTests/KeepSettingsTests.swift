@@ -10,7 +10,10 @@ import Testing
 @MainActor
 struct KeepSettingsTests {
     private func keep(_ core: KiwiCore, _ ids: [String]) -> CommandResponse {
-        core.execute("keep_settings", args: ids.map(JSONValue.string))
+        core.execute(
+            KiwiCore.keepSettingsCommand,
+            args: ([core.settingsEpoch] + ids).map(JSONValue.string)
+        )
     }
 
     private func members(_ data: JSONValue?, _ key: String) -> [String] {

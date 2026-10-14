@@ -5,49 +5,104 @@ import Foundation
 /// `LiveProfileEdit` through `writeThroughLiveProfile`, whose
 /// `recordLookWrite` lands a follower's look leaves in the shared
 /// look. Never `save_profile`, which snapshots everything live.
+/// What it answers as kept is re-judged after the write, so a
+/// write that did not land is never told as kept.
 extension KiwiCore {
+    /// The verb's name, read by the MCP `keep` tool and its `run`
+    /// refusal so a rename cannot leave either aimed at a dead verb.
+    nonisolated public static let keepSettingsCommand = "keep_settings"
+
+    /// `keep_settings(epoch, id…)`: refused whole where `epoch` is
+    /// not the live one, since the ids then name values a load
+    /// already replaced.
     func keepSettings(_ args: [JSONValue]) -> CommandResponse {
-        let ids = args.compactMap(\.stringValue)
-        let paths = Set(ids.compactMap(KeepPointer.path(_:)))
-        guard !ids.isEmpty, paths.count == Set(ids).count,
-            ids.count == args.count
+        let strings = args.compactMap(\.stringValue)
+        let paths = strings.dropFirst().compactMap(KeepPointer.path(_:))
+        guard strings.count == args.count, strings.count >= 2,
+            paths.count == strings.count - 1
         else {
-            return .fail("expected leaf ids from a change report")
+            return .fail("expected an epoch and leaf ids from a report")
         }
-        let verdicts = touchedLeaves(
-            paths.sorted { $0.lexicographicallyPrecedes($1) }
-        )
-        let live = keepDocument
-        var leaves = KeptLeaves()
-        for verdict in verdicts where verdict.notKeepable == nil {
-            guard let path = KeepPointer.path(verdict.id) else { continue }
-            let rest = Array(path.dropFirst())
-            if path.first == KeepRoot.spaceModes {
-                let mode = KeepPointer.value(at: path, in: live)?
-                    .stringValue.flatMap(LayoutMode.init(rawValue:))
-                if let mode { leaves.spaceModes[SpaceID(rest[0])] = mode }
+        guard strings[0] == settingsEpoch else {
+            return .fail(
+                "stale epoch: the live settings were replaced since "
+                    + "that report"
+            )
+        }
+        let unique = Set(paths).sorted { $0.lexicographicallyPrecedes($1) }
+        let judge = keepJudge()
+        let verdicts = unique.compactMap(judge.verdict(of:))
+        let wanted = verdicts.filter { $0.notKeepable == nil && !$0.stored }
+        var refused = verdicts.filter { $0.notKeepable != nil }
+        let (leaves, undecodable) = keptLeaves(wanted, judge)
+        refused += undecodable
+        let skipped = Set(undecodable.map(\.id))
+        let attempted = wanted.filter { !skipped.contains($0.id) }
+        if !attempted.isEmpty {
+            writeThroughLiveProfile(.kept(leaves))
+        }
+        // Judged again after the write: kept is what landed.
+        let after = keepJudge()
+        var kept = verdicts.filter { $0.notKeepable == nil && $0.stored }
+        for leaf in attempted {
+            let landed =
+                KeepPointer.path(leaf.id)
+                .flatMap(after.verdict(of:))?.stored ?? false
+            if landed {
+                kept.append(leaf)
             } else {
-                leaves.settings[rest] = .some(
-                    KeepPointer.value(at: path, in: live)
-                )
+                refused.append(Self.unwritten(leaf))
             }
         }
-        let kept = verdicts.filter { $0.notKeepable == nil }
-        if !kept.isEmpty, !writeThroughLiveProfile(.kept(leaves)) {
-            return .fail("the live profile's file was not written")
+        return .ok(keepAnswer(kept: kept, refused: refused))
+    }
+
+    /// The live values of `leaves`, and those whose settings could
+    /// not be laid over the stored profile together.
+    private func keptLeaves(
+        _ leaves: [TouchedLeaf],
+        _ judge: KeepJudge
+    ) -> (KeptLeaves, [TouchedLeaf]) {
+        var kept = KeptLeaves()
+        var settingsLeaves: [TouchedLeaf] = []
+        for leaf in leaves {
+            guard let path = KeepPointer.path(leaf.id) else { continue }
+            let value = KeepPointer.value(at: path, in: judge.live)
+            let rest = Array(path.dropFirst())
+            if path.first == KeepRoot.spaceModes {
+                if let mode = value?.stringValue
+                    .flatMap(LayoutMode.init(rawValue:))
+                {
+                    kept.spaceModes[SpaceID(rest[0])] = mode
+                }
+            } else {
+                kept.settings[rest] = .some(value)
+                settingsLeaves.append(leaf)
+            }
         }
-        return .ok(keepAnswer(verdicts, kept: kept))
+        let stored = profiles.currentName.flatMap {
+            try? profiles.read(name: $0)
+        }
+        guard !kept.settings.isEmpty, let stored,
+            stored.settings.patched(kept.settings) == nil
+        else { return (kept, []) }
+        kept.settings = [:]
+        return (kept, settingsLeaves.map(Self.unwritten))
+    }
+
+    private static func unwritten(_ leaf: TouchedLeaf) -> TouchedLeaf {
+        TouchedLeaf(id: leaf.id, owner: leaf.owner, notKeepable: .notWritten)
     }
 
     private func keepAnswer(
-        _ verdicts: [TouchedLeaf],
-        kept: [TouchedLeaf]
+        kept: [TouchedLeaf],
+        refused: [TouchedLeaf]
     ) -> JSONValue {
+        let byID: (TouchedLeaf, TouchedLeaf) -> Bool = { $0.id < $1.id }
         var answer: [String: JSONValue] = [
-            "kept": .array(kept.map(Self.json)),
-            "not_keepable": .array(
-                verdicts.filter { $0.notKeepable != nil }.map(Self.json)
-            ),
+            "epoch": .string(settingsEpoch),
+            "kept": .array(kept.sorted(by: byID).map(Self.json)),
+            "not_keepable": .array(refused.sorted(by: byID).map(Self.json)),
         ]
         if let name = profiles.currentName {
             answer["profile"] = .string(name)
@@ -55,9 +110,7 @@ extension KiwiCore {
         // A shared-look leaf reaches every profile wearing it.
         if kept.contains(where: { $0.owner == .sharedLook }) {
             answer["followers"] = .array(
-                profiles.list().filter {
-                    (try? profiles.read(name: $0))?.look == nil
-                }.map(JSONValue.string)
+                followingProfiles().map { .string($0.name) }
             )
         }
         return .object(answer)

@@ -85,6 +85,13 @@ struct ChangeReportTests {
         let one = KeepFixture.leaf(declared, "/space_modes/1")
         #expect(one?.owner == .profile)
         #expect(one?.notKeepable == nil)
+        // Making a Space is no change of its layout.
+        let made = KeepFixture.report(
+            core,
+            "set_mode",
+            [.string("9"), .string("bsp")]
+        )
+        #expect(KeepFixture.leaf(made, "/space_modes/9") == nil)
         let other = KeepFixture.report(
             core,
             "set_mode",
@@ -102,8 +109,33 @@ struct ChangeReportTests {
             "set_refusal_sound",
             [.bool(!core.appWide.refusalSound)]
         )
-        let leaf = KeepFixture.leaf(response, "/app_wide/refusalSound")
+        let leaf = KeepFixture.leaf(response, "/app_wide/refusal/sound")
         #expect(leaf?.notKeepable == .appWide)
+    }
+
+    @Test("a watched leaf is judged stored once live matches")
+    func watchedIsJudged() throws {
+        let core = try KeepFixture.core()
+        try core.profiles.save(KeepFixture.profile("Odd"))
+        KeepFixture.load("Odd", core)
+        let id = "/settings/border/width"
+        let stored = core.tiler.settings.borderStyle.width
+        _ = KeepFixture.report(core, "border.set_width", [.number(9)])
+        let pending = core.answer(.reporting("version", watch: [id]))
+        #expect(pending.changes?.watched.first?.stored == false)
+        _ = core.execute("border.set_width", args: [.number(stored)])
+        let back = core.answer(.reporting("version", watch: [id]))
+        #expect(back.changes?.watched.first?.stored == true)
+    }
+
+    @Test("every wholesale replacement moves the epoch")
+    func replacementsMoveTheEpoch() throws {
+        let core = try KeepFixture.core()
+        let before = core.settingsEpoch
+        core.applyProfileScopedState(from: GuiConfig())
+        #expect(core.settingsEpoch != before)
+        let other = try KeepFixture.core()
+        #expect(other.settingsEpoch != core.settingsEpoch)
     }
 
     @Test("a load moves the epoch and reports no leaves")

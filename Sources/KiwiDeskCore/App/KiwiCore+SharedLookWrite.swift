@@ -75,10 +75,9 @@ extension KiwiCore {
     /// Non-adopting, and a copy already wearing it is not rewritten.
     private func restampFollowers() {
         guard let base = sharedLook else { return }
-        for name in profiles.list() {
-            guard var stored = try? profiles.read(name: name),
-                stored.look == nil, !base.isWorn(by: stored.settings)
-            else { continue }
+        for var stored in followingProfiles()
+        where !base.isWorn(by: stored.settings) {
+            let name = stored.name
             stored.settings = wearingSharedLook(stored.settings)
             do {
                 try profiles.write(stored)
@@ -96,8 +95,17 @@ extension KiwiCore {
         guard liveLookReference == nil else { return }
         let worn = wearingSharedLook(tiler.settings)
         guard worn != tiler.settings else { return }
+        // Not a replacement (#1685): it paints what was just
+        // stored, which a change report reads as stored.
         tiler.settings = worn
         retile(pass: .apply)
+    }
+
+    /// Every stored profile that wears the shared look, read from
+    /// its file.
+    func followingProfiles() -> [Profile] {
+        profiles.list().compactMap { try? profiles.read(name: $0) }
+            .filter { $0.look == nil }
     }
 
     /// Writes `gui.json` with the stamp; false where nothing

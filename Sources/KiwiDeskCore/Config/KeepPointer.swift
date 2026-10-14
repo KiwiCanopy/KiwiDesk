@@ -65,7 +65,10 @@ public enum KeepPointer {
     }
 
     /// `root` with the leaf at `path` set to `value`, or removed
-    /// where `value` is nil; missing groups are made on the way.
+    /// where `value` is nil; missing groups are made on the way,
+    /// and a group a removal empties goes with it, so a map entry
+    /// whose leaves all left is no entry rather than an empty one
+    /// its decoder refuses.
     public static func setting(
         _ value: JSONValue?,
         at path: [String],
@@ -76,11 +79,12 @@ public enum KeepPointer {
         if path.count == 1 {
             map[key] = value
         } else {
-            map[key] = setting(
+            let child = setting(
                 value,
                 at: Array(path.dropFirst()),
                 in: map[key] ?? .object([:])
             )
+            map[key] = child == .object([:]) && value == nil ? nil : child
         }
         return .object(map)
     }

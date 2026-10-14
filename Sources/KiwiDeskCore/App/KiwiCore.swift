@@ -276,9 +276,10 @@ public final class KiwiCore {
     var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
     var sharedLookLedger = SharedLookLedger()
-    /// Moves where live settings are replaced wholesale (#1685,
-    /// `KiwiCore+ChangeReport`).
-    var settingsEpoch = 0
+    /// The live settings' epoch parts (#1685,
+    /// `KiwiCore+LiveSettingsEpoch`).
+    let settingsEpochOwner = UUID().uuidString
+    var settingsReplacements = 0
     /// Rehome target (#68): adopted from the active profile, GUI-edited,
     /// saved back; nil falls back to the space order's first survivor.
     var fallbackSpace: SpaceID?

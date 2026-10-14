@@ -10,12 +10,17 @@ import Testing
 /// leaves to `keep_settings`.
 @Suite("MCP keep")
 struct MCPKeepTests {
-    /// Answers each request, attaching the report `changes` gives.
+    /// Answers each request as Core would: the leaves `touched`
+    /// names for a command, every watched id judged against
+    /// `stored`, and a keep's `keepAnswer`, whose kept ids become
+    /// stored.
     final class FakeApp: @unchecked Sendable {
         var sent: [CommandRequest] = []
-        var epoch = 1
+        var epoch = "e1"
         var touched: [String: [TouchedLeaf]] = [:]
+        var stored: Set<String> = []
         var keepAnswer: JSONValue = .object([:])
+        private var known: [String: TouchedLeaf] = [:]
 
         lazy var tools: MCPTools = {
             var tools = MCPTools()
@@ -25,16 +30,31 @@ struct MCPKeepTests {
 
         func answer(_ request: CommandRequest) -> CommandResponse {
             sent.append(request)
-            var response = CommandResponse.ok(
-                request.command == MCPTools.keepCommand ? keepAnswer : nil
-            )
-            if request.reportChanges == true {
-                response.changes = ChangeReport(
-                    epoch: epoch,
-                    profile: "Work",
-                    touched: touched[request.command] ?? []
-                )
+            let keeping = request.command == MCPTools.keepCommand
+            if keeping, case .object(let fields) = keepAnswer,
+                case .array(let kept)? = fields["kept"]
+            {
+                for case .object(let leaf) in kept {
+                    if let id = leaf["id"]?.stringValue { stored.insert(id) }
+                }
             }
+            var response = CommandResponse.ok(keeping ? keepAnswer : nil)
+            guard request.reportChanges == true else { return response }
+            let touched = touched[request.command] ?? []
+            for leaf in touched { known[leaf.id] = leaf }
+            let judged = { (leaf: TouchedLeaf) -> TouchedLeaf in
+                var leaf = leaf
+                leaf.stored = self.stored.contains(leaf.id)
+                return leaf
+            }
+            response.changes = ChangeReport(
+                epoch: epoch,
+                profile: "Work",
+                touched: touched.map(judged),
+                watched: (request.keepWatch ?? []).compactMap {
+                    self.known[$0].map(judged)
+                }
+            )
             return response
         }
     }
@@ -122,7 +142,8 @@ struct MCPKeepTests {
         #expect(sent?.command == MCPTools.keepCommand)
         #expect(
             sent?.args == [
-                .string("/settings/gap/global"), .string("/space_modes/2"),
+                .string("e1"), .string("/settings/gap/global"),
+                .string("/space_modes/2"),
             ]
         )
         #expect(Self.text(kept).contains("Kept 2"))
@@ -156,7 +177,8 @@ struct MCPKeepTests {
             Self.leaf("/settings/border/width")
         ]
         _ = try Self.run(app, "border.set_width")
-        app.epoch = 2
+        app.epoch = "e2"
+        app.stored.insert("/settings/border/width")
         let reloaded = try Self.run(app, "version")
         #expect(
             Self.status(reloaded)?["replaced"]
@@ -164,6 +186,21 @@ struct MCPKeepTests {
         )
         #expect(Self.status(reloaded)?["pending"] == .number(0))
         #expect(Self.status(try Self.run(app, "version")) == nil)
+    }
+
+    @Test("a leaf stored by a Save or a set-back leaves silently")
+    func storedElsewhereLeaves() throws {
+        let app = FakeApp()
+        app.touched["border.set_width"] = [
+            Self.leaf("/settings/border/width")
+        ]
+        _ = try Self.run(app, "border.set_width")
+        app.stored.insert("/settings/border/width")
+        let later = try Self.run(app, "version")
+        #expect(Self.status(later) == nil)
+        #expect(
+            app.sent.last?.keepWatch == ["/settings/border/width"]
+        )
     }
 
     @Test("an unkeepable leaf is told, never counted or sent")

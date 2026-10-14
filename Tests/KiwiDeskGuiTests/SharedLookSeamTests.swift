@@ -54,10 +54,14 @@ struct SharedLookSeamTests {
         let apply = try squashed(
             "KiwiDeskCore/Profiles/KiwiCore+ProfileResolution.swift"
         )
-        #expect(apply.contains("tiler.settings=resolvedSettings(of:profile)"))
         #expect(
             apply.contains(
-                "tiler.settings=wearingSharedLook(composed.settings)"
+                "replaceLiveSettings(resolvedSettings(of:profile))"
+            )
+        )
+        #expect(
+            apply.contains(
+                "replaceLiveSettings(wearingSharedLook(composed.settings))"
             )
         )
         #expect(!apply.contains("tiler.settings=profile.settings"))

@@ -124,11 +124,13 @@ extension APIReference {
     /// config polling it would count its own work.
     /// `self_test` reads the WindowServer once per private path
     /// (#1889) — a diagnostic, never a config's to call.
+    /// `keep_settings` writes the live profile's file from a
+    /// change report's ids (#1685); a config owns its own values.
     public static let cliOnly: [String] = [
         socketOnlyCommand,
         ServiceManager.prepareRestartCommand,
         "get_work_counters",
         PrivatePathSelfTest.command,
-        "keep_settings",
+        KiwiCore.keepSettingsCommand,
     ]
 }

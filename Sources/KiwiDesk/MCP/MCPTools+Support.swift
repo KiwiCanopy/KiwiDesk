@@ -46,6 +46,10 @@ enum MCPWording {
                 + "Settings ▸ General keeps it"
         case .temporarySpace:
             why = "that Space is not in the profile"
+        case .notWritten:
+            why =
+                "the write did not land; the profile or gui.json "
+                + "was not written"
         case .unknown:
             why = "it is not a setting keep can write"
         }
@@ -98,11 +102,13 @@ enum MCPWording {
 
 /// The readings and result shapes the tools share (#1685).
 extension MCPTools {
-    /// A command the socket answers: Lua-only verbs have no
-    /// command, and `subscribe` streams instead of answering.
+    /// A command `run` may send: Lua-only verbs have no command,
+    /// `subscribe` streams instead of answering, and a keep goes
+    /// through the `keep` tool alone.
     static func isRunnable(_ entry: APIEntry) -> Bool {
         entry.command != nil
             && entry.qualifiedName != APIReference.socketOnlyCommand
+            && entry.qualifiedName != keepCommand
     }
 
     /// The socket request a tool's `command` and `args` describe,

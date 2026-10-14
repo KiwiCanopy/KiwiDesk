@@ -125,6 +125,8 @@ extension MCPTools {
     func outcome(of request: CommandRequest) -> MCPOutcome {
         var request = request
         request.reportChanges = true
+        let watch = ledger.watch
+        request.keepWatch = watch.isEmpty ? nil : watch
         do {
             let response = try send(request)
             if let changes = response.changes { ledger.absorb(changes) }

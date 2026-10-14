@@ -16,7 +16,6 @@ extension KiwiCore {
         profile: Profile,
         cause: ProfileApplyCause
     ) {
-        settingsEpoch += 1  // #1685: unkept live changes end here
         // Owed #1741 and #1752 crossings end at the first apply.
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
@@ -44,7 +43,7 @@ extension KiwiCore {
         let outgoingIcons = tiler.settings.spaceIcons
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
-        tiler.settings = resolvedSettings(of: profile)
+        replaceLiveSettings(resolvedSettings(of: profile))
         // The session layer reseeds on an explicit apply, and on
         // any apply that CHANGES the profile — it outranks the
         // incoming authored overrides (#458, #764). A same-
@@ -176,7 +175,6 @@ extension KiwiCore {
         composed: ProfileComposition.Composed,
         forceRetile: Bool
     ) {
-        settingsEpoch += 1  // #1685: unkept live changes end here
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
@@ -193,7 +191,7 @@ extension KiwiCore {
         let switching = recordOutgoingPartitioning(before: standard)
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
-        tiler.settings = wearingSharedLook(composed.settings)
+        replaceLiveSettings(wearingSharedLook(composed.settings))
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
             clearSessionRatios { $0 = SessionRatios() }

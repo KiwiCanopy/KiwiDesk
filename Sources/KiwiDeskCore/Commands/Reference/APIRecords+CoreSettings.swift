@@ -142,9 +142,10 @@ extension APIReference {
                 + "more events, or all of them.",
             .choice("event", KiwiNotification.self, optional: true)
         ),
-        "keep_settings": APIRecord(
-            "Keeps the leaves a change report named in the live "
-                + "profile or its shared look.",
+        KiwiCore.keepSettingsCommand: APIRecord(
+            "Keeps leaves a report named, after its epoch, in the "
+                + "live profile or its shared look.",
+            .text("epoch"),
             .text("id")
         ),
         "save_profile": APIRecord(

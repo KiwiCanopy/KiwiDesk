@@ -145,7 +145,7 @@ extension KiwiCore {
         // (#51 review).
         // Read before the draft's Spaces are made live (#1790).
         let temporaries = Set(liveTemporarySpaces)
-        tiler.settings = config.settings
+        replaceLiveSettings(config.settings)
         // A GUI save is an explicit apply (§5): reseed the
         // session resize layer so an edited Layout Defaults
         // ratio visibly applies on every space (#458).

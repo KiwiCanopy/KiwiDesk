@@ -13,7 +13,9 @@ extension APIReference {
     /// this list or its ruled exemptions. Ruled out: a Desktop
     /// switch onto a bound Desktop loads its profile as a swipe
     /// does, which is the binding working; `set_default_profile`
-    /// replaces only a choice another call restores.
+    /// replaces only a choice another call restores;
+    /// `keep_settings` writes values the user asked to keep, and
+    /// a set and a keep put the old one back (#1685).
     public static let destructive: Set<String> = [
         "delete_space",
         "close_window",

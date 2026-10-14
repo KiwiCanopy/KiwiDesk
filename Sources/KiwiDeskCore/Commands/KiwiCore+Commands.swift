@@ -171,7 +171,7 @@ extension KiwiCore {
             "delete_profile", "set_default_profile",
             "list_profiles", "get_profile_status":
             return profileCommand(command, args)
-        case "keep_settings":
+        case Self.keepSettingsCommand:
             return keepSettings(args)
         case "bind_profile_to_desktop":
             return bindProfileToDesktop(args)

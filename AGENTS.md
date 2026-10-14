@@ -972,6 +972,12 @@ Touching `Config`, `Profiles`, `Commands`.
   outside Settings takes, its draft policy ruled once in
   `SettingsModel.adoptLiveWrite` (#1720, #1518, `ShelfPaintTests`,
   `BarMenuLandingTests`)
+- a change report reads one judgement — the live settings replaced wholesale
+  only through `replaceLiveSettings`, which moves its epoch
+  (`LiveSettingsReplaceCensusTests`), where a leaf is kept, why not and
+  whether it already is answered by the one `KeepJudge` (`ChangeReportTests`,
+  `KeepSettingsEdgeTests`), and a live store a verb writes joining the keep
+  document or reporting nothing, which is review's (#1685)
 - the starter setup is DERIVED from the connected screens and its tuning is ONE
   `TilingSettings` — each layout tuned for the screen `StarterSetup.hosts`
   names — Scrolling for the widest screen that leads it — minimum size by the

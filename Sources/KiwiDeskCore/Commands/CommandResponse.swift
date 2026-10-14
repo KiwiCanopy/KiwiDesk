@@ -7,6 +7,8 @@ public struct CommandRequest: Codable, Sendable, Equatable {
     public var args: [JSONValue]?
     /// Asks for a `ChangeReport` beside the answer (#1685).
     public var reportChanges: Bool?
+    /// Leaf ids the report also judges (#1685).
+    public var keepWatch: [String]?
 
     public init(command: String, args: [JSONValue]? = nil) {
         self.command = command
@@ -16,6 +18,7 @@ public struct CommandRequest: Codable, Sendable, Equatable {
     enum CodingKeys: String, CodingKey {
         case command, args
         case reportChanges = "report_changes"
+        case keepWatch = "keep_watch"
     }
 }
 

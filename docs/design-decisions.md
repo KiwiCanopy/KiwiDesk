@@ -1113,21 +1113,22 @@ and making it permanent is a separate write — the `keep` tool —
 never a property of the setter, and never `save_profile`, which
 snapshots everything live.
 
-What a command changed is a diff of the live settings, the Spaces'
-layouts and the app-wide values taken around it, never a list of
-setters: a new setter reports itself, and a setter that changes
-nothing reports nothing. Each changed leaf carries where a keep
-would write it — the live profile, or the shared look for a look
-leaf of a profile wearing it — or why none can: `init.lua` owns the
-config, no saved profile is live, the value is app-wide, or the
-Space is not in the profile. The ledger of what is pending lives in
-the MCP server and holds only those ids, so it never re-derives
-Core's answer. A load, a reload or a profile apply moves an epoch,
-and the server reports the pending changes it replaced on the next
-result rather than keeping a value that is no longer live. A keep
-writes each leaf as it is live at that moment, as one edit through
-the same door the bar menus and the tour use, so an open Settings
-draft takes it the same way.
+What a command changed is a diff of the values Core reports taken
+around it, never a list of setters: a list is a second register of
+what each verb writes, and the `set_*` spelling it was read from
+already named a verb that writes a file. Whether a change is still
+pending is Core's verdict too — its live value against what its
+owner stores, asked again on every request — so a Settings Save, a
+value set back or a keep is seen however it happened, and a guess
+from the session's own history would call a stored value unkept.
+The MCP server keeps only what Core reported of the leaves the
+session touched, never a verdict of its own. The epoch exists so a
+load, which also makes live match stored, is told as a
+replacement rather than as a keep; it names the process, since the
+server outlives a relaunch. A keep writes each leaf as live at
+that moment through the same door the bar menus and the tour use,
+so an open Settings draft takes it alike, and it answers what it
+re-reads as stored, never what it meant to write.
 :::
 
 ### The landing page argues from the papercut, not from the mess
