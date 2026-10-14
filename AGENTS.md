@@ -409,6 +409,9 @@ Touching Anywhere in `Sources/KiwiDeskCore`.
   summary — save a `.window` argument, which exempts a named call from the #292
   preflight and so is read only through `commandTarget` (#1518,
   `WindowArgumentReachTests`)
+- a new command answers whether it is destructive in
+  `APIReference.destructive`, a name the census cannot read being review's
+  (#1685, `APIDestructiveCensusTests`)
 - the #292 preflight's one verb bypass is
   `FocusedCommandPolicy.raiseFlightExempt`, joined only by a verb that changes
   no window's content, size or membership and judged by the app the raise LEFT,
