@@ -37,6 +37,7 @@ struct SettingsThemeWiringTests {
         "sunken": "Chips.swift",
         "previewPlate": "HomeCardPlate.swift",
         "plateInk": "HomeCardPlate.swift",
+        "visionVeil": "KiwiVisionScene.swift",
         "keyFree": "KeyboardBoard.swift",
         "keyReserved": "KeyboardBoard.swift",
         "keyConflict": "KeyboardBoard.swift",

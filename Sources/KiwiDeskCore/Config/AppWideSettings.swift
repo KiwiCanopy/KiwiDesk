@@ -26,6 +26,15 @@ public struct AppWideSettings: Equatable, Sendable {
     /// and the layout it landed on (`mode.cue`, #2144). ON by
     /// default: the press asked for it.
     public var modeCue = true
+    /// KiwiVision's dim, in percent (`kiwivision.dim`, #2103) —
+    /// 60 by default (ruling 10).
+    public var visionDim: Double = 60
+    /// Whether KiwiVision's plate blurs (`kiwivision.blur`,
+    /// #2103). ON by default (ruling 10).
+    public var visionBlur = true
+    /// The system appearance asked for while KiwiVision is on
+    /// (`kiwivision.appearance`, #2103 ruling 7).
+    public var visionAppearance = VisionAppearance.unchanged
 
     public init() {}
 
@@ -34,6 +43,11 @@ public struct AppWideSettings: Equatable, Sendable {
     static func clampedDepth(_ raw: Int) -> Int {
         let range = QuitGridLayout.targetDepthRange
         return min(max(raw, range.lowerBound), range.upperBound)
+    }
+
+    /// `raw` clamped into the dim's 0...100 %, as `clampedDepth`.
+    static func clampedDim(_ raw: Double) -> Double {
+        raw.isFinite ? min(max(raw, 0), 100) : 60
     }
 }
 
@@ -70,22 +84,37 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
+    /// `gui.json`'s `kiwivision` group (#2103) — additive, as
+    /// `desktop`; v3's sets join it.
+    struct Vision: Codable {
+        var dim: Double?
+        var blur: Bool?
+        var appearance: VisionAppearance?
+    }
+
     /// The stored value, or nil when neither #1741 group is
     /// present — the file predates #1741 and the crossing is still
-    /// owed. The `desktop` (#2142), `space` (#2228) and `mode`
-    /// (#2144) groups crossed nothing, so they never decide that.
+    /// owed. The `desktop` (#2142), `space` (#2228), `mode`
+    /// (#2144) and `kiwivision` (#2103) groups crossed nothing, so
+    /// they never decide that.
     init?(
         refusal: Refusal?,
         quit: Quit?,
         desktop: Desktop? = nil,
         space: Space? = nil,
-        mode: Mode? = nil
+        mode: Mode? = nil,
+        vision: Vision? = nil
     ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
         if let cue = desktop?.cue { desktopCue = cue }
         if let cue = space?.cue { spaceCue = cue }
         if let cue = mode?.cue { modeCue = cue }
+        if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
+        if let blur = vision?.blur { visionBlur = blur }
+        if let appearance = vision?.appearance {
+            visionAppearance = appearance
+        }
         if let sound = refusal?.sound { refusalSound = sound }
         if let depth = quit?.gridTargetDepth {
             quitGridTargetDepth = Self.clampedDepth(depth)
@@ -100,4 +129,11 @@ extension AppWideSettings {
     var desktop: Desktop { Desktop(cue: desktopCue) }
     var space: Space { Space(cue: spaceCue) }
     var mode: Mode { Mode(cue: modeCue) }
+    var vision: Vision {
+        Vision(
+            dim: visionDim,
+            blur: visionBlur,
+            appearance: visionAppearance
+        )
+    }
 }

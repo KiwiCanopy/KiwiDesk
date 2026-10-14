@@ -15,8 +15,8 @@ enum HomeCardOrder {
     /// one to orphan on the row's second line (owner and
     /// ui-designer, #1365).
     static let wholeApp: [SettingsDestination] = [
-        .shortcuts, .profiles, .appRules, .ai, .general,
-        .macChecklist,
+        .kiwiVision, .shortcuts, .profiles, .appRules, .ai,
+        .general, .macChecklist,
     ]
 
     /// Single offer predicate for home dashboard cards (#18) — no

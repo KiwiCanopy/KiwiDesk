@@ -61,6 +61,9 @@ appWide.modeCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
 appWide.spaceCue
+appWide.visionAppearance
+appWide.visionBlur
+appWide.visionDim
 config.appRules[app]
 config.floatAutomatically
 config.floatRules

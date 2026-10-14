@@ -22,6 +22,7 @@ enum SettingsCatalog {
     static let profiles = ProfilesControls()
     static let shortcuts = ShortcutsControls()
     static let appRules = AppRulesControls()
+    static let kiwiVision = KiwiVisionControls()
     static let ai = AIControls()
     static let general = GeneralControls()
     static let macChecklist = MacChecklistControls()
@@ -46,6 +47,7 @@ enum SettingsCatalog {
         case .profiles: return profiles
         case .shortcuts: return shortcuts
         case .appRules: return appRules
+        case .kiwiVision: return kiwiVision
         case .ai: return ai
         case .general: return general
         case .macChecklist: return macChecklist

@@ -64,9 +64,13 @@ struct VisionAppearanceSeamTests {
                 "retargetVisionAppearance("
             ),
             (
-                "App/KiwiCore+VisionAppearance.swift",
-                "func setVisionAppearance(",
+                "App/KiwiCore+Vision.swift",
+                "func appWideLiveChanged(",
                 "retargetVisionAppearance("
+            ),
+            (
+                "App/KiwiCore.swift", "var appWideLedger",
+                "appWideLiveChanged(from: oldValue.live)"
             ),
             (
                 "App/KiwiCore+Lifecycle.swift", "public func stop(",

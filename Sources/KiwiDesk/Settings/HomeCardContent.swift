@@ -137,6 +137,8 @@ enum HomeCardContent {
                 "%1$d apps pinned or floating",
                 rules
             )
+        case .kiwiVision:
+            return kiwiVisionSubtitle(model)
         case .ai:
             // Fixed: KiwiDesk cannot know what an AI app has
             // configured, and a status line is ruled out (#1685).
@@ -237,5 +239,46 @@ extension AnimationSettings {
     /// True when any window animation is enabled.
     var anyEnabled: Bool {
         onWindowResize || onWindowSwap || onRelayout
+    }
+}
+
+extension HomeCardContent {
+    /// The running state, so the card is worth reading (#2103):
+    /// off with the chord that turns it on, or on with its values.
+    @MainActor static func kiwiVisionSubtitle(
+        _ model: SettingsModel
+    ) -> String {
+        guard model.core.kiwiVisionIsOn else {
+            guard
+                let chord = ShortcutsOpenBinding.comboGlyphs(
+                    core: model.core,
+                    lua: KeybindingCatalog.toggleKiwiVision.lua
+                )
+            else {
+                return L(
+                    "home.card.kiwivision.off_no_shortcut",
+                    "Off · no shortcut yet"
+                )
+            }
+            return L(
+                "home.card.kiwivision.off",
+                "Off · %1$@ turns it on",
+                chord
+            )
+        }
+        let dim = SettingsValueReadout.percent(
+            model.appWide.visionDim / 100
+        )
+        return model.appWide.visionBlur
+            ? L(
+                "home.card.kiwivision.on_blur",
+                "On · Dim %1$@, blur on",
+                dim
+            )
+            : L(
+                "home.card.kiwivision.on_no_blur",
+                "On · Dim %1$@, blur off",
+                dim
+            )
     }
 }

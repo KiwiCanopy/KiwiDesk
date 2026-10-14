@@ -6375,6 +6375,58 @@ turns macOS's Automatic mode off, so the payment turns it back on
 where it was on; that re-arm writes the preference and posts the
 theme notification, the one step no device has measured yet.
 
+### KiwiVision has its own page, and its rows apply at once (#2103)
+
+**[Rationale]**
+
+KiwiVision is a mode the user turns on and looks at, so its
+settings get their own Whole App page, first on Home, rather than
+a card on a per-profile page. Its Home card says whether the mode
+is on right now and how to turn it on, so it is worth reading on
+every visit; a picture row there waits for named lenses. Dim, Blur
+and Appearance while on are app-wide and write `gui.json` the
+moment they change, like General's rows (#1741). With KiwiVision
+on, Settings stays clear while every window behind it dims as the
+Dim value steps, which is the best preview there is. Each card says
+"Applies at once, in every profile."
+
+*Stored as one group, with no crossing.* The settings live in
+`gui.json` as `kiwivision.{dim, blur, appearance}`, every field
+optional, so a file written before them reads the defaults.
+KiwiVision never had a per-profile home, so nothing is captured or
+owed. A group rather than three flat keys leaves room for named
+lenses beside these fields (v3) without moving a stored value.
+Every change of the live values, whether from a verb, a row, a
+reload of `gui.json`, a restore or a reset, reaches the plate and
+the appearance switch through one hook, so a reload while the mode
+is on never leaves the system dark under an "Unchanged" setting.
+
+*Dim is a stepper, not a slider.* A proportion judged by eye would
+usually take a slider (`docs/ui-patterns.md`). The owner ruled a
+stepper with a typed field, 0–100 % in 5 % steps, because a value
+can be typed and read back exactly, and with the mode on the
+screen itself shows the result.
+
+*The picture is drawn, in the side panel.* A realistic desk under
+the plate's real glass read too hard beside the rest of Settings
+(owner, on device), so the picture is drawn in the schematics'
+language: the user's palette, gaps and focus ring, four kinds of
+window. It invents no verdict. The veil takes the plate's own dim
+mapping, the softening shows only where the plate's blur door
+draws (so Reduce transparency drops it here too), and the windows
+take the appearance the mode will show, never Settings' own
+Appearance pick. It sits in the side panel even though the page
+has no draft: nothing there misleads, since the rows already hold
+what a Save would, and in v3 the same panel follows the selected
+lens while its draft fills the list beneath.
+
+*Lenses later save with Save.* A lens cannot apply at once. Its
+shortcut must not register before Save, the profiles it applies to
+are written to other profiles' files, and a rename rewrites stored
+bindings. The plain settings and the "Always clear" list stay
+immediate. That is why the sentence sits on each immediate card
+rather than on the page.
+
 ## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom

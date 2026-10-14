@@ -69,7 +69,7 @@ final class AppKitVisionPlate: VisionPlateBackend {
         CATransaction.setDisableActions(true)
         dimLayer.frame = CGRect(origin: .zero, size: frame.size)
         blurView.frame = CGRect(origin: .zero, size: frame.size)
-        dimLayer.opacity = Float(min(max(dim, 0), 1))
+        dimLayer.opacity = Float(VisionPlateDim.opacity(forDim: dim))
         CATransaction.commit()
         if blurView.isHidden == blur { blurView.isHidden = !blur }
     }
@@ -174,5 +174,14 @@ final class AppKitVisionPlate: VisionPlateBackend {
         hud.blendingMode = .behindWindow
         hud.state = .active
         return hud
+    }
+}
+
+/// The plate's dim mapping (#2103): the one copy, read by the
+/// plate's dim layer and the Settings picture's veil.
+public enum VisionPlateDim {
+    /// The dim layer's opacity for a dim of 0...1.
+    public static func opacity(forDim dim: CGFloat) -> CGFloat {
+        min(max(dim, 0), 1)
     }
 }

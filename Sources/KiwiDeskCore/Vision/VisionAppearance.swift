@@ -3,7 +3,7 @@ import Foundation
 /// The system appearance KiwiVision asks for while it is on
 /// (#2103 ruling 7). `unchanged` leaves the system alone;
 /// `opposite` takes whichever the system is not showing.
-public enum VisionAppearance: String, APIChoiceType, Sendable {
+public enum VisionAppearance: String, APIChoiceType, Codable, Sendable {
     case unchanged, opposite, dark, light
 
     /// The appearance asked for over `found`, nil for `unchanged`.

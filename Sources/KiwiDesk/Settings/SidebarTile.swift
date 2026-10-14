@@ -8,7 +8,7 @@ struct SidebarTile: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: 6)
-            .fill(destination.tint)
+            .fill(destination.tileFill)
             .frame(
                 width: SettingsMetrics.sidebarTile,
                 height: SettingsMetrics.sidebarTile

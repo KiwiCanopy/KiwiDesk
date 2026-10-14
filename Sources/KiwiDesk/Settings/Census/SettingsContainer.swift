@@ -1,6 +1,10 @@
 /// Titled card or group within an area. Spans multiple areas where relevant.
 enum SettingsContainer: CaseIterable, Hashable {
     case advanced
+    /// KiwiVision ▸ Dim and blur (#2103).
+    case kiwiVisionLevels
+    /// KiwiVision ▸ System appearance (#2103).
+    case kiwiVisionAppearance
     /// AI ▸ Set up (#1685).
     case aiSetup
     /// AI ▸ Ready-made prompts (#1685).
@@ -82,7 +86,12 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .setting(.borders(.borderEnabled))
         case .motion:
             return .runtime(.reduceMotion)
+        case .kiwiVisionLevels:
+            // Glass's shape (#1418): the blur greys under Reduce
+            // transparency, the dim is exempt.
+            return .runtime(.reduceTransparency)
         case .accent, .advanced, .aiSetup, .readyMadePrompts,
+            .kiwiVisionAppearance,
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .grid, .kiwiHub,

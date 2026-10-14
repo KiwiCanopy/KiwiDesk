@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import KiwiDeskCore
 
 extension AppDelegate {
@@ -18,7 +19,9 @@ extension AppDelegate {
         statusItem?.onToggleKiwiVision = { [weak self] in
             self?.core.toggleKiwiVision()
         }
-        core.vision.onChange = { on in
+        core.vision.onChange = { [weak self] on in
+            // The Home card's subtitle reads the running state.
+            self?.dashboardIfCreated?.model.objectWillChange.send()
             NSAccessibility.post(
                 element: NSApp as Any,
                 notification: .announcementRequested,

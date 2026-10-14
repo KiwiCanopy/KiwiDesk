@@ -127,6 +127,8 @@ struct CrossReferenceRowSlotTests {
         "SharedLookPointer.swift:follows?Self.sharedProse:Self.ownProse",
         "SpacesSection+LiveOnly.swift:Self.noProfileProse",
         "SpacesSection.swift:Self.shortcutsProse",
+        // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
+        "KiwiVisionSection.swift:Self.prose(chord:chord)",
     ]
 
     // MARK: - The values

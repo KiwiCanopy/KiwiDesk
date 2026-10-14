@@ -271,7 +271,10 @@ public final class KiwiCore {
     /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
     /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
-    var appWideLedger = AppWideLedger()
+    /// Every change of `live` reaches KiwiVision (#2103).
+    var appWideLedger = AppWideLedger() {
+        didSet { appWideLiveChanged(from: oldValue.live) }
+    }
     /// Space history and its setting (#1655, `KiwiCore+SpaceHistory`).
     var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
