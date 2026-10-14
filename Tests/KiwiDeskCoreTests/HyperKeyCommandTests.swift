@@ -160,4 +160,27 @@ struct HyperKeyCommandTests {
         #expect(!reply.isSuccess)
         #expect(fake.written == nil)  // nothing of ours landed
     }
+
+    @Test("the verb sets the running value and never stores it")
+    func verbIsSessionOnly() {
+        let core = makeTestCore()
+        let fake = FakeHost()
+        core.hyperRemapHost = fake.host
+        _ = core.execute("set_hyper_key", args: [.string("f13")])
+        #expect(core.appWide.hyperKey == .f13)
+        #expect(core.appWideStamp?.hyperKey == nil)
+    }
+
+    @Test("a stored value reaching the engine remaps the key")
+    func storedValueApplies() {
+        let core = makeTestCore()
+        let fake = FakeHost()
+        core.hyperRemapHost = fake.host
+        core.setAppWide(persisting: false) { $0.hyperKey = .capsLock }
+        #expect(core.keys.hyperSource == .capsLock)
+        #expect(core.keys.hyperEnabled)
+        core.setAppWide(persisting: false) { $0.hyperKey = nil }
+        #expect(!core.keys.hyperEnabled)
+        #expect(fake.mapping.isEmpty)
+    }
 }

@@ -246,6 +246,14 @@ GLOSSARY = {
     # `system_shortcut.*` keys follow macOS per locale, but these
     # words stay English inside prose in every locale.
     "bundle",  # "Bundle identifier"
+    # "Caps Lock": Apple's own key name, which macOS's Keyboard
+    # pane keeps Latin in ja, ko, ru and pt-BR (#1870).
+    "caps",
+    "lock",
+    # The Hyper key (#1870): the keyboard-tool name for the extra
+    # modifier, kept Latin around a translated "key" in every
+    # catalog, as the site's `compare_cell_hotkeys_omniwm` does.
+    "hyper",
     "control",  # "Mission Control"
     "desktop",  # Mission Control's own noun
     "dock",

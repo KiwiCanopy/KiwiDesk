@@ -924,7 +924,11 @@ app. If a key mapping KiwiDesk did not set is already in place
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
-The verb changes the running session only.
+The GUI twin is **Shortcuts & Gestures ▸ Hyper key**, a recorder
+that takes one key — left and right apart. Like
+[`set_desktop_cue`](#set_desktop_cue), the setting is app-wide,
+stored in `gui.json` as `hyper.key`; the verb changes the running
+value only.
 
 **Example:**
 

@@ -35,6 +35,10 @@ public struct AppWideSettings: Equatable, Sendable {
     /// The system appearance asked for while KiwiVision is on
     /// (`kiwivision.appearance`, #2103 ruling 7).
     public var visionAppearance = VisionAppearance.unchanged
+    /// The key turned into the Hyper modifier, nil for none
+    /// (`hyper.key`, #1870). Per Mac, never per profile: it remaps
+    /// a physical key, and a profile can change on a swipe.
+    public var hyperKey: HyperSourceKey?
 
     public init() {}
 
@@ -90,6 +94,13 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
+    /// `gui.json`'s `hyper` group (#1870) — additive, as `desktop`.
+    /// Off is stored as `"off"`, never left out, so the group
+    /// always carries its one leaf; an unknown name reads as off.
+    struct Hyper: Codable, Equatable {
+        var key: String?
+    }
+
     /// `gui.json`'s `kiwivision` group (#2103) — additive, as
     /// `desktop`; v3's sets join it.
     struct Vision: Codable, Equatable {
@@ -109,13 +120,15 @@ extension AppWideSettings {
         desktop: Desktop? = nil,
         space: Space? = nil,
         mode: Mode? = nil,
-        vision: Vision? = nil
+        vision: Vision? = nil,
+        hyper: Hyper? = nil
     ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
         if let cue = desktop?.cue { desktopCue = cue }
         if let cue = space?.cue { spaceCue = cue }
         if let cue = mode?.cue { modeCue = cue }
+        hyperKey = hyper?.key.flatMap(HyperSourceKey.init(rawValue:))
         if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
         if let blur = vision?.blur { visionBlur = blur }
         if let appearance = vision?.appearance {
@@ -135,6 +148,7 @@ extension AppWideSettings {
     var desktop: Desktop { Desktop(cue: desktopCue) }
     var space: Space { Space(cue: spaceCue) }
     var mode: Mode { Mode(cue: modeCue) }
+    var hyper: Hyper { Hyper(key: hyperKey?.rawValue ?? "off") }
     var vision: Vision {
         Vision(
             dim: visionDim,

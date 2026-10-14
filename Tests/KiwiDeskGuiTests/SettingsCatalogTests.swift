@@ -135,7 +135,8 @@ struct SettingsCatalogTests {
         // 140 since #2265: Shortcuts' KiwiHub group.
         // 141 since #1685: the AI page's look prompt row.
         // 146 since #2103: KiwiVision's two cards and three rows.
-        #expect(allEntries.count == 146)
+        // 147 since #1870: Shortcuts' Hyper key card.
+        #expect(allEntries.count == 147)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

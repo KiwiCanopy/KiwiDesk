@@ -23,6 +23,8 @@ struct SpokenKeyboardBoard: View {
     /// without the words would draw an outline saying nothing,
     /// which is #1126's harm in a new place.
     let conflictDetail: [String]
+    /// The Hyper key, marked ✦ on its cap (#1870).
+    var hyperKey: HyperSourceKey?
 
     private var scopeLabel: String {
         switch scope {
@@ -38,7 +40,8 @@ struct SpokenKeyboardBoard: View {
             claims: claims,
             scope: scope,
             conflicted: conflicted,
-            onHover: onHover
+            onHover: onHover,
+            hyperKey: hyperKey
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(

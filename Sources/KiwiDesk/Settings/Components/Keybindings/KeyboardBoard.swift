@@ -11,6 +11,9 @@ struct KeyboardBoard: View {
     /// A closure rather than a binding: the board owns no hover
     /// state, so a rebuilt cap cannot strand a stale key here.
     var onHover: ((UInt32?) -> Void)?
+    /// The Hyper key, whose cap wears ✦ in place of its legend
+    /// (#1870).
+    var hyperKey: HyperSourceKey?
 
     var body: some View {
         GeometryReader { geometry in
@@ -88,7 +91,8 @@ struct KeyboardBoard: View {
                 ?? false,
             isOverwritten: key.code
                 .map(overwritten.contains) ?? false,
-            legend: key.legend
+            legend: key.source != nil && key.source == hyperKey
+                ? ComboSymbols.hyperGlyph : key.legend
         )
         .frame(width: max(width, 0), height: unit)
         .onHover { inside in

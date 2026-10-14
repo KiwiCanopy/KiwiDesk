@@ -10,15 +10,20 @@ enum KeyboardMatrix {
         let code: UInt32?
         let units: Double
         let legend: String?
+        /// The physical key a legend cap is, so the board can mark
+        /// the Hyper key on it (#1870); nil for a bindable key.
+        let source: HyperSourceKey?
 
         init(
             _ code: UInt32?,
             _ units: Double = 1,
-            legend: String? = nil
+            legend: String? = nil,
+            source: HyperSourceKey? = nil
         ) {
             self.code = code
             self.units = units
             self.legend = legend
+            self.source = source
         }
     }
 
@@ -55,10 +60,11 @@ enum KeyboardMatrix {
     private static let ansiRows: [[Key]] = [
         [Key(50)] + digitRow,
         [Key(48, 1.5)] + qwertyRow + [Key(42, 1.5)],
-        [Key(nil, 1.75, legend: "⇪")] + homeRow
+        [Key(nil, 1.75, legend: "⇪", source: .capsLock)] + homeRow
             + [Key(36, 2.25)],
-        [Key(nil, 2.25, legend: "⇧")] + bottomLetters
-            + [Key(nil, 2.75, legend: "⇧")],
+        [Key(nil, 2.25, legend: "⇧", source: .leftShift)]
+            + bottomLetters
+            + [Key(nil, 2.75, legend: "⇧", source: .rightShift)],
         spaceRow,
     ]
 
@@ -71,10 +77,11 @@ enum KeyboardMatrix {
     private static let isoRows: [[Key]] = [
         [Key(10)] + digitRow,
         [Key(48, 1.5)] + qwertyRow + [Key(36, 1.5)],
-        [Key(nil, 1.75, legend: "⇪")] + homeRow
+        [Key(nil, 1.75, legend: "⇪", source: .capsLock)] + homeRow
             + [Key(42), Key(nil, 1.25)],
-        [Key(nil, 1.25, legend: "⇧"), Key(50)] + bottomLetters
-            + [Key(nil, 2.75, legend: "⇧")],
+        [Key(nil, 1.25, legend: "⇧", source: .leftShift), Key(50)]
+            + bottomLetters
+            + [Key(nil, 2.75, legend: "⇧", source: .rightShift)],
         spaceRow,
     ]
 
@@ -106,12 +113,12 @@ enum KeyboardMatrix {
     /// name — a combo carries modifiers in `HotkeyModifiers`, so
     /// ⌃⌥⌘⇧ have no key code to bind.
     private static let spaceRow: [Key] = [
-        Key(nil, 1.25, legend: "⌃"),
-        Key(nil, 1.25, legend: "⌥"),
-        Key(nil, 1.25, legend: "⌘"),
+        Key(nil, 1.25, legend: "⌃", source: .leftControl),
+        Key(nil, 1.25, legend: "⌥", source: .leftOption),
+        Key(nil, 1.25, legend: "⌘", source: .leftCommand),
         Key(49, 4.75),
-        Key(nil, 1.25, legend: "⌘"),
-        Key(nil, 1.25, legend: "⌥"),
+        Key(nil, 1.25, legend: "⌘", source: .rightCommand),
+        Key(nil, 1.25, legend: "⌥", source: .rightOption),
         Key(123), Key(126), Key(125), Key(124),
     ]
 

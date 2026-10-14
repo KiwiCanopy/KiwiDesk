@@ -5,8 +5,9 @@ import Foundation
 /// held. The remap is KiwiCore's — the manager never spawns
 /// `hidutil` — and it lives only while KiwiDesk runs.
 extension KiwiCore {
-    /// `set_hyper_key <key|off>`. Session only for now: #1870's
-    /// stored setting is the Settings row's.
+    /// `set_hyper_key <key|off>`: the running value, as every
+    /// app-wide verb (#1741); the Settings row stores it
+    /// (`hyper.key`). The remap runs from `appWideLiveChanged`.
     func setHyperKey(_ args: [JSONValue]) -> CommandResponse {
         guard let name = args.first?.stringValue else {
             return .fail("expected a key name or off")
@@ -19,8 +20,12 @@ extension KiwiCore {
         } else {
             return .fail("expected off|\(HyperSourceKey.expectedList)")
         }
-        keys.hyperSource = want
-        switch applyHyperKey() {
+        // The same key again is a retry: a refused remap may have
+        // gone since, and no change reaches `appWideLiveChanged`.
+        let retry = appWide.hyperKey == want
+        setAppWide(persisting: false) { $0.hyperKey = want }
+        if retry { applyHyperKey() }
+        switch keys.hyperStatus {
         case .refused:
             return .fail(
                 "a key remap KiwiDesk did not set is in place; "

@@ -110,6 +110,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case space
         case mode
         case kiwivision
+        case hyper
         case look
     }
 
@@ -222,6 +223,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             vision: try container.decodeIfPresent(
                 AppWideSettings.Vision.self,
                 forKey: .kiwivision
+            ),
+            hyper: try container.decodeIfPresent(
+                AppWideSettings.Hyper.self,
+                forKey: .hyper
             )
         )
         // Additive since #1752: absence is "no shared look adopted
@@ -286,6 +291,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.encode(appWide.space, forKey: .space)
             try container.encode(appWide.mode, forKey: .mode)
             try container.encode(appWide.vision, forKey: .kiwivision)
+            try container.encode(appWide.hyper, forKey: .hyper)
         }
         try container.encodeIfPresent(look, forKey: .look)
     }

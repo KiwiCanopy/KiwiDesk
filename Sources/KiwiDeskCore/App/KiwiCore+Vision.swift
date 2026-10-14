@@ -72,6 +72,10 @@ extension KiwiCore {
         }
         // The whole stored group, so a field v3 adds re-draws too.
         if new.vision != old.vision { updateVision() }
+        if new.hyperKey != old.hyperKey {
+            keys.hyperSource = new.hyperKey
+            applyHyperKey()
+        }
         onAppWideChange()
     }
 

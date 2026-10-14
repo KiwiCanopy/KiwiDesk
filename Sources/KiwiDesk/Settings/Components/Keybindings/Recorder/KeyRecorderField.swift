@@ -217,9 +217,10 @@ struct KeyRecorderField: View {
             commit(combo)
         case .clickAway:
             cancelledByClick = Date()
-        case .cancelled, .modifiers:
-            // `.modifiers` is the scroll recorder's; this field
-            // records in `.combo` mode.
+        case .cancelled, .modifiers, .sourceKey:
+            // `.modifiers` is the scroll recorder's and
+            // `.sourceKey` the Hyper key's; this field records in
+            // `.combo` mode.
             break
         }
     }
