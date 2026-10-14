@@ -50,6 +50,10 @@ enum MCPWording {
             why =
                 "the write did not land; the profile or gui.json "
                 + "was not written"
+        case .conflicting:
+            why =
+                "it cannot be written into the profile together "
+                + "with the changes kept beside it; keep it on its own"
         case .unknown:
             why = "it is not a setting keep can write"
         }
@@ -57,9 +61,18 @@ enum MCPWording {
     }
 
     static func replaced(_ count: Int) -> String {
-        "A config reload or profile load replaced \(count) unkept "
-            + "change(s); they are no longer live."
+        "Something else — a config reload, a profile load, Settings "
+            + "or another tool — replaced \(count) unkept change(s); "
+            + "they are no longer live."
     }
+
+    /// A keep Core refused because the live settings were replaced
+    /// after the report it named; the ledger already took the new
+    /// one, so a second keep acts on what is still pending.
+    static let staleKeep =
+        "The live settings changed since those changes were "
+        + "reported; the pending list is updated. Call keep again "
+        + "to keep what is still pending."
 
     static func kept(
         _ leaves: [TouchedLeaf],

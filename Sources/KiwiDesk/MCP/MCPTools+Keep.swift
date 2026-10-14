@@ -69,7 +69,10 @@ extension MCPTools {
             )
         )
         guard outcome.ok, let data = outcome.data else {
-            return decorated(Self.failure(outcome.text))
+            let stale = outcome.error == KiwiCore.staleKeepRefusal
+            return decorated(
+                Self.failure(stale ? MCPWording.staleKeep : outcome.text)
+            )
         }
         let kept = Self.leaves(data, "kept")
         ledger.settle(

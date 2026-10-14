@@ -41,21 +41,25 @@ public struct TouchedLeaf: Codable, Sendable, Equatable {
     /// by a keep, a Save or a value set back. False for a leaf no
     /// keep can write.
     public var stored: Bool
+    /// The live value when judged; nil where the leaf is absent.
+    public var value: JSONValue?
 
     public init(
         id: String,
         owner: KeepOwner,
         notKeepable: NotKeepable?,
-        stored: Bool = false
+        stored: Bool = false,
+        value: JSONValue? = nil
     ) {
         self.id = id
         self.owner = owner
         self.notKeepable = notKeepable
         self.stored = stored
+        self.value = value
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, owner, stored
+        case id, owner, stored, value
         case notKeepable = "not_keepable"
     }
 }
@@ -83,9 +87,12 @@ public enum NotKeepable: String, Codable, Sendable, CaseIterable {
     case appWide = "app_wide"
     /// A Space the live profile does not declare.
     case temporarySpace = "temporary_space"
-    /// The write did not land: the file, or the shared look, was
-    /// not written, or the leaves could not be decoded together.
+    /// The write did not land: the profile's file, or `gui.json`
+    /// for the shared look, was not written.
     case notWritten = "not_written"
+    /// The leaf cannot be laid over the stored profile — alone, or
+    /// with the leaves kept beside it — so nothing was written.
+    case conflicting
     /// Not a leaf of the keep document.
     case unknown
 }

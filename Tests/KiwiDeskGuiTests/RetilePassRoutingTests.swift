@@ -51,6 +51,10 @@ struct RetilePassRoutingTests {
         // wearing it (#1752): an explicit look write, re-issued.
         "KiwiDeskCore/App/KiwiCore+SharedLookWrite.swift":
             Site(applies: 1, reissues: 0),
+        // A keep putting back what the shared look's landing
+        // repainted live (#1685).
+        "KiwiDeskCore/App/KiwiCore+LiveSettingsEpoch.swift":
+            Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+Commands.swift":
             Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+GapCommands.swift":

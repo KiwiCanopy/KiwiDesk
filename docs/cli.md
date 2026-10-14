@@ -201,8 +201,9 @@ change `init.lua` owns, one made while no saved profile is live, an
 app-wide one, or one belonging to a Space that is not in the
 profile is named but cannot be kept. A change a Settings Save
 stored, or one set back to its saved value, needs no keep. A config
-reload, a profile load or a built-in layout's apply before the keep
-replaces them, and the AI app is told. A command the binary does
+reload, a profile load, a built-in layout's apply or Settings that
+puts another value there before the keep replaces it, and the AI
+app is told. A command the binary does
 not know is refused rather than sent. `get_state` hands the AI app
 your window titles. ChatGPT reaches only remote MCP servers, so it
 needs [OpenAI's secure MCP tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
@@ -846,8 +847,9 @@ in every app process, the live `profile`, and the setting leaves
 the command changed under `touched`, each an `id` (a JSON Pointer
 such as `/settings/border/width`, `/space_modes/2` or
 `/app_wide/refusal/sound`), an `owner` (`profile`, `shared_look`,
-`init_lua` or `none`), whether its live value is the `stored` one,
-and a `not_keepable` reason where no keep can write it. Ids sent as
+`init_lua` or `none`), its live `value`, whether that is the
+`stored` one, and a `not_keepable` reason where no keep can write
+it. Ids sent as
 `"keep_watch": [...]` come back judged the same way under
 `watched`. `keep_settings` takes that epoch and the ids, refuses a
 stale epoch, and answers which ids it `kept`:

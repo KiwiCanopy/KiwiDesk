@@ -1122,13 +1122,16 @@ owner stores, asked again on every request — so a Settings Save, a
 value set back or a keep is seen however it happened, and a guess
 from the session's own history would call a stored value unkept.
 The MCP server keeps only what Core reported of the leaves the
-session touched, never a verdict of its own. The epoch exists so a
-load, which also makes live match stored, is told as a
-replacement rather than as a keep; it names the process, since the
-server outlives a relaunch. A keep writes each leaf as live at
-that moment through the same door the bar menus and the tour use,
-so an open Settings draft takes it alike, and it answers what it
-re-reads as stored, never what it meant to write.
+session touched, never a verdict of its own; a leaf now stored with
+the value the session set was kept, one stored with another value
+was replaced. The epoch exists so a keep naming a report a
+replacement outdated is refused rather than writing the replacing
+value back; it names the process, since the server outlives a
+relaunch. A keep writes each leaf as live at that moment through
+the same door the bar menus and the tour use, so an open Settings
+draft takes it alike; it moves nothing live, though landing the
+shared look repaints the live look from the files; and it answers
+what it re-reads as stored, never what it meant to write.
 :::
 
 ### The landing page argues from the papercut, not from the mess

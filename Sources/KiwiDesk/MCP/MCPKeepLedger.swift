@@ -10,36 +10,70 @@ import KiwiDeskCore
 final class MCPKeepLedger {
     /// Core's latest verdict on every leaf still outstanding, by id.
     private var leaves: [String: TouchedLeaf] = [:]
+    /// The value this session last set on each leaf, by id.
+    private var ownValues: [String: JSONValue?] = [:]
     /// The epoch of the latest report; a keep sends it back.
     private(set) var epoch: String?
     private var profile: String?
-    /// Pending ids a load or reload replaced, told once.
+    /// Pending ids something else replaced, told once.
     private var replaced: [String] = []
 
-    /// The ids a request asks Core to judge.
-    var watch: [String] { leaves.keys.sorted() }
+    /// Refusals another state can lift, so Core judges them again.
+    private static let rejudged: Set<NotKeepable> = [
+        .temporarySpace, .notWritten, .conflicting,
+    ]
+
+    /// The ids a request asks Core to judge: the pending leaves
+    /// and the refusals another state can lift.
+    var watch: [String] {
+        leaves.values.filter {
+            $0.notKeepable.map(Self.rejudged.contains) ?? true
+        }.map(\.id).sorted()
+    }
 
     /// Takes in one answer's report. A leaf Core now calls stored
-    /// leaves the ledger — told as replaced where the epoch moved,
-    /// since a load put the stored value back; told nothing
-    /// otherwise, since a Save or a value set back kept it.
+    /// leaves the ledger: told nothing where its live value is the
+    /// one this session set — a keep, a Save or a set-back stored
+    /// it — and told as replaced where something else put another
+    /// value there. A moved epoch also ends the refusals no keep
+    /// could lift, since the load reset what they named.
     func absorb(_ report: ChangeReport) {
-        let moved = epoch != nil && epoch != report.epoch
+        if let epoch, epoch != report.epoch {
+            for leaf in refused
+            where !(leaf.notKeepable.map(Self.rejudged.contains) ?? false) {
+                forget(leaf.id)
+            }
+        }
         epoch = report.epoch
         profile = report.profile
-        for leaf in report.watched + report.touched {
+        for leaf in report.touched {
+            leaves[leaf.id] = leaf
+            ownValues[leaf.id] = .some(leaf.value)
+        }
+        for leaf in report.watched where leaves[leaf.id] != nil {
             leaves[leaf.id] = leaf
         }
-        let settled = leaves.values.filter(\.stored).map(\.id).sorted()
-        if moved { replaced += settled }
-        for id in settled { leaves[id] = nil }
+        for leaf in leaves.values.filter(\.stored) {
+            if let mine = ownValues[leaf.id], mine != leaf.value {
+                replaced.append(leaf.id)
+            }
+            forget(leaf.id)
+        }
+        replaced.sort()
+    }
+
+    private func forget(_ id: String) {
+        leaves[id] = nil
+        ownValues[id] = nil
     }
 
     /// Ends the leaves a keep wrote, and takes the verdict it gave
     /// for any it could not.
     func settle(kept: [String], refused: [TouchedLeaf]) {
-        for id in kept { leaves[id] = nil }
-        for leaf in refused { leaves[leaf.id] = leaf }
+        for id in kept { forget(id) }
+        for leaf in refused where leaves[leaf.id] != nil {
+            leaves[leaf.id] = leaf
+        }
     }
 
     /// The leaves a keep can still write, in id order.

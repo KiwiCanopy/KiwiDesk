@@ -115,22 +115,29 @@ struct KeepJudge {
     let liveSettings: TilingSettings
     let liveSpaces: Set<SpaceID>
 
+    /// Whether the leaf's live value is the stored one — a removal
+    /// that landed included, where neither side holds it any more.
+    func holds(_ path: [String]) -> Bool {
+        stored != nil
+            && KeepPointer.value(at: path, in: live)
+                == stored.flatMap { KeepPointer.value(at: path, in: $0) }
+    }
+
     func verdict(of path: [String]) -> TouchedLeaf? {
         let id = KeepPointer.string(path)
+        let liveValue = KeepPointer.value(at: path, in: live)
+        let storedValue = self.stored.flatMap {
+            KeepPointer.value(at: path, in: $0)
+        }
         func leaf(_ owner: KeepOwner, _ refusal: NotKeepable? = nil)
             -> TouchedLeaf
         {
-            let stored =
-                refusal == nil
-                && KeepPointer.value(at: path, in: live)
-                    == self.stored.flatMap {
-                        KeepPointer.value(at: path, in: $0)
-                    }
-            return TouchedLeaf(
+            TouchedLeaf(
                 id: id,
                 owner: owner,
                 notKeepable: refusal,
-                stored: stored
+                stored: refusal == nil && liveValue == storedValue,
+                value: liveValue
             )
         }
         let rest = Array(path.dropFirst())
@@ -146,6 +153,10 @@ struct KeepJudge {
         if path.first == KeepRoot.appWide { return leaf(.none, .appWide) }
         guard let declared, stored != nil else {
             return leaf(.none, .noProfile)
+        }
+        // A path neither side holds names no setting.
+        if liveValue == nil, storedValue == nil {
+            return leaf(.none, .unknown)
         }
         if path.first == KeepRoot.spaceModes {
             return declared.contains(SpaceID(rest[0]))

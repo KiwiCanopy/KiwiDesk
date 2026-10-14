@@ -1340,6 +1340,11 @@ fact about its command*. The obligations:
   reports nothing and the AI app is never told the change is
   unkept; nothing scans for a store left out, so that is
   review's.
+- **A keep moves nothing live.** It writes files through
+  `preservingLiveSettings`, which puts back what the shared look's
+  landing repaints, so a look leaf the keep did not name stays
+  pending rather than vanishing (`KeepSettingsEdgeTests` ▸
+  `partialKeepKeepsOthersLive`).
 - **`keep_settings` is the second writer of a Space's layout**
   beside the quick menu's `keepLayouts`: it writes only Spaces
   the live profile declares, through `writeThroughLiveProfile`,

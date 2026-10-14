@@ -102,6 +102,50 @@ struct KeepSettingsEdgeTests {
         #expect(writes == 0)
     }
 
+    @Test("keeping one look leaf leaves another pending live")
+    func partialKeepKeepsOthersLive() throws {
+        let core = try KeepFixture.core()
+        let width = KeepFixture.report(core, "border.set_width", [.number(9)])
+        let glow = KeepFixture.report(
+            core,
+            "border.set_glow_size",
+            [.number(7)]
+        )
+        let glowIDs = (glow.changes?.touched ?? []).map(\.id)
+        #expect(!glowIDs.isEmpty)
+        let epoch = core.settingsEpoch
+        let response = keep(core, (width.changes?.touched ?? []).map(\.id))
+        #expect(!ids(response.data, "kept").isEmpty)
+        #expect(core.settingsEpoch == epoch)
+        let still = core.answer(.reporting("version", watch: glowIDs))
+        #expect(still.changes?.watched.allSatisfy { !$0.stored } == true)
+    }
+
+    @Test("a path no side holds is unknown, never kept")
+    func unknownPathIsRefused() throws {
+        let core = try KeepFixture.core()
+        let response = keep(core, ["/settings/gap/globl"])
+        #expect(ids(response.data, "kept").isEmpty)
+        #expect(ids(response.data, "not_keepable") == ["/settings/gap/globl"])
+    }
+
+    @Test("half of a new map entry is refused as conflicting")
+    func halfAnEntryConflicts() throws {
+        let core = try KeepFixture.core()
+        try odd(core)
+        let before = core.keepDocument
+        core.tiler.settings.gapsOverride["1"] = Gaps(
+            outer: Gaps.Outer(top: 3, bottom: 4, left: 5, right: 6)
+        )
+        let paths = KeepPointer.diff(before, core.keepDocument)
+        #expect(paths.count > 1)
+        let first = try #require(paths.first)
+        let response = keep(core, [KeepPointer.string(first)])
+        #expect(ids(response.data, "kept").isEmpty)
+        let stored = try core.profiles.read(name: "Odd")
+        #expect(stored.settings.gapsOverride["1"] == nil)
+    }
+
     @Test("a write that does not land is answered not written")
     func unwrittenIsRefused() throws {
         let core = try KeepFixture.core()

@@ -40,6 +40,9 @@ public struct KeptLeaves: Equatable {
         self.spaceModes = spaceModes
     }
 
+    /// Whether the edit writes nothing.
+    var isEmpty: Bool { settings.isEmpty && spaceModes.isEmpty }
+
     /// `settings` with the kept leaves laid over; unchanged where
     /// the decoder refuses the result.
     func applied(to settings: TilingSettings) -> TilingSettings {
