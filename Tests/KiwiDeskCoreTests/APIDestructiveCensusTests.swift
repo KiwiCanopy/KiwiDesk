@@ -25,7 +25,13 @@ struct APIDestructiveCensusTests {
 
     /// Commands whose name reads destructive and which lose
     /// nothing, each with its reason.
-    static let ruledSafe: [String: String] = [:]
+    static let ruledSafe: [String: String] = [
+        "look.apply": "a live paint like a batch of setters: it "
+            + "writes nothing, and a set or another apply puts the "
+            + "values back (#1685)",
+        "look.save": "refuses an existing or bundled name, so it "
+            + "never replaces a look (#1685)",
+    ]
 
     @Test("every registered name is a command a caller can run")
     func membersAreCommands() {

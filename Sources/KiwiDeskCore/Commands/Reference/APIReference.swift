@@ -253,6 +253,9 @@ public enum APIReference {
             "toggle", "set_dim", "set_blur", "set_appearance",
         ],
         "kiwihub": ["show"],
+        "look": [
+            "list", "current", "apply", "save", "delete",
+        ],
     ]
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).

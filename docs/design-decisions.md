@@ -1096,7 +1096,11 @@ rather than forwarded, so nothing reaches the app past the check.
 A batch is judged whole before anything runs, so it never stops
 halfway for a reason it knew up front. The trade: a hint is
 honoured by the client, and an app that ignores it runs the
-command unasked.
+command unasked. `look.save` refuses a name already taken where
+Settings offers Overwrite: an overwrite loses the saved look and
+would put every save behind `run_destructive`, so the verb stays
+one `run` can send, and replacing a look is the destructive
+`look.delete` followed by a save.
 
 ### Whether a setting lasts is not a fact about its command
 
@@ -1132,7 +1136,10 @@ at that moment through the same door the bar menus and the tour
 use, so an open Settings draft takes it alike; it lands the shared
 look without repainting the live one, which still holds the
 session's other pending look values; and it answers what it
-re-reads as stored, never what it meant to write.
+re-reads as stored, never what it meant to write. `look.apply` is a
+setter in this sense and paints live only; the tour's click writes
+through because the tour has no keep (▸ *The tour's look is
+written through, and the tour owns its undo*).
 :::
 
 ### The landing page argues from the papercut, not from the mess

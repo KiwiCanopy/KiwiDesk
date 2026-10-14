@@ -321,6 +321,9 @@ public final class KiwiCore {
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
     public var onShortcutsAdded: ShortcutsAdded = { _ in }
+    /// Fired when a verb saved or deleted a look (#1685), so an
+    /// open Settings re-reads the library it caches.
+    public var onLookLibraryChanged: @MainActor () -> Void = {}
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
     /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.

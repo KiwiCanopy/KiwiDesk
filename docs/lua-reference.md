@@ -3747,6 +3747,71 @@ kiwivision.set_appearance("dark")
 ```
 :::
 
+:::unreleased
+## Looks
+
+A look is the bars' styling, Liquid Glass, the focus border's
+shape, the global gaps and the colors they wear, as on Settings ▸
+Looks & Animations; a look you saved carries the animations too. These verbs reach the same library
+from Lua, the CLI and an AI app. The global `look` table holds
+them; an `init.lua` that assigns its own global `look` replaces
+it for that config.
+
+### look.list
+
+**Expects:** nothing.
+
+**Does:** returns `looks`, every look by `name`, the bundled ones
+first, each with `bundled` and, where it is worn, `worn`:
+`"applied"`, or `"other_colors"` when its styling is worn with
+other colors.
+
+### look.current
+
+**Expects:** nothing.
+
+**Does:** returns the worn look's `style` and `colors` by path,
+`setters` naming the command that sets each path, the live
+`profile` (null when none is saved), `follows_shared_look`, and the
+profiles wearing the shared look (`followers`, empty when the
+screen does not). A setter takes its own argument
+form, which `help` gives — `set_gap_global` reads its table
+differently from the stored `gap.global`, and a bar's `set_edge`
+clears its per-screen edges, which a look keeps.
+
+### look.apply
+
+**Expects:** a look's name.
+
+**Does:** wears that look on screen and writes no file; a saved
+look carries its animations, a bundled one none. `save_profile`
+stores it, in the shared look where the profile wears it; over the
+CLI or an AI app, [`keep_settings`](cli.md#raw-ipc-protocol) keeps
+it instead.
+
+### look.save
+
+**Expects:** a new name.
+
+**Does:** saves the look on screen to your library. A name a
+bundled or saved look already has is refused; to replace a saved
+look, delete it first.
+
+### look.delete
+
+**Expects:** a saved look's name.
+
+**Does:** deletes it. A bundled look cannot be deleted.
+
+**Example:**
+
+```lua
+look.apply("Glass")
+border.set_width(4)
+look.save("Glass, thin border")
+```
+:::
+
 ## Mouse Resizing
 
 Resizing a tiled window with the mouse adjusts the layout the same
