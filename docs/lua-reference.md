@@ -3710,6 +3710,32 @@ border.fit_gaps(6)  -- leave 6 pt after the reach: outer 16,
                     -- inner 16 (26 if unfocused borders are on)
 ```
 
+:::unreleased
+## KiwiVision
+
+KiwiVision keeps the focused window clear and dims every screen
+around it, the wallpaper included; the menu bar, the Dock and
+KiwiShelf stay clear. It is off at every launch.
+
+### kiwivision.toggle
+
+**Expects:** nothing.
+
+**Does:** turns KiwiVision on or off. The window kept clear follows
+the focus — a click, ⌘-Tab or a Space switch moves it — and a
+screen showing a native full-screen window or a presentation stands
+the dim down. The quick menu's **KiwiVision** row does the same,
+and ⌃⌥V is its default shortcut.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+v", function()
+    kiwivision.toggle()
+end)
+```
+:::
+
 ## Mouse Resizing
 
 Resizing a tiled window with the mouse adjusts the layout the same

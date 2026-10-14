@@ -67,6 +67,61 @@ struct BorderOrderCensusTests {
         )
     }
 
+    /// A KiwiVision plate's stack is the same round trip, one per
+    /// screen (#2103): its callers are the sync, gated by the
+    /// ring's own `ordersOverlay`, and the target's restack after
+    /// its reorder event, beside the one definition in the plate.
+    @Test("only the ruled sites stack a KiwiVision plate")
+    func plateOrderSitesAreCensused() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "order(below:",
+            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted() == [
+                "VisionManager.swift", "VisionManager.swift",
+            ],
+            "found \(sites.map(\.site))"
+        )
+        // The restack tee is wired at boot, which no test core
+        // runs, and fires AFTER the ring's own order in both arms,
+        // or the ring lands under the plate.
+        let seams = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+BootSeams.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            seams.contains(
+                "borders.onWindowRestacked={[weakself]idin"
+                    + "self?.visionTargetRestacked(id)}"
+            )
+        )
+        let events = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/Borders/BorderManager+SkyLight.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        let restack =
+            "overlays[id]?.order(relativeTo:id.raw)"
+            + "onWindowRestacked(id)"
+        #expect(events.components(separatedBy: restack).count == 3)
+        // The stand-down is the shelf's verdict, filed by the one
+        // bar refresh, never a read of the plate's own.
+        let shelf = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Shelf.swift"
+            )
+        )
+        #expect(shelf.contains("noteVisionStandDown(standingDown)"))
+        let vision = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
+            )
+        )
+        #expect(!vision.contains("shelfStandsDown("))
+    }
+
     /// The #1959 hold is armed in one door, the switch's own
     /// retile, which knows whether the switch un-parks its anchor;
     /// a second switch path arming its own would hold a ring with

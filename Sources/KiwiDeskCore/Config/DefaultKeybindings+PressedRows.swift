@@ -1,7 +1,8 @@
 import Foundation
 
-/// The seed's pressed `⌃⌥` panel and layout rows (#453, #762, #1875),
-/// each its own builder so the generations name it.
+/// The seed's pressed `⌃⌥` panel, layout and KiwiVision rows
+/// (#453, #762, #1875, #2103), each its own builder so the
+/// generations name it.
 extension DefaultKeybindings {
     /// Next layout on `⌃⌥C` (#453).
     public static func nextLayoutRow() -> KeyBinding {
@@ -30,6 +31,18 @@ extension DefaultKeybindings {
             lua: "KiwiDesk.show_jump_to_window()",
             kind: .navigation,
             label: "Jump to window"
+        )
+    }
+
+    /// KiwiVision on `⌃⌥V` (#2103), V for vision. Free in
+    /// `SystemShortcuts.map` and macOS's symbolic hotkeys
+    /// (read 2026-10-14).
+    public static func kiwiVisionRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+v",
+            lua: "kiwivision.toggle()",
+            kind: .navigation,
+            label: "Toggle KiwiVision"
         )
     }
 

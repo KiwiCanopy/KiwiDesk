@@ -13,6 +13,9 @@ paths:
   # markers, where a per-stroke store would be re-added.
   - "Sources/KiwiDeskCore/Tiling/WindowStroke.swift"
   - "Sources/KiwiDeskCore/Tiling/DragVisual.swift"
+  # KiwiVision's plate stacks with the ring and rides its triggers.
+  - "Sources/KiwiDeskCore/Vision/**"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
 ---
 
 # Focus ring & sticky mark overlays
@@ -310,6 +313,46 @@ drawing backend back for a crisper front order —
 `BorderMissionControlTests` reds a non-AppKit ring or a panel
 without the flag, and whether the flag still hides is a device
 check no test can make.
+
+## KiwiVision's plate stacks with the ring (#2103)
+
+One plate per screen dims everything below the focused window. It
+is an AppKit `.transient` panel joining every Desktop, ordered
+only through AppKit, so the `.transient` and #1962 sections above
+bind it too (`StickyOverlaySpanTests` ▸ `plateJoinsAllSpaces`).
+Obligations:
+
+- **Stack the plate under the target's ring where the ring draws
+  behind its window, and under the window otherwise** — the anchor
+  is the one `BorderManager.ringPanel(of:)` reading, taken by the
+  sync and kept for the restack, never re-derived beside either
+  (`KiwiVisionCoreTests`).
+- **Re-stack a plate only from the ring's triggers, through the
+  ring's own `BorderManager.ordersOverlay` gate**: the sync at the
+  tail of `updateBorders` (the focus moved, a settle pass, no
+  WindowServer stream) and `onWindowRestacked`, which fires AFTER
+  the ring's own re-order in both reorder arms. A new caller of a
+  plate's `order(below:` owes its ruling in `BorderOrderCensusTests`
+  ▸ `plateOrderSitesAreCensused`, which also needles the tee's
+  place.
+- **Watch the target whatever the border setting**: the target
+  joins the WindowServer request through `setVisionTracked`, so a
+  plate re-stacks with borders off (`KiwiVisionCoreTests` ▸
+  `targetWatchedWithoutRings`). That made `BorderManager` the
+  broker for three consumers; the standalone `WindowServerWatch`
+  extraction (#414) is owed before a fourth — the per-float dim
+  panels — joins.
+- **Read the stand-down from the shelf's verdict**, filed once per
+  pass by `updateBars()` through `noteVisionStandDown`, never a
+  `shelfStandsDown` read of the plate's own: that read is a
+  WindowServer round trip per screen on the switch path.
+- **Nothing focused shows no plate**, a standing one included, so
+  no plate stays stacked under a window that left
+  (`VisionManagerTests` ▸ `noTargetNoPlateShown`).
+- **The mode is a session value, carried by no snapshot**: off at
+  every launch, an in-place restart included, and off when the
+  core stops — silently, since a stop is no toggle to announce
+  (`VisionManagerTests` ▸ `clearIsSilent`).
 
 ## Never gate an overlay pass on the global animation count
 

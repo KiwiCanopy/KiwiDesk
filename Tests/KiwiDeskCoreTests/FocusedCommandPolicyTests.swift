@@ -40,6 +40,9 @@ struct FocusedCommandPolicyTests {
         // Names an app too: one of its windows, never the focus
         // (#1513).
         "move_here",
+        // Dims every screen around the focus, moving no window
+        // (#2103).
+        "kiwivision.toggle",
         "get_state",
         "get_layout_info",
         "list_monitors",

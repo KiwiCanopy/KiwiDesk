@@ -150,7 +150,7 @@ enum KeybindingCatalog {
                 title: "Focus",
                 commands: focusDirections + spaceStepRows
                     + spaceHistoryRows + goToSpace(spaces)
-                    + [jumpToWindow]
+                    + [jumpToWindow, toggleKiwiVision]
             ),
             NavGroup(
                 title: "Window Management",
@@ -180,6 +180,15 @@ enum KeybindingCatalog {
         lua: "KiwiDesk.show_jump_to_window()",
         displayLabel: {
             L("keybinding.show_window_switcher", "Show window switcher")
+        }
+    )
+
+    /// KiwiVision on or off (#2103).
+    static let toggleKiwiVision = NavCommand(
+        label: "Toggle KiwiVision",
+        lua: "kiwivision.toggle()",
+        displayLabel: {
+            L("keybinding.toggle_kiwivision", "Toggle KiwiVision")
         }
     )
 

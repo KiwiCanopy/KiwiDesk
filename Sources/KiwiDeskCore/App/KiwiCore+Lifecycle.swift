@@ -207,6 +207,7 @@ extension KiwiCore {
         // sit stranded over the scattered desktop.
         borders.stop()
         stickyMarks.clear()
+        vision.clear()
         retireReduceTransparency()
         retireFontSet()
         payOwedShortcutDrops()  // nothing carries the debt (#1827)
