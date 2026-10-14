@@ -37,6 +37,10 @@ enum SettingsTheme {
         dark: 0x12_25_1A
     )
 
+    /// KiwiVision's veil in its picture (#2103): black in both
+    /// appearances, since the plate's dim is always black.
+    static let visionVeil = token(light: 0x00_00_00, dark: 0x00_00_00)
+
     /// Plate light ink fallback when palette ink sinks into `previewPlate`.
     static let plateInk = token(
         light: 0xEA_F3_EE,

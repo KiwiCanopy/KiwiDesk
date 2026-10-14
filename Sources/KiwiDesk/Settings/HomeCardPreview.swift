@@ -18,10 +18,13 @@ enum HomeCardPreview {
             return AnyView(ruleIcons(model))
         case .macChecklist:
             return AnyView(checklistTicks(model))
-        // General's version moved to Home's footer (#1536); its
+        // KiwiVision's picture row waits for v3's lens names
+        // (#2103). General's version moved to Home's footer
+        // (#1536); its
         // subtitle already says the language and start at login.
         case .spaces, .bars, .layoutDefaults, .screens,
-            .gapsAndBorders, .looks, .advancedColors, .general, .ai:
+            .gapsAndBorders, .looks, .advancedColors, .general, .ai,
+            .kiwiVision:
             return nil
         }
     }

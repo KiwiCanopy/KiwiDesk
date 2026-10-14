@@ -93,6 +93,11 @@ struct GateReasonPlacementTests {
                 // #1685: Copy Setup Prompt greys on a translocated
                 // copy, a cause shown nowhere else.
                 .ai(.copySetupPrompt),
+                // #2103: KiwiVision's app-wide rows grey under a
+                // Lua-owned config, a cause shown nowhere on its
+                // page, so each draws its sentence.
+                .kiwiVision(.dim), .kiwiVision(.blur),
+                .kiwiVision(.appearance),
             ]
         )
     }

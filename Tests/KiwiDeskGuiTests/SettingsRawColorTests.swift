@@ -59,7 +59,8 @@ struct SettingsRawColorTests {
             + "retune is an eyeball item of the responsive "
             + "pass, and until it lands these are the shipped "
             + "design; the AI tile's .orange is owner-ruled "
-            + "(#1685)",
+            + "(#1685), and KiwiVision's Aurora gradient "
+            + "(teal, violet, pink stops) is owner-ruled (#2103)",
         "Color+KiwiHex.swift":
             "RGBA tuple member accessors (c.red, c.green) in "
             + "the hex parser — the token scan cannot tell a "
@@ -149,7 +150,8 @@ struct SettingsRawColorTests {
             "the two destination tile tints with no matching "
             + "system hue — the tile retune is an eyeball item "
             + "of the responsive pass, and until it lands these "
-            + "are the shipped design"
+            + "are the shipped design — and KiwiVision's Aurora "
+            + "gradient stops, owner-ruled (#2103)"
     ]
 
     @Test("no RGB literal outside the exempt map")

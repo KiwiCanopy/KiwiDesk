@@ -110,7 +110,10 @@ restated `20...80` satisfies on the day it is written.
 - **A picture whose object is NOT the draft goes in a sheet, and
   writes nothing** (#859). Choose the container by whose object the
   picture is — draft → the panel, anything the user is not editing
-  → a sheet off the thing that names it — and keep the sheet
+  → a sheet off the thing that names it, save that a page with no
+  draft whose rows write at once takes the panel for its own live
+  values (KiwiVision, #2103; `DetailPanelTests` holds the offer
+  set) — and keep the sheet
   read-only, a sheet that grows a commit being a dialog wearing
   the wrong chrome. A read-only sheet also answers the keyboard
   both ways: Return on its one dismissal, and Escape, which a
@@ -577,8 +580,10 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles, Screens, Behaviour, the Mac Checklist and AI
-render from it now** (#678 Phases 2-3; #1365; #1685): each
+Layouts, Profiles, Screens, Behaviour, the Mac Checklist, AI and
+KiwiVision render from it now** (#678 Phases 2-3; #1365; #1685;
+#2103 — both KiwiVision cards walk their lists,
+`KiwiVisionCensusRenderTests` ▸ `levelsCardWiring`): each
 carries its own order list and a census-render suite pinning that
 order to the census (`MacChecklistRowOrder` /
 `MacChecklistCensusRenderTests` is the worked pair; its

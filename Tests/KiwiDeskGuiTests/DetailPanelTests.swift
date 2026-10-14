@@ -17,16 +17,15 @@ struct DetailPanelTests {
     /// panel with an `EmptyView` preview, which the branch test
     /// below cannot see on its own. v1 was owner-scoped to four
     /// (2026-08-09) and pass 5 added Shortcuts, which is the
-    /// extension motion #793-#795 each repeat — so a member
-    /// arriving here without a branch in the map below is the
-    /// failure this pair exists to catch.
-    @Test("the offer set is the scoped seven")
+    /// extension motion #793-#795 and #2103 repeat — a member
+    /// arriving without a branch below is what this pair catches.
+    @Test("the offer set is the scoped eight")
     func offerSetIsPinned() {
         #expect(
             SettingsDetailPanelOffer.offering == [
                 .gapsAndBorders, .bars, .looks,
                 .layoutDefaults, .shortcuts, .advancedColors,
-                .spaces,
+                .spaces, .kiwiVision,
             ]
         )
         // General's absence is a RULING, not a gap (#795, owner
@@ -92,6 +91,8 @@ struct DetailPanelTests {
                 + "AdvancedColorsPanel(model:model)",
             .spaces:
                 "case.spaces:SpacesPanelPreview(model:model)",
+            .kiwiVision:  // #2103
+                "case.kiwiVision:KiwiVisionPanelPreview(model:model)",
         ]
         #expect(
             Set(branches.keys)

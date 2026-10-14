@@ -12,7 +12,7 @@ import SwiftUI
 enum SettingsDetailPanelOffer {
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .looks, .layoutDefaults,
-        .shortcuts, .advancedColors, .spaces,
+        .shortcuts, .advancedColors, .spaces, .kiwiVision,
     ]
 
     static func offers(
@@ -92,6 +92,8 @@ struct SettingsDetailPanel: View {
             SpacesPanelPreview(model: model)
         case .shortcuts:
             KeyboardPreviewPanel(model: model)
+        case .kiwiVision:
+            KiwiVisionPanelPreview(model: model)
         case .layoutDefaults:
             LayoutPreviewPanel(
                 model: model,

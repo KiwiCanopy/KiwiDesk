@@ -6,15 +6,6 @@ import Foundation
 /// read taken right after its own switch, which may not have
 /// landed (performed is not applied).
 extension KiwiCore {
-    /// `kiwivision.set_appearance`: a live mode takes the new ask
-    /// at once; the same ask again moves nothing.
-    func setVisionAppearance(_ appearance: VisionAppearance) {
-        guard appearance != vision.appearanceWhileOn else { return }
-        vision.appearanceWhileOn = appearance
-        guard vision.isOn else { return }
-        retargetVisionAppearance(appearance)
-    }
-
     /// Moves the system to what `ask` wants over the found
     /// appearance; a nil ask goes home. Switches only where the
     /// target differs from what was last asked, stores the debt

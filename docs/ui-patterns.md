@@ -195,6 +195,13 @@ by which pane the setting lives in:
 Minimum window size is a `StepperRow` on this rule (#204): a
 precise pt threshold, not a feel knob.
 
+:::unreleased
+KiwiVision's **Dim** is a ruled exception: a proportion,
+yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on
+the desk behind Settings shows the effect as it steps (#2103,
+[design decisions](design-decisions.md#kiwivision-has-its-own-page-and-its-rows-apply-at-once-2103)).
+:::
+
 A stored SHARE keeps its slider and gains an exact chooser
 beneath it where the share has a second reading a user names
 (#1382): the scrolling slot's Percent slider carries a
@@ -718,6 +725,14 @@ panel-first drawing with no card twin — and that area's cards
 carry no duplicate preview (`DetailPanelTests` holds the offer
 set and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).
+
+:::unreleased
+KiwiVision is in that set too (#2103), though its page has no
+draft: its rows write at once, so its panel draws the live
+values they wrote. *Why* is
+[Design decisions](design-decisions.md) ▸ the panel's object is
+the DRAFT.
+:::
 
 **The panel keeps its column only above 1200 pt.** Below that
 it waits behind a "Show preview" button, which opens it as a

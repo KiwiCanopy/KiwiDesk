@@ -265,13 +265,15 @@ public final class KiwiCore {
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
-    /// The space the empty-display heal seeded per monitor fingerprint
-    /// (#1175), so a pin reset that did not prune re-pins the same seed
-    /// instead of minting another. Session state, retired where a
-    /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
+    /// The empty-display heal's seed per monitor fingerprint (#1175),
+    /// re-pinned rather than re-minted; session state, retired by a
+    /// declaration (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
-    /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
-    var appWideLedger = AppWideLedger()
+    /// Settings no profile carries (#1741); `appWideLiveChanged`.
+    var appWideLedger = AppWideLedger() {
+        didSet { appWideLiveChanged(from: oldValue.live) }
+    }
+    public var onAppWideChange: @MainActor () -> Void = {}
     /// Space history and its setting (#1655, `KiwiCore+SpaceHistory`).
     var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
@@ -317,8 +319,7 @@ public final class KiwiCore {
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
     public var onShortcutsAdded: ShortcutsAdded = { _ in }
-    /// Fired when a verb saved or deleted a look (#1685), so an
-    /// open Settings re-reads the library it caches.
+    /// A verb saved or deleted a look (#1685): Settings re-reads.
     public var onLookLibraryChanged: @MainActor () -> Void = {}
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued

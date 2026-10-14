@@ -305,5 +305,8 @@ extension InterpolatedLabelTests {
         "colors.front_app_off.help": 2,
         // A layer's locked box points at Delete layer (#2022).
         "shortcuts.layer_reach.locked_help": 1,
+        // KiwiVision's pointer names Shortcuts ▸ Focus by its
+        // labels (#2103).
+        "kiwivision.xref_link": 1,
     ]
 }

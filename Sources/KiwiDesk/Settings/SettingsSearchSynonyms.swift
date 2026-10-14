@@ -43,6 +43,10 @@ enum SettingsSearchSynonyms {
                 "mcp", "model context protocol", "claude",
                 "cursor", "codex", "assistant", "llm",
             ]
+        // A brand word (#2103): the effect's own words reach it;
+        // never "zen" (ruling 5).
+        case .kiwiVision:
+            return ["dim", "blur", "haze", "focus"]
         default: return []
         }
     }

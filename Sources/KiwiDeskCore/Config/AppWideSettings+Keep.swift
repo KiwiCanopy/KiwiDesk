@@ -11,7 +11,8 @@ extension AppWideSettings {
             quit: quit,
             desktop: desktop,
             space: space,
-            mode: mode
+            mode: mode,
+            kiwivision: vision
         )
         guard let data = try? JSONEncoder().encode(groups),
             let value = try? JSONDecoder().decode(JSONValue.self, from: data)
@@ -25,5 +26,6 @@ extension AppWideSettings {
         let desktop: Desktop
         let space: Space
         let mode: Mode
+        let kiwivision: Vision
     }
 }

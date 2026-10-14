@@ -15,9 +15,9 @@ extension KiwiCore {
         setKiwiVision(!vision.isOn)
     }
 
-    /// The `kiwivision.*` verbs (#2103). Dim and blur are session
-    /// values until KiwiVision's settings are stored; no window
-    /// moves, so no retile.
+    /// The `kiwivision.*` verbs (#2103). The settings are
+    /// app-wide session values, as every app-wide verb's
+    /// (`setAppWide`); no window moves, so no retile.
     func visionCommand(
         _ command: String,
         _ args: [JSONValue]
@@ -29,33 +29,50 @@ extension KiwiCore {
         case "kiwivision.set_dim":
             // Lua's whole range, as the GUI's (ruling 10, amended).
             guard let percent = args.first?.numberValue,
-                percent.isFinite, (0...100).contains(percent)
+                percent.isFinite,
+                AppWideSettings.visionDimRange.contains(percent)
             else { return .fail("expected 0-100") }
-            vision.dim = CGFloat(percent / 100)
+            setAppWide(persisting: false) { $0.visionDim = percent }
         case "kiwivision.set_blur":
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")
             }
-            vision.blur = on
+            setAppWide(persisting: false) { $0.visionBlur = on }
         case "kiwivision.set_appearance":
             guard
                 let raw = args.first?.stringValue,
                 let appearance = VisionAppearance(rawValue: raw)
             else { return .expected(VisionAppearance.self) }
-            setVisionAppearance(appearance)
+            setAppWide(persisting: false) {
+                $0.visionAppearance = appearance
+            }
         default:
             return .fail("unknown command: \(command)")
         }
-        updateVision()
         return .ok()
     }
 
     func setKiwiVision(_ on: Bool) {
         guard on != vision.isOn else { return }
         vision.isOn = on
-        retargetVisionAppearance(on ? vision.appearanceWhileOn : nil)
+        retargetVisionAppearance(on ? appWide.visionAppearance : nil)
         updateVision(reassertOrder: true)
         vision.onChange(on)
+    }
+
+    /// Every change of the live app-wide values — a verb, a row,
+    /// a `gui.json` reload, restore or reset — reaches the plate
+    /// and the appearance ledger here (`appWideLedger`'s
+    /// `didSet`), so none of them leaves the mode out of step.
+    func appWideLiveChanged(from old: AppWideSettings) {
+        let new = appWide
+        guard new != old else { return }
+        if new.visionAppearance != old.visionAppearance, vision.isOn {
+            retargetVisionAppearance(new.visionAppearance)
+        }
+        // The whole stored group, so a field v3 adds re-draws too.
+        if new.vision != old.vision { updateVision() }
+        onAppWideChange()
     }
 
     /// Re-draws the plates from the live focus. Costs nothing
@@ -73,6 +90,26 @@ extension KiwiCore {
         )
         request.tracked = borders.skyLightActive
         vision.sync(request, reassert: reassertOrder)
+    }
+
+    /// Whether the plate draws its blur now: the stored switch,
+    /// stood down under Reduce transparency — what the Settings
+    /// picture draws, read through the plate's own door.
+    public var kiwiVisionDrawsBlur: Bool {
+        LiquidGlassGate.rendered(blur: appWide.visionBlur)
+    }
+
+    /// Whether macOS shows Dark while KiwiVision is on: the ask
+    /// over the appearance the mode found — the debt's while a
+    /// switch is owed, else what macOS shows now. Never Settings'
+    /// own Appearance pick. The Settings picture reads it.
+    public var kiwiVisionShowsDark: Bool {
+        let machine = vision.appearanceSwitch
+        let found =
+            (vision.isOn ? machine.readDebt()?.found : nil)
+            ?? machine.read()
+        return appWide.visionAppearance.wantsDark(over: found)
+            ?? found.dark
     }
 
     /// The target's WindowServer reorder event, after its ring's
@@ -114,8 +151,8 @@ extension KiwiCore {
             below: ring,
             standDown: vision.standDown,
             tracked: borders.skyLightActive,
-            dim: vision.dim,
-            blur: LiquidGlassGate.rendered(blur: vision.blur)
+            dim: CGFloat(appWide.visionDim / 100),
+            blur: kiwiVisionDrawsBlur
         )
     }
 }

@@ -6325,6 +6325,7 @@ ruling: the next tiled space on that screen re-tiles the window,
 and a remembered per-window float frame is a separate decision,
 ruled only if the transience shows on a device.
 
+:::unreleased
 ### KiwiVision's blur is Liquid Glass clear, behind one switch (#2103)
 
 **[Rationale]**
@@ -6381,6 +6382,64 @@ the app's defaults and never travels in a backup. A manual switch
 turns macOS's Automatic mode off, so the payment turns it back on
 where it was on; that re-arm writes the preference and posts the
 theme notification, the one step no device has measured yet.
+
+### KiwiVision has its own page, and its rows apply at once (#2103)
+
+**[Rationale]**
+
+KiwiVision is a mode the user turns on and looks at, so its
+settings get their own page, first in Whole App on Home, rather
+than a card on a per-profile page. Its Home card says whether the
+mode is on right now and how to turn it on, so it is worth reading
+on every visit; a picture row there waits for the planned named
+lenses. Dim, Blur and Appearance while on are app-wide and write
+`gui.json` the moment they change, like General's rows
+([Spaces, profiles & config
+ownership](#spaces-profiles--config-ownership), #1741). With KiwiVision
+on, Settings stays clear while every window behind it dims as the
+Dim value steps, which is the best preview there is. Each card says
+"Applies at once, in every profile."
+
+*Stored as one group, with no crossing.* The settings live in
+`gui.json` as `kiwivision.{dim, blur, appearance}`, every field
+optional, so a file written before them reads the defaults.
+KiwiVision never had a per-profile home, so nothing is captured or
+owed. A group rather than three flat keys leaves room for named
+lenses (planned) beside these fields without moving a stored
+value.
+Every change of the live values, whether from a verb, a row, a
+reload of `gui.json`, a restore or a reset, reaches the plate and
+the appearance switch through one hook, so a reload while the mode
+is on never leaves the system dark under an "Unchanged" setting.
+
+*Dim is a stepper, not a slider.* By `docs/ui-patterns.md`'s
+numeric-control test a proportion tuned by eye takes a slider,
+and that page lists Dim as the exception (owner ruling). A
+slider earns its place by showing the effect while it moves, and
+here the desk already does that better: with the mode on, every
+window behind Settings dims as the value steps. What a slider
+cannot give is an exact value typed and read back, so the stepper
+keeps the one thing the slider would have added nothing to.
+
+*The picture is drawn, in the side panel.* A realistic desk under
+the plate's real glass read too hard beside the rest of Settings
+(owner, on device), so the picture is drawn in the schematics'
+language: the user's palette, gaps and focus ring, four kinds of
+window. It invents no verdict. The veil takes the plate's own dim
+mapping, the softening shows only where the plate's blur door
+draws (so Reduce transparency drops it here too), and the windows
+take the appearance the mode will show, never Settings' own
+Appearance pick. It sits in the side panel although the page has
+no draft, on the carve-out argued in [Navigation &
+saving](#navigation--saving) ▸ the panel's object is the DRAFT.
+
+*Named lenses, when they come, save with Save.* A lens could not
+apply at once: its shortcut must not register before Save, the
+profiles it applies to are written to other profiles' files, and
+a rename rewrites stored bindings. The plain settings stay
+immediate beside them. That is why "Applies at once, in every
+profile." sits on each immediate card rather than on the page.
+:::
 
 ## Settings GUI & UX
 
@@ -8502,6 +8561,23 @@ the draft would make the picture change when the user edited
 something unrelated, and would quietly turn Profiles back into a
 draft-preview surface — the one line the whole ruling above rests
 on.
+
+:::unreleased
+**A page with no draft, whose rows write at once, takes the panel
+for a picture of its own live values** — KiwiVision (#2103). The
+ruling above turns on the heading lying while the draft and the
+picture's object differ; on a page whose every row writes
+`gui.json` the moment it changes there is nothing for them to
+differ by, since the live values ARE what a Save would hold. The
+panel's width-driven fallback costs nothing there either: with
+the mode on, the desk behind Settings is the larger preview, so
+the picture is redundant with something on screen in exactly the
+way a panel preview should be. The carve-out is that narrow — a
+picture of anything else on such a page, a catalog entry or a
+stored file, still takes a sheet, and a page that grows a draft
+(KiwiVision's planned named lenses save with Save) has its panel
+watch that draft like any other.
+:::
 
 **A composite question needs a composite picture, in the colours
 the user actually set.** (#793, owner 2026-08-16.) Advanced

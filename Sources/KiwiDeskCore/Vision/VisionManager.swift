@@ -33,14 +33,6 @@ public final class VisionManager {
 
     /// Whether the mode is on.
     public internal(set) var isOn = false
-    /// The dim, 0...1 — 60 % by default (#2103 ruling 10). A
-    /// session value until KiwiVision's settings are stored.
-    var dim: CGFloat = 0.6
-    /// Whether the plate blurs, ON by default (#2103 ruling 10).
-    var blur = true
-    /// The system appearance asked for while on (#2103 ruling 7);
-    /// a session value until KiwiVision's settings are stored.
-    var appearanceWhileOn = VisionAppearance.unchanged
     /// The machine half of the appearance switch; the bootstrap
     /// wires the live one.
     var appearanceSwitch = VisionAppearanceSwitch.inert()
