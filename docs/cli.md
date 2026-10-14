@@ -241,6 +241,13 @@ spawns one supervised launch; it finds the instance lock held,
 brings the running copy forward once — taking focus from your
 terminal — and exits cleanly.
 
+:::unreleased
+`start` and `restart` refuse a copy opened straight from
+Downloads, which macOS runs from a temporary location that
+changes each time it starts: move `KiwiDesk.app` to
+`/Applications` and run them from there.
+:::
+
 `restart` of a running service leaves your windows where they
 are: the app is told first, spreads nothing out on its way down,
 and the new process picks the windows up in place, sizes
