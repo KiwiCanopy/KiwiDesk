@@ -105,6 +105,7 @@ extension StatusItemController {
             switcher.isEnabled = !inert
             menu.addItem(switcher)
         }
+        menu.addItem(makeKiwiVisionItem(inert: inert))
 
         // App chrome (#326).
         menu.addItem(.separator())
@@ -231,7 +232,7 @@ extension StatusItemController {
         return parent
     }
 
-    private static func applyMenuEquivalent(
+    static func applyMenuEquivalent(
         _ combo: KeyCombo,
         to item: NSMenuItem
     ) {

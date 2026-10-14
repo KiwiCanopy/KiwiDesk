@@ -37,6 +37,17 @@ struct StickyOverlaySpanTests {
         #expect(literal?.contains(".canJoinAllSpaces") == true)
     }
 
+    /// A KiwiVision plate dims a whole screen whichever Desktop it
+    /// shows, so it joins every Desktop (#2103).
+    @Test("a KiwiVision plate joins all Spaces")
+    func plateJoinsAllSpaces() throws {
+        let literal = try behaviorLiteral(
+            "Sources/KiwiDeskCore/Vision/VisionPlate.swift"
+        )
+        #expect(literal?.contains(".canJoinAllSpaces") == true)
+        #expect(literal?.contains(".transient") == true)
+    }
+
     @Test("the ring is built on one Desktop and spans when carried")
     func ringSpansOnlyWhenCarried() throws {
         let literal = try behaviorLiteral(

@@ -13,12 +13,13 @@ struct DefaultShortcutGenerationTests {
     private let forward = "KiwiDesk.focus_space_forward()"
     private let previous = "KiwiDesk.focus_space_previous()"
     private let next = "KiwiDesk.focus_space_next()"
-    /// Generations 2 and 3: 3.0.0's layout keys (#453, #762) and
-    /// Jump to window (#1875).
+    /// Generations 2 to 4: 3.0.0's layout keys (#453, #762), Jump
+    /// to window (#1875) and KiwiVision (#2103).
     private let layoutKeys = [
         "KiwiDesk.cycle_mode()", "KiwiDesk.cycle_mode(\"prev\")",
         "KiwiDesk.show_layout_picker()",
         "KiwiDesk.show_jump_to_window()",
+        "kiwivision.toggle()",
     ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.
@@ -39,6 +40,14 @@ struct DefaultShortcutGenerationTests {
             above: 0
         )
         #expect(rows.map(\.lua) == [back, forward] + layoutKeys)
+    }
+
+    @Test("KiwiVision is generation 4, alone")
+    func kiwiVisionGeneration() {
+        #expect(
+            DefaultKeybindings.rows(ofGeneration: 4)
+                == [DefaultKeybindings.kiwiVisionRow()]
+        )
     }
 
     @Test("Free chords get every generation's rows")

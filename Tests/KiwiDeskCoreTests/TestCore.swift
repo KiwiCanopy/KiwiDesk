@@ -96,6 +96,9 @@ func makeTestCore(
     // testing the panel builds its own manager.
     core.borders.backendFactory = { InertBorderBackend(orderMode: $0) }
     core.borders.readCornerRadius = { _ in nil }
+    // A KiwiVision plate is a real panel per screen (#2103).
+    core.vision.plateFactory = { InertVisionPlate() }
+    core.vision.reduceMotion = { true }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
     core.inPlaceRestart.serviceProgram = { nil }

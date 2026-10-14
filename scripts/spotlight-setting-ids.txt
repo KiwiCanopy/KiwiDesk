@@ -82,6 +82,7 @@ keybinding.shrink_height
 keybinding.shrink_width
 keybinding.toggle_display_sticky
 keybinding.toggle_floating
+keybinding.toggle_kiwivision
 keybinding.toggle_sticky
 profile.isDefault
 settings.animations (master)

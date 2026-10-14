@@ -67,6 +67,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     var onSetLayoutMode: (LayoutMode, SpaceID?) -> Void = { _, _ in
     }
     var onSaveLayoutToProfile: () -> Void = {}
+    /// Whether KiwiVision is on, and its live chord, read fresh on
+    /// each menu open (#2103).
+    var kiwiVisionProvider: () -> Bool = { false }
+    var kiwiVisionComboProvider: () -> KeyCombo? = { nil }
+    var onToggleKiwiVision: () -> Void = {}
 
     /// Injected menu-bar slot so tests never register a real
     /// system item (`StatusItemHandle`, the #565-class seam).

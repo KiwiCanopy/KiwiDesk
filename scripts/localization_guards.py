@@ -218,6 +218,8 @@ GLOSSARY = {
     # verbatim like `kiwidesk` — `bars.switch.kiwishelf` ships
     # Latin in every catalog.
     "kiwishelf",
+    # The focus mode (#2103): a product name like KiwiShelf.
+    "kiwivision",
     # Apple's `Liquid Glass`, a product name (see PRODUCT_NAMES).
     # Trade: a stray "glass" in non-Latin prose is no longer caught.
     "liquid",
@@ -312,6 +314,9 @@ PRODUCT_NAMES = (
     # The one edge both bars sit on (#1517, owner ruling 2026-09-24):
     # a coined name like the bars, kept verbatim in every locale.
     "KiwiShelf",
+    # The focus mode (#2103, ruling 8): a coined brand word like
+    # KiwiShelf, kept verbatim in every locale.
+    "KiwiVision",
     # Apple's material, named as Apple ships it (owner ruling
     # 2026-09-29): `colors.liquid_glass` is Latin in every catalog.
     "Liquid Glass",

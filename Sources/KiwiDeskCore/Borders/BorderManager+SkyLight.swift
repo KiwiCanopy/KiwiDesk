@@ -2,10 +2,11 @@ import AppKit
 
 /// WindowServer event integration and geometry tracking for
 /// `BorderManager` (#285). The manager is the WS-events broker
-/// for two consumers — the ring and the sticky mark's tees —
-/// because `SkyLightWindowEvents` has a single weak sink. Two is
-/// a deliberate deferral; a THIRD is the trigger to extract a
-/// standalone `WindowServerWatch` service (#414).
+/// for three consumers — the ring, the sticky mark's tees and
+/// KiwiVision's plates (#2103) — because `SkyLightWindowEvents`
+/// has a single weak sink. The third made the standalone
+/// `WindowServerWatch` service (#414) due: it is owed before the
+/// per-float dim panels, a fourth, join.
 extension BorderManager {
     /// Configures WindowServer tracking from the environment
     /// (`KIWIDESK_NO_WS_TRACKING`, #596). Named after
@@ -39,6 +40,14 @@ extension BorderManager {
         updateSkyLightSubscription(Set(overlays.keys))
     }
 
+    /// Updates the window KiwiVision keeps clear in the watch set
+    /// (#2103).
+    func setVisionTracked(_ ids: Set<WindowID>) {
+        guard ids != visionTracked else { return }
+        visionTracked = ids
+        updateSkyLightSubscription(Set(overlays.keys))
+    }
+
     /// Handles a WindowServer notification. The guard is scoped
     /// to windows we watch EITHER way (ring or sticky-tracked); a
     /// window watched neither way is a stale additive delivery
@@ -47,7 +56,9 @@ extension BorderManager {
         _ kind: SkyLightWindowEvents.Kind,
         window id: WindowID
     ) {
-        guard overlays[id] != nil || markTracked.contains(id)
+        guard
+            overlays[id] != nil || markTracked.contains(id)
+                || visionTracked.contains(id)
         else { return }
         switch kind.action {
         case .follow:
@@ -55,6 +66,7 @@ extension BorderManager {
         case .reorder:
             onWindowReordered(id)
             overlays[id]?.order(relativeTo: id.raw)
+            onWindowRestacked(id)
         case .followAndReorder:
             // Unhide must re-assert order even when the bounds
             // read fails; restoration stays with that one explicit
@@ -63,6 +75,7 @@ extension BorderManager {
             _ = reconcile(id, restoreVisibility: false)
             onWindowReordered(id)
             overlays[id]?.order(relativeTo: id.raw)
+            onWindowRestacked(id)
         case .hide:
             overlays[id]?.hide()
         }
@@ -90,10 +103,12 @@ extension BorderManager {
     }
 
     /// The windows the WindowServer request names: rings worn and
-    /// dormant, plus marks — a Space switch moves rings between
-    /// the first two and leaves the set unchanged (#1925).
+    /// dormant, plus marks and KiwiVision's target — a Space
+    /// switch moves rings between the first two and leaves the
+    /// set unchanged (#1925).
     func watchSet(ringed: Set<WindowID>) -> Set<WindowID> {
         ringed.union(dormant.keys).union(markTracked)
+            .union(visionTracked)
     }
 
     func updateSkyLightSubscription(

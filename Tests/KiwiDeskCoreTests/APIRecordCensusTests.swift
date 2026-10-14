@@ -151,7 +151,7 @@ struct APIRecordCensusTests {
         // for having looked at nothing — `guard-prover` named
         // this as the suite's standing vacuity risk.
         #expect(APIReference.entries.count > 200)
-        #expect(APIReference.namespaces.count == 17)
+        #expect(APIReference.namespaces.count == 18)
         #expect(APIReference.coreRecords.count > 50)
         #expect(!APIReference.luaOnlyRecords.isEmpty)
         #expect(

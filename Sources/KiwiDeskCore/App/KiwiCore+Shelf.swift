@@ -52,6 +52,7 @@ extension KiwiCore {
         var appBarsShown: [AppBarManager.Bar] = []
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
+        var standingDown: Set<DisplayID> = []
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
             // the plan and every style a bar draws carry it.
@@ -64,6 +65,7 @@ extension KiwiCore {
             // retires each overlay through its manager, keeping
             // `shownStrips` consistent with the float clamp.
             let down = shelfStandsDown(on: display.id)
+            if down { standingDown.insert(display.id) }
             let app =
                 down
                 ? nil : appBarContent(on: display.id, settings: shown)
@@ -121,6 +123,8 @@ extension KiwiCore {
         }
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
+        // KiwiVision stands down on the same verdict (#2103).
+        noteVisionStandDown(standingDown)
     }
 
     /// Drops the bar overlays of displays outside `live` — after the

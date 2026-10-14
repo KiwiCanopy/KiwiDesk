@@ -25,14 +25,15 @@ struct JumpToWindowSeedTests {
     }
 
     /// An install already topped up to generation 2 from
-    /// release/3.0.0 still gets the key.
+    /// release/3.0.0 still gets the key, ahead of the later
+    /// generations.
     @Test("an install past generation 2 still gets ⌃⌥J")
     func joinsTheGeneration() {
         let row = DefaultKeybindings.jumpToWindowRow()
         #expect(DefaultKeybindings.rows(ofGeneration: 3) == [row])
         #expect(
             DefaultKeybindings.generationTopUp(existing: [], above: 2)
-                == [row]
+                .first == row
         )
     }
 
