@@ -40,6 +40,12 @@ struct AISetupRowWiringTests {
                 of: "executable:RunningCopy.executablePath"
             ) == 1
         )
+        // The census hit lands on the row (#1250).
+        #expect(
+            row.occurrences(
+                of: ".searchAnchored(SettingsCatalog.ai.copySetupPrompt)"
+            ) == 1
+        )
     }
 
     @Test("the setup prompt spells no localized string")

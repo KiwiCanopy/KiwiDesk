@@ -9,6 +9,17 @@ import Testing
 /// editing the census; the setup card draws its one row by hand.
 @Suite("AI render ↔ census parity")
 struct AICensusRenderTests {
+    /// `AIReadyPrompt`'s source, where each caption's `L()` key
+    /// is spelled — the drawn caption, not a census copy of it.
+    private static let readyPromptSource: String = {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/AI/"
+                    + "AIReadyPrompt.swift"
+            )
+        return (try? SourceScan.strippedSource(at: url)) ?? ""
+    }()
+
     private func censusRows(
         _ container: SettingsContainer
     ) -> Set<SettingKey> {
@@ -53,8 +64,9 @@ struct AICensusRenderTests {
     /// clipboard, one with no caption draws a bare title — every
     /// listed prompt has both.
     @Test("every ready-made prompt has its caption and text")
-    @MainActor func everyPromptHasText() {
+    @MainActor func everyPromptHasText() throws {
         LocalizationManager.shared.select("en")
+        #expect(!AIRowOrder.readyMadePrompts.isEmpty)
         for row in AIRowOrder.readyMadePrompts {
             guard case .ai(let key) = row else {
                 Issue.record("\(row.id) is not an AI row")
@@ -62,6 +74,14 @@ struct AICensusRenderTests {
             }
             let caption = AIReadyPrompt.caption(for: key) ?? ""
             #expect(!caption.isEmpty, "\(key)")
+            // The drawn caption's key is the census row's.
+            let captionKey = try #require(key.text.captionKey)
+            #expect(
+                Self.readyPromptSource.occurrences(
+                    of: "\"\(captionKey)\""
+                ) == 1,
+                "\(key)"
+            )
             let text = AIReadyPrompt.text(for: key) ?? ""
             #expect(text.contains("one question at a time"), "\(key)")
             #expect(text.contains("keep"), "\(key)")
@@ -107,6 +127,7 @@ struct AICensusRenderTests {
         )
         #expect(AIRowOrder.bespokeContainers == [.aiSetup])
         #expect(squashed.contains("AISetupRow()"))
+        #expect(squashed.occurrences(of: "AIPromptRow(") == 1)
         #expect(!squashed.contains("AIRowOrder.setup"))
     }
 }
