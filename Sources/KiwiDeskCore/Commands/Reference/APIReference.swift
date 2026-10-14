@@ -250,7 +250,7 @@ public enum APIReference {
             "set_mark", "set_color",
         ],
         "kiwivision": [
-            "toggle"
+            "toggle", "set_dim", "set_blur",
         ],
     ]
 

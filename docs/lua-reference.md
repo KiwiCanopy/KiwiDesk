@@ -3734,6 +3734,30 @@ KiwiDesk.bind("ctrl+alt+v", function()
     kiwivision.toggle()
 end)
 ```
+
+### kiwivision.set_dim
+
+**Expects:** a percentage, 0–100. Default 40.
+
+**Does:** sets how far KiwiVision darkens everything but the
+focused window. 0 leaves only the blur, or nothing while the blur
+is off.
+
+### kiwivision.set_blur
+
+**Expects:** `true` or `false`. Default `false`.
+
+**Does:** blurs what KiwiVision dims, beneath the dim. Off by
+default: the blur costs the GPU noticeably more than the dim alone.
+With Reduce transparency on in macOS, the blur stands down and the
+dim stays.
+
+**Example:**
+
+```lua
+kiwivision.set_dim(60)
+kiwivision.set_blur(true)
+```
 :::
 
 ## Mouse Resizing

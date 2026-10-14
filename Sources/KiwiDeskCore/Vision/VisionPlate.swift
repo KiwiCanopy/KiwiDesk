@@ -6,8 +6,9 @@ import AppKit
 protocol VisionPlateBackend: AnyObject {
     /// Shown, or fading in: the plate covers its screen.
     var isShown: Bool { get }
-    /// Covers `frame` (AppKit coordinates) at `dim`, 0...1.
-    func update(frame: CGRect, dim: CGFloat)
+    /// Covers `frame` (AppKit coordinates) at `dim`, 0...1, over
+    /// a `hud` blur of what lies beneath where `blur`.
+    func update(frame: CGRect, dim: CGFloat, blur: Bool)
     /// Orders the plate in directly below `window`.
     func order(below window: CGWindowID)
     /// Fades the plate in unless `reduceMotion`.
@@ -25,6 +26,9 @@ protocol VisionPlateBackend: AnyObject {
 final class AppKitVisionPlate: VisionPlateBackend {
     private var panel: NSPanel?
     private let dimLayer = CALayer()
+    /// The behind-window blur, `hud` the one style: the only one
+    /// that darkens, so it works with the dim (#2103 ruling 10).
+    private let blurView = NSVisualEffectView()
     private(set) var isShown = false
     /// Bumped per show and hide, so a fade-out that lands after a
     /// later show leaves the panel ordered in.
@@ -48,7 +52,7 @@ final class AppKitVisionPlate: VisionPlateBackend {
         }
     #endif
 
-    func update(frame: CGRect, dim: CGFloat) {
+    func update(frame: CGRect, dim: CGFloat, blur: Bool) {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         if panel.frame != frame {
@@ -57,8 +61,10 @@ final class AppKitVisionPlate: VisionPlateBackend {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         dimLayer.frame = CGRect(origin: .zero, size: frame.size)
+        blurView.frame = CGRect(origin: .zero, size: frame.size)
         dimLayer.opacity = Float(min(max(dim, 0), 1))
         CATransaction.commit()
+        if blurView.isHidden == blur { blurView.isHidden = !blur }
     }
 
     /// AppKit's order: WindowServer applies no SkyLight order to
@@ -138,7 +144,15 @@ final class AppKitVisionPlate: VisionPlateBackend {
         let view = NSView()
         view.wantsLayer = true
         view.layer?.opacity = 0
+        blurView.material = .hudWindow
+        blurView.blendingMode = .behindWindow
+        blurView.state = .active
+        blurView.isHidden = true
+        blurView.autoresizingMask = [.width, .height]
+        view.addSubview(blurView)
+        // Above the blur: the dim darkens what the blur leaves.
         dimLayer.backgroundColor = NSColor.black.cgColor
+        dimLayer.zPosition = 1
         view.layer?.addSublayer(dimLayer)
         panel.contentView = view
         return panel

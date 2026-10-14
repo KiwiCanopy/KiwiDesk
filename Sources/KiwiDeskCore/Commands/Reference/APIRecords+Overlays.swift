@@ -204,6 +204,14 @@ extension APIReference {
         "toggle": APIRecord(
             "Turns KiwiVision on or off: every screen dims but the "
                 + "focused window."
-        )
+        ),
+        "set_dim": APIRecord(
+            "Sets how far KiwiVision dims, in percent (0-100).",
+            .number("percent")
+        ),
+        "set_blur": APIRecord(
+            "Blurs what KiwiVision dims; off by default.",
+            .boolean("enabled")
+        ),
     ]
 }
