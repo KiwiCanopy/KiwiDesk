@@ -71,12 +71,13 @@ extension SettingsModel {
         recomputeDirty()
     }
 
-    /// An AI app's keep wrote app rules (#1685 ▸ Ruling 6c) —
-    /// the shared base or a profile's own — so a draft of ANY
-    /// target re-reads the stored tables its Save diffs against. A
-    /// clean draft re-reads whole; a dirty live draft takes each
-    /// rule the keep changed on both sides of its diff, the newer
-    /// act winning, as `adoptLiveWrite` does.
+    /// An AI app's keep wrote rules (#1685 ▸ Ruling 6c) — the
+    /// shared base or a profile's own — so a draft of ANY target
+    /// re-reads the stored tables its Save diffs against: a clean
+    /// draft re-reads whole, and a dirty one takes each rule the
+    /// keep changed on its page on both sides of its diff, the newer
+    /// act winning, as `adoptLiveWrite` does — or its Save would
+    /// encode the old rule back over the keep.
     func adoptRuleKeep() {
         guard isDirty else {
             reload()
@@ -84,33 +85,49 @@ extension SettingsModel {
         }
         suppressDirty = true
         ruleReachStored = core.ruleReachSnapshot()
-        if target == .live, let stored = core.storedRules() {
+        if let page = reachPage, let stored = ruleReachStored {
             let old = cleanConfig
-            Self.takeKeptRules(stored, over: old, into: &config)
-            Self.takeKeptRules(stored, over: old, into: &cleanConfig)
+            Self.takeKeptRules(stored, page: page, over: old, into: &config)
+            Self.takeKeptRules(
+                stored,
+                page: page,
+                over: old,
+                into: &cleanConfig
+            )
         }
         suppressDirty = false
         recomputeDirty()
     }
 
-    /// Lays the rules the files hold now over `config` wherever they
-    /// differ from `old`, the draft's last read of them.
+    /// Lays `page`'s rules as the files hold them now over `config`
+    /// wherever they differ from `old`, the draft's last read.
     static func takeKeptRules(
-        _ stored: (apps: [String: SpaceID], floats: [String]),
+        _ stored: RuleReachSnapshot,
+        page: String,
         over old: GuiConfig,
         into config: inout GuiConfig
     ) {
-        for app in Set(old.appRules.keys).union(stored.apps.keys)
-        where old.appRules[app] != stored.apps[app] {
-            config.appRules[app] = stored.apps[app]
+        let apps = stored.appRules.resolved(for: page)
+        for app in Set(old.appRules.keys).union(apps.keys)
+        where old.appRules[app] != apps[app] {
+            config.appRules[app] = apps[app]
         }
-        let was = Set(old.floatRules)
-        let now = Set(stored.floats)
+        let was = Set(old.floatRules.map(FloatRules.normalizedRule))
+        let now = Set(stored.floatRules.resolved(for: page).values.joined())
+        let gone = was.subtracting(now)
         var floats = config.floatRules.filter {
-            !was.subtracting(now).contains($0)
+            !gone.contains(FloatRules.normalizedRule($0))
         }
-        floats += now.subtracting(was).filter { !floats.contains($0) }.sorted()
+        floats += now.subtracting(was).subtracting(floats).sorted()
         config.floatRules = floats
+        let auto =
+            stored.floatAutomatically.resolved(
+                RuleReachTable<Bool>.floatAutomaticallyKey,
+                for: page
+            ) ?? FloatGuess.enabledByDefault
+        if auto != old.floatAutomatically {
+            config.floatAutomatically = auto
+        }
     }
 
     /// Appends `rows` to the default layer, skipping a row whose

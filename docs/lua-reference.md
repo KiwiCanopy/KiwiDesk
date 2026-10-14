@@ -4287,9 +4287,10 @@ Profile overrides resolve the same way over a Lua-owned base.
 ### App rule verbs
 
 The `app_rule` table changes the live rules from Lua, the CLI and
-an AI app. It is not the `app_rules` global above, which declares
-the rules — in `init.lua`, declare them there. A change lasts until a config reload or a
-profile load; over the CLI or an AI app,
+an AI app. It is not the [`app_rules`](#app_rules) and
+[`float_rules`](#float_rules) globals, which declare the rules in
+`init.lua`. A change lasts until a config reload, a profile load, a
+Settings Save of the rules or a quit; over the CLI or an AI app,
 [`keep_settings`](cli.md#raw-ipc-protocol) keeps it.
 
 #### app_rule.list
@@ -4307,6 +4308,7 @@ exists.
 
 **Does:** the app's NEXT windows open in that Space, or stop
 doing so; windows already open stay where they are.
+`remove_space` refuses an app with no rule.
 
 #### app_rule.set_float / app_rule.remove_float
 
@@ -4314,7 +4316,9 @@ doing so; windows already open stay where they are.
 
 **Does:** adds or removes a float rule — the app's every window,
 or those whose title contains the fragment. Open windows are
-checked again at once.
+checked again at once. `remove_float` removes exactly the rule
+named, so an app's title rules stay unless each is named, and
+refuses a rule that is not there.
 
 **Example:**
 

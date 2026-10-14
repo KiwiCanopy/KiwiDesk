@@ -1351,9 +1351,15 @@ fact about its command*. The obligations:
   without repainting the live one (`LiveProfileEdit.repaintsLiveLook`),
   so a look leaf the keep did not name stays pending rather than
   taking the stored value (`KeepSettingsEdgeTests` ▸
-  `partialKeepKeepsOthersLive`).
-- **Judge a leaf against the stored profile, read once per
-  judgement and only where a caller holds leaves.** The stored
+  `partialKeepKeepsOthersLive`), and its rule write passes
+  `saveRuleReach` the `.outside` origin, which re-resolves nothing
+  live (`AppRuleKeepTests` ▸ `partialKeepMovesNothingLive`).
+- **Judge a leaf against the stored profile and the rule
+  snapshot, each read once per judgement and only where a caller
+  holds leaves.** A rule leaf's owner is read off the reach the
+  keep's write takes (`RuleReachTable.keepIsShared`), never off
+  the file's raw keys, so the report and the keep agree
+  (`AppRuleKeepTests` ▸ `leftOutRuleIsShared`). The stored
   values are no adoption state — #1245's rule answers a question
   about the live profile from `ActiveProfile` because the switch
   path asks it; a change report asks only for an MCP session, so
@@ -1430,11 +1436,12 @@ to are not the same verb. Keep them apart, in both directions:
 - **An AI app's keep keeps the leaves one session changed
   (#1685).** A layout write that keeps every declared Space takes
   `keepLayouts`; one that keeps the Spaces a change report named
-  takes `keep_settings`, which writes only Spaces the profile
-  declares through `writeThroughLiveProfile`, so its draft debt is
-  that door's (`adoptLiveWrite`, the edit on both sides of a dirty
-  draft) and never `onCapturedLive` (`KeepSettingsTests` ▸
-  `ownProfileKeeps`).
+  takes `keep_settings`, which writes the settings leaves and only
+  Spaces the profile declares through `writeThroughLiveProfile`,
+  so their draft debt is that door's (`adoptLiveWrite`, the edit on
+  both sides of a dirty draft) and never `onCapturedLive`
+  (`KeepSettingsTests` ▸ `ownProfileKeeps`) — and its rule leaves
+  through `saveRuleReach`, below.
 - **A Settings Save against the LIVE target = a draft commit.**
   "Save what I edited." It applies and persists the modes of the
   spaces the draft actually edited and nothing else —
@@ -1469,7 +1476,18 @@ is not rewritten (`RuleReachTableTests` ▸
 write in the same Save, since that write reloads the config,
 which re-reads the loaded profile's rules. Its profile writes
 stay non-adopting (`ProfileManager.write`), so reaching another
-profile never moves `currentName` (#1249).
+profile never moves `currentName` (#1249). **A rule write from
+outside Settings takes the same door with the `.outside` origin
+(#1685)**, never `writeThroughLiveProfile`, whose one
+`LiveProfileEdit` cannot reach another profile or the shared base:
+`keep_settings` keeps a rule at the encoder's own
+`RuleReachTable.defaultReach` on the loaded profile, snapshots
+the files after any `gui.json` write it follows, and the door —
+not the caller — tells an open draft of ANY target through
+`onRulesKept`, whose policy is `SettingsModel.adoptRuleKeep`: a
+clean draft re-reads, a dirty one takes each rule the keep changed
+on its page on both sides of its diff (`AppRuleKeepTests`,
+`RuleKeepDraftTests`).
 
 **The look checklist is that door's sibling, with the same
 obligations (#1752).** "Look applies to" reaches every profile it
@@ -1519,8 +1537,9 @@ and the tour owns its undo*.
 bar menu's row (#1518), a Space added to or removed from the
 profile (#1790: the bar's confirmed Delete, `create_space` /
 `delete_space` with `profile`, Settings ▸ Spaces' add button,
-which is the one in-Settings caller), and `keep_settings` (#1685)
-— carrying one
+which is the one in-Settings caller), and `keep_settings`'s
+settings and layout leaves (#1685; its rule leaves take
+`saveRuleReach`, above) — carrying one
 `LiveProfileEdit` that the file and the draft each apply — which
 writes the file non-adopting and
 then hands the SAME edit to an open draft through

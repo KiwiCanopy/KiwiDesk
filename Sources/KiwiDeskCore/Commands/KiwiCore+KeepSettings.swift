@@ -1,10 +1,11 @@
 import Foundation
 
 /// `keep_settings` (#1685 ▸ Ruling 4): the leaves a change report
-/// named, written as they are live NOW into the live profile — one
-/// `LiveProfileEdit` through `writeThroughLiveProfile`, whose
+/// named, written as they are live NOW — the settings and layouts
+/// as one `LiveProfileEdit` through `writeThroughLiveProfile`, whose
 /// `recordLookWrite` lands a follower's look leaves in the shared
-/// look without repainting the live one. Never `save_profile`,
+/// look without repainting the live one, and the rule leaves through
+/// the App Rules page's door (`keepRules`, Ruling 6c). Never `save_profile`,
 /// which snapshots everything live. What it answers as kept is
 /// re-judged after the write, so a write that did not land is
 /// never told as kept; a leaf a load already put back is stored,
@@ -38,9 +39,7 @@ extension KiwiCore {
         if !leaves.isEmpty {
             writeThroughLiveProfile(.kept(leaves))
         }
-        if !rules.isEmpty {
-            keepRules(rules, live: judge.live)
-        }
+        let reached = rules.isEmpty ? [] : keepRules(rules, live: judge.live)
         // Judged again after the write: kept is what landed.
         let after = keepJudge()
         var kept = verdicts.filter { $0.notKeepable == nil && $0.stored }
@@ -52,7 +51,7 @@ extension KiwiCore {
                 refused.append(Self.unwritten(leaf))
             }
         }
-        return .ok(keepAnswer(kept: kept, refused: refused))
+        return .ok(keepAnswer(kept: kept, refused: refused, reached: reached))
     }
 
     /// The live values of `leaves`, and those that cannot be laid
@@ -116,7 +115,8 @@ extension KiwiCore {
 
     private func keepAnswer(
         kept: [TouchedLeaf],
-        refused: [TouchedLeaf]
+        refused: [TouchedLeaf],
+        reached: [String]
     ) -> JSONValue {
         let byID: (TouchedLeaf, TouchedLeaf) -> Bool = { $0.id < $1.id }
         var answer: [String: JSONValue] = [
@@ -132,12 +132,9 @@ extension KiwiCore {
                 followingProfiles().map { .string($0.name) }
             )
         }
-        // A shared rule reaches every profile without its own.
-        let shared = kept.filter { $0.owner == .sharedRules }
-        if !shared.isEmpty {
-            answer["rule_followers"] = .array(
-                ruleFollowers(of: shared).map(JSONValue.string)
-            )
+        // Every profile whose rule a kept rule leaf changed.
+        if kept.contains(where: Self.isRuleLeaf) {
+            answer["rule_profiles"] = .array(reached.map(JSONValue.string))
         }
         return .object(answer)
     }

@@ -46,7 +46,7 @@ struct AppRuleKeepTests {
         #expect(try core.profiles.read(name: "Work").appRules == nil)
         #expect(told == 1)
         guard case .object(let fields)? = response.data else { return }
-        #expect(fields["rule_followers"] == .array([.string("Work")]))
+        #expect(fields["rule_profiles"] == .array([.string("Work")]))
     }
 
     @Test("a profile's own rule is kept in its file")
@@ -135,5 +135,36 @@ struct AppRuleKeepTests {
         #expect(leaf?.owner == .sharedRules)
         #expect(kept(keep(core, ids(set))) == ["/float_automatically"])
         #expect(core.guiConfigStore.load()?.floatAutomatically == flipped)
+    }
+
+    /// A rule the page leaves out is a new one there: the report
+    /// and the keep agree it is the shared rule, and the profile
+    /// that left it out is named among those it reached.
+    @Test("a left-out rule is reported and kept as shared")
+    func leftOutRuleIsShared() throws {
+        let core = try KeepFixture.core()
+        var base = try #require(core.guiConfigStore.load())
+        base.appRules = ["com.x": "1"]
+        try core.guiConfigStore.save(base)
+        var odd = KeepFixture.profile("Odd")
+        let leftOut: [String: SpaceID?] = ["com.x": SpaceID?.none]
+        odd.appRules = AppRuleOverride(rules: leftOut)
+        try core.profiles.save(odd)
+        KeepFixture.load("Odd", core)
+        #expect(core.state.appRules["com.x"] == nil)
+        let set = KeepFixture.report(
+            core,
+            "app_rule.set_space",
+            [.string("com.x"), .string("1")]
+        )
+        #expect(KeepFixture.leaf(set, "/app_rules/")?.owner == .sharedRules)
+        let response = keep(core, ids(set))
+        #expect(kept(response) == ["/app_rules/com.x"])
+        guard case .object(let fields)? = response.data else { return }
+        #expect(fields["rule_profiles"] == .array([.string("Odd")]))
+        #expect(
+            try core.profiles.read(name: "Odd").appRules?
+                .normalizedRules["com.x"] == nil
+        )
     }
 }

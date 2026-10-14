@@ -53,6 +53,10 @@ struct FocusedCommandPolicyTests {
         "look.apply",
         "look.save",
         "look.delete",
+        // The live app rules: no window is named or moved (#1685).
+        "app_rule.list",
+        "app_rule.remove_space",
+        "app_rule.remove_float",
         "get_state",
         "get_layout_info",
         "list_monitors",

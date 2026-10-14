@@ -13,27 +13,45 @@ struct RuleKeepDraftTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
     @Test("only the rules the keep changed move, the draft's own stay")
-    @MainActor func keptRulesMoveOnly() {
+    @MainActor func keptRulesMoveOnly() throws {
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent("kiwi-rulekeep-\(UUID().uuidString)")
+        )
+        var base = GuiConfig()
+        base.appRules = ["com.a": "1", "com.b": "4", "com.k": "1"]
+        base.floatRules = ["com.f", "com.n"]
+        base.floatAutomatically = false
+        try core.guiConfigStore.save(base)
+        let stored = try #require(core.ruleReachSnapshot())
         var old = GuiConfig()
         old.appRules = ["com.a": "1", "com.b": "2"]
         old.floatRules = ["com.f", "com.g"]
+        old.floatAutomatically = true
         var draft = old
         draft.appRules["com.d"] = "3"
         draft.floatRules.append("com.h")
-        let stored: (apps: [String: SpaceID], floats: [String]) = (
-            ["com.a": "1", "com.b": "4", "com.k": "1"],
-            ["com.f", "com.n"]
+        SettingsModel.takeKeptRules(
+            stored,
+            page: "Work",
+            over: old,
+            into: &draft
         )
-        SettingsModel.takeKeptRules(stored, over: old, into: &draft)
         #expect(
             draft.appRules
                 == ["com.a": "1", "com.b": "4", "com.k": "1", "com.d": "3"]
         )
         #expect(Set(draft.floatRules) == ["com.f", "com.h", "com.n"])
+        #expect(draft.floatAutomatically == false)
         var clean = old
-        SettingsModel.takeKeptRules(stored, over: old, into: &clean)
-        #expect(clean.appRules == stored.apps)
-        #expect(Set(clean.floatRules) == Set(stored.floats))
+        SettingsModel.takeKeptRules(
+            stored,
+            page: "Work",
+            over: old,
+            into: &clean
+        )
+        #expect(clean.appRules == base.appRules)
+        #expect(Set(clean.floatRules) == Set(base.floatRules))
     }
 
     /// The hook, its route to the model, and the keep firing it —
@@ -49,7 +67,7 @@ struct RuleKeepDraftTests {
         ),
         (
             "onRulesKept()",
-            "Sources/KiwiDeskCore/Commands", "KiwiCore+KeepRules.swift"
+            "Sources/KiwiDeskCore/Profiles", "KiwiCore+RuleReach.swift"
         ),
     ]
 
