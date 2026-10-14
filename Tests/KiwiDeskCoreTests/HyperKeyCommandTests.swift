@@ -75,6 +75,10 @@ struct HyperKeyCommandTests {
         #expect(!reply.isSuccess)
         #expect(!core.keys.hyperEnabled)
         #expect(core.keys.hyperStatus == .refused)
+        // Off takes the no-spawn return and still clears the
+        // status the row reads.
+        _ = core.execute("set_hyper_key", args: [.string("off")])
+        #expect(core.keys.hyperStatus == .off)
         core.retireHyperKey()
         #expect(!fake.mapping.isEmpty)  // never cleared
     }

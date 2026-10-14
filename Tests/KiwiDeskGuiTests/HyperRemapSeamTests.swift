@@ -42,6 +42,16 @@ struct HyperRemapSeamTests {
                 Self.count("run: { _ in nil }", in: text) == 1,
                 "\(twin)'s host runs hidutil"
             )
+            // The record lives in the real defaults: both of its
+            // closures are inert too.
+            #expect(
+                Self.count("readWritten: { nil }", in: text) == 1,
+                "\(twin)'s host reads the real record"
+            )
+            #expect(
+                Self.count("writeWritten: { _ in }", in: text) == 1,
+                "\(twin)'s host writes the real record"
+            )
         }
     }
 
@@ -56,7 +66,9 @@ struct HyperRemapSeamTests {
         )
         #expect(Self.count("/usr/bin/hidutil", in: remap) == 1)
         let sources = Self.root.appendingPathComponent("Sources")
-        for file in try SourceScan.swiftSources(under: sources) {
+        let files = try SourceScan.swiftSources(under: sources)
+        #expect(files.count > 100)  // the walk saw the tree
+        for file in files {
             let name = file.lastPathComponent
             guard name != "HyperKeyRemap.swift" else { continue }
             let text = SourceScan.stripComments(

@@ -123,7 +123,7 @@ struct HyperLayerTests {
         let masks = Set(
             registrar.live.values.filter { $0.code == f18 }.map(\.mask)
         )
-        #expect(masks.count == 16)  // every set of ⌃⌥⇧⌘
+        #expect(masks.count == 1 << 4)  // every set of ⌃⌥⇧⌘
     }
 
     @Test("a layer change mid-hold keeps the trigger and the hold")
