@@ -97,6 +97,39 @@ struct VisionAppearanceSeamTests {
         }
     }
 
+    /// v3's active value inherits one door only while the mode is
+    /// switched through `setKiwiVision` (and `stop()`'s `clear()`).
+    @Test("only the one door writes KiwiVision on or off")
+    func oneOnOffWriter() throws {
+        var writers: Set<String> = []
+        for file in try SourceScan.swiftSources(under: Self.core) {
+            let text = try SourceScan.strippedSource(at: file)
+            guard text.occurrences(of: "vision.isOn =") > 0 else {
+                continue
+            }
+            let path = file.standardizedFileURL.path
+            let prefix = Self.core.standardizedFileURL.path + "/"
+            writers.insert(String(path.dropFirst(prefix.count)))
+        }
+        #expect(writers == ["App/KiwiCore+Vision.swift"], "\(writers)")
+        let manager = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "Vision/VisionManager.swift"
+            )
+        )
+        let clear = try #require(
+            SourceScan.declarationBody(after: "func clear(", in: manager)
+        )
+        // Writes, less the stored property's own declaration.
+        let writes =
+            manager.occurrences(of: "isOn = ")
+            - manager.occurrences(of: "var isOn = ")
+        #expect(
+            writes == clear.occurrences(of: "isOn = "),
+            "VisionManager writes isOn outside clear()"
+        )
+    }
+
     /// A crash's debt is paid before a config can turn KiwiVision
     /// on again, or the new switch is judged against the crash's.
     @Test("start pays a leftover switch before it loads the config")

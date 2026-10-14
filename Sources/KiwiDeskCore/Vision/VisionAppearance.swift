@@ -34,8 +34,12 @@ struct VisionAppearanceDebt: Codable, Equatable, Sendable {
     static let settleBound: TimeInterval = 10
 
     /// Whether `read` disagreeing with the ask is the user's doing.
+    /// A debt asking for home never is: the only other value is
+    /// the one KiwiVision itself switched to, so it stays owed until
+    /// paid. Residue: a fallback ask still waiting on an Automation
+    /// prompt past the bound reads as the user's.
     func overridden(by read: SystemAppearance.State, at now: Date) -> Bool {
-        read.dark != setDark
+        setDark != found.dark && read.dark != setDark
             && now.timeIntervalSince(askedAt) >= Self.settleBound
     }
 }

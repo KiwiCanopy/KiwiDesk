@@ -191,6 +191,28 @@ struct KiwiVisionAppearanceTests {
         #expect(system.state.dark == false)
     }
 
+    @Test("a way back left queued at quit is paid however late")
+    func queuedHomeDebtSurvivesTheBound() {
+        var now = Self.start
+        let system = FakeSystem()
+        system.state.auto = true
+        system.lands = false
+        let core = makeCore(system) { now }
+        _ = ask(core, "dark")
+        core.setKiwiVision(true)
+        system.land()  // the way there landed
+        core.setKiwiVision(false)  // the way back stays queued: quit
+        system.queued.removeAll()  // the process exited first
+        #expect(system.debt?.setDark == false)
+        now += VisionAppearanceDebt.settleBound * 6
+        system.lands = true
+        core.retargetVisionAppearance(nil)  // the next start
+        #expect(system.state.dark == false)
+        #expect(system.debt == nil)
+        #expect(system.rearms == 1, "Auto comes back after the switch")
+        #expect(system.state.auto)
+    }
+
     @Test("automatic switching comes back where it was on")
     func autoIsRearmed() {
         let system = FakeSystem()

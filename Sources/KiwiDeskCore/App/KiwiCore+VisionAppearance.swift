@@ -49,12 +49,15 @@ extension KiwiCore {
         }
         guard let owed = debt else { return }
         if owed.setDark == base.dark && live.dark == base.dark {
-            _ = machine.writeDebt(nil)  // a queued payment landed
+            // A queued payment landed; its switch turned Auto off.
+            if base.auto && !live.auto { machine.rearmAuto() }
+            _ = machine.writeDebt(nil)
             return
         }
         let taken = machine.setDark(base.dark)
-        if base.auto && !live.auto { machine.rearmAuto() }
         if taken {
+            // After the switch, which turns Auto off itself.
+            if base.auto && !live.auto { machine.rearmAuto() }
             _ = machine.writeDebt(nil)
         } else {
             var home = owed
