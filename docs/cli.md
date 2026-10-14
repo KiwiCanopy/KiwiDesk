@@ -357,6 +357,13 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 :::
 
+:::unreleased
+`look.list`, `look.current`, `look.apply <name>`, `look.save
+<name>` and `look.delete <name>` reach the look library
+([Looks](lua-reference.md#looks)). `look.apply` wears a look
+without writing it, and `look.save` refuses a name already taken.
+:::
+
 | Category | Command | Arguments |
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |

@@ -29,6 +29,8 @@ extension APIReference {
         "reload_config",
         "bind_profile_to_desktop",
         "reset_layout_sizing",
+        // A saved look is gone; nothing brings it back (#1685).
+        "look.delete",
         ServiceManager.prepareRestartCommand,
     ]
 

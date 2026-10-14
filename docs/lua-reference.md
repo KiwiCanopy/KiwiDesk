@@ -3739,6 +3739,63 @@ kiwivision.set_appearance("dark")
 ```
 :::
 
+:::unreleased
+## Looks
+
+A look is KiwiShelf's styling and the colors it wears, as on
+Settings ▸ Looks & Animations. These verbs reach the same library
+from Lua, the CLI and an AI app. The global `look` table holds
+them; an `init.lua` that assigns its own global `look` replaces
+it for that config.
+
+### look.list
+
+**Expects:** nothing.
+
+**Does:** returns every look, the bundled ones first, each with
+`bundled` and, where it is worn, `worn`: `"applied"`, or
+`"other_colors"` when its styling is worn with other colors.
+
+### look.current
+
+**Expects:** nothing.
+
+**Does:** returns the worn look's `style` and `colors` by path,
+`setters` naming the command that sets each path, the live
+`profile`, and whether it follows the shared look, with the
+profiles that do (`followers`).
+
+### look.apply
+
+**Expects:** a look's name.
+
+**Does:** wears that look on screen, motion included where the look
+carries it. Nothing is written until `keep_settings` or
+`save_profile` stores it.
+
+### look.save
+
+**Expects:** a new name.
+
+**Does:** saves the look on screen to your library. A name a
+bundled or saved look already has is refused; delete the old one
+first to replace it.
+
+### look.delete
+
+**Expects:** a saved look's name.
+
+**Does:** deletes it. A bundled look cannot be deleted.
+
+**Example:**
+
+```lua
+look.apply("Glass")
+border.set_width(4)
+look.save("Glass, thin border")
+```
+:::
+
 ## Mouse Resizing
 
 Resizing a tiled window with the mouse adjusts the layout the same
