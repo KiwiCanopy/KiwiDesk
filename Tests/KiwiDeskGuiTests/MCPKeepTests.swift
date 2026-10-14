@@ -16,7 +16,6 @@ struct MCPKeepTests {
     /// stored.
     final class FakeApp: @unchecked Sendable {
         var sent: [CommandRequest] = []
-        var epoch = "e1"
         var touched: [String: [TouchedLeaf]] = [:]
         var stored: Set<String> = []
         var keepAnswer: JSONValue = .object([:])
@@ -34,13 +33,6 @@ struct MCPKeepTests {
         func answer(_ request: CommandRequest) -> CommandResponse {
             sent.append(request)
             let keeping = request.command == MCPTools.keepCommand
-            if keeping, request.args?.first?.stringValue != epoch {
-                var refusal = CommandResponse.fail(
-                    KiwiCore.staleKeepRefusal
-                )
-                refusal.changes = ChangeReport(epoch: epoch, profile: "Work")
-                return refusal
-            }
             if keeping, case .object(let fields) = keepAnswer,
                 case .array(let kept)? = fields["kept"]
             {
@@ -59,7 +51,6 @@ struct MCPKeepTests {
                 return leaf
             }
             response.changes = ChangeReport(
-                epoch: epoch,
                 profile: "Work",
                 touched: touched.map(judged),
                 watched: (request.keepWatch ?? []).compactMap {
@@ -153,7 +144,7 @@ struct MCPKeepTests {
         #expect(sent?.command == MCPTools.keepCommand)
         #expect(
             sent?.args == [
-                .string("e1"), .string("/settings/gap/global"),
+                .string("/settings/gap/global"),
                 .string("/space_modes/2"),
             ]
         )
@@ -181,14 +172,13 @@ struct MCPKeepTests {
         #expect(Self.text(empty) == MCPWording.nothingToKeep)
     }
 
-    @Test("a moved epoch reports the pending changes replaced, once")
-    func epochReplaces() throws {
+    @Test("a load's value is told replaced, once")
+    func loadReplaces() throws {
         let app = FakeApp()
         app.touched["border.set_width"] = [
             Self.leaf("/settings/border/width")
         ]
         _ = try Self.run(app, "border.set_width")
-        app.epoch = "e2"
         app.stored.insert("/settings/border/width")
         app.values["/settings/border/width"] = .number(5)
         let reloaded = try Self.run(app, "version")
@@ -215,20 +205,23 @@ struct MCPKeepTests {
         )
     }
 
-    @Test("a value something else stored is told replaced")
+    @Test("another tool's live change is told replaced, never kept")
     func otherValueIsReplaced() throws {
         let app = FakeApp()
         app.touched["border.set_width"] = [
             Self.leaf("/settings/border/width")
         ]
         _ = try Self.run(app, "border.set_width")
-        app.stored.insert("/settings/border/width")
         app.values["/settings/border/width"] = .number(5)
         let later = try Self.run(app, "version")
         #expect(
             Self.status(later)?["replaced"]
                 == .array([.string("/settings/border/width")])
         )
+        let count = app.sent.count
+        let keep = try Self.call(app, MCPTools.keep)
+        #expect(Self.text(keep).contains(MCPWording.nothingToKeep))
+        #expect(app.sent.count == count)
     }
 
     @Test("an unkeepable leaf is told, never counted or sent")
@@ -246,41 +239,18 @@ struct MCPKeepTests {
         #expect(app.sent.count == count)
     }
 
-    @Test("a refusal no keep can lift ends with the epoch")
-    func refusalEndsWithTheEpoch() throws {
+    @Test("a refusal ends once its value moves on")
+    func refusalEndsWithItsValue() throws {
         let app = FakeApp()
-        app.touched["set_refusal_sound"] = [
-            Self.leaf("/app_wide/refusal/sound", .none, .appWide)
-        ]
+        let id = "/app_wide/refusal/sound"
+        app.touched["set_refusal_sound"] = [Self.leaf(id, .none, .appWide)]
         _ = try Self.run(app, "set_refusal_sound")
+        let still = try Self.run(app, "version")
+        #expect(Self.text(still).contains("cannot be kept"))
+        #expect(app.sent.last?.keepWatch == [id])
+        app.values[id] = .bool(false)
         _ = try Self.run(app, "version")
-        #expect(app.sent.last?.keepWatch == nil)
-        app.epoch = "e2"
         #expect(Self.status(try Self.run(app, "version")) == nil)
-    }
-
-    @Test("a stale keep says to retry, and the retry keeps")
-    func staleKeepRetries() throws {
-        let app = FakeApp()
-        app.touched["border.set_width"] = [
-            Self.leaf("/settings/border/width")
-        ]
-        _ = try Self.run(app, "border.set_width")
-        app.epoch = "e2"
-        let stale = try Self.call(app, MCPTools.keep)
-        #expect(stale["isError"] == .bool(true))
-        #expect(Self.text(stale).contains(MCPWording.staleKeep))
-        app.keepAnswer = .object([
-            "kept": .array([
-                .object([
-                    "id": .string("/settings/border/width"),
-                    "owner": .string("profile"),
-                ])
-            ])
-        ])
-        let retry = try Self.call(app, MCPTools.keep)
-        #expect(retry["isError"] == .bool(false))
-        #expect(app.sent.last?.args?.first == .string("e2"))
     }
 
     @Test("a shared-look keep names the profiles wearing it")

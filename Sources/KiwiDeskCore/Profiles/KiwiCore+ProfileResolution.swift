@@ -43,7 +43,7 @@ extension KiwiCore {
         let outgoingIcons = tiler.settings.spaceIcons
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
-        replaceLiveSettings(resolvedSettings(of: profile))
+        tiler.settings = resolvedSettings(of: profile)
         // The session layer reseeds on an explicit apply, and on
         // any apply that CHANGES the profile — it outranks the
         // incoming authored overrides (#458, #764). A same-
@@ -191,7 +191,7 @@ extension KiwiCore {
         let switching = recordOutgoingPartitioning(before: standard)
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
-        replaceLiveSettings(wearingSharedLook(composed.settings))
+        tiler.settings = wearingSharedLook(composed.settings)
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
             clearSessionRatios { $0 = SessionRatios() }

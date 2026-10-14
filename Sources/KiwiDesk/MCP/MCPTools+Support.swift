@@ -62,17 +62,10 @@ enum MCPWording {
 
     static func replaced(_ count: Int) -> String {
         "Something else — a config reload, a profile load, Settings "
-            + "or another tool — replaced \(count) unkept change(s); "
-            + "they are no longer live."
+            + "or another tool — changed \(count) unkept setting(s) "
+            + "since; keep would no longer write this session's value, "
+            + "so they are dropped."
     }
-
-    /// A keep Core refused because the live settings were replaced
-    /// after the report it named; the ledger already took the new
-    /// one, so a second keep acts on what is still pending.
-    static let staleKeep =
-        "The live settings changed since those changes were "
-        + "reported; the pending list is updated. Call keep again "
-        + "to keep what is still pending."
 
     static func kept(
         _ leaves: [TouchedLeaf],

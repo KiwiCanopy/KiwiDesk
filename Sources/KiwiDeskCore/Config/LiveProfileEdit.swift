@@ -15,6 +15,14 @@ public enum LiveProfileEdit {
     /// layouts of Spaces the profile already declares.
     case kept(KeptLeaves)
 
+    /// Whether landing the shared look may repaint the live look:
+    /// a keep's values are live already, beside pending ones the
+    /// files do not hold, so it may not (#1685).
+    var repaintsLiveLook: Bool {
+        if case .kept = self { return false }
+        return true
+    }
+
     /// Whether the edit moves which Spaces the profile declares,
     /// so the adoption record must follow the file (#1245).
     var redeclares: Bool {

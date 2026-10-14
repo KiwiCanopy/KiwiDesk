@@ -1324,11 +1324,6 @@ still unkept, from Core's change report alone. The argument is
 `docs/design-decisions.md` ▸ *Whether a setting lasts is not a
 fact about its command*. The obligations:
 
-- **Replace the live settings wholesale only through
-  `replaceLiveSettings`**, which moves the epoch the report
-  carries; a write beside it drops a session's unkept changes
-  with nothing told (`LiveSettingsReplaceCensusTests`, whose
-  `allowed` map is the one copy of who may).
 - **Answer where a leaf would be kept, why it cannot be, and
   whether it already is through the one `KeepJudge`** — the
   report and `keep_settings` both read it, so a keep and the
@@ -1340,15 +1335,19 @@ fact about its command*. The obligations:
   reports nothing and the AI app is never told the change is
   unkept; nothing scans for a store left out, so that is
   review's.
-- **A keep moves nothing live.** It writes files through
-  `preservingLiveSettings`, which puts back what the shared look's
-  landing repaints, so a look leaf the keep did not name stays
-  pending rather than vanishing (`KeepSettingsEdgeTests` ▸
+- **A keep moves nothing live.** Its edit lands the shared look
+  without repainting the live one (`LiveProfileEdit.repaintsLiveLook`),
+  so a look leaf the keep did not name stays pending rather than
+  taking the stored value (`KeepSettingsEdgeTests` ▸
   `partialKeepKeepsOthersLive`).
-- **`keep_settings` is the second writer of a Space's layout**
-  beside the quick menu's `keepLayouts`: it writes only Spaces
-  the live profile declares, through `writeThroughLiveProfile`,
-  so an open draft takes the edit as it takes a bar row's.
+- **Judge a leaf against the stored profile, read once per
+  judgement and only where a caller holds leaves.** The stored
+  values are no adoption state — #1245's rule answers a question
+  about the live profile from `ActiveProfile` because the switch
+  path asks it; a change report asks only for an MCP session, so
+  `keepJudge` reads the file once and every verdict of that
+  answer takes that one read. A new reader on the switch path
+  answers from adoption state instead.
 
 ## Resolve before layout, and merge per-field first
 
@@ -1410,6 +1409,14 @@ to are not the same verb. Keep them apart, in both directions:
   `ProfileManager.onCapturedLive`, told which `CapturedWrite` it
   was so the baseline moves for exactly what was written
   (`SpaceChipLifecycleRowsTests` ▸ `keepKeepsLayouts`).
+- **An AI app's keep keeps the leaves one session changed
+  (#1685).** A layout write that keeps every declared Space takes
+  `keepLayouts`; one that keeps the Spaces a change report named
+  takes `keep_settings`, which writes only Spaces the profile
+  declares through `writeThroughLiveProfile`, so its draft debt is
+  that door's (`adoptLiveWrite`, the edit on both sides of a dirty
+  draft) and never `onCapturedLive` (`KeepSettingsTests` ▸
+  `ownProfileKeeps`).
 - **A Settings Save against the LIVE target = a draft commit.**
   "Save what I edited." It applies and persists the modes of the
   spaces the draft actually edited and nothing else —

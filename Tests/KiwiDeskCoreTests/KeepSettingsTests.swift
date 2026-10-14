@@ -12,7 +12,7 @@ struct KeepSettingsTests {
     private func keep(_ core: KiwiCore, _ ids: [String]) -> CommandResponse {
         core.execute(
             KiwiCore.keepSettingsCommand,
-            args: ([core.settingsEpoch] + ids).map(JSONValue.string)
+            args: ids.map(JSONValue.string)
         )
     }
 

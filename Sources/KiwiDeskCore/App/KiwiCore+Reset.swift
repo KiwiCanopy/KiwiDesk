@@ -99,7 +99,7 @@ extension KiwiCore {
         mainSpaces = []
         healedSpaces = [:]
         forgetHeldSpaces()
-        replaceLiveSettings(TilingSettings())
+        tiler.settings = TilingSettings()
         resetAppWide()
         resetSharedLook()
         // Live spaces down to the first-launch set before the

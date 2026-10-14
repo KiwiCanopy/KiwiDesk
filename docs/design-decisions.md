@@ -1124,14 +1124,15 @@ from the session's own history would call a stored value unkept.
 The MCP server keeps only what Core reported of the leaves the
 session touched, never a verdict of its own; a leaf now stored with
 the value the session set was kept, one stored with another value
-was replaced. The epoch exists so a keep naming a report a
-replacement outdated is refused rather than writing the replacing
-value back; it names the process, since the server outlives a
-relaunch. A keep writes each leaf as live at that moment through
-the same door the bar menus and the tour use, so an open Settings
-draft takes it alike; it moves nothing live, though landing the
-shared look repaints the live look from the files; and it answers
-what it re-reads as stored, never what it meant to write.
+was replaced. Because the judgement compares values, it needs no
+epoch: a load leaves every leaf either stored or holding another
+value, and a keep sent after one writes nothing back, since what
+it would write is already stored. A keep writes each leaf as live
+at that moment through the same door the bar menus and the tour
+use, so an open Settings draft takes it alike; it lands the shared
+look without repainting the live one, which still holds the
+session's other pending look values; and it answers what it
+re-reads as stored, never what it meant to write.
 :::
 
 ### The landing page argues from the papercut, not from the mess

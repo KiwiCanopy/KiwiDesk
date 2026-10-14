@@ -60,19 +60,14 @@ extension MCPTools {
                 Self.result(MCPWording.nothingToKeep, structured: .object([:]))
             )
         }
-        // Core refuses a keep whose epoch a load has moved past.
-        let epoch = ledger.epoch ?? ""
         let outcome = outcome(
             of: CommandRequest(
                 command: Self.keepCommand,
-                args: ([epoch] + ids).map(JSONValue.string)
+                args: ids.map(JSONValue.string)
             )
         )
         guard outcome.ok, let data = outcome.data else {
-            let stale = outcome.error == KiwiCore.staleKeepRefusal
-            return decorated(
-                Self.failure(stale ? MCPWording.staleKeep : outcome.text)
-            )
+            return decorated(Self.failure(outcome.text))
         }
         let kept = Self.leaves(data, "kept")
         ledger.settle(

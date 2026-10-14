@@ -1,13 +1,11 @@
 import Foundation
 
 /// What a socket request changed in the live settings, when it
-/// asks (`report_changes`, #1685): the leaves it touched, where
-/// each would be kept, and the epoch a load or reload moves. Core
-/// names; the caller narrates (#96).
+/// asks (`report_changes`, #1685): the leaves it touched and those
+/// it was asked to judge (`keep_watch`), each with where it would
+/// be kept, its live value and whether that is stored. Core names;
+/// the caller narrates (#96).
 public struct ChangeReport: Codable, Sendable, Equatable {
-    /// Moves whenever the live settings are replaced wholesale,
-    /// and differs in every process; compared for equality only.
-    public var epoch: String
     /// The saved profile that is live, if any.
     public var profile: String?
     /// The leaves the request changed, in id order.
@@ -17,12 +15,10 @@ public struct ChangeReport: Codable, Sendable, Equatable {
     public var watched: [TouchedLeaf]
 
     public init(
-        epoch: String,
         profile: String?,
         touched: [TouchedLeaf] = [],
         watched: [TouchedLeaf] = []
     ) {
-        self.epoch = epoch
         self.profile = profile
         self.touched = touched
         self.watched = watched
@@ -56,6 +52,14 @@ public struct TouchedLeaf: Codable, Sendable, Equatable {
         self.notKeepable = notKeepable
         self.stored = stored
         self.value = value
+    }
+
+    /// This leaf as the wire carries it.
+    public var json: JSONValue {
+        guard let data = try? JSONEncoder().encode(self),
+            let value = try? JSONDecoder().decode(JSONValue.self, from: data)
+        else { return .object(["id": .string(id)]) }
+        return value
     }
 
     enum CodingKeys: String, CodingKey {

@@ -45,7 +45,10 @@ extension KiwiCore {
             if edit.redeclares { profiles.redeclare(profile) }
             // A follower's look is the shared one (#1752); an edit
             // that leaves the look alone lands nothing.
-            recordLookWrite(of: profile)
+            recordLookWrite(
+                of: profile,
+                repaintsLive: edit.repaintsLiveLook
+            )
             refreshConfigIssues()
             return true
         } catch {

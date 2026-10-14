@@ -841,20 +841,18 @@ a close match exists.
 
 :::unreleased
 A request may add `"report_changes": true` — `kiwidesk mcp` does —
-and the response then carries a `changes` object: an `epoch`
-string that moves when the live settings are replaced and differs
-in every app process, the live `profile`, and the setting leaves
-the command changed under `touched`, each an `id` (a JSON Pointer
-such as `/settings/border/width`, `/space_modes/2` or
+and the response then carries a `changes` object: the live
+`profile`, and the setting leaves the command changed under
+`touched`, each an `id` (a JSON Pointer such as
+`/settings/border/width`, `/space_modes/2` or
 `/app_wide/refusal/sound`), an `owner` (`profile`, `shared_look`,
 `init_lua` or `none`), its live `value`, whether that is the
 `stored` one, and a `not_keepable` reason where no keep can write
-it. Ids sent as
-`"keep_watch": [...]` come back judged the same way under
-`watched`. `keep_settings` takes that epoch and the ids, refuses a
-stale epoch, and answers which ids it `kept`:
+it. Ids sent as `"keep_watch": [...]` come back judged the same way
+under `watched`. `keep_settings` writes those ids as they are live
+and answers which ones it `kept`:
 
 ```sh
-kiwidesk keep_settings "<epoch>" /settings/border/width
+kiwidesk keep_settings /settings/border/width
 ```
 :::

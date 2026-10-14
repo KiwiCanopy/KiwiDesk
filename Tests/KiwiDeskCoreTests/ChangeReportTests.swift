@@ -128,28 +128,15 @@ struct ChangeReportTests {
         #expect(back.changes?.watched.first?.stored == true)
     }
 
-    @Test("every wholesale replacement moves the epoch")
-    func replacementsMoveTheEpoch() throws {
+    @Test("a load reports what it changed, as stored")
+    func loadReportsStored() throws {
         let core = try KeepFixture.core()
-        let before = core.settingsEpoch
-        core.applyProfileScopedState(from: GuiConfig())
-        #expect(core.settingsEpoch != before)
-        let other = try KeepFixture.core()
-        #expect(other.settingsEpoch != core.settingsEpoch)
-    }
-
-    @Test("a load moves the epoch and reports no leaves")
-    func loadMovesTheEpoch() throws {
-        let core = try KeepFixture.core()
-        let before = KeepFixture.report(core, "version").changes?.epoch
+        try core.profiles.save(KeepFixture.profile("Odd"))
+        KeepFixture.load("Odd", core)
         core.tiler.settings.borderStyle.width = 11
-        let load = KeepFixture.report(
-            core,
-            "load_profile",
-            [.string("Work")]
-        )
+        let load = KeepFixture.report(core, "load_profile", [.string("Odd")])
         #expect(load.isSuccess)
-        #expect(load.changes?.touched == [])
-        #expect(load.changes?.epoch != before)
+        let width = KeepFixture.leaf(load, "/settings/border/width")
+        #expect(width?.stored == true)
     }
 }

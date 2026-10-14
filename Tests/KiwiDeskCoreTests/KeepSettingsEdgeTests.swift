@@ -12,7 +12,7 @@ struct KeepSettingsEdgeTests {
     private func keep(_ core: KiwiCore, _ ids: [String]) -> CommandResponse {
         core.execute(
             KiwiCore.keepSettingsCommand,
-            args: ([core.settingsEpoch] + ids).map(JSONValue.string)
+            args: ids.map(JSONValue.string)
         )
     }
 
@@ -37,20 +37,15 @@ struct KeepSettingsEdgeTests {
         KeepFixture.load("Odd", core)
     }
 
-    @Test("a keep after a load is refused whole")
-    func staleEpochRefuses() throws {
+    @Test("a keep after a load writes nothing back")
+    func keepAfterLoadWritesNothing() throws {
         let core = try KeepFixture.core()
         try odd(core)
         let width = KeepFixture.report(core, "border.set_width", [.number(9)])
-        let epoch = core.settingsEpoch
         KeepFixture.load("Odd", core)
-        #expect(core.settingsEpoch != epoch)
         let ids = (width.changes?.touched ?? []).map(\.id)
-        let response = core.execute(
-            KiwiCore.keepSettingsCommand,
-            args: ([epoch] + ids).map(JSONValue.string)
-        )
-        #expect(!response.isSuccess)
+        let response = keep(core, ids)
+        #expect(response.isSuccess)
         let stored = try core.profiles.read(name: "Odd")
         #expect(stored.settings.borderStyle.width != 9)
     }
@@ -113,10 +108,8 @@ struct KeepSettingsEdgeTests {
         )
         let glowIDs = (glow.changes?.touched ?? []).map(\.id)
         #expect(!glowIDs.isEmpty)
-        let epoch = core.settingsEpoch
         let response = keep(core, (width.changes?.touched ?? []).map(\.id))
         #expect(!ids(response.data, "kept").isEmpty)
-        #expect(core.settingsEpoch == epoch)
         let still = core.answer(.reporting("version", watch: glowIDs))
         #expect(still.changes?.watched.allSatisfy { !$0.stored } == true)
     }

@@ -27,10 +27,11 @@ extension KiwiCore {
     /// (`commitSharedLook`) and the tour's paint reach it; an own
     /// profile's write is its own, and before the crossing there is
     /// no shared look to write — the crossing alone seeds it
-    /// (`SharedLookWriteTests`).
-    func recordLookWrite(of profile: Profile) {
-        guard profile.look == nil, sharedLook != nil, isGuiManaged
-        else { return }
+    /// (`SharedLookWriteTests`). `repaintsLive` false keeps the live
+    /// look as it is: a keep writes values already live, beside
+    /// pending ones the files do not hold (#1685).
+    func recordLookWrite(of profile: Profile, repaintsLive: Bool = true) {
+        guard followsSharedLook(profile), isGuiManaged else { return }
         // An owed motion crossing elects this writer first, or the
         // re-stamp would hand its animations to every follower that
         // ran its own (#2176).
@@ -40,7 +41,13 @@ extension KiwiCore {
         guard !sharedLookLedger.motionOwed else { return }
         let written = LookBody(of: profile.settings)
         guard written != sharedLook else { return }
-        landSharedLook(written)
+        landSharedLook(written, repaintsLive: repaintsLive)
+    }
+
+    /// Whether `profile` wears the shared look — the one reading a
+    /// look write, the follower list and a change report take.
+    func followsSharedLook(_ profile: Profile) -> Bool {
+        profile.look == nil && sharedLook != nil
     }
 
     /// A stored-profile Settings Save's look half (#1752): the
@@ -56,9 +63,10 @@ extension KiwiCore {
     /// once that write landed is every follower's file copy
     /// re-stamped — the snapshot an older build or a Lua-owned load
     /// reads, never read while it follows — and the live screen
-    /// re-resolved. A failed write changes nothing.
+    /// re-resolved unless `repaintsLive` is false. A failed write
+    /// changes nothing.
     @discardableResult
-    func landSharedLook(_ base: LookBody) -> Bool {
+    func landSharedLook(_ base: LookBody, repaintsLive: Bool = true) -> Bool {
         let before = sharedLookLedger
         sharedLookLedger.base = base
         sharedLookLedger.owed = false
@@ -67,7 +75,7 @@ extension KiwiCore {
             return false
         }
         restampFollowers()
-        reresolveLiveLook()
+        if repaintsLive { reresolveLiveLook() }
         return true
     }
 
@@ -95,8 +103,6 @@ extension KiwiCore {
         guard liveLookReference == nil else { return }
         let worn = wearingSharedLook(tiler.settings)
         guard worn != tiler.settings else { return }
-        // Not a replacement (#1685): it paints what was just
-        // stored, which a change report reads as stored.
         tiler.settings = worn
         retile(pass: .apply)
     }
@@ -105,7 +111,7 @@ extension KiwiCore {
     /// its file.
     func followingProfiles() -> [Profile] {
         profiles.list().compactMap { try? profiles.read(name: $0) }
-            .filter { $0.look == nil }
+            .filter(followsSharedLook)
     }
 
     /// Writes `gui.json` with the stamp; false where nothing

@@ -4,7 +4,6 @@ import Foundation
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
-        noteLiveSettingsReplaced()
         // #1790: `init.lua`'s Spaces are undeclared until its run
         // returns, so nothing is retired meanwhile.
         profiles.arrangementInFlight += 1

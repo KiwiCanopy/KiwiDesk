@@ -13,8 +13,7 @@ struct SocketTests {
         server.handler = { request in
             var response = CommandResponse.ok()
             response.changes = ChangeReport(
-                epoch: request.reportChanges == true ? "asked" : "no",
-                profile: "Work",
+                profile: request.reportChanges == true ? "asked" : "no",
                 watched: (request.keepWatch ?? []).map {
                     TouchedLeaf(
                         id: $0,
@@ -32,7 +31,7 @@ struct SocketTests {
             .reporting("version", watch: ["/settings/border/width"]),
             over: path
         )
-        #expect(response.changes?.epoch == "asked")
+        #expect(response.changes?.profile == "asked")
         #expect(
             response.changes?.watched.map(\.id)
                 == ["/settings/border/width"]

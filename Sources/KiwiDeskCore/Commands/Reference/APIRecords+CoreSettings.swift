@@ -143,9 +143,8 @@ extension APIReference {
             .choice("event", KiwiNotification.self, optional: true)
         ),
         KiwiCore.keepSettingsCommand: APIRecord(
-            "Keeps leaves a report named, after its epoch, in the "
+            "Keeps one or more leaves a change report named in the "
                 + "live profile or its shared look.",
-            .text("epoch"),
             .text("id")
         ),
         "save_profile": APIRecord(

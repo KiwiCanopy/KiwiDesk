@@ -7,30 +7,25 @@ import Foundation
 /// `KeepJudge`.
 extension KiwiCore {
     /// Answers a socket request, with a `ChangeReport` where it
-    /// asks. A request during which the epoch moved replaced the
-    /// live settings rather than setting them, so it reports no
-    /// leaves of its own.
+    /// asks. A load reports what it changed like any command; its
+    /// leaves come back stored.
     func answer(_ request: CommandRequest) -> CommandResponse {
         let args = request.args ?? []
         guard request.reportChanges == true else {
             return execute(request.command, args: args)
         }
-        let epoch = settingsEpoch
         let before = keepDocument
         var response = execute(request.command, args: args)
         let after = keepDocument
-        let touched =
-            epoch == settingsEpoch
-            ? KeepPointer.diff(before, after).filter {
-                Self.isSettledLeaf($0, before, after)
-            } : []
+        let touched = KeepPointer.diff(before, after).filter {
+            Self.isSettledLeaf($0, before, after)
+        }
         let watched = (request.keepWatch ?? []).compactMap(
             KeepPointer.path(_:)
         )
         let judge =
             touched.isEmpty && watched.isEmpty ? nil : keepJudge(live: after)
         response.changes = ChangeReport(
-            epoch: settingsEpoch,
             profile: profiles.currentName,
             touched: touched.compactMap { judge?.verdict(of: $0) },
             watched: watched.compactMap { judge?.verdict(of: $0) }
@@ -68,7 +63,9 @@ extension KiwiCore {
 
     /// The one reading of both sides a report judges against, taken
     /// once: the stored profile is read only here, and only where a
-    /// leaf is to be judged (an MCP request, never the switch path).
+    /// leaf is to be judged — a caller holding leaves, never the
+    /// switch path (profiles.md ▸ A change report reads one
+    /// judgement, beside #1245).
     func keepJudge(live: JSONValue? = nil) -> KeepJudge {
         let managed = isGuiManaged
         let stored =
@@ -90,9 +87,8 @@ extension KiwiCore {
         }
         return KeepJudge(
             guiManaged: managed,
-            declared: profiles.active?.declaredSpaces,
-            follows: sharedLook != nil && stored != nil
-                && stored?.look == nil,
+            profile: stored,
+            follows: stored.map(followsSharedLook) ?? false,
             live: live ?? keepDocument,
             stored: storedDoc,
             liveSettings: tiler.settings,
@@ -105,8 +101,8 @@ extension KiwiCore {
 /// already is — the one table a report and `keep_settings` read.
 struct KeepJudge {
     let guiManaged: Bool
-    /// The live profile's declared Spaces; nil with none live.
-    let declared: Set<SpaceID>?
+    /// The live profile as stored, read once; nil with none live.
+    let profile: Profile?
     /// Whether the live profile wears the shared look.
     let follows: Bool
     let live: JSONValue
@@ -151,7 +147,7 @@ struct KeepJudge {
         guard known else { return leaf(.none, .unknown) }
         guard guiManaged else { return leaf(.initLua, .luaOwned) }
         if path.first == KeepRoot.appWide { return leaf(.none, .appWide) }
-        guard let declared, stored != nil else {
+        guard let declared = profile?.declaredSpaces, stored != nil else {
             return leaf(.none, .noProfile)
         }
         // A path neither side holds names no setting.
