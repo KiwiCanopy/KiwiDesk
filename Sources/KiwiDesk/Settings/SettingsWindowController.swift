@@ -201,6 +201,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptShortcutDrop(spaces)
     }
 
+    /// Routes an AI app's rule keep to the draft (#1685).
+    func adoptRuleKeep() {
+        model.adoptRuleKeep()
+    }
+
     /// Re-reads the look library a verb changed (#1685).
     func refreshLooks() {
         model.refreshLooks()

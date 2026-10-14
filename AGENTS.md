@@ -971,10 +971,12 @@ Touching `Config`, `Profiles`, `Commands`.
   one `writeThroughLiveProfile` door every write of the live profile from
   outside Settings takes, its draft policy ruled once in
   `SettingsModel.adoptLiveWrite` (#1720, #1518, `ShelfPaintTests`,
-  `BarMenuLandingTests`)
+  `BarMenuLandingTests`) — save a rule write, which takes `saveRuleReach`
+  with the `.outside` origin and `SettingsModel.adoptRuleKeep` (#1685,
+  `AppRuleKeepTests`, `RuleKeepDraftTests`)
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
-  stored profile, taken only where a caller holds leaves (`ChangeReportTests`,
+  stored profile and the rule snapshot, taken only where a caller holds leaves (`ChangeReportTests`,
   `KeepSettingsEdgeTests`), a keep landing the shared look without repainting
   live, and a live store a verb writes joining the keep document or reporting
   nothing, which is review's (#1685)

@@ -85,10 +85,7 @@ enum RuleReachDraft {
         editing: String,
         isLoaded: Bool
     ) -> RuleReach {
-        if stored.resolved(key, for: editing) != nil {
-            return stored.reach(of: key, editing: editing)
-        }
-        return isLoaded ? .shared(joining: []) : .listed([editing])
+        stored.defaultReach(of: key, editing: editing, isLoaded: isLoaded)
     }
 
     /// `stored` with the draft applied: `current` is the edited

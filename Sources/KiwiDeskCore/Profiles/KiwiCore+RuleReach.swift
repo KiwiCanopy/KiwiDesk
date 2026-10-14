@@ -131,11 +131,17 @@ extension KiwiCore {
     /// The shared rules and every profile's overrides, or nil
     /// where `gui.json` does not own the base (a hand-written
     /// `init.lua` authors it, so no shared write is possible).
-    public func ruleReachSnapshot() -> RuleReachSnapshot? {
+    /// `reading` is a profile the caller already read, taken in place
+    /// of a second read of its file.
+    public func ruleReachSnapshot(
+        reading live: Profile? = nil
+    ) -> RuleReachSnapshot? {
         guard isGuiManaged, let sidecar = guiConfigStore.load() else {
             return nil
         }
-        let stored = profiles.allProfiles()
+        let stored = profiles.allProfiles().map { profile in
+            live.flatMap { $0.name == profile.name ? $0 : nil } ?? profile
+        }
         var floats: [String: RuleListOverride] = [:]
         var tiles: [String: RuleListOverride] = [:]
         var keys: [String: KeyLayerOverride] = [:]
@@ -210,9 +216,13 @@ extension KiwiCore {
     /// `keysLeftTo` names the stored profile whose shortcut override
     /// its own Save diffs from the page (`overwriteProfile`), which
     /// carries its layer structure too; its keys are skipped here.
+    /// A write from `.outside` Settings — an AI app's keep (#1685)
+    /// — re-resolves nothing live and tells an open draft through
+    /// `onRulesKept` instead.
     public func saveRuleReach(
         _ snapshot: RuleReachSnapshot,
-        keysLeftTo page: String? = nil
+        keysLeftTo page: String? = nil,
+        origin: RuleWriteOrigin = .settings
     ) throws {
         guard snapshot.isEdited else { return }
         let app = snapshot.appRules
@@ -322,6 +332,10 @@ extension KiwiCore {
         for profile in pending { try profiles.write(profile) }
         if let sidecar { try guiConfigStore.save(sidecar) }
         refreshConfigIssues()
+        guard origin == .settings else {
+            onRulesKept()
+            return
+        }
         refreshStructuredOverrides(
             keys: keysMoved
                 || snapshot.keyLayers.touched.values.contains { !$0.isEmpty }

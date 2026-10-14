@@ -31,6 +31,10 @@ struct APIDestructiveCensusTests {
             + "values back (#1685)",
         "look.save": "refuses an existing or bundled name, so it "
             + "never replaces a look (#1685)",
+        "app_rule.remove_space": "live only: a set puts the rule "
+            + "back, and only a keep writes (#1685 ▸ Ruling 6c)",
+        "app_rule.remove_float": "live only: a set puts the rule "
+            + "back, and only a keep writes (#1685 ▸ Ruling 6c)",
     ]
 
     @Test("every registered name is a command a caller can run")

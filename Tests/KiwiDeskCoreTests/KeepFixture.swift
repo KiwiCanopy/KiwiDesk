@@ -7,7 +7,8 @@ import Testing
 /// Cores for the keep suites (#1685): GUI-managed or Lua-owned,
 /// with a profile that follows the shared look or keeps its own.
 /// Per-suite helpers by convention; this one file is shared by the
-/// two keep suites only because they split at the size ceiling.
+/// keep suites only because they split at the size ceiling — the
+/// app rule suites keep through the same door.
 @MainActor
 enum KeepFixture {
     /// A core on one 100x100 screen. With `gui`, `gui.json` exists
