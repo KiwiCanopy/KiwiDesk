@@ -206,6 +206,7 @@ extension KiwiCore {
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.
         borders.stop()
+        windowServer.stop()
         stickyMarks.clear()
         vision.clear()
         retargetVisionAppearance(nil)  // a quit puts it back

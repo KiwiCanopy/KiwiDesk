@@ -36,7 +36,7 @@ final class NoopHotkeyRegistrar: HotkeyRegistrar {
 /// - `configDirectory` — throwaway temp dir, not `~/.config`.
 /// - `reduceMotion` — pinned false, not the host's real
 ///   `NSWorkspace` Reduce-Motion state.
-/// - `windowServerTrackingDisabled` — pinned false, not the
+/// - `windowServer.trackingDisabled` — pinned false, not the
 ///   host's exported `KIWIDESK_NO_WS_TRACKING` QA lever (#596).
 /// - `allScreenBounds` — pinned `[]` (the single-screen
 ///   verdict), not the host's real screen arrangement (#878).
@@ -68,7 +68,9 @@ func makeTestCore(
     core.borders.arrivalClock = { 0 }
     core.borders.scheduleArrivalCheck = { _, _ in }
     core.borders.reduceMotion = { true }
-    core.borders.windowServerTrackingDisabled = false
+    core.windowServer.trackingDisabled = false
+    // A frame event fed through the core reads no live bounds.
+    core.windowServer.readWindowBounds = { _ in nil }
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }

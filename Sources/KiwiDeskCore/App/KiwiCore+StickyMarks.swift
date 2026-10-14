@@ -13,10 +13,10 @@ extension KiwiCore {
     /// do for the rings (#2026).
     func updateStickyMarks(reassertOrder: Bool = false) {
         let specs = stickyMarkSpecs()
+        // Ahead of the sync, whose follow reads the verdict: the
+        // mark hears its windows with or without a ring (#414).
+        windowServer.request(Set(specs.map(\.window)), for: .mark)
         stickyMarks.sync(specs, reassertOrder: reassertOrder)
-        // Fold marked windows into the ring's WS watch set so the
-        // mark gets z-order/frame events even with no border (#414).
-        borders.setMarkTracked(Set(specs.map(\.window)))
     }
 
     /// One spec per marked window, glyphs outermost first.

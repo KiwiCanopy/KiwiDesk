@@ -1601,8 +1601,8 @@ Touching `Borders`, `Vision`.
 
 - a KiwiVision plate stacks under its target's behind ring through
   the one `ringPanel(of:)` reading, re-stacks only through the
-  ring's `ordersOverlay` gate and the post-ring `onWindowRestacked`
-  tee, keeps its target watched with borders off, reads the
+  ring's `ordersOverlay` gate and the watch's post-ring restack,
+  keeps its target watched with borders off, reads the
   shelf's stand-down verdict, stands its blur down at the one
   `kiwiVisionDrawsBlur` door every reader of the drawn blur takes,
   takes every live app-wide change through the one
@@ -1612,6 +1612,10 @@ Touching `Borders`, `Vision`.
   carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
   `VisionManagerTests`, `OverlayGlassGateTests`,
   `VisionAppearanceSeamTests`, `KiwiVisionStoredTests`)
+- an overlay hearing WindowServer's per-window events connects to the one
+  `WindowServerWatch` under its own `Consumer` case, whose position is its
+  place in the fan-out, and calls no `SkyLightWindowEvents` door itself
+  (#2275, `WindowServerWatchTests`, `WindowServerWatchSeamTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).

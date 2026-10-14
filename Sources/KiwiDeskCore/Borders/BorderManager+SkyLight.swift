@@ -1,159 +1,59 @@
 import AppKit
 
-/// WindowServer event integration and geometry tracking for
-/// `BorderManager` (#285). The manager is the WS-events broker
-/// for three consumers — the ring, the sticky mark's tees and
-/// KiwiVision's plates (#2103) — because `SkyLightWindowEvents`
-/// has a single weak sink. The third made the standalone
-/// `WindowServerWatch` service (#414) due: it is owed before the
-/// per-float dim panels, a fourth, join.
+/// The ring's half of the WindowServer stream (#285): it hears
+/// its rings through the one `WindowServerWatch` (#2275), which
+/// owns the subscription and fans each event out in its consumer
+/// order — the sticky mark ahead of the ring, KiwiVision's plate
+/// after it.
 extension BorderManager {
-    /// Configures WindowServer tracking from the environment
-    /// (`KIWIDESK_NO_WS_TRACKING`, #596). Named after
-    /// `StrandDetector.configureFromEnvironment` but NOT its twin:
-    /// where `KIWIDESK_STRAND_LOG` only turns on logging, this
-    /// kills a production fast path for the whole run.
-    func configureFromEnvironment(
-        _ environment: [String: String] = ProcessInfo.processInfo
-            .environment
-    ) {
-        let value = environment["KIWIDESK_NO_WS_TRACKING"]
-        windowServerTrackingDisabled = !(value?.isEmpty ?? true)
-    }
-
     /// Whether geometry tracking uses WindowServer stream for `id`.
     func usesWindowServerTracking(_ id: WindowID) -> Bool {
-        overlays[id] != nil && skyLightActive
+        overlays[id] != nil && watch.hears(id, as: .ring)
     }
 
-    /// Whether sticky mark should consume WindowServer stream for `id` (#414).
-    func markUsesWindowServerTracking(_ id: WindowID) -> Bool {
-        skyLightActive
-            && (overlays[id] != nil || markTracked.contains(id))
+    /// Whether WindowServer tracking is up for the last request.
+    var skyLightActive: Bool { watch.isActive }
+
+    /// The ring's hooks, connected once at construction. Unhide
+    /// re-asserts order through `restack` even when the bounds
+    /// read failed, and restoration stays with that one order.
+    func connectRing() {
+        watch.connect(
+            .ring,
+            WindowServerWatch.Hooks(
+                frame: { [weak self] id, frame, unhiding in
+                    self?.reconciled(
+                        id,
+                        frame: frame,
+                        restoreVisibility: !unhiding
+                    )
+                },
+                restack: { [weak self] id in
+                    self?.overlays[id]?.order(relativeTo: id.raw)
+                },
+                hide: { [weak self] id in self?.overlays[id]?.hide() }
+            )
+        )
     }
 
-    /// Updates the marked windows' watch set in the WindowServer
-    /// subscription (#414, #1799).
-    func setMarkTracked(_ ids: Set<WindowID>) {
-        guard ids != markTracked else { return }
-        markTracked = ids
-        updateSkyLightSubscription(Set(overlays.keys))
-    }
-
-    /// Updates the window KiwiVision keeps clear in the watch set
-    /// (#2103).
-    func setVisionTracked(_ ids: Set<WindowID>) {
-        guard ids != visionTracked else { return }
-        visionTracked = ids
-        updateSkyLightSubscription(Set(overlays.keys))
-    }
-
-    /// Handles a WindowServer notification. The guard is scoped
-    /// to windows we watch EITHER way (ring or sticky-tracked); a
-    /// window watched neither way is a stale additive delivery
-    /// (`watch(_:)`'s undocumented semantics) and is dropped.
-    func handleSkyLightEvent(
-        _ kind: SkyLightWindowEvents.Kind,
-        window id: WindowID
-    ) {
-        guard
-            overlays[id] != nil || markTracked.contains(id)
-                || visionTracked.contains(id)
-        else { return }
-        switch kind.action {
-        case .follow:
-            _ = reconcile(id)
-        case .reorder:
-            onWindowReordered(id)
-            overlays[id]?.order(relativeTo: id.raw)
-            onWindowRestacked(id)
-        case .followAndReorder:
-            // Unhide must re-assert order even when the bounds
-            // read fails; restoration stays with that one explicit
-            // order so a successful reconcile cannot issue it
-            // twice.
-            _ = reconcile(id, restoreVisibility: false)
-            onWindowReordered(id)
-            overlays[id]?.order(relativeTo: id.raw)
-            onWindowRestacked(id)
-        case .hide:
-            overlays[id]?.hide()
-        }
-    }
-
-    /// Reconciles authoritative WindowServer bounds unless window is animating
-    /// (#594).
-    @discardableResult
-    func reconcile(
+    /// Reconciles a WindowServer frame the watch read, which
+    /// stands down while our own animation drives the window (#594).
+    func reconciled(
         _ id: WindowID,
+        frame: CGRect,
         restoreVisibility: Bool = true
-    ) -> Bool {
-        guard !isAnimating(id) else { return false }
-        guard let frame = readWindowBounds(id) else {
-            return false
-        }
+    ) {
         apply(
             id,
             windowFrame: frame,
             restoreVisibility: restoreVisibility
         )
-        onFrameReconciled(id, frame)
         noteArrivalReport(id, frame: frame)
-        return true
     }
 
-    /// The windows the WindowServer request names: rings worn and
-    /// dormant, plus marks and KiwiVision's target — a Space
-    /// switch moves rings between the first two and leaves the
-    /// set unchanged (#1925).
-    func watchSet(ringed: Set<WindowID>) -> Set<WindowID> {
-        ringed.union(dormant.keys).union(markTracked)
-            .union(visionTracked)
-    }
-
-    func updateSkyLightSubscription(
-        _ borderWanted: Set<WindowID>
-    ) {
-        let wanted = watchSet(ringed: borderWanted)
-        #if DEBUG
-            if let watchOverride {
-                skyLightActive = watchOverride(wanted)
-                return
-            }
-        #endif
-        guard privateRuntimeStarted else {
-            skyLightActive = false
-            return
-        }
-        if windowServerTrackingDisabled {
-            skyLightActive = false
-        } else {
-            if !triedEventSource, !wanted.isEmpty {
-                triedEventSource = true
-                eventSource = SkyLightWindowEvents.shared
-                eventSource?.attach(self)
-            }
-            skyLightActive = eventSource?.watch(wanted) == true
-        }
-        if reportedTrackingActive != skyLightActive {
-            reportedTrackingActive = skyLightActive
-            onLog(trackingStatusMessage)
-        }
-    }
-
-    /// The one line telling a QA run which path it is on — names
-    /// the lever explicitly when it forced the fallback, or an
-    /// unexplained "unavailable" on a healthy Mac reads as a real
-    /// WindowServer failure.
-    private var trackingStatusMessage: String {
-        if skyLightActive {
-            return "WindowServer border tracking active"
-        }
-        if windowServerTrackingDisabled {
-            return "WindowServer border tracking disabled by "
-                + "KIWIDESK_NO_WS_TRACKING; using AX fallback"
-        }
-        return "WindowServer border tracking unavailable; "
-            + "using AX fallback"
+    /// The ring's request: rings worn, plus dormant ones kept in
+    /// the request so a Space switch leaves it unchanged (#1925).
+    func requestRingTracking(_ ringed: Set<WindowID>) {
+        watch.request(ringed, for: .ring, keeping: Set(dormant.keys))
     }
 }

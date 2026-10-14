@@ -4,82 +4,72 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The sticky mark rides the ring's WindowServer stream (#414 QA):
-/// a re-click on an ALREADY-focused window raises it above its own
-/// mark but fires no AX focus event, so the mark's only re-assert is
-/// the WS `.reorder` tee — which must reach a sticky window even when
-/// it wears no ring. These pin that plumbing at the manager boundary.
+/// The sticky mark hears WindowServer through the one watch
+/// (#414 QA, #2275): a re-click on an ALREADY-focused window raises
+/// it above its own mark but fires no AX focus event, so the mark's
+/// only re-assert is the `.reorder` restack — which must reach a
+/// marked window even when it wears no ring. These pin that
+/// plumbing at the watch boundary.
 @Suite("Sticky mark WindowServer tee")
 @MainActor
 struct StickyChipWindowServerTeeTests {
-    private func reorder(
-        _ border: BorderManager,
-        _ raw: UInt32
-    ) {
-        border.handleSkyLightEvent(.reorder, window: WindowID(raw))
+    /// A watch whose mark consumer records its restacks.
+    private func markWatch() -> (WindowServerWatch, () -> [WindowID]) {
+        let watch = WindowServerWatch()
+        var reasserted: [WindowID] = []
+        watch.connect(
+            .mark,
+            WindowServerWatch.Hooks(restack: { reasserted.append($0) })
+        )
+        return (watch, { reasserted })
     }
 
-    @Test("A reorder event tees even for an unbordered window")
+    @Test("A reorder event reaches a marked, unbordered window")
     func reorderTeeFiresWithoutOverlay() {
-        let border = BorderManager()
-        border.movePanel = { _, _ in false }
-        var reasserted: [WindowID] = []
-        border.onWindowReordered = { reasserted.append($0) }
-        // Window 7 wears a mark but no ring — sticky-tracked only.
-        // The old top-level overlay guard dropped this event,
-        // burying the mark on a re-click; the scoped guard admits it.
-        border.setMarkTracked([WindowID(7)])
-        reorder(border, 7)
-        #expect(reasserted == [WindowID(7)])
+        let (watch, reasserted) = markWatch()
+        // Window 7 wears a mark but no ring — mark-tracked only.
+        watch.request([WindowID(7)], for: .mark)
+        watch.handle(.reorder, window: WindowID(7))
+        #expect(reasserted() == [WindowID(7)])
     }
 
-    @Test("Unhide (followAndReorder) also tees the mark re-assert")
+    @Test("Unhide (followAndReorder) also re-asserts the mark")
     func unhideTeesReassert() {
-        let border = BorderManager()
-        border.movePanel = { _, _ in false }
-        var reasserted: [WindowID] = []
-        border.onWindowReordered = { reasserted.append($0) }
-        border.setMarkTracked([WindowID(3)])
-        border.handleSkyLightEvent(.unhide, window: WindowID(3))
-        #expect(reasserted == [WindowID(3)])
+        let (watch, reasserted) = markWatch()
+        watch.readWindowBounds = { _ in nil }
+        watch.request([WindowID(3)], for: .mark)
+        watch.handle(.unhide, window: WindowID(3))
+        #expect(reasserted() == [WindowID(3)])
     }
 
-    @Test("A stale delivery we watch neither way is dropped")
+    @Test("A stale delivery no consumer hears is dropped")
     func staleDeliveryDropped() {
-        let border = BorderManager()
-        border.movePanel = { _, _ in false }
-        var reasserted: [WindowID] = []
-        border.onWindowReordered = { reasserted.append($0) }
-        // No ring, not sticky-tracked: an additive stale delivery.
-        // The scoped guard must drop it — no stray tee fan-out.
-        reorder(border, 7)
-        #expect(reasserted.isEmpty)
+        let (watch, reasserted) = markWatch()
+        // Not requested by anyone: an additive stale delivery.
+        watch.handle(.reorder, window: WindowID(7))
+        #expect(reasserted().isEmpty)
     }
 
-    @Test("markUsesWindowServerTracking follows the watch set")
-    func markTrackingReflectsStickySet() {
-        let border = BorderManager()
-        border.movePanel = { _, _ in false }
-        border.setMarkTracked([WindowID(7)])
-        #expect(border.markTracked == [WindowID(7)])
-        // The predicate gates on a live stream; force it on AFTER
-        // the mutation (`setMarkTracked` runs the subscription,
-        // which resets `skyLightActive` while the runtime is not
-        // started in unit tests).
-        border.skyLightActive = true
-        #expect(border.markUsesWindowServerTracking(WindowID(7)))
-        // A window we do not track stays on the AX-echo path.
-        #expect(!border.markUsesWindowServerTracking(WindowID(9)))
+    @Test("The mark hears only its own windows, on a live stream")
+    func markTrackingReflectsItsRequest() {
+        let watch = WindowServerWatch()
+        watch.override = { _ in true }
+        watch.request([WindowID(7)], for: .mark)
+        #expect(watch.requested(by: .mark) == [WindowID(7)])
+        #expect(watch.hears(WindowID(7), as: .mark))
+        // A window the mark did not ask for stays on the AX echo,
+        // even one the ring hears.
+        watch.request([WindowID(9)], for: .ring)
+        #expect(!watch.hears(WindowID(9), as: .mark))
     }
 
     @Test("A dead stream never claims WS tracking")
     func noTrackingWhenStreamDown() {
-        let border = BorderManager()
-        border.movePanel = { _, _ in false }
-        border.setMarkTracked([WindowID(7)])
-        // `skyLightActive` false — the mark must keep following AX
-        // echoes, never stand down waiting on a stream that is off.
-        #expect(!border.markUsesWindowServerTracking(WindowID(7)))
+        let watch = WindowServerWatch()
+        watch.request([WindowID(7)], for: .mark)
+        // Not started: the mark keeps following AX echoes, never
+        // stands down waiting on a stream that is off.
+        #expect(!watch.hears(WindowID(7), as: .mark))
     }
 }
 
