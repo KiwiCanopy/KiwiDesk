@@ -90,6 +90,7 @@ struct QuickMenuKiwiVisionRowTests {
             "lua:KeybindingCatalog.toggleKiwiVision.lua",
             "self?.core.toggleKiwiVision()",
             "core.vision.onChange={[weakself]onin",
+            "core.onAppWideChange={[weakself]in",
             "notification:.announcementRequested",
         ] {
             #expect(text.contains(needle), "missing \(needle)")

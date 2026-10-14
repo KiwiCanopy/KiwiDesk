@@ -107,8 +107,9 @@ struct SettingsCatalogSiteTests {
         // 128 since #2228: KiwiShelf's Show the Space switch.
         // 133 since #1685: the AI page's five declarations.
         // 134 since #2265: Shortcuts' KiwiHub group.
-        // 139 since #2103: KiwiVision's five declarations.
-        #expect(names.count == 139)
+        // 135 since #1685: the AI page's look prompt row.
+        // 140 since #2103: KiwiVision's five declarations.
+        #expect(names.count == 140)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

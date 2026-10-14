@@ -7822,6 +7822,12 @@ does not exist yet. Copy Setup Prompt greys on a translocated copy
 through the one `RunningCopy` verdict the login item reads too
 (▸ Open at login), because the path it would copy dies at the next
 launch.
+
+A look matched to the wallpaper is made from a screenshot the user
+hands the AI app; KiwiDesk never reads the wallpaper itself, since
+reading the desktop picture raised a macOS folder-access prompt
+(measured 2026-10-05, #1685 ▸ Ruling 6b). A wallpaper-colour verb
+reopens this only with a read that raises no prompt.
 :::
 
 ### Open at login

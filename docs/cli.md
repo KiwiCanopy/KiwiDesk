@@ -177,7 +177,7 @@ or walks you through it. The same page has ready-made prompts that
 have the AI app ask you what you want, one question at a time.
 
 The server speaks MCP `2026-07-28` and, after an `initialize`,
-`2025-11-25` and `2025-06-18`. It offers seven tools:
+`2025-11-25` and `2025-06-18`. It offers eight tools:
 
 | Tool | Does |
 |---|---|
@@ -188,6 +188,7 @@ The server speaks MCP `2026-07-28` and, after an `initialize`,
 | `run_batch` | Up to 100 commands in order, stopping at the first failure |
 | `run_destructive` | One command that cannot be undone |
 | `keep` | Makes this session's setting changes permanent |
+| `looks` | The `look.*` verbs as one tool: list, inspect, wear and save looks |
 
 `list_commands` and `help` answer without the app; the others
 need it running. A command `list_commands --json` marks
@@ -196,6 +197,12 @@ need it running. A command `list_commands --json` marks
 hint, which an AI app that honours it turns into a question to you
 before the command runs. `subscribe` and the Lua-only verbs are
 not offered.
+
+`looks` takes an `action` — each `look.*` verb that can be undone —
+and that verb's arguments by name; `look.delete` goes through
+`run_destructive`. The AI page's **Make a new look** prompt offers to
+match your wallpaper from a screenshot you give the AI app: KiwiDesk
+never reads the wallpaper itself.
 
 A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where

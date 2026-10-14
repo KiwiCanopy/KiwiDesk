@@ -72,6 +72,11 @@ struct VisionAppearanceSeamTests {
                 "App/KiwiCore.swift", "var appWideLedger",
                 "appWideLiveChanged(from: oldValue.live)"
             ),
+            // The plate reads the one blur door the picture reads.
+            (
+                "App/KiwiCore+Vision.swift", "func visionRequest(",
+                "blur: kiwiVisionDrawsBlur"
+            ),
             // The whole stored group, so a new plate input re-draws.
             (
                 "App/KiwiCore+Vision.swift", "func appWideLiveChanged(",

@@ -129,7 +129,7 @@ struct MCPToolsEdgeTests {
         #expect(
             Set(names) == [
                 "list_commands", "help", "get_state", "run",
-                "run_batch", "run_destructive", "keep",
+                "run_batch", "run_destructive", "keep", "looks",
             ]
         )
         #expect(Set(names).count == names.count)
@@ -148,5 +148,39 @@ struct MCPToolsEdgeTests {
         #expect(result["isError"] == .bool(false))
         #expect(app.sent.map(\.command) == ["get_state"])
         #expect(Self.text(result).contains("active_space"))
+    }
+
+    /// A command a tool's description names is one `run` sends,
+    /// or a destructive one `run_destructive` sends — never one
+    /// both refuse, such as `keep_settings` (#1685 ▸ Ruling 4).
+    @Test("every command a description names is reachable")
+    func descriptionsNameReachableCommands() {
+        guard case .array(let tools) = MCPTools().definitions else {
+            Issue.record("no tools")
+            return
+        }
+        let named = APIReference.entries.filter {
+            $0.qualifiedName.contains("_") || $0.qualifiedName.contains(".")
+        }
+        var checked = 0
+        for case .object(let tool) in tools {
+            let text = tool["description"]?.stringValue ?? ""
+            let words = Set(
+                text.split { !($0.isLetter || $0 == "_" || $0 == ".") }
+                    .map { $0.trimmingCharacters(in: ["."]) }
+            )
+            for entry in named where words.contains(entry.qualifiedName) {
+                checked += 1
+                let destructive = APIReference.isDestructive(entry)
+                let probe = MCPTools.request(
+                    from: ["command": .string(entry.qualifiedName)],
+                    destructive: destructive
+                )
+                if case .failure(let refusal) = probe {
+                    Issue.record("\(entry.qualifiedName): \(refusal.reason)")
+                }
+            }
+        }
+        #expect(checked > 0)
     }
 }
