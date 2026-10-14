@@ -147,10 +147,10 @@ struct BorderArrivalTests {
     ) throws {
         let clock = Clock()
         let border = manager(clock)
-        border.readWindowBounds = { [corner] _ in corner }
+        border.watch.readWindowBounds = { [corner] _ in corner }
         defer { border.clear() }
         let panel = try heldRing(border)
-        border.handleSkyLightEvent(kind, window: WindowID(1))
+        border.watch.handle(kind, window: WindowID(1))
         #expect(panel.panelAlpha == 0)
         #expect(panel.isOrderedIn)
     }
@@ -191,7 +191,7 @@ struct BorderArrivalTests {
     func heldRingTakesNoFurtherOrder() throws {
         let clock = Clock()
         let border = manager(clock)
-        border.watchOverride = { _ in true }
+        border.watch.override = { _ in true }
         defer { border.clear() }
         let panel = try heldRing(border)
         let ordered = panel.appKitOrders

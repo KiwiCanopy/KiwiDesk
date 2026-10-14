@@ -57,8 +57,10 @@ extension KiwiCore {
         wireScrollPan()
         wireScrollSpaceStep()
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
-        // pins the ring and mark to the AX-fallback path.
-        borders.configureFromEnvironment()
+        // pins every overlay to the AX-fallback path.
+        windowServer.onLog = log
+        windowServer.configureFromEnvironment()
+        connectWindowServerConsumers()
         wireDrag()
         wireOwnKeyWindowRefresh()
         wireHoldGlide()
@@ -148,6 +150,7 @@ extension KiwiCore {
         }
         borders.isAnimating = animationDriven
         stickyMarks.isAnimating = animationDriven
+        windowServer.isAnimating = animationDriven
         // The instant twin of the tick's leading truth (#881):
         // a just-commanded `applyInstant` target leads the
         // echo-fed state frame in the steady-state syncs, so

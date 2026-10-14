@@ -39,6 +39,7 @@ enum SeamRegister {
         "SleepWakeManager",
         "SocketServer",
         "StrandDetector",
+        "WindowServerWatch",
     ]
 
 }

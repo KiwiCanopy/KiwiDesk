@@ -8,6 +8,10 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
+  # The one WindowServer stream every overlay hears through
+  # (#2275), and its consumer order, live outside Borders/.
+  - "Sources/KiwiDeskCore/OS/WindowServerWatch.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+WindowServer.swift"
   - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
   # The window stroke below is derived and stored beside the drag
   # markers, where a per-stroke store would be re-added.
@@ -330,18 +334,25 @@ Obligations:
 - **Re-stack a plate only from the ring's triggers, through the
   ring's own `BorderManager.ordersOverlay` gate**: the sync at the
   tail of `updateBorders` (the focus moved, a settle pass, no
-  WindowServer stream) and `onWindowRestacked`, which fires AFTER
-  the ring's own re-order in both reorder arms. A new caller of a
+  WindowServer stream) and the watch's restack phase, which runs
+  the plate AFTER the ring's own re-order. A new caller of a
   plate's `order(below:` owes its ruling in `BorderOrderCensusTests`
-  ▸ `plateOrderSitesAreCensused`, which also needles the tee's
+  ▸ `plateOrderSitesAreCensused`, which also needles the hook's
   place.
 - **Watch the target whatever the border setting**: the target
-  joins the WindowServer request through `setVisionTracked`, so a
-  plate re-stacks with borders off (`KiwiVisionCoreTests` ▸
-  `targetWatchedWithoutRings`). That made `BorderManager` the
-  broker for three consumers; the standalone `WindowServerWatch`
-  extraction (#414) is owed before a fourth — the per-float dim
-  panels — joins.
+  joins the WindowServer request under KiwiVision's own consumer,
+  so a plate re-stacks with borders off (`KiwiVisionCoreTests` ▸
+  `targetWatchedWithoutRings`).
+- **An overlay that hears WindowServer's per-window events
+  connects to the one `WindowServerWatch` under its own
+  `Consumer` case** (#2275), whose declaration position is its
+  place in every phase's fan-out — the mark ahead of the ring so
+  it stays above a front ring, the plate after it — and calls no
+  `SkyLightWindowEvents` door itself; the watch owns the request,
+  `isActive` and the one gated bounds read
+  (`WindowServerWatchTests` ▸ `phaseOrder`,
+  `WindowServerWatchSeamTests`). A new consumer — the per-float
+  dim panels — rules its position in the change that adds it.
 - **Read the stand-down from the shelf's verdict**, filed once per
   pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a
@@ -520,9 +531,10 @@ style for every window stroke.
 
 ## Exercising the fallback path
 
-`KIWIDESK_NO_WS_TRACKING=<anything>` keeps `skyLightActive` false
-for the whole run: the subscription never attaches and never
-watches, because a live one keeps feeding `reconcile`, which heals
+`KIWIDESK_NO_WS_TRACKING=<anything>` keeps `WindowServerWatch`'s
+`isActive` false for the whole run: the subscription never
+attaches and never watches, because a live one keeps feeding the
+ring's frames, which heals
 the very drift the fallback path exists to expose. The startup log
 line names the lever, so a QA run cannot mistake it for a real
 WindowServer failure. Device QA procedure is in

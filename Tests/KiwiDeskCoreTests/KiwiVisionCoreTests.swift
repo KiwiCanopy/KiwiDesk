@@ -119,9 +119,11 @@ struct KiwiVisionCoreTests {
     func targetWatchedWithoutRings() {
         let core = makeCore()
         core.tiler.settings.borderStyle.enabled = false
+        let plate = InertVisionPlate()
+        core.vision.plateFactory = { plate }
         // The request sent to the WindowServer, read at its seam.
         var watched: Set<WindowID> = []
-        core.borders.watchOverride = {
+        core.windowServer.override = {
             watched = $0
             return true
         }
@@ -129,14 +131,28 @@ struct KiwiVisionCoreTests {
         core.updateBorders()
         #expect(watched == [w1])
         #expect(core.borders.overlays.isEmpty)
-        #expect(core.borders.visionTracked == [w1])
-        var restacked: [WindowID] = []
-        core.borders.onWindowRestacked = { restacked.append($0) }
-        core.borders.handleSkyLightEvent(.reorder, window: w1)
-        #expect(restacked == [w1])
+        #expect(core.windowServer.requested(by: .vision) == [w1])
+        // The watch's own fan-out reaches the plate.
+        core.vision.sync(
+            VisionManager.Request(
+                screens: [
+                    (DisplayID(1), CGRect(x: 0, y: 0, width: 9, height: 9))
+                ],
+                target: w1.raw,
+                below: nil,
+                standDown: [],
+                tracked: true,
+                dim: 0.4,
+                blur: false
+            ),
+            reassert: false
+        )
+        let before = plate.orders.count
+        core.windowServer.handle(.reorder, window: w1)
+        #expect(plate.orders.count == before + 1)
         core.vision.isOn = false
         core.updateBorders()
-        #expect(core.borders.visionTracked.isEmpty)
+        #expect(core.windowServer.requested(by: .vision).isEmpty)
     }
 
     @Test("the target's restack re-stacks the plates under it")
