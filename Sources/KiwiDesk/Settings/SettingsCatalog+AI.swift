@@ -8,6 +8,10 @@ struct AIControls: Sendable {
         "ai.setup.copy",
         "Copy Setup Prompt"
     )
+    let capabilitiesCard = SettingsControl(
+        "ai.capabilities.title",
+        "What it can do"
+    )
     let promptsCard = SettingsControl(
         "ai.prompts.title",
         "Ready-made prompts"
@@ -15,9 +19,5 @@ struct AIControls: Sendable {
     let promptSpaces = SettingsControl(
         "ai.prompt.spaces",
         "Set up my Spaces"
-    )
-    let capabilitiesCard = SettingsControl(
-        "ai.capabilities.title",
-        "What it can do"
     )
 }

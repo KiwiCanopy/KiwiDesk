@@ -2,8 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The AI page (#1685 ▸ Ruling 6a): connect the user's own AI app
-/// to `kiwidesk mcp`, ready-made prompts to start from, and what
-/// it can do. Single column, no draft (`SettingsDetailPanelOffer`);
+/// to `kiwidesk mcp`, what it can do, and ready-made prompts to
+/// start from. Single column, no draft (`SettingsDetailPanelOffer`);
 /// no status of any AI app, which KiwiDesk cannot read.
 struct AISection: View {
     @EnvironmentObject private var localization: LocalizationManager
@@ -12,8 +12,10 @@ struct AISection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 setup
-                prompts
+                // Above the prompts, which grow with each tool: the
+                // keep and privacy facts must stay in view (#1685).
                 AICapabilitiesCard()
+                prompts
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
