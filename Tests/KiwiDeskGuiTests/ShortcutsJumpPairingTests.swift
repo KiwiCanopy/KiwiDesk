@@ -28,6 +28,10 @@ struct ShortcutsJumpPairingTests {
         }
         return [
             (
+                "ShortcutsRowOrder.kiwiHubAtRest",
+                ShortcutsRowOrder.kiwiHubAtRest
+            ),
+            (
                 "ShortcutsRowOrder.focusAtRest",
                 ShortcutsRowOrder.focusAtRest
             ),

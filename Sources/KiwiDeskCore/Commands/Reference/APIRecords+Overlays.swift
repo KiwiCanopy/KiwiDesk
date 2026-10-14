@@ -219,4 +219,12 @@ extension APIReference {
             .choice("appearance", VisionAppearance.self)
         ),
     ]
+
+    static let kiwihubRecords: [String: APIRecord] = [
+        "show": APIRecord(
+            "Opens KiwiHub on a side, switches it there, or closes "
+                + "it if that side is open.",
+            .choice("side", KiwiHubSide.self)
+        )
+    ]
 }

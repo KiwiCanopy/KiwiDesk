@@ -182,6 +182,9 @@ extension KiwiCore {
             // live retile would be a pure no-op. Same policy
             // as `track.swap` above.
             return quitCommand(command, args)
+        case let hub where hub.hasPrefix("kiwihub."):
+            // No window moves: the GUI shows a panel (#2265).
+            return kiwiHubCommand(command, args)
         case let vision where vision.hasPrefix("kiwivision."):
             // No window moves: the plates re-draw, nothing else.
             return visionCommand(command, args)

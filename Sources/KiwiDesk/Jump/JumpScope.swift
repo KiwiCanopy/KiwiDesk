@@ -2,16 +2,16 @@ import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// The key panel's three sides (#2229, #2246): the window
+/// KiwiHub's three sides (#2229, #2246, #2265): the window
 /// switcher's list, the shortcuts sheet and the layout picker's
 /// tiles, one field above all three, in the order of their keys
 /// J K L. ⇥ steps forward and ⇧⇥ back, wrapping, and each side's
-/// own shortcut reaches it while the panel is up.
-enum JumpScope: CaseIterable, Equatable {
-    case windows
-    case shortcuts
-    case layouts
+/// own shortcut reaches it while the panel is up. One enum with
+/// Core's, so the panel and `kiwihub.show` cannot map a side two
+/// ways.
+typealias JumpScope = KiwiHubSide
 
+extension KiwiHubSide {
     /// The side ⇥ (forward) or ⇧⇥ reaches, wrapping.
     func stepped(forward: Bool) -> JumpScope {
         let all = Self.allCases
@@ -35,6 +35,12 @@ enum JumpScope: CaseIterable, Equatable {
         }
     }
 
+    /// The whole panel's VoiceOver name, the product name around
+    /// every side's (#2265).
+    @MainActor static var panelName: String {
+        L("kiwihub.name", "KiwiHub")
+    }
+
     /// The side's VoiceOver name, and the noun its shortcut row
     /// shows (#2245, `ShortcutsPanelNounTests`).
     @MainActor var panelName: String {
@@ -44,16 +50,6 @@ enum JumpScope: CaseIterable, Equatable {
             return L("shortcuts.panel.ax_label", "Shortcuts panel")
         case .layouts:
             return L("layout_picker.panel.ax_label", "Layout picker")
-        }
-    }
-
-    /// The Lua the side's own shortcut runs, whose live chord the
-    /// switch prints (#2245).
-    var lua: String {
-        switch self {
-        case .windows: return KeybindingCatalog.jumpToWindow.lua
-        case .shortcuts: return ShortcutsOpenBinding.lua
-        case .layouts: return KeybindingCatalog.showLayoutPicker.lua
         }
     }
 

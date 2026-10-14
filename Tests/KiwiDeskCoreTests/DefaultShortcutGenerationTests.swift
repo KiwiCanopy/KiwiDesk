@@ -13,12 +13,12 @@ struct DefaultShortcutGenerationTests {
     private let forward = "KiwiDesk.focus_space_forward()"
     private let previous = "KiwiDesk.focus_space_previous()"
     private let next = "KiwiDesk.focus_space_next()"
-    /// Generations 2 to 4: 3.0.0's layout keys (#453, #762), Jump
-    /// to window (#1875) and KiwiVision (#2103).
+    /// Generations 2 to 4: 3.0.0's layout keys (#453, #762), the
+    /// window switcher (#1875) and KiwiVision (#2103).
     private let layoutKeys = [
         "KiwiDesk.cycle_mode()", "KiwiDesk.cycle_mode(\"prev\")",
-        "KiwiDesk.show_layout_picker()",
-        "KiwiDesk.show_jump_to_window()",
+        "kiwihub.show(\"layouts\")",
+        "kiwihub.show(\"windows\")",
         "kiwivision.toggle()",
     ]
 
@@ -116,7 +116,9 @@ struct DefaultShortcutGenerationTests {
 
     /// The actions the 2.2.0 seed bound, its digit and Desktop
     /// families aside, which their own top-ups own. Frozen: a later
-    /// seed row joins a generation, never this list.
+    /// seed row joins a generation, never this list — save a
+    /// spelling a migration renamed, which the stored row now
+    /// carries (#2265).
     private let seededBeforeGenerations: Set<String> = [
         "KiwiDesk.focus(\"left\")", "KiwiDesk.focus(\"down\")",
         "KiwiDesk.focus(\"up\")", "KiwiDesk.focus(\"right\")",
@@ -126,7 +128,7 @@ struct DefaultShortcutGenerationTests {
         "KiwiDesk.resize(\"y\", 10)", "KiwiDesk.resize(\"y\", -10)",
         "KiwiDesk.toggle_floating()", "KiwiDesk.toggle_sticky()",
         "KiwiDesk.toggle_display_sticky()",
-        "KiwiDesk.show_shortcuts()", "KiwiDesk.open_settings()",
+        "kiwihub.show(\"shortcuts\")", "KiwiDesk.open_settings()",
     ]
 
     /// The direction a release forgets: a seed row added with no

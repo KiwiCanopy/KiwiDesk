@@ -397,6 +397,17 @@ synonym:
   section is where the two collide), and not "tier" either:
   *tier* is already spoken for twice over by `SettingTier` /
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
+- **KiwiHub** — the product name of the key panel and its three
+  sides (Lua `kiwihub.show(side)`, #2265). Write **KiwiHub** where
+  copy — a label, a catalog value, `docs/` prose — names the whole
+  panel, and a side's own name where it names one; a row title
+  stays a verb phrase on the side's name (#2245). As a product
+  name it appears verbatim in every catalog —
+  `scripts/localization_guards.py`'s `PRODUCT_NAMES` is the
+  register — and a string naming the panel takes the
+  `kiwihub.name` key rather than a second key spelling it.
+  Retired as its name in a label, a catalog value or a user doc:
+  *key panel*, which `docs/design-decisions.md` may still argue in.
 - **shortcuts panel** — the key panel's Shortcuts side, the
   read-only list ⌃⌥K opens (#326, #2246); its VoiceOver name.
   Retired as names for it: *shortcuts reference*, *reference

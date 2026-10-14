@@ -252,13 +252,13 @@ public enum APIReference {
         "kiwivision": [
             "toggle", "set_dim", "set_blur", "set_appearance",
         ],
+        "kiwihub": ["show"],
     ]
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).
     public static let luaOnly: [String] = [
         "exec", "bind", "on", "define_layer", "switch_layer",
-        "show_shortcuts", "open_settings", "show_jump_to_window",
-        "show_layout_picker",
+        "open_settings",
     ]
 
     /// Command names reachable through dispatcher and CLI/IPC (#37).

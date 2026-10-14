@@ -611,39 +611,6 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 ```
 :::
 
-:::unreleased
-### show_layout_picker
-
-**Expects:** nothing.
-
-**Does:** opens the **layout picker**, the **Layouts** side of the
-key panel the [window switcher](#show_jump_to_window) opens, for
-the Space shown on the screen under the pointer. It switches to it
-from another side, or closes the panel if it already shows
-Layouts. Every layout is a tile with its
-picture, the current one marked ✓.
-
-- **←** and **→**, or moving the mouse over a tile, move the
-  selection; typing narrows the tiles by name, dimming the rest.
-- **Return** applies the selected layout, like `set_mode` for that
-  Space, and closes the panel; **⌘1** … **⌘7** apply a tile
-  directly.
-- **⌘S** keeps the layouts in the profile, as the Layout menu's
-  Keep does; **⌘,** opens Layout Defaults in Settings on the
-  selected layout.
-- **Tab** steps to the panel's next side and **⇧Tab** to the one
-  before, as on the window switcher; **Escape** clears the typing,
-  then closes the panel.
-
-**Example:**
-
-```lua
-KiwiDesk.bind("ctrl+alt+l", function()
-    KiwiDesk.show_layout_picker()
-end)
-```
-:::
-
 ### set_gap_global
 
 **Expects:**
@@ -1013,11 +980,9 @@ glass is untinted: it draws `.regular` where the bars draw
 `.clear`, and no Fill reaches it (#1295).
 
 :::unreleased
-The shortcuts panel is a side of the key panel, so this leaf sets
-the material of the whole key panel — the
-[window switcher](#show_jump_to_window), the
-[shortcuts panel](#show_shortcuts) and the
-[layout picker](#show_layout_picker).
+The shortcuts panel is a side of [KiwiHub](#kiwihubshow), so this
+leaf sets the material of all of KiwiHub — the window switcher,
+the shortcuts panel and the layout picker.
 :::
 
 Stored as `shortcut_panel.liquid_glass` in the profile, so a
@@ -4090,7 +4055,7 @@ window verbs. Its float rules work the same way yours do, so a
 `float_rules` entry can keep it out of the layout permanently.
 KiwiDesk's *other* windows are not managed: the setup tour and
 the Config Issues window are tracked but always floating, and its
-panels — the ⌃⌥K panel, drag/drop overlays, App Bar
+panels — KiwiHub, drag/drop overlays, App Bar
 overlays and focus borders — are ignored outright and appear in
 no bar and no window list KiwiDesk publishes.
 
@@ -4846,46 +4811,90 @@ end)
 
 ## User Interface
 
-### show_shortcuts
-
-**Expects:** nothing.
-
-**Does:** opens the read-only **shortcuts panel** — a live glance
-at the active layer's bindings — or closes it if it is already
-open. It is the panel behind the menu bar's *View Shortcuts…*
-row; the bound combo shows beside that row and in the panel's
-close hint.
-
 :::unreleased
-The shortcuts panel is the **Shortcuts** side of the key panel
-the [window switcher](#show_jump_to_window) opens, and it carries
-no close hint: the call switches to it from another side and
-closes the panel only when it already shows Shortcuts. The bound
-combo shows beside the *View Shortcuts…* row.
+### kiwihub.show
+
+**Expects:** a side: `"windows"`, `"shortcuts"` or `"layouts"`.
+
+**Does:** opens **KiwiHub** on that side, switches to it from
+another side, or closes KiwiHub when it already shows that side.
+Over the CLI it is `kiwidesk kiwihub.show windows`; any other side
+is refused, naming the three.
+
+The `"shortcuts"` side is the read-only **shortcuts panel** — a
+live glance at the active layer's bindings. It is the panel behind
+the menu bar's *View Shortcuts…* row; the bound combo shows beside
+that row.
 
 - Typing narrows the list by name, the matched letters in bold.
 - **↑** **↓** and **Page Up** / **Page Down** scroll the list;
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts & Gestures.
-- **Tab** steps to the panel's next side and **⇧Tab** to the one
-  before, as on the window switcher.
-- **Escape** clears the typing, then closes the panel.
-:::
 
-Seeded to **⌃⌥K** in the base layer and in every layer you
-create.
+The `"windows"` side is the **window switcher**, its field at
+Spotlight's height on the screen under the pointer. It lists every
+window KiwiDesk knows except the one you are in — open windows
+first, most recently used first, including those up on another
+macOS Desktop, then minimized windows, then one row per hidden
+app. Typing narrows the list by app name, then by title. Moving
+the mouse over a row selects it.
 
-Offered under **Shortcuts & Gestures ▸ Open applications ▸
-KiwiDesk** ("Show shortcuts panel"), where you can rebind or clear
-it per layer.
+- **Return** goes to the selected window, switching Space or
+  Desktop as needed; on a minimized window it brings it back, on a
+  hidden app it unhides it.
+- **⇧Return** moves the window into the Space you are on instead,
+  as [move_here](#move_here) does.
+- **⌘1** … **⌘9** pick one of the first nine results.
+
+A window in native full screen is listed, and Return activates its
+app rather than switching to its full-screen Space.
+
+The `"layouts"` side is the **layout picker**, for the Space shown
+on the screen under the pointer. Every layout is a tile with its
+picture, the current one marked ✓.
+
+- **←** and **→**, or moving the mouse over a tile, move the
+  selection; typing narrows the tiles by name, dimming the rest.
+- **Return** applies the selected layout, like `set_mode` for that
+  Space, and closes KiwiHub; **⌘1** … **⌘7** apply a tile
+  directly.
+- **⌘S** keeps the layouts in the profile, as the Layout menu's
+  Keep does; **⌘,** opens Layout Defaults in Settings on the
+  selected layout.
+
+On every side:
+
+- **Tab** steps to the next side and **⇧Tab** to the one before —
+  Windows, Shortcuts and Layouts, wrapping, and past Layouts when
+  the Space it would show is gone — clearing the typing. The
+  switch at the end of the field shows each side's own key, read
+  from your shortcuts.
+- **Escape** clears the typing, then closes KiwiHub; **⌘W**, a
+  click elsewhere or another app taking the keyboard close it too.
+
+Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer
+you create too) and **⌃⌥L** (layouts), and offered under
+**Shortcuts & Gestures ▸ KiwiHub**, where you can rebind or clear
+each per layer.
 
 **Example:**
 
 ```lua
 KiwiDesk.bind("alt+space", function()
-    KiwiDesk.show_shortcuts()
+    kiwihub.show("windows")
 end)
 ```
+:::
+
+:::unreleased
+### Retired panel verbs
+
+`show_shortcuts`, `show_jump_to_window` and `show_layout_picker`
+are retired for [kiwihub.show](#kiwihubshow). A call in
+`init.lua` is reported in Config Issues, naming `kiwihub.show`;
+over the CLI it fails with `<verb> was retired — use
+kiwihub.show`. A shortcut made in Settings is updated for you.
+:::
 
 ### open_settings
 
@@ -4911,50 +4920,6 @@ KiwiDesk.bind("ctrl+alt+shift+comma", function()
     KiwiDesk.open_settings()
 end)
 ```
-
-:::unreleased
-### show_jump_to_window
-
-**Expects:** nothing.
-
-**Does:** opens the **window switcher**, a search panel on the screen
-under the pointer, its field at Spotlight's height — the Windows
-side of the key panel. From another side it switches to the
-windows, and showing the windows it closes. It lists every window KiwiDesk knows except the one you are in —
-open windows first, most recently used first, including those up
-on another macOS Desktop, then minimized windows, then one row per
-hidden app. Typing narrows the list by app name, then by title.
-Moving the mouse over a row selects it.
-
-- **Return** goes to the selected window, switching Space or
-  Desktop as needed; on a minimized window it brings it back, on a
-  hidden app it unhides it.
-- **⇧Return** moves the window into the Space you are on instead,
-  as [move_here](#move_here) does.
-- **⌘1** … **⌘9** pick one of the first nine results.
-- **Tab** steps to the panel's next side and **⇧Tab** to the one
-  before — Windows, [Shortcuts](#show_shortcuts) and
-  [Layouts](#show_layout_picker), wrapping, and past Layouts when
-  the Space it would show is gone — clearing the typing. The
-  switch at the end of the field shows each side's own key, read
-  from your shortcuts.
-- **Escape** clears the typing, then closes the panel; **⌘W**, a
-  click elsewhere or another app taking the keyboard close it too.
-
-A window in native full screen is listed, and Return activates its
-app rather than switching to its full-screen Space.
-
-Seeded on **`⌃⌥J`** in the base layer, and offered under
-**Shortcuts & Gestures ▸ Focus** ("Show window switcher").
-
-**Example:**
-
-```lua
-KiwiDesk.bind("ctrl+alt+space", function()
-    KiwiDesk.show_jump_to_window()
-end)
-```
-:::
 
 ## Keybindings
 

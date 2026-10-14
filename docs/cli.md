@@ -503,6 +503,13 @@ moves the focused Space to the next layout in its cycle list;
 [cycle_mode](lua-reference.md#cycle_mode).
 :::
 
+:::unreleased
+`kiwihub.show` takes `windows`, `shortcuts` or `layouts` and opens
+KiwiHub on that side, so a launcher reaches it without a shortcut;
+any other side is refused, naming the three. See
+[kiwihub.show](lua-reference.md#kiwihubshow).
+:::
+
 `gather` (Launch) takes an app bundle id and moves every window of
 that app into the Space you are on, from other macOS Desktops too
 where the Desktop bridge is present; it never launches the app, and

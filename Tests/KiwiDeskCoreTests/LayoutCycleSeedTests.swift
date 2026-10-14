@@ -47,7 +47,7 @@ struct LayoutCycleSeedTests {
     func seedsLayoutPicker() {
         let row = DefaultKeybindings.layoutPickerRow()
         #expect(row.combo == "control+option+l")
-        #expect(row.lua == "KiwiDesk.show_layout_picker()")
+        #expect(row.lua == "kiwihub.show(\"layouts\")")
         #expect(row.kind == .navigation)
         #expect(row.label == "Show layout picker")
         #expect(seeded.filter { $0 == row }.count == 1)
@@ -61,7 +61,7 @@ struct LayoutCycleSeedTests {
         #expect(
             !DefaultKeybindings.appChromeRows().contains {
                 $0.lua.hasPrefix("KiwiDesk.cycle_mode")
-                    || $0.lua.hasPrefix("KiwiDesk.show_layout_picker")
+                    || $0.lua == KiwiHubSide.layouts.lua
             }
         )
     }

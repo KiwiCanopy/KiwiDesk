@@ -133,6 +133,11 @@ struct ShortcutsSection: View {
     }
 
     @ViewBuilder private var actionGroups: some View {
+        KiwiHubGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         FocusGroup(
             model: model,
             bindings: bindingsBinding,
