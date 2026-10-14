@@ -3,29 +3,41 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// KiwiVision's appearance while on (#2103 ruling 7): the switch
-/// happens only where the system differs, the way back only where
-/// KiwiVision made the switch and nobody changed it since, and an
-/// unpaid switch is paid by the next stop or start.
+/// KiwiVision's appearance while on (#2103 ruling 7): every move is
+/// one transition of one ledger, judged against the appearance the
+/// debt FOUND — the switch happens only where the system differs,
+/// the way back only for a switch nobody changed since, a reload
+/// moves nothing, and an unpaid switch waits for the next start.
 @Suite("KiwiVision appearance while on")
 @MainActor
 struct KiwiVisionAppearanceTests {
-    /// A system appearance the test drives, recording every ask.
+    /// A system appearance the test drives. `lands` false keeps an
+    /// ask queued until `land()`, as the System Events fallback does.
     @MainActor
     final class FakeSystem {
         var state = SystemAppearance.State(dark: false, auto: false)
         var asked: [Bool] = []
+        var queued: [Bool] = []
+        var lands = true
         var rearms = 0
         var debt: VisionAppearanceDebt?
         var refusesDebt = false
+
+        /// Lands every queued ask, in order.
+        func land() {
+            for dark in queued { state = .init(dark: dark, auto: false) }
+            queued.removeAll()
+        }
 
         var machine: VisionAppearanceSwitch {
             VisionAppearanceSwitch(
                 read: { self.state },
                 setDark: {
                     self.asked.append($0)
+                    self.queued.append($0)
                     // A manual switch turns automatic switching off.
-                    self.state = .init(dark: $0, auto: false)
+                    if self.lands { self.land() }
+                    return self.lands
                 },
                 rearmAuto: {
                     self.rearms += 1
@@ -41,7 +53,12 @@ struct KiwiVisionAppearanceTests {
         }
     }
 
-    private func makeCore(_ system: FakeSystem) -> KiwiCore {
+    private static let start = Date(timeIntervalSince1970: 1_000_000)
+
+    private func makeCore(
+        _ system: FakeSystem,
+        clock: @escaping () -> Date = { start }
+    ) -> KiwiCore {
         let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
@@ -51,6 +68,7 @@ struct KiwiVisionAppearanceTests {
         )
         core.eventLoop.ownKeyWindow = { nil }
         core.vision.appearanceSwitch = system.machine
+        core.wallClock = clock
         return core
     }
 
@@ -77,13 +95,8 @@ struct KiwiVisionAppearanceTests {
         #expect(system.asked.isEmpty, "off: the ask waits for on")
         core.setKiwiVision(true)
         #expect(system.asked == [true])
-        #expect(
-            system.debt
-                == VisionAppearanceDebt(
-                    found: .init(dark: false, auto: false),
-                    setDark: true
-                )
-        )
+        #expect(system.debt?.found == .init(dark: false, auto: false))
+        #expect(system.debt?.setDark == true)
         core.setKiwiVision(false)
         #expect(system.asked == [true, false])
         #expect(system.debt == nil)
@@ -116,16 +129,66 @@ struct KiwiVisionAppearanceTests {
         #expect(system.debt == nil)
     }
 
-    @Test("a manual change while on is kept")
+    @Test("a manual change while on is kept, once ours had landed")
     func manualChangeIsKept() {
+        var now = Self.start
         let system = FakeSystem()
-        let core = makeCore(system)
+        let core = makeCore(system) { now }
         _ = ask(core, "dark")
         core.setKiwiVision(true)
+        now += VisionAppearanceDebt.settleBound
         system.state.dark = false  // the user switched back by hand
         core.setKiwiVision(false)
         #expect(system.asked == [true])
         #expect(system.debt == nil)
+    }
+
+    @Test("a reload repeating the ask moves nothing")
+    func repeatedAskMovesNothing() {
+        let system = FakeSystem()
+        let core = makeCore(system)
+        _ = ask(core, "dark")
+        core.setKiwiVision(true)
+        _ = ask(core, "dark")
+        core.retargetVisionAppearance(.dark)
+        #expect(system.asked == [true])
+    }
+
+    @Test("a new ask is judged against the appearance found")
+    func newAskJudgesTheFound() {
+        let system = FakeSystem()
+        system.lands = false  // nothing lands during the test
+        let core = makeCore(system)
+        _ = ask(core, "dark")
+        core.setKiwiVision(true)
+        // Light found, dark asked: opposite of light is dark, already
+        // asked — a stale read must not flip it or record dark found.
+        _ = ask(core, "opposite")
+        #expect(system.asked == [true])
+        #expect(system.debt?.found.dark == false)
+        _ = ask(core, "light")
+        #expect(system.asked == [true, false])
+        system.land()
+        core.setKiwiVision(false)
+        #expect(system.debt == nil)
+        #expect(system.state.dark == false)
+    }
+
+    @Test("a fast on and off keeps the debt until the way back lands")
+    func inFlightSwitchIsNotTheUsers() {
+        let system = FakeSystem()
+        system.lands = false
+        let core = makeCore(system)
+        _ = ask(core, "dark")
+        core.setKiwiVision(true)
+        core.setKiwiVision(false)
+        #expect(system.asked == [true, false], "the way back is asked")
+        #expect(system.debt?.setDark == false, "and still owed")
+        system.land()
+        core.retargetVisionAppearance(nil)  // the next start
+        #expect(system.debt == nil)
+        #expect(system.asked == [true, false])
+        #expect(system.state.dark == false)
     }
 
     @Test("automatic switching comes back where it was on")
@@ -152,31 +215,21 @@ struct KiwiVisionAppearanceTests {
         #expect(system.asked.isEmpty)
     }
 
-    @Test("a new ask while on pays the old switch first")
-    func askWhileOn() {
-        let system = FakeSystem()
-        let core = makeCore(system)
-        _ = ask(core, "dark")
-        core.setKiwiVision(true)
-        _ = ask(core, "light")
-        // Paid back to light, which `light` then finds shown.
-        #expect(system.asked == [true, false])
-        #expect(system.debt == nil)
-        _ = ask(core, "dark")
-        #expect(system.asked == [true, false, true])
-        #expect(system.debt?.setDark == true)
-    }
-
-    @Test("a debt left by a quit or crash is paid by the next core")
+    @Test("a crash's debt is paid, and a new switch keeps its found")
     func leftoverDebtIsPaid() {
         let system = FakeSystem()
         system.state.dark = true
         system.debt = VisionAppearanceDebt(
             found: .init(dark: false, auto: false),
-            setDark: true
+            setDark: true,
+            askedAt: Self.start
         )
         let core = makeCore(system)
-        core.payVisionAppearanceDebt()
+        _ = ask(core, "dark")
+        core.setKiwiVision(true)  // e.g. init.lua, ahead of the pay
+        #expect(system.asked.isEmpty)
+        #expect(system.debt?.found.dark == false, "the crash's found")
+        core.retargetVisionAppearance(nil)
         #expect(system.asked == [false])
         #expect(system.debt == nil)
     }

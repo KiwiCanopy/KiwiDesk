@@ -45,24 +45,33 @@ enum SystemAppearance {
         return State(dark: style == "Dark", auto: auto)
     }
 
-    /// Asks macOS for `dark`. Performed is not applied: a reader
-    /// judges by the next `read()`. The fallback runs off the main
-    /// actor — `osascript` waits on an Automation prompt.
+    /// Asks macOS for `dark`; true when SkyLight took it in this
+    /// call (applied within milliseconds, #2103 P5), false when the
+    /// fallback was queued. The fallback runs off the main actor —
+    /// `osascript` waits on an Automation prompt — on one serial
+    /// queue, so two asks land in the order they were made.
     @MainActor
+    @discardableResult
     static func setDark(
         _ dark: Bool,
         onLog: @escaping @MainActor (String) -> Void
-    ) {
+    ) -> Bool {
         if let set = setLegacySymbol.function {
             set(dark)
-            return
+            return true
         }
-        Task.detached(priority: .userInitiated) {
+        fallbackQueue.async {
             if let failure = runSystemEvents(dark: dark) {
-                await MainActor.run { onLog(failure) }
+                Task { @MainActor in onLog(failure) }
             }
         }
+        return false
     }
+
+    private static let fallbackQueue = DispatchQueue(
+        label: "com.kiwicanopy.kiwidesk.appearance-fallback",
+        qos: .userInitiated
+    )
 
     /// Turns macOS's automatic switching back on, which a manual
     /// switch turns off. Unverified on a device (#2103).

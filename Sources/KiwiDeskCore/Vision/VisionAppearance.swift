@@ -18,11 +18,26 @@ public enum VisionAppearance: String, APIChoiceType, Sendable {
 }
 
 /// A switch KiwiVision made and still owes undoing: the state it
-/// found and the one it asked for. Stored before the switch, so a
-/// quit or crash leaves it for the next start.
+/// found, the one it last asked for, and when. Stored before the
+/// switch, so a quit or crash leaves it for the next start. A
+/// stored format in the app's defaults: a renamed field orphans a
+/// live debt, so field names are frozen like a config key.
 struct VisionAppearanceDebt: Codable, Equatable, Sendable {
     var found: SystemAppearance.State
     var setDark: Bool
+    var askedAt: Date
+
+    /// How long an ask may take to land before a read that
+    /// disagrees counts as the user's own change — past the
+    /// fallback's `osascript`, not past an Automation prompt left
+    /// unanswered, which then reads as the user's.
+    static let settleBound: TimeInterval = 10
+
+    /// Whether `read` disagreeing with the ask is the user's doing.
+    func overridden(by read: SystemAppearance.State, at now: Date) -> Bool {
+        read.dark != setDark
+            && now.timeIntervalSince(askedAt) >= Self.settleBound
+    }
 }
 
 /// The machine half of the appearance switch — the system
@@ -34,7 +49,8 @@ struct VisionAppearanceDebt: Codable, Equatable, Sendable {
 @MainActor
 struct VisionAppearanceSwitch {
     var read: @MainActor () -> SystemAppearance.State
-    var setDark: @MainActor (Bool) -> Void
+    /// Asks for `dark`; true when the switch was taken in the call.
+    var setDark: @MainActor (Bool) -> Bool
     var rearmAuto: @MainActor () -> Void
     var readDebt: @MainActor () -> VisionAppearanceDebt?
     /// Stores the debt, or clears it on nil; false when it failed.
@@ -78,7 +94,7 @@ struct VisionAppearanceSwitch {
         let store = InertDebtStore()
         return VisionAppearanceSwitch(
             read: { SystemAppearance.State(dark: false, auto: false) },
-            setDark: { _ in },
+            setDark: { _ in true },
             rearmAuto: {},
             readDebt: { store.debt },
             writeDebt: {

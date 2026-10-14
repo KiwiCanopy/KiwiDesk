@@ -17,7 +17,8 @@ struct VisionAppearanceSeamTests {
     /// The OS calls, and the one file that may make them.
     private static let osCalls = [
         "SystemAppearance.setDark", "SystemAppearance.rearmAuto",
-        "SystemAppearance.read",
+        "SystemAppearance.read", "SystemAppearance.setLegacySymbol",
+        "SystemAppearance.getLegacySymbol",
     ]
     private static let seamHome = "Vision/VisionAppearance.swift"
 
@@ -45,7 +46,7 @@ struct VisionAppearanceSeamTests {
             let text = Array(try SourceScan.strippedSource(at: file))
             guard
                 Self.osCalls.contains(where: {
-                    !SourceScan.callSites(in: text, for: $0).isEmpty
+                    SourceScan.mentions($0, in: text)
                 })
             else { continue }
             let path = file.standardizedFileURL.path
@@ -55,24 +56,25 @@ struct VisionAppearanceSeamTests {
         #expect(callers == [Self.seamHome], "\(callers)")
     }
 
-    @Test("the debt is paid on every way out, and the seam is live")
-    func paymentIsWired() throws {
+    @Test("every way in and out takes the one transition")
+    func transitionIsWired() throws {
         let sites: [(file: String, after: String, needle: String)] = [
             (
                 "App/KiwiCore+Vision.swift", "func setKiwiVision(",
-                "payVisionAppearanceDebt()"
+                "retargetVisionAppearance("
             ),
             (
-                "App/KiwiCore+Vision.swift", "func setKiwiVision(",
-                "applyVisionAppearance()"
+                "App/KiwiCore+VisionAppearance.swift",
+                "func setVisionAppearance(",
+                "retargetVisionAppearance("
             ),
             (
                 "App/KiwiCore+Lifecycle.swift", "public func stop(",
-                "payVisionAppearanceDebt()"
+                "retargetVisionAppearance(nil)"
             ),
             (
                 "App/KiwiCore+Boot.swift", "public func start(",
-                "payVisionAppearanceDebt()"
+                "retargetVisionAppearance(nil)"
             ),
             (
                 "App/KiwiCore+Bootstrap.swift",
@@ -93,5 +95,22 @@ struct VisionAppearanceSeamTests {
                 "\(site.after) lost \(site.needle)"
             )
         }
+    }
+
+    /// A crash's debt is paid before a config can turn KiwiVision
+    /// on again, or the new switch is judged against the crash's.
+    @Test("start pays a leftover switch before it loads the config")
+    func startPaysBeforeConfig() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent("App/KiwiCore+Boot.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(after: "public func start(", in: source)
+        )
+        let pay = try #require(
+            body.range(of: "retargetVisionAppearance(nil)")
+        )
+        let load = try #require(body.range(of: "loadConfig()"))
+        #expect(pay.lowerBound < load.lowerBound)
     }
 }

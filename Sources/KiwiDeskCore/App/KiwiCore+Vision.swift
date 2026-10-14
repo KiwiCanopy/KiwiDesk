@@ -53,11 +53,7 @@ extension KiwiCore {
     func setKiwiVision(_ on: Bool) {
         guard on != vision.isOn else { return }
         vision.isOn = on
-        if on {
-            applyVisionAppearance()
-        } else {
-            payVisionAppearanceDebt()
-        }
+        retargetVisionAppearance(on ? vision.appearanceWhileOn : nil)
         updateVision(reassertOrder: true)
         vision.onChange(on)
     }
