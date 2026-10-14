@@ -102,6 +102,16 @@ struct HyperKeyRemapTests {
             )
             """
         #expect(HyperKeyRemap.pairs(inHidutilOutput: listing) == [caps])
+        // macOS 27's own order alone, with no Src-first twin.
+        let dstFirst = """
+            1   UserKeyMapping   (
+                    {
+                    HIDKeyboardModifierMappingDst = 30064771181;
+                    HIDKeyboardModifierMappingSrc = 30064771129;
+                }
+            )
+            """
+        #expect(HyperKeyRemap.pairs(inHidutilOutput: dstFirst) == [caps])
         #expect(
             HyperKeyRemap.pairs(
                 inHidutilOutput: "1   UserKeyMapping   (null)"

@@ -68,4 +68,52 @@ struct HyperRemapSeamTests {
             )
         }
     }
+
+    /// The remap is applied at `start()` and cleared at `stop()`;
+    /// the behaviour suites call the doors directly, so the
+    /// lifecycle wiring is read here.
+    @Test("start applies and stop retires the remap")
+    func lifecycleIsWired() throws {
+        let boot = try Self.source(
+            "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
+        )
+        #expect(
+            try Self.body(
+                of: boot,
+                from: "public func start()",
+                to: "driveBootScan()"
+            ).contains("applyHyperKey()")
+        )
+        let life = try Self.source(
+            "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
+        )
+        #expect(
+            try Self.body(
+                of: life,
+                from: "public func stop()",
+                to: "gatherWindows()"
+            ).contains("retireHyperKey()")
+        )
+    }
+
+    /// The text between two needles, the second after the first.
+    private static func body(
+        of text: String,
+        from first: String,
+        to last: String
+    ) throws -> Substring {
+        let open = try #require(text.range(of: first))
+        let tail = open.upperBound..<text.endIndex
+        let close = try #require(text.range(of: last, range: tail))
+        return text[open.upperBound..<close.lowerBound]
+    }
+
+    @Test("Carbon registers the mask without the hyper bit")
+    func carbonTakesTheMask() throws {
+        let carbon = try Self.source(
+            "Sources/KiwiDeskCore/OS/CarbonHotkey.swift"
+        )
+        #expect(Self.count("modifiers.carbonMask,", in: carbon) == 1)
+        #expect(Self.count("modifiers.rawValue,", in: carbon) == 0)
+    }
 }

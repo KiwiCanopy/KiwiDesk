@@ -11,8 +11,11 @@ private final class LiveRegistrar: HotkeyRegistrar,
     HotkeyReleaseReporting
 {
     var onRelease: @MainActor (UInt32) -> Void = { _ in }
-    var live: [UInt32: (code: UInt32, mask: UInt32, fire: () -> Void)] =
-        [:]
+    var live:
+        [UInt32: (
+            code: UInt32, mask: UInt32, raw: HotkeyModifiers,
+            fire: () -> Void
+        )] = [:]
     private var nextID: UInt32 = 1
 
     func register(
@@ -21,7 +24,7 @@ private final class LiveRegistrar: HotkeyRegistrar,
         handler: @escaping @MainActor () -> Void
     ) -> UInt32? {
         defer { nextID += 1 }
-        live[nextID] = (keyCode, modifiers.carbonMask, handler)
+        live[nextID] = (keyCode, modifiers.carbonMask, modifiers, handler)
         return nextID
     }
 
@@ -84,6 +87,8 @@ struct HyperLayerTests {
         #expect(!registrar.has(h))
         registrar.press(f18)
         #expect(registrar.has(h))  // bare: no modifier mask
+        // The registrar is never handed the hyper bit.
+        #expect(!registrar.live.values.contains { $0.raw.contains(.hyper) })
         registrar.release(f18)
         #expect(!registrar.has(h))
         #expect(registrar.has(f18))
@@ -115,10 +120,10 @@ struct HyperLayerTests {
         #expect(
             registrar.has(f18, mask: UInt32(cmdKey | controlKey))
         )
-        #expect(
-            registrar.live.values.filter { $0.code == f18 }.count
-                == 16
+        let masks = Set(
+            registrar.live.values.filter { $0.code == f18 }.map(\.mask)
         )
+        #expect(masks.count == 16)  // every set of ⌃⌥⇧⌘
     }
 
     @Test("a layer change mid-hold keeps the trigger and the hold")
