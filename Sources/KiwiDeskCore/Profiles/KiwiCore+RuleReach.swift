@@ -210,9 +210,12 @@ extension KiwiCore {
     /// `keysLeftTo` names the stored profile whose shortcut override
     /// its own Save diffs from the page (`overwriteProfile`), which
     /// carries its layer structure too; its keys are skipped here.
+    /// A keep passes `refreshingLive: false`: it writes the files
+    /// and moves nothing live (#1685 ▸ Ruling 4).
     public func saveRuleReach(
         _ snapshot: RuleReachSnapshot,
-        keysLeftTo page: String? = nil
+        keysLeftTo page: String? = nil,
+        refreshingLive: Bool = true
     ) throws {
         guard snapshot.isEdited else { return }
         let app = snapshot.appRules
@@ -322,6 +325,7 @@ extension KiwiCore {
         for profile in pending { try profiles.write(profile) }
         if let sidecar { try guiConfigStore.save(sidecar) }
         refreshConfigIssues()
+        guard refreshingLive else { return }
         refreshStructuredOverrides(
             keys: keysMoved
                 || snapshot.keyLayers.touched.values.contains { !$0.isEmpty }

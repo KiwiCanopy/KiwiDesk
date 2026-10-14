@@ -321,6 +321,7 @@ public final class KiwiCore {
     public var onShortcutsAdded: ShortcutsAdded = { _ in }
     /// A verb saved or deleted a look (#1685): Settings re-reads.
     public var onLookLibraryChanged: @MainActor () -> Void = {}
+    public var onRulesKept: @MainActor () -> Void = {}
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
     /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.

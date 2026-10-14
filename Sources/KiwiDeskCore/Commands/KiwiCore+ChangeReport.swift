@@ -46,7 +46,32 @@ extension KiwiCore {
             KeepRoot.settings: tiler.settings.keepJSON ?? .null,
             KeepRoot.spaceModes: .object(modes),
             KeepRoot.appWide: appWide.groupsJSON,
+            KeepRoot.appRules: Self.appRuleJSON(state.appRules),
+            KeepRoot.floatRules: Self.floatRuleJSON(
+                eventLoop.floatRules.rawRules
+            ),
+            KeepRoot.floatAutomatically: .bool(
+                eventLoop.floatRules.guess.enabled
+            ),
         ])
+    }
+
+    /// The app rules as the keep document carries them.
+    static func appRuleJSON(_ rules: [String: SpaceID]) -> JSONValue {
+        .object(rules.mapValues { .string($0.raw) })
+    }
+
+    /// The float rules as an object, each rule a leaf of its own —
+    /// an array would diff as one leaf.
+    static func floatRuleJSON(_ rules: [String]) -> JSONValue {
+        .object(
+            Dictionary(
+                rules.map {
+                    (FloatRules.normalizedRule($0), JSONValue.bool(true))
+                },
+                uniquingKeysWith: { first, _ in first }
+            )
+        )
     }
 
     /// A Space made or dropped is no change of its layout: a mode
@@ -79,11 +104,32 @@ extension KiwiCore {
                 let mode = stored.spaceModes[id] ?? .bsp
                 modes[id.raw] = .string(mode.rawValue)
             }
-            storedDoc = .object([
+            var doc: [String: JSONValue] = [
                 KeepRoot.settings: resolvedSettings(of: stored).keepJSON
                     ?? .null,
                 KeepRoot.spaceModes: .object(modes),
-            ])
+            ]
+            // The rules as the files resolve them: the shared base,
+            // then the profile's own (#1685 ▸ Ruling 6c).
+            if let base = guiConfigStore.load() {
+                doc[KeepRoot.appRules] = Self.appRuleJSON(
+                    ConfigResolver.resolvedAppRules(
+                        base: base.appRules,
+                        profile: stored.appRules
+                    )
+                )
+                let floats = FloatRules(base.floatRules).rawRules
+                doc[KeepRoot.floatRules] = Self.floatRuleJSON(
+                    stored.floatRules?.resolved(
+                        onto: floats,
+                        normalizing: FloatRules.normalizedRule
+                    ) ?? floats
+                )
+                doc[KeepRoot.floatAutomatically] = .bool(
+                    stored.floatAutomatically ?? base.floatAutomatically
+                )
+            }
+            storedDoc = .object(doc)
         }
         return KeepJudge(
             guiManaged: managed,
@@ -142,6 +188,9 @@ struct KeepJudge {
         case KeepRoot.appWide?: known = !rest.isEmpty
         case KeepRoot.settings?: known = !rest.isEmpty
         case KeepRoot.spaceModes?: known = rest.count == 1
+        case KeepRoot.appRules?, KeepRoot.floatRules?:
+            known = rest.count == 1
+        case KeepRoot.floatAutomatically?: known = rest.isEmpty
         default: known = false
         }
         guard known else { return leaf(.none, .unknown) }
@@ -157,6 +206,22 @@ struct KeepJudge {
         if path.first == KeepRoot.spaceModes {
             return declared.contains(SpaceID(rest[0]))
                 ? leaf(.profile) : leaf(.none, .temporarySpace)
+        }
+        if path.first == KeepRoot.appRules {
+            if let space = liveValue?.stringValue,
+                !declared.contains(SpaceID(space))
+            {
+                return leaf(.none, .temporarySpace)
+            }
+            return ownsAppRule(rest[0]) ? leaf(.profile) : leaf(.sharedRules)
+        }
+        if path.first == KeepRoot.floatAutomatically {
+            return profile?.floatAutomatically != nil
+                ? leaf(.profile) : leaf(.sharedRules)
+        }
+        if path.first == KeepRoot.floatRules {
+            return ownsFloatRule(rest[0])
+                ? leaf(.profile) : leaf(.sharedRules)
         }
         if namesTemporarySpace(rest, declared: declared) {
             return leaf(.none, .temporarySpace)
@@ -191,6 +256,24 @@ struct KeepJudge {
 }
 
 extension KeepJudge {
+    /// Whether the live profile carries its own rule for `app` — a
+    /// value or a tombstone — so a keep writes there; otherwise the
+    /// rule is the shared one (#1685 ▸ Ruling 6c).
+    func ownsAppRule(_ app: String) -> Bool {
+        profile?.appRules?.normalizedRules.keys.contains(app) ?? false
+    }
+
+    /// The same for a float rule, judged per app as the App Rules
+    /// page groups them.
+    func ownsFloatRule(_ rule: String) -> Bool {
+        let app = RuleReachTable<[String]>.app(of: rule)
+        let keys = profile?.floatRules?.rules.keys.map { $0 } ?? []
+        return keys.contains {
+            RuleReachTable<[String]>.app(of: FloatRules.normalizedRule($0))
+                == app
+        }
+    }
+
     /// Whether a settings leaf belongs to a look — under one of
     /// the look's styling or colour paths.
     static func isLookLeaf(_ path: [String]) -> Bool {
@@ -206,4 +289,7 @@ enum KeepRoot {
     static let settings = "settings"
     static let spaceModes = "space_modes"
     static let appWide = "app_wide"
+    static let appRules = "app_rules"
+    static let floatRules = "float_rules"
+    static let floatAutomatically = "float_automatically"
 }

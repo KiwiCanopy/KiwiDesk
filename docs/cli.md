@@ -371,6 +371,15 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 without writing it.
 :::
 
+:::unreleased
+`app_rule.list`, `app_rule.set_space <app> <space>`,
+`app_rule.remove_space <app>`, `app_rule.set_float <app> [title]`
+and `app_rule.remove_float <app> [title]` change the app rules live
+([App rule verbs](lua-reference.md#app-rule-verbs)). `keep_settings`
+keeps a new rule in the shared rules every profile without its own
+follows, and names those profiles under `rule_followers`.
+:::
+
 | Category | Command | Arguments |
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |

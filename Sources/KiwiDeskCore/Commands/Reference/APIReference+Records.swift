@@ -39,6 +39,7 @@ extension APIReference {
         "kiwivision": kiwivisionRecords,
         "kiwihub": kiwihubRecords,
         "look": lookRecords,
+        "app_rule": appRuleRecords,
     ]
 }
 

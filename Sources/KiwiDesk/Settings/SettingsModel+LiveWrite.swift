@@ -71,6 +71,48 @@ extension SettingsModel {
         recomputeDirty()
     }
 
+    /// An AI app's keep wrote app rules (#1685 ▸ Ruling 6c) —
+    /// the shared base or a profile's own — so a draft of ANY
+    /// target re-reads the stored tables its Save diffs against. A
+    /// clean draft re-reads whole; a dirty live draft takes each
+    /// rule the keep changed on both sides of its diff, the newer
+    /// act winning, as `adoptLiveWrite` does.
+    func adoptRuleKeep() {
+        guard isDirty else {
+            reload()
+            return
+        }
+        suppressDirty = true
+        ruleReachStored = core.ruleReachSnapshot()
+        if target == .live, let stored = core.storedRules() {
+            let old = cleanConfig
+            Self.takeKeptRules(stored, over: old, into: &config)
+            Self.takeKeptRules(stored, over: old, into: &cleanConfig)
+        }
+        suppressDirty = false
+        recomputeDirty()
+    }
+
+    /// Lays the rules the files hold now over `config` wherever they
+    /// differ from `old`, the draft's last read of them.
+    static func takeKeptRules(
+        _ stored: (apps: [String: SpaceID], floats: [String]),
+        over old: GuiConfig,
+        into config: inout GuiConfig
+    ) {
+        for app in Set(old.appRules.keys).union(stored.apps.keys)
+        where old.appRules[app] != stored.apps[app] {
+            config.appRules[app] = stored.apps[app]
+        }
+        let was = Set(old.floatRules)
+        let now = Set(stored.floats)
+        var floats = config.floatRules.filter {
+            !was.subtracting(now).contains($0)
+        }
+        floats += now.subtracting(was).filter { !floats.contains($0) }.sorted()
+        config.floatRules = floats
+    }
+
     /// Appends `rows` to the default layer, skipping a row whose
     /// action that layer already runs.
     private static func appendToDefault(

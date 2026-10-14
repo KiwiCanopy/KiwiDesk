@@ -26,14 +26,20 @@ extension KiwiCore {
         let unique = Set(paths).sorted { $0.lexicographicallyPrecedes($1) }
         let judge = keepJudge()
         let verdicts = unique.compactMap(judge.verdict(of:))
-        let wanted = verdicts.filter { $0.notKeepable == nil && !$0.stored }
+        let pending = verdicts.filter { $0.notKeepable == nil && !$0.stored }
+        let wanted = pending.filter { !Self.isRuleLeaf($0) }
+        let rules = pending.filter(Self.isRuleLeaf)
         var refused = verdicts.filter { $0.notKeepable != nil }
         let (leaves, conflicting) = keptLeaves(wanted, judge)
         refused += conflicting
         let skipped = Set(conflicting.map(\.id))
-        let attempted = wanted.filter { !skipped.contains($0.id) }
+        let attempted =
+            wanted.filter { !skipped.contains($0.id) } + rules
         if !leaves.isEmpty {
             writeThroughLiveProfile(.kept(leaves))
+        }
+        if !rules.isEmpty {
+            keepRules(rules, live: judge.live)
         }
         // Judged again after the write: kept is what landed.
         let after = keepJudge()
@@ -124,6 +130,13 @@ extension KiwiCore {
         if kept.contains(where: { $0.owner == .sharedLook }) {
             answer["followers"] = .array(
                 followingProfiles().map { .string($0.name) }
+            )
+        }
+        // A shared rule reaches every profile without its own.
+        let shared = kept.filter { $0.owner == .sharedRules }
+        if !shared.isEmpty {
+            answer["rule_followers"] = .array(
+                ruleFollowers(of: shared).map(JSONValue.string)
             )
         }
         return .object(answer)
