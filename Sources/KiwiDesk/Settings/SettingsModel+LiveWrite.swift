@@ -118,13 +118,14 @@ extension SettingsModel {
         var floats = config.floatRules.filter {
             !gone.contains(FloatRules.normalizedRule($0))
         }
-        floats += now.subtracting(was).subtracting(floats).sorted()
+        floats += now.subtracting(was)
+            .subtracting(floats.map(FloatRules.normalizedRule)).sorted()
         config.floatRules = floats
         let auto =
             stored.floatAutomatically.resolved(
                 RuleReachTable<Bool>.floatAutomaticallyKey,
                 for: page
-            ) ?? FloatGuess.enabledByDefault
+            ) ?? stored.floatAutomatically.floatAutomaticallyBase
         if auto != old.floatAutomatically {
             config.floatAutomatically = auto
         }

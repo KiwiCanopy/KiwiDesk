@@ -1,8 +1,8 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// An AI app's rule keep reaches an open Settings draft (#1685 ▸
 /// Ruling 6c): a dirty live draft takes each rule the keep changed
@@ -52,6 +52,40 @@ struct RuleKeepDraftTests {
         )
         #expect(clean.appRules == base.appRules)
         #expect(Set(clean.floatRules) == Set(base.floatRules))
+    }
+
+    /// A dirty draft of a STORED profile's page reads the shared
+    /// base too, so a shared keep it did not take would be encoded
+    /// as the draft removing the rule — and its Save would delete
+    /// it from the base and every profile.
+    @Test("a dirty stored-profile draft keeps a shared keep")
+    @MainActor func storedDraftKeepsTheKeep() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        let blank = { (name: String) in
+            Profile(
+                name: name,
+                monitorSets: [MonitorSet(monitors: [])],
+                spaces: [SpaceID("1")],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        }
+        try core.profiles.save(blank("Work"))
+        try core.profiles.write(blank("Home"))
+        let model = makeTestModel(core: core)
+        model.reload()
+        model.target = .storedProfile("Home")
+        model.reload()
+        model.config.floatRules.append("com.dirty")
+        #expect(model.isDirty)
+        var snapshot = try #require(core.ruleReachSnapshot())
+        snapshot.appRules.keep("com.x", value: "1", editing: "Work")
+        try core.saveRuleReach(snapshot, origin: .outside)
+        model.adoptRuleKeep()
+        #expect(model.config.appRules["com.x"] == "1")
+        #expect(model.encodedReach?.appRules.base["com.x"] == "1")
+        #expect(model.isDirty)
     }
 
     /// The hook, its route to the model, and the keep firing it —

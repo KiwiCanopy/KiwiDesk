@@ -23,14 +23,26 @@ enum MCPWording {
             pending.contains { $0.owner == .sharedLook }
             ? ", look changes into the shared look its profiles wear"
             : ""
-        let rules =
+        var rules =
             pending.contains { $0.owner == .sharedRules }
             ? ", app rule changes into the shared rules every profile "
                 + "without its own rule for that app follows"
             : ""
+        if pending.contains(where: { $0.owner == .profile && isRule($0) }) {
+            rules +=
+                ", and a rule the profile holds into every profile "
+                + "holding the same rule"
+        }
         return "Not kept yet: \(pending.count) setting change(s), "
             + "live until a config reload, profile load or restart. "
             + "keep writes them into \(place)\(look)\(rules)."
+    }
+
+    /// Whether a leaf is an app rule or the automatic-float switch.
+    private static func isRule(_ leaf: TouchedLeaf) -> Bool {
+        ["/app_rules/", "/float_rules/", "/float_automatically"].contains {
+            leaf.id.hasPrefix($0)
+        }
     }
 
     /// Why one leaf cannot be kept.

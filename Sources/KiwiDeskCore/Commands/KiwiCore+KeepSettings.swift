@@ -25,7 +25,9 @@ extension KiwiCore {
             return .fail("expected leaf ids from a change report")
         }
         let unique = Set(paths).sorted { $0.lexicographicallyPrecedes($1) }
-        let judge = keepJudge()
+        let judge = keepJudge(
+            judgingRules: paths.contains(where: Self.isRulePath)
+        )
         let verdicts = unique.compactMap(judge.verdict(of:))
         let pending = verdicts.filter { $0.notKeepable == nil && !$0.stored }
         let wanted = pending.filter { !Self.isRuleLeaf($0) }
@@ -41,7 +43,9 @@ extension KiwiCore {
         }
         let reached = rules.isEmpty ? [] : keepRules(rules, live: judge.live)
         // Judged again after the write: kept is what landed.
-        let after = keepJudge()
+        let after = keepJudge(
+            judgingRules: paths.contains(where: Self.isRulePath)
+        )
         var kept = verdicts.filter { $0.notKeepable == nil && $0.stored }
         for leaf in attempted {
             let landed = KeepPointer.path(leaf.id).map(after.holds) ?? false

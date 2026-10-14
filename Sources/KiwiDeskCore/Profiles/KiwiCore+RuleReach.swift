@@ -131,11 +131,17 @@ extension KiwiCore {
     /// The shared rules and every profile's overrides, or nil
     /// where `gui.json` does not own the base (a hand-written
     /// `init.lua` authors it, so no shared write is possible).
-    public func ruleReachSnapshot() -> RuleReachSnapshot? {
+    /// `reading` is a profile the caller already read, taken in place
+    /// of a second read of its file.
+    public func ruleReachSnapshot(
+        reading live: Profile? = nil
+    ) -> RuleReachSnapshot? {
         guard isGuiManaged, let sidecar = guiConfigStore.load() else {
             return nil
         }
-        let stored = profiles.allProfiles()
+        let stored = profiles.allProfiles().map { profile in
+            live.flatMap { $0.name == profile.name ? $0 : nil } ?? profile
+        }
         var floats: [String: RuleListOverride] = [:]
         var tiles: [String: RuleListOverride] = [:]
         var keys: [String: KeyLayerOverride] = [:]

@@ -24,7 +24,14 @@ extension KiwiCore {
             KeepPointer.path(_:)
         )
         let judge =
-            touched.isEmpty && watched.isEmpty ? nil : keepJudge(live: after)
+            touched.isEmpty && watched.isEmpty
+            ? nil
+            : keepJudge(
+                live: after,
+                judgingRules: (touched + watched).contains(
+                    where: Self.isRulePath
+                )
+            )
         response.changes = ChangeReport(
             profile: profiles.currentName,
             touched: touched.compactMap { judge?.verdict(of: $0) },
@@ -70,7 +77,7 @@ extension KiwiCore {
             KeepRoot.appRules: appRuleJSON(rules.appRules.resolved(for: page)),
             KeepRoot.floatRules: floatRuleJSON(floats),
             KeepRoot.floatAutomatically: .bool(
-                auto ?? FloatGuess.enabledByDefault
+                auto ?? rules.floatAutomatically.floatAutomaticallyBase
             ),
         ]
     }
@@ -110,14 +117,21 @@ extension KiwiCore {
     /// leaf is to be judged — a caller holding leaves, never the
     /// switch path (profiles.md ▸ A change report reads one
     /// judgement, beside #1245).
-    func keepJudge(live: JSONValue? = nil) -> KeepJudge {
+    /// `judgingRules` reads the rule snapshot — every profile and
+    /// `gui.json` — only where a rule leaf is judged.
+    func keepJudge(
+        live: JSONValue? = nil,
+        judgingRules: Bool = true
+    ) -> KeepJudge {
         let managed = isGuiManaged
         let stored =
             managed
             ? profiles.currentName.flatMap { try? profiles.read(name: $0) }
             : nil
         var storedDoc: JSONValue?
-        let rules = stored == nil ? nil : ruleReachSnapshot()
+        let rules =
+            stored == nil || !judgingRules
+            ? nil : ruleReachSnapshot(reading: stored)
         if let stored {
             var modes: [String: JSONValue] = [:]
             for id in stored.declaredSpaces {

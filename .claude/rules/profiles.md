@@ -1354,9 +1354,10 @@ fact about its command*. The obligations:
   `partialKeepKeepsOthersLive`), and its rule write passes
   `saveRuleReach` the `.outside` origin, which re-resolves nothing
   live (`AppRuleKeepTests` ▸ `partialKeepMovesNothingLive`).
-- **Judge a leaf against the stored profile and the rule
-  snapshot, each read once per judgement and only where a caller
-  holds leaves.** A rule leaf's owner is read off the reach the
+- **Judge a leaf against the stored profile, read once per
+  judgement and only where a caller holds leaves, and against the
+  rule snapshot only where a rule leaf is judged — built over that
+  same read (`ruleReachSnapshot(reading:)`).** A rule leaf's owner is read off the reach the
   keep's write takes (`RuleReachTable.keepIsShared`), never off
   the file's raw keys, so the report and the keep agree
   (`AppRuleKeepTests` ▸ `leftOutRuleIsShared`). The stored

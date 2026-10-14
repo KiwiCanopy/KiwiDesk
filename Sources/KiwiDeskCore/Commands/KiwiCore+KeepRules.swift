@@ -9,7 +9,11 @@ import Foundation
 extension KiwiCore {
     /// Whether a leaf is a rule leaf, which this door writes.
     static func isRuleLeaf(_ leaf: TouchedLeaf) -> Bool {
-        let root = KeepPointer.path(leaf.id)?.first
+        KeepPointer.path(leaf.id).map(isRulePath) ?? false
+    }
+
+    static func isRulePath(_ path: [String]) -> Bool {
+        let root = path.first
         return root == KeepRoot.appRules || root == KeepRoot.floatRules
             || root == KeepRoot.floatAutomatically
     }
