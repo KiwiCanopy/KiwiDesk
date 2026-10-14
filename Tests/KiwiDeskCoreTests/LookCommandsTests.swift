@@ -44,10 +44,13 @@ struct LookCommandsTests {
         #expect(response.isSuccess)
         #expect(core.tiler.settings != settings)
         #expect(files(core) == before)
-        let worn = rows(core.execute("look.list"))
-            .first { $0["name"] == .string(name) }
+        let listed = rows(core.execute("look.list"))
+        let worn = listed.first { $0["name"] == .string(name) }
         #expect(worn?["worn"] == .string("applied"))
         #expect(worn?["bundled"] == .bool(true))
+        // Only the look worn is marked applied.
+        let applied = listed.filter { $0["worn"] == .string("applied") }
+        #expect(applied.count == 1)
     }
 
     @Test("a follower's wear is reported pending in the shared look")
@@ -92,6 +95,21 @@ struct LookCommandsTests {
         #expect(style["border.width"] != nil)
         #expect(fields["follows_shared_look"] == .bool(true))
         #expect(fields["followers"] == .array([.string("Work")]))
+    }
+
+    @Test("an own look is no shared look and names no followers")
+    func ownLookHasNoFollowers() throws {
+        let core = try KeepFixture.core()
+        try core.profiles.save(KeepFixture.profile("Own", look: .own))
+        KeepFixture.load("Own", core)
+        guard case .object(let fields)? = core.execute("look.current").data
+        else {
+            Issue.record("no look")
+            return
+        }
+        #expect(fields["profile"] == .string("Own"))
+        #expect(fields["follows_shared_look"] == .bool(false))
+        #expect(fields["followers"] == .array([]))
     }
 
     @Test("a saved look wears back to the same settings")
@@ -182,14 +200,11 @@ struct LookCommandsTests {
             !core.execute("look.delete", args: [.string("Mine")])
                 .isSuccess
         )
-        #expect(
-            !core.execute(
-                "look.delete",
-                args: [
-                    .string(LookCatalog.defaultName)
-                ]
-            ).isSuccess
+        let bundled = core.execute(
+            "look.delete",
+            args: [.string(LookCatalog.defaultName)]
         )
+        #expect(bundled.error == "a bundled look cannot be deleted")
         #expect(APIReference.destructive.contains("look.delete"))
     }
 
