@@ -1,11 +1,11 @@
 import Foundation
 
 /// The Lua a shortcut built by `shortcut.set` runs (#1685 ▸ Ruling
-/// 6c): one call of a command `run` could send — Lua registers it,
-/// it is not destructive, not Lua- or CLI-only and not a write of
-/// the shortcuts themselves — with literal arguments only, so a
-/// shortcut an AI app binds can never run a shell command or other
-/// Lua.
+/// 6c): one call of a command `run` could send — Lua registers it
+/// and it is not destructive — spelled as `APIReference.luaFunction`
+/// calls it, with literal arguments of the kinds its record names,
+/// so a shortcut an AI app binds can never run a shell command or
+/// other Lua. A verb that writes shortcuts is never bound.
 enum ShortcutCall {
     struct Refusal: Error {
         let reason: String
@@ -16,17 +16,10 @@ enum ShortcutCall {
         _ args: [JSONValue]
     ) -> Result<String, Refusal> {
         guard let entry = APIReference.entry(named: name),
-            entry.channel == .both, entry.command != nil
+            entry.channel == .both, entry.command != nil,
+            !APIReference.isDestructive(entry), entry.group != "shortcut"
         else {
             return .failure(Refusal(reason: "\(name) cannot be bound"))
-        }
-        guard !APIReference.isDestructive(entry),
-            entry.qualifiedName != KiwiCore.keepSettingsCommand,
-            entry.group != "shortcut"
-        else {
-            return .failure(
-                Refusal(reason: "\(entry.qualifiedName) cannot be bound")
-            )
         }
         let arguments = entry.record.arguments
         let required = arguments.filter { !$0.isOptional }.count
@@ -39,20 +32,41 @@ enum ShortcutCall {
             )
         }
         var literals: [String] = []
-        for value in args {
-            guard let literal = literal(value) else {
+        for (value, argument) in zip(args, arguments) {
+            guard fits(value, argument.kind), let literal = literal(value)
+            else {
                 return .failure(
                     Refusal(
-                        reason: "arguments must be strings, numbers or "
-                            + "booleans"
+                        reason: "\(argument.name) takes a "
+                            + argument.kind.wireName
                     )
                 )
             }
             literals.append(literal)
         }
-        return .success(
-            "\(entry.qualifiedName)(\(literals.joined(separator: ", ")))"
-        )
+        let function = APIReference.luaFunction(of: entry)
+        return .success("\(function)(\(literals.joined(separator: ", ")))")
+    }
+
+    /// Whether `value` is a literal of `kind` as the command's
+    /// decoder reads it.
+    static func fits(_ value: JSONValue, _ kind: APIArgumentKind) -> Bool {
+        switch (kind, value) {
+        case (.boolean, .bool):
+            return true
+        case (.number, .number), (.desktop, .number), (.window, .number):
+            return true
+        case (.integer, .number(let number)):
+            return number == number.rounded()
+        case (.text, .string), (.color, .string):
+            return true
+        case (.space, .string), (.space, .number):
+            return true
+        case (.choice(let choice), .string(let text)):
+            return choice.values.contains(text)
+        default:
+            return false
+        }
     }
 
     /// A Lua literal for a JSON scalar; nil for anything else.

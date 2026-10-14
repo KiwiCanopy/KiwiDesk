@@ -1352,8 +1352,10 @@ fact about its command*. The obligations:
   so a look leaf the keep did not name stays pending rather than
   taking the stored value (`KeepSettingsEdgeTests` ▸
   `partialKeepKeepsOthersLive`), and its rule write passes
-  `saveRuleReach` the `.outside` origin, which re-resolves nothing
-  live (`AppRuleKeepTests` ▸ `partialKeepMovesNothingLive`).
+  `saveRuleReach` the `.outside` origin, which leaves the rules as
+  live holds them and registers only the shortcuts — which have no
+  live layer — from the files (`AppRuleKeepTests` ▸
+  `partialKeepMovesNothingLive`).
 - **Judge a leaf against the stored profile, read once per
   judgement and only where a caller holds leaves, and against the
   rule snapshot only where a rule leaf is judged — built over that

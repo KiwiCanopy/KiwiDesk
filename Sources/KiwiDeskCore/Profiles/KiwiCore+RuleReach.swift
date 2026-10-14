@@ -216,9 +216,10 @@ extension KiwiCore {
     /// `keysLeftTo` names the stored profile whose shortcut override
     /// its own Save diffs from the page (`overwriteProfile`), which
     /// carries its layer structure too; its keys are skipped here.
-    /// A write from `.outside` Settings — an AI app's keep (#1685)
-    /// — re-resolves nothing live and tells an open draft through
-    /// `onRulesKept` instead.
+    /// A write from `.outside` Settings — an AI app's keep or a
+    /// shortcut verb (#1685) — leaves the rules as live holds them,
+    /// registers the shortcuts, which have no live layer, from the
+    /// files, and tells an open draft through `onRulesKept`.
     public func saveRuleReach(
         _ snapshot: RuleReachSnapshot,
         keysLeftTo page: String? = nil,

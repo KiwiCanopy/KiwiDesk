@@ -38,10 +38,19 @@ struct ShortcutCommandsTests {
         #expect(set.isSuccess)
         #expect(
             baseRows(core).contains {
-                $0.combo == "ctrl+alt+h" && $0.lua == "focus(\"left\")"
+                $0.combo == "control+option+h"
+                    && $0.lua == "KiwiDesk.focus(\"left\")"
             }
         )
         #expect(try core.profiles.read(name: "Work").layers == nil)
+        // The bound Lua runs: a core verb is the KiwiDesk table's.
+        let lua = try #require(
+            baseRows(core).first { $0.combo == "control+option+h" }?.lua
+        )
+        let ran = try #require(core.lua?.run(lua))
+        if case .failure(let error) = ran {
+            Issue.record("bound Lua failed: \(error)")
+        }
         // Keys load only from the files: the saved row registers now.
         let combo = try #require(KeyCombo.parse("ctrl+alt+h"))
         #expect(core.keys.bindings(for: KeyLayer.defaultName)[combo] != nil)
@@ -79,6 +88,8 @@ struct ShortcutCommandsTests {
             ("no_such_verb", []),
             ("focus", [.array([])]),
             ("focus", [.string("left"), .string("extra"), .string("x")]),
+            ("focus", [.number(42)]),
+            ("focus", [.string("sideways")]),
         ]
         for (name, args) in refused {
             let set = run(
@@ -88,7 +99,7 @@ struct ShortcutCommandsTests {
             )
             #expect(!set.isSuccess, "\(name)")
         }
-        #expect(!baseRows(core).contains { $0.combo == "ctrl+alt+k" })
+        #expect(!baseRows(core).contains { $0.combo == "control+option+k" })
     }
 
     @Test("a taken chord or a bound command is refused")
@@ -115,7 +126,8 @@ struct ShortcutCommandsTests {
         )
         #expect(moved.error?.contains("remove it first") == true)
         #expect(
-            baseRows(core).filter { $0.lua == "focus(\"left\")" }.count == 1
+            baseRows(core).filter { $0.lua == "KiwiDesk.focus(\"left\")" }
+                .count == 1
         )
     }
 
@@ -133,7 +145,7 @@ struct ShortcutCommandsTests {
         #expect(
             run(core, "shortcut.remove", [.string("ctrl+alt+h")]).isSuccess
         )
-        #expect(!baseRows(core).contains { $0.combo == "ctrl+alt+h" })
+        #expect(!baseRows(core).contains { $0.combo == "control+option+h" })
         #expect(
             !run(core, "shortcut.remove", [.string("ctrl+alt+h")]).isSuccess
         )
@@ -162,5 +174,36 @@ struct ShortcutCommandsTests {
         #expect(ShortcutCall.literal(.bool(false)) == "false")
         #expect(ShortcutCall.literal(.string("\u{07}")) == nil)
         #expect(ShortcutCall.literal(.array([])) == nil)
+    }
+
+    /// A Space verb is one action whatever its argument's spelling
+    /// (`NavigationChords.sameAction`), so a seeded row with a
+    /// string Space refuses a second chord given a number.
+    @Test("a seeded action written another way is still bound")
+    func seededActionIsBound() throws {
+        let core = try KeepFixture.core()
+        var base = try #require(core.guiConfigStore.load())
+        base.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [
+                    KeyBinding(
+                        combo: "control+option+1",
+                        lua: "KiwiDesk.focus_space(\"1\")"
+                    )
+                ]
+            )
+        ]
+        try core.guiConfigStore.save(base)
+        let set = run(
+            core,
+            "shortcut.set",
+            [
+                .string("ctrl+alt+9"), .string("focus_space"),
+                .array([.number(1)]),
+            ]
+        )
+        #expect(set.error?.contains("remove it first") == true)
+        #expect(baseRows(core).count == 1)
     }
 }

@@ -128,11 +128,11 @@ struct RuleKeepDraftTests {
         model.adoptRuleKeep()
         let row = { (config: GuiConfig) in
             config.layers.first(where: \.isDefault)?.bindings.first {
-                $0.lua == "focus(\"left\")"
+                $0.lua == "KiwiDesk.focus(\"left\")"
             }?.combo
         }
-        #expect(row(model.config) == "ctrl+alt+h")
-        #expect(row(model.cleanConfig) == "ctrl+alt+h")
+        #expect(row(model.config) == "control+option+h")
+        #expect(row(model.cleanConfig) == "control+option+h")
         model.config.floatRules.removeAll { $0 == "com.dirty" }
         #expect(!model.isDirty)
     }

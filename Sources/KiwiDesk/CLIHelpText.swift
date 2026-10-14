@@ -147,11 +147,7 @@ enum CLIHelpText {
         return lines
     }
 
-    /// A dispatcher verb and a Lua-only entry point are both
-    /// reached through the global `KiwiDesk` table; a namespace
-    /// function is its own table's.
     private static func luaCall(of entry: APIEntry) -> String {
-        entry.group == APIReference.coreGroup
-            ? "KiwiDesk.\(entry.name)" : entry.qualifiedName
+        APIReference.luaFunction(of: entry)
     }
 }

@@ -8,8 +8,8 @@ extension APIReference {
                 + "and the Lua each one runs."
         ),
         "set": APIRecord(
-            "Binds a chord to a command and its arguments, saved at "
-                + "once; never replaces a binding.",
+            "Binds a chord to a command and its arguments, given as "
+                + "a list or one by one; saved at once.",
             .text("chord"),
             .text("command"),
             .text("arguments", optional: true)

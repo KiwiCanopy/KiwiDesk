@@ -14,4 +14,13 @@ extension APIReference {
             + parts.dropFirst().joined(separator: "_")
         return dispatchable.contains(name) ? name : nil
     }
+
+    /// The Lua function an entry is called as: a dispatcher verb and
+    /// a Lua-only entry point through the global `KiwiDesk` table, a
+    /// namespace function through its own table — the one spelling
+    /// help and a bound shortcut share (#1685).
+    public static func luaFunction(of entry: APIEntry) -> String {
+        entry.group == coreGroup
+            ? "KiwiDesk.\(entry.name)" : entry.qualifiedName
+    }
 }

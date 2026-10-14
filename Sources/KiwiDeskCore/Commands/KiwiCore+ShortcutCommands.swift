@@ -73,25 +73,34 @@ extension KiwiCore {
         case .failure(let refusal): return .fail(refusal.reason)
         case .success(let call): lua = call
         }
-        guard var (snapshot, page) = shortcutPage() else {
+        guard let found = shortcutPage() else {
             return Self.noShortcutPage
         }
+        var snapshot = found.0
+        let page = found.1
         guard let layer = Self.defaultLayer(snapshot, page) else {
             return .fail("no default layer")
         }
         let key = RuleReachTable<String>.keyID(layer: layer, lua: lua)
         let table = snapshot.keyLayers
-        let bound = table.resolved(for: page)
-        if let held = bound[key] {
-            return Self.sameChord(held, chord)
-                ? .ok() : .fail("\(lua) is bound to \(held); remove it first")
+        if table.resolved(key, for: page).map({ Self.sameChord($0, chord) })
+            == true
+        {
+            return .ok()
         }
-        if let rival = bound.first(where: { other in
-            RuleReachTable<String>.keyParts(other.key).layer == layer
-                && Self.sameChord(other.value, chord)
-        }) {
-            let action = RuleReachTable<String>.keyParts(rival.key).lua
-            return .fail("\(chord) runs \(action); remove it first")
+        // Judged across the base and every profile, since a shared
+        // row reaches them all: never a second chord for an action
+        // (profiles.md ▸ one chord per layer), never a chord taken.
+        let wanted = KeyBinding(combo: chord, lua: lua)
+        for row in Self.rows(of: table, layer: layer) {
+            if NavigationChords.sameAction(row, wanted) {
+                return .fail(
+                    "\(lua) is bound to \(row.combo); remove it first"
+                )
+            }
+            if Self.sameChord(row.combo, chord) {
+                return .fail("\(chord) runs \(row.lua); remove it first")
+            }
         }
         snapshot.keyTemplates[key] = KeyBinding(combo: chord, lua: lua)
         snapshot.keyLayers.applyKey(
@@ -105,9 +114,11 @@ extension KiwiCore {
 
     private func removeShortcut(_ args: [JSONValue]) -> CommandResponse {
         guard let chord = Self.chord(args.first) else { return Self.noChord }
-        guard var (snapshot, page) = shortcutPage() else {
+        guard let found = shortcutPage() else {
             return Self.noShortcutPage
         }
+        var snapshot = found.0
+        let page = found.1
         guard let layer = Self.defaultLayer(snapshot, page),
             let key = snapshot.keyLayers.resolved(for: page).first(where: {
                 RuleReachTable<String>.keyParts($0.key).layer == layer
@@ -135,6 +146,22 @@ extension KiwiCore {
         }
     }
 
+    /// Every row `layer` holds in the base or any profile.
+    private static func rows(
+        of table: RuleReachTable<String>,
+        layer: String
+    ) -> [KeyBinding] {
+        let maps =
+            [table.base] + table.profiles.map { table.resolved(for: $0) }
+        return maps.flatMap { map in
+            map.compactMap { key, combo in
+                let parts = RuleReachTable<String>.keyParts(key)
+                return parts.layer == layer
+                    ? KeyBinding(combo: combo, lua: parts.lua) : nil
+            }
+        }
+    }
+
     private static func defaultLayer(
         _ snapshot: RuleReachSnapshot,
         _ page: String
@@ -147,9 +174,11 @@ extension KiwiCore {
         guard
             let text = value?.stringValue?
                 .trimmingCharacters(in: .whitespaces),
-            KeyCombo.parse(text) != nil
+            let combo = KeyCombo.parse(text)
         else { return nil }
-        return text.lowercased()
+        // Stored as the recorder and the seed spell it, so a plain
+        // string compare (`takeOver`) finds it.
+        return combo.comboString()
     }
 
     private static func sameChord(_ a: String, _ b: String) -> Bool {

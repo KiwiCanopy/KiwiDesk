@@ -154,7 +154,9 @@ extension SettingsModel {
     }
 
     /// Lays `moved` over `layers`: a row's combo set, a row added, or
-    /// an unbound row dropped.
+    /// an unbound row dropped — a row matched by the action it runs
+    /// (`NavigationChords.sameAction`), and a written chord taken
+    /// from any other row holding it, the newer act winning.
     static func takeShortcuts(
         _ moved: [String: String?],
         into layers: inout [KeyLayer]
@@ -163,19 +165,22 @@ extension SettingsModel {
             let parts = RuleReachTable<String>.keyParts(key)
             guard let at = layers.firstIndex(where: { $0.name == parts.layer })
             else { continue }
-            let row = layers[at].bindings.firstIndex { $0.lua == parts.lua }
-            switch (combo, row) {
-            case (let combo?, let row?):
-                layers[at].bindings[row].combo = combo
-            case (let combo?, nil):
-                layers[at].bindings.append(
-                    KeyBinding(combo: combo, lua: parts.lua)
-                )
-            case (nil, let row?):
-                layers[at].bindings.remove(at: row)
-            case (nil, nil):
-                break
+            let written = KeyBinding(combo: combo ?? "", lua: parts.lua)
+            var placed = false
+            var rows: [KeyBinding] = []
+            for var row in layers[at].bindings {
+                if NavigationChords.sameAction(row, written) {
+                    // The action keeps its place, once, at the chord.
+                    guard let combo, !placed else { continue }
+                    row.combo = combo
+                    placed = true
+                } else if let combo, row.combo == combo {
+                    continue
+                }
+                rows.append(row)
             }
+            if combo != nil, !placed { rows.append(written) }
+            layers[at].bindings = rows
         }
     }
 
