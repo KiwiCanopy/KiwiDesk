@@ -5967,7 +5967,7 @@ Space](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-wind
 **Expects:** a number (milliseconds, clamped 50–1000).
 
 **Does:** sets the general animation duration for window moves
-and layout reflowing. Persisted per profile.
+and layout reflowing ([Animation Cascade](#animation-cascade)).
 
 **Example:**
 
@@ -5979,8 +5979,8 @@ animations.set_duration(150)
 
 **Expects:** a number (milliseconds, clamped 50–1000).
 
-**Does:** sets the scrolling-layout focus-shift duration, an
-independent knob, also persisted per profile.
+**Does:** sets the scrolling-layout focus-shift duration, a knob
+independent of `set_duration` ([Animation Cascade](#animation-cascade)).
 
 **Example:**
 

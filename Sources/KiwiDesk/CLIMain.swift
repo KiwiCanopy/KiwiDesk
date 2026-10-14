@@ -15,6 +15,9 @@ func runCLI(_ arguments: [String]) -> Int32 {
         return 0
     case "service":
         return runService(arguments)
+    case "mcp":
+        // An MCP client's stdio server (#1685), not a socket verb.
+        return MCPServer.run()
     default:
         return runSocketCommand(arguments)
     }
@@ -96,9 +99,7 @@ private func runSocketCommand(
 
     let client: SocketClient
     do {
-        client = try SocketClient(
-            path: KiwiCore.defaultSocketPath
-        )
+        client = try AppSocket.connect()
     } catch {
         FileHandle.standardError.write(
             Data(
@@ -164,6 +165,7 @@ let cliUsage = """
       kiwidesk --version              print version and exit
       kiwidesk service start|stop|restart|status
       kiwidesk subscribe [events...]  stream events (NDJSON)
+      kiwidesk mcp                    MCP server on stdio, for AI apps
 
     the API, from this binary (no running app needed):
       kiwidesk list_commands          every command, grouped

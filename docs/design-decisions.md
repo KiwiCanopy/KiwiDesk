@@ -1050,6 +1050,70 @@ would trade a drift problem for a much worse documentation one.
 Generating its *signature tables* from this data is a genuine
 follow-up, and it is the reason the data is shaped this way.
 
+:::unreleased
+### `kiwidesk mcp` is hand-rolled, and holds no state
+
+**[Rationale]**
+
+The MCP server is a few hundred lines of JSON-RPC in
+`Sources/KiwiDesk/MCP/`, not a Swift MCP SDK. The CLI and the app
+are one executable, so an SDK would ship inside the signed,
+notarized `.app` with its own `Package.resolved` pins, each owing
+a verbatim notice in `ACKNOWLEDGEMENTS` (`LicensePackagingTests`),
+and at the owner's ruling (2026-10-14, #1685) no Swift SDK spoke
+the current revision, 2026-07-28. A tools-only server needs the
+parse, the two handshakes and `tools/list` / `tools/call`, which
+is less than the dependency's packaging costs. Whether that still
+holds is re-checked on each spec revision (#2257).
+
+It holds no KiwiDesk state: `list_commands` and `help` answer from
+`APIReference`, compiled into the same binary (the entry above),
+and every other tool forwards one request to the running app over
+its socket, a connection per call so a relaunched app is reached
+again. A new tool is backed by a Core verb with an `APIRecord`,
+so the CLI and Lua get it too; a tool that computed a verdict
+beside Core would be its second home. Nothing but JSON-RPC lines
+may reach stdout, and the window manager never listens on HTTP:
+an AI app that reaches only remote servers goes through its own
+tunnel.
+
+### A command that cannot be undone has its own MCP tool
+
+**[Principle]**
+
+`APIReference.destructive` registers the commands that lose
+something a user cannot get back by running another command — a
+file, a window's content, unsaved live changes. `run` and
+`run_batch` refuse them and `run_destructive` takes only them,
+carrying MCP's `destructiveHint`: annotations are per tool, so the
+split is the only way a client can tell the two apart. A `confirm`
+argument on `run` would confirm nothing, since the model fills it
+in itself. `save_profile`, `load_profile` and
+`bind_profile_to_desktop` belong in the set though they read as
+everyday verbs: one overwrites a saved profile, the others replace
+unsaved live changes. A name the binary does not know is refused
+rather than forwarded, so nothing reaches the app past the check.
+A batch is judged whole before anything runs, so it never stops
+halfway for a reason it knew up front. The trade: a hint is
+honoured by the client, and an app that ignores it runs the
+command unasked.
+
+### Whether a setting lasts is not a fact about its command
+
+**[Rationale]**
+
+No `set_*` verb but `set_default_profile` writes a file, so
+whether a value outlives a profile load, a reload or a relaunch
+depends on where the value lives — a profile, the shared look,
+`gui.json`'s app-wide settings, a Space's session — and on what is
+saved afterwards, never on the command. A `persists` field on
+`APIRecord` would be false for the setters it seemed to describe.
+`kiwidesk mcp` tells the AI app after each setter that the change
+is temporary instead, and making one permanent is a separate
+write — the `keep` tool #1685 rules — never a property of the
+setter, and never `save_profile`, which snapshots everything live.
+:::
+
 ### The landing page argues from the papercut, not from the mess
 
 **[Principle]**

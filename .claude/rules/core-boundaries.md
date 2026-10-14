@@ -66,7 +66,7 @@ below, so it corrects itself when a seventh is added.
   again in the probe, which reads the sink before any lifecycle
   runs.
 - **The API surface describes itself, and an enum's values are
-  READ rather than typed (#1033).** Four obligations, all on
+  READ rather than typed (#1033).** Five obligations, all on
   `Commands/`:
   - **A new command owes a record** in the matching
     `Commands/Reference/APIRecords+*` table — group, arguments,
@@ -79,6 +79,14 @@ below, so it corrects itself when a seventh is added.
     `cliOnly`, the one register of commands Lua never registers,
     `subscribe` beside it (`APIRecordCensusTests` ▸
     `cliOnlyIsNeverLua`).
+  - **A new command answers whether it is destructive** —
+    whether it loses something a user cannot get back by running
+    another command: a file, a window's content, unsaved live
+    changes — in `APIReference.destructive`, the register beside
+    `cliOnly` that routes it to `kiwidesk mcp`'s `run_destructive`
+    tool (#1685). `APIDestructiveCensusTests` holds a command whose
+    name reads destructive to the register or its `ruledSafe` map;
+    one named otherwise is outside that net and is review's.
   - **An enum-valued argument names the TYPE, never the values**
     — `.choice("anchor", ScrollingParams.Anchor.self)`.
     `APIChoice` has exactly one initializer and it reads
