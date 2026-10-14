@@ -59,6 +59,13 @@ enum LiquidGlassGate {
         stored && drawsGlass
     }
 
+    /// KiwiVision's stored blur as drawn (#2103): off while
+    /// transparency is reduced, the dim staying. Platform glass is
+    /// not asked — the plate draws `hud` where glass cannot.
+    static func rendered(blur stored: Bool) -> Bool {
+        stored && !reducesTransparency
+    }
+
     /// A Fill at full alpha, keeping its hue. A fully transparent
     /// Fill stays so: it asked for no plate, and none is opaque.
     static func opaque(_ hex: String) -> String {

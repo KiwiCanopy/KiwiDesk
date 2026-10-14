@@ -7,15 +7,41 @@ import AppKit
 /// ring, and the target's WindowServer reorder event re-stacks it
 /// once the ring has re-ordered (borders.md ▸ KiwiVision).
 extension KiwiCore {
-    /// The dim until KiwiVision's settings land (#2103 ruling 10).
-    static let visionDim: CGFloat = 0.4
-
     /// Whether KiwiVision is on.
     public var kiwiVisionIsOn: Bool { vision.isOn }
 
     /// `kiwivision.toggle`: turns KiwiVision on or off.
     public func toggleKiwiVision() {
         setKiwiVision(!vision.isOn)
+    }
+
+    /// The `kiwivision.*` verbs (#2103). Dim and blur are session
+    /// values until KiwiVision's settings are stored; no window
+    /// moves, so no retile.
+    func visionCommand(
+        _ command: String,
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        switch command {
+        case "kiwivision.toggle":
+            toggleKiwiVision()
+            return .ok(.object(["on": .bool(kiwiVisionIsOn)]))
+        case "kiwivision.set_dim":
+            // Lua's whole range, as the GUI's (ruling 10, amended).
+            guard let percent = args.first?.numberValue,
+                percent.isFinite, (0...100).contains(percent)
+            else { return .fail("expected 0-100") }
+            vision.dim = CGFloat(percent / 100)
+        case "kiwivision.set_blur":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            vision.blur = on
+        default:
+            return .fail("unknown command: \(command)")
+        }
+        updateVision()
+        return .ok()
     }
 
     func setKiwiVision(_ on: Bool) {
@@ -81,7 +107,8 @@ extension KiwiCore {
             below: ring,
             standDown: vision.standDown,
             tracked: borders.skyLightActive,
-            dim: Self.visionDim
+            dim: vision.dim,
+            blur: LiquidGlassGate.rendered(blur: vision.blur)
         )
     }
 }

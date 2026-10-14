@@ -84,7 +84,7 @@ struct KiwiVisionCoreTests {
         let request = core.visionRequest()
         #expect(request.target == w1.raw)
         #expect(request.below == 4242)
-        #expect(request.dim == KiwiCore.visionDim)
+        #expect(request.dim == 0.6)
     }
 
     @Test("a front ring sits above its window, so the plate takes it")
@@ -154,7 +154,8 @@ struct KiwiVisionCoreTests {
                 below: nil,
                 standDown: [],
                 tracked: true,
-                dim: 0.4
+                dim: 0.4,
+                blur: false
             ),
             reassert: false
         )
