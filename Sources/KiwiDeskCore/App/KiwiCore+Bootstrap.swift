@@ -160,9 +160,8 @@ extension KiwiCore {
         borders.commandedFrame = commandedInstant
         stickyMarks.commandedFrame = commandedInstant
 
-        socket.handler = { [weak self] command, args in
-            self?.execute(command, args: args)
-                ?? .fail("core unavailable")
+        socket.handler = { [weak self] request in
+            self?.answer(request) ?? .fail("core unavailable")
         }
         socket.bus = bus
         tiler.elementProvider = { [weak self] id in

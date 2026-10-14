@@ -6,9 +6,9 @@ import Network
 @MainActor
 public final class SocketServer {
     public typealias Handler =
-        @MainActor (String, [JSONValue]) -> CommandResponse
+        @MainActor (CommandRequest) -> CommandResponse
 
-    public var handler: Handler = { _, _ in
+    public var handler: Handler = { _ in
         .fail("server not wired")
     }
     public weak var bus: EventBus?
@@ -157,9 +157,7 @@ public final class SocketServer {
             )
             return
         }
-        client.send(
-            handler(request.command, request.args ?? [])
-        )
+        client.send(handler(request))
     }
 
     /// Subscribes client to requested notifications (`core-boundaries.md`).

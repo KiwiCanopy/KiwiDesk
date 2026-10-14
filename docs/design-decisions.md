@@ -1108,10 +1108,31 @@ depends on where the value lives — a profile, the shared look,
 `gui.json`'s app-wide settings, a Space's session — and on what is
 saved afterwards, never on the command. A `persists` field on
 `APIRecord` would be false for the setters it seemed to describe.
-`kiwidesk mcp` tells the AI app after each setter that the change
-is temporary instead, and making one permanent is a separate
-write — the `keep` tool #1685 rules — never a property of the
-setter, and never `save_profile`, which snapshots everything live.
+`kiwidesk mcp` tells the AI app what a command changed instead,
+and making it permanent is a separate write — the `keep` tool —
+never a property of the setter, and never `save_profile`, which
+snapshots everything live.
+
+What a command changed is a diff of the values Core reports taken
+around it, never a list of setters: a list is a second register of
+what each verb writes, and the `set_*` spelling it was read from
+already named a verb that writes a file. Whether a change is still
+pending is Core's verdict too — its live value against what its
+owner stores, asked again on every request — so a Settings Save, a
+value set back or a keep is seen however it happened, and a guess
+from the session's own history would call a stored value unkept.
+The MCP server keeps only what Core reported of the leaves the
+session touched, never a verdict of its own; a leaf now stored with
+the value the session set was kept, one stored with another value
+was replaced. Because the judgement compares values, it needs no
+epoch: a load leaves every leaf either stored or holding another
+value, and a keep sent after one writes nothing back, since what
+it would write is already stored. A keep writes each leaf as live
+at that moment through the same door the bar menus and the tour
+use, so an open Settings draft takes it alike; it lands the shared
+look without repainting the live one, which still holds the
+session's other pending look values; and it answers what it
+re-reads as stored, never what it meant to write.
 :::
 
 ### The landing page argues from the papercut, not from the mess

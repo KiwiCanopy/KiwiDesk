@@ -19,7 +19,7 @@ extension MCPTools {
             title: "Run a KiwiDesk command",
             "Runs one command that can be undone. Destructive commands "
                 + "are refused: use run_destructive. "
-                + MCPWording.temporary,
+                + MCPWording.liveNotKept,
             properties: MCPToolSchema.command,
             required: ["command"]
         ),
@@ -35,7 +35,7 @@ extension MCPTools {
             title: "Run several KiwiDesk commands",
             "Runs commands in order and stops at the first failure. "
                 + "Refuses the whole batch if any command is "
-                + "destructive. " + MCPWording.temporary,
+                + "destructive. " + MCPWording.liveNotKept,
             properties: [
                 "commands": .object([
                     "type": .string("array"),
@@ -113,18 +113,28 @@ extension MCPTools {
     /// Sends one request and reports it as a tool result.
     func forward(_ request: CommandRequest) -> JSONValue {
         let outcome = outcome(of: request)
-        guard outcome.ok else { return Self.failure(outcome.text) }
-        let text =
-            outcome.changed
-            ? outcome.text + "\n" + MCPWording.temporary : outcome.text
-        return Self.result(text, structured: outcome.data ?? .object([:]))
+        guard outcome.ok else { return decorated(Self.failure(outcome.text)) }
+        return decorated(
+            Self.result(outcome.text, structured: outcome.data ?? .object([:]))
+        )
     }
 
     /// One command's answer, as `run` and `run_batch` both report
-    /// it: the one place a reply becomes a step.
+    /// it: the one place a reply becomes a step, and the one place
+    /// a change report reaches the ledger.
     func outcome(of request: CommandRequest) -> MCPOutcome {
+        var request = request
+        request.reportChanges = true
+        let watch = ledger.watch
+        request.keepWatch = watch.isEmpty ? nil : watch
         do {
             let response = try send(request)
+            if let changes = response.changes {
+                let replacing =
+                    APIReference.entry(named: request.command)
+                    .map(APIReference.isDestructive) ?? false
+                ledger.absorb(changes, replacing: replacing)
+            }
             return MCPOutcome(
                 request: request,
                 ok: response.isSuccess,
@@ -149,9 +159,6 @@ struct MCPOutcome {
     let ok: Bool
     let data: JSONValue?
     let error: String?
-
-    /// A setting this answer reports as temporary.
-    var changed: Bool { ok && MCPTools.isSetter(request.command) }
 
     /// What the model reads: the reason, or the data.
     var text: String {

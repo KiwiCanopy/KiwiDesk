@@ -12,6 +12,9 @@ struct MCPTools {
     var send: (CommandRequest) throws -> CommandResponse =
         MCPTools.sendToApp
 
+    /// This server's unkept changes, shared by every copy.
+    let ledger = MCPKeepLedger()
+
     /// One tool: what a client lists, and what a call runs.
     struct Tool: Sendable {
         let name: String
@@ -23,7 +26,7 @@ struct MCPTools {
     /// list. The one copy: `definitions` and `call` both read it.
     static let all: [Tool] = [
         listCommandsTool, helpTool, getStateTool,
-        runTool, runBatchTool, runDestructiveTool,
+        runTool, runBatchTool, runDestructiveTool, keepTool,
     ]
 
     var definitions: JSONValue { .array(Self.all.map(\.definition)) }
