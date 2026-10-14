@@ -6,7 +6,8 @@ import Foundation
 enum MCPInvocation {
     /// The CLI verb `runCLI` dispatches to `MCPServer`.
     static let verb = "mcp"
-    /// The server's name inside an `mcpServers` map.
+    /// The server's name: its `mcpServers` key and the name the
+    /// handshake reports.
     static let serverName = "kiwidesk"
 
     /// The `mcpServers` entry for `executable` as one line of

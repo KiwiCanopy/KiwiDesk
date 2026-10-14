@@ -105,6 +105,7 @@ struct AICensusRenderTests {
                     + ".enumerated())"
             )
         )
+        #expect(AIRowOrder.bespokeContainers == [.aiSetup])
         #expect(squashed.contains("AISetupRow()"))
         #expect(!squashed.contains("AIRowOrder.setup"))
     }

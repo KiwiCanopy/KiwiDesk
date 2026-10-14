@@ -24,15 +24,21 @@ public enum LoginItemManager {
     /// Why the running copy cannot be a login item, nil if it can.
     /// A path check only, so the main actor may ask (#2094).
     public static var unavailableCopy: LoginItemUnavailable? {
-        unavailableReason(for: Bundle.main.bundleURL)
+        unavailableReason(for: RunningCopy.location)
     }
 
-    /// Why bundle at `url` cannot register (nil if registerable),
-    /// read off the one `RunningCopy` location verdict.
+    /// Why bundle at `url` cannot register (nil if registerable).
     static func unavailableReason(
         for url: URL
     ) -> LoginItemUnavailable? {
-        switch RunningCopy.location(of: url) {
+        unavailableReason(for: RunningCopy.location(of: url))
+    }
+
+    /// Why a copy at `location` cannot register, nil if it can.
+    static func unavailableReason(
+        for location: RunningCopy.Location
+    ) -> LoginItemUnavailable? {
+        switch location {
         case .bundled: return nil
         case .translocated: return .translocated
         case .bare: return .notBundled
