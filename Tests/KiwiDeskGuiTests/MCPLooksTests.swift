@@ -108,6 +108,8 @@ struct MCPLooksTests {
     @Test("a later argument never skips an omitted earlier one")
     func positionalGapIsRefused() {
         let app = FakeApp()
+        let core = MCPTools.offered(group: APIReference.coreGroup)
+        #expect(core.contains { $0.name == "create_space" })
         let refused = app.tools.runGroupAction(
             group: APIReference.coreGroup,
             [
@@ -118,6 +120,7 @@ struct MCPLooksTests {
         )
         guard case .object(let fields) = refused else { return }
         #expect(fields["isError"] == .bool(true))
+        #expect(MCPKeepTests.text(fields).contains("needs mode"))
         #expect(app.sent.isEmpty)
     }
 

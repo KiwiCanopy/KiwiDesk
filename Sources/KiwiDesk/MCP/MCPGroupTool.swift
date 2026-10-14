@@ -90,7 +90,10 @@ extension MCPTools {
     }
 
     /// Sends the action's command, its arguments in the record's
-    /// positional order, through the same gate `run` applies.
+    /// positional order, through the same gate `run` applies. A
+    /// later argument after an omitted optional is refused, even
+    /// where the decoder lets it take that slot (`create_space`'s
+    /// scope): the record cannot say so, and `run` sends it.
     func runGroupAction(
         group: String,
         _ arguments: [String: JSONValue]
