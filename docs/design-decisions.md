@@ -6318,6 +6318,39 @@ ruling: the next tiled space on that screen re-tiles the window,
 and a remembered per-window float frame is a separate decision,
 ruled only if the transience shows on a device.
 
+### KiwiVision's blur is Liquid Glass clear, behind one switch (#2103)
+
+**[Rationale]**
+
+The blur is one on/off switch that draws Liquid Glass `clear`,
+pinned to its dark variant since the dim over it is always black
+— a plate has no Fill, so the pin outranks the Settings Appearance
+pick as a dark Fill's does on the bars — and `hud` (`NSVisualEffectView`) only where glass cannot draw —
+macOS 14 and 15. There is no style picker, and no strength.
+
+The owner compared Off, `hud`, glass `regular` and glass `clear`
+live, over a Scrolling and a BSP Space, with the dim beside each:
+`clear` reads clearly better; `regular` reads like `hud` at about
+half the dim, so it adds nothing. A picker would hand the user an
+engineering trade-off between two looks they did not ask to
+choose between, under a word ("hud") no user knows — and "off"
+is already the switch. A strength control has nothing to drive:
+fading the blur shifts its colour rather than weakening it, and
+the backdrop's private blur radius changes in the layer without
+any visible effect, since WindowServer draws a behind-window
+blur.
+
+The blur is on by default, at a 60 % dim, and carries no battery
+warning. KiwiVision itself is off until the user turns it on, so
+the blur only ever costs anything inside a mode the user chose;
+over a still desk it costs next to nothing, and content moving
+behind it costs `clear` about twice `hud`'s GPU power — small
+next to the desk's own load (measured in #2103). A warning on the
+row would put people off a feature for a cost no other drawn
+surface owns up to. Should `hud` be wanted on macOS 26 after all,
+it comes as a separate Lua-only style verb, never by turning the
+stored boolean into an enum, which would owe a migration.
+
 ## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom

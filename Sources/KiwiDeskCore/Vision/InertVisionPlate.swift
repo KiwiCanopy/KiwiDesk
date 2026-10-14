@@ -12,10 +12,12 @@ import AppKit
         /// Test-only: the last frame and dim handed in.
         private(set) var frame: CGRect?
         private(set) var dim: CGFloat?
+        private(set) var blur: Bool?
 
-        func update(frame: CGRect, dim: CGFloat) {
+        func update(frame: CGRect, dim: CGFloat, blur: Bool) {
             self.frame = frame
             self.dim = dim
+            self.blur = blur
         }
         func order(below window: CGWindowID) { orders.append(window) }
         func show(reduceMotion: Bool) { isShown = true }

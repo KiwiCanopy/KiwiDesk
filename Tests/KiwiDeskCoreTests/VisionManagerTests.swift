@@ -44,7 +44,8 @@ struct VisionManagerTests {
             below: below,
             standDown: standDown,
             tracked: tracked,
-            dim: 0.4
+            dim: 0.4,
+            blur: true
         )
     }
 
@@ -65,6 +66,7 @@ struct VisionManagerTests {
             #expect(plate.isShown)
             #expect(plate.orders == [7])
             #expect(plate.dim == 0.4)
+            #expect(plate.blur == true)
         }
         #expect(made().compactMap(\.frame).map(\.minX).sorted() == [100, 200])
     }

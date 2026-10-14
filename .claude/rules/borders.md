@@ -346,6 +346,13 @@ Obligations:
   pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a
   WindowServer round trip per screen on the switch path.
+- **Stand the blur down under Reduce transparency at the one
+  `LiquidGlassGate.rendered(blur:)` read in `visionRequest`,
+  keeping the dim** — the plate draws `hud` where glass cannot, so
+  the door asks no platform glass, and a second reader of the
+  stored blur beside it would draw the blur under the setting
+  (`OverlayGlassGateTests` ▸ `overlaysTakeTheGate`,
+  `KiwiVisionSettingsTests` ▸ `flipRedraws`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

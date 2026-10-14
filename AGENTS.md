@@ -1600,9 +1600,11 @@ Touching `Borders`, `Vision`.
   the one `ringPanel(of:)` reading, re-stacks only through the
   ring's `ordersOverlay` gate and the post-ring `onWindowRestacked`
   tee, keeps its target watched with borders off, reads the
-  shelf's stand-down verdict, and is a session value no snapshot
-  carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
-  `VisionManagerTests`)
+  shelf's stand-down verdict, stands its blur down at the one
+  `LiquidGlassGate.rendered(blur:)` read, and is a session value no
+  snapshot carries (#2103, `BorderOrderCensusTests`,
+  `KiwiVisionCoreTests`, `VisionManagerTests`,
+  `OverlayGlassGateTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).

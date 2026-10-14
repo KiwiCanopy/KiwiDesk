@@ -139,7 +139,9 @@ struct ReduceTransparencySeamTests {
             ),
             "the handler is gone"
         )
-        for update in ["updateBars()", "updateStickyMarks()"] {
+        for update in [
+            "updateBars()", "updateStickyMarks()", "updateVision()",
+        ] {
             #expect(
                 handler.contains(update),
                 Comment(rawValue: "the handler skips \(update)")

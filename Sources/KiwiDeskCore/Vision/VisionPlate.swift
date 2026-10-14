@@ -6,8 +6,9 @@ import AppKit
 protocol VisionPlateBackend: AnyObject {
     /// Shown, or fading in: the plate covers its screen.
     var isShown: Bool { get }
-    /// Covers `frame` (AppKit coordinates) at `dim`, 0...1.
-    func update(frame: CGRect, dim: CGFloat)
+    /// Covers `frame` (AppKit coordinates) at `dim`, 0...1, over
+    /// a blur of what lies beneath where `blur`.
+    func update(frame: CGRect, dim: CGFloat, blur: Bool)
     /// Orders the plate in directly below `window`.
     func order(below window: CGWindowID)
     /// Fades the plate in unless `reduceMotion`.
@@ -25,6 +26,10 @@ protocol VisionPlateBackend: AnyObject {
 final class AppKitVisionPlate: VisionPlateBackend {
     private var panel: NSPanel?
     private let dimLayer = CALayer()
+    /// The behind-window blur: Liquid Glass `clear` pinned dark,
+    /// `hud` where glass cannot draw (#2103 ruling 10, amended
+    /// 2026-10-14).
+    private let blurView = AppKitVisionPlate.makeBlur()
     private(set) var isShown = false
     /// Bumped per show and hide, so a fade-out that lands after a
     /// later show leaves the panel ordered in.
@@ -46,9 +51,15 @@ final class AppKitVisionPlate: VisionPlateBackend {
         var panelBehavior: NSWindow.CollectionBehavior? {
             panel?.collectionBehavior
         }
+        /// Whether the blur view draws.
+        var blurShown: Bool { !blurView.isHidden }
+        /// Whether the dim draws above the blur.
+        var dimAboveBlur: Bool {
+            dimLayer.zPosition > (blurView.layer?.zPosition ?? 0)
+        }
     #endif
 
-    func update(frame: CGRect, dim: CGFloat) {
+    func update(frame: CGRect, dim: CGFloat, blur: Bool) {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         if panel.frame != frame {
@@ -57,8 +68,10 @@ final class AppKitVisionPlate: VisionPlateBackend {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         dimLayer.frame = CGRect(origin: .zero, size: frame.size)
+        blurView.frame = CGRect(origin: .zero, size: frame.size)
         dimLayer.opacity = Float(min(max(dim, 0), 1))
         CATransaction.commit()
+        if blurView.isHidden == blur { blurView.isHidden = !blur }
     }
 
     /// AppKit's order: WindowServer applies no SkyLight order to
@@ -138,9 +151,28 @@ final class AppKitVisionPlate: VisionPlateBackend {
         let view = NSView()
         view.wantsLayer = true
         view.layer?.opacity = 0
+        blurView.isHidden = true
+        blurView.autoresizingMask = [.width, .height]
+        view.addSubview(blurView)
+        // Above the blur: the dim darkens what the blur leaves.
         dimLayer.backgroundColor = NSColor.black.cgColor
+        dimLayer.zPosition = 1
         view.layer?.addSublayer(dimLayer)
         panel.contentView = view
         return panel
+    }
+
+    /// The blur view a plate carries; glass where it can draw.
+    static func makeBlur() -> NSView {
+        if let glass = GlassPlate.make() {
+            GlassPlate.update(glass, frame: .zero, cornerRadius: 0)
+            GlassTint.pinDark(glass)
+            return glass
+        }
+        let hud = NSVisualEffectView()
+        hud.material = .hudWindow
+        hud.blendingMode = .behindWindow
+        hud.state = .active
+        return hud
     }
 }
