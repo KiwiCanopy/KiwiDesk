@@ -5,7 +5,8 @@ enum AIRowOrder {
     static let setup: [SettingKey] = [.ai(.copySetupPrompt)]
 
     static let readyMadePrompts: [SettingKey] = [
-        .ai(.promptSpaces)
+        .ai(.promptLook),
+        .ai(.promptSpaces),
     ]
 
     static let byContainer: [SettingsContainer: [SettingKey]] = [

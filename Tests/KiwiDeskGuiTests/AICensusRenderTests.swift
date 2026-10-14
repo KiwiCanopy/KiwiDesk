@@ -107,6 +107,16 @@ struct AICensusRenderTests {
         }
     }
 
+    /// The look row leads the prompts (#1685 ▸ Ruling 6a), and its
+    /// ruled text asks for a screenshot of the wallpaper.
+    @Test("the look prompt leads and asks for a screenshot")
+    @MainActor func lookPromptLeads() {
+        LocalizationManager.shared.select("en")
+        #expect(AIRowOrder.readyMadePrompts.first == .ai(.promptLook))
+        let text = AIReadyPrompt.text(for: .promptLook) ?? ""
+        #expect(text.contains("screenshot"))
+    }
+
     /// The prompts card walks its list; the setup card draws its
     /// one row by hand, so the row must be mounted there.
     @Test("the prompts card walks its list, the setup row mounts")

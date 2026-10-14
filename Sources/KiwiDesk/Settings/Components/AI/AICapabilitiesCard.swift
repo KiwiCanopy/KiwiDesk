@@ -40,6 +40,11 @@ struct AICapabilitiesCard: View {
                 "Change gaps, borders and the bars on KiwiShelf."
             ),
             L(
+                "ai.capability.looks",
+                "Make, wear and save looks, matched to your "
+                    + "wallpaper from a screenshot."
+            ),
+            L(
                 "ai.capability.inspect",
                 "See your Spaces and windows, and look up any "
                     + "command."

@@ -43,6 +43,7 @@ struct LooksShelf: View {
             bundledGroup
             keepColorsRow
             userGroup
+            AILookPointer(model: model)
         }
         .onAppear(perform: reload)
         .onChange(of: model.isDirty) { _, dirty in

@@ -59,6 +59,7 @@ struct AISection: View {
         let catalog = SettingsCatalog.ai
         switch key {
         case .copySetupPrompt: return catalog.copySetupPrompt
+        case .promptLook: return catalog.promptLook
         case .promptSpaces: return catalog.promptSpaces
         }
     }
