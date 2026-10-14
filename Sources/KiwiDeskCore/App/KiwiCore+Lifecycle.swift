@@ -208,6 +208,7 @@ extension KiwiCore {
         borders.stop()
         stickyMarks.clear()
         vision.clear()
+        retargetVisionAppearance(nil)  // a quit puts it back
         retireReduceTransparency()
         retireFontSet()
         payOwedShortcutDrops()  // nothing carries the debt (#1827)

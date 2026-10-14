@@ -3752,11 +3752,25 @@ Liquid Glass (a plain blur on macOS 14 and 15).
 With Reduce transparency on in macOS, the blur stands down and the
 dim stays.
 
+### kiwivision.set_appearance
+
+**Expects:** `"unchanged"`, `"opposite"`, `"dark"` or `"light"`.
+Default `"unchanged"`.
+
+**Does:** switches macOS to dark or light while KiwiVision is on —
+`"opposite"` to whichever it is not showing —
+and back when it turns off — only if the system was showing the
+other one, and not if you changed the appearance yourself in the
+meantime. If KiwiDesk quits or crashes while it is on, the next
+start switches back. Automatic (light by day, dark at night) is
+turned back on where it was on.
+
 **Example:**
 
 ```lua
 kiwivision.set_dim(30)
 kiwivision.set_blur(false)
+kiwivision.set_appearance("dark")
 ```
 :::
 

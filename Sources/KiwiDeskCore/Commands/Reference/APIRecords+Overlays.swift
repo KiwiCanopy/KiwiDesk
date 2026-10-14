@@ -213,5 +213,10 @@ extension APIReference {
             "Blurs what KiwiVision dims; on by default.",
             .boolean("enabled")
         ),
+        "set_appearance": APIRecord(
+            "Sets the system appearance KiwiVision switches to "
+                + "while on; unchanged by default.",
+            .choice("appearance", VisionAppearance.self)
+        ),
     ]
 }

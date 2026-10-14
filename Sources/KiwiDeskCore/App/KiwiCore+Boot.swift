@@ -74,6 +74,9 @@ extension KiwiCore {
         boot.interval = signposter.beginInterval("boot")
         boot.began = ContinuousClock.now
         armMachineSeams()
+        // A switch a crash left unpaid (#2103 ruling 7), before a
+        // config can turn KiwiVision on again.
+        retargetVisionAppearance(nil)
         let config = signposter.beginInterval("loadConfig")
         loadConfig()
         signposter.endInterval("loadConfig", config)

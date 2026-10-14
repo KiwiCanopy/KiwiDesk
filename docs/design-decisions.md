@@ -6351,6 +6351,30 @@ surface owns up to. Should `hud` be wanted on macOS 26 after all,
 it comes as a separate Lua-only style verb, never by turning the
 stored boolean into an enum, which would owe a migration.
 
+### KiwiVision switches the appearance and owes it back (#2103)
+
+**[Rationale]**
+
+Appearance while on is *Unchanged* by default, *Opposite*, *Dark*
+or *Light*:
+turning KiwiVision on switches the system only where it shows the
+other appearance, and turning it off switches back only a switch
+KiwiVision made — a change the user made by hand while it was on
+is theirs, and stays. Without that rule the mode would fight the
+user's own toggle on the way out.
+
+The switch is SkyLight's legacy theme call, measured to take no
+permission (P5 in the issue); System Events, which asks for
+Automation once, is the fallback where the symbol is gone. The
+undo is a debt stored BEFORE the switch and paid on every way
+out — the toggle, a quit, the next start after a crash — because
+a Mac left dark by an app that died is the failure a user cannot
+trace back to us. The debt is this Mac's state, so it lives in
+the app's defaults and never travels in a backup. A manual switch
+turns macOS's Automatic mode off, so the payment turns it back on
+where it was on; that re-arm writes the preference and posts the
+theme notification, the one step no device has measured yet.
+
 ## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom

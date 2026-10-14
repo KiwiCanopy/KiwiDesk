@@ -38,6 +38,12 @@ public final class VisionManager {
     var dim: CGFloat = 0.6
     /// Whether the plate blurs, ON by default (#2103 ruling 10).
     var blur = true
+    /// The system appearance asked for while on (#2103 ruling 7);
+    /// a session value until KiwiVision's settings are stored.
+    var appearanceWhileOn = VisionAppearance.unchanged
+    /// The machine half of the appearance switch; the bootstrap
+    /// wires the live one.
+    var appearanceSwitch = VisionAppearanceSwitch.inert()
     /// Hears every change of `isOn`; the GUI announces it.
     public var onChange: @MainActor (Bool) -> Void = { _ in }
     var plates: [DisplayID: any VisionPlateBackend] = [:]
