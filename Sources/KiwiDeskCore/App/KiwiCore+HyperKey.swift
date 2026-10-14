@@ -48,14 +48,17 @@ extension KiwiCore {
             keys.hyperSource,
             on: hyperRemapHost
         )
-        keys.hyperStatus = outcome
-        keys.hyperEnabled = outcome == .on
+        // Off asked is off had: a mapping KiwiDesk cannot touch
+        // is not the user's Hyper key.
+        let status = keys.hyperSource == nil ? .off : outcome
+        keys.hyperStatus = status
+        keys.hyperEnabled = status == .on
         if keys.hyperSource != nil,
             outcome == .refused || outcome == .failed
         {
             onLog("hyper: remap \(outcome), Hyper key off")
         }
-        return outcome
+        return status
     }
 
     /// Gives the key back at `stop()`; the choice is kept, so the

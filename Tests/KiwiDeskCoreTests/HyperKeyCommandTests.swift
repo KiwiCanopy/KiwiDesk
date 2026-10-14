@@ -9,6 +9,7 @@ private final class FakeHost {
     var mapping: Set<HyperKeyRemap.Pair> = []
     var written: HyperKeyRemap.Pair?
     var answers = true
+    var failsSet = false
     var runs = 0
 
     var host: HyperKeyRemap.Host {
@@ -17,6 +18,7 @@ private final class FakeHost {
                 runs += 1
                 guard answers else { return nil }
                 if arguments.contains("--get") { return listing }
+                if failsSet { return nil }
                 let json = arguments.last ?? ""
                 mapping =
                     json.contains("Src")
@@ -133,5 +135,29 @@ struct HyperKeyCommandTests {
         core.applyHyperKey()
         #expect(fake.runs == 0)
         #expect(core.keys.hyperStatus == .off)
+    }
+
+    @Test("off with another tool's mapping in place is still off")
+    func offBesideForeignIsOff() {
+        let core = makeTestCore()
+        let fake = FakeHost()
+        fake.mapping = [HyperKeyRemap.pair(for: .capsLock)]
+        fake.written = HyperKeyRemap.pair(for: .rightCommand)
+        core.hyperRemapHost = fake.host
+        let off = core.execute("set_hyper_key", args: [.string("off")])
+        #expect(off.isSuccess)
+        #expect(core.keys.hyperStatus == .off)
+        #expect(!fake.mapping.isEmpty)  // never touched
+    }
+
+    @Test("a set that did not answer leaves the record true")
+    func failedSetSettlesTheRecord() {
+        let core = makeTestCore()
+        let fake = FakeHost()
+        fake.failsSet = true
+        core.hyperRemapHost = fake.host
+        let reply = core.execute("set_hyper_key", args: [.string("f13")])
+        #expect(!reply.isSuccess)
+        #expect(fake.written == nil)  // nothing of ours landed
     }
 }

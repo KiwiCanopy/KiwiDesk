@@ -152,25 +152,28 @@ struct HyperKeyRemapTests {
 }
 
 /// The ownership record outlives a crash but not the mapping it
-/// names: a record from another boot is no record (#1870).
+/// names: a record from another boot session is no record (#1870).
 @Suite("Hyper key remap record")
 struct HyperKeyRemapRecordTests {
     private let caps = HyperKeyRemap.pair(for: .capsLock)
 
     @Test("a record from this boot names its entry")
     func sameBootReads() {
-        let boot = Date(timeIntervalSince1970: 1_000_000)
-        let stored = HyperKeyRemap.record(caps, bootedAt: boot)
-        #expect(HyperKeyRemap.recorded(stored, bootedAt: boot) == caps)
+        let stored = HyperKeyRemap.record(caps, boot: "A")
+        #expect(HyperKeyRemap.recorded(stored, boot: "A") == caps)
     }
 
     @Test("a record from another boot names nothing")
     func otherBootIsAbsent() {
-        let then = Date(timeIntervalSince1970: 1_000_000)
-        let stored = HyperKeyRemap.record(caps, bootedAt: then)
-        let now = then.addingTimeInterval(3600)
-        #expect(HyperKeyRemap.recorded(stored, bootedAt: now) == nil)
-        #expect(HyperKeyRemap.recorded(nil, bootedAt: now) == nil)
-        #expect(HyperKeyRemap.recorded([1.0], bootedAt: now) == nil)
+        let stored = HyperKeyRemap.record(caps, boot: "A")
+        #expect(HyperKeyRemap.recorded(stored, boot: "B") == nil)
+        #expect(HyperKeyRemap.recorded(stored, boot: nil) == nil)
+        #expect(HyperKeyRemap.recorded(nil, boot: "A") == nil)
+        #expect(HyperKeyRemap.recorded(["boot": "A"], boot: "A") == nil)
+    }
+
+    @Test("this boot has a session id")
+    func bootSessionReads() {
+        #expect(HyperKeyRemap.bootSession()?.isEmpty == false)
     }
 }

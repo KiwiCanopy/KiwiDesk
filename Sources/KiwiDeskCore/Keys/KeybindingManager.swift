@@ -180,6 +180,8 @@ public final class KeybindingManager {
     /// Resets all layers and releases Lua references on config reload.
     func reset() {
         deactivate()
+        // No rows survive a reset, so neither does the trigger.
+        disarmHyperTrigger()
         if let lua {
             for bindings in layers.values {
                 for ref in bindings.values {

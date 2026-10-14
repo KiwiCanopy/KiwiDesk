@@ -145,6 +145,16 @@ struct HyperLayerTests {
         #expect(!registrar.has(k))
     }
 
+    @Test("a reset leaves no trigger behind")
+    func resetDisarms() throws {
+        let registrar = LiveRegistrar()
+        let keys = try manager(registrar)
+        keys.hyperEnabled = true
+        #expect(registrar.has(f18))
+        keys.reset()
+        #expect(!registrar.has(f18))
+    }
+
     @Test("the watchdog ends a hold whose release never came")
     func watchdogEndsTheHold() throws {
         let registrar = LiveRegistrar()

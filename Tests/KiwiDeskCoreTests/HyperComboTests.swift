@@ -54,7 +54,7 @@ struct HyperConflictTests {
             KeybindingConflicts.conflict(
                 for: spotlight,
                 in: [spotlight]
-            ) != nil
+            )?.target == .systemShortcut(.spotlight)
         )
     }
 

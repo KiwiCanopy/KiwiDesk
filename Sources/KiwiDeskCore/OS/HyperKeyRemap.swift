@@ -152,40 +152,82 @@ extension HyperKeyRemap {
             host.writeWritten(nil)
             return .refused
         }
-        if let argument = setArgument(for: plan) {
-            guard host.run(["property", "--set", argument]) != nil
-            else { return .failed }
-        }
+        let before = host.readWritten()
+        // Recorded ahead of the set: a timed-out set may still
+        // land, and an unrecorded mapping of ours would be refused
+        // as another tool's for good.
         if case .set(let pair) = plan { host.writeWritten(pair) }
+        if let argument = setArgument(for: plan),
+            host.run(["property", "--set", argument]) == nil
+        {
+            settleRecord(after: plan, previous: before, on: host)
+            return .failed
+        }
         if plan == .clear { host.writeWritten(nil) }
         return want == nil ? .off : .on
+    }
+
+    /// After a set that did not answer, the record names what the
+    /// mapping now holds of ours: the new entry, the previous one,
+    /// or nothing.
+    @MainActor
+    private static func settleRecord(
+        after plan: Plan,
+        previous: Pair?,
+        on host: Host
+    ) {
+        let now = host.run(["property", "--get", "UserKeyMapping"])
+            .map { pairs(inHidutilOutput: $0) }
+        if case .set(let pair) = plan, now == [pair] { return }
+        if let previous, now == [previous] {
+            host.writeWritten(previous)
+        } else {
+            host.writeWritten(nil)
+        }
     }
 
 }
 
 extension HyperKeyRemap {
-    /// The stored record: the entry and the boot it was written
-    /// in. A `hidutil` mapping dies at a restart and the record
-    /// does not, so a record from another boot names a mapping
-    /// that is gone — and a mapping with its shape now is another
-    /// tool's, never KiwiDesk's.
-    static func record(_ pair: Pair, bootedAt boot: Date) -> [Double] {
+    /// The stored record: the entry and the boot session it was
+    /// written in. A `hidutil` mapping dies at a restart and the
+    /// record does not, so a record from another boot names a
+    /// mapping that is gone — and a mapping with its shape now is
+    /// another tool's, never KiwiDesk's. The boot is
+    /// `kern.bootsessionuuid`, never `kern.boottime`, which a
+    /// clock step moves: a live record read as foreign would leave
+    /// the key remapped after quit.
+    static func record(_ pair: Pair, boot: String) -> [String: Any] {
         [
-            Double(pair.source), Double(pair.destination),
-            boot.timeIntervalSince1970,
+            "source": NSNumber(value: pair.source),
+            "destination": NSNumber(value: pair.destination),
+            "boot": boot,
         ]
     }
 
     /// The entry a stored record names, nil where it is from
-    /// another boot or unreadable.
-    static func recorded(_ raw: [Any]?, bootedAt boot: Date) -> Pair? {
-        guard let values = raw as? [Double], values.count == 3,
-            abs(values[2] - boot.timeIntervalSince1970) < 1
+    /// another boot, the boot is unreadable, or the record is.
+    static func recorded(_ raw: [String: Any]?, boot: String?) -> Pair? {
+        guard let raw, let boot, raw["boot"] as? String == boot,
+            let source = raw["source"] as? NSNumber,
+            let destination = raw["destination"] as? NSNumber
         else { return nil }
         return Pair(
-            source: UInt64(values[0]),
-            destination: UInt64(values[1])
+            source: source.uint64Value,
+            destination: destination.uint64Value
         )
+    }
+
+    /// This boot's session id, nil where the sysctl fails.
+    static func bootSession() -> String? {
+        let name = "kern.bootsessionuuid"
+        var size = 0
+        let probed = sysctlbyname(name, nil, &size, nil, 0)
+        guard probed == 0, size > 1 else { return nil }
+        var bytes = [UInt8](repeating: 0, count: size)
+        let read = sysctlbyname(name, &bytes, &size, nil, 0)
+        guard read == 0 else { return nil }
+        return String(decoding: bytes.prefix { $0 != 0 }, as: UTF8.self)
     }
 }
 
@@ -235,8 +277,8 @@ extension HyperKeyRemap.Host {
         },
         readWritten: {
             HyperKeyRemap.recorded(
-                UserDefaults.standard.array(forKey: recordKey),
-                bootedAt: SystemBoot.time()
+                UserDefaults.standard.dictionary(forKey: recordKey),
+                boot: HyperKeyRemap.bootSession()
             )
         },
         writeWritten: { pair in
@@ -244,11 +286,14 @@ extension HyperKeyRemap.Host {
                 UserDefaults.standard.removeObject(forKey: recordKey)
                 return
             }
+            // No boot to stamp: write nothing a later read would
+            // have to trust.
+            guard let boot = HyperKeyRemap.bootSession() else {
+                UserDefaults.standard.removeObject(forKey: recordKey)
+                return
+            }
             UserDefaults.standard.set(
-                HyperKeyRemap.record(
-                    pair,
-                    bootedAt: SystemBoot.time()
-                ),
+                HyperKeyRemap.record(pair, boot: boot),
                 forKey: recordKey
             )
         }
