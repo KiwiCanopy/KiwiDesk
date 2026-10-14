@@ -137,6 +137,44 @@ struct RuleKeepDraftTests {
         #expect(!model.isDirty)
     }
 
+    /// The merge matches a row by the action it runs and lets the
+    /// written chord win over another row holding it.
+    @Test("a written shortcut moves its action and takes its chord")
+    @MainActor func takeShortcutsMatchesByAction() {
+        var layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [
+                    KeyBinding(
+                        combo: "control+option+1",
+                        lua: "KiwiDesk.focus_space(\"1\")"
+                    ),
+                    KeyBinding(
+                        combo: "control+option+h",
+                        lua: "KiwiDesk.focus(\"up\")"
+                    ),
+                ]
+            )
+        ]
+        let key = { (lua: String) in
+            RuleReachTable<String>.keyID(layer: KeyLayer.defaultName, lua: lua)
+        }
+        SettingsModel.takeShortcuts(
+            [
+                key("KiwiDesk.focus_space(1)"): .some("control+option+2"),
+                key("KiwiDesk.focus(\"left\")"): .some("control+option+h"),
+            ],
+            into: &layers
+        )
+        let rows = layers[0].bindings.map { "\($0.combo) \($0.lua)" }
+        #expect(
+            rows == [
+                "control+option+2 KiwiDesk.focus_space(\"1\")",
+                "control+option+h KiwiDesk.focus(\"left\")",
+            ]
+        )
+    }
+
     /// The hook, its route to the model, and the keep firing it —
     /// each deletable with the merge above still green.
     static let wirings: [(String, String, String)] = [

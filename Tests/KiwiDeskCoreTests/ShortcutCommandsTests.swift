@@ -206,4 +206,42 @@ struct ShortcutCommandsTests {
         #expect(set.error?.contains("remove it first") == true)
         #expect(baseRows(core).count == 1)
     }
+
+    /// A base row every profile leaves out is still the shared one a
+    /// write would take over, so its chord is refused.
+    @Test("a base chord every page leaves out is still taken")
+    func leftOutBaseChordIsTaken() throws {
+        let core = try KeepFixture.core()
+        var base = try #require(core.guiConfigStore.load())
+        base.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [
+                    KeyBinding(
+                        combo: "control+option+x",
+                        lua: "KiwiDesk.focus(\"up\")"
+                    )
+                ]
+            )
+        ]
+        try core.guiConfigStore.save(base)
+        let leftOut = KeyLayerOverride(
+            removed: [KeyLayer.defaultName: ["control+option+x"]]
+        )
+        for name in ["Work", "Odd"] {
+            var profile = KeepFixture.profile(name)
+            profile.layers = leftOut
+            try core.profiles.save(profile)
+        }
+        KeepFixture.load("Odd", core)
+        let set = run(
+            core,
+            "shortcut.set",
+            [
+                .string("ctrl+alt+x"), .string("focus"),
+                .array([.string("left")]),
+            ]
+        )
+        #expect(set.error?.contains("remove it first") == true)
+    }
 }
