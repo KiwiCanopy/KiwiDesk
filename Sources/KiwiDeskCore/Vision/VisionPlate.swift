@@ -7,7 +7,7 @@ protocol VisionPlateBackend: AnyObject {
     /// Shown, or fading in: the plate covers its screen.
     var isShown: Bool { get }
     /// Covers `frame` (AppKit coordinates) at `dim`, 0...1, over
-    /// a `hud` blur of what lies beneath where `blur`.
+    /// a blur of what lies beneath where `blur`.
     func update(frame: CGRect, dim: CGFloat, blur: Bool)
     /// Orders the plate in directly below `window`.
     func order(below window: CGWindowID)
@@ -26,9 +26,10 @@ protocol VisionPlateBackend: AnyObject {
 final class AppKitVisionPlate: VisionPlateBackend {
     private var panel: NSPanel?
     private let dimLayer = CALayer()
-    /// The behind-window blur, `hud` the one style: the only one
-    /// that darkens, so it works with the dim (#2103 ruling 10).
-    private let blurView = NSVisualEffectView()
+    /// The behind-window blur: Liquid Glass `clear` pinned dark,
+    /// `hud` where glass cannot draw (#2103 ruling 10, amended
+    /// 2026-10-14).
+    private let blurView = AppKitVisionPlate.makeBlur()
     private(set) var isShown = false
     /// Bumped per show and hide, so a fade-out that lands after a
     /// later show leaves the panel ordered in.
@@ -144,9 +145,6 @@ final class AppKitVisionPlate: VisionPlateBackend {
         let view = NSView()
         view.wantsLayer = true
         view.layer?.opacity = 0
-        blurView.material = .hudWindow
-        blurView.blendingMode = .behindWindow
-        blurView.state = .active
         blurView.isHidden = true
         blurView.autoresizingMask = [.width, .height]
         view.addSubview(blurView)
@@ -156,5 +154,21 @@ final class AppKitVisionPlate: VisionPlateBackend {
         view.layer?.addSublayer(dimLayer)
         panel.contentView = view
         return panel
+    }
+
+    /// The blur view a plate carries; glass where it can draw.
+    static func makeBlur() -> NSView {
+        if #available(macOS 26.0, *) {
+            let glass = NSGlassEffectView()
+            glass.style = .clear
+            glass.cornerRadius = 0
+            GlassTint.pinDark(glass)
+            return glass
+        }
+        let hud = NSVisualEffectView()
+        hud.material = .hudWindow
+        hud.blendingMode = .behindWindow
+        hud.state = .active
+        return hud
     }
 }

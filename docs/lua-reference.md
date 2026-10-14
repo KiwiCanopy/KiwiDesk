@@ -3737,7 +3737,7 @@ end)
 
 ### kiwivision.set_dim
 
-**Expects:** a percentage, 0–100. Default 40.
+**Expects:** a percentage, 0–100. Default 60.
 
 **Does:** sets how far KiwiVision darkens everything but the
 focused window. 0 leaves only the blur, or nothing while the blur
@@ -3745,18 +3745,18 @@ is off.
 
 ### kiwivision.set_blur
 
-**Expects:** `true` or `false`. Default `false`.
+**Expects:** `true` or `false`. Default `true`.
 
-**Does:** blurs what KiwiVision dims, beneath the dim. Off by
-default: the blur costs the GPU noticeably more than the dim alone.
+**Does:** blurs what KiwiVision dims, beneath the dim, with
+Liquid Glass (a plain blur on macOS 14 and 15).
 With Reduce transparency on in macOS, the blur stands down and the
 dim stays.
 
 **Example:**
 
 ```lua
-kiwivision.set_dim(60)
-kiwivision.set_blur(true)
+kiwivision.set_dim(30)
+kiwivision.set_blur(false)
 ```
 :::
 

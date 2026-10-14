@@ -210,7 +210,7 @@ extension APIReference {
             .number("percent")
         ),
         "set_blur": APIRecord(
-            "Blurs what KiwiVision dims; off by default.",
+            "Blurs what KiwiVision dims; on by default.",
             .boolean("enabled")
         ),
     ]

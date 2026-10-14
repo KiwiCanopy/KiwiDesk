@@ -6,7 +6,7 @@ import Testing
 
 /// KiwiVision's dim and blur verbs (#2103, ruling 10 as amended
 /// 2026-10-14): dim takes the whole 0–100 % in Lua as in the GUI,
-/// default 40 %; the `hud` blur is OFF by default, and Reduce
+/// default 60 %; the glass blur is ON by default, and Reduce
 /// transparency stands it down while the dim stays.
 /// `.serialized`: `LiquidGlassGate.override` is process-global.
 @Suite("KiwiVision dim and blur", .serialized)
@@ -24,11 +24,11 @@ struct KiwiVisionSettingsTests {
         return core
     }
 
-    @Test("defaults: 40 % dim, no blur")
+    @Test("defaults: 60 % dim, blur on")
     func defaults() {
         let core = makeCore()
-        #expect(core.vision.dim == 0.4)
-        #expect(!core.vision.blur)
+        #expect(core.vision.dim == 0.6)
+        #expect(core.vision.blur)
     }
 
     @Test("set_dim takes 0–100 and refuses past it")
@@ -64,10 +64,12 @@ struct KiwiVisionSettingsTests {
         defer { LiquidGlassGate.override = nil }
         let core = makeCore()
         #expect(
-            core.execute("kiwivision.set_blur", args: [.bool(true)])
+            core.execute("kiwivision.set_blur", args: [.bool(false)])
                 .isSuccess
         )
-        #expect(core.vision.blur)
+        #expect(!core.vision.blur)
+        #expect(!core.visionRequest().blur)
+        _ = core.execute("kiwivision.set_blur", args: [.bool(true)])
         #expect(core.visionRequest().blur)
         #expect(
             !core.execute("kiwivision.set_blur", args: [.number(1)])
@@ -103,5 +105,20 @@ struct KiwiVisionSettingsTests {
         LiquidGlassGate.override = { true }
         core.reduceTransparencyDidChange()
         #expect(plate.blur == false)
+    }
+
+    @Test("the blur is Liquid Glass clear, hud where glass cannot draw")
+    func blurIsGlassClear() throws {
+        let blur = AppKitVisionPlate.makeBlur()
+        if #available(macOS 26.0, *) {
+            let glass = try #require(blur as? NSGlassEffectView)
+            #expect(glass.style == .clear)
+            #expect(glass.cornerRadius == 0)
+            #expect(glass.appearance?.name == .darkAqua)
+        } else {
+            let hud = try #require(blur as? NSVisualEffectView)
+            #expect(hud.material == .hudWindow)
+            #expect(hud.blendingMode == .behindWindow)
+        }
     }
 }
