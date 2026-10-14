@@ -142,6 +142,11 @@ extension APIReference {
                 + "more events, or all of them.",
             .choice("event", KiwiNotification.self, optional: true)
         ),
+        "keep_settings": APIRecord(
+            "Keeps the leaves a change report named in the live "
+                + "profile or its shared look.",
+            .text("id")
+        ),
         "save_profile": APIRecord(
             "Saves the current configuration to a profile, which "
                 + "claims the connected screen setup.",

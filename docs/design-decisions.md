@@ -1108,10 +1108,26 @@ depends on where the value lives — a profile, the shared look,
 `gui.json`'s app-wide settings, a Space's session — and on what is
 saved afterwards, never on the command. A `persists` field on
 `APIRecord` would be false for the setters it seemed to describe.
-`kiwidesk mcp` tells the AI app after each setter that the change
-is temporary instead, and making one permanent is a separate
-write — the `keep` tool #1685 rules — never a property of the
-setter, and never `save_profile`, which snapshots everything live.
+`kiwidesk mcp` tells the AI app what a command changed instead,
+and making it permanent is a separate write — the `keep` tool —
+never a property of the setter, and never `save_profile`, which
+snapshots everything live.
+
+What a command changed is a diff of the live settings, the Spaces'
+layouts and the app-wide values taken around it, never a list of
+setters: a new setter reports itself, and a setter that changes
+nothing reports nothing. Each changed leaf carries where a keep
+would write it — the live profile, or the shared look for a look
+leaf of a profile wearing it — or why none can: `init.lua` owns the
+config, no saved profile is live, the value is app-wide, or the
+Space is not in the profile. The ledger of what is pending lives in
+the MCP server and holds only those ids, so it never re-derives
+Core's answer. A load, a reload or a profile apply moves an epoch,
+and the server reports the pending changes it replaced on the next
+result rather than keeping a value that is no longer live. A keep
+writes each leaf as it is live at that moment, as one edit through
+the same door the bar menus and the tour use, so an open Settings
+draft takes it the same way.
 :::
 
 ### The landing page argues from the papercut, not from the mess

@@ -68,6 +68,9 @@ struct FocusedCommandPolicyTests {
         "get_work_counters",
         // Reads the private paths, touching no window (#1889).
         "self_test",
+        // Writes the live profile's file, touching no window
+        // (#1685).
+        "keep_settings",
     ]
 
     /// A command that does not act on the implicit focused window:

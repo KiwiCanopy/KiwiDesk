@@ -85,7 +85,7 @@ struct MCPToolsTests {
         #expect(app.sent.count == 1)
     }
 
-    @Test("run sends a safe command; a setter is told temporary")
+    @Test("run sends a safe command, asking for its change report")
     func runSends() throws {
         let app = FakeApp()
         let read = try Self.call(
@@ -94,23 +94,27 @@ struct MCPToolsTests {
             Self.command("version")
         )
         #expect(read["isError"] == .bool(false))
-        #expect(!Self.text(read).contains(MCPWording.temporary))
         let set = try Self.call(
             app.tools,
             MCPTools.run,
             Self.command("border.set_width", [.number(4)])
         )
-        #expect(Self.text(set).contains(MCPWording.temporary))
-        let saved = try Self.call(
+        #expect(set["isError"] == .bool(false))
+        #expect(app.sent.map(\.command) == ["version", "border.set_width"])
+        #expect(app.sent.allSatisfy { $0.reportChanges == true })
+    }
+
+    @Test("run refuses keep_settings: a keep goes through keep")
+    func runRefusesKeepSettings() throws {
+        let app = FakeApp()
+        let result = try Self.call(
             app.tools,
             MCPTools.run,
-            Self.command("set_default_profile", [.string("Work")])
+            Self.command("keep_settings", [.string("/settings/x")])
         )
-        #expect(!Self.text(saved).contains(MCPWording.temporary))
-        #expect(
-            app.sent.map(\.command)
-                == ["version", "border.set_width", "set_default_profile"]
-        )
+        #expect(result["isError"] == .bool(true))
+        #expect(Self.text(result).contains("keep"))
+        #expect(app.sent.isEmpty)
     }
 
     @Test("an app refusal and a dead socket are tool errors")

@@ -10,12 +10,12 @@ struct SocketTests {
     func roundTrip() async throws {
         let path = Self.throwawaySocketPath()
         let server = SocketServer(path: path)
-        server.handler = { command, args in
+        server.handler = { request in
             .ok(
                 .object([
-                    "echo": .string(command),
+                    "echo": .string(request.command),
                     "count": .number(
-                        Double(args.count)
+                        Double(request.args?.count ?? 0)
                     ),
                 ])
             )

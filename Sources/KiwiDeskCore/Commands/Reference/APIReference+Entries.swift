@@ -129,5 +129,6 @@ extension APIReference {
         ServiceManager.prepareRestartCommand,
         "get_work_counters",
         PrivatePathSelfTest.command,
+        "keep_settings",
     ]
 }

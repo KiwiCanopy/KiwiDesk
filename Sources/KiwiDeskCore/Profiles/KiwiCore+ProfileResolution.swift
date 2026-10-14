@@ -16,6 +16,7 @@ extension KiwiCore {
         profile: Profile,
         cause: ProfileApplyCause
     ) {
+        settingsEpoch += 1  // #1685: unkept live changes end here
         // Owed #1741 and #1752 crossings end at the first apply.
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
@@ -175,6 +176,7 @@ extension KiwiCore {
         composed: ProfileComposition.Composed,
         forceRetile: Bool
     ) {
+        settingsEpoch += 1  // #1685: unkept live changes end here
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }

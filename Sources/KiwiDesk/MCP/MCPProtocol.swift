@@ -34,8 +34,7 @@ enum MCPProtocol {
         + "and run it with run (or run_batch for several). get_state "
         + "shows the Spaces and windows. Commands that cannot be "
         + "undone go only through run_destructive, so ask the user "
-        + "before calling it. " + MCPWording.temporary
-        + " Tell the user so after such a change."
+        + "before calling it. " + MCPWording.liveNotKept
 
     /// The version an `initialize` settles on: the client's if
     /// served, else the newest legacy one.

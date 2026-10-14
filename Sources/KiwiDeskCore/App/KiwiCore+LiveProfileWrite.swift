@@ -12,8 +12,8 @@ public typealias LiveProfileWrite =
 /// takes — the tour's look (#1720), a bar menu's row (#1518), and a
 /// Space added to or removed from the profile (#1790): the bar's
 /// Delete, `create_space`/`delete_space` with `profile`, and
-/// Settings ▸ Spaces' add button. The draft policy that answers it
-/// is profiles.md's.
+/// Settings ▸ Spaces' add button — and `keep_settings` (#1685).
+/// The draft policy that answers it is profiles.md's.
 extension KiwiCore {
     /// `edit` lands in the live profile's file, non-adopting, then
     /// reaches an open draft through `onLiveProfileWritten`, which
@@ -42,10 +42,7 @@ extension KiwiCore {
             try profiles.write(profile)
             // Only a Space edit moves what is declared; a settings
             // edit leaves that to the next apply (#1245).
-            if case .settings = edit {
-            } else {
-                profiles.redeclare(profile)
-            }
+            if edit.redeclares { profiles.redeclare(profile) }
             // A follower's look is the shared one (#1752); an edit
             // that leaves the look alone lands nothing.
             recordLookWrite(of: profile)

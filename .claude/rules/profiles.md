@@ -1461,7 +1461,8 @@ and the tour owns its undo*.
 bar menu's row (#1518), a Space added to or removed from the
 profile (#1790: the bar's confirmed Delete, `create_space` /
 `delete_space` with `profile`, Settings ▸ Spaces' add button,
-which is the one in-Settings caller) — carrying one
+which is the one in-Settings caller; `keep_settings`, #1685) —
+carrying one
 `LiveProfileEdit` that the file and the draft each apply — which
 writes the file non-adopting and
 then hands the SAME edit to an open draft through
