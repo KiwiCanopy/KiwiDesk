@@ -48,6 +48,38 @@ struct WindowServerWatchSeamTests {
         )
     }
 
+    /// The mark's restack is its #414 re-assert on a raise that
+    /// fires no AX focus event; its effect is a panel order no
+    /// Core test can read, so the wiring is needled.
+    @Test("the core connects the mark's re-assert to the restack")
+    func markRestackIsWired() throws {
+        let wiring = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "App/KiwiCore+WindowServer.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            wiring.occurrences(
+                of: "restack:{[weakself]idinself?.stickyMarks.reassert(id)}"
+            ) == 1
+        )
+    }
+
+    /// A stop clears outside the verdict path, so a quit never
+    /// logs a tracking state; the log arm is unreachable from a
+    /// test without the live pump, so the shape is needled.
+    @Test("a stop never runs the verdict path")
+    func stopSkipsTheVerdict() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent("OS/WindowServerWatch.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(after: "func stop()", in: source)
+        )
+        #expect(body.occurrences(of: "submit(") == 0)
+        #expect(body.occurrences(of: "onLog(") == 0)
+    }
+
     @Test("the watch is built in one place")
     func oneConstructionSite() throws {
         // The core builds its watch; BorderManager's default is a
