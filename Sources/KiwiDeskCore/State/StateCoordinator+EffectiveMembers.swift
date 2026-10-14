@@ -135,10 +135,8 @@ extension StateCoordinator {
         guard let last = workspaces.lastFocused,
             !space.windows.contains(last)
         else { return space.focused }
-        if tiled.contains(last) { return last }
-        if let window = windows[last], window.isSticky,
-            window.isFloating,
-            stickyRenderSpace(of: window) == space.id
+        if tiled.contains(last)
+            || floatingStickyVisitors(of: space).contains(last)
         {
             return last
         }
@@ -188,15 +186,25 @@ extension StateCoordinator {
             if next < injected.count { next += 1 }
         }
         result.append(contentsOf: injected[next...])
-        let floating = windows.all
+        let floating = floatingStickyVisitors(of: space).filter {
+            windows[$0]?.isFullscreen == false
+        }
+        return result + floating
+    }
+
+    /// Floating sticky windows homed elsewhere that render on `space`,
+    /// by id — the one set the focus anchor, the Space Bar and the
+    /// ring slots share (#2259). Fullscreen ones stay in; a reader
+    /// keeping them home (#670) drops them itself.
+    public func floatingStickyVisitors(of space: Space) -> [WindowID] {
+        windows.all
             .filter {
-                $0.isSticky && $0.isFloating && !$0.isFullscreen
+                $0.isSticky && $0.isFloating
                     && !space.windows.contains($0.id)
                     && stickyRenderSpace(of: $0) == space.id
             }
             .map(\.id)
             .sorted { $0.raw < $1.raw }
-        return result + floating
     }
 
     /// Tiled-sticky windows homed elsewhere with derived home index (#670).

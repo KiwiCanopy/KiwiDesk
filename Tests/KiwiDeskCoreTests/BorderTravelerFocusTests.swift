@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -23,13 +24,16 @@ struct BorderTravelerFocusTests {
 
     private func makeWindow(
         _ id: UInt32,
-        isSticky: Bool = false
+        isSticky: Bool = false,
+        isFloating: Bool = false
     ) -> ManagedWindow {
         ManagedWindow(
             id: WindowID(id),
             pid: 100,
             appName: "App",
             title: "Title",
+            frame: CGRect(x: 100, y: 100, width: 400, height: 300),
+            isFloating: isFloating,
             stickyScope: isSticky ? .global : .none
         )
     }
@@ -73,5 +77,24 @@ struct BorderTravelerFocusTests {
         let specs = core.desiredBorderSpecs()
         #expect(specs.count == 1)
         #expect(specs.first?.window == WindowID(1))
+    }
+
+    /// #2259: the anchor admits a FLOATING sticky window visiting
+    /// the active space, so the ring slots must too — or the focus
+    /// lands on a window with no slot and every ring goes dormant.
+    @Test("A focused floating sticky visitor wears the focused ring")
+    func floatingVisitorGetsFocusedRing() {
+        let core = makeCore()
+        seed(core)
+        core.state.windows.upsert(
+            makeWindow(60, isSticky: true, isFloating: true)
+        )
+        core.state.workspaces.add(WindowID(60), to: "2")
+        core.state.workspaces.focus(WindowID(60), in: "2")
+        let specs = core.desiredBorderSpecs()
+        let focusColor = core.tiler.settings.borderStyle.focusedColor
+        #expect(specs.count == 1)
+        #expect(specs.first?.window == WindowID(60))
+        #expect(specs.first?.colorHex == focusColor)
     }
 }

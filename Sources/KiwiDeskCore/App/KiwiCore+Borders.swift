@@ -97,14 +97,16 @@ extension KiwiCore {
         // same `focusAnchor` the App Bar / Scrolling / Monocle already
         // read (#431), so a keyboard focus that lands on a traveler
         // moves the ring onto it too — not only a mouse click.
+        // Floating sticky visitors join the slots: the anchor admits
+        // them, so a focused one with no slot leaves no ring (#2259).
         let tiled = state.effectiveTiledMembers(of: space)
-        let travelers = tiled.filter { !space.windows.contains($0) }
+        let travelers =
+            tiled.filter { !space.windows.contains($0) }
+            + state.floatingStickyVisitors(of: space)
         // Transient overlays (launchers, panels) never get a ring,
-        // even while focused — see `borderSpecs` (#300). Scans
-        // `space.windows` only by construction: an overlay is never
-        // tiled, so it can never be a traveler.
+        // even while focused — see `borderSpecs` (#300).
         let overlays = Set(
-            space.windows.filter {
+            (space.windows + travelers).filter {
                 state.windows[$0]?.isTransientOverlay == true
             }
         )
@@ -112,7 +114,7 @@ extension KiwiCore {
         // ring would show only at the corners: native fullscreen
         // (it keeps its home-space slot, no destroy fires) or a
         // presenting float (#1788). Travelers ARE included (a
-        // tiled-sticky window can go fullscreen).
+        // sticky window can go fullscreen).
         let fillsDisplay = Set(
             (space.windows + travelers).filter { id in
                 guard let window = state.windows[id] else {
