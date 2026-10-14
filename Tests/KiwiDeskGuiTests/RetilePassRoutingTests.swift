@@ -47,6 +47,9 @@ struct RetilePassRoutingTests {
         // The tour's live look (#1720): a paint of the shelf.
         "KiwiDeskCore/App/KiwiCore+ShelfPaint.swift":
             Site(applies: 1, reissues: 0),
+        // `look.apply` (#1685): a look worn live, an explicit apply.
+        "KiwiDeskCore/Commands/KiwiCore+LookCommands.swift":
+            Site(applies: 1, reissues: 0),
         // A shared look that changed repaints the live screen
         // wearing it (#1752): an explicit look write, re-issued.
         "KiwiDeskCore/App/KiwiCore+SharedLookWrite.swift":

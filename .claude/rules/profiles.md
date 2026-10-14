@@ -1358,8 +1358,14 @@ fact about its command*. The obligations:
   about the live profile from `ActiveProfile` because the switch
   path asks it; a change report asks only for an MCP session, so
   `keepJudge` reads the file once and every verdict of that
-  answer takes that one read. A new reader on the switch path
-  answers from adoption state instead.
+  answer takes that one read. `look.current` is the second such
+  MCP-time reader, through `liveWearsSharedLook`; a new reader on
+  the switch path answers from adoption state instead.
+- **A look verb paints live only (#1685).** `look.apply` writes no
+  file; a wear that must also WRITE takes `writeThroughLiveProfile`
+  as the tour's paint does, never a grown `wearLook`, and a verb
+  that changes `looks.json` tells an open Settings through
+  `onLookLibraryChanged` (`LookCommandsTests`).
 
 ## Resolve before layout, and merge per-field first
 
