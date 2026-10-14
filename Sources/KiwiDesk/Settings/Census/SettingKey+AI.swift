@@ -2,6 +2,7 @@
 /// an `(action)` census entry so search reaches it.
 enum AIKey: String, CaseIterable, Hashable {
     case copySetupPrompt = "(action) ai.setup.copy"
+    case promptLook = "(action) ai.prompt.look"
     case promptSpaces = "(action) ai.prompt.spaces"
 }
 
@@ -15,7 +16,7 @@ extension AIKey {
                 .atRest,
                 gate: .runtime(.runningCopyTranslocated)
             )
-        case .promptSpaces:
+        case .promptLook, .promptSpaces:
             return .row(.ai, .readyMadePrompts, .atRest)
         }
     }
@@ -28,7 +29,7 @@ extension AIKey {
                 caption: labelKey + ".caption",
                 help: labelKey + ".help"
             )
-        case .promptSpaces:
+        case .promptLook, .promptSpaces:
             return .text(labelKey, caption: labelKey + ".caption")
         }
     }

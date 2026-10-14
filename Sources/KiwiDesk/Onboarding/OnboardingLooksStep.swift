@@ -101,8 +101,9 @@ struct OnboardingLooksStep: View {
 
     private var laterHint: String {
         L(
-            "onboarding.looks.hint",
-            "Change either later under %1$@ ▸ %2$@.",
+            "onboarding.looks.hint_ai",
+            "Change either later under %1$@ ▸ %2$@ — or "
+                + "connect your AI and ask it to make you a new look.",
             L("home.title", "Settings"),
             SettingsDestination.looks.title
         )

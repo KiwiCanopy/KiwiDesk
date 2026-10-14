@@ -16,6 +16,10 @@ struct AIControls: Sendable {
         "ai.prompts.title",
         "Ready-made prompts"
     )
+    let promptLook = SettingsControl(
+        "ai.prompt.look",
+        "Make a new look"
+    )
     let promptSpaces = SettingsControl(
         "ai.prompt.spaces",
         "Set up my Spaces"

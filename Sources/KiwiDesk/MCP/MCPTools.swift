@@ -27,6 +27,7 @@ struct MCPTools {
     static let all: [Tool] = [
         listCommandsTool, helpTool, getStateTool,
         runTool, runBatchTool, runDestructiveTool, keepTool,
+        looksTool,
     ]
 
     var definitions: JSONValue { .array(Self.all.map(\.definition)) }

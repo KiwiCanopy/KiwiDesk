@@ -10,6 +10,12 @@ enum AIReadyPrompt {
     /// ready-made prompt.
     @MainActor static func caption(for key: AIKey) -> String? {
         switch key {
+        case .promptLook:
+            return L(
+                "ai.prompt.look.caption",
+                "The vibe, the colors or your wallpaper\u{2019}s, and "
+                    + "how the bars look."
+            )
         case .promptSpaces:
             return L(
                 "ai.prompt.spaces.caption",
@@ -25,6 +31,19 @@ enum AIReadyPrompt {
     /// no ready-made prompt.
     @MainActor static func text(for key: AIKey) -> String? {
         switch key {
+        case .promptLook:
+            // Wallpaper by screenshot: reading it raises a TCC
+            // prompt (#1685 ▸ Ruling 6b).
+            return L(
+                "ai.prompt.look.text",
+                "Help me make my own look in KiwiDesk. Ask me, one "
+                    + "question at a time: what vibe I want, which "
+                    + "colors (or offer to match my wallpaper from a "
+                    + "screenshot), how the bars should look (edge, "
+                    + "thickness, glass or solid), and what I want to "
+                    + "keep. Show each change live. I\u{2019}ll say "
+                    + "\u{201C}keep\u{201D} when I\u{2019}m happy."
+            )
         case .promptSpaces:
             let names = spacesLayouts.map(\.displayName)
             return L(
