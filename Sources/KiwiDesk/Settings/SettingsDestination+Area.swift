@@ -17,6 +17,7 @@ extension SettingsDestination {
         case .profiles: return .profiles
         case .shortcuts: return .shortcuts
         case .appRules: return .appRules
+        case .ai: return .ai
         case .general: return .general
         case .macChecklist: return .macChecklist
         }
@@ -36,6 +37,7 @@ extension SettingsDestination {
         case .profiles: self = .profiles
         case .shortcuts: self = .shortcuts
         case .appRules: self = .appRules
+        case .ai: self = .ai
         case .general: self = .general
         case .macChecklist: self = .macChecklist
         }

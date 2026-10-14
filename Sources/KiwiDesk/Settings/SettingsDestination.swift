@@ -15,6 +15,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case profiles
     case shortcuts
     case appRules
+    case ai
     case general
     case macChecklist
 
@@ -35,7 +36,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// lists KiwiDesk's own rows before macOS's (#1365) — Home
     /// orders its cards separately (`HomeCardOrder`).
     static let wholeApp: [SettingsDestination] = [
-        .profiles, .shortcuts, .appRules, .general, .macChecklist,
+        .profiles, .shortcuts, .appRules, .ai, .general,
+        .macChecklist,
     ]
 
     @MainActor var title: String {
@@ -61,6 +63,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             return L("destination.shortcuts", "Shortcuts & Gestures")
         case .appRules:
             return L("destination.app_rules", "App Rules")
+        case .ai: return L("destination.ai", "AI")
         case .general: return L("destination.general", "General")
         case .macChecklist:
             return L("destination.mac_checklist", "Mac Checklist")
@@ -80,6 +83,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .profiles: return "square.stack.3d.up"
         case .shortcuts: return "keyboard"
         case .appRules: return "app.badge.checkmark"
+        case .ai: return "brain.head.profile"
         case .general: return "gearshape"
         case .macChecklist: return "checklist"
         }
@@ -110,6 +114,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
                 blue: 0.38
             )
         case .appRules: return .red
+        case .ai: return .orange
         case .general: return .gray
         case .macChecklist: return .cyan
         }
@@ -129,9 +134,9 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         !Self.profileless.contains(self)
     }
 
-    /// Destinations no profile owns (#18, #1365).
+    /// Destinations no profile owns (#18, #1365, #1685).
     private static let profileless: Set<SettingsDestination> = [
-        .general, .macChecklist,
+        .ai, .general, .macChecklist,
     ]
 
     /// Reachability predicate for profile editing mode (#18).

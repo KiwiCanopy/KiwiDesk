@@ -51,7 +51,7 @@ enum HomeCardPlate {
             return tile(padding: 11, settings: settings) {
                 HomeCardSwatchGridTile(settings: settings)
             }
-        case .shortcuts, .profiles, .appRules, .general,
+        case .shortcuts, .profiles, .appRules, .ai, .general,
             .macChecklist:
             return nil
         }

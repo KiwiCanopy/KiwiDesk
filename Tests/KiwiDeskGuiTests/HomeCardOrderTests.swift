@@ -97,6 +97,7 @@ struct HomeCardOrderTests {
         )
         #expect(!cards.contains(.general))
         #expect(!cards.contains(.macChecklist))
+        #expect(!cards.contains(.ai))
         #expect(cards.count == 3)
     }
 

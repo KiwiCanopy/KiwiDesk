@@ -577,8 +577,8 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles, Screens, Behaviour and the Mac Checklist
-render from it now** (#678 Phases 2-3; #1365): each
+Layouts, Profiles, Screens, Behaviour, the Mac Checklist and AI
+render from it now** (#678 Phases 2-3; #1365; #1685): each
 carries its own order list and a census-render suite pinning that
 order to the census (`MacChecklistRowOrder` /
 `MacChecklistCensusRenderTests` is the newest pair; its
