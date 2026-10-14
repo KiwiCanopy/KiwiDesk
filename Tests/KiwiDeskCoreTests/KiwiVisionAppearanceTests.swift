@@ -154,6 +154,20 @@ struct KiwiVisionAppearanceTests {
         #expect(system.asked == [true])
     }
 
+    @Test("a repeated ask leaves a manual change alone")
+    func repeatedAskKeepsTheManualChange() {
+        var now = Self.start
+        let system = FakeSystem()
+        let core = makeCore(system) { now }
+        _ = ask(core, "dark")
+        core.setKiwiVision(true)
+        now += VisionAppearanceDebt.settleBound
+        system.state.dark = false  // the user switched back by hand
+        _ = ask(core, "dark")  // e.g. a reload re-running init.lua
+        #expect(system.asked == [true])
+        #expect(system.state.dark == false)
+    }
+
     @Test("a new ask is judged against the appearance found")
     func newAskJudgesTheFound() {
         let system = FakeSystem()
@@ -211,6 +225,23 @@ struct KiwiVisionAppearanceTests {
         #expect(system.debt == nil)
         #expect(system.rearms == 1, "Auto comes back after the switch")
         #expect(system.state.auto)
+    }
+
+    @Test("a way back that landed late still brings Auto back")
+    func landedHomeRearmsAuto() {
+        let system = FakeSystem()
+        system.state.auto = true
+        system.lands = false
+        let core = makeCore(system)
+        _ = ask(core, "dark")
+        core.setKiwiVision(true)
+        system.land()
+        core.setKiwiVision(false)  // the way back stays queued
+        system.land()  // and lands after the call: Auto now off
+        core.retargetVisionAppearance(nil)  // the next start
+        #expect(system.debt == nil)
+        #expect(system.asked == [true, false])
+        #expect(system.state == .init(dark: false, auto: true))
     }
 
     @Test("automatic switching comes back where it was on")
