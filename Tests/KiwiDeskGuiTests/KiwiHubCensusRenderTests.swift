@@ -36,7 +36,7 @@ struct KiwiHubCensusRenderTests {
     func kiwiHubTier() {
         let keys = ShortcutsRowOrder.kiwiHubAtRest
         pin(keys, .kiwiHub, .atRest, "kiwihub at rest")
-        #expect(keys.count == 3)
+        #expect(keys.count == KiwiHubSide.allCases.count)
         #expect(censusRows(.kiwiHub, .showMore).isEmpty)
         #expect(censusRows(.kiwiHub, .immediate).isEmpty)
     }
