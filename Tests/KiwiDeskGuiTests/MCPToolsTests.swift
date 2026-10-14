@@ -113,8 +113,12 @@ struct MCPToolsTests {
             Self.command("keep_settings", [.string("/settings/x")])
         )
         #expect(result["isError"] == .bool(true))
-        #expect(Self.text(result).contains("keep"))
+        #expect(Self.text(result).contains("call keep"))
         #expect(app.sent.isEmpty)
+        let entry = try #require(
+            APIReference.entry(named: MCPTools.keepCommand)
+        )
+        #expect(!MCPTools.isRunnable(entry))
     }
 
     @Test("an app refusal and a dead socket are tool errors")

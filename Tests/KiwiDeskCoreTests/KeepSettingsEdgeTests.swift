@@ -122,6 +122,29 @@ struct KeepSettingsEdgeTests {
         #expect(ids(response.data, "not_keepable") == ["/settings/gap/globl"])
     }
 
+    @Test("a conflicting leaf is refused alone, its neighbour kept")
+    func conflictingRefusedAlone() throws {
+        let core = try KeepFixture.core()
+        try odd(core)
+        let width = KeepFixture.report(core, "border.set_width", [.number(9)])
+        let before = core.keepDocument
+        core.tiler.settings.gapsOverride["1"] = Gaps(
+            outer: Gaps.Outer(top: 3, bottom: 4, left: 5, right: 6)
+        )
+        let half = try #require(
+            KeepPointer.diff(before, core.keepDocument).first
+        )
+        let gap = KeepPointer.string(half)
+        let response = keep(
+            core,
+            (width.changes?.touched ?? []).map(\.id) + [gap]
+        )
+        #expect(ids(response.data, "kept") == ["/settings/border/width"])
+        #expect(ids(response.data, "not_keepable") == [gap])
+        let stored = try core.profiles.read(name: "Odd")
+        #expect(stored.settings.borderStyle.width == 9)
+    }
+
     @Test("half of a new map entry is refused as conflicting")
     func halfAnEntryConflicts() throws {
         let core = try KeepFixture.core()

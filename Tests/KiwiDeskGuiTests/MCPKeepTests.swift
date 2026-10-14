@@ -239,6 +239,18 @@ struct MCPKeepTests {
         #expect(app.sent.count == count)
     }
 
+    @Test("the session's own value reported back stays pending")
+    func ownValueStaysPending() throws {
+        let app = FakeApp()
+        let id = "/settings/border/width"
+        app.touched["border.set_width"] = [Self.leaf(id)]
+        app.values[id] = .number(9)
+        _ = try Self.run(app, "border.set_width")
+        let later = try Self.run(app, "version")
+        #expect(Self.status(later)?["pending"] == .number(1))
+        #expect(Self.status(later)?["replaced"] == nil)
+    }
+
     @Test("a refusal no later state lifts is told once")
     func unliftableRefusalIsToldOnce() throws {
         let app = FakeApp()

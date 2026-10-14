@@ -32,6 +32,7 @@ struct ChangeReportTests {
         let leaf = KeepFixture.leaf(response, "/settings/border/width")
         #expect(leaf?.owner == .profile)
         #expect(leaf?.notKeepable == nil)
+        #expect(leaf?.value == .number(9))
         #expect(response.changes?.profile == "Odd")
     }
 
@@ -58,6 +59,15 @@ struct ChangeReportTests {
         let leaf = KeepFixture.leaf(response, "/settings/border/width")
         #expect(leaf?.owner == .initLua)
         #expect(leaf?.notKeepable == .luaOwned)
+        // An app-wide value too: init.lua is that config's store.
+        let sound = KeepFixture.report(
+            core,
+            "set_refusal_sound",
+            [.bool(!core.appWide.refusalSound)]
+        )
+        let appWide = KeepFixture.leaf(sound, "/app_wide/refusal/sound")
+        #expect(appWide?.owner == .initLua)
+        #expect(appWide?.notKeepable == .luaOwned)
     }
 
     @Test("with no saved profile live, nothing is keepable")
@@ -123,6 +133,7 @@ struct ChangeReportTests {
         _ = KeepFixture.report(core, "border.set_width", [.number(9)])
         let pending = core.answer(.reporting("version", watch: [id]))
         #expect(pending.changes?.watched.first?.stored == false)
+        #expect(pending.changes?.watched.first?.value == .number(9))
         _ = core.execute("border.set_width", args: [.number(stored)])
         let back = core.answer(.reporting("version", watch: [id]))
         #expect(back.changes?.watched.first?.stored == true)
