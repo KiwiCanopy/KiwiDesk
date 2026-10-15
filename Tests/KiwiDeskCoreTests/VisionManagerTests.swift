@@ -45,7 +45,9 @@ struct VisionManagerTests {
             standDown: standDown,
             tracked: tracked,
             dim: 0.4,
-            blur: true
+            blur: true,
+            clearWallpaper: false,
+            windows: []
         )
     }
 

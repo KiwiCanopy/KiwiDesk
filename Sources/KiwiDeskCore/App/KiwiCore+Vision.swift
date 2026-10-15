@@ -89,18 +89,25 @@ extension KiwiCore {
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
         var request = visionRequest(refreshingList: reassertOrder)
-        // Watched whether or not a ring or a mark asks (#2103), the
-        // float tier too: a float landing re-stacks the plate.
-        if !request.clearWallpaper { vision.forgetListedWindows() }
-        windowServer.request(
-            vision.isOn && request.target != nil
-                ? Set(floatLayerTargets()).union(
-                    request.target.map { [WindowID($0)] } ?? []
-                ) : [],
-            for: .vision
-        )
+        if !visionMasks { vision.forgetListedWindows() }
+        requestVisionWindows(target: request.target)
         request.tracked = windowServer.isActive
         vision.sync(request, reassert: reassertOrder)
+    }
+
+    /// KiwiVision's WindowServer request: the target and the float
+    /// tier — a float landing re-stacks the plate — whether or not
+    /// a ring or a mark asks (#2103), and the other apps' windows a
+    /// mask draws, so their moves re-mask it.
+    func requestVisionWindows(target: CGWindowID? = nil) {
+        let target = target ?? vision.target
+        windowServer.request(
+            vision.isOn && target != nil
+                ? Set(floatLayerTargets())
+                    .union(target.map { [WindowID($0)] } ?? [])
+                    .union(visionMaskListedIDs()) : [],
+            for: .vision
+        )
     }
 
     /// Whether the plate draws its blur now: the stored switch,
@@ -136,6 +143,12 @@ extension KiwiCore {
         }
         // Stood down, the restack would order the ring for nothing.
         guard vision.hasShownPlates else { return }
+        // Another app's window a mask draws: its order changed the
+        // mask, never the plate's place (#2103 ruling 21).
+        guard state.windows[id] != nil else {
+            oweVisionReshape(list: true)
+            return
+        }
         windowServer.restack(WindowID(target))
     }
 
@@ -168,7 +181,6 @@ extension KiwiCore {
         let screens = ScreenList.all.compactMap { screen in
             screen.screenNumber.map { (DisplayID($0), screen.frame) }
         }
-        let clearWallpaper = vision.isOn && appWide.visionClearWallpaper
         return VisionManager.Request(
             screens: screens,
             target: target,
@@ -177,32 +189,12 @@ extension KiwiCore {
             tracked: windowServer.isActive,
             dim: CGFloat(appWide.visionDim / 100),
             blur: kiwiVisionDrawsBlur,
-            clearWallpaper: clearWallpaper,
-            windows: clearWallpaper
-                ? visionMaskWindows(refreshingList: refreshingList) : [],
-            cornerRadius: GeometryUtils.systemWindowCornerRadius
+            clearWallpaper: visionMasks,
+            windows: visionMasks
+                ? visionMaskWindows(
+                    target: target,
+                    refreshingList: refreshingList
+                ) : []
         )
-    }
-
-    /// Every window below the plates, AppKit global frames: the
-    /// shown Spaces' members at the frame the engine last sent —
-    /// so a pass's mask lands with its windows rather than their
-    /// echoes — and every other app's window from the one list
-    /// read, which a settle pass refreshes (#2103 ruling 21).
-    func visionMaskWindows(refreshingList: Bool) -> [CGRect] {
-        var frames: [CGRect] = []
-        for placement in tiler.visiblePlacements(state: state) {
-            for id in state.effectiveMembers(of: placement.space) {
-                guard let window = state.windows[id], !window.isFullscreen
-                else { continue }
-                frames.append(tiler.commandedFrame(of: id) ?? window.frame)
-            }
-        }
-        for listed in vision.listedWindows(refresh: refreshingList)
-        where state.windows[WindowID(listed.number)] == nil {
-            frames.append(listed.frame)
-        }
-        let height = GeometryUtils.primaryHeight
-        return frames.map { GeometryUtils.flip($0, primaryHeight: height) }
     }
 }

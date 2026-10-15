@@ -52,6 +52,8 @@ final class AppKitVisionPlate: VisionPlateBackend {
         var blurShown: Bool { veil.blurShown }
         /// Whether the dim draws above the blur.
         var dimAboveBlur: Bool { veil.dimAboveBlur }
+        /// The mask the content takes, nil while it draws whole.
+        var maskPath: CGPath? { veil.maskPath }
     #endif
 
     func update(frame: CGRect, dim: CGFloat, blur: Bool) {

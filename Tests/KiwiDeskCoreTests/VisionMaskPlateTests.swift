@@ -38,8 +38,9 @@ struct VisionMaskPlateTests {
             dim: 0.6,
             blur: true,
             clearWallpaper: clear,
-            windows: windows,
-            cornerRadius: 16
+            windows: windows.map {
+                VisionMask.Window(frame: $0, cornerRadius: 16, clear: false)
+            }
         )
     }
 
@@ -75,6 +76,8 @@ struct VisionMaskPlateTests {
         let b = a.offsetBy(dx: 50, dy: 0)
         vision.sync(request(clear: true, windows: [b]), reassert: false)
         #expect(plate.shapes.count == 2)
+        vision.reshapeShown(request(clear: true, windows: [a]))
+        #expect(plate.shapes.count == 3)
         #expect(plate.orders.count == orders, "the target never moved")
     }
 
@@ -86,5 +89,33 @@ struct VisionMaskPlateTests {
         vision.sync(request(clear: false, windows: [a]), reassert: false)
         let plate = try #require(made().first)
         #expect(plate.shapes.last == .some(nil))
+    }
+
+    /// The production plate: the mask lands on the veil's content
+    /// layer, and nil takes it away.
+    @Test("the real plate masks its content and unmasks on nil")
+    func realPlateTakesTheMask() throws {
+        let plate = AppKitVisionPlate()
+        plate.update(frame: screenFrame, dim: 0.6, blur: true)
+        #expect(plate.maskPath == nil)
+        let path = try #require(
+            VisionMask.path(
+                screen: screenFrame,
+                clearWallpaper: true,
+                windows: [
+                    VisionMask.Window(
+                        frame: CGRect(x: 100, y: 100, width: 300, height: 200),
+                        cornerRadius: 16,
+                        clear: false
+                    )
+                ]
+            )
+        )
+        plate.reshape(path)
+        let applied = try #require(plate.maskPath)
+        #expect(applied.contains(CGPoint(x: 250, y: 200)))
+        #expect(!applied.contains(CGPoint(x: 600, y: 500)))
+        plate.reshape(nil)
+        #expect(plate.maskPath == nil)
     }
 }

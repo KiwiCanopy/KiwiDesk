@@ -68,41 +68,67 @@ public enum FloatDetection {
         )
     }
 
-    /// Every on-screen, visible normal-layer (0) window's bounds,
-    /// FRONT to back — the order the WindowServer composites
-    /// them in (#1787). CG bounds are top-left, as AX frames are.
-    public static func frontToBackNormalFrames(
+    /// One on-screen window as the front-to-back read lists it.
+    public struct ListedWindow: Equatable, Sendable {
+        public let number: CGWindowID
+        public let pid: pid_t
+        public let layer: Int
+        /// CG global bounds, top-left origin — as AX frames are.
+        public let frame: CGRect
+    }
+
+    /// Every on-screen, visible window of any layer, FRONT to back
+    /// — the order the WindowServer composites them in (#1787).
+    /// The one front-to-back read: a consumer filters layers.
+    public static func frontToBackWindows(
         isOwnChrome: (pid_t, Int) -> Bool
-    ) -> [CGRect] {
+    ) -> [ListedWindow] {
         let list =
             CGWindowListCopyWindowInfo(
                 [.optionOnScreenOnly, .excludeDesktopElements],
                 kCGNullWindowID
             ) as? [[String: Any]] ?? []
-        return normalFrames(in: list, isOwnChrome: isOwnChrome)
+        return listedWindows(in: list, isOwnChrome: isOwnChrome)
     }
 
-    /// Layer-0 visible frames of `list`, KiwiDesk's chrome left
-    /// out (`isOwnChrome` of the owner pid and window number): no
+    /// The visible windows of `list`, KiwiDesk's chrome left out
+    /// (`isOwnChrome` of the owner pid and window number): no
     /// overlay is ever a presentation, and an animating ring's
     /// panel spans its screen (#1937). A tiled own window stays.
+    static func listedWindows(
+        in list: [[String: Any]],
+        isOwnChrome: (pid_t, Int) -> Bool
+    ) -> [ListedWindow] {
+        list.compactMap { info in
+            let pid = info[kCGWindowOwnerPID as String] as? pid_t ?? 0
+            let number = info[kCGWindowNumber as String] as? Int ?? 0
+            guard let layer = info[kCGWindowLayer as String] as? Int,
+                (info[kCGWindowAlpha as String] as? Double ?? 0) > 0,
+                !isOwnChrome(pid, number),
+                let raw = CGWindowID(exactly: number),
+                let frame =
+                    (info[kCGWindowBounds as String]
+                    as? [String: Any])
+                    .flatMap({
+                        CGRect(dictionaryRepresentation: $0 as CFDictionary)
+                    })
+            else { return nil }
+            return ListedWindow(
+                number: raw,
+                pid: pid,
+                layer: layer,
+                frame: frame
+            )
+        }
+    }
+
+    /// The layer-0 frames of `list`, as `listedWindows` reads it.
     static func normalFrames(
         in list: [[String: Any]],
         isOwnChrome: (pid_t, Int) -> Bool
     ) -> [CGRect] {
-        list.compactMap { info in
-            guard info[kCGWindowLayer as String] as? Int == 0,
-                (info[kCGWindowAlpha as String] as? Double ?? 0) > 0,
-                !isOwnChrome(
-                    info[kCGWindowOwnerPID as String] as? pid_t ?? 0,
-                    info[kCGWindowNumber as String] as? Int ?? 0
-                )
-            else { return nil }
-            return (info[kCGWindowBounds as String] as? [String: Any])
-                .flatMap {
-                    CGRect(dictionaryRepresentation: $0 as CFDictionary)
-                }
-        }
+        listedWindows(in: list, isOwnChrome: isOwnChrome)
+            .filter { $0.layer == 0 }.map(\.frame)
     }
 
     /// CGWindowList's own on-screen flag for ONE window (#1345):

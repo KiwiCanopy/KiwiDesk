@@ -116,11 +116,15 @@ struct ScreenCoveringCallerCensusTests {
     private let frontSeamAllowed: [String: Int] = [
         // The seam's declaration and its live default.
         "App/KiwiCore.swift": 2,
-        // The stand-down's one read, the default's definition and
+        // The stand-down's one read, the default's definition, the
+        // any-layer read's definition, the default's call of it and
         // the CGWindowList call it wraps.
-        "App/KiwiCore+ScreenCovering.swift": 3,
+        "App/KiwiCore+ScreenCovering.swift": 5,
         // The CGWindowList read's own definition.
         "AX/FloatDetection.swift": 1,
+        // KiwiVision's mask (#2103 ruling 21): its one list seam's
+        // live default, read at a settle or with nothing cached.
+        "Vision/VisionManager.swift": 1,
     ]
 
     @Test("only the presentation verdict reads the front windows")
@@ -130,7 +134,7 @@ struct ScreenCoveringCallerCensusTests {
         let prefix = root.path + "/"
         let pattern = try NSRegularExpression(
             pattern: #"\b(frontWindowFrames|liveFrontFrames|"#
-                + #"frontToBackNormalFrames)\b"#
+                + #"liveFrontWindows|frontToBackWindows)\b"#
         )
         var counts: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: root) {

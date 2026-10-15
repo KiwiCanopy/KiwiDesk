@@ -143,7 +143,9 @@ struct KiwiVisionCoreTests {
                 standDown: [],
                 tracked: true,
                 dim: 0.4,
-                blur: false
+                blur: false,
+                clearWallpaper: false,
+                windows: []
             ),
             reassert: false
         )
@@ -171,7 +173,9 @@ struct KiwiVisionCoreTests {
                 standDown: [],
                 tracked: true,
                 dim: 0.4,
-                blur: false
+                blur: false,
+                clearWallpaper: false,
+                windows: []
             ),
             reassert: false
         )

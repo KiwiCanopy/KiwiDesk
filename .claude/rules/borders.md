@@ -420,19 +420,29 @@ Obligations:
   home only once a switch was taken; both `makeTestCore` twins
   pin the inert machine (`VisionAppearanceSeamTests`,
   `KiwiVisionAppearanceTests`).
-- **A plate's mask never orders, and its window list has one
-  seam** (#2103 ruling 21). A mask is a `CAShapeLayer` on the
-  veil's content, which clips the blur with the dim (v2 probe P8);
-  it follows every pass, so `VisionManager`'s reshape sets a path
-  only where it changed and calls no `order(below:` — a mask
-  routed through the order gate would cost a WindowServer round
-  trip per pass (`VisionMaskPlateTests` ▸ `reshapeOnlyOnChange`).
-  The windows it reads are the shown Spaces' members at the frame
-  the engine last sent, plus other apps' windows from the one
-  `VisionManager.listWindows` read, taken at a settle pass or with
-  nothing cached and never on the switch path, pinned empty in
-  both `makeTestCore` twins (`KiwiVisionClearWallpaperTests` ▸
-  `listReadCadence`).
+- **A plate's mask never orders, and reads its windows through
+  one list seam** (#2103 ruling 21). A mask is a `CAShapeLayer` on
+  the veil's content, which clips the blur with the dim (v2 probe
+  P8, `VisionMaskPlateTests` ▸ `realPlateTakesTheMask`); a re-mask
+  sets a path only where it changed and calls no `order(below:`,
+  since one routed through the order gate costs a WindowServer
+  round trip per pass (`VisionMaskPlateTests` ▸
+  `reshapeOnlyOnChange`). The windows run front to back in
+  `VisionMask.Window`s, each hazed or a hole; a shown Space's
+  member takes the frame the engine last sent, every other app's
+  window the cached `VisionManager.listWindows` read — the one
+  front-to-back read, `KiwiCore.liveFrontWindows`, its readers held
+  by `ScreenCoveringCallerCensusTests` ▸
+  `frontWindowSeamHasOneReader` — and a window tracked at the read
+  never re-enters it as another app's (`KiwiVisionClearWallpaperTests`
+  ▸ `departedTrackedWindowStaysOut`). A pass reads the cache; a new
+  read is owed by a settle pass, an empty cache or an event that
+  adds or removes a window, through the coalesced `oweVisionReshape`
+  — never by the pass itself — and a listed window's own WindowServer
+  event moves or drops its entry, its reorder re-masking rather than
+  re-stacking the plate (`KiwiVisionClearWallpaperTests` ▸
+  `listReadCadence`, `eventsKeepTheMaskFresh`). Both `makeTestCore`
+  twins pin the seam empty.
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

@@ -31,12 +31,10 @@ public final class VisionManager {
         var blur: Bool
         /// Whether the wallpaper stays clear, so a plate draws
         /// only over `windows` (#2103 ruling 17).
-        var clearWallpaper = false
-        /// The windows below the plates, AppKit global frames;
-        /// read only while `clearWallpaper` holds.
-        var windows: [CGRect] = []
-        /// The corner radius each window's shape takes.
-        var cornerRadius: CGFloat = 0
+        var clearWallpaper: Bool
+        /// The windows below the plates, front to back; empty
+        /// where no mask is drawn.
+        var windows: [VisionMask.Window]
     }
 
     /// Whether the mode is on.
@@ -68,22 +66,64 @@ public final class VisionManager {
     var reduceMotion: @MainActor () -> Bool = { BarMotion.isReduced }
     /// The one WindowServer list read a mask takes; both
     /// `makeTestCore` twins pin it empty.
-    var listWindows: @MainActor () -> [VisionListedWindow] = {
-        VisionWindowList.read()
+    var listWindows: @MainActor () -> [FloatDetection.ListedWindow] = {
+        KiwiCore.liveFrontWindows()
     }
-    /// The windows the last list read found, nil until a mask
-    /// needs it and again once none does.
-    private(set) var listed: [VisionListedWindow]?
+    /// The windows the last list read found, front to back, nil
+    /// until a mask needs it and again once none does.
+    private(set) var listed: [FloatDetection.ListedWindow]?
+    /// The listed windows KiwiDesk tracked at the read: their
+    /// frames come from state, and one that has left it since —
+    /// another Desktop's, a closed one's — is no other app's
+    /// window to haze (#2103 PR A review).
+    private(set) var trackedAtRead: Set<CGWindowID> = []
 
     /// Re-reads the WindowServer list where `refresh` asks or
-    /// nothing is cached, and returns it.
-    func listedWindows(refresh: Bool) -> [VisionListedWindow] {
-        if refresh || listed == nil { listed = listWindows() }
+    /// nothing is cached, noting which windows `tracks` names.
+    func listedWindows(
+        refresh: Bool,
+        tracks: (CGWindowID) -> Bool
+    ) -> [FloatDetection.ListedWindow] {
+        if refresh || listed == nil {
+            let read = listWindows()
+            listed = read
+            trackedAtRead = Set(read.map(\.number).filter(tracks))
+        }
         return listed ?? []
     }
 
+    /// Moves a listed window to the bounds its own event reported
+    /// (CG coordinates), or drops it where `frame` is nil — it
+    /// hid or closed. True where the cache changed.
+    func noteListedWindow(_ number: CGWindowID, frame: CGRect?) -> Bool {
+        guard var all = listed,
+            let index = all.firstIndex(where: { $0.number == number })
+        else { return false }
+        if let frame {
+            guard all[index].frame != frame else { return false }
+            let old = all[index]
+            all[index] = FloatDetection.ListedWindow(
+                number: old.number,
+                pid: old.pid,
+                layer: old.layer,
+                frame: frame
+            )
+        } else {
+            all.remove(at: index)
+        }
+        listed = all
+        return true
+    }
+
+    /// Whether an event owed the list a fresh read before the next
+    /// re-mask (`KiwiCore.oweVisionReshape`).
+    var listOwed = false
+
     /// Drops the cached list: no mask reads it.
-    func forgetListedWindows() { listed = nil }
+    func forgetListedWindows() {
+        listed = nil
+        trackedAtRead = []
+    }
     #if DEBUG
         /// Test-only: builds plate backends. Every test core sets
         /// it to the inert plate, so a real panel needs its own
@@ -168,12 +208,22 @@ public final class VisionManager {
         let shape = VisionMask.path(
             screen: screen.frame,
             clearWallpaper: request.clearWallpaper,
-            windows: request.windows,
-            cornerRadius: request.cornerRadius
+            windows: request.windows
         )
         guard shapes[screen.display] != .some(shape) else { return }
         shapes[screen.display] = .some(shape)
         plate.reshape(shape)
+    }
+
+    /// Re-masks every shown plate to `request`, ordering nothing:
+    /// a window moved under a standing plate.
+    func reshapeShown(_ request: Request) {
+        guard isOn else { return }
+        for screen in request.screens {
+            guard let plate = plates[screen.display], plate.isShown
+            else { continue }
+            reshape(plate, on: screen, request)
+        }
     }
 
     /// Re-stacks every shown plate after the target's reorder
@@ -195,6 +245,7 @@ public final class VisionManager {
         plates = [:]
         stackedUnder = [:]
         shapes = [:]
+        forgetListedWindows()
         target = nil
         below = nil
     }

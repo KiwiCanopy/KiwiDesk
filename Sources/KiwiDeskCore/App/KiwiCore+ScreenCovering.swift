@@ -123,8 +123,15 @@ extension KiwiCore {
     /// never a presentation, and a moving ring's panel spans its
     /// screen (#1937). The live default of `frontWindowFrames`.
     static func liveFrontFrames() -> [CGRect] {
+        liveFrontWindows().filter { $0.layer == 0 }.map(\.frame)
+    }
+
+    /// Every visible window front to back, any layer, KiwiDesk's
+    /// chrome left out — the one front-to-back read; a consumer
+    /// filters the layers it needs (KiwiVision's mask, #2103).
+    static func liveFrontWindows() -> [FloatDetection.ListedWindow] {
         let own = getpid()
-        return FloatDetection.frontToBackNormalFrames { pid, number in
+        return FloatDetection.frontToBackWindows { pid, number in
             pid == own && EventLoop.isOwnChrome(number: number)
         }
     }
