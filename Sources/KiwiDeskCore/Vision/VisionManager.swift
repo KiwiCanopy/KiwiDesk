@@ -40,8 +40,9 @@ public final class VisionManager {
     public var onChange: @MainActor (Bool) -> Void = { _ in }
     var plates: [DisplayID: any VisionPlateBackend] = [:]
     /// The target each plate was last ordered below: a plate
-    /// re-stacks only when the focus moves, a settle pass asks or
-    /// the target's own reorder event fires, since every order is
+    /// re-stacks only when the focus moves, a settle pass asks, the
+    /// target's own reorder event fires or a float lands, since
+    /// every order is
     /// a WindowServer round trip on the switch path (#1925).
     private var stackedUnder: [DisplayID: CGWindowID] = [:]
     /// The window the plates keep clear, as the last sync read it.

@@ -193,3 +193,7 @@ with or without glow
 swipe let go before Mission Control opens leaves the ring drawn
 until the swipe ends
 ([#1921](https://github.com/KiwiCanopy/KiwiDesk/issues/1921)).
+
+:::unreleased
+With KiwiVision on, the window you move the focus away from stays clear for a split second — about 40–60 ms — after you click or switch, until KiwiDesk hears that the focus moved ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)). A floating window shows it most, since it sits on top. macOS reports a focus change through Accessibility only after the window has come forward.
+:::

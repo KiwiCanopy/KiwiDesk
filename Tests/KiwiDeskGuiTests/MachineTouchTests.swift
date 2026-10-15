@@ -226,10 +226,15 @@ struct MachineTouchTests {
     /// added as a *new* symbol in one twin only would slip a
     /// narrower net. The twins' only legitimate differences are
     /// doc comments, which the normalization strips.
-    @Test("the makeTestCore twins are identical")
-    func testCoreTwins() throws {
+    @Test(
+        "the makeTestCore twins are identical",
+        arguments: [
+            MachineTouchTests.coreFactory, "TestCoreTripwires.swift",
+        ]
+    )
+    func testCoreTwins(file: String) throws {
         let twins = Self.testTrees.map {
-            $0.appendingPathComponent(Self.coreFactory)
+            $0.appendingPathComponent(file)
         }
         let normalized = try twins.map {
             try SourceScan.normalizedFile($0)
@@ -239,7 +244,7 @@ struct MachineTouchTests {
         #expect(!normalized.contains(""))
         #expect(
             normalized[0] == normalized[1],
-            "makeTestCore twins drifted — desynced seams"
+            "\(file) twins drifted — desynced seams"
         )
     }
 

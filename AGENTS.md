@@ -1559,10 +1559,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 
 Touching `Borders`, `Vision`.
 
-- A float the float tier lifts above the focus wears KiwiVision's veil on a
-  panel of its own, above its earliest-ordered chrome and sized to its ring's
-  outline, from the one `floatsAboveFocus` the raise reads (#2103,
-  `KiwiVisionFloatTests`, `FloatVeilWiringTests`)
+- Floats are dimmed by the plate, never by panels of their own: while a plate
+  shows, a float's landing re-stacks the target's overlays through the one
+  watch door (#2103, `KiwiVisionFloatLandingTests`)
 - A ring stays on its window's Desktop and spans every Desktop only while its
   window is carried, the sticky mark always spanning, and a ring is re-homed
   through `BorderOverlay` only where it stopped spanning or `sync` orders it on
@@ -1923,7 +1922,8 @@ Touching `Tests/**`.
 - split suites early
 - generous hang-guards, never tight deadlines (#344)
 - reach the machine only through injected seams (hotkeys #565, menu-bar slots —
-  `MachineTouchTests`, `StatusItemSeamGuardTests`)
+  `MachineTouchTests`, `StatusItemSeamGuardTests`; the live app list, an
+  attach to or frame for another app refused — #2289, `LiveAppListSeamTests`)
 - a change owes a test that reds when it is reverted, and a test whose
   assertions are new or changed owes a `guard-prover` run whatever shape that
   test is — spawned `isolation: "worktree"`, or run alone

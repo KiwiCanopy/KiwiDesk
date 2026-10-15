@@ -61,9 +61,9 @@ extension KiwiCore {
     /// EFFECTIVE float, never a tiled slot a gapless layout may
     /// size to a screen, and never native fullscreen, which its
     /// own exemption owns. Ruled onto it: the focus ring, the
-    /// on-window marks, KiwiVision's float veils and the #1161
-    /// placement bounce (`PresentingReaderTests`), and
-    /// `explain_window` reports it (#1685). A raw `covers` /
+    /// on-window marks and the #1161 placement bounce
+    /// (`PresentingReaderTests`), and `explain_window` reports it
+    /// (#1685). A raw `covers` /
     /// `coversAScreen` caller is a register entry in
     /// `ScreenCoveringCallerCensusTests`. Ruled to STAY on
     /// native fullscreen's skips alone: the inactive-Space
