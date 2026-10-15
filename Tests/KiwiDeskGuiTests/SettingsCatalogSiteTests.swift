@@ -112,7 +112,8 @@ struct SettingsCatalogSiteTests {
         // 141 since #1870: Shortcuts' Hyper key card.
         // 143 since #1685: the AI page's migration and app rules
         // prompt rows.
-        #expect(names.count == 143)
+        // 145 since #2103 v2: KiwiVision's Stays clear card and row.
+        #expect(names.count == 145)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

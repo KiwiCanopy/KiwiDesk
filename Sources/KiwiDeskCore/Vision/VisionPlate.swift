@@ -9,6 +9,10 @@ protocol VisionPlateBackend: AnyObject {
     /// Covers `frame` (AppKit coordinates) at `dim`, 0...1, over
     /// a blur of what lies beneath where `blur`.
     func update(frame: CGRect, dim: CGFloat, blur: Bool)
+    /// Masks the plate to `path` (its own coordinates), nil for
+    /// the whole screen. Never orders: a mask follows every pass,
+    /// and an order is a WindowServer round trip (#1925).
+    func reshape(_ path: CGPath?)
     /// Orders the plate in directly below `window`.
     func order(below window: CGWindowID)
     /// Fades the plate in unless `reduceMotion`.
@@ -48,6 +52,8 @@ final class AppKitVisionPlate: VisionPlateBackend {
         var blurShown: Bool { veil.blurShown }
         /// Whether the dim draws above the blur.
         var dimAboveBlur: Bool { veil.dimAboveBlur }
+        /// The mask the content takes, nil while it draws whole.
+        var maskPath: CGPath? { veil.maskPath }
     #endif
 
     func update(frame: CGRect, dim: CGFloat, blur: Bool) {
@@ -57,6 +63,10 @@ final class AppKitVisionPlate: VisionPlateBackend {
             panel.setFrame(frame, display: false)
         }
         veil.update(size: frame.size, dim: dim, blur: blur, cornerRadius: 0)
+    }
+
+    func reshape(_ path: CGPath?) {
+        veil.mask(path)
     }
 
     /// AppKit's order: WindowServer applies no SkyLight order to
@@ -158,6 +168,32 @@ final class VisionVeil {
         CATransaction.commit()
         if blurView.isHidden == blur { blurView.isHidden = !blur }
     }
+
+    /// Clips the dim and the blur to `path`, nil for the whole
+    /// view: a layer mask on the content clips a behind-window
+    /// blur too, Liquid Glass and `hud` alike (v2 probe P8).
+    func mask(_ path: CGPath?) {
+        guard let layer = view.layer else { return }
+        guard let path else {
+            layer.mask = nil
+            return
+        }
+        let shape = (layer.mask as? CAShapeLayer) ?? CAShapeLayer()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        shape.frame = layer.bounds
+        shape.fillColor = NSColor.black.cgColor
+        shape.path = path
+        CATransaction.commit()
+        if layer.mask !== shape { layer.mask = shape }
+    }
+
+    #if DEBUG
+        /// The mask's path, nil while the veil draws whole.
+        var maskPath: CGPath? {
+            (view.layer?.mask as? CAShapeLayer)?.path
+        }
+    #endif
 
     /// Fades the veil to `target` opacity, cut in under Reduce
     /// Motion, then calls `done`.

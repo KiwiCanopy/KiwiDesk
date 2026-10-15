@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The KiwiVision page (#2103 ▸ the Settings area ruling): how to
-/// turn it on, then its two cards; the picture is the side
+/// turn it on, then its three cards; the picture is the side
 /// panel's (`KiwiVisionPanelPreview`). Every row is app-wide and
 /// written at once (#1741). v3's lens strip lands above the
 /// pointer line, which belongs to the Focused window body.
@@ -14,6 +14,7 @@ struct KiwiVisionSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 KiwiVisionPointer(model: model)
                 KiwiVisionLevelsCard(model: model)
+                KiwiVisionClearCard(model: model)
                 KiwiVisionAppearanceCard(model: model)
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)

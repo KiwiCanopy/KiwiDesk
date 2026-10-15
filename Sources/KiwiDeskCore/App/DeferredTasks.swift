@@ -87,6 +87,9 @@ final class DeferredTasks {
         /// The Hyper key's remap after its value changed (#1870),
         /// coalesced so a reload remaps once.
         case hyperRemap
+        /// Re-masks KiwiVision's plates after windows moved or the
+        /// list went stale (#2103 ruling 21), coalesced.
+        case visionMask
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -105,7 +108,7 @@ final class DeferredTasks {
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
-                .menuBarRevealReturn, .hyperRemap:
+                .menuBarRevealReturn, .hyperRemap, .visionMask:
                 return false
             }
         }

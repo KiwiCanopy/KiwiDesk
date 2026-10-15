@@ -177,6 +177,7 @@ func makeTestCore(
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
     core.windowIsOnScreen = { _ in nil }
     core.windowIsOnShownDesktop = { _ in nil }
+    core.vision.listWindows = { [] }
     core.desktopMemory.readCensus = { _ in nil }
     // Same class, seventh time (#1147): the Desktop stamp write
     // defaults LIVE, and a fixture space id is a real Desktop id

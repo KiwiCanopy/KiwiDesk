@@ -28,8 +28,14 @@ extension KiwiCore {
         windowServer.connect(
             .vision,
             WindowServerWatch.Hooks(
+                frame: { [weak self] id, frame, _ in
+                    self?.visionListedWindowChanged(id, frame: frame)
+                },
                 restack: { [weak self] id in
                     self?.visionWindowRestacked(id)
+                },
+                hide: { [weak self] id in
+                    self?.visionListedWindowChanged(id, frame: nil)
                 }
             )
         )

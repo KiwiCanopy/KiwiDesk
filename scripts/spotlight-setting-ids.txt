@@ -67,6 +67,7 @@ appWide.refusalSound
 appWide.spaceCue
 appWide.visionAppearance
 appWide.visionBlur
+appWide.visionClearWallpaper
 appWide.visionDim
 config.appRules[app]
 config.desktopShortcutBase

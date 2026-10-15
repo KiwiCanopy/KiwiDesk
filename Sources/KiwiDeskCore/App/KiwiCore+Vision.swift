@@ -46,6 +46,11 @@ extension KiwiCore {
             setAppWide(persisting: false) {
                 $0.visionAppearance = appearance
             }
+        case "kiwivision.set_clear_wallpaper":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            setAppWide(persisting: false) { $0.visionClearWallpaper = on }
         default:
             return .fail("unknown command: \(command)")
         }
@@ -67,18 +72,29 @@ extension KiwiCore {
             vision.isOn || vision.hasShownPlates
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
-        var request = visionRequest()
-        // Watched whether or not a ring or a mark asks (#2103), the
-        // float tier too: a float landing re-stacks the plate.
-        windowServer.request(
-            vision.isOn && request.target != nil
-                ? Set(floatLayerTargets()).union(
-                    request.target.map { [WindowID($0)] } ?? []
-                ) : [],
-            for: .vision
-        )
+        var request = visionRequest(refreshingList: reassertOrder)
+        if !visionMasks { vision.forgetListedWindows() }
+        requestVisionWindows(target: request.target)
         request.tracked = windowServer.isActive
         vision.sync(request, reassert: reassertOrder)
+    }
+
+    /// KiwiVision's WindowServer request: the target and the float
+    /// tier — a float landing re-stacks the plate — whether or not
+    /// a ring or a mark asks (#2103), and the other apps' windows a
+    /// mask draws, so their moves re-mask it. Hearing them costs one
+    /// bounds read per move event, as a ring's does; with borders
+    /// off the target and the floats pay it too, accepted while a
+    /// mask is drawn.
+    func requestVisionWindows(target: CGWindowID? = nil) {
+        let target = target ?? vision.target
+        windowServer.request(
+            vision.isOn && target != nil
+                ? Set(floatLayerTargets())
+                    .union(target.map { [WindowID($0)] } ?? [])
+                    .union(visionMaskListedIDs()) : [],
+            for: .vision
+        )
     }
 
     /// Whether the plate draws its blur now: the stored switch,
@@ -114,6 +130,12 @@ extension KiwiCore {
         }
         // Stood down, the restack would order the ring for nothing.
         guard vision.hasShownPlates else { return }
+        // Another app's window a mask draws: its order changed the
+        // mask, never the plate's place (#2103 ruling 21).
+        guard state.windows[id] != nil else {
+            oweVisionReshape(list: true)
+            return
+        }
         windowServer.restack(WindowID(target))
     }
 
@@ -127,7 +149,9 @@ extension KiwiCore {
     /// ring's focused window, or an own key window that is not it
     /// — a dialog, Sparkle's alert — which stays clear the way
     /// it stands the focused ring down (#933).
-    func visionRequest() -> VisionManager.Request {
+    func visionRequest(
+        refreshingList: Bool = false
+    ) -> VisionManager.Request {
         let anchor = activeSpace.flatMap {
             state.focusAnchor(
                 of: $0,
@@ -151,7 +175,13 @@ extension KiwiCore {
             standDown: vision.standDown,
             tracked: windowServer.isActive,
             dim: CGFloat(appWide.visionDim / 100),
-            blur: kiwiVisionDrawsBlur
+            blur: kiwiVisionDrawsBlur,
+            clearWallpaper: visionMasks,
+            windows: visionMasks
+                ? visionMaskWindows(
+                    target: target,
+                    refreshingList: refreshingList
+                ) : []
         )
     }
 }

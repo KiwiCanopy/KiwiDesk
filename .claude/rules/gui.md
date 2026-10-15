@@ -585,8 +585,9 @@ it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
 Layouts, Profiles, Screens, Behaviour, the Mac Checklist, AI and
 KiwiVision render from it now** (#678 Phases 2-3; #1365; #1685;
-#2103 — both KiwiVision cards walk their lists,
-`KiwiVisionCensusRenderTests` ▸ `levelsCardWiring`): each
+#2103 — every KiwiVision card walks its list,
+`KiwiVisionCensusRenderTests` ▸ `levelsCardWiring`,
+`clearCardWiring`): each
 carries its own order list and a census-render suite pinning that
 order to the census (`MacChecklistRowOrder` /
 `MacChecklistCensusRenderTests` is the worked pair; its
