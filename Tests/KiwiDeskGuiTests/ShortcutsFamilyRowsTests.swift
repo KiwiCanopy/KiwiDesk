@@ -71,6 +71,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.spaceHistory),
             .shortcuts(.modeCycle),
             .shortcuts(.modeCue),
+            .shortcuts(.hyperKey),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {

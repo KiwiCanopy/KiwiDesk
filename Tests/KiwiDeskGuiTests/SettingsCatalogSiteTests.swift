@@ -109,9 +109,10 @@ struct SettingsCatalogSiteTests {
         // 134 since #2265: Shortcuts' KiwiHub group.
         // 135 since #1685: the AI page's look prompt row.
         // 140 since #2103: KiwiVision's five declarations.
-        // 142 since #1685: the AI page's migration and app rules
+        // 141 since #1870: Shortcuts' Hyper key card.
+        // 143 since #1685: the AI page's migration and app rules
         // prompt rows.
-        #expect(names.count == 142)
+        #expect(names.count == 143)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

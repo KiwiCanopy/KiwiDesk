@@ -4,7 +4,8 @@ import Foundation
 /// (`⇧⌘,`, `⌃⌥←`, #23).
 ///
 /// Modifiers appear in canonical `⌃⌥⇧⌘` order with no `+` delimiter
-/// (#23). Printable characters resolve via active layout
+/// (#23), KiwiDesk's own Hyper `✦` ahead of them (#1870).
+/// Printable characters resolve via active layout
 /// (`UCKeyTranslate`).
 public enum ComboSymbols {
     /// Renders combo into native glyph string using provided layout
@@ -23,12 +24,16 @@ public enum ComboSymbols {
         _ modifiers: HotkeyModifiers
     ) -> String {
         var out = ""
+        if modifiers.contains(.hyper) { out += hyperGlyph }
         if modifiers.contains(.control) { out += "⌃" }
         if modifiers.contains(.option) { out += "⌥" }
         if modifiers.contains(.shift) { out += "⇧" }
         if modifiers.contains(.command) { out += "⌘" }
         return out
     }
+
+    /// The Hyper modifier's glyph (#1870); macOS has none.
+    public static let hyperGlyph = "✦"
 
     /// Capitalises character if character count remains 1
     /// (avoids German `ß` -> `SS`).

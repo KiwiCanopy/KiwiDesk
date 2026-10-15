@@ -156,7 +156,7 @@ struct ScrollChordRecorderField: View {
             commit(recorded)
         case .clickAway:
             cancelledByClick = Date()
-        case .cancelled, .chord:
+        case .cancelled, .chord, .sourceKey:
             break
         }
     }

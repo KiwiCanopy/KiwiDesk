@@ -42,6 +42,8 @@ struct ShortcutsJumpTests {
             .layers,
             // The tail's Lua drawer and the header's restore row.
             .luaBindings, .defaultShortcuts,
+            // One row above the first chip's card (#1870).
+            .hyperKey,
         ]
         let chipped = Set(ShortcutsJumpGroup.allCases.map(\.container))
         let rendered = ShortcutsCensusRenderTests.containers(

@@ -23,6 +23,21 @@ struct SpokenKeyboardBoard: View {
     /// without the words would draw an outline saying nothing,
     /// which is #1126's harm in a new place.
     let conflictDetail: [String]
+    /// The Hyper key, marked ✦ on its cap (#1870).
+    var hyperKey: HyperSourceKey?
+
+    /// The Hyper key's spoken name where the board draws its ✦,
+    /// nil where it draws none (#1870) — the cap's own predicate.
+    @MainActor
+    static func hyperName(
+        _ key: HyperSourceKey?,
+        on type: KeyboardMatrix.PhysicalType
+    ) -> String? {
+        guard let key, KeyboardMatrix.draws(key, on: type) else {
+            return nil
+        }
+        return HyperKeyWords.name(key)
+    }
 
     private var scopeLabel: String {
         switch scope {
@@ -38,7 +53,8 @@ struct SpokenKeyboardBoard: View {
             claims: claims,
             scope: scope,
             conflicted: conflicted,
-            onHover: onHover
+            onHover: onHover,
+            hyperKey: hyperKey
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
@@ -51,6 +67,7 @@ struct SpokenKeyboardBoard: View {
                 ),
                 scopeLabel: scopeLabel,
                 layerLabel: layerLabel,
+                hyperName: Self.hyperName(hyperKey, on: type),
                 conflictDetail: conflictDetail
             )
         )
@@ -104,6 +121,7 @@ enum KeyboardBoardSpoken {
         buckets: Buckets,
         scopeLabel: String,
         layerLabel: String?,
+        hyperName: String?,
         conflictDetail: [String]
     ) -> String {
         var parts = [
@@ -119,6 +137,16 @@ enum KeyboardBoardSpoken {
                     "keyboard.ax.layer",
                     "In the \u{201C}%1$@\u{201D} layer.",
                     layerLabel
+                )
+            )
+        }
+        // The cap the board marks ✦ (#1870), spoken as drawn.
+        if let hyperName {
+            parts.append(
+                L(
+                    "keyboard.ax.hyper",
+                    "The Hyper key is %1$@.",
+                    hyperName
                 )
             )
         }

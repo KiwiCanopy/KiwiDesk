@@ -44,6 +44,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case monocle
     case motion
     case gestures
+    /// The Hyper key's one row, above the layer header (#1870).
+    case hyperKey
     case moveWindows
     case openApplications
     case optionalSettings
@@ -98,7 +100,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .layout,
             .looks, .luaBindings,
-            .screenFingerprints, .monocle, .gestures,
+            .screenFingerprints, .monocle, .gestures, .hyperKey,
             .moveWindows, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedScreens, .presets,
