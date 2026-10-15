@@ -132,6 +132,37 @@ struct VisionMaskTests {
         }
     }
 
+    /// Behind the last hole every window is hazed where seen, and
+    /// a clear window covered by a hazed one in front stays hazed
+    /// there: the walk that stops at the last hole loses nothing.
+    @Test("windows behind the last hole stay hazed where seen")
+    func walkStopsAtTheLastHole() throws {
+        let front = CGRect(x: 1000, y: 0, width: 200, height: 600)
+        let clear = CGRect(x: 1100, y: 100, width: 300, height: 300)
+        let behind = CGRect(x: 1300, y: 200, width: 300, height: 300)
+        for wallpaper in [true, false] {
+            let path = try shape(
+                [
+                    window(front, radius: 0),
+                    window(clear, clear: true, radius: 0),
+                    window(behind, radius: 0),
+                ],
+                clearWallpaper: wallpaper
+            )
+            #expect(path.contains(CGPoint(x: 150, y: 200)), "front")
+            #expect(!path.contains(CGPoint(x: 300, y: 200)), "the hole")
+            #expect(
+                !path.contains(CGPoint(x: 350, y: 300)),
+                "behind, under the hole"
+            )
+            #expect(path.contains(CGPoint(x: 550, y: 450)), "behind")
+            #expect(
+                path.contains(CGPoint(x: 700, y: 550)) == !wallpaper,
+                "the wallpaper"
+            )
+        }
+    }
+
     @Test("a window on another screen draws nothing here")
     func otherScreenSkipped() throws {
         let path = try shape([

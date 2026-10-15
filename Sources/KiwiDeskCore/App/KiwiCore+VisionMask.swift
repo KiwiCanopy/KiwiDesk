@@ -7,8 +7,13 @@ import AppKit
 extension KiwiCore {
     /// Whether the plates draw a mask rather than the whole screen.
     var visionMasks: Bool {
-        vision.isOn
-            && (appWide.visionClearWallpaper || appWide.visionClearApp)
+        visionClearsWallpaper || (vision.isOn && appWide.visionClearApp)
+    }
+
+    /// Whether the wallpaper stays clear now — the one reading the
+    /// request's flag and the mask gate share.
+    var visionClearsWallpaper: Bool {
+        vision.isOn && appWide.visionClearWallpaper
     }
 
     /// The windows below the plates, front to back, in AppKit
@@ -29,6 +34,7 @@ extension KiwiCore {
     /// path: a member takes the ring's cached reading there.
     func visionMaskWindows(
         target: CGWindowID?,
+        targetPid: pid_t?,
         refreshingList: Bool
     ) -> [VisionMask.Window] {
         var members: [WindowID] = []
@@ -67,25 +73,37 @@ extension KiwiCore {
             else { continue }
             ordered.append((id, entry.frame, entry.pid))
         }
-        let clearApp = visionClearAppPid(target: target)
+        let clear = visionClearPids(
+            target: targetPid,
+            among: Set(ordered.map(\.pid))
+        )
         let height = GeometryUtils.primaryHeight
         return ordered.map { id, frame, pid in
             VisionMask.Window(
                 frame: GeometryUtils.flip(frame, primaryHeight: height),
                 cornerRadius: vision.listedRadii[id.raw]
                     ?? windowRadius(id, reading: refreshingList),
-                clear: clearApp.map { eventLoop.names($0, appOf: pid) }
-                    ?? false
+                clear: clear.contains(pid)
             )
         }
     }
 
-    /// The target's process while "the current app's other
-    /// windows" is on: a tracked target's, else this one's — the
-    /// target is then an own key window. Nil while off.
-    private func visionClearAppPid(target: CGWindowID?) -> pid_t? {
-        guard appWide.visionClearApp, let target else { return nil }
-        return state.windows[WindowID(target)]?.pid ?? getpid()
+    /// The processes whose windows stay clear this pass: with "the
+    /// current app's other windows" on, every one of `pids` that
+    /// names the target's app — the one identity door, read from
+    /// what attach filed and never LaunchServices (#1785, #1936).
+    /// Decided once per pass, per process; a further clear source
+    /// (Always clear, a lens) joins here.
+    func visionClearPids(
+        target: pid_t?,
+        among pids: Set<pid_t>
+    ) -> Set<pid_t> {
+        guard appWide.visionClearApp, let target, target > 0 else {
+            return []
+        }
+        return pids.filter {
+            eventLoop.names(target, appOf: $0, lookingUp: false)
+        }
     }
 
     /// A window's corner radius: the ring's reading, read from the

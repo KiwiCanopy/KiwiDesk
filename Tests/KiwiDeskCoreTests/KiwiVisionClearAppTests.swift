@@ -46,8 +46,12 @@ struct KiwiVisionClearAppTests {
     }
 
     private func clearIDs(_ core: KiwiCore) -> [Bool] {
-        core.visionMaskWindows(target: focused.raw, refreshingList: true)
-            .map(\.clear)
+        core.visionMaskWindows(
+            target: focused.raw,
+            targetPid: samePid,
+            refreshingList: true
+        )
+        .map(\.clear)
     }
 
     @Test("gui.json stores clear_app; its absence reads off")
@@ -120,8 +124,60 @@ struct KiwiVisionClearAppTests {
         }
         let windows = core.visionMaskWindows(
             target: focused.raw,
+            targetPid: samePid,
             refreshingList: true
         )
         #expect(windows.map(\.clear) == [true, false, true, false])
+    }
+
+    /// An app running as two processes (#1785): the child filed as
+    /// unlisted under the target's bundle is the same app, read from
+    /// what attach filed, never LaunchServices.
+    @Test("a sibling process's window is clear")
+    func siblingProcessIsClear() {
+        let core = makeCore()
+        core.setAppWide(persisting: false) { $0.visionClearApp = true }
+        let child: pid_t = 900_004
+        let bundle = AppRef(bundleID: "test.kiwi.profiles", name: "P")
+        core.eventLoop.processIdentity.note(
+            RunningApp(pid: samePid, activationPolicy: .regular, ref: bundle)
+        )
+        core.eventLoop.processIdentity.record(
+            RunningApp(pid: child, activationPolicy: .regular, ref: bundle)
+        )
+        var lookups: [pid_t] = []
+        core.eventLoop.processIdentity.appAt = { pid in
+            lookups.append(pid)
+            return nil
+        }
+        #expect(
+            core.visionClearPids(
+                target: child,
+                among: [samePid, child, otherPid]
+            ) == [samePid, child]
+        )
+        #expect(lookups.isEmpty, "the pass asks LaunchServices nothing")
+    }
+
+    /// An own key window is the target — a dialog — and its app is
+    /// this one: the tiled Settings window, tracked under this
+    /// process, stays clear.
+    @Test("an own key window's app is KiwiDesk")
+    func ownKeyWindowNamesThisProcess() {
+        let core = makeCore()
+        let settings = WindowID(4)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: settings, pid: getpid(), appName: "Kiwi")
+            )
+        )
+        core.eventLoop.ownKeyWindow = {
+            OwnKeyWindowReading(number: 777_777, isDialog: true)
+        }
+        core.setAppWide(persisting: false) { $0.visionClearApp = true }
+        core.vision.isOn = true
+        let windows = core.visionRequest().windows
+        #expect(windows.filter(\.clear).count == 1)
+        #expect(windows.count == 4, "the focus is behind the dialog")
     }
 }

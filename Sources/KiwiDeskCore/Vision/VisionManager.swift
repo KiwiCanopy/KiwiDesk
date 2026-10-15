@@ -54,6 +54,15 @@ public final class VisionManager {
     /// The mask each plate last took, so a pass that leaves it
     /// alone sets nothing.
     private var shapes: [DisplayID: CGPath?] = [:]
+    /// What each plate's shape was built from: an unchanged input
+    /// builds nothing, since a hole costs path booleans per window.
+    private var shapeInputs: [DisplayID: ShapeInput] = [:]
+
+    private struct ShapeInput: Equatable {
+        var screen: CGRect
+        var clearWallpaper: Bool
+        var windows: [VisionMask.Window]
+    }
     /// The window the plates keep clear, as the last sync read it.
     private(set) var target: CGWindowID?
     /// What the plates stack under, as the last sync read it: the
@@ -171,6 +180,7 @@ public final class VisionManager {
             plates[display] = nil
             stackedUnder[display] = nil
             shapes[display] = nil
+            shapeInputs[display] = nil
         }
         target = request.target
         below = request.target.map { request.below ?? $0 }
@@ -220,10 +230,17 @@ public final class VisionManager {
         on screen: (display: DisplayID, frame: CGRect),
         _ request: Request
     ) {
-        let shape = VisionMask.path(
+        let input = ShapeInput(
             screen: screen.frame,
             clearWallpaper: request.clearWallpaper,
             windows: request.windows
+        )
+        guard shapeInputs[screen.display] != input else { return }
+        shapeInputs[screen.display] = input
+        let shape = VisionMask.path(
+            screen: input.screen,
+            clearWallpaper: input.clearWallpaper,
+            windows: input.windows
         )
         guard shapes[screen.display] != .some(shape) else { return }
         shapes[screen.display] = .some(shape)
@@ -260,6 +277,7 @@ public final class VisionManager {
         plates = [:]
         stackedUnder = [:]
         shapes = [:]
+        shapeInputs = [:]
         forgetListedWindows()
         target = nil
         below = nil
