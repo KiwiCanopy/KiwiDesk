@@ -32,17 +32,20 @@ public struct FloatRules: Sendable, Equatable {
 
     /// Rules as normalized for matching and config seeding.
     public var rawRules: [String] {
-        rules.map { rule in
-            rule.title.map { "\(rule.app):\($0)" } ?? rule.app
-        }
+        rules.map(Self.spelled)
     }
 
     /// `bundleID`'s own rules, spelled as `rawRules` spells them.
     public func rules(of bundleID: String) -> [String] {
         let app = bundleID.lowercased()
-        return rules.filter { $0.app == app }.map { rule in
-            rule.title.map { "\(rule.app):\($0)" } ?? rule.app
-        }
+        return rules.filter { $0.app == app }.map(Self.spelled)
+    }
+
+    /// A rule as `app` or `app:title`, the grammar `init` parses.
+    private static func spelled(_ rule: (app: String, title: String?))
+        -> String
+    {
+        rule.title.map { "\(rule.app):\($0)" } ?? rule.app
     }
 
     /// Cheap gate before title-change float detection.
