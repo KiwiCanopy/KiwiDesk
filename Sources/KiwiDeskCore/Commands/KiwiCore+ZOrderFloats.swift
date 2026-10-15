@@ -64,19 +64,26 @@ extension KiwiCore {
             generation: generation
         ) {
             [weak self] in
-            guard let self,
-                generation == self.zOrderRaiseGeneration.value
-            else { return }
-            // The anchor, not `activeSpace?.focused`: a sticky
-            // traveler homed elsewhere is never that slot (#1727).
-            if let focused, focused == self.focusedWindowID {
-                self.focusWindow(
-                    focused,
-                    refocusRetile: false,
-                    warp: false
-                )
-            }
+            self?.landFloatRaise(
+                thenFocus: focused,
+                generation: generation
+            )
         }
+    }
+
+    /// The raise sequence's landing: hands focus back and re-stacks
+    /// the anchor's ring, which a float landing directly under the
+    /// frontmost window separated from that window (#2284). A
+    /// stale sequence does neither.
+    func landFloatRaise(thenFocus focused: WindowID?, generation: Int) {
+        guard generation == zOrderRaiseGeneration.value else {
+            return
+        }
+        // The anchor, not `activeSpace?.focused`: a sticky
+        // traveler homed elsewhere is never that slot (#1727).
+        guard let focused, focused == focusedWindowID else { return }
+        focusWindow(focused, refocusRetile: false, warp: false)
+        borders.restack(focused)
     }
 
     /// The #412 raise a Space LANDING owes once its own retile

@@ -31,6 +31,11 @@ struct BorderOrderCensusTests {
                 + "and unhide events (#2275)"
         ),
         "BorderManager+DeadEnd.swift": (1, "the transient dead-end ring"),
+        "BorderManager.swift": (
+            1,
+            "`restack`, the anchor's ring once the float-tier "
+                + "raise lands (#2284)"
+        ),
     ]
 
     @Test("only the ruled sites order a ring")

@@ -173,7 +173,12 @@ these:
   only from a ruled trigger** — `sync`'s `ordersOverlay` gate
   (`needsOrder`, a settle pass, no WindowServer stream), the
   WindowServer reorder and unhide events, the unhide's restore of
-  visibility, and the dead-end ring. A new caller is a new round
+  visibility, the dead-end ring, and the float-tier raise's
+  landing, which re-stacks the anchor's shown ring once — a float
+  the raise cannot lift over the frontmost window lands between
+  that window and its ring, and its reorder event re-stacks only
+  its own (#2284, `FloatRaiseRingRestackTests`,
+  `FloatRaiseLandingWiringTests`). A new caller is a new round
   trip on the switch path and owes its ruling in
   `BorderOrderCensusTests`' `allowed` map; a front-order ring's
   level read is a second one (`levelOf`). The order is AppKit's
