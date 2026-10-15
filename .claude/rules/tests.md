@@ -706,6 +706,16 @@ bootstrap (`wireOwnKeyWindowRefresh`) is the same class without a
 read: any window turning key in the test process re-synced every
 live core's rings, so both twins unhook it and only its own suite
 re-wires (#1971's flake, `KeyWindowStreamPinTests`).
+The app list every scan, reconcile and heal walks
+(`EventLoop.runningApplications`) is the same class with a frame
+write at the end of it: a suite that marked its loop running and
+loaded a config attached every real app, and the retile resized
+the developer's windows (#2289). Both twins pin the list empty,
+and wrap the applier's element read so a frame aimed at a window
+of another running app is refused and records an issue, whatever
+route found it (`LiveAppListSeamTests`). A suite that wants an
+app states it; a new AX write path outside the frame applier owes
+the same refusal.
 `MouseButtonSeamGuardTests` holds each read to its homes AND
 every pin into both twins, a deletion from both being silent
 otherwise; it is a sibling of `MachineTouchTests`
