@@ -55,6 +55,11 @@ struct AICapabilitiesCard: View {
                     + "list."
             ),
             L(
+                "ai.capability.diagnose",
+                "Explain why a window floats, tiles or opens where it "
+                    + "does."
+            ),
+            L(
                 "ai.capability.inspect",
                 "See your Spaces and windows, and look up any "
                     + "command."

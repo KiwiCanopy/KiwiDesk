@@ -130,7 +130,7 @@ struct MCPToolsEdgeTests {
             Set(names) == [
                 "list_commands", "help", "get_state", "run",
                 "run_batch", "run_destructive", "keep", "looks",
-                "app_rules",
+                "app_rules", "diagnose_window",
             ]
         )
         #expect(Set(names).count == names.count)

@@ -14,6 +14,8 @@ extension KiwiCore {
     /// ops, reads, or explicit-id App Bar actions — only the
     /// commands `FocusedCommandPolicy` classifies as focused, and
     /// of those only a call that names no window (#1518).
+    /// `explain_window` is the one read among them: it must not
+    /// explain a stale focus anchor (#1685).
     ///
     /// Foreground ownership requires ALL of:
     /// 1. `focusedWindow` (the focus ANCHOR, `focusedWindowID`, so a

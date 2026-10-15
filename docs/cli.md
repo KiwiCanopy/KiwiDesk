@@ -177,7 +177,7 @@ or walks you through it. The same page has ready-made prompts that
 have the AI app ask you what you want, one question at a time.
 
 The server speaks MCP `2026-07-28` and, after an `initialize`,
-`2025-11-25` and `2025-06-18`. It offers nine tools:
+`2025-11-25` and `2025-06-18`. It offers ten tools:
 
 | Tool | Does |
 |---|---|
@@ -190,6 +190,7 @@ The server speaks MCP `2026-07-28` and, after an `initialize`,
 | `keep` | Makes this session's setting changes permanent |
 | `looks` | The `look.*` verbs as one tool: list, inspect, wear and save looks |
 | `app_rules` | The `app_rule.*` verbs as one tool: list app rules, and set or remove which Space an app opens in and which windows float |
+| `diagnose_window` | Why a window floats, tiles or opens where it does: `explain_window` for a window, `explain_app` for an app whose window KiwiDesk does not manage |
 
 `list_commands` and `help` answer without the app; the others
 need it running. A command `list_commands --json` marks
@@ -208,6 +209,12 @@ never reads the wallpaper itself.
 
 `app_rules` takes the same shape over the `app_rule.*` verbs. An app
 is named by the `bundle_id` `get_state` lists for its windows.
+
+`diagnose_window` takes exactly one of `window` (an id from
+`get_state`'s `windows`) or `app` (a bundle id), and sends
+`explain_window` or `explain_app`
+([`explain_window`](lua-reference.md#explain_window)); `window` has
+no focused-window default here.
 
 A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where
@@ -391,6 +398,13 @@ write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 `app_rule.remove_space <app>`, `app_rule.set_float <app> [title]`
 and `app_rule.remove_float <app> [title]` change the app rules live
 ([App rule verbs](lua-reference.md#app-rule-verbs)).
+:::
+
+:::unreleased
+`explain_window [window]` says why a window floats or tiles and
+what would change it; `explain_app <bundle_id>` says what KiwiDesk
+knows of an app whose window it does not list
+([`explain_window`](lua-reference.md#explain_window)).
 :::
 
 | Category | Command | Arguments |

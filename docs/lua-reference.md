@@ -6614,7 +6614,8 @@ carry `track_breaks` (ids of the windows that start a track,
 #128) and, while a track holds an uneven cross-axis split,
 `track_weights` (head window id → session weight).
 
-Each window object has: `id`, `app`, `title`, `floating` (boolean).
+Each window object has: `id`, `app`, `bundle_id`, `title`,
+`floating` (boolean).
 
 **Example:**
 
@@ -6629,6 +6630,45 @@ for _, window in ipairs(state.windows) do
     end
 end
 ```
+
+:::unreleased
+### explain_window
+
+**Expects:** optionally a window id from `get_state`'s `windows`;
+the focused window otherwise.
+
+**Does:** returns why the window floats or tiles: `id`, `app`,
+`bundle_id`, `space_id`, `mode`, `floating` (its own float flag,
+as `get_state` has it), `float`, `app_rule`, `sticky` (`none`,
+`global` or `display`), `fullscreen`, `presenting` and `focused`.
+`float` holds `floats` (whether it floats, a floating-layout Space
+included), `cause` (`detection`, `user`, `space_mode` or `nil`) and
+`detection` (`reason` — `rule`, `panel`, `accessory_app` or
+`fixed_size` — `is_guess`, and `escapes`, what would let it tile:
+`set_float_automatically`, `app_rule.remove_float`, or `tile_rule`,
+a Tile rule only Settings, Lua or a profile writes). `app_rule`
+holds the app's Space rule (`space`), its float rules (`floats`),
+whether it has a Tile rule (`tile_rule`) and
+`float_automatically`. `space_id`, `mode` and `app_rule` are `nil`
+where the window has none. No window title is returned. Any other
+id is refused, an away window's included; ask `explain_app`
+instead.
+
+### explain_app
+
+**Expects:** an app's bundle identifier.
+
+**Does:** returns what KiwiDesk knows of the app, for a window
+`get_state` does not list: `bundle_id` (lowercased), `ignored`
+(`by_rule`, an ignore rule; `built_in`, KiwiDesk's own ignore list; `built_in_raised`, whether
+that list ignores the app's raised windows, as it does Ghostty's
+quick terminal),
+`running` (each process's `pid`, whether KiwiDesk `observed` it,
+its `policy` and whether it is `hidden`), `windows` (tracked
+ids), `minimized` (ids), `away` (each `id` with its `space_id`)
+and `app_rule`, as `explain_window` has it. An app nothing knows
+answers empty lists.
+:::
 
 ### help
 

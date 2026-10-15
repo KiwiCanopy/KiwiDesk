@@ -2,6 +2,7 @@
   "about.website": "Site web",
   "ai.capabilities.title": "Ce qu'elle peut faire",
   "ai.capability.app_rules": "Choisir quelles apps flottent et dans quel espace s'ouvre chaque app.",
+  "ai.capability.diagnose": "Expliquer pourquoi une fenêtre flotte, est mise en mosaïque ou s'ouvre là où elle s'ouvre.",
   "ai.capability.inspect": "Voir vos espaces et vos fenêtres, et consulter n'importe quelle commande.",
   "ai.capability.looks": "Créer, appliquer et enregistrer des looks, assortis à votre fond d'écran à partir d'une capture d'écran.",
   "ai.capability.settings": "Modifier les écarts, les bordures et les barres de KiwiShelf.",
