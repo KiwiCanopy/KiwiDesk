@@ -57,18 +57,20 @@ extension KiwiCore {
             refresh: refreshingList,
             tracks: { self.state.windows[WindowID($0)] != nil },
             radius: { self.windowRadius(WindowID($0), reading: true) },
-            bundle: { self.readBundle(of: $0) }
+            bundle: appWide.visionNeverDimmed.isEmpty
+                ? nil
+                : { self.eventLoop.bundle(of: $0, lookingUp: true) }
         )
         let seen = Set(listed.map { WindowID($0.number) })
         var ordered: [(id: WindowID, frame: CGRect, pid: pid_t)] = []
-        var apps: [pid_t: VisionApp] = [:]
+        var apps: [pid_t: AppRef] = [:]
         func member(_ id: WindowID) {
             guard let frame = memberFrame(id), let window = state.windows[id]
             else { return }
             ordered.append((id, frame, window.pid))
             apps[window.pid] =
                 apps[window.pid]
-                ?? VisionApp(
+                ?? AppRef(
                     bundleID: window.appBundleID,
                     name: window.appName
                 )
@@ -109,12 +111,11 @@ extension KiwiCore {
     /// it has none (#2103 ruling 26) — and a lens will too.
     func visionClearPids(
         target: pid_t?,
-        among apps: [pid_t: VisionApp]
+        among apps: [pid_t: AppRef]
     ) -> Set<pid_t> {
-        let never = Set(appWide.visionNeverDimmed)
         var clear: Set<pid_t> = []
         for (pid, app) in apps {
-            if !never.isEmpty, never.contains(app.key) {
+            if isNeverDimmed(app) {
                 clear.insert(pid)
             } else if appWide.visionClearApp, let target, target > 0,
                 eventLoop.names(target, appOf: pid, lookingUp: false)
@@ -132,10 +133,14 @@ extension KiwiCore {
         _ entry: FloatDetection.ListedWindow
     ) -> Bool {
         if entry.layer == 0 { return true }
-        guard entry.layer < 0, entry.layer > Self.desktopIconLayer,
-            !appWide.visionNeverDimmed.isEmpty
-        else { return false }
-        return appWide.visionNeverDimmed.contains(listedApp(entry).key)
+        return Self.isBeneathNormal(layer: entry.layer)
+            && isNeverDimmed(listedApp(entry))
+    }
+
+    /// Whether the Never dimmed list names `app`.
+    private func isNeverDimmed(_ app: AppRef) -> Bool {
+        let list = appWide.visionNeverDimmed
+        return !list.isEmpty && list.contains(app.listKey)
     }
 
     /// The desktop icons' level: a hole there would clear the
@@ -144,21 +149,17 @@ extension KiwiCore {
         CGWindowLevelForKey(.desktopIconWindow)
     )
 
-    private func listedApp(_ entry: FloatDetection.ListedWindow) -> VisionApp {
-        VisionApp(
+    /// Whether a window layer lies beneath the normal one and above
+    /// the desktop icons — where SketchyBar draws its bar.
+    static func isBeneathNormal(layer: Int) -> Bool {
+        layer < 0 && layer > desktopIconLayer
+    }
+
+    private func listedApp(_ entry: FloatDetection.ListedWindow) -> AppRef {
+        AppRef(
             bundleID: vision.listedBundles[entry.pid] ?? nil,
             name: entry.owner
         )
-    }
-
-    /// A listed process's bundle id, read with the list: what attach
-    /// filed, else LaunchServices — at a list read only, never on a
-    /// pass (#1936).
-    private func readBundle(of pid: pid_t) -> String? {
-        let identity = eventLoop.processIdentity
-        return identity.observed[pid]?.ref.bundleID
-            ?? identity.unlisted[pid]
-            ?? identity.appAt(pid)?.ref.bundleID
     }
 
     /// A window's corner radius: the ring's reading, read from the

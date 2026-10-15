@@ -72,7 +72,7 @@ struct KiwiVisionNeverDimmedCard: View {
                     if let app = AppBundlePanel.pick() { add(app.bundleID) }
                 },
                 exclude: Set(apps),
-                onScreen: { model.core.appsOnScreen() }
+                onScreen: { model.core.appsOnScreen(beneathNormal: true) }
             )
             .fixedSize()
             .accessibilityLabel(SettingsCatalog.kiwiVision.neverDimmed.text)
@@ -131,7 +131,7 @@ struct AppPickerRowLabel: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(nsImage: AppIconCache.shared.icon(forBundleID: key))
+            Image(nsImage: AppIconCache.shared.icon(forListKey: key))
                 .resizable()
                 .frame(width: AppIconCache.side, height: AppIconCache.side)
             Text(KeybindingCatalog.displayName(forBundleID: key))

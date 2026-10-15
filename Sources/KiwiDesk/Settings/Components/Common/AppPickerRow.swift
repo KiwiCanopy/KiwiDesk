@@ -1,6 +1,5 @@
 import AppKit
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// One row of the shared app picker (#2103 ruling 27): the app's
 /// icon and name, one line, spoken as one element. A process with
@@ -31,9 +30,7 @@ struct AppPickerRow: View {
     }
 
     private var icon: NSImage {
-        guard let bundleID else {
-            return NSWorkspace.shared.icon(for: .unixExecutable)
-        }
+        guard let bundleID else { return AppIconCache.shared.processIcon }
         return AppIconCache.shared.icon(forBundleID: bundleID)
     }
 }

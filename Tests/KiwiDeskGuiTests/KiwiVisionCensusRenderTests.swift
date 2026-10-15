@@ -87,9 +87,8 @@ struct KiwiVisionCensusRenderTests {
         #expect(card.contains("case.kiwiVision(.clearApp):appRow"))
     }
 
-    /// Never dimmed sits below Stays clear (#2103 ruling 26), walks
-    /// its list, and its add picker leads with what is on screen
-    /// and leaves out what the list already holds (ruling 27).
+    /// Never dimmed sits below Stays clear and walks its list; its
+    /// picker leads with what is on screen (#2103 rulings 26–27).
     @Test("the Never dimmed card walks its list below Stays clear")
     func neverDimmedCardWiring() throws {
         let section = try Self.squashed(
@@ -115,7 +114,11 @@ struct KiwiVisionCensusRenderTests {
         )
         #expect(card.contains("case.kiwiVision(.neverDimmed):list"))
         #expect(card.contains("exclude:Set(apps)"))
-        #expect(card.contains("onScreen:{model.core.appsOnScreen()}"))
+        #expect(
+            card.contains(
+                "onScreen:{model.core.appsOnScreen(beneathNormal:true)}"
+            )
+        )
     }
 
     /// With the wallpaper clear the caption and the spoken label

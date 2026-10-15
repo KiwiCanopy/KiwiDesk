@@ -17,11 +17,13 @@ struct AppPickerSectionsTests {
 
     private let onScreen: [OnScreenApp] = [
         .init(
-            key: "com.apple.textedit",
-            name: "TextEdit",
-            bundleID: "com.apple.TextEdit"
+            app: AppRef(bundleID: "com.apple.TextEdit", name: "TextEdit"),
+            name: "TextEdit"
         ),
-        .init(key: "sketchybar", name: "sketchybar", bundleID: nil),
+        .init(
+            app: AppRef(bundleID: nil, name: "sketchybar"),
+            name: "sketchybar"
+        ),
     ]
 
     @Test func onScreenAppIsListedOnce() {

@@ -95,9 +95,10 @@ public final class VisionManager {
     /// list and replaced at each read, so the cache never outgrows
     /// the windows on screen.
     private(set) var listedRadii: [CGWindowID: CGFloat] = [:]
-    /// Each listed process's bundle id, read with the list (nil
-    /// for a process without one), so a pass names an app without
-    /// asking LaunchServices.
+    /// Each listed process's bundle id (nil for a process without
+    /// one), read with the list and kept per pid across reads, so
+    /// a pass names an app without asking LaunchServices and a
+    /// read asks only of a process it has not seen (#1936).
     private(set) var listedBundles: [pid_t: String?] = [:]
 
     /// Re-reads the WindowServer list where `refresh` asks or
@@ -106,7 +107,7 @@ public final class VisionManager {
         refresh: Bool,
         tracks: (CGWindowID) -> Bool,
         radius: (CGWindowID) -> CGFloat,
-        bundle: (pid_t) -> String? = { _ in nil }
+        bundle: ((pid_t) -> String?)?
     ) -> [FloatDetection.ListedWindow] {
         if refresh || listed == nil {
             let read = listWindows()
@@ -121,10 +122,17 @@ public final class VisionManager {
                     .map { ($0.number, radius($0.number)) },
                 uniquingKeysWith: { first, _ in first }
             )
-            listedBundles = Dictionary(
-                Set(read.map(\.pid)).map { ($0, bundle($0)) },
-                uniquingKeysWith: { first, _ in first }
-            )
+            var bundles: [pid_t: String?] = [:]
+            if let bundle {
+                let readable = read.filter {
+                    $0.layer == 0
+                        || KiwiCore.isBeneathNormal(layer: $0.layer)
+                }
+                for pid in Set(readable.map(\.pid)) {
+                    bundles[pid] = listedBundles[pid] ?? bundle(pid)
+                }
+            }
+            listedBundles = bundles
         }
         return listed ?? []
     }

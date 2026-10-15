@@ -154,9 +154,9 @@ struct KiwiVisionClearAppTests {
             core.visionClearPids(
                 target: child,
                 among: [
-                    samePid: VisionApp(bundleID: nil, name: "P"),
-                    child: VisionApp(bundleID: nil, name: "P"),
-                    otherPid: VisionApp(bundleID: nil, name: "O"),
+                    samePid: AppRef(bundleID: nil, name: "P"),
+                    child: AppRef(bundleID: nil, name: "P"),
+                    otherPid: AppRef(bundleID: nil, name: "O"),
                 ]
             ) == [samePid, child]
         )

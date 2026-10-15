@@ -106,6 +106,19 @@ struct KiwiVisionNeverDimmedTests {
             ]) == ["sketchybar", "com.apple.music"]
         )
         #expect(AppWideSettings().visionNeverDimmed.isEmpty)
+        // A hand-edited entry is normalized on decode.
+        var raw = GuiConfig()
+        var edited = AppWideSettings()
+        edited.visionNeverDimmed = [" SketchyBar ", "Com.Apple.Music"]
+        raw.appWide = edited
+        let decoded = try JSONDecoder().decode(
+            GuiConfig.self,
+            from: JSONEncoder().encode(raw)
+        )
+        #expect(
+            decoded.appWide?.visionNeverDimmed
+                == ["sketchybar", "com.apple.music"]
+        )
     }
 
     @Test("the verb takes a table or words, and nothing clears it")
@@ -160,10 +173,56 @@ struct KiwiVisionNeverDimmedTests {
     @Test("on screen now lists each app once, beneath the layer too")
     func appsOnScreen() {
         let core = makeCore()
-        let apps = core.appsOnScreen()
-        #expect(apps.map(\.key) == ["test.kiwi.music", "other", "sketchybar"])
+        let apps = core.appsOnScreen(beneathNormal: true)
+        #expect(
+            apps.map(\.key) == ["test.kiwi.music", "other", "sketchybar"]
+        )
         #expect(apps.map(\.name) == ["Music", "Other", "sketchybar"])
         #expect(apps.first?.bundleID == "test.kiwi.music")
         #expect(apps.last?.bundleID == nil)
+        let normal = core.appsOnScreen(beneathNormal: false)
+        #expect(normal.map(\.key) == ["test.kiwi.music", "other"])
+    }
+
+    /// A list read asks LaunchServices nothing while the list is
+    /// empty, and with it set asks only of a process it has not
+    /// seen; a changed list drops the cached read (#1936).
+    @Test("the list read asks LaunchServices only of new processes")
+    func bundleLookupsAreBounded() {
+        let core = makeCore()
+        var lookups: [pid_t] = []
+        core.eventLoop.processIdentity.appAt = { pid in
+            lookups.append(pid)
+            return nil
+        }
+        core.vision.isOn = true
+        core.setAppWide(persisting: false) { $0.visionClearApp = true }
+        _ = core.visionMaskWindows(
+            target: focused.raw,
+            targetPid: 900_010,
+            refreshingList: true
+        )
+        #expect(lookups.isEmpty, "an empty list reads no bundle")
+        core.setAppWide(persisting: false) {
+            $0.visionNeverDimmed = ["sketchybar"]
+        }
+        for _ in 0..<2 {
+            _ = core.visionMaskWindows(
+                target: focused.raw,
+                targetPid: 900_010,
+                refreshingList: true
+            )
+        }
+        #expect(Set(lookups) == [stranger, bare])
+        #expect(lookups.count == 2, "a seen process is asked once")
+        core.setAppWide(persisting: false) {
+            $0.visionNeverDimmed = ["sketchybar", "other"]
+        }
+        _ = core.visionMaskWindows(
+            target: focused.raw,
+            targetPid: 900_010,
+            refreshingList: true
+        )
+        #expect(lookups.count == 4, "a changed list reads afresh")
     }
 }
