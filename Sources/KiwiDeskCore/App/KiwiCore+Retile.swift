@@ -78,10 +78,9 @@ extension KiwiCore {
         // A z-order restore that waited for the debt rides this
         // pass's settle, or runs now when nothing animates.
         defer {
-            if paying, pendingZOrderRestore,
-                tiler.animation.activeCount == 0
-            {
+            if paying, tiler.animation.activeCount == 0 {
                 runPendingZOrderRestore()
+                runPendingFloatRaise()
             }
         }
         // Session weights are validated at WRITE time against

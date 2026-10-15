@@ -41,6 +41,7 @@ extension KiwiCore {
     func animationsDidSettle() {
         runPendingZOrderRestore()
         runPendingFocusRaise()
+        runPendingFloatRaise()
         scheduleBorderResync()
     }
 }

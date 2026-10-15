@@ -10,8 +10,9 @@ import Testing
 /// window — between that window and its ring, which was ordered
 /// against it before the raise. The float's reorder event re-stacks
 /// only the float's ring, so the raise's landing re-stacks the
-/// anchor's ring once more. The drain that calls the landing is not
-/// reachable here; `FloatRaiseLandingWiringTests` pins that call.
+/// anchor's overlays through the watch's one fan-out. The drain
+/// that calls the landing is not reachable here;
+/// `FloatRaiseLandingWiringTests` pins that call.
 @Suite("Float raise re-stacks the anchor's ring (#2284)", .serialized)
 @MainActor
 struct FloatRaiseRingRestackTests {
@@ -24,7 +25,7 @@ struct FloatRaiseRingRestackTests {
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.borders.movePanel = { _, _ in false }
-        core.borders.watchOverride = { _ in true }
+        core.borders.watch.override = { _ in true }
         core.borders.backendFactory = { _ in
             CountingBackend { orders.counts[$0, default: 0] += 1 }
         }
@@ -97,20 +98,6 @@ struct FloatRaiseRingRestackTests {
         seed(core)
         let generation = core.zOrderRaiseGeneration.bump()
         core.landFloatRaise(thenFocus: WindowID(2), generation: generation)
-        #expect(orders.counts == [1: 1, 2: 1])
-    }
-
-    /// A hidden ring is `sync`'s to order: a re-stack that showed
-    /// it would bring back a ring macOS hid with its window.
-    @Test("A ring not shown is left to sync")
-    func hiddenRingIsNotRestacked() {
-        let orders = Orders()
-        let core = makeCore(orders)
-        defer { core.borders.clear() }
-        seed(core)
-        core.borders.handleSkyLightEvent(.hide, window: WindowID(1))
-        core.borders.restack(WindowID(1))
-        core.borders.restack(WindowID(9))
         #expect(orders.counts == [1: 1, 2: 1])
     }
 }

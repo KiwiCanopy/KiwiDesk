@@ -173,11 +173,12 @@ these:
   only from a ruled trigger** — `sync`'s `ordersOverlay` gate
   (`needsOrder`, a settle pass, no WindowServer stream), the
   WindowServer reorder and unhide events, the unhide's restore of
-  visibility, the dead-end ring, and the float-tier raise's
-  landing, which re-stacks the anchor's shown ring once — a float
-  the raise cannot lift over the frontmost window lands between
-  that window and its ring, and its reorder event re-stacks only
-  its own (#2284, `FloatRaiseRingRestackTests`,
+  visibility, and the dead-end ring. The reorder event's fan-out
+  has one door, `WindowServerWatch.restack`, which the float-tier
+  raise's landing also takes for its anchor — a float the raise
+  cannot lift over the frontmost window lands between that window
+  and its ring, and the float's event re-stacks only its own
+  overlays (#2284, `FloatRaiseRingRestackTests`,
   `FloatRaiseLandingWiringTests`). A new caller is a new round
   trip on the switch path and owes its ruling in
   `BorderOrderCensusTests`' `allowed` map; a front-order ring's
@@ -352,7 +353,8 @@ Obligations:
 - **Re-stack a plate only from the ring's triggers, through the
   ring's own `BorderManager.ordersOverlay` gate**: the sync at the
   tail of `updateBorders` (the focus moved, a settle pass, no
-  WindowServer stream) and the watch's restack phase, which runs
+  WindowServer stream) and the watch's restack phase — a reorder
+  event, or the float-tier raise's landing (#2284) — which runs
   the plate AFTER the ring's own re-order. A new caller of a
   plate's `order(below:` owes its ruling in `BorderOrderCensusTests`
   ▸ `plateOrderSitesAreCensused`, which also needles the hook's

@@ -48,6 +48,7 @@ extension KiwiCore {
             return
         }
         raiseWindow(id)
+        raiseFloatsAbove(afterFocusing: id)
     }
 
     /// The one AX raise call behind both the immediate and the
@@ -142,6 +143,12 @@ extension KiwiCore {
             )
         if !defersRaise {
             raiseWindow(id)
+            // A commanded focus reports back as our own echo, which
+            // the focus handler skips; a re-assert of the same
+            // window — the raise's hand-back — owes none (#2284).
+            if previousFocused != id {
+                raiseFloatsAbove(afterFocusing: id)
+            }
         }
         // Mouse follows focus (#186) fires at the intent point,
         // strictly AFTER the raise: synthetic CG mouse activity

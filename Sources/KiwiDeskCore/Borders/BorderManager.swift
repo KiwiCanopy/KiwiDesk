@@ -156,17 +156,6 @@ public final class BorderManager {
         Set(overlays.keys)
     }
 
-    /// Re-stacks `id`'s shown ring against its window once more:
-    /// a float the raise could not lift over that window lands
-    /// between the window and its ring, and its reorder event
-    /// re-stacks only the float's own ring (#2284). A ring not
-    /// shown is `sync`'s to order, so it is left alone.
-    func restack(_ id: WindowID) {
-        guard let overlay = overlays[id], !overlay.needsOrder
-        else { return }
-        overlay.order(relativeTo: id.raw)
-    }
-
     /// Sets draw order (behind or in front of windows, #367).
     public func setDrawOrder(_ order: BorderStyle.DrawOrder) {
         let mapped: BorderGeometry.Order =

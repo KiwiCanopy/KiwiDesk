@@ -31,6 +31,9 @@ extension KiwiCore {
     func raiseFloatsAndSticky(
         thenFocus focused: WindowID?
     ) {
+        // A raise starting now supersedes one scheduled or owed.
+        deferred.cancel(.floatRaise)
+        floatRaiseDebt.owed = nil
         let pairs = floatRaisePairs()
         guard !pairs.isEmpty else {
             if let focused {
@@ -72,9 +75,10 @@ extension KiwiCore {
     }
 
     /// The raise sequence's landing: hands focus back and re-stacks
-    /// the anchor's ring, which a float landing directly under the
-    /// frontmost window separated from that window (#2284). A
-    /// stale sequence does neither.
+    /// the anchor's overlays as its reorder event would — a float
+    /// landing directly under the frontmost window separates the
+    /// window from its ring, and that float's event re-stacks only
+    /// its own (#2284). A stale sequence does neither.
     func landFloatRaise(thenFocus focused: WindowID?, generation: Int) {
         guard generation == zOrderRaiseGeneration.value else {
             return
@@ -83,7 +87,7 @@ extension KiwiCore {
         // traveler homed elsewhere is never that slot (#1727).
         guard let focused, focused == focusedWindowID else { return }
         focusWindow(focused, refocusRetile: false, warp: false)
-        borders.restack(focused)
+        windowServer.restack(focused)
     }
 
     /// The #412 raise a Space LANDING owes once its own retile
@@ -110,11 +114,12 @@ extension KiwiCore {
     /// activate; `raiseFloatsAndSticky` hands focus back and the
     /// float echoes are reverted (`zOrderRaiseEchoes`), so the
     /// ring stays on the focused tiled window while the floats keep
-    /// their z-order above it. Gated by the caller to genuine
-    /// (non-echo) focus changes so the focus-handoff's own echo
-    /// cannot re-trigger the raise, and skipped when the focused
-    /// window is itself an EFFECTIVE float (#1286): nothing tiled
-    /// was focused, so there is nothing to keep the layer above.
+    /// their z-order above it. Called for a genuine (non-echo)
+    /// focus report and for a commanded focus change (#2284), never
+    /// for the hand-back, which would re-trigger it; skipped when
+    /// the focused window is itself an EFFECTIVE float (#1286):
+    /// nothing tiled was focused, so there is nothing to keep the
+    /// layer above.
     ///
     /// Coalesced through the `.floatRaise` deferred slot: a burst of
     /// focus changes (rapid clicks, held focus-nav) would otherwise
@@ -137,6 +142,10 @@ extension KiwiCore {
             [weak self] in
             guard let self, id == self.focusedWindowID
             else { return }
+            if self.tiledPlaneMoving {
+                self.floatRaiseDebt.owed = id
+                return
+            }
             self.raiseFloatsAndSticky(thenFocus: id)
         }
     }
