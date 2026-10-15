@@ -29,7 +29,7 @@ extension AppRulesSection {
                 name: $newSpaceApp,
                 exclude: Set(spaceApps),
                 onCommit: addWithSpace,
-                onScreen: { model.core.appsOnScreen(beneathNormal: false) }
+                onScreenOf: model.core
             )
             .disabled(!gates.hasSpaces)
             noSpacesNote
@@ -106,7 +106,7 @@ extension AppRulesSection {
                 name: $newFloatingApp,
                 exclude: Set(floatApps),
                 onCommit: addFloating,
-                onScreen: { model.core.appsOnScreen(beneathNormal: false) }
+                onScreenOf: model.core
             )
         }
     }

@@ -40,8 +40,7 @@ struct AppRulesOnScreenTests {
 
     @Test("Space and Float take the section, Tile does not")
     func wiring() throws {
-        let needle =
-            "onScreen: { model.core.appsOnScreen(beneathNormal: false) }"
+        let needle = "onScreenOf: model.core"
         let lists = try source("Sections/AppRulesSection+Lists.swift")
         #expect(lists.occurrences(of: needle) == 2)
         let tile = try source("Sections/AppRulesSection+Automatic.swift")
@@ -51,8 +50,12 @@ struct AppRulesOnScreenTests {
         )
         #expect(
             selector.occurrences(
-                of: "onScreen: onScreen.map { read in "
-                    + "{ Self.ruleCandidates(read()) } }"
+                of: "{ Self.ruleCandidates(core) }"
+            ) == 1
+        )
+        #expect(
+            selector.occurrences(
+                of: "core.appsOnScreen(beneathNormal: false)"
             ) == 1
         )
     }
