@@ -54,6 +54,8 @@ struct MotionScopeCensusTests {
         // The scroll gestures' two consumers.
         "KiwiDeskCore/App/KiwiCore+ScrollPan.swift": 1,
         "KiwiDeskCore/App/KiwiCore+ScrollSpaceStep.swift": 1,
+        // Hover focus at the resting pointer (#1869).
+        "KiwiDeskCore/App/KiwiCore+HoverFocus.swift": 1,
         // The window drag: its moves and its drop, a live display
         // crossing, the Space Bar spring switch.
         "KiwiDeskCore/Tiling/KiwiCore+Drag.swift": 2,

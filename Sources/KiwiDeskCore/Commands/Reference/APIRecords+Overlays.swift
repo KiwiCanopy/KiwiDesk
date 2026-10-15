@@ -156,7 +156,12 @@ extension APIReference {
             "Warps the mouse pointer to the center of the "
                 + "focused window.",
             .boolean("enabled")
-        )
+        ),
+        "set_hover_focus": APIRecord(
+            "Focuses and raises the window the mouse pointer comes "
+                + "to rest on.",
+            .boolean("enabled")
+        ),
     ]
 
     static let scrollGestureRecords: [String: APIRecord] = [

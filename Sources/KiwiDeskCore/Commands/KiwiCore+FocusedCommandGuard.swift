@@ -157,15 +157,33 @@ extension KiwiCore {
         let front = frontmostPIDProvider?()
         let before = focusedWindowID
         let response = navigate(args, swapping: false)
-        let after = focusedWindowID
-        if let front, let after, after != before {
-            raiseFlight = RaiseFlight(
-                target: after,
-                leftPID: front,
-                issuedAt: wallClock()
-            )
-        }
+        recordRaiseFlight(from: front, before: before)
         return response
+    }
+
+    /// Hover focus's flight (#1869): a fresh user act like the
+    /// verb, so `front` — read before its focus ran — is the app
+    /// the raise leaves.
+    func hoverRecordingFlight(
+        from front: pid_t?,
+        before: WindowID?
+    ) {
+        recordRaiseFlight(from: front, before: before)
+    }
+
+    /// The one flight writer, its target the anchor; a focus that
+    /// moved nothing records nothing.
+    private func recordRaiseFlight(
+        from front: pid_t?,
+        before: WindowID?
+    ) {
+        let after = focusedWindowID
+        guard let front, let after, after != before else { return }
+        raiseFlight = RaiseFlight(
+            target: after,
+            leftPID: front,
+            issuedAt: wallClock()
+        )
     }
 
     /// Whether the frontmost process is `pid`'s app — the

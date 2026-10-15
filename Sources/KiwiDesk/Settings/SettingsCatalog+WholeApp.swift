@@ -171,6 +171,10 @@ struct GesturesControls: Sendable {
         "behavior.mouse.resize_action",
         "Mouse resize action"
     )
+    let hoverFocus = SettingsControl(
+        "behavior.mouse.hover_focus",
+        "Focus the window the pointer rests on"
+    )
     let followsFocus = SettingsControl(
         "behavior.mouse.follows_focus",
         "Move the pointer to the window that gets focus"

@@ -31,8 +31,15 @@ public final class TilingEngine {
                 settings.animations.durationMS
             animation.scrollDurationMS =
                 settings.animations.scrollDurationMS
+            if settings.mouse != oldValue.mouse {
+                onMouseSettings?(settings.mouse)
+            }
         }
     }
+
+    /// Told when `settings.mouse` changes, by whichever write —
+    /// the pointer rest's switch rides it (#1869).
+    var onMouseSettings: (@MainActor (MouseSettings) -> Void)?
 
     /// Applies frames off the main thread with frame-dropping
     /// and per-app EnhancedUserInterface toggling. Internal,

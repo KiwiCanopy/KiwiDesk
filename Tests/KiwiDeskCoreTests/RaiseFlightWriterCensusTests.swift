@@ -2,7 +2,8 @@ import Foundation
 import Testing
 
 /// A `RaiseFlight` (#1812) is written by the `focus` verb's
-/// wrapper alone: three review rounds went to re-assert paths
+/// wrapper and hover focus (#1869) alone: three review rounds
+/// went to re-assert paths
 /// that rewrote it inside `focusWindow`, naming the app the user
 /// switched to as the one left. Every construction and every
 /// whole-record assignment in Core lives in the preflight file;
@@ -47,5 +48,37 @@ struct RaiseFlightWriterCensusTests {
         }
         #expect(writers[Self.home] == 2, "\(writers)")
         #expect(Set(writers.keys) == [Self.home], "\(writers)")
+    }
+
+    /// Hover's recorder is reached from hover alone: a re-assert
+    /// calling it would name the app the user switched to as the
+    /// one left, the #1812 failure.
+    @Test("only hover focus calls hover's flight recorder")
+    func hoverRecorderHasOneCaller() throws {
+        let core = scriptFixtureRepoRoot()
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        let files = try #require(
+            FileManager.default.enumerator(atPath: core.path)
+        )
+        var callers: [String: Int] = [:]
+        for case let path as String in files
+        where path.hasSuffix(".swift") {
+            let text = try String(
+                contentsOf: core.appendingPathComponent(path),
+                encoding: .utf8
+            )
+            let hits =
+                text.components(
+                    separatedBy: "hoverRecordingFlight("
+                ).count - 1
+            if hits > 0 { callers[path] = hits }
+        }
+        #expect(
+            callers == [
+                Self.home: 1,
+                "App/KiwiCore+HoverFocus.swift": 1,
+            ],
+            "\(callers)"
+        )
     }
 }

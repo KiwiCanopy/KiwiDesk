@@ -1717,12 +1717,14 @@ editing here:
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
   the door's docstring. Which window a screen shows in FRONT is
-  read through `showsPresentation` / `shelfStandsDown`, never the
-  raw `KiwiCore.frontWindowFrames` seam, its live default or the
-  CGWindowList read beneath it, and a new z-order need widens
-  that one seam rather than adding a second front-to-back read
+  read through `showsPresentation` / `shelfStandsDown`, never off
+  the raw `KiwiCore.frontStack` seam, its live default or the
+  CGWindowList read beneath it; a new z-order need reads that one
+  seam's `FrontWindow` element rather than adding a second
+  front-to-back read, and is ruled as a reader there — hover
+  focus's hit test at the pointer is one (#1869)
   (`ScreenCoveringCallerCensusTests` ▸
-  `frontWindowSeamHasOneReader`).
+  `frontWindowSeamReadersAreRuled`).
 - **A window is tiled or floating, and detection's verdict is
   read through ONE door (#1810).** The float verbs and the bar
   menu's Float/Tile row ask `KiwiCore.tileRefusal(of:)`, never

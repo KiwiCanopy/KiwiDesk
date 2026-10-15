@@ -172,7 +172,7 @@ extension KiwiCore {
         }
     }
 
-    /// `mouse.*` pointer-behaviour toggles (#186). Persist in
+    /// `mouse.*` pointer-behaviour toggles (#186, #1869). Persist in
     /// `settings.mouse` so they ride the profile split like
     /// the animation toggles above.
     func mouseCommand(
@@ -185,6 +185,8 @@ extension KiwiCore {
         switch command {
         case "mouse.set_follows_focus":
             tiler.settings.mouse.followsFocus = enabled
+        case "mouse.set_hover_focus":
+            tiler.settings.mouse.hoverFocus = enabled
         default:
             return .fail("unknown command: \(command)")
         }
