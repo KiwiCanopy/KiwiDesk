@@ -35,7 +35,7 @@ struct OverlayGlassGateTests {
         (
             file: "App/KiwiCore+Vision.swift",
             function: "var kiwiVisionDrawsBlur:",
-            stored: "blur: appWide.visionBlur"
+            stored: "blur: visionLook.blur"
         ),
     ]
 
