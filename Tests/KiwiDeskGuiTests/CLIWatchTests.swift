@@ -54,11 +54,13 @@ struct CLIWatchTests {
         #expect(CLIWatchEvent.variable(for: "space-id") == "KIWIDESK_SPACE_ID")
     }
 
-    @Test("a non-integral number keeps its fraction")
+    @Test("a number renders as Core renders it, a boolean as text")
     func numbers() {
-        #expect(CLIWatchEvent.scalar(.number(4711)) == "4711")
-        #expect(CLIWatchEvent.scalar(.number(-2)) == "-2")
-        #expect(CLIWatchEvent.scalar(.number(0.5)) == "0.5")
+        #expect(JSONValue.number(4711).scalarText == "4711")
+        #expect(JSONValue.number(-2).scalarText == "-2")
+        #expect(JSONValue.number(0.5).scalarText == "0.5")
+        #expect(JSONValue.bool(true).scalarText == "true")
+        #expect(JSONValue.null.scalarText == nil)
     }
 
     /// A runner whose spawns are recorded instead of run.
@@ -127,5 +129,21 @@ struct CLIWatchTests {
         #expect(queue.pop() == "a")
         #expect(queue.pop() == "b")
         #expect(queue.pop() == nil)
+    }
+
+    @Test("a waiting pop is woken by a push from another thread")
+    func queueWakes() {
+        final class Box: @unchecked Sendable { var line: String? }
+        let queue = CLIWatchQueue()
+        let box = Box()
+        let done = DispatchSemaphore(value: 0)
+        Thread {
+            box.line = queue.pop()
+            done.signal()
+        }.start()
+        Thread.sleep(forTimeInterval: 0.05)
+        queue.push("a")
+        #expect(done.wait(timeout: .now() + 30) == .success)
+        #expect(box.line == "a")
     }
 }

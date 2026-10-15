@@ -32,7 +32,7 @@ struct CLIWatchEvent: Equatable {
     var environment: [String: String] {
         var result: [String: String] = [:]
         for (key, value) in data {
-            if let text = Self.scalar(value) {
+            if let text = value.scalarText {
                 result[Self.variable(for: key)] = text
             }
         }
@@ -50,24 +50,6 @@ struct CLIWatchEvent: Equatable {
                 ? Character(scalar) : "_"
         }
         return prefix + String(name)
-    }
-
-    /// A scalar's text, an integral number without a fraction; nil
-    /// for null, an object or an array.
-    static func scalar(_ value: JSONValue) -> String? {
-        switch value {
-        case .string(let text):
-            return text
-        case .bool(let flag):
-            return flag ? "true" : "false"
-        case .number(let number):
-            if number.rounded() == number, abs(number) < 1e15 {
-                return String(Int64(number))
-            }
-            return String(number)
-        case .null, .array, .object:
-            return nil
-        }
     }
 
     /// The names a confirmation line says the app did not know.

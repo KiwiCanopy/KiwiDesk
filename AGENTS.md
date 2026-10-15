@@ -395,6 +395,8 @@ Touching Anywhere in `Sources/KiwiDeskCore`.
   `KiwiCore+Bootstrap`
 - a capture diagnostic logs via `os.Logger` with `privacy: .public`, never
   `NSLog`, which macOS redacts
+- a verb the CLI answers without the app owes no record and joins `CLIRoute`,
+  never shadowing a socket command (#1685, `CLIRouteTests`)
 - a new command owes a record in `Commands/Reference` — a verb a config must
   never call registered `cliOnly`, never into Lua (#930,
   `APIRecordCensusTests`) — whose enum arguments name the TYPE so the values

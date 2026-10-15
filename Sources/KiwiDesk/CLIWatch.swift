@@ -42,21 +42,42 @@ enum CLIWatch {
         // A command that exits without reading its stdin must end
         // the write with an error, never the watcher with a signal.
         signal(SIGPIPE, SIG_IGN)
+        return watch(
+            invocation,
+            stream: CLIEventStream(),
+            runner: CLIWatchRunner(command: invocation.command)
+        )
+    }
+
+    /// Reads `stream` on its own thread — always reconnecting — and
+    /// hands each line to `runner` in order, until the stream ends.
+    static func watch(
+        _ invocation: Invocation,
+        stream: CLIEventStream,
+        runner: CLIWatchRunner
+    ) -> Int32 {
         let queue = CLIWatchQueue()
-        let reader = Thread {
-            let code = CLIEventStream().run(
+        let reader = StreamReader(stream: stream)
+        let thread = Thread {
+            let code = reader.stream.run(
                 events: invocation.events,
                 reconnect: true,
                 deliver: queue.push
             )
             queue.finish(code)
         }
-        reader.start()
-        let runner = CLIWatchRunner(command: invocation.command)
+        thread.start()
         while let line = queue.pop() {
             runner.handle(line)
         }
         return queue.exitCode
+    }
+
+    /// Carries the stream onto the reader thread, which alone uses
+    /// it.
+    private final class StreamReader: @unchecked Sendable {
+        let stream: CLIEventStream
+        init(stream: CLIEventStream) { self.stream = stream }
     }
 }
 
@@ -100,9 +121,7 @@ struct CLIWatchRunner {
     let command: [String]
     var spawn: ([String], [String: String], String) -> Int32 =
         CLIWatchRunner.launch
-    var note: (String) -> Void = { line in
-        FileHandle.standardError.write(Data("\(line)\n".utf8))
-    }
+    var note: (String) -> Void = CLIEventStream.writeNote
 
     func handle(_ line: String) {
         guard let parsed = CLIWatchEvent(line: line) else {

@@ -35,9 +35,20 @@ enum CLIRoute: CaseIterable, Equatable {
         allCases.first { $0.verbs.contains(verb) } ?? .socket
     }
 
+    /// Whether completion offers this route's verbs; the hidden
+    /// `__complete` is the shims' alone.
+    var offered: Bool { self != .complete }
+
     /// Every local verb, in route order.
     static var localVerbs: [String] { allCases.flatMap(\.verbs) }
 
-    /// `service`'s actions, which completion offers after it.
-    static let serviceActions = ["start", "stop", "restart", "status"]
+    /// The local verbs completion offers.
+    static var offeredVerbs: [String] {
+        allCases.filter(\.offered).flatMap(\.verbs)
+    }
+
+    /// Local verbs that answer a name the API also lists, by
+    /// ruling: help is answered from the binary (#1033). Any other
+    /// overlap would hide a socket command (`CLIRouteTests`).
+    static let shadowedCommands: Set<String> = ["help"]
 }

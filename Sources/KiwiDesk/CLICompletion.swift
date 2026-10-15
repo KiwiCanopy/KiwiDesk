@@ -7,39 +7,54 @@ import Foundation
 enum CLICompletion {
     static let verb = "completion"
 
-    static let usage = "usage: kiwidesk completion zsh|bash|fish"
+    /// The shells a shim exists for; completion offers them too.
+    enum Shell: String, CaseIterable {
+        case zsh, bash, fish
+
+        var script: String {
+            switch self {
+            case .zsh: return CLICompletion.zsh
+            case .bash: return CLICompletion.bash
+            case .fish: return CLICompletion.fish
+            }
+        }
+    }
+
+    static var usage: String {
+        "usage: kiwidesk completion "
+            + Shell.allCases.map(\.rawValue).joined(separator: "|")
+    }
 
     static func run(_ arguments: [String]) -> Int32 {
         guard
             arguments.count == 3,
-            let script = script(for: arguments[2])
+            let shell = Shell(rawValue: arguments[2])
         else {
             FileHandle.standardError.write(Data("\(usage)\n".utf8))
             return 1
         }
-        print(script, terminator: "")
+        print(shell.script, terminator: "")
         return 0
     }
 
-    static func script(for shell: String) -> String? {
-        switch shell {
-        case "zsh": return zsh
-        case "bash": return bash
-        case "fish": return fish
-        default: return nil
-        }
-    }
-
-    /// Autoloaded from `fpath` as `_kiwidesk`, or sourced.
-    static let zsh = """
+    /// Autoloaded from `fpath` as `_kiwidesk`, or sourced. The
+    /// typed words are unquoted (`Q`), and the current one loses an
+    /// opening quote, so a quoted name still matches; after
+    /// `watch … --` the rest completes as a command line of its own
+    /// (`_normal`).
+    static let zsh = #"""
         #compdef kiwidesk
         _kiwidesk() {
           local -a candidates
-          candidates=(${(f)"$("${words[1]}" \(CLICompleter.verb) \
-        "${(@)words[2,CURRENT]}" 2>/dev/null)"})
-          if [[ "${candidates[1]}" == "\(CLICompleter.defaultDirective)" ]]
+          local typed=${(Q)${words[CURRENT]#[\"\']}}
+          candidates=(${(f)"$("${words[1]}" \#(CLICompleter.verb) \#
+        "${(@Q)words[2,CURRENT-1]}" "$typed" 2>/dev/null)"})
+          if [[ "${candidates[1]}" == "\#(CLICompleter.defaultDirective)" ]]
           then
-            _default
+            local split=${words[(i)--]}
+            shift $split words
+            (( CURRENT -= split ))
+            _normal
             return
           fi
           compadd -- "${candidates[@]}"
@@ -50,37 +65,54 @@ enum CLICompletion {
           compdef _kiwidesk kiwidesk
         fi
 
-        """
+        """#
 
-    /// Sourced, or dropped into `bash-completion`'s directory.
-    /// `-o default` lets a `watch` command complete as files.
-    static let bash = """
+    /// Sourced or eval'd. The word being completed loses a leading
+    /// quote and its backslashes before it is asked about; after
+    /// `watch … --` the next word completes as a command, the rest
+    /// as files.
+    static let bash = #"""
         _kiwidesk() {
-          local cur="${COMP_WORDS[COMP_CWORD]}" line
+          local cur="${COMP_WORDS[COMP_CWORD]}" line i
+          local typed="${cur#[\"\']}"
+          typed="${typed//\\/}"
           COMPREPLY=()
           while IFS= read -r line; do
-            [[ "$line" == "\(CLICompleter.defaultDirective)" ]] && return
+            if [[ "$line" == "\#(CLICompleter.defaultDirective)" ]]; then
+              for (( i = 1; i < COMP_CWORD; i++ )); do
+                [[ "${COMP_WORDS[i]}" == "--" ]] && break
+              done
+              local kind=-f
+              (( i == COMP_CWORD - 1 )) && kind=-c
+              while IFS= read -r line; do
+                COMPREPLY+=("$(printf '%q' "$line")")
+              done < <(compgen $kind -- "$typed")
+              return
+            fi
             [[ -n "$line" ]] && COMPREPLY+=("$(printf '%q' "$line")")
-          done < <("${COMP_WORDS[0]}" \(CLICompleter.verb) \
-        "${COMP_WORDS[@]:1:COMP_CWORD}" 2>/dev/null)
+          done < <("${COMP_WORDS[0]}" \#(CLICompleter.verb) \#
+        "${COMP_WORDS[@]:1:COMP_CWORD-1}" "$typed" 2>/dev/null)
         }
-        complete -o default -F _kiwidesk kiwidesk
+        complete -F _kiwidesk kiwidesk
 
-        """
+        """#
 
-    /// Dropped into `~/.config/fish/completions/kiwidesk.fish`.
-    static let fish = """
+    /// Dropped into `~/.config/fish/completions/kiwidesk.fish`. After
+    /// `watch … --` the rest completes as a command line of its own.
+    static let fish = #"""
         function __kiwidesk_complete
-            set -l tokens (commandline -opc) (commandline -ct)
-            set -l out ($tokens[1] \(CLICompleter.verb) $tokens[2..-1] \
+            set -l tokens (commandline -opc) \#
+        (commandline -ct | string unescape)
+            set -l out ($tokens[1] \#(CLICompleter.verb) $tokens[2..-1] \#
         2>/dev/null)
-            if test "$out[1]" = "\(CLICompleter.defaultDirective)"
-                __fish_complete_path (commandline -ct)
+            if test "$out[1]" = "\#(CLICompleter.defaultDirective)"
+                set -l split (contains -i -- -- $tokens)
+                __fish_complete_subcommand --fcs-skip=$split
                 return
             end
-            printf '%s\\n' $out
+            printf '%s\n' $out
         end
         complete -c kiwidesk -f -a '(__kiwidesk_complete)'
 
-        """
+        """#
 }

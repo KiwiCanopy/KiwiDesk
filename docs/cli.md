@@ -159,10 +159,10 @@ profile names and look names. The script asks the binary for every
 answer, so it never needs regenerating after an upgrade.
 
 ```sh
-# zsh: a directory early in $fpath, then restart the shell
-kiwidesk completion zsh > "${fpath[1]}/_kiwidesk"
-# bash: add to ~/.bashrc
-source <(kiwidesk completion bash)
+# zsh: add to ~/.zshrc, after compinit
+source <(kiwidesk completion zsh)
+# bash: add to ~/.bash_profile
+eval "$(kiwidesk completion bash)"
 # fish
 kiwidesk completion fish > ~/.config/fish/completions/kiwidesk.fish
 ```
@@ -930,14 +930,15 @@ kiwidesk watch -- sh -c 'echo "$KIWIDESK_EVENT" >> ~/events.log'
 ```
 
 Event names go before `--`, as with `subscribe` (none means every
-event); the command and its arguments go after it and run without
+event), and a name the app does not know is reported on stderr; the
+command and its arguments go after it and run without
 a shell, so wrap shell syntax in `sh -c`. Each run gets the event's
 JSON line on stdin, and these variables:
 
 - `KIWIDESK_EVENT` — the event name.
 - `KIWIDESK_DATA` — the event's `data` object as JSON.
-- `KIWIDESK_<KEY>` for each string, number or boolean in `data`,
-  upper-cased: `KIWIDESK_SPACE_ID`, `KIWIDESK_WINDOW_ID`.
+- `KIWIDESK_<KEY>` for each top-level string, number or boolean
+  in `data`, upper-cased: `KIWIDESK_SPACE_ID`, `KIWIDESK_WINDOW_ID`.
 
 Runs happen one at a time, in event order; events that arrive
 during a run wait for it. A command that exits non-zero is reported

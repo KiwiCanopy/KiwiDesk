@@ -27,24 +27,35 @@ func runCLI(_ arguments: [String]) -> Int32 {
     }
 }
 
+/// `kiwidesk service`'s actions; completion offers them too.
+enum ServiceAction: String, CaseIterable {
+    case start, stop, restart, status
+
+    static var usage: String {
+        "usage: kiwidesk service "
+            + allCases.map(\.rawValue).joined(separator: "|")
+    }
+}
+
 private func runService(_ arguments: [String]) -> Int32 {
     guard arguments.count > 2 else {
-        print("usage: kiwidesk service start|stop|restart|status")
+        print(ServiceAction.usage)
+        return 1
+    }
+    guard let action = ServiceAction(rawValue: arguments[2]) else {
+        print("unknown service command: \(arguments[2])")
         return 1
     }
     let outcome: ServiceManager.Outcome
-    switch arguments[2] {
-    case "start":
+    switch action {
+    case .start:
         outcome = ServiceManager.start()
-    case "stop":
+    case .stop:
         outcome = ServiceManager.stop()
-    case "restart":
+    case .restart:
         outcome = ServiceManager.restart()
-    case "status":
+    case .status:
         outcome = ServiceManager.status()
-    default:
-        print("unknown service command: \(arguments[2])")
-        return 1
     }
     // Errors go to stderr with non-zero exit; status messages to
     // stdout (#328).
@@ -109,7 +120,7 @@ private func runSocketCommand(
         client = try AppSocket.connect()
     } catch {
         FileHandle.standardError.write(
-            Data(cannotConnectMessage(error).utf8)
+            Data("\(cannotConnectMessage(error))\n".utf8)
         )
         return 1
     }
@@ -153,7 +164,7 @@ private func runSocketCommand(
 func cannotConnectMessage(_ error: Error) -> String {
     """
     KiwiDesk: cannot connect to \(KiwiCore.defaultSocketPath)
-    Is the KiwiDesk app running? (\(error))\n
+    Is the KiwiDesk app running? (\(error))
     """
 }
 
@@ -185,5 +196,5 @@ let cliUsage = """
       kiwidesk get_state
       kiwidesk help scroll.set_anchor
       kiwidesk subscribe space_change layout_change
-      kiwidesk watch space_change -- sketchybar --trigger space
+      kiwidesk watch space_change -- sketchybar --trigger kiwi_space
     """

@@ -25,9 +25,7 @@ struct CLIEventStream {
     var pause: () -> Void = {
         Thread.sleep(forTimeInterval: CLIEventStream.retryInterval)
     }
-    var note: (String) -> Void = { line in
-        FileHandle.standardError.write(Data("\(line)\n".utf8))
-    }
+    var note: (String) -> Void = CLIEventStream.writeNote
     /// Asked before each attempt; a test ends the loop with it.
     var keepGoing: () -> Bool = { true }
 
@@ -92,9 +90,12 @@ struct CLIEventStream {
     }
 
     /// `kiwidesk subscribe [--reconnect] [events…]`.
-    static func subscribe(_ rest: [String]) -> Int32 {
+    static func subscribe(
+        _ rest: [String],
+        stream: CLIEventStream = CLIEventStream()
+    ) -> Int32 {
         let parsed = parse(rest)
-        return CLIEventStream().run(
+        return stream.run(
             events: parsed.events,
             reconnect: parsed.reconnect,
             deliver: writeLine
@@ -107,6 +108,14 @@ struct CLIEventStream {
         _ rest: [String]
     ) -> (events: [String], reconnect: Bool) {
         (rest.filter { $0 != reconnectFlag }, rest.contains(reconnectFlag))
+    }
+
+    /// Writes one note to stderr; a closed stderr drops it rather
+    /// than ending the process.
+    static func writeNote(_ line: String) {
+        try? FileHandle.standardError.write(
+            contentsOf: Data("\(line)\n".utf8)
+        )
     }
 
     /// Writes one line to stdout unbuffered, so a pipe or a file

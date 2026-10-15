@@ -20,4 +20,13 @@ struct CLIRouteTests {
         let verbs = CLIRoute.localVerbs
         #expect(Set(verbs).count == verbs.count, "a verb is listed twice")
     }
+
+    /// A local verb spelled like a socket command makes that
+    /// command unreachable from the CLI; only the ruled overlap may.
+    @Test("no local verb hides a socket command, save help by ruling")
+    func noShadowing() {
+        let commands = Set(CLICompleter.commandNames)
+        let shadowed = Set(CLIRoute.localVerbs).intersection(commands)
+        #expect(shadowed == CLIRoute.shadowedCommands)
+    }
 }

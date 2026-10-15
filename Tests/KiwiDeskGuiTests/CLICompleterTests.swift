@@ -49,6 +49,7 @@ struct CLICompleterTests {
         #expect(all.contains("scroll.set_anchor"))
         #expect(all.contains("subscribe"))
         #expect(!all.contains(CLICompleter.verb), "hidden verb offered")
+        #expect(Set(all).count == all.count, "a word is offered twice")
         #expect(!all.contains("--version"), "flags only after `-`")
         #expect(!all.contains("exec"), "a Lua-only verb is offered")
         #expect(Self.candidates([], "-").contains("--version"))
@@ -62,8 +63,14 @@ struct CLICompleterTests {
                 == ScrollingParams.Anchor.allCases.map(\.rawValue)
         )
         #expect(Self.candidates(["set_mode", "1"], "sc") == ["scrolling"])
-        #expect(Self.candidates(["service"], "") == CLIRoute.serviceActions)
-        #expect(Self.candidates(["completion"], "") == CLICompleter.shells)
+        #expect(
+            Self.candidates(["service"], "")
+                == ServiceAction.allCases.map(\.rawValue)
+        )
+        #expect(
+            Self.candidates(["completion"], "")
+                == CLICompletion.Shell.allCases.map(\.rawValue)
+        )
     }
 
     @Test("subscribe and watch offer the events subscribe's record lists")
@@ -128,6 +135,39 @@ struct CLICompleterTests {
                     $0.name == name
                 }
                 #expect(argument?.kind == .text, "\(command) \(name)")
+            }
+        }
+    }
+
+    /// Text arguments in the profile and look families that name
+    /// no existing profile or look, with why: `look.save` refuses a
+    /// taken name; a binding's `screen` is a screen fingerprint.
+    static let freeText: [String: Set<String>] = [
+        "look.save": ["name"],
+        "bind_profile_to_desktop": ["screen"],
+    ]
+
+    /// A new profile- or look-naming argument joins `textSources`
+    /// or `freeText`; neither list may lose one silently.
+    @Test("every profile and look text argument is classified")
+    func textSourceCensus() {
+        let family = APIReference.groups.flatMap(\.entries).filter {
+            $0.channel != .lua
+                && ($0.qualifiedName.contains("profile")
+                    || $0.qualifiedName.hasPrefix("look."))
+        }
+        #expect(!family.isEmpty, "the census scans nothing")
+        for entry in family {
+            for argument in entry.record.arguments
+            where argument.kind == .text {
+                let name = entry.qualifiedName
+                let sourced =
+                    CLILiveValues.textSources[name]?[argument.name] != nil
+                let free = Self.freeText[name]?.contains(argument.name)
+                #expect(
+                    sourced || free == true,
+                    "\(name) \(argument.name) is unclassified"
+                )
             }
         }
     }

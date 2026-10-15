@@ -11,6 +11,8 @@ struct CLILiveValues {
         case windows
         case profiles
         case looks
+        /// The looks a user saved, which alone may be deleted.
+        case savedLooks
     }
 
     /// A text argument whose values are a live source's names,
@@ -23,7 +25,7 @@ struct CLILiveValues {
         "set_default_profile": ["name": .profiles],
         "bind_profile_to_desktop": ["profile": .profiles],
         "look.apply": ["name": .looks],
-        "look.delete": ["name": .looks],
+        "look.delete": ["name": .savedLooks],
     ]
 
     /// Seconds a completion waits for the app.
@@ -47,7 +49,7 @@ struct CLILiveValues {
             return CommandRequest(command: "get_state")
         case .profiles:
             return CommandRequest(command: "list_profiles")
-        case .looks:
+        case .looks, .savedLooks:
             return CommandRequest(command: "look.list")
         }
     }
@@ -64,6 +66,10 @@ struct CLILiveValues {
             return rows.compactMap(\.stringValue)
         case .looks:
             return field("name", of: data["looks"])
+        case .savedLooks:
+            guard case .array(let rows)? = data["looks"] else { return [] }
+            let saved = rows.filter { $0["bundled"] != .bool(true) }
+            return field("name", of: .array(saved))
         }
     }
 
@@ -73,7 +79,7 @@ struct CLILiveValues {
     ) -> [String] {
         guard case .array(let rows)? = rows else { return [] }
         return rows.compactMap { row in
-            row[key].flatMap(CLIWatchEvent.scalar)
+            row[key]?.scalarText
         }
     }
 }

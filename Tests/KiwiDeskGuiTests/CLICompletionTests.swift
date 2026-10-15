@@ -8,12 +8,11 @@ import Testing
 /// directive, and names no command itself — so it cannot go stale.
 @Suite("CLI completion shims")
 struct CLICompletionTests {
-    @Test("every shell the completer offers has a shim")
+    @Test("the usage names every shell a shim exists for")
     func everyShell() {
-        for shell in CLICompleter.shells {
-            #expect(CLICompletion.script(for: shell) != nil, "\(shell)")
+        for shell in CLICompletion.Shell.allCases {
+            #expect(CLICompletion.usage.contains(shell.rawValue))
         }
-        #expect(CLICompletion.script(for: "tcsh") == nil)
     }
 
     @Test("each shim asks __complete and honours the directive")
@@ -23,9 +22,9 @@ struct CLICompletionTests {
             "bash": #""${COMP_WORDS[0]}""#,
             "fish": "$tokens[1]",
         ]
-        for shell in CLICompleter.shells {
-            let script = try #require(CLICompletion.script(for: shell))
-            let caller = try #require(typed[shell])
+        for shell in CLICompletion.Shell.allCases {
+            let script = shell.script
+            let caller = try #require(typed[shell.rawValue])
             #expect(
                 script.contains("\(caller) \(CLICompleter.verb)"),
                 "\(shell) must call the binary the user typed"

@@ -12,8 +12,6 @@ struct CLICompleter {
     /// for any command — the program a `watch` runs, say.
     static let defaultDirective = ":default"
 
-    static let shells = ["zsh", "bash", "fish"]
-
     var live = CLILiveValues()
 
     /// What to offer for `current`, given the words before it.
@@ -32,9 +30,11 @@ struct CLICompleter {
         case .help:
             offer = rest.isEmpty ? Self.commandNames + [CLIHelp.jsonFlag] : []
         case .service:
-            offer = rest.isEmpty ? CLIRoute.serviceActions : []
+            offer = rest.isEmpty ? ServiceAction.allCases.map(\.rawValue) : []
         case .completion:
-            offer = rest.isEmpty ? Self.shells : []
+            offer =
+                rest.isEmpty
+                ? CLICompletion.Shell.allCases.map(\.rawValue) : []
         case .watch:
             if rest.contains(CLIWatch.separator) { return .shellDefault }
             offer =
@@ -60,6 +60,7 @@ struct CLICompleter {
         }
         guard
             let entry = APIReference.entry(named: command),
+            entry.channel != .lua,
             rest.count < entry.record.arguments.count
         else { return [] }
         let argument = entry.record.arguments[rest.count]
@@ -82,14 +83,14 @@ struct CLICompleter {
         }
     }
 
-    /// The first word: every local verb a user types — never the
-    /// hidden `__complete`, and a flag only once `-` is typed —
-    /// then every command the CLI can send.
+    /// The first word: every local verb a user types — a flag only
+    /// once `-` is typed — then every command the CLI can send.
     private static func firstWords(_ current: String) -> [String] {
-        let local = CLIRoute.localVerbs.filter {
-            $0 != verb && ($0.hasPrefix("-") == current.hasPrefix("-"))
+        let local = CLIRoute.offeredVerbs.filter {
+            $0.hasPrefix("-") == current.hasPrefix("-")
         }
-        return (local + commandNames).filter { $0.hasPrefix(current) }
+        let commands = commandNames.filter { !local.contains($0) }
+        return (local + commands).filter { $0.hasPrefix(current) }
     }
 
     /// Every command the socket answers, as `list_commands` names

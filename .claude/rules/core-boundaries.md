@@ -66,8 +66,9 @@ below, so it corrects itself when a seventh is added.
   again in the probe, which reads the sink before any lifecycle
   runs.
 - **The API surface describes itself, and an enum's values are
-  READ rather than typed (#1033).** Five obligations, all on
-  `Commands/`:
+  READ rather than typed (#1033).** The obligations are the
+  bullets immediately below, each on `Commands/` save the CLI's
+  local verbs:
   - **A new command owes a record** in the matching
     `Commands/Reference/APIRecords+*` table — group, arguments,
     one-line summary. `APIRecordCensusTests` holds the record
@@ -79,6 +80,13 @@ below, so it corrects itself when a seventh is added.
     `cliOnly`, the one register of commands Lua never registers,
     `subscribe` beside it (`APIRecordCensusTests` ▸
     `cliOnlyIsNeverLua`).
+  - **A verb the CLI answers without the app owes no record** —
+    a record is for a command the socket or Lua dispatches. Such
+    a verb joins `CLIRoute` in `Sources/KiwiDesk`, which `runCLI`
+    switches on and shell completion reads, and never an `if`
+    ahead of that switch; it may not take a spelling a socket
+    command has, save the ruled `help` (#1685,
+    `CLIRouteTests`, `CLIHelpSeamTests`).
   - **A new command answers whether it is destructive** —
     whether it loses something a user cannot get back by running
     another command: a file, a window's content, unsaved live

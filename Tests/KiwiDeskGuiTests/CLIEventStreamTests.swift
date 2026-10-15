@@ -133,4 +133,43 @@ struct CLIEventStreamTests {
         #expect(parsed.reconnect)
         #expect(!CLIEventStream.parse(["focus_change"]).reconnect)
     }
+
+    @Test("subscribe hands the parsed flag and names to its stream")
+    func subscribeWiring() {
+        let once = Script([FakeSource([]), FakeSource([])])
+        _ = CLIEventStream.subscribe(["focus_change"], stream: once.stream)
+        #expect(once.sources.count == 1, "reconnected without the flag")
+        let kept = Script([FakeSource([]), FakeSource([])])
+        _ = CLIEventStream.subscribe(
+            ["focus_change", CLIEventStream.reconnectFlag],
+            stream: kept.stream
+        )
+        #expect(kept.sources.count == 2, "--reconnect did not reconnect")
+        #expect(
+            kept.sources.first?.sent.first?.args == [.string("focus_change")]
+        )
+    }
+
+    @Test("watch always reconnects and runs each event")
+    func watchWiring() {
+        let script = Script([
+            FakeSource([Self.ack, Self.event]), FakeSource([Self.event]),
+        ])
+        final class Runs: @unchecked Sendable { var lines: [String] = [] }
+        let runs = Runs()
+        var runner = CLIWatchRunner(command: ["x"])
+        runner.spawn = { _, _, line in
+            runs.lines.append(line)
+            return 0
+        }
+        runner.note = { _ in }
+        let code = CLIWatch.watch(
+            .init(events: ["space_change"], command: ["x"]),
+            stream: script.stream,
+            runner: runner
+        )
+        #expect(code == 0)
+        #expect(script.sources.count == 2, "watch did not reconnect")
+        #expect(runs.lines == [Self.event, Self.event])
+    }
 }
