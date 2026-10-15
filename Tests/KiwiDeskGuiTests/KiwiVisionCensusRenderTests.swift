@@ -54,7 +54,10 @@ struct KiwiVisionCensusRenderTests {
         #expect(
             KiwiVisionRowOrder.appearance == [.kiwiVision(.appearance)]
         )
-        #expect(KiwiVisionRowOrder.clear == [.kiwiVision(.clearWallpaper)])
+        #expect(
+            KiwiVisionRowOrder.clear
+                == [.kiwiVision(.clearApp), .kiwiVision(.clearWallpaper)]
+        )
     }
 
     /// Stays clear sits between Dim and blur and System appearance
@@ -81,12 +84,14 @@ struct KiwiVisionCensusRenderTests {
         #expect(
             card.contains("case.kiwiVision(.clearWallpaper):wallpaperRow")
         )
+        #expect(card.contains("case.kiwiVision(.clearApp):appRow"))
     }
 
     /// With the wallpaper clear the caption and the spoken label
     /// say so, and the picture veils each hazed window instead.
     @Test("the caption names a clear wallpaper")
     @MainActor func captionNamesTheWallpaper() throws {
+        try captionNamesTheApp()
         LocalizationManager.shared.select("en")
         let both = KiwiVisionEffect(dims: true, blurs: true, windowsOnly: true)
         #expect(both.caption.contains("wallpaper stays clear"))
@@ -111,7 +116,7 @@ struct KiwiVisionCensusRenderTests {
                 + "KiwiVisionScene.swift"
         )
         #expect(scene.contains("visionVeil.opacity(windowsOnly?0:veil)"))
-        #expect(scene.contains("if!focused,windowsOnly{"))
+        #expect(scene.contains("ifhazed,windowsOnly{"))
     }
 
     /// Reduce transparency greys the levels card as a unit, the
@@ -274,5 +279,32 @@ struct KiwiVisionCensusRenderTests {
                 .contains("is blurred.")
         )
         #expect(both.spoken(dimPercent: 60).hasSuffix("60%"))
+    }
+
+    /// With the focused app's other windows clear, both sentences
+    /// say so, and the picture's second document leaves the haze.
+    @MainActor private func captionNamesTheApp() throws {
+        LocalizationManager.shared.select("en")
+        let app = KiwiVisionEffect(
+            dims: true,
+            blurs: true,
+            windowsOnly: false,
+            clearApp: true
+        )
+        #expect(app.caption.contains("focused app's windows"))
+        #expect(app.caption.contains("its windows become the clear ones"))
+        let both = KiwiVisionEffect(
+            dims: true,
+            blurs: false,
+            windowsOnly: true,
+            clearApp: true
+        )
+        #expect(both.caption.contains("Other apps' windows are dimmed;"))
+        let scene = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/KiwiVision/"
+                + "KiwiVisionScene.swift"
+        )
+        #expect(scene.contains("lethazed=!focused&&!clear"))
+        #expect(scene.contains("clear:clearApp,"))
     }
 }

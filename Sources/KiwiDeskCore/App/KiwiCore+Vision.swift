@@ -51,6 +51,11 @@ extension KiwiCore {
                 return .fail("expected boolean")
             }
             setAppWide(persisting: false) { $0.visionClearWallpaper = on }
+        case "kiwivision.set_clear_app":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            setAppWide(persisting: false) { $0.visionClearApp = on }
         default:
             return .fail("unknown command: \(command)")
         }
@@ -176,7 +181,7 @@ extension KiwiCore {
             tracked: windowServer.isActive,
             dim: CGFloat(appWide.visionDim / 100),
             blur: kiwiVisionDrawsBlur,
-            clearWallpaper: visionMasks,
+            clearWallpaper: vision.isOn && appWide.visionClearWallpaper,
             windows: visionMasks
                 ? visionMaskWindows(
                     target: target,

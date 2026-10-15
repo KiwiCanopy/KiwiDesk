@@ -6,7 +6,7 @@ enum KiwiVisionRowOrder {
     ]
 
     static let clear: [SettingKey] = [
-        .kiwiVision(.clearWallpaper)
+        .kiwiVision(.clearApp), .kiwiVision(.clearWallpaper),
     ]
 
     static let appearance: [SettingKey] = [

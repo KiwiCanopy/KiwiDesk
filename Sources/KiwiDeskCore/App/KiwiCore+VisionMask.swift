@@ -7,7 +7,8 @@ import AppKit
 extension KiwiCore {
     /// Whether the plates draw a mask rather than the whole screen.
     var visionMasks: Bool {
-        vision.isOn && appWide.visionClearWallpaper
+        vision.isOn
+            && (appWide.visionClearWallpaper || appWide.visionClearApp)
     }
 
     /// The windows below the plates, front to back, in AppKit
@@ -16,9 +17,12 @@ extension KiwiCore {
     /// sent — so a pass's mask lands with its windows rather than
     /// their echoes — and every other app's normal window at its
     /// listed bounds. A member the list has not seen yet goes in
-    /// front: it arrived since the read. The float tier is walked
-    /// as if below the plate, which sits over it (#2287): a verdict
-    /// that clears a window skips the target and the float tier.
+    /// front: it arrived since the read. The float tier sits below
+    /// the plate (#2287), so a float takes a verdict like any
+    /// window. With "the current app's other windows" on, a window
+    /// of the target's app — one process, or a sibling of it
+    /// (`EventLoop.names(_:appOf:)`, #1785) — is clear: a hole for
+    /// its visible part.
     /// KiwiDesk's own untiled windows — a dialog, the update and
     /// What's new windows — are chrome to the read and stay clear.
     /// Corner radii are read only on a list read, off the switch
@@ -43,33 +47,45 @@ extension KiwiCore {
             radius: { self.windowRadius(WindowID($0), reading: true) }
         )
         let seen = Set(listed.map { WindowID($0.number) })
-        var ordered: [(id: WindowID, frame: CGRect)] = []
-        for id in members where !seen.contains(id) {
-            if let frame = memberFrame(id) { ordered.append((id, frame)) }
+        var ordered: [(id: WindowID, frame: CGRect, pid: pid_t)] = []
+        func member(_ id: WindowID) {
+            guard let frame = memberFrame(id),
+                let pid = state.windows[id]?.pid
+            else { return }
+            ordered.append((id, frame, pid))
         }
+        for id in members where !seen.contains(id) { member(id) }
         for entry in listed {
             let id = WindowID(entry.number)
             if shown.contains(id) {
-                if let frame = memberFrame(id) {
-                    ordered.append((id, frame))
-                }
+                member(id)
                 continue
             }
             guard entry.layer == 0, entry.number != target,
                 !vision.trackedAtRead.contains(entry.number),
                 state.windows[id] == nil
             else { continue }
-            ordered.append((id, entry.frame))
+            ordered.append((id, entry.frame, entry.pid))
         }
+        let clearApp = visionClearAppPid(target: target)
         let height = GeometryUtils.primaryHeight
-        return ordered.map { id, frame in
+        return ordered.map { id, frame, pid in
             VisionMask.Window(
                 frame: GeometryUtils.flip(frame, primaryHeight: height),
                 cornerRadius: vision.listedRadii[id.raw]
                     ?? windowRadius(id, reading: refreshingList),
-                clear: false
+                clear: clearApp.map { eventLoop.names($0, appOf: pid) }
+                    ?? false
             )
         }
+    }
+
+    /// The target's process while "the current app's other
+    /// windows" is on: a tracked target's, else this one's — the
+    /// target is then an own key window. Nil while off.
+    private func visionClearAppPid(target: CGWindowID?) -> pid_t? {
+        guard appWide.visionClearApp, let target else { return nil }
+        return state.windows[WindowID(target)]?.pid ?? getpid()
     }
 
     /// A window's corner radius: the ring's reading, read from the

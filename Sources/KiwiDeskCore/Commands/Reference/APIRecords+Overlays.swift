@@ -223,6 +223,11 @@ extension APIReference {
                 + "windows; off by default.",
             .boolean("enabled")
         ),
+        "set_clear_app": APIRecord(
+            "Keeps every window of the focused app clear, not only "
+                + "the focused one; off by default.",
+            .boolean("enabled")
+        ),
     ]
 
     static let kiwihubRecords: [String: APIRecord] = [

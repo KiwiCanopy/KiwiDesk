@@ -254,7 +254,7 @@ public enum APIReference {
         ],
         "kiwivision": [
             "toggle", "set_dim", "set_blur", "set_appearance",
-            "set_clear_wallpaper",
+            "set_clear_wallpaper", "set_clear_app",
         ],
         "kiwihub": ["show"],
         "look": [
