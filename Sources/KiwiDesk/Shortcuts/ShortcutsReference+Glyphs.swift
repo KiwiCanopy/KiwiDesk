@@ -31,9 +31,10 @@ extension ShortcutsReferenceBuilder {
 
     /// A verb row's glyph on the key panel's Shortcuts side
     /// (#2246): the layout cycle, the size quartet, the float and
-    /// sticky toggles — wearing the marks the windows wear — and a
-    /// layer switch. Panel-only; Settings draws glyphs only where
-    /// one names a thing.
+    /// sticky toggles — wearing the marks the windows wear — a
+    /// layer switch, and the KiwiVision toggle wearing its Settings
+    /// card's symbol (#2103). Panel-only; Settings draws glyphs only
+    /// where one names a thing.
     static func verbIcon(for lua: String) -> String? {
         switch lua {
         case "KiwiDesk.cycle_mode()":
@@ -52,7 +53,6 @@ extension ShortcutsReferenceBuilder {
         if lua.hasPrefix("KiwiDesk.switch_layer(") {
             return "square.3.layers.3d"
         }
-        // KiwiVision wears its Settings card's symbol (#2103).
         if lua.hasPrefix("kiwivision.toggle(") {
             return SettingsDestination.kiwiVision.symbol
         }
