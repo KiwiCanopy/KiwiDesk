@@ -384,7 +384,7 @@ take the screen.
 
 Take the seam that NAMES the moment the window appears; a
 callback that merely fires near it is a race, not a fix. #1011 is
-the worked case (Sparkle 2.9.6, the version `Package.resolved`
+the worked case (Sparkle 2.10.0, the version `Package.resolved`
 pins — a bump re-checks it): `UpdatePromptDriver` overrides
 `showReadyToInstallAndRelaunch`, and `UpdatePromptPolicy` refuses
 the status window's minimize button.
@@ -447,7 +447,7 @@ that bring-forward (`UpdateUpToDateTests` ▸
 bypasses the policy's delegate answers, so the own path asks the
 policy through its own doors (`offerArrived`,
 `offerGotAttention`) and never writes `updatePending` itself.
-Two orderings are Sparkle 2.9.6's and a bump re-checks them
+Two orderings are Sparkle 2.10.0's and a bump re-checks them
 beside #1011's: the ready-to-install prompt is answered
 `.install` because the window already had its Install; and Try
 Again's check starts at
