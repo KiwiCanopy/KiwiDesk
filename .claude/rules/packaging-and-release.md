@@ -165,7 +165,7 @@ untestable without a signing identity:
   missing `@rpath`.
 - **A vendor framework's own signature is not something to
   preserve.** Sparkle ships ad-hoc signed with no Team ID
-  (checked against 2.9.6, both distributions), so ours is the
+  (checked against 2.10.0, both distributions), so ours is the
   only real signature the nest gets. A future dependency that
   arrives properly signed is a different case — weigh it then
   rather than inheriting this sentence.
