@@ -51,6 +51,39 @@ struct AISetupRowWiringTests {
         )
     }
 
+    /// Add to Claude Desktop (#2258 ▸ Ruling 7): it greys with the
+    /// shared translocation reason drawn once, re-reads whether
+    /// Claude Desktop is installed whenever KiwiDesk comes back,
+    /// and hands the click to the one generator.
+    @Test("Add to Claude Desktop greys, refreshes and builds")
+    func addRowIsWired() throws {
+        let row = try flat(
+            "Sources/KiwiDesk/Settings/Components/AI/AISetupRow.swift"
+        )
+        // Its own caption is withheld while translocated, so the
+        // move sentence under Copy is the one reason drawn.
+        #expect(row.occurrences(of: "if!translocated{Text(addCaption)") == 1)
+        #expect(
+            row.occurrences(
+                of: "NSApplication.didBecomeActiveNotification"
+            ) == 1
+        )
+        #expect(
+            row.occurrences(
+                of: "MCPDesktopExtension.claudeDesktop()!=nil"
+            ) == 2
+        )
+        #expect(
+            row.occurrences(of: "tryMCPDesktopExtension.addToClaudeDesktop")
+                == 1
+        )
+        #expect(
+            row.occurrences(
+                of: ".searchAnchored(SettingsCatalog.ai.addToClaudeDesktop)"
+            ) == 1
+        )
+    }
+
     /// The row draws the caption the census guard checks.
     @Test("a prompt row draws its prompt's caption")
     func promptRowDrawsTheCaption() throws {

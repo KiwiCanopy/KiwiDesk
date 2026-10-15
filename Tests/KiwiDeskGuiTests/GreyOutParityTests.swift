@@ -82,6 +82,13 @@ struct GreyOutParityTests {
             "GreyOut(active: translocated)",
             1
         ),
+        // Add to Claude Desktop: translocated, or no Claude
+        // Desktop to open the extension (#2258).
+        (
+            "AISetupRow.swift",
+            "GreyOut(active: translocated || !claudeInstalled)",
+            1
+        ),
         (
             "FocusBorderEditor.swift",
             "active: glowAutoReason != nil",

@@ -65,9 +65,12 @@ extension MCPDesktopExtension {
     }
 
     /// Builds a fresh bundle for the running copy in a temporary
-    /// folder and opens it in Claude Desktop.
+    /// folder and opens it in Claude Desktop; `openFailed` runs on
+    /// the main actor if Claude Desktop refuses the file.
     @MainActor
-    static func addToClaudeDesktop() throws {
+    static func addToClaudeDesktop(
+        openFailed: @escaping @MainActor () -> Void
+    ) throws {
         guard let claude = claudeDesktop() else {
             throw Failure.noClaudeDesktop
         }
@@ -86,7 +89,10 @@ extension MCPDesktopExtension {
             [output],
             withApplicationAt: claude,
             configuration: NSWorkspace.OpenConfiguration()
-        )
+        ) { _, error in
+            guard error != nil else { return }
+            Task { @MainActor in openFailed() }
+        }
     }
 
     /// The app's icon as a 512-point PNG, the size the bundle

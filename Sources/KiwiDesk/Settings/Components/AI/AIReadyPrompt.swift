@@ -33,7 +33,7 @@ enum AIReadyPrompt {
                 "How many Spaces, what goes where, and each "
                     + "one\u{2019}s layout."
             )
-        case .copySetupPrompt:
+        case .addToClaudeDesktop, .copySetupPrompt:
             return nil
         }
     }
@@ -101,7 +101,7 @@ enum AIReadyPrompt {
                 names[5],
                 names[6]
             )
-        case .copySetupPrompt:
+        case .addToClaudeDesktop, .copySetupPrompt:
             return nil
         }
     }

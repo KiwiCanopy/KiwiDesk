@@ -58,6 +58,7 @@ struct AISection: View {
     static func control(for key: AIKey) -> SettingsControl? {
         let catalog = SettingsCatalog.ai
         switch key {
+        case .addToClaudeDesktop: return catalog.addToClaudeDesktop
         case .copySetupPrompt: return catalog.copySetupPrompt
         case .promptLook: return catalog.promptLook
         case .promptMigrate: return catalog.promptMigrate
