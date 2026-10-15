@@ -624,8 +624,7 @@ here — sparkles as Apple Intelligence, an up-arrow as Install.
 **The window answers "you're up to date" too (#1849).** A check
 the user started that finds nothing newer opens the same window,
 headed "KiwiDesk is up to date", on the same strip — the running
-version's notes, which nothing else in the app shows again once
-"What's new" is closed, then Next, which it opens on — with one
+version's notes, then Next, which it opens on — with one
 Done that answers Sparkle. Two answers to one question used to
 look like two apps. Only that reason is ours: a check refused
 because the system is too old or too new keeps Sparkle's own

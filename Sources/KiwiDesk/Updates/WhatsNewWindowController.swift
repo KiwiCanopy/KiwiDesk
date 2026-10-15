@@ -5,7 +5,7 @@ import KiwiDeskCore
 /// window with one Done. Its close is Done too. A spotlight row's
 /// "Show me" hides it without answering it (#2038 ruling ▸
 /// handoff); whose trail that is, and when it ends, is
-/// `WhatsNewCoordinator`'s. With `releases` it carries the release
+/// `WhatsNewCoordinator`'s. With a `menu` it carries the release
 /// menu (#2308).
 @MainActor
 final class WhatsNewWindowController: NSObject, NSWindowDelegate {
@@ -14,10 +14,8 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     let narration: BootNarration?
     /// Internal so a test sees what the window was handed.
     let next: NextOnMyList?
-    /// The release menu's list; nil draws none.
-    let releases: WhatsNewReleases?
-    /// The menu's first selection.
-    let opening: WhatsNewReleases.Option?
+    /// The release menu; nil draws none.
+    let menu: WhatsNewMenu?
     /// The notes on screen — `offer` until the menu picks another
     /// release; what a "Show me" hands off.
     private(set) var shown: UpdateOffer
@@ -33,21 +31,20 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     /// Takes the window off screen; a test records it instead.
     var hides: (NSWindow) -> Void = { $0.orderOut(nil) }
 
+    /// `offer` is the menu's opening when there is a menu.
     init(
         offer: UpdateOffer,
         narration: BootNarration?,
         next: NextOnMyList?,
-        releases: WhatsNewReleases? = nil,
-        opening: WhatsNewReleases.Option? = nil,
+        menu: WhatsNewMenu? = nil,
         showMe: @escaping SpotlightShowMe,
         done: @escaping () -> Void
     ) {
-        self.offer = offer
-        self.shown = offer
+        self.offer = menu?.offer ?? offer
+        self.shown = self.offer
         self.narration = narration
         self.next = next
-        self.releases = releases
-        self.opening = opening
+        self.menu = menu
         self.showMe = showMe
         self.done = done
         super.init()
@@ -76,25 +73,32 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
         hides(window)
     }
 
+    /// The menu picked another release.
+    func didShow(_ offer: UpdateOffer) {
+        shown = offer
+    }
+
     /// Internal so a test takes the production window and hands
     /// it the close.
     func makeWindow() -> NSWindow {
         let finished: () -> Void = { [weak self] in self?.finish() }
-        let mode =
-            UpdateWindowMode
-            .whatsNew(narration: narration, next: next, done: finished)
         let window: NSWindow
-        if let releases, let opening {
+        if let menu {
             window = UpdateWindowChrome.window(
-                releases: releases,
-                opening: opening,
-                mode: mode,
-                showMe: showMe
-            ) { [weak self] in self?.shown = $0 }
+                menu: menu,
+                narration: narration,
+                next: next,
+                showMe: showMe,
+                done: finished
+            ) { [weak self] in self?.didShow($0) }
         } else {
             window = UpdateWindowChrome.window(
                 offer: offer,
-                mode: mode,
+                mode: .whatsNew(
+                    narration: narration,
+                    next: next,
+                    done: finished
+                ),
                 showMe: showMe
             )
         }

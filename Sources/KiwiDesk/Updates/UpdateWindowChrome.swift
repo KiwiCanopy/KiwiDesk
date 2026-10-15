@@ -32,31 +32,40 @@ enum UpdateWindowChrome {
     /// What's new with its release menu (#2308): as tall as the
     /// tallest release's notes, so a pick never resizes it (#1666).
     static func window(
-        releases: WhatsNewReleases,
-        opening: WhatsNewReleases.Option,
-        mode: UpdateWindowMode,
+        menu: WhatsNewMenu,
+        narration: BootNarration?,
+        next: NextOnMyList?,
         showMe: SpotlightShowMe?,
+        done: @escaping () -> Void,
         onShow: @escaping (UpdateOffer) -> Void
     ) -> NSWindow {
-        let tallest =
-            releases.options.compactMap { option in
-                releases.offer(for: option).map {
-                    fittingHeight(
-                        offer: $0,
-                        mode: mode,
-                        showMe: showMe,
-                        picking: ReleasePicking(
-                            releases: releases,
-                            selection: .constant(option)
-                        )
-                    )
-                }
-            }.max() ?? 0
+        let releases = menu.releases
+        var tallest: CGFloat = 0
+        for option in releases.options {
+            guard let offer = releases.offer(for: option) else { continue }
+            let mode = UpdateWindowMode.whatsNew(
+                narration: narration,
+                next: next,
+                picking: ReleasePicking(
+                    releases: releases,
+                    selection: .constant(option)
+                ),
+                done: done
+            )
+            tallest = max(
+                tallest,
+                fittingHeight(offer: offer, mode: mode, showMe: showMe)
+            )
+            // Past the ruled maximum the window scrolls anyway.
+            let fitted = tallest + UpdateWindowMetrics.titleBar
+            if fitted >= UpdateWindowMetrics.maxHeight { break }
+        }
         return window(
             root: WhatsNewBrowser(
-                releases: releases,
-                opening: opening,
-                mode: mode,
+                menu: menu,
+                narration: narration,
+                next: next,
+                done: done,
                 onShow: onShow
             )
             .environment(\.spotlightShowMe, showMe),
@@ -99,14 +108,12 @@ enum UpdateWindowChrome {
     private static func fittingHeight(
         offer: UpdateOffer,
         mode: UpdateWindowMode,
-        showMe: SpotlightShowMe?,
-        picking: ReleasePicking? = nil
+        showMe: SpotlightShowMe?
     ) -> CGFloat {
         let unscrolled = UpdateWindowView(
             offer: offer,
             mode: mode,
-            measuring: true,
-            picking: picking
+            measuring: true
         )
         .environment(\.spotlightShowMe, showMe)
         let probe = NSHostingView(

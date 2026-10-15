@@ -135,10 +135,12 @@ struct HomeSupportStripTests {
             }
         }
         #expect(callers == ["HomeSupportStrip.swift"])
+        // About's links are License, Acknowledgements and Website:
+        // a fourth, whatever its URL, is a second door.
         let about = try SourceScan.blankedSource(
             at: root.appendingPathComponent("Settings/Home/AboutSheet.swift")
-        )
-        #expect(!about.contains("SupportLinks.releases"))
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(about.occurrences(of: "link(L(") == 3)
     }
 
     @Test("About is the shell's action, not a sheet of the strip's")

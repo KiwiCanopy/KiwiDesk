@@ -73,6 +73,31 @@ struct WhatsNewReleasesTests {
         #expect(single.options.first == .release("3.1.0"))
     }
 
+    /// The range is the owed digest's own: a skipped release whose
+    /// notes do not read still counts toward it and keeps its
+    /// link, though it never lists alone.
+    @Test("An unreadable skipped release keeps the range and its link")
+    func unreadableKeepsTheRange() throws {
+        let releases = try #require(
+            WhatsNewReleases(
+                items: [
+                    Self.item("3.1.0"), Self.item("3.0.0", readable: false),
+                    Self.item("2.3.0"),
+                ],
+                current: "3.1.0",
+                since: "2.3.0"
+            )
+        )
+        #expect(
+            releases.options == [
+                .since("2.3.0"), .release("3.1.0"),
+                .release("2.3.0"),
+            ]
+        )
+        let range = try #require(releases.offer(for: .since("2.3.0")))
+        #expect(range.digest?.unreadable == ["3.0.0"])
+    }
+
     @Test("Owed notes open on the range; every other open on this version")
     func openingRule() throws {
         let items = [

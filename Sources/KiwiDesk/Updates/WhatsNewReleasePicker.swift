@@ -12,37 +12,47 @@ struct ReleasePicking {
 /// names, in the update window's own layout, reporting each
 /// switch so a "Show me" hands off the rows on screen.
 struct WhatsNewBrowser: View {
-    let releases: WhatsNewReleases
-    let mode: UpdateWindowMode
+    let menu: WhatsNewMenu
+    let narration: BootNarration?
+    let next: NextOnMyList?
+    let done: () -> Void
     let onShow: (UpdateOffer) -> Void
     @State private var selection: WhatsNewReleases.Option
 
     init(
-        releases: WhatsNewReleases,
-        opening: WhatsNewReleases.Option,
-        mode: UpdateWindowMode,
+        menu: WhatsNewMenu,
+        narration: BootNarration?,
+        next: NextOnMyList?,
+        done: @escaping () -> Void,
         onShow: @escaping (UpdateOffer) -> Void
     ) {
-        self.releases = releases
-        self.mode = mode
+        self.menu = menu
+        self.narration = narration
+        self.next = next
+        self.done = done
         self.onShow = onShow
-        _selection = State(initialValue: opening)
+        _selection = State(initialValue: menu.opening)
     }
 
     var body: some View {
         UpdateWindowView(
             offer: offer,
-            mode: mode,
-            picking: ReleasePicking(releases: releases, selection: $selection)
+            mode: .whatsNew(
+                narration: narration,
+                next: next,
+                picking: ReleasePicking(
+                    releases: menu.releases,
+                    selection: $selection
+                ),
+                done: done
+            )
         )
         .onChange(of: selection) { onShow(offer) }
     }
 
+    /// Every listed option resolves; the opening is the net.
     private var offer: UpdateOffer {
-        let current = WhatsNewReleases.Option.release(releases.current)
-        return releases.offer(for: selection)
-            ?? releases.offer(for: current)
-            ?? UpdateOffer.unread(build: releases.current)
+        menu.releases.offer(for: selection) ?? menu.offer
     }
 }
 
@@ -80,11 +90,9 @@ struct ReleasePicker: View {
     ) -> String {
         switch option {
         case .since(let start):
-            return L(
-                "update.window.release_since",
-                "Since %1$@",
-                releases.item(start)?.shown ?? start
-            )
+            let shown =
+                releases.feed.first { $0.version == start }?.shown ?? start
+            return L("update.window.release_since", "Since %1$@", shown)
         case .release(let version):
             let item = releases.item(version)
             let shown = item?.shown ?? version

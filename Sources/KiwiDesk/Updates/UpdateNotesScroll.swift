@@ -12,8 +12,7 @@ struct UpdateNotesScroll: View {
     let whatsNew: Bool
     /// The last tab's list, while there is one.
     var next: NextOnMyList?
-    /// Beside a release menu, which lists 2.0.0 onward: the older
-    /// releases are the site changelog's (#2308).
+    /// Links the site changelog, every release on it (#2308).
     var listsAllReleases = false
     /// Lays every tab out at once, unscrolled, so the window's
     /// height is the tallest tab's and a switch does not jump it.

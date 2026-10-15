@@ -87,7 +87,6 @@ struct AboutSheet: View {
     }
 
     private var links: some View {
-        // The notes are Home's What's new, one door (#2308).
         HStack(spacing: 16) {
             link(
                 L("general.about.license", "License"),

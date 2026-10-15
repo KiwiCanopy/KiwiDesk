@@ -99,7 +99,8 @@ final class SparkleUpdater: AppUpdating {
             driver.current?.isOffer ?? false
         }
         whatsNew?.frontsUpdateOffer = { [driver] in
-            _ = driver.focusOpenWindow()
+            guard driver.current?.isOffer == true else { return false }
+            return driver.focusOpenWindow()
         }
         // Sparkle takes the switch only while it checks on its own
         // (`allowsAutomaticUpdates`); both values are KVO.

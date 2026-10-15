@@ -4,8 +4,7 @@ import Sparkle
 /// The releases "What's new" can show (#2308): every feed item up
 /// to the running version whose structured notes read — so the
 /// untyped 1.x releases never list — newest first, plus the
-/// merged range of an update whose skipped notes are owed. Pure,
-/// so `WhatsNewReleasesTests` pins the list without a window.
+/// merged range of an update whose skipped notes are owed.
 struct WhatsNewReleases {
     enum Option: Hashable {
         /// Everything after the version the update replaced.
@@ -15,10 +14,14 @@ struct WhatsNewReleases {
 
     /// Readable items, newest first.
     let items: [WhatsNewFeed.Item]
+    /// The feed as read, unreadable items included: the merged
+    /// range is the owed digest's own, which links each skipped
+    /// release whose notes do not read.
+    let feed: [WhatsNewFeed.Item]
     /// The running `CFBundleVersion`.
     let current: String
-    /// The start of the owed range; nil when no range spans more
-    /// than one readable release.
+    /// The start of the owed range; nil when the range holds one
+    /// release only.
     let since: String?
 
     /// Nil when the running version's own notes do not read.
@@ -37,11 +40,15 @@ struct WhatsNewReleases {
             .sorted { compare($0.version, $1.version) == .orderedDescending }
         guard readable.first?.version == current else { return nil }
         self.items = readable
+        self.feed = items
         self.current = current
         let spanned = since.map { start in
-            readable.filter {
-                compare($0.version, start) == .orderedDescending
-            }.count
+            Set(
+                items.filter {
+                    compare($0.version, start) == .orderedDescending
+                        && compare($0.version, current) != .orderedDescending
+                }.map(\.version)
+            ).count
         }
         self.since = (spanned ?? 0) > 1 ? since : nil
     }
@@ -63,19 +70,18 @@ struct WhatsNewReleases {
     }
 
     /// The notes an option shows: the merged range through the
-    /// one digest the update window takes, or one release alone,
-    /// which carries no version tags.
+    /// digest the owed notes take, or one release alone, which
+    /// carries no version tags. Every listed option resolves.
     func offer(for option: Option) -> UpdateOffer? {
         switch option {
         case .since(let start):
             return UpdateOffer.whatsNew(
-                items: items,
+                items: feed,
                 since: start,
                 current: current
             )
         case .release(let version):
-            guard let item = items.first(where: { $0.version == version })
-            else { return nil }
+            guard let item = item(version) else { return nil }
             return UpdateOffer.whatsNew(
                 items: [item],
                 since: nil,
@@ -87,5 +93,25 @@ struct WhatsNewReleases {
     /// The item a version names, for its shown string and date.
     func item(_ version: String) -> WhatsNewFeed.Item? {
         items.first { $0.version == version }
+    }
+}
+
+/// The release menu a What's new window carries: the list and its
+/// first pick, one value so neither travels without the other.
+struct WhatsNewMenu {
+    let releases: WhatsNewReleases
+    let opening: WhatsNewReleases.Option
+    /// The notes the window opens on.
+    let offer: UpdateOffer
+
+    /// Nil when `releases` is, or when the opening resolves no
+    /// notes — the window then draws no menu.
+    init?(_ releases: WhatsNewReleases?, owed: Bool) {
+        guard let releases else { return nil }
+        let opening = releases.opening(owed: owed)
+        guard let offer = releases.offer(for: opening) else { return nil }
+        self.releases = releases
+        self.opening = opening
+        self.offer = offer
     }
 }

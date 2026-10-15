@@ -7,10 +7,12 @@ import SwiftUI
 enum UpdateWindowMode {
     case offer(UpdateSession)
     /// `narration` is set after the window's own Install (#1667);
-    /// `next` is "Next on my list" (#1813).
+    /// `next` is "Next on my list" (#1813); `picking` is the
+    /// release menu, which only What's new carries (#2308).
     case whatsNew(
         narration: BootNarration?,
         next: NextOnMyList?,
+        picking: ReleasePicking? = nil,
         done: () -> Void
     )
     /// A check found nothing newer: the running version's notes
@@ -26,8 +28,6 @@ struct UpdateWindowView: View {
     /// Lays the notes out unscrolled, so the controller can read
     /// their natural height.
     var measuring = false
-    /// The release menu, where What's new offers one (#2308).
-    var picking: ReleasePicking?
 
     var body: some View {
         switch mode {
@@ -37,7 +37,7 @@ struct UpdateWindowView: View {
                 session: session,
                 measuring: measuring
             )
-        case .whatsNew(let narration, let next, let done):
+        case .whatsNew(let narration, let next, let picking, let done):
             UpdateWindowLayout(
                 offer: offer,
                 whatsNew: true,
@@ -125,7 +125,7 @@ private struct UpdateWindowLayout<Footer: View>: View {
                     upToDate: upToDate,
                     next: next != nil
                 ),
-                listsAllReleases: picking != nil,
+                listsAllReleases: whatsNew,
                 measuring: measuring
             )
             // Another release opens on Highlights: its tabs differ.
