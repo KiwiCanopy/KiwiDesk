@@ -496,7 +496,7 @@ fi
 # Sparkle is four nested signable pieces plus the framework, and
 # every one of them has to be sealed before the framework, which
 # has to be sealed before the app. Upstream ships ALL of it
-# ad-hoc signed with no Team ID (checked against 2.9.6, both
+# ad-hoc signed with no Team ID (checked against 2.10.0, both
 # distributions), so this is not re-signing over a vendor
 # identity — it is the only real signature the nest ever gets,
 # and notarization rejects the app if one piece is missed.
