@@ -52,6 +52,10 @@ extension ShortcutsReferenceBuilder {
         if lua.hasPrefix("KiwiDesk.switch_layer(") {
             return "square.3.layers.3d"
         }
+        // KiwiVision wears its Settings card's symbol (#2103).
+        if lua.hasPrefix("kiwivision.toggle(") {
+            return SettingsDestination.kiwiVision.symbol
+        }
         guard lua.hasPrefix("KiwiDesk.resize(") else { return nil }
         let shrinks = lua.contains("-")
         if lua.contains("\"x\"") {
