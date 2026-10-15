@@ -728,8 +728,10 @@ the pin is what keeps such an element out of a test core.
 A test core never boots either (#2294): `start()` re-arms the
 live seams the factory pinned, so it resets the boot latches and
 then asks `BootRun.admitsStart`, which both twins arm to refuse
-with an issue (`TestCoreStartTripwireTests`); a suite proving the
-reset alone states a silent refusal itself.
+with an issue (`TestCoreStartTripwireTests`). A test never admits
+a test core's start: a suite proving the reset alone writes a
+refusing closure, and every write of the gate under `Tests/` is
+held to its file and to a refusal (`TestCoreStartSeamTests`).
 `MouseButtonSeamGuardTests` holds each read to its homes AND
 every pin into both twins, a deletion from both being silent
 otherwise; it is a sibling of `MachineTouchTests`

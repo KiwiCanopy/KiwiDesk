@@ -1927,7 +1927,8 @@ Touching `Tests/**`.
 - reach the machine only through injected seams (hotkeys #565, menu-bar slots —
   `MachineTouchTests`, `StatusItemSeamGuardTests`; the live app list, an
   attach to or frame for another app refused — #2289, `LiveAppListSeamTests`;
-  a test core's boot refused — #2294, `TestCoreStartTripwireTests`)
+  a test core's boot refused — #2294, `TestCoreStartTripwireTests`,
+  `TestCoreStartSeamTests`)
 - a change owes a test that reds when it is reverted, and a test whose
   assertions are new or changed owes a `guard-prover` run whatever shape that
   test is — spawned `isolation: "worktree"`, or run alone

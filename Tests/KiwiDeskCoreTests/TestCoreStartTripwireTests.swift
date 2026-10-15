@@ -10,8 +10,13 @@ import Testing
 @Suite("Test core start tripwire (#2294)")
 struct TestCoreStartTripwireTests {
     @Test("a test core's start refuses after its reset")
-    func startRefuses() {
+    func startRefuses() throws {
         let core = makeTestCore()
+        // Asked before `start()`, so a lost tripwire reds here
+        // rather than by booting against the host.
+        var admitted = true
+        withKnownIssue { admitted = core.boot.admitsStart() }
+        try #require(!admitted)
         core.boot.reachedReady = true
         core.boot.publishRestore(.placing(placed: 0, total: 1))
         withKnownIssue { core.start() }

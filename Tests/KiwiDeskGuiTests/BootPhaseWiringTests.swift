@@ -203,10 +203,11 @@ struct BootPhaseWiringTests {
     /// the hint expression and the pulse can both be deleted with
     /// `OnboardingGrantPhaseTests` green, because that suite reads
     /// the properties rather than the page they are handed to.
-    /// The latch the gate above reads: set by the tail, cleared
-    /// by `start()` through `BootRun.begin()`. The tail is not
-    /// reachable from a test, so both are needled here; the clear
-    /// itself is `TestCoreStartTripwireTests`' (#2294).
+    /// The latch the gate above reads: set by the tail, which no
+    /// test reaches, so it is needled; cleared by `start()`
+    /// through `BootRun.begin()`, needled here beside
+    /// `TestCoreStartTripwireTests`, which drives the clear
+    /// itself (#2294).
     @Test("the boot tail latches that it reached ready")
     func theTailLatchesReady() throws {
         let text = try source(bootPath)
