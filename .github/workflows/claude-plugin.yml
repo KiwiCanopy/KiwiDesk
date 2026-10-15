@@ -1,0 +1,109 @@
+name: Sync Claude Code plugin
+
+# The Claude Code marketplace lives in its own small repository,
+# KiwiCanopy/kiwidesk-claude, because Claude Code clones the whole
+# repository a marketplace is in (#2258 ▸ Ruling 3). This copies the
+# released tag's `plugins/` folder there with the release's version,
+# on publication — the same boundary the Homebrew cask advances on.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Published release tag to sync (e.g. v3.0.0)'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: claude-plugin
+  queue: max
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  sync:
+    name: Sync plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the tag
+        id: tag
+        run: |
+          set -euo pipefail
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::tag must be vMAJOR.MINOR.PATCH: $TAG"
+            exit 1
+          fi
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      # The released source, not main: the plugin must match the
+      # app the release ships.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+          path: kiwidesk
+
+      - name: Skip a release without the plugin
+        id: source
+        run: |
+          if [ -f kiwidesk/plugins/kiwidesk/.claude-plugin/plugin.json ]
+          then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$TAG carries no plugins/ folder; nothing to sync"
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require the marketplace deploy key
+        if: steps.source.outputs.present == 'true'
+        env:
+          DEPLOY_KEY: ${{ secrets.CLAUDE_PLUGIN_DEPLOY_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::error::CLAUDE_PLUGIN_DEPLOY_KEY is not configured"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.source.outputs.present == 'true'
+        with:
+          repository: KiwiCanopy/kiwidesk-claude
+          ref: main
+          path: marketplace
+          ssh-key: ${{ secrets.CLAUDE_PLUGIN_DEPLOY_KEY }}
+
+      - name: Copy the plugin and stamp its version
+        if: steps.source.outputs.present == 'true'
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          rsync -a --delete --exclude .git kiwidesk/plugins/ marketplace/
+          MANIFEST=marketplace/kiwidesk/.claude-plugin/plugin.json
+          jq --arg v "$VERSION" '.version = $v' "$MANIFEST" \
+            > "$RUNNER_TEMP/plugin.json"
+          mv "$RUNNER_TEMP/plugin.json" "$MANIFEST"
+          jq -e '.name == "kiwidesk"' "$MANIFEST" > /dev/null
+          jq -e . marketplace/.claude-plugin/marketplace.json > /dev/null
+          test -x marketplace/kiwidesk/scripts/kiwidesk-mcp
+
+      - name: Commit and push
+        if: steps.source.outputs.present == 'true'
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          git -C marketplace add -A
+          if git -C marketplace diff --cached --quiet; then
+            echo "kiwidesk-claude already carries $TAG"
+            exit 0
+          fi
+          git -C marketplace config user.name github-actions\[bot\]
+          git -C marketplace config \
+            user.email 41898282+github-actions\[bot\]@users.noreply.github.com
+          git -C marketplace commit -m "chore: sync kiwidesk plugin $VERSION"
+          git -C marketplace push origin HEAD:main
