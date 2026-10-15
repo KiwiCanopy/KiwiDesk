@@ -173,6 +173,19 @@ struct KiwiVisionNeverDimmedTests {
     @Test("on screen now lists each app once, beneath the layer too")
     func appsOnScreen() {
         let core = makeCore()
+        let listed = core.vision.listWindows
+        core.vision.listWindows = {
+            // KiwiDesk's own window is never offered.
+            [
+                FloatDetection.ListedWindow(
+                    number: 80,
+                    pid: getpid(),
+                    layer: 0,
+                    frame: CGRect(x: 0, y: 0, width: 50, height: 50),
+                    owner: "KiwiDesk"
+                )
+            ] + listed()
+        }
         let apps = core.appsOnScreen(beneathNormal: true)
         #expect(
             apps.map(\.key) == ["test.kiwi.music", "other", "sketchybar"]
