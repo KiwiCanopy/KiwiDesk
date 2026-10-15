@@ -17,8 +17,7 @@ final class StickyMarkOverlay {
     private static let collapseDuration: TimeInterval = 0.16
     private var panel: NSPanel?
 
-    /// AppKit keeps a visible panel alive after its owner is gone,
-    /// so a dropped overlay would leave it on screen (#1868).
+    /// AppKit keeps a dropped overlay's panel on screen (#1868).
     isolated deinit {
         panel?.orderOut(nil)
     }
@@ -64,27 +63,28 @@ final class StickyMarkOverlay {
         }
     }
 
-    /// Owes the mark a stack at the next sync: its window was
-    /// carried to another Desktop, which may report no reorder.
+    /// Owes a stack: a carry to another Desktop may report none.
     func oweOrder() { hasOrdered = false }
 
-    /// The panel's window number once WindowServer has it.
-    var panelNumber: CGWindowID? {
-        (panel?.windowNumber).flatMap { $0 > 0 ? CGWindowID($0) : nil }
+    /// The shown panel and when it last stacked (`ChromeOrderClock`).
+    var chrome: (panel: CGWindowID, stamp: UInt64)? {
+        guard let panel, panel.isVisible, orderStamp > 0 else { return nil }
+        return (CGWindowID(panel.windowNumber), orderStamp)
     }
+    private var orderStamp: UInt64 = 0
 
     /// Stacks mark above target window.
     func order() {
         guard let panel else { return }
         panel.order(.above, relativeTo: Int(target))
         hasOrdered = true
+        orderStamp = ChromeOrderClock.tick()
         #if DEBUG
             orderCount += 1
         #endif
     }
 
-    /// Whether the plate carries a sticky glyph — the pills are
-    /// sticky's (#1799).
+    /// Whether the plate carries a sticky glyph, the pills' (#1799).
     var isSticky: Bool {
         glyphs.contains { $0.kind == .sticky }
     }

@@ -392,11 +392,15 @@ Obligations:
   every veil as the plate does (`FloatDimManagerTests` ▸
   `offRetiresEveryVeil`). The look is the plate's one `VisionVeil`.
   Its panel takes AppKit's `setFrame` per tick, as the sticky
-  mark's does — a float is not parked on a Space switch, so the
-  ring's #1956 move stays unmeasured for it; and for the 50 ms the
-  float raise coalesces, a float still under the focused window is
-  veiled twice (accepted, `docs/accepted-limitations.md`'s to
-  record if the device shows it).
+  mark's does: a veil takes frames only while its float is in the
+  active set, so a float parked or un-parked by a Space switch moves
+  a dormant veil that draws nothing, and the ring's #1956 move stays
+  unmeasured for it; and for the 50 ms the
+  float raise coalesces — and wherever a re-raise misses, the
+  #418 limitation — a float left under the focused window is veiled
+  over the plate's dim, so it reads near black until the next focus
+  change re-raises it (owner ruling 2026-10-15: no z-order read; the
+  fix is the re-raise reaching every focus path).
 - **Read the stand-down from the shelf's verdict**, filed once per
   pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a

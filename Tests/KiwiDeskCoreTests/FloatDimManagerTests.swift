@@ -174,4 +174,16 @@ struct FloatDimManagerTests {
         #expect(panel.orderedOut == 1)
         #expect(manager.shown.isEmpty && manager.dormant.isEmpty)
     }
+
+    /// The watch re-orders the chrome before the veil, so a
+    /// restack re-reads which piece is now on top.
+    @Test("a restack re-reads the topmost chrome")
+    func restackRereadsTheAnchor() throws {
+        let (manager, made) = make()
+        manager.sync(request([float()]), alive: [f1], reassert: false)
+        manager.anchorOf = { _ in 950 }
+        manager.restack(f1)
+        let panel = try #require(made().first)
+        #expect(panel.orders == [900, 950])
+    }
 }

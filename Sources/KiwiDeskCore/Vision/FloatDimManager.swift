@@ -58,6 +58,9 @@ final class FloatDimManager {
     var isWindowServerTracked: @MainActor (WindowID) -> Bool = {
         _ in false
     }
+    /// A float's topmost chrome now, re-read at a restack: the
+    /// watch has just re-ordered it (`KiwiCore.topmostChrome`).
+    var anchorOf: @MainActor (WindowID) -> CGWindowID? = { _ in nil }
     /// The Reduce Motion read the fades name (borders.md).
     var reduceMotion: @MainActor () -> Bool = { BarMotion.isReduced }
     #if DEBUG
@@ -196,8 +199,9 @@ final class FloatDimManager {
     /// re-ordered: the veil goes back above them.
     func restack(_ id: WindowID) {
         guard let float = entries[id]?.float else { return }
-        entries[id]?.backend.order(above: float.anchor)
-        entries[id]?.ordered = float.anchor
+        let anchor = anchorOf(id) ?? float.anchor
+        entries[id]?.backend.order(above: anchor)
+        entries[id]?.ordered = anchor
     }
 
     /// The float was hidden — minimized, its app hidden, its

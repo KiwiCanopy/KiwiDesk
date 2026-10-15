@@ -155,7 +155,6 @@ struct SnapshotStoreCensusTests {
         "borders.overlays": (.behind, "render state, redrawn"),
         "borders.specs": (.behind, "render state, redrawn"),
         "borders.watch.heard[]": (.behind, "render state, re-requested"),
-        "stickyMarks.orderStamps": (.behind, "render state, re-stamped"),
         "stickyMarks.overlays": (.behind, "render state, redrawn"),
     ]
 

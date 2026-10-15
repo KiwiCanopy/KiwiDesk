@@ -41,6 +41,9 @@ extension KiwiCore {
                 }
             )
         )
+        floatDims.anchorOf = { [weak self] id in
+            self?.topmostChrome(of: id)
+        }
         floatDims.isWindowServerTracked = { [weak self] id in
             self?.windowServer.hears(id, as: .floatDim) ?? false
         }
