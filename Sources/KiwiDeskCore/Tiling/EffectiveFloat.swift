@@ -32,10 +32,7 @@
 /// (`KiwiCore+ZOrderFloats.raiseFloatsAbove`, `floatRaiseFloor`,
 /// `FloatingModeRaiseTests`) while its TARGETS stay the flag's,
 /// there being no tiled plane in a floating-mode space to lift
-/// over. KiwiVision's float veils (#2103 ruling 3) ride that
-/// raise's focus guard through the one shared
-/// `KiwiCore.floatsAboveFocus`, so they veil exactly the floats
-/// it lifts (`KiwiVisionFloatTests`). The float PLACEMENT of `make_floating` /
+/// over. The float PLACEMENT of `make_floating` /
 /// `toggle_floating` (#1674), of a move verb's entry into a
 /// floating Space (#1708) and of a detection flip over a tiled
 /// window (#1820, `DetectedFloatPlacementTests`) is ruled onto it: a

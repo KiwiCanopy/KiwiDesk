@@ -80,24 +80,21 @@ extension KiwiCore {
     /// while the mode is off and every plate has faded.
     func updateVision(reassertOrder: Bool = false) {
         guard
-            vision.isOn || vision.hasShownPlates || floatDims.hasShown
+            vision.isOn || vision.hasShownPlates
                 || !windowServer.requested(by: .vision).isEmpty
-                || !windowServer.requested(by: .floatDim).isEmpty
         else { return }
-        let focus = visionFocus()
-        var request = visionRequest(focus)
-        // Watched whether or not a ring or a mark asks (#2103).
+        var request = visionRequest()
+        // Watched whether or not a ring or a mark asks (#2103), the
+        // float tier too: a float landing re-stacks the plate.
         windowServer.request(
-            vision.isOn
-                ? Set(request.target.map { [WindowID($0)] } ?? []) : [],
+            vision.isOn && request.target != nil
+                ? Set(floatLayerTargets()).union(
+                    request.target.map { [WindowID($0)] } ?? []
+                ) : [],
             for: .vision
         )
         request.tracked = windowServer.isActive
         vision.sync(request, reassert: reassertOrder)
-        updateFloatDims(
-            above: focus.ownKey == nil ? focus.anchor : nil,
-            reassertOrder: reassertOrder
-        )
     }
 
     /// Whether the plate draws its blur now: the stored switch,
@@ -120,10 +117,20 @@ extension KiwiCore {
             ?? found.dark
     }
 
-    /// The target's WindowServer reorder event, after its ring's
-    /// re-order (`BorderManager+WindowServer`).
-    func visionTargetRestacked(_ id: WindowID) {
-        vision.restack(after: id.raw)
+    /// A reorder event the plate hears. The target's re-stacks the
+    /// plate after its ring's re-order (`BorderManager+WindowServer`).
+    /// A float's is its raise landing directly under the focused
+    /// window, above its ring and the plate (#2284): the target's
+    /// overlays re-stack at once, so the float is dimmed then rather
+    /// than when the whole raise lands.
+    func visionWindowRestacked(_ id: WindowID) {
+        guard let target = vision.target, id.raw != target else {
+            vision.restack(after: id.raw)
+            return
+        }
+        // Stood down, the restack would order the ring for nothing.
+        guard vision.hasShownPlates else { return }
+        windowServer.restack(WindowID(target))
     }
 
     /// The shelf's stand-down verdict, judged once per pass in
@@ -132,9 +139,11 @@ extension KiwiCore {
         if vision.noteStandDown(displays) { updateVision() }
     }
 
-    /// The ring's focused window, and an own key window that is
-    /// not it.
-    func visionFocus() -> (anchor: WindowID?, ownKey: CGWindowID?) {
+    /// What the plates draw now. The window kept clear is the
+    /// ring's focused window, or an own key window that is not it
+    /// — a dialog, Sparkle's alert — which stays clear the way
+    /// it stands the focused ring down (#933).
+    func visionRequest() -> VisionManager.Request {
         let anchor = activeSpace.flatMap {
             state.focusAnchor(
                 of: $0,
@@ -144,17 +153,6 @@ extension KiwiCore {
         let ownKey = eventLoop.ownKeyWindow()
             .flatMap { UInt32(exactly: $0.number) }
             .flatMap { $0 == anchor?.raw ? nil : $0 }
-        return (anchor, ownKey)
-    }
-
-    /// What the plates draw now. The window kept clear is the
-    /// ring's focused window, or an own key window that is not it
-    /// — a dialog, Sparkle's alert — which stays clear the way
-    /// it stands the focused ring down (#933).
-    func visionRequest(
-        _ focus: (anchor: WindowID?, ownKey: CGWindowID?)? = nil
-    ) -> VisionManager.Request {
-        let (anchor, ownKey) = focus ?? visionFocus()
         let target = ownKey ?? anchor?.raw
         let ring =
             ownKey == nil

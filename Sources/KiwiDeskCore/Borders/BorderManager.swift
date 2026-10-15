@@ -178,32 +178,6 @@ public final class BorderManager {
         return overlays[id]?.backend.orderedPanelNumber
     }
 
-    /// `id`'s ring panel where it draws IN FRONT of its window, and
-    /// when it last ordered — chrome a KiwiVision float veil must
-    /// clear (#2103 ruling 3). Nil for a ring behind its window.
-    func frontRing(of id: WindowID) -> (panel: CGWindowID, stamp: UInt64)? {
-        guard activeOrder == .above, let overlay = overlays[id],
-            let panel = overlay.backend.orderedPanelNumber
-        else { return nil }
-        return (panel, overlay.orderStamp)
-    }
-
-    /// How far `id`'s ring reaches past its window and its outer
-    /// corner radius, as drawn — what a float veil covers. Nil
-    /// while it draws no ring.
-    func ringOutline(
-        of id: WindowID
-    ) -> (reach: CGFloat, cornerRadius: CGFloat)? {
-        guard let spec = specs[id] else { return nil }
-        let reach = BorderGeometry.outwardReach(
-            width: spec.width,
-            glowBlur: spec.glowBlur
-        )
-        let radius =
-            spec.cornerStyle == .square ? 0 : cornerRadius(for: id) + reach
-        return (reach, radius)
-    }
-
     /// Window corner radius from SkyLight or system fallback (#357).
     func cornerRadius(for id: WindowID) -> CGFloat {
         if let cached = cornerRadii[id] { return cached }
