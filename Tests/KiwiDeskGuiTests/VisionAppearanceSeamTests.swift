@@ -83,6 +83,12 @@ struct VisionAppearanceSeamTests {
                 "func appWideLiveChanged(",
                 "if new.vision != old.vision { updateVision() }"
             ),
+            // The Hyper remap rides the same seam (#1870).
+            (
+                "App/KiwiCore+AppWideLive.swift",
+                "func appWideLiveChanged(",
+                "oweHyperRemap()"
+            ),
             (
                 "App/KiwiCore+Lifecycle.swift", "public func stop(",
                 "retargetVisionAppearance(nil)"

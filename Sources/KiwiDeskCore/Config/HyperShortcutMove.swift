@@ -113,7 +113,7 @@ public enum HyperShortcutMove {
         let found = unit.compactMap { move in
             rows.firstIndex {
                 $0.kind == .navigation && $0.lua == move.lua
-                    && $0.combo == move.from
+                    && KeyCombo.equivalent($0.combo, move.from)
             }.map { ($0, move) }
         }
         guard !found.isEmpty,

@@ -10219,8 +10219,11 @@ a Save or a Revert has to move the rows and the base together, and
 a base written at once beside a reverted move is the split again.
 The base is the Mac's while a profile may carry Desktop rows of its
 own, so the move runs only on the loaded profile's page, where a
-Save writes the shared rows; a Desktop row another profile
-overrides stays on its chord until that row is recorded again. The
+Save writes the shared rows. A Desktop row a profile overrides is
+that profile's: one another profile overrides stays on its chord
+until that row is recorded again, and one the loaded profile
+overrides moves in that profile's file while the base moves for
+every profile. The
 move applies exactly what its sheet showed, in every layer that
 holds a row on the chord shown.
 Turning Hyper off moves nothing back silently. The Hyper rows dim
