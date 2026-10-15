@@ -151,8 +151,8 @@ enum KeybindingCatalog {
                 title: "Focus",
                 commands: focusDirections + spaceStepRows
                     + spaceHistoryRows + goToSpace(spaces)
-                    + [toggleKiwiVision]
             ),
+            NavGroup(title: "KiwiVision", commands: [toggleKiwiVision]),
             NavGroup(
                 title: "Window Management",
                 commands: swapDirections

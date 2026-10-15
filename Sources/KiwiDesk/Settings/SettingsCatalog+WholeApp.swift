@@ -61,6 +61,11 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.focus",
         "Focus"
     )
+    /// The KiwiVision group (#2312), titled by the product name.
+    let kiwiVisionKeys = SettingsControl(
+        "shortcuts.section.kiwivision",
+        "KiwiVision"
+    )
     let moveWindows = SettingsControl(
         "shortcuts.section.move_windows",
         "Move windows"

@@ -25,7 +25,6 @@ extension ShortcutsReferenceBuilder {
             + KeybindingCatalog.spaceStepRows
             + KeybindingCatalog.spaceHistoryRows
             + KeybindingCatalog.goToSpace(spaces, icons: spaceIcons)
-            + [KeybindingCatalog.toggleKiwiVision]
             + KeybindingCatalog.goToDesktop(
                 desktops.desktops,
                 absent: desktops.absent
@@ -71,6 +70,12 @@ extension ShortcutsReferenceBuilder {
                         step: resizeStep
                     )
                 )
+            ),
+            // A section of its own, empty and so dropped while no
+            // KiwiVision key is bound (#2312).
+            ShortcutSubgroup(
+                title: L("shortcuts.section.kiwivision", "KiwiVision"),
+                rows: rows([KeybindingCatalog.toggleKiwiVision])
             ),
             ShortcutSubgroup(
                 title: L(

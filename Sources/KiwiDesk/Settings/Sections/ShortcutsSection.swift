@@ -178,6 +178,11 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
+        KiwiVisionShortcutsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         ApplicationsGroup(
             model: model,
             bindings: bindingsBinding,
