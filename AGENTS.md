@@ -1557,6 +1557,9 @@ Touching `Borders`, `Vision`.
   through `BorderOverlay` only where it stopped spanning or `sync` orders it on
   another Desktop (#2149, #1145, `StickyOverlaySpanTests`,
   `BorderDesktopSpanTests`)
+- every window `focusAnchor` may yield has a ring slot — the slots and the
+  anchor read the one `anchorVisitors(of:tiled:)` (#2259,
+  `BorderTravelerFocusTests`)
 - `FollowSource` owns which frame the ring AND mark render — never re-implement
   it beside a call site, and a new decision input enters through its signature
   (the #677 size pin rides the tick this way)
