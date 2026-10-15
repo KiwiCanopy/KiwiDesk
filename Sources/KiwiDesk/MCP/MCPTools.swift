@@ -31,7 +31,9 @@ struct MCPTools {
         ] + groupTools.map(groupTool)
 
     /// Every domain tool over a command group (#1685 ▸ Ruling 2).
-    static let groupTools: [GroupToolSpec] = [looksSpec]
+    static let groupTools: [GroupToolSpec] = [
+        looksSpec, appRulesSpec,
+    ]
 
     var definitions: JSONValue { .array(Self.all.map(\.definition)) }
 

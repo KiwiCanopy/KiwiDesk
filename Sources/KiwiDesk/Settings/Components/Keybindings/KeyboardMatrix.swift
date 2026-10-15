@@ -10,15 +10,20 @@ enum KeyboardMatrix {
         let code: UInt32?
         let units: Double
         let legend: String?
+        /// The physical key a legend cap is, so the board can mark
+        /// the Hyper key on it (#1870); nil for a bindable key.
+        let source: HyperSourceKey?
 
         init(
             _ code: UInt32?,
             _ units: Double = 1,
-            legend: String? = nil
+            legend: String? = nil,
+            source: HyperSourceKey? = nil
         ) {
             self.code = code
             self.units = units
             self.legend = legend
+            self.source = source
         }
     }
 
@@ -55,10 +60,11 @@ enum KeyboardMatrix {
     private static let ansiRows: [[Key]] = [
         [Key(50)] + digitRow,
         [Key(48, 1.5)] + qwertyRow + [Key(42, 1.5)],
-        [Key(nil, 1.75, legend: "⇪")] + homeRow
+        [Key(nil, 1.75, legend: "⇪", source: .capsLock)] + homeRow
             + [Key(36, 2.25)],
-        [Key(nil, 2.25, legend: "⇧")] + bottomLetters
-            + [Key(nil, 2.75, legend: "⇧")],
+        [Key(nil, 2.25, legend: "⇧", source: .leftShift)]
+            + bottomLetters
+            + [Key(nil, 2.75, legend: "⇧", source: .rightShift)],
         spaceRow,
     ]
 
@@ -71,10 +77,11 @@ enum KeyboardMatrix {
     private static let isoRows: [[Key]] = [
         [Key(10)] + digitRow,
         [Key(48, 1.5)] + qwertyRow + [Key(36, 1.5)],
-        [Key(nil, 1.75, legend: "⇪")] + homeRow
+        [Key(nil, 1.75, legend: "⇪", source: .capsLock)] + homeRow
             + [Key(42), Key(nil, 1.25)],
-        [Key(nil, 1.25, legend: "⇧"), Key(50)] + bottomLetters
-            + [Key(nil, 2.75, legend: "⇧")],
+        [Key(nil, 1.25, legend: "⇧", source: .leftShift), Key(50)]
+            + bottomLetters
+            + [Key(nil, 2.75, legend: "⇧", source: .rightShift)],
         spaceRow,
     ]
 
@@ -106,14 +113,34 @@ enum KeyboardMatrix {
     /// name — a combo carries modifiers in `HotkeyModifiers`, so
     /// ⌃⌥⌘⇧ have no key code to bind.
     private static let spaceRow: [Key] = [
-        Key(nil, 1.25, legend: "⌃"),
-        Key(nil, 1.25, legend: "⌥"),
-        Key(nil, 1.25, legend: "⌘"),
+        Key(nil, 1.25, legend: "⌃", source: .leftControl),
+        Key(nil, 1.25, legend: "⌥", source: .leftOption),
+        Key(nil, 1.25, legend: "⌘", source: .leftCommand),
         Key(49, 4.75),
-        Key(nil, 1.25, legend: "⌘"),
-        Key(nil, 1.25, legend: "⌥"),
+        Key(nil, 1.25, legend: "⌘", source: .rightCommand),
+        Key(nil, 1.25, legend: "⌥", source: .rightOption),
         Key(123), Key(126), Key(125), Key(124),
     ]
+
+    /// The legend a cap draws: the Hyper key's ✦ in place of its
+    /// own (#1870). The board's cap and its spoken description
+    /// both read this, so the two channels cannot disagree.
+    static func legend(of key: Key, hyper: HyperSourceKey?) -> String? {
+        guard let source = key.source, source == hyper else {
+            return key.legend
+        }
+        return ComboSymbols.hyperGlyph
+    }
+
+    /// Whether the board draws `hyper`'s cap — F1–F20 it does not.
+    static func draws(
+        _ hyper: HyperSourceKey?,
+        on type: PhysicalType
+    ) -> Bool {
+        rows(for: type).joined().contains {
+            legend(of: $0, hyper: hyper) == ComboSymbols.hyperGlyph
+        }
+    }
 
     /// Unique keycodes the board draws — derived from the rows,
     /// never from `KeyCombo.keyCodes`, whose aliases would count

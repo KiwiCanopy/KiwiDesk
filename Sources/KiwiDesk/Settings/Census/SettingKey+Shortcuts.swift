@@ -36,6 +36,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case modeCycle = "config.modeCycle"
     /// The plate shown after a cycle (#2144): app-wide (#1741).
     case modeCue = "appWide.modeCue"
+    /// The key turned into Hyper (#1870): app-wide, per Mac.
+    case hyperKey = "appWide.hyperKey"
     case growWidth = "keybinding.grow_width"
     case shrinkWidth = "keybinding.shrink_width"
     case growHeight = "keybinding.grow_height"
@@ -113,6 +115,16 @@ extension ShortcutsKey {
             return .row(
                 .shortcuts,
                 .layout,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
+        case .hyperKey:
+            // Above the layer header: it belongs to no layer
+            // (#1870). Written at once; greys where init.lua owns
+            // the config, as the layout cue does.
+            return .row(
+                .shortcuts,
+                .hyperKey,
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
@@ -226,6 +238,11 @@ extension ShortcutsKey {
             return .text(
                 "shortcuts.mode_cue",
                 help: "shortcuts.mode_cue.help"
+            )
+        case .hyperKey:
+            return .text(
+                "shortcuts.hyper_key",
+                help: "shortcuts.hyper_key.help"
             )
         }
     }

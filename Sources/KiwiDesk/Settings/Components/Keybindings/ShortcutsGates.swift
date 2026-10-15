@@ -44,7 +44,7 @@ struct ShortcutsGates {
         case .shortcuts(.moveWindowToTrack),
             .shortcuts(.swapWithTrack):
             return trackIsUsed ? nil : .trackUnused
-        case .shortcuts(.modeCue):
+        case .shortcuts(.modeCue), .shortcuts(.hyperKey):
             return guiManaged ? nil : .appWideLuaOwned
         default:
             assertionFailure(
@@ -106,6 +106,7 @@ struct ShortcutsGates {
         .shortcuts(.moveWindowToTrack),
         .shortcuts(.swapWithTrack),
         .shortcuts(.modeCue),
+        .shortcuts(.hyperKey),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's

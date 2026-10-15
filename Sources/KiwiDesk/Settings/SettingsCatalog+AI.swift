@@ -20,6 +20,14 @@ struct AIControls: Sendable {
         "ai.prompt.look",
         "Make a new look"
     )
+    let promptMigrate = SettingsControl(
+        "ai.prompt.migrate",
+        "Coming from another window manager"
+    )
+    let promptAppRules = SettingsControl(
+        "ai.prompt.app_rules",
+        "Set up app rules"
+    )
     let promptSpaces = SettingsControl(
         "ai.prompt.spaces",
         "Set up my Spaces"

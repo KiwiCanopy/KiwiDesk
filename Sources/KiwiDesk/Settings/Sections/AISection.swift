@@ -60,6 +60,8 @@ struct AISection: View {
         switch key {
         case .copySetupPrompt: return catalog.copySetupPrompt
         case .promptLook: return catalog.promptLook
+        case .promptMigrate: return catalog.promptMigrate
+        case .promptAppRules: return catalog.promptAppRules
         case .promptSpaces: return catalog.promptSpaces
         }
     }
