@@ -124,6 +124,17 @@ struct CLIEventStreamTests {
         #expect(script.notes.count == 1, "\(script.notes)")
     }
 
+    @Test("a first connection that sends nothing opens no gap")
+    func silentFirstConnection() {
+        let script = Script([FakeSource([]), FakeSource([Self.ack])])
+        _ = script.run([], reconnect: true)
+        #expect(
+            !script.notes.contains { $0.contains("missed") },
+            "\(script.notes)"
+        )
+        #expect(script.notes.count == 1, "\(script.notes)")
+    }
+
     @Test("subscribe strips the flag before the names reach the app")
     func flagIsStripped() {
         let parsed = CLIEventStream.parse(

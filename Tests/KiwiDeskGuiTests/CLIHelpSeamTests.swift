@@ -57,6 +57,10 @@ struct CLIHelpSeamTests {
             "runCLI must dispatch through the one local-verb register"
         )
         #expect(
+            !main.contains("CLIHelp.verbs"),
+            "a second help dispatch ahead of the route"
+        )
+        #expect(
             main.contains("CLIHelp.run(arguments)"),
             "the help verbs must reach CLIHelp"
         )
