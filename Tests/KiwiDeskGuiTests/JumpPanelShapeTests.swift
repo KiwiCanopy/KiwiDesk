@@ -56,7 +56,8 @@ struct JumpPanelShapeTests {
             ]
         )
         #expect(C.sheetCap(visible: visible, area: side) == free)
-        let raised = CGRect(x: 0, y: 200, width: 1440, height: 700)
+        // High enough that the bottom fit, not the ceiling, binds.
+        let raised = CGRect(x: 0, y: 250, width: 1440, height: 650)
         #expect(C.sheetCap(visible: visible, area: raised) < free)
         let tiny = CGRect(x: 0, y: 0, width: 1440, height: 300)
         #expect(C.sheetCap(visible: tiny, area: tiny) == 200)

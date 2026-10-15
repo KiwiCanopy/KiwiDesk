@@ -92,7 +92,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         let model = JumpModel(
             snapshot: snapshot,
             icons: Self.icons(for: snapshot),
-            rowCap: Self.rowCap(visibleHeight: visible.height),
+            rowCap: Self.rowCap,
             sheetCap: Self.sheetCap(visible: visible, area: area),
             modifiers: NSEvent.modifierFlags
         )
