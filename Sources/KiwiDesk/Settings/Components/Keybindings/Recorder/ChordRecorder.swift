@@ -9,6 +9,8 @@ import KiwiDeskCore
 /// focus mid-recording (`ChordRecorderTests`). In `.modifiers`
 /// mode (a scroll gesture's chord, #1656) keys are ignored and the
 /// largest modifier set held at once commits when all are released.
+/// In `.sourceKey` mode (the Hyper key, #1870) the first physical
+/// key pressed commits, a modifier by its own sided key code.
 @MainActor
 final class ChordRecorder {
     enum Outcome {
@@ -16,6 +18,9 @@ final class ChordRecorder {
         case chord(String)
         /// `.modifiers` mode: every modifier was released.
         case modifiers(ScrollChord)
+        /// `.sourceKey` mode: the key code pressed, a modifier's
+        /// carrying its side (Right ⌘ 54, Left ⌘ 55).
+        case sourceKey(UInt16)
         /// Bare Escape or app deactivation.
         case cancelled
         /// A mouse click ended the recording.
@@ -27,6 +32,8 @@ final class ChordRecorder {
         case combo
         /// Modifiers alone, locked on the last release.
         case modifiers
+        /// One physical key, locked on its press.
+        case sourceKey
     }
 
     enum EventKind {
@@ -146,6 +153,10 @@ final class ChordRecorder {
                 finish(.cancelled)
                 return true
             }
+            if mode == .sourceKey {
+                finish(.sourceKey(keyCode))
+                return true
+            }
             guard mode == .combo else { return true }
             guard
                 let combo = KeyCombo.comboString(
@@ -166,6 +177,16 @@ final class ChordRecorder {
             // its original responder.
             return consumeSuppressedKeyUp(keyCode)
         case .flagsChanged:
+            if mode == .sourceKey {
+                // A modifier's press, never its release: its OWN
+                // side's device bit is down — the shared `.command`
+                // flag stays set while the other side is held.
+                guard let mask = Self.sideMask[keyCode],
+                    mask == 0 || flags.rawValue & mask != 0
+                else { return true }
+                finish(.sourceKey(keyCode))
+                return true
+            }
             guard mode == .modifiers else {
                 onPreview(Self.modifierSymbols(flags))
                 return false
@@ -190,6 +211,21 @@ final class ChordRecorder {
         }
         return false
     }
+
+    /// Each sided modifier's device-dependent bit (IOKit's
+    /// `NX_DEVICE*KEYMASK`), keyed by `HyperSourceKey`'s own code;
+    /// Caps Lock toggles, so its every report is a press (0).
+    static let sideMask: [UInt16: UInt] = [
+        HyperSourceKey.leftControl.keyCode: 0x0001,
+        HyperSourceKey.leftShift.keyCode: 0x0002,
+        HyperSourceKey.rightShift.keyCode: 0x0004,
+        HyperSourceKey.leftCommand.keyCode: 0x0008,
+        HyperSourceKey.rightCommand.keyCode: 0x0010,
+        HyperSourceKey.leftOption.keyCode: 0x0020,
+        HyperSourceKey.rightOption.keyCode: 0x0040,
+        HyperSourceKey.rightControl.keyCode: 0x2000,
+        HyperSourceKey.capsLock.keyCode: 0,
+    ]
 
     /// The scroll chord a modifier set spells.
     static func scrollChord(_ flags: NSEvent.ModifierFlags) -> ScrollChord {

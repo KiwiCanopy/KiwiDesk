@@ -24,7 +24,7 @@ extension SettingsValueReadout {
             .advanced, .`import`, .restoreDefaults:
             return []
         // App-wide, written at once, never in the draft (#1741).
-        case .modeCue:
+        case .modeCue, .hyperKey:
             return []
         // A layer's profiles are no config field: the checklist's own
         // rows carry them (`layerDiffRows`, #2022).

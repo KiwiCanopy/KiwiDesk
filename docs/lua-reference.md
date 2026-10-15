@@ -916,15 +916,20 @@ KiwiDesk.set_desktop_cue(false)
 
 **Does:** turns that key into the Hyper modifier, `hyper` in a
 combo (`"hyper+h"`), drawn ✦ (#1870). KiwiDesk remaps the key
-while it runs and gives it back at quit, so the key stops doing
-its own job meanwhile — Caps Lock types no capitals, Right ⌘ is
-no longer ⌘. Left and right are different keys here. Hyper
-needs no Input Monitoring, and a shortcut on it collides with no
-app. If a key mapping KiwiDesk did not set is already in place
+while it manages your windows and gives it back when it stops or
+quits, so the key stops doing its own job meanwhile — Caps Lock
+types no capitals, Right ⌘ is no longer ⌘. Left and right are different keys here. Hyper
+needs no Input Monitoring, and a shortcut on Hyper alone collides
+with nothing; combined with ⌘, ⌥ or ⌃, an enabled macOS shortcut on
+the same keys still wins. If a key mapping KiwiDesk did not set is already in place
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
-The verb changes the running session only.
+The GUI twin is **Shortcuts & Gestures ▸ Hyper key**, a recorder
+that takes one key — left and right apart. Like
+[`set_desktop_cue`](#set_desktop_cue), the setting is app-wide,
+stored in `gui.json` as `hyper.key`; the verb changes the running
+value only.
 
 **Example:**
 

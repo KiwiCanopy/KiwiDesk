@@ -127,6 +127,11 @@ struct SettingsBorderedSealTests {
                     + "signal is the chrome's own accent fill, "
                     + "which never reads the tint"
             ),
+            "HyperKeyField.swift": (
+                1, ".tint(buttonTint)",
+                "the Hyper key's recorder (#1870), the key "
+                    + "recorder's own field and tint"
+            ),
             "ScrollChordRecorderField.swift": (
                 1, ".tint(buttonTint)",
                 "the scroll gestures' modifier recorder (#1656), "

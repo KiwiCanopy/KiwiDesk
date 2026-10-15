@@ -83,7 +83,8 @@ struct KeyboardPreviewPanel: View {
                 conflicted: collisions,
                 layerLabel: layerLabel,
                 onHover: { hovered = $0 },
-                conflictDetail: conflictDetail
+                conflictDetail: conflictDetail,
+                hyperKey: model.appWide.hyperKey
             )
             statusSlot
             fillLegend.accessibilityHidden(true)

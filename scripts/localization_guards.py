@@ -232,6 +232,12 @@ GLOSSARY = {
     "kiwivision",
     # The key panel (#2265): a product name like KiwiShelf.
     "kiwihub",
+    # The Hyper key (#1870): the keyboard tools' name for the
+    # extra modifier, kept Latin around a translated "key" in
+    # every catalog, as the site's `compare_cell_hotkeys_omniwm`
+    # does. Trade: a stray "hyper" in non-Latin prose is no
+    # longer caught.
+    "hyper",
     # Apple's `Liquid Glass`, a product name (see PRODUCT_NAMES).
     # Trade: a stray "glass" in non-Latin prose is no longer caught.
     "liquid",
@@ -246,6 +252,12 @@ GLOSSARY = {
     # `system_shortcut.*` keys follow macOS per locale, but these
     # words stay English inside prose in every locale.
     "bundle",  # "Bundle identifier"
+    # "Caps Lock": Apple's own key name, which macOS's Keyboard
+    # pane keeps Latin in ja, ko, ru and pt-BR (#1870). Trade: a
+    # stray "caps" or "lock" in non-Latin prose is no longer
+    # caught.
+    "caps",
+    "lock",
     "control",  # "Mission Control"
     "desktop",  # Mission Control's own noun
     "dock",

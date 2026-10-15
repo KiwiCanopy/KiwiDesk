@@ -82,9 +82,6 @@ public final class KeybindingManager {
             )
             return { item.cancel() }
         }
-    /// The key the user chose as Hyper, nil for none; KiwiCore
-    /// owns its remap (`KiwiCore+HyperKey`).
-    public internal(set) var hyperSource: HyperSourceKey?
     /// What the last remap did, for the Settings row (#96).
     public internal(set) var hyperStatus = HyperKeyStatus.off
     /// Whether the Hyper key is on: its remap is in place, so F18

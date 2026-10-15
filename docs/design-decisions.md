@@ -9548,7 +9548,10 @@ Hyper is a modifier of its own, not an alias for the four: a
 `hyper+h` collides with nothing, including an app that already
 binds `⌃⌥⇧⌘H`. The key is the Mac's, not a profile's: it remaps a
 physical key, and a profile can change on a Desktop swipe, which
-would flip Caps Lock mid-sentence. KiwiDesk touches a key mapping
+would flip Caps Lock mid-sentence. No per-profile value preceded
+it, so `hyper.key` crosses nothing (#1741's app-wide rule); it
+travels in a backup with the rest of `gui.json`, so a restored
+setup turns the same key into Hyper on the new Mac. KiwiDesk touches a key mapping
 only where it is exactly the one KiwiDesk recorded writing —
 Caps Lock → F18 is also a common Hammerspoon setup — and refuses
 otherwise. The trade: "tap Hyper alone for Escape" needs a posted

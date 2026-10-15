@@ -98,6 +98,11 @@ struct ShortcutsControls: Sendable {
         "shortcuts.mode_cue",
         "Show the layout after cycling"
     )
+    /// The Hyper key's recorder row (#1870), on its census label.
+    let hyperKey = SettingsControl(
+        "shortcuts.hyper_key",
+        "Hyper key"
+    )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",
         "Size & float"

@@ -95,6 +95,11 @@ struct ShortcutsBespokeContainerTests {
                 "gesturesMore", .gestures,
                 ShortcutsRowOrder.gesturesMore
             ),
+            // The Hyper key card's one recorder row (#1870).
+            (
+                "hyperKeyList", .hyperKey,
+                ShortcutsRowOrder.hyperKeyList
+            ),
             // Walked by `DesktopShortcutsOffer`, which takes its
             // list as a `keys:` PARAMETER rather than walking it
             // here — so `isWalked` reads the `ForEach` inside

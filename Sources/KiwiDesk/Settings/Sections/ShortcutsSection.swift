@@ -118,6 +118,7 @@ struct ShortcutsSection: View {
         // after its chip, so nothing in it reads as per-layer
         // (#1726, #1520; amending the 2026-08-04 ruling that the
         // layers card leads the section).
+        HyperKeyRow(model: model)
         GesturesDrawer(model: model, expanded: $gesturesExpanded)
         ShortcutsHeader(model: model, selected: selection)
         layersCard

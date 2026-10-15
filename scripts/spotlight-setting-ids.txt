@@ -58,6 +58,7 @@ UserDefaults.SUAutomaticallyUpdate (Sparkle)
 UserDefaults.appearance
 UserDefaults.language
 appWide.desktopCue
+appWide.hyperKey
 appWide.modeCue
 appWide.quitGridTargetDepth
 appWide.refusalSound

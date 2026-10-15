@@ -13,6 +13,7 @@ enum ShortcutsRowOrder {
         .luaBindings,
         .defaultShortcuts,
         .gestures,
+        .hyperKey,
     ]
 
     /// The Mouse & trackpad drawer's settings, in entry order
@@ -110,6 +111,12 @@ enum ShortcutsRowOrder {
     static let layoutList: [SettingKey] = [
         .shortcuts(.modeCycle),
         .shortcuts(.modeCue),
+    ]
+
+    /// The Hyper key card's one row (#1870), drawn by
+    /// `HyperKeyRow`.
+    static let hyperKeyList: [SettingKey] = [
+        .shortcuts(.hyperKey)
     ]
 
     /// Layout group order (#453): `KeybindingCatalog
