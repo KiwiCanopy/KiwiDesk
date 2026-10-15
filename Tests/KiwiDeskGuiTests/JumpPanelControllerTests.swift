@@ -11,14 +11,20 @@ import Testing
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
-    @Test("the row cap is a third of the screen, 8 to 10 rows")
+    /// Every numbered target is on screen, and the Windows list
+    /// at its cap fits under the one ceiling (#2309).
+    @Test("the row cap is the numbered reach, inside the ceiling")
     func rowCap() {
-        let row = JumpRowView.height
-        #expect(JumpPanelController.rowCap(visibleHeight: 300) == 8)
-        #expect(
-            JumpPanelController.rowCap(visibleHeight: 3 * row * 9) == 9
+        #expect(JumpPanelController.rowCap == JumpList.numbered)
+        let list = JumpPanelView.listHeight(
+            rows: 40,
+            headers: 0,
+            rowCap: JumpPanelController.rowCap
         )
-        #expect(JumpPanelController.rowCap(visibleHeight: 5000) == 10)
+        #expect(
+            JumpPanelView.fieldHeight + list
+                < JumpPanelController.maxPanelHeight
+        )
     }
 
     /// The footer's scroll cue shows exactly when the content runs

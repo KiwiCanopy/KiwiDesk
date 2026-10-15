@@ -1,16 +1,12 @@
 import AppKit
 import KiwiDeskCore
 
-/// Jump to window's size (#1875 ▸ Panel): the list grows to a
-/// third of the screen and the panel follows its results.
+/// KiwiHub's size (#1875 ▸ Panel): one fixed ceiling on every
+/// side, the panel following each side's content beneath it.
 extension JumpPanelController {
-    /// The most rows the list shows: a third of the screen's
-    /// visible height, never fewer than 8 nor more than 10
-    /// (#2229).
-    static func rowCap(visibleHeight: CGFloat) -> Int {
-        let rows = Int(visibleHeight / 3 / JumpRowView.height)
-        return min(max(rows, 8), 10)
-    }
+    /// The most rows the Windows list shows: the numbered reach,
+    /// so every ⌘1–9 target is on screen (#2309).
+    static let rowCap = JumpList.numbered
 
     /// The visible area with every KiwiShelf strip cut away by the
     /// edge Core says it sits on — the one home for where the panel
@@ -53,8 +49,9 @@ extension JumpPanelController {
         return max(min(below, maxPanelHeight) - shortcutsChrome, 200)
     }
 
-    /// The tallest the panel stands on its Shortcuts side.
-    static let maxPanelHeight: CGFloat = 720
+    /// The tallest the panel stands on any side: compact, as
+    /// Spotlight is, the Shortcuts sheet scrolling past it (#2309).
+    static let maxPanelHeight: CGFloat = 400
 
     /// What the Shortcuts side draws besides its sheet: the field,
     /// the button row, the footer and their dividers.
