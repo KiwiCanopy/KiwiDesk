@@ -25,7 +25,7 @@ struct BorderOrderCensusTests {
             "sync, gated by `ordersOverlay`: needsOrder, a settle "
                 + "pass or no WindowServer stream"
         ),
-        "BorderManager+SkyLight.swift": (
+        "BorderManager+WindowServer.swift": (
             1,
             "the watch's restack phase: the WindowServer reorder "
                 + "and unhide events (#2275)"

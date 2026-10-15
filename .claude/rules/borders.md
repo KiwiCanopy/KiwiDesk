@@ -11,6 +11,7 @@ paths:
   # The one WindowServer stream every overlay hears through
   # (#2275), and its consumer order, live outside Borders/.
   - "Sources/KiwiDeskCore/OS/WindowServerWatch.swift"
+  - "Sources/KiwiDeskCore/OS/SkyLightWindowEvent*.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+WindowServer.swift"
   - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
   # The window stroke below is derived and stored beside the drag
