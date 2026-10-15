@@ -6659,8 +6659,8 @@ instead.
 **Expects:** an app's bundle identifier.
 
 **Does:** returns what KiwiDesk knows of the app, for a window
-`get_state` does not list: `bundle_id` (lowercased), `ignored` (`by_rule`, an ignore rule;
-`built_in`, KiwiDesk's own ignore list; `built_in_raised`, whether
+`get_state` does not list: `bundle_id` (lowercased), `ignored`
+(`by_rule`, an ignore rule; `built_in`, KiwiDesk's own ignore list; `built_in_raised`, whether
 that list ignores the app's raised windows, as it does Ghostty's
 quick terminal),
 `running` (each process's `pid`, whether KiwiDesk `observed` it,
