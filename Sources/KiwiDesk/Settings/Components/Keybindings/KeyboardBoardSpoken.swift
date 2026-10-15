@@ -54,6 +54,8 @@ struct SpokenKeyboardBoard: View {
                 ),
                 scopeLabel: scopeLabel,
                 layerLabel: layerLabel,
+                hyperName: KeyboardMatrix.draws(hyperKey, on: type)
+                    ? hyperKey.map(HyperKeyWords.name) : nil,
                 conflictDetail: conflictDetail
             )
         )
@@ -107,6 +109,7 @@ enum KeyboardBoardSpoken {
         buckets: Buckets,
         scopeLabel: String,
         layerLabel: String?,
+        hyperName: String?,
         conflictDetail: [String]
     ) -> String {
         var parts = [
@@ -122,6 +125,16 @@ enum KeyboardBoardSpoken {
                     "keyboard.ax.layer",
                     "In the \u{201C}%1$@\u{201D} layer.",
                     layerLabel
+                )
+            )
+        }
+        // The cap the board marks ✦ (#1870), spoken as drawn.
+        if let hyperName {
+            parts.append(
+                L(
+                    "keyboard.ax.hyper",
+                    "The Hyper key is %1$@.",
+                    hyperName
                 )
             )
         }

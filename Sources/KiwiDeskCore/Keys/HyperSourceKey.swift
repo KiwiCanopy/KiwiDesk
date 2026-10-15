@@ -6,8 +6,9 @@ import Foundation
 /// Input Monitoring is needed. Keys that type text are not
 /// cases: picking one would cost that character everywhere.
 ///
-/// The raw value is the wire spelling (`set_hyper_key`), and a
-/// stored value once #1870's setting persists.
+/// The raw value is the wire spelling (`set_hyper_key`) and a
+/// stored value (`gui.json`'s `hyper.key`): renaming one owes a
+/// `ConfigMigration` step (§5).
 public enum HyperSourceKey: String, CaseIterable, Sendable {
     case capsLock = "caps_lock"
     case leftCommand = "left_command"

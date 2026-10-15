@@ -36,8 +36,8 @@ public struct AppWideSettings: Equatable, Sendable {
     /// (`kiwivision.appearance`, #2103 ruling 7).
     public var visionAppearance = VisionAppearance.unchanged
     /// The key turned into the Hyper modifier, nil for none
-    /// (`hyper.key`, #1870). Per Mac, never per profile: it remaps
-    /// a physical key, and a profile can change on a swipe.
+    /// (`hyper.key`, #1870). Per install, never per profile: it
+    /// remaps a physical key, and a profile can change on a swipe.
     public var hyperKey: HyperSourceKey?
 
     public init() {}
@@ -96,9 +96,40 @@ extension AppWideSettings {
 
     /// `gui.json`'s `hyper` group (#1870) — additive, as `desktop`.
     /// Off is stored as `"off"`, never left out, so the group
-    /// always carries its one leaf; an unknown name reads as off.
+    /// always carries its one leaf. Strict: a key name this build
+    /// does not know fails the decode, so a renamed
+    /// `HyperSourceKey` owes a `ConfigMigration` step (§5).
     struct Hyper: Codable, Equatable {
-        var key: String?
+        var key: HyperSourceKey?
+
+        enum CodingKeys: String, CodingKey { case key }
+
+        init(key: HyperSourceKey?) { self.key = key }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let name = try container.decodeIfPresent(
+                String.self,
+                forKey: .key
+            )
+            guard let name, name != "off" else {
+                key = nil
+                return
+            }
+            guard let named = HyperSourceKey(rawValue: name) else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .key,
+                    in: container,
+                    debugDescription: "unknown Hyper key \(name)"
+                )
+            }
+            key = named
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(key?.rawValue ?? "off", forKey: .key)
+        }
     }
 
     /// `gui.json`'s `kiwivision` group (#2103) — additive, as
@@ -112,8 +143,8 @@ extension AppWideSettings {
     /// The stored value, or nil when neither #1741 group is
     /// present — the file predates #1741 and the crossing is still
     /// owed. The `desktop` (#2142), `space` (#2228), `mode`
-    /// (#2144) and `kiwivision` (#2103) groups crossed nothing, so
-    /// they never decide that.
+    /// (#2144), `kiwivision` (#2103) and `hyper` (#1870) groups
+    /// crossed nothing, so they never decide that.
     init?(
         refusal: Refusal?,
         quit: Quit?,
@@ -128,7 +159,7 @@ extension AppWideSettings {
         if let cue = desktop?.cue { desktopCue = cue }
         if let cue = space?.cue { spaceCue = cue }
         if let cue = mode?.cue { modeCue = cue }
-        hyperKey = hyper?.key.flatMap(HyperSourceKey.init(rawValue:))
+        hyperKey = hyper?.key
         if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
         if let blur = vision?.blur { visionBlur = blur }
         if let appearance = vision?.appearance {
@@ -148,7 +179,7 @@ extension AppWideSettings {
     var desktop: Desktop { Desktop(cue: desktopCue) }
     var space: Space { Space(cue: spaceCue) }
     var mode: Mode { Mode(cue: modeCue) }
-    var hyper: Hyper { Hyper(key: hyperKey?.rawValue ?? "off") }
+    var hyper: Hyper { Hyper(key: hyperKey) }
     var vision: Vision {
         Vision(
             dim: visionDim,

@@ -178,10 +178,11 @@ final class ChordRecorder {
             return consumeSuppressedKeyUp(keyCode)
         case .flagsChanged:
             if mode == .sourceKey {
-                // A modifier's press, never its release: the flag
-                // it sets is down.
-                guard let flag = Self.sidedFlag[keyCode],
-                    flags.contains(flag)
+                // A modifier's press, never its release: its OWN
+                // side's device bit is down — the shared `.command`
+                // flag stays set while the other side is held.
+                guard let mask = Self.sideMask[keyCode],
+                    mask == 0 || flags.rawValue & mask != 0
                 else { return true }
                 finish(.sourceKey(keyCode))
                 return true
@@ -211,12 +212,19 @@ final class ChordRecorder {
         return false
     }
 
-    /// The flag each sided modifier key sets; Caps Lock's toggles,
-    /// so its every report is a press.
-    static let sidedFlag: [UInt16: NSEvent.ModifierFlags] = [
-        55: .command, 54: .command, 58: .option, 61: .option,
-        59: .control, 62: .control, 56: .shift, 60: .shift,
-        57: [],
+    /// Each sided modifier's device-dependent bit (IOKit's
+    /// `NX_DEVICE*KEYMASK`), keyed by `HyperSourceKey`'s own code;
+    /// Caps Lock toggles, so its every report is a press (0).
+    static let sideMask: [UInt16: UInt] = [
+        HyperSourceKey.leftControl.keyCode: 0x0001,
+        HyperSourceKey.leftShift.keyCode: 0x0002,
+        HyperSourceKey.rightShift.keyCode: 0x0004,
+        HyperSourceKey.leftCommand.keyCode: 0x0008,
+        HyperSourceKey.rightCommand.keyCode: 0x0010,
+        HyperSourceKey.leftOption.keyCode: 0x0020,
+        HyperSourceKey.rightOption.keyCode: 0x0040,
+        HyperSourceKey.rightControl.keyCode: 0x2000,
+        HyperSourceKey.capsLock.keyCode: 0,
     ]
 
     /// The scroll chord a modifier set spells.

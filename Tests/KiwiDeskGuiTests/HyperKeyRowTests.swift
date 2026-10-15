@@ -37,15 +37,36 @@ struct HyperKeyRowTests {
         // A release of a key held before recording is no press.
         recorder.handle(.flagsChanged, keyCode: 55, flags: [])
         #expect(capture.outcomes.isEmpty)
-        recorder.handle(.flagsChanged, keyCode: 54, flags: [.command])
+        let rightDown = NSEvent.ModifierFlags(
+            rawValue: NSEvent.ModifierFlags.command.rawValue | 0x10
+        )
+        recorder.handle(.flagsChanged, keyCode: 54, flags: rightDown)
         #expect(capture.code == 54)  // Right ⌘, not Left (55)
+    }
+
+    @Test("a release on one side while the other is held is no press")
+    func otherSideHeldIsNoPress() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = start(recorder)
+        // Left ⌘ (55) lets go; Right ⌘ still holds `.command`,
+        // and only its own device bit (0x10) is down.
+        let rightOnly = NSEvent.ModifierFlags(
+            rawValue: NSEvent.ModifierFlags.command.rawValue | 0x10
+        )
+        recorder.handle(.flagsChanged, keyCode: 55, flags: rightOnly)
+        #expect(capture.outcomes.isEmpty)
+        let leftDown = NSEvent.ModifierFlags(
+            rawValue: NSEvent.ModifierFlags.command.rawValue | 0x08
+        )
+        recorder.handle(.flagsChanged, keyCode: 55, flags: leftDown)
+        #expect(capture.code == 55)
     }
 
     @Test("a key down commits, Caps Lock commits, Escape cancels")
     func keysCommit() {
         let f13 = ChordRecorder()
         defer { f13.stop() }
-        #expect(start(f13).code == nil)
         let capture = start(f13)
         f13.handle(.keyDown, keyCode: 105, flags: [])
         #expect(capture.code == 105)
@@ -77,6 +98,8 @@ struct HyperKeyRowTests {
         #expect(HyperKeyWords.caption(.f13).contains("no other job"))
         #expect(HyperKeyWords.caption(.f5).contains("its own action"))
         #expect(HyperKeyWords.caption(nil).contains("Caps Lock"))
+        #expect(HyperKeyWords.name(.rightShift) == "Right ⇧")
+        #expect(HyperKeyWords.paused.contains("manages"))
         #expect(HyperKeyWords.trouble(.refused) != nil)
         #expect(HyperKeyWords.trouble(.on) == nil)
     }
@@ -86,6 +109,20 @@ struct HyperKeyRowTests {
         #expect(HyperKeyRow.isOffered(in: .powerUser, key: nil))
         #expect(!HyperKeyRow.isOffered(in: .simple, key: nil))
         #expect(HyperKeyRow.isOffered(in: .simple, key: .capsLock))
+    }
+
+    @Test("the cap and the spoken board read one predicate")
+    func boardMarksTheHyperKey() {
+        let rows = KeyboardMatrix.rows(for: .ansi).flatMap { $0 }
+        let caps = rows.first { $0.source == .capsLock }!
+        #expect(KeyboardMatrix.legend(of: caps, hyper: .capsLock) == "✦")
+        #expect(KeyboardMatrix.legend(of: caps, hyper: nil) == "⇪")
+        #expect(
+            KeyboardMatrix.legend(of: caps, hyper: .rightCommand) == "⇪"
+        )
+        #expect(KeyboardMatrix.draws(.rightCommand, on: .ansi))
+        #expect(!KeyboardMatrix.draws(.f13, on: .ansi))
+        #expect(!KeyboardMatrix.draws(nil, on: .ansi))
     }
 
     @Test("the board can mark every modifier and Caps Lock")

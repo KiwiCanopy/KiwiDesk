@@ -91,8 +91,7 @@ struct KeyboardBoard: View {
                 ?? false,
             isOverwritten: key.code
                 .map(overwritten.contains) ?? false,
-            legend: key.source != nil && key.source == hyperKey
-                ? ComboSymbols.hyperGlyph : key.legend
+            legend: KeyboardMatrix.legend(of: key, hyper: hyperKey)
         )
         .frame(width: max(width, 0), height: unit)
         .onHover { inside in

@@ -65,6 +65,11 @@ struct HyperKeyRow: View {
             // The key is chosen but not working: its cost sentence
             // would claim it is Hyper now.
             caption(trouble)
+        } else if model.appWide.hyperKey != nil,
+            model.hyperStatus == .off
+        {
+            // Chosen, not applied: KiwiDesk is not managing yet.
+            caption(HyperKeyWords.paused)
         } else {
             caption(HyperKeyWords.caption(model.appWide.hyperKey))
         }

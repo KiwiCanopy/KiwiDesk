@@ -94,6 +94,28 @@ struct KeyboardBoardSpokenTests {
         #expect(buckets == .init())
     }
 
+    /// The cap the board marks ✦ is spoken too (#1870), from the
+    /// one `KeyboardMatrix` predicate the cap draws from.
+    @Test("the Hyper key is spoken where the board marks it")
+    func hyperIsSpoken() {
+        LocalizationManager.shared.select("en")
+        let named = KeyboardBoardSpoken.sentence(
+            buckets: .init(),
+            scopeLabel: "All",
+            layerLabel: nil,
+            hyperName: "Caps Lock",
+            conflictDetail: []
+        )
+        #expect(named.contains("The Hyper key is Caps Lock."))
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/"
+                    + "Keybindings/KeyboardBoardSpoken.swift"
+            )
+        let source = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        #expect(source.contains("KeyboardMatrix.draws(hyperKey"))
+    }
+
     @Test("the sentence speaks only the buckets that have keys")
     func sentenceOmitsEmptyBuckets() {
         LocalizationManager.shared.select("en")
@@ -101,6 +123,7 @@ struct KeyboardBoardSpokenTests {
             buckets: .init(),
             scopeLabel: "All",
             layerLabel: nil,
+            hyperName: nil,
             conflictDetail: []
         )
         #expect(
@@ -114,6 +137,7 @@ struct KeyboardBoardSpokenTests {
             ),
             scopeLabel: "⌘",
             layerLabel: nil,
+            hyperName: nil,
             conflictDetail: []
         )
         #expect(full.hasPrefix("Keyboard preview, showing ⌘. Bound: Q"))
@@ -134,6 +158,7 @@ struct KeyboardBoardSpokenTests {
             buckets: .init(bound: ["Q"]),
             scopeLabel: "All",
             layerLabel: "media",
+            hyperName: nil,
             conflictDetail: []
         )
         #expect(
@@ -145,6 +170,7 @@ struct KeyboardBoardSpokenTests {
                 buckets: .init(bound: ["Q"]),
                 scopeLabel: "All",
                 layerLabel: nil,
+                hyperName: nil,
                 conflictDetail: []
             ).contains("layer")
         )
@@ -164,6 +190,7 @@ struct KeyboardBoardSpokenTests {
             buckets: .init(bound: ["J"], conflict: ["J"]),
             scopeLabel: "⌃⌥",
             layerLabel: nil,
+            hyperName: nil,
             conflictDetail: [
                 "⌃⌥J — Focus left", "⌃⌥J — Swap left",
             ]
@@ -176,6 +203,7 @@ struct KeyboardBoardSpokenTests {
             buckets: .init(bound: ["J"]),
             scopeLabel: "⌃⌥",
             layerLabel: nil,
+            hyperName: nil,
             conflictDetail: ["⌃⌥J — Focus left"]
         )
         #expect(!quiet.contains("Focus left"))

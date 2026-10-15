@@ -23,19 +23,28 @@ enum HyperKeyWords {
     }
 
     /// The key as the row names it: "Caps Lock", "Right ⌘", "F13".
+    /// One key per sided modifier: the side is an adjective that
+    /// agrees with each key's own noun (localization.md).
     static func name(_ key: HyperSourceKey) -> String {
         switch key {
         case .capsLock:
             return L("shortcuts.hyper_key.caps_lock", "Caps Lock")
-        case .leftCommand, .leftOption, .leftControl, .leftShift:
-            return L("shortcuts.hyper_key.left", "Left %1$@", glyph(key))
-        case .rightCommand, .rightOption, .rightControl,
-            .rightShift:
-            return L(
-                "shortcuts.hyper_key.right",
-                "Right %1$@",
-                glyph(key)
-            )
+        case .leftCommand:
+            return L("shortcuts.hyper_key.left_command", "Left ⌘")
+        case .rightCommand:
+            return L("shortcuts.hyper_key.right_command", "Right ⌘")
+        case .leftOption:
+            return L("shortcuts.hyper_key.left_option", "Left ⌥")
+        case .rightOption:
+            return L("shortcuts.hyper_key.right_option", "Right ⌥")
+        case .leftControl:
+            return L("shortcuts.hyper_key.left_control", "Left ⌃")
+        case .rightControl:
+            return L("shortcuts.hyper_key.right_control", "Right ⌃")
+        case .leftShift:
+            return L("shortcuts.hyper_key.left_shift", "Left ⇧")
+        case .rightShift:
+            return L("shortcuts.hyper_key.right_shift", "Right ⇧")
         default:
             return key.rawValue.uppercased()  // F1 … F20
         }
@@ -103,6 +112,15 @@ enum HyperKeyWords {
         case .on, .off:
             return nil
         }
+    }
+
+    /// A key chosen while KiwiDesk manages no windows: the remap
+    /// waits for Start Tiling.
+    static var paused: String {
+        L(
+            "shortcuts.hyper_key.paused",
+            "Hyper turns on once KiwiDesk manages your windows."
+        )
     }
 
     static var typesText: String {

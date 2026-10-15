@@ -84,6 +84,9 @@ final class DeferredTasks {
         /// Pays an owed menu-bar reveal return once the bar hides
         /// (#2224).
         case menuBarRevealReturn
+        /// The Hyper key's remap after its value changed (#1870),
+        /// coalesced so a reload remaps once.
+        case hyperRemap
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -102,7 +105,7 @@ final class DeferredTasks {
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
-                .menuBarRevealReturn:
+                .menuBarRevealReturn, .hyperRemap:
                 return false
             }
         }

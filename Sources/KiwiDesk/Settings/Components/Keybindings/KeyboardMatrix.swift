@@ -122,6 +122,25 @@ enum KeyboardMatrix {
         Key(123), Key(126), Key(125), Key(124),
     ]
 
+    /// The legend a cap draws: the Hyper key's ✦ in place of its
+    /// own (#1870). The board's cap and its spoken description
+    /// both read this, so the two channels cannot disagree.
+    static func legend(of key: Key, hyper: HyperSourceKey?) -> String? {
+        guard let source = key.source, source == hyper else {
+            return key.legend
+        }
+        return ComboSymbols.hyperGlyph
+    }
+
+    /// Whether the board draws `hyper`'s cap — F1–F20 it does not.
+    static func draws(
+        _ hyper: HyperSourceKey?,
+        on type: PhysicalType
+    ) -> Bool {
+        guard let hyper else { return false }
+        return rows(for: type).joined().contains { $0.source == hyper }
+    }
+
     /// Unique keycodes the board draws — derived from the rows,
     /// never from `KeyCombo.keyCodes`, whose aliases would count
     /// `escape` twice and whose entries include codes no row

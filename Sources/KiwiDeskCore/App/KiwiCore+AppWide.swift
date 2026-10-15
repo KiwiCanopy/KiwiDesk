@@ -51,7 +51,13 @@ extension KiwiCore {
     /// whose `init.lua` is the store.
     func prepareAppWide() {
         guard isGuiManaged else {
-            appWideLedger.owed = nil
+            // `init.lua` is the store: its verbs set the values
+            // again as it runs, so a reload agrees with a relaunch
+            // and a verb the file no longer calls stops holding
+            // (#1870 — the Hyper key would stay remapped).
+            let backup = appWideLedger.backup
+            appWideLedger = AppWideLedger()
+            appWideLedger.backup = backup
             return
         }
         guard let config = guiConfigStore.load() else { return }
