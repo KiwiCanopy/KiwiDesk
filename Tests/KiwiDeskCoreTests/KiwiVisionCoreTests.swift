@@ -175,9 +175,9 @@ struct KiwiVisionCoreTests {
             ),
             reassert: false
         )
-        core.visionTargetRestacked(w2)
+        core.visionWindowRestacked(w2)
         #expect(plate.orders == [w1.raw])
-        core.visionTargetRestacked(w1)
+        core.visionWindowRestacked(w1)
         #expect(plate.orders == [w1.raw, w1.raw])
     }
 

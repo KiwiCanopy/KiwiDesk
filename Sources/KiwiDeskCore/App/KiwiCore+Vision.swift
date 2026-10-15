@@ -84,10 +84,13 @@ extension KiwiCore {
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
         var request = visionRequest()
-        // Watched whether or not a ring or a mark asks (#2103).
+        // Watched whether or not a ring or a mark asks (#2103), the
+        // float tier too: a float landing re-stacks the plate.
         windowServer.request(
-            vision.isOn
-                ? Set(request.target.map { [WindowID($0)] } ?? []) : [],
+            vision.isOn && request.target != nil
+                ? Set(floatLayerTargets()).union(
+                    request.target.map { [WindowID($0)] } ?? []
+                ) : [],
             for: .vision
         )
         request.tracked = windowServer.isActive
@@ -114,10 +117,21 @@ extension KiwiCore {
             ?? found.dark
     }
 
-    /// The target's WindowServer reorder event, after its ring's
-    /// re-order (`BorderManager+WindowServer`).
-    func visionTargetRestacked(_ id: WindowID) {
-        vision.restack(after: id.raw)
+    /// A reorder event the plate hears. The target's re-stacks the
+    /// plate after its ring's re-order (`BorderManager+WindowServer`).
+    /// A float's is its raise landing directly under the focused
+    /// window, above its ring and the plate (#2284): the target's
+    /// overlays re-stack at once, so the float is dimmed then rather
+    /// than when the whole raise lands.
+    func visionWindowRestacked(_ id: WindowID) {
+        guard let target = vision.target, id.raw != target else {
+            vision.restack(after: id.raw)
+            return
+        }
+        guard vision.isOn, floatLayerTargets().contains(id) else {
+            return
+        }
+        windowServer.restack(WindowID(target))
     }
 
     /// The shelf's stand-down verdict, judged once per pass in

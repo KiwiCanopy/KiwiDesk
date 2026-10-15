@@ -29,7 +29,7 @@ extension KiwiCore {
             .vision,
             WindowServerWatch.Hooks(
                 restack: { [weak self] id in
-                    self?.visionTargetRestacked(id)
+                    self?.visionWindowRestacked(id)
                 }
             )
         )

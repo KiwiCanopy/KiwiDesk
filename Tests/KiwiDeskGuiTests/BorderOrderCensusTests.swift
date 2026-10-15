@@ -70,8 +70,9 @@ struct BorderOrderCensusTests {
 
     /// The watch's restack fan-out orders every overlay of a window,
     /// so a caller beside the reorder event is a round trip per
-    /// consumer on the switch path: the float raise's landing is the
-    /// one ruled so far (#2284).
+    /// consumer on the switch path: the float raise's landing
+    /// (#2284), and while KiwiVision is on each float's own landing,
+    /// so the plate dims it at once (#2103).
     @Test("only the ruled sites take the watch's restack door")
     func watchRestackSitesAreCensused() throws {
         let sites = try SourceScan.identifierSites(
@@ -79,8 +80,8 @@ struct BorderOrderCensusTests {
             under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
         )
         #expect(
-            sites.map(\.file.lastPathComponent)
-                == ["KiwiCore+ZOrderFloats.swift"],
+            sites.map(\.file.lastPathComponent).sorted()
+                == ["KiwiCore+Vision.swift", "KiwiCore+ZOrderFloats.swift"],
             "found \(sites.map(\.site))"
         )
     }
@@ -112,7 +113,7 @@ struct BorderOrderCensusTests {
         ).filter { !$0.isWhitespace }
         #expect(
             wiring.contains(
-                "restack:{[weakself]idinself?.visionTargetRestacked(id)}"
+                "restack:{[weakself]idinself?.visionWindowRestacked(id)}"
             )
         )
         // The stand-down is the shelf's verdict, filed by the one
