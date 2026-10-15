@@ -3,6 +3,8 @@
 enum AIKey: String, CaseIterable, Hashable {
     case copySetupPrompt = "(action) ai.setup.copy"
     case promptLook = "(action) ai.prompt.look"
+    case promptMigrate = "(action) ai.prompt.migrate"
+    case promptAppRules = "(action) ai.prompt.app_rules"
     case promptSpaces = "(action) ai.prompt.spaces"
 }
 
@@ -16,7 +18,8 @@ extension AIKey {
                 .atRest,
                 gate: .runtime(.runningCopyTranslocated)
             )
-        case .promptLook, .promptSpaces:
+        case .promptLook, .promptMigrate, .promptAppRules,
+            .promptSpaces:
             return .row(.ai, .readyMadePrompts, .atRest)
         }
     }
@@ -29,7 +32,8 @@ extension AIKey {
                 caption: labelKey + ".caption",
                 help: labelKey + ".help"
             )
-        case .promptLook, .promptSpaces:
+        case .promptLook, .promptMigrate, .promptAppRules,
+            .promptSpaces:
             return .text(labelKey, caption: labelKey + ".caption")
         }
     }

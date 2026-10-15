@@ -4,12 +4,12 @@ extension APIReference {
     /// The `app_rule.*` verbs (#1685 ▸ Ruling 6c).
     static let appRuleRecords: [String: APIRecord] = [
         "list": APIRecord(
-            "Lists the live app rules: each app's Space and the "
-                + "float, tile and ignore rules."
+            "Lists the live app rules by bundle id: each app's "
+                + "Space and its float, tile and ignore rules."
         ),
         "set_space": APIRecord(
-            "Opens the app's new windows in a Space, live; a keep "
-                + "stores it.",
+            "Opens an app's new windows, by bundle id, in a Space, "
+                + "live; a keep stores it.",
             .text("app"),
             .space("space")
         ),
@@ -18,8 +18,8 @@ extension APIReference {
             .text("app")
         ),
         "set_float": APIRecord(
-            "Floats the app's windows, or only those whose title "
-                + "contains the text, live; a keep stores it.",
+            "Floats an app's windows by bundle id, or those whose "
+                + "title has the text, live; a keep stores it.",
             .text("app"),
             .text("title", optional: true)
         ),

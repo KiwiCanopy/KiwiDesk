@@ -1,4 +1,6 @@
+(action) ai.prompt.app_rules
 (action) ai.prompt.look
+(action) ai.prompt.migrate
 (action) ai.prompt.spaces
 (action) ai.setup.copy
 (action) app_rules.add_float

@@ -117,6 +117,22 @@ struct AICensusRenderTests {
         #expect(text.contains("screenshot"))
     }
 
+    /// The prompts keep their ruled order (#1685 ▸ Ruling 6a), and
+    /// the migration prompt has the shortcuts shown before they
+    /// are added, since they save at once (Ruling 6c).
+    @Test("the prompts keep their ruled order")
+    @MainActor func promptsKeepRuledOrder() {
+        LocalizationManager.shared.select("en")
+        #expect(
+            AIRowOrder.readyMadePrompts == [
+                .ai(.promptLook), .ai(.promptMigrate),
+                .ai(.promptAppRules), .ai(.promptSpaces),
+            ]
+        )
+        let text = AIReadyPrompt.text(for: .promptMigrate) ?? ""
+        #expect(text.contains("shortcuts before you add them"))
+    }
+
     /// The prompts card walks its list; the setup card draws its
     /// one row by hand, so the row must be mounted there.
     @Test("the prompts card walks its list, the setup row mounts")
