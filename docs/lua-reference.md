@@ -6630,6 +6630,41 @@ for _, window in ipairs(state.windows) do
 end
 ```
 
+:::unreleased
+### explain_window
+
+**Expects:** optionally a window id, as `get_state` lists it; the
+focused window otherwise.
+
+**Does:** returns why the window floats or tiles: `window`, `app`,
+`bundle_id`, `space_id`, `space_mode`, `floating`, `app_rule`,
+`sticky` (`none`, `global` or `display`), `fullscreen`,
+`presenting` and `focused`. `floating` holds `floats` (whether it
+floats, a floating-layout Space included), `flag` (its own float
+flag), `cause` (`detection`, `user`, `space_mode` or `nil`) and
+`detection` (`reason` — `rule`, `panel`, `accessory_app` or
+`fixed_size` — `is_guess`, and `escapes`, what would let it tile:
+`tile_rule`, `float_automatically` or `remove_float_rule`).
+`app_rule` holds the app's Space rule (`space`), its float rules
+(`float_rules`), whether it has a Tile rule (`tile_rule`) and
+`float_automatically`. No window title is returned. An id
+`get_state` does not list is refused; ask `explain_app` instead.
+
+### explain_app
+
+**Expects:** an app's bundle identifier.
+
+**Does:** returns what KiwiDesk knows of the app, for a window
+`get_state` does not list: `ignored` (`by_rule`, an ignore rule;
+`built_in`, KiwiDesk's own ignore list; `raised_windows`, whether
+its raised windows are ignored, as Ghostty's quick terminal is),
+`running` (each process's `pid`, whether KiwiDesk `observed` it,
+its `policy` and whether it is `hidden`), `windows` (tracked
+ids), `minimized` (ids), `away` (each `id` with its `space_id`)
+and `app_rule`, as `explain_window` has it. An app nothing knows
+answers empty lists.
+:::
+
 ### help
 
 **Expects:** nothing, or one command name.

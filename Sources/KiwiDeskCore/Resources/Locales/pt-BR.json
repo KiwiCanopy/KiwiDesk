@@ -2,6 +2,7 @@
   "about.website": "Site",
   "ai.capabilities.title": "O que ele pode fazer",
   "ai.capability.app_rules": "Escolher quais apps flutuam e em qual espaço cada app abre.",
+  "ai.capability.diagnose": "Explicar por que uma janela flutua, é organizada lado a lado ou abre onde abre.",
   "ai.capability.inspect": "Ver seus espaços e janelas e consultar qualquer comando.",
   "ai.capability.looks": "Criar, aplicar e salvar looks, combinando com sua imagem de fundo a partir de uma captura de tela.",
   "ai.capability.settings": "Mudar os espaçamentos, os contornos e as barras do KiwiShelf.",

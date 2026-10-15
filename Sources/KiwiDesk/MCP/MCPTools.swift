@@ -28,6 +28,7 @@ struct MCPTools {
         [
             listCommandsTool, helpTool, getStateTool,
             runTool, runBatchTool, runDestructiveTool, keepTool,
+            diagnoseWindowTool,
         ] + groupTools.map(groupTool)
 
     /// Every domain tool over a command group (#1685 ▸ Ruling 2).
