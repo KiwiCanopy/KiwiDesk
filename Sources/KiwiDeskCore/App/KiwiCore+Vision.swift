@@ -51,6 +51,21 @@ extension KiwiCore {
                 return .fail("expected boolean")
             }
             setAppWide(persisting: false) { $0.visionClearWallpaper = on }
+        case "kiwivision.set_never_dimmed":
+            // A Lua table arrives as one array; the CLI's words as
+            // separate strings.
+            var values = args
+            if args.count == 1, case .array(let list) = args[0] {
+                values = list
+            }
+            let apps = values.compactMap(\.stringValue)
+            guard apps.count == values.count else {
+                return .fail("expected app names")
+            }
+            setAppWide(persisting: false) {
+                $0.visionNeverDimmed =
+                    AppWideSettings.neverDimmedEntries(apps)
+            }
         case "kiwivision.set_clear_app":
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")

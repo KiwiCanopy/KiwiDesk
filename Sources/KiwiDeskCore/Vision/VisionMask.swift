@@ -106,3 +106,20 @@ public enum VisionMask {
         )
     }
 }
+
+/// An app as KiwiVision's clear verdict names it (#2103 ruling 26):
+/// its lowercased bundle id, or its process name where it has none.
+public struct VisionApp: Equatable, Sendable {
+    public var bundleID: String?
+    public var name: String
+
+    public init(bundleID: String?, name: String) {
+        self.bundleID = bundleID
+        self.name = name
+    }
+
+    /// The Never dimmed list's spelling of this app.
+    public var key: String {
+        (bundleID ?? name).lowercased()
+    }
+}

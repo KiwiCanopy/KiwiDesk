@@ -87,6 +87,37 @@ struct KiwiVisionCensusRenderTests {
         #expect(card.contains("case.kiwiVision(.clearApp):appRow"))
     }
 
+    /// Never dimmed sits below Stays clear (#2103 ruling 26), walks
+    /// its list, and its add picker leads with what is on screen
+    /// and leaves out what the list already holds (ruling 27).
+    @Test("the Never dimmed card walks its list below Stays clear")
+    func neverDimmedCardWiring() throws {
+        let section = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Sections/KiwiVisionSection.swift"
+        )
+        let clear = try #require(section.range(of: "KiwiVisionClearCard("))
+        let never = try #require(
+            section.range(of: "KiwiVisionNeverDimmedCard(")
+        )
+        let look = try #require(
+            section.range(of: "KiwiVisionAppearanceCard(")
+        )
+        #expect(clear.lowerBound < never.lowerBound)
+        #expect(never.lowerBound < look.lowerBound)
+        let card = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/KiwiVision/"
+                + "KiwiVisionNeverDimmedCard.swift"
+        )
+        #expect(
+            card.contains(
+                "ForEach(KiwiVisionRowOrder.neverDimmed,id:\\.id){keyin"
+            )
+        )
+        #expect(card.contains("case.kiwiVision(.neverDimmed):list"))
+        #expect(card.contains("exclude:Set(apps)"))
+        #expect(card.contains("onScreen:{model.core.appsOnScreen()}"))
+    }
+
     /// With the wallpaper clear the caption and the spoken label
     /// say so, and the picture veils each hazed window instead.
     @Test("the caption names a clear wallpaper")

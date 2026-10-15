@@ -114,7 +114,7 @@ struct SettingsCatalogSiteTests {
         // prompt rows.
         // 145 since #2103 v2: KiwiVision's Stays clear card and row.
         // 146 since #2103 v2: its current app's other windows row.
-        #expect(names.count == 146)
+        #expect(names.count == 148)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

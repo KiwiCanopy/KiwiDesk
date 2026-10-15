@@ -7,7 +7,10 @@ import AppKit
 extension KiwiCore {
     /// Whether the plates draw a mask rather than the whole screen.
     var visionMasks: Bool {
-        visionClearsWallpaper || (vision.isOn && appWide.visionClearApp)
+        visionClearsWallpaper
+            || (vision.isOn
+                && (appWide.visionClearApp
+                    || !appWide.visionNeverDimmed.isEmpty))
     }
 
     /// Whether the wallpaper stays clear now — the one reading the
@@ -27,7 +30,10 @@ extension KiwiCore {
     /// window. With "the current app's other windows" on, a window
     /// of the target's app — one process, or a sibling of it
     /// (`EventLoop.names(_:appOf:)`, #1785) — is clear: a hole for
-    /// its visible part.
+    /// its visible part. A window of a Never dimmed app is clear
+    /// too, beneath the normal layer as well — SketchyBar draws its
+    /// bar at layer −20, under every window — down to, never
+    /// including, the desktop icons' level.
     /// KiwiDesk's own untiled windows — a dialog, the update and
     /// What's new windows — are chrome to the read and stay clear.
     /// Corner radii are read only on a list read, off the switch
@@ -50,15 +56,22 @@ extension KiwiCore {
         let listed = vision.listedWindows(
             refresh: refreshingList,
             tracks: { self.state.windows[WindowID($0)] != nil },
-            radius: { self.windowRadius(WindowID($0), reading: true) }
+            radius: { self.windowRadius(WindowID($0), reading: true) },
+            bundle: { self.readBundle(of: $0) }
         )
         let seen = Set(listed.map { WindowID($0.number) })
         var ordered: [(id: WindowID, frame: CGRect, pid: pid_t)] = []
+        var apps: [pid_t: VisionApp] = [:]
         func member(_ id: WindowID) {
-            guard let frame = memberFrame(id),
-                let pid = state.windows[id]?.pid
+            guard let frame = memberFrame(id), let window = state.windows[id]
             else { return }
-            ordered.append((id, frame, pid))
+            ordered.append((id, frame, window.pid))
+            apps[window.pid] =
+                apps[window.pid]
+                ?? VisionApp(
+                    bundleID: window.appBundleID,
+                    name: window.appName
+                )
         }
         for id in members where !seen.contains(id) { member(id) }
         for entry in listed {
@@ -67,16 +80,15 @@ extension KiwiCore {
                 member(id)
                 continue
             }
-            guard entry.layer == 0, entry.number != target,
+            guard entry.number != target,
                 !vision.trackedAtRead.contains(entry.number),
-                state.windows[id] == nil
+                state.windows[id] == nil,
+                visionMaskReads(entry)
             else { continue }
             ordered.append((id, entry.frame, entry.pid))
+            apps[entry.pid] = apps[entry.pid] ?? listedApp(entry)
         }
-        let clear = visionClearPids(
-            target: targetPid,
-            among: Set(ordered.map(\.pid))
-        )
+        let clear = visionClearPids(target: targetPid, among: apps)
         let height = GeometryUtils.primaryHeight
         return ordered.map { id, frame, pid in
             VisionMask.Window(
@@ -92,18 +104,61 @@ extension KiwiCore {
     /// current app's other windows" on, every one of `pids` that
     /// names the target's app — the one identity door, read from
     /// what attach filed and never LaunchServices (#1785, #1936).
-    /// Decided once per pass, per process; a further clear source
-    /// (Always clear, a lens) joins here.
+    /// Decided once per pass, per process; Never dimmed joins it —
+    /// an app named by its bundle id, or by its process name where
+    /// it has none (#2103 ruling 26) — and a lens will too.
     func visionClearPids(
         target: pid_t?,
-        among pids: Set<pid_t>
+        among apps: [pid_t: VisionApp]
     ) -> Set<pid_t> {
-        guard appWide.visionClearApp, let target, target > 0 else {
-            return []
+        let never = Set(appWide.visionNeverDimmed)
+        var clear: Set<pid_t> = []
+        for (pid, app) in apps {
+            if !never.isEmpty, never.contains(app.key) {
+                clear.insert(pid)
+            } else if appWide.visionClearApp, let target, target > 0,
+                eventLoop.names(target, appOf: pid, lookingUp: false)
+            {
+                clear.insert(pid)
+            }
         }
-        return pids.filter {
-            eventLoop.names(target, appOf: $0, lookingUp: false)
-        }
+        return clear
+    }
+
+    /// Whether the mask reads a listed window of another app: a
+    /// normal one, or one beneath the normal layer — above the
+    /// desktop icons — of a Never dimmed app.
+    private func visionMaskReads(
+        _ entry: FloatDetection.ListedWindow
+    ) -> Bool {
+        if entry.layer == 0 { return true }
+        guard entry.layer < 0, entry.layer > Self.desktopIconLayer,
+            !appWide.visionNeverDimmed.isEmpty
+        else { return false }
+        return appWide.visionNeverDimmed.contains(listedApp(entry).key)
+    }
+
+    /// The desktop icons' level: a hole there would clear the
+    /// whole wallpaper.
+    static let desktopIconLayer = Int(
+        CGWindowLevelForKey(.desktopIconWindow)
+    )
+
+    private func listedApp(_ entry: FloatDetection.ListedWindow) -> VisionApp {
+        VisionApp(
+            bundleID: vision.listedBundles[entry.pid] ?? nil,
+            name: entry.owner
+        )
+    }
+
+    /// A listed process's bundle id, read with the list: what attach
+    /// filed, else LaunchServices — at a list read only, never on a
+    /// pass (#1936).
+    private func readBundle(of pid: pid_t) -> String? {
+        let identity = eventLoop.processIdentity
+        return identity.observed[pid]?.ref.bundleID
+            ?? identity.unlisted[pid]
+            ?? identity.appAt(pid)?.ref.bundleID
     }
 
     /// A window's corner radius: the ring's reading, read from the
@@ -128,7 +183,7 @@ extension KiwiCore {
         return Set(
             listed.lazy
                 .filter {
-                    $0.layer == 0
+                    self.visionMaskReads($0)
                         && !self.vision.trackedAtRead.contains($0.number)
                 }
                 .map { WindowID($0.number) }

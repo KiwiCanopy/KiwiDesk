@@ -95,13 +95,18 @@ public final class VisionManager {
     /// list and replaced at each read, so the cache never outgrows
     /// the windows on screen.
     private(set) var listedRadii: [CGWindowID: CGFloat] = [:]
+    /// Each listed process's bundle id, read with the list (nil
+    /// for a process without one), so a pass names an app without
+    /// asking LaunchServices.
+    private(set) var listedBundles: [pid_t: String?] = [:]
 
     /// Re-reads the WindowServer list where `refresh` asks or
     /// nothing is cached, noting which windows `tracks` names.
     func listedWindows(
         refresh: Bool,
         tracks: (CGWindowID) -> Bool,
-        radius: (CGWindowID) -> CGFloat
+        radius: (CGWindowID) -> CGFloat,
+        bundle: (pid_t) -> String? = { _ in nil }
     ) -> [FloatDetection.ListedWindow] {
         if refresh || listed == nil {
             let read = listWindows()
@@ -114,6 +119,10 @@ public final class VisionManager {
                             && !self.trackedAtRead.contains($0.number)
                     }
                     .map { ($0.number, radius($0.number)) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            listedBundles = Dictionary(
+                Set(read.map(\.pid)).map { ($0, bundle($0)) },
                 uniquingKeysWith: { first, _ in first }
             )
         }
@@ -152,6 +161,7 @@ public final class VisionManager {
         listed = nil
         trackedAtRead = []
         listedRadii = [:]
+        listedBundles = [:]
     }
     #if DEBUG
         /// Test-only: builds plate backends. Every test core sets

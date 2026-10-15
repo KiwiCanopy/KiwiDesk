@@ -153,7 +153,11 @@ struct KiwiVisionClearAppTests {
         #expect(
             core.visionClearPids(
                 target: child,
-                among: [samePid, child, otherPid]
+                among: [
+                    samePid: VisionApp(bundleID: nil, name: "P"),
+                    child: VisionApp(bundleID: nil, name: "P"),
+                    otherPid: VisionApp(bundleID: nil, name: "O"),
+                ]
             ) == [samePid, child]
         )
         #expect(lookups.isEmpty, "the pass asks LaunchServices nothing")
