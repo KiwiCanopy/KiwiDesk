@@ -9,6 +9,27 @@ import Testing
 @Suite("Hyper move offer: the Desktop line and base", .serialized)
 @MainActor
 struct HyperShortcutMoveDesktopTests {
+    /// Applies the offer the default layer shows, as the sheet does.
+    private func move(
+        _ direction: HyperShortcutMove.Direction,
+        items: Set<String>,
+        desktop: Bool,
+        to config: inout GuiConfig
+    ) {
+        let rows = config.layers.first { $0.isDefault }?.bindings ?? []
+        let offer = HyperShortcutMove.offer(
+            direction,
+            rows: rows,
+            base: config.desktopShortcutBase
+        )
+        HyperShortcutMove.apply(
+            offer,
+            items: items,
+            desktop: desktop,
+            to: &config
+        )
+    }
+
     private final class Mark { var value = 0 }
 
     private func lua(_ number: Int) -> String {
@@ -36,7 +57,7 @@ struct HyperShortcutMoveDesktopTests {
     func lineMovesRowsAndBase() {
         var config = config(desktops: [1, 2])
         config.layers[0].bindings[1].combo = "control+option+2"
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [],
             desktop: true,
@@ -51,7 +72,7 @@ struct HyperShortcutMoveDesktopTests {
     @Test("without the line, neither the rows nor the base move")
     func noLineMovesNothing() {
         var config = config(desktops: [1])
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [],
             desktop: false,
@@ -74,7 +95,7 @@ struct HyperShortcutMoveDesktopTests {
             ).desktop
         )
         #expect(line.kept.map(\.holder) == [taker])
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [],
             desktop: true,
@@ -84,30 +105,34 @@ struct HyperShortcutMoveDesktopTests {
         #expect(config.desktopShortcutBase == .hyper)
     }
 
-    @Test("the line is offered with no Desktop rows, for Desktops to come")
-    func lineWithoutRows() {
-        let offer = HyperShortcutMove.offer(
-            .toHyper,
-            rows: [],
-            base: .standard
+    @Test("a declined line retires; the reverse stays while the base is ✦")
+    func lineRetiresAndReverseStays() {
+        // Forward, with no seeded Desktop row: nothing to offer, so a
+        // declined line retires with the letters.
+        #expect(
+            HyperShortcutMove.offer(.toHyper, rows: [], base: .standard)
+                .desktop == nil
         )
-        #expect(offer.desktop?.base == .hyper)
         #expect(
             HyperShortcutMove.offer(.toHyper, rows: [], base: .hyper)
                 .desktop == nil
         )
+        // The reverse alone resets the base, rows or none.
+        let back = HyperShortcutMove.offer(.back, rows: [], base: .hyper)
+        #expect(back.desktop?.base == .standard)
+        #expect(!back.isEmpty)
     }
 
     @Test("the reverse moves the rows back and resets the base")
     func reverseResetsTheBase() {
         var config = config(desktops: [1, 3])
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [],
             desktop: true,
             to: &config
         )
-        HyperShortcutMove.apply(.back, items: [], desktop: true, to: &config)
+        move(.back, items: [], desktop: true, to: &config)
         #expect(combo(1, in: config) == "control+option+shift+command+1")
         #expect(combo(3, in: config) == "control+option+shift+command+3")
         #expect(config.desktopShortcutBase == .standard)

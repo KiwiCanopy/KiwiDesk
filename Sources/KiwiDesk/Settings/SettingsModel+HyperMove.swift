@@ -44,19 +44,21 @@ extension SettingsModel {
         guard let offer = hyperMoveOffer else { return nil }
         return HyperMoveRequest(
             direction: hyperMoveDirection,
+            offer: offer,
             lines: offer.items.map(line(for:)),
             desktop: offer.desktop.map(desktopLine(for:))
         )
     }
 
-    /// Stages the picked lines into the draft.
+    /// Stages the picked lines of `request` into the draft — exactly
+    /// the moves its sheet showed.
     func applyHyperMove(
-        _ direction: HyperShortcutMove.Direction,
+        _ request: HyperMoveRequest,
         items: Set<String>,
         desktop: Bool
     ) {
         HyperShortcutMove.apply(
-            direction,
+            request.offer,
             items: items,
             desktop: desktop,
             to: &config

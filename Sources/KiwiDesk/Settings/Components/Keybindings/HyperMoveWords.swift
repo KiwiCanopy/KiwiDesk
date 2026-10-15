@@ -35,6 +35,15 @@ enum HyperMoveWords {
         )
     }
 
+    /// Under the offer while a saved profile other than the loaded
+    /// one is being edited.
+    static var storedPage: String {
+        L(
+            "shortcuts.hyper_move.stored_page",
+            "Move shortcuts to Hyper while editing the loaded profile."
+        )
+    }
+
     /// A dimmed row's hint for VoiceOver and the pointer.
     static var dormantHint: String {
         L(
@@ -113,6 +122,12 @@ enum HyperMoveWords {
             from,
             to
         )
+    }
+
+    /// `text` with ✦ spelled "Hyper" for VoiceOver; Hyper is kept
+    /// Latin in every catalog, so the name needs no key.
+    static func spoken(_ text: String) -> String {
+        text.replacingOccurrences(of: ComboSymbols.hyperGlyph, with: "Hyper ")
     }
 
     /// `combo` as the board draws it.

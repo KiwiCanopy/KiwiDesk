@@ -60,7 +60,7 @@ struct HyperMoveOfferTests {
         let model = model(key: .capsLock)
         let request = try #require(model.hyperMoveRequest())
         model.applyHyperMove(
-            .toHyper,
+            request,
             items: Set(request.lines.map(\.id)),
             desktop: true
         )
@@ -76,13 +76,14 @@ struct HyperMoveOfferTests {
     @Test("with no key, the offer runs the other way")
     func reverseWithNoKey() throws {
         let model = model(key: .capsLock)
-        let ids = Set(try #require(model.hyperMoveRequest()).lines.map(\.id))
-        model.applyHyperMove(.toHyper, items: ids, desktop: true)
+        let request = try #require(model.hyperMoveRequest())
+        let ids = Set(request.lines.map(\.id))
+        model.applyHyperMove(request, items: ids, desktop: true)
         model.core.setAppWide(persisting: false) { $0.hyperKey = nil }
         #expect(model.hyperMoveDirection == .back)
         let back = try #require(model.hyperMoveRequest())
         #expect(Set(back.lines.map(\.id)) == ids)
-        model.applyHyperMove(.back, items: ids, desktop: true)
+        model.applyHyperMove(back, items: ids, desktop: true)
         #expect(model.config.desktopShortcutBase == .standard)
         #expect(!model.draftUsesHyper)
         #expect(model.hyperMoveOffer == nil)
@@ -107,6 +108,18 @@ struct HyperMoveOfferTests {
         )
         #expect(row.contains("if model.hyperMoveOffer != nil"))
         #expect(row.contains("usesHyper: model.draftUsesHyper"))
+        // A stored-profile page greys the offer and says why.
+        #expect(row.contains("|| model.editingStoredProfile"))
+        #expect(row.contains("return HyperMoveWords.storedPage"))
+        #expect(row.contains("? HyperMoveWords.offCaption : nil"))
+        // With no key, the reverse offer says why rows are dim.
+        #expect(row.contains("if let text = offerCaption { caption(text) }"))
+        let sheet = try source(
+            "Components/Keybindings/HyperMoveSheet.swift"
+        )
+        // Every sheet text but the title (no ✦) speaks ✦ as Hyper.
+        #expect(sheet.occurrences(of: "Text(") == 2)
+        #expect(sheet.contains("accessibilityLabel(HyperMoveWords.spoken("))
         let section = try source("Sections/ShortcutsSection.swift")
         #expect(
             section.contains(
@@ -117,7 +130,7 @@ struct HyperMoveOfferTests {
         let field = try source(
             "Components/Keybindings/Recorder/KeyRecorderField.swift"
         )
-        #expect(field.contains(".opacity(hyperDormant ? 0.55 : 1)"))
+        #expect(field.contains(".opacity(hyperDormant ?"))
         #expect(field.contains("hyperKeyIsOff && !recording"))
     }
 }

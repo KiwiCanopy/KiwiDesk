@@ -28,6 +28,27 @@ struct HyperShortcutMoveTests {
         config.layers[0].bindings.first { $0.lua == lua }?.combo
     }
 
+    /// Applies the offer the default layer shows, as the sheet does.
+    private func move(
+        _ direction: HyperShortcutMove.Direction,
+        items: Set<String>,
+        desktop: Bool,
+        to config: inout GuiConfig
+    ) {
+        let rows = config.layers.first { $0.isDefault }?.bindings ?? []
+        let offer = HyperShortcutMove.offer(
+            direction,
+            rows: rows,
+            base: config.desktopShortcutBase
+        )
+        HyperShortcutMove.apply(
+            offer,
+            items: items,
+            desktop: desktop,
+            to: &config
+        )
+    }
+
     private let floating = "KiwiDesk.toggle_floating()"
     private let display = "KiwiDesk.toggle_display_sticky()"
     private let sticky = "KiwiDesk.toggle_sticky()"
@@ -59,7 +80,7 @@ struct HyperShortcutMoveTests {
         #expect(!lines.isEmpty)
         #expect(lines.allSatisfy { $0.seeded && $0.taken == nil })
         var config = config(rows)
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: Set(lines.map(\.id)),
             desktop: false,
@@ -86,7 +107,7 @@ struct HyperShortcutMoveTests {
         let line = try #require(offer(rows).items.first { $0.id == display })
         #expect(!line.seeded)
         var config = config(rows)
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [display],
             desktop: false,
@@ -116,7 +137,7 @@ struct HyperShortcutMoveTests {
         let line = try #require(offer(rows).items.first { $0.id == floating })
         #expect(line.taken == taker)
         var config = config(rows)
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [floating],
             desktop: false,
@@ -147,7 +168,7 @@ struct HyperShortcutMoveTests {
         )
         #expect(refused.taken != nil)
         var config = config(taken)
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [refused.id],
             desktop: false,
@@ -162,7 +183,7 @@ struct HyperShortcutMoveTests {
     @Test("an unpicked line stays where it is")
     func unpickedStays() {
         var config = config(seedLayer())
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [floating],
             desktop: false,
@@ -177,7 +198,7 @@ struct HyperShortcutMoveTests {
         let rows = seedLayer()
         var config = config(rows)
         let ids = Set(offer(rows).items.map(\.id))
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: ids,
             desktop: false,
@@ -191,7 +212,7 @@ struct HyperShortcutMoveTests {
         )
         #expect(back.items.map(\.id).sorted() == ids.sorted())
         #expect(back.items.allSatisfy { $0.seeded })
-        HyperShortcutMove.apply(.back, items: ids, desktop: false, to: &config)
+        move(.back, items: ids, desktop: false, to: &config)
         #expect(config.layers[0].bindings.map(\.combo) == rows.map(\.combo))
     }
 
@@ -205,7 +226,7 @@ struct HyperShortcutMoveTests {
             )
         )
         let group = offer(seedLayer()).items.first { $0.seeds.count > 1 }
-        HyperShortcutMove.apply(
+        move(
             .toHyper,
             items: [group?.id ?? ""],
             desktop: false,

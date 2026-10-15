@@ -1612,6 +1612,7 @@
   "shortcuts.hyper_move.off_caption": "Hyper is off, so shortcuts with ✦ are dimmed and don't work. Record a Hyper key again, or move them back.",
   "shortcuts.hyper_move.offer": "Move my ⌃⌥ letter shortcuts to Hyper…",
   "shortcuts.hyper_move.offer_back": "Move my Hyper shortcuts back to ⌃⌥…",
+  "shortcuts.hyper_move.stored_page": "Move shortcuts to Hyper while editing the loaded profile.",
   "shortcuts.hyper_move.taken": "%1$@ is taken by %2$@, so this stays.",
   "shortcuts.hyper_move.title": "Move shortcuts to Hyper",
   "shortcuts.hyper_move.title_back": "Move shortcuts back to ⌃⌥",

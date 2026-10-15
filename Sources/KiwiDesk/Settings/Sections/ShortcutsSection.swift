@@ -111,7 +111,7 @@ struct ShortcutsSection: View {
                 request: request,
                 onMove: { items, desktop in
                     model.applyHyperMove(
-                        request.direction,
+                        request,
                         items: items,
                         desktop: desktop
                     )

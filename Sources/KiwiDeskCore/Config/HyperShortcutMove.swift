@@ -77,40 +77,45 @@ public enum HyperShortcutMove {
         )
     }
 
-    /// `config` with the picked lines moved in every layer — a
-    /// line refused in a layer stays there — and, with `desktop`,
-    /// the Desktop rows and the base moved too.
+    /// `config` with exactly the moves `offer` showed: each picked
+    /// line, and with `desktop` the Desktop line and its base. A
+    /// row moves in every layer that holds it on the chord shown,
+    /// a line as one unit, and never where another row of that
+    /// layer holds a chord it would take.
     public static func apply(
-        _ direction: Direction,
+        _ offer: Offer,
         items picked: Set<String>,
         desktop: Bool,
         to config: inout GuiConfig
     ) {
-        let base = config.desktopShortcutBase
-        var target: DesktopShortcutBase?
+        var units = offer.items.filter {
+            picked.contains($0.id) && $0.taken == nil
+        }.map(\.moves)
+        if desktop, let line = offer.desktop {
+            units += line.moves.map { [$0] }
+            config.desktopShortcutBase = line.base
+        }
         for index in config.layers.indices {
             var rows = config.layers[index].bindings
-            let offer = offer(direction, rows: rows, base: base)
-            var moves = offer.items.filter {
-                picked.contains($0.id) && $0.taken == nil
-            }.flatMap(\.moves)
-            if desktop, let line = offer.desktop {
-                moves += line.moves
-                target = line.base
-            }
-            for move in moves {
-                guard
-                    let row = rows.firstIndex(where: {
-                        $0.kind == .navigation && $0.lua == move.lua
-                            && $0.combo == move.from
-                    })
-                else { continue }
-                rows[row].combo = move.to
-            }
+            for unit in units { move(unit, in: &rows) }
             config.layers[index].bindings = rows
         }
-        if let target { config.desktopShortcutBase = target }
         NavigationChords.deduplicate(&config)
+    }
+
+    /// Moves the rows of `unit` this layer holds on their shown
+    /// chord, or none of them where one's new chord is taken.
+    private static func move(_ unit: [Move], in rows: inout [KeyBinding]) {
+        let found = unit.compactMap { move in
+            rows.firstIndex {
+                $0.kind == .navigation && $0.lua == move.lua
+                    && $0.combo == move.from
+            }.map { ($0, move) }
+        }
+        guard !found.isEmpty,
+            holder(of: found.map(\.1), in: rows) == nil
+        else { return }
+        for (row, move) in found { rows[row].combo = move.to }
     }
 
     /// The seed's `⌃⌥` rows off the arrow and digit ladder, in seed
@@ -190,7 +195,7 @@ public enum HyperShortcutMove {
     /// The first row outside `moves` already on a chord one of them
     /// takes, compared as registered (a held Hyper row is its bare
     /// chord, as the conflict check reads it).
-    private static func holder(
+    static func holder(
         of moves: [Move],
         in rows: [KeyBinding]
     ) -> KeyBinding? {
@@ -204,36 +209,6 @@ public enum HyperShortcutMove {
                     targets.contains($0.registered)
                 } == true
         }
-    }
-
-    private static func desktopLine(
-        _ direction: Direction,
-        rows: [KeyBinding],
-        base: DesktopShortcutBase
-    ) -> DesktopLine? {
-        let toHyper = direction == .toHyper
-        let from: DesktopShortcutBase = toHyper ? .standard : .hyper
-        let to: DesktopShortcutBase = toHyper ? .hyper : .standard
-        guard base == from else { return nil }
-        var moves: [Move] = []
-        var kept: [Kept] = []
-        for number in 1...DefaultKeybindings.digitCapacity {
-            guard
-                let seeded = DefaultKeybindings.desktopRow(number, base: from),
-                let next = DefaultKeybindings.desktopRow(number, base: to),
-                let row = rows.first(where: {
-                    $0.lua == seeded.lua
-                        && KeyCombo.equivalent($0.combo, seeded.combo)
-                })
-            else { continue }
-            let move = Move(lua: row.lua, from: row.combo, to: next.combo)
-            if let holder = holder(of: [move], in: rows) {
-                kept.append(Kept(move: move, holder: holder))
-            } else {
-                moves.append(move)
-            }
-        }
-        return DesktopLine(moves: moves, kept: kept, from: from, base: to)
     }
 
     /// KiwiHub's sides and the app chrome they travel with.

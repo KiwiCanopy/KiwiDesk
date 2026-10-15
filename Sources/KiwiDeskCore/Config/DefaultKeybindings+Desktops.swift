@@ -27,6 +27,30 @@ extension DefaultKeybindings {
         )
     }
 
+    /// `row` moved onto `base` where it is a Go to Desktop row on
+    /// another base's seeded chord; any other row unchanged. A
+    /// top-up row adopted into a draft that staged a base move
+    /// takes the draft's base (#1870).
+    public static func rebased(
+        _ row: KeyBinding,
+        onto base: DesktopShortcutBase
+    ) -> KeyBinding {
+        for number in 1...digitCapacity {
+            guard let target = desktopRow(number, base: base),
+                target.lua == row.lua
+            else { continue }
+            let seeded = DesktopShortcutBase.allCases.contains {
+                desktopRow(number, base: $0)
+                    .map { KeyCombo.equivalent($0.combo, row.combo) }
+                    == true
+            }
+            var moved = row
+            if seeded { moved.combo = target.combo }
+            return moved
+        }
+        return row
+    }
+
     /// Whether `row` goes to a Desktop — the seed's own spelling,
     /// derived from `desktopRow` rather than restated.
     public static func isDesktopRow(_ row: KeyBinding) -> Bool {

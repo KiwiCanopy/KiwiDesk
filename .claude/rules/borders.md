@@ -21,7 +21,6 @@ paths:
   # KiwiVision's plate stacks with the ring and rides its triggers.
   - "Sources/KiwiDeskCore/Vision/**"
   - "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
-  - "Sources/KiwiDeskCore/App/KiwiCore+AppWideLive.swift"
 ---
 
 # Focus ring & sticky mark overlays

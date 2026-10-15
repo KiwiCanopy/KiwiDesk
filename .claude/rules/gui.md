@@ -115,7 +115,10 @@ restated `20...80` satisfies on the day it is written.
   values (KiwiVision, #2103; `DetailPanelTests` holds the offer
   set) — and keep the sheet
   read-only, a sheet that grows a commit being a dialog wearing
-  the wrong chrome. A read-only sheet also answers the keyboard
+  the wrong chrome — save a ruled offer whose one commit STAGES a
+  multi-row edit into the draft through a closure its host hands
+  it, taking no model (#1870's Hyper move, owner-ruled; a further
+  one is a ruling too). A read-only sheet also answers the keyboard
   both ways: Return on its one dismissal, and Escape, which a
   `Button` cannot carry beside `.defaultAction` so the content
   view takes `.onExitCommand`. `SheetPresentationSeamTests` is the

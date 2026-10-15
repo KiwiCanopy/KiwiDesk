@@ -3,6 +3,7 @@ paths:
   - "Sources/KiwiDeskCore/Profiles/**"
   - "Sources/KiwiDeskCore/Config/**"
   - "Sources/KiwiDeskCore/Commands/**"
+  - "Sources/KiwiDeskCore/App/KiwiCore+AppWide*.swift"
 ---
 
 # Profiles & config ownership
@@ -98,11 +99,12 @@ because two real clients now remove drift — see
   `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
   its own. The tier's modifiers are the stored
-  `GuiConfig.desktopShortcutBase` (#1870), which the top-up and
-  Restore Defaults write on, and which only the Hyper move offer
-  and its reverse change — in the draft, beside the rows they
-  move, so a Save or a Revert keeps the two together
-  (`HyperShortcutMoveDesktopTests`).
+  `GuiConfig.desktopShortcutBase` (#1870): a writer of a Desktop
+  row writes it on that base — the top-up, Restore Defaults, and a
+  top-up row adopted into a draft that staged a move — and a writer
+  of the base moves the Desktop rows in the same draft write, and a
+  path that drops the draft's rows drops the base with them
+  (`HyperShortcutMoveDesktopTests`, `HyperMoveDraftTests`).
 - **A default row added after the first-run seed joins the next
   generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
   and list the row in `rows(ofGeneration:)`, beside adding it to
@@ -584,6 +586,11 @@ holds the secondary-switch decision including its nil case.
   which does. The obligations:
   - Write `appWideLedger` only in `KiwiCore+AppWide.swift`
     (`AppWideSeamTests` ▸ `ledgerHasOneHome`).
+  - Reach every consumer of a live app-wide change — KiwiVision's
+    plate, the Hyper remap, the next one — from the one
+    `appWideLiveChanged` (`KiwiCore+AppWideLive.swift`), which the
+    ledger's `didSet` calls, never from a writer
+    (`VisionAppearanceSeamTests` ▸ `transitionIsWired`).
   - Run the capture before anything that may rewrite a profile
     file — first in `loadConfig`, ahead of the #1530 settle —
     or the rewrite destroys the copy the election reads

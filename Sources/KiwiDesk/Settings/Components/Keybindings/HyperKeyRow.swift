@@ -81,12 +81,23 @@ struct HyperKeyRow: View {
                 moveRequest = model.hyperMoveRequest()
             }
             .settingsActionButton()
-            .disabled(offerReason == .appWideLuaOwned)
-            if model.hyperMoveDirection == .back {
-                caption(HyperMoveWords.offCaption)
-            }
+            .disabled(
+                offerReason == .appWideLuaOwned || model.editingStoredProfile
+            )
+            if let text = offerCaption { caption(text) }
         }
         .padding(.top, 6)
+    }
+
+    /// Why the offer is greyed, or why Hyper rows are dim; nil when
+    /// neither. The Desktop base is the Mac's, so the move runs on
+    /// the page whose Save writes the shared rows (#1870).
+    private var offerCaption: String? {
+        guard !model.editingStoredProfile else {
+            return HyperMoveWords.storedPage
+        }
+        return model.hyperMoveDirection == .back
+            ? HyperMoveWords.offCaption : nil
     }
 
     private var captions: some View {

@@ -21,6 +21,8 @@ struct HyperMoveLine: Identifiable, Equatable {
 struct HyperMoveRequest: Identifiable {
     let id = UUID()
     let direction: HyperShortcutMove.Direction
+    /// What the lines were read from; the move applies exactly it.
+    let offer: HyperShortcutMove.Offer
     let lines: [HyperMoveLine]
     let desktop: HyperMoveLine?
 }
@@ -71,7 +73,7 @@ struct HyperMoveSheet: View {
                 .font(.title3)
                 .fontWeight(.semibold)
                 .accessibilityAddTraits(.isHeader)
-            Text(HyperMoveWords.intro(request.direction))
+            spoken(HyperMoveWords.intro(request.direction))
                 .font(.callout)
                 .foregroundStyle(SettingsTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -109,22 +111,28 @@ struct HyperMoveSheet: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Toggle(isOn: isOn) {
-                Text(line.name)
+                spoken(line.name)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .toggleStyle(.checkbox)
             .disabled(line.refusal != nil)
             Group {
                 if !line.chords.isEmpty {
-                    Text(line.chords).monospaced()
+                    spoken(line.chords).monospaced()
                 }
-                ForEach(captions(of: line), id: \.self) { Text($0) }
+                ForEach(captions(of: line), id: \.self) { spoken($0) }
             }
             .font(.caption)
             .foregroundStyle(SettingsTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.leading, 20)
         }
+    }
+
+    /// `text` drawn with ✦ and announced with "Hyper" (#1870's glyph
+    /// ruling), since VoiceOver has no name for the glyph.
+    private func spoken(_ text: String) -> Text {
+        Text(text).accessibilityLabel(HyperMoveWords.spoken(text))
     }
 
     private func captions(of line: HyperMoveLine) -> [String] {
