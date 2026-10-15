@@ -91,7 +91,7 @@ struct ShortcutsSheetTests {
             "KiwiDesk.resize(\"y\", 50)", "KiwiDesk.resize(\"y\", -50)",
             "KiwiDesk.toggle_floating()", "KiwiDesk.toggle_sticky()",
             "KiwiDesk.toggle_display_sticky()",
-            "KiwiDesk.switch_layer(\"vim\")",
+            "KiwiDesk.switch_layer(\"vim\")", "kiwivision.toggle()",
         ]
         let glyphs = verbs.map {
             ShortcutsReferenceBuilder.verbIcon(for: $0)
@@ -99,6 +99,8 @@ struct ShortcutsSheetTests {
         #expect(!glyphs.contains(nil))
         // Grow and shrink, width and height: four shapes.
         #expect(Set(glyphs[2...5].compactMap { $0 }).count == 4)
+        // KiwiVision wears its Settings card's symbol.
+        #expect(glyphs.last == SettingsDestination.kiwiVision.symbol)
         for symbol in Set(
             glyphs.compactMap { $0 } + ShortcutsReferenceBuilder.verbSymbols
         ) {
