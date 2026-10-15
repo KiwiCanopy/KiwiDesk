@@ -209,7 +209,6 @@ extension KiwiCore {
         borders.stop()
         stickyMarks.clear()
         vision.clear()
-        floatDims.clear()
         retargetVisionAppearance(nil)  // a quit puts it back
         retireReduceTransparency()
         retireFontSet()

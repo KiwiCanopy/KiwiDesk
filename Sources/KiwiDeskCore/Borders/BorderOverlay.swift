@@ -62,8 +62,6 @@ final class BorderOverlay {
     /// `sync` last ordered it on, and whether a ring that stopped
     /// spanning still owes its re-home (#2149).
     private var spansDesktops = false
-    /// When the ring last ordered (`ChromeOrderClock`).
-    private(set) var orderStamp: UInt64 = 0
     private var shownDesktop: UInt64?
     private var orderedOn: UInt64?
     private var rehomeOwed = false
@@ -168,7 +166,6 @@ final class BorderOverlay {
         }
         hasOrdered = true
         backend.order(relativeTo: windowNumber)
-        orderStamp = ChromeOrderClock.tick()
         if isDormant, !isArrivalHeld {
             isDormant = false
             backend.setDormant(false)

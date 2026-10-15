@@ -80,12 +80,10 @@ extension KiwiCore {
     /// while the mode is off and every plate has faded.
     func updateVision(reassertOrder: Bool = false) {
         guard
-            vision.isOn || vision.hasShownPlates || floatDims.hasShown
+            vision.isOn || vision.hasShownPlates
                 || !windowServer.requested(by: .vision).isEmpty
-                || !windowServer.requested(by: .floatDim).isEmpty
         else { return }
-        let focus = visionFocus()
-        var request = visionRequest(focus)
+        var request = visionRequest()
         // Watched whether or not a ring or a mark asks (#2103).
         windowServer.request(
             vision.isOn
@@ -94,10 +92,6 @@ extension KiwiCore {
         )
         request.tracked = windowServer.isActive
         vision.sync(request, reassert: reassertOrder)
-        updateFloatDims(
-            above: focus.ownKey == nil ? focus.anchor : nil,
-            reassertOrder: reassertOrder
-        )
     }
 
     /// Whether the plate draws its blur now: the stored switch,
@@ -132,9 +126,11 @@ extension KiwiCore {
         if vision.noteStandDown(displays) { updateVision() }
     }
 
-    /// The ring's focused window, and an own key window that is
-    /// not it.
-    func visionFocus() -> (anchor: WindowID?, ownKey: CGWindowID?) {
+    /// What the plates draw now. The window kept clear is the
+    /// ring's focused window, or an own key window that is not it
+    /// — a dialog, Sparkle's alert — which stays clear the way
+    /// it stands the focused ring down (#933).
+    func visionRequest() -> VisionManager.Request {
         let anchor = activeSpace.flatMap {
             state.focusAnchor(
                 of: $0,
@@ -144,17 +140,6 @@ extension KiwiCore {
         let ownKey = eventLoop.ownKeyWindow()
             .flatMap { UInt32(exactly: $0.number) }
             .flatMap { $0 == anchor?.raw ? nil : $0 }
-        return (anchor, ownKey)
-    }
-
-    /// What the plates draw now. The window kept clear is the
-    /// ring's focused window, or an own key window that is not it
-    /// — a dialog, Sparkle's alert — which stays clear the way
-    /// it stands the focused ring down (#933).
-    func visionRequest(
-        _ focus: (anchor: WindowID?, ownKey: CGWindowID?)? = nil
-    ) -> VisionManager.Request {
-        let (anchor, ownKey) = focus ?? visionFocus()
         let target = ownKey ?? anchor?.raw
         let ring =
             ownKey == nil

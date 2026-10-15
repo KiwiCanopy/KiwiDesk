@@ -68,42 +68,6 @@ struct BorderOrderCensusTests {
         )
     }
 
-    /// A float's veil is one more order per float on the switch
-    /// path (#2103 ruling 3): its callers are the manager's sync,
-    /// gated by the ring's own `ordersOverlay`, and its restack
-    /// after the float's reorder event, which the watch delivers
-    /// after the mark's and the ring's, so the veil ends above
-    /// both.
-    @Test("only the ruled sites stack a float veil")
-    func floatVeilOrderSitesAreCensused() throws {
-        let sites = try SourceScan.identifierSites(
-            of: "order(above:",
-            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
-        )
-        #expect(
-            sites.map(\.file.lastPathComponent).sorted() == [
-                "FloatDimManager.swift", "FloatDimManager.swift",
-            ],
-            "found \(sites.map(\.site))"
-        )
-        let wiring = try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent(
-                "Sources/KiwiDeskCore/App/KiwiCore+WindowServer.swift"
-            )
-        ).filter { !$0.isWhitespace }
-        #expect(
-            wiring.contains(
-                "restack:{[weakself]idinself?.floatDims.restack(id)}"
-            )
-        )
-        let floats = try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent(
-                "Sources/KiwiDeskCore/App/KiwiCore+VisionFloats.swift"
-            )
-        )
-        #expect(!floats.contains("shelfStandsDown("))
-    }
-
     /// The watch's restack fan-out orders every overlay of a window,
     /// so a caller beside the reorder event is a round trip per
     /// consumer on the switch path: the float raise's landing is the

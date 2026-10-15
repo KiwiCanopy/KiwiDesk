@@ -99,8 +99,7 @@ final class AppKitVisionPlate: VisionPlateBackend {
 }
 
 /// KiwiVision's look — a behind-window blur under a black dim —
-/// and its fade: the one copy the screen plate and the per-float
-/// panels draw (#2103 ruling 3).
+/// and its fade, the one copy a plate draws (#2103).
 @MainActor
 final class VisionVeil {
     /// The panel's content view; transparent until `fade`.
