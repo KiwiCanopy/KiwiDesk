@@ -10,7 +10,9 @@ public final class WindowServerWatch {
     /// Declaration order IS the fan-out order in every phase: the
     /// mark re-asserts before the ring orders, so the mark stays
     /// above a front ring, and the plate restacks after the ring,
-    /// which it stacks under.
+    /// which it stacks under. KiwiVision's consumer also hears the
+    /// float tier, whose landing re-enters the fan-out for the
+    /// target (`KiwiCore.visionWindowRestacked`).
     enum Consumer: CaseIterable {
         case mark, ring, vision
     }

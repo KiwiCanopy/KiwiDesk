@@ -365,6 +365,17 @@ Obligations:
   joins the WindowServer request under KiwiVision's own consumer,
   so a plate re-stacks with borders off (`KiwiVisionCoreTests` ▸
   `targetWatchedWithoutRings`).
+- **Floats are dimmed by the plate, never by panels of their own**
+  (#2103 owner ruling 2026-10-15, withdrawing ruling 3's per-float
+  veils): a raised float lands directly under the focused window
+  (#2287), so while a plate shows, KiwiVision's consumer also hears
+  the float tier and a float's own reorder event re-stacks the
+  target's overlays through the one watch door, the plate landing
+  above the float at once rather than at the raise's end. Gate it
+  on a shown plate, since each call is a ring and mark order on the
+  switch path (#1925) (`KiwiVisionFloatLandingTests`,
+  `BorderOrderCensusTests` ▸ `watchRestackSitesAreCensused`).
+  Re-adding a per-float panel needs a new ruling.
 - **An overlay that hears WindowServer's per-window events
   connects to the one `WindowServerWatch` under its own
   `Consumer` case** (#2275), whose declaration position is its
@@ -373,8 +384,8 @@ Obligations:
   `SkyLightWindowEvents` door itself; the watch owns the request,
   `isActive` and the one gated bounds read
   (`WindowServerWatchTests` ▸ `phaseOrder`,
-  `WindowServerWatchSeamTests`). A new consumer — the per-float
-  dim panels — rules its position in the change that adds it.
+  `WindowServerWatchSeamTests`). A new consumer rules its
+  position in the change that adds it.
 - **Read the stand-down from the shelf's verdict**, filed once per
   pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a

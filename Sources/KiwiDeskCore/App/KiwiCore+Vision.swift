@@ -128,9 +128,8 @@ extension KiwiCore {
             vision.restack(after: id.raw)
             return
         }
-        guard vision.isOn, floatLayerTargets().contains(id) else {
-            return
-        }
+        // Stood down, the restack would order the ring for nothing.
+        guard vision.hasShownPlates else { return }
         windowServer.restack(WindowID(target))
     }
 

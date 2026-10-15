@@ -54,25 +54,72 @@ struct KiwiVisionFloatLandingTests {
         return (core, plate)
     }
 
-    @Test("a float's landing re-stacks the plate over it at once")
+    /// A ring backend reporting an ordered-in panel and counting
+    /// its orders.
+    private final class CountingRing: BorderOverlayBackend {
+        let orderMode: BorderGeometry.Order
+        var orders = 0
+        init(_ order: BorderGeometry.Order) { orderMode = order }
+        var orderedPanelNumber: CGWindowID? { 4242 }
+        func update(
+            geometry: BorderGeometry,
+            colorHex: String,
+            screen: NSScreen?,
+            room: CGRect?
+        ) {}
+        func order(relativeTo windowNumber: CGWindowID) { orders += 1 }
+        func hide() {}
+    }
+
+    @Test("a float's landing re-stacks the ring and the plate at once")
     func floatLandingRestacksThePlate() {
         let (core, plate) = makeCore()
+        var rings: [CountingRing] = []
+        core.borders.backendFactory = {
+            let ring = CountingRing($0)
+            rings.append(ring)
+            return ring
+        }
+        core.updateBorders()
         core.setKiwiVision(true)
         #expect(core.windowServer.requested(by: .vision).contains(float))
-        let before = plate.orders.count
+        let platesBefore = plate.orders.count
+        let ringsBefore = rings.map(\.orders).reduce(0, +)
         core.windowServer.handle(.reorder, window: float)
-        #expect(plate.orders.count == before + 1)
-        #expect(plate.orders.last == tiled.raw)
+        #expect(plate.orders.count == platesBefore + 1)
+        #expect(plate.orders.last == 4242)
+        #expect(rings.map(\.orders).reduce(0, +) == ringsBefore + 1)
     }
 
     @Test("off, the plate hears no float")
     func offHearsNoFloat() {
-        let (core, plate) = makeCore()
+        let (core, _) = makeCore()
         core.setKiwiVision(true)
         core.setKiwiVision(false)
         #expect(core.windowServer.requested(by: .vision).isEmpty)
+    }
+
+    /// Every plate stood down — fullscreen, a presentation — a
+    /// landing re-stacks nothing: it would order the ring alone.
+    @Test("a stood-down plate takes no landing restack")
+    func standDownTakesNoRestack() {
+        let (core, plate) = makeCore()
+        var rings: [CountingRing] = []
+        core.borders.backendFactory = {
+            let ring = CountingRing($0)
+            rings.append(ring)
+            return ring
+        }
+        core.updateBorders()
+        core.setKiwiVision(true)
+        let displays = Set(core.visionRequest().screens.map(\.display))
+        core.noteVisionStandDown(displays)
+        #expect(!core.vision.hasShownPlates)
         let before = plate.orders.count
+        let ringsBefore = rings.map(\.orders).reduce(0, +)
         core.visionWindowRestacked(float)
         #expect(plate.orders.count == before)
+        #expect(rings.map(\.orders).reduce(0, +) == ringsBefore)
+        #expect(core.windowServer.requested(by: .vision).contains(float))
     }
 }

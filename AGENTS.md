@@ -1556,6 +1556,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 
 Touching `Borders`, `Vision`.
 
+- Floats are dimmed by the plate, never by panels of their own: while a plate
+  shows, a float's landing re-stacks the target's overlays through the one
+  watch door (#2103, `KiwiVisionFloatLandingTests`)
 - A ring stays on its window's Desktop and spans every Desktop only while its
   window is carried, the sticky mark always spanning, and a ring is re-homed
   through `BorderOverlay` only where it stopped spanning or `sync` orders it on
