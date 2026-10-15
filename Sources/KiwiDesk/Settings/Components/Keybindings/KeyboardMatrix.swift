@@ -137,8 +137,9 @@ enum KeyboardMatrix {
         _ hyper: HyperSourceKey?,
         on type: PhysicalType
     ) -> Bool {
-        guard let hyper else { return false }
-        return rows(for: type).joined().contains { $0.source == hyper }
+        rows(for: type).joined().contains {
+            legend(of: $0, hyper: hyper) == ComboSymbols.hyperGlyph
+        }
     }
 
     /// Unique keycodes the board draws — derived from the rows,

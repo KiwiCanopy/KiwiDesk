@@ -142,4 +142,34 @@ struct HyperKeyRowTests {
             )
         }
     }
+
+    /// The surfacing branches a source scan is the only net for
+    /// (gui.md): the board takes the shared legend, and the row
+    /// narrates a chosen key the core has not applied.
+    @Test("the board and the row are wired to their predicates")
+    func wiring() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Keybindings"
+            )
+        let board = SourceScan.stripComments(
+            try String(
+                contentsOf: root.appendingPathComponent(
+                    "KeyboardBoard.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(board.contains("KeyboardMatrix.legend(of: key, hyper:"))
+        let row = SourceScan.stripComments(
+            try String(
+                contentsOf: root.appendingPathComponent(
+                    "HyperKeyRow.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(row.contains("caption(HyperKeyWords.paused)"))
+        #expect(row.contains("model.hyperStatus == .off"))
+    }
 }

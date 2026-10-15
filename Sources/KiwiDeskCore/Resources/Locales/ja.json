@@ -1578,7 +1578,7 @@
   "shortcuts.hyper_key.caption.system_key": "%1$@ は Hyper になり、本来の動作をしなくなりました。KiwiDesk を終了すると元に戻ります。",
   "shortcuts.hyper_key.clear": "Hyper キーをオフにする",
   "shortcuts.hyper_key.failed": "macOS がキーの割り当て変更に応答しなかったため、Hyper は今のところオフのままです。",
-  "shortcuts.hyper_key.help": "Hyper は、どのアプリも使っていない追加の修飾キーです。Hyper だけのショートカットは何とも競合しません。⌘、⌥、⌃ と組み合わせた場合は、同じキーに割り当てられた有効な macOS のショートカットが優先されます。ショートカットの記録とは違い、この行では左右を区別します。右⌘を Hyper にしても、左⌘は⌘のままです。KiwiDesk の実行中は、選んだキーは本来の働きをしなくなります。",
+  "shortcuts.hyper_key.help": "Hyper は、どのアプリも使っていない追加の修飾キーです。Hyper だけのショートカットは何とも競合しません。⌘、⌥、⌃ と組み合わせた場合は、同じキーに割り当てられた有効な macOS のショートカットが優先されます。ショートカットの記録とは違い、この行では左右を区別します。右⌘を Hyper にしても、左⌘は⌘のままです。KiwiDesk がウインドウを管理している間は、選んだキーは本来の働きをしなくなります。",
   "shortcuts.hyper_key.left_command": "左⌘",
   "shortcuts.hyper_key.left_control": "左⌃",
   "shortcuts.hyper_key.left_option": "左⌥",

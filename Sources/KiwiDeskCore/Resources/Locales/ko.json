@@ -1578,7 +1578,7 @@
   "shortcuts.hyper_key.caption.system_key": "%1$@이(가) 이제 Hyper가 되어 원래 동작을 하지 않습니다. KiwiDesk를 종료하면 원래대로 돌아옵니다.",
   "shortcuts.hyper_key.clear": "Hyper 키 끄기",
   "shortcuts.hyper_key.failed": "macOS가 키 다시 매핑에 응답하지 않아 Hyper가 당분간 꺼진 상태로 유지됩니다.",
-  "shortcuts.hyper_key.help": "Hyper는 어떤 앱도 사용하지 않는 추가 보조 키입니다. Hyper만 쓰는 단축키는 절대 충돌하지 않지만, ⌘, ⌥ 또는 ⌃와 함께 쓰면 같은 키에 켜져 있는 macOS 단축키가 여전히 우선합니다. 단축키 기록과 달리 이 행은 왼쪽과 오른쪽을 구분합니다. 오른쪽 ⌘를 Hyper로 지정해도 왼쪽 ⌘는 ⌘로 남습니다. KiwiDesk가 실행되는 동안에는 선택한 키가 원래 기능을 하지 않습니다.",
+  "shortcuts.hyper_key.help": "Hyper는 어떤 앱도 사용하지 않는 추가 보조 키입니다. Hyper만 쓰는 단축키는 절대 충돌하지 않지만, ⌘, ⌥ 또는 ⌃와 함께 쓰면 같은 키에 켜져 있는 macOS 단축키가 여전히 우선합니다. 단축키 기록과 달리 이 행은 왼쪽과 오른쪽을 구분합니다. 오른쪽 ⌘를 Hyper로 지정해도 왼쪽 ⌘는 ⌘로 남습니다. KiwiDesk가 윈도우를 관리하는 동안에는 선택한 키가 원래 기능을 하지 않습니다.",
   "shortcuts.hyper_key.left_command": "왼쪽 ⌘",
   "shortcuts.hyper_key.left_control": "왼쪽 ⌃",
   "shortcuts.hyper_key.left_option": "왼쪽 ⌥",

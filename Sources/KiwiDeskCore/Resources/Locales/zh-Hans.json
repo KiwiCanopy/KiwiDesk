@@ -1578,7 +1578,7 @@
   "shortcuts.hyper_key.caption.system_key": "%1$@ 现在是 Hyper，不再执行它原本的操作。退出 KiwiDesk 后即可恢复。",
   "shortcuts.hyper_key.clear": "关闭 Hyper 键",
   "shortcuts.hyper_key.failed": "macOS 没有响应按键重新映射，因此 Hyper 暂时保持关闭。",
-  "shortcuts.hyper_key.help": "Hyper 是一个没有任何 App 使用的额外修饰键。仅用 Hyper 的快捷键永远不会冲突；与 ⌘、⌥ 或 ⌃ 组合时，相同按键上已启用的 macOS 快捷键仍然优先。与快捷键录制不同，这一行会区分左右：右⌘ 可以作为 Hyper，而左⌘ 仍是 ⌘。KiwiDesk 运行期间，你选择的键将不再执行它原本的功能。",
+  "shortcuts.hyper_key.help": "Hyper 是一个没有任何 App 使用的额外修饰键。仅用 Hyper 的快捷键永远不会冲突；与 ⌘、⌥ 或 ⌃ 组合时，相同按键上已启用的 macOS 快捷键仍然优先。与快捷键录制不同，这一行会区分左右：右⌘ 可以作为 Hyper，而左⌘ 仍是 ⌘。KiwiDesk 管理你的窗口期间，你选择的键将不再执行它原本的功能。",
   "shortcuts.hyper_key.left_command": "左⌘",
   "shortcuts.hyper_key.left_control": "左⌃",
   "shortcuts.hyper_key.left_option": "左⌥",

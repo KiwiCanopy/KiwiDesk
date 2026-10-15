@@ -1578,7 +1578,7 @@
   "shortcuts.hyper_key.caption.system_key": "%1$@ ora è Hyper e non esegue più la propria azione. Uscendo da KiwiDesk, il tasto torna a funzionare come prima.",
   "shortcuts.hyper_key.clear": "Disattiva il tasto Hyper",
   "shortcuts.hyper_key.failed": "macOS non ha risposto alla rimappatura del tasto, quindi per ora Hyper resta disattivato.",
-  "shortcuts.hyper_key.help": "Hyper è un modificatore aggiuntivo che nessuna app usa. Una scorciatoia solo su Hyper non va mai in conflitto; combinata con ⌘, ⌥ o ⌃, una scorciatoia di macOS attiva sugli stessi tasti ha comunque la precedenza. A differenza della registrazione delle scorciatoie, questa riga distingue sinistra e destra: ⌘ Comando destro può essere Hyper mentre ⌘ Comando sinistro resta ⌘. Finché KiwiDesk è in esecuzione, il tasto che scegli smette di svolgere la propria funzione.",
+  "shortcuts.hyper_key.help": "Hyper è un modificatore aggiuntivo che nessuna app usa. Una scorciatoia solo su Hyper non va mai in conflitto; combinata con ⌘, ⌥ o ⌃, una scorciatoia di macOS attiva sugli stessi tasti ha comunque la precedenza. A differenza della registrazione delle scorciatoie, questa riga distingue sinistra e destra: ⌘ Comando destro può essere Hyper mentre ⌘ Comando sinistro resta ⌘. Finché KiwiDesk gestisce le tue finestre, il tasto che scegli smette di svolgere la propria funzione.",
   "shortcuts.hyper_key.left_command": "⌘ Comando sinistro",
   "shortcuts.hyper_key.left_control": "⌃ Ctrl sinistro",
   "shortcuts.hyper_key.left_option": "⌥ Opzione sinistra",

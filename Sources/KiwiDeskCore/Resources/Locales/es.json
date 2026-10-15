@@ -1578,7 +1578,7 @@
   "shortcuts.hyper_key.caption.system_key": "%1$@ es ahora Hyper y deja de realizar su propia acción. Al salir de KiwiDesk, la tecla vuelve a funcionar como antes.",
   "shortcuts.hyper_key.clear": "Desactivar la tecla Hyper",
   "shortcuts.hyper_key.failed": "macOS no respondió a la reasignación de la tecla, así que Hyper sigue desactivado por ahora.",
-  "shortcuts.hyper_key.help": "Hyper es una tecla modificadora adicional que no usa ninguna app. Un atajo solo con Hyper nunca choca; combinado con ⌘, ⌥ o ⌃, un atajo de macOS activado en las mismas teclas sigue teniendo prioridad. A diferencia de la grabación de atajos, esta fila distingue izquierda y derecha: ⌘ Comando derecho puede ser Hyper mientras ⌘ Comando izquierdo sigue siendo ⌘. Mientras KiwiDesk está abierto, la tecla que elijas deja de cumplir su propia función.",
+  "shortcuts.hyper_key.help": "Hyper es una tecla modificadora adicional que no usa ninguna app. Un atajo solo con Hyper nunca choca; combinado con ⌘, ⌥ o ⌃, un atajo de macOS activado en las mismas teclas sigue teniendo prioridad. A diferencia de la grabación de atajos, esta fila distingue izquierda y derecha: ⌘ Comando derecho puede ser Hyper mientras ⌘ Comando izquierdo sigue siendo ⌘. Mientras KiwiDesk gestiona tus ventanas, la tecla que elijas deja de cumplir su propia función.",
   "shortcuts.hyper_key.left_command": "⌘ Comando izquierdo",
   "shortcuts.hyper_key.left_control": "⌃ Control izquierdo",
   "shortcuts.hyper_key.left_option": "⌥ Opción izquierda",

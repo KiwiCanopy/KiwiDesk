@@ -17,8 +17,8 @@ enum HyperKeyWords {
                 + "same keys still wins. Unlike shortcut recording, "
                 + "this row "
                 + "tells left from right: Right ⌘ can be Hyper while "
-                + "Left ⌘ stays ⌘. While KiwiDesk runs, the key you "
-                + "pick stops doing its own job."
+                + "Left ⌘ stays ⌘. While KiwiDesk manages your "
+                + "windows, the key you pick stops doing its own job."
         )
     }
 

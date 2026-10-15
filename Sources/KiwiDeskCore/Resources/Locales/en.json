@@ -1578,7 +1578,7 @@
   "shortcuts.hyper_key.caption.system_key": "%1$@ is now Hyper and stops its own action. Quitting KiwiDesk gives it back.",
   "shortcuts.hyper_key.clear": "Turn the Hyper key off",
   "shortcuts.hyper_key.failed": "macOS did not answer the key remap, so Hyper stays off for now.",
-  "shortcuts.hyper_key.help": "Hyper is an extra modifier key that no app uses. A shortcut on Hyper alone never collides; combined with ⌘, ⌥ or ⌃, an enabled macOS shortcut on the same keys still wins. Unlike shortcut recording, this row tells left from right: Right ⌘ can be Hyper while Left ⌘ stays ⌘. While KiwiDesk runs, the key you pick stops doing its own job.",
+  "shortcuts.hyper_key.help": "Hyper is an extra modifier key that no app uses. A shortcut on Hyper alone never collides; combined with ⌘, ⌥ or ⌃, an enabled macOS shortcut on the same keys still wins. Unlike shortcut recording, this row tells left from right: Right ⌘ can be Hyper while Left ⌘ stays ⌘. While KiwiDesk manages your windows, the key you pick stops doing its own job.",
   "shortcuts.hyper_key.left_command": "Left ⌘",
   "shortcuts.hyper_key.left_control": "Left ⌃",
   "shortcuts.hyper_key.left_option": "Left ⌥",

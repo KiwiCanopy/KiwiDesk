@@ -81,7 +81,9 @@ extension KiwiCore {
     func retireHyperKey() {
         deferred.cancel(.hyperRemap)
         setHyperState(.off)
-        guard appWide.hyperKey != nil else { return }
+        // What was applied, never the wanted key: an off still
+        // owed when the stop cancelled it left the mapping ours.
+        guard hyperRemapHost.readWritten() != nil else { return }
         _ = HyperKeyRemap.apply(nil, on: hyperRemapHost)
     }
 
