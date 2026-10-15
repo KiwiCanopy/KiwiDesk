@@ -15,6 +15,14 @@ struct CLICompletionTests {
         }
     }
 
+    /// How each shim unquotes the word it asks about; bash's is
+    /// driven for real in `ExecTestsCLICompletion`.
+    static let unquotes = [
+        "zsh": "(@Q)",
+        "bash": #"${typed//\\/}"#,
+        "fish": "string unescape",
+    ]
+
     @Test("each shim asks __complete and honours the directive")
     func shimsAsk() throws {
         let typed = [
@@ -32,6 +40,10 @@ struct CLICompletionTests {
             #expect(
                 script.contains(CLICompleter.defaultDirective),
                 "\(shell) ignores the default directive"
+            )
+            #expect(
+                script.contains(Self.unquotes[shell.rawValue] ?? "?"),
+                "\(shell) sends the typed word with its quoting"
             )
             for command in ["focus_space", "subscribe", "load_profile"] {
                 #expect(!script.contains(command), "\(shell): \(command)")

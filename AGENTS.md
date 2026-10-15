@@ -395,8 +395,6 @@ Touching Anywhere in `Sources/KiwiDeskCore`.
   `KiwiCore+Bootstrap`
 - a capture diagnostic logs via `os.Logger` with `privacy: .public`, never
   `NSLog`, which macOS redacts
-- a verb the CLI answers without the app owes no record and joins `CLIRoute`,
-  never shadowing a socket command (#1685, `CLIRouteTests`)
 - a new command owes a record in `Commands/Reference` — a verb a config must
   never call registered `cliOnly`, never into Lua (#930,
   `APIRecordCensusTests`) — whose enum arguments name the TYPE so the values
@@ -1645,6 +1643,8 @@ Touching `Borders`, `Vision`.
 Touching `Sources/KiwiDesk` (the GUI).
 
 - North-star and settled conventions
+- a verb the CLI answers without the app joins `CLIRoute` and owes no record,
+  never shadowing a socket command (#1685, `CLIRouteTests`)
 - grey don't hide — and an `NSMenu` greying a row for its own reason turns
   auto-enabling off — per menu, every nested submenu included — after which
   every row states `isEnabled`, submenu parents too (#802,

@@ -54,4 +54,14 @@ struct CLILiveValuesTests {
         let bundled = core.bundledLooks.map(\.name)
         #expect(Array(names.prefix(bundled.count)) == bundled)
     }
+
+    @Test("look.delete offers saved looks, never a bundled one")
+    func savedLooks() {
+        let core = makeTestCore()
+        let saved = core.execute("look.save", args: [.string("Mine")])
+        #expect(saved.isSuccess, "\(saved.error ?? "")")
+        let names = Self.names(.savedLooks, from: core)
+        #expect(names == ["Mine"])
+        #expect(Self.names(.looks, from: core).contains("Mine"))
+    }
 }

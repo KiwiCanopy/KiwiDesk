@@ -6,7 +6,7 @@ import KiwiDeskCore
 /// request per completion, and nothing when the app does not
 /// answer.
 struct CLILiveValues {
-    enum Source: Equatable {
+    enum Source: CaseIterable, Equatable {
         case spaces
         case windows
         case profiles

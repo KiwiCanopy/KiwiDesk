@@ -174,10 +174,7 @@ struct CLICompleterTests {
 
     @Test("each live source's request is a command the CLI can send")
     func liveRequestsExist() {
-        let sources: [CLILiveValues.Source] = [
-            .spaces, .windows, .profiles, .looks,
-        ]
-        for source in sources {
+        for source in CLILiveValues.Source.allCases {
             let command = CLILiveValues.request(for: source).command
             #expect(
                 CLICompleter.commandNames.contains(command),

@@ -72,6 +72,12 @@ enum CLICompletion {
     /// `watch … --` the next word completes as a command, the rest
     /// as files.
     static let bash = #"""
+        # Inside an open quote readline adds the closing quote;
+        # escaping there would put a backslash in the name.
+        __kiwidesk_quote() {
+          if [[ "$cur" == [\"\']* ]]; then printf '%s' "$1"
+          else printf '%q' "$1"; fi
+        }
         _kiwidesk() {
           local cur="${COMP_WORDS[COMP_CWORD]}" line i
           local typed="${cur#[\"\']}"
@@ -85,11 +91,11 @@ enum CLICompletion {
               local kind=-f
               (( i == COMP_CWORD - 1 )) && kind=-c
               while IFS= read -r line; do
-                COMPREPLY+=("$(printf '%q' "$line")")
+                COMPREPLY+=("$(__kiwidesk_quote "$line")")
               done < <(compgen $kind -- "$typed")
               return
             fi
-            [[ -n "$line" ]] && COMPREPLY+=("$(printf '%q' "$line")")
+            [[ -n "$line" ]] && COMPREPLY+=("$(__kiwidesk_quote "$line")")
           done < <("${COMP_WORDS[0]}" \#(CLICompleter.verb) \#
         "${COMP_WORDS[@]:1:COMP_CWORD-1}" "$typed" 2>/dev/null)
         }
@@ -101,8 +107,9 @@ enum CLICompletion {
     /// `watch … --` the rest completes as a command line of its own.
     static let fish = #"""
         function __kiwidesk_complete
-            set -l tokens (commandline -opc) \#
-        (commandline -ct | string unescape)
+            set -l cur (commandline -ct | string unescape)
+            or set cur (commandline -ct)
+            set -l tokens (commandline -opc) "$cur"
             set -l out ($tokens[1] \#(CLICompleter.verb) $tokens[2..-1] \#
         2>/dev/null)
             if test "$out[1]" = "\#(CLICompleter.defaultDirective)"
