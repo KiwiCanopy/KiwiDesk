@@ -217,7 +217,7 @@ public enum APIReference {
             "set_overflow_style_override",
         ],
         "mouse": [
-            "set_follows_focus"
+            "set_follows_focus", "set_hover_focus",
         ],
         "scroll_gesture": [
             "set_pan", "set_space_step", "set_natural_scrolling",

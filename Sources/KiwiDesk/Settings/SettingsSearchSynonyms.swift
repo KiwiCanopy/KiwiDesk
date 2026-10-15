@@ -142,7 +142,8 @@ enum SettingsSearchSynonyms {
                 "reset", "reset shortcuts", "factory",
                 "original shortcuts", "stock shortcuts",
             ]
-        case .behaviour(.mouseFollowsFocus):
+        // The tilers' name for it (#1869).
+        case .behaviour(.mouseHoverFocus):
             return ["focus follows mouse", "hover focus"]
         case .behaviour(.minWindowSize):
             return ["minimum size"]

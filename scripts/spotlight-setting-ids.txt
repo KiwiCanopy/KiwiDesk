@@ -190,6 +190,7 @@ settings.monocle.newWindowPlacement
 settings.monocle.orientation
 settings.monocle.wrapFocus
 settings.mouse.followsFocus
+settings.mouse.hoverFocus
 settings.mouseResize
 settings.scrolling.anchor
 settings.scrolling.appBar.enabled

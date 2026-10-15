@@ -38,6 +38,11 @@ struct FrameSetReaderCensusTests {
             "a scroll target is revealed once the window sits where "
                 + "it was asked to"
         ),
+        "KiwiCore+HoverFocus.swift": (
+            .issued,
+            "a hover stands down if a focus would move any window "
+                + "from where it was asked to sit (#1869)"
+        ),
         "KiwiCore+Borders.swift": (
             .slots,
             "membership and fallback geometry; rings draw "
