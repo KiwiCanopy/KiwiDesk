@@ -97,20 +97,32 @@ struct FloatRaiseLandingWiringTests {
         #expect(
             restoreSequence.contains("floatRaiseDebt.restoresInFlight -= 1")
         )
-        #expect(
-            restoreSequence.contains("defer { self.runPendingFloatRaise() }")
+        // Ahead of the staleness guard, or a superseded restore
+        // never pays the debt it held up.
+        let pays = restoreSequence.range(
+            of: "defer { self.runPendingFloatRaise() }"
         )
+        let stale = restoreSequence.range(
+            of: "guard generation == self.zOrderRaiseGeneration.value"
+        )
+        #expect(pays != nil)
+        #expect(stale != nil)
+        if let pays, let stale {
+            #expect(pays.lowerBound < stale.lowerBound)
+        }
         // An owed pass drawn with nothing to animate pays both, the
         // restore first, inside the same quiet branch.
         let paysAtRest = [
             (
                 "KiwiCore+Retile.swift",
-                "activeCount==0{runPendingZOrderRestore()"
+                "ifpaying,tiler.animation.activeCount==0{"
+                    + "runPendingZOrderRestore()"
                     + "runPendingFloatRaise()}"
             ),
             (
                 "KiwiCore+MotionCause.swift",
-                "activeCount==0{self.runPendingZOrderRestore()"
+                "ifself.tiler.animation.activeCount==0{"
+                    + "self.runPendingZOrderRestore()"
                     + "self.runPendingFloatRaise()}"
             ),
         ]
