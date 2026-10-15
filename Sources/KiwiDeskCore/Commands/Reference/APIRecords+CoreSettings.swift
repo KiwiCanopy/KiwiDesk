@@ -108,6 +108,16 @@ extension APIReference {
             "Returns a snapshot of Spaces, windows, and "
                 + "screens."
         ),
+        "explain_window": APIRecord(
+            "Explains why a window floats or tiles, its Space and "
+                + "app rules, and what would change them.",
+            .window("window", optional: true)
+        ),
+        "explain_app": APIRecord(
+            "Explains what KiwiDesk knows of an app by bundle id: "
+                + "ignores, processes and windows.",
+            .text("app")
+        ),
         "get_layout_info": APIRecord(
             "Returns diagnostic info for the active Space."
         ),
