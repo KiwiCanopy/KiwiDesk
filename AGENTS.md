@@ -1919,7 +1919,8 @@ Touching `Tests/**`.
 - split suites early
 - generous hang-guards, never tight deadlines (#344)
 - reach the machine only through injected seams (hotkeys #565, menu-bar slots —
-  `MachineTouchTests`, `StatusItemSeamGuardTests`)
+  `MachineTouchTests`, `StatusItemSeamGuardTests`; the live app list, an
+  attach to or frame for another app refused — #2289, `LiveAppListSeamTests`)
 - a change owes a test that reds when it is reverted, and a test whose
   assertions are new or changed owes a `guard-prover` run whatever shape that
   test is — spawned `isolation: "worktree"`, or run alone
