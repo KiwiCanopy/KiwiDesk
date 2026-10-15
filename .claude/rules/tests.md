@@ -710,12 +710,21 @@ The app list every scan, reconcile and heal walks
 (`EventLoop.runningApplications`) is the same class with a frame
 write at the end of it: a suite that marked its loop running and
 loaded a config attached every real app, and the retile resized
-the developer's windows (#2289). Both twins pin the list empty,
-and wrap the applier's element read so a frame aimed at a window
-of another running app is refused and records an issue, whatever
-route found it (`LiveAppListSeamTests`). A suite that wants an
-app states it; a new AX write path outside the frame applier owes
-the same refusal.
+the developer's windows (#2289). Both twins pin the list empty
+and the workspace observers off, and arm two tripwires
+(`TestCoreTripwires.swift`, twinned like `TestCore.swift`): the
+observer factory refuses an attach to another running app, and
+the applier's element read refuses a frame for one, each
+recording an issue (`LiveAppListSeamTests`). Two obligations
+follow. A suite that injects an element does it through
+`tiler.elementProvider`, never by assigning
+`tiler.applier.elementProvider` on a `makeTestCore` core, which
+drops the frame net. And a fixture pid is one no process holds —
+the 900 000 range the newer suites use, above macOS's pid
+ceiling — since the tripwire refuses, and reds, a pid that a
+real app happens to hold on the host. A raise or AX write on an
+element of an app the test never attached passes neither net;
+the pin is what keeps such an element out of a test core.
 `MouseButtonSeamGuardTests` holds each read to its homes AND
 every pin into both twins, a deletion from both being silent
 otherwise; it is a sibling of `MachineTouchTests`

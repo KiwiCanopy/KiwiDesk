@@ -1,6 +1,5 @@
 import AppKit
 import Foundation
-import Testing
 
 @testable import KiwiDeskCore
 
@@ -182,17 +181,11 @@ func makeTestCore(
     core.eventLoop.processIdentity.runs = { _ in true }
     core.eventLoop.processIdentity.isActive = { _ in nil }
     core.eventLoop.processIdentity.appAt = { _ in nil }
-    // Same class (#2289): the app list every scan, reconcile and
-    // heal walks defaults LIVE, so a running loop's config load
-    // attached every real app and the retile resized their
-    // windows. Pin "no app runs"; a suite that wants one states it.
+    // No real app is listed, launched or activated into a test
+    // core (#2289); a suite that wants one states it.
     core.eventLoop.runningApplications = { [] }
-    // The net under every such route: a frame for a window of
-    // another running app is refused, and reds the test.
-    let resolve = core.tiler.applier.elementProvider
-    core.tiler.applier.elementProvider = { id in
-        resolve(id).flatMap(refusingForeignWindow)
-    }
+    core.eventLoop.registersWorkspaceObservers = false
+    armForeignAppTripwires(core)
     // Same class, sixth time (#1146): the compositor reads behind
     // the gone classifier and the away ledger default LIVE, and
     // a fixture id can be a real CGWindowID on the host — one
@@ -319,21 +312,6 @@ func makeTestCore(
         return frame
     }
     return core
-}
-
-/// `makeTestCore`'s tripwire (#2289): nil, with an issue, for an
-/// element owned by another running app, which no test may move.
-@MainActor private func refusingForeignWindow(
-    _ element: AXUIElement
-) -> AXUIElement? {
-    var pid: pid_t = 0
-    guard AXUIElementGetPid(element, &pid) == .success,
-        pid != getpid(),
-        let app = NSRunningApplication(processIdentifier: pid)
-    else { return element }
-    let name = app.bundleIdentifier ?? "pid \(pid)"
-    Issue.record("a test reached a real window of \(name) (#2289)")
-    return nil
 }
 
 /// `makeTestCore`'s per-process memo of the screen list.

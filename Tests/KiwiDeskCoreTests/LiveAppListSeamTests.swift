@@ -5,13 +5,9 @@ import os
 
 @testable import KiwiDeskCore
 
-/// A test run must never move the developer's real windows
-/// (#2289). The app list every scan, reconcile and heal walks
-/// defaulted LIVE in `makeTestCore`, so a suite that marked its
-/// loop running and loaded a config attached every real app and
-/// the retile resized their windows. Both twins pin the list
-/// empty, and refuse — with an issue — any frame aimed at a
-/// window of another running app, whatever route found it.
+/// A test core lists no real app, and its tripwires refuse, with
+/// an issue, any attach to or frame for another running app
+/// (#2289); a fixture's unused pid passes both.
 @MainActor
 @Suite("Live app list seam (#2289)")
 struct LiveAppListSeamTests {
@@ -21,20 +17,31 @@ struct LiveAppListSeamTests {
         var total: Int { count.withLock { $0 } }
     }
 
-    private func counting(_ writes: Writes) -> FrameWriter {
-        FrameWriter(
+    private static let frame = CGRect(x: 0, y: 0, width: 400, height: 300)
+
+    /// A regular app the host runs, which no test may touch.
+    nonisolated static var foreignApp: NSRunningApplication? {
+        NSWorkspace.shared.runningApplications.first {
+            $0.processIdentifier > 0
+                && $0.processIdentifier != getpid()
+                && $0.activationPolicy == .regular
+        }
+    }
+
+    /// A core whose frames for `pid` land in `writes`.
+    private func core(
+        framing pid: pid_t,
+        into writes: Writes
+    ) -> KiwiCore {
+        let core = makeTestCore()
+        core.tiler.applier.writer = FrameWriter(
             setFrame: { _, _ in writes.add() },
             setPosition: { _, _ in writes.add() },
             writeEUI: { _, _ in }
         )
-    }
-
-    /// Another app the host runs, which a frame must never reach.
-    nonisolated static var foreignPID: pid_t? {
-        NSWorkspace.shared.runningApplications.first {
-            $0.processIdentifier > 0
-                && $0.processIdentifier != getpid()
-        }?.processIdentifier
+        let element = AXUIElementCreateApplication(pid)
+        core.tiler.elementProvider = { _ in element }
+        return core
     }
 
     @Test("the test core lists no running app")
@@ -54,45 +61,49 @@ struct LiveAppListSeamTests {
     }
 
     @Test(
-        "a frame for another app's window is refused",
-        .enabled(if: LiveAppListSeamTests.foreignPID != nil)
+        "an attach to another app is refused",
+        .enabled(if: LiveAppListSeamTests.foreignApp != nil)
     )
-    func foreignFrameRefused() throws {
-        let pid = try #require(Self.foreignPID)
+    func foreignAttachRefused() throws {
+        let app = try #require(Self.foreignApp)
         let core = makeTestCore()
-        let writes = Writes()
-        core.tiler.applier.writer = counting(writes)
-        let element = AXUIElementCreateApplication(pid)
-        core.tiler.elementProvider = { _ in element }
+        core.eventLoop.isRunning = true
         withKnownIssue {
-            core.tiler.applier.apply(
-                WindowID(1),
-                CGRect(x: 0, y: 0, width: 400, height: 300),
-                setSize: true
+            core.eventLoop.attach(
+                pid: app.processIdentifier,
+                activationPolicy: .regular,
+                ref: AppRef(bundleID: "app.test.foreign", name: "Foreign"),
+                scanWindowsAtAttach: false
             )
         }
+        #expect(core.eventLoop.observers.isEmpty)
+    }
+
+    @Test(
+        "a frame for another app's window is refused",
+        .enabled(if: LiveAppListSeamTests.foreignApp != nil)
+    )
+    func foreignFrameRefused() throws {
+        let pid = try #require(Self.foreignApp).processIdentifier
+        let writes = Writes()
+        let core = core(framing: pid, into: writes)
+        withKnownIssue {
+            core.tiler.applier.apply(WindowID(1), Self.frame, setSize: true)
+        }
+        // The set would run on the app's own queue: drain it.
+        core.tiler.applier.queue(for: pid).sync {}
         #expect(writes.total == 0)
     }
 
-    /// The control: a fixture element names no running process,
-    /// so its frame is written as before.
+    /// The control: a fixture pid names no running process, so
+    /// its frame is written as before.
     @Test("a fixture window's frame is still written")
-    func fixtureFrameWritten() async {
-        let core = makeTestCore()
+    func fixtureFrameWritten() {
+        let pid: pid_t = 902_289
         let writes = Writes()
-        core.tiler.applier.writer = counting(writes)
-        let element = AXUIElementCreateApplication(902_289)
-        core.tiler.elementProvider = { _ in element }
-        core.tiler.applier.apply(
-            WindowID(1),
-            CGRect(x: 0, y: 0, width: 400, height: 300),
-            setSize: true
-        )
-        // Generous hang-guard (#344): the set runs on the app's
-        // own queue.
-        for _ in 0..<500 where writes.total == 0 {
-            try? await Task.sleep(for: .milliseconds(10))
-        }
+        let core = core(framing: pid, into: writes)
+        core.tiler.applier.apply(WindowID(1), Self.frame, setSize: true)
+        core.tiler.applier.queue(for: pid).sync {}
         #expect(writes.total == 1)
     }
 }
