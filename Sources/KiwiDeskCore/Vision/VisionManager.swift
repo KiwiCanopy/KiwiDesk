@@ -29,6 +29,14 @@ public final class VisionManager {
         /// Whether the plate blurs what it covers: the user's
         /// switch, stood down under Reduce transparency.
         var blur: Bool
+        /// Whether the wallpaper stays clear, so a plate draws
+        /// only over `windows` (#2103 ruling 17).
+        var clearWallpaper = false
+        /// The windows below the plates, AppKit global frames;
+        /// read only while `clearWallpaper` holds.
+        var windows: [CGRect] = []
+        /// The corner radius each window's shape takes.
+        var cornerRadius: CGFloat = 0
     }
 
     /// Whether the mode is on.
@@ -45,6 +53,9 @@ public final class VisionManager {
     /// every order is
     /// a WindowServer round trip on the switch path (#1925).
     private var stackedUnder: [DisplayID: CGWindowID] = [:]
+    /// The mask each plate last took, so a pass that leaves it
+    /// alone sets nothing.
+    private var shapes: [DisplayID: CGPath?] = [:]
     /// The window the plates keep clear, as the last sync read it.
     private(set) var target: CGWindowID?
     /// What the plates stack under, as the last sync read it: the
@@ -55,6 +66,24 @@ public final class VisionManager {
     private(set) var standDown: Set<DisplayID> = []
     /// The Reduce Motion read the fades name (borders.md).
     var reduceMotion: @MainActor () -> Bool = { BarMotion.isReduced }
+    /// The one WindowServer list read a mask takes; both
+    /// `makeTestCore` twins pin it empty.
+    var listWindows: @MainActor () -> [VisionListedWindow] = {
+        VisionWindowList.read()
+    }
+    /// The windows the last list read found, nil until a mask
+    /// needs it and again once none does.
+    private(set) var listed: [VisionListedWindow]?
+
+    /// Re-reads the WindowServer list where `refresh` asks or
+    /// nothing is cached, and returns it.
+    func listedWindows(refresh: Bool) -> [VisionListedWindow] {
+        if refresh || listed == nil { listed = listWindows() }
+        return listed ?? []
+    }
+
+    /// Drops the cached list: no mask reads it.
+    func forgetListedWindows() { listed = nil }
     #if DEBUG
         /// Test-only: builds plate backends. Every test core sets
         /// it to the inert plate, so a real panel needs its own
@@ -86,6 +115,7 @@ public final class VisionManager {
             plate.hide(reduceMotion: true)
             plates[display] = nil
             stackedUnder[display] = nil
+            shapes[display] = nil
         }
         target = request.target
         below = request.target.map { request.below ?? $0 }
@@ -115,6 +145,7 @@ public final class VisionManager {
                 dim: request.dim,
                 blur: request.blur
             )
+            reshape(plate, on: screen, request)
             if BorderManager.ordersOverlay(
                 reassert: reassert,
                 needsOrder: stackedUnder[display] != target,
@@ -125,6 +156,24 @@ public final class VisionManager {
             }
             plate.show(reduceMotion: motion)
         }
+    }
+
+    /// Masks `plate` to what `request` shows on `screen`, only
+    /// where that changed. Never orders (ruling 21).
+    private func reshape(
+        _ plate: any VisionPlateBackend,
+        on screen: (display: DisplayID, frame: CGRect),
+        _ request: Request
+    ) {
+        let shape = VisionMask.path(
+            screen: screen.frame,
+            clearWallpaper: request.clearWallpaper,
+            windows: request.windows,
+            cornerRadius: request.cornerRadius
+        )
+        guard shapes[screen.display] != .some(shape) else { return }
+        shapes[screen.display] = .some(shape)
+        plate.reshape(shape)
     }
 
     /// Re-stacks every shown plate after the target's reorder
@@ -145,6 +194,7 @@ public final class VisionManager {
         for plate in plates.values { plate.hide(reduceMotion: true) }
         plates = [:]
         stackedUnder = [:]
+        shapes = [:]
         target = nil
         below = nil
     }

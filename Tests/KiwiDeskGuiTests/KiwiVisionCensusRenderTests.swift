@@ -54,6 +54,64 @@ struct KiwiVisionCensusRenderTests {
         #expect(
             KiwiVisionRowOrder.appearance == [.kiwiVision(.appearance)]
         )
+        #expect(KiwiVisionRowOrder.clear == [.kiwiVision(.clearWallpaper)])
+    }
+
+    /// Stays clear sits between Dim and blur and System appearance
+    /// (#2103 ruling 18), and its card walks its list.
+    @Test("the Stays clear card walks its list between the others")
+    func clearCardWiring() throws {
+        let section = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Sections/KiwiVisionSection.swift"
+        )
+        let levels = try #require(section.range(of: "KiwiVisionLevelsCard("))
+        let clear = try #require(section.range(of: "KiwiVisionClearCard("))
+        let look = try #require(
+            section.range(of: "KiwiVisionAppearanceCard(")
+        )
+        #expect(levels.lowerBound < clear.lowerBound)
+        #expect(clear.lowerBound < look.lowerBound)
+        let card = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/KiwiVision/"
+                + "KiwiVisionClearCard.swift"
+        )
+        #expect(
+            card.contains("ForEach(KiwiVisionRowOrder.clear,id:\\.id){keyin")
+        )
+        #expect(
+            card.contains("case.kiwiVision(.clearWallpaper):wallpaperRow")
+        )
+    }
+
+    /// With the wallpaper clear the caption and the spoken label
+    /// say so, and the picture veils each hazed window instead.
+    @Test("the caption names a clear wallpaper")
+    @MainActor func captionNamesTheWallpaper() throws {
+        LocalizationManager.shared.select("en")
+        let both = KiwiVisionEffect(dims: true, blurs: true, windowsOnly: true)
+        #expect(both.caption.contains("wallpaper stays clear"))
+        #expect(both.caption.contains("dimmed and blurred"))
+        #expect(both.spoken(dimPercent: 60).hasSuffix("60%"))
+        #expect(
+            KiwiVisionEffect(dims: true, blurs: false, windowsOnly: true)
+                .caption.contains("are dimmed;")
+        )
+        #expect(
+            KiwiVisionEffect(dims: false, blurs: true, windowsOnly: true)
+                .caption.contains("are blurred;")
+        )
+        let none = KiwiVisionEffect(
+            dims: false,
+            blurs: false,
+            windowsOnly: true
+        )
+        #expect(none.caption.contains("changes nothing"))
+        let scene = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/KiwiVision/"
+                + "KiwiVisionScene.swift"
+        )
+        #expect(scene.contains("visionVeil.opacity(windowsOnly?0:veil)"))
+        #expect(scene.contains("if!focused,windowsOnly{"))
     }
 
     /// Reduce transparency greys the levels card as a unit, the
@@ -177,7 +235,9 @@ struct KiwiVisionCensusRenderTests {
                 + "KiwiVisionScene.swift"
         )
         let hazed = try #require(scene.range(of: "grid(focusedLayer:false)"))
-        let veil = try #require(scene.range(of: "visionVeil.opacity(veil)"))
+        let veil = try #require(
+            scene.range(of: "visionVeil.opacity(windowsOnly?0:veil)")
+        )
         let clear = try #require(scene.range(of: "grid(focusedLayer:true)"))
         #expect(hazed.lowerBound < veil.lowerBound)
         #expect(veil.lowerBound < clear.lowerBound)

@@ -17,14 +17,17 @@ struct KiwiVisionPanelPreview: View {
         let _ = reduceTransparency
         let dim = model.appWide.visionDim
         let blurs = model.core.kiwiVisionDrawsBlur
+        let windowsOnly = model.appWide.visionClearWallpaper
         let effect = KiwiVisionEffect(
             dims: VisionPlateDim.opacity(forDim: dim / 100) > 0,
-            blurs: blurs
+            blurs: blurs,
+            windowsOnly: windowsOnly
         )
         VStack(alignment: .leading, spacing: 8) {
             KiwiVisionScene(
                 dimPercent: dim,
                 blurs: blurs,
+                windowsOnly: windowsOnly,
                 darkWindows: darkWindows,
                 settings: model.config.settings
             )
@@ -54,15 +57,18 @@ struct KiwiVisionPanelPreview: View {
 }
 
 /// What the picture shows at the running values; the caption and
-/// the spoken label read the same two facts.
+/// the spoken label read the same three facts.
 @MainActor
 struct KiwiVisionEffect: Equatable {
     var dims: Bool
     var blurs: Bool
+    /// Whether the wallpaper stays clear (#2103 ruling 17).
+    var windowsOnly = false
 
     /// Each state's whole caption is one key, so no locale has
     /// to join two sentences.
     var caption: String {
+        if windowsOnly, let caption = windowsCaption { return caption }
         switch (dims, blurs) {
         case (true, true):
             return L(
@@ -91,9 +97,44 @@ struct KiwiVisionEffect: Equatable {
         }
     }
 
+    /// The caption with the wallpaper clear; nil where nothing
+    /// changes, which reads the same either way.
+    private var windowsCaption: String? {
+        switch (dims, blurs) {
+        case (true, true):
+            return L(
+                "kiwivision.preview.caption.windows.dim_blur",
+                "The windows behind the focused one are dimmed and "
+                    + "blurred; the wallpaper stays clear. Focus "
+                    + "another window and it becomes the clear one."
+            )
+        case (true, false):
+            return L(
+                "kiwivision.preview.caption.windows.dim",
+                "The windows behind the focused one are dimmed; the "
+                    + "wallpaper stays clear. Focus another window and "
+                    + "it becomes the clear one."
+            )
+        case (false, true):
+            return L(
+                "kiwivision.preview.caption.windows.blur",
+                "The windows behind the focused one are blurred; the "
+                    + "wallpaper stays clear. Focus another window and "
+                    + "it becomes the clear one."
+            )
+        case (false, false):
+            return nil
+        }
+    }
+
     /// One VoiceOver element, the number last (localization.md).
     func spoken(dimPercent: Double) -> String {
         let dim = SettingsValueReadout.percent(dimPercent / 100)
+        if windowsOnly,
+            let spoken = windowsSpoken(dim: dim)
+        {
+            return spoken
+        }
         switch (dims, blurs) {
         case (true, true):
             return L(
@@ -123,6 +164,41 @@ struct KiwiVisionEffect: Equatable {
                 "kiwivision.preview.ax.none",
                 "KiwiVision preview: nothing changes at these settings."
             )
+        }
+    }
+
+    /// The spoken label with the wallpaper clear; nil where
+    /// nothing changes.
+    private func windowsSpoken(dim: String) -> String? {
+        switch (dims, blurs) {
+        case (true, true):
+            return L(
+                "kiwivision.preview.ax.windows.dim_blur",
+                "KiwiVision preview: the windows behind the focused "
+                    + "one are dimmed and blurred and the wallpaper "
+                    + "stays clear; focus another window and it "
+                    + "becomes the clear one. Dim: %1$@",
+                dim
+            )
+        case (true, false):
+            return L(
+                "kiwivision.preview.ax.windows.dim",
+                "KiwiVision preview: the windows behind the focused "
+                    + "one are dimmed and the wallpaper stays clear; "
+                    + "focus another window and it becomes the clear "
+                    + "one. Dim: %1$@",
+                dim
+            )
+        case (false, true):
+            return L(
+                "kiwivision.preview.ax.windows.blur",
+                "KiwiVision preview: the windows behind the focused "
+                    + "one are blurred and the wallpaper stays clear; "
+                    + "focus another window and it becomes the clear "
+                    + "one."
+            )
+        case (false, false):
+            return nil
         }
     }
 }

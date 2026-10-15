@@ -3712,11 +3712,13 @@ border.fit_gaps(6)  -- leave 6 pt after the reach: outer 16,
 ## KiwiVision
 
 KiwiVision keeps the focused window clear and dims every screen
-around it, the wallpaper included; the menu bar, the Dock and
-KiwiShelf stay clear. It is off at every launch.
+around it, the wallpaper included unless `set_clear_wallpaper`
+keeps it clear; the menu bar, the Dock and KiwiShelf stay clear.
+It is off at every launch.
 
 Its settings are app-wide: they are stored in `gui.json` as the
-`kiwivision` group (`dim`, `blur`, `appearance`), no profile
+`kiwivision` group (`dim`, `blur`, `appearance`,
+`clear_wallpaper`), no profile
 carries them, and loading a profile never changes them. Their GUI
 twin is Settings ▸ **KiwiVision**. The `set_*` verbs below change
 the running value only, never `gui.json`; in a Lua-owned setup,
@@ -3771,12 +3773,22 @@ meantime. If KiwiDesk quits or crashes while it is on, the next
 start switches back. Automatic (light by day, dark at night) is
 turned back on where it was on.
 
+### kiwivision.set_clear_wallpaper
+
+**Expects:** `true` or `false`. Default `false`.
+
+**Does:** leaves the wallpaper clear, so KiwiVision dims and blurs
+only the windows behind the focused one; the gaps between them stay
+clear too. A window another app opens or moves joins the haze when
+the next layout pass settles.
+
 **Example:**
 
 ```lua
 kiwivision.set_dim(30)
 kiwivision.set_blur(false)
 kiwivision.set_appearance("dark")
+kiwivision.set_clear_wallpaper(true)
 ```
 :::
 

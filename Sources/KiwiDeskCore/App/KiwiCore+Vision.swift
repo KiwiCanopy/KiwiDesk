@@ -46,6 +46,11 @@ extension KiwiCore {
             setAppWide(persisting: false) {
                 $0.visionAppearance = appearance
             }
+        case "kiwivision.set_clear_wallpaper":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            setAppWide(persisting: false) { $0.visionClearWallpaper = on }
         default:
             return .fail("unknown command: \(command)")
         }
@@ -83,9 +88,10 @@ extension KiwiCore {
             vision.isOn || vision.hasShownPlates
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
-        var request = visionRequest()
+        var request = visionRequest(refreshingList: reassertOrder)
         // Watched whether or not a ring or a mark asks (#2103), the
         // float tier too: a float landing re-stacks the plate.
+        if !request.clearWallpaper { vision.forgetListedWindows() }
         windowServer.request(
             vision.isOn && request.target != nil
                 ? Set(floatLayerTargets()).union(
@@ -143,7 +149,9 @@ extension KiwiCore {
     /// ring's focused window, or an own key window that is not it
     /// — a dialog, Sparkle's alert — which stays clear the way
     /// it stands the focused ring down (#933).
-    func visionRequest() -> VisionManager.Request {
+    func visionRequest(
+        refreshingList: Bool = false
+    ) -> VisionManager.Request {
         let anchor = activeSpace.flatMap {
             state.focusAnchor(
                 of: $0,
@@ -160,6 +168,7 @@ extension KiwiCore {
         let screens = ScreenList.all.compactMap { screen in
             screen.screenNumber.map { (DisplayID($0), screen.frame) }
         }
+        let clearWallpaper = vision.isOn && appWide.visionClearWallpaper
         return VisionManager.Request(
             screens: screens,
             target: target,
@@ -167,7 +176,33 @@ extension KiwiCore {
             standDown: vision.standDown,
             tracked: windowServer.isActive,
             dim: CGFloat(appWide.visionDim / 100),
-            blur: kiwiVisionDrawsBlur
+            blur: kiwiVisionDrawsBlur,
+            clearWallpaper: clearWallpaper,
+            windows: clearWallpaper
+                ? visionMaskWindows(refreshingList: refreshingList) : [],
+            cornerRadius: GeometryUtils.systemWindowCornerRadius
         )
+    }
+
+    /// Every window below the plates, AppKit global frames: the
+    /// shown Spaces' members at the frame the engine last sent —
+    /// so a pass's mask lands with its windows rather than their
+    /// echoes — and every other app's window from the one list
+    /// read, which a settle pass refreshes (#2103 ruling 21).
+    func visionMaskWindows(refreshingList: Bool) -> [CGRect] {
+        var frames: [CGRect] = []
+        for placement in tiler.visiblePlacements(state: state) {
+            for id in state.effectiveMembers(of: placement.space) {
+                guard let window = state.windows[id], !window.isFullscreen
+                else { continue }
+                frames.append(tiler.commandedFrame(of: id) ?? window.frame)
+            }
+        }
+        for listed in vision.listedWindows(refresh: refreshingList)
+        where state.windows[WindowID(listed.number)] == nil {
+            frames.append(listed.frame)
+        }
+        let height = GeometryUtils.primaryHeight
+        return frames.map { GeometryUtils.flip($0, primaryHeight: height) }
     }
 }

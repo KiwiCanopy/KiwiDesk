@@ -19,6 +19,11 @@ import AppKit
             self.dim = dim
             self.blur = blur
         }
+        /// Test-only: every mask handed in, nil for the whole
+        /// screen.
+        private(set) var shapes: [CGPath?] = []
+
+        func reshape(_ path: CGPath?) { shapes.append(path) }
         func order(below window: CGWindowID) { orders.append(window) }
         func show(reduceMotion: Bool) { isShown = true }
         func hide(reduceMotion: Bool) { isShown = false }

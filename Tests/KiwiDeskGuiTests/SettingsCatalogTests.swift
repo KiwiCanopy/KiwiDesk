@@ -138,7 +138,8 @@ struct SettingsCatalogTests {
         // 147 since #1870: Shortcuts' Hyper key card.
         // 149 since #1685: the AI page's migration and app rules
         // prompt rows.
-        #expect(allEntries.count == 149)
+        // 151 since #2103 v2: KiwiVision's Stays clear card and row.
+        #expect(allEntries.count == 151)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

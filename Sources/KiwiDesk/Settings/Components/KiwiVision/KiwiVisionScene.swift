@@ -6,11 +6,15 @@ import SwiftUI
 /// Core's — the veil at the plate's own dim mapping, the softening
 /// only where the plate's blur door draws, the windows in the
 /// appearance the mode will show. The focused window and the menu
-/// bar sit above the veil, as the plate sits under the ring.
+/// bar sit above the veil, as the plate sits under the ring. With
+/// the wallpaper clear the veil goes on each hazed window instead,
+/// so the desk and the gaps stay bright, as the plate's mask does.
 struct KiwiVisionScene: View {
     /// The dim in percent, as stored.
     let dimPercent: Double
     let blurs: Bool
+    /// Whether the wallpaper stays clear (#2103 ruling 17).
+    var windowsOnly = false
     let darkWindows: Bool
     let settings: TilingSettings
 
@@ -29,7 +33,7 @@ struct KiwiVisionScene: View {
         ZStack(alignment: .top) {
             palette.base
             grid(focusedLayer: false)
-            SettingsTheme.visionVeil.opacity(veil)
+            SettingsTheme.visionVeil.opacity(windowsOnly ? 0 : veil)
             grid(focusedLayer: true)
             Rectangle()
                 .fill(palette.ink.opacity(0.25))
@@ -78,6 +82,10 @@ struct KiwiVisionScene: View {
         .environment(\.colorScheme, darkWindows ? .dark : .light)
         if focused == layer {
             window.overlay {
+                if !focused, windowsOnly {
+                    SettingsTheme.visionVeil.opacity(veil)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
                 if focused, settings.borderStyle.enabled {
                     RoundedRectangle(cornerRadius: 4).strokeBorder(
                         palette.accent,

@@ -100,7 +100,7 @@ struct GateReasonPlacementTests {
                 // Lua-owned config, a cause shown nowhere on its
                 // page, so each draws its sentence.
                 .kiwiVision(.dim), .kiwiVision(.blur),
-                .kiwiVision(.appearance),
+                .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
             ]
         )
     }

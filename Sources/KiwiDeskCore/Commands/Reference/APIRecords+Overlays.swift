@@ -218,6 +218,11 @@ extension APIReference {
                 + "while on; unchanged by default.",
             .choice("appearance", VisionAppearance.self)
         ),
+        "set_clear_wallpaper": APIRecord(
+            "Leaves the wallpaper clear so KiwiVision dims only the "
+                + "windows; off by default.",
+            .boolean("enabled")
+        ),
     ]
 
     static let kiwihubRecords: [String: APIRecord] = [

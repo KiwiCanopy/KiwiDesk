@@ -420,6 +420,19 @@ Obligations:
   home only once a switch was taken; both `makeTestCore` twins
   pin the inert machine (`VisionAppearanceSeamTests`,
   `KiwiVisionAppearanceTests`).
+- **A plate's mask never orders, and its window list has one
+  seam** (#2103 ruling 21). A mask is a `CAShapeLayer` on the
+  veil's content, which clips the blur with the dim (v2 probe P8);
+  it follows every pass, so `VisionManager`'s reshape sets a path
+  only where it changed and calls no `order(below:` — a mask
+  routed through the order gate would cost a WindowServer round
+  trip per pass (`VisionMaskPlateTests` ▸ `reshapeOnlyOnChange`).
+  The windows it reads are the shown Spaces' members at the frame
+  the engine last sent, plus other apps' windows from the one
+  `VisionManager.listWindows` read, taken at a settle pass or with
+  nothing cached and never on the switch path, pinned empty in
+  both `makeTestCore` twins (`KiwiVisionClearWallpaperTests` ▸
+  `listReadCadence`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

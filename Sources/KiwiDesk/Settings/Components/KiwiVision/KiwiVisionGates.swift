@@ -16,7 +16,7 @@ struct KiwiVisionGates {
     /// Runtime-gated keys this resolver answers directly.
     static let resolved: Set<SettingKey> = [
         .kiwiVision(.dim), .kiwiVision(.blur),
-        .kiwiVision(.appearance),
+        .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
     ]
 
     func inertReason(for key: SettingKey) -> InertReason? {

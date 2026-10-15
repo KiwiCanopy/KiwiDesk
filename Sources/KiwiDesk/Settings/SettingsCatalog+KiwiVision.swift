@@ -1,6 +1,6 @@
 import KiwiDeskCore
 
-/// KiwiVision page declarations (#2103): two cards and one
+/// KiwiVision page declarations (#2103): three cards and one
 /// control per census row, keyed on the row's label key (#1250).
 struct KiwiVisionControls: Sendable {
     let levelsCard = SettingsControl(
@@ -9,6 +9,14 @@ struct KiwiVisionControls: Sendable {
     )
     let dim = SettingsControl("kiwivision.dim", "Dim")
     let blur = SettingsControl("kiwivision.blur", "Blur")
+    let clearCard = SettingsControl(
+        "kiwivision.section.clear",
+        "Stays clear"
+    )
+    let clearWallpaper = SettingsControl(
+        "kiwivision.clear_wallpaper",
+        "Wallpaper"
+    )
     let appearanceCard = SettingsControl(
         "kiwivision.section.appearance",
         "System appearance"
