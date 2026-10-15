@@ -7,6 +7,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case kiwiVisionAppearance
     /// KiwiVision ▸ Stays clear (#2103 ruling 18).
     case kiwiVisionClear
+    /// KiwiVision ▸ Never dimmed (#2103 rulings 26–27).
+    case kiwiVisionNeverDimmed
     /// AI ▸ Set up (#1685).
     case aiSetup
     /// AI ▸ Ready-made prompts (#1685).
@@ -96,6 +98,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .runtime(.reduceTransparency)
         case .accent, .advanced, .aiSetup, .readyMadePrompts,
             .kiwiVisionAppearance, .kiwiVisionClear,
+            .kiwiVisionNeverDimmed,
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .grid, .kiwiHub,

@@ -230,6 +230,10 @@ GLOSSARY = {
     "amethyst",
     "rectangle",
     "yabai",
+    # The status bar KiwiVision's never-dimmed list names as its
+    # example (#2103), the same class: a proper noun no locale
+    # translates.
+    "sketchybar",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
     # The one edge both bars sit on (#1517): a product name, kept

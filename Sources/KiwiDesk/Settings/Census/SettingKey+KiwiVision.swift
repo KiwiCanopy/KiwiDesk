@@ -8,6 +8,7 @@ enum KiwiVisionKey: String, CaseIterable, Hashable {
     case appearance = "appWide.visionAppearance"
     case clearWallpaper = "appWide.visionClearWallpaper"
     case clearApp = "appWide.visionClearApp"
+    case neverDimmed = "appWide.visionNeverDimmed"
 }
 
 extension KiwiVisionKey {
@@ -42,6 +43,13 @@ extension KiwiVisionKey {
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
+        case .neverDimmed:
+            return .row(
+                .kiwiVision,
+                .kiwiVisionNeverDimmed,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
         }
     }
 
@@ -65,6 +73,11 @@ extension KiwiVisionKey {
             return .text(
                 "kiwivision.clear_app",
                 help: "kiwivision.clear_app.help"
+            )
+        case .neverDimmed:
+            return .text(
+                "kiwivision.never_dimmed",
+                help: "kiwivision.never_dimmed.help"
             )
         }
     }

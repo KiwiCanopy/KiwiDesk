@@ -43,6 +43,11 @@ public struct AppWideSettings: Equatable, Sendable {
     /// clear, not only the focused one (`kiwivision.clear_app`,
     /// #2103 ruling 17). OFF by default: v1's one clear window.
     public var visionClearApp = false
+    /// The apps whose windows KiwiVision never dims or blurs, each
+    /// a lowercased bundle id or, for a process with none, its name
+    /// (`kiwivision.never_dimmed`, #2103 ruling 26). Empty by
+    /// default.
+    public var visionNeverDimmed: [String] = []
     /// The key turned into the Hyper modifier, nil for none
     /// (`hyper.key`, #1870). Per install, never per profile: it
     /// remaps a physical key, and a profile can change on a swipe.
@@ -60,6 +65,21 @@ public struct AppWideSettings: Equatable, Sendable {
     /// The dim's band in percent: the verb, the decode and the
     /// Settings stepper all read it.
     public static let visionDimRange: ClosedRange<Double> = 0...100
+
+    /// A Never dimmed list as stored: each entry trimmed and
+    /// lowercased — a bundle id matches as `AppRef` lowercases it,
+    /// a process name likewise — empty and repeated ones dropped.
+    public static func neverDimmedEntries(_ raw: [String]) -> [String] {
+        var seen: Set<String> = []
+        return raw.compactMap { entry in
+            let key = entry.trimmingCharacters(in: .whitespaces)
+                .lowercased()
+            guard !key.isEmpty, seen.insert(key).inserted else {
+                return nil
+            }
+            return key
+        }
+    }
 
     /// `raw` clamped into `visionDimRange`, as `clampedDepth`.
     static func clampedDim(_ raw: Double) -> Double {
@@ -148,11 +168,13 @@ extension AppWideSettings {
         var appearance: VisionAppearance?
         var clearWallpaper: Bool?
         var clearApp: Bool?
+        var neverDimmed: [String]?
 
         enum CodingKeys: String, CodingKey {
             case dim, blur, appearance
             case clearWallpaper = "clear_wallpaper"
             case clearApp = "clear_app"
+            case neverDimmed = "never_dimmed"
         }
     }
 
@@ -185,6 +207,9 @@ extension AppWideSettings {
             visionClearWallpaper = clear
         }
         if let clear = vision?.clearApp { visionClearApp = clear }
+        if let apps = vision?.neverDimmed {
+            visionNeverDimmed = Self.neverDimmedEntries(apps)
+        }
         if let sound = refusal?.sound { refusalSound = sound }
         if let depth = quit?.gridTargetDepth {
             quitGridTargetDepth = Self.clampedDepth(depth)
@@ -206,7 +231,8 @@ extension AppWideSettings {
             blur: visionBlur,
             appearance: visionAppearance,
             clearWallpaper: visionClearWallpaper,
-            clearApp: visionClearApp
+            clearApp: visionClearApp,
+            neverDimmed: visionNeverDimmed
         )
     }
 }

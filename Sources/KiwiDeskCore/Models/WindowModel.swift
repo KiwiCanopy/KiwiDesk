@@ -27,6 +27,10 @@ public struct AppRef: Sendable, Equatable {
         self.bundleID = bundleID.map { $0.lowercased() }
         self.name = name
     }
+
+    /// How a user's app list names this app (#2103 ruling 26): its
+    /// bundle id, or its process name where it has none, lowercased.
+    public var listKey: String { bundleID ?? name.lowercased() }
 }
 
 /// Stickiness scope across Spaces (#414, #445).

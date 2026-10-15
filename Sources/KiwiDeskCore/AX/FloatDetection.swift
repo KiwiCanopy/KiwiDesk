@@ -75,6 +75,22 @@ public enum FloatDetection {
         public let layer: Int
         /// CG global bounds, top-left origin — as AX frames are.
         public let frame: CGRect
+        /// The owning process's name, as the WindowServer lists it.
+        public let owner: String
+
+        public init(
+            number: CGWindowID,
+            pid: pid_t,
+            layer: Int,
+            frame: CGRect,
+            owner: String = ""
+        ) {
+            self.number = number
+            self.pid = pid
+            self.layer = layer
+            self.frame = frame
+            self.owner = owner
+        }
     }
 
     /// Every on-screen, visible window of any layer, FRONT to back
@@ -117,7 +133,8 @@ public enum FloatDetection {
                 number: raw,
                 pid: pid,
                 layer: layer,
-                frame: frame
+                frame: frame,
+                owner: info[kCGWindowOwnerName as String] as? String ?? ""
             )
         }
     }

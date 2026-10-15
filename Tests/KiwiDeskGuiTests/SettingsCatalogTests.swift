@@ -140,7 +140,7 @@ struct SettingsCatalogTests {
         // prompt rows.
         // 151 since #2103 v2: KiwiVision's Stays clear card and row.
         // 152 since #2103 v2: its current app's other windows row.
-        #expect(allEntries.count == 152)
+        #expect(allEntries.count == 154)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

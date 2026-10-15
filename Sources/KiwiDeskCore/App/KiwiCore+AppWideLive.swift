@@ -14,6 +14,10 @@ extension KiwiCore {
         if new.visionAppearance != old.visionAppearance, vision.isOn {
             retargetVisionAppearance(new.visionAppearance)
         }
+        // A changed list re-reads the windows, with their bundles.
+        if new.visionNeverDimmed != old.visionNeverDimmed {
+            vision.forgetListedWindows()
+        }
         // The whole stored group, so a field v3 adds re-draws too.
         if new.vision != old.vision { updateVision() }
         if new.hyperKey != old.hyperKey { oweHyperRemap() }

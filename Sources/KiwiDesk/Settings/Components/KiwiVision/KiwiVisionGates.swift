@@ -17,7 +17,7 @@ struct KiwiVisionGates {
     static let resolved: Set<SettingKey> = [
         .kiwiVision(.dim), .kiwiVision(.blur),
         .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
-        .kiwiVision(.clearApp),
+        .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
     ]
 
     func inertReason(for key: SettingKey) -> InertReason? {

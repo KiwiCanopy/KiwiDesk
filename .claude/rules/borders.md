@@ -448,8 +448,13 @@ Obligations:
   `EventLoop.names(_:appOf:lookingUp: false)` — never a bare pid
   compare, which drops #1785's sibling processes, and never a
   LaunchServices lookup on the pass (#1936) — so a further clear
-  source (Always clear, a lens) joins that function
-  (`KiwiVisionClearAppTests` ▸ `siblingProcessIsClear`). The mask
+  source (a lens) joins that function, as Never dimmed did, keyed
+  by `AppRef.listKey` — the bundle id read with the list, or the
+  process name — whose LaunchServices read runs at a list read
+  alone, only while the list is non-empty and only of a process
+  the cache has not seen (`KiwiVisionClearAppTests` ▸
+  `siblingProcessIsClear`, `KiwiVisionNeverDimmedTests` ▸
+  `neverDimmedAreHoles`, `bundleLookupsAreBounded`). The mask
   walks path booleans only down to the last clear window, its
   length the one `VisionMask.walkedCount` (`VisionMaskTests` ▸
   `walkedCountStopsAtTheLastHole`), and builds nothing for an
