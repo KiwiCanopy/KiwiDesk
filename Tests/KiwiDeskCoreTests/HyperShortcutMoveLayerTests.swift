@@ -62,6 +62,19 @@ struct HyperShortcutMoveLayerTests {
         )
     }
 
+    @Test("a row spelled differently on the chord shown still moves")
+    func otherSpellingMoves() {
+        var config = config(work: [
+            KeyBinding(
+                combo: "alt+ctrl+f",
+                lua: floating,
+                kind: .navigation
+            )
+        ])
+        moveAll(&config)
+        #expect(config.layers[1].bindings.map(\.combo) == ["hyper+f"])
+    }
+
     @Test("a line refused in one layer stays whole there")
     func refusedInOneLayerStaysWhole() {
         var config = config(
