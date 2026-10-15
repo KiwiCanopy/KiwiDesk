@@ -168,6 +168,7 @@ func makeTestCore(
     core.eventLoop.runningApplications = { [] }
     core.eventLoop.registersWorkspaceObservers = false
     armForeignAppTripwires(core)
+    armStartTripwire(core)
     // Same class, sixth time (#1146): the compositor reads behind
     // the gone classifier and the away ledger default LIVE, and
     // a fixture id can be a real CGWindowID on the host — one

@@ -12,6 +12,17 @@ final class BootRun {
     /// Latch indicating whether this launch finished booting.
     var reachedReady = false
 
+    /// Whether `start()` boots past its latch reset; a test core
+    /// refuses, since the boot reaches the machine (#2294).
+    var admitsStart: @MainActor () -> Bool = { true }
+
+    /// Readies the latches for a new boot: not ready yet, and a
+    /// restore belongs to the boot that armed it (#2133).
+    func begin() {
+        reachedReady = false
+        publishRestore(.none)
+    }
+
     /// Signpost interval state for boot duration reporting (#672).
     var interval: OSSignpostIntervalState?
     var began: ContinuousClock.Instant?
