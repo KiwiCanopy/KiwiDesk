@@ -131,11 +131,3 @@ extension MCPTools {
         }
     }
 }
-
-extension JSONValue {
-    /// An object's member, or nil for any other value.
-    fileprivate subscript(_ key: String) -> JSONValue? {
-        if case .object(let members) = self { return members[key] }
-        return nil
-    }
-}

@@ -1884,6 +1884,16 @@ being a static state it draws either way.
   before applying the chrome; `SettingsDisclosure`'s interior
   states the mechanism at the seam.
 
+## The CLI's local verbs (#1685)
+
+**A verb the CLI answers without the app joins `CLIRoute` and
+owes no API record** — a record is for a command the socket or
+Lua dispatches (core-boundaries.md). `runCLI` switches on the
+route and shell completion reads it, so a local verb is never an
+`if` ahead of that switch, and it never takes a spelling a socket
+command has, save the ruled `help` (`CLIRouteTests`,
+`CLIHelpSeamTests`).
+
 ## Strings
 
 - **A shortcut row's title is a verb phrase saying what pressing

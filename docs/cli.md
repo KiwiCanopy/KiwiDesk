@@ -149,6 +149,25 @@ what answers "what may I send".
 Bare `kiwidesk help` (and `--help` / `-h`) still prints the short
 usage block. Add a name, or `--json`, to get the API instead.
 
+## Shell Completion
+
+:::unreleased
+`kiwidesk completion zsh`, `bash` or `fish` prints a completion
+script. It completes command names, an argument's legal values,
+event names, and — while the app runs — Space ids, window ids,
+profile names and look names. The script asks the binary for every
+answer, so it never needs regenerating after an upgrade.
+
+```sh
+# zsh: add to ~/.zshrc, after compinit
+source <(kiwidesk completion zsh)
+# bash: add to ~/.bash_profile
+eval "$(kiwidesk completion bash)"
+# fish
+kiwidesk completion fish > ~/.config/fish/completions/kiwidesk.fish
+```
+:::
+
 ## Using KiwiDesk from AI Apps
 
 :::unreleased
@@ -755,6 +774,17 @@ Subscribe to nothing *but* unrecognised names and the stream
 stays silent: an empty filter is not the same request as no
 filter.
 
+:::unreleased
+The stream ends when the app quits. Add `--reconnect` to keep it
+across a quit and relaunch: it waits for the app, subscribes again
+with the same names, and notes on stderr that events in between
+were missed. Each reconnection prints the confirmation line again.
+
+```sh
+kiwidesk subscribe --reconnect space_change
+```
+:::
+
 Every window event carries `bundle_id` — the stable identity
 key (the one app rules and `focus_or_spawn` match on) — next to
 the locale-dependent display `app` name. It is JSON `null` for
@@ -888,6 +918,33 @@ names, `default` included:
 {"event": "layer_change",
  "data": {"from_layer": "default", "to_layer": "resize"}}
 ```
+
+### Running a Command per Event
+
+:::unreleased
+`watch` runs a command once per event:
+
+```sh
+kiwidesk watch space_change -- sketchybar --trigger kiwi_space
+kiwidesk watch -- sh -c 'echo "$KIWIDESK_EVENT" >> ~/events.log'
+```
+
+Event names go before `--`, as with `subscribe` (none means every
+event), and a name the app does not know is reported on stderr; the
+command and its arguments go after it and run without
+a shell, so wrap shell syntax in `sh -c`. Each run gets the event's
+JSON line on stdin, and these variables:
+
+- `KIWIDESK_EVENT` — the event name.
+- `KIWIDESK_DATA` — the event's `data` object as JSON.
+- `KIWIDESK_<KEY>` for each top-level string, number or boolean
+  in `data`, upper-cased: `KIWIDESK_SPACE_ID`, `KIWIDESK_WINDOW_ID`.
+
+Runs happen one at a time, in event order; events that arrive
+during a run wait for it. A command that exits non-zero is reported
+on stderr and the watch continues. The watch reconnects across a
+relaunch, as `subscribe --reconnect` does, and runs until stopped.
+:::
 
 ## Raw IPC Protocol
 
