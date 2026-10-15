@@ -3718,7 +3718,7 @@ It is off at every launch.
 
 Its settings are app-wide: they are stored in `gui.json` as the
 `kiwivision` group (`dim`, `blur`, `appearance`,
-`clear_wallpaper`), no profile
+`clear_wallpaper`, `clear_app`), no profile
 carries them, and loading a profile never changes them. Their GUI
 twin is Settings ▸ **KiwiVision**. The `set_*` verbs below change
 the running value only, never `gui.json`; in a Lua-owned setup,
@@ -3782,6 +3782,15 @@ only the windows behind the focused one; the gaps between them stay
 clear too. A window another app opens or moves joins the haze when
 the next layout pass settles.
 
+### kiwivision.set_clear_app
+
+**Expects:** `true` or `false`. Default `false`.
+
+**Does:** keeps every window of the focused app clear, not only the
+focused one — the part of each you can see; where another app's
+window covers it, that window stays dimmed. Focus a window of
+another app and its windows become the clear ones.
+
 **Example:**
 
 ```lua
@@ -3789,6 +3798,7 @@ kiwivision.set_dim(30)
 kiwivision.set_blur(false)
 kiwivision.set_appearance("dark")
 kiwivision.set_clear_wallpaper(true)
+kiwivision.set_clear_app(true)
 ```
 :::
 

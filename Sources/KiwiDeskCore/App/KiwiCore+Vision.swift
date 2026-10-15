@@ -51,6 +51,11 @@ extension KiwiCore {
                 return .fail("expected boolean")
             }
             setAppWide(persisting: false) { $0.visionClearWallpaper = on }
+        case "kiwivision.set_clear_app":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            setAppWide(persisting: false) { $0.visionClearApp = on }
         default:
             return .fail("unknown command: \(command)")
         }
@@ -162,6 +167,10 @@ extension KiwiCore {
             .flatMap { UInt32(exactly: $0.number) }
             .flatMap { $0 == anchor?.raw ? nil : $0 }
         let target = ownKey ?? anchor?.raw
+        // An own key window's app is this one.
+        let targetPid =
+            ownKey != nil
+            ? getpid() : anchor.flatMap { state.windows[$0]?.pid }
         let ring =
             ownKey == nil
             ? anchor.flatMap { borders.ringPanel(of: $0) } : nil
@@ -176,10 +185,11 @@ extension KiwiCore {
             tracked: windowServer.isActive,
             dim: CGFloat(appWide.visionDim / 100),
             blur: kiwiVisionDrawsBlur,
-            clearWallpaper: visionMasks,
+            clearWallpaper: visionClearsWallpaper,
             windows: visionMasks
                 ? visionMaskWindows(
                     target: target,
+                    targetPid: targetPid,
                     refreshingList: refreshingList
                 ) : []
         )

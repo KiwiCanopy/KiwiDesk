@@ -132,6 +132,7 @@ struct KiwiVisionClearWallpaperTests {
         }
         let windows = core.visionMaskWindows(
             target: w1.raw,
+            targetPid: nil,
             refreshingList: true
         )
         let height = GeometryUtils.primaryHeight
@@ -157,11 +158,19 @@ struct KiwiVisionClearWallpaperTests {
         core.vision.listWindows = {
             [self.listed(2, CGRect(x: 0, y: 0, width: 50, height: 50))]
         }
-        _ = core.visionMaskWindows(target: w1.raw, refreshingList: true)
+        _ = core.visionMaskWindows(
+            target: w1.raw,
+            targetPid: nil,
+            refreshingList: true
+        )
         core.state.apply(.windowDestroyed(w2, wasMinimized: false))
         #expect(
-            core.visionMaskWindows(target: w1.raw, refreshingList: false)
-                .isEmpty
+            core.visionMaskWindows(
+                target: w1.raw,
+                targetPid: nil,
+                refreshingList: false
+            )
+            .isEmpty
         )
     }
 
@@ -180,6 +189,7 @@ struct KiwiVisionClearWallpaperTests {
         core.vision.listWindows = { list }
         let first = core.visionMaskWindows(
             target: w1.raw,
+            targetPid: nil,
             refreshingList: true
         )
         #expect(first.map(\.cornerRadius) == [24, 40])
@@ -190,6 +200,7 @@ struct KiwiVisionClearWallpaperTests {
         core.borders.cornerRadii = [:]
         let steady = core.visionMaskWindows(
             target: w1.raw,
+            targetPid: nil,
             refreshingList: false
         )
         #expect(
@@ -198,7 +209,11 @@ struct KiwiVisionClearWallpaperTests {
         )
         #expect(reads.isEmpty, "a pass reads no radius")
         core.vision.listWindows = { [] }
-        _ = core.visionMaskWindows(target: w1.raw, refreshingList: true)
+        _ = core.visionMaskWindows(
+            target: w1.raw,
+            targetPid: nil,
+            refreshingList: true
+        )
         #expect(core.vision.listedRadii.isEmpty, "gone with the list")
     }
 

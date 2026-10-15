@@ -9,12 +9,17 @@ import SwiftUI
 /// bar sit above the veil, as the plate sits under the ring. With
 /// the wallpaper clear the veil goes on each hazed window instead,
 /// so the desk and the gaps stay bright, as the plate's mask does.
+/// The bottom-right window is a second document of the focused
+/// app: hazed, or clear above the veil with "the current app's
+/// other windows" on — the picture changes only in its haze.
 struct KiwiVisionScene: View {
     /// The dim in percent, as stored.
     let dimPercent: Double
     let blurs: Bool
     /// Whether the wallpaper stays clear (#2103 ruling 17).
     var windowsOnly = false
+    /// Whether the focused app's other windows stay clear.
+    var clearApp = false
     let darkWindows: Bool
     let settings: TilingSettings
 
@@ -60,7 +65,12 @@ struct KiwiVisionScene: View {
             }
             HStack(spacing: mini(inner.horizontal)) {
                 pane(.chat, focused: false, layer: focusedLayer)
-                pane(.calendar, focused: false, layer: focusedLayer)
+                pane(
+                    .document,
+                    focused: false,
+                    clear: clearApp,
+                    layer: focusedLayer
+                )
             }
         }
         .padding(.top, Self.menuBar + mini(outer.top))
@@ -72,17 +82,19 @@ struct KiwiVisionScene: View {
     @ViewBuilder private func pane(
         _ kind: KiwiVisionWindow.Kind,
         focused: Bool,
+        clear: Bool = false,
         layer: Bool
     ) -> some View {
+        let hazed = !focused && !clear
         let window = KiwiVisionWindow(
             kind: kind,
-            soft: !focused && blurs,
+            soft: hazed && blurs,
             accent: palette.accent
         )
         .environment(\.colorScheme, darkWindows ? .dark : .light)
-        if focused == layer {
+        if hazed != layer {
             window.overlay {
-                if !focused, windowsOnly {
+                if hazed, windowsOnly {
                     SettingsTheme.visionVeil.opacity(veil)
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 }

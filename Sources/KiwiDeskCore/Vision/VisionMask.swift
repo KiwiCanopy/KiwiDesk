@@ -31,26 +31,20 @@ public enum VisionMask {
         clearWallpaper: Bool,
         windows: [Window]
     ) -> CGPath? {
-        let holes = windows.contains(where: \.clear)
-        guard clearWallpaper || holes else { return nil }
+        let hasHole = windows.contains(where: \.clear)
+        guard clearWallpaper || hasHole else { return nil }
         // Nothing clear: every window draws whole, and the non-zero
         // fill unions them with no boolean operation per pass.
-        guard holes else {
-            let union = CGMutablePath()
-            for window in windows where window.frame.intersects(screen) {
-                let (rect, radius) = local(window, on: screen)
-                union.addRoundedRect(
-                    in: rect,
-                    cornerWidth: radius,
-                    cornerHeight: radius
-                )
-            }
-            return union
-        }
-        var drawn = CGPath(rect: .zero, transform: nil)
+        guard hasHole else { return union(windows, on: screen) }
+        // Only the windows down to the last clear one shape a hole;
+        // behind it, every window is hazed or under one. So the
+        // holes take one walk that stops there, and the drawn shape
+        // is the cheap base less them (#2103 PR B review).
+        let walked = walkedCount(windows)
+        var holes = CGPath(rect: .zero, transform: nil)
         var covered = CGPath(rect: .zero, transform: nil)
-        for window in windows {
-            guard window.frame.intersects(screen) else { continue }
+        for (index, window) in windows.prefix(walked).enumerated()
+        where window.frame.intersects(screen) {
             let (rect, radius) = local(window, on: screen)
             let shape = CGPath(
                 roundedRect: rect,
@@ -58,19 +52,45 @@ public enum VisionMask {
                 cornerHeight: radius,
                 transform: nil
             )
-            if !window.clear {
-                drawn = drawn.union(shape.subtracting(covered))
+            if window.clear {
+                holes = holes.union(shape.subtracting(covered))
             }
-            covered = covered.union(shape)
+            if index < walked - 1 { covered = covered.union(shape) }
         }
-        if !clearWallpaper {
-            let whole = CGPath(
+        let base: CGPath
+        if clearWallpaper {
+            base = union(windows.filter { !$0.clear }, on: screen)
+        } else {
+            base = CGPath(
                 rect: CGRect(origin: .zero, size: screen.size),
                 transform: nil
             )
-            drawn = drawn.union(whole.subtracting(covered))
         }
-        return drawn
+        return base.subtracting(holes)
+    }
+
+    /// How many windows, from the front, the hole walk reads: down
+    /// to the last clear one, none when nothing is clear.
+    static func walkedCount(_ windows: [Window]) -> Int {
+        (windows.lastIndex(where: \.clear) ?? -1) + 1
+    }
+
+    /// The windows' shapes on `screen`, unioned by the non-zero
+    /// fill with no boolean operation.
+    private static func union(
+        _ windows: [Window],
+        on screen: CGRect
+    ) -> CGPath {
+        let union = CGMutablePath()
+        for window in windows where window.frame.intersects(screen) {
+            let (rect, radius) = local(window, on: screen)
+            union.addRoundedRect(
+                in: rect,
+                cornerWidth: radius,
+                cornerHeight: radius
+            )
+        }
+        return union
     }
 
     /// `window`'s frame in the plate's coordinates, and the radius

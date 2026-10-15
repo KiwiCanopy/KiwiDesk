@@ -39,6 +39,10 @@ public struct AppWideSettings: Equatable, Sendable {
     /// the windows (`kiwivision.clear_wallpaper`, #2103 ruling 17).
     /// OFF by default: v1's whole-screen haze.
     public var visionClearWallpaper = false
+    /// Whether KiwiVision keeps every window of the focused app
+    /// clear, not only the focused one (`kiwivision.clear_app`,
+    /// #2103 ruling 17). OFF by default: v1's one clear window.
+    public var visionClearApp = false
     /// The key turned into the Hyper modifier, nil for none
     /// (`hyper.key`, #1870). Per install, never per profile: it
     /// remaps a physical key, and a profile can change on a swipe.
@@ -143,10 +147,12 @@ extension AppWideSettings {
         var blur: Bool?
         var appearance: VisionAppearance?
         var clearWallpaper: Bool?
+        var clearApp: Bool?
 
         enum CodingKeys: String, CodingKey {
             case dim, blur, appearance
             case clearWallpaper = "clear_wallpaper"
+            case clearApp = "clear_app"
         }
     }
 
@@ -178,6 +184,7 @@ extension AppWideSettings {
         if let clear = vision?.clearWallpaper {
             visionClearWallpaper = clear
         }
+        if let clear = vision?.clearApp { visionClearApp = clear }
         if let sound = refusal?.sound { refusalSound = sound }
         if let depth = quit?.gridTargetDepth {
             quitGridTargetDepth = Self.clampedDepth(depth)
@@ -198,7 +205,8 @@ extension AppWideSettings {
             dim: visionDim,
             blur: visionBlur,
             appearance: visionAppearance,
-            clearWallpaper: visionClearWallpaper
+            clearWallpaper: visionClearWallpaper,
+            clearApp: visionClearApp
         )
     }
 }

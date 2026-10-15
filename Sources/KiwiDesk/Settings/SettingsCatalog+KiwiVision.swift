@@ -13,6 +13,10 @@ struct KiwiVisionControls: Sendable {
         "kiwivision.section.clear",
         "Stays clear"
     )
+    let clearApp = SettingsControl(
+        "kiwivision.clear_app",
+        "The current app's other windows"
+    )
     let clearWallpaper = SettingsControl(
         "kiwivision.clear_wallpaper",
         "Wallpaper"
