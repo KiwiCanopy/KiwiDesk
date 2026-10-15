@@ -44,7 +44,7 @@ struct WindowServerWatchSeamTests {
         )
         #expect(
             try sites(of: "windowServer.connect(")
-                == ["KiwiCore+WindowServer.swift": 2]
+                == ["KiwiCore+WindowServer.swift": 3]
         )
     }
 

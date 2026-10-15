@@ -163,6 +163,12 @@ public final class StickyMarkManager {
         overlays[id]?.oweOrder()
     }
 
+    /// `id`'s mark panel, what KiwiVision's float veil orders
+    /// above (#2103 ruling 3).
+    func panelNumber(of id: WindowID) -> CGWindowID? {
+        overlays[id]?.panelNumber
+    }
+
     /// Re-orders mark above window following z-order changes
     /// (the watch's restack phase, #414).
     public func reassert(_ id: WindowID) {

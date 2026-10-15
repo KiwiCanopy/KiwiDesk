@@ -68,6 +68,11 @@ final class StickyMarkOverlay {
     /// carried to another Desktop, which may report no reorder.
     func oweOrder() { hasOrdered = false }
 
+    /// The panel's window number once WindowServer has it.
+    var panelNumber: CGWindowID? {
+        (panel?.windowNumber).flatMap { $0 > 0 ? CGWindowID($0) : nil }
+    }
+
     /// Stacks mark above target window.
     func order() {
         guard let panel else { return }

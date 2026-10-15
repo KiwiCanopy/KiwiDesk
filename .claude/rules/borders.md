@@ -364,8 +364,24 @@ Obligations:
   `SkyLightWindowEvents` door itself; the watch owns the request,
   `isActive` and the one gated bounds read
   (`WindowServerWatchTests` ▸ `phaseOrder`,
-  `WindowServerWatchSeamTests`). A new consumer — the per-float
-  dim panels — rules its position in the change that adds it.
+  `WindowServerWatchSeamTests`). A new consumer rules its
+  position in the change that adds it.
+- **A float the float tier lifts above the focused window wears
+  the plate's veil on a panel of its own, above its own chrome**
+  (#2103 ruling 3, owner ruling option A 2026-10-15): one
+  `FloatDimManager` panel per float in the one
+  `KiwiCore.floatsAboveFocus` set the float raise reads — never a
+  second "floats above the focus" spelling — ordered directly
+  above the float's mark panel, else the float, so a mark or a
+  ring that re-orders lands under it, and sized to the ring's
+  outer reach so the ring dims too. Its consumer comes after
+  `.mark` and `.ring` in the watch, its order sites are
+  `BorderOrderCensusTests` ▸ `floatVeilOrderSitesAreCensused`'s,
+  it joins one Desktop unless its float is carried
+  (`StickyOverlaySpanTests` ▸ `floatVeilSpansOnlyWhenCarried`),
+  and a float that leaves the set goes dormant, still ordered in
+  (`FloatDimManagerTests`, `KiwiVisionFloatTests`). The look is the
+  plate's one `VisionVeil`, never a second blur or dim.
 - **Read the stand-down from the shelf's verdict**, filed once per
   pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a

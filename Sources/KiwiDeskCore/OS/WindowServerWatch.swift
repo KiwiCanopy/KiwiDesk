@@ -9,10 +9,12 @@ import AppKit
 public final class WindowServerWatch {
     /// Declaration order IS the fan-out order in every phase: the
     /// mark re-asserts before the ring orders, so the mark stays
-    /// above a front ring, and the plate restacks after the ring,
-    /// which it stacks under.
+    /// above a front ring; a float's veil orders after both, above
+    /// its mark, so the chrome dims with the float (#2103 ruling
+    /// 3); and the plate restacks after the ring, which it stacks
+    /// under.
     enum Consumer: CaseIterable {
-        case mark, ring, vision
+        case mark, ring, floatDim, vision
     }
 
     /// What a consumer does with an event; a nil hook is a phase

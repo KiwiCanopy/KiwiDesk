@@ -100,6 +100,7 @@ func makeTestCore(
     core.borders.readCornerRadius = { _ in nil }
     // A KiwiVision plate is a real panel per screen (#2103).
     core.vision.plateFactory = { InertVisionPlate() }
+    core.floatDims.panelFactory = { InertFloatDim() }
     core.vision.reduceMotion = { true }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.

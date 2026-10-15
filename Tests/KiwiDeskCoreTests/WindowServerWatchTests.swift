@@ -33,10 +33,14 @@ struct WindowServerWatchTests {
         return (watch, { log.calls })
     }
 
-    @Test("the consumers fan out mark, then ring, then vision")
+    /// A float's veil after its mark and ring, so it ends above
+    /// both (#2103 ruling 3); the plate after the ring it stacks
+    /// under.
+    @Test("the consumers fan out mark, ring, float veil, plate")
     func consumerOrder() {
         #expect(
-            WindowServerWatch.Consumer.allCases == [.mark, .ring, .vision]
+            WindowServerWatch.Consumer.allCases
+                == [.mark, .ring, .floatDim, .vision]
         )
     }
 
@@ -49,8 +53,9 @@ struct WindowServerWatchTests {
         watch.handle(.unhide, window: w1)
         #expect(
             calls() == [
-                "mark.frame", "ring.frame",
-                "mark.restack", "ring.restack", "vision.restack",
+                "mark.frame", "ring.frame", "floatDim.frame",
+                "mark.restack", "ring.restack", "floatDim.restack",
+                "vision.restack",
             ]
         )
         let (reorder, reordered) = recordingWatch()
@@ -59,7 +64,10 @@ struct WindowServerWatchTests {
         }
         reorder.handle(.reorder, window: w1)
         #expect(
-            reordered() == ["mark.restack", "ring.restack", "vision.restack"]
+            reordered() == [
+                "mark.restack", "ring.restack", "floatDim.restack",
+                "vision.restack",
+            ]
         )
         let (hide, hidden) = recordingWatch()
         hide.request([w1], for: .ring)
