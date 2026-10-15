@@ -29,6 +29,43 @@ enum UpdateWindowChrome {
         )
     }
 
+    /// What's new with its release menu (#2308): as tall as the
+    /// tallest release's notes, so a pick never resizes it (#1666).
+    static func window(
+        releases: WhatsNewReleases,
+        opening: WhatsNewReleases.Option,
+        mode: UpdateWindowMode,
+        showMe: SpotlightShowMe?,
+        onShow: @escaping (UpdateOffer) -> Void
+    ) -> NSWindow {
+        let tallest =
+            releases.options.compactMap { option in
+                releases.offer(for: option).map {
+                    fittingHeight(
+                        offer: $0,
+                        mode: mode,
+                        showMe: showMe,
+                        picking: ReleasePicking(
+                            releases: releases,
+                            selection: .constant(option)
+                        )
+                    )
+                }
+            }.max() ?? 0
+        return window(
+            root: WhatsNewBrowser(
+                releases: releases,
+                opening: opening,
+                mode: mode,
+                onShow: onShow
+            )
+            .environment(\.spotlightShowMe, showMe),
+            height: UpdateWindowMetrics.height(
+                fitting: tallest + UpdateWindowMetrics.titleBar
+            )
+        )
+    }
+
     /// The window around any of its states, at `height` and, for a
     /// state narrower than the notes, `width`.
     static func window<Root: View>(
@@ -62,12 +99,14 @@ enum UpdateWindowChrome {
     private static func fittingHeight(
         offer: UpdateOffer,
         mode: UpdateWindowMode,
-        showMe: SpotlightShowMe?
+        showMe: SpotlightShowMe?,
+        picking: ReleasePicking? = nil
     ) -> CGFloat {
         let unscrolled = UpdateWindowView(
             offer: offer,
             mode: mode,
-            measuring: true
+            measuring: true,
+            picking: picking
         )
         .environment(\.spotlightShowMe, showMe)
         let probe = NSHostingView(

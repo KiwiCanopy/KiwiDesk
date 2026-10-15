@@ -159,7 +159,7 @@ struct WhatsNewRelaunchTests {
         )
         #expect(
             chrome.contains(
-                "mode: .whatsNew(narration: narration, next: next)"
+                ".whatsNew(narration: narration, next: next"
             )
         )
     }

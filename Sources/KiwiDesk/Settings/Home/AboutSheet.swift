@@ -9,7 +9,7 @@ struct AboutRequest: Identifiable {
 /// About KiwiDesk (#1536): a read-only sheet over Settings — the
 /// #859 shape, Return and Escape both dismissing. Holds what Home's
 /// footer does not: the wordmark, the version, the update state
-/// once more, Release Notes, License, Acknowledgements, the website.
+/// once more, License, Acknowledgements, the website.
 struct AboutSheet: View {
     /// The one update store and the check door, handed in by the
     /// shell — the sheet takes no `SettingsModel` (#859).
@@ -87,11 +87,8 @@ struct AboutSheet: View {
     }
 
     private var links: some View {
+        // The notes are Home's What's new, one door (#2308).
         HStack(spacing: 16) {
-            link(
-                L("general.about.release_notes", "Release Notes"),
-                SupportLinks.releases
-            )
             link(
                 L("general.about.license", "License"),
                 LicenseDocuments.url(for: .license)
