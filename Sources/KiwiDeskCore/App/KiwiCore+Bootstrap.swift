@@ -130,6 +130,12 @@ extension KiwiCore {
                 source: .animationTick,
                 pin: pin
             )
+            self?.floatDims.follow(
+                id,
+                windowFrame: frame,
+                source: .animationTick,
+                pin: pin
+            )
         }
         // Mid-animation the commanded tick frame leads the real
         // bounds on slow-AX apps (#594): while this answers
@@ -150,6 +156,7 @@ extension KiwiCore {
         }
         borders.isAnimating = animationDriven
         stickyMarks.isAnimating = animationDriven
+        floatDims.isAnimating = animationDriven
         windowServer.isAnimating = animationDriven
         // The instant twin of the tick's leading truth (#881):
         // a just-commanded `applyInstant` target leads the
@@ -163,6 +170,7 @@ extension KiwiCore {
             }
         borders.commandedFrame = commandedInstant
         stickyMarks.commandedFrame = commandedInstant
+        floatDims.commandedFrame = commandedInstant
 
         socket.handler = { [weak self] request in
             self?.answer(request) ?? .fail("core unavailable")

@@ -25,11 +25,7 @@ protocol VisionPlateBackend: AnyObject {
 @MainActor
 final class AppKitVisionPlate: VisionPlateBackend {
     private var panel: NSPanel?
-    private let dimLayer = CALayer()
-    /// The behind-window blur: Liquid Glass `clear` pinned dark,
-    /// `hud` where glass cannot draw (#2103 ruling 10, amended
-    /// 2026-10-14).
-    private let blurView = AppKitVisionPlate.makeBlur()
+    private let veil = VisionVeil()
     private(set) var isShown = false
     /// Bumped per show and hide, so a fade-out that lands after a
     /// later show leaves the panel ordered in.
@@ -41,9 +37,6 @@ final class AppKitVisionPlate: VisionPlateBackend {
         panel?.orderOut(nil)
     }
 
-    /// The plate's fade, on and off.
-    static let fadeDuration: CFTimeInterval = 0.2
-
     #if DEBUG
         /// The panel's window number, nil before the first update.
         var panelNumber: Int? { panel?.windowNumber }
@@ -52,11 +45,9 @@ final class AppKitVisionPlate: VisionPlateBackend {
             panel?.collectionBehavior
         }
         /// Whether the blur view draws.
-        var blurShown: Bool { !blurView.isHidden }
+        var blurShown: Bool { veil.blurShown }
         /// Whether the dim draws above the blur.
-        var dimAboveBlur: Bool {
-            dimLayer.zPosition > (blurView.layer?.zPosition ?? 0)
-        }
+        var dimAboveBlur: Bool { veil.dimAboveBlur }
     #endif
 
     func update(frame: CGRect, dim: CGFloat, blur: Bool) {
@@ -65,13 +56,7 @@ final class AppKitVisionPlate: VisionPlateBackend {
         if panel.frame != frame {
             panel.setFrame(frame, display: false)
         }
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        dimLayer.frame = CGRect(origin: .zero, size: frame.size)
-        blurView.frame = CGRect(origin: .zero, size: frame.size)
-        dimLayer.opacity = Float(VisionPlateDim.opacity(forDim: dim))
-        CATransaction.commit()
-        if blurView.isHidden == blur { blurView.isHidden = !blur }
+        veil.update(size: frame.size, dim: dim, blur: blur, cornerRadius: 0)
     }
 
     /// AppKit's order: WindowServer applies no SkyLight order to
@@ -81,31 +66,108 @@ final class AppKitVisionPlate: VisionPlateBackend {
     }
 
     func show(reduceMotion: Bool) {
-        guard !isShown, let layer = panel?.contentView?.layer
-        else { return }
+        guard !isShown, panel != nil else { return }
         isShown = true
         generation += 1
-        fade(layer, to: 1, reduceMotion: reduceMotion) {}
+        veil.fade(to: 1, reduceMotion: reduceMotion) {}
     }
 
     func hide(reduceMotion: Bool) {
-        guard isShown, let layer = panel?.contentView?.layer
-        else { return }
+        guard isShown, panel != nil else { return }
         isShown = false
         generation += 1
         let fadeOut = generation
-        fade(layer, to: 0, reduceMotion: reduceMotion) { [weak self] in
+        veil.fade(to: 0, reduceMotion: reduceMotion) { [weak self] in
             guard let self, self.generation == fadeOut else { return }
             self.panel?.orderOut(nil)
         }
     }
 
-    private func fade(
-        _ layer: CALayer,
+    private func makePanel() -> NSPanel {
+        // Every Desktop: the dim stays put while a Desktop
+        // switch slides the windows under it. `.transient` hides
+        // it in Mission Control (#1917).
+        let panel = VisionVeil.makePanel()
+        panel.collectionBehavior = [
+            .transient,
+            .canJoinAllSpaces,
+            .ignoresCycle,
+        ]
+        panel.contentView = veil.view
+        return panel
+    }
+}
+
+/// KiwiVision's look — a behind-window blur under a black dim —
+/// and its fade: the one copy the screen plate and the per-float
+/// panels draw (#2103 ruling 3).
+@MainActor
+final class VisionVeil {
+    /// The panel's content view; transparent until `fade`.
+    let view = NSView()
+    private let dimLayer = CALayer()
+    /// The behind-window blur: Liquid Glass `clear` pinned dark,
+    /// `hud` where glass cannot draw (#2103 ruling 10, amended
+    /// 2026-10-14).
+    private let blurView = VisionVeil.makeBlur()
+
+    /// The fade, on and off.
+    static let fadeDuration: CFTimeInterval = 0.2
+
+    init() {
+        view.wantsLayer = true
+        view.layer?.opacity = 0
+        blurView.isHidden = true
+        blurView.wantsLayer = true
+        view.addSubview(blurView)
+        // Above the blur: the dim darkens what the blur leaves.
+        dimLayer.backgroundColor = NSColor.black.cgColor
+        dimLayer.zPosition = 1
+        view.layer?.addSublayer(dimLayer)
+    }
+
+    #if DEBUG
+        var blurShown: Bool { !blurView.isHidden }
+        var dimAboveBlur: Bool {
+            dimLayer.zPosition > (blurView.layer?.zPosition ?? 0)
+        }
+        var dimOpacity: Float { dimLayer.opacity }
+        var cornerRadius: CGFloat { dimLayer.cornerRadius }
+    #endif
+
+    /// Draws `size` at `dim`, 0...1, over a blur of what lies
+    /// beneath where `blur`, rounded to `cornerRadius`.
+    func update(
+        size: CGSize,
+        dim: CGFloat,
+        blur: Bool,
+        cornerRadius: CGFloat
+    ) {
+        let bounds = CGRect(origin: .zero, size: size)
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        dimLayer.frame = bounds
+        dimLayer.cornerRadius = cornerRadius
+        if blurView.frame != bounds { blurView.frame = bounds }
+        GlassPlate.update(blurView, frame: bounds, cornerRadius: cornerRadius)
+        // Glass rounds itself; the `hud` fallback is masked.
+        if blurView is NSVisualEffectView {
+            blurView.layer?.cornerRadius = cornerRadius
+            blurView.layer?.masksToBounds = cornerRadius > 0
+        }
+        dimLayer.opacity = Float(VisionPlateDim.opacity(forDim: dim))
+        CATransaction.commit()
+        if blurView.isHidden == blur { blurView.isHidden = !blur }
+    }
+
+    /// Fades the veil to `target` opacity, cut in under Reduce
+    /// Motion, then calls `done`.
+    func fade(
         to target: Float,
         reduceMotion: Bool,
         then done: @escaping @MainActor () -> Void
     ) {
+        guard let layer = view.layer else { return }
         CATransaction.begin()
         CATransaction.setCompletionBlock {
             MainActor.assumeIsolated { done() }
@@ -125,44 +187,7 @@ final class AppKitVisionPlate: VisionPlateBackend {
         CATransaction.commit()
     }
 
-    private func makePanel() -> NSPanel {
-        let panel = NSPanel(
-            contentRect: .zero,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: true
-        )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
-        panel.ignoresMouseEvents = true
-        // The ring's band: stacked relative to the focused window.
-        panel.level = .normal
-        panel.isReleasedWhenClosed = false
-        panel.animationBehavior = .none
-        // Every Desktop: the dim stays put while a Desktop
-        // switch slides the windows under it. `.transient` hides
-        // it in Mission Control (#1917).
-        panel.collectionBehavior = [
-            .transient,
-            .canJoinAllSpaces,
-            .ignoresCycle,
-        ]
-        let view = NSView()
-        view.wantsLayer = true
-        view.layer?.opacity = 0
-        blurView.isHidden = true
-        blurView.autoresizingMask = [.width, .height]
-        view.addSubview(blurView)
-        // Above the blur: the dim darkens what the blur leaves.
-        dimLayer.backgroundColor = NSColor.black.cgColor
-        dimLayer.zPosition = 1
-        view.layer?.addSublayer(dimLayer)
-        panel.contentView = view
-        return panel
-    }
-
-    /// The blur view a plate carries; glass where it can draw.
+    /// The blur view a veil carries; glass where it can draw.
     static func makeBlur() -> NSView {
         if let glass = GlassPlate.make() {
             GlassPlate.update(glass, frame: .zero, cornerRadius: 0)
@@ -174,6 +199,25 @@ final class AppKitVisionPlate: VisionPlateBackend {
         hud.blendingMode = .behindWindow
         hud.state = .active
         return hud
+    }
+
+    /// A click-through `.normal` panel for a veil, stacked relative
+    /// to a window — the ring's band.
+    static func makePanel() -> NSPanel {
+        let panel = NSPanel(
+            contentRect: .zero,
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: true
+        )
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = false
+        panel.ignoresMouseEvents = true
+        panel.level = .normal
+        panel.isReleasedWhenClosed = false
+        panel.animationBehavior = .none
+        return panel
     }
 }
 

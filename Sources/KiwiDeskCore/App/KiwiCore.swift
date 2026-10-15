@@ -29,6 +29,7 @@ public final class KiwiCore {
     public let stickyMarks = StickyMarkManager()
     /// KiwiVision's plates (#2103), driven with the rings.
     public let vision = VisionManager()
+    let floatDims = FloatDimManager()
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
@@ -328,7 +329,6 @@ public final class KiwiCore {
 
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
-
     public let socket: SocketServer
 
     public init(

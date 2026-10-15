@@ -163,6 +163,12 @@ public final class StickyMarkManager {
         overlays[id]?.oweOrder()
     }
 
+    /// `id`'s mark panel and when it last ordered — chrome a
+    /// KiwiVision float veil must clear (#2103 ruling 3).
+    func chrome(of id: WindowID) -> (panel: CGWindowID, stamp: UInt64)? {
+        overlays[id]?.chrome
+    }
+
     /// Re-orders mark above window following z-order changes
     /// (the watch's restack phase, #414).
     public func reassert(_ id: WindowID) {

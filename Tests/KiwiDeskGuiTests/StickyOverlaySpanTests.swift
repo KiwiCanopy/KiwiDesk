@@ -48,6 +48,27 @@ struct StickyOverlaySpanTests {
         #expect(literal?.contains(".transient") == true)
     }
 
+    /// A float's KiwiVision veil follows one float, so it is the
+    /// ring's kind: one Desktop, joining every Desktop only while
+    /// its float is carried (#2103 ruling 3, #2149).
+    @Test("a float veil is built on one Desktop and spans when carried")
+    func floatVeilSpansOnlyWhenCarried() throws {
+        let literal = try behaviorLiteral(
+            "Sources/KiwiDeskCore/Vision/FloatDimPanel.swift"
+        )
+        #expect(literal?.contains(".transient") == true)
+        #expect(literal?.contains(".canJoinAllSpaces") == false)
+        let core = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/App/KiwiCore+VisionFloats.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(core.contains("spans: carried.contains(id)"))
+    }
+
     @Test("the ring is built on one Desktop and spans when carried")
     func ringSpansOnlyWhenCarried() throws {
         let literal = try behaviorLiteral(

@@ -125,10 +125,7 @@ extension KiwiCore {
         // sit under a tile until the next tiled focus re-raises the
         // layer. Self-healing and rare (sub-50ms tile→float); the
         // z-order thrash the coalescing removes is the worse failure.
-        guard
-            !isEffectiveFloatOnActiveSpace(id),
-            !floatLayerTargets().isEmpty
-        else { return }
+        guard !floatsAboveFocus(of: id).isEmpty else { return }
         deferred.schedule(.floatRaise, after: .milliseconds(50)) {
             [weak self] in
             guard let self, id == self.focusedWindowID
