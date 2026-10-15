@@ -77,17 +77,31 @@ public final class VisionManager {
     /// another Desktop's, a closed one's — is no other app's
     /// window to haze (#2103 PR A review).
     private(set) var trackedAtRead: Set<CGWindowID> = []
+    /// The other apps' listed windows' corner radii, read with the
+    /// list and replaced at each read, so the cache never outgrows
+    /// the windows on screen.
+    private(set) var listedRadii: [CGWindowID: CGFloat] = [:]
 
     /// Re-reads the WindowServer list where `refresh` asks or
     /// nothing is cached, noting which windows `tracks` names.
     func listedWindows(
         refresh: Bool,
-        tracks: (CGWindowID) -> Bool
+        tracks: (CGWindowID) -> Bool,
+        radius: (CGWindowID) -> CGFloat
     ) -> [FloatDetection.ListedWindow] {
         if refresh || listed == nil {
             let read = listWindows()
             listed = read
             trackedAtRead = Set(read.map(\.number).filter(tracks))
+            listedRadii = Dictionary(
+                read
+                    .filter {
+                        $0.layer == 0
+                            && !self.trackedAtRead.contains($0.number)
+                    }
+                    .map { ($0.number, radius($0.number)) },
+                uniquingKeysWith: { first, _ in first }
+            )
         }
         return listed ?? []
     }
@@ -123,6 +137,7 @@ public final class VisionManager {
     func forgetListedWindows() {
         listed = nil
         trackedAtRead = []
+        listedRadii = [:]
     }
     #if DEBUG
         /// Test-only: builds plate backends. Every test core sets

@@ -31,22 +31,27 @@ public enum VisionMask {
         clearWallpaper: Bool,
         windows: [Window]
     ) -> CGPath? {
-        guard clearWallpaper || windows.contains(where: \.clear) else {
-            return nil
+        let holes = windows.contains(where: \.clear)
+        guard clearWallpaper || holes else { return nil }
+        // Nothing clear: every window draws whole, and the non-zero
+        // fill unions them with no boolean operation per pass.
+        guard holes else {
+            let union = CGMutablePath()
+            for window in windows where window.frame.intersects(screen) {
+                let (rect, radius) = local(window, on: screen)
+                union.addRoundedRect(
+                    in: rect,
+                    cornerWidth: radius,
+                    cornerHeight: radius
+                )
+            }
+            return union
         }
         var drawn = CGPath(rect: .zero, transform: nil)
         var covered = CGPath(rect: .zero, transform: nil)
         for window in windows {
             guard window.frame.intersects(screen) else { continue }
-            let rect = window.frame.offsetBy(
-                dx: -screen.minX,
-                dy: -screen.minY
-            )
-            let radius = min(
-                window.cornerRadius,
-                rect.width / 2,
-                rect.height / 2
-            )
+            let (rect, radius) = local(window, on: screen)
             let shape = CGPath(
                 roundedRect: rect,
                 cornerWidth: radius,
@@ -66,5 +71,18 @@ public enum VisionMask {
             drawn = drawn.union(whole.subtracting(covered))
         }
         return drawn
+    }
+
+    /// `window`'s frame in the plate's coordinates, and the radius
+    /// that frame can take.
+    private static func local(
+        _ window: Window,
+        on screen: CGRect
+    ) -> (CGRect, CGFloat) {
+        let rect = window.frame.offsetBy(dx: -screen.minX, dy: -screen.minY)
+        return (
+            rect,
+            min(window.cornerRadius, rect.width / 2, rect.height / 2)
+        )
     }
 }

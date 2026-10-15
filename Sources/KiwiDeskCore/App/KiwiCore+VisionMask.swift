@@ -16,7 +16,13 @@ extension KiwiCore {
     /// sent — so a pass's mask lands with its windows rather than
     /// their echoes — and every other app's normal window at its
     /// listed bounds. A member the list has not seen yet goes in
-    /// front: it arrived since the read.
+    /// front: it arrived since the read. The float tier is walked
+    /// as if below the plate, which sits over it (#2287): a verdict
+    /// that clears a window skips the target and the float tier.
+    /// KiwiDesk's own untiled windows — a dialog, the update and
+    /// What's new windows — are chrome to the read and stay clear.
+    /// Corner radii are read only on a list read, off the switch
+    /// path: a member takes the ring's cached reading there.
     func visionMaskWindows(
         target: CGWindowID?,
         refreshingList: Bool
@@ -31,9 +37,11 @@ extension KiwiCore {
             }
         }
         let shown = Set(members)
-        let listed = vision.listedWindows(refresh: refreshingList) {
-            self.state.windows[WindowID($0)] != nil
-        }
+        let listed = vision.listedWindows(
+            refresh: refreshingList,
+            tracks: { self.state.windows[WindowID($0)] != nil },
+            radius: { self.windowRadius(WindowID($0), reading: true) }
+        )
         let seen = Set(listed.map { WindowID($0.number) })
         var ordered: [(id: WindowID, frame: CGRect)] = []
         for id in members where !seen.contains(id) {
@@ -57,10 +65,26 @@ extension KiwiCore {
         return ordered.map { id, frame in
             VisionMask.Window(
                 frame: GeometryUtils.flip(frame, primaryHeight: height),
-                cornerRadius: borders.cornerRadius(for: id),
+                cornerRadius: vision.listedRadii[id.raw]
+                    ?? windowRadius(id, reading: refreshingList),
                 clear: false
             )
         }
+    }
+
+    /// A window's corner radius: the ring's reading, read from the
+    /// WindowServer only where `reading` allows, else its cache or
+    /// the system radius.
+    private func windowRadius(_ id: WindowID, reading: Bool) -> CGFloat {
+        if reading, state.windows[id] != nil {
+            return borders.cornerRadius(for: id)
+        }
+        if reading {
+            return borders.readCornerRadius(id.raw)
+                ?? GeometryUtils.systemWindowCornerRadius
+        }
+        return borders.cornerRadii[id]
+            ?? GeometryUtils.systemWindowCornerRadius
     }
 
     /// The other apps' listed windows a mask draws, so the plate's
@@ -104,7 +128,10 @@ extension KiwiCore {
     /// A listed window's own WindowServer event: its bounds moved
     /// (CG coordinates) or, with nil, it hid or closed.
     func visionListedWindowChanged(_ id: WindowID, frame: CGRect?) {
-        guard visionMasks,
+        // A tracked window's frame is state's; its slot in the list
+        // stays where the read put it.
+        guard visionMasks, state.windows[id] == nil,
+            !vision.trackedAtRead.contains(id.raw),
             vision.noteListedWindow(id.raw, frame: frame)
         else { return }
         oweVisionReshape(list: false)

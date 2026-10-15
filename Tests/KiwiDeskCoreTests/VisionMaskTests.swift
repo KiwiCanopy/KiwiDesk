@@ -106,6 +106,32 @@ struct VisionMaskTests {
         #expect(path.contains(CGPoint(x: 400, y: 200)))
     }
 
+    /// With nothing clear the shape is the plain union, no boolean
+    /// operation per pass; it covers what the walk would.
+    @Test("no hole takes the plain union")
+    func noHoleIsThePlainUnion() throws {
+        let windows = [
+            window(CGRect(x: 1100, y: 100, width: 200, height: 200)),
+            window(CGRect(x: 1250, y: 150, width: 200, height: 200)),
+        ]
+        let path = try shape(windows)
+        #expect(path.contains(CGPoint(x: 280, y: 180)), "the overlap")
+        let walked = try shape(
+            windows + [
+                window(
+                    CGRect(x: 1700, y: 500, width: 10, height: 10),
+                    clear: true
+                )
+            ]
+        )
+        for point in [
+            CGPoint(x: 280, y: 180), CGPoint(x: 150, y: 150),
+            CGPoint(x: 600, y: 500),
+        ] {
+            #expect(path.contains(point) == walked.contains(point))
+        }
+    }
+
     @Test("a window on another screen draws nothing here")
     func otherScreenSkipped() throws {
         let path = try shape([

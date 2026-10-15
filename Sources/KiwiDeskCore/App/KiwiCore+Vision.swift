@@ -98,7 +98,10 @@ extension KiwiCore {
     /// KiwiVision's WindowServer request: the target and the float
     /// tier — a float landing re-stacks the plate — whether or not
     /// a ring or a mark asks (#2103), and the other apps' windows a
-    /// mask draws, so their moves re-mask it.
+    /// mask draws, so their moves re-mask it. Hearing them costs one
+    /// bounds read per move event, as a ring's does; with borders
+    /// off the target and the floats pay it too, accepted while a
+    /// mask is drawn.
     func requestVisionWindows(target: CGWindowID? = nil) {
         let target = target ?? vision.target
         windowServer.request(

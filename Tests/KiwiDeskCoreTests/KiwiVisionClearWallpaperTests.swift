@@ -165,6 +165,57 @@ struct KiwiVisionClearWallpaperTests {
         )
     }
 
+    /// Radii are WindowServer reads: another app's window's is read
+    /// with the list and kept only while listed; a member's only on
+    /// a list read, the ring's cache or the system radius between.
+    @Test("corner radii are read with the list, never per pass")
+    func radiiReadWithTheList() {
+        let core = makeCore()
+        var reads: [CGWindowID] = []
+        core.borders.readCornerRadius = {
+            reads.append($0)
+            return $0 == 99 ? 40 : 24
+        }
+        let list = [listed(99, CGRect(x: 500, y: 40, width: 90, height: 90))]
+        core.vision.listWindows = { list }
+        let first = core.visionMaskWindows(
+            target: w1.raw,
+            refreshingList: true
+        )
+        #expect(first.map(\.cornerRadius) == [24, 40])
+        #expect(Set(reads) == [2, 99])
+        reads = []
+        // A member the ring never read: a pass takes the system
+        // radius rather than reading it.
+        core.borders.cornerRadii = [:]
+        let steady = core.visionMaskWindows(
+            target: w1.raw,
+            refreshingList: false
+        )
+        #expect(
+            steady.map(\.cornerRadius)
+                == [GeometryUtils.systemWindowCornerRadius, 40]
+        )
+        #expect(reads.isEmpty, "a pass reads no radius")
+        core.vision.listWindows = { [] }
+        _ = core.visionMaskWindows(target: w1.raw, refreshingList: true)
+        #expect(core.vision.listedRadii.isEmpty, "gone with the list")
+    }
+
+    /// A tracked window's frame is state's: its own event leaves
+    /// the cached list as read.
+    @Test("a tracked window's event leaves the cached list alone")
+    func trackedEventLeavesTheList() throws {
+        let core = makeCore()
+        core.vision.listWindows = { [self.listed(2, .zero)] }
+        core.setAppWide(persisting: false) {
+            $0.visionClearWallpaper = true
+        }
+        core.setKiwiVision(true)
+        core.visionListedWindowChanged(w2, frame: nil)
+        #expect(core.vision.listed?.count == 1)
+    }
+
     @Test("the list is read at a settle pass or when nothing is cached")
     func listReadCadence() {
         let core = makeCore()
@@ -212,7 +263,8 @@ struct KiwiVisionClearWallpaperTests {
         try #require(core.vision.hasShownPlates)
         core.noteVisionMaskEvent(.windowMoved(w2, .zero))
         #expect(!core.vision.listOwed)
-        core.noteVisionMaskEvent(.appTerminated(pid: 5))
+        // Through the event loop's own door, so the wiring is held.
+        core.handle(.appTerminated(pid: 5))
         #expect(core.vision.listOwed)
         core.reshapeVision()
         #expect(reads == 2)
