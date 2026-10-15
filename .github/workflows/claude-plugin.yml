@@ -42,9 +42,10 @@ jobs:
             echo "::error::tag must be vMAJOR.MINOR.PATCH: $TAG"
             exit 1
           fi
-          # A manual retry names a tag that may still be a draft's.
+          # A manual retry names a tag that may still be a draft's,
+          # which this endpoint answers with a 404.
           DRAFT="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" \
-            --jq '.draft')"
+            --jq '.draft' 2>/dev/null || echo missing)"
           if [ "$DRAFT" != false ]; then
             echo "::error::$TAG is not a published release"
             exit 1

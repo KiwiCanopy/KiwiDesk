@@ -75,8 +75,7 @@ extension MCPDesktopExtension {
     }
 
     /// Builds a fresh bundle for the running copy and opens it in
-    /// Claude Desktop. The build runs off the main actor; each click
-    /// replaces the previous one in the one temporary folder.
+    /// Claude Desktop. The build runs off the main actor.
     @MainActor
     static func addToClaudeDesktop() async throws {
         guard RunningCopy.location != .translocated else {
@@ -94,8 +93,9 @@ extension MCPDesktopExtension {
         try await open(output, with: claude)
     }
 
-    /// Stages and packs the bundle in the one temporary folder,
-    /// keeping only the `.mcpb`.
+    /// Stages and packs the bundle in a temporary folder of its own,
+    /// keeping only the `.mcpb`. An earlier build's file is left for
+    /// macOS to clear, since Claude Desktop may still be reading it.
     private static func build(
         executable: String,
         version: String,
@@ -103,8 +103,7 @@ extension MCPDesktopExtension {
     ) throws -> URL {
         let files = FileManager.default
         let folder = files.temporaryDirectory
-            .appendingPathComponent("KiwiDesk-mcpb")
-        try? files.removeItem(at: folder)
+            .appendingPathComponent("KiwiDesk-mcpb-\(UUID().uuidString)")
         let staged = folder.appendingPathComponent("bundle")
         let output = folder.appendingPathComponent(fileName)
         try stage(

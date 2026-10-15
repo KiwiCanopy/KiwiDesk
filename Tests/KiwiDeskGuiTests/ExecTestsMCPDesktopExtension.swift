@@ -62,6 +62,20 @@ struct ExecTestsMCPDesktopExtension {
             version: "1.2.3",
             icon: Data([0x89, 0x50])
         )
+        // Every staged file carries an attribute, as files a process
+        // writes often do, so the archive must leave its `._` side
+        // file out on any host, not only one that stamps them.
+        for name in [
+            "manifest.json", MCPDesktopExtension.launcherPath,
+            MCPDesktopExtension.iconPath,
+        ] {
+            let path = staged.appendingPathComponent(name).path
+            let value = Array("kiwi".utf8)
+            #expect(
+                setxattr(path, "com.kiwidesk.test", value, value.count, 0, 0)
+                    == 0
+            )
+        }
         try MCPDesktopExtension.pack(staged, to: packed)
         // Exactly the bundle's files: no `._` metadata entries.
         #expect(

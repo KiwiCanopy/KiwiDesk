@@ -629,8 +629,8 @@ verb into its launcher, and the published plugin starts the
 server by that verb under `MCPInvocation.serverName`, so renaming
 either breaks installs nobody can reach. A rename is a crossing:
 keep the old spelling answering, and ship the plugin's new
-spelling in the same release (`MCPDesktopExtensionTests`,
-`ClaudePluginSourceTests`).
+spelling in the same release (`MCPInvocationContractTests` pins the
+stored spellings).
 
 ## Never `Bundle.module` in code that runs from the `.app` (#89)
 

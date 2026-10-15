@@ -83,6 +83,8 @@ struct AISetupRowWiringTests {
         // A build in flight greys the button; a Claude Desktop
         // removed since the last read re-reads instead of failing.
         #expect(row.occurrences(of: "||building") == 1)
+        // …and the grey always lifts, whatever the build answered.
+        #expect(row.occurrences(of: "defer{building=false}") == 1)
         #expect(
             row.occurrences(
                 of: "catchMCPDesktopExtension.Failure.noClaudeDesktop"
