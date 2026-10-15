@@ -17,9 +17,12 @@ extension KiwiCore {
     /// Stated as properties rather than as a list of who is
     /// excused, deliberately: a trigger list that grows an
     /// exemption per client stops being a rule. Today none of the
-    /// three trips them — the two raises carry their own pending
-    /// flags and re-validate at fire time, and the border re-sync
-    /// only arms a deferred task.
+    /// four trips them — the three raises carry their own pending
+    /// state and re-validate at fire time, and the border re-sync
+    /// only arms a deferred task. The float raise (#2284) runs
+    /// after the restore yet needs no order: it re-asks
+    /// `tiledPlaneMoving` when it fires, so a restore this settle
+    /// started owes it again, to that restore's completion.
     ///
     /// Order-independence is the one property worth re-checking
     /// when adding a runner. The two raises are order-insensitive

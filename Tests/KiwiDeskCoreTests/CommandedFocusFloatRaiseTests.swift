@@ -161,4 +161,45 @@ struct CommandedFocusFloatRaiseTests {
         #expect(second != first)
         core.deferred.cancel(.floatRaise)
     }
+
+    /// A newer focus supersedes a raise owed to an earlier one, and
+    /// a debt for a focus that moved on is dropped at payment —
+    /// paying it would replace the newer focus's scheduled raise.
+    @Test("A stale owed raise never replaces a newer one")
+    func staleDebtIsDropped() throws {
+        let core = makeCore()
+        seed(core)
+        core.floatRaiseDebt.owed = WindowID(1)
+        core.focusWindow(WindowID(2), warp: false)
+        #expect(core.floatRaiseDebt.owed == nil)
+        let fresh = try #require(core.deferred.task(for: .floatRaise))
+        core.floatRaiseDebt.owed = WindowID(1)
+        core.runPendingFloatRaise()
+        #expect(core.floatRaiseDebt.owed == nil)
+        #expect(core.deferred.task(for: .floatRaise) == fresh)
+        core.deferred.cancel(.floatRaise)
+    }
+
+    /// The owed-pass arm: a layout pass the hand has not let draw.
+    @Test("The wait reads an owed pass")
+    func waitReadsAnOwedPass() {
+        let core = makeCore()
+        seed(core)
+        let gate = core.tiler.motionGate
+        gate.schedule = { _, _ in }
+        gate.onLog = { _ in }
+        gate.quiescence.sinceMouseMoved = { 0 }
+        #expect(!core.tiledPlaneMoving)
+        let held = gate.admit(
+            MotionGate.Owed(
+                animated: nil,
+                pass: .event,
+                newlyCreatedWindow: nil,
+                sizing: .mayInstantSize
+            )
+        )
+        #expect(held == nil)
+        #expect(core.tiledPlaneMoving)
+        gate.dropAll()
+    }
 }

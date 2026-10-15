@@ -137,15 +137,15 @@ public final class WindowServerWatch {
             )
         }
         if action == .reorder || action == .followAndReorder {
-            for consumer in heardBy { hooks[consumer]?.restack?(id) }
+            restack(id)
         }
         if action == .hide {
             for consumer in heardBy { hooks[consumer]?.hide?(id) }
         }
     }
 
-    /// Re-stacks `id`'s overlays in the reorder event's order, for
-    /// a raise that moved other windows in between `id` and its
+    /// Re-stacks `id`'s overlays in consumer order: a reorder event,
+    /// and a raise that moved other windows in between `id` and its
     /// overlays and sent `id` no event of its own (#2284).
     func restack(_ id: WindowID) {
         for consumer in hearers(of: id) { hooks[consumer]?.restack?(id) }

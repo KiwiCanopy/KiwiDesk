@@ -26,10 +26,12 @@ extension KiwiCore {
 
     /// Pays the owed raise; the raise re-asks the predicate, so a
     /// restore this settle just started owes it again, to its own
-    /// completion.
+    /// completion. A debt for a focus that has moved on is dropped:
+    /// paying it would replace the newer focus's scheduled raise.
     func runPendingFloatRaise() {
         guard let id = floatRaiseDebt.owed else { return }
         floatRaiseDebt.owed = nil
+        guard id == focusedWindowID else { return }
         raiseFloatsAbove(afterFocusing: id)
     }
 }

@@ -100,13 +100,27 @@ struct FloatRaiseLandingWiringTests {
         #expect(
             restoreSequence.contains("defer { self.runPendingFloatRaise() }")
         )
-        for file in ["KiwiCore+Retile.swift", "KiwiCore+MotionCause.swift"] {
+        // An owed pass drawn with nothing to animate pays both, the
+        // restore first, inside the same quiet branch.
+        let paysAtRest = [
+            (
+                "KiwiCore+Retile.swift",
+                "activeCount==0{runPendingZOrderRestore()"
+                    + "runPendingFloatRaise()}"
+            ),
+            (
+                "KiwiCore+MotionCause.swift",
+                "activeCount==0{self.runPendingZOrderRestore()"
+                    + "self.runPendingFloatRaise()}"
+            ),
+        ]
+        for (file, needle) in paysAtRest {
             let source = try SourceScan.strippedSource(
                 at: SourceScan.repoRoot(from: #filePath)
                     .appendingPathComponent("Sources/KiwiDeskCore/App")
                     .appendingPathComponent(file)
-            )
-            #expect(source.contains("runPendingFloatRaise()"), "\(file)")
+            ).filter { !$0.isWhitespace }
+            #expect(source.contains(needle), "\(file)")
         }
     }
 }

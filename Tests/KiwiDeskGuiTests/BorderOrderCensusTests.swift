@@ -104,6 +104,23 @@ struct BorderOrderCensusTests {
         #expect(!floats.contains("shelfStandsDown("))
     }
 
+    /// The watch's restack fan-out orders every overlay of a window,
+    /// so a caller beside the reorder event is a round trip per
+    /// consumer on the switch path: the float raise's landing is the
+    /// one ruled so far (#2284).
+    @Test("only the ruled sites take the watch's restack door")
+    func watchRestackSitesAreCensused() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "windowServer.restack(",
+            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent)
+                == ["KiwiCore+ZOrderFloats.swift"],
+            "found \(sites.map(\.site))"
+        )
+    }
+
     /// A KiwiVision plate's stack is the same round trip, one per
     /// screen (#2103): its callers are the sync, gated by the
     /// ring's own `ordersOverlay`, and the target's restack after

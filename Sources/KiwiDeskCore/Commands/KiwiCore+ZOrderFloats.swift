@@ -138,6 +138,8 @@ extension KiwiCore {
         // layer. Self-healing and rare (sub-50ms tile→float); the
         // z-order thrash the coalescing removes is the worse failure.
         guard !floatsAboveFocus(of: id).isEmpty else { return }
+        // This focus supersedes a raise owed to an earlier one.
+        floatRaiseDebt.owed = nil
         deferred.schedule(.floatRaise, after: .milliseconds(50)) {
             [weak self] in
             guard let self, id == self.focusedWindowID

@@ -179,7 +179,9 @@ these:
   cannot lift over the frontmost window lands between that window
   and its ring, and the float's event re-stacks only its own
   overlays (#2284, `FloatRaiseRingRestackTests`,
-  `FloatRaiseLandingWiringTests`). A new caller is a new round
+  `FloatRaiseLandingWiringTests`); that landing pays one ring
+  order per raise even where a front-order ring needed none,
+  accepted. A new caller is a new round
   trip on the switch path and owes its ruling in
   `BorderOrderCensusTests`' `allowed` map; a front-order ring's
   level read is a second one (`levelOf`). The order is AppKit's
