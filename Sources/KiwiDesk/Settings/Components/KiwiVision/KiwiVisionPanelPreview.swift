@@ -18,16 +18,19 @@ struct KiwiVisionPanelPreview: View {
         let dim = model.appWide.visionDim
         let blurs = model.core.kiwiVisionDrawsBlur
         let windowsOnly = model.appWide.visionClearWallpaper
+        let clearApp = model.appWide.visionClearApp
         let effect = KiwiVisionEffect(
             dims: VisionPlateDim.opacity(forDim: dim / 100) > 0,
             blurs: blurs,
-            windowsOnly: windowsOnly
+            windowsOnly: windowsOnly,
+            clearApp: clearApp
         )
         VStack(alignment: .leading, spacing: 8) {
             KiwiVisionScene(
                 dimPercent: dim,
                 blurs: blurs,
                 windowsOnly: windowsOnly,
+                clearApp: clearApp,
                 darkWindows: darkWindows,
                 settings: model.config.settings
             )

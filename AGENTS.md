@@ -1625,6 +1625,9 @@ Touching `Borders`, `Vision`.
   masks itself through a reshape that never orders, its window
   list read at a settle pass through one seam
   (`VisionMaskPlateTests`, `KiwiVisionClearWallpaperTests`),
+  decides its clear verdict once per pass in `visionClearPids`
+  through `names(_:appOf:lookingUp: false)`
+  (`KiwiVisionClearAppTests`),
   switches the system appearance through one seam whose debt every
   way out pays, and its on/off is a session value no snapshot
   carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,

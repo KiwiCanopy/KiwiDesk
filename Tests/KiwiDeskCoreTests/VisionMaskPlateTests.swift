@@ -78,6 +78,9 @@ struct VisionMaskPlateTests {
         #expect(plate.shapes.count == 2)
         vision.reshapeShown(request(clear: true, windows: [a]))
         #expect(plate.shapes.count == 3)
+        let built = vision.shapeBuilds
+        vision.reshapeShown(request(clear: true, windows: [a]))
+        #expect(vision.shapeBuilds == built, "an unchanged input builds none")
         #expect(plate.orders.count == orders, "the target never moved")
     }
 
