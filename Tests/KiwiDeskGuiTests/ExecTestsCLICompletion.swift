@@ -118,4 +118,29 @@ struct ExecTestsCLICompletion {
         )
         #expect(file.reply == ["kiwidesk"], "\(file.reply)")
     }
+
+    /// `complete -o default` would offer files wherever KiwiDesk
+    /// offers nothing; the stubbed runs above cannot see it.
+    @Test("the shim registers with no file fallback")
+    func registration() throws {
+        let shim = FileManager.default.temporaryDirectory
+            .appendingPathComponent("kiwi-shim-\(UUID().uuidString)")
+        try CLICompletion.Shell.bash.script
+            .write(to: shim, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: shim) }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/bash")
+        process.arguments = [
+            "-c", "source '\(shim.path)'; complete -p kiwidesk",
+        ]
+        let output = Pipe()
+        process.standardOutput = output
+        process.standardError = FileHandle.nullDevice
+        try process.run()
+        let data = output.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        let line = String(decoding: data, as: UTF8.self)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(line == "complete -F _kiwidesk kiwidesk")
+    }
 }
