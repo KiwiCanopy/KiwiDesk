@@ -99,10 +99,9 @@ extension KiwiCore {
             )
             // A restore that waited for this pass rides its settle,
             // or runs now when nothing animates.
-            if self.pendingZOrderRestore,
-                self.tiler.animation.activeCount == 0
-            {
+            if self.tiler.animation.activeCount == 0 {
                 self.runPendingZOrderRestore()
+                self.runPendingFloatRaise()
             }
         }
         tiler.applier.cause = { [weak self] in

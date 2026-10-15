@@ -527,6 +527,10 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
 - a switch landing on a Space it un-stashes raises that Space's float layer
   once after its own retile, handing focus back to the ANCHOR (#412/#1727,
   `FollowSwitchFloatRaiseTests`)
+- a commanded focus onto another window owes the float-tier raise at the
+  command, since its report is our own echo, OWED while `tiledPlaneMoving`
+  and paid at rest, a direct raise superseding it (#2284,
+  `CommandedFocusFloatRaiseTests`)
 - a mutation that changes which windows overlap arms the matching z-order
   restore after its own retile, and narrowly (#674) — and a removal whose
   close-return raise stood down arms no track restore either, the one

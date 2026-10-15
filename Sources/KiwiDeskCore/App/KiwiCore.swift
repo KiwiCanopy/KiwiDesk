@@ -63,10 +63,11 @@ public final class KiwiCore {
     var defersEventRetiles = false
     /// A Desktop switch's re-sync, folded alike (`+SwitchResync`).
     var switchResync: SwitchResyncBatch?
-
     /// A z-order restore is waiting for the current animations
     /// to settle (`runPendingZOrderRestore`).
     var pendingZOrderRestore = false
+    /// The float raise owed behind the tiled plane (#2284).
+    let floatRaiseDebt = FloatRaiseDebt()
 
     /// A command reordered windows but its paired retile is the
     /// dispatcher's trailing `retile(pass: .apply)` (#153), so
@@ -89,7 +90,6 @@ public final class KiwiCore {
     var pendingFocusRaise: WindowID?
     /// A `focus` press's raise in flight (#1812).
     var raiseFlight: RaiseFlight?
-
     /// When KiwiDesk's own AX raise of each window was issued
     /// (#152): a report for a window raised within
     /// `selfRaiseEchoWindow` is our echo, not a user action, and

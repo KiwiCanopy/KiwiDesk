@@ -126,24 +126,33 @@ public final class WindowServerWatch {
     /// A window no consumer hears is a stale additive delivery
     /// (`SkyLightWindowEvents.watch`'s undocumented semantics).
     func handle(_ kind: SkyLightWindowEvents.Kind, window id: WindowID) {
-        let hearers = Consumer.allCases.filter {
-            heard[$0]?.contains(id) == true
-        }
-        guard !hearers.isEmpty else { return }
+        let heardBy = hearers(of: id)
+        guard !heardBy.isEmpty else { return }
         let action = kind.action
         if action == .follow || action == .followAndReorder {
             deliverFrame(
                 id,
-                to: hearers,
+                to: heardBy,
                 unhiding: action == .followAndReorder
             )
         }
         if action == .reorder || action == .followAndReorder {
-            for consumer in hearers { hooks[consumer]?.restack?(id) }
+            restack(id)
         }
         if action == .hide {
-            for consumer in hearers { hooks[consumer]?.hide?(id) }
+            for consumer in heardBy { hooks[consumer]?.hide?(id) }
         }
+    }
+
+    /// Re-stacks `id`'s overlays in consumer order: a reorder event,
+    /// and a raise that moved other windows in between `id` and its
+    /// overlays and sent `id` no event of its own (#2284).
+    func restack(_ id: WindowID) {
+        for consumer in hearers(of: id) { hooks[consumer]?.restack?(id) }
+    }
+
+    private func hearers(of id: WindowID) -> [Consumer] {
+        Consumer.allCases.filter { heard[$0]?.contains(id) == true }
     }
 
     /// One gated bounds read, only where a hearer takes frames.

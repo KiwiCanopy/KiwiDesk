@@ -299,14 +299,17 @@ extension KiwiCore {
             pairs.map(\.0),
             excluding: focused
         )
+        floatRaiseDebt.restoresInFlight += 1
         performZOrderSequence(
             targets: pairs,
             above: floor,
             generation: generation
         ) {
             [weak self] in
-            guard let self,
-                generation == self.zOrderRaiseGeneration.value
+            guard let self else { return }
+            self.floatRaiseDebt.restoresInFlight -= 1
+            defer { self.runPendingFloatRaise() }
+            guard generation == self.zOrderRaiseGeneration.value
             else { return }
             if let focused, focused == self.activeSpace?.focused {
                 self.focusWindow(focused, warp: false)

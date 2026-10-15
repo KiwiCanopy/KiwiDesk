@@ -819,6 +819,22 @@ editing here:
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
   call, which no unit test reaches, is
   `ZOrderSequenceWiringTests`' needle).
+- **A commanded focus onto another window owes the float-tier
+  raise at the command (#2284)** — its report comes back as our
+  own echo, which the focus handler's `!selfEcho` arm skips, so a
+  Space Bar or App Bar click and a keyboard focus move lifted
+  nothing. `focusWindow` schedules it for a focus that changed,
+  never for a re-assert of the same window, which is the raise's
+  own hand-back; scrolling's deferred raise schedules it after the
+  tile's. A door that raises the layer itself supersedes it:
+  `raiseFloatsAndSticky` cancels a scheduled or owed raise. The
+  raise is OWED, never issued, while the tiled plane still moves
+  — a pan, an owed #804 pass, a restore armed or draining — asked
+  through the one `tiledPlaneMoving`, and paid at the settle, at
+  an owed pass drawn with nothing to animate, and at a tiled
+  restore's completion; the float raise's own drain is no tiled
+  restore, so a newer focus still supersedes it at once
+  (`CommandedFocusFloatRaiseTests`, `FloatRaiseLandingWiringTests`).
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**
@@ -839,10 +855,10 @@ editing here:
   Arm **narrowly**: a restore drains a verified raise sequence on
   the blocking ordered queue — holding the mouse warp for as long
   as that takes — re-asserts the focus at the end of it, and
-  leaves the tiled plane above the float layer until the next
-  genuine focus event (#418), so "harmless, it re-raises the same
-  order" is not an argument for arming on a mutation that
-  scrambled nothing.
+  leaves the tiled plane above the float layer until a float raise
+  owed behind it is paid (#418, #2284), so "harmless, it re-raises
+  the same order" is not an argument for arming on a mutation
+  that scrambled nothing.
   And the close-return stand-down governs the ARM, not only the
   direct raise (#936): a removal whose return raise stood down
   arms no track restore either, because the drain ends in a focus
