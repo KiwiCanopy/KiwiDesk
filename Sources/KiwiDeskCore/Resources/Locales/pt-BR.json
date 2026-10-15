@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "⌃ Control esquerdo",
   "shortcuts.hyper_key.left_option": "⌥ Option esquerdo",
   "shortcuts.hyper_key.left_shift": "⇧ Shift esquerdo",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "O Hyper é ativado assim que o KiwiDesk passar a gerenciar suas janelas.",
   "shortcuts.hyper_key.press": "Pressione uma tecla…",
   "shortcuts.hyper_key.record": "Gravar tecla",

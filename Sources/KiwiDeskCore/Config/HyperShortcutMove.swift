@@ -71,9 +71,13 @@ public enum HyperShortcutMove {
         let items = groups.compactMap {
             item(for: $0, direction, rows: rows)
         }
+        // Forward, the Desktop line rides the letter offer and
+        // retires with it, declined or not.
+        let lettersLeft = direction == .back || !items.isEmpty
         return Offer(
             items: items,
-            desktop: desktopLine(direction, rows: rows, base: base)
+            desktop: lettersLeft
+                ? desktopLine(direction, rows: rows, base: base) : nil
         )
     }
 

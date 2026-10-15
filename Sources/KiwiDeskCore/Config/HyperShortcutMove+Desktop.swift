@@ -5,9 +5,9 @@ import Foundation
 extension HyperShortcutMove {
     /// The line `rows` earn while `base` is the one `direction`
     /// leaves. Forward, it is offered only while a seeded Desktop
-    /// row would move or stay, so a declined line retires with the
-    /// letters; the reverse stays while the base is Hyper, since it
-    /// alone resets the base for Desktops added later.
+    /// row would move or stay; the reverse stays while the base is
+    /// Hyper, since it alone resets the base for Desktops added
+    /// later.
     static func desktopLine(
         _ direction: Direction,
         rows: [KeyBinding],

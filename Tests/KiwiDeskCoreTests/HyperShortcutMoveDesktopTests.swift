@@ -36,14 +36,17 @@ struct HyperShortcutMoveDesktopTests {
         "KiwiDesk.focus_desktop(\(number))"
     }
 
+    /// The seed's letters with `desktops`' rows: the Desktop line
+    /// rides the letter offer, so a fixture without letters has none.
     private func config(desktops: [Int]) -> GuiConfig {
         var config = GuiConfig()
         config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
-                bindings: desktops.compactMap {
-                    DefaultKeybindings.desktopRow($0)
-                }
+                bindings: HyperShortcutMove.letterSeed
+                    + desktops.compactMap {
+                        DefaultKeybindings.desktopRow($0)
+                    }
             )
         ]
         return config
@@ -54,9 +57,12 @@ struct HyperShortcutMoveDesktopTests {
     }
 
     @Test("the line moves the seeded rows and sets the base")
-    func lineMovesRowsAndBase() {
+    func lineMovesRowsAndBase() throws {
         var config = config(desktops: [1, 2])
-        config.layers[0].bindings[1].combo = "control+option+2"
+        let two = try #require(
+            config.layers[0].bindings.firstIndex { $0.lua == lua(2) }
+        )
+        config.layers[0].bindings[two].combo = "control+option+2"
         move(
             .toHyper,
             items: [],
@@ -103,6 +109,24 @@ struct HyperShortcutMoveDesktopTests {
         )
         #expect(combo(2, in: config) == "control+option+shift+command+2")
         #expect(config.desktopShortcutBase == .hyper)
+    }
+
+    @Test("a declined Desktop line retires with the letters")
+    func declinedLineRetires() {
+        var config = config(desktops: [1, 2])
+        let letters = HyperShortcutMove.offer(
+            .toHyper,
+            rows: config.layers[0].bindings,
+            base: .standard
+        ).items.map(\.id)
+        move(.toHyper, items: Set(letters), desktop: false, to: &config)
+        let after = HyperShortcutMove.offer(
+            .toHyper,
+            rows: config.layers[0].bindings,
+            base: config.desktopShortcutBase
+        )
+        #expect(after.isEmpty)
+        #expect(combo(1, in: config) == "control+option+shift+command+1")
     }
 
     @Test("a declined line retires; the reverse stays while the base is ✦")

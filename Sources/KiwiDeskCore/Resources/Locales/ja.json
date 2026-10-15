@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "左⌃",
   "shortcuts.hyper_key.left_option": "左⌥",
   "shortcuts.hyper_key.left_shift": "左⇧",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "KiwiDesk がウインドウの管理を始めると、Hyper がオンになります。",
   "shortcuts.hyper_key.press": "キーを押してください…",
   "shortcuts.hyper_key.record": "キーを記録",

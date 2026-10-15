@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "⌃ Ctrl sinistro",
   "shortcuts.hyper_key.left_option": "⌥ Opzione sinistra",
   "shortcuts.hyper_key.left_shift": "⇧ Maiuscole sinistro",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "Hyper si attiva non appena KiwiDesk gestisce le tue finestre.",
   "shortcuts.hyper_key.press": "Premi un tasto…",
   "shortcuts.hyper_key.record": "Registra tasto",

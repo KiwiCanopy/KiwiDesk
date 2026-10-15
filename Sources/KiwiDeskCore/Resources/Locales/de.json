@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "⌃ links",
   "shortcuts.hyper_key.left_option": "⌥ links",
   "shortcuts.hyper_key.left_shift": "⇧ links",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "Hyper wird aktiv, sobald KiwiDesk deine Fenster verwaltet.",
   "shortcuts.hyper_key.press": "Taste drücken…",
   "shortcuts.hyper_key.record": "Taste aufnehmen",

@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "왼쪽 ⌃",
   "shortcuts.hyper_key.left_option": "왼쪽 ⌥",
   "shortcuts.hyper_key.left_shift": "왼쪽 ⇧",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "KiwiDesk가 윈도우를 관리하기 시작하면 Hyper가 켜집니다.",
   "shortcuts.hyper_key.press": "키를 누르세요…",
   "shortcuts.hyper_key.record": "키 기록",

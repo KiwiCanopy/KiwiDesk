@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "⌃ gauche",
   "shortcuts.hyper_key.left_option": "⌥ gauche",
   "shortcuts.hyper_key.left_shift": "⇧ gauche",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "Hyper s'active dès que KiwiDesk gère vos fenêtres.",
   "shortcuts.hyper_key.press": "Appuyez sur une touche…",
   "shortcuts.hyper_key.record": "Enregistrer la touche",

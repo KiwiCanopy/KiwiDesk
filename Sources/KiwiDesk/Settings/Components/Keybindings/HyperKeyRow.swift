@@ -29,8 +29,11 @@ struct HyperKeyRow: View {
     }
 
     private var offerReason: ShortcutsGates.InertReason? {
-        ShortcutsGates(config: model.config, guiManaged: model.guiManaged)
-            .inertReason(for: .shortcuts(.desktopShortcutBase))
+        ShortcutsGates(
+            config: model.config,
+            guiManaged: model.guiManaged,
+            editingStoredProfile: model.editingStoredProfile
+        ).inertReason(for: .shortcuts(.desktopShortcutBase))
     }
 
     var body: some View {
@@ -81,19 +84,16 @@ struct HyperKeyRow: View {
                 moveRequest = model.hyperMoveRequest()
             }
             .settingsActionButton()
-            .disabled(
-                offerReason == .appWideLuaOwned || model.editingStoredProfile
-            )
+            .disabled(offerReason != nil)
             if let text = offerCaption { caption(text) }
         }
         .padding(.top, 6)
     }
 
     /// Why the offer is greyed, or why Hyper rows are dim; nil when
-    /// neither. The Desktop base is the Mac's, so the move runs on
-    /// the page whose Save writes the shared rows (#1870).
+    /// neither. The Lua-owned reason is the card's own caption.
     private var offerCaption: String? {
-        guard !model.editingStoredProfile else {
+        guard offerReason != .storedProfilePage else {
             return HyperMoveWords.storedPage
         }
         return model.hyperMoveDirection == .back

@@ -109,7 +109,10 @@ struct HyperMoveOfferTests {
         #expect(row.contains("if model.hyperMoveOffer != nil"))
         #expect(row.contains("usesHyper: model.draftUsesHyper"))
         // A stored-profile page greys the offer and says why.
-        #expect(row.contains("|| model.editingStoredProfile"))
+        #expect(row.contains(".disabled(offerReason != nil)"))
+        #expect(
+            row.contains("editingStoredProfile: model.editingStoredProfile")
+        )
         #expect(row.contains("return HyperMoveWords.storedPage"))
         #expect(row.contains("? HyperMoveWords.offCaption : nil"))
         // With no key, the reverse offer says why rows are dim.

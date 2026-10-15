@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "Левый ⌃",
   "shortcuts.hyper_key.left_option": "Левый ⌥",
   "shortcuts.hyper_key.left_shift": "Левый ⇧",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "Hyper включится, как только KiwiDesk начнёт управлять твоими окнами.",
   "shortcuts.hyper_key.press": "Нажми клавишу…",
   "shortcuts.hyper_key.record": "Записать клавишу",

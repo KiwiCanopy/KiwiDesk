@@ -124,10 +124,12 @@ enum HyperMoveWords {
         )
     }
 
-    /// `text` with ✦ spelled "Hyper" for VoiceOver; Hyper is kept
-    /// Latin in every catalog, so the name needs no key.
+    /// `text` with ✦ spelled out for VoiceOver.
     static func spoken(_ text: String) -> String {
-        text.replacingOccurrences(of: ComboSymbols.hyperGlyph, with: "Hyper ")
+        text.replacingOccurrences(
+            of: ComboSymbols.hyperGlyph,
+            with: L("shortcuts.hyper_key.name", "Hyper") + " "
+        )
     }
 
     /// `combo` as the board draws it.

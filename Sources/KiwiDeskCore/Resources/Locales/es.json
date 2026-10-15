@@ -1592,6 +1592,7 @@
   "shortcuts.hyper_key.left_control": "⌃ Control izquierdo",
   "shortcuts.hyper_key.left_option": "⌥ Opción izquierda",
   "shortcuts.hyper_key.left_shift": "⇧ Mayúsculas izquierda",
+  "shortcuts.hyper_key.name": "Hyper",
   "shortcuts.hyper_key.paused": "Hyper se activa en cuanto KiwiDesk gestione tus ventanas.",
   "shortcuts.hyper_key.press": "Pulsa una tecla…",
   "shortcuts.hyper_key.record": "Grabar tecla",

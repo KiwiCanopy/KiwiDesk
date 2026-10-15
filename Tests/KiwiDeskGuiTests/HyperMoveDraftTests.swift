@@ -19,9 +19,10 @@ struct HyperMoveDraftTests {
         config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
-                bindings: [1, 2].compactMap {
-                    DefaultKeybindings.desktopRow($0)
-                }
+                bindings: HyperShortcutMove.letterSeed
+                    + [1, 2].compactMap {
+                        DefaultKeybindings.desktopRow($0)
+                    }
             )
         ]
         model.config = config
