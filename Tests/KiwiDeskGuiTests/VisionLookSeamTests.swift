@@ -2,6 +2,7 @@ import Foundation
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// Every Core read of a KiwiVision setting goes through the one
 /// resolver, `VisionLook` (#2103 v3): a plain read beside it is
@@ -13,6 +14,20 @@ struct VisionLookSeamTests {
     private static let homes: Set<String> = [
         "Config/AppWideSettings.swift", "Config/VisionLook.swift",
     ]
+
+    /// Every flat live field a lens can override, read off the
+    /// overrides by reflection, and the stored group itself.
+    private static var needle: String {
+        let fields = fieldNamesOf(VisionLens.Overrides()).map {
+            "vision" + $0.prefix(1).uppercased() + $0.dropFirst()
+        }
+        return #"(?<!\$0)\.("# + fields.sorted().joined(separator: "|")
+            + #")\b|appWide\.vision\."#
+    }
+
+    private static func fieldNamesOf(_ value: Any) -> [String] {
+        Mirror(reflecting: value).children.compactMap(\.label)
+    }
 
     @Test("no Core file reads a KiwiVision setting beside the resolver")
     func oneDoor() throws {
@@ -37,7 +52,7 @@ struct VisionLookSeamTests {
                 try String(contentsOf: url, encoding: .utf8)
             )
             if source.range(
-                of: #"appWide\.vision[A-Z]"#,
+                of: Self.needle,
                 options: .regularExpression
             ) != nil {
                 readers.append(path)

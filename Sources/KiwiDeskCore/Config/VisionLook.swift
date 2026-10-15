@@ -14,6 +14,13 @@ public struct VisionLook: Equatable, Sendable {
     public var neverDimmed: [String]
     /// The lens drawn, nil for plain KiwiVision.
     public var lens: VisionLens?
+
+    /// Every app this look names as clear by listing it — Never
+    /// dimmed and the lens's members: the one derivation the
+    /// bundle read and the list's freshness key on.
+    public var listedApps: [String] {
+        neverDimmed + (lens?.apps ?? [])
+    }
 }
 
 extension AppWideSettings {
@@ -36,7 +43,8 @@ extension AppWideSettings {
 
     /// The lens named `name`, ignoring case (ruling 39).
     public func lens(named name: String) -> VisionLens? {
-        visionLenses.first {
+        let name = Self.lensName(name)
+        return visionLenses.first {
             $0.name.caseInsensitiveCompare(name) == .orderedSame
         }
     }

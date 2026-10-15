@@ -55,16 +55,21 @@ extension VisionLens: Codable {
         apps = AppWideSettings.neverDimmedEntries(
             try c.decodeIfPresent([String].self, forKey: .apps) ?? []
         )
-        titles =
+        titles = Self.memberTitles(
             try c.decodeIfPresent(
                 [String: [String]].self,
                 forKey: .titles
-            ) ?? [:]
+            ) ?? [:],
+            of: apps
+        )
+        let defaults = VisionLens(name: name)
         keepFocus =
-            try c.decodeIfPresent(Bool.self, forKey: .keepFocus) ?? true
-        let delay =
-            try c.decodeIfPresent(Double.self, forKey: .clearDelay) ?? 2
-        clearDelay = delay.isFinite ? max(delay, 0) : 2
+            try c.decodeIfPresent(Bool.self, forKey: .keepFocus)
+            ?? defaults.keepFocus
+        clearDelay = AppWideSettings.clampedDelay(
+            try c.decodeIfPresent(Double.self, forKey: .clearDelay)
+                ?? defaults.clearDelay
+        )
         reminder = try c.decodeIfPresent(String.self, forKey: .reminder)
         overrides = Overrides(
             dim: try c.decodeIfPresent(Double.self, forKey: .dim)
@@ -101,7 +106,44 @@ extension VisionLens: Codable {
     }
 }
 
+extension VisionLens {
+    /// Title patterns keyed as members are (`AppRef.listKey`,
+    /// trimmed and lowercased), a key naming no member dropped:
+    /// a title rule only narrows a member (ruling 32).
+    static func memberTitles(
+        _ raw: [String: [String]],
+        of members: [String]
+    ) -> [String: [String]] {
+        var out: [String: [String]] = [:]
+        for (key, patterns) in raw {
+            let member = key.trimmingCharacters(in: .whitespaces)
+                .lowercased()
+            guard members.contains(member) else { continue }
+            out[member, default: []] += patterns
+        }
+        return out
+    }
+}
+
 extension AppWideSettings {
+    /// A lens's clear delay as stored: never below 0, a value that
+    /// is no number the default 2 s.
+    public static func clampedDelay(_ raw: Double) -> Double {
+        raw.isFinite ? max(raw, 0) : VisionLens(name: "").clearDelay
+    }
+
+    /// The longest a lens name may be (ruling 39).
+    public static let lensNameLimit = 40
+
+    /// A lens name as stored and looked up: trimmed, and cut to
+    /// `lensNameLimit` characters.
+    public static func lensName(_ raw: String) -> String {
+        String(
+            raw.trimmingCharacters(in: .whitespacesAndNewlines)
+                .prefix(lensNameLimit)
+        )
+    }
+
     /// A lens list as stored: each name trimmed, a nameless lens
     /// and a later one whose name repeats an earlier one ignoring
     /// case dropped (ruling 39).
@@ -109,7 +151,7 @@ extension AppWideSettings {
         var seen: Set<String> = []
         return raw.compactMap { lens in
             var lens = lens
-            lens.name = lens.name.trimmingCharacters(in: .whitespaces)
+            lens.name = lensName(lens.name)
             guard !lens.name.isEmpty,
                 seen.insert(lens.name.lowercased()).inserted
             else { return nil }

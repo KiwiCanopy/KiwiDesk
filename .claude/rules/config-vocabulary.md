@@ -401,8 +401,8 @@ synonym:
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
 - **lens** — a named KiwiVision: the apps it keeps clear, its
   own shortcut and any KiwiVision setting it overrides (#2103
-  ruling 28; Lua `kiwivision.define_lens`, JSON
-  `kiwivision.lenses`). Each catalog translates the common noun,
+  ruling 28; JSON `kiwivision.lenses`, its Lua verbs
+  `kiwivision.define_lens` and `kiwivision.toggle(lens)`). Each catalog translates the common noun,
   and the user names each one ("Writing"). Retired as names for
   it: *set*, *room*, *scene*, *session*, *focus*, *layer* and
   *mode*, each already spoken for or rejected on #2103.

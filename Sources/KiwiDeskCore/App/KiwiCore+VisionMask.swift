@@ -57,7 +57,7 @@ extension KiwiCore {
             refresh: refreshingList,
             tracks: { self.state.windows[WindowID($0)] != nil },
             radius: { self.windowRadius(WindowID($0), reading: true) },
-            bundle: visionLook.neverDimmed.isEmpty
+            bundle: visionLook.listedApps.isEmpty
                 ? nil
                 : { self.eventLoop.bundle(of: $0, lookingUp: true) }
         )

@@ -11,7 +11,7 @@ import Testing
 struct VisionLensTests {
     private func lensWithEverything() -> VisionLens {
         var lens = VisionLens(name: "Writing")
-        lens.apps = ["com.apple.textedit", "sketchybar"]
+        lens.apps = ["com.apple.preview", "sketchybar"]
         lens.titles = ["com.apple.preview": ["notes"]]
         lens.keepFocus = false
         lens.clearDelay = 3.5
@@ -27,6 +27,7 @@ struct VisionLensTests {
     @Test("a lens round-trips with every field")
     func roundTrip() throws {
         let lens = lensWithEverything()
+        expectAllChanged(lens, from: VisionLens(name: "x"))
         expectAllChanged(lens.overrides, from: VisionLens.Overrides())
         let back = try JSONDecoder().decode(
             VisionLens.self,
@@ -83,6 +84,46 @@ struct VisionLensTests {
         )
         #expect(lensed.neverDimmed == plain.neverDimmed)
         #expect(settings.look(lens: "Nope") == plain)
+    }
+
+    /// An override is spelled in JSON as the plain setting it
+    /// overrides, so a renamed key reds here.
+    @Test("an override's JSON key is the plain setting's")
+    func overrideKeys() throws {
+        func keys(_ value: some Encodable) throws -> Set<String> {
+            let object = try JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(value)
+            )
+            return Set((object as? [String: Any] ?? [:]).keys)
+        }
+        var plain = AppWideSettings().vision
+        plain.neverDimmed = []
+        plain.lenses = []
+        let stored = try keys(plain)
+            .subtracting(["never_dimmed", "lenses"])
+        #expect(!stored.isEmpty)
+        #expect(stored.isSubset(of: try keys(lensWithEverything())))
+    }
+
+    @Test("titles key by member, names are cut and looked up trimmed")
+    func normalisedKeys() throws {
+        let json =
+            #"{"name":"  Writing  ","apps":["com.apple.preview"],"#
+            + #""titles":{" Com.Apple.Preview ":["notes"],"x":["y"]}}"#
+        var settings = AppWideSettings()
+        settings.visionLenses = AppWideSettings.lensEntries([
+            try JSONDecoder().decode(
+                VisionLens.self,
+                from: Data(json.utf8)
+            ),
+            VisionLens(name: String(repeating: "a", count: 60)),
+        ])
+        let lens = try #require(settings.lens(named: " writing\n"))
+        #expect(lens.titles == ["com.apple.preview": ["notes"]])
+        #expect(
+            settings.visionLenses.last?.name.count
+                == AppWideSettings.lensNameLimit
+        )
     }
 
     @Test("gui.json carries the lenses, names unique ignoring case")

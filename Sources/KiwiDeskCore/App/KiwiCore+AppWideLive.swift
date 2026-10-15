@@ -17,7 +17,9 @@ extension KiwiCore {
             retargetVisionAppearance(appearance)
         }
         // A changed list re-reads the windows, with their bundles.
-        if new.visionNeverDimmed != old.visionNeverDimmed {
+        if new.look(lens: lens).listedApps
+            != old.look(lens: lens).listedApps
+        {
             vision.forgetListedWindows()
         }
         // The whole stored group, so a field v3 adds re-draws too.
