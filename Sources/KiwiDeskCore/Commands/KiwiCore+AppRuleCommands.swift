@@ -75,13 +75,11 @@ extension KiwiCore {
     func appRuleFacts(_ bundleID: String?) -> JSONValue {
         guard let app = bundleID?.lowercased() else { return .null }
         let floats = eventLoop.floatRules
-        let mine = floats.rawRules.filter {
-            $0 == app || $0.hasPrefix(app + ":")
-        }
+        let mine = floats.rules(of: app)
         return .object([
             "space": state.appRules[app].map { .string($0.raw) }
                 ?? .null,
-            "float_rules": .array(mine.sorted().map(JSONValue.string)),
+            "floats": .array(mine.sorted().map(JSONValue.string)),
             "tile_rule": .bool(floats.guess.tileRules.contains(app)),
             "float_automatically": .bool(floats.guess.enabled),
         ])

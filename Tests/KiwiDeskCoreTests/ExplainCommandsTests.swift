@@ -66,7 +66,7 @@ struct ExplainCommandsTests {
     func tiledHasNoCause() {
         let core = makeCore()
         track(core)
-        let floating = explain(core)["floating"]
+        let floating = explain(core)["float"]
         #expect(field(floating, "floats") == .bool(false))
         #expect(field(floating, "cause") == .null)
         #expect(field(floating, "detection") == .null)
@@ -81,7 +81,7 @@ struct ExplainCommandsTests {
     func detectionIsTheCause(_ reason: AutoFloatReason) {
         let core = makeCore()
         track(core, .floats(reason))
-        let floating = explain(core)["floating"]
+        let floating = explain(core)["float"]
         #expect(field(floating, "cause") == .string("detection"))
         let detection = field(floating, "detection")
         #expect(field(detection, "reason") == .string(reason.wireName))
@@ -96,19 +96,27 @@ struct ExplainCommandsTests {
     func escapesFollowTheReason() {
         #expect(
             AutoFloatReason.accessoryApp.escapes
-                == ["tile_rule", "float_automatically"]
+                == ["set_float_automatically", "tile_rule"]
         )
         #expect(AutoFloatReason.panel.escapes.isEmpty)
-        #expect(AutoFloatReason.rule.escapes == ["remove_float_rule"])
+        #expect(
+            AutoFloatReason.rule.escapes == ["app_rule.remove_float"]
+        )
+        // An escape that names a verb names one that exists.
+        let verbs = [AutoFloatReason.rule, .panel, .accessoryApp, .fixedSize]
+            .flatMap(\.escapes).filter { $0 != "tile_rule" }
+        for verb in verbs {
+            #expect(APIReference.entry(named: verb) != nil, "\(verb)")
+        }
     }
 
     @Test("a flag with no verdict is the user's float")
     func flagAloneIsTheUser() {
         let core = makeCore()
         track(core, .tiles, flag: true)
-        let floating = explain(core)["floating"]
+        let floating = explain(core)["float"]
         #expect(field(floating, "cause") == .string("user"))
-        #expect(field(floating, "flag") == .bool(true))
+        #expect(explain(core)["floating"] == .bool(true))
     }
 
     @Test("a floating-mode Space floats a window with no flag")
@@ -118,11 +126,11 @@ struct ExplainCommandsTests {
         let space = try #require(core.state.workspaces.space(of: id))
         core.state.workspaces.setMode(space, .floating)
         let answer = explain(core)
-        let floating = answer["floating"]
+        let floating = answer["float"]
         #expect(field(floating, "cause") == .string("space_mode"))
         #expect(field(floating, "floats") == .bool(true))
-        #expect(field(floating, "flag") == .bool(false))
-        #expect(answer["space_mode"] == .string("floating"))
+        #expect(answer["floating"] == .bool(false))
+        #expect(answer["mode"] == .string("floating"))
     }
 
     @Test("the app's rules are its own slice, and no title is told")
@@ -140,7 +148,7 @@ struct ExplainCommandsTests {
         let rule = answer["app_rule"]
         #expect(field(rule, "space") == .string("3"))
         #expect(
-            field(rule, "float_rules")
+            field(rule, "floats")
                 == .array([.string("\(bundle):Info")])
         )
         #expect(field(rule, "tile_rule") == .bool(true))
@@ -165,12 +173,16 @@ struct ExplainCommandsTests {
                 RunningApp(
                     pid: 4242,
                     activationPolicy: .accessory,
-                    ref: AppRef(bundleID: self.bundle, name: "App")
+                    ref: AppRef(
+                        bundleID: "COM.Example.App",
+                        name: "App"
+                    )
                 )
             ]
         }
         core.eventLoop.visiblePIDs = { [] }
         core.eventLoop.appIsHidden = { _ in true }
+        core.eventLoop.activationPolicy = { _ in .accessory }
         let response = core.execute(
             "explain_app",
             args: [.string("COM.Example.App")]
@@ -179,7 +191,7 @@ struct ExplainCommandsTests {
             Issue.record("no answer: \(response.error ?? "")")
             return
         }
-        #expect(answer["app"] == .string(bundle))
+        #expect(answer["bundle_id"] == .string(bundle))
         #expect(field(answer["ignored"], "by_rule") == .bool(true))
         #expect(field(answer["ignored"], "built_in") == .bool(false))
         #expect(answer["windows"] == .array([.number(Double(id.raw))]))
@@ -190,9 +202,10 @@ struct ExplainCommandsTests {
             return
         }
         #expect(field(process, "pid") == .number(4242))
-        // The policy is `policy(of:)`'s one reading — LaunchServices
-        // for an unobserved pid — so only its presence is pinned.
-        #expect(field(process, "policy")?.stringValue != nil)
+        // An unobserved pid's policy is LaunchServices' answer,
+        // read through `policy(of:)` over the pinned seam.
+        #expect(field(process, "policy") == .string("accessory"))
+        #expect(field(process, "observed") == .bool(false))
         #expect(field(process, "hidden") == .bool(true))
     }
 

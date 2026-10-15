@@ -51,14 +51,15 @@ extension AutoFloatReason {
         }
     }
 
-    /// What would let the window tile: a guess yields to a Tile
-    /// rule or to Float automatically off (#2173), a rule to its
-    /// removal, and a panel to nothing.
+    /// What would let the window tile, as the verb that does it:
+    /// a guess yields to Float automatically off or to a Tile rule
+    /// (#2173), which no verb writes, so it is named `tile_rule`;
+    /// a rule yields to its removal, and a panel to nothing.
     var escapes: [String] {
         switch self {
         case .accessoryApp, .fixedSize:
-            ["tile_rule", "float_automatically"]
-        case .rule: ["remove_float_rule"]
+            ["set_float_automatically", "tile_rule"]
+        case .rule: ["app_rule.remove_float"]
         case .panel: []
         }
     }

@@ -37,6 +37,14 @@ public struct FloatRules: Sendable, Equatable {
         }
     }
 
+    /// `bundleID`'s own rules, spelled as `rawRules` spells them.
+    public func rules(of bundleID: String) -> [String] {
+        let app = bundleID.lowercased()
+        return rules.filter { $0.app == app }.map { rule in
+            rule.title.map { "\(rule.app):\($0)" } ?? rule.app
+        }
+    }
+
     /// Cheap gate before title-change float detection.
     public func hasTitleRule(bundleID: String?) -> Bool {
         guard let bundleID = bundleID?.lowercased() else {

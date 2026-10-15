@@ -76,7 +76,9 @@
 /// Float/Tile row and its submenu ticks (#1518) stay on the flag
 /// for the same reason: they label what their verbs write.
 /// `explain_window` (#1685) reports the flag AND this predicate's
-/// answer, each labelled, and decides nothing from either. Every
+/// answer, and names the flag as the cause only where
+/// `tileRefusal(of:)` gives none, since #1810 makes a flag without
+/// a verdict the user's. Every
 /// other reader
 /// is the flag's own
 /// identity, a net already routed here, or a "tiled member"

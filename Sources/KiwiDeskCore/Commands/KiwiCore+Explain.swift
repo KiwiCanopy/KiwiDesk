@@ -3,7 +3,9 @@ import AppKit
 /// `explain_window` and `explain_app` (#1685 ▸ Ruling 6d): why a
 /// window floats or tiles and where it opens, as structure read
 /// from the doors that decide it — never re-detected here. Neither
-/// answer carries a window title.
+/// answer carries a window title. Keys follow `get_state`'s and
+/// `app_rule.list`'s spellings, since an AI app reads them side by
+/// side.
 extension KiwiCore {
     /// `explain_window [window]`: the named window, else the
     /// focused one (#1518).
@@ -18,15 +20,15 @@ extension KiwiCore {
             let mode = space.flatMap { state.workspaces[$0]?.mode }
             return .ok(
                 .object([
-                    "window": .number(Double(id.raw)),
+                    "id": .number(Double(id.raw)),
                     "app": .string(window.appName),
                     "bundle_id": window.appBundleID.map {
                         .string($0)
                     } ?? .null,
                     "space_id": space.map { .string($0.raw) } ?? .null,
-                    "space_mode": mode.map { .string($0.rawValue) }
-                        ?? .null,
-                    "floating": floating(window, mode: mode),
+                    "mode": mode.map { .string($0.rawValue) } ?? .null,
+                    "floating": .bool(window.isFloating),
+                    "float": float(window, mode: mode),
                     "app_rule": appRuleFacts(window.appBundleID),
                     "sticky": .string(window.stickyScope.rawValue),
                     "fullscreen": .bool(window.isFullscreen),
@@ -39,8 +41,11 @@ extension KiwiCore {
 
     /// Whether the window floats, and WHY: detection's verdict
     /// through the one `tileRefusal(of:)` door, else the user's
-    /// own float, else a floating-mode Space.
-    private func floating(
+    /// own float — #1810 lets no user float stand where detection
+    /// floats — else a floating-mode Space. Accepted: between a
+    /// guess's re-judge and its recheck, a detection float with no
+    /// cached verdict reads as the user's.
+    private func float(
         _ window: ManagedWindow,
         mode: LayoutMode?
     ) -> JSONValue {
@@ -68,7 +73,6 @@ extension KiwiCore {
             "floats": .bool(
                 EffectiveFloat.applies(isFloating: flag, mode: mode)
             ),
-            "flag": .bool(flag),
             "cause": cause,
             "detection": detection,
         ])
@@ -100,7 +104,7 @@ extension KiwiCore {
         }
         return .ok(
             .object([
-                "app": .string(app),
+                "bundle_id": .string(app),
                 "ignored": .object([
                     "by_rule": .bool(
                         eventLoop.ignoreRules.matches(bundleID: app)
@@ -108,7 +112,7 @@ extension KiwiCore {
                     "built_in": .bool(
                         FloatDetection.isBuiltInIgnoredApp(bundleID: app)
                     ),
-                    "raised_windows": .bool(
+                    "built_in_raised": .bool(
                         FloatDetection.ignoresRaisedWindows(
                             bundleID: app
                         )
@@ -126,6 +130,9 @@ extension KiwiCore {
     /// The app's live processes, each with whether KiwiDesk
     /// observes it, its activation policy and whether it is
     /// hidden — through the event loop's one reading of each.
+    /// `liveApps()` takes its default owners, a WindowServer read,
+    /// so an app's unlisted sibling processes are listed too; it
+    /// files their identities as the next reconcile would.
     private func runningProcesses(of app: String) -> [JSONValue] {
         eventLoop.liveApps()
             .filter { $0.ref.bundleID == app }

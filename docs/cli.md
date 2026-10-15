@@ -210,11 +210,11 @@ never reads the wallpaper itself.
 `app_rules` takes the same shape over the `app_rule.*` verbs. An app
 is named by the `bundle_id` `get_state` lists for its windows.
 
-`diagnose_window` takes exactly one of `window` (an id `get_state`
-lists) or `app` (a bundle id), and sends `explain_window` or
-`explain_app` ([Debugging](lua-reference.md#explain_window)). It
-needs one of them, since the window an AI app has in focus is its
-own.
+`diagnose_window` takes exactly one of `window` (an id from
+`get_state`'s `windows`) or `app` (a bundle id), and sends
+`explain_window` or `explain_app`
+([`explain_window`](lua-reference.md#explain_window)); `window` has
+no focused-window default here.
 
 A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where

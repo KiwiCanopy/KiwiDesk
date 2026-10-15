@@ -75,9 +75,7 @@ extension FloatDetection {
             || layer >= screenSaverLayer
             || layer != 0
                 && (isAccessory && !titlebarButton
-                    || bundleID.map {
-                        layerScopedIgnoredApps[$0.lowercased()] != nil
-                    } == true
+                    || ignoresRaisedWindows(bundleID: bundleID)
                         && !(escapesWithButton(bundleID)
                             && (titlebarButton || layer == modalPanelLayer)))
     }
@@ -112,9 +110,7 @@ extension FloatDetection {
         isAccessory: Bool
     ) -> Bool {
         isAccessory
-            || bundleID.map {
-                layerScopedIgnoredApps[$0.lowercased()] != nil
-            } == true
+            || ignoresRaisedWindows(bundleID: bundleID)
     }
 
     /// Whether an untracked window of `layer` is a built-in
