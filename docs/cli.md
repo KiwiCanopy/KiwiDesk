@@ -177,7 +177,7 @@ or walks you through it. The same page has ready-made prompts that
 have the AI app ask you what you want, one question at a time.
 
 The server speaks MCP `2026-07-28` and, after an `initialize`,
-`2025-11-25` and `2025-06-18`. It offers eight tools:
+`2025-11-25` and `2025-06-18`. It offers nine tools:
 
 | Tool | Does |
 |---|---|
@@ -189,6 +189,7 @@ The server speaks MCP `2026-07-28` and, after an `initialize`,
 | `run_destructive` | One command that cannot be undone |
 | `keep` | Makes this session's setting changes permanent |
 | `looks` | The `look.*` verbs as one tool: list, inspect, wear and save looks |
+| `app_rules` | The `app_rule.*` verbs as one tool: list app rules, and set or remove which Space an app opens in and which windows float |
 
 `list_commands` and `help` answer without the app; the others
 need it running. A command `list_commands --json` marks
@@ -204,6 +205,9 @@ and that verb's arguments by name; `look.delete` goes through
 `run_destructive`. The AI page's **Make a new look** prompt offers to
 match your wallpaper from a screenshot you give the AI app: KiwiDesk
 never reads the wallpaper itself.
+
+`app_rules` takes the same shape over the `app_rule.*` verbs. An app
+is named by the `bundle_id` `get_state` lists for its windows.
 
 A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where

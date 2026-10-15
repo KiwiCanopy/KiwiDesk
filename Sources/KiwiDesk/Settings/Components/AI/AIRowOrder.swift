@@ -6,6 +6,8 @@ enum AIRowOrder {
 
     static let readyMadePrompts: [SettingKey] = [
         .ai(.promptLook),
+        .ai(.promptMigrate),
+        .ai(.promptAppRules),
         .ai(.promptSpaces),
     ]
 

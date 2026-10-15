@@ -80,7 +80,7 @@ struct FloatFlagReaderCensusTests {
         "Commands/KiwiCore+ZOrderFloatLayer.swift":
             [.routed: 1, .ruledToStay: 2],
         "State/StateCoordinator+EffectiveMembers.swift":
-            [.tiledMember: 5],
+            [.tiledMember: 4],
         "State/StateCoordinator+WindowCreated.swift":
             [.tiledMember: 2],
         // Ruled to stay (#1362): an arrival on another display
