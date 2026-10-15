@@ -11035,14 +11035,14 @@ fixed at the field, under one ceiling of 400 pt on every side
 as Spotlight's fixed height does, and a sheet that grew to the
 screen's bottom read as a window rather than a launcher; the
 Shortcuts sheet scrolls past the ceiling, cued in words, and the
-Windows list holds the nine rows ⌘1–9 reach. Fixed points rather
-than a share of the screen, which would grow the panel on exactly
-the large screens. The fit to just above the screen's bottom or a
-KiwiShelf strip, which the visible frame does not exclude, only
-lowers it on a short screen. The field shows only the typing: the selection
-is the green row or tile, shown once, and inline completion —
-weighed — reads as native only where → or Tab would accept it,
-which here they never do.
+Windows list holds nine rows of room, the numbered reach. Fixed
+points rather than a share of the screen, which would grow the
+panel on exactly the large screens. The fit to just above the
+screen's bottom or a KiwiShelf strip, which the visible frame
+does not exclude, only lowers it on a short screen. The field
+shows only the typing: the selection is the green row or tile,
+shown once, and inline completion — weighed — reads as native
+only where → or Tab would accept it, which here they never do.
 
 **The footer lights one hint: the pick live now (#2246, owner
 ruling 2026-10-13).** With the selection gone from the field, the

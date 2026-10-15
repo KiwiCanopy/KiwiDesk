@@ -4,8 +4,8 @@ import KiwiDeskCore
 /// KiwiHub's size (#1875 ▸ Panel): one fixed ceiling on every
 /// side, the panel following each side's content beneath it.
 extension JumpPanelController {
-    /// The most rows the Windows list shows: the numbered reach,
-    /// so every ⌘1–9 target is on screen (#2309).
+    /// The Windows list's room, in rows: nine, the numbered reach,
+    /// section headers drawn inside it (#2309).
     static let rowCap = JumpList.numbered
 
     /// The visible area with every KiwiShelf strip cut away by the

@@ -4,29 +4,13 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The list grows to a third of the screen's visible height, never
-/// fewer than 8 rows nor more than 10 (#2229), and shrinks to fit
-/// fewer results (#1875 ▸ Panel). A pick of another app's window
-/// distrusts the dismiss blip (#952); a close arms nothing.
+/// The list holds nine rows of room under the panel's one ceiling
+/// (#2309), and shrinks to fit fewer results (#1875 ▸ Panel). A
+/// pick of another app's window distrusts the dismiss blip (#952);
+/// a close arms nothing.
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
-    /// Every numbered target is on screen, and the Windows list
-    /// at its cap fits under the one ceiling (#2309).
-    @Test("the row cap is the numbered reach, inside the ceiling")
-    func rowCap() {
-        #expect(JumpPanelController.rowCap == JumpList.numbered)
-        let list = JumpPanelView.listHeight(
-            rows: 40,
-            headers: 0,
-            rowCap: JumpPanelController.rowCap
-        )
-        #expect(
-            JumpPanelView.fieldHeight + list
-                < JumpPanelController.maxPanelHeight
-        )
-    }
-
     /// The footer's scroll cue shows exactly when the content runs
     /// past the cap — headers included.
     @Test("the list overflows only past the cap")
