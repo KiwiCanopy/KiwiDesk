@@ -59,6 +59,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var floatAutomatically = FloatGuess.enabledByDefault
     /// Apps whose guessed floats tile (`tile_rules`, #2173).
     public var tileRules: [String] = []
+    /// The modifiers the Go to Desktop rows sit on
+    /// (`desktop_shortcut_base`, #1870): app-wide, drafted with
+    /// `layers` so a Save moves the rows and the base together.
+    public var desktopShortcutBase = DesktopShortcutBase.standard
     /// The settings no profile carries (#1741); nil until adopted.
     /// Stamped at the write (`GuiConfigStore.liveAppWide`), never
     /// drafted: General writes them the moment they change.
@@ -104,6 +108,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case modeCycle = "mode_cycle"
         case floatAutomatically = "float_automatically"
         case tileRules = "tile_rules"
+        case desktopShortcutBase = "desktop_shortcut_base"
         case refusal
         case quit
         case desktop
@@ -197,6 +202,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 [String].self,
                 forKey: .tileRules
             ) ?? []
+        // Additive since #1870: absence is the seeded tier.
+        desktopShortcutBase =
+            try container.decodeIfPresent(
+                DesktopShortcutBase.self,
+                forKey: .desktopShortcutBase
+            ) ?? .standard
         // Additive since #1741, like `desktopSpaces`: absence is
         // "not adopted yet", which the adoption reads.
         appWide = AppWideSettings(
@@ -284,6 +295,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             forKey: .floatAutomatically
         )
         try container.encode(tileRules, forKey: .tileRules)
+        try container.encode(
+            desktopShortcutBase,
+            forKey: .desktopShortcutBase
+        )
         if let appWide {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)

@@ -128,6 +128,8 @@ struct AnnouncedValuePinTests {
         "AppRulesSection+Automatic.swift": 1,
         // Jump to window's Hidden section header (#1875).
         "JumpPanelView.swift": 1,
+        // The Hyper move sheet's title (#1870).
+        "HyperMoveSheet.swift": 1,
     ]
 
     @Test("title components are rotor headings")

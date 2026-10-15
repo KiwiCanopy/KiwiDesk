@@ -5,17 +5,22 @@ import SwiftUI
 /// to no layer. One recorder row, app-wide and written at once like
 /// the layout cue (#1741), greyed with its sentence only where
 /// `init.lua` owns the config. Offered in Power User, and in Simple
-/// once a key is set (config presence expands Simple).
+/// once a key is set or the draft uses Hyper (config presence
+/// expands Simple). Below it, the one-shot move offer (#1870).
 struct HyperKeyRow: View {
     @ObservedObject var model: SettingsModel
+    /// The move sheet, hosted by `ShortcutsSection`, which outlives
+    /// this card (`SheetPresentationSeamTests`).
+    @Binding var moveRequest: HyperMoveRequest?
 
     /// The one offer predicate, evaluated at `.simple` for the
     /// mode-gated frame (#760).
     static func isOffered(
         in mode: SettingsMode,
-        key: HyperSourceKey?
+        key: HyperSourceKey?,
+        usesHyper: Bool = false
     ) -> Bool {
-        mode == .powerUser || key != nil
+        mode == .powerUser || key != nil || usesHyper
     }
 
     private var reason: ShortcutsGates.InertReason? {
@@ -23,10 +28,19 @@ struct HyperKeyRow: View {
             .inertReason(for: .shortcuts(.hyperKey))
     }
 
+    private var offerReason: ShortcutsGates.InertReason? {
+        ShortcutsGates(
+            config: model.config,
+            guiManaged: model.guiManaged,
+            editingStoredProfile: model.editingStoredProfile
+        ).inertReason(for: .shortcuts(.desktopShortcutBase))
+    }
+
     var body: some View {
         if Self.isOffered(
             in: model.settingsMode,
-            key: model.appWide.hyperKey
+            key: model.appWide.hyperKey,
+            usesHyper: model.draftUsesHyper
         ) {
             card
         }
@@ -38,7 +52,8 @@ struct HyperKeyRow: View {
             help: HyperKeyWords.help,
             modeGated: !Self.isOffered(
                 in: .simple,
-                key: model.appWide.hyperKey
+                key: model.appWide.hyperKey,
+                usesHyper: model.draftUsesHyper
             )
         ) {
             VStack(alignment: .leading, spacing: 6) {
@@ -52,8 +67,37 @@ struct HyperKeyRow: View {
                     disabled: reason == .appWideLuaOwned
                 )
                 captions
+                if model.hyperMoveOffer != nil {
+                    moveOffer
+                }
             }
         }
+    }
+
+    /// The one-shot offer: to Hyper while a key is set, back while
+    /// none is; it retires once nothing is left to move. Rows are
+    /// the draft's, so it greys with them where `init.lua` owns
+    /// the config.
+    private var moveOffer: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button(HyperMoveWords.offer(model.hyperMoveDirection)) {
+                moveRequest = model.hyperMoveRequest()
+            }
+            .settingsActionButton()
+            .disabled(offerReason != nil)
+            if let text = offerCaption { caption(text) }
+        }
+        .padding(.top, 6)
+    }
+
+    /// Why the offer is greyed, or why Hyper rows are dim; nil when
+    /// neither. The Lua-owned reason is the card's own caption.
+    private var offerCaption: String? {
+        guard offerReason != .storedProfilePage else {
+            return HyperMoveWords.storedPage
+        }
+        return model.hyperMoveDirection == .back
+            ? HyperMoveWords.offCaption : nil
     }
 
     private var captions: some View {

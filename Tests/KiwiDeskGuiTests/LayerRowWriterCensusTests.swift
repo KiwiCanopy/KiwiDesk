@@ -80,6 +80,13 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Shortcuts/ShortcutsReference.swift":
             (1, "shortcuts panel: removes rows from a copy it draws"),
+        "KiwiDeskCore/Config/HyperShortcutMove.swift":
+            (
+                1,
+                "Hyper move: rewrites a row's chord in place, adds no"
+                    + " row, then takes the dedupe (#1870,"
+                    + " HyperShortcutMoveTests)"
+            ),
         "KiwiDeskCore/Config/KeyLayer.swift":
             (1, "the initializer"),
     ]
@@ -99,6 +106,8 @@ struct LayerRowWriterCensusTests {
             (1, "custom rows, which are no navigation action"),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingAppGroup.swift":
             (1, "application rows, which are no navigation action"),
+        "KiwiDeskCore/Config/HyperShortcutMove.swift":
+            (1, "the Hyper move: rewrites chords in place, adds no row"),
         "KiwiDeskCore/Keys/KeybindingMerge.swift":
             (1, "the import merge; its caller takes the dedupe"),
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":

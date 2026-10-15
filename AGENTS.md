@@ -867,7 +867,10 @@ Touching `Config`, `Profiles`, `Commands`.
   on the window" (swap on an arrow, send on a digit), or off a positional key
   reverses its unshifted stepping twin as `⇧Tab` and `⌃⌥⇧C` do (#453), or on
   `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past a per-Mac
-  mark through the one `topUpDesktopShortcuts` (`DesktopShortcutTopUpTests`)
+  mark through the one `topUpDesktopShortcuts` on the stored
+  `desktopShortcutBase`, a writer of the base moving the Desktop rows in the
+  same draft write (#1870, `DesktopShortcutTopUpTests`,
+  `HyperShortcutMoveDesktopTests`)
   (#1094/#1655, `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`,
   `DefaultKeybindingLadderTests` ▸ `shiftReversesItsTwin`), and `⌘` on an arrow
   steps the Spaces (`DefaultKeybindingLadderTests` ▸ `arrowsRideTheirOwnTiers`)
@@ -1922,7 +1925,8 @@ Touching `Tests/**`.
 - split suites early
 - generous hang-guards, never tight deadlines (#344)
 - reach the machine only through injected seams (hotkeys #565, menu-bar slots —
-  `MachineTouchTests`, `StatusItemSeamGuardTests`)
+  `MachineTouchTests`, `StatusItemSeamGuardTests`; the live app list, an
+  attach to or frame for another app refused — #2289, `LiveAppListSeamTests`)
 - a change owes a test that reds when it is reverted, and a test whose
   assertions are new or changed owes a `guard-prover` run whatever shape that
   test is — spawned `isolation: "worktree"`, or run alone

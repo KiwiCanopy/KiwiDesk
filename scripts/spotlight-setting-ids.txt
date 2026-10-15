@@ -70,6 +70,7 @@ appWide.visionBlur
 appWide.visionClearWallpaper
 appWide.visionDim
 config.appRules[app]
+config.desktopShortcutBase
 config.floatAutomatically
 config.floatRules
 config.layers[].icon

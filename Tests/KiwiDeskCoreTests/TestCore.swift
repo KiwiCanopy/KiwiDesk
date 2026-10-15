@@ -181,6 +181,11 @@ func makeTestCore(
     core.eventLoop.processIdentity.runs = { _ in true }
     core.eventLoop.processIdentity.isActive = { _ in nil }
     core.eventLoop.processIdentity.appAt = { _ in nil }
+    // No real app is listed, launched or activated into a test
+    // core (#2289); a suite that wants one states it.
+    core.eventLoop.runningApplications = { [] }
+    core.eventLoop.registersWorkspaceObservers = false
+    armForeignAppTripwires(core)
     // Same class, sixth time (#1146): the compositor reads behind
     // the gone classifier and the away ledger default LIVE, and
     // a fixture id can be a real CGWindowID on the host — one

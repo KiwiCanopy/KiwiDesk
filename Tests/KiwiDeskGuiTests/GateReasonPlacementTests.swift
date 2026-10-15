@@ -75,6 +75,8 @@ struct GateReasonPlacementTests {
                 // #1870: the Hyper key's recorder, the same shape
                 // on its own card above the layer header.
                 .shortcuts(.hyperKey),
+                // #1870: its move offer, on the same card.
+                .shortcuts(.desktopShortcutBase),
                 // #2228: the Space plate's switch, the same shape
                 // on KiwiShelf ▸ Show.
                 .spaceBar(.spaceCue),
