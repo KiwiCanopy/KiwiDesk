@@ -152,9 +152,27 @@ struct ShortcutsGateTests {
             Set(ShortcutsGates.InertReason.allCases)
                 == [
                     .onlyDefaultLayer, .noDesktopBinding, .trackUnused,
-                    .appWideLuaOwned,
+                    .appWideLuaOwned, .storedProfilePage,
                 ]
         )
+    }
+
+    /// The Hyper move offer (#1870) greys where `init.lua` owns
+    /// the config and on a stored-profile page, Lua first.
+    @Test("the Hyper move offer's reasons")
+    func hyperMoveOfferReasons() {
+        let key = SettingKey.shortcuts(.desktopShortcutBase)
+        let base = config(layers: [KeyLayer.defaultName])
+        func reason(lua: Bool, stored: Bool) -> ShortcutsGates.InertReason? {
+            ShortcutsGates(
+                config: base,
+                guiManaged: !lua,
+                editingStoredProfile: stored
+            ).inertReason(for: key)
+        }
+        #expect(reason(lua: false, stored: false) == nil)
+        #expect(reason(lua: false, stored: true) == .storedProfilePage)
+        #expect(reason(lua: true, stored: true) == .appWideLuaOwned)
     }
 
     /// Every gated row the area declares is either resolved from

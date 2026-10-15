@@ -25,6 +25,7 @@ struct KeyRecorderField: View {
     let onClear: () -> Void
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
+    @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
@@ -106,7 +107,11 @@ struct KeyRecorderField: View {
         .modifier(
             RecorderButtonChrome(recording: recording, dead: isDead)
         )
-        .help(Self.recordHelp)
+        // Dim, never disable: re-recording is how a row leaves
+        // Hyper (#1870, `keybindingRowStyle`'s rule).
+        .opacity(hyperDormant ? 0.55 : 1)
+        .help(hyperDormant ? HyperMoveWords.dormantHint : Self.recordHelp)
+        .accessibilityHint(hyperDormant ? HyperMoveWords.dormantHint : "")
         .accessibilityLabel(name)
         // The cost is announced ONCE, by the badge that precedes
         // this button in the row (#1126) — a second copy here
@@ -151,6 +156,12 @@ struct KeyRecorderField: View {
             },
             onDismiss: { self.rejection = nil }
         )
+    }
+
+    /// A Hyper chord while no Hyper key is set: it cannot fire.
+    private var hyperDormant: Bool {
+        hyperKeyIsOff && !recording
+            && KeyCombo.parse(combo)?.modifiers.contains(.hyper) == true
     }
 
     private var buttonTint: Color {

@@ -25,7 +25,19 @@ private struct KeybindingReservesTrashSlotKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+/// Whether no Hyper key is set (#1870), read once per section render:
+/// a recorder holding a Hyper chord then dims in place. False by
+/// default, so a mount outside `ShortcutsSection` never dims.
+private struct HyperKeyIsOffKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
 extension EnvironmentValues {
+    var hyperKeyIsOff: Bool {
+        get { self[HyperKeyIsOffKey.self] }
+        set { self[HyperKeyIsOffKey.self] = newValue }
+    }
+
     var disabledSystemShortcuts: Set<SystemShortcut> {
         get { self[DisabledSystemShortcutsKey.self] }
         set { self[DisabledSystemShortcutsKey.self] = newValue }

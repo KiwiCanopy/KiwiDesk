@@ -113,10 +113,11 @@ enum ShortcutsRowOrder {
         .shortcuts(.modeCue),
     ]
 
-    /// The Hyper key card's one row (#1870), drawn by
-    /// `HyperKeyRow`.
+    /// The Hyper key card's rows (#1870), drawn by `HyperKeyRow`:
+    /// the recorder, then the move offer under it.
     static let hyperKeyList: [SettingKey] = [
-        .shortcuts(.hyperKey)
+        .shortcuts(.hyperKey),
+        .shortcuts(.desktopShortcutBase),
     ]
 
     /// Layout group order (#453): `KeybindingCatalog

@@ -867,7 +867,10 @@ Touching `Config`, `Profiles`, `Commands`.
   on the window" (swap on an arrow, send on a digit), or off a positional key
   reverses its unshifted stepping twin as `⇧Tab` and `⌃⌥⇧C` do (#453), or on
   `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past a per-Mac
-  mark through the one `topUpDesktopShortcuts` (`DesktopShortcutTopUpTests`)
+  mark through the one `topUpDesktopShortcuts` on the stored
+  `desktopShortcutBase`, a writer of the base moving the Desktop rows in the
+  same draft write (#1870, `DesktopShortcutTopUpTests`,
+  `HyperShortcutMoveDesktopTests`)
   (#1094/#1655, `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`,
   `DefaultKeybindingLadderTests` ▸ `shiftReversesItsTwin`), and `⌘` on an arrow
   steps the Spaces (`DefaultKeybindingLadderTests` ▸ `arrowsRideTheirOwnTiers`)

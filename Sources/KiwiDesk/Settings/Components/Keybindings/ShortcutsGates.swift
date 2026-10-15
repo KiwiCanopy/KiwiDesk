@@ -13,6 +13,9 @@ struct ShortcutsGates {
     /// `SettingsModel.guiManaged`; read by the plate switch alone,
     /// which writes `gui.json` at once (#2144).
     var guiManaged = true
+    /// `SettingsModel.editingStoredProfile`; read by the Hyper move
+    /// offer alone, whose Save must write the shared rows (#1870).
+    var editingStoredProfile = false
 
     /// Reason why a Shortcuts setting is withheld or gated.
     enum InertReason: Hashable, CaseIterable {
@@ -25,6 +28,10 @@ struct ShortcutsGates {
         /// `init.lua` owns the config, so the app-wide plate switch
         /// has no store to write (`.luaOwnsConfig`, #2144).
         case appWideLuaOwned
+        /// A saved profile other than the loaded one is being
+        /// edited, so the Hyper move has no shared rows to write
+        /// (#1870).
+        case storedProfilePage
     }
 
     /// Evaluates inert reason for setting key.
@@ -46,6 +53,9 @@ struct ShortcutsGates {
             return trackIsUsed ? nil : .trackUnused
         case .shortcuts(.modeCue), .shortcuts(.hyperKey):
             return guiManaged ? nil : .appWideLuaOwned
+        case .shortcuts(.desktopShortcutBase):
+            guard guiManaged else { return .appWideLuaOwned }
+            return editingStoredProfile ? .storedProfilePage : nil
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -107,6 +117,7 @@ struct ShortcutsGates {
         .shortcuts(.swapWithTrack),
         .shortcuts(.modeCue),
         .shortcuts(.hyperKey),
+        .shortcuts(.desktopShortcutBase),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's

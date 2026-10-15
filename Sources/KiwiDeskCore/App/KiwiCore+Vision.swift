@@ -60,22 +60,6 @@ extension KiwiCore {
         vision.onChange(on)
     }
 
-    /// Every change of the live app-wide values — a verb, a row,
-    /// a `gui.json` reload, restore or reset — reaches the plate
-    /// and the appearance ledger here (`appWideLedger`'s
-    /// `didSet`), so none of them leaves the mode out of step.
-    func appWideLiveChanged(from old: AppWideSettings) {
-        let new = appWide
-        guard new != old else { return }
-        if new.visionAppearance != old.visionAppearance, vision.isOn {
-            retargetVisionAppearance(new.visionAppearance)
-        }
-        // The whole stored group, so a field v3 adds re-draws too.
-        if new.vision != old.vision { updateVision() }
-        if new.hyperKey != old.hyperKey { oweHyperRemap() }
-        onAppWideChange()
-    }
-
     /// Re-draws the plates from the live focus. Costs nothing
     /// while the mode is off and every plate has faded.
     func updateVision(reassertOrder: Bool = false) {
