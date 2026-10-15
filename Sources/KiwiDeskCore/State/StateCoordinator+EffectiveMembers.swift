@@ -135,12 +135,22 @@ extension StateCoordinator {
         guard let last = workspaces.lastFocused,
             !space.windows.contains(last)
         else { return space.focused }
-        if tiled.contains(last)
-            || floatingStickyVisitors(of: space).contains(last)
-        {
+        if anchorVisitors(of: space, tiled: tiled).contains(last) {
             return last
         }
         return space.focused
+    }
+
+    /// The windows homed elsewhere that `focusAnchor` may yield for
+    /// `space` — tiled travelers, then floating sticky visitors. A
+    /// surface drawing the anchor takes this set, so every anchor it
+    /// can be handed has a slot (#2259).
+    public func anchorVisitors(
+        of space: Space,
+        tiled: [WindowID]
+    ) -> [WindowID] {
+        tiled.filter { !space.windows.contains($0) }
+            + floatingStickyVisitors(of: space)
     }
 
     /// Variant of `focusAnchor` computing its own `tiled` list (#416).
@@ -193,9 +203,8 @@ extension StateCoordinator {
     }
 
     /// Floating sticky windows homed elsewhere that render on `space`,
-    /// by id — the one set the focus anchor, the Space Bar and the
-    /// ring slots share (#2259). Fullscreen ones stay in; a reader
-    /// keeping them home (#670) drops them itself.
+    /// by id (#2259). Fullscreen ones stay in; a reader keeping them
+    /// home (#670) drops them itself.
     public func floatingStickyVisitors(of space: Space) -> [WindowID] {
         windows.all
             .filter {

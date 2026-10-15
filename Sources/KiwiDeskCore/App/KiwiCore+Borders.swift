@@ -97,12 +97,10 @@ extension KiwiCore {
         // same `focusAnchor` the App Bar / Scrolling / Monocle already
         // read (#431), so a keyboard focus that lands on a traveler
         // moves the ring onto it too — not only a mouse click.
-        // Floating sticky visitors join the slots: the anchor admits
-        // them, so a focused one with no slot leaves no ring (#2259).
+        // Slots take every visitor the anchor may yield, or a focused
+        // one leaves no ring and the rest go dormant (#2259).
         let tiled = state.effectiveTiledMembers(of: space)
-        let travelers =
-            tiled.filter { !space.windows.contains($0) }
-            + state.floatingStickyVisitors(of: space)
+        let travelers = state.anchorVisitors(of: space, tiled: tiled)
         // Transient overlays (launchers, panels) never get a ring,
         // even while focused — see `borderSpecs` (#300).
         let overlays = Set(

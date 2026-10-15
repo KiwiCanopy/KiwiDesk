@@ -89,6 +89,18 @@ same rect**: it selects the backing scale, so a held frame paired
 with the spec's screen rasterizes the ring at the wrong display's
 scale during a cross-display move.
 
+## Every window the anchor may yield has a ring slot
+
+**The ring's slots take the active Space's own windows plus the
+one `StateCoordinator.anchorVisitors(of:tiled:)` set, the same set
+`focusAnchor` admits from outside the Space** (#2259). An anchor
+with no slot draws no focused ring, and with unfocused rings off
+every other ring goes dormant: that was a floating sticky window
+the anchor admitted and the slots did not. A new class of window
+the anchor may yield joins `anchorVisitors`, never the anchor or
+the slot list alone (`BorderTravelerFocusTests` ▸
+`floatingVisitorGetsFocusedRing`).
+
 ## The focused ring consults the own-key-window seam
 
 While the process holds an own key or modal window that is NOT

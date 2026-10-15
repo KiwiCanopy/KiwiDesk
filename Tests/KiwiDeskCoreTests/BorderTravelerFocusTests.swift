@@ -41,6 +41,7 @@ struct BorderTravelerFocusTests {
     /// space1 (active) holds locals 1...2; a sticky window homes on
     /// space2 and so travels into space1's row.
     private func seed(_ core: KiwiCore) {
+        core.tiler.settings.borderStyle.unfocusedEnabled = false
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.ensureSpace("2")
         core.state.workspaces.activate("1")
@@ -96,5 +97,27 @@ struct BorderTravelerFocusTests {
         #expect(specs.count == 1)
         #expect(specs.first?.window == WindowID(60))
         #expect(specs.first?.colorHex == focusColor)
+    }
+
+    /// #2259, the unfocused arm: a floating sticky visitor is a float,
+    /// so it takes the unfocused ring every float gets (#1286).
+    @Test("An unfocused floating sticky visitor wears the unfocused ring")
+    func floatingVisitorGetsUnfocusedRing() {
+        let core = makeCore()
+        seed(core)
+        core.tiler.settings.borderStyle.unfocusedEnabled = true
+        core.state.windows.upsert(
+            makeWindow(60, isSticky: true, isFloating: true)
+        )
+        core.state.workspaces.add(WindowID(60), to: "2")
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        let style = core.tiler.settings.borderStyle
+        let drawn = Dictionary(
+            uniqueKeysWithValues: core.desiredBorderSpecs().map {
+                ($0.window, $0.colorHex)
+            }
+        )
+        #expect(drawn[WindowID(1)] == style.focusedColor)
+        #expect(drawn[WindowID(60)] == style.unfocusedColor)
     }
 }
