@@ -131,9 +131,17 @@ struct HyperKeyRowTests {
             let sources = KeyboardMatrix.rows(for: type)
                 .flatMap { $0 }.compactMap(\.source)
             #expect(Set(sources).count == sources.count)
-            #expect(sources.contains(.capsLock))
-            #expect(sources.contains(.rightCommand))
-            #expect(sources.contains(.leftShift))
+            // Every key the board draws a cap for: Caps Lock and
+            // the modifiers, less Right ⌃, which Mac boards lack.
+            let drawable = Set(
+                HyperSourceKey.allCases.filter {
+                    switch $0.kind {
+                    case .capsLock, .modifier: return true
+                    case .systemKey, .spare: return false
+                    }
+                }
+            ).subtracting([.rightControl])
+            #expect(Set(sources) == drawable)
             // Only legend caps carry a source: a bindable key's
             // code stays the board's.
             #expect(
@@ -169,7 +177,41 @@ struct HyperKeyRowTests {
                 encoding: .utf8
             )
         )
-        #expect(row.contains("caption(HyperKeyWords.paused)"))
-        #expect(row.contains("model.hyperStatus == .off"))
+        // The view draws the one pure caption, handed the live
+        // status (`captionStates` holds what it answers).
+        #expect(row.contains("Self.captionText("))
+        #expect(row.contains("status: model.hyperStatus"))
+    }
+
+    @Test("the caption names the state the key is in")
+    func captionStates() {
+        LocalizationManager.shared.select("en")
+        let text = HyperKeyRow.captionText
+        #expect(
+            text(.capsLock, .refused, false)
+                == HyperKeyWords.trouble(.refused)
+        )
+        #expect(
+            text(.capsLock, .failed, false)
+                == HyperKeyWords.trouble(.failed)
+        )
+        #expect(text(.capsLock, .off, false) == HyperKeyWords.paused)
+        #expect(
+            text(.capsLock, .on, false)
+                == HyperKeyWords.caption(.capsLock)
+        )
+        #expect(text(nil, .off, false) == HyperKeyWords.caption(nil))
+        #expect(text(.capsLock, .on, true) != HyperKeyWords.caption(.capsLock))
+    }
+
+    @Test("pressing the Hyper key again keeps the key it is")
+    func f18KeepsTheKey() {
+        let f18: UInt16 = 79
+        #expect(
+            HyperKeyField.committed(code: f18, current: .capsLock) == .capsLock
+        )
+        #expect(HyperKeyField.committed(code: f18, current: nil) == .f18)
+        #expect(HyperKeyField.committed(code: 105, current: .capsLock) == .f13)
+        #expect(HyperKeyField.committed(code: 4, current: nil) == nil)  // H
     }
 }

@@ -26,6 +26,19 @@ struct SpokenKeyboardBoard: View {
     /// The Hyper key, marked ✦ on its cap (#1870).
     var hyperKey: HyperSourceKey?
 
+    /// The Hyper key's spoken name where the board draws its ✦,
+    /// nil where it draws none (#1870) — the cap's own predicate.
+    @MainActor
+    static func hyperName(
+        _ key: HyperSourceKey?,
+        on type: KeyboardMatrix.PhysicalType
+    ) -> String? {
+        guard let key, KeyboardMatrix.draws(key, on: type) else {
+            return nil
+        }
+        return HyperKeyWords.name(key)
+    }
+
     private var scopeLabel: String {
         switch scope {
         case .all: return L("keyboard.scope.all", "All")
@@ -54,8 +67,7 @@ struct SpokenKeyboardBoard: View {
                 ),
                 scopeLabel: scopeLabel,
                 layerLabel: layerLabel,
-                hyperName: KeyboardMatrix.draws(hyperKey, on: type)
-                    ? hyperKey.map(HyperKeyWords.name) : nil,
+                hyperName: Self.hyperName(hyperKey, on: type),
                 conflictDetail: conflictDetail
             )
         )

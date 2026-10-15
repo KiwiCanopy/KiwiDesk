@@ -129,13 +129,27 @@ struct HyperKeyField: View {
     /// While Hyper is on, the key already arrives as F18: pressing
     /// it again keeps the key it is.
     private func commit(_ code: UInt16) {
-        guard let recorded = HyperSourceKey(keyCode: code) else {
+        guard let recorded = Self.committed(code: code, current: key)
+        else {
             refused = true
             flash()
             announce(HyperKeyWords.typesText)
             return
         }
-        if recorded == .f18, let key { self.key = key } else { key = recorded }
+        key = recorded
+    }
+
+    /// The key a press records, nil for a key that types. While
+    /// Hyper is on the key already arrives as F18, so pressing it
+    /// again keeps the key it is.
+    static func committed(
+        code: UInt16,
+        current: HyperSourceKey?
+    ) -> HyperSourceKey? {
+        guard let recorded = HyperSourceKey(keyCode: code) else {
+            return nil
+        }
+        return recorded == .f18 ? current ?? .f18 : recorded
     }
 
     private func announce(_ text: String) {

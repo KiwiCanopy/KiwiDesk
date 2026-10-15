@@ -107,13 +107,21 @@ struct KeyboardBoardSpokenTests {
             conflictDetail: []
         )
         #expect(named.contains("The Hyper key is Caps Lock."))
+        #expect(
+            SpokenKeyboardBoard.hyperName(.capsLock, on: .ansi)
+                == "Caps Lock"
+        )
+        #expect(SpokenKeyboardBoard.hyperName(.f13, on: .ansi) == nil)
+        #expect(SpokenKeyboardBoard.hyperName(nil, on: .ansi) == nil)
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/"
                     + "Keybindings/KeyboardBoardSpoken.swift"
             )
         let source = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-        #expect(source.contains("KeyboardMatrix.draws(hyperKey"))
+        #expect(
+            source.contains("hyperName: Self.hyperName(hyperKey, on: type)")
+        )
     }
 
     @Test("the sentence speaks only the buckets that have keys")

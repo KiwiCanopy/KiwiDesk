@@ -56,23 +56,30 @@ struct HyperKeyRow: View {
         }
     }
 
-    @ViewBuilder private var captions: some View {
-        if reason == .appWideLuaOwned {
-            caption(GeneralGateHelp.sentence(for: .luaOwned))
-        } else if model.appWide.hyperKey != nil,
-            let trouble = HyperKeyWords.trouble(model.hyperStatus)
-        {
-            // The key is chosen but not working: its cost sentence
-            // would claim it is Hyper now.
-            caption(trouble)
-        } else if model.appWide.hyperKey != nil,
-            model.hyperStatus == .off
-        {
-            // Chosen, not applied: KiwiDesk is not managing yet.
-            caption(HyperKeyWords.paused)
-        } else {
-            caption(HyperKeyWords.caption(model.appWide.hyperKey))
-        }
+    private var captions: some View {
+        caption(
+            Self.captionText(
+                key: model.appWide.hyperKey,
+                status: model.hyperStatus,
+                luaOwned: reason == .appWideLuaOwned
+            )
+        )
+    }
+
+    /// The one sentence under the field.
+    static func captionText(
+        key: HyperSourceKey?,
+        status: HyperKeyStatus,
+        luaOwned: Bool
+    ) -> String {
+        if luaOwned { return GeneralGateHelp.sentence(for: .luaOwned) }
+        guard key != nil else { return HyperKeyWords.caption(nil) }
+        // The key is chosen but not working: its cost sentence
+        // would claim it is Hyper now.
+        if let trouble = HyperKeyWords.trouble(status) { return trouble }
+        // Chosen, not applied: KiwiDesk is not managing yet.
+        if status == .off { return HyperKeyWords.paused }
+        return HyperKeyWords.caption(key)
     }
 
     private func caption(_ text: String) -> some View {
