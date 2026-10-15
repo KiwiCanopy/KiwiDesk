@@ -305,6 +305,12 @@ struct KiwiVisionCensusRenderTests {
                 + "KiwiVisionScene.swift"
         )
         #expect(scene.contains("lethazed=!focused&&!clear"))
+        let panel = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/KiwiVision/"
+                + "KiwiVisionPanelPreview.swift"
+        )
+        #expect(panel.contains("letclearApp=model.appWide.visionClearApp"))
+        #expect(panel.occurrences(of: "clearApp:clearApp") == 2)
         #expect(scene.contains("clear:clearApp,"))
     }
 }

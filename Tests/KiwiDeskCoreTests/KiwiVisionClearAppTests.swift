@@ -189,13 +189,17 @@ struct KiwiVisionClearAppTests {
                 ManagedWindow(id: settings, pid: getpid(), appName: "Kiwi")
             )
         )
+        // The anchor stays another app's window, so its pid and this
+        // process's tell the two readings apart.
+        let space = core.state.workspaces.space(of: focused)!
+        core.state.workspaces.focus(focused, in: space)
         core.eventLoop.ownKeyWindow = {
             OwnKeyWindowReading(number: 777_777, isDialog: true)
         }
         core.setAppWide(persisting: false) { $0.visionClearApp = true }
         core.vision.isOn = true
         let windows = core.visionRequest().windows
-        #expect(windows.filter(\.clear).count == 1)
+        #expect(windows.filter(\.clear).count == 1, "Settings alone")
         #expect(windows.count == 4, "the focus is behind the dialog")
     }
 }
