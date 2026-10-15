@@ -3718,7 +3718,7 @@ It is off at every launch.
 
 Its settings are app-wide: they are stored in `gui.json` as the
 `kiwivision` group (`dim`, `blur`, `appearance`,
-`clear_wallpaper`, `clear_app`), no profile
+`clear_wallpaper`, `clear_app`, `never_dimmed`), no profile
 carries them, and loading a profile never changes them. Their GUI
 twin is Settings ▸ **KiwiVision**. The `set_*` verbs below change
 the running value only, never `gui.json`; in a Lua-owned setup,
@@ -3791,6 +3791,17 @@ focused one — the part of each you can see; where another app's
 window covers it, that window stays dimmed. Focus a window of
 another app and its windows become the clear ones.
 
+### kiwivision.set_never_dimmed
+
+**Expects:** a list of apps, as a table or as separate strings —
+each a bundle id, or the process name of an app without one, such
+as `"sketchybar"`. Nothing clears the list.
+
+**Does:** keeps every window of these apps clear, focused or not —
+the part you can see. A window drawn beneath all others, such as
+SketchyBar's bar, shows through the haze. Settings ▸ KiwiVision ▸
+**Never dimmed** edits the same list.
+
 **Example:**
 
 ```lua
@@ -3799,6 +3810,7 @@ kiwivision.set_blur(false)
 kiwivision.set_appearance("dark")
 kiwivision.set_clear_wallpaper(true)
 kiwivision.set_clear_app(true)
+kiwivision.set_never_dimmed({ "sketchybar", "com.apple.Music" })
 ```
 :::
 

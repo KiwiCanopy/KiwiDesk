@@ -252,7 +252,9 @@ extension EventLoop {
         return bundle(of: other, lookingUp: lookingUp) == bundleID
     }
 
-    private func bundle(of pid: pid_t, lookingUp: Bool) -> String? {
+    /// A process's bundle id: what attach filed, else — where
+    /// `lookingUp` — LaunchServices. A caller spells the flag.
+    func bundle(of pid: pid_t, lookingUp: Bool) -> String? {
         processIdentity.observed[pid]?.ref.bundleID
             ?? processIdentity.unlisted[pid]
             ?? (lookingUp ? processIdentity.appAt(pid)?.ref.bundleID : nil)

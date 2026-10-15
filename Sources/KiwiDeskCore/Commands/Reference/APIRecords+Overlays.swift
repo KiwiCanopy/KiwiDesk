@@ -223,6 +223,11 @@ extension APIReference {
                 + "windows; off by default.",
             .boolean("enabled")
         ),
+        "set_never_dimmed": APIRecord(
+            "Replaces the never-dimmed apps: bundle ids or process "
+                + "names, one or more; none clears it.",
+            .text("app", optional: true)
+        ),
         "set_clear_app": APIRecord(
             "Keeps every window of the focused app clear, not only "
                 + "the focused one; off by default.",

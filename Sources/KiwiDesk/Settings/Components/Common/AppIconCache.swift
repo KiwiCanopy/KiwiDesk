@@ -25,6 +25,31 @@ final class AppIconCache {
         return image
     }
 
+    /// The icon for a list entry (#2103 ruling 27): the app's where
+    /// the entry is a bundle id an app answers to, else the generic
+    /// program icon a process without a bundle id shows.
+    func icon(forListKey key: String) -> NSImage {
+        let id = "list:" + key.lowercased()
+        if let hit = memo[id] { return hit }
+        let image =
+            NSWorkspace.shared.urlForApplication(
+                withBundleIdentifier: key
+            ) == nil
+            ? processIcon : icon(forBundleID: key)
+        memo[id] = image
+        return image
+    }
+
+    /// The generic program icon of a process without a bundle id.
+    var processIcon: NSImage {
+        if let hit = memo["process:"] { return hit }
+        let image = Self.downsized(
+            NSWorkspace.shared.icon(for: .unixExecutable)
+        )
+        memo["process:"] = image
+        return image
+    }
+
     /// Asynchronously warms the icon memo for disk applications.
     func warm() {
         guard !warming else { return }
