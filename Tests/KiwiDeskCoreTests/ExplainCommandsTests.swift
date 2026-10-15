@@ -98,6 +98,10 @@ struct ExplainCommandsTests {
             AutoFloatReason.accessoryApp.escapes
                 == ["set_float_automatically", "tile_rule"]
         )
+        #expect(
+            AutoFloatReason.fixedSize.escapes
+                == ["set_float_automatically", "tile_rule"]
+        )
         #expect(AutoFloatReason.panel.escapes.isEmpty)
         #expect(
             AutoFloatReason.rule.escapes == ["app_rule.remove_float"]
@@ -108,6 +112,15 @@ struct ExplainCommandsTests {
         for verb in verbs {
             #expect(APIReference.entry(named: verb) != nil, "\(verb)")
         }
+    }
+
+    /// The reasons' wire spellings are a machine contract.
+    @Test("each reason keeps its wire spelling")
+    func wireNamesAreFrozen() {
+        #expect(AutoFloatReason.rule.wireName == "rule")
+        #expect(AutoFloatReason.panel.wireName == "panel")
+        #expect(AutoFloatReason.accessoryApp.wireName == "accessory_app")
+        #expect(AutoFloatReason.fixedSize.wireName == "fixed_size")
     }
 
     @Test("a flag with no verdict is the user's float")
@@ -140,7 +153,7 @@ struct ExplainCommandsTests {
         core.state.appRules[bundle] = SpaceID("3")
         core.installFloatRules(
             FloatRules(
-                ["\(bundle):Info", "com.other.app"],
+                ["\(bundle):Info", "\(bundle)s", "com.other.app"],
                 guess: FloatGuess(tileRules: [bundle])
             )
         )
@@ -218,6 +231,24 @@ struct ExplainCommandsTests {
         )
         #expect(
             !FloatDetection.ignoresRaisedWindows(bundleID: "com.apple.finder")
+        )
+    }
+
+    @Test("explain_app reports the built-in raised-window ignore")
+    func explainAppReportsRaised() {
+        let core = makeCore()
+        core.eventLoop.runningApplications = { [] }
+        core.eventLoop.visiblePIDs = { [] }
+        let response = core.execute(
+            "explain_app",
+            args: [.string("com.mitchellh.ghostty")]
+        )
+        guard case .object(let answer)? = response.data else {
+            Issue.record("no answer")
+            return
+        }
+        #expect(
+            field(answer["ignored"], "built_in_raised") == .bool(true)
         )
     }
 
