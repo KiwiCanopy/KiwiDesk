@@ -97,7 +97,12 @@ because two real clients now remove drift — see
   `gui.json` clears that mark and the generation mark below (`DesktopShortcutTopUpTests`,
   `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
-  its own.
+  its own. The tier's modifiers are the stored
+  `GuiConfig.desktopShortcutBase` (#1870), which the top-up and
+  Restore Defaults write on, and which only the Hyper move offer
+  and its reverse change — in the draft, beside the rows they
+  move, so a Save or a Revert keeps the two together
+  (`HyperShortcutMoveDesktopTests`).
 - **A default row added after the first-run seed joins the next
   generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
   and list the row in `rows(ofGeneration:)`, beside adding it to

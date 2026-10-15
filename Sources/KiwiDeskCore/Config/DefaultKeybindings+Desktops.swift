@@ -6,13 +6,21 @@ import Foundation
 /// tier rather than acting on the window; the ruling is
 /// `docs/design-decisions.md` ▸ *The Desktop tier is seeded*.
 extension DefaultKeybindings {
-    /// The row that goes to Desktop `number`, or nil past the ten
-    /// digits.
+    /// The seeded tier's row for Desktop `number`.
     public static func desktopRow(_ number: Int) -> KeyBinding? {
+        desktopRow(number, base: .standard)
+    }
+
+    /// The row that goes to Desktop `number` on `base`, or nil past
+    /// the ten digits.
+    public static func desktopRow(
+        _ number: Int,
+        base: DesktopShortcutBase
+    ) -> KeyBinding? {
         guard (1...digitCapacity).contains(number) else { return nil }
         let digit = number == digitCapacity ? "0" : String(number)
         return KeyBinding(
-            combo: "control+option+shift+command+\(digit)",
+            combo: base.combo(digit),
             lua: "KiwiDesk.focus_desktop(\(number))",
             kind: .navigation,
             label: "Go to Desktop \(number)"
@@ -28,24 +36,28 @@ extension DefaultKeybindings {
         return row.lua.hasPrefix(sample[...open])
     }
 
-    /// Rows for the Desktops in `desktops` numbered above `mark`
-    /// that no row in `existing` already goes to and whose chord
-    /// is free. Additive, like `digitTopUp`: a Desktop at or
+    /// Rows on `base` for the Desktops in `desktops` numbered above
+    /// `mark` that no row in `existing` already goes to and whose
+    /// chord is free. Additive, like `digitTopUp`: a Desktop at or
     /// below the mark was offered before, so a row the user
-    /// deleted stays deleted.
+    /// deleted stays deleted. A chord is free as registered, so a
+    /// Hyper row is taken by its bare twin (#1870).
     public static func desktopTopUp(
         existing: [KeyBinding],
         desktops: [Int],
-        above mark: Int
+        above mark: Int,
+        base: DesktopShortcutBase = .standard
     ) -> [KeyBinding] {
-        var taken = Set(existing.compactMap { KeyCombo.parse($0.combo) })
+        var taken = Set(
+            existing.compactMap { KeyCombo.parse($0.combo)?.registered }
+        )
         let bound = Set(existing.map(\.lua))
         var rows: [KeyBinding] = []
         for number in Set(desktops).sorted() where number > mark {
-            guard let row = desktopRow(number),
+            guard let row = desktopRow(number, base: base),
                 !bound.contains(row.lua),
                 let combo = KeyCombo.parse(row.combo),
-                taken.insert(combo).inserted
+                taken.insert(combo.registered).inserted
             else { continue }
             rows.append(row)
         }
