@@ -62,6 +62,8 @@ public final class StickyMarkManager {
         }
     }
 
+    /// When each mark last ordered (`ChromeOrderClock`).
+    private var orderStamps: [WindowID: UInt64] = [:]
     private(set) var overlays: [WindowID: StickyMarkOverlay] =
         [:]
 
@@ -105,6 +107,7 @@ public final class StickyMarkManager {
         where !wanted.contains(id) {
             overlay.hide()
             overlays[id] = nil
+            orderStamps[id] = nil
         }
         for spec in desired {
             let overlay =
@@ -129,6 +132,7 @@ public final class StickyMarkManager {
                 tracked: isWindowServerTracked(spec.window)
             ) {
                 overlay.order()
+                orderStamps[spec.window] = ChromeOrderClock.tick()
             }
         }
     }
@@ -163,16 +167,18 @@ public final class StickyMarkManager {
         overlays[id]?.oweOrder()
     }
 
-    /// `id`'s mark panel, what KiwiVision's float veil orders
-    /// above (#2103 ruling 3).
-    func panelNumber(of id: WindowID) -> CGWindowID? {
-        overlays[id]?.panelNumber
+    /// `id`'s mark panel and when it last ordered — chrome a
+    /// KiwiVision float veil must clear (#2103 ruling 3).
+    func chrome(of id: WindowID) -> (panel: CGWindowID, stamp: UInt64)? {
+        guard let panel = overlays[id]?.panelNumber else { return nil }
+        return (panel, orderStamps[id] ?? 0)
     }
 
     /// Re-orders mark above window following z-order changes
     /// (the watch's restack phase, #414).
     public func reassert(_ id: WindowID) {
         overlays[id]?.order()
+        orderStamps[id] = ChromeOrderClock.tick()
     }
 
     /// Flashes expanded home-space reorder hint (#421).
@@ -202,5 +208,6 @@ public final class StickyMarkManager {
     public func clear() {
         for overlay in overlays.values { overlay.hide() }
         overlays = [:]
+        orderStamps = [:]
     }
 }

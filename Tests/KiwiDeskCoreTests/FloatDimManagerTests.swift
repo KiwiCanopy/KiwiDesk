@@ -146,4 +146,32 @@ struct FloatDimManagerTests {
         let panel = try #require(made().first)
         #expect(panel.frame == moved.insetBy(dx: -5, dy: -5))
     }
+
+    @Test("the veil anchors on the chrome ordered earliest")
+    func anchorIsTheTopmostChrome() {
+        #expect(FloatDimManager.anchor(chrome: [nil, nil], float: 7) == 7)
+        #expect(
+            FloatDimManager.anchor(chrome: [(70, 3), nil], float: 7) == 70
+        )
+        // A ring ordered before the mark sits above it.
+        #expect(
+            FloatDimManager.anchor(chrome: [(70, 3), (80, 5)], float: 7)
+                == 70
+        )
+        #expect(
+            FloatDimManager.anchor(chrome: [(70, 6), (80, 5)], float: 7)
+                == 80
+        )
+    }
+
+    @Test("off, every veil fades and goes for good")
+    func offRetiresEveryVeil() throws {
+        let (manager, made) = make()
+        manager.sync(request([float()]), alive: [f1], reassert: false)
+        manager.sync(request([], on: false), alive: [f1], reassert: false)
+        let panel = try #require(made().first)
+        #expect(!panel.isShown)
+        #expect(panel.orderedOut == 1)
+        #expect(manager.shown.isEmpty && manager.dormant.isEmpty)
+    }
 }

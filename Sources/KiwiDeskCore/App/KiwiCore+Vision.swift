@@ -132,10 +132,6 @@ extension KiwiCore {
         if vision.noteStandDown(displays) { updateVision() }
     }
 
-    /// What the plates draw now. The window kept clear is the
-    /// ring's focused window, or an own key window that is not it
-    /// — a dialog, Sparkle's alert — which stays clear the way
-    /// it stands the focused ring down (#933).
     /// The ring's focused window, and an own key window that is
     /// not it.
     func visionFocus() -> (anchor: WindowID?, ownKey: CGWindowID?) {
@@ -151,6 +147,10 @@ extension KiwiCore {
         return (anchor, ownKey)
     }
 
+    /// What the plates draw now. The window kept clear is the
+    /// ring's focused window, or an own key window that is not it
+    /// — a dialog, Sparkle's alert — which stays clear the way
+    /// it stands the focused ring down (#933).
     func visionRequest(
         _ focus: (anchor: WindowID?, ownKey: CGWindowID?)? = nil
     ) -> VisionManager.Request {

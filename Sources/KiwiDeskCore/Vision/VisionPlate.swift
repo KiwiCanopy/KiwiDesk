@@ -37,9 +37,6 @@ final class AppKitVisionPlate: VisionPlateBackend {
         panel?.orderOut(nil)
     }
 
-    /// The plate's fade, on and off.
-    static let fadeDuration: CFTimeInterval = 0.2
-
     #if DEBUG
         /// The panel's window number, nil before the first update.
         var panelNumber: Int? { panel?.windowNumber }
@@ -99,20 +96,6 @@ final class AppKitVisionPlate: VisionPlateBackend {
         panel.contentView = veil.view
         return panel
     }
-
-    /// The blur view a plate carries; glass where it can draw.
-    static func makeBlur() -> NSView {
-        if let glass = GlassPlate.make() {
-            GlassPlate.update(glass, frame: .zero, cornerRadius: 0)
-            GlassTint.pinDark(glass)
-            return glass
-        }
-        let hud = NSVisualEffectView()
-        hud.material = .hudWindow
-        hud.blendingMode = .behindWindow
-        hud.state = .active
-        return hud
-    }
 }
 
 /// KiwiVision's look — a behind-window blur under a black dim —
@@ -126,7 +109,10 @@ final class VisionVeil {
     /// The behind-window blur: Liquid Glass `clear` pinned dark,
     /// `hud` where glass cannot draw (#2103 ruling 10, amended
     /// 2026-10-14).
-    private let blurView = AppKitVisionPlate.makeBlur()
+    private let blurView = VisionVeil.makeBlur()
+
+    /// The fade, on and off.
+    static let fadeDuration: CFTimeInterval = 0.2
 
     init() {
         view.wantsLayer = true
@@ -164,8 +150,11 @@ final class VisionVeil {
         dimLayer.cornerRadius = cornerRadius
         if blurView.frame != bounds { blurView.frame = bounds }
         GlassPlate.update(blurView, frame: bounds, cornerRadius: cornerRadius)
-        blurView.layer?.cornerRadius = cornerRadius
-        blurView.layer?.masksToBounds = cornerRadius > 0
+        // Glass rounds itself; the `hud` fallback is masked.
+        if blurView is NSVisualEffectView {
+            blurView.layer?.cornerRadius = cornerRadius
+            blurView.layer?.masksToBounds = cornerRadius > 0
+        }
         dimLayer.opacity = Float(VisionPlateDim.opacity(forDim: dim))
         CATransaction.commit()
         if blurView.isHidden == blur { blurView.isHidden = !blur }
@@ -189,13 +178,27 @@ final class VisionVeil {
                 from: layer.presentation()?.opacity ?? layer.opacity,
                 to: target,
                 begin: CACurrentMediaTime(),
-                duration: AppKitVisionPlate.fadeDuration,
+                duration: Self.fadeDuration,
                 reduceMotion: reduceMotion
             ),
             forKey: "fade"
         )
         layer.opacity = target
         CATransaction.commit()
+    }
+
+    /// The blur view a veil carries; glass where it can draw.
+    static func makeBlur() -> NSView {
+        if let glass = GlassPlate.make() {
+            GlassPlate.update(glass, frame: .zero, cornerRadius: 0)
+            GlassTint.pinDark(glass)
+            return glass
+        }
+        let hud = NSVisualEffectView()
+        hud.material = .hudWindow
+        hud.blendingMode = .behindWindow
+        hud.state = .active
+        return hud
     }
 
     /// A click-through `.normal` panel for a veil, stacked relative

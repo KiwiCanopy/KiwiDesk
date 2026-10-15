@@ -4,7 +4,8 @@ import AppKit
 /// float tier lifts above the focused window sits above the plate,
 /// so each one wears the plate's veil on a panel of its own,
 /// stacked above the float's own chrome so its mark and its ring
-/// dim with it (owner ruling, option A, 2026-10-15).
+/// dim with it (owner ruling, option A, 2026-10-15). Off, every
+/// veil fades and goes.
 @MainActor
 final class FloatDimManager {
     /// One float to veil.
@@ -18,9 +19,8 @@ final class FloatDimManager {
         /// The veil's corner radius, ring reach included.
         let cornerRadius: CGFloat
         /// The window the veil orders directly above: the float's
-        /// mark panel where it has one, else the float. Chrome
-        /// orders directly above its float, so it always lands
-        /// under a veil already above it.
+        /// topmost chrome, else the float. Chrome orders directly
+        /// above its float, so a re-order lands under the veil.
         let anchor: CGWindowID
         /// Whether the float is carried across Desktops (#2149).
         let spans: Bool
@@ -44,7 +44,7 @@ final class FloatDimManager {
         var float: Float?
         /// Where the veil sits now, AX coordinates, unoutset.
         var frame: CGRect?
-        /// The anchor the veil was last ordered above, nil while
+        /// The chrome the veil was last ordered above, nil while
         /// it owes an order.
         var ordered: CGWindowID?
         var spans = false
@@ -84,6 +84,18 @@ final class FloatDimManager {
         Set(entries.filter { $0.value.float == nil }.keys)
     }
 
+    /// The window a veil orders directly above: of a float's
+    /// chrome, the piece ordered earliest (`ChromeOrderClock`) —
+    /// each later one lands directly above the float, under it —
+    /// else the float.
+    static func anchor(
+        chrome: [(panel: CGWindowID, stamp: UInt64)?],
+        float: CGWindowID
+    ) -> CGWindowID {
+        chrome.compactMap { $0 }
+            .min { $0.stamp < $1.stamp }?.panel ?? float
+    }
+
     /// Whether any veil is shown or fading.
     var hasShown: Bool {
         entries.values.contains { $0.backend.isShown }
@@ -97,6 +109,14 @@ final class FloatDimManager {
         dim = request.dim
         blur = request.blur
         let motion = fades ? reduceMotion() : true
+        guard request.on else {
+            // Off: every veil fades and goes, as the plate does.
+            for entry in entries.values {
+                entry.backend.retire(reduceMotion: motion)
+            }
+            entries = [:]
+            return
+        }
         let wanted = Dictionary(
             request.floats.map { ($0.id, $0) },
             uniquingKeysWith: { first, _ in first }

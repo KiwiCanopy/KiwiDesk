@@ -24,6 +24,9 @@ protocol FloatDimBackend: AnyObject {
     func hide(reduceMotion: Bool)
     /// Takes the panel off screen: its float was hidden.
     func orderOut()
+    /// Fades out unless `reduceMotion`, then orders out for good:
+    /// KiwiVision turned off.
+    func retire(reduceMotion: Bool)
     /// Joins every Desktop while its float is carried (#2149).
     func setSpansDesktops(_ on: Bool)
 }
@@ -92,6 +95,14 @@ final class AppKitFloatDimPanel: FloatDimBackend {
 
     func orderOut() {
         panel?.orderOut(nil)
+    }
+
+    func retire(reduceMotion: Bool) {
+        isShown = false
+        // Holds the panel through its fade-out.
+        veil.fade(to: 0, reduceMotion: reduceMotion) { [self] in
+            panel?.orderOut(nil)
+        }
     }
 
     func setSpansDesktops(_ on: Bool) {

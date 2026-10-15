@@ -1553,8 +1553,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 Touching `Borders`, `Vision`.
 
 - A float the float tier lifts above the focus wears KiwiVision's veil on a
-  panel of its own, above its mark and sized to its ring, from the one
-  `floatsAboveFocus` the raise reads (#2103, `KiwiVisionFloatTests`)
+  panel of its own, above its earliest-ordered chrome and sized to its ring's
+  outline, from the one `floatsAboveFocus` the raise reads (#2103,
+  `KiwiVisionFloatTests`, `FloatVeilWiringTests`)
 - A ring stays on its window's Desktop and spans every Desktop only while its
   window is carried, the sticky mark always spanning, and a ring is re-homed
   through `BorderOverlay` only where it stopped spanning or `sync` orders it on

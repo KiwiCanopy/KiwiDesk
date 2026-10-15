@@ -53,6 +53,10 @@ import AppKit
         func show(reduceMotion: Bool) { isShown = true }
         func hide(reduceMotion: Bool) { isShown = false }
         func orderOut() { orderedOut += 1 }
+        func retire(reduceMotion: Bool) {
+            isShown = false
+            orderedOut += 1
+        }
         func setSpansDesktops(_ on: Bool) { spans = on }
     }
 #endif

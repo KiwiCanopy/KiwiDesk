@@ -371,17 +371,32 @@ Obligations:
   (#2103 ruling 3, owner ruling option A 2026-10-15): one
   `FloatDimManager` panel per float in the one
   `KiwiCore.floatsAboveFocus` set the float raise reads — never a
-  second "floats above the focus" spelling — ordered directly
-  above the float's mark panel, else the float, so a mark or a
-  ring that re-orders lands under it, and sized to the ring's
-  outer reach so the ring dims too. Its consumer comes after
-  `.mark` and `.ring` in the watch, its order sites are
-  `BorderOrderCensusTests` ▸ `floatVeilOrderSitesAreCensused`'s,
-  it joins one Desktop unless its float is carried
-  (`StickyOverlaySpanTests` ▸ `floatVeilSpansOnlyWhenCarried`),
-  and a float that leaves the set goes dormant, still ordered in
-  (`FloatDimManagerTests`, `KiwiVisionFloatTests`). The look is the
-  plate's one `VisionVeil`, never a second blur or dim.
+  second "floats above the focus" spelling (`FloatVeilWiringTests`
+  ▸ `raiseReadsTheSharedSet`) — sized and rounded from the ring's
+  own outline (`BorderManager.ringOutline`), and kept off every
+  window a ring skips through the ring's own readings
+  (`isRingOverlay`, `ringFillsDisplay`), never a copy of them
+  (`KiwiVisionFloatTests`). It orders directly above the float's
+  chrome piece ordered EARLIEST — `ChromeOrderClock` stamps every
+  ring and mark order, and chrome lands directly above its float,
+  under what is already there — so a ring or mark that re-orders
+  lands under the veil (`FloatDimManagerTests` ▸
+  `anchorIsTheTopmostChrome`). Its consumer comes after `.mark`
+  and `.ring` (`WindowServerWatchTests` ▸ `consumerOrder`), its
+  order sites are `BorderOrderCensusTests` ▸
+  `floatVeilOrderSitesAreCensused`'s, every frame site that feeds
+  the mark feeds it (`FloatVeilWiringTests`), it joins one Desktop
+  unless its float is carried (`StickyOverlaySpanTests` ▸
+  `floatVeilSpansOnlyWhenCarried`), a float that leaves the set
+  goes dormant, still ordered in, and turning the mode off retires
+  every veil as the plate does (`FloatDimManagerTests` ▸
+  `offRetiresEveryVeil`). The look is the plate's one `VisionVeil`.
+  Its panel takes AppKit's `setFrame` per tick, as the sticky
+  mark's does — a float is not parked on a Space switch, so the
+  ring's #1956 move stays unmeasured for it; and for the 50 ms the
+  float raise coalesces, a float still under the focused window is
+  veiled twice (accepted, `docs/accepted-limitations.md`'s to
+  record if the device shows it).
 - **Read the stand-down from the shelf's verdict**, filed once per
   pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a

@@ -130,7 +130,7 @@ struct KiwiVisionSettingsTests {
 
     @Test("the blur is Liquid Glass clear, hud where glass cannot draw")
     func blurIsGlassClear() throws {
-        let blur = AppKitVisionPlate.makeBlur()
+        let blur = VisionVeil.makeBlur()
         if #available(macOS 26.0, *) {
             let glass = try #require(blur as? NSGlassEffectView)
             #expect(glass.style == .clear)

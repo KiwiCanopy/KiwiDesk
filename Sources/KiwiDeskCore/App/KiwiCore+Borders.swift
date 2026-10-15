@@ -104,9 +104,7 @@ extension KiwiCore {
         // Transient overlays (launchers, panels) never get a ring,
         // even while focused — see `borderSpecs` (#300).
         let overlays = Set(
-            (space.windows + travelers).filter {
-                state.windows[$0]?.isTransientOverlay == true
-            }
+            (space.windows + travelers).filter(isRingOverlay)
         )
         // A window filling its display never gets one either — a
         // ring would show only at the corners: native fullscreen
@@ -114,13 +112,7 @@ extension KiwiCore {
         // presenting float (#1788). Travelers ARE included (a
         // sticky window can go fullscreen).
         let fillsDisplay = Set(
-            (space.windows + travelers).filter { id in
-                guard let window = state.windows[id] else {
-                    return false
-                }
-                return window.isFullscreen
-                    || presents(id, at: window.frame)
-            }
+            (space.windows + travelers).filter(ringFillsDisplay)
         )
         let slots = (space.windows + travelers).compactMap {
             id -> (id: WindowID, frame: CGRect)? in
@@ -175,6 +167,19 @@ extension KiwiCore {
                 desktop: shownDesktop(at: frame)
             )
         }
+    }
+
+    /// A transient overlay — a launcher, a panel — that gets no
+    /// ring even while focused (#300).
+    func isRingOverlay(_ id: WindowID) -> Bool {
+        state.windows[id]?.isTransientOverlay == true
+    }
+
+    /// A window filling its display — native fullscreen or a
+    /// presenting float (#1788) — that gets no ring.
+    func ringFillsDisplay(_ id: WindowID) -> Bool {
+        guard let window = state.windows[id] else { return false }
+        return window.isFullscreen || presents(id, at: window.frame)
     }
 
     /// The native Space the screen holding `frame` shows, as the

@@ -3,8 +3,8 @@ import AppKit
 /// KiwiVision's float veils (#2103 ruling 3): the float tier sits
 /// above the focused window and so above the plate, and each float
 /// there wears the plate's veil on a panel of its own — above its
-/// mark and sized to its ring, so both dim with it (owner ruling,
-/// option A, 2026-10-15).
+/// chrome and sized to its ring, so its mark and ring dim with it
+/// (owner ruling, option A, 2026-10-15).
 extension KiwiCore {
     /// The floats the float tier lifts above `target`: none while
     /// `target` is itself an effective float, since nothing tiled is
@@ -22,11 +22,13 @@ extension KiwiCore {
     func updateFloatDims(above focus: WindowID?, reassertOrder: Bool) {
         var request = floatDimRequest(above: focus)
         let wanted = Set(request.floats.map(\.id))
+        // Off, nothing is kept: the sync retires every veil.
         windowServer.request(
             wanted,
             for: .floatDim,
-            keeping: floatDims.shown.union(floatDims.dormant)
-                .subtracting(wanted)
+            keeping: vision.isOn
+                ? floatDims.shown.union(floatDims.dormant)
+                    .subtracting(wanted) : []
         )
         request.tracked = windowServer.isActive
         floatDims.sync(
@@ -36,31 +38,29 @@ extension KiwiCore {
         )
     }
 
-    /// What the veils draw now. Kept clear, as the plate keeps them
-    /// clear or a ring would skip them: a transient overlay or a
-    /// raised-layer panel (#300), a native-fullscreen or presenting
-    /// float (#1788), a parked one, and any on a screen whose plate
-    /// stands down.
+    /// What the veils draw now. Kept clear: any window a ring
+    /// skips (`isRingOverlay`, `ringFillsDisplay`), a raised-layer
+    /// panel, a parked float and any on a screen whose plate
+    /// stands down. A veil covers the float's ring as drawn and
+    /// orders above its topmost chrome.
     func floatDimRequest(above focus: WindowID?) -> FloatDimManager.Request {
-        let style = tiler.settings.borderStyle
-        let outset =
-            style.enabled && style.unfocusedEnabled ? style.width : 0
         let carried = stickyReachCarried()
         let ids = vision.isOn ? focus.map(floatsAboveFocus(of:)) ?? [] : []
         let floats = ids.compactMap { id -> FloatDimManager.Float? in
             guard id != focus, let window = state.windows[id],
-                !window.isTransientOverlay, !window.isRaisedLayer,
-                !window.isFullscreen,
+                !isRingOverlay(id), !ringFillsDisplay(id),
+                !window.isRaisedLayer,
                 !tiler.looksStashed(window.frame),
-                !presents(id, at: window.frame),
                 !visionStandsDown(at: window.frame)
             else { return nil }
+            let outline = borders.ringOutline(of: id)
             return FloatDimManager.Float(
                 id: id,
                 frame: window.frame,
-                outset: outset,
-                cornerRadius: borders.cornerRadius(for: id) + outset,
-                anchor: stickyMarks.panelNumber(of: id) ?? id.raw,
+                outset: outline?.reach ?? 0,
+                cornerRadius: outline?.cornerRadius
+                    ?? borders.cornerRadius(for: id),
+                anchor: topmostChrome(of: id),
                 spans: carried.contains(id)
             )
         }
@@ -70,6 +70,15 @@ extension KiwiCore {
             dim: CGFloat(appWide.visionDim / 100),
             blur: kiwiVisionDrawsBlur,
             tracked: windowServer.isActive
+        )
+    }
+
+    /// The window `id`'s veil orders directly above
+    /// (`FloatDimManager.anchor`).
+    func topmostChrome(of id: WindowID) -> CGWindowID {
+        FloatDimManager.anchor(
+            chrome: [borders.frontRing(of: id), stickyMarks.chrome(of: id)],
+            float: id.raw
         )
     }
 

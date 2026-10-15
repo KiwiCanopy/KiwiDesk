@@ -90,13 +90,75 @@ struct KiwiVisionFloatTests {
         #expect(core.floatDimRequest(above: tiled).floats.isEmpty)
     }
 
-    @Test("turning the mode off puts every veil to sleep")
-    func offSleepsTheVeils() {
+    @Test("turning the mode off retires every veil and its watch")
+    func offRetiresTheVeils() {
         let core = makeCore()
         core.setKiwiVision(true)
         core.setKiwiVision(false)
         #expect(core.floatDims.shown.isEmpty)
-        #expect(core.floatDims.dormant == [float])
-        #expect(!core.floatDims.hasShown)
+        #expect(core.floatDims.dormant.isEmpty)
+        #expect(core.windowServer.requested(by: .floatDim).isEmpty)
+    }
+
+    /// A ring backend reporting an ordered-in panel.
+    private final class OrderedRing: BorderOverlayBackend {
+        let orderMode: BorderGeometry.Order
+        init(_ order: BorderGeometry.Order) { orderMode = order }
+        var orderedPanelNumber: CGWindowID? { 4242 }
+        func update(
+            geometry: BorderGeometry,
+            colorHex: String,
+            screen: NSScreen?,
+            room: CGRect?
+        ) {}
+        func order(relativeTo windowNumber: CGWindowID) {}
+        func hide() {}
+    }
+
+    private func ringedCore() -> KiwiCore {
+        let core = makeCore()
+        core.tiler.settings.borderStyle.unfocusedEnabled = true
+        core.tiler.settings.floatingStyle.mark = false
+        core.borders.backendFactory = { OrderedRing($0) }
+        core.updateBorders()
+        return core
+    }
+
+    @Test("the veil covers the float's ring as the ring draws it")
+    func veilCoversTheRing() throws {
+        let core = ringedCore()
+        core.setKiwiVision(true)
+        let veil = try #require(
+            core.floatDimRequest(above: tiled).floats.first
+        )
+        let spec = try #require(core.borders.specs[float])
+        let ring = BorderGeometry.compute(
+            windowFrame: veil.frame,
+            width: spec.width,
+            cornerStyle: spec.cornerStyle,
+            glowBlur: spec.glowBlur
+        )
+        #expect(
+            veil.frame.insetBy(dx: -veil.outset, dy: -veil.outset)
+                == ring.overlayFrame
+        )
+        core.tiler.settings.borderStyle.cornerStyle = .square
+        core.updateBorders()
+        #expect(
+            core.floatDimRequest(above: tiled).floats.first?
+                .cornerRadius == 0
+        )
+    }
+
+    @Test("a front ring is chrome the veil orders above")
+    func frontRingIsTheAnchor() {
+        let core = ringedCore()
+        core.tiler.settings.borderStyle.drawOrder = .front
+        core.updateBorders()
+        core.setKiwiVision(true)
+        #expect(core.topmostChrome(of: float) == 4242)
+        core.tiler.settings.borderStyle.drawOrder = .behind
+        core.updateBorders()
+        #expect(core.topmostChrome(of: float) == float.raw)
     }
 }
