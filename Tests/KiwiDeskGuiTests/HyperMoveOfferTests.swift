@@ -40,6 +40,15 @@ struct HyperMoveOfferTests {
         )
     }
 
+    @Test("a moved Desktop base alone counts as using Hyper")
+    func baseAloneUsesHyper() {
+        let model = model(key: nil)
+        model.config.layers = [KeyLayer(name: KeyLayer.defaultName)]
+        #expect(!model.draftUsesHyper)
+        model.config.desktopShortcutBase = .hyper
+        #expect(model.draftUsesHyper)
+    }
+
     @Test("with a key set, the sheet lists the seed lines, named")
     func requestNamesTheLines() throws {
         LocalizationManager.shared.select("en")

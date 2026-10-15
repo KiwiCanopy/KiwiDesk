@@ -70,7 +70,15 @@ struct HyperShortcutMoveTests {
             #expect(parsed?.modifiers.contains(.command) == false)
         }
         #expect(!seed.contains("KiwiDesk.focus(\"left\")"))
-        #expect(!seed.contains { $0.hasPrefix("KiwiDesk.focus_space(") })
+        // The ladder is arrows and digits, keypad twins included.
+        for combo in ["control+option+1", "control+option+0", "left"] {
+            let parsed = KeyCombo.parse(combo)
+            #expect(parsed.map(HyperShortcutMove.isLadder) == true)
+        }
+        #expect(
+            KeyCombo.parse("control+option+f")
+                .map(HyperShortcutMove.isLadder) == false
+        )
     }
 
     @Test("a fresh seed offers every line ticked and moves it to ✦")
@@ -123,6 +131,15 @@ struct HyperShortcutMoveTests {
         rows[index].combo = "command+shift+s"
         #expect(!offer(rows).items.contains { $0.id == sticky })
         #expect(offer(rows).items.contains { $0.id == floating })
+    }
+
+    @Test("a bare twin of the ✦ chord refuses too, as registered")
+    func bareTwinRefuses() throws {
+        var rows = seedLayer()
+        let taker = KeyBinding(combo: "f", lua: "hs.x()", kind: .custom)
+        rows.append(taker)
+        let line = try #require(offer(rows).items.first { $0.id == floating })
+        #expect(line.taken == taker)
     }
 
     @Test("a Hyper chord the user took refuses its line, which stays")

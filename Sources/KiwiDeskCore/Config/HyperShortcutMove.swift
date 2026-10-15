@@ -223,7 +223,8 @@ public enum HyperShortcutMove {
         return lua.contains(row.lua)
     }
 
-    private static func isLadder(_ combo: KeyCombo) -> Bool {
+    /// Whether `combo` is on the arrow or digit ladder.
+    static func isLadder(_ combo: KeyCombo) -> Bool {
         guard let name = KeyCombo.keyName(for: combo.keyCode) else {
             return false
         }
