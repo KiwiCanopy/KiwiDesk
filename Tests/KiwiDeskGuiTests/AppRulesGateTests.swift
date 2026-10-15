@@ -113,7 +113,8 @@ struct AppRulesGateTests {
             (
                 "role: .space, name: $newSpaceApp, "
                     + "exclude: Set(spaceApps), "
-                    + "onCommit: addWithSpace) "
+                    + "onCommit: addWithSpace, onScreen: { "
+                    + "model.core.appsOnScreen(beneathNormal: false) }) "
                     + ".disabled(!gates.hasSpaces)",
                 lists, "the Space add picker"
             ),

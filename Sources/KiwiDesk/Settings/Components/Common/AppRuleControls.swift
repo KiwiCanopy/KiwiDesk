@@ -34,6 +34,9 @@ struct AppSelector: View {
     /// Called with the bundle id the user committed. The caller
     /// owns normalisation and dedup; this view only says when.
     let onCommit: (String) -> Void
+    /// The apps on screen now, leading the Space and Float pickers
+    /// (#2297); only those with a bundle id are offered.
+    var onScreen: (() -> [OnScreenApp])?
 
     var body: some View {
         AppPickerButton(
@@ -58,7 +61,8 @@ struct AppSelector: View {
                 }
             },
             exclude: exclude,
-            guessed: guessed
+            guessed: guessed,
+            onScreen: onScreen.map { read in { Self.ruleCandidates(read()) } }
         )
         // Hug the content (no fixed column to align with) instead
         // of filling the row.
@@ -73,6 +77,13 @@ struct AppSelector: View {
                 ? roleLabel
                 : KeybindingCatalog.displayName(forBundleID: name)
         )
+    }
+
+    /// The on-screen apps a rule can name: `AppRef` matches a rule
+    /// by bundle id alone, so a process without one (SketchyBar)
+    /// would save a rule that never matches.
+    static func ruleCandidates(_ apps: [OnScreenApp]) -> [OnScreenApp] {
+        apps.filter { $0.bundleID != nil }
     }
 
     /// Drawn as the button's placeholder and spoken as its name,
