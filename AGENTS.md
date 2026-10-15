@@ -1974,7 +1974,7 @@ Touching Any hand-mirrored field list.
 ### [packaging-and-release](.claude/rules/packaging-and-release.md)
 
 Touching `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`,
-workflows.
+workflows, `plugins/`.
 
 - Every distributable artifact needs its own notarization ticket, and the build
   machine is the one place that failure is invisible
@@ -2041,6 +2041,10 @@ workflows.
   outside the groups that step downgrades (#1780, `WarningGateTests`)
 - a minor or major release is preceded by a `profile-tests` run against the
   last baseline, the owner's session only (#1868)
+- the Claude Code plugin advances only from a published tag's `plugins/`,
+  the version stamped by the sync alone, and `kiwidesk mcp`'s verb and server
+  name are stored outside the repo, so renaming them is a crossing (#2258,
+  `ClaudePluginSyncWorkflowTests`, `ClaudePluginSourceTests`)
 
 ### [rule-authoring](.claude/rules/rule-authoring.md)
 

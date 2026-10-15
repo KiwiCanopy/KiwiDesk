@@ -31,7 +31,35 @@ struct ClaudePluginSyncWorkflowTests {
             )
         )
         #expect(copy.contains("jq --arg v \"$VERSION\" '.version = $v'"))
-        #expect(copy.contains("kiwidesk/.claude-plugin/plugin.json"))
+        #expect(
+            copy.contains(
+                "MANIFEST=\"marketplace/$FOLDER/.claude-plugin/plugin.json\""
+            )
+        )
+        #expect(copy.contains("cp kiwidesk/LICENSE marketplace/LICENSE"))
+    }
+
+    /// The folder comes from the marketplace file, so a renamed
+    /// plugin cannot skip the sync silently.
+    @Test("it finds the plugin through the marketplace file")
+    func folderFromMarketplace() throws {
+        let yaml = try workflowSource(Self.file)
+        let skip = try workflowStep(
+            "Skip a release without the plugin",
+            in: yaml
+        )
+        #expect(skip.contains("plugins/.claude-plugin/marketplace.json"))
+        #expect(skip.contains("jq -r '.plugins[0].source' \"$MARKET\""))
+    }
+
+    /// A manual retry is a retry of a PUBLISHED release, as the
+    /// Homebrew cask's is.
+    @Test("a manual run refuses a draft's tag")
+    func refusesDrafts() throws {
+        let yaml = try workflowSource(Self.file)
+        let check = try workflowStep("Check the tag", in: yaml)
+        #expect(check.contains("releases/tags/$TAG"))
+        #expect(check.contains("if [ \"$DRAFT\" != false ]; then"))
     }
 
     @Test("it writes through the marketplace's deploy key")

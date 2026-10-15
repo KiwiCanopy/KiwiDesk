@@ -10,10 +10,13 @@ import SwiftUI
 /// from the one `RunningCopy` verdict at render (#1685 ▸ Ruling 6a).
 /// Without Claude Desktop only the first button greys, with its
 /// reason; installing it while Settings is open lights it on return.
+/// That cause stays out of the census on purpose: it is a fact about
+/// another app, read live, with no setting that owns it.
 struct AISetupRow: View {
     @EnvironmentObject private var localization: LocalizationManager
-    @State private var claudeInstalled =
-        MCPDesktopExtension.claudeDesktop() != nil
+    /// Nil until first read, so no "install first" flashes.
+    @State private var claudeInstalled: Bool?
+    @State private var building = false
     @State private var addFailed = false
     @State private var announcement: DispatchWorkItem?
 
@@ -25,7 +28,12 @@ struct AISetupRow: View {
                     Label(addTitle, systemImage: "puzzlepiece.extension")
                 }
                 .settingsActionButton()
-                .modifier(GreyOut(active: translocated || !claudeInstalled))
+                .modifier(
+                    GreyOut(
+                        active: translocated || claudeInstalled == false
+                            || building
+                    )
+                )
                 if !translocated {
                     Text(addCaption)
                         .font(.caption)
@@ -60,12 +68,16 @@ struct AISetupRow: View {
 
     private func add() {
         addFailed = false
-        do {
-            try MCPDesktopExtension.addToClaudeDesktop {
+        building = true
+        Task { @MainActor in
+            defer { building = false }
+            do {
+                try await MCPDesktopExtension.addToClaudeDesktop()
+            } catch MCPDesktopExtension.Failure.noClaudeDesktop {
+                refreshClaude()
+            } catch {
                 failAdd()
             }
-        } catch {
-            failAdd()
         }
     }
 
@@ -90,7 +102,7 @@ struct AISetupRow: View {
 
     private var addCaption: String {
         if addFailed { return addFailedCaption }
-        guard claudeInstalled else {
+        guard claudeInstalled != false else {
             return L(
                 "ai.setup.claude_desktop.missing",
                 "Install Claude Desktop first."
@@ -106,9 +118,9 @@ struct AISetupRow: View {
     private var addFailedCaption: String {
         L(
             "ai.setup.claude_desktop.failed",
-            "Couldn’t create the extension. Try again, or use "
-                + "%1$@ below.",
-            title
+            "Couldn’t add the extension to Claude Desktop. Try "
+                + "again, or use %1$@ below.",
+            L("ai.setup.copy", "Copy Setup Prompt")
         )
     }
 

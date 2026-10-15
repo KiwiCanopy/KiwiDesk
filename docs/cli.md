@@ -268,14 +268,15 @@ stored, or one set back to its saved value, needs no keep. A config
 reload, a profile load, a built-in layout's apply or Settings that
 puts another value there before the keep replaces it, and the AI
 app is told. A command the binary does
-not know is refused rather than sent. `get_state` hands the AI app
-your window titles.
+not know is refused rather than sent. `get_state` and
+`diagnose_window` hand the AI app your window titles.
 
 ChatGPT reaches only remote MCP servers, so it needs
 [OpenAI's Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
 in front of `kiwidesk mcp`; KiwiDesk itself opens no network port.
-With a tunnel created in your OpenAI Platform organization, OpenAI's
-`tunnel-client` runs the server for it:
+With a tunnel created in your OpenAI Platform organization and a
+runtime key in `CONTROL_PLANE_API_KEY`, OpenAI's `tunnel-client`
+runs the server for it:
 
 ```sh
 tunnel-client init --sample sample_mcp_stdio_local \

@@ -6,39 +6,42 @@ description: Change how KiwiDesk tiles and looks through its MCP tools — layou
 # Driving KiwiDesk
 
 KiwiDesk is a tiling window manager for macOS. Its tools come from
-the `kiwidesk` MCP server, which talks to the running app.
+the `kiwidesk` MCP server, which talks to the running app; each
+tool's description and each result say the details this skill
+leaves out.
 
 ## Find before you act
 
 - `get_state` shows the Spaces, their layouts and the windows.
-- `list_commands` and `help` name every command and its arguments.
-  Read `help` before calling a command you have not used.
+- `list_commands` and `help` name every command the tools can send
+  and its arguments. Read `help` before calling a command you have
+  not used.
 - For "why does this window float / not tile / open there", call
   `diagnose_window` with the window's id (from `get_state`), or with
-  the app's bundle id when the window is not managed. Do this before
-  changing a rule.
+  the app's bundle id when KiwiDesk does not manage the window. Do
+  this before changing a rule.
 
 ## Change live, then keep
 
-- `run` and `run_batch` apply changes **live**. They are temporary
-  until kept, and each result says how many changes are pending.
+- `run` and `run_batch` apply changes live; they stay temporary
+  until kept, and the results say what is still pending.
 - Show the user each change as you make it. Ask **once per task**
   whether to keep the result, not after every command. When the
-  user's words already ask for permanence ("from now on", "always"),
-  keep straight away.
-- `keep` writes exactly the changes this session made into the live
-  profile. A change it reports as `not_keepable` stays live only;
-  tell the user why.
+  user's words already ask for permanence ("from now on",
+  "always"), keep straight away.
+- `keep` writes the pending changes — all of them, or the ids you
+  name — and its result says where each went. Tell the user that,
+  and why any change could not be kept.
 - `looks` and `app_rules` bundle the common jobs: trying, saving and
   wearing a look; adding and removing app rules.
 
 ## Ask before anything that cannot be undone
 
-- `run_destructive` carries commands that delete or overwrite —
-  a Space, a profile, a look, a shortcut. Ask the user first and
-  name what will be lost. Never use it to work around a refusal.
-- Shortcut commands save at once rather than live: show the whole
-  mapping in the chat and write only after the user agrees.
+- A command `list_commands` marks `destructive` goes only through
+  `run_destructive`. Ask the user first and name what will be lost.
+  Never use it to work around a refusal.
+- Shortcut commands save at once: show the whole mapping in the
+  chat and write only after the user agrees.
 
 ## Privacy
 

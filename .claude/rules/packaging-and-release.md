@@ -10,6 +10,8 @@ paths:
   - "scripts/pre-commit"
   - "Package.swift"
   - ".github/workflows/**"
+  - "plugins/**"
+  - "Sources/KiwiDesk/MCP/MCPInvocation.swift"
   - "**/ResourceBundle*.swift"
 ---
 
@@ -606,6 +608,29 @@ against GitHub's SHA-256 digest before changing the cask, and its
 write credential stays scoped to `KiwiCanopy/homebrew-tap`. A
 manual dispatch is a retry of that same published asset, not an
 alternate way to build or publish one.
+
+**Advance the Claude Code plugin only after publication, and only
+from `plugins/` (#2258).** `.github/workflows/claude-plugin.yml`
+copies the PUBLISHED tag's `plugins/` folder — never `main`'s, and
+a manual dispatch refuses a draft's tag — to
+`KiwiCanopy/kiwidesk-claude` through that repository's own deploy
+key, and stamps the release's version into the plugin manifest
+there; the source keeps no version of its own
+(`ClaudePluginSyncWorkflowTests`, `ClaudePluginSourceTests` ▸
+`noVersionInSource`). kiwidesk-claude is an exact mirror, so a
+change to the marketplace or the plugin is made in `plugins/` and
+never in that repository. A new `kiwidesk mcp` tool owes the
+plugin's skill a line (`ClaudePluginSourceTests` ▸
+`skillNamesEveryTool`).
+
+**The server's verb and name are stored outside this repository.**
+Every installed Claude Desktop extension bakes `kiwidesk mcp`'s
+verb into its launcher, and the published plugin starts the
+server by that verb under `MCPInvocation.serverName`, so renaming
+either breaks installs nobody can reach. A rename is a crossing:
+keep the old spelling answering, and ship the plugin's new
+spelling in the same release (`MCPDesktopExtensionTests`,
+`ClaudePluginSourceTests`).
 
 ## Never `Bundle.module` in code that runs from the `.app` (#89)
 

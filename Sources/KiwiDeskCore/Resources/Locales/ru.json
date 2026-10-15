@@ -30,7 +30,7 @@
   "ai.prompts.title": "Готовые промпты",
   "ai.setup.claude_desktop": "Добавить в Claude Desktop…",
   "ai.setup.claude_desktop.caption": "Откроется Claude Desktop и предложит установить расширение KiwiDesk.",
-  "ai.setup.claude_desktop.failed": "Не удалось создать расширение. Попробуй ещё раз или воспользуйся кнопкой «%1$@» ниже.",
+  "ai.setup.claude_desktop.failed": "Не удалось добавить расширение в Claude Desktop. Попробуй ещё раз или воспользуйся кнопкой «%1$@» ниже.",
   "ai.setup.claude_desktop.missing": "Сначала установи Claude Desktop.",
   "ai.setup.copy": "Скопировать промпт подключения",
   "ai.setup.copy.caption": "Вставь его в Claude Code, Cursor или Codex. В нём всё, что нужно приложению для подключения к KiwiDesk.",

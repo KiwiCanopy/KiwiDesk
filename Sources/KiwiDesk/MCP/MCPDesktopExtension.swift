@@ -14,7 +14,7 @@ enum MCPDesktopExtension {
     static let manifestVersion = "0.3"
 
     /// The manifest, for the app version `version`.
-    static func manifest(version: String) -> Data {
+    static func manifest(version: String) throws -> Data {
         let manifest = Manifest(
             manifestVersion: manifestVersion,
             name: MCPInvocation.serverName,
@@ -51,7 +51,11 @@ enum MCPDesktopExtension {
         encoder.outputFormatting = [
             .prettyPrinted, .sortedKeys, .withoutEscapingSlashes,
         ]
-        return (try? encoder.encode(manifest)) ?? Data()
+        do {
+            return try encoder.encode(manifest)
+        } catch {
+            throw Failure.manifestUnencodable
+        }
     }
 
     /// The launcher: starts `executable` with the server's

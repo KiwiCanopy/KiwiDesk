@@ -11,7 +11,7 @@ import Testing
 @Suite("MCP Claude Desktop extension")
 struct MCPDesktopExtensionTests {
     static func manifest() throws -> [String: Any] {
-        let data = MCPDesktopExtension.manifest(version: "9.8.7")
+        let data = try MCPDesktopExtension.manifest(version: "9.8.7")
         let object = try JSONSerialization.jsonObject(with: data)
         return try #require(object as? [String: Any])
     }
@@ -50,6 +50,27 @@ struct MCPDesktopExtensionTests {
         }
         let author = try #require(manifest["author"] as? [String: Any])
         #expect(author["name"] is String)
+    }
+
+    /// Every installed extension carries this link, so the heading
+    /// it lands on cannot be renamed silently.
+    @Test("the documentation link lands on a cli.md heading")
+    func documentationAnchor() throws {
+        let manifest = try Self.manifest()
+        let link = try #require(manifest["documentation"] as? String)
+        let anchor = try #require(link.split(separator: "#").last)
+        let cli = try String(
+            contentsOf: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("docs/cli.md"),
+            encoding: .utf8
+        )
+        let slugs = cli.split(separator: "\n")
+            .filter { $0.hasPrefix("## ") }
+            .map {
+                $0.dropFirst(3).lowercased()
+                    .replacingOccurrences(of: " ", with: "-")
+            }
+        #expect(slugs.contains(String(anchor)), "\(anchor)")
     }
 
     @Test("the launcher starts the given copy with the server's arguments")

@@ -27,6 +27,22 @@ struct ExecTestsMCPDesktopExtension {
         )
     }
 
+    /// The archive's entries as `zipinfo` lists them — what Claude
+    /// Desktop's unzip sees, `._` side files included.
+    static func entries(of archive: URL) throws -> [String] {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/zipinfo")
+        process.arguments = ["-1", archive.path]
+        let output = Pipe()
+        process.standardOutput = output
+        process.standardError = FileHandle.nullDevice
+        try process.run()
+        let data = output.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        return String(decoding: data, as: UTF8.self)
+            .split(separator: "\n").map(String.init).sorted()
+    }
+
     static func scratch() -> URL {
         FileManager.default.temporaryDirectory
             .appendingPathComponent("kiwi-mcpb-\(UUID().uuidString)")
@@ -47,6 +63,13 @@ struct ExecTestsMCPDesktopExtension {
             icon: Data([0x89, 0x50])
         )
         try MCPDesktopExtension.pack(staged, to: packed)
+        // Exactly the bundle's files: no `._` metadata entries.
+        #expect(
+            try Self.entries(of: packed) == [
+                MCPDesktopExtension.iconPath, "manifest.json", "server/",
+                MCPDesktopExtension.launcherPath,
+            ]
+        )
         let unzip = try Self.run(
             "/usr/bin/ditto",
             ["-x", "-k", packed.path, unpacked.path]

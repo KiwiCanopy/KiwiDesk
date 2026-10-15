@@ -6,10 +6,16 @@ import KiwiDeskCore
 extension MCPDesktopExtension {
     static let claudeDesktopBundleID = "com.anthropic.claudefordesktop"
 
-    /// Why a hand-off could not start.
+    /// Why a hand-off did not reach Claude Desktop's dialog.
     enum Failure: Error, Equatable {
+        /// A translocated copy's path dies at relaunch, so no
+        /// extension may carry it (#1685 ▸ Ruling 6a).
+        case translocated
         case noClaudeDesktop
+        case manifestUnencodable
         case packFailed(Int32)
+        /// Claude Desktop refused the file it was handed.
+        case openFailed
     }
 
     /// Claude Desktop's app, when one is installed.
@@ -50,12 +56,16 @@ extension MCPDesktopExtension {
     }
 
     /// Zips `staged`'s contents into `output` with `ditto`, which
-    /// keeps the launcher's executable bit.
+    /// keeps the launcher's executable bit; the metadata flags keep
+    /// macOS's `._` side files out of an archive Claude Desktop
+    /// unpacks as plain files.
     static func pack(_ staged: URL, to output: URL) throws {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
-        process.arguments = ["-c", "-k", staged.path, output.path]
-        process.standardOutput = FileHandle.nullDevice
+        process.arguments = [
+            "-c", "-k", "--norsrc", "--noextattr", "--noacl",
+            staged.path, output.path,
+        ]
         process.standardError = FileHandle.nullDevice
         try process.run()
         process.waitUntilExit()
@@ -64,34 +74,65 @@ extension MCPDesktopExtension {
         }
     }
 
-    /// Builds a fresh bundle for the running copy in a temporary
-    /// folder and opens it in Claude Desktop; `openFailed` runs on
-    /// the main actor if Claude Desktop refuses the file.
+    /// Builds a fresh bundle for the running copy and opens it in
+    /// Claude Desktop. The build runs off the main actor; each click
+    /// replaces the previous one in the one temporary folder.
     @MainActor
-    static func addToClaudeDesktop(
-        openFailed: @escaping @MainActor () -> Void
-    ) throws {
+    static func addToClaudeDesktop() async throws {
+        guard RunningCopy.location != .translocated else {
+            throw Failure.translocated
+        }
         guard let claude = claudeDesktop() else {
             throw Failure.noClaudeDesktop
         }
-        let folder = FileManager.default.temporaryDirectory
-            .appendingPathComponent("KiwiDesk-mcpb-\(UUID().uuidString)")
+        let executable = RunningCopy.executablePath
+        let version = KiwiDeskVersion.semantic
+        let icon = appIcon()
+        let output = try await Task.detached(priority: .userInitiated) {
+            try build(executable: executable, version: version, icon: icon)
+        }.value
+        try await open(output, with: claude)
+    }
+
+    /// Stages and packs the bundle in the one temporary folder,
+    /// keeping only the `.mcpb`.
+    private static func build(
+        executable: String,
+        version: String,
+        icon: Data?
+    ) throws -> URL {
+        let files = FileManager.default
+        let folder = files.temporaryDirectory
+            .appendingPathComponent("KiwiDesk-mcpb")
+        try? files.removeItem(at: folder)
         let staged = folder.appendingPathComponent("bundle")
         let output = folder.appendingPathComponent(fileName)
         try stage(
             in: staged,
-            executable: RunningCopy.executablePath,
-            version: KiwiDeskVersion.semantic,
-            icon: appIcon()
+            executable: executable,
+            version: version,
+            icon: icon
         )
         try pack(staged, to: output)
-        NSWorkspace.shared.open(
-            [output],
-            withApplicationAt: claude,
-            configuration: NSWorkspace.OpenConfiguration()
-        ) { _, error in
-            guard error != nil else { return }
-            Task { @MainActor in openFailed() }
+        try? files.removeItem(at: staged)
+        return output
+    }
+
+    @MainActor
+    private static func open(_ bundle: URL, with claude: URL) async throws {
+        try await withCheckedThrowingContinuation {
+            (done: CheckedContinuation<Void, Error>) in
+            NSWorkspace.shared.open(
+                [bundle],
+                withApplicationAt: claude,
+                configuration: NSWorkspace.OpenConfiguration()
+            ) { _, error in
+                if error == nil {
+                    done.resume()
+                } else {
+                    done.resume(throwing: Failure.openFailed)
+                }
+            }
         }
     }
 

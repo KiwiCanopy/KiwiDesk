@@ -86,7 +86,7 @@ struct GreyOutParityTests {
         // Desktop to open the extension (#2258).
         (
             "AISetupRow.swift",
-            "GreyOut(active: translocated || !claudeInstalled)",
+            "active: translocated || claudeInstalled == false",
             1
         ),
         (

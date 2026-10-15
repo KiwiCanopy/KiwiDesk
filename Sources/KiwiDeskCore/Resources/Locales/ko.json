@@ -30,7 +30,7 @@
   "ai.prompts.title": "바로 쓰는 프롬프트",
   "ai.setup.claude_desktop": "Claude Desktop에 추가…",
   "ai.setup.claude_desktop.caption": "Claude Desktop이 열리고 KiwiDesk 확장 프로그램을 설치할지 묻습니다.",
-  "ai.setup.claude_desktop.failed": "확장 프로그램을 만들지 못했습니다. 다시 시도하거나 아래의 ‘%1$@’ 버튼을 사용하십시오.",
+  "ai.setup.claude_desktop.failed": "확장 프로그램을 Claude Desktop에 추가하지 못했습니다. 다시 시도하거나 아래의 ‘%1$@’ 버튼을 사용하십시오.",
   "ai.setup.claude_desktop.missing": "먼저 Claude Desktop을 설치하십시오.",
   "ai.setup.copy": "연결 설정 프롬프트 복사",
   "ai.setup.copy.caption": "Claude Code, Cursor 또는 Codex에 붙여 넣으십시오. 앱이 KiwiDesk에 연결하는 데 필요한 모든 내용이 들어 있습니다.",

@@ -68,14 +68,26 @@ struct AISetupRowWiringTests {
                 of: "NSApplication.didBecomeActiveNotification"
             ) == 1
         )
+        // Read on appear and on return, never in the initializer.
         #expect(
             row.occurrences(
                 of: "MCPDesktopExtension.claudeDesktop()!=nil"
-            ) == 2
+            ) == 1
         )
+        #expect(row.occurrences(of: ".onAppear(perform:refreshClaude)") == 1)
         #expect(
-            row.occurrences(of: "tryMCPDesktopExtension.addToClaudeDesktop")
-                == 1
+            row.occurrences(
+                of: "tryawaitMCPDesktopExtension.addToClaudeDesktop()"
+            ) == 1
+        )
+        // A build in flight greys the button; a Claude Desktop
+        // removed since the last read re-reads instead of failing.
+        #expect(row.occurrences(of: "||building") == 1)
+        #expect(
+            row.occurrences(
+                of: "catchMCPDesktopExtension.Failure.noClaudeDesktop"
+                    + "{refreshClaude()}"
+            ) == 1
         )
         #expect(
             row.occurrences(

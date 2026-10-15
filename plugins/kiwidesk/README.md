@@ -10,7 +10,7 @@ looks and app rules live, and keep them only when you say so.
 
 KiwiDesk 3.0 or later, installed in `/Applications` or
 `~/Applications`, or with `kiwidesk` on your `PATH`. KiwiDesk has to
-be running for its tools to answer.
+be running for most of its tools to answer.
 
 ## Install
 

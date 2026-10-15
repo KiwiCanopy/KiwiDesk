@@ -30,7 +30,7 @@
   "ai.prompts.title": "Ready-made prompts",
   "ai.setup.claude_desktop": "Add to Claude Desktop…",
   "ai.setup.claude_desktop.caption": "Claude Desktop opens and asks you to install KiwiDesk’s extension.",
-  "ai.setup.claude_desktop.failed": "Couldn’t create the extension. Try again, or use %1$@ below.",
+  "ai.setup.claude_desktop.failed": "Couldn’t add the extension to Claude Desktop. Try again, or use %1$@ below.",
   "ai.setup.claude_desktop.missing": "Install Claude Desktop first.",
   "ai.setup.copy": "Copy Setup Prompt",
   "ai.setup.copy.caption": "Paste it into Claude Code, Cursor or Codex. It holds everything the app needs to connect to KiwiDesk.",

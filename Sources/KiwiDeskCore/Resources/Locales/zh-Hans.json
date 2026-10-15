@@ -30,7 +30,7 @@
   "ai.prompts.title": "现成的提示词",
   "ai.setup.claude_desktop": "添加到 Claude Desktop…",
   "ai.setup.claude_desktop.caption": "Claude Desktop 会打开，并询问你是否安装 KiwiDesk 的扩展。",
-  "ai.setup.claude_desktop.failed": "无法创建扩展。请再试一次，或使用下方的“%1$@”。",
+  "ai.setup.claude_desktop.failed": "无法将扩展添加到 Claude Desktop。请再试一次，或使用下方的“%1$@”。",
   "ai.setup.claude_desktop.missing": "请先安装 Claude Desktop。",
   "ai.setup.copy": "拷贝连接提示词",
   "ai.setup.copy.caption": "将它粘贴到 Claude Code、Cursor 或 Codex 中。它包含 App 连接 KiwiDesk 所需的一切。",

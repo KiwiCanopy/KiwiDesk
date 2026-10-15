@@ -5,6 +5,8 @@ name: Sync Claude Code plugin
 # repository a marketplace is in (#2258 ▸ Ruling 3). This copies the
 # released tag's `plugins/` folder there with the release's version,
 # on publication — the same boundary the Homebrew cask advances on.
+# kiwidesk-claude is an EXACT mirror of `plugins/` plus the LICENSE:
+# never edit it by hand, the next sync deletes what `plugins/` lacks.
 on:
   release:
     types: [published]
@@ -32,10 +34,19 @@ jobs:
     steps:
       - name: Check the tag
         id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::tag must be vMAJOR.MINOR.PATCH: $TAG"
+            exit 1
+          fi
+          # A manual retry names a tag that may still be a draft's.
+          DRAFT="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" \
+            --jq '.draft')"
+          if [ "$DRAFT" != false ]; then
+            echo "::error::$TAG is not a published release"
             exit 1
           fi
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
@@ -47,16 +58,22 @@ jobs:
           ref: ${{ env.TAG }}
           path: kiwidesk
 
+      # Keyed on the marketplace file, and the plugin folder read
+      # from it, so a renamed plugin cannot turn the sync into a
+      # silent no-op.
       - name: Skip a release without the plugin
         id: source
         run: |
-          if [ -f kiwidesk/plugins/kiwidesk/.claude-plugin/plugin.json ]
-          then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
+          set -euo pipefail
+          MARKET=kiwidesk/plugins/.claude-plugin/marketplace.json
+          if [ ! -f "$MARKET" ]; then
             echo "::notice::$TAG carries no plugins/ folder; nothing to sync"
             echo "present=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          FOLDER="$(jq -r '.plugins[0].source' "$MARKET")"
+          echo "present=true" >> "$GITHUB_OUTPUT"
+          echo "folder=${FOLDER#./}" >> "$GITHUB_OUTPUT"
 
       - name: Require the marketplace deploy key
         if: steps.source.outputs.present == 'true'
@@ -80,16 +97,18 @@ jobs:
         if: steps.source.outputs.present == 'true'
         env:
           VERSION: ${{ steps.tag.outputs.version }}
+          FOLDER: ${{ steps.source.outputs.folder }}
         run: |
           set -euo pipefail
           rsync -a --delete --exclude .git kiwidesk/plugins/ marketplace/
-          MANIFEST=marketplace/kiwidesk/.claude-plugin/plugin.json
+          cp kiwidesk/LICENSE marketplace/LICENSE
+          MANIFEST="marketplace/$FOLDER/.claude-plugin/plugin.json"
           jq --arg v "$VERSION" '.version = $v' "$MANIFEST" \
             > "$RUNNER_TEMP/plugin.json"
           mv "$RUNNER_TEMP/plugin.json" "$MANIFEST"
           jq -e '.name == "kiwidesk"' "$MANIFEST" > /dev/null
           jq -e . marketplace/.claude-plugin/marketplace.json > /dev/null
-          test -x marketplace/kiwidesk/scripts/kiwidesk-mcp
+          test -x "marketplace/$FOLDER/scripts/kiwidesk-mcp"
 
       - name: Commit and push
         if: steps.source.outputs.present == 'true'

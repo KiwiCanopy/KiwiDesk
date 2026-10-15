@@ -30,7 +30,7 @@
   "ai.prompts.title": "Fertige Prompts",
   "ai.setup.claude_desktop": "Zu Claude Desktop hinzufügen…",
   "ai.setup.claude_desktop.caption": "Claude Desktop öffnet sich und bittet dich, die KiwiDesk-Erweiterung zu installieren.",
-  "ai.setup.claude_desktop.failed": "Die Erweiterung konnte nicht erstellt werden. Versuche es noch einmal oder nutze unten „%1$@“.",
+  "ai.setup.claude_desktop.failed": "Die Erweiterung konnte nicht zu Claude Desktop hinzugefügt werden. Versuche es noch einmal oder nutze unten „%1$@“.",
   "ai.setup.claude_desktop.missing": "Installiere zuerst Claude Desktop.",
   "ai.setup.copy": "Einrichtungs-Prompt kopieren",
   "ai.setup.copy.caption": "Füge ihn in Claude Code, Cursor oder Codex ein. Er enthält alles, was die App braucht, um sich mit KiwiDesk zu verbinden.",
