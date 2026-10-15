@@ -195,6 +195,22 @@ clipboard: paste it into the AI app, which adds the server itself
 or walks you through it. The same page has ready-made prompts that
 have the AI app ask you what you want, one question at a time.
 
+**Add to Claude Desktop…** on the same page builds a Claude Desktop
+extension for the copy you are running and opens it in Claude
+Desktop, which asks you to install it. The extension starts that
+copy, so after moving KiwiDesk add it again.
+
+In Claude Code, the KiwiDesk plugin adds the server and a skill
+(`/kiwidesk:drive`) on how to change things live and keep them:
+
+```sh
+/plugin marketplace add KiwiCanopy/kiwidesk-claude
+/plugin install kiwidesk@kiwidesk
+```
+
+It finds KiwiDesk in `/Applications`, in `~/Applications` or as
+`kiwidesk` on your `PATH`.
+
 The server speaks MCP `2026-07-28` and, after an `initialize`,
 `2025-11-25` and `2025-06-18`. It offers ten tools:
 
@@ -253,9 +269,22 @@ reload, a profile load, a built-in layout's apply or Settings that
 puts another value there before the keep replaces it, and the AI
 app is told. A command the binary does
 not know is refused rather than sent. `get_state` hands the AI app
-your window titles. ChatGPT reaches only remote MCP servers, so it
-needs [OpenAI's secure MCP tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
-in front of `kiwidesk mcp`.
+your window titles.
+
+ChatGPT reaches only remote MCP servers, so it needs
+[OpenAI's Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+in front of `kiwidesk mcp`; KiwiDesk itself opens no network port.
+With a tunnel created in your OpenAI Platform organization, OpenAI's
+`tunnel-client` runs the server for it:
+
+```sh
+tunnel-client init --sample sample_mcp_stdio_local \
+  --profile kiwidesk --tunnel-id <tunnel id> \
+  --mcp-command "/Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk mcp"
+tunnel-client run --profile kiwidesk
+```
+
+Then add a connector in ChatGPT whose connection is that tunnel.
 :::
 
 ## Service Control
