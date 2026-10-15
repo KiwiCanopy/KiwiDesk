@@ -26,6 +26,18 @@ func armForeignAppTripwires(_ core: KiwiCore) {
     }
 }
 
+/// `makeTestCore`'s boot net (#2294): `start()` resets its latches
+/// and then refuses with an issue, since the boot re-arms live
+/// seams the factory pinned. A suite proving the reset alone
+/// states a silent refusal itself.
+@MainActor
+func armStartTripwire(_ core: KiwiCore) {
+    core.boot.admitsStart = {
+        Issue.record("a test booted a test core (#2294)")
+        return false
+    }
+}
+
 /// True, with an issue, for a pid LaunchServices names as an app
 /// other than this process; a fixture's unused pid is no app.
 @MainActor

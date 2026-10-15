@@ -204,9 +204,9 @@ struct BootPhaseWiringTests {
     /// `OnboardingGrantPhaseTests` green, because that suite reads
     /// the properties rather than the page they are handed to.
     /// The latch the gate above reads: set by the tail, cleared
-    /// by `start()`. Neither assignment is reachable from a test
-    /// — `start()` arms the real machine seams — so both are
-    /// needled here.
+    /// by `start()` through `BootRun.begin()`. The tail is not
+    /// reachable from a test, so both are needled here; the clear
+    /// itself is `TestCoreStartTripwireTests`' (#2294).
     @Test("the boot tail latches that it reached ready")
     func theTailLatchesReady() throws {
         let text = try source(bootPath)
@@ -230,7 +230,7 @@ struct BootPhaseWiringTests {
         )
         let cleared =
             #"func start\(\)[\s\S]{0,200}?"#
-            + #"boot\.reachedReady = false"#
+            + #"boot\.begin\(\)"#
         #expect(
             text.range(of: cleared, options: .regularExpression)
                 != nil,

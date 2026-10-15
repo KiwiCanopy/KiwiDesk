@@ -725,6 +725,11 @@ ceiling — since the tripwire refuses, and reds, a pid that a
 real app happens to hold on the host. A raise or AX write on an
 element of an app the test never attached passes neither net;
 the pin is what keeps such an element out of a test core.
+A test core never boots either (#2294): `start()` re-arms the
+live seams the factory pinned, so it resets the boot latches and
+then asks `BootRun.admitsStart`, which both twins arm to refuse
+with an issue (`TestCoreStartTripwireTests`); a suite proving the
+reset alone states a silent refusal itself.
 `MouseButtonSeamGuardTests` holds each read to its homes AND
 every pin into both twins, a deletion from both being silent
 otherwise; it is a sibling of `MachineTouchTests`

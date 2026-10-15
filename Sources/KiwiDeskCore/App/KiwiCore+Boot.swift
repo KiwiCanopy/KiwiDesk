@@ -67,10 +67,9 @@ extension KiwiCore {
     /// evidence for a hung app is a duration, so every boot
     /// leaves one on record.
     public func start() {
+        boot.begin()
+        guard boot.admitsStart() else { return }
         let signposter = BootSignpost.signposter
-        boot.reachedReady = false
-        // A restore belongs to the boot that armed it (#2133).
-        boot.publishRestore(.none)
         boot.interval = signposter.beginInterval("boot")
         boot.began = ContinuousClock.now
         armMachineSeams()

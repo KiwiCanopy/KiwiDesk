@@ -158,7 +158,10 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         core.crossSessionSettlePass()
         #expect(core.restorePhase == .done(placed: 0, total: 1))
         core.stop()
+        // The reset alone: a test core never boots (#2294).
+        core.boot.admitsStart = { false }
         core.start()
+        #expect(core.restorePhase == .none)
         let seen = recording(core)
         leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
         arrange(core)
