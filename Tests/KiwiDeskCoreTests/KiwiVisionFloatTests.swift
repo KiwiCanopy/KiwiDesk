@@ -93,11 +93,18 @@ struct KiwiVisionFloatTests {
     @Test("turning the mode off retires every veil and its watch")
     func offRetiresTheVeils() {
         let core = makeCore()
+        // The request sent to the WindowServer, kept ids included.
+        var watched: Set<WindowID> = []
+        core.windowServer.override = {
+            watched = $0
+            return true
+        }
         core.setKiwiVision(true)
+        #expect(watched.contains(float))
         core.setKiwiVision(false)
         #expect(core.floatDims.shown.isEmpty)
         #expect(core.floatDims.dormant.isEmpty)
-        #expect(core.windowServer.requested(by: .floatDim).isEmpty)
+        #expect(!watched.contains(float))
     }
 
     /// A ring backend reporting an ordered-in panel.
