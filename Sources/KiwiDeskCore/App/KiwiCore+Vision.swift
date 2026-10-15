@@ -115,7 +115,7 @@ extension KiwiCore {
     }
 
     /// The target's WindowServer reorder event, after its ring's
-    /// re-order (`BorderManager+SkyLight`).
+    /// re-order (`BorderManager+WindowServer`).
     func visionTargetRestacked(_ id: WindowID) {
         vision.restack(after: id.raw)
     }

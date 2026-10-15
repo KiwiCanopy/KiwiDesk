@@ -39,7 +39,7 @@ struct WindowServerWatchSeamTests {
     func oneConnectPerConsumer() throws {
         #expect(
             try sites(of: "watch.connect(") == [
-                "BorderManager+SkyLight.swift": 1
+                "BorderManager+WindowServer.swift": 1
             ]
         )
         #expect(
