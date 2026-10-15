@@ -1899,6 +1899,7 @@
   "system_shortcut.screenshot_selection": "Istantanea della selezione",
   "system_shortcut.screenshot_tools": "Strumenti per istantanee dello schermo",
   "system_shortcut.spotlight": "Spotlight",
+  "system_shortcut.switch_to_desktop": "Mission Control: Passa alla scrivania %1$d",
   "system_shortcut.zoom_in": "Ingrandisci",
   "system_shortcut.zoom_out": "Riduci",
   "system_shortcut.zoom_toggle": "Attiva o disattiva zoom",

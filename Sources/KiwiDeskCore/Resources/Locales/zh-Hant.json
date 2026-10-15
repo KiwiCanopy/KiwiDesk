@@ -1899,6 +1899,7 @@
   "system_shortcut.screenshot_selection": "螢幕快照選取範圍",
   "system_shortcut.screenshot_tools": "螢幕快照工具",
   "system_shortcut.spotlight": "Spotlight",
+  "system_shortcut.switch_to_desktop": "指揮中心：切換至桌面%1$d",
   "system_shortcut.zoom_in": "放大",
   "system_shortcut.zoom_out": "縮小",
   "system_shortcut.zoom_toggle": "啟用或停用縮放",

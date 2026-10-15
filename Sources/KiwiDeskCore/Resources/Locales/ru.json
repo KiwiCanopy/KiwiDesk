@@ -1899,6 +1899,7 @@
   "system_shortcut.screenshot_selection": "Снимок выбранной области",
   "system_shortcut.screenshot_tools": "Инструменты для снимков экрана",
   "system_shortcut.spotlight": "Spotlight",
+  "system_shortcut.switch_to_desktop": "Mission Control: Перейти на Рабочий стол %1$d",
   "system_shortcut.zoom_in": "Увеличить",
   "system_shortcut.zoom_out": "Уменьшить",
   "system_shortcut.zoom_toggle": "Включить или выключить увеличение",

@@ -1899,6 +1899,7 @@
   "system_shortcut.screenshot_selection": "Captura de la selección",
   "system_shortcut.screenshot_tools": "Herramientas de captura de pantalla",
   "system_shortcut.spotlight": "Spotlight",
+  "system_shortcut.switch_to_desktop": "Mission Control: Cambiar al escritorio %1$d",
   "system_shortcut.zoom_in": "Ampliar",
   "system_shortcut.zoom_out": "Reducir",
   "system_shortcut.zoom_toggle": "Activar o desactivar zoom",

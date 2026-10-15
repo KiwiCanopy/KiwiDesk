@@ -1899,6 +1899,7 @@
   "system_shortcut.screenshot_selection": "Capture de la sélection",
   "system_shortcut.screenshot_tools": "Outils de capture d'écran",
   "system_shortcut.spotlight": "Spotlight",
+  "system_shortcut.switch_to_desktop": "Mission Control : Passer au Bureau %1$d",
   "system_shortcut.zoom_in": "Zoom avant",
   "system_shortcut.zoom_out": "Zoom arrière",
   "system_shortcut.zoom_toggle": "Activer ou désactiver le zoom",

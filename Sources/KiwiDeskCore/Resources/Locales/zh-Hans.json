@@ -1899,6 +1899,7 @@
   "system_shortcut.screenshot_selection": "选区截屏",
   "system_shortcut.screenshot_tools": "截屏工具",
   "system_shortcut.spotlight": "聚焦",
+  "system_shortcut.switch_to_desktop": "调度中心：切换到桌面%1$d",
   "system_shortcut.zoom_in": "放大",
   "system_shortcut.zoom_out": "缩小",
   "system_shortcut.zoom_toggle": "打开或关闭缩放",

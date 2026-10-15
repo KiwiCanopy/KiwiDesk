@@ -1899,6 +1899,7 @@
   "system_shortcut.screenshot_selection": "선택 영역 스크린샷",
   "system_shortcut.screenshot_tools": "스크린샷 도구",
   "system_shortcut.spotlight": "Spotlight",
+  "system_shortcut.switch_to_desktop": "Mission Control: 데스크탑 %1$d로 전환",
   "system_shortcut.zoom_in": "확대",
   "system_shortcut.zoom_out": "축소",
   "system_shortcut.zoom_toggle": "확대/축소 켜거나 끄기",

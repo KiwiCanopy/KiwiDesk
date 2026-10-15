@@ -222,6 +222,15 @@ extension SystemShortcut {
                 "system_shortcut.decrease_contrast",
                 "Decrease Contrast"
             )
+        // Apple's own row label after the pane name (#2311).
+        case .switchToDesktop1, .switchToDesktop2, .switchToDesktop3,
+            .switchToDesktop4, .switchToDesktop5, .switchToDesktop6,
+            .switchToDesktop7, .switchToDesktop8, .switchToDesktop9:
+            return L(
+                "system_shortcut.switch_to_desktop",
+                "Mission Control: Switch to Desktop %1$d",
+                desktopNumber ?? 0
+            )
         }
     }
 }
