@@ -28,7 +28,8 @@ extension AppRulesSection {
                 role: .space,
                 name: $newSpaceApp,
                 exclude: Set(spaceApps),
-                onCommit: addWithSpace
+                onCommit: addWithSpace,
+                onScreenOf: model.core
             )
             .disabled(!gates.hasSpaces)
             noSpacesNote
@@ -104,7 +105,8 @@ extension AppRulesSection {
                 role: .float,
                 name: $newFloatingApp,
                 exclude: Set(floatApps),
-                onCommit: addFloating
+                onCommit: addFloating,
+                onScreenOf: model.core
             )
         }
     }
