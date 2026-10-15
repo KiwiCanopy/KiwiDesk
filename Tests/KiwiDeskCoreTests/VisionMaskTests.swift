@@ -163,6 +163,18 @@ struct VisionMaskTests {
         }
     }
 
+    /// The hole walk reads down to the last clear window only.
+    @Test("the hole walk stops at the last clear window")
+    func walkedCountStopsAtTheLastHole() {
+        let r = CGRect(x: 1100, y: 100, width: 50, height: 50)
+        #expect(VisionMask.walkedCount([window(r), window(r)]) == 0)
+        #expect(
+            VisionMask.walkedCount([
+                window(r), window(r, clear: true), window(r), window(r),
+            ]) == 2
+        )
+    }
+
     @Test("a window on another screen draws nothing here")
     func otherScreenSkipped() throws {
         let path = try shape([

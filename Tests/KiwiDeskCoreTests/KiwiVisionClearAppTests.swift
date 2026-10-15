@@ -157,6 +157,24 @@ struct KiwiVisionClearAppTests {
             ) == [samePid, child]
         )
         #expect(lookups.isEmpty, "the pass asks LaunchServices nothing")
+        // Through the mask's own walk: the child's listed window.
+        core.vision.listWindows = {
+            [
+                FloatDetection.ListedWindow(
+                    number: 60,
+                    pid: child,
+                    layer: 0,
+                    frame: CGRect(x: 600, y: 40, width: 90, height: 90)
+                )
+            ]
+        }
+        #expect(
+            core.visionMaskWindows(
+                target: focused.raw,
+                targetPid: samePid,
+                refreshingList: true
+            ).map(\.clear) == [true, false, true]
+        )
     }
 
     /// An own key window is the target — a dialog — and its app is

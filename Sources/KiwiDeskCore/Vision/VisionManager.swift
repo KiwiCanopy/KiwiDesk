@@ -58,6 +58,11 @@ public final class VisionManager {
     /// builds nothing, since a hole costs path booleans per window.
     private var shapeInputs: [DisplayID: ShapeInput] = [:]
 
+    #if DEBUG
+        /// Test-only: how many shapes the plates built.
+        private(set) var shapeBuilds = 0
+    #endif
+
     private struct ShapeInput: Equatable {
         var screen: CGRect
         var clearWallpaper: Bool
@@ -237,6 +242,9 @@ public final class VisionManager {
         )
         guard shapeInputs[screen.display] != input else { return }
         shapeInputs[screen.display] = input
+        #if DEBUG
+            shapeBuilds += 1
+        #endif
         let shape = VisionMask.path(
             screen: input.screen,
             clearWallpaper: input.clearWallpaper,

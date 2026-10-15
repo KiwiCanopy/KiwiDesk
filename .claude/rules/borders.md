@@ -450,9 +450,10 @@ Obligations:
   LaunchServices lookup on the pass (#1936) — so a further clear
   source (Always clear, a lens) joins that function
   (`KiwiVisionClearAppTests` ▸ `siblingProcessIsClear`). The mask
-  walks path booleans only down to the last clear window and
-  builds nothing for an unchanged input (`VisionMaskTests` ▸
-  `walkStopsAtTheLastHole`).
+  walks path booleans only down to the last clear window, its
+  length the one `VisionMask.walkedCount` (`VisionMaskTests` ▸
+  `walkedCountStopsAtTheLastHole`), and builds nothing for an
+  unchanged input (`VisionMaskPlateTests` ▸ `reshapeOnlyOnChange`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

@@ -40,10 +40,10 @@ public enum VisionMask {
         // behind it, every window is hazed or under one. So the
         // holes take one walk that stops there, and the drawn shape
         // is the cheap base less them (#2103 PR B review).
-        let lastClear = windows.lastIndex(where: \.clear) ?? 0
+        let walked = walkedCount(windows)
         var holes = CGPath(rect: .zero, transform: nil)
         var covered = CGPath(rect: .zero, transform: nil)
-        for (index, window) in windows[...lastClear].enumerated()
+        for (index, window) in windows.prefix(walked).enumerated()
         where window.frame.intersects(screen) {
             let (rect, radius) = local(window, on: screen)
             let shape = CGPath(
@@ -55,7 +55,7 @@ public enum VisionMask {
             if window.clear {
                 holes = holes.union(shape.subtracting(covered))
             }
-            if index < lastClear { covered = covered.union(shape) }
+            if index < walked - 1 { covered = covered.union(shape) }
         }
         let base: CGPath
         if clearWallpaper {
@@ -67,6 +67,12 @@ public enum VisionMask {
             )
         }
         return base.subtracting(holes)
+    }
+
+    /// How many windows, from the front, the hole walk reads: down
+    /// to the last clear one, none when nothing is clear.
+    static func walkedCount(_ windows: [Window]) -> Int {
+        (windows.lastIndex(where: \.clear) ?? -1) + 1
     }
 
     /// The windows' shapes on `screen`, unioned by the non-zero
