@@ -409,7 +409,7 @@ take the screen.
 
 Take the seam that NAMES the moment the window appears; a
 callback that merely fires near it is a race, not a fix. #1011 is
-the worked case (Sparkle 2.9.6, the version `Package.resolved`
+the worked case (Sparkle 2.10.0, the version `Package.resolved`
 pins — a bump re-checks it): `UpdatePromptDriver` overrides
 `showReadyToInstallAndRelaunch`, and `UpdatePromptPolicy` refuses
 the status window's minimize button.
@@ -472,7 +472,7 @@ that bring-forward (`UpdateUpToDateTests` ▸
 bypasses the policy's delegate answers, so the own path asks the
 policy through its own doors (`offerArrived`,
 `offerGotAttention`) and never writes `updatePending` itself.
-Two orderings are Sparkle 2.9.6's and a bump re-checks them
+Two orderings are Sparkle 2.10.0's and a bump re-checks them
 beside #1011's: the ready-to-install prompt is answered
 `.install` because the window already had its Install; and Try
 Again's check starts at
@@ -1883,6 +1883,16 @@ being a static state it draws either way.
   well. Wrap the content in a `VStack` (or another single view)
   before applying the chrome; `SettingsDisclosure`'s interior
   states the mechanism at the seam.
+
+## The CLI's local verbs (#1685)
+
+**A verb the CLI answers without the app joins `CLIRoute` and
+owes no API record** — a record is for a command the socket or
+Lua dispatches (core-boundaries.md). `runCLI` switches on the
+route and shell completion reads it, so a local verb is never an
+`if` ahead of that switch, and it never takes a spelling a socket
+command has, save the ruled `help` (`CLIRouteTests`,
+`CLIHelpSeamTests`).
 
 ## Strings
 

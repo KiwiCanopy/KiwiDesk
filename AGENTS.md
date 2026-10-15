@@ -1643,6 +1643,8 @@ Touching `Borders`, `Vision`.
 Touching `Sources/KiwiDesk` (the GUI).
 
 - North-star and settled conventions
+- a verb the CLI answers without the app joins `CLIRoute` and owes no record,
+  never shadowing a socket command (#1685, `CLIRouteTests`)
 - grey don't hide — and an `NSMenu` greying a row for its own reason turns
   auto-enabling off — per menu, every nested submenu included — after which
   every row states `isEnabled`, submenu parents too (#802,
