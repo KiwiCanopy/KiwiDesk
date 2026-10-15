@@ -62,6 +62,7 @@ struct FocusedCommandPolicyTests {
         "shortcut.set",
         "shortcut.remove",
         "get_state",
+        "explain_app",
         "get_layout_info",
         "list_monitors",
         "debug_log",

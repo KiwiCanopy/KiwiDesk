@@ -85,6 +85,8 @@ public enum APIReference {
                 "set_new_window_placement_override"
             ),
             ("get_state", "get_state"),
+            ("explain_window", "explain_window"),
+            ("explain_app", "explain_app"),
             ("get_layout_info", "get_layout_info"),
             ("list_monitors", "list_monitors"),
             ("debug_log", "debug_log"),

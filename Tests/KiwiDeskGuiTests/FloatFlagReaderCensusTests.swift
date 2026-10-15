@@ -52,6 +52,9 @@ struct FloatFlagReaderCensusTests {
         // `toggle_floating` flips the flag by ruling (#1697).
         "Commands/KiwiCore+FloatCommands.swift": [.ruledToStay: 1],
         "Commands/KiwiCore+Diagnostics.swift": [.identity: 1],
+        // `explain_window` reports the flag beside the effective
+        // float it routes (#1685).
+        "Commands/KiwiCore+Explain.swift": [.identity: 1],
         // A user float restores only where detection tiles the
         // window, and at arrival the flag IS detection's (#1810).
         "State/StateCoordinator+Intents.swift": [.identity: 1],

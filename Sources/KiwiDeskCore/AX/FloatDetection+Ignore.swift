@@ -43,6 +43,13 @@ extension FloatDetection {
         tracked ? min(layer, screenSaverLayer - 1) : layer
     }
 
+    /// Whether the built-in table ignores `bundleID`'s raised-layer
+    /// windows — a table read, never a window's verdict (#1685).
+    public static func ignoresRaisedWindows(bundleID: String?) -> Bool {
+        guard let bundleID else { return false }
+        return layerScopedIgnoredApps[bundleID.lowercased()] != nil
+    }
+
     public static func isBuiltInIgnoredApp(
         bundleID: String?
     ) -> Bool {

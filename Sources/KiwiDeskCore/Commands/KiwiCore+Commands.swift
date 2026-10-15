@@ -143,6 +143,10 @@ extension KiwiCore {
             )
         case "get_state":
             return .ok(stateJSON())
+        case "explain_window":
+            return explainWindow(args)
+        case "explain_app":
+            return explainApp(args)
         case "get_work_counters":
             return .ok(
                 tiler.meter.report(

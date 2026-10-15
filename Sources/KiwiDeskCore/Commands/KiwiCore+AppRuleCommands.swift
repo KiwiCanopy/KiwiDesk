@@ -70,6 +70,23 @@ extension KiwiCore {
         ])
     }
 
+    /// One app's live rules, the slice `app_rule.list` holds for
+    /// it: `explain_window` and `explain_app` both read this.
+    func appRuleFacts(_ bundleID: String?) -> JSONValue {
+        guard let app = bundleID?.lowercased() else { return .null }
+        let floats = eventLoop.floatRules
+        let mine = floats.rawRules.filter {
+            $0 == app || $0.hasPrefix(app + ":")
+        }
+        return .object([
+            "space": state.appRules[app].map { .string($0.raw) }
+                ?? .null,
+            "float_rules": .array(mine.sorted().map(JSONValue.string)),
+            "tile_rule": .bool(floats.guess.tileRules.contains(app)),
+            "float_automatically": .bool(floats.guess.enabled),
+        ])
+    }
+
     /// Installs `rules` live over the current guess, and re-checks
     /// open windows where this call site may (`setFloatAutomatically`
     /// is the precedent).

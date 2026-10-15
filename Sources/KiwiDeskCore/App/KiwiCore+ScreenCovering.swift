@@ -62,7 +62,8 @@ extension KiwiCore {
     /// size to a screen, and never native fullscreen, which its
     /// own exemption owns. Ruled onto it: the focus ring, the
     /// on-window marks and the #1161 placement bounce
-    /// (`PresentingReaderTests`). A raw `covers` /
+    /// (`PresentingReaderTests`), and `explain_window` reports it
+    /// (#1685). A raw `covers` /
     /// `coversAScreen` caller is a register entry in
     /// `ScreenCoveringCallerCensusTests`. Ruled to STAY on
     /// native fullscreen's skips alone: the inactive-Space
