@@ -244,8 +244,13 @@ extension EventLoop {
     /// Whether an announced pid names `pid`'s app: itself, or a
     /// sibling process of it, which LaunchServices may announce
     /// in its place (#1785). The #292 preflight asks this too.
-    func names(_ announced: pid_t, appOf pid: pid_t) -> Bool {
-        announced == pid || areSiblings(announced, pid)
+    func names(
+        _ announced: pid_t,
+        appOf pid: pid_t,
+        lookingUp: Bool = true
+    ) -> Bool {
+        announced == pid
+            || areSiblings(announced, pid, lookingUp: lookingUp)
     }
 
     private func activeAppReading() -> pid_t? {

@@ -442,7 +442,18 @@ Obligations:
   event moves or drops its entry, its reorder re-masking rather than
   re-stacking the plate (`KiwiVisionClearWallpaperTests` ▸
   `listReadCadence`, `eventsKeepTheMaskFresh`). Both `makeTestCore`
-  twins pin the seam empty.
+  twins pin the seam empty. **A window's clear verdict is decided
+  once per pass, per process, in `KiwiCore.visionClearPids`**, and
+  "the same app" is the one identity door,
+  `EventLoop.names(_:appOf:lookingUp: false)` — never a bare pid
+  compare, which drops #1785's sibling processes, and never a
+  LaunchServices lookup on the pass (#1936) — so a further clear
+  source (Always clear, a lens) joins that function
+  (`KiwiVisionClearAppTests` ▸ `siblingProcessIsClear`). The mask
+  walks path booleans only down to the last clear window, its
+  length the one `VisionMask.walkedCount` (`VisionMaskTests` ▸
+  `walkedCountStopsAtTheLastHole`), and builds nothing for an
+  unchanged input (`VisionMaskPlateTests` ▸ `reshapeOnlyOnChange`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

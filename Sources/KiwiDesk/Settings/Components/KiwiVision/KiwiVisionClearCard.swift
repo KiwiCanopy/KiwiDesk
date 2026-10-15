@@ -28,6 +28,7 @@ struct KiwiVisionClearCard: View {
 
     @ViewBuilder private func row(_ key: SettingKey) -> some View {
         switch key {
+        case .kiwiVision(.clearApp): appRow
         case .kiwiVision(.clearWallpaper): wallpaperRow
         default:
             let _ = assertionFailure(
@@ -41,6 +42,24 @@ struct KiwiVisionClearCard: View {
         for key: SettingKey
     ) -> KiwiVisionGates.InertReason? {
         KiwiVisionGates(guiManaged: model.guiManaged).inertReason(for: key)
+    }
+
+    private var appRow: some View {
+        ToggleRow(
+            label: SettingsCatalog.kiwiVision.clearApp.text,
+            isOn: Binding(
+                get: { model.appWide.visionClearApp },
+                set: { on in model.setAppWide { $0.visionClearApp = on } }
+            ),
+            help: L(
+                "kiwivision.clear_app.help",
+                "Keeps every window of the focused app clear, not only "
+                    + "the focused one. Focus a window of another app "
+                    + "and its windows become the clear ones."
+            ),
+            disabled: reason(for: .kiwiVision(.clearApp)) != nil
+        )
+        .searchAnchored(SettingsCatalog.kiwiVision.clearApp)
     }
 
     private var wallpaperRow: some View {

@@ -103,6 +103,7 @@ struct GateReasonPlacementTests {
                 // page, so each draws its sentence.
                 .kiwiVision(.dim), .kiwiVision(.blur),
                 .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
+                .kiwiVision(.clearApp),
             ]
         )
     }
