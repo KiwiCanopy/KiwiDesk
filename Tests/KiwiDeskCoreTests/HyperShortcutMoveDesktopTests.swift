@@ -141,6 +141,14 @@ struct HyperShortcutMoveDesktopTests {
             HyperShortcutMove.offer(.toHyper, rows: [], base: .hyper)
                 .desktop == nil
         )
+        // Letters left but no seeded Desktop row: no line either.
+        #expect(
+            HyperShortcutMove.offer(
+                .toHyper,
+                rows: HyperShortcutMove.letterSeed,
+                base: .standard
+            ).desktop == nil
+        )
         // The reverse alone resets the base, rows or none.
         let back = HyperShortcutMove.offer(.back, rows: [], base: .hyper)
         #expect(back.desktop?.base == .standard)
