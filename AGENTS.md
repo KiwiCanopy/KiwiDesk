@@ -1789,7 +1789,7 @@ Touching `Sources/KiwiDesk` (the GUI).
   (#859, `SheetPresentationSeamTests` is the register of who may host one,
   `PresetPreviewSheetTests` the structural no-draft half) — save that a page
   with no draft whose rows write at once takes the panel for its own live
-  values (KiwiVision, #2103, `DetailPanelTests`)
+  values (KiwiVision's Focused window chip, #2103, `DetailPanelTests`)
 - a presentation built from ONE row is handed that row by `item:`, sheet or
   popover alike (#843)
 - a diff row narrates through `SettingsValueReadout`, whose totality net covers

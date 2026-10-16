@@ -98,6 +98,13 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDeskCore/Config/KeyLayer.swift":
             (1, "the initializer"),
+        "KiwiDesk/Settings/Components/KiwiVision/"
+            + "KiwiVisionLensHeader.swift":
+            (
+                1,
+                "a lens's header (#2103): the NavRow's binding setter,"
+                    + " writing back the rows the row itself edited"
+            ),
     ]
 
     /// File → (writable `[KeyBinding]` holders, why it holds the rule).
@@ -128,6 +135,13 @@ struct LayerRowWriterCensusTests {
         "KiwiDesk/Settings/Components/Keybindings/"
             + "KiwiVisionShortcutsGroup.swift":
             (1, "the KiwiVision group: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/KiwiVision/"
+            + "KiwiVisionLensHeader.swift":
+            (
+                1,
+                "a lens's header (#2103): hands the base layer's rows"
+                    + " to the lens's one NavRow"
+            ),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "OrphanedShortcutsGroup.swift":
             (1, "Inactive rows: hands the holder to its rows"),

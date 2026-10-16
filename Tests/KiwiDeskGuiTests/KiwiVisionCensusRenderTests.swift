@@ -87,7 +87,7 @@ struct KiwiVisionCensusRenderTests {
         #expect(card.contains("case.kiwiVision(.clearApp):appRow"))
     }
 
-    /// Never dimmed sits below Stays clear and walks its list; its
+    /// Never dimmed sits last, every lens's, and walks its list; its
     /// picker leads with what is on screen (#2103 rulings 26–27).
     @Test("the Never dimmed card walks its list below Stays clear")
     func neverDimmedCardWiring() throws {
@@ -101,8 +101,21 @@ struct KiwiVisionCensusRenderTests {
         let look = try #require(
             section.range(of: "KiwiVisionAppearanceCard(")
         )
-        #expect(clear.lowerBound < never.lowerBound)
-        #expect(never.lowerBound < look.lowerBound)
+        // Last, every lens's card, on the Focused window page and a
+        // lens's (#2103 ruling 47).
+        #expect(clear.lowerBound < look.lowerBound)
+        #expect(look.lowerBound < never.lowerBound)
+        let lensPage = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/KiwiVision/"
+                + "KiwiVisionLensPage.swift"
+        )
+        let heading = try #require(
+            lensPage.range(of: "KiwiVisionEveryLensHeading(")
+        )
+        let lensNever = try #require(
+            lensPage.range(of: "KiwiVisionNeverDimmedCard(")
+        )
+        #expect(heading.lowerBound < lensNever.lowerBound)
         let card = try Self.squashed(
             "Sources/KiwiDesk/Settings/Components/KiwiVision/"
                 + "KiwiVisionNeverDimmedCard.swift"
@@ -321,8 +334,10 @@ struct KiwiVisionCensusRenderTests {
             "Sources/KiwiDesk/Settings/Components/KiwiVision/"
                 + "KiwiVisionPanelPreview.swift"
         )
-        #expect(panel.contains("letclearApp=model.appWide.visionClearApp"))
-        #expect(panel.occurrences(of: "clearApp:clearApp") == 2)
+        // The picture reads the selected chip's look, the one
+        // resolver, and hands its clear-app switch to both readers.
+        #expect(panel.contains("returnsettings.look("))
+        #expect(panel.occurrences(of: "clearApp:look.clearApp") == 2)
         #expect(scene.contains("clear:clearApp,"))
     }
 }

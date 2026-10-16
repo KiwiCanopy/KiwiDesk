@@ -18,6 +18,7 @@ struct KiwiVisionGates {
         .kiwiVision(.dim), .kiwiVision(.blur),
         .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
         .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
+        .kiwiVision(.lenses),
     ]
 
     func inertReason(for key: SettingKey) -> InertReason? {

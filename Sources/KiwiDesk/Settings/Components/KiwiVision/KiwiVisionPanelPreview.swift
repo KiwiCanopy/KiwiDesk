@@ -13,37 +13,46 @@ struct KiwiVisionPanelPreview: View {
     /// it asks macOS's preferences — never per render.
     @State private var darkWindows = false
 
+    /// What the picture draws: the selected chip's look over the
+    /// draft's lenses, through the one resolver (`VisionLook`).
+    private var look: VisionLook {
+        var settings = model.appWide
+        settings.visionLenses = model.draftLenses
+        return settings.look(
+            lens: model.nav.kiwiVisionLensSelection(in: model.draftLenses)
+        )
+    }
+
     var body: some View {
         let _ = reduceTransparency
-        let dim = model.appWide.visionDim
-        let blurs = model.core.kiwiVisionDrawsBlur
-        let windowsOnly = model.appWide.visionClearWallpaper
-        let clearApp = model.appWide.visionClearApp
+        let look = look
+        let dim = look.dim
+        let blurs = model.core.kiwiVisionDrawsBlur(for: look)
         let effect = KiwiVisionEffect(
             dims: VisionPlateDim.opacity(forDim: dim / 100) > 0,
             blurs: blurs,
-            windowsOnly: windowsOnly,
-            clearApp: clearApp
+            windowsOnly: look.clearWallpaper,
+            clearApp: look.clearApp
         )
         VStack(alignment: .leading, spacing: 8) {
             KiwiVisionScene(
                 dimPercent: dim,
                 blurs: blurs,
-                windowsOnly: windowsOnly,
-                clearApp: clearApp,
+                windowsOnly: look.clearWallpaper,
+                clearApp: look.clearApp,
                 darkWindows: darkWindows,
                 settings: model.config.settings
             )
             .accessibilityElement()
             .accessibilityLabel(effect.spoken(dimPercent: dim))
-            Text(effect.caption)
+            Text(caption(effect))
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink3)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityHidden(true)
         }
         .onAppear(perform: readAppearance)
-        .onChange(of: model.appWide.visionAppearance) { readAppearance() }
+        .onChange(of: look.appearance) { readAppearance() }
         .onChange(of: model.core.kiwiVisionIsOn) { readAppearance() }
         .onReceive(
             DistributedNotificationCenter.default().publisher(
@@ -54,7 +63,16 @@ struct KiwiVisionPanelPreview: View {
         ) { _ in readAppearance() }
     }
 
+    /// A lens's picture names what it keeps clear (ruling 29).
+    private func caption(_ effect: KiwiVisionEffect) -> String {
+        guard let lens = look.lens else { return effect.caption }
+        return KiwiVisionLensWords.panelCaption(
+            lens.name,
+            apps: lens.apps.map(KeybindingCatalog.displayName(forBundleID:))
+        )
+    }
+
     private func readAppearance() {
-        darkWindows = model.core.kiwiVisionShowsDark
+        darkWindows = model.core.kiwiVisionShowsDark(for: look)
     }
 }

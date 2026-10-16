@@ -42,6 +42,7 @@ struct SettingsNavigationResetTests {
         _ = nav.startFlash("anchor")
         nav.layoutModeTab = .stack
         nav.shortcutsLayer = "media"
+        nav.kiwiVisionLens = "Writing"
         nav.spaceOverridesFocus = SpaceID("code")
         nav.homeReturnFocus = .shortcuts
         nav.navigationMovesFocus = true

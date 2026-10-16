@@ -30,6 +30,7 @@ struct JumpScopeModelTests {
                 vision: (.off, []),
                 visionChord: nil,
                 lensChord: { _ in nil },
+                offersNewLens: true,
                 inert: nil
             )
         )

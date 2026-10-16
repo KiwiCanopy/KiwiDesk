@@ -150,8 +150,34 @@ extension SettingsThemeContrastTests {
             )
         }
 
+    /// An empty lens's chip draws its lighter label on the page,
+    /// chosen or not (#2103 ruling 50).
+    private static let emptyLensChips: [Pairing] = [
+        Pairing(
+            "ink2 on an empty lens's chosen chip",
+            SettingsTheme.ink2,
+            on: SettingsTheme.page,
+            washedWith: (
+                SettingsTheme.accent,
+                ChoiceChip.selectedWashOpacity
+            )
+        ),
+        Pairing(
+            "ink2 on an empty lens's chip",
+            SettingsTheme.ink2,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipRest]
+        ),
+        Pairing(
+            "ink2 on an empty lens's hovered chip",
+            SettingsTheme.ink2,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipHover]
+        ),
+    ]
+
     static let chips: [Pairing] =
-        segments + buttonChips + iconChips + choiceChips
+        segments + buttonChips + iconChips + choiceChips + emptyLensChips
 
     /// The opacity of the retired `primary` track, which read as a
     /// well in light — #2047's defect was dark alone — so its

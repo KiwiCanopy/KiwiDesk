@@ -56,9 +56,8 @@ enum ShortcutsOpenBinding {
         in bindings: [KeyBinding],
         lens name: String
     ) -> KeyCombo? {
-        bindings.first {
-            KeybindingCatalog.names($0, name) && !$0.combo.isEmpty
-        }.flatMap { KeyCombo.parse($0.combo) }
+        bindings.first { KeybindingCatalog.isLensChord($0, name) }
+            .flatMap { KeyCombo.parse($0.combo) }
     }
 
     @MainActor private static func combo(

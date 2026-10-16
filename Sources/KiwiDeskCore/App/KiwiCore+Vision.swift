@@ -169,7 +169,13 @@ extension KiwiCore {
     /// stood down under Reduce transparency — what the Settings
     /// picture draws, read through the plate's own door.
     public var kiwiVisionDrawsBlur: Bool {
-        LiquidGlassGate.rendered(blur: visionLook.blur)
+        kiwiVisionDrawsBlur(for: visionLook)
+    }
+
+    /// The same door over `look` — the Settings picture of a lens
+    /// the draft holds (#2103 ruling 29).
+    public func kiwiVisionDrawsBlur(for look: VisionLook) -> Bool {
+        LiquidGlassGate.rendered(blur: look.blur)
     }
 
     /// Whether macOS shows Dark while KiwiVision is on: the ask
@@ -177,12 +183,16 @@ extension KiwiCore {
     /// switch is owed, else what macOS shows now. Never Settings'
     /// own Appearance pick. The Settings picture reads it.
     public var kiwiVisionShowsDark: Bool {
+        kiwiVisionShowsDark(for: visionLook)
+    }
+
+    /// The same ask over `look`'s appearance.
+    public func kiwiVisionShowsDark(for look: VisionLook) -> Bool {
         let machine = vision.appearanceSwitch
         let found =
             (vision.isOn ? machine.readDebt()?.found : nil)
             ?? machine.read()
-        return visionLook.appearance.wantsDark(over: found)
-            ?? found.dark
+        return look.appearance.wantsDark(over: found) ?? found.dark
     }
 
     /// A reorder event the plate hears. The target's re-stacks the

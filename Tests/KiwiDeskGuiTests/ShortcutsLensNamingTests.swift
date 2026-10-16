@@ -136,7 +136,10 @@ struct ShortcutsLensNamingTests {
             )
             .contains(
                 "lenses:KeybindingCatalog.lensOffer("
-                    + "stored:model.core.kiwiVisionStoredLensNames,"
+                    // The page's lenses, seeded from the stored
+                    // list, so a lens the draft adds takes a chord
+                    // before Save (#2103 PR 7).
+                    + "stored:model.draftLenses.map(\\.name),"
                     + "bindings:model.config.layers.flatMap(\\.bindings))"
             )
         )

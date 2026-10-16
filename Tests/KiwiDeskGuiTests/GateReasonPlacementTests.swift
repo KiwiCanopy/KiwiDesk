@@ -105,6 +105,8 @@ struct GateReasonPlacementTests {
                 .kiwiVision(.dim), .kiwiVision(.blur),
                 .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
                 .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
+                // A lens's page draws it under its draft cards.
+                .kiwiVision(.lenses),
             ]
         )
     }

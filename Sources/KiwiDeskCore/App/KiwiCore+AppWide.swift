@@ -114,13 +114,6 @@ extension KiwiCore {
         endCrossing(adopting: owed[profile.name] ?? appWideLedger.settled)
     }
 
-    /// The stored lenses' names, never a session `define_lens`'s:
-    /// what a binding may name, since it outlives the session
-    /// (#2103 ruling 40).
-    public var kiwiVisionStoredLensNames: [String] {
-        kiwiVisionStoredLenses.map(\.name)
-    }
-
     /// The stored lenses: what the Settings lens page seeds its
     /// draft from and writes back, so a session `define_lens` or
     /// `delete_lens` never reaches `gui.json` (ruling 40).

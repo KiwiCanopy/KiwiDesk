@@ -315,6 +315,9 @@ extension InterpolatedLabelTests {
         // KiwiVision's pointer names Shortcuts ▸ Focus by its
         // labels (#2103).
         "kiwivision.xref_link": 1,
+        // The lens page's other-layer caption names Shortcuts
+        // (#2103).
+        "kiwivision.lens.chord_elsewhere": 1,
         // #2258: the Add to Claude Desktop failure names Copy Setup
         // Prompt.
         "ai.setup.claude_desktop.failed": 1,
