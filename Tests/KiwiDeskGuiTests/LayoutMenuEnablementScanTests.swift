@@ -3,8 +3,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Every row the Layout submenu builds states its own
-/// `isEnabled` (#802).
+/// Every row a checked menu-bar builder (`QuickMenuBuilders`)
+/// builds states its own `isEnabled` (#802).
 ///
 /// **Why a source scan and not an assertion on the built menu.**
 /// A `guard-prover` run (2026-08-17) proved the obvious runtime

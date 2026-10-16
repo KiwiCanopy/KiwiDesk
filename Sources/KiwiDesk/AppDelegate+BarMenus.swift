@@ -43,8 +43,8 @@ extension AppDelegate {
         return alert.runModal() == .alertFirstButtonReturn
     }
 
-    /// The Layout menu's Keep row, from the status item or a Space
-    /// chip: the layouts alone (#1179, re-ruled by #1790), the
+    /// Keep, from a Space chip's Layout menu or KiwiHub's View side:
+    /// the layouts alone (#1179, re-ruled by #1790), the
     /// draft's baseline following through `profiles.onCapturedLive`.
     func keepLayoutInProfile() {
         do {
