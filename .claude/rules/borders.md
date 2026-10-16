@@ -491,7 +491,9 @@ Obligations:
   switch path (#1245). `ProfileManager`'s `active` and a config
   load re-judge the lens on through `liveProfileChanged`, and a lens
   turned off for reach says why through its `VisionChangeCause`
-  (`KiwiVisionLensReachTests`). **A lens rename or delete owes
+  (`KiwiVisionLensReachTests`). A path that moves who owns the
+  setup — `gui.json` or `init.lua` written — without a config load
+  owes the same `liveProfileChanged` call. **A lens rename or delete owes
   every profile's `lens_reach` a re-key or a clear** in the same
   write, or a later lens of that name inherits "left out" — review's
   until #2103 PR 6 owes it a test.
