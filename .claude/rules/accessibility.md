@@ -15,6 +15,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+FloatVerdict.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+PanelButton.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowServerWakeUp.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+WindowServerWakeUp.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
@@ -114,9 +115,13 @@ editing AX code:
   `FloatDetection.shouldIgnore` and `isBuiltInIgnoredPanel` take
   the button with no default, so a new caller decides it, and the
   untracked-focus classifier reads it from the report's element.
-  `hasVisibleIgnoredPanel` cannot see buttons, so it takes the
-  gate's admitted ids through `admittedWindows(of:)`
-  (`CommandBarIgnoreTests`, `AXDumpCorpusTests`). The escape
+  A reader of the visible-panel distrust asks the one
+  `EventLoop.showsIgnoredPanel`, which leaves out the gate's
+  admitted ids and hands the scan an untracked window's button
+  reader, never `FloatDetection.hasVisibleIgnoredPanel` beside it
+  (#2344, `VisiblePanelWiringTests` the door,
+  `VisiblePanelButtonTests` the verdict; `CommandBarIgnoreTests`,
+  `AXDumpCorpusTests`). The escape
   stops at the screen-saver level (#2069), whose arm takes no
   button, arms the ignored-panel distrust for any app, and
   refuses ADOPTION only: a tracked window rising to it is judged

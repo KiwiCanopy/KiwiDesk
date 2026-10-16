@@ -1086,7 +1086,8 @@ Touching `AX`, the boot scan's, the bulk passes', the sweep's and the
 adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
 `+ReconcileAll`, `+ReconcileOffMain`, `+ListedWindows`, `+Heal`,
 `+WindowPolicy`, `+FloatVerdict`, `+Tabs`, `+RemovalDistrust`, `+Tracking`,
-`+ProcessIdentity`, `+ShadowWindows`, `+WindowServerWakeUp`).
+`+ProcessIdentity`, `+ShadowWindows`, `+WindowServerWakeUp`,
+`+PanelButton`).
 
 - AX calls are slow and can block — snapshot before layout math, and the
   activation, focus, hide and undeferred-close arms and the distrust and
