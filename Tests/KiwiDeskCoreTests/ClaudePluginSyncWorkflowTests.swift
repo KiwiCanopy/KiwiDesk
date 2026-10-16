@@ -19,7 +19,12 @@ struct ClaudePluginSyncWorkflowTests {
     @Test("it copies the released source, not main")
     func releasedSource() throws {
         let yaml = try workflowSource(Self.file)
-        #expect(yaml.contains("ref: ${{ env.TAG }}"))
+        // Each ref read beside its own checkout's path, since
+        // a file-wide needle passed with the two refs swapped.
+        #expect(
+            yaml.contains("ref: ${{ env.TAG }}\n          path: kiwidesk")
+        )
+        #expect(yaml.contains("ref: main\n          path: marketplace"))
         let copy = try workflowStep(
             "Copy the plugin and stamp its version",
             in: yaml
