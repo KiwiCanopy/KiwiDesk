@@ -169,8 +169,8 @@ LATIN_LOCALES = {
 #
 # The layout names are here to stop the residue rule flagging a
 # locale that legitimately KEEPS a mode name in Latin inside its
-# own script. Only `ru` and `zh-Hant` exercise it (18 and 10
-# values); the CJK three never have, and structurally now cannot
+# own script. Only `ru` exercises it; the CJK locales never
+# have, and structurally now cannot
 # for a capitalised name, since `untranslated_mode_names` forbids
 # it there. (`de` keeps them Latin as well but needs no exemption
 # — `english_residue` is scoped away from Latin-script locales
@@ -179,8 +179,8 @@ LATIN_LOCALES = {
 # as a deliberate name rather than residue.
 #
 # Do NOT read this as "the GUI ships mode names untranslated":
-# the three CJK locales (`ja` モノクル, `ko` 트랙, `zh-Hans` 单窗)
-# render them natively, while the seven Latin-script locales keep
+# the CJK locales (`ja` モノクル, `ko` 트랙, `zh-Hans` 单窗,
+# `zh-Hant` 單窗) render them natively, while the others keep
 # them English so the picker matches the value typed into Lua and
 # the CLI (`set_mode(1, "stack")`). That is why no guard REQUIRES
 # a mode name to be KEPT, unlike `PRODUCT_NAMES`;
@@ -756,9 +756,9 @@ def untranslated_mode_names(
     mode name is ordinary tiling vocabulary each locale may render
     natively, so there is no single right word to demand — this
     guard instead requires the English name to be **absent** once
-    the locale has translated the picker. `de`, `ru` and `zh-Hant`
-    keep the English names, so their picker *is* the English word
-    and they are skipped by construction, with no exemption list.
+    the locale has translated the picker. A locale that keeps the
+    English names (`de`, `ru`) has the English word as its picker,
+    so it is skipped by construction, with no exemption list.
 
     Reading `layout.<mode>.name` from the locale's own catalog is
     the whole trick: the rule is "prose agrees with your picker",
