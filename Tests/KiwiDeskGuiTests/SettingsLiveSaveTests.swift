@@ -105,6 +105,22 @@ struct SettingsLiveSaveTests {
         #expect(try storedWidth(model) == 7)
     }
 
+    /// A stored profile's draft is another file: Core's live rows
+    /// are never its to list.
+    @Test("a stored profile's draft lists no live rows")
+    func storedTargetListsNothing() throws {
+        let model = try makeModel()
+        _ = model.core.execute("border.set_width", args: [.number(9)])
+        model.refreshOwner()
+        #expect(model.liveUnsaved)
+
+        model.target = .storedProfile("Odd")
+        model.refreshUnsavedLive()
+
+        #expect(model.unsavedLive == nil)
+        #expect(!model.liveUnsaved)
+    }
+
     @Test("a clean draft's Save keeps the live change it lists")
     func cleanSaveKeepsLive() throws {
         let model = try makeModel()
