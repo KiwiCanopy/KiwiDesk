@@ -523,13 +523,18 @@ Obligations:
   new target ends the old hold and may begin one, and a lens that
   stops asking — off, Keep focus off, a delay of 0 — ends it there.
   A hold begins on a CHANGE of target to a window the lens leaves
-  out, through the one pure `VisionHold.begins` verdict, never on a
-  plate turning on; its exemptions — Never dimmed, an overlay,
+  out, through the one pure `VisionHold.begins` verdict, after a
+  sync that drew the mode on — never KiwiVision turning on; its exemptions — Never dimmed, an overlay,
   KiwiDesk's own window, the clear window's dialog, a fresh click
   that landed it — join that verdict, not a call site. It ends at
   its `.visionHold` deadline, on a press the stamp says reached the
   held window (`visionPressed`, beside `stampLeftClick` in the
-  press fan-out), and at the next settle; never on typing. While it
+  press fan-out), at the next settle and at `stop()`, every end
+  through `endVisionHold`, since its pill has no timer; never on
+  typing. The pill takes its own overlay, so a refusal flashed on
+  the held window never replaces it, and follows its window at
+  each settle (`KiwiVisionHoldExemptionTests` ▸
+  `holdPillHasItsOwnOverlay`). While it
   stands the plates order ABOVE the held window and its own reorder
   event re-orders them there, since an activation lifts it back
   (v3 probe P9), and the mask walks it hazed in front

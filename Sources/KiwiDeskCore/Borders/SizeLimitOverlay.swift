@@ -72,7 +72,8 @@ final class SizeLimitOverlay {
 
     /// Shows a lens's reminder pill centred on a held window, with
     /// no symbol and no timer: it stays until `release` (#2103
-    /// ruling 12).
+    /// ruling 12). A pill already shown follows the window without
+    /// popping again.
     @discardableResult
     func hold(window: CGWindowID, frame: CGRect, text: String) -> Bool {
         present(window: window, frame: frame, text: text, symbol: nil)
@@ -95,6 +96,7 @@ final class SizeLimitOverlay {
         text: String,
         symbol: String?
     ) -> Bool {
+        let shown = pills[window] != nil
         var pill = pills[window] ?? makePill()
         pill.hideWork?.cancel()
         pill.hideWork = nil
@@ -132,6 +134,9 @@ final class SizeLimitOverlay {
             scales: Self.popKeyframes.map(\.scale)
         )
 
+        if symbol == nil, shown, pill.panel.frame == panelRect {
+            return true
+        }
         // The plate first: the shadow follows what the panel draws.
         pill.plate.frame = PopRoom.plateFrame(
             plate: screenRect,
@@ -142,7 +147,9 @@ final class SizeLimitOverlay {
         pill.panel.order(.above, relativeTo: Int(window))
         pill.panel.alphaValue = 1
 
-        if !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+        if symbol != nil || !shown,
+            !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        {
             popEntrance(pill.plate)
         }
 

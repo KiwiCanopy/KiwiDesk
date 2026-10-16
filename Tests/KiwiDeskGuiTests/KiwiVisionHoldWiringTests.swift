@@ -39,8 +39,7 @@ struct KiwiVisionHoldWiringTests {
         #expect(
             vision.contains(
                 "letfocus=visionTarget()"
-                    + "settleVisionHold(target:focus.target,"
-                    + "ownKey:focus.ownKey)"
+                    + "settleVisionHold(target:focus.target)"
                     + "varrequest=visionRequest("
                     + "refreshingList:reassertOrder,focus:focus)"
             )
@@ -52,11 +51,23 @@ struct KiwiVisionHoldWiringTests {
         let delegate = try flat(
             "Sources/KiwiDesk/AppDelegate+KiwiVision.swift"
         )
-        #expect(delegate.contains("core.vision.onHold={reminderin"))
+        #expect(delegate.contains("core.vision.onHold={ownin"))
         #expect(
             delegate.contains(
                 ".announcement:Self.spokenReminder(reminder)"
             )
+        )
+    }
+
+    /// A stop releases the hold's pill before the plates go, since
+    /// a hold pill has no timer of its own.
+    @Test("a stop ends the hold ahead of the plates")
+    func stopEndsTheHold() throws {
+        let lifecycle = try flat(
+            "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
+        )
+        #expect(
+            lifecycle.contains("endVisionHold(restack:false)vision.clear()")
         )
     }
 

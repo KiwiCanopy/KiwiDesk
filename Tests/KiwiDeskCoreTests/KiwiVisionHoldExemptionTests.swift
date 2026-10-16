@@ -91,7 +91,7 @@ struct KiwiVisionHoldExemptionTests {
     func reminderIsHeard() {
         LocalizationManager.shared.select("en")
         let (core, _) = F.core(lens: ["reminder": .string("Stay here")])
-        var heard: [String] = []
+        var heard: [String?] = []
         core.vision.onHold = { heard.append($0) }
         F.focus(core, F.stranger)
         core.updateVision()
@@ -103,16 +103,17 @@ struct KiwiVisionHoldExemptionTests {
     func blankReminderShowsTheDefault() {
         LocalizationManager.shared.select("en")
         let (core, _) = F.core(lens: ["reminder": .string("  ")])
-        var heard: [String] = []
+        var heard: [String?] = []
         core.vision.onHold = { heard.append($0) }
         F.focus(core, F.stranger)
-        #expect(heard == ["🥝 Keep the vision juicy 🥝"])
+        #expect(heard == [nil])
+        #expect(core.visionReminder == "🥝 Keep the vision juicy 🥝")
     }
 
     @Test("at a delay of 0 nothing is heard")
     func noDelayIsSilent() {
         let (core, _) = F.core(lens: ["clear_delay": .number(0)])
-        var heard: [String] = []
+        var heard: [String?] = []
         core.vision.onHold = { heard.append($0) }
         F.focus(core, F.stranger)
         #expect(heard.isEmpty)
@@ -132,5 +133,16 @@ struct KiwiVisionHoldExemptionTests {
         )
         #expect(abs(pill.panel.midX - flipped.midX) < 1)
         #expect(abs(pill.panel.midY - flipped.midY) < 1)
+        // It follows the window when the window moves.
+        let moved = frame.offsetBy(dx: 120, dy: 0)
+        #expect(overlay.hold(window: 1, frame: moved, text: "Wait"))
+        let after = try #require(overlay.pillForTest(1))
+        #expect(abs(after.panel.midX - (flipped.midX + 120)) < 1)
+    }
+
+    @Test("a hold pill and a refusal pill never share a slot")
+    func holdPillHasItsOwnOverlay() {
+        let (core, _) = F.core()
+        #expect(core.borders.holdPillOverlay !== core.borders.sizeLimitOverlay)
     }
 }

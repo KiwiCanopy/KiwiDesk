@@ -17,13 +17,18 @@ extension KiwiCore {
         return lens.clearDelay
     }
 
-    /// The reminder the hold's pill draws: the lens's own text, a
-    /// blank one showing the default (ruling 42a).
-    var visionReminder: String {
+    /// The lens's own reminder, nil where it is blank.
+    var visionLensReminder: String? {
         let own =
             visionLook.lens?.reminder?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        guard own.isEmpty else { return own }
+        return own.isEmpty ? nil : own
+    }
+
+    /// The reminder the hold's pill draws: the lens's own text, a
+    /// blank one showing the default (ruling 42a).
+    var visionReminder: String {
+        if let own = visionLensReminder { return own }
         return L(
             "kiwivision.reminder.default",
             "🥝 Keep the vision juicy 🥝"
@@ -32,52 +37,59 @@ extension KiwiCore {
 
     /// Judges the plates' next target against the hold, ahead of
     /// the sync that draws it: the hold ends where its target left
-    /// or the lens stopped asking, and a new target the lens leaves
-    /// out begins one. Plates not yet shown — KiwiVision turning
-    /// on, a stand-down — make no landing.
-    func settleVisionHold(target: CGWindowID?, ownKey: Bool) {
+    /// or the lens stopped asking, a standing one's pill follows its
+    /// window, and a new target the lens leaves out begins one.
+    /// KiwiVision turning on makes no landing.
+    func settleVisionHold(target: CGWindowID?) {
         let previous = vision.target
         let previousClear = vision.hold?.window.raw != previous
-        if let hold = vision.hold,
-            hold.window.raw != target || visionHoldDelay == nil
-        {
-            endVisionHold(restack: false)
+        if let hold = vision.hold {
+            if hold.window.raw != target || visionHoldDelay == nil {
+                endVisionHold(restack: false)
+            } else if let frame = refusalPillFrame(hold.window) {
+                borders.showHoldPill(
+                    window: hold.window,
+                    frame: frame,
+                    text: visionReminder
+                )
+            }
         }
-        guard target != previous, vision.hasShownPlates,
+        guard target != previous, vision.drewOn,
             let target, let delay = visionHoldDelay
         else { return }
         let id = WindowID(target)
         let landing = visionLanding(
             id,
-            after: previousClear ? previous : nil,
-            ownKey: ownKey
+            after: previousClear ? previous : nil
         )
         guard VisionHold.begins(landing) else { return }
         vision.hold = VisionHold(window: id)
         deferred.schedule(.visionHold, after: .seconds(delay)) {
             [weak self] in self?.endVisionHold()
         }
-        let reminder = visionReminder
         if let frame = refusalPillFrame(id) {
-            borders.showHoldPill(window: id, frame: frame, text: reminder)
+            borders.showHoldPill(
+                window: id,
+                frame: frame,
+                text: visionReminder
+            )
         }
-        vision.onHold(reminder)
+        vision.onHold(visionLensReminder)
     }
 
     /// What `id` is as a landing. `clear` is the window that was
-    /// clear before it, nil where the plates held it.
+    /// clear before it, nil where the plates held it. An own key
+    /// window is never tracked, so it lands as nothing left out.
     func visionLanding(
         _ id: WindowID,
-        after clear: CGWindowID?,
-        ownKey: Bool
+        after clear: CGWindowID?
     ) -> VisionHold.Landing {
         guard let window = state.windows[id], let skip = lensKeySkip()
         else { return VisionHold.Landing(leftOut: false) }
         var landing = VisionHold.Landing(leftOut: skip(id))
         landing.neverDimmed = isNeverDimmed(window.appRef)
         landing.overlay = window.isTransientOverlay || window.isRaisedLayer
-        landing.own =
-            ownKey || window.carriesOwnMark || window.pid == getpid()
+        landing.own = window.carriesOwnMark
         if let clear, let was = state.windows[WindowID(clear)],
             Self.dialogSubroles.contains(window.subrole ?? "")
         {

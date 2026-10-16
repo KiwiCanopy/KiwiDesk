@@ -32,7 +32,13 @@ enum VisionHoldFixture {
         core.vision.plateFactory = { plate }
         let base = [
             window(member, notes, "test.kiwi.notes", "Draft"),
-            window(stranger, strangers, "test.kiwi.other", "Mail"),
+            window(
+                stranger,
+                strangers,
+                "test.kiwi.other",
+                "Mail",
+                frame: CGRect(x: 640, y: 120, width: 330, height: 210)
+            ),
             window(other, strangers + 1, "test.kiwi.third", "Chat"),
         ]
         for window in base + windows {
@@ -202,7 +208,38 @@ struct KiwiVisionHoldTests {
         let (core, _) = F.core(lens: ["clear_wallpaper": .bool(true)])
         F.focus(core, F.stranger)
         let windows = core.visionRequest().windows
+        let held = GeometryUtils.flip(
+            core.state.windows[F.stranger]!.frame,
+            primaryHeight: GeometryUtils.primaryHeight
+        )
+        #expect(windows.first?.frame == held)
         #expect(windows.first?.clear == false)
-        #expect(windows.first?.frame.width == 400)
+    }
+
+    @Test("turning a lens on over a left-out window holds nothing")
+    func turningOnIsNoLanding() {
+        let (core, _) = F.core()
+        core.execute("kiwivision.toggle", args: [.string("Writing")])
+        F.focus(core, F.stranger)
+        core.execute("kiwivision.toggle", args: [.string("Writing")])
+        #expect(core.vision.hold == nil)
+    }
+
+    @Test("a landing after nothing was focused still waits")
+    func landingAfterNothingFocused() {
+        let (core, _) = F.core()
+        for id in [F.member, F.stranger, F.other] {
+            core.state.apply(.windowDestroyed(id, wasMinimized: false))
+        }
+        core.updateVision()
+        #expect(!core.vision.hasShownPlates)
+        let late = WindowID(20)
+        core.state.apply(
+            .windowCreated(
+                F.window(late, F.strangers, "test.kiwi.other", "Mail")
+            )
+        )
+        F.focus(core, late)
+        #expect(core.vision.hold?.window == late)
     }
 }

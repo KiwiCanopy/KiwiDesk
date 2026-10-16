@@ -136,7 +136,7 @@ extension KiwiCore {
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
         let focus = visionTarget()
-        settleVisionHold(target: focus.target, ownKey: focus.ownKey)
+        settleVisionHold(target: focus.target)
         var request = visionRequest(
             refreshingList: reassertOrder,
             focus: focus
@@ -250,10 +250,9 @@ extension KiwiCore {
     }
 
     /// What `visionTarget` reads: the window kept clear, its
-    /// process, the ring the plates stack under, and whether it is
-    /// an own key window.
+    /// process and the ring the plates stack under.
     typealias VisionTarget = (
-        target: CGWindowID?, pid: pid_t?, ring: CGWindowID?, ownKey: Bool
+        target: CGWindowID?, pid: pid_t?, ring: CGWindowID?
     )
 
     /// The window the plates keep clear: the ring's focused
@@ -276,6 +275,6 @@ extension KiwiCore {
         let ring =
             ownKey == nil
             ? anchor.flatMap { borders.ringPanel(of: $0) } : nil
-        return (ownKey ?? anchor?.raw, pid, ring, ownKey != nil)
+        return (ownKey ?? anchor?.raw, pid, ring)
     }
 }

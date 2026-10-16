@@ -24,7 +24,14 @@ extension AppDelegate {
         }
         // A lens holds a landing under the haze: its reminder,
         // once per landing (#2103 ruling 12).
-        core.vision.onHold = { reminder in
+        core.vision.onHold = { own in
+            // The default is the GUI's to render (#96).
+            let reminder =
+                own
+                ?? L(
+                    "kiwivision.reminder.default",
+                    "🥝 Keep the vision juicy 🥝"
+                )
             NSAccessibility.post(
                 element: NSApp as Any,
                 notification: .announcementRequested,

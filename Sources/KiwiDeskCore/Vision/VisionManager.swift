@@ -57,12 +57,15 @@ public final class VisionManager {
         }
     /// Hears a change of which lenses reach the live profile.
     public var onReachChange: @MainActor () -> Void = {}
-    /// Hears each landing a lens holds, with the reminder its pill
-    /// draws; the GUI announces it.
-    public var onHold: @MainActor (String) -> Void = { _ in }
+    /// Hears each landing a lens holds, with the lens's own
+    /// reminder, nil for the default; the GUI announces it.
+    public var onHold: @MainActor (String?) -> Void = { _ in }
     /// The landing a lens holds under the haze now, nil while none
-    /// waits (`KiwiCore+VisionHold`).
+    /// waits; begun and ended only in `KiwiCore+VisionHold`.
     var hold: VisionHold?
+    /// Whether the last sync drew the mode on: a target change
+    /// after one is a landing, the sync turning it on is not.
+    private(set) var drewOn = false
     var plates: [DisplayID: any VisionPlateBackend] = [:]
     /// Where each plate was last ordered: a plate re-stacks only
     /// when the focus moves, a hold begins or ends, a settle pass
@@ -170,6 +173,7 @@ public final class VisionManager {
         target = request.target
         below = request.target.map { request.below ?? $0 }
         holding = request.holding != nil && request.holding == target
+        drewOn = isOn
         guard isOn else {
             for plate in plates.values { plate.hide(reduceMotion: motion) }
             stacked = [:]
@@ -289,7 +293,7 @@ public final class VisionManager {
         target = nil
         below = nil
         holding = false
-        hold = nil
+        drewOn = false
     }
 
     private func makePlate() -> any VisionPlateBackend {
