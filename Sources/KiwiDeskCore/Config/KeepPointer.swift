@@ -104,12 +104,14 @@ extension TilingSettings {
 
     /// `live` with every leaf where these settings differ from
     /// `base` taken from these — a draft's edits laid over the
-    /// settings live draws now, leaf by leaf (#2262).
+    /// settings live draws now, leaf by leaf (#2262). Where the
+    /// decoder refuses the edits over live, these settings whole:
+    /// a Save never drops an edit it was asked to commit.
     public func rebased(
         from base: TilingSettings,
         onto live: TilingSettings
     ) -> TilingSettings {
-        guard let mine = keepJSON else { return live }
+        guard let mine = keepJSON else { return self }
         var leaves: [[String]: JSONValue?] = [:]
         for path in KeepPointer.diff(base.keepJSON, mine) {
             leaves.updateValue(
@@ -117,7 +119,8 @@ extension TilingSettings {
                 forKey: path
             )
         }
-        return live.patchedLeafByLeaf(leaves)
+        guard !leaves.isEmpty else { return live }
+        return live.patched(leaves) ?? self
     }
 
     /// `patched`, where a leaf the decoder refuses beside the others

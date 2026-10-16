@@ -107,14 +107,6 @@ extension SettingsModel {
             into: &config,
             seededWith: seedSpaces
         )
-        // The draft's settings edits over live as it is NOW, leaf
-        // by leaf: a whole-settings apply would put back every value
-        // a verb, an AI app or a hotkey changed since the seed —
-        // the rows the pill lists as kept (#2262).
-        config.settings = config.settings.rebased(
-            from: cleanConfig.settings,
-            onto: core.tiler.settings
-        )
         let edited = SettingsDraftDiff.between(
             config: config,
             cleanConfig: cleanConfig,
@@ -129,9 +121,16 @@ extension SettingsModel {
         // A failed checklist write stops the Save, as the stored
         // door's does: the ticks stay staged with its warning.
         guard saveLookReach() else { return false }
+        // Only the draft's settings edits, over live as it is now
+        // (#2262).
+        var committing = config
+        committing.settings = config.settings.rebased(
+            from: cleanConfig.settings,
+            onto: core.tiler.settings
+        )
         core.withUserMotion {
             core.applyProfileScopedState(
-                from: config,
+                from: committing,
                 applyingModesFor: edited
             )
         }

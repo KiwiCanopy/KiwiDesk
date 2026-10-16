@@ -132,6 +132,8 @@ struct BarMenuLandingTests {
     func sessionOnlyWriteLeavesTheDraft() {
         let model = dirtyModel()
         let span = model.config.settings.spaceBarStyle.glyphSpan
+        // Live took the write: a draft that re-read live would see it.
+        model.core.tiler.settings.spaceBarStyle.glyphSpan = span + 2
         model.adoptLiveWrite(
             .settings { $0.spaceBarStyle.glyphSpan = span + 2 },
             persisted: false
