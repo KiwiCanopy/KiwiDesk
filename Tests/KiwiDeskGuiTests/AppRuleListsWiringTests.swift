@@ -186,7 +186,32 @@ struct AppRuleListsWiringTests {
     /// rule may be the row's only stored rule, and clearing it
     /// dropped the row mid-composition (#1022).
     @Test("opening the pattern editor clears no float rule")
+    /// The title editor's writes reach the Float rules through the
+    /// one `FloatFacet.settingPatterns`, and the first pattern and
+    /// the last one's removal hold the editor open (#1022, #2103
+    /// ruling 43): the editor edits a list and knows no rule.
+    private func titleEditorWritesTheRules() throws {
+        let binding = try body(
+            of: "private var titlePatterns: Binding<[String]>",
+            in: "AppRuleFloatRow.swift"
+        )
+        #expect(binding.contains("FloatFacet.settingPatterns("))
+        #expect(
+            binding.contains(
+                Self.squashed(
+                    "if wasEmpty || patterns.isEmpty { "
+                        + "titlesEditing.wrappedValue = true }"
+                )
+            )
+        )
+        #expect(
+            try source("AppRuleFloatRow.swift")
+                .contains("patterns:titlePatterns,")
+        )
+    }
+
     func openTitlesKeepsTheRule() throws {
+        try titleEditorWritesTheRules()
         let open = try body(
             of: "private func openTitles()",
             in: "AppRuleFloatRow.swift"

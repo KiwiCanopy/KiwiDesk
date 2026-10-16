@@ -171,18 +171,25 @@ struct AppRuleFloatRow: View {
 
     /// The app's title patterns as `app:pattern` Float rules (the
     /// GUI assembles the colon syntax). A write drops the bare rule
-    /// as the first pattern lands and keeps the editor open, even
-    /// once the last pattern goes (#1022).
+    /// as the first pattern lands; the first pattern and the last
+    /// one's removal keep the editor open (#1022), and no other write
+    /// moves the section's one open composer.
     private var titlePatterns: Binding<[String]> {
         Binding(
             get: { FloatFacet.patterns(model.config.floatRules, app: app) },
             set: { patterns in
+                let wasEmpty = FloatFacet.patterns(
+                    model.config.floatRules,
+                    app: app
+                ).isEmpty
                 model.config.floatRules = FloatFacet.settingPatterns(
                     patterns,
                     of: app,
                     in: model.config.floatRules
                 )
-                titlesEditing.wrappedValue = true
+                if wasEmpty || patterns.isEmpty {
+                    titlesEditing.wrappedValue = true
+                }
             }
         )
     }

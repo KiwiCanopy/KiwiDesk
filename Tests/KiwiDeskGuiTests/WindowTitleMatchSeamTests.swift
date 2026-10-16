@@ -10,14 +10,15 @@ import Testing
 /// Reads comment-stripped Core source; no main actor.
 @Suite("Window title match seam (#2103)")
 struct WindowTitleMatchSeamTests {
-    /// Core's files, comments stripped, by file name.
+    /// Core's files, comments stripped, by path under Core, so two
+    /// files sharing a name never shadow each other.
     private func coreSources() throws -> [String: String] {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDeskCore")
         var sources: [String: String] = [:]
         for url in try SourceScan.swiftSources(under: root) {
-            sources[url.lastPathComponent] =
-                try SourceScan.strippedSource(at: url)
+            let path = String(url.path.dropFirst(root.path.count + 1))
+            sources[path] = try SourceScan.strippedSource(at: url)
         }
         #expect(sources.count > 100, "Core read empty")
         return sources
@@ -32,20 +33,22 @@ struct WindowTitleMatchSeamTests {
             .filter { $0.value > 0 }
         #expect(
             callers == [
-                "WindowRules.swift": 1,
-                "KiwiCore+VisionLens.swift": 1,
+                "AX/WindowRules.swift": 1,
+                "App/KiwiCore+VisionLens.swift": 1,
             ]
         )
     }
 
-    /// The substring match lives in the predicate's body alone.
+    /// The substring match lives in the predicate's body alone. The
+    /// needle is the shape a title rule takes today; a match spelled
+    /// otherwise (`range(of:`, an optional chain) is review's.
     @Test("the match is spelled in one place")
     func matchHasOneHome() throws {
         let homes = try coreSources()
             .filter { $0.value.contains("title.contains(") }
             .keys
-        #expect(Set(homes) == ["WindowRules.swift"])
-        let rules = try #require(try coreSources()["WindowRules.swift"])
+        #expect(Set(homes) == ["AX/WindowRules.swift"])
+        let rules = try #require(try coreSources()["AX/WindowRules.swift"])
         #expect(rules.occurrences(of: "title.contains(") == 1)
     }
 }
