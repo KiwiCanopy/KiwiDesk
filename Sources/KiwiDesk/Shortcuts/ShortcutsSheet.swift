@@ -46,10 +46,13 @@ struct ShortcutsSheet {
         func keeps(_ row: ShortcutRow) -> Bool {
             matchRange(of: needle, in: row.label) != nil
         }
-        // A folded row kept whole where its own label matches,
-        // else opened to the members that do (#2312).
+        // A folded row stays whole where every member matches, or
+        // none does and its own label still matches; otherwise it
+        // opens to the members that match (#2312).
         func shown(_ row: ShortcutRow) -> [ShortcutRow] {
-            keeps(row) ? [row] : row.members.filter(keeps)
+            let hits = row.members.filter(keeps)
+            if hits.isEmpty { return keeps(row) ? [row] : [] }
+            return hits.count == row.members.count ? [row] : hits
         }
         var out = reference
         out.controls = reference.controls.compactMap { group in

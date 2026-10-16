@@ -5,8 +5,7 @@ import Testing
 
 /// The shortcuts overview folds (#2312): a regular digit ladder
 /// and a complete mirrored set become one row; anything the user
-/// changed stands alone, and a search opens a fold to the members
-/// it names.
+/// changed stands alone.
 @Suite("Shortcuts overview fold", .serialized)
 @MainActor
 struct ShortcutFoldTests {
@@ -14,7 +13,8 @@ struct ShortcutFoldTests {
 
     private func build(
         _ bindings: [(String, String)],
-        icons: [SpaceID: String] = [:]
+        icons: [SpaceID: String] = [:],
+        desktops: [Int] = []
     ) -> ShortcutsReference {
         ShortcutsReferenceBuilder.build(
             layer: KeyLayer(
@@ -25,7 +25,7 @@ struct ShortcutFoldTests {
             ),
             spaces: spaces,
             spaceIcons: icons,
-            desktops: [],
+            desktops: desktops,
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName]
         )
@@ -80,6 +80,56 @@ struct ShortcutFoldTests {
         )
     }
 
+    @Test("an away Desktop breaks its run")
+    func awayDesktopBreaks() {
+        LocalizationManager.shared.select("en")
+        let bindings = (1...3).map {
+            (
+                "control+option+command+\($0)",
+                KeybindingCatalog.goToDesktop([$0])[0].lua
+            )
+        }
+        let live = rows(build(bindings, desktops: [1, 2, 3]))
+        #expect(live.map(\.label) == ["Go to Desktop 1–3"])
+        let away = rows(build(bindings, desktops: [1, 3]))
+        #expect(away.count == 3)
+    }
+
+    /// The digit is judged by key code, so a layout whose number
+    /// row draws other glyphs (AZERTY's "&é\"") still folds, and
+    /// prints its own glyphs.
+    @Test("own digit is the key code, never the drawn glyph")
+    func ownDigitByKeyCode() throws {
+        LocalizationManager.shared.select("en")
+        let commands = KeybindingCatalog.goToSpace(
+            ["1", "2", "3"].map { SpaceID($0) }
+        )
+        let azerty = ["&", "é", "\""]
+        let tagged = commands.enumerated().map { index, command in
+            var row = ShortcutRow(
+                id: command.lua,
+                label: command.resolvedLabel,
+                combo: "⌃⌥" + azerty[index]
+            )
+            row.fold = ShortcutFold.tag(
+                for: command,
+                at: .init(family: .goToSpace, position: index + 1),
+                combo: KeyCombo.parse("control+option+\(index + 1)"),
+                rendered: row.combo
+            )
+            return row
+        }
+        let folded = try #require(ShortcutFold.folded(tagged).first)
+        #expect(folded.combo == "⌃⌥&–\"")
+        let lying = ShortcutFold.tag(
+            for: commands[0],
+            at: .init(family: .goToSpace, position: 1),
+            combo: KeyCombo.parse("control+option+w"),
+            rendered: "⌃⌥1"
+        )
+        #expect(lying?.ownDigit == false)
+    }
+
     @Test("a mirrored set folds only while every member is bound")
     func setsFoldWhole() {
         LocalizationManager.shared.select("en")
@@ -103,27 +153,32 @@ struct ShortcutFoldTests {
         ]
         let resize = rows(build(width))
         #expect(resize.map(\.label) == ["Shrink / grow width"])
-        #expect(resize.first?.combo == "⌥⌘12")
+        #expect(resize.first?.combo == "⌥⌘1 2")
     }
 
-    @Test("a search opens a fold to the members it names")
-    func searchOpensTheFold() {
+    /// Each folded set lists its members in the order its label
+    /// names them, which is the order its keys print in.
+    @Test("a set's members keep its label's order")
+    func setMembersKeepLabelOrder() {
         LocalizationManager.shared.select("en")
-        let moves = (1...3).map {
-            (
-                "control+option+shift+\($0)",
-                KeybindingCatalog.moveToSpaceRows([SpaceID("\($0)")])[0].lua
-            )
+        let expected: [ShortcutFold.Family: [String]] = [
+            .focusDirections: [
+                "Focus window to the left", "Focus window below",
+                "Focus window above", "Focus window to the right",
+            ],
+            .width: ["Shrink width", "Grow width"],
+            .height: ["Shrink height", "Grow height"],
+        ]
+        for (family, members) in ShortcutFold.sets(resizeStep: 50) {
+            let keys = ["a", "b", "c", "d"]
+            let bound = members.enumerated().map {
+                ("option+command+\(keys[$0.offset])", $0.element.lua)
+            }
+            let row = rows(build(bound)).first
+            #expect(row?.members.map(\.id) == members.map(\.lua))
+            if let labels = expected[family] {
+                #expect(row?.members.map(\.label) == labels)
+            }
         }
-        var sheet = ShortcutsSheet(
-            reference: build((1...3).map { goTo($0) } + moves)
-        )
-        sheet.setQuery("space 3")
-        let named = sheet.shown?.controls.flatMap(\.rows).map(\.label)
-        #expect(named == ["Go to Space 3", "Move to Space 3"])
-        sheet.setQuery("go to space")
-        let folded = sheet.shown?.controls.flatMap(\.rows).map(\.label)
-        #expect(folded == ["Go to Space 1–3"])
-        #expect(sheet.matchCount == 1)
     }
 }

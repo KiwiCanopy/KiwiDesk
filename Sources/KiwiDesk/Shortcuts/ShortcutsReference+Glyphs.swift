@@ -26,8 +26,11 @@ extension ShortcutsReferenceBuilder {
         {
             return "\(n).square"
         }
-        return "squares.below.rectangle"
+        return spaceGroupIcon
     }
+
+    /// The Spaces glyph a row naming no one Space wears.
+    static let spaceGroupIcon = "squares.below.rectangle"
 
     /// A verb row's glyph on the key panel's Shortcuts side
     /// (#2246): the layout cycle, the size quartet, the float and
