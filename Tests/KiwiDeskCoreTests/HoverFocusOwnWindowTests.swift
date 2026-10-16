@@ -55,13 +55,19 @@ struct HoverFocusOwnWindowTests {
             ]
         }
         let fronts = Fronts()
-        core.mouse.rest.frontOwnWindow = { fronts.numbers.append($0) }
+        core.mouse.rest.frontOwnWindow = { [weak core] number in
+            fronts.numbers.append(number)
+            fronts.focusAtFront.append(core?.focusedWindowID)
+        }
         return (core, fronts)
     }
 
     @MainActor
     final class Fronts {
         var numbers: [Int] = []
+        /// Core's focus when the GUI was asked to front: the
+        /// command comes first (#1281).
+        var focusAtFront: [WindowID?] = []
     }
 
     private func rest(_ core: KiwiCore, at point: CGPoint) {
@@ -88,8 +94,21 @@ struct HoverFocusOwnWindowTests {
         rest(core, at: overRight)
         #expect(core.focusedWindowID == WindowID(3))
         #expect(fronts.numbers == [3])
+        #expect(fronts.focusAtFront == [WindowID(3)])
         // The flight names the app the hover left (#1812).
         #expect(core.raiseFlight?.leftPID == 11)
+    }
+
+    /// A focus the Desktop raise gate refuses (#1345) moves
+    /// nothing, so the GUI is never asked for the bare front #1281
+    /// exists to prevent.
+    @Test("A refused focus is not fronted")
+    func refusedFocusIsNotFronted() {
+        let (core, fronts) = makeCore(marked: true)
+        core.windowIsOnScreen = { $0 == WindowID(3) ? false : nil }
+        rest(core, at: overRight)
+        #expect(core.focusedWindowID == WindowID(1))
+        #expect(fronts.numbers.isEmpty)
     }
 
     @Test("Another app's window is never fronted by the GUI")

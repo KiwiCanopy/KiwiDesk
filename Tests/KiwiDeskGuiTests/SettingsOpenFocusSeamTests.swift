@@ -3,7 +3,10 @@ import Testing
 
 /// The Settings raise tells Core first (#1281). Every mouse and
 /// chord path that opens Settings funnels into
-/// `SettingsWindowController.show()`, and a bare `forceFront` of
+/// `SettingsWindowController.show()` — hover focus, which raises
+/// an open one from Core, commands the focus itself and fronts
+/// through `PointerRest.frontOwnWindow` instead (#1869) — and
+/// a bare `forceFront` of
 /// a window the row just panned out reports a clickless focus
 /// that #1161's placement distrust bounces for two seconds. The
 /// raise branch therefore calls `KiwiCore.focusOwnWindow` BEFORE

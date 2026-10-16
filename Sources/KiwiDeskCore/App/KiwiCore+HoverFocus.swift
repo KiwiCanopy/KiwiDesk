@@ -39,7 +39,7 @@ extension KiwiCore {
             // KiwiDesk's own marked window: the command above made
             // the focus ours, and only AppKit can make KiwiDesk key
             // while another app is in front (#1281).
-            if target.own {
+            if target.own, focusedWindowID == target.id {
                 mouse.rest.frontOwnWindow(Int(target.id.raw))
             }
         }
