@@ -223,7 +223,7 @@ extension APIReference {
         "define_lens": APIRecord(
             "Adds or replaces a lens: a Lua table, or a JSON object "
                 + "string over the CLI.",
-            .text("lens")
+            .text("table")
         ),
         "delete_lens": APIRecord(
             "Removes a lens for this session; KiwiVision turns off "

@@ -3773,13 +3773,15 @@ end)
 **Expects:** nothing.
 
 **Does:** returns `on`; `lens`, the lens that is on (null for plain
-KiwiVision or off); `plain`, the running values of the
-`kiwivision` group without its lenses; and `lenses`, each lens as
-its [`define_lens`](#kiwivisiondefine_lens) table with `saved`
-(whether `gui.json` holds it as it is) and, where it cannot turn
-on, `refusal`: `{reason = "no_apps"}`, or
-`{reason = "out_of_reach", profile = "Studio"}` for the live
-profile that leaves it out.
+KiwiVision or off); `settings`, the plain KiwiVision values under
+the `kiwivision` group's keys, without its lenses; and `lenses`,
+one entry per lens. An entry carries `lens`, its
+[`define_lens`](#kiwivisiondefine_lens) table; `saved`, whether
+`gui.json` holds that lens as it is (absent in a Lua-owned setup);
+and, where it cannot turn on, `refusal`: `{reason = "no_apps"}`,
+or `{reason = "out_of_reach", profile = "Studio"}` for the live
+profile that leaves it out. `kiwivision.toggle` returns the same
+`on` and `lens`.
 
 ### kiwivision.define_lens
 
@@ -3816,7 +3818,9 @@ that was clear never wait.
 A setting the lens leaves out follows the
 plain KiwiVision one, and never-dimmed apps stay clear under every
 lens. Like the `set_*` verbs, it changes the running lenses only;
-`init.lua` defines them on every load.
+`init.lua` defines them on every load. A lens defined here lasts
+until a config reload or restart and is not listed on Settings ▸
+KiwiVision until you make it there.
 
 **Example:**
 

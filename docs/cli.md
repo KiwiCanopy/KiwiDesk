@@ -253,11 +253,11 @@ is named by the `bundle_id` `get_state` lists for its windows.
 no focused-window default here.
 
 `kiwivision` takes an `action`, as `looks` does, over every
-`kiwivision.*` verb, `kiwivision.current` among them; `define_lens`
-takes the lens as a JSON object string. A KiwiVision setting or a lens it changes is
-app-wide, so `keep` names it but cannot write it: change the
-setting on Settings ▸ KiwiVision, or make the lens there, to keep
-it.
+`kiwivision.*` verb, `kiwivision.current` among them;
+`define_lens` takes `table`, the lens as a JSON object string.
+`keep` cannot write a KiwiVision change. To keep a KiwiVision
+setting, change it on Settings ▸ KiwiVision; to keep a lens, make
+it there.
 
 A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where
@@ -466,9 +466,12 @@ knows of an app whose window it does not list
 :::
 
 :::unreleased
-`kiwivision.current` says whether KiwiVision is on, which lens is
-on, its settings and every lens with why it cannot turn on
-([`kiwivision.current`](lua-reference.md#kiwivisioncurrent)).
+`kiwivision.toggle [lens]`, `kiwivision.current`, the
+`kiwivision.set_*` verbs, `kiwivision.define_lens <json>` and
+`kiwivision.delete_lens <name>` reach KiwiVision and its lenses
+([KiwiVision](lua-reference.md#kiwivision)). `kiwivision.current`
+says whether KiwiVision is on, which lens is on, its settings and
+every lens with why it cannot turn on.
 :::
 
 | Category | Command | Arguments |

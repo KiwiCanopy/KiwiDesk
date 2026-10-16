@@ -10,19 +10,22 @@ import Testing
 @Suite("KiwiVision look seam")
 struct VisionLookSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
-    /// The flat live fields' home and the resolver's.
+    /// The flat live fields' home and the resolver's, and the
+    /// `gui.json` encoder, which writes the stored group whole.
     private static let homes: Set<String> = [
         "Config/AppWideSettings.swift", "Config/VisionLook.swift",
+        "Config/GuiConfig.swift",
     ]
 
     /// Every flat live field a lens can override, read off the
-    /// overrides by reflection, and the stored group itself.
+    /// overrides by reflection, and the stored group itself, read
+    /// whole or by member (`visionLenses` is a different word).
     private static var needle: String {
         let fields = fieldNamesOf(VisionLens.Overrides()).map {
             "vision" + $0.prefix(1).uppercased() + $0.dropFirst()
         }
         return #"(?<!\$0)\.("# + fields.sorted().joined(separator: "|")
-            + #")\b|appWide\.vision\."#
+            + #")\b|appWide\.vision\b"#
     }
 
     private static func fieldNamesOf(_ value: Any) -> [String] {

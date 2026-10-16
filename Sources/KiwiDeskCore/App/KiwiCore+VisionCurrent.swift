@@ -4,31 +4,38 @@ import Foundation
 /// draws now and the live settings, read through the same accessors
 /// KiwiHub and Settings read — never a second derivation.
 extension KiwiCore {
-    /// Whether KiwiVision is on, the lens on, the plain settings as
-    /// `gui.json`'s `kiwivision` group stores them, and every live
-    /// lens as its `define_lens` table with its refusal and whether
-    /// `gui.json` holds it as it is (ruling 40).
+    /// Whether KiwiVision is on and the lens on, the plain look
+    /// under `gui.json`'s `kiwivision` keys, and every live lens:
+    /// its `define_lens` table, its refusal, and whether `gui.json`
+    /// holds it as it is — absent for a Lua-owned setup, whose
+    /// store is `init.lua` (ruling 40).
     func visionCurrent() -> JSONValue {
-        var plain = appWide.vision
-        plain.lenses = nil
-        let stored = kiwiVisionStoredLenses
+        let stored = isGuiManaged ? appWideStamp?.visionLenses ?? [] : nil
         let lenses: [JSONValue] = appWide.visionLenses.map { lens in
-            guard case .object(var table) = Self.json(lens) else {
-                return .null
-            }
+            var row: [String: JSONValue] = [
+                "lens": JSONValue(encoding: lens) ?? .null
+            ]
             if let refusal = lensRefusal(lens) {
-                table["refusal"] = Self.json(refusal)
+                row["refusal"] = Self.json(refusal)
             }
-            table["saved"] = .bool(stored.contains(lens))
-            return .object(table)
+            if let stored { row["saved"] = .bool(stored.contains(lens)) }
+            return .object(row)
         }
-        let active = kiwiVisionActive
-        return .object([
-            "on": .bool(active.isOn),
-            "lens": active.lensName.map(JSONValue.string) ?? .null,
-            "plain": Self.json(plain),
-            "lenses": .array(lenses),
-        ])
+        var answer = visionState
+        answer["settings"] =
+            JSONValue(encoding: appWide.look(lens: nil).storedGroup)
+            ?? .null
+        answer["lenses"] = .array(lenses)
+        return .object(answer)
+    }
+
+    /// Whether KiwiVision is on and the lens on, null for plain or
+    /// off: what `toggle` answers and `current` opens with.
+    var visionState: [String: JSONValue] {
+        [
+            "on": .bool(vision.isOn),
+            "lens": visionLensName.map(JSONValue.string) ?? .null,
+        ]
     }
 
     /// A refusal as structure: its reason, and the profile that
@@ -43,12 +50,5 @@ extension KiwiCore {
                 "profile": .string(profile),
             ])
         }
-    }
-
-    private static func json<T: Encodable>(_ value: T) -> JSONValue {
-        guard let data = try? JSONEncoder().encode(value),
-            let json = try? JSONDecoder().decode(JSONValue.self, from: data)
-        else { return .null }
-        return json
     }
 }

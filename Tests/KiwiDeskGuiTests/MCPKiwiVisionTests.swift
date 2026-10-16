@@ -64,7 +64,7 @@ struct MCPKiwiVisionTests {
         let table = #"{"name":"Writing","apps":["com.apple.Notes"]}"#
         let define = try Self.vision(
             app,
-            ["action": .string("define_lens"), "lens": .string(table)]
+            ["action": .string("define_lens"), "table": .string(table)]
         )
         #expect(define["isError"] == .bool(false))
         #expect(app.sent.last?.command == "kiwivision.define_lens")
@@ -85,30 +85,49 @@ struct MCPKiwiVisionTests {
         #expect(app.sent.last?.command == "kiwivision.delete_lens")
     }
 
-    /// The ids are the keep document's own, read off `groupsJSON`,
-    /// so the sentence follows the leaf a report really names.
-    @Test("a KiwiVision leaf keep cannot write names its page")
-    func appWideLeafNamesThePage() {
+    /// The keep document's leaf for one change of `settings`.
+    static func leafID(
+        _ change: (inout AppWideSettings) -> Void
+    ) -> [String] {
         var settings = AppWideSettings()
         let before = settings.groupsJSON
-        settings.visionDim = 15
-        settings.visionLenses = [VisionLens(name: "Writing")]
-        settings.refusalSound.toggle()
-        let ids = KeepPointer.diff(before, settings.groupsJSON).map {
+        change(&settings)
+        return KeepPointer.diff(before, settings.groupsJSON).map {
             KeepPointer.string([KeepRoot.appWide] + $0)
         }
-        #expect(ids.count == 3)
-        for id in ids {
-            let leaf = MCPKeepTests.leaf(id, .none, .appWide)
-            let told = MCPWording.unkeepable(leaf)
-            let page =
-                id.contains("kiwivision")
-                ? "Settings ▸ KiwiVision" : "Settings ▸ General"
-            #expect(told.contains(page), "\(id)")
-            #expect(
-                told.contains("make it there") == id.contains("lenses"),
-                "\(id)"
-            )
+    }
+
+    /// The ids and the KiwiVision group are the keep document's own,
+    /// read off `groupsJSON` and the stored lens key, so a rename of
+    /// either reds rather than leaving the sentence on General.
+    @Test("a KiwiVision leaf keep cannot write names its page")
+    func appWideLeafNamesThePage() throws {
+        let dim = Self.leafID { $0.visionDim = 15 }
+        let lens = Self.leafID {
+            $0.visionLenses = [VisionLens(name: "Writing")]
+        }
+        let sound = Self.leafID { $0.refusalSound.toggle() }
+        let ids = try #require(
+            [dim, lens, sound].allSatisfy { $0.count == 1 }
+                ? [dim[0], lens[0], sound[0]] : nil
+        )
+        let group = try #require(
+            KeepPointer.path(ids[0])?.dropFirst().first
+        )
+        let lensKey = AppWideSettings.Vision.CodingKeys.lenses.rawValue
+        #expect(
+            KeepPointer.path(ids[1]) == [KeepRoot.appWide, group, lensKey]
+        )
+        let told = ids.map {
+            MCPWording.unkeepable(MCPKeepTests.leaf($0, .none, .appWide))
+        }
+        #expect(told[0].contains("Settings ▸ KiwiVision"))
+        #expect(!told[0].contains("make it there"))
+        #expect(told[1].contains("Settings ▸ KiwiVision"))
+        #expect(told[1].contains("make it there"))
+        #expect(told[2].contains("Settings ▸ General"))
+        for sentence in told {
+            #expect(sentence.contains("a config reload or restart"))
         }
     }
 }

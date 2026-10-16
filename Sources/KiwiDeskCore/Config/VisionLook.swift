@@ -23,6 +23,22 @@ public struct VisionLook: Equatable, Sendable {
     }
 }
 
+extension VisionLook {
+    /// This look under `gui.json`'s `kiwivision` keys, without the
+    /// lens list.
+    var storedGroup: AppWideSettings.Vision {
+        AppWideSettings.Vision(
+            dim: dim,
+            blur: blur,
+            appearance: appearance,
+            clearWallpaper: clearWallpaper,
+            clearApp: clearApp,
+            neverDimmed: neverDimmed,
+            lenses: nil
+        )
+    }
+}
+
 extension AppWideSettings {
     /// The look for `lens`, by name ignoring case; plain where the
     /// name is nil or names no lens.

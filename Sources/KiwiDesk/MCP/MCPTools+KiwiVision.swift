@@ -19,7 +19,7 @@ extension MCPTools {
             + "focused window; a lens is a named KiwiVision that also "
             + "keeps its apps clear. current reads what is on, the "
             + "settings and each lens with why it cannot turn on. "
-            + "define_lens takes lens as a JSON object string with "
+            + "define_lens takes table, a JSON object string with "
             + "the keys " + VisionLens.tableKeys.joined(separator: ", ")
             + "; an app is a bundle_id \(getState) lists. "
             + "set_never_dimmed replaces the whole list with one app; "
@@ -33,21 +33,17 @@ extension MCPWording {
     static let visionLeaf = "/app_wide/kiwivision/"
     static let lensLeaf = visionLeaf + "lenses"
 
-    /// Where Settings keeps an app-wide leaf `keep` cannot: a
-    /// KiwiVision value on its own page, a lens only by making it
-    /// there, since that page lists the saved lenses alone (#2103
-    /// ruling 40); every other on General.
+    /// Why an app-wide leaf cannot be kept, and the Settings page
+    /// that keeps it: KiwiVision's own, which lists only the lenses
+    /// saved there (#2103 ruling 40); General for every other.
     static func appWideHome(_ id: String) -> String {
-        if id.hasPrefix(lensLeaf) {
-            return "a lens a command defines or deletes lasts until a "
-                + "config reload or restart, and Settings ▸ KiwiVision "
-                + "shows only saved lenses; make it there to keep it"
-        }
-        if id.hasPrefix(visionLeaf) {
-            return "it is app-wide and lasts until a config reload or "
-                + "restart; Settings ▸ KiwiVision keeps it"
-        }
-        return "it is app-wide and lasts until KiwiDesk restarts; "
-            + "Settings ▸ General keeps it"
+        let page =
+            id.hasPrefix(visionLeaf)
+            ? "Settings ▸ KiwiVision" : "Settings ▸ General"
+        let tail =
+            id.hasPrefix(lensLeaf)
+            ? ", for a lens made there; make it there to keep it" : ""
+        return "it is app-wide and lasts until a config reload or "
+            + "restart; \(page) keeps it\(tail)"
     }
 }
