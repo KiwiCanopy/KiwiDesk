@@ -51,7 +51,9 @@ extension KiwiCore {
                         .classifiesAsOverlay(pid: window.pid),
                     tracked: self.eventLoop.admittedWindows(
                         of: window.pid
-                    )
+                    ),
+                    titlebarButton: self.eventLoop
+                        .untrackedTitlebarButton(of: window.pid)
                 ),
                 self.eventLoop.focusedWindowID(pid: window.pid) == id,
                 let space = self.state.workspaces.space(

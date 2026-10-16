@@ -324,8 +324,7 @@ extension EventLoop {
     }
 
     /// The ids the ignore gate admitted for `pid` — what the
-    /// visible-panel distrust leaves out, since it cannot see the
-    /// #2072 escape.
+    /// visible-panel distrust leaves out.
     func admittedWindows(of pid: pid_t) -> Set<WindowID> {
         Set(elements[pid]?.keys ?? [:].keys)
     }

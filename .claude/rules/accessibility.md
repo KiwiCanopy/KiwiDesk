@@ -114,9 +114,11 @@ editing AX code:
   `FloatDetection.shouldIgnore` and `isBuiltInIgnoredPanel` take
   the button with no default, so a new caller decides it, and the
   untracked-focus classifier reads it from the report's element.
-  `hasVisibleIgnoredPanel` cannot see buttons, so it takes the
-  gate's admitted ids through `admittedWindows(of:)`
-  (`CommandBarIgnoreTests`, `AXDumpCorpusTests`). The escape
+  `hasVisibleIgnoredPanel` leaves out the gate's admitted ids
+  through `admittedWindows(of:)` and asks an untracked window's
+  button through `untrackedTitlebarButton(of:)` (#2344,
+  `CommandBarIgnoreTests` ▸ `panelScanReadsTheButton`,
+  `AXDumpCorpusTests`). The escape
   stops at the screen-saver level (#2069), whose arm takes no
   button, arms the ignored-panel distrust for any app, and
   refuses ADOPTION only: a tracked window rising to it is judged

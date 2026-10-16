@@ -234,6 +234,64 @@ struct CommandBarIgnoreTests {
         )
     }
 
+    /// The visible-panel scan states the button like every other
+    /// reader of the ignore predicate (#2344): an untracked
+    /// buttoned window of an accessory app is no panel, and the
+    /// button is asked only where it decides.
+    @Test("the visible-panel scan reads the title-bar button")
+    func panelScanReadsTheButton() {
+        func panel(
+            _ id: WindowID?,
+            layer: Int = 8,
+            bundleID: String = "com.example.menubarapp",
+            accessory: Bool = true,
+            tracked: Set<WindowID> = [],
+            buttoned: Set<WindowID> = []
+        ) -> (panel: Bool, asked: [WindowID]) {
+            var asked: [WindowID] = []
+            let verdict = FloatDetection.isVisibleIgnoredPanel(
+                id: id,
+                layer: layer,
+                bundleID: bundleID,
+                isAccessory: accessory,
+                tracked: tracked,
+                titlebarButton: {
+                    asked.append($0)
+                    return buttoned.contains($0)
+                }
+            )
+            return (verdict, asked)
+        }
+        let window = WindowID(900_101)
+        #expect(panel(window).panel)
+        #expect(!panel(window, buttoned: [window]).panel)
+        #expect(panel(window, buttoned: [window]).asked == [window])
+        // Tracked, outside the band, or no number: never asked.
+        #expect(panel(window, tracked: [window]).asked.isEmpty)
+        #expect(!panel(window, tracked: [window]).panel)
+        #expect(!panel(window, layer: 0, buttoned: [window]).panel)
+        #expect(panel(nil).panel)
+        #expect(panel(nil).asked.isEmpty)
+        // Raycast takes no escape, so its button is never read.
+        let raycast = panel(
+            window,
+            bundleID: "com.raycast.macos",
+            accessory: false,
+            buttoned: [window]
+        )
+        #expect(raycast.panel)
+        #expect(raycast.asked.isEmpty)
+        // Ghostty's buttoned window escapes as the gate's does.
+        #expect(
+            !panel(
+                window,
+                bundleID: "com.mitchellh.ghostty",
+                accessory: false,
+                buttoned: [window]
+            ).panel
+        )
+    }
+
     @Test("Layer scan required for accessory and listed apps")
     func requiresWindowLayers() {
         #expect(
