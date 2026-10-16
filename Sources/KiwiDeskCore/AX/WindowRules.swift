@@ -47,8 +47,8 @@ public struct FloatRules: Sendable, Equatable {
     /// keep their case-sensitive matching semantics.
     public static func normalizedRule(_ rule: String) -> String {
         let parts = rule.split(separator: ":", maxSplits: 1)
-        guard parts.count == 2 else { return rule.lowercased() }
-        return String(parts[0]).lowercased() + ":" + String(parts[1])
+        guard parts.count == 2 else { return app(of: rule) }
+        return app(of: rule) + ":" + String(parts[1])
     }
 
     /// Rules as normalized for matching and config seeding.
@@ -58,7 +58,7 @@ public struct FloatRules: Sendable, Equatable {
 
     /// `bundleID`'s own rules, spelled as `rawRules` spells them.
     public func rules(of bundleID: String) -> [String] {
-        let app = bundleID.lowercased()
+        let app = Self.appKey(bundleID)
         return rules.filter { $0.app == app }.map(Self.spelled)
     }
 
@@ -71,7 +71,7 @@ public struct FloatRules: Sendable, Equatable {
 
     /// Cheap gate before title-change float detection.
     public func hasTitleRule(bundleID: String?) -> Bool {
-        guard let bundleID = bundleID?.lowercased() else {
+        guard let bundleID = bundleID.map(Self.appKey) else {
             return false
         }
         return rules.contains {
@@ -83,7 +83,7 @@ public struct FloatRules: Sendable, Equatable {
         bundleID: String?,
         title: String
     ) -> Bool {
-        guard let bundleID = bundleID?.lowercased() else {
+        guard let bundleID = bundleID.map(Self.appKey) else {
             return false
         }
         return rules.contains { rule in

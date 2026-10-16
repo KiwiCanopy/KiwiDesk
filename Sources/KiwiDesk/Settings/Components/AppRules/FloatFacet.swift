@@ -16,11 +16,13 @@ enum FloatFacet: Equatable {
     case titled
 
     /// Whether a float rule matches by title rather than floating
-    /// every window. The one spelling of the marker test, so
+    /// every window, split as the engine splits it — a rule ending
+    /// in a bare colon carries no fragment and is no title rule
+    /// (#2345). The one spelling of the marker test, so
     /// `AppRuleTitleOffer` cannot read the colon differently from
     /// `current(_:app:)` (architect review, 2026-09-22).
     static func isTitled(_ rule: String) -> Bool {
-        rule.contains(":")
+        rule.split(separator: ":", maxSplits: 1).count == 2
     }
 
     /// The app a float rule names, as the engine keys it.
@@ -35,7 +37,7 @@ enum FloatFacet: Equatable {
         let app = FloatRules.appKey(app)
         var sawTitled = false
         for rule in Self.rules(rules, app: app) {
-            if FloatRules.normalizedRule(rule) == app { return .all }
+            if !isTitled(rule) { return .all }
             sawTitled = true
         }
         return sawTitled ? .titled : .never
@@ -45,9 +47,8 @@ enum FloatFacet: Equatable {
         _ rules: [String],
         app: String
     ) -> [String] {
-        Self.rules(rules, app: app).compactMap { rule in
-            let parts = rule.split(separator: ":", maxSplits: 1)
-            return parts.count == 2 ? String(parts[1]) : nil
+        Self.rules(rules, app: app).filter(isTitled).compactMap {
+            $0.split(separator: ":", maxSplits: 1).last.map(String.init)
         }
     }
 
