@@ -216,6 +216,10 @@ extension APIReference {
                 + "or off while it is on.",
             .text("lens", optional: true)
         ),
+        "current": APIRecord(
+            "Returns whether KiwiVision is on, the lens on, the settings "
+                + "and every lens with its refusal."
+        ),
         "define_lens": APIRecord(
             "Adds or replaces a lens: a Lua table, or a JSON object "
                 + "string over the CLI.",

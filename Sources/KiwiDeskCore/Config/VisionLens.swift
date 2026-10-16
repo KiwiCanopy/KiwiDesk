@@ -40,7 +40,7 @@ public struct VisionLens: Equatable, Sendable {
 extension VisionLens: Codable {
     /// One flat object per lens: its own keys and the overrides
     /// beside them, each named as the plain setting it overrides.
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey, CaseIterable {
         case name, apps, titles, reminder
         case keepFocus = "keep_focus"
         case clearDelay = "clear_delay"
@@ -107,6 +107,12 @@ extension VisionLens: Codable {
 }
 
 extension VisionLens {
+    /// The keys a lens table takes, in `CodingKeys`' order: what
+    /// `define_lens` reads and `kiwivision.current` returns.
+    public static var tableKeys: [String] {
+        CodingKeys.allCases.map(\.rawValue)
+    }
+
     /// The key a profile's `lens_reach` names a lens by: its stored
     /// name, lowercased, since names are unique ignoring case
     /// (ruling 39).

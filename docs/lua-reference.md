@@ -3768,6 +3768,19 @@ KiwiDesk.bind("ctrl+alt+w", function()
 end)
 ```
 
+### kiwivision.current
+
+**Expects:** nothing.
+
+**Does:** returns `on`; `lens`, the lens that is on (null for plain
+KiwiVision or off); `plain`, the running values of the
+`kiwivision` group without its lenses; and `lenses`, each lens as
+its [`define_lens`](#kiwivisiondefine_lens) table with `saved`
+(whether `gui.json` holds it as it is) and, where it cannot turn
+on, `refusal`: `{reason = "no_apps"}`, or
+`{reason = "out_of_reach", profile = "Studio"}` for the live
+profile that leaves it out.
+
 ### kiwivision.define_lens
 
 **Expects:** a table: `name` (at most 40 characters, unique
