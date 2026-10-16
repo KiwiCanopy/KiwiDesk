@@ -188,7 +188,7 @@ struct RuleKeepDraftTests {
         ),
         (
             "onRulesKept()",
-            "Sources/KiwiDeskCore/Profiles", "KiwiCore+RuleReach.swift"
+            "Sources/KiwiDeskCore/Profiles", "KiwiCore+RuleReachSave.swift"
         ),
     ]
 

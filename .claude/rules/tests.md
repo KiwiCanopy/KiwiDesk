@@ -330,13 +330,14 @@ bite large test PRs:
   within:)` — with nothing pinning `now`. The seam rule above
   covers it, in one of Core's two clock shapes: a `now:`
   PARAMETER threaded from the handler where the write and the
-  read share the call chain the test drives (`selfRaiseStamp`,
-  `FollowFocusIntent.record(at:)` — #1371's stamp-ahead, #1364's
-  backdate), or a CLOSURE on the type where a stamp lands off
-  another chain — the applier's post-set stamps on the AX queue
-  (#1254), the placement stamps at the tiler's leaves (#1161) —
-  as `FrameApplier.clock`, `PlacementLedger.clock`,
-  `ZOrderDrain.now`, `TeardownRestack.now` and
+  read share the call chain the test drives (`selfRaiseStamp` —
+  #1371's stamp-ahead, #1364's backdate), or a CLOSURE on the
+  type where a stamp lands off another chain — the applier's
+  post-set stamps on the AX queue (#1254), the placement stamps
+  at the tiler's leaves (#1161), an arrival debt recorded at a
+  command and paid at a fold (#2341) — as `FrameApplier.clock`,
+  `PlacementLedger.clock`, `ZOrderDrain.now`,
+  `TeardownRestack.now`, `FollowFocusIntent.clock` and
   `KiwiCore.wallClock` do — one clock shape per stored type,
   uptime for a `TimeInterval` stamp and `wallClock` for a `Date`
   one. A handler's `now` and every stamp it judges come from the

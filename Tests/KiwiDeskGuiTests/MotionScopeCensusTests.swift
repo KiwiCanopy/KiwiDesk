@@ -75,6 +75,8 @@ struct MotionScopeCensusTests {
         "KiwiDesk/Settings/SettingsModel+Backup.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Reset.swift": 1,
         "KiwiDesk/Settings/SettingsModel+AppWide.swift": 1,
+        // The lens page's Save writing its lenses (#2103).
+        "KiwiDesk/Settings/SettingsModel+Lenses.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ScreenSetups.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Persistence.swift": 1,
     ]

@@ -28,13 +28,21 @@ extension SettingsModel {
     /// The pass over `edits`, uncached — for a reading taken
     /// without one of the draft's picks.
     func layeredReach(_ edits: RuleReachEdits) -> RuleReachSnapshot? {
-        guard let stored = ruleReachStored, let editing = reachProfile
-        else { return ruleReachStored }
-        guard !edits.layers.isEmpty || !edits.deletedLayers.isEmpty else {
+        guard let stored = ruleReachStored else { return nil }
+        guard
+            !edits.layers.isEmpty || !edits.deletedLayers.isEmpty
+                || edits.lenses != nil
+        else {
             return stored
         }
         var snapshot = stored
         do {
+            // The lens crossings reach every file and need no page:
+            // a built-in live has none (#2103).
+            if let lenses = edits.lenses {
+                try lensPass(&snapshot, lenses)
+            }
+            guard let editing = reachProfile else { return snapshot }
             try deletePass(&snapshot, edits, editing: editing)
             try renamePass(&snapshot, edits)
             for (page, edit) in edits.layers.sorted(by: { $0.key < $1.key }) {

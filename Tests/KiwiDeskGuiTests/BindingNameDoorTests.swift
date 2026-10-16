@@ -49,9 +49,10 @@ struct BindingNameDoorTests {
             "a NavCommand's label written into a binding on rename"
         ),
         "KeybindingCatalog+Lenses.swift": (
-            1,
-            "a NavCommand's label written into a binding on a lens "
-                + "rename (#2103)"
+            3,
+            "a lens rename compares a binding's label with the label "
+                + "the catalog wrote for the old name, and writes the "
+                + "new name's in its place (#2103)"
         ),
         "KeybindingNavRow.swift": (
             1,

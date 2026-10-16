@@ -1675,9 +1675,11 @@ Touching `Borders`, `Vision`.
   and every stored binding naming it through the one pair of crossings,
   a rename carried by its own write so the lens on follows it, a lens
   matched by the one `sameLens`, a Settings row drawn through `lensOffer`
-  — the lens page's Save wiring review's until #2103 PR 7 (#2103,
+  — the lens page's Save laying every rename, delete and reach pick in
+  the one layer pass and writing the settled list (#2103,
   `KiwiVisionLensReachTests`, `KiwiVisionLensRenameTests`,
-  `ShortcutsLensRowsTests`, `ShortcutsLensNamingTests`)
+  `ShortcutsLensRowsTests`, `ShortcutsLensNamingTests`,
+  `LensPageSaveTests`, `LensEditsTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).

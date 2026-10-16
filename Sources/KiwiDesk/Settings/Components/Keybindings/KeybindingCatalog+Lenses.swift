@@ -55,30 +55,54 @@ extension KeybindingCatalog {
 
     /// Re-keys every binding that toggles `old` — ignoring case,
     /// as lens names compare (ruling 39) — to toggle `new`, its
-    /// label following. A stale row for `new` in a layer that holds
-    /// the renamed lens's own is dropped, so no lens gains a second
-    /// chord (profiles.md ▸ one chord per navigation action).
+    /// label following (`renameLenses`).
     static func renameLens(
         in layers: [KeyLayer],
         from old: String,
         to new: String
     ) -> [KeyLayer] {
-        let row = toggleLens(new)
-        let respelled = AppWideSettings.sameLens(old, new)
+        renameLenses(in: layers, [old: new])
+    }
+
+    /// Every rename in `map` (old → new) at once, so a chain or a
+    /// swap cannot merge two lenses' chords, each label following
+    /// only where the catalog wrote it. A stale row for a new
+    /// name, in a layer that holds the renamed lens's own, is
+    /// dropped, so no lens gains a second chord (profiles.md ▸ one
+    /// chord per navigation action).
+    static func renameLenses(
+        in layers: [KeyLayer],
+        _ map: [String: String]
+    ) -> [KeyLayer] {
+        func renamed(_ lens: String) -> String? {
+            map.first { AppWideSettings.sameLens($0.key, lens) }?.value
+        }
         return layers.map { layer in
             var layer = layer
-            // A stale row of the new name gives way to the renamed
+            let targets = map.filter { old, _ in
+                layer.bindings.contains { names($0, old) }
+            }.values
+            // A stale row of a new name gives way to the renamed
             // lens's own chord.
-            if !respelled,
-                layer.bindings.contains(where: { names($0, old) })
-            {
-                layer.bindings.removeAll { names($0, new) }
+            layer.bindings.removeAll { binding in
+                guard let lens = lensTarget(of: binding.lua),
+                    renamed(lens) == nil
+                else { return false }
+                return targets.contains {
+                    AppWideSettings.sameLens($0, lens)
+                }
             }
             layer.bindings = layer.bindings.map { binding in
-                guard names(binding, old) else { return binding }
+                guard let lens = lensTarget(of: binding.lua),
+                    let new = renamed(lens)
+                else { return binding }
                 var binding = binding
-                binding.lua = row.lua
-                binding.label = row.label
+                binding.lua = toggleLens(new).lua
+                // A label the catalog wrote follows; the user's own
+                // stays.
+                if binding.label == toggleLens(lens).label {
+                    binding.label = toggleLens(new).label
+                }
                 return binding
             }
             return layer

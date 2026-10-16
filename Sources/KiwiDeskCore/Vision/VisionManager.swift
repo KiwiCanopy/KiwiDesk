@@ -63,6 +63,12 @@ public final class VisionManager {
     /// The lens rename the write in flight carries, set by
     /// `setAppWide(…renamingLens:)` for that write alone (#2103).
     var renamedLens: (from: String, to: String)?
+    /// Whether a lens Save is between its marks and its lenses,
+    /// holding the lens on's re-judge (`withLensReachHeld`).
+    var reachHeld = false
+    /// Whether a re-judge was skipped while held, owed at the
+    /// scope's end.
+    var reachJudgeOwed = false
     /// The landing a lens holds under the haze now, nil while none
     /// waits; begun and ended only in `KiwiCore+VisionHold`.
     var hold: VisionHold?
