@@ -3732,8 +3732,9 @@ greyed.
 **Does:** turns KiwiVision on or off. The window kept clear follows
 the focus — a click, ⌘-Tab or a Space switch moves it — and a
 screen showing a native full-screen window or a presentation stands
-the dim down. The quick menu's **KiwiVision** row does the same,
-and ⌃⌥V is its default shortcut.
+the dim down. The KiwiVision line of KiwiHub's
+[view picker](#kiwihubshow) does the same, and ⌃⌥V is its default
+shortcut.
 
 With a lens name (any case), it turns that lens on — from off, or
 from another lens — and turns KiwiVision off when that lens is the
@@ -5098,9 +5099,7 @@ Over the CLI it is `kiwidesk kiwihub.show windows`; any other side
 is refused, naming the three.
 
 The `"shortcuts"` side is the read-only **shortcuts panel** — a
-live glance at the active layer's bindings. It is the panel behind
-the menu bar's *View Shortcuts…* row; the bound combo shows beside
-that row.
+live glance at the active layer's bindings.
 
 - Typing narrows the list by name, the matched letters in bold.
 - **↑** **↓** and **Page Up** / **Page Down** scroll the list;
@@ -5126,7 +5125,9 @@ A window in native full screen is listed, and Return activates its
 app rather than switching to its full-screen Space.
 
 The `"view"` side is the **view picker**, three lines in one
-panel, the current item on each marked ✓:
+panel, the current item on each marked ✓. The menu bar's **Open
+KiwiHub…** row opens it too, its bound combo shown beside that
+row.
 
 - **Layout** — a tile per layout for the Space shown on the screen
   under the pointer, greyed where there is none; Return applies it
@@ -5150,8 +5151,8 @@ Keys on this side:
   among the matches while you type; holding **⌘** shows the
   numbers.
 - **⌘,** opens the Settings page of the line the selection is on;
-  **⌘S** keeps the layouts in the profile, as the Layout menu's
-  Keep does.
+  **⌘S** keeps the layouts in the profile, as Keep in a Space's
+  Layout menu does.
 
 On every side:
 
@@ -5163,7 +5164,7 @@ On every side:
   click elsewhere or another app taking the keyboard close it too.
 
 Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer
-you create too) and **⌃⌥L** (layouts), and offered under
+you create too) and **⌃⌥L** (view), and offered under
 **Shortcuts & Gestures ▸ KiwiHub**, where you can rebind or clear
 each per layer.
 

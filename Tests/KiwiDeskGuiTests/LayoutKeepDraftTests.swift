@@ -5,18 +5,54 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-// The #1179 half of the quick menu: what a session-only layout
-// switch does and does not do to an open Settings draft, and
-// what the Keep verb owes that draft. Split from
-// `LayoutQuickMenuTests.swift` at the §2.1 sweet spot, and
-// deliberately an EXTENSION rather than a second suite — the
-// fixture writes a profile under one config directory and the
-// base suite is `.serialized` for it, so a second suite would
-// race the first under parallel testing.
-
+/// What a session-only layout switch does and does not do to an
+/// open Settings draft, and what Keep owes that draft (#1179) —
+/// Keep as KiwiHub's View side and a Space chip's Layout menu both
+/// reach it. `.serialized`: the fixture writes a profile under one
+/// config directory.
+@Suite("Layout switch and Keep against the draft", .serialized)
 @MainActor
-extension LayoutQuickMenuTests {
-    @Test("A quick-menu switch leaves the draft clean")
+struct LayoutKeepDraftTests {
+    func makeModel() -> (SettingsModel, KiwiCore) {
+        // makeTestCore's default registrar is already the no-op
+        // (#565) — this suite asserts nothing about registration.
+        let core = makeTestCore()
+        try? core.guiConfigStore.save(GuiConfig())
+        return (makeTestModel(core: core), core)
+    }
+
+    func loadProfile(
+        _ core: KiwiCore,
+        mode: LayoutMode = .bsp
+    ) throws {
+        // A valid monitor set is required (decode rejects a
+        // profile without one) and it must match a live
+        // display, or `load_profile` marks the profile dirty
+        // (#36) and the guardrail-3 assertions turn vacuous.
+        let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "A",
+                frame: frame,
+                visibleFrame: frame
+            )
+        )
+        let profile = Profile(
+            name: "test-profile",
+            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+            spaces: [SpaceID("1")],
+            spaceModes: [SpaceID("1"): mode],
+            settings: TilingSettings()
+        )
+        try core.profiles.save(profile)
+        _ = core.execute(
+            "load_profile",
+            args: [.string("test-profile")]
+        )
+    }
+
+    @Test("A session layout switch leaves the draft clean")
     func switchLeavesTheDraftClean() throws {
         // #1179: the draft narrates the PROFILE. A session-only
         // layout switch is not an edit, so it must not dirty the
@@ -134,18 +170,16 @@ extension LayoutQuickMenuTests {
         #expect(model.isDirty)
     }
 
-    @Test("The Keep row arms on a NON-focused screen's drift")
+    @Test("Keep arms on a NON-focused screen's drift")
     func keepArmsOnAnyScreensDrift() throws {
         // Condition 1 of the ruling, and it needs two screens by
-        // construction: on one screen `anyScreenHasDrifted` and
-        // `activeSpaceHasDrifted` agree, so a single-screen
-        // fixture cannot tell the new predicate from the old one
-        // (code + architect review, 2026-08-31). The verb writes
-        // the WHOLE profile, so a row greyed while another
-        // screen's submenu says "not saved to profile" was
-        // refusing to do what it was about to do.
+        // construction: on one screen the any-screen and the
+        // active-Space readings agree, so a single-screen fixture
+        // cannot tell them apart. The verb writes
+        // the WHOLE profile, so a Keep greyed while another
+        // screen's layout was not saved refused to do what it was
+        // about to do.
         let (_, core) = makeModel()
-        let controller = makeController(core)
 
         let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         core.state.workspaces.upsertDisplay(
@@ -191,20 +225,17 @@ extension LayoutQuickMenuTests {
         // The FOCUSED screen's space matches the profile...
         core.state.workspaces.activate(SpaceID("1"))
         core.state.workspaces.setMode(SpaceID("1"), .bsp)
-        let cleanMenu = try #require(
-            controller.layoutItem().submenu
+        let clean = try #require(
+            core.layoutPickerState(for: SpaceID("1"))
         )
-        let clean = try #require(saveRow(in: cleanMenu))
-        #expect(!clean.isEnabled)
+        #expect(!clean.keepArmed)
 
         // ...and the OTHER screen's does not.
         core.state.workspaces.setMode(SpaceID("2"), .monocle)
-        let info = LayoutMenuInfo.current(from: core)
-        #expect(!info.activeSpaceHasDrifted)
-        let armedMenu = try #require(
-            controller.layoutItem().submenu
+        let armed = try #require(
+            core.layoutPickerState(for: SpaceID("1"))
         )
-        let armed = try #require(saveRow(in: armedMenu))
-        #expect(armed.isEnabled)
+        #expect(!armed.drifted)
+        #expect(armed.keepArmed)
     }
 }

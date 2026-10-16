@@ -1859,22 +1859,24 @@ being a static state it draws either way.
   responds to its action (observed on macOS 26.6.1,
   2026-08-12), so a row that WORKS cannot be dimmed while
   `autoenablesItems` is on — which is what the quick menu
-  needs during boot (#802) and what the Layout submenu's save row
-  needed before it (#68). The cost is the other half of the
-  switch: a nil-action row is no longer disabled for free, so an
-  unstated `isEnabled` ships an enabled-looking context line —
-  and a **submenu parent** is one of those rows, its nil action
-  being what opens the child.
+  needs during boot (#802) and what a Space chip's Layout menu
+  needs for its Keep row (#68, #1518). The cost is the other half
+  of the switch: a nil-action row is no longer disabled for free,
+  so an unstated `isEnabled` ships an enabled-looking context
+  line — and a **submenu parent** is one of those rows, its nil
+  action being what opens the child.
   **The flag is per `NSMenu` and does not inherit**, so a builder
   that nests menus turns it off on every one it constructs, not
   only the outermost: a nested menu left on auto-enabling
   re-enables at display time exactly the rows the switch was
-  thrown to keep dim. `QuickMenuBootRowTests` and
-  `QuickMenuProfileRowTests` hold the two menus' rows;
-  `LayoutMenuEnablementScanTests` pairs each constructed row to
-  its own `isEnabled` statement (never a per-file total, which a
+  thrown to keep dim. `QuickMenuBootRowTests` holds the quick
+  menu's rows and `BarMenuTests` ▸ `menuShape` the bar menus'
+  flag at every level; `LayoutMenuEnablementScanTests` pairs each
+  constructed row in a `QuickMenuBuilders.checked` file to its
+  own `isEnabled` statement (never a per-file total, which a
   `guard-prover` round forged) and derives the flag count from
-  the `NSMenu()` count, so a nested menu that skipped it reds.
+  the `NSMenu()` count, so a nested menu there that skipped it
+  reds.
 - **Modifiers on a bare `ForEach` apply PER CHILD, never to the
   run.** A container that hands a `ForEach` straight to its
   chrome (a background well, padding, a border) stamps that

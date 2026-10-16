@@ -13,27 +13,15 @@ enum QuickMenuBuilders {
     ///
     /// **A list with a coverage check, not one hard-coded path.**
     /// The scan was pinned to a single file and `total > 0` cannot
-    /// tell a SPLIT from a whole file: move `screenItem` and
-    /// `everyScreenItem` into their own file at §2.1's next
-    /// squeeze — which this file is one row away from needing —
-    /// and their rows go unguarded with the suite green. That is
+    /// tell a SPLIT from a whole file: move a row builder into its
+    /// own file and its rows go unguarded with the suite green. That is
     /// `gui.md`'s scan-root rule (`ChromeScanRoots` is the worked
     /// example): a new tree joins the list, and the guard carries a
     /// root-coverage check.
     ///
     /// **`StatusItemController+Menu.swift` is deliberately NOT
-    /// here yet, and adding it reds.** That file constructs ten
-    /// rows and states enablement on five, while its own header
-    /// says "Every row below states its own `isEnabled` (#802)" —
-    /// a false claim, though not a defect: the seven unstated rows
-    /// (`paused`, `issues`, `shortcuts`, `settings`, `quit`, the
-    /// switcher parent, a profile entry) all SHOULD be enabled,
-    /// and unstated means enabled. So the rows are right and the
-    /// sentence is wrong, which is #802's surface rather than this
-    /// branch's — filed, not swept. Adding it here is the fix's
-    /// second half.
+    /// here yet, and adding it reds** — see `unchecked`.
     static let checked = [
-        "Sources/KiwiDesk/StatusItemController+Layout.swift",
         // The Check-for-Updates row (#874). It joins the CHECKED
         // list rather than the exempt one because its enablement
         // is genuinely conditional — Sparkle refuses while a check
@@ -44,8 +32,6 @@ enum QuickMenuBuilders {
         // The Settings pull-down (#1393) turns auto-enabling off and
         // states every row's `isEnabled` from its item.
         "Sources/KiwiDesk/Settings/Components/Common/NativePullDown.swift",
-        // The KiwiVision row (#2103), greyed with the Layout row.
-        "Sources/KiwiDesk/StatusItemController+KiwiVision.swift",
     ]
 
     /// Files that construct rows and are NOT checked per row,
@@ -62,10 +48,12 @@ enum QuickMenuBuilders {
             + "does not bind it — the rule is about the cost of "
             + "switching the flag off",
         "StatusItemController+Menu.swift":
-            "constructs ten rows and states five; the seven "
-            + "unstated ones all SHOULD be enabled, so the rows "
-            + "are right and only the file's own header claim is "
-            + "wrong — #802's surface, filed rather than swept",
+            "builds the quick menu's rows and states enablement only "
+            + "where a row greys (the starting count) or must stay "
+            + "live (Start Tiling, Open KiwiHub, #2309); the rest "
+            + "SHOULD be enabled and unstated means enabled. Its "
+            + "menu is created in StatusItemController.swift, so "
+            + "the per-menu flag count cannot pair it here",
     ]
 
 }

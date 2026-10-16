@@ -26,7 +26,7 @@ struct ViewPickItemsTests {
             "Laptop", ["Laptop", "Studio", "Old"], ["Old"]
         ),
         visionOn: Bool = false,
-        inert: Bool = false
+        inert: String? = nil
     ) -> [Line: [ViewPickList.Item]] {
         JumpPanelController.items(
             layout: layout,
@@ -76,11 +76,11 @@ struct ViewPickItemsTests {
     @Test("every chip greys while KiwiDesk boots, and says so")
     func inertGreysAll() {
         LocalizationManager.shared.select("en")
-        let all = items(inert: true).values.flatMap { $0 }
+        let all = items(inert: ViewPickText.starting).values.flatMap { $0 }
         #expect(!all.isEmpty)
         #expect(all.allSatisfy { !$0.isApplicable })
         #expect(all.allSatisfy { $0.inertReason == "KiwiDesk is starting" })
-        let off = items(inert: true)[.vision]?.first
+        let off = items(inert: ViewPickText.starting)[.vision]?.first
         #expect(
             off.map { ViewPickText.spoken($0, on: .vision) }
                 == "KiwiVision: Off, current, KiwiDesk is starting"
@@ -99,6 +99,8 @@ struct ViewPickItemsTests {
         let source = SourceScan.stripComments(raw)
             .split(whereSeparator: \.isWhitespace).joined()
         #expect(source.contains("letinert=core.bootPhase.isStarting"))
+        // Before Start Tiling too (ruling 9), the reason its own.
+        #expect(source.contains(":ViewPickText.held(hold())"))
         #expect(source.occurrences(of: "inert:inert") == 1)
     }
 
@@ -122,7 +124,7 @@ struct ViewPickItemsTests {
             profiles: ("Laptop", ["Laptop", "Studio"], []),
             visionOn: false,
             visionChord: nil,
-            inert: false
+            inert: nil
         )
         #expect(lines[.layout]?.allSatisfy { !$0.isApplicable } == true)
         #expect(

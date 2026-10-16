@@ -9401,18 +9401,21 @@ carries the why. The blocked tooltip's monitor wording appears
 only when a monitor set really is the only thing a save would
 write.
 
-**Quick-menu layout switch is session-only, and Settings does
-not narrate it.** Changing a space's layout from the status-bar
-quick menu updates the running state immediately and writes
-nothing: users try Monocle for ten minutes without rewriting
-their configuration. Keeping it is one row away — **Keep Layout
-in Profile "<name>"** — and Keep, not Save, is the word,
+:::unreleased
+**A picked layout is session-only, and Settings does not narrate
+it.** Changing a space's layout from KiwiHub's view picker or a
+Space's Layout menu updates the running state immediately and
+writes nothing: users try Monocle for ten minutes without
+rewriting their configuration. Keeping it is one press away —
+**Keep** on either surface — and Keep, not Save, is the word,
 because macOS already uses it for exactly this shape: a change
-that is undone unless you say otherwise. That row arms when ANY
+that is undone unless you say otherwise. Keep arms when ANY
 screen's shown space stands on a temporary layout, not just the
-focused one, since the verb keeps every screen's at once; a
-failed keep raises an alert, the menu having no surface to warn
-in.
+one the surface names, since the verb keeps every screen's at
+once; a failed keep raises one alert whichever surface asked,
+because a menu has no surface to warn in and the two must not
+fail differently.
+:::
 
 **The profile has three write paths, and each writes exactly
 what its words say (#1179, re-ruled by #1790).**
@@ -9466,15 +9469,18 @@ counts as un-edited, exactly as that popover row disappears.
 Two consequences are the model rather than bugs, and are named
 here so they read that way:
 
+:::unreleased
 - After an unrelated Save, screen and file may disagree about a
   space you did not touch. That is what "temporary" means. The
-  quick menu's per-entry **"not saved to profile"** subtitle is
-  the one narration of it — and with the Settings drift surface
-  retired it is the app's only statement that a switch is
-  temporary, which is why it stays.
+  pickers' **"not saved to profile"** — the view picker's
+  caption, the Layout menu's subtitle — is the one narration of
+  it, and with the Settings drift surface retired it is the
+  app's only statement that a switch is temporary, which is why
+  it stays.
 - Editing a mode back to its saved value neither saves nor ends
-  a standing temporary layout. Ending one is the quick menu's
-  job: switch back, or Keep.
+  a standing temporary layout. Ending one is the pickers' job:
+  switch back, or Keep.
+:::
 
 **Settings surfaces no temporary-layout drift.** No pill row,
 no drift-armed Save and no caption under the Spaces mode picker
@@ -9484,7 +9490,7 @@ question, ruled in *The save pill counts what the header
 claims*, #1197.) A Save enabled *because of* a temporary layout
 whose effect on it is identical to Revert is the thing refused;
 the one permanent path through Settings is the ordinary draft
-flow — Spaces, change the mode, Save. A quick-menu Keep does
+flow — Spaces, change the mode, Save. A picker's Keep does
 move the open draft's saved baseline onto the layout it just
 wrote, leaving staged edits staged: without that, the next Save
 would commit the pre-keep mode over the layout just kept.
@@ -11157,8 +11163,8 @@ its own.
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
 brings arrows, type-select, Return, Escape and VoiceOver for free.
-That argument holds for a list of names, and it is why the status
-item's and a Space chip's Layout menus stay menus. The picker
+That argument holds for a list of names, and it is why a Space
+chip's Layout menu stays a menu. The picker
 became a panel because a panel can show each layout's picture,
 drawn by the same schematics Settings uses, and a picture answers
 "which one is Track?" faster than a name; a panel of names alone
@@ -11230,10 +11236,12 @@ still applies the third layout. ⇧ with ↩ or a digit does nothing
 here, since there is nothing to move.
 
 The Profile line appears only where another profile can be
-loaded, as the menu decides, and a profile that cannot load stays
-listed, greyed, with its reason, rather than vanishing. With no
-Space under the pointer the Layout line greys instead of the side
-being stepped past, because the other two lines need no Space.
+loaded, since a line with nothing to pick but the current
+profile is a label rather than a choice, and a profile that
+cannot load stays listed, greyed, with its reason, rather than
+vanishing. With no Space under the pointer the Layout line greys
+instead of the side being stepped past, because the other two
+lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
 :::
@@ -16500,15 +16508,18 @@ reachable without opening Settings. Profile issues also
 refresh on save/delete, so repairing one clears its badge
 immediately. (#68 §3.7, #39/#31 own the validation cores)
 
+:::unreleased
 **An undecodable profile is greyed, never hidden.** A profile
 whose JSON won't decode yields no summary, but hiding it stranded
 a broken file with no reachable remedy (#246). It stays listed
 everywhere — a Delete (and Reveal in Finder) on its Config Issues
 row, a greyed "couldn't load" row with a Delete in the Settings
-profile list, and a disabled entry in the quick menu's Switch
-Profile submenu (the remedy is the same panel, one entry up).
-Grey-don't-hide (#171); re-saving was never reachable for a file
-that can't be read, so the warning no longer suggests it. (#246)
+profile list, and a greyed chip on KiwiHub's Profile line saying
+it can't load (the remedy is the Config Issues window, which the
+menu bar offers while a load has failed). Grey-don't-hide (#171);
+re-saving was never reachable for a file that can't be read, so
+the warning no longer suggests it. (#246)
+:::
 
 **A typo is non-fatal, but never invisible.** An unknown call
 on `KiwiDesk` or a layout namespace table is a guarded no-op
@@ -16520,35 +16531,48 @@ badge and window above. Runtime hits (a typo inside a
 keybinding closure) only log; a persistent "config error"
 badge for a transient slip would mislead. (#39)
 
-**The quick menu is for daily driving.** A healthy menu opens
-straight on **Layout** (the most-used control), then Switch
-Profile (`load_profile`'s quick path) — same topic, no
-separator between them — then **Settings… low, next to Quit**,
-where every native menu-bar extra keeps Preferences. Warning
-rows (**Window Management Paused…** when Accessibility is
-missing, the **starting count** while boot is still scanning,
-**Config Issues…** when a config load failed) appear
-**only when they apply**, at the top, fenced by a single
+:::unreleased
+**The quick menu is the pointer's way into the daily switches,
+and KiwiHub holds them (#2309).** The layout, the profile and
+KiwiVision are what a user changes through the day, and they live
+in one place, KiwiHub's view picker, reached by ⌃⌥L from the
+keyboard and by **Open KiwiHub…** from the menu bar. The row
+opens that side and shows its live chord the way a menu item
+shows a key equivalent, so every pointer trip teaches the faster
+path. The menu holds no switch of its own: a Layout submenu, a
+Switch Profile submenu and a KiwiVision row beside the panel were
+two ways to do one thing, learned twice, and the menu's copy was
+the poorer one — no pictures of the layouts, no search, and
+submenus that are slow to steer with a pointer.
+
+What else the menu holds is either a warning or app chrome.
+**Settings…** sits low, next to Quit, where every native
+menu-bar extra keeps Preferences, with What's New and Update
+Available… beside Quit while they apply. Warning rows (**Start
+Tiling** until tiling is started, **Window Management Paused…**
+when Accessibility is missing, the **starting count** while boot
+is still scanning, **Config Issues…** when a config load failed)
+appear **only when they apply**, at the top, fenced by a single
 separator that is itself present only when a warning fired.
-They rank permission → starting → config: without permission
+Start Tiling, never shown beside the paused row, leads; the rest
+rank permission → starting → config: without permission
 nothing tiles however far a boot got, and a config problem is a
 thing to fix once the app can be clicked at all (▸ *Boot: the
-wait is narrated*, which argues the middle one).
-Menu entries stay monochrome template symbols; the colored
-tiles are a Settings-window device. (#68 §3.10, §6.2)
+wait is narrated*, which argues the middle one). Menu entries
+stay monochrome template symbols; the colored tiles are a
+Settings-window device. (#68 §3.10, §6.2)
 
 Deliberately *not* in the menu: a **header row** naming the
-live profile (the active profile is already checkmarked in the
-Switch Profile submenu — a permanent top line is near-zero-info
-chrome above the thing you came for); a permanent
-**Accessibility Settings…** deep link (a standing nag for the
-99% granted case — the paused warning row covers the untrusted
-case, and onboarding's own "Open System Settings" is the fix
-path); and a **Support** row (it lives in Settings as a
-discreet link — a menu opened daily for Layout is no place for a
-recurring support ask). Trimmed from thirteen possible rows to
-~six, each of which either does something you came for or is app
-chrome you expect near Quit.
+live profile (the view picker marks it with a ✓ — a permanent
+top line is near-zero-info chrome above the thing you came for);
+a permanent **Accessibility Settings…** deep link (a standing nag
+for the 99% granted case — the paused warning row covers the
+untrusted case, and onboarding's own "Open System Settings" is
+the fix path); a **View Shortcuts…** row (the shortcuts are
+KiwiHub's middle side, one ⇧⇥ from where the row lands); and a
+**Support** row (it lives in Settings as a discreet link — a menu
+opened daily is no place for a recurring support ask).
+:::
 
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain
@@ -16587,11 +16611,22 @@ surface: the menu-bar mark keeps its glyph and is drawn dimmed
 (lightness, because the bar tints template images itself — and
 because hue is the channel colour-vision deficiency takes away),
 the quick menu opens on a disabled row carrying a determinate
-count, and Layout / Switch Profile are greyed rather than hidden
+count, and the switches it reaches are greyed rather than hidden
 (#171 — they work in a moment, which is what dimming is for; the
 count row is the sentence that explains the grey). The mark
 returning to full strength IS the ready signal
 ([#802](https://github.com/KiwiCanopy/KiwiDesk/issues/802)).
+
+:::unreleased
+The grey sits on the switches, not on the row that leads to them
+(#2309). **Open KiwiHub…** stays enabled while KiwiDesk starts,
+waits for Start Tiling or lacks the Accessibility permission, and
+the view picker greys its own items
+with the reason as text. A greyed row leaves its reason to a
+neighbouring row; the panel puts it on the item itself, and since
+the row and the chord open the same side, the pointer and the
+keyboard meet the same explanation.
+:::
 
 **[Trade-off]**
 

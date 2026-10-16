@@ -62,9 +62,8 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/Tiling/KiwiCore+Drag.swift": 2,
         "KiwiDeskCore/Tiling/KiwiCore+DragCrossing.swift": 1,
         "KiwiDeskCore/Bar/KiwiCore+SpaceBarDrop.swift": 1,
-        // The status menu's layout rows, Config Issues' reload
-        // and delete.
-        "KiwiDesk/AppDelegate.swift": 3,
+        // Config Issues' reload and delete.
+        "KiwiDesk/AppDelegate.swift": 2,
         // The tour's shelf paint and its revert.
         "KiwiDesk/AppDelegate+OnboardingLooks.swift": 2,
         // Settings: Save and its config reload, load, delete, set

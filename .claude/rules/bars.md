@@ -900,9 +900,9 @@ rather than the row it names makes the user search again. So:
   `discSetsTheSpan`). A session value — a Layout pick, the
   divider's reset — takes the setter alone, as its other doors
   do.
-- **The Layout rows' look is `LayoutModeRows.entries`**, which
-  the status item's Layout menu builds from too; each side hands
-  it its own words, so no sentence crosses the #96 seam.
+- **The Layout rows' look is `LayoutModeRows.entries`**, and a
+  second surface that draws those rows builds from it too,
+  handing it its own words, so no sentence crosses the #96 seam.
 
 ## A Space wears one marker, drawn after its identifier (#1790)
 
