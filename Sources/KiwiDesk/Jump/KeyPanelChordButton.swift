@@ -7,12 +7,22 @@ struct KeyPanelChordButton: View {
     let title: String
     let chord: String
     var hint: String? = nil
+    /// An SF Symbol drawn before the title — the Settings page the
+    /// button opens — decorative, so the name stays the title.
+    var symbol: String? = nil
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                Text(title).lineLimit(1)
+                HStack(spacing: 4) {
+                    if let symbol {
+                        Image(systemName: symbol)
+                            .imageScale(.small)
+                            .accessibilityHidden(true)
+                    }
+                    Text(title).lineLimit(1)
+                }
                 Text(verbatim: chord)
                     .font(.callout.monospaced())
                     .foregroundStyle(.secondary)

@@ -45,11 +45,11 @@ extension JumpPanelView {
                 JumpLayerLabel(name: name)
             }
         case .view:
+            let line = model.view?.selection?.line ?? .layout
             KeyPanelChordButton(
-                title: ViewPickText.settings(
-                    model.view?.selection?.line ?? .layout
-                ),
-                chord: "⌘,"
+                title: ViewPickText.settings(line),
+                chord: "⌘,",
+                symbol: ViewPickText.destination(line).symbol
             ) { model.handle(.settings) }
         }
     }

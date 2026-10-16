@@ -40,10 +40,15 @@ struct JumpViewSide: View {
 
     private func heading(_ line: ViewPickList.Line) -> some View {
         HStack(spacing: 6) {
-            Text(ViewPickText.title(line))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .accessibilityAddTraits(.isHeader)
+            HStack(spacing: 4) {
+                Image(systemName: ViewPickText.destination(line).symbol)
+                    .font(.caption2)
+                    .accessibilityHidden(true)
+                Text(ViewPickText.title(line))
+                    .font(.caption.weight(.semibold))
+                    .accessibilityAddTraits(.isHeader)
+            }
+            .foregroundStyle(.secondary)
             if line == .layout {
                 Text(caption)
                     .font(.caption)

@@ -55,8 +55,12 @@ struct JumpFooterFitTests {
             - leading - trailing
     }
 
-    private func button(_ title: String, _ chord: String) -> some View {
-        KeyPanelChordButton(title: title, chord: chord) {}
+    private func button(
+        _ title: String,
+        _ chord: String,
+        symbol: String? = nil
+    ) -> some View {
+        KeyPanelChordButton(title: title, chord: chord, symbol: symbol) {}
     }
 
     @Test("the View side keeps its first hint in every language")
@@ -65,9 +69,19 @@ struct JumpFooterFitTests {
         for code in try Self.locales() {
             LocalizationManager.shared.select(code)
             let footer = JumpFooter(scope: .view, overflows: false)
-            let settings = button(ViewPickText.settings(.profile), "⌘,")
+            // The widest of the three lines' Settings buttons.
+            let leading =
+                ViewPickList.Line.allCases.map {
+                    width(
+                        button(
+                            ViewPickText.settings($0),
+                            "⌘,",
+                            symbol: ViewPickText.destination($0).symbol
+                        )
+                    )
+                }.max() ?? 0
             let room = room(
-                leading: width(settings),
+                leading: leading,
                 trailing: width(
                     button(LayoutPickText.keep(Self.profile), "⌘S")
                 )
