@@ -257,6 +257,8 @@ struct SettingsCatalogTests {
                 #expect(destination == .spaces)
             case .appRule:
                 #expect(destination == .appRules)
+            case .newLens:
+                #expect(destination == .kiwiVision)
             }
         }
     }

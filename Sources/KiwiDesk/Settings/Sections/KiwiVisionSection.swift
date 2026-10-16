@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The KiwiVision page (#2103 ▸ the Settings area ruling): the
-/// lens strip, then the selected chip's body — Focused window's
+/// lens strip, then the selected chip's body — Default's
 /// four cards, written at once (#1741), or a lens's page, saved
 /// with Save (ruling 29). The picture is the side panel's
 /// (`KiwiVisionPanelPreview`), following the chip on `nav`.
@@ -16,7 +16,7 @@ struct KiwiVisionSection: View {
                 if let lens = selectedLens {
                     KiwiVisionLensPage(model: model, lens: lens)
                 } else {
-                    focusedWindow
+                    defaultPage
                 }
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
@@ -30,8 +30,8 @@ struct KiwiVisionSection: View {
         }
     }
 
-    /// Plain KiwiVision: Never dimmed last, every lens's (ruling 47).
-    @ViewBuilder private var focusedWindow: some View {
+    /// The Default page: Never dimmed last, every lens's (ruling 47).
+    @ViewBuilder private var defaultPage: some View {
         KiwiVisionPointer(model: model)
         KiwiVisionLevelsCard(model: model)
         KiwiVisionClearCard(model: model)

@@ -3754,8 +3754,8 @@ profile switch (a load, a screen change or a Desktop binding) into
 a profile that leaves out the lens that is on turns KiwiVision off.
 A pill on the focused window says "Writing is off: it does not
 reach Studio.", and VoiceOver says the same. Switching back
-leaves KiwiVision off. Plain KiwiVision, with no lens, stays on
-across every switch.
+leaves KiwiVision off. Plain KiwiVision, with no lens — Default
+in Settings and KiwiHub — stays on across every switch.
 
 **Example:**
 
@@ -5195,13 +5195,14 @@ row.
 - **Profile** — one per saved profile, shown only while another
   one can be loaded; one that cannot load is greyed. Return loads
   it like `load_profile`.
-- **KiwiVision** — Off and Focused window, which turn
-  [KiwiVision](#kiwivisiontoggle) off and on, then one item per
-  lens, which turns that lens on; picking the lens already on
-  leaves it on. A lens with no apps is greyed, "No apps yet", and
-  one the live profile leaves out is greyed "Not in Studio". While
-  there is no lens, the line ends in **New Lens…**, which opens
-  Settings ▸ KiwiVision.
+- **KiwiVision** — Default, which turns
+  [KiwiVision](#kiwivisiontoggle) on with no lens, then one item
+  per lens, which turns that lens on. Picking the item already on
+  turns KiwiVision off. A lens with no apps is greyed, "No apps
+  yet", and one the live profile leaves out is greyed "Not in
+  Studio". The line ends in **New Lens…**, which opens Settings ▸
+  KiwiVision ready to name a lens; ⌘1–9 and ↓ skip it, and a
+  Lua-owned setup greys it.
 
 Keys on this side:
 

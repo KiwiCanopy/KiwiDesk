@@ -12,15 +12,44 @@ enum ViewPickText {
         }
     }
 
-    static var visionOff: String { L("view_picker.vision.off", "Off") }
-
-    static var visionFocused: String {
-        L("view_picker.vision.focused", "Focused window")
+    /// KiwiVision's base settings, which a lens overrides (#2103
+    /// ruling 55).
+    static var visionDefault: String {
+        L("view_picker.vision.default", "Default")
     }
 
-    /// The chip offered while no lens exists (#2103 ruling 41).
+    /// What ↩ or a click does on the current KiwiVision chip,
+    /// spoken ahead of its ⌘ hint (#2103 ruling 56).
+    static var turnsOffHint: String {
+        L("view_picker.vision.turns_off", "Turns KiwiVision off")
+    }
+
+    /// A chip's VoiceOver hint: the KiwiVision item already on says
+    /// it turns KiwiVision off, ahead of its ⌘ hint (#2103 ruling
+    /// 56), the two joined in one localized frame.
+    static func hint(for item: ViewPickList.Item, number: Int?) -> String {
+        let chord = number.map { LayoutPickText.chordHint("⌘\($0)") }
+        guard ViewPickList.action(of: item) == .visionOff else {
+            return chord ?? ""
+        }
+        guard let chord else { return turnsOffHint }
+        return L("view_picker.ax.hint_pair", "%1$@, %2$@", turnsOffHint, chord)
+    }
+
+    /// The footer's lit hint while ↩ turns KiwiVision off.
+    static var turnOffFooter: String {
+        L("view_picker.footer.turn_off", "%1$@ Turn Off", "↩")
+    }
+
+    /// The KiwiVision line's last chip (#2103 ruling 57).
     static var newLens: String {
         L("kiwivision.lens.new", "New Lens…")
+    }
+
+    /// Why New Lens… greys where `init.lua` owns the setup and
+    /// defines its lenses (gui.md: grey, don't hide).
+    static var newLensLuaOwned: String {
+        L("view_picker.vision.new_lens_lua", "Lenses come from init.lua")
     }
 
     /// Why a lens chip cannot turn its lens on (#2103).
@@ -76,7 +105,8 @@ enum ViewPickText {
     /// it is current, and why it cannot be applied.
     static func spoken(
         _ item: ViewPickList.Item,
-        on line: ViewPickList.Line
+        on line: ViewPickList.Line,
+        visionOff: Bool = false
     ) -> String {
         var name = item.name
         if item.isCurrent {
@@ -90,7 +120,13 @@ enum ViewPickText {
                 refusal
             )
         }
-        return L("view_picker.ax.item", "%1$@: %2$@", title(line), name)
+        // With nothing on, no chip says "current": the line says
+        // KiwiVision is off (#2103 ruling 56).
+        let heading =
+            line == .vision && visionOff
+            ? L("view_picker.ax.vision_off", "%1$@, off", title(line))
+            : title(line)
+        return L("view_picker.ax.item", "%1$@: %2$@", heading, name)
     }
 
     /// The Settings page a line's ⌘, opens; the line's heading and

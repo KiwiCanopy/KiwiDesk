@@ -24,7 +24,7 @@ struct OverrideChrome<Content: View>: View {
     var subject: String? = nil
     /// What an inheriting row follows instead of the layout's
     /// defaults — the gaps row's Gaps & Borders page (#1775), a
-    /// lens row's Focused window (#2103 ruling 46).
+    /// lens row's Default (#2103 rulings 46, 55).
     var inheritsName: String? = nil
     @ViewBuilder let content: Content
     @Environment(\.isInsideGreyOut) private var alreadyDimmed

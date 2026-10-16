@@ -51,7 +51,8 @@ struct ViewPickItemsTests {
         )
         #expect(brokenOnly[.profile]?.isEmpty == true)
         #expect(
-            ViewPickList(layout: layout, items: alone).lines
+            ViewPickList(layout: layout, kiwiVisionOn: false, items: alone)
+                .lines
                 == [.layout, .vision]
         )
     }
@@ -69,15 +70,15 @@ struct ViewPickItemsTests {
     func visionLine() {
         LocalizationManager.shared.select("en")
         let off = items(vision: .off)[.vision] ?? []
-        // With no lens yet the line offers one (ruling 41).
-        #expect(
-            off.map(\.pick) == [.visionOff, .vision(lens: nil), .newLens]
-        )
-        #expect(off.map(\.isCurrent) == [true, false, false])
-        #expect(off[1].chord == "⌃⌥V")
+        // No Off chip; the line ends in New Lens… (#2103 rulings
+        // 56, 57).
+        #expect(off.map(\.pick) == [.vision(lens: nil), .newLens])
+        #expect(off.map(\.isCurrent) == [false, false])
+        #expect(off[0].name == "Default")
+        #expect(off[0].chord == "⌃⌥V")
         #expect(off.last?.name == "New Lens…")
         let on = items(vision: .plain)[.vision] ?? []
-        #expect(on.map(\.isCurrent) == [false, true, false])
+        #expect(on.map(\.isCurrent) == [true, false])
         let lua =
             JumpPanelController.items(
                 layout: nil,
@@ -88,11 +89,15 @@ struct ViewPickItemsTests {
                 offersNewLens: false,
                 inert: nil
             )[.vision] ?? []
-        #expect(!lua.contains { $0.pick == .newLens })
+        // A Lua-owned setup greys it rather than hiding it.
+        let luaNew = lua.first { $0.pick == .newLens }
+        #expect(luaNew?.isApplicable == false)
+        #expect(luaNew?.refusal == "Lenses come from init.lua")
     }
 
-    /// Ruling 41: a chip per lens after Focused window, the lens on
-    /// marked; a lens Core refuses greys with the reason it names.
+    /// Ruling 41: a chip per lens after Default, the lens on
+    /// marked, New Lens… still last (ruling 57); a lens Core
+    /// refuses greys with the reason it names.
     @Test("each lens gets a chip, an empty one greyed")
     func lensChips() {
         LocalizationManager.shared.select("en")
@@ -104,16 +109,17 @@ struct ViewPickItemsTests {
         let chips = line ?? []
         #expect(
             chips.map(\.pick) == [
-                .visionOff, .vision(lens: nil), .vision(lens: "Writing"),
-                .vision(lens: "Calls"),
+                .vision(lens: nil), .vision(lens: "Writing"),
+                .vision(lens: "Calls"), .newLens,
             ]
         )
-        #expect(chips.map(\.name).suffix(2) == ["Writing", "Calls"])
-        #expect(chips.map(\.isCurrent) == [false, false, true, false])
-        #expect(chips.map(\.isApplicable) == [true, true, true, false])
-        #expect(chips.last?.refusal == "No apps yet")
+        let lensChips = Array(chips.dropFirst().dropLast())
+        #expect(lensChips.map(\.name) == ["Writing", "Calls"])
+        #expect(chips.map(\.isCurrent) == [false, true, false, false])
+        #expect(lensChips.map(\.isApplicable) == [true, false])
+        #expect(lensChips.last?.refusal == "No apps yet")
         #expect(
-            chips.last.map { ViewPickText.spoken($0, on: .vision) }
+            lensChips.last.map { ViewPickText.spoken($0, on: .vision) }
                 == "KiwiVision: Calls, No apps yet"
         )
         // Ruling 15: a lens the live profile leaves out says which.
@@ -126,8 +132,9 @@ struct ViewPickItemsTests {
                 )
             ]
         )[.vision]
-        #expect(away?.last?.refusal == "Not in Studio")
-        #expect(away?.last?.isApplicable == false)
+        let writing = away?.first { $0.pick == .vision(lens: "Writing") }
+        #expect(writing?.refusal == "Not in Studio")
+        #expect(writing?.isApplicable == false)
     }
 
     @Test("every chip greys while KiwiDesk boots, and says so")
@@ -140,10 +147,11 @@ struct ViewPickItemsTests {
         #expect(!all.isEmpty)
         #expect(all.allSatisfy { !$0.isApplicable })
         #expect(all.allSatisfy { $0.inertReason == "KiwiDesk is starting" })
-        let off = items(inert: ViewPickText.starting)[.vision]?.first
+        let plain = items(inert: ViewPickText.starting)[.vision]?.first
         #expect(
-            off.map { ViewPickText.spoken($0, on: .vision) }
-                == "KiwiVision: Off, current, KiwiDesk is starting"
+            plain.map {
+                ViewPickText.spoken($0, on: .vision, visionOff: true)
+            } == "KiwiVision, off: Default, KiwiDesk is starting"
         )
     }
 

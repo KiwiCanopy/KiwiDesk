@@ -29,14 +29,10 @@ extension JumpModel {
         case .step(let delta):
             moveViewSelection { $0.moveLine(delta) }
         case .pick(moveHere: false):
-            if let item = view.selected, item.isApplicable {
-                onApplyView(item.pick)
-            }
+            if let item = view.selected { applyView(item) }
         // ⇧⌘+digit does nothing on this side (#2309 ruling 4).
         case .quick(let index, moveHere: false):
-            if let item = view.quick(index), item.isApplicable {
-                onApplyView(item.pick)
-            }
+            if let item = view.quick(index) { applyView(item) }
         case .keep:
             if let layout = view.layout, layout.keepArmed,
                 layout.profile != nil
@@ -56,6 +52,14 @@ extension JumpModel {
         }
     }
 
+    /// The one door every View pick takes — ↩, a ⌘ digit, a click
+    /// — so what an item does is decided once: the KiwiVision item
+    /// already on turns KiwiVision off (#2103 ruling 56).
+    func applyView(_ item: ViewPickList.Item) {
+        guard item.isApplicable else { return }
+        onApplyView(ViewPickList.action(of: item))
+    }
+
     private func moveViewSelection(_ move: (inout ViewPickList) -> Void) {
         guard var list = view else { return }
         let before = list.selection
@@ -67,7 +71,7 @@ extension JumpModel {
     /// How many items the ⌘ numbers reach on the selected line.
     var viewQuickCount: Int {
         guard let view, let line = view.selection?.line else { return 0 }
-        return min(view.matches(line).count, 9)
+        return min(view.digitOrder(line).count, 9)
     }
 
     /// What VoiceOver hears as the View selection moves.
@@ -77,6 +81,10 @@ extension JumpModel {
         else {
             return ViewPickText.noMatch(view.query)
         }
-        return ViewPickText.spoken(item, on: line)
+        return ViewPickText.spoken(
+            item,
+            on: line,
+            visionOff: view.visionIsOff
+        )
     }
 }

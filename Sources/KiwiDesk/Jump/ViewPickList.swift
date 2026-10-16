@@ -18,13 +18,24 @@ struct ViewPickList: Equatable {
     enum Pick: Hashable, Sendable {
         case layout(LayoutMode)
         case profile(String)
+        /// No chip draws it: the current KiwiVision chip's pick
+        /// (#2103 ruling 56).
         case visionOff
-        /// KiwiVision on: around the focused window where `lens` is
-        /// nil, else that lens (#2103 ruling 41).
+        /// KiwiVision on: its Default where `lens` is nil, else that
+        /// lens (#2103 rulings 41, 55).
         case vision(lens: String?)
-        /// Offered while no lens exists: Settings ▸ KiwiVision,
-        /// where a lens is made (#2103 ruling 41).
+        /// The line's last chip: Settings ▸ KiwiVision with the add
+        /// popover open (#2103 ruling 57, #2359 ruling 4).
         case newLens
+
+        /// A create chip, which no ⌘ digit reaches (#2359 ruling 1).
+        var isCreate: Bool {
+            // Exhaustive, so a new pick is ruled on here.
+            switch self {
+            case .newLens: return true
+            case .layout, .profile, .visionOff, .vision: return false
+            }
+        }
     }
 
     struct Item: Equatable, Identifiable {
@@ -60,9 +71,18 @@ struct ViewPickList: Equatable {
     private(set) var query = ""
     /// The selected item; nil while the query matches nothing.
     private(set) var selection: Position?
+    /// Whether KiwiVision is on, as Core reads it — stated by
+    /// every builder, so the line's spoken state is Core's, never
+    /// a guess from which chip is marked (#2103 ruling 56).
+    let kiwiVisionOn: Bool
 
-    init(layout: LayoutPickerState?, items: [Line: [Item]]) {
+    init(
+        layout: LayoutPickerState?,
+        kiwiVisionOn: Bool,
+        items: [Line: [Item]]
+    ) {
         self.layout = layout
+        self.kiwiVisionOn = kiwiVisionOn
         self.items = items.filter { !$0.value.isEmpty }
         selection = nil
         selection = resting(on: lines.first ?? .layout)
@@ -95,13 +115,38 @@ struct ViewPickList: Equatable {
         !matches(line).contains(index)
     }
 
+    /// The matches the ⌘ digits count, in drawn order: a create
+    /// chip is no pick (#2359 ruling 1).
+    func digitOrder(_ line: Line) -> [Int] {
+        let all = items(line)
+        return matches(line).filter { !all[$0].pick.isCreate }
+    }
+
     /// The line's ⌘ number for the item, counted among the
-    /// matches; nil past nine or for an item the query dims.
+    /// matches; nil past nine, for an item the query dims and for
+    /// a create chip.
     func number(_ line: Line, _ index: Int) -> Int? {
-        guard let at = matches(line).firstIndex(of: index), at < 9
+        guard let at = digitOrder(line).firstIndex(of: index), at < 9
         else { return nil }
         return at + 1
     }
+
+    /// What a pick of `item` does: the KiwiVision item already on
+    /// turns KiwiVision off (#2103 ruling 56); every other item,
+    /// a current profile or layout included, applies itself.
+    static func action(of item: Item) -> Pick {
+        if case .vision = item.pick, item.isCurrent { return .visionOff }
+        return item.pick
+    }
+
+    /// Whether ↩ now turns KiwiVision off, which the footer says.
+    var selectionTurnsOff: Bool {
+        selected.map { Self.action(of: $0) == .visionOff } ?? false
+    }
+
+    /// Whether the KiwiVision line shows with KiwiVision off, which
+    /// its spoken title says (#2103 ruling 56).
+    var visionIsOff: Bool { items[.vision] != nil && !kiwiVisionOn }
 
     /// A new query selects its first match on the selection's
     /// line, else on the first line with one; a cleared query
@@ -157,7 +202,10 @@ struct ViewPickList: Equatable {
         let next = at + delta
         guard reachable.indices.contains(next) else { return }
         let column = matches(current.line).firstIndex(of: current.index)
-        let target = matches(reachable[next])
+        // Never onto a create chip, unless nothing else matches
+        // (#2359 ruling 1).
+        let pickable = digitOrder(reachable[next])
+        let target = pickable.isEmpty ? matches(reachable[next]) : pickable
         let index = target[min(column ?? 0, target.count - 1)]
         selection = Position(line: reachable[next], index: index)
     }
@@ -177,7 +225,7 @@ struct ViewPickList: Equatable {
     /// ⌘1–9: the selected line's item at that number.
     func quick(_ index: Int) -> Item? {
         guard let line = selection?.line else { return nil }
-        let order = matches(line)
+        let order = digitOrder(line)
         guard index < 9, order.indices.contains(index) else {
             return nil
         }

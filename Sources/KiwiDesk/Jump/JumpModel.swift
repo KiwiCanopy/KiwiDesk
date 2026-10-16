@@ -54,7 +54,7 @@ final class JumpModel: ObservableObject {
     var onScopeChange: () -> Void = {}
     /// Reads the View side's lines now.
     var loadView: () -> ViewPickList = {
-        ViewPickList(layout: nil, items: [:])
+        ViewPickList(layout: nil, kiwiVisionOn: false, items: [:])
     }
     var onApplyView: (ViewPickList.Pick) -> Void = { _ in }
     var onKeep: () -> Void = {}

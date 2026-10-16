@@ -1,17 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A lens's own values for the Focused window cards (#2103 rulings
+/// A lens's own values for the Default cards (#2103 rulings
 /// 23, 29, 46): Dim and blur, Stays clear and System appearance,
 /// one override checkbox per ROW — a lens often changes the dim and
-/// keeps the blur. An unchecked row reads "follows Focused window ·
+/// keeps the blur. An unchecked row reads "follows Default ·
 /// <value>"; checking it seeds the lens with that value.
 struct KiwiVisionLensOverrides: View {
     @ObservedObject var model: SettingsModel
     let lens: VisionLens
 
     private var plain: AppWideSettings { model.appWide }
-    private var focused: String { KiwiVisionLensWords.focusedWindow }
+    private var defaultName: String { KiwiVisionLensWords.defaultName }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -69,7 +69,7 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: plain.visionDim),
             inherited: (label, Self.percent(plain.visionDim)),
-            inheritsName: focused
+            inheritsName: defaultName
         ) {
             SettingsRowShape {
                 SettingsRowLabel(label: label, help: nil)
@@ -98,7 +98,7 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, Self.onOff(global)),
-            inheritsName: focused
+            inheritsName: defaultName
         ) {
             ToggleRow(
                 label: label,
@@ -119,7 +119,7 @@ struct KiwiVisionLensOverrides: View {
             inherited: (
                 label, KiwiVisionAppearanceCard.title(plain.visionAppearance)
             ),
-            inheritsName: focused
+            inheritsName: defaultName
         ) {
             DropdownRow(
                 label: label,

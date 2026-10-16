@@ -34,7 +34,7 @@ extension SettingsView {
         }
         model.destination = resolved.destination
         // Every KiwiVision anchor but the strip's lives on the
-        // Focused window page, and a landing names no lens (#2103).
+        // Default page, and a landing names no lens (#2103).
         if resolved.destination == .kiwiVision {
             model.nav.kiwiVisionLens = nil
         }
@@ -50,6 +50,8 @@ extension SettingsView {
             // Scroll and flash, as the search lands — no focus: a
             // navigation moves focus only where macOS would (#991).
             scroll = AppRulesSection.card(holding: app, in: model)?.id
+        case .newLens:
+            model.nav.kiwiVisionAddRequested = true
         }
         // Unconditional, nil included: guarding a nil→nil publish
         // would stop a destination-only request from CLEARING an

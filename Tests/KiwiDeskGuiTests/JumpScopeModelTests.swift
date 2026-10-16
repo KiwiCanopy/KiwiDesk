@@ -24,6 +24,7 @@ struct JumpScopeModelTests {
         )
         return ViewPickList(
             layout: space ? layout : nil,
+            kiwiVisionOn: false,
             items: JumpPanelController.items(
                 layout: space ? layout : nil,
                 profiles: ("Dual", ["Dual", "Studio"], []),
@@ -127,6 +128,8 @@ struct JumpScopeModelTests {
         model.handle(.quick(1, moveHere: false))
         model.handle(.step(1))
         model.handle(.pick(moveHere: false))
+        // ↓ keeps the column, clamped (#2309 ruling 11) to the
+        // last chip a digit reaches, never New Lens… (#2359).
         #expect(applied == [.profile("Studio"), .vision(lens: nil)])
     }
 

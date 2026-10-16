@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The chip strip atop Settings ▸ KiwiVision (#2103 rulings 29,
-/// 48, 50, 54): Focused window, a thin rule, each lens, and `+`.
+/// 48, 50, 54): Default, a thin rule, each lens, and `+`.
 /// The selection parks on `nav`, which the side panel reads.
 struct KiwiVisionLensStrip: View {
     @ObservedObject var model: SettingsModel
@@ -16,7 +16,7 @@ struct KiwiVisionLensStrip: View {
         let selected = model.nav.kiwiVisionLensSelection(in: lenses)
         HStack(spacing: 6) {
             ShortcutLayerChip(
-                name: KiwiVisionLensWords.focusedWindow,
+                name: KiwiVisionLensWords.defaultName,
                 selected: selected == nil
             ) { model.nav.kiwiVisionLens = nil }
             Rectangle()
@@ -35,6 +35,25 @@ struct KiwiVisionLensStrip: View {
         }
         .searchAnchored(SettingsCatalog.kiwiVision.lenses)
         .help(KiwiVisionLensWords.lensesHelp)
+        .onAppear(perform: takeAddRequest)
+        .onChange(of: model.nav.kiwiVisionAddRequested) {
+            takeAddRequest()
+        }
+    }
+
+    /// KiwiHub's New Lens… lands here asking for the add popover
+    /// (#2359 ruling 4): opened once, where the add is not greyed,
+    /// a turn later so a page drawn this pass has its anchor.
+    private func takeAddRequest() {
+        guard model.nav.kiwiVisionAddRequested else { return }
+        model.nav.kiwiVisionAddRequested = false
+        guard addReason == nil else { return }
+        DispatchQueue.main.async { openAdd() }
+    }
+
+    /// The add popover, as the `+` and a landing open it.
+    private func openAdd() {
+        adding = NameEditRequest(seed: "", subject: "")
     }
 
     private var addReason: String? {
@@ -44,9 +63,7 @@ struct KiwiVisionLensStrip: View {
     }
 
     private var addChip: some View {
-        Button {
-            adding = NameEditRequest(seed: "", subject: "")
-        } label: {
+        Button(action: openAdd) {
             Image(systemName: "plus")
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)

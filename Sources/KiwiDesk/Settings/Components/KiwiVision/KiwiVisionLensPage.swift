@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The selected lens's page (#2103 rulings 29, 46–54): its header,
-/// Apps and Other apps, its own values for the Focused window
+/// Apps and Other apps, its own values for the Default
 /// cards, then — under "Every lens" — Never dimmed, which writes at
 /// once. Everything above that heading waits for the page's Save.
 /// Greyed where `init.lua` owns the config.

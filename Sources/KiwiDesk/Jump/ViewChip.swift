@@ -13,6 +13,9 @@ struct ViewChip: View {
     let isSelected: Bool
     let isDimmed: Bool
     let showsNumber: Bool
+    /// Whether the KiwiVision line shows nothing on, which the
+    /// spoken line title says (#2103 ruling 56).
+    var visionOff = false
     let onActivate: () -> Void
     let onHover: () -> Void
 
@@ -24,15 +27,17 @@ struct ViewChip: View {
         Button(action: onActivate) { content }
             .buttonStyle(.plain)
             .focusable(false)
-            .accessibilityLabel(ViewPickText.spoken(item, on: line))
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-            .accessibilityHint(
-                number.map { LayoutPickText.chordHint("⌘\($0)") } ?? ""
+            .accessibilityLabel(
+                ViewPickText.spoken(item, on: line, visionOff: visionOff)
             )
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .accessibilityHint(hint)
             .onContinuousHover { phase in
                 if case .active = phase { onHover() }
             }
     }
+
+    private var hint: String { ViewPickText.hint(for: item, number: number) }
 
     private var badgeShown: Bool { showsNumber && number != nil }
 
@@ -67,6 +72,13 @@ struct ViewChip: View {
             if item.isCurrent {
                 Image(systemName: "checkmark")
                     .font(.system(size: 10, weight: .bold))
+            }
+            // A create chip leads with an unfilled plus; its label
+            // is its name (#2359 ruling 2).
+            if item.pick.isCreate {
+                Image(systemName: "plus")
+                    .font(.system(size: 10, weight: .semibold))
+                    .accessibilityHidden(true)
             }
             Text(item.name).lineLimit(1)
             if let chord = item.chord {

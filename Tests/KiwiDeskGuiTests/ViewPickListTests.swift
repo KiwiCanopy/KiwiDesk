@@ -40,6 +40,7 @@ struct ViewPickListTests {
                 profile: nil,
                 keepArmed: false
             ),
+            kiwiVisionOn: false,
             items: [
                 .layout: layouts, .profile: profileItems, .vision: vision,
             ]

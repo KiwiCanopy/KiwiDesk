@@ -7,10 +7,9 @@ import SwiftUI
 /// (localization.md).
 @MainActor
 enum KiwiVisionLensWords {
-    /// The plain KiwiVision chip, KiwiHub's word for it.
-    static var focusedWindow: String {
-        L("view_picker.vision.focused", "Focused window")
-    }
+    /// The base settings' chip, KiwiHub's word for it (#2103
+    /// ruling 55).
+    static var defaultName: String { ViewPickText.visionDefault }
 
     static var newLens: String { ViewPickText.newLens }
 
@@ -272,7 +271,7 @@ enum KiwiVisionLensWords {
         L(
             "kiwivision.lens.follows.caption",
             "Unchecked rows follow %1$@.",
-            focusedWindow
+            defaultName
         )
     }
 
