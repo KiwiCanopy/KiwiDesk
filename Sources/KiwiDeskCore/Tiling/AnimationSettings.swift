@@ -130,11 +130,7 @@ extension AnimationSettings {
     /// Nil for an unknown key or a value of the wrong type.
     func setting(_ key: String, to value: JSONValue) -> Self? {
         guard CodingKeys(rawValue: key) != nil,
-            let data = try? JSONEncoder().encode(self),
-            case .object(var map) = try? JSONDecoder().decode(
-                JSONValue.self,
-                from: data
-            )
+            case .object(var map) = JSONValue(encoding: self)
         else { return nil }
         map[key] = value
         guard let patched = try? JSONEncoder().encode(JSONValue.object(map))

@@ -35,6 +35,8 @@ struct ConfigMigrationGlassRoutingTests {
             "Config/ConfigMigration+BarEdges.swift",
             // The keep document's root (#1685), never a file.
             "Commands/KiwiCore+ChangeReport.swift",
+            // `kiwivision.current`'s answer key (#2103), never a file.
+            "App/KiwiCore+VisionCurrent.swift",
         ]
         var declarers: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {

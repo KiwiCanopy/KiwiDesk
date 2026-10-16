@@ -114,11 +114,18 @@ extension KiwiCore {
         endCrossing(adopting: owed[profile.name] ?? appWideLedger.settled)
     }
 
-    /// The stored lenses: what the Settings lens page seeds its
+    /// The settled lenses: what the Settings lens page seeds its
     /// draft from and writes back, so a session `define_lens` or
     /// `delete_lens` never reaches `gui.json` (ruling 40).
     public var kiwiVisionStoredLenses: [VisionLens] {
         appWideLedger.settled.visionLenses
+    }
+
+    /// The lenses `gui.json` holds now — none before its group is
+    /// stored, since settled values a crossing owes are in no file —
+    /// and nil for a Lua-owned setup, whose store is `init.lua`.
+    var kiwiVisionLensesInGuiJSON: [VisionLens]? {
+        isGuiManaged ? appWideStamp?.visionLenses ?? [] : nil
     }
 
     /// A General row (`persisting`) or a verb changing a value. A

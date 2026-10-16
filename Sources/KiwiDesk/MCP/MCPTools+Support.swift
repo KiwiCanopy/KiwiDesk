@@ -65,9 +65,7 @@ enum MCPWording {
                 "no saved profile is live, so it lasts until the "
                 + "next layout or profile change"
         case .appWide:
-            why =
-                "it is app-wide and lasts until KiwiDesk restarts; "
-                + "Settings ▸ General keeps it"
+            why = appWideHome(leaf.id)
         case .temporarySpace:
             why = "that Space is not in the profile"
         case .notWritten:

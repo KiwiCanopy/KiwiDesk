@@ -56,10 +56,7 @@ public struct TouchedLeaf: Codable, Sendable, Equatable {
 
     /// This leaf as the wire carries it.
     public var json: JSONValue {
-        guard let data = try? JSONEncoder().encode(self),
-            let value = try? JSONDecoder().decode(JSONValue.self, from: data)
-        else { return .object(["id": .string(id)]) }
-        return value
+        JSONValue(encoding: self) ?? .object(["id": .string(id)])
     }
 
     enum CodingKeys: String, CodingKey {

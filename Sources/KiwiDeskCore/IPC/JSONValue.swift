@@ -95,6 +95,17 @@ public indirect enum JSONValue: Codable, Sendable, Equatable {
     }
 }
 
+extension JSONValue {
+    /// `value` as the JSON its own encoder writes; nil where it
+    /// cannot be encoded.
+    public init?(encoding value: some Encodable) {
+        guard let data = try? JSONEncoder().encode(value),
+            let json = try? JSONDecoder().decode(JSONValue.self, from: data)
+        else { return nil }
+        self = json
+    }
+}
+
 extension Double {
     /// Safe Int conversion: nil unless finite and in `Int`'s
     /// range. `Int(1e300)`, `Int(.nan)` and `Int(.infinity)`
