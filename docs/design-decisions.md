@@ -1676,6 +1676,21 @@ nothing could navigate back in. Array-order layouts reach the
 float tier through their existing edge fall-through to the
 geometric search.
 
+:::unreleased
+A KiwiVision lens that keeps focus on its apps adds one more
+filter, orthogonal to both models like the float tier
+([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)):
+`navigate` hands every model the one predicate `lensKeySkip`,
+which refuses other apps' windows. The geometric search and the
+float tier drop them from their candidates, Scrolling and Monocle
+step past their indices through `Navigation.arrayStep`, and Track
+folds the predicate into the skip its pile handling already
+takes. A new layout's navigation takes that predicate too, or
+the lens stops steering the keys on it. Only a keyed call skips:
+the scroll gesture calls `navigate` with `keyed: false`
+([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
+:::
+
 ```mermaid
 flowchart TD
     L["a new layout"] --> M{"navigation model?"}
@@ -6457,6 +6472,36 @@ the app's defaults and never travels in a backup. A manual switch
 turns macOS's Automatic mode off, so the payment turns it back on
 where it was on; that re-arm writes the preference and posts the
 theme notification, the one step no device has measured yet.
+
+### A lens steers the keys, never a pick (#2103)
+
+**[Rationale]**
+
+While a lens keeps focus on its apps, `focus` and `swap` skip
+other apps' windows, and nothing else does: a click, a bar item,
+hover focus and the scroll gesture reach any window, and the
+window switcher lists every window, the lens's apps first.
+
+The line runs between a step and a pick. A directional key steps
+blind: it lands on whichever window lies that way, so inside a
+lens an unsteered press spends itself on a window the user was
+not working in, and the next press has to come back. A click, a
+bar item and a switcher row each name their window; refusing one
+would turn the lens into a lock, with a window the user can see
+and point at that will not take the focus. macOS's own ways in —
+⌘-Tab, the Dock, a notification — are never refused either, so a
+KiwiDesk refusal would hold back nothing they do not already
+reach. For the same reason the switcher orders and never filters:
+leaving other apps out of it would make their windows unfindable
+from KiwiDesk.
+
+Hover focus is a pick by the hand resting on a window. The scroll
+gesture steps the row like a key but under the hand: a swipe
+moves the focus one window, the distance the user feels, and a
+step that leapt past the windows between would move the row by a
+distance no swipe measured. Should a user want the gesture to
+skip, that is a ruling of its own, never a default to change
+quietly at the `keyed:` argument.
 
 ### KiwiVision has its own page, and its rows apply at once (#2103)
 

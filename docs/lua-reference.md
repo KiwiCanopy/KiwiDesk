@@ -125,6 +125,12 @@ or cycle to it instead
 ([Accepted limitations](accepted-limitations.md)). `swap` is
 tiled-only.
 
+:::unreleased
+While a KiwiVision lens is on with
+[`keep_focus`](#kiwivisiondefine_lens), `focus` and `swap` skip
+the windows of apps the lens does not hold.
+:::
+
 **Example:**
 
 ```lua
@@ -3774,7 +3780,14 @@ without one), and optionally `titles`, `keep_focus`, `clear_delay`,
 lens is on, every window of its apps stays clear beside the focused
 one. `titles` maps an app to text its window titles contain: only
 those of its windows stay clear, and only windows KiwiDesk manages,
-whose titles it can read. A setting the lens leaves out follows the
+whose titles it can read.
+
+With `keep_focus` on (the default), [`focus`](#focus) and
+[`swap`](#swap) — from a key, the CLI or Lua — skip the windows of
+apps the lens does not hold, in every layout. A click, the bars,
+hover focus and a [scroll gesture](#scroll-gestures) skip nothing.
+
+A setting the lens leaves out follows the
 plain KiwiVision one, and never-dimmed apps stay clear under every
 lens. Like the `set_*` verbs, it changes the running lenses only;
 `init.lua` defines them on every load.
@@ -5123,8 +5136,10 @@ Spotlight's height on the screen under the pointer. It lists every
 window KiwiDesk knows except the one you are in — open windows
 first, most recently used first, including those up on another
 macOS Desktop, then minimized windows, then one row per hidden
-app. Typing narrows the list by app name, then by title. Moving
-the mouse over a row selects it.
+app. Typing narrows the list by app name, then by title. While a
+[KiwiVision lens](#kiwivisiondefine_lens) is on, the rows of the
+lens's apps come first and every other app's follow under **Other
+apps**, while you type too. Moving the mouse over a row selects it.
 
 - **Return** goes to the selected window, switching Space or
   Desktop as needed; on a minimized window it brings it back, on a
