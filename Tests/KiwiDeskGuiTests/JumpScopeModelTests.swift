@@ -24,6 +24,7 @@ struct JumpScopeModelTests {
         )
         return ViewPickList(
             layout: space ? layout : nil,
+            kiwiVisionOn: false,
             items: JumpPanelController.items(
                 layout: space ? layout : nil,
                 profiles: ("Dual", ["Dual", "Studio"], []),

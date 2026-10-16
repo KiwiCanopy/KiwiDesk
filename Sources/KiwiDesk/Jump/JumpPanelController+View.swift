@@ -7,7 +7,8 @@ import KiwiDeskCore
 extension JumpPanelController {
     func wireView(_ model: JumpModel) {
         model.loadView = { [weak self] in
-            self?.viewList() ?? ViewPickList(layout: nil, items: [:])
+            self?.viewList()
+                ?? ViewPickList(layout: nil, kiwiVisionOn: false, items: [:])
         }
         model.onApplyView = { [weak self, weak model] pick in
             guard let self, let model else { return }
@@ -51,8 +52,9 @@ extension JumpPanelController {
             core: core,
             lua: KeybindingCatalog.toggleKiwiVision.lua
         )
-        var list = ViewPickList(
+        return ViewPickList(
             layout: layout,
+            kiwiVisionOn: core.kiwiVisionActive != .off,
             items: Self.items(
                 layout: layout,
                 profiles: (profiles.currentName, profiles.list(), broken),
@@ -65,8 +67,6 @@ extension JumpPanelController {
                 inert: inert
             )
         )
-        list.kiwiVisionOn = core.kiwiVisionActive != .off
-        return list
     }
 
     /// Each line's items. Profile is drawn only where there is
@@ -148,7 +148,7 @@ extension JumpPanelController {
             )
         }
         // Opening Settings is no machine act, so no boot grey; a
-        // Lua-owned setup greys it with Settings' own reason.
+        // Lua-owned setup greys it, its reason short enough for a chip.
         let create = ViewPickList.Item(
             pick: .newLens,
             name: ViewPickText.newLens,

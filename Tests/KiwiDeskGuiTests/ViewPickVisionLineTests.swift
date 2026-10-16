@@ -29,8 +29,11 @@ struct ViewPickVisionLineTests {
             offersNewLens: true,
             inert: nil
         )
-        var list = ViewPickList(layout: nil, items: items)
-        list.kiwiVisionOn = vision != .off
+        var list = ViewPickList(
+            layout: nil,
+            kiwiVisionOn: vision != .off,
+            items: items
+        )
         if let pick { list.select(pick) }
         return list
     }
@@ -101,6 +104,16 @@ struct ViewPickVisionLineTests {
             model.contains("onApplyView(ViewPickList.action(of:item))")
         )
         #expect(model.occurrences(of: "onApplyView(") == 1)
+        // Nowhere else in KiwiHub calls past the door.
+        let jump = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Jump")
+        var calls = 0
+        for file in try SourceScan.swiftSources(under: jump) {
+            calls += try SourceScan.blankedSource(at: file)
+                .split(whereSeparator: \.isWhitespace).joined()
+                .occurrences(of: "onApplyView(")
+        }
+        #expect(calls == 1)
     }
 
     @Test("New Lens… is last and no ⌘ digit reaches it")

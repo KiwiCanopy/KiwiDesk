@@ -71,13 +71,18 @@ struct ViewPickList: Equatable {
     private(set) var query = ""
     /// The selected item; nil while the query matches nothing.
     private(set) var selection: Position?
-    /// Whether KiwiVision is on, as Core reads it — set by the
-    /// panel, so the line's spoken state is Core's, never a guess
-    /// from which chip is marked (#2103 ruling 56).
-    var kiwiVisionOn = false
+    /// Whether KiwiVision is on, as Core reads it — stated by
+    /// every builder, so the line's spoken state is Core's, never
+    /// a guess from which chip is marked (#2103 ruling 56).
+    let kiwiVisionOn: Bool
 
-    init(layout: LayoutPickerState?, items: [Line: [Item]]) {
+    init(
+        layout: LayoutPickerState?,
+        kiwiVisionOn: Bool,
+        items: [Line: [Item]]
+    ) {
         self.layout = layout
+        self.kiwiVisionOn = kiwiVisionOn
         self.items = items.filter { !$0.value.isEmpty }
         selection = nil
         selection = resting(on: lines.first ?? .layout)

@@ -51,7 +51,8 @@ struct ViewPickItemsTests {
         )
         #expect(brokenOnly[.profile]?.isEmpty == true)
         #expect(
-            ViewPickList(layout: layout, items: alone).lines
+            ViewPickList(layout: layout, kiwiVisionOn: false, items: alone)
+                .lines
                 == [.layout, .vision]
         )
     }
