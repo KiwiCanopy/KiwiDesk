@@ -96,15 +96,31 @@ public enum FloatDetection {
     /// Every on-screen, visible window of any layer, FRONT to back
     /// — the order the WindowServer composites them in (#1787).
     /// The one front-to-back read: a consumer filters layers.
+    /// `includingDesktopElements` keeps what macOS counts as the
+    /// desktop — a below-normal bar such as SketchyBar's, at layer
+    /// −20, as well as the wallpaper and desktop icons.
     public static func frontToBackWindows(
+        includingDesktopElements: Bool = false,
         isOwnChrome: (pid_t, Int) -> Bool
     ) -> [ListedWindow] {
         let list =
             CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly, .excludeDesktopElements],
+                listOptions(
+                    includingDesktopElements: includingDesktopElements
+                ),
                 kCGNullWindowID
             ) as? [[String: Any]] ?? []
         return listedWindows(in: list, isOwnChrome: isOwnChrome)
+    }
+
+    /// The read's options: on-screen windows, the desktop's left out
+    /// unless asked for.
+    static func listOptions(
+        includingDesktopElements: Bool
+    ) -> CGWindowListOption {
+        includingDesktopElements
+            ? [.optionOnScreenOnly]
+            : [.optionOnScreenOnly, .excludeDesktopElements]
     }
 
     /// The visible windows of `list`, KiwiDesk's chrome left out
