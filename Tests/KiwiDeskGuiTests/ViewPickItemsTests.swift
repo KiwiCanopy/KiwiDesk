@@ -100,7 +100,7 @@ struct ViewPickItemsTests {
             .split(whereSeparator: \.isWhitespace).joined()
         #expect(source.contains("letinert=core.bootPhase.isStarting"))
         // Before Start Tiling too (ruling 9), the reason its own.
-        #expect(source.contains(":tilingIdle()?ViewPickText.notTiling:nil"))
+        #expect(source.contains(":ViewPickText.held(hold())"))
         #expect(source.occurrences(of: "inert:inert") == 1)
     }
 

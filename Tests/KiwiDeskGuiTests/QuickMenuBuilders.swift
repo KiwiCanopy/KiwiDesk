@@ -13,10 +13,8 @@ enum QuickMenuBuilders {
     ///
     /// **A list with a coverage check, not one hard-coded path.**
     /// The scan was pinned to a single file and `total > 0` cannot
-    /// tell a SPLIT from a whole file: move `screenItem` and
-    /// `everyScreenItem` into their own file at §2.1's next
-    /// squeeze — which this file is one row away from needing —
-    /// and their rows go unguarded with the suite green. That is
+    /// tell a SPLIT from a whole file: move a row builder into its
+    /// own file and its rows go unguarded with the suite green. That is
     /// `gui.md`'s scan-root rule (`ChromeScanRoots` is the worked
     /// example): a new tree joins the list, and the guard carries a
     /// root-coverage check.

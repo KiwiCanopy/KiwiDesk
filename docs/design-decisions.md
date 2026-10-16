@@ -16600,8 +16600,9 @@ returning to full strength IS the ready signal
 
 :::unreleased
 The grey sits on the switches, not on the row that leads to them
-(#2309). **Open KiwiHub…** stays enabled while KiwiDesk starts or
-waits for Start Tiling, and the view picker greys its own items
+(#2309). **Open KiwiHub…** stays enabled while KiwiDesk starts,
+waits for Start Tiling or lacks the Accessibility permission, and
+the view picker greys its own items
 with the reason as text. A greyed row leaves its reason to a
 neighbouring row; the panel puts it on the item itself, and since
 the row and the chord open the same side, the pointer and the

@@ -29,9 +29,19 @@ enum ViewPickText {
         L("view_picker.layout.no_space", "No Space under the pointer")
     }
 
-    /// Every line's caption until Start Tiling is pressed (#2050).
-    static var notTiling: String {
-        L("view_picker.not_tiling", "Tiling hasn't started")
+    /// Every line's caption while window management is held
+    /// (#2050), nil once it runs.
+    static func held(_ hold: CoreHold) -> String? {
+        switch hold {
+        case .running: return nil
+        case .notStarted:
+            return L("view_picker.not_tiling", "Tiling hasn't started")
+        case .permissionMissing:
+            return L(
+                "view_picker.no_permission",
+                "Needs Accessibility permission"
+            )
+        }
     }
 
     /// Every line's caption while KiwiDesk boots.

@@ -43,9 +43,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// new panel rather than closing one already going.
     var isOpen: Bool { panel?.isVisible == true && !presence.leaving }
 
-    /// Whether window management waits for Start Tiling (#2050);
-    /// the View side greys its chips meanwhile (#2309 ruling 9).
-    var tilingIdle: () -> Bool = { false }
+    /// Why window management is held (#2050), if it is; the View
+    /// side greys its chips meanwhile (#2309 ruling 9).
+    var hold: () -> CoreHold = { .running }
     /// The Space the View side's Layout line acts on, read with the screen
     /// the panel opens on so the two never disagree.
     var pickerSpace: SpaceID?

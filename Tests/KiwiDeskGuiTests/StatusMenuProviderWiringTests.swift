@@ -34,4 +34,39 @@ struct StatusMenuProviderWiringTests {
             squashed.contains("lua:KeybindingCatalog.openSettings.lua")
         )
     }
+
+    /// The Open KiwiHub row and the View side's hold read both
+    /// default inert, so a lost wire leaves the row dead and the
+    /// chips live before tiling with no test red (#2309).
+    @Test("AppDelegate wires the KiwiHub row and the hold")
+    func kiwiHubRowIsWired() throws {
+        let squashed = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/AppDelegate.swift"
+                )
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            squashed.contains(
+                "statusItem.onOpenKiwiHub={[weakjumpPanel]in"
+                    + "jumpPanel?.toggle(.view)}"
+            )
+        )
+        #expect(
+            squashed.contains(
+                "jumpPanel.hold={[weakself]inself?.coreHold??.running}"
+            )
+        )
+    }
+
+    @Test("each hold names its own reason, running none")
+    func holdReasons() {
+        LocalizationManager.shared.select("en")
+        #expect(ViewPickText.held(.running) == nil)
+        #expect(ViewPickText.held(.notStarted) == "Tiling hasn't started")
+        #expect(
+            ViewPickText.held(.permissionMissing)
+                == "Needs Accessibility permission"
+        )
+    }
 }

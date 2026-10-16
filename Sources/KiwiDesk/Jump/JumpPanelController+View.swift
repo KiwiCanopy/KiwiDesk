@@ -35,7 +35,7 @@ extension JumpPanelController {
         let inert =
             core.bootPhase.isStarting
             ? ViewPickText.starting
-            : tilingIdle() ? ViewPickText.notTiling : nil
+            : ViewPickText.held(hold())
         let layout = pickerSpace.flatMap(core.layoutPickerState(for:))
         let profiles = core.profiles
         let broken = Set(profiles.brokenProfiles().map(\.name))

@@ -173,10 +173,9 @@ struct LayoutKeepDraftTests {
     @Test("Keep arms on a NON-focused screen's drift")
     func keepArmsOnAnyScreensDrift() throws {
         // Condition 1 of the ruling, and it needs two screens by
-        // construction: on one screen `anyScreenHasDrifted` and
-        // `activeSpaceHasDrifted` agree, so a single-screen
-        // fixture cannot tell the new predicate from the old one
-        // (code + architect review, 2026-08-31). The verb writes
+        // construction: on one screen the any-screen and the
+        // active-Space readings agree, so a single-screen fixture
+        // cannot tell them apart. The verb writes
         // the WHOLE profile, so a Keep greyed while another
         // screen's layout was not saved refused to do what it was
         // about to do.
