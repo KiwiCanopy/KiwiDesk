@@ -1670,7 +1670,7 @@ Touching `Borders`, `Vision`.
   lens rename or delete re-keys or clears every profile's `lens_reach`
   and every stored binding naming it through the one pair of crossings,
   a rename carried by its own write so the lens on follows it, a lens
-  matched by the one `sameLens` and a binding naming only a stored lens
+  matched by the one `sameLens` and a row offered only for a stored lens
   — the lens page's Save wiring review's until #2103 PR 7 (#2103,
   `KiwiVisionLensReachTests`, `KiwiVisionLensRenameTests`,
   `ShortcutsLensRowsTests`, `ShortcutsLensNamingTests`)

@@ -57,6 +57,31 @@ struct ShortcutsLensNamingTests {
         #expect(row.label == "Toggle Writing lens")
     }
 
+    /// A binding naming a lens no store holds, or a stored lens in
+    /// another spelling, still draws a row, so its chord can be
+    /// seen and removed.
+    @Test("every bound lens draws a row, in the binding's spelling")
+    func boundLensesDrawRows() {
+        let bindings = [
+            KeyBinding(
+                combo: "control+w",
+                lua: KeybindingCatalog.toggleLens("writing").lua,
+                kind: .navigation
+            ),
+            KeyBinding(
+                combo: "control+g",
+                lua: KeybindingCatalog.toggleLens("Gone").lua,
+                kind: .navigation
+            ),
+        ]
+        #expect(
+            KeybindingCatalog.lensOffer(
+                stored: ["Writing", "Mail"],
+                bindings: bindings
+            ) == ["writing", "Mail", "Gone"]
+        )
+    }
+
     @Test("a chip's chord matches its lens however it is spelled")
     func chordMatchesAnySpelling() {
         #expect(KeybindingCatalog.names(binding, "WRITING"))
@@ -78,7 +103,11 @@ struct ShortcutsLensNamingTests {
             try flat(
                 "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
             )
-            .contains("lenses:model.core.kiwiVisionStoredLensNames")
+            .contains(
+                "lenses:KeybindingCatalog.lensOffer("
+                    + "stored:model.core.kiwiVisionStoredLensNames,"
+                    + "bindings:model.config.layers.flatMap(\\.bindings))"
+            )
         )
         #expect(
             try flat(

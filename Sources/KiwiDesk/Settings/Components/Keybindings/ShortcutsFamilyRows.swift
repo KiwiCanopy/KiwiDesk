@@ -24,7 +24,8 @@ struct ShortcutsFamilyRows {
     /// Available layer names and active editing layer.
     let layerNames: [String]
     let currentLayer: String
-    /// The live lenses, in stored order (#2103 ruling 42).
+    /// The lenses to draw a row for (`KeybindingCatalog.lensOffer`,
+    /// #2103 ruling 42).
     var lenses: [String] = []
 
     func rows(for key: SettingKey) -> [NavCommand]? {

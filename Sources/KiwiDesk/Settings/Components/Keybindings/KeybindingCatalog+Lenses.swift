@@ -16,6 +16,28 @@ extension KeybindingCatalog {
         )
     }
 
+    /// The lenses Settings draws a row for: every stored lens, plus
+    /// every lens a binding names — an unstored or differently
+    /// spelled one included, so its chord stays visible and
+    /// removable, as `desktopOffer` keeps a detached Desktop's. A
+    /// binding's own spelling wins, so its row matches it.
+    static func lensOffer(
+        stored: [String],
+        bindings: [KeyBinding]
+    ) -> [String] {
+        var offer = stored
+        for name in bindings.compactMap({ lensTarget(of: $0.lua) }) {
+            if let index = offer.firstIndex(where: {
+                AppWideSettings.sameLens($0, name)
+            }) {
+                offer[index] = name
+            } else {
+                offer.append(name)
+            }
+        }
+        return offer
+    }
+
     /// The lens a toggle binding names, or nil for any other Lua —
     /// a bare `kiwivision.toggle()` included. Only the
     /// double-quoted form this catalog writes is read: a Lua user's

@@ -484,11 +484,13 @@ Obligations:
   page's Save says so is review's until #2103 PR 7 (`VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
   `KiwiVisionLensActivationTests` ▸ `activeFollowsDefinition`,
   `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`,
-  `renameIsTheWritesAlone`). **A lens is matched by the one
+  `persistingRenameFollows`). **A lens is matched by the one
   `AppWideSettings.sameLens`**, never a case compare beside it, and
-  **a binding may name only a STORED lens** — Settings' rows read
+  **Settings offers a row only for a STORED lens** —
   `kiwiVisionStoredLensNames` — since a chord outlives a session
-  `define_lens` (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
+  `define_lens`, while a binding naming any other lens still draws
+  its row through the one `KeybindingCatalog.lensOffer`, so its
+  chord stays visible and removable (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
   and writes the settled list, never the live one**, so a session
   `define_lens` or `delete_lens` never reaches `gui.json` (ruling
   40) — review's until the lens page owes it a test.

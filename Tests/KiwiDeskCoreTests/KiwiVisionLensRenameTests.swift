@@ -89,16 +89,25 @@ struct KiwiVisionLensRenameTests {
         #expect(core.vision.renamedLens == nil)
     }
 
-    /// The rename lives as long as its write: a profile change
-    /// after it follows nothing, and an earlier one took nothing.
-    @Test("the rename is the write's alone")
-    func renameIsTheWritesAlone() {
+    /// A stored write renames too, and the rename ends with the
+    /// write: a later one that renames nothing follows nothing.
+    @Test("a persisting rename follows and ends with its write")
+    func persistingRenameFollows() {
         let core = core()
-        core.liveProfileChanged()
-        #expect(core.vision.renamedLens == nil)
-        rename(core, to: "Draft", announced: true)
-        #expect(core.vision.renamedLens == nil)
+        core.setAppWide(
+            persisting: true,
+            renamingLens: ("Writing", "Draft")
+        ) { settings in
+            settings.visionLenses = settings.visionLenses.map {
+                var lens = $0
+                lens.name = "Draft"
+                return lens
+            }
+        }
         #expect(core.kiwiVisionActive == .lens("Draft"))
+        #expect(core.vision.renamedLens == nil)
+        rename(core, to: "Writing")
+        #expect(core.kiwiVisionActive == .off)
     }
 
     @Test("a mark absent from the old name clears a stale new one")
