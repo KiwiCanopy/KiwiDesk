@@ -12,14 +12,20 @@ import Testing
 struct GapPreviewScaleTests {
     @Test("Endpoints pin the miniature span")
     func endpoints() {
-        #expect(GapPreviewScale.mini(0) == 1)
-        #expect(GapPreviewScale.mini(100) == 14)
+        #expect(GapPreviewScale.mini(0) == GapPreviewScale.miniMin)
+        #expect(
+            GapPreviewScale.mini(GapPreviewScale.realMax)
+                == GapPreviewScale.miniMax
+        )
     }
 
     @Test("Out-of-range input clamps, never extrapolates")
     func clamps() {
-        #expect(GapPreviewScale.mini(-5) == 1)
-        #expect(GapPreviewScale.mini(400) == 14)
+        #expect(GapPreviewScale.mini(-5) == GapPreviewScale.miniMin)
+        #expect(
+            GapPreviewScale.mini(GapPreviewScale.realMax * 4)
+                == GapPreviewScale.miniMax
+        )
     }
 
     @Test("Strictly increasing across the slider range")

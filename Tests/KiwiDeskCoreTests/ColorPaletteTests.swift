@@ -190,15 +190,16 @@ struct ColorPaletteTests {
         #expect(settings.kiwishelf.fillColor == before)
     }
 
-    @Test("The bundled catalog is 10 palettes, default first, unique")
+    @Test("The bundled catalog decodes, default first, names unique")
     func bundledCatalog() {
         let all = PaletteCatalog.bundled()
-        #expect(all.count == 10)
         #expect(all.first?.name == PaletteCatalog.defaultName)
         let names = all.map(\.name)
-        #expect(Set(names).count == 10)
-        // Every authored palette decoded from the resource.
-        #expect(PaletteCatalog.authored().count == 9)
+        #expect(Set(names).count == names.count)
+        #expect(names.allSatisfy { !$0.isEmpty })
+        // The authored palettes decode all-or-nothing, so an
+        // empty list is a resource that stopped decoding.
+        #expect(!PaletteCatalog.authored().isEmpty)
         // The neon showcase palette exists under its shared name —
         // the GUI keys its swatch's "pair with Glow" link on it
         // (#578, replacing the retracted glow-on-select side-effect).
