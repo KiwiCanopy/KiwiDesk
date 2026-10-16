@@ -39,6 +39,14 @@ extension KiwiCore {
         return profileLeavingOut(lens).map { .outOfReach(profile: $0) }
     }
 
+    /// Announces that the next write of the lenses renames `old`
+    /// to `new`, so the lens on follows it (#2103). The writer
+    /// re-keys the stored bindings and every profile's
+    /// `lens_reach` in the same save (`VisionLens.reach`).
+    public func noteLensRename(from old: String, to new: String) {
+        vision.renamedLens = (old, new)
+    }
+
     /// Every lens in stored order, with its verdict.
     public var kiwiVisionLensChoices: [VisionLensChoice] {
         appWide.visionLenses.map {

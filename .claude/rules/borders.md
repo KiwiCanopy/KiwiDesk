@@ -478,10 +478,11 @@ Obligations:
   with one writer, `setVision`, and the lens on follows the stored
   lenses through the one `followActiveLens`**: a write that removes
   or empties it turns KiwiVision off, one that stores it under
-  another spelling re-keys it, and a rename (#2103 PR 6) re-keys it
-  there, never beside it (`VisionAppearanceSeamTests` ▸
-  `oneOnOffWriter`, `KiwiVisionLensActivationTests` ▸
-  `activeFollowsDefinition`). **A GUI write of the lenses seeds from
+  another spelling re-keys it, and a rename is announced through
+  `noteLensRename` before the write so it re-keys there, never
+  beside it (`VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
+  `KiwiVisionLensActivationTests` ▸ `activeFollowsDefinition`,
+  `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`). **A GUI write of the lenses seeds from
   and writes the settled list, never the live one**, so a session
   `define_lens` or `delete_lens` never reaches `gui.json` (ruling
   40) — review's until the lens page owes it a test.
@@ -498,9 +499,14 @@ Obligations:
   (`KiwiVisionLensReachTests`). A path that moves who owns the
   setup — `gui.json` or `init.lua` written — without a config load
   owes the same `liveProfileChanged` call. **A lens rename or delete owes
-  every profile's `lens_reach` a re-key or a clear** in the same
-  write, or a later lens of that name inherits "left out" — review's
-  until #2103 PR 6 owes it a test.
+  every profile's `lens_reach` a re-key or a clear, and every stored
+  binding naming it the same** in the same write, or a later lens of
+  that name inherits "left out" and the old chord — through the one
+  `VisionLens.reach(_:renaming:to:)` / `reach(_:deleting:)` and
+  `KeybindingCatalog.renameLens` / `deleteLens`, which compare names
+  ignoring case (`KiwiVisionLensRenameTests`,
+  `ShortcutsLensRowsTests`). That the lens page's Save calls them is
+  review's until #2103 PR 7 owes it a test.
 - **A step KiwiDesk's own navigation takes skips what a lens leaves
   out, through the one `lensKeySkip`; a pick skips nothing**
   (#2103 rulings 35, 44, 45). `navigate` asks it once and threads

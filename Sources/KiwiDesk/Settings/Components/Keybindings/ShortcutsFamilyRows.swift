@@ -24,6 +24,8 @@ struct ShortcutsFamilyRows {
     /// Available layer names and active editing layer.
     let layerNames: [String]
     let currentLayer: String
+    /// The live lenses, in stored order (#2103 ruling 42).
+    var lenses: [String] = []
 
     func rows(for key: SettingKey) -> [NavCommand]? {
         guard case .shortcuts(let family) = key else {
@@ -77,6 +79,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.jumpToWindow]
         case .toggleKiwiVision:
             return [KeybindingCatalog.toggleKiwiVision]
+        case .toggleLens:
+            return lenses.map(KeybindingCatalog.toggleLens)
         case .growWidth:
             return [resizeRow(.growWidth)]
         case .shrinkWidth:

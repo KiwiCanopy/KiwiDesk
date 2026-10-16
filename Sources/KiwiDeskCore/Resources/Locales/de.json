@@ -755,6 +755,7 @@
   "keybinding.toggle_display_sticky.help": "Hält dieses Fenster auf jedem Space des Bildschirms sichtbar, auf dem es sich befindet. Wird es auf einen Space eines anderen Bildschirms verschoben, wird es dort verankert. Mit „%1$@“ machst du ein Sticky-Fenster vollständig global.",
   "keybinding.toggle_floating": "Schweben umschalten",
   "keybinding.toggle_kiwivision": "KiwiVision umschalten",
+  "keybinding.toggle_lens": "Linse „%1$@“ umschalten",
   "keybinding.toggle_sticky": "Sticky überall umschalten",
   "keybinding.toggle_sticky.help": "Hält dieses Fenster auf jedem Space sichtbar. Ein gekacheltes Sticky-Fenster kann nur auf seinem Heimat-Space neu angeordnet werden — anderswo folgt seine Position automatisch. Ein schwebendes Sticky-Fenster ist nicht betroffen — es bewegt sich überall frei.",
   "keybinding_conflict.dismiss": "Konfliktwarnung ausblenden",

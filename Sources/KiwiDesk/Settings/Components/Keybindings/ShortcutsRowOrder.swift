@@ -48,10 +48,11 @@ enum ShortcutsRowOrder {
         .shortcuts(.goToSpace),
     ]
 
-    /// KiwiVision group order: its toggle (#2312); the lenses'
-    /// rows join with #2103 v3.
+    /// KiwiVision group order: its toggle (#2312), then a row
+    /// per lens (#2103 ruling 42).
     static let kiwiVisionAtRest: [SettingKey] = [
-        .shortcuts(.toggleKiwiVision)
+        .shortcuts(.toggleKiwiVision),
+        .shortcuts(.toggleLens),
     ]
 
     /// Move windows group order: swaps, then space moves.

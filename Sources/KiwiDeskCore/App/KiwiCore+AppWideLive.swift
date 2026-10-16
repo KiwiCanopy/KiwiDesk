@@ -26,15 +26,23 @@ extension KiwiCore {
     /// change of the live profile: one the values no longer hold,
     /// or that Core refuses, turns KiwiVision off — with ruling
     /// 16's cue where the profile left it out — and one stored
-    /// under another spelling is followed to it. A rename (#2103
-    /// PR 6) re-keys it here. `old` is the values before a write.
+    /// under another spelling, or renamed through
+    /// `noteLensRename`, is followed to it. `old` is the values
+    /// before a write.
     /// True where it moved the active value, whose own door then
     /// took the change of look.
     @discardableResult
     func followActiveLens(from old: AppWideSettings? = nil) -> Bool {
+        let renamed = vision.renamedLens
+        vision.renamedLens = nil
         guard let name = visionLensName else { return false }
         let before = (old ?? appWide).look(lens: name)
-        guard let lens = appWide.lens(named: name) else {
+        let follow =
+            renamed.flatMap {
+                $0.from.caseInsensitiveCompare(name) == .orderedSame
+                    ? $0.to : nil
+            } ?? name
+        guard let lens = appWide.lens(named: follow) else {
             setVision(.off, from: before)
             return true
         }

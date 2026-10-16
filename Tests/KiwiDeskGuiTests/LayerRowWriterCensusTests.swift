@@ -78,6 +78,15 @@ struct LayerRowWriterCensusTests {
                 "layer rename: rewrites Lua in place, adds no row;"
                     + " layer delete: removes rows, adds none"
             ),
+        "KiwiDesk/Settings/Components/Keybindings/"
+            + "KeybindingCatalog+Lenses.swift":
+            (
+                2,
+                "lens rename: rewrites Lua in place, or drops the old"
+                    + " rows where the new name has one, adds no row;"
+                    + " lens delete: removes rows, adds none (#2103,"
+                    + " ShortcutsLensRowsTests)"
+            ),
         "KiwiDesk/Shortcuts/ShortcutsReference.swift":
             (1, "shortcuts panel: removes rows from a copy it draws"),
         "KiwiDeskCore/Config/HyperShortcutMove.swift":

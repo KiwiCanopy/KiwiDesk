@@ -18,6 +18,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// side's VoiceOver name (#2245).
     case jumpToWindow = "keybinding.show_jump_to_window"
     case toggleKiwiVision = "keybinding.toggle_kiwivision"
+    /// One row per live lens (#2103 ruling 42).
+    case toggleLens = "keybinding.toggle_lens (x N lenses)"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =
         "keybinding.move_window_to_{prev,next}_track"
@@ -79,7 +81,7 @@ extension ShortcutsKey {
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
             .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
-        case .toggleKiwiVision:
+        case .toggleKiwiVision, .toggleLens:
             return .row(.shortcuts, .kiwiVisionShortcuts, .atRest)
         // KiwiHub's three sides, one group for one panel (#2265).
         case .jumpToWindow, .showShortcuts, .viewPicker:
@@ -179,7 +181,7 @@ extension ShortcutsKey {
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
-            .layoutCycle, .viewPicker, .jumpToWindow:
+            .layoutCycle, .viewPicker, .jumpToWindow, .toggleLens:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

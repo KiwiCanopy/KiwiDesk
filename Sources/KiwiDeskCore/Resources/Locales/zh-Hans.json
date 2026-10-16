@@ -755,6 +755,7 @@
   "keybinding.toggle_display_sticky.help": "让此窗口在其所在显示器的每个空间中保持可见。将其移动到其他显示器的空间会重新将其归属到该处。使用“%1$@”可将 Sticky 窗口设为完全全局。",
   "keybinding.toggle_floating": "切换浮动",
   "keybinding.toggle_kiwivision": "切换 KiwiVision",
+  "keybinding.toggle_lens": "切换“%1$@”镜头",
   "keybinding.toggle_sticky": "在所有空间切换 Sticky",
   "keybinding.toggle_sticky.help": "让此窗口在每个空间中持续可见。已平铺的 Sticky 窗口只能在其归属空间中重新排列，在其他空间中位置会自动跟随。浮动的 Sticky 窗口不受影响，可在任何地方自由移动。",
   "keybinding_conflict.dismiss": "忽略冲突警告",
