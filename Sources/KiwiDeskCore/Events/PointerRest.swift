@@ -51,6 +51,15 @@ public final class PointerRest {
     /// or stop has ended it yet.
     var isArmed: Bool { timer != nil }
 
+    #if DEBUG
+        /// The armed dwell, for a test to await rather than poll
+        /// (tests.md, #344); production never reads it. Cleared by
+        /// the rest it fires, so read it BEFORE awaiting — nil means
+        /// nothing was armed, and awaiting a cancelled one bounds
+        /// nothing.
+        var pendingDwell: Task<Void, Never>? { timer }
+    #endif
+
     /// Whether the mouse-moved monitor is installed.
     var isListening: Bool { monitor != nil }
 

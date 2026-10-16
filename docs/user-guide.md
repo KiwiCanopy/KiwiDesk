@@ -187,6 +187,14 @@ backup does not carry the folder, and Reset All Settings leaves
 it. In a synced or dotfiles folder, add `migration-backups/` to
 its `.gitignore`.
 
+:::unreleased
+An older KiwiDesk never writes over `gui.json` or a profile that a
+newer one migrated: it reports the file as unreadable, and a save
+to it fails until that Mac is updated. Versions before 3.0.0 do
+not have this check, so update every Mac sharing a synced folder
+together.
+:::
+
 ```json
 {
   "spaces": [ "1", "2", "mail" ],

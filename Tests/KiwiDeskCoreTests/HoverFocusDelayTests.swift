@@ -10,10 +10,6 @@ import Testing
 @Suite("Hover focus delay (#1869)")
 @MainActor
 struct HoverFocusDelayTests {
-    /// How long a rest the timer fires may take to land: a hang
-    /// guard, never a deadline (tests.md, #344).
-    private static let hangGuard: Duration = .seconds(30)
-
     @Test("mouse.set_hover_focus_delay takes milliseconds, 0 or more")
     func verb() {
         let directory = FileManager.default.temporaryDirectory
@@ -63,18 +59,16 @@ struct HoverFocusDelayTests {
     /// That the timer waits `dwell` at all is the gap test's below;
     /// this one holds that a rest the timer fires is delivered.
     @Test("The rest's timer fires a rest")
-    func timerWaitsTheDwell() async {
+    func timerWaitsTheDwell() async throws {
         let rest = PointerRest()
         rest.dwell = .zero
         rest.location = { CGPoint(x: 10, y: 10) }
         var rested = false
         rest.onRest = { _, _ in rested = true }
         rest.moved(to: CGPoint(x: 10, y: 10))
-        let clock = ContinuousClock()
-        let deadline = clock.now + Self.hangGuard
-        while !rested, clock.now < deadline {
-            await Task.yield()
-        }
+        // Read before the await: the rest it fires clears it.
+        let dwell = try #require(rest.pendingDwell)
+        await dwell.value
         #expect(rested)
         #expect(!rest.isArmed)
     }

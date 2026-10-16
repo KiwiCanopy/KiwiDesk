@@ -81,8 +81,8 @@ struct KiwiVisionAppearanceTests {
     func unchangedNeverSwitches() {
         let system = FakeSystem()
         let core = makeCore(system)
-        core.setKiwiVision(true)
-        core.setKiwiVision(false)
+        core.setKiwiVision(.plain)
+        core.setKiwiVision(.off)
         #expect(system.asked.isEmpty)
         #expect(system.debt == nil)
     }
@@ -93,11 +93,11 @@ struct KiwiVisionAppearanceTests {
         let core = makeCore(system)
         #expect(ask(core, "dark"))
         #expect(system.asked.isEmpty, "off: the ask waits for on")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(system.asked == [true])
         #expect(system.debt?.found == .init(dark: false, auto: false))
         #expect(system.debt?.setDark == true)
-        core.setKiwiVision(false)
+        core.setKiwiVision(.off)
         #expect(system.asked == [true, false])
         #expect(system.debt == nil)
     }
@@ -109,9 +109,9 @@ struct KiwiVisionAppearanceTests {
             system.state.dark = startsDark
             let core = makeCore(system)
             _ = ask(core, "opposite")
-            core.setKiwiVision(true)
+            core.setKiwiVision(.plain)
             #expect(system.asked == [!startsDark])
-            core.setKiwiVision(false)
+            core.setKiwiVision(.off)
             #expect(system.asked == [!startsDark, startsDark])
             #expect(system.debt == nil)
         }
@@ -123,8 +123,8 @@ struct KiwiVisionAppearanceTests {
         system.state.dark = true
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
-        core.setKiwiVision(false)
+        core.setKiwiVision(.plain)
+        core.setKiwiVision(.off)
         #expect(system.asked.isEmpty)
         #expect(system.debt == nil)
     }
@@ -135,10 +135,10 @@ struct KiwiVisionAppearanceTests {
         let system = FakeSystem()
         let core = makeCore(system) { now }
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         now += VisionAppearanceDebt.settleBound
         system.state.dark = false  // the user switched back by hand
-        core.setKiwiVision(false)
+        core.setKiwiVision(.off)
         #expect(system.asked == [true])
         #expect(system.debt == nil)
     }
@@ -148,7 +148,7 @@ struct KiwiVisionAppearanceTests {
         let system = FakeSystem()
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         _ = ask(core, "dark")
         core.retargetVisionAppearance(.dark)
         #expect(system.asked == [true])
@@ -160,7 +160,7 @@ struct KiwiVisionAppearanceTests {
         let system = FakeSystem()
         let core = makeCore(system) { now }
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         now += VisionAppearanceDebt.settleBound
         system.state.dark = false  // the user switched back by hand
         _ = ask(core, "dark")  // e.g. a reload re-running init.lua
@@ -174,7 +174,7 @@ struct KiwiVisionAppearanceTests {
         system.lands = false  // nothing lands during the test
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         // Light found, dark asked: opposite of light is dark, already
         // asked — a stale read must not flip it or record dark found.
         _ = ask(core, "opposite")
@@ -183,7 +183,7 @@ struct KiwiVisionAppearanceTests {
         _ = ask(core, "light")
         #expect(system.asked == [true, false])
         system.land()
-        core.setKiwiVision(false)
+        core.setKiwiVision(.off)
         #expect(system.debt == nil)
         #expect(system.state.dark == false)
     }
@@ -194,8 +194,8 @@ struct KiwiVisionAppearanceTests {
         system.lands = false
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
-        core.setKiwiVision(false)
+        core.setKiwiVision(.plain)
+        core.setKiwiVision(.off)
         #expect(system.asked == [true, false], "the way back is asked")
         #expect(system.debt?.setDark == false, "and still owed")
         system.land()
@@ -213,9 +213,9 @@ struct KiwiVisionAppearanceTests {
         system.lands = false
         let core = makeCore(system) { now }
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         system.land()  // the way there landed
-        core.setKiwiVision(false)  // the way back stays queued: quit
+        core.setKiwiVision(.off)  // the way back stays queued: quit
         system.queued.removeAll()  // the process exited first
         #expect(system.debt?.setDark == false)
         now += VisionAppearanceDebt.settleBound * 6
@@ -234,9 +234,9 @@ struct KiwiVisionAppearanceTests {
         system.lands = false
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         system.land()
-        core.setKiwiVision(false)  // the way back stays queued
+        core.setKiwiVision(.off)  // the way back stays queued
         system.land()  // and lands after the call: Auto now off
         core.retargetVisionAppearance(nil)  // the next start
         #expect(system.debt == nil)
@@ -250,9 +250,9 @@ struct KiwiVisionAppearanceTests {
         system.state.auto = true
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(system.debt?.found.auto == true)
-        core.setKiwiVision(false)
+        core.setKiwiVision(.off)
         #expect(system.asked == [true, false])
         #expect(system.rearms == 1)
         #expect(system.state == .init(dark: false, auto: true))
@@ -264,7 +264,7 @@ struct KiwiVisionAppearanceTests {
         system.refusesDebt = true
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(system.asked.isEmpty)
     }
 
@@ -279,7 +279,7 @@ struct KiwiVisionAppearanceTests {
         )
         let core = makeCore(system)
         _ = ask(core, "dark")
-        core.setKiwiVision(true)  // e.g. init.lua, ahead of the pay
+        core.setKiwiVision(.plain)  // e.g. init.lua, ahead of the pay
         #expect(system.asked.isEmpty)
         #expect(system.debt?.found.dark == false, "the crash's found")
         core.retargetVisionAppearance(nil)

@@ -3,18 +3,24 @@ import Combine
 import KiwiDeskCore
 
 extension AppDelegate {
+    /// Every GUI reader of KiwiVision's state or its lenses: the
+    /// page, its picture, the Home subtitle and KiwiHub's chips.
+    /// A new reader joins here, never one trigger's closure.
+    func visionReadersChanged() {
+        dashboardIfCreated?.model.objectWillChange.send()
+        jumpPanel?.reloadViewIfShown()
+    }
+
     /// KiwiVision (#2103): VoiceOver hears every change, whichever
     /// door made it.
     func wireKiwiVision() {
-        // The page, its picture and the Home subtitle read the
-        // live values, which a verb may change from outside.
+        // A verb or a chord may change the values from outside.
         core.onAppWideChange = { [weak self] in
-            self?.dashboardIfCreated?.model.objectWillChange.send()
+            self?.visionReadersChanged()
         }
         var wasOn = core.kiwiVisionIsOn
         core.vision.onChange = { [weak self] active in
-            // The Home card's subtitle reads the running state.
-            self?.dashboardIfCreated?.model.objectWillChange.send()
+            self?.visionReadersChanged()
             // A switch between lenses is no on or off to announce.
             let on = active.isOn
             guard on != wasOn else { return }
