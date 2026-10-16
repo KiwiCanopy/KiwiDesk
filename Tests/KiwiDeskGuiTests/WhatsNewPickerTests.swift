@@ -164,10 +164,11 @@ struct WhatsNewPickerTests {
         )
         let view = try Self.source("UpdateWindowView.swift")
         #expect(view.contains(".id(picking?.selection.wrappedValue)"))
-        #expect(view.contains("listsAllReleases:whatsNew,"))
+        // The changelog link rides the installed notes' flag, so the
+        // offer, whose flag is false, never draws it.
         #expect(
             try Self.source("UpdateNotesScroll.swift").contains(
-                "iflistsAllReleases{UpdateNotesLink("
+                "ifwhatsNew{UpdateNotesLink("
             )
         )
     }

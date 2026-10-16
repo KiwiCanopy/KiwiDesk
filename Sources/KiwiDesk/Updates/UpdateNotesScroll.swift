@@ -12,8 +12,6 @@ struct UpdateNotesScroll: View {
     let whatsNew: Bool
     /// The last tab's list, while there is one.
     var next: NextOnMyList?
-    /// Links the site changelog, every release on it (#2308).
-    var listsAllReleases = false
     /// Lays every tab out at once, unscrolled, so the window's
     /// height is the tallest tab's and a switch does not jump it.
     let measuring: Bool
@@ -28,14 +26,12 @@ struct UpdateNotesScroll: View {
         whatsNew: Bool,
         next: NextOnMyList? = nil,
         opening: UpdateNotesTab = UpdateNotesTabs.initial,
-        listsAllReleases: Bool = false,
         measuring: Bool
     ) {
         self.offer = offer
         self.failed = failed
         self.whatsNew = whatsNew
         self.next = next
-        self.listsAllReleases = listsAllReleases
         self.measuring = measuring
         _selection = State(initialValue: opening)
     }
@@ -137,7 +133,8 @@ struct UpdateNotesScroll: View {
             title: L("update.window.full_notes", "Full release notes"),
             url: UpdateOffer.notesURL(for: offer.version)
         )
-        if listsAllReleases {
+        // Beside the installed notes, never the offer's (#2308).
+        if whatsNew {
             UpdateNotesLink(
                 title: L("update.window.all_releases", "All releases"),
                 url: SupportLinks.changelog

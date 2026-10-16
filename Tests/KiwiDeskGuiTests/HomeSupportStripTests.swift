@@ -141,6 +141,10 @@ struct HomeSupportStripTests {
             at: root.appendingPathComponent("Settings/Home/AboutSheet.swift")
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(about.occurrences(of: "link(L(") == 3)
+        // The helper's own `Link` is the one; no other opener.
+        #expect(about.occurrences(of: "Link(destination:") == 1)
+        #expect(!about.contains("NSWorkspace"))
+        #expect(!about.contains("SupportLinks.releases"))
     }
 
     @Test("About is the shell's action, not a sheet of the strip's")

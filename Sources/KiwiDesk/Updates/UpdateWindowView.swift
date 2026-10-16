@@ -125,7 +125,6 @@ private struct UpdateWindowLayout<Footer: View>: View {
                     upToDate: upToDate,
                     next: next != nil
                 ),
-                listsAllReleases: whatsNew,
                 measuring: measuring
             )
             // Another release opens on Highlights: its tabs differ.

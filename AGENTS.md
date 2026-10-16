@@ -1787,9 +1787,8 @@ Touching `Sources/KiwiDesk` (the GUI).
   that one window through `browse()` alone and answering nothing — an offer on
   screen or owed notes outranking it (#2308, `WhatsNewBrowseTests`) —, and a
   spotlight row's "Show me" hides What's new unanswered, lands Settings through
-  the one
-  `SettingsModel.land(on:)` door — the one `pendingReveal` writer every outside
-  landing takes —, and every way out of the trail — its one owner
+  the one `SettingsModel.land(on:)` door — the one `pendingReveal` writer every
+  outside landing takes —, and every way out of the trail — its one owner
   `WhatsNewCoordinator` — ends it (#2038, `WhatsNewHandoffTests`,
   `WhatsNewTrailWiringTests`)
 - the guard pins the WIRING beside the override body or the override goes dead

@@ -162,7 +162,7 @@ struct WhatsNewBrowseTests {
         #expect(log.shown.isEmpty)
     }
 
-    @Test("Every read caches the feed: Home's, and the launch's")
+    @Test("The launch's read caches the feed too")
     func readsCache() async throws {
         let (coordinator, record, _) = try Self.coordinator(
             feed: WhatsNewFixture.items(["9999.2.0", "9999.1.0"])
