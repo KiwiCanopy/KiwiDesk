@@ -71,8 +71,29 @@ struct HomeSupportStrip: View {
         )
     }
 
+    /// One line while it fits; below that the links wrap to a
+    /// second, trailing line — a narrow window sheds no control
+    /// (gui.md ▸ Responsive width).
     private var footer: some View {
-        HStack(spacing: 8) {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) {
+                identity
+                Spacer(minLength: 8)
+                links
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) { identity }
+                HStack(spacing: 8) {
+                    Spacer(minLength: 0)
+                    links
+                }
+            }
+        }
+    }
+
+    /// Mark, name, version and update state.
+    @ViewBuilder private var identity: some View {
+        Group {
             if let mark = BrandAssets.appMark {
                 Image(nsImage: mark)
                     .resizable()
@@ -95,18 +116,28 @@ struct HomeSupportStrip: View {
                 store: model.updater.updates,
                 check: { model.updater.checkForUpdates() }
             )
-            Spacer(minLength: 8)
-            // The tour's permanent door (#1754).
+        }
+    }
+
+    /// What's new beside the version it describes (#2308), the
+    /// tour's permanent door (#1754), then About.
+    @ViewBuilder private var links: some View {
+        Group {
+            Button(action: { model.updater.whatsNew?.browse() }) {
+                Text(L("home.footer.whats_new", "What's new")).underline()
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12))
+            .linkHover()
+            .disabled(model.updater.whatsNew == nil)
+            separator
             Button(action: { model.onShowTour() }) {
                 Text(L("home.footer.tour", "Show me around")).underline()
             }
             .buttonStyle(.plain)
             .font(.system(size: 12))
             .linkHover()
-            Text("·")
-                .font(.system(size: 12))
-                .foregroundStyle(SettingsTheme.ink3)
-                .accessibilityHidden(true)
+            separator
             Button(action: openAbout) {
                 Text(L("home.footer.about", "About KiwiDesk")).underline()
             }
@@ -114,6 +145,13 @@ struct HomeSupportStrip: View {
             .font(.system(size: 12))
             .linkHover()
         }
+    }
+
+    private var separator: some View {
+        Text("·")
+            .font(.system(size: 12))
+            .foregroundStyle(SettingsTheme.ink3)
+            .accessibilityHidden(true)
     }
 }
 

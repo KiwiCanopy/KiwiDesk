@@ -624,8 +624,7 @@ here — sparkles as Apple Intelligence, an up-arrow as Install.
 **The window answers "you're up to date" too (#1849).** A check
 the user started that finds nothing newer opens the same window,
 headed "KiwiDesk is up to date", on the same strip — the running
-version's notes, which nothing else in the app shows again once
-"What's new" is closed, then Next, which it opens on — with one
+version's notes, then Next, which it opens on — with one
 Done that answers Sparkle. Two answers to one question used to
 look like two apps. Only that reason is ours: a check refused
 because the system is too old or too new keeps Sparkle's own
@@ -716,6 +715,34 @@ only as honest as its last correction. On the relaunch after the
 window's own Install the card is best effort: it shows what the
 offer fetched before the install began, since that relaunch opens
 before anything could be fetched again.
+
+:::unreleased
+**Any release's notes stay one menu away (#2308).** What's new
+carries a release menu under its title, because the notes of an
+update are read once and wanted again later — a release's
+highlights, after the next one replaced them on screen. It lists
+every release up to the running one whose structured notes
+read, newest first, each with its date and the running one
+marked; the untyped 1.x releases never list, since their notes
+cannot load, and a menu entry that opens nothing would promise
+what the window cannot keep — the window's "All releases" link
+reaches them on the site. An update's skipped range is one more
+entry, "Since 2.2.0", and the opening choice only when the
+window opened for owed notes: every other opening, Home's door
+included, is about the version running now. One release shows
+its own rows alone, untagged; a pick reopens the tabs on
+Highlights, since another release's tabs differ, and the window
+is as tall as the tallest release so a pick never resizes it,
+the #1666 rule for tabs carried over. The offer has no menu: its
+one decision is Install or Later. Offline the window opens from
+the feed last read, kept in the app's defaults beside the "What's
+new" record and replaced by each read rather than added to, so it
+grows only with the feed's structured notes; with nothing kept,
+the notes say they are online. Home's What's new answers nothing
+— owed notes keep their own window and their Done, and an offer
+on screen comes forward instead, since it carries the notes worth
+reading.
+:::
 
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates
@@ -17066,6 +17093,21 @@ opens, so it needs no search entry — About beside it has none
 either. One permanent door only: a second one elsewhere would
 make the reader ask whether they differ.
 
+:::unreleased
+**"What's new" leads the footer's links (#2308).** The notes
+were reachable once, after an update, and then never again from
+inside the app — a user who jumped 2.3 to 3.1 and pressed Done
+could not go back to 3.0.0's highlights. They are a question
+about the app itself, like the tour and About, so they join the
+same line, first, beside the version they describe: "What's new
+· Show me around · About KiwiDesk". It is the notes' one
+permanent door, so About's *Release Notes* link left with it
+(the exclusive placement below). The line never sheds a link as
+the window narrows: below its width the links wrap to a second,
+trailing line, the way every other control keeps its reach
+(*Narrow windows drop the preview before they drop a control*).
+:::
+
 **The update state is one component.** What the channel last
 said lands in one store (`UpdateStateStore`, written by the
 updater and its Sparkle delegate) and one view draws it, on
@@ -17102,7 +17144,8 @@ outlive its opener (`SheetPresentationSeamTests`).
 
 **Link placement is exclusive.** Home carries the community
 links only; About carries the version, the update state,
-Release Notes, License, Acknowledgements and the website only.
+License, Acknowledgements and the website only — the release
+notes are the footer's "What's new" (#2308).
 A link in both places makes the reader ask whether they differ,
 and a General ▸ About card is the same doubt one level up — so
 nothing *about* KiwiDesk returns to General, and Settings search

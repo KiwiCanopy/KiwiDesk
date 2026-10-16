@@ -133,6 +133,13 @@ struct UpdateNotesScroll: View {
             title: L("update.window.full_notes", "Full release notes"),
             url: UpdateOffer.notesURL(for: offer.version)
         )
+        // Beside the installed notes, never the offer's (#2308).
+        if whatsNew {
+            UpdateNotesLink(
+                title: L("update.window.all_releases", "All releases"),
+                url: SupportLinks.changelog
+            )
+        }
     }
 
     /// Soft edge while more is below (#1542 ruling): the notes

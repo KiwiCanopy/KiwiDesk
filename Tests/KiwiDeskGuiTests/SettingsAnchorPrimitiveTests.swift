@@ -168,6 +168,10 @@ struct SettingsAnchorPrimitiveTests {
         // opens the new tab at its top (#1666). Not a Settings
         // destination, so nothing there is a reveal target.
         "UpdateNotesScroll.swift": 1,
+        // Release identity (#2308): a pick in What's new's release
+        // menu reopens the notes on Highlights, since another
+        // release's tabs differ. Not a reveal target either.
+        "UpdateWindowView.swift": 1,
         // Animation identity (#1726): a gesture picture's hover
         // loop ends with the view that ran it, since its rest
         // frame and the loop's target are one value. Not a reveal
