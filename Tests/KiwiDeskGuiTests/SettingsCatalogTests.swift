@@ -140,8 +140,10 @@ struct SettingsCatalogTests {
         // prompt rows.
         // 151 since #2103 v2: KiwiVision's Stays clear card and row.
         // 152 since #2103 v2: its current app's other windows row.
-        // 156 since #1869: Mouse & trackpad ▸ hover focus.
-        #expect(allEntries.count == 156)
+        // 155 since #1869: Mouse & trackpad ▸ hover focus.
+        // 156 since #2258: AI ▸ Add to Claude Desktop.
+        // 157 since #2312: KiwiVision's own shortcuts group.
+        #expect(allEntries.count == 157)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

@@ -51,6 +51,53 @@ struct AISetupRowWiringTests {
         )
     }
 
+    /// Add to Claude Desktop (#2258 ▸ Ruling 7): it greys with the
+    /// shared translocation reason drawn once, re-reads whether
+    /// Claude Desktop is installed whenever KiwiDesk comes back,
+    /// and hands the click to the one generator.
+    @Test("Add to Claude Desktop greys, refreshes and builds")
+    func addRowIsWired() throws {
+        let row = try flat(
+            "Sources/KiwiDesk/Settings/Components/AI/AISetupRow.swift"
+        )
+        // Its own caption is withheld while translocated, so the
+        // move sentence under Copy is the one reason drawn.
+        #expect(row.occurrences(of: "if!translocated{Text(addCaption)") == 1)
+        #expect(
+            row.occurrences(
+                of: "NSApplication.didBecomeActiveNotification"
+            ) == 1
+        )
+        // Read on appear and on return, never in the initializer.
+        #expect(
+            row.occurrences(
+                of: "MCPDesktopExtension.claudeDesktop()!=nil"
+            ) == 1
+        )
+        #expect(row.occurrences(of: ".onAppear(perform:refreshClaude)") == 1)
+        #expect(
+            row.occurrences(
+                of: "tryawaitMCPDesktopExtension.addToClaudeDesktop()"
+            ) == 1
+        )
+        // A build in flight greys the button; a Claude Desktop
+        // removed since the last read re-reads instead of failing.
+        #expect(row.occurrences(of: "||building") == 1)
+        // …and the grey always lifts, whatever the build answered.
+        #expect(row.occurrences(of: "defer{building=false}") == 1)
+        #expect(
+            row.occurrences(
+                of: "catchMCPDesktopExtension.Failure.noClaudeDesktop"
+                    + "{refreshClaude()}"
+            ) == 1
+        )
+        #expect(
+            row.occurrences(
+                of: ".searchAnchored(SettingsCatalog.ai.addToClaudeDesktop)"
+            ) == 1
+        )
+    }
+
     /// The row draws the caption the census guard checks.
     @Test("a prompt row draws its prompt's caption")
     func promptRowDrawsTheCaption() throws {

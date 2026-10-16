@@ -354,7 +354,10 @@ These apply everywhere, whatever you touch:
   Nothing external depends on the current command names, Lua/CLI
   verbs or event names — rename and restructure those outright
   (#42 renamed the space commands), and add no compatibility
-  aliases or deprecation layers for them.
+  aliases or deprecation layers for them — save `kiwidesk mcp`'s
+  verb and server name, which installed Claude Desktop extensions
+  and the published plugin store (packaging-and-release.md,
+  `MCPInvocationContractTests`).
   **File formats are no longer in that set.** The old rule read
   "pre-release, single user… re-editing the config *is* the
   migration", and that premise expired the day v0.9.7 went to
@@ -1974,7 +1977,7 @@ Touching Any hand-mirrored field list.
 ### [packaging-and-release](.claude/rules/packaging-and-release.md)
 
 Touching `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`,
-workflows.
+workflows, `plugins/`, `MCPInvocation.swift`.
 
 - Every distributable artifact needs its own notarization ticket, and the build
   machine is the one place that failure is invisible
@@ -2041,6 +2044,10 @@ workflows.
   outside the groups that step downgrades (#1780, `WarningGateTests`)
 - a minor or major release is preceded by a `profile-tests` run against the
   last baseline, the owner's session only (#1868)
+- the Claude Code plugin advances only from a published tag's `plugins/`,
+  the version stamped by the sync alone, and `kiwidesk mcp`'s verb and server
+  name are stored outside the repo, so renaming them is a crossing (#2258,
+  `ClaudePluginSyncWorkflowTests`, `MCPInvocationContractTests`)
 
 ### [rule-authoring](.claude/rules/rule-authoring.md)
 

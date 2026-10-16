@@ -12,10 +12,10 @@ struct AISection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 setup
-                // Above the prompts, which grow with each tool: the
-                // keep and privacy facts must stay in view (#1685).
-                AICapabilitiesCard()
+                // A prompt shows what the AI app can do and acts
+                // at once, so it leads the list (#1685 ▸ Ruling 6a).
                 prompts
+                AICapabilitiesCard()
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
@@ -58,6 +58,7 @@ struct AISection: View {
     static func control(for key: AIKey) -> SettingsControl? {
         let catalog = SettingsCatalog.ai
         switch key {
+        case .addToClaudeDesktop: return catalog.addToClaudeDesktop
         case .copySetupPrompt: return catalog.copySetupPrompt
         case .promptLook: return catalog.promptLook
         case .promptMigrate: return catalog.promptMigrate
