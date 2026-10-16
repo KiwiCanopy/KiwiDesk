@@ -74,13 +74,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     func show(_ scope: JumpScope = .windows) {
         let screen = PanelHandBack.screenUnderPointer()
         pickerSpace = core.layoutPickerSpace()
-        // ⌃⌥L with no Space to act on opens nothing, rather than
-        // the other scope.
-        if scope == .view,
-            pickerSpace.flatMap(core.layoutPickerState(for:)) == nil
-        {
-            return
-        }
         let visible =
             screen?.visibleFrame
             ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
@@ -292,7 +285,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             }
         }
         panel.scope = { [weak model] in model?.scope ?? .windows }
-        wireLayouts(model)
+        wireView(model)
         wireShortcuts(model)
     }
 

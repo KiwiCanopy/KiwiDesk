@@ -4,13 +4,38 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The key panel's two scopes (#2229 ▸ Ruling): ⇥ switches and
-/// clears both queries, Layouts reads its Space fresh on entry, and
-/// its keys apply, keep and land in Layout Defaults.
+/// KiwiHub's sides (#2229, #2309): ⇥ switches and clears every
+/// query, View reads its lines fresh on entry and is always
+/// reachable, and its keys apply, keep and land in Settings.
 @Suite("Jump to window scopes")
 @MainActor
 struct JumpScopeModelTests {
+    static func viewList(
+        space: Bool = true,
+        keepArmed: Bool = true,
+        profile: String? = "Dual"
+    ) -> ViewPickList {
+        let layout = LayoutPickerState(
+            space: "3",
+            live: .grid,
+            drifted: keepArmed,
+            profile: profile,
+            keepArmed: keepArmed
+        )
+        return ViewPickList(
+            layout: space ? layout : nil,
+            items: JumpPanelController.items(
+                layout: space ? layout : nil,
+                profiles: ("Dual", ["Dual", "Studio"], []),
+                visionOn: false,
+                visionChord: nil,
+                inert: false
+            )
+        )
+    }
+
     private func model(
+        space: Bool = true,
         keepArmed: Bool = true,
         profile: String? = "Dual"
     ) -> JumpModel {
@@ -25,17 +50,8 @@ struct JumpScopeModelTests {
             pointer: .zero
         )
         model.currentPointer = { .zero }
-        model.loadLayouts = { _ in
-            LayoutPickList(
-                state: LayoutPickerState(
-                    space: "3",
-                    live: .grid,
-                    drifted: keepArmed,
-                    profile: profile,
-                    keepArmed: keepArmed
-                ),
-                names: JumpPanelController.layoutNames
-            )
+        model.loadView = {
+            Self.viewList(space: space, keepArmed: keepArmed, profile: profile)
         }
         return model
     }
@@ -55,42 +71,61 @@ struct JumpScopeModelTests {
         model.query = "mon"
         model.handle(.stepScope(forward: true))
         #expect(model.scope == .windows)
-        #expect(model.layouts?.query == "")
+        #expect(model.view?.query == "")
         model.handle(.stepScope(forward: false))
         #expect(model.scope == .view)
     }
 
-    @Test("⇥ steps past a Layouts side whose Space is gone")
-    func goneSpaceIsSteppedPast() {
-        let model = model()
-        model.loadLayouts = { _ in nil }
+    /// Profile and KiwiVision need no Space, so the side opens
+    /// with the Layout line greyed rather than being stepped past.
+    @Test("View opens with no Space, its layouts greyed")
+    func noSpaceGreysTheLayouts() {
+        let model = model(space: false)
+        var applied: [ViewPickList.Pick] = []
+        model.onApplyView = { applied.append($0) }
         model.setScope(.view)
-        #expect(model.scope == .windows)
-        model.handle(.stepScope(forward: true))
-        #expect(model.scope == .shortcuts)
-        model.handle(.stepScope(forward: true))
-        #expect(model.scope == .windows)
-        model.handle(.stepScope(forward: false))
-        #expect(model.scope == .shortcuts)
+        #expect(model.scope == .view)
+        #expect(model.view?.selection?.line == .layout)
+        model.handle(.pick(moveHere: false))
+        model.handle(.quick(0, moveHere: false))
+        #expect(applied.isEmpty)
+        model.handle(.step(1))
+        model.handle(.pick(moveHere: false))
+        #expect(applied == [.profile("Dual")])
     }
 
     @Test("↩ and ⌘ digits apply, Esc clears then closes")
-    func layoutsKeys() {
+    func viewKeys() {
         let model = model()
-        var applied: [LayoutMode] = []
+        var applied: [ViewPickList.Pick] = []
         var closed = 0
-        model.onApply = { applied.append($0) }
+        model.onApplyView = { applied.append($0) }
         model.onClose = { closed += 1 }
         model.setScope(.view)
         model.handle(.pick(moveHere: false))
         model.handle(.quick(0, moveHere: false))
-        #expect(applied == [.grid, LayoutMode.allCases[0]])
+        // ⇧⌘ digits do nothing on this side (ruling 4).
+        model.handle(.quick(1, moveHere: true))
+        #expect(applied == [.layout(.grid), .layout(LayoutMode.allCases[0])])
         model.query = "mon"
         model.handle(.escape)
         #expect(model.query == "")
         #expect(closed == 0)
         model.handle(.escape)
         #expect(closed == 1)
+    }
+
+    @Test("↓ moves to the next line, where ⌘ digits count anew")
+    func linesTakeTheDigits() {
+        let model = model()
+        var applied: [ViewPickList.Pick] = []
+        model.onApplyView = { applied.append($0) }
+        model.setScope(.view)
+        model.handle(.step(1))
+        model.handle(.quick(1, moveHere: false))
+        model.handle(.step(1))
+        model.handle(.pick(moveHere: false))
+        #expect(applied == [.profile("Studio"), .vision(true)])
     }
 
     @Test("⌘S keeps only while Keep is armed")
@@ -114,18 +149,30 @@ struct JumpScopeModelTests {
         #expect(kept == 1)
     }
 
-    @Test("⌘, lands on the selected tile's layout")
-    func layoutDefaultsTakesTheSelection() {
+    @Test("⌘, lands on the selected line's page")
+    func settingsTakesTheLine() {
         let model = model()
-        var landed: [LayoutMode] = []
-        model.onLayoutDefaults = { landed.append($0) }
+        var landed: [SettingsLanding] = []
+        model.onViewSettings = { line, item in
+            landed.append(
+                JumpPanelController.landing(line, item?.pick, live: .grid)
+            )
+        }
         model.setScope(.view)
         model.handle(.side(1))
         model.handle(.settings)
+        model.handle(.step(1))
+        model.handle(.settings)
+        model.handle(.step(1))
+        model.handle(.settings)
         let grid = LayoutMode.allCases.firstIndex(of: .grid)!
-        #expect(landed == [LayoutMode.allCases[grid + 1]])
+        #expect(
+            landed == [
+                .layoutDefaults(LayoutMode.allCases[grid + 1]),
+                .profiles, .kiwiVision,
+            ]
+        )
     }
-
 }
 
 /// The selection follows the pointer on a real move only (#2229 ▸
@@ -178,26 +225,17 @@ struct JumpHoverTests {
         #expect(model.list.selection == 0)
     }
 
-    @Test("a tile hover moves the selection, never the current mark")
+    @Test("an item hover moves the selection, never the current mark")
     func tileHover() {
         let model = model()
-        model.loadLayouts = { _ in
-            LayoutPickList(
-                state: LayoutPickerState(
-                    space: "3",
-                    live: .grid,
-                    drifted: false,
-                    profile: nil,
-                    keepArmed: false
-                ),
-                names: JumpPanelController.layoutNames
-            )
-        }
+        model.loadView = { JumpScopeModelTests.viewList() }
         model.currentPointer = { CGPoint(x: 10, y: 10) }
         model.setScope(.view)
-        model.hoverTile(.stack, pointer: CGPoint(x: 40, y: 10))
-        #expect(model.layouts?.selected == .stack)
-        #expect(model.layouts?.state.live == .grid)
+        model.hoverItem(.layout(.stack), pointer: CGPoint(x: 40, y: 10))
+        #expect(model.view?.selected?.pick == .layout(.stack))
+        #expect(model.view?.layout?.live == .grid)
+        model.hoverItem(.vision(true), pointer: CGPoint(x: 60, y: 30))
+        #expect(model.view?.selected?.pick == .vision(true))
         // A row hover reaches nothing while Layouts shows.
         model.hoverRow(1, pointer: CGPoint(x: 50, y: 10))
         #expect(model.list.selection == 0)

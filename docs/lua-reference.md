@@ -5064,24 +5064,38 @@ the mouse over a row selects it.
 A window in native full screen is listed, and Return activates its
 app rather than switching to its full-screen Space.
 
-The `"view"` side is the **view picker**, for the Space shown
-on the screen under the pointer. Every layout is a tile with its
-picture, the current one marked ✓.
+The `"view"` side is the **view picker**, three lines in one
+panel, the current item on each marked ✓:
 
-- **←** and **→**, or moving the mouse over a tile, move the
-  selection; typing narrows the tiles by name, dimming the rest.
-- **Return** applies the selected layout, like `set_mode` for that
-  Space, and closes KiwiHub; **⌘1** … **⌘7** apply a tile
-  directly.
-- **⌘S** keeps the layouts in the profile, as the Layout menu's
-  Keep does; **⌘,** opens Layout Defaults in Settings on the
-  selected layout.
+- **Layout** — a tile per layout for the Space shown on the screen
+  under the pointer, greyed where there is none; Return applies it
+  like `set_mode` for that Space.
+- **Profile** — one per saved profile, shown only while another
+  one can be loaded; one that cannot load is greyed. Return loads
+  it like `load_profile`.
+- **KiwiVision** — Off and Focused window, which turn
+  [KiwiVision](#kiwivisiontoggle) off and on.
+
+Keys on this side:
+
+- **←** and **→**, or moving the mouse over an item, move along a
+  line; **↑** and **↓** move between lines and keep the position,
+  clamped to a shorter line. A line longer than the panel scrolls
+  sideways.
+- Typing narrows all three lines, dimming the rest, and selects
+  the first match.
+- **Return** applies the selected item and closes KiwiHub.
+  **⌘1** … **⌘9** apply the line's items by position, counted
+  among the matches while you type; holding **⌘** shows the
+  numbers.
+- **⌘,** opens the Settings page of the line the selection is on;
+  **⌘S** keeps the layouts in the profile, as the Layout menu's
+  Keep does.
 
 On every side:
 
 - **Tab** steps to the next side and **⇧Tab** to the one before —
-  Windows, Shortcuts and Layouts, wrapping, and past Layouts when
-  the Space it would show is gone — clearing the typing. The
+  Windows, Shortcuts and View, wrapping — clearing the typing. The
   switch at the end of the field shows each side's own key, read
   from your shortcuts.
 - **Escape** clears the typing, then closes KiwiHub; **⌘W**, a

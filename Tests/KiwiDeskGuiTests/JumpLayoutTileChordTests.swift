@@ -35,10 +35,12 @@ struct JumpLayoutTileChordTests {
     @Test("VoiceOver hears the tile's chord with ⌘ up or down")
     func chordIsSpoken() throws {
         let tile = try Self.tileSource()
-        let hint =
-            ".accessibilityHint("
-            + "LayoutPickText.chordHint(\"⌘\\(number)\"))"
-        #expect(tile.occurrences(of: hint) == 1)
+        #expect(tile.occurrences(of: ".accessibilityHint(chordHint)") == 1)
+        #expect(tile.occurrences(of: "var chordHint: String {") == 1)
+        #expect(
+            tile.occurrences(of: "LayoutPickText.chordHint(\"⌘\\($0)\")")
+                == 1
+        )
     }
 
     /// The brace-balanced body of computed property `name`.
@@ -64,7 +66,7 @@ struct JumpLayoutTileChordTests {
             try String(
                 contentsOf: SourceScan.repoRoot(from: #filePath)
                     .appendingPathComponent(
-                        "Sources/KiwiDesk/Jump/JumpLayoutsView.swift"
+                        "Sources/KiwiDesk/Jump/JumpLayoutTile.swift"
                     ),
                 encoding: .utf8
             )

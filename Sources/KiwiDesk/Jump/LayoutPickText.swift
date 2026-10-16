@@ -25,10 +25,6 @@ enum LayoutPickText {
         )
     }
 
-    static func noMatch(_ query: String) -> String {
-        L("layout_picker.no_match", "No layout matches “%1$@”", query)
-    }
-
     /// A tile as VoiceOver hears it.
     static func spoken(_ mode: LayoutMode, current: Bool) -> String {
         guard current else { return mode.displayName }
@@ -48,14 +44,6 @@ enum LayoutPickText {
         L(
             "layout_picker.keep_saved",
             "Every layout on screen is saved in the profile"
-        )
-    }
-
-    static var layoutDefaults: String {
-        L(
-            "layout_picker.layout_defaults",
-            "%1$@…",
-            L("destination.layout", "Layout Defaults")
         )
     }
 

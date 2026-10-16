@@ -16,9 +16,13 @@ public enum SettingsLanding: Equatable, Sendable {
     case appRule(String)
     /// Layout Defaults, on this layout's tab (#2229).
     case layoutDefaults(LayoutMode)
+    /// Profiles (#2309).
+    case profiles
+    /// KiwiVision (#2309).
+    case kiwiVision
 }
 
-/// What a bar menu, or the key panel's Layouts side (#2229), asks
+/// What a bar menu, or KiwiHub's View side (#2229), asks
 /// of the GUI (#1518) — set at the GUI's bootstrap, beside
 /// `uiBridge`.
 public struct BarMenuHooks {

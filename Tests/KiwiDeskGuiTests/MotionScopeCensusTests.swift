@@ -64,6 +64,8 @@ struct MotionScopeCensusTests {
         // The status menu's profile and layout rows, Config
         // Issues' reload and delete.
         "KiwiDesk/AppDelegate.swift": 4,
+        // KiwiHub's View side loading a profile (#2309).
+        "KiwiDesk/Jump/JumpPanelController+View.swift": 1,
         // The tour's shelf paint and its revert.
         "KiwiDesk/AppDelegate+OnboardingLooks.swift": 2,
         // Settings: Save and its config reload, load, delete, set

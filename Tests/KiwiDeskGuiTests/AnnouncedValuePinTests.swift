@@ -124,6 +124,8 @@ struct AnnouncedValuePinTests {
         "GestureEntry.swift": 1,
         // The tour looks step's two row headers (#1720).
         "OnboardingLooksRows.swift": 1,
+        // KiwiHub's View lines (#2309).
+        "JumpViewSide.swift": 1,
         // App Rules ▸ Automatic floating's "Tile instead" (#2173).
         "AppRulesSection+Automatic.swift": 1,
         // Jump to window's Hidden section header (#1875).
