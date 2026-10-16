@@ -76,4 +76,30 @@ struct KiwiVisionLensJumpTests {
         let found = JumpSearch.matches(core.jumpEntries(), query: "mail")
         #expect(windows(found.map(\.entry)).first == 2)
     }
+
+    /// A blank query sorts by section too: a minimized member row
+    /// stays ahead of an other app's open one, where the window
+    /// tiers alone would put the open row first.
+    @Test("a blank query keeps the lens's apps ahead of the tiers")
+    func blankQueryKeepsTheSplit() {
+        func row(_ id: UInt32, _ status: JumpEntry.Status, other: Bool)
+            -> JumpEntry
+        {
+            JumpEntry(
+                target: .window(WindowID(id)),
+                pid: 900_041,
+                app: "App",
+                title: "",
+                space: nil,
+                spaceIcon: nil,
+                status: status,
+                isOtherApp: other
+            )
+        }
+        let rows = [
+            row(1, .minimized, other: false), row(2, .shown, other: true),
+        ]
+        let found = JumpSearch.matches(rows, query: "")
+        #expect(windows(found.map(\.entry)) == [1, 2])
+    }
 }

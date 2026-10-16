@@ -247,5 +247,10 @@ struct KiwiVisionLensWrapTests {
         core.state.apply(.windowDestroyed(WindowID(1), wasMinimized: false))
         core.setKiwiVision(.lens("Writing"))
         #expect(focusRight(core, from: 3) == WindowID(3))
+        // A step onto the origin would answer `.ok`; one with nowhere
+        // to go fails at the dead end.
+        core.state.workspaces.focus(WindowID(3), in: "1")
+        let step = core.navigate([.string("right")], swapping: false)
+        #expect(!step.isSuccess)
     }
 }
