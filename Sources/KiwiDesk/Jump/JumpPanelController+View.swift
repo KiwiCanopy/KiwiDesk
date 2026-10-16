@@ -117,8 +117,9 @@ extension JumpPanelController {
         ]
     }
 
-    /// Off, Focused window, then each lens (#2103 ruling 41); a
-    /// lens Core refuses greys with its reason; the lens on is never
+    /// Default, each lens, then New Lens… (#2103 rulings 55–57); no
+    /// Off chip, the current chip turning KiwiVision off. A lens
+    /// Core refuses greys with its reason; the lens on is never
     /// refused, since `followActiveLens` turns a refused one off.
     private static func visionItems(
         _ vision: (active: VisionActive, lenses: [VisionLensChoice]),
@@ -127,40 +128,30 @@ extension JumpPanelController {
         offersNewLens: Bool,
         inert: String?
     ) -> [ViewPickList.Item] {
-        let fixed = [
+        let plain = ViewPickList.Item(
+            pick: .vision(lens: nil),
+            name: ViewPickText.visionDefault,
+            isCurrent: vision.active == .plain,
+            inertReason: inert,
+            chord: chord
+        )
+        let lenses = vision.lenses.map { lens in
             ViewPickList.Item(
-                pick: .visionOff,
-                name: ViewPickText.visionOff,
-                isCurrent: vision.active == .off,
-                inertReason: inert
-            ),
-            ViewPickList.Item(
-                pick: .vision(lens: nil),
-                name: ViewPickText.visionFocused,
-                isCurrent: vision.active == .plain,
+                pick: .vision(lens: lens.name),
+                name: lens.name,
+                isCurrent: vision.active == .lens(lens.name),
                 inertReason: inert,
-                chord: chord
-            ),
-        ]
-        guard !vision.lenses.isEmpty else {
-            // Opening Settings is no machine act, so no boot grey;
-            // offered only where Settings can save a lens.
-            guard offersNewLens else { return fixed }
-            return fixed + [
-                ViewPickList.Item(pick: .newLens, name: ViewPickText.newLens)
-            ]
+                refusal: lens.refusal.map(ViewPickText.lensRefusal),
+                chord: lensChord(lens.name)
+            )
         }
-        return fixed
-            + vision.lenses.map { lens in
-                ViewPickList.Item(
-                    pick: .vision(lens: lens.name),
-                    name: lens.name,
-                    isCurrent: vision.active == .lens(lens.name),
-                    inertReason: inert,
-                    refusal: lens.refusal.map(ViewPickText.lensRefusal),
-                    chord: lensChord(lens.name)
-                )
-            }
+        // Opening Settings is no machine act, so no boot grey;
+        // offered only where Settings can save a lens.
+        let create =
+            offersNewLens
+            ? [ViewPickList.Item(pick: .newLens, name: ViewPickText.newLens)]
+            : []
+        return [plain] + lenses + create
     }
 
     /// Closes on a pick, then applies it — once: a click during
@@ -180,7 +171,7 @@ extension JumpPanelController {
         case .vision(lens: let name?):
             core.setKiwiVision(.lens(name))
         case .newLens:
-            core.barMenuHooks.openSettings(.kiwiVision)
+            core.barMenuHooks.openSettings(.newLens)
         }
     }
 

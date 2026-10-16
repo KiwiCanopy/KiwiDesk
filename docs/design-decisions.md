@@ -6653,7 +6653,7 @@ so the switch path decides from memory and never reads a profile
 file (#1245).
 
 *A switch out of reach turns KiwiVision off, not down to plain.*
-Falling back to Focused window would leave the user in a mode
+Falling back to Default would leave the user in a mode
 whose way out is a chord they never pressed: a lens's chord turns
 KiwiVision off only while that lens is on. Off is the state every user
 already knows how to leave, and it pays the appearance switch back
@@ -11443,6 +11443,38 @@ instead of the side being stepped past, because the other two
 lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
+:::
+
+:::unreleased
+**KiwiHub's KiwiVision line has no Off chip: the item already on
+turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**
+Every other chip on the line turns something on, and its plain
+settings always exist as Default, so an Off chip was one more
+place to aim for a state that already has a chord. Control
+Center's Focus menu is the model: clicking the Focus already on
+turns it off, and a lens's own chord already behaves that way.
+Because the selection rests on the current chip, ↓ then ↩ now
+turns KiwiVision off where it used to re-apply it, so the panel
+says so before the key is pressed. The footer's lit hint reads
+"↩ Turn Off", the chip's VoiceOver hint is "Turns KiwiVision off",
+and with nothing on the line's spoken title is "KiwiVision, off",
+since no chip says "current". Only this line toggles. A profile
+or a layout has no off, so its current item re-applies.
+
+The base settings are named **Default** rather than "Focused
+window". That was a mode's name, and wrong for both meanings:
+"The current app's other windows" keeps more than one window
+clear, and the base applies whether or not a lens is on.
+"Default" is already KiwiDesk's word for the base an override
+sits on, as Layout Defaults are for a Space's overrides.
+
+**A create chip is a line's last item and no pick (#2359).** "New
+Lens…" ends the KiwiVision line always, not only while no lens
+exists. A line keeps one shape, and a chip that appeared and
+vanished after the first lens taught nothing. Placed first, it
+would shift every ⌘ digit and put ↩ one keystroke from a create.
+The digits skip it and the filter finds it by name.
+`ViewPickVisionLineTests` and `ViewPickItemsTests` hold it.
 :::
 
 :::unreleased

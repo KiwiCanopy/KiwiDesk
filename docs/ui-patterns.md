@@ -182,7 +182,7 @@ are.
 
 :::unreleased
 A KiwiVision lens's rows (#2103) are such a surface too: an
-unchecked row reads "follows Focused window · `<value>`".
+unchecked row reads "follows Default · `<value>`".
 :::
 
 **Numeric controls pick one of three idioms by a single
@@ -732,7 +732,7 @@ set and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).
 
 :::unreleased
-KiwiVision is in that set too (#2103). Its Focused window rows
+KiwiVision is in that set too (#2103). Its Default rows
 write at once, so on that chip the panel draws the live values
 they wrote; a lens's page is a draft saved with Save, so on a
 lens's chip the panel draws the draft's lens. *Why* is

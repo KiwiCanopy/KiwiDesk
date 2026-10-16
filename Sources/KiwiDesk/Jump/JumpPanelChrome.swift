@@ -17,6 +17,9 @@ struct JumpFooter: View {
     /// How many items the View side's ⌘ digits reach on the
     /// selected line (#2309 ruling 7).
     var quickCount = 9
+    /// Whether ↩ turns KiwiVision off, which the lit hint then
+    /// says instead of Apply (#2103 ruling 56).
+    var turnsOff = false
 
     var body: some View {
         let hints = hints
@@ -136,7 +139,10 @@ extension JumpFooter {
             return [other]
         case .view:
             let digits = quickCount > 1 ? "⌘1–\(quickCount)" : "⌘1"
-            let apply = L("layout_picker.footer.apply", "%1$@ Apply", "↩")
+            let apply =
+                turnsOff
+                ? ViewPickText.turnOffFooter
+                : L("layout_picker.footer.apply", "%1$@ Apply", "↩")
             let quick = L(
                 "layout_picker.footer.quick",
                 "%1$@ Quick apply",

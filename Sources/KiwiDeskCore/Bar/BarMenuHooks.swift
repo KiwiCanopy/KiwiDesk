@@ -20,6 +20,8 @@ public enum SettingsLanding: Equatable, Sendable {
     case profiles
     /// KiwiVision (#2309).
     case kiwiVision
+    /// KiwiVision with its add-lens popover open (#2359 ruling 4).
+    case newLens
 }
 
 /// What a bar menu asks of the GUI (#1518) — set at the GUI's

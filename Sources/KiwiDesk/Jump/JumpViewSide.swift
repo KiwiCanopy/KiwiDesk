@@ -87,7 +87,7 @@ struct JumpViewSide: View {
                             || !item.isApplicable,
                         showsNumber: held
                             && list.number(.layout, index) != nil,
-                        onActivate: { apply(item) },
+                        onActivate: { apply(item, on: .layout) },
                         onHover: { onHover(item.pick) }
                     )
                 }
@@ -108,7 +108,8 @@ struct JumpViewSide: View {
                     isSelected: isSelected(line, index),
                     isDimmed: list.isDimmed(line, index),
                     showsNumber: commandHeld && selectedLine == line,
-                    onActivate: { apply(item) },
+                    visionOff: list.visionIsOff,
+                    onActivate: { apply(item, on: line) },
                     onHover: { onHover(item.pick) }
                 )
             }
@@ -120,7 +121,11 @@ struct JumpViewSide: View {
         list.selection == ViewPickList.Position(line: line, index: index)
     }
 
-    private func apply(_ item: ViewPickList.Item) {
-        if item.isApplicable { onApply(item.pick) }
+    private func apply(
+        _ item: ViewPickList.Item,
+        on line: ViewPickList.Line
+    ) {
+        guard item.isApplicable else { return }
+        onApply(ViewPickList.action(of: item, on: line))
     }
 }

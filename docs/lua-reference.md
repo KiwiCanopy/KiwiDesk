@@ -5195,13 +5195,14 @@ row.
 - **Profile** — one per saved profile, shown only while another
   one can be loaded; one that cannot load is greyed. Return loads
   it like `load_profile`.
-- **KiwiVision** — Off and Focused window, which turn
-  [KiwiVision](#kiwivisiontoggle) off and on, then one item per
-  lens, which turns that lens on; picking the lens already on
-  leaves it on. A lens with no apps is greyed, "No apps yet", and
-  one the live profile leaves out is greyed "Not in Studio". While
-  there is no lens, the line ends in **New Lens…**, which opens
-  Settings ▸ KiwiVision.
+- **KiwiVision** — Default, which turns
+  [KiwiVision](#kiwivisiontoggle) on, then one item per lens,
+  which turns that lens on. Picking the item already on turns
+  KiwiVision off; the footer then reads "↩ Turn Off". A lens with
+  no apps is greyed, "No apps yet", and one the live profile
+  leaves out is greyed "Not in Studio". The line ends in **New
+  Lens…**, which opens Settings ▸ KiwiVision ready to name a lens;
+  ⌘1–9 skip it.
 
 Keys on this side:
 
