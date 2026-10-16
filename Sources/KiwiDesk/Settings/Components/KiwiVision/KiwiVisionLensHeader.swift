@@ -97,7 +97,7 @@ struct KiwiVisionLensHeader: View {
         model.config.layers.first { layer in
             !layer.isDefault
                 && layer.bindings.contains {
-                    KeybindingCatalog.names($0, lens)
+                    KeybindingCatalog.isLensChord($0, lens)
                 }
         }?.name
     }
