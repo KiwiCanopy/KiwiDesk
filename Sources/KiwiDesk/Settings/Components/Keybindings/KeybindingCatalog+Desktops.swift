@@ -100,6 +100,17 @@ extension KeybindingCatalog {
         }
     }
 
+    /// The caption over Desktop rows whose Desktop is away, in
+    /// Settings and the Shortcuts sheet alike.
+    @MainActor static var desktopAwayCaption: String {
+        L(
+            "shortcuts.desktop_away",
+            "Dimmed rows target a Desktop that isn't on any "
+                + "screen right now. Their shortcuts stay "
+                + "recorded and work again when it comes back."
+        )
+    }
+
     /// Desktops offered in keybinding UI and disconnected status (#92).
     struct DesktopOffer: Equatable {
         var desktops: [Int] = []
