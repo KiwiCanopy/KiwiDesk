@@ -125,7 +125,35 @@ struct RuleReachFamilyParityTests {
         #expect(save.contains("snapshot.fileLensReach"))
         #expect(save.contains("profile.lensReach ="))
         let text = try source("KiwiCore+RuleReach.swift")
-        #expect(text.contains("|| lensReach != fileLensReach"))
+        let start = try #require(
+            text.range(of: "public var isEdited: Bool {")
+        )
+        let end = try #require(
+            text.range(
+                of: "\n    }\n",
+                range: start.upperBound..<text.endIndex
+            )
+        )
+        let isEdited = text[start.upperBound..<end.lowerBound]
+        #expect(isEdited.contains("lensReach"))
+        #expect(isEdited.contains("fileLensReach"))
+    }
+
+    /// The held re-judge is a public Core scope; a second caller
+    /// would hold the lens on's judgement where no lens Save runs.
+    @Test("the lens Save is the one holder of the reach re-judge")
+    func reachHoldHasOneCaller() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "withLensReachHeld",
+            under: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted() == [
+                "KiwiCore+VisionReach.swift",
+                "SettingsModel+RuleReach.swift",
+            ]
+        )
     }
 
     @Test("every family's override is applied through the one helper")

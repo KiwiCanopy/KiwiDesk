@@ -66,6 +66,9 @@ public final class VisionManager {
     /// Whether a lens Save is between its marks and its lenses,
     /// holding the lens on's re-judge (`withLensReachHeld`).
     var reachHeld = false
+    /// Whether a re-judge was skipped while held, owed at the
+    /// scope's end.
+    var reachJudgeOwed = false
     /// The landing a lens holds under the haze now, nil while none
     /// waits; begun and ended only in `KiwiCore+VisionHold`.
     var hold: VisionHold?
