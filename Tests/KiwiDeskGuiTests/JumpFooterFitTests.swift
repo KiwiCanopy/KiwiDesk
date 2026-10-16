@@ -106,6 +106,9 @@ struct JumpFooterFitTests {
                 )
             )
             let cue = width(footer.row([]))
+            // The row drawn is the cue itself, not an empty one.
+            let text = try #require(footer.scrollHint)
+            #expect(cue >= width(Text(text).font(.caption)), "\(code)")
             #expect(cue <= room, "\(code): cue \(cue) pt in \(room) pt")
         }
     }
@@ -136,11 +139,18 @@ struct JumpFooterFitTests {
         #expect(chrome.contains("(0...hints.count).reversed()"))
         // The last candidate, which ViewThatFits takes when none
         // fits, truncates instead of spilling.
-        let shedding = try #require(chrome.range(of: "ViewThatFits("))
-        let fallback = try #require(
-            chrome.range(of: "row([], fixed: false)")
+        let chars = Array(chrome)
+        let opener = try #require(
+            chrome.range(of: "ViewThatFits(in: .horizontal)")
         )
-        #expect(shedding.upperBound < fallback.lowerBound)
+        var cursor = chrome.distance(
+            from: chrome.startIndex,
+            to: opener.upperBound
+        )
+        let closure = try #require(
+            SourceScan.balanced(chars, from: &cursor, open: "{", close: "}")
+        )
+        #expect(closure.contains("row([], fixed: false)"))
         #expect(footer.contains("leading.layoutPriority(1)"))
         #expect(footer.contains("trailing.layoutPriority(1)"))
     }
