@@ -272,7 +272,7 @@ struct RefusalCueSeamTests {
     /// rather than a press (#2103 ruling 16). A further caller
     /// would be a refusal silently exempt from `refusal.sound` —
     /// the defect this suite exists to catch.
-    @Test("the unsounded pill door has its two named callers")
+    @Test("the unsounded pill door has its named callers")
     func pillDoorCallersAreNamed() throws {
         let core = Self.root.appendingPathComponent(
             "Sources/KiwiDeskCore"

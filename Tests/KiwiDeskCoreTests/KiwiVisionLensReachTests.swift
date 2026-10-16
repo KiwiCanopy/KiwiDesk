@@ -138,15 +138,31 @@ struct KiwiVisionLensReachTests {
     }
 
     /// Ruling 40: a load that hands a Lua-owned setup to the GUI
-    /// makes the profile's marks count, with no profile change.
+    /// makes the profile's marks count, with no profile change. The
+    /// lens is stored in `gui.json`, so the load moves no app-wide
+    /// value and only the owner's re-judge can turn it off.
     @Test("a load that changes the owner re-judges the lens on")
     func ownerFlip() throws {
-        let core = try makeCore(guiManaged: false)
+        let core = try makeCore()
+        var config = GuiConfig()
+        config.appWide = core.appWide
+        try core.guiConfigStore.save(config)
+        // A binding is managed vocabulary: init.lua owns the setup.
+        try #"KiwiDesk.bind("alt+h", function() end)"#.write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        #expect(!core.isGuiManaged)
         load(core, "Studio")
         core.setKiwiVision(.lens("Writing"))
         #expect(core.kiwiVisionActive == .lens("Writing"))
-        try core.guiConfigStore.save(GuiConfig())
+        let before = core.appWide
+        try FileManager.default.removeItem(at: core.configURL)
         core.loadConfig()
+        #expect(core.isGuiManaged)
+        #expect(core.appWide == before)
         #expect(core.kiwiVisionActive == .off)
     }
 
