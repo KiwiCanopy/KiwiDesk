@@ -41,9 +41,6 @@ struct QuickMenuBootRowTests {
         let controller = StatusItemController(
             item: FakeStatusItem()
         )
-        controller.profilesProvider = {
-            (active: "Work", all: ["Work", "Play"], broken: [])
-        }
         controller.setWarning(warning)
         controller.setConfigError(configError)
         controller.setBootPhase(phase)
@@ -137,24 +134,16 @@ struct QuickMenuBootRowTests {
         #expect(!menu.autoenablesItems)
     }
 
-    @Test("Layout and Switch Profile grey while starting")
-    func actionsGreyWhileStarting() {
+    /// Ruling 9 of #2309: the row stays enabled while KiwiDesk
+    /// boots; KiwiHub's View side greys its own chips.
+    @Test("Open KiwiHub stays enabled while starting")
+    func hubRowEnabledWhileStarting() {
         let starting = menu(
             controller(phase: .scanning(scanned: 2, total: 9))
         )
-        // Grey, don't hide (#171): both act on state the scan has
-        // not finished collecting, and both work in a moment.
-        #expect(row(starting, titled: "Layout")?.isEnabled == false)
-        #expect(
-            row(starting, titled: "Switch Profile")?.isEnabled
-                == false
-        )
-
+        #expect(row(starting, titled: "Open KiwiHub…")?.isEnabled == true)
         let ready = menu(controller(phase: .ready))
-        #expect(row(ready, titled: "Layout")?.isEnabled == true)
-        #expect(
-            row(ready, titled: "Switch Profile")?.isEnabled == true
-        )
+        #expect(row(ready, titled: "Open KiwiHub…")?.isEnabled == true)
     }
 
     @Test("a missing permission still outranks a boot in flight")

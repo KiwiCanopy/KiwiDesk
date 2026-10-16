@@ -21,7 +21,7 @@ struct StatusMenuProviderWiringTests {
             .joined()
         #expect(
             squashed.contains(
-                "statusItem.shortcutsComboProvider={"
+                "statusItem.kiwiHubComboProvider={"
             )
         )
         #expect(
@@ -29,7 +29,7 @@ struct StatusMenuProviderWiringTests {
                 "statusItem.settingsComboProvider={"
             )
         )
-        #expect(squashed.contains("lua:ShortcutsOpenBinding.lua"))
+        #expect(squashed.contains("lua:KiwiHubSide.view.lua"))
         #expect(
             squashed.contains("lua:KeybindingCatalog.openSettings.lua")
         )

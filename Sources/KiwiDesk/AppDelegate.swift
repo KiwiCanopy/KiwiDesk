@@ -99,38 +99,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onMenuClose = { [weak self] in
             self?.core.statusMenuDidClose()
         }
-        // The quick menu's dynamic entries (#68 §3.10).
-        statusItem.profilesProvider = { [weak self] in
-            (
-                active: self?.core.profiles.currentName,
-                all: self?.core.profiles.list() ?? [],
-                broken: Set(
-                    self?.core.profiles.brokenProfiles()
-                        .map(\.name) ?? []
-                )
-            )
-        }
-        statusItem.onLoadProfile = { [weak self] name in
-            self?.core.loadProfileAsUser(name)
-        }
-        statusItem.layoutInfoProvider = { [weak self] in
-            guard let self else { return LayoutMenuInfo.empty }
-            return LayoutMenuInfo.current(from: self.core)
-        }
-        statusItem.onSetLayoutMode = { [weak self] mode, space in
-            let args: [JSONValue] =
-                space.map { [.string($0.raw), .string(mode.rawValue)] }
-                ?? [.string(mode.rawValue)]
-            self?.core.withUserMotion {
-                _ = self?.core.execute("set_mode", args: args)
-            }
-            // Nothing to tell Settings: a quick-menu switch is
-            // session-only, and since #1179 the draft narrates
-            // the PROFILE rather than the session.
-        }
-        statusItem.onSaveLayoutToProfile = { [weak self] in
-            self?.keepLayoutInProfile()
-        }
         // Every forceFront is an own front Core honors (#1861).
         NSApplication.ownFrontNote = { [weak core] number in
             core?.noteOwnFront(number: number)
@@ -142,8 +110,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         jumpPanel.onEditShortcuts = { [weak self] in
             self?.openSettingsFromTour(at: .shortcuts)
         }
-        statusItem.onShowShortcuts = { [weak jumpPanel] in
-            jumpPanel?.toggle(.shortcuts)
+        statusItem.onOpenKiwiHub = { [weak jumpPanel] in
+            jumpPanel?.toggle(.view)
+        }
+        jumpPanel.tilingIdle = { [weak self] in
+            self?.statusItem?.tilingIdle ?? false
         }
         // ⌃⌥J/K/L open KiwiHub on a side (#2246, #2265).
         core.uiBridge.onKiwihubShow = { [weak jumpPanel] side in
@@ -154,11 +125,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.dashboard.show()
         }
         // Reads bound open-combo live for quick menu.
-        statusItem.shortcutsComboProvider = { [weak self] in
+        statusItem.kiwiHubComboProvider = { [weak self] in
             guard let self else { return nil }
             return ShortcutsOpenBinding.combo(
                 core: self.core,
-                lua: ShortcutsOpenBinding.lua
+                lua: KiwiHubSide.view.lua
             )
         }
         statusItem.settingsComboProvider = { [weak self] in

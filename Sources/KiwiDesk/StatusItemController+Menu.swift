@@ -14,7 +14,6 @@ extension StatusItemController {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         menu.autoenablesItems = false
-        let profiles = profilesProvider()
         let phase = bootPhase
 
         var warnings: [NSMenuItem] = []
@@ -78,57 +77,30 @@ extension StatusItemController {
             menu.addItem(.separator())
         }
 
-        let hasSwitchTarget = profiles.all.contains {
-            $0 != profiles.active
-                && !profiles.broken.contains($0)
-        }
-        // Active profile header shown only when alternative targets exist
-        // (#324, #36).
-        if let active = profiles.active, hasSwitchTarget {
-            let current = NSMenuItem.sectionHeader(
-                title: L(
-                    "menu.active_profile",
-                    "Profile: %1$@",
-                    active
-                )
-            )
-            menu.addItem(current)
-        }
-        // Dim rather than hide during boot scanning (#171), and
-        // until Start Tiling makes them work (#2050).
-        let inert = phase.isStarting || tilingIdle
-        let layout = layoutItem()
-        layout.isEnabled = !inert
-        menu.addItem(layout)
-        if hasSwitchTarget {
-            let switcher = switchProfileItem(profiles)
-            switcher.isEnabled = !inert
-            menu.addItem(switcher)
-        }
-        menu.addItem(makeKiwiVisionItem(inert: inert))
-
-        // App chrome (#326).
-        menu.addItem(.separator())
-        let shortcutsTitle = L(
-            "menu.view_shortcuts",
-            "View Shortcuts…"
-        )
-        let shortcuts = NSMenuItem(
-            title: shortcutsTitle,
-            action: #selector(showShortcuts(_:)),
+        // KiwiHub's View side switches the layout, the profile and
+        // KiwiVision (#2309 ruling 8). Enabled while KiwiDesk boots
+        // or waits for Start Tiling: the side greys its own chips.
+        let hub = NSMenuItem(
+            title: L(
+                "menu.open_kiwihub",
+                "Open %1$@…",
+                L("kiwihub.name", "KiwiHub")
+            ),
+            action: #selector(openKiwiHub(_:)),
             keyEquivalent: ""
         )
-        shortcuts.target = self
-        shortcuts.image = symbol("keyboard")
+        hub.target = self
+        hub.image = symbol("square.grid.2x2")
+        hub.isEnabled = true
         // The status menu is not the app's MainMenu, so its key
         // equivalent is active only while this menu is tracking.
         // Using the native column gives the combo AppKit's dimmed,
         // right-aligned treatment; its duplicate keyboard action
-        // is ignored in `showShortcuts` below.
-        if let combo = shortcutsComboProvider() {
-            Self.applyMenuEquivalent(combo, to: shortcuts)
+        // is ignored in `openKiwiHub` below.
+        if let combo = kiwiHubComboProvider() {
+            Self.applyMenuEquivalent(combo, to: hub)
         }
-        menu.addItem(shortcuts)
+        menu.addItem(hub)
         let settings = NSMenuItem(
             title: L("menu.settings", "Settings…"),
             action: #selector(openDashboard),
@@ -178,58 +150,6 @@ extension StatusItemController {
             scanned,
             total
         )
-    }
-
-    /// `load_profile` had no quick path before (§3.10): one
-    /// submenu entry per saved profile, checkmark on the
-    /// active one.
-    private func switchProfileItem(
-        _ profiles: (
-            active: String?, all: [String], broken: Set<String>
-        )
-    ) -> NSMenuItem {
-        let parent = NSMenuItem(
-            title: L("menu.switch_profile", "Switch Profile"),
-            action: nil,
-            keyEquivalent: ""
-        )
-        parent.image = symbol("square.stack.3d.up")
-        let submenu = NSMenu()
-        if profiles.all.isEmpty {
-            let empty = NSMenuItem(
-                title: L(
-                    "menu.no_profiles",
-                    "No saved profiles"
-                ),
-                action: nil,
-                keyEquivalent: ""
-            )
-            empty.isEnabled = false
-            submenu.addItem(empty)
-        }
-        for name in profiles.all {
-            // A broken profile carries no action, so the menu
-            // auto-disables it — greyed but still listed (#246).
-            let broken = profiles.broken.contains(name)
-            let entry = NSMenuItem(
-                title: name,
-                action: broken
-                    ? nil : #selector(loadProfile(_:)),
-                keyEquivalent: ""
-            )
-            entry.target = broken ? nil : self
-            entry.state =
-                name == profiles.active ? .on : .off
-            if broken {
-                entry.toolTip = L(
-                    "menu.profile_broken",
-                    "Can't load — see Config Issues"
-                )
-            }
-            submenu.addItem(entry)
-        }
-        parent.submenu = submenu
-        return parent
     }
 
     static func applyMenuEquivalent(
@@ -283,11 +203,11 @@ extension StatusItemController {
         onOpenDashboard()
     }
 
-    @objc private func showShortcuts(_ sender: NSMenuItem) {
+    @objc private func openKiwiHub(_ sender: NSMenuItem) {
         // Carbon owns shortcut globally; ignore AppKit's duplicate keyDown
         // event.
         if menuActionIsKeyDown() { return }
-        onShowShortcuts()
+        onOpenKiwiHub()
     }
 
     @objc private func showConfigIssues() {
@@ -302,7 +222,4 @@ extension StatusItemController {
         onShowAccessibilityHelp()
     }
 
-    @objc private func loadProfile(_ sender: NSMenuItem) {
-        onLoadProfile(sender.title)
-    }
 }

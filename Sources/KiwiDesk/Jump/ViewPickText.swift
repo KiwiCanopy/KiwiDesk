@@ -29,6 +29,11 @@ enum ViewPickText {
         L("view_picker.layout.no_space", "No Space under the pointer")
     }
 
+    /// Every line's caption until Start Tiling is pressed (#2050).
+    static var notTiling: String {
+        L("view_picker.not_tiling", "Tiling hasn't started")
+    }
+
     /// Every line's caption while KiwiDesk boots.
     static var starting: String {
         L("view_picker.starting", "KiwiDesk is starting")

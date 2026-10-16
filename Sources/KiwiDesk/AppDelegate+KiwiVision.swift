@@ -3,22 +3,9 @@ import Combine
 import KiwiDeskCore
 
 extension AppDelegate {
-    /// KiwiVision (#2103): the quick menu's row toggles it and
-    /// VoiceOver hears every change, whichever door made it.
+    /// KiwiVision (#2103): VoiceOver hears every change, whichever
+    /// door made it.
     func wireKiwiVision() {
-        statusItem?.kiwiVisionProvider = { [weak self] in
-            self?.core.kiwiVisionIsOn ?? false
-        }
-        statusItem?.kiwiVisionComboProvider = { [weak self] in
-            guard let self else { return nil }
-            return ShortcutsOpenBinding.combo(
-                core: self.core,
-                lua: KeybindingCatalog.toggleKiwiVision.lua
-            )
-        }
-        statusItem?.onToggleKiwiVision = { [weak self] in
-            self?.core.toggleKiwiVision()
-        }
         // The page, its picture and the Home subtitle read the
         // live values, which a verb may change from outside.
         core.onAppWideChange = { [weak self] in
