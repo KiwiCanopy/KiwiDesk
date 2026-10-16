@@ -69,17 +69,14 @@ struct JumpFooterFitTests {
         for code in try Self.locales() {
             LocalizationManager.shared.select(code)
             let footer = JumpFooter(scope: .view, overflows: false)
-            // The widest of the three lines' Settings buttons.
-            let leading =
-                ViewPickList.Line.allCases.map {
-                    width(
-                        button(
-                            ViewPickText.settings($0),
-                            "⌘,",
-                            symbol: ViewPickText.destination($0).symbol
-                        )
-                    )
-                }.max() ?? 0
+            // The Settings button reserves its widest label.
+            let leading = width(
+                KeyPanelChordButton(
+                    title: ViewPickText.settings(.profile),
+                    chord: "⌘,",
+                    reserves: ViewPickText.settingsLabels
+                ) {}
+            )
             let room = room(
                 leading: leading,
                 trailing: width(

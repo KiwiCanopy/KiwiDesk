@@ -100,6 +100,17 @@ enum ViewPickText {
         }
     }
 
+    /// Every label the View side's Settings button can wear, which
+    /// it reserves the width of.
+    static var settingsLabels: [KeyPanelChordButton.Label] {
+        ViewPickList.Line.allCases.map {
+            KeyPanelChordButton.Label(
+                title: settings($0),
+                symbol: destination($0).symbol
+            )
+        }
+    }
+
     /// The Settings button: the page of the line the selection is
     /// on.
     static func settings(_ line: ViewPickList.Line) -> String {

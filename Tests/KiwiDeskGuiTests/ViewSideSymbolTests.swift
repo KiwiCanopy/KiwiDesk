@@ -1,5 +1,6 @@
-import Foundation
+import AppKit
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -79,5 +80,33 @@ struct ViewSideSymbolTests {
             let chain = text[site.upperBound...].prefix(160)
             #expect(chain.contains(".accessibilityHidden(true)"), "\(name)")
         }
+    }
+
+    /// A line change swaps the button's title; were its width to
+    /// follow, every hint and Keep beside it would jump.
+    @Test("the Settings button stands one width on every line")
+    func settingsButtonHoldsItsWidth() throws {
+        defer { LocalizationManager.shared.select("en") }
+        for code in ["en", "de", "ja", "ru"] {
+            LocalizationManager.shared.select(code)
+            let widths = ViewPickList.Line.allCases.map { line in
+                NSHostingController(
+                    rootView: KeyPanelChordButton(
+                        title: ViewPickText.settings(line),
+                        chord: "⌘,",
+                        symbol: ViewPickText.destination(line).symbol,
+                        reserves: ViewPickText.settingsLabels
+                    ) {}
+                    .fixedSize()
+                )
+                .sizeThatFits(in: CGSize(width: 4000, height: 200)).width
+            }
+            #expect(Set(widths).count == 1, "\(code): \(widths)")
+        }
+        let footer = try source("JumpPanelView+Footer.swift")
+        #expect(
+            footer.occurrences(of: "reserves: ViewPickText.settingsLabels")
+                == 1
+        )
     }
 }

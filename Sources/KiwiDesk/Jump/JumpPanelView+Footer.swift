@@ -49,7 +49,8 @@ extension JumpPanelView {
             KeyPanelChordButton(
                 title: ViewPickText.settings(line),
                 chord: "⌘,",
-                symbol: ViewPickText.destination(line).symbol
+                symbol: ViewPickText.destination(line).symbol,
+                reserves: ViewPickText.settingsLabels
             ) { model.handle(.settings) }
         }
     }
