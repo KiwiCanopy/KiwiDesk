@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -101,6 +102,64 @@ struct DesktopSwitchShortcutTests {
             #expect(
                 reserved?.desktopNumber == nil,
                 "\(row.combo) meets \(reserved as Any)"
+            )
+        }
+    }
+}
+
+/// Each Desktop's name is a whole sentence of its own key, never
+/// a frame the number is interpolated into (#2311): Korean's
+/// particle agrees with the number — Apple's own labels read
+/// `3으로` and `6으로` beside `1로` — so a shared `%1$d` frame
+/// is wrong for some Desktops in some locale whatever it says.
+/// `.serialized`: `LocalizationManager` is process-wide.
+@Suite("Switch to Desktop names (#2311)", .serialized)
+@MainActor
+struct DesktopSwitchShortcutNameTests {
+    private static let localesDirectory = SourceScan.repoRoot(
+        from: #filePath
+    )
+    .appendingPathComponent("Sources/KiwiDeskCore/Resources/Locales")
+
+    @Test("every catalog carries each Desktop's own label")
+    func everyCatalogHasEachDesktopsKey() throws {
+        let files = try FileManager.default.contentsOfDirectory(
+            at: Self.localesDirectory,
+            includingPropertiesForKeys: nil
+        )
+        .filter { $0.pathExtension == "json" }
+        #expect(files.count > 1)
+        for file in files {
+            let catalog = try JSONDecoder().decode(
+                [String: String].self,
+                from: try Data(contentsOf: file)
+            )
+            let name = file.lastPathComponent
+            for number in 1...9 {
+                let key = "system_shortcut.switch_to_desktop_\(number)"
+                let value = try #require(
+                    catalog[key],
+                    "\(name) lacks \(key)"
+                )
+                #expect(value.contains("\(number)"), "\(name) \(key)")
+                #expect(!value.contains("%"), "\(name) \(key)")
+            }
+            #expect(catalog["system_shortcut.switch_to_desktop"] == nil)
+        }
+    }
+
+    @Test("Korean takes the particle each number needs")
+    func koreanParticleAgrees() {
+        LocalizationManager.shared.select("ko")
+        defer { LocalizationManager.shared.select(nil) }
+        for (index, shortcut)
+            in SystemShortcut.switchToDesktop.enumerated()
+        {
+            let number = index + 1
+            let particle = [3, 6].contains(number) ? "으로" : "로"
+            #expect(
+                shortcut.localizedName.contains("\(number)\(particle)"),
+                "\(shortcut.localizedName)"
             )
         }
     }
