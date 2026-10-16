@@ -314,9 +314,10 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    /// Non-adopting write for background profile editing (#18, #82).
+    /// Non-adopting write (#18, #82); refuses a newer file (#2325).
     func write(_ profile: Profile) throws {
         let name = try validated(profile.name)
+        try NewerFormatOnDisk.refuse(url(for: name), Profile.currentFormat)
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true
