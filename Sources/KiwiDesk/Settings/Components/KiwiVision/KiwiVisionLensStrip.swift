@@ -37,6 +37,12 @@ struct KiwiVisionLensStrip: View {
         .help(KiwiVisionLensWords.lensesHelp)
     }
 
+    private var addReason: String? {
+        KiwiVisionGates(guiManaged: model.guiManaged)
+            .inertReason(for: .kiwiVision(.lenses))
+            .map(KiwiVisionGates.sentence(for:))
+    }
+
     private var addChip: some View {
         Button {
             adding = NameEditRequest(seed: "", subject: "")
@@ -52,8 +58,12 @@ struct KiwiVisionLensStrip: View {
         }
         .buttonStyle(.plain)
         .onHover { addHovered = isEnabled && $0 }
-        .help(KiwiVisionLensWords.newLens)
+        // A Lua-owned setup defines its lenses in init.lua; the
+        // chips stay live, the add greys with its reason.
+        .disabled(addReason != nil)
+        .help(addReason ?? KiwiVisionLensWords.newLens)
         .accessibilityLabel(KiwiVisionLensWords.newLens)
+        .accessibilityHint(addReason ?? "")
         .popover(item: $adding, arrowEdge: .bottom) { request in
             NameEditPopover(
                 seed: request.seed,
@@ -96,7 +106,7 @@ struct KiwiVisionLensChip: View {
                 Text(name).lineLimit(1)
             }
             .font(.callout)
-            .foregroundStyle(empty ? SettingsTheme.ink3 : SettingsTheme.ink)
+            .foregroundStyle(empty ? SettingsTheme.ink2 : SettingsTheme.ink)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .choiceChip(selected: selected, hovering: hovering && isEnabled)

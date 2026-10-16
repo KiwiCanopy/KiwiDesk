@@ -35,6 +35,7 @@ struct ViewPickItemsTests {
             vision: (vision, lenses),
             visionChord: "⌃⌥V",
             lensChord: { _ in nil },
+            offersNewLens: true,
             inert: inert
         )
     }
@@ -77,6 +78,17 @@ struct ViewPickItemsTests {
         #expect(off.last?.name == "New Lens…")
         let on = items(vision: .plain)[.vision] ?? []
         #expect(on.map(\.isCurrent) == [false, true, false])
+        let lua =
+            JumpPanelController.items(
+                layout: nil,
+                profiles: (nil, [], []),
+                vision: (.off, []),
+                visionChord: nil,
+                lensChord: { _ in nil },
+                offersNewLens: false,
+                inert: nil
+            )[.vision] ?? []
+        #expect(!lua.contains { $0.pick == .newLens })
     }
 
     /// Ruling 41: a chip per lens after Focused window, the lens on
@@ -121,7 +133,10 @@ struct ViewPickItemsTests {
     @Test("every chip greys while KiwiDesk boots, and says so")
     func inertGreysAll() {
         LocalizationManager.shared.select("en")
-        let all = items(inert: ViewPickText.starting).values.flatMap { $0 }
+        let every = items(inert: ViewPickText.starting).values.flatMap { $0 }
+        // New Lens… opens Settings, which no boot holds (#2103).
+        let all = every.filter { $0.pick != .newLens }
+        #expect(every.first { $0.pick == .newLens }?.isApplicable == true)
         #expect(!all.isEmpty)
         #expect(all.allSatisfy { !$0.isApplicable })
         #expect(all.allSatisfy { $0.inertReason == "KiwiDesk is starting" })
@@ -225,6 +240,7 @@ struct ViewPickItemsTests {
             vision: (.off, []),
             visionChord: nil,
             lensChord: { _ in nil },
+            offersNewLens: true,
             inert: nil
         )
         #expect(lines[.layout]?.allSatisfy { !$0.isApplicable } == true)

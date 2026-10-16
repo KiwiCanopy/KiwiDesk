@@ -38,9 +38,4 @@ struct KiwiVisionControls: Sendable {
         "Appearance while on"
     )
     let lenses = SettingsControl("kiwivision.lenses", "Lenses")
-    let lensAppsCard = SettingsControl("kiwivision.lens.apps", "Apps")
-    let lensOtherCard = SettingsControl(
-        "kiwivision.lens.other",
-        "Other apps"
-    )
 }

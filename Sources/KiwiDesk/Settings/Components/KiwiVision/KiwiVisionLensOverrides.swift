@@ -16,7 +16,7 @@ struct KiwiVisionLensOverrides: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             SettingsSection(
-                SettingsCatalog.kiwiVision.levelsCard,
+                SettingsCatalog.kiwiVision.levelsCard.text,
                 caption: KiwiVisionLensWords.followsCaption
             ) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -28,7 +28,7 @@ struct KiwiVisionLensOverrides: View {
                     )
                 }
             }
-            SettingsSection(SettingsCatalog.kiwiVision.clearCard) {
+            SettingsSection(SettingsCatalog.kiwiVision.clearCard.text) {
                 VStack(alignment: .leading, spacing: 4) {
                     toggleRow(
                         SettingsCatalog.kiwiVision.clearApp.text,
@@ -43,7 +43,7 @@ struct KiwiVisionLensOverrides: View {
                 }
             }
             SettingsSection(
-                SettingsCatalog.kiwiVision.appearanceCard
+                SettingsCatalog.kiwiVision.appearanceCard.text
             ) {
                 appearanceRow
             }

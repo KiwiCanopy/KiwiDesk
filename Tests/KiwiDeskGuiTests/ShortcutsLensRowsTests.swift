@@ -95,6 +95,7 @@ struct ShortcutsLensRowsTests {
             ),
             visionChord: "⌃⌥V",
             lensChord: { $0 == "Writing" ? "⌃⌥W" : nil },
+            offersNewLens: true,
             inert: nil
         )
         let vision = try #require(items[.vision])

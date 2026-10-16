@@ -10,7 +10,7 @@ struct KiwiVisionLensAppsCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.kiwiVision.lensAppsCard,
+            KiwiVisionLensWords.appsTitle,
             caption: KiwiVisionLensWords.appsCaption(lens.name),
             help: KiwiVisionLensWords.appsHelp
         ) {
@@ -57,7 +57,9 @@ struct KiwiVisionLensAppsCard: View {
                 model: model,
                 patterns: titles(of: app),
                 app: app,
-                caption: KiwiVisionLensWords.titledCaption
+                caption: (lens.titles[app] ?? []).isEmpty
+                    ? KiwiVisionLensWords.titledEmptyCaption
+                    : KiwiVisionLensWords.titledCaption
             ) { _ in EmptyView() }
             .padding(.leading, AppIconCache.side + 6)
         }

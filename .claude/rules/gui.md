@@ -112,7 +112,8 @@ restated `20...80` satisfies on the day it is written.
   picture is — draft → the panel, anything the user is not editing
   → a sheet off the thing that names it, save that a page with no
   draft whose rows write at once takes the panel for its own live
-  values (KiwiVision, #2103; `DetailPanelTests` holds the offer
+  values (KiwiVision's Focused window chip, #2103 — a lens's chip
+  is a draft like any other; `DetailPanelTests` holds the offer
   set) — and keep the sheet
   read-only, a sheet that grows a commit being a dialog wearing
   the wrong chrome — save a ruled offer whose one commit STAGES a
@@ -607,7 +608,10 @@ it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
 Layouts, Profiles, Screens, Behaviour, the Mac Checklist, AI and
 KiwiVision render from it now** (#678 Phases 2-3; #1365; #1685;
-#2103 — every KiwiVision card walks its list,
+#2103 — every KiwiVision card walks its list, save the lens
+strip, one bespoke key drawing a page per live lens as Profiles
+does, a landing into KiwiVision naming no lens and a lens page's
+cards anchoring nothing (`KiwiVisionLensWiringTests`),
 `KiwiVisionCensusRenderTests` ▸ `levelsCardWiring`,
 `clearCardWiring`): each
 carries its own order list and a census-render suite pinning that

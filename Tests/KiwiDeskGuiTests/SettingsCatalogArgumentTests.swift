@@ -74,6 +74,16 @@ struct SettingsCatalogArgumentTests {
         // shape through `AISection.control(for:)` (#1685),
         // pinned by `AICensusRenderTests`.
         "AIPromptRow.swift: control",
+        // A lens's own cards (#2103), UNANCHORED: a search lands on
+        // the plain card, never on a lens's draft.
+        "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.levelsCard.text",
+        "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.clearCard.text",
+        "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.appearanceCard.text",
+        "KiwiVisionLensAppsCard.swift: KiwiVisionLensWords.appsTitle",
+        "KiwiVisionLensOtherAppsCard.swift: KiwiVisionLensWords.otherTitle",
     ]
 
     /// Sanctioned literal-`L()` `SettingsSection` titles —
@@ -87,13 +97,7 @@ struct SettingsCatalogArgumentTests {
     /// sites. **Mutual exclusion is the only admissible
     /// reason** — the sites must never co-render, or the shared
     /// id is ambiguous.
-    /// KiwiVision's three Focused window cards mount on its page
-    /// and, as a lens's own values, on a lens's page — the strip
-    /// shows one page at a time (#2103 ruling 46).
-    private let alternatelyMounted: [String: Int] = [
-        "kiwiVision.levelsCard": 2, "kiwiVision.clearCard": 2,
-        "kiwiVision.appearanceCard": 2,
-    ]
+    private let alternatelyMounted: [String: Int] = [:]
 
     /// Every `SettingsSection(` / `SettingsDisclosure(` first
     /// argument is a catalog declaration (counted, so a
@@ -233,8 +237,8 @@ struct SettingsCatalogArgumentTests {
         // Show the Space switch. 106 since #1685: the AI page's
         // three cards and its setup row. 107: #2265's KiwiHub group.
         // 112-118: #2103, #1870, #2103 v2. 119 #1869, 120 #2258,
-        // 121 #2312, 127 #2103's lens page and its three cards.
-        #expect(direct.values.reduce(0, +) == 127)
+        // 121 #2312, 122 #2103's lens strip.
+        #expect(direct.values.reduce(0, +) == 122)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

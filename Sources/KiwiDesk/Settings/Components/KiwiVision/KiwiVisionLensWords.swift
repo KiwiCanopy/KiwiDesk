@@ -12,9 +12,7 @@ enum KiwiVisionLensWords {
         L("view_picker.vision.focused", "Focused window")
     }
 
-    static var newLens: String {
-        L("kiwivision.lens.new", "New Lens…")
-    }
+    static var newLens: String { ViewPickText.newLens }
 
     static var lensName: String {
         L("kiwivision.lens.name", "Lens name")
@@ -70,8 +68,6 @@ enum KiwiVisionLensWords {
 
     static var appliesTo: String { L("app_rules.reach", "Applies to") }
 
-    static var shortcut: String { L("kiwivision.lens.shortcut", "Shortcut") }
-
     static var reachCaption: String {
         L(
             "kiwivision.lens.reach.caption",
@@ -81,9 +77,7 @@ enum KiwiVisionLensWords {
 
     /// The closed "Applies to" label over the saved profiles.
     static func reachLabel(_ reached: [String], of all: [String]) -> String {
-        if reached.count == all.count {
-            return L("app_rules.reach.all", "All profiles")
-        }
+        if reached.count == all.count { return RuleReachWords.allProfiles }
         switch reached.count {
         case 0:
             return L("kiwivision.lens.reach.none", "Built-in layouts only")
@@ -113,9 +107,7 @@ enum KiwiVisionLensWords {
         )
     }
 
-    static var appsTitle: String {
-        SettingsCatalog.kiwiVision.lensAppsCard.text
-    }
+    static var appsTitle: String { L("kiwivision.lens.apps", "Apps") }
 
     static func appsCaption(_ lens: String) -> String {
         L(
@@ -144,9 +136,7 @@ enum KiwiVisionLensWords {
         )
     }
 
-    static var addApp: String {
-        L("kiwivision.never_dimmed.add", "Add an app…")
-    }
+    static var addApp: String { KiwiVisionNeverDimmedCard.addLabel }
 
     static var removeApp: String {
         L("kiwivision.lens.apps.remove", "Remove from this lens")
@@ -164,6 +154,15 @@ enum KiwiVisionLensWords {
         L("kiwivision.lens.apps.windows", "Windows")
     }
 
+    /// While a titled member has no title yet, Core keeps every
+    /// window clear; the caption says so (#2103 ruling 32).
+    static var titledEmptyCaption: String {
+        L(
+            "kiwivision.lens.apps.titled_empty",
+            "Until you add a title, every window of this app stays clear."
+        )
+    }
+
     static var titledCaption: String {
         L(
             "kiwivision.lens.apps.titled_caption",
@@ -174,7 +173,7 @@ enum KiwiVisionLensWords {
     // MARK: Other apps
 
     static var otherTitle: String {
-        SettingsCatalog.kiwiVision.lensOtherCard.text
+        L("kiwivision.lens.other", "Other apps")
     }
 
     static func otherCaption(_ lens: String) -> String {

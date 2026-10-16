@@ -9,6 +9,8 @@ import SwiftUI
 struct KiwiVisionLensPage: View {
     @ObservedObject var model: SettingsModel
     let lens: VisionLens
+    /// The header's chord recorder, as Shortcuts holds its own.
+    @StateObject private var coordinator = RecorderCoordinator()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -30,6 +32,15 @@ struct KiwiVisionLensPage: View {
             \.disabledSystemShortcuts,
             model.disabledSystemShortcuts()
         )
+        .environmentObject(coordinator)
+        .onAppear {
+            // Suspend hotkeys while a chord is captured (#213).
+            coordinator.onArmedChange = { [model] armed in
+                model.setRecorderArmed(armed)
+            }
+        }
+        .onChange(of: lens.name) { _, _ in coordinator.invalidate() }
+        .onDisappear { coordinator.invalidate() }
     }
 
     private var reason: KiwiVisionGates.InertReason? {

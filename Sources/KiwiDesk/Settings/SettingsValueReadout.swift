@@ -43,7 +43,8 @@ enum SettingsValueReadout {
             // Copy buttons only — nothing in the draft.
             return []
         case .kiwiVision:
-            // App-wide, written at once — nothing in the draft.
+            // App-wide rows write at once; the lens page's draft
+            // narrates through `lensDiffRows` (#2103).
             return []
         case .macChecklist:
             // Read from macOS or the user's own tick — never a

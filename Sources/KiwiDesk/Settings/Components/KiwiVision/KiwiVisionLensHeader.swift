@@ -9,7 +9,7 @@ struct KiwiVisionLensHeader: View {
     @ObservedObject var model: SettingsModel
     let lens: String
     @State private var renameRequest: NameEditRequest?
-    @State private var deleting = false
+    @State private var deleting: LensDeleteRequest?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -30,7 +30,7 @@ struct KiwiVisionLensHeader: View {
                 Spacer(minLength: 8)
                 renameButton
                 Button(KiwiVisionLensWords.deleteLens, role: .destructive) {
-                    deleting = true
+                    deleting = LensDeleteRequest(id: lens)
                 }
                 .buttonStyle(.bordered)
             }
@@ -42,15 +42,19 @@ struct KiwiVisionLensHeader: View {
         }
         .font(.callout)
         .confirmationDialog(
-            KiwiVisionLensWords.deleteTitle(lens),
-            isPresented: $deleting,
-            titleVisibility: .visible
-        ) {
+            KiwiVisionLensWords.deleteTitle(deleting?.id ?? lens),
+            isPresented: Binding(
+                get: { deleting != nil },
+                set: { if !$0 { deleting = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: deleting
+        ) { request in
             Button(KiwiVisionLensWords.delete, role: .destructive) {
-                model.deleteLens(lens)
+                model.deleteLens(request.id)
                 model.nav.kiwiVisionLens = nil
             }
-        } message: {
+        } message: { _ in
             Text(KiwiVisionLensWords.deleteMessage)
         }
     }
@@ -81,13 +85,16 @@ struct KiwiVisionLensHeader: View {
         }
     }
 
-    /// The base layer's rows, where a lens chord is written.
+    /// The default layer's rows, where the header reads and
+    /// writes a lens chord; a chord on another layer is that
+    /// layer's, edited on Shortcuts.
     private var defaultBindings: Binding<[KeyBinding]> {
-        Binding(
-            get: { model.config.layers.first?.bindings ?? [] },
+        let index = model.config.layers.firstIndex(where: \.isDefault)
+        return Binding(
+            get: { index.map { model.config.layers[$0].bindings } ?? [] },
             set: { rows in
-                guard !model.config.layers.isEmpty else { return }
-                model.config.layers[0].bindings = rows
+                guard let index else { return }
+                model.config.layers[index].bindings = rows
             }
         )
     }
@@ -124,7 +131,7 @@ struct KiwiVisionLensReachControl: View {
     private func checklist(_ reached: Set<String>) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Toggle(
-                L("app_rules.reach.all", "All profiles"),
+                RuleReachWords.allProfiles,
                 isOn: Binding(
                     get: { reached.count == profiles.count },
                     set: { model.setLensReach(lens, $0 ? Set(profiles) : []) }
@@ -160,4 +167,9 @@ struct KiwiVisionLensReachControl: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(KiwiVisionLensWords.appliesTo)
     }
+}
+
+/// The delete dialog's request, built from ONE lens (#843).
+struct LensDeleteRequest: Identifiable {
+    let id: String
 }

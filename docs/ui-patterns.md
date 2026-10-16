@@ -168,11 +168,9 @@ trailing OVERRIDE checkbox column (`overrideStateColumn`,
 88 pt) and the `OverrideChrome` accent bar, so a 2–4-peer field
 has no room for a segmented render; `OverridePickerRow`
 renders `.menu` and has no `.segmented` branch, since every
-override surface sits in a bounded column — the per-space editor,
-and a KiwiVision lens's rows (#2103), which read "follows Focused
-window · `<value>`" until checked. Restore a required-style
-parameter only if a genuinely *full-width* override surface
-arrives. The inherited (unchecked) state
+override surface sits in a bounded column. Restore a
+required-style parameter only if a genuinely *full-width*
+override surface arrives. The inherited (unchecked) state
 collapses to a quiet "follows `<Layout>` defaults · `<value>`"
 readout (the slot-size pair keeps its live control instead,
 dimmed via the chrome's `.disabled` + `.opacity(0.5)`). App
@@ -181,6 +179,11 @@ the one segmented label tight at minimum width; it stays
 segmented by width headroom and is re-checked for truncation
 when each new locale ships (#95), as the help-glyph labels
 are.
+
+:::unreleased
+A KiwiVision lens's rows (#2103) are such a surface too: an
+unchecked row reads "follows Focused window · `<value>`".
+:::
 
 **Numeric controls pick one of three idioms by a single
 test:** *would a user say a specific number out loud?* — never

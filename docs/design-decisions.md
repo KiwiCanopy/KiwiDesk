@@ -6582,22 +6582,20 @@ KiwiVision is a mode the user turns on and looks at, so its
 settings get their own page, first in Whole App on Home, rather
 than a card on a per-profile page. Its Home card says whether the
 mode is on right now and how to turn it on, so it is worth reading
-on every visit; a picture row there waits for the planned named
-lenses. Dim, Blur and Appearance while on are app-wide and write
+on every visit; a picture row there is not drawn yet. Dim, Blur and Appearance while on are app-wide and write
 `gui.json` the moment they change, like General's rows
 ([Spaces, profiles & config
 ownership](#spaces-profiles--config-ownership), #1741). With KiwiVision
 on, Settings stays clear while every window behind it dims as the
 Dim value steps, which is the best preview there is. Each card says
-"Applies at once, in every profile."
+"Applies at once, in every profile.", save Never dimmed (below).
 
 *Stored as one group, with no crossing.* The settings live in
 `gui.json` as `kiwivision.{dim, blur, appearance}`, every field
 optional, so a file written before them reads the defaults.
 KiwiVision never had a per-profile home, so nothing is captured or
-owed. A group rather than three flat keys leaves room for named
-lenses (planned) beside these fields without moving a stored
-value.
+owed. A group rather than three flat keys let the lenses join
+beside these fields without moving a stored value.
 Every change of the live values, whether from a verb, a row, a
 reload of `gui.json`, a restore or a reset, reaches the plate and
 the appearance switch through one hook, so a reload while the mode
@@ -6620,8 +6618,9 @@ window. It invents no verdict. The veil takes the plate's own dim
 mapping, the softening shows only where the plate's blur door
 draws (so Reduce transparency drops it here too), and the windows
 take the appearance the mode will show, never Settings' own
-Appearance pick. It sits in the side panel although the page has
-no draft, on the carve-out argued in [Navigation &
+Appearance pick. It sits in the side panel although the Focused
+window page has no draft (a lens's page has one, and the panel
+draws it), on the carve-out argued in [Navigation &
 saving](#navigation--saving) ▸ the panel's object is the DRAFT.
 
 *Lenses save with Save.* A lens cannot apply at once: its
@@ -8837,7 +8836,8 @@ on.
 
 :::unreleased
 **A page with no draft, whose rows write at once, takes the panel
-for a picture of its own live values** — KiwiVision (#2103). The
+for a picture of its own live values** — KiwiVision's Focused
+window chip (#2103). The
 ruling above turns on the heading lying while the draft and the
 picture's object differ; on a page whose every row writes
 `gui.json` the moment it changes there is nothing for them to
@@ -8848,8 +8848,8 @@ the picture is redundant with something on screen in exactly the
 way a panel preview should be. The carve-out is that narrow — a
 picture of anything else on such a page, a catalog entry or a
 stored file, still takes a sheet, and a page that grows a draft
-(KiwiVision's planned named lenses save with Save) has its panel
-watch that draft like any other.
+has its panel watch that draft like any other — on a KiwiVision
+lens's chip, the draft's lens.
 :::
 
 **A composite question needs a composite picture, in the colours

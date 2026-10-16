@@ -11,7 +11,7 @@ struct KiwiVisionLensOtherAppsCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.kiwiVision.lensOtherCard,
+            KiwiVisionLensWords.otherTitle,
             caption: KiwiVisionLensWords.otherCaption(lens.name),
             help: KiwiVisionLensWords.otherHelp
         ) {
@@ -58,7 +58,9 @@ struct KiwiVisionLensOtherAppsCard: View {
             Stepper(
                 KiwiVisionLensWords.clearAfter,
                 value: binding(\.clearDelay),
-                in: 0...5,
+                // Ruling 12's band, widened to a Lua value past it,
+                // which Core does not cap.
+                in: 0...max(5, lens.clearDelay),
                 step: 0.5
             )
             .labelsHidden()

@@ -33,6 +33,11 @@ extension SettingsView {
             model.noteSearchModeSwitch(resolved.destination)
         }
         model.destination = resolved.destination
+        // Every KiwiVision anchor but the strip's lives on the
+        // Focused window page, and a landing names no lens (#2103).
+        if resolved.destination == .kiwiVision {
+            model.nav.kiwiVisionLens = nil
+        }
         var scroll = resolved.scroll
         switch resolved.surface {
         case .main:
