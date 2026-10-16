@@ -51,7 +51,7 @@ extension JumpPanelController {
             core: core,
             lua: KeybindingCatalog.toggleKiwiVision.lua
         )
-        return ViewPickList(
+        var list = ViewPickList(
             layout: layout,
             items: Self.items(
                 layout: layout,
@@ -65,6 +65,8 @@ extension JumpPanelController {
                 inert: inert
             )
         )
+        list.kiwiVisionOn = core.kiwiVisionActive != .off
+        return list
     }
 
     /// Each line's items. Profile is drawn only where there is
@@ -145,13 +147,15 @@ extension JumpPanelController {
                 chord: lensChord(lens.name)
             )
         }
-        // Opening Settings is no machine act, so no boot grey;
-        // offered only where Settings can save a lens.
-        let create =
-            offersNewLens
-            ? [ViewPickList.Item(pick: .newLens, name: ViewPickText.newLens)]
-            : []
-        return [plain] + lenses + create
+        // Opening Settings is no machine act, so no boot grey; a
+        // Lua-owned setup greys it with Settings' own reason.
+        let create = ViewPickList.Item(
+            pick: .newLens,
+            name: ViewPickText.newLens,
+            refusal: offersNewLens
+                ? nil : ViewPickText.newLensLuaOwned
+        )
+        return [plain] + lenses + [create]
     }
 
     /// Closes on a pick, then applies it — once: a click during

@@ -8,7 +8,9 @@ struct JumpViewSide: View {
     let list: ViewPickList
     let settings: TilingSettings
     let commandHeld: Bool
-    let onApply: (ViewPickList.Pick) -> Void
+    /// An item was clicked: the model's one apply door decides
+    /// what it does.
+    let onApply: (ViewPickList.Item) -> Void
     /// The pointer moved over an item.
     let onHover: (ViewPickList.Pick) -> Void
 
@@ -87,7 +89,7 @@ struct JumpViewSide: View {
                             || !item.isApplicable,
                         showsNumber: held
                             && list.number(.layout, index) != nil,
-                        onActivate: { apply(item, on: .layout) },
+                        onActivate: { onApply(item) },
                         onHover: { onHover(item.pick) }
                     )
                 }
@@ -109,7 +111,7 @@ struct JumpViewSide: View {
                     isDimmed: list.isDimmed(line, index),
                     showsNumber: commandHeld && selectedLine == line,
                     visionOff: list.visionIsOff,
-                    onActivate: { apply(item, on: line) },
+                    onActivate: { onApply(item) },
                     onHover: { onHover(item.pick) }
                 )
             }
@@ -121,11 +123,4 @@ struct JumpViewSide: View {
         list.selection == ViewPickList.Position(line: line, index: index)
     }
 
-    private func apply(
-        _ item: ViewPickList.Item,
-        on line: ViewPickList.Line
-    ) {
-        guard item.isApplicable else { return }
-        onApply(ViewPickList.action(of: item, on: line))
-    }
 }

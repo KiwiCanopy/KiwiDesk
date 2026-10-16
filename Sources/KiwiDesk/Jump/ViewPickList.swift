@@ -30,8 +30,11 @@ struct ViewPickList: Equatable {
 
         /// A create chip, which no ⌘ digit reaches (#2359 ruling 1).
         var isCreate: Bool {
-            if case .newLens = self { return true }
-            return false
+            // Exhaustive, so a new pick is ruled on here.
+            switch self {
+            case .newLens: return true
+            case .layout, .profile, .visionOff, .vision: return false
+            }
         }
     }
 
@@ -68,6 +71,10 @@ struct ViewPickList: Equatable {
     private(set) var query = ""
     /// The selected item; nil while the query matches nothing.
     private(set) var selection: Position?
+    /// Whether KiwiVision is on, as Core reads it — set by the
+    /// panel, so the line's spoken state is Core's, never a guess
+    /// from which chip is marked (#2103 ruling 56).
+    var kiwiVisionOn = false
 
     init(layout: LayoutPickerState?, items: [Line: [Item]]) {
         self.layout = layout
@@ -119,26 +126,22 @@ struct ViewPickList: Equatable {
         return at + 1
     }
 
-    /// What a pick of `item` does: the current KiwiVision chip
+    /// What a pick of `item` does: the KiwiVision item already on
     /// turns KiwiVision off (#2103 ruling 56); every other item,
-    /// a current one on the other lines included, applies itself.
-    static func action(of item: Item, on line: Line) -> Pick {
-        line == .vision && item.isCurrent ? .visionOff : item.pick
+    /// a current profile or layout included, applies itself.
+    static func action(of item: Item) -> Pick {
+        if case .vision = item.pick, item.isCurrent { return .visionOff }
+        return item.pick
     }
 
     /// Whether ↩ now turns KiwiVision off, which the footer says.
     var selectionTurnsOff: Bool {
-        guard let line = selection?.line, let item = selected else {
-            return false
-        }
-        return Self.action(of: item, on: line) == .visionOff
+        selected.map { Self.action(of: $0) == .visionOff } ?? false
     }
 
-    /// Whether the KiwiVision line shows with nothing on, which its
-    /// spoken title says (#2103 ruling 56).
-    var visionIsOff: Bool {
-        items[.vision] != nil && !items(.vision).contains(where: \.isCurrent)
-    }
+    /// Whether the KiwiVision line shows with KiwiVision off, which
+    /// its spoken title says (#2103 ruling 56).
+    var visionIsOff: Bool { items[.vision] != nil && !kiwiVisionOn }
 
     /// A new query selects its first match on the selection's
     /// line, else on the first line with one; a cleared query
@@ -194,7 +197,10 @@ struct ViewPickList: Equatable {
         let next = at + delta
         guard reachable.indices.contains(next) else { return }
         let column = matches(current.line).firstIndex(of: current.index)
-        let target = matches(reachable[next])
+        // Never onto a create chip, unless nothing else matches
+        // (#2359 ruling 1).
+        let pickable = digitOrder(reachable[next])
+        let target = pickable.isEmpty ? matches(reachable[next]) : pickable
         let index = target[min(column ?? 0, target.count - 1)]
         selection = Position(line: reachable[next], index: index)
     }

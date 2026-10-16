@@ -127,9 +127,9 @@ struct JumpScopeModelTests {
         model.handle(.quick(1, moveHere: false))
         model.handle(.step(1))
         model.handle(.pick(moveHere: false))
-        // ↓ keeps the column, clamped (#2309 ruling 11): here the
-        // KiwiVision line's last chip, New Lens… (#2103 ruling 57).
-        #expect(applied == [.profile("Studio"), .newLens])
+        // ↓ keeps the column, clamped (#2309 ruling 11) to the
+        // last chip a digit reaches, never New Lens… (#2359).
+        #expect(applied == [.profile("Studio"), .vision(lens: nil)])
     }
 
     @Test("⌘S keeps only while Keep is armed")

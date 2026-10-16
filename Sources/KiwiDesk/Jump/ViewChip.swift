@@ -37,15 +37,7 @@ struct ViewChip: View {
             }
     }
 
-    /// The current KiwiVision chip says it turns KiwiVision off,
-    /// ahead of its ⌘ hint (#2103 ruling 56).
-    private var hint: String {
-        let chord = number.map { LayoutPickText.chordHint("⌘\($0)") }
-        let off =
-            ViewPickList.action(of: item, on: line) == .visionOff
-            ? ViewPickText.turnsOffHint : nil
-        return [off, chord].compactMap { $0 }.joined(separator: ", ")
-    }
+    private var hint: String { ViewPickText.hint(for: item, number: number) }
 
     private var badgeShown: Bool { showsNumber && number != nil }
 

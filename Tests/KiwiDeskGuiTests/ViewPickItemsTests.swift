@@ -88,7 +88,10 @@ struct ViewPickItemsTests {
                 offersNewLens: false,
                 inert: nil
             )[.vision] ?? []
-        #expect(!lua.contains { $0.pick == .newLens })
+        // A Lua-owned setup greys it rather than hiding it.
+        let luaNew = lua.first { $0.pick == .newLens }
+        #expect(luaNew?.isApplicable == false)
+        #expect(luaNew?.refusal == "Lenses come from init.lua")
     }
 
     /// Ruling 41: a chip per lens after Default, the lens on

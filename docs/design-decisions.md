@@ -6618,8 +6618,8 @@ window. It invents no verdict. The veil takes the plate's own dim
 mapping, the softening shows only where the plate's blur door
 draws (so Reduce transparency drops it here too), and the windows
 take the appearance the mode will show, never Settings' own
-Appearance pick. It sits in the side panel although the Focused
-window page has no draft (a lens's page has one, and the panel
+Appearance pick. It sits in the side panel although the Default
+page has no draft (a lens's page has one, and the panel
 draws it), on the carve-out argued in [Navigation &
 saving](#navigation--saving) ▸ the panel's object is the DRAFT.
 
@@ -8836,8 +8836,8 @@ on.
 
 :::unreleased
 **A page with no draft, whose rows write at once, takes the panel
-for a picture of its own live values** — KiwiVision's Focused
-window chip (#2103). The
+for a picture of its own live values** — KiwiVision's Default
+chip (#2103). The
 ruling above turns on the heading lying while the draft and the
 picture's object differ; on a page whose every row writes
 `gui.json` the moment it changes there is nothing for them to
@@ -11448,17 +11448,15 @@ lines need no Space.
 :::unreleased
 **KiwiHub's KiwiVision line has no Off chip: the item already on
 turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**
-Every other chip on the line turns something on, and its plain
-settings always exist as Default, so an Off chip was one more
-place to aim for a state that already has a chord. Control
+Every other chip on the line turns something on, and
+KiwiVision's base settings always exist as Default, so an Off chip
+was one more place to aim for a state that already has a chord. Control
 Center's Focus menu is the model: clicking the Focus already on
 turns it off, and a lens's own chord already behaves that way.
-Because the selection rests on the current chip, ↓ then ↩ now
-turns KiwiVision off where it used to re-apply it, so the panel
-says so before the key is pressed. The footer's lit hint reads
-"↩ Turn Off", the chip's VoiceOver hint is "Turns KiwiVision off",
-and with nothing on the line's spoken title is "KiwiVision, off",
-since no chip says "current". Only this line toggles. A profile
+The selection rests on the current chip, so ↩ there turns
+KiwiVision off, and the panel says so before the key is pressed:
+the footer, the chip's VoiceOver hint and, with nothing on, the
+line's spoken title, since then no chip says "current". Only this line toggles. A profile
 or a layout has no off, so its current item re-applies.
 
 The base settings are named **Default** rather than "Focused
@@ -11470,10 +11468,11 @@ sits on, as Layout Defaults are for a Space's overrides.
 
 **A create chip is a line's last item and no pick (#2359).** "New
 Lens…" ends the KiwiVision line always, not only while no lens
-exists. A line keeps one shape, and a chip that appeared and
-vanished after the first lens taught nothing. Placed first, it
+exists, so a line keeps one shape. Placed first, it
 would shift every ⌘ digit and put ↩ one keystroke from a create.
-The digits skip it and the filter finds it by name.
+The digits skip it, ↓ never lands on it while the line holds
+anything else, and the filter finds it by name. A Lua-owned setup
+draws it greyed with its reason rather than hiding it.
 `ViewPickVisionLineTests` and `ViewPickItemsTests` hold it.
 :::
 

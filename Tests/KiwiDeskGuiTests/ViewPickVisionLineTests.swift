@@ -17,21 +17,20 @@ struct ViewPickVisionLineTests {
 
     private func list(
         vision: VisionActive = .plain,
+        lenses: [String] = ["Writing"],
         selected pick: ViewPickList.Pick? = nil
     ) -> ViewPickList {
         let items = JumpPanelController.items(
             layout: nil,
             profiles: ("Laptop", ["Laptop", "Studio"], []),
-            vision: (
-                vision,
-                [VisionLensChoice(name: "Writing")]
-            ),
+            vision: (vision, lenses.map { VisionLensChoice(name: $0) }),
             visionChord: nil,
             lensChord: { _ in nil },
             offersNewLens: true,
             inert: nil
         )
         var list = ViewPickList(layout: nil, items: items)
+        list.kiwiVisionOn = vision != .off
         if let pick { list.select(pick) }
         return list
     }
@@ -42,17 +41,17 @@ struct ViewPickVisionLineTests {
         let vision = on.items(.vision)
         let writing = vision[1]
         #expect(writing.isCurrent)
-        #expect(ViewPickList.action(of: writing, on: .vision) == .visionOff)
+        #expect(ViewPickList.action(of: writing) == .visionOff)
         // A chip that is not on applies itself.
         #expect(
-            ViewPickList.action(of: vision[0], on: .vision)
+            ViewPickList.action(of: vision[0])
                 == .vision(lens: nil)
         )
         // The current profile re-applies: only KiwiVision is off-able.
         let laptop = on.items(.profile)[0]
         #expect(laptop.isCurrent)
         #expect(
-            ViewPickList.action(of: laptop, on: .profile)
+            ViewPickList.action(of: laptop)
                 == .profile("Laptop")
         )
     }
@@ -80,16 +79,28 @@ struct ViewPickVisionLineTests {
         #expect(applied == [.visionOff, .visionOff])
     }
 
-    @Test("a click routes through the turn-off action")
-    func clickTurnsOff() throws {
-        let side = try SourceScan.blankedSource(
-            at: SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent(
-                    "Sources/KiwiDesk/Jump/JumpViewSide.swift"
-                )
-        ).split(whereSeparator: \.isWhitespace).joined()
-        #expect(side.contains("onApply(ViewPickList.action(of:item,on:line))"))
-        #expect(!side.contains("onApply(item.pick)"))
+    /// Every View pick takes the model's one door, so a new door
+    /// cannot re-apply the item already on instead of turning
+    /// KiwiVision off.
+    @Test("clicks and keys share the one apply door")
+    func oneApplyDoor() throws {
+        func squashed(_ path: String) throws -> String {
+            try SourceScan.blankedSource(
+                at: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent("Sources/KiwiDesk/Jump/" + path)
+            ).split(whereSeparator: \.isWhitespace).joined()
+        }
+        let side = try squashed("JumpViewSide.swift")
+        #expect(side.occurrences(of: "onActivate:{onApply(item)}") == 2)
+        #expect(!side.contains("action(of:"))
+        let panel = try squashed("JumpPanelView.swift")
+        #expect(panel.contains("onApply:{model.applyView($0)}"))
+        let model = try squashed("JumpModel+View.swift")
+        #expect(model.occurrences(of: "applyView(item)") == 2)
+        #expect(
+            model.contains("onApplyView(ViewPickList.action(of:item))")
+        )
+        #expect(model.occurrences(of: "onApplyView(") == 1)
     }
 
     @Test("New Lens… is last and no ⌘ digit reaches it")
@@ -107,6 +118,20 @@ struct ViewPickVisionLineTests {
         #expect(list.selected?.pick == .newLens)
     }
 
+    /// ↓ keeps the column but never lands on a create chip while
+    /// the line holds anything else (#2359 ruling 1).
+    @Test("↓ never lands on New Lens…")
+    func downSkipsTheCreateChip() {
+        var list = list(lenses: [], selected: .profile("Studio"))
+        #expect(
+            list.items(.vision).map(\.pick) == [
+                .vision(lens: nil), .newLens,
+            ]
+        )
+        list.moveLine(1)
+        #expect(list.selected?.pick == .vision(lens: nil))
+    }
+
     @Test("the footer, the hint and the title say what ↩ does")
     func safeguardsSpeak() {
         LocalizationManager.shared.select("en")
@@ -120,6 +145,20 @@ struct ViewPickVisionLineTests {
         let off = list(vision: .off, selected: .vision(lens: nil))
         #expect(!off.selectionTurnsOff)
         #expect(off.visionIsOff)
+        // The turn-off hint comes ahead of the ⌘ hint (ruling 56).
+        let current = on.items(.vision)[0]
+        let chord = LayoutPickText.chordHint("⌘1")
+        #expect(
+            ViewPickText.hint(for: current, number: 1)
+                == "\(ViewPickText.turnsOffHint), \(chord)"
+        )
+        #expect(
+            ViewPickText.hint(for: current, number: nil)
+                == ViewPickText.turnsOffHint
+        )
+        #expect(
+            ViewPickText.hint(for: off.items(.vision)[0], number: 1) == chord
+        )
         #expect(
             ViewPickText.spoken(
                 off.items(.vision)[0],
@@ -181,7 +220,12 @@ struct ViewPickVisionLineTests {
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent("Sources/KiwiDesk/Jump/ViewChip.swift")
         ).split(whereSeparator: \.isWhitespace).joined()
-        #expect(chip.contains("?ViewPickText.turnsOffHint:nil"))
+        #expect(
+            chip.contains(
+                "privatevarhint:String{"
+                    + "ViewPickText.hint(for:item,number:number)}"
+            )
+        )
         #expect(chip.contains(".accessibilityHint(hint)"))
         #expect(chip.contains("visionOff:visionOff"))
         let side = try SourceScan.blankedSource(

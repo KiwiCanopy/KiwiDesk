@@ -24,6 +24,18 @@ enum ViewPickText {
         L("view_picker.vision.turns_off", "Turns KiwiVision off")
     }
 
+    /// A chip's VoiceOver hint: the KiwiVision item already on says
+    /// it turns KiwiVision off, ahead of its ⌘ hint (#2103 ruling
+    /// 56), the two joined in one localized frame.
+    static func hint(for item: ViewPickList.Item, number: Int?) -> String {
+        let chord = number.map { LayoutPickText.chordHint("⌘\($0)") }
+        guard ViewPickList.action(of: item) == .visionOff else {
+            return chord ?? ""
+        }
+        guard let chord else { return turnsOffHint }
+        return L("view_picker.ax.hint_pair", "%1$@, %2$@", turnsOffHint, chord)
+    }
+
     /// The footer's lit hint while ↩ turns KiwiVision off.
     static var turnOffFooter: String {
         L("view_picker.footer.turn_off", "%1$@ Turn Off", "↩")
@@ -32,6 +44,12 @@ enum ViewPickText {
     /// The KiwiVision line's last chip (#2103 ruling 57).
     static var newLens: String {
         L("kiwivision.lens.new", "New Lens…")
+    }
+
+    /// Why New Lens… greys where `init.lua` owns the setup and
+    /// defines its lenses (gui.md: grey, don't hide).
+    static var newLensLuaOwned: String {
+        L("view_picker.vision.new_lens_lua", "Lenses come from init.lua")
     }
 
     /// Why a lens chip cannot turn its lens on (#2103).

@@ -42,11 +42,17 @@ struct KiwiVisionLensStrip: View {
     }
 
     /// KiwiHub's New Lens… lands here asking for the add popover
-    /// (#2359 ruling 4): opened once, where the add is not greyed.
+    /// (#2359 ruling 4): opened once, where the add is not greyed,
+    /// a turn later so a page drawn this pass has its anchor.
     private func takeAddRequest() {
         guard model.nav.kiwiVisionAddRequested else { return }
         model.nav.kiwiVisionAddRequested = false
         guard addReason == nil else { return }
+        DispatchQueue.main.async { openAdd() }
+    }
+
+    /// The add popover, as the `+` and a landing open it.
+    private func openAdd() {
         adding = NameEditRequest(seed: "", subject: "")
     }
 
@@ -57,9 +63,7 @@ struct KiwiVisionLensStrip: View {
     }
 
     private var addChip: some View {
-        Button {
-            adding = NameEditRequest(seed: "", subject: "")
-        } label: {
+        Button(action: openAdd) {
             Image(systemName: "plus")
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)

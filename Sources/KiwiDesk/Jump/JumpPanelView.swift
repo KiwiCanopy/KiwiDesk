@@ -124,7 +124,7 @@ struct JumpPanelView: View {
                     list: view,
                     settings: settings,
                     commandHeld: model.commandHeld,
-                    onApply: { model.onApplyView($0) },
+                    onApply: { model.applyView($0) },
                     onHover: {
                         model.hoverItem($0, pointer: model.currentPointer())
                     }
