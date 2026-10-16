@@ -11,19 +11,16 @@ extension KiwiCore {
     func appWideLiveChanged(from old: AppWideSettings) {
         let new = appWide
         guard new != old else { return }
+        // A lens the new values no longer hold turns KiwiVision off.
+        if let lens = visionLensName, new.lens(named: lens) == nil {
+            setVision(.off)
+        }
         let lens = visionLensName
-        let appearance = new.look(lens: lens).appearance
-        if appearance != old.look(lens: lens).appearance, vision.isOn {
-            retargetVisionAppearance(appearance)
-        }
-        // A changed list re-reads the windows, with their bundles.
-        if new.look(lens: lens).listedApps
-            != old.look(lens: lens).listedApps
-        {
-            vision.forgetListedWindows()
-        }
+        let before = old.look(lens: lens)
+        let after = new.look(lens: lens)
+        visionLookChanged(from: before, to: after)
         // The whole stored group, so a field v3 adds re-draws too.
-        if new.vision != old.vision { updateVision() }
+        if new.vision != old.vision, before == after { updateVision() }
         if new.hyperKey != old.hyperKey { oweHyperRemap() }
         onAppWideChange()
     }

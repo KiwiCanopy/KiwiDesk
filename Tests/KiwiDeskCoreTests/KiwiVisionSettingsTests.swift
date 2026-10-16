@@ -117,7 +117,7 @@ struct KiwiVisionSettingsTests {
             core.state.workspaces.focus(w1, in: space)
             let plate = InertVisionPlate()
             core.vision.plateFactory = { plate }
-            core.vision.isOn = true
+            core.vision.active = .plain
             core.noteVisionStandDown([])
             core.updateVision()
             try #require(!core.vision.plates.isEmpty)

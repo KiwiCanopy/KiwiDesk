@@ -15,6 +15,9 @@ extension KiwiCore {
         setKiwiVision(!vision.isOn)
     }
 
+    /// What KiwiVision draws now: off, plain or a lens.
+    public var kiwiVisionActive: VisionActive { vision.active }
+
     /// The `kiwivision.*` verbs (#2103). The settings are
     /// app-wide session values, as every app-wide verb's
     /// (`setAppWide`); no window moves, so no retile.
@@ -24,8 +27,9 @@ extension KiwiCore {
     ) -> CommandResponse {
         switch command {
         case "kiwivision.toggle":
-            toggleKiwiVision()
-            return .ok(.object(["on": .bool(kiwiVisionIsOn)]))
+            return toggleCommand(args.first?.stringValue)
+        case "kiwivision.define_lens", "kiwivision.delete_lens":
+            return lensCommand(command, args)
         case "kiwivision.set_dim":
             // Lua's whole range, as the GUI's (ruling 10, amended).
             guard let percent = args.first?.numberValue,
@@ -77,19 +81,51 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The lens KiwiVision draws, nil for plain KiwiVision — none
-    /// turns on yet (#2103 v3 PR 2).
-    var visionLensName: String? { nil }
+    /// The lens KiwiVision draws, nil for plain KiwiVision or off.
+    var visionLensName: String? { vision.active.lensName }
 
     /// What KiwiVision draws now, through the one resolver.
     var visionLook: VisionLook { appWide.look(lens: visionLensName) }
 
-    func setKiwiVision(_ on: Bool) {
-        guard on != vision.isOn else { return }
-        vision.isOn = on
-        retargetVisionAppearance(on ? visionLook.appearance : nil)
+    /// Turns plain KiwiVision on, or KiwiVision off.
+    public func setKiwiVision(_ on: Bool) {
+        setVision(on ? .plain : .off)
+    }
+
+    /// The one writer of what KiwiVision draws: on, off, plain or a
+    /// lens. Turning on or off pays the appearance switch and is
+    /// announced; a switch between plain and a lens, or between
+    /// lenses, is a change of look (#2103 v3).
+    func setVision(_ next: VisionActive) {
+        let before = vision.active
+        guard next != before else { return }
+        let old = visionLook
+        vision.active = next
+        guard before.isOn != next.isOn else {
+            visionLookChanged(from: old, to: visionLook)
+            return
+        }
+        if old.listedApps != visionLook.listedApps {
+            vision.forgetListedWindows()
+        }
+        retargetVisionAppearance(next.isOn ? visionLook.appearance : nil)
         updateVision(reassertOrder: true)
-        vision.onChange(on)
+        vision.onChange(next.isOn)
+    }
+
+    /// The one door a change of what KiwiVision draws takes while
+    /// it stays on — a lens switch, or a live app-wide value: the
+    /// appearance follows the new ask, a new list of named apps
+    /// re-reads the windows, and the plates re-draw.
+    func visionLookChanged(from old: VisionLook, to new: VisionLook) {
+        guard old != new else { return }
+        if vision.isOn, new.appearance != old.appearance {
+            retargetVisionAppearance(new.appearance)
+        }
+        if new.listedApps != old.listedApps {
+            vision.forgetListedWindows()
+        }
+        updateVision()
     }
 
     /// Re-draws the plates from the live focus. Costs nothing

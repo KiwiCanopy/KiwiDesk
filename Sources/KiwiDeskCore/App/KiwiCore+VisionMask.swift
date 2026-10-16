@@ -8,9 +8,8 @@ extension KiwiCore {
     /// Whether the plates draw a mask rather than the whole screen.
     var visionMasks: Bool {
         visionClearsWallpaper
-            || (vision.isOn
-                && (visionLook.clearApp
-                    || !visionLook.neverDimmed.isEmpty))
+            || (vision.isOn && !visionLook.listedApps.isEmpty)
+            || (vision.isOn && visionLook.clearApp)
     }
 
     /// Whether the wallpaper stays clear now — the one reading the
@@ -62,12 +61,14 @@ extension KiwiCore {
                 : { self.eventLoop.bundle(of: $0, lookingUp: true) }
         )
         let seen = Set(listed.map { WindowID($0.number) })
-        var ordered: [(id: WindowID, frame: CGRect, pid: pid_t)] = []
+        var ordered:
+            [(id: WindowID, frame: CGRect, pid: pid_t, title: String?)] =
+                []
         var apps: [pid_t: AppRef] = [:]
         func member(_ id: WindowID) {
             guard let frame = memberFrame(id), let window = state.windows[id]
             else { return }
-            ordered.append((id, frame, window.pid))
+            ordered.append((id, frame, window.pid, window.title))
             apps[window.pid] =
                 apps[window.pid]
                 ?? AppRef(
@@ -87,17 +88,21 @@ extension KiwiCore {
                 state.windows[id] == nil,
                 visionMaskReads(entry)
             else { continue }
-            ordered.append((id, entry.frame, entry.pid))
+            // The list reads no titles: a titled lens member's
+            // untracked windows stay hazed.
+            ordered.append((id, entry.frame, entry.pid, nil))
             apps[entry.pid] = apps[entry.pid] ?? listedApp(entry)
         }
         let clear = visionClearPids(target: targetPid, among: apps)
+        let lens = apps.mapValues(visionLensClear)
         let height = GeometryUtils.primaryHeight
-        return ordered.map { id, frame, pid in
+        return ordered.map { id, frame, pid, title in
             VisionMask.Window(
                 frame: GeometryUtils.flip(frame, primaryHeight: height),
                 cornerRadius: vision.listedRadii[id.raw]
                     ?? windowRadius(id, reading: refreshingList),
                 clear: clear.contains(pid)
+                    || lens[pid]?.clears(title: title) == true
             )
         }
     }
@@ -108,7 +113,9 @@ extension KiwiCore {
     /// what attach filed and never LaunchServices (#1785, #1936).
     /// Decided once per pass, per process; Never dimmed joins it —
     /// an app named by its bundle id, or by its process name where
-    /// it has none (#2103 ruling 26) — and a lens will too.
+    /// it has none (#2103 ruling 26) — and so does a lens member
+    /// whose every window stays clear; a titled member is judged per
+    /// window in the walk (`visionLensClear`).
     func visionClearPids(
         target: pid_t?,
         among apps: [pid_t: AppRef]
@@ -116,7 +123,7 @@ extension KiwiCore {
         var clear: Set<pid_t> = []
         let look = visionLook
         for (pid, app) in apps {
-            if isNeverDimmed(app) {
+            if isNeverDimmed(app) || visionLensClear(app) == .all {
                 clear.insert(pid)
             } else if look.clearApp, let target, target > 0,
                 eventLoop.names(target, appOf: pid, lookingUp: false)

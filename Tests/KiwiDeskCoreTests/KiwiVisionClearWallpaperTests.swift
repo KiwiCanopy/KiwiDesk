@@ -103,7 +103,7 @@ struct KiwiVisionClearWallpaperTests {
             $0.visionClearWallpaper = true
         }
         #expect(!core.visionRequest().clearWallpaper, "mode off")
-        core.vision.isOn = true
+        core.vision.active = .plain
         #expect(core.visionRequest().clearWallpaper)
         core.setAppWide(persisting: false) {
             $0.visionClearWallpaper = false

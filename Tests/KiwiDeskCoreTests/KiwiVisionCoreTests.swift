@@ -127,7 +127,7 @@ struct KiwiVisionCoreTests {
             watched = $0
             return true
         }
-        core.vision.isOn = true
+        core.vision.active = .plain
         core.updateBorders()
         #expect(watched == [w1])
         #expect(core.borders.overlays.isEmpty)
@@ -152,7 +152,7 @@ struct KiwiVisionCoreTests {
         let before = plate.orders.count
         core.windowServer.handle(.reorder, window: w1)
         #expect(plate.orders.count == before + 1)
-        core.vision.isOn = false
+        core.vision.active = .off
         core.updateBorders()
         #expect(core.windowServer.requested(by: .vision).isEmpty)
     }
@@ -162,7 +162,7 @@ struct KiwiVisionCoreTests {
         let core = makeCore()
         let plate = InertVisionPlate()
         core.vision.plateFactory = { plate }
-        core.vision.isOn = true
+        core.vision.active = .plain
         core.vision.sync(
             VisionManager.Request(
                 screens: [
@@ -188,7 +188,7 @@ struct KiwiVisionCoreTests {
     @Test("updateBorders re-draws the plates for the anchor")
     func bordersDriveTheVision() {
         let core = makeCore()
-        core.vision.isOn = true
+        core.vision.active = .plain
         core.updateBorders()
         #expect(core.vision.target == w1.raw)
     }
@@ -196,7 +196,7 @@ struct KiwiVisionCoreTests {
     @Test("the shelf's verdict reaches the plates")
     func standDownComesFromTheShelf() {
         let core = makeCore()
-        core.vision.isOn = true
+        core.vision.active = .plain
         core.noteVisionStandDown([DisplayID(77)])
         #expect(core.visionRequest().standDown == [DisplayID(77)])
     }
@@ -206,7 +206,7 @@ struct KiwiVisionCoreTests {
         let core = makeCore()
         var heard: [Bool] = []
         core.vision.onChange = { heard.append($0) }
-        core.vision.isOn = true
+        core.vision.active = .plain
         core.stop()
         #expect(!core.kiwiVisionIsOn)
         #expect(heard.isEmpty)

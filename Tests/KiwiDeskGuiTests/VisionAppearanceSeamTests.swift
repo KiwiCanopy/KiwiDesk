@@ -60,13 +60,23 @@ struct VisionAppearanceSeamTests {
     func transitionIsWired() throws {
         let sites: [(file: String, after: String, needle: String)] = [
             (
-                "App/KiwiCore+Vision.swift", "func setKiwiVision(",
+                "App/KiwiCore+Vision.swift", "func setVision(",
                 "retargetVisionAppearance("
+            ),
+            // A change of look while on — a lens switch, a live
+            // app-wide value — takes the one door (#2103 v3).
+            (
+                "App/KiwiCore+Vision.swift", "func visionLookChanged(",
+                "retargetVisionAppearance("
+            ),
+            (
+                "App/KiwiCore+Vision.swift", "func setVision(",
+                "visionLookChanged(from:"
             ),
             (
                 "App/KiwiCore+AppWideLive.swift",
                 "func appWideLiveChanged(",
-                "retargetVisionAppearance("
+                "visionLookChanged(from:"
             ),
             (
                 "App/KiwiCore.swift", "var appWideLedger",
@@ -81,7 +91,7 @@ struct VisionAppearanceSeamTests {
             (
                 "App/KiwiCore+AppWideLive.swift",
                 "func appWideLiveChanged(",
-                "if new.vision != old.vision { updateVision() }"
+                "if new.vision != old.vision, before == after {"
             ),
             // The Hyper remap rides the same seam (#1870).
             (
@@ -118,14 +128,15 @@ struct VisionAppearanceSeamTests {
         }
     }
 
-    /// v3's active value inherits one door only while the mode is
-    /// switched through `setKiwiVision` (and `stop()`'s `clear()`).
+    /// What KiwiVision draws — off, plain or a lens — has one door,
+    /// `setVision` (and `stop()`'s `clear()`), so a lens switch pays
+    /// the appearance like an on or off (#2103 v3).
     @Test("only the one door writes KiwiVision on or off")
     func oneOnOffWriter() throws {
         var writers: Set<String> = []
         for file in try SourceScan.swiftSources(under: Self.core) {
             let text = try SourceScan.strippedSource(at: file)
-            guard text.occurrences(of: "vision.isOn =") > 0 else {
+            guard text.occurrences(of: "vision.active =") > 0 else {
                 continue
             }
             let path = file.standardizedFileURL.path
@@ -143,11 +154,11 @@ struct VisionAppearanceSeamTests {
         )
         // Writes, less the stored property's own declaration.
         let writes =
-            manager.occurrences(of: "isOn = ")
-            - manager.occurrences(of: "var isOn = ")
+            manager.occurrences(of: "active = ")
+            - manager.occurrences(of: "var active = ")
         #expect(
-            writes == clear.occurrences(of: "isOn = "),
-            "VisionManager writes isOn outside clear()"
+            writes == clear.occurrences(of: "active = "),
+            "VisionManager writes active outside clear()"
         )
     }
 

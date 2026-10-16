@@ -158,7 +158,7 @@ struct KiwiVisionNeverDimmedTests {
         core.setAppWide(persisting: false) {
             $0.visionNeverDimmed = ["test.kiwi.music", "sketchybar"]
         }
-        core.vision.isOn = true
+        core.vision.active = .plain
         #expect(core.visionMasks, "the list masks on its own")
         let windows = core.visionMaskWindows(
             target: focused.raw,
@@ -208,7 +208,7 @@ struct KiwiVisionNeverDimmedTests {
             lookups.append(pid)
             return nil
         }
-        core.vision.isOn = true
+        core.vision.active = .plain
         core.setAppWide(persisting: false) { $0.visionClearApp = true }
         _ = core.visionMaskWindows(
             target: focused.raw,

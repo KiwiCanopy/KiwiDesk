@@ -37,8 +37,10 @@ public final class VisionManager {
         var windows: [VisionMask.Window]
     }
 
+    /// What the mode draws now.
+    public internal(set) var active = VisionActive.off
     /// Whether the mode is on.
-    public internal(set) var isOn = false
+    public var isOn: Bool { active.isOn }
     /// The machine half of the appearance switch; the bootstrap
     /// wires the live one.
     var appearanceSwitch = VisionAppearanceSwitch.inert()
@@ -298,7 +300,7 @@ public final class VisionManager {
     /// Turns the mode off and drops every plate at once, saying
     /// nothing: a stop or a quit is no toggle to announce.
     func clear() {
-        isOn = false
+        active = .off
         for plate in plates.values { plate.hide(reduceMotion: true) }
         plates = [:]
         stackedUnder = [:]
