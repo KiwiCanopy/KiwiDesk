@@ -830,11 +830,14 @@ editing here:
   `raiseFloatsAndSticky` cancels a scheduled or owed raise. The
   raise is OWED, never issued, while the tiled plane still moves
   — a pan, an owed #804 pass, a restore armed or draining — asked
-  through the one `tiledPlaneMoving`, and paid at the settle, at
-  an owed pass drawn with nothing to animate, and at a tiled
-  restore's completion; the float raise's own drain is no tiled
-  restore, so a newer focus still supersedes it at once
-  (`CommandedFocusFloatRaiseTests`, `FloatRaiseLandingWiringTests`).
+  through the one `tiledPlaneMoving`, and a site where the tiled
+  plane comes to rest pays it through the one
+  `tiledPlaneCameToRest(restore:focusRaise:)`, never a payer
+  beside it — `scheduleZOrderRestore`'s and `focusWindow`'s
+  immediate runs being the two ruled non-rest callers (#2343,
+  `FloatRaiseLandingWiringTests` ▸ `debtIsPaidAtRest`); the float
+  raise's own drain is no tiled restore, so a newer focus still
+  supersedes it at once (`CommandedFocusFloatRaiseTests`).
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**
@@ -1720,7 +1723,7 @@ editing here:
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
   the door's docstring. Which window a screen shows in FRONT is
-  read through `showsPresentation` / `shelfStandsDown`, never off
+  read through `shelfStandsDown` (#2348), never off
   the raw `KiwiCore.frontStack` seam, its live default or the
   CGWindowList read beneath it; a new z-order need reads that one
   seam's `FrontWindow` element rather than adding a second

@@ -42,9 +42,7 @@ extension KiwiCore {
     /// comes back on the WindowServer reorder event or the late
     /// re-sync, a steady sync no longer re-stacking (#1925, #2026).
     func animationsDidSettle() {
-        runPendingZOrderRestore()
-        runPendingFocusRaise()
-        runPendingFloatRaise()
+        tiledPlaneCameToRest(restore: true, focusRaise: true)
         scheduleBorderResync()
     }
 }

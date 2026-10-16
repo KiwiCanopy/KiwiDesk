@@ -38,11 +38,11 @@ extension KiwiCore {
         )
         guard case .settled(let cue) = verdict else { return }
         desktopCue.owed = nil
-        // The shelf's stand-down, the one home of it (#1787): a
-        // full-screen Desktop earned no cue above, and a show in
-        // front of this screen keeps it clear.
+        // The shelf's stand-down, the one home of it (#1787, #2348):
+        // a full-screen Desktop or a show in front of this screen
+        // keeps it clear, as it does the bars and the other cues.
         guard let cue, appWide.desktopCue,
-            !showsPresentation(on: cue.display)
+            !shelfStandsDown(on: cue.display)
         else { return }
         desktopCue.onCue(cue)
     }

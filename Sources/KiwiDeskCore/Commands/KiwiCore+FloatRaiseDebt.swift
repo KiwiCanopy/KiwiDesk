@@ -24,6 +24,17 @@ extension KiwiCore {
             || floatRaiseDebt.restoresInFlight > 0
     }
 
+    /// What the tiled plane coming to rest pays (#2284, #2343): the
+    /// z-order restore that waited for it and the deferred focus
+    /// raise where the caller says they run, then the owed float
+    /// raise, last so the floats land above both. Every rest site
+    /// takes this door, never a payer beside it.
+    func tiledPlaneCameToRest(restore: Bool, focusRaise: Bool) {
+        if restore { runPendingZOrderRestore() }
+        if focusRaise { runPendingFocusRaise() }
+        runPendingFloatRaise()
+    }
+
     /// Pays the owed raise; the raise re-asks the predicate, so a
     /// restore this settle just started owes it again, to its own
     /// completion. A debt for a focus that has moved on is dropped:
