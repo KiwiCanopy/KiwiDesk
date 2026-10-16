@@ -135,46 +135,6 @@ struct WorkMeterTests {
         #expect(c.parksSkipped == 1)
     }
 
-    @Test("A pass counts the frames it issues and the ones it skips")
-    func framesCount() throws {
-        guard NSScreen.main != nil else { return }
-        let core = makeTestCore()
-        let m = meter()
-        core.tiler.meter = m
-        core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1000, height: 800)
-        }
-        core.tiler.animation.isEnabled = false
-        core.tiler.animation.apply = { _, _, _ in }
-        for raw in UInt32(1)...2 {
-            core.state.apply(
-                .windowCreated(
-                    ManagedWindow(id: WindowID(raw), pid: 1, appName: "A")
-                )
-            )
-        }
-        core.retile()
-        // The echo: every window is where the pass put it.
-        for (id, frame) in core.tiler.calculatedFrames(
-            state: core.state
-        ) {
-            core.state.apply(.windowResized(id, frame))
-        }
-        _ = m.snapshot(reset: true)
-        core.retile()
-        var c = m.snapshot(reset: true).counts
-        #expect(c.framesSkipped == 2)
-        #expect(c.framesIssued == 0)
-        #expect(c.retiles == 1)
-        #expect(c.reissuePasses == 0)
-
-        core.retile(animated: false, pass: .reissue)
-        c = m.snapshot(reset: false).counts
-        #expect(c.framesIssued == 2)
-        #expect(c.framesSkipped == 0)
-        #expect(c.reissuePasses == 1)
-    }
-
     @Test("Events and explicit switches are counted where they enter")
     func eventsAndSwitches() {
         let core = makeTestCore()

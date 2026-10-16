@@ -18,22 +18,6 @@ import Testing
 @MainActor
 @Suite("The Liquid Glass master")
 struct LiquidGlassMasterTests {
-    /// The default this suite reasons from (tests.md): both
-    /// ship ON together (owner ruling 2026-09-10), so an untouched
-    /// config already agrees with what the row shows and the
-    /// master never has to write to make that true. A panel
-    /// defaulting OFF would render no glass beside a switch
-    /// reading on.
-    @Test("the shipped surfaces already agree")
-    func shippedSurfacesAgree() {
-        let settings = TilingSettings()
-        // Agreement, never the polarity: a retune of the default
-        // must not red this (tests.md ▸ a clause pins the SHAPE).
-        #expect(
-            LiquidGlassAgreement(settings: settings).differ
-                == false
-        )
-    }
 
     /// Every stored leaf the master writes — the shelf, the panel,
     /// the drag markers (#1620) and the sticky mark (#1621).

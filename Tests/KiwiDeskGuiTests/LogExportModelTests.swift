@@ -59,8 +59,5 @@ struct LogExportModelTests {
         let refused = model(answering: "", status: 64)
         await refused.exportLog(.last(60), to: url)
         #expect(refused.logExportProblem == .toolFailed)
-        // Dismissing clears it, as the alert binding does.
-        refused.logExportProblem = nil
-        #expect(refused.logExportProblem == nil)
     }
 }

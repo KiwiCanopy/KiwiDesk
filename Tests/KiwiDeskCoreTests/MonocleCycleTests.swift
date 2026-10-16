@@ -67,6 +67,28 @@ struct MonocleCycleTests {
         #expect(core.activeSpace?.focused == w3)
     }
 
+    @Test("wrap_focus off makes focus stop at the ends")
+    func wrapOffStopsAtEnds() {
+        let core = makeMonocleCore()
+        core.execute(
+            "monocle.set_wrap_focus",
+            args: [.bool(false)]
+        )
+        // At the first window, left no longer wraps.
+        #expect(
+            !core.execute("focus", args: [.string("left")])
+                .isSuccess
+        )
+        #expect(core.activeSpace?.focused == w1)
+        // Mid-array stepping is unaffected.
+        core.state.workspaces.focus(w2, in: SpaceID(1))
+        #expect(
+            core.execute("focus", args: [.string("right")])
+                .isSuccess
+        )
+        #expect(core.activeSpace?.focused == w3)
+    }
+
     @Test("Cross-axis directions fall through to geometry")
     func crossAxisFallsThrough() {
         let core = makeMonocleCore()

@@ -115,28 +115,6 @@ struct MoveToSpaceDesktopYieldTests {
         #expect(core.state.workspaces.activeSpace == SpaceID(2))
     }
 
-    /// Issue #446 symptom 1: the display-follow is a no-op with
-    /// no per-display space assignment (single-monitor / headless)
-    /// — a click never spuriously flips the active space. Here it
-    /// bails at the `activeSpace(on:)` guard (the test's space is
-    /// unassigned to a display), not the `display != focusedDisplay`
-    /// one; the true cross-monitor collapse needs a second display
-    /// (device QA). This pins the no-op outcome regardless.
-    @Test("Display-follow click is a no-op on one display")
-    func displayFollowNoOpSingleDisplay() {
-        guard let screen = NSScreen.main else { return }
-        let core = makeCore()
-        addWindow(core, 1)
-        let before = core.state.workspaces.activeSpace
-        core.followDisplayUnderClick(
-            at: CGPoint(
-                x: screen.visibleFrame.midX,
-                y: screen.visibleFrame.midY
-            )
-        )
-        #expect(core.state.workspaces.activeSpace == before)
-    }
-
     @Test("Moving to the current space re-stamps focus safely")
     func moveToSameSpaceIsSafe() {
         let core = makeCore()

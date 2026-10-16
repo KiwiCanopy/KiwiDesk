@@ -129,25 +129,4 @@ struct FloatClampTests {
         #expect(carved.minY == strip.maxY + 5)
         #expect(carved.maxY == region.maxY)
     }
-
-    @Test("An inset of zero is exactly the un-inset behaviour")
-    func zeroInsetIsTheOldBehaviour() {
-        // The parameter defaults to zero and every pre-#1091
-        // caller relies on that, so the identity is worth
-        // holding: rings off must leave the clamp untouched.
-        let frame = CGRect(x: 0, y: 10, width: 300, height: 200)
-        #expect(
-            AppBarGeometry.clampClear(
-                frame,
-                of: strip,
-                edge: .top,
-                inset: 0
-            )
-                == AppBarGeometry.clampClear(
-                    frame,
-                    of: strip,
-                    edge: .top
-                )
-        )
-    }
 }

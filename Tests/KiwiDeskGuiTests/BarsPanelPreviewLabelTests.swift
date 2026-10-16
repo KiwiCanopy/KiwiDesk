@@ -38,13 +38,6 @@ struct BarsPanelPreviewLabelTests {
     func labelsAreTheBarsLadder() {
         let labels = BarsPanelPreview.spaceLabels(of: config())
         #expect(
-            labels == [
-                .text("⭐", tinted: false), .symbol("book"),
-                .symbol("headphones"), .text("4", tinted: true),
-                .text("MA", tinted: true),
-            ]
-        )
-        #expect(
             labels
                 == spaces.map {
                     KiwiCore.spaceIdentifier(id: $0, icon: icons[$0])

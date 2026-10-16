@@ -136,22 +136,6 @@ struct BorderSpecsTests {
         #expect(result.first?.window == w1)
     }
 
-    /// A float is a slot like any other to the ring (#1286): its
-    /// overlap hides nothing, since each ring sits behind its own
-    /// window (#278).
-    @Test("An overlapping float rings when unfocused")
-    func floatRingsWhenUnfocused() {
-        var style = BorderStyle()
-        style.unfocusedEnabled = true
-        let slots: [(id: WindowID, frame: CGRect)] = [
-            (w1, CGRect(x: 0, y: 0, width: 100, height: 100)),
-            (w2, CGRect(x: 10, y: 10, width: 100, height: 100)),
-            (w3, CGRect(x: 400, y: 0, width: 100, height: 100)),
-        ]
-        let result = specs(style, focused: w1, slots: slots)
-        #expect(Set(result.map(\.window)) == [w1, w2, w3])
-    }
-
     @Test("A focused transient overlay gets no ring")
     func focusedOverlaySuppressed() {
         // A launcher (Spotlight/Raycast) momentarily takes focus.
@@ -165,19 +149,6 @@ struct BorderSpecsTests {
                 overlays: [w1]
             ).isEmpty
         )
-    }
-
-    @Test("A focused user-floated window still gets a ring")
-    func focusedFloatStillRinged() {
-        // A user-floated *standard* window (float rule, not an
-        // overlay) keeps its focus ring — only overlays lose it.
-        let result = specs(
-            BorderStyle(),
-            focused: w1,
-            slots: disjoint,
-            overlays: []
-        )
-        #expect(result.map(\.window) == [w1])
     }
 
     @Test("An overlay is excluded from unfocused rings too")

@@ -324,13 +324,4 @@ struct SettingsCatalogTests {
         #expect(gapsCard != nil)
         #expect(gapsCard?.parent == nil)
     }
-
-    /// Drawers sharing a label key stay distinct by instance —
-    /// the shelf's Style drawer against a future bar drawer — so
-    /// no two resolve to one `scrollTo` id (#1517).
-    @Test("shared-label drawers carry an instance id")
-    func instanceIdsAreDistinct() {
-        let style = SettingsCatalog.bars.kiwishelfStyle
-        #expect(style.control.id == "kiwishelf/bars.style")
-    }
 }

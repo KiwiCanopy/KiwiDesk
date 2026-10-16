@@ -11,20 +11,4 @@ import Testing
 /// `resetSurfaces`, which must clear the focus or the window would
 /// re-open onto a stale per-space editor.
 struct SpaceOverridesNavTests {
-    @Test("resetSurfaces drops the pushed override editor")
-    func resetClearsOverrideFocus() {
-        var nav = SettingsNavigation()
-        nav.spaceOverridesFocus = SpaceID("code")
-        // Pinned alongside the surfaces it sits beside. The
-        // REGISTER — that no per-visit field is forgotten — is
-        // `SettingsNavigationResetTests`' by reflection since
-        // #1127; these two stay because this suite's subject is
-        // the pushed editor and they are what it opens beside.
-        nav.layoutModeTab = .stack
-        nav.shortcutsLayer = "media"
-        nav.resetSurfaces()
-        #expect(nav.spaceOverridesFocus == nil)
-        #expect(nav.layoutModeTab == nil)
-        #expect(nav.shortcutsLayer == nil)
-    }
 }

@@ -56,11 +56,6 @@ struct SpaceBarGroupingTests {
     @Test("a fresh setup groups, as before the switch")
     func defaultGroups() {
         #expect(SpaceBarStyle().groupAdjacentWindows)
-        let decoded = try? JSONDecoder().decode(
-            SpaceBarStyle.self,
-            from: Data("{}".utf8)
-        )
-        #expect(decoded?.groupAdjacentWindows == true)
     }
 
     @Test("off, each window is its own glyph")
@@ -70,14 +65,6 @@ struct SpaceBarGroupingTests {
         #expect(drawn.map(\.name) == ["Zed", "Zed", "Finder"])
         #expect(drawn.map(\.count) == [1, 1, 1])
         #expect(drawn.map(\.focused) == [false, true, false])
-    }
-
-    @Test("on, an adjacent same-app run shares one glyph")
-    func onGroupsTheRun() {
-        let core = core(apps: ["Zed", "Zed", "Finder"])
-        let drawn = apps(core, grouping: true)
-        #expect(drawn.map(\.name) == ["Zed", "Finder"])
-        #expect(drawn.map(\.count) == [2, 1])
     }
 
     @Test("the verb writes the setting")

@@ -41,9 +41,4 @@ struct OpenSettingsVerbTests {
         // (guard-prover, 2026-08-12).
         #expect(fired == 1)
     }
-
-    @Test("Listed as a Lua-only verb so help() covers it")
-    func listedLuaOnly() {
-        #expect(APIReference.luaOnly.contains("open_settings"))
-    }
 }

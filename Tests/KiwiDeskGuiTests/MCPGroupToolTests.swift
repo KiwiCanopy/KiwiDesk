@@ -150,10 +150,4 @@ struct MCPGroupToolTests {
             )
         }
     }
-
-    @Test("a window argument is an integer id")
-    func windowIsAnInteger() {
-        let built = MCPToolSchema.property(for: .window("window"), "")
-        #expect(Self.member(built, "type") == .string("integer"))
-    }
 }

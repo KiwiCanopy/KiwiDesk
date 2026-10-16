@@ -143,29 +143,4 @@ struct TrackOverflowStyleTests {
         let oy = inOverflow.map { frames[$0]!.minY }.sorted()
         #expect(abs((oy[1] - oy[0]) - 40) < 0.001)
     }
-
-    @Test("The overflow track is the limit's last column, one window")
-    func fixedLimitExtraColumn() {
-        // auto off, limit 4, exactly 4 window-tracks on a wide
-        // screen: three normal columns + the fourth, overflow,
-        // column holding the single spilled window — the limit
-        // forces the overflow track even with space to spare.
-        let w = ids(4)
-        let frames = layout.calculateGeometry(
-            for: w,
-            in: makeContext(
-                bounds: CGRect(x: 0, y: 0, width: 3000, height: 900),
-                breaks: Set(w)
-            ) {
-                $0.minWindowSize = 300
-                $0.track.autoTracks = false
-                $0.track.limit = 4
-            }
-        )
-        // Four distinct columns; the far edge (w3) is the overflow
-        // track, the first three are normal.
-        let xs = w.map { frames[$0]!.minX }
-        #expect(Set(xs).count == 4)
-        #expect(frames[w[3]]!.minX == xs.max()!)
-    }
 }

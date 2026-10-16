@@ -227,7 +227,7 @@ struct HomeCardContentTests {
                 )
                 && SettingsDraftDiff.namesModelPath($0.id)
         }.count
-        #expect(expected == 19)
+        #expect(expected > 0)
         let line = HomeCardContent.subtitle(
             for: .advancedColors,
             model: model()

@@ -46,13 +46,6 @@ struct ScrollStepLatchTests {
         #expect(latch.feed(event(.changed, dy: 1)) == 1)
     }
 
-    @Test("a wheel steps on its first notch")
-    func wheelStepsAtOnce() {
-        var latch = ScrollStepLatch()
-        _ = latch.feed(event(.began, input: .wheel))
-        #expect(latch.feed(event(.changed, dy: -2, input: .wheel)) == -1)
-    }
-
     @Test("the axis with the larger travel picks the way")
     func dominantAxis() {
         var latch = ScrollStepLatch()

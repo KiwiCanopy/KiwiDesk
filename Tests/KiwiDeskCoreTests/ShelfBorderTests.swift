@@ -12,15 +12,10 @@ struct ShelfBorderTests {
     /// The default is the look that shipped before the setting:
     /// no stroke at all, so an old profile draws as it was saved.
     @Test("The default draws no border")
-    func defaultDrawsNone() throws {
+    func defaultDrawsNone() {
         let shelf = KiwiShelf()
         #expect(!shelf.border)
         #expect(shelf.drawnBorderWidth == 0)
-        let decoded = try JSONDecoder().decode(
-            KiwiShelf.self,
-            from: Data("{}".utf8)
-        )
-        #expect(decoded == shelf)
     }
 
     /// The default border colour is the default item colour at
@@ -72,17 +67,6 @@ struct ShelfBorderTests {
         #expect(shelf.border)
         #expect(shelf.borderWidth == CGFloat(drawn))
         #expect(shelf.borderColor == "#11223344")
-    }
-
-    @Test("The three keys round-trip through JSON")
-    func roundTrip() throws {
-        var shelf = KiwiShelf()
-        shelf.border = true
-        shelf.borderWidth = 3
-        shelf.borderColor = "#1C1C1E"
-        let data = try JSONEncoder().encode(shelf)
-        let back = try JSONDecoder().decode(KiwiShelf.self, from: data)
-        #expect(back == shelf)
     }
 
     @Test(

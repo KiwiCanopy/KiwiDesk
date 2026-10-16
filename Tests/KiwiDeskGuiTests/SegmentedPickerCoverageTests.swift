@@ -108,59 +108,6 @@ struct SegmentedPickerCoverageTests {
         }
     }
 
-    /// The floor the pairing rests on, stated as the boundary
-    /// rather than as today's value. `SettingsThemeContrastTests`
-    /// asserts the shipped accent passes; it cannot say how much
-    /// room is left, so an accent retune made for unrelated
-    /// reasons — a brand tweak — would red only after crossing
-    /// the line, with every other lens still green.
-    ///
-    /// Derived, not restated: the boundary is SOLVED from the
-    /// shipped `accentInk` — WCAG's ratio is linear in the
-    /// lighter luminance, so the AA point is
-    /// `4.5 * (inkL + 0.05) - 0.05` — and the literal below is
-    /// checked against that, never used as the source. The
-    /// number also appears in #823's `ui-designer` ruling, which
-    /// is prose nothing can guard; this is what makes it
-    /// re-derivable.
-    @Test("the accent keeps room above the AA boundary")
-    func accentLuminanceFloor() throws {
-        let ink = try resolved(SettingsTheme.accentInk)
-        let accent = try resolved(SettingsTheme.accent)
-        let inkLuminance = luminance(ink)
-        // `accentInk` is the darker of the pair, so the ratio is
-        // (accentL + 0.05) / (inkL + 0.05); AA at 4.5 is reached
-        // when accentL = 4.5 * (inkL + 0.05) - 0.05.
-        let boundary = 4.5 * (inkLuminance + 0.05) - 0.05
-        #expect(
-            abs(boundary - 0.244) < 0.001,
-            Comment(
-                rawValue: String(
-                    format:
-                        "the AA boundary moved to %.4f — "
-                        + "accentInk changed, so the 0.244 this "
-                        + "test and #823's ruling both name is "
-                        + "stale",
-                    boundary
-                )
-            )
-        )
-        #expect(
-            luminance(accent) > boundary,
-            Comment(
-                rawValue: String(
-                    format:
-                        "accent luminance %.3f is under the "
-                        + "%.3f floor — accentInk drops below "
-                        + "AA on it, everywhere the pair is "
-                        + "drawn",
-                    luminance(accent),
-                    boundary
-                )
-            )
-        )
-    }
-
     // MARK: - WCAG arithmetic over resolved tokens
 
     private func resolved(

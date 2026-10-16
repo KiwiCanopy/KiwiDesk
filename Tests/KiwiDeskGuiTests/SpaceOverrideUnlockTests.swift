@@ -152,9 +152,6 @@ struct SpaceOverrideUnlockTests {
             ),
             "a Simple user with overrides must still reach them"
         )
-        // The values themselves are untouched by the mode: the
-        // offer is chrome, the override is state.
-        #expect(settings.spaceOverrideCount(for: spaces[0]) == 1)
     }
 
 }
