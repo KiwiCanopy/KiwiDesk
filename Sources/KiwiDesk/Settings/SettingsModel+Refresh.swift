@@ -76,28 +76,10 @@ extension SettingsModel {
         if ownerMoved || luaChangedOnDisk, !isDirty {
             reload()
         } else {
-            adoptLiveSettings()
+            // A live setting a verb moved while the window was away
+            // calls nothing back (#2262).
+            refreshUnsavedLive()
         }
-    }
-
-    /// A live setting a verb moved while the window was away calls
-    /// nothing back (#2262), so the draft takes it on both sides of
-    /// its diff — every leaf the draft did not edit — or its Save,
-    /// which applies the draft's settings whole, would put the old
-    /// value back over the change its pill lists as kept.
-    func adoptLiveSettings() {
-        let live = core.tiler.settings
-        if target == .live, !editingLua, live != cleanConfig.settings {
-            suppressDirty = true
-            config.settings = config.settings.rebased(
-                from: cleanConfig.settings,
-                onto: live
-            )
-            cleanConfig.settings = live
-            suppressDirty = false
-            recomputeDirty()
-        }
-        refreshUnsavedLive()
     }
 
     /// Re-reads what each draft binding loads (#1609). Owed by

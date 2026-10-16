@@ -79,9 +79,9 @@ struct SettingsLiveRowsTests {
     }
 
     /// Wiring the behaviour suites cannot see: Core is asked again
-    /// at the seed, a window-key return (which rebases the draft
-    /// onto live first — `SettingsLiveSaveTests` drives it), a
-    /// captured or adopted outside write; the one refresh gates on
+    /// at the seed, a window-key return, a captured or adopted
+    /// outside write — the rows' freshness, while the Save's own
+    /// rebase is `SettingsLiveSaveTests`'; the one refresh gates on
     /// the live target; the pill
     /// and the active profile's Save count a live row as work; the
     /// panel's draft list leaves live rows to the pill. Shape, not
@@ -95,18 +95,14 @@ struct SettingsLiveRowsTests {
                 "refreshProfiles()refreshUnsavedLive()"
             ],
             "SettingsModel+Refresh.swift": [
-                "}else{adoptLiveSettings()}",
-                "config.settings=config.settings.rebased("
-                    + "from:cleanConfig.settings,onto:live)"
-                    + "cleanConfig.settings=live",
-                "recomputeDirty()}refreshUnsavedLive()}",
+                "}else{refreshUnsavedLive()}"
             ],
             "SettingsModel+LiveWrite.swift": [
-                "guardpersistedelse{adoptLiveSettings()return}",
+                "guardpersistedelse{refreshUnsavedLive()return}",
                 "recomputeDirty()refreshUnsavedLive()}",
             ],
             "SettingsWindowController.swift": [
-                "model.adoptCapturedSpaces()}model.adoptLiveSettings()"
+                "model.adoptCapturedSpaces()}model.refreshUnsavedLive()"
             ],
             "SettingsDiffRowSource+Live.swift": [
                 "unsavedLive=target==.live&&!editingLua"

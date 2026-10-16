@@ -1401,9 +1401,9 @@ fact about its command*. The obligations:
   Settings' **Live, not saved** rows are the one ruled reader that
   holds no leaves (#2262): `unsavedLiveSettings` diffs the
   settings root itself and judges each leaf through the same
-  `KeepJudge`, and Settings asks it only where the live settings
-  or the draft's baseline can have moved — the seed, a window-key
-  return, an adopted outside write — never per render
+  `KeepJudge`, and Settings asks it again wherever the live
+  settings or the draft's baseline can have moved — which is
+  review's, the rows' freshness alone riding on it — never per render
   (`UnsavedLiveSettingsTests`, `SettingsLiveRowsTests` ▸
   `wiringReadsTheVerdict`). A further reader of that shape is a
   ruling here.
@@ -1600,14 +1600,14 @@ the newer act, wins (`BarMenuLandingTests`); a stored profile's
 draft is another file and takes nothing. An edit NO file took —
 no profile live, or the write failed — lasts the session, as the
 tour's click does, which means until a Save writes the draft: a
-clean draft still re-reads, the tour's shipped behaviour, and a
-dirty draft takes its settings on both sides of its diff through
-the one `adoptLiveSettings`, as it takes any live change, the
-draft's own edits rebased over them — the pill lists the value
-"Live, not saved", so taking it calls nothing saved, while
-leaving it would let the Save put the old value back over the
-row (#2262, `BarMenuLandingTests` ▸ `sessionOnlyWriteIsLive`,
-`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). A writer that paints
+clean draft still re-reads, the tour's shipped behaviour, while a
+dirty draft takes nothing of it, since taking it on both sides
+would call a session value saved
+(`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
+`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). Its Save
+still keeps the value: a Settings Save lays only the draft's own
+edits over live as it is at the Save (#2262,
+`SettingsLiveSaveTests`). A writer that paints
 more than the leaves it names — the tour's whole look — refuses
 while a live-profile draft is dirty instead
 (`OnboardingLooksTests` ▸ `draftBlocks`).

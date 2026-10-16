@@ -6976,10 +6976,13 @@ hands over. A second comparison in the GUI would list what no keep
 could write: an app-wide value, a temporary Space's leaf, a
 Lua-owned config.
 
-Save keeps the rows, because Save writes what live draws. Closing
-Settings reverts nothing live and never asks the leave question:
-these are not the window's edits. A setting the draft also edits
-is the draft's row alone, the newer act. Undoing a live row means
+Save keeps the rows, because a Settings Save lays only the draft's
+own edits over live as it is at the Save, never the settings it
+was seeded with — a whole-settings apply would put back every live
+change since, these rows among them. Closing Settings reverts
+nothing live and never asks the leave question: these are not the
+window's edits. A setting the draft also edits is the draft's row
+alone, since that edit is what its Save commits. Undoing a live row means
 applying the saved value live, a Core verb rather than a draft
 writeback, so it waits for per-row revert (#792), as does whether
 Revert all reaches live state.

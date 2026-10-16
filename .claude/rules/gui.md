@@ -1162,12 +1162,12 @@ must keep:
   over and never the draft's baseline, asked again through the one
   `refreshUnsavedLive` wherever live or that baseline can have
   moved (#2262, `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
-  `UnsavedLiveSettingsTests`) — and since a Settings Save applies
-  the draft's settings whole, a live setting that moved under an
-  open draft is taken on BOTH sides of its diff through the one
-  `adoptLiveSettings`, the draft's own edits rebased over it, or
-  Save reverts the change its row lists as kept
-  (`SettingsLiveSaveTests`). A surface deriving one of those
+  `UnsavedLiveSettingsTests`) — and a Settings Save lays only the
+  draft's own settings edits over live as it is AT the Save
+  (`TilingSettings.rebased`), never the draft's settings whole,
+  which would put back every live change since the seed, the
+  rows it lists as kept among them (`SettingsLiveSaveTests`). A
+  surface deriving one of those
   verdicts for itself is how the pill came to say "Unsaved
   changes" over an empty list, and no scan sees a second
   derivation, so that is review's. A surface stating an N beside

@@ -104,8 +104,7 @@ extension TilingSettings {
 
     /// `live` with every leaf where these settings differ from
     /// `base` taken from these — a draft's edits laid over the
-    /// settings live draws now, leaf by leaf (#2262). A leaf the
-    /// decoder refuses beside the others costs only itself.
+    /// settings live draws now, leaf by leaf (#2262).
     public func rebased(
         from base: TilingSettings,
         onto live: TilingSettings
@@ -118,9 +117,17 @@ extension TilingSettings {
                 forKey: path
             )
         }
-        guard !leaves.isEmpty else { return live }
-        if let whole = live.patched(leaves) { return whole }
-        var each = live
+        return live.patchedLeafByLeaf(leaves)
+    }
+
+    /// `patched`, where a leaf the decoder refuses beside the others
+    /// costs only itself.
+    func patchedLeafByLeaf(
+        _ leaves: [[String]: JSONValue?]
+    ) -> TilingSettings {
+        guard !leaves.isEmpty else { return self }
+        if let whole = patched(leaves) { return whole }
+        var each = self
         for (path, value) in leaves {
             if let one = each.patched([path: value]) { each = one }
         }

@@ -33,10 +33,12 @@ extension KiwiCore {
             KeepPointer.value(at: root, in: live),
             at: root
         )
+        // Every path differs, so none is stored; the verdict says
+        // whether a keep could write it.
         var leaves: [[String]: JSONValue?] = [:]
         for path in paths {
             guard let verdict = judge.verdict(of: path),
-                verdict.notKeepable == nil, !verdict.stored
+                verdict.notKeepable == nil
             else { continue }
             // `updateValue`: a nil subscript write would drop the
             // entry, and a stored absence is a value to put back.
@@ -46,18 +48,8 @@ extension KiwiCore {
             )
         }
         let current = tiler.settings
-        guard !leaves.isEmpty else { return nil }
-        var saved = current.patched(leaves)
-        if saved == nil {
-            // A leaf the decoder refuses beside the others costs
-            // only itself.
-            var each = current
-            for (path, value) in leaves {
-                if let one = each.patched([path: value]) { each = one }
-            }
-            saved = each
-        }
-        guard let saved, saved != current else { return nil }
+        let saved = current.patchedLeafByLeaf(leaves)
+        guard saved != current else { return nil }
         return UnsavedLiveSettings(saved: saved, live: current)
     }
 }
