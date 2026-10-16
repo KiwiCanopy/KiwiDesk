@@ -49,21 +49,26 @@ and every card and panel title is a heading for its rotor.
 
 ## The Status Bar Quick Menu
 
-A layout switched from the menu bar's **Layout** submenu is
-**session-only**: it does not rewrite the profile, and the menu
-shows a "not saved to profile" subtitle while it drifts. **Keep
-Layout in Profile "‹name›"** writes what is on screen, every
-screen at once, into the active profile — the layouts, not a
-keyboard or mouse resize, which is session-only. A Settings
-Save does not
-touch a temporary layout, which stays on screen through it; the
-one exception is a Space whose layout you changed in **Settings
-→ Spaces**, which wins on Save.
+:::unreleased
+**Open KiwiHub…** opens KiwiHub on its view picker
+([`kiwihub.show`](lua-reference.md#kiwihubshow)), the side `⌃⌥L`
+opens, and shows that side's shortcut beside it. While KiwiDesk
+is starting, or until you press **Start Tiling**, the row still
+opens it, with the view picker's items greyed and the reason
+shown.
 
-With more than one screen the submenu nests: **All Screens**
-first, then a row per screen in desk order. A layout belongs to
-a Space, so a screen's row sets the layout of whatever Space is
-showing there.
+A layout switched from the view picker, or from a Space's
+right-click **Layout** menu, is **session-only**: it does not
+rewrite the profile, and both say "not saved to profile" while
+it drifts. **Keep in Profile "‹name›"** (`⌘S` in the view
+picker), or **Keep Layout in Profile "‹name›"** in the Layout
+menu, writes what is on screen, every screen at once, into the
+active profile — the layouts, not a keyboard or mouse resize,
+which is session-only. A Settings Save does not touch a
+temporary layout, which stays on screen through it; the one
+exception is a Space whose layout you changed in **Settings →
+Spaces**, which wins on Save.
+:::
 
 KiwiDesk checks for updates on its own in the background, and a
 found update shows as a dot on the menu-bar icon and an
