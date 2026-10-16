@@ -103,6 +103,12 @@ struct SettingsCodingTests {
         // `mouse.set_hover_focus` → `mouse.hover_focus` (#1869),
         // off by default.
         #expect(mouse["hover_focus"] as? Bool == false)
+        // `mouse.set_hover_focus_delay` → `mouse.hover_focus_delay`
+        // (#1869), in milliseconds.
+        #expect(
+            mouse["hover_focus_delay"] as? Int
+                == MouseSettings.defaultHoverFocusDelayMS
+        )
         // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
         // (#172), on by default.
         #expect(root["swap_skips_cascade"] as? Bool == true)

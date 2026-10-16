@@ -2957,7 +2957,12 @@ already has the focus and the two never loop. A dwell timed from
 ENTERING a window would steal focus whenever the hand crossed a
 wide window slowly; a rest is blind to window size. It is longer
 than the bar peek's dwell because a peek is a label and a focus
-redirects typing.
+redirects typing. The GUI keeps it fixed and Lua may tune it
+(`mouse.set_hover_focus_delay`): the GUI curates, and a user coming
+from an immediate trigger, or crossing windows on a trackpad, has a
+real reason to move it. It is per-profile because its switch is:
+a switch and its timing kept in different stores would disagree,
+and moving the `mouse` group app-wide is its own crossing.
 
 **The target is whatever the WindowServer composites in front at
 the pointer**, read through the one front-to-back seam, and only

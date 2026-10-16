@@ -218,6 +218,7 @@ public enum APIReference {
         ],
         "mouse": [
             "set_follows_focus", "set_hover_focus",
+            "set_hover_focus_delay",
         ],
         "scroll_gesture": [
             "set_pan", "set_space_step", "set_natural_scrolling",

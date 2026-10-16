@@ -179,18 +179,20 @@ extension KiwiCore {
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
-        guard let enabled = args.first?.boolValue else {
-            return .fail("expected boolean")
-        }
         switch command {
         case "mouse.set_follows_focus":
-            tiler.settings.mouse.followsFocus = enabled
+            return setBool(args) { tiler.settings.mouse.followsFocus = $0 }
         case "mouse.set_hover_focus":
-            tiler.settings.mouse.hoverFocus = enabled
+            return setBool(args) { tiler.settings.mouse.hoverFocus = $0 }
+        case "mouse.set_hover_focus_delay":
+            guard let ms = args.first?.intValue, ms >= 0 else {
+                return .fail("expected milliseconds, 0 or more")
+            }
+            tiler.settings.mouse.hoverFocusDelayMS = ms
+            return .ok()
         default:
             return .fail("unknown command: \(command)")
         }
-        return .ok()
     }
 
     /// `quit.*` teardown placement (#197), app-wide (#1741) and

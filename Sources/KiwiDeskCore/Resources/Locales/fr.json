@@ -394,6 +394,7 @@
   "diff.label.float_placement": "Position au flottement",
   "diff.label.float_scale_on_display_change": "Adapter les flottantes entre écrans",
   "diff.label.gap_override": "Surcharge d'écarts",
+  "diff.label.hover_focus_delay": "Délai du focus à l'arrêt du pointeur",
   "diff.label.ignore_rule": "Règle d'exclusion",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Calque",

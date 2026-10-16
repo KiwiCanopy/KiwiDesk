@@ -9,11 +9,11 @@ import AppKit
 /// move armed with (input-and-animation.md).
 @MainActor
 public final class PointerRest {
-    /// How long the pointer rests before the consumer is asked.
-    /// Longer than the bar peek's dwell: focus and raise redirect
-    /// typing where a peek only labels, and 200 ms rides out a
-    /// trackpad re-clutch mid-travel (#1869 design read).
-    static let dwell: Duration = .milliseconds(200)
+    /// How long the pointer rests before the consumer is asked —
+    /// `mouse.hover_focus_delay`, written through `apply`.
+    var dwell: Duration = .milliseconds(
+        MouseSettings.defaultHoverFocusDelayMS
+    )
     /// Motion within this many points of the last rest is jitter.
     static let stillRadius: CGFloat = 4
 
@@ -49,6 +49,13 @@ public final class PointerRest {
 
     /// Whether the mouse-moved monitor is installed.
     var isListening: Bool { monitor != nil }
+
+    /// The one door from the settings (#1869): the delay and the
+    /// switch together, so a new field the rest reads joins here.
+    public func apply(_ settings: MouseSettings) {
+        dwell = .milliseconds(settings.hoverFocusDelayMS)
+        setEnabled(settings.hoverFocus)
+    }
 
     /// The consumer's switch; the monitor is installed only while
     /// it is on and the tracker runs, so an off setting costs no
@@ -89,7 +96,8 @@ public final class PointerRest {
         lastMove = point
         timer?.cancel()
         timer = Task { [weak self] in
-            try? await Task.sleep(for: Self.dwell)
+            guard let dwell = self?.dwell else { return }
+            try? await Task.sleep(for: dwell)
             guard !Task.isCancelled else { return }
             self?.rest()
         }

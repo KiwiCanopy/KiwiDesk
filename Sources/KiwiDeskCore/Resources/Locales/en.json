@@ -394,6 +394,7 @@
   "diff.label.float_placement": "Float placement",
   "diff.label.float_scale_on_display_change": "Scale floats across screens",
   "diff.label.gap_override": "Gap override",
+  "diff.label.hover_focus_delay": "Hover focus delay",
   "diff.label.ignore_rule": "Ignore rule",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Layer",
