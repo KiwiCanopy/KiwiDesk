@@ -67,24 +67,71 @@ struct FloatRaiseLandingWiringTests {
         }
     }
 
-    /// The owed raise is paid where the tiled plane comes to rest:
-    /// the settle, an owed pass drawing with nothing to animate,
-    /// and a tiled restore's completion. No unit test reaches the
-    /// restore's drain or the live settle, and a lost payment
-    /// leaves the floats buried with every behaviour test green.
+    /// The owed raise is paid where the tiled plane comes to rest,
+    /// through the one `tiledPlaneCameToRest` (#2343): the settle,
+    /// an owed pass drawing with nothing to animate, and a tiled
+    /// restore's completion. No unit test reaches the restore's
+    /// drain or the live settle, and a lost payment leaves the
+    /// floats buried with every behaviour test green.
     @Test("The owed float raise is paid at every rest")
     func debtIsPaidAtRest() throws {
-        let settle = try SourceScan.functionBody(
-            of: "animationsDidSettle",
-            in: "KiwiCore+Settle.swift",
-            under: "App"
+        let core = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        let door = try SourceScan.functionBody(
+            of: "tiledPlaneCameToRest",
+            in: "KiwiCore+FloatRaiseDebt.swift",
+            under: "Commands"
         )
-        let restore = settle.range(of: "runPendingZOrderRestore()")
-        let paid = settle.range(of: "runPendingFloatRaise()")
-        #expect(restore != nil)
-        #expect(paid != nil)
-        if let restore, let paid {
-            #expect(restore.lowerBound < paid.lowerBound)
+        // The restore, then the focus raise, then the floats.
+        let order = [
+            "runPendingZOrderRestore()",
+            "runPendingFocusRaise()",
+            "runPendingFloatRaise()",
+        ].map { door.range(of: $0)?.lowerBound }
+        #expect(!order.contains(nil), "door pays all three")
+        let found = order.compactMap { $0 }
+        #expect(found == found.sorted(), "door pays in order")
+        // The payer is spelled at the door alone.
+        var payers: [String: Int] = [:]
+        for url in try SourceScan.swiftSources(under: core) {
+            let source = try SourceScan.strippedSource(at: url)
+            let hits =
+                source.components(separatedBy: "runPendingFloatRaise(")
+                .count - 1
+            if hits > 0 { payers[url.lastPathComponent] = hits }
+        }
+        #expect(
+            payers == ["KiwiCore+FloatRaiseDebt.swift": 2],
+            "the float raise is paid beside the door: \(payers)"
+        )
+        // Each rest site takes the door with its own payments.
+        let rests = [
+            (
+                "App/KiwiCore+Settle.swift",
+                "tiledPlaneCameToRest(restore:true,focusRaise:true)"
+            ),
+            (
+                "App/KiwiCore+Retile.swift",
+                "ifpaying,tiler.animation.activeCount==0{"
+                    + "tiledPlaneCameToRest(restore:true,focusRaise:false)}"
+            ),
+            (
+                "App/KiwiCore+MotionCause.swift",
+                "ifself.tiler.animation.activeCount==0{"
+                    + "self.tiledPlaneCameToRest(restore:true,"
+                    + "focusRaise:false)}"
+            ),
+            (
+                "Commands/KiwiCore+ZOrder.swift",
+                "defer{self.tiledPlaneCameToRest(restore:false,"
+                    + "focusRaise:false)}"
+            ),
+        ]
+        for (file, needle) in rests {
+            let source = try SourceScan.strippedSource(
+                at: core.appendingPathComponent(file)
+            ).filter { !$0.isWhitespace }
+            #expect(source.contains(needle), "\(file)")
         }
         let restoreSequence = try SourceScan.functionBody(
             of: "raiseSequentially",
@@ -99,9 +146,7 @@ struct FloatRaiseLandingWiringTests {
         )
         // Ahead of the staleness guard, or a superseded restore
         // never pays the debt it held up.
-        let pays = restoreSequence.range(
-            of: "defer { self.runPendingFloatRaise() }"
-        )
+        let pays = restoreSequence.range(of: "tiledPlaneCameToRest(")
         let stale = restoreSequence.range(
             of: "guard generation == self.zOrderRaiseGeneration.value"
         )
@@ -109,30 +154,6 @@ struct FloatRaiseLandingWiringTests {
         #expect(stale != nil)
         if let pays, let stale {
             #expect(pays.lowerBound < stale.lowerBound)
-        }
-        // An owed pass drawn with nothing to animate pays both, the
-        // restore first, inside the same quiet branch.
-        let paysAtRest = [
-            (
-                "KiwiCore+Retile.swift",
-                "ifpaying,tiler.animation.activeCount==0{"
-                    + "runPendingZOrderRestore()"
-                    + "runPendingFloatRaise()}"
-            ),
-            (
-                "KiwiCore+MotionCause.swift",
-                "ifself.tiler.animation.activeCount==0{"
-                    + "self.runPendingZOrderRestore()"
-                    + "self.runPendingFloatRaise()}"
-            ),
-        ]
-        for (file, needle) in paysAtRest {
-            let source = try SourceScan.strippedSource(
-                at: SourceScan.repoRoot(from: #filePath)
-                    .appendingPathComponent("Sources/KiwiDeskCore/App")
-                    .appendingPathComponent(file)
-            ).filter { !$0.isWhitespace }
-            #expect(source.contains(needle), "\(file)")
         }
     }
 }

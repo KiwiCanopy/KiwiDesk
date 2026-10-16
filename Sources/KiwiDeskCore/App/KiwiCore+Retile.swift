@@ -79,8 +79,7 @@ extension KiwiCore {
         // pass's settle, or runs now when nothing animates.
         defer {
             if paying, tiler.animation.activeCount == 0 {
-                runPendingZOrderRestore()
-                runPendingFloatRaise()
+                tiledPlaneCameToRest(restore: true, focusRaise: false)
             }
         }
         // Session weights are validated at WRITE time against
