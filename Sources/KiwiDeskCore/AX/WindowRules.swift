@@ -18,23 +18,38 @@ public struct FloatRules: Sendable, Equatable {
 
     public init(_ rules: [String] = [], guess: FloatGuess = FloatGuess()) {
         self.guess = guess
-        self.rules = rules.map { rule in
-            let parts = rule.split(
-                separator: ":",
-                maxSplits: 1
-            )
-            let title = parts.count == 2 ? String(parts[1]) : nil
-            return (Self.app(of: rule), title)
-        }
+        self.rules = rules.map(Self.parse)
     }
 
-    /// The app a float rule names, case-folded: the rule itself,
-    /// or the segment before an `app:title` rule's colon — the one
-    /// key the engine, the profile reach and the Float list match
-    /// on (#2345).
-    public static func app(of rule: String) -> String {
+    /// A float rule's grammar, read once: `app`, or `app:title`
+    /// with a non-empty title fragment — a rule ending in a bare
+    /// colon is a bare app. The app is case-folded through
+    /// `appKey`; the fragment keeps its case. Every reading of a
+    /// rule — the engine's, the profile reach's, the Float list's
+    /// — derives from this, so none can split it differently
+    /// (#2345).
+    public static func parse(
+        _ rule: String
+    ) -> (app: String, title: String?) {
         let parts = rule.split(separator: ":", maxSplits: 1)
-        return appKey(parts.count == 2 ? String(parts[0]) : rule)
+        guard parts.count == 2 else { return (appKey(rule), nil) }
+        return (appKey(String(parts[0])), String(parts[1]))
+    }
+
+    /// The app a float rule names (`parse`).
+    public static func app(of rule: String) -> String {
+        parse(rule).app
+    }
+
+    /// The title fragment a float rule matches, nil for a rule
+    /// that floats every window of its app (`parse`).
+    public static func title(of rule: String) -> String? {
+        parse(rule).title
+    }
+
+    /// A rule spelled from its parts, the grammar `parse` reads.
+    public static func rule(app: String, title: String?) -> String {
+        title.map { "\(app):\($0)" } ?? app
     }
 
     /// A bundle id as a float rule's app is keyed.
@@ -46,27 +61,20 @@ public struct FloatRules: Sendable, Equatable {
     /// ids compare case-insensitively, while title fragments
     /// keep their case-sensitive matching semantics.
     public static func normalizedRule(_ rule: String) -> String {
-        let parts = rule.split(separator: ":", maxSplits: 1)
-        guard parts.count == 2 else { return app(of: rule) }
-        return app(of: rule) + ":" + String(parts[1])
+        let parsed = parse(rule)
+        return Self.rule(app: parsed.app, title: parsed.title)
     }
 
     /// Rules as normalized for matching and config seeding.
     public var rawRules: [String] {
-        rules.map(Self.spelled)
+        rules.map { Self.rule(app: $0.app, title: $0.title) }
     }
 
     /// `bundleID`'s own rules, spelled as `rawRules` spells them.
     public func rules(of bundleID: String) -> [String] {
         let app = Self.appKey(bundleID)
-        return rules.filter { $0.app == app }.map(Self.spelled)
-    }
-
-    /// A rule as `app` or `app:title`, the grammar `init` parses.
-    private static func spelled(_ rule: (app: String, title: String?))
-        -> String
-    {
-        rule.title.map { "\(rule.app):\($0)" } ?? rule.app
+        return rules.filter { $0.app == app }
+            .map { Self.rule(app: $0.app, title: $0.title) }
     }
 
     /// Cheap gate before title-change float detection.

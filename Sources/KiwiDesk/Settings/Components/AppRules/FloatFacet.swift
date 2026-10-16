@@ -16,13 +16,13 @@ enum FloatFacet: Equatable {
     case titled
 
     /// Whether a float rule matches by title rather than floating
-    /// every window, split as the engine splits it — a rule ending
-    /// in a bare colon carries no fragment and is no title rule
-    /// (#2345). The one spelling of the marker test, so
-    /// `AppRuleTitleOffer` cannot read the colon differently from
-    /// `current(_:app:)` (architect review, 2026-09-22).
+    /// every window, read through the engine's own
+    /// `FloatRules.parse` (#2345). The one spelling of the marker
+    /// test, so `AppRuleTitleOffer` cannot read the colon
+    /// differently from `current(_:app:)` (architect review,
+    /// 2026-09-22).
     static func isTitled(_ rule: String) -> Bool {
-        rule.split(separator: ":", maxSplits: 1).count == 2
+        FloatRules.title(of: rule) != nil
     }
 
     /// The app a float rule names, as the engine keys it.
@@ -47,9 +47,7 @@ enum FloatFacet: Equatable {
         _ rules: [String],
         app: String
     ) -> [String] {
-        Self.rules(rules, app: app).filter(isTitled).compactMap {
-            $0.split(separator: ":", maxSplits: 1).last.map(String.init)
-        }
+        Self.rules(rules, app: app).compactMap(FloatRules.title(of:))
     }
 
     /// `rules` with `app`'s title patterns set to `patterns`: a
@@ -65,12 +63,12 @@ enum FloatFacet: Equatable {
         let old = Self.patterns(rules, app: app)
         let dropped = Set(old.filter { !patterns.contains($0) })
         var kept = rules.filter { rule in
-            let rule = FloatRules.normalizedRule(rule)
-            return rule != app
-                && !dropped.contains { rule == "\(app):\($0)" }
+            let parsed = FloatRules.parse(rule)
+            guard parsed.app == app else { return true }
+            return parsed.title.map { !dropped.contains($0) } ?? false
         }
         for pattern in patterns where !old.contains(pattern) {
-            kept.append("\(app):\(pattern)")
+            kept.append(FloatRules.rule(app: app, title: pattern))
         }
         return kept
     }

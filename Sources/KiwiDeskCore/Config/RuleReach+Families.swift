@@ -57,12 +57,12 @@ extension RuleReachTable where Value == [String] {
             let rules = override?.rules ?? [:]
             let apps = Set(
                 rules.filter { $0.value != false }.keys.map {
-                    app(of: FloatRules.normalizedRule($0))
+                    app(of: $0)
                 }
             )
             for app in apps {
                 let subset = rules.filter {
-                    Self.app(of: FloatRules.normalizedRule($0.key)) == app
+                    Self.app(of: $0.key) == app
                 }
                 let inherited = grouped[app] ?? []
                 let resolved = RuleListOverride(rules: subset)
@@ -91,7 +91,7 @@ extension RuleReachTable where Value == [String] {
         guard !baseTouched.isEmpty else { return original }
         var result = original.filter {
             !baseTouched.contains(
-                Self.app(of: FloatRules.normalizedRule($0))
+                Self.app(of: $0)
             )
         }
         for app in baseTouched.sorted() {
@@ -113,7 +113,7 @@ extension RuleReachTable where Value == [String] {
             .union(baseTouched.filter { own[$0] != nil })
         guard !apps.isEmpty else { return original }
         var rules = (original?.rules ?? [:]).filter {
-            !apps.contains(Self.app(of: FloatRules.normalizedRule($0.key)))
+            !apps.contains(Self.app(of: $0.key))
         }
         for app in apps {
             guard let entry = own[app] else { continue }
