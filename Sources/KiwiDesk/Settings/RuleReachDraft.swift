@@ -47,11 +47,13 @@ struct RuleReachEdits: Equatable {
     var layers: [String: LayerEdit] = [:]
     /// Stored layers the draft deleted, and how far.
     var deletedLayers: [String: RuleRemoval] = [:]
+    /// The lens page's draft (#2103), nil while it changes nothing.
+    var lenses: LensEdits?
 
     var isEmpty: Bool {
         reach.values.allSatisfy(\.isEmpty)
             && removal.values.allSatisfy(\.isEmpty)
-            && layers.isEmpty && deletedLayers.isEmpty
+            && layers.isEmpty && deletedLayers.isEmpty && lenses == nil
     }
 }
 

@@ -234,7 +234,21 @@ extension SettingsModel {
     /// override is left to its Save's diff (`overwriteProfile`),
     /// which carries its layer structure too.
     func saveRuleReach() -> RuleReachWrite {
-        guard let reach = encodedReach, reach.isEdited else {
+        var written = RuleReachWrite.nothing
+        // The lenses after their chords and marks, ahead of every
+        // gui.json write of the Save — on every door (#2103).
+        core.withLensReachHeld {
+            written = writeRuleReach()
+            if written != .failed { saveLensHalf() }
+        }
+        return written
+    }
+
+    private func writeRuleReach() -> RuleReachWrite {
+        // With no page — a built-in live — the layered snapshot
+        // carries the lens crossings alone.
+        guard let reach = encodedReach ?? layeredReach, reach.isEdited
+        else {
             return .nothing
         }
         do {
