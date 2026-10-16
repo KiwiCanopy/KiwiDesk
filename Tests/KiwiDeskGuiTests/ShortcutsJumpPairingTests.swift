@@ -36,6 +36,10 @@ struct ShortcutsJumpPairingTests {
                 ShortcutsRowOrder.focusAtRest
             ),
             (
+                "ShortcutsRowOrder.kiwiVisionAtRest",
+                ShortcutsRowOrder.kiwiVisionAtRest
+            ),
+            (
                 "ShortcutsRowOrder.moveWindowsAtRest",
                 ShortcutsRowOrder.moveWindowsAtRest
             ),

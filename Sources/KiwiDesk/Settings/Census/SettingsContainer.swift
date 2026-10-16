@@ -35,6 +35,9 @@ enum SettingsContainer: CaseIterable, Hashable {
     /// Shortcuts' KiwiHub group: the key panel's three sides
     /// (#2265).
     case kiwiHub
+    /// Shortcuts' KiwiVision group: its toggle and, with #2103
+    /// v3, each lens's (#2312).
+    case kiwiVisionShortcuts
     case kiwishelf
     case appliesImmediately
     case layers
@@ -102,6 +105,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .grid, .kiwiHub,
+            .kiwiVisionShortcuts,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .layout,
             .looks, .luaBindings,
