@@ -60,7 +60,9 @@ struct HoverFocusDelayTests {
         #expect(try delay(#"{"mouse":{"hover_focus_delay":-5}}"#) == 0)
     }
 
-    @Test("The rest's timer waits its dwell and then rests")
+    /// That the timer waits `dwell` at all is the gap test's below;
+    /// this one holds that a rest the timer fires is delivered.
+    @Test("The rest's timer fires a rest")
     func timerWaitsTheDwell() async {
         let rest = PointerRest()
         rest.dwell = .zero
@@ -91,5 +93,19 @@ struct HoverFocusDelayTests {
         #expect(!rested)
         #expect(rest.isArmed)
         rest.stop()
+    }
+
+    @Test("Settings reach the rest through its one door")
+    func applyTakesDelayAndSwitch() {
+        let rest = PointerRest()
+        var settings = MouseSettings()
+        settings.hoverFocus = true
+        settings.hoverFocusDelayMS = 75
+        rest.apply(settings)
+        #expect(rest.dwell == .milliseconds(75))
+        #expect(rest.isEnabled)
+        settings.hoverFocus = false
+        rest.apply(settings)
+        #expect(!rest.isEnabled)
     }
 }

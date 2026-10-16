@@ -12,7 +12,7 @@ public struct MouseSettings: Sendable, Equatable, Codable {
     /// milliseconds (`mouse.hover_focus_delay`, Lua-only, #1869);
     /// never negative.
     public var hoverFocusDelayMS = Self.defaultHoverFocusDelayMS {
-        didSet { hoverFocusDelayMS = max(0, hoverFocusDelayMS) }
+        didSet { hoverFocusDelayMS = Self.clampedDelay(hoverFocusDelayMS) }
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -25,6 +25,9 @@ public struct MouseSettings: Sendable, Equatable, Codable {
     /// typing where a peek only labels, and 200 ms rides out a
     /// trackpad re-clutch mid-travel (#1869 design read).
     public static let defaultHoverFocusDelayMS = 200
+
+    /// The delay's one floor: a stored negative is no delay.
+    static func clampedDelay(_ ms: Int) -> Int { max(0, ms) }
 
     public init() {}
 
@@ -45,8 +48,7 @@ public struct MouseSettings: Sendable, Equatable, Codable {
                 Bool.self,
                 forKey: .hoverFocus
             ) ?? false
-        hoverFocusDelayMS = max(
-            0,
+        hoverFocusDelayMS = Self.clampedDelay(
             try container.decodeIfPresent(
                 Int.self,
                 forKey: .hoverFocusDelayMS

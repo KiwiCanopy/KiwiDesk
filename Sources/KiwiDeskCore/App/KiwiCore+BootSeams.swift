@@ -94,15 +94,9 @@ extension KiwiCore {
         }
         mouse.rest.noteArm = { [weak self] in self?.focusedWindowID }
         tiler.onMouseSettings = { [weak self] settings in
-            self?.mouse.rest.dwell = .milliseconds(
-                settings.hoverFocusDelayMS
-            )
-            self?.mouse.rest.setEnabled(settings.hoverFocus)
+            self?.mouse.rest.apply(settings)
         }
-        mouse.rest.dwell = .milliseconds(
-            tiler.settings.mouse.hoverFocusDelayMS
-        )
-        mouse.rest.setEnabled(tiler.settings.mouse.hoverFocus)
+        mouse.rest.apply(tiler.settings.mouse)
         // Both memories from ONE reading (#888): the authority
         // the switch handler compares against, and the
         // per-display Spaces it diffs against. Seeding only the
