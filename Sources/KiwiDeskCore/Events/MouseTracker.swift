@@ -1,9 +1,10 @@
 import AppKit
 
-/// Pointer input, two jobs: left-button presses for gesture
+/// Pointer input: left-button presses for gesture
 /// classification and display focus (#446, #953), and — through
-/// `scroll` — the scroll-gesture tap, whose lifetime follows
-/// this tracker's `start`/`stop` (#1656, #1519).
+/// `scroll` and `rest` — the scroll-gesture tap and the pointer
+/// rest, whose lifetimes follow this tracker's `start`/`stop`
+/// (#1656, #1519, #1869).
 @MainActor
 public final class MouseTracker {
     public struct Press {
@@ -27,6 +28,8 @@ public final class MouseTracker {
     public private(set) var press: Press?
     /// Scroll gestures (#1656, #1519).
     public let scroll = ScrollGestures()
+    /// The pointer coming to rest, hover focus's trigger (#1869).
+    public let rest = PointerRest()
 
     /// Which mouse buttons are down, as a mask — the one home
     /// in Core for `NSEvent.pressedMouseButtons` (#1103/#1199).
@@ -118,6 +121,7 @@ public final class MouseTracker {
 
     public func start() {
         scroll.start()
+        rest.start()
         guard monitors.isEmpty else { return }
         let down = NSEvent.addGlobalMonitorForEvents(
             matching: .leftMouseDown
@@ -216,6 +220,7 @@ public final class MouseTracker {
         monitors = []
         press = nil
         scroll.stop()
+        rest.stop()
     }
 
     /// The one fan-out (#1281): both arms deliver through it,

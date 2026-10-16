@@ -68,6 +68,9 @@ struct MouseButtonSeamGuardTests {
         // The key panel's selection follows a real pointer move
         // (#2229); its suites pin `currentPointer`.
         "JumpModel.swift",
+        // The pointer rest's location at a rest (#1869), read
+        // only after a monitor both twins pin inert delivered a move.
+        "PointerRest.swift",
     ]
 
     @Test("the live pointer read stays in its seam homes")

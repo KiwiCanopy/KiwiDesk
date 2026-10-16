@@ -25,8 +25,9 @@ enum ShortcutsRowOrder {
         .shortcuts(.scrollSpaceStep),
         .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.scrollNaturalMouse),
-        .behaviour(.mouseResize),
+        .behaviour(.mouseHoverFocus),
         .behaviour(.mouseFollowsFocus),
+        .behaviour(.mouseResize),
     ]
 
     /// KiwiHub group order: its sides in the order of their keys,

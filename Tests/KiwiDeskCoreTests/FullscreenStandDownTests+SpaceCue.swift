@@ -33,7 +33,7 @@ extension FullscreenStandDownTests {
         }
         core.state.workspaces.setMode("2", .grid)
         core.state.workspaces.activate("1")
-        core.frontWindowFrames = { [] }
+        core.frontStack = { [] }
         core.setAppWide(persisting: false) { $0.spaceCue = cue }
         var settings = core.tiler.settings
         settings.spaceBarStyle.enabled = spaceBar

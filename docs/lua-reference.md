@@ -3947,6 +3947,36 @@ Mouse & trackpad**.
 ```lua
 mouse.set_follows_focus(true)
 ```
+:::unreleased
+
+### mouse.set_hover_focus
+
+**Expects:** a boolean (default `false`).
+
+**Does:** when `true`, the window the mouse pointer comes to rest
+on takes the focus and comes to the front, as a click on it
+would. The pointer has to move and then rest for 200 ms; a focus
+change made while it rests, or during those 200 ms, is never taken
+back. Nothing happens while a mouse button is held, within a
+second of a Desktop switch, over a full-screen window or
+KiwiDesk's own windows, or where something other than a managed
+window is in front under the pointer: a menu, the Dock, a bar,
+another app's panel. A window whose focus would move the layout —
+a scrolling row that would pan, a parked monocle window — is not
+focused. A window on another screen makes that screen's Space
+the active one. The pointer is never warped by it, so it works
+beside [`mouse.set_follows_focus`](#mouseset_follows_focus).
+
+Also togglable in the Settings app under **Shortcuts & Gestures ▸
+Mouse & trackpad**.
+
+**Example:**
+
+```lua
+mouse.set_hover_focus(true)
+```
+
+:::
 
 ## Scroll Gestures
 

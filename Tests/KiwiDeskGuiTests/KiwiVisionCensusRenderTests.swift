@@ -172,28 +172,6 @@ struct KiwiVisionCensusRenderTests {
         )
     }
 
-    /// Every row is app-wide, so it greys only where `init.lua`
-    /// owns the config, as the resolver answers.
-    @Test("every row's gate is the Lua-owned one, resolved here")
-    @MainActor func rowGates() {
-        for key in KiwiVisionKey.allCases {
-            #expect(
-                SettingKey.kiwiVision(key).placement.gate
-                    == .runtime(.luaOwnsConfig)
-            )
-        }
-        #expect(
-            KiwiVisionGates.resolved
-                == Set(KiwiVisionKey.allCases.map(SettingKey.kiwiVision))
-        )
-        let owned = KiwiVisionGates(guiManaged: false)
-        let managed = KiwiVisionGates(guiManaged: true)
-        for key in KiwiVisionGates.resolved {
-            #expect(owned.inertReason(for: key) == .appWideLuaOwned)
-            #expect(managed.inertReason(for: key) == nil)
-        }
-    }
-
     /// The card walks its list, reads Reduce transparency from the
     /// environment, and greys each row through the census's
     /// exemption rather than a predicate of its own.

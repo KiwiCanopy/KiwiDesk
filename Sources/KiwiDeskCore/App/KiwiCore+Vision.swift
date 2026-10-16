@@ -77,10 +77,17 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// The lens KiwiVision draws, nil for plain KiwiVision — none
+    /// turns on yet (#2103 v3 PR 2).
+    var visionLensName: String? { nil }
+
+    /// What KiwiVision draws now, through the one resolver.
+    var visionLook: VisionLook { appWide.look(lens: visionLensName) }
+
     func setKiwiVision(_ on: Bool) {
         guard on != vision.isOn else { return }
         vision.isOn = on
-        retargetVisionAppearance(on ? appWide.visionAppearance : nil)
+        retargetVisionAppearance(on ? visionLook.appearance : nil)
         updateVision(reassertOrder: true)
         vision.onChange(on)
     }
@@ -121,7 +128,7 @@ extension KiwiCore {
     /// stood down under Reduce transparency — what the Settings
     /// picture draws, read through the plate's own door.
     public var kiwiVisionDrawsBlur: Bool {
-        LiquidGlassGate.rendered(blur: appWide.visionBlur)
+        LiquidGlassGate.rendered(blur: visionLook.blur)
     }
 
     /// Whether macOS shows Dark while KiwiVision is on: the ask
@@ -133,7 +140,7 @@ extension KiwiCore {
         let found =
             (vision.isOn ? machine.readDebt()?.found : nil)
             ?? machine.read()
-        return appWide.visionAppearance.wantsDark(over: found)
+        return visionLook.appearance.wantsDark(over: found)
             ?? found.dark
     }
 
@@ -198,7 +205,7 @@ extension KiwiCore {
             below: ring,
             standDown: vision.standDown,
             tracked: windowServer.isActive,
-            dim: CGFloat(appWide.visionDim / 100),
+            dim: CGFloat(visionLook.dim / 100),
             blur: kiwiVisionDrawsBlur,
             clearWallpaper: visionClearsWallpaper,
             windows: visionMasks
