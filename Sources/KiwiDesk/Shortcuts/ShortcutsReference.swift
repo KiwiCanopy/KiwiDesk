@@ -52,12 +52,18 @@ enum ShortcutsReferenceBuilder {
                     ?? directionalIcon(for: cmd.lua)
                     ?? spaceFallbackIcon(for: cmd.lua)
                     ?? verbIcon(for: cmd.lua)
+                let combo = glyphs(binding.combo)
                 return ShortcutRow(
                     id: cmd.lua,
                     label: cmd.resolvedLabel,
-                    combo: glyphs(binding.combo),
+                    combo: combo,
                     icon: icon,
-                    unavailable: cmd.unavailable != nil
+                    unavailable: cmd.unavailable != nil,
+                    fold: ShortcutFold.tag(
+                        for: cmd,
+                        combo: KeyCombo.parse(binding.combo),
+                        rendered: combo
+                    )
                 )
             }
         }
