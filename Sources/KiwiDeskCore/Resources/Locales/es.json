@@ -685,6 +685,7 @@
   "jump.scope.windows": "Ventanas",
   "jump.section.hidden": "Ocultas",
   "jump.section.minimized": "Minimizadas",
+  "jump.section.other_apps": "Otras apps",
   "jump.space.numbered": "Espacio %1$@",
   "jump.status.fullscreen": "Pantalla completa",
   "jump.status.hidden": "Oculta",

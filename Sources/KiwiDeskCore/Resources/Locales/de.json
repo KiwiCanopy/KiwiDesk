@@ -685,6 +685,7 @@
   "jump.scope.windows": "Fenster",
   "jump.section.hidden": "Ausgeblendet",
   "jump.section.minimized": "Minimiert",
+  "jump.section.other_apps": "Andere Apps",
   "jump.space.numbered": "Space %1$@",
   "jump.status.fullscreen": "Vollbild",
   "jump.status.hidden": "Ausgeblendet",

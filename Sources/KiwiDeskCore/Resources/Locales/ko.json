@@ -685,6 +685,7 @@
   "jump.scope.windows": "윈도우",
   "jump.section.hidden": "가려짐",
   "jump.section.minimized": "최소화됨",
+  "jump.section.other_apps": "다른 앱",
   "jump.space.numbered": "공간 %1$@",
   "jump.status.fullscreen": "전체 화면",
   "jump.status.hidden": "가려짐",

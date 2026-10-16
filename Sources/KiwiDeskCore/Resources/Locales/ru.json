@@ -685,6 +685,7 @@
   "jump.scope.windows": "Окна",
   "jump.section.hidden": "Скрытые",
   "jump.section.minimized": "Свёрнутые",
+  "jump.section.other_apps": "Другие приложения",
   "jump.space.numbered": "Пространство %1$@",
   "jump.status.fullscreen": "Полный экран",
   "jump.status.hidden": "Скрыто",

@@ -685,6 +685,7 @@
   "jump.scope.windows": "ウインドウ",
   "jump.section.hidden": "非表示",
   "jump.section.minimized": "Dock内",
+  "jump.section.other_apps": "ほかのアプリ",
   "jump.space.numbered": "スペース %1$@",
   "jump.status.fullscreen": "フルスクリーン",
   "jump.status.hidden": "非表示",
