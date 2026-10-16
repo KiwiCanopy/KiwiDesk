@@ -7,9 +7,9 @@ import Testing
 /// (#1007).
 ///
 /// The record is pure — a window id and a date — so every bound
-/// is asserted by passing the clock in rather than by sleeping;
-/// `.claude/rules/tests.md` bars a tight wall-clock deadline, and
-/// an injected `now` is not one.
+/// is asserted by moving the intent's own clock rather than by
+/// sleeping; `.claude/rules/tests.md` bars a tight wall-clock
+/// deadline, and an injected clock is not one (#2341).
 ///
 /// The DRAIN itself is not here. Paying the debt means
 /// `focusWindow` on a live AX window at a real arrival, which is
@@ -23,17 +23,33 @@ import Testing
 struct FollowFocusIntentTests {
     private let moved = WindowID(7)
     private let other = WindowID(9)
-    private let t0 = Date(timeIntervalSince1970: 1_000)
+    private static let t0 = Date(timeIntervalSince1970: 1_000)
+    private static let late = t0.addingTimeInterval(
+        FollowFocusIntent.drainWindow + 0.01
+    )
+
+    /// The time the intent reads, moved by the test.
+    @MainActor
+    private final class Clock {
+        var now = FollowFocusIntentTests.t0
+    }
+
+    private func make() -> (FollowFocusIntent, Clock) {
+        let intent = FollowFocusIntent()
+        let clock = Clock()
+        intent.clock = { clock.now }
+        return (intent, clock)
+    }
 
     private func payable(_: WindowID) -> Bool { true }
     private func unpayable(_: WindowID) -> Bool { false }
 
     @Test("a payable debt is paid, once")
     func payableDebtIsPaidOnce() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
-        #expect(intent.claim(at: t0, if: payable) == moved)
-        #expect(intent.claim(at: t0, if: payable) == nil)
+        let (intent, _) = make()
+        intent.record(moved)
+        #expect(intent.claim(if: payable) == moved)
+        #expect(intent.claim(if: payable) == nil)
     }
 
     /// The reason `claim` takes a predicate at all: the reveal can
@@ -42,25 +58,24 @@ struct FollowFocusIntentTests {
     /// outright.
     @Test("a live debt the caller cannot pay yet is kept")
     func unpayableDebtSurvives() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
-        #expect(intent.claim(at: t0, if: unpayable) == nil)
-        #expect(intent.claim(at: t0, if: payable) == moved)
+        let (intent, _) = make()
+        intent.record(moved)
+        #expect(intent.claim(if: unpayable) == nil)
+        #expect(intent.claim(if: payable) == moved)
     }
 
     /// The other direction, and the one that keeps a follow macOS
     /// declined from firing minutes later.
     @Test("an expired debt is dropped even when payable")
     func expiredDebtIsDropped() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
-        let late = t0.addingTimeInterval(
-            FollowFocusIntent.drainWindow + 0.01
-        )
-        #expect(intent.claim(at: late, if: payable) == nil)
+        let (intent, clock) = make()
+        intent.record(moved)
+        clock.now = Self.late
+        #expect(intent.claim(if: payable) == nil)
         // Dropped, not merely refused: it must not pay on a
         // later drain that happens to arrive.
-        #expect(intent.claim(at: t0, if: payable) == nil)
+        clock.now = Self.t0
+        #expect(intent.claim(if: payable) == nil)
     }
 
     /// `owed` is the second instance's READ (#1207): the fold's
@@ -69,23 +84,22 @@ struct FollowFocusIntentTests {
     /// absent — and is dropped, so a later drain cannot pay it.
     @Test("owed reads the live debt without paying it")
     func owedReadsWithoutPaying() {
-        let intent = FollowFocusIntent()
-        #expect(intent.owed(at: t0) == nil)
-        intent.record(moved, at: t0)
-        #expect(intent.owed(at: t0) == moved)
-        #expect(intent.claim(at: t0, if: payable) == moved)
-        #expect(intent.owed(at: t0) == nil)
+        let (intent, _) = make()
+        #expect(intent.owed() == nil)
+        intent.record(moved)
+        #expect(intent.owed() == moved)
+        #expect(intent.claim(if: payable) == moved)
+        #expect(intent.owed() == nil)
     }
 
     @Test("an expired debt reads as absent and is dropped")
     func owedDropsAnExpiredDebt() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
-        let late = t0.addingTimeInterval(
-            FollowFocusIntent.drainWindow + 0.01
-        )
-        #expect(intent.owed(at: late) == nil)
-        #expect(intent.claim(at: t0, if: payable) == nil)
+        let (intent, clock) = make()
+        intent.record(moved)
+        clock.now = Self.late
+        #expect(intent.owed() == nil)
+        clock.now = Self.t0
+        #expect(intent.claim(if: payable) == nil)
     }
 
     /// `forget` retires a debt unpaid (#1207): a Desktop return
@@ -93,16 +107,16 @@ struct FollowFocusIntentTests {
     /// the last return's before deciding whether to owe again.
     @Test("a forgotten debt is gone")
     func forgetRetiresTheDebt() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
+        let (intent, _) = make()
+        intent.record(moved)
         intent.forget()
-        #expect(intent.owed(at: t0) == nil)
-        #expect(intent.claim(at: t0, if: payable) == nil)
+        #expect(intent.owed() == nil)
+        #expect(intent.claim(if: payable) == nil)
     }
 
     @Test("retire drops only a debt naming that window")
     func retireIsKeyed() {
-        let intent = FollowFocusIntent()
+        let (intent, _) = make()
         intent.record(WindowID(7))
         intent.retire(WindowID(8))
         #expect(intent.owed() == WindowID(7))
@@ -112,25 +126,23 @@ struct FollowFocusIntentTests {
 
     @Test("a re-keyed window keeps the debt and its clock")
     func rekeyKeepsTheDebt() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
+        let (intent, clock) = make()
+        intent.record(moved)
         intent.rekey(old: moved, new: other)
         // The debt now names the NEW id — the old one is dead.
-        #expect(intent.claim(at: t0, if: { $0 == self.moved }) == nil)
+        #expect(intent.claim(if: { $0 == self.moved }) == nil)
         // The clock travels with it: a re-key must not silently
         // renew a debt that was about to expire.
-        let late = t0.addingTimeInterval(
-            FollowFocusIntent.drainWindow + 0.01
-        )
-        #expect(intent.claim(at: late, if: payable) == nil)
+        clock.now = Self.late
+        #expect(intent.claim(if: payable) == nil)
     }
 
     @Test("a re-key of another window leaves the debt alone")
     func rekeyOfAnotherWindowIsIgnored() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
+        let (intent, _) = make()
+        intent.record(moved)
         intent.rekey(old: other, new: WindowID(11))
-        #expect(intent.claim(at: t0, if: payable) == moved)
+        #expect(intent.claim(if: payable) == moved)
     }
 
     /// The drain is keyed to the arriving window, so an
@@ -142,14 +154,9 @@ struct FollowFocusIntentTests {
     /// to compensate for — `FollowFocusSeamTests` pins the zero.
     @Test("another window's arrival does not pay the debt")
     func anotherArrivalDoesNotPay() {
-        let intent = FollowFocusIntent()
-        intent.record(moved, at: t0)
-        #expect(
-            intent.claim(at: t0, if: { $0 == self.other }) == nil
-        )
-        #expect(
-            intent.claim(at: t0, if: { $0 == self.moved })
-                == moved
-        )
+        let (intent, _) = make()
+        intent.record(moved)
+        #expect(intent.claim(if: { $0 == self.other }) == nil)
+        #expect(intent.claim(if: { $0 == self.moved }) == moved)
     }
 }
