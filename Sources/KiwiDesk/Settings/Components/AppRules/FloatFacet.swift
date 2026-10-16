@@ -1,3 +1,5 @@
+import KiwiDeskCore
+
 /// Float facet parsing and filtering helper matching `FloatRules`.
 ///
 /// The colon is the pattern marker, as the engine reads it: a
@@ -19,19 +21,23 @@ enum FloatFacet: Equatable {
         rule.contains(":")
     }
 
-    /// Extracts app segment from float rule string (`FloatRules`).
+    /// A float rule's app segment, case-folded as `FloatRules`
+    /// keys it, so a hand-written `Com.Apple.Notes` lists against
+    /// the app the engine floats (#2345).
     static func appSegment(of rule: String) -> String {
-        let parts = rule.split(separator: ":", maxSplits: 1)
-        return parts.count == 2 ? String(parts[0]) : rule
+        let parts = FloatRules.normalizedRule(rule)
+            .split(separator: ":", maxSplits: 1)
+        return parts.first.map(String.init) ?? ""
     }
 
     static func current(
         _ rules: [String],
         app: String
     ) -> FloatFacet {
+        let app = app.lowercased()
         var sawTitled = false
         for rule in rules where appSegment(of: rule) == app {
-            if rule == app { return .all }
+            if !isTitled(rule) { return .all }
             sawTitled = true
         }
         return sawTitled ? .titled : .never
@@ -41,13 +47,14 @@ enum FloatFacet: Equatable {
         _ rules: [String],
         app: String
     ) -> [String] {
-        rules.compactMap { rule in
+        let app = app.lowercased()
+        return rules.compactMap { rule in
             let parts = rule.split(
                 separator: ":",
                 maxSplits: 1
             )
             guard parts.count == 2,
-                String(parts[0]) == app
+                String(parts[0]).lowercased() == app
             else { return nil }
             return String(parts[1])
         }
@@ -62,10 +69,12 @@ enum FloatFacet: Equatable {
         of app: String,
         in rules: [String]
     ) -> [String] {
+        let app = app.lowercased()
         let old = Self.patterns(rules, app: app)
         let dropped = Set(old.filter { !patterns.contains($0) })
         var kept = rules.filter { rule in
-            rule != app
+            let rule = FloatRules.normalizedRule(rule)
+            return rule != app
                 && !dropped.contains { rule == "\(app):\($0)" }
         }
         for pattern in patterns where !old.contains(pattern) {
@@ -75,6 +84,7 @@ enum FloatFacet: Equatable {
     }
 
     static func rules(_ rules: [String], app: String) -> [String] {
-        rules.filter { appSegment(of: $0) == app }
+        let app = app.lowercased()
+        return rules.filter { appSegment(of: $0) == app }
     }
 }
