@@ -1636,8 +1636,11 @@ Touching `Borders`, `Vision`.
   (`VisionMaskPlateTests`, `KiwiVisionClearWallpaperTests`),
   decides its clear verdict once per pass in `visionClearPids`
   through `names(_:appOf:lookingUp: false)`, Never dimmed
-  joining it (`KiwiVisionClearAppTests`,
-  `KiwiVisionNeverDimmedTests`),
+  joining it, a lens member judged per window through the one
+  `visionLensClear` (`KiwiVisionClearAppTests`,
+  `KiwiVisionNeverDimmedTests`), the lens on written by
+  `setVision` alone and following the stored lenses through
+  `followActiveLens` (`KiwiVisionLensActivationTests`),
   switches the system appearance through one seam whose debt every
   way out pays, and its on/off is a session value no snapshot
   carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,

@@ -113,9 +113,9 @@ extension KiwiCore {
     /// what attach filed and never LaunchServices (#1785, #1936).
     /// Decided once per pass, per process; Never dimmed joins it —
     /// an app named by its bundle id, or by its process name where
-    /// it has none (#2103 ruling 26) — and so does a lens member
-    /// whose every window stays clear; a titled member is judged per
-    /// window in the walk (`visionLensClear`).
+    /// it has none (#2103 ruling 26). A lens member is judged per
+    /// window in the walk (`visionLensClear`), since a title rule
+    /// clears some of an app's windows and not others.
     func visionClearPids(
         target: pid_t?,
         among apps: [pid_t: AppRef]
@@ -123,7 +123,7 @@ extension KiwiCore {
         var clear: Set<pid_t> = []
         let look = visionLook
         for (pid, app) in apps {
-            if isNeverDimmed(app) || visionLensClear(app) == .all {
+            if isNeverDimmed(app) {
                 clear.insert(pid)
             } else if look.clearApp, let target, target > 0,
                 eventLoop.names(target, appOf: pid, lookingUp: false)

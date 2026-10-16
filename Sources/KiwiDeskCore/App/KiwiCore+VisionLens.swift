@@ -16,11 +16,13 @@ extension KiwiCore {
         guard let lens = appWide.lens(named: name) else {
             return .fail("no lens named \(name)")
         }
-        guard !lens.apps.isEmpty else {
-            return .fail("\(lens.name) has no apps yet")
-        }
         let active = vision.active.lensName.map {
             $0.caseInsensitiveCompare(lens.name) == .orderedSame
+        }
+        // The lens on always turns off; an empty one refuses only
+        // on the way in.
+        guard active == true || !lens.apps.isEmpty else {
+            return .fail("\(lens.name) has no apps yet")
         }
         setVision(active == true ? .off : .lens(lens.name))
         return toggleAnswer()
@@ -41,9 +43,12 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         if command == "kiwivision.delete_lens" {
-            guard let name = args.first?.stringValue,
-                appWide.lens(named: name) != nil
-            else { return .fail("expected a lens name") }
+            guard let name = args.first?.stringValue else {
+                return .fail("expected a lens name")
+            }
+            guard appWide.lens(named: name) != nil else {
+                return .fail("no lens named \(name)")
+            }
             setAppWide(persisting: false) {
                 $0.visionLenses.removeAll {
                     $0.name.caseInsensitiveCompare(
@@ -60,12 +65,15 @@ extension KiwiCore {
         case .string(let json)?: data = Data(json.utf8)
         default: data = nil
         }
-        guard let data,
-            var lens = try? JSONDecoder().decode(
-                VisionLens.self,
-                from: data
-            )
-        else { return .fail("expected a lens table with a name") }
+        guard let data else {
+            return .fail("expected a lens table with a name")
+        }
+        var lens: VisionLens
+        do {
+            lens = try JSONDecoder().decode(VisionLens.self, from: data)
+        } catch {
+            return .fail("not a lens: \(Self.decodeProblem(error))")
+        }
         lens.name = AppWideSettings.lensName(lens.name)
         guard !lens.name.isEmpty else {
             return .fail("expected a lens table with a name")
@@ -82,6 +90,32 @@ extension KiwiCore {
             settings.visionLenses = AppWideSettings.lensEntries(lenses)
         }
         return .ok()
+    }
+
+    /// The field a lens table got wrong, in English for the CLI.
+    private static func decodeProblem(_ error: Error) -> String {
+        switch error as? DecodingError {
+        case .keyNotFound(let key, _)?:
+            return "missing \(key.stringValue)"
+        case .typeMismatch(_, let context)?, .dataCorrupted(let context)?:
+            let path = context.codingPath.map(\.stringValue)
+            return path.isEmpty
+                ? "unreadable" : "bad \(path.joined(separator: "."))"
+        case .valueNotFound(_, let context)?:
+            return "missing \(context.codingPath.map(\.stringValue))"
+        default:
+            return "unreadable"
+        }
+    }
+
+    /// A title change of a window a lens judges by title re-masks
+    /// the plates (#2103 ruling 32): a browser's title follows its
+    /// tab.
+    func noteVisionTitleChanged(_ id: WindowID) {
+        guard vision.isOn, let window = state.windows[id] else { return }
+        let app = AppRef(bundleID: window.appBundleID, name: window.appName)
+        guard case .titled = visionLensClear(app) else { return }
+        oweVisionReshape(list: false)
     }
 
     /// What the active lens keeps clear of `app`'s windows: all of
@@ -101,7 +135,8 @@ extension KiwiCore {
 enum VisionLensClear: Equatable {
     case none
     case all
-    /// The windows whose title holds one of these, ignoring case.
+    /// The windows whose title holds one of these, as a Float rule
+    /// matches (`WindowTitleMatch`).
     case titled([String])
 
     /// Whether a window titled `title` stays clear: a title the
@@ -113,7 +148,7 @@ enum VisionLensClear: Equatable {
         case .titled(let patterns):
             guard let title else { return false }
             return patterns.contains {
-                title.localizedCaseInsensitiveContains($0)
+                WindowTitleMatch.matches(title, $0)
             }
         }
     }

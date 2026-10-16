@@ -45,14 +45,14 @@ struct KiwiVisionCoreTests {
     @Test("the verb toggles the mode and the GUI hears it")
     func verbToggles() {
         let core = makeCore()
-        var heard: [Bool] = []
+        var heard: [VisionActive] = []
         core.vision.onChange = { heard.append($0) }
         let on = core.execute("kiwivision.toggle")
         #expect(on.isSuccess)
         #expect(core.kiwiVisionIsOn)
         _ = core.execute("kiwivision.toggle")
         #expect(!core.kiwiVisionIsOn)
-        #expect(heard == [true, false])
+        #expect(heard == [.plain, .off])
     }
 
     /// A ring backend reporting an ordered-in panel, so
@@ -204,7 +204,7 @@ struct KiwiVisionCoreTests {
     @Test("stopping the core turns KiwiVision off, unannounced")
     func stopClears() {
         let core = makeCore()
-        var heard: [Bool] = []
+        var heard: [VisionActive] = []
         core.vision.onChange = { heard.append($0) }
         core.vision.active = .plain
         core.stop()

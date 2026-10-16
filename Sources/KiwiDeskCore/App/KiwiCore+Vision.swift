@@ -93,24 +93,27 @@ extension KiwiCore {
     }
 
     /// The one writer of what KiwiVision draws: on, off, plain or a
-    /// lens. Turning on or off pays the appearance switch and is
-    /// announced; a switch between plain and a lens, or between
-    /// lenses, is a change of look (#2103 v3).
-    func setVision(_ next: VisionActive) {
+    /// lens. Turning on or off pays the appearance switch; a switch
+    /// between plain and a lens, or between lenses, is a change of
+    /// look. Every change is heard (#2103 v3). `old` is the look
+    /// before, for a caller whose settings already moved.
+    func setVision(_ next: VisionActive, from old: VisionLook? = nil) {
         let before = vision.active
         guard next != before else { return }
-        let old = visionLook
+        let old = old ?? visionLook
         vision.active = next
-        guard before.isOn != next.isOn else {
+        if before.isOn == next.isOn {
             visionLookChanged(from: old, to: visionLook)
-            return
+        } else {
+            if old.listedApps != visionLook.listedApps {
+                vision.forgetListedWindows()
+            }
+            retargetVisionAppearance(
+                next.isOn ? visionLook.appearance : nil
+            )
+            updateVision(reassertOrder: true)
         }
-        if old.listedApps != visionLook.listedApps {
-            vision.forgetListedWindows()
-        }
-        retargetVisionAppearance(next.isOn ? visionLook.appearance : nil)
-        updateVision(reassertOrder: true)
-        vision.onChange(next.isOn)
+        vision.onChange(next)
     }
 
     /// The one door a change of what KiwiVision draws takes while

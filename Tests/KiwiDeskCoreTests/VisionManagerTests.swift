@@ -179,7 +179,7 @@ struct VisionManagerTests {
     @Test("clear turns the mode off without announcing a toggle")
     func clearIsSilent() {
         let (vision, _) = manager()
-        var heard: [Bool] = []
+        var heard: [VisionActive] = []
         vision.onChange = { heard.append($0) }
         vision.active = .plain
         vision.sync(request(target: 7), reassert: false)

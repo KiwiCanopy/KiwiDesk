@@ -226,6 +226,7 @@ extension KiwiCore {
                 reason: .hidden
             )
         case .windowTitleChanged(let id, _):
+            noteVisionTitleChanged(id)
             if effects.floatFlipped {
                 retile()
             } else {
