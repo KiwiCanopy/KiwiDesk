@@ -1,6 +1,6 @@
 ---
 name: drive
-description: Change how KiwiDesk tiles and looks through its MCP tools — layouts, Spaces, gaps and borders, the bars, looks, app rules and shortcuts — or explain why a window floats, tiles or opens where it does. Use when the user asks Claude to set up, change or troubleshoot KiwiDesk.
+description: Change how KiwiDesk tiles and looks through its MCP tools — layouts, Spaces, gaps and borders, the bars, looks, app rules, shortcuts and KiwiVision — or explain why a window floats, tiles or opens where it does. Use when the user asks Claude to set up, change or troubleshoot KiwiDesk.
 ---
 
 # Driving KiwiDesk
@@ -34,6 +34,10 @@ leaves out.
   and why any change could not be kept.
 - `looks` and `app_rules` bundle the common jobs: trying, saving and
   wearing a look; adding and removing app rules.
+- `kiwivision` turns KiwiVision and its lenses on and off and
+  changes them; its `current` action reads what is on. Its changes
+  are app-wide and `keep` cannot write them: point the user at
+  Settings ▸ KiwiVision to keep one.
 
 ## Ask before anything that cannot be undone
 

@@ -4,6 +4,7 @@
   "ai.capability.app_rules": "選擇哪些 App 浮動，以及每個 App 在哪個空間中開啟。",
   "ai.capability.diagnose": "解釋視窗為何浮動、並排，或在目前位置開啟。",
   "ai.capability.inspect": "查看你的空間與視窗，並查詢任何指令。",
+  "ai.capability.kiwivision": "開啟和關閉 KiwiVision 及其鏡頭，並變更它們。",
   "ai.capability.looks": "建立、套用與儲存造型，並根據螢幕快照配合你的背景圖片。",
   "ai.capability.settings": "變更間距、邊框以及 KiwiShelf 上的列。",
   "ai.capability.shortcuts": "在你同意列表後，為指令加入快速鍵。",

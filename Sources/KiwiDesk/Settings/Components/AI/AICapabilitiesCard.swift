@@ -50,6 +50,11 @@ struct AICapabilitiesCard: View {
                     + "opens in."
             ),
             L(
+                "ai.capability.kiwivision",
+                "Turn KiwiVision and its lenses on and off, and change "
+                    + "them."
+            ),
+            L(
                 "ai.capability.shortcuts",
                 "Add shortcuts for commands, once you agree to the "
                     + "list."

@@ -15,10 +15,7 @@ extension AppWideSettings {
             kiwivision: vision,
             hyper: hyper
         )
-        guard let data = try? JSONEncoder().encode(groups),
-            let value = try? JSONDecoder().decode(JSONValue.self, from: data)
-        else { return .object([:]) }
-        return value
+        return JSONValue(encoding: groups) ?? .object([:])
     }
 
     private struct Groups: Encodable {

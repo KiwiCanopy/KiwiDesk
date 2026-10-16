@@ -4,6 +4,7 @@
   "ai.capability.app_rules": "Choose which apps float and which Space each app opens in.",
   "ai.capability.diagnose": "Explain why a window floats, tiles or opens where it does.",
   "ai.capability.inspect": "See your Spaces and windows, and look up any command.",
+  "ai.capability.kiwivision": "Turn KiwiVision and its lenses on and off, and change them.",
   "ai.capability.looks": "Make, wear and save looks, matched to your wallpaper from a screenshot.",
   "ai.capability.settings": "Change gaps, borders and the bars on KiwiShelf.",
   "ai.capability.shortcuts": "Add shortcuts for commands, once you agree to the list.",
