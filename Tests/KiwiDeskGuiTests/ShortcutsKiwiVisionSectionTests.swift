@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -64,20 +65,64 @@ struct ShortcutsKiwiVisionSectionTests {
         )
     }
 
-    @Test("Settings files the toggle in the KiwiVision container")
-    func censusPlacement() {
-        #expect(
-            SettingKey.shortcuts(.toggleKiwiVision).placement.container
-                == .kiwiVisionShortcuts
+    private func censusRows(
+        _ tier: SettingTier
+    ) -> Set<SettingKey> {
+        Set(
+            SettingKey.allCases.filter {
+                $0.placement.area == .shortcuts
+                    && $0.placement.container == .kiwiVisionShortcuts
+                    && $0.placement.tier == tier
+            }
         )
-        #expect(
-            ShortcutsRowOrder.kiwiVisionAtRest
-                == [.shortcuts(.toggleKiwiVision)]
-        )
+    }
+
+    /// The group's one tier is the census's, so a lens key placed
+    /// in the container and left off the list reds here.
+    @Test("KiwiVision's one tier is the census's")
+    func kiwiVisionTier() {
+        let keys = ShortcutsRowOrder.kiwiVisionAtRest
+        #expect(Set(keys) == censusRows(.atRest))
+        #expect(keys.count == Set(keys).count)
+        #expect(keys.contains(.shortcuts(.toggleKiwiVision)))
+        #expect(censusRows(.showMore).isEmpty)
+        #expect(censusRows(.immediate).isEmpty)
         #expect(
             !ShortcutsRowOrder.focusAtRest.contains(
                 .shortcuts(.toggleKiwiVision)
             )
         )
+    }
+
+    /// The group draws its WHOLE list, and the section mounts it.
+    @Test("KiwiVision draws every row")
+    func rowsAreAllDrawn() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        func squeezed(_ file: String) throws -> String {
+            SourceScan.stripComments(
+                try String(
+                    contentsOf: root.appendingPathComponent(file),
+                    encoding: .utf8
+                )
+            )
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+        }
+        let group = try #require(
+            SourceScan.declarationBody(
+                after: "structKiwiVisionShortcutsGroup",
+                in: try squeezed(
+                    "Components/Keybindings/KiwiVisionShortcutsGroup.swift"
+                )
+            )
+        )
+        #expect(
+            group.contains(
+                "ForEach(ShortcutsRowOrder.kiwiVisionAtRest,id:\\.id)"
+            )
+        )
+        let section = try squeezed("Sections/ShortcutsSection.swift")
+        #expect(section.occurrences(of: "KiwiVisionShortcutsGroup(") == 1)
     }
 }

@@ -74,7 +74,7 @@ extension ShortcutsReferenceBuilder {
             // A section of its own, empty and so dropped while no
             // KiwiVision key is bound (#2312).
             ShortcutSubgroup(
-                title: L("shortcuts.section.kiwivision", "KiwiVision"),
+                title: L("destination.kiwivision", "KiwiVision"),
                 rows: rows([KeybindingCatalog.toggleKiwiVision])
             ),
             ShortcutSubgroup(
