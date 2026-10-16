@@ -136,6 +136,9 @@ struct CoreLocalizationBoundaryTests {
         "Commands/WindowActionRefusal.swift": 6,
         // KiwiVision's out-of-reach pill (#2103 ruling 16).
         "App/KiwiCore+VisionReach.swift": 1,
+        // A lens's default reminder, on the hold pill Core draws
+        // (#2103 ruling 42a).
+        "App/KiwiCore+VisionHold.swift": 1,
         "Bar/BarMenu.swift": 3,
         "Bar/LayoutModeRows.swift": 8,
     ]

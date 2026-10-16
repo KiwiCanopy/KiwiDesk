@@ -924,6 +924,7 @@
   "kiwivision.preview.caption.haze.windows.dim": "Las ventanas detrás de la enfocada están oscurecidas; el fondo de pantalla se mantiene nítido.",
   "kiwivision.preview.caption.haze.windows.dim_blur": "Las ventanas detrás de la enfocada están oscurecidas y desenfocadas; el fondo de pantalla se mantiene nítido.",
   "kiwivision.preview.caption.none": "Con estos ajustes, KiwiVision no cambia nada en la pantalla.",
+  "kiwivision.reminder.default": "🥝 Keep the vision juicy 🥝",
   "kiwivision.section.appearance": "Apariencia del sistema",
   "kiwivision.section.clear": "Se mantiene nítido",
   "kiwivision.section.levels": "Oscurecimiento y desenfoque",

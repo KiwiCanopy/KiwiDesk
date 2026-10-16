@@ -22,6 +22,7 @@ paths:
   - "Sources/KiwiDeskCore/Vision/**"
   - "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+VisionFocus.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+VisionHold.swift"
 ---
 
 # Focus ring & sticky mark overlays
@@ -358,9 +359,11 @@ Obligations:
   tail of `updateBorders` (the focus moved, a settle pass, no
   WindowServer stream) and the watch's restack phase — a reorder
   event, or the float-tier raise's landing (#2284) — which runs
-  the plate AFTER the ring's own re-order. A new caller of a
-  plate's `order(below:` owes its ruling in `BorderOrderCensusTests`
-  ▸ `plateOrderSitesAreCensused`, which also needles the hook's
+  the plate AFTER the ring's own re-order. Every plate order goes
+  through `VisionManager`'s one ordering door, below or above, and
+  a new caller of a plate's `order(below:` or `order(above:` owes
+  its ruling in `BorderOrderCensusTests` ▸
+  `plateOrderSitesAreCensused`, which also needles the hook's
   place.
 - **Watch the target whatever the border setting**: the target
   joins the WindowServer request under KiwiVision's own consumer,
@@ -514,6 +517,24 @@ Obligations:
   switcher are picks and never ask it (`KiwiVisionLensFocusTests`,
   `KiwiVisionLensWrapTests`, `KiwiVisionLensGestureTests`,
   `KiwiVisionLensJumpTests`).
+- **A lens's delayed clear is ONE hold, judged at every re-draw
+  before its sync** (#2103 rulings 12, 14, 30, 34): `updateVision`
+  asks `settleVisionHold` with the target it is about to draw, so a
+  new target ends the old hold and may begin one, and a lens that
+  stops asking — off, Keep focus off, a delay of 0 — ends it there.
+  A hold begins on a CHANGE of target to a window the lens leaves
+  out, through the one pure `VisionHold.begins` verdict, never on a
+  plate turning on; its exemptions — Never dimmed, an overlay,
+  KiwiDesk's own window, the clear window's dialog, a fresh click
+  that landed it — join that verdict, not a call site. It ends at
+  its `.visionHold` deadline, on a press the stamp says reached the
+  held window (`visionPressed`, beside `stampLeftClick` in the
+  press fan-out), and at the next settle; never on typing. While it
+  stands the plates order ABOVE the held window and its own reorder
+  event re-orders them there, since an activation lifts it back
+  (v3 probe P9), and the mask walks it hazed in front
+  (`KiwiVisionHoldTests`, `KiwiVisionHoldExemptionTests`,
+  `KiwiVisionHoldWiringTests`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

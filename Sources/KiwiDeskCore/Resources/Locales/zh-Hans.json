@@ -924,6 +924,7 @@
   "kiwivision.preview.caption.haze.windows.dim": "焦点窗口后方的窗口会被调暗；墙纸保持清晰。",
   "kiwivision.preview.caption.haze.windows.dim_blur": "焦点窗口后方的窗口会被调暗并模糊；墙纸保持清晰。",
   "kiwivision.preview.caption.none": "在这些设置下，KiwiVision 不会改变屏幕上的任何内容。",
+  "kiwivision.reminder.default": "🥝 Keep the vision juicy 🥝",
   "kiwivision.section.appearance": "系统外观",
   "kiwivision.section.clear": "保持清晰",
   "kiwivision.section.levels": "调暗与模糊",

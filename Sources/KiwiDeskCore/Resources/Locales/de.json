@@ -924,6 +924,7 @@
   "kiwivision.preview.caption.haze.windows.dim": "Die Fenster hinter dem fokussierten sind abgedunkelt; das Hintergrundbild bleibt klar.",
   "kiwivision.preview.caption.haze.windows.dim_blur": "Die Fenster hinter dem fokussierten sind abgedunkelt und weichgezeichnet; das Hintergrundbild bleibt klar.",
   "kiwivision.preview.caption.none": "Mit diesen Einstellungen ändert KiwiVision nichts auf dem Bildschirm.",
+  "kiwivision.reminder.default": "🥝 Keep the vision juicy 🥝",
   "kiwivision.section.appearance": "Erscheinungsbild des Systems",
   "kiwivision.section.clear": "Bleibt klar",
   "kiwivision.section.levels": "Abdunkeln und Weichzeichnen",

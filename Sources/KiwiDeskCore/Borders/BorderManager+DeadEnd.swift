@@ -82,4 +82,16 @@ extension BorderManager {
             symbol: symbol
         )
     }
+
+    /// Shows the reminder pill on a window a lens holds, centred
+    /// on it, until `releaseHoldPill` (#2103 ruling 12).
+    func showHoldPill(window: WindowID, frame: CGRect, text: String) {
+        guard privateRuntimeStarted else { return }
+        sizeLimitOverlay.hold(window: window.raw, frame: frame, text: text)
+    }
+
+    /// Fades a held window's reminder pill out.
+    func releaseHoldPill(_ window: WindowID) {
+        sizeLimitOverlay.release(window.raw)
+    }
 }

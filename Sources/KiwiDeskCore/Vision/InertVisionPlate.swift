@@ -9,6 +9,8 @@ import AppKit
         private(set) var isShown = false
         /// Test-only: the window each order stacked under.
         private(set) var orders: [CGWindowID] = []
+        /// Test-only: the window each above order stacked over.
+        private(set) var ordersAbove: [CGWindowID] = []
         /// Test-only: the last frame and dim handed in.
         private(set) var frame: CGRect?
         private(set) var dim: CGFloat?
@@ -25,6 +27,9 @@ import AppKit
 
         func reshape(_ path: CGPath?) { shapes.append(path) }
         func order(below window: CGWindowID) { orders.append(window) }
+        func order(above window: CGWindowID) {
+            ordersAbove.append(window)
+        }
         func show(reduceMotion: Bool) { isShown = true }
         func hide(reduceMotion: Bool) { isShown = false }
     }

@@ -35,6 +35,9 @@ public final class VisionManager {
         /// The windows below the plates, front to back; empty
         /// where no mask is drawn.
         var windows: [VisionMask.Window]
+        /// The target a lens holds under the haze (#2103 ruling
+        /// 12): the plates order directly above it, nil otherwise.
+        var holding: CGWindowID?
     }
 
     /// What the mode draws now.
@@ -54,13 +57,25 @@ public final class VisionManager {
         }
     /// Hears a change of which lenses reach the live profile.
     public var onReachChange: @MainActor () -> Void = {}
+    /// Hears each landing a lens holds, with the reminder its pill
+    /// draws; the GUI announces it.
+    public var onHold: @MainActor (String) -> Void = { _ in }
+    /// The landing a lens holds under the haze now, nil while none
+    /// waits (`KiwiCore+VisionHold`).
+    var hold: VisionHold?
     var plates: [DisplayID: any VisionPlateBackend] = [:]
-    /// The target each plate was last ordered below: a plate
-    /// re-stacks only when the focus moves, a settle pass asks, the
-    /// target's own reorder event fires or a float lands, since
-    /// every order is
-    /// a WindowServer round trip on the switch path (#1925).
-    private var stackedUnder: [DisplayID: CGWindowID] = [:]
+    /// Where each plate was last ordered: a plate re-stacks only
+    /// when the focus moves, a hold begins or ends, a settle pass
+    /// asks, the target's own reorder event fires or a float
+    /// lands, since every order is a WindowServer round trip on
+    /// the switch path (#1925).
+    private var stacked: [DisplayID: Stack] = [:]
+
+    /// A plate's place: below the target, or above a held one.
+    private struct Stack: Equatable {
+        var target: CGWindowID
+        var above: Bool
+    }
     /// The mask each plate last took, so a pass that leaves it
     /// alone sets nothing.
     private var shapes: [DisplayID: CGPath?] = [:]
@@ -83,6 +98,9 @@ public final class VisionManager {
     /// What the plates stack under, as the last sync read it: the
     /// target's behind ring, else the target.
     private var below: CGWindowID?
+    /// Whether the last sync held its target, so a restack orders
+    /// the plates above it.
+    private var holding = false
     /// The shelf's per-screen stand-down, filed by `updateBars`
     /// once per pass so the plate reads no WindowServer itself.
     private(set) var standDown: Set<DisplayID> = []
@@ -95,92 +113,26 @@ public final class VisionManager {
     }
     /// The windows the last list read found, front to back, nil
     /// until a mask needs it and again once none does.
-    private(set) var listed: [FloatDetection.ListedWindow]?
+    var listed: [FloatDetection.ListedWindow]?
     /// The listed windows KiwiDesk tracked at the read: their
     /// frames come from state, and one that has left it since —
     /// another Desktop's, a closed one's — is no other app's
     /// window to haze (#2103 PR A review).
-    private(set) var trackedAtRead: Set<CGWindowID> = []
+    var trackedAtRead: Set<CGWindowID> = []
     /// The other apps' listed windows' corner radii, read with the
     /// list and replaced at each read, so the cache never outgrows
     /// the windows on screen.
-    private(set) var listedRadii: [CGWindowID: CGFloat] = [:]
+    var listedRadii: [CGWindowID: CGFloat] = [:]
     /// Each listed process's bundle id (nil for a process without
     /// one), read with the list and kept per pid across reads, so
     /// a pass names an app without asking LaunchServices and a
     /// read asks only of a process it has not seen (#1936).
-    private(set) var listedBundles: [pid_t: String?] = [:]
-
-    /// Re-reads the WindowServer list where `refresh` asks or
-    /// nothing is cached, noting which windows `tracks` names.
-    func listedWindows(
-        refresh: Bool,
-        tracks: (CGWindowID) -> Bool,
-        radius: (CGWindowID) -> CGFloat,
-        bundle: ((pid_t) -> String?)?
-    ) -> [FloatDetection.ListedWindow] {
-        if refresh || listed == nil {
-            let read = listWindows()
-            listed = read
-            trackedAtRead = Set(read.map(\.number).filter(tracks))
-            listedRadii = Dictionary(
-                read
-                    .filter {
-                        $0.layer == 0
-                            && !self.trackedAtRead.contains($0.number)
-                    }
-                    .map { ($0.number, radius($0.number)) },
-                uniquingKeysWith: { first, _ in first }
-            )
-            var bundles: [pid_t: String?] = [:]
-            if let bundle {
-                let readable = read.filter {
-                    $0.layer == 0
-                        || KiwiCore.isBeneathNormal(layer: $0.layer)
-                }
-                for pid in Set(readable.map(\.pid)) {
-                    bundles[pid] = listedBundles[pid] ?? bundle(pid)
-                }
-            }
-            listedBundles = bundles
-        }
-        return listed ?? []
-    }
-
-    /// Moves a listed window to the bounds its own event reported
-    /// (CG coordinates), or drops it where `frame` is nil — it
-    /// hid or closed. True where the cache changed.
-    func noteListedWindow(_ number: CGWindowID, frame: CGRect?) -> Bool {
-        guard var all = listed,
-            let index = all.firstIndex(where: { $0.number == number })
-        else { return false }
-        if let frame {
-            guard all[index].frame != frame else { return false }
-            let old = all[index]
-            all[index] = FloatDetection.ListedWindow(
-                number: old.number,
-                pid: old.pid,
-                layer: old.layer,
-                frame: frame
-            )
-        } else {
-            all.remove(at: index)
-        }
-        listed = all
-        return true
-    }
+    var listedBundles: [pid_t: String?] = [:]
 
     /// Whether an event owed the list a fresh read before the next
     /// re-mask (`KiwiCore.oweVisionReshape`).
     var listOwed = false
 
-    /// Drops the cached list: no mask reads it.
-    func forgetListedWindows() {
-        listed = nil
-        trackedAtRead = []
-        listedRadii = [:]
-        listedBundles = [:]
-    }
     #if DEBUG
         /// Test-only: builds plate backends. Every test core sets
         /// it to the inert plate, so a real panel needs its own
@@ -211,29 +163,30 @@ public final class VisionManager {
         for (display, plate) in plates where !live.contains(display) {
             plate.hide(reduceMotion: true)
             plates[display] = nil
-            stackedUnder[display] = nil
+            stacked[display] = nil
             shapes[display] = nil
             shapeInputs[display] = nil
         }
         target = request.target
         below = request.target.map { request.below ?? $0 }
+        holding = request.holding != nil && request.holding == target
         guard isOn else {
             for plate in plates.values { plate.hide(reduceMotion: motion) }
-            stackedUnder = [:]
+            stacked = [:]
             return
         }
         for screen in request.screens {
             let display = screen.display
             if request.standDown.contains(display) {
                 plates[display]?.hide(reduceMotion: motion)
-                stackedUnder[display] = nil
+                stacked[display] = nil
                 continue
             }
             // Nothing focused, nothing to keep clear: no stale
             // stack under a window that left.
             guard let target = request.target, let below else {
                 plates[display]?.hide(reduceMotion: motion)
-                stackedUnder[display] = nil
+                stacked[display] = nil
                 continue
             }
             let plate = plates[display] ?? makePlate()
@@ -244,13 +197,14 @@ public final class VisionManager {
                 blur: request.blur
             )
             reshape(plate, on: screen, request)
+            let stack = Stack(target: target, above: holding)
             if BorderManager.ordersOverlay(
                 reassert: reassert,
-                needsOrder: stackedUnder[display] != target,
+                needsOrder: stacked[display] != stack,
                 tracked: request.tracked
             ) {
-                plate.order(below: below)
-                stackedUnder[display] = target
+                order(plate, stack, below: below)
+                stacked[display] = stack
             }
             plate.show(reduceMotion: motion)
         }
@@ -299,9 +253,26 @@ public final class VisionManager {
     /// last sync chose.
     func restack(after window: CGWindowID) {
         guard isOn, window == target, let below else { return }
+        let stack = Stack(target: window, above: holding)
         for (display, plate) in plates where plate.isShown {
+            order(plate, stack, below: below)
+            stacked[display] = stack
+        }
+    }
+
+    /// The one place a plate orders: above a held target — its
+    /// app's activation lifts the window back over the plate, so
+    /// each reorder re-orders it (v3 probe P9) — else below
+    /// `below`.
+    private func order(
+        _ plate: any VisionPlateBackend,
+        _ stack: Stack,
+        below: CGWindowID
+    ) {
+        if stack.above {
+            plate.order(above: stack.target)
+        } else {
             plate.order(below: below)
-            stackedUnder[display] = window
         }
     }
 
@@ -311,12 +282,14 @@ public final class VisionManager {
         active = .off
         for plate in plates.values { plate.hide(reduceMotion: true) }
         plates = [:]
-        stackedUnder = [:]
+        stacked = [:]
         shapes = [:]
         shapeInputs = [:]
         forgetListedWindows()
         target = nil
         below = nil
+        holding = false
+        hold = nil
     }
 
     private func makePlate() -> any VisionPlateBackend {

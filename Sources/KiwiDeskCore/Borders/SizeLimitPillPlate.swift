@@ -40,17 +40,20 @@ final class SizeLimitPillPlate: NSVisualEffectView {
     }
 
     /// The leading glyph, chosen by the refusal's own case
-    /// (`ResizeRefusal.pillSymbol`).
-    func setSymbol(_ name: String) {
-        icon.image = NSImage(
-            systemSymbolName: name,
-            accessibilityDescription: nil
-        )
+    /// (`ResizeRefusal.pillSymbol`); nil draws the text alone.
+    func setSymbol(_ name: String?) {
+        icon.image = name.flatMap {
+            NSImage(systemSymbolName: $0, accessibilityDescription: nil)
+        }
+        icon.isHidden = name == nil
+        needsLayout = true
     }
+
+    private var textInset: CGFloat { icon.isHidden ? 12 : 24 }
 
     override var fittingSize: NSSize {
         let labelSize = label.intrinsicContentSize
-        return NSSize(width: labelSize.width + 36, height: 26)
+        return NSSize(width: labelSize.width + textInset + 12, height: 26)
     }
 
     override func layout() {
@@ -62,9 +65,9 @@ final class SizeLimitPillPlate: NSVisualEffectView {
             height: 12
         )
         label.frame = NSRect(
-            x: 24,
+            x: textInset,
             y: (bounds.height - 15) / 2,
-            width: bounds.width - 30,
+            width: bounds.width - textInset - 6,
             height: 15
         )
     }

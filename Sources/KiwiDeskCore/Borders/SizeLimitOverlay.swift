@@ -67,6 +67,34 @@ final class SizeLimitOverlay {
         text: String,
         symbol: String
     ) -> Bool {
+        present(window: window, frame: frame, text: text, symbol: symbol)
+    }
+
+    /// Shows a lens's reminder pill centred on a held window, with
+    /// no symbol and no timer: it stays until `release` (#2103
+    /// ruling 12).
+    @discardableResult
+    func hold(window: CGWindowID, frame: CGRect, text: String) -> Bool {
+        present(window: window, frame: frame, text: text, symbol: nil)
+    }
+
+    /// Fades a pill out now, a held one included.
+    func release(_ window: CGWindowID) {
+        guard let pill = pills[window] else { return }
+        pill.hideWork?.cancel()
+        pills[window]?.hideWork = nil
+        fadeOut(window)
+    }
+
+    /// Shows the pill: a refusal's at the window's top with its
+    /// symbol, faded after `holdDuration`; a hold's centred, with
+    /// no symbol, until released.
+    private func present(
+        window: CGWindowID,
+        frame: CGRect,
+        text: String,
+        symbol: String?
+    ) -> Bool {
         var pill = pills[window] ?? makePill()
         pill.hideWork?.cancel()
         pill.hideWork = nil
@@ -90,7 +118,8 @@ final class SizeLimitOverlay {
 
         let pillRect = CGRect(
             x: frame.midX - pillWidth / 2,
-            y: frame.minY + 8,
+            y: symbol == nil
+                ? frame.midY - Self.pillHeight / 2 : frame.minY + 8,
             width: pillWidth,
             height: Self.pillHeight
         )
@@ -117,6 +146,8 @@ final class SizeLimitOverlay {
             popEntrance(pill.plate)
         }
 
+        pills[window] = pill
+        guard symbol != nil else { return true }
         let work = DispatchWorkItem { [weak self] in
             self?.fadeOut(window)
         }

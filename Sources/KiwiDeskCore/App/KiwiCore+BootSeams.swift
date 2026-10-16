@@ -76,6 +76,8 @@ extension KiwiCore {
         // frames live in.
         mouse.onLeftMouseDown = { [weak self] point, origin in
             self?.stampLeftClick(at: GeometryUtils.axPoint(point))
+            // A click on a window a lens holds clears it (#2103).
+            self?.visionPressed()
             // Neither arm hears a press on a bar or the peek, so
             // every press it does hear is a click outside the peek
             // (#1946).

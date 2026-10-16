@@ -22,6 +22,19 @@ extension AppDelegate {
         core.vision.onReachChange = { [weak self] in
             self?.visionReadersChanged()
         }
+        // A lens holds a landing under the haze: its reminder,
+        // once per landing (#2103 ruling 12).
+        core.vision.onHold = { reminder in
+            NSAccessibility.post(
+                element: NSApp as Any,
+                notification: .announcementRequested,
+                userInfo: [
+                    .announcement: Self.spokenReminder(reminder),
+                    .priority:
+                        NSAccessibilityPriorityLevel.high.rawValue,
+                ]
+            )
+        }
         var wasOn = core.kiwiVisionIsOn
         core.vision.onChange = { [weak self] active, cause in
             self?.visionReadersChanged()
@@ -39,6 +52,20 @@ extension AppDelegate {
                 ]
             )
         }
+    }
+
+    /// A reminder as VoiceOver reads it: without its emoji, which
+    /// the default's kiwis would otherwise be spoken as (ruling
+    /// 42a).
+    static func spokenReminder(_ reminder: String) -> String {
+        let kept = reminder.unicodeScalars.filter {
+            !$0.properties.isEmojiPresentation
+                && !($0.properties.isEmoji && $0.value > 0x7F)
+                && $0.value != 0xFE0F && $0.value != 0x200D
+        }
+        return String(String.UnicodeScalarView(kept))
+            .split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
     }
 
     /// What VoiceOver hears: on or off, or — where the user did not

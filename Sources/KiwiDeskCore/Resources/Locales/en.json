@@ -925,6 +925,7 @@
   "kiwivision.preview.caption.haze.windows.dim": "The windows behind the focused one are dimmed; the wallpaper stays clear.",
   "kiwivision.preview.caption.haze.windows.dim_blur": "The windows behind the focused one are dimmed and blurred; the wallpaper stays clear.",
   "kiwivision.preview.caption.none": "At these settings KiwiVision changes nothing on screen.",
+  "kiwivision.reminder.default": "🥝 Keep the vision juicy 🥝",
   "kiwivision.section.appearance": "System appearance",
   "kiwivision.section.clear": "Stays clear",
   "kiwivision.section.levels": "Dim and blur",
