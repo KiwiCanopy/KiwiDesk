@@ -22,15 +22,16 @@ final class FollowFocusIntent {
 
     private var pending: (window: WindowID, at: Date)?
 
-    /// The clock the debt is stamped and aged on — the core's
+    /// The one clock the debt is stamped and aged on — the core's
     /// `wallClock`, wired in `KiwiCore+Bootstrap`, which
     /// `makeTestCore` freezes (#2341, tests.md ▸ age-bounded
-    /// ledgers).
+    /// ledgers). No method takes a time of its own, so a stamp
+    /// and its read cannot come from two clocks (#1852).
     var clock: () -> Date = Date.init
 
     /// Records that `id` is owed a focus at its arrival.
-    func record(_ id: WindowID, at now: Date? = nil) {
-        pending = (id, now ?? clock())
+    func record(_ id: WindowID) {
+        pending = (id, clock())
     }
 
     /// Claims the owed focus if `isPayable` says it can be paid
@@ -41,10 +42,9 @@ final class FollowFocusIntent {
     /// switch inside the window would have paid the debt and
     /// yanked focus mid-swipe (review, #1007).
     func claim(
-        at now: Date? = nil,
         if isPayable: (WindowID) -> Bool
     ) -> WindowID? {
-        guard let window = owed(at: now), isPayable(window)
+        guard let window = owed(), isPayable(window)
         else { return nil }
         pending = nil
         return window
@@ -53,11 +53,10 @@ final class FollowFocusIntent {
     /// The live debt, unpaid: nil once expired (which drops it)
     /// or absent. A READ for the arrival fold's mirror and the
     /// settle's stand-down (#1207); `claim` is the one payer.
-    func owed(at now: Date? = nil) -> WindowID? {
+    func owed() -> WindowID? {
         guard let pending else { return nil }
         guard
-            (now ?? clock()).timeIntervalSince(pending.at)
-                < Self.drainWindow
+            clock().timeIntervalSince(pending.at) < Self.drainWindow
         else {
             self.pending = nil
             return nil
