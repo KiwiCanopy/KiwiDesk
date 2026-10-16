@@ -273,7 +273,7 @@ struct ShortcutsSection: View {
             layerNames: model.config.layers.map(\.name),
             currentLayer: selected,
             lenses: KeybindingCatalog.lensOffer(
-                stored: model.core.kiwiVisionStoredLensNames,
+                stored: model.draftLenses.map(\.name),
                 bindings: model.config.layers.flatMap(\.bindings)
             )
         )

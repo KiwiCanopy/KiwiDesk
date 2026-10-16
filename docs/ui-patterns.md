@@ -167,8 +167,8 @@ controls (#291).** The override editor is a full pushed pane
 trailing OVERRIDE checkbox column (`overrideStateColumn`,
 88 pt) and the `OverrideChrome` accent bar, so a 2–4-peer field
 has no room for a segmented render; `OverridePickerRow`
-renders `.menu` and has no `.segmented` branch, since the
-per-space editor is the only override surface. Restore a
+renders `.menu` and has no `.segmented` branch, since every
+override surface sits in a bounded column. Restore a
 required-style parameter only if a genuinely *full-width*
 override surface arrives. The inherited (unchecked) state
 collapses to a quiet "follows `<Layout>` defaults · `<value>`"
@@ -179,6 +179,11 @@ the one segmented label tight at minimum width; it stays
 segmented by width headroom and is re-checked for truncation
 when each new locale ships (#95), as the help-glyph labels
 are.
+
+:::unreleased
+A KiwiVision lens's rows (#2103) are such a surface too: an
+unchecked row reads "follows Focused window · `<value>`".
+:::
 
 **Numeric controls pick one of three idioms by a single
 test:** *would a user say a specific number out loud?* — never
@@ -727,9 +732,10 @@ set and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).
 
 :::unreleased
-KiwiVision is in that set too (#2103), though its page has no
-draft: its rows write at once, so its panel draws the live
-values they wrote. *Why* is
+KiwiVision is in that set too (#2103). Its Focused window rows
+write at once, so on that chip the panel draws the live values
+they wrote; a lens's page is a draft saved with Save, so on a
+lens's chip the panel draws the draft's lens. *Why* is
 [Design decisions](design-decisions.md) ▸ the panel's object is
 the DRAFT.
 :::

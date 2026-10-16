@@ -1,5 +1,6 @@
 /// KiwiVision page row order (`KiwiVisionCensusRenderTests`,
-/// #2103). Every card walks its list.
+/// #2103). Every card walks its list, save the lens strip's one
+/// key, which draws a page per live lens (`KiwiVisionLensWiringTests`).
 enum KiwiVisionRowOrder {
     static let levels: [SettingKey] = [
         .kiwiVision(.dim), .kiwiVision(.blur),
@@ -17,10 +18,14 @@ enum KiwiVisionRowOrder {
         .kiwiVision(.appearance)
     ]
 
+    /// One setting, a page per live lens (Profiles' shape).
+    static let lenses: [SettingKey] = [.kiwiVision(.lenses)]
+
     static let byContainer: [SettingsContainer: [SettingKey]] = [
         .kiwiVisionLevels: levels,
         .kiwiVisionClear: clear,
         .kiwiVisionNeverDimmed: neverDimmed,
         .kiwiVisionAppearance: appearance,
+        .kiwiVisionLenses: lenses,
     ]
 }

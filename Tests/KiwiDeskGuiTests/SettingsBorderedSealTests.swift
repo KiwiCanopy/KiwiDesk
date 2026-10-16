@@ -120,6 +120,11 @@ struct SettingsBorderedSealTests {
                     + "until this fix — its sealed sibling is "
                     + "rename (moved from the strip, #2022)"
             ),
+            "KiwiVisionLensHeader.swift": (
+                1, "role: .destructive",
+                "Delete Lens…, the layer header's twin (#2103 "
+                    + "ruling 49): the system red IS the warning"
+            ),
             "KeyRecorderField.swift": (
                 1, ".tint(buttonTint)",
                 "resolves its own tint per state: red on a "

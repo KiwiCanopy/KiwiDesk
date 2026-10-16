@@ -1,25 +1,42 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The KiwiVision page (#2103 ▸ the Settings area ruling): how to
-/// turn it on, then its four cards; the picture is the side
-/// panel's (`KiwiVisionPanelPreview`). Every row is app-wide and
-/// written at once (#1741). v3's lens strip lands above the
-/// pointer line, which belongs to the Focused window body.
+/// The KiwiVision page (#2103 ▸ the Settings area ruling): the
+/// lens strip, then the selected chip's body — Focused window's
+/// four cards, written at once (#1741), or a lens's page, saved
+/// with Save (ruling 29). The picture is the side panel's
+/// (`KiwiVisionPanelPreview`), following the chip on `nav`.
 struct KiwiVisionSection: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                KiwiVisionPointer(model: model)
-                KiwiVisionLevelsCard(model: model)
-                KiwiVisionClearCard(model: model)
-                KiwiVisionNeverDimmedCard(model: model)
-                KiwiVisionAppearanceCard(model: model)
+                KiwiVisionLensStrip(model: model)
+                if let lens = selectedLens {
+                    KiwiVisionLensPage(model: model, lens: lens)
+                } else {
+                    focusedWindow
+                }
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
+    }
+
+    private var selectedLens: VisionLens? {
+        let lenses = model.draftLenses
+        return model.nav.kiwiVisionLensSelection(in: lenses).flatMap {
+            name in lenses.first { $0.name == name }
+        }
+    }
+
+    /// Plain KiwiVision: Never dimmed last, every lens's (ruling 47).
+    @ViewBuilder private var focusedWindow: some View {
+        KiwiVisionPointer(model: model)
+        KiwiVisionLevelsCard(model: model)
+        KiwiVisionClearCard(model: model)
+        KiwiVisionAppearanceCard(model: model)
+        KiwiVisionNeverDimmedCard(model: model)
     }
 }
 

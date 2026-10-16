@@ -3724,7 +3724,7 @@ It is off at every launch.
 
 Its settings are app-wide: they are stored in `gui.json` as the
 `kiwivision` group (`dim`, `blur`, `appearance`,
-`clear_wallpaper`, `clear_app`, `never_dimmed`), no profile
+`clear_wallpaper`, `clear_app`, `never_dimmed`, `lenses`), no profile
 carries them, and loading a profile never changes them. Their GUI
 twin is Settings ▸ **KiwiVision**. The `set_*` verbs below change
 the running value only, never `gui.json`; in a Lua-owned setup,
@@ -3820,7 +3820,8 @@ plain KiwiVision one, and never-dimmed apps stay clear under every
 lens. Like the `set_*` verbs, it changes the running lenses only;
 `init.lua` defines them on every load. A lens defined here lasts
 until a config reload or restart and is not listed on Settings ▸
-KiwiVision until you make it there.
+KiwiVision; a lens made there is stored in `gui.json` and saved
+with Save, and `define_lens` never writes there.
 
 **Example:**
 
@@ -5198,7 +5199,9 @@ row.
   [KiwiVision](#kiwivisiontoggle) off and on, then one item per
   lens, which turns that lens on; picking the lens already on
   leaves it on. A lens with no apps is greyed, "No apps yet", and
-  one the live profile leaves out is greyed "Not in Studio".
+  one the live profile leaves out is greyed "Not in Studio". While
+  there is no lens, the line ends in **New Lens…**, which opens
+  Settings ▸ KiwiVision.
 
 Keys on this side:
 

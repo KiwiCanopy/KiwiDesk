@@ -37,4 +37,5 @@ struct KiwiVisionControls: Sendable {
         "kiwivision.appearance",
         "Appearance while on"
     )
+    let lenses = SettingsControl("kiwivision.lenses", "Lenses")
 }

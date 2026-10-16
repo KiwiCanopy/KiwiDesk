@@ -71,6 +71,7 @@ appWide.visionBlur
 appWide.visionClearApp
 appWide.visionClearWallpaper
 appWide.visionDim
+appWide.visionLenses
 appWide.visionNeverDimmed
 config.appRules[app]
 config.desktopShortcutBase

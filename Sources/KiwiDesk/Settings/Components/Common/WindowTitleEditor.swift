@@ -119,7 +119,11 @@ struct WindowTitleEditor<Preview: View>: View {
         let covered = shown
         return Set(
             model.core.state.windows.all
-                .filter { $0.appBundleID == app }
+                // A lens stores its members lowercased (#2103 ruling
+                // 31); a bundle id compares without case.
+                .filter {
+                    $0.appBundleID?.lowercased() == app.lowercased()
+                }
                 .map(\.title)
         )
         .subtracting(covered)

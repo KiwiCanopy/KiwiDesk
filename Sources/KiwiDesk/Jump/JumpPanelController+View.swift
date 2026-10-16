@@ -61,6 +61,7 @@ extension JumpPanelController {
                 lensChord: { [core] in
                     ShortcutsOpenBinding.lensGlyphs(core: core, lens: $0)
                 },
+                offersNewLens: core.isGuiManaged,
                 inert: inert
             )
         )
@@ -75,6 +76,7 @@ extension JumpPanelController {
         vision: (active: VisionActive, lenses: [VisionLensChoice]),
         visionChord: String?,
         lensChord: (String) -> String?,
+        offersNewLens: Bool,
         inert: String?
     ) -> [ViewPickList.Line: [ViewPickList.Item]] {
         let grey = inert
@@ -109,6 +111,7 @@ extension JumpPanelController {
                 vision,
                 chord: visionChord,
                 lensChord: lensChord,
+                offersNewLens: offersNewLens,
                 inert: grey
             ),
         ]
@@ -121,6 +124,7 @@ extension JumpPanelController {
         _ vision: (active: VisionActive, lenses: [VisionLensChoice]),
         chord: String?,
         lensChord: (String) -> String?,
+        offersNewLens: Bool,
         inert: String?
     ) -> [ViewPickList.Item] {
         let fixed = [
@@ -138,6 +142,14 @@ extension JumpPanelController {
                 chord: chord
             ),
         ]
+        guard !vision.lenses.isEmpty else {
+            // Opening Settings is no machine act, so no boot grey;
+            // offered only where Settings can save a lens.
+            guard offersNewLens else { return fixed }
+            return fixed + [
+                ViewPickList.Item(pick: .newLens, name: ViewPickText.newLens)
+            ]
+        }
         return fixed
             + vision.lenses.map { lens in
                 ViewPickList.Item(
@@ -167,6 +179,8 @@ extension JumpPanelController {
             core.setKiwiVision(.plain)
         case .vision(lens: let name?):
             core.setKiwiVision(.lens(name))
+        case .newLens:
+            core.barMenuHooks.openSettings(.kiwiVision)
         }
     }
 

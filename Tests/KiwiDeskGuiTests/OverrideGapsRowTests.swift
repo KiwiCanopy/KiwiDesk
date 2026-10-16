@@ -93,7 +93,11 @@ struct OverrideGapsRowTests {
         #expect(row.contains("GapsBordersGates.innerDiffers(current)"))
         #expect(!row.contains("SettingsSlider("))
         #expect(row.contains("overrideToggle($value,global:global)"))
-        #expect(row.contains("inheritsFrom:.gapsAndBorders"))
+        #expect(
+            row.contains(
+                "inheritsName:SettingsDestination.gapsAndBorders.title"
+            )
+        )
     }
 
     /// The row sits above the layout rows on every mode, writes

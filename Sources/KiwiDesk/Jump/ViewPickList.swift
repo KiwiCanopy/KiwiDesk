@@ -22,6 +22,9 @@ struct ViewPickList: Equatable {
         /// KiwiVision on: around the focused window where `lens` is
         /// nil, else that lens (#2103 ruling 41).
         case vision(lens: String?)
+        /// Offered while no lens exists: Settings ▸ KiwiVision,
+        /// where a lens is made (#2103 ruling 41).
+        case newLens
     }
 
     struct Item: Equatable, Identifiable {

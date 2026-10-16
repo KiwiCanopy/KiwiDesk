@@ -108,6 +108,9 @@ struct AnnouncedValuePinTests {
         "SettingsHeaderBar.swift": 1,
         // #1655: the Space history group's heading.
         "SpaceHistoryRow.swift": 1,
+        // A lens's name and the Every lens rule (#2103 PR 7).
+        "KiwiVisionLensHeader.swift": 1,
+        "KiwiVisionLensPage.swift": 1,
         "HomeScreen.swift": 1,
         // The key panel's Shortcuts section titles (#1292, #2246),
         // one heading level since the bands went.

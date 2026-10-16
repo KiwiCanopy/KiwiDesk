@@ -117,7 +117,8 @@ struct SettingsCatalogSiteTests {
         // 149 since #1869: Mouse & trackpad ▸ hover focus.
         // 150 since #2258: AI ▸ Add to Claude Desktop.
         // 151 since #2312: KiwiVision's own shortcuts group.
-        #expect(names.count == 151)
+        // 152 since #2103 PR 7: the lens strip.
+        #expect(names.count == 152)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

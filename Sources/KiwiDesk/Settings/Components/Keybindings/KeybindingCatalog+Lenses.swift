@@ -122,6 +122,13 @@ extension KeybindingCatalog {
         }
     }
 
+    /// Whether `binding` is `lens`'s live chord: it toggles the lens
+    /// and holds a key — what KiwiHub, Shortcuts and the lens page
+    /// all count as the lens's shortcut.
+    static func isLensChord(_ binding: KeyBinding, _ lens: String) -> Bool {
+        names(binding, lens) && !binding.combo.isEmpty
+    }
+
     /// Whether `binding` toggles `lens`, by the one lens
     /// comparison (`AppWideSettings.sameLens`).
     static func names(_ binding: KeyBinding, _ lens: String) -> Bool {

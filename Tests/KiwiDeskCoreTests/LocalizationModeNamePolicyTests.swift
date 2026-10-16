@@ -10,7 +10,7 @@ import Testing
 /// "set_mode","args":["1","grid"]}` over IPC. A picker reading
 /// "Pila" above a config that only accepts `"stack"` breaks the
 /// link between what you see and what you write, and no other
-/// setting has that property. The three CJK locales are the
+/// setting has that property. The four CJK locales are the
 /// exception: there the English word is a foreign body in a way it
 /// is not between two Latin-script languages.
 ///
@@ -26,7 +26,7 @@ import Testing
 @Suite("localization mode-name policy")
 struct LocalizationModeNamePolicyTests {
     private static let nativeLocales: Set<String> = [
-        "ja", "ko", "zh-Hans",
+        "ja", "ko", "zh-Hans", "zh-Hant",
     ]
 
     private static let modeKeys = [
@@ -97,7 +97,7 @@ struct LocalizationModeNamePolicyTests {
     }
 
     @Test("only the CJK locales render mode names natively")
-    func nativeLocalesAreExactlyTheCJKThree() throws {
+    func nativeLocalesAreExactlyTheCJKOnes() throws {
         let english = try catalog("en")
         var native: Set<String> = []
         for locale in try shippedLocaleCodes() where locale != "en" {
