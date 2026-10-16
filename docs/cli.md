@@ -608,7 +608,7 @@ moves the focused Space to the next layout in its cycle list;
 :::
 
 :::unreleased
-`kiwihub.show` takes `windows`, `shortcuts` or `layouts` and opens
+`kiwihub.show` takes `windows`, `shortcuts` or `view` and opens
 KiwiHub on that side, so a launcher reaches it without a shortcut;
 any other side is refused, naming the three. See
 [kiwihub.show](lua-reference.md#kiwihubshow).

@@ -5117,7 +5117,9 @@ row.
   one can be loaded; one that cannot load is greyed. Return loads
   it like `load_profile`.
 - **KiwiVision** — Off and Focused window, which turn
-  [KiwiVision](#kiwivisiontoggle) off and on.
+  [KiwiVision](#kiwivisiontoggle) off and on, then one item per
+  lens, which turns that lens on; picking the lens already on
+  leaves it on. A lens with no apps is greyed, "No apps yet".
 
 Keys on this side:
 
