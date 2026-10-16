@@ -218,6 +218,8 @@ extension KiwiCore {
         for name in profiles.list() {
             guard let url = try? profiles.fileURL(name: name),
                 let data = try? Data(contentsOf: url),
+                // A newer build's file is not this build's (#2325).
+                (try? NewerFormatOnDisk.refuseProfile(url)) != nil,
                 let stripped = ConfigMigration.withoutLegacyAppWide(
                     data
                 )

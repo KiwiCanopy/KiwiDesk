@@ -1011,6 +1011,9 @@ Touching `Config`, `Profiles`, `Commands`.
   `PresetShapeTuningSeamTests`)
 - a new file in the config directory joins `ConfigArtifact` AND answers "does
   this travel in a backup?" in the same change set, neither alone
+- a write of `gui.json` or a profile file goes through its store's door, which
+  refuses a file a newer build wrote, and a raw rewrite beside it asks
+  `NewerFormatOnDisk.check` first (#2325, `NewerFormatWriteRefusalTests`)
 - a change breaking the decoded shape of anything a bundle carries bumps
   `SetupBundle.currentFormat`, breaking Profile or GuiConfig schema bumps
   `Profile.currentFormat` / `GuiConfig.currentFormat`, and a breaking palette
