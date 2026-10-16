@@ -4001,10 +4001,11 @@ on takes the focus and comes to the front, as a click on it
 would. The pointer has to move and then rest for 200 ms; a focus
 change made while it rests, or during those 200 ms, is never taken
 back. Nothing happens while a mouse button is held, within a
-second of a Desktop switch, over a full-screen window or
-KiwiDesk's own windows, or where something other than a managed
-window is in front under the pointer: a menu, the Dock, a bar,
-another app's panel. A window whose focus would move the layout —
+second of a Desktop switch, over a full-screen window, or where
+something other than a managed window is in front under the
+pointer: a menu, the Dock, a bar, a panel. KiwiDesk's Settings
+window is focused like any other; its dialogs are not. A window
+whose focus would move the layout —
 a scrolling row that would pan, a parked monocle window — is not
 focused. A window on another screen makes that screen's Space
 the active one. The pointer is never warped by it, so it works
