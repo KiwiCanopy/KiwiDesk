@@ -28,6 +28,15 @@ extension KiwiCore {
         return toggleAnswer()
     }
 
+    /// Turns the lens `name` on, from off, plain or another lens;
+    /// the lens already on stays on. A lens that is gone or has no
+    /// apps refuses (ruling 37) — KiwiHub greys it first.
+    public func setKiwiVision(lens name: String) {
+        guard let lens = appWide.lens(named: name), !lens.apps.isEmpty
+        else { return }
+        setVision(.lens(lens.name))
+    }
+
     private func toggleAnswer() -> CommandResponse {
         var answer: [String: JSONValue] = ["on": .bool(vision.isOn)]
         if let lens = visionLensName { answer["lens"] = .string(lens) }

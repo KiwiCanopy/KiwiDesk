@@ -29,8 +29,8 @@ struct ViewPickListTests {
             Item(pick: .profile($1), name: $1, isCurrent: $0 == 0)
         }
         let vision = [
-            Item(pick: .vision(false), name: "Off", isCurrent: true),
-            Item(pick: .vision(true), name: "Focused window"),
+            Item(pick: .visionOff, name: "Off", isCurrent: true),
+            Item(pick: .vision(lens: nil), name: "Focused window"),
         ]
         return ViewPickList(
             layout: LayoutPickerState(
@@ -74,7 +74,7 @@ struct ViewPickListTests {
         list.setQuery("stu")
         #expect(list.selected?.pick == .profile("Studio"))
         list.setQuery("focus")
-        #expect(list.selected?.pick == .vision(true))
+        #expect(list.selected?.pick == .vision(lens: nil))
     }
 
     @Test("non-matches dim and stay in place")
@@ -125,9 +125,9 @@ struct ViewPickListTests {
         #expect(list.selected?.pick == .profile("Studio"))
         list.step(1)
         list.moveLine(1)
-        #expect(list.selected?.pick == .vision(true))
+        #expect(list.selected?.pick == .vision(lens: nil))
         list.moveLine(1)
-        #expect(list.selected?.pick == .vision(true))
+        #expect(list.selected?.pick == .vision(lens: nil))
         list.moveLine(-1)
         #expect(list.selected?.pick == .profile("Studio"))
         list.moveLine(-1)

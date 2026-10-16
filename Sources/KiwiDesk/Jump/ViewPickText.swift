@@ -18,6 +18,12 @@ enum ViewPickText {
         L("view_picker.vision.focused", "Focused window")
     }
 
+    /// A lens with no apps, which its chip cannot turn on (#2103
+    /// ruling 37).
+    static var lensEmpty: String {
+        L("view_picker.vision.lens_empty", "No apps yet")
+    }
+
     /// A profile the menu greys for the same reason (#246).
     static var profileBroken: String {
         L("view_picker.profile.broken", "Can't load")

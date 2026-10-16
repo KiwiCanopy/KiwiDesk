@@ -29,6 +29,14 @@ extension JumpPanelController {
         }
     }
 
+    /// Re-reads a shown View side: KiwiVision or its lenses
+    /// changed through another door — a chord, a verb.
+    func reloadViewIfShown() {
+        guard isOpen, let model = currentModel, model.scope == .view
+        else { return }
+        model.reloadView()
+    }
+
     /// The lines as Core reads now. Every chip greys while
     /// KiwiDesk boots or waits for Start Tiling (#2309 ruling 9).
     func viewList() -> ViewPickList {
@@ -48,7 +56,7 @@ extension JumpPanelController {
             items: Self.items(
                 layout: layout,
                 profiles: (profiles.currentName, profiles.list(), broken),
-                visionOn: core.kiwiVisionIsOn,
+                vision: (core.kiwiVisionActive, core.appWide.visionLenses),
                 visionChord: visionChord,
                 inert: inert
             )
@@ -61,7 +69,7 @@ extension JumpPanelController {
     static func items(
         layout: LayoutPickerState?,
         profiles: (current: String?, all: [String], broken: Set<String>),
-        visionOn: Bool,
+        vision: (active: VisionActive, lenses: [VisionLens]),
         visionChord: String?,
         inert: String?
     ) -> [ViewPickList.Line: [ViewPickList.Item]] {
@@ -91,22 +99,46 @@ extension JumpPanelController {
                         ? ViewPickText.profileBroken : nil
                 )
             } : []
-        let vision = [
+        return [
+            .layout: layouts, .profile: profileItems,
+            .vision: visionItems(vision, chord: visionChord, inert: grey),
+        ]
+    }
+
+    /// Off, Focused window, then each lens (#2103 ruling 41); a
+    /// lens with no apps greys with its reason (ruling 37).
+    private static func visionItems(
+        _ vision: (active: VisionActive, lenses: [VisionLens]),
+        chord: String?,
+        inert: String?
+    ) -> [ViewPickList.Item] {
+        let fixed = [
             ViewPickList.Item(
-                pick: .vision(false),
+                pick: .visionOff,
                 name: ViewPickText.visionOff,
-                isCurrent: !visionOn,
-                inertReason: grey
+                isCurrent: vision.active == .off,
+                inertReason: inert
             ),
             ViewPickList.Item(
-                pick: .vision(true),
+                pick: .vision(lens: nil),
                 name: ViewPickText.visionFocused,
-                isCurrent: visionOn,
-                inertReason: grey,
-                chord: visionChord
+                isCurrent: vision.active == .plain,
+                inertReason: inert,
+                chord: chord
             ),
         ]
-        return [.layout: layouts, .profile: profileItems, .vision: vision]
+        return fixed
+            + vision.lenses.map { lens in
+                let current = vision.active == .lens(lens.name)
+                return ViewPickList.Item(
+                    pick: .vision(lens: lens.name),
+                    name: lens.name,
+                    isCurrent: current,
+                    inertReason: inert,
+                    refusal: lens.apps.isEmpty && !current
+                        ? ViewPickText.lensEmpty : nil
+                )
+            }
     }
 
     /// Closes on a pick, then applies it — once: a click during
@@ -119,8 +151,12 @@ extension JumpPanelController {
             if let space { core.applyLayout(mode, to: space) }
         case .profile(let name):
             core.loadProfileAsUser(name)
-        case .vision(let on):
-            core.setKiwiVision(on)
+        case .visionOff:
+            core.setKiwiVision(false)
+        case .vision(lens: nil):
+            core.setKiwiVision(true)
+        case .vision(lens: let name?):
+            core.setKiwiVision(lens: name)
         }
     }
 

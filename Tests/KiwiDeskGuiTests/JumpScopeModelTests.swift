@@ -27,7 +27,7 @@ struct JumpScopeModelTests {
             items: JumpPanelController.items(
                 layout: space ? layout : nil,
                 profiles: ("Dual", ["Dual", "Studio"], []),
-                visionOn: false,
+                vision: (.off, []),
                 visionChord: nil,
                 inert: nil
             )
@@ -125,7 +125,7 @@ struct JumpScopeModelTests {
         model.handle(.quick(1, moveHere: false))
         model.handle(.step(1))
         model.handle(.pick(moveHere: false))
-        #expect(applied == [.profile("Studio"), .vision(true)])
+        #expect(applied == [.profile("Studio"), .vision(lens: nil)])
     }
 
     @Test("⌘S keeps only while Keep is armed")
@@ -234,8 +234,8 @@ struct JumpHoverTests {
         model.hoverItem(.layout(.stack), pointer: CGPoint(x: 40, y: 10))
         #expect(model.view?.selected?.pick == .layout(.stack))
         #expect(model.view?.layout?.live == .grid)
-        model.hoverItem(.vision(true), pointer: CGPoint(x: 60, y: 30))
-        #expect(model.view?.selected?.pick == .vision(true))
+        model.hoverItem(.vision(lens: nil), pointer: CGPoint(x: 60, y: 30))
+        #expect(model.view?.selected?.pick == .vision(lens: nil))
         // A row hover reaches nothing while Layouts shows.
         model.hoverRow(1, pointer: CGPoint(x: 50, y: 10))
         #expect(model.list.selection == 0)

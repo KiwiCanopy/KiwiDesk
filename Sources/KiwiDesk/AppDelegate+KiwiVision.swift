@@ -10,11 +10,14 @@ extension AppDelegate {
         // live values, which a verb may change from outside.
         core.onAppWideChange = { [weak self] in
             self?.dashboardIfCreated?.model.objectWillChange.send()
+            // KiwiHub's lens chips read the lens list.
+            self?.jumpPanel?.reloadViewIfShown()
         }
         var wasOn = core.kiwiVisionIsOn
         core.vision.onChange = { [weak self] active in
             // The Home card's subtitle reads the running state.
             self?.dashboardIfCreated?.model.objectWillChange.send()
+            self?.jumpPanel?.reloadViewIfShown()
             // A switch between lenses is no on or off to announce.
             let on = active.isOn
             guard on != wasOn else { return }
