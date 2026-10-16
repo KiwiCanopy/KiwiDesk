@@ -9,10 +9,12 @@ extension SettingsModel {
     func reachDiffRows() -> [SettingsDiffRow] {
         // The layered snapshot is what the row edits encoded against:
         // a layer edit is the layer rows' (#2022), never a row's.
+        // The lenses are app-wide and need no page (#2103).
+        let lenses = lensDiffRows()
         guard let stored = layeredReach, let encoded = encodedReach,
             let editing = reachProfile
-        else { return [] }
-        return layerDiffRows() + lensDiffRows()
+        else { return lenses }
+        return layerDiffRows() + lenses
             + rows(
                 .appRules(.appRules),
                 stored.appRules,

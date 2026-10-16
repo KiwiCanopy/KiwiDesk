@@ -114,6 +114,20 @@ struct RuleReachFamilyParityTests {
         }
     }
 
+    @Test("the lens marks, no table family, are judged and written too")
+    func lensReachIsWritten() throws {
+        let save = try SourceScan.functionBody(
+            of: "saveRuleReach",
+            in: "KiwiCore+RuleReachSave.swift",
+            under: "Profiles"
+        )
+        #expect(save.contains("snapshot.lensReach"))
+        #expect(save.contains("snapshot.fileLensReach"))
+        #expect(save.contains("profile.lensReach ="))
+        let text = try source("KiwiCore+RuleReach.swift")
+        #expect(text.contains("|| lensReach != fileLensReach"))
+    }
+
     @Test("every family's override is applied through the one helper")
     func applyResolvesEveryFamily() throws {
         let helper = try SourceScan.functionBody(

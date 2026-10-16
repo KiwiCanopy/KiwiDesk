@@ -906,7 +906,7 @@
   "kiwivision.lens.diff.edited": "edited",
   "kiwivision.lens.diff.label": "“%1$@” lens",
   "kiwivision.lens.diff.left_out": "left out of %1$@",
-  "kiwivision.lens.diff.new": "new lens",
+  "kiwivision.lens.diff.new": "added",
   "kiwivision.lens.diff.renamed": "renamed to “%1$@”",
   "kiwivision.never_dimmed": "Never dimmed apps",
   "kiwivision.never_dimmed.add": "Add an app…",

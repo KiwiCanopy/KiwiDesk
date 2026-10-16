@@ -24,8 +24,13 @@ extension SettingsModel {
                 let before = stored.first(where: { $0.name == old })
             else {
                 result.append(
-                    row(name, "new", L("kiwivision.lens.diff.new", "new lens"))
+                    row(
+                        name,
+                        "new",
+                        L("kiwivision.lens.diff.new", "added")
+                    )
                 )
+                result += reachRows(name, stored: nil)
                 continue
             }
             if old != name {
@@ -57,14 +62,15 @@ extension SettingsModel {
         return result
     }
 
-    /// One row per saved profile `name` newly reaches or leaves out.
+    /// One row per saved profile `name` newly reaches or leaves out;
+    /// a new lens starts out reaching every one.
     private func reachRows(
         _ name: String,
-        stored old: String
+        stored old: String?
     ) -> [SettingsDiffRow] {
-        guard let before = ruleReachStored?.profilesReaching(old),
-            let after = lensReach(name),
-            let profiles = lensProfiles
+        guard let after = lensReach(name), let profiles = lensProfiles,
+            let before = old.map({ ruleReachStored?.profilesReaching($0) })
+                ?? Set(profiles)
         else { return [] }
         return profiles.compactMap { profile in
             let had = before.contains(profile)

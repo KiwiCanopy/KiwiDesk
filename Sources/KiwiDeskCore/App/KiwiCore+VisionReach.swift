@@ -27,8 +27,21 @@ extension KiwiCore {
     /// to a profile a lens reaches turns nothing on: a switch is no
     /// press (ruling 16).
     func liveProfileChanged() {
+        guard !vision.reachHeld else { return }
         followActiveLens()
         vision.onReachChange()
+    }
+
+    /// Runs a Save that writes lens marks and then the lenses, the
+    /// lens on judged once both landed: judged between them, a swap
+    /// of two lenses reads the lens on against the other's marks
+    /// and turns it off (#2103).
+    public func withLensReachHeld(_ body: () -> Void) {
+        let outer = vision.reachHeld
+        vision.reachHeld = true
+        body()
+        vision.reachHeld = outer
+        liveProfileChanged()
     }
 
     /// Ruling 16's cue: one refusal pill on the focused window

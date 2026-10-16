@@ -19,7 +19,7 @@ struct LensPageSaveTests {
     /// gui.json binds Writing to W and Reading to R in the shared
     /// layer; Work is loaded, Home leaves Writing out and binds it
     /// to H in a layer override, Travel is plain.
-    private func makeModel() throws -> SettingsModel {
+    private func makeModel(loaded: Bool = true) throws -> SettingsModel {
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1200, height: 800)
@@ -37,7 +37,11 @@ struct LensPageSaveTests {
         core.setAppWide(persisting: true) {
             $0.visionLenses = [lens("Writing"), lens("Reading")]
         }
-        try core.profiles.save(profile("Work"))
+        if loaded {
+            try core.profiles.save(profile("Work"))
+        } else {
+            try core.profiles.write(profile("Work"))
+        }
         var home = profile("Home")
         home.lensReach = ["writing": false]
         home.layers = KeyLayerOverride(
@@ -129,6 +133,22 @@ struct LensPageSaveTests {
         #expect(!base.contains(reading))
     }
 
+    @Test("with no profile loaded the crossings still reach every file")
+    func builtInLiveCarriesTheCrossings() throws {
+        let model = try makeModel(loaded: false)
+        #expect(model.reachProfile == nil)
+        model.renameLens("Writing", to: "Draft")
+        model.setLensReach("Reading", ["Work"])
+        model.saveAsNewProfile(named: "New")
+        #expect(storedNames(model) == ["Draft", "Reading"])
+        let draft = KeybindingCatalog.toggleLens("Draft").lua
+        #expect(luas(try homeLayers(model)).contains(draft))
+        #expect(
+            try model.core.profiles.read(name: "Home").lensReach
+                == ["draft": false, "reading": false]
+        )
+    }
+
     @Test("a delete frees every stored chord and clears its marks")
     func deleteReachesEveryFile() throws {
         let model = try makeModel()
@@ -194,6 +214,21 @@ struct LensPageSaveTests {
         model.renameLens("Writing", to: "Draft")
         model.updateActiveProfile()
         #expect(model.core.kiwiVisionActive == .lens("Draft"))
+    }
+
+    @Test("the lens on stays on through a swap the Save carries")
+    func swapKeepsTheLensOn() throws {
+        let model = try makeModel()
+        model.core.execute("kiwivision.toggle", args: [.string("Reading")])
+        _ = try model.core.loadProfile(named: "Home")
+        model.reload()
+        // Home leaves Writing out; Reading is on.
+        #expect(model.core.kiwiVisionActive == .lens("Reading"))
+        model.renameLens("Writing", to: "Tmp")
+        model.renameLens("Reading", to: "Writing")
+        model.renameLens("Tmp", to: "Reading")
+        model.updateActiveProfile()
+        #expect(model.core.kiwiVisionActive == .lens("Writing"))
     }
 
     @Test("an edit dirties the draft; undoing it cleans it")
