@@ -12,7 +12,7 @@ extension SettingsModel {
         guard let stored = layeredReach, let encoded = encodedReach,
             let editing = reachProfile
         else { return [] }
-        return layerDiffRows()
+        return layerDiffRows() + lensDiffRows()
             + rows(
                 .appRules(.appRules),
                 stored.appRules,

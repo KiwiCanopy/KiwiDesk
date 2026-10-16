@@ -108,7 +108,14 @@ struct ShortcutsLensRowsTests {
             KeyLayer(
                 name: KeyLayer.defaultName,
                 bindings: [
-                    binding(#"kiwivision.toggle("writing")"#, "control+w"),
+                    // The label the catalog writes, which a rename
+                    // carries along (`renameLenses`).
+                    KeyBinding(
+                        combo: "control+w",
+                        lua: #"kiwivision.toggle("writing")"#,
+                        kind: .navigation,
+                        label: KeybindingCatalog.toggleLens("writing").label
+                    ),
                     binding(
                         KeybindingCatalog.toggleKiwiVision.lua,
                         "control+v"

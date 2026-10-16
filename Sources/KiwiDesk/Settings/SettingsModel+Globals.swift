@@ -65,7 +65,11 @@ extension SettingsModel {
             seedSpaces = config.spaces
         }
         saveLookReach()
-        if saveRuleReach() == .failed { dropRuleHalf() }
+        if saveRuleReach() == .failed {
+            dropRuleHalf()
+        } else {
+            saveLensHalf()
+        }
         do {
             if core.lua == nil {
                 // Cold paused boot: core.start() never ran, so a

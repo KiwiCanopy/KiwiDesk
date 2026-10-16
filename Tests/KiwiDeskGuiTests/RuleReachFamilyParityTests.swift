@@ -103,7 +103,7 @@ struct RuleReachFamilyParityTests {
     func saveWritesEveryFamily() throws {
         let body = try SourceScan.functionBody(
             of: "saveRuleReach",
-            in: "KiwiCore+RuleReach.swift",
+            in: "KiwiCore+RuleReachSave.swift",
             under: "Profiles"
         )
         for family in try families() {

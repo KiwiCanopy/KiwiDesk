@@ -47,6 +47,7 @@ extension SettingsModel {
             recomputeDirty()
             return
         }
+        saveLensHalf()
         do {
             // With a checklist the rule families are the table's,
             // already written above — one encoder per field.

@@ -157,7 +157,13 @@ extension SettingsModel {
         // the config, which re-reads the loaded profile's rules.
         // The files half must land for the base half to: a failed
         // write keeps the stored rules in the globals write too.
-        if !saved || saveRuleReach() == .failed { dropRuleHalf() }
+        if !saved || saveRuleReach() == .failed {
+            dropRuleHalf()
+        } else {
+            // The lenses after their chords and marks (#2103), ahead
+            // of the gui.json write below.
+            saveLensHalf()
+        }
         persistGlobalsIfNeeded()
         reload()
         return saved

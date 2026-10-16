@@ -480,8 +480,9 @@ Obligations:
   or empties it turns KiwiVision off, one that stores it under
   another spelling re-keys it, and a write that renames a lens
   says so in `setAppWide(…renamingLens:)`, alive for that write
-  alone, so it re-keys there, never beside it — that the lens
-  page's Save says so is review's until #2103 PR 7 (`VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
+  alone, so it re-keys there, never beside it, the lens page's
+  Save included (`LensPageSaveTests` ▸ `activeFollowsTheSave`,
+  `VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
   `KiwiVisionLensActivationTests` ▸ `activeFollowsDefinition`,
   `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`,
   `persistingRenameFollows`). **A lens is matched by the one
@@ -495,7 +496,10 @@ Obligations:
   setup defines its lenses on every load (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
   and writes the settled list, never the live one**, so a session
   `define_lens` or `delete_lens` never reaches `gui.json` (ruling
-  40) — review's until the lens page owes it a test.
+  40): the lens page's draft is `LensEdits`, seeded from
+  `kiwiVisionStoredLenses` and laid over each list it writes
+  (`LensPageSaveTests` ▸ `sessionLensStaysSession`,
+  `LensEditsTests` ▸ `appliedKeepsSessionLenses`).
 - **A lens's reach is read from adoption state, and followed on
   every change of it** (#2103 rulings 16, 38). A profile leaves a
   lens out through its sparse `lens_reach`, keyed by
@@ -518,8 +522,14 @@ Obligations:
   `ShortcutsLensRowsTests`). The binding crossing rewrites the Lua a
   rule-reach key is built from, so the lens page's Save applies both
   crossings to the shared base, every profile file and the reach
-  snapshot in one `RuleReachSnapshot` pass ahead of the row encode —
-  review's until #2103 PR 7 owes it a test.
+  snapshot in the one layer pass ahead of the row encode
+  (`lensPass`), every rename of a draft at once, as one stored →
+  page name map, or a swap merges two lenses — the chords through
+  `KeybindingCatalog.renameLenses`, the marks through
+  `RuleReachSnapshot.renameLenses` — and an "Applies to" pick
+  rewrites every saved profile's marks there too, its lenses
+  written after that rule half lands and before any `gui.json`
+  write of the Save, on every Save door (`LensPageSaveTests`).
 - **A step KiwiDesk's own navigation takes skips what a lens leaves
   out, through the one `lensKeySkip`; a pick skips nothing**
   (#2103 rulings 35, 44, 45). `navigate` asks it once and threads

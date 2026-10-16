@@ -118,7 +118,14 @@ extension KiwiCore {
     /// what a binding may name, since it outlives the session
     /// (#2103 ruling 40).
     public var kiwiVisionStoredLensNames: [String] {
-        appWideLedger.settled.visionLenses.map(\.name)
+        kiwiVisionStoredLenses.map(\.name)
+    }
+
+    /// The stored lenses: what the Settings lens page seeds its
+    /// draft from and writes back, so a session `define_lens` or
+    /// `delete_lens` never reaches `gui.json` (ruling 40).
+    public var kiwiVisionStoredLenses: [VisionLens] {
+        appWideLedger.settled.visionLenses
     }
 
     /// A General row (`persisting`) or a verb changing a value. A

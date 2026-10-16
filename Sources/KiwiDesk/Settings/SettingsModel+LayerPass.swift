@@ -30,11 +30,17 @@ extension SettingsModel {
     func layeredReach(_ edits: RuleReachEdits) -> RuleReachSnapshot? {
         guard let stored = ruleReachStored, let editing = reachProfile
         else { return ruleReachStored }
-        guard !edits.layers.isEmpty || !edits.deletedLayers.isEmpty else {
+        guard
+            !edits.layers.isEmpty || !edits.deletedLayers.isEmpty
+                || edits.lenses != nil
+        else {
             return stored
         }
         var snapshot = stored
         do {
+            if let lenses = edits.lenses {
+                try lensPass(&snapshot, lenses)
+            }
             try deletePass(&snapshot, edits, editing: editing)
             try renamePass(&snapshot, edits)
             for (page, edit) in edits.layers.sorted(by: { $0.key < $1.key }) {
