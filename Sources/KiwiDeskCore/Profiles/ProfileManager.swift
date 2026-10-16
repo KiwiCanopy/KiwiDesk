@@ -145,6 +145,7 @@ public final class ProfileManager {
 
     /// Saves the profile; auto-flags as count's default if first for count.
     func save(_ profile: Profile) throws {
+        try NewerFormatOnDisk.refuseProfile(fileURL(name: profile.name))
         var profile = profile
         if !profile.isDefault,
             defaultProfile(count: profile.monitorCount) == nil
@@ -317,7 +318,7 @@ public final class ProfileManager {
     /// Non-adopting write (#18, #82); refuses a newer file (#2325).
     func write(_ profile: Profile) throws {
         let name = try validated(profile.name)
-        try NewerFormatOnDisk.refuse(url(for: name), Profile.currentFormat)
+        try NewerFormatOnDisk.refuseProfile(url(for: name))
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true

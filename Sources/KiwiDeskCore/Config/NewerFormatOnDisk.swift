@@ -23,20 +23,30 @@ public struct NewerFormatOnDisk: Error, Equatable,
         if let refusal = check(url, knows: knows) { throw refusal }
     }
 
+    /// `refuse` for a profile file at `url`.
+    static func refuseProfile(_ url: URL) throws {
+        try refuse(url, Profile.currentFormat)
+    }
+
     /// The refusal owed before writing `url`, or nil where the
     /// file is absent, unreadable or carries a format this build
     /// `knows`. Only a readable integer above `knows` refuses: a
     /// corrupt file stays the decoder's to report.
     static func check(_ url: URL, knows: Int) -> NewerFormatOnDisk? {
         guard let data = try? Data(contentsOf: url),
-            let root = try? JSONSerialization.jsonObject(with: data)
-                as? [String: Any],
-            let format = root["format"] as? Int,
+            let format = storedFormat(of: data),
             format > knows
         else { return nil }
         return NewerFormatOnDisk(
             file: url.lastPathComponent,
             format: format
         )
+    }
+
+    /// A config file's own top-level `format`, nil where it carries
+    /// none or is no JSON object.
+    static func storedFormat(of data: Data) -> Int? {
+        let root = try? JSONSerialization.jsonObject(with: data)
+        return (root as? [String: Any])?["format"] as? Int
     }
 }

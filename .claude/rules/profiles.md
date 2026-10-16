@@ -770,6 +770,22 @@ The obligations below bind this directory:
 clauses, scoped to the doors' own bodies rather than to their
 file.
 
+## A file a newer build wrote is never overwritten (#2325)
+
+**Write `gui.json` and a profile file through its store's door,
+which refuses a file a newer build wrote.** `GuiConfigStore.save`
+and `ProfileManager.write` / `save` throw `NewerFormatOnDisk` over
+a `format` this build does not know: its decoder refuses that
+file, so a write would replace a setup it never read — on a
+synced config folder, another Mac's. A sequence that writes
+something else first refuses before it (`save`'s sibling
+defaults, the Lua adoption's ledger). A raw rewrite beside the
+doors asks `NewerFormatOnDisk.check` first, as the app-wide strip
+does, unless it rewrites only below the current format by
+construction, as `MigrationBackup` does; nothing scans for a new
+raw writer, so that is review's (`NewerFormatWriteRefusalTests`,
+`NewerFormatWriteRefusalCallerTests`).
+
 ## A new file in the config directory answers the backup question
 
 A backup carries an **allow-list, never a directory sweep**, and
