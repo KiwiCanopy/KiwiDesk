@@ -21,12 +21,19 @@ extension SettingsModel {
             reload()
             return
         }
-        guard persisted else { return }
+        guard persisted else {
+            // A session-only write is a live change like a verb's
+            // (#2262): the rows re-read it, the draft takes nothing.
+            refreshUnsavedLive()
+            return
+        }
         suppressDirty = true
         config.apply(edit)
         cleanConfig.apply(edit)
         suppressDirty = false
         recomputeDirty()
+        // A keep or a menu row may have saved a live row (#2262).
+        refreshUnsavedLive()
     }
 
     /// A gone Space's shortcuts left the base and every profile

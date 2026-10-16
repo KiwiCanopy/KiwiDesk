@@ -409,6 +409,8 @@
   "diff.label.space_name": "Nom de l'espace",
   "diff.label.space_pin": "Épinglage à l'écran",
   "diff.label.swap_skips_cascade": "L'échange ignore la cascade",
+  "diff.live.heading": "Appliqué, non enregistré",
+  "diff.live.more": "Autres : %1$d",
   "diff.note.added": "Ajout",
   "diff.note.edited": "Modification",
   "diff.note.removed": "Suppression",

@@ -8,7 +8,8 @@ import Testing
 /// with a profile that follows the shared look or keeps its own.
 /// Per-suite helpers by convention; this one file is shared by the
 /// keep suites only because they split at the size ceiling — the
-/// app rule suites keep through the same door.
+/// app rule suites keep through the same door, and the unsaved-live
+/// suite reads the same judgement (#2262).
 @MainActor
 enum KeepFixture {
     /// A core on one 100x100 screen. With `gui`, `gui.json` exists

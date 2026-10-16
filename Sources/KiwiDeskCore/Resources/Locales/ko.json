@@ -409,6 +409,8 @@
   "diff.label.space_name": "공간 이름",
   "diff.label.space_pin": "화면 고정",
   "diff.label.swap_skips_cascade": "교체 시 겹침 건너뛰기",
+  "diff.live.heading": "적용됨, 저장되지 않음",
+  "diff.live.more": "더 보기: %1$d",
   "diff.note.added": "추가됨",
   "diff.note.edited": "편집됨",
   "diff.note.removed": "제거됨",

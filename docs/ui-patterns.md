@@ -1203,6 +1203,15 @@ count dock into a full-width bar at the foot of the window —
 one view, two containers, because at that width the floating
 form covers the rows it is about. No draft, no bar.
 
+:::unreleased
+The pill's list also carries a **Live, not saved** section: each
+stored setting changed live outside Settings, narrated saved →
+live and counted with the rest. While one stands the pill and its
+bar stay, a clean draft included, and Save keeps it; the detail
+panel's "Changed in this draft" list leaves these rows to the
+pill.
+:::
+
 **Rows go two-line below 900 pt.** A labelled row's control
 normally hangs off the shared 210 pt label axis; below the row
 breakpoint the label moves above it and the control starts at

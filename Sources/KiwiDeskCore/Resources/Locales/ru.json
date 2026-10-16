@@ -409,6 +409,8 @@
   "diff.label.space_name": "Имя пространства",
   "diff.label.space_pin": "Закрепление за экраном",
   "diff.label.swap_skips_cascade": "Обмен пропускает каскад",
+  "diff.live.heading": "Применено, не сохранено",
+  "diff.live.more": "Ещё: %1$d",
   "diff.note.added": "Добавлено",
   "diff.note.edited": "Изменено",
   "diff.note.removed": "Удалено",
