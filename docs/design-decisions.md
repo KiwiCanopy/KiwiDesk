@@ -11434,9 +11434,8 @@ Desktop switching. The panel opens on the Layout line, so ⌃⌥L ⌘3
 still applies the third layout. ⇧ with ↩ or a digit does nothing
 here, since there is nothing to move.
 
-The Profile line appears only where another profile can be
-loaded, since a line with nothing to pick but the current
-profile is a label rather than a choice, and a profile that
+The Profile line always shows, ending in Save as New Profile…
+(▸ *A create chip is a line's last item*), and a profile that
 cannot load stays listed, greyed, with its reason, rather than
 vanishing. With no Space under the pointer the Layout line greys
 instead of the side being stepped past, because the other two
@@ -11468,12 +11467,17 @@ sits on, as Layout Defaults are for a Space's overrides.
 
 **A create chip is a line's last item and no pick (#2359).** "New
 Lens…" ends the KiwiVision line always, not only while no lens
-exists, so a line keeps one shape. Placed first, it
-would shift every ⌘ digit and put ↩ one keystroke from a create.
+exists, and "Save as New Profile…" ends the Profile line, so a
+line keeps one shape. Saving a profile from KiwiHub names it in
+the search field rather than in a dialog, since the panel already
+holds the keyboard, and saves the live arrangement — never a
+Settings draft — under a free name, so a taken name never
+overwrites. Placed first, a create chip would shift every ⌘ digit and put ↩ one keystroke from a create.
 The digits skip it, ↓ never lands on it while the line holds
 anything else, and the filter finds it by name. A Lua-owned setup
-draws it greyed with its reason rather than hiding it.
-`ViewPickVisionLineTests` and `ViewPickItemsTests` hold it.
+draws New Lens… greyed with its reason rather than hiding it.
+`ViewPickVisionLineTests`, `ViewPickItemsTests` and
+`JumpProfileNamingTests` hold it.
 :::
 
 :::unreleased

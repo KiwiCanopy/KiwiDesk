@@ -183,9 +183,7 @@ struct JumpPanelShapeTests {
         #expect(call.contains("hasSelection: model.hasSelection"))
         // The field shows only the typing: its placeholder always,
         // and no stand-in drawn over it.
-        #expect(
-            view.occurrences(of: "prompt: Text(model.scope.fieldName)") == 1
-        )
+        #expect(view.occurrences(of: "prompt: Text(fieldName)") == 1)
         // No typing drawn clear under a stand-in, in any spelling.
         #expect(view.occurrences(of: "Color.clear") == 0)
         #expect(view.occurrences(of: "fieldName }") == 0)

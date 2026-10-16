@@ -57,7 +57,10 @@ extension JumpModel {
     /// already on turns KiwiVision off (#2103 ruling 56).
     func applyView(_ item: ViewPickList.Item) {
         guard item.isApplicable else { return }
-        onApplyView(ViewPickList.action(of: item))
+        let action = ViewPickList.action(of: item)
+        // Save as New Profile… names its profile first (#2359).
+        guard action != .newProfile else { return beginNaming() }
+        onApplyView(action)
     }
 
     private func moveViewSelection(_ move: (inout ViewPickList) -> Void) {

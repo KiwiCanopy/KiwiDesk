@@ -66,6 +66,49 @@ enum ViewPickText {
         }
     }
 
+    /// The Profile line's last chip (#2359 ruling 2), Settings'
+    /// own words for the same save.
+    static var newProfile: String {
+        L("footer.save_as_new_profile", "Save as New Profile…")
+    }
+
+    /// The name the field starts from, made free by Core.
+    static var newProfileBase: String {
+        L("view_picker.profile.new_name", "New Profile")
+    }
+
+    /// The field's prompt and VoiceOver name while it names a
+    /// profile.
+    static var namingPrompt: String {
+        L("view_picker.profile.name_prompt", "Profile name")
+    }
+
+    /// The one line under the field: what ↩ writes, and that it
+    /// becomes this screen setup's default (#2359 ruling 3).
+    static func savesAs(_ name: String) -> String {
+        L(
+            "view_picker.profile.saves_as",
+            "↩ saves this arrangement as “%1$@”, the default for "
+                + "these screens",
+            name
+        )
+    }
+
+    /// The line under the field when a save did not land.
+    static var saveFailed: String {
+        L("view_picker.profile.save_failed", "Couldn't save the profile")
+    }
+
+    /// The line under the field where the typing cannot name a
+    /// profile.
+    static var invalidName: String {
+        L(
+            "view_picker.profile.invalid_name",
+            "A profile name can't be empty, start with a dot or "
+                + "contain “/”"
+        )
+    }
+
     /// A profile the menu greys for the same reason (#246).
     static var profileBroken: String {
         L("view_picker.profile.broken", "Can't load")

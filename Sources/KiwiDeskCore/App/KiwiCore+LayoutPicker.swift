@@ -66,6 +66,15 @@ extension KiwiCore {
         }
     }
 
+    /// Saves the live arrangement as `name` as KiwiHub's Save as
+    /// New Profile… does (#2359), as user motion; whether it
+    /// landed.
+    public func saveProfileAsUser(_ name: String) -> Bool {
+        withUserMotion {
+            execute("save_profile", args: [.string(name)]).isSuccess
+        }
+    }
+
     /// `id`'s live layout, whether it drifted from the profile,
     /// and whether Keep is armed — which any shown Space's drift
     /// arms, since Keep keeps every screen's layout (#1179).
