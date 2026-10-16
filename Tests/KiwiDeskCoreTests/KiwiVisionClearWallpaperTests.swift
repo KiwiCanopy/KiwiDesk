@@ -226,7 +226,7 @@ struct KiwiVisionClearWallpaperTests {
         core.setAppWide(persisting: false) {
             $0.visionClearWallpaper = true
         }
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         core.visionListedWindowChanged(w2, frame: nil)
         #expect(core.vision.listed?.count == 1)
     }
@@ -242,7 +242,7 @@ struct KiwiVisionClearWallpaperTests {
         core.setAppWide(persisting: false) {
             $0.visionClearWallpaper = true
         }
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(reads == 1, "turning on is a re-stack: it reads")
         core.updateVision()
         core.updateVision()
@@ -274,7 +274,7 @@ struct KiwiVisionClearWallpaperTests {
         core.setAppWide(persisting: false) {
             $0.visionClearWallpaper = true
         }
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         try #require(core.vision.hasShownPlates)
         core.noteVisionMaskEvent(.windowMoved(w2, .zero))
         #expect(!core.vision.listOwed)

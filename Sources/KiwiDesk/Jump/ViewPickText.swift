@@ -18,6 +18,13 @@ enum ViewPickText {
         L("view_picker.vision.focused", "Focused window")
     }
 
+    /// Why a lens chip cannot turn its lens on (#2103).
+    static func lensRefusal(_ refusal: LensRefusal) -> String {
+        switch refusal {
+        case .noApps: return L("view_picker.vision.lens_empty", "No apps yet")
+        }
+    }
+
     /// A profile the menu greys for the same reason (#246).
     static var profileBroken: String {
         L("view_picker.profile.broken", "Can't load")

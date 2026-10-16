@@ -30,7 +30,7 @@ extension KiwiCore {
     private func followActiveLens(from old: AppWideSettings) -> Bool {
         guard let name = visionLensName else { return false }
         let before = old.look(lens: name)
-        guard let lens = appWide.lens(named: name), !lens.apps.isEmpty
+        guard let lens = appWide.lens(named: name), lensRefusal(lens) == nil
         else {
             setVision(.off, from: before)
             return true

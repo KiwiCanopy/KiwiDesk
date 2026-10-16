@@ -25,13 +25,14 @@ struct ViewPickItemsTests {
         profiles: (String?, [String], Set<String>) = (
             "Laptop", ["Laptop", "Studio", "Old"], ["Old"]
         ),
-        visionOn: Bool = false,
+        vision: VisionActive = .off,
+        lenses: [VisionLensChoice] = [],
         inert: String? = nil
     ) -> [Line: [ViewPickList.Item]] {
         JumpPanelController.items(
             layout: layout,
             profiles: profiles,
-            visionOn: visionOn,
+            vision: (vision, lenses),
             visionChord: "⌃⌥V",
             inert: inert
         )
@@ -65,12 +66,39 @@ struct ViewPickItemsTests {
     @Test("KiwiVision marks its state and carries its shortcut")
     func visionLine() {
         LocalizationManager.shared.select("en")
-        let off = items(visionOn: false)[.vision] ?? []
-        #expect(off.map(\.pick) == [.vision(false), .vision(true)])
+        let off = items(vision: .off)[.vision] ?? []
+        #expect(off.map(\.pick) == [.visionOff, .vision(lens: nil)])
         #expect(off.map(\.isCurrent) == [true, false])
         #expect(off.last?.chord == "⌃⌥V")
-        let on = items(visionOn: true)[.vision] ?? []
+        let on = items(vision: .plain)[.vision] ?? []
         #expect(on.map(\.isCurrent) == [false, true])
+    }
+
+    /// Ruling 41: a chip per lens after Focused window, the lens on
+    /// marked; a lens Core refuses greys with the reason it names.
+    @Test("each lens gets a chip, an empty one greyed")
+    func lensChips() {
+        LocalizationManager.shared.select("en")
+        let lenses = [
+            VisionLensChoice(name: "Writing"),
+            VisionLensChoice(name: "Calls", refusal: .noApps),
+        ]
+        let line = items(vision: .lens("Writing"), lenses: lenses)[.vision]
+        let chips = line ?? []
+        #expect(
+            chips.map(\.pick) == [
+                .visionOff, .vision(lens: nil), .vision(lens: "Writing"),
+                .vision(lens: "Calls"),
+            ]
+        )
+        #expect(chips.map(\.name).suffix(2) == ["Writing", "Calls"])
+        #expect(chips.map(\.isCurrent) == [false, false, true, false])
+        #expect(chips.map(\.isApplicable) == [true, true, true, false])
+        #expect(chips.last?.refusal == "No apps yet")
+        #expect(
+            chips.last.map { ViewPickText.spoken($0, on: .vision) }
+                == "KiwiVision: Calls, No apps yet"
+        )
     }
 
     @Test("every chip greys while KiwiDesk boots, and says so")
@@ -104,6 +132,61 @@ struct ViewPickItemsTests {
         #expect(source.occurrences(of: "inert:inert") == 1)
     }
 
+    /// A builder test cannot see the pick reach Core, nor the
+    /// line re-read when a chord or a verb changes KiwiVision.
+    @Test("a lens chip turns its lens on, and the line follows")
+    func lensWiring() throws {
+        func flat(_ path: String) throws -> String {
+            let url = SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(path)
+            let raw = try String(contentsOf: url, encoding: .utf8)
+            return SourceScan.stripComments(raw)
+                .split(whereSeparator: \.isWhitespace).joined()
+        }
+        let panel = try flat(
+            "Sources/KiwiDesk/Jump/JumpPanelController+View.swift"
+        )
+        #expect(
+            panel.contains(
+                "case.vision(lens:letname?):core.setKiwiVision(.lens(name))"
+            )
+        )
+        #expect(
+            panel.contains(
+                "vision:(core.kiwiVisionActive,core.kiwiVisionLensChoices)"
+            )
+        )
+        #expect(
+            panel.contains(
+                "guardisOpen,letmodel=currentModel,model.scope==.view"
+                    + "else{return}model.reloadView()"
+            )
+        )
+        let delegate = try flat(
+            "Sources/KiwiDesk/AppDelegate+KiwiVision.swift"
+        )
+        // Both triggers reach the one funnel, which reaches the chips.
+        #expect(
+            delegate.contains(
+                "core.onAppWideChange={[weakself]in"
+                    + "self?.visionReadersChanged()}"
+            )
+        )
+        #expect(
+            delegate.contains(
+                "core.vision.onChange={[weakself]activein"
+                    + "self?.visionReadersChanged()"
+            )
+        )
+        #expect(
+            delegate.contains(
+                "funcvisionReadersChanged(){"
+                    + "dashboardIfCreated?.model.objectWillChange.send()"
+                    + "jumpPanel?.reloadViewIfShown()}"
+            )
+        )
+    }
+
     @Test("no match leaves the digits out of the footer")
     func footerDropsDigitsWithoutMatches() {
         LocalizationManager.shared.select("en")
@@ -122,7 +205,7 @@ struct ViewPickItemsTests {
         let lines = JumpPanelController.items(
             layout: nil,
             profiles: ("Laptop", ["Laptop", "Studio"], []),
-            visionOn: false,
+            vision: (.off, []),
             visionChord: nil,
             inert: nil
         )

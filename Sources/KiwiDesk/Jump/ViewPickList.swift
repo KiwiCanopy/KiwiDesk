@@ -18,8 +18,10 @@ struct ViewPickList: Equatable {
     enum Pick: Hashable, Sendable {
         case layout(LayoutMode)
         case profile(String)
-        /// KiwiVision off, or on around the focused window.
-        case vision(Bool)
+        case visionOff
+        /// KiwiVision on: around the focused window where `lens` is
+        /// nil, else that lens (#2103 ruling 41).
+        case vision(lens: String?)
     }
 
     struct Item: Equatable, Identifiable {

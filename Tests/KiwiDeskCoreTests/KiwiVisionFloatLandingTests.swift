@@ -81,7 +81,7 @@ struct KiwiVisionFloatLandingTests {
             return ring
         }
         core.updateBorders()
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(core.windowServer.requested(by: .vision).contains(float))
         let platesBefore = plate.orders.count
         let ringsBefore = rings.map(\.orders).reduce(0, +)
@@ -94,8 +94,8 @@ struct KiwiVisionFloatLandingTests {
     @Test("off, the plate hears no float")
     func offHearsNoFloat() {
         let (core, _) = makeCore()
-        core.setKiwiVision(true)
-        core.setKiwiVision(false)
+        core.setKiwiVision(.plain)
+        core.setKiwiVision(.off)
         #expect(core.windowServer.requested(by: .vision).isEmpty)
     }
 
@@ -111,7 +111,7 @@ struct KiwiVisionFloatLandingTests {
             return ring
         }
         core.updateBorders()
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         let displays = Set(core.visionRequest().screens.map(\.display))
         core.noteVisionStandDown(displays)
         #expect(!core.vision.hasShownPlates)

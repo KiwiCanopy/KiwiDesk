@@ -100,7 +100,7 @@ struct KiwiVisionStoredTests {
     func rowRetargetsWhileOn() {
         let system = FakeSystem()
         let core = makeCore(system)
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(system.asked.isEmpty)
         core.setAppWide(persisting: true) { $0.visionAppearance = .dark }
         #expect(system.asked == [true])
@@ -114,7 +114,7 @@ struct KiwiVisionStoredTests {
             "kiwivision.set_appearance",
             args: [.string("dark")]
         )
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(system.state.dark)
         core.resetAppWide()
         #expect(core.appWide.visionAppearance == .unchanged)
@@ -132,7 +132,7 @@ struct KiwiVisionStoredTests {
         stored.visionAppearance = .dark
         config.appWide = stored
         try core.guiConfigStore.save(config)
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(system.asked.isEmpty, "the live ask is still unchanged")
         core.prepareAppWide()
         #expect(core.appWide.visionAppearance == .dark)
@@ -165,7 +165,7 @@ struct KiwiVisionStoredTests {
         let plate = InertVisionPlate()
         core.vision.plateFactory = { plate }
         core.noteVisionStandDown([])
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         try #require(plate.dim == 0.6)
         _ = core.execute("kiwivision.set_dim", args: [.number(25)])
         #expect(plate.dim == 0.25)
