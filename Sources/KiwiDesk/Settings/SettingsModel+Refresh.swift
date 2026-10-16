@@ -73,7 +73,19 @@ extension SettingsModel {
     /// (#2183) or, in the Lua editor, changed at all (#2206) —
     /// file reads cheap enough for every window-key.
     func refreshOwner() {
-        if ownerMoved || luaChangedOnDisk, !isDirty { reload() }
+        // A live setting a verb moved while the window was away
+        // calls nothing back (#2262): a clean live draft re-seeds,
+        // so its controls and its Save draw what live does, and a
+        // dirty one re-asks which live rows stand.
+        if ownerMoved || luaChangedOnDisk, !isDirty {
+            reload()
+        } else if !isDirty, target == .live, !editingLua,
+            core.tiler.settings != cleanConfig.settings
+        {
+            reload()
+        } else {
+            refreshUnsavedLive()
+        }
     }
 
     /// Re-reads what each draft binding loads (#1609). Owed by

@@ -113,7 +113,10 @@ struct SettingsDetailPanel: View {
         // against a visible list must BE that list's count (owner
         // 2026-08-10: `draftChangeCount` said "1" over a
         // three-row family).
-        let all = SettingsDiffRowSource.rows(for: model)
+        // "Changed in this draft": the pill alone lists live rows.
+        let all = SettingsDiffRowSource.rows(for: model).filter {
+            $0.section == .draft
+        }
         let rows = SettingsDiffRowSource.areaRows(
             all,
             in: destination

@@ -409,7 +409,7 @@
   "diff.label.space_name": "Space-Name",
   "diff.label.space_pin": "Bildschirm-Pin",
   "diff.label.swap_skips_cascade": "Tausch überspringt Kaskade",
-  "diff.live.heading": "Aktiv, nicht gespeichert",
+  "diff.live.heading": "Aktiv, nicht gesichert",
   "diff.live.more": "Weitere: %1$d",
   "diff.note.added": "Hinzugefügt",
   "diff.note.edited": "Geändert",

@@ -6917,7 +6917,7 @@ ruling 2026-08-12.)
 
 The pill's leading readout is the ROW COUNT of the list it opens
 (owner 2026-08-10), so every reason the pill appears must be a row
-in that list. Two reasons exist: a draft config leaf, which
+in that list. Two reasons existed when this was ruled: a draft config leaf, which
 `SettingsDraftDiff` attributes to a census row, and live drift —
 the active profile storing no monitor set for the connected
 screens, a built-in layout composing, a matched profile deleted —
@@ -6955,25 +6955,26 @@ Saved profiles card's one anchored control is Load — the verb
 that replaces a layout — which is the wrong thing to flash under
 a note that says *save as a profile*.
 
+:::unreleased
 ### A live change nobody saved is a row of its own (#2262)
 
 **[Rationale]**
 
-Settings seeds its draft from live, so a stored setting an AI app,
-the CLI or a Lua call changed live read as saved: no pill, no row,
-and the next Save wrote it into the profile without saying so. The
-change is a third reason the pill appears, and by the rule above
-it is a row — under its own **Live, not saved** heading, narrated
-saved → live, so it never reads as an edit made here.
+Settings seeds its draft from live, so without its own row a stored
+setting an AI app, the CLI or a Lua call changed live reads as
+saved: no pill, no row, and the next Save writes it into the
+profile without saying so. The change is a further reason the pill
+appears, and by #1197's ruling it is a row — under its own **Live,
+not saved** heading, narrated saved → live, so it never reads as an
+edit made here; the panel's "Changed in this draft" list leaves it
+to the pill for the same reason.
 
 **Core decides which leaves count, through the one `KeepJudge`**
 the change report and `keep_settings` read (#1685) — keepable and
-not stored — and hands Settings the live settings with those leaves
-put back (`KiwiCore.savedSettingsBehindLive`); the GUI only diffs
-and narrates. A second comparison in the GUI would list what no
-keep could write: an app-wide value, a temporary Space's leaf, a
-Lua-owned config. The judgement reads the profile's file, so it
-runs where the draft is seeded, never per render.
+not stored — and Settings only diffs and narrates the two sides it
+hands over. A second comparison in the GUI would list what no keep
+could write: an app-wide value, a temporary Space's leaf, a
+Lua-owned config.
 
 Save keeps the rows, because Save writes what live draws. Closing
 Settings reverts nothing live and never asks the leave question:
@@ -6982,6 +6983,7 @@ is the draft's row alone, the newer act. Undoing a live row means
 applying the saved value live, a Core verb rather than a draft
 writeback, so it waits for per-row revert (#792), as does whether
 Revert all reaches live state.
+:::
 
 ### The header search is a field, not a button that opens one
 

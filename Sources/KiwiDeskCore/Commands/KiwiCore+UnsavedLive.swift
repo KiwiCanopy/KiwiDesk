@@ -4,18 +4,26 @@ import Foundation
 /// changed live from outside Settings — `kiwidesk mcp`, the CLI,
 /// a Lua call, a bar's menu row — that the live profile or the
 /// shared look it wears does not store.
-extension KiwiCore {
+public struct UnsavedLiveSettings: Equatable {
     /// The live settings with each unsaved leaf put back to its
-    /// stored value, or nil where none is. "Unsaved" is the one
-    /// `KeepJudge`'s verdict — keepable and not stored — so these
-    /// rows and a change report never disagree (#1685); a leaf no
-    /// keep can write (app-wide, a temporary Space's, a Lua-owned
-    /// config's) is no row.
+    /// stored value.
+    public let saved: TilingSettings
+    /// The live settings, read beside `saved` in one judgement.
+    public let live: TilingSettings
+}
+
+extension KiwiCore {
+    /// The settings an unsaved live leaf separates, or nil where
+    /// none does. "Unsaved" is the one `KeepJudge`'s verdict —
+    /// keepable and not stored — so these rows and a change report
+    /// never disagree (#1685); a leaf no keep can write (a
+    /// temporary Space's, a Lua-owned config's) is no row.
     ///
-    /// Reads the live profile's file: call it where Settings seeds
-    /// its draft, never per render (profiles.md ▸ A change report
-    /// reads one judgement).
-    public func savedSettingsBehindLive() -> TilingSettings? {
+    /// Reads the live profile's file: a caller asks where the
+    /// live settings or Settings' baseline can have moved, never
+    /// per render (profiles.md ▸ A change report reads one
+    /// judgement).
+    public func unsavedLiveSettings() -> UnsavedLiveSettings? {
         let live = keepDocument
         let judge = keepJudge(live: live, judgingRules: false)
         guard let stored = judge.stored else { return nil }
@@ -37,16 +45,19 @@ extension KiwiCore {
                 forKey: Array(path.dropFirst())
             )
         }
+        let current = tiler.settings
         guard !leaves.isEmpty else { return nil }
-        if let whole = tiler.settings.patched(leaves) { return whole }
-        // A leaf the decoder refuses beside the others costs only
-        // itself.
-        var settings = tiler.settings
-        for (path, value) in leaves {
-            if let one = settings.patched([path: value]) {
-                settings = one
+        var saved = current.patched(leaves)
+        if saved == nil {
+            // A leaf the decoder refuses beside the others costs
+            // only itself.
+            var each = current
+            for (path, value) in leaves {
+                if let one = each.patched([path: value]) { each = one }
             }
+            saved = each
         }
-        return settings == tiler.settings ? nil : settings
+        guard let saved, saved != current else { return nil }
+        return UnsavedLiveSettings(saved: saved, live: current)
     }
 }

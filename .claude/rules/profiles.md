@@ -1398,6 +1398,15 @@ fact about its command*. The obligations:
   answer takes that one read. `look.current` is the second such
   MCP-time reader, through `liveWearsSharedLook`; a new reader on
   the switch path answers from adoption state instead.
+  Settings' **Live, not saved** rows are the one ruled reader that
+  holds no leaves (#2262): `unsavedLiveSettings` diffs the
+  settings root itself and judges each leaf through the same
+  `KeepJudge`, and Settings asks it only where the live settings
+  or the draft's baseline can have moved — the seed, a window-key
+  return, an adopted outside write — never per render
+  (`UnsavedLiveSettingsTests`, `SettingsLiveRowsTests` ▸
+  `wiringReadsTheVerdict`). A further reader of that shape is a
+  ruling here.
 - **A look verb paints live only (#1685).** `look.apply` writes no
   file; a wear that must also WRITE takes `writeThroughLiveProfile`
   as the tour's paint does, never a grown `wearLook`, and a verb

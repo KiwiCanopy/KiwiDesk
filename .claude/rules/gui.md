@@ -1153,16 +1153,19 @@ must keep:
   config leaf through `SettingsDraftDiff`, whose every-leaf
   attribution net (`SettingsDraftDiffTests`) is what a new
   `GuiConfig` or `TilingSettings` field reds until its census
-  row exists, and live drift through the ONE
+  row exists, live drift through the ONE
   `SettingsModel.profileDrift` verdict the header's status line,
-  the pill's presence and `driftRows` all read — a surface
-  deriving that predicate for itself is how the pill came to
-  say "Unsaved changes" over an empty list (#1197,
-  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`) — and a
-  stored setting changed live and not saved through Core's keep
-  judgement, `KiwiCore.savedSettingsBehindLive`, read once where
-  the draft is seeded and never re-derived in this tree (#2262,
-  `SettingsLiveRowsTests`, `UnsavedLiveSettingsTests`). A surface stating an N beside
+  the pill's presence and `driftRows` all read (#1197,
+  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`), and an
+  unsaved live setting through Core's keep judgement,
+  `KiwiCore.unsavedLiveSettings`, diffing the two sides it hands
+  over and never the draft's baseline, asked again through the one
+  `refreshUnsavedLive` wherever live or that baseline can have
+  moved (#2262, `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
+  `UnsavedLiveSettingsTests`). A surface deriving one of those
+  verdicts for itself is how the pill came to say "Unsaved
+  changes" over an empty list, and no scan sees a second
+  derivation, so that is review's. A surface stating an N beside
   a visible list derives the N from that list's rows, never
   from the settings count — a per-instance family made the
   two disagree on sight (owner 2026-08-10).

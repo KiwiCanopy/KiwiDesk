@@ -70,10 +70,7 @@ extension SettingsModel {
         resetLookReach()
         suppressDirty = false
         refreshProfiles()
-        // Once per seed: the judgement reads the profile's file.
-        savedBehindLive =
-            target == .live && !editingLua
-            ? core.savedSettingsBehindLive() : nil
+        refreshUnsavedLive()
         liveOnlySpaces = core.liveOnlySpaces
         refreshPalettes()
         refreshLooks()

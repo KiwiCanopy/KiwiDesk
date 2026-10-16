@@ -412,8 +412,9 @@ failures. 1 still means the command itself did not get through.
 A `set_*` command other than `set_default_profile` writes no file:
 it changes the running value only.
 [`save_profile`](lua-reference.md#save_profile-load_profile-delete_profile-set_default_profile)
-keeps what it captures; any other value lasts until a profile load
-or a config reload sets it again, or until KiwiDesk quits.
+keeps what it captures, and so does a Settings Save for a setting
+the live profile stores; any other value lasts until a profile
+load or a config reload sets it again, or until KiwiDesk quits.
 
 `focus_space_previous`, `focus_space_next`, `focus_space_back`,
 `focus_space_forward` and `set_space_history` step through the

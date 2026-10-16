@@ -27,6 +27,8 @@ extension SettingsModel {
         cleanConfig.apply(edit)
         suppressDirty = false
         recomputeDirty()
+        // A keep or a menu row may have saved a live row (#2262).
+        refreshUnsavedLive()
     }
 
     /// A gone Space's shortcuts left the base and every profile
