@@ -21,6 +21,12 @@ enum SupportLinks {
     /// The website, for About (#1536).
     static var website: URL { site }
 
+    /// The site's changelog — every release, 1.x included — for
+    /// What's new beside its release menu (#2308).
+    static var changelog: URL {
+        site.appendingPathComponent("changelog", isDirectory: true)
+    }
+
     /// GitHub Releases — KiwiDesk's changelog (#570). Linked for
     /// the NOTES, not as a download: `docs/design-decisions.md` ▸
     /// "No distribution channel without an update path" governs

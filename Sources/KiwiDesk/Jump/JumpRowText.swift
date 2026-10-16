@@ -71,6 +71,20 @@ enum JumpRowText {
         L("jump.section.minimized", "Minimized")
     }
 
+    /// The header above the rows of apps the lens on does not hold
+    /// (#2103 ruling 36).
+    static var otherApps: String {
+        L("jump.section.other_apps", "Other apps")
+    }
+
+    static func header(_ section: JumpList.Section) -> String {
+        switch section {
+        case .minimized: return minimized
+        case .hidden: return hidden
+        case .otherApps: return otherApps
+        }
+    }
+
     /// The footer's cue while the list runs past what it shows.
     static var scrollHint: String {
         L("jump.footer.scroll_hint", "Scroll for more windows")

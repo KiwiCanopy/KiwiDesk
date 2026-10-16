@@ -144,8 +144,7 @@ extension KiwiCore {
     /// tab.
     func noteVisionTitleChanged(_ id: WindowID) {
         guard vision.isOn, let window = state.windows[id] else { return }
-        let app = AppRef(bundleID: window.appBundleID, name: window.appName)
-        guard case .titled = visionLensClear(app) else { return }
+        guard case .titled = visionLensClear(window.appRef) else { return }
         oweVisionReshape(list: false)
     }
 

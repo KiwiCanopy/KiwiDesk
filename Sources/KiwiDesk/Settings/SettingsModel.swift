@@ -112,6 +112,10 @@ final class SettingsModel: ObservableObject {
     @Published var activeStandardTitle: StarterTitle?
     /// True when live state diverged from saved profile.
     @Published var profileDirty = false
+    /// Core's unsaved live settings, and whether they draw a row
+    /// (#2262); written by `refreshUnsavedLive` alone.
+    @Published var unsavedLive: UnsavedLiveSettings?
+    @Published var liveUnsaved = false
     /// Dashboard edit target: live config or stored profile (#18, #64).
     @Published var target: EditTarget = .live
     /// Whether screen placement canvas is editable for current target (#18).

@@ -1,5 +1,14 @@
 import KiwiDeskCore
 
+/// The two parts of the diff list (#2262).
+enum SettingsDiffSection: Hashable {
+    /// The draft's edits and the profile drift.
+    case draft
+    /// A stored setting changed live, outside Settings, and not
+    /// saved: narrated saved → live.
+    case live
+}
+
 /// Display-ready row of the draft diff (`SettingsDiffRowsView`, #678 turn 9).
 struct SettingsDiffRow: Identifiable, Hashable {
     /// Stable identity: census id plus instance discriminator.
@@ -18,6 +27,8 @@ struct SettingsDiffRow: Identifiable, Hashable {
     /// labelled control — for a row whose subject no control
     /// renders (#1197).
     var jumpsToAreaRoot = false
+    /// Which part of the list the row is drawn in.
+    var section: SettingsDiffSection = .draft
 
     /// A plain value-pair row.
     static func change(

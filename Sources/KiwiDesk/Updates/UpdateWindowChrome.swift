@@ -29,6 +29,52 @@ enum UpdateWindowChrome {
         )
     }
 
+    /// What's new with its release menu (#2308): as tall as the
+    /// tallest release's notes, so a pick never resizes it (#1666).
+    static func window(
+        menu: WhatsNewMenu,
+        narration: BootNarration?,
+        next: NextOnMyList?,
+        showMe: SpotlightShowMe?,
+        done: @escaping () -> Void,
+        onShow: @escaping (UpdateOffer) -> Void
+    ) -> NSWindow {
+        let releases = menu.releases
+        var tallest: CGFloat = 0
+        for option in releases.options {
+            guard let offer = releases.offer(for: option) else { continue }
+            let mode = UpdateWindowMode.whatsNew(
+                narration: narration,
+                next: next,
+                picking: ReleasePicking(
+                    releases: releases,
+                    selection: .constant(option)
+                ),
+                done: done
+            )
+            tallest = max(
+                tallest,
+                fittingHeight(offer: offer, mode: mode, showMe: showMe)
+            )
+            // Past the ruled maximum the window scrolls anyway.
+            let fitted = tallest + UpdateWindowMetrics.titleBar
+            if fitted >= UpdateWindowMetrics.maxHeight { break }
+        }
+        return window(
+            root: WhatsNewBrowser(
+                menu: menu,
+                narration: narration,
+                next: next,
+                done: done,
+                onShow: onShow
+            )
+            .environment(\.spotlightShowMe, showMe),
+            height: UpdateWindowMetrics.height(
+                fitting: tallest + UpdateWindowMetrics.titleBar
+            )
+        )
+    }
+
     /// The window around any of its states, at `height` and, for a
     /// state narrower than the notes, `width`.
     static func window<Root: View>(

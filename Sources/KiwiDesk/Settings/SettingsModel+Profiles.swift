@@ -121,9 +121,16 @@ extension SettingsModel {
         // A failed checklist write stops the Save, as the stored
         // door's does: the ticks stay staged with its warning.
         guard saveLookReach() else { return false }
+        // Only the draft's settings edits, over live as it is now
+        // (#2262).
+        var committing = config
+        committing.settings = config.settings.rebased(
+            from: cleanConfig.settings,
+            onto: core.tiler.settings
+        )
         core.withUserMotion {
             core.applyProfileScopedState(
-                from: config,
+                from: committing,
                 applyingModesFor: edited
             )
         }

@@ -1398,6 +1398,15 @@ fact about its command*. The obligations:
   answer takes that one read. `look.current` is the second such
   MCP-time reader, through `liveWearsSharedLook`; a new reader on
   the switch path answers from adoption state instead.
+  Settings' **Live, not saved** rows are the one ruled reader that
+  holds no leaves (#2262): `unsavedLiveSettings` diffs the
+  settings root itself and judges each leaf through the same
+  `KeepJudge`, and Settings asks it again wherever the live
+  settings or the draft's baseline can have moved — which is
+  review's, the rows' freshness alone riding on it — never per render
+  (`UnsavedLiveSettingsTests`, `SettingsLiveRowsTests` ▸
+  `wiringReadsTheVerdict`). A further reader of that shape is a
+  ruling here.
 - **A look verb paints live only (#1685).** `look.apply` writes no
   file; a wear that must also WRITE takes `writeThroughLiveProfile`
   as the tour's paint does, never a grown `wearLook`, and a verb
@@ -1595,7 +1604,10 @@ clean draft still re-reads, the tour's shipped behaviour, while a
 dirty draft takes nothing of it, since taking it on both sides
 would call a session value saved
 (`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
-`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). A writer that paints
+`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). Its Save
+still keeps the value: a Settings Save lays only the draft's own
+edits over live as it is at the Save (#2262,
+`SettingsLiveSaveTests`). A writer that paints
 more than the leaves it names — the tour's whole look — refuses
 while a live-profile draft is dirty instead
 (`OnboardingLooksTests` ▸ `draftBlocks`).

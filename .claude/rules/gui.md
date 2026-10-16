@@ -519,6 +519,16 @@ first; a new direct-launch path owes a marker of its own
 (`UpdatePromptWiringTests` ▸ the launch origin,
 `WhatsNewSurfaceTests`).
 
+**Home's "What's new" opens the same window on a click and answers
+nothing (#2308).** It goes through `WhatsNewCoordinator.browse()`
+alone, from Home's footer alone (`HomeSupportStripTests` ▸
+`notesHaveOneDoor`): an update offer on screen comes forward
+instead and owed notes open as owed, through `show()`, which then
+replaces Home's window — the coordinator holds ONE What's new
+window, so one trail and one owner. Home's window never writes
+`waiting` and never calls `markAnswered`; its read re-checks the
+screen before it opens (`WhatsNewBrowseTests`).
+
 **A spotlight row's "Show me" hides What's new WITHOUT answering
 it, and every way out of the trail ends it (#2038).** Settings
 lands on the row's control through `SettingsModel.land(on:)` —
@@ -1153,12 +1163,24 @@ must keep:
   config leaf through `SettingsDraftDiff`, whose every-leaf
   attribution net (`SettingsDraftDiffTests`) is what a new
   `GuiConfig` or `TilingSettings` field reds until its census
-  row exists, and live drift through the ONE
+  row exists, live drift through the ONE
   `SettingsModel.profileDrift` verdict the header's status line,
-  the pill's presence and `driftRows` all read — a surface
-  deriving that predicate for itself is how the pill came to
-  say "Unsaved changes" over an empty list (#1197,
-  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`). A surface stating an N beside
+  the pill's presence and `driftRows` all read (#1197,
+  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`), and an
+  unsaved live setting through Core's keep judgement,
+  `KiwiCore.unsavedLiveSettings`, diffing the two sides it hands
+  over and never the draft's baseline, asked again through the one
+  `refreshUnsavedLive` wherever live or that baseline can have
+  moved (#2262, `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
+  `UnsavedLiveSettingsTests`) — and a Settings Save lays only the
+  draft's own settings edits over live as it is AT the Save
+  (`TilingSettings.rebased`), never the draft's settings whole,
+  which would put back every live change since the seed, the
+  rows it lists as kept among them (`SettingsLiveSaveTests`). A
+  surface deriving one of those
+  verdicts for itself is how the pill came to say "Unsaved
+  changes" over an empty list, and no scan sees a second
+  derivation, so that is review's. A surface stating an N beside
   a visible list derives the N from that list's rows, never
   from the settings count — a per-instance family made the
   two disagree on sight (owner 2026-08-10).

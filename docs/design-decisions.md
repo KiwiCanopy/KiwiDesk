@@ -624,8 +624,7 @@ here — sparkles as Apple Intelligence, an up-arrow as Install.
 **The window answers "you're up to date" too (#1849).** A check
 the user started that finds nothing newer opens the same window,
 headed "KiwiDesk is up to date", on the same strip — the running
-version's notes, which nothing else in the app shows again once
-"What's new" is closed, then Next, which it opens on — with one
+version's notes, then Next, which it opens on — with one
 Done that answers Sparkle. Two answers to one question used to
 look like two apps. Only that reason is ours: a check refused
 because the system is too old or too new keeps Sparkle's own
@@ -716,6 +715,34 @@ only as honest as its last correction. On the relaunch after the
 window's own Install the card is best effort: it shows what the
 offer fetched before the install began, since that relaunch opens
 before anything could be fetched again.
+
+:::unreleased
+**Any release's notes stay one menu away (#2308).** What's new
+carries a release menu under its title, because the notes of an
+update are read once and wanted again later — a release's
+highlights, after the next one replaced them on screen. It lists
+every release up to the running one whose structured notes
+read, newest first, each with its date and the running one
+marked; the untyped 1.x releases never list, since their notes
+cannot load, and a menu entry that opens nothing would promise
+what the window cannot keep — the window's "All releases" link
+reaches them on the site. An update's skipped range is one more
+entry, "Since 2.2.0", and the opening choice only when the
+window opened for owed notes: every other opening, Home's door
+included, is about the version running now. One release shows
+its own rows alone, untagged; a pick reopens the tabs on
+Highlights, since another release's tabs differ, and the window
+is as tall as the tallest release so a pick never resizes it,
+the #1666 rule for tabs carried over. The offer has no menu: its
+one decision is Install or Later. Offline the window opens from
+the feed last read, kept in the app's defaults beside the "What's
+new" record and replaced by each read rather than added to, so it
+grows only with the feed's structured notes; with nothing kept,
+the notes say they are online. Home's What's new answers nothing
+— owed notes keep their own window and their Done, and an offer
+on screen comes forward instead, since it carries the notes worth
+reading.
+:::
 
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates
@@ -1675,6 +1702,25 @@ anchor falls back to a geometric search from its live frame) but
 nothing could navigate back in. Array-order layouts reach the
 float tier through their existing edge fall-through to the
 geometric search.
+
+:::unreleased
+A KiwiVision lens that keeps focus on its apps adds one more
+filter, orthogonal to both models like the float tier
+([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)):
+`navigate` hands every model the one predicate `lensKeySkip`,
+which refuses every window the lens leaves out, judged per
+window by the lens's own verdict the plates take. The geometric search and the
+float tier drop them from their candidates, Scrolling and Monocle
+step past their indices through `Navigation.arrayStep`, and Track
+folds the predicate into the skip its pile handling already
+takes, its wraps through the same `arrayStep` — an across step
+judging each track by the window at the focus's position in it,
+as it does a pile. The scroll
+gesture's steps skip too, through `navigate` on a row and its
+own-order step everywhere else. A new layout's navigation takes
+that predicate too, or the lens stops steering the keys on it
+([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
+:::
 
 ```mermaid
 flowchart TD
@@ -6458,6 +6504,44 @@ turns macOS's Automatic mode off, so the payment turns it back on
 where it was on; that re-arm writes the preference and posts the
 theme notification, the one step no device has measured yet.
 
+### A lens steers the keys, never a pick (#2103)
+
+**[Rationale]**
+
+While a lens keeps focus on its apps, `focus`, `swap` and the
+scroll gesture skip the windows the lens leaves out, and nothing
+else does: a click, a bar item and hover focus reach any window,
+and the window switcher lists every window, the lens's apps
+first.
+
+The line runs between a step and a pick. A directional key steps
+blind: it lands on whichever window lies that way, so inside a
+lens an unsteered press spends itself on a window the user was
+not working in, and the next press has to come back. A click, a
+bar item and a switcher row each name their window; refusing one
+would turn the lens into a lock, with a window the user can see
+and point at that will not take the focus. macOS's own ways in —
+⌘-Tab, the Dock, a notification — are never refused either, so a
+KiwiDesk refusal would hold back nothing they do not already
+reach. For the same reason the switcher orders and never filters:
+leaving other apps out of it would make their windows unfindable
+from KiwiDesk.
+
+Hover focus is a pick by the hand resting on a window. The scroll
+gesture is a step: like a key, it moves the focus to whichever
+window comes next along the row, without naming one, so it skips
+as the keys do. One switch, **Keep focus on these apps**, governs
+both, since a lens that steered one way of stepping and not the
+other would still let the focus wander off it.
+
+What a step skips is what the lens leaves out, judged per window
+as the plates judge a member: a member app whose title rule clears
+only some of its windows has the rest skipped like a stranger's,
+since a step that lands under the haze is the press the lens
+exists to save. A Never dimmed app's windows stay clear on screen
+but are no member, so a step skips them too: they are kept clear
+to be seen, not worked in.
+
 ### KiwiVision has its own page, and its rows apply at once (#2103)
 
 **[Rationale]**
@@ -6917,7 +7001,7 @@ ruling 2026-08-12.)
 
 The pill's leading readout is the ROW COUNT of the list it opens
 (owner 2026-08-10), so every reason the pill appears must be a row
-in that list. Two reasons exist: a draft config leaf, which
+in that list. Two reasons existed when this was ruled: a draft config leaf, which
 `SettingsDraftDiff` attributes to a census row, and live drift —
 the active profile storing no monitor set for the connected
 screens, a built-in layout composing, a matched profile deleted —
@@ -6954,6 +7038,39 @@ than a control: nothing renders the composing Standard, and the
 Saved profiles card's one anchored control is Load — the verb
 that replaces a layout — which is the wrong thing to flash under
 a note that says *save as a profile*.
+
+:::unreleased
+### A live change nobody saved is a row of its own (#2262)
+
+**[Rationale]**
+
+Settings seeds its draft from live, so without its own row a stored
+setting an AI app, the CLI or a Lua call changed live reads as
+saved: no pill, no row, and the next Save writes it into the
+profile without saying so. The change is a further reason the pill
+appears, and by #1197's ruling it is a row — under its own **Live,
+not saved** heading, narrated saved → live, so it never reads as an
+edit made here; the panel's "Changed in this draft" list leaves it
+to the pill for the same reason.
+
+**Core decides which leaves count, through the one `KeepJudge`**
+the change report and `keep_settings` read (#1685) — keepable and
+not stored — and Settings only diffs and narrates the two sides it
+hands over. A second comparison in the GUI would list what no keep
+could write: an app-wide value, a temporary Space's leaf, a
+Lua-owned config.
+
+Save keeps the rows, because a Settings Save lays only the draft's
+own edits over live as it is at the Save, never the settings it
+was seeded with — a whole-settings apply would put back every live
+change since, these rows among them. Closing Settings reverts
+nothing live and never asks the leave question: these are not the
+window's edits. A setting the draft also edits is the draft's row
+alone, since that edit is what its Save commits. Undoing a live row means
+applying the saved value live, a Core verb rather than a draft
+writeback, so it waits for per-row revert (#792), as does whether
+Revert all reaches live state.
+:::
 
 ### The header search is a field, not a button that opens one
 
@@ -9706,6 +9823,20 @@ because a laptop was undocked, which is routine and temporary;
 reshuffling rows to the bottom of the page on every undock
 reports a normal state as debris.
 
+:::unreleased
+**KiwiHub's Shortcuts side lifts those rows out instead**, into
+an Unavailable shortcuts band at the end of its column (owner
+ruling 2026-10-16). The reason Settings keeps them in place is
+that Settings is an editor: a row stays where its catalog puts
+it so it can be rebound there. The hub is a read-only list of
+what a key does now, so a group that mixes working keys with
+keys that do nothing answers its one question wrongly. The band
+is not the Inactive one, for the first reason above — its
+caption promises the key still fires — and it takes the caption
+Settings puts over the same rows, so both surfaces say the same
+thing about them.
+:::
+
 **Config presence expands the Simple surface.** The simple
 mode is not a smaller product, it is a smaller *offer*. Anything
 already in the user's config — a shortcut layer, an imported Lua
@@ -11142,8 +11273,9 @@ leads Apps, which is KiwiDesk's own app row, rather than standing
 alone in a one-row group. The panel holds one fixed width, 720 pt,
 since a width that changed on ⇥ would move the field and the
 switch under the eye; only the height follows each side, its top
-fixed at the field, under one ceiling of 400 pt on every side
-(#2309, owner ruling 2026-10-15). A glance panel stays compact,
+fixed at the field, under one ceiling of 452 pt on every side
+(#2309, owner rulings 2026-10-15 and 2026-10-16 — raised from
+400 so a roomier footer row costs the Shortcuts sheet nothing). A glance panel stays compact,
 as Spotlight's fixed height does, and a sheet that grew to the
 screen's bottom read as a window rather than a launcher; the
 Shortcuts sheet scrolls past the ceiling, cued in words, and the
@@ -17033,6 +17165,21 @@ opens, so it needs no search entry — About beside it has none
 either. One permanent door only: a second one elsewhere would
 make the reader ask whether they differ.
 
+:::unreleased
+**"What's new" leads the footer's links (#2308).** The notes
+were reachable once, after an update, and then never again from
+inside the app — a user who jumped 2.3 to 3.1 and pressed Done
+could not go back to 3.0.0's highlights. They are a question
+about the app itself, like the tour and About, so they join the
+same line, first, beside the version they describe: "What's new
+· Show me around · About KiwiDesk". It is the notes' one
+permanent door, so About's *Release Notes* link left with it
+(the exclusive placement below). The line never sheds a link as
+the window narrows: below its width the links wrap to a second,
+trailing line, the way every other control keeps its reach
+(*Narrow windows drop the preview before they drop a control*).
+:::
+
 **The update state is one component.** What the channel last
 said lands in one store (`UpdateStateStore`, written by the
 updater and its Sparkle delegate) and one view draws it, on
@@ -17069,7 +17216,8 @@ outlive its opener (`SheetPresentationSeamTests`).
 
 **Link placement is exclusive.** Home carries the community
 links only; About carries the version, the update state,
-Release Notes, License, Acknowledgements and the website only.
+License, Acknowledgements and the website only — the release
+notes are the footer's "What's new" (#2308).
 A link in both places makes the reader ask whether they differ,
 and a General ▸ About card is the same doubt one level up — so
 nothing *about* KiwiDesk returns to General, and Settings search

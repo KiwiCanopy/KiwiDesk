@@ -88,6 +88,29 @@ enum ViewPickText {
         return L("view_picker.ax.item", "%1$@: %2$@", title(line), name)
     }
 
+    /// The Settings page a line's ⌘, opens; the line's heading and
+    /// that button wear its symbol.
+    static func destination(
+        _ line: ViewPickList.Line
+    ) -> SettingsDestination {
+        switch line {
+        case .layout: return .layoutDefaults
+        case .profile: return .profiles
+        case .vision: return .kiwiVision
+        }
+    }
+
+    /// Every label the View side's Settings button can wear, which
+    /// it reserves the width of.
+    static var settingsLabels: [KeyPanelChordButton.Label] {
+        ViewPickList.Line.allCases.map {
+            KeyPanelChordButton.Label(
+                title: settings($0),
+                symbol: destination($0).symbol
+            )
+        }
+    }
+
     /// The Settings button: the page of the line the selection is
     /// on.
     static func settings(_ line: ViewPickList.Line) -> String {

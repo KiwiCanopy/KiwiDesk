@@ -83,12 +83,7 @@ struct KeybindingFamilyRows: View {
 
     /// Caption for actions targeting temporarily disconnected displays.
     private var unavailableNote: String {
-        L(
-            "shortcuts.desktop_away",
-            "Dimmed rows target a Desktop that isn't on any "
-                + "screen right now. Their shortcuts stay "
-                + "recorded and work again when it comes back."
-        )
+        KeybindingCatalog.desktopAwayCaption
     }
 }
 

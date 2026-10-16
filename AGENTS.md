@@ -987,7 +987,9 @@ Touching `Config`, `Profiles`, `Commands`.
   `AppRuleKeepTests`, `RuleKeepDraftTests`)
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
-  stored profile and the rule snapshot, taken only where a caller holds leaves (`ChangeReportTests`,
+  stored profile and the rule snapshot, taken only where a caller holds leaves
+  — save Settings' live rows, the one ruled reader that holds none (#2262,
+  `UnsavedLiveSettingsTests`) — (`ChangeReportTests`,
   `KeepSettingsEdgeTests`), a keep landing the shared look without repainting
   live, and a live store a verb writes joining the keep document or reporting
   nothing, which is review's (#1685)
@@ -1649,6 +1651,11 @@ Touching `Borders`, `Vision`.
   carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
   `VisionManagerTests`, `OverlayGlassGateTests`,
   `VisionAppearanceSeamTests`, `KiwiVisionStoredTests`)
+- a navigation step — a focus or swap key, the scroll gesture — skips what
+  a lens leaves out through the one `lensKeySkip`, threaded with no default
+  into every navigation model and judged per window by `visionLensClear`,
+  and a pick never asks it (#2103, `KiwiVisionLensFocusTests`,
+  `KiwiVisionLensGestureTests`)
 - an overlay hearing WindowServer's per-window events connects to the one
   `WindowServerWatch` under its own `Consumer` case, whose position is its
   place in the fan-out, and calls no `SkyLightWindowEvents` door itself
@@ -1758,7 +1765,9 @@ Touching `Sources/KiwiDesk` (the GUI).
   save pill exists only while the draft does (`DetailPanelTests`,
   `HomeSurfacingTests`) and every reason it appears owes a row in its own list
   — config leaves through `SettingsDraftDiff`, live drift through the ONE
-  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`)
+  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`),
+  an unsaved live setting through Core's `unsavedLiveSettings`, asked again
+  wherever live or the baseline can have moved (#2262, `SettingsLiveRowsTests`)
 - a picture whose object is NOT the draft takes a read-only sheet instead,
   which answers Return AND Escape and is hosted above the subtree that opens it
   (#859, `SheetPresentationSeamTests` is the register of who may host one,
@@ -1861,10 +1870,12 @@ Touching `Sources/KiwiDesk` (the GUI).
   and "What's new" is a second pending fact with one home, outranked by a
   waiting update and opened only on a launch the user started — or the relaunch
   after the window's own Install, which narrates boot (#1542/#1667,
-  `WhatsNewSurfaceTests`, `WhatsNewRelaunchTests`), and a spotlight row's "Show
-  me" hides What's new unanswered, lands Settings through the one
-  `SettingsModel.land(on:)` door — the one `pendingReveal` writer every outside
-  landing takes —, and every way out of the trail — its one owner
+  `WhatsNewSurfaceTests`, `WhatsNewRelaunchTests`), Home's "What's new" opening
+  that one window through `browse()` alone and answering nothing — an offer on
+  screen or owed notes outranking it (#2308, `WhatsNewBrowseTests`) —, and a
+  spotlight row's "Show me" hides What's new unanswered, lands Settings through
+  the one `SettingsModel.land(on:)` door — the one `pendingReveal` writer every
+  outside landing takes —, and every way out of the trail — its one owner
   `WhatsNewCoordinator` — ends it (#2038, `WhatsNewHandoffTests`,
   `WhatsNewTrailWiringTests`)
 - the guard pins the WIRING beside the override body or the override goes dead

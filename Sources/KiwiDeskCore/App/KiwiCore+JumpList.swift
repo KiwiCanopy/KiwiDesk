@@ -32,8 +32,23 @@ extension KiwiCore {
         let focused = jumpFocusedWindow().map {
             JumpEntry.Target.window($0)
         }
-        return ordered.map(\.element).filter { $0.target != focused }
+        let rows =
+            ordered.map(\.element).filter { $0.target != focused }
             + hiddenAppJumpEntries()
+        return lensOrdered(rows)
+    }
+
+    /// The lens's apps' rows first, the rest after, each part
+    /// keeping its order (#2103 ruling 36); unchanged while no lens
+    /// is on, since no row is then an other app's.
+    private func lensOrdered(_ rows: [JumpEntry]) -> [JumpEntry] {
+        rows.filter { !$0.isOtherApp } + rows.filter(\.isOtherApp)
+    }
+
+    /// Whether a row of `app` sits under "Other apps": a lens is on
+    /// and does not hold it (ruling 36).
+    private func jumpIsOtherApp(_ app: AppRef) -> Bool {
+        visionLook.lens != nil && !lensHolds(app)
     }
 
     /// The window the user is in: the bar's focus, only while its
@@ -70,7 +85,8 @@ extension KiwiCore {
                     space: space,
                     spaceIcon: space.flatMap(jumpSpaceIcon),
                     status: window.isFullscreen ? .fullscreen : .shown,
-                    movesHere: jumpMovesHere(window, from: space)
+                    movesHere: jumpMovesHere(window, from: space),
+                    isOtherApp: jumpIsOtherApp(window.appRef)
                 )
             }
     }
@@ -95,7 +111,10 @@ extension KiwiCore {
                 spaceIcon: space.flatMap(jumpSpaceIcon),
                 status: .away(desktop: snapshot.number(of: entry.nativeSpace)),
                 movesHere: canDriveDesktops && entry.appBundleID != nil
-                    && state.workspaces.activeSpace != nil
+                    && state.workspaces.activeSpace != nil,
+                isOtherApp: jumpIsOtherApp(
+                    AppRef(bundleID: entry.appBundleID, name: entry.appName)
+                )
             )
         }
     }
@@ -116,7 +135,10 @@ extension KiwiCore {
                 space: nil,
                 spaceIcon: nil,
                 status: .minimized,
-                movesHere: state.workspaces.activeSpace != nil
+                movesHere: state.workspaces.activeSpace != nil,
+                isOtherApp: jumpIsOtherApp(
+                    AppRef(bundleID: record.bundleID, name: record.app)
+                )
             )
         }
     }
@@ -143,7 +165,8 @@ extension KiwiCore {
                     title: "",
                     space: nil,
                     spaceIcon: nil,
-                    status: .shown
+                    status: .shown,
+                    isOtherApp: jumpIsOtherApp(app.ref)
                 )
             }
     }
