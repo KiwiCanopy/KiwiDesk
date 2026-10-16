@@ -6624,12 +6624,17 @@ Appearance pick. It sits in the side panel although the page has
 no draft, on the carve-out argued in [Navigation &
 saving](#navigation--saving) ▸ the panel's object is the DRAFT.
 
-*Named lenses, when they come, save with Save.* A lens could not
-apply at once: its shortcut must not register before Save, the
-profiles it applies to are written to other profiles' files, and
-a rename rewrites stored bindings. The plain settings stay
-immediate beside them. That is why "Applies at once, in every
-profile." sits on each immediate card rather than on the page.
+*Lenses save with Save.* A lens cannot apply at once: its
+shortcut must not register before Save, the profiles it applies
+to are written to other profiles' files, and a rename rewrites
+stored bindings. The plain settings stay immediate beside them.
+That is why "Applies at once, in every profile." sits on each
+immediate card rather than on the page, and why Never dimmed —
+the one immediate card a lens's page shows — sits last, under
+"Every lens", saying "in every profile and lens": two save
+behaviours on one page each need their own sentence. A lens
+overrides the plain settings one row at a time, since a lens
+that changes the dim usually keeps the blur.
 
 ### A lens's reach is the profile's mark, and leaving it turns KiwiVision off (#2103)
 

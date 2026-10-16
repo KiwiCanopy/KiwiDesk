@@ -138,6 +138,15 @@ extension JumpPanelController {
                 chord: chord
             ),
         ]
+        guard !vision.lenses.isEmpty else {
+            return fixed + [
+                ViewPickList.Item(
+                    pick: .newLens,
+                    name: ViewPickText.newLens,
+                    inertReason: inert
+                )
+            ]
+        }
         return fixed
             + vision.lenses.map { lens in
                 ViewPickList.Item(
@@ -167,6 +176,8 @@ extension JumpPanelController {
             core.setKiwiVision(.plain)
         case .vision(lens: let name?):
             core.setKiwiVision(.lens(name))
+        case .newLens:
+            core.barMenuHooks.openSettings(.kiwiVision)
         }
     }
 

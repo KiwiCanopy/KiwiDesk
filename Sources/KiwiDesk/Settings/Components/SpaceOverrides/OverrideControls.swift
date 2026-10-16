@@ -25,6 +25,9 @@ struct OverrideChrome<Content: View>: View {
     /// The page an inheriting row follows instead of the layout's
     /// defaults — the gaps row's Gaps & Borders (#1775).
     var inheritsFrom: SettingsDestination? = nil
+    /// What an inheriting row follows when it is no page — a
+    /// lens row's Focused window (#2103 ruling 46).
+    var inheritsName: String? = nil
     @ViewBuilder let content: Content
     @Environment(\.isInsideGreyOut) private var alreadyDimmed
     @Environment(\.overrideLayoutName) private var layoutName
@@ -141,11 +144,11 @@ struct OverrideChrome<Content: View>: View {
 
 extension OverrideChrome {
     fileprivate func inheritedText(_ value: String) -> String {
-        if let inheritsFrom {
+        if let followed = inheritsName ?? inheritsFrom?.title {
             return L(
                 "space_override.inherits_page",
                 "follows %1$@ · %2$@",
-                inheritsFrom.title,
+                followed,
                 value
             )
         }

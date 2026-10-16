@@ -11,7 +11,7 @@ struct KiwiVisionNeverDimmedCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.kiwiVision.neverDimmedCard,
-            caption: KiwiVisionCopy.appliesAtOnce,
+            caption: KiwiVisionLensWords.neverDimmedCaption,
             help: Self.help
         ) {
             VStack(alignment: .leading, spacing: 8) {

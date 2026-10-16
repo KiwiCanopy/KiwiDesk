@@ -18,6 +18,11 @@ enum ViewPickText {
         L("view_picker.vision.focused", "Focused window")
     }
 
+    /// The chip offered while no lens exists (#2103 ruling 41).
+    static var newLens: String {
+        L("kiwivision.lens.new", "New Lens…")
+    }
+
     /// Why a lens chip cannot turn its lens on (#2103).
     static func lensRefusal(_ refusal: LensRefusal) -> String {
         switch refusal {
