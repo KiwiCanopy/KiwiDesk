@@ -1779,7 +1779,7 @@
   "space_bar.group_adjacent.help": "Führt benachbarte Fenster derselben App in einem Space zu einer Glyphe mit Zähler-Badge zusammen, statt jedem Fenster eine eigene Glyphe zu geben.",
   "space_bar.hide_empty": "Leere Spaces ausblenden",
   "space_bar.hide_empty.help": "Spaces ohne Fenster werden in der Leiste ausgeblendet, außer der Space, auf dem du dich befindest. Verwende ein Tastenkürzel, um zu einem ausgeblendeten Space zu springen.",
-  "space_bar.inactive_content": "Andere Spaces",
+  "space_bar.inactive_content": "Fenster in anderen Spaces",
   "space_bar.inactive_content.apps": "Apps",
   "space_bar.inactive_content.count": "Fensteranzahl",
   "space_bar.inactive_content.help": "Was die Spaces zeigen, die gerade nicht auf dem Bildschirm sind. %1$@ — ihre App-Glyphen. %2$@ — nur die Nummer, der Name oder das Symbol jedes Space, mit der Anzahl seiner Fenster in der Ecke. In beiden Fällen wird ein leerer Space gedämpft dargestellt, außer bei einem farbigen Emoji-Symbol, das sich nicht dämpfen lässt.",

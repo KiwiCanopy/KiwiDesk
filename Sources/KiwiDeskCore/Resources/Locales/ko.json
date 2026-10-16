@@ -1779,7 +1779,7 @@
   "space_bar.group_adjacent.help": "공간 안에서 같은 앱의 이웃한 윈도우를 각각의 글리프 대신 하나의 글리프로 병합하고, 개수 배지를 표시합니다.",
   "space_bar.hide_empty": "빈 공간 가리기",
   "space_bar.hide_empty.help": "윈도우가 없는 공간은 바에서 가려집니다. 다만 현재 있는 공간은 예외입니다. 가려진 공간으로 이동하려면 단축키를 사용하십시오.",
-  "space_bar.inactive_content": "다른 공간",
+  "space_bar.inactive_content": "다른 공간의 윈도우",
   "space_bar.inactive_content.apps": "앱",
   "space_bar.inactive_content.count": "윈도우 개수",
   "space_bar.inactive_content.help": "화면에 표시되지 않은 공간에 무엇을 보여 줄지 정합니다. %1$@ — 해당 공간의 앱 글리프를 표시합니다. %2$@ — 각 공간의 번호, 이름 또는 아이콘만 표시하고, 그 모서리에 윈도우 개수를 표시합니다. 어느 쪽이든 빈 공간은 흐리게 표시되지만, 컬러 이모티콘 아이콘은 흐리게 할 수 없습니다.",
