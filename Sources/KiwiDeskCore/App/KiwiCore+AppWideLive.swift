@@ -39,6 +39,8 @@ extension KiwiCore {
             return true
         }
         if let refusal = lensRefusal(lens) {
+            // An emptied lens goes off silently: the define that
+            // emptied it was the user's own act.
             var cause: VisionChangeCause?
             if case .outOfReach(let profile) = refusal {
                 cause = .outOfReach(lens: lens.name, profile: profile)

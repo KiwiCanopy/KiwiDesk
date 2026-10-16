@@ -48,7 +48,7 @@ extension AppDelegate {
         switch cause {
         case .outOfReach(let lens, let profile)?:
             return L(
-                "kiwivision.announce.out_of_reach",
+                "kiwivision.out_of_reach",
                 "%1$@ is off: it does not reach %2$@.",
                 lens,
                 profile

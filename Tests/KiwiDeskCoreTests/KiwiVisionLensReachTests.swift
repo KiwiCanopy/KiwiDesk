@@ -123,6 +123,33 @@ struct KiwiVisionLensReachTests {
         )
     }
 
+    /// The hook moves only with what it reports: a write of another
+    /// profile refiles the live one unchanged.
+    @Test("a write that moves no mark tells nobody")
+    func quietWrite() throws {
+        let core = try makeCore()
+        load(core, "Laptop")
+        var heard = 0
+        core.vision.onReachChange = { heard += 1 }
+        try core.profiles.write(profile("Desk", leavesOut: "Writing"))
+        #expect(heard == 0)
+        try core.profiles.write(profile("Laptop", leavesOut: "Writing"))
+        #expect(heard == 1)
+    }
+
+    /// Ruling 40: a load that hands a Lua-owned setup to the GUI
+    /// makes the profile's marks count, with no profile change.
+    @Test("a load that changes the owner re-judges the lens on")
+    func ownerFlip() throws {
+        let core = try makeCore(guiManaged: false)
+        load(core, "Studio")
+        core.setKiwiVision(.lens("Writing"))
+        #expect(core.kiwiVisionActive == .lens("Writing"))
+        try core.guiConfigStore.save(GuiConfig())
+        core.loadConfig()
+        #expect(core.kiwiVisionActive == .off)
+    }
+
     /// Rulings 38 and 40: nothing is stored for a built-in, and a
     /// Lua-owned setup's lenses reach every profile.
     @Test("no live profile and a Lua-owned setup reach every lens")

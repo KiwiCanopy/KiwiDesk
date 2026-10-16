@@ -19,11 +19,17 @@ public final class ProfileManager {
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
     private(set) var active: ActiveProfile? {
-        didSet { onActiveChange() }
+        didSet {
+            guard
+                oldValue?.name != active?.name
+                    || oldValue?.lensesLeftOut != active?.lensesLeftOut
+            else { return }
+            onActiveChange()
+        }
     }
-    /// Fired on every write of `active` — an apply, a write of its
-    /// file, a rename, a Standard going live — so KiwiVision
-    /// re-judges the lens on against it (#2103 ruling 16).
+    /// Fired when the live profile or the lenses it leaves out move
+    /// — an apply, a write of its file, a rename, a Standard going
+    /// live — so KiwiVision re-judges the lens on (#2103 ruling 16).
     var onActiveChange: @MainActor () -> Void = {}
     /// Nonzero while an apply or a config load moves what is live
     /// and what is declared (#1790): a temporary Space is judged

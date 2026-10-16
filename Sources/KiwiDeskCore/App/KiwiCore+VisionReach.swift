@@ -10,17 +10,19 @@ extension KiwiCore {
     /// arrangement and a Lua-owned setup reach every lens (rulings
     /// 38, 40).
     func profileLeavingOut(_ lens: VisionLens) -> String? {
-        guard isGuiManaged,
-            case .profile(let name)? = liveHome?.arrangement,
+        // The ownership read touches disk, so it comes last.
+        guard case .profile(let name)? = liveHome?.arrangement,
             profiles.active?.lensesLeftOut.contains(
                 VisionLens.reachKey(lens.name)
-            ) == true
+            ) == true,
+            isGuiManaged
         else { return nil }
         return name
     }
 
     /// The live profile changed — an apply, a write of its file, a
-    /// rename, a Standard going live. The lens on is judged again,
+    /// rename, a Standard going live — or a config load moved who
+    /// owns the setup (rulings 38, 40). The lens on is judged again,
     /// and every reader of a lens's reach hears it. A switch back
     /// to a profile a lens reaches turns nothing on: a switch is no
     /// press (ruling 16).
@@ -39,7 +41,7 @@ extension KiwiCore {
             _ = flashRefusalPill(
                 window,
                 text: L(
-                    "kiwivision.pill.out_of_reach",
+                    "kiwivision.out_of_reach",
                     "%1$@ is off: it does not reach %2$@.",
                     lens,
                     profile

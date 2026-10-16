@@ -1653,6 +1653,10 @@ Touching `Borders`, `Vision`.
   `WindowServerWatch` under its own `Consumer` case, whose position is its
   place in the fan-out, and calls no `SkyLightWindowEvents` door itself
   (#2275, `WindowServerWatchTests`, `WindowServerWatchSeamTests`)
+- a lens's reach is read from the live profile's adoption state through
+  the one `profileLeavingOut` and re-judged on every change of it, and a
+  lens rename or delete re-keys or clears every profile's `lens_reach`
+  (#2103, `KiwiVisionLensReachTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).
