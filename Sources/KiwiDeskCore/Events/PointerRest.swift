@@ -21,6 +21,10 @@ public final class PointerRest {
     /// Cocoa screen space, and the focus `noteArm` read when the
     /// dwell last armed.
     var onRest: ((CGPoint, WindowID?) -> Void)?
+    /// Fronts KiwiDesk's own marked window, by number, after hover
+    /// focus commanded its focus — AppKit's half of #1281's raise,
+    /// wired by the GUI; a no-op where no GUI runs.
+    public var frontOwnWindow: @MainActor (Int) -> Void = { _ in }
     /// The focus now, read each time a move arms the dwell.
     var noteArm: (() -> WindowID?)?
     /// Installs the global mouse-moved monitor, live in

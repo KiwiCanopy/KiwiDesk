@@ -122,6 +122,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.uiBridge.onOpenSettings = { [weak self] in
             self?.dashboard.show()
         }
+        // Hover focus fronts the own window its command focused
+        // (#1869, #1281): AppKit's half, no Settings reload.
+        core.mouse.rest.frontOwnWindow = { number in
+            guard
+                let window = NSApp.windows.first(where: {
+                    $0.windowNumber == number
+                })
+            else { return }
+            NSApp.forceFront(window)
+        }
         // Reads bound open-combo live for quick menu.
         statusItem.kiwiHubComboProvider = { [weak self] in
             guard let self else { return nil }

@@ -142,52 +142,6 @@ struct HoverFocusStandDownTests {
         #expect(core.hoverTarget(at: point) == nil)
     }
 
-    /// KiwiDesk's chrome (a bar, a panel) is untracked and stands
-    /// hover down; its tracked Settings window is a target, flagged
-    /// own so its raise takes the GUI's door.
-    @Test("Own chrome stands down; the own tracked window is a target")
-    func ownWindowIsTargetOnlyWhenTracked() throws {
-        let core = try makeCore()
-        let point = try overW2(core)
-        let below = core.frontStack()
-        core.frontStack = {
-            [listed(number: 99, pid: getpid(), frame: below[1].frame)]
-                + below
-        }
-        #expect(core.hoverTarget(at: point) == nil)
-        core.frontStack = {
-            [listed(number: 2, pid: getpid(), frame: below[1].frame)]
-                + below
-        }
-        let target = try #require(core.hoverTarget(at: point))
-        #expect(target.id == WindowID(2))
-        #expect(target.own)
-    }
-
-    /// The Settings window is raised through the open-or-raise
-    /// door, never a bare focus (#1281); another window never
-    /// reaches it.
-    @Test("Hover onto Settings takes the Settings door")
-    func settingsTakesItsDoor() throws {
-        let core = try makeCore()
-        var opened = 0
-        core.uiBridge.onOpenSettings = { opened += 1 }
-        let point = try overW2(core)
-        let ax = GeometryUtils.axPoint(point)
-        core.focusUnderRestingPointer(at: ax, armedFocus: WindowID(1))
-        #expect(opened == 0, "another app's window is focused directly")
-        #expect(core.focusedWindowID == WindowID(2))
-        core.focusWindow(WindowID(1), warp: false)
-        let below = core.frontStack()
-        core.frontStack = {
-            [listed(number: 2, pid: getpid(), frame: below[1].frame)]
-                + below
-        }
-        core.focusUnderRestingPointer(at: ax, armedFocus: WindowID(1))
-        #expect(opened == 1)
-        #expect(core.focusedWindowID == WindowID(1), "no bare focus")
-    }
-
     /// A hotkey pressed while the hovered app is still coming
     /// forward passes the #292 preflight as the `focus` verb's
     /// does: the hover records the app it left (#1812).

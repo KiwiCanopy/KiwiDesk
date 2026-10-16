@@ -27,15 +27,7 @@ extension KiwiCore {
         let front = frontmostPIDProvider?()
         let before = focusedWindowID
         withUserMotion {
-            if target.own {
-                // Settings, the one own window that tiles: its raise
-                // is the GUI's door, Core's focus then `forceFront`
-                // (#1281), on the screen it sits on.
-                if target.space != state.workspaces.activeSpace {
-                    applyFocusedSpaceSwitch(to: target.space)
-                }
-                uiBridge.onOpenSettings()
-            } else if target.space == state.workspaces.activeSpace {
+            if target.space == state.workspaces.activeSpace {
                 focusWindow(target.id, warp: false)
             } else {
                 // Another screen, as a click there (#446): the
@@ -44,6 +36,12 @@ extension KiwiCore {
                 handFollowFocus(to: target.id, in: target.space, warp: false)
                 spaceSwitchRetile(asSwitch: true)
             }
+            // KiwiDesk's own marked window: the command above made
+            // the focus ours, and only AppKit can make KiwiDesk key
+            // while another app is in front (#1281).
+            if target.own {
+                mouse.rest.frontOwnWindow(Int(target.id.raw))
+            }
         }
         hoverRecordingFlight(from: front, before: before)
         onLog("hover focus: w\(target.id.raw)")
@@ -51,13 +49,13 @@ extension KiwiCore {
 
     /// The window hover focus would focus at `point` (AX space),
     /// the shown Space it renders in, and whether it is KiwiDesk's
-    /// own (the Settings window, whose raise has its one door) —
-    /// nil where nothing is owed: something other than a tracked
-    /// window is in front there (a menu, the Dock, a bar, a
-    /// panel), the window already holds the focus, sits in no
-    /// shown Space, is full screen, or its focus would move a
-    /// window of that Space — a scrolling pan, a monocle flip —
-    /// under a resting hand.
+    /// own marked window (`OwnWindowTiling`'s census) — nil where
+    /// nothing is owed: something other than a tracked window is
+    /// in front there (a menu, the Dock, a bar, a panel), an own
+    /// window other than the marked one, the window already holds
+    /// the focus, sits in no shown Space, is full screen, or its
+    /// focus would move a window of that Space — a scrolling pan,
+    /// a monocle flip — under a resting hand.
     func hoverTarget(
         at point: CGPoint
     ) -> (id: WindowID, space: SpaceID, own: Bool)? {
@@ -72,6 +70,11 @@ extension KiwiCore {
                         && Self.ignoresPointer(number: Int($0.number)))
             }),
             let window = state.windows[WindowID(front.number)],
+            front.pid != own
+                || eventLoop.tilesAsOwnWindow(
+                    pid: window.pid,
+                    id: window.id
+                ),
             !window.isFullscreen,
             let space = state.stickyRenderSpace(of: window)
                 ?? state.workspaces.space(of: window.id),

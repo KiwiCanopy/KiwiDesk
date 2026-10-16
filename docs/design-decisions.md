@@ -2971,10 +2971,11 @@ popover, Spotlight or another app's panel in front stands hover
 focus down over its area; a state-only hit test would focus the
 window under an open menu. KiwiDesk's own click-through overlays
 (the ring, the marks, the cues, the KiwiVision plate) are
-passed through, and its Settings window, the one own window that
-tiles, is raised through its one door (#1281), the one the menu's
-Settings row takes, since a raise from Core alone cannot make
-KiwiDesk key while another app is in front.
+passed through. Its marked window, Settings (`OwnWindowTiling`),
+is focused by the same command as any window and then fronted by
+the GUI, since only AppKit can make KiwiDesk key while another app
+is in front (#1281); every other own window, a dialog or the tour,
+stands hover down.
 
 It always RAISES. Focus without a raise needs a private event
 path no public API offers, and a hover focus goes through the
