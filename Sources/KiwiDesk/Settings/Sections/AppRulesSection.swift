@@ -56,7 +56,9 @@ struct AppRulesSection: View {
             return SettingsCatalog.appRules.spaceList
         }
         let floats = model.config.floatRules.map(FloatFacet.appSegment(of:))
-        if floats.contains(app) { return SettingsCatalog.appRules.floatList }
+        if floats.contains(FloatRules.appKey(app)) {
+            return SettingsCatalog.appRules.floatList
+        }
         let tiles = model.config.tileRules.map(FloatGuess.normalizedRule)
         if tiles.contains(app) || model.core.floatsOnGuess(app: app) {
             return SettingsCatalog.appRules.automaticList

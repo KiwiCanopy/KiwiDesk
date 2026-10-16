@@ -203,9 +203,10 @@ struct AppRuleFloatRow: View {
 
     private func setAll() {
         titlesEditing.wrappedValue = false
-        model.config.floatRules.removeAll {
-            FloatFacet.appSegment(of: $0) == app
-        }
-        model.config.floatRules.append(app)
+        let others = FloatFacet.removingRules(
+            of: app,
+            from: model.config.floatRules
+        )
+        model.config.floatRules = others + [FloatRules.appKey(app)]
     }
 }
