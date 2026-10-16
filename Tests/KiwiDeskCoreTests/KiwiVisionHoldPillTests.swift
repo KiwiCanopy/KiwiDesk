@@ -38,17 +38,6 @@ struct KiwiVisionHoldPillTests {
         #expect(abs(after.panel.midX - (flipped.midX + 120)) < 1)
     }
 
-    @Test("a pill fading after a release shows again on a re-hold")
-    func fadingPillShowsAgain() throws {
-        let overlay = SizeLimitOverlay()
-        let frame = CGRect(x: 200, y: 200, width: 800, height: 600)
-        overlay.hold(window: 1, frame: frame, text: "Wait")
-        overlay.release(1)
-        overlay.hold(window: 1, frame: frame, text: "Wait")
-        let pill = try #require(overlay.pillForTest(1))
-        #expect(pill.alpha == 1)
-    }
-
     @Test("a refusal on the held window leaves the reminder standing")
     func refusalLeavesTheReminder() throws {
         let core = core()

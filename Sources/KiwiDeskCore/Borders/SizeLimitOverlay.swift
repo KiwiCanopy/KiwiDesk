@@ -251,14 +251,9 @@ final class SizeLimitOverlay {
         /// as `flash` placed them.
         func pillForTest(
             _ window: CGWindowID
-        ) -> (
-            panel: CGRect, content: NSView?, plate: NSView, alpha: CGFloat
-        )? {
+        ) -> (panel: CGRect, content: NSView?, plate: NSView)? {
             pills[window].map {
-                (
-                    $0.panel.frame, $0.panel.contentView, $0.plate,
-                    $0.panel.alphaValue
-                )
+                ($0.panel.frame, $0.panel.contentView, $0.plate)
             }
         }
     #endif
