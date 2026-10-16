@@ -239,6 +239,4 @@ struct KeyLayerOverrideTests {
         #expect(result[1].bindings[0].combo == "alt+y")
         #expect(result[1].bindings[0].lua == "swap")
     }
-
-    // MARK: - Default-layer invariant (O4 switch-key-trap)
 }

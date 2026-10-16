@@ -88,6 +88,11 @@ struct OnboardingTests {
     /// the coach mark was a third until #828). A step dropped
     /// from `isClosingBeat` reds here even though the sweep above
     /// cannot see it.
+    ///
+    /// The flow: grant → spaces → looks → keys → done, with no
+    /// machine-gated step. The route still varies by its DOOR,
+    /// which is why the progress row derives its length instead
+    /// of drawing a fixed counter (`OnboardingProgressTests`).
     @Test("every terminal route arrives having reached the end")
     func everyTerminalRouteReachesTheEnd() {
         // Route 1 — the full tour: grant, spaces, keys, done. The

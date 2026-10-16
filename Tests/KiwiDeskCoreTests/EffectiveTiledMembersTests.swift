@@ -3,8 +3,8 @@ import Testing
 
 @testable import KiwiDeskCore
 
-@Suite("Effective tiled members parity", .serialized)
-struct TiledMembersParityTests {
+@Suite("Effective tiled members", .serialized)
+struct EffectiveTiledMembersTests {
 
     private func makeWindow(
         _ id: UInt32,
@@ -21,8 +21,8 @@ struct TiledMembersParityTests {
         )
     }
 
-    @Test("Tiled members exclude floating windows like per-site filter")
-    func mixedFloatingParity() {
+    @Test("Tiled members exclude floating windows")
+    func excludesFloating() {
         var state = StateCoordinator()
         let spaceID = SpaceID("1")
         state.workspaces.ensureSpace(spaceID)

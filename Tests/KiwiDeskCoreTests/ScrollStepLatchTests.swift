@@ -10,13 +10,12 @@ struct ScrollStepLatchTests {
     private func event(
         _ kind: ScrollGestureEvent.Kind,
         dx: Double = 0,
-        dy: Double = 0,
-        input: ScrollGestureEvent.Input = .trackpad
+        dy: Double = 0
     ) -> ScrollGestureEvent {
         ScrollGestureEvent(
             chord: [.control, .option],
             kind: kind,
-            input: input,
+            input: .trackpad,
             delta: CGVector(dx: dx, dy: dy),
             momentum: false,
             location: .zero,

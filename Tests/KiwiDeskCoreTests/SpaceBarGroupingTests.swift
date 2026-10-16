@@ -52,7 +52,8 @@ struct SpaceBarGroupingTests {
     }
 
     /// The default is the behaviour an absent key always meant,
-    /// which is why the setting owes no `ConfigMigration`.
+    /// which is why the setting owes no `ConfigMigration`; the
+    /// absent key itself is `SpaceBarParityTests` ▸ `sparseDecode`'s.
     @Test("a fresh setup groups, as before the switch")
     func defaultGroups() {
         #expect(SpaceBarStyle().groupAdjacentWindows)

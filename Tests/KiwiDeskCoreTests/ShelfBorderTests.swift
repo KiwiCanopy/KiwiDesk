@@ -10,7 +10,8 @@ import Testing
 @Suite("KiwiShelf border")
 struct ShelfBorderTests {
     /// The default is the look that shipped before the setting:
-    /// no stroke at all, so an old profile draws as it was saved.
+    /// no stroke at all. An absent key decoding to it is
+    /// `KiwiShelfParityTests` ▸ `sparseDecode`'s.
     @Test("The default draws no border")
     func defaultDrawsNone() {
         let shelf = KiwiShelf()

@@ -81,6 +81,11 @@ struct LiquidGlassMasterTests {
     /// The `?` predicate, at both its answers — and it is the
     /// SAME reading the row shows, so the switch and its
     /// explanation cannot contradict.
+    ///
+    /// The default this suite reasons from (tests.md): both
+    /// ship ON together (owner ruling 2026-09-10), so an untouched
+    /// config already agrees with what the row shows and the
+    /// master never has to write to make that true.
     @Test("divergence is seen only while they disagree")
     func divergenceSeen() {
         var settings = TilingSettings()

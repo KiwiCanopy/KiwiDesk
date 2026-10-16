@@ -206,6 +206,9 @@ struct BorderSpecsTests {
         #expect(Set(result.map(\.window)) == [w1, w3])
     }
 
+    /// A float is a slot like any other to the ring (#1286): its
+    /// overlap hides nothing, since each ring sits behind its own
+    /// window (#278).
     @Test("Every overflow cascade member gets a ring")
     func cascadeMembersRemainIndependent() {
         var style = BorderStyle()

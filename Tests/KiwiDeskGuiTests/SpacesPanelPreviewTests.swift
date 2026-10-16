@@ -18,10 +18,8 @@ import Testing
 /// **Mostly arithmetic, with one needle that says so.** A
 /// caption calling the seam and rendering a constant would pass
 /// any scan, so the counts are read directly over settings built
-/// here. The exception is `captionAgreesWithTheHeader`: the
-/// value half of it is a delegation tautology, so the binding
-/// claim rests on a source needle over the header's render
-/// site.
+/// here. The exception is `captionAgreesWithTheHeader`, which
+/// rests on a source needle over the header's render site.
 @Suite("Spaces panel preview")
 @MainActor
 struct SpacesPanelPreviewTests {

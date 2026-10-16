@@ -118,7 +118,7 @@ struct FloatRuleTests {
         )
     }
 
-    @Test("Ghostty's quick terminal panel is never managed")
+    @Test("another app's raised panel floats rather than being ignored")
     func ignoreDetection() throws {
         let noRules = IgnoreRules()
         // Other regular apps' panels merely float; the ignore

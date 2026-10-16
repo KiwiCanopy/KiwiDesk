@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 import SwiftUI
 import Testing
@@ -6,15 +5,10 @@ import Testing
 @testable import KiwiDesk
 
 /// What the #823 migration is worth only if nothing undoes it:
-/// the shared `SegmentedPicker` is the ONLY segmented chooser and
-/// its accent pill keeps an ink that clears AA. The track is the
-/// `trackFill` token, its labels measured with the chips
-/// (`SettingsThemeContrastTests.chips`, #2047).
-///
-/// Split from `SettingsThemeContrastTests` because that suite is
-/// at the §2.1 ceiling; the WCAG arithmetic below is a per-file
-/// copy by the same convention its own helpers are (tests.md),
-/// and it measures the same resolved-token truth.
+/// the shared `SegmentedPicker` is the ONLY segmented chooser.
+/// Its accent pill's ink is measured as "accentInk on accent" in
+/// `SettingsThemeContrastTests`, the track (`trackFill`) with the
+/// chips there (#2047).
 @Suite("Segmented picker coverage (#823)")
 @MainActor
 struct SegmentedPickerCoverageTests {
@@ -108,37 +102,4 @@ struct SegmentedPickerCoverageTests {
         }
     }
 
-    // MARK: - WCAG arithmetic over resolved tokens
-
-    private func resolved(
-        _ color: Color,
-        dark: Bool = false
-    ) throws -> (r: Double, g: Double, b: Double) {
-        let appearance = try #require(
-            NSAppearance(named: dark ? .darkAqua : .aqua)
-        )
-        var resolvedColor: NSColor?
-        appearance.performAsCurrentDrawingAppearance {
-            resolvedColor =
-                NSColor(color).usingColorSpace(.sRGB)
-        }
-        let srgb = try #require(resolvedColor)
-        return (
-            Double(srgb.redComponent),
-            Double(srgb.greenComponent),
-            Double(srgb.blueComponent)
-        )
-    }
-
-    private func luminance(
-        _ rgb: (r: Double, g: Double, b: Double)
-    ) -> Double {
-        func lin(_ v: Double) -> Double {
-            v <= 0.04045
-                ? v / 12.92
-                : pow((v + 0.055) / 1.055, 2.4)
-        }
-        return 0.2126 * lin(rgb.r) + 0.7152 * lin(rgb.g)
-            + 0.0722 * lin(rgb.b)
-    }
 }
