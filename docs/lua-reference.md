@@ -3740,6 +3740,17 @@ With a lens name (any case), it turns that lens on — from off, or
 from another lens — and turns KiwiVision off when that lens is the
 one on. A lens with no apps, or a name no lens has, is refused.
 
+A saved profile can leave a lens out through its
+[`lens_reach`](#profile-json-format). While that profile is live,
+turning the lens on is refused: "Writing does not reach Studio". A
+built-in Standard, and a Lua-owned setup, reach every lens. A
+profile switch (a load, a screen change or a Desktop binding) into
+a profile that leaves out the lens that is on turns KiwiVision off.
+A pill on the focused window says "Writing is off: it does not
+reach Studio.", and VoiceOver says the same. Switching back
+leaves KiwiVision off. Plain KiwiVision, with no lens, stays on
+across every switch.
+
 **Example:**
 
 ```lua
@@ -5138,7 +5149,8 @@ row.
 - **KiwiVision** — Off and Focused window, which turn
   [KiwiVision](#kiwivisiontoggle) off and on, then one item per
   lens, which turns that lens on; picking the lens already on
-  leaves it on. A lens with no apps is greyed, "No apps yet".
+  leaves it on. A lens with no apps is greyed, "No apps yet", and
+  one the live profile leaves out is greyed "Not in Studio".
 
 Keys on this side:
 
@@ -6290,6 +6302,13 @@ stripped, grouped by namespace — `set_gap_override` becomes
   ]
 }
 ```
+
+:::unreleased
+`lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
+the profile. It maps a lens name, in lower case, to `false`:
+`"lens_reach": { "writing": false }`. A lens the key does not name
+reaches the profile, and without the key every lens does.
+:::
 
 ### macOS Desktops (Mission Control)
 

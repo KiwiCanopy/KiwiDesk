@@ -6512,6 +6512,34 @@ profiles it applies to are written to other profiles' files, and
 a rename rewrites stored bindings. The plain settings stay
 immediate beside them. That is why "Applies at once, in every
 profile." sits on each immediate card rather than on the page.
+
+### A lens's reach is the profile's mark, and leaving it turns KiwiVision off (#2103)
+
+**[Rationale]**
+
+*Reach is stored in the profile, not on the lens.* A lens lives
+once, app-wide in `gui.json`; a profile that does not take it says
+so in its own file, as a sparse `lens_reach` mark. It is the
+storage App Rules' *Applies to* already reads (#1393), with
+absence meaning "reached": a lens defined later reaches every
+existing profile, a profile created later takes every lens, and a
+built-in Standard, which has no file, is reached by all of them
+without anything stored for it. A profile list on the lens record
+would invert each of those. The mark rides the
+live profile's adoption state and follows every write of its file,
+so the switch path decides from memory and never reads a profile
+file (#1245).
+
+*A switch out of reach turns KiwiVision off, not down to plain.*
+Falling back to Focused window would leave the user in a mode
+whose way out is a chord they never pressed: a lens's chord turns
+KiwiVision off only while that lens is on. Off is the state every user
+already knows how to leave, and it pays the appearance switch back
+on the one off path. The pill names the lens and the profile
+because the user did not ask for the change. A switch back does
+not turn the lens on again, since a switch is not a press. Plain
+KiwiVision is app-wide and has no reach, so it stays on across
+every switch.
 :::
 
 ## Settings GUI & UX
