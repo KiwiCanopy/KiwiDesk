@@ -1681,13 +1681,15 @@ A KiwiVision lens that keeps focus on its apps adds one more
 filter, orthogonal to both models like the float tier
 ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)):
 `navigate` hands every model the one predicate `lensKeySkip`,
-which refuses other apps' windows. The geometric search and the
+which refuses every window the lens keeps hazed, judged per
+window as the plates judge it. The geometric search and the
 float tier drop them from their candidates, Scrolling and Monocle
 step past their indices through `Navigation.arrayStep`, and Track
 folds the predicate into the skip its pile handling already
-takes. A new layout's navigation takes that predicate too, or
-the lens stops steering the keys on it. Only a keyed call skips:
-the scroll gesture calls `navigate` with `keyed: false`
+takes, its wraps through the same `arrayStep`. The scroll
+gesture's steps skip too, through `navigate` on a row and its
+own-order step everywhere else. A new layout's navigation takes
+that predicate too, or the lens stops steering the keys on it
 ([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
 :::
 
@@ -6477,10 +6479,11 @@ theme notification, the one step no device has measured yet.
 
 **[Rationale]**
 
-While a lens keeps focus on its apps, `focus` and `swap` skip
-other apps' windows, and nothing else does: a click, a bar item,
-hover focus and the scroll gesture reach any window, and the
-window switcher lists every window, the lens's apps first.
+While a lens keeps focus on its apps, `focus`, `swap` and the
+scroll gesture skip the windows the lens keeps hazed, and nothing
+else does: a click, a bar item and hover focus reach any window,
+and the window switcher lists every window, the lens's apps
+first.
 
 The line runs between a step and a pick. A directional key steps
 blind: it lands on whichever window lies that way, so inside a
@@ -6496,12 +6499,17 @@ leaving other apps out of it would make their windows unfindable
 from KiwiDesk.
 
 Hover focus is a pick by the hand resting on a window. The scroll
-gesture steps the row like a key but under the hand: a swipe
-moves the focus one window, the distance the user feels, and a
-step that leapt past the windows between would move the row by a
-distance no swipe measured. Should a user want the gesture to
-skip, that is a ruling of its own, never a default to change
-quietly at the `keyed:` argument.
+gesture is a step: like a key, it moves the focus to whichever
+window comes next along the row, without naming one, so it skips
+as the keys do. One switch, **Keep focus on these apps**, governs
+both, since a lens that steered one way of stepping and not the
+other would still let the focus wander off it.
+
+What a step skips is what the plates haze, judged per window: a
+member app whose title rule clears only some of its windows has
+the rest skipped like a stranger's. A step that lands under the
+haze is the press the lens exists to save, whoever owns the
+window.
 
 ### KiwiVision has its own page, and its rows apply at once (#2103)
 
