@@ -25,8 +25,10 @@ struct KiwiVisionLensOtherAppsCard: View {
                     .foregroundStyle(SettingsTheme.ink3)
                     .padding(.leading, ToggleRow.captionIndent)
                     .fixedSize(horizontal: false, vertical: true)
-                delayRow.modifier(GreyOut(active: !lens.keepFocus))
-                reminderRow.modifier(GreyOut(active: !remindsAtAll))
+                delayRow
+                    .modifier(GreyOut(active: !lens.keepFocus))
+                reminderRow
+                    .modifier(GreyOut(active: !remindsAtAll))
                 if let reason {
                     KiwiVisionCopy.reason(reason)
                 }
