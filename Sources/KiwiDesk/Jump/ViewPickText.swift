@@ -21,7 +21,14 @@ enum ViewPickText {
     /// Why a lens chip cannot turn its lens on (#2103).
     static func lensRefusal(_ refusal: LensRefusal) -> String {
         switch refusal {
-        case .noApps: return L("view_picker.vision.lens_empty", "No apps yet")
+        case .noApps:
+            return L("view_picker.vision.lens_empty", "No apps yet")
+        case .outOfReach(let profile):
+            return L(
+                "view_picker.vision.lens_out_of_reach",
+                "Not in %1$@",
+                profile
+            )
         }
     }
 

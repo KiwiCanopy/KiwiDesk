@@ -395,6 +395,18 @@ argument is *An own act is never a bounce* under "A placement
 bounce is the app's answer, not the user's (#1161)" in
 `docs/design-decisions.md`.
 
+**A raise Core starts takes the other order of the same two
+halves (#1869).** Hover focus issues the focus command itself and
+then hands the GUI only the window number, through
+`PointerRest.frontOwnWindow`, which `AppDelegate` wires to
+`forceFront` with no door call — the command already made the
+report intended, and only once it moved the focus does Core ask
+for the front (`HoverFocusOwnWindowTests`,
+`HoverFocusWiringTests` ▸ `frontOwnWindowIsWired`). The hook is
+hover's: a second Core-started raise of the marked window first
+moves it beside `EventLoop.ownWindow(number:)`, rather than reaching
+into the pointer rest.
+
 ## A window that finishes something already begun comes forward
 
 **It activates at the moment it appears, a window a framework

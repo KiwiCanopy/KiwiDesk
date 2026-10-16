@@ -89,31 +89,10 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Which look this profile wears (#1752): nil is the shared
     /// look in `gui.json`, `.own` the copy in `settings`.
     public var look: LookReference?
-
-    enum CodingKeys: String, CodingKey {
-        case format
-        case name
-        case monitorSets = "monitor_sets"
-        case dormantMonitorCount = "monitor_count"
-        case mainSpaces = "main_spaces"
-        case isDefault = "default"
-        case isStarterSetup = "starter_setup"
-        case spaces
-        case fallbackSpace = "fallback_space"
-        case spaceModes = "space_modes"
-        case settings
-        case savedAt = "saved_at"
-        case layers
-        case appRules = "app_rules"
-        case floatRules = "float_rules"
-        case ignoreRules = "ignore_rules"
-        case scrollGesture = "scroll_gesture"
-        case spaceHistory = "space_history"
-        case modeCycle = "mode_cycle"
-        case floatAutomatically = "float_automatically"
-        case tileRules = "tile_rules"
-        case look
-    }
+    /// Lenses this profile leaves out (#2103 ruling 9), keyed by
+    /// `VisionLens.reachKey`, `false` where left out; nil and a
+    /// lens it does not name reach it.
+    public var lensReach: [String: Bool]?
 
     public init(
         format: Int = Profile.currentFormat,
@@ -137,7 +116,8 @@ public struct Profile: Codable, Sendable, Equatable {
         modeCycle: [LayoutMode]? = nil,
         floatAutomatically: Bool? = nil,
         tileRules: RuleListOverride? = nil,
-        look: LookReference? = nil
+        look: LookReference? = nil,
+        lensReach: [String: Bool]? = nil
     ) {
         self.format = format
         self.name = name
@@ -162,6 +142,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.floatAutomatically = floatAutomatically
         self.tileRules = tileRules
         self.look = look
+        self.lensReach = lensReach
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -291,6 +272,10 @@ public struct Profile: Codable, Sendable, Equatable {
         look = try container.decodeIfPresent(
             LookReference.self,
             forKey: .look
+        )
+        lensReach = try container.decodeIfPresent(
+            [String: Bool].self,
+            forKey: .lensReach
         )
     }
 

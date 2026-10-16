@@ -992,7 +992,10 @@ editing here:
   never bounced — `intended != id` is the consult's first clause
   — and `focusOwnWindow(number:)`, beside the arm, is the door a
   GUI raise of an own window takes so its report arrives that way
-  (#1281, `PlacementIntentTests`): the command for a tracked
+  (#1281, `PlacementIntentTests`) — a raise CORE starts (hover
+  focus, #1869) commands the focus itself and asks the GUI only
+  for the front, once that focus moved, which is gui.md's ▸ "A raise
+  Core starts" (`HoverFocusOwnWindowTests`): the command for a tracked
   window; a CLOSED one — re-shown under the number it kept —
   arrives as a return from a close, which the fold grants the
   focus a new window gets, so the report is intended before it

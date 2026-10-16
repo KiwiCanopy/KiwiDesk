@@ -119,7 +119,7 @@ struct KiwiVisionLensActivationTests {
             ["name": .string("Calls"), "apps": .array([.string("x")])]
         )
         var heard: [VisionActive] = []
-        core.vision.onChange = { heard.append($0) }
+        core.vision.onChange = { active, _ in heard.append(active) }
         #expect(toggle(core, "writing").isSuccess)
         #expect(core.kiwiVisionActive == .lens("Writing"))
         #expect(core.visionLook.dim == 30)

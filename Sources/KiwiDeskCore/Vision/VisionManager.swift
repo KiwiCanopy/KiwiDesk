@@ -44,9 +44,16 @@ public final class VisionManager {
     /// The machine half of the appearance switch; the bootstrap
     /// wires the live one.
     var appearanceSwitch = VisionAppearanceSwitch.inert()
-    /// Hears every change of `active` — on, off, or another lens;
-    /// the GUI announces an on or an off.
-    public var onChange: @MainActor (VisionActive) -> Void = { _ in }
+    /// Hears every change of `active` — on, off, or another lens —
+    /// with its cause where the user did not ask for it; the GUI
+    /// announces an on or an off.
+    public var onChange:
+        @MainActor (VisionActive, VisionChangeCause?) -> Void = {
+            _,
+            _ in
+        }
+    /// Hears a change of which lenses reach the live profile.
+    public var onReachChange: @MainActor () -> Void = {}
     var plates: [DisplayID: any VisionPlateBackend] = [:]
     /// The target each plate was last ordered below: a plate
     /// re-stacks only when the focus moves, a settle pass asks, the

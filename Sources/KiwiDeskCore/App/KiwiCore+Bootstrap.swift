@@ -42,6 +42,9 @@ extension KiwiCore {
         }
         exec.onLog = log
         profiles.onLog = log
+        profiles.onActiveChange = { [weak self] in
+            self?.liveProfileChanged()
+        }
         borders.onLog = log
         socket.onLog = log
         bus.onLog = log
