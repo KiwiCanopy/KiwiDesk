@@ -308,7 +308,9 @@ extension KiwiCore {
             [weak self] in
             guard let self else { return }
             self.floatRaiseDebt.restoresInFlight -= 1
-            defer { self.runPendingFloatRaise() }
+            defer {
+                self.tiledPlaneCameToRest(restore: false, focusRaise: false)
+            }
             guard generation == self.zOrderRaiseGeneration.value
             else { return }
             if let focused, focused == self.activeSpace?.focused {

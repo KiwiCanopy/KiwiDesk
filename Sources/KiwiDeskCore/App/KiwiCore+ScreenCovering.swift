@@ -103,7 +103,7 @@ extension KiwiCore {
     /// view overscans 1 pt into the neighbour screen. The
     /// z-order read is taken only while a tracked window covers
     /// that screen, so a desk without one pays nothing.
-    func showsPresentation(on display: DisplayID) -> Bool {
+    private func showsPresentation(on display: DisplayID) -> Bool {
         guard let screen = TilingEngine.screen(for: display)
         else { return false }
         let bounds = Self.axFrame(of: screen)

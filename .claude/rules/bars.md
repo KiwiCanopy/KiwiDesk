@@ -277,7 +277,11 @@ twice, was a question the user answered twice. The argument is
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
   `presentationInFrontStandsShelfDown` holds both bars through
-  it.
+  it. **A cue the shelf would sit beside — the Space, layout
+  and Desktop cues — stands down through the same verdict**,
+  never a part of it such as `showsPresentation`, which a
+  new stand-down case would leave behind (#2348,
+  `ShelfStandDownSeamTests` ▸ `cuesAskTheStandDown`).
 - **Keep a bar's `naturalLength` equal to what its render
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:
