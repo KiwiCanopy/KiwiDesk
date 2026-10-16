@@ -15,6 +15,9 @@ protocol VisionPlateBackend: AnyObject {
     func reshape(_ path: CGPath?)
     /// Orders the plate in directly below `window`.
     func order(below window: CGWindowID)
+    /// Orders the plate in directly above `window`: a lens holds
+    /// it under the haze (#2103 ruling 12).
+    func order(above window: CGWindowID)
     /// Fades the plate in unless `reduceMotion`.
     func show(reduceMotion: Bool)
     /// Fades the plate out unless `reduceMotion`, then orders it
@@ -73,6 +76,10 @@ final class AppKitVisionPlate: VisionPlateBackend {
     /// an AppKit panel (#1962).
     func order(below window: CGWindowID) {
         panel?.order(.below, relativeTo: Int(window))
+    }
+
+    func order(above window: CGWindowID) {
+        panel?.order(.above, relativeTo: Int(window))
     }
 
     func show(reduceMotion: Bool) {

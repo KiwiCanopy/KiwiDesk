@@ -924,6 +924,7 @@
   "kiwivision.preview.caption.haze.windows.dim": "포커스된 윈도우 뒤의 윈도우가 어둡게 표시되고, 배경화면은 선명하게 유지됩니다.",
   "kiwivision.preview.caption.haze.windows.dim_blur": "포커스된 윈도우 뒤의 윈도우가 어둡고 흐리게 표시되고, 배경화면은 선명하게 유지됩니다.",
   "kiwivision.preview.caption.none": "이 설정에서는 KiwiVision이 화면에서 아무것도 바꾸지 않습니다.",
+  "kiwivision.reminder.default": "🥝 Keep the vision juicy 🥝",
   "kiwivision.section.appearance": "시스템 외관",
   "kiwivision.section.clear": "선명하게 유지",
   "kiwivision.section.levels": "밝기 낮춤 및 흐림",

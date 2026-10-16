@@ -6542,6 +6542,38 @@ exists to save. A Never dimmed app's windows stay clear on screen
 but are no member, so a step skips them too: they are kept clear
 to be seen, not worked in.
 
+### A lens holds a stray landing, never refuses it (#2103)
+
+**[Rationale]**
+
+macOS's own ways in — ⌘-Tab, the Dock, a notification — are never
+refused, so a lens that keeps focus on its apps still lets another
+app's window take the focus. What it does instead is hold that
+window under the haze for the lens's delay, a reminder pill centred
+on it, and then clear it like any focused window. The delay is the
+point of the lens made visible: the user sees where they landed
+and that it is outside what they meant to work in, and a deliberate
+visit costs only the wait. Refusing would make the lens a lock;
+clearing at once would make it no more than a dim.
+
+Every landing waits, whichever door chose the window — a key, the
+Dock, a bar item, the window switcher, a Space switch — because
+the question is where the user is working next, not how they got
+there. The one landing that never waits is a click on the window
+itself: pointing at a window is the plainest statement that it is
+wanted, and making it wait would answer that statement with a
+delay. Typing does not end the wait, since a keystroke into a
+window is not a choice of it. A window that was never the user's
+choice of a place to work never waits either: Never dimmed apps,
+KiwiDesk's own windows, launcher palettes and other overlays, and
+the dialog of the window that was clear.
+
+The plate orders above the held window rather than masking a hole
+shut, because the window must stay where macOS put it in the
+stack, and an activation lifts it back over the plate every time
+(the v3 probe), so the hold re-orders on each of its reorder
+events until the delay ends.
+
 ### KiwiVision has its own page, and its rows apply at once (#2103)
 
 **[Rationale]**

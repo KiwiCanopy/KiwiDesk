@@ -924,6 +924,7 @@
   "kiwivision.preview.caption.haze.windows.dim": "Окна позади окна в фокусе затемнены; обои остаются чёткими.",
   "kiwivision.preview.caption.haze.windows.dim_blur": "Окна позади окна в фокусе затемнены и размыты; обои остаются чёткими.",
   "kiwivision.preview.caption.none": "При этих настройках KiwiVision ничего не меняет на экране.",
+  "kiwivision.reminder.default": "🥝 Keep the vision juicy 🥝",
   "kiwivision.section.appearance": "Оформление системы",
   "kiwivision.section.clear": "Остаётся чётким",
   "kiwivision.section.levels": "Затемнение и размытие",

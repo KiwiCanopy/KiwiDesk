@@ -135,7 +135,12 @@ extension KiwiCore {
             vision.isOn || vision.hasShownPlates
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
-        var request = visionRequest(refreshingList: reassertOrder)
+        let focus = visionTarget()
+        settleVisionHold(target: focus.target)
+        var request = visionRequest(
+            refreshingList: reassertOrder,
+            focus: focus
+        )
         if !visionMasks { vision.forgetListedWindows() }
         requestVisionWindows(target: request.target)
         request.tracked = windowServer.isActive
@@ -213,8 +218,47 @@ extension KiwiCore {
     /// — a dialog, Sparkle's alert — which stays clear the way
     /// it stands the focused ring down (#933).
     func visionRequest(
-        refreshingList: Bool = false
+        refreshingList: Bool = false,
+        focus: VisionTarget? = nil
     ) -> VisionManager.Request {
+        let focus = focus ?? visionTarget()
+        let target = focus.target
+        let holding = vision.hold.map(\.window.raw).flatMap {
+            $0 == target ? $0 : nil
+        }
+        let screens = ScreenList.all.compactMap { screen in
+            screen.screenNumber.map { (DisplayID($0), screen.frame) }
+        }
+        return VisionManager.Request(
+            screens: screens,
+            target: target,
+            below: focus.ring,
+            standDown: vision.standDown,
+            tracked: windowServer.isActive,
+            dim: CGFloat(visionLook.dim / 100),
+            blur: kiwiVisionDrawsBlur,
+            clearWallpaper: visionClearsWallpaper,
+            windows: visionMasks
+                ? visionMaskWindows(
+                    target: target,
+                    targetPid: focus.pid,
+                    holding: holding,
+                    refreshingList: refreshingList
+                ) : [],
+            holding: holding
+        )
+    }
+
+    /// What `visionTarget` reads: the window kept clear, its
+    /// process and the ring the plates stack under.
+    typealias VisionTarget = (
+        target: CGWindowID?, pid: pid_t?, ring: CGWindowID?
+    )
+
+    /// The window the plates keep clear: the ring's focused
+    /// window, or an own key window that is not it, with its
+    /// process and the ring the plates stack under.
+    func visionTarget() -> VisionTarget {
         let anchor = activeSpace.flatMap {
             state.focusAnchor(
                 of: $0,
@@ -224,32 +268,13 @@ extension KiwiCore {
         let ownKey = eventLoop.ownKeyWindow()
             .flatMap { UInt32(exactly: $0.number) }
             .flatMap { $0 == anchor?.raw ? nil : $0 }
-        let target = ownKey ?? anchor?.raw
         // An own key window's app is this one.
-        let targetPid =
+        let pid =
             ownKey != nil
             ? getpid() : anchor.flatMap { state.windows[$0]?.pid }
         let ring =
             ownKey == nil
             ? anchor.flatMap { borders.ringPanel(of: $0) } : nil
-        let screens = ScreenList.all.compactMap { screen in
-            screen.screenNumber.map { (DisplayID($0), screen.frame) }
-        }
-        return VisionManager.Request(
-            screens: screens,
-            target: target,
-            below: ring,
-            standDown: vision.standDown,
-            tracked: windowServer.isActive,
-            dim: CGFloat(visionLook.dim / 100),
-            blur: kiwiVisionDrawsBlur,
-            clearWallpaper: visionClearsWallpaper,
-            windows: visionMasks
-                ? visionMaskWindows(
-                    target: target,
-                    targetPid: targetPid,
-                    refreshingList: refreshingList
-                ) : []
-        )
+        return (ownKey ?? anchor?.raw, pid, ring)
     }
 }

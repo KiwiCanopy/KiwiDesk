@@ -40,6 +40,7 @@ extension KiwiCore {
     func visionMaskWindows(
         target: CGWindowID?,
         targetPid: pid_t?,
+        holding: CGWindowID? = nil,
         refreshingList: Bool
     ) -> [VisionMask.Window] {
         var members: [WindowID] = []
@@ -91,15 +92,30 @@ extension KiwiCore {
         let clear = visionClearPids(target: targetPid, among: apps)
         let lens = apps.mapValues(visionLensClear)
         let height = GeometryUtils.primaryHeight
-        return ordered.map { id, frame, pid, title in
-            VisionMask.Window(
-                frame: GeometryUtils.flip(frame, primaryHeight: height),
-                cornerRadius: vision.listedRadii[id.raw]
-                    ?? windowRadius(id, reading: refreshingList),
-                clear: clear.contains(pid)
-                    || lens[pid]?.clears(title: title) == true
-            )
+        // A held target sits directly below the plates: hazed, in
+        // front of every other window (#2103 ruling 12).
+        let held = holding.flatMap { number -> [VisionMask.Window]? in
+            let id = WindowID(number)
+            return memberFrame(id).map {
+                [
+                    VisionMask.Window(
+                        frame: GeometryUtils.flip($0, primaryHeight: height),
+                        cornerRadius: windowRadius(id, reading: false),
+                        clear: false
+                    )
+                ]
+            }
         }
+        return (held ?? [])
+            + ordered.map { id, frame, pid, title in
+                VisionMask.Window(
+                    frame: GeometryUtils.flip(frame, primaryHeight: height),
+                    cornerRadius: vision.listedRadii[id.raw]
+                        ?? windowRadius(id, reading: refreshingList),
+                    clear: clear.contains(pid)
+                        || lens[pid]?.clears(title: title) == true
+                )
+            }
     }
 
     /// The processes whose windows stay clear this pass: with "the
@@ -141,7 +157,7 @@ extension KiwiCore {
     }
 
     /// Whether the Never dimmed list names `app`.
-    private func isNeverDimmed(_ app: AppRef) -> Bool {
+    func isNeverDimmed(_ app: AppRef) -> Bool {
         let list = visionLook.neverDimmed
         return !list.isEmpty && list.contains(app.listKey)
     }

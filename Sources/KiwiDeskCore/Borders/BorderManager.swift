@@ -123,6 +123,9 @@ public final class BorderManager {
     let bumpAnimator = BorderBumpAnimator()
     /// Overlay pill for minimum size refusal cues (#933).
     let sizeLimitOverlay = SizeLimitOverlay()
+    /// A lens hold's reminder pill (#2103): its own overlay, so a
+    /// refusal flashed on the held window never replaces it.
+    let holdPillOverlay = SizeLimitOverlay()
 
     /// Test observation seam for resize refusal cues (#933).
     var onResizeRefusal: (ResizeRefusal) -> Void = { _ in }

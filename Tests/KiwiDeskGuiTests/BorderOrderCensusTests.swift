@@ -87,21 +87,37 @@ struct BorderOrderCensusTests {
     }
 
     /// A KiwiVision plate's stack is the same round trip, one per
-    /// screen (#2103): its callers are the sync, gated by the
-    /// ring's own `ordersOverlay`, and the target's restack after
-    /// its reorder event, beside the one definition in the plate.
+    /// screen (#2103): the sync, gated by the ring's own
+    /// `ordersOverlay`, and the target's restack after its reorder
+    /// event both order through the manager's one door.
     @Test("only the ruled sites stack a KiwiVision plate")
     func plateOrderSitesAreCensused() throws {
-        let sites = try SourceScan.identifierSites(
-            of: "order(below:",
+        // Two triggers reach the manager's one ordering door: the
+        // sync and the restack.
+        let triggers = try SourceScan.identifierSites(
+            of: "order(plate,",
             under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
         )
         #expect(
-            sites.map(\.file.lastPathComponent).sorted() == [
-                "VisionManager.swift", "VisionManager.swift",
-            ],
-            "found \(sites.map(\.site))"
+            triggers.map(\.file.lastPathComponent)
+                == ["VisionManager.swift", "VisionManager.swift"],
+            "found \(triggers.map(\.site))"
         )
+        // The door orders below, or — while a lens holds the target
+        // (#2103 ruling 12) — above.
+        for needle in ["order(below:", "order(above:"] {
+            let sites = try SourceScan.identifierSites(
+                of: needle,
+                under: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore"
+                )
+            )
+            #expect(
+                sites.map(\.file.lastPathComponent)
+                    == ["VisionManager.swift"],
+                "found \(sites.map(\.site))"
+            )
+        }
         // The plate restacks AFTER the ring's own order — the
         // watch's consumer order, held by `WindowServerWatchTests`
         // ▸ `phaseOrder`, or the ring lands under the plate — and

@@ -90,6 +90,9 @@ final class DeferredTasks {
         /// Re-masks KiwiVision's plates after windows moved or the
         /// list went stale (#2103 ruling 21), coalesced.
         case visionMask
+        /// Ends a lens's delayed clear at its deadline (#2103
+        /// ruling 12).
+        case visionHold
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -108,7 +111,8 @@ final class DeferredTasks {
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
-                .menuBarRevealReturn, .hyperRemap, .visionMask:
+                .menuBarRevealReturn, .hyperRemap, .visionMask,
+                .visionHold:
                 return false
             }
         }

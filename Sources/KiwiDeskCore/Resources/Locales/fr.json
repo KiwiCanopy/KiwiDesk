@@ -924,6 +924,7 @@
   "kiwivision.preview.caption.haze.windows.dim": "Les fenêtres derrière celle qui est ciblée sont assombries ; le fond d'écran reste net.",
   "kiwivision.preview.caption.haze.windows.dim_blur": "Les fenêtres derrière celle qui est ciblée sont assombries et floutées ; le fond d'écran reste net.",
   "kiwivision.preview.caption.none": "Avec ces réglages, KiwiVision ne change rien à l'écran.",
+  "kiwivision.reminder.default": "🥝 Keep the vision juicy 🥝",
   "kiwivision.section.appearance": "Apparence du système",
   "kiwivision.section.clear": "Reste net",
   "kiwivision.section.levels": "Assombrissement et flou",

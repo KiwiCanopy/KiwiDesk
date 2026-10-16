@@ -3789,6 +3789,17 @@ out, in every layout: other apps' windows — never-dimmed ones
 included — and a member's windows its `titles` do not match. A
 click, the bars and hover focus skip nothing.
 
+With `keep_focus` on, a window the lens leaves out that still
+takes the focus — through ⌘-Tab, the Dock, a notification, a bar
+item or the window switcher — stays under the haze for
+`clear_delay` seconds (default 2; 0 clears it at once) with a pill
+centred on it, then clears. A click
+on the window clears it at once; typing does not. The pill shows
+`reminder`, or "🥝 Keep the vision juicy 🥝" where it is blank, and
+VoiceOver reads it once. Never-dimmed apps, KiwiDesk's own windows,
+overlays such as a launcher palette, and a dialog of the window
+that was clear never wait.
+
 A setting the lens leaves out follows the
 plain KiwiVision one, and never-dimmed apps stay clear under every
 lens. Like the `set_*` verbs, it changes the running lenses only;
@@ -3801,6 +3812,8 @@ kiwivision.define_lens({
     name = "Writing",
     apps = { "com.apple.Notes", "com.apple.Safari" },
     titles = { ["com.apple.safari"] = { "Docs" } },
+    clear_delay = 3,
+    reminder = "Back to the draft",
     dim = 80,
 })
 ```

@@ -1660,6 +1660,11 @@ Touching `Borders`, `Vision`.
   `WindowServerWatch` under its own `Consumer` case, whose position is its
   place in the fan-out, and calls no `SkyLightWindowEvents` door itself
   (#2275, `WindowServerWatchTests`, `WindowServerWatchSeamTests`)
+- a lens's delayed clear is one hold judged at every KiwiVision re-draw
+  through the pure `VisionHold.begins`, ended by its deadline, a press on
+  the held window, a new target or the lens letting go, the plates ordered
+  above it through the manager's one ordering door (#2103,
+  `KiwiVisionHoldTests`, `BorderOrderCensusTests`)
 - a lens's reach is read from the live profile's adoption state through
   the one `profileLeavingOut` and re-judged on every change of it, and a
   lens rename or delete re-keys or clears every profile's `lens_reach`
