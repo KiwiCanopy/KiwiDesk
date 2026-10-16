@@ -37,6 +37,12 @@ struct FloatFacetCaseTests {
         #expect(
             FloatFacet.rules(rules, app: app) == ["Com.Apple.Notes:Draft"]
         )
+        #expect(
+            FloatFacet.patterns(rules, app: "com.apple.Notes") == ["Draft"]
+        )
+        #expect(
+            FloatFacet.rules(rules, app: "com.apple.Notes").count == 1
+        )
     }
 
     @Test("a write replaces the mixed-case bare rule")
@@ -55,14 +61,38 @@ struct FloatFacetCaseTests {
         )
     }
 
+    /// The engine's own spelling of each rule — `rawRules`, split
+    /// here by hand — is the app the list must show.
     @Test("the list agrees with the engine on every rule")
     func agreesWithEngine() {
         let rules = ["Com.Apple.Notes", "Org.Mozilla.Firefox:Picture"]
-        let engine = FloatRules(rules)
-        for rule in rules {
-            let segment = FloatFacet.appSegment(of: rule)
-            #expect(!engine.rules(of: segment).isEmpty)
-            #expect(FloatFacet.current(rules, app: segment) != .never)
+        let engine = FloatRules(rules).rawRules
+        for (rule, spelled) in zip(rules, engine) {
+            let engineApp = String(
+                spelled.split(separator: ":", maxSplits: 1)[0]
+            )
+            #expect(FloatFacet.appSegment(of: rule) == engineApp)
+            #expect(FloatFacet.current(rules, app: engineApp) != .never)
         }
+    }
+
+    /// A trailing colon is no title rule to the engine, which
+    /// takes the whole rule as its app; the list reads it alike.
+    @Test("a trailing colon reads as the engine reads it")
+    func trailingColonIsBare() {
+        let app = FloatRules(["Foo:"]).rawRules.first ?? ""
+        #expect(app == "foo:")
+        #expect(FloatFacet.appSegment(of: "Foo:") == app)
+        #expect(FloatFacet.current(["Foo:"], app: app) == .all)
+        #expect(FloatFacet.patterns(["Foo:"], app: app).isEmpty)
+    }
+
+    @Test("removing an app's rules takes every spelling")
+    func removalFolds() {
+        let rules = ["Com.Apple.Notes", "com.apple.notes:A", "other.app"]
+        #expect(
+            FloatFacet.removingRules(of: "com.apple.Notes", from: rules)
+                == ["other.app"]
+        )
     }
 }

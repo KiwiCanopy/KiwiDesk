@@ -129,10 +129,9 @@ extension RuleReachTable where Value == [String] {
         return override.isEmpty ? nil : override
     }
 
-    /// The app a normalized float rule names.
+    /// The app a float rule names (`FloatRules.app(of:)`).
     public static func app(of rule: String) -> String {
-        let parts = rule.split(separator: ":", maxSplits: 1)
-        return parts.count == 2 ? String(parts[0]) : rule
+        FloatRules.app(of: rule)
     }
 
     /// A flat rule list as the table's per-app values.

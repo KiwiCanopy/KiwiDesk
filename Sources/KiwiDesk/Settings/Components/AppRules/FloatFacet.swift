@@ -7,7 +7,9 @@ import KiwiDeskCore
 /// window and `app:fragment` floats the windows whose title
 /// contains that fragment. `AppRuleTitleOffer` reads the same
 /// marker to decide whether the titled choice is offered, and
-/// `AppRuleTitleOfferTests` pins the two agreeing.
+/// `AppRuleTitleOfferTests` pins the two agreeing. A rule's app
+/// is keyed through `FloatRules.app(of:)`, the engine's own
+/// case-folded key (#2345).
 enum FloatFacet: Equatable {
     case never
     case all
@@ -21,23 +23,19 @@ enum FloatFacet: Equatable {
         rule.contains(":")
     }
 
-    /// A float rule's app segment, case-folded as `FloatRules`
-    /// keys it, so a hand-written `Com.Apple.Notes` lists against
-    /// the app the engine floats (#2345).
+    /// The app a float rule names, as the engine keys it.
     static func appSegment(of rule: String) -> String {
-        let parts = FloatRules.normalizedRule(rule)
-            .split(separator: ":", maxSplits: 1)
-        return parts.first.map(String.init) ?? ""
+        FloatRules.app(of: rule)
     }
 
     static func current(
         _ rules: [String],
         app: String
     ) -> FloatFacet {
-        let app = app.lowercased()
+        let app = FloatRules.appKey(app)
         var sawTitled = false
-        for rule in rules where appSegment(of: rule) == app {
-            if !isTitled(rule) { return .all }
+        for rule in Self.rules(rules, app: app) {
+            if FloatRules.normalizedRule(rule) == app { return .all }
             sawTitled = true
         }
         return sawTitled ? .titled : .never
@@ -47,16 +45,9 @@ enum FloatFacet: Equatable {
         _ rules: [String],
         app: String
     ) -> [String] {
-        let app = app.lowercased()
-        return rules.compactMap { rule in
-            let parts = rule.split(
-                separator: ":",
-                maxSplits: 1
-            )
-            guard parts.count == 2,
-                String(parts[0]).lowercased() == app
-            else { return nil }
-            return String(parts[1])
+        Self.rules(rules, app: app).compactMap { rule in
+            let parts = rule.split(separator: ":", maxSplits: 1)
+            return parts.count == 2 ? String(parts[1]) : nil
         }
     }
 
@@ -69,7 +60,7 @@ enum FloatFacet: Equatable {
         of app: String,
         in rules: [String]
     ) -> [String] {
-        let app = app.lowercased()
+        let app = FloatRules.appKey(app)
         let old = Self.patterns(rules, app: app)
         let dropped = Set(old.filter { !patterns.contains($0) })
         var kept = rules.filter { rule in
@@ -83,8 +74,18 @@ enum FloatFacet: Equatable {
         return kept
     }
 
+    /// `app`'s own rules, in stored order and spelling.
     static func rules(_ rules: [String], app: String) -> [String] {
-        let app = app.lowercased()
+        let app = FloatRules.appKey(app)
         return rules.filter { appSegment(of: $0) == app }
+    }
+
+    /// `rules` without any of `app`'s.
+    static func removingRules(
+        of app: String,
+        from rules: [String]
+    ) -> [String] {
+        let app = FloatRules.appKey(app)
+        return rules.filter { appSegment(of: $0) != app }
     }
 }

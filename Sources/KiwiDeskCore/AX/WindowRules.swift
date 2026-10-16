@@ -23,11 +23,23 @@ public struct FloatRules: Sendable, Equatable {
                 separator: ":",
                 maxSplits: 1
             )
-            guard parts.count == 2 else {
-                return (rule.lowercased(), nil)
-            }
-            return (String(parts[0]).lowercased(), String(parts[1]))
+            let title = parts.count == 2 ? String(parts[1]) : nil
+            return (Self.app(of: rule), title)
         }
+    }
+
+    /// The app a float rule names, case-folded: the rule itself,
+    /// or the segment before an `app:title` rule's colon — the one
+    /// key the engine, the profile reach and the Float list match
+    /// on (#2345).
+    public static func app(of rule: String) -> String {
+        let parts = rule.split(separator: ":", maxSplits: 1)
+        return appKey(parts.count == 2 ? String(parts[0]) : rule)
+    }
+
+    /// A bundle id as a float rule's app is keyed.
+    public static func appKey(_ bundleID: String) -> String {
+        bundleID.lowercased()
     }
 
     /// Canonical identity used by profile sparse diffs: bundle
