@@ -607,11 +607,11 @@ the catalogs ship rather than by script:
 - **Layout mode names follow your picker — and only the CJK
   locales translate them.** Floating, Grid, Monocle, Scrolling,
   Stack and Track are values the user types verbatim
-  (`set_mode(1, "stack")`), so the seven Latin-script locales
-  keep them English and the picker matches the value typed into
-  Lua or the CLI; `LocalizationModeNamePolicyTests` enforces
-  that. The three CJK locales render them natively — `ja`
-  モノクル, `zh-Hans` 单窗, `ko` 트랙. The one rule is **match
+  (`set_mode(1, "stack")`), so the non-CJK locales keep them
+  English and the picker matches the value typed into Lua or
+  the CLI; `LocalizationModeNamePolicyTests` enforces that. The
+  CJK locales render them natively — `ja` モノクル, `zh-Hans`
+  单窗, `zh-Hant` 單窗, `ko` 트랙. The one rule is **match
   your own picker**: if `layout.monocle.name` in your file says
   モノクル, the prose around it says モノクル too, never
   "Monocle".
