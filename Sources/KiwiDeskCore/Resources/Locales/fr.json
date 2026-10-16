@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "Disposition",
   "view_picker.line.profile": "Profil",
   "view_picker.no_match": "Aucun résultat pour « %1$@ »",
+  "view_picker.no_permission": "Nécessite l'autorisation d'Accessibilité",
   "view_picker.not_tiling": "La mosaïque n'a pas démarré",
   "view_picker.panel.ax_label": "Sélecteur de vue",
   "view_picker.profile.broken": "Chargement impossible",

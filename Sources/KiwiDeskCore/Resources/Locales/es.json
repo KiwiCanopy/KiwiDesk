@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "Diseño",
   "view_picker.line.profile": "Perfil",
   "view_picker.no_match": "Nada coincide con «%1$@»",
+  "view_picker.no_permission": "Requiere el permiso de Accesibilidad",
   "view_picker.not_tiling": "El mosaico no se ha iniciado",
   "view_picker.panel.ax_label": "Selector de vista",
   "view_picker.profile.broken": "No se puede cargar",

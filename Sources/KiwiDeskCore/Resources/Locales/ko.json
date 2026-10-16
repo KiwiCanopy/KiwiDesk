@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "레이아웃",
   "view_picker.line.profile": "프로필",
   "view_picker.no_match": "‘%1$@’에 일치하는 항목 없음",
+  "view_picker.no_permission": "손쉬운 사용 권한이 필요합니다",
   "view_picker.not_tiling": "타일 배치가 시작되지 않았습니다",
   "view_picker.panel.ax_label": "보기 선택기",
   "view_picker.profile.broken": "불러올 수 없음",

@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "Layout",
   "view_picker.line.profile": "Perfil",
   "view_picker.no_match": "Nada corresponde a “%1$@”",
+  "view_picker.no_permission": "Requer a permissão de Acessibilidade",
   "view_picker.not_tiling": "O lado a lado não foi iniciado",
   "view_picker.panel.ax_label": "Seletor de visualização",
   "view_picker.profile.broken": "Não é possível carregar",

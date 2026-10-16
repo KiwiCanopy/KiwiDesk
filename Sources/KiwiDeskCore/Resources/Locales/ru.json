@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "Раскладка",
   "view_picker.line.profile": "Профиль",
   "view_picker.no_match": "Ничего не найдено по запросу «%1$@»",
+  "view_picker.no_permission": "Требуется разрешение «Универсальный доступ»",
   "view_picker.not_tiling": "Мозаика не запущена",
   "view_picker.panel.ax_label": "Выбор вида",
   "view_picker.profile.broken": "Не удаётся загрузить",

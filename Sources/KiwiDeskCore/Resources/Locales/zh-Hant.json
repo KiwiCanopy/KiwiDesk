@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "佈局",
   "view_picker.line.profile": "描述檔",
   "view_picker.no_match": "沒有符合「%1$@」的項目",
+  "view_picker.no_permission": "需要「輔助使用」權限",
   "view_picker.not_tiling": "尚未開始並排",
   "view_picker.panel.ax_label": "檢視選擇器",
   "view_picker.profile.broken": "無法載入",

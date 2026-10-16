@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "Layout",
   "view_picker.line.profile": "Profil",
   "view_picker.no_match": "Keine Treffer für „%1$@“",
+  "view_picker.no_permission": "Benötigt die Erlaubnis für Bedienungshilfen",
   "view_picker.not_tiling": "Kachelung wurde noch nicht gestartet",
   "view_picker.panel.ax_label": "Ansichtsauswahl",
   "view_picker.profile.broken": "Kann nicht geladen werden",

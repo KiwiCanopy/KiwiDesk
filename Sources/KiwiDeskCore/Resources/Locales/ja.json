@@ -1975,6 +1975,7 @@
   "view_picker.line.layout": "レイアウト",
   "view_picker.line.profile": "プロファイル",
   "view_picker.no_match": "「%1$@」に一致する項目はありません",
+  "view_picker.no_permission": "アクセシビリティの許可が必要です",
   "view_picker.not_tiling": "タイル表示は開始されていません",
   "view_picker.panel.ax_label": "表示ピッカー",
   "view_picker.profile.broken": "読み込めません",
