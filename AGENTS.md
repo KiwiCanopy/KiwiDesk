@@ -533,8 +533,8 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   `FollowSwitchFloatRaiseTests`)
 - a commanded focus onto another window owes the float-tier raise at the
   command, since its report is our own echo, OWED while `tiledPlaneMoving`
-  and paid at rest, a direct raise superseding it (#2284,
-  `CommandedFocusFloatRaiseTests`)
+  and paid at rest through the one `tiledPlaneCameToRest`, a direct raise
+  superseding it (#2284, #2343, `CommandedFocusFloatRaiseTests`)
 - a mutation that changes which windows overlap arms the matching z-order
   restore after its own retile, and narrowly (#674) — and a removal whose
   close-return raise stood down arms no track restore either, the one
@@ -1441,7 +1441,8 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   `KiwiCore.updateBars()`, never a single-bar sync (`ShelfArrangementTests`,
   `ShelfDriverTests`, `ShelfGeometryTests`, `ShelfNeedParityTests`), standing
   down through the one `shelfStandsDown(on:)` — native fullscreen or a
-  presentation in front (#1787, `ShelfStandDownSeamTests`)
+  presentation in front, the cues through it too (#1787, #2348,
+  `ShelfStandDownSeamTests`)
 - an overlay skips a show whose input repeats, so a draw-time read joins the
   one `BarDrawEnvironment` and a path leaving views where a redraw of the same
   input would not put them (the App Bar drop) invalidates its overlay, and app

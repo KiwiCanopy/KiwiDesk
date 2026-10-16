@@ -91,19 +91,34 @@ struct FloatRaiseLandingWiringTests {
         #expect(!order.contains(nil), "door pays all three")
         let found = order.compactMap { $0 }
         #expect(found == found.sorted(), "door pays in order")
-        // The payer is spelled at the door alone.
-        var payers: [String: Int] = [:]
-        for url in try SourceScan.swiftSources(under: core) {
-            let source = try SourceScan.strippedSource(at: url)
-            let hits =
-                source.components(separatedBy: "runPendingFloatRaise(")
-                .count - 1
-            if hits > 0 { payers[url.lastPathComponent] = hits }
+        // Every payer is spelled at its declaration and the door —
+        // so a new rest site that runs a restore but forgets the
+        // float raise reds here — save two ruled non-rest runs:
+        // `scheduleZOrderRestore` with nothing moving (its drain
+        // pays through the door at completion) and `focusWindow`'s
+        // immediate deferred raise with no pan (the command
+        // schedules the float raise itself).
+        let allowed: [String: [String: Int]] = [
+            "runPendingFloatRaise(": ["KiwiCore+FloatRaiseDebt.swift": 2],
+            "runPendingZOrderRestore(": [
+                "KiwiCore+FloatRaiseDebt.swift": 1,
+                "KiwiCore+ZOrder.swift": 2,
+            ],
+            "runPendingFocusRaise(": [
+                "KiwiCore+FloatRaiseDebt.swift": 1,
+                "KiwiCore+FocusRaise.swift": 2,
+            ],
+        ]
+        let sources = try SourceScan.swiftSources(under: core)
+        for (payer, homes) in allowed {
+            var found: [String: Int] = [:]
+            for url in sources {
+                let source = try SourceScan.strippedSource(at: url)
+                let hits = source.components(separatedBy: payer).count - 1
+                if hits > 0 { found[url.lastPathComponent] = hits }
+            }
+            #expect(found == homes, "\(payer) spelled in \(found)")
         }
-        #expect(
-            payers == ["KiwiCore+FloatRaiseDebt.swift": 2],
-            "the float raise is paid beside the door: \(payers)"
-        )
         // Each rest site takes the door with its own payments.
         let rests = [
             (
@@ -133,6 +148,17 @@ struct FloatRaiseLandingWiringTests {
             ).filter { !$0.isWhitespace }
             #expect(source.contains(needle), "\(file)")
         }
+        // The settle's payment sits in the settle itself.
+        let settle = try SourceScan.functionBody(
+            of: "animationsDidSettle",
+            in: "KiwiCore+Settle.swift",
+            under: "App"
+        ).filter { !$0.isWhitespace }
+        #expect(
+            settle.contains(
+                "tiledPlaneCameToRest(restore:true,focusRaise:true)"
+            )
+        )
         let restoreSequence = try SourceScan.functionBody(
             of: "raiseSequentially",
             in: "KiwiCore+ZOrder.swift",
