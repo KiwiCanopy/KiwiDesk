@@ -48,6 +48,16 @@ struct LayoutCycleModelTests {
         #expect(model.sidecarConfig.modeCycle == ModeCycle.defaultList)
     }
 
+    /// The row reads the draft's tick back before any Save, so the
+    /// checklist shows what the user ticked (#2342).
+    @Test("a tick shows in the row before the Save")
+    func tickReadsBack() throws {
+        let model = try makeModel()
+        model.setProfile(.cycle, key, "Home", true)
+        let row = try #require(model.cycleReach())
+        #expect(row.users == ["Work", "Home"])
+    }
+
     @Test("ticking Home writes Work's list into Home's file")
     func tickHome() throws {
         let model = try makeModel()

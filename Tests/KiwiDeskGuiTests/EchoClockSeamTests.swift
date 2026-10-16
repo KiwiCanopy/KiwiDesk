@@ -174,7 +174,6 @@ struct EchoClockSeamTests {
         "CrashRecovery.swift": 1,  // seam
         "LogExport.swift": 2,  // param
         "PendingSpaceAssignment.swift": 2,  // param
-        "FollowFocusIntent.swift": 3,  // param
         "LaunchFollowIntent.swift": 1,  // param
         "KiwiCore+LaunchFollow.swift": 3,  // param
         "MoveIntentLatch.swift": 2,  // param
@@ -242,5 +241,30 @@ struct EchoClockSeamTests {
             seam.occurrences(of: "var wallClock: () -> Date = Date.init")
                 == 1
         )
+    }
+
+    /// Both arrival debts age on the core's wall clock (#2341): a
+    /// `FollowFocusIntent` left on its `Date.init` default reads the
+    /// host clock, and a test reading the debt after a stalled turn
+    /// sees it expire.
+    @Test("both arrival debts are wired to the wall clock")
+    func arrivalDebtsAgeOnTheWallClock() throws {
+        let bootstrap = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
+            )
+        )
+        for wiring in [
+            "followFocus.clock = { [weak self] in",
+            "desktopMemory.returnFocus.clock = { [weak self] in",
+        ] {
+            #expect(bootstrap.occurrences(of: wiring) == 1, "\(wiring)")
+        }
+        let intent = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/FollowFocusIntent.swift"
+            )
+        )
+        #expect(intent.occurrences(of: "now ?? clock()") == 2)
     }
 }

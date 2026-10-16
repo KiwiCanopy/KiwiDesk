@@ -223,6 +223,13 @@ extension KiwiCore {
         eventLoop.wallClock = { [weak self] in
             self?.wallClock() ?? .distantPast
         }
+        // Both arrival debts age on it too (#2341).
+        followFocus.clock = { [weak self] in
+            self?.wallClock() ?? .distantPast
+        }
+        desktopMemory.returnFocus.clock = { [weak self] in
+            self?.wallClock() ?? .distantPast
+        }
         eventLoop.onRemovalEpisodesEnded = { [weak self] ids in
             self?.retireDelayedClose(touching: ids, why: "re-listed")
         }
