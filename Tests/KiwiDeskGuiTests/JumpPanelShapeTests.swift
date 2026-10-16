@@ -166,10 +166,19 @@ struct JumpPanelShapeTests {
                 encoding: .utf8
             )
         )
+        let footerFile = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/JumpPanelView+Footer.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
         // Asked of the footer's own call: the rows read the same
         // flag for their way-here column.
-        let footer = try #require(view.range(of: "JumpFooter("))
-        let call = view[footer.lowerBound...].prefix(260)
+        let footer = try #require(footerFile.range(of: "JumpFooter("))
+        let call = footerFile[footer.lowerBound...].prefix(260)
         #expect(call.contains("modifiers: model.heldModifiers"))
         #expect(call.contains("hasSelection: model.hasSelection"))
         // The field shows only the typing: its placeholder always,

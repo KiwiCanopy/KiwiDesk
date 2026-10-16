@@ -206,56 +206,78 @@ struct ShortcutsPanelScrollCueTests {
         #expect(!JumpShortcutsView.overflows(content: 519.5, cap: 520))
     }
 
-    /// The cue is MOUNTED, gated, and draws its own string.
+    /// The cue is MOUNTED, gated, and draws its own string — in
+    /// the panel's footer row, where the side's buttons stand.
     ///
-    /// Keyed on the footer's own body for the mount — a private
-    /// computed property nothing renders compiles silently, and
-    /// the band one suite over went missing from the screen with
-    /// every builder expectation green
+    /// Keyed on the footer row's own body for the mount — a
+    /// private computed property nothing renders compiles
+    /// silently, and the band one suite over went missing from the
+    /// screen with every builder expectation green
     /// (`ShortcutsInactiveBandTests` ▸ `theViewDrawsTheBand`).
-    /// The GATE is asked of the file rather than of `scrollCue`:
-    /// moving the `if` up into the footer honours the invariant
-    /// exactly, and pinning one spelling billed a false red for
-    /// it (`guard-prover`, 2026-09-07).
+    /// The GATE is asked of the file rather than of one spelling,
+    /// which billed a false red once (`guard-prover`, 2026-09-07).
     @Test("the cue is mounted, gated, and drawn")
     func theCueIsMountedGatedAndDrawn() throws {
-        let text = try Self.source("JumpShortcutsView.swift")
-        let buttons = try #require(
+        let text = try Self.source("JumpPanelChrome.swift")
+        let row = try #require(
             SourceScan.declarationBody(
-                after: "private var buttons",
+                after: "func row(",
                 in: text
             ),
-            "buttons not found"
+            "the footer row not found"
         )
         #expect(
-            buttons.contains("scrollCue"),
-            "the button row does not mount the cue"
+            row.contains("scrollHint"),
+            "the footer row does not mount the cue"
         )
         #expect(
-            text.contains("if Self.overflows("),
+            row.contains("if overflows"),
             "the cue is drawn ungated"
         )
         #expect(
             text.contains("shortcuts.panel.scroll_hint"),
             "the cue does not draw its own string"
         )
+        // The Shortcuts side draws its cue in the leading slot, gated
+        // on the side's own verdict.
+        let footer = try Self.source("JumpPanelView+Footer.swift")
+        let leading = try #require(
+            SourceScan.declarationBody(
+                after: "private var footerLeading",
+                in: footer
+            ),
+            "footerLeading not found"
+        )
+        #expect(leading.contains("if footerOverflows"))
+        #expect(leading.contains("JumpFooter.scrollHint(for: .shortcuts)"))
+        #expect(leading.contains("JumpScrollCue(text: cue)"))
     }
 
     /// The verdict READS the measured sheet against its cap.
     /// Proven arithmetic whose inputs are constants is the #1292
     /// defect back verbatim (`guard-prover`, 2026-09-07). Counted
     /// on both sides, so deleting the wiring reds as loudly as
-    /// duplicating it.
+    /// duplicating it: the sheet reports its height, the panel
+    /// reads it, and the footer asks the verdict of it.
     @Test("the verdict reaches the view")
     func theVerdictReachesTheView() throws {
-        let text = try Self.source("JumpShortcutsView.swift")
-        for needle in [
-            "Self.overflows(content: contentHeight, cap: maxHeight)",
+        let sheet = try Self.source("JumpShortcutsView.swift")
+        let panel = try Self.source("JumpPanelView.swift")
+        let footer = try Self.source("JumpPanelView+Footer.swift")
+        for (text, needle) in [
             // The writer as well as the reader: without it the
             // height stays 0 and the cue never shows.
-            "key: SheetHeightKey.self",
-            "onPreferenceChange(SheetHeightKey.self)",
-            ".frame(maxHeight: maxHeight)",
+            (sheet, "key: SheetHeightKey.self"),
+            (sheet, ".frame(maxHeight: maxHeight)"),
+            (
+                panel,
+                "onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }"
+            ),
+            (footer, "JumpShortcutsView.overflows("),
+            // Computed and handed on, never computed and dropped.
+            (footer, "overflows: footerOverflows,"),
+            (footer, "content: sheetHeight"),
+            (footer, "cap: model.sheetCap"),
         ] {
             #expect(
                 text.occurrences(of: needle) == 1,

@@ -9739,6 +9739,20 @@ because a laptop was undocked, which is routine and temporary;
 reshuffling rows to the bottom of the page on every undock
 reports a normal state as debris.
 
+:::unreleased
+**KiwiHub's Shortcuts side lifts those rows out instead**, into
+an Unavailable shortcuts band at the end of its column (owner
+ruling 2026-10-16). The reason Settings keeps them in place is
+that Settings is an editor: a row stays where its catalog puts
+it so it can be rebound there. The hub is a read-only list of
+what a key does now, so a group that mixes working keys with
+keys that do nothing answers its one question wrongly. The band
+is not the Inactive one, for the first reason above — its
+caption promises the key still fires — and it takes the caption
+Settings puts over the same rows, so both surfaces say the same
+thing about them.
+:::
+
 **Config presence expands the Simple surface.** The simple
 mode is not a smaller product, it is a smaller *offer*. Anything
 already in the user's config — a shortcut layer, an imported Lua
@@ -11175,8 +11189,9 @@ leads Apps, which is KiwiDesk's own app row, rather than standing
 alone in a one-row group. The panel holds one fixed width, 720 pt,
 since a width that changed on ⇥ would move the field and the
 switch under the eye; only the height follows each side, its top
-fixed at the field, under one ceiling of 400 pt on every side
-(#2309, owner ruling 2026-10-15). A glance panel stays compact,
+fixed at the field, under one ceiling of 452 pt on every side
+(#2309, owner rulings 2026-10-15 and 2026-10-16 — raised from
+400 so a roomier footer row costs the Shortcuts sheet nothing). A glance panel stays compact,
 as Spotlight's fixed height does, and a sheet that grew to the
 screen's bottom read as a window rather than a launcher; the
 Shortcuts sheet scrolls past the ceiling, cued in words, and the

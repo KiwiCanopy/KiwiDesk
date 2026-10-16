@@ -40,6 +40,9 @@ struct ViewChip: View {
         HStack(alignment: .firstTextBaseline, spacing: 0) {
             Text(verbatim: number.map { "⌘\($0)" } ?? "")
                 .font(.system(size: 11).monospacedDigit())
+                // One line even in the half slot it rests in, or
+                // the hidden number wraps and pads the chip.
+                .lineLimit(1)
                 .foregroundStyle(secondaryInk)
                 .opacity(badgeShown ? 1 : 0)
                 .frame(
@@ -48,7 +51,9 @@ struct ViewChip: View {
                 )
                 .accessibilityHidden(true)
             label
-            Color.clear.frame(width: badgeShown ? 0 : Self.slot / 2)
+            // Zero height: a bare `Color` takes all the height it is
+            // offered and sinks the baseline-aligned name with it.
+            Color.clear.frame(width: badgeShown ? 0 : Self.slot / 2, height: 0)
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 3)

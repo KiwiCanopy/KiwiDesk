@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The shortcuts sheet (#326, #820) as the key panel's Shortcuts
-/// side draws it (#2246): one titled column — each Controls group,
-/// then Apps, Custom and Inactive last. Section titles are the one
-/// heading level, and a section the query empties is dropped.
+/// side draws it (#2246): one titled column — each Controls
+/// group, then Apps, Custom, Inactive and Unavailable last.
+/// Section titles are the one heading level, and a section the
+/// query empties is dropped.
 struct ShortcutsSheetView: View {
     /// What the sheet shows; nil where `init.lua` owns the
     /// shortcuts.
@@ -32,7 +33,11 @@ struct ShortcutsSheetView: View {
     struct Section {
         let title: String
         let rows: [ShortcutRow]
-        var inactive = false
+        /// What the whole list has in common, under the title.
+        var caption: String? = nil
+        /// Whether the section dims its rows; an unavailable row
+        /// dims itself.
+        var dims = false
     }
 
     /// The column's sections, in reading order.
@@ -59,7 +64,18 @@ struct ShortcutsSheetView: View {
                     "Inactive shortcuts"
                 ),
                 rows: reference.inactive,
-                inactive: true
+                caption: inactiveCaption,
+                dims: true
+            )
+        )
+        out.append(
+            Section(
+                title: L(
+                    "shortcuts.section.unavailable",
+                    "Unavailable shortcuts"
+                ),
+                rows: reference.desktopAway,
+                caption: KeybindingCatalog.desktopAwayCaption
             )
         )
         return out.filter { !$0.rows.isEmpty }
@@ -74,8 +90,8 @@ struct ShortcutsSheetView: View {
                 .padding(.bottom, 2)
             // A filtered row's dimming and hint already say it; the
             // caption is for the whole list.
-            if section.inactive, needle.isEmpty {
-                Text(inactiveCaption)
+            if let caption = section.caption, needle.isEmpty {
+                Text(caption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 4)
@@ -84,7 +100,7 @@ struct ShortcutsSheetView: View {
                 ShortcutRowView(row: row)
                     .frame(height: 26)
             }
-            .opacity(section.inactive ? 0.6 : 1)
+            .opacity(section.dims ? 0.6 : 1)
         }
         .padding(.top, first ? 0 : 16)
     }

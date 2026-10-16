@@ -2,9 +2,13 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The panel's static key hints for its scope — hidden from
-/// VoiceOver, whose row actions say the same (#1875 ▸ footer).
+/// VoiceOver, whose row actions say the same (#1875 ▸ footer);
+/// the scroll cue is spoken. Short of room, it sheds hints from
+/// the end, then truncates the scroll cue; a hint keeps its index,
+/// so the lit one stays lit while it is shown.
 struct JumpFooter: View {
     let scope: JumpScope
+    /// Whether the side runs past what it shows.
     let overflows: Bool
     /// The modifiers held now, which decide the one lit hint.
     var modifiers: NSEvent.ModifierFlags = []
@@ -15,17 +19,32 @@ struct JumpFooter: View {
     var quickCount = 9
 
     var body: some View {
-        HStack(spacing: 8) {
-            // Worded rather than positional, so it stays true at
-            // any scroll offset — the shortcuts panel's cue (#1292).
-            if overflows, scope == .windows {
-                HStack(spacing: 4) {
-                    Image(systemName: "chevron.down")
-                    Text(JumpRowText.scrollHint)
-                }
-                Text(verbatim: "·")
+        let hints = hints
+        ViewThatFits(in: .horizontal) {
+            ForEach((0...hints.count).reversed(), id: \.self) {
+                row(Array(hints.prefix($0)))
             }
-            ForEach(Array(hints.enumerated()), id: \.offset) { index, hint in
+            // Past every candidate the cue truncates rather than
+            // spill onto the side's controls.
+            row([], fixed: false)
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+    }
+
+    /// One candidate line: the scroll cue, then `shown`; a line
+    /// that is not `fixed` truncates to the room it is given.
+    func row(_ shown: [String], fixed: Bool = true) -> some View {
+        HStack(spacing: 8) {
+            // The Shortcuts side draws its cue in the leading slot.
+            if overflows, scope != .shortcuts, let cue = scrollHint {
+                JumpScrollCue(text: cue)
+                if !shown.isEmpty {
+                    Text(verbatim: "·").accessibilityHidden(true)
+                }
+            }
+            ForEach(Array(shown.enumerated()), id: \.offset) { index, hint in
                 if index > 0 { Text(verbatim: "·") }
                 Text(hint)
                     .foregroundStyle(
@@ -34,13 +53,26 @@ struct JumpFooter: View {
                             : AnyShapeStyle(.secondary)
                     )
             }
+            .accessibilityHidden(true)
         }
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 7)
-        .accessibilityHidden(true)
+        .fixedSize(horizontal: fixed, vertical: false)
+    }
+
+    /// The side's scroll cue; the View side never scrolls.
+    var scrollHint: String? { Self.scrollHint(for: scope) }
+
+    static func scrollHint(for scope: JumpScope) -> String? {
+        switch scope {
+        case .windows:
+            return JumpRowText.scrollHint
+        case .shortcuts:
+            return L(
+                "shortcuts.panel.scroll_hint",
+                "Scroll for more shortcuts"
+            )
+        case .view:
+            return nil
+        }
     }
 }
 
@@ -99,10 +131,9 @@ extension JumpFooter {
                 other,
             ]
         case .shortcuts:
-            return [
-                L("shortcuts.footer.edit", "%1$@ Edit", "⌘,"),
-                other,
-            ]
+            // Edit in Settings… stands beside the hints with its
+            // own chord.
+            return [other]
         case .view:
             let digits = quickCount > 1 ? "⌘1–\(quickCount)" : "⌘1"
             let apply = L("layout_picker.footer.apply", "%1$@ Apply", "↩")
@@ -115,6 +146,20 @@ extension JumpFooter {
             return quickCount > 0
                 ? [apply, quick, ViewPickText.lineHint("↑↓"), other]
                 : [apply, ViewPickText.lineHint("↑↓"), other]
+        }
+    }
+}
+
+/// A side's scroll cue, worded rather than positional so it stays
+/// true at any scroll offset (#1292); spoken, its chevron silent.
+struct JumpScrollCue: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "chevron.down")
+                .accessibilityHidden(true)
+            Text(text)
         }
     }
 }

@@ -91,8 +91,10 @@ struct ShortcutFoldTests {
         }
         let live = rows(build(bindings, desktops: [1, 2, 3]))
         #expect(live.map(\.label) == ["Go to Desktop 1–3"])
+        // The away row leaves for the Unavailable band, and the two
+        // left behind are no run.
         let away = rows(build(bindings, desktops: [1, 3]))
-        #expect(away.count == 3)
+        #expect(away.map(\.label) == ["Go to Desktop 1", "Go to Desktop 3"])
     }
 
     /// The digit is judged by key code, so a layout whose number

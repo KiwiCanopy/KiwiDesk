@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import SwiftUI
 
 /// KiwiHub's size (#1875 ▸ Panel): one fixed ceiling on every
 /// side, the panel following each side's content beneath it.
@@ -41,8 +42,8 @@ extension JumpPanelController {
 
     /// The Shortcuts side's tallest sheet: the panel runs from its
     /// field down to 40 pt above the clear area's bottom, never
-    /// taller than `maxPanelHeight`, less the field, the button row
-    /// and the footer (#2246).
+    /// taller than `maxPanelHeight`, less the field and the footer
+    /// row (#2246).
     static func sheetCap(visible: CGRect, area: CGRect) -> CGFloat {
         let top = visible.maxY - visible.height * topFraction
         let below = top - area.minY - 40
@@ -51,11 +52,18 @@ extension JumpPanelController {
 
     /// The tallest the panel stands on any side: compact, as
     /// Spotlight is, the Shortcuts sheet scrolling past it (#2309).
-    static let maxPanelHeight: CGFloat = 400
+    /// Room for the Windows side's nine rows under the footer row,
+    /// and two more Shortcuts rows than 400 gave.
+    static let maxPanelHeight: CGFloat = 452
 
     /// What the Shortcuts side draws besides its sheet: the field,
-    /// the button row, the footer and their dividers.
-    static let shortcutsChrome: CGFloat = 130
+    /// the footer row and their two dividers.
+    static var shortcutsChrome: CGFloat {
+        JumpPanelView.fieldHeight + 2
+            + JumpFooterRow<EmptyView, EmptyView>.height(
+                carriesControls: true
+            )
+    }
 
     /// The panel's width: `JumpPanelView.width`, kept 40 pt clear
     /// of each edge of a narrower screen.

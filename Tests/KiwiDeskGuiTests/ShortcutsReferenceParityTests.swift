@@ -21,7 +21,10 @@ struct ShortcutsReferenceParityTests {
         )
         let names = Mirror(reflecting: reference).children.compactMap(\.label)
         #expect(
-            names == ["layerName", "controls", "inactive", "apps", "custom"],
+            names == [
+                "layerName", "controls", "inactive", "desktopAway",
+                "apps", "custom",
+            ],
             Comment(
                 rawValue: "a new section must join isEmpty, the filter, "
                     + "the count and the column"
