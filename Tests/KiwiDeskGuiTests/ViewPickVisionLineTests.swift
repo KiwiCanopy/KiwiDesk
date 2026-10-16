@@ -207,6 +207,9 @@ struct ViewPickVisionLineTests {
                     + "{takeAddRequest()}"
             )
         )
+        // A landing opens the one add door, a turn later.
+        #expect(strip.contains("DispatchQueue.main.async{openAdd()}"))
+        #expect(strip.contains("Button(action:openAdd)"))
         #expect(
             strip.contains(
                 "adding=NameEditRequest(seed:\"\",subject:\"\")"
