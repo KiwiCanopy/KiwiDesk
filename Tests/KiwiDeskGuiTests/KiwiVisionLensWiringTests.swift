@@ -109,6 +109,24 @@ struct KiwiVisionLensWiringTests {
         #expect(core.contains("kiwiVisionShowsDark(for:visionLook)"))
     }
 
+    /// Clear after and the Reminder grey through `GreyOut`, which
+    /// dims the row: a bare `.disabled` leaves a field showing only
+    /// its placeholder looking live.
+    @Test("Other apps' gated rows dim, not only disable")
+    func gatedRowsDim() throws {
+        let card = try Self.squashed(
+            Self.dir + "KiwiVisionLensOtherAppsCard.swift"
+        )
+        #expect(
+            card.contains("delayRow.modifier(GreyOut(active:!lens.keepFocus))")
+        )
+        #expect(
+            card.contains(
+                "reminderRow.modifier(GreyOut(active:!remindsAtAll))"
+            )
+        )
+    }
+
     /// Every lens override has a row: a field added to
     /// `VisionLens.Overrides` resolves and saves, and without this
     /// would have no row on the page.
