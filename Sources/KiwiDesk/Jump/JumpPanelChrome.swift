@@ -31,21 +31,15 @@ struct JumpFooter: View {
         .font(.caption)
         .foregroundStyle(.secondary)
         .lineLimit(1)
-        .padding(.vertical, 7)
     }
 
     /// One candidate line: the scroll cue, then `shown`; a line
     /// that is not `fixed` truncates to the room it is given.
     func row(_ shown: [String], fixed: Bool = true) -> some View {
         HStack(spacing: 8) {
-            // Worded rather than positional, so it stays true at
-            // any scroll offset — the shortcuts panel's cue (#1292).
-            if overflows, let cue = scrollHint {
-                HStack(spacing: 4) {
-                    Image(systemName: "chevron.down")
-                        .accessibilityHidden(true)
-                    Text(cue)
-                }
+            // The Shortcuts side draws its cue in the leading slot.
+            if overflows, scope != .shortcuts, let cue = scrollHint {
+                JumpScrollCue(text: cue)
                 if !shown.isEmpty {
                     Text(verbatim: "·").accessibilityHidden(true)
                 }
@@ -65,7 +59,9 @@ struct JumpFooter: View {
     }
 
     /// The side's scroll cue; the View side never scrolls.
-    var scrollHint: String? {
+    var scrollHint: String? { Self.scrollHint(for: scope) }
+
+    static func scrollHint(for scope: JumpScope) -> String? {
         switch scope {
         case .windows:
             return JumpRowText.scrollHint
@@ -150,6 +146,20 @@ extension JumpFooter {
             return quickCount > 0
                 ? [apply, quick, ViewPickText.lineHint("↑↓"), other]
                 : [apply, ViewPickText.lineHint("↑↓"), other]
+        }
+    }
+}
+
+/// A side's scroll cue, worded rather than positional so it stays
+/// true at any scroll offset (#1292); spoken, its chevron silent.
+struct JumpScrollCue: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "chevron.down")
+                .accessibilityHidden(true)
+            Text(text)
         }
     }
 }

@@ -238,6 +238,19 @@ struct ShortcutsPanelScrollCueTests {
             text.contains("shortcuts.panel.scroll_hint"),
             "the cue does not draw its own string"
         )
+        // The Shortcuts side draws its cue in the leading slot, gated
+        // on the side's own verdict.
+        let footer = try Self.source("JumpPanelView+Footer.swift")
+        let leading = try #require(
+            SourceScan.declarationBody(
+                after: "private var footerLeading",
+                in: footer
+            ),
+            "footerLeading not found"
+        )
+        #expect(leading.contains("if footerOverflows"))
+        #expect(leading.contains("JumpFooter.scrollHint(for: .shortcuts)"))
+        #expect(leading.contains("JumpScrollCue(text: cue)"))
     }
 
     /// The verdict READS the measured sheet against its cap.

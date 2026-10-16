@@ -10,7 +10,7 @@ struct JumpFooterMidline: Layout {
     var spacing: CGFloat
 
     /// The most a control may take before it truncates.
-    static let controlShare: CGFloat = 0.4
+    static let controlShare: CGFloat = 0.5
 
     /// The room between the controls, each control with its gap; an
     /// absent control (zero wide) takes no gap.

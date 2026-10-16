@@ -96,19 +96,27 @@ struct JumpFooterFitTests {
         }
     }
 
-    /// A layer named as layers are keeps the whole cue; a name at
-    /// the chip's cap truncates in the chip, and the cue after it
-    /// (`shapeIsWired`'s truncating fallback).
+    /// The cue stands whole in the leading slot, and leaves the
+    /// centred hints their first one, in every language.
     @Test("the Shortcuts side keeps its scroll cue in every language")
     func shortcutsKeepItsCue() throws {
         defer { LocalizationManager.shared.select("en") }
+        typealias Row = JumpFooterRow<EmptyView, EmptyView>
+        let rowWidth = JumpPanelView.width - 2 * Row.inset
         for code in try Self.locales() {
             LocalizationManager.shared.select(code)
-            let footer = JumpFooter(scope: .shortcuts, overflows: true)
+            let text = try #require(JumpFooter.scrollHint(for: .shortcuts))
+            let cue = width(JumpScrollCue(text: text).font(.caption))
+            #expect(cue > 0, "\(code)")
+            #expect(
+                cue <= rowWidth * JumpFooterMidline.controlShare,
+                "\(code): cue \(cue) pt passes the slot"
+            )
             let capped = width(JumpLayerLabel(name: Self.layer), cap: 280)
             #expect(capped <= 280, "\(code): the layer chip passes its cap")
+            let footer = JumpFooter(scope: .shortcuts, overflows: true)
             let room = room(
-                leading: width(JumpLayerLabel(name: "Navigation")),
+                leading: cue,
                 trailing: width(
                     button(
                         L(
@@ -119,11 +127,8 @@ struct JumpFooterFitTests {
                     )
                 )
             )
-            let cue = width(footer.row([]))
-            // The row drawn is the cue itself, not an empty one.
-            let text = try #require(footer.scrollHint)
-            #expect(cue >= width(Text(text).font(.caption)), "\(code)")
-            #expect(cue <= room, "\(code): cue \(cue) pt in \(room) pt")
+            let first = width(footer.row(Array(footer.hints.prefix(1))))
+            #expect(first <= room, "\(code): \(first) pt in \(room) pt")
         }
     }
 
@@ -188,9 +193,9 @@ struct JumpFooterFitTests {
     }
 
     /// `shortcutsChrome` states what the Shortcuts side draws
-    /// besides its sheet; the field, two dividers and the footer
-    /// row with its button must fit inside it, with little to
-    /// spare, or the sheet's cap is measured against a fiction.
+    /// besides its sheet, derived from the footer row's height; the
+    /// field, two dividers and the drawn row must match it, or the
+    /// sheet's cap is measured against a fiction.
     @Test("the Shortcuts chrome allowance matches what is drawn")
     func chromeMatchesTheDrawing() {
         LocalizationManager.shared.select("en")
@@ -203,8 +208,10 @@ struct JumpFooterFitTests {
             JumpPanelView.fieldHeight + 2
             + size(row, width: JumpPanelView.width).height
         let allowed = JumpPanelController.shortcutsChrome
-        #expect(drawn <= allowed, "draws \(drawn) pt over \(allowed)")
-        #expect(drawn > allowed - 16, "draws \(drawn) pt of \(allowed)")
+        #expect(
+            abs(drawn - allowed) < 1,
+            "draws \(drawn) pt, allows \(allowed)"
+        )
     }
 
     /// The hints share one centre on every side while they fit, and

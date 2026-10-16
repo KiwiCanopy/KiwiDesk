@@ -11189,8 +11189,9 @@ leads Apps, which is KiwiDesk's own app row, rather than standing
 alone in a one-row group. The panel holds one fixed width, 720 pt,
 since a width that changed on ⇥ would move the field and the
 switch under the eye; only the height follows each side, its top
-fixed at the field, under one ceiling of 400 pt on every side
-(#2309, owner ruling 2026-10-15). A glance panel stays compact,
+fixed at the field, under one ceiling of 452 pt on every side
+(#2309, owner rulings 2026-10-15 and 2026-10-16 — raised from
+400 so a roomier footer row costs the Shortcuts sheet nothing). A glance panel stays compact,
 as Spotlight's fixed height does, and a sheet that grew to the
 screen's bottom read as a window rather than a launcher; the
 Shortcuts sheet scrolls past the ceiling, cued in words, and the

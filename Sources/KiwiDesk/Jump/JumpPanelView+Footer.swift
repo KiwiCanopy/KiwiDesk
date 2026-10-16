@@ -39,10 +39,21 @@ extension JumpPanelView {
         case .windows:
             EmptyView()
         case .shortcuts:
-            if let name = model.shortcuts?.reference?.layerName,
-                name != KeyLayer.defaultName
-            {
-                JumpLayerLabel(name: name)
+            // The scroll cue reads first, beside the active layer.
+            HStack(spacing: 8) {
+                if let name = model.shortcuts?.reference?.layerName,
+                    name != KeyLayer.defaultName
+                {
+                    JumpLayerLabel(name: name)
+                }
+                if footerOverflows,
+                    let cue = JumpFooter.scrollHint(for: .shortcuts)
+                {
+                    JumpScrollCue(text: cue)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
         case .view:
             let line = model.view?.selection?.line ?? .layout
@@ -95,6 +106,8 @@ struct JumpFooterRow<Leading: View, Trailing: View>: View {
 
     static var spacing: CGFloat { 12 }
     static var inset: CGFloat { KeyPanelStyle.selectionInset + 10 }
+    /// One height on every side, so ⇥ never changes the panel's.
+    static var height: CGFloat { 40 }
 
     var body: some View {
         // Each side is one subview even where it draws nothing.
@@ -104,6 +117,7 @@ struct JumpFooterRow<Leading: View, Trailing: View>: View {
             ZStack { trailing }
         }
         .padding(.horizontal, Self.inset)
+        .frame(height: Self.height)
     }
 }
 
