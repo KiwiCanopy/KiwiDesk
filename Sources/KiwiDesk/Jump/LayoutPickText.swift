@@ -35,8 +35,19 @@ enum LayoutPickText {
         )
     }
 
-    static func keep(_ profile: String) -> String {
-        L("layout_picker.keep", "Keep in Profile “%1$@”", profile)
+    /// The Keep button: one width whatever the profile is called,
+    /// the profile itself named in its hint.
+    static var keep: String {
+        L("layout_picker.keep_in_profile", "Keep in Profile")
+    }
+
+    /// Keep's tooltip and VoiceOver hint: the profile it writes.
+    static func keepHint(_ profile: String) -> String {
+        L(
+            "layout_picker.keep_hint",
+            "Keeps this layout in “%1$@”.",
+            profile
+        )
     }
 
     /// Why Keep is greyed, for VoiceOver.

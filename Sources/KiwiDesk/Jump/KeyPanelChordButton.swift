@@ -14,6 +14,8 @@ struct KeyPanelChordButton: View {
     /// as the widest and centres the one it shows, so a title change
     /// moves nothing beside it.
     var reserves: [Label] = []
+    /// The pointer's tooltip, where the title leaves something out.
+    var help: String? = nil
     let action: () -> Void
 
     struct Label: Hashable {
@@ -42,6 +44,7 @@ struct KeyPanelChordButton: View {
         .focusable(false)
         .accessibilityLabel(title)
         .accessibilityHint(hint ?? LayoutPickText.chordHint(chord))
+        .help(help ?? "")
     }
 
     private func titleRow(_ label: Label) -> some View {

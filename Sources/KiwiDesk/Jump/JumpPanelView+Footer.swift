@@ -72,9 +72,12 @@ extension JumpPanelView {
                 let profile = layout.profile
             {
                 KeyPanelChordButton(
-                    title: LayoutPickText.keep(profile),
+                    title: LayoutPickText.keep,
                     chord: "⌘S",
-                    hint: layout.keepArmed ? nil : LayoutPickText.keepSaved
+                    hint: layout.keepArmed
+                        ? LayoutPickText.keepHint(profile)
+                        : LayoutPickText.keepSaved,
+                    help: LayoutPickText.keepHint(profile)
                 ) { model.handle(.keep) }
                 .disabled(!layout.keepArmed)
             }
@@ -82,11 +85,9 @@ extension JumpPanelView {
     }
 }
 
-/// The footer row's shape: the side's controls are sized first
-/// and the hints take what is left, shedding from the end where a
-/// locale's controls leave them too little room. The controls are
-/// prioritised rather than fixed, so the layer chip still
-/// truncates at its own cap.
+/// The footer row's shape: the side's controls at its edges and the
+/// hints on the panel's midline (`JumpFooterMidline`), shedding from
+/// the end where a locale's controls leave them too little room.
 struct JumpFooterRow<Leading: View, Trailing: View>: View {
     let footer: JumpFooter
     @ViewBuilder let leading: Leading
@@ -96,10 +97,11 @@ struct JumpFooterRow<Leading: View, Trailing: View>: View {
     static var inset: CGFloat { KeyPanelStyle.selectionInset + 10 }
 
     var body: some View {
-        HStack(spacing: Self.spacing) {
-            leading.layoutPriority(1)
+        // Each side is one subview even where it draws nothing.
+        JumpFooterMidline(spacing: Self.spacing) {
+            ZStack { leading }
             footer
-            trailing.layoutPriority(1)
+            ZStack { trailing }
         }
         .padding(.horizontal, Self.inset)
     }

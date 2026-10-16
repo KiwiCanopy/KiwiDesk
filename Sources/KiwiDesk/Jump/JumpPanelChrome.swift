@@ -31,7 +31,6 @@ struct JumpFooter: View {
         .font(.caption)
         .foregroundStyle(.secondary)
         .lineLimit(1)
-        .frame(maxWidth: .infinity)
         .padding(.vertical, 7)
     }
 

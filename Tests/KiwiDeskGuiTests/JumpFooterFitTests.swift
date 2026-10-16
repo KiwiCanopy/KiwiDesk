@@ -14,7 +14,6 @@ import Testing
 @Suite("KiwiHub footer fit")
 @MainActor
 struct JumpFooterFitTests {
-    private static let profile = "Super Ultrawide"
     private static let layer = String(repeating: "Hyper layer ", count: 8)
 
     private static func locales() throws -> [String] {
@@ -50,9 +49,13 @@ struct JumpFooterFitTests {
     /// What the row leaves its hints beside `leading` and
     /// `trailing`, read off the row's own spacing and inset.
     private func room(leading: CGFloat, trailing: CGFloat) -> CGFloat {
-        JumpPanelView.width - 2 * JumpFooterRow<EmptyView, EmptyView>.inset
-            - 2 * JumpFooterRow<EmptyView, EmptyView>.spacing
-            - leading - trailing
+        typealias Row = JumpFooterRow<EmptyView, EmptyView>
+        return JumpFooterMidline.room(
+            JumpPanelView.width - 2 * Row.inset,
+            leading: leading,
+            trailing: trailing,
+            spacing: Row.spacing
+        )
     }
 
     private func button(
@@ -80,7 +83,7 @@ struct JumpFooterFitTests {
             let room = room(
                 leading: leading,
                 trailing: width(
-                    button(LayoutPickText.keep(Self.profile), "⌘S")
+                    button(LayoutPickText.keep, "⌘S")
                 )
             )
             let hints = footer.hints
@@ -162,8 +165,9 @@ struct JumpFooterFitTests {
             SourceScan.balanced(chars, from: &cursor, open: "{", close: "}")
         )
         #expect(closure.contains("row([], fixed: false)"))
-        #expect(footer.contains("leading.layoutPriority(1)"))
-        #expect(footer.contains("trailing.layoutPriority(1)"))
+        #expect(
+            footer.contains("JumpFooterMidline(spacing: Self.spacing)")
+        )
     }
 
     /// `shortcutsChrome` states what the Shortcuts side draws
@@ -184,5 +188,45 @@ struct JumpFooterFitTests {
         let allowed = JumpPanelController.shortcutsChrome
         #expect(drawn <= allowed, "draws \(drawn) pt over \(allowed)")
         #expect(drawn > allowed - 16, "draws \(drawn) pt of \(allowed)")
+    }
+
+    /// The hints share one centre on every side while they fit, and
+    /// move toward the narrower control only as far as they must.
+    @Test("the hints sit on the midline, and leave it only to fit")
+    func hintsSitOnTheMidline() {
+        typealias M = JumpFooterMidline
+        // Room on both sides: the midline, whatever the controls.
+        #expect(
+            M.centre(600, leading: 0, trailing: 150, middle: 200, spacing: 12)
+                == 300
+        )
+        #expect(
+            M.centre(
+                600,
+                leading: 100,
+                trailing: 150,
+                middle: 200,
+                spacing: 12
+            )
+                == 300
+        )
+        // Too wide to centre beside the trailing control: it moves
+        // left until it clears it, and no further.
+        let tight = M.centre(
+            600,
+            leading: 0,
+            trailing: 150,
+            middle: 400,
+            spacing: 12
+        )
+        #expect(abs(tight - CGFloat(600 - 150 - 12 - 200)) < 0.5)
+        #expect(
+            JumpFooterMidline.room(
+                600,
+                leading: 0,
+                trailing: 150,
+                spacing: 12
+            ) == 438
+        )
     }
 }
