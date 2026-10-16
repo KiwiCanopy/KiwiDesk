@@ -409,6 +409,8 @@
   "diff.label.space_name": "空间名称",
   "diff.label.space_pin": "显示器固定",
   "diff.label.swap_skips_cascade": "互换跳过层叠",
+  "diff.live.heading": "已生效，未保存",
+  "diff.live.more": "更多：%1$d",
   "diff.note.added": "已添加",
   "diff.note.edited": "已修改",
   "diff.note.removed": "已移除",

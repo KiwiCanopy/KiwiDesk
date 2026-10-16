@@ -6955,6 +6955,34 @@ Saved profiles card's one anchored control is Load — the verb
 that replaces a layout — which is the wrong thing to flash under
 a note that says *save as a profile*.
 
+### A live change nobody saved is a row of its own (#2262)
+
+**[Rationale]**
+
+Settings seeds its draft from live, so a stored setting an AI app,
+the CLI or a Lua call changed live read as saved: no pill, no row,
+and the next Save wrote it into the profile without saying so. The
+change is a third reason the pill appears, and by the rule above
+it is a row — under its own **Live, not saved** heading, narrated
+saved → live, so it never reads as an edit made here.
+
+**Core decides which leaves count, through the one `KeepJudge`**
+the change report and `keep_settings` read (#1685) — keepable and
+not stored — and hands Settings the live settings with those leaves
+put back (`KiwiCore.savedSettingsBehindLive`); the GUI only diffs
+and narrates. A second comparison in the GUI would list what no
+keep could write: an app-wide value, a temporary Space's leaf, a
+Lua-owned config. The judgement reads the profile's file, so it
+runs where the draft is seeded, never per render.
+
+Save keeps the rows, because Save writes what live draws. Closing
+Settings reverts nothing live and never asks the leave question:
+these are not the window's edits. A setting the draft also edits
+is the draft's row alone, the newer act. Undoing a live row means
+applying the saved value live, a Core verb rather than a draft
+writeback, so it waits for per-row revert (#792), as does whether
+Revert all reaches live state.
+
 ### The header search is a field, not a button that opens one
 
 **[Trade-off]**

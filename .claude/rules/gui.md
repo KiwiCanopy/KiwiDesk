@@ -1158,7 +1158,11 @@ must keep:
   the pill's presence and `driftRows` all read — a surface
   deriving that predicate for itself is how the pill came to
   say "Unsaved changes" over an empty list (#1197,
-  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`). A surface stating an N beside
+  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`) — and a
+  stored setting changed live and not saved through Core's keep
+  judgement, `KiwiCore.savedSettingsBehindLive`, read once where
+  the draft is seeded and never re-derived in this tree (#2262,
+  `SettingsLiveRowsTests`, `UnsavedLiveSettingsTests`). A surface stating an N beside
   a visible list derives the N from that list's rows, never
   from the settings count — a per-instance family made the
   two disagree on sight (owner 2026-08-10).

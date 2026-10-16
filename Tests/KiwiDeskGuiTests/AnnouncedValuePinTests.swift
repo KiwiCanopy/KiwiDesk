@@ -134,6 +134,8 @@ struct AnnouncedValuePinTests {
         "HyperMoveSheet.swift": 1,
         // The app picker's two section headers, one site (#2103).
         "AppPickerButton.swift": 1,
+        // The diff list's "Live, not saved" heading (#2262).
+        "SettingsDiffRowsView.swift": 1,
     ]
 
     @Test("title components are rotor headings")

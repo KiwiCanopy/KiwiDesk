@@ -218,6 +218,7 @@ enum SettingsDiffRowSource {
         // (#1197) — ONE list, so the footer's N is still the
         // count of the list it opens.
         rows += driftRows(for: model)
+        rows += liveRows(for: model, leaving: diff.changedSettings)
         return rows
     }
 

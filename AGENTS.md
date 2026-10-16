@@ -1758,7 +1758,9 @@ Touching `Sources/KiwiDesk` (the GUI).
   save pill exists only while the draft does (`DetailPanelTests`,
   `HomeSurfacingTests`) and every reason it appears owes a row in its own list
   — config leaves through `SettingsDraftDiff`, live drift through the ONE
-  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`)
+  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`),
+  a live change not saved through Core's `savedSettingsBehindLive` (#2262,
+  `SettingsLiveRowsTests`)
 - a picture whose object is NOT the draft takes a read-only sheet instead,
   which answers Return AND Escape and is hosted above the subtree that opens it
   (#859, `SheetPresentationSeamTests` is the register of who may host one,

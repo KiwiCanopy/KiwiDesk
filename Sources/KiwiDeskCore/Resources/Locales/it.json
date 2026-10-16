@@ -409,6 +409,8 @@
   "diff.label.space_name": "Nome dello spazio",
   "diff.label.space_pin": "Fissaggio allo schermo",
   "diff.label.swap_skips_cascade": "Lo scambio salta la cascata",
+  "diff.live.heading": "Applicato, non salvato",
+  "diff.live.more": "Altri: %1$d",
   "diff.note.added": "Aggiunta",
   "diff.note.edited": "Modifica",
   "diff.note.removed": "Rimozione",

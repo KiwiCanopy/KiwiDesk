@@ -409,6 +409,8 @@
   "diff.label.space_name": "スペース名",
   "diff.label.space_pin": "画面への固定",
   "diff.label.swap_skips_cascade": "入れ替えで重なりをスキップ",
+  "diff.live.heading": "適用中・未保存",
+  "diff.live.more": "その他: %1$d",
   "diff.note.added": "追加",
   "diff.note.edited": "編集",
   "diff.note.removed": "削除",

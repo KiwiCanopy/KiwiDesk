@@ -409,6 +409,8 @@
   "diff.label.space_name": "Space name",
   "diff.label.space_pin": "Screen pin",
   "diff.label.swap_skips_cascade": "Swap skips cascade",
+  "diff.live.heading": "Live, not saved",
+  "diff.live.more": "More: %1$d",
   "diff.note.added": "Added",
   "diff.note.edited": "Edited",
   "diff.note.removed": "Removed",
