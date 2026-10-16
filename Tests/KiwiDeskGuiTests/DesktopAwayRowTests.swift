@@ -166,7 +166,7 @@ struct DesktopAwayRowTests {
         #expect(reference.custom.isEmpty)
         let labels =
             (reference.controls.flatMap(\.rows)
-            + reference.unavailable).map(\.label)
+            + reference.desktopAway).map(\.label)
         #expect(labels.contains("Go to Desktop 2"))
         #expect(labels.contains("Move to Desktop 5 & follow"))
     }
@@ -207,7 +207,7 @@ struct DesktopAwayRowTests {
         )
         let rows =
             reference.controls.flatMap(\.rows)
-            + reference.unavailable
+            + reference.desktopAway
         let away = rows.filter(\.unavailable)
         #expect(away.count == 1)
         #expect(away.first?.label == "Go to Desktop 5")

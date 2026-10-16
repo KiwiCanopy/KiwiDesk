@@ -74,8 +74,8 @@ struct ShortcutsSheetView: View {
                     "shortcuts.section.unavailable",
                     "Unavailable shortcuts"
                 ),
-                rows: reference.unavailable,
-                caption: unavailableCaption
+                rows: reference.desktopAway,
+                caption: KeybindingCatalog.desktopAwayCaption
             )
         )
         return out.filter { !$0.rows.isEmpty }
@@ -115,16 +115,6 @@ struct ShortcutsSheetView: View {
                 + "Space list. They still work — pressing one "
                 + "recreates its Space — and they come back "
                 + "when their Space returns."
-        )
-    }
-
-    /// Settings' Desktop rows carry the same caption.
-    private var unavailableCaption: String {
-        L(
-            "shortcuts.desktop_away",
-            "Dimmed rows target a Desktop that isn't on any "
-                + "screen right now. Their shortcuts stay "
-                + "recorded and work again when it comes back."
         )
     }
 

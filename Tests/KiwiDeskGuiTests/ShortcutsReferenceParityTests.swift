@@ -22,7 +22,7 @@ struct ShortcutsReferenceParityTests {
         let names = Mirror(reflecting: reference).children.compactMap(\.label)
         #expect(
             names == [
-                "layerName", "controls", "inactive", "unavailable",
+                "layerName", "controls", "inactive", "desktopAway",
                 "apps", "custom",
             ],
             Comment(

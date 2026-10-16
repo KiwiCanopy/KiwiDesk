@@ -221,7 +221,7 @@ struct ShortcutsPanelScrollCueTests {
         let text = try Self.source("JumpPanelChrome.swift")
         let row = try #require(
             SourceScan.declarationBody(
-                after: "private func row",
+                after: "func row(",
                 in: text
             ),
             "the footer row not found"
@@ -244,8 +244,8 @@ struct ShortcutsPanelScrollCueTests {
     /// Proven arithmetic whose inputs are constants is the #1292
     /// defect back verbatim (`guard-prover`, 2026-09-07). Counted
     /// on both sides, so deleting the wiring reds as loudly as
-    /// duplicating it: the sheet measures itself, the panel holds
-    /// the height, and the footer asks the verdict of it.
+    /// duplicating it: the sheet reports its height, the panel
+    /// reads it, and the footer asks the verdict of it.
     @Test("the verdict reaches the view")
     func theVerdictReachesTheView() throws {
         let sheet = try Self.source("JumpShortcutsView.swift")
@@ -255,9 +255,11 @@ struct ShortcutsPanelScrollCueTests {
             // The writer as well as the reader: without it the
             // height stays 0 and the cue never shows.
             (sheet, "key: SheetHeightKey.self"),
-            (sheet, "onPreferenceChange(SheetHeightKey.self)"),
             (sheet, ".frame(maxHeight: maxHeight)"),
-            (panel, "contentHeight: $sheetHeight"),
+            (
+                panel,
+                "onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }"
+            ),
             (footer, "JumpShortcutsView.overflows("),
             (footer, "content: sheetHeight"),
             (footer, "cap: model.sheetCap"),

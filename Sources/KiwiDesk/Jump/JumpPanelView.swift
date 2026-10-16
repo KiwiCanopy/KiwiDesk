@@ -18,7 +18,7 @@ struct JumpPanelView: View {
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
     /// The Shortcuts sheet's own height, which the footer's
-    /// scroll cue reads.
+    /// scroll cue reads; 0 on the other sides.
     @State var sheetHeight: CGFloat = 0
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -116,8 +116,7 @@ struct JumpPanelView: View {
                 JumpShortcutsView(
                     sheet: sheet,
                     scroll: model.sheetScroll,
-                    maxHeight: model.sheetCap,
-                    contentHeight: $sheetHeight
+                    maxHeight: model.sheetCap
                 )
                 .transition(.opacity)
             } else if let view = model.view {
@@ -133,6 +132,7 @@ struct JumpPanelView: View {
                 .transition(.opacity)
             }
         }
+        .onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }
     }
 
     @ViewBuilder private var results: some View {

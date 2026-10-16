@@ -51,15 +51,16 @@ struct ShortcutsReference {
     var controls: [ShortcutSubgroup]
     /// Inactive space bindings shown under real names (#820).
     var inactive: [ShortcutRow] = []
-    /// Rows whose action cannot run now (`ShortcutRow.unavailable`),
-    /// lifted out of their groups to the column's end.
-    var unavailable: [ShortcutRow] = []
+    /// Rows whose Desktop no screen shows (`ShortcutRow.unavailable`),
+    /// lifted out of their groups to the column's end; Settings
+    /// dims the same rows in place, where they stay rebindable.
+    var desktopAway: [ShortcutRow] = []
     var apps: [ShortcutRow]
     var custom: [ShortcutRow]
 
     /// Whether the reference contains no listable shortcuts.
     var isEmpty: Bool {
-        controls.isEmpty && inactive.isEmpty && unavailable.isEmpty
+        controls.isEmpty && inactive.isEmpty && desktopAway.isEmpty
             && apps.isEmpty && custom.isEmpty
     }
 }

@@ -9739,6 +9739,20 @@ because a laptop was undocked, which is routine and temporary;
 reshuffling rows to the bottom of the page on every undock
 reports a normal state as debris.
 
+:::unreleased
+**KiwiHub's Shortcuts side lifts those rows out instead**, into
+an Unavailable shortcuts band at the end of its column (owner
+ruling 2026-10-16). The reason Settings keeps them in place is
+that Settings is an editor: a row stays where its catalog puts
+it so it can be rebound there. The hub is a read-only list of
+what a key does now, so a group that mixes working keys with
+keys that do nothing answers its one question wrongly. The band
+is not the Inactive one, for the first reason above — its
+caption promises the key still fires — and it takes the caption
+Settings puts over the same rows, so both surfaces say the same
+thing about them.
+:::
+
 **Config presence expands the Simple surface.** The simple
 mode is not a smaller product, it is a smaller *offer*. Anything
 already in the user's config — a shortcut layer, an imported Lua

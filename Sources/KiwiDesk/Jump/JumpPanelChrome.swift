@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The panel's static key hints for its scope — hidden from
-/// VoiceOver, whose row actions say the same (#1875 ▸ footer).
-/// Short of room, it sheds hints from the end, never the scroll
-/// cue or the lit one's place.
+/// VoiceOver, whose row actions say the same (#1875 ▸ footer);
+/// the scroll cue is spoken. Short of room, it sheds hints from
+/// the end, then truncates the scroll cue; a hint keeps its index,
+/// so the lit one stays lit while it is shown.
 struct JumpFooter: View {
     let scope: JumpScope
     /// Whether the side runs past what it shows.
@@ -23,25 +24,32 @@ struct JumpFooter: View {
             ForEach((0...hints.count).reversed(), id: \.self) {
                 row(Array(hints.prefix($0)))
             }
+            // Past every candidate the cue truncates rather than
+            // spill onto the side's controls.
+            row([], fixed: false)
         }
         .font(.caption)
         .foregroundStyle(.secondary)
         .lineLimit(1)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 7)
-        .accessibilityHidden(true)
     }
 
-    private func row(_ shown: [String]) -> some View {
+    /// One candidate line: the scroll cue, then `shown`; a line
+    /// that is not `fixed` truncates to the room it is given.
+    func row(_ shown: [String], fixed: Bool = true) -> some View {
         HStack(spacing: 8) {
             // Worded rather than positional, so it stays true at
             // any scroll offset — the shortcuts panel's cue (#1292).
             if overflows, let cue = scrollHint {
                 HStack(spacing: 4) {
                     Image(systemName: "chevron.down")
+                        .accessibilityHidden(true)
                     Text(cue)
                 }
-                if !shown.isEmpty { Text(verbatim: "·") }
+                if !shown.isEmpty {
+                    Text(verbatim: "·").accessibilityHidden(true)
+                }
             }
             ForEach(Array(shown.enumerated()), id: \.offset) { index, hint in
                 if index > 0 { Text(verbatim: "·") }
@@ -52,8 +60,9 @@ struct JumpFooter: View {
                             : AnyShapeStyle(.secondary)
                     )
             }
+            .accessibilityHidden(true)
         }
-        .fixedSize()
+        .fixedSize(horizontal: fixed, vertical: false)
     }
 
     /// The side's scroll cue; the View side never scrolls.

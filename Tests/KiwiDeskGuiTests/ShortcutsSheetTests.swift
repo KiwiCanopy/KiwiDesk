@@ -28,7 +28,7 @@ struct ShortcutsSheetTests {
             ),
         ],
         inactive: [row("Go to Space 9")],
-        unavailable: [row("Go to Desktop 6")],
+        desktopAway: [row("Go to Desktop 6")],
         apps: [row("Open Settings"), row("Safari")],
         custom: [row("KiwiDesk.notify()")]
     )

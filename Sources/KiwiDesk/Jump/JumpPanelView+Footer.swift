@@ -60,7 +60,10 @@ extension JumpPanelView {
             EmptyView()
         case .shortcuts:
             KeyPanelChordButton(
-                title: JumpFooterRow<EmptyView, EmptyView>.editTitle,
+                title: L(
+                    "shortcuts.panel.edit_in_settings",
+                    "Edit in Settings…"
+                ),
                 chord: "⌘,"
             ) { model.handle(.settings) }
         case .view:
@@ -78,25 +81,26 @@ extension JumpPanelView {
     }
 }
 
-/// The footer row's shape: the buttons keep their full size and
-/// the hints take what is left, shedding from the end where a
-/// locale's buttons leave them too little room.
+/// The footer row's shape: the side's controls are sized first
+/// and the hints take what is left, shedding from the end where a
+/// locale's controls leave them too little room. The controls are
+/// prioritised rather than fixed, so the layer chip still
+/// truncates at its own cap.
 struct JumpFooterRow<Leading: View, Trailing: View>: View {
     let footer: JumpFooter
     @ViewBuilder let leading: Leading
     @ViewBuilder let trailing: Trailing
 
-    static var editTitle: String {
-        L("shortcuts.panel.edit_in_settings", "Edit in Settings…")
-    }
+    static var spacing: CGFloat { 12 }
+    static var inset: CGFloat { KeyPanelStyle.selectionInset + 10 }
 
     var body: some View {
-        HStack(spacing: 12) {
-            leading.fixedSize()
+        HStack(spacing: Self.spacing) {
+            leading.layoutPriority(1)
             footer
-            trailing.fixedSize()
+            trailing.layoutPriority(1)
         }
-        .padding(.horizontal, KeyPanelStyle.selectionInset + 10)
+        .padding(.horizontal, Self.inset)
     }
 }
 

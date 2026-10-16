@@ -4,17 +4,14 @@ import SwiftUI
 
 /// The key panel's Shortcuts side (#2246): the active layer's
 /// shortcuts, narrowed by the field, scrolling under a capped
-/// height. Its layer name, scroll cue and Edit in Settings… sit in
-/// the panel's footer row.
+/// height, reporting that height as `SheetHeightKey` for the
+/// footer's scroll cue. Its layer name, scroll cue and Edit in
+/// Settings… sit in the panel's footer row.
 struct JumpShortcutsView: View {
     let sheet: ShortcutsSheet
     let scroll: SheetScroll
     /// The tallest the sheet stands (`JumpPanelController.sheetCap`).
     let maxHeight: CGFloat
-    /// The sheet's own height, read off its layout for the
-    /// footer's scroll cue.
-    @Binding var contentHeight: CGFloat
-
     /// Whether the sheet runs past what the cap shows — the one
     /// verdict the cue reads (#1292).
     static func overflows(content: CGFloat, cap: CGFloat) -> Bool {
@@ -42,14 +39,14 @@ struct JumpShortcutsView: View {
         }
         .frame(maxHeight: maxHeight)
         .fixedSize(horizontal: false, vertical: true)
-        .onPreferenceChange(SheetHeightKey.self) { contentHeight = $0 }
         // VoiceOver lands on the scroll view as a bare "scroll
         // area" before interacting into it (#812).
         .accessibilityLabel(JumpScope.shortcuts.panelName)
     }
 }
 
-private struct SheetHeightKey: PreferenceKey {
+/// The Shortcuts sheet's own height; 0 while no sheet is drawn.
+struct SheetHeightKey: PreferenceKey {
     static let defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = max(value, nextValue())

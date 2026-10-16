@@ -39,8 +39,8 @@ struct ShortcutsUnavailableBandTests {
         LocalizationManager.shared.select("en")
         let reference = build([1, 2])
         let grouped = reference.controls.flatMap(\.rows)
-        #expect(reference.unavailable.map(\.label) == ["Go to Desktop 6"])
-        let marked = reference.unavailable.allSatisfy { $0.unavailable }
+        #expect(reference.desktopAway.map(\.label) == ["Go to Desktop 6"])
+        let marked = reference.desktopAway.allSatisfy { $0.unavailable }
         #expect(marked)
         #expect(!grouped.contains { $0.unavailable })
         #expect(grouped.contains { $0.label == "Go to Desktop 1" })
@@ -50,7 +50,7 @@ struct ShortcutsUnavailableBandTests {
     func presentDesktopsStayGrouped() {
         LocalizationManager.shared.select("en")
         let reference = build([1, 2, 3, 4, 5, 6])
-        #expect(reference.unavailable.isEmpty)
+        #expect(reference.desktopAway.isEmpty)
         #expect(
             reference.controls.flatMap(\.rows).contains {
                 $0.label == "Go to Desktop 6"
@@ -74,7 +74,8 @@ struct ShortcutsUnavailableBandTests {
         .joined()
         #expect(
             source.contains(
-                "rows:reference.unavailable,caption:unavailableCaption"
+                "rows:reference.desktopAway,"
+                    + "caption:KeybindingCatalog.desktopAwayCaption"
             )
         )
     }

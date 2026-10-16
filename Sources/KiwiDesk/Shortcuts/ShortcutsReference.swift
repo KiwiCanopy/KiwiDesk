@@ -116,7 +116,7 @@ enum ShortcutsReferenceBuilder {
 
         // A key that does nothing until its Desktop returns leaves
         // its group, so the groups list only keys that work.
-        let unavailable = controls.flatMap(\.rows).filter(\.unavailable)
+        let desktopAway = controls.flatMap(\.rows).filter(\.unavailable)
         let working = controls.compactMap { group -> ShortcutSubgroup? in
             let rows = group.rows.filter { !$0.unavailable }
             return rows.isEmpty
@@ -127,7 +127,7 @@ enum ShortcutsReferenceBuilder {
             layerName: layer.name,
             controls: working,
             inactive: inactive,
-            unavailable: unavailable,
+            desktopAway: desktopAway,
             apps: apps,
             custom: custom
         )
