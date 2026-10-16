@@ -84,7 +84,8 @@ extension KiwiCore {
     /// What KiwiVision draws now, through the one resolver.
     var visionLook: VisionLook { appWide.look(lens: visionLensName) }
 
-    func setKiwiVision(_ on: Bool) {
+    /// Turns KiwiVision on or off — the one writer of its on/off.
+    public func setKiwiVision(_ on: Bool) {
         guard on != vision.isOn else { return }
         vision.isOn = on
         retargetVisionAppearance(on ? visionLook.appearance : nil)

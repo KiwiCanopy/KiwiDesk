@@ -1,6 +1,6 @@
 import KiwiDeskCore
 
-/// The Layouts scope's words (#2229): Core hands the facts in
+/// The View side's Layout line words (#2229): Core hands the facts in
 /// `LayoutPickerState`, the GUI narrates them (#96).
 @MainActor
 enum LayoutPickText {

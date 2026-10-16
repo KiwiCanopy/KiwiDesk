@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -72,12 +73,45 @@ struct ViewPickItemsTests {
         #expect(on.map(\.isCurrent) == [false, true])
     }
 
-    @Test("every chip greys while KiwiDesk boots")
+    @Test("every chip greys while KiwiDesk boots, and says so")
     func inertGreysAll() {
         LocalizationManager.shared.select("en")
         let all = items(inert: true).values.flatMap { $0 }
         #expect(!all.isEmpty)
         #expect(all.allSatisfy { !$0.isApplicable })
+        #expect(all.allSatisfy { $0.inertReason == "KiwiDesk is starting" })
+        let off = items(inert: true)[.vision]?.first
+        #expect(
+            off.map { ViewPickText.spoken($0, on: .vision) }
+                == "KiwiVision: Off, current, KiwiDesk is starting"
+        )
+    }
+
+    /// The boot read is the panel's: a builder fed `inert` by hand
+    /// cannot see the consumer drop it.
+    @Test("the panel reads boot from Core")
+    func bootIsRead() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Jump/JumpPanelController+View.swift"
+            )
+        let raw = try String(contentsOf: url, encoding: .utf8)
+        let source = SourceScan.stripComments(raw)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(source.contains("letinert=core.bootPhase.isStarting"))
+        #expect(source.occurrences(of: "inert:inert") == 1)
+    }
+
+    @Test("no match leaves the digits out of the footer")
+    func footerDropsDigitsWithoutMatches() {
+        LocalizationManager.shared.select("en")
+        func hints(_ count: Int) -> [String] {
+            JumpFooter(scope: .view, overflows: false, quickCount: count)
+                .hints
+        }
+        #expect(hints(3).contains("⌘1–3 Quick apply"))
+        #expect(hints(1).contains("⌘1 Quick apply"))
+        #expect(!hints(0).contains { $0.contains("Quick apply") })
     }
 
     @Test("the layouts grey where no Space is under the pointer")
@@ -91,6 +125,10 @@ struct ViewPickItemsTests {
             inert: false
         )
         #expect(lines[.layout]?.allSatisfy { !$0.isApplicable } == true)
+        #expect(
+            lines[.layout]?.first?.inertReason
+                == "No Space under the pointer"
+        )
         #expect(lines[.vision]?.allSatisfy(\.isApplicable) == true)
     }
 }

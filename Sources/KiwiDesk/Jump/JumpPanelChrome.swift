@@ -105,12 +105,16 @@ extension JumpFooter {
             ]
         case .view:
             let digits = quickCount > 1 ? "⌘1–\(quickCount)" : "⌘1"
-            return [
-                L("layout_picker.footer.apply", "%1$@ Apply", "↩"),
-                L("layout_picker.footer.quick", "%1$@ Quick apply", digits),
-                ViewPickText.lineHint("↑↓"),
-                other,
-            ]
+            let apply = L("layout_picker.footer.apply", "%1$@ Apply", "↩")
+            let quick = L(
+                "layout_picker.footer.quick",
+                "%1$@ Quick apply",
+                digits
+            )
+            // Nothing matched: no digit reaches anything.
+            return quickCount > 0
+                ? [apply, quick, ViewPickText.lineHint("↑↓"), other]
+                : [apply, ViewPickText.lineHint("↑↓"), other]
         }
     }
 }

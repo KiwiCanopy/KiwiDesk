@@ -37,7 +37,7 @@ struct ViewChip: View {
     private var badgeShown: Bool { showsNumber && number != nil }
 
     private var content: some View {
-        HStack(spacing: 0) {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
             Text(verbatim: number.map { "⌘\($0)" } ?? "")
                 .font(.system(size: 11).monospacedDigit())
                 .foregroundStyle(secondaryInk)
@@ -67,7 +67,7 @@ struct ViewChip: View {
             if let chord = item.chord {
                 Text(chord).foregroundStyle(secondaryInk)
             }
-            if let refusal = item.refusal, !refusal.isEmpty {
+            if let refusal = item.refusal {
                 Text(refusal).foregroundStyle(secondaryInk)
             }
         }

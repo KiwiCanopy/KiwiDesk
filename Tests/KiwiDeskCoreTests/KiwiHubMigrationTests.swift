@@ -152,25 +152,52 @@ struct KiwiHubMigrationTests {
         )
     }
 
-    /// The layouts side was renamed View before release (#2309), so
-    /// a file a pre-release build wrote crosses at any format.
+    /// The layouts side was renamed View before release (#2309):
+    /// a file a pre-release build wrote at the #2265 formats crosses
+    /// through the whole migration, gate included.
     @Test("the unreleased layouts side crosses to view")
     func layoutsSideCrosses() throws {
-        var config = guiConfig(format: GuiConfig.currentFormat)
-        config.layers = [
+        let layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
                 bindings: [row("l", "kiwihub.show(\"layouts\")")]
             )
         ]
-        let data = try encoder.encode(config)
-        let out = try #require(
-            ConfigMigration.migratingRetiredPanelVerbs(data)
+        var config = guiConfig(format: 7)
+        config.layers = layers
+        var stored = profile(format: 21)
+        stored.layers = KeyLayerOverride(layers: layers)
+        let view = [KiwiHubSide.view.lua]
+
+        let gui = try #require(
+            ConfigMigration.migrated(try encoder.encode(config))
         )
-        let migrated = try decoder.decode(GuiConfig.self, from: out)
+        let migrated = try decoder.decode(GuiConfig.self, from: gui)
+        #expect(migrated.layers.first?.bindings.map(\.lua) == view)
+
+        let file = try #require(
+            ConfigMigration.migrated(try encoder.encode(stored))
+        )
+        let profile = try decoder.decode(Profile.self, from: file)
+        #expect(profile.layers?.layers.first?.bindings.map(\.lua) == view)
+
+        let bundle = SetupBundle(
+            format: 26,
+            writtenBy: "test",
+            config: config,
+            profiles: [stored],
+            palettes: []
+        )
+        let packed = try #require(
+            ConfigMigration.migrated(try encoder.encode(bundle))
+        )
+        let unpacked = try decoder.decode(SetupBundle.self, from: packed)
         #expect(
-            migrated.layers.first?.bindings.map(\.lua)
-                == [KiwiHubSide.view.lua]
+            unpacked.config?.layers.first?.bindings.map(\.lua) == view
+        )
+        #expect(
+            unpacked.profiles.first?.layers?.layers.first?.bindings
+                .map(\.lua) == view
         )
     }
 

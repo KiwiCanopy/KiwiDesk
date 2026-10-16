@@ -1,11 +1,11 @@
 import AppKit
 
-/// The layout picker (#762, #2229): the GUI's key panel on its
-/// Layouts scope, acting on the Space the pointer's screen shows —
+/// KiwiHub's View side (#762, #2229, #2309): its Layout line,
+/// acting on the Space the pointer's screen shows —
 /// on a desk of several screens the pointer is the one unambiguous
 /// "this screen".
 extension KiwiCore {
-    /// The Space the layout picker acts on: the one shown on the
+    /// The Space the Layout line acts on: the one shown on the
     /// screen under the pointer.
     public func layoutPickerSpace() -> SpaceID? {
         spaceUnderPointer(shelves.contextMenus.pointer())
@@ -58,6 +58,14 @@ extension KiwiCore {
         }
     }
 
+    /// Loads the saved profile `name` as the quick menu's row and
+    /// KiwiHub's View side do, as user motion (#804, #2309).
+    public func loadProfileAsUser(_ name: String) {
+        withUserMotion {
+            _ = execute("load_profile", args: [.string(name)])
+        }
+    }
+
     /// `id`'s live layout, whether it drifted from the profile,
     /// and whether Keep is armed — which any shown Space's drift
     /// arms, since Keep keeps every screen's layout (#1179).
@@ -84,7 +92,7 @@ extension KiwiCore {
     }
 }
 
-/// The layout picker's facts for one Space (#2229); the GUI words
+/// The Layout line's facts for one Space (#2229); the GUI words
 /// them (#96).
 public struct LayoutPickerState: Equatable, Sendable {
     public let space: SpaceID

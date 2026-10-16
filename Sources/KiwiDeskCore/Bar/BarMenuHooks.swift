@@ -22,9 +22,10 @@ public enum SettingsLanding: Equatable, Sendable {
     case kiwiVision
 }
 
-/// What a bar menu, or KiwiHub's View side (#2229), asks
-/// of the GUI (#1518) — set at the GUI's bootstrap, beside
-/// `uiBridge`.
+/// What a bar menu asks of the GUI (#1518) — set at the GUI's
+/// bootstrap, beside `uiBridge`. KiwiHub's View side (#2229, #2309)
+/// is a GUI caller of the same doors, so a Settings landing has
+/// one route.
 public struct BarMenuHooks {
     /// Opens Settings on `landing`.
     public var openSettings: @MainActor (SettingsLanding) -> Void = {

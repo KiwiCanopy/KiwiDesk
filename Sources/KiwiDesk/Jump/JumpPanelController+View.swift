@@ -20,7 +20,8 @@ extension JumpPanelController {
         // No distrust: a close arms none, and the next own report
         // is Settings coming forward (#952).
         model.onViewSettings = { [weak self, weak model] line, item in
-            let live = model?.view?.layout?.live ?? .bsp
+            // No Space: Layout Defaults opens on its first tab.
+            let live = model?.view?.layout?.live ?? LayoutMode.allCases[0]
             guard let self, self.dismiss(distrusting: false) else { return }
             self.core.barMenuHooks.openSettings(
                 Self.landing(line, item?.pick, live: live)
@@ -60,14 +61,15 @@ extension JumpPanelController {
         visionChord: String?,
         inert: Bool
     ) -> [ViewPickList.Line: [ViewPickList.Item]] {
-        let grey: String? = inert ? "" : nil
+        let grey = inert ? ViewPickText.starting : nil
         let layouts = LayoutMode.allCases.map { mode in
             ViewPickList.Item(
                 pick: .layout(mode),
                 name: mode.displayName,
                 spellings: [mode.rawValue],
                 isCurrent: mode == layout?.live,
-                refusal: layout == nil ? "" : grey
+                inertReason: grey
+                    ?? (layout == nil ? ViewPickText.noSpace : nil)
             )
         }
         let switchable = profiles.all.contains {
@@ -80,8 +82,9 @@ extension JumpPanelController {
                     pick: .profile(name),
                     name: name,
                     isCurrent: name == profiles.current,
+                    inertReason: grey,
                     refusal: profiles.broken.contains(name)
-                        ? ViewPickText.profileBroken : grey
+                        ? ViewPickText.profileBroken : nil
                 )
             } : []
         let vision = [
@@ -89,13 +92,13 @@ extension JumpPanelController {
                 pick: .vision(false),
                 name: ViewPickText.visionOff,
                 isCurrent: !visionOn,
-                refusal: grey
+                inertReason: grey
             ),
             ViewPickList.Item(
                 pick: .vision(true),
                 name: ViewPickText.visionFocused,
                 isCurrent: visionOn,
-                refusal: grey,
+                inertReason: grey,
                 chord: visionChord
             ),
         ]
@@ -111,11 +114,9 @@ extension JumpPanelController {
         case .layout(let mode):
             if let space { core.applyLayout(mode, to: space) }
         case .profile(let name):
-            core.withUserMotion {
-                _ = core.execute("load_profile", args: [.string(name)])
-            }
+            core.loadProfileAsUser(name)
         case .vision(let on):
-            if core.kiwiVisionIsOn != on { core.toggleKiwiVision() }
+            core.setKiwiVision(on)
         }
     }
 

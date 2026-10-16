@@ -23,6 +23,17 @@ enum ViewPickText {
         L("view_picker.profile.broken", "Can't load")
     }
 
+    /// The Layout line's caption where no Space is under the
+    /// pointer.
+    static var noSpace: String {
+        L("view_picker.layout.no_space", "No Space under the pointer")
+    }
+
+    /// Every line's caption while KiwiDesk boots.
+    static var starting: String {
+        L("view_picker.starting", "KiwiDesk is starting")
+    }
+
     static func noMatch(_ query: String) -> String {
         L("view_picker.no_match", "Nothing matches “%1$@”", query)
     }
@@ -37,7 +48,7 @@ enum ViewPickText {
         if item.isCurrent {
             name = L("view_picker.ax.current", "%1$@, current", name)
         }
-        if let refusal = item.refusal, !refusal.isEmpty {
+        if let refusal = item.refusal ?? item.inertReason {
             name = L(
                 "view_picker.ax.refused",
                 "%1$@, %2$@",

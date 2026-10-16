@@ -11,7 +11,7 @@ private let jumpLog = Logger(
 )
 
 /// The key panel (#1875, #2229, #2246): the window switcher, the
-/// shortcuts sheet and the layout picker, one panel at Spotlight's
+/// shortcuts sheet and the view picker, one panel at Spotlight's
 /// height on the screen under the pointer, opened over a snapshot
 /// of every window KiwiDesk knows.
 /// A pick closes it and hands the row to Core's `jump(to:)` or
@@ -43,7 +43,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// new panel rather than closing one already going.
     var isOpen: Bool { panel?.isVisible == true && !presence.leaving }
 
-    /// The Space the Layouts scope acts on, read with the screen
+    /// The Space the View side's Layout line acts on, read with the screen
     /// the panel opens on so the two never disagree.
     var pickerSpace: SpaceID?
 

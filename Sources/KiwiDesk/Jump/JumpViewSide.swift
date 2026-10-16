@@ -62,7 +62,10 @@ struct JumpViewSide: View {
         if list.selection == nil, !list.query.isEmpty {
             return ViewPickText.noMatch(list.query)
         }
-        return list.layout.map(LayoutPickText.caption) ?? ""
+        if let reason = list.items(.layout).first?.inertReason {
+            return reason
+        }
+        return list.layout.map(LayoutPickText.caption) ?? ViewPickText.noSpace
     }
 
     private var tiles: some View {

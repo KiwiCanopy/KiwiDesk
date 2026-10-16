@@ -34,5 +34,9 @@ extension GuiConfig {
     /// so a stored `show_*` panel call is renamed. A number the
     /// release branch holds and main does not — kept above main's
     /// at each sync (profiles.md ▸ A long-lived release branch).
-    public static let currentFormat = 7
+    ///
+    /// **8 (#2309)**: the layouts side became View before release,
+    /// so a stored `kiwihub.show("layouts")` is renamed. Above
+    /// main's, as 7 is.
+    public static let currentFormat = 8
 }

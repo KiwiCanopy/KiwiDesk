@@ -5,7 +5,8 @@ import Foundation
 /// side (#2265, `KiwiHubMigrationTests`) — the layouts side among
 /// them, renamed View before release (#2309). Any other spelling is
 /// the user's script and is left alone. Idempotent, so no format
-/// floor.
+/// floor — but a file reaches it only below the current format, so
+/// each new spelling owes every shape's `currentFormat` a bump.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps naming
     /// what it was written to name.

@@ -30,7 +30,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
         "keybinding.move_to_desktop_follow (x N)"
     /// Next / previous layout of the focused Space (#453).
     case layoutCycle = "keybinding.{next,previous}_layout"
-    /// The layout picker at the pointer (#762).
+    /// KiwiHub's View side, its Layout line at the pointer (#762,
+    /// #2309).
     case viewPicker = "keybinding.show_view_picker"
     /// The layouts the cycle walks (#453).
     case modeCycle = "config.modeCycle"

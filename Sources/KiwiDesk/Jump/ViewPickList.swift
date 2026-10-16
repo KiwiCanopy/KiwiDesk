@@ -30,13 +30,17 @@ struct ViewPickList: Equatable {
         /// own name a native script cannot be typed as.
         var spellings: [String] = []
         var isCurrent = false
-        /// Why the item cannot be applied; nil where it can.
+        /// Why the whole line is greyed — KiwiDesk boots, or no Space
+        /// is under the pointer — drawn once as the line's caption
+        /// and spoken with each item.
+        var inertReason: String?
+        /// Why this item cannot be applied, drawn beside its name.
         var refusal: String?
         /// The item's own shortcut, drawn after its name.
         var chord: String?
 
         var id: Pick { pick }
-        var isApplicable: Bool { refusal == nil }
+        var isApplicable: Bool { refusal == nil && inertReason == nil }
     }
 
     struct Position: Equatable {
