@@ -48,6 +48,29 @@ struct LayoutCycleModelTests {
         #expect(model.sidecarConfig.modeCycle == ModeCycle.defaultList)
     }
 
+    /// The row reads the draft's pick back before any Save (#2342).
+    /// A tick on a shared row is a JOIN the table cannot show until
+    /// the Save makes it, so only the pick can say Home was ticked:
+    /// Work follows the shared cycle here, Home keeps its own.
+    @Test("a tick shows in the row before the Save")
+    func tickReadsBack() throws {
+        let core = makeTestCore()
+        var config = GuiConfig()
+        config.spaces = [SpaceID("1")]
+        try core.guiConfigStore.save(config)
+        try core.profiles.save(profile("Work"))
+        var home = profile("Home")
+        home.modeCycle = [.grid, .bsp]
+        try core.profiles.write(home)
+        let model = makeTestModel(core: core)
+        model.reload()
+        let before = try #require(model.cycleReach())
+        #expect(before.shared && before.joined.isEmpty)
+        model.setProfile(.cycle, key, "Home", true)
+        let row = try #require(model.cycleReach())
+        #expect(row.joined == ["Home"])
+    }
+
     @Test("ticking Home writes Work's list into Home's file")
     func tickHome() throws {
         let model = try makeModel()

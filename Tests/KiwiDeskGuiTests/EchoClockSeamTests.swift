@@ -169,15 +169,18 @@ struct EchoClockSeamTests {
     /// count. `param` — a `now:` parameter's default, the caller
     /// threading the clock; `seam` — a closure seam's default;
     /// `stamp` — a timestamp no ledger ages; `debt` — a ledger not
-    /// yet on `wallClock`, to move when it is next touched.
+    /// yet on `wallClock`, to move when it is next touched (a
+    /// `param` no production caller threads is a debt too).
     private static let wallClockReads: [String: Int] = [
         "CrashRecovery.swift": 1,  // seam
+        "KiwiCore.swift": 1,  // seam: `wallClock` itself
+        "EventLoop.swift": 1,  // seam, wired in Bootstrap
+        "FollowFocusIntent.swift": 1,  // seam, wired in Bootstrap
         "LogExport.swift": 2,  // param
-        "PendingSpaceAssignment.swift": 2,  // param
-        "FollowFocusIntent.swift": 3,  // param
-        "LaunchFollowIntent.swift": 1,  // param
-        "KiwiCore+LaunchFollow.swift": 3,  // param
-        "MoveIntentLatch.swift": 2,  // param
+        "PendingSpaceAssignment.swift": 2,  // debt: callers default
+        "LaunchFollowIntent.swift": 1,  // debt: callers default
+        "KiwiCore+LaunchFollow.swift": 3,  // debt: callers default
+        "MoveIntentLatch.swift": 2,  // debt: callers default
         "KiwiCore+DesktopSettle.swift": 1,  // param
         "EventLoop+Tabs.swift": 1,  // param
         "KiwiCore+GoneReason.swift": 3,  // param ×2, debt
@@ -205,9 +208,13 @@ struct EchoClockSeamTests {
         var counts: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: core) {
             let source = try SourceScan.strippedSource(at: file)
-            // Every spelling of "now" a ledger could grow (#1021).
-            let hits = ["Date()", "Date.now", "Date(timeIntervalSinceNow"]
-                .reduce(0) { $0 + source.occurrences(of: $1) }
+            // Every spelling of "now" a ledger could grow (#1021),
+            // a closure seam's `Date.init` default included (#2341).
+            let hits = [
+                "Date()", "Date.now", "Date(timeIntervalSinceNow",
+                "Date.init",
+            ]
+            .reduce(0) { $0 + source.occurrences(of: $1) }
             if hits > 0 {
                 counts[file.lastPathComponent, default: 0] += hits
             }
@@ -242,5 +249,33 @@ struct EchoClockSeamTests {
             seam.occurrences(of: "var wallClock: () -> Date = Date.init")
                 == 1
         )
+    }
+
+    /// Every arrival debt ages on the core's wall clock (#2341): a
+    /// `FollowFocusIntent` left on its `Date.init` default reads the
+    /// host clock, and a test reading the debt after a stalled turn
+    /// sees it expire. The constructions are counted, so a third
+    /// instance reds until it is wired here too.
+    @Test("every arrival debt is wired to the wall clock")
+    func arrivalDebtsAgeOnTheWallClock() throws {
+        let core = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore"
+        )
+        var built = 0
+        for file in try SourceScan.swiftSources(under: core) {
+            built += try SourceScan.strippedSource(at: file)
+                .occurrences(of: "FollowFocusIntent()")
+        }
+        let wirings = [
+            "followFocus.clock = { [weak self] in",
+            "desktopMemory.returnFocus.clock = { [weak self] in",
+        ]
+        #expect(built == wirings.count, "\(built) intents built")
+        let bootstrap = try SourceScan.strippedSource(
+            at: core.appendingPathComponent("App/KiwiCore+Bootstrap.swift")
+        )
+        for wiring in wirings {
+            #expect(bootstrap.occurrences(of: wiring) == 1, "\(wiring)")
+        }
     }
 }
