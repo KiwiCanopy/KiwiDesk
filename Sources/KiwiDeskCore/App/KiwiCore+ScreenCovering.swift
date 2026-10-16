@@ -143,9 +143,16 @@ extension KiwiCore {
     }
 
     /// The stack without KiwiDesk's chrome — KiwiVision's mask
-    /// reads it (#2103).
+    /// reads it (#2103). It keeps the desktop's elements: macOS
+    /// counts a below-normal bar such as SketchyBar's among them,
+    /// and Never dimmed must see it to keep it clear; the mask walk
+    /// drops the wallpaper and the icons by layer.
     static func liveFrontWindows() -> [FrontWindow] {
-        withoutOwnChrome(liveFrontStack())
+        withoutOwnChrome(
+            FloatDetection.frontToBackWindows(
+                includingDesktopElements: true
+            ) { _, _ in false }
+        )
     }
 
     /// The normal-layer frames of `stack` — which window a screen

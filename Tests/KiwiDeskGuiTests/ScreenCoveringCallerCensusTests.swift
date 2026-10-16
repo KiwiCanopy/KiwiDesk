@@ -154,6 +154,33 @@ struct ScreenCoveringCallerCensusTests {
         )
     }
 
+    /// KiwiVision's read keeps the desktop's elements: macOS counts
+    /// SketchyBar's layer −20 bar among them, and Never dimmed must
+    /// see it (#2103). Hover and the presentation verdict read the
+    /// other way, through `liveFrontStack`.
+    @Test("KiwiVision's read keeps the desktop's elements")
+    func visionReadKeepsDesktop() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDeskCore/App/KiwiCore+ScreenCovering.swift"
+                )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            source.contains(
+                "staticfuncliveFrontWindows()->[FrontWindow]{"
+                    + "withoutOwnChrome(FloatDetection.frontToBackWindows("
+                    + "includingDesktopElements:true"
+            )
+        )
+        #expect(
+            source.contains(
+                "staticfuncliveFrontStack()->[FrontWindow]{"
+                    + "FloatDetection.frontToBackWindows{"
+            )
+        )
+    }
+
     /// The raw spellings beneath the seam stay in their homes, so a
     /// reader cannot swap the seam for the live read and keep its
     /// file's count — which would read the host's real windows
