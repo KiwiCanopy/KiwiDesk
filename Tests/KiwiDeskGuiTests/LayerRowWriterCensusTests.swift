@@ -117,6 +117,9 @@ struct LayerRowWriterCensusTests {
         "KiwiDesk/Settings/Components/Keybindings/KiwiHubGroup.swift":
             (1, "the KiwiHub group: hands the holder to its rows"),
         "KiwiDesk/Settings/Components/Keybindings/"
+            + "KiwiVisionShortcutsGroup.swift":
+            (1, "the KiwiVision group: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/Keybindings/"
             + "OrphanedShortcutsGroup.swift":
             (1, "Inactive rows: hands the holder to its rows"),
         "KiwiDesk/Settings/Components/Keybindings/"
