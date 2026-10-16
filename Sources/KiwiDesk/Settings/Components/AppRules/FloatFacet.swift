@@ -34,7 +34,6 @@ enum FloatFacet: Equatable {
         _ rules: [String],
         app: String
     ) -> FloatFacet {
-        let app = FloatRules.appKey(app)
         var sawTitled = false
         for rule in Self.rules(rules, app: app) {
             if !isTitled(rule) { return .all }

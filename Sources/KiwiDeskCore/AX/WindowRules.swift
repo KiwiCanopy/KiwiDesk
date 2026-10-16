@@ -23,7 +23,8 @@ public struct FloatRules: Sendable, Equatable {
 
     /// A float rule's grammar, read once: `app`, or `app:title`
     /// with a non-empty title fragment — a rule ending in a bare
-    /// colon is a bare app. The app is case-folded through
+    /// colon is a bare app whose name keeps the colon, so it
+    /// matches no bundle id. The app is case-folded through
     /// `appKey`; the fragment keeps its case. Every reading of a
     /// rule — the engine's, the profile reach's, the Float list's
     /// — derives from this, so none can split it differently
