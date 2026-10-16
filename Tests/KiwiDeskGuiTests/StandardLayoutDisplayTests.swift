@@ -90,14 +90,14 @@ struct StandardLayoutDisplayTests {
         reset()
         LocalizationManager.shared.select("en")
         defer { reset() }
-        let one = StarterTitle(shape: .ultrawide, otherScreens: 0)
-            .onboardingTitle
-        let more = StarterTitle(shape: .ultrawide, otherScreens: 1)
-            .onboardingTitle
-        #expect(!one.isEmpty)
-        #expect(!more.isEmpty)
-        // One screen and several take different sentences.
-        #expect(one != more)
+        func title(_ shape: ScreenClass, _ others: Int) -> String {
+            StarterTitle(shape: shape, otherScreens: others)
+                .onboardingTitle
+        }
+        // One screen names its class; several name none, so two
+        // classes read alike there and apart alone.
+        #expect(title(.ultrawide, 0) != title(.laptop, 0))
+        #expect(title(.ultrawide, 1) == title(.laptop, 1))
     }
 
     /// The starter answers with its title, never its identity

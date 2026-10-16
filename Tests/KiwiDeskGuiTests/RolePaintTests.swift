@@ -38,12 +38,13 @@ struct RolePaintTests {
                 ]
         )
         // A follower drawn in the anchor's own colour still takes
-        // no tick: a group colour never writes it.
+        // no tick, and a row split off the anchor takes none.
         var settings = TilingSettings()
         settings.spaceBarStyle.focusedItemColor = "#E0A030"
         settings.spaceBarStyle.focusedHighlightColor = "#E0A030"
+        settings.dragDropZone.borderColor = "#3070E0"
         let seeded = RolePaint.seed(.secondAccent, settings)
-        #expect(seeded.contains(.spaceBar(.spaceBarFocusedItemColor)))
+        #expect(!seeded.contains(.borders(.dragDropZoneBorderColor)))
         #expect(
             !seeded.contains(.spaceBar(.spaceBarFocusedHighlightColor))
         )

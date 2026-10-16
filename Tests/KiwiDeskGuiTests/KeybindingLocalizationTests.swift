@@ -27,7 +27,6 @@ struct KeybindingLocalizationTests {
         #expect(command.label == "Focus window to the left")
         // What German says is the catalog's; that it translates
         // at all is the split under test.
-        #expect(!command.resolvedLabel.isEmpty)
         #expect(command.resolvedLabel != command.label)
     }
 

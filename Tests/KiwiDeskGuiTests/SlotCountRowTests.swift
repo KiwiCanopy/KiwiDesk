@@ -219,7 +219,7 @@ struct PercentFormatterTests {
 /// the stored share IS the chip's at the wire's precision.
 @Suite("Fraction chips (#1382)")
 struct FractionChipsTests {
-    @Test("the five shares, in reading order")
+    @Test("each share's glyph is its value, ascending")
     @MainActor func shares() {
         let shares = FractionChips.shares
         #expect(!shares.isEmpty)

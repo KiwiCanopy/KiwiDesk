@@ -113,7 +113,7 @@ struct ShortcutsJumpReadoutTests {
         // The caption's font and ink are tunings; a theme ink and
         // its hiding from VoiceOver are the shape.
         let caption = try Regex(
-            #"Text\(label\)\.font\(.*?\)"#
+            #"Text\(label\)\.font\((?:[^()]|\([^()]*\))*\)"#
                 + #"\.foregroundStyle\(SettingsTheme\.\w+\)"#
                 + #"\.lineLimit\(1\)\.fixedSize\(\)"#
                 + #"\.accessibilityHidden\(true\)"#

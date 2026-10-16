@@ -107,8 +107,8 @@ struct HomeCardProfileChipsTests {
         #expect(folded > 0)
     }
 
-    /// Written out rather than recomputed: the cap is 4, so five
-    /// profiles draw three chips and "+2" — never four and "+1".
+    /// One profile past the cap draws cap−1 chips and "+2" —
+    /// never a full row and "+1".
     @Test("one profile past the cap gives up a chip to the +N marker")
     func fiveProfilesGiveUpASlot() {
         let cap = HomeCardPreview.chipCap

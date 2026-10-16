@@ -190,7 +190,7 @@ struct ColorPaletteTests {
         #expect(settings.kiwishelf.fillColor == before)
     }
 
-    @Test("The bundled catalog is 10 palettes, default first, unique")
+    @Test("The bundled catalog decodes, default first, names unique")
     func bundledCatalog() {
         let all = PaletteCatalog.bundled()
         #expect(all.first?.name == PaletteCatalog.defaultName)

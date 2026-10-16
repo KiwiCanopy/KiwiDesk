@@ -74,10 +74,10 @@ struct IconHoverChipTests {
         text.split(whereSeparator: \.isWhitespace).joined()
     }
 
-    /// A full-row entry rests at nothing and lifts one rest step,
-    /// a theme token rather than a bare opacity (#2047). The whole
-    /// call, so a dropped or retuned argument reds.
-    @Test("a full-row entry lifts one chipRest step")
+    /// A full-row entry rests at nothing and lifts on a theme
+    /// token rather than a bare opacity (#2047); which token is a
+    /// tuning.
+    @Test("a full-row entry rests at nothing and lifts on a token")
     func rowLiftsOneRestStep() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
         let row = body(of: "rowHoverHighlight", in: rows)
