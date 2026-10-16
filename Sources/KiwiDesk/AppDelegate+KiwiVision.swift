@@ -11,9 +11,14 @@ extension AppDelegate {
         core.onAppWideChange = { [weak self] in
             self?.dashboardIfCreated?.model.objectWillChange.send()
         }
-        core.vision.onChange = { [weak self] on in
+        var wasOn = core.kiwiVisionIsOn
+        core.vision.onChange = { [weak self] active in
             // The Home card's subtitle reads the running state.
             self?.dashboardIfCreated?.model.objectWillChange.send()
+            // A switch between lenses is no on or off to announce.
+            let on = active.isOn
+            guard on != wasOn else { return }
+            wasOn = on
             NSAccessibility.post(
                 element: NSApp as Any,
                 notification: .announcementRequested,

@@ -21,7 +21,7 @@ struct VisionMaskPlateTests {
             return plate
         }
         vision.reduceMotion = { true }
-        vision.isOn = true
+        vision.active = .plain
         return (vision, { made })
     }
 

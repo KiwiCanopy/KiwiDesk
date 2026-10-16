@@ -3727,7 +3727,7 @@ greyed.
 
 ### kiwivision.toggle
 
-**Expects:** nothing.
+**Expects:** nothing, or a lens name.
 
 **Does:** turns KiwiVision on or off. The window kept clear follows
 the focus — a click, ⌘-Tab or a Space switch moves it — and a
@@ -3736,13 +3736,55 @@ the dim down. The KiwiVision line of KiwiHub's
 [view picker](#kiwihubshow) does the same, and ⌃⌥V is its default
 shortcut.
 
+With a lens name (any case), it turns that lens on — from off, or
+from another lens — and turns KiwiVision off when that lens is the
+one on. A lens with no apps, or a name no lens has, is refused.
+
 **Example:**
 
 ```lua
 KiwiDesk.bind("ctrl+alt+v", function()
     kiwivision.toggle()
 end)
+KiwiDesk.bind("ctrl+alt+w", function()
+    kiwivision.toggle("Writing")
+end)
 ```
+
+### kiwivision.define_lens
+
+**Expects:** a table: `name` (at most 40 characters, unique
+ignoring case), `apps` (bundle ids, or the process name of an app
+without one), and optionally `titles`, `keep_focus`, `clear_delay`,
+`reminder` and any of `dim`, `blur`, `appearance`,
+`clear_wallpaper` and `clear_app`.
+
+**Does:** adds a lens, or replaces the one of its name. While the
+lens is on, every window of its apps stays clear beside the focused
+one. `titles` maps an app to text its window titles contain: only
+those of its windows stay clear, and only windows KiwiDesk manages,
+whose titles it can read. A setting the lens leaves out follows the
+plain KiwiVision one, and never-dimmed apps stay clear under every
+lens. Like the `set_*` verbs, it changes the running lenses only;
+`init.lua` defines them on every load.
+
+**Example:**
+
+```lua
+kiwivision.define_lens({
+    name = "Writing",
+    apps = { "com.apple.Notes", "com.apple.Safari" },
+    titles = { ["com.apple.safari"] = { "Docs" } },
+    dim = 80,
+})
+```
+
+### kiwivision.delete_lens
+
+**Expects:** a lens name.
+
+**Does:** removes the lens for this session; KiwiVision turns off
+if it was the one on.
 
 ### kiwivision.set_dim
 

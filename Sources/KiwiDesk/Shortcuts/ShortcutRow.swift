@@ -26,6 +26,15 @@ struct ShortcutRow: Identifiable {
     /// fires and recreates its Space; only Mission Control makes
     /// a Desktop (`NavCommand.unavailable`).
     var unavailable: Bool = false
+    /// What the overview's fold reads off a row that may join
+    /// others (#2312); nil for one that never folds.
+    var fold: ShortcutFold.Tag? = nil
+    /// A folded row's members, each with its own chord: a search
+    /// that names one opens the fold to it (#2312).
+    var members: [ShortcutRow] = []
+    /// The label VoiceOver reads where the drawn one abbreviates,
+    /// a folded range read as "1 to 3".
+    var spokenLabel: String? = nil
 }
 
 /// Named subgroup of shortcut rows in the Controls band.

@@ -35,6 +35,8 @@ struct APIDestructiveCensusTests {
             + "back, and only a keep writes (#1685 ▸ Ruling 6c)",
         "app_rule.remove_float": "live only: a set puts the rule "
             + "back, and only a keep writes (#1685 ▸ Ruling 6c)",
+        "kiwivision.delete_lens": "a session value: a reload or a "
+            + "define_lens puts the lens back (#2103 ruling 40)",
     ]
 
     @Test("every registered name is a command a caller can run")

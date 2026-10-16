@@ -41,6 +41,21 @@ enum ShortcutsReferenceBuilder {
             }
         }
 
+        // Widened by the layer's own bindings, so a bound Desktop
+        // row keeps its name instead of falling through to Custom
+        // as raw Lua (the General band's #678 item 18 defect).
+        // What the widening adds is exactly what is NOT attached,
+        // so it is also the dim set.
+        let offer = KeybindingCatalog.desktopOffer(
+            live: desktops,
+            bindings: layer.bindings
+        )
+        let places = ShortcutFold.places(
+            spaces: spaces,
+            desktops: offer.desktops,
+            resizeStep: resizeStep
+        )
+
         func rows(_ commands: [NavCommand]) -> [ShortcutRow] {
             commands.compactMap { cmd in
                 guard let binding = bound(cmd.lua) else {
@@ -52,25 +67,23 @@ enum ShortcutsReferenceBuilder {
                     ?? directionalIcon(for: cmd.lua)
                     ?? spaceFallbackIcon(for: cmd.lua)
                     ?? verbIcon(for: cmd.lua)
+                let combo = glyphs(binding.combo)
                 return ShortcutRow(
                     id: cmd.lua,
                     label: cmd.resolvedLabel,
-                    combo: glyphs(binding.combo),
+                    combo: combo,
                     icon: icon,
-                    unavailable: cmd.unavailable != nil
+                    unavailable: cmd.unavailable != nil,
+                    fold: ShortcutFold.tag(
+                        for: cmd,
+                        at: places[cmd.lua],
+                        combo: KeyCombo.parse(binding.combo),
+                        rendered: combo
+                    )
                 )
             }
         }
 
-        // Widened by the layer's own bindings, so a bound Desktop
-        // row keeps its name instead of falling through to Custom
-        // as raw Lua (the General band's #678 item 18 defect).
-        // What the widening adds is exactly what is NOT attached,
-        // so it is also the dim set.
-        let offer = KeybindingCatalog.desktopOffer(
-            live: desktops,
-            bindings: layer.bindings
-        )
         let controls = buildControls(
             activeLayer: layer.name,
             spaces: spaces,

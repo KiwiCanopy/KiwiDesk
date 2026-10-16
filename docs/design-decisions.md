@@ -11121,6 +11121,20 @@ shows only the typing: the selection is the green row or tile,
 shown once, and inline completion — weighed — reads as native
 only where → or Tab would accept it, which here they never do.
 
+**The shortcuts sheet folds what reads as one, and nothing the
+user changed (#2312, owner ruling 2026-10-16).** A digit ladder
+— Go to Space 1, 2, 3 — and a mirrored set — the four focus
+arrows, grow and shrink — are one fact said three or four times,
+and they made a stock setup scroll. So a run of consecutive
+digits on one modifier set, each on its own digit and none named,
+reads "Go to Space 1–3 ⌃⌥1–3" from two members up, and a set
+folds only while every member is bound. Anything the user
+changed — a rebound key, a named Space, a gap — breaks the run
+and stands alone, so no bound key is ever hidden. A search opens
+a fold to the members it names, each with its own chord, so
+"space 3" still finds Space 3. Settings never folds: each chord
+there must stay rebindable, and the sheet reads as its summary.
+
 **The footer lights one hint: the pick live now (#2246, owner
 ruling 2026-10-13).** With the selection gone from the field, the
 footer says what a press would do: exactly one hint in full ink —
