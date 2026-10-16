@@ -17,7 +17,7 @@ struct QuickMenuBuilderCoverageTests {
     /// only shape that catches a split.
     ///
     /// Asserting the listed files still build rows does not: after
-    /// `screenItem` moves to its own file, the original still
+    /// a row builder moves to its own file, the original still
     /// builds plenty and the suite stays green while half the rows
     /// go unchecked. This asks the opposite question — is there any
     /// file building rows that no list names — so a new file lands

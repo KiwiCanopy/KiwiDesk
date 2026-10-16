@@ -30,9 +30,12 @@ extension JumpPanelController {
     }
 
     /// The lines as Core reads now. Every chip greys while
-    /// KiwiDesk boots (#2309 ruling 9).
+    /// KiwiDesk boots or waits for Start Tiling (#2309 ruling 9).
     func viewList() -> ViewPickList {
-        let inert = core.bootPhase.isStarting
+        let inert =
+            core.bootPhase.isStarting
+            ? ViewPickText.starting
+            : ViewPickText.held(hold())
         let layout = pickerSpace.flatMap(core.layoutPickerState(for:))
         let profiles = core.profiles
         let broken = Set(profiles.brokenProfiles().map(\.name))
@@ -53,15 +56,16 @@ extension JumpPanelController {
     }
 
     /// Each line's items. Profile is drawn only where there is
-    /// another profile to load, as the quick menu decides.
+    /// another profile to load. `inert` is why every chip greys,
+    /// nil where none does.
     static func items(
         layout: LayoutPickerState?,
         profiles: (current: String?, all: [String], broken: Set<String>),
         visionOn: Bool,
         visionChord: String?,
-        inert: Bool
+        inert: String?
     ) -> [ViewPickList.Line: [ViewPickList.Item]] {
-        let grey = inert ? ViewPickText.starting : nil
+        let grey = inert
         let layouts = LayoutMode.allCases.map { mode in
             ViewPickList.Item(
                 pick: .layout(mode),

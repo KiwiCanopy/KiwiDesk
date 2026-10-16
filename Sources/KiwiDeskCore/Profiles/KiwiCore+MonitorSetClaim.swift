@@ -79,7 +79,8 @@ extension KiwiCore {
         return try profiles.claim(monitors, for: profile.name)
     }
 
-    /// Loads `name` explicitly — `load_profile`, Switch Profile —
+    /// Loads `name` explicitly — `load_profile`, KiwiHub's Profile
+    /// line —
     /// and, where its screen count fits, hands it the connected
     /// set first, so the load sticks at the next monitor change. A
     /// profile for another count loads dirty, claiming nothing

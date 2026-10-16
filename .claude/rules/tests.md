@@ -643,7 +643,7 @@ obligations: keep off the main actor everything that does not
 need it — the fix in that second case was to run the catalog
 reads and the source scans off it and memoize the AppKit
 measurement — and state the spend in the new suite's own
-docstring, the shape `LayoutScreensQuickMenuTests` uses. Sizing
+docstring, the shape `UpdateStateTests` uses. Sizing
 a deadline against the backlog instead is what the clause above
 forbids; #979 is where that was paid on the mode reveal.
 

@@ -1702,9 +1702,9 @@ behaviour, the mixed case and the source scan; the sparse
 encoding's omitted `.bsp` resolves in one place,
 `GuiConfig.modes(for:)`.
 
-`docs/design-decisions.md` ▸ *Quick-menu layout switch is
-session-only* owns the product half, including the two residues
-this deliberately leaves visible.
+`docs/design-decisions.md` ▸ *A picked layout is session-only*
+owns the product half, including the two residues this
+deliberately leaves visible.
 
 ## Applies force or don't, explicitly
 
