@@ -231,6 +231,16 @@ struct LensPageSaveTests {
         #expect(model.core.kiwiVisionActive == .lens("Writing"))
     }
 
+    @Test("a pick leaving the live profile out turns the lens on off")
+    func pickJudgedAfterTheSave() throws {
+        let model = try makeModel()
+        model.core.execute("kiwivision.toggle", args: [.string("Reading")])
+        #expect(model.core.kiwiVisionActive == .lens("Reading"))
+        model.setLensReach("Reading", ["Home"])
+        model.updateActiveProfile()
+        #expect(model.core.kiwiVisionActive == .off)
+    }
+
     @Test("an edit dirties the draft; undoing it cleans it")
     func draftDirtiesAndCleans() throws {
         let model = try makeModel()
