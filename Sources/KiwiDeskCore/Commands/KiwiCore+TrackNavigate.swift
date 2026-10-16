@@ -26,7 +26,8 @@ extension KiwiCore {
         space: Space,
         focused: WindowID,
         swapping: Bool,
-        warp: Bool
+        warp: Bool,
+        skip lensSkip: (WindowID) -> Bool = { _ in false }
     ) -> CommandResponse? {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.effectiveTiledMembers(of: space)
@@ -57,7 +58,9 @@ extension KiwiCore {
             swapping && tiler.settings.swapSkipsCascade
             ? trackPile(space: space, focused: focused)
             : []
-        let skip: (WindowID) -> Bool = { pile.contains($0) }
+        let skip: (WindowID) -> Bool = {
+            pile.contains($0) || lensSkip($0)
+        }
         let target: WindowID?
         switch direction {
         case .up where vertical, .left where !vertical:

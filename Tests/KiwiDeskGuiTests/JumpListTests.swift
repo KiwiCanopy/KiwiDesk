@@ -120,4 +120,44 @@ struct JumpListTests {
         #expect(list.sectionCount == 2)
         #expect(self.list(three).sectionCount == 0)
     }
+
+    /// #2103 ruling 36: the rows of apps a lens keeps out sit under
+    /// one "Other apps" header, which takes no Minimized or Hidden
+    /// header of its own.
+    @Test("a lens's other apps take one section after its own")
+    @MainActor
+    func otherApps() {
+        LocalizationManager.shared.select("en")
+        let entries = [
+            Self.row(1, "Notes"),
+            Self.row(2, "Notes", status: .minimized),
+            JumpEntry(
+                target: .window(WindowID(3)),
+                pid: 3,
+                app: "Mail",
+                title: "",
+                space: "1",
+                spaceIcon: nil,
+                status: .minimized,
+                isOtherApp: true
+            ),
+            JumpEntry(
+                target: .hiddenApp(4),
+                pid: 4,
+                app: "Spotify",
+                title: "",
+                space: nil,
+                spaceIcon: nil,
+                status: .shown,
+                isOtherApp: true
+            ),
+        ]
+        let list = list(entries)
+        #expect(list.section(at: 1) == .minimized)
+        #expect(list.section(at: 2) == .otherApps)
+        #expect(list.section(at: 3) == nil)
+        #expect(list.hiddenStart == nil)
+        #expect(list.sectionCount == 2)
+        #expect(JumpRowText.header(.otherApps) == "Other apps")
+    }
 }

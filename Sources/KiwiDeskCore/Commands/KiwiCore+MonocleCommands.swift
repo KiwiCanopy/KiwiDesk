@@ -105,7 +105,8 @@ extension KiwiCore {
         space: Space,
         focused: WindowID,
         swapping: Bool,
-        warp: Bool
+        warp: Bool,
+        skip: (WindowID) -> Bool = { _ in false }
     ) -> CommandResponse? {
         // Resolve per-space (#149): a space with a vertical
         // orientation override renders vertically, so its focus
@@ -135,24 +136,24 @@ extension KiwiCore {
         let wrap =
             tiler.settings.resolvedMonocle(for: space.id)
             .wrapFocus
-        let next = index + step
-        let target: WindowID
-        if tiled.indices.contains(next) {
-            target = tiled[next]
-        } else if !swapping, wrap {
-            // Focus wraps the carousel (opt out with wrap_focus);
-            // `swap` never wraps, matching scrolling/track (a
-            // wrapping swap would teleport a window end to end).
-            target = step > 0 ? tiled[0] : tiled[tiled.count - 1]
-        } else {
-            // At an end without a wrap: fall through. Every
-            // monocle window shares one frame, so the TILED
-            // search finds no neighbor; only the float tier
-            // (#488) can answer — a deliberate float hop, never
-            // an accidental tile jump — and with no float that
-            // way the command cleanly fails.
-            return nil
-        }
+        // Focus wraps the carousel (opt out with wrap_focus);
+        // `swap` never wraps, matching scrolling/track (a wrapping
+        // swap would teleport a window end to end). At an end
+        // without a wrap: fall through. Every monocle window shares
+        // one frame, so the TILED search finds no neighbor; only
+        // the float tier (#488) can answer — a deliberate float
+        // hop, never an accidental tile jump — and with no float
+        // that way the command cleanly fails.
+        guard
+            let next = Navigation.arrayStep(
+                from: index,
+                step: step,
+                count: tiled.count,
+                wrap: !swapping && wrap,
+                skip: { skip(tiled[$0]) }
+            )
+        else { return nil }
+        let target = tiled[next]
         if swapping {
             if refuseSwapOntoTraveler(target, in: space) {
                 return .ok()

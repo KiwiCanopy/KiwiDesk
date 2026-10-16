@@ -42,6 +42,10 @@ public struct JumpEntry: Sendable, Equatable {
     /// Space — the GUI draws the way there by it, never by its own
     /// reading of the gates `moveHere(_:)` applies.
     public let movesHere: Bool
+    /// Whether a lens is on and this row's app is not one it holds:
+    /// the row sits under "Other apps", after every member's (#2103
+    /// ruling 36). False for every row while no lens is on.
+    public internal(set) var isOtherApp: Bool
 
     public init(
         target: Target,
@@ -51,8 +55,10 @@ public struct JumpEntry: Sendable, Equatable {
         space: SpaceID?,
         spaceIcon: SpaceGlyph?,
         status: Status,
-        movesHere: Bool = false
+        movesHere: Bool = false,
+        isOtherApp: Bool = false
     ) {
+        self.isOtherApp = isOtherApp
         self.target = target
         self.pid = pid
         self.app = app

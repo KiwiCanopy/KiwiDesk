@@ -63,15 +63,29 @@ struct JumpList {
         index < numbered ? index + 1 : nil
     }
 
+    /// Where the Other apps section starts, nil without one: the
+    /// first row of an app the lens on does not hold, which ranks
+    /// after every member's (#2103 ruling 36). Its rows take no
+    /// further header.
+    var otherAppsStart: Int? {
+        results.firstIndex { $0.entry.isOtherApp }
+    }
+
+    /// The rows the Minimized and Hidden headers divide: the lens's
+    /// apps', or every row while no lens is on.
+    private var tiered: ArraySlice<JumpSearch.Match> {
+        results[..<(otherAppsStart ?? results.endIndex)]
+    }
+
     /// Where the Hidden section starts, nil without one.
     var hiddenStart: Int? {
-        results.firstIndex { $0.entry.isHiddenApp }
+        tiered.firstIndex { $0.entry.isHiddenApp }
     }
 
     /// Where the Minimized section starts, nil without one: the
     /// first minimized window, which ranks after every open one.
     var minimizedStart: Int? {
-        results.firstIndex {
+        tiered.firstIndex {
             !$0.entry.isHiddenApp && $0.entry.status == .minimized
         }
     }
@@ -81,14 +95,16 @@ struct JumpList {
     func section(at index: Int) -> Section? {
         if index == minimizedStart { return .minimized }
         if index == hiddenStart { return .hidden }
+        if index == otherAppsStart { return .otherApps }
         return nil
     }
 
     /// How many section headers the list draws.
     var sectionCount: Int {
-        [minimizedStart, hiddenStart].compactMap { $0 }.count
+        [minimizedStart, hiddenStart, otherAppsStart]
+            .compactMap { $0 }.count
     }
 
-    enum Section { case minimized, hidden }
+    enum Section { case minimized, hidden, otherApps }
 
 }

@@ -23,11 +23,12 @@ extension KiwiCore {
         in direction: Direction,
         space: Space,
         focused: WindowID,
-        swapping: Bool
+        swapping: Bool,
+        skip: (WindowID) -> Bool = { _ in false }
     ) -> WindowID? {
         guard !swapping else { return nil }
         let candidates = state.floatingFocusCandidates(of: space)
-            .filter { $0 != focused }
+            .filter { $0 != focused && !skip($0) }
             .compactMap { id -> (WindowID, CGRect)? in
                 guard let frame = state.windows[id]?.frame,
                     !frame.isEmpty

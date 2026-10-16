@@ -32,8 +32,48 @@ extension KiwiCore {
         let focused = jumpFocusedWindow().map {
             JumpEntry.Target.window($0)
         }
-        return ordered.map(\.element).filter { $0.target != focused }
+        let rows =
+            ordered.map(\.element).filter { $0.target != focused }
             + hiddenAppJumpEntries()
+        return lensOrdered(rows)
+    }
+
+    /// The lens's apps' rows first, the rest after and marked, each
+    /// part keeping its order (#2103 ruling 36); unchanged while no
+    /// lens is on.
+    private func lensOrdered(_ rows: [JumpEntry]) -> [JumpEntry] {
+        guard let apps = visionLensApps else { return rows }
+        var members: [JumpEntry] = []
+        var others: [JumpEntry] = []
+        for var row in rows {
+            if let key = jumpAppKey(row), apps.contains(key) {
+                members.append(row)
+            } else {
+                row.isOtherApp = true
+                others.append(row)
+            }
+        }
+        return members + others
+    }
+
+    /// A row's app as an app list names it: a window's from what
+    /// KiwiDesk holds of it, a hidden app's from its process.
+    private func jumpAppKey(_ row: JumpEntry) -> String? {
+        switch row.target {
+        case .hiddenApp(let pid):
+            return eventLoop.appRef(of: pid).listKey
+        case .window(let id):
+            if let window = state.windows[id] {
+                return window.appRef.listKey
+            }
+            if let away = state.awayWindows[id] {
+                return AppRef(bundleID: away.appBundleID, name: away.appName)
+                    .listKey
+            }
+            return state.minimizeOrder.first { $0.id == id }.map {
+                AppRef(bundleID: $0.bundleID, name: $0.app).listKey
+            }
+        }
     }
 
     /// The window the user is in: the bar's focus, only while its
