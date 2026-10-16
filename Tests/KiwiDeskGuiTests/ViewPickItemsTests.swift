@@ -68,11 +68,15 @@ struct ViewPickItemsTests {
     func visionLine() {
         LocalizationManager.shared.select("en")
         let off = items(vision: .off)[.vision] ?? []
-        #expect(off.map(\.pick) == [.visionOff, .vision(lens: nil)])
-        #expect(off.map(\.isCurrent) == [true, false])
-        #expect(off.last?.chord == "⌃⌥V")
+        // With no lens yet the line offers one (ruling 41).
+        #expect(
+            off.map(\.pick) == [.visionOff, .vision(lens: nil), .newLens]
+        )
+        #expect(off.map(\.isCurrent) == [true, false, false])
+        #expect(off[1].chord == "⌃⌥V")
+        #expect(off.last?.name == "New Lens…")
         let on = items(vision: .plain)[.vision] ?? []
-        #expect(on.map(\.isCurrent) == [false, true])
+        #expect(on.map(\.isCurrent) == [false, true, false])
     }
 
     /// Ruling 41: a chip per lens after Focused window, the lens on

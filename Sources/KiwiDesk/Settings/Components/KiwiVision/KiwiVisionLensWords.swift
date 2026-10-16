@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import SwiftUI
 
@@ -53,12 +54,10 @@ enum KiwiVisionLensWords {
         switch refusal {
         case .empty: return nil
         case .tooLong:
-            // Ruling 48's sentence; the limit is
-            // `AppWideSettings.lensNameLimit`, spelled as a word so no
-            // catalog has to agree with a count.
             return L(
                 "kiwivision.lens.name.too_long",
-                "A name can be up to 40 characters."
+                "A name can be up to %1$d characters.",
+                AppWideSettings.lensNameLimit
             )
         case .taken(let holder):
             return L(
@@ -76,8 +75,7 @@ enum KiwiVisionLensWords {
     static var reachCaption: String {
         L(
             "kiwivision.lens.reach.caption",
-            "Built-in setups — the Starter and presets you have not "
-                + "saved — always include every lens."
+            "Built-in layouts always include every lens."
         )
     }
 
@@ -88,7 +86,7 @@ enum KiwiVisionLensWords {
         }
         switch reached.count {
         case 0:
-            return L("kiwivision.lens.reach.none", "Built-in setups only")
+            return L("kiwivision.lens.reach.none", "Built-in layouts only")
         case 1:
             return L("app_rules.reach.only", "%1$@ only", reached[0])
         case 2:
@@ -105,7 +103,19 @@ enum KiwiVisionLensWords {
 
     // MARK: Apps
 
-    static var appsTitle: String { L("kiwivision.lens.apps", "Apps") }
+    /// The census row's help (`kiwivision.lenses`).
+    static var lensesHelp: String {
+        L(
+            "kiwivision.lenses.help",
+            "A lens is a KiwiVision of its own: the apps it keeps "
+                + "clear, its own shortcut and any setting it changes. "
+                + "Lens changes are kept when you save."
+        )
+    }
+
+    static var appsTitle: String {
+        SettingsCatalog.kiwiVision.lensAppsCard.text
+    }
 
     static func appsCaption(_ lens: String) -> String {
         L(
@@ -120,7 +130,8 @@ enum KiwiVisionLensWords {
             "kiwivision.lens.apps.help",
             "Every window of an app here stays clear while the lens is "
                 + "on, on top of what the settings below keep clear. "
-                + "Never dimmed apps stay clear too."
+                + "The apps in %1$@ stay clear too.",
+            SettingsCatalog.kiwiVision.neverDimmedCard.text
         )
     }
 
@@ -163,7 +174,7 @@ enum KiwiVisionLensWords {
     // MARK: Other apps
 
     static var otherTitle: String {
-        L("kiwivision.lens.other", "Other apps")
+        SettingsCatalog.kiwiVision.lensOtherCard.text
     }
 
     static func otherCaption(_ lens: String) -> String {
@@ -205,7 +216,11 @@ enum KiwiVisionLensWords {
         return L(
             "kiwivision.lens.delay.seconds",
             "%1$@ s",
-            seconds.formatted(.number.precision(.fractionLength(0...1)))
+            // The rows' own number shape, not the host's locale.
+            String(
+                format: seconds.rounded() == seconds ? "%.0f" : "%.1f",
+                seconds
+            )
         )
     }
 
@@ -273,7 +288,7 @@ enum KiwiVisionLensWords {
             "kiwivision.lens.panel.caption",
             "While %1$@ is on, these stay clear: %2$@.",
             lens,
-            apps.formatted(.list(type: .and))
+            apps.joined(separator: ", ")
         )
     }
 }

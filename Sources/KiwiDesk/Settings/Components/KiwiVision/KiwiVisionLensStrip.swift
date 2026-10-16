@@ -34,6 +34,7 @@ struct KiwiVisionLensStrip: View {
             addChip
         }
         .searchAnchored(SettingsCatalog.kiwiVision.lenses)
+        .help(KiwiVisionLensWords.lensesHelp)
     }
 
     private var addChip: some View {

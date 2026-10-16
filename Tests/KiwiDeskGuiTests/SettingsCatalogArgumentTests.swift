@@ -87,18 +87,13 @@ struct SettingsCatalogArgumentTests {
     /// sites. **Mutual exclusion is the only admissible
     /// reason** — the sites must never co-render, or the shared
     /// id is ambiguous.
-    /// Empty since #678 turn 13b, and kept so the next mutually
-    /// exclusive pair has to be recorded on purpose rather than
-    /// pass as an ordinary double mount.
-    ///
-    /// Monitors' entry left it: the picture and the
-    /// "not connected" banner used to be if/else TWINS each
-    /// mounting `monitors.spacePlacement`, and they are now two
-    /// gated ROWS inside one mount of it — which is what the
-    /// census says they are. (The bar colour drawers left this
-    /// list earlier, when the Bars switch died: they co-render
-    /// now, so each mounts its own instance declaration.)
-    private let alternatelyMounted: [String: Int] = [:]
+    /// KiwiVision's three Focused window cards mount on its page
+    /// and, as a lens's own values, on a lens's page — the strip
+    /// shows one page at a time (#2103 ruling 46).
+    private let alternatelyMounted: [String: Int] = [
+        "kiwiVision.levelsCard": 2, "kiwiVision.clearCard": 2,
+        "kiwiVision.appearanceCard": 2,
+    ]
 
     /// Every `SettingsSection(` / `SettingsDisclosure(` first
     /// argument is a catalog declaration (counted, so a
@@ -237,8 +232,9 @@ struct SettingsCatalogArgumentTests {
         // the indirect parameter above. 102 since #2228: KiwiShelf's
         // Show the Space switch. 106 since #1685: the AI page's
         // three cards and its setup row. 107: #2265's KiwiHub group.
-        // 112-118: #2103, #1870, #2103 v2. 119 #1869, 120 #2258, 121 #2312.
-        #expect(direct.values.reduce(0, +) == 121)
+        // 112-118: #2103, #1870, #2103 v2. 119 #1869, 120 #2258,
+        // 121 #2312, 127 #2103's lens page and its three cards.
+        #expect(direct.values.reduce(0, +) == 127)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

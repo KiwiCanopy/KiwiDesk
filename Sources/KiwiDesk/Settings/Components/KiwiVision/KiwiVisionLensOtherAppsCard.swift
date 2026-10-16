@@ -11,7 +11,7 @@ struct KiwiVisionLensOtherAppsCard: View {
 
     var body: some View {
         SettingsSection(
-            KiwiVisionLensWords.otherTitle,
+            SettingsCatalog.kiwiVision.lensOtherCard,
             caption: KiwiVisionLensWords.otherCaption(lens.name),
             help: KiwiVisionLensWords.otherHelp
         ) {

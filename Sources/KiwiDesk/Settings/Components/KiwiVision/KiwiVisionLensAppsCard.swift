@@ -10,7 +10,7 @@ struct KiwiVisionLensAppsCard: View {
 
     var body: some View {
         SettingsSection(
-            KiwiVisionLensWords.appsTitle,
+            SettingsCatalog.kiwiVision.lensAppsCard,
             caption: KiwiVisionLensWords.appsCaption(lens.name),
             help: KiwiVisionLensWords.appsHelp
         ) {

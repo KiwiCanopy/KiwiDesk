@@ -143,7 +143,8 @@ struct SettingsCatalogTests {
         // 155 since #1869: Mouse & trackpad ▸ hover focus.
         // 156 since #2258: AI ▸ Add to Claude Desktop.
         // 157 since #2312: KiwiVision's own shortcuts group.
-        #expect(allEntries.count == 157)
+        // 160 since #2103 PR 7: the lens strip, Apps and Other apps.
+        #expect(allEntries.count == 160)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
