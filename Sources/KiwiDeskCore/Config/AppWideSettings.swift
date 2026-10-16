@@ -48,6 +48,9 @@ public struct AppWideSettings: Equatable, Sendable {
     /// (`kiwivision.never_dimmed`, #2103 ruling 26). Empty by
     /// default.
     public var visionNeverDimmed: [String] = []
+    /// KiwiVision's lenses (`kiwivision.lenses`, #2103 v3), names
+    /// unique ignoring case. Empty by default.
+    public var visionLenses: [VisionLens] = []
     /// The key turned into the Hyper modifier, nil for none
     /// (`hyper.key`, #1870). Per install, never per profile: it
     /// remaps a physical key, and a profile can change on a swipe.
@@ -161,7 +164,7 @@ extension AppWideSettings {
     }
 
     /// `gui.json`'s `kiwivision` group (#2103) — additive, as
-    /// `desktop`; v3's sets join it.
+    /// `desktop`; v3's lenses joined it with no crossing.
     struct Vision: Codable, Equatable {
         var dim: Double?
         var blur: Bool?
@@ -169,9 +172,10 @@ extension AppWideSettings {
         var clearWallpaper: Bool?
         var clearApp: Bool?
         var neverDimmed: [String]?
+        var lenses: [VisionLens]?
 
         enum CodingKeys: String, CodingKey {
-            case dim, blur, appearance
+            case dim, blur, appearance, lenses
             case clearWallpaper = "clear_wallpaper"
             case clearApp = "clear_app"
             case neverDimmed = "never_dimmed"
@@ -210,6 +214,9 @@ extension AppWideSettings {
         if let apps = vision?.neverDimmed {
             visionNeverDimmed = Self.neverDimmedEntries(apps)
         }
+        if let lenses = vision?.lenses {
+            visionLenses = Self.lensEntries(lenses)
+        }
         if let sound = refusal?.sound { refusalSound = sound }
         if let depth = quit?.gridTargetDepth {
             quitGridTargetDepth = Self.clampedDepth(depth)
@@ -232,7 +239,8 @@ extension AppWideSettings {
             appearance: visionAppearance,
             clearWallpaper: visionClearWallpaper,
             clearApp: visionClearApp,
-            neverDimmed: visionNeverDimmed
+            neverDimmed: visionNeverDimmed,
+            lenses: visionLenses
         )
     }
 }

@@ -1626,6 +1626,8 @@ Touching `Borders`, `Vision`.
   `kiwiVisionDrawsBlur` door every reader of the drawn blur takes,
   takes every live app-wide change through the one
   `appWideLiveChanged`, which compares the whole stored group,
+  reads every KiwiVision setting through the one `VisionLook`
+  resolver (`VisionLookSeamTests`),
   masks itself through a reshape that never orders, its window
   list read at a settle pass through one seam
   (`VisionMaskPlateTests`, `KiwiVisionClearWallpaperTests`),

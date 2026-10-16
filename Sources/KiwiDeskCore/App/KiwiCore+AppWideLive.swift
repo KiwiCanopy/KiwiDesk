@@ -11,11 +11,15 @@ extension KiwiCore {
     func appWideLiveChanged(from old: AppWideSettings) {
         let new = appWide
         guard new != old else { return }
-        if new.visionAppearance != old.visionAppearance, vision.isOn {
-            retargetVisionAppearance(new.visionAppearance)
+        let lens = visionLensName
+        let appearance = new.look(lens: lens).appearance
+        if appearance != old.look(lens: lens).appearance, vision.isOn {
+            retargetVisionAppearance(appearance)
         }
         // A changed list re-reads the windows, with their bundles.
-        if new.visionNeverDimmed != old.visionNeverDimmed {
+        if new.look(lens: lens).listedApps
+            != old.look(lens: lens).listedApps
+        {
             vision.forgetListedWindows()
         }
         // The whole stored group, so a field v3 adds re-draws too.

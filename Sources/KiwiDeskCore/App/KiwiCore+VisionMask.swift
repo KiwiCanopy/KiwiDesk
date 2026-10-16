@@ -9,14 +9,14 @@ extension KiwiCore {
     var visionMasks: Bool {
         visionClearsWallpaper
             || (vision.isOn
-                && (appWide.visionClearApp
-                    || !appWide.visionNeverDimmed.isEmpty))
+                && (visionLook.clearApp
+                    || !visionLook.neverDimmed.isEmpty))
     }
 
     /// Whether the wallpaper stays clear now — the one reading the
     /// request's flag and the mask gate share.
     var visionClearsWallpaper: Bool {
-        vision.isOn && appWide.visionClearWallpaper
+        vision.isOn && visionLook.clearWallpaper
     }
 
     /// The windows below the plates, front to back, in AppKit
@@ -57,7 +57,7 @@ extension KiwiCore {
             refresh: refreshingList,
             tracks: { self.state.windows[WindowID($0)] != nil },
             radius: { self.windowRadius(WindowID($0), reading: true) },
-            bundle: appWide.visionNeverDimmed.isEmpty
+            bundle: visionLook.listedApps.isEmpty
                 ? nil
                 : { self.eventLoop.bundle(of: $0, lookingUp: true) }
         )
@@ -114,10 +114,11 @@ extension KiwiCore {
         among apps: [pid_t: AppRef]
     ) -> Set<pid_t> {
         var clear: Set<pid_t> = []
+        let look = visionLook
         for (pid, app) in apps {
             if isNeverDimmed(app) {
                 clear.insert(pid)
-            } else if appWide.visionClearApp, let target, target > 0,
+            } else if look.clearApp, let target, target > 0,
                 eventLoop.names(target, appOf: pid, lookingUp: false)
             {
                 clear.insert(pid)
@@ -139,7 +140,7 @@ extension KiwiCore {
 
     /// Whether the Never dimmed list names `app`.
     private func isNeverDimmed(_ app: AppRef) -> Bool {
-        let list = appWide.visionNeverDimmed
+        let list = visionLook.neverDimmed
         return !list.isEmpty && list.contains(app.listKey)
     }
 

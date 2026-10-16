@@ -442,7 +442,13 @@ Obligations:
   event moves or drops its entry, its reorder re-masking rather than
   re-stacking the plate (`KiwiVisionClearWallpaperTests` ▸
   `listReadCadence`, `eventsKeepTheMaskFresh`). Both `makeTestCore`
-  twins pin the seam empty. **A window's clear verdict is decided
+  twins pin the seam empty. **Every Core read of a KiwiVision
+  setting goes through the one resolver, `VisionLook`**
+  (`KiwiCore.visionLook`, `AppWideSettings.look(lens:)`), never
+  a flat `appWide.vision…` field beside it: a plain read is
+  wrong only while a lens is on, which no plain-mode suite sees
+  (#2103 v3, `VisionLookSeamTests`, `VisionLensTests` ▸
+  `resolverAppliesEveryField`). **A window's clear verdict is decided
   once per pass, per process, in `KiwiCore.visionClearPids`**, and
   "the same app" is the one identity door,
   `EventLoop.names(_:appOf:lookingUp: false)` — never a bare pid
