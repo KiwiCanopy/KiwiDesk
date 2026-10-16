@@ -17,7 +17,7 @@ struct DefaultShortcutGenerationTests {
     /// window switcher (#1875) and KiwiVision (#2103).
     private let layoutKeys = [
         "KiwiDesk.cycle_mode()", "KiwiDesk.cycle_mode(\"prev\")",
-        "kiwihub.show(\"layouts\")",
+        "kiwihub.show(\"view\")",
         "kiwihub.show(\"windows\")",
         "kiwivision.toggle()",
     ]

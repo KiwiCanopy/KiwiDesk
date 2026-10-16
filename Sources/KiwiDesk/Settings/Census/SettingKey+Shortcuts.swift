@@ -31,7 +31,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// Next / previous layout of the focused Space (#453).
     case layoutCycle = "keybinding.{next,previous}_layout"
     /// The layout picker at the pointer (#762).
-    case layoutPicker = "keybinding.show_layout_picker"
+    case viewPicker = "keybinding.show_view_picker"
     /// The layouts the cycle walks (#453).
     case modeCycle = "config.modeCycle"
     /// The plate shown after a cycle (#2144): app-wide (#1741).
@@ -79,7 +79,7 @@ extension ShortcutsKey {
             .goToSpace, .toggleKiwiVision:
             return .row(.shortcuts, .focus, .atRest)
         // KiwiHub's three sides, one group for one panel (#2265).
-        case .jumpToWindow, .showShortcuts, .layoutPicker:
+        case .jumpToWindow, .showShortcuts, .viewPicker:
             return .row(.shortcuts, .kiwiHub, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
@@ -176,7 +176,7 @@ extension ShortcutsKey {
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
-            .layoutCycle, .layoutPicker, .jumpToWindow:
+            .layoutCycle, .viewPicker, .jumpToWindow:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

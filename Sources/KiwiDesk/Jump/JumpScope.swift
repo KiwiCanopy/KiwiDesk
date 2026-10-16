@@ -2,9 +2,9 @@ import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// KiwiHub's three sides (#2229, #2246, #2265): the window
-/// switcher's list, the shortcuts sheet and the layout picker's
-/// tiles, one field above all three, in the order of their keys
+/// KiwiHub's three sides (#2229, #2246, #2265, #2309): the window
+/// switcher's list, the shortcuts sheet and the view picker's
+/// lines, one field above all three, in the order of their keys
 /// J K L. ⇥ steps forward and ⇧⇥ back, wrapping, and each side's
 /// own shortcut reaches it while the panel is up. One enum with
 /// Core's, so the panel and `kiwihub.show` cannot map a side two
@@ -31,7 +31,7 @@ extension KiwiHubSide {
         case .windows: return L("jump.scope.windows", "Windows")
         case .shortcuts:
             return L("jump.scope.shortcuts", "Shortcuts")
-        case .layouts: return L("jump.scope.layouts", "Layouts")
+        case .view: return L("jump.scope.view", "View")
         }
     }
 
@@ -48,8 +48,8 @@ extension KiwiHubSide {
         case .windows: return L("jump.panel.ax_label", "Window switcher")
         case .shortcuts:
             return L("shortcuts.panel.ax_label", "Shortcuts panel")
-        case .layouts:
-            return L("layout_picker.panel.ax_label", "Layout picker")
+        case .view:
+            return L("view_picker.panel.ax_label", "View picker")
         }
     }
 
@@ -59,8 +59,11 @@ extension KiwiHubSide {
         case .windows: return L("jump.field.label", "Jump to window")
         case .shortcuts:
             return L("shortcuts.field.label", "Search shortcuts")
-        case .layouts:
-            return L("layout_picker.field.label", "Choose a layout")
+        case .view:
+            return L(
+                "view_picker.field.label",
+                "Search layouts, profiles and lenses"
+            )
         }
     }
 }

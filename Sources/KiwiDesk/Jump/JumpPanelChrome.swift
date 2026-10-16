@@ -100,7 +100,7 @@ extension JumpFooter {
                 L("shortcuts.footer.edit", "%1$@ Edit", "⌘,"),
                 other,
             ]
-        case .layouts:
+        case .view:
             return [
                 L("layout_picker.footer.choose", "%1$@ Choose", "← →"),
                 L("layout_picker.footer.apply", "%1$@ Apply", "↩"),

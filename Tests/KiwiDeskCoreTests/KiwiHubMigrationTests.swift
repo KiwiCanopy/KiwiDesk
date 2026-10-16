@@ -152,6 +152,28 @@ struct KiwiHubMigrationTests {
         )
     }
 
+    /// The layouts side was renamed View before release (#2309), so
+    /// a file a pre-release build wrote crosses at any format.
+    @Test("the unreleased layouts side crosses to view")
+    func layoutsSideCrosses() throws {
+        var config = guiConfig(format: GuiConfig.currentFormat)
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [row("l", "kiwihub.show(\"layouts\")")]
+            )
+        ]
+        let data = try encoder.encode(config)
+        let out = try #require(
+            ConfigMigration.migratingRetiredPanelVerbs(data)
+        )
+        let migrated = try decoder.decode(GuiConfig.self, from: out)
+        #expect(
+            migrated.layers.first?.bindings.map(\.lua)
+                == [KiwiHubSide.view.lua]
+        )
+    }
+
     @Test("a file without a retired call is left alone")
     func untouchedWithoutTheCall() throws {
         var config = guiConfig(format: guiBefore)

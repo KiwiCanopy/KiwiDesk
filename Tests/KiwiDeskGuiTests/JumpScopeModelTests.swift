@@ -50,21 +50,21 @@ struct JumpScopeModelTests {
         #expect(model.list.query == "")
         model.query = "flo"
         model.handle(.stepScope(forward: true))
-        #expect(model.scope == .layouts)
+        #expect(model.scope == .view)
         #expect(model.shortcuts?.query == "")
         model.query = "mon"
         model.handle(.stepScope(forward: true))
         #expect(model.scope == .windows)
         #expect(model.layouts?.query == "")
         model.handle(.stepScope(forward: false))
-        #expect(model.scope == .layouts)
+        #expect(model.scope == .view)
     }
 
     @Test("⇥ steps past a Layouts side whose Space is gone")
     func goneSpaceIsSteppedPast() {
         let model = model()
         model.loadLayouts = { _ in nil }
-        model.setScope(.layouts)
+        model.setScope(.view)
         #expect(model.scope == .windows)
         model.handle(.stepScope(forward: true))
         #expect(model.scope == .shortcuts)
@@ -81,7 +81,7 @@ struct JumpScopeModelTests {
         var closed = 0
         model.onApply = { applied.append($0) }
         model.onClose = { closed += 1 }
-        model.setScope(.layouts)
+        model.setScope(.view)
         model.handle(.pick(moveHere: false))
         model.handle(.quick(0, moveHere: false))
         #expect(applied == [.grid, LayoutMode.allCases[0]])
@@ -98,18 +98,18 @@ struct JumpScopeModelTests {
         var kept = 0
         let armed = model(keepArmed: true)
         armed.onKeep = { kept += 1 }
-        armed.setScope(.layouts)
+        armed.setScope(.view)
         armed.handle(.keep)
         #expect(kept == 1)
         let saved = model(keepArmed: false)
         saved.onKeep = { kept += 1 }
-        saved.setScope(.layouts)
+        saved.setScope(.view)
         saved.handle(.keep)
         #expect(kept == 1)
         // No profile, no Keep, whatever the drift.
         let unprofiled = model(keepArmed: true, profile: nil)
         unprofiled.onKeep = { kept += 1 }
-        unprofiled.setScope(.layouts)
+        unprofiled.setScope(.view)
         unprofiled.handle(.keep)
         #expect(kept == 1)
     }
@@ -119,7 +119,7 @@ struct JumpScopeModelTests {
         let model = model()
         var landed: [LayoutMode] = []
         model.onLayoutDefaults = { landed.append($0) }
-        model.setScope(.layouts)
+        model.setScope(.view)
         model.handle(.side(1))
         model.handle(.settings)
         let grid = LayoutMode.allCases.firstIndex(of: .grid)!
@@ -194,7 +194,7 @@ struct JumpHoverTests {
             )
         }
         model.currentPointer = { CGPoint(x: 10, y: 10) }
-        model.setScope(.layouts)
+        model.setScope(.view)
         model.hoverTile(.stack, pointer: CGPoint(x: 40, y: 10))
         #expect(model.layouts?.selected == .stack)
         #expect(model.layouts?.state.live == .grid)

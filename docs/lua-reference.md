@@ -1015,7 +1015,7 @@ glass is untinted: it draws `.regular` where the bars draw
 :::unreleased
 The shortcuts panel is a side of [KiwiHub](#kiwihubshow), so this
 leaf sets the material of all of KiwiHub — the window switcher,
-the shortcuts panel and the layout picker.
+the shortcuts panel and the view picker.
 :::
 
 Stored as `shortcut_panel.liquid_glass` in the profile, so a
@@ -5029,7 +5029,7 @@ end)
 :::unreleased
 ### kiwihub.show
 
-**Expects:** a side: `"windows"`, `"shortcuts"` or `"layouts"`.
+**Expects:** a side: `"windows"`, `"shortcuts"` or `"view"`.
 
 **Does:** opens **KiwiHub** on that side, switches to it from
 another side, or closes KiwiHub when it already shows that side.
@@ -5064,7 +5064,7 @@ the mouse over a row selects it.
 A window in native full screen is listed, and Return activates its
 app rather than switching to its full-screen Space.
 
-The `"layouts"` side is the **layout picker**, for the Space shown
+The `"view"` side is the **view picker**, for the Space shown
 on the screen under the pointer. Every layout is a tile with its
 picture, the current one marked ✓.
 

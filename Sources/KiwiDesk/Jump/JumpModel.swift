@@ -83,7 +83,7 @@ final class JumpModel: ObservableObject {
             switch scope {
             case .windows: return list.query
             case .shortcuts: return shortcuts?.query ?? ""
-            case .layouts: return layouts?.query ?? ""
+            case .view: return layouts?.query ?? ""
             }
         }
         set {
@@ -95,7 +95,7 @@ final class JumpModel: ObservableObject {
             case .shortcuts:
                 setShortcutQuery(newValue)
                 return
-            case .layouts:
+            case .view:
                 setLayoutQuery(newValue)
                 return
             }
@@ -111,7 +111,7 @@ final class JumpModel: ObservableObject {
             // A Layouts side with no Space to act on is stepped
             // past rather than stopping ⇥.
             let next = scope.stepped(forward: forward)
-            if !setScope(next), next == .layouts {
+            if !setScope(next), next == .view {
                 setScope(next.stepped(forward: forward))
             }
             return
@@ -121,7 +121,7 @@ final class JumpModel: ObservableObject {
         case .shortcuts:
             handleShortcuts(key)
             return
-        case .layouts:
+        case .view:
             handleLayouts(key)
             return
         }
@@ -158,7 +158,7 @@ final class JumpModel: ObservableObject {
     @discardableResult
     func setScope(_ scope: JumpScope) -> Bool {
         guard scope != self.scope else { return true }
-        if scope == .layouts {
+        if scope == .view {
             guard let fresh = loadLayouts(nil) else { return false }
             layouts = fresh
         }
@@ -185,7 +185,7 @@ final class JumpModel: ObservableObject {
     }
 
     func hoverTile(_ mode: LayoutMode, pointer: CGPoint) {
-        guard scope == .layouts, pointerMoved(to: pointer) else { return }
+        guard scope == .view, pointerMoved(to: pointer) else { return }
         layouts?.select(mode)
     }
 
@@ -208,7 +208,7 @@ final class JumpModel: ObservableObject {
         switch scope {
         case .windows: return list.selected != nil
         case .shortcuts: return false
-        case .layouts: return layouts?.selected != nil
+        case .view: return layouts?.selected != nil
         }
     }
 

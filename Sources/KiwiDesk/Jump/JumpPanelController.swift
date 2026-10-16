@@ -76,7 +76,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         pickerSpace = core.layoutPickerSpace()
         // ⌃⌥L with no Space to act on opens nothing, rather than
         // the other scope.
-        if scope == .layouts,
+        if scope == .view,
             pickerSpace.flatMap(core.layoutPickerState(for:)) == nil
         {
             return

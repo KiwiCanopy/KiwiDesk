@@ -58,7 +58,7 @@ enum JumpKey: Equatable {
             [.shift, .command, .option, .control]
         )
         let plain = held.isEmpty
-        if scope == .layouts, let key = layouts(keyCode, held) {
+        if scope == .view, let key = layouts(keyCode, held) {
             return key
         }
         if scope != .windows, keyCode == comma, held == .command {

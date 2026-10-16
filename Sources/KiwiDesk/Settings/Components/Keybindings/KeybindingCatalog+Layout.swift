@@ -23,9 +23,9 @@ extension KeybindingCatalog {
     /// The layout picker, KiwiHub's Layouts side (#2229, #2265).
     static let showLayoutPicker = NavCommand(
         label: "Show layout picker",
-        lua: KiwiHubSide.layouts.lua,
+        lua: KiwiHubSide.view.lua,
         displayLabel: {
-            L("keybinding.show_layout_picker", "Show layout picker")
+            L("keybinding.show_view_picker", "Show view picker")
         }
     )
 
