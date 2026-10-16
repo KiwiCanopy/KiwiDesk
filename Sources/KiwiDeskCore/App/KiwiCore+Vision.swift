@@ -10,11 +10,6 @@ extension KiwiCore {
     /// Whether KiwiVision is on.
     public var kiwiVisionIsOn: Bool { vision.isOn }
 
-    /// `kiwivision.toggle`: turns KiwiVision on or off.
-    public func toggleKiwiVision() {
-        setKiwiVision(vision.isOn ? .off : .plain)
-    }
-
     /// What KiwiVision draws now: off, plain or a lens.
     public var kiwiVisionActive: VisionActive { vision.active }
 

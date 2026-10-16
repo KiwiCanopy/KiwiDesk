@@ -447,6 +447,16 @@ bite large test PRs:
   owns the sequencing and the argument, and
   `.claude/agents/guard-prover.md` owns what the agent itself
   does about it.
+
+  **Remove an isolated prover's worktree and its branch once it
+  reports or is stopped** (owner, 2026-10-16). A prover always
+  changes its tree, so the harness never cleans it up, and the
+  leftovers pile up in `.claude/worktrees/`. First check that the
+  worktree's HEAD and its `worktree-agent-*` branch hold no commit
+  that is on no other branch (`git branch -a --contains <sha>`);
+  an uncommitted change there is a mutation, discarded with the
+  tree. Then run `git worktree remove --force <path>` and
+  `git branch -D <branch>` from your own worktree.
 - **A perf change owes the correctness half.** A skip, a cache or
   an early return whose safety rests on something else running
   later pins that dependency with a test, never with a comment —
