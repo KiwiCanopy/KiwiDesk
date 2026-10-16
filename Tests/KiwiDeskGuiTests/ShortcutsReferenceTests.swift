@@ -293,8 +293,10 @@ struct ShortcutsReferenceTests {
             layerNames: layerNames
         )
         #expect(reference.custom.isEmpty)
+        // A folded row stands for its members (#2312): every one
+        // is still there, inside it.
         let controlRows = reference.controls.reduce(0) {
-            $0 + $1.rows.count
+            $0 + $1.rows.reduce(0) { $0 + max($1.members.count, 1) }
         }
         // Open Settings leads Apps, and the key panel's own openers
         // are not listed (#2246).
