@@ -71,7 +71,7 @@ struct ShortcutsFamilyRows {
             )
         case .layoutCycle:
             return KeybindingCatalog.layoutCycleRows
-        case .layoutPicker:
+        case .viewPicker:
             return [KeybindingCatalog.showLayoutPicker]
         case .jumpToWindow:
             return [KeybindingCatalog.jumpToWindow]

@@ -16,7 +16,7 @@ extension SettingsValueReadout {
         case .focusDir, .spaceStep, .spaceHistoryStep, .goToSpace, .swapDir,
             .moveWindowToTrack, .swapWithTrack, .moveToSpace,
             .moveToSpaceFollow, .focusDesktop, .moveToDesktop,
-            .moveToDesktopFollow, .layoutCycle, .layoutPicker, .jumpToWindow,
+            .moveToDesktopFollow, .layoutCycle, .viewPicker, .jumpToWindow,
             .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleKiwiVision,
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,

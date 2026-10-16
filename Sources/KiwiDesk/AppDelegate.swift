@@ -49,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     }
     private let configIssues = ConfigIssuesWindowController()
     /// The key panel: the window switcher, the shortcuts sheet
-    /// (#326, #2246) and the layout picker, retained so it
+    /// (#326, #2246) and the view picker, retained so it
     /// survives close and reopen.
     var jumpPanel: JumpPanelController?
     /// Held strongly so the source stays active for the
@@ -111,12 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             )
         }
         statusItem.onLoadProfile = { [weak self] name in
-            self?.core.withUserMotion {
-                _ = self?.core.execute(
-                    "load_profile",
-                    args: [.string(name)]
-                )
-            }
+            self?.core.loadProfileAsUser(name)
         }
         statusItem.layoutInfoProvider = { [weak self] in
             guard let self else { return LayoutMenuInfo.empty }

@@ -11195,8 +11195,42 @@ choice the user made, and selecting it would steal the keyboard's
 selection. The ✓ never moves with it: the pill marks where ↩
 goes, the ✓ what the Space shows. One verb opens every side,
 `kiwihub.show`, and the CLI reaches it (▸ *The key panel is
-KiwiHub*). `JumpScopeModelTests`, `LayoutPickListTests` and
+KiwiHub*). `JumpScopeModelTests`, `ViewPickListTests` and
 `JumpKeyTests` hold the keys. (#2229)
+:::
+
+:::unreleased
+**The ⌃⌥L side is View: one chord reaches every daily switch
+(#2309, owner ruling 2026-10-15).** #2229 and #2246 admitted a
+side for its search alone. The layout, the profile and KiwiVision
+are the three things a user changes through the day, and a status
+menu can reach them only with the pointer, so the third side
+widened to hold all three and took the name View. It stayed one
+side rather than becoming a fourth: the side switch shares a row
+with the search field in a panel of fixed width, and the three
+answer one question, how the desk looks now.
+
+Each group is one line that never wraps, so ↑ and ↓ always mean
+"the next line" and the panel's height does not depend on a name's
+length; a longer line scrolls sideways, keeps the selection in
+view and fades at each edge it cuts. ↑ and ↓ keep the position
+along the line, clamped to a shorter one, the way a grid of icons
+in Finder or the emoji picker moves. The ⌘ digits count on the
+line the selection is on, among the matches while a search is
+typed, never by what scrolled into view. Per-line modifiers were
+weighed and refused: ⌃⌥ is still held from the summon, ⌥ with a
+digit types a character, and ⌃ with a digit is macOS's own
+Desktop switching. The panel opens on the Layout line, so ⌃⌥L ⌘3
+still applies the third layout. ⇧ with ↩ or a digit does nothing
+here, since there is nothing to move.
+
+The Profile line appears only where another profile can be
+loaded, as the menu decides, and a profile that cannot load stays
+listed, greyed, with its reason, rather than vanishing. With no
+Space under the pointer the Layout line greys instead of the side
+being stepped past, because the other two lines need no Space.
+`ViewPickListTests`, `ViewPickItemsTests` and
+`JumpScopeModelTests` hold it.
 :::
 
 :::unreleased

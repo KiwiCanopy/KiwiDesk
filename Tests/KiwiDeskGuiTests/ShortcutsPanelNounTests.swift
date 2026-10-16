@@ -80,8 +80,8 @@ struct ShortcutsPanelNounTests {
             translated: true
         ),
         Pair(
-            panelName: "layout_picker.panel.ax_label",
-            opener: "keybinding.show_layout_picker",
+            panelName: "view_picker.panel.ax_label",
+            opener: "keybinding.show_view_picker",
             translated: true
         ),
     ]

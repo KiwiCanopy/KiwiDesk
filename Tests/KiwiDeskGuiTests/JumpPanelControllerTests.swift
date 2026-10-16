@@ -61,13 +61,13 @@ struct JumpPanelControllerTests {
     @Test("a scope's shortcut opens, switches or closes")
     func toggleAction() {
         typealias C = JumpPanelController
-        #expect(C.toggleAction(showing: nil, asked: .layouts) == .open)
+        #expect(C.toggleAction(showing: nil, asked: .view) == .open)
         #expect(
-            C.toggleAction(showing: .windows, asked: .layouts)
+            C.toggleAction(showing: .windows, asked: .view)
                 == .switchScope
         )
         #expect(
-            C.toggleAction(showing: .layouts, asked: .layouts) == .close
+            C.toggleAction(showing: .view, asked: .view) == .close
         )
     }
 

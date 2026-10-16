@@ -1,7 +1,7 @@
 import KiwiDeskCore
 
 /// The layout cycle's rows through the `mode_cycle` list (#453)
-/// and KiwiHub's layout picker (#762, #2265). Written out per row
+/// and KiwiHub's view picker (#762, #2265, #2309). Written out per row
 /// so each key stays a literal `scripts/extract-keys` can see.
 extension KeybindingCatalog {
     static let nextLayout = NavCommand(
@@ -20,12 +20,12 @@ extension KeybindingCatalog {
         }
     )
 
-    /// The layout picker, KiwiHub's Layouts side (#2229, #2265).
+    /// The view picker, KiwiHub's View side (#2229, #2265, #2309).
     static let showLayoutPicker = NavCommand(
-        label: "Show layout picker",
-        lua: KiwiHubSide.layouts.lua,
+        label: "Show view picker",
+        lua: KiwiHubSide.view.lua,
         displayLabel: {
-            L("keybinding.show_layout_picker", "Show layout picker")
+            L("keybinding.show_view_picker", "Show view picker")
         }
     )
 

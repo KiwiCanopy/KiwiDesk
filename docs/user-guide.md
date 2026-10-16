@@ -882,9 +882,10 @@ and `⌃⌥L` open **KiwiHub**
 ([`kiwihub.show`](lua-reference.md#kiwihubshow)), one panel with
 three sides, listed together under Shortcuts & Gestures ▸ KiwiHub:
 `⌃⌥J` the **window switcher**, `⌃⌥K` the **shortcuts panel**, where
-typing searches your shortcuts, and `⌃⌥L` the **layout picker**,
-for the space on the screen under the pointer. `Tab` and `⇧Tab`
-step through the three sides.
+typing searches your shortcuts, and `⌃⌥L` the **view picker**,
+which switches the layout of the space under the pointer, the
+profile and KiwiVision. `Tab` and `⇧Tab` step through the three
+sides.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

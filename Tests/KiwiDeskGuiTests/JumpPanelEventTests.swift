@@ -107,7 +107,7 @@ struct JumpPanelEventTests {
             isARepeat: false,
             keyCode: 43
         )!
-        for scope in [JumpScope.shortcuts, .layouts] {
+        for scope in [JumpScope.shortcuts, .view] {
             panel.scope = { scope }
             #expect(panel.performKeyEquivalent(with: comma))
         }

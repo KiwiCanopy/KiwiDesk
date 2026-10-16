@@ -17,7 +17,7 @@ struct JumpSideNameTests {
         LocalizationManager.shared.select("en")
         let rows: [(JumpScope, NavCommand)] = [
             (.windows, KeybindingCatalog.jumpToWindow),
-            (.layouts, KeybindingCatalog.showLayoutPicker),
+            (.view, KeybindingCatalog.showLayoutPicker),
         ]
         for (scope, row) in rows {
             #expect(row.lua == scope.lua)
@@ -49,7 +49,7 @@ struct JumpSideNameTests {
         ]
         let chords = JumpPanelController.chords { bound[$0] }
         #expect(chords[.windows] == "⌃⌥W")
-        #expect(chords[.layouts] == "⌃⌥P")
+        #expect(chords[.view] == "⌃⌥P")
         // A side whose shortcut is unbound prints no chord.
         let unbound = JumpPanelController.chords { _ in nil }
         #expect(unbound.isEmpty)

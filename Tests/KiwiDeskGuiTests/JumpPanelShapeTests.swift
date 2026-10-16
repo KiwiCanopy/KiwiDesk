@@ -95,14 +95,15 @@ struct JumpPanelShapeTests {
         #expect(lit(.windows, .shift) == 1)
         #expect(lit(.windows, .command) == 2)
         #expect(lit(.windows, [.shift, .command]) == 2)
-        #expect(lit(.layouts) == 1)
-        #expect(lit(.layouts, .shift) == 1)
-        #expect(lit(.layouts, .command) == 2)
-        #expect(lit(.layouts, [.shift, .command]) == 2)
+        #expect(lit(.view) == 0)
+        // ⇧ moves nothing here, so nothing lights under it (#2309).
+        #expect(lit(.view, .shift) == nil)
+        #expect(lit(.view, .command) == 1)
+        #expect(lit(.view, [.shift, .command]) == nil)
         #expect(lit(.shortcuts) == nil)
         #expect(lit(.shortcuts, .command) == nil)
         #expect(lit(.windows, selection: false) == nil)
-        #expect(lit(.layouts, .command, selection: false) == nil)
+        #expect(lit(.view, .command, selection: false) == nil)
     }
 
     /// ⇧ alone moves the selected row; ⇧⌘ reaches every numbered
