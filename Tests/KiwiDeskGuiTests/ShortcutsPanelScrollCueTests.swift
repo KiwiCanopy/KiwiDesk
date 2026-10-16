@@ -261,6 +261,8 @@ struct ShortcutsPanelScrollCueTests {
                 "onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }"
             ),
             (footer, "JumpShortcutsView.overflows("),
+            // Computed and handed on, never computed and dropped.
+            (footer, "overflows: footerOverflows,"),
             (footer, "content: sheetHeight"),
             (footer, "cap: model.sheetCap"),
         ] {

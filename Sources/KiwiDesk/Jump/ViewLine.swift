@@ -25,7 +25,6 @@ struct ViewLine<Content: View>: View {
                     .padding(.horizontal, KeyPanelStyle.selectionInset)
                     .background(measure)
             }
-            .fixedSize(horizontal: false, vertical: true)
             .coordinateSpace(name: Self.space)
             .onGeometryChange(for: CGFloat.self) {
                 $0.size.width

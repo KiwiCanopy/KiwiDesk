@@ -61,6 +61,7 @@ struct JumpFooterFitTests {
 
     @Test("the View side keeps its first hint in every language")
     func viewKeepsItsFirstHint() throws {
+        defer { LocalizationManager.shared.select("en") }
         for code in try Self.locales() {
             LocalizationManager.shared.select(code)
             let footer = JumpFooter(scope: .view, overflows: false)
@@ -79,7 +80,6 @@ struct JumpFooterFitTests {
             print("footer fit view \(code): \(kept)/\(hints.count)")
             #expect(kept >= 1, "\(code) leaves the hints \(room) pt")
         }
-        LocalizationManager.shared.select("en")
     }
 
     /// A layer named as layers are keeps the whole cue; a name at
@@ -87,6 +87,7 @@ struct JumpFooterFitTests {
     /// (`shapeIsWired`'s truncating fallback).
     @Test("the Shortcuts side keeps its scroll cue in every language")
     func shortcutsKeepItsCue() throws {
+        defer { LocalizationManager.shared.select("en") }
         for code in try Self.locales() {
             LocalizationManager.shared.select(code)
             let footer = JumpFooter(scope: .shortcuts, overflows: true)
@@ -107,7 +108,6 @@ struct JumpFooterFitTests {
             let cue = width(footer.row([]))
             #expect(cue <= room, "\(code): cue \(cue) pt in \(room) pt")
         }
-        LocalizationManager.shared.select("en")
     }
 
     /// The shedding and the controls' priority are what the fit

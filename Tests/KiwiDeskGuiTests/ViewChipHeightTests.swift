@@ -5,9 +5,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// A View-side chip and its line stand at their text's height
-/// whatever height they are offered: the line is a horizontal
-/// scroller, which offers its content the panel's leftover height.
+/// A View-side chip stands at its text's height whatever height
+/// it is offered: its line is a horizontal scroller, which offers
+/// its content the panel's leftover height.
 @Suite("KiwiHub chip height")
 @MainActor
 struct ViewChipHeightTests {
@@ -41,14 +41,5 @@ struct ViewChipHeightTests {
             let height = height(chip(showsNumber: shows))
             #expect(height > 0 && height < 30, "\(shows): \(height) pt")
         }
-    }
-
-    @Test("a chip line keeps its chips' height")
-    func lineHugsItsChips() {
-        let line = ViewLine(selected: nil) {
-            chip(showsNumber: false)
-        }
-        let height = height(line)
-        #expect(height > 0 && height < 30, "\(height) pt")
     }
 }
