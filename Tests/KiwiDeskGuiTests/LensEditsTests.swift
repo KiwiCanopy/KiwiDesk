@@ -22,10 +22,38 @@ struct LensEditsTests {
         let live = [named("writing"), named("Mail"), named("Scratch")]
         #expect(
             edits.applied(to: live).map(\.name)
-                == ["Draft", "New", "Scratch"]
+                == ["Draft", "Scratch", "New"]
         )
         let settled = [named("Writing"), named("Mail")]
         #expect(edits.applied(to: settled).map(\.name) == ["Draft", "New"])
+    }
+
+    @Test("a lens the draft left as stored keeps its live entry")
+    func untouchedLensKeepsLive() {
+        var redefined = named("Writing")
+        redefined.keepFocus = false
+        var edits = LensEdits(stored: [named("Writing"), named("Mail")])
+        edits.lenses[1].lens.apps = ["test.kiwi.mail"]
+        // A session redefined Writing and deleted Mail.
+        let live = [redefined]
+        let applied = edits.applied(to: live)
+        #expect(applied.map(\.name) == ["Writing", "Mail"])
+        #expect(applied.first?.keepFocus == false)
+        // Left as stored, a session-deleted lens stays deleted.
+        let untouched = LensEdits(stored: [named("Writing"), named("Mail")])
+        #expect(untouched.applied(to: live).map(\.name) == ["Writing"])
+    }
+
+    @Test("a swap laid over a list merges nothing")
+    func appliedSwap() {
+        var writing = named("Writing")
+        writing.apps = ["test.kiwi.notes"]
+        var edits = LensEdits(stored: [writing, named("Reading")])
+        edits.lenses[0].lens.name = "Reading"
+        edits.lenses[1].lens.name = "Writing"
+        let applied = edits.applied(to: edits.seed)
+        #expect(applied.map(\.name) == ["Reading", "Writing"])
+        #expect(applied.first?.apps == ["test.kiwi.notes"])
     }
 
     @Test("a draft that changes nothing is inert")

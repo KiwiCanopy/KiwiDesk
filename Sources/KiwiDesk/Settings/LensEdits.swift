@@ -15,8 +15,12 @@ struct LensEdits: Equatable {
     /// name; a lens it does not name keeps its stored reach.
     var reach: [String: Set<String>] = [:]
 
+    /// The stored lenses the draft was seeded from.
+    let seed: [VisionLens]
+
     /// The draft that changes nothing.
     init(stored: [VisionLens]) {
+        seed = stored
         lenses = stored.map { DraftLens(lens: $0, stored: $0.name) }
     }
 
@@ -39,20 +43,40 @@ struct LensEdits: Equatable {
         current == stored && deleted.isEmpty && reach.isEmpty
     }
 
-    /// `list` with the draft's changes laid over it: every page
-    /// lens in page order, then whatever `list` holds that the
-    /// draft never stored — a session `define_lens` lives on in the
-    /// live list, and the settled list has none. A deleted lens
-    /// goes. One name comparison throughout (`sameLens`).
+    /// `list` with the draft's CHANGES laid over it: a deleted lens
+    /// goes, an edited or renamed one replaces its stored name's
+    /// entry in place, a new one is appended, and a lens the draft
+    /// left as stored keeps whatever `list` holds for it — so on the
+    /// live list a session `define_lens` or `delete_lens` survives a
+    /// Save, and on the settled list the result is the page's. Every
+    /// target is found before any write, so a swap merges nothing. One
+    /// name comparison throughout (`sameLens`).
     func applied(to list: [VisionLens]) -> [VisionLens] {
-        let named = lenses.compactMap(\.stored) + deleted
-        let extras = list.filter { lens in
-            !named.contains { AppWideSettings.sameLens($0, lens.name) }
-                && !lenses.contains {
-                    AppWideSettings.sameLens($0.lens.name, lens.name)
+        var result = list.filter { lens in
+            !deleted.contains { AppWideSettings.sameLens($0, lens.name) }
+        }
+        // Every target found in the list as it was, so a swap's
+        // second rename cannot land on the first one's write.
+        let changed = lenses.filter { draft in
+            draft.lens
+                != draft.stored.flatMap { name in
+                    seed.first { $0.name == name }
                 }
         }
-        return AppWideSettings.lensEntries(current + extras)
+        let targets = changed.map { draft in
+            let key = draft.stored ?? draft.lens.name
+            return result.firstIndex {
+                AppWideSettings.sameLens($0.name, key)
+            }
+        }
+        for (draft, at) in zip(changed, targets) {
+            if let at {
+                result[at] = draft.lens
+            } else {
+                result.append(draft.lens)
+            }
+        }
+        return AppWideSettings.lensEntries(result)
     }
 }
 

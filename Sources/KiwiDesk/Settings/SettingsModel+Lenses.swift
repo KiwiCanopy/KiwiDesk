@@ -130,9 +130,9 @@ extension SettingsModel {
     /// Writes the draft's lenses — the settled list with its
     /// edits, never the live one (ruling 40) — once the rule half,
     /// which carried the chords and marks, has landed. Live takes
-    /// the same edits, a session lens kept beside them, until the
-    /// Save's config reload makes the stored list live, as after
-    /// any Save. A rename of the lens on says so, so it follows
+    /// the same changes and nothing more (`LensEdits.applied`), so
+    /// a session lens edit outlives the Save. A rename of the lens
+    /// on says so, so it follows
     /// (`followActiveLens`). Called by `saveRuleReach` alone, so
     /// every Save door carries it.
     func saveLensHalf() {
