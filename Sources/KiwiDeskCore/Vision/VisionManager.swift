@@ -37,13 +37,16 @@ public final class VisionManager {
         var windows: [VisionMask.Window]
     }
 
+    /// What the mode draws now.
+    public internal(set) var active = VisionActive.off
     /// Whether the mode is on.
-    public internal(set) var isOn = false
+    public var isOn: Bool { active.isOn }
     /// The machine half of the appearance switch; the bootstrap
     /// wires the live one.
     var appearanceSwitch = VisionAppearanceSwitch.inert()
-    /// Hears every change of `isOn`; the GUI announces it.
-    public var onChange: @MainActor (Bool) -> Void = { _ in }
+    /// Hears every change of `active` — on, off, or another lens;
+    /// the GUI announces an on or an off.
+    public var onChange: @MainActor (VisionActive) -> Void = { _ in }
     var plates: [DisplayID: any VisionPlateBackend] = [:]
     /// The target each plate was last ordered below: a plate
     /// re-stacks only when the focus moves, a settle pass asks, the
@@ -298,7 +301,7 @@ public final class VisionManager {
     /// Turns the mode off and drops every plate at once, saying
     /// nothing: a stop or a quit is no toggle to announce.
     func clear() {
-        isOn = false
+        active = .off
         for plate in plates.values { plate.hide(reduceMotion: true) }
         plates = [:]
         stackedUnder = [:]

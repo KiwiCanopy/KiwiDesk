@@ -89,7 +89,9 @@ struct QuickMenuKiwiVisionRowTests {
             "self?.core.kiwiVisionIsOn",
             "lua:KeybindingCatalog.toggleKiwiVision.lua",
             "self?.core.toggleKiwiVision()",
-            "core.vision.onChange={[weakself]onin",
+            "core.vision.onChange={[weakself]activein",
+            // A lens switch is no on or off to announce.
+            "guardon!=wasOnelse{return}",
             "core.onAppWideChange={[weakself]in",
             "notification:.announcementRequested",
         ] {

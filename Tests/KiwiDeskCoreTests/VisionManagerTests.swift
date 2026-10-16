@@ -61,7 +61,7 @@ struct VisionManagerTests {
     @Test("on, every screen shows a plate under the target")
     func onShowsEveryScreen() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
         #expect(made().count == 2)
         for plate in made() {
@@ -76,7 +76,7 @@ struct VisionManagerTests {
     @Test("a ring behind the target is what the plate stacks under")
     func stacksUnderTheRing() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7, below: 70), reassert: false)
         #expect(made().allSatisfy { $0.orders == [70] })
     }
@@ -84,7 +84,7 @@ struct VisionManagerTests {
     @Test("the same target re-stacks only when a settle pass asks")
     func sameTargetOrdersOnce() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
         vision.sync(request(target: 7), reassert: false)
         #expect(made().allSatisfy { $0.orders == [7] })
@@ -97,7 +97,7 @@ struct VisionManagerTests {
     @Test("nothing focused shows no plate, fresh or standing")
     func noTargetNoPlateShown() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: nil), reassert: false)
         #expect(made().isEmpty)
         vision.sync(request(target: 7), reassert: false)
@@ -110,7 +110,7 @@ struct VisionManagerTests {
     @Test("an untracked target re-stacks on every sync, as a ring does")
     func untrackedRestacksEverySync() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7, tracked: false), reassert: false)
         vision.sync(request(target: 7, tracked: false), reassert: false)
         #expect(made().allSatisfy { $0.orders == [7, 7] })
@@ -127,7 +127,7 @@ struct VisionManagerTests {
     @Test("a screen standing down hides, and re-stacks on its return")
     func standDownHides() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
         vision.sync(
             request(target: 7, standDown: [left]),
@@ -147,7 +147,7 @@ struct VisionManagerTests {
     @Test("a screen that leaves drops its plate")
     func goneScreenDrops() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
         vision.sync(request(target: 7, screens: [right]), reassert: false)
         #expect(vision.plates.keys.sorted { $0.raw < $1.raw } == [right])
@@ -157,9 +157,9 @@ struct VisionManagerTests {
     @Test("off fades every plate out")
     func offHidesAll() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
-        vision.isOn = false
+        vision.active = .off
         vision.sync(request(target: 7), reassert: false)
         #expect(made().allSatisfy { !$0.isShown })
         #expect(!vision.hasShownPlates)
@@ -168,7 +168,7 @@ struct VisionManagerTests {
     @Test("the target's restack re-stacks under the sync's anchor")
     func restackFollowsTheTarget() {
         let (vision, made) = manager()
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7, below: 70), reassert: false)
         vision.restack(after: 9)
         #expect(made().allSatisfy { $0.orders == [70] })
@@ -179,9 +179,9 @@ struct VisionManagerTests {
     @Test("clear turns the mode off without announcing a toggle")
     func clearIsSilent() {
         let (vision, _) = manager()
-        var heard: [Bool] = []
+        var heard: [VisionActive] = []
         vision.onChange = { heard.append($0) }
-        vision.isOn = true
+        vision.active = .plain
         vision.sync(request(target: 7), reassert: false)
         vision.clear()
         #expect(!vision.isOn)

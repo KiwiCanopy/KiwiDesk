@@ -207,8 +207,19 @@ extension APIReference {
 
     static let kiwivisionRecords: [String: APIRecord] = [
         "toggle": APIRecord(
-            "Turns KiwiVision on or off: every screen dims but the "
-                + "focused window."
+            "Turns KiwiVision on or off; named, turns that lens on, "
+                + "or off while it is on.",
+            .text("lens", optional: true)
+        ),
+        "define_lens": APIRecord(
+            "Adds or replaces a lens: a Lua table, or a JSON object "
+                + "string over the CLI.",
+            .text("lens")
+        ),
+        "delete_lens": APIRecord(
+            "Removes a lens for this session; KiwiVision turns off "
+                + "if it was the one on.",
+            .text("lens")
         ),
         "set_dim": APIRecord(
             "Sets how far KiwiVision dims, in percent (0-100).",

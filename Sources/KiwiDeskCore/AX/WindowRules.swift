@@ -1,5 +1,14 @@
 import Foundation
 
+/// Whether a window title matches a rule's fragment: a
+/// case-sensitive substring, the one reading App Rules' Float rows
+/// and a KiwiVision lens member share (#2103 ruling 32).
+public enum WindowTitleMatch {
+    public static func matches(_ title: String, _ fragment: String) -> Bool {
+        title.contains(fragment)
+    }
+}
+
 /// Float rules matching bundle IDs and optional case-sensitive
 /// title fragments.
 public struct FloatRules: Sendable, Equatable {
@@ -68,7 +77,7 @@ public struct FloatRules: Sendable, Equatable {
         return rules.contains { rule in
             guard rule.app == bundleID else { return false }
             guard let fragment = rule.title else { return true }
-            return title.contains(fragment)
+            return WindowTitleMatch.matches(title, fragment)
         }
     }
 

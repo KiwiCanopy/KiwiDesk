@@ -82,7 +82,7 @@ struct KiwiVisionClearAppTests {
         )
         #expect(core.appWide.visionClearApp)
         #expect(core.guiConfigStore.load()?.appWide == nil)
-        core.vision.isOn = true
+        core.vision.active = .plain
         #expect(core.visionMasks, "the app switch masks without Wallpaper")
         let request = core.visionRequest()
         #expect(!request.clearWallpaper, "the wallpaper stays hazed")
@@ -201,7 +201,7 @@ struct KiwiVisionClearAppTests {
             OwnKeyWindowReading(number: 777_777, isDialog: true)
         }
         core.setAppWide(persisting: false) { $0.visionClearApp = true }
-        core.vision.isOn = true
+        core.vision.active = .plain
         let windows = core.visionRequest().windows
         #expect(windows.filter(\.clear).count == 1, "Settings alone")
         #expect(windows.count == 4, "the focus is behind the dialog")

@@ -11,20 +11,32 @@ extension KiwiCore {
     func appWideLiveChanged(from old: AppWideSettings) {
         let new = appWide
         guard new != old else { return }
+        let handled = followActiveLens(from: old)
         let lens = visionLensName
-        let appearance = new.look(lens: lens).appearance
-        if appearance != old.look(lens: lens).appearance, vision.isOn {
-            retargetVisionAppearance(appearance)
-        }
-        // A changed list re-reads the windows, with their bundles.
-        if new.look(lens: lens).listedApps
-            != old.look(lens: lens).listedApps
-        {
-            vision.forgetListedWindows()
-        }
+        let before = old.look(lens: lens)
+        let after = new.look(lens: lens)
+        if !handled { visionLookChanged(from: before, to: after) }
         // The whole stored group, so a field v3 adds re-draws too.
-        if new.vision != old.vision { updateVision() }
+        if new.vision != old.vision, before == after { updateVision() }
         if new.hyperKey != old.hyperKey { oweHyperRemap() }
         onAppWideChange()
+    }
+
+    /// The lens on, after a write of the lenses: one the new values
+    /// no longer hold, or that holds no apps, turns KiwiVision off,
+    /// and one stored under another spelling is followed to it. A
+    /// rename (#2103 PR 6) re-keys it here. True where it moved the
+    /// active value, whose own door then took the change of look.
+    private func followActiveLens(from old: AppWideSettings) -> Bool {
+        guard let name = visionLensName else { return false }
+        let before = old.look(lens: name)
+        guard let lens = appWide.lens(named: name), !lens.apps.isEmpty
+        else {
+            setVision(.off, from: before)
+            return true
+        }
+        guard lens.name != name else { return false }
+        setVision(.lens(lens.name), from: before)
+        return true
     }
 }
