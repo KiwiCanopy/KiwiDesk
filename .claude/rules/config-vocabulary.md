@@ -438,14 +438,22 @@ synonym:
   already uses, and the same of every side of the key panel
   (#2245). **A panel a shortcut row opens joins that suite's
   `pairs` in the change that adds it.**
-- **window switcher** / **layout picker** — the key panel's
-  Windows and Layouts sides, which ⌃⌥J and ⌃⌥L open, by their
-  VoiceOver names (#2245); with the shortcuts panel between them
-  the panel has three sides, J, K and L (#2246); a side
+- **window switcher** / **view picker** — the key panel's
+  Windows and View sides, which ⌃⌥J and ⌃⌥L open, by their
+  VoiceOver names (#2245, #2309); with the shortcuts panel between
+  them the panel has three sides, J, K and L (#2246); a side
   name is translated, never kept as an English word. Retired as
   the panel's NAME: *Jump to window*, which stays its field
   prompt — the panel's own verb is *Jump* — and never a brand
   name.
+- **View** — the ⌃⌥L side's name (Lua `kiwihub.show("view")`,
+  #2309): one chord reaching the Layout, Profile and KiwiVision
+  lines, each a **line** of chips or tiles. Write **View** as the
+  side's name and **view picker** where its VoiceOver name is
+  meant. Retired as the side's name: *Layouts*, which names its
+  Layout line alone, and *layout picker*. The word binds copy
+  naming that side; it does not reach a sentence about a window
+  or a screen.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename

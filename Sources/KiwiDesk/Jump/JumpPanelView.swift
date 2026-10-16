@@ -63,7 +63,8 @@ struct JumpPanelView: View {
                 scope: model.scope,
                 overflows: overflows,
                 modifiers: model.heldModifiers,
-                hasSelection: model.hasSelection
+                hasSelection: model.hasSelection,
+                quickCount: model.viewQuickCount
             )
         }
         // The side's own name, which its shortcut row shows (#2245).
@@ -122,16 +123,16 @@ struct JumpPanelView: View {
                     onEdit: { model.handle(.settings) }
                 )
                 .transition(.opacity)
-            } else if let layouts = model.layouts {
-                JumpLayoutsView(
-                    list: layouts,
+            } else if let view = model.view {
+                JumpViewSide(
+                    list: view,
                     settings: settings,
                     commandHeld: model.commandHeld,
-                    onApply: { model.onApply($0) },
+                    onApply: { model.onApplyView($0) },
                     onKeep: { model.handle(.keep) },
-                    onLayoutDefaults: { model.onLayoutDefaults($0) },
+                    onSettings: { model.handle(.settings) },
                     onHover: {
-                        model.hoverTile($0, pointer: model.currentPointer())
+                        model.hoverItem($0, pointer: model.currentPointer())
                     }
                 )
                 .transition(.opacity)

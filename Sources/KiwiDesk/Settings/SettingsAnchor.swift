@@ -85,6 +85,10 @@ extension SettingsAnchor {
                 destination: .layoutDefaults,
                 surface: .layoutMode(mode)
             )
+        case .profiles:
+            self.init(destination: .profiles)
+        case .kiwiVision:
+            self.init(destination: .kiwiVision)
         }
     }
 }

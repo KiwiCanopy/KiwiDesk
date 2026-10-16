@@ -2,7 +2,7 @@ import AppKit
 import KiwiDeskCore
 
 /// What a key press means inside Jump to window (#1875 ▸ Ruling —
-/// keys; #2229 for the Layouts scope's): fixed, never rebindable.
+/// keys; #2229, #2309 for the View side's): fixed, never rebindable.
 /// Pure, so every chord is testable without a panel. A press this
 /// answers nil for goes to the search field as typing.
 enum JumpKey: Equatable {
@@ -58,7 +58,7 @@ enum JumpKey: Equatable {
             [.shift, .command, .option, .control]
         )
         let plain = held.isEmpty
-        if scope == .layouts, let key = layouts(keyCode, held) {
+        if scope == .view, let key = layouts(keyCode, held) {
             return key
         }
         if scope != .windows, keyCode == comma, held == .command {
@@ -85,7 +85,7 @@ enum JumpKey: Equatable {
         }
     }
 
-    /// The Layouts scope's own keys: ← → move the tiles even while
+    /// The View side's own keys: ← → move along a line even while
     /// the field has focus (owner ruling, #2229), ⌘S keeps.
     private static func layouts(
         _ keyCode: UInt16,

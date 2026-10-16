@@ -33,10 +33,10 @@ struct KiwiHubShowVerbTests {
         core.uiBridge.onKiwihubShow = { opened.append($0) }
         let response = core.execute(
             "kiwihub.show",
-            args: [.string("layouts")]
+            args: [.string("view")]
         )
         #expect(response.error == nil)
-        #expect(opened == [.layouts])
+        #expect(opened == [.view])
     }
 
     @Test("an unknown or missing side is refused, the hook untouched")

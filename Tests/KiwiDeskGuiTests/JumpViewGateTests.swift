@@ -32,11 +32,11 @@ struct JumpViewGateTests {
         #expect(view.components(separatedBy: "ifexpanded{").count == 3)
     }
 
-    /// Layout Defaults… hands focus to Settings, which the #952
+    /// A line's Settings page hands focus to Settings, which the #952
     /// grace would eat as a dismiss blip: its close arms nothing.
-    @Test("Layout Defaults closes the panel without the distrust")
+    @Test("the Settings page closes the panel without the distrust")
     func layoutDefaultsArmsNoDistrust() throws {
-        let wiring = try squashed("JumpPanelController+Layouts.swift")
+        let wiring = try squashed("JumpPanelController+View.swift")
         #expect(
             wiring.contains(
                 "self.dismiss(distrusting:false)else{return}"

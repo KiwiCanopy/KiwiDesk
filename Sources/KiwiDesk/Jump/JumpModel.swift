@@ -9,8 +9,9 @@ import KiwiDeskCore
 final class JumpModel: ObservableObject {
     @Published private(set) var list: JumpList
     @Published private(set) var scope: JumpScope = .windows
-    /// The Layouts scope's tiles, read fresh on each entry to it.
-    @Published var layouts: LayoutPickList?
+    /// The View side's lines, read fresh on each entry to it
+    /// (#2309).
+    @Published var view: ViewPickList?
     /// The Shortcuts side's sheet, read fresh on each entry to it
     /// (#2246).
     @Published var shortcuts: ShortcutsSheet?
@@ -51,12 +52,15 @@ final class JumpModel: ObservableObject {
     var onResultsChange: () -> Void = {}
     /// The panel's height glides to the new scope.
     var onScopeChange: () -> Void = {}
-    /// Reads the layout picker's Space — the one under the pointer
-    /// for nil — now; nil where it is gone.
-    var loadLayouts: (SpaceID?) -> LayoutPickList? = { _ in nil }
-    var onApply: (LayoutMode) -> Void = { _ in }
+    /// Reads the View side's lines now.
+    var loadView: () -> ViewPickList = {
+        ViewPickList(layout: nil, items: [:])
+    }
+    var onApplyView: (ViewPickList.Pick) -> Void = { _ in }
     var onKeep: () -> Void = {}
-    var onLayoutDefaults: (LayoutMode) -> Void = { _ in }
+    /// ⌘, on the View side: the Settings page of the line.
+    var onViewSettings: (ViewPickList.Line, ViewPickList.Item?) -> Void =
+        { _, _ in }
     /// Reads the active layer's shortcuts now; nil where
     /// `init.lua` owns them.
     var loadShortcuts: () -> ShortcutsReference? = { nil }
@@ -83,7 +87,7 @@ final class JumpModel: ObservableObject {
             switch scope {
             case .windows: return list.query
             case .shortcuts: return shortcuts?.query ?? ""
-            case .layouts: return layouts?.query ?? ""
+            case .view: return view?.query ?? ""
             }
         }
         set {
@@ -95,8 +99,8 @@ final class JumpModel: ObservableObject {
             case .shortcuts:
                 setShortcutQuery(newValue)
                 return
-            case .layouts:
-                setLayoutQuery(newValue)
+            case .view:
+                setViewQuery(newValue)
                 return
             }
             list.setQuery(newValue)
@@ -108,12 +112,7 @@ final class JumpModel: ObservableObject {
     func handle(_ key: JumpKey) {
         guard !leaving else { return }
         if case .stepScope(let forward) = key {
-            // A Layouts side with no Space to act on is stepped
-            // past rather than stopping ⇥.
-            let next = scope.stepped(forward: forward)
-            if !setScope(next), next == .layouts {
-                setScope(next.stepped(forward: forward))
-            }
+            setScope(scope.stepped(forward: forward))
             return
         }
         switch scope {
@@ -121,8 +120,8 @@ final class JumpModel: ObservableObject {
         case .shortcuts:
             handleShortcuts(key)
             return
-        case .layouts:
-            handleLayouts(key)
+        case .view:
+            handleView(key)
             return
         }
         switch key {
@@ -151,28 +150,20 @@ final class JumpModel: ObservableObject {
 
     /// Switches to `scope` with every query cleared (owner
     /// ruling, #2229) — a query means different things in each.
-    /// Layouts reads its Space fresh, and stays out of reach
-    /// where that Space is gone. Shortcuts reads the active layer
-    /// fresh.
-    /// False where the side stayed out of reach.
-    @discardableResult
-    func setScope(_ scope: JumpScope) -> Bool {
-        guard scope != self.scope else { return true }
-        if scope == .layouts {
-            guard let fresh = loadLayouts(nil) else { return false }
-            layouts = fresh
-        }
+    /// View and Shortcuts read their content fresh.
+    func setScope(_ scope: JumpScope) {
+        guard scope != self.scope else { return }
+        if scope == .view { view = loadView() }
         if scope == .shortcuts {
             shortcuts = ShortcutsSheet(reference: loadShortcuts())
         }
         if !list.query.isEmpty { list.setQuery("") }
-        layouts?.setQuery("")
+        view?.setQuery("")
         shortcuts?.setQuery("")
         self.scope = scope
         lastPointer = currentPointer()
         onScopeChange()
         onAnnounce(scope.title)
-        return true
     }
 
     /// The selection follows the pointer, on a real move only
@@ -184,9 +175,9 @@ final class JumpModel: ObservableObject {
         list.select(index)
     }
 
-    func hoverTile(_ mode: LayoutMode, pointer: CGPoint) {
-        guard scope == .layouts, pointerMoved(to: pointer) else { return }
-        layouts?.select(mode)
+    func hoverItem(_ pick: ViewPickList.Pick, pointer: CGPoint) {
+        guard scope == .view, pointerMoved(to: pointer) else { return }
+        view?.select(pick)
     }
 
     private func pointerMoved(to point: CGPoint) -> Bool {
@@ -208,7 +199,7 @@ final class JumpModel: ObservableObject {
         switch scope {
         case .windows: return list.selected != nil
         case .shortcuts: return false
-        case .layouts: return layouts?.selected != nil
+        case .view: return view?.selected?.isApplicable == true
         }
     }
 

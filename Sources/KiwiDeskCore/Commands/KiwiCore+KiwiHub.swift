@@ -1,12 +1,12 @@
 import Foundation
 
 /// KiwiHub's three sides, in the order of their keys J K L
-/// (#2246, #2265): the window switcher, the shortcuts panel and
-/// the layout picker.
+/// (#2246, #2265, #2309): the window switcher, the shortcuts panel
+/// and the view picker.
 public enum KiwiHubSide: String, Sendable, CaseIterable, Equatable {
     case windows
     case shortcuts
-    case layouts
+    case view
 
     /// The Lua a binding runs to open this side — the one spelling
     /// the seed, the Settings rows and the panel's chord labels

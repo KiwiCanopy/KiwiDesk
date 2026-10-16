@@ -35,7 +35,7 @@ enum ShortcutsRowOrder {
     static let kiwiHubAtRest: [SettingKey] = [
         .shortcuts(.jumpToWindow),
         .shortcuts(.showShortcuts),
-        .shortcuts(.layoutPicker),
+        .shortcuts(.viewPicker),
     ]
 
     /// Focus group order: directions, the Space steps, the
