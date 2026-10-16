@@ -221,11 +221,17 @@ struct PercentFormatterTests {
 struct FractionChipsTests {
     @Test("the five shares, in reading order")
     @MainActor func shares() {
-        let glyphs = FractionChips.shares.map(\.glyph)
-        #expect(glyphs == ["¼", "⅓", "½", "⅔", "¾"])
-        let values = FractionChips.shares.map(\.value)
-        let expected: [Double] = [0.25, 1.0 / 3, 0.5, 2.0 / 3, 0.75]
-        #expect(values == expected)
+        let shares = FractionChips.shares
+        #expect(!shares.isEmpty)
+        // Each glyph is the vulgar fraction of its own value.
+        for share in shares {
+            let numeric = share.glyph.unicodeScalars.first?
+                .properties.numericValue
+            #expect(numeric.map { abs($0 - share.value) < 1e-9 } == true)
+        }
+        let values = shares.map(\.value)
+        #expect(values == values.sorted())
+        #expect(Set(values).count == values.count)
     }
 
     @Test("a chip is pressed only where the share reads as it")

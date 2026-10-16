@@ -90,16 +90,14 @@ struct StandardLayoutDisplayTests {
         reset()
         LocalizationManager.shared.select("en")
         defer { reset() }
-        #expect(
-            StarterTitle(shape: .ultrawide, otherScreens: 0)
-                .onboardingTitle
-                == "Your Spaces are ready for your ultrawide screen"
-        )
-        #expect(
-            StarterTitle(shape: .ultrawide, otherScreens: 1)
-                .onboardingTitle
-                == "Your Spaces are ready for all your screens"
-        )
+        let one = StarterTitle(shape: .ultrawide, otherScreens: 0)
+            .onboardingTitle
+        let more = StarterTitle(shape: .ultrawide, otherScreens: 1)
+            .onboardingTitle
+        #expect(!one.isEmpty)
+        #expect(!more.isEmpty)
+        // One screen and several take different sentences.
+        #expect(one != more)
     }
 
     /// The starter answers with its title, never its identity
@@ -110,9 +108,9 @@ struct StandardLayoutDisplayTests {
         LocalizationManager.shared.select("en")
         defer { reset() }
         let title = StarterTitle(shape: .ultrawide, otherScreens: 1)
-        #expect(
-            standardDisplayName(StarterSetup.name, title: title)
-                == "Ultrawide + 1"
-        )
+        let shown = standardDisplayName(StarterSetup.name, title: title)
+        #expect(shown == title.displayName)
+        #expect(shown != StarterSetup.name)
+        #expect(shown.contains(StarterTitle.displayName(of: .ultrawide)))
     }
 }

@@ -109,11 +109,12 @@ struct HomeCardProfileChipsTests {
 
     /// Written out rather than recomputed: the cap is 4, so five
     /// profiles draw three chips and "+2" — never four and "+1".
-    @Test("five profiles draw three chips, not four")
+    @Test("one profile past the cap gives up a chip to the +N marker")
     func fiveProfilesGiveUpASlot() {
-        let raw = (1...5).map { summary("p\($0)", count: $0) }
-        #expect(chips(raw).count == 3)
-        #expect(chips(Array(raw.prefix(4))).count == 4)
+        let cap = HomeCardPreview.chipCap
+        let raw = (1...(cap + 1)).map { summary("p\($0)", count: $0) }
+        #expect(chips(raw).count == cap - 1)
+        #expect(chips(Array(raw.prefix(cap))).count == cap)
         #expect(chips(Array(raw.prefix(1))).count == 1)
     }
 

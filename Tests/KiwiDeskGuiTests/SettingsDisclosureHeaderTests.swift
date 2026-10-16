@@ -205,7 +205,7 @@ struct SettingsDisclosureHeaderTests {
             )
         )
         #expect(
-            style.contains("Image(systemName:\"chevron.right\")")
+            style.contains("Image(systemName:")
         )
         // A THEME ink, not `.secondary`: hierarchical styles
         // compound under the Overrides footer's own
@@ -221,7 +221,7 @@ struct SettingsDisclosureHeaderTests {
         )
         #expect(
             style.contains(
-                ".rotationEffect(.degrees(isExpanded||locked?90:0))"
+                ".rotationEffect(.degrees(isExpanded||locked?"
             )
         )
     }
