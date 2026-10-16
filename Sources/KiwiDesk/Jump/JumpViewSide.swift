@@ -2,16 +2,13 @@ import KiwiDeskCore
 import SwiftUI
 
 /// KiwiHub's View side (#2229, #2309): the Layout, Profile and
-/// KiwiVision lines, each one line under its heading, then the
-/// line's Settings page and Keep. The buttons are reached by their
-/// chords, never Tab, which switches side.
+/// KiwiVision lines, each one line under its heading. The line's
+/// Settings page and Keep sit in the panel's footer row.
 struct JumpViewSide: View {
     let list: ViewPickList
     let settings: TilingSettings
     let commandHeld: Bool
     let onApply: (ViewPickList.Pick) -> Void
-    let onKeep: () -> Void
-    let onSettings: () -> Void
     /// The pointer moved over an item.
     let onHover: (ViewPickList.Pick) -> Void
 
@@ -22,9 +19,8 @@ struct JumpViewSide: View {
             ForEach(list.lines, id: \.self) { line in
                 section(line)
             }
-            buttons
         }
-        .padding(.top, 8)
+        .padding(.vertical, 8)
     }
 
     private func section(_ line: ViewPickList.Line) -> some View {
@@ -121,25 +117,5 @@ struct JumpViewSide: View {
 
     private func apply(_ item: ViewPickList.Item) {
         if item.isApplicable { onApply(item.pick) }
-    }
-
-    private var buttons: some View {
-        HStack(spacing: 8) {
-            KeyPanelChordButton(
-                title: ViewPickText.settings(selectedLine ?? .layout),
-                chord: "⌘,"
-            ) { onSettings() }
-            Spacer(minLength: 0)
-            if let layout = list.layout, let profile = layout.profile {
-                KeyPanelChordButton(
-                    title: LayoutPickText.keep(profile),
-                    chord: "⌘S",
-                    hint: layout.keepArmed ? nil : LayoutPickText.keepSaved
-                ) { onKeep() }
-                .disabled(!layout.keepArmed)
-            }
-        }
-        .padding(.horizontal, KeyPanelStyle.selectionInset + 10)
-        .padding(.bottom, 10)
     }
 }

@@ -3,8 +3,11 @@ import SwiftUI
 
 /// The panel's static key hints for its scope — hidden from
 /// VoiceOver, whose row actions say the same (#1875 ▸ footer).
+/// Short of room, it sheds hints from the end, never the scroll
+/// cue or the lit one's place.
 struct JumpFooter: View {
     let scope: JumpScope
+    /// Whether the side runs past what it shows.
     let overflows: Bool
     /// The modifiers held now, which decide the one lit hint.
     var modifiers: NSEvent.ModifierFlags = []
@@ -15,17 +18,32 @@ struct JumpFooter: View {
     var quickCount = 9
 
     var body: some View {
+        let hints = hints
+        ViewThatFits(in: .horizontal) {
+            ForEach((0...hints.count).reversed(), id: \.self) {
+                row(Array(hints.prefix($0)))
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 7)
+        .accessibilityHidden(true)
+    }
+
+    private func row(_ shown: [String]) -> some View {
         HStack(spacing: 8) {
             // Worded rather than positional, so it stays true at
             // any scroll offset — the shortcuts panel's cue (#1292).
-            if overflows, scope == .windows {
+            if overflows, let cue = scrollHint {
                 HStack(spacing: 4) {
                     Image(systemName: "chevron.down")
-                    Text(JumpRowText.scrollHint)
+                    Text(cue)
                 }
-                Text(verbatim: "·")
+                if !shown.isEmpty { Text(verbatim: "·") }
             }
-            ForEach(Array(hints.enumerated()), id: \.offset) { index, hint in
+            ForEach(Array(shown.enumerated()), id: \.offset) { index, hint in
                 if index > 0 { Text(verbatim: "·") }
                 Text(hint)
                     .foregroundStyle(
@@ -35,12 +53,22 @@ struct JumpFooter: View {
                     )
             }
         }
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 7)
-        .accessibilityHidden(true)
+        .fixedSize()
+    }
+
+    /// The side's scroll cue; the View side never scrolls.
+    var scrollHint: String? {
+        switch scope {
+        case .windows:
+            return JumpRowText.scrollHint
+        case .shortcuts:
+            return L(
+                "shortcuts.panel.scroll_hint",
+                "Scroll for more shortcuts"
+            )
+        case .view:
+            return nil
+        }
     }
 }
 
@@ -99,10 +127,9 @@ extension JumpFooter {
                 other,
             ]
         case .shortcuts:
-            return [
-                L("shortcuts.footer.edit", "%1$@ Edit", "⌘,"),
-                other,
-            ]
+            // Edit in Settings… stands beside the hints with its
+            // own chord.
+            return [other]
         case .view:
             let digits = quickCount > 1 ? "⌘1–\(quickCount)" : "⌘1"
             let apply = L("layout_picker.footer.apply", "%1$@ Apply", "↩")

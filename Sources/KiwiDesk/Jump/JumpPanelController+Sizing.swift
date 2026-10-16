@@ -41,8 +41,8 @@ extension JumpPanelController {
 
     /// The Shortcuts side's tallest sheet: the panel runs from its
     /// field down to 40 pt above the clear area's bottom, never
-    /// taller than `maxPanelHeight`, less the field, the button row
-    /// and the footer (#2246).
+    /// taller than `maxPanelHeight`, less the field and the footer
+    /// row (#2246).
     static func sheetCap(visible: CGRect, area: CGRect) -> CGFloat {
         let top = visible.maxY - visible.height * topFraction
         let below = top - area.minY - 40
@@ -54,8 +54,8 @@ extension JumpPanelController {
     static let maxPanelHeight: CGFloat = 400
 
     /// What the Shortcuts side draws besides its sheet: the field,
-    /// the button row, the footer and their dividers.
-    static let shortcutsChrome: CGFloat = 130
+    /// the footer row and their dividers.
+    static let shortcutsChrome: CGFloat = 80
 
     /// The panel's width: `JumpPanelView.width`, kept 40 pt clear
     /// of each edge of a narrower screen.

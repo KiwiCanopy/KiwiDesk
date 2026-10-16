@@ -28,6 +28,7 @@ struct ShortcutsSheetTests {
             ),
         ],
         inactive: [row("Go to Space 9")],
+        unavailable: [row("Go to Desktop 6")],
         apps: [row("Open Settings"), row("Safari")],
         custom: [row("KiwiDesk.notify()")]
     )
@@ -58,7 +59,7 @@ struct ShortcutsSheetTests {
     @Test("an empty query shows the whole sheet")
     func emptyShowsAll() {
         let sheet = ShortcutsSheet(reference: Self.reference)
-        #expect(sheet.matchCount == 7)
+        #expect(sheet.matchCount == 8)
     }
 
     @Test("a match ignores case and diacritics")
@@ -69,7 +70,7 @@ struct ShortcutsSheetTests {
         #expect(ShortcutsSheet.matchRange(of: "", in: "Safari") == nil)
     }
 
-    @Test("the column reads Controls, Apps, Custom, then Inactive")
+    @Test("the column reads Controls, Apps, Custom, Inactive, Unavailable")
     func sectionOrder() {
         LocalizationManager.shared.select("en")
         let view = ShortcutsSheetView(reference: Self.reference, needle: "")
@@ -77,10 +78,13 @@ struct ShortcutsSheetTests {
         #expect(
             titles == [
                 "Focus", "Move windows", "Apps", "Custom",
-                "Inactive shortcuts",
+                "Inactive shortcuts", "Unavailable shortcuts",
             ]
         )
-        #expect(view.sections(Self.reference).last?.inactive == true)
+        // Only Inactive dims as a section; an unavailable row
+        // dims itself.
+        let dimmed = view.sections(Self.reference).filter(\.dims)
+        #expect(dimmed.map(\.title) == ["Inactive shortcuts"])
     }
 
     @Test("every verb row wears a glyph that resolves")

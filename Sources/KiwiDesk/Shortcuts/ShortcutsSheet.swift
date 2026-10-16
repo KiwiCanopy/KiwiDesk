@@ -36,7 +36,8 @@ struct ShortcutsSheet {
     var matchCount: Int {
         guard let shown else { return 0 }
         return shown.controls.reduce(0) { $0 + $1.rows.count }
-            + shown.inactive.count + shown.apps.count + shown.custom.count
+            + shown.inactive.count + shown.unavailable.count
+            + shown.apps.count + shown.custom.count
     }
 
     static func filtered(
@@ -61,6 +62,7 @@ struct ShortcutsSheet {
                 ? nil : ShortcutSubgroup(title: group.title, rows: rows)
         }
         out.inactive = reference.inactive.filter(keeps)
+        out.unavailable = reference.unavailable.filter(keeps)
         out.apps = reference.apps.filter(keeps)
         out.custom = reference.custom.filter(keeps)
         return out

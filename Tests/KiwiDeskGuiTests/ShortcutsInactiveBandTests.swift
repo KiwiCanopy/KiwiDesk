@@ -137,13 +137,14 @@ struct ShortcutsInactiveBandTests {
         .split(whereSeparator: \.isWhitespace)
         .joined()
         for needle in [
-            "rows:reference.inactive,inactive:true",
+            "rows:reference.inactive,caption:inactiveCaption,dims:true",
             // The dim, keyed on the section's own flag: every
             // section draws the same `ForEach`, and only the
             // inactive one dims. How much is a tuning, so the
             // needle stops before the value.
-            ".opacity(section.inactive?",
-            "Text(inactiveCaption)",
+            ".opacity(section.dims?",
+            "ifletcaption=section.caption",
+            "Text(caption)",
         ] {
             #expect(
                 source.contains(needle),
