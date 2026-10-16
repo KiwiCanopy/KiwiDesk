@@ -1,0 +1,15 @@
+{
+  "name": "kiwidesk",
+  "owner": {
+    "name": "Maikel Hajiabadi",
+    "url": "https://kiwidesk.kiwicanopy.com"
+  },
+  "description": "KiwiDesk, the tiling window manager for macOS, for Claude Code.",
+  "plugins": [
+    {
+      "name": "kiwidesk",
+      "source": "./kiwidesk",
+      "description": "Set up and control KiwiDesk by asking Claude, through KiwiDesk's own MCP server."
+    }
+  ]
+}

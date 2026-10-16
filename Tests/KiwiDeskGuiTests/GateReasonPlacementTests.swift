@@ -96,8 +96,9 @@ struct GateReasonPlacementTests {
                 // the overrides box, so the row draws its reason.
                 .gaps(.perSpaceOverride),
                 // #1685: Copy Setup Prompt greys on a translocated
-                // copy, a cause shown nowhere else.
-                .ai(.copySetupPrompt),
+                // copy, a cause shown nowhere else; Add to Claude
+                // Desktop shares that one sentence (#2258).
+                .ai(.addToClaudeDesktop), .ai(.copySetupPrompt),
                 // #2103: KiwiVision's app-wide rows grey under a
                 // Lua-owned config, a cause shown nowhere on its
                 // page, so each draws its sentence.

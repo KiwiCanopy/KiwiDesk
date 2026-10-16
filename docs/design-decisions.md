@@ -7886,10 +7886,26 @@ user reads them, and each has the AI app interview the user one
 question at a time, so it works pasted unchanged. A ready-made
 prompt lands with the tools it needs and is never drawn before
 them — removed rather than dimmed, as with any entry whose channel
-does not exist yet. Copy Setup Prompt greys on a translocated copy
-through the one `RunningCopy` verdict the login item reads too
-(▸ Open at login), because the path it would copy dies at the next
-launch.
+does not exist yet. Copy Setup Prompt and Add to Claude Desktop…
+grey on a translocated copy through the one `RunningCopy` verdict
+the login item reads too (▸ Open at login), because the path each
+one carries dies at the next launch. Add to Claude Desktop… shows
+nothing after the click: Claude Desktop's own install dialog is the
+feedback, and KiwiDesk cannot see whether the user accepted it. It
+reads only whether Claude Desktop is installed, which greys it with
+its reason.
+
+The Claude Desktop extension is built on the user's Mac at the
+click, with the running copy's path and version in it, so it always
+starts the copy that made it — wherever that copy lives — and never
+a stale one. It is unsigned, since no key is on the user's Mac and
+it carries nothing but a launcher for the notarized app, and no
+release attaches it, since anyone who can use it already has the
+button. The Claude Code plugin's source lives in `plugins/` beside
+the code it is tested against, while its marketplace is a
+repository of its own: Claude Code adds a marketplace by cloning
+the repository that holds it, and this one is about 100 MB even as
+a shallow clone (#2258 ▸ Ruling).
 
 A look matched to the wallpaper is made from a screenshot the user
 hands the AI app; KiwiDesk never reads the wallpaper itself, since
