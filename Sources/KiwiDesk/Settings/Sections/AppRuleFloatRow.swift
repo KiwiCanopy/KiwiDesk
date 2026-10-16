@@ -54,11 +54,22 @@ struct AppRuleFloatRow: View {
             }
             .font(.callout)
             if scope == .titled || editingTitles {
-                AppRuleTitledEditor(
+                WindowTitleEditor(
                     model: model,
+                    patterns: titlePatterns,
                     app: app,
-                    editingTitles: titlesEditing
-                )
+                    caption: L(
+                        "app_rules.titled.caption",
+                        "Windows whose title contains a pattern "
+                            + "stay floating."
+                    )
+                ) { pending in
+                    AppRuleMatchPreview(
+                        model: model,
+                        app: app,
+                        pending: pending
+                    )
+                }
                 .padding(.leading, editorInset)
             }
         }
@@ -158,10 +169,27 @@ struct AppRuleFloatRow: View {
 
     // MARK: - Mutations (GUI assembles the colon syntax)
 
+    /// The app's title patterns as `app:pattern` Float rules (the
+    /// GUI assembles the colon syntax). A write drops the bare rule
+    /// as the first pattern lands and keeps the editor open, even
+    /// once the last pattern goes (#1022).
+    private var titlePatterns: Binding<[String]> {
+        Binding(
+            get: { FloatFacet.patterns(model.config.floatRules, app: app) },
+            set: { patterns in
+                model.config.floatRules = FloatFacet.settingPatterns(
+                    patterns,
+                    of: app,
+                    in: model.config.floatRules
+                )
+                titlesEditing.wrappedValue = true
+            }
+        )
+    }
+
     /// Opens the pattern editor WITHOUT clearing the float rule:
-    /// a bare rule may be the row's only stored rule, and
-    /// `AppRuleTitledEditor.addPattern` drops it as the first
-    /// pattern lands (#1022).
+    /// a bare rule may be the row's only stored rule, and the
+    /// first pattern written drops it (#1022).
     private func openTitles() {
         titlesEditing.wrappedValue = true
     }

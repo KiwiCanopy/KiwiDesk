@@ -53,6 +53,27 @@ enum FloatFacet: Equatable {
         }
     }
 
+    /// `rules` with `app`'s title patterns set to `patterns`: a
+    /// removed pattern's rule goes, a new one's is appended, the
+    /// rest keep their order, and the bare rule goes with any write
+    /// — a pattern now picks the app's windows (#1022).
+    static func settingPatterns(
+        _ patterns: [String],
+        of app: String,
+        in rules: [String]
+    ) -> [String] {
+        let old = Self.patterns(rules, app: app)
+        let dropped = Set(old.filter { !patterns.contains($0) })
+        var kept = rules.filter { rule in
+            rule != app
+                && !dropped.contains { rule == "\(app):\($0)" }
+        }
+        for pattern in patterns where !old.contains(pattern) {
+            kept.append("\(app):\(pattern)")
+        }
+        return kept
+    }
+
     static func rules(_ rules: [String], app: String) -> [String] {
         rules.filter { appSegment(of: $0) == app }
     }

@@ -1,21 +1,27 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Editor for window title matching patterns within an app rule
-/// (#68 §3.11). `editingTitles` stays owned by the row — it also
-/// gates this editor's visibility — and is bound here so adding
-/// the first pattern keeps the editor open.
-struct AppRuleTitledEditor: View {
+/// Editor for the title patterns that pick some of an app's
+/// windows (#68 §3.11, #2103 ruling 43): a chip per pattern, a menu
+/// of the app's open titles, a free-text escape, the caller's
+/// preview of what the patterns match and its caption. A pattern
+/// matches as `WindowTitleMatch` reads it; where the patterns are
+/// stored is the caller's.
+struct WindowTitleEditor<Preview: View>: View {
     @ObservedObject var model: SettingsModel
+    @Binding var patterns: [String]
+    /// The app's bundle id, whose open windows the menu offers.
     let app: String
-    @Binding var editingTitles: Bool
+    let caption: String
+    /// What the patterns match, handed the pattern being typed.
+    @ViewBuilder let preview: (String) -> Preview
     @State private var customPattern = ""
     @State private var addingCustom = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if !patterns.isEmpty {
-                WrapChips(patterns) { pattern in
+            if !shown.isEmpty {
+                WrapChips(shown) { pattern in
                     patternChip(pattern)
                 }
             }
@@ -39,38 +45,22 @@ struct AppRuleTitledEditor: View {
                     .settingsActionButton()
                 }
             }
-            AppRuleMatchPreview(
-                model: model,
-                app: app,
-                pending: addingCustom ? customPattern : ""
-            )
-            Text(titledPatternCaption)
+            preview(addingCustom ? customPattern : "")
+            Text(caption)
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
     }
 
     /// Deduplicated, because the chips are identified by VALUE.
-    /// `addPattern` refuses a duplicate, but `floatRules` decodes
-    /// straight from JSON and a hand-written config can repeat
-    /// one — which under value identity is two `ForEach` children
-    /// claiming one id (code review, 2026-08-04). Order is the
-    /// config's; only the repeat is dropped.
-    private var patterns: [String] {
+    /// `addPattern` refuses a duplicate, but a store decoded
+    /// straight from JSON can repeat one — which under value
+    /// identity is two `ForEach` children claiming one id (code
+    /// review, 2026-08-04). Order is the store's; only the repeat
+    /// is dropped.
+    private var shown: [String] {
         var seen: Set<String> = []
-        return FloatFacet.patterns(
-            model.config.floatRules,
-            app: app
-        )
-        .filter { seen.insert($0).inserted }
-    }
-
-    private var titledPatternCaption: String {
-        L(
-            "app_rules.titled.caption",
-            "Windows whose title contains a pattern "
-                + "stay floating."
-        )
+        return patterns.filter { seen.insert($0).inserted }
     }
 
     private func patternChip(_ pattern: String) -> some View {
@@ -126,7 +116,7 @@ struct AppRuleTitledEditor: View {
     }
 
     private var openTitles: [String] {
-        let covered = patterns
+        let covered = shown
         return Set(
             model.core.state.windows.all
                 .filter { $0.appBundleID == app }
@@ -137,23 +127,15 @@ struct AppRuleTitledEditor: View {
         .sorted()
     }
 
-    // MARK: - Mutations (GUI assembles the colon syntax)
+    // MARK: - Mutations
 
     private func addPattern(_ pattern: String) {
-        let rule = "\(app):\(pattern)"
-        model.config.floatRules.removeAll { $0 == app }
-        guard !model.config.floatRules.contains(rule) else {
-            return
-        }
-        model.config.floatRules.append(rule)
-        editingTitles = true
+        guard !patterns.contains(pattern) else { return }
+        patterns.append(pattern)
     }
 
     private func removePattern(_ pattern: String) {
-        model.config.floatRules.removeAll {
-            $0 == "\(app):\(pattern)"
-        }
-        if patterns.isEmpty { editingTitles = true }
+        patterns.removeAll { $0 == pattern }
     }
 
     private func commitCustom() {

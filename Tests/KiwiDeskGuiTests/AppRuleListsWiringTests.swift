@@ -66,7 +66,7 @@ struct AppRuleListsWiringTests {
     func patternEditorScopesToFloat() throws {
         #expect(
             try source("AppRuleFloatRow.swift")
-                .contains("AppRuleTitledEditor("),
+                .contains("WindowTitleEditor("),
             "the Float row no longer mounts the pattern editor"
         )
         // Every file the Space row spans, so an extension beside it
@@ -79,7 +79,7 @@ struct AppRuleListsWiringTests {
         .map { try source($0.lastPathComponent) }
         .joined()
         #expect(
-            !spaceRow.isEmpty && !spaceRow.contains("AppRuleTitledEditor"),
+            !spaceRow.isEmpty && !spaceRow.contains("WindowTitleEditor"),
             Comment(
                 rawValue:
                     "the Space row draws a title pattern again — "
