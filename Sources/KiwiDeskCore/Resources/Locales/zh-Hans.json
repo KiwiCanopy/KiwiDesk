@@ -4,6 +4,7 @@
   "ai.capability.app_rules": "选择哪些 App 浮动，以及每个 App 在哪个空间中打开。",
   "ai.capability.diagnose": "解释窗口为何浮动、平铺，或在当前位置打开。",
   "ai.capability.inspect": "查看你的空间和窗口，并查询任意命令。",
+  "ai.capability.kiwivision": "开启和关闭 KiwiVision 及其镜头，并更改它们。",
   "ai.capability.looks": "创建、应用和存储造型，并根据截屏匹配你的墙纸。",
   "ai.capability.settings": "更改间距、边框以及 KiwiShelf 上的栏。",
   "ai.capability.shortcuts": "在你同意列表后，为命令添加快捷键。",

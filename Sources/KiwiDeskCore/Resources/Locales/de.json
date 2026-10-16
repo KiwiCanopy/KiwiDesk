@@ -4,6 +4,7 @@
   "ai.capability.app_rules": "Festlegen, welche Apps schweben und in welchem Space sich jede App öffnet.",
   "ai.capability.diagnose": "Erklären, warum ein Fenster schwebt, gekachelt wird oder sich dort öffnet, wo es sich öffnet.",
   "ai.capability.inspect": "Deine Spaces und Fenster sehen und jeden Befehl nachschlagen.",
+  "ai.capability.kiwivision": "KiwiVision und seine Linsen ein- und ausschalten und ändern.",
   "ai.capability.looks": "Looks erstellen, anwenden und sichern, per Bildschirmfoto passend zu deinem Hintergrundbild.",
   "ai.capability.settings": "Abstände, Rahmen und die Leisten auf KiwiShelf ändern.",
   "ai.capability.shortcuts": "Tastenkürzel für Befehle hinzufügen, sobald du der Liste zustimmst.",

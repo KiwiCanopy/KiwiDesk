@@ -4,6 +4,7 @@
   "ai.capability.app_rules": "Scegliere quali app fluttuano e in quale spazio si apre ciascuna app.",
   "ai.capability.diagnose": "Spiegare perché una finestra fluttua, viene affiancata o si apre dove si apre.",
   "ai.capability.inspect": "Vedere i tuoi spazi e le tue finestre, e consultare qualsiasi comando.",
+  "ai.capability.kiwivision": "Attivare e disattivare KiwiVision e le sue lenti, e modificarli.",
   "ai.capability.looks": "Creare, applicare e salvare look, abbinati al tuo sfondo partendo da un'istantanea dello schermo.",
   "ai.capability.settings": "Modificare le spaziature, i contorni e le barre su KiwiShelf.",
   "ai.capability.shortcuts": "Aggiungere scorciatoie per i comandi, dopo che hai approvato l'elenco.",
