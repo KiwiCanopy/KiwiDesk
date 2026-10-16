@@ -20,7 +20,7 @@ extension FullscreenStandDownTests {
         core.state.workspaces.activate("1")
         core.state.workspaces.setMode("1", .bsp)
         core.modeCycle.base = [.bsp, .stack, .floating]
-        core.frontWindowFrames = { [] }
+        core.frontStack = { [] }
         let box = CueBox()
         core.onModeCue = { box.cues.append($0) }
         return (core, box)

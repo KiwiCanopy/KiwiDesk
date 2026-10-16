@@ -9,6 +9,8 @@ enum KiwiVisionKey: String, CaseIterable, Hashable {
     case clearWallpaper = "appWide.visionClearWallpaper"
     case clearApp = "appWide.visionClearApp"
     case neverDimmed = "appWide.visionNeverDimmed"
+    /// Lua-only until the lens page lands (#2103 v3 PR 7).
+    case lenses = "appWide.visionLenses"
 }
 
 extension KiwiVisionKey {
@@ -50,6 +52,8 @@ extension KiwiVisionKey {
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
+        case .lenses:
+            return .luaOnly
         }
     }
 
@@ -79,6 +83,8 @@ extension KiwiVisionKey {
                 "kiwivision.never_dimmed",
                 help: "kiwivision.never_dimmed.help"
             )
+        case .lenses:
+            return .none
         }
     }
 }

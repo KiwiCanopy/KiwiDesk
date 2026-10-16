@@ -100,6 +100,9 @@ struct SettingsCodingTests {
         // (#186), off by default.
         let mouse = try object(root["mouse"])
         #expect(mouse["follows_focus"] as? Bool == false)
+        // `mouse.set_hover_focus` → `mouse.hover_focus` (#1869),
+        // off by default.
+        #expect(mouse["hover_focus"] as? Bool == false)
         // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
         // (#172), on by default.
         #expect(root["swap_skips_cascade"] as? Bool == true)

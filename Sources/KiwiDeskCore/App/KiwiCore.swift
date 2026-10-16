@@ -231,11 +231,11 @@ public final class KiwiCore {
 
     /// The WindowServer window reads, all pinned by `makeTestCore`: the
     /// Desktop raise gate's on-screen flag and shown host (#1345/#1410),
-    /// and the front-to-back frames, one door by census (#1788).
+    /// and the front-to-back windows, one door by census (#1788).
     var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
     var windowIsOnShownDesktop: (WindowID) -> Bool? =
         NativeSpaces.isOnShownDesktop
-    var frontWindowFrames: @MainActor () -> [CGRect] = liveFrontFrames
+    var frontStack: @MainActor () -> [FrontWindow] = liveFrontStack
     /// A move verb's departures, claimed at the vanish (#1345).
     var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).

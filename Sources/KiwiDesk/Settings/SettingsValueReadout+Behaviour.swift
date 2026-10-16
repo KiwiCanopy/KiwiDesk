@@ -92,6 +92,15 @@ extension SettingsValueReadout {
                     new: after.mouse.followsFocus
                 )
             ]
+        case .mouseHoverFocus:
+            return [
+                behaviourToggleRow(
+                    census,
+                    label: label(for: census),
+                    old: before.mouse.hoverFocus,
+                    new: after.mouse.hoverFocus
+                )
+            ]
         }
     }
 
