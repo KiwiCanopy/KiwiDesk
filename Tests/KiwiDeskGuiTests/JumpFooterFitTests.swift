@@ -168,6 +168,23 @@ struct JumpFooterFitTests {
         #expect(
             footer.contains("JumpFooterMidline(spacing: Self.spacing)")
         )
+        // The middle is placed at the centre the clamp decides.
+        let midline = SourceScan.stripComments(
+            try String(
+                contentsOf: root.appendingPathComponent(
+                    "JumpFooterMidline.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        let place = try #require(
+            SourceScan.declarationBody(
+                after: "func placeSubviews",
+                in: midline
+            )
+        )
+        #expect(place.contains("Self.centre("))
+        #expect(place.contains("x: bounds.minX + centre"))
     }
 
     /// `shortcutsChrome` states what the Shortcuts side draws
