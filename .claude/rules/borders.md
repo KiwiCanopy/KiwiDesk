@@ -485,12 +485,14 @@ Obligations:
   `KiwiVisionLensActivationTests` ▸ `activeFollowsDefinition`,
   `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`,
   `persistingRenameFollows`). **A lens is matched by the one
-  `AppWideSettings.sameLens`**, never a case compare beside it, and
-  **Settings offers a row only for a STORED lens** —
-  `kiwiVisionStoredLensNames` — since a chord outlives a session
-  `define_lens`, while a binding naming any other lens still draws
-  its row through the one `KeybindingCatalog.lensOffer`, so its
-  chord stays visible and removable (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
+  `AppWideSettings.sameLens`**, never a case compare beside it.
+  **Settings draws a lens row for every stored lens and every lens
+  a binding names, through the one `KeybindingCatalog.lensOffer`**,
+  never for a lens only a session `define_lens` holds, since a
+  chord outlives the session; a row owns every spelling of its
+  lens (`NavCommand.owns`), so no chord is hidden in any layer, and
+  a row for a lens no store holds stays bindable, since a Lua-owned
+  setup defines its lenses on every load (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
   and writes the settled list, never the live one**, so a session
   `define_lens` or `delete_lens` never reaches `gui.json` (ruling
   40) — review's until the lens page owes it a test.

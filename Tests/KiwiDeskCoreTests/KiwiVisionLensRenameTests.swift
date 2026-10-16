@@ -89,11 +89,20 @@ struct KiwiVisionLensRenameTests {
         #expect(core.vision.renamedLens == nil)
     }
 
-    /// A stored write renames too, and the rename ends with the
-    /// write: a later one that renames nothing follows nothing.
+    /// A stored write renames too — on a GUI-managed core, the lens
+    /// in `gui.json` — and the rename ends with the write: a later
+    /// one that renames nothing follows nothing.
     @Test("a persisting rename follows and ends with its write")
-    func persistingRenameFollows() {
+    func persistingRenameFollows() throws {
         let core = core()
+        try core.guiConfigStore.save(GuiConfig())
+        core.setAppWide(persisting: true) { settings in
+            settings.visionLenses = core.appWide.visionLenses
+        }
+        #expect(
+            core.guiConfigStore.load()?.appWide?.visionLenses.map(\.name)
+                == ["Writing"]
+        )
         core.setAppWide(
             persisting: true,
             renamingLens: ("Writing", "Draft")
@@ -106,6 +115,10 @@ struct KiwiVisionLensRenameTests {
         }
         #expect(core.kiwiVisionActive == .lens("Draft"))
         #expect(core.vision.renamedLens == nil)
+        #expect(
+            core.guiConfigStore.load()?.appWide?.visionLenses.map(\.name)
+                == ["Draft"]
+        )
         rename(core, to: "Writing")
         #expect(core.kiwiVisionActive == .off)
     }

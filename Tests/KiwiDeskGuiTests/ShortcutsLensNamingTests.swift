@@ -57,10 +57,10 @@ struct ShortcutsLensNamingTests {
         #expect(row.label == "Toggle Writing lens")
     }
 
-    /// A binding naming a lens no store holds, or a stored lens in
-    /// another spelling, still draws a row, so its chord can be
-    /// seen and removed.
-    @Test("every bound lens draws a row, in the binding's spelling")
+    /// A binding naming a lens no store holds still draws a row,
+    /// and a stored lens's row owns every spelling of it, so no
+    /// chord is hidden whichever layer holds it.
+    @Test("every bound lens draws a row that owns its spellings")
     func boundLensesDrawRows() {
         let bindings = [
             KeyBinding(
@@ -78,7 +78,18 @@ struct ShortcutsLensNamingTests {
             KeybindingCatalog.lensOffer(
                 stored: ["Writing", "Mail"],
                 bindings: bindings
-            ) == ["writing", "Mail", "Gone"]
+            ) == ["Writing", "Mail", "Gone"]
+        )
+        // The stored lens's row owns the other spelling, so its
+        // chord in any layer is the row's.
+        let row = KeybindingCatalog.toggleLens("Writing")
+        #expect(row.runs(bindings[0].lua))
+        #expect(!row.runs(bindings[1].lua))
+        #expect(!row.runs(KeybindingCatalog.toggleKiwiVision.lua))
+        #expect(
+            KeybindingCatalog.toggleKiwiVision.runs(
+                KeybindingCatalog.toggleKiwiVision.lua
+            )
         )
     }
 
@@ -101,6 +112,18 @@ struct ShortcutsLensNamingTests {
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(path)
         ).filter { !$0.isWhitespace }
+    }
+
+    /// A row finds, records and preflights its binding through the
+    /// row's own ownership, never an exact-Lua compare beside it.
+    @Test("a row matches its bindings through what it owns")
+    func rowMatchesThroughRuns() throws {
+        let row = try flat(
+            "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                + "KeybindingNavRow.swift"
+        )
+        #expect(row.occurrences(of: "command.runs($0.lua)") == 3)
+        #expect(!row.contains("$0.lua==command.lua"))
     }
 
     /// Each surface hands its lens list in; a default would let a

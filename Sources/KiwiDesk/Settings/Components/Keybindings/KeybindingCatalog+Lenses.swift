@@ -12,28 +12,28 @@ extension KeybindingCatalog {
             lua: "kiwivision.toggle(\(quote(name)))",
             displayLabel: {
                 L("keybinding.toggle_lens", "Toggle %1$@ lens", name)
+            },
+            owns: { stored in
+                lensTarget(of: stored).map {
+                    AppWideSettings.sameLens($0, name)
+                } ?? false
             }
         )
     }
 
     /// The lenses Settings draws a row for: every stored lens, plus
-    /// every lens a binding names — an unstored or differently
-    /// spelled one included, so its chord stays visible and
-    /// removable, as `desktopOffer` keeps a detached Desktop's. A
-    /// binding's own spelling wins, so its row matches it.
+    /// every lens a binding names in any layer, so its chord stays
+    /// visible and removable, as `desktopOffer` keeps a detached
+    /// Desktop's. Each row owns every spelling of its lens
+    /// (`NavCommand.owns`), so which spelling names it is moot.
     static func lensOffer(
         stored: [String],
         bindings: [KeyBinding]
     ) -> [String] {
         var offer = stored
-        for name in bindings.compactMap({ lensTarget(of: $0.lua) }) {
-            if let index = offer.firstIndex(where: {
-                AppWideSettings.sameLens($0, name)
-            }) {
-                offer[index] = name
-            } else {
-                offer.append(name)
-            }
+        for name in bindings.compactMap({ lensTarget(of: $0.lua) })
+        where !offer.contains(where: { AppWideSettings.sameLens($0, name) }) {
+            offer.append(name)
         }
         return offer
     }
