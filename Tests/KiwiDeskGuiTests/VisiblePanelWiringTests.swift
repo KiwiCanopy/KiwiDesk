@@ -75,6 +75,19 @@ struct VisiblePanelWiringTests {
             )
         )
         #expect(body.contains("tracked: admittedWindows(of: pid)"))
+        // The reader answers with the gate's own trait read, which
+        // has no seam (`PanelButtonReaderTests` holds the rest).
+        let reader = try SourceScan.functionBody(
+            of: "untrackedTitlebarButton",
+            in: "EventLoop+PanelButton.swift",
+            under: "Events"
+        )
+        try #require(!reader.isEmpty)
+        #expect(
+            reader.components(
+                separatedBy: "return Self.readsTitlebarButton(element"
+            ).count - 1 == 2
+        )
         let scan = try SourceScan.functionBody(
             of: "hasVisibleIgnoredPanel",
             in: "FloatDetection+Ignore.swift",

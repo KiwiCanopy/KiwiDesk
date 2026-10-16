@@ -27,8 +27,9 @@ extension EventLoop {
     /// only when a candidate asks, and resolved only as far as
     /// the asked id; a window it does not list has no button.
     /// The read runs on the main actor, as the callers' own
-    /// focused-window read does.
-    private func untrackedTitlebarButton(
+    /// focused-window read does. Internal for its suite alone; a
+    /// caller takes `showsIgnoredPanel`.
+    func untrackedTitlebarButton(
         of pid: pid_t
     ) -> (WindowID) -> Bool {
         var list: [AXUIElement]?
