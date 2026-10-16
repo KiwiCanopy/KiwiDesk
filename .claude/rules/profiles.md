@@ -1600,10 +1600,13 @@ the newer act, wins (`BarMenuLandingTests`); a stored profile's
 draft is another file and takes nothing. An edit NO file took —
 no profile live, or the write failed — lasts the session, as the
 tour's click does, which means until a Save writes the draft: a
-clean draft still re-reads, the tour's shipped behaviour, while a
-dirty draft takes nothing of it, since taking it on both sides
-would call a session value saved
-(`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
+clean draft still re-reads, the tour's shipped behaviour, and a
+dirty draft takes its settings on both sides of its diff through
+the one `adoptLiveSettings`, as it takes any live change, the
+draft's own edits rebased over them — the pill lists the value
+"Live, not saved", so taking it calls nothing saved, while
+leaving it would let the Save put the old value back over the
+row (#2262, `BarMenuLandingTests` ▸ `sessionOnlyWriteIsLive`,
 `BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). A writer that paints
 more than the leaves it names — the tour's whole look — refuses
 while a live-profile draft is dirty instead

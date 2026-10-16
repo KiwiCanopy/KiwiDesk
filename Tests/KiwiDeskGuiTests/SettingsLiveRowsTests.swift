@@ -102,7 +102,7 @@ struct SettingsLiveRowsTests {
                 "recomputeDirty()}refreshUnsavedLive()}",
             ],
             "SettingsModel+LiveWrite.swift": [
-                "guardpersistedelse{refreshUnsavedLive()return}",
+                "guardpersistedelse{adoptLiveSettings()return}",
                 "recomputeDirty()refreshUnsavedLive()}",
             ],
             "SettingsWindowController.swift": [
