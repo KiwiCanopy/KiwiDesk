@@ -112,7 +112,7 @@ extension KiwiCore {
         guard let title = args.dropFirst().first?.stringValue,
             !title.isEmpty
         else { return app }
-        return FloatRules.normalizedRule("\(app):\(title)")
+        return FloatRules.rule(app: app, title: title)
     }
 
     private var noApp: CommandResponse {

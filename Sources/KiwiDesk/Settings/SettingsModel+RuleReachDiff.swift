@@ -47,7 +47,7 @@ extension SettingsModel {
 
     /// A float rule set in the Float menu's own words.
     static func floatWords(_ rules: [String]) -> String {
-        rules.contains { !$0.contains(":") }
+        rules.contains { !FloatFacet.isTitled($0) }
             ? L("app_rules.float.scope.all", "All windows")
             : L("app_rules.float.scope.titled.resting", "Windows titled")
     }

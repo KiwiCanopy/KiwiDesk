@@ -1197,6 +1197,8 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   (`CommandBarIgnoreTests`), a screen-saver-level window refused at adoption
   alone, a tracked one judged through the one `FloatDetection.judgedLayer`
   (#2069, `ScreenSaverLayerWiringTests`)
+- a float rule is read only through `FloatRules.parse` and spelled only
+  through `FloatRules.rule(app:title:)` (#2345, `FloatRuleGrammarSeamTests`)
 
 ### [os-private-apis](.claude/rules/os-private-apis.md)
 

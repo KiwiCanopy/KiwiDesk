@@ -23,12 +23,14 @@ enum RuleFamily: Hashable {
     case autoFloat
 
     /// How a row's subject keys its table: app rules by the
-    /// lowercased bundle id, a shortcut's action and a scroll
-    /// setting verbatim.
+    /// lowercased bundle id — a float rule's app by the engine's
+    /// own `FloatRules.appKey` (#2345) — a shortcut's action and a
+    /// scroll setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
         case .key, .scroll, .history, .cycle, .autoFloat: subject
-        case .space, .float, .tile: subject.lowercased()
+        case .float: FloatRules.appKey(subject)
+        case .space, .tile: subject.lowercased()
         }
     }
 }

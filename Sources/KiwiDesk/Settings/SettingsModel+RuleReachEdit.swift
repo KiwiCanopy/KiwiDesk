@@ -21,9 +21,9 @@ extension SettingsModel {
         guard let reach = encodedReach else { return nil }
         return reading(
             reach.floatRules,
-            app.lowercased(),
+            FloatRules.appKey(app),
             reach.unreadable,
-            picked: reachEdits.reach[.float]?[app.lowercased()],
+            picked: reachEdits.reach[.float]?[FloatRules.appKey(app)],
             describe
         )
     }
