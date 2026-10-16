@@ -22,17 +22,28 @@ extension KiwiCore {
         onAppWideChange()
     }
 
-    /// The lens on, after a write of the lenses: one the new values
-    /// no longer hold, or that holds no apps, turns KiwiVision off,
-    /// and one stored under another spelling is followed to it. A
-    /// rename (#2103 PR 6) re-keys it here. True where it moved the
-    /// active value, whose own door then took the change of look.
-    private func followActiveLens(from old: AppWideSettings) -> Bool {
+    /// The lens on, judged again after a write of the lenses or a
+    /// change of the live profile: one the values no longer hold,
+    /// or that Core refuses, turns KiwiVision off — with ruling
+    /// 16's cue where the profile left it out — and one stored
+    /// under another spelling is followed to it. A rename (#2103
+    /// PR 6) re-keys it here. `old` is the values before a write.
+    /// True where it moved the active value, whose own door then
+    /// took the change of look.
+    @discardableResult
+    func followActiveLens(from old: AppWideSettings? = nil) -> Bool {
         guard let name = visionLensName else { return false }
-        let before = old.look(lens: name)
-        guard let lens = appWide.lens(named: name), lensRefusal(lens) == nil
-        else {
+        let before = (old ?? appWide).look(lens: name)
+        guard let lens = appWide.lens(named: name) else {
             setVision(.off, from: before)
+            return true
+        }
+        if let refusal = lensRefusal(lens) {
+            var cause: VisionChangeCause?
+            if case .outOfReach(let profile) = refusal {
+                cause = .outOfReach(lens: lens.name, profile: profile)
+            }
+            setVision(.off, from: before, cause: cause)
             return true
         }
         guard lens.name != name else { return false }

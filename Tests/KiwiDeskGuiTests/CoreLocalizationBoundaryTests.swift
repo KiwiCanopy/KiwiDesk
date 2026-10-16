@@ -134,6 +134,8 @@ struct CoreLocalizationBoundaryTests {
         // to window's Bring here refusal (#1875) and move_here's
         // two (#1513).
         "Commands/WindowActionRefusal.swift": 6,
+        // KiwiVision's out-of-reach pill (#2103 ruling 16).
+        "App/KiwiCore+VisionReach.swift": 1,
         "Bar/BarMenu.swift": 3,
         "Bar/LayoutModeRows.swift": 8,
     ]

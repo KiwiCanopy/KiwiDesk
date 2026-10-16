@@ -36,7 +36,7 @@ struct KiwiVisionLensPickTests {
     func pickTurnsOn() {
         let core = makeCore()
         var heard: [VisionActive] = []
-        core.vision.onChange = { heard.append($0) }
+        core.vision.onChange = { active, _ in heard.append(active) }
         core.setKiwiVision(.lens("writing"))
         #expect(core.kiwiVisionActive == .lens("Writing"))
         // A pick of the lens on is no toggle.

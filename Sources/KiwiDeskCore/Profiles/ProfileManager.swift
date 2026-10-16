@@ -1,32 +1,5 @@
 import Foundation
 
-/// Outcome of matching live monitors against saved profiles (#36, #53).
-public enum ProfileMatch: Equatable {
-    case exact(Profile)
-    case countDefault(Profile)
-    case none
-}
-
-/// Thrown for invalid profile names or name collisions.
-public enum ProfileError: Error, CustomStringConvertible {
-    case invalidName(String)
-    case nameTaken(String)
-    case dormantDefault(String)
-
-    public var description: String {
-        switch self {
-        case .invalidName(let name):
-            return "invalid profile name: '\(name)'"
-        case .nameTaken(let name):
-            return "a profile named '\(name)' already exists"
-        case .dormantDefault(let name):
-            return
-                "'\(name)' holds no screen setup, so it cannot be "
-                + "a screen count's default; load it first"
-        }
-    }
-}
-
 /// Persists profiles and selects matching configurations for monitor setups.
 @MainActor
 public final class ProfileManager {
@@ -45,7 +18,13 @@ public final class ProfileManager {
     /// The active profile as one value — what `currentName` reads
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
-    private(set) var active: ActiveProfile?
+    private(set) var active: ActiveProfile? {
+        didSet { onActiveChange() }
+    }
+    /// Fired on every write of `active` — an apply, a write of its
+    /// file, a rename, a Standard going live — so KiwiVision
+    /// re-judges the lens on against it (#2103 ruling 16).
+    var onActiveChange: @MainActor () -> Void = {}
     /// Nonzero while an apply or a config load moves what is live
     /// and what is declared (#1790): a temporary Space is judged
     /// against the adoption state, which is the OUTGOING one until
