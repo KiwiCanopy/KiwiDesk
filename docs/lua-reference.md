@@ -128,7 +128,7 @@ tiled-only.
 :::unreleased
 While a KiwiVision lens is on with
 [`keep_focus`](#kiwivisiondefine_lens), `focus` and `swap` skip
-the windows the lens keeps hazed.
+the windows the lens leaves out.
 :::
 
 **Example:**
@@ -3784,10 +3784,10 @@ whose titles it can read.
 
 With `keep_focus` on (the default), [`focus`](#focus) and
 [`swap`](#swap) — from a key, the CLI or Lua — and a
-[scroll gesture](#scroll-gestures) skip every window the lens keeps
-hazed, in every layout: other apps' windows, and a member's windows
-its `titles` leave out. A click, the bars and hover focus skip
-nothing.
+[scroll gesture](#scroll-gestures) skip every window the lens leaves
+out, in every layout: other apps' windows — never-dimmed ones
+included — and a member's windows its `titles` do not match. A
+click, the bars and hover focus skip nothing.
 
 A setting the lens leaves out follows the
 plain KiwiVision one, and never-dimmed apps stay clear under every

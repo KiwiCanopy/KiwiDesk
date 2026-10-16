@@ -6,7 +6,7 @@ import Foundation
 extension KiwiCore {
     /// `warp: false` is a scroll gesture's (#1656): the pointer
     /// stays where the hand holds it. Every step, a gesture's too,
-    /// skips what a lens keeps hazed (`lensKeySkip`, #2103 rulings
+    /// skips what a lens leaves out (`lensKeySkip`, #2103 rulings
     /// 35, 44, 45).
     func navigate(
         _ args: [JSONValue],

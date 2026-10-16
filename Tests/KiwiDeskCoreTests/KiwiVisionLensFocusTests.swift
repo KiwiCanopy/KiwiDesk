@@ -12,7 +12,9 @@ private enum LensNavFixture {
     static let member = "test.kiwi.notes"
     static let other = "test.kiwi.other"
 
-    /// `windows` in Space order: id, bundle id, title.
+    /// `windows` in Space order: id, bundle id, title. "track"
+    /// gives each window its own track, so `right` steps across;
+    /// "track-along" one horizontal track, so `right` steps along.
     static func core(
         mode: String,
         windows: [(UInt32, String, String)]
@@ -45,6 +47,12 @@ private enum LensNavFixture {
                 "track.set_new_window",
                 args: [.string("own_track")]
             )
+        }
+        if mode == "track-along" {
+            // One horizontal track: `right` steps along it.
+            core.execute("track.set_axis", args: [.string("horizontal")])
+            core.execute("set_mode", args: [.string("1"), .string("track")])
+            return core
         }
         core.execute("set_mode", args: [.string("1"), .string(mode)])
         return core
@@ -200,7 +208,9 @@ struct KiwiVisionLensWrapTests {
                 (3, LensNavFixture.member, ""),
             ]
         )
-        let verb = mode == "scrolling" ? "scroll" : mode
+        let verb =
+            mode == "scrolling"
+            ? "scroll" : mode.hasPrefix("track") ? "track" : mode
         core.execute("\(verb).set_wrap_focus", args: [.bool(true)])
         LensNavFixture.defineLens(core)
         return core
@@ -217,7 +227,7 @@ struct KiwiVisionLensWrapTests {
 
     @Test(
         "a wrap skips the stranger at the row's start",
-        arguments: ["scrolling", "monocle", "track"]
+        arguments: ["scrolling", "monocle", "track", "track-along"]
     )
     func wrapSkips(mode: String) {
         let core = makeCore(mode: mode)
@@ -230,7 +240,7 @@ struct KiwiVisionLensWrapTests {
     /// focus stays rather than wrapping onto itself.
     @Test(
         "a wrap never lands on the origin",
-        arguments: ["scrolling", "monocle", "track"]
+        arguments: ["scrolling", "monocle", "track", "track-along"]
     )
     func wrapNeverSelf(mode: String) {
         let core = makeCore(mode: mode)

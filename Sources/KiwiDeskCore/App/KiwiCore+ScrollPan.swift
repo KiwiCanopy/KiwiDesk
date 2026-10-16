@@ -127,7 +127,7 @@ extension KiwiCore {
 
     /// Any other layout: the next or previous window in the
     /// Space's own order, floats included, wrapping at the ends,
-    /// past every window a lens keeps hazed (#2103 ruling 45). A
+    /// past every window a lens leaves out (#2103 ruling 45). A
     /// native-fullscreen member is left out: it sits on a Desktop
     /// nobody shows, so the focus gate refuses it (#1345).
     private func stepInOrder(

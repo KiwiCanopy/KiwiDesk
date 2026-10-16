@@ -159,7 +159,8 @@ extension KiwiCore {
     /// nearest track whose window there `skip` accepts — a whole
     /// cascaded track is all pile-mates — wrapping last <-> first
     /// when asked, a wrap asking `skip` too and never landing on
-    /// the origin's track.
+    /// the origin's track. A track is judged by that one window, so
+    /// a lens member elsewhere in a skipped track is passed over.
     private func acrossTarget(
         step: Int,
         index: Int,

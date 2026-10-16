@@ -1650,7 +1650,7 @@ Touching `Borders`, `Vision`.
   `VisionManagerTests`, `OverlayGlassGateTests`,
   `VisionAppearanceSeamTests`, `KiwiVisionStoredTests`)
 - a navigation step — a focus or swap key, the scroll gesture — skips what
-  a lens keeps hazed through the one `lensKeySkip`, threaded with no default
+  a lens leaves out through the one `lensKeySkip`, threaded with no default
   into every navigation model and judged per window by `visionLensClear`,
   and a pick never asks it (#2103, `KiwiVisionLensFocusTests`,
   `KiwiVisionLensGestureTests`)

@@ -16,7 +16,8 @@ struct KiwiVisionLensGestureTests {
     /// Windows 1 and 3 are the lens's app, 2 another app's; 1 has
     /// the focus.
     private func makeCore(
-        _ mode: String
+        _ mode: String,
+        keepFocus: Bool = true
     ) -> (KiwiCore, ScrollPanSession) {
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in
@@ -45,6 +46,7 @@ struct KiwiVisionLensGestureTests {
         let lens: [String: JSONValue] = [
             "name": .string("Writing"),
             "apps": .array([.string(member)]),
+            "keep_focus": .bool(keepFocus),
         ]
         core.execute("kiwivision.define_lens", args: [.object(lens)])
         let session = ScrollPanSession()
@@ -85,5 +87,16 @@ struct KiwiVisionLensGestureTests {
         #expect(swipeNext(core, session) == WindowID(2))
         core.setKiwiVision(.lens("Writing"))
         #expect(swipeNext(core, session) == WindowID(3))
+    }
+
+    /// The gesture follows the same switch as the keys (ruling 45).
+    @Test(
+        "with the switch off a swipe skips nothing",
+        arguments: ["scrolling", "bsp"]
+    )
+    func switchOffSkipsNothing(mode: String) {
+        let (core, session) = makeCore(mode, keepFocus: false)
+        core.setKiwiVision(.lens("Writing"))
+        #expect(swipeNext(core, session) == WindowID(2))
     }
 }
