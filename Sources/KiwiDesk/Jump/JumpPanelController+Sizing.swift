@@ -60,7 +60,9 @@ extension JumpPanelController {
     /// the footer row and their two dividers.
     static var shortcutsChrome: CGFloat {
         JumpPanelView.fieldHeight + 2
-            + JumpFooterRow<EmptyView, EmptyView>.height
+            + JumpFooterRow<EmptyView, EmptyView>.height(
+                carriesControls: true
+            )
     }
 
     /// The panel's width: `JumpPanelView.width`, kept 40 pt clear

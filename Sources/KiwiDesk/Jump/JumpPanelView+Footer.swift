@@ -13,6 +13,7 @@ extension JumpPanelView {
                 hasSelection: model.hasSelection,
                 quickCount: model.viewQuickCount
             ),
+            carriesControls: model.scope != .windows,
             leading: { footerLeading },
             trailing: { footerTrailing }
         )
@@ -101,13 +102,20 @@ extension JumpPanelView {
 /// the end where a locale's controls leave them too little room.
 struct JumpFooterRow<Leading: View, Trailing: View>: View {
     let footer: JumpFooter
+    /// Whether a side draws a button here: View and Shortcuts always
+    /// do, Windows never.
+    let carriesControls: Bool
     @ViewBuilder let leading: Leading
     @ViewBuilder let trailing: Trailing
 
     static var spacing: CGFloat { 12 }
     static var inset: CGFloat { KeyPanelStyle.selectionInset + 10 }
-    /// One height on every side, so ⇥ never changes the panel's.
-    static var height: CGFloat { 40 }
+
+    /// A row of buttons takes room around them; a row of captions
+    /// alone stays as low as the captions.
+    static func height(carriesControls: Bool) -> CGFloat {
+        carriesControls ? 40 : 28
+    }
 
     var body: some View {
         // Each side is one subview even where it draws nothing.
@@ -117,7 +125,7 @@ struct JumpFooterRow<Leading: View, Trailing: View>: View {
             ZStack { trailing }
         }
         .padding(.horizontal, Self.inset)
-        .frame(height: Self.height)
+        .frame(height: Self.height(carriesControls: carriesControls))
     }
 }
 

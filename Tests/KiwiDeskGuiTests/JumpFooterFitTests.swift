@@ -201,6 +201,7 @@ struct JumpFooterFitTests {
         LocalizationManager.shared.select("en")
         let row = JumpFooterRow(
             footer: JumpFooter(scope: .shortcuts, overflows: true),
+            carriesControls: true,
             leading: { JumpLayerLabel(name: "Hyper") },
             trailing: { button("Edit in Settings…", "⌘,") }
         )
@@ -251,6 +252,41 @@ struct JumpFooterFitTests {
                 trailing: 150,
                 spacing: 12
             ) == 438
+        )
+    }
+
+    /// A row of captions alone stands lower than a row of buttons,
+    /// and the panel tells the Windows side from the others.
+    @Test("the button-less Windows footer stands lower")
+    func windowsFooterStandsLower() throws {
+        LocalizationManager.shared.select("en")
+        func drawn(_ scope: JumpScope, controls: Bool) -> CGFloat {
+            size(
+                JumpFooterRow(
+                    footer: JumpFooter(scope: scope, overflows: false),
+                    carriesControls: controls,
+                    leading: { EmptyView() },
+                    trailing: { EmptyView() }
+                ),
+                width: JumpPanelView.width
+            ).height
+        }
+        let bare = drawn(.windows, controls: false)
+        let buttoned = drawn(.view, controls: true)
+        #expect(bare < buttoned, "\(bare) pt vs \(buttoned) pt")
+        let footer = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/JumpPanelView+Footer.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(
+            footer.occurrences(
+                of: "carriesControls: model.scope != .windows"
+            ) == 1
         )
     }
 }
