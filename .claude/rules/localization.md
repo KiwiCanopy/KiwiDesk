@@ -332,8 +332,9 @@ every name in `PRODUCT_NAMES` — the register; do not list its
 members here — **present** in every locale, script irrelevant
 (deliberately *not* the residue rule's mirror);
 `untranslated_mode_names` requires the English mode name
-**absent** in the three CJK locales, which render them natively,
-and skips the seven that keep the English word. A new name joins
+**absent** in the CJK locales, which render them natively, and
+skips the ones that keep the English word
+(`LocalizationModeNamePolicyTests` holds which are which). A new name joins
 a family by one checkable question — *does its own label key ship
 untranslated in all eleven catalogs?* — never by arguing whether
 it is a coinage. Matched as a phrase, not as tokens: `GLOSSARY`
