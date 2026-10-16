@@ -57,6 +57,8 @@ struct AnnouncedValueTests {
         // #1209: the export row's range menu, named by the range
         // key because the button beside it names the export.
         "GeneralSection+LogExport.swift": 1,
+        // #2308: What's new's release menu, named "Release".
+        "WhatsNewReleasePicker.swift": 1,
     ]
 
     @Test("a named picker or menu gives its value back")

@@ -100,6 +100,53 @@ struct HomeSupportStripTests {
         )
     }
 
+    /// What's new sits beside the version it describes, ahead of
+    /// the tour and About (#2308), and opens through the
+    /// coordinator's one browse door.
+    @Test("The footer leads with What's new, through the browse door")
+    func footerLeadsWithWhatsNew() throws {
+        let source = try strip.split(whereSeparator: \.isWhitespace)
+            .joined()
+        let whatsNew = try #require(
+            source.range(
+                of: "Button(action:{model.updater.whatsNew?.browse()})"
+            )
+        )
+        let tour = try #require(
+            source.range(of: "Button(action:{model.onShowTour()})")
+        )
+        #expect(whatsNew.upperBound < tour.lowerBound)
+    }
+
+    /// One door to the notes (#2308, amending #1536's exclusive
+    /// placement): Home's footer browses, and About no longer
+    /// carries a Release Notes link beside it.
+    @Test("Home's footer is the one door to the notes")
+    func notesHaveOneDoor() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var callers: Set<String> = []
+        for url in try SourceScan.swiftSources(under: root) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            if text.contains(".browse()") {
+                callers.insert(url.lastPathComponent)
+            }
+        }
+        #expect(callers == ["HomeSupportStrip.swift"])
+        // About's links are License, Acknowledgements and Website:
+        // a fourth, whatever its URL, is a second door.
+        let about = try SourceScan.blankedSource(
+            at: root.appendingPathComponent("Settings/Home/AboutSheet.swift")
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(about.occurrences(of: "link(L(") == 3)
+        // The helper's own `Link` is the one; no other opener.
+        #expect(about.occurrences(of: "Link(destination:") == 1)
+        #expect(!about.contains("NSWorkspace"))
+        #expect(!about.contains("SupportLinks.releases"))
+    }
+
     @Test("About is the shell's action, not a sheet of the strip's")
     func aboutGoesThroughTheShell() throws {
         let source = try strip

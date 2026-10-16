@@ -18,6 +18,12 @@ struct WhatsNewRecord {
     /// waiting on the feed (#1667).
     static let relaunchKey = "updates.relaunchNotes"
 
+    /// The last feed read, so the footer's "What's new" opens
+    /// offline (#2308): the readable items alone, REPLACED by each
+    /// read rather than added to, so it is only as large as the
+    /// feed's structured notes.
+    static let feedCacheKey = "updates.feedCache"
+
     /// What the relaunch reads: the version installed, the one it
     /// replaced, the feed items the window merged, and the "Next on
     /// my list" fetched while the offer was open (#1813).
@@ -57,6 +63,27 @@ struct WhatsNewRecord {
         guard let data = defaults.data(forKey: Self.relaunchKey)
         else { return nil }
         return try? JSONDecoder().decode(Relaunch.self, from: data)
+    }
+
+    /// Replaces the cached feed with `items`' readable notes.
+    func cacheFeed(_ items: [WhatsNewFeed.Item]) {
+        let readable = items.filter { ReleaseNotes.decode($0.notes) != nil }
+        guard !readable.isEmpty,
+            let data = try? JSONEncoder().encode(readable)
+        else { return }
+        defaults.set(data, forKey: Self.feedCacheKey)
+    }
+
+    /// The cached feed; empty before the first read, or when a
+    /// later build cannot decode it.
+    var cachedFeed: [WhatsNewFeed.Item] {
+        guard let data = defaults.data(forKey: Self.feedCacheKey)
+        else { return [] }
+        return
+            (try? JSONDecoder().decode(
+                [WhatsNewFeed.Item].self,
+                from: data
+            )) ?? []
     }
 
     /// The owed range is answered: this version's notes are done.

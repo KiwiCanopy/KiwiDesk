@@ -1870,10 +1870,12 @@ Touching `Sources/KiwiDesk` (the GUI).
   and "What's new" is a second pending fact with one home, outranked by a
   waiting update and opened only on a launch the user started — or the relaunch
   after the window's own Install, which narrates boot (#1542/#1667,
-  `WhatsNewSurfaceTests`, `WhatsNewRelaunchTests`), and a spotlight row's "Show
-  me" hides What's new unanswered, lands Settings through the one
-  `SettingsModel.land(on:)` door — the one `pendingReveal` writer every outside
-  landing takes —, and every way out of the trail — its one owner
+  `WhatsNewSurfaceTests`, `WhatsNewRelaunchTests`), Home's "What's new" opening
+  that one window through `browse()` alone and answering nothing — an offer on
+  screen or owed notes outranking it (#2308, `WhatsNewBrowseTests`) —, and a
+  spotlight row's "Show me" hides What's new unanswered, lands Settings through
+  the one `SettingsModel.land(on:)` door — the one `pendingReveal` writer every
+  outside landing takes —, and every way out of the trail — its one owner
   `WhatsNewCoordinator` — ends it (#2038, `WhatsNewHandoffTests`,
   `WhatsNewTrailWiringTests`)
 - the guard pins the WIRING beside the override body or the override goes dead

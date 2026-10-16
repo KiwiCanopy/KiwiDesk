@@ -17,6 +17,9 @@ struct JumpPanelView: View {
     /// The panel's width on its screen, from the controller.
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
+    /// The Shortcuts sheet's own height, which the footer's
+    /// scroll cue reads; 0 on the other sides.
+    @State var sheetHeight: CGFloat = 0
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
@@ -59,13 +62,7 @@ struct JumpPanelView: View {
             Divider()
             scopeContent
             Divider()
-            JumpFooter(
-                scope: model.scope,
-                overflows: overflows,
-                modifiers: model.heldModifiers,
-                hasSelection: model.hasSelection,
-                quickCount: model.viewQuickCount
-            )
+            footer
         }
         // The side's own name, which its shortcut row shows (#2245).
         .accessibilityElement(children: .contain)
@@ -119,8 +116,7 @@ struct JumpPanelView: View {
                 JumpShortcutsView(
                     sheet: sheet,
                     scroll: model.sheetScroll,
-                    maxHeight: model.sheetCap,
-                    onEdit: { model.handle(.settings) }
+                    maxHeight: model.sheetCap
                 )
                 .transition(.opacity)
             } else if let view = model.view {
@@ -129,8 +125,6 @@ struct JumpPanelView: View {
                     settings: settings,
                     commandHeld: model.commandHeld,
                     onApply: { model.onApplyView($0) },
-                    onKeep: { model.handle(.keep) },
-                    onSettings: { model.handle(.settings) },
                     onHover: {
                         model.hoverItem($0, pointer: model.currentPointer())
                     }
@@ -138,6 +132,7 @@ struct JumpPanelView: View {
                 .transition(.opacity)
             }
         }
+        .onPreferenceChange(SheetHeightKey.self) { sheetHeight = $0 }
     }
 
     @ViewBuilder private var results: some View {
@@ -233,8 +228,8 @@ struct JumpPanelView: View {
         )
     }
 
-    /// Whether the list runs past what it shows.
-    private var overflows: Bool {
+    /// Whether the Windows list runs past what it shows.
+    var listOverflows: Bool {
         Self.overflows(
             rows: model.list.results.count,
             headers: model.list.sectionCount,
