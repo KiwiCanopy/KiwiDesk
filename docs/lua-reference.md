@@ -4019,6 +4019,25 @@ mouse.set_hover_focus(true)
 ```
 
 :::
+:::unreleased
+
+### mouse.set_hover_focus_delay
+
+**Expects:** milliseconds, `0` or more (default `200`).
+
+**Does:** sets how long the pointer has to rest before
+[`mouse.set_hover_focus`](#mouseset_hover_focus) focuses the
+window under it. `0` focuses as soon as the pointer stops moving;
+a longer delay keeps a window you cross on the way to another from
+taking the focus. Not offered in the Settings app.
+
+**Example:**
+
+```lua
+mouse.set_hover_focus_delay(80)
+```
+
+:::
 
 ## Scroll Gestures
 

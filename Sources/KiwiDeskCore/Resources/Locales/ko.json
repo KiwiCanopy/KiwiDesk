@@ -394,6 +394,7 @@
   "diff.label.float_placement": "플로팅 전환 시 배치",
   "diff.label.float_scale_on_display_change": "화면 간 플로팅 크기 조정",
   "diff.label.gap_override": "간격 오버라이드",
+  "diff.label.hover_focus_delay": "포인터가 머물 때 포커스 지연",
   "diff.label.ignore_rule": "무시 규칙",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "레이어",

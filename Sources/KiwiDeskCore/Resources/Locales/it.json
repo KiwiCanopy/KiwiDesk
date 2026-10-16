@@ -394,6 +394,7 @@
   "diff.label.float_placement": "Posizione quando fluttua",
   "diff.label.float_scale_on_display_change": "Ridimensiona le fluttuanti tra gli schermi",
   "diff.label.gap_override": "Personalizzazione delle spaziature",
+  "diff.label.hover_focus_delay": "Ritardo del focus a puntatore fermo",
   "diff.label.ignore_rule": "Regola di esclusione",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Livello",

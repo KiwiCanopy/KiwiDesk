@@ -162,6 +162,11 @@ extension APIReference {
                 + "to rest on.",
             .boolean("enabled")
         ),
+        "set_hover_focus_delay": APIRecord(
+            "Sets how long the pointer rests before hover focus acts, "
+                + "in milliseconds.",
+            .integer("milliseconds")
+        ),
     ]
 
     static let scrollGestureRecords: [String: APIRecord] = [

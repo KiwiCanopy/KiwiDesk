@@ -394,6 +394,7 @@
   "diff.label.float_placement": "Размещение плавающих окон",
   "diff.label.float_scale_on_display_change": "Масштаб плавающих между экранами",
   "diff.label.gap_override": "Переопределение отступов",
+  "diff.label.hover_focus_delay": "Задержка указателя до фокуса",
   "diff.label.ignore_rule": "Правило игнорирования",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Слой",

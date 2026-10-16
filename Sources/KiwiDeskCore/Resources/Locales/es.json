@@ -394,6 +394,7 @@
   "diff.label.float_placement": "Posición al flotar",
   "diff.label.float_scale_on_display_change": "Escalar ventanas flotantes entre pantallas",
   "diff.label.gap_override": "Anulación de espaciado",
+  "diff.label.hover_focus_delay": "Retardo del foco al detenerse el puntero",
   "diff.label.ignore_rule": "Regla de exclusión",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Capa",

@@ -394,6 +394,7 @@
   "diff.label.float_placement": "浮动时的位置",
   "diff.label.float_scale_on_display_change": "跨显示器缩放浮动窗口",
   "diff.label.gap_override": "间距覆盖",
+  "diff.label.hover_focus_delay": "指针停留获得焦点的延迟",
   "diff.label.ignore_rule": "忽略规则",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "层",

@@ -394,6 +394,7 @@
   "diff.label.float_placement": "フローティング時の配置",
   "diff.label.float_scale_on_display_change": "画面間でフローティングのサイズを調整",
   "diff.label.gap_override": "ギャップのオーバーライド",
+  "diff.label.hover_focus_delay": "ポインタを止めたときのフォーカス遅延",
   "diff.label.ignore_rule": "除外ルール",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "レイヤー",

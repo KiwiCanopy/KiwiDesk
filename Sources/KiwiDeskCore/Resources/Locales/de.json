@@ -394,6 +394,7 @@
   "diff.label.float_placement": "Platzierung beim Schweben",
   "diff.label.float_scale_on_display_change": "Schwebende Fenster über Bildschirme skalieren",
   "diff.label.gap_override": "Abstands-Überschreibung",
+  "diff.label.hover_focus_delay": "Fokus-Verzögerung beim Ruhen",
   "diff.label.ignore_rule": "Ignorier-Regel",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Ebene",

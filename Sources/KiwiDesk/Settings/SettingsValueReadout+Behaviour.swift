@@ -92,6 +92,22 @@ extension SettingsValueReadout {
                     new: after.mouse.followsFocus
                 )
             ]
+        case .mouseHoverFocusDelay:
+            return [
+                .change(
+                    census,
+                    label: L(
+                        "diff.label.hover_focus_delay",
+                        "Hover focus delay"
+                    ),
+                    old: milliseconds(
+                        Double(before.mouse.hoverFocusDelayMS)
+                    ),
+                    new: milliseconds(
+                        Double(after.mouse.hoverFocusDelayMS)
+                    )
+                )
+            ]
         case .mouseHoverFocus:
             return [
                 behaviourToggleRow(

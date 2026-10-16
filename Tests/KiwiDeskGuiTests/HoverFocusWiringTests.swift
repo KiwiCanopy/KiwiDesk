@@ -58,6 +58,21 @@ struct HoverFocusWiringTests {
         )
     }
 
+    /// The delay reaches the rest beside its switch, and boot
+    /// seeds it: unwired, a Lua delay is stored and never felt.
+    @Test("the rest takes the configured delay")
+    func delayIsWired() throws {
+        let change =
+            #"tiler\.onMouseSettings\s*=\s*\{[\s\S]{0,200}?"#
+            + #"mouse\.rest\.dwell\s*=\s*\.milliseconds\(\s*"#
+            + #"settings\.hoverFocusDelayMS"#
+        let seed =
+            #"mouse\.rest\.dwell\s*=\s*\.milliseconds\(\s*"#
+            + #"tiler\.settings\.mouse\.hoverFocusDelayMS"#
+        #expect(try wired(change), "a delay change no longer reaches it")
+        #expect(try wired(seed), "boot no longer seeds the delay")
+    }
+
     @Test("a mouse settings change switches the rest")
     func settingsSwitchIsWired() throws {
         let pattern =

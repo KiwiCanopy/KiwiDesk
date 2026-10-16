@@ -394,6 +394,7 @@
   "diff.label.float_placement": "Posição ao flutuar",
   "diff.label.float_scale_on_display_change": "Redimensionar flutuantes entre telas",
   "diff.label.gap_override": "Substituição de espaçamento",
+  "diff.label.hover_focus_delay": "Atraso do foco com o cursor em repouso",
   "diff.label.ignore_rule": "Regra de exclusão",
   "diff.label.instance": "%1$@ · %2$@",
   "diff.label.layer": "Camada",
