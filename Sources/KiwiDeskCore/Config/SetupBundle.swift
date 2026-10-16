@@ -66,7 +66,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// #2228; kept so a development build's bundle still loads.
     /// 26 = KiwiHub's sides open through `kiwihub.show` (#2265),
     /// which reaches a bundle's `config` and its `[Profile]` alike.
-    public static let currentFormat = 26
+    /// 27 = the layouts side became View (#2309), in a bundle's
+    /// `config` and its `[Profile]` alike.
+    public static let currentFormat = 27
 
     public let format: Int
 

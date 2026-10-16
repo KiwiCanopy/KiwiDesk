@@ -29,12 +29,13 @@ public struct Profile: Codable, Sendable, Equatable {
     /// `on_space_change: false` was turned on once (#1931; retired
     /// with the slide, #2228), 20 for #2143's step withdrawn by
     /// #2228 (kept so a development build's file loads), 21 since
-    /// a stored `show_*` call opens `kiwihub.show` (#2265).
+    /// a stored `show_*` call opens `kiwihub.show` (#2265), 22 since
+    /// the layouts side became View (#2309).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 21
+    public static let currentFormat = 22
 
     public var format: Int
     public var name: String

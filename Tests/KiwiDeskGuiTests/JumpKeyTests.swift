@@ -71,7 +71,7 @@ struct JumpKeyTests {
             _ code: UInt16,
             _ modifiers: NSEvent.ModifierFlags = []
         ) -> JumpKey? {
-            JumpKey.of(keyCode: code, modifiers: modifiers, scope: .layouts)
+            JumpKey.of(keyCode: code, modifiers: modifiers, scope: .view)
         }
         #expect(layouts(123) == .side(-1))
         #expect(layouts(124) == .side(1))

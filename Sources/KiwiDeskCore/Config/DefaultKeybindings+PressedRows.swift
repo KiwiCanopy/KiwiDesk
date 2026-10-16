@@ -18,9 +18,9 @@ extension DefaultKeybindings {
     public static func layoutPickerRow() -> KeyBinding {
         KeyBinding(
             combo: "control+option+l",
-            lua: KiwiHubSide.layouts.lua,
+            lua: KiwiHubSide.view.lua,
             kind: .navigation,
-            label: "Show layout picker"
+            label: "Show view picker"
         )
     }
 

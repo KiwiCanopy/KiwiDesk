@@ -96,7 +96,7 @@ extension KiwiCore {
 
     /// A Space's Layout menu rows — the status item's, Keep
     /// included, since a mode picked here is a temporary layout like
-    /// any other (#1179). The layout picker (#2229) reads the same
+    /// any other (#1179). The view picker (#2229) reads the same
     /// `layoutDrift`.
     func layoutModeMenuRows(for id: SpaceID) -> [BarMenuRow] {
         guard let drift = layoutDrift(for: id) else { return [] }
