@@ -2,6 +2,7 @@ import Foundation
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// The quick menu's two chord providers default to `{ nil }`, a
 /// fallback that answers for a forgotten wire — the row shows
@@ -60,6 +61,7 @@ struct StatusMenuProviderWiringTests {
     }
 
     @Test("each hold names its own reason, running none")
+    @MainActor
     func holdReasons() {
         LocalizationManager.shared.select("en")
         #expect(ViewPickText.held(.running) == nil)
