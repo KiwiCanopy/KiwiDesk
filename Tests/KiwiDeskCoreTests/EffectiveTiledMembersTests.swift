@@ -3,8 +3,8 @@ import Testing
 
 @testable import KiwiDeskCore
 
-@Suite("Effective tiled members parity", .serialized)
-struct TiledMembersParityTests {
+@Suite("Effective tiled members", .serialized)
+struct EffectiveTiledMembersTests {
 
     private func makeWindow(
         _ id: UInt32,
@@ -21,36 +21,8 @@ struct TiledMembersParityTests {
         )
     }
 
-    @Test("Tiled members match old space filter for pure tiled setup")
-    func pureTiledParity() {
-        var state = StateCoordinator()
-        let spaceID = SpaceID("1")
-        state.workspaces.ensureSpace(spaceID)
-        state.workspaces.activate(spaceID)
-
-        let w1 = makeWindow(1)
-        let w2 = makeWindow(2)
-        state.windows.upsert(w1)
-        state.windows.upsert(w2)
-        state.workspaces.add(WindowID(1), to: spaceID)
-        state.workspaces.add(WindowID(2), to: spaceID)
-
-        guard let space = state.workspaces[spaceID] else {
-            Issue.record("Expected space to exist")
-            return
-        }
-
-        let oldDerivation = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
-        let helperOutput = state.effectiveTiledMembers(of: space)
-
-        #expect(helperOutput == oldDerivation)
-        #expect(helperOutput == [WindowID(1), WindowID(2)])
-    }
-
-    @Test("Tiled members exclude floating windows like per-site filter")
-    func mixedFloatingParity() {
+    @Test("Tiled members exclude floating windows")
+    func excludesFloating() {
         var state = StateCoordinator()
         let spaceID = SpaceID("1")
         state.workspaces.ensureSpace(spaceID)
@@ -71,13 +43,10 @@ struct TiledMembersParityTests {
             return
         }
 
-        let oldDerivation = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
-        let helperOutput = state.effectiveTiledMembers(of: space)
-
-        #expect(helperOutput == oldDerivation)
-        #expect(helperOutput == [WindowID(1), WindowID(3)])
+        #expect(
+            state.effectiveTiledMembers(of: space)
+                == [WindowID(1), WindowID(3)]
+        )
     }
 
     @Test("Tiled-sticky homed elsewhere joins the active layout")

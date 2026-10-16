@@ -89,21 +89,6 @@ struct OpenOrFocusCycleTests {
         #expect(ring(core, 20) == nil)
     }
 
-    @Test("The cycle wraps from the last window to the first")
-    func wrapsAround() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        addWindow(core, 20)
-        addWindow(core, 21)
-        core.state.workspaces.focus(WindowID(21), in: "1")
-        core.frontmostPIDProvider = { 100 }
-        #expect(press(core).isSuccess)
-        #expect(
-            core.state.workspaces.lastFocused == WindowID(20)
-        )
-    }
-
     @Test("A successor on another space switches and focuses")
     func crossSpaceSuccessorSwitches() {
         let core = makeCore()

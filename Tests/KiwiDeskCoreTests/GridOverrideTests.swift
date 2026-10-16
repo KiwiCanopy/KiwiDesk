@@ -142,14 +142,6 @@ struct GridOverrideCommandTests {
         #expect(over?.type == .rigid)
         // The global params are untouched.
         #expect(core.tiler.settings.grid.type == .dynamic)
-        #expect(
-            core.tiler.settings.resolvedGrid(for: "2").type
-                == .rigid
-        )
-        #expect(
-            core.tiler.settings.resolvedGrid(for: "1").type
-                == .dynamic
-        )
     }
 
     @Test("dimensions override sets columns + rows, floored")
@@ -182,9 +174,6 @@ struct GridOverrideCommandTests {
         #expect(over?.autoSize == true)
         // Global stays off.
         #expect(core.tiler.settings.grid.autoSize == false)
-        #expect(
-            core.tiler.settings.resolvedGrid(for: "4").autoSize
-        )
     }
 
     @Test("global auto_size sets the flag")

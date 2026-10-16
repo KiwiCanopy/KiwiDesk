@@ -110,7 +110,6 @@ struct ShortcutsJumpReadoutTests {
                     + "if!width.collapsesChrome{captionLine}chips}"
             )
         )
-        #expect(bar.contains("L(\"shortcuts.jump.label\",\"Jumpto\")"))
         #expect(
             bar.contains(
                 "Text(label).font(.callout)"

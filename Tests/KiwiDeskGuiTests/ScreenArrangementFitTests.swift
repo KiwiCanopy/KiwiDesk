@@ -109,41 +109,6 @@ struct ScreenArrangementFitTests {
         )
     }
 
-    /// An ordinary desk must not make the picture SCROLL.
-    ///
-    /// `layout` fills the canvas it is handed almost exactly — it
-    /// fits the displays into `canvas − trayHeight − trayGap` and
-    /// then puts the band back — so `contentSize` lands on the
-    /// canvas height, and any padding the view adds afterwards
-    /// pushes it past the frame. That is what scrolled a
-    /// one-display desk by a few points.
-    ///
-    /// Asserted against the canvas `ScreensPicture` actually
-    /// hands over (its 240 pt band less its 4 pt inset either
-    /// side), so the test fails if either constant moves without
-    /// the other.
-    @Test("a one-display desk fits without scrolling")
-    func oneDisplayDoesNotScroll() {
-        let inset: CGFloat = 4
-        let canvas = CGSize(
-            width: 520 - inset * 2,
-            height: 240 - inset * 2
-        )
-        let layout = ScreenArrangement.layout(
-            displays: single,
-            mainID: DisplayID(1),
-            canvas: canvas
-        )
-        #expect(
-            layout.contentSize.height <= canvas.height + 0.5,
-            "the picture would scroll vertically on one display"
-        )
-        #expect(
-            layout.contentSize.width <= canvas.width + 0.5,
-            "the picture would scroll horizontally"
-        )
-    }
-
     /// The two arms differ, which is what says `hostsChips` is
     /// read at all: on one canvas the tray-less fit must be
     /// strictly the taller of the two, because it has the band

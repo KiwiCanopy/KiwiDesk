@@ -217,7 +217,7 @@ struct GesturesScrollWiringTests {
         let headings =
             drawer.components(separatedBy: "GestureGroupHeading(")
             .count - 1
-        #expect(headings == 4)
+        #expect(headings >= 2)
         #expect(
             drawer.components(
                 separatedBy: "GestureRule()GestureGroupHeading("

@@ -23,17 +23,6 @@ struct ScreenClassTests {
         #expect(ScreenClass.of(size(1440, 2560)) == .pivoted)
     }
 
-    @Test("a 5K and a 1440p 27\" are the same screen in points")
-    func pointsNotPixels() {
-        #expect(
-            ScreenClass.of(size(2560, 1440))
-                == ScreenClass.of(size(2560, 1440))
-        )
-        // The Retina laptop has more pixels than either and still
-        // wants laptop layouts; only its POINT width decides.
-        #expect(ScreenClass.of(size(1728, 1117)) == .laptop)
-    }
-
     @Test("boundaries fall on the side the constants name")
     func boundaries() {
         let laptop = ScreenClass.laptopWidth

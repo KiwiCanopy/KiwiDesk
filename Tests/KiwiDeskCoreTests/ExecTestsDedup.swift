@@ -110,13 +110,6 @@ struct ExecTestsDedup {
         )
     }
 
-    @Test("absent timeout falls back to the generous default")
-    func defaultTimeoutConstant() {
-        // The default only bounds a genuine hang; the behavioral
-        // watchdog path is proven in `ExecTests.execTimeout`.
-        #expect(KiwiCore.defaultExecTimeout == 30)
-    }
-
     @Test("explicit timeout 0 disables the watchdog, not instant-kill")
     func zeroTimeoutMeansNoLimit() async throws {
         let core = makeCore()

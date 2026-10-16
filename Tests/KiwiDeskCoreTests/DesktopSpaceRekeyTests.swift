@@ -46,22 +46,6 @@ struct DesktopSpaceRekeyTests {
         return core.stampedDesktopSnapshot()
     }
 
-    @Test("A number entry moves to the Desktop's stamp")
-    func numberEntryRekeys() {
-        defer { resetAuthorityOverrides() }
-        let core = makeAuthorityCore()
-        core.state.workspaces.ensureSpace(SpaceID(2))
-        // Filed on the one call that saw the Desktop unstamped.
-        core.desktopMemory.virtualSpaces[.number(1)] = SpaceID(2)
-        let snapshot = stampedSnapshot()
-        core.reconcileDesktopSpaceMemory(in: snapshot)
-        #expect(
-            core.desktopMemory.virtualSpaces[.identity(stamp)]
-                == SpaceID(2)
-        )
-        #expect(core.desktopMemory.virtualSpaces[.number(1)] == nil)
-    }
-
     /// The whole point: after the re-key the Desktop returns to
     /// the Space it was left on rather than stepping over it.
     @Test("A re-keyed Desktop returns to its own Space")

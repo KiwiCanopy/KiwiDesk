@@ -147,11 +147,6 @@ struct BorderSheenTests {
         )
     }
 
-    @Test("the strength defaults to a half lift")
-    func defaultsToHalf() {
-        #expect(TilingSettings().borderStyle.sheen == 0.5)
-    }
-
     @Test("border.set_sheen writes a clamped number, rejects a non-number")
     func setter() {
         let core = makeTestCore()

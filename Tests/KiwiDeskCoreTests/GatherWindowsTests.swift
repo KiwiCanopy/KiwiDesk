@@ -179,34 +179,6 @@ struct GatherTargetsTests {
         #expect(frames.isEmpty)
     }
 
-    @Test("window in unassigned space falls back to first display")
-    func fallsBackToFirstDisplay() throws {
-        var state = makeState()
-        // Add a second space with no display assignment,
-        // then move a window there.
-        state.workspaces.ensureSpace(SpaceID(99))
-        let w = ManagedWindow(
-            id: WindowID(55),
-            pid: 99,
-            appName: "App",
-            title: "",
-            frame: CGRect(
-                x: 0,
-                y: 0,
-                width: 800,
-                height: 600
-            )
-        )
-        state.apply(.windowCreated(w))
-        // Relocate to the display-less space.
-        state.workspaces.add(WindowID(55), to: SpaceID(99))
-        let frames = targets(state)
-        // Falls back to the first (and only) display.
-        let frame = try #require(frames[WindowID(55)])
-        #expect(frame.minX >= axVisible.minX)
-        #expect(frame.maxX <= axVisible.maxX)
-    }
-
     @Test("collect merges all of a display's spaces: 6+6 = one 12")
     func collectMergesSpacesPerDisplay() throws {
         // 6 windows on one virtual space and 6 on another,

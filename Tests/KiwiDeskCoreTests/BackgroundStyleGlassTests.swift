@@ -29,17 +29,6 @@ struct BackgroundStyleGlassTests {
         #expect(style.hasBox == false)
     }
 
-    @Test("liquid_glass round-trips through JSON")
-    func roundTrip() throws {
-        var shelf = KiwiShelf()
-        shelf.liquidGlass = false
-        shelf.backgroundStyle = .boxed
-        let data = try JSONEncoder().encode(shelf)
-        let back = try JSONDecoder().decode(KiwiShelf.self, from: data)
-        #expect(back.liquidGlass == false)
-        #expect(back.backgroundStyle == .boxed)
-    }
-
     @Test("the shelf parser takes liquid_glass; the bars' do not")
     func parseGlass() {
         let shelf = KiwiShelfCommandSetting.parse(

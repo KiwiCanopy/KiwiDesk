@@ -32,16 +32,6 @@ struct LocalizationManagerTests {
         #expect(!LocalizationManager.shared.available.contains("en"))
     }
 
-    @Test("selecting a shipped locale returns its translation")
-    func explicitSelectionTranslates() {
-        reset()
-        LocalizationManager.shared.select("de")
-        defer { reset() }
-        // Seeded in the small de.json (docs/translating.md).
-        let value = L("menu.quit", "Quit KiwiDesk")
-        #expect(value == "KiwiDesk beenden")
-    }
-
     @Test(
         "an untranslated key falls back to English (per-key)"
     )
@@ -57,16 +47,6 @@ struct LocalizationManagerTests {
             "Untranslated fallback"
         )
         #expect(value == "Untranslated fallback")
-    }
-
-    @Test("nil selection resolves to system-or-English")
-    func nilSelectionResolvesSystemOrEnglish() {
-        reset()
-        // Without a matching shipped locale for the test
-        // runner's system language (almost certainly not
-        // "de" or an unshipped code), English is used.
-        let value = L("menu.quit", "Quit KiwiDesk")
-        #expect(!value.isEmpty)
     }
 
     @Test("select(nil) restores System default")

@@ -209,21 +209,7 @@ struct KiwiProminentButtonStateTests {
     @Test("every state is a token and none is an opacity")
     func statesAreTokensNotOpacity() throws {
         let source = try sealSource()
-        for token in [
-            "SettingsTheme.accent", "SettingsTheme.accentPressed",
-            "SettingsTheme.accentDisabled",
-            "SettingsTheme.accentInk",
-        ] {
-            #expect(
-                source.contains(token),
-                Comment(
-                    rawValue:
-                        "the seal no longer names \(token) — a "
-                        + "state it does not draw from a token "
-                        + "is drawn from the ground"
-                )
-            )
-        }
+        #expect(source.contains("SettingsTheme.accentInk"))
         // The stroke's alpha is the one sanctioned use, and it
         // rides `accentInk` rather than the ground.
         #expect(

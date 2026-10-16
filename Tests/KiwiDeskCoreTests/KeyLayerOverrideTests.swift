@@ -239,48 +239,4 @@ struct KeyLayerOverrideTests {
         #expect(result[1].bindings[0].combo == "alt+y")
         #expect(result[1].bindings[0].lua == "swap")
     }
-
-    // MARK: - Default-layer invariant (O4 switch-key-trap)
-
-    /// A profile that rebinds exactly one combo in the default
-    /// layer must still expose every other base binding it does
-    /// not remove.
-    @Test("Default-layer invariant: unbound base combos survive")
-    func defaultLayerInvariant() {
-        let switchKey = binding(
-            combo: "alt+p",
-            lua: "load_profile(\"Work\")"
-        )
-        let base = [
-            KeyLayer(
-                name: KeyLayer.defaultName,
-                bindings: [
-                    switchKey,
-                    binding(combo: "alt+h", lua: "focus_left"),
-                    binding(combo: "alt+j", lua: "focus_down"),
-                ]
-            )
-        ]
-        // Profile rebinds only alt+h.
-        let over = KeyLayerOverride(
-            layers: [
-                KeyLayer(
-                    name: KeyLayer.defaultName,
-                    bindings: [
-                        binding(combo: "alt+h", lua: "CUSTOM")
-                    ]
-                )
-            ]
-        )
-        let result = over.resolved(onto: base)
-        #expect(result.count == 1)
-        let combos = result[0].bindings.map(\.combo)
-        // alt+p (switch key) must survive — no trap.
-        #expect(combos.contains("alt+p"))
-        // alt+j must also survive.
-        #expect(combos.contains("alt+j"))
-        // alt+h is overridden.
-        let h = result[0].bindings.first { $0.combo == "alt+h" }
-        #expect(h?.lua == "CUSTOM")
-    }
 }

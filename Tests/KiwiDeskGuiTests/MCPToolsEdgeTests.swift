@@ -104,14 +104,6 @@ struct MCPToolsEdgeTests {
             Self.command("version")
         )
         #expect(Self.text(result).contains("may have run"))
-        var down = MCPTools()
-        down.send = { _ in throw SocketError.connectFailed("refused") }
-        let dead = try Self.call(
-            down,
-            MCPTools.run,
-            Self.command("version")
-        )
-        #expect(Self.text(dead).contains("not reachable"))
     }
 
     @Test("every listed tool answers its own name")

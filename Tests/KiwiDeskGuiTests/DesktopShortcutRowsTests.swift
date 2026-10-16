@@ -124,11 +124,6 @@ struct DesktopShortcutRowsTests {
             .isEmpty
         )
     }
-    private static let desktopFamilies: [SettingKey] = [
-        .shortcuts(.focusDesktop),
-        .shortcuts(.moveToDesktop),
-        .shortcuts(.moveToDesktopFollow),
-    ]
 
     /// Pins every input an expansion reasons from, so a moved
     /// default reds as a default. Two Desktops against three
