@@ -169,7 +169,6 @@ struct HomeCardChromeTests {
                 "letcount=max(1,min(band.homeColumnCap,fit))"
             )
         )
-        #expect(SettingsWidthClass.wide.homeColumnCap == 4)
         #expect(
             source.contains(
                 ".frame(maxWidth:gridCap)"

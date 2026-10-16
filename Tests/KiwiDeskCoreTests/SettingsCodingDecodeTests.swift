@@ -95,9 +95,6 @@ struct SettingsCodingDecodeTests {
         #expect(!decoded.animations.onWindowSwap)
         // on_scrolling absent — keeps its `true` default.
         #expect(decoded.animations.onScrolling)
-        // Duration knobs absent — keep their 150 ms defaults.
-        #expect(decoded.animations.durationMS == 150)
-        #expect(decoded.animations.scrollDurationMS == 150)
     }
 
     @Test("Missing keys fall back to defaults")

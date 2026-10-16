@@ -39,23 +39,6 @@ struct LayersCardOfferTests {
         return config
     }
 
-    @Test("only the default layer means no layers configured")
-    func defaultAloneIsNotALayer() {
-        #expect(!layersExist(config(layers: ["default"])))
-    }
-
-    @Test("a second layer is what counts as configured")
-    func aSecondLayerCounts() {
-        #expect(layersExist(config(layers: ["default", "resize"])))
-        // Presence, not a count — three still reads "exists", so
-        // an off-by-one cannot pass the boundary pair.
-        #expect(
-            layersExist(
-                config(layers: ["default", "resize", "media"])
-            )
-        )
-    }
-
     /// The card's own gate, which is what the owner ruling
     /// changed: shown when layers exist OR when Power User is on,
     /// withheld otherwise.

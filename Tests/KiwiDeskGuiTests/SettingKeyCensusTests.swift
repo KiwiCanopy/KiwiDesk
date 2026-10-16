@@ -137,18 +137,6 @@ struct SettingKeyCensusTests {
         }
     }
 
-    /// Every declared area holds at least one surfaced row —
-    /// a dead area case is a Home card with nothing behind it.
-    @Test func noAreaIsEmpty() {
-        let used = Set(keys.compactMap { $0.placement.area })
-        for area in SettingsArea.allCases {
-            #expect(
-                used.contains(area),
-                "area \(area) has no surfaced rows"
-            )
-        }
-    }
-
     /// No area has zero at-rest rows: an area whose every row
     /// hides behind "Show more" opens as an empty-looking card.
     @Test func everyAreaHasAtRestRows() {

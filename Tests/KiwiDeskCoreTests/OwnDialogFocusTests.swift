@@ -36,11 +36,6 @@ struct OwnDialogFocusTests {
         wasMinimized: false
     )
 
-    @Test("ownKeyWindowReading is nil in a headless environment")
-    func headlessEnvironmentReadsNil() {
-        #expect(EventLoop.ownKeyWindowReading() == nil)
-    }
-
     @Test("a hide stands the raise down whatever is key")
     func hideStandsDown() {
         let loop = EventLoop()

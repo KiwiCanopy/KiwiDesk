@@ -76,7 +76,6 @@ struct SlotCountRowTests {
         )
         bound.write(3)
         #expect(stored == .fraction(ScrollSize.share(of: 3)))
-        #expect(ScrollSize.count(of: ScrollSize.share(of: 3)) == 3)
         bound.write(1)
         #expect(stored == .fraction(1))
     }

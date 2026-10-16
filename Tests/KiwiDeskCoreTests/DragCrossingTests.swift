@@ -222,6 +222,28 @@ struct DragCrossingTests {
         )
     }
 
+    @Test("insertDropped onto the head takes the head slot")
+    func insertDroppedOnHead() {
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        addWindow(core, 3)
+        core.state.workspaces.assign("B", to: DisplayID(2))
+        core.state.workspaces.add(WindowID(2), to: "B")
+        core.state.workspaces.add(WindowID(3), to: "B")
+        // Index 0 is the edge an off-by-one in the target index
+        // lands after the head instead of on it.
+        core.insertDropped(
+            WindowID(1),
+            onto: WindowID(2),
+            into: "B"
+        )
+        #expect(
+            core.state.workspaces[SpaceID("B")]?.windows
+                == [WindowID(1), WindowID(2), WindowID(3)]
+        )
+    }
+
     @Test("insertDropped lands on the target's index")
     func insertDroppedOnTarget() {
         let core = makeCore()
