@@ -181,9 +181,9 @@ enum ShortcutFold {
         return row
     }
 
-    /// One shared modifier set prints once, before every key. Glyph
-    /// keys (arrows) run together; a letter or digit key keeps a
-    /// space, or two keys would read as one ("12").
+    /// One shared modifier set prints once, before every key.
+    /// Arrows run together; any other key keeps a space, or two
+    /// keys would read as one ("12", "-=").
     private static func setCombo(_ tags: [Tag]) -> String {
         let shared = Set(tags.map(\.modifiers)).count == 1
         guard shared, let modifiers = tags.first?.modifiers else {
@@ -191,10 +191,10 @@ enum ShortcutFold {
                 .joined(separator: " ")
         }
         let keys = tags.map(\.key)
-        let glyphs = keys.allSatisfy {
-            $0.count == 1 && !$0.contains { $0.isLetter || $0.isNumber }
+        let arrows = keys.allSatisfy {
+            ["←", "→", "↑", "↓"].contains($0)
         }
-        return modifiers + keys.joined(separator: glyphs ? "" : " ")
+        return modifiers + keys.joined(separator: arrows ? "" : " ")
     }
 }
 

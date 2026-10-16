@@ -154,6 +154,24 @@ struct ShortcutFoldTests {
         let resize = rows(build(width))
         #expect(resize.map(\.label) == ["Shrink / grow width"])
         #expect(resize.first?.combo == "⌥⌘1 2")
+        // Drawn glyphs fixed by hand: the host's layout draws its own.
+        let members = ShortcutFold.sets(resizeStep: 50)
+            .first { $0.0 == .width }!.1
+        let punctuation = members.enumerated().map { index, command in
+            var row = ShortcutRow(
+                id: command.lua,
+                label: command.resolvedLabel,
+                combo: ["⌥⌘-", "⌥⌘="][index]
+            )
+            row.fold = ShortcutFold.tag(
+                for: command,
+                at: .init(family: .width, position: index),
+                combo: KeyCombo.parse("option+command+minus"),
+                rendered: row.combo
+            )
+            return row
+        }
+        #expect(ShortcutFold.folded(punctuation).first?.combo == "⌥⌘- =")
     }
 
     /// Each folded set lists its members in the order its label
