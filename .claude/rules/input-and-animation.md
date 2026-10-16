@@ -23,6 +23,21 @@ editing here:
   dies at the restart (design-decisions ▸ "The recorder stages
   like every control"). The recorder's suspend (#213) is the one
   live touch, and it resumes the saved table.
+- **Hover focus is armed by USER pointer motion alone (#1869),
+  held by two safeguards that both stay.** The `PointerRest` dwell
+  starts on a global mouse-moved event, and KiwiDesk moves the
+  pointer with a bare `CGWarpMouseCursorPosition`, which posts none
+  — a change that synthesizes a mouse event (a moved event after
+  the warp, to refresh apps' hover states, is the common one)
+  arms the rest from our own move, and owes a stamp the rest
+  refuses first (`HoverFocusWiringTests` ▸ `warpPostsNoMotion`).
+  And a rest carries the focus its user move ARMED with — a re-arm
+  for motion the monitor did not hear keeps it — and stands down
+  when the focus has moved since, which is what keeps a warp
+  landing inside a dwell from looping (`PointerRestTests` ▸
+  `reArmKeepsTheArmedFocus`, `HoverFocusStandDownTests` ▸
+  `movedFocusStands`). A new trigger for hover focus is a user
+  event too, never a reading of where the pointer IS.
 - **Scroll gestures take the ONE active scroll-wheel tap,
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the

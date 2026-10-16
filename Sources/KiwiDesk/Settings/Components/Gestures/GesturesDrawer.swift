@@ -45,6 +45,15 @@ struct GesturesDrawer: View {
                 GestureRule()
                 GestureGroupHeading(
                     title: L(
+                        "shortcuts.gestures.group.focus",
+                        "Focus and the pointer"
+                    ),
+                    followsGroup: true
+                )
+                focusEntries
+                GestureRule()
+                GestureGroupHeading(
+                    title: L(
                         "shortcuts.gestures.group.windows",
                         "On your windows"
                     ),
@@ -71,8 +80,9 @@ struct GesturesDrawer: View {
     private var summary: String {
         L(
             "shortcuts.gestures.summary",
-            "Drag, click, point and scroll, and whether the "
-                + "pointer follows focus"
+            "Scroll gestures, focus where the pointer rests, "
+                + "whether the pointer follows focus, and mouse "
+                + "resize"
         )
     }
 
@@ -106,6 +116,35 @@ struct GesturesDrawer: View {
             .searchAnchored(
                 SettingsCatalog.shortcuts.gestures.children
                     .mouseResize
+            )
+        }
+    }
+
+    /// Hover focus, then its inverse: the hand acts, then the
+    /// pointer follows (#1869).
+    @ViewBuilder private var focusEntries: some View {
+        GestureEntry(
+            L(
+                "shortcuts.gestures.hover_focus",
+                "Rest the pointer on a window to focus it and bring "
+                    + "it to the front."
+            ),
+            surface: .windows,
+            settings: settings,
+            pace: .steps
+        ) {
+            GesturePicture.HoverFocus(t: $0)
+        } control: {
+            Toggle(
+                L(
+                    "behavior.mouse.hover_focus",
+                    "Focus the window the pointer rests on"
+                ),
+                isOn: $model.config.settings.mouse.hoverFocus
+            )
+            .searchAnchored(
+                SettingsCatalog.shortcuts.gestures.children
+                    .hoverFocus
             )
         }
         GestureRule()

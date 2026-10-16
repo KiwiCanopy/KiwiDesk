@@ -2933,6 +2933,61 @@ shape one would take (owner, 2026-10-07).
 `FocusRaiseFlightGuardTests` holds the bypass, each refusal it
 keeps, and every other verb.
 
+:::unreleased
+
+### Hover focus fires on a pointer at REST, never a pointer that is merely there (#1869)
+
+**[Rationale]**
+
+`mouse.hover_focus` focuses and raises the window the pointer
+comes to rest on. Two choices carry it, and each closes a defect
+the obvious shape has.
+
+**The trigger is user motion that then rests**: 200 ms with no
+move, jitter within a few points of the last rest not counting
+as one. A trigger read off "the pointer is over an unfocused
+window" undoes every focus change the pointer did not make: a
+shortcut, a scroll-gesture step, a close-return or a Space switch
+leaves the pointer where it was, and 200 ms later the old window
+takes the focus back. So only a global mouse-moved event arms the
+dwell, and a focus that moves while it runs stands. KiwiDesk's
+own warp posts no mouse event (input-and-animation.md), so
+`mouse.follows_focus` lands the pointer on the window that
+already has the focus and the two never loop. A dwell timed from
+ENTERING a window would steal focus whenever the hand crossed a
+wide window slowly; a rest is blind to window size. It is longer
+than the bar peek's dwell because a peek is a label and a focus
+redirects typing.
+
+**The target is whatever the WindowServer composites in front at
+the pointer**, read through the one front-to-back seam, and only
+another app's tracked window counts. A menu, the Dock, a bar, a
+popover, Spotlight or another app's panel in front stands hover
+focus down over its area; a state-only hit test would focus the
+window under an open menu. KiwiDesk's own click-through overlays
+(the ring, the marks, the cues, the KiwiVision plate) are
+passed through, and its own
+Settings window is never a target, its raise having one door
+(#1281).
+
+It always RAISES. Focus without a raise needs a private event
+path no public API offers, and a hover focus goes through the
+focus command like any other, so its report is our intent rather
+than a clickless focus the #1161 distrust bounces, and it records
+the raise flight the `focus` verb does (#1812). A focus that
+would move any window of the Space — a scrolling pan under a
+re-seating anchor or towards a peeking slot, a monocle flip onto
+a parked window — is not taken: it would move the row under a
+resting hand, and the next rest would land on whatever slid
+under the pointer. A window on another screen switches the
+focused screen first, as a click there does (#446). A rest within
+the settle after a Desktop switch is dropped, as a click's
+display follow is. The setting lives beside `mouse.follows_focus`
+and shares its per-profile scope
+([accepted limitations](accepted-limitations.md)).
+
+:::
+
 ### Layout and resize behavior
 
 **[Rationale]**
@@ -11030,12 +11085,19 @@ leads Apps, which is KiwiDesk's own app row, rather than standing
 alone in a one-row group. The panel holds one fixed width, 720 pt,
 since a width that changed on ⇥ would move the field and the
 switch under the eye; only the height follows each side, its top
-fixed at the field, the sheet growing down to just above the
+fixed at the field, under one ceiling of 400 pt on every side
+(#2309, owner ruling 2026-10-15). A glance panel stays compact,
+as Spotlight's fixed height does, and a sheet that grew to the
+screen's bottom read as a window rather than a launcher; the
+Shortcuts sheet scrolls past the ceiling, cued in words, and the
+Windows list holds nine rows of room, the numbered reach. Fixed
+points rather than a share of the screen, which would grow the
+panel on exactly the large screens. The fit to just above the
 screen's bottom or a KiwiShelf strip, which the visible frame
-does not exclude. The field shows only the typing: the selection
-is the green row or tile, shown once, and inline completion —
-weighed — reads as native only where → or Tab would accept it,
-which here they never do.
+does not exclude, only lowers it on a short screen. The field
+shows only the typing: the selection is the green row or tile,
+shown once, and inline completion — weighed — reads as native
+only where → or Tab would accept it, which here they never do.
 
 **The footer lights one hint: the pick live now (#2246, owner
 ruling 2026-10-13).** With the selection gone from the field, the

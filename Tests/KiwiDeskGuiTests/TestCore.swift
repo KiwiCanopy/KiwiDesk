@@ -132,6 +132,8 @@ func makeTestCore(
     // real session-wide event tap in any suite that binds a
     // chord. A suite that means the tap injects its own.
     core.mouse.scroll.makeTap = { _ in nil }
+    // The pointer rest's mouse-moved monitor (#1869).
+    core.mouse.rest.makeMonitor = { _ in nil }
     // Same class, fourth time (#878): the per-retile neighbor
     // scan defaults to the real screen list, so on a
     // multi-screen dev Mac an engine fixture would inherit the
@@ -144,7 +146,7 @@ func makeTestCore(
     // The WindowServer z-order and screen frames the
     // presentation verdict reads (#1787): live, they hand every
     // fixture the host desk.
-    core.frontWindowFrames = { [] }
+    core.frontStack = { [] }
     // Jump to window's minimize-record check (#1875) reads every
     // window id on the host otherwise.
     core.jump.knownWindows = { nil }

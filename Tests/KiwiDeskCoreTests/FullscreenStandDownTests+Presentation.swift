@@ -115,12 +115,12 @@ extension FullscreenStandDownTests {
         // Another window in front of the show — the presenter
         // view, or the editor after a cmd-tab — keeps the shelf.
         let editor = CGRect(x: 100, y: 100, width: 800, height: 600)
-        core.frontWindowFrames = { [editor, screen] }
+        core.frontStack = { [editor, screen].map { listed(frame: $0) } }
         core.updateBars()
         #expect(!core.spaceBars.shownStrips.isEmpty)
         #expect(!core.appBars.shownStrips.isEmpty)
 
-        core.frontWindowFrames = { [screen, editor] }
+        core.frontStack = { [screen, editor].map { listed(frame: $0) } }
         core.updateBars()
         #expect(core.spaceBars.shownStrips.isEmpty)
         #expect(core.appBars.shownStrips.isEmpty)
@@ -136,7 +136,7 @@ extension FullscreenStandDownTests {
         let core = try #require(
             makeShelfCore(frame: screen, subrole: "AXStandardWindow")
         )
-        core.frontWindowFrames = { [screen] }
+        core.frontStack = { [screen].map { listed(frame: $0) } }
         core.updateBars()
         #expect(!core.spaceBars.shownStrips.isEmpty)
         core.clampFloatsClearOfBars()
@@ -147,7 +147,7 @@ extension FullscreenStandDownTests {
         let show = try #require(
             makeShelfCore(frame: screen, subrole: "AXUnknown")
         )
-        show.frontWindowFrames = { [screen] }
+        show.frontStack = { [screen].map { listed(frame: $0) } }
         show.updateBars()
         #expect(show.spaceBars.shownStrips.isEmpty)
         show.clampFloatsClearOfBars()
@@ -164,7 +164,9 @@ extension FullscreenStandDownTests {
         // is front-most, while this screen's show sits behind it.
         var presenter = screen
         presenter.origin.x = screen.minX - screen.width + 1
-        core.frontWindowFrames = { [presenter, screen] }
+        core.frontStack = {
+            [presenter, screen].map { listed(frame: $0) }
+        }
         core.updateBars()
         #expect(core.spaceBars.shownStrips.isEmpty)
     }
@@ -177,7 +179,7 @@ extension FullscreenStandDownTests {
         // device: mid-animation, short of every edge.
         let opening = screen.insetBy(dx: 8, dy: 5)
         let core = try #require(makeShelfCore(frame: opening))
-        core.frontWindowFrames = { [screen] }
+        core.frontStack = { [screen].map { listed(frame: $0) } }
         core.updateBars()
         #expect(!core.spaceBars.shownStrips.isEmpty)
 
@@ -199,7 +201,7 @@ extension FullscreenStandDownTests {
         let core = try #require(
             makeShelfCore(frame: screen.insetBy(dx: 8, dy: 5))
         )
-        core.frontWindowFrames = { [screen] }
+        core.frontStack = { [screen].map { listed(frame: $0) } }
         core.updateBars()
         #expect(!core.spaceBars.shownStrips.isEmpty)
 
@@ -237,14 +239,14 @@ extension FullscreenStandDownTests {
         }
         let editor = CGRect(x: 100, y: 100, width: 800, height: 600)
         // Control: the editor in front, so the plate shows.
-        core.frontWindowFrames = { [editor, screen] }
+        core.frontStack = { [editor, screen].map { listed(frame: $0) } }
         owe()
         core.payDesktopCue(
             in: NativeSpaces.desktopSnapshot(),
             loadedProfile: nil
         )
         #expect(shown == 1)
-        core.frontWindowFrames = { [screen, editor] }
+        core.frontStack = { [screen, editor].map { listed(frame: $0) } }
         owe()
         core.payDesktopCue(
             in: NativeSpaces.desktopSnapshot(),
@@ -253,4 +255,20 @@ extension FullscreenStandDownTests {
         #expect(shown == 1)
         #expect(core.desktopCue.owed == nil)
     }
+}
+
+/// One front-to-back row (#1869); the fields a fixture leaves out
+/// are the defaults no stand-down reads.
+private func listed(
+    number: Int = 0,
+    pid: pid_t = 0,
+    layer: Int = 0,
+    frame: CGRect
+) -> KiwiCore.FrontWindow {
+    KiwiCore.FrontWindow(
+        number: CGWindowID(number),
+        pid: pid,
+        layer: layer,
+        frame: frame
+    )
 }

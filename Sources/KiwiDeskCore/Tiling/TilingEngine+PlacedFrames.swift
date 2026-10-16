@@ -13,10 +13,19 @@ extension TilingEngine {
     /// where a window IS takes this; one that CLASSIFIES slots
     /// keeps `calculatedFrames` — `FrameSetReaderCensusTests` is
     /// the register, state-and-layout.md the argument (#934).
+    /// `recording: false` is a what-if reading over a state that
+    /// is not live (#1869): the monocle hold the layout input
+    /// records is put back, so the live engine is left as found.
     func placedFrames(
-        state: StateCoordinator
+        state: StateCoordinator,
+        recording: Bool = true
     ) -> [WindowID: CGRect] {
-        visibleFrames(state: state, placed: true)
+        guard !recording else {
+            return visibleFrames(state: state, placed: true)
+        }
+        let held = monocleShownMembers
+        defer { monocleShownMembers = held }
+        return visibleFrames(state: state, placed: true)
     }
 
     /// One loop for both sets: every visible space laid out on

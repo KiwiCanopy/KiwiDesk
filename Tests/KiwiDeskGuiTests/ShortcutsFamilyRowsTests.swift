@@ -62,6 +62,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.restoreDefaults),
             .behaviour(.mouseResize),
             .behaviour(.mouseFollowsFocus),
+            .behaviour(.mouseHoverFocus),
             .shortcuts(.scrollPan),
             .shortcuts(.scrollLongSwipes),
             .shortcuts(.scrollStepDistance),

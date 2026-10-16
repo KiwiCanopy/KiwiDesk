@@ -89,6 +89,7 @@ struct GesturesDrawerTests {
         arguments: [
             ("shortcuts.gestures.swap", "windows"),
             ("shortcuts.gestures.edge", "windows"),
+            ("shortcuts.gestures.hover_focus", "windows"),
             ("shortcuts.gestures.follow_focus", "windows"),
             ("shortcuts.gestures.drop_on_space", "spaceBar"),
             ("shortcuts.gestures.glyph_click", "spaceBar"),
