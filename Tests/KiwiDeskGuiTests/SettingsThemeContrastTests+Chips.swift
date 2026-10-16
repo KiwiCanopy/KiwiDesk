@@ -165,7 +165,14 @@ extension SettingsThemeContrastTests {
         Pairing(
             "ink2 on an empty lens's chip",
             SettingsTheme.ink2,
-            on: SettingsTheme.page
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipRest]
+        ),
+        Pairing(
+            "ink2 on an empty lens's hovered chip",
+            SettingsTheme.ink2,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipHover]
         ),
     ]
 

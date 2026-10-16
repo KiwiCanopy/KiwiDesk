@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "Seules les fenêtres dont le titre contient l'un de ces termes restent nettes.",
   "kiwivision.lens.apps.titled_empty": "Tant que vous n'ajoutez pas de titre, toutes les fenêtres de cette app restent nettes.",
   "kiwivision.lens.apps.windows": "Fenêtres",
+  "kiwivision.lens.chord_elsewhere": "Le calque « %1$@ » a son propre raccourci pour cette lentille ; modifiez-le dans %2$@.",
   "kiwivision.lens.clear_after": "Nette après",
   "kiwivision.lens.delay.off": "Désactivé",
   "kiwivision.lens.delay.seconds": "%1$@ s",

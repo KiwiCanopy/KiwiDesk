@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "Só permanecem nítidas as janelas cujo título contém um destes termos.",
   "kiwivision.lens.apps.titled_empty": "Até você adicionar um título, todas as janelas deste app permanecem nítidas.",
   "kiwivision.lens.apps.windows": "Janelas",
+  "kiwivision.lens.chord_elsewhere": "A camada “%1$@” tem um atalho próprio para esta lente; altere-o em %2$@.",
   "kiwivision.lens.clear_after": "Nítida após",
   "kiwivision.lens.delay.off": "Desativado",
   "kiwivision.lens.delay.seconds": "%1$@ s",

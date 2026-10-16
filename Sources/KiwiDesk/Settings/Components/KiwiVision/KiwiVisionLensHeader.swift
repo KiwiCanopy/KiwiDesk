@@ -39,6 +39,12 @@ struct KiwiVisionLensHeader: View {
                 bindings: defaultBindings,
                 command: KeybindingCatalog.toggleLens(lens)
             )
+            if let layer = otherLayer {
+                Text(KiwiVisionLensWords.chordElsewhere(layer))
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .font(.callout)
         .confirmationDialog(
@@ -83,6 +89,17 @@ struct KiwiVisionLensHeader: View {
                 model.nav.kiwiVisionLens = AppWideSettings.lensName(typed)
             }
         }
+    }
+
+    /// A layer other than the default holding a chord for the
+    /// lens: that chord is the layer's, edited on Shortcuts.
+    private var otherLayer: String? {
+        model.config.layers.first { layer in
+            !layer.isDefault
+                && layer.bindings.contains {
+                    KeybindingCatalog.names($0, lens)
+                }
+        }?.name
     }
 
     /// The default layer's rows, where the header reads and

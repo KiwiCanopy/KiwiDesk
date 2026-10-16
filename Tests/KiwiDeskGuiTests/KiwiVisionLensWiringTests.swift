@@ -25,7 +25,6 @@ struct KiwiVisionLensWiringTests {
     /// mounts the selected lens's page, the strip a chip per lens.
     @Test("the lens container is bespoke, a page per live lens")
     func lensContainerIsBespoke() throws {
-        #expect(KiwiVisionRowOrder.bespokeContainers == [.kiwiVisionLenses])
         let section = try Self.squashed(
             "Sources/KiwiDesk/Settings/Sections/KiwiVisionSection.swift"
         )

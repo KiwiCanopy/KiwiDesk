@@ -912,6 +912,7 @@
   "kiwivision.lens.apps.titled_caption": "Only windows whose title contains one of these stay clear.",
   "kiwivision.lens.apps.titled_empty": "Until you add a title, every window of this app stays clear.",
   "kiwivision.lens.apps.windows": "Windows",
+  "kiwivision.lens.chord_elsewhere": "The “%1$@” layer has its own shortcut for this lens; change it in %2$@.",
   "kiwivision.lens.clear_after": "Clear after",
   "kiwivision.lens.delay.off": "Off",
   "kiwivision.lens.delay.seconds": "%1$@ s",

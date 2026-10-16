@@ -68,6 +68,18 @@ enum KiwiVisionLensWords {
 
     static var appliesTo: String { L("app_rules.reach", "Applies to") }
 
+    /// Under the header's chord row, for a chord another layer
+    /// holds: the row edits the default layer's alone.
+    static func chordElsewhere(_ layer: String) -> String {
+        L(
+            "kiwivision.lens.chord_elsewhere",
+            "The “%1$@” layer has its own shortcut for this lens; "
+                + "change it in %2$@.",
+            layer,
+            SettingsDestination.shortcuts.title
+        )
+    }
+
     static var reachCaption: String {
         L(
             "kiwivision.lens.reach.caption",

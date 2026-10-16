@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "Чёткими остаются только окна, заголовок которых содержит одно из этих слов.",
   "kiwivision.lens.apps.titled_empty": "Пока ты не добавишь заголовок, все окна этого приложения остаются чёткими.",
   "kiwivision.lens.apps.windows": "Окна",
+  "kiwivision.lens.chord_elsewhere": "У слоя «%1$@» есть своё сочетание клавиш для этой линзы; измени его в разделе %2$@.",
   "kiwivision.lens.clear_after": "Прояснение через",
   "kiwivision.lens.delay.off": "Выкл.",
   "kiwivision.lens.delay.seconds": "%1$@ с",

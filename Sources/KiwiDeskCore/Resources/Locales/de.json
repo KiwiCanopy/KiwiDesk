@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "Nur Fenster, deren Titel einen dieser Begriffe enthält, bleiben klar.",
   "kiwivision.lens.apps.titled_empty": "Bis du einen Titel hinzufügst, bleibt jedes Fenster dieser App klar.",
   "kiwivision.lens.apps.windows": "Fenster",
+  "kiwivision.lens.chord_elsewhere": "Die Ebene „%1$@“ hat ein eigenes Tastenkürzel für diese Linse; ändere es unter %2$@.",
   "kiwivision.lens.clear_after": "Klar nach",
   "kiwivision.lens.delay.off": "Aus",
   "kiwivision.lens.delay.seconds": "%1$@ s",

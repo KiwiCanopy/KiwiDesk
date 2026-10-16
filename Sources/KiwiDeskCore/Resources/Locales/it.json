@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "Restano nitide solo le finestre il cui titolo contiene uno di questi termini.",
   "kiwivision.lens.apps.titled_empty": "Finché non aggiungi un titolo, tutte le finestre di questa app restano nitide.",
   "kiwivision.lens.apps.windows": "Finestre",
+  "kiwivision.lens.chord_elsewhere": "Il livello «%1$@» ha una propria scorciatoia per questa lente; modificala in %2$@.",
   "kiwivision.lens.clear_after": "Nitida dopo",
   "kiwivision.lens.delay.off": "Disattivato",
   "kiwivision.lens.delay.seconds": "%1$@ s",

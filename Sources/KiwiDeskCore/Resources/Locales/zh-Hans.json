@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "只有标题包含其中任一项的窗口才会保持清晰。",
   "kiwivision.lens.apps.titled_empty": "在你添加标题之前，此 App 的每个窗口都会保持清晰。",
   "kiwivision.lens.apps.windows": "窗口",
+  "kiwivision.lens.chord_elsewhere": "“%1$@”层为此镜头设有自己的快捷键；请在%2$@中更改。",
   "kiwivision.lens.clear_after": "变清晰前等待",
   "kiwivision.lens.delay.off": "关闭",
   "kiwivision.lens.delay.seconds": "%1$@ 秒",

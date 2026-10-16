@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "タイトルにこれらのいずれかを含むウインドウだけが、くっきり表示のままになります。",
   "kiwivision.lens.apps.titled_empty": "タイトルを追加するまでは、このアプリのすべてのウインドウがくっきり表示のままです。",
   "kiwivision.lens.apps.windows": "ウインドウ",
+  "kiwivision.lens.chord_elsewhere": "「%1$@」レイヤーには、このレンズ専用のショートカットがあります。%2$@で変更してください。",
   "kiwivision.lens.clear_after": "くっきり表示までの時間",
   "kiwivision.lens.delay.off": "オフ",
   "kiwivision.lens.delay.seconds": "%1$@ 秒",

@@ -911,6 +911,7 @@
   "kiwivision.lens.apps.titled_caption": "제목에 이 중 하나가 포함된 윈도우만 선명하게 유지됩니다.",
   "kiwivision.lens.apps.titled_empty": "제목을 추가하기 전까지는 이 앱의 모든 윈도우가 선명하게 유지됩니다.",
   "kiwivision.lens.apps.windows": "윈도우",
+  "kiwivision.lens.chord_elsewhere": "‘%1$@’ 레이어에 이 렌즈 전용 단축키가 있습니다. %2$@에서 변경하십시오.",
   "kiwivision.lens.clear_after": "선명해질 때까지",
   "kiwivision.lens.delay.off": "끔",
   "kiwivision.lens.delay.seconds": "%1$@ 초",
