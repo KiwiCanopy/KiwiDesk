@@ -1779,7 +1779,7 @@
   "space_bar.group_adjacent.help": "Fusionne les fenêtres voisines d'une même app dans un espace en un seul glyphe, signalé par une pastille de comptage, au lieu d'un glyphe par fenêtre.",
   "space_bar.hide_empty": "Masquer les espaces vides",
   "space_bar.hide_empty.help": "Les espaces sans fenêtre sont masqués de la barre, sauf l'espace sur lequel vous vous trouvez. Utilisez un raccourci pour accéder à un espace masqué.",
-  "space_bar.inactive_content": "Autres espaces",
+  "space_bar.inactive_content": "Fenêtres dans les autres espaces",
   "space_bar.inactive_content.apps": "Apps",
   "space_bar.inactive_content.count": "Nombre de fenêtres",
   "space_bar.inactive_content.help": "Ce qu'affichent les espaces qui ne sont pas à l'écran. %1$@ — leurs glyphes d'applications. %2$@ — seulement le numéro, le nom ou l'icône de chaque espace, avec dans son coin le nombre de fenêtres qu'il contient. Dans les deux cas, un espace vide apparaît atténué, sauf avec une icône emoji en couleur, qui ne peut pas être atténuée.",

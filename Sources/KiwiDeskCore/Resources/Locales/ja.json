@@ -1779,7 +1779,7 @@
   "space_bar.group_adjacent.help": "スペース内の同一アプリの隣接ウインドウを、個別のグリフの代わりにカウントバッジ付きの単一グリフに統合します。",
   "space_bar.hide_empty": "空のスペースを非表示",
   "space_bar.hide_empty.help": "ウインドウのないスペースをバーから隠します。ただし現在いるスペースは表示されたままです。隠れているスペースへはショートカットで移動できます。",
-  "space_bar.inactive_content": "他のスペース",
+  "space_bar.inactive_content": "他のスペースのウインドウ",
   "space_bar.inactive_content.apps": "アプリ",
   "space_bar.inactive_content.count": "ウインドウ数",
   "space_bar.inactive_content.help": "画面に表示されていないスペースに何を表示するかです。%1$@ — アプリグリフを表示します。%2$@ — 各スペースの番号、名前、アイコンだけを表示し、その隅にウインドウの数を表示します。どちらの場合も、空のスペースは淡色で表示されますが、カラー絵文字のアイコンは淡色にできません。",

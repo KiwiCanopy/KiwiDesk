@@ -1779,7 +1779,7 @@
   "space_bar.group_adjacent.help": "Merges neighbouring windows of the same app in a Space into one glyph with a count badge, instead of one glyph each.",
   "space_bar.hide_empty": "Hide empty Spaces",
   "space_bar.hide_empty.help": "Spaces with no windows are hidden from the bar, except the Space you're currently on. Use a shortcut to jump to a hidden Space.",
-  "space_bar.inactive_content": "Other Spaces",
+  "space_bar.inactive_content": "Windows in other Spaces",
   "space_bar.inactive_content.apps": "Apps",
   "space_bar.inactive_content.count": "Window count",
   "space_bar.inactive_content.help": "What the Spaces not on screen show. %1$@ — their app glyphs. %2$@ — just each Space's number, name or icon, with how many windows it holds on its corner. Either way an empty Space draws dimmer, except a color emoji icon, which cannot dim.",

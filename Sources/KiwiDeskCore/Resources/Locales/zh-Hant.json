@@ -1779,7 +1779,7 @@
   "space_bar.group_adjacent.help": "將空間中同一 App 的相鄰視窗合併為單一圖形，並加上計數徽章，而不是各顯示一個圖形。",
   "space_bar.hide_empty": "隱藏空的空間",
   "space_bar.hide_empty.help": "沒有視窗的空間會從列中隱藏，但你目前所在的空間除外。請用快速鍵跳到隱藏的空間。",
-  "space_bar.inactive_content": "其他空間",
+  "space_bar.inactive_content": "其他空間中的視窗",
   "space_bar.inactive_content.apps": "App",
   "space_bar.inactive_content.count": "視窗數",
   "space_bar.inactive_content.help": "不在螢幕上的空間顯示什麼。%1$@ — 顯示其 App 圖形。%2$@ — 只顯示每個空間的編號、名稱或圖像，並在其角落顯示它有多少個視窗。兩種情況下，空的空間都會變暗顯示，但彩色圖像無法變暗。",
