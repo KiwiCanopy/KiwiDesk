@@ -69,12 +69,7 @@ extension KiwiCore {
             guard let frame = memberFrame(id), let window = state.windows[id]
             else { return }
             ordered.append((id, frame, window.pid, window.title))
-            apps[window.pid] =
-                apps[window.pid]
-                ?? AppRef(
-                    bundleID: window.appBundleID,
-                    name: window.appName
-                )
+            apps[window.pid] = apps[window.pid] ?? window.appRef
         }
         for id in members where !seen.contains(id) { member(id) }
         for entry in listed {

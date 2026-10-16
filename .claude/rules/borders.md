@@ -21,6 +21,7 @@ paths:
   # KiwiVision's plate stacks with the ring and rides its triggers.
   - "Sources/KiwiDeskCore/Vision/**"
   - "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+VisionFocus.swift"
 ---
 
 # Focus ring & sticky mark overlays
@@ -497,6 +498,22 @@ Obligations:
   every profile's `lens_reach` a re-key or a clear** in the same
   write, or a later lens of that name inherits "left out" — review's
   until #2103 PR 6 owes it a test.
+- **A step KiwiDesk's own navigation takes skips what a lens leaves
+  out, through the one `lensKeySkip`; a pick skips nothing**
+  (#2103 rulings 35, 44, 45). `navigate` asks it once and threads
+  it into every navigation model — the geometric search and its
+  float tier, scrolling's and monocle's rows and track's index
+  math through `Navigation.arrayStep`, whose wrap asks it too —
+  and the scroll gesture's own-order step takes it beside. A
+  navigation model takes `skip:` with no default, so a new model
+  or caller threads it rather than inheriting "skip nothing" —
+  review's, since nothing scans for a default. Membership is the
+  plates' per-window `visionLensClear`, never an app-set test,
+  while the window switcher's split stays by app (`lensHolds`,
+  ruling 36). A click, a bar item, hover focus and the window
+  switcher are picks and never ask it (`KiwiVisionLensFocusTests`,
+  `KiwiVisionLensWrapTests`, `KiwiVisionLensGestureTests`,
+  `KiwiVisionLensJumpTests`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

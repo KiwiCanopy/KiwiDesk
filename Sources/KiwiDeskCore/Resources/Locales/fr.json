@@ -686,6 +686,7 @@
   "jump.scope.windows": "Fenêtres",
   "jump.section.hidden": "Masquées",
   "jump.section.minimized": "Réduites",
+  "jump.section.other_apps": "Autres apps",
   "jump.space.numbered": "Espace %1$@",
   "jump.status.fullscreen": "Plein écran",
   "jump.status.hidden": "Masquée",

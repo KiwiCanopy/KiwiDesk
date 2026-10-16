@@ -686,6 +686,7 @@
   "jump.scope.windows": "Finestre",
   "jump.section.hidden": "Nascoste",
   "jump.section.minimized": "Ridotte",
+  "jump.section.other_apps": "Altre app",
   "jump.space.numbered": "Spazio %1$@",
   "jump.status.fullscreen": "Schermo intero",
   "jump.status.hidden": "Nascosta",

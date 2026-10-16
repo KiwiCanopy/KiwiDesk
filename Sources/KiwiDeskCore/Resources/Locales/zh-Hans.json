@@ -686,6 +686,7 @@
   "jump.scope.windows": "窗口",
   "jump.section.hidden": "已隐藏",
   "jump.section.minimized": "已最小化",
+  "jump.section.other_apps": "其他 App",
   "jump.space.numbered": "空间 %1$@",
   "jump.status.fullscreen": "全屏幕",
   "jump.status.hidden": "已隐藏",

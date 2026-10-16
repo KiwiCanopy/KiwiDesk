@@ -209,17 +209,14 @@ struct JumpPanelView: View {
     }
 
     private func sectionHeader(_ section: JumpList.Section) -> some View {
-        Text(
-            section == .hidden
-                ? JumpRowText.hidden : JumpRowText.minimized
-        )
-        .font(.subheadline.weight(.semibold))
-        .foregroundStyle(.secondary)
-        .accessibilityAddTraits(.isHeader)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, JumpRowView.padding)
-        .padding(.bottom, 3)
-        .frame(height: Self.headerHeight, alignment: .bottom)
+        Text(JumpRowText.header(section))
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .accessibilityAddTraits(.isHeader)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, JumpRowView.padding)
+            .padding(.bottom, 3)
+            .frame(height: Self.headerHeight, alignment: .bottom)
     }
 
     /// The list's height: what its rows take, up to `rowCap` rows.

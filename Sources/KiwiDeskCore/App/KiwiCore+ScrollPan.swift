@@ -92,8 +92,8 @@ extension KiwiCore {
 
     /// One window on `space`; false where it landed on nothing.
     /// A row goes through the arrow keys' own `navigate` — row
-    /// step, wrap, float tier (#488), dead-end bump (#436) and
-    /// deferred raise alike — without warping the pointer.
+    /// step, wrap, float tier (#488), dead-end bump (#436), deferred
+    /// raise and a lens's skip alike — without warping the pointer.
     private func stepScrollPan(_ space: Space, by step: Int) -> Bool {
         let direction = Self.direction(
             step,
@@ -126,7 +126,8 @@ extension KiwiCore {
     }
 
     /// Any other layout: the next or previous window in the
-    /// Space's own order, floats included, wrapping at the ends. A
+    /// Space's own order, floats included, wrapping at the ends,
+    /// past every window a lens leaves out (#2103 ruling 45). A
     /// native-fullscreen member is left out: it sits on a Desktop
     /// nobody shows, so the focus gate refuses it (#1345).
     private func stepInOrder(
@@ -140,12 +141,19 @@ extension KiwiCore {
         guard let focused = state.focusAnchor(of: space) else {
             return false
         }
-        guard ring.count > 1, let index = ring.firstIndex(of: focused)
+        let skip = lensKeySkip() ?? { _ in false }
+        guard let index = ring.firstIndex(of: focused),
+            let next = Navigation.arrayStep(
+                from: index,
+                step: step,
+                count: ring.count,
+                wrap: true,
+                skip: { skip(ring[$0]) }
+            )
         else {
             flashDeadEnd(focused, direction: direction)
             return false
         }
-        let next = (index + step + ring.count) % ring.count
         focusWindow(ring[next], warp: false)
         return true
     }

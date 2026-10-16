@@ -687,6 +687,7 @@
   "jump.scope.windows": "Windows",
   "jump.section.hidden": "Hidden",
   "jump.section.minimized": "Minimized",
+  "jump.section.other_apps": "Other apps",
   "jump.space.numbered": "Space %1$@",
   "jump.status.fullscreen": "Full Screen",
   "jump.status.hidden": "Hidden",

@@ -47,11 +47,13 @@ public enum JumpSearch {
     }
 
     /// The panel's sections in order — the window tiers, then hidden
-    /// apps — each drawn under its own header, so no match quality
+    /// apps, the lens's apps ahead of the other apps (#2103 ruling
+    /// 36) — each drawn under its own header, so no match quality
     /// lifts a row out of its section.
     private static func section(_ entry: JumpEntry) -> Int {
-        entry.isHiddenApp
-            ? JumpTier.minimized.rawValue + 1 : entry.tier.rawValue
+        let tiers = JumpTier.allCases.count
+        let kind = entry.isHiddenApp ? tiers : entry.tier.rawValue
+        return entry.isOtherApp ? kind + tiers + 1 : kind
     }
 
     /// The tier `entry` ranks in for `needle`, nil where nothing

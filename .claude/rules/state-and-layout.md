@@ -2255,6 +2255,11 @@ The authoritative map is the "Layout navigation & overflow models"
 table in `docs/design-decisions.md` — a **new layout must add its
 row** there.
 
+A new navigation model, or a new caller of one, also threads a
+KiwiVision lens's skip; the obligation is
+[borders.md](borders.md)'s ▸ "A step KiwiDesk's own navigation
+takes".
+
 ## macOS native tabs are one `NSWindow` per tab, coalesced temporally
 
 Finder/Terminal/Ghostty native tabs are separate `NSWindow`s
