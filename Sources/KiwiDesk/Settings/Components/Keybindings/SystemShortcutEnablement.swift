@@ -62,7 +62,10 @@ extension SystemShortcut {
             .screenshotSelection, .screenshotTools, .zoomToggle,
             .zoomIn, .zoomOut, .dockHiding, .finderSearch,
             .inputSourceNext, .invertColors, .increaseContrast,
-            .decreaseContrast:
+            .decreaseContrast, .switchToDesktop1, .switchToDesktop2,
+            .switchToDesktop3, .switchToDesktop4, .switchToDesktop5,
+            .switchToDesktop6, .switchToDesktop7, .switchToDesktop8,
+            .switchToDesktop9:
             return false
         }
     }
@@ -103,6 +106,12 @@ extension SystemShortcut {
         case .invertColors: return (21, false)
         case .increaseContrast: return (25, false)
         case .decreaseContrast: return (26, false)
+        // Ids 118…126 = Desktops 1…9, keycode + control mask
+        // read 2026-10-15, macOS 27.0.1 (#2311).
+        case .switchToDesktop1, .switchToDesktop2, .switchToDesktop3,
+            .switchToDesktop4, .switchToDesktop5, .switchToDesktop6,
+            .switchToDesktop7, .switchToDesktop8, .switchToDesktop9:
+            return desktopNumber.map { (117 + $0, false) }
         }
     }
 }
