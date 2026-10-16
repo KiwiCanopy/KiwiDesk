@@ -21,6 +21,23 @@ struct UpdateOffer {
             .appendingPathComponent("v" + version)
     }
 
+    /// The running version with no notes the window can read —
+    /// offline, with nothing cached (#2308). The Highlights tab
+    /// then says the notes are online.
+    static func unread(build: String, host: Bundle = .main) -> UpdateOffer {
+        let shown =
+            host.object(
+                forInfoDictionaryKey: "CFBundleShortVersionString"
+            ) as? String ?? build
+        return UpdateOffer(
+            version: shown,
+            build: build,
+            installed: shown,
+            released: nil,
+            digest: nil
+        )
+    }
+
     /// The offer and its notes merged across every loaded item.
     /// Versions compare as Sparkle compares them —
     /// `sparkle:version` against the host's `CFBundleVersion` —
