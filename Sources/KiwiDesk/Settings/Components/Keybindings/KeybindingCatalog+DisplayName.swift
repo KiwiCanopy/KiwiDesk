@@ -109,6 +109,10 @@ extension KeybindingCatalog {
         let desktops = desktopOffer(live: [], bindings: bindings)
         commands += goToDesktop(desktops.desktops)
         commands += moveToDesktop(desktops.desktops)
+        // Lens rows read the bindings too: a lens's row keeps its
+        // name whatever the live list holds.
+        commands += bindings.compactMap { lensTarget(of: $0.lua) }
+            .map(toggleLens)
         return commands
     }
 

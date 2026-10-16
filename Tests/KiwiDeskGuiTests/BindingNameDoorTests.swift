@@ -48,6 +48,11 @@ struct BindingNameDoorTests {
             1,
             "a NavCommand's label written into a binding on rename"
         ),
+        "KeybindingCatalog+Lenses.swift": (
+            1,
+            "a NavCommand's label written into a binding on a lens "
+                + "rename (#2103)"
+        ),
         "KeybindingNavRow.swift": (
             1,
             "a NavCommand's label stored on the binding it creates"

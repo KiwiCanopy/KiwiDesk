@@ -1668,7 +1668,12 @@ Touching `Borders`, `Vision`.
 - a lens's reach is read from the live profile's adoption state through
   the one `profileLeavingOut` and re-judged on every change of it, and a
   lens rename or delete re-keys or clears every profile's `lens_reach`
-  (#2103, `KiwiVisionLensReachTests`)
+  and every stored binding naming it through the one pair of crossings,
+  a rename carried by its own write so the lens on follows it, a lens
+  matched by the one `sameLens`, a Settings row drawn through `lensOffer`
+  — the lens page's Save wiring review's until #2103 PR 7 (#2103,
+  `KiwiVisionLensReachTests`, `KiwiVisionLensRenameTests`,
+  `ShortcutsLensRowsTests`, `ShortcutsLensNamingTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).

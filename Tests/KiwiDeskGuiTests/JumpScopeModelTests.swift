@@ -29,6 +29,7 @@ struct JumpScopeModelTests {
                 profiles: ("Dual", ["Dual", "Studio"], []),
                 vision: (.off, []),
                 visionChord: nil,
+                lensChord: { _ in nil },
                 inert: nil
             )
         )

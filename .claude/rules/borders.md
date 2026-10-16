@@ -478,10 +478,21 @@ Obligations:
   with one writer, `setVision`, and the lens on follows the stored
   lenses through the one `followActiveLens`**: a write that removes
   or empties it turns KiwiVision off, one that stores it under
-  another spelling re-keys it, and a rename (#2103 PR 6) re-keys it
-  there, never beside it (`VisionAppearanceSeamTests` ▸
-  `oneOnOffWriter`, `KiwiVisionLensActivationTests` ▸
-  `activeFollowsDefinition`). **A GUI write of the lenses seeds from
+  another spelling re-keys it, and a write that renames a lens
+  says so in `setAppWide(…renamingLens:)`, alive for that write
+  alone, so it re-keys there, never beside it — that the lens
+  page's Save says so is review's until #2103 PR 7 (`VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
+  `KiwiVisionLensActivationTests` ▸ `activeFollowsDefinition`,
+  `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`,
+  `persistingRenameFollows`). **A lens is matched by the one
+  `AppWideSettings.sameLens`**, never a case compare beside it.
+  **Settings draws a lens row for every stored lens and every lens
+  a binding names, through the one `KeybindingCatalog.lensOffer`**,
+  never for a lens only a session `define_lens` holds, since a
+  chord outlives the session; a row owns every spelling of its
+  lens (`NavCommand.owns`), so no chord is hidden in any layer, and
+  a row for a lens no store holds stays bindable, since a Lua-owned
+  setup defines its lenses on every load (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
   and writes the settled list, never the live one**, so a session
   `define_lens` or `delete_lens` never reaches `gui.json` (ruling
   40) — review's until the lens page owes it a test.
@@ -498,9 +509,17 @@ Obligations:
   (`KiwiVisionLensReachTests`). A path that moves who owns the
   setup — `gui.json` or `init.lua` written — without a config load
   owes the same `liveProfileChanged` call. **A lens rename or delete owes
-  every profile's `lens_reach` a re-key or a clear** in the same
-  write, or a later lens of that name inherits "left out" — review's
-  until #2103 PR 6 owes it a test.
+  every profile's `lens_reach` a re-key or a clear, and every stored
+  binding naming it the same** in the same write, or a later lens of
+  that name inherits "left out" and the old chord — through the one
+  `VisionLens.reach(_:renaming:to:)` / `reach(_:deleting:)` and
+  `KeybindingCatalog.renameLens` / `deleteLens`, which compare names
+  through `sameLens` (`KiwiVisionLensRenameTests`,
+  `ShortcutsLensRowsTests`). The binding crossing rewrites the Lua a
+  rule-reach key is built from, so the lens page's Save applies both
+  crossings to the shared base, every profile file and the reach
+  snapshot in one `RuleReachSnapshot` pass ahead of the row encode —
+  review's until #2103 PR 7 owes it a test.
 - **A step KiwiDesk's own navigation takes skips what a lens leaves
   out, through the one `lensKeySkip`; a pick skips nothing**
   (#2103 rulings 35, 44, 45). `navigate` asks it once and threads

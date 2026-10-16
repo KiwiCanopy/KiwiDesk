@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// KiwiVision's shortcut section (#2312): its toggle, and with
-/// #2103 v3 each lens's. A view mode is no Focus verb, so it
+/// KiwiVision's shortcut section (#2312): its toggle and each
+/// lens's (#2103 ruling 42). A view mode is no Focus verb, so it
 /// leaves that group.
 struct KiwiVisionShortcutsGroup: View {
     @ObservedObject var model: SettingsModel

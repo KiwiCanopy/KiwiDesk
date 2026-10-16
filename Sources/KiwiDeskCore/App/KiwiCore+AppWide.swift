@@ -114,16 +114,30 @@ extension KiwiCore {
         endCrossing(adopting: owed[profile.name] ?? appWideLedger.settled)
     }
 
+    /// The stored lenses' names, never a session `define_lens`'s:
+    /// what a binding may name, since it outlives the session
+    /// (#2103 ruling 40).
+    public var kiwiVisionStoredLensNames: [String] {
+        appWideLedger.settled.visionLenses.map(\.name)
+    }
+
     /// A General row (`persisting`) or a verb changing a value. A
     /// row writes `gui.json` at once — ending an owed crossing
     /// through the same door the first apply takes, after which
     /// the engine runs what was stored — and a verb changes the
     /// session alone, as every `set_*` does. No default: a caller
-    /// says which it is.
+    /// says which it is. A write that renames a lens says so in
+    /// `renamingLens`, so the lens on follows it — for this write
+    /// alone (#2103); the writer re-keys the stored bindings and
+    /// every profile's `lens_reach` in the same save
+    /// (`VisionLens.reach`).
     public func setAppWide(
         persisting: Bool,
+        renamingLens: (from: String, to: String)? = nil,
         _ change: (inout AppWideSettings) -> Void
     ) {
+        vision.renamedLens = renamingLens
+        defer { vision.renamedLens = nil }
         change(&appWideLedger.live)
         // A Lua-owned config has no store to write (its rows grey).
         guard persisting, isGuiManaged else { return }

@@ -13,7 +13,8 @@ enum ShortcutsReferenceBuilder {
         spaceIcons: [SpaceID: String],
         desktops: [Int],
         resizeStep: Int,
-        layerNames: [String]
+        layerNames: [String],
+        lenses: [String] = []
     ) -> ShortcutsReference {
         // Drop the key panel's three openers from the working set
         // BEFORE any band builds, so the suppression holds by
@@ -91,6 +92,7 @@ enum ShortcutsReferenceBuilder {
             desktops: offer,
             resizeStep: resizeStep,
             layerNames: layerNames,
+            lenses: lenses,
             rows: rows
         )
         // Inactive orphans built before Apps/Custom (#820).

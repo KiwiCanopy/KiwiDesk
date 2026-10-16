@@ -18,6 +18,7 @@ extension ShortcutsReferenceBuilder {
         desktops: KeybindingCatalog.DesktopOffer = .none,
         resizeStep: Int,
         layerNames: [String],
+        lenses: [String] = [],
         rows: ([NavCommand]) -> [ShortcutRow]
     ) -> [ShortcutSubgroup] {
         let focus =
@@ -75,7 +76,10 @@ extension ShortcutsReferenceBuilder {
             // KiwiVision key is bound (#2312).
             ShortcutSubgroup(
                 title: L("destination.kiwivision", "KiwiVision"),
-                rows: rows([KeybindingCatalog.toggleKiwiVision])
+                rows: rows(
+                    [KeybindingCatalog.toggleKiwiVision]
+                        + lenses.map(KeybindingCatalog.toggleLens)
+                )
             ),
             ShortcutSubgroup(
                 title: L(

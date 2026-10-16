@@ -34,6 +34,7 @@ struct ViewPickItemsTests {
             profiles: profiles,
             vision: (vision, lenses),
             visionChord: "⌃⌥V",
+            lensChord: { _ in nil },
             inert: inert
         )
     }
@@ -219,6 +220,7 @@ struct ViewPickItemsTests {
             profiles: ("Laptop", ["Laptop", "Studio"], []),
             vision: (.off, []),
             visionChord: nil,
+            lensChord: { _ in nil },
             inert: nil
         )
         #expect(lines[.layout]?.allSatisfy { !$0.isApplicable } == true)

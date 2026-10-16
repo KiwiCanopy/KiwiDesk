@@ -335,7 +335,8 @@ struct ShortcutsFamilyRowsTests {
             desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName, "resize"],
-            currentLayer: KeyLayer.defaultName
+            currentLayer: KeyLayer.defaultName,
+            lenses: ["Writing"]
         )
     }
 }

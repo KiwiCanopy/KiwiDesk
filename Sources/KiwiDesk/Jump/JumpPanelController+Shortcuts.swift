@@ -69,7 +69,8 @@ extension JumpPanelController {
                 in: NativeSpaces.desktopSnapshot()
             ),
             resizeStep: Int(config.settings.resizeStep),
-            layerNames: layers.map(\.name)
+            layerNames: layers.map(\.name),
+            lenses: core.kiwiVisionLensChoices.map(\.name)
         )
         return withAppGlyphs(
             reference,

@@ -58,6 +58,9 @@ extension JumpPanelController {
                 profiles: (profiles.currentName, profiles.list(), broken),
                 vision: (core.kiwiVisionActive, core.kiwiVisionLensChoices),
                 visionChord: visionChord,
+                lensChord: { [core] in
+                    ShortcutsOpenBinding.lensGlyphs(core: core, lens: $0)
+                },
                 inert: inert
             )
         )
@@ -71,6 +74,7 @@ extension JumpPanelController {
         profiles: (current: String?, all: [String], broken: Set<String>),
         vision: (active: VisionActive, lenses: [VisionLensChoice]),
         visionChord: String?,
+        lensChord: (String) -> String?,
         inert: String?
     ) -> [ViewPickList.Line: [ViewPickList.Item]] {
         let grey = inert
@@ -101,7 +105,12 @@ extension JumpPanelController {
             } : []
         return [
             .layout: layouts, .profile: profileItems,
-            .vision: visionItems(vision, chord: visionChord, inert: grey),
+            .vision: visionItems(
+                vision,
+                chord: visionChord,
+                lensChord: lensChord,
+                inert: grey
+            ),
         ]
     }
 
@@ -111,6 +120,7 @@ extension JumpPanelController {
     private static func visionItems(
         _ vision: (active: VisionActive, lenses: [VisionLensChoice]),
         chord: String?,
+        lensChord: (String) -> String?,
         inert: String?
     ) -> [ViewPickList.Item] {
         let fixed = [
@@ -135,7 +145,8 @@ extension JumpPanelController {
                     name: lens.name,
                     isCurrent: vision.active == .lens(lens.name),
                     inertReason: inert,
-                    refusal: lens.refusal.map(ViewPickText.lensRefusal)
+                    refusal: lens.refusal.map(ViewPickText.lensRefusal),
+                    chord: lensChord(lens.name)
                 )
             }
     }

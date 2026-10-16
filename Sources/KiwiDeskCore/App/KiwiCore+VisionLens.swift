@@ -17,7 +17,7 @@ extension KiwiCore {
             return .fail("no lens named \(name)")
         }
         let active = vision.active.lensName.map {
-            $0.caseInsensitiveCompare(lens.name) == .orderedSame
+            AppWideSettings.sameLens($0, lens.name)
         }
         // The lens on always turns off; a refusal binds only on the
         // way in.
@@ -82,9 +82,7 @@ extension KiwiCore {
             }
             setAppWide(persisting: false) {
                 $0.visionLenses.removeAll {
-                    $0.name.caseInsensitiveCompare(
-                        AppWideSettings.lensName(name)
-                    ) == .orderedSame
+                    AppWideSettings.sameLens($0.name, name)
                 }
             }
             return .ok()
@@ -112,7 +110,7 @@ extension KiwiCore {
         setAppWide(persisting: false) { settings in
             var lenses = settings.visionLenses
             if let index = lenses.firstIndex(where: {
-                $0.name.caseInsensitiveCompare(lens.name) == .orderedSame
+                AppWideSettings.sameLens($0.name, lens.name)
             }) {
                 lenses[index] = lens
             } else {
