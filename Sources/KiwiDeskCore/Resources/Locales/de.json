@@ -471,7 +471,6 @@
   "general.about.acknowledgements": "Danksagungen",
   "general.about.app_name": "KiwiDesk",
   "general.about.license": "Lizenz",
-  "general.about.release_notes": "Release-Notes",
   "general.advanced.backup.error.empty": "Diese Sicherung ist leer — es gibt darin nichts wiederherzustellen.",
   "general.advanced.backup.error.export_title": "Sicherung konnte nicht gespeichert werden",
   "general.advanced.backup.error.lua_owned": "Die Einstellungen dieses Macs stammen aus deiner init.lua, daher lassen sich die Einstellungen einer Sicherung hier nicht anwenden. Wechsle zuerst zum visuellen Editor, oder stelle auf einem Mac wieder her, der ihn verwendet.",

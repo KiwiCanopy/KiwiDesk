@@ -7,10 +7,12 @@ import SwiftUI
 enum UpdateWindowMode {
     case offer(UpdateSession)
     /// `narration` is set after the window's own Install (#1667);
-    /// `next` is "Next on my list" (#1813).
+    /// `next` is "Next on my list" (#1813); `picking` is the
+    /// release menu, which only What's new carries (#2308).
     case whatsNew(
         narration: BootNarration?,
         next: NextOnMyList?,
+        picking: ReleasePicking? = nil,
         done: () -> Void
     )
     /// A check found nothing newer: the running version's notes
@@ -35,13 +37,14 @@ struct UpdateWindowView: View {
                 session: session,
                 measuring: measuring
             )
-        case .whatsNew(let narration, let next, let done):
+        case .whatsNew(let narration, let next, let picking, let done):
             UpdateWindowLayout(
                 offer: offer,
                 whatsNew: true,
                 failed: false,
                 narration: narration,
                 next: next,
+                picking: picking,
                 measuring: measuring
             ) {
                 WhatsNewFooter(done: done)
@@ -93,18 +96,24 @@ private struct UpdateWindowLayout<Footer: View>: View {
     var narration: BootNarration?
     var upToDate = false
     var next: NextOnMyList?
+    var picking: ReleasePicking?
     let measuring: Bool
     @ViewBuilder let footer: () -> Footer
 
     var body: some View {
         VStack(spacing: 0) {
             if let narration {
-                NarratedHeader(offer: offer, narration: narration)
+                NarratedHeader(
+                    offer: offer,
+                    narration: narration,
+                    picking: picking
+                )
             } else {
                 UpdateWindowHeader(
                     offer: offer,
                     whatsNew: whatsNew,
-                    upToDate: upToDate
+                    upToDate: upToDate,
+                    picking: picking
                 )
             }
             UpdateNotesScroll(
@@ -118,6 +127,8 @@ private struct UpdateWindowLayout<Footer: View>: View {
                 ),
                 measuring: measuring
             )
+            // Another release opens on Highlights: its tabs differ.
+            .id(picking?.selection.wrappedValue)
             footer()
         }
         .frame(width: UpdateWindowMetrics.width)
@@ -169,11 +180,13 @@ enum UpdateWindowMetrics {
 private struct NarratedHeader: View {
     let offer: UpdateOffer
     @ObservedObject var narration: BootNarration
+    var picking: ReleasePicking?
 
     var body: some View {
         UpdateWindowHeader(
             offer: offer,
             whatsNew: true,
+            picking: picking,
             narration: narration.line
         )
     }
@@ -183,6 +196,9 @@ private struct UpdateWindowHeader: View {
     let offer: UpdateOffer
     let whatsNew: Bool
     var upToDate = false
+    /// The release menu takes the subtitle's place: each entry
+    /// carries its own date (#2308).
+    var picking: ReleasePicking?
     /// Boot's line after the window's own Install; it takes the
     /// subtitle slot until boot is ready (#1667).
     var narration: String?
@@ -202,6 +218,10 @@ private struct UpdateWindowHeader: View {
                     Text(subtitle)
                         .font(.system(size: 12))
                         .foregroundStyle(SettingsTheme.ink2)
+                }
+                if let picking {
+                    ReleasePicker(picking: picking)
+                        .padding(.top, 2)
                 }
             }
             Spacer(minLength: 0)
@@ -234,6 +254,7 @@ private struct UpdateWindowHeader: View {
 
     private var subtitle: String {
         if let narration { return narration }
+        if picking != nil { return "" }
         if upToDate {
             return L(
                 "update.window.up_to_date_subtitle",

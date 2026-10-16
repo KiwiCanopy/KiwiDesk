@@ -121,7 +121,8 @@ struct WhatsNewRelaunchTests {
         )
         #expect(
             source.contains(
-                "case .whatsNew(let narration, let next, let done)"
+                "case .whatsNew(let narration, let next, let picking, "
+                    + "let done)"
             )
         )
         #expect(source.contains("narration: narration.line"))
@@ -157,10 +158,10 @@ struct WhatsNewRelaunchTests {
                 "Sources/KiwiDesk/Updates/WhatsNewWindowController.swift"
             )
         )
-        #expect(
-            chrome.contains(
-                "mode: .whatsNew(narration: narration, next: next)"
-            )
-        )
+        // Both builds hand the narration on: with the release menu
+        // (#2308) and without it.
+        let squashed = chrome.split(whereSeparator: \.isWhitespace).joined()
+        #expect(squashed.contains("menu:menu,narration:narration,next:next,"))
+        #expect(squashed.contains(".whatsNew(narration:narration,next:next,"))
     }
 }

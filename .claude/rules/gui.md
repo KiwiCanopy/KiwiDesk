@@ -482,6 +482,16 @@ first; a new direct-launch path owes a marker of its own
 (`UpdatePromptWiringTests` ▸ the launch origin,
 `WhatsNewSurfaceTests`).
 
+**Home's "What's new" opens the same window on a click and answers
+nothing (#2308).** It goes through `WhatsNewCoordinator.browse()`
+alone, from Home's footer alone (`HomeSupportStripTests` ▸
+`notesHaveOneDoor`): an update offer on screen comes forward
+instead and owed notes open as owed, through `show()`, which then
+replaces Home's window — the coordinator holds ONE What's new
+window, so one trail and one owner. Home's window never writes
+`waiting` and never calls `markAnswered`; its read re-checks the
+screen before it opens (`WhatsNewBrowseTests`).
+
 **A spotlight row's "Show me" hides What's new WITHOUT answering
 it, and every way out of the trail ends it (#2038).** Settings
 lands on the row's control through `SettingsModel.land(on:)` —
