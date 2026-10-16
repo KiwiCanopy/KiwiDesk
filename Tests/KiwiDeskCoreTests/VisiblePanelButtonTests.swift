@@ -1,3 +1,4 @@
+import CoreGraphics
 import Testing
 
 @testable import KiwiDeskCore
@@ -50,6 +51,11 @@ struct VisiblePanelButtonTests {
         #expect(panel(window, tracked: [window]).asked.isEmpty)
         #expect(!panel(window, layer: 0).panel)
         #expect(panel(window, layer: 0).asked.isEmpty)
+        // A status item or popped menu sits at or above the
+        // main-menu level, outside the band the scan counts (#448).
+        let menuLevel = Int(CGWindowLevelForKey(.mainMenuWindow))
+        #expect(!panel(window, layer: menuLevel).panel)
+        #expect(panel(window, layer: menuLevel).asked.isEmpty)
         #expect(panel(nil).panel)
         #expect(panel(nil).asked.isEmpty)
     }

@@ -36,12 +36,17 @@ struct PanelButtonReaderTests {
             box.listReads += 1
             return [tracked] + untracked
         }
+        // Every ask is recorded — the tracked element as -1 — so a
+        // reader that asks the app about it is seen.
         loop.resolveWindowID = { candidate in
             guard
                 let index = untracked.firstIndex(where: {
                     CFEqual($0, candidate)
                 })
-            else { return nil }
+            else {
+                box.asked.append(-1)
+                return nil
+            }
             box.asked.append(index)
             return WindowID(UInt32(31 + index))
         }
