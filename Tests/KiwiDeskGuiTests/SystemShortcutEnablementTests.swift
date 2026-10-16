@@ -12,19 +12,26 @@ import Testing
 struct SystemShortcutEnablementTests {
     /// The set-equality census of what macOS ships OFF: the Zoom
     /// trio and the Accessibility display trio (#1094's six,
-    /// re-measured 2026-09-01, macOS 26.6.2). A new case whose
+    /// re-measured 2026-09-01, macOS 26.6.2), and Switch to
+    /// Desktop 1…9 (#2311, macOS 27.0.1). A new case whose
     /// `symbolicHotkey` answers `shipsEnabled: false` must join
     /// this list consciously.
-    @Test("nil answers everywhere = the six dormant chords")
+    @Test("nil answers everywhere = the dormant chords")
     func shippedDefaultsMatchTheDormantSet() {
+        let desktops: Set<SystemShortcut> = [
+            .switchToDesktop1, .switchToDesktop2, .switchToDesktop3,
+            .switchToDesktop4, .switchToDesktop5, .switchToDesktop6,
+            .switchToDesktop7, .switchToDesktop8, .switchToDesktop9,
+        ]
         #expect(
             SystemShortcutEnablement.disabled(
                 reading: { _ in nil }
-            ) == [
-                .zoomToggle, .zoomIn, .zoomOut,
-                .invertColors, .increaseContrast,
-                .decreaseContrast,
-            ]
+            )
+                == desktops.union([
+                    .zoomToggle, .zoomIn, .zoomOut,
+                    .invertColors, .increaseContrast,
+                    .decreaseContrast,
+                ])
         )
     }
 

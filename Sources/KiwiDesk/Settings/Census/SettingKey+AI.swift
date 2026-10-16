@@ -1,6 +1,7 @@
 /// AI rows (#1685): copy buttons only, nothing stored. A row is
 /// an `(action)` census entry so search reaches it.
 enum AIKey: String, CaseIterable, Hashable {
+    case addToClaudeDesktop = "(action) ai.setup.claude_desktop"
     case copySetupPrompt = "(action) ai.setup.copy"
     case promptLook = "(action) ai.prompt.look"
     case promptMigrate = "(action) ai.prompt.migrate"
@@ -11,7 +12,7 @@ enum AIKey: String, CaseIterable, Hashable {
 extension AIKey {
     var placement: SettingPlacement {
         switch self {
-        case .copySetupPrompt:
+        case .addToClaudeDesktop, .copySetupPrompt:
             return .row(
                 .ai,
                 .aiSetup,
@@ -32,8 +33,8 @@ extension AIKey {
                 caption: labelKey + ".caption",
                 help: labelKey + ".help"
             )
-        case .promptLook, .promptMigrate, .promptAppRules,
-            .promptSpaces:
+        case .addToClaudeDesktop, .promptLook, .promptMigrate,
+            .promptAppRules, .promptSpaces:
             return .text(labelKey, caption: labelKey + ".caption")
         }
     }

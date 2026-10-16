@@ -156,4 +156,19 @@ struct AICensusRenderTests {
         #expect(squashed.occurrences(of: "AIPromptRow(") == 1)
         #expect(!squashed.contains("AIRowOrder.setup"))
     }
+
+    /// The cards' ruled order (#1685 ▸ Ruling 6a, 2026-10-15): Set
+    /// up, the ready-made prompts, then what the AI app can do.
+    @Test("the cards keep their ruled order")
+    func cardOrder() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let section = root.appendingPathComponent(
+            "Sources/KiwiDesk/Settings/Sections/AISection.swift"
+        )
+        let source = try SourceScan.blankedSource(at: section)
+        let squashed = source.split(
+            whereSeparator: \.isWhitespace
+        ).joined()
+        #expect(squashed.contains("setupprompts" + "AICapabilitiesCard()"))
+    }
 }

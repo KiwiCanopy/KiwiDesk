@@ -2,7 +2,9 @@
 /// prompt is listed only once the tools it needs exist, never
 /// greyed before (issue #1685 ▸ Ruling 6a).
 enum AIRowOrder {
-    static let setup: [SettingKey] = [.ai(.copySetupPrompt)]
+    static let setup: [SettingKey] = [
+        .ai(.addToClaudeDesktop), .ai(.copySetupPrompt),
+    ]
 
     static let readyMadePrompts: [SettingKey] = [
         .ai(.promptLook),

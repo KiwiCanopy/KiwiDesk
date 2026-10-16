@@ -39,15 +39,19 @@ enum ShortcutsRowOrder {
     ]
 
     /// Focus group order: directions, the Space steps, the
-    /// history setting above its two rows (#1655), live spaces,
-    /// and KiwiVision, which keeps the focused one clear (#2103).
+    /// history setting above its two rows (#1655), live spaces.
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
         .shortcuts(.spaceStep),
         .shortcuts(.spaceHistory),
         .shortcuts(.spaceHistoryStep),
         .shortcuts(.goToSpace),
-        .shortcuts(.toggleKiwiVision),
+    ]
+
+    /// KiwiVision group order: its toggle (#2312); the lenses'
+    /// rows join with #2103 v3.
+    static let kiwiVisionAtRest: [SettingKey] = [
+        .shortcuts(.toggleKiwiVision)
     ]
 
     /// Move windows group order: swaps, then space moves.

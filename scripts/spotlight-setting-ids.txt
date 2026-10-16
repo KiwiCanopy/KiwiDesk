@@ -2,6 +2,7 @@
 (action) ai.prompt.look
 (action) ai.prompt.migrate
 (action) ai.prompt.spaces
+(action) ai.setup.claude_desktop
 (action) ai.setup.copy
 (action) app_rules.add_float
 (action) app_rules.add_space

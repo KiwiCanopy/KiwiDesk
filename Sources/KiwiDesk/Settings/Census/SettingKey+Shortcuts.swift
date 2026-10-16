@@ -76,8 +76,10 @@ extension ShortcutsKey {
                 gate: .runtime(.layersExist)
             )
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
-            .goToSpace, .toggleKiwiVision:
+            .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
+        case .toggleKiwiVision:
+            return .row(.shortcuts, .kiwiVisionShortcuts, .atRest)
         // KiwiHub's three sides, one group for one panel (#2265).
         case .jumpToWindow, .showShortcuts, .layoutPicker:
             return .row(.shortcuts, .kiwiHub, .atRest)

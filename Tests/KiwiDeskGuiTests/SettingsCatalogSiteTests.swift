@@ -115,7 +115,9 @@ struct SettingsCatalogSiteTests {
         // 145 since #2103 v2: KiwiVision's Stays clear card and row.
         // 146 since #2103 v2: its current app's other windows row.
         // 149 since #1869: Mouse & trackpad ▸ hover focus.
-        #expect(names.count == 149)
+        // 150 since #2258: AI ▸ Add to Claude Desktop.
+        // 151 since #2312: KiwiVision's own shortcuts group.
+        #expect(names.count == 151)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
