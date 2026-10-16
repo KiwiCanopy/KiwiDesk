@@ -1720,6 +1720,7 @@
   "shortcuts.restore_defaults.title": "要回復預設快速鍵嗎？",
   "shortcuts.section.focus": "焦點",
   "shortcuts.section.inactive": "未生效的快速鍵",
+  "shortcuts.section.kiwivision": "KiwiVision",
   "shortcuts.section.layers": "層",
   "shortcuts.section.layout": "佈局",
   "shortcuts.section.move_windows": "移動視窗",

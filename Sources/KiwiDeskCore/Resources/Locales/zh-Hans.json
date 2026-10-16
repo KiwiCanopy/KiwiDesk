@@ -1720,6 +1720,7 @@
   "shortcuts.restore_defaults.title": "要恢复默认快捷键吗？",
   "shortcuts.section.focus": "焦点",
   "shortcuts.section.inactive": "未生效的快捷键",
+  "shortcuts.section.kiwivision": "KiwiVision",
   "shortcuts.section.layers": "层",
   "shortcuts.section.layout": "布局",
   "shortcuts.section.move_windows": "移动窗口",

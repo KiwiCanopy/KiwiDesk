@@ -43,6 +43,11 @@ struct ShortcutsBespokeContainerTests {
                 "focusAtRest", .focus,
                 ShortcutsRowOrder.focusAtRest
             ),
+            // KiwiVision's toggle, and its lenses' later (#2312).
+            (
+                "kiwiVisionAtRest", .kiwiVisionShortcuts,
+                ShortcutsRowOrder.kiwiVisionAtRest
+            ),
             (
                 "moveWindowsAtRest", .moveWindows,
                 ShortcutsRowOrder.moveWindowsAtRest

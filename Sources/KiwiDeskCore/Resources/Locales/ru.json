@@ -1720,6 +1720,7 @@
   "shortcuts.restore_defaults.title": "Вернуть стандартные сочетания клавиш?",
   "shortcuts.section.focus": "Фокус",
   "shortcuts.section.inactive": "Неактивные сочетания клавиш",
+  "shortcuts.section.kiwivision": "KiwiVision",
   "shortcuts.section.layers": "Слои",
   "shortcuts.section.layout": "Раскладка",
   "shortcuts.section.move_windows": "Перемещение окон",

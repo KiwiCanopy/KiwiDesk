@@ -1720,6 +1720,7 @@
   "shortcuts.restore_defaults.title": "Restore the default shortcuts?",
   "shortcuts.section.focus": "Focus",
   "shortcuts.section.inactive": "Inactive shortcuts",
+  "shortcuts.section.kiwivision": "KiwiVision",
   "shortcuts.section.layers": "Layers",
   "shortcuts.section.layout": "Layout",
   "shortcuts.section.move_windows": "Move windows",

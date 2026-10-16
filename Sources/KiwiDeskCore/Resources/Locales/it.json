@@ -1720,6 +1720,7 @@
   "shortcuts.restore_defaults.title": "Ripristinare le scorciatoie predefinite?",
   "shortcuts.section.focus": "Focus",
   "shortcuts.section.inactive": "Scorciatoie inattive",
+  "shortcuts.section.kiwivision": "KiwiVision",
   "shortcuts.section.layers": "Livelli",
   "shortcuts.section.layout": "Layout",
   "shortcuts.section.move_windows": "Sposta finestre",

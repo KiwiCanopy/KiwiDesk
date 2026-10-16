@@ -1720,6 +1720,7 @@
   "shortcuts.restore_defaults.title": "기본 단축키를 복원하시겠습니까?",
   "shortcuts.section.focus": "포커스",
   "shortcuts.section.inactive": "비활성 단축키",
+  "shortcuts.section.kiwivision": "KiwiVision",
   "shortcuts.section.layers": "레이어",
   "shortcuts.section.layout": "레이아웃",
   "shortcuts.section.move_windows": "윈도우 이동",
