@@ -27,7 +27,15 @@ extension KiwiCore {
         let front = frontmostPIDProvider?()
         let before = focusedWindowID
         withUserMotion {
-            if target.space == state.workspaces.activeSpace {
+            if target.own {
+                // Settings, the one own window that tiles: its raise
+                // is the GUI's door, Core's focus then `forceFront`
+                // (#1281), on the screen it sits on.
+                if target.space != state.workspaces.activeSpace {
+                    applyFocusedSpaceSwitch(to: target.space)
+                }
+                uiBridge.onOpenSettings()
+            } else if target.space == state.workspaces.activeSpace {
                 focusWindow(target.id, warp: false)
             } else {
                 // Another screen, as a click there (#446): the
@@ -42,17 +50,17 @@ extension KiwiCore {
     }
 
     /// The window hover focus would focus at `point` (AX space),
-    /// and the shown Space it renders in — nil where nothing is
-    /// owed: something other than another app's tracked window is
-    /// in front there (a menu, the Dock, a bar, a panel, our own
-    /// Settings window, whose raise has its one door, #1281), the
-    /// window already holds the focus, sits in no shown Space, is
-    /// full screen, or its focus would move a window of that
-    /// Space — a scrolling pan, a monocle flip — under a resting
-    /// hand.
+    /// the shown Space it renders in, and whether it is KiwiDesk's
+    /// own (the Settings window, whose raise has its one door) —
+    /// nil where nothing is owed: something other than a tracked
+    /// window is in front there (a menu, the Dock, a bar, a
+    /// panel), the window already holds the focus, sits in no
+    /// shown Space, is full screen, or its focus would move a
+    /// window of that Space — a scrolling pan, a monocle flip —
+    /// under a resting hand.
     func hoverTarget(
         at point: CGPoint
-    ) -> (id: WindowID, space: SpaceID)? {
+    ) -> (id: WindowID, space: SpaceID, own: Bool)? {
         // No tracked window there: skip the WindowServer read.
         guard state.windows.all.contains(where: { $0.frame.contains(point) })
         else { return nil }
@@ -63,7 +71,6 @@ extension KiwiCore {
                     && !($0.pid == own
                         && Self.ignoresPointer(number: Int($0.number)))
             }),
-            front.pid != own,
             let window = state.windows[WindowID(front.number)],
             !window.isFullscreen,
             let space = state.stickyRenderSpace(of: window)
@@ -80,7 +87,7 @@ extension KiwiCore {
         guard !focusMovesWindows(window.id, in: space) else {
             return nil
         }
-        return (window.id, space)
+        return (window.id, space, front.pid == own)
     }
 
     /// Whether focusing `id` would move any window the layouts
