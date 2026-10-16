@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// KiwiHub's lens chips (#2103 ruling 41) turn a lens on through
-/// `setKiwiVision(lens:)`: a pick, never a toggle, so the lens
+/// `setKiwiVision(.lens(_:))`: a pick, never a toggle, so the lens
 /// already on stays on, and a lens with no apps or no lens at all
 /// refuses (ruling 37).
 @Suite("KiwiVision lens pick")
@@ -37,26 +37,38 @@ struct KiwiVisionLensPickTests {
         let core = makeCore()
         var heard: [VisionActive] = []
         core.vision.onChange = { heard.append($0) }
-        core.setKiwiVision(lens: "writing")
+        core.setKiwiVision(.lens("writing"))
         #expect(core.kiwiVisionActive == .lens("Writing"))
         // A pick of the lens on is no toggle.
-        core.setKiwiVision(lens: "Writing")
+        core.setKiwiVision(.lens("Writing"))
         #expect(core.kiwiVisionActive == .lens("Writing"))
-        core.setKiwiVision(true)
+        core.setKiwiVision(.plain)
         #expect(core.kiwiVisionActive == .plain)
-        core.setKiwiVision(lens: "Writing")
+        core.setKiwiVision(.lens("Writing"))
         #expect(core.kiwiVisionActive == .lens("Writing"))
         #expect(heard == [.lens("Writing"), .plain, .lens("Writing")])
+    }
+
+    /// The pickers read Core's verdict rather than judging a lens.
+    @Test("each lens is offered with its verdict, in stored order")
+    func choices() {
+        let core = makeCore()
+        #expect(
+            core.kiwiVisionLensChoices == [
+                VisionLensChoice(name: "Writing"),
+                VisionLensChoice(name: "Empty", refusal: .noApps),
+            ]
+        )
     }
 
     @Test("an empty or unknown lens refuses the pick")
     func refusals() {
         let core = makeCore()
-        core.setKiwiVision(lens: "Empty")
-        core.setKiwiVision(lens: "Nope")
+        core.setKiwiVision(.lens("Empty"))
+        core.setKiwiVision(.lens("Nope"))
         #expect(core.kiwiVisionActive == .off)
-        core.setKiwiVision(lens: "Writing")
-        core.setKiwiVision(lens: "Empty")
+        core.setKiwiVision(.lens("Writing"))
+        core.setKiwiVision(.lens("Empty"))
         #expect(core.kiwiVisionActive == .lens("Writing"))
     }
 }

@@ -19,20 +19,39 @@ extension KiwiCore {
         let active = vision.active.lensName.map {
             $0.caseInsensitiveCompare(lens.name) == .orderedSame
         }
-        // The lens on always turns off; an empty one refuses only
-        // on the way in.
-        guard active == true || !lens.apps.isEmpty else {
-            return .fail("\(lens.name) has no apps yet")
+        // The lens on always turns off; a refusal binds only on the
+        // way in.
+        if active != true, let refusal = lensRefusal(lens) {
+            switch refusal {
+            case .noApps: return .fail("\(lens.name) has no apps yet")
+            }
         }
         setVision(active == true ? .off : .lens(lens.name))
         return toggleAnswer()
     }
 
-    /// Turns the lens `name` on, from off, plain or another lens;
-    /// the lens already on stays on. A lens that is gone or has no
-    /// apps refuses (ruling 37) — KiwiHub greys it first.
-    public func setKiwiVision(lens name: String) {
-        guard let lens = appWide.lens(named: name), !lens.apps.isEmpty
+    /// Why `lens` cannot turn on, nil where it can: the one verdict
+    /// every gate and picker reads.
+    public func lensRefusal(_ lens: VisionLens) -> LensRefusal? {
+        lens.apps.isEmpty ? .noApps : nil
+    }
+
+    /// Every lens in stored order, with its verdict.
+    public var kiwiVisionLensChoices: [VisionLensChoice] {
+        appWide.visionLenses.map {
+            VisionLensChoice(name: $0.name, refusal: lensRefusal($0))
+        }
+    }
+
+    /// Sets what KiwiVision draws — a pick, never a toggle, so the
+    /// lens on stays on. A lens that is gone or refused changes
+    /// nothing; KiwiHub greys it first.
+    public func setKiwiVision(_ next: VisionActive) {
+        guard case .lens(let name) = next else {
+            setVision(next)
+            return
+        }
+        guard let lens = appWide.lens(named: name), lensRefusal(lens) == nil
         else { return }
         setVision(.lens(lens.name))
     }

@@ -12,7 +12,7 @@ extension KiwiCore {
 
     /// `kiwivision.toggle`: turns KiwiVision on or off.
     public func toggleKiwiVision() {
-        setKiwiVision(!vision.isOn)
+        setKiwiVision(vision.isOn ? .off : .plain)
     }
 
     /// What KiwiVision draws now: off, plain or a lens.
@@ -86,11 +86,6 @@ extension KiwiCore {
 
     /// What KiwiVision draws now, through the one resolver.
     var visionLook: VisionLook { appWide.look(lens: visionLensName) }
-
-    /// Turns plain KiwiVision on, or KiwiVision off.
-    public func setKiwiVision(_ on: Bool) {
-        setVision(on ? .plain : .off)
-    }
 
     /// The one writer of what KiwiVision draws: on, off, plain or a
     /// lens. Turning on or off pays the appearance switch; a switch

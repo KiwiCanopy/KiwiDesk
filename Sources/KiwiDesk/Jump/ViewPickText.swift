@@ -18,10 +18,11 @@ enum ViewPickText {
         L("view_picker.vision.focused", "Focused window")
     }
 
-    /// A lens with no apps, which its chip cannot turn on (#2103
-    /// ruling 37).
-    static var lensEmpty: String {
-        L("view_picker.vision.lens_empty", "No apps yet")
+    /// Why a lens chip cannot turn its lens on (#2103).
+    static func lensRefusal(_ refusal: LensRefusal) -> String {
+        switch refusal {
+        case .noApps: return L("view_picker.vision.lens_empty", "No apps yet")
+        }
     }
 
     /// A profile the menu greys for the same reason (#246).

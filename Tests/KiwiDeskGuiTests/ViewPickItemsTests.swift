@@ -26,7 +26,7 @@ struct ViewPickItemsTests {
             "Laptop", ["Laptop", "Studio", "Old"], ["Old"]
         ),
         vision: VisionActive = .off,
-        lenses: [VisionLens] = [],
+        lenses: [VisionLensChoice] = [],
         inert: String? = nil
     ) -> [Line: [ViewPickList.Item]] {
         JumpPanelController.items(
@@ -75,13 +75,14 @@ struct ViewPickItemsTests {
     }
 
     /// Ruling 41: a chip per lens after Focused window, the lens on
-    /// marked; ruling 37: a lens with no apps greys with its reason.
+    /// marked; a lens Core refuses greys with the reason it names.
     @Test("each lens gets a chip, an empty one greyed")
     func lensChips() {
         LocalizationManager.shared.select("en")
-        var writing = VisionLens(name: "Writing")
-        writing.apps = ["test.kiwi.notes"]
-        let lenses = [writing, VisionLens(name: "Calls")]
+        let lenses = [
+            VisionLensChoice(name: "Writing"),
+            VisionLensChoice(name: "Calls", refusal: .noApps),
+        ]
         let line = items(vision: .lens("Writing"), lenses: lenses)[.vision]
         let chips = line ?? []
         #expect(
@@ -147,19 +148,43 @@ struct ViewPickItemsTests {
         )
         #expect(
             panel.contains(
-                "case.vision(lens:letname?):core.setKiwiVision(lens:name)"
+                "case.vision(lens:letname?):core.setKiwiVision(.lens(name))"
             )
         )
         #expect(
             panel.contains(
-                "vision:(core.kiwiVisionActive,core.appWide.visionLenses)"
+                "vision:(core.kiwiVisionActive,core.kiwiVisionLensChoices)"
+            )
+        )
+        #expect(
+            panel.contains(
+                "guardisOpen,letmodel=currentModel,model.scope==.view"
+                    + "else{return}model.reloadView()"
             )
         )
         let delegate = try flat(
             "Sources/KiwiDesk/AppDelegate+KiwiVision.swift"
         )
-        // Both doors: what is on, and the lens list.
-        #expect(delegate.occurrences(of: ".reloadViewIfShown()") == 2)
+        // Both triggers reach the one funnel, which reaches the chips.
+        #expect(
+            delegate.contains(
+                "core.onAppWideChange={[weakself]in"
+                    + "self?.visionReadersChanged()}"
+            )
+        )
+        #expect(
+            delegate.contains(
+                "core.vision.onChange={[weakself]activein"
+                    + "self?.visionReadersChanged()"
+            )
+        )
+        #expect(
+            delegate.contains(
+                "funcvisionReadersChanged(){"
+                    + "dashboardIfCreated?.model.objectWillChange.send()"
+                    + "jumpPanel?.reloadViewIfShown()}"
+            )
+        )
     }
 
     @Test("no match leaves the digits out of the footer")

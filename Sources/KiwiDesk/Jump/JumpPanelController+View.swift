@@ -56,7 +56,7 @@ extension JumpPanelController {
             items: Self.items(
                 layout: layout,
                 profiles: (profiles.currentName, profiles.list(), broken),
-                vision: (core.kiwiVisionActive, core.appWide.visionLenses),
+                vision: (core.kiwiVisionActive, core.kiwiVisionLensChoices),
                 visionChord: visionChord,
                 inert: inert
             )
@@ -69,7 +69,7 @@ extension JumpPanelController {
     static func items(
         layout: LayoutPickerState?,
         profiles: (current: String?, all: [String], broken: Set<String>),
-        vision: (active: VisionActive, lenses: [VisionLens]),
+        vision: (active: VisionActive, lenses: [VisionLensChoice]),
         visionChord: String?,
         inert: String?
     ) -> [ViewPickList.Line: [ViewPickList.Item]] {
@@ -106,9 +106,9 @@ extension JumpPanelController {
     }
 
     /// Off, Focused window, then each lens (#2103 ruling 41); a
-    /// lens with no apps greys with its reason (ruling 37).
+    /// lens Core refuses greys with its reason, save the one on.
     private static func visionItems(
-        _ vision: (active: VisionActive, lenses: [VisionLens]),
+        _ vision: (active: VisionActive, lenses: [VisionLensChoice]),
         chord: String?,
         inert: String?
     ) -> [ViewPickList.Item] {
@@ -135,8 +135,8 @@ extension JumpPanelController {
                     name: lens.name,
                     isCurrent: current,
                     inertReason: inert,
-                    refusal: lens.apps.isEmpty && !current
-                        ? ViewPickText.lensEmpty : nil
+                    refusal: current
+                        ? nil : lens.refusal.map(ViewPickText.lensRefusal)
                 )
             }
     }
@@ -152,11 +152,11 @@ extension JumpPanelController {
         case .profile(let name):
             core.loadProfileAsUser(name)
         case .visionOff:
-            core.setKiwiVision(false)
+            core.setKiwiVision(.off)
         case .vision(lens: nil):
-            core.setKiwiVision(true)
+            core.setKiwiVision(.plain)
         case .vision(lens: let name?):
-            core.setKiwiVision(lens: name)
+            core.setKiwiVision(.lens(name))
         }
     }
 
