@@ -187,6 +187,14 @@ backup does not carry the folder, and Reset All Settings leaves
 it. In a synced or dotfiles folder, add `migration-backups/` to
 its `.gitignore`.
 
+:::unreleased
+An older KiwiDesk never writes over `gui.json` or a profile that a
+newer one migrated: it reports the file as unreadable, and a save
+to it fails until that Mac is updated. Versions before 3.0.0 do
+not have this check, so update every Mac sharing a synced folder
+together.
+:::
+
 ```json
 {
   "spaces": [ "1", "2", "mail" ],
@@ -582,9 +590,9 @@ be hidden, that glyph shows in its place.
 
 While your pointer rests on
 a Space it holds still, so a second click lands where the first
-did; it re-centres once the pointer leaves. With **Other Spaces** set to *Window count*, a
-Space not on screen draws no glyphs, so a click anywhere on it
-switches.
+did; it re-centres once the pointer leaves. With **Windows in
+other Spaces** set to *Window count*, a Space not on screen draws
+no glyphs, so a click anywhere on it switches.
 
 While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,

@@ -78,7 +78,10 @@ extension SpaceBarCard {
             )
         case .spaceBarInactiveContent:
             SegmentedPicker(
-                L("space_bar.inactive_content", "Other Spaces"),
+                L(
+                    "space_bar.inactive_content",
+                    "Windows in other Spaces"
+                ),
                 selection: style.inactiveContent,
                 options: AppBarOptions.inactiveContent
                     .map { ($0.1, $0.0) },

@@ -131,15 +131,14 @@ struct GesturesDrawer: View {
             ),
             surface: .windows,
             settings: settings,
-            pace: .steps
+            pace: .steps,
+            help: Self.hoverFocusHelp,
+            helpSubject: Self.hoverFocusLabel
         ) {
             GesturePicture.HoverFocus(t: $0)
         } control: {
             Toggle(
-                L(
-                    "behavior.mouse.hover_focus",
-                    "Focus the window the pointer rests on"
-                ),
+                Self.hoverFocusLabel,
                 isOn: $model.config.settings.mouse.hoverFocus
             )
             .searchAnchored(
@@ -172,6 +171,27 @@ struct GesturesDrawer: View {
                     .followsFocus
             )
         }
+    }
+}
+
+extension GesturesDrawer {
+    static var hoverFocusLabel: String {
+        L(
+            "behavior.mouse.hover_focus",
+            "Focus the window the pointer rests on"
+        )
+    }
+
+    /// The `?` the hover focus entry carries: the one place it
+    /// stands down that a user would not expect (#1869).
+    static var hoverFocusHelp: String {
+        L(
+            "behavior.mouse.hover_focus.help",
+            "In a scrolling layout, a window only partly on screen "
+                + "isn't focused by resting on it, so the row never "
+                + "moves under the pointer — click it, or its item in "
+                + "the App Bar or Space Bar, to bring it in."
+        )
     }
 }
 

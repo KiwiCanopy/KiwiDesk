@@ -10,6 +10,7 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case mouseResize = "settings.mouseResize"
     case mouseFollowsFocus = "settings.mouse.followsFocus"
     case mouseHoverFocus = "settings.mouse.hoverFocus"
+    case mouseHoverFocusDelay = "settings.mouse.hoverFocusDelayMS"
 }
 
 extension BehaviourKey {
@@ -18,7 +19,8 @@ extension BehaviourKey {
         case .minWindowSize:
             return .row(.layoutDefaults, .general, .atRest)
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride:
+            .floatScaleOnDisplayChange, .placementOverride,
+            .mouseHoverFocusDelay:
             return .luaOnly
         case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus:
             // Moved from Behavior with #1726: the Mouse &
@@ -34,7 +36,8 @@ extension BehaviourKey {
         case .minWindowSize:
             return .text("layout_defaults.min_window_size")
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride:
+            .floatScaleOnDisplayChange, .placementOverride,
+            .mouseHoverFocusDelay:
             return .none
         case .mouseResize:
             return .text(
@@ -44,7 +47,10 @@ extension BehaviourKey {
         case .mouseFollowsFocus:
             return .text("behavior.mouse.follows_focus")
         case .mouseHoverFocus:
-            return .text("behavior.mouse.hover_focus")
+            return .text(
+                "behavior.mouse.hover_focus",
+                help: "behavior.mouse.hover_focus.help"
+            )
         }
     }
 }

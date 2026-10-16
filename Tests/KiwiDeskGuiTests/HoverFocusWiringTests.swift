@@ -5,14 +5,16 @@ import Testing
 /// `KiwiCore+BootSeams.swift` — `armMachineSeams()` never runs in
 /// a test core, so `HoverFocusTests` and `PointerRestTests` stay
 /// green with any of these lines deleted while the feature never
-/// fires in production. Three needles against comment-stripped
-/// source: the rest reaches `focusUnderRestingPointer`, a mouse
-/// settings change switches the rest, and boot seeds the switch
-/// from the settings already loaded.
+/// fires in production. Needles against comment-stripped source:
+/// the rest reaches `focusUnderRestingPointer` with its armed
+/// focus, reads the focus it arms with, and takes the mouse
+/// settings through its one `apply` door on a change and at boot;
+/// beside them, the pointer is moved without a mouse event and the
+/// tracker carries the rest's lifetime.
 ///
 /// Known limits: textual, so a wire nulled later still matches,
-/// and the 160-char windows let an unrelated statement sit
-/// between a closure's head and its call.
+/// and the bounded windows (120–160 chars) let an unrelated
+/// statement sit between a closure's head and its call.
 @Suite("Hover focus wiring (#1869)")
 struct HoverFocusWiringTests {
     private func bootSeams() throws -> String {
@@ -58,26 +60,22 @@ struct HoverFocusWiringTests {
         )
     }
 
-    @Test("a mouse settings change switches the rest")
-    func settingsSwitchIsWired() throws {
-        let pattern =
-            #"tiler\.onMouseSettings\s*=\s*\{[\s\S]{0,160}?"#
-            + #"mouse\.rest\.setEnabled\([^)]*hoverFocus\)"#
-        #expect(
-            try wired(pattern),
-            "a hover-focus toggle no longer starts the rest"
-        )
+    /// The settings reach the rest through its one door, on a
+    /// change and at boot: unwired, the toggle or a Lua delay is
+    /// stored and never felt.
+    @Test("a mouse settings change reaches the rest")
+    func settingsReachTheRest() throws {
+        let change =
+            #"tiler\.onMouseSettings\s*=\s*\{[\s\S]{0,120}?"#
+            + #"mouse\.rest\.apply\(\s*settings\s*\)"#
+        #expect(try wired(change), "a settings change no longer reaches it")
     }
 
-    @Test("boot seeds the switch from the loaded settings")
+    @Test("boot seeds the rest from the loaded settings")
     func bootSeedIsWired() throws {
         let pattern =
-            #"mouse\.rest\.setEnabled\(\s*"#
-            + #"tiler\.settings\.mouse\.hoverFocus\s*\)"#
-        #expect(
-            try wired(pattern),
-            "boot no longer seeds hover focus's rest"
-        )
+            #"mouse\.rest\.apply\(\s*tiler\.settings\.mouse\s*\)"#
+        #expect(try wired(pattern), "boot no longer seeds the rest")
     }
 
     /// Hover focus and `mouse.follows_focus` cannot loop only

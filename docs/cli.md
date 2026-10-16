@@ -595,6 +595,8 @@ Monocle focus change is a raise and plays no flip.
 :::unreleased
 `mouse.set_hover_focus` takes `true|false` (default `false`):
 focus and raise the window the pointer comes to rest on.
+`mouse.set_hover_focus_delay` takes milliseconds, `0` or more
+(default `200`): how long the pointer rests first.
 :::
 
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,
