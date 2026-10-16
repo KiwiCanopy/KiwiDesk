@@ -106,7 +106,8 @@ extension JumpPanelController {
     }
 
     /// Off, Focused window, then each lens (#2103 ruling 41); a
-    /// lens Core refuses greys with its reason, save the one on.
+    /// lens Core refuses greys with its reason; the lens on is never
+    /// refused, since `followActiveLens` turns a refused one off.
     private static func visionItems(
         _ vision: (active: VisionActive, lenses: [VisionLensChoice]),
         chord: String?,
@@ -129,14 +130,12 @@ extension JumpPanelController {
         ]
         return fixed
             + vision.lenses.map { lens in
-                let current = vision.active == .lens(lens.name)
-                return ViewPickList.Item(
+                ViewPickList.Item(
                     pick: .vision(lens: lens.name),
                     name: lens.name,
-                    isCurrent: current,
+                    isCurrent: vision.active == .lens(lens.name),
                     inertReason: inert,
-                    refusal: current
-                        ? nil : lens.refusal.map(ViewPickText.lensRefusal)
+                    refusal: lens.refusal.map(ViewPickText.lensRefusal)
                 )
             }
     }

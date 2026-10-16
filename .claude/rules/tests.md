@@ -455,8 +455,10 @@ bite large test PRs:
   worktree's HEAD and its `worktree-agent-*` branch hold no commit
   that is on no other branch (`git branch -a --contains <sha>`);
   an uncommitted change there is a mutation, discarded with the
-  tree. Then run `git worktree remove --force <path>` and
-  `git branch -D <branch>` from your own worktree.
+  tree. Then run `git worktree remove --force --force <path>` —
+  the harness leaves a finished prover's worktree locked, and a
+  locked one needs the flag twice — and `git branch -D <branch>`
+  from your own worktree.
 - **A perf change owes the correctness half.** A skip, a cache or
   an early return whose safety rests on something else running
   later pins that dependency with a test, never with a comment —
