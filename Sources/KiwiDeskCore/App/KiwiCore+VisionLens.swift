@@ -60,9 +60,7 @@ extension KiwiCore {
     }
 
     private func toggleAnswer() -> CommandResponse {
-        var answer: [String: JSONValue] = ["on": .bool(vision.isOn)]
-        if let lens = visionLensName { answer["lens"] = .string(lens) }
-        return .ok(.object(answer))
+        .ok(.object(visionState))
     }
 
     /// `kiwivision.define_lens{…}` adds a lens or replaces the one

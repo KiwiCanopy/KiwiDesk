@@ -4,6 +4,7 @@
   "ai.capability.app_rules": "フローティングにするアプリと、各アプリを開くスペースの選択。",
   "ai.capability.diagnose": "ウインドウがフローティングやタイル表示になる理由や、その場所で開く理由の説明。",
   "ai.capability.inspect": "スペースとウインドウの確認と、あらゆるコマンドの検索。",
+  "ai.capability.kiwivision": "KiwiVisionとそのレンズのオン/オフと変更。",
   "ai.capability.looks": "デザインの作成、適用、保存と、スクリーンショットで壁紙に合わせた配色。",
   "ai.capability.settings": "ギャップ、ボーダー、KiwiShelfのバーの変更。",
   "ai.capability.shortcuts": "一覧に同意したうえでの、コマンドへのショートカットの追加。",

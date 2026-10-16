@@ -4,6 +4,7 @@
   "ai.capability.app_rules": "어떤 앱을 플로팅할지, 각 앱을 어느 공간에서 열지 정합니다.",
   "ai.capability.diagnose": "윈도우가 플로팅되거나, 타일로 배치되거나, 지금 위치에서 열리는 이유를 설명합니다.",
   "ai.capability.inspect": "공간과 윈도우를 확인하고, 모든 명령을 찾아봅니다.",
+  "ai.capability.kiwivision": "KiwiVision과 렌즈를 켜고 끄고, 변경합니다.",
   "ai.capability.looks": "디자인을 만들고, 적용하고, 저장하며, 스크린샷으로 배경화면에 맞춥니다.",
   "ai.capability.settings": "간격, 테두리, KiwiShelf의 바를 변경합니다.",
   "ai.capability.shortcuts": "목록에 동의하면 명령에 단축키를 추가합니다.",

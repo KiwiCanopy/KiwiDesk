@@ -254,7 +254,7 @@ public enum APIReference {
             "set_mark", "set_color",
         ],
         "kiwivision": [
-            "toggle", "set_dim", "set_blur", "set_appearance",
+            "toggle", "current", "set_dim", "set_blur", "set_appearance",
             "set_clear_wallpaper", "set_clear_app", "set_never_dimmed",
             "define_lens", "delete_lens",
         ],

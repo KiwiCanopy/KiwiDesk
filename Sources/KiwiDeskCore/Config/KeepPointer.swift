@@ -97,10 +97,7 @@ public enum KeepPointer {
 
 extension TilingSettings {
     /// These settings as the JSON their file stores.
-    var keepJSON: JSONValue? {
-        guard let data = try? JSONEncoder().encode(self) else { return nil }
-        return try? JSONDecoder().decode(JSONValue.self, from: data)
-    }
+    var keepJSON: JSONValue? { JSONValue(encoding: self) }
 
     /// `live` with every leaf where these settings differ from
     /// `base` taken from these — a draft's edits laid over the

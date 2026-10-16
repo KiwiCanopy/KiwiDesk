@@ -23,6 +23,7 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+VisionFocus.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+VisionHold.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+VisionCurrent.swift"
 ---
 
 # Focus ring & sticky mark overlays

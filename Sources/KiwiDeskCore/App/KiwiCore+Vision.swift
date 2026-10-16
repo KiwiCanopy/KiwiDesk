@@ -23,6 +23,8 @@ extension KiwiCore {
         switch command {
         case "kiwivision.toggle":
             return toggleCommand(args.first?.stringValue)
+        case "kiwivision.current":
+            return .ok(visionCurrent())
         case "kiwivision.define_lens", "kiwivision.delete_lens":
             return lensCommand(command, args)
         case "kiwivision.set_dim":
