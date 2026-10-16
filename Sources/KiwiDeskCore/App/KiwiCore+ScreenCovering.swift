@@ -122,9 +122,10 @@ extension KiwiCore {
     typealias FrontWindow = FloatDetection.ListedWindow
 
     /// Every visible window front to back, any layer, KiwiDesk's
-    /// own windows INCLUDED — the one front-to-back read, and the
+    /// own windows INCLUDED, the desktop's elements left out — the
     /// live default of `frontStack` (#1788, #1869); a consumer
-    /// filters what it needs.
+    /// filters what it needs. KiwiVision reads the other way,
+    /// through `liveFrontWindows`.
     static func liveFrontStack() -> [FrontWindow] {
         FloatDetection.frontToBackWindows { _, _ in false }
     }

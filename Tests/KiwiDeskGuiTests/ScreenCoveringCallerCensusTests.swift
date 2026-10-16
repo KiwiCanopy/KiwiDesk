@@ -118,7 +118,8 @@ struct ScreenCoveringCallerCensusTests {
         "App/KiwiCore.swift": 2,
         // The stand-down's one read, the default's definition and
         // the CGWindowList call it wraps, and KiwiVision's
-        // chrome-free view's definition and its call of the default.
+        // chrome-free view's definition and its own raw read, the
+        // desktop's elements kept.
         "App/KiwiCore+ScreenCovering.swift": 5,
         // The CGWindowList read's own definition.
         "AX/FloatDetection.swift": 1,
@@ -208,7 +209,8 @@ struct ScreenCoveringCallerCensusTests {
                 // The seam's default.
                 "App/KiwiCore.swift": 1,
                 // The default's definition, the read it wraps, and
-                // KiwiVision's chrome-free view's call of it.
+                // KiwiVision's own raw read, the desktop's elements
+                // kept.
                 "App/KiwiCore+ScreenCovering.swift": 3,
                 // The read's own definition.
                 "AX/FloatDetection.swift": 1,
