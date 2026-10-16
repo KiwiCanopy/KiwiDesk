@@ -84,7 +84,14 @@ extension ShortcutsReferenceBuilder {
                 ),
                 rows: rows(switchLayers)
             ),
-        ].filter { !$0.rows.isEmpty }
+        ]
+        .map {
+            ShortcutSubgroup(
+                title: $0.title,
+                rows: ShortcutFold.folded($0.rows)
+            )
+        }
+        .filter { !$0.rows.isEmpty }
     }
 
     /// Builds inactive shortcut rows (`OrphanedShortcuts`, #92, #820).
