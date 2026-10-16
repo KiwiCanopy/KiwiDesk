@@ -49,7 +49,7 @@ struct LayoutCycleSeedTests {
         #expect(row.combo == "control+option+l")
         #expect(row.lua == "kiwihub.show(\"view\")")
         #expect(row.kind == .navigation)
-        #expect(row.label == "Show layout picker")
+        #expect(row.label == "Show view picker")
         #expect(seeded.filter { $0 == row }.count == 1)
     }
 

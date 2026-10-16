@@ -20,7 +20,7 @@ extension DefaultKeybindings {
             combo: "control+option+l",
             lua: KiwiHubSide.view.lua,
             kind: .navigation,
-            label: "Show layout picker"
+            label: "Show view picker"
         )
     }
 
