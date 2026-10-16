@@ -44,36 +44,71 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case invertColors
     case increaseContrast
     case decreaseContrast
+    // Mission Control ▸ Switch to Desktop N, ⌃1…⌃9 (#2311),
+    // shipped OFF. One case per Desktop so `CaseIterable` and
+    // every exhaustive switch stay compiler-held. Desktop 10
+    // (⌃0) is left out: its id and chord are unmeasured.
+    case switchToDesktop1
+    case switchToDesktop2
+    case switchToDesktop3
+    case switchToDesktop4
+    case switchToDesktop5
+    case switchToDesktop6
+    case switchToDesktop7
+    case switchToDesktop8
+    case switchToDesktop9
+
+    /// The "Switch to Desktop N" cases, Desktop 1 first — the
+    /// one place a case is paired with its number.
+    public static let switchToDesktop: [SystemShortcut] = [
+        .switchToDesktop1, .switchToDesktop2, .switchToDesktop3,
+        .switchToDesktop4, .switchToDesktop5, .switchToDesktop6,
+        .switchToDesktop7, .switchToDesktop8, .switchToDesktop9,
+    ]
+
+    /// The Desktop this case switches to, nil for every other
+    /// case.
+    public var desktopNumber: Int? {
+        Self.switchToDesktop.firstIndex(of: self).map { $0 + 1 }
+    }
 }
 
 /// System shortcut conflict mappings (`KeybindingConflicts`).
 public enum SystemShortcuts {
     /// Known system shortcuts keyed by parsed key combination.
-    public static let map: [KeyCombo: SystemShortcut] = build([
-        ("command+space", .spotlight),
-        ("command+tab", .appSwitcher),
-        ("command+q", .quitApp),
-        ("command+w", .closeWindow),
-        ("command+m", .minimize),
-        ("command+h", .hideApp),
-        ("command+option+esc", .forceQuit),
-        ("control+left", .missionControlSpaceLeft),
-        ("control+right", .missionControlSpaceRight),
-        ("control+up", .missionControl),
-        ("control+down", .appWindows),
-        ("command+shift+3", .screenshot),
-        ("command+shift+4", .screenshotSelection),
-        ("command+shift+5", .screenshotTools),
-        ("option+command+8", .zoomToggle),
-        ("option+command+equal", .zoomIn),
-        ("option+command+minus", .zoomOut),
-        ("option+command+d", .dockHiding),
-        ("option+command+space", .finderSearch),
-        ("control+option+space", .inputSourceNext),
-        ("control+option+command+8", .invertColors),
-        ("control+option+command+.", .increaseContrast),
-        ("control+option+command+,", .decreaseContrast),
-    ])
+    public static let map: [KeyCombo: SystemShortcut] = build(
+        [
+            ("command+space", .spotlight),
+            ("command+tab", .appSwitcher),
+            ("command+q", .quitApp),
+            ("command+w", .closeWindow),
+            ("command+m", .minimize),
+            ("command+h", .hideApp),
+            ("command+option+esc", .forceQuit),
+            ("control+left", .missionControlSpaceLeft),
+            ("control+right", .missionControlSpaceRight),
+            ("control+up", .missionControl),
+            ("control+down", .appWindows),
+            ("command+shift+3", .screenshot),
+            ("command+shift+4", .screenshotSelection),
+            ("command+shift+5", .screenshotTools),
+            ("option+command+8", .zoomToggle),
+            ("option+command+equal", .zoomIn),
+            ("option+command+minus", .zoomOut),
+            ("option+command+d", .dockHiding),
+            ("option+command+space", .finderSearch),
+            ("control+option+space", .inputSourceNext),
+            ("control+option+command+8", .invertColors),
+            ("control+option+command+.", .increaseContrast),
+            ("control+option+command+,", .decreaseContrast),
+        ] + desktopEntries
+    )
+
+    /// `control+N` for each "Switch to Desktop N" case.
+    private static let desktopEntries: [(String, SystemShortcut)] =
+        SystemShortcut.switchToDesktop.enumerated().map {
+            ("control+\($0.offset + 1)", $0.element)
+        }
 
     private static func build(
         _ entries: [(String, SystemShortcut)]
