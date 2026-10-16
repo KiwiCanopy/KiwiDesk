@@ -90,6 +90,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     func adoptKeptLayout(_ write: CapturedWrite) {
         model.adoptKeptLayout()
         if write == .wholeLive { model.adoptCapturedSpaces() }
+        // A whole-live capture stored the live settings (#2262).
+        model.adoptLiveSettings()
     }
 
     /// Whether a live-profile draft holds edits a Save would

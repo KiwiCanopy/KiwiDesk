@@ -21,7 +21,11 @@ extension SettingsModel {
             reload()
             return
         }
-        guard persisted else { return }
+        guard persisted else {
+            // A session-only write is itself a live change (#2262).
+            refreshUnsavedLive()
+            return
+        }
         suppressDirty = true
         config.apply(edit)
         cleanConfig.apply(edit)

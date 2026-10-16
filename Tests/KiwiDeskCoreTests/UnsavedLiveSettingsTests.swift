@@ -97,6 +97,21 @@ struct UnsavedLiveSettingsTests {
         #expect(unsaved.saved.spaceIcons[SpaceID("8")] == "star")
     }
 
+    /// What an open draft takes when live moved under it: its own
+    /// edits, leaf by leaf, over the settings live draws now.
+    @Test("a draft rebased onto live keeps only its own edits")
+    func rebaseKeepsEdits() {
+        let base = TilingSettings()
+        var draft = base
+        draft.gapsGlobal.outer.top += 3
+        var live = base
+        live.borderStyle.width = 9
+        let rebased = draft.rebased(from: base, onto: live)
+        #expect(rebased.borderStyle.width == 9)
+        #expect(rebased.gapsGlobal.outer.top == draft.gapsGlobal.outer.top)
+        #expect(base.rebased(from: base, onto: live) == live)
+    }
+
     @Test("with no store to keep into, nothing is listed")
     func noStoreListsNothing() throws {
         let lua = try KeepFixture.core(gui: false)

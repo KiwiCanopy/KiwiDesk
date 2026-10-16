@@ -102,6 +102,31 @@ extension TilingSettings {
         return try? JSONDecoder().decode(JSONValue.self, from: data)
     }
 
+    /// `live` with every leaf where these settings differ from
+    /// `base` taken from these — a draft's edits laid over the
+    /// settings live draws now, leaf by leaf (#2262). A leaf the
+    /// decoder refuses beside the others costs only itself.
+    public func rebased(
+        from base: TilingSettings,
+        onto live: TilingSettings
+    ) -> TilingSettings {
+        guard let mine = keepJSON else { return live }
+        var leaves: [[String]: JSONValue?] = [:]
+        for path in KeepPointer.diff(base.keepJSON, mine) {
+            leaves.updateValue(
+                KeepPointer.value(at: path, in: mine),
+                forKey: path
+            )
+        }
+        guard !leaves.isEmpty else { return live }
+        if let whole = live.patched(leaves) { return whole }
+        var each = live
+        for (path, value) in leaves {
+            if let one = each.patched([path: value]) { each = one }
+        }
+        return each
+    }
+
     /// These settings with each leaf in `leaves` set to its value,
     /// or removed where nil, through the config's own decoder — nil
     /// where that decoder refuses the result.

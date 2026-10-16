@@ -79,8 +79,10 @@ struct SettingsLiveRowsTests {
     }
 
     /// Wiring the behaviour suites cannot see: Core is asked again
-    /// at the seed, a window-key return and an adopted outside
-    /// write; the one refresh gates on the live target; the pill
+    /// at the seed, a window-key return (which rebases the draft
+    /// onto live first — `SettingsLiveSaveTests` drives it), a
+    /// captured or adopted outside write; the one refresh gates on
+    /// the live target; the pill
     /// and the active profile's Save count a live row as work; the
     /// panel's draft list leaves live rows to the pill. Shape, not
     /// value: each needle is the seam's name at its use site.
@@ -93,11 +95,18 @@ struct SettingsLiveRowsTests {
                 "refreshProfiles()refreshUnsavedLive()"
             ],
             "SettingsModel+Refresh.swift": [
-                "core.tiler.settings!=cleanConfig.settings{reload()}"
-                    + "else{refreshUnsavedLive()}"
+                "}else{adoptLiveSettings()}",
+                "config.settings=config.settings.rebased("
+                    + "from:cleanConfig.settings,onto:live)"
+                    + "cleanConfig.settings=live",
+                "recomputeDirty()}refreshUnsavedLive()}",
             ],
             "SettingsModel+LiveWrite.swift": [
-                "recomputeDirty()refreshUnsavedLive()}"
+                "guardpersistedelse{refreshUnsavedLive()return}",
+                "recomputeDirty()refreshUnsavedLive()}",
+            ],
+            "SettingsWindowController.swift": [
+                "model.adoptCapturedSpaces()}model.adoptLiveSettings()"
             ],
             "SettingsDiffRowSource+Live.swift": [
                 "unsavedLive=target==.live&&!editingLua"
