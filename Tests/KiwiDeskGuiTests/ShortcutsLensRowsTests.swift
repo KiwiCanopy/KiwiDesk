@@ -35,6 +35,7 @@ struct ShortcutsLensRowsTests {
                 for: .shortcuts(.toggleLens)
             )
         )
+        try #require(rows.count == 2)
         #expect(
             rows.map(\.lua) == [
                 #"kiwivision.toggle("Writing")"#,
@@ -171,6 +172,28 @@ struct ShortcutsLensRowsTests {
         #expect(
             respelled[0].bindings.first?.lua
                 == KeybindingCatalog.toggleLens("WRITING").lua
+        )
+    }
+
+    @Test("a rename leaves a layer without the old lens alone")
+    func renameLeavesOtherLayers() {
+        let layers = [
+            KeyLayer(
+                name: "other",
+                bindings: [
+                    binding(
+                        KeybindingCatalog.toggleLens("Draft").lua,
+                        "control+d"
+                    )
+                ]
+            )
+        ]
+        #expect(
+            KeybindingCatalog.renameLens(
+                in: layers,
+                from: "Writing",
+                to: "Draft"
+            ) == layers
         )
     }
 

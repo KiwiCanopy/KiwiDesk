@@ -42,15 +42,42 @@ enum ShortcutsOpenBinding {
         core: KiwiCore,
         lens name: String
     ) -> String? {
-        combo(core: core) { KeybindingCatalog.names($0, name) }.map {
+        guard let bindings = activeBindings(core: core) else {
+            return nil
+        }
+        return lensCombo(in: bindings, lens: name).map {
             ComboSymbols.render($0, layoutChar: LayoutKeyGlyph.char)
         }
+    }
+
+    /// The chord of the row in `bindings` that toggles `name`,
+    /// however either spells it.
+    static func lensCombo(
+        in bindings: [KeyBinding],
+        lens name: String
+    ) -> KeyCombo? {
+        bindings.first {
+            KeybindingCatalog.names($0, name) && !$0.combo.isEmpty
+        }.flatMap { KeyCombo.parse($0.combo) }
     }
 
     @MainActor private static func combo(
         core: KiwiCore,
         matching row: (KeyBinding) -> Bool
     ) -> KeyCombo? {
+        guard
+            let combo = activeBindings(core: core)?.first(where: {
+                row($0) && !$0.combo.isEmpty
+            })?.combo,
+            let parsed = KeyCombo.parse(combo)
+        else { return nil }
+        return parsed
+    }
+
+    /// The RESOLVED active layer's rows.
+    @MainActor private static func activeBindings(
+        core: KiwiCore
+    ) -> [KeyBinding]? {
         guard let snapshot = core.liveKeybindingSnapshot() else {
             return nil
         }
@@ -58,12 +85,6 @@ enum ShortcutsOpenBinding {
             snapshot.keyLayers.first {
                 $0.name == snapshot.activeLayerName
             } ?? snapshot.keyLayers.first
-        guard
-            let combo = layer?.bindings.first(where: {
-                row($0) && !$0.combo.isEmpty
-            })?.combo,
-            let parsed = KeyCombo.parse(combo)
-        else { return nil }
-        return parsed
+        return layer?.bindings
     }
 }

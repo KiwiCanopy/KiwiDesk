@@ -86,6 +86,14 @@ struct ShortcutsLensNamingTests {
     func chordMatchesAnySpelling() {
         #expect(KeybindingCatalog.names(binding, "WRITING"))
         #expect(!KeybindingCatalog.names(binding, "Draft"))
+        #expect(
+            ShortcutsOpenBinding.lensCombo(in: [binding], lens: "WRITING")
+                == KeyCombo.parse("control+option+w")
+        )
+        #expect(
+            ShortcutsOpenBinding.lensCombo(in: [binding], lens: "Draft")
+                == nil
+        )
     }
 
     private func flat(_ path: String) throws -> String {
