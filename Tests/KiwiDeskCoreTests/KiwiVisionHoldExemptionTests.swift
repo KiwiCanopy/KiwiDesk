@@ -72,8 +72,14 @@ struct KiwiVisionHoldExemptionTests {
         F.focus(core, F.member)
         F.focus(core, extra)
         #expect(core.vision.hold == nil)
-        // The same dialog reached from a stranger's window is held.
-        F.focus(core, F.stranger)
+        // Reached from another app's clear window — a Never dimmed
+        // one — the same dialog is held.
+        core.execute(
+            "kiwivision.set_never_dimmed",
+            args: [.string("test.kiwi.third")]
+        )
+        F.focus(core, F.other)
+        #expect(core.vision.hold == nil)
         F.focus(core, extra)
         #expect(core.vision.hold?.window == extra)
     }
