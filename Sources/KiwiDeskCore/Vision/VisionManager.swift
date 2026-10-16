@@ -60,9 +60,8 @@ public final class VisionManager {
     /// Hears each landing a lens holds, with the lens's own
     /// reminder, nil for the default; the GUI announces it.
     public var onHold: @MainActor (String?) -> Void = { _ in }
-    /// A lens rename a write of the lenses is about to land, so the
-    /// lens on follows it rather than turning off (#2103); taken by
-    /// the next `followActiveLens`.
+    /// The lens rename the write in flight carries, set by
+    /// `setAppWide(…renamingLens:)` for that write alone (#2103).
     var renamedLens: (from: String, to: String)?
     /// The landing a lens holds under the haze now, nil while none
     /// waits; begun and ended only in `KiwiCore+VisionHold`.

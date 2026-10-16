@@ -21,6 +21,8 @@ struct KiwiVisionLensRenameTests {
         #expect(
             VisionLens.reach(reach, renaming: "Chat", to: "Talk") == reach
         )
+        #expect(AppWideSettings.sameLens("Writing ", "WRITING"))
+        #expect(!AppWideSettings.sameLens("Writing", "Draft"))
         #expect(VisionLens.reach(nil, renaming: "Writing", to: "D") == nil)
     }
 
@@ -61,8 +63,15 @@ struct KiwiVisionLensRenameTests {
         return core
     }
 
-    private func rename(_ core: KiwiCore, to name: String) {
-        core.setAppWide(persisting: false) { settings in
+    private func rename(
+        _ core: KiwiCore,
+        to name: String,
+        announced: Bool = false
+    ) {
+        core.setAppWide(
+            persisting: false,
+            renamingLens: announced ? ("writing", name) : nil
+        ) { settings in
             settings.visionLenses = settings.visionLenses.map {
                 var lens = $0
                 lens.name = name
@@ -75,10 +84,33 @@ struct KiwiVisionLensRenameTests {
     func activeFollowsTheRename() {
         let core = core()
         #expect(core.kiwiVisionActive == .lens("Writing"))
-        core.noteLensRename(from: "writing", to: "Draft")
-        rename(core, to: "Draft")
+        rename(core, to: "Draft", announced: true)
         #expect(core.kiwiVisionActive == .lens("Draft"))
         #expect(core.vision.renamedLens == nil)
+    }
+
+    /// The rename lives as long as its write: a profile change
+    /// after it follows nothing, and an earlier one took nothing.
+    @Test("the rename is the write's alone")
+    func renameIsTheWritesAlone() {
+        let core = core()
+        core.liveProfileChanged()
+        #expect(core.vision.renamedLens == nil)
+        rename(core, to: "Draft", announced: true)
+        #expect(core.vision.renamedLens == nil)
+        #expect(core.kiwiVisionActive == .lens("Draft"))
+    }
+
+    @Test("a mark absent from the old name clears a stale new one")
+    func renameClearsAStaleMark() {
+        #expect(
+            VisionLens.reach(
+                ["draft": false],
+                renaming: "Writing",
+                to: "Draft"
+            )
+                == nil
+        )
     }
 
     @Test("an unannounced rename reads as a removal and turns it off")

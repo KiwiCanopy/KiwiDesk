@@ -74,9 +74,15 @@ enum KeybindingImportClassifier {
             binding.label = shape.label
             return shape.step
         }
-        if let command = KeybindingCatalog.desktopCommand(
-            from: binding.lua
-        ) {
+        // A lens toggle is matched by shape, as a Desktop row is:
+        // the config records no lens a session defined.
+        let lens = KeybindingCatalog.lensTarget(of: binding.lua)
+            .map(KeybindingCatalog.toggleLens)
+        if let command = lens
+            ?? KeybindingCatalog.desktopCommand(
+                from: binding.lua
+            )
+        {
             binding.kind = .navigation
             binding.label = command.label
         } else if let label = navigation[binding.lua] {

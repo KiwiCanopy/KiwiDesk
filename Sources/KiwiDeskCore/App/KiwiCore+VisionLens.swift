@@ -17,7 +17,7 @@ extension KiwiCore {
             return .fail("no lens named \(name)")
         }
         let active = vision.active.lensName.map {
-            $0.caseInsensitiveCompare(lens.name) == .orderedSame
+            AppWideSettings.sameLens($0, lens.name)
         }
         // The lens on always turns off; a refusal binds only on the
         // way in.
@@ -37,14 +37,6 @@ extension KiwiCore {
     public func lensRefusal(_ lens: VisionLens) -> LensRefusal? {
         if lens.apps.isEmpty { return .noApps }
         return profileLeavingOut(lens).map { .outOfReach(profile: $0) }
-    }
-
-    /// Announces that the next write of the lenses renames `old`
-    /// to `new`, so the lens on follows it (#2103). The writer
-    /// re-keys the stored bindings and every profile's
-    /// `lens_reach` in the same save (`VisionLens.reach`).
-    public func noteLensRename(from old: String, to new: String) {
-        vision.renamedLens = (old, new)
     }
 
     /// Every lens in stored order, with its verdict.
@@ -90,9 +82,7 @@ extension KiwiCore {
             }
             setAppWide(persisting: false) {
                 $0.visionLenses.removeAll {
-                    $0.name.caseInsensitiveCompare(
-                        AppWideSettings.lensName(name)
-                    ) == .orderedSame
+                    AppWideSettings.sameLens($0.name, name)
                 }
             }
             return .ok()
@@ -120,7 +110,7 @@ extension KiwiCore {
         setAppWide(persisting: false) { settings in
             var lenses = settings.visionLenses
             if let index = lenses.firstIndex(where: {
-                $0.name.caseInsensitiveCompare(lens.name) == .orderedSame
+                AppWideSettings.sameLens($0.name, lens.name)
             }) {
                 lenses[index] = lens
             } else {

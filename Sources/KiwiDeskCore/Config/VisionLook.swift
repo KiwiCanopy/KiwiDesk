@@ -43,9 +43,6 @@ extension AppWideSettings {
 
     /// The lens named `name`, ignoring case (ruling 39).
     public func lens(named name: String) -> VisionLens? {
-        let name = Self.lensName(name)
-        return visionLenses.first {
-            $0.name.caseInsensitiveCompare(name) == .orderedSame
-        }
+        visionLenses.first { Self.sameLens($0.name, name) }
     }
 }

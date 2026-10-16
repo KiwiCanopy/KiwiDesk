@@ -17,7 +17,10 @@ extension KeybindingCatalog {
     }
 
     /// The lens a toggle binding names, or nil for any other Lua —
-    /// a bare `kiwivision.toggle()` included.
+    /// a bare `kiwivision.toggle()` included. Only the
+    /// double-quoted form this catalog writes is read: a Lua user's
+    /// `toggle('Writing')` is Custom Lua, outside the rows, the
+    /// chips' chords and the crossings.
     static func lensTarget(of lua: String) -> String? {
         let prefix = "kiwivision.toggle("
         guard lua.hasPrefix(prefix), lua.hasSuffix(")") else {
@@ -30,8 +33,8 @@ extension KeybindingCatalog {
 
     /// Re-keys every binding that toggles `old` — ignoring case,
     /// as lens names compare (ruling 39) — to toggle `new`, its
-    /// label following. A layer already holding a row for `new`
-    /// keeps that one and drops the old, so no lens gains a second
+    /// label following. A stale row for `new` in a layer that holds
+    /// the renamed lens's own is dropped, so no lens gains a second
     /// chord (profiles.md ▸ one chord per navigation action).
     static func renameLens(
         in layers: [KeyLayer],
@@ -39,14 +42,16 @@ extension KeybindingCatalog {
         to new: String
     ) -> [KeyLayer] {
         let row = toggleLens(new)
-        let respelled = old.caseInsensitiveCompare(new) == .orderedSame
+        let respelled = AppWideSettings.sameLens(old, new)
         return layers.map { layer in
-            if !respelled,
-                layer.bindings.contains(where: { names($0, new) })
-            {
-                return deleteLens(in: [layer], named: old)[0]
-            }
             var layer = layer
+            // A stale row of the new name gives way to the renamed
+            // lens's own chord.
+            if !respelled,
+                layer.bindings.contains(where: { names($0, old) })
+            {
+                layer.bindings.removeAll { names($0, new) }
+            }
             layer.bindings = layer.bindings.map { binding in
                 guard names(binding, old) else { return binding }
                 var binding = binding
@@ -71,9 +76,11 @@ extension KeybindingCatalog {
         }
     }
 
-    private static func names(_ binding: KeyBinding, _ lens: String) -> Bool {
+    /// Whether `binding` toggles `lens`, by the one lens
+    /// comparison (`AppWideSettings.sameLens`).
+    static func names(_ binding: KeyBinding, _ lens: String) -> Bool {
         lensTarget(of: binding.lua).map {
-            $0.caseInsensitiveCompare(lens) == .orderedSame
+            AppWideSettings.sameLens($0, lens)
         } ?? false
     }
 }

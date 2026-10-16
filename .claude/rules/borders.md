@@ -478,11 +478,17 @@ Obligations:
   with one writer, `setVision`, and the lens on follows the stored
   lenses through the one `followActiveLens`**: a write that removes
   or empties it turns KiwiVision off, one that stores it under
-  another spelling re-keys it, and a rename is announced through
-  `noteLensRename` before the write so it re-keys there, never
-  beside it (`VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
+  another spelling re-keys it, and a write that renames a lens
+  says so in `setAppWide(…renamingLens:)`, alive for that write
+  alone, so it re-keys there, never beside it — that the lens
+  page's Save says so is review's until #2103 PR 7 (`VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
   `KiwiVisionLensActivationTests` ▸ `activeFollowsDefinition`,
-  `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`). **A GUI write of the lenses seeds from
+  `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`,
+  `renameIsTheWritesAlone`). **A lens is matched by the one
+  `AppWideSettings.sameLens`**, never a case compare beside it, and
+  **a binding may name only a STORED lens** — Settings' rows read
+  `kiwiVisionStoredLensNames` — since a chord outlives a session
+  `define_lens` (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
   and writes the settled list, never the live one**, so a session
   `define_lens` or `delete_lens` never reaches `gui.json` (ruling
   40) — review's until the lens page owes it a test.
@@ -504,8 +510,11 @@ Obligations:
   that name inherits "left out" and the old chord — through the one
   `VisionLens.reach(_:renaming:to:)` / `reach(_:deleting:)` and
   `KeybindingCatalog.renameLens` / `deleteLens`, which compare names
-  ignoring case (`KiwiVisionLensRenameTests`,
-  `ShortcutsLensRowsTests`). That the lens page's Save calls them is
+  through `sameLens` (`KiwiVisionLensRenameTests`,
+  `ShortcutsLensRowsTests`). The binding crossing rewrites the Lua a
+  rule-reach key is built from, so the lens page's Save applies both
+  crossings to the shared base, every profile file and the reach
+  snapshot in one `RuleReachSnapshot` pass ahead of the row encode —
   review's until #2103 PR 7 owes it a test.
 - **A step KiwiDesk's own navigation takes skips what a lens leaves
   out, through the one `lensKeySkip`; a pick skips nothing**

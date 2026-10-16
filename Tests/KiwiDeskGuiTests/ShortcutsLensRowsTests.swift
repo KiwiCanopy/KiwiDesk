@@ -135,7 +135,7 @@ struct ShortcutsLensRowsTests {
         #expect(renamed[0].bindings[0].combo == "control+w")
     }
 
-    @Test("a rename onto a name already bound keeps one chord")
+    @Test("a rename over a stale row keeps the lens's own chord")
     func renameKeepsOneChord() {
         let layers = [
             KeyLayer(
@@ -157,7 +157,11 @@ struct ShortcutsLensRowsTests {
             from: "Writing",
             to: "Draft"
         )
-        #expect(renamed[0].bindings.map(\.combo) == ["control+d"])
+        #expect(renamed[0].bindings.map(\.combo) == ["control+w"])
+        #expect(
+            renamed[0].bindings.map(\.lua)
+                == [KeybindingCatalog.toggleLens("Draft").lua]
+        )
         // A new spelling of the same name keeps its row.
         let respelled = KeybindingCatalog.renameLens(
             in: layers,

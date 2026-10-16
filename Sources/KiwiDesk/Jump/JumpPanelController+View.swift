@@ -58,11 +58,8 @@ extension JumpPanelController {
                 profiles: (profiles.currentName, profiles.list(), broken),
                 vision: (core.kiwiVisionActive, core.kiwiVisionLensChoices),
                 visionChord: visionChord,
-                lensChord: { [core] name in
-                    ShortcutsOpenBinding.comboGlyphs(
-                        core: core,
-                        lua: KeybindingCatalog.toggleLens(name).lua
-                    )
+                lensChord: { [core] in
+                    ShortcutsOpenBinding.lensGlyphs(core: core, lens: $0)
                 },
                 inert: inert
             )
@@ -77,7 +74,7 @@ extension JumpPanelController {
         profiles: (current: String?, all: [String], broken: Set<String>),
         vision: (active: VisionActive, lenses: [VisionLensChoice]),
         visionChord: String?,
-        lensChord: (String) -> String? = { _ in nil },
+        lensChord: (String) -> String?,
         inert: String?
     ) -> [ViewPickList.Line: [ViewPickList.Item]] {
         let grey = inert

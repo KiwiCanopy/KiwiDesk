@@ -33,6 +33,24 @@ enum ShortcutsOpenBinding {
         core: KiwiCore,
         lua verb: String
     ) -> KeyCombo? {
+        combo(core: core) { $0.lua == verb }
+    }
+
+    /// A lens's chord: the row that toggles it, however its name is
+    /// spelled (#2103 ruling 39).
+    @MainActor static func lensGlyphs(
+        core: KiwiCore,
+        lens name: String
+    ) -> String? {
+        combo(core: core) { KeybindingCatalog.names($0, name) }.map {
+            ComboSymbols.render($0, layoutChar: LayoutKeyGlyph.char)
+        }
+    }
+
+    @MainActor private static func combo(
+        core: KiwiCore,
+        matching row: (KeyBinding) -> Bool
+    ) -> KeyCombo? {
         guard let snapshot = core.liveKeybindingSnapshot() else {
             return nil
         }
@@ -42,7 +60,7 @@ enum ShortcutsOpenBinding {
             } ?? snapshot.keyLayers.first
         guard
             let combo = layer?.bindings.first(where: {
-                $0.lua == verb && !$0.combo.isEmpty
+                row($0) && !$0.combo.isEmpty
             })?.combo,
             let parsed = KeyCombo.parse(combo)
         else { return nil }
