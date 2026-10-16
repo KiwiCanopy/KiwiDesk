@@ -98,12 +98,7 @@ public enum LookKeys {
         from settings: TilingSettings,
         paths: [String] = all
     ) -> [String: JSONValue] {
-        guard let data = try? JSONEncoder().encode(settings),
-            let root = try? JSONDecoder().decode(
-                JSONValue.self,
-                from: data
-            )
-        else { return [:] }
+        guard let root = JSONValue(encoding: settings) else { return [:] }
         var out: [String: JSONValue] = [:]
         for path in paths {
             if let value = value(at: path, in: root) {

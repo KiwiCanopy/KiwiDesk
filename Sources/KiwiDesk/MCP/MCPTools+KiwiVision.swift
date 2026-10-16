@@ -42,7 +42,7 @@ extension MCPWording {
             ? "Settings ▸ KiwiVision" : "Settings ▸ General"
         let tail =
             id.hasPrefix(lensLeaf)
-            ? ", for a lens made there; make it there to keep it" : ""
+            ? "; define or delete the lens there" : ""
         return "it is app-wide and lasts until a config reload or "
             + "restart; \(page) keeps it\(tail)"
     }

@@ -9,6 +9,10 @@ extension KiwiCore {
     /// its `define_lens` table, its refusal, and whether `gui.json`
     /// holds it as it is — absent for a Lua-owned setup, whose
     /// store is `init.lua` (ruling 40).
+    /// `saved` reads `appWideStamp`, what every `gui.json` write
+    /// stamps, rather than the lens page's settled list: the two
+    /// agree once the group is stored, and before that the settled
+    /// values are a crossing's, which no file holds yet.
     func visionCurrent() -> JSONValue {
         let stored = isGuiManaged ? appWideStamp?.visionLenses ?? [] : nil
         let lenses: [JSONValue] = appWide.visionLenses.map { lens in

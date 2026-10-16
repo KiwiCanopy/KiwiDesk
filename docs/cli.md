@@ -255,9 +255,9 @@ no focused-window default here.
 `kiwivision` takes an `action`, as `looks` does, over every
 `kiwivision.*` verb, `kiwivision.current` among them;
 `define_lens` takes `table`, the lens as a JSON object string.
-`keep` cannot write a KiwiVision change. To keep a KiwiVision
-setting, change it on Settings ▸ KiwiVision; to keep a lens, make
-it there.
+`keep` cannot write a KiwiVision change: Settings ▸ KiwiVision
+keeps it, so change the setting, or define or delete the lens,
+there.
 
 A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where
@@ -467,7 +467,7 @@ knows of an app whose window it does not list
 
 :::unreleased
 `kiwivision.toggle [lens]`, `kiwivision.current`, the
-`kiwivision.set_*` verbs, `kiwivision.define_lens <json>` and
+`kiwivision.set_*` verbs, `kiwivision.define_lens <table>` and
 `kiwivision.delete_lens <name>` reach KiwiVision and its lenses
 ([KiwiVision](lua-reference.md#kiwivision)). `kiwivision.current`
 says whether KiwiVision is on, which lens is on, its settings and

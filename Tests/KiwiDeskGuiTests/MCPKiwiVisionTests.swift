@@ -122,9 +122,9 @@ struct MCPKiwiVisionTests {
             MCPWording.unkeepable(MCPKeepTests.leaf($0, .none, .appWide))
         }
         #expect(told[0].contains("Settings ▸ KiwiVision"))
-        #expect(!told[0].contains("make it there"))
+        #expect(!told[0].contains("define or delete the lens"))
         #expect(told[1].contains("Settings ▸ KiwiVision"))
-        #expect(told[1].contains("make it there"))
+        #expect(told[1].contains("define or delete the lens there"))
         #expect(told[2].contains("Settings ▸ General"))
         for sentence in told {
             #expect(sentence.contains("a config reload or restart"))
