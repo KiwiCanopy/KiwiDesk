@@ -582,9 +582,9 @@ be hidden, that glyph shows in its place.
 
 While your pointer rests on
 a Space it holds still, so a second click lands where the first
-did; it re-centres once the pointer leaves. With **Other Spaces** set to *Window count*, a
-Space not on screen draws no glyphs, so a click anywhere on it
-switches.
+did; it re-centres once the pointer leaves. With **Windows in
+other Spaces** set to *Window count*, a Space not on screen draws
+no glyphs, so a click anywhere on it switches.
 
 While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,

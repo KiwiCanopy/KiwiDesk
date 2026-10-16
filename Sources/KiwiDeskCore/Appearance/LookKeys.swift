@@ -4,7 +4,8 @@ import Foundation
 /// if it changes how the same items look or where they sit, and
 /// functionality if it changes which items exist, what they show
 /// or say, or what they do (owner ruling 2026-09-27) — so App Bar
-/// content, Other Spaces and each bar's on/off never join. The
+/// content, Windows in other Spaces and each bar's on/off never
+/// join. The
 /// focus border's shape and the global gaps join too (#1739), so
 /// a look reproduces its whole picture. Colours are a palette's,
 /// never a look's. Motion joins too (#2176), so animations travel

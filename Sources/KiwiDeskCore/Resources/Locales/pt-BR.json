@@ -1780,7 +1780,7 @@
   "space_bar.group_adjacent.help": "Funde as janelas vizinhas do mesmo app em um espaço em um único glifo, marcado com um selo de contagem, em vez de um glifo para cada.",
   "space_bar.hide_empty": "Ocultar espaços vazios",
   "space_bar.hide_empty.help": "Os espaços sem janelas ficam ocultos na barra, exceto o espaço em que você está. Use um atalho para ir até um espaço oculto.",
-  "space_bar.inactive_content": "Outros espaços",
+  "space_bar.inactive_content": "Janelas em outros espaços",
   "space_bar.inactive_content.apps": "Apps",
   "space_bar.inactive_content.count": "Número de janelas",
   "space_bar.inactive_content.help": "O que os espaços fora da tela mostram. %1$@ — seus glifos de app. %2$@ — só o número, o nome ou o ícone de cada espaço, com a quantidade de janelas que ele tem no canto. Em ambos os casos, um espaço vazio aparece esmaecido, exceto com um ícone de emoji colorido, que não pode ser esmaecido.",

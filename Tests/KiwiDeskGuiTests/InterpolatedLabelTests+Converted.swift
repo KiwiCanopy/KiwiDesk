@@ -102,7 +102,8 @@ extension InterpolatedLabelTests {
         // names interpolated from their own keys, authored that
         // way from the start.
         "monocle.hide_style.help": 2,
-        // #1683: the Other Spaces `?` names its three segments.
+        // #1683: the Windows in other Spaces `?` names its
+        // segments.
         "space_bar.inactive_content.help": 2,
         // #1535: the Space label `?` names both segments.
         "space_bar.item_label.help": 2,
