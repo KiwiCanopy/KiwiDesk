@@ -125,10 +125,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // Hover focus fronts the own window its command focused
         // (#1869, #1281): AppKit's half, no Settings reload.
         core.mouse.rest.frontOwnWindow = { number in
-            guard
-                let window = NSApp.windows.first(where: {
-                    $0.windowNumber == number
-                })
+            guard let window = EventLoop.ownWindow(number: number)
             else { return }
             NSApp.forceFront(window)
         }

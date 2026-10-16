@@ -131,7 +131,7 @@ extension EventLoop {
     /// AX identity meets AppKit identity, shared by the ignore
     /// gate (`canBecomeMain`) and by `ownWindowIdentifier`'s
     /// production default (the tiling mark).
-    static func ownWindow(number: Int) -> NSWindow? {
+    public static func ownWindow(number: Int) -> NSWindow? {
         NSApplication.shared.windows.first { $0.windowNumber == number }
     }
 
