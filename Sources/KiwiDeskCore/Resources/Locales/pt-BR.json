@@ -213,6 +213,7 @@
   "behavior.animations.window_swap": "Animar as trocas de janelas",
   "behavior.mouse.follows_focus": "Levar o cursor até a janela que recebe o foco",
   "behavior.mouse.hover_focus": "Focar a janela em que o cursor repousa",
+  "behavior.mouse.hover_focus.help": "Em um layout Scrolling, uma janela só em parte na tela não recebe o foco quando o cursor repousa sobre ela, então a fileira nunca se move sob o cursor — clique nela, ou no item dela na App Bar ou na Space Bar, para trazê-la à vista.",
   "behavior.mouse.resize_action": "Redimensionar com o mouse",
   "behavior.mouse.resize_action.help": "**%1$@** — Arrastar a borda de uma janela a redimensiona e rearranja as vizinhas no layout.\n**%2$@** — A janela se redimensiona livremente enquanto você arrasta e retorna ao tamanho lado a lado ao soltar.",
   "behavior.mouse.resize_layout": "Redimensionar as janelas adjacentes",

@@ -47,7 +47,10 @@ extension BehaviourKey {
         case .mouseFollowsFocus:
             return .text("behavior.mouse.follows_focus")
         case .mouseHoverFocus:
-            return .text("behavior.mouse.hover_focus")
+            return .text(
+                "behavior.mouse.hover_focus",
+                help: "behavior.mouse.hover_focus.help"
+            )
         }
     }
 }
