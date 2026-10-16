@@ -1872,7 +1872,9 @@ Touching `Sources/KiwiDesk` (the GUI).
   declares cannot see what it is wired to (#1011, `UpdatePromptWiringTests`)
 - the marked own window's raise goes through `KiwiCore.focusOwnWindow(number:)`
   BEFORE `forceFront`, so its report arrives intended rather than as the
-  clickless focus #1161's distrust bounces — the gate and the window-number
+  clickless focus #1161's distrust bounces — a raise Core starts commanding
+  the focus itself and handing the GUI only the front through
+  `PointerRest.frontOwnWindow` (#1869, `HoverFocusWiringTests`) — the gate and the window-number
   bridge are Core's, this tree never spells the verb, and
   `SettingsOpenFocusSeamTests`' `allowed` map is the one copy of who may call
   the door (#1281)

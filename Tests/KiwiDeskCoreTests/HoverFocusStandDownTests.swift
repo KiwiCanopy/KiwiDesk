@@ -142,18 +142,6 @@ struct HoverFocusStandDownTests {
         #expect(core.hoverTarget(at: point) == nil)
     }
 
-    @Test("KiwiDesk's own window in front stands down")
-    func ownWindowStandsDown() throws {
-        let core = try makeCore()
-        let point = try overW2(core)
-        let below = core.frontStack()
-        core.frontStack = {
-            [listed(number: 2, pid: getpid(), frame: below[1].frame)]
-                + below
-        }
-        #expect(core.hoverTarget(at: point) == nil)
-    }
-
     /// A hotkey pressed while the hovered app is still coming
     /// forward passes the #292 preflight as the `focus` verb's
     /// does: the hover records the app it left (#1812).

@@ -164,4 +164,24 @@ struct HoverFocusWiringTests {
         Issue.record("unbalanced body after \(head)")
         return ""
     }
+
+    /// The GUI's half of an own-window hover raise (#1281): the
+    /// hook defaults to a no-op, so an unwired one leaves the
+    /// Settings window focused in state and behind the app in
+    /// front.
+    @Test("the GUI fronts the own window hover focused")
+    func frontOwnWindowIsWired() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/AppDelegate.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        let pattern =
+            #"core\.mouse\.rest\.frontOwnWindow\s*=\s*\{[\s\S]{0,240}?"#
+            + #"NSApp\.forceFront\(window\)"#
+        #expect(
+            source.range(of: pattern, options: .regularExpression) != nil,
+            "AppDelegate no longer fronts the own window hover focused"
+        )
+    }
 }
