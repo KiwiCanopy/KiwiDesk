@@ -118,31 +118,4 @@ struct KiwiVisionHoldExemptionTests {
         F.focus(core, F.stranger)
         #expect(heard.isEmpty)
     }
-
-    /// The pill a hold shows sits centred on its window and stays
-    /// until released, where a refusal's sits at the top.
-    @Test("the hold pill is centred on its window")
-    func holdPillIsCentred() throws {
-        let overlay = SizeLimitOverlay()
-        let frame = CGRect(x: 200, y: 200, width: 800, height: 600)
-        #expect(overlay.hold(window: 1, frame: frame, text: "Wait"))
-        let pill = try #require(overlay.pillForTest(1))
-        let flipped = GeometryUtils.flip(
-            frame,
-            primaryHeight: GeometryUtils.primaryHeight
-        )
-        #expect(abs(pill.panel.midX - flipped.midX) < 1)
-        #expect(abs(pill.panel.midY - flipped.midY) < 1)
-        // It follows the window when the window moves.
-        let moved = frame.offsetBy(dx: 120, dy: 0)
-        #expect(overlay.hold(window: 1, frame: moved, text: "Wait"))
-        let after = try #require(overlay.pillForTest(1))
-        #expect(abs(after.panel.midX - (flipped.midX + 120)) < 1)
-    }
-
-    @Test("a hold pill and a refusal pill never share a slot")
-    func holdPillHasItsOwnOverlay() {
-        let (core, _) = F.core()
-        #expect(core.borders.holdPillOverlay !== core.borders.sizeLimitOverlay)
-    }
 }

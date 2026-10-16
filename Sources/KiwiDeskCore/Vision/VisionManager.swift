@@ -63,8 +63,9 @@ public final class VisionManager {
     /// The landing a lens holds under the haze now, nil while none
     /// waits; begun and ended only in `KiwiCore+VisionHold`.
     var hold: VisionHold?
-    /// Whether the last sync drew the mode on: a target change
-    /// after one is a landing, the sync turning it on is not.
+    /// Whether the last sync drew the mode on a screen not standing
+    /// down: a target change after one is a landing, the sync
+    /// turning it on is not.
     private(set) var drewOn = false
     var plates: [DisplayID: any VisionPlateBackend] = [:]
     /// Where each plate was last ordered: a plate re-stacks only
@@ -173,7 +174,7 @@ public final class VisionManager {
         target = request.target
         below = request.target.map { request.below ?? $0 }
         holding = request.holding != nil && request.holding == target
-        drewOn = isOn
+        drewOn = isOn && !live.isSubset(of: request.standDown)
         guard isOn else {
             for plate in plates.values { plate.hide(reduceMotion: motion) }
             stacked = [:]

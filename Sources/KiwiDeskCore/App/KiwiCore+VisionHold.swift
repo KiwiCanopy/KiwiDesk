@@ -46,7 +46,7 @@ extension KiwiCore {
         if let hold = vision.hold {
             if hold.window.raw != target || visionHoldDelay == nil {
                 endVisionHold(restack: false)
-            } else if let frame = refusalPillFrame(hold.window) {
+            } else if let frame = visionHoldFrame(hold.window) {
                 borders.showHoldPill(
                     window: hold.window,
                     frame: frame,
@@ -67,7 +67,7 @@ extension KiwiCore {
         deferred.schedule(.visionHold, after: .seconds(delay)) {
             [weak self] in self?.endVisionHold()
         }
-        if let frame = refusalPillFrame(id) {
+        if let frame = visionHoldFrame(id) {
             borders.showHoldPill(
                 window: id,
                 frame: frame,
@@ -101,6 +101,13 @@ extension KiwiCore {
         }
         landing.clicked = recentClickReached(id, now: wallClock())
         return landing
+    }
+
+    /// Where the held window's pill sits: the frame last sent,
+    /// else the window's own — never a re-layout, which a settle
+    /// would pay on every pass of the hold.
+    private func visionHoldFrame(_ id: WindowID) -> CGRect? {
+        tiler.commandedFrame(of: id) ?? state.windows[id]?.frame
     }
 
     /// The subroles of a dialog a clear window's app opens over it

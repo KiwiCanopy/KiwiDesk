@@ -134,7 +134,11 @@ final class SizeLimitOverlay {
             scales: Self.popKeyframes.map(\.scale)
         )
 
-        if symbol == nil, shown, pill.panel.frame == panelRect {
+        // A standing hold pill that has not moved; one fading out
+        // after a release falls through and is shown again.
+        if symbol == nil, shown, pill.panel.frame == panelRect,
+            pill.panel.alphaValue == 1
+        {
             return true
         }
         // The plate first: the shadow follows what the panel draws.
