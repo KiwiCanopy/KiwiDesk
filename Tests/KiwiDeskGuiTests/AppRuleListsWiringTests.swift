@@ -185,7 +185,6 @@ struct AppRuleListsWiringTests {
     /// The titled choice must NOT clear the float rule: a bare
     /// rule may be the row's only stored rule, and clearing it
     /// dropped the row mid-composition (#1022).
-    @Test("opening the pattern editor clears no float rule")
     /// The title editor's writes reach the Float rules through the
     /// one `FloatFacet.settingPatterns`, and the first pattern and
     /// the last one's removal hold the editor open (#1022, #2103
@@ -208,8 +207,14 @@ struct AppRuleListsWiringTests {
             try source("AppRuleFloatRow.swift")
                 .contains("patterns:titlePatterns,")
         )
+        // Exactly once: a second write after the conditional would
+        // keep the needle and hold the editor open on every edit.
+        #expect(
+            binding.occurrences(of: "titlesEditing.wrappedValue=true") == 1
+        )
     }
 
+    @Test("opening the pattern editor clears no float rule")
     func openTitlesKeepsTheRule() throws {
         try titleEditorWritesTheRules()
         let open = try body(
