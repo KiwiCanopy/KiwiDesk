@@ -51,10 +51,9 @@ public enum JumpSearch {
     /// 36) — each drawn under its own header, so no match quality
     /// lifts a row out of its section.
     private static func section(_ entry: JumpEntry) -> Int {
-        let kind =
-            entry.isHiddenApp
-            ? JumpTier.minimized.rawValue + 1 : entry.tier.rawValue
-        return entry.isOtherApp ? kind + 3 : kind
+        let tiers = JumpTier.allCases.count
+        let kind = entry.isHiddenApp ? tiers : entry.tier.rawValue
+        return entry.isOtherApp ? kind + tiers + 1 : kind
     }
 
     /// The tier `entry` ranks in for `needle`, nil where nothing

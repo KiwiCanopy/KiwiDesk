@@ -5,14 +5,13 @@ import Foundation
 /// `KiwiCore+Commands` for file size.
 extension KiwiCore {
     /// `warp: false` is a scroll gesture's (#1656): the pointer
-    /// stays where the hand holds it. `keyed` is a focus or swap
-    /// verb's, whose steps skip what a lens keeps focus off (#2103
-    /// rulings 30, 35); a gesture is no key and skips nothing.
+    /// stays where the hand holds it. Every step, a gesture's too,
+    /// skips what a lens keeps hazed (`lensKeySkip`, #2103 rulings
+    /// 35, 44, 45).
     func navigate(
         _ args: [JSONValue],
         swapping: Bool,
-        warp: Bool = true,
-        keyed: Bool = true
+        warp: Bool = true
     ) -> CommandResponse {
         guard let raw = args.first?.stringValue,
             let direction = Direction(rawValue: raw)
@@ -47,7 +46,7 @@ extension KiwiCore {
         if swapping, refuseSwapOntoTraveler(focused, in: space) {
             return .ok()
         }
-        let skip = (keyed ? lensKeySkip() : nil) ?? { _ in false }
+        let skip = lensKeySkip() ?? { _ in false }
         // Monocle windows all share one frame, so geometric
         // neighbor search finds nothing. Directions on the
         // configured orientation axis cycle the window order

@@ -106,7 +106,7 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool,
         warp: Bool,
-        skip: (WindowID) -> Bool = { _ in false }
+        skip: (WindowID) -> Bool
     ) -> CommandResponse? {
         // Resolve per-space (#149): a space with a vertical
         // orientation override renders vertically, so its focus

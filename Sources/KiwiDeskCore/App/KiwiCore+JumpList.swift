@@ -38,42 +38,17 @@ extension KiwiCore {
         return lensOrdered(rows)
     }
 
-    /// The lens's apps' rows first, the rest after and marked, each
-    /// part keeping its order (#2103 ruling 36); unchanged while no
-    /// lens is on.
+    /// The lens's apps' rows first, the rest after, each part
+    /// keeping its order (#2103 ruling 36); unchanged while no lens
+    /// is on, since no row is then an other app's.
     private func lensOrdered(_ rows: [JumpEntry]) -> [JumpEntry] {
-        guard let apps = visionLensApps else { return rows }
-        var members: [JumpEntry] = []
-        var others: [JumpEntry] = []
-        for var row in rows {
-            if let key = jumpAppKey(row), apps.contains(key) {
-                members.append(row)
-            } else {
-                row.isOtherApp = true
-                others.append(row)
-            }
-        }
-        return members + others
+        rows.filter { !$0.isOtherApp } + rows.filter(\.isOtherApp)
     }
 
-    /// A row's app as an app list names it: a window's from what
-    /// KiwiDesk holds of it, a hidden app's from its process.
-    private func jumpAppKey(_ row: JumpEntry) -> String? {
-        switch row.target {
-        case .hiddenApp(let pid):
-            return eventLoop.appRef(of: pid).listKey
-        case .window(let id):
-            if let window = state.windows[id] {
-                return window.appRef.listKey
-            }
-            if let away = state.awayWindows[id] {
-                return AppRef(bundleID: away.appBundleID, name: away.appName)
-                    .listKey
-            }
-            return state.minimizeOrder.first { $0.id == id }.map {
-                AppRef(bundleID: $0.bundleID, name: $0.app).listKey
-            }
-        }
+    /// Whether a row of `app` sits under "Other apps": a lens is on
+    /// and does not hold it (ruling 36).
+    private func jumpIsOtherApp(_ app: AppRef) -> Bool {
+        visionLook.lens != nil && !lensHolds(app)
     }
 
     /// The window the user is in: the bar's focus, only while its
@@ -110,7 +85,8 @@ extension KiwiCore {
                     space: space,
                     spaceIcon: space.flatMap(jumpSpaceIcon),
                     status: window.isFullscreen ? .fullscreen : .shown,
-                    movesHere: jumpMovesHere(window, from: space)
+                    movesHere: jumpMovesHere(window, from: space),
+                    isOtherApp: jumpIsOtherApp(window.appRef)
                 )
             }
     }
@@ -135,7 +111,10 @@ extension KiwiCore {
                 spaceIcon: space.flatMap(jumpSpaceIcon),
                 status: .away(desktop: snapshot.number(of: entry.nativeSpace)),
                 movesHere: canDriveDesktops && entry.appBundleID != nil
-                    && state.workspaces.activeSpace != nil
+                    && state.workspaces.activeSpace != nil,
+                isOtherApp: jumpIsOtherApp(
+                    AppRef(bundleID: entry.appBundleID, name: entry.appName)
+                )
             )
         }
     }
@@ -156,7 +135,10 @@ extension KiwiCore {
                 space: nil,
                 spaceIcon: nil,
                 status: .minimized,
-                movesHere: state.workspaces.activeSpace != nil
+                movesHere: state.workspaces.activeSpace != nil,
+                isOtherApp: jumpIsOtherApp(
+                    AppRef(bundleID: record.bundleID, name: record.app)
+                )
             )
         }
     }
@@ -183,7 +165,8 @@ extension KiwiCore {
                     title: "",
                     space: nil,
                     spaceIcon: nil,
-                    status: .shown
+                    status: .shown,
+                    isOtherApp: jumpIsOtherApp(app.ref)
                 )
             }
     }

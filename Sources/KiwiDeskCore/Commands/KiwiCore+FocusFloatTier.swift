@@ -24,7 +24,7 @@ extension KiwiCore {
         space: Space,
         focused: WindowID,
         swapping: Bool,
-        skip: (WindowID) -> Bool = { _ in false }
+        skip: (WindowID) -> Bool
     ) -> WindowID? {
         guard !swapping else { return nil }
         let candidates = state.floatingFocusCandidates(of: space)

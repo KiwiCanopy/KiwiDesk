@@ -27,7 +27,7 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool,
         warp: Bool,
-        skip: (WindowID) -> Bool = { _ in false }
+        skip: (WindowID) -> Bool
     ) -> CommandResponse? {
         let horizontal =
             tiler.settings.resolvedScrolling(for: space.id)

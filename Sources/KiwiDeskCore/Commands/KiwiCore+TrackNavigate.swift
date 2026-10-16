@@ -27,7 +27,7 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool,
         warp: Bool,
-        skip lensSkip: (WindowID) -> Bool = { _ in false }
+        skip lensSkip: (WindowID) -> Bool
     ) -> CommandResponse? {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.effectiveTiledMembers(of: space)
@@ -133,10 +133,10 @@ extension KiwiCore {
     }
 
     /// The next window within the track, stepping past any the
-    /// `skip` predicate rejects (cascade-mates, #172), and
-    /// wrapping at the ends when asked (a lone window never wraps
-    /// onto itself). Wrap and skip never co-occur: wrap is a
-    /// `focus`-only concession, skip a `swap`-only one.
+    /// `skip` predicate rejects (cascade-mates, #172; a lens's
+    /// hazed windows, #2103 ruling 35) and wrapping at the ends
+    /// when asked — a wrap asks `skip` too and never lands on the
+    /// origin.
     private func alongTarget(
         step: Int,
         index: Int,
@@ -145,22 +145,21 @@ extension KiwiCore {
         wrap: Bool,
         skip: (WindowID) -> Bool
     ) -> WindowID? {
-        var next = index + step
-        while range.contains(next) {
-            if !skip(tiled[next]) { return tiled[next] }
-            next += step
-        }
-        guard wrap, range.count > 1 else { return nil }
-        return tiled[
-            step > 0 ? range.lowerBound : range.upperBound - 1
-        ]
+        let base = range.lowerBound
+        return Navigation.arrayStep(
+            from: index - base,
+            step: step,
+            count: range.count,
+            wrap: wrap,
+            skip: { skip(tiled[base + $0]) }
+        ).map { tiled[base + $0] }
     }
 
     /// The window at the same relative position (clamped) in the
-    /// nearest track the `skip` predicate accepts, wrapping last
-    /// <-> first when asked. Skipping steps across further tracks
-    /// (a whole cascaded track is all pile-mates); wrap applies
-    /// only to `focus`, where skip is inert.
+    /// nearest track whose window there `skip` accepts — a whole
+    /// cascaded track is all pile-mates — wrapping last <-> first
+    /// when asked, a wrap asking `skip` too and never landing on
+    /// the origin's track.
     private func acrossTarget(
         step: Int,
         index: Int,
@@ -171,17 +170,17 @@ extension KiwiCore {
         skip: (WindowID) -> Bool
     ) -> WindowID? {
         let offset = index - ranges[track].lowerBound
-        func mapped(_ range: Range<Int>) -> WindowID {
-            tiled[range.lowerBound + min(offset, range.count - 1)]
+        func mapped(_ track: Int) -> WindowID {
+            let range = ranges[track]
+            return tiled[range.lowerBound + min(offset, range.count - 1)]
         }
-        var target = track + step
-        while ranges.indices.contains(target) {
-            let candidate = mapped(ranges[target])
-            if !skip(candidate) { return candidate }
-            target += step
-        }
-        guard wrap, ranges.count > 1 else { return nil }
-        return mapped(ranges[step > 0 ? 0 : ranges.count - 1])
+        return Navigation.arrayStep(
+            from: track,
+            step: step,
+            count: ranges.count,
+            wrap: wrap,
+            skip: { skip(mapped($0)) }
+        ).map(mapped)
     }
 
     /// The focused window's overflow-cascade pile in a track

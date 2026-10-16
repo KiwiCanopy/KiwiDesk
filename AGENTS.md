@@ -1649,6 +1649,11 @@ Touching `Borders`, `Vision`.
   carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
   `VisionManagerTests`, `OverlayGlassGateTests`,
   `VisionAppearanceSeamTests`, `KiwiVisionStoredTests`)
+- a navigation step — a focus or swap key, the scroll gesture — skips what
+  a lens keeps hazed through the one `lensKeySkip`, threaded with no default
+  into every navigation model and judged per window by `visionLensClear`,
+  and a pick never asks it (#2103, `KiwiVisionLensFocusTests`,
+  `KiwiVisionLensGestureTests`)
 - an overlay hearing WindowServer's per-window events connects to the one
   `WindowServerWatch` under its own `Consumer` case, whose position is its
   place in the fan-out, and calls no `SkyLightWindowEvents` door itself

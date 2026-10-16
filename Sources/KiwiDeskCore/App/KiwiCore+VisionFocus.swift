@@ -1,33 +1,29 @@
 import Foundation
 
-/// A lens's hold on the keyboard (#2103 rulings 30, 35, 36): while
-/// a lens keeps focus on its apps, KiwiDesk's focus and swap keys
-/// skip other apps' windows; while a lens is on, the window
-/// switcher lists its apps first. A click, the bars, hover focus
-/// and a scroll gesture are deliberate picks and skip nothing.
+/// A lens's hold on KiwiDesk's own navigation (#2103 rulings 30,
+/// 35, 36, 44, 45): while a lens keeps focus on its apps, the focus
+/// and swap keys and the scroll gesture skip every window the lens
+/// keeps hazed; while a lens is on, the window switcher lists its
+/// apps first. A click, a bar item, hover focus and the window
+/// switcher are deliberate picks and skip nothing.
 extension KiwiCore {
-    /// The apps the lens on holds, by `AppRef.listKey`; nil while
-    /// no lens is on.
-    var visionLensApps: Set<String>? {
-        visionLook.lens.map { Set($0.apps) }
-    }
-
-    /// The apps the lens on keeps focus on; nil while no lens is on
-    /// or its "Keep focus on these apps" is off.
-    var lensFocusApps: Set<String>? {
-        guard visionLook.lens?.keepFocus == true else { return nil }
-        return visionLensApps
-    }
-
-    /// The windows the focus and swap keys skip now: every window
-    /// whose app the lens on does not hold (rulings 30, 35). Nil
-    /// while no lens keeps focus.
+    /// The windows a keyed step skips now: every window the lens on
+    /// keeps hazed, asked per window of the one `visionLensClear`
+    /// the plates take (ruling 44). Nil while no lens keeps focus.
     func lensKeySkip() -> ((WindowID) -> Bool)? {
-        guard let apps = lensFocusApps else { return nil }
-        return { [state] id in
+        guard visionLook.lens?.keepFocus == true else { return nil }
+        return { [self] id in
             guard let window = state.windows[id] else { return false }
-            return !apps.contains(window.appRef.listKey)
+            return !visionLensClear(window.appRef)
+                .clears(title: window.title)
         }
+    }
+
+    /// Whether the lens on holds `app` at all — a window switcher
+    /// row's question, which names apps (ruling 36); false while no
+    /// lens is on.
+    func lensHolds(_ app: AppRef) -> Bool {
+        visionLensClear(app) != .none
     }
 }
 

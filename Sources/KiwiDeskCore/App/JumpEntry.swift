@@ -45,7 +45,7 @@ public struct JumpEntry: Sendable, Equatable {
     /// Whether a lens is on and this row's app is not one it holds:
     /// the row sits under "Other apps", after every member's (#2103
     /// ruling 36). False for every row while no lens is on.
-    public internal(set) var isOtherApp: Bool
+    public let isOtherApp: Bool
 
     public init(
         target: Target,
@@ -93,7 +93,7 @@ public struct JumpSnapshot: Sendable, Equatable {
 /// window — tracked or up on an away Desktop — before one put away
 /// in the Dock, each by recency. The ONE rule Jump to window's list
 /// and `move_here`'s pick share; hidden apps sit below both.
-public enum JumpTier: Int, Comparable, Sendable {
+public enum JumpTier: Int, Comparable, CaseIterable, Sendable {
     case open
     case minimized
 
