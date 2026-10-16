@@ -122,9 +122,10 @@ extension KiwiCore {
     typealias FrontWindow = FloatDetection.ListedWindow
 
     /// Every visible window front to back, any layer, KiwiDesk's
-    /// own windows INCLUDED — the one front-to-back read, and the
+    /// own windows INCLUDED, the desktop's elements left out — the
     /// live default of `frontStack` (#1788, #1869); a consumer
-    /// filters what it needs.
+    /// filters what it needs. KiwiVision reads the other way,
+    /// through `liveFrontWindows`.
     static func liveFrontStack() -> [FrontWindow] {
         FloatDetection.frontToBackWindows { _, _ in false }
     }
@@ -143,9 +144,16 @@ extension KiwiCore {
     }
 
     /// The stack without KiwiDesk's chrome — KiwiVision's mask
-    /// reads it (#2103).
+    /// reads it (#2103). It keeps the desktop's elements: macOS
+    /// counts a below-normal bar such as SketchyBar's among them,
+    /// and Never dimmed must see it to keep it clear; the mask walk
+    /// drops the wallpaper and the icons by layer.
     static func liveFrontWindows() -> [FrontWindow] {
-        withoutOwnChrome(liveFrontStack())
+        withoutOwnChrome(
+            FloatDetection.frontToBackWindows(
+                includingDesktopElements: true
+            ) { _, _ in false }
+        )
     }
 
     /// The normal-layer frames of `stack` — which window a screen

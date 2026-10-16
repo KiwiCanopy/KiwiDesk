@@ -987,7 +987,9 @@ Touching `Config`, `Profiles`, `Commands`.
   `AppRuleKeepTests`, `RuleKeepDraftTests`)
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
-  stored profile and the rule snapshot, taken only where a caller holds leaves (`ChangeReportTests`,
+  stored profile and the rule snapshot, taken only where a caller holds leaves
+  — save Settings' live rows, the one ruled reader that holds none (#2262,
+  `UnsavedLiveSettingsTests`) — (`ChangeReportTests`,
   `KeepSettingsEdgeTests`), a keep landing the shared look without repainting
   live, and a live store a verb writes joining the keep document or reporting
   nothing, which is review's (#1685)
@@ -1763,7 +1765,9 @@ Touching `Sources/KiwiDesk` (the GUI).
   save pill exists only while the draft does (`DetailPanelTests`,
   `HomeSurfacingTests`) and every reason it appears owes a row in its own list
   — config leaves through `SettingsDraftDiff`, live drift through the ONE
-  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`)
+  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`),
+  an unsaved live setting through Core's `unsavedLiveSettings`, asked again
+  wherever live or the baseline can have moved (#2262, `SettingsLiveRowsTests`)
 - a picture whose object is NOT the draft takes a read-only sheet instead,
   which answers Return AND Escape and is hosted above the subtree that opens it
   (#859, `SheetPresentationSeamTests` is the register of who may host one,

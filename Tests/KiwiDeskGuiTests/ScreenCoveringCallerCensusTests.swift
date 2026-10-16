@@ -118,7 +118,8 @@ struct ScreenCoveringCallerCensusTests {
         "App/KiwiCore.swift": 2,
         // The stand-down's one read, the default's definition and
         // the CGWindowList call it wraps, and KiwiVision's
-        // chrome-free view's definition and its call of the default.
+        // chrome-free view's definition and its own raw read, the
+        // desktop's elements kept.
         "App/KiwiCore+ScreenCovering.swift": 5,
         // The CGWindowList read's own definition.
         "AX/FloatDetection.swift": 1,
@@ -154,6 +155,33 @@ struct ScreenCoveringCallerCensusTests {
         )
     }
 
+    /// KiwiVision's read keeps the desktop's elements: macOS counts
+    /// SketchyBar's layer −20 bar among them, and Never dimmed must
+    /// see it (#2103). Hover and the presentation verdict read the
+    /// other way, through `liveFrontStack`.
+    @Test("KiwiVision's read keeps the desktop's elements")
+    func visionReadKeepsDesktop() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDeskCore/App/KiwiCore+ScreenCovering.swift"
+                )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            source.contains(
+                "staticfuncliveFrontWindows()->[FrontWindow]{"
+                    + "withoutOwnChrome(FloatDetection.frontToBackWindows("
+                    + "includingDesktopElements:true"
+            )
+        )
+        #expect(
+            source.contains(
+                "staticfuncliveFrontStack()->[FrontWindow]{"
+                    + "FloatDetection.frontToBackWindows{"
+            )
+        )
+    }
+
     /// The raw spellings beneath the seam stay in their homes, so a
     /// reader cannot swap the seam for the live read and keep its
     /// file's count — which would read the host's real windows
@@ -181,7 +209,8 @@ struct ScreenCoveringCallerCensusTests {
                 // The seam's default.
                 "App/KiwiCore.swift": 1,
                 // The default's definition, the read it wraps, and
-                // KiwiVision's chrome-free view's call of it.
+                // KiwiVision's own raw read, the desktop's elements
+                // kept.
                 "App/KiwiCore+ScreenCovering.swift": 3,
                 // The read's own definition.
                 "AX/FloatDetection.swift": 1,

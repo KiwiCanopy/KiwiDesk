@@ -166,8 +166,8 @@ struct DetailPanelTests {
         #expect(
             source.contains(
                 "letall=SettingsDiffRowSource.rows(for:model)"
-                    + "letrows=SettingsDiffRowSource.areaRows("
-                    + "all,in:destination)"
+                    + ".filter{$0.section==.draft}letrows="
+                    + "SettingsDiffRowSource.areaRows(all,in:destination)"
             ),
             Comment(
                 rawValue:

@@ -51,8 +51,9 @@ extension SettingsModel {
             return isDirty && core.isGuiManaged
         case .updateActiveProfile:
             // Blocked while permission is paused (#335).
+            // A live change not saved is Save's to keep (#2262).
             return profileSaveBlockedReason == nil && updateEnabled
-                && (isDirty || profileDirty)
+                && (isDirty || profileDirty || liveUnsaved)
         case .saveAsNewProfile:
             return profileSaveBlockedReason == nil
         }

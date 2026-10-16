@@ -409,6 +409,8 @@
   "diff.label.space_name": "空間名稱",
   "diff.label.space_pin": "螢幕釘選",
   "diff.label.swap_skips_cascade": "互換時略過層疊",
+  "diff.live.heading": "已生效，未儲存",
+  "diff.live.more": "更多：%1$d",
   "diff.note.added": "已加入",
   "diff.note.edited": "已編輯",
   "diff.note.removed": "已移除",

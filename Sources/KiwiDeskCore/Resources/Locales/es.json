@@ -409,6 +409,8 @@
   "diff.label.space_name": "Nombre del espacio",
   "diff.label.space_pin": "Fijación a pantalla",
   "diff.label.swap_skips_cascade": "El intercambio omite el escalonamiento",
+  "diff.live.heading": "Aplicado, sin guardar",
+  "diff.live.more": "Más: %1$d",
   "diff.note.added": "Añadido",
   "diff.note.edited": "Editado",
   "diff.note.removed": "Eliminado",
