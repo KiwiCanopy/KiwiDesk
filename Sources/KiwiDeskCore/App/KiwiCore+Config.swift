@@ -4,6 +4,9 @@ import Foundation
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
+        // A load may move who owns the setup, which a lens's reach
+        // reads (#2103 ruling 40).
+        defer { liveProfileChanged() }
         // #1790: `init.lua`'s Spaces are undeclared until its run
         // returns, so nothing is retired meanwhile.
         profiles.arrangementInFlight += 1

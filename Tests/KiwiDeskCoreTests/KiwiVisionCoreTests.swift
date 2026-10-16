@@ -46,7 +46,7 @@ struct KiwiVisionCoreTests {
     func verbToggles() {
         let core = makeCore()
         var heard: [VisionActive] = []
-        core.vision.onChange = { heard.append($0) }
+        core.vision.onChange = { active, _ in heard.append(active) }
         let on = core.execute("kiwivision.toggle")
         #expect(on.isSuccess)
         #expect(core.kiwiVisionIsOn)
@@ -205,7 +205,7 @@ struct KiwiVisionCoreTests {
     func stopClears() {
         let core = makeCore()
         var heard: [VisionActive] = []
-        core.vision.onChange = { heard.append($0) }
+        core.vision.onChange = { active, _ in heard.append(active) }
         core.vision.active = .plain
         core.stop()
         #expect(!core.kiwiVisionIsOn)

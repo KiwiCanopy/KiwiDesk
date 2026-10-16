@@ -107,6 +107,13 @@ extension VisionLens: Codable {
 }
 
 extension VisionLens {
+    /// The key a profile's `lens_reach` names a lens by: its stored
+    /// name, lowercased, since names are unique ignoring case
+    /// (ruling 39).
+    public static func reachKey(_ name: String) -> String {
+        AppWideSettings.lensName(name).lowercased()
+    }
+
     /// Title patterns keyed as members are (`AppRef.listKey`,
     /// trimmed and lowercased), a key naming no member dropped:
     /// a title rule only narrows a member (ruling 32).

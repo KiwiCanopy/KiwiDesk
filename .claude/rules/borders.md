@@ -481,6 +481,22 @@ Obligations:
   and writes the settled list, never the live one**, so a session
   `define_lens` or `delete_lens` never reaches `gui.json` (ruling
   40) — review's until the lens page owes it a test.
+- **A lens's reach is read from adoption state, and followed on
+  every change of it** (#2103 rulings 16, 38). A profile leaves a
+  lens out through its sparse `lens_reach`, keyed by
+  `VisionLens.reachKey`; the live profile's marks ride
+  `ActiveProfile`, refiled on every write of its file, and the one
+  `profileLeavingOut` reads them over `liveHome` before the
+  ownership read, which touches disk — never the profile file on a
+  switch path (#1245). `ProfileManager`'s `active` and a config
+  load re-judge the lens on through `liveProfileChanged`, and a lens
+  turned off for reach says why through its `VisionChangeCause`
+  (`KiwiVisionLensReachTests`). A path that moves who owns the
+  setup — `gui.json` or `init.lua` written — without a config load
+  owes the same `liveProfileChanged` call. **A lens rename or delete owes
+  every profile's `lens_reach` a re-key or a clear** in the same
+  write, or a later lens of that name inherits "left out" — review's
+  until #2103 PR 6 owes it a test.
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

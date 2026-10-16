@@ -99,6 +99,18 @@ struct ViewPickItemsTests {
             chips.last.map { ViewPickText.spoken($0, on: .vision) }
                 == "KiwiVision: Calls, No apps yet"
         )
+        // Ruling 15: a lens the live profile leaves out says which.
+        let away = items(
+            vision: .off,
+            lenses: [
+                VisionLensChoice(
+                    name: "Writing",
+                    refusal: .outOfReach(profile: "Studio")
+                )
+            ]
+        )[.vision]
+        #expect(away?.last?.refusal == "Not in Studio")
+        #expect(away?.last?.isApplicable == false)
     }
 
     @Test("every chip greys while KiwiDesk boots, and says so")
@@ -174,7 +186,7 @@ struct ViewPickItemsTests {
         )
         #expect(
             delegate.contains(
-                "core.vision.onChange={[weakself]activein"
+                "core.vision.onChange={[weakself]active,causein"
                     + "self?.visionReadersChanged()"
             )
         )

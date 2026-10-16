@@ -24,6 +24,8 @@ extension KiwiCore {
         if active != true, let refusal = lensRefusal(lens) {
             switch refusal {
             case .noApps: return .fail("\(lens.name) has no apps yet")
+            case .outOfReach(let profile):
+                return .fail("\(lens.name) does not reach \(profile)")
             }
         }
         setVision(active == true ? .off : .lens(lens.name))
@@ -33,7 +35,8 @@ extension KiwiCore {
     /// Why `lens` cannot turn on, nil where it can: the one verdict
     /// every gate and picker reads.
     public func lensRefusal(_ lens: VisionLens) -> LensRefusal? {
-        lens.apps.isEmpty ? .noApps : nil
+        if lens.apps.isEmpty { return .noApps }
+        return profileLeavingOut(lens).map { .outOfReach(profile: $0) }
     }
 
     /// Every lens in stored order, with its verdict.

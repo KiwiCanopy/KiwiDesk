@@ -28,7 +28,7 @@ struct ConfigMigrationGlassRoutingTests {
         let root = coreRoot
         let prefix = root.path + "/"
         let allowed: Set<String> = [
-            "Profiles/Profile.swift",
+            "Profiles/Profile+CodingKeys.swift",
             "Config/ConfigMigration+GlassDefault.swift",
             "Config/ConfigMigration+TrackLimit.swift",
             "Config/ConfigMigration+KiwiShelf.swift",
