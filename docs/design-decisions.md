@@ -3010,7 +3010,17 @@ window" undoes every focus change the pointer did not make: a
 shortcut, a scroll-gesture step, a close-return or a Space switch
 leaves the pointer where it was, and 200 ms later the old window
 takes the focus back. So only a global mouse-moved event arms the
-dwell, and a focus that moves while it runs stands. KiwiDesk's
+dwell, and a focus that moves while it runs stands. That closes
+the still pointer, and a small nudge needs the same answer: after
+the focus moves without the pointer — a shortcut, a new window, a
+Space switch — the windows the pointer is left over are HELD, and
+a rest on one stands down until a move leaves them all (owner
+ruling 2026-10-17). A 5 pt brush on a trackpad is not a choice of
+the window under it; entering another window is, which is sway's
+`focus_follows_mouse yes` and Hyprland's `mouse_refocus = false`.
+Coupling hover focus to `mouse.follows_focus` would hide the same
+gap by moving the pointer for people who chose not to have it
+moved, so the two stay independent. KiwiDesk's
 own warp posts no mouse event (input-and-animation.md), so
 `mouse.follows_focus` lands the pointer on the window that
 already has the focus and the two never loop. A dwell timed from
@@ -8126,10 +8136,10 @@ user reads them, and each has the AI app interview the user one
 question at a time, so it works pasted unchanged. A ready-made
 prompt lands with the tools it needs and is never drawn before
 them — removed rather than dimmed, as with any entry whose channel
-does not exist yet. Copy Setup Prompt and Add to Claude Desktop…
+does not exist yet. Copy Setup Prompt and Claude Desktop's Add…
 grey on a translocated copy through the one `RunningCopy` verdict
 the login item reads too (▸ Open at login), because the path each
-one carries dies at the next launch. Add to Claude Desktop… shows
+one carries dies at the next launch. Claude Desktop's Add… shows
 nothing after the click: Claude Desktop's own install dialog is the
 feedback, and KiwiDesk cannot see whether the user accepted it. It
 reads only whether Claude Desktop is installed, which greys it with

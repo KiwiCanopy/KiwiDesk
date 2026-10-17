@@ -7,11 +7,16 @@ import SwiftUI
 struct SettingsRowShape<Label: View, Control: View>: View {
     @Environment(\.settingsWidth) private var width
     @Environment(\.settingsLabelColumn) private var labelColumn
+    /// The label takes the row's free width and the control sits
+    /// trailing, instead of the shared label column — a titled,
+    /// captioned row with one action (the AI page's action rows).
+    var labelFills = false
     @ViewBuilder let label: Label
     @ViewBuilder let control: Control
 
     var body: some View {
         let stacked = width.stacksRows
+        let column = stacked || labelFills ? nil : labelColumn
         let layout =
             stacked
             ? AnyLayout(
@@ -24,8 +29,9 @@ struct SettingsRowShape<Label: View, Control: View>: View {
                 // chain rather than becoming an `if`, which would
                 // wrap the label in `_ConditionalContent` and give
                 // away the identity `AnyLayout` is here to keep.
+                .frame(width: column, alignment: .leading)
                 .frame(
-                    width: stacked ? nil : labelColumn,
+                    maxWidth: labelFills ? .infinity : nil,
                     alignment: .leading
                 )
             control
