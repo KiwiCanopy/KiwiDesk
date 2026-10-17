@@ -1672,7 +1672,7 @@
   "shortcuts.gestures.space_bar_off": "La Space Bar est désactivée. Activez-la dans %1$@.",
   "shortcuts.gestures.spring": "Maintenez-la au-dessus de l'espace et, après %1$@, la vue ouvre cet espace avec la fenêtre déjà dans sa disposition.",
   "shortcuts.gestures.spring_link": "Modifiez le délai dans %1$@.",
-  "shortcuts.gestures.summary": "Gestes de défilement, focus là où s'arrête le pointeur, si le pointeur suit le focus, et redimensionnement à la souris",
+  "shortcuts.gestures.summary": "Faites défiler en maintenant des touches, donnez le focus en pointant, faites glisser et redimensionnez les fenêtres, et cliquez ou faites glisser sur la KiwiShelf",
   "shortcuts.gestures.swap": "Faites glisser une fenêtre sur une autre pour les échanger, ou sur un autre écran pour l'y déplacer.",
   "shortcuts.gestures.title": "Souris et trackpad",
   "shortcuts.go_to_desktop": "Aller au Bureau",

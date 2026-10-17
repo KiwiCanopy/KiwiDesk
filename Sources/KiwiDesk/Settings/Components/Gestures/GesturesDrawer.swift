@@ -18,9 +18,10 @@ struct GesturesDrawer: View {
     /// The section's, so its jump chip can open the card (#1520).
     @Binding var expanded: Bool
     /// Per visit, like `expanded`: the first click open arms the
-    /// first entry's play, which spends it.
+    /// first entry's play, a picture's click its own entry's, and
+    /// the entry that plays spends it.
     @State private var played = false
-    @State private var autoplay = false
+    @State private var playing: GestureItem?
 
     private var settings: TilingSettings { model.config.settings }
 
@@ -29,8 +30,9 @@ struct GesturesDrawer: View {
             SettingsCatalog.shortcuts.gestures,
             isExpanded: $expanded,
             summary: summary,
+            preview: AnyView(strip),
             onToggle: { open in
-                autoplay = open && !played
+                if open, !played { playing = .scrollStep }
                 if open { played = true }
             }
         ) {
@@ -41,7 +43,7 @@ struct GesturesDrawer: View {
                         "Scroll gestures — anywhere, holding a modifier"
                     )
                 )
-                GesturesScrollEntries(model: model, autoplay: $autoplay)
+                GesturesScrollEntries(model: model, playing: $playing)
                 GestureRule()
                 GestureGroupHeading(
                     title: L(
@@ -68,7 +70,7 @@ struct GesturesDrawer: View {
                     ),
                     followsGroup: true
                 )
-                GesturesShelfEntries(model: model)
+                GesturesShelfEntries(model: model, playing: $playing)
             }
             .environment(
                 \.schematicPalette,
@@ -80,36 +82,49 @@ struct GesturesDrawer: View {
     private var summary: String {
         L(
             "shortcuts.gestures.summary",
-            "Scroll gestures, focus where the pointer rests, "
-                + "whether the pointer follows focus, and mouse "
-                + "resize"
+            "Scroll with held keys, focus by pointing, drag and "
+                + "resize windows, and click or drag on the KiwiShelf"
+        )
+    }
+
+    /// The shut card's pictures; a click opens the card at that
+    /// entry and plays it once, spending the visit's first play.
+    private var strip: some View {
+        GestureStrip(
+            settings: settings,
+            gestures: model.config.scrollGesture
+        ) { item in
+            playing = item
+            played = true
+            expanded = true
+            model.nav.pendingReveal = SettingsAnchor(
+                destination: .shortcuts,
+                anchor: item.anchor
+            )
+        }
+        .environment(
+            \.schematicPalette,
+            HomeCardPlate.palette(settings)
         )
     }
 
     @ViewBuilder private var windowEntries: some View {
         GestureEntry(
-            L(
-                "shortcuts.gestures.swap",
-                "Drag a window onto another to swap them, or onto "
-                    + "another screen to move it there."
-            ),
-            surface: .windows,
+            .swap,
             settings: settings,
-            pace: .story
-        ) { GesturePicture.Swap(t: $0) }
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.swap)
         GestureRule()
         GestureEntry(
-            L(
-                "shortcuts.gestures.edge",
-                "Drag a window's edge to resize it."
-            ),
-            surface: .windows,
+            .edge,
             settings: settings,
+            gestures: model.config.scrollGesture,
             help: MouseResizePicker.help,
-            helpSubject: MouseResizePicker.spokenLabel
+            helpSubject: MouseResizePicker.spokenLabel,
+            playing: $playing
         ) {
-            GesturePicture.Edge(t: $0)
-        } control: {
             MouseResizePicker(
                 selection: $model.config.settings.mouseResize
             )
@@ -118,25 +133,20 @@ struct GesturesDrawer: View {
                     .mouseResize
             )
         }
+        .gestureAnchored(.edge)
     }
 
     /// Hover focus, then its inverse: the hand acts, then the
     /// pointer follows (#1869).
     @ViewBuilder private var focusEntries: some View {
         GestureEntry(
-            L(
-                "shortcuts.gestures.hover_focus",
-                "Rest the pointer on a window to focus it and bring "
-                    + "it to the front."
-            ),
-            surface: .windows,
+            .hoverFocus,
             settings: settings,
-            pace: .steps,
+            gestures: model.config.scrollGesture,
             help: Self.hoverFocusHelp,
-            helpSubject: Self.hoverFocusLabel
+            helpSubject: Self.hoverFocusLabel,
+            playing: $playing
         ) {
-            GesturePicture.HoverFocus(t: $0)
-        } control: {
             VStack(alignment: .leading, spacing: 6) {
                 Toggle(
                     Self.hoverFocusLabel,
@@ -149,19 +159,14 @@ struct GesturesDrawer: View {
                 hoverDelayRow
             }
         }
+        .gestureAnchored(.hoverFocus)
         GestureRule()
         GestureEntry(
-            L(
-                "shortcuts.gestures.follow_focus",
-                "Focus moves with a shortcut, a Space switch, "
-                    + "switching apps or a closed window."
-            ),
-            surface: .windows,
+            .followFocus,
             settings: settings,
-            pace: .steps
+            gestures: model.config.scrollGesture,
+            playing: $playing
         ) {
-            GesturePicture.FollowFocus(t: $0)
-        } control: {
             Toggle(
                 L(
                     "behavior.mouse.follows_focus",
@@ -174,6 +179,7 @@ struct GesturesDrawer: View {
                     .followsFocus
             )
         }
+        .gestureAnchored(.followFocus)
     }
 }
 

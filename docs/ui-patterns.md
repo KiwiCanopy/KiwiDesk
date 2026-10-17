@@ -346,6 +346,13 @@ rather than under it because it states a VALUE and disappears
 on expand, where a caption explains what a thing IS and stays.
 The ruling is in `docs/design-decisions.md`.
 
+:::unreleased
+
+A collapsible section may also take a `preview:` drawn under its
+row while shut — the Mouse & trackpad card's picture strip is the
+one instance, ruled in `docs/design-decisions.md` ▸ Shortcuts.
+:::
+
 **A section header's trailing readout is words only.** A
 `SettingsSection` takes `trailing:` — a short value at the
 title's far edge, drawn in `ink2` at `.subheadline`, the Mac

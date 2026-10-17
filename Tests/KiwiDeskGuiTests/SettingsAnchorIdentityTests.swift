@@ -100,6 +100,9 @@ struct SettingsAnchorIdentityTests {
         // frame and the loop's target are one value. Not a reveal
         // target — the picture is hidden from accessibility.
         "GestureEntry.swift": 1,
+        // The same loop ending, for the shut card's strip (owner
+        // ruling 2026-10-17); hidden from accessibility likewise.
+        "GestureStripPlate.swift": 1,
         // Scroll identity: the tour's palette and look rows
         // scroll the live pick into view (#1720, #1528). Not a
         // Settings destination, so nothing there is a reveal

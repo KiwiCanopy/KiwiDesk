@@ -11,9 +11,9 @@ import SwiftUI
 /// resolved values.
 struct GesturesScrollEntries: View {
     @ObservedObject var model: SettingsModel
-    /// The first entry plays once as it appears, spending this
+    /// The entry that plays once as it appears, spending this
     /// (`GesturesDrawer`).
-    @Binding var autoplay: Bool
+    @Binding var playing: GestureItem?
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }
 
@@ -24,23 +24,11 @@ struct GesturesScrollEntries: View {
 
     var body: some View {
         GestureEntry(
-            L(
-                "shortcuts.gestures.scroll.sentence",
-                "Hold these keys and scroll to move focus window by "
-                    + "window along a %1$@ row. On any other Space, "
-                    + "focus moves through its windows in order "
-                    + "instead.",
-                L("layout.scrolling.name", "Scrolling")
-            ),
-            surface: .windows,
+            .scrollStep,
             settings: model.config.settings,
-            pace: .steps,
-            // Core's verdict, so a hand-edited lone ⌃ greys too.
-            off: gestures.sanitized.pan.isEmpty,
-            playsOnAppear: $autoplay
+            gestures: gestures,
+            playing: $playing
         ) {
-            GesturePicture.ScrollStep(t: $0, chord: gestures.pan)
-        } control: {
             VStack(alignment: .leading, spacing: 8) {
                 reachRow(.pan) {
                     ScrollChordRecorderField(
@@ -71,6 +59,7 @@ struct GesturesScrollEntries: View {
                 }
             }
         }
+        .gestureAnchored(.scrollStep)
         GestureRule()
         spaceStepEntry
         GestureRule()
@@ -100,19 +89,11 @@ struct GesturesScrollEntries: View {
     /// swipe-length rows.
     private var spaceStepEntry: some View {
         GestureEntry(
-            L(
-                "shortcuts.gestures.scroll.space_step_sentence",
-                "Hold these keys and scroll to switch to the next or "
-                    + "previous Space on the screen under the "
-                    + "pointer, one per swipe or wheel notch."
-            ),
-            surface: .windows,
+            .spaceStep,
             settings: model.config.settings,
-            pace: .story,
-            off: gestures.sanitized.spaceStep.isEmpty
+            gestures: gestures,
+            playing: $playing
         ) {
-            GesturePicture.SpaceStep(t: $0, chord: gestures.spaceStep)
-        } control: {
             reachRow(.spaceStep) {
                 ScrollChordRecorderField(
                     name: ScrollGestureWords.label(.spaceStep),
@@ -127,6 +108,7 @@ struct GesturesScrollEntries: View {
                 )
             }
         }
+        .gestureAnchored(.spaceStep)
     }
 
     /// Go to: a gesture's recorder row, through the one reveal
