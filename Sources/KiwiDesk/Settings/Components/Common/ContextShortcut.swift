@@ -84,14 +84,19 @@ private struct RowActions<MenuContent: View>: ViewModifier {
 }
 
 /// A chord popover's entry: a full-row entry, lifting under the
-/// pointer (`rowHoverHighlight`) and greyed while disabled.
+/// pointer (`rowHoverHighlight`), deepening while pressed and
+/// greyed while disabled.
 private struct PopoverRowStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        Row(label: configuration.label)
+        Row(
+            label: configuration.label,
+            pressed: configuration.isPressed
+        )
     }
 
     private struct Row: View {
         let label: ButtonStyleConfiguration.Label
+        let pressed: Bool
         @Environment(\.isEnabled) private var isEnabled
 
         var body: some View {
@@ -104,6 +109,12 @@ private struct PopoverRowStyle: ButtonStyle {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
                 .rowHoverHighlight()
+                .background(
+                    RoundedRectangle(cornerRadius: 5).fill(
+                        pressed && isEnabled
+                            ? SettingsTheme.chipRest : .clear
+                    )
+                )
         }
     }
 }

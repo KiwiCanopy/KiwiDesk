@@ -304,13 +304,16 @@ extension View {
 
     /// Hover highlight for full-width row buttons: rests at
     /// nothing and lifts one `chipRest` step (#956, #2047).
+    /// `lifts: false` holds a row whose click changes nothing —
+    /// a selected one — flat.
     func rowHoverHighlight(
+        lifts: Bool = true,
         cornerRadius: CGFloat = 5,
         padding: CGFloat = 0
     ) -> some View {
         hoverHighlight(
             rest: .clear,
-            hover: SettingsTheme.chipRest,
+            hover: lifts ? SettingsTheme.chipRest : .clear,
             edge: nil,
             cornerRadius: cornerRadius,
             padding: padding

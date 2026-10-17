@@ -50,7 +50,9 @@ struct HyperKeyField: View {
         .controlSize(.regular)
         .tint(buttonTint)
         .foregroundStyle(buttonTint)
-        .modifier(RecorderButtonChrome(recording: recording))
+        .modifier(
+            RecorderButtonChrome(recording: recording, flashing: flashing)
+        )
         .accessibilityLabel(HyperKeyWords.title)
         .accessibilityValue(spokenValue)
     }

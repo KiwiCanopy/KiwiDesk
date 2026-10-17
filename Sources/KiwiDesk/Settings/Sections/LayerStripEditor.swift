@@ -7,12 +7,8 @@ struct LayerStripEditor: View {
     @Binding var selected: String
     @State private var addingLayer = false
     @State private var newLayer = ""
-    @State private var addLayerHovered = false
     /// Keyboard focus target following layer deletion (#816).
     @FocusState private var focusedChip: String?
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -25,9 +21,6 @@ struct LayerStripEditor: View {
                 focusedChip =
                     stripSurvivesDeletion ? KeyLayer.defaultName : nil
             }
-        }
-        .onChange(of: isEnabled) { _, now in
-            if !now { addLayerHovered = false }
         }
     }
 
@@ -69,14 +62,9 @@ struct LayerStripEditor: View {
             Image(systemName: "plus")
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
-                .choiceChip(
-                    hovering: isEnabled && addLayerHovered,
-                    edged: false
-                )
-                .animation(hoverAnimation, value: addLayerHovered)
+                .choiceChip(edged: false)
         }
         .buttonStyle(.plain)
-        .onHover { addLayerHovered = isEnabled && $0 }
         .help(L("shortcuts.add_layer.help", "Add a layer"))
         .accessibilityLabel(
             L("shortcuts.add_layer.help", "Add a layer")
@@ -109,10 +97,6 @@ struct LayerStripEditor: View {
 
     private var layerNamePlaceholder: String {
         L("shortcuts.layer_name", "Layer name")
-    }
-
-    private var hoverAnimation: Animation? {
-        reduceMotion ? nil : .easeOut(duration: 0.12)
     }
 
     /// What Add does with the typed name, read off the one

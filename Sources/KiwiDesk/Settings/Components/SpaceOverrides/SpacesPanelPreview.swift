@@ -213,10 +213,6 @@ private struct SpacePreviewChip: View {
     let title: String
     let isOn: Bool
     let action: () -> Void
-    @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         Button(action: action) {
@@ -225,20 +221,9 @@ private struct SpacePreviewChip: View {
                 .fontWeight(.medium)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
-                .choiceChip(
-                    selected: isOn,
-                    hovering: hovering && isEnabled
-                )
-                .animation(
-                    reduceMotion ? nil : .easeOut(duration: 0.12),
-                    value: hovering
-                )
+                .choiceChip(selected: isOn)
         }
         .buttonStyle(.plain)
-        .onHover { hovering = isEnabled && $0 }
-        .onChange(of: isEnabled) { _, now in
-            if !now { hovering = false }
-        }
         .accessibilityAddTraits(
             isOn ? [.isButton, .isSelected] : .isButton
         )

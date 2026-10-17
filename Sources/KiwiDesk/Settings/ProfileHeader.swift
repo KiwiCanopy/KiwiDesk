@@ -49,6 +49,7 @@ struct ProfileEditTargetMenu: View {
         // — so the whole chip is the menu's hit area.
         .menuStyle(.button)
         .buttonStyle(.plain)
+        .neutralMenuLabel()
         .menuIndicator(.hidden)
         .fixedSize()
         // A button chip: it lifts under the pointer (#2377).
@@ -78,7 +79,6 @@ struct ProfileEditTargetMenu: View {
                     .foregroundStyle(SettingsTheme.ink2)
             }
         }
-        .foregroundStyle(SettingsTheme.ink)
         .padding(.horizontal, ChipMetrics.padH)
         .padding(.vertical, ChipMetrics.padV)
         .contentShape(ChipMetrics.shape)

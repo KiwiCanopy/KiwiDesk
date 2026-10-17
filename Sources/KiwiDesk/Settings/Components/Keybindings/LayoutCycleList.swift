@@ -18,6 +18,7 @@ struct LayoutCycleList: View {
     @State private var dragged: LayoutMode?
     @State private var rowFrames: [LayoutMode: CGRect] = [:]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.controlActiveState) private var activeState
 
     private static let listSpace = "layoutCycleList"
 
@@ -60,9 +61,12 @@ struct LayoutCycleList: View {
         picked.flatMap { model.config.modeCycle.contains($0) ? $0 : nil }
     }
 
-    /// Whether the list holds keyboard focus — a click selects
-    /// without it, so the accent row is the keyboard's alone.
-    private var listFocused: Bool { focused != nil }
+    /// Whether the list holds keyboard focus in the key window — a
+    /// click selects without it, so the accent row is the
+    /// keyboard's alone, and focus outlives the window resigning.
+    private var listFocused: Bool {
+        focused != nil && activeState == .key
+    }
 
     /// The selected row is the accent while the list holds focus
     /// and the grey selection otherwise, as a macOS list draws it.
@@ -91,9 +95,19 @@ struct LayoutCycleList: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
+        // The pointer's lift, a fill apart from the selection's
+        // (#1173); the selected row, whose click changes nothing,
+        // stays flat.
+        .rowHoverHighlight(lifts: selected != mode, cornerRadius: 0)
         .background(rowFill(mode))
         .contentShape(Rectangle())
-        .onTapGesture { picked = mode }
+        // A click always lands grey: focus a click kept — the row
+        // already focused, or one the focus refusal missed — is
+        // cleared here, so only the keyboard draws the accent.
+        .onTapGesture {
+            picked = mode
+            focused = nil
+        }
         .focusable()
         .focused($focused, equals: mode)
         .onDeleteCommand { remove(mode) }

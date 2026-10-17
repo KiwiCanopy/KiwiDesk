@@ -7,10 +7,6 @@ struct ScopeChip: View {
     let label: String
     let isOn: Bool
     let action: () -> Void
-    @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         Button(action: action) {
@@ -18,20 +14,9 @@ struct ScopeChip: View {
                 .font(.system(size: 11, weight: .semibold))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .choiceChip(
-                    selected: isOn,
-                    hovering: hovering && isEnabled
-                )
-                .animation(
-                    reduceMotion ? nil : .easeOut(duration: 0.12),
-                    value: hovering
-                )
+                .choiceChip(selected: isOn)
         }
         .buttonStyle(.plain)
-        .onHover { hovering = isEnabled && $0 }
-        .onChange(of: isEnabled) { _, now in
-            if !now { hovering = false }
-        }
         .accessibilityLabel(label)
         .accessibilityAddTraits(isOn ? [.isSelected] : [])
     }

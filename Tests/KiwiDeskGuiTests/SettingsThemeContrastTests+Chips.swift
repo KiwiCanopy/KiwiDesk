@@ -127,6 +127,38 @@ extension SettingsThemeContrastTests {
             on: "warningSurface",
             SettingsTheme.warningSurface
         ),
+        // The recorder's conflict badge, warning or dead.
+        icon(
+            "warningInk",
+            SettingsTheme.warningInk,
+            on: "sunken",
+            SettingsTheme.sunken
+        ),
+        icon(
+            "danger",
+            SettingsTheme.danger,
+            on: "sunken",
+            SettingsTheme.sunken
+        ),
+    ]
+
+    /// A borderless menu or popover trigger's label under its lift
+    /// (`menuTriggerHover`): `ink`, or `ink2` where an "Applies to"
+    /// reach is shared, on the card rows that carry them, at the
+    /// text floor.
+    private static let triggerChips: [Pairing] = [
+        Pairing(
+            "ink on a hovered menu trigger on card",
+            SettingsTheme.ink,
+            on: SettingsTheme.card,
+            layers: [SettingsTheme.chipHover]
+        ),
+        Pairing(
+            "ink2 on a hovered menu trigger on card",
+            SettingsTheme.ink2,
+            on: SettingsTheme.card,
+            layers: [SettingsTheme.chipHover]
+        ),
     ]
 
     private static func icon(
@@ -197,7 +229,8 @@ extension SettingsThemeContrastTests {
     ]
 
     static let chips: [Pairing] =
-        segments + buttonChips + iconChips + choiceChips + emptyLensChips
+        segments + buttonChips + iconChips + triggerChips + choiceChips
+        + emptyLensChips
 
     /// The opacity of the retired `primary` track, which read as a
     /// well in light — #2047's defect was dark alone — so its

@@ -56,27 +56,50 @@ struct HoverLiftAdoptionTests {
         #expect(strip.contains(".onHover{insideinifinside{"))
         // Selection is the stroke alone: no accent wash.
         #expect(!strip.contains("SettingsTheme.accent.opacity("))
-        #expect(strip.contains("selected?SettingsTheme.accent:"))
+        #expect(strip.contains(".strokeBorder(selected?SettingsTheme."))
     }
 
-    /// The cycle list's selected row is the accent while the list
-    /// holds keyboard focus and the grey selection otherwise, as
-    /// a macOS list draws it (owner, 2026-10-17).
-    @Test("the cycle row is the accent only while the list is focused")
+    /// The cycle list's selected row takes its focused look only
+    /// while the list holds keyboard focus in the key window, as a
+    /// macOS list draws it (owner, 2026-10-17): the fill and the
+    /// inks each read that one predicate. Which tokens is a tuning.
+    @Test("the cycle row's focused look reads the list's focus")
     func cycleRowFollowsFocus() throws {
-        let list = try squashed(
+        let list = try source(
             "Settings/Components/Keybindings/LayoutCycleList.swift"
         )
-        #expect(list.contains("privatevarlistFocused:Bool{focused!=nil}"))
-        #expect(
-            list.contains(
-                "listFocused?SettingsTheme.accent:SettingsTheme.rowSelected"
-            )
-        )
-        #expect(list.contains(".background(rowFill(mode))"))
-        #expect(list.contains("onAccent?SettingsTheme.accentInk:"))
+        let focus = try body("private var listFocused:", in: list)
+        #expect(focus.contains("focused!=nil"))
+        #expect(focus.contains("activeState==.key"))
+        let fill = try body("private func rowFill(", in: list)
+        #expect(fill.contains("guardselected==modeelse{return.clear}"))
+        #expect(fill.contains("returnlistFocused?SettingsTheme."))
+        let item = try body("private func item(", in: list)
+        #expect(item.occurrences(of: ".background(rowFill(mode))") == 1)
+        #expect(item.contains("letonAccent=selected==mode&&listFocused"))
+        #expect(item.occurrences(of: "onAccent?SettingsTheme.") == 2)
         // The − button and the + menu.
-        #expect(list.occurrences(of: ".iconHoverChip(") == 2)
+        #expect(squash(list).occurrences(of: ".iconHoverChip(") == 2)
+    }
+
+    /// A click always lands on the grey selection — the tap clears
+    /// any focus the click kept, the row already focused included
+    /// (owner device report, 2026-10-17) — and every row but the
+    /// selected one lifts, on a layer apart from the selection's
+    /// fill (#1173).
+    @Test("a cycle row click lands grey, and the rows lift")
+    func cycleRowClickAndLift() throws {
+        let list = try source(
+            "Settings/Components/Keybindings/LayoutCycleList.swift"
+        )
+        let item = try body("private func item(", in: list)
+        #expect(item.contains(".onTapGesture{picked=modefocused=nil}"))
+        let lift = try #require(
+            item.range(of: ".rowHoverHighlight(lifts:selected!=mode")
+        )
+        let fill = try #require(item.range(of: ".background(rowFill(mode))"))
+        #expect(lift.lowerBound < fill.lowerBound)
+        #expect(item.occurrences(of: ".rowHoverHighlight(") == 1)
     }
 
     /// Revert and Save a copy wash like the count button beside
@@ -112,7 +135,9 @@ struct HoverLiftAdoptionTests {
         // The button menu style draws the label whole, so the dot
         // and the padding are inside the menu's hit area.
         #expect(
-            chain.contains(".menuStyle(.button).buttonStyle(.plain)")
+            chain.contains(
+                ".menuStyle(.button).buttonStyle(.plain).neutralMenuLabel()"
+            )
         )
         #expect(!menu.contains(".menuStyle(.borderlessButton)"))
         let label = try body("private var chipLabel:", in: menu)
@@ -122,25 +147,21 @@ struct HoverLiftAdoptionTests {
         )
     }
 
-    /// A choice chip's hover is gated on `isEnabled` where it is
-    /// written, so a disabled chip never lifts (`PresetChip`).
-    @Test("the scope and Space chips gate their hover")
-    func choiceChipsGateHover() throws {
+    /// The scope and Space chips hand their selection to the one
+    /// choice-chip surface, which owns the hover
+    /// (`ChoiceChipTests` holds the surface and the sites).
+    @Test("the scope and Space chips hand the surface their choice")
+    func choiceChipsTakeTheSurface() throws {
         for path in [
             "Settings/Components/Keybindings/KeyboardChrome.swift",
             "Settings/Components/SpaceOverrides/SpacesPanelPreview.swift",
         ] {
-            let chip = try squashed(path)
-            for needle in [
-                ".onHover{hovering=isEnabled&&$0}",
-                "hovering:hovering&&isEnabled",
-                "selected:isOn,",
-            ] {
-                #expect(
-                    chip.contains(needle),
-                    Comment(rawValue: "\(path): \(needle)")
-                )
-            }
+            #expect(
+                try squashed(path).occurrences(
+                    of: ".choiceChip(selected:isOn)"
+                ) == 1,
+                Comment(rawValue: path)
+            )
         }
     }
 
@@ -160,16 +181,54 @@ struct HoverLiftAdoptionTests {
         #expect(!badge.contains(".pointingHandCursor()"))
     }
 
+    /// The shortcut recorder's idle well lifts under the pointer
+    /// with a fill over the well — never a ring, the armed state's
+    /// vocabulary — and an armed or disabled well does not react,
+    /// nor one flashing a refusal, whose `danger` label is
+    /// measured on the bare well.
+    @Test("the recorder's idle well lifts; an armed one does not")
+    func recorderWellLifts() throws {
+        let chrome = try source(
+            "Settings/Components/Keybindings/Recorder/"
+                + "KeyRecorderChrome.swift"
+        )
+        let gate = try body("private var lifted:", in: chrome)
+        #expect(
+            gate.contains("hovering&&isEnabled&&!recording&&!flashing")
+        )
+        for path in [
+            "Settings/Components/Keybindings/Recorder/"
+                + "KeyRecorderField.swift",
+            "Settings/Components/Keybindings/HyperKeyField.swift",
+        ] {
+            #expect(
+                try squashed(path).contains("flashing:flashing)"),
+                Comment(rawValue: path)
+            )
+        }
+        let well = squash(chrome)
+        #expect(well.contains(".fill(lifted?SettingsTheme."))
+        #expect(well.contains(".animation(reduceMotion?nil:"))
+        #expect(well.contains(".onHover{hovering=$0}"))
+        // The lift is a fill: no stroke reads it.
+        #expect(!well.contains(".strokeBorder(lifted"))
+    }
+
     /// A chord popover's entries are full-row entries: the style
-    /// every entry takes lifts each one (`rowHoverHighlight`).
+    /// every entry takes lifts each one (`rowHoverHighlight`) and
+    /// deepens while pressed.
     @Test("the chord popover's rows lift")
     func chordPopoverRowsLift() throws {
-        let shortcut = try squashed(
+        let raw = try source(
             "Settings/Components/Common/ContextShortcut.swift"
         )
+        let shortcut = squash(raw)
         #expect(shortcut.contains(".buttonStyle(PopoverRowStyle())"))
-        #expect(shortcut.contains(".rowHoverHighlight()"))
         #expect(!shortcut.contains(".buttonStyle(.plain)"))
+        let style = try body("struct PopoverRowStyle", in: raw)
+        #expect(style.occurrences(of: ".rowHoverHighlight()") == 1)
+        #expect(style.contains("pressed:configuration.isPressed"))
+        #expect(style.contains("pressed&&isEnabled?SettingsTheme."))
     }
 
     /// A link-shaped control takes the link hover — the hand and

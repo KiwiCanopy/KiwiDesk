@@ -9,7 +9,8 @@ import Testing
 /// green words in this window, since #678 turn 16b tinted it
 /// kiwi — so each such style owes a neutralising modifier and a
 /// guard. This suite holds `.menuStyle(.borderlessButton)`
-/// (found and fixed 2026-08-04) and `.pickerStyle(.menu)` in
+/// (found and fixed 2026-08-04), `.menuStyle(.button)` (the
+/// profile chip, 2026-10-17) and `.pickerStyle(.menu)` in
 /// both spellings (#1502), and enumerates the direct
 /// `.neutralButtonLabel()` uses; the bordered half — sealed to
 /// its neutralisation by `settingsActionButton()` since #771 —
@@ -105,9 +106,11 @@ struct SettingsLabelNeutralityTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let styledMenus = source.occurrences(
-                of: ".menuStyle(.borderlessButton)"
-            )
+            // The button menu style too: its label is drawn by
+            // the button style, which reads the tint as well.
+            let styledMenus =
+                source.occurrences(of: ".menuStyle(.borderlessButton)")
+                + source.occurrences(of: ".menuStyle(.button)")
             // Both spellings of the one style, as
             // `SegmentedPickerCoverageTests` counts the segmented.
             let styledPickers =

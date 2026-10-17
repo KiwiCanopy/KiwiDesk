@@ -87,20 +87,61 @@ struct MenuTriggerHoverTests {
         #expect(seen > 5)
     }
 
-    /// The popover triggers drawn with the App Rules menu label —
-    /// the "Applies to" controls — lift the same way: one lift per
-    /// label, in every file outside the label's own declaration.
+    /// The chain of the control a label sits in: climb out of the
+    /// closures around `index` one `}` at a time and take the
+    /// first non-empty chain after one — a wrapping stack carries
+    /// none, the control does. At most `levels` closures up.
+    private func controlChain(
+        in source: String,
+        from index: String.Index,
+        levels: Int = 3
+    ) -> String {
+        var cursor = index
+        for _ in 0..<levels {
+            var depth = 0
+            var close: String.Index?
+            var at = cursor
+            while at < source.endIndex {
+                let character = source[at]
+                if character == "{" { depth += 1 }
+                if character == "}" {
+                    if depth == 0 {
+                        close = at
+                        break
+                    }
+                    depth -= 1
+                }
+                at = source.index(after: at)
+            }
+            guard let close else { return "" }
+            let rest = chain(in: source, after: close)
+            if !rest.isEmpty { return rest }
+            cursor = source.index(after: close)
+        }
+        return ""
+    }
+
+    /// The popover and menu triggers drawn with the App Rules menu
+    /// label — the value menus and the "Applies to" controls —
+    /// carry the text tier in their OWN control's chain, so a
+    /// neighbour's lift cannot stand in for a missing one.
     @Test("every App Rules menu label's control lifts")
     func menuLabelControlsLift() throws {
         var seen = 0
         for (name, source) in try sources() {
-            let labels = source.occurrences(of: "AppRuleMenuLabel(text:")
-            guard labels > 0 else { continue }
-            seen += labels
-            #expect(
-                source.occurrences(of: ".menuTriggerHover()") == labels,
-                Comment(rawValue: name)
-            )
+            var cursor = source.startIndex
+            while let hit = source.range(
+                of: "AppRuleMenuLabel(text:",
+                range: cursor..<source.endIndex
+            ) {
+                cursor = hit.upperBound
+                seen += 1
+                let rest = controlChain(in: source, from: hit.upperBound)
+                #expect(
+                    rest.contains(".menuTriggerHover()"),
+                    Comment(rawValue: "\(name): no trigger lift")
+                )
+            }
         }
         #expect(seen > 5)
     }
