@@ -753,6 +753,7 @@
   "keybinding.next_layout": "Переключить пространство на следующую раскладку",
   "keybinding.open_settings": "Открыть настройки",
   "keybinding.previous_layout": "Переключить пространство на предыдущую раскладку",
+  "keybinding.reset_sizes": "Сбросить размеры в этом пространстве",
   "keybinding.show_shortcuts": "Показать панель сочетаний клавиш",
   "keybinding.show_view_picker": "Показать выбор вида",
   "keybinding.show_window_switcher": "Показать переключатель окон",

@@ -1,7 +1,7 @@
 import Foundation
 
-/// The seed's pressed `⌃⌥` panel, layout and KiwiVision rows
-/// (#453, #762, #1875, #2103), each its own builder so the
+/// The seed's pressed `⌃⌥` panel, layout, KiwiVision and sizing
+/// rows (#453, #762, #1875, #2103, #2303), each its own builder so the
 /// generations name it.
 extension DefaultKeybindings {
     /// Next layout on `⌃⌥C` (#453).
@@ -43,6 +43,19 @@ extension DefaultKeybindings {
             lua: "kiwivision.toggle()",
             kind: .navigation,
             label: "Toggle KiwiVision"
+        )
+    }
+
+    /// Reset sizes in this Space on `⌃⌥R` (#2303), R for reset:
+    /// `reset_layout_sizing` on the active Space. Free in
+    /// `SystemShortcuts.map`, macOS's symbolic hotkeys and every
+    /// running app's menus (read 2026-10-18).
+    public static func resetSizesRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+r",
+            lua: "KiwiDesk.reset_layout_sizing()",
+            kind: .navigation,
+            label: "Reset sizes in this Space"
         )
     }
 

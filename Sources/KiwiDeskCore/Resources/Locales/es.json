@@ -753,6 +753,7 @@
   "keybinding.next_layout": "Cambiar al diseño siguiente",
   "keybinding.open_settings": "Abrir Ajustes",
   "keybinding.previous_layout": "Cambiar al diseño anterior",
+  "keybinding.reset_sizes": "Restablecer los tamaños de este espacio",
   "keybinding.show_shortcuts": "Mostrar el panel de atajos",
   "keybinding.show_view_picker": "Mostrar el selector de vista",
   "keybinding.show_window_switcher": "Mostrar el selector de ventanas",

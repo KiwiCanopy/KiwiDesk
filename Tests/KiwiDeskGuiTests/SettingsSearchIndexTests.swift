@@ -242,8 +242,8 @@ struct SettingsSearchIndexTests {
                 // 10 since #277: the two General rows' anchors,
                 // kept under Open applications (#1520); 11, #2022; 12, #1655.
                 // 13 since #2103: Toggle KiwiVision, at rest.
-                // 14 since #1870: the Hyper move offer.
-                .shortcuts: 14,
+                // 14 #1870: the Hyper move offer; 15 #2303: Reset sizes.
+                .shortcuts: 15,
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
                 // a row can no longer be a no-op — a new census

@@ -714,9 +714,14 @@ orientation and stack position, the overflow style, the
 scrolling anchor and orientation, the track axis and limit, a
 grid's columns and rows, new-window placement. Where a window's
 own minimum binds, the next retile's floor heal moves the ratio
-back off that value by as much. Retiles at once. Unbound by
-default; bind it from `init.lua` or the Shortcuts & Gestures ▸
-Lua bindings drawer.
+back off that value by as much. Retiles at once.
+
+:::unreleased
+`⌃⌥R` runs it on the active space by default, listed as **Reset
+sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
+`"all"` has no default key; bind it from `init.lua` or the Lua
+bindings drawer.
+:::
 
 **Example:**
 

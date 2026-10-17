@@ -133,12 +133,14 @@ enum ShortcutsRowOrder {
         .shortcuts(.layoutCycle)
     ]
 
-    /// Size & float order: resize pairs followed by state toggles.
+    /// Size & float order: resize pairs and the reset that undoes
+    /// them (#2303), followed by state toggles.
     static let sizeAndFloatAtRest: [SettingKey] = [
         .shortcuts(.growWidth),
         .shortcuts(.shrinkWidth),
         .shortcuts(.growHeight),
         .shortcuts(.shrinkHeight),
+        .shortcuts(.resetSizes),
         .shortcuts(.toggleFloating),
         .shortcuts(.toggleSticky),
         .shortcuts(.toggleDisplaySticky),

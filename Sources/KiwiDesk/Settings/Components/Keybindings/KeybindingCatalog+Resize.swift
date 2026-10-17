@@ -6,6 +6,7 @@ extension KeybindingCatalog {
     static func resizeAndFloat(step: Int) -> [NavCommand] {
         ResizeRow.allCases.map { resizeRow($0, step: step) }
             + [
+                resetSizes,
                 toggleFloating,
                 toggleSticky,
                 toggleDisplaySticky,
@@ -18,6 +19,7 @@ extension KeybindingCatalog {
     /// hand-mirrors, a drifted command classified with an English
     /// label the banner interpolated untranslated.
     static let stepFreeCommands: [NavCommand] = [
+        resetSizes,
         toggleFloating,
         makeFloating,
         toggleSticky,
@@ -81,6 +83,16 @@ extension KeybindingCatalog {
             )
         }
     }
+
+    /// `reset_layout_sizing` on the active Space (#764, #2303),
+    /// the way back from the four resize rows above it.
+    static let resetSizes = NavCommand(
+        label: "Reset sizes in this Space",
+        lua: "KiwiDesk.reset_layout_sizing()",
+        displayLabel: {
+            L("keybinding.reset_sizes", "Reset sizes in this Space")
+        }
+    )
 
     /// Toggle floating window command (#221).
     static let toggleFloating = NavCommand(

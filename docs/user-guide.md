@@ -893,6 +893,13 @@ which switches the layout of the space under the pointer, the
 profile and KiwiVision. `Tab` and `⇧Tab` step through the three
 sides.
 
+:::unreleased
+`⌃⌥R` returns the focused space's sizes to what your profile set
+([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),
+undoing the resize keys and mouse resizes; it is listed under
+Shortcuts & Gestures ▸ Size & float.
+:::
+
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you
 delete stays deleted.

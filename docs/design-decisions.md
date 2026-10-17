@@ -10442,6 +10442,21 @@ only while a notebook cell has focus, where the panel wins. It
 reaches an install in a generation of its own (3), since installs
 built from `release/3.0.0` had already taken generation 2.
 
+:::unreleased
+Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
+the way back from the size keys, but a key you press once, so it
+rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
+not `appChromeRows`, and the Hyper move carries it with the other
+letters. It resets the focused space only, for the reason the
+#764 entry gives the verb's default: a key undoes what you just
+did in front of you. `"all"` stays a Lua and CLI form with no
+default key. The 2026-10-18 sweep found `⌃⌥R` free in
+`SystemShortcuts.map`, in macOS's symbolic hotkeys and in the
+menus of every app running on the dev Mac; the nearest chord taken
+is macOS's own `fn⌃R`, Return to Previous Size. It reaches an
+install as generation 5.
+:::
+
 **A shortcut row says what pressing it does (#2245).** Its title
 is a verb phrase: "Show" and the panel's VoiceOver name for a
 panel — "Show window switcher", "Show layout picker" — "Open" for

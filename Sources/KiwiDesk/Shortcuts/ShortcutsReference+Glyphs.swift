@@ -50,6 +50,8 @@ extension ShortcutsReferenceBuilder {
             return StickyStyle.symbolName
         case "KiwiDesk.toggle_display_sticky()":
             return StickyStyle.displaySymbolName
+        case "KiwiDesk.reset_layout_sizing()":
+            return "arrow.counterclockwise"
         default:
             break
         }
@@ -85,6 +87,7 @@ extension ShortcutsReferenceBuilder {
         "arrow.left.and.line.vertical.and.arrow.right",
         "arrow.down.and.line.horizontal.and.arrow.up",
         "arrow.up.and.line.horizontal.and.arrow.down",
+        "arrow.counterclockwise",
         "curlybraces",
         "rectangle.stack",
     ]

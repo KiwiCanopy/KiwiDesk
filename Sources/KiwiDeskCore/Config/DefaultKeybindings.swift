@@ -84,6 +84,7 @@ public enum DefaultKeybindings {
         rows.append(layoutPickerRow())
         rows.append(jumpToWindowRow())
         rows.append(kiwiVisionRow())
+        rows.append(resetSizesRow())
         rows.append(contentsOf: appChromeRows())
         return rows
     }
