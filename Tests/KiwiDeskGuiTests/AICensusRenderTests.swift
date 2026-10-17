@@ -210,6 +210,21 @@ struct AICensusRenderTests {
             .split(whereSeparator: \.isWhitespace).joined()
     }
 
+    /// The setup card's intro is its header caption, the slot
+    /// every card's framing sentence takes, never a body line
+    /// drawn like the rows beneath it.
+    @Test("the setup intro is the card's caption")
+    func setupIntroIsTheCaption() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let section = root.appendingPathComponent(
+            "Sources/KiwiDesk/Settings/Sections/AISection.swift"
+        )
+        let squashed = try SourceScan.strippedSource(at: section)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(squashed.contains("caption:L(\"ai.setup.intro\""))
+        #expect(!squashed.contains("Text(L(\"ai.setup.intro\""))
+    }
+
     /// The cards' ruled order (#1685 ▸ Ruling 6a, 2026-10-15): Set
     /// up, the ready-made prompts, then what the AI app can do.
     @Test("the cards keep their ruled order")
