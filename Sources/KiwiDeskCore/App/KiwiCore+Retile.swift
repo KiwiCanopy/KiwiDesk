@@ -36,8 +36,6 @@ extension KiwiCore {
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.
         // A temporary one the same way, once armed (#1790).
-        // A plate slide another activation took past (#1956).
-        endSpaceSlideIfOvertaken()
         noteSpaceVisits()  // #1655: a Space shown without an event
         let heldRetired = retireEmptiedHeldSpaces()
         var spacesChanged = false
@@ -80,10 +78,8 @@ extension KiwiCore {
         // A z-order restore that waited for the debt rides this
         // pass's settle, or runs now when nothing animates.
         defer {
-            if paying, pendingZOrderRestore,
-                tiler.animation.activeCount == 0
-            {
-                runPendingZOrderRestore()
+            if paying, tiler.animation.activeCount == 0 {
+                tiledPlaneCameToRest(restore: true, focusRaise: false)
             }
         }
         // Session weights are validated at WRITE time against

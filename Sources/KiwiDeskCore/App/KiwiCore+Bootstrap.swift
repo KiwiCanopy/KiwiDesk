@@ -42,6 +42,9 @@ extension KiwiCore {
         }
         exec.onLog = log
         profiles.onLog = log
+        profiles.onActiveChange = { [weak self] in
+            self?.liveProfileChanged()
+        }
         borders.onLog = log
         socket.onLog = log
         bus.onLog = log
@@ -53,11 +56,14 @@ extension KiwiCore {
         strandDetector.onLog = log
         mouse.scroll.onLog = log
         tiler.motionGate.onLog = log
+        vision.appearanceSwitch = .live(onLog: log)
         wireScrollPan()
         wireScrollSpaceStep()
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
-        // pins the ring and mark to the AX-fallback path.
-        borders.configureFromEnvironment()
+        // pins every overlay to the AX-fallback path.
+        windowServer.onLog = log
+        windowServer.configureFromEnvironment()
+        connectWindowServerConsumers()
         wireDrag()
         wireOwnKeyWindowRefresh()
         wireHoldGlide()
@@ -147,6 +153,7 @@ extension KiwiCore {
         }
         borders.isAnimating = animationDriven
         stickyMarks.isAnimating = animationDriven
+        windowServer.isAnimating = animationDriven
         // The instant twin of the tick's leading truth (#881):
         // a just-commanded `applyInstant` target leads the
         // echo-fed state frame in the steady-state syncs, so
@@ -160,9 +167,8 @@ extension KiwiCore {
         borders.commandedFrame = commandedInstant
         stickyMarks.commandedFrame = commandedInstant
 
-        socket.handler = { [weak self] command, args in
-            self?.execute(command, args: args)
-                ?? .fail("core unavailable")
+        socket.handler = { [weak self] request in
+            self?.answer(request) ?? .fail("core unavailable")
         }
         socket.bus = bus
         tiler.elementProvider = { [weak self] id in
@@ -215,6 +221,13 @@ extension KiwiCore {
         }
         // The #2002 episode opening, on the core's one wall clock.
         eventLoop.wallClock = { [weak self] in
+            self?.wallClock() ?? .distantPast
+        }
+        // Both arrival debts age on it too (#2341).
+        followFocus.clock = { [weak self] in
+            self?.wallClock() ?? .distantPast
+        }
+        desktopMemory.returnFocus.clock = { [weak self] in
             self?.wallClock() ?? .distantPast
         }
         eventLoop.onRemovalEpisodesEnded = { [weak self] ids in

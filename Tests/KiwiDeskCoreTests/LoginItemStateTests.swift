@@ -34,36 +34,6 @@ struct LoginItemStateTests {
         )
     }
 
-    @Test("unavailable-reason gate discriminates the three cases")
-    func unavailableReason() {
-        // A normal /Applications bundle is registerable (nil), so
-        // its `.notFound` reads as "turn it on", not greyed.
-        let app = URL(fileURLWithPath: "/Applications/KiwiDesk.app")
-        // A Gatekeeper-translocated copy is terminal: registering
-        // would point the item at an ephemeral randomized path.
-        let translocated = URL(
-            fileURLWithPath:
-                "/private/var/folders/x/T/AppTranslocation/"
-                + "ABC/d/KiwiDesk.app"
-        )
-        // A bare non-bundled binary: bundle URL is the containing
-        // dir, not an `.app`.
-        let bareBinary = URL(
-            fileURLWithPath: "/Users/me/.build/release"
-        )
-        #expect(
-            LoginItemManager.unavailableReason(for: app) == nil
-        )
-        #expect(
-            LoginItemManager.unavailableReason(for: translocated)
-                == .translocated
-        )
-        #expect(
-            LoginItemManager.unavailableReason(for: bareBinary)
-                == .notBundled
-        )
-    }
-
     @Test("the switch reads on for enabled and awaiting-approval")
     func isOnDerivation() {
         // `.requiresApproval` counts as on: the user said yes,

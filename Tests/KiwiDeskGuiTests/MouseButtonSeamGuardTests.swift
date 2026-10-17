@@ -51,15 +51,26 @@ struct MouseButtonSeamGuardTests {
 
     /// The pointer read's homes (#1532, the same class one read
     /// over): the drag pipeline's cursor seam (#1103), the
-    /// reveal-strip seam beside `pressedButtons`, and the GUI's
-    /// shortcuts panel placing itself under the pointer at open —
-    /// a one-shot position no suite measures — and the hover
-    /// peek's hull hold, pinned by both `makeTestCore` twins (#1946).
+    /// reveal-strip seam beside `pressedButtons`, the GUI's
+    /// shortcuts and Jump to window panels placing themselves
+    /// under the pointer at open — a one-shot position no suite
+    /// measures — and the hover peek's hull hold, pinned by both
+    /// `makeTestCore` twins (#1946).
     private static let pointerHomes = [
+        // The layout picker's pointer (#762).
+        "BarContextMenus.swift",
         "BarPeek.swift",
         "KiwiCore+Drag.swift",
         "MouseTracker.swift",
-        "ShortcutsPanelController.swift",
+        // The shortcuts and Jump to window panels open on the
+        // screen under the pointer (#1875).
+        "PanelHandBack.swift",
+        // The key panel's selection follows a real pointer move
+        // (#2229); its suites pin `currentPointer`.
+        "JumpModel.swift",
+        // The pointer rest's location at a rest (#1869), read
+        // only after a monitor both twins pin inert delivered a move.
+        "PointerRest.swift",
     ]
 
     @Test("the live pointer read stays in its seam homes")
@@ -160,7 +171,8 @@ struct MouseButtonSeamGuardTests {
 
     /// The live host reads `wireDrag` and the seam defaults
     /// leave on every core a suite builds — the button mask, the
-    /// cursor, and since #1532 the reveal-strip read. Deleting a pin from
+    /// cursor, since #1532 the reveal-strip read, and since #2224 the
+    /// revealed app's open-menu read. Deleting a pin from
     /// BOTH twins is otherwise silent: the twins-identical scan
     /// sees only a one-sided deletion, and a behavioural read
     /// answers 0 on a quiet host either way — which is exactly
@@ -194,6 +206,9 @@ struct MouseButtonSeamGuardTests {
                     )
                     && source.contains(
                         "mouse.pointerInMenuBarStrip = { false }"
+                    )
+                    && source.contains(
+                        "mouse.menuOpen = { _ in false }"
                     )
                     && source.contains(
                         "BarHoverHit.pointerOverride = { _ in"

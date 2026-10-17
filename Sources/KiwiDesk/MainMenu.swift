@@ -21,6 +21,60 @@ enum MainMenu {
         return bar
     }
 
+    /// The submenus a non-activating key panel hands its chords to
+    /// (owner ruling 2026-10-13, #1875): File and Edit alone, so
+    /// ⌘Q, ⌘H or ⌘, aimed at the app in front never quits, hides
+    /// or opens KiwiDesk while a panel holds the keyboard.
+    static let panelChordMenus = [fileMenuID, editMenuID]
+    static let fileMenuID = NSUserInterfaceItemIdentifier(
+        "kiwidesk.menu.file"
+    )
+    static let editMenuID = NSUserInterfaceItemIdentifier(
+        "kiwidesk.menu.edit"
+    )
+
+    /// Hands `event` to the panel chord submenus of `bar`; true
+    /// where one of them performed it.
+    static func performPanelChord(
+        _ event: NSEvent,
+        in bar: NSMenu? = NSApplication.shared.mainMenu
+    ) -> Bool {
+        guard let bar else { return false }
+        return bar.items.contains { item in
+            guard let id = item.identifier,
+                panelChordMenus.contains(id),
+                let menu = item.submenu
+            else { return false }
+            return menu.performKeyEquivalent(with: event)
+        }
+    }
+
+    /// Whether any item of `bar` carries `event`'s chord — the
+    /// chords a key panel swallows rather than lets AppKit hand to
+    /// KiwiDesk's other menus.
+    static func holdsChord(
+        _ event: NSEvent,
+        in bar: NSMenu? = NSApplication.shared.mainMenu
+    ) -> Bool {
+        guard let bar,
+            let key = event.charactersIgnoringModifiers?.lowercased()
+        else { return false }
+        let mask: NSEvent.ModifierFlags = [
+            .command, .shift, .option, .control,
+        ]
+        let held = event.modifierFlags.intersection(mask)
+        func holds(_ menu: NSMenu) -> Bool {
+            menu.items.contains { item in
+                if let sub = item.submenu, holds(sub) { return true }
+                return !item.keyEquivalent.isEmpty
+                    && item.keyEquivalent.lowercased() == key
+                    && item.keyEquivalentModifierMask.intersection(mask)
+                        == held
+            }
+        }
+        return holds(bar)
+    }
+
     private static func submenu(_ title: String) -> NSMenuItem {
         let item = NSMenuItem()
         item.submenu = NSMenu(title: title)
@@ -86,9 +140,10 @@ enum MainMenu {
 
     /// Close answers for whichever window is key (#1533); a
     /// borderless panel earns it by validating `performClose(_:)`
-    /// itself, as `ShortcutsPanel` does.
+    /// itself, as `JumpPanel` does.
     private static func fileMenu() -> NSMenuItem {
         let item = submenu(L("menu.file.title", "File"))
+        item.identifier = fileMenuID
         let menu = item.submenu!
         menu.addItem(
             withTitle: L("menu.file.close", "Close"),
@@ -100,6 +155,7 @@ enum MainMenu {
 
     private static func editMenu() -> NSMenuItem {
         let item = submenu(L("menu.edit.title", "Edit"))
+        item.identifier = editMenuID
         let menu = item.submenu!
         menu.addItem(
             withTitle: L("menu.edit.undo", "Undo"),

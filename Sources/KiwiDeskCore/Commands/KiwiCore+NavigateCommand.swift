@@ -5,7 +5,9 @@ import Foundation
 /// `KiwiCore+Commands` for file size.
 extension KiwiCore {
     /// `warp: false` is a scroll gesture's (#1656): the pointer
-    /// stays where the hand holds it.
+    /// stays where the hand holds it. Every step, a gesture's too,
+    /// skips what a lens leaves out (`lensKeySkip`, #2103 rulings
+    /// 35, 44, 45).
     func navigate(
         _ args: [JSONValue],
         swapping: Bool,
@@ -44,6 +46,7 @@ extension KiwiCore {
         if swapping, refuseSwapOntoTraveler(focused, in: space) {
             return .ok()
         }
+        let skip = lensKeySkip() ?? { _ in false }
         // Monocle windows all share one frame, so geometric
         // neighbor search finds nothing. Directions on the
         // configured orientation axis cycle the window order
@@ -54,7 +57,8 @@ extension KiwiCore {
                 space: space,
                 focused: focused,
                 swapping: swapping,
-                warp: warp
+                warp: warp,
+                skip: skip
             )
         {
             return response
@@ -70,7 +74,8 @@ extension KiwiCore {
                 space: space,
                 focused: focused,
                 swapping: swapping,
-                warp: warp
+                warp: warp,
+                skip: skip
             )
         {
             return response
@@ -85,7 +90,8 @@ extension KiwiCore {
                 space: space,
                 focused: focused,
                 swapping: swapping,
-                warp: warp
+                warp: warp,
+                skip: skip
             )
         {
             return response
@@ -102,7 +108,7 @@ extension KiwiCore {
         else {
             return .fail("no focused window")
         }
-        let candidates = tiled.filter { $0 != focused }
+        let candidates = tiled.filter { $0 != focused && !skip($0) }
             .compactMap { id -> (WindowID, CGRect)? in
                 guard
                     let slot = slots[id]
@@ -166,7 +172,8 @@ extension KiwiCore {
                     in: direction,
                     space: space,
                     focused: focused,
-                    swapping: swapping
+                    swapping: swapping,
+                    skip: skip
                 )
         else {
             // Dead end — no window that way. Rubber-band the ring

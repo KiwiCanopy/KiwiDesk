@@ -56,6 +56,21 @@ extension APIReference {
                 + "after KiwiDesk's own Desktop switch.",
             .boolean("enabled")
         ),
+        "set_hyper_key": APIRecord(
+            "Turns a key into the Hyper modifier for this "
+                + "session, or `off`; it becomes F18 until quit.",
+            .choice("key", HyperSourceKey.self)
+        ),
+        "set_space_cue": APIRecord(
+            "Shows the Space and its layout on the screen that "
+                + "switched, where no Space Bar is drawn.",
+            .boolean("enabled")
+        ),
+        "set_mode_cue": APIRecord(
+            "Shows the cycle list and the new layout on the "
+                + "Space's screen after cycle_mode.",
+            .boolean("enabled")
+        ),
         "set_space_history": APIRecord(
             "Sets whether Space history is kept per screen or "
                 + "across every screen.",
@@ -69,11 +84,6 @@ extension APIReference {
         "set_shortcut_panel_liquid_glass": APIRecord(
             "Lays a macOS 26 Liquid Glass material over the "
                 + "shortcuts panel and the slow-boot notice.",
-            .boolean("enabled")
-        ),
-        "set_space_switch_liquid_glass": APIRecord(
-            "Draws the Space switch's plates in macOS 26 Liquid "
-                + "Glass.",
             .boolean("enabled")
         ),
         "set_new_window_placement_override": APIRecord(
@@ -97,6 +107,16 @@ extension APIReference {
         "get_state": APIRecord(
             "Returns a snapshot of Spaces, windows, and "
                 + "screens."
+        ),
+        "explain_window": APIRecord(
+            "Explains why a window floats or tiles, its Space and "
+                + "app rules, and what would change them.",
+            .window("window", optional: true)
+        ),
+        "explain_app": APIRecord(
+            "Explains what KiwiDesk knows of an app by bundle id: "
+                + "ignores, processes and windows.",
+            .text("app")
         ),
         "get_layout_info": APIRecord(
             "Returns diagnostic info for the active Space."
@@ -136,6 +156,11 @@ extension APIReference {
             "Streams events as newline-delimited JSON; names one or "
                 + "more events, or all of them.",
             .choice("event", KiwiNotification.self, optional: true)
+        ),
+        KiwiCore.keepSettingsCommand: APIRecord(
+            "Keeps one or more leaves a change report named in the "
+                + "live profile or its shared look.",
+            .text("id")
         ),
         "save_profile": APIRecord(
             "Saves the current configuration to a profile, which "

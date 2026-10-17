@@ -12,7 +12,7 @@ import SwiftUI
 enum SettingsDetailPanelOffer {
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .looks, .layoutDefaults,
-        .shortcuts, .advancedColors, .spaces,
+        .shortcuts, .advancedColors, .spaces, .kiwiVision,
     ]
 
     static func offers(
@@ -92,6 +92,8 @@ struct SettingsDetailPanel: View {
             SpacesPanelPreview(model: model)
         case .shortcuts:
             KeyboardPreviewPanel(model: model)
+        case .kiwiVision:
+            KiwiVisionPanelPreview(model: model)
         case .layoutDefaults:
             LayoutPreviewPanel(
                 model: model,
@@ -111,7 +113,10 @@ struct SettingsDetailPanel: View {
         // against a visible list must BE that list's count (owner
         // 2026-08-10: `draftChangeCount` said "1" over a
         // three-row family).
-        let all = SettingsDiffRowSource.rows(for: model)
+        // "Changed in this draft": the pill alone lists live rows.
+        let all = SettingsDiffRowSource.rows(for: model).filter {
+            $0.section == .draft
+        }
         let rows = SettingsDiffRowSource.areaRows(
             all,
             in: destination
@@ -216,6 +221,7 @@ enum SettingsDiffRowSource {
         // (#1197) — ONE list, so the footer's N is still the
         // count of the list it opens.
         rows += driftRows(for: model)
+        rows += liveRows(for: model, leaving: diff.changedSettings)
         return rows
     }
 

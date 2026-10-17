@@ -102,21 +102,6 @@ struct BarGlyphCycleTests {
         )
     }
 
-    /// A playing Monocle flip owes its focus at its landing, so
-    /// `lastFocused` still names the window it leaves: the click
-    /// steps from the owed one, or a fast second click would land
-    /// the same window again.
-    @Test("An owed Monocle focus is the focus the click steps from")
-    func owedMonocleFocusCounts() {
-        let core = seededCore()
-        core.pickFromSpaceBar(pick())
-        core.pendingMonocleFocus = (
-            from: WindowID(2), to: WindowID(3), warp: false
-        )
-        #expect(core.barFocus(on: two) == WindowID(3))
-        #expect(core.glyphCycleTarget(pick()) == WindowID(4))
-    }
-
     /// A window the focus door refuses (#1345) would leave the
     /// focus where it was, so the next click would pick it again
     /// and the walk would stall: the cycle steps over it.
@@ -130,24 +115,6 @@ struct BarGlyphCycleTests {
         #expect(core.state.workspaces.lastFocused == WindowID(4))
         core.pickFromSpaceBar(pick())
         #expect(core.state.workspaces.lastFocused == WindowID(2), "wraps")
-    }
-
-    /// A flip owes Web 5 while `lastFocused` still names Mail 2:
-    /// the glyph's tint follows the list's check onto Web, so a
-    /// glyph and its peek never name two windows.
-    @Test("The glyph tint reads the owed Monocle focus too")
-    func tintReadsTheOwedFocus() throws {
-        let core = seededCore()
-        core.pickFromSpaceBar(pick())
-        core.pendingMonocleFocus = (
-            from: WindowID(2), to: WindowID(5), warp: false
-        )
-        let item = try #require(
-            core.spaceBarItems(display: display, style: SpaceBarLook())
-                .first { $0.space == two }
-        )
-        let tinted = item.apps.filter(\.focused).map(\.name)
-        #expect(tinted == ["Web"])
     }
 
     @Test("The focus counts only on the active Space")

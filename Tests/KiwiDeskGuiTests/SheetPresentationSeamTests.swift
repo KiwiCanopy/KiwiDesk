@@ -36,6 +36,12 @@ struct SheetPresentationSeamTests {
         // About (#1536) is the shell's: its footer opener sits in
         // Home, which reflows under it, and the shell outlives both.
         "SettingsView.swift": "$aboutRequest",
+        // The Hyper move sheet (#1870) is the section's: the card
+        // that opens it leaves the page once its last Hyper row
+        // moves back, and the section outlives it. Its one commit
+        // stages into the draft through a closure the section
+        // hands it, so the content still takes no model.
+        "ShortcutsSection.swift": "$hyperMoveRequest",
     ]
 
     private var trees: [URL] {

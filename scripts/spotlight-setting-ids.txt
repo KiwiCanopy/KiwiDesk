@@ -1,3 +1,9 @@
+(action) ai.prompt.app_rules
+(action) ai.prompt.look
+(action) ai.prompt.migrate
+(action) ai.prompt.spaces
+(action) ai.setup.claude_desktop
+(action) ai.setup.copy
 (action) app_rules.add_float
 (action) app_rules.add_space
 (action) app_rules.add_tile
@@ -55,14 +61,26 @@ UserDefaults.SUAutomaticallyUpdate (Sparkle)
 UserDefaults.appearance
 UserDefaults.language
 appWide.desktopCue
+appWide.hyperKey
+appWide.modeCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
+appWide.spaceCue
+appWide.visionAppearance
+appWide.visionBlur
+appWide.visionClearApp
+appWide.visionClearWallpaper
+appWide.visionDim
+appWide.visionLenses
+appWide.visionNeverDimmed
 config.appRules[app]
+config.desktopShortcutBase
 config.floatAutomatically
 config.floatRules
 config.layers[].icon
 config.layers[].reach
 config.mainSpaces
+config.modeCycle
 config.scrollGesture.longSwipes
 config.scrollGesture.naturalMouse
 config.scrollGesture.naturalTrackpad
@@ -79,21 +97,18 @@ keybinding.shrink_height
 keybinding.shrink_width
 keybinding.toggle_display_sticky
 keybinding.toggle_floating
+keybinding.toggle_kiwivision
 keybinding.toggle_sticky
 profile.isDefault
 settings.animations (master)
 settings.animations.durationMS
-settings.animations.monocleFlipDurationMS
-settings.animations.onMonocleFocus
 settings.animations.onRelayout
 settings.animations.onScrolling
 settings.animations.onShelf
-settings.animations.onSpaceChange
 settings.animations.onWindowResize
 settings.animations.onWindowSwap
 settings.animations.scrollDurationMS
 settings.animations.shelfDurationMS
-settings.animations.spaceChangeDurationMS
 settings.appBarStyle.activeIndicator
 settings.appBarStyle.edge
 settings.appBarStyle.edgeOverride[screen]
@@ -177,6 +192,8 @@ settings.monocle.newWindowPlacement
 settings.monocle.orientation
 settings.monocle.wrapFocus
 settings.mouse.followsFocus
+settings.mouse.hoverFocus
+settings.mouse.hoverFocusDelayMS
 settings.mouseResize
 settings.scrolling.anchor
 settings.scrolling.appBar.enabled

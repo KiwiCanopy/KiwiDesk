@@ -32,6 +32,8 @@ public struct KeyCombo: Hashable, Sendable {
                 modifiers.insert(.control)
             case "shift":
                 modifiers.insert(.shift)
+            case "hyper":
+                modifiers.insert(.hyper)
             default:
                 return nil
             }
@@ -39,6 +41,15 @@ public struct KeyCombo: Hashable, Sendable {
         return KeyCombo(
             keyCode: keyCode,
             modifiers: modifiers
+        )
+    }
+
+    /// The chord Carbon registers: a Hyper combo is registered
+    /// bare while the Hyper key is held (#1870).
+    public var registered: KeyCombo {
+        KeyCombo(
+            keyCode: keyCode,
+            modifiers: modifiers.subtracting(.hyper)
         )
     }
 
@@ -57,15 +68,18 @@ public struct KeyCombo: Hashable, Sendable {
     /// Carbon hotkeys cannot tell left from right modifiers (that
     /// needs an event tap + Input Monitoring, which KiwiDesk
     /// avoids), so the two sides are deliberately unified.
+    /// `hyper` (#1870) leads, as its glyph does.
     public static func comboString(
         keyCode: UInt32,
         command: Bool,
         option: Bool,
         control: Bool,
-        shift: Bool
+        shift: Bool,
+        hyper: Bool = false
     ) -> String? {
         guard let key = keyName(for: keyCode) else { return nil }
         var parts: [String] = []
+        if hyper { parts.append("hyper") }
         if control { parts.append("control") }
         if option { parts.append("option") }
         if shift { parts.append("shift") }
@@ -81,7 +95,8 @@ public struct KeyCombo: Hashable, Sendable {
             command: modifiers.contains(.command),
             option: modifiers.contains(.option),
             control: modifiers.contains(.control),
-            shift: modifiers.contains(.shift)
+            shift: modifiers.contains(.shift),
+            hyper: modifiers.contains(.hyper)
         )
     }
 

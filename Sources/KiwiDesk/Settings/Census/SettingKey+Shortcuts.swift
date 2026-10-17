@@ -14,6 +14,12 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case spaceHistory = "config.spaceHistory"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
+    /// The window switcher (#1875), its row named "Show" and the
+    /// side's VoiceOver name (#2245).
+    case jumpToWindow = "keybinding.show_jump_to_window"
+    case toggleKiwiVision = "keybinding.toggle_kiwivision"
+    /// One row per live lens (#2103 ruling 42).
+    case toggleLens = "keybinding.toggle_lens (x N lenses)"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =
         "keybinding.move_window_to_{prev,next}_track"
@@ -24,6 +30,20 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case moveToDesktop = "keybinding.move_to_desktop (x N desktops)"
     case moveToDesktopFollow =
         "keybinding.move_to_desktop_follow (x N)"
+    /// Next / previous layout of the focused Space (#453).
+    case layoutCycle = "keybinding.{next,previous}_layout"
+    /// KiwiHub's View side, its Layout line at the pointer (#762,
+    /// #2309).
+    case viewPicker = "keybinding.show_view_picker"
+    /// The layouts the cycle walks (#453).
+    case modeCycle = "config.modeCycle"
+    /// The plate shown after a cycle (#2144): app-wide (#1741).
+    case modeCue = "appWide.modeCue"
+    /// The key turned into Hyper (#1870): app-wide, per Mac.
+    case hyperKey = "appWide.hyperKey"
+    /// The Hyper move offer and the Desktop base it writes (#1870),
+    /// drafted with the layers.
+    case desktopShortcutBase = "config.desktopShortcutBase"
     case growWidth = "keybinding.grow_width"
     case shrinkWidth = "keybinding.shrink_width"
     case growHeight = "keybinding.grow_height"
@@ -61,6 +81,11 @@ extension ShortcutsKey {
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
             .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
+        case .toggleKiwiVision, .toggleLens:
+            return .row(.shortcuts, .kiwiVisionShortcuts, .atRest)
+        // KiwiHub's three sides, one group for one panel (#2265).
+        case .jumpToWindow, .showShortcuts, .viewPicker:
+            return .row(.shortcuts, .kiwiHub, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
         // An OFFER until the Track layout is in play (#1440).
@@ -90,14 +115,35 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.desktopBindingsExist)
             )
+        case .layoutCycle, .modeCycle:
+            return .row(.shortcuts, .layout, .atRest)
+        case .modeCue:
+            // Written at once; greys where init.lua owns the
+            // config, as the Desktop switch cue does (#2142).
+            return .row(
+                .shortcuts,
+                .layout,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
+        case .hyperKey, .desktopShortcutBase:
+            // Above the layer header: it belongs to no layer
+            // (#1870). The key is written at once, the offer into
+            // the draft; both grey where init.lua owns the config.
+            return .row(
+                .shortcuts,
+                .hyperKey,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
-        // KiwiDesk's own two chords, under the group's "KiwiDesk"
+        // KiwiDesk's own chord, under the group's "KiwiDesk"
         // subheading since the General drawer folded in (#1520).
-        case .showShortcuts, .openSettings:
+        case .openSettings:
             return .row(.shortcuts, .openApplications, .atRest)
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
@@ -134,7 +180,8 @@ extension ShortcutsKey {
             .spaceStep, .spaceHistoryStep, .goToSpace, .swapDir,
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
-            .moveToDesktop, .moveToDesktopFollow, .switchToLayer:
+            .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
+            .layoutCycle, .viewPicker, .jumpToWindow, .toggleLens:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")
@@ -150,6 +197,8 @@ extension ShortcutsKey {
             return .text("keybinding.shrink_height")
         case .toggleFloating:
             return .text("keybinding.toggle_floating")
+        case .toggleKiwiVision:
+            return .text("keybinding.toggle_kiwivision")
         case .toggleSticky:
             return .text(
                 "keybinding.toggle_sticky",
@@ -188,6 +237,23 @@ extension ShortcutsKey {
                 "shortcuts.space_history.kept",
                 help: "shortcuts.space_history.choice_help"
             )
+        case .modeCycle:
+            return .text(
+                "shortcuts.mode_cycle",
+                help: "shortcuts.mode_cycle.help"
+            )
+        case .modeCue:
+            return .text(
+                "shortcuts.mode_cue",
+                help: "shortcuts.mode_cue.help"
+            )
+        case .hyperKey:
+            return .text(
+                "shortcuts.hyper_key",
+                help: "shortcuts.hyper_key.help"
+            )
+        case .desktopShortcutBase:
+            return .text("shortcuts.hyper_move.offer")
         }
     }
 }

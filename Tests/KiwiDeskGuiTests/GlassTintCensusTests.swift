@@ -23,6 +23,8 @@ struct GlassTintCensusTests {
         "fade": [],
         "pinnedAppearance": ["drawsGlass", "wantsLightInk"],
         "sits": ["subviews"],
+        // KiwiVision's plate: no Fill, a black dim (#2103).
+        "pinDark": ["darkAqua"],
         // Both doors take the one painter (#1946's uniform tint).
         "apply": ["paint("],
         "applyUniform": ["paint("],

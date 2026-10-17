@@ -129,7 +129,7 @@ struct ShortcutsInactiveBandTests {
         let path = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Shortcuts/"
-                    + "ShortcutsPanelView.swift"
+                    + "ShortcutsSheetView.swift"
             )
         let source = SourceScan.stripComments(
             try String(contentsOf: path, encoding: .utf8)
@@ -137,21 +137,20 @@ struct ShortcutsInactiveBandTests {
         .split(whereSeparator: \.isWhitespace)
         .joined()
         for needle in [
-            "inactive(reference.inactive)",
-            // The dim, keyed past the rows' closing braces: the
-            // Custom band draws the same `ForEach`, undimmed.
-            // THAT it dims is the invariant; how much is a
-            // tuning, so the needle stops at the paren — the
-            // contiguity is what distinguishes the two bands,
-            // and it survives without the value.
-            "ShortcutRowView(row:$0)}}.opacity(",
-            "Text(inactiveCaption)",
+            "rows:reference.inactive,caption:inactiveCaption,dims:true",
+            // The dim, keyed on the section's own flag: every
+            // section draws the same `ForEach`, and only the
+            // inactive one dims. How much is a tuning, so the
+            // needle stops before the value.
+            ".opacity(section.dims?",
+            "ifletcaption=section.caption",
+            "Text(caption)",
         ] {
             #expect(
                 source.contains(needle),
                 Comment(
                     rawValue:
-                        "ShortcutsPanelView no longer draws "
+                        "ShortcutsSheetView no longer draws "
                         + "`\(needle)` — the Inactive band is "
                         + "gone from the screen with every "
                         + "builder expectation still green"

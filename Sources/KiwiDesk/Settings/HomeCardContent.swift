@@ -72,8 +72,8 @@ enum HomeCardContent {
                 )
             }
             return L(
-                "home.card.colors.subtitle_off",
-                "Animations off"
+                "home.card.colors.subtitle_window_off",
+                "Window animations off"
             )
         case .layoutDefaults:
             return L(
@@ -136,6 +136,15 @@ enum HomeCardContent {
                 "home.card.app_rules.subtitle",
                 "%1$d apps pinned or floating",
                 rules
+            )
+        case .kiwiVision:
+            return kiwiVisionSubtitle(model)
+        case .ai:
+            // Fixed: KiwiDesk cannot know what an AI app has
+            // configured, and a status line is ruled out (#1685).
+            return L(
+                "home.card.ai.subtitle",
+                "Set up and control KiwiDesk with your own AI app"
             )
         case .general:
             if model.autoStart.level != .off {
@@ -227,9 +236,50 @@ enum HomeCardContent {
 }
 
 extension AnimationSettings {
-    /// True when any event animation is enabled.
+    /// True when any window animation is enabled.
     var anyEnabled: Bool {
-        onSpaceChange || onWindowResize || onWindowSwap
-            || onRelayout
+        onWindowResize || onWindowSwap || onRelayout
+    }
+}
+
+extension HomeCardContent {
+    /// The running state, so the card is worth reading (#2103):
+    /// off with the chord that turns it on, or on with its values.
+    @MainActor static func kiwiVisionSubtitle(
+        _ model: SettingsModel
+    ) -> String {
+        guard model.core.kiwiVisionIsOn else {
+            guard
+                let chord = ShortcutsOpenBinding.comboGlyphs(
+                    core: model.core,
+                    lua: KeybindingCatalog.toggleKiwiVision.lua
+                )
+            else {
+                return L(
+                    "home.card.kiwivision.off_no_shortcut",
+                    "Off · no shortcut yet"
+                )
+            }
+            return L(
+                "home.card.kiwivision.off",
+                "Off · %1$@ turns it on",
+                chord
+            )
+        }
+        let dim = SettingsValueReadout.percent(
+            model.appWide.visionDim / 100
+        )
+        // The blur as drawn: Reduce transparency stands it down.
+        return model.core.kiwiVisionDrawsBlur
+            ? L(
+                "home.card.kiwivision.on_blur",
+                "On · Dim %1$@, blur on",
+                dim
+            )
+            : L(
+                "home.card.kiwivision.on_no_blur",
+                "On · Dim %1$@, blur off",
+                dim
+            )
     }
 }

@@ -189,9 +189,8 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                // 37 since #1389: the two lone-window fill rows;
-                // 39 since #1391: the Monocle flip's pair.
-                .layoutDefaults: 39,
+                // 37 since #1389: the two lone-window fill rows.
+                .layoutDefaults: 37,
                 .screens: 3,
                 // 18 since #1473: the focus border's four rows,
                 // the fit-gaps spacing and the sticky mark are
@@ -206,8 +205,8 @@ struct SettingsSearchIndexTests {
                 // lost their Style drawers, so every bar row is
                 // at rest and anchor-less by the same ruling
                 // (#277 anchors, first #1517 split — both moot).
-                // 18: Glyph gap (#1689) and Other Spaces (#1683),
-                // at rest; #1713 took the glyph size to Style.
+                // 18: Glyph gap (#1689), Windows in other Spaces
+                // (#1683) at rest; #1713 took glyph size to Style.
                 // 19 since #1535: Space label, at rest.
                 // -1 #1528 (App Bar Content), +1 #1725 (grouping).
                 .bars: 19,
@@ -215,12 +214,11 @@ struct SettingsSearchIndexTests {
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to
                 // anchor and stay anchor-less by ruling.
-                // 8: #1644's Sheen row, on every macOS; 13 since
-                // #1684: the look shelf's five labelled actions,
-                // anchor-less like the palette shelf's. 14 since
-                // #1752: "Keep previous colors" is labelled, where
-                // the "use its colors" row it replaced was not. 15:
-                // the Shared look card's "Applies to" (#1752).
+                // 8: #1644's Sheen row; 13 since #1684: the look
+                // shelf's five labelled actions; 14 and 15 since
+                // #1752: "Keep previous colors" and "Applies to";
+                // 17: #2143's picker and duration, at rest; 15
+                // since #2228 took both out.
                 .looks: 15,
                 // 17 #1517, 18 #1679, 19 #1856, 21 #1857 (wells).
                 .advancedColors: 21,
@@ -243,7 +241,9 @@ struct SettingsSearchIndexTests {
                 // 12 since #1255 — the same row leaving.
                 // 10 since #277: the two General rows' anchors,
                 // kept under Open applications (#1520); 11, #2022; 12, #1655.
-                .shortcuts: 12,
+                // 13 since #2103: Toggle KiwiVision, at rest.
+                // 14 since #1870: the Hyper move offer.
+                .shortcuts: 14,
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
                 // a row can no longer be a no-op — a new census

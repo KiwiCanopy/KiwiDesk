@@ -3,8 +3,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Every row the Layout submenu builds states its own
-/// `isEnabled` (#802).
+/// Every row a checked menu-bar builder (`QuickMenuBuilders`)
+/// builds states its own `isEnabled` (#802).
 ///
 /// **Why a source scan and not an assertion on the built menu.**
 /// A `guard-prover` run (2026-08-17) proved the obvious runtime
@@ -23,8 +23,9 @@ import Testing
 /// precedent).
 @Suite("Layout menu rows state their enablement (#802)")
 struct LayoutMenuEnablementScanTests {
-    /// Rows constructed in the builder that state their enablement
-    /// somewhere ELSE, and where. One entry today.
+    /// Rows constructed in a builder that state their enablement
+    /// somewhere ELSE, and where. None since the quick menu's
+    /// Layout submenu went to KiwiHub (#2309).
     ///
     /// The entry names the statement that IS its reason, so an
     /// exemption whose grounds have gone reds rather than
@@ -34,18 +35,7 @@ struct LayoutMenuEnablementScanTests {
     /// pairing above keys on it, so an exemption has to name the
     /// thing it exempts.
     private static let statedByTheCaller:
-        [(row: String, statedIn: String, needle: String)] = [
-            (
-                // The Layout submenu's own parent row, which is
-                // added to the OUTER menu; that builder decides
-                // its enablement from the boot phase (#802), so
-                // stating it here would fight the caller.
-                row: "parent",
-                statedIn:
-                    "Sources/KiwiDesk/StatusItemController+Menu.swift",
-                needle: "layout.isEnabled"
-            )
-        ]
+        [(row: String, statedIn: String, needle: String)] = []
 
     private func source(_ path: String) throws -> String {
         let root = SourceScan.repoRoot(from: #filePath)

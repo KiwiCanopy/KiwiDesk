@@ -175,9 +175,6 @@ struct StartTilingGateTests {
     ) -> StatusItemController {
         LocalizationManager.shared.select("en")
         let controller = StatusItemController(item: FakeStatusItem())
-        controller.profilesProvider = {
-            (active: "Work", all: ["Work", "Play"], broken: [])
-        }
         controller.setWarning(warning)
         controller.setTilingIdle(idle)
         return controller
@@ -203,18 +200,19 @@ struct StartTilingGateTests {
             _ = (start.target as? NSObject)?.perform(action, with: start)
         }
         #expect(presses == 1)
-        // Grey, don't hide (#171): these work once tiling runs.
-        let layout = items.first { $0.title == "Layout" }
-        let switcher = items.first { $0.title == "Switch Profile" }
-        #expect(layout?.isEnabled == false)
-        #expect(switcher?.isEnabled == false)
+        // KiwiHub stays reachable; its View side greys its own
+        // chips until tiling runs (#2309 ruling 9).
+        let hub = items.first { $0.title == "Open KiwiHub…" }
+        #expect(hub?.isEnabled == true)
     }
 
     @Test("a running menu offers no start")
     func runningMenuHasNoStart() {
         let items = menu(controller(idle: false)).items
         #expect(!items.contains { $0.title == "Start Tiling" })
-        #expect(items.first { $0.title == "Layout" }?.isEnabled == true)
+        #expect(
+            items.first { $0.title == "Open KiwiHub…" }?.isEnabled == true
+        )
     }
 
     /// Without the permission a press could start nothing; the

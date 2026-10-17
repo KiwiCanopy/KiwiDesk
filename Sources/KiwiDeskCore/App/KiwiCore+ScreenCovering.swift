@@ -62,7 +62,8 @@ extension KiwiCore {
     /// size to a screen, and never native fullscreen, which its
     /// own exemption owns. Ruled onto it: the focus ring, the
     /// on-window marks and the #1161 placement bounce
-    /// (`PresentingReaderTests`). A raw `covers` /
+    /// (`PresentingReaderTests`), and `explain_window` reports it
+    /// (#1685). A raw `covers` /
     /// `coversAScreen` caller is a register entry in
     /// `ScreenCoveringCallerCensusTests`. Ruled to STAY on
     /// native fullscreen's skips alone: the inactive-Space
@@ -102,7 +103,7 @@ extension KiwiCore {
     /// view overscans 1 pt into the neighbour screen. The
     /// z-order read is taken only while a tracked window covers
     /// that screen, so a desk without one pays nothing.
-    func showsPresentation(on display: DisplayID) -> Bool {
+    private func showsPresentation(on display: DisplayID) -> Bool {
         guard let screen = TilingEngine.screen(for: display)
         else { return false }
         let bounds = Self.axFrame(of: screen)
@@ -110,22 +111,57 @@ extension KiwiCore {
             state.windows.all.contains(where: {
                 Self.mayPresent($0) && Self.covers($0.frame, bounds)
             }),
-            let front = frontWindowFrames().first(where: {
+            let front = Self.normalFrames(of: frontStack()).first(where: {
                 bounds.contains(CGPoint(x: $0.midX, y: $0.midY))
             })
         else { return false }
         return Self.covers(front, bounds)
     }
 
-    /// The WindowServer's normal-layer windows, front to back —
-    /// which window a screen SHOWS in front. KiwiDesk's chrome is
-    /// never a presentation, and a moving ring's panel spans its
-    /// screen (#1937). The live default of `frontWindowFrames`.
-    static func liveFrontFrames() -> [CGRect] {
+    /// One window of the front-to-back read.
+    typealias FrontWindow = FloatDetection.ListedWindow
+
+    /// Every visible window front to back, any layer, KiwiDesk's
+    /// own windows INCLUDED, the desktop's elements left out — the
+    /// live default of `frontStack` (#1788, #1869); a consumer
+    /// filters what it needs. KiwiVision reads the other way,
+    /// through `liveFrontWindows`.
+    static func liveFrontStack() -> [FrontWindow] {
+        FloatDetection.frontToBackWindows { _, _ in false }
+    }
+
+    /// `stack` without KiwiDesk's chrome: no overlay is ever a
+    /// presentation or a masked window, and a moving ring's panel
+    /// spans its screen (#1937).
+    static func withoutOwnChrome(
+        _ stack: [FrontWindow]
+    ) -> [FrontWindow] {
         let own = getpid()
-        return FloatDetection.frontToBackNormalFrames { pid, number in
-            pid == own && EventLoop.isOwnChrome(number: number)
+        return stack.filter {
+            !($0.pid == own
+                && EventLoop.isOwnChrome(number: Int($0.number)))
         }
+    }
+
+    /// The stack without KiwiDesk's chrome — KiwiVision's mask
+    /// reads it (#2103). It keeps the desktop's elements: macOS
+    /// counts a below-normal bar such as SketchyBar's among them,
+    /// and Never dimmed must see it to keep it clear; the mask walk
+    /// drops the wallpaper and the icons by layer.
+    static func liveFrontWindows() -> [FrontWindow] {
+        withoutOwnChrome(
+            FloatDetection.frontToBackWindows(
+                includingDesktopElements: true
+            ) { _, _ in false }
+        )
+    }
+
+    /// The normal-layer frames of `stack` — which window a screen
+    /// SHOWS in front.
+    static func normalFrames(
+        of stack: [FrontWindow]
+    ) -> [CGRect] {
+        withoutOwnChrome(stack).filter { $0.layer == 0 }.map(\.frame)
     }
 
     /// Whether a move or resize took a window into or out of

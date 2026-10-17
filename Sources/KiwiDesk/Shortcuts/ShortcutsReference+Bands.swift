@@ -18,6 +18,7 @@ extension ShortcutsReferenceBuilder {
         desktops: KeybindingCatalog.DesktopOffer = .none,
         resizeStep: Int,
         layerNames: [String],
+        lenses: [String] = [],
         rows: ([NavCommand]) -> [ShortcutRow]
     ) -> [ShortcutSubgroup] {
         let focus =
@@ -57,6 +58,10 @@ extension ShortcutsReferenceBuilder {
                 rows: rows(move)
             ),
             ShortcutSubgroup(
+                title: L("shortcuts.section.layout", "Layout"),
+                rows: rows(KeybindingCatalog.layoutRows)
+            ),
+            ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.size_float",
                     "Size & float"
@@ -67,13 +72,14 @@ extension ShortcutsReferenceBuilder {
                     )
                 )
             ),
-            // The editor's Open applications ▸ KiwiDesk rows
-            // (#1520) minus the panel's own opener. Without it a
-            // bound Open Settings fell through to Custom and
-            // rendered as raw untranslated Lua (#678 item 18).
+            // A section of its own, empty and so dropped while no
+            // KiwiVision key is bound (#2312).
             ShortcutSubgroup(
-                title: L("app.name", "KiwiDesk"),
-                rows: rows([KeybindingCatalog.openSettings])
+                title: L("destination.kiwivision", "KiwiVision"),
+                rows: rows(
+                    [KeybindingCatalog.toggleKiwiVision]
+                        + lenses.map(KeybindingCatalog.toggleLens)
+                )
             ),
             ShortcutSubgroup(
                 title: L(
@@ -82,7 +88,14 @@ extension ShortcutsReferenceBuilder {
                 ),
                 rows: rows(switchLayers)
             ),
-        ].filter { !$0.rows.isEmpty }
+        ]
+        .map {
+            ShortcutSubgroup(
+                title: $0.title,
+                rows: ShortcutFold.folded($0.rows)
+            )
+        }
+        .filter { !$0.rows.isEmpty }
     }
 
     /// Builds inactive shortcut rows (`OrphanedShortcuts`, #92, #820).
@@ -158,9 +171,11 @@ extension ShortcutsReferenceBuilder {
                     "Opens a new instance"
                 )
             )
+        // Not the floating mark's symbol, which the Shortcuts side
+        // shows beside it for a different meaning (#2246).
         case .gather:
             return (
-                "macwindow.on.rectangle",
+                "rectangle.stack",
                 L(
                     "shortcuts.app_behavior.gather.badge",
                     "Gathers its windows here"
@@ -185,6 +200,7 @@ extension ShortcutsReferenceBuilder {
                     id: binding.id.uuidString,
                     label: binding.lua,
                     combo: glyphs(binding.combo),
+                    icon: "curlybraces",
                     monospaced: true
                 )
             }

@@ -310,16 +310,47 @@ editing here:
   any one of them leaves `FollowFocusIntentTests` fully green
   while the follow silently stops carrying focus. The ruling is
   `docs/design-decisions.md`'s.
+- **The window switcher's Move here owes a plain ARRIVAL focus, never a
+  follow (#1875).** `JumpState` records it only where a move was
+  DISPATCHED for that window — a hop the bridge accepted, an
+  un-minimize — so the arrival is certain; the `.windowCreated`
+  arm pays it with a bare focus while the Space it was owed for
+  is still active, a Move here that landed elsewhere filed there
+  first through `fileMembership` — never ahead of the arrival,
+  which may not come — and it stands down off that Space, past
+  `FollowFocusIntent.drainWindow`, or after a press or a
+  commanded focus since. Keep it off `followFocus`: that debt
+  pays as a Space switch and, while it stands, holds the #1207
+  return and the #1564 sticky return down — the follow's
+  register therefore names no Jump site
+  (`JumpActionsTests` ▸ `moveHereAwayPaysAtArrival`;
+  `JumpFocusTests` holds each stand-down arm). A Move here on a
+  HIDDEN app owes its second debt, `JumpState.owedApp`, to the
+  window the unhide brings back focused, and it is paid at that
+  app's first HONORED focus REPORT rather than an arrival — ahead
+  of `rememberHonoredFocus`, so the #1207 memory files the Space
+  the window now holds, and ahead of the focus follow, which would
+  otherwise switch away to it; the handler, not the payer, decides
+  whether that report retiles (`JumpHiddenAppTests` ▸
+  `reportWiring`, `onePass`).
 - **Opening an app follows its window into its app rule's Space,
   and only an OPEN owes it (#1599).** The debt is
   `LaunchFollowIntent`, keyed by the app's bundle id because the
   window does not exist when it is owed, and owed through the
   one `oweLaunchFollow` door: by Open or Focus, by `new_window`
   (#1518, which retires its own debt when the app answers that
-  it opened nothing), and by `noteAppActivation` for an
-  activation within `pressGrace` of a click or key-down, of a process started within `launchGrace`
-  or showing no window (a reopen, an un-minimize — owner ruling
-  2026-09-23), outside a Desktop switch — never on "the app is
+  it opened nothing), by the window switcher's un-minimize (#1875,
+  an open by the same rule), and by `noteAppActivation` for an
+  activation within `pressGrace` of a click or key-down, of a
+  process started within `launchGrace` or showing no window (a
+  reopen, an un-minimize — owner ruling 2026-09-23), or of a
+  process that started at most `pressGrace` AFTER the last press
+  and activates within `coldStartGrace` of its start — a slow
+  cold start (#2201) — outside a Desktop switch. That press-keyed
+  arm reads the press timing through `pressBefore` alone, and a
+  press older than `watchedFor` (KiwiDesk's own start) never
+  counts, or the login password launches every restored app
+  (`LaunchFollowColdStartTests`) — never on "the app is
   active" or "a press just happened" alone, which the boot scan,
   a switch's arriving app and any app that activates while the
   user types satisfy (the measurements are
@@ -608,9 +639,25 @@ editing here:
   stored state beside a call site. The #1532 menu-bar reveal
   return is the third of the family and takes the same one-home
   shape: `KiwiCore+MenuBarRevealReturn.swift` owns the arm and
-  its one-shot stamp, decides at the report — its docstring is
-  the roster of what it reads there, and a new stand-down joins
-  that roster rather than a call site — and re-asserts with the
+  its debt, decides at the report and again at the payment — the
+  arm's docstring is the roster of what it reads at the report,
+  `payMenuBarRevealIfDue`'s of what it reads at the payment, and
+  a new stand-down joins the roster of the moment it reads at
+  rather than a call site — OWES the return while the bar shows
+  or KiwiDesk's quick menu is open — and at the OPEN for the one
+  report the arm declined only for the menu being shut, since
+  the quick menu's activation reports ahead of `menuWillOpen`
+  and its press reaches no local monitor (#2224, measured
+  2026-10-13 on macOS 27.0.1): `statusMenuDidOpen` looks back
+  within `menuBarRevealOpenGrace` on `oweDeclinedReveal`'s
+  roster, the open's — the candidate ended by a report for
+  another window at the arm, by a commanded focus or a click on
+  the revealed window since, and the owe cancelling the Space
+  follow the honored report scheduled — never a second arm
+  beside it — and never raises
+  before the
+  bar hides, since a return raised at once was taken back every
+  ~1.3 s (#2224), then pays it once with the
   STAMPED raise, `raiseWindow`, so the report that follows is our
   own echo (#1281) and the scrolling placement distrust does not
   bounce it (#1414's class): never a bare `AXHelper.raise(`, and
@@ -628,9 +675,11 @@ editing here:
   further member takes the same one-home shape with its own
   consulting site there, and a new live host read on any arm
   takes a `MouseTracker` seam pinned in both twins
-  (`MenuBarRevealReturnTests` the verdicts,
+  (`MenuBarRevealReturnTests` the arm's verdicts,
+  `MenuBarRevealPaymentTests` the payment's,
   `MenuBarRevealSeamTests` the stamped raise and the arm's place
-  between #1161 and #958, `MouseButtonSeamGuardTests` the read's
+  between #1161 and #958 and the quick menu's GUI wiring,
+  `MouseButtonSeamGuardTests` the read's
   home and the pins).
   `IgnoredPanelGraceTests` pins the machine's transitions (the
   dismissal grace, the click-provenance escape, expiry, the
@@ -770,6 +819,25 @@ editing here:
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
   call, which no unit test reaches, is
   `ZOrderSequenceWiringTests`' needle).
+- **A commanded focus onto another window owes the float-tier
+  raise at the command (#2284)** — its report comes back as our
+  own echo, which the focus handler's `!selfEcho` arm skips, so a
+  Space Bar or App Bar click and a keyboard focus move lifted
+  nothing. `focusWindow` schedules it for a focus that changed,
+  never for a re-assert of the same window, which is the raise's
+  own hand-back; scrolling's deferred raise schedules it after the
+  tile's. A door that raises the layer itself supersedes it:
+  `raiseFloatsAndSticky` cancels a scheduled or owed raise. The
+  raise is OWED, never issued, while the tiled plane still moves
+  — a pan, an owed #804 pass, a restore armed or draining — asked
+  through the one `tiledPlaneMoving`, and a site where the tiled
+  plane comes to rest pays it through the one
+  `tiledPlaneCameToRest(restore:focusRaise:)`, never a payer
+  beside it — `scheduleZOrderRestore`'s and `focusWindow`'s
+  immediate runs being the two ruled non-rest callers (#2343,
+  `FloatRaiseLandingWiringTests` ▸ `debtIsPaidAtRest`); the float
+  raise's own drain is no tiled restore, so a newer focus still
+  supersedes it at once (`CommandedFocusFloatRaiseTests`).
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**
@@ -790,10 +858,10 @@ editing here:
   Arm **narrowly**: a restore drains a verified raise sequence on
   the blocking ordered queue — holding the mouse warp for as long
   as that takes — re-asserts the focus at the end of it, and
-  leaves the tiled plane above the float layer until the next
-  genuine focus event (#418), so "harmless, it re-raises the same
-  order" is not an argument for arming on a mutation that
-  scrambled nothing.
+  leaves the tiled plane above the float layer until a float raise
+  owed behind it is paid (#418, #2284), so "harmless, it re-raises
+  the same order" is not an argument for arming on a mutation
+  that scrambled nothing.
   And the close-return stand-down governs the ARM, not only the
   direct raise (#936): a removal whose return raise stood down
   arms no track restore either, because the drain ends in a focus
@@ -927,7 +995,10 @@ editing here:
   never bounced — `intended != id` is the consult's first clause
   — and `focusOwnWindow(number:)`, beside the arm, is the door a
   GUI raise of an own window takes so its report arrives that way
-  (#1281, `PlacementIntentTests`): the command for a tracked
+  (#1281, `PlacementIntentTests`) — a raise CORE starts (hover
+  focus, #1869) commands the focus itself and asks the GUI only
+  for the front, once that focus moved, which is gui.md's ▸ "A raise
+  Core starts" (`HoverFocusOwnWindowTests`): the command for a tracked
   window; a CLOSED one — re-shown under the number it kept —
   arrives as a return from a close, which the fold grants the
   focus a new window gets, so the report is intended before it
@@ -1652,12 +1723,14 @@ editing here:
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
   the door's docstring. Which window a screen shows in FRONT is
-  read through `showsPresentation` / `shelfStandsDown`, never the
-  raw `KiwiCore.frontWindowFrames` seam, its live default or the
-  CGWindowList read beneath it, and a new z-order need widens
-  that one seam rather than adding a second front-to-back read
+  read through `shelfStandsDown` (#2348), never off
+  the raw `KiwiCore.frontStack` seam, its live default or the
+  CGWindowList read beneath it; a new z-order need reads that one
+  seam's `FrontWindow` element rather than adding a second
+  front-to-back read, and is ruled as a reader there — hover
+  focus's hit test at the pointer is one (#1869)
   (`ScreenCoveringCallerCensusTests` ▸
-  `frontWindowSeamHasOneReader`).
+  `frontWindowSeamReadersAreRuled`).
 - **A window is tiled or floating, and detection's verdict is
   read through ONE door (#1810).** The float verbs and the bar
   menu's Float/Tile row ask `KiwiCore.tileRefusal(of:)`, never
@@ -2184,6 +2257,11 @@ detector is `Navigation.pileMates`).
 The authoritative map is the "Layout navigation & overflow models"
 table in `docs/design-decisions.md` — a **new layout must add its
 row** there.
+
+A new navigation model, or a new caller of one, also threads a
+KiwiVision lens's skip; the obligation is
+[borders.md](borders.md)'s ▸ "A step KiwiDesk's own navigation
+takes".
 
 ## macOS native tabs are one `NSWindow` per tab, coalesced temporally
 

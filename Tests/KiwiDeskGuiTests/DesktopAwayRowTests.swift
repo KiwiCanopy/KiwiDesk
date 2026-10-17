@@ -164,9 +164,9 @@ struct DesktopAwayRowTests {
             layerNames: [KeyLayer.defaultName]
         )
         #expect(reference.custom.isEmpty)
-        let labels = reference.controls.flatMap(\.rows).map(
-            \.label
-        )
+        let labels =
+            (reference.controls.flatMap(\.rows)
+            + reference.desktopAway).map(\.label)
         #expect(labels.contains("Go to Desktop 2"))
         #expect(labels.contains("Move to Desktop 5 & follow"))
     }
@@ -205,7 +205,9 @@ struct DesktopAwayRowTests {
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName]
         )
-        let rows = reference.controls.flatMap(\.rows)
+        let rows =
+            reference.controls.flatMap(\.rows)
+            + reference.desktopAway
         let away = rows.filter(\.unavailable)
         #expect(away.count == 1)
         #expect(away.first?.label == "Go to Desktop 5")
@@ -221,18 +223,4 @@ struct DesktopAwayRowTests {
         .shortcuts(.moveToDesktop),
         .shortcuts(.moveToDesktopFollow),
     ]
-
-    /// Pins every input an expansion reasons from, so a moved
-    /// default reds as a default. Two Desktops against three
-    /// spaces, deliberately: see `instanceCounts`.
-    private func fixture() -> ShortcutsFamilyRows {
-        ShortcutsFamilyRows(
-            spaces: ["1", "2", "mail"],
-            icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
-            resizeStep: 42,
-            layerNames: [KeyLayer.defaultName],
-            currentLayer: KeyLayer.defaultName
-        )
-    }
 }

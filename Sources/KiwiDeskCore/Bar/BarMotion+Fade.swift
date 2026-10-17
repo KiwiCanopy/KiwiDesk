@@ -151,4 +151,27 @@ extension BarMotion {
             body()
         }
     }
+
+    /// A layer `opacity` fade from `from` to `to` across
+    /// `duration`, starting at render-server time `begin` — the
+    /// focused ring's arrival reveal (#1959). Forwards only: a
+    /// later fade on the key must not be overridden from the
+    /// start.
+    static func opacityFade(
+        from: Float,
+        to: Float,
+        begin: CFTimeInterval,
+        duration: CFTimeInterval,
+        reduceMotion: Bool
+    ) -> CAAnimation {
+        let fade = CABasicAnimation(keyPath: "opacity")
+        fade.fromValue = reduceMotion ? to : from
+        fade.toValue = to
+        fade.beginTime = begin
+        fade.duration = max(duration, 0.001)
+        fade.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        fade.fillMode = .forwards
+        fade.isRemovedOnCompletion = false
+        return fade
+    }
 }

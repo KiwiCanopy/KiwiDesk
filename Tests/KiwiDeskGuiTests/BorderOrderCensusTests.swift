@@ -25,9 +25,10 @@ struct BorderOrderCensusTests {
             "sync, gated by `ordersOverlay`: needsOrder, a settle "
                 + "pass or no WindowServer stream"
         ),
-        "BorderManager+SkyLight.swift": (
-            2,
-            "the WindowServer reorder and unhide events"
+        "BorderManager+WindowServer.swift": (
+            1,
+            "the watch's restack phase: the WindowServer reorder "
+                + "and unhide events (#2275)"
         ),
         "BorderManager+DeadEnd.swift": (1, "the transient dead-end ring"),
     ]
@@ -65,6 +66,86 @@ struct BorderOrderCensusTests {
             ],
             "found \(sites.map(\.site))"
         )
+    }
+
+    /// The watch's restack fan-out orders every overlay of a window,
+    /// so a caller beside the reorder event is a round trip per
+    /// consumer on the switch path: the float raise's landing
+    /// (#2284), and while KiwiVision is on each float's own landing,
+    /// so the plate dims it at once (#2103).
+    @Test("only the ruled sites take the watch's restack door")
+    func watchRestackSitesAreCensused() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "windowServer.restack(",
+            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted()
+                == ["KiwiCore+Vision.swift", "KiwiCore+ZOrderFloats.swift"],
+            "found \(sites.map(\.site))"
+        )
+    }
+
+    /// A KiwiVision plate's stack is the same round trip, one per
+    /// screen (#2103): the sync, gated by the ring's own
+    /// `ordersOverlay`, and the target's restack after its reorder
+    /// event both order through the manager's one door.
+    @Test("only the ruled sites stack a KiwiVision plate")
+    func plateOrderSitesAreCensused() throws {
+        // Two triggers reach the manager's one ordering door: the
+        // sync and the restack.
+        let triggers = try SourceScan.identifierSites(
+            of: "order(plate,",
+            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            triggers.map(\.file.lastPathComponent)
+                == ["VisionManager.swift", "VisionManager.swift"],
+            "found \(triggers.map(\.site))"
+        )
+        // The door orders below, or — while a lens holds the target
+        // (#2103 ruling 12) — above.
+        for needle in ["order(below:", "order(above:"] {
+            let sites = try SourceScan.identifierSites(
+                of: needle,
+                under: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore"
+                )
+            )
+            #expect(
+                sites.map(\.file.lastPathComponent)
+                    == ["VisionManager.swift"],
+                "found \(sites.map(\.site))"
+            )
+        }
+        // The plate restacks AFTER the ring's own order — the
+        // watch's consumer order, held by `WindowServerWatchTests`
+        // ▸ `phaseOrder`, or the ring lands under the plate — and
+        // its restack hook is the one the core connects.
+        let wiring = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+WindowServer.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            wiring.contains(
+                "restack:{[weakself]idinself?.visionWindowRestacked(id)}"
+            )
+        )
+        // The stand-down is the shelf's verdict, filed by the one
+        // bar refresh, never a read of the plate's own.
+        let shelf = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Shelf.swift"
+            )
+        )
+        #expect(shelf.contains("noteVisionStandDown(standingDown)"))
+        let vision = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
+            )
+        )
+        #expect(!vision.contains("shelfStandsDown("))
     }
 
     /// The #1959 hold is armed in one door, the switch's own

@@ -9,154 +9,115 @@ import Testing
 /// macOS 27 answers the pointer reaching the top edge by
 /// activating the last regular app — KiwiDesk is an accessory
 /// app — and a clickless foreign focus report lands ~190 ms
-/// later. The return keeps state focus on the own window; each
-/// let-out (a press, the one-shot bound, a foreign anchor, a
-/// self echo, the pointer elsewhere) is a case below. The device
-/// evidence is on the issue.
+/// later. The report is taken and the return OWED until the bar
+/// hides or KiwiDesk's quick menu closes (#2224). This suite holds
+/// the arm — each let-out at the report (a click on the window,
+/// another window, a foreign anchor, a self echo, the pointer
+/// elsewhere) is a case
+/// below; the payment and its stand-downs are
+/// `MenuBarRevealPaymentTests`'. The device evidence is on the
+/// issues.
 @Suite("Menu-bar reveal return (#1532)", .serialized)
 @MainActor
 struct MenuBarRevealReturnTests {
-    /// The return's log phrase, asserted POSITIVELY on a return
-    /// and NEGATIVELY on the silent let-outs — one constant, so
-    /// a reword of the production line reds the positive half
-    /// instead of leaving the negative one vacuously green.
-    private static let returnLogNeedle = "menu-bar reveal activation"
+    private typealias F = MenuBarRevealFixture
 
-    /// Windows 1 (OUR pid — the anchor) and 2 (a foreign regular
-    /// app), window 1 focused, the pointer read pinned IN the
-    /// strip: the reveal's shape.
-    private func makeCore(inStrip: Bool = true) -> KiwiCore {
-        let core = makeTestCore()
-        let own = pid_t(ProcessInfo.processInfo.processIdentifier)
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(
-                    id: WindowID(1),
-                    pid: own,
-                    appName: "KiwiDesk"
-                )
-            )
-        )
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(
-                    id: WindowID(2),
-                    pid: 99,
-                    appName: "Other"
-                )
-            )
-        )
-        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
-        core.mouse.pointerInMenuBarStrip = { inStrip }
-        return core
-    }
-
-    private func focused(_ core: KiwiCore) -> WindowID? {
-        core.state.workspaces[SpaceID(1)]?.focused
-    }
-
-    @Test("The reveal's activation is returned to the own window")
-    func activationIsReturned() {
-        let core = makeCore()
-        var log: [String] = []
-        core.onLog = { log.append($0) }
+    @Test("The reveal's activation is taken and its return owed")
+    func activationIsOwed() {
+        let core = F.makeCore()
+        let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(1))
-        #expect(log.contains { $0.contains(Self.returnLogNeedle) })
-        #expect(core.menuBarRevealReturnAt != nil)
+        #expect(F.focused(core) == WindowID(1))
+        #expect(lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
     }
 
     @Test("The pointer elsewhere makes it an ordinary focus")
     func pointerAwayIsHonored() {
-        let core = makeCore(inStrip: false)
-        var log: [String] = []
-        core.onLog = { log.append($0) }
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(2))
-        #expect(!log.contains { $0.contains(Self.returnLogNeedle) })
+        #expect(F.focused(core) == WindowID(2))
+        #expect(!lines.contain(F.returnLogNeedle))
     }
 
-    @Test("A left press anywhere is the user choosing")
-    func recentPressStandsDown() {
-        // A click into the revealed bar's menus reaches no
-        // managed window, so the stand-down is ANY press, not a
-        // press that reached the reported window.
-        let core = makeCore()
+    /// A click into the revealed bar's menus reaches no window and
+    /// chooses nothing (owner, 2026-10-13); a click that reached
+    /// the reported window is a window choice.
+    @Test("Only a click on the reported window is a choice")
+    func clickOnTheWindowIsAChoice() {
+        let core = F.makeCore()
         // Stamped AHEAD: an "inside the window" verdict measured
         // against the wall clock races a starved runner (#1371).
         core.lastLeftClick = (
             at: core.wallClock().addingTimeInterval(60),
             point: .zero,
+            reached: WindowID(2)
+        )
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(F.focused(core) == WindowID(2))
+        #expect(!lines.contain(F.returnLogNeedle))
+        // The control: the same press in the bar is no choice.
+        let bar = F.makeCore()
+        bar.lastLeftClick = (
+            at: bar.wallClock().addingTimeInterval(60),
+            point: .zero,
             reached: nil
         )
-        var log: [String] = []
-        core.onLog = { log.append($0) }
-        core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(2))
-        #expect(!log.contains { $0.contains(Self.returnLogNeedle) })
+        bar.handle(.windowFocused(WindowID(2)))
+        #expect(F.focused(bar) == WindowID(1))
+        #expect(bar.menuBarReveal.debt != nil)
     }
 
-    @Test("One return per reveal; the bound then re-opens")
-    func oneReturnInsideTheWindow() {
-        let core = makeCore()
+    /// A lazy app reports a raised window twice (#887): the repeat
+    /// is the same reveal, still taken.
+    @Test("A repeat of the reveal's report is the same reveal")
+    func repeatIsTheSameReveal() {
+        let core = F.makeCore()
         core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(1))
-        // A second activation inside the bound is honored — an
-        // activation KiwiDesk could not hold is never fought
-        // twice. The stamp is set AHEAD so the verdict does not
-        // ride how long the runner took between the two calls.
-        core.menuBarRevealReturnAt = core.wallClock().addingTimeInterval(60)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(2))
-        // Past the bound, the next reveal is returned again.
-        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
-        core.menuBarRevealReturnAt =
-            core.wallClock().addingTimeInterval(
-                -KiwiCore.menuBarRevealReturnWindow - 1
+        #expect(F.focused(core) == WindowID(1))
+        #expect(core.menuBarReveal.debt != nil)
+    }
+
+    /// ⌘-Tab while the bar shows: another window's report is the
+    /// user switching, so the debt drops and the report stands.
+    @Test("Another window's report is the user switching")
+    func anotherWindowDropsTheDebt() {
+        let core = F.makeCore()
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(3), pid: 77, appName: "Third")
             )
+        )
+        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(1))
-    }
-
-    /// The reason the re-assert is a stamped raise and not the
-    /// focus command: the command's displacement note would put
-    /// the foreign window in the placement ledger, and in an
-    /// ACTIVE scrolling Space that live entry is the whole #1161
-    /// verdict — every later report from that app bounced for the
-    /// ledger's window, so the one-shot never decided there.
-    @Test("In scrolling the one-shot still decides the second report")
-    func scrollingHonorsTheSecondReport() {
-        let core = makeCore()
-        core.state.workspaces.setMode(SpaceID(1), .scrolling)
-        core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(1))
-        #expect(core.tiler.placements.recent(WindowID(2)) == nil)
-        core.menuBarRevealReturnAt = core.wallClock().addingTimeInterval(60)
-        core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(2))
+        core.handle(.windowFocused(WindowID(3)))
+        #expect(F.focused(core) == WindowID(3))
+        #expect(core.menuBarReveal.debt == nil)
     }
 
     /// The #1345 stand-down, beside a shown control: a return
     /// that would switch Desktops is refused and the report
-    /// honored, the arm neither returning nor stranding state.
+    /// honored, the arm neither owing nor stranding state.
     @Test("A return that crosses Desktops is honored instead")
     func crossingReturnIsHonored() {
-        let core = makeCore()
+        let core = F.makeCore()
         core.windowIsOnScreen = { $0 != WindowID(1) }
         core.desktopMemory.readWindowSpace = { _ in .hosted(10) }
-        var log: [String] = []
-        core.onLog = { log.append($0) }
+        let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(focused(core) == WindowID(2))
-        #expect(!log.contains { $0.contains(Self.returnLogNeedle) })
-        #expect(log.contains { $0.contains("#1345") })
-        #expect(core.menuBarRevealReturnAt == nil)
-        // The control: shown, the same report is returned.
-        let shown = makeCore()
+        #expect(F.focused(core) == WindowID(2))
+        #expect(!lines.contain(F.returnLogNeedle))
+        #expect(lines.contain("#1345"))
+        #expect(core.menuBarReveal.debt == nil)
+        // The control: shown, the same report is owed.
+        let shown = F.makeCore()
         shown.windowIsOnScreen = { _ in true }
         shown.desktopMemory.readWindowSpace = { _ in .hosted(10) }
         shown.handle(.windowFocused(WindowID(2)))
-        #expect(focused(shown) == WindowID(1))
+        #expect(F.focused(shown) == WindowID(1))
     }
 
     @Test("A foreign anchor is never returned to")
@@ -164,7 +125,7 @@ struct MenuBarRevealReturnTests {
         // Only an accessory app's window is skipped by the
         // activation; a regular app's focused window is where
         // macOS lands anyway, so there is nothing to return.
-        let core = makeCore()
+        let core = F.makeCore()
         core.state.apply(
             .windowCreated(
                 ManagedWindow(
@@ -175,16 +136,15 @@ struct MenuBarRevealReturnTests {
             )
         )
         core.state.workspaces.focus(WindowID(2), in: SpaceID(1))
-        var log: [String] = []
-        core.onLog = { log.append($0) }
+        let lines = F.log(core)
         core.handle(.windowFocused(WindowID(3)))
-        #expect(focused(core) == WindowID(3))
-        #expect(!log.contains { $0.contains(Self.returnLogNeedle) })
+        #expect(F.focused(core) == WindowID(3))
+        #expect(!lines.contain(F.returnLogNeedle))
     }
 
     @Test("A report for an own window is never returned")
     func ownReportIsNotReturned() {
-        let core = makeCore()
+        let core = F.makeCore()
         core.state.apply(
             .windowCreated(
                 ManagedWindow(
@@ -198,116 +158,161 @@ struct MenuBarRevealReturnTests {
         // again so only the pid clause stands between this report
         // and a return (guard-prover, 2026-09-21).
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
-        var log: [String] = []
-        core.onLog = { log.append($0) }
+        let lines = F.log(core)
         core.handle(.windowFocused(WindowID(4)))
-        #expect(focused(core) == WindowID(4))
-        #expect(!log.contains { $0.contains(Self.returnLogNeedle) })
+        #expect(F.focused(core) == WindowID(4))
+        #expect(!lines.contain(F.returnLogNeedle))
     }
 
     @Test("Our own raise's echo is not a reveal")
     func selfEchoIsNotReturned() {
-        let core = makeCore()
+        let core = F.makeCore()
         core.selfRaiseStamps[WindowID(2)] =
-            core.wallClock().addingTimeInterval(
-                60
-            )
-        var log: [String] = []
-        core.onLog = { log.append($0) }
+            core.wallClock().addingTimeInterval(60)
+        let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
-        #expect(!log.contains { $0.contains(Self.returnLogNeedle) })
-        #expect(core.menuBarRevealReturnAt == nil)
+        #expect(!lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt == nil)
     }
 
-    // MARK: the strip geometry
-
-    @Test("The band is the deepest of the three readings")
-    func bandTakesTheDeepest() {
-        #expect(
-            GeometryUtils.menuBarBand(
-                safeTop: 37,
-                reservedTop: 32,
-                barHeight: 24
-            ) == 37
-        )
-        #expect(
-            GeometryUtils.menuBarBand(
-                safeTop: 0,
-                reservedTop: 0,
-                barHeight: 24
-            ) == 24
-        )
-        // The bare-menu reading (0) never collapses the band.
-        #expect(
-            GeometryUtils.menuBarBand(
-                safeTop: 0,
-                reservedTop: 24,
-                barHeight: 0
-            ) == 24
-        )
+    /// The quick menu's activation reports AHEAD of `menuWillOpen`,
+    /// inside the menu's build (device, 2026-10-13: 52 ms ahead),
+    /// so the report is honored at the time and the open owes it.
+    @Test("A report ahead of the quick menu's open is owed at the open")
+    func reportAheadOfTheOpenIsOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(F.focused(core) == WindowID(2))
+        #expect(!lines.contain(F.returnLogNeedle))
+        core.statusMenuDidOpen()
+        #expect(F.focused(core) == WindowID(1))
+        #expect(lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
     }
 
-    @Test("The strip is the top band of the pointer's screen")
-    func stripIsTheTopBand() {
-        let main = GeometryUtils.MenuBarScreen(
-            frame: CGRect(x: 0, y: 0, width: 1728, height: 1117),
-            band: 37
+    /// A report older than the grace was the user's.
+    @Test("A stale report is not owed at the open")
+    func staleReportIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        let late = core.wallClock().addingTimeInterval(
+            KiwiCore.menuBarRevealOpenGrace + 1
         )
-        let right = GeometryUtils.MenuBarScreen(
-            frame: CGRect(x: 1728, y: 0, width: 2560, height: 1440),
-            band: 24
+        core.wallClock = { late }
+        core.statusMenuDidOpen()
+        #expect(F.focused(core) == WindowID(2))
+        #expect(!lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt == nil)
+    }
+
+    /// The revealed window may sit in another Space — its report
+    /// switches nothing and leaves the active Space's focus on the
+    /// anchor (device, 2026-10-13) — and the open still owes it.
+    @Test("A revealed window in another Space is owed at the open")
+    func otherSpaceReportIsOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.state.workspaces.add(WindowID(2), to: SpaceID("2"))
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(!lines.contain(F.returnLogNeedle))
+        core.statusMenuDidOpen()
+        #expect(lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+        #expect(F.focused(core) == WindowID(1))
+    }
+
+    /// A lazy app's duplicate of the declined report (#887) keeps
+    /// the candidate for the open.
+    @Test("A repeat of the declined report keeps it for the open")
+    func repeatKeepsTheDeclinedReport() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        core.handle(.windowFocused(WindowID(2)))
+        core.statusMenuDidOpen()
+        #expect(lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+    }
+
+    /// A focus command between the report and the open is a
+    /// choice the arm never sees (its echo is a self raise), so
+    /// the open asks the commanded-focus ledger itself.
+    @Test("A commanded focus since is not owed at the open")
+    func commandedSinceIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.handle(.windowFocused(WindowID(2)))
+        core.eventLoop.lastCommandedFocus =
+            .now.advanced(by: .seconds(1))
+        core.statusMenuDidOpen()
+        #expect(core.menuBarReveal.debt == nil)
+        #expect(F.focused(core) == WindowID(2))
+    }
+
+    /// A click that reached the revealed window since is a window
+    /// choice, as it is at the report.
+    @Test("A click on the revealed window since is not owed")
+    func clickOnTheRevealedSinceIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.handle(.windowFocused(WindowID(2)))
+        core.lastLeftClick = (
+            at: core.wallClock(),
+            point: .zero,
+            reached: WindowID(2)
         )
-        let screens = [main, right]
-        // Resting ON the edge reads y == maxY: inside.
-        #expect(
-            GeometryUtils.pointerInMenuBarStrip(
-                CGPoint(x: 864, y: 1117),
-                screens: screens
+        core.statusMenuDidOpen()
+        #expect(core.menuBarReveal.debt == nil)
+        #expect(F.focused(core) == WindowID(2))
+    }
+
+    /// The honored other-Space report scheduled the 250 ms Space
+    /// follow; the open owing the return cancels it, since the
+    /// user asked for the menu and not that Space.
+    @Test("The open cancels the follow the honored report scheduled")
+    func openCancelsTheHonoredFollow() {
+        let core = F.makeCore(inStrip: false)
+        core.state.workspaces.add(WindowID(2), to: SpaceID("2"))
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(core.deferred.task(for: .focusFollow) != nil)
+        core.statusMenuDidOpen()
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+    }
+
+    /// An other-Space repeat reaches the decline branch again (the
+    /// anchor is still the active Space's focus); the grace keeps
+    /// running from the FIRST report.
+    @Test("An other-Space repeat keeps the first stamp")
+    func otherSpaceRepeatKeepsTheFirstStamp() {
+        let core = F.makeCore(inStrip: false)
+        core.state.workspaces.add(WindowID(2), to: SpaceID("2"))
+        let first = core.wallClock()
+        core.handle(.windowFocused(WindowID(2)))
+        core.wallClock = { first.addingTimeInterval(0.5) }
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(core.menuBarReveal.declined?.armedAt == first)
+    }
+
+    /// A window honored after the declined report is the user's
+    /// choice; the open owes nothing over it.
+    @Test("A later choice is not owed at the open")
+    func laterChoiceIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(3), pid: 98, appName: "Third")
             )
         )
-        #expect(
-            GeometryUtils.pointerInMenuBarStrip(
-                CGPoint(x: 864, y: 1081),
-                screens: screens
-            )
-        )
-        #expect(
-            !GeometryUtils.pointerInMenuBarStrip(
-                CGPoint(x: 864, y: 1079),
-                screens: screens
-            )
-        )
-        // The other screen's own band, not the main one's.
-        #expect(
-            GeometryUtils.pointerInMenuBarStrip(
-                CGPoint(x: 3000, y: 1420),
-                screens: screens
-            )
-        )
-        #expect(
-            !GeometryUtils.pointerInMenuBarStrip(
-                CGPoint(x: 3000, y: 1400),
-                screens: screens
-            )
-        )
-        // A point on the seam between stacked screens is the
-        // upper one's bottom row, not the lower one's strip.
-        let lower = GeometryUtils.MenuBarScreen(
-            frame: CGRect(x: 0, y: -1000, width: 1728, height: 1000),
-            band: 24
-        )
-        #expect(
-            !GeometryUtils.pointerInMenuBarStrip(
-                CGPoint(x: 100, y: 0),
-                screens: [lower, main]
-            )
-        )
-        // Off every screen: nowhere to reveal.
-        #expect(
-            !GeometryUtils.pointerInMenuBarStrip(
-                CGPoint(x: 5000, y: 10),
-                screens: screens
-            )
-        )
+        // The new window took the focus; the anchor must hold it
+        // for the first report to arm a candidate at all.
+        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        core.handle(.windowFocused(WindowID(3)))
+        core.statusMenuDidOpen()
+        #expect(F.focused(core) == WindowID(3))
+        #expect(!lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt == nil)
     }
 }

@@ -35,11 +35,18 @@ final class LaunchFollowIntent {
     /// password (#1599). It bounds #2187's app-act motion too.
     static let pressGrace: TimeInterval = 1
 
-    /// Longest gap between a process starting and its activation
-    /// for that activation to be its LAUNCH: measured at most
-    /// 0.3 s; the rest is headroom for a slow cold start. An
-    /// older process opens only when it shows no window (#1599).
+    /// Longest gap between a process starting and an activation
+    /// within `pressGrace` of a press for it to be the LAUNCH:
+    /// measured at most 0.3 s (#1599); a press that came before
+    /// the start is `coldStartGrace`'s. An older process opens
+    /// only when it shows no window.
     static let launchGrace: TimeInterval = 5
+
+    /// Longest gap between a press-started process and its
+    /// activation for that press to stay its cause: twice the
+    /// slowest cold start measured, Word's 7.58 s (#2201). Past
+    /// it the activation is the app's own.
+    static let coldStartGrace: TimeInterval = 15
 
     /// An activation this soon after a native Desktop switch is
     /// the switch's own, not a launch: measured 0.3–0.9 s after
@@ -57,6 +64,34 @@ final class LaunchFollowIntent {
     func recentPress() -> TimeInterval? {
         guard let press = pressAge?(), press <= Self.pressGrace
         else { return nil }
+        return press
+    }
+
+    /// Seconds since KiwiDesk began managing windows
+    /// (`boot.began`). A press older than that predates it — the
+    /// login password — and opened nothing (#2201). nil until
+    /// `start()` wires it, like `pressAge`.
+    var watchedFor: (@MainActor () -> TimeInterval?)?
+
+    /// Whether a press came within the last `age` seconds — the
+    /// one reading for a ledger asking "pressed since I was
+    /// owed", Jump's two stand-downs.
+    func pressed(within age: TimeInterval) -> Bool {
+        pressAge?().map { $0 < age } ?? false
+    }
+
+    /// The last press's age when it came at most `pressGrace`
+    /// BEFORE a process that started `startedAgo` seconds ago,
+    /// within `coldStartGrace`, while KiwiDesk watched: that
+    /// press launched it, however late a cold start activates
+    /// (#2201).
+    func pressBefore(startedAgo: TimeInterval) -> TimeInterval? {
+        guard startedAgo <= Self.coldStartGrace,
+            let watched = watchedFor?(), let press = pressAge?(),
+            press <= watched
+        else { return nil }
+        let lead = press - startedAgo
+        guard lead >= 0, lead <= Self.pressGrace else { return nil }
         return press
     }
 

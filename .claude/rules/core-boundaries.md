@@ -50,7 +50,7 @@ below, so it corrects itself when a seventh is added.
   fire and the documented capture reads nothing.
   `LogSeamSinkTests` pins Core's sink both ways; a GUI-side
   logger owes the same shape with no guard, so its doc comment
-  carries the danger (`ShortcutsPanelController`'s `panelLog`
+  carries the danger (`JumpPanelController`'s `jumpLog`
   is the worked example). Four guards, reading
   different things — `LogSeamWiringTests` scans source for the
   wiring and its `allowed` map is the exemption list;
@@ -66,7 +66,7 @@ below, so it corrects itself when a seventh is added.
   again in the probe, which reads the sink before any lifecycle
   runs.
 - **The API surface describes itself, and an enum's values are
-  READ rather than typed (#1033).** Four obligations, all on
+  READ rather than typed (#1033).** Five obligations, all on
   `Commands/`:
   - **A new command owes a record** in the matching
     `Commands/Reference/APIRecords+*` table — group, arguments,
@@ -79,6 +79,14 @@ below, so it corrects itself when a seventh is added.
     `cliOnly`, the one register of commands Lua never registers,
     `subscribe` beside it (`APIRecordCensusTests` ▸
     `cliOnlyIsNeverLua`).
+  - **A new command answers whether it is destructive** —
+    whether it loses something a user cannot get back by running
+    another command: a file, a window's content, unsaved live
+    changes — in `APIReference.destructive`, the register beside
+    `cliOnly` that routes it to `kiwidesk mcp`'s `run_destructive`
+    tool (#1685). `APIDestructiveCensusTests` holds a command whose
+    name reads destructive to the register or its `ruledSafe` map;
+    one named otherwise is outside that net and is review's.
   - **An enum-valued argument names the TYPE, never the values**
     — `.choice("anchor", ScrollingParams.Anchor.self)`.
     `APIChoice` has exactly one initializer and it reads
@@ -163,9 +171,13 @@ below, so it corrects itself when a seventh is added.
   that raise LEFT is still in front — an order question asked of
   the one `RaiseFlight` record, never of the echo ledger's
   presence. That record is written by the `focus` verb's wrapper
-  alone; a raise path only restamps or rekeys it, since a
-  re-assert that records names the app the user switched to as
-  the one left (`RaiseFlightWriterCensusTests`). Widening the list
+  and hover focus (#1869) alone — each a fresh user act whose
+  front app, read before its focus ran, IS the app left — through
+  the one recorder in the preflight file; a raise path only
+  restamps or rekeys it, since a re-assert that records names the
+  app the user switched to as the one left
+  (`RaiseFlightWriterCensusTests`, `HoverFocusStandDownTests` ▸
+  `hoverRecordsAFlight`). Widening the list
   is a ruling, not a tidy-up; `FocusRaiseFlightGuardTests` ▸
   `otherVerbsRefuse` holds every verb outside it to the refusal.
 

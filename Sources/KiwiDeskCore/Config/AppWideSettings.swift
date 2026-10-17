@@ -18,6 +18,43 @@ public struct AppWideSettings: Equatable, Sendable {
     /// ON by default: the instant switch removed the slide that
     /// was the cue.
     public var desktopCue = true
+    /// Whether an explicit Space switch shows the plate naming the
+    /// Space it landed on, where no Space Bar is drawn
+    /// (`space.cue`, #2228). ON by default: the switch is instant.
+    public var spaceCue = true
+    /// Whether `cycle_mode` shows the plate with the cycle list
+    /// and the layout it landed on (`mode.cue`, #2144). ON by
+    /// default: the press asked for it.
+    public var modeCue = true
+    /// KiwiVision's dim, in percent (`kiwivision.dim`, #2103) —
+    /// 60 by default (ruling 10).
+    public var visionDim: Double = 60
+    /// Whether KiwiVision's plate blurs (`kiwivision.blur`,
+    /// #2103). ON by default (ruling 10).
+    public var visionBlur = true
+    /// The system appearance asked for while KiwiVision is on
+    /// (`kiwivision.appearance`, #2103 ruling 7).
+    public var visionAppearance = VisionAppearance.unchanged
+    /// Whether KiwiVision leaves the wallpaper clear, dimming only
+    /// the windows (`kiwivision.clear_wallpaper`, #2103 ruling 17).
+    /// OFF by default: v1's whole-screen haze.
+    public var visionClearWallpaper = false
+    /// Whether KiwiVision keeps every window of the focused app
+    /// clear, not only the focused one (`kiwivision.clear_app`,
+    /// #2103 ruling 17). OFF by default: v1's one clear window.
+    public var visionClearApp = false
+    /// The apps whose windows KiwiVision never dims or blurs, each
+    /// a lowercased bundle id or, for a process with none, its name
+    /// (`kiwivision.never_dimmed`, #2103 ruling 26). Empty by
+    /// default.
+    public var visionNeverDimmed: [String] = []
+    /// KiwiVision's lenses (`kiwivision.lenses`, #2103 v3), names
+    /// unique ignoring case. Empty by default.
+    public var visionLenses: [VisionLens] = []
+    /// The key turned into the Hyper modifier, nil for none
+    /// (`hyper.key`, #1870). Per install, never per profile: it
+    /// remaps a physical key, and a profile can change on a swipe.
+    public var hyperKey: HyperSourceKey?
 
     public init() {}
 
@@ -25,6 +62,32 @@ public struct AppWideSettings: Equatable, Sendable {
     /// so a hand-edited file cannot smuggle a value past it.
     static func clampedDepth(_ raw: Int) -> Int {
         let range = QuitGridLayout.targetDepthRange
+        return min(max(raw, range.lowerBound), range.upperBound)
+    }
+
+    /// The dim's band in percent: the verb, the decode and the
+    /// Settings stepper all read it.
+    public static let visionDimRange: ClosedRange<Double> = 0...100
+
+    /// A Never dimmed list as stored: each entry trimmed and
+    /// lowercased — a bundle id matches as `AppRef` lowercases it,
+    /// a process name likewise — empty and repeated ones dropped.
+    public static func neverDimmedEntries(_ raw: [String]) -> [String] {
+        var seen: Set<String> = []
+        return raw.compactMap { entry in
+            let key = entry.trimmingCharacters(in: .whitespaces)
+                .lowercased()
+            guard !key.isEmpty, seen.insert(key).inserted else {
+                return nil
+            }
+            return key
+        }
+    }
+
+    /// `raw` clamped into `visionDimRange`, as `clampedDepth`.
+    static func clampedDim(_ raw: Double) -> Double {
+        guard raw.isFinite else { return AppWideSettings().visionDim }
+        let range = visionDimRange
         return min(max(raw, range.lowerBound), range.upperBound)
     }
 }
@@ -52,14 +115,108 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
+    /// `gui.json`'s `space` group (#2228) — additive, as `desktop`.
+    struct Space: Codable {
+        var cue: Bool?
+    }
+
+    /// `gui.json`'s `mode` group (#2144) — additive, as `desktop`.
+    struct Mode: Codable {
+        var cue: Bool?
+    }
+
+    /// `gui.json`'s `hyper` group (#1870) — additive, as `desktop`.
+    /// Off is stored as `"off"`, never left out, so the group
+    /// always carries its one leaf. Strict: a key name this build
+    /// does not know fails the decode, so a renamed
+    /// `HyperSourceKey` owes a `ConfigMigration` step (§5).
+    struct Hyper: Codable, Equatable {
+        var key: HyperSourceKey?
+
+        enum CodingKeys: String, CodingKey { case key }
+
+        init(key: HyperSourceKey?) { self.key = key }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let name = try container.decodeIfPresent(
+                String.self,
+                forKey: .key
+            )
+            guard let name, name != "off" else {
+                key = nil
+                return
+            }
+            guard let named = HyperSourceKey(rawValue: name) else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .key,
+                    in: container,
+                    debugDescription: "unknown Hyper key \(name)"
+                )
+            }
+            key = named
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(key?.rawValue ?? "off", forKey: .key)
+        }
+    }
+
+    /// `gui.json`'s `kiwivision` group (#2103) — additive, as
+    /// `desktop`; v3's lenses joined it with no crossing.
+    struct Vision: Codable, Equatable {
+        var dim: Double?
+        var blur: Bool?
+        var appearance: VisionAppearance?
+        var clearWallpaper: Bool?
+        var clearApp: Bool?
+        var neverDimmed: [String]?
+        var lenses: [VisionLens]?
+
+        enum CodingKeys: String, CodingKey {
+            case dim, blur, appearance, lenses
+            case clearWallpaper = "clear_wallpaper"
+            case clearApp = "clear_app"
+            case neverDimmed = "never_dimmed"
+        }
+    }
+
     /// The stored value, or nil when neither #1741 group is
     /// present — the file predates #1741 and the crossing is still
-    /// owed. The `desktop` group (#2142) crossed nothing, so it
-    /// never decides that.
-    init?(refusal: Refusal?, quit: Quit?, desktop: Desktop? = nil) {
+    /// owed. The `desktop` (#2142), `space` (#2228), `mode`
+    /// (#2144), `kiwivision` (#2103) and `hyper` (#1870) groups
+    /// crossed nothing, so they never decide that.
+    init?(
+        refusal: Refusal?,
+        quit: Quit?,
+        desktop: Desktop? = nil,
+        space: Space? = nil,
+        mode: Mode? = nil,
+        vision: Vision? = nil,
+        hyper: Hyper? = nil
+    ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
         if let cue = desktop?.cue { desktopCue = cue }
+        if let cue = space?.cue { spaceCue = cue }
+        if let cue = mode?.cue { modeCue = cue }
+        hyperKey = hyper?.key
+        if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
+        if let blur = vision?.blur { visionBlur = blur }
+        if let appearance = vision?.appearance {
+            visionAppearance = appearance
+        }
+        if let clear = vision?.clearWallpaper {
+            visionClearWallpaper = clear
+        }
+        if let clear = vision?.clearApp { visionClearApp = clear }
+        if let apps = vision?.neverDimmed {
+            visionNeverDimmed = Self.neverDimmedEntries(apps)
+        }
+        if let lenses = vision?.lenses {
+            visionLenses = Self.lensEntries(lenses)
+        }
         if let sound = refusal?.sound { refusalSound = sound }
         if let depth = quit?.gridTargetDepth {
             quitGridTargetDepth = Self.clampedDepth(depth)
@@ -72,4 +229,18 @@ extension AppWideSettings {
         Quit(gridTargetDepth: quitGridTargetDepth, layout: quitLayout)
     }
     var desktop: Desktop { Desktop(cue: desktopCue) }
+    var space: Space { Space(cue: spaceCue) }
+    var mode: Mode { Mode(cue: modeCue) }
+    var hyper: Hyper { Hyper(key: hyperKey) }
+    var vision: Vision {
+        Vision(
+            dim: visionDim,
+            blur: visionBlur,
+            appearance: visionAppearance,
+            clearWallpaper: visionClearWallpaper,
+            clearApp: visionClearApp,
+            neverDimmed: visionNeverDimmed,
+            lenses: visionLenses
+        )
+    }
 }

@@ -34,13 +34,33 @@ struct ShortcutsBespokeContainerTests {
         }
         // Each order list, and the container it serves.
         let lists: [(String, SettingsContainer, [SettingKey])] = [
+            // KiwiHub's three sides (#2265).
+            (
+                "kiwiHubAtRest", .kiwiHub,
+                ShortcutsRowOrder.kiwiHubAtRest
+            ),
             (
                 "focusAtRest", .focus,
                 ShortcutsRowOrder.focusAtRest
             ),
+            // KiwiVision's toggle, and its lenses' later (#2312).
+            (
+                "kiwiVisionAtRest", .kiwiVisionShortcuts,
+                ShortcutsRowOrder.kiwiVisionAtRest
+            ),
             (
                 "moveWindowsAtRest", .moveWindows,
                 ShortcutsRowOrder.moveWindowsAtRest
+            ),
+            (
+                "layoutAtRest", .layout,
+                ShortcutsRowOrder.layoutAtRest
+            ),
+            // The cycle list and the plate's switch, drawn above
+            // the walked shortcuts by their own views (#453).
+            (
+                "layoutList", .layout,
+                ShortcutsRowOrder.layoutList
             ),
             (
                 "sizeAndFloatAtRest", .sizeAndFloat,
@@ -79,6 +99,11 @@ struct ShortcutsBespokeContainerTests {
             (
                 "gesturesMore", .gestures,
                 ShortcutsRowOrder.gesturesMore
+            ),
+            // The Hyper key card's one recorder row (#1870).
+            (
+                "hyperKeyList", .hyperKey,
+                ShortcutsRowOrder.hyperKeyList
             ),
             // Walked by `DesktopShortcutsOffer`, which takes its
             // list as a `keys:` PARAMETER rather than walking it

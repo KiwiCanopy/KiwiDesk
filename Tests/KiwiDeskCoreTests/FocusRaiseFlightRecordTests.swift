@@ -5,10 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Where a raise flight (#1812) is written, carried and ended:
-/// the `focus` verb records it — a Monocle flip's owed target
-/// included — a re-assert never does, a deferred raise or a
-/// landing flip restamps it, a tab switch rekeys it, and any app
-/// activation ends it. `FocusRaiseFlightGuardTests` reads it.
+/// the `focus` verb records it, a re-assert never does, a
+/// deferred raise restamps it, a tab switch rekeys it, and any
+/// app activation ends it. `FocusRaiseFlightGuardTests` reads it.
 @Suite("Raise flight write sites", .serialized)
 @MainActor
 struct FocusRaiseFlightRecordTests {
@@ -159,25 +158,5 @@ struct FocusRaiseFlightRecordTests {
         core.focusWindow(anchor, warp: false)
         #expect(core.raiseFlight == nil)
         #expect(preflight(core, "focus")?.error == Self.generic)
-    }
-
-    /// A Monocle flip defers the state write (#1391): the press
-    /// records the focus the flip owes, not the unmoved anchor.
-    @Test("A flip's owed focus is the flight's target")
-    func flipOwedTargetRecords() {
-        let core = makeCore()
-        core.pendingMonocleFocus = (from: anchor, to: previous, warp: false)
-        _ = core.focusRecordingFlight([.string("nowhere")])
-        #expect(core.raiseFlight?.target == previous)
-        #expect(core.raiseFlight?.leftPID == previousPID)
-    }
-
-    @Test("A landing flip restamps the flight")
-    func flipLandingRestamps() {
-        let core = makeCore()
-        raise(core, to: anchor, age: KiwiCore.selfRaiseEchoWindow)
-        core.pendingMonocleFocus = (from: previous, to: anchor, warp: false)
-        core.runPendingMonocleFocus()
-        #expect(preflight(core, "focus") == nil)
     }
 }

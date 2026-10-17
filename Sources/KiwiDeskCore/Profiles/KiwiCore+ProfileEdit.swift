@@ -18,8 +18,8 @@ extension KiwiCore {
     /// empty here anyway).
     ///
     /// `writingRules: false` leaves the app rule, float rule,
-    /// scroll-gesture and Space history overrides as stored
-    /// (`RuleReachFamilyParityTests`), for a caller whose
+    /// scroll-gesture, Space history and layout cycle overrides as
+    /// stored (`RuleReachFamilyParityTests`), for a caller whose
     /// `saveRuleReach` writes them — one encoder per field
     /// (#1393). The shortcut
     /// override is always this diff, against the base as stored
@@ -37,6 +37,7 @@ extension KiwiCore {
             existing.floatRules = stored.floatRules
             existing.scrollGesture = stored.scrollGesture
             existing.spaceHistory = stored.spaceHistory
+            existing.modeCycle = stored.modeCycle
             existing.tileRules = stored.tileRules
             existing.floatAutomatically = stored.floatAutomatically
         }
@@ -177,6 +178,10 @@ extension KiwiCore {
             profile.spaceHistory = .sparse(
                 config.spaceHistory,
                 over: base.spaceHistory
+            )
+            profile.modeCycle = ModeCycle.sparse(
+                config.modeCycle,
+                over: base.modeCycle
             )
             profile.tileRules = RuleListOverride.diff(
                 base: sidecar?.tileRules ?? globalRuleBase.tileRules,

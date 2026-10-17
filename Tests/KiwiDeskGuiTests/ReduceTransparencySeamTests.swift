@@ -139,7 +139,9 @@ struct ReduceTransparencySeamTests {
             ),
             "the handler is gone"
         )
-        for update in ["updateBars()", "updateStickyMarks()"] {
+        for update in [
+            "updateBars()", "updateStickyMarks()", "updateVision()",
+        ] {
             #expect(
                 handler.contains(update),
                 Comment(rawValue: "the handler skips \(update)")
@@ -189,13 +191,12 @@ struct ReduceTransparencySeamTests {
     private static let allowedGuiReaders: [String: String] = [
         "GlassChrome.swift": "gates the glass branch",
         // The switch greys with its reason under the same OS
-        // value — a grey, not a second gate on the branch
-        // (#1418).
+        // value — a grey, not a second gate on the branch (#1418).
         "GlassCard.swift": "greys the Liquid Glass row with its reason",
-        // Drops the white knob's rim and shadow only where the
-        // glass draws — its edge, not a gate on the branch
-        // (#1527).
+        // The knob's rim and shadow only where glass draws (#1527).
         "SettingsSlider.swift": "stands the knob's edge down under glass",
+        "KiwiVisionLevelsCard.swift": "greys Blur with its reason",
+        "KiwiVisionPanelPreview.swift": "redraws on a flip (#2103)",
     ]
 
     @Test("the OS flag has one home per tree")

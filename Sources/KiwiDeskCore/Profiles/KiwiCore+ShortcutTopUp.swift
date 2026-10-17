@@ -1,7 +1,7 @@
 import Foundation
 
 /// The seed's three top-ups: the Space digit rows (#485), the
-/// Desktop tier's `⌃⌥⇧⌘` + digit rows and the rows a release added
+/// Desktop tier's rows on its stored base and the rows a release added
 /// (#2211). All three are additive and
 /// GUI-managed only, append through `appendBaseShortcuts`, and tell
 /// an open Settings draft what they added.
@@ -54,8 +54,9 @@ extension KiwiCore {
     }
 
     /// Tops up the Desktop rows for `desktops`, the snapshot's user
-    /// Desktops: each Desktop past the per-Mac mark gets its row
-    /// when no row goes there and the chord is free. A Desktop at
+    /// Desktops: each Desktop past the per-Mac mark gets its row,
+    /// on the stored `desktopShortcutBase` (#1870), when no row
+    /// goes there and the chord is free. A Desktop at
     /// or below the mark was offered before, so a row the user
     /// deleted stays deleted. The mark advances only once the rows
     /// landed; a setup that declines (Lua-owned, no sidecar) is
@@ -82,7 +83,8 @@ extension KiwiCore {
         let added = DefaultKeybindings.desktopTopUp(
             existing: config.layers[index].bindings + overrides,
             desktops: reachable,
-            above: mark
+            above: mark,
+            base: config.desktopShortcutBase
         )
         if added.isEmpty
             || appendBaseShortcuts(added, to: &config, layer: index)

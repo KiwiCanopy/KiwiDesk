@@ -77,25 +77,32 @@ extension KiwiCore {
         }
     }
 
-    /// A Space chip: its Layout menu — the status item's rows,
-    /// Keep included, since a mode picked here is a temporary
-    /// layout like any other (#1179) — and its Settings card.
+    /// A Space chip: its Layout menu and its Settings card.
     private func spaceChipRows(_ id: SpaceID) -> [BarMenuRow] {
-        guard let space = state.workspaces[id] else { return [] }
-        let shown = state.workspaces.allDisplays.compactMap {
-            state.workspaces.activeSpace(on: $0.id)
-        }
-        let spaces = Array(Set(shown + [id]))
-        let saved = savedModes(for: spaces)
-        let drifted = { (space: SpaceID) in
-            LayoutModeRows.drifted(
-                live: self.state.workspaces[space]?.mode,
-                saved: saved[space]
-            )
-        }
+        let layout = layoutModeMenuRows(for: id)
+        guard !layout.isEmpty else { return [] }
+        return [
+            .submenu(
+                L("menu.layout", "Layout"),
+                symbol: "rectangle.3.group",
+                layout
+            ),
+            landingRow(
+                L("bar.menu.space_settings", "Space Settings…"),
+                .space(id)
+            ),
+        ]
+    }
+
+    /// A Space's Layout menu rows, Keep included, since a mode
+    /// picked here is a temporary layout like any other (#1179).
+    /// The view picker (#2229) reads the same
+    /// `layoutDrift`.
+    func layoutModeMenuRows(for id: SpaceID) -> [BarMenuRow] {
+        guard let drift = layoutDrift(for: id) else { return [] }
         var layout = LayoutModeRows.entries(
-            live: space.mode,
-            drifted: drifted(id),
+            live: drift.live,
+            drifted: drift.drifted,
             words: LayoutModeRows.coreWords
         ).map { entry in
             BarMenuRow.action(
@@ -119,25 +126,13 @@ extension KiwiCore {
                         "Keep Layout in Profile “%1$@”",
                         profile
                     ),
-                    enabled: LayoutModeRows.keepArmed(
-                        drifts: spaces.map(drifted)
-                    )
+                    enabled: drift.keepArmed
                 ) { [weak self] in
                     self?.barMenuHooks.keepLayout()
                 },
             ]
         }
-        return [
-            .submenu(
-                L("menu.layout", "Layout"),
-                symbol: "rectangle.3.group",
-                layout
-            ),
-            landingRow(
-                L("bar.menu.space_settings", "Space Settings…"),
-                .space(id)
-            ),
-        ]
+        return layout
     }
 
     /// A `+N` disc: how many glyphs a Space shows, written to the

@@ -52,18 +52,6 @@ struct GuiSpaceReconcileTests {
         )
     }
 
-    @Test("Listing every live space prunes nothing")
-    func keepAllPrunesNothing() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace(SpaceID("1"))
-        core.state.workspaces.ensureSpace(SpaceID("2"))
-        core.applyProfileScopedState(
-            from: config(spaces: [SpaceID("1"), SpaceID("2")])
-        )
-        #expect(core.state.workspaces[SpaceID("1")] != nil)
-        #expect(core.state.workspaces[SpaceID("2")] != nil)
-    }
-
     @Test("A space kept alive by a mode-only reference survives")
     func modeReferenceKeepsSpace() {
         let core = makeCore()

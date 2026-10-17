@@ -7,12 +7,8 @@ enum ColoursKey: String, CaseIterable, Hashable {
         "settings.shortcutPanelLiquidGlass"
     case dragLiquidGlass = "settings.dragLiquidGlass"
     case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
-    case spaceSwitchLiquidGlass = "settings.spaceSwitchLiquidGlass"
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
-    case animationsOnSpaceChange = "settings.animations.onSpaceChange"
-    case animationsSpaceChangeDurationMS =
-        "settings.animations.spaceChangeDurationMS"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
     case animationsOnRelayout = "settings.animations.onRelayout"
@@ -20,10 +16,6 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsOnScrolling = "settings.animations.onScrolling"
     case animationsScrollDurationMS =
         "settings.animations.scrollDurationMS"
-    case animationsOnMonocleFocus =
-        "settings.animations.onMonocleFocus"
-    case animationsMonocleFlipDurationMS =
-        "settings.animations.monocleFlipDurationMS"
     case animationsOnShelf = "settings.animations.onShelf"
     case animationsShelfDurationMS =
         "settings.animations.shelfDurationMS"
@@ -60,7 +52,7 @@ extension ColoursKey {
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
-            .stickyLiquidGlass, .spaceSwitchLiquidGlass:
+            .stickyLiquidGlass:
             // Written by the master row, never its own row —
             // and reachable from Lua like the shelf's leaf.
             return .luaOnly
@@ -76,7 +68,7 @@ extension ColoursKey {
             )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
-        case .animationsOnSpaceChange, .animationsOnWindowResize,
+        case .animationsOnWindowResize,
             .animationsOnWindowSwap, .animationsOnRelayout,
             .animationsDurationMS:
             return .row(
@@ -84,15 +76,6 @@ extension ColoursKey {
                 .motion,
                 .showMore,
                 gate: .setting(.colours(.animationsMaster))
-            )
-        case .animationsSpaceChangeDurationMS:
-            // Paces the slide alone, so greys with its toggle,
-            // which the master turns off (#1931).
-            return .row(
-                .coloursAndMotion,
-                .motion,
-                .showMore,
-                gate: .setting(.colours(.animationsOnSpaceChange))
             )
         case .animationsOnShelf:
             // Not under the master: the shelf glides whatever the
@@ -113,15 +96,6 @@ extension ColoursKey {
                 .scrolling,
                 .atRest,
                 gate: .setting(.colours(.animationsOnScrolling))
-            )
-        case .animationsOnMonocleFocus:
-            return .row(.layoutDefaults, .monocle, .atRest)
-        case .animationsMonocleFlipDurationMS:
-            return .row(
-                .layoutDefaults,
-                .monocle,
-                .atRest,
-                gate: .setting(.colours(.animationsOnMonocleFocus))
             )
         case .paletteApply, .paletteSave, .paletteImport:
             return .row(.coloursAndMotion, .palettes, .atRest)
@@ -165,7 +139,7 @@ extension ColoursKey {
     var text: SettingRowText {
         switch self {
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
-            .stickyLiquidGlass, .spaceSwitchLiquidGlass:
+            .stickyLiquidGlass:
             return .none
         case .borderSheen:
             return .text("colors.sheen", caption: "colors.sheen.caption")
@@ -178,16 +152,6 @@ extension ColoursKey {
             return .text(
                 "behavior.animations.master",
                 help: "behavior.animations.master.help"
-            )
-        case .animationsOnSpaceChange:
-            return .text(
-                "behavior.animations.space_change",
-                caption: "behavior.animations.space_change.caption"
-            )
-        case .animationsSpaceChangeDurationMS:
-            return .text(
-                "behavior.animations.space_change_duration",
-                help: "behavior.animations.space_change_duration.help"
             )
         case .animationsOnWindowResize:
             return .text("behavior.animations.window_resize")
@@ -217,13 +181,6 @@ extension ColoursKey {
             )
         case .animationsScrollDurationMS:
             return .text("scroll_grid.scroll_duration")
-        case .animationsOnMonocleFocus:
-            return .text(
-                "monocle.flip",
-                help: "monocle.flip.help"
-            )
-        case .animationsMonocleFlipDurationMS:
-            return .text("monocle.flip_duration")
         case .paletteApply:
             return .dynamic
         case .paletteSave:

@@ -48,6 +48,12 @@ struct BindingNameDoorTests {
             1,
             "a NavCommand's label written into a binding on rename"
         ),
+        "KeybindingCatalog+Lenses.swift": (
+            3,
+            "a lens rename compares a binding's label with the label "
+                + "the catalog wrote for the old name, and writes the "
+                + "new name's in its place (#2103)"
+        ),
         "KeybindingNavRow.swift": (
             1,
             "a NavCommand's label stored on the binding it creates"
@@ -60,7 +66,7 @@ struct BindingNameDoorTests {
             1,
             "a KeyLayer's chord label, not a binding's"
         ),
-        "ShortcutsPanelController+Reference.swift": (
+        "JumpPanelController+Shortcuts.swift": (
             1,
             "a built ShortcutRow's display label"
         ),

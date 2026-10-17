@@ -14,6 +14,8 @@ extension KiwiCore {
     /// ops, reads, or explicit-id App Bar actions — only the
     /// commands `FocusedCommandPolicy` classifies as focused, and
     /// of those only a call that names no window (#1518).
+    /// `explain_window` is the one read among them: it must not
+    /// explain a stale focus anchor (#1685).
     ///
     /// Foreground ownership requires ALL of:
     /// 1. `focusedWindow` (the focus ANCHOR, `focusedWindowID`, so a
@@ -149,22 +151,39 @@ extension KiwiCore {
 
     /// The `focus` verb: navigates, and records the raise it
     /// started with the app in front as the press ran — the app
-    /// the raise leaves. The target is the focus a Monocle flip
-    /// still owes, or else the anchor (#1391); a press that moved
-    /// nothing records nothing.
+    /// the raise leaves. The target is the anchor; a press that
+    /// moved nothing records nothing.
     func focusRecordingFlight(_ args: [JSONValue]) -> CommandResponse {
         let front = frontmostPIDProvider?()
         let before = focusedWindowID
         let response = navigate(args, swapping: false)
-        let after = pendingMonocleFocus?.to ?? focusedWindowID
-        if let front, let after, after != before {
-            raiseFlight = RaiseFlight(
-                target: after,
-                leftPID: front,
-                issuedAt: wallClock()
-            )
-        }
+        recordRaiseFlight(from: front, before: before)
         return response
+    }
+
+    /// Hover focus's flight (#1869): a fresh user act like the
+    /// verb, so `front` — read before its focus ran — is the app
+    /// the raise leaves.
+    func hoverRecordingFlight(
+        from front: pid_t?,
+        before: WindowID?
+    ) {
+        recordRaiseFlight(from: front, before: before)
+    }
+
+    /// The one flight writer, its target the anchor; a focus that
+    /// moved nothing records nothing.
+    private func recordRaiseFlight(
+        from front: pid_t?,
+        before: WindowID?
+    ) {
+        let after = focusedWindowID
+        guard let front, let after, after != before else { return }
+        raiseFlight = RaiseFlight(
+            target: after,
+            leftPID: front,
+            issuedAt: wallClock()
+        )
     }
 
     /// Whether the frontmost process is `pid`'s app — the

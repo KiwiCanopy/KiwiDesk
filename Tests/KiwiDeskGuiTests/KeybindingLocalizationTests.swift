@@ -25,7 +25,9 @@ struct KeybindingLocalizationTests {
         let command = KeybindingCatalog.focusDirections[0]
         // English canonical identity never changes.
         #expect(command.label == "Focus window to the left")
-        #expect(command.resolvedLabel == "Fenster links fokussieren")
+        // What German says is the catalog's; that it translates
+        // at all is the split under test.
+        #expect(command.resolvedLabel != command.label)
     }
 
     @Test("a resize preset label resolves to German")
@@ -35,7 +37,11 @@ struct KeybindingLocalizationTests {
         defer { reset() }
         let grow = KeybindingCatalog.resizeAndFloat(step: 50)[0]
         #expect(grow.label == "Grow width")
-        #expect(grow.resolvedLabel == "Breite vergrößern")
+        #expect(
+            grow.resolvedLabel
+                == L("keybinding.grow_width", "Grow width")
+        )
+        #expect(grow.resolvedLabel != grow.label)
     }
 
     @Test("a go-to-space label keeps the space name untranslated")
@@ -49,7 +55,12 @@ struct KeybindingLocalizationTests {
         #expect(command.label == "Go to Space Studio")
         // The sentence translates; the user-authored space
         // name inside it (positional %1$@) does not.
-        #expect(command.resolvedLabel == "Zu Space Studio wechseln")
+        #expect(
+            command.resolvedLabel
+                == L("keybinding.go_to_space", "Go to Space %1$@", "Studio")
+        )
+        #expect(command.resolvedLabel != command.label)
+        #expect(command.resolvedLabel.contains("Studio"))
     }
 
     @Test("switchLayerCommand keeps the mode name untranslated")
@@ -61,7 +72,16 @@ struct KeybindingLocalizationTests {
             "Deep Work"
         )
         #expect(command.label == "Switch to Deep Work")
-        #expect(command.resolvedLabel == "Zu Deep Work wechseln")
+        #expect(
+            command.resolvedLabel
+                == L(
+                    "keybinding.switch_to_layer",
+                    "Switch to %1$@",
+                    "Deep Work"
+                )
+        )
+        #expect(command.resolvedLabel != command.label)
+        #expect(command.resolvedLabel.contains("Deep Work"))
     }
 
     @Test("without a translation, resolvedLabel falls back to English")

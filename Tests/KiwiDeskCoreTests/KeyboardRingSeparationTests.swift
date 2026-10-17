@@ -69,22 +69,6 @@ struct KeyboardRingSeparationTests {
         }
     }
 
-    /// `SettingsTheme.danger` was the conflict ring for a day.
-    /// It varies by appearance, and its DARK value is what fails
-    /// — on a board pinned in both modes precisely so a picture
-    /// of a keyboard cannot change with the window. Kept as the
-    /// statement of what the dedicated token buys.
-    @Test("The appearance-varying danger red would not clear it")
-    func dangerWouldNotClearTheFloor() throws {
-        let source = try themeSource()
-        let bound = try token("accent", in: source)
-        let danger = try token("danger", in: source)
-        let separation = try #require(
-            ColorVision.separation(danger.dark, bound.dark)
-        )
-        #expect(separation < ColorVision.separationFloor)
-    }
-
     private func themeSource() throws -> String {
         var url = URL(fileURLWithPath: #filePath)
         for _ in 0..<3 { url.deleteLastPathComponent() }

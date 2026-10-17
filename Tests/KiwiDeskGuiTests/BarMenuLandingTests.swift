@@ -28,6 +28,15 @@ struct BarMenuLandingTests {
             SettingsAnchor(landing: .advancedColors)
                 == SettingsAnchor(destination: .advancedColors)
         )
+        // The key panel's Layout Defaults… (#2229): the page, on
+        // the layout's own tab.
+        #expect(
+            SettingsAnchor(landing: .layoutDefaults(.track))
+                == SettingsAnchor(
+                    destination: .layoutDefaults,
+                    surface: .layoutMode(.track)
+                )
+        )
     }
 
     /// A Space's card is a surface of Spaces alone: the reveal
@@ -123,6 +132,8 @@ struct BarMenuLandingTests {
     func sessionOnlyWriteLeavesTheDraft() {
         let model = dirtyModel()
         let span = model.config.settings.spaceBarStyle.glyphSpan
+        // Live took the write: a draft that re-read live would see it.
+        model.core.tiler.settings.spaceBarStyle.glyphSpan = span + 2
         model.adoptLiveWrite(
             .settings { $0.spaceBarStyle.glyphSpan = span + 2 },
             persisted: false

@@ -4,40 +4,58 @@ import KiwiDeskCore
 /// CLI mode: the same binary doubles as the command-line tool
 /// when invoked with arguments (`kiwidesk focus left`).
 func runCLI(_ arguments: [String]) -> Int32 {
-    let command = arguments[1]
-
-    switch command {
-    case let help where CLIHelp.verbs.contains(help):
+    switch CLIRoute.of(arguments[1]) {
+    case .help:
         // Answered locally from binary's APIReference (#1033).
         return CLIHelp.run(arguments)
-    case "--version", "-v":
+    case .version:
         print(KiwiDeskVersion.displayString)
         return 0
-    case "service":
+    case .service:
         return runService(arguments)
-    default:
+    case .mcp:
+        // An MCP client's stdio server (#1685), not a socket verb.
+        return MCPServer.run()
+    case .completion:
+        return CLICompletion.run(arguments)
+    case .complete:
+        return CLICompleter.run(arguments)
+    case .watch:
+        return CLIWatch.run(arguments)
+    case .socket:
         return runSocketCommand(arguments)
+    }
+}
+
+/// `kiwidesk service`'s actions; completion offers them too.
+enum ServiceAction: String, CaseIterable {
+    case start, stop, restart, status
+
+    static var usage: String {
+        "usage: kiwidesk service "
+            + allCases.map(\.rawValue).joined(separator: "|")
     }
 }
 
 private func runService(_ arguments: [String]) -> Int32 {
     guard arguments.count > 2 else {
-        print("usage: kiwidesk service start|stop|restart|status")
+        print(ServiceAction.usage)
+        return 1
+    }
+    guard let action = ServiceAction(rawValue: arguments[2]) else {
+        print("unknown service command: \(arguments[2])")
         return 1
     }
     let outcome: ServiceManager.Outcome
-    switch arguments[2] {
-    case "start":
+    switch action {
+    case .start:
         outcome = ServiceManager.start()
-    case "stop":
+    case .stop:
         outcome = ServiceManager.stop()
-    case "restart":
+    case .restart:
         outcome = ServiceManager.restart()
-    case "status":
+    case .status:
         outcome = ServiceManager.status()
-    default:
-        print("unknown service command: \(arguments[2])")
-        return 1
     }
     // Errors go to stderr with non-zero exit; status messages to
     // stdout (#328).
@@ -88,6 +106,9 @@ private func runSocketCommand(
         selfTestText = !json && CLIOutput.stdoutIsTerminal
         rest = []
     }
+    if command == APIReference.socketOnlyCommand {
+        return CLIEventStream.subscribe(rest)
+    }
     let args = rest.map { JSONValue.string($0) }
     let request = CommandRequest(
         command: command,
@@ -96,31 +117,15 @@ private func runSocketCommand(
 
     let client: SocketClient
     do {
-        client = try SocketClient(
-            path: KiwiCore.defaultSocketPath
-        )
+        client = try AppSocket.connect()
     } catch {
         FileHandle.standardError.write(
-            Data(
-                """
-                KiwiDesk: cannot connect to \
-                \(KiwiCore.defaultSocketPath)
-                Is the KiwiDesk app running? (\(error))\n
-                """.utf8
-            )
+            Data("\(cannotConnectMessage(error))\n".utf8)
         )
         return 1
     }
 
     do {
-        if command == "subscribe" {
-            // Stream mode: print events until killed.
-            try client.send(request)
-            while let line = try client.readLine() {
-                print(line)
-            }
-            return 0
-        }
         let response = try client.roundTrip(request)
         if selfTestText, let data = response.data,
             let text = CLISelfTest.render(data)
@@ -155,6 +160,14 @@ private func runSocketCommand(
     }
 }
 
+/// The note a socket verb prints when no app answers.
+func cannotConnectMessage(_ error: Error) -> String {
+    """
+    KiwiDesk: cannot connect to \(KiwiCore.defaultSocketPath)
+    Is the KiwiDesk app running? (\(error))
+    """
+}
+
 let cliUsage = """
     KiwiDesk — tiling window manager for macOS
 
@@ -163,7 +176,13 @@ let cliUsage = """
       kiwidesk <command> [args...]    send an IPC command
       kiwidesk --version              print version and exit
       kiwidesk service start|stop|restart|status
-      kiwidesk subscribe [events...]  stream events (NDJSON)
+      kiwidesk subscribe [--reconnect] [events...]
+                                      stream events (NDJSON)
+      kiwidesk watch [events...] -- <command> [args...]
+                                      run a command per event
+      kiwidesk completion zsh|bash|fish
+                                      print a shell completion script
+      kiwidesk mcp                    MCP server on stdio, for AI apps
 
     the API, from this binary (no running app needed):
       kiwidesk list_commands          every command, grouped
@@ -177,4 +196,5 @@ let cliUsage = """
       kiwidesk get_state
       kiwidesk help scroll.set_anchor
       kiwidesk subscribe space_change layout_change
+      kiwidesk watch space_change -- sketchybar --trigger kiwi_space
     """

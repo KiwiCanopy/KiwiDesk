@@ -68,6 +68,10 @@ struct NotificationArmNeedleTests {
         // through the seam so `HiddenAppWindowTests` can state
         // what the app lists (the seam's own docstring).
         "EventLoop+Reconcile.swift": 1,
+        // The visible-panel scan's button reader (#2344): no
+        // notification arm, so it asks without the `notify:` line,
+        // and only for an element the tracked map cannot name.
+        "EventLoop+PanelButton.swift": 1,
     ]
 
     private static func count(_ needle: String, in source: String)

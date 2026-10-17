@@ -15,11 +15,10 @@ extension KiwiCore {
     /// Another app coming forward retires the debt (the user moved
     /// on); the owing app's own activation does not, since it is
     /// the open completing. An activation owes a new one only as an
-    /// OPEN: a click or key-down within `pressGrace`, of a process
-    /// started within `launchGrace` or showing no other window — a
-    /// reopen or an un-minimize — and no native Desktop switch
-    /// within `desktopSwitchGrace`, since a switch by key press
-    /// activates the arriving Desktop's app inside the press grace.
+    /// OPEN: a process a press started (`openingPress`), and no
+    /// native Desktop switch within `desktopSwitchGrace`, since a
+    /// switch by key press activates the arriving Desktop's app
+    /// inside the press grace.
     /// A rule-placed window that arrived after the press and before
     /// this activation is paid here rather than owed.
     func noteAppActivation(
@@ -30,8 +29,7 @@ extension KiwiCore {
             launchFollow.forget(keeping: activation.bundleID)
         }
         guard let bundleID = activation.bundleID,
-            let press = launchFollow.recentPress(),
-            isOpening(activation, now: now)
+            let press = openingPress(of: activation, now: now)
         else { return }
         guard
             now.timeIntervalSince(lastDesktopSwitch)
@@ -63,6 +61,27 @@ extension KiwiCore {
         }
         onLog("launch follow: owed to \(bundleID)")
         oweLaunchFollow(bundleID, at: now)
+    }
+
+    /// The age of the press that opened `activation`, else nil: a
+    /// press at most `pressGrace` before the process started — a
+    /// cold start activates seconds later (#2201) — or one within
+    /// `pressGrace` of the activation of an opening process.
+    private func openingPress(
+        of activation: AppActivation,
+        now: Date
+    ) -> TimeInterval? {
+        if let launchedAt = activation.launchedAt,
+            let press = launchFollow.pressBefore(
+                startedAgo: now.timeIntervalSince(launchedAt)
+            )
+        {
+            return press
+        }
+        guard let press = launchFollow.recentPress(),
+            isOpening(activation, now: now)
+        else { return nil }
+        return press
     }
 
     /// A fresh process, or one showing no window beyond a

@@ -37,6 +37,11 @@ extension SettingsButtonStyleConventionTests {
                 3, "leaveActions",
                 "Returned to the discard gate's confirmationDialog"
             ),
+            "LayoutCycleList.swift": (
+                3, "rowActions",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845, #453)"
+            ),
             "SpaceAssignmentChip.swift": (
                 3, "rowActions",
                 "Returned to the row-menu builder the rowActions "

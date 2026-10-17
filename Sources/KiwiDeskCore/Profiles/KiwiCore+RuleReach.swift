@@ -12,6 +12,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public let storedScrollBase: ScrollGestureBase
     /// The Space history setting, one key (#1655).
     public var spaceHistory: RuleReachTable<SpaceHistoryKind>
+    /// The layout cycle, one key (#453).
+    public var modeCycle: RuleReachTable<[LayoutMode]>
     /// The Tile list and the "Float windows automatically" switch
     /// (#2173).
     public var tileRules: RuleReachTable<[String]>
@@ -38,6 +40,12 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     /// Profiles whose file could not be read, listed so a shared
     /// rule never looks as if it covered them.
     public let unreadable: [String]
+    /// Each profile's sparse `lens_reach` (#2103 ruling 38), with
+    /// the draft's lens edits laid over it (`RuleReachSnapshot+Lenses`).
+    public internal(set) var lensReach: [String: [String: Bool]]
+    /// The marks as the files hold them, which a save compares
+    /// against.
+    public let fileLensReach: [String: [String: Bool]]
 
     public init(
         appRules: RuleReachTable<SpaceID>,
@@ -46,6 +54,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         scrollGestures: RuleReachTable<ScrollGestureValue>,
         storedScrollBase: ScrollGestureBase,
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
+        modeCycle: RuleReachTable<[LayoutMode]>,
         tileRules: RuleReachTable<[String]>,
         floatAutomatically: RuleReachTable<Bool>,
         storedTileBase: [String],
@@ -56,7 +65,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         storedAppBase: [String: SpaceID],
         storedFloatBase: [String],
         storedFloatOverrides: [String: RuleListOverride],
-        unreadable: [String]
+        unreadable: [String],
+        lensReach: [String: [String: Bool]] = [:]
     ) {
         self.appRules = appRules
         self.floatRules = floatRules
@@ -64,6 +74,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.scrollGestures = scrollGestures
         self.storedScrollBase = storedScrollBase
         self.spaceHistory = spaceHistory
+        self.modeCycle = modeCycle
         self.tileRules = tileRules
         self.floatAutomatically = floatAutomatically
         self.storedTileBase = storedTileBase
@@ -77,6 +88,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.storedFloatBase = storedFloatBase
         self.storedFloatOverrides = storedFloatOverrides
         self.unreadable = unreadable
+        self.lensReach = lensReach
+        self.fileLensReach = lensReach
     }
 
     /// Whether a change reached any file.
@@ -85,6 +98,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || !keyLayers.baseTouched.isEmpty
             || !scrollGestures.baseTouched.isEmpty
             || !spaceHistory.baseTouched.isEmpty
+            || !modeCycle.baseTouched.isEmpty
             || !tileRules.baseTouched.isEmpty
             || !floatAutomatically.baseTouched.isEmpty
             || !RuleReachTable<String>.sameShortcuts(keyBase, fileKeyBase)
@@ -94,8 +108,10 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || keyLayers.touched.values.contains { !$0.isEmpty }
             || scrollGestures.touched.values.contains { !$0.isEmpty }
             || spaceHistory.touched.values.contains { !$0.isEmpty }
+            || modeCycle.touched.values.contains { !$0.isEmpty }
             || tileRules.touched.values.contains { !$0.isEmpty }
             || floatAutomatically.touched.values.contains { !$0.isEmpty }
+            || lensReach != fileLensReach
     }
 
     /// The loaded page's gui.json layers, when the draft is that
@@ -125,11 +141,17 @@ extension KiwiCore {
     /// The shared rules and every profile's overrides, or nil
     /// where `gui.json` does not own the base (a hand-written
     /// `init.lua` authors it, so no shared write is possible).
-    public func ruleReachSnapshot() -> RuleReachSnapshot? {
+    /// `reading` is a profile the caller already read, taken in place
+    /// of a second read of its file.
+    public func ruleReachSnapshot(
+        reading live: Profile? = nil
+    ) -> RuleReachSnapshot? {
         guard isGuiManaged, let sidecar = guiConfigStore.load() else {
             return nil
         }
-        let stored = profiles.allProfiles()
+        let stored = profiles.allProfiles().map { profile in
+            live.flatMap { $0.name == profile.name ? $0 : nil } ?? profile
+        }
         var floats: [String: RuleListOverride] = [:]
         var tiles: [String: RuleListOverride] = [:]
         var keys: [String: KeyLayerOverride] = [:]
@@ -169,6 +191,10 @@ extension KiwiCore {
                 base: sidecar.spaceHistory,
                 overrides: stored.map { ($0.name, $0.spaceHistory) }
             ),
+            modeCycle: .modeCycle(
+                base: sidecar.modeCycle,
+                overrides: stored.map { ($0.name, $0.modeCycle) }
+            ),
             tileRules: .tileRules(
                 base: sidecar.tileRules,
                 overrides: stored.map { ($0.name, $0.tileRules) }
@@ -185,129 +211,12 @@ extension KiwiCore {
             storedAppBase: sidecar.appRules,
             storedFloatBase: sidecar.floatRules,
             storedFloatOverrides: floats,
-            unreadable: profiles.brokenProfiles().map(\.name)
-        )
-    }
-
-    /// Writes an edited snapshot: each profile the change reached,
-    /// then the shared base, then re-resolves the live rules so
-    /// the loaded profile's page is what the screen does. A
-    /// profile the change did not reach is not rewritten. Every
-    /// reached file and the base are read and encoded before any
-    /// write, so an unreadable one refuses the whole write rather
-    /// than half of it.
-    ///
-    /// `keysLeftTo` names the stored profile whose shortcut override
-    /// its own Save diffs from the page (`overwriteProfile`), which
-    /// carries its layer structure too; its keys are skipped here.
-    public func saveRuleReach(
-        _ snapshot: RuleReachSnapshot,
-        keysLeftTo page: String? = nil
-    ) throws {
-        guard snapshot.isEdited else { return }
-        let app = snapshot.appRules
-        let float = snapshot.floatRules
-        let scroll = snapshot.scrollGestures
-        let history = snapshot.spaceHistory
-        let tile = snapshot.tileRules
-        let automatic = snapshot.floatAutomatically
-        var pending: [Profile] = []
-        for name in app.profiles {
-            let original = snapshot.storedFloatOverrides[name]
-            let floatOverride = float.floatRuleOverride(
-                for: name,
-                original: original
+            unreadable: profiles.brokenProfiles().map(\.name),
+            lensReach: Dictionary(
+                uniqueKeysWithValues: stored.map {
+                    ($0.name, $0.lensReach ?? [:])
+                }
             )
-            let appTouched = !(app.touched[name] ?? []).isEmpty
-            let keyTouched =
-                name != page
-                && (!(snapshot.keyLayers.touched[name] ?? []).isEmpty
-                    || snapshot.storedKeyOverrides[name]
-                        != snapshot.fileKeyOverrides[name])
-            let scrollTouched = !(scroll.touched[name] ?? []).isEmpty
-            let historyTouched = !(history.touched[name] ?? []).isEmpty
-            let tileOriginal = snapshot.storedTileOverrides[name]
-            let tileOverride = tile.floatRuleOverride(
-                for: name,
-                original: tileOriginal
-            )
-            let automaticTouched =
-                !(automatic.touched[name] ?? []).isEmpty
-            guard
-                appTouched || keyTouched || scrollTouched
-                    || historyTouched || floatOverride != original
-                    || tileOverride != tileOriginal || automaticTouched
-            else { continue }
-            var profile = try profiles.read(name: name)
-            if appTouched {
-                profile.appRules = app.appRuleOverride(for: name)
-            }
-            if keyTouched {
-                profile.layers = snapshot.keyLayers.keyLayerOverride(
-                    for: name,
-                    original: snapshot.storedKeyOverrides[name],
-                    newBase: snapshot.keyBase,
-                    templates: snapshot.keyTemplates
-                )
-            }
-            if scrollTouched {
-                profile.scrollGesture = scroll.scrollGestureOverride(
-                    for: name,
-                    original: snapshot.storedScrollBase
-                )
-            }
-            if historyTouched {
-                profile.spaceHistory = history.spaceHistoryOverride(
-                    for: name
-                )
-            }
-            if automaticTouched {
-                profile.floatAutomatically =
-                    automatic.floatAutomaticallyOverride(for: name)
-            }
-            profile.floatRules = floatOverride
-            profile.tileRules = tileOverride
-            pending.append(profile)
-        }
-        var sidecar: GuiConfig?
-        let keysMoved =
-            !snapshot.keyLayers.baseTouched.isEmpty
-            || !RuleReachTable<String>.sameShortcuts(
-                snapshot.keyBase,
-                snapshot.fileKeyBase
-            )
-        if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty
-            || !scroll.baseTouched.isEmpty
-            || !history.baseTouched.isEmpty || keysMoved
-            || !tile.baseTouched.isEmpty || !automatic.baseTouched.isEmpty
-        {
-            guard var stored = guiConfigStore.load() else {
-                throw SidecarError.unreadable
-            }
-            stored.appRules = app.appRuleBase(
-                original: snapshot.storedAppBase
-            )
-            stored.floatRules = float.floatRuleBase(
-                original: snapshot.storedFloatBase
-            )
-            stored.layers = snapshot.keyBase
-            stored.scrollGesture = scroll.scrollGestureBase(
-                original: snapshot.storedScrollBase
-            )
-            stored.spaceHistory = history.spaceHistoryBase
-            stored.tileRules = tile.floatRuleBase(
-                original: snapshot.storedTileBase
-            )
-            stored.floatAutomatically = automatic.floatAutomaticallyBase
-            sidecar = stored
-        }
-        for profile in pending { try profiles.write(profile) }
-        if let sidecar { try guiConfigStore.save(sidecar) }
-        refreshConfigIssues()
-        refreshStructuredOverrides(
-            keys: keysMoved
-                || snapshot.keyLayers.touched.values.contains { !$0.isEmpty }
-                || snapshot.storedKeyOverrides != snapshot.fileKeyOverrides
         )
     }
 }

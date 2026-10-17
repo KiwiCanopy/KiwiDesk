@@ -1,32 +1,5 @@
 import Foundation
 
-/// Outcome of matching live monitors against saved profiles (#36, #53).
-public enum ProfileMatch: Equatable {
-    case exact(Profile)
-    case countDefault(Profile)
-    case none
-}
-
-/// Thrown for invalid profile names or name collisions.
-public enum ProfileError: Error, CustomStringConvertible {
-    case invalidName(String)
-    case nameTaken(String)
-    case dormantDefault(String)
-
-    public var description: String {
-        switch self {
-        case .invalidName(let name):
-            return "invalid profile name: '\(name)'"
-        case .nameTaken(let name):
-            return "a profile named '\(name)' already exists"
-        case .dormantDefault(let name):
-            return
-                "'\(name)' holds no screen setup, so it cannot be "
-                + "a screen count's default; load it first"
-        }
-    }
-}
-
 /// Persists profiles and selects matching configurations for monitor setups.
 @MainActor
 public final class ProfileManager {
@@ -45,7 +18,19 @@ public final class ProfileManager {
     /// The active profile as one value — what `currentName` reads
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
-    private(set) var active: ActiveProfile?
+    private(set) var active: ActiveProfile? {
+        didSet {
+            guard
+                oldValue?.name != active?.name
+                    || oldValue?.lensesLeftOut != active?.lensesLeftOut
+            else { return }
+            onActiveChange()
+        }
+    }
+    /// Fired when the live profile or the lenses it leaves out move
+    /// — an apply, a write of its file, a rename, a Standard going
+    /// live — so KiwiVision re-judges the lens on (#2103 ruling 16).
+    var onActiveChange: @MainActor () -> Void = {}
     /// Nonzero while an apply or a config load moves what is live
     /// and what is declared (#1790): a temporary Space is judged
     /// against the adoption state, which is the OUTGOING one until
@@ -145,6 +130,7 @@ public final class ProfileManager {
 
     /// Saves the profile; auto-flags as count's default if first for count.
     func save(_ profile: Profile) throws {
+        try NewerFormatOnDisk.refuseProfile(fileURL(name: profile.name))
         var profile = profile
         if !profile.isDefault,
             defaultProfile(count: profile.monitorCount) == nil
@@ -314,9 +300,10 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    /// Non-adopting write for background profile editing (#18, #82).
+    /// Non-adopting write (#18, #82); refuses a newer file (#2325).
     func write(_ profile: Profile) throws {
         let name = try validated(profile.name)
+        try NewerFormatOnDisk.refuseProfile(url(for: name))
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true

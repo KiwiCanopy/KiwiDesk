@@ -44,14 +44,11 @@ extension KiwiCore {
                 // following that report would enforce the main
                 // window's space under the panel the user is
                 // actually typing into (issue #21).
-                !FloatDetection.hasVisibleIgnoredPanel(
+                !self.eventLoop.showsIgnoredPanel(
                     pid: window.pid,
                     bundleID: window.appBundleID,
                     isAccessory: self.eventLoop
-                        .classifiesAsOverlay(pid: window.pid),
-                    tracked: self.eventLoop.admittedWindows(
-                        of: window.pid
-                    )
+                        .classifiesAsOverlay(pid: window.pid)
                 ),
                 self.eventLoop.focusedWindowID(pid: window.pid) == id,
                 let space = self.state.workspaces.space(
@@ -122,7 +119,7 @@ extension KiwiCore {
             || target == state.workspaces.activeSpace
         addFocusedToSpace(window, to: target, restoring: restoring)
         // A target named by an undeclared id takes its screen now:
-        // the re-anchor and a follow's slide read it (#1994).
+        // the re-anchor and a follow's Space cue read it (#1994).
         placeUnplacedSpaces()
         if from != target,
             !placeEnteringFloat(window, wasFloat: wasFloat)

@@ -284,9 +284,10 @@ public enum ServiceManager {
     /// (Re)writes the LaunchAgent plist. Returns an error message
     /// on failure, `nil` on success.
     private static func writePlist() -> String? {
-        let executable =
-            Bundle.main.executableURL?.path
-            ?? CommandLine.arguments[0]
+        if let refusal = installRefusal(for: RunningCopy.location) {
+            return refusal
+        }
+        let executable = RunningCopy.executablePath
         do {
             try FileManager.default.createDirectory(
                 at: agentURL.deletingLastPathComponent(),

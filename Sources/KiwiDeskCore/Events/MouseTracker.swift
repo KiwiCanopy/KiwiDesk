@@ -1,9 +1,10 @@
 import AppKit
 
-/// Pointer input, two jobs: left-button presses for gesture
+/// Pointer input: left-button presses for gesture
 /// classification and display focus (#446, #953), and — through
-/// `scroll` — the scroll-gesture tap, whose lifetime follows
-/// this tracker's `start`/`stop` (#1656, #1519).
+/// `scroll` and `rest` — the scroll-gesture tap and the pointer
+/// rest, whose lifetimes follow this tracker's `start`/`stop`
+/// (#1656, #1519, #1869).
 @MainActor
 public final class MouseTracker {
     public struct Press {
@@ -27,6 +28,8 @@ public final class MouseTracker {
     public private(set) var press: Press?
     /// Scroll gestures (#1656, #1519).
     public let scroll = ScrollGestures()
+    /// The pointer coming to rest, hover focus's trigger (#1869).
+    public let rest = PointerRest()
 
     /// Which mouse buttons are down, as a mask — the one home
     /// in Core for `NSEvent.pressedMouseButtons` (#1103/#1199).
@@ -46,6 +49,34 @@ public final class MouseTracker {
     /// Any button — a warp must not yank the pointer out of a
     /// gesture, whichever button started it.
     var anyButtonHeld: Bool { pressedButtons() != 0 }
+
+    /// Whether `pid` has one of its menus open — a pop-up-level
+    /// window of its own on a screen. An open menu keeps the bar a
+    /// reveal shows up while the pointer sits in it, below the
+    /// strip (#2224). Live in production, pinned false by
+    /// `makeTestCore` the way `pointerInMenuBarStrip` is.
+    var menuOpen: @MainActor (pid_t) -> Bool = { pid in
+        let level = Int(CGWindowLevelForKey(.popUpMenuWindow))
+        let screens = ScreenList.all.map(\.frame)
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        return list.contains { info in
+            guard info[kCGWindowOwnerPID as String] as? pid_t == pid,
+                info[kCGWindowLayer as String] as? Int == level,
+                let bounds = info[kCGWindowBounds as String]
+                    as? [String: CGFloat],
+                let x = bounds["X"], let width = bounds["Width"]
+            else { return false }
+            // Off-screen stand-ins (a status bar's parked panels)
+            // share the level; a menu lies on a screen.
+            return screens.contains {
+                x < $0.maxX && x + width > $0.minX
+            }
+        }
+    }
 
     /// Whether the pointer sits in the strip an auto-hidden menu
     /// bar reveals from (#1532); false outright while the bar
@@ -90,6 +121,7 @@ public final class MouseTracker {
 
     public func start() {
         scroll.start()
+        rest.start()
         guard monitors.isEmpty else { return }
         let down = NSEvent.addGlobalMonitorForEvents(
             matching: .leftMouseDown
@@ -188,6 +220,7 @@ public final class MouseTracker {
         monitors = []
         press = nil
         scroll.stop()
+        rest.stop()
     }
 
     /// The one fan-out (#1281): both arms deliver through it,

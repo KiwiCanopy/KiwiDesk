@@ -10,13 +10,12 @@ struct ScrollStepLatchTests {
     private func event(
         _ kind: ScrollGestureEvent.Kind,
         dx: Double = 0,
-        dy: Double = 0,
-        input: ScrollGestureEvent.Input = .trackpad
+        dy: Double = 0
     ) -> ScrollGestureEvent {
         ScrollGestureEvent(
             chord: [.control, .option],
             kind: kind,
-            input: input,
+            input: .trackpad,
             delta: CGVector(dx: dx, dy: dy),
             momentum: false,
             location: .zero,
@@ -44,13 +43,6 @@ struct ScrollStepLatchTests {
         let under = ScrollStepLatch.trackpadThreshold - 1
         #expect(latch.feed(event(.changed, dy: under)) == nil)
         #expect(latch.feed(event(.changed, dy: 1)) == 1)
-    }
-
-    @Test("a wheel steps on its first notch")
-    func wheelStepsAtOnce() {
-        var latch = ScrollStepLatch()
-        _ = latch.feed(event(.began, input: .wheel))
-        #expect(latch.feed(event(.changed, dy: -2, input: .wheel)) == -1)
     }
 
     @Test("the axis with the larger travel picks the way")

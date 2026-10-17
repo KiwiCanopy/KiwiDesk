@@ -169,9 +169,9 @@ English or drop the key.
 Floating, Grid, Monocle, Scrolling, Stack, Track. (BSP is an
 initialism every locale keeps.)
 
-The three CJK locales render them natively — `ja` モノクル, `ko`
-트랙, `zh-Hans` 单窗. The seven Latin-script locales keep them
-English.
+The four CJK locales render them natively — `ja` モノクル, `ko`
+트랙, `zh-Hans` 单窗, `zh-Hant` 單窗. The other six locales keep
+them English.
 
 ### What it requires
 
@@ -195,8 +195,8 @@ behaviour and is free; "la disposizione Floating" names a picker
 entry that reads "Fluttuante" and is not.
 
 **Known blind spot: the check runs in one direction only.** It
-fires where a picker is translated, which today means the three
-CJK locales. The seven that keep the English names skip
+fires where a picker is translated, which means the CJK
+locales. The ones that keep the English names skip
 themselves, so nothing checks *their* prose against their own
 picker: a German caption reading "Schwebend" beside a picker
 reading "Floating" passes. Those locales are held by review, and

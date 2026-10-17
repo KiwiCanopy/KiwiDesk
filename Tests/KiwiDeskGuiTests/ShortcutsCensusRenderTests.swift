@@ -100,6 +100,14 @@ struct ShortcutsCensusRenderTests {
         #expect(censusRows(.moveWindows, .showMore).isEmpty)
     }
 
+    @Test("Layout's one tier is the census's (#453)")
+    func layoutTier() {
+        let list = ShortcutsRowOrder.layoutList
+        let keys = ShortcutsRowOrder.layoutAtRest
+        pin(list + keys, .layout, .atRest, "layout at rest")
+        #expect(!list.isEmpty && !keys.isEmpty)
+    }
+
     @Test("Size & float's two tiers are the census's")
     func sizeAndFloatTiers() {
         pin(
@@ -271,13 +279,13 @@ struct ShortcutsCensusRenderTests {
     /// renderer to publish its mounted containers as data, which
     /// no area does yet — until one does, a deleted card is a
     /// reviewer's catch.
-    @Test("Shortcuts holds exactly the eight rendered containers")
+    @Test("Shortcuts holds exactly the twelve rendered containers")
     func shortcutsContainers() {
         #expect(
             Self.containers(of: .shortcuts) == [
-                .focus, .moveWindows, .sizeAndFloat,
-                .openApplications, .layers,
-                .luaBindings, .defaultShortcuts, .gestures,
+                .kiwiHub, .focus, .moveWindows, .layout, .sizeAndFloat,
+                .kiwiVisionShortcuts, .openApplications, .layers,
+                .luaBindings, .defaultShortcuts, .gestures, .hyperKey,
             ]
         )
     }

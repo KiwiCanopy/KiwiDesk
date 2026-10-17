@@ -122,8 +122,7 @@ struct SlotSizeOverrideStateTests {
     func explicitDefault() throws {
         var over = ScrollingOverride()
         over.slotSize = .auto
-        // Not nil — an explicit orientation standard, not inherit.
-        #expect(over.slotSize != nil)
+        // An explicit standard, not inherit: it survives the trip.
         #expect(try roundTrip(over).slotSize == .auto)
     }
 

@@ -3,7 +3,7 @@ import AppKit
 /// Shared panel creation and window level constants for bar overlays (#293).
 public enum BarPanel {
     /// Window level where bar overlays render (`DragOverlay`,
-    /// `ShortcutsPanelController`).
+    /// `JumpPanelController`).
     public static let level: NSWindow.Level = .floating
 
     /// Window level one step above bars for modal onboarding overlays (#828).

@@ -21,8 +21,8 @@ struct SharedLookSection: View {
             caption: L(
                 "looks.shared.caption",
                 "A look is every color, the bars' styling, Liquid "
-                    + "Glass, the focus border's shape and the window "
-                    + "gaps. Animations stay with each profile."
+                    + "Glass, the focus border's shape, the window "
+                    + "gaps and the animations."
             )
         ) {
             SettingsRowShape {

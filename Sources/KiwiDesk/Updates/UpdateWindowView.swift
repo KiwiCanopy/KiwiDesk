@@ -144,7 +144,7 @@ extension View {
     /// behind the traffic lights.
     func updateWindowGround() -> some View {
         // The tint BELOW the glass, so the ground sits outside the
-        // tinted environment (gui.md, as `ShortcutsPanelView`).
+        // tinted environment (gui.md, as `JumpPanelView`).
         tint(SettingsTheme.accent)
             .background {
                 Color.clear

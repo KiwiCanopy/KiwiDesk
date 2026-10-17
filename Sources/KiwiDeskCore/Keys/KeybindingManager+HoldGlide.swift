@@ -18,7 +18,7 @@ extension KeybindingManager {
         {
             holdGlide.releaseCapable = true
             reporting.onRelease = { [weak self] id in
-                self?.holdGlide.released(id: id)
+                self?.routeRelease(id: id)
             }
         }
         holdGlide.onOverrun = { [weak self] in

@@ -6,16 +6,49 @@ import Testing
 @Suite("Socket round-trip", .serialized)
 @MainActor
 struct SocketTests {
+    @Test("A change report crosses the socket both ways")
+    func reportRoundTrip() async throws {
+        let path = Self.throwawaySocketPath()
+        let server = SocketServer(path: path)
+        server.handler = { request in
+            var response = CommandResponse.ok()
+            response.changes = ChangeReport(
+                profile: request.reportChanges == true ? "asked" : "no",
+                watched: (request.keepWatch ?? []).map {
+                    TouchedLeaf(
+                        id: $0,
+                        owner: .profile,
+                        notKeepable: nil,
+                        stored: true
+                    )
+                }
+            )
+            return response
+        }
+        try server.start()
+        defer { server.stop() }
+        let response = try await Self.roundTrip(
+            .reporting("version", watch: ["/settings/border/width"]),
+            over: path
+        )
+        #expect(response.changes?.profile == "asked")
+        #expect(
+            response.changes?.watched.map(\.id)
+                == ["/settings/border/width"]
+        )
+        #expect(response.changes?.watched.first?.stored == true)
+    }
+
     @Test("Client command reaches the server handler")
     func roundTrip() async throws {
         let path = Self.throwawaySocketPath()
         let server = SocketServer(path: path)
-        server.handler = { command, args in
+        server.handler = { request in
             .ok(
                 .object([
-                    "echo": .string(command),
+                    "echo": .string(request.command),
                     "count": .number(
-                        Double(args.count)
+                        Double(request.args?.count ?? 0)
                     ),
                 ])
             )

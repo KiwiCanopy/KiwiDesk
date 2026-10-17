@@ -10,6 +10,9 @@ struct ShortcutRow: Identifiable {
     var bundleID: String? = nil
     /// App Font ligature name overriding bundle icon (#294).
     var glyph: String? = nil
+    /// Draws KiwiDesk's own app icon — its Open Settings row
+    /// (#2246).
+    var ownApp = false
     var monospaced: Bool = false
     /// Trailing accessory glyph for non-default actions (#334).
     var accessoryIcon: String? = nil
@@ -23,6 +26,15 @@ struct ShortcutRow: Identifiable {
     /// fires and recreates its Space; only Mission Control makes
     /// a Desktop (`NavCommand.unavailable`).
     var unavailable: Bool = false
+    /// What the overview's fold reads off a row that may join
+    /// others (#2312); nil for one that never folds.
+    var fold: ShortcutFold.Tag? = nil
+    /// A folded row's members, each with its own chord: a search
+    /// that names one opens the fold to it (#2312).
+    var members: [ShortcutRow] = []
+    /// The label VoiceOver reads where the drawn one abbreviates,
+    /// a folded range read as "1 to 3".
+    var spokenLabel: String? = nil
 }
 
 /// Named subgroup of shortcut rows in the Controls band.
@@ -39,12 +51,16 @@ struct ShortcutsReference {
     var controls: [ShortcutSubgroup]
     /// Inactive space bindings shown under real names (#820).
     var inactive: [ShortcutRow] = []
+    /// Rows whose Desktop no screen shows (`ShortcutRow.unavailable`),
+    /// lifted out of their groups to the column's end; Settings
+    /// dims the same rows in place, where they stay rebindable.
+    var desktopAway: [ShortcutRow] = []
     var apps: [ShortcutRow]
     var custom: [ShortcutRow]
 
     /// Whether the reference contains no listable shortcuts.
     var isEmpty: Bool {
-        controls.isEmpty && inactive.isEmpty && apps.isEmpty
-            && custom.isEmpty
+        controls.isEmpty && inactive.isEmpty && desktopAway.isEmpty
+            && apps.isEmpty && custom.isEmpty
     }
 }

@@ -69,6 +69,17 @@ struct GateReasonPlacementTests {
                 // #2142: the app-wide Desktop switch cue greys the
                 // same way, a cause shown nowhere on Profiles.
                 .profiles(.desktopCue),
+                // #2144: the layout plate's switch, the same
+                // shape on Shortcuts ▸ Layout.
+                .shortcuts(.modeCue),
+                // #1870: the Hyper key's recorder, the same shape
+                // on its own card above the layer header.
+                .shortcuts(.hyperKey),
+                // #1870: its move offer, on the same card.
+                .shortcuts(.desktopShortcutBase),
+                // #2228: the Space plate's switch, the same shape
+                // on KiwiShelf ▸ Show.
+                .spaceBar(.spaceCue),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no
@@ -84,6 +95,18 @@ struct GateReasonPlacementTests {
                 // its layout is picked in the Space list, not in
                 // the overrides box, so the row draws its reason.
                 .gaps(.perSpaceOverride),
+                // #1685: Copy Setup Prompt greys on a translocated
+                // copy, a cause shown nowhere else; Add to Claude
+                // Desktop shares that one sentence (#2258).
+                .ai(.addToClaudeDesktop), .ai(.copySetupPrompt),
+                // #2103: KiwiVision's app-wide rows grey under a
+                // Lua-owned config, a cause shown nowhere on its
+                // page, so each draws its sentence.
+                .kiwiVision(.dim), .kiwiVision(.blur),
+                .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
+                .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
+                // A lens's page draws it under its draft cards.
+                .kiwiVision(.lenses),
             ]
         )
     }

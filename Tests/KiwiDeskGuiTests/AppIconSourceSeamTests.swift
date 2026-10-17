@@ -5,7 +5,7 @@ import Testing
 /// the LaunchServices read is a round trip on the main actor, and an
 /// app activation invalidates every retained `NSRunningApplication`
 /// (#1936), so a second reader pays the read again on the path it
-/// sits on. The Monocle flip's card was that second reader.
+/// sits on.
 ///
 /// Scope: the spellings that read `.icon` straight off a running
 /// application — a constructed one, the workspace's frontmost or

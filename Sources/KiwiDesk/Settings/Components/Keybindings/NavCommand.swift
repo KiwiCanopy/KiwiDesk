@@ -17,7 +17,16 @@ struct NavCommand: Identifiable, Hashable {
     /// A live Space the profile does not hold, whose chip the row
     /// wears (#1827).
     var liveOnly: LiveOnlySpace.Kind? = nil
+    /// Which stored Lua this row owns, where more than its own
+    /// spelling does — a lens row owns every spelling of its lens
+    /// (#2103 ruling 39); nil owns `lua` alone.
+    var owns: (@Sendable (String) -> Bool)? = nil
     var id: String { lua }
+
+    /// Whether a stored binding's Lua is this row's.
+    func runs(_ stored: String) -> Bool {
+        owns?(stored) ?? (stored == lua)
+    }
 
     @MainActor var resolvedLabel: String {
         let resolved = displayLabel()

@@ -11,6 +11,8 @@ struct NavRow: View {
     private var layerName
     @Environment(\.disabledSystemShortcuts)
     private var disabledSystemShortcuts
+    @Environment(\.keybindingReservesTrashSlot)
+    private var reservesTrashSlot
     /// A clear of a shortcut other profiles share asks where it
     /// goes, as the trash does (#1393).
     @State private var confirmingClear = false
@@ -57,6 +59,9 @@ struct NavRow: View {
                 onRecord: record,
                 onClear: clear
             )
+            if reservesTrashSlot {
+                AppRuleDeleteButton.slot
+            }
         }
         .keybindingRowStyle(unavailable: command.unavailable?())
         .confirmationDialog(
@@ -78,7 +83,7 @@ struct NavRow: View {
 
     private var index: Int? {
         bindings.firstIndex {
-            $0.kind == .navigation && $0.lua == command.lua
+            $0.kind == .navigation && command.runs($0.lua)
         }
     }
 
@@ -97,8 +102,8 @@ struct NavRow: View {
     ) -> RecorderRejection? {
         RecorderPreflight.rejection(
             combo: combo,
-            excluding: { [lua = command.lua] in
-                $0.kind == .navigation && $0.lua == lua
+            excluding: { [command] in
+                $0.kind == .navigation && command.runs($0.lua)
             },
             bindings: $bindings,
             config: model.config,
@@ -122,7 +127,7 @@ struct NavRow: View {
             )
         }
         if let updated = bindings.first(where: {
-            $0.kind == .navigation && $0.lua == command.lua
+            $0.kind == .navigation && command.runs($0.lua)
         }) {
             model.noteRecordedCombo(updated, in: bindings)
         }

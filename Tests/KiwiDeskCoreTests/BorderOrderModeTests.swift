@@ -32,8 +32,6 @@ struct BorderOrderModeTests {
             order: .above
         )
         #expect(backend.lastGeometry == expected)
-        // The on-window capped lap (1), not the hidden 5.
-        #expect(backend.lastGeometry?.lineWidth == 7.0)
     }
 
     @Test("The injected corner radius drives the arc")

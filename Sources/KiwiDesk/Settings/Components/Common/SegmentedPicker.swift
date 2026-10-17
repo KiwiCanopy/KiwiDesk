@@ -11,6 +11,17 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// longest. A strip that hugs its content (#1726) sizes every
     /// segment to the widest label at the selected weight instead.
     private let hugsLabels: Bool
+    /// Each segment keeps its own label's width, reserved at the
+    /// selected weight so picking never changes it, without the
+    /// equal sizing `hugsLabels` adds — a strip whose longest label
+    /// must not cost every segment its width (#2246).
+    private let reservesWeight: Bool
+    /// A key drawn in secondary ink after a segment's title, and
+    /// read as that segment's VoiceOver hint, never its name. A new
+    /// caller adds its ground to the contrast suite's pairings.
+    private let hints: [Value: String]
+    /// The words VoiceOver reads a hint in.
+    private let spokenHint: (String) -> String
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
     /// Optional field help text (#94).
@@ -26,6 +37,9 @@ struct SegmentedPicker<Value: Hashable>: View {
         _ label: String? = nil,
         spokenLabel: String? = nil,
         hugsLabels: Bool = false,
+        reservesWeight: Bool = false,
+        hints: [Value: String] = [:],
+        spokenHint: @escaping (String) -> String = { $0 },
         selection: Binding<Value>,
         options: [(title: String, value: Value)],
         help: String? = nil
@@ -33,6 +47,9 @@ struct SegmentedPicker<Value: Hashable>: View {
         self.label = label
         self.spokenLabel = spokenLabel
         self.hugsLabels = hugsLabels
+        self.reservesWeight = reservesWeight
+        self.hints = hints
+        self.spokenHint = spokenHint
         self._selection = selection
         self.options = options
         self.help = help
@@ -84,7 +101,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         let label = Text(title)
             .font(selected ? .body.weight(.semibold) : .callout)
             .lineLimit(1)
-        if hugsLabels {
+        if hugsLabels || reservesWeight {
             Text(title)
                 .font(.body.weight(.semibold))
                 .hidden()
@@ -167,11 +184,14 @@ struct SegmentedPicker<Value: Hashable>: View {
         } label: {
             segmentLabel(
                 option.title,
+                hint: hints[option.value],
                 selected: selected,
                 index: index
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(
+            SegmentPressStyle(presses: isEnabled && !selected)
+        )
         // Only the focus stop goes, to the track; click,
         // VoiceOver and `isEnabled` stay (#997).
         .focusable(false)
@@ -190,34 +210,63 @@ struct SegmentedPicker<Value: Hashable>: View {
         .accessibilityAddTraits(
             selected ? [.isSelected] : []
         )
+        .accessibilityHint(hints[option.value].map(spokenHint) ?? "")
     }
 
     private func segmentLabel(
         _ title: String,
+        hint: String?,
         selected: Bool,
         index: Int
     ) -> some View {
-        labelText(title, selected: selected)
+        HStack(spacing: 5) {
+            labelText(title, selected: selected)
+                .foregroundStyle(
+                    selected
+                        ? SettingsTheme.accentInk
+                        : SettingsTheme.ink
+                )
+            if let hint {
+                hintText(
+                    hint,
+                    selected: selected,
+                    hovered: hoveredIndex == index
+                )
+            }
+        }
+        .lineLimit(1)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity)
+        .background(
+            Capsule().fill(
+                isEnabled && !selected && hoveredIndex == index
+                    ? SettingsTheme.chipRest : .clear
+            )
+        )
+        .animation(
+            reduceMotion ? nil : .easeOut(duration: 0.12),
+            value: hoveredIndex
+        )
+        .contentShape(Capsule())
+    }
+
+    /// The fill is fixed in both modes on the selected segment,
+    /// so its ink is too; the hover lift takes full ink, `ink2`
+    /// falling under 4.5:1 on it in dark.
+    private func hintText(
+        _ hint: String,
+        selected: Bool,
+        hovered: Bool
+    ) -> some View {
+        Text(hint)
+            .font(.callout)
             .foregroundStyle(
                 selected
-                    ? SettingsTheme.accentInk
-                    : SettingsTheme.ink
+                    ? SettingsTheme.accentInkSecondary
+                    : hovered ? SettingsTheme.ink : SettingsTheme.ink2
             )
-            .lineLimit(1)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 10)
-            .frame(maxWidth: .infinity)
-            .background(
-                Capsule().fill(
-                    isEnabled && !selected && hoveredIndex == index
-                        ? SettingsTheme.chipRest : .clear
-                )
-            )
-            .animation(
-                reduceMotion ? nil : .easeOut(duration: 0.12),
-                value: hoveredIndex
-            )
-            .contentShape(Capsule())
+            .accessibilityHidden(true)
     }
 
     private func updateHover(
@@ -255,5 +304,22 @@ struct SegmentedPicker<Value: Hashable>: View {
     private var pill: some View {
         Capsule()
             .fill(SettingsTheme.accent)
+    }
+}
+
+/// A segment's button: `.plain` faded its label while pressed, which
+/// read lighter than the hover; an unselected segment presses one
+/// step darker than its hover lift instead, the chip ladder's
+/// order (#2377).
+private struct SegmentPressStyle: ButtonStyle {
+    let presses: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.background(
+            Capsule().fill(
+                presses && configuration.isPressed
+                    ? SettingsTheme.chipHover : .clear
+            )
+        )
     }
 }

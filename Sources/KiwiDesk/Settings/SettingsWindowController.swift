@@ -90,6 +90,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     func adoptKeptLayout(_ write: CapturedWrite) {
         model.adoptKeptLayout()
         if write == .wholeLive { model.adoptCapturedSpaces() }
+        // A whole-live capture may have stored a live row (#2262).
+        model.refreshUnsavedLive()
     }
 
     /// Whether a live-profile draft holds edits a Save would
@@ -201,6 +203,16 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptShortcutDrop(spaces)
     }
 
+    /// Routes an AI app's rule keep to the draft (#1685).
+    func adoptRuleKeep() {
+        model.adoptRuleKeep()
+    }
+
+    /// Re-reads the look library a verb changed (#1685).
+    func refreshLooks() {
+        model.refreshLooks()
+    }
+
     /// Routes a top-up's appended base rows to the draft.
     func adoptShortcutAdd(_ rows: [KeyBinding]) {
         model.adoptShortcutAdd(rows)
@@ -253,6 +265,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
+        // While it is key, hover focus hears the pointer leave
+        // through Core's local monitor alone (#2378).
+        window.acceptsMouseMovedEvents = true
         // Tiled window ID for AX bridge discrimination
         // (#678, OwnWindowTiling).
         window.identifier = NSUserInterfaceItemIdentifier(

@@ -2,6 +2,7 @@
 /// `id` is the machine-checked key for `settings.*`/`config.*` slices
 /// (parsed by model-parity guard); other prefixes are convention-only.
 enum SettingKey: Hashable, CaseIterable {
+    case ai(AIKey)
     case appBar(AppBarKey)
     case appRules(AppRulesKey)
     case behaviour(BehaviourKey)
@@ -10,6 +11,7 @@ enum SettingKey: Hashable, CaseIterable {
     case gaps(GapsKey)
     case general(GeneralKey)
     case kiwishelf(KiwiShelfKey)
+    case kiwiVision(KiwiVisionKey)
     case layout(LayoutKey)
     case layoutAppBar(LayoutAppBarKey)
     case macChecklist(MacChecklistKey)
@@ -20,7 +22,8 @@ enum SettingKey: Hashable, CaseIterable {
     case spaces(SpacesKey)
 
     static var allCases: [SettingKey] {
-        AppBarKey.allCases.map(Self.appBar)
+        AIKey.allCases.map(Self.ai)
+            + AppBarKey.allCases.map(Self.appBar)
             + AppRulesKey.allCases.map(Self.appRules)
             + BehaviourKey.allCases.map(Self.behaviour)
             + BordersKey.allCases.map(Self.borders)
@@ -28,6 +31,7 @@ enum SettingKey: Hashable, CaseIterable {
             + GapsKey.allCases.map(Self.gaps)
             + GeneralKey.allCases.map(Self.general)
             + KiwiShelfKey.allCases.map(Self.kiwishelf)
+            + KiwiVisionKey.allCases.map(Self.kiwiVision)
             + LayoutKey.allCases.map(Self.layout)
             + LayoutAppBarKey.allCases.map(Self.layoutAppBar)
             + MacChecklistKey.allCases.map(Self.macChecklist)
@@ -41,6 +45,7 @@ enum SettingKey: Hashable, CaseIterable {
     /// Verbatim census row key.
     var id: String {
         switch self {
+        case .ai(let k): return k.rawValue
         case .appBar(let k): return k.rawValue
         case .appRules(let k): return k.rawValue
         case .behaviour(let k): return k.rawValue
@@ -49,6 +54,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .gaps(let k): return k.rawValue
         case .general(let k): return k.rawValue
         case .kiwishelf(let k): return k.rawValue
+        case .kiwiVision(let k): return k.rawValue
         case .layout(let k): return k.rawValue
         case .layoutAppBar(let k): return k.rawValue
         case .macChecklist(let k): return k.rawValue
@@ -62,6 +68,7 @@ enum SettingKey: Hashable, CaseIterable {
 
     var placement: SettingPlacement {
         switch self {
+        case .ai(let k): return k.placement
         case .appBar(let k): return k.placement
         case .appRules(let k): return k.placement
         case .behaviour(let k): return k.placement
@@ -70,6 +77,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .gaps(let k): return k.placement
         case .general(let k): return k.placement
         case .kiwishelf(let k): return k.placement
+        case .kiwiVision(let k): return k.placement
         case .layout(let k): return k.placement
         case .layoutAppBar(let k): return k.placement
         case .macChecklist(let k): return k.placement
@@ -83,6 +91,7 @@ enum SettingKey: Hashable, CaseIterable {
 
     var text: SettingRowText {
         switch self {
+        case .ai(let k): return k.text
         case .appBar(let k): return k.text
         case .appRules(let k): return k.text
         case .behaviour(let k): return k.text
@@ -91,6 +100,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .gaps(let k): return k.text
         case .general(let k): return k.text
         case .kiwishelf(let k): return k.text
+        case .kiwiVision(let k): return k.text
         case .layout(let k): return k.text
         case .layoutAppBar(let k): return k.text
         case .macChecklist(let k): return k.text

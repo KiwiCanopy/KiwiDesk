@@ -44,6 +44,7 @@ struct PrivatePathCensusTests {
         "SLSWindowIteratorGetCornerRadii", "SLSGetEventPort",
         "_CFMachPortSetOptions", "SLSRegisterNotifyProc",
         "CGDisplayCreateUUIDFromDisplayID",
+        "SLSGetAppearanceThemeLegacy",
     ]
 
     /// The resolver spellings: the three named resolvers, a bare

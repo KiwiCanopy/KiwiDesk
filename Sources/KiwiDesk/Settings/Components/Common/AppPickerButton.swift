@@ -18,9 +18,14 @@ struct AppPickerButton: View {
     /// Where given, the list is these apps instead of every
     /// installed one, read when the popover opens (#2071).
     var guessed: (() -> [GuessedFloatApp])?
+    /// Where given, the apps on screen lead the list as their own
+    /// section, read when the popover opens (#2103 ruling 27).
+    var onScreen: (() -> [OnScreenApp])?
 
     @State private var showing = false
     @State private var search = ""
+    @State private var onScreenApps: [OnScreenApp] = []
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
         Button {
@@ -52,45 +57,137 @@ struct AppPickerButton: View {
             }
         }
         // Every open starts with an empty search (#1357): the
-        // reset rides the popover's own dismissal edge.
+        // reset rides the popover's own dismissal edge, and the
+        // on-screen apps are read at the opening one.
         .onChange(of: showing) { _, isShowing in
             if !isShowing { search = "" }
+            if isShowing { onScreenApps = onScreen?() ?? [] }
         }
     }
 
     // MARK: - Popover
 
+    /// The search, the sections, then the one escape pinned below
+    /// them — the same order in every picker (#2103 ruling 27).
     private var popover: some View {
-        VStack(spacing: 8) {
+        let lists = sections
+        return VStack(spacing: 8) {
             TextField(
                 L("app_picker.search.placeholder", "Search apps"),
                 text: $search
             )
             .textFieldStyle(.roundedBorder)
-            escapeRow
-            Divider()
+            .focused($searchFocused)
+            .onSubmit { pickFirst(lists) }
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    ForEach(filtered) { app in
-                        row(app)
-                    }
+                    sectionsBody(lists)
                 }
-                .frame(
-                    maxWidth: .infinity,
-                    alignment: .leading
-                )
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            Divider()
+            escapeRow
         }
         .padding(12)
         .frame(width: 280, height: 360)
+        .onAppear { searchFocused = true }
+    }
+
+    private var sections: (onScreen: [OnScreenApp], all: [InstalledApp]) {
+        AppPickerSections.lists(
+            onScreen: onScreenApps,
+            installed: KeybindingCatalog.installedAppsSnapshot,
+            exclude: exclude,
+            query: search
+        )
+    }
+
+    typealias InstalledApp = KeybindingCatalog.InstalledApp
+
+    @ViewBuilder private func sectionsBody(
+        _ lists: (onScreen: [OnScreenApp], all: [InstalledApp])
+    ) -> some View {
+        let both = !lists.onScreen.isEmpty && !lists.all.isEmpty
+        if lists.onScreen.isEmpty, lists.all.isEmpty {
+            Text(
+                L("app_picker.no_match", "No matching apps.")
+            )
+            .font(.callout)
+            .foregroundStyle(SettingsTheme.ink3)
+            .padding(.vertical, 6)
+        }
+        if !lists.onScreen.isEmpty {
+            section(Self.onScreenTitle, headed: both) {
+                ForEach(lists.onScreen, id: \.key) { app in
+                    AppPickerRow(
+                        name: app.name,
+                        bundleID: app.bundleID
+                    ) {
+                        pick(.init(bundleID: app.key, name: app.name))
+                    }
+                }
+            }
+        }
+        if !lists.all.isEmpty {
+            section(Self.allTitle, headed: both) {
+                ForEach(lists.all) { app in
+                    AppPickerRow(name: app.name, bundleID: app.bundleID) {
+                        pick(app)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private func section<Rows: View>(
+        _ title: String,
+        headed: Bool,
+        @ViewBuilder rows: () -> Rows
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if headed {
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .padding(.top, 6)
+                    .padding(.bottom, 2)
+                    .accessibilityAddTraits(.isHeader)
+            }
+            rows()
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(headed ? title : "")
+    }
+
+    static var onScreenTitle: String {
+        L("app_picker.section.on_screen", "On screen now")
+    }
+
+    static var allTitle: String {
+        L("app_picker.section.all", "All apps")
+    }
+
+    private func pick(_ app: InstalledApp) {
+        onPick(app)
+        showing = false
+    }
+
+    /// Return picks the first row the search left.
+    private func pickFirst(
+        _ lists: (onScreen: [OnScreenApp], all: [InstalledApp])
+    ) {
+        if let first = lists.onScreen.first {
+            pick(.init(bundleID: first.key, name: first.name))
+        } else if let first = lists.all.first {
+            pick(first)
+        }
     }
 
     /// The Tile picker's list (#2071): no search over a short list,
-    /// the escape first and the hint saying where the rows come from.
+    /// the hint saying where the rows come from, and the escape
+    /// last, as in every picker.
     private func guessedPopover(_ apps: [GuessedFloatApp]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            escapeRow
-            Divider()
             GuessedAppRows(
                 apps: apps.filter { !exclude.contains($0.bundleID) },
                 onPick: { app in
@@ -103,6 +200,8 @@ struct AppPickerButton: View {
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink3)
                 .fixedSize(horizontal: false, vertical: true)
+            Divider()
+            escapeRow
         }
         .padding(12)
         .frame(width: 280)
@@ -124,43 +223,6 @@ struct AppPickerButton: View {
         }
         .buttonStyle(.plain)
         .rowHoverHighlight()
-    }
-
-    private func row(
-        _ app: KeybindingCatalog.InstalledApp
-    ) -> some View {
-        Button {
-            onPick(app)
-            showing = false
-        } label: {
-            HStack(spacing: 8) {
-                Image(
-                    nsImage: AppIconCache.shared.icon(
-                        forBundleID: app.bundleID
-                    )
-                )
-                .resizable()
-                .frame(
-                    width: AppIconCache.side,
-                    height: AppIconCache.side
-                )
-                Text(app.name)
-                Spacer()
-            }
-            .contentShape(Rectangle())
-            .padding(.vertical, 3)
-        }
-        .buttonStyle(.plain)
-        .rowHoverHighlight()
-    }
-
-    private var filtered: [KeybindingCatalog.InstalledApp] {
-        AppPickerFilter.matching(
-            KeybindingCatalog.installedAppsSnapshot.filter {
-                !exclude.contains($0.bundleID)
-            },
-            query: search
-        )
     }
 }
 

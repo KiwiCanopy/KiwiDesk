@@ -18,22 +18,6 @@ import Testing
 @MainActor
 @Suite("The Liquid Glass master")
 struct LiquidGlassMasterTests {
-    /// The default this suite reasons from (tests.md): both
-    /// ship ON together (owner ruling 2026-09-10), so an untouched
-    /// config already agrees with what the row shows and the
-    /// master never has to write to make that true. A panel
-    /// defaulting OFF would render no glass beside a switch
-    /// reading on.
-    @Test("the shipped surfaces already agree")
-    func shippedSurfacesAgree() {
-        let settings = TilingSettings()
-        // Agreement, never the polarity: a retune of the default
-        // must not red this (tests.md ▸ a clause pins the SHAPE).
-        #expect(
-            LiquidGlassAgreement(settings: settings).differ
-                == false
-        )
-    }
 
     /// Every stored leaf the master writes — the shelf, the panel,
     /// the drag markers (#1620) and the sticky mark (#1621).
@@ -43,7 +27,6 @@ struct LiquidGlassMasterTests {
             \.shortcutPanelLiquidGlass,
             \.dragLiquidGlass,
             \.stickyStyle.liquidGlass,
-            \.spaceSwitchLiquidGlass,
         ]
 
     /// The shipped default, pinned ONCE (#1369): the migration's
@@ -98,6 +81,11 @@ struct LiquidGlassMasterTests {
     /// The `?` predicate, at both its answers — and it is the
     /// SAME reading the row shows, so the switch and its
     /// explanation cannot contradict.
+    ///
+    /// The default this suite reasons from (tests.md): both
+    /// ship ON together (owner ruling 2026-09-10), so an untouched
+    /// config already agrees with what the row shows and the
+    /// master never has to write to make that true.
     @Test("divergence is seen only while they disagree")
     func divergenceSeen() {
         var settings = TilingSettings()
@@ -130,11 +118,20 @@ struct LiquidGlassMasterTests {
     /// Two needles because they are two different failures: the
     /// controller can stop READING the setting, and the view can
     /// stop HANDING it to the material.
-    @Test("the panel is wired to the setting it stores")
+    ///
+    /// The key panel (#1875) wears the leaf the retired ⌃⌥K sheet
+    /// wore, the Shortcuts side now one of its sides (#2246).
+    @Test("the panels are wired to the setting they store")
     func panelReadsTheSetting() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Shortcuts")
-        let files = try SourceScan.swiftSources(under: root)
+        let gui = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let files =
+            try SourceScan.swiftSources(
+                under: gui.appendingPathComponent("Shortcuts")
+            )
+            + SourceScan.swiftSources(
+                under: gui.appendingPathComponent("Jump")
+            )
         func source(_ name: String) throws -> String {
             let file = try #require(
                 files.first { $0.lastPathComponent == name }
@@ -145,21 +142,14 @@ struct LiquidGlassMasterTests {
             .split(whereSeparator: \.isWhitespace).joined()
         }
         #expect(
-            try source("ShortcutsPanelController.swift")
+            try source("JumpPanelController.swift")
                 .contains("settings.shortcutPanelLiquidGlass"),
-            """
-            the controller no longer reads the stored leaf, so \
-            the one Liquid Glass row cannot reach the panel.
-            """
+            "Jump to window no longer reads the stored leaf."
         )
         #expect(
-            try source("ShortcutsPanelView.swift")
+            try source("JumpPanelView.swift")
                 .contains("enabled:liquidGlass"),
-            """
-            the panel no longer hands its setting to \
-            `glassChrome`, so it draws one finish whatever the \
-            row says.
-            """
+            "Jump to window no longer hands its setting on."
         )
     }
 

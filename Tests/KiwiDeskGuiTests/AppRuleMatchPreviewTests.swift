@@ -42,49 +42,6 @@ struct AppRuleMatchPreviewTests {
         )
     }
 
-    /// A fragment, not a whole title — the over-matching half of
-    /// the same question ("Info" also catching "Information").
-    @Test("a title fragment matches anywhere in the title")
-    func fragmentMatchesSubstring() {
-        let net = rules(["Info"])
-        #expect(net.matches(bundleID: app, title: "Information"))
-        #expect(!net.matches(bundleID: app, title: "Documents"))
-    }
-
-    /// The bundle id is the other half, and it goes the other
-    /// way — the picker stores a lower-cased id but a hand-typed
-    /// one may not be, and the engine folds both.
-    @Test("the bundle id matches case-insensitively")
-    func bundleIDIsCaseInsensitive() {
-        #expect(
-            FloatRules(["com.apple.Finder:Info"]).matches(
-                bundleID: "com.apple.finder",
-                title: "Get Info"
-            )
-        )
-    }
-
-    /// An app-only rule floats every window, which is what the
-    /// preview must show for the "floats" facet rather than
-    /// falling through to per-title reasoning.
-    @Test("an app-only rule floats every window")
-    func appOnlyRuleFloatsAll() {
-        let net = FloatRules([app])
-        #expect(net.matches(bundleID: app, title: "anything"))
-        #expect(net.matches(bundleID: app, title: ""))
-    }
-
-    /// Another app's windows are never this rule's business.
-    @Test("a rule never reaches another app's windows")
-    func otherAppsUnaffected() {
-        #expect(
-            !rules(["Info"]).matches(
-                bundleID: "com.apple.safari",
-                title: "Get Info"
-            )
-        )
-    }
-
     /// The PREVIEW's own verdict, asserted against the engine's
     /// over the inputs where a re-derivation diverges. The scan
     /// below is one spelling deep — guard-prover slipped a

@@ -36,7 +36,7 @@ final class NoopHotkeyRegistrar: HotkeyRegistrar {
 /// - `configDirectory` — throwaway temp dir, not `~/.config`.
 /// - `reduceMotion` — pinned false, not the host's real
 ///   `NSWorkspace` Reduce-Motion state.
-/// - `windowServerTrackingDisabled` — pinned false, not the
+/// - `windowServer.trackingDisabled` — pinned false, not the
 ///   host's exported `KIWIDESK_NO_WS_TRACKING` QA lever (#596).
 /// - `allScreenBounds` — pinned `[]` (the single-screen
 ///   verdict), not the host's real screen arrangement (#878).
@@ -61,20 +61,6 @@ func makeTestCore(
         hotkeyRegistrar: hotkeyRegistrar
     )
     core.tiler.animation.reduceMotion = { false }
-    // The Monocle flip's own read (#1391), pinned the OTHER way:
-    // the flip defers a commanded `focusWindow` to its midpoint,
-    // so with it playing every suite that navigates a Monocle
-    // Space would read the focus before it landed. A flip suite
-    // states the read itself.
-    core.monocleFlip.reduceMotion = { true }
-    // The plate slide's read (#1956), pinned the same way: a
-    // playing slide holds the incoming windows' writes until it
-    // lands, which every switching suite would read too early. A
-    // slide suite states the read, and keeps the panel and the
-    // WindowServer stack read inert, which default live.
-    core.spaceSlide.reduceMotion = { true }
-    core.spaceSlide.present = { _ in }
-    core.spaceSlide.stackOrder = { [:] }
     // The focused ring's arrival hold (#1959) reads the render
     // clock, the host's Reduce Motion and a live timer: frozen and
     // inert here, so ring visibility after a switch never depends
@@ -82,7 +68,9 @@ func makeTestCore(
     core.borders.arrivalClock = { 0 }
     core.borders.scheduleArrivalCheck = { _, _ in }
     core.borders.reduceMotion = { true }
-    core.borders.windowServerTrackingDisabled = false
+    core.windowServer.trackingDisabled = false
+    // A frame event fed through the core reads no live bounds.
+    core.windowServer.readWindowBounds = { _ in nil }
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }
@@ -92,6 +80,9 @@ func makeTestCore(
     // testing the panel builds its own manager.
     core.borders.backendFactory = { InertBorderBackend(orderMode: $0) }
     core.borders.readCornerRadius = { _ in nil }
+    // A KiwiVision plate is a real panel per screen (#2103).
+    core.vision.plateFactory = { InertVisionPlate() }
+    core.vision.reduceMotion = { true }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
     core.inPlaceRestart.serviceProgram = { nil }
@@ -113,6 +104,7 @@ func makeTestCore(
     // pid itself.
     core.openOrFocus.runningAppPID = { _ in nil }
     core.openOrFocus.openApp = { _, _ in false }
+    core.openOrFocus.bundleIDNamed = { _ in nil }
     // A Space Bar menu pops modally and would hang the run (#1528).
     core.spaceBars.glyphActions.present = { _, _ in }
     // A hover's dwell would open the peek's panel on a live
@@ -125,6 +117,9 @@ func makeTestCore(
     core.shelves.peek.now = { 0 }
     // A bar menu's Quit row terminates a real app (#1518).
     core.shelves.contextMenus.terminateApp = { _ in }
+    // The layout picker's pointer (#762, #2229): live, it would
+    // pick the Space under the developer's mouse.
+    core.shelves.contextMenus.pointer = { .zero }
     // New Window activates the target's app and both window
     // actions press another app's AX element (#1518).
     core.openOrFocus.activate = { _ in }
@@ -137,6 +132,8 @@ func makeTestCore(
     // real session-wide event tap in any suite that binds a
     // chord. A suite that means the tap injects its own.
     core.mouse.scroll.makeTap = { _ in nil }
+    // The pointer rest's mouse-moved monitor (#1869).
+    core.mouse.rest.makeMonitor = { _ in nil }
     // Same class, fourth time (#878): the per-retile neighbor
     // scan defaults to the real screen list, so on a
     // multi-screen dev Mac an engine fixture would inherit the
@@ -149,7 +146,10 @@ func makeTestCore(
     // The WindowServer z-order and screen frames the
     // presentation verdict reads (#1787): live, they hand every
     // fixture the host desk.
-    core.frontWindowFrames = { [] }
+    core.frontStack = { [] }
+    // Jump to window's minimize-record check (#1875) reads every
+    // window id on the host otherwise.
+    core.jump.knownWindows = { nil }
     core.tiler.allScreenFrames = { [] }
     // Same class, fifth time (#933): the own-key-window seam
     // defaults to a live `NSApplication.shared` read, so a
@@ -165,6 +165,12 @@ func makeTestCore(
     core.eventLoop.processIdentity.runs = { _ in true }
     core.eventLoop.processIdentity.isActive = { _ in nil }
     core.eventLoop.processIdentity.appAt = { _ in nil }
+    // No real app is listed, launched or activated into a test
+    // core (#2289); a suite that wants one states it.
+    core.eventLoop.runningApplications = { [] }
+    core.eventLoop.registersWorkspaceObservers = false
+    armForeignAppTripwires(core)
+    armStartTripwire(core)
     // Same class, sixth time (#1146): the compositor reads behind
     // the gone classifier and the away ledger default LIVE, and
     // a fixture id can be a real CGWindowID on the host — one
@@ -174,6 +180,7 @@ func makeTestCore(
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
     core.windowIsOnScreen = { _ in nil }
     core.windowIsOnShownDesktop = { _ in nil }
+    core.vision.listWindows = { [] }
     core.desktopMemory.readCensus = { _ in nil }
     // Same class, seventh time (#1147): the Desktop stamp write
     // defaults LIVE, and a fixture space id is a real Desktop id
@@ -198,6 +205,10 @@ func makeTestCore(
     // "nothing held"; a test that wants the branch states the
     // mask itself.
     core.mouse.pressedButtons = { 0 }
+    // KiwiVision's appearance switch defaults LIVE (#2103): a
+    // fixture turning the mode on with an appearance asked would
+    // flip the developer's own Mac. Pin the inert machine.
+    core.vision.appearanceSwitch = .inert()
     // The motion gate's mouse-quiet read defaults LIVE (#804):
     // pin "the mouse is at rest", so every pass is admitted
     // unless a test states otherwise.
@@ -208,6 +219,7 @@ func makeTestCore(
     // suite return foreign reports to an own window. Pin "not in
     // the strip"; the return suite states the reading itself.
     core.mouse.pointerInMenuBarStrip = { false }
+    core.mouse.menuOpen = { _ in false }
     // Same class, process-wide (#1971's flake): every core hears
     // EVERY key-window change in the test process, so another
     // suite's window or post re-synced this one's rings mid-test.
@@ -221,6 +233,13 @@ func makeTestCore(
     // bar sits at the top of the primary screen, where a hand on
     // the menu bar rests. Pin "off every window".
     BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
+    // The Hyper remap rewrites the host's live key mapping and
+    // its record lives in the real defaults (#1870).
+    core.hyperRemapHost = HyperKeyRemap.Host(
+        run: { _ in nil },
+        readWritten: { nil },
+        writeWritten: { _ in }
+    )
     // A shelf panel is a real window on the developer's screen,
     // and a core outlives its test while a task still holds it
     // (#1894): placed, never ordered in, unless the suite asks.

@@ -330,13 +330,14 @@ bite large test PRs:
   within:)` — with nothing pinning `now`. The seam rule above
   covers it, in one of Core's two clock shapes: a `now:`
   PARAMETER threaded from the handler where the write and the
-  read share the call chain the test drives (`selfRaiseStamp`,
-  `FollowFocusIntent.record(at:)` — #1371's stamp-ahead, #1364's
-  backdate), or a CLOSURE on the type where a stamp lands off
-  another chain — the applier's post-set stamps on the AX queue
-  (#1254), the placement stamps at the tiler's leaves (#1161) —
-  as `FrameApplier.clock`, `PlacementLedger.clock`,
-  `ZOrderDrain.now`, `TeardownRestack.now` and
+  read share the call chain the test drives (`selfRaiseStamp` —
+  #1371's stamp-ahead, #1364's backdate), or a CLOSURE on the
+  type where a stamp lands off another chain — the applier's
+  post-set stamps on the AX queue (#1254), the placement stamps
+  at the tiler's leaves (#1161), an arrival debt recorded at a
+  command and paid at a fold (#2341) — as `FrameApplier.clock`,
+  `PlacementLedger.clock`, `ZOrderDrain.now`,
+  `TeardownRestack.now`, `FollowFocusIntent.clock` and
   `KiwiCore.wallClock` do — one clock shape per stored type,
   uptime for a `TimeInterval` stamp and `wallClock` for a `Date`
   one. A handler's `now` and every stamp it judges come from the
@@ -447,6 +448,18 @@ bite large test PRs:
   owns the sequencing and the argument, and
   `.claude/agents/guard-prover.md` owns what the agent itself
   does about it.
+
+  **Remove an isolated prover's worktree and its branch once it
+  reports or is stopped** (owner, 2026-10-16). A prover always
+  changes its tree, so the harness never cleans it up, and the
+  leftovers pile up in `.claude/worktrees/`. First check that the
+  worktree's HEAD and its `worktree-agent-*` branch hold no commit
+  that is on no other branch (`git branch -a --contains <sha>`);
+  an uncommitted change there is a mutation, discarded with the
+  tree. Then run `git worktree remove --force --force <path>` —
+  the harness leaves a finished prover's worktree locked, and a
+  locked one needs the flag twice — and `git branch -D <branch>`
+  from your own worktree.
 - **A perf change owes the correctness half.** A skip, a cache or
   an early return whose safety rests on something else running
   later pins that dependency with a test, never with a comment —
@@ -643,7 +656,7 @@ obligations: keep off the main actor everything that does not
 need it — the fix in that second case was to run the catalog
 reads and the source scans off it and memoize the AppKit
 measurement — and state the spend in the new suite's own
-docstring, the shape `LayoutScreensQuickMenuTests` uses. Sizing
+docstring, the shape `UpdateStateTests` uses. Sizing
 a deadline against the backlog instead is what the clause above
 forbids; #979 is where that was paid on the mode reveal.
 
@@ -706,6 +719,32 @@ bootstrap (`wireOwnKeyWindowRefresh`) is the same class without a
 read: any window turning key in the test process re-synced every
 live core's rings, so both twins unhook it and only its own suite
 re-wires (#1971's flake, `KeyWindowStreamPinTests`).
+The app list every scan, reconcile and heal walks
+(`EventLoop.runningApplications`) is the same class with a frame
+write at the end of it: a suite that marked its loop running and
+loaded a config attached every real app, and the retile resized
+the developer's windows (#2289). Both twins pin the list empty
+and the workspace observers off, and arm two tripwires
+(`TestCoreTripwires.swift`, twinned like `TestCore.swift`): the
+observer factory refuses an attach to another running app, and
+the applier's element read refuses a frame for one, each
+recording an issue (`LiveAppListSeamTests`). Two obligations
+follow. A suite that injects an element does it through
+`tiler.elementProvider`, never by assigning
+`tiler.applier.elementProvider` on a `makeTestCore` core, which
+drops the frame net. And a fixture pid is one no process holds —
+the 900 000 range the newer suites use, above macOS's pid
+ceiling — since the tripwire refuses, and reds, a pid that a
+real app happens to hold on the host. A raise or AX write on an
+element of an app the test never attached passes neither net;
+the pin is what keeps such an element out of a test core.
+A test core never boots either (#2294): `start()` re-arms the
+live seams the factory pinned, so it resets the boot latches and
+then asks `BootRun.admitsStart`, which both twins arm to refuse
+with an issue (`TestCoreStartTripwireTests`). A test never admits
+a test core's start: a suite proving the reset alone writes a
+refusing closure, and every write of the gate under `Tests/` is
+held to its file and to a refusal (`TestCoreStartSeamTests`).
 `MouseButtonSeamGuardTests` holds each read to its homes AND
 every pin into both twins, a deletion from both being silent
 otherwise; it is a sibling of `MachineTouchTests`

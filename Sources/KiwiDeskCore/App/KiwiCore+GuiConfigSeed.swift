@@ -57,6 +57,7 @@ extension KiwiCore {
             profile.scrollGesture?.resolved(onto: config.scrollGesture)
             ?? config.scrollGesture
         config.spaceHistory = profile.spaceHistory ?? config.spaceHistory
+        config.modeCycle = profile.modeCycle ?? config.modeCycle
         config.tileRules =
             profile.tileRules?.resolved(
                 onto: config.tileRules,
@@ -201,6 +202,7 @@ extension KiwiCore {
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
         config.spaceHistory = spaceHistory.base
+        config.modeCycle = modeCycle.base
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
         for space in capturedSpaces {

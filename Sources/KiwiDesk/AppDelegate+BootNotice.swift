@@ -4,7 +4,7 @@ import KiwiDeskCore
 extension AppDelegate {
     /// The slow-boot notice's reads (#1715): it stands down while
     /// the tour owns the screen and where the shelf would, follows
-    /// the Liquid Glass switch through the ⌃⌥K panel's leaf, and
+    /// the Liquid Glass switch through the key panel's leaf, and
     /// anchors on the status item.
     func wireBootNotice() {
         bootNotice.tourShowing = { [weak self] in

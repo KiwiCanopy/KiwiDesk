@@ -71,17 +71,11 @@ struct MainMenuTests {
         #expect(commandW.map(\.action) == [closeSelector])
     }
 
-    /// A borderless window fails AppKit's own Close validation,
-    /// so the Shortcuts panel validates the item itself and
-    /// answers it with the keyboard-commanded cancel. The panel
-    /// is the controller's own build, so a change to its class
-    /// or style mask is what this clause reads.
-    @Test("the borderless Shortcuts panel validates and answers Close")
-    func shortcutsPanelHonoursClose() {
-        let controller = ShortcutsPanelController(
-            core: makeTestCore(),
-            onEdit: {}
-        )
+    /// Jump to window's panel is the second borderless key window
+    /// (#1875): ⌘W closes it as Esc on an empty field does.
+    @Test("the borderless Jump panel validates and answers Close")
+    func jumpPanelHonoursClose() {
+        let controller = JumpPanelController(core: makeTestCore())
         let panel = controller.makePanel()
         #expect(!panel.styleMask.contains(.closable))
         var cancelled = 0
@@ -94,8 +88,6 @@ struct MainMenuTests {
         #expect(panel.validateUserInterfaceItem(close))
         panel.performClose(nil)
         #expect(cancelled == 1)
-        // The override is narrow: a verb the panel cannot perform
-        // still takes AppKit's verdict.
         let minimize = NSMenuItem(
             title: "Minimize",
             action: #selector(NSWindow.performMiniaturize(_:)),

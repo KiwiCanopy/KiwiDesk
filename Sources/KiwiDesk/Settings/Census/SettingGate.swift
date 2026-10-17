@@ -11,6 +11,9 @@ enum SettingRuntimeGate: Hashable {
     case loginItemServiceStatus
     /// LaunchAgent service is already loaded (#1071).
     case autoStartServiceLoaded
+    /// The running copy is App-Translocated, so a path an outside
+    /// launcher would keep dies at relaunch (#1685).
+    case runningCopyTranslocated
     /// Sparkle refuses automatic install: no update channel, or
     /// automatic checks are off (#1542).
     case automaticInstallUnavailable

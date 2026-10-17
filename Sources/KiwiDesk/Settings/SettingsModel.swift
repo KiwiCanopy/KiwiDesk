@@ -112,6 +112,12 @@ final class SettingsModel: ObservableObject {
     @Published var activeStandardTitle: StarterTitle?
     /// True when live state diverged from saved profile.
     @Published var profileDirty = false
+    /// Core's unsaved live settings, and whether they draw a row
+    /// (#2262); written by `refreshUnsavedLive` alone.
+    @Published var unsavedLive: UnsavedLiveSettings?
+    @Published var liveUnsaved = false
+    /// Live leaves the last Keep could not write, by keep id (#2368).
+    @Published var liveKeepRefusals: [String: NotKeepable] = [:]
     /// Dashboard edit target: live config or stored profile (#18, #64).
     @Published var target: EditTarget = .live
     /// Whether screen placement canvas is editable for current target (#18).
@@ -280,7 +286,7 @@ final class SettingsModel: ObservableObject {
     var profileEditingBaseLayers: [KeyLayer]?
     /// The App Rules families across the shared base and every
     /// profile, as stored (#1393); nil where no checklist is
-    /// offered. Re-read by `reload()` alone.
+    /// offered. Re-read by `reload()` and the outside-write adopters.
     var ruleReachStored: RuleReachSnapshot? {
         didSet { dropReachCaches() }
     }

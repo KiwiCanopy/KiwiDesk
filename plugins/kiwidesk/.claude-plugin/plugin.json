@@ -1,0 +1,12 @@
+{
+  "name": "kiwidesk",
+  "description": "Set up and control the KiwiDesk tiling window manager by asking Claude.",
+  "author": {
+    "name": "Maikel Hajiabadi",
+    "url": "https://kiwidesk.kiwicanopy.com"
+  },
+  "homepage": "https://kiwidesk.kiwicanopy.com",
+  "repository": "https://github.com/KiwiCanopy/KiwiDesk",
+  "license": "BUSL-1.1",
+  "keywords": ["macos", "window-manager", "tiling", "mcp"]
+}

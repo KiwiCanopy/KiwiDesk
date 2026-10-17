@@ -27,6 +27,12 @@ extension KiwiCore {
         eventLoop.frontmostPID = frontmost
         // The launch follow's press read (#1599).
         launchFollow.pressAge = { KiwiCore.secondsSinceUserPress() }
+        launchFollow.watchedFor = { [weak self] in
+            self?.boot.began.map {
+                TimeInterval($0.duration(to: .now) / .milliseconds(1))
+                    / 1_000
+            }
+        }
         // The wake payment's fallback seed reads the one trusted
         // frontmost chain (#442/#1130).
         trustedFrontmostProvider = { [weak self] in
@@ -70,6 +76,8 @@ extension KiwiCore {
         // frames live in.
         mouse.onLeftMouseDown = { [weak self] point, origin in
             self?.stampLeftClick(at: GeometryUtils.axPoint(point))
+            // A click on a window a lens holds clears it (#2103).
+            self?.visionPressed()
             // Neither arm hears a press on a bar or the peek, so
             // every press it does hear is a click outside the peek
             // (#1946).
@@ -81,6 +89,16 @@ extension KiwiCore {
                 self?.followDisplayUnderClick(at: point)
             }
         }
+        // Hover focus (#1869): the rest's monitor runs only while
+        // the setting is on.
+        mouse.rest.onRest = { [weak self] point, armed in
+            self?.focusUnderRestingPointer(at: point, armedFocus: armed)
+        }
+        mouse.rest.noteArm = { [weak self] in self?.focusedWindowID }
+        tiler.onMouseSettings = { [weak self] settings in
+            self?.mouse.rest.apply(settings)
+        }
+        mouse.rest.apply(tiler.settings.mouse)
         // Both memories from ONE reading (#888): the authority
         // the switch handler compares against, and the
         // per-display Spaces it diffs against. Seeding only the
@@ -99,23 +117,6 @@ extension KiwiCore {
         // never renders an image-fallback frame.
         appFont.preload()
         borders.start()
-        // The mark rides the ring's WindowServer bounds stream —
-        // AX move echoes alone lag visibly during drags. The
-        // reposition path is unguarded (WS bounds are the truth);
-        // the reorder tee re-asserts stacking on a raise that
-        // fires no AX focus event (a re-click on the focused
-        // window); and the tracking predicate lets the mark's
-        // AX-echo `follow` stand down while the WS stream owns
-        // the frame.
-        borders.onFrameReconciled = { [weak self] id, frame in
-            self?.stickyMarks
-                .reposition(id, windowFrame: frame)
-        }
-        borders.onWindowReordered = { [weak self] id in
-            self?.stickyMarks.reassert(id)
-        }
-        stickyMarks.isWindowServerTracked = { [weak self] id in
-            self?.borders.markUsesWindowServerTracking(id) ?? false
-        }
+        windowServer.start()
     }
 }

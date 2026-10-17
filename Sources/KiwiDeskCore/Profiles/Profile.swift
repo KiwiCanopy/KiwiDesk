@@ -21,17 +21,21 @@ public struct Profile: Codable, Sendable, Equatable {
     /// it wears and one from before is stamped `own` (#1752), 14
     /// since `app_bar.content` retired (#1528), 15 since a layer
     /// override holds one chord per navigation action (#1797), 16
-    /// since the Space switch plates' Liquid Glass leaf is filled
-    /// (#1956), 17 since a stored app shortcut calls
-    /// `focus_or_spawn` (#1511), 18 since a layer override may leave
-    /// a shared layer out whole (#2022) — no step, as for 7 — 19
-    /// since a stored `on_space_change: false` is turned on once
-    /// (#1931). The
-    /// bump is what RUNS a step: `needsMigration` short-circuits on
-    /// it, so a step that must reach this shape owes one whatever it
-    /// rewrites — a retired key decodes to the default and an absent
-    /// leaf to the NEW default, silently, without it.
-    public static let currentFormat = 19
+    /// since the Space switch plates' Liquid Glass leaf was filled
+    /// (#1956; the step retired with the slide, #2228), 17 since a
+    /// stored app shortcut calls `focus_or_spawn` (#1511), 18 since
+    /// a layer override may leave a shared layer out whole (#2022)
+    /// — no step, as for 7 — 19 since a stored
+    /// `on_space_change: false` was turned on once (#1931; retired
+    /// with the slide, #2228), 20 for #2143's step withdrawn by
+    /// #2228 (kept so a development build's file loads), 21 since
+    /// a stored `show_*` call opens `kiwihub.show` (#2265), 22 since
+    /// the layouts side became View (#2309).
+    /// The bump is what RUNS a step: `needsMigration`
+    /// short-circuits on it, so a step reaching this shape owes one
+    /// whatever it rewrites — a retired key decodes to the default
+    /// and an absent leaf to the NEW default, silently, without it.
+    public static let currentFormat = 22
 
     public var format: Int
     public var name: String
@@ -75,6 +79,8 @@ public struct Profile: Codable, Sendable, Equatable {
     public var scrollGesture: ScrollGestureOverride?
     /// Sparse Space history override (#1655); nil follows the base.
     public var spaceHistory: SpaceHistoryKind?
+    /// Sparse layout-cycle override (#453); nil follows the base.
+    public var modeCycle: [LayoutMode]?
     /// Sparse override of `float_automatically` (#2173); nil
     /// follows the base.
     public var floatAutomatically: Bool?
@@ -83,30 +89,10 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Which look this profile wears (#1752): nil is the shared
     /// look in `gui.json`, `.own` the copy in `settings`.
     public var look: LookReference?
-
-    enum CodingKeys: String, CodingKey {
-        case format
-        case name
-        case monitorSets = "monitor_sets"
-        case dormantMonitorCount = "monitor_count"
-        case mainSpaces = "main_spaces"
-        case isDefault = "default"
-        case isStarterSetup = "starter_setup"
-        case spaces
-        case fallbackSpace = "fallback_space"
-        case spaceModes = "space_modes"
-        case settings
-        case savedAt = "saved_at"
-        case layers
-        case appRules = "app_rules"
-        case floatRules = "float_rules"
-        case ignoreRules = "ignore_rules"
-        case scrollGesture = "scroll_gesture"
-        case spaceHistory = "space_history"
-        case floatAutomatically = "float_automatically"
-        case tileRules = "tile_rules"
-        case look
-    }
+    /// Lenses this profile leaves out (#2103 ruling 9), keyed by
+    /// `VisionLens.reachKey`, `false` where left out; nil and a
+    /// lens it does not name reach it.
+    public var lensReach: [String: Bool]?
 
     public init(
         format: Int = Profile.currentFormat,
@@ -127,9 +113,11 @@ public struct Profile: Codable, Sendable, Equatable {
         ignoreRules: RuleListOverride? = nil,
         scrollGesture: ScrollGestureOverride? = nil,
         spaceHistory: SpaceHistoryKind? = nil,
+        modeCycle: [LayoutMode]? = nil,
         floatAutomatically: Bool? = nil,
         tileRules: RuleListOverride? = nil,
-        look: LookReference? = nil
+        look: LookReference? = nil,
+        lensReach: [String: Bool]? = nil
     ) {
         self.format = format
         self.name = name
@@ -150,9 +138,11 @@ public struct Profile: Codable, Sendable, Equatable {
         self.ignoreRules = ignoreRules
         self.scrollGesture = scrollGesture
         self.spaceHistory = spaceHistory
+        self.modeCycle = modeCycle
         self.floatAutomatically = floatAutomatically
         self.tileRules = tileRules
         self.look = look
+        self.lensReach = lensReach
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -267,6 +257,10 @@ public struct Profile: Codable, Sendable, Equatable {
             SpaceHistoryKind.self,
             forKey: .spaceHistory
         )
+        modeCycle = try ModeCycle.decodedIfPresent(
+            container,
+            forKey: .modeCycle
+        )
         floatAutomatically = try container.decodeIfPresent(
             Bool.self,
             forKey: .floatAutomatically
@@ -278,6 +272,10 @@ public struct Profile: Codable, Sendable, Equatable {
         look = try container.decodeIfPresent(
             LookReference.self,
             forKey: .look
+        )
+        lensReach = try container.decodeIfPresent(
+            [String: Bool].self,
+            forKey: .lensReach
         )
     }
 

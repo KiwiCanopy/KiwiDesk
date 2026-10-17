@@ -10,6 +10,8 @@ paths:
   - "scripts/pre-commit"
   - "Package.swift"
   - ".github/workflows/**"
+  - "plugins/**"
+  - "Sources/KiwiDesk/MCP/MCPInvocation.swift"
   - "**/ResourceBundle*.swift"
 ---
 
@@ -529,9 +531,10 @@ present only when it carries a bullet, one bullet per change
 (#1542, held by `ChangelogParserTests` ▸ `malformedBodyRefused`;
 a release before 2.0.0 keeps its free titles, and
 `--body <file> --tag <tag>` checks one of those). A release MAY
-open its sections with `### Spotlight` (#2038): up to
-`SPOTLIGHT_MAX_ROWS` rows
-`- **Title** — one line. {setting:<id>} {symbol:<sf name>}`,
+open its sections with `### Spotlight` (#2038): rows — past
+`SPOTLIGHT_ROW_GUIDELINE` of them, or a line past
+`SPOTLIGHT_LINE_GUIDELINE`, `--body` warns and never refuses —
+each `- **Title** — one line. {setting:<id>} {symbol:<sf name>}`,
 both tokens optional, the summary then ONE intro sentence; a
 `{setting:…}` names an id "Show me" can land on, listed
 build-free in `scripts/spotlight-setting-ids.txt` and held to
@@ -606,6 +609,29 @@ against GitHub's SHA-256 digest before changing the cask, and its
 write credential stays scoped to `KiwiCanopy/homebrew-tap`. A
 manual dispatch is a retry of that same published asset, not an
 alternate way to build or publish one.
+
+**Advance the Claude Code plugin only after publication, and only
+from `plugins/` (#2258).** `.github/workflows/claude-plugin.yml`
+copies the PUBLISHED tag's `plugins/` folder — never `main`'s, and
+a manual dispatch refuses a draft's tag — to
+`KiwiCanopy/kiwidesk-claude` through that repository's own deploy
+key, and stamps the release's version into the plugin manifest
+there; the source keeps no version of its own
+(`ClaudePluginSyncWorkflowTests`, `ClaudePluginSourceTests` ▸
+`noVersionInSource`). kiwidesk-claude is an exact mirror, so a
+change to the marketplace or the plugin is made in `plugins/` and
+never in that repository. A new `kiwidesk mcp` tool owes the
+plugin's skill a line (`ClaudePluginSourceTests` ▸
+`skillNamesEveryTool`).
+
+**The server's verb and name are stored outside this repository.**
+Every installed Claude Desktop extension bakes `kiwidesk mcp`'s
+verb into its launcher, and the published plugin starts the
+server by that verb under `MCPInvocation.serverName`, so renaming
+either breaks installs nobody can reach. A rename is a crossing:
+keep the old spelling answering, and ship the plugin's new
+spelling in the same release (`MCPInvocationContractTests` pins the
+stored spellings).
 
 ## Never `Bundle.module` in code that runs from the `.app` (#89)
 

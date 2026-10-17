@@ -28,18 +28,8 @@ extension KiwiCore {
         // ONE profile read for both override tiers (#55/#109).
         let profile = activeProfileOverrides()
         // Rules need no VM — apply them before the Lua guard.
-        applyStructuredRules(
-            from: config,
-            profile: WindowRuleOverrides(profile)
-        )
-        applyScrollGestures(
-            base: config.scrollGesture,
-            profile: profile?.scrollGesture
-        )
-        applySpaceHistory(
-            base: config.spaceHistory,
-            profile: profile?.spaceHistory
-        )
+        applyStructuredRules(from: config)
+        applyBehaviorOverrides(base: config, profile: profile)
         // Mint refs from the SAME interpreter that releases
         // them (`keys.lua`, see `KeybindingManager.reset`),
         // so mint and release cannot diverge.
@@ -51,48 +41,31 @@ extension KiwiCore {
         )
     }
 
-    /// Re-applies the profile's behavior overrides from one
-    /// sidecar decode: keybindings and all window-rule families.
-    /// Called from `apply(profile:)` / `apply(composed:)` so
-    /// load_profile, dock/undock, and native-Space switches
-    /// update both. Takes the overrides explicitly: callers
-    /// adopt AFTER applying, so `profiles.currentName` may
-    /// still point at the previous profile here. Resets the
-    /// active key mode to default (the set may change with the
-    /// profile). Window-rule overrides apply for either global
-    /// owner; only the keybinding half is GUI-managed and needs
-    /// a live VM.
-    func reapplyStructuredOverrides(
-        profileModes: KeyLayerOverride?,
-        profileRules: WindowRuleOverrides,
-        profileScrollGesture: ScrollGestureOverride?,
-        profileSpaceHistory: SpaceHistoryKind?
-    ) {
+    /// Re-applies `profile`'s behaviour overrides — every family
+    /// `applyBehaviorOverrides` resolves, then the shortcuts — from
+    /// one sidecar decode; nil (a composed Standard) is the base.
+    /// Called from `apply(profile:)` / `apply(composed:)`, which
+    /// adopt AFTER applying, so the profile is passed rather than
+    /// read from `profiles.currentName`. Resets the active key mode
+    /// to default. The families resolve for either config owner;
+    /// only the shortcuts are GUI-managed and need a live VM.
+    func reapplyStructuredOverrides(_ profile: Profile?) {
         var structured: GuiConfig?
         if isGuiManaged {
             guard let config = loadStructuredConfig() else {
                 return
             }
             structured = config
-            captureGlobalWindowRuleBase(from: config)
         }
-        setResolvedWindowRules(profileRules)
         // Resolves over either owner: the sidecar's base, or the
         // one `init.lua`'s verbs left in hand.
-        applyScrollGestures(
-            base: structured?.scrollGesture,
-            profile: profileScrollGesture
-        )
-        applySpaceHistory(
-            base: structured?.spaceHistory,
-            profile: profileSpaceHistory
-        )
+        applyBehaviorOverrides(base: structured, profile: profile)
         guard isGuiManaged else { return }
         guard let lua = keys.lua else { return }
         guard let config = structured else { return }
         applyStructuredKeybindings(
             layers: config.layers,
-            profile: profileModes,
+            profile: profile?.layers,
             lua: lua
         )
     }

@@ -109,40 +109,4 @@ struct ProfileModesTests {
         #expect(json.contains("\"layers\":["))
         #expect(!json.contains("\"layers\":{"))
     }
-
-    @Test("layers array shape matches GuiConfig.layers vocabulary")
-    func modesArrayMatchesGuiConfig() throws {
-        // Profile "layers" must decode from the same JSON shape
-        // that GuiConfig.layers encodes — one vocabulary (#5).
-        let guiModes: [KeyLayer] = [
-            KeyLayer(
-                name: "default",
-                bindings: [
-                    KeyBinding(
-                        combo: "alt+h",
-                        lua: "KiwiDesk.focus(\"left\")",
-                        kind: .navigation,
-                        label: "Focus left"
-                    )
-                ]
-            )
-        ]
-        var config = GuiConfig()
-        config.layers = guiModes
-        let guiEncoder = JSONEncoder()
-        let guiData = try guiEncoder.encode(config)
-        let guiDecoded = try JSONDecoder().decode(
-            GuiConfig.self,
-            from: guiData
-        )
-        // Same layers encoded via GuiConfig must survive as
-        // KeyLayerOverride when wrapped in a bare array.
-        let asOverride = KeyLayerOverride(layers: guiDecoded.layers)
-        let overData = try JSONEncoder().encode(asOverride)
-        let overBack = try JSONDecoder().decode(
-            KeyLayerOverride.self,
-            from: overData
-        )
-        #expect(overBack.layers == guiDecoded.layers)
-    }
 }

@@ -13,7 +13,7 @@ struct OverrideGapsRow: View {
         OverrideChrome(
             isOn: overrideToggle($value, global: global),
             inherited: (Self.label, Self.summary(global)),
-            inheritsFrom: .gapsAndBorders
+            inheritsName: SettingsDestination.gapsAndBorders.title
         ) {
             VStack(alignment: .leading, spacing: 6) {
                 GapsMasterRow(

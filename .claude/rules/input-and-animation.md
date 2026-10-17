@@ -23,6 +23,21 @@ editing here:
   dies at the restart (design-decisions ▸ "The recorder stages
   like every control"). The recorder's suspend (#213) is the one
   live touch, and it resumes the saved table.
+- **Hover focus is armed by USER pointer motion alone (#1869),
+  held by two safeguards that both stay.** The `PointerRest` dwell
+  starts on a global mouse-moved event, and KiwiDesk moves the
+  pointer with a bare `CGWarpMouseCursorPosition`, which posts none
+  — a change that synthesizes a mouse event (a moved event after
+  the warp, to refresh apps' hover states, is the common one)
+  arms the rest from our own move, and owes a stamp the rest
+  refuses first (`HoverFocusWiringTests` ▸ `warpPostsNoMotion`).
+  And a rest carries the focus its user move ARMED with — a re-arm
+  for motion the monitor did not hear keeps it — and stands down
+  when the focus has moved since, which is what keeps a warp
+  landing inside a dwell from looping (`PointerRestTests` ▸
+  `reArmKeepsTheArmedFocus`, `HoverFocusStandDownTests` ▸
+  `movedFocusStands`). A new trigger for hover focus is a user
+  event too, never a reading of where the pointer IS.
 - **Scroll gestures take the ONE active scroll-wheel tap,
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the
@@ -368,7 +383,7 @@ editing here:
   last focus KiwiDesk COMMANDED is dropped, since the blocking
   read used to serialize the notification ahead of the next
   hotkey and a stale report landing after `focusWindow` dropped
-  the scrolling raise and a Monocle flip's owed focus —
+  the scrolling raise —
   `focusWindow` stamps `EventLoop.lastCommandedFocus` for a
   command onto ANOTHER window, after the #1345 refusal, so the
   z-order closing re-asserts (same target) and a refused command
@@ -683,77 +698,24 @@ editing here:
   [accessibility.md](accessibility.md)'s, because it constrains
   a file under `AX/` that this rule's `paths:` do not reach.
 
-- **The Monocle focus flip is a drawn card over a behind-window
-  blur, never a transform or a capture of the real window
-  (#1391).** The measurement that closed the live-image tier
-  (2026-09-16 — the #884 performed-not-applied shape on
-  `SLSSetWindowTransform`/`SLSSetWindowAlpha`, and no pixels
-  without Screen Recording) and the no-new-permission ruling
-  are argued once, in `docs/design-decisions.md` ▸ "A Monocle
-  focus change flips a drawn card"; do not re-probe them. Four
-  obligations. A focus KiwiDesk COMMANDS in a Monocle Space
-  takes the one `focusWithMonocleFlip` door, which records the
-  owed focus as `pendingMonocleFocus` — a ledger on the core
-  with its sibling `pendingFocusRaise`'s hooks, never a closure
-  holding a `WindowID` — and lands `focusWindow` once the blur
-  covers the surface, never later (the latency argument is the
-  design entry's), a press during a play landing at once and
-  retargeting the card rather than restarting it; an
-  OS-reported focus never takes the door, since
-  its swap already happened (`MonocleFlipSeamTests` pins the
-  three commanded sites, the door as the one payer, and the
-  wiring below). A focused-window command lands the owed focus
-  ahead of its dispatch (`KiwiCore.execute` over
-  `FocusedCommandPolicy`), the door ends a play and lands its
-  focus BEFORE it plans (the App Bar click passes no
-  dispatcher), an honored report for any other window drops it,
-  a rekey carries it, a gone target lands nothing, and a Space
-  switch drops it with the play through the one
-  `dropMonocleFlip` in `spaceSwitchRetile`
-  (`MonocleFlipDoorTests`). The decision is pure
-  (`MonocleFlipPlan.decide`, `MonocleFlipPlanTests`) and takes
-  Reduce Motion as an argument, read through the overlay's own
-  seam, which `makeTestCore` pins ON (the engine's is pinned
-  OFF) because a playing flip defers the focus every navigation
-  suite reads at once — a flip suite states the read itself,
-  and a further seam that defers a commanded focus is pinned
-  the same way in both `makeTestCore` twins with its reason
-  beside it (`MonocleFlipSeamTests` ▸ `bothTwinsPinTheRead`).
-  And the overlay starts no motion of its own: its turn and
-  fades are `BarMotion`'s censused members
-  (`BarMotionSeamTests`), so Core's motion keeps one home.
-- **A Space switch's motion is DRAWN, and each window still
-  moves once (#1956).** The plate slide is a picture over the
-  windows, never an animation of them: keep the switch's pass
-  the instant one, since re-animating window frames on a switch,
-  or adding a write per window, re-opens the corner slide's
-  per-frame AX cost (`SpaceSlideSwitchTests` ▸
-  `slideCostsNoExtraWork`). Four obligations. Stage an incoming
-  window's writes in `FrameApplier`'s hold through EVERY applier
-  write path (`SpaceSlideSeamTests` ▸ `writePathsReachTheHold`)
-  and release them from the app's own queue at the landing —
-  KiwiDesk's own window, whose queue is main, excepted — once,
-  inside one Enhanced UI hold (`FrameApplierHeldTests`); a play
-  that ends early releases what it held, whichever activation
-  overtook it — asked once at the head of every retile, never per
-  activation door (`SpaceSlideSwitchTests` ▸
-  `instantSwitchReleasesHolds`, `overtakenPlayEnds`), and
-  the quit gather drops every hold, being the one frame write
-  outside the applier. Move KiwiDesk's own window through AppKit
-  inside the caller's turn, never on a later main-queue turn
-  (`FrameApplierOwnWindowTests`). Order the overlay's panel in
-  once per screen and never move it during a play — what moves
-  is a layer timed from the press, through `BarMotion`'s
-  censused members (`BarMotionSeamTests`); the panel half is
-  review's, since no fixture orders a panel in. And play only
-  for navigation that passes a `SpaceSlideIntent`
-  (`SpaceSlideSwitchTests` ▸ `onlyNavigationPlays` holds the
-  display follow; boot, wake and a restore pass none through
-  `spaceSwitchRetile`'s nil default, which review holds). A live
-  read the slide adds is pinned inert in both `makeTestCore`
-  twins (`SpaceSlideSeamTests` ▸ `bothTwinsPinTheReads`). The
-  product ruling is `docs/design-decisions.md` ▸ *A Space switch
-  plays a drawn plate slide*.
+- **A Space switch is instant, and each window moves once
+  (#2228).** Keep the switch's pass the instant one: re-animating
+  window frames on a switch, or adding a write per window,
+  re-opens the corner slide's per-frame AX cost. Move KiwiDesk's
+  own window through AppKit inside the caller's turn, never on a
+  later main-queue turn (`FrameApplierOwnWindowTests`). The Space
+  cue (#2143) is the switch's one picture: `spaceSwitchRetile` is
+  its one payer, handed the screen an explicit switch changes
+  (`spaceSwitchDisplay`, read before the switch activates), and
+  `paySpaceCue` reads `space.cue` itself — a second payer, or a
+  reader of the toggle beside it, is a switch that shows the
+  plate past the user's off (`SpaceCueSeamTests`). A display
+  follow passes no screen, since its screen already shows the
+  Space (`FullscreenStandDownTests` ▸ `displayFollowNamesNothing`);
+  boot, wake and a restore pass none through `spaceSwitchRetile`'s
+  nil default, which review holds. The product ruling is
+  `docs/design-decisions.md` ▸ *A Space switch is instant, and
+  names the Space only where no Space Bar does*.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

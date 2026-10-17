@@ -37,6 +37,10 @@ enum SettingsTheme {
         dark: 0x12_25_1A
     )
 
+    /// KiwiVision's veil in its picture (#2103): black in both
+    /// appearances, since the plate's dim is always black.
+    static let visionVeil = token(light: 0x00_00_00, dark: 0x00_00_00)
+
     /// Plate light ink fallback when palette ink sinks into `previewPlate`.
     static let plateInk = token(
         light: 0xEA_F3_EE,
@@ -106,6 +110,16 @@ enum SettingsTheme {
         darkAlpha: 0.22
     )
 
+    /// The selected row of an editable list — a durable marking,
+    /// kept off the chip press it matches today so a hover or
+    /// press added later does not overwrite it (#1173, #453).
+    static let rowSelected = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.16,
+        darkAlpha: 0.22
+    )
+
     /// A text button chip's edge, constant in every state — what
     /// tells it from a passive hairline capsule (#1520 amendments
     /// 5, 6).
@@ -153,6 +167,14 @@ enum SettingsTheme {
     static let accentInk = token(
         light: 0x12_25_1A,
         dark: 0x12_25_1A
+    )
+
+    /// Secondary text on `accent` — Jump to window's Space and
+    /// number columns on the selected row (#1875): `accentInk`
+    /// mixed toward the accent, opaque so the pair stays measured.
+    static let accentInkSecondary = token(
+        light: 0x2B_41_26,
+        dark: 0x2B_41_26
     )
 
     /// The accent seal's PRESSED fill — the accent darkened

@@ -84,7 +84,6 @@ enum MigrationBackup {
 
     /// The file's own `format`, 0 where it carries none.
     private static func storedFormat(of data: Data) -> Int {
-        let root = try? JSONSerialization.jsonObject(with: data)
-        return (root as? [String: Any])?["format"] as? Int ?? 0
+        NewerFormatOnDisk.storedFormat(of: data) ?? 0
     }
 }

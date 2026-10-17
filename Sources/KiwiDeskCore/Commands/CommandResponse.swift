@@ -5,10 +5,20 @@ import Foundation
 public struct CommandRequest: Codable, Sendable, Equatable {
     public var command: String
     public var args: [JSONValue]?
+    /// Asks for a `ChangeReport` beside the answer (#1685).
+    public var reportChanges: Bool?
+    /// Leaf ids the report also judges (#1685).
+    public var keepWatch: [String]?
 
     public init(command: String, args: [JSONValue]? = nil) {
         self.command = command
         self.args = args
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case command, args
+        case reportChanges = "report_changes"
+        case keepWatch = "keep_watch"
     }
 }
 
@@ -30,6 +40,8 @@ public struct CommandResponse: Codable, Sendable, Equatable {
     public var status: String
     public var data: JSONValue?
     public var error: String?
+    /// Present only when the request asked (`reportChanges`).
+    public var changes: ChangeReport?
 
     public var isSuccess: Bool { status == "success" }
 

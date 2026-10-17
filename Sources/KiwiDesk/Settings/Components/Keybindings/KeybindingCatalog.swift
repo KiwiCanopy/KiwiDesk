@@ -146,17 +146,20 @@ enum KeybindingCatalog {
         spaces: [SpaceID]
     ) -> [NavGroup] {
         [
+            NavGroup(title: "KiwiHub", commands: kiwiHubRows),
             NavGroup(
                 title: "Focus",
                 commands: focusDirections + spaceStepRows
                     + spaceHistoryRows + goToSpace(spaces)
             ),
+            NavGroup(title: "KiwiVision", commands: [toggleKiwiVision]),
             NavGroup(
                 title: "Window Management",
                 commands: swapDirections
                     + trackRows
                     + moveToSpace(spaces)
             ),
+            NavGroup(title: "Layout", commands: layoutRows),
         ]
     }
 
@@ -169,6 +172,31 @@ enum KeybindingCatalog {
     static func quote(_ raw: String) -> String {
         SpaceLuaArg.quote(raw)
     }
+
+    /// KiwiHub's sides in the order of their keys, J K L (#2265).
+    static var kiwiHubRows: [NavCommand] {
+        [jumpToWindow, showShortcuts, showLayoutPicker]
+    }
+
+    /// The window switcher (#1875): "Show" and the side's
+    /// VoiceOver name (#2245). The stored label stays the identity
+    /// a binding is matched by.
+    static let jumpToWindow = NavCommand(
+        label: "Jump to window",
+        lua: KiwiHubSide.windows.lua,
+        displayLabel: {
+            L("keybinding.show_window_switcher", "Show window switcher")
+        }
+    )
+
+    /// KiwiVision on or off (#2103).
+    static let toggleKiwiVision = NavCommand(
+        label: "Toggle KiwiVision",
+        lua: "kiwivision.toggle()",
+        displayLabel: {
+            L("keybinding.toggle_kiwivision", "Toggle KiwiVision")
+        }
+    )
 
     /// Command opening shortcuts cheat sheet overlay (#330, #602).
     static let showShortcuts = NavCommand(

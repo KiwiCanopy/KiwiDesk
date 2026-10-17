@@ -44,9 +44,24 @@ struct LayoutStoryTests {
             #expect(story.start.motion.focus != 0)
         case .monocle:
             #expect(story.start.windows == 4)
-            // A whole number of half-turns is the resting card.
-            let turn = story.start.motion.turn
-            #expect(turn != 0 && turn == turn.rounded())
+            // The next window starts one fan step back, without
+            // the focus mark, and steps into the front wearing it.
+            #expect(story.start.motion.arrival == 1)
+            let start = MonocleSchematic(
+                orientation: .horizontal,
+                arrival: story.start.motion.arrival
+            )
+            let rest = MonocleSchematic(
+                orientation: .horizontal,
+                arrival: story.rest.motion.arrival
+            )
+            #expect(start.drawnLevel(0) == 1)
+            #expect(rest.drawnLevel(0) == 0)
+            #expect(start.focusWeight == 0)
+            #expect(rest.focusWeight == 1)
+            let back = start.fanDepth
+            #expect(start.opacity(ofLevel: back) == 0)
+            #expect(rest.opacity(ofLevel: back) == 1)
         case .floating:
             #expect(story.start.windows == 4)
             #expect(story.start.motion.drag < 1)

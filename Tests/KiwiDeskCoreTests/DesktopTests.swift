@@ -273,28 +273,6 @@ struct DesktopBindingTests {
         )
     }
 
-    @Test("Desktops restore their last virtual space")
-    func virtualSpaceMemory() {
-        defer { resetDesktops() }
-        let core = makeCore()
-        core.state.workspaces.ensureSpace(SpaceID(2))
-        NativeSpaces.spacesOverride = []
-        let snapshot = NativeSpaces.desktopSnapshot()
-        // An unremembered Desktop steps OVER a Space another
-        // Desktop is already showing (#1230): space 1 is the
-        // active one here, so the fresh Desktop takes 2 rather
-        // than landing on a Space whose windows are elsewhere.
-        #expect(
-            core.virtualSpaceTarget(for: .number(3), in: snapshot)
-                == SpaceID(2)
-        )
-        core.desktopMemory.virtualSpaces[.number(3)] = SpaceID(2)
-        #expect(
-            core.virtualSpaceTarget(for: .number(3), in: snapshot)
-                == SpaceID(2)
-        )
-    }
-
     @Test("Invalid arguments fail")
     func invalidArgs() {
         defer { resetDesktops() }

@@ -66,6 +66,32 @@ public final class KeybindingManager {
 
     /// Hold-to-glide engine (#1056, #1082).
     let holdGlide = HoldGlide()
+    /// The Hyper layer's trigger and held registrations (#1870).
+    var hyper = HyperLayer()
+    /// Schedules the Hyper hold's watchdog; returns its cancel.
+    var hyperSchedule:
+        @MainActor (
+            TimeInterval, @escaping @MainActor () -> Void
+        ) -> () -> Void = { delay, work in
+            let item = DispatchWorkItem {
+                MainActor.assumeIsolated { work() }
+            }
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + delay,
+                execute: item
+            )
+            return { item.cancel() }
+        }
+    /// What the last remap did, for the Settings row (#96).
+    public internal(set) var hyperStatus = HyperKeyStatus.off
+    /// Whether the Hyper key is on: its remap is in place, so F18
+    /// arrives when it is pressed (`KiwiCore.applyHyperKey`).
+    public internal(set) var hyperEnabled = false {
+        didSet {
+            guard hyperEnabled != oldValue else { return }
+            activate(currentLayer)
+        }
+    }
     private var suspended = false
     let registrar: HotkeyRegistrar
 
@@ -151,6 +177,8 @@ public final class KeybindingManager {
     /// Resets all layers and releases Lua references on config reload.
     func reset() {
         deactivate()
+        // No rows survive a reset, so neither does the trigger.
+        disarmHyperTrigger()
         if let lua {
             for bindings in layers.values {
                 for ref in bindings.values {

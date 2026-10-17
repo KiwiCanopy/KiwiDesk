@@ -16,10 +16,12 @@ extension SettingsModel {
         target.layers = source.layers
         target.scrollGesture = source.scrollGesture
         target.spaceHistory = source.spaceHistory
+        target.modeCycle = source.modeCycle
         target.appRules = source.appRules
         target.floatRules = source.floatRules
         target.ignoreRules = source.ignoreRules
         target.tileRules = source.tileRules
+        target.desktopShortcutBase = source.desktopShortcutBase
         target.floatAutomatically = source.floatAutomatically
         target.profileBindings = source.profileBindings
         target.spaces = source.spaces

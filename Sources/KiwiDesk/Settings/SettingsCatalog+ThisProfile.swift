@@ -89,14 +89,6 @@ struct ColorsControls: Sendable {
 /// census label keys and declared in `ColorsRowOrder.motionMore`'s
 /// order.
 struct MotionMoreControls: Sendable {
-    let animateSpaceSwitches = SettingsControl(
-        "behavior.animations.space_change",
-        "Animate Space switches"
-    )
-    let spaceSwitchDuration = SettingsControl(
-        "behavior.animations.space_change_duration",
-        "Space switch duration"
-    )
     let animateWindowResizes = SettingsControl(
         "behavior.animations.window_resize",
         "Animate window resizes"

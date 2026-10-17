@@ -30,18 +30,27 @@ public struct LookBody: Codable, Sendable, Equatable {
         ShelfLook(name: name, style: style, colors: colors)
     }
 
-    /// `settings` with this look painted over — `isWorn`'s pair,
-    /// and the one copy of the paint (#1752).
+    /// `settings` wearing this look — `isWorn`'s pair (#1752).
+    /// Wearing is no pick, so a per-layout App Bar indicator stays,
+    /// which a picked look (`ShelfLook.apply`) clears (#2368).
     public func worn(over settings: TilingSettings) -> TilingSettings {
         var worn = settings
         named("").admitted.apply(to: &worn)
+        for leaf in TilingSettings.layoutIndicatorLeaves {
+            worn[keyPath: leaf] = settings[keyPath: leaf]
+        }
         return worn
     }
 
     /// Whether `settings` already wear this look — `isApplied`'s
-    /// answer, never a path diff (#1752).
+    /// answer, never a path diff (#1752), a per-layout indicator
+    /// left out as `worn(over:)` leaves it.
     public func isWorn(by settings: TilingSettings) -> Bool {
-        named("").admitted.isApplied(to: settings)
+        var probe = settings
+        for leaf in TilingSettings.layoutIndicatorLeaves {
+            probe[keyPath: leaf] = nil
+        }
+        return named("").admitted.isApplied(to: probe)
     }
 
     private enum CodingKeys: String, CodingKey {

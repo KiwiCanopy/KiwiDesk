@@ -75,7 +75,7 @@ struct GuessedAppRows: View {
         guard titles.count > 1 else { return name }
         return L(
             "app_rules.tile.picker.windows",
-            "%1$@ and more: %2$lld",
+            "%1$@ and more: %2$d",
             name,
             titles.count - 1
         )

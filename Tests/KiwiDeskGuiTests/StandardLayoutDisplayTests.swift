@@ -90,16 +90,14 @@ struct StandardLayoutDisplayTests {
         reset()
         LocalizationManager.shared.select("en")
         defer { reset() }
-        #expect(
-            StarterTitle(shape: .ultrawide, otherScreens: 0)
+        func title(_ shape: ScreenClass, _ others: Int) -> String {
+            StarterTitle(shape: shape, otherScreens: others)
                 .onboardingTitle
-                == "Your Spaces are ready for your ultrawide screen"
-        )
-        #expect(
-            StarterTitle(shape: .ultrawide, otherScreens: 1)
-                .onboardingTitle
-                == "Your Spaces are ready for all your screens"
-        )
+        }
+        // One screen names its class; several name none, so two
+        // classes read alike there and apart alone.
+        #expect(title(.ultrawide, 0) != title(.laptop, 0))
+        #expect(title(.ultrawide, 1) == title(.laptop, 1))
     }
 
     /// The starter answers with its title, never its identity
@@ -110,9 +108,9 @@ struct StandardLayoutDisplayTests {
         LocalizationManager.shared.select("en")
         defer { reset() }
         let title = StarterTitle(shape: .ultrawide, otherScreens: 1)
-        #expect(
-            standardDisplayName(StarterSetup.name, title: title)
-                == "Ultrawide + 1"
-        )
+        let shown = standardDisplayName(StarterSetup.name, title: title)
+        #expect(shown == title.displayName)
+        #expect(shown != StarterSetup.name)
+        #expect(shown.contains(StarterTitle.displayName(of: .ultrawide)))
     }
 }

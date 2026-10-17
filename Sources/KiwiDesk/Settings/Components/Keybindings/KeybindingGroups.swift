@@ -83,12 +83,7 @@ struct KeybindingFamilyRows: View {
 
     /// Caption for actions targeting temporarily disconnected displays.
     private var unavailableNote: String {
-        L(
-            "shortcuts.desktop_away",
-            "Dimmed rows target a Desktop that isn't on any "
-                + "screen right now. Their shortcuts stay "
-                + "recorded and work again when it comes back."
-        )
+        KeybindingCatalog.desktopAwayCaption
     }
 }
 
@@ -187,6 +182,31 @@ struct MoveWindowsGroup: View {
     }
 }
 
+/// Layout shortcut section (#453): the focused Space's next and
+/// previous layout.
+struct LayoutGroup: View {
+    @ObservedObject var model: SettingsModel
+    @Binding var bindings: [KeyBinding]
+    let expander: ShortcutsFamilyRows
+
+    var body: some View {
+        SettingsSection(SettingsCatalog.shortcuts.layoutKeys) {
+            // `ShortcutsRowOrder.layoutList`, drawn by its own views.
+            LayoutCycleRow(model: model)
+            LayoutCueRow(model: model)
+            ForEach(ShortcutsRowOrder.layoutAtRest, id: \.id) {
+                key in
+                KeybindingFamilyRows(
+                    model: model,
+                    bindings: $bindings,
+                    key: key,
+                    expander: expander
+                )
+            }
+        }
+    }
+}
+
 /// Size & float shortcut section (#68, #56, #184).
 struct SizeFloatGroup: View {
     @ObservedObject var model: SettingsModel
@@ -280,11 +300,6 @@ struct KiwiDeskKeyRows: View {
         @ViewBuilder family: () -> Family
     ) -> some View {
         switch key {
-        case .shortcuts(.showShortcuts):
-            VStack(alignment: .leading, spacing: 8) { family() }
-                .searchAnchored(
-                    SettingsCatalog.shortcuts.showShortcutsBinding
-                )
         case .shortcuts(.openSettings):
             VStack(alignment: .leading, spacing: 8) { family() }
                 .searchAnchored(

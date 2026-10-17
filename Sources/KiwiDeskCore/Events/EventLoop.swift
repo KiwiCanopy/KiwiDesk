@@ -67,12 +67,12 @@ public final class EventLoop {
             .identifier?.rawValue
     }
 
-    /// KiwiDesk's own active key or modal window, nil when the
-    /// process holds none — the ONE seam the #929/#935 close-return
-    /// stand-down and the #933 ring suppression share, so the two
-    /// can never disagree about WHICH window is key: the ring reads
-    /// `number`, the raise the narrower `isDialog` (borders.md;
-    /// `classifiesAsOwnDialog`). Injected in tests.
+    /// KiwiDesk's own active key or modal window, nil when none —
+    /// the ONE seam the #929/#935 raise stand-down, the #933 ring
+    /// and the #2224 reveal payment share (`number`, `isDialog`);
+    /// the ring and KiwiVision look past a `floatsOverWindows`
+    /// panel (#2373, borders.md), and hover focus stands down
+    /// under one (#2378). Injected in tests.
     var ownKeyWindow: () -> OwnKeyWindowReading? = {
         EventLoop.ownKeyWindowReading()
     }

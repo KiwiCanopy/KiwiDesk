@@ -84,9 +84,11 @@ extension KiwiCore {
     /// is not applied (os-private-apis.md): the arrival, or the
     /// reap's reconcile, is the verification. Returns the windows
     /// whose move was dispatched, or nil where the bridge refused.
-    private func hopAwayWindows(
+    /// `only` narrows the hop to one window (#1875's Bring here).
+    func hopAwayWindows(
         bundleID: String,
-        into target: SpaceID
+        into target: SpaceID,
+        only: WindowID? = nil
     ) -> [WindowID]? {
         guard canDriveDesktops,
             let reach = awayReach(bundleID: bundleID),
@@ -96,7 +98,8 @@ extension KiwiCore {
             let shown = reach.snapshot.currentSpaces[uuid]
         else { return [] }
         let windows = reach.windows.map(\.window).filter { window in
-            state.rememberedSpaces[window.id] != nil
+            (only == nil || window.id == only)
+                && state.rememberedSpaces[window.id] != nil
                 && reach.snapshot.spaces.first {
                     $0.id == window.nativeSpace
                 }?.displayUUID == uuid

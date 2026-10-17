@@ -52,6 +52,10 @@ struct FloatFlagReaderCensusTests {
         // `toggle_floating` flips the flag by ruling (#1697).
         "Commands/KiwiCore+FloatCommands.swift": [.ruledToStay: 1],
         "Commands/KiwiCore+Diagnostics.swift": [.identity: 1],
+        // `explain_window` reports the flag, routes the effective
+        // float and names the flag a cause only past detection
+        // (#1685).
+        "Commands/KiwiCore+Explain.swift": [.identity: 1, .routed: 1],
         // A user float restores only where detection tiles the
         // window, and at arrival the flag IS detection's (#1810).
         "State/StateCoordinator+Intents.swift": [.identity: 1],
@@ -64,7 +68,6 @@ struct FloatFlagReaderCensusTests {
         // The presenting door (#1788).
         "App/KiwiCore+ScreenCovering.swift": [.routed: 1],
         // A plate's draw tier (#1956).
-        "Commands/KiwiCore+SpaceSlide.swift": [.routed: 1],
         // The verbs' gate, and the cascade's neighbour set (#1708).
         "App/KiwiCore+FloatPlacement.swift": [.routed: 2],
         "App/KiwiCore+FloatRecovery.swift": [.routed: 1],
@@ -81,7 +84,7 @@ struct FloatFlagReaderCensusTests {
         "Commands/KiwiCore+ZOrderFloatLayer.swift":
             [.routed: 1, .ruledToStay: 2],
         "State/StateCoordinator+EffectiveMembers.swift":
-            [.tiledMember: 5],
+            [.tiledMember: 4],
         "State/StateCoordinator+WindowCreated.swift":
             [.tiledMember: 2],
         // Ruled to stay (#1362): an arrival on another display

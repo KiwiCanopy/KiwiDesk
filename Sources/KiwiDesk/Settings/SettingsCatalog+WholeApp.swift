@@ -52,9 +52,20 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.layers",
         "Layers"
     )
+    /// The KiwiHub group (#2265), titled by the product name.
+    let kiwiHubKeys = SettingsControl(
+        "kiwihub.name",
+        "KiwiHub"
+    )
     let focusKeys = SettingsControl(
         "shortcuts.section.focus",
         "Focus"
+    )
+    /// The KiwiVision group (#2312), titled by the product name's
+    /// one key.
+    let kiwiVisionKeys = SettingsControl(
+        "destination.kiwivision",
+        "KiwiVision"
     )
     let moveWindows = SettingsControl(
         "shortcuts.section.move_windows",
@@ -78,6 +89,26 @@ struct ShortcutsControls: Sendable {
         "shortcuts.tracks.move",
         "Move windows in the track layout"
     )
+    let layoutKeys = SettingsControl(
+        "shortcuts.section.layout",
+        "Layout"
+    )
+    /// Layout ▸ the cycle list and the plate's switch (#453,
+    /// #2144), keyed on their census label keys so a hit lands on
+    /// the row.
+    let modeCycle = SettingsControl(
+        "shortcuts.mode_cycle",
+        "Layouts to cycle"
+    )
+    let modeCue = SettingsControl(
+        "shortcuts.mode_cue",
+        "Show the layout after cycling"
+    )
+    /// The Hyper key's recorder row (#1870), on its census label.
+    let hyperKey = SettingsControl(
+        "shortcuts.hyper_key",
+        "Hyper key"
+    )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",
         "Size & float"
@@ -86,9 +117,10 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.open_applications",
         "Open applications"
     )
-    /// Open applications ▸ KiwiDesk's two rows, keyed on their
-    /// census label keys (the `L()` sites are `KeybindingCatalog`'s)
-    /// so a hit lands on the row (#1520).
+    /// KiwiHub's shortcuts-panel row and Open applications ▸
+    /// KiwiDesk's row, keyed on their census label keys (the `L()`
+    /// sites are `KeybindingCatalog`'s) so a hit lands on the row
+    /// (#1520, #2265).
     let showShortcutsBinding = SettingsControl(
         "keybinding.show_shortcuts",
         "Show shortcuts panel"
@@ -144,6 +176,14 @@ struct GesturesControls: Sendable {
     let mouseResize = SettingsControl(
         "behavior.mouse.resize_action",
         "Mouse resize action"
+    )
+    let hoverFocus = SettingsControl(
+        "behavior.mouse.hover_focus",
+        "Focus the window the pointer rests on"
+    )
+    let hoverFocusDelay = SettingsControl(
+        "behavior.mouse.hover_focus_delay",
+        "Hover delay"
     )
     let followsFocus = SettingsControl(
         "behavior.mouse.follows_focus",

@@ -4,13 +4,29 @@ import Foundation
 /// if it changes how the same items look or where they sit, and
 /// functionality if it changes which items exist, what they show
 /// or say, or what they do (owner ruling 2026-09-27) — so App Bar
-/// content, Other Spaces and each bar's on/off never join. The
+/// content, Windows in other Spaces and each bar's on/off never
+/// join. The
 /// focus border's shape and the global gaps join too (#1739), so
 /// a look reproduces its whole picture. Colours are a palette's,
-/// never a look's.
+/// never a look's. Motion joins too (#2176), so animations travel
+/// between profiles with the shared look; a bundled look and the
+/// tour's paint carry styling alone.
 public enum LookKeys {
-    /// Every settable styling path, in a stable order.
-    public static let all: [String] =
+    /// Every path a look may set: its styling, then its motion.
+    public static let all: [String] = styling + motion
+
+    /// The animation paths (#2176) — every stored field of
+    /// `AnimationSettings`, read off its keys. A look the user
+    /// saves and the shared look carry them; a bundled look and
+    /// the tour's paint never do (`LookKeysCensusTests`).
+    public static let motion: [String] =
+        AnimationSettings.CodingKeys.allCases.map {
+            "animations.\($0.stringValue)"
+        }
+
+    /// The styling paths: how the same items look or where they
+    /// sit. What a bundled look and the tour's paint reach.
+    public static let styling: [String] =
         shelfFields.map { "kiwishelf.\($0)" } + [
             // Each bar's own edge (#1731): a look that places the
             // bars says where each sits, on/off left alone.
@@ -77,18 +93,14 @@ public enum LookKeys {
     private static let functionality =
         "which items exist, what they show or what they do"
 
-    /// Extracts the styling map from settings, every path in `all`.
+    /// Extracts the look map from settings, every path in `paths`.
     public static func extract(
-        from settings: TilingSettings
+        from settings: TilingSettings,
+        paths: [String] = all
     ) -> [String: JSONValue] {
-        guard let data = try? JSONEncoder().encode(settings),
-            let root = try? JSONDecoder().decode(
-                JSONValue.self,
-                from: data
-            )
-        else { return [:] }
+        guard let root = JSONValue(encoding: settings) else { return [:] }
         var out: [String: JSONValue] = [:]
-        for path in all {
+        for path in paths {
             if let value = value(at: path, in: root) {
                 out[path] = value
             }
