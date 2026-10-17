@@ -46,6 +46,8 @@ do switch themselves off after an update instead of breaking.
 
 [How it compares with yabai, AeroSpace and the rest →](https://kiwidesk.kiwicanopy.com/compare/)
 
+[Everything it does, feature by feature →](https://kiwidesk.kiwicanopy.com/nerd/#features)
+
 ## Installation
 
 Requirements: macOS 14 or later, on Apple silicon.
