@@ -278,6 +278,8 @@ extension KiwiCore {
             )
         }
         let ownKey = eventLoop.ownKeyWindow()
+            // KiwiHub floats over the plate: it targets nothing.
+            .flatMap { $0.floatsOverWindows ? nil : $0 }
             .flatMap { UInt32(exactly: $0.number) }
             .flatMap { $0 == anchor?.raw ? nil : $0 }
         // An own key window's app is this one.
