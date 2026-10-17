@@ -39,7 +39,6 @@ The procedure and the desk script live in the repository's
 | Parks | Windows moved to the hiding corner per switch |
 | Retile mean / max | Main-thread time of one layout pass, ms |
 
-:::unreleased
 
 ## 3.0.0 against 2.3.1
 
@@ -91,7 +90,6 @@ under a saturated GPU on the pair with floating windows, where
 2.3.1's slide roughly doubled the average pass. The longest
 passes under that load vary by tens of milliseconds between runs
 of one build, so their differences are noise.
-:::
 
 ## Earlier comparisons
 

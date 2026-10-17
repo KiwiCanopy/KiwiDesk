@@ -180,14 +180,12 @@ A `space_bar.*` or `app_bar.*` write that leaves every layout's
 unchanged on every screen runs no pass at all: it repaints the bars and
 re-clamps the floats (#1524).
 
-:::unreleased
 A Space switch is always that one instant reissue. After an
 explicit switch, Core hands the GUI the Space and its layout for
 the screen that switched (`paySpaceCue`, in
 `Commands/SpaceSwitchCue`), standing down where that screen draws
 a Space Bar or the shelf stands down; the plate itself is drawn in
 `Sources/KiwiDesk/CuePlate` (#2143, #2228).
-:::
 
 The Lua watchdog is an instruction-count hook and **cannot**
 interrupt a blocking C call, so anything that blocks in C
