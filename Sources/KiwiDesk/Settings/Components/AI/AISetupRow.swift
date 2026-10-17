@@ -2,12 +2,13 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// AI ▸ Set up's two rows (#2258 ▸ Ruling 7): Add to Claude Desktop
-/// first, then Copy Setup Prompt with its `?`. A copy opened from
-/// Downloads runs from a translocated path that dies at relaunch, so
-/// there both buttons grey and the move sentence is drawn once, under
-/// the second row — the census gate `runningCopyTranslocated`, read
-/// from the one `RunningCopy` verdict at render (#1685 ▸ Ruling 6a).
+/// AI ▸ Set up's two rows (#2258 ▸ Ruling 7), in the prompts'
+/// row shape: Claude Desktop first, then Other AI apps with its
+/// `?`. A copy opened from Downloads runs from a translocated path
+/// that dies at relaunch, so there both buttons grey and the move
+/// sentence is drawn once, as the second row's caption — the
+/// census gate `runningCopyTranslocated`, read from the one
+/// `RunningCopy` verdict at render (#1685 ▸ Ruling 6a).
 /// Without Claude Desktop only the first button greys, with its
 /// reason; installing it while Settings is open lights it on return.
 /// That cause stays out of the census on purpose: it is a fact about
@@ -22,34 +23,22 @@ struct AISetupRow: View {
 
     var body: some View {
         let translocated = RunningCopy.location == .translocated
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Button(action: add) {
-                    Label(addTitle, systemImage: "puzzlepiece.extension")
-                }
-                .settingsActionButton()
-                .modifier(
-                    GreyOut(
-                        active: translocated || claudeInstalled == false
-                            || building
-                    )
-                )
-                if !translocated {
-                    Text(addCaption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+        VStack(alignment: .leading, spacing: 8) {
+            AIActionRow(
+                title: SettingsCatalog.ai.addToClaudeDesktop.text,
+                caption: translocated ? nil : addCaption
+            ) {
+                addButton(translocated: translocated)
             }
             .searchAnchored(SettingsCatalog.ai.addToClaudeDesktop)
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    AICopyButton(title: title, text: prompt)
-                        .modifier(GreyOut(active: translocated))
-                    HelpButton(explanation: help, subject: title)
-                }
-                Text(translocated ? movedCaption : caption)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            Divider()
+            AIActionRow(
+                title: SettingsCatalog.ai.copySetupPrompt.text,
+                caption: translocated ? movedCaption : caption,
+                help: help
+            ) {
+                AICopyButton(title: copyTitle, text: prompt)
+                    .modifier(GreyOut(active: translocated))
             }
             .searchAnchored(SettingsCatalog.ai.copySetupPrompt)
         }
@@ -60,6 +49,25 @@ struct AISetupRow: View {
         ) { _ in refreshClaude() }
         .onAppear(perform: refreshClaude)
         .onDisappear { announcement?.cancel() }
+    }
+
+    private func addButton(translocated: Bool) -> some View {
+        Button(action: add) {
+            Label(
+                L("ai.setup.add", "Add…"),
+                systemImage: "puzzlepiece.extension"
+            )
+        }
+        .settingsActionButton()
+        .accessibilityLabel(
+            L("ai.setup.add.ax", "Add to Claude Desktop")
+        )
+        .modifier(
+            GreyOut(
+                active: translocated || claudeInstalled == false
+                    || building
+            )
+        )
     }
 
     private func refreshClaude() {
@@ -96,10 +104,6 @@ struct AISetupRow: View {
         )
     }
 
-    private var addTitle: String {
-        SettingsCatalog.ai.addToClaudeDesktop.text
-    }
-
     private var addCaption: String {
         if addFailed { return addFailedCaption }
         guard claudeInstalled != false else {
@@ -109,8 +113,8 @@ struct AISetupRow: View {
             )
         }
         return L(
-            "ai.setup.claude_desktop.caption",
-            "Claude Desktop opens and asks you to install "
+            "ai.setup.desktop.caption",
+            "Opens Claude Desktop, which asks you to install "
                 + "KiwiDesk’s extension."
         )
     }
@@ -124,15 +128,16 @@ struct AISetupRow: View {
         )
     }
 
-    private var title: String {
-        SettingsCatalog.ai.copySetupPrompt.text
+    private var copyTitle: String {
+        L("ai.setup.copy", "Copy Setup Prompt")
     }
 
     private var caption: String {
         L(
-            "ai.setup.copy.caption",
-            "Paste it into Claude Code, Cursor or Codex. It holds "
-                + "everything the app needs to connect to KiwiDesk."
+            "ai.setup.coding_apps.caption",
+            "Claude Code, Cursor or Codex: paste the setup prompt "
+                + "into it. It holds everything the app needs to "
+                + "connect to KiwiDesk."
         )
     }
 
@@ -147,7 +152,7 @@ struct AISetupRow: View {
 
     private var help: String {
         L(
-            "ai.setup.copy.help",
+            "ai.setup.coding_apps.help",
             "MCP is the standard way an AI app uses tools on "
                 + "your Mac. KiwiDesk gives it the same commands "
                 + "you can type in Terminal."

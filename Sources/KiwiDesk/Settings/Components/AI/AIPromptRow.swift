@@ -8,14 +8,10 @@ struct AIPromptRow: View {
     let control: SettingsControl
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(control.text)
-                Text(AIReadyPrompt.caption(for: key) ?? "")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        AIActionRow(
+            title: control.text,
+            caption: AIReadyPrompt.caption(for: key) ?? ""
+        ) {
             AICopyButton(
                 title: copyTitle,
                 spokenName: L(

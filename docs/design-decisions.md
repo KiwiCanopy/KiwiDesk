@@ -8126,10 +8126,10 @@ user reads them, and each has the AI app interview the user one
 question at a time, so it works pasted unchanged. A ready-made
 prompt lands with the tools it needs and is never drawn before
 them — removed rather than dimmed, as with any entry whose channel
-does not exist yet. Copy Setup Prompt and Add to Claude Desktop…
+does not exist yet. Copy Setup Prompt and Claude Desktop's Add…
 grey on a translocated copy through the one `RunningCopy` verdict
 the login item reads too (▸ Open at login), because the path each
-one carries dies at the next launch. Add to Claude Desktop… shows
+one carries dies at the next launch. Claude Desktop's Add… shows
 nothing after the click: Claude Desktop's own install dialog is the
 feedback, and KiwiDesk cannot see whether the user accepted it. It
 reads only whether Claude Desktop is installed, which greys it with
