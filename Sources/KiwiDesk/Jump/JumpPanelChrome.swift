@@ -20,6 +20,9 @@ struct JumpFooter: View {
     /// Whether ↩ turns KiwiVision off, which the lit hint then
     /// says instead of Apply (#2103 ruling 56).
     var turnsOff = false
+    /// Whether the field names a profile: ↩ saves, Esc goes back,
+    /// and no digit picks (#2359).
+    var naming = false
 
     var body: some View {
         let hints = hints
@@ -92,7 +95,8 @@ extension JumpFooter {
         switch JumpKey.of(
             keyCode: JumpKey.returnKey,
             modifiers: held,
-            scope: scope
+            scope: scope,
+            naming: naming
         ) {
         // Windows: ↩ Jump, ⇧↩ Move here; View: ↩ Apply.
         case .pick(let moveHere):
@@ -102,7 +106,12 @@ extension JumpFooter {
             break
         }
         let one = UInt16(JumpKey.digitRows[0])
-        let digit = JumpKey.of(keyCode: one, modifiers: held, scope: scope)
+        let digit = JumpKey.of(
+            keyCode: one,
+            modifiers: held,
+            scope: scope,
+            naming: naming
+        )
         guard case .quick(_, let moveHere) = digit else { return nil }
         if scope == .windows { return 2 }
         return moveHere ? nil : 1
@@ -137,6 +146,12 @@ extension JumpFooter {
             // Edit in Settings… stands beside the hints with its
             // own chord.
             return [other]
+        case .view where naming:
+            return [
+                L("view_picker.footer.save", "%1$@ Save", "↩"),
+                L("view_picker.footer.back", "%1$@ Back", "Esc"),
+                other,
+            ]
         case .view:
             let digits = quickCount > 1 ? "⌘1–\(quickCount)" : "⌘1"
             let apply =

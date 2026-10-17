@@ -201,7 +201,8 @@ struct JumpPanelEventTests {
                     JumpKey.of(
                         keyCode: code,
                         modifiers: item.keyEquivalentModifierMask,
-                        scope: scope
+                        scope: scope,
+                        naming: false
                     ) == nil,
                     "the panel claims \(item.title)'s chord on \(scope)"
                 )

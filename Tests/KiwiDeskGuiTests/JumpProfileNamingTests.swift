@@ -182,7 +182,12 @@ struct JumpProfileNamingTests {
             #expect(key == nil)
         }
         #expect(
-            JumpKey.of(keyCode: left, modifiers: [], scope: .view)
+            JumpKey.of(
+                keyCode: left,
+                modifiers: [],
+                scope: .view,
+                naming: false
+            )
                 == .side(-1)
         )
         let save = JumpKey.of(

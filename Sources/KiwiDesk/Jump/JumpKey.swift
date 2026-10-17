@@ -53,7 +53,7 @@ enum JumpKey: Equatable {
         keyCode: UInt16,
         modifiers: NSEvent.ModifierFlags,
         scope: JumpScope = .windows,
-        naming: Bool = false
+        naming: Bool
     ) -> JumpKey? {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]

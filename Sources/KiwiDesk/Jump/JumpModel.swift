@@ -26,8 +26,7 @@ final class JumpModel: ObservableObject {
     func requestFieldFocus() { fieldFocusRequests += 1 }
     /// What the field holds while Save as New Profile… names a
     /// profile, until ↩ saves or Esc returns to picking (#2359
-    /// ruling 3); nil while picking. Changed only through
-    /// `beginNaming`, `typeName` and `endNaming`.
+    /// ruling 3); nil while picking, and cleared with the side.
     @Published var naming: ProfileNaming?
     /// Bumped as naming starts: the field selects its pre-fill.
     @Published private(set) var fieldSelectAllRequests = 0
