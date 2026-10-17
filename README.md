@@ -31,18 +31,30 @@ Powerful when you reach for it, never in your way.
 
 ## Why KiwiDesk?
 
-I love tiling window managers, but I could never recommend one to a
-friend who doesn't live in a terminal. On the Mac they all want a
-config file first; they feel like a nerd's toy. KiwiDesk is the one I
-can hand over: it tiles your windows the moment you say go, everything
-is a slider or a switch in a real Settings window, and going deeper
-feels like learning a feature rather than hacking a file. When you do
-want the file, it is there: Lua config, a CLI and a socket, the whole
-nerd's toy underneath.
+I love tiling window managers, but I could never seriously recommend
+one to a friend who doesn't live in a terminal. On macOS, most of them
+make you write a config file before you can even move a window — they
+feel more like a nerd's construction kit than actual software.
 
-It is also built to survive macOS updates. Every private Apple API
-has a public fallback, and the two things only Apple's own bridge can
-do switch themselves off after an update instead of breaking.
+I want KiwiDesk to be different. A few ideas drive how I build it:
+
+- **It just works out of the box.** Download it, grant one permission,
+  press Start — no dotfiles to get going, and in-app updates so you
+  never think about maintenance.
+- **Opinionated, but adaptable.** It ships with strong default
+  workflows that make sense right away, and you can still bend and
+  tweak it to your heart's content.
+- **Performance and UI/UX are equally non-negotiable.** I won't trade
+  one for the other. If the UI is clumsy, people lose interest or end
+  up scripting around it; if it lags, power users leave. It has to feel
+  both polished and light.
+- **Still very much a nerd's toy.** Approachable doesn't mean
+  neutered: there's a Lua config, a proper CLI and an event stream, so
+  you can script whatever setup you want.
+- **Built to survive macOS updates.** Every private Apple API has a
+  public fallback, and the few things only Apple's own bridge can do
+  switch themselves off after an update instead of breaking your
+  desktop.
 
 [How it compares with yabai, AeroSpace and the rest →](https://kiwidesk.kiwicanopy.com/compare/)
 
