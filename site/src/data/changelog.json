@@ -2,6 +2,103 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "3.0.0",
+      "tag": "v3.0.0",
+      "date": "2026-10-17",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v3.0.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v3.0.0/KiwiDesk-3.0.0.dmg",
+      "summary": "KiwiDesk 3.0.0 brings KiwiVision for focus, KiwiHub for windows and shortcuts, a layout cycle, and setup by asking your AI app.",
+      "heads": "Space switches no longer slide — they're instant, and a screen without a Space Bar names the Space for a moment. The menu bar's Layout, Switch Profile and View Shortcuts… rows are now one Open KiwiHub… row.",
+      "spotlight": [
+        {
+          "title": "Everything but your focus fades back",
+          "line": "⌃⌥V dims everything else; a lens keeps the apps you pick clear.",
+          "setting": "appWide.visionLenses",
+          "symbol": "binoculars"
+        },
+        {
+          "title": "One panel for windows, shortcuts and layouts",
+          "line": "⌃⌥J finds a window, ⌃⌥K your shortcuts, ⌃⌥L a layout, profile or lens.",
+          "setting": "keybinding.show_shortcuts",
+          "symbol": "macwindow"
+        },
+        {
+          "title": "Step through your layouts",
+          "line": "⌃⌥C moves the Space you're on to its next layout, ⌃⌥⇧C back.",
+          "setting": "config.modeCycle",
+          "symbol": "rectangle.3.group"
+        },
+        {
+          "title": "Set KiwiDesk up by asking your AI app",
+          "line": "Add it to Claude Desktop in a click; other AI apps get a setup prompt.",
+          "setting": "(action) ai.setup.desktop",
+          "symbol": "brain.head.profile"
+        },
+        {
+          "title": "Hold one key instead of several",
+          "line": "Make Caps Lock or another key Hyper; move ⌃⌥ letter shortcuts to it.",
+          "setting": "appWide.hyperKey",
+          "symbol": "capslock"
+        },
+        {
+          "title": "Focus follows the pointer",
+          "line": "Rest the pointer on a window to focus it; off until you turn it on.",
+          "setting": "settings.mouse.hoverFocus",
+          "symbol": "cursorarrow"
+        }
+      ],
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**New: KiwiVision (⌃⌥V) dims and blurs everything but the window you're in.** Settings ▸ KiwiVision sets how much, whether the wallpaper or the current app's other windows stay clear, which apps are never dimmed, and whether macOS switches to Dark while it's on.",
+            "**New: KiwiVision lenses keep the apps you pick clear**, each on its own shortcut and in the profiles you choose; while one is on, KiwiDesk's focus keys stay on those apps. Make one with New Lens… in Settings ▸ KiwiVision.",
+            "**New: KiwiHub, one panel on ⌃⌥J, ⌃⌥K and ⌃⌥L.** Jump to any window by typing its name (⇧↩ brings it to the Space you're on), see every shortcut, or pick a layout, profile or lens for the Space under the pointer; Tab steps between the three.",
+            "**New: ⌃⌥C switches the Space you're on to its next layout and ⌃⌥⇧C to the previous one**, with a moment's picture of the cycle. Choose the layouts it walks under Shortcuts & Gestures ▸ Layout ▸ Layouts to cycle; it starts with BSP, Scrolling and Floating.",
+            "**New: set KiwiDesk up by asking your AI app.** Settings ▸ AI adds KiwiDesk to Claude Desktop in one click or copies a setup prompt for Claude Code, Cursor or Codex, with ready-made prompts for your Spaces, a new look, app rules or a move from another window manager; setting changes stay temporary until you say keep.",
+            "**New: focus can follow the mouse** — rest the pointer on a window and it takes the focus. Off by default; turn it on under Shortcuts & Gestures ▸ Mouse & trackpad ▸ Focus and the pointer.",
+            "**New: a Hyper key.** Shortcuts & Gestures ▸ Hyper key turns Caps Lock, a modifier (left and right apart) or an F-key into an extra modifier no app uses, without Input Monitoring, and offers to move your ⌃⌥ letter shortcuts and Go to Desktop keys onto it. Quitting KiwiDesk gives the key back.",
+            "**New: a What's new link in Settings Home's footer** opens the notes of any release since 2.0.0."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**Space switches are now instant and no longer slide**; on a screen without a Space Bar a plate names the Space you arrived on for a moment. Turn it off under KiwiShelf ▸ Show ▸ Show the Space after a switch.",
+            "**A Monocle Space no longer flips a card when focus moves**: the next window comes straight to the front, and the two flip settings are gone.",
+            "**The menu-bar menu now has one Open KiwiHub… row** in place of Layout, Switch Profile and View Shortcuts…; it opens KiwiHub on its Layout, Profile and KiwiVision lines.",
+            "**Updating now adds ⌃⌥J, ⌃⌥L, ⌃⌥C, ⌃⌥⇧C and ⌃⌥V** wherever the key is free and the action has no shortcut yet; change or remove them in Shortcuts & Gestures. ⌃⌥K still opens your shortcuts, now as KiwiHub's middle side.",
+            "**Scrolling and Monocle have new symbols** in the Layout menu, the Space Bar and KiwiHub, so the two no longer look alike.",
+            "**A look now carries your animations too**, so changing them on the shared look reaches every profile that wears it.",
+            "**Settings looks and responds more consistently**: every button, palette, chip and menu lifts grey under the pointer, searchable lists move one kiwi highlight with both the pointer and the keys, and the font and app pickers match macOS's own pop-ups.",
+            "**Settings now lists changes made from outside it**, by a shortcut, the command line or an AI app, under Live, not saved in the save pill, and Save no longer puts back a change made while Settings was open; Keep saves them into your profile."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**An app that takes a few seconds to start, like Word, Xcode or VS Code, now takes you along to its App Rule's Space.**",
+            "**Floating windows now stay above the tiles after a Space Bar or App Bar click or a keyboard focus move**, and the focus border no longer slips under a floating window or goes missing on a floating sticky one.",
+            "**With the menu bar shown on hover, the window you were in no longer flickers while the pointer rests at the top of the screen** on macOS 27.0.1.",
+            "**A shortcut on ⌃1 to ⌃9 now warns that macOS's Switch to Desktop shortcut takes that key.**"
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**If you write your own Lua config:** `show_shortcuts` is now `kiwihub.show(\"shortcuts\")`, the slide's `animations.set_on_space_change`, `animations.set_space_change_duration` and `set_space_switch_liquid_glass` give way to `set_space_cue`, and `animations.set_on_monocle_focus` and `animations.set_monocle_flip_duration` are gone. Each old name is refused with its replacement, and shortcuts saved in Settings are renamed for you.",
+            "**New verbs:** `kiwivision.*`, `look.*`, `app_rule.*`, `shortcut.*`, `explain_window` and `explain_app`, `move_here`, `set_hyper_key`, `mouse.set_hover_focus` and `mouse.set_hover_focus_delay`; `kiwidesk mcp` serves them to AI apps.",
+            "**`kiwidesk completion zsh|bash|fish` and `kiwidesk watch` are new**, `subscribe --reconnect` survives a relaunch, and an app verb given an app's name now suggests its bundle id."
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "2.3.1",
       "tag": "v2.3.1",
       "date": "2026-10-13",

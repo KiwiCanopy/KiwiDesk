@@ -125,11 +125,9 @@ or cycle to it instead
 ([Accepted limitations](accepted-limitations.md)). `swap` is
 tiled-only.
 
-:::unreleased
 While a KiwiVision lens is on with
 [`keep_focus`](#kiwivisiondefine_lens), `focus` and `swap` skip
 the windows the lens leaves out.
-:::
 
 **Example:**
 
@@ -575,7 +573,6 @@ KiwiDesk.set_mode(1, "stack")
 KiwiDesk.set_mode("music", "floating")
 ```
 
-:::unreleased
 ### cycle_mode
 
 **Expects:** optionally a direction: `"prev"` or `"next"` (the
@@ -615,7 +612,6 @@ reaches a file; a profile's own list still wins.
 ```lua
 KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 ```
-:::
 
 ### set_gap_global
 
@@ -912,7 +908,6 @@ changes the running value only.
 KiwiDesk.set_desktop_cue(false)
 ```
 
-:::unreleased
 ### set_hyper_key
 
 **Expects:** a key name, or `off` (default `off`): `caps_lock`,
@@ -943,9 +938,7 @@ value only.
 KiwiDesk.set_hyper_key("caps_lock")
 KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
 ```
-:::
 
-:::unreleased
 ### set_space_cue
 
 **Expects:** `true` or `false` (default `true`).
@@ -977,9 +970,7 @@ switch no longer slides.
 ```lua
 KiwiDesk.set_space_cue(false)
 ```
-:::
 
-:::unreleased
 ### set_mode_cue
 
 **Expects:** `true` or `false` (default `true`).
@@ -1006,7 +997,6 @@ the running value only.
 ```lua
 KiwiDesk.set_mode_cue(false)
 ```
-:::
 
 ### set_shortcut_panel_liquid_glass
 
@@ -1018,11 +1008,9 @@ macOS&nbsp;26, the panel draws `.regularMaterial`. The panel's
 glass is untinted: it draws `.regular` where the bars draw
 `.clear`, and no Fill reaches it (#1295).
 
-:::unreleased
 The shortcuts panel is a side of [KiwiHub](#kiwihubshow), so this
 leaf sets the material of all of KiwiHub — the window switcher,
 the shortcuts panel and the view picker.
-:::
 
 Stored as `shortcut_panel.liquid_glass` in the profile, so a
 profile switch can change the panel's material.
@@ -1062,10 +1050,8 @@ corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
-:::unreleased
 The switch is instant; whether a plate names the Space it lands
 on is [`set_space_cue`](#set_space_cue).
-:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -3714,7 +3700,6 @@ border.fit_gaps(6)  -- leave 6 pt after the reach: outer 16,
                     -- inner 16 (26 if unfocused borders are on)
 ```
 
-:::unreleased
 ## KiwiVision
 
 KiwiVision keeps the focused window clear and dims every screen
@@ -3912,9 +3897,7 @@ kiwivision.set_clear_wallpaper(true)
 kiwivision.set_clear_app(true)
 kiwivision.set_never_dimmed({ "sketchybar", "com.apple.Music" })
 ```
-:::
 
-:::unreleased
 ## Looks
 
 A look is the bars' styling, Liquid Glass, the focus border's
@@ -3977,7 +3960,6 @@ look.apply("Glass")
 border.set_width(4)
 look.save("Glass, thin border")
 ```
-:::
 
 ## Mouse Resizing
 
@@ -4047,7 +4029,6 @@ Mouse & trackpad**.
 ```lua
 mouse.set_follows_focus(true)
 ```
-:::unreleased
 
 ### mouse.set_hover_focus
 
@@ -4077,8 +4058,6 @@ Mouse & trackpad**.
 mouse.set_hover_focus(true)
 ```
 
-:::
-:::unreleased
 
 ### mouse.set_hover_focus_delay
 
@@ -4097,7 +4076,6 @@ Mouse & trackpad, up to 2000 ms.
 mouse.set_hover_focus_delay(80)
 ```
 
-:::
 
 ## Scroll Gestures
 
@@ -4501,7 +4479,6 @@ pins, and unlisted apps inherit the base rule. Edit it from the
 Settings app's App Rules section while editing a stored profile.
 Profile overrides resolve the same way over a Lua-owned base.
 
-:::unreleased
 ### App rule verbs
 
 The `app_rule` table changes the live rules from Lua, the CLI and
@@ -4544,7 +4521,6 @@ refuses a rule that is not there.
 app_rule.set_space("com.spotify.client", "music")
 app_rule.set_float("com.apple.finder", "Get Info")
 ```
-:::
 
 ### Finding a bundle identifier
 
@@ -4561,11 +4537,9 @@ the identifier for you. To find one by hand:
   display `app` name.
 - Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
 
-:::unreleased
 An app verb passed a running app's name instead is still refused,
 and the refusal names that app's identifier:
 `app not found: safari — did you mean 'com.apple.Safari'?`.
-:::
 
 Identifiers are matched case-insensitively. An app with no bundle
 identifier (a rare unbundled helper process) cannot be targeted
@@ -5103,7 +5077,6 @@ end)
 It is the third choice, *Gather Windows*, in the **Action** menu
 of an Open applications shortcut in Settings.
 
-:::unreleased
 ### move_here
 
 **Expects:** an app bundle identifier (e.g. `com.apple.Notes`),
@@ -5143,11 +5116,9 @@ KiwiDesk.bind("ctrl+shift+i", function()
     KiwiDesk.move_here("com.apple.mail", "Inbox")
 end)
 ```
-:::
 
 ## User Interface
 
-:::unreleased
 ### kiwihub.show
 
 **Expects:** a side: `"windows"`, `"shortcuts"` or `"view"`.
@@ -5246,9 +5217,7 @@ KiwiDesk.bind("alt+space", function()
     kiwihub.show("windows")
 end)
 ```
-:::
 
-:::unreleased
 ### Retired panel verbs
 
 `show_shortcuts`, `show_jump_to_window` and `show_layout_picker`
@@ -5256,7 +5225,6 @@ are retired for [kiwihub.show](#kiwihubshow). A call in
 `init.lua` is reported in Config Issues, naming `kiwihub.show`;
 over the CLI it fails with `<verb> was retired — use
 kiwihub.show`. A shortcut made in Settings is updated for you.
-:::
 
 ### open_settings
 
@@ -5299,13 +5267,11 @@ end)
 **Modifiers:** `cmd`/`command`, `alt`/`opt`/`option`,
 `ctrl`/`control`, `shift`.
 
-:::unreleased
 `hyper` is KiwiDesk's own Hyper modifier, live once
 [`set_hyper_key`](#set_hyper_key) names a key; it combines with
 any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
 its chord without `hyper`, so an enabled macOS shortcut on that
 chord (`hyper+cmd+space` is Spotlight's) still wins.
-:::
 
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
@@ -5651,7 +5617,6 @@ Profiles re-resolve their bindings whenever they apply: on
 switch. Switching profiles also returns you to the default
 layer.
 
-:::unreleased
 ### Shortcut verbs
 
 The `shortcut` table writes the saved shortcuts of the live profile
@@ -5696,7 +5661,6 @@ shared shortcut. A chord with no shortcut is refused.
 shortcut.set("ctrl+alt+h", "focus", "left")
 shortcut.remove("ctrl+alt+h")
 ```
-:::
 
 ## Events
 
@@ -6360,12 +6324,10 @@ stripped, grouped by namespace — `set_gap_override` becomes
 }
 ```
 
-:::unreleased
 `lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
 the profile. It maps a lens name, in lower case, to `false`:
 `"lens_reach": { "writing": false }`. A lens the key does not name
 reaches the profile, and without the key every lens does.
-:::
 
 ### macOS Desktops (Mission Control)
 
@@ -6543,7 +6505,6 @@ changes.
 animations.set_on_relayout(true)
 ```
 
-:::unreleased
 ### Retired Monocle flip verbs
 
 `animations.set_on_monocle_focus` and
@@ -6553,7 +6514,6 @@ flip. A call in `init.lua` is reported in Config Issues; over the
 CLI each fails with `…: a Monocle focus change is a raise and
 plays no flip`. A saved profile's stored values are dropped on its
 next write.
-:::
 
 ### animations.set_on_shelf, animations.set_shelf_duration
 
@@ -6612,13 +6572,11 @@ calls in `init.lua` apply only until a bound profile activates.
 To make a value stick on a bound Desktop, set it and re-save
 that profile (or edit the profile JSON).
 
-:::unreleased
 With a GUI-managed configuration the animations are part of the
 look: a profile using the shared look runs the shared look's
 `animations.*`, and a profile with its own look keeps its own.
 A saved look carries them; a bundled look carries none, so
 applying one leaves the animations unchanged.
-:::
 
 ### Quit & Restart
 
@@ -6849,7 +6807,6 @@ for _, window in ipairs(state.windows) do
 end
 ```
 
-:::unreleased
 ### explain_window
 
 **Expects:** optionally a window id from `get_state`'s `windows`;
@@ -6886,7 +6843,6 @@ its `policy` and whether it is `hidden`), `windows` (tracked
 ids), `minimized` (ids), `away` (each `id` with its `space_id`)
 and `app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
-:::
 
 ### help
 

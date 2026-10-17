@@ -116,9 +116,7 @@ After a restart of the Mac, or a logout and login, KiwiDesk matches the windows 
 
 The focused-window shortcut row above has one exception: `focus` itself runs through the activation race when it is KiwiDesk's own raise toward the focused window — a raise pending a scrolling pan or issued a moment ago, while the managed app it left is still in front ([#1812](https://github.com/KiwiCanopy/KiwiDesk/issues/1812)). Every other focused verb still waits for the foreground.
 
-:::unreleased
 The Layout menu subtitle row above has a remedy on every macOS: KiwiHub's view picker (`⌃⌥L`) names the layout of the Space under the pointer and adds "not saved to profile" while it drifts.
-:::
 
 
 The sticky-window row above covers the *gesture* switch too: a
@@ -137,9 +135,7 @@ A click on another window during the switch keeps your choice.
 
 A window you closed and then reopened — an app whose close hides the window and whose reopen shows the same one again, Telegram's main window for one — comes back like a new window: to the Space its app rule names, else the Space you are on, taking the focus there in every layout, rather than to the Space you closed it in with the slot it had there ([#1414](https://github.com/KiwiCanopy/KiwiDesk/issues/1414), [#1561](https://github.com/KiwiCanopy/KiwiDesk/issues/1561); the ruling is in [design decisions](design-decisions.md)); the [#1161](https://github.com/KiwiCanopy/KiwiDesk/issues/1161) row's bounce no longer reaches it. What remains: an app that re-shows a closed window on its own, with nothing you did behind it, takes the focus once, where you are.
 
-:::unreleased
 On macOS 27 the focus that a menu-bar reveal moves to the previous app comes back: while the previous app's bar is revealed the Settings window looks inactive, and once the pointer leaves the edge — or KiwiDesk's menu-bar menu closes — KiwiDesk returns the focus to it once ([#1532](https://github.com/KiwiCanopy/KiwiDesk/issues/1532), [#2224](https://github.com/KiwiCanopy/KiwiDesk/issues/2224); the ruling is in [design decisions](design-decisions.md)). A click in the menu bar keeps the return; another window taking the focus meanwhile, or a shortcut that moves the focus, is honored instead.
-:::
 
 The rejection in the row above has a second form. Issued while the Space KiwiDesk shows is **empty** — after `move_to_desktop` and a `focus_desktop` to that Desktop ([Lua reference ▸ move_to_desktop](lua-reference.md#move_to_desktop)) — a focused-window shortcut is rejected, and the refusal names it: `the active Space 2 is empty; the focused window (Finder) is in Space 1 — focus_space 1 first`, which the log carries too ([#1336](https://github.com/KiwiCanopy/KiwiDesk/issues/1336); the ruling is in [design decisions](design-decisions.md#an-empty-active-space-refuses-by-name-1336)). What remains: the verb acts only on the Space you are on, so the window that `get_state` marks focused in another Space is parked, not focused, until `focus_space` brings its Space back.
 
@@ -147,9 +143,7 @@ Dragging a **stack** window's edge along its zone's own axis — a height drag b
 
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `focus_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `focus_or_spawn` (`open -a`, say) leaves you where you are, and so does a first window that appears more than about ten seconds after the app comes forward. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
 
-:::unreleased
 A slow cold start takes you there too: the press counts when the app's process started within about a second of it, even when the app then takes up to about fifteen seconds to come forward ([#2201](https://github.com/KiwiCanopy/KiwiDesk/issues/2201)). What remains: a click or key press you make between the launch and the app coming forward takes that place, so the app leaves you where you are unless it comes forward within a second of that later press.
-:::
 
 Reopening an app whose last window you closed while the app kept running can take you to **another macOS Desktop**. Some apps — Microsoft Word for one — hide a closed window and show that same window again when you click the app in the Dock, and macOS switches to the Desktop that window was on before KiwiDesk hears of it (measured 2026-10-13). KiwiDesk does not switch you back: undoing a switch macOS has already made would move you between two Desktops on every reopen ([#1515](https://github.com/KiwiCanopy/KiwiDesk/issues/1515)). An app you quit opens its next window on the Desktop you are on. macOS's own *When switching to an application, switch to a Space with open windows for the application* (System Settings ▸ Desktop & Dock ▸ Mission Control) governs that switch; whether turning it off keeps you on your Desktop for a re-shown window is not measured.
 
@@ -199,6 +193,4 @@ swipe let go before Mission Control opens leaves the ring drawn
 until the swipe ends
 ([#1921](https://github.com/KiwiCanopy/KiwiDesk/issues/1921)).
 
-:::unreleased
 With KiwiVision on, the window you move the focus away from stays clear for a split second — about 40–60 ms — after you click or switch, until KiwiDesk hears that the focus moved ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)). A floating window shows it most, since it sits on top. macOS reports a focus change through Accessibility only after the window has come forward.
-:::

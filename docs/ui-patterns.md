@@ -180,10 +180,8 @@ segmented by width headroom and is re-checked for truncation
 when each new locale ships (#95), as the help-glyph labels
 are.
 
-:::unreleased
 A KiwiVision lens's rows (#2103) are such a surface too: an
 unchecked row reads "follows Default · `<value>`".
-:::
 
 **Numeric controls pick one of three idioms by a single
 test:** *would a user say a specific number out loud?* — never
@@ -200,12 +198,10 @@ by which pane the setting lives in:
 Minimum window size is a `StepperRow` on this rule (#204): a
 precise pt threshold, not a feel knob.
 
-:::unreleased
 KiwiVision's **Dim** is a ruled exception: a proportion,
 yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on
 the desk behind Settings shows the effect as it steps (#2103,
 [design decisions](design-decisions.md#kiwivision-has-its-own-page-and-its-rows-apply-at-once-2103)).
-:::
 
 A stored SHARE keeps its slider and gains an exact chooser
 beneath it where the share has a second reading a user names
@@ -346,12 +342,10 @@ rather than under it because it states a VALUE and disappears
 on expand, where a caption explains what a thing IS and stays.
 The ruling is in `docs/design-decisions.md`.
 
-:::unreleased
 
 A collapsible section may also take a `preview:` drawn under its
 row while shut — the Mouse & trackpad card's picture strip is the
 one instance, ruled in `docs/design-decisions.md` ▸ Shortcuts.
-:::
 
 **A section header's trailing readout is words only.** A
 `SettingsSection` takes `trailing:` — a short value at the
@@ -738,14 +732,12 @@ carry no duplicate preview (`DetailPanelTests` holds the offer
 set and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).
 
-:::unreleased
 KiwiVision is in that set too (#2103). Its Default rows
 write at once, so on that chip the panel draws the live values
 they wrote; a lens's page is a draft saved with Save, so on a
 lens's chip the panel draws the draft's lens. *Why* is
 [Design decisions](design-decisions.md) ▸ the panel's object is
 the DRAFT.
-:::
 
 **The panel keeps its column only above 1200 pt.** Below that
 it waits behind a "Show preview" button, which opens it as a
@@ -1057,13 +1049,11 @@ The shelf's own glide is the one chrome motion with rows on that
 card — **Animate KiwiShelf** and its duration — and Reduce Motion
 still wins over them (#1838).
 
-:::unreleased
 The plate naming the Space after a switch is not on that card:
 it is a cue rather than motion, so its row, **Show the Space after
 a switch**, sits on KiwiShelf under the Space Bar switch, and
 neither Reduce Motion nor the animations master greys it. Reduce
 Motion drops only its fade (#2228).
-:::
 
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
@@ -1175,7 +1165,6 @@ keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
 
-:::unreleased
 A Layouts strip tile lifts like a palette tile, with the
 selection drawn as its stroke alone. A borderless value-menu or
 popover trigger whose label is text takes the glyph chip's lift
@@ -1192,7 +1181,6 @@ cursor, moved by real pointer motion only, and the font family
 picker, the app picker and the header search draw it as a solid
 `accent` fill with `accentInk` text, their rows taking no hover
 lift beside it (`DropdownCursor`).
-:::
 
 Every chip fill in that ladder is a theme token, never a bare
 opacity. A chip rests at `chipRest`, lifts to `chipHover` and,
@@ -1243,14 +1231,12 @@ count dock into a full-width bar at the foot of the window —
 one view, two containers, because at that width the floating
 form covers the rows it is about. No draft, no bar.
 
-:::unreleased
 The pill's list also carries a **Live, not saved** section: each
 stored setting changed live outside Settings, narrated saved →
 live and counted with the rest. While one stands the pill and its
 bar stay, a clean draft included, and Save keeps it; the detail
 panel's "Changed in this draft" list leaves these rows to the
 pill.
-:::
 
 **Rows go two-line below 900 pt.** A labelled row's control
 normally hangs off the shared 210 pt label axis; below the row
