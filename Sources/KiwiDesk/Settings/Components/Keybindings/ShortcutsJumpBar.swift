@@ -172,8 +172,7 @@ struct ShortcutsJumpChip: View {
     /// The chip's own shape, answering the pointer alone; beneath
     /// the marking (#1520 amendments 4 and 5).
     static func restFill(pressed: Bool, hovered: Bool) -> Color {
-        if pressed { return SettingsTheme.chipPressed }
-        return hovered ? SettingsTheme.chipHover : SettingsTheme.chipRest
+        ButtonChipStyle.fill(pressed: pressed, hovered: hovered)
     }
 
     /// The marking's layer, over the pointer's.

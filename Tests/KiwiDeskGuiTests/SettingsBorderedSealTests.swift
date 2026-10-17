@@ -224,23 +224,24 @@ struct SettingsBorderedSealTests {
         let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
+        // Since #2377 the seal's style is the button-chip face.
         #expect(
-            source.occurrences(of: "buttonStyle(.bordered)") == 1,
-            "the seal applies the bordered style exactly once"
+            source.occurrences(of: "buttonStyle(ButtonChipStyle())") == 1,
+            "the seal applies the button-chip style exactly once"
         )
         #expect(
             SourceScan.adjacentPairs(
                 in: source,
-                line: "buttonStyle(.bordered)",
+                line: "buttonStyle(ButtonChipStyle())",
                 followedBy: ".neutralButtonLabel()"
             ) == 1,
             Comment(
                 rawValue:
                     "the seal's `.neutralButtonLabel()` must sit "
                     + "directly beneath its `buttonStyle"
-                    + "(.bordered)` — a seal that styles without "
-                    + "neutralising re-opens #759 at every call "
-                    + "site at once."
+                    + "(ButtonChipStyle())` — a seal that styles "
+                    + "without neutralising re-opens #759 at every "
+                    + "call site at once."
             )
         )
     }
