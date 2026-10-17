@@ -26,6 +26,7 @@ extension SettingsDiffRowSource {
             cleanConfig: saved
         )
         let skip = Set(edited)
+        let owners = leafOwners(unsaved, saved: saved)
         return diff.changedSettings.filter { !skip.contains($0) }
             .flatMap { key in
                 SettingsValueReadout.rows(
@@ -34,21 +35,65 @@ extension SettingsDiffRowSource {
                     new: live
                 ).map { row in
                     var row = row
+                    row.keepIDs = owners[row.id, default: []].sorted()
                     row.id += "#" + liveInstance
                     row.section = .live
                     return row
                 }
             }
     }
+
+    /// Which unsaved leaves each row carries, by row id: a leaf
+    /// belongs to every row its own change narrates, so one key's
+    /// rows (a setting per layout) keep apart.
+    private static func leafOwners(
+        _ unsaved: UnsavedLiveSettings,
+        saved: GuiConfig
+    ) -> [String: [String]] {
+        var owners: [String: [String]] = [:]
+        for (id, settings) in unsaved.leaves {
+            var one = saved
+            one.settings = settings
+            let keys = SettingsDraftDiff.between(
+                config: one,
+                cleanConfig: saved
+            ).changedSettings
+            for key in keys {
+                for row in SettingsValueReadout.rows(
+                    for: key,
+                    old: saved,
+                    new: one
+                ) {
+                    owners[row.id, default: []].append(id)
+                }
+            }
+        }
+        return owners
+    }
 }
 
 extension SettingsModel {
+    /// Keeps a live row's leaves into the live profile through
+    /// Core's keep (#2368), then asks Core again; the write moves
+    /// an open draft's baseline through `adoptLiveWrite`.
+    /// Leaves it could not write stay listed with their reason in
+    /// `liveKeepRefusals`.
+    @discardableResult
+    func keepLive(_ ids: [String]) -> LiveKeepOutcome? {
+        guard target == .live, !ids.isEmpty else { return nil }
+        let outcome = core.keepUnsavedLive(ids)
+        refreshUnsavedLive()
+        liveKeepRefusals = outcome.refused
+        return outcome
+    }
+
     /// Asks Core again — the one writer of `unsavedLive` and
     /// `liveUnsaved`. Owed wherever the live settings or the
     /// draft's baseline can have moved: the seed, a window-key
     /// return, an outside write the draft adopts. Only the live
     /// target lists live rows: a stored profile is another file.
     func refreshUnsavedLive() {
+        liveKeepRefusals = [:]
         unsavedLive =
             target == .live && !editingLua
             ? core.unsavedLiveSettings() : nil

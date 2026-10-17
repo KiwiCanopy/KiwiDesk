@@ -87,7 +87,10 @@ twice, was a question the user answered twice. The argument is
   tour's Revert leaves it behind: `ShelfPaintRoundTripTests` ▸
   `revertRoundTripsEveryLook` reds one that reaches a glass leaf
   or a per-layout App Bar override; a write elsewhere owes that
-  fixture the field.
+  fixture the field. The per-layout indicators it clears are the
+  one `TilingSettings.layoutIndicatorLeaves`, which wearing the
+  shared look keeps (`LookBody.worn`, `isWorn`) and the undo
+  restores (#2368, `SettingsLiveFollowerTests`).
 - **Retire a bar verb by adding it to `APIReference.retired`**,
   naming its replacement or nil, and never by an alias (AGENTS.md
   §5). A field the shelf migration moves joins

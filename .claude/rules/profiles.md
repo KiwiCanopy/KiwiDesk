@@ -1399,14 +1399,17 @@ fact about its command*. The obligations:
   MCP-time reader, through `liveWearsSharedLook`; a new reader on
   the switch path answers from adoption state instead.
   Settings' **Live, not saved** rows are the one ruled reader that
-  holds no leaves (#2262): `unsavedLiveSettings` diffs the
-  settings root itself and judges each leaf through the same
-  `KeepJudge`, and Settings asks it again wherever the live
-  settings or the draft's baseline can have moved — which is
-  review's, the rows' freshness alone riding on it — never per render
-  (`UnsavedLiveSettingsTests`, `SettingsLiveRowsTests` ▸
-  `wiringReadsTheVerdict`). A further reader of that shape is a
-  ruling here.
+  diffs the settings root itself (#2262): `unsavedLiveSettings`
+  judges each leaf through the same `KeepJudge` and hands Settings
+  its leaves by keep id (`UnsavedLiveSettings.leaves`); a row's
+  Keep takes its ids from there alone, never derived in the GUI,
+  and writes through `keepUnsavedLive`, the verb's own typed
+  `keep(paths:)` (#2368, `SettingsLiveKeepTests`). Settings asks it
+  again wherever the live settings or the draft's baseline can have
+  moved — which is review's, the rows' freshness alone riding on it
+  — never per render (`UnsavedLiveSettingsTests`,
+  `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`). A further
+  reader of that shape is a ruling here.
 - **A look verb paints live only (#1685).** `look.apply` writes no
   file; a wear that must also WRITE takes `writeThroughLiveProfile`
   as the tour's paint does, never a grown `wearLook`, and a verb

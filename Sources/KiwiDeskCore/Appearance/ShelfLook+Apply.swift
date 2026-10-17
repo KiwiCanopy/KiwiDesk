@@ -105,8 +105,9 @@ extension ShelfLook {
                 }
                 // A per-layout indicator would hide the look's.
                 if case .activeIndicator = setting {
-                    settings.monocle.appBar.activeIndicator = nil
-                    settings.scrolling.appBar.activeIndicator = nil
+                    for leaf in TilingSettings.layoutIndicatorLeaves {
+                        settings[keyPath: leaf] = nil
+                    }
                 }
             }
         case "border":
