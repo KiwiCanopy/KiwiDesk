@@ -37,6 +37,9 @@ struct ChoiceChipTests {
             "Settings/Components/Common/FractionChips.swift": true,
             "Settings/Sections/ShortcutLayerChip.swift": true,
             "Settings/Sections/LayerStripEditor.swift": false,
+            "Settings/Components/Keybindings/KeyboardChrome.swift": true,
+            "Settings/Components/SpaceOverrides/SpacesPanelPreview.swift":
+                true,
         ]
         for (path, edged) in sites {
             let url = SourceScan.repoRoot(from: #filePath)

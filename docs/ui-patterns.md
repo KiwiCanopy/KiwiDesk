@@ -1175,6 +1175,17 @@ keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
 
+:::unreleased
+A Layouts strip tile lifts like a palette tile, a `chipRest`
+fill apart from its selection stroke, and the selected tile
+stays flat. A borderless value-menu or popover trigger — App
+Rules' value menus, the "Applies to" controls, an app
+shortcut's action, Add Window — rests as its label and lifts
+to the chip's hover fill (`menuTriggerHover`), drawn on the
+control and not inside the `Menu`, whose borderless label
+AppKit flattens; the menu itself stays native.
+:::
+
 Every chip fill in that ladder is a theme token, never a bare
 opacity. A chip rests at `chipRest`, lifts to `chipHover` and,
 where its style can see the press, deepens to `chipPressed`; a

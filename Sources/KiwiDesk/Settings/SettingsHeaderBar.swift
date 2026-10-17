@@ -114,7 +114,13 @@ struct SettingsHeaderBar: View {
                     .font(.callout)
             }
             .foregroundStyle(SettingsTheme.ink)
-            .chipSurface()
+            .padding(.horizontal, ChipMetrics.padH)
+            .padding(.vertical, ChipMetrics.padV)
+            // A button chip: it lifts under the pointer (#2377).
+            .hoverHighlight(
+                cornerRadius: SettingsTheme.chipRadius,
+                padding: 0
+            )
             .contentShape(ChipMetrics.shape)
         }
         .buttonStyle(.plain)
@@ -122,31 +128,10 @@ struct SettingsHeaderBar: View {
         .accessibilityLabel(L("home.back", "Home"))
     }
 
-    /// Profile edit target dropdown chip (#18, #1393). The dot is
-    /// green while the target is what is on screen and a hollow
-    /// ring on a stored profile — a shape as well as a hue; the
-    /// menu's value speaks it.
+    /// Profile edit target dropdown chip (#18, #1393), the whole
+    /// chip its menu's hit area.
     private var profileChip: some View {
-        HStack(spacing: 6) {
-            targetDot(stored: model.editingStoredProfile)
-                .frame(width: 8, height: 8)
-                .accessibilityHidden(true)
-            ProfileEditTargetMenu(model: model)
-        }
-        .chipSurface()
-    }
-
-    /// One circle either way — filled, or a ring — so the dot
-    /// changes shape rather than appearing and leaving.
-    private func targetDot(stored: Bool) -> some View {
-        Circle()
-            .fill(stored ? Color.clear : SettingsTheme.accent)
-            .overlay(
-                Circle().strokeBorder(
-                    stored ? SettingsTheme.ink3 : Color.clear,
-                    lineWidth: 1.5
-                )
-            )
+        ProfileEditTargetMenu(model: model)
     }
 
     /// Mode segment picker triggering mode reveal wash (#760, #823).

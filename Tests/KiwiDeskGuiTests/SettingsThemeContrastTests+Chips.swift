@@ -150,12 +150,14 @@ extension SettingsThemeContrastTests {
     /// A choice chip's label — a layer, a preset share or weight
     /// — when chosen, on the accent wash in place of the rest
     /// fill; unchosen it is a button chip's (`buttonChips`, and
-    /// the jump chips' rows for the page).
+    /// the jump chips' rows for the page). The panel carries the
+    /// keyboard's scope chips and the Spaces preview's chips.
     private static let choiceChips: [Pairing] =
         [
             ("card", SettingsTheme.card),
             ("sunken", SettingsTheme.sunken),
             ("page", SettingsTheme.page),
+            ("panel", SettingsTheme.panel),
         ].map { name, ground in
             Pairing(
                 "ink on a chosen choice chip on \(name)",

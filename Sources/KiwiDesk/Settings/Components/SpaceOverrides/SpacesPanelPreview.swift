@@ -72,35 +72,12 @@ struct SpacesPanelPreview: View {
     }
 
     private func chip(_ candidate: SpaceID) -> some View {
-        let isOn = candidate == space
-        return Button {
+        SpacePreviewChip(
+            title: candidate.raw,
+            isOn: candidate == space
+        ) {
             pick(candidate)
-        } label: {
-            Text(candidate.raw)
-                .font(.caption)
-                .fontWeight(.medium)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(
-                    Capsule()
-                        .fill(
-                            SettingsTheme.accent
-                                .opacity(isOn ? 0.22 : 0.08)
-                        )
-                )
-                .overlay(
-                    Capsule().strokeBorder(
-                        SettingsTheme.accent
-                            .opacity(isOn ? 0.7 : 0.25),
-                        lineWidth: isOn ? 1.5 : 1
-                    )
-                )
-                .foregroundStyle(SettingsTheme.ink)
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(
-            isOn ? [.isButton, .isSelected] : .isButton
-        )
     }
 
     // MARK: - The scene
@@ -227,5 +204,43 @@ struct SpacesPanelPreview: View {
                 .font(.caption.monospacedDigit())
                 .settingsReadout()
         }
+    }
+}
+
+/// One Space's chip in the preview's row: a choice chip, lifting
+/// under the pointer and washed with the accent while shown.
+private struct SpacePreviewChip: View {
+    let title: String
+    let isOn: Bool
+    let action: () -> Void
+    @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .choiceChip(
+                    selected: isOn,
+                    hovering: hovering && isEnabled
+                )
+                .animation(
+                    reduceMotion ? nil : .easeOut(duration: 0.12),
+                    value: hovering
+                )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = isEnabled && $0 }
+        .onChange(of: isEnabled) { _, now in
+            if !now { hovering = false }
+        }
+        .accessibilityAddTraits(
+            isOn ? [.isButton, .isSelected] : .isButton
+        )
     }
 }

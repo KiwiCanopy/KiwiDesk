@@ -156,9 +156,12 @@ extension SettingsFooter {
     }
 }
 
-/// Hover highlight on pill dark chrome (#1069).
+/// Hover highlight on pill dark chrome (#1069): every text action
+/// in the pill but the accent Save; a disabled one does not react,
+/// and the pointing hand stays a link's.
 private struct PillHoverWash: ViewModifier {
     @State private var hovering = false
+    @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
@@ -170,7 +173,7 @@ private struct PillHoverWash: ViewModifier {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(
                         SettingsTheme.savePillInk.opacity(
-                            hovering ? 0.14 : 0
+                            hovering && isEnabled ? 0.14 : 0
                         )
                     )
             )
@@ -181,12 +184,12 @@ private struct PillHoverWash: ViewModifier {
                 value: hovering
             )
             .onHover { hovering = $0 }
-            .pointingHandCursor()
     }
 }
 
 extension View {
-    fileprivate func pillHoverWash() -> some View {
+    /// The save pill's hover wash (`PillHoverWash`).
+    func pillHoverWash() -> some View {
         modifier(PillHoverWash())
     }
 }

@@ -201,11 +201,10 @@ struct UpdateNotesLink: View {
                 Text(title)
                     .underline()
                     .font(.system(size: 12.5))
-                    .foregroundStyle(SettingsTheme.ink2)
             }
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(.isLink)
-        .pointingHandCursor()
+        .linkHover()
     }
 }

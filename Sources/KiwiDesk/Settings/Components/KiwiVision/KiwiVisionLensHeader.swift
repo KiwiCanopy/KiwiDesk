@@ -138,6 +138,7 @@ struct KiwiVisionLensReachControl: View {
             AppRuleMenuLabel(text: label)
         }
         .buttonStyle(.borderless)
+        .menuTriggerHover()
         .accessibilityLabel(KiwiVisionLensWords.appliesTo)
         .accessibilityValue(label)
         .popover(item: $request, arrowEdge: .bottom) { _ in

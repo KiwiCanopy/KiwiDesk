@@ -101,6 +101,7 @@ struct AppRuleFloatRow: View {
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
+        .menuTriggerHover()
         .accessibilityLabel(L("app_rules.float", "Float"))
         .accessibilityValue(floatFacetLabel)
     }

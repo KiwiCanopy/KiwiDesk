@@ -140,6 +140,7 @@ struct SettingsFooter: View {
             .foregroundStyle(
                 SettingsTheme.savePillInk.opacity(0.8)
             )
+            .pillHoverWash()
             .disabled(!model.isDirty)
             copySlot
             primarySlot

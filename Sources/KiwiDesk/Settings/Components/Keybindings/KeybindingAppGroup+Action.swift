@@ -37,6 +37,7 @@ extension ApplicationsGroup {
             .menuStyle(.borderlessButton)
             .neutralMenuLabel()
             .fixedSize()
+            .menuTriggerHover()
             .accessibilityLabel(
                 L("shortcuts.app_behavior", "Action")
             )
