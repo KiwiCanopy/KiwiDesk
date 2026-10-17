@@ -882,7 +882,9 @@ Touching `Config`, `Profiles`, `Commands`.
   reaches an existing install once through `topUpGenerationShortcuts`, only
   where its action is unbound and its chord free, its mark cleared with a
   discarded `gui.json` (#2211, `DefaultShortcutGenerationTests` ▸
-  `everySeedRowHasAGeneration`)
+  `everySeedRowHasAGeneration`), a `⌃⌥` letter landing on the base the
+  layer's letters took through the one `HyperShortcutMove.onLettersBase`
+  (#2303, `ResetSizesSeedTests`)
 - a temporary Space's shortcuts go when it drops and a held Space's when its
   hold ends, through the one `retireLiveOnlyShortcuts`, a binding another
   arrangement declares staying #92's (#1827, `SpaceShortcutDropTests`)

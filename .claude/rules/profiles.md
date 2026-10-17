@@ -115,7 +115,12 @@ because two real clients now remove drift — see
   ▸ `seedCarriesEveryGeneration`). A seed action outside the
   frozen 2.2.0 baseline and every generation reds
   `DefaultShortcutGenerationTests` ▸ `everySeedRowHasAGeneration`;
-  move a row into that baseline only by ruling.
+  move a row into that baseline only by ruling. A `⌃⌥` letter row
+  the top-up adds lands on the base the layer's seeded letters
+  took, through the one `HyperShortcutMove.onLettersBase`, its
+  chord judged free as registered, or the Hyper move reappears for
+  one row (#2303, `ResetSizesSeedTests` ▸ `movedLayerGetsHyper`,
+  `bareRHoldsHyperR`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took
