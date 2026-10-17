@@ -40,7 +40,10 @@ extension DefaultKeybindings {
         above mark: Int
     ) -> [KeyBinding] {
         guard mark < newestGeneration else { return [] }
-        var taken = Set(existing.compactMap { KeyCombo.parse($0.combo) })
+        // As registered: a Hyper row holds its bare chord (#1870).
+        var taken = Set(
+            existing.compactMap { KeyCombo.parse($0.combo)?.registered }
+        )
         var bound = Set(existing.map(\.lua))
         var added: [KeyBinding] = []
         for number in (max(mark, 0) + 1)...newestGeneration {
@@ -51,7 +54,7 @@ extension DefaultKeybindings {
                 )
                 guard !bound.contains(row.lua),
                     let combo = KeyCombo.parse(row.combo),
-                    taken.insert(combo).inserted
+                    taken.insert(combo.registered).inserted
                 else { continue }
                 bound.insert(row.lua)
                 added.append(row)

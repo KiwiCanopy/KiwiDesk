@@ -118,6 +118,23 @@ struct ResetSizesSeedTests {
         #expect(offer.items.isEmpty)
     }
 
+    /// ✦R registers as a bare R while Hyper is held, so a row
+    /// already on bare R holds it, as it does in the move.
+    @Test("a bare R holds ✦R")
+    func bareRHoldsHyperR() {
+        let mine = KeyBinding(
+            combo: "r",
+            lua: "KiwiDesk.open_settings()",
+            kind: .navigation
+        )
+        #expect(
+            DefaultKeybindings.generationTopUp(
+                existing: movedLayer + [mine],
+                above: 4
+            ).isEmpty
+        )
+    }
+
     /// A layer that kept its letters on ⌃⌥ gets ⌃⌥R.
     @Test("a layer on ⌃⌥ gets ⌃⌥R")
     func unmovedLayerGetsTheSeed() {
