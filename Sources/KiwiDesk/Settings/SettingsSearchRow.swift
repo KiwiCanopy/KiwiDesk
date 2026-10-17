@@ -4,6 +4,9 @@ import SwiftUI
 /// One row in search result list (#678 turn 11, 4c, `SettingsValueReadout`).
 struct SettingsSearchRow: View {
     let result: SettingsSearchResult
+    /// The dropdown's cursor sits here (`DropdownCursor`): the
+    /// row's text takes the on-accent inks.
+    var onCursor = false
     /// Enrichment: current setting value evaluated from in-memory draft.
     let value: (SettingKey) -> String?
     /// Whether committing flips active settings mode.
@@ -22,15 +25,17 @@ struct SettingsSearchRow: View {
         HStack(spacing: 8) {
             SidebarTile(
                 destination: result.destination,
-                badged: badged
+                badged: badged,
+                edged: onCursor
             )
             VStack(alignment: .leading, spacing: 1) {
                 Text(primary)
+                    .foregroundStyle(DropdownRowStyle.ink(onCursor))
                     .lineLimit(1)
                 if let breadcrumb {
                     Text(breadcrumb)
                         .font(.caption2)
-                        .foregroundStyle(SettingsTheme.ink3)
+                        .foregroundStyle(secondaryInk)
                         .lineLimit(1)
                 }
             }
@@ -38,7 +43,7 @@ struct SettingsSearchRow: View {
             if let shownValue {
                 Text(shownValue)
                     .font(.callout)
-                    .foregroundStyle(SettingsTheme.ink3)
+                    .foregroundStyle(secondaryInk)
                     .lineLimit(1)
             }
             if switchesMode { modeTag }
@@ -60,19 +65,30 @@ struct SettingsSearchRow: View {
     private var modeTag: some View {
         Text(L("mode.power_user", "Power User"))
             .font(.caption2)
-            .foregroundStyle(SettingsTheme.ink3)
+            .foregroundStyle(secondaryInk)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(
-                Capsule().strokeBorder(
-                    SettingsTheme.accent.opacity(
-                        SettingsTheme.modeGatedStrokeOpacity
-                    )
-                )
+            .background(Capsule().strokeBorder(modeTagEdge))
+    }
+
+    /// The tag's accent edge would vanish on the cursor's accent,
+    /// so there it takes the row's secondary ink.
+    private var modeTagEdge: Color {
+        onCursor
+            ? DropdownRowStyle.secondaryInk(onCursor)
+            : SettingsTheme.accent.opacity(
+                SettingsTheme.modeGatedStrokeOpacity
             )
     }
 
-    private var primary: String {
+    private var secondaryInk: Color {
+        DropdownRowStyle.secondaryInk(onCursor)
+    }
+
+    private var primary: String { Self.title(of: result) }
+
+    /// The name a result row leads with.
+    static func title(of result: SettingsSearchResult) -> String {
         switch result {
         case .destination(let d): return d.title
         case .setting(let row): return row.label

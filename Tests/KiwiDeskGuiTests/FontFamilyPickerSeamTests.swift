@@ -2,9 +2,10 @@ import Foundation
 import Testing
 
 /// The font family picker's two event paths (#1681): a pointer
-/// moves the highlight and never scrolls — a hover that scrolled
-/// the list moved the next row under a still pointer, over and
-/// over — and the search takes its highlight from the one static
+/// moves the cursor (`DropdownCursor`) and never scrolls — a
+/// hover that scrolled the list moved the next row under a still
+/// pointer, over and over — and the search takes its highlight
+/// from the one static
 /// rule `BarFontSettingsTests` ▸ `highlightRule` holds. Both are
 /// wiring no runtime clause can see, so they are pinned in the
 /// picker's source.
@@ -20,13 +21,16 @@ struct FontFamilyPickerSeamTests {
         )
     }
 
-    @Test("a hover sets the highlight and never the scroll target")
+    @Test("a hover moves the cursor and never the scroll target")
     func hoverNeverScrolls() throws {
         let text = try Self.source()
         let hover = try #require(
-            SourceScan.declarationBody(after: ".onHover", in: text)
+            SourceScan.declarationBody(
+                after: ".dropdownCursorRow(",
+                in: text
+            )
         )
-        #expect(hover.contains("highlighted ="))
+        #expect(hover.contains("cursor.hover(family"))
         #expect(
             !hover.contains("scrollTarget"),
             "the hover handler scrolls the list again"
@@ -43,6 +47,7 @@ struct FontFamilyPickerSeamTests {
             )
         )
         #expect(move.occurrences(of: "scrollTarget =") == 1)
+        #expect(move.contains("cursor.keyMove("))
         #expect(search.occurrences(of: "scrollTarget =") == 1)
         #expect(
             text.occurrences(of: "scrollTarget =") == 2,
@@ -63,5 +68,19 @@ struct FontFamilyPickerSeamTests {
             "the search handler no longer asks the highlight rule"
         )
         #expect(call.contains("query:"))
+        #expect(search.contains("cursor.reset(to: next"))
+    }
+
+    @Test("the open seeds the stored family and Return asks the model")
+    func openAndCommit() throws {
+        let text = try Self.source()
+        let appear = try #require(
+            SourceScan.declarationBody(after: ".onAppear {", in: text)
+        )
+        #expect(appear.contains("cursor.opened(at: selection"))
+        let commit = try #require(
+            SourceScan.declarationBody(after: "func commit(", in: text)
+        )
+        #expect(commit.contains("cursor.commit("))
     }
 }

@@ -7,6 +7,10 @@ import SwiftUI
 struct GuessedAppRows: View {
     let apps: [GuessedFloatApp]
     let onPick: (KeybindingCatalog.InstalledApp) -> Void
+    /// The bundle id the picker's cursor sits on (`DropdownCursor`).
+    var cursor: String?
+    /// Every pointer event over a row, for `DropdownCursor.hover`.
+    var onPoint: (String) -> Void = { _ in }
 
     var body: some View {
         if apps.isEmpty {
@@ -32,7 +36,8 @@ struct GuessedAppRows: View {
     }
 
     private func row(_ app: GuessedFloatApp) -> some View {
-        Button {
+        let onCursor = app.bundleID == cursor
+        return Button {
             onPick(.init(bundleID: app.bundleID, name: app.name))
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -50,18 +55,21 @@ struct GuessedAppRows: View {
                     if let caption = Self.caption(app.titles) {
                         Text(caption)
                             .font(.caption)
-                            .foregroundStyle(SettingsTheme.ink3)
+                            .foregroundStyle(
+                                DropdownRowStyle.secondaryInk(onCursor)
+                            )
                             .lineLimit(1)
                     }
                 }
                 Spacer()
             }
+            .foregroundStyle(DropdownRowStyle.ink(onCursor))
             .contentShape(Rectangle())
             .padding(.vertical, 3)
             .accessibilityElement(children: .combine)
         }
         .buttonStyle(.plain)
-        .rowHoverHighlight()
+        .dropdownCursorRow(onCursor) { onPoint(app.bundleID) }
     }
 
     /// The first open window's title, and how many more; nil for

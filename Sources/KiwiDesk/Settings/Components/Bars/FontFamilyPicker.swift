@@ -5,15 +5,15 @@ import SwiftUI
 /// The KiwiShelf font family popover (#1681): a search field
 /// focused on open that filters by substring, the two system
 /// families pinned first, then every installed family A–Z, each
-/// named in its own face. ↑/↓ and the pointer move one highlight,
-/// Return picks it, Escape closes (ui-designer).
+/// named in its own face. ↑/↓ and real pointer motion move one
+/// cursor (`DropdownCursor`), Return picks it, Escape closes.
 struct FontFamilyPicker: View {
     let selection: String
     let onPick: (String) -> Void
     let onClose: () -> Void
 
     @State private var search = ""
-    @State private var highlighted: String?
+    @State private var cursor = DropdownCursor<String>()
     /// Where the list scrolls — set by the keyboard and the search
     /// alone, so a pointer resting on an edge row never scrolls
     /// the list out from under itself.
@@ -46,7 +46,7 @@ struct FontFamilyPicker: View {
         .onAppear {
             installed = BarFont.installedFamilies
             searchFocused = true
-            highlighted = selection
+            cursor.opened(at: selection, pointer: DropdownPointer.live())
         }
         .onChange(of: search) { _, query in
             let next = Self.highlight(
@@ -54,7 +54,7 @@ struct FontFamilyPicker: View {
                 selection: selection,
                 families: families
             )
-            highlighted = next
+            cursor.reset(to: next, pointer: DropdownPointer.live())
             scrollTarget = next
         }
     }
@@ -79,6 +79,7 @@ struct FontFamilyPicker: View {
 
     private func row(_ family: String) -> some View {
         let name = BarFontText.familyName(family)
+        let onCursor = family == cursor.highlighted
         return Button {
             onPick(family)
         } label: {
@@ -89,22 +90,15 @@ struct FontFamilyPicker: View {
                 FamilyName(family: family, name: name)
                 Spacer(minLength: 0)
             }
+            .foregroundStyle(DropdownRowStyle.ink(onCursor))
             .contentShape(Rectangle())
             .padding(.vertical, 3)
             .padding(.horizontal, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(
-                        SettingsTheme.accent.opacity(
-                            family == highlighted ? 0.2 : 0
-                        )
-                    )
-            )
+            .dropdownCursorRow(onCursor) {
+                cursor.hover(family, pointer: DropdownPointer.live())
+            }
         }
         .buttonStyle(.plain)
-        .onHover { inside in
-            if inside { highlighted = family }
-        }
         .accessibilityLabel(name)
         .accessibilityAddTraits(family == selection ? [.isSelected] : [])
     }
@@ -153,12 +147,13 @@ struct FontFamilyPicker: View {
     }
 
     private func move(_ step: Int) -> KeyPress.Result {
-        let list = families
-        guard !list.isEmpty else { return .handled }
-        let index = highlighted.flatMap { list.firstIndex(of: $0) }
-        let next = index.map { $0 + step } ?? (step > 0 ? 0 : list.count - 1)
-        let family = list[min(max(next, 0), list.count - 1)]
-        highlighted = family
+        guard
+            let family = cursor.keyMove(
+                step,
+                in: families,
+                pointer: DropdownPointer.live()
+            )
+        else { return .handled }
         scrollTarget = family
         // Focus stays in the search field, so VoiceOver hears the
         // highlight only if it is said.
@@ -169,10 +164,12 @@ struct FontFamilyPicker: View {
     }
 
     private func commit() -> KeyPress.Result {
-        guard let highlighted, families.contains(highlighted) else {
-            return .ignored
-        }
-        onPick(highlighted)
+        let picked = cursor.commit(
+            in: families,
+            pointer: DropdownPointer.live()
+        )
+        guard let picked else { return .ignored }
+        onPick(picked)
         return .handled
     }
 }
@@ -190,6 +187,7 @@ private struct FamilyName: View {
         Text(name)
             .font(face ?? .body)
             .lineLimit(1)
+            .truncationMode(.middle)
             .onAppear {
                 guard !built else { return }
                 built = true

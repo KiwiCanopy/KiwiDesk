@@ -25,7 +25,8 @@ struct HeaderSearch: View {
     let armModeNotice: (SettingsDestination) -> Void
 
     @State var query = ""
-    @State var highlighted: String?
+    /// The one cursor pointer and keys share (`DropdownCursor`).
+    @State var cursor = DropdownCursor<String>()
     @FocusState var focused: Bool
     @State var panelHovered = false
     @Environment(\.settingsWidth) private var width
@@ -59,16 +60,16 @@ struct HeaderSearch: View {
         .frame(minWidth: 110, maxWidth: .infinity)
         .overlay(alignment: .topLeading) { resultPanel }
         .background { focusShortcut }
-        .onChange(of: query) { _, _ in highlighted = nil }
+        .onChange(of: query) { _, _ in resetCursor() }
         // The narrow entry collapses once neither focus nor the
         // pointer holds the panel — a typed query's rows can be
         // hovered after the field blurs, and a blur alone raced
         // that hover-keepalive (#1030).
         .onChange(of: focused) { _, now in
-            // A highlight does not outlive the focus that made
-            // it, or the next focus re-opens with a row armed
+            // A moved cursor does not outlive the focus that made
+            // it, or the next focus re-opens with that row armed
             // for a bare Return (#1030).
-            if !now { highlighted = nil }
+            if !now { resetCursor() }
             collapseIfIdle()
         }
         .onChange(of: panelHovered) { _, _ in collapseIfIdle() }
@@ -120,31 +121,38 @@ struct HeaderSearch: View {
             armModeNotice(result.destination)
         }
         query = ""
-        highlighted = nil
         focused = false
         panelHovered = false
         expanded = false
         reveal(result.anchor)
     }
 
-    /// Moves highlight up or down in result list.
+    /// The query's first match takes the cursor, the keyboard's.
+    private func resetCursor() {
+        cursor.reset(to: hits.first?.id, pointer: DropdownPointer.live())
+    }
+
+    /// Moves the cursor up or down the result list.
     private func move(_ direction: MoveCommandDirection) {
         let hits = hits
         guard !hits.isEmpty else { return }
-        let current = hits.firstIndex { $0.id == highlighted }
-        let next: Int
+        let step: Int
         switch direction {
-        case .up:
-            next = current.map { max($0 - 1, 0) } ?? 0
-        case .down:
-            next =
-                current.map {
-                    min($0 + 1, hits.count - 1)
-                } ?? 0
-        default:
-            return
+        case .up: step = -1
+        case .down: step = 1
+        default: return
         }
-        highlighted = hits[next].id
+        let id = cursor.keyMove(
+            step,
+            in: hits.map(\.id),
+            pointer: DropdownPointer.live()
+        )
+        guard let hit = hits.first(where: { $0.id == id }) else { return }
+        // Focus stays in the field, so VoiceOver hears the cursor
+        // only if it is said.
+        AccessibilityNotification.Announcement(
+            SettingsSearchRow.title(of: hit)
+        ).post()
     }
 
     /// Commits the highlighted result, or the first match of a
@@ -152,8 +160,12 @@ struct HeaderSearch: View {
     /// navigate somewhere the user did not name (#1030).
     private func commitHighlighted() {
         let hits = hits
+        let picked = cursor.commit(
+            in: hits.map(\.id),
+            pointer: DropdownPointer.live()
+        )
         let hit =
-            hits.first { $0.id == highlighted }
+            hits.first { $0.id == picked }
             ?? (searching ? hits.first : nil)
         guard let hit else { return }
         pick(hit)

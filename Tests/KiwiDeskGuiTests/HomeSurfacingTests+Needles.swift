@@ -236,7 +236,7 @@ extension HomeSurfacingTests {
             // `emptyQuery`), not re-derived here (#1470).
             "lethits=hitsguard!hits.isEmpty",
             "??(searching?hits.first:nil)",
-            "if!now{highlighted=nil}collapseIfIdle()",
+            "if!now{resetCursor()}collapseIfIdle()",
             // The narrow entry collapses on idle, not on blur.
             ".onChange(of:panelHovered){_,_incollapseIfIdle()}",
             "if!focused,!panelHovered,!searching{expanded=false}",

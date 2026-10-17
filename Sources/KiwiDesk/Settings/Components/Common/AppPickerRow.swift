@@ -9,6 +9,10 @@ struct AppPickerRow: View {
     let name: String
     /// Nil for a process without a bundle id.
     let bundleID: String?
+    /// The picker's cursor sits here (`DropdownCursor`).
+    var onCursor = false
+    /// Every pointer event over the row, for `DropdownCursor.hover`.
+    var onPoint: () -> Void = {}
     let action: () -> Void
 
     var body: some View {
@@ -21,11 +25,12 @@ struct AppPickerRow: View {
                     .lineLimit(1)
                 Spacer()
             }
+            .foregroundStyle(DropdownRowStyle.ink(onCursor))
             .contentShape(Rectangle())
             .padding(.vertical, 3)
         }
         .buttonStyle(.plain)
-        .rowHoverHighlight()
+        .dropdownCursorRow(onCursor, onPoint: onPoint)
         .accessibilityElement(children: .combine)
     }
 

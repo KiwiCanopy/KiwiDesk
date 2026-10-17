@@ -188,11 +188,14 @@ struct SettingsButtonStyleConventionTests {
             // one inside itself — `.bordered` plus its
             // neutralisation in `settingsActionButton()` (#771),
             // `KiwiProminentButtonStyle` plus its `accentInk`
-            // label in `kiwiProminentButton()` (#828).
+            // label in `kiwiProminentButton()` (#828), and
+            // `PopUpTriggerStyle` plus its neutralisation in
+            // `settingsPopUpTrigger()`.
             let styles =
                 source.occurrences(of: ".buttonStyle(")
                 + source.occurrences(of: ".settingsActionButton()")
                 + source.occurrences(of: ".kiwiProminentButton()")
+                + source.occurrences(of: ".settingsPopUpTrigger()")
             let exempt = unstyledExempt[name]?.count ?? 0
             let extraStyles = stylesOnNonButtons[name]?.count ?? 0
 

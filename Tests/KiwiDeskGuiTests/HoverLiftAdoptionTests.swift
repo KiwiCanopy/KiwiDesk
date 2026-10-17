@@ -128,8 +128,9 @@ struct HoverLiftAdoptionTests {
         #expect(!unsaved.contains(".pointingHandCursor()"))
     }
 
-    /// The back chip and the profile chip are button chips: they
-    /// rest, lift and keep their edge through the shared chip.
+    /// The back chip is a button chip, resting, lifting and keeping
+    /// its edge through the shared chip; the profile chip is a
+    /// pop-up trigger (`PopUpTriggerTests` holds its seal).
     @Test("the header's chips are button chips")
     func headerChipsLift() throws {
         let header = try source("Settings/SettingsHeaderBar.swift")
@@ -138,20 +139,20 @@ struct HoverLiftAdoptionTests {
         #expect(!header.contains(".chipSurface()"))
         let menu = try source("Settings/ProfileHeader.swift")
         let chain = try body("private var menu:", in: menu)
-        #expect(chain.occurrences(of: ".hoverHighlight(") == 1)
+        #expect(chain.occurrences(of: ".hoverHighlight(") == 0)
         // The button menu style draws the label whole, so the dot
-        // and the padding are inside the menu's hit area.
+        // is inside the menu's hit area.
         #expect(
             chain.contains(
-                ".menuStyle(.button).buttonStyle(.plain).neutralMenuLabel()"
+                ".menuStyle(.button).settingsPopUpTrigger()"
+                    + ".neutralMenuLabel()"
             )
         )
         #expect(!menu.contains(".menuStyle(.borderlessButton)"))
         let label = try body("private var chipLabel:", in: menu)
         #expect(label.contains("targetDot(stored:"))
-        #expect(
-            label.contains(".padding(.horizontal,ChipMetrics.padH)")
-        )
+        // The seal's face pads the chip; the label adds none.
+        #expect(!label.contains(".padding("))
     }
 
     /// The scope and Space chips hand their selection to the one

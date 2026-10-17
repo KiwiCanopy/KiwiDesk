@@ -1182,7 +1182,16 @@ popover trigger whose label is text takes the glyph chip's lift
 without its `ink2` tint (`menuTriggerHover`), chosen by role
 since a value's label must not go `ink2`, and drawn on the
 control because AppKit draws a borderless `Menu`'s label; the
-menu itself stays native.
+menu itself stays native. A button that opens a pop-up of its
+own — the Font and app pickers' triggers and the profile chip —
+draws as the native pop-up beside it: a capsule on the chip
+ladder with no edge, still lifting under the pointer
+(`settingsPopUpTrigger()`). A searchable dropdown is the exception
+to custom full-row picker entries: its pointer and keys share one
+cursor, moved by real pointer motion only, and the font family
+picker, the app picker and the header search draw it as a solid
+`accent` fill with `accentInk` text, their rows taking no hover
+lift beside it (`DropdownCursor`).
 :::
 
 Every chip fill in that ladder is a theme token, never a bare

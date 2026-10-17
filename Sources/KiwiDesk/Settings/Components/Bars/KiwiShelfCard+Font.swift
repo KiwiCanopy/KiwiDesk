@@ -1,3 +1,4 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
@@ -74,21 +75,33 @@ struct FontFamilyRow: View {
         }
     }
 
+    /// The system face's line height at the trigger's size.
+    private static var systemLineHeight: CGFloat {
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        return ceil(NSLayoutManager().defaultLineHeight(for: font))
+    }
+
     private var trigger: some View {
         Button {
             showing = true
         } label: {
+            // Hugs the name, as a native pop-up does: no spacer in
+            // the label, the chevron right after the name.
             HStack(spacing: 4) {
                 Text(BarFontText.familyName(family))
+                    .font(FontFamilyPicker.face(of: family))
                     .lineLimit(1)
-                Spacer(minLength: 4)
+                    // A tall face keeps the system face's line box,
+                    // so the row matches its siblings.
+                    .frame(height: Self.systemLineHeight)
+                    .clipped()
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
             .frame(minWidth: 150, alignment: .leading)
         }
-        .settingsActionButton()
+        .settingsPopUpTrigger()
         .controlSize(.large)
         .accessibilityLabel(label)
         .accessibilityValue(spokenValue)
