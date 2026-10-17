@@ -988,8 +988,9 @@ Touching `Config`, `Profiles`, `Commands`.
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
   stored profile and the rule snapshot, taken only where a caller holds leaves
-  — save Settings' live rows, the one ruled reader that holds none (#2262,
-  `UnsavedLiveSettingsTests`) — (`ChangeReportTests`,
+  — save Settings' live rows, the one ruled reader that diffs the root, its
+  Keep taking the reading's own keep ids (#2262, #2368,
+  `UnsavedLiveSettingsTests`, `SettingsLiveKeepTests`) — (`ChangeReportTests`,
   `KeepSettingsEdgeTests`), a keep landing the shared look without repainting
   live, and a live store a verb writes joining the keep document or reporting
   nothing, which is review's (#1685)
@@ -1594,8 +1595,9 @@ Touching `Borders`, `Vision`.
 - the settle passes are two keys, early visibility and late geometry
 - an own key window that is not the focus anchor stands the focused ring down,
   read from the one `EventLoop.ownKeyWindow` seam the #929 raise stand-down
-  shares — one reading, two ruled facets: the ring takes the broad `number`,
-  the raise the narrow `isDialog` (#933/#935)
+  shares — one reading, three ruled facets: the ring takes the broad `number`,
+  the raise the narrow `isDialog`, and the ring and KiwiVision look past a
+  `floatsOverWindows` panel such as KiwiHub (#933/#935/#2373)
 - the sheen is one `BorderSheen` ramp every surface paints — ring, bar
   highlight and border, drag borders, and their Settings pictures — the surface
   clearing its flat ink while it paints, and the ramp's flat band staying the

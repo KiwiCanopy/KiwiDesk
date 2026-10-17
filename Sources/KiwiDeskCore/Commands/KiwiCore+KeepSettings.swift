@@ -24,6 +24,26 @@ extension KiwiCore {
         else {
             return .fail("expected leaf ids from a change report")
         }
+        let outcome = keep(paths: paths)
+        return .ok(
+            keepAnswer(
+                kept: outcome.kept,
+                refused: outcome.refused,
+                reached: outcome.reached
+            )
+        )
+    }
+
+    /// What one keep wrote and refused, as structure: the verb
+    /// encodes it, Settings reads it (#2368).
+    struct KeepOutcome {
+        var kept: [TouchedLeaf]
+        var refused: [TouchedLeaf]
+        var reached: [String]
+    }
+
+    /// The keep itself, over leaf paths.
+    func keep(paths: [[String]]) -> KeepOutcome {
         let unique = Set(paths).sorted { $0.lexicographicallyPrecedes($1) }
         let judge = keepJudge(
             judgingRules: paths.contains(where: Self.isRulePath)
@@ -55,7 +75,7 @@ extension KiwiCore {
                 refused.append(Self.unwritten(leaf))
             }
         }
-        return .ok(keepAnswer(kept: kept, refused: refused, reached: reached))
+        return KeepOutcome(kept: kept, refused: refused, reached: reached)
     }
 
     /// The live values of `leaves`, and those that cannot be laid

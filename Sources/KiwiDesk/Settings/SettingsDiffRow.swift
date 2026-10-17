@@ -29,6 +29,9 @@ struct SettingsDiffRow: Identifiable, Hashable {
     var jumpsToAreaRoot = false
     /// Which part of the list the row is drawn in.
     var section: SettingsDiffSection = .draft
+    /// A live row's unsaved leaves, as keep ids — what its Keep
+    /// writes (#2368); empty on a draft row.
+    var keepIDs: [String] = []
 
     /// A plain value-pair row.
     static func change(
