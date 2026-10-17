@@ -19,6 +19,9 @@ extension KiwiCore {
     ) {
         guard tiler.settings.mouse.hoverFocus,
             !mouse.anyButtonHeld,
+            // KiwiHub is worked in wherever the pointer rests, and
+            // a focus taken away closes it (#2378).
+            eventLoop.ownKeyWindow()?.floatsOverWindows != true,
             focusedWindowID == armedFocus,
             wallClock().timeIntervalSince(lastDesktopSwitch)
                 > DesktopSwitch.settle,

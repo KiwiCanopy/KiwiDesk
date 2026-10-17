@@ -27,13 +27,18 @@ public final class PointerRest {
     public var frontOwnWindow: @MainActor (Int) -> Void = { _ in }
     /// The focus now, read each time a move arms the dwell.
     var noteArm: (() -> WindowID?)?
-    /// Installs the global mouse-moved monitor, live in
-    /// production and pinned inert by both `makeTestCore` twins
-    /// as the scroll tap is (tests.md ▸ machine touch).
+    /// Installs the mouse-moved monitors, live in production and
+    /// pinned inert by both `makeTestCore` twins as the scroll tap
+    /// is (tests.md ▸ machine touch). A move delivered without a
+    /// point is read through `location`.
     var makeMonitor:
-        @MainActor (@escaping @MainActor (CGPoint) -> Void) -> Any? =
+        @MainActor (@escaping @MainActor (CGPoint?) -> Void) -> Any? =
             live
-    var removeMonitor: (Any) -> Void = { NSEvent.removeMonitor($0) }
+    var removeMonitor: (Any) -> Void = { monitors in
+        for monitor in monitors as? [Any] ?? [monitors] {
+            NSEvent.removeMonitor(monitor)
+        }
+    }
     /// The pointer's location now, Cocoa screen space.
     var location: @MainActor () -> CGPoint = { NSEvent.mouseLocation }
 
@@ -135,7 +140,10 @@ public final class PointerRest {
     private func sync() {
         if running, isEnabled {
             guard monitor == nil else { return }
-            monitor = makeMonitor { [weak self] in self?.moved(to: $0) }
+            monitor = makeMonitor { [weak self] point in
+                guard let self else { return }
+                self.moved(to: point ?? self.location())
+            }
         } else {
             if let monitor { removeMonitor(monitor) }
             monitor = nil
@@ -146,13 +154,27 @@ public final class PointerRest {
         }
     }
 
+    /// Both arms (#2378): moves go to the ACTIVE app, so while
+    /// KiwiDesk is active — its Settings window key — only the
+    /// local monitor hears the pointer leaving for another window.
     private static func live(
-        _ deliver: @escaping @MainActor (CGPoint) -> Void
+        _ deliver: @escaping @MainActor (CGPoint?) -> Void
     ) -> Any? {
         // A global monitor's event location is in screen space.
-        NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) {
+        let global = NSEvent.addGlobalMonitorForEvents(
+            matching: .mouseMoved
+        ) {
             let point = $0.locationInWindow
             Task { @MainActor in deliver(point) }
         }
+        // A local event's location is its window's, so the rest
+        // reads the pointer itself.
+        let local = NSEvent.addLocalMonitorForEvents(
+            matching: .mouseMoved
+        ) { event in
+            Task { @MainActor in deliver(nil) }
+            return event
+        }
+        return [global, local].compactMap { $0 }
     }
 }

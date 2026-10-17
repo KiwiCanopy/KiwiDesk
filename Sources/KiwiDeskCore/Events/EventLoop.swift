@@ -71,7 +71,8 @@ public final class EventLoop {
     /// the ONE seam the #929/#935 raise stand-down, the #933 ring
     /// and the #2224 reveal payment share (`number`, `isDialog`);
     /// the ring and KiwiVision look past a `floatsOverWindows`
-    /// panel (#2373, borders.md). Injected in tests.
+    /// panel (#2373, borders.md), and hover focus stands down
+    /// under one (#2378). Injected in tests.
     var ownKeyWindow: () -> OwnKeyWindowReading? = {
         EventLoop.ownKeyWindowReading()
     }

@@ -125,7 +125,10 @@ the normal level — KiwiHub — is looked past** by the ring and
 KiwiVision's plate through the reading's `floatsOverWindows`
 facet, a plate ordered under a `.floating` panel landing behind
 the windows; the #929 raise and the #1532 reveal payment still
-read the window (#2373, `FloatingOwnPanelConsumerTests`).
+read the window (#2373, `FloatingOwnPanelConsumerTests`), and
+hover focus stands down while one is key, since a focus moved
+away closes it (#2378, `HoverFocusStandDownTests` ▸
+`floatingOwnPanelStandsDown`).
 
 ## Two settle passes, two deferred keys
 
