@@ -158,7 +158,11 @@ date, macOS version and commits named above it — measuring the
 previous release again in the same sitting, since times compare
 only within a table. The comparison it replaces becomes a link
 under *Earlier comparisons* to the page at the tag that shipped
-it; `docs.md`'s row for that page owns the rule.
+it; `docs.md`'s row for that page owns the rule. **Explain every
+counter that grows** against the previous release, by the PR that
+grew it (accessibility.md asks a change to state its per-switch
+cost); a growth nobody can name is a finding, written as
+unattributed and bisected, never left as a footnote.
 
 ## What this is not
 

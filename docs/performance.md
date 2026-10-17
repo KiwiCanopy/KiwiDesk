@@ -83,7 +83,10 @@ Each cell reads **2.3.1 → 3.0.0**.
 The two releases do the same work per switch: within a few
 accessibility calls and parked windows on every pair, with
 bsp ↔ scrolling up to 9 % more calls in 3.0.0, and the same
-average layout pass. Against 2.3.1 as it ships, 3.0.0 is lighter
+average layout pass. Those extra calls run off the main thread:
+calls on it fall from about 50 to 40 per 20 switches, and their
+time from 55 to 31 ms. Which change added them is not yet
+attributed; it predates `2732a681d`. Against 2.3.1 as it ships, 3.0.0 is lighter
 under a saturated GPU on the pair with floating windows, where
 2.3.1's slide roughly doubled the average pass. The longest
 passes under that load vary by tens of milliseconds between runs
