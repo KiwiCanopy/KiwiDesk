@@ -3,8 +3,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The Highlights tab's spotlight (#2038): the intro sentence,
-/// then up to four rows. Drawn in place of the prose summary,
-/// never beside it.
+/// then its rows, which the notes scroll past the guideline.
+/// Drawn in place of the prose summary, never beside it.
 struct UpdateSpotlightRows: View {
     let digest: UpdateNotesDigest
     /// Failed steps the gold symbols back, as the panel's star.
