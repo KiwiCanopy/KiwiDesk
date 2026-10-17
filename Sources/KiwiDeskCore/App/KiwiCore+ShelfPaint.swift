@@ -95,10 +95,9 @@ extension KiwiCore {
         for leaf in TilingSettings.liquidGlassLeaves {
             settings[keyPath: leaf] = before[keyPath: leaf]
         }
-        settings.monocle.appBar.activeIndicator =
-            before.monocle.appBar.activeIndicator
-        settings.scrolling.appBar.activeIndicator =
-            before.scrolling.appBar.activeIndicator
+        for leaf in TilingSettings.layoutIndicatorLeaves {
+            settings[keyPath: leaf] = before[keyPath: leaf]
+        }
         return settings
     }
 

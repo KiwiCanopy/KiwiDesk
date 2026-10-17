@@ -28,7 +28,8 @@ struct SettingsLiveRowsTests {
         saved.borderStyle.width = 5
         model.unsavedLive = UnsavedLiveSettings(
             saved: saved,
-            live: model.cleanConfig.settings
+            live: model.cleanConfig.settings,
+            leaves: [:]
         )
         return model
     }
