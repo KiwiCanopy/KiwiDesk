@@ -265,6 +265,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
+        // While it is key, hover focus hears the pointer leave
+        // through Core's local monitor alone (#2378).
+        window.acceptsMouseMovedEvents = true
         // Tiled window ID for AX bridge discrimination
         // (#678, OwnWindowTiling).
         window.identifier = NSUserInterfaceItemIdentifier(

@@ -1597,7 +1597,8 @@ Touching `Borders`, `Vision`.
   read from the one `EventLoop.ownKeyWindow` seam the #929 raise stand-down
   shares — one reading, three ruled facets: the ring takes the broad `number`,
   the raise the narrow `isDialog`, and the ring and KiwiVision look past a
-  `floatsOverWindows` panel such as KiwiHub (#933/#935/#2373)
+  `floatsOverWindows` panel such as KiwiHub, under which hover focus stands
+  down (#933/#935/#2373/#2378)
 - the sheen is one `BorderSheen` ramp every surface paints — ring, bar
   highlight and border, drag borders, and their Settings pictures — the surface
   clearing its flat ink while it paints, and the ramp's flat band staying the
