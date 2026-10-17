@@ -24,6 +24,7 @@ struct LayerReachControl: View {
             }
         }
         .buttonStyle(.borderless)
+        .menuTriggerHover()
         .foregroundStyle(RuleReachWords.ink(reading))
         .frame(minWidth: SettingsMetrics.ruleReachColumn, alignment: .leading)
         .help(RuleReachWords.spoken(reading))

@@ -1175,6 +1175,16 @@ keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
 
+:::unreleased
+A Layouts strip tile lifts like a palette tile, with the
+selection drawn as its stroke alone. A borderless value-menu or
+popover trigger whose label is text takes the glyph chip's lift
+without its `ink2` tint (`menuTriggerHover`), chosen by role
+since a value's label must not go `ink2`, and drawn on the
+control because AppKit draws a borderless `Menu`'s label; the
+menu itself stays native.
+:::
+
 Every chip fill in that ladder is a theme token, never a bare
 opacity. A chip rests at `chipRest`, lifts to `chipHover` and,
 where its style can see the press, deepens to `chipPressed`; a

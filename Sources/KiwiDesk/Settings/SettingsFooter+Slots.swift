@@ -18,6 +18,7 @@ extension SettingsFooter {
             .foregroundStyle(
                 SettingsTheme.savePillInk.opacity(0.8)
             )
+            .pillHoverWash()
             .disabled(copyBlockedReason != nil)
             .help(copyBlockedReason ?? "")
         } else if model.activeProfile != nil {
@@ -29,6 +30,7 @@ extension SettingsFooter {
             .foregroundStyle(
                 SettingsTheme.savePillInk.opacity(0.8)
             )
+            .pillHoverWash()
             .disabled(model.profileSaveBlockedReason != nil)
             .help(model.profileSaveBlockedReason ?? "")
         }

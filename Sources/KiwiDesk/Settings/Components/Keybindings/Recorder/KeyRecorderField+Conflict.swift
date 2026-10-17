@@ -38,7 +38,7 @@ extension KeyRecorderField {
                     )
                 }
                 .buttonStyle(.plain)
-                .pointingHandCursor()
+                .iconHoverChip()
                 .help(sentence)
                 .accessibilityLabel(sentence)
                 .popover(

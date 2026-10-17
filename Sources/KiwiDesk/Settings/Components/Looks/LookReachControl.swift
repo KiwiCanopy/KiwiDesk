@@ -24,6 +24,7 @@ struct LookReachControl: View {
             AppRuleMenuLabel(text: label)
         }
         .buttonStyle(.borderless)
+        .menuTriggerHover()
         .foregroundStyle(SettingsTheme.ink)
         .frame(minWidth: SettingsMetrics.ruleReachColumn, alignment: .leading)
         .help(label)

@@ -128,10 +128,17 @@ extension SettingsButtonStyleConventionTests {
                     + "Acknowledgements and Website"
             ),
             "ContextShortcut.swift": (
-                1, ".buttonStyle(.plain)",
+                1, ".buttonStyle(PopoverRowStyle())",
                 "The chord popover's container style for the "
                     + "seam-fed menu buttons, which live in the "
                     + "call sites' builder files (#845)"
+            ),
+            // The profile chip's menu draws its label whole
+            // through the button menu style (owner, 2026-10-17).
+            "ProfileHeader.swift": (
+                1, ".buttonStyle(.plain)",
+                "The profile chip's Menu taking plain style, so "
+                    + "the whole chip is the menu's hit area"
             ),
             // Moved from `PresetsSection.swift` with the card
             // itself in #859. The reason is also CORRECTED: the

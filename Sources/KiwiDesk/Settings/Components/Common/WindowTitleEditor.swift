@@ -113,6 +113,7 @@ struct WindowTitleEditor<Preview: View>: View {
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
+        .menuTriggerHover()
     }
 
     private var openTitles: [String] {

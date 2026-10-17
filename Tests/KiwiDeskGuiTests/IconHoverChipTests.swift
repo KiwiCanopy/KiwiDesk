@@ -76,17 +76,17 @@ struct IconHoverChipTests {
 
     /// A full-row entry rests at nothing and lifts on a theme
     /// token rather than a bare opacity (#2047); which token is a
-    /// tuning.
+    /// tuning. A row whose click changes nothing holds flat.
     @Test("a full-row entry rests at nothing and lifts on a token")
     func rowLiftsOneRestStep() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
         let row = body(of: "rowHoverHighlight", in: rows)
         #expect(
             squashed(row).contains(
-                "hoverHighlight(rest:.clear,hover:SettingsTheme."
+                "hoverHighlight(rest:.clear,hover:lifts?SettingsTheme."
             )
         )
-        #expect(squashed(row).contains(",edge:nil,"))
+        #expect(squashed(row).contains(":.clear,edge:nil,"))
         #expect(!row.contains(".opacity("))
     }
 

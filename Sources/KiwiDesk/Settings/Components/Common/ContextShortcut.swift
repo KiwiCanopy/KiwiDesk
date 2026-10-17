@@ -57,7 +57,7 @@ private struct RowActions<MenuContent: View>: ViewModifier {
                 VStack(alignment: .leading, spacing: 2) {
                     menu()
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PopoverRowStyle())
                 .padding(8)
             }
             .onAppear {
@@ -80,6 +80,44 @@ private struct RowActions<MenuContent: View>: ViewModifier {
                     )
                 }
             }
+    }
+}
+
+/// A chord popover's entry: a full-row entry, lifting under the
+/// pointer (`rowHoverHighlight`), deepening while pressed and
+/// greyed while disabled.
+private struct PopoverRowStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Row(
+            label: configuration.label,
+            pressed: configuration.isPressed
+        )
+    }
+
+    private struct Row: View {
+        let label: ButtonStyleConfiguration.Label
+        let pressed: Bool
+        @Environment(\.isEnabled) private var isEnabled
+
+        var body: some View {
+            label
+                .foregroundStyle(
+                    isEnabled ? SettingsTheme.ink : SettingsTheme.ink3
+                )
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                // While pressed the press's own token stands in for
+                // the lift, one fill rather than two stacked.
+                .rowHoverHighlight(lifts: !pressed)
+                .background(
+                    RoundedRectangle(cornerRadius: 5).fill(
+                        pressed && isEnabled
+                            ? SettingsTheme.chipPressed : .clear
+                    )
+                )
+        }
     }
 }
 

@@ -6,6 +6,8 @@ import SwiftUI
 struct LayoutStrip: View {
     @ObservedObject var model: SettingsModel
     @Binding var selection: LayoutMode
+    @State private var hovered: LayoutMode?
+    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -50,21 +52,34 @@ struct LayoutStrip: View {
                     .foregroundStyle(.secondary)
             }
             .padding(6)
-            .background(selectionChrome(selected))
+            .background(selectionChrome(mode, selected: selected))
         }
         .buttonStyle(.plain)
+        .onHover { inside in
+            if inside {
+                hovered = mode
+            } else if hovered == mode {
+                hovered = nil
+            }
+        }
         .accessibilityAddTraits(
             selected ? [.isButton, .isSelected] : .isButton
         )
     }
 
-    /// Background plate indicating selection state.
-    private func selectionChrome(_ selected: Bool) -> some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(
-                selected
-                    ? SettingsTheme.accent.opacity(0.12)
-                    : SettingsTheme.card
+    /// The tile's plate: selection is the stroke alone, and the
+    /// pointer's grey lift a fill apart from it (#1173); the
+    /// selected tile, whose click changes nothing, stays flat.
+    private func selectionChrome(
+        _ mode: LayoutMode,
+        selected: Bool
+    ) -> some View {
+        let lifted = hovered == mode && isEnabled && !selected
+        return RoundedRectangle(cornerRadius: 8)
+            .fill(SettingsTheme.card)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(lifted ? SettingsTheme.chipRest : .clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)

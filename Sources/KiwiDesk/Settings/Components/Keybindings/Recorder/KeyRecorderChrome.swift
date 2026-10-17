@@ -10,6 +10,20 @@ import SwiftUI
 struct RecorderButtonChrome: ViewModifier {
     let recording: Bool
     var dead = false
+    /// A refused press's flash: its `danger` label is measured on
+    /// the bare well, so the lift stands down while it shows.
+    var flashing = false
+    @State private var hovering = false
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    /// The idle well's grey lift under the pointer: a fill over
+    /// the well, never a ring, which is the armed state's
+    /// vocabulary; an armed or disabled well does not react.
+    private var lifted: Bool {
+        hovering && isEnabled && !recording && !flashing
+    }
 
     func body(content: Content) -> some View {
         content
@@ -17,6 +31,15 @@ struct RecorderButtonChrome: ViewModifier {
                 if !recording {
                     RoundedRectangle(cornerRadius: 5)
                         .fill(SettingsTheme.sunken)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5).fill(
+                                lifted ? SettingsTheme.chipRest : .clear
+                            )
+                        )
+                        .animation(
+                            reduceMotion ? nil : .easeOut(duration: 0.12),
+                            value: lifted
+                        )
                         .allowsHitTesting(false)
                 } else {
                     RoundedRectangle(cornerRadius: 6)
@@ -45,5 +68,6 @@ struct RecorderButtonChrome: ViewModifier {
                         .allowsHitTesting(false)
                 }
             }
+            .onHover { hovering = $0 }
     }
 }

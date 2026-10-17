@@ -10,8 +10,7 @@ struct ProfileEditTargetMenu: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        // The menu's own trailing inset is the gap before the `?`.
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             menu
             HelpButton(
                 explanation: L(
@@ -43,17 +42,18 @@ struct ProfileEditTargetMenu: View {
                 }
             }
         } label: {
-            HStack(spacing: 5) {
-                Image(systemName: "square.stack.3d.up")
-                Text(title)
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            chipLabel
         }
-        .menuStyle(.borderlessButton)
+        // The button style draws the label whole — a borderless
+        // menu's AppKit label drops the dot and the chip's padding
+        // — so the whole chip is the menu's hit area.
+        .menuStyle(.button)
+        .buttonStyle(.plain)
         .neutralMenuLabel()
+        .menuIndicator(.hidden)
         .fixedSize()
+        // A button chip: it lifts under the pointer (#2377).
+        .hoverHighlight(cornerRadius: SettingsTheme.chipRadius, padding: 0)
         // Closed, the menu shows only its VALUE, so VoiceOver
         // heard a name with no noun — name the control, keep the
         // value (#812, the App Rules facet shape).
@@ -61,6 +61,40 @@ struct ProfileEditTargetMenu: View {
             L("profile_header.menu.ax", "Profile to edit")
         )
         .accessibilityValue(spokenValue)
+    }
+
+    /// The dot is green while the target is what is on screen and
+    /// a hollow ring on a stored profile — a shape as well as a
+    /// hue; the menu's value speaks it.
+    private var chipLabel: some View {
+        HStack(spacing: 6) {
+            targetDot(stored: model.editingStoredProfile)
+                .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
+            HStack(spacing: 5) {
+                Image(systemName: "square.stack.3d.up")
+                Text(title)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
+        }
+        .padding(.horizontal, ChipMetrics.padH)
+        .padding(.vertical, ChipMetrics.padV)
+        .contentShape(ChipMetrics.shape)
+    }
+
+    /// One circle either way — filled, or a ring — so the dot
+    /// changes shape rather than appearing and leaving.
+    private func targetDot(stored: Bool) -> some View {
+        Circle()
+            .fill(stored ? Color.clear : SettingsTheme.accent)
+            .overlay(
+                Circle().strokeBorder(
+                    stored ? SettingsTheme.ink3 : Color.clear,
+                    lineWidth: 1.5
+                )
+            )
     }
 
     /// A row's title, marked where it is the open target.

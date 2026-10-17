@@ -54,10 +54,6 @@ struct PresetChip: View {
     let font: Font
     let selected: Bool
     let action: () -> Void
-    @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         Button(action: action) {
@@ -65,22 +61,10 @@ struct PresetChip: View {
                 .font(font)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
-                .choiceChip(
-                    selected: selected,
-                    hovering: hovering && isEnabled
-                )
-                .animation(hoverAnimation, value: hovering)
+                .choiceChip(selected: selected)
         }
         .buttonStyle(.plain)
-        .onHover { hovering = isEnabled && $0 }
-        .onChange(of: isEnabled) { _, now in
-            if !now { hovering = false }
-        }
         .accessibilityLabel(title)
         .accessibilityAddTraits(selected ? [.isSelected] : [])
-    }
-
-    private var hoverAnimation: Animation? {
-        reduceMotion ? nil : .easeOut(duration: 0.12)
     }
 }

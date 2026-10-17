@@ -37,6 +37,12 @@ struct ChoiceChipTests {
             "Settings/Components/Common/FractionChips.swift": true,
             "Settings/Sections/ShortcutLayerChip.swift": true,
             "Settings/Sections/LayerStripEditor.swift": false,
+            "Settings/Components/Keybindings/KeyboardChrome.swift": true,
+            "Settings/Components/SpaceOverrides/SpacesPanelPreview.swift":
+                true,
+            // Its `+` is glyph-only; its lens chips are edged.
+            "Settings/Components/KiwiVision/KiwiVisionLensStrip.swift":
+                false,
         ]
         for (path, edged) in sites {
             let url = SourceScan.repoRoot(from: #filePath)
@@ -56,13 +62,55 @@ struct ChoiceChipTests {
                 source.contains("edged:false") == !edged,
                 Comment(rawValue: path)
             )
-            for banned in [".primary.opacity(", ".secondary.opacity("] {
+            // The hover is the surface's own: a site holding hover
+            // state beside it is a second copy of the gate.
+            for banned in [
+                ".primary.opacity(", ".secondary.opacity(",
+                ".onHover{", "hovering", "Hovered",
+            ] {
                 #expect(
                     !source.contains(banned),
                     Comment(rawValue: "\(path): \(banned)")
                 )
             }
         }
+    }
+
+    /// The surface owns its hover the way `HoverChip` does: it
+    /// lifts only while enabled, drops a lift its control loses
+    /// the enable under, and names its Reduce Motion gate.
+    @Test("the choice chip owns its hover in one home")
+    func hoverHasOneHome() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("Chips.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        let surface = try #require(
+            SourceScan.declarationBody(
+                after: "struct ChoiceChipSurface",
+                in: source
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        for needle in [
+            "hovering:hovering&&isEnabled",
+            ".onHover{hovering=isEnabled&&$0}",
+            ".onChange(of:isEnabled){_,nowinif!now{hovering=false}}",
+            ".animation(reduceMotion?nil:",
+        ] {
+            #expect(surface.contains(needle), Comment(rawValue: needle))
+        }
+        // The view extension is the surface's one way in.
+        #expect(
+            source.split(whereSeparator: \.isWhitespace).joined()
+                .contains(
+                    "modifier(ChoiceChipSurface(selected:selected,"
+                        + "edged:edged))"
+                )
+        )
     }
 
     /// The edge a text choice draws is the button chip's own.

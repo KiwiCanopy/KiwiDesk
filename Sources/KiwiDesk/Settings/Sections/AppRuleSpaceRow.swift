@@ -78,6 +78,7 @@ struct AppRuleSpaceRow: View {
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
+        .menuTriggerHover()
         .modifier(
             GreyOut(active: !gates.hasSpaces, help: noSpacesHelp)
         )

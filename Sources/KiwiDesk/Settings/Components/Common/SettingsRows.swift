@@ -288,15 +288,32 @@ extension View {
         .accessibilityLabel(label)
     }
 
+    /// The lift of a borderless value-menu or popover trigger: rests
+    /// at nothing and lifts to the chip's hover fill around the
+    /// label, the menu itself staying native. Applied OUTSIDE a
+    /// `Menu`, whose borderless label AppKit flattens.
+    func menuTriggerHover() -> some View {
+        hoverHighlight(
+            rest: .clear,
+            hover: SettingsTheme.chipHover,
+            edge: nil,
+            cornerRadius: 5,
+            padding: 2
+        )
+    }
+
     /// Hover highlight for full-width row buttons: rests at
     /// nothing and lifts one `chipRest` step (#956, #2047).
+    /// `lifts: false` holds a row whose click changes nothing —
+    /// a selected one — flat.
     func rowHoverHighlight(
+        lifts: Bool = true,
         cornerRadius: CGFloat = 5,
         padding: CGFloat = 0
     ) -> some View {
         hoverHighlight(
             rest: .clear,
-            hover: SettingsTheme.chipRest,
+            hover: lifts ? SettingsTheme.chipRest : .clear,
             edge: nil,
             cornerRadius: cornerRadius,
             padding: padding

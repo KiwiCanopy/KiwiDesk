@@ -7,9 +7,6 @@ import SwiftUI
 struct KiwiVisionLensStrip: View {
     @ObservedObject var model: SettingsModel
     @State private var adding: NameEditRequest?
-    @State private var addHovered = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         let lenses = model.draftLenses
@@ -67,14 +64,9 @@ struct KiwiVisionLensStrip: View {
             Image(systemName: "plus")
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
-                .choiceChip(hovering: isEnabled && addHovered, edged: false)
-                .animation(
-                    reduceMotion ? nil : .easeOut(duration: 0.12),
-                    value: addHovered
-                )
+                .choiceChip(edged: false)
         }
         .buttonStyle(.plain)
-        .onHover { addHovered = isEnabled && $0 }
         // A Lua-owned setup defines its lenses in init.lua; the
         // chips stay live, the add greys with its reason.
         .disabled(addReason != nil)
@@ -108,9 +100,6 @@ struct KiwiVisionLensChip: View {
     let empty: Bool
     let selected: Bool
     let action: () -> Void
-    @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         Button(action: action) {
@@ -126,17 +115,9 @@ struct KiwiVisionLensChip: View {
             .foregroundStyle(empty ? SettingsTheme.ink2 : SettingsTheme.ink)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
-            .choiceChip(selected: selected, hovering: hovering && isEnabled)
-            .animation(
-                reduceMotion ? nil : .easeOut(duration: 0.12),
-                value: hovering
-            )
+            .choiceChip(selected: selected)
         }
         .buttonStyle(.plain)
-        .onHover { hovering = isEnabled && $0 }
-        .onChange(of: isEnabled) { _, now in
-            if !now { hovering = false }
-        }
         .help(empty ? KiwiVisionLensWords.noApps(name) : "")
         .accessibilityLabel(name)
         .accessibilityValue(empty ? KiwiVisionLensWords.noApps(name) : "")
