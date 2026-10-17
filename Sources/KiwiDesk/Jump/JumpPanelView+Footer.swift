@@ -12,7 +12,8 @@ extension JumpPanelView {
                 modifiers: model.heldModifiers,
                 hasSelection: model.hasSelection,
                 quickCount: model.viewQuickCount,
-                turnsOff: model.view?.selectionTurnsOff ?? false
+                turnsOff: model.view?.selectionTurnsOff ?? false,
+                naming: model.isNaming
             ),
             carriesControls: model.scope != .windows,
             leading: { footerLeading },

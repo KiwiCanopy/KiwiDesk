@@ -72,11 +72,10 @@ extension SettingsModel {
 
     /// Creates new profile with unique name capturing the live screen setup.
     func saveAsNewProfile(named name: String) {
-        let trimmed = name.trimmingCharacters(
-            in: .whitespaces
-        )
-        guard !trimmed.isEmpty else { return }
-        persist(named: core.profiles.freeName(base: trimmed))
+        guard let free = core.profiles.newProfileName(typed: name) else {
+            return
+        }
+        persist(named: free)
     }
 
     /// A Settings Save is a DRAFT COMMIT, and the two lines

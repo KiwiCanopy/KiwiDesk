@@ -100,9 +100,8 @@ struct ViewPickVisionLineTests {
         #expect(panel.contains("onApply:{model.applyView($0)}"))
         let model = try squashed("JumpModel+View.swift")
         #expect(model.occurrences(of: "applyView(item)") == 2)
-        #expect(
-            model.contains("onApplyView(ViewPickList.action(of:item))")
-        )
+        #expect(model.contains("letaction=ViewPickList.action(of:item)"))
+        #expect(model.contains("onApplyView(action)"))
         #expect(model.occurrences(of: "onApplyView(") == 1)
         // Nowhere else in KiwiHub calls past the door.
         let jump = SourceScan.repoRoot(from: #filePath)

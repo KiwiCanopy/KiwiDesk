@@ -14,6 +14,21 @@ extension JumpPanelController {
             guard let self, let model else { return }
             self.apply(pick, space: model.view?.layout?.space)
         }
+        model.newProfileName = { [weak self] typed in
+            self?.core.profiles.newProfileName(typed: typed)
+        }
+        // Saves the LIVE arrangement — `save_profile`, never
+        // Settings' draft commit — and claims the connected screen
+        // setup as every save does (#2359 ruling 3). No load: the
+        // saved profile is the live one.
+        // A save that does not land keeps the panel open, saying so.
+        model.onSaveProfile = { [weak self] name in
+            guard let self, self.core.saveProfileAsUser(name) else {
+                return false
+            }
+            _ = self.dismiss(distrusting: false)
+            return true
+        }
         model.onKeep = { [weak self, weak model] in
             self?.core.barMenuHooks.keepLayout()
             model?.reloadView()
@@ -69,9 +84,9 @@ extension JumpPanelController {
         )
     }
 
-    /// Each line's items. Profile is drawn only where there is
-    /// another profile to load. `inert` is why every chip greys,
-    /// nil where none does.
+    /// Each line's items. The Profile line always shows, ending in
+    /// Save as New Profile… (#2359 ruling 3, amending #2309 ruling
+    /// 2). `inert` is why every chip greys, nil where none does.
     static func items(
         layout: LayoutPickerState?,
         profiles: (current: String?, all: [String], broken: Set<String>),
@@ -92,12 +107,8 @@ extension JumpPanelController {
                     ?? (layout == nil ? ViewPickText.noSpace : nil)
             )
         }
-        let switchable = profiles.all.contains {
-            $0 != profiles.current && !profiles.broken.contains($0)
-        }
         let profileItems =
-            switchable
-            ? profiles.all.map { name in
+            profiles.all.map { name in
                 ViewPickList.Item(
                     pick: .profile(name),
                     name: name,
@@ -106,7 +117,15 @@ extension JumpPanelController {
                     refusal: profiles.broken.contains(name)
                         ? ViewPickText.profileBroken : nil
                 )
-            } : []
+            } + [
+                // Saving the live arrangement is a machine act, so
+                // it greys while KiwiDesk boots.
+                ViewPickList.Item(
+                    pick: .newProfile,
+                    name: ViewPickText.newProfile,
+                    inertReason: grey
+                )
+            ]
         return [
             .layout: layouts, .profile: profileItems,
             .vision: visionItems(
@@ -164,6 +183,9 @@ extension JumpPanelController {
     private func apply(_ pick: ViewPickList.Pick, space: SpaceID?) {
         guard dismiss(distrusting: false) else { return }
         switch pick {
+        case .newProfile:
+            // `JumpModel.applyView` names it in the panel instead.
+            break
         case .layout(let mode):
             if let space { core.applyLayout(mode, to: space) }
         case .profile(let name):

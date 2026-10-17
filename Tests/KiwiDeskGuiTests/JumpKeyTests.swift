@@ -13,7 +13,7 @@ struct JumpKeyTests {
         _ code: UInt16,
         _ modifiers: NSEvent.ModifierFlags = []
     ) -> JumpKey? {
-        JumpKey.of(keyCode: code, modifiers: modifiers)
+        JumpKey.of(keyCode: code, modifiers: modifiers, naming: false)
     }
 
     @Test("arrows step one row, pages a page")
@@ -71,7 +71,12 @@ struct JumpKeyTests {
             _ code: UInt16,
             _ modifiers: NSEvent.ModifierFlags = []
         ) -> JumpKey? {
-            JumpKey.of(keyCode: code, modifiers: modifiers, scope: .view)
+            JumpKey.of(
+                keyCode: code,
+                modifiers: modifiers,
+                scope: .view,
+                naming: false
+            )
         }
         #expect(layouts(123) == .side(-1))
         #expect(layouts(124) == .side(1))
@@ -97,7 +102,12 @@ struct JumpKeyTests {
             _ code: UInt16,
             _ modifiers: NSEvent.ModifierFlags = []
         ) -> JumpKey? {
-            JumpKey.of(keyCode: code, modifiers: modifiers, scope: .shortcuts)
+            JumpKey.of(
+                keyCode: code,
+                modifiers: modifiers,
+                scope: .shortcuts,
+                naming: false
+            )
         }
         #expect(sheet(125) == .step(1))
         #expect(sheet(116) == .page(-1))

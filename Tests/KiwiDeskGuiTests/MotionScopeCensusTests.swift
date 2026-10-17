@@ -47,9 +47,10 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift": 2,
         // Every bar menu row's action.
         "KiwiDeskCore/App/KiwiCore+BarMenus.swift": 1,
-        // The view picker's layout apply (#2229), and a profile
-        // load from it or the quick menu (#2309).
-        "KiwiDeskCore/App/KiwiCore+LayoutPicker.swift": 2,
+        // The view picker's layout apply (#2229), a profile load
+        // from it or the quick menu (#2309), and its Save as New
+        // Profile… (#2359).
+        "KiwiDeskCore/App/KiwiCore+LayoutPicker.swift": 3,
         // Jump to window's Jump and Bring here (#1875).
         "KiwiDeskCore/App/KiwiCore+JumpActions.swift": 2,
         // The scroll gestures' two consumers.

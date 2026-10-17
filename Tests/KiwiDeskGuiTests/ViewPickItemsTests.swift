@@ -4,8 +4,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// What the View side's lines hold (#2309 rulings 2 and 9): the
-/// Profile line only where another profile can be loaded, a broken
+/// What the View side's lines hold (#2309 rulings 2 and 9, #2359):
+/// the Profile line always, ending in Save as New Profile…, a broken
 /// profile greyed with its reason, KiwiVision's current state
 /// marked, and every chip greyed while KiwiDesk boots.
 @Suite("View picker items", .serialized)
@@ -40,27 +40,33 @@ struct ViewPickItemsTests {
         )
     }
 
-    @Test("Profile shows only where another profile can load")
-    func profileLineNeedsATarget() {
+    /// The Profile line always shows, ending in Save as New
+    /// Profile… — alone where nothing is saved (#2359 ruling 3,
+    /// amending #2309 ruling 2).
+    @Test("Profile always shows, ending in Save as New Profile…")
+    func profileLineEndsInTheSaveChip() {
         LocalizationManager.shared.select("en")
-        #expect(items()[.profile]?.count == 3)
-        let alone = items(profiles: ("Laptop", ["Laptop"], []))
-        #expect(alone[.profile]?.isEmpty == true)
-        let brokenOnly = items(
-            profiles: ("Laptop", ["Laptop", "Old"], ["Old"])
-        )
-        #expect(brokenOnly[.profile]?.isEmpty == true)
+        let all = items()[.profile] ?? []
         #expect(
-            ViewPickList(layout: layout, kiwiVisionOn: false, items: alone)
+            all.map(\.pick) == [
+                .profile("Laptop"), .profile("Studio"), .profile("Old"),
+                .newProfile,
+            ]
+        )
+        #expect(all.last?.name == "Save as New Profile…")
+        let none = items(profiles: (nil, [], []))
+        #expect(none[.profile]?.map(\.pick) == [.newProfile])
+        #expect(
+            ViewPickList(layout: layout, kiwiVisionOn: false, items: none)
                 .lines
-                == [.layout, .vision]
+                == [.layout, .profile, .vision]
         )
     }
 
     @Test("a broken profile is greyed with its reason")
     func brokenProfileIsGreyed() {
         LocalizationManager.shared.select("en")
-        let profiles = items()[.profile] ?? []
+        let profiles = (items()[.profile] ?? []).dropLast()
         #expect(profiles.map(\.isApplicable) == [true, true, false])
         #expect(profiles.last?.refusal == "Can't load")
         #expect(profiles.first?.isCurrent == true)

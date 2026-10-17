@@ -1,3 +1,4 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
@@ -59,6 +60,7 @@ struct JumpPanelView: View {
     private var side: some View {
         VStack(spacing: 0) {
             field
+            namingCaption
             Divider()
             scopeContent
             Divider()
@@ -73,7 +75,7 @@ struct JumpPanelView: View {
         // The glyph's frame matches the row icon's, so the field
         // text and the row titles share one leading edge.
         HStack(spacing: JumpRowView.spacing) {
-            Image(systemName: "magnifyingglass")
+            Image(systemName: model.isNaming ? "plus" : "magnifyingglass")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(width: JumpRowView.iconSize)
@@ -86,13 +88,14 @@ struct JumpPanelView: View {
                 ),
                 // The field shows only the typing; the selection is
                 // the row or tile below (#2246).
-                prompt: Text(model.scope.fieldName)
+                prompt: Text(fieldName)
             )
             .textFieldStyle(.plain)
             .font(.title3)
             .tint(SettingsTheme.accent)
             .focused($fieldFocused)
-            .accessibilityLabel(model.scope.fieldName)
+            .accessibilityLabel(fieldName)
+            .accessibilityHint(namingLine ?? "")
             JumpScopeSwitch(model: model)
         }
         // The glyph keeps the row icons' leading edge: the
@@ -105,6 +108,18 @@ struct JumpPanelView: View {
         .onAppear { fieldFocused = true }
         .onChange(of: model.fieldFocusRequests) { fieldFocused = true }
         .onChange(of: model.scope) { fieldFocused = true }
+        .onChange(of: model.fieldSelectAllRequests) { selectFieldText() }
+    }
+
+    /// The pre-filled name is selected, so typing replaces it. The
+    /// field editor selects a turn later, once the field holds
+    /// the new text.
+    private func selectFieldText() {
+        fieldFocused = true
+        // The panel's own field editor, never whatever responds.
+        DispatchQueue.main.async {
+            (NSApp.keyWindow?.firstResponder as? NSText)?.selectAll(nil)
+        }
     }
 
     /// One scope at a time, cross-faded in place.

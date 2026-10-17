@@ -13,6 +13,9 @@ final class JumpPanel: NSPanel {
     var onModifiers: (NSEvent.ModifierFlags) -> Void = { _ in }
     /// The scope the keys are read for (#2229).
     var scope: () -> JumpScope = { .windows }
+    /// Whether the field names a profile, so only ↩, Esc and ⇥
+    /// are the panel's keys (#2359).
+    var naming: () -> Bool = { false }
 
     override var canBecomeKey: Bool { true }
 
@@ -44,7 +47,8 @@ final class JumpPanel: NSPanel {
             let key = JumpKey.of(
                 keyCode: event.keyCode,
                 modifiers: event.modifierFlags,
-                scope: scope()
+                scope: scope(),
+                naming: naming()
             )
         {
             onKey(key)
@@ -82,7 +86,8 @@ final class JumpPanel: NSPanel {
                 let key = JumpKey.of(
                     keyCode: event.keyCode,
                     modifiers: event.modifierFlags,
-                    scope: scope()
+                    scope: scope(),
+                    naming: naming()
                 )
             {
                 onKey(key)

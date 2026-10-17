@@ -27,12 +27,15 @@ struct ViewPickList: Equatable {
         /// The line's last chip: Settings ▸ KiwiVision with the add
         /// popover open (#2103 ruling 57, #2359 ruling 4).
         case newLens
+        /// The Profile line's last chip: the field names a profile
+        /// the live arrangement saves as (#2359 ruling 3).
+        case newProfile
 
         /// A create chip, which no ⌘ digit reaches (#2359 ruling 1).
         var isCreate: Bool {
             // Exhaustive, so a new pick is ruled on here.
             switch self {
-            case .newLens: return true
+            case .newLens, .newProfile: return true
             case .layout, .profile, .visionOff, .vision: return false
             }
         }

@@ -5192,9 +5192,13 @@ row.
 - **Layout** — a tile per layout for the Space shown on the screen
   under the pointer, greyed where there is none; Return applies it
   like `set_mode` for that Space.
-- **Profile** — one per saved profile, shown only while another
-  one can be loaded; one that cannot load is greyed. Return loads
-  it like `load_profile`.
+- **Profile** — one per saved profile; one that cannot load is
+  greyed. Return loads it like `load_profile`. The line ends in
+  **Save as New Profile…**: Return turns the search field into a
+  name field, and Return again saves the current arrangement under
+  that name like `save_profile`, which hands it the connected
+  screen setup; a taken name saves beside it rather than over it. Esc
+  goes back to picking, and ⌘1–9 and ↓ skip the chip.
 - **KiwiVision** — Default, which turns
   [KiwiVision](#kiwivisiontoggle) on with no lens, then one item
   per lens, which turns that lens on. Picking the item already on
