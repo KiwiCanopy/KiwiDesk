@@ -84,13 +84,17 @@ TYPED_FROM = (2, 0, 0)
 HEADS_MARKER = "**Before you update:**"
 
 # The optional spotlight (#2038): a typed release's Highlights
-# tab is EITHER the prose summary OR one intro sentence and up to
-# four rows — design-decisions ▸ *What's new leads with a
+# tab is EITHER the prose summary OR one intro sentence and its
+# rows — design-decisions ▸ *What's new leads with a
 # spotlight*. It is the first `###`, it is no type (each row's
 # change stays a bullet in its own section), and it travels as
 # the entry's `spotlight` list.
 SPOTLIGHT_HEADING = "Spotlight"
-SPOTLIGHT_MAX_ROWS = 4
+# Curation guidelines, never refusals (owner ruling 2026-10-17):
+# past them `--body` warns. The window scrolls whatever the count;
+# design-decisions ▸ the spotlight entry argues both numbers.
+SPOTLIGHT_ROW_GUIDELINE = 6
+SPOTLIGHT_LINE_GUIDELINE = 70
 # "One intro sentence": one paragraph, one sentence, no longer
 # than this. A summary past it is prose, which the rows replace
 # rather than sit beside.
@@ -726,6 +730,27 @@ def parse_curated(
     return summary, sections, heads, spotlight
 
 
+def spotlight_warnings(rows: list[dict]) -> list[str]:
+    """What a draft's rows do past the guidelines: more rows than
+    the window shows unscrolled, or a line that wraps."""
+    warnings = []
+    if len(rows) > SPOTLIGHT_ROW_GUIDELINE:
+        warnings.append(
+            f"{len(rows)} spotlight rows, past the guideline of "
+            f"{SPOTLIGHT_ROW_GUIDELINE}: the window scrolls them, "
+            "and the full record is the sections below."
+        )
+    for row in rows:
+        line = row.get("line", "")
+        if len(line) > SPOTLIGHT_LINE_GUIDELINE:
+            warnings.append(
+                f"spotlight row \"{row.get('title', '')}\": its line "
+                f"is {len(line)} characters, past the guideline of "
+                f"{SPOTLIGHT_LINE_GUIDELINE}, so it wraps."
+            )
+    return warnings
+
+
 def parse_spotlight(
     items: list[str],
     problems: list[str],
@@ -734,12 +759,6 @@ def parse_spotlight(
     """The `### Spotlight` bullets → rows of `title`, `line` and
     the optional `setting` and `symbol`, appending a problem for
     every row the window could not draw as written."""
-    if len(items) > SPOTLIGHT_MAX_ROWS:
-        problems.append(
-            f"{len(items)} spotlight rows. At most "
-            f"{SPOTLIGHT_MAX_ROWS}: the rows are signposts, and the "
-            "full record is the sections below."
-        )
     rows: list[dict] = []
     for item in items:
         tokens: dict[str, str] = {}
@@ -1151,6 +1170,8 @@ def run_body(
         )
     except NotesError as error:
         return _report(error)
+    for warning in spotlight_warnings(spotlight):
+        print(f"changelog-sync: WARNING — {warning}", file=sys.stderr)
     entries = sum(len(s["items"]) for s in sections)
     print(
         f"changelog-sync --body: OK — {len(sections)} section(s), "

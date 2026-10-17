@@ -25,19 +25,6 @@ extension ChangelogRefusal {
 
     static let spotlight: [ChangelogRefusal] = [
         ChangelogRefusal(
-            name: "more than four spotlight rows",
-            body: body(
-                spotlight: """
-                    - **One** — a line.
-                    - **Two** — a line.
-                    - **Three** — a line.
-                    - **Four** — a line.
-                    - **Five** — a line.
-                    """
-            ),
-            fragment: "5 spotlight rows. At most 4"
-        ),
-        ChangelogRefusal(
             name: "a spotlight row without a title",
             body: body(spotlight: "- Just a line, no title."),
             fragment: "has no title"
