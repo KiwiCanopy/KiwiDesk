@@ -150,7 +150,7 @@
   "compare_magnet_good": "Mac ユーザーが実際に名前を聞いたことがある唯一のもので、それには理由があります。数百円で買え、30 秒で理解でき、ウインドウを画面の端にドラッグするだけで、多くの人が実際に抱えている問題が解決します。Rectangle はほぼ同じことを無料で行います。",
   "compare_meta_desc": "KiwiDesk と yabai、AeroSpace、Rift、OmniWM、Magnet の率直な比較。それぞれの得意なこと、要求する権限、そして KiwiDesk が本当に違う点。",
   "compare_meta_title": "KiwiDesk と yabai・AeroSpace・Rift・OmniWM・Magnet の比較 — macOS のウインドウマネージャー",
-  "compare_nudge_dev_short": "yabai・AeroSpace・Rift と比較する",
+  "compare_nudge_dev_short": "yabai・AeroSpace などと比較する",
   "compare_omniwm_diff": "選ぶ前に知っておく価値のある違いが 2 つ。起動時に<strong>入力監視</strong>を要求します（KiwiDesk はアクセシビリティだけです）。そして macOS の「ディスプレイごとに個別の操作スペース」がオンであることを要求し、オンになるまでウインドウ管理を停止します。KiwiDesk はどちらでも動きます。GUI の下にあるのはスクリプト VM ではなく TOML ファイルで、レイアウトは 2 つ（KiwiDesk は 7 つ）、ライセンスは GPL-2.0 です（KiwiDesk は 1.3.0 から BSL 1.1 のもとでソース公開）。コードを再利用するつもりなら、この違いは効いてきます。",
   "compare_omniwm_good": "ここで最も対等に近い存在です。Swift 製、SIP を切らず、公証済みのビルドを配布し、このリストで本物の設定 App を持つもう一方でもあります。niri 風のスクロールと dwindle の BSP レイアウトはよくできており、急速に伸びています。",
   "compare_outro": "1.3.0 から BSL 1.1 のもとでソースを公開し、利用は無料です。macOS 14 以降・Apple シリコン向け。上のいずれかから移ってきましたか？ {lua}Lua リファレンス{/lua}が、設定がどこまで届くかを示します。",
