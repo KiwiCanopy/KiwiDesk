@@ -13,6 +13,9 @@ struct SettingsCollapsibleSection<Content: View>: View {
     private let drawer: any AnySettingsDrawer
     private let modeGated: Bool
     private let summary: String
+    /// Drawn under the disclosure while shut only — the Mouse &
+    /// trackpad card's pictures (owner ruling 2026-10-17).
+    private let preview: AnyView?
     @Binding private var isExpanded: Bool
     private let onToggle: ((Bool) -> Void)?
     @ViewBuilder private let content: () -> Content
@@ -23,6 +26,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
         _ drawer: SettingsDrawer<Children>,
         isExpanded: Binding<Bool>,
         summary: String,
+        preview: AnyView? = nil,
         modeGated: Bool = false,
         onToggle: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
@@ -32,6 +36,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
         self.drawer = drawer
         self._isExpanded = isExpanded
         self.summary = summary
+        self.preview = preview
         self.modeGated = modeGated
         self.content = content
     }
@@ -51,6 +56,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .accessibilityLabel(summary)
+            if !isExpanded, let preview { preview }
             if isExpanded {
                 SettingsTheme.hairline.frame(height: 1)
                 content()

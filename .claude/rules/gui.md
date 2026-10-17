@@ -256,13 +256,18 @@ restated `20...80` satisfies on the day it is written.
 - **A gesture picture is not a schematic.** A Mouse & trackpad
   entry on the Shortcuts & Gestures page teaches a gesture rather
   than a rest state, so its picture may move: while hovered, and
-  the card's first entry once when the user's own click opens the
-  card (owner ruling 2026-09-29) — at most once per visit, never
-  on a search, Go to or diff-jump expansion, never looped.
-  Otherwise it rests on its key frame, and always under Reduce
-  Motion, never a bundled clip, with the gate named per call
-  (`ReduceMotionGateTests`). `GestureAutoplayWiringTests` holds
-  the one entry that plays and the click as its only trigger.
+  once on the user's own click alone — the card's first entry
+  when a click opens the card, at most once per visit (owner
+  ruling 2026-09-29), and the entry a click on its picture in the
+  shut card's strip lands on, once per such click (owner ruling
+  2026-10-17) — never on a search, Go to or diff-jump expansion,
+  never looped. Otherwise it rests on its
+  key frame, and always under Reduce Motion, never a bundled clip,
+  with the gate named per call (`ReduceMotionGateTests`).
+  `GestureAutoplayWiringTests` holds the click as the only
+  trigger. An entry's sentence, picture, surface and pace live
+  once, on `GestureItem`, which the entry and the strip both read
+  (`GesturesDrawerTests` ▸ `entriesAreTheItems`, `GestureStripTests`).
   Whether it actually moves is a device check, since no headless
   suite sees an animation run (#1726; `docs/design-decisions.md`
   ▸ Shortcuts carries why).

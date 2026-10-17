@@ -96,6 +96,11 @@ struct SilentDimTests {
             + "the row above it",
         "DragVisualPreview.swift":
             "the same, for the drag visuals preview",
+        "GestureStripPlate.swift":
+            "a PICTURE in the shut gestures card's strip, hidden "
+            + "from accessibility: it fades where its gesture is "
+            + "off, its click still lands on the entry whose "
+            + "grey and off sentence give the reason",
         "KeyRecorderField.swift":
             "a Hyper chord while no Hyper key is set (#1870): the "
             + "recorder stays live, since re-recording is a way "

@@ -11949,6 +11949,31 @@ on the click — a search hit, Go to or a diff jump opens the card
 to reach one row, whose wash is the motion that answers them —
 and never under Reduce Motion.
 
+:::unreleased
+
+**Shut, the card shows every entry's picture (owner ruling
+2026-10-17).** A collapsible section's shut state is its summary
+row, and here that was one small `ink3` sentence between two cards
+with real controls — the one card on the page users overlooked.
+So the shut card also draws a strip of every entry's picture at
+rest, in card order with the groups set apart, scrolling sideways
+and fading at an end where it cuts a picture, the KiwiShelf's
+overflow arithmetic (`ShelfOverflow.fades`) rather than a copy.
+A picture plays while hovered, shows its entry's own sentence as
+a tooltip after the window's 250 ms delay, and a click opens the
+card at its entry and plays that one — the same "a click asked to
+read it" argument as the first picture's, aimed. The strip is a
+pointer shortcut: hidden from VoiceOver, never a focus stop, since
+the disclosure above it opens the card where every entry is
+reachable. It breaks the "summary is words only" convention for
+this one card, which is a section — a peer of the page — rather
+than a drawer: a picture is the content arriving, where a drawer's
+summary states a value. Every entry is drawn rather than one per
+group because each picture is its entry's own way in; the cost is
+weight, so a strip that reads as a solid band in light mode is
+the signal to cut it back to one picture per group.
+:::
+
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
 app does not do — the channel-not-yet-existing case, removed
