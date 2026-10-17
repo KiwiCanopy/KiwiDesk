@@ -231,6 +231,28 @@ struct MenuBarRevealPaymentTests {
         #expect(paid.contain("menu bar hidden"))
     }
 
+    /// KiwiHub keyed from the quick menu still drops the return: the
+    /// floating facet is the ring's and KiwiVision's alone (#2373),
+    /// or the payment's raise would close KiwiHub.
+    @Test("A floating own panel keyed since still drops the return")
+    func floatingPanelStillDrops() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.statusMenuDidOpen()
+        core.handle(.windowFocused(WindowID(2)))
+        core.statusMenuDidClose()
+        core.eventLoop.ownKeyWindow = {
+            OwnKeyWindowReading(
+                number: 999_999,
+                isDialog: false,
+                floatsOverWindows: true
+            )
+        }
+        core.payMenuBarRevealIfDue()
+        #expect(lines.contain("an own window keyed since"))
+        #expect(!lines.contain("menu bar hidden"))
+    }
+
     /// A return the open owed over a report ahead of it waits for
     /// the menu to close and is paid then, like one owed at the
     /// report.

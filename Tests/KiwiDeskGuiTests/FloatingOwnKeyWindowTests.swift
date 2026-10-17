@@ -5,11 +5,9 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// KiwiHub floats over every window, so it reads as no own key
-/// window and the focus ring and KiwiVision stay on the focus
-/// beneath it; Settings, at the normal level, keeps today's
-/// reading (#2373). The production reading needs a real key
-/// window, so its gate is pinned by a needle beside the verdict.
+/// KiwiHub's panel floats above the normal level, which is what the
+/// reading's `floatsOverWindows` facet keys on (#2373); the
+/// consumers are `FloatingOwnPanelConsumerTests`'.
 @Suite("Floating own key window (#2373)")
 @MainActor
 struct FloatingOwnKeyWindowTests {
@@ -20,25 +18,28 @@ struct FloatingOwnKeyWindowTests {
         #expect(!EventLoop.floatsAboveWindows(.normal))
     }
 
-    @Test("the reading drops a floating key window, KiwiHub floats")
-    func readingDropsKiwiHub() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
+    @Test("KiwiHub's panel floats, as a panel")
+    func kiwiHubFloats() {
+        let panel = JumpPanelController(core: makeTestCore()).makePanel()
+        #expect(EventLoop.floatsAboveWindows(panel.level))
+        #expect((panel as NSWindow) is NSPanel)
+    }
+
+    /// The facet needs a real key window, so its classification is
+    /// pinned where it is written: a non-modal panel above normal.
+    @Test("the reading marks a non-modal floating panel")
+    func readingMarksIt() throws {
         let reading = try SourceScan.blankedSource(
-            at: root.appendingPathComponent(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
                 "Sources/KiwiDeskCore/Events/EventLoop+RaiseStandDown.swift"
             )
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(
             reading.contains(
-                "guardletkey,!floatsAboveWindows(key.level)else{returnnil}"
+                "floatsOverWindows:classifiedisNSPanel"
+                    + "&&app.modalWindow!==key"
+                    + "&&floatsAboveWindows(key.level)"
             )
         )
-        let hub = try SourceScan.blankedSource(
-            at: root.appendingPathComponent(
-                "Sources/KiwiDesk/Jump/JumpPanelController.swift"
-            )
-        ).split(whereSeparator: \.isWhitespace).joined()
-        #expect(hub.contains("panel.level=.floating"))
-        #expect(EventLoop.floatsAboveWindows(.floating))
     }
 }

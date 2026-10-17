@@ -13,6 +13,11 @@ struct OwnKeyWindowReading: Equatable {
     /// close-return raise stand-down governs — see
     /// `EventLoop.classifiesAsOwnDialog`.
     let isDialog: Bool
+    /// Whether that window is a non-modal panel floating over every
+    /// window — KiwiHub — which the focus ring and KiwiVision look
+    /// past to the focus beneath it (#2373). The raise stand-down
+    /// and the menu-bar reveal still read the window.
+    var floatsOverWindows = false
 }
 
 /// The close-return raise stand-down (#913/#929/#935) and the
@@ -90,18 +95,13 @@ extension EventLoop {
     /// walked to the chain's ROOT, so a sheet (however nested)
     /// over the marked Settings window inherits its exemption —
     /// while `number` stays the key window's own, which is what
-    /// the ring compares against the anchor. A key window floating
-    /// above the normal level — KiwiHub — reads as none: it sits
-    /// over the windows, so the ring and KiwiVision stay on the
-    /// focus beneath it (#2373).
+    /// the ring compares against the anchor.
     static func ownKeyWindowReading() -> OwnKeyWindowReading? {
         let app = NSApplication.shared
         let key =
             app.keyWindow?.isVisible == true
             ? app.keyWindow : app.modalWindow
-        guard let key, !floatsAboveWindows(key.level) else {
-            return nil
-        }
+        guard let key else { return nil }
         var classified = key
         while let parent = classified.sheetParent {
             classified = parent
@@ -114,7 +114,10 @@ extension EventLoop {
                 isPanel: classified is NSPanel,
                 isMarkedTilingWindow: classified.identifier?
                     .rawValue == OwnWindowTiling.identifier
-            )
+            ),
+            floatsOverWindows: classified is NSPanel
+                && app.modalWindow !== key
+                && floatsAboveWindows(key.level)
         )
     }
 

@@ -141,7 +141,10 @@ extension KiwiCore {
         // owns the split).
         let anchor = state.focusAnchor(of: space, tiled: tiled)
         let suppressed =
-            eventLoop.ownKeyWindow().map { reading in
+            eventLoop.ownKeyWindow().flatMap {
+                // A floating panel (KiwiHub) leaves the ring (#2373).
+                $0.floatsOverWindows ? nil : $0
+            }.map { reading in
                 UInt32(exactly: reading.number).map {
                     anchor?.raw != $0
                 } ?? true
