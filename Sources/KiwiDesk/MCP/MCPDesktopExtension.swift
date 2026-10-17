@@ -67,11 +67,11 @@ enum MCPDesktopExtension {
         return """
             #!/bin/sh
             # Starts KiwiDesk's MCP server. Written by KiwiDesk ▸
-            # Settings ▸ AI ▸ Add to Claude Desktop.
+            # Settings ▸ AI ▸ Claude Desktop ▸ Add….
             KIWIDESK=\(quoted)
             if [ ! -x "$KIWIDESK" ]; then
               echo "KiwiDesk is not at $KIWIDESK. Open KiwiDesk," \
-                "then Settings > AI > Add to Claude Desktop again." >&2
+                "then Settings > AI > Claude Desktop > Add… again." >&2
               exit 1
             fi
             exec "$KIWIDESK" \(args)

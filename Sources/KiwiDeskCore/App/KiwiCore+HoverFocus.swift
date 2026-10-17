@@ -25,7 +25,10 @@ extension KiwiCore {
             focusedWindowID == armedFocus,
             wallClock().timeIntervalSince(lastDesktopSwitch)
                 > DesktopSwitch.settle,
-            let target = hoverTarget(at: GeometryUtils.axPoint(cocoaPoint))
+            let target = hoverTarget(at: GeometryUtils.axPoint(cocoaPoint)),
+            // The window the pointer was left over when the focus
+            // moved without it waits until the pointer leaves it.
+            !mouse.rest.held.contains(target.id)
         else { return }
         let front = frontmostPIDProvider?()
         let before = focusedWindowID
@@ -128,5 +131,14 @@ extension KiwiCore {
     private static func ignoresPointer(number: Int) -> Bool {
         EventLoop.ownWindow(number: number)?.ignoresMouseEvents
             == true
+    }
+
+    /// The tracked windows whose state frames hold `cocoaPoint` —
+    /// the pointer rest's hold, read on every move, so state only.
+    func trackedWindows(at cocoaPoint: CGPoint) -> Set<WindowID> {
+        let point = GeometryUtils.axPoint(cocoaPoint)
+        return Set(
+            state.windows.all.filter { $0.frame.contains(point) }.map(\.id)
+        )
     }
 }

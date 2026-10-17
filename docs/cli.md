@@ -189,14 +189,15 @@ take this entry, and one with its own config format takes the same
 }
 ```
 
-Settings ▸ AI ▸ **Copy Setup Prompt** puts a short prompt carrying
-this entry, with the path of the copy you are running, on the
-clipboard: paste it into the AI app, which adds the server itself
-or walks you through it. The same page has ready-made prompts that
-have the AI app ask you what you want, one question at a time.
+Settings ▸ AI ▸ Other AI apps ▸ **Copy Setup Prompt** puts a short
+prompt carrying this entry, with the path of the copy you are
+running, on the clipboard: paste it into the AI app, which adds
+the server itself or walks you through it. The same page has
+ready-made prompts that have the AI app ask you what you want, one
+question at a time.
 
-**Add to Claude Desktop…** on the same page builds a Claude Desktop
-extension for the copy you are running and opens it in Claude
+**Add…** in the Claude Desktop row of the same page builds a Claude
+Desktop extension for the copy you are running and opens it in Claude
 Desktop, which asks you to install it. The extension starts that
 copy, so after moving KiwiDesk add it again.
 

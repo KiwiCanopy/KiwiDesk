@@ -95,6 +95,9 @@ extension KiwiCore {
             self?.focusUnderRestingPointer(at: point, armedFocus: armed)
         }
         mouse.rest.noteArm = { [weak self] in self?.focusedWindowID }
+        mouse.rest.windowsAt = { [weak self] point in
+            self?.trackedWindows(at: point) ?? []
+        }
         tiler.onMouseSettings = { [weak self] settings in
             self?.mouse.rest.apply(settings)
         }

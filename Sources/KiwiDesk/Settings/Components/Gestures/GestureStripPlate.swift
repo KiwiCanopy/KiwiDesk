@@ -3,7 +3,8 @@ import SwiftUI
 
 /// One picture in the shut card's strip: at rest on its key frame,
 /// looping while hovered (never under Reduce Motion), its gesture's
-/// sentence as the tooltip, half-faded where the gesture is off —
+/// sentence as an AppKit tooltip (`PlateToolTip`), half-faded where
+/// the gesture is off —
 /// faded, not `GreyOut`, whose `.disabled` would refuse the click
 /// that lands on the entry explaining why.
 struct GestureStripPlate: View {
@@ -26,7 +27,7 @@ struct GestureStripPlate: View {
         .contentShape(Rectangle())
         .onTapGesture { onLand(item) }
         .onHover(perform: hover)
-        .help(item.sentence(settings))
+        .overlay(PlateToolTip(text: item.sentence(settings)))
     }
 
     /// Restarts the gesture from its first frame, then loops it.

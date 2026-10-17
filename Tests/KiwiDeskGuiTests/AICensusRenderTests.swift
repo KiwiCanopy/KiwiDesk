@@ -157,6 +157,74 @@ struct AICensusRenderTests {
         #expect(!squashed.contains("AIRowOrder.setup"))
     }
 
+    /// Both cards draw one row shape (owner ruling 2026-10-17):
+    /// the setup row mounts `AIActionRow` twice — Claude Desktop
+    /// before Other AI apps (#2258 ▸ Ruling 7) — and a prompt row
+    /// once, so the two cards cannot drift apart.
+    @Test("both cards draw the shared action row")
+    func cardsShareTheActionRow() throws {
+        let setup = try squashedAI("AISetupRow.swift")
+        #expect(setup.occurrences(of: "AIActionRow(") == 2)
+        let add = try #require(
+            setup.range(of: "title:SettingsCatalog.ai.addToClaudeDesktop")
+        )
+        let copy = try #require(
+            setup.range(of: "title:SettingsCatalog.ai.copySetupPrompt")
+        )
+        #expect(add.lowerBound < copy.lowerBound)
+        let prompt = try squashedAI("AIPromptRow.swift")
+        #expect(prompt.occurrences(of: "AIActionRow(") == 1)
+        // The shared row lays out through the one row axis.
+        let row = try squashedAI("AIActionRow.swift")
+        #expect(row.occurrences(of: "SettingsRowShape(labelFills:true)") == 1)
+        // The button names itself, so the title is drawn, not spoken.
+        #expect(
+            row.occurrences(of: "Text(title).accessibilityHidden(true)")
+                == 1
+        )
+    }
+
+    /// The setup rows draw the caption and help the census names
+    /// for search, each spelled once (#1250).
+    @Test("the setup rows draw their census caption and help")
+    func setupRowsDrawTheirCensusText() throws {
+        let setup = try squashedAI("AISetupRow.swift")
+        for key in [AIKey.addToClaudeDesktop, .copySetupPrompt] {
+            let caption = try #require(key.text.captionKey)
+            #expect(
+                setup.occurrences(of: "\"\(caption)\"") == 1,
+                "\(key)"
+            )
+        }
+        let help = try #require(AIKey.copySetupPrompt.text.helpKey)
+        #expect(setup.occurrences(of: "\"\(help)\"") == 1)
+        #expect(setup.occurrences(of: "help:help") == 1)
+    }
+
+    private func squashedAI(_ file: String) throws -> String {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/AI/" + file
+            )
+        return try SourceScan.strippedSource(at: url)
+            .split(whereSeparator: \.isWhitespace).joined()
+    }
+
+    /// The setup card's intro is its header caption, the slot
+    /// every card's framing sentence takes, never a body line
+    /// drawn like the rows beneath it.
+    @Test("the setup intro is the card's caption")
+    func setupIntroIsTheCaption() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let section = root.appendingPathComponent(
+            "Sources/KiwiDesk/Settings/Sections/AISection.swift"
+        )
+        let squashed = try SourceScan.strippedSource(at: section)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(squashed.contains("caption:L(\"ai.setup.intro\""))
+        #expect(!squashed.contains("Text(L(\"ai.setup.intro\""))
+    }
+
     /// The cards' ruled order (#1685 ▸ Ruling 6a, 2026-10-15): Set
     /// up, the ready-made prompts, then what the AI app can do.
     @Test("the cards keep their ruled order")
