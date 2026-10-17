@@ -116,6 +116,8 @@ final class SettingsModel: ObservableObject {
     /// (#2262); written by `refreshUnsavedLive` alone.
     @Published var unsavedLive: UnsavedLiveSettings?
     @Published var liveUnsaved = false
+    /// Live leaves the last Keep could not write, by keep id (#2368).
+    @Published var liveKeepRefusals: [String: NotKeepable] = [:]
     /// Dashboard edit target: live config or stored profile (#18, #64).
     @Published var target: EditTarget = .live
     /// Whether screen placement canvas is editable for current target (#18).

@@ -10,6 +10,20 @@ public struct UnsavedLiveSettings: Equatable {
     public let saved: TilingSettings
     /// The live settings, read beside `saved` in one judgement.
     public let live: TilingSettings
+    /// Each unsaved leaf by its keep id (a `KeepPointer` string),
+    /// mapped to `saved` with that one leaf live — what Settings
+    /// reads to tell which leaves a row's Keep writes (#2368).
+    public let leaves: [String: TilingSettings]
+
+    public init(
+        saved: TilingSettings,
+        live: TilingSettings,
+        leaves: [String: TilingSettings] = [:]
+    ) {
+        self.saved = saved
+        self.live = live
+        self.leaves = leaves
+    }
 }
 
 extension KiwiCore {
@@ -50,6 +64,38 @@ extension KiwiCore {
         let current = tiler.settings
         let saved = current.patchedLeafByLeaf(leaves)
         guard saved != current else { return nil }
-        return UnsavedLiveSettings(saved: saved, live: current)
+        var each: [String: TilingSettings] = [:]
+        for path in leaves.keys {
+            var others = leaves
+            others.removeValue(forKey: path)
+            each[KeepPointer.string([KeepRoot.settings] + path)] =
+                current.patchedLeafByLeaf(others)
+        }
+        return UnsavedLiveSettings(saved: saved, live: current, leaves: each)
+    }
+
+    /// Keeps the named unsaved leaves into the live profile, as
+    /// `keep_settings` does (#2368); ids come from `leaves`.
+    /// Answers the ids it could not keep, with the reason.
+    @discardableResult
+    public func keepUnsavedLive(_ ids: [String]) -> [String: NotKeepable] {
+        let answer = keepSettings(ids.map(JSONValue.string))
+        guard answer.isSuccess else {
+            return Dictionary(
+                ids.map { ($0, .notWritten) },
+                uniquingKeysWith: { first, _ in first }
+            )
+        }
+        guard case .object(let map)? = answer.data,
+            case .array(let refused)? = map["not_keepable"]
+        else { return [:] }
+        var reasons: [String: NotKeepable] = [:]
+        for case .object(let leaf) in refused {
+            guard let id = leaf["id"]?.stringValue else { continue }
+            reasons[id] =
+                leaf["not_keepable"]?.stringValue
+                .flatMap(NotKeepable.init(rawValue:)) ?? .notWritten
+        }
+        return reasons
     }
 }

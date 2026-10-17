@@ -7096,10 +7096,24 @@ hands over. A second comparison in the GUI would list what no keep
 could write: an app-wide value, a temporary Space's leaf, a
 Lua-owned config.
 
-Save keeps the rows, because a Settings Save lays only the draft's
-own edits over live as it is at the Save, never the settings it
-was seeded with — a whole-settings apply would put back every live
-change since, these rows among them. Closing Settings reverts
+Save writes the rows into the profile with the draft, because a
+Settings Save lays only the draft's own edits over live as it is at
+the Save, never the settings it was seeded with — a whole-settings
+apply would put back every live change since, these rows among
+them. A row also keeps alone, without the draft's edits (#2368):
+each row's **Keep**, and **Keep All** once the section lists more
+than one, write exactly the leaves that row narrates through the
+same `keep_settings` judgement, so keeping one layout's value
+never keeps its sibling's, and a leaf the keep cannot write stays
+listed with the reason under it.
+
+A per-layout App Bar indicator survives wearing the shared look
+(#2368, owner ruling 2026-10-17). Picking a look clears it, since
+the pick says "draw the look's indicator"; following the shared
+look is no pick, and clearing it there made the stored value
+unreadable to the keep judgement — the row survived every Save.
+So `LookBody.worn(over:)` keeps it and `painted(over:)`, the
+explicit pick, clears it. Closing Settings reverts
 nothing live and never asks the leave question: these are not the
 window's edits. A setting the draft also edits is the draft's row
 alone, since that edit is what its Save commits. Undoing a live row means
