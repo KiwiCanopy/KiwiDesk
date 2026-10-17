@@ -11420,13 +11420,13 @@ the user typed.
 
 A click still selects the item before it does what ↩ does, so the
 footer never describes something other than what was acted on —
-Save as New Profile… stays open to be named. A key that moves the
+Save as New Profile… stays open to be named — and an item the
+query dims, which ↩ cannot reach, takes no click either. A key that moves the
 selection clears the lift until the pointer really moves again,
 so ↑, ↓, ↩ and the digits always start from the green; a row that
 slides under a still pointer — the panel opening there, a
 re-rank, a scroll — lifts nothing. The lift is the hover ink
-Settings already uses (`chipRest` on a row or tile, `chipHover`
-in a chip's capsule) and never the accent, a border or an ink
+Settings already uses and never the accent, a border or an ink
 change, and the selected item draws none, since a durable marking
 and a pointer state never share a property (#1173). VoiceOver
 follows the selection only. `JumpHoverTests` holds the rule.

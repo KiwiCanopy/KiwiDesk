@@ -37,26 +37,4 @@ extension JumpModel {
     func endHover(_ target: JumpHover) {
         if hover == target { clearHover() }
     }
-
-    /// A click selects the item, then does what ↩ does on it, so
-    /// the footer never describes something else (#2365).
-    func clickItem(_ item: ViewPickList.Item) {
-        guard scope == .view else { return }
-        view?.select(item.pick)
-        applyView(item)
-    }
-
-    private func noteHover(_ target: JumpHover, pointer: CGPoint) {
-        if pointerMoved(to: pointer) {
-            if hover != target { hover = target }
-        } else if hover != target {
-            clearHover()
-        }
-    }
-
-    private func pointerMoved(to point: CGPoint) -> Bool {
-        guard point != lastPointer else { return false }
-        lastPointer = point
-        return true
-    }
 }

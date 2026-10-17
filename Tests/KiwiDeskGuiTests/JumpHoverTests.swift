@@ -63,6 +63,7 @@ struct JumpHoverTests {
     @Test("a key clears the lift until the pointer moves again")
     func keyClearsLift() {
         let model = model()
+        model.currentPointer = { CGPoint(x: 10, y: 30) }
         model.hoverRow(1, pointer: CGPoint(x: 10, y: 30))
         #expect(model.hover == .row(1))
         model.handle(.step(1))
@@ -73,6 +74,19 @@ struct JumpHoverTests {
         model.hoverRow(0, pointer: CGPoint(x: 10, y: 12))
         #expect(model.hover == .row(0))
         #expect(model.list.selection == 1)
+    }
+
+    /// The pointer rested off the rows — a header, the padding —
+    /// then ↓ scrolled a row under it: no lift.
+    @Test("a key scroll under a pointer resting off the rows lifts nothing")
+    func keyScrollAfterOffRowRest() {
+        let model = model()
+        var pointer = CGPoint(x: 10, y: 10)
+        model.currentPointer = { pointer }
+        pointer = CGPoint(x: 10, y: 70)
+        model.handle(.step(1))
+        model.hoverRow(0, pointer: pointer)
+        #expect(model.hover == nil)
     }
 
     /// A scroll slides another row under the still pointer: the lift
@@ -150,6 +164,25 @@ struct JumpHoverTests {
         model.clickItem(item)
         #expect(model.view?.selected?.pick == .layout(.stack))
         #expect(applied == [.layout(.stack)])
+    }
+
+    /// ↩ cannot reach an item the query dims, so a click on one
+    /// selects nothing and applies nothing.
+    @Test("a click on a dimmed item does nothing")
+    func dimmedClickIsInert() throws {
+        let model = model()
+        model.loadView = { JumpScopeModelTests.viewList() }
+        var applied: [ViewPickList.Pick] = []
+        model.onApplyView = { applied.append($0) }
+        model.setScope(.view)
+        model.query = "studio"
+        let before = model.view?.selected?.pick
+        let item = try #require(
+            model.view?.items(.layout).first { $0.pick == .layout(.stack) }
+        )
+        model.clickItem(item)
+        #expect(model.view?.selected?.pick == before)
+        #expect(applied.isEmpty)
     }
 
     @Test("the selected item draws no lift; the accent wins")
