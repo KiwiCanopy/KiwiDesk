@@ -22,18 +22,16 @@ struct AISection: View {
     }
 
     private var setup: some View {
-        SettingsSection(SettingsCatalog.ai.setupCard) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(
-                    L(
-                        "ai.setup.intro",
-                        "KiwiDesk has no AI of its own. Connect the AI "
-                            + "app you already use, and set up and "
-                            + "control KiwiDesk by asking it."
-                    )
-                )
-                AISetupRow()
-            }
+        SettingsSection(
+            SettingsCatalog.ai.setupCard,
+            caption: L(
+                "ai.setup.intro",
+                "KiwiDesk has no AI of its own. Connect the AI "
+                    + "app you already use, and set up and "
+                    + "control KiwiDesk by asking it."
+            )
+        ) {
+            AISetupRow()
         }
     }
 
