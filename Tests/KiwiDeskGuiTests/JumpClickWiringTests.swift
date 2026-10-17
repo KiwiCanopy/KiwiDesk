@@ -25,12 +25,15 @@ struct JumpClickWiringTests {
             )
         )
         #expect(panel.contains("onApply:{model.clickItem($0)}"))
-        // No view calls past them.
-        for file in [
-            "JumpPanelView.swift", "JumpViewSide.swift", "JumpRowView.swift",
-            "ViewChip.swift", "JumpLayoutTile.swift",
-        ] {
-            let source = try Self.squashed(file)
+        // Nothing outside the model calls past them.
+        let jump = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Jump")
+        let files = try SourceScan.swiftSources(under: jump)
+        #expect(files.count > 5)
+        for file in files
+        where !file.lastPathComponent.hasPrefix("JumpModel") {
+            let source = try SourceScan.blankedSource(at: file)
+                .split(whereSeparator: \.isWhitespace).joined()
             #expect(!source.contains("applyView("), "\(file)")
             #expect(!source.contains("onPick("), "\(file)")
         }

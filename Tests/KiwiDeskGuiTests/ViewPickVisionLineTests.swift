@@ -118,6 +118,7 @@ struct ViewPickVisionLineTests {
 
     @Test("New Lens… is last and no ⌘ digit reaches it")
     func digitsSkipTheCreateChip() {
+        LocalizationManager.shared.select("en")
         var list = list()
         let vision = list.items(.vision)
         #expect(vision.last?.pick == .newLens)
