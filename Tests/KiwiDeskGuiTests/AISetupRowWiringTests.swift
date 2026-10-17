@@ -86,6 +86,14 @@ struct AISetupRowWiringTests {
         // A build in flight greys the button; a Claude Desktop
         // removed since the last read re-reads instead of failing.
         #expect(row.occurrences(of: "||building") == 1)
+        // "Add…" alone names nothing: VoiceOver hears the target,
+        // on the Add button's own chain.
+        #expect(
+            row.occurrences(
+                of: ".settingsActionButton()"
+                    + ".accessibilityLabel(L(\"ai.setup.add.ax\","
+            ) == 1
+        )
         // …and the grey always lifts, whatever the build answered.
         #expect(row.occurrences(of: "defer{building=false}") == 1)
         #expect(

@@ -177,6 +177,11 @@ struct AICensusRenderTests {
         // The shared row lays out through the one row axis.
         let row = try squashedAI("AIActionRow.swift")
         #expect(row.occurrences(of: "SettingsRowShape(labelFills:true)") == 1)
+        // The button names itself, so the title is drawn, not spoken.
+        #expect(
+            row.occurrences(of: "Text(title).accessibilityHidden(true)")
+                == 1
+        )
     }
 
     /// The setup rows draw the caption and help the census names

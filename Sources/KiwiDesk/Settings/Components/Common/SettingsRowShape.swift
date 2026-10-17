@@ -9,7 +9,7 @@ struct SettingsRowShape<Label: View, Control: View>: View {
     @Environment(\.settingsLabelColumn) private var labelColumn
     /// The label takes the row's free width and the control sits
     /// trailing, instead of the shared label column — a titled,
-    /// captioned row with one action (AI ▸ Set up).
+    /// captioned row with one action (the AI page's action rows).
     var labelFills = false
     @ViewBuilder let label: Label
     @ViewBuilder let control: Control

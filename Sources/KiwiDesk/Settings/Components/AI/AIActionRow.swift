@@ -15,7 +15,9 @@ struct AIActionRow<Action: View>: View {
         SettingsRowShape(labelFills: true) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
+                    // Drawn, not spoken: the button names itself.
                     Text(title)
+                        .accessibilityHidden(true)
                     if let help {
                         HelpButton(explanation: help, subject: title)
                     }
