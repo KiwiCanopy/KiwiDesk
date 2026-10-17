@@ -14,12 +14,12 @@ extension JumpPanelController {
             guard let self, let model else { return }
             self.apply(pick, space: model.view?.layout?.space)
         }
-        model.freeProfileName = { [weak self] base in
-            self?.core.profiles.freeName(base: base) ?? base
+        model.newProfileName = { [weak self] typed in
+            self?.core.profiles.newProfileName(typed: typed)
         }
         // Saves the LIVE arrangement — `save_profile`, never
-        // Settings' draft commit — and claims this screen setup's
-        // default as every save does (#2359 ruling 3). No load: the
+        // Settings' draft commit — and claims the connected screen
+        // setup as every save does (#2359 ruling 3). No load: the
         // saved profile is the live one.
         // A save that does not land keeps the panel open, saying so.
         model.onSaveProfile = { [weak self] name in
@@ -181,13 +181,10 @@ extension JumpPanelController {
     /// the exit fade applies nothing. No distrust: the window the
     /// close keys again is the one the user was in.
     private func apply(_ pick: ViewPickList.Pick, space: SpaceID?) {
-        // Save as New Profile… names its profile in the panel
-        // first (`JumpModel.applyView`); it never closes it here.
-        guard pick != .newProfile, dismiss(distrusting: false) else {
-            return
-        }
+        guard dismiss(distrusting: false) else { return }
         switch pick {
         case .newProfile:
+            // `JumpModel.applyView` names it in the panel instead.
             break
         case .layout(let mode):
             if let space { core.applyLayout(mode, to: space) }

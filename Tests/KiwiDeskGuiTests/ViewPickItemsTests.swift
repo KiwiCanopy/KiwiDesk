@@ -4,8 +4,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// What the View side's lines hold (#2309 rulings 2 and 9): the
-/// Profile line only where another profile can be loaded, a broken
+/// What the View side's lines hold (#2309 rulings 2 and 9, #2359):
+/// the Profile line always, ending in Save as New Profile…, a broken
 /// profile greyed with its reason, KiwiVision's current state
 /// marked, and every chip greyed while KiwiDesk boots.
 @Suite("View picker items", .serialized)

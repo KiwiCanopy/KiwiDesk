@@ -24,16 +24,18 @@ final class JumpModel: ObservableObject {
     @Published private(set) var fieldFocusRequests = 0
 
     func requestFieldFocus() { fieldFocusRequests += 1 }
-    /// The profile name the field holds while Save as New
-    /// Profile… names one, until ↩ saves or Esc returns to
-    /// picking (#2359 ruling 3); nil while picking.
-    @Published var profileNaming: String?
+    /// What the field holds while Save as New Profile… names a
+    /// profile, until ↩ saves or Esc returns to picking (#2359
+    /// ruling 3); nil while picking. Changed only through
+    /// `beginNaming`, `typeName` and `endNaming`.
+    @Published var naming: ProfileNaming?
     /// Bumped as naming starts: the field selects its pre-fill.
     @Published private(set) var fieldSelectAllRequests = 0
-    /// The last save did not land; cleared as the name changes.
-    @Published var namingFailed = false
 
     func requestFieldSelectAll() { fieldSelectAllRequests += 1 }
+
+    /// Whether the field names a profile rather than filtering.
+    var isNaming: Bool { scope == .view && naming != nil }
     /// Set when a close starts its fade; keys stop counting.
     @Published private(set) var leaving = false
 
@@ -67,8 +69,9 @@ final class JumpModel: ObservableObject {
         ViewPickList(layout: nil, kiwiVisionOn: false, items: [:])
     }
     var onApplyView: (ViewPickList.Pick) -> Void = { _ in }
-    /// Core's free profile name for a typed base (`freeName`).
-    var freeProfileName: (String) -> String = { $0 }
+    /// The name a save writes for what was typed, nil where it
+    /// names no profile (`ProfileManager.newProfileName`).
+    var newProfileName: (String) -> String? = { $0.isEmpty ? nil : $0 }
     /// Saves the live arrangement as the named profile; whether it
     /// landed.
     var onSaveProfile: (String) -> Bool = { _ in true }
@@ -102,14 +105,13 @@ final class JumpModel: ObservableObject {
             switch scope {
             case .windows: return list.query
             case .shortcuts: return shortcuts?.query ?? ""
-            case .view: return profileNaming ?? view?.query ?? ""
+            case .view: return naming?.text ?? view?.query ?? ""
             }
         }
         set {
             guard newValue != query else { return }
-            if scope == .view, profileNaming != nil {
-                profileNaming = newValue
-                namingFailed = false
+            if isNaming {
+                typeName(newValue)
                 return
             }
             // What re-ranks under the pointer is no pointer move.
@@ -135,7 +137,7 @@ final class JumpModel: ObservableObject {
             setScope(scope.stepped(forward: forward))
             return
         }
-        if scope == .view, profileNaming != nil {
+        if isNaming {
             handleNaming(key)
             return
         }
@@ -177,7 +179,7 @@ final class JumpModel: ObservableObject {
     /// View and Shortcuts read their content fresh.
     func setScope(_ scope: JumpScope) {
         guard scope != self.scope else { return }
-        profileNaming = nil
+        naming = nil
         if scope == .view { view = loadView() }
         if scope == .shortcuts {
             shortcuts = ShortcutsSheet(reference: loadShortcuts())

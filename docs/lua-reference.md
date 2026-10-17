@@ -5196,8 +5196,8 @@ row.
   greyed. Return loads it like `load_profile`. The line ends in
   **Save as New Profile…**: Return turns the search field into a
   name field, and Return again saves the current arrangement under
-  that name like `save_profile`, making it this screen setup's
-  default; a taken name saves beside it rather than over it. Esc
+  that name like `save_profile`, which hands it the connected
+  screen setup; a taken name saves beside it rather than over it. Esc
   goes back to picking, and ⌘1–9 and ↓ skip the chip.
 - **KiwiVision** — Default, which turns
   [KiwiVision](#kiwivisiontoggle) on with no lens, then one item

@@ -75,7 +75,7 @@ struct JumpPanelView: View {
         // The glyph's frame matches the row icon's, so the field
         // text and the row titles share one leading edge.
         HStack(spacing: JumpRowView.spacing) {
-            Image(systemName: naming ? "plus" : "magnifyingglass")
+            Image(systemName: model.isNaming ? "plus" : "magnifyingglass")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(width: JumpRowView.iconSize)
@@ -95,6 +95,7 @@ struct JumpPanelView: View {
             .tint(SettingsTheme.accent)
             .focused($fieldFocused)
             .accessibilityLabel(fieldName)
+            .accessibilityHint(namingLine ?? "")
             JumpScopeSwitch(model: model)
         }
         // The glyph keeps the row icons' leading edge: the
@@ -115,12 +116,9 @@ struct JumpPanelView: View {
     /// the new text.
     private func selectFieldText() {
         fieldFocused = true
+        // The panel's own field editor, never whatever responds.
         DispatchQueue.main.async {
-            NSApp.sendAction(
-                #selector(NSText.selectAll(_:)),
-                to: nil,
-                from: nil
-            )
+            (NSApp.keyWindow?.firstResponder as? NSText)?.selectAll(nil)
         }
     }
 

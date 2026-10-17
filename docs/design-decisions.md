@@ -11471,9 +11471,13 @@ exists, and "Save as New Profile…" ends the Profile line, so a
 line keeps one shape. Saving a profile from KiwiHub names it in
 the search field rather than in a dialog, since the panel already
 holds the keyboard, and saves the live arrangement — never a
-Settings draft — under a free name, so a taken name never
-overwrites. Placed first, a create chip would shift every ⌘ digit and put ↩ one keystroke from a create.
-The digits skip it, ↓ never lands on it while the line holds
+Settings draft — under a free name: a panel driven by single keys
+must never replace a saved profile without a word, so a taken
+name saves beside it. The save claims the connected screen setup,
+as every save does, and the caption says the new profile then
+holds these screens. Placed first, a create chip would shift
+every ⌘ digit and put ↩ one keystroke from a create. The digits
+skip it, ↓ never lands on it while the line holds
 anything else, and the filter finds it by name. A Lua-owned setup
 draws New Lens… greyed with its reason rather than hiding it.
 `ViewPickVisionLineTests`, `ViewPickItemsTests` and

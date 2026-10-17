@@ -1,42 +1,66 @@
 import Foundation
 import KiwiDeskCore
 
-/// KiwiHub's Save as New Profile… (#2359 ruling 3): the field
-/// names the profile, the live arrangement saves under it through
-/// `save_profile`, and Esc returns to picking. No load and no
-/// forwarding: the saved profile is the live one.
+/// What KiwiHub's field holds while Save as New Profile… names a
+/// profile (#2359 ruling 3): the typing, the name ↩ writes —
+/// worked out once per change, since a free name reads the
+/// profile directory — and whether the last save failed.
+struct ProfileNaming: Equatable {
+    var text: String
+    /// The name a save writes, nil where the typing names none.
+    var target: String?
+    var failed = false
+}
+
+/// KiwiHub's Save as New Profile…: the field names the profile,
+/// the live arrangement saves under it through `save_profile`,
+/// and Esc returns to picking. No load and no forwarding: the
+/// saved profile is the live one.
 extension JumpModel {
     /// Save as New Profile… was picked: the field names the
     /// profile, pre-filled with a free name and selected.
     func beginNaming() {
-        profileNaming = freeProfileName(ViewPickText.newProfileBase)
+        let start =
+            newProfileName(ViewPickText.newProfileBase)
+            ?? ViewPickText.newProfileBase
+        let target = newProfileName(start)
+        naming = ProfileNaming(text: start, target: target)
         requestFieldSelectAll()
-        onAnnounce(ViewPickText.namingPrompt)
+        // The caption row joins the panel, which refits.
+        onResultsChange()
+        onAnnounce(ViewPickText.namingSpoken(target ?? start))
     }
 
-    /// The name ↩ writes — the typed name, made free so a save
-    /// never overwrites — or nil where it cannot name a profile.
-    var namingTarget: String? {
-        guard let typed = profileNaming,
-            ProfileManager.isValidName(typed)
-        else { return nil }
-        return freeProfileName(
-            typed.trimmingCharacters(in: .whitespacesAndNewlines)
-        )
+    /// The typing changed: its target follows, a failure clears.
+    func typeName(_ text: String) {
+        naming = ProfileNaming(text: text, target: newProfileName(text))
     }
 
-    /// ↩ saves, Esc returns to picking; the field keeps every
-    /// other key.
+    /// Back to picking.
+    func endNaming() {
+        naming = nil
+        requestFieldFocus()
+        onResultsChange()
+    }
+
+    /// The name ↩ writes, nil where the typing names no profile.
+    var namingTarget: String? { naming?.target }
+
+    /// ↩ saves, Esc returns to picking; every other key is the
+    /// field's (`JumpKey.of` classifies only these while naming).
     func handleNaming(_ key: JumpKey) {
         switch key {
         case .pick(moveHere: false):
-            if let name = namingTarget {
-                namingFailed = !onSaveProfile(name)
+            guard let name = naming?.target else {
+                onAnnounce(ViewPickText.invalidName)
+                return
+            }
+            if !onSaveProfile(name) {
+                naming?.failed = true
+                onAnnounce(ViewPickText.saveFailed)
             }
         case .escape:
-            profileNaming = nil
-            namingFailed = false
-            requestFieldFocus()
+            endNaming()
             onAnnounce(viewSpoken)
         default:
             break

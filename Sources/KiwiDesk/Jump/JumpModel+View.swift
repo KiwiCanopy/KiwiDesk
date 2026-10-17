@@ -58,8 +58,14 @@ extension JumpModel {
     func applyView(_ item: ViewPickList.Item) {
         guard item.isApplicable else { return }
         let action = ViewPickList.action(of: item)
-        // Save as New Profile… names its profile first (#2359).
-        guard action != .newProfile else { return beginNaming() }
+        // Save as New Profile… names its profile first (#2359); a
+        // second pick of it keeps what was typed, and any other
+        // pick leaves the naming and applies.
+        if action == .newProfile {
+            if !isNaming { beginNaming() }
+            return
+        }
+        if isNaming { endNaming() }
         onApplyView(action)
     }
 

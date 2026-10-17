@@ -18,6 +18,16 @@ extension ProfileManager {
         return "\(base)_\(suffix)"
     }
 
+    /// The name a "Save as New Profile…" writes for `typed`:
+    /// trimmed, then made free, so a taken name saves beside it
+    /// and never over it; nil where it names no profile. The one
+    /// home both Settings and KiwiHub ask (#2359).
+    public func newProfileName(typed: String) -> String? {
+        let trimmed = typed.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard Self.isValidName(trimmed) else { return nil }
+        return freeName(base: trimmed)
+    }
+
     /// Validates profile filename boundaries (no slashes, nulls, dot-files).
     public static func isValidName(_ name: String) -> Bool {
         let trimmed = name.trimmingCharacters(

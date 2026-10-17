@@ -83,15 +83,22 @@ enum ViewPickText {
         L("view_picker.profile.name_prompt", "Profile name")
     }
 
-    /// The one line under the field: what ↩ writes, and that it
-    /// becomes this screen setup's default (#2359 ruling 3).
+    /// The one line under the field: what ↩ writes, and that the
+    /// new profile then holds these screens — a save claims the
+    /// connected screen setup (#2359 ruling 3, profiles.md).
     static func savesAs(_ name: String) -> String {
         L(
-            "view_picker.profile.saves_as",
-            "↩ saves this arrangement as “%1$@”, the default for "
-                + "these screens",
+            "view_picker.profile.saves_holding",
+            "↩ saves your Spaces and layouts as “%1$@”, which then "
+                + "holds these screens",
             name
         )
+    }
+
+    /// What VoiceOver hears as naming starts: the field and what
+    /// ↩ will write.
+    static func namingSpoken(_ name: String) -> String {
+        L("view_picker.ax.naming", "%1$@, %2$@", namingPrompt, savesAs(name))
     }
 
     /// The line under the field when a save did not land.

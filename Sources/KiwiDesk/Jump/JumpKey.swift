@@ -52,12 +52,18 @@ enum JumpKey: Equatable {
     static func of(
         keyCode: UInt16,
         modifiers: NSEvent.ModifierFlags,
-        scope: JumpScope = .windows
+        scope: JumpScope = .windows,
+        naming: Bool = false
     ) -> JumpKey? {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]
         )
         let plain = held.isEmpty
+        // A field naming a profile keeps every key but ↩, Esc and
+        // ⇥, so the caret moves through the name (#2359).
+        if naming {
+            return namingKey(keyCode, held)
+        }
         if scope == .view, let key = layouts(keyCode, held) {
             return key
         }
@@ -82,6 +88,25 @@ enum JumpKey: Equatable {
             return .pick(moveHere: held.contains(.shift))
         default:
             return quick(keyCode, held)
+        }
+    }
+
+    /// The keys a naming field gives up: ↩ saves, Esc and ⇥ end it.
+    private static func namingKey(
+        _ keyCode: UInt16,
+        _ held: NSEvent.ModifierFlags
+    ) -> JumpKey? {
+        switch keyCode {
+        case returnKey, enter:
+            return held.isEmpty ? .pick(moveHere: false) : nil
+        case escapeKey:
+            return held.isEmpty ? .escape : nil
+        case tab:
+            return held.subtracting(.shift).isEmpty
+                ? .stepScope(forward: !held.contains(.shift))
+                : .swallow
+        default:
+            return nil
         }
     }
 
