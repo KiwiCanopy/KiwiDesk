@@ -116,24 +116,27 @@ const layouts = [
   { name: "floating", label: "Floating", desc: s.guide_layout_floating },
 ];
 
-// The Settings window's sections, in the order the app's sidebar
-// shows them (Design = per-profile, System = global).
+// The Settings window's destinations, in the order Home groups
+// them (`SettingsDestination.thisProfile`, then `.wholeApp`).
 //
-// Not one card per destination. Two destinations fold into the
-// card ahead of them, on the same reading each time: this is a
+// Not one card per destination. Three destinations fold into a
+// card beside them, on the same reading each time: this is a
 // walkthrough for someone deciding whether to install, so a card
-// is a thing you would go and do, not a row in the sidebar.
+// is a thing you would go and do, not a tile on Home.
 //   • Advanced Colors folds into Looks & Animations. The app's own
 //     promise there is that you never have to open it — it is the
 //     deep twin of the page above it — so a card
 //     of equal weight would advertise a second page of color work
 //     to exactly the reader the redesign spared it from. The card
 //     names it and says what it is for, which keeps the fold
-//     truthful about what the sidebar actually shows.
+//     truthful about what Home actually shows.
 //   • General folds into App Rules, as it always has.
+//   • Mac Checklist folds into App Rules & General too, named
+//     there: a one-time list of macOS settings is not a thing a
+//     reader comes back to.
 // Everything else keeps its own card, including Gaps & Borders —
 // it is a rename (from Appearance), so the new name has to be on
-// the page or a reader scanning the sidebar for what they read
+// the page or a reader scanning Home for what they read
 // here finds nothing.
 const tour = [
   { title: s.guide_tour_spaces_title, body: s.guide_tour_spaces_body },
@@ -166,6 +169,11 @@ const tour = [
     title: s.guide_tour_apprules_title,
     body: s.guide_tour_apprules_body,
   },
+  {
+    title: s.guide_tour_kiwivision_title,
+    body: s.guide_tour_kiwivision_body,
+  },
+  { title: s.guide_tour_ai_title, body: s.guide_tour_ai_body },
 ];
 
 // The "choosing your own shortcuts" section (#1097). Keys are
@@ -770,6 +778,11 @@ const jsonLd = [
                   <li set:html={note}></li>
                 ))}
               </ul>
+
+              {/* A way out of the constraints, not a fourth one —
+                   so a paragraph after the list rather than an
+                   entry in it. */}
+              <p set:html={s.guide_keys_hyper}></p>
 
               <p>{s.guide_keys_bonus}</p>
             </section>
