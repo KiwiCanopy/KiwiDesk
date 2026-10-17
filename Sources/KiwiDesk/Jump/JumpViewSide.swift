@@ -8,11 +8,14 @@ struct JumpViewSide: View {
     let list: ViewPickList
     let settings: TilingSettings
     let commandHeld: Bool
-    /// An item was clicked: the model's one apply door decides
-    /// what it does.
+    /// The item the pointer lifts (#2365).
+    let hover: JumpHover?
+    /// An item was clicked: the model selects it and its one apply
+    /// door decides what it does.
     let onApply: (ViewPickList.Item) -> Void
-    /// The pointer moved over an item.
+    /// The pointer moved over an item, or left it.
     let onHover: (ViewPickList.Pick) -> Void
+    let onHoverEnd: (ViewPickList.Pick) -> Void
 
     private var selectedLine: ViewPickList.Line? { list.selection?.line }
 
@@ -84,13 +87,15 @@ struct JumpViewSide: View {
                         number: list.number(.layout, index),
                         settings: settings,
                         isSelected: isSelected(.layout, index),
+                        isLifted: isLifted(item.pick, .layout, index),
                         isCurrent: item.isCurrent,
                         isDimmed: list.isDimmed(.layout, index)
                             || !item.isApplicable,
                         showsNumber: held
                             && list.number(.layout, index) != nil,
                         onActivate: { onApply(item) },
-                        onHover: { onHover(item.pick) }
+                        onHover: { onHover(item.pick) },
+                        onHoverEnd: { onHoverEnd(item.pick) }
                     )
                 }
             }
@@ -108,11 +113,13 @@ struct JumpViewSide: View {
                     line: line,
                     number: list.number(line, index),
                     isSelected: isSelected(line, index),
+                    isLifted: isLifted(item.pick, line, index),
                     isDimmed: list.isDimmed(line, index),
                     showsNumber: commandHeld && selectedLine == line,
                     visionOff: list.visionIsOff,
                     onActivate: { onApply(item) },
-                    onHover: { onHover(item.pick) }
+                    onHover: { onHover(item.pick) },
+                    onHoverEnd: { onHoverEnd(item.pick) }
                 )
             }
         }
@@ -121,6 +128,18 @@ struct JumpViewSide: View {
 
     private func isSelected(_ line: ViewPickList.Line, _ index: Int) -> Bool {
         list.selection == ViewPickList.Position(line: line, index: index)
+    }
+
+    private func isLifted(
+        _ pick: ViewPickList.Pick,
+        _ line: ViewPickList.Line,
+        _ index: Int
+    ) -> Bool {
+        JumpHover.lifts(
+            .item(pick),
+            hover: hover,
+            selected: isSelected(line, index)
+        )
     }
 
 }

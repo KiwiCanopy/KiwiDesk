@@ -139,10 +139,12 @@ struct JumpPanelView: View {
                     list: view,
                     settings: settings,
                     commandHeld: model.commandHeld,
-                    onApply: { model.applyView($0) },
+                    hover: model.hover,
+                    onApply: { model.clickItem($0) },
                     onHover: {
                         model.hoverItem($0, pointer: model.currentPointer())
-                    }
+                    },
+                    onHoverEnd: { model.endHover(.item($0)) }
                 )
                 .transition(.opacity)
             }
@@ -210,16 +212,22 @@ struct JumpPanelView: View {
             match: match,
             icon: model.icons[match.entry.pid],
             isSelected: index == list.selection,
+            isLifted: JumpHover.lifts(
+                .row(index),
+                hover: model.hover,
+                selected: index == list.selection
+            ),
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
             shiftHeld: model.shiftHeld,
             wayHere: match.entry.movesHere ? here : nil,
             onActivate: { moveHere in
-                model.onPick(match.entry, moveHere)
+                model.clickRow(index, moveHere: moveHere)
             },
             onHover: {
                 model.hoverRow(index, pointer: model.currentPointer())
-            }
+            },
+            onHoverEnd: { model.endHover(.row(index)) }
         )
     }
 

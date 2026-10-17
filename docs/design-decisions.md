@@ -11397,16 +11397,39 @@ One row of seven tiles was chosen over a 3/3/1 grid: the row keeps
 the panel at Jump's width, and ↓ from an outer tile in a grid has
 no tile below it.
 
-The selection follows the mouse, as a menu's highlight does, so
-the row under the pointer is the one ↩ acts on — but only on a
-real pointer move. A row that slides under a still pointer, as
-the panel opens there or the list re-ranks while typing, is not a
-choice the user made, and selecting it would steal the keyboard's
-selection. The ✓ never moves with it: the pill marks where ↩
-goes, the ✓ what the Space shows. One verb opens every side,
-`kiwihub.show`, and the CLI reaches it (▸ *The key panel is
-KiwiHub*). `JumpScopeModelTests`, `ViewPickListTests` and
-`JumpKeyTests` hold the keys. (#2229)
+The pointer lifts and the keys select (▸ *In KiwiHub the pointer
+lifts and the keys select*). The ✓ never moves with the
+selection: the pill marks where ↩ goes, the ✓ what the Space
+shows. One verb opens every side, `kiwihub.show`, and the CLI
+reaches it (▸ *The key panel is KiwiHub*). `JumpScopeModelTests`,
+`ViewPickListTests` and `JumpKeyTests` hold the keys. (#2229)
+:::
+
+:::unreleased
+**In KiwiHub the pointer lifts and the keys select (#2365, owner
+ruling 2026-10-17).** The item under the pointer takes a neutral
+grey lift; the green selection moves only by a key or a click.
+A menu's highlight follows the mouse because a menu is driven by
+the pointer alone. KiwiHub is driven by the keyboard, and more
+than a row reads its selection: the footer's Settings button
+names the selected line, the lit hint says what ↩ does, the ⌘
+digits count on the selected line and ⇧ shows the selected row's
+way here. A selection that followed the pointer let a hand
+resting on the trackpad retitle the button and re-aim ⌘3 while
+the user typed.
+
+A click still selects the item before it does what ↩ does, so the
+footer never describes something other than what was acted on —
+Save as New Profile… stays open to be named. A key that moves the
+selection clears the lift until the pointer really moves again,
+so ↑, ↓, ↩ and the digits always start from the green; a row that
+slides under a still pointer — the panel opening there, a
+re-rank, a scroll — lifts nothing. The lift is the hover ink
+Settings already uses (`chipRest` on a row or tile, `chipHover`
+in a chip's capsule) and never the accent, a border or an ink
+change, and the selected item draws none, since a durable marking
+and a pointer state never share a property (#1173). VoiceOver
+follows the selection only. `JumpHoverTests` holds the rule.
 :::
 
 :::unreleased

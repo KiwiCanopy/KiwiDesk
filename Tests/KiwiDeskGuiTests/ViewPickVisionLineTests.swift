@@ -97,7 +97,10 @@ struct ViewPickVisionLineTests {
         #expect(side.occurrences(of: "onActivate:{onApply(item)}") == 2)
         #expect(!side.contains("action(of:"))
         let panel = try squashed("JumpPanelView.swift")
-        #expect(panel.contains("onApply:{model.applyView($0)}"))
+        #expect(panel.contains("onApply:{model.clickItem($0)}"))
+        // A click selects, then takes the door (#2365).
+        let click = try squashed("JumpHover.swift")
+        #expect(click.occurrences(of: "applyView(item)") == 1)
         let model = try squashed("JumpModel+View.swift")
         #expect(model.occurrences(of: "applyView(item)") == 2)
         #expect(model.contains("letaction=ViewPickList.action(of:item)"))

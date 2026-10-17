@@ -21,6 +21,20 @@ extension SettingsThemeContrastTests {
             SettingsTheme.accentInkSecondary,
             on: SettingsTheme.accent
         ),
+        // A row or tile the pointer lifts (#2365); the panel's
+        // inks there are vibrant, `ink` stands in for `.primary`.
+        Pairing(
+            "ink on a lifted KiwiHub row",
+            SettingsTheme.ink,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipRest]
+        ),
+        Pairing(
+            "ink on a lifted KiwiHub chip",
+            SettingsTheme.ink,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipHover]
+        ),
         // The scope switch's chord hints (#2245): the selected
         // segment's is `accentInkSecondary` on the accent, above,
         // and a hovered one's is `ink`, which the segment
@@ -78,9 +92,13 @@ extension SettingsThemeContrastTests {
                 encoding: .utf8
             )
         )
-        #expect(source.occurrences(of: ".fill(") == 1)
+        // The selection's accent, and the hover lift (#2365).
+        #expect(source.occurrences(of: ".fill(") == 2)
         #expect(
             source.occurrences(of: ".fill(SettingsTheme.accent)") == 1
+        )
+        #expect(
+            source.occurrences(of: ".fill(SettingsTheme.chipRest)") == 1
         )
     }
 
