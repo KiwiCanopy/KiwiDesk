@@ -57,15 +57,6 @@ struct SpotlightScriptParityTests {
         #expect(!listed.contains { $0.contains("[space]") })
     }
 
-    @Test("the script's row cap is the window's")
-    func rowCapMatches() throws {
-        let out = try Self.python("print(g['SPOTLIGHT_MAX_ROWS'])")
-        #expect(
-            Int(out.trimmingCharacters(in: .whitespacesAndNewlines))
-                == UpdateNotesDigest.spotlightCap
-        )
-    }
-
     /// One fixture list, both readers: the script judges a patch
     /// by its tag, the window by the feed's version.
     @Test("a patch is a patch to both readers")

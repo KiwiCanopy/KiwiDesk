@@ -768,8 +768,8 @@ it fixed, and a mark tells them nothing.
 **[Rationale]**
 
 **The Highlights tab carries EITHER the prose summary OR one
-intro sentence and up to four spotlight rows, decided per
-release — never both.** Two paragraphs of prose answer "what is
+intro sentence and spotlight rows, decided per release — never
+both.** Two paragraphs of prose answer "what is
 new" only to someone who reads them; a row — an SF Symbol, a
 two-to-four-word title, one line of what the reader gains — is
 read at a glance, which is the shape of Apple's own What's New
@@ -781,6 +781,20 @@ nothing exists only as a row. Rows are the default for any release
 that adds something, a patch included; prose is for a fixes-only
 release, which has nothing new to find, and the owner may overrule
 either for a release.
+
+:::unreleased
+**The row count and a row's line length are guidelines, not
+limits (owner ruling 2026-10-17).** Six one-line rows fill the
+notes at the window's tallest; past that the notes scroll, which
+the window already does for every tab, and `changelog-sync`
+warns at curation rather than refusing. A release with more worth
+finding than six rows should not hide it to fit a number, and a
+refusal would push the curator to drop a real signpost or cram
+two into one line. The line guideline matters more: a line past
+about seventy characters wraps to two, and two-line rows are what
+held the old cap at four. Rows merged in from skipped versions
+are not trimmed either: kept short, they scroll like the rest.
+:::
 
 **A row's symbol depicts the object, never a state or an
 action.** Sparkles read as Apple Intelligence and an up-arrow as
@@ -819,7 +833,7 @@ written after the build.
 
 **Across skipped versions, rows win.** A reader crossing several
 releases sees rows when any of them has rows, newest version's
-first, capped at four by trimming the oldest version's; a row from
+first, every row of every version; a row from
 an older version carries its version after the title. The intro is
 always the newest version's own: its intro sentence, or — for a
 patch told in prose — that prose in full, which is why a patch's

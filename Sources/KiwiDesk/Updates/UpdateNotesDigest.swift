@@ -40,8 +40,8 @@ struct UpdateNotesDigest: Equatable {
     /// The offered version's summary, for the Highlights panel —
     /// its one intro sentence while `spotlight` has rows.
     let summary: String
-    /// The Highlights rows, newest first, at most
-    /// `spotlightCap`; empty draws the summary as prose.
+    /// The Highlights rows, newest first, every covered
+    /// version's; empty draws the summary as prose.
     var spotlight: [SpotlightEntry] = []
     /// Every merged version's "Before you update", newest first.
     let cautions: [Caution]
@@ -116,28 +116,26 @@ struct UpdateNotesDigest: Equatable {
         )
     }
 
-    /// The most rows the Highlights tab draws (#2038).
-    static let spotlightCap = 4
-
     /// Which rows the Highlights tab draws, newest first — the
     /// one home of the mixed-version rule (#2038 ruling ▸ rows
     /// win): rows when any covered version has them, unless the
     /// newest is a minor or major with none, whose prose then
     /// stands alone. The intro is always the newest version's
     /// summary — its intro sentence, or a patch's capped prose.
-    /// Capped by trimming the oldest version's rows first.
+    /// Nothing is trimmed: the notes scroll past what the window
+    /// shows, and the row count is a curation guideline (owner
+    /// ruling 2026-10-17).
     static func spotlight(
         _ readable: [(String, ReleaseNotes)]
     ) -> [SpotlightEntry] {
         guard let newest = readable.first,
             !newest.1.spotlight.isEmpty || isPatch(newest.0)
         else { return [] }
-        let merged = readable.flatMap { version, notes in
+        return readable.flatMap { version, notes in
             notes.spotlight.map {
                 SpotlightEntry(row: $0, version: version)
             }
         }
-        return Array(merged.prefix(spotlightCap))
     }
 
     /// `x.y.z` with z > 0, read off the leading digits so a
