@@ -23,10 +23,12 @@ struct ButtonChipStyle: ButtonStyle {
         @State private var hovered = false
         @Environment(\.isEnabled) private var isEnabled
         @Environment(\.controlSize) private var controlSize
+        @Environment(\.font) private var font
 
         var body: some View {
             configuration.label
-                .font(.system(size: metrics.font))
+                // A caller's font wins, as it did on the bezel.
+                .font(font ?? .system(size: metrics.font))
                 .lineLimit(1)
                 .foregroundStyle(
                     isEnabled ? SettingsTheme.ink : SettingsTheme.ink3

@@ -39,6 +39,20 @@ struct ButtonChipStyleTests {
         #expect(face.contains("hovered:isEnabled&&hovered"))
     }
 
+    /// A caller's `.font` wins over the size default, as it did on
+    /// the system bezel (`IconPicker`'s caption, the Lua editor's
+    /// callout).
+    @Test("a caller's font wins over the size default")
+    func callerFontWins() throws {
+        let face = try SourceScan.blankedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Settings/ButtonChipStyle.swift"
+            )
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(face.contains(".font(font??.system(size:metrics.font))"))
+        #expect(face.components(separatedBy: ".font(").count == 2)
+    }
+
     /// KiwiHub's footer buttons wear the same seal as Settings'.
     @Test("KiwiHub's chord buttons take the action-button seal")
     func kiwiHubTakesTheSeal() throws {
