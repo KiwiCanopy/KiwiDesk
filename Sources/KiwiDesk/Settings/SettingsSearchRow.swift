@@ -25,7 +25,8 @@ struct SettingsSearchRow: View {
         HStack(spacing: 8) {
             SidebarTile(
                 destination: result.destination,
-                badged: badged
+                badged: badged,
+                edged: onCursor
             )
             VStack(alignment: .leading, spacing: 1) {
                 Text(primary)
@@ -67,12 +68,16 @@ struct SettingsSearchRow: View {
             .foregroundStyle(secondaryInk)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(
-                Capsule().strokeBorder(
-                    SettingsTheme.accent.opacity(
-                        SettingsTheme.modeGatedStrokeOpacity
-                    )
-                )
+            .background(Capsule().strokeBorder(modeTagEdge))
+    }
+
+    /// The tag's accent edge would vanish on the cursor's accent,
+    /// so there it takes the row's secondary ink.
+    private var modeTagEdge: Color {
+        onCursor
+            ? DropdownRowStyle.secondaryInk(onCursor)
+            : SettingsTheme.accent.opacity(
+                SettingsTheme.modeGatedStrokeOpacity
             )
     }
 

@@ -100,6 +100,7 @@ struct SettingsFixedGroundTests {
             ".buttonStyle(.borderedProminent)",
             ".buttonStyle(.bordered)",
             ".settingsActionButton()",
+            ".settingsPopUpTrigger()",
             ".neutralButtonLabel()",
             ".neutralMenuLabel()",
         ]

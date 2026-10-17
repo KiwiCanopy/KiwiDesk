@@ -1221,7 +1221,11 @@ must keep:
   neutral fill lift says where the pointer is (the idiom
   `hoverHighlight` and `ShortcutLayerChip` already keep — the
   accent is reserved for identity and selection). The two then
-  compose instead of one erasing the other.
+  compose instead of one erasing the other. A searchable
+  dropdown's `DropdownCursor` IS the selection Return reads, so
+  real pointer motion may move it there and nowhere else — a list
+  whose selection anything beyond Return reads (KiwiHub) keeps the
+  pointer apart (`DropdownCursorWiringTests`).
   `HomeCardChromeTests` holds the split, its negative half
   located by `cardStroke`'s brace-balanced body rather than by
   a spelling a retune may move.

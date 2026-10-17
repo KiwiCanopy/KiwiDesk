@@ -102,13 +102,34 @@ struct DropdownCursorWiringTests {
         )
         #expect(hover.contains("cursor.hover("))
         #expect(!hover.contains("scrollTarget"))
-        let cursor = try Self.source(
-            Self.common + "AppPickerButton+Cursor.swift"
+        let guessed = try Self.source(Self.common + "GuessedAppRows.swift")
+        #expect(
+            guessed.contains(
+                ".dropdownCursorRow(onCursor) { onPoint(app.bundleID) }"
+            )
         )
         #expect(
-            cursor.occurrences(of: "scrollTarget =") == 2,
+            try Self.pickerSources().reduce(0) {
+                $0 + $1.occurrences(of: "scrollTarget =")
+            } == 2,
             "a writer of the scroll target besides the keys and search"
         )
+    }
+
+    /// Every GUI file declaring or extending `AppPickerButton`,
+    /// since its `scrollTarget` is visible to all of them.
+    private static func pickerSources() throws -> [String] {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let texts = try SourceScan.swiftSources(under: root).map {
+            try SourceScan.strippedSource(at: $0)
+        }
+        let picker = texts.filter {
+            $0.contains("struct AppPickerButton")
+                || $0.contains("extension AppPickerButton")
+        }
+        #expect(picker.count == 2, "the picker's files moved")
+        return picker
     }
 
     @Test("the app picker's keys, search and open go through the model")
@@ -178,6 +199,19 @@ struct DropdownCursorWiringTests {
         )
         #expect(search.occurrences(of: ".foregroundStyle(secondaryInk)") == 3)
         #expect(search.occurrences(of: "SettingsTheme.ink3") == 0)
+        let edge = try Self.body(
+            "private var modeTagEdge",
+            in: Self.settings + "SettingsSearchRow.swift"
+        )
+        #expect(edge.contains("onCursor"))
+        #expect(edge.contains("DropdownRowStyle.secondaryInk(onCursor)"))
+        #expect(search.contains("Capsule().strokeBorder(modeTagEdge)"))
+        #expect(search.contains("edged: onCursor"))
+        let tile = try Self.body(
+            "if edged",
+            in: Self.settings + "SidebarTile.swift"
+        )
+        #expect(tile.contains(".strokeBorder(SettingsTheme.accentInk)"))
         for path in [
             Self.settings + "Components/Bars/FontFamilyPicker.swift",
             Self.common + "AppPickerRow.swift",

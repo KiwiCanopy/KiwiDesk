@@ -78,17 +78,19 @@ struct FontFamilyRow: View {
         Button {
             showing = true
         } label: {
+            // Hugs the name, as a native pop-up does: no spacer in
+            // the label, the floor on the name alone.
             HStack(spacing: 4) {
                 Text(BarFontText.familyName(family))
+                    .font(FontFamilyPicker.face(of: family))
                     .lineLimit(1)
-                Spacer(minLength: 4)
+                    .frame(minWidth: 150, alignment: .leading)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-            .frame(minWidth: 150, alignment: .leading)
         }
-        .settingsActionButton()
+        .settingsPopUpTrigger()
         .controlSize(.large)
         .accessibilityLabel(label)
         .accessibilityValue(spokenValue)

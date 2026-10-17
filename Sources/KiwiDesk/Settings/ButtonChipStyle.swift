@@ -62,42 +62,47 @@ struct ButtonChipStyle: ButtonStyle {
             )
         }
 
-        /// The system font and the bezel's room per control size.
         private var metrics: Metrics {
-            switch controlSize {
-            case .mini:
-                return Metrics(
-                    font: 9,
-                    horizontal: 6,
-                    vertical: 2,
-                    radius: 4
-                )
-            case .small:
-                return Metrics(
-                    font: 11,
-                    horizontal: 8,
-                    vertical: 3,
-                    radius: 5
-                )
-            case .large, .extraLarge:
-                return Metrics(
-                    font: 13,
-                    horizontal: 14,
-                    vertical: 6,
-                    radius: 8
-                )
-            default:
-                return Metrics(
-                    font: 13,
-                    horizontal: 10,
-                    vertical: 4,
-                    radius: 6
-                )
-            }
+            ButtonChipStyle.metrics(for: controlSize)
         }
     }
 
-    private struct Metrics {
+    /// The system font and the bezel's room per control size —
+    /// shared with `PopUpTriggerStyle`, so the two read one height.
+    static func metrics(for controlSize: ControlSize) -> Metrics {
+        switch controlSize {
+        case .mini:
+            return Metrics(
+                font: 9,
+                horizontal: 6,
+                vertical: 2,
+                radius: 4
+            )
+        case .small:
+            return Metrics(
+                font: 11,
+                horizontal: 8,
+                vertical: 3,
+                radius: 5
+            )
+        case .large, .extraLarge:
+            return Metrics(
+                font: 13,
+                horizontal: 14,
+                vertical: 6,
+                radius: 8
+            )
+        default:
+            return Metrics(
+                font: 13,
+                horizontal: 10,
+                vertical: 4,
+                radius: 6
+            )
+        }
+    }
+
+    struct Metrics {
         let font: CGFloat
         let horizontal: CGFloat
         let vertical: CGFloat

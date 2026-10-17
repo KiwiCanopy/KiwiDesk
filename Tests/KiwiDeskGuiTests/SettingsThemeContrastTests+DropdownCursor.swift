@@ -24,5 +24,21 @@ extension SettingsThemeContrastTests {
             SettingsTheme.accentInkSecondary,
             on: SettingsTheme.accent
         ),
+        // The Power User tag's edge on the cursor row: a
+        // non-text boundary, so the 3:1 floor.
+        Pairing(
+            "accentInkSecondary tag edge on a dropdown's cursor row",
+            SettingsTheme.accentInkSecondary,
+            on: SettingsTheme.accent,
+            floor: 3.0
+        ),
+        // A result tile's edge there — Profiles' tile IS the
+        // accent, so the edge is all that outlines it.
+        Pairing(
+            "accentInk tile edge on a dropdown's cursor row",
+            SettingsTheme.accentInk,
+            on: SettingsTheme.accent,
+            floor: 3.0
+        ),
     ]
 }

@@ -5,6 +5,10 @@ struct SidebarTile: View {
     let destination: SettingsDestination
     /// Accent dot on tile corner for notifications.
     var badged = false
+    /// An `accentInk` edge, for a tile drawn on the accent — a
+    /// dropdown's cursor row — where Profiles' own accent tile
+    /// would otherwise lose its outline.
+    var edged = false
 
     var body: some View {
         RoundedRectangle(cornerRadius: 6)
@@ -17,6 +21,12 @@ struct SidebarTile: View {
                 Image(systemName: destination.symbol)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white)
+            }
+            .overlay {
+                if edged {
+                    RoundedRectangle(cornerRadius: 6)
+                        .strokeBorder(SettingsTheme.accentInk)
+                }
             }
             // The badge must not be the colour of the tile it
             // sits on, and one tile IS the accent: Profiles is

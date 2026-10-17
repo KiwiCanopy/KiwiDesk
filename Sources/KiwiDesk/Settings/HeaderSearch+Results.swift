@@ -132,7 +132,7 @@ extension HeaderSearch {
         )
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .dropdownCursorRow(onCursor, cornerRadius: 6) {
+        .dropdownCursorRow(onCursor) {
             cursor.hover(result.id, pointer: DropdownPointer.live())
         }
     }

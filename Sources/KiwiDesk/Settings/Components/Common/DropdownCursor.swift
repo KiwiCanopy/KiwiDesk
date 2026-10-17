@@ -75,6 +75,9 @@ enum DropdownPointer {
 /// `accent` behind it and the inks KiwiHub's selected row measures
 /// on it; every other row draws nothing.
 enum DropdownRowStyle {
+    /// The cursor's one corner, in every dropdown.
+    static let cornerRadius: CGFloat = 6
+
     static func fill(_ onCursor: Bool) -> Color {
         onCursor ? SettingsTheme.accent : .clear
     }
@@ -96,11 +99,10 @@ extension View {
     /// `DropdownCursor.hover` with the live pointer.
     func dropdownCursorRow(
         _ onCursor: Bool,
-        cornerRadius: CGFloat = 5,
         onPoint: @escaping () -> Void
     ) -> some View {
         background(
-            RoundedRectangle(cornerRadius: cornerRadius)
+            RoundedRectangle(cornerRadius: DropdownRowStyle.cornerRadius)
                 .fill(DropdownRowStyle.fill(onCursor))
         )
         .onContinuousHover { phase in

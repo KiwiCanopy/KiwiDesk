@@ -187,6 +187,7 @@ private struct FamilyName: View {
         Text(name)
             .font(face ?? .body)
             .lineLimit(1)
+            .truncationMode(.middle)
             .onAppear {
                 guard !built else { return }
                 built = true
