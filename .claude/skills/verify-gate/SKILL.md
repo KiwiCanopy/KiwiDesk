@@ -10,9 +10,7 @@ continue to later steps.
 
 ## Which gate the change earns
 
-Default to the full gate below. One narrow exception, and it is
-about running the gate that *can* catch something rather than
-about saving time:
+Default to the full gate below. Two narrow exceptions:
 
 - Read `.github/ci-ignore.txt`. Never restate that list here — it
   is the one authority, shared with the `changes` job in `ci.yml`,
@@ -20,17 +18,26 @@ about saving time:
 - If `git diff --name-only` against the base is **entirely**
   inside that list, the Swift gate cannot be affected: nothing the
   build, the lint or the suite reads is in it. Skip steps 1–3.
-- **Anything else runs the full gate.** `docs/`, `AGENTS.md`,
-  `.claude/rules/**` and `.claude/agents/**` are deliberately not
-  on the ignore list, so "it's only prose" is not a reason to
-  skip: `RuleCitationTests` and `InstructionPinTests` read that
-  tree — including paths a rule file *pins*, which is why
-  `docs/**` is not ignorable — and a prose-only edit there has
-  already shipped a dangling citation.
-- **Additionally**, when the change touches `docs/` or `site/`,
-  run the site build — `npm ci && npm run build` in `site/`. It
-  is a separate gate, not a substitute: a missing Starlight
-  frontmatter block breaks the site and no Swift test can see it.
+- **A change entirely inside `docs/` takes CI as its gate**
+  (owner, 2026-10-16): push, open the PR and arm auto-merge
+  without a local `swift test` or site build. CI runs the same
+  checks — `Build, Lint & Test` reads `docs/` because
+  `RuleCitationTests` and `InstructionPinTests` resolve the paths
+  rule files pin there, and `Build site` builds the pages — and a
+  red PR cannot merge, so the local run only finds the failure a
+  few minutes sooner while holding the machine-wide gate slot
+  other sessions wait on. Fix a red and push again. Still run
+  `scripts/unreleased-strip --check` locally: it takes a second.
+- **Anything else runs the full gate.** `AGENTS.md`,
+  `.claude/rules/**`, `.claude/agents/**` and this skill tree are
+  instructions every session reasons from, and a prose-only edit
+  to them has already shipped a dangling citation; code, tests and
+  `site/` need it besides.
+- **Additionally**, when a gated change touches `site/` — or
+  `docs/` beside code — run the site build: `npm ci && npm run
+  build` in `site/`. It is a separate gate, not a substitute: a
+  missing Starlight frontmatter block breaks the site and no Swift
+  test can see it.
 
 Say in the report which gate you ran and why.
 
