@@ -86,7 +86,8 @@ struct SegmentedPickerKeyTests {
                     + "segment"
             ),
             (
-                segment, ".buttonStyle(.plain).focusable(false)",
+                segment,
+                ".buttonStyle(SegmentPressStyle()).focusable(false)",
                 "and each SEGMENT gives its own stop up — "
                     + "without this the track's stop is ADDED to "
                     + "the per-segment ones, which is the "

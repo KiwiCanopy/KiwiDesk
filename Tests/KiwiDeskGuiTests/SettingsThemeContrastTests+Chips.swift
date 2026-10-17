@@ -37,13 +37,18 @@ extension SettingsThemeContrastTests {
             ]
         }
 
-    /// A text button chip's label at rest and under the pointer —
-    /// a monitor card's `+n` on `sunken`, the tray's and the
-    /// collapsed screen-setups chip's on `card`.
+    /// A text button chip's label at rest, under the pointer and
+    /// pressed — a monitor card's `+n` on `sunken`, the tray's and
+    /// the collapsed screen-setups chip's on `card`, and every
+    /// bordered action button (`ButtonChipStyle`, #2377) on the
+    /// page and the floating panel too. A disabled one keeps the
+    /// rest fill under `ink3` and takes the suite's 3.0 floor.
     private static let buttonChips: [Pairing] =
         [
             ("card", SettingsTheme.card),
             ("sunken", SettingsTheme.sunken),
+            ("page", SettingsTheme.page),
+            ("panel", SettingsTheme.panel),
         ].flatMap { name, ground in
             [
                 Pairing(
@@ -57,6 +62,19 @@ extension SettingsThemeContrastTests {
                     SettingsTheme.ink,
                     on: ground,
                     layers: [SettingsTheme.chipHover]
+                ),
+                Pairing(
+                    "ink on a pressed button chip on \(name)",
+                    SettingsTheme.ink,
+                    on: ground,
+                    layers: [SettingsTheme.chipPressed]
+                ),
+                Pairing(
+                    "ink3 on a disabled button chip on \(name)",
+                    SettingsTheme.ink3,
+                    on: ground,
+                    layers: [SettingsTheme.chipRest],
+                    floor: 3.0
                 ),
             ]
         }

@@ -7313,6 +7313,30 @@ page instead would move it somewhere the user was not looking
 narrow). `HomeSurfacingTests` needles the query-only panel and the
 collapse.
 
+:::unreleased
+### A bordered action button lifts grey under the pointer (#2377)
+
+**[Principle]**
+
+**Every bordered action button — in Settings and in KiwiHub —
+draws on the button-chip tier and lifts one grey step under the
+pointer, one more while pressed (owner ruling 2026-10-17).** A
+system bordered button does not hover on macOS, and Apple-native
+binds behaviour, which argued for leaving it alone. But a bordered
+text button is a capsule with a word in it: beside labels and
+chips that do lift, it reads as a tag and is overlooked, and
+KiwiHub's footer buttons were the one thing in the panel that did
+not answer the pointer. One small grey lift, on the same ladder
+every chip already uses, keeps every button behaving the same and
+stays close to the platform. The lift goes only where a shape can
+be mistaken for text: an accent-filled primary is the loudest thing
+on its surface, and a menu picker's chevron, a stepper's arrows and
+a checkbox's box already say "control", so they keep system
+behaviour (`docs/ui-patterns.md` ▸ *Hover confirms custom hit
+areas*). A segmented picker keeps its own base — one step over its
+track — since the selected pill is its press feedback.
+:::
+
 ### Hover help appears sooner than AppKit's default
 
 **[Trade-off]**
