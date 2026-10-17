@@ -36,7 +36,10 @@ editing here:
   when the focus has moved since, which is what keeps a warp
   landing inside a dwell from looping (`PointerRestTests` ▸
   `reArmKeepsTheArmedFocus`, `HoverFocusStandDownTests` ▸
-  `movedFocusStands`). A new trigger for hover focus is a user
+  `movedFocusStands`). And after a focus the pointer did not make,
+  the windows it is left over are held until a move leaves them,
+  read from state frames on the move (`PointerRest.held`,
+  `HoverFocusHoldTests`). A new trigger for hover focus is a user
   event too, never a reading of where the pointer IS.
 - **Scroll gestures take the ONE active scroll-wheel tap,
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
