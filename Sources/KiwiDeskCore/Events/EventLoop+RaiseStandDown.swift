@@ -90,13 +90,18 @@ extension EventLoop {
     /// walked to the chain's ROOT, so a sheet (however nested)
     /// over the marked Settings window inherits its exemption —
     /// while `number` stays the key window's own, which is what
-    /// the ring compares against the anchor.
+    /// the ring compares against the anchor. A key window floating
+    /// above the normal level — KiwiHub — reads as none: it sits
+    /// over the windows, so the ring and KiwiVision stay on the
+    /// focus beneath it (#2373).
     static func ownKeyWindowReading() -> OwnKeyWindowReading? {
         let app = NSApplication.shared
         let key =
             app.keyWindow?.isVisible == true
             ? app.keyWindow : app.modalWindow
-        guard let key else { return nil }
+        guard let key, !floatsAboveWindows(key.level) else {
+            return nil
+        }
         var classified = key
         while let parent = classified.sheetParent {
             classified = parent
@@ -111,5 +116,11 @@ extension EventLoop {
                     .rawValue == OwnWindowTiling.identifier
             )
         )
+    }
+
+    /// Whether an own window at `level` floats over every app
+    /// window rather than standing among them.
+    static func floatsAboveWindows(_ level: NSWindow.Level) -> Bool {
+        level.rawValue > NSWindow.Level.normal.rawValue
     }
 }

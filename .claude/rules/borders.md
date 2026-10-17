@@ -120,7 +120,11 @@ stand-downs can never disagree about WHICH window is key —
 only about the ruled class. The why (Sparkle's alert flow, why
 a number rather than a Bool, and the split's argument) lives
 on that seam's own doc; the guard is
-`BorderOwnKeyWindowTests`.
+`BorderOwnKeyWindowTests`. **An own key window floating above the
+normal level reads as none** — KiwiHub sits over every window, so
+the ring and KiwiVision's plate stay on the focus beneath it, a
+plate ordered under a `.floating` panel landing behind the windows
+(#2373, `FloatingOwnKeyWindowTests`).
 
 ## Two settle passes, two deferred keys
 
