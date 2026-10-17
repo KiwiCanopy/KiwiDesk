@@ -10447,14 +10447,24 @@ Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
 the way back from the size keys, but a key you press once, so it
 rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
 not `appChromeRows`, and the Hyper move carries it with the other
-letters. It resets the focused space only, for the reason the
+letters. A default letter added after the move lands where the
+letters went: the top-up offers `✦R` on a layer whose seeded
+letters sit mostly on Hyper, or the move would reappear for one
+row. It resets the active space only, for the reason the
 #764 entry gives the verb's default: a key undoes what you just
-did in front of you. `"all"` stays a Lua and CLI form with no
-default key. The 2026-10-18 sweep found `⌃⌥R` free in
-`SystemShortcuts.map`, in macOS's symbolic hotkeys and in the
-menus of every app running on the dev Mac; the nearest chord taken
-is macOS's own `fn⌃R`, Return to Previous Size. It reaches an
-install as generation 5.
+did in front of you. `"all"` gets no Settings row and no default
+key; it stays a Lua and CLI form (owner ruling 2026-10-18). The
+verb is in `APIReference.destructive`, which makes an AI app
+confirm it, and a default key does not contradict that: the
+register guards a call the user did not make, and a key press is
+the user's own. What one press loses is the hand sizing of one
+Space, which the resize keys rebuild. A default key for a verb in
+that register remains a ruling of its own. The 2026-10-18 sweep
+found `⌃⌥R` free in `SystemShortcuts.map`, in macOS's symbolic
+hotkeys and in the menus of every app running on the dev Mac, read
+through AX with the fn bit decoded (recorded on #2303); the
+nearest chord taken is macOS's own `fn⌃R`, Return to Previous
+Size.
 :::
 
 **A shortcut row says what pressing it does (#2245).** Its title

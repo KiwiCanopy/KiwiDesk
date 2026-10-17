@@ -714,20 +714,20 @@ orientation and stack position, the overflow style, the
 scrolling anchor and orientation, the track axis and limit, a
 grid's columns and rows, new-window placement. Where a window's
 own minimum binds, the next retile's floor heal moves the ratio
-back off that value by as much. Retiles at once.
+back off that value by as much. Retiles at once. Bind it from
+`init.lua` or the Shortcuts & Gestures ▸ Lua bindings drawer.
 
 :::unreleased
 `⌃⌥R` runs it on the active space by default, listed as **Reset
 sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
-`"all"` has no default key; bind it from `init.lua` or the Lua
-bindings drawer.
+`"all"` has no default key.
 :::
 
 **Example:**
 
 ```lua
 KiwiDesk.bind("ctrl+alt+equal", function()
-    KiwiDesk.reset_layout_sizing()
+    KiwiDesk.reset_layout_sizing("all")
 end)
 KiwiDesk.reset_layout_sizing("mail")
 KiwiDesk.reset_layout_sizing("all")

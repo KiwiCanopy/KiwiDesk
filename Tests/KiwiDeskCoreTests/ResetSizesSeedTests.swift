@@ -77,4 +77,55 @@ struct ResetSizesSeedTests {
         #expect(item.seeds == [row])
         #expect(item.moves.map(\.to) == ["hyper+r"])
     }
+
+    /// A 3.0.0 layer — the seed without the reset — after the
+    /// Hyper move took every letter line.
+    private var movedLayer: [KeyBinding] {
+        let reset = DefaultKeybindings.resetSizesRow().lua
+        var config = GuiConfig()
+        let index = config.layers.firstIndex { $0.isDefault } ?? 0
+        config.layers[index].bindings = seeded.filter { $0.lua != reset }
+        let offer = HyperShortcutMove.offer(
+            .toHyper,
+            rows: config.layers[index].bindings,
+            base: config.desktopShortcutBase
+        )
+        HyperShortcutMove.apply(
+            offer,
+            items: Set(offer.items.map(\.id)),
+            desktop: false,
+            to: &config
+        )
+        return config.layers[index].bindings
+    }
+
+    /// An install that took the move gets the reset on ✦R beside
+    /// its letters, so the move is not offered again for one row.
+    @Test("a layer on Hyper gets ✦R, and no move line comes back")
+    func movedLayerGetsHyper() {
+        let layer = movedLayer
+        #expect(layer.contains { $0.combo == "hyper+f" })
+        let added = DefaultKeybindings.generationTopUp(
+            existing: layer,
+            above: 4
+        )
+        #expect(added.map(\.combo) == ["hyper+r"])
+        let offer = HyperShortcutMove.offer(
+            .toHyper,
+            rows: layer + added,
+            base: .standard
+        )
+        #expect(offer.items.isEmpty)
+    }
+
+    /// A layer that kept its letters on ⌃⌥ gets ⌃⌥R.
+    @Test("a layer on ⌃⌥ gets ⌃⌥R")
+    func unmovedLayerGetsTheSeed() {
+        let reset = DefaultKeybindings.resetSizesRow()
+        let added = DefaultKeybindings.generationTopUp(
+            existing: seeded.filter { $0.lua != reset.lua },
+            above: 4
+        )
+        #expect(added == [reset])
+    }
 }

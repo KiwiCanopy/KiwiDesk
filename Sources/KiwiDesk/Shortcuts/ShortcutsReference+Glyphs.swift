@@ -33,7 +33,8 @@ extension ShortcutsReferenceBuilder {
     static let spaceGroupIcon = "squares.below.rectangle"
 
     /// A verb row's glyph on the key panel's Shortcuts side
-    /// (#2246): the layout cycle, the size quartet, the float and
+    /// (#2246): the layout cycle, the size quartet and its reset
+    /// (#2303), the float and
     /// sticky toggles — wearing the marks the windows wear — a
     /// layer switch, and the KiwiVision toggle wearing its Settings
     /// card's symbol (#2103). Panel-only; Settings draws glyphs only
