@@ -80,6 +80,15 @@ struct SettingsLiveFollowerTests {
         #expect(!model.liveUnsaved)
     }
 
+    /// `look.apply` is a pick, never a wear (#2368).
+    @Test("the look verb picks, clearing a per-layout indicator")
+    func lookVerbPicks() {
+        let core = makeTestCore()
+        core.tiler.settings.monocle.appBar.activeIndicator = .edgeMark
+        core.wearLook(LookBody(of: TilingSettings()).named("Plain"))
+        #expect(core.tiler.settings.monocle.appBar.activeIndicator == nil)
+    }
+
     @Test("wearing keeps every per-layout indicator, a pick clears")
     func pickClears() {
         let look = LookBody(of: TilingSettings())

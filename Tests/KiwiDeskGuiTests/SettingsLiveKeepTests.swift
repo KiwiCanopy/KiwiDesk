@@ -11,8 +11,8 @@ import Testing
 @Suite("Live, not saved Keep (#2368)", .serialized)
 @MainActor
 struct SettingsLiveKeepTests {
-    /// One key draws a row per layout; each row owns its own leaf,
-    /// so keeping Monocle's never keeps Scrolling's.
+    /// Two layouts' indicator rows each own their own leaf, so
+    /// keeping Monocle's never keeps Scrolling's.
     @Test("a row keeps its own leaf, never its sibling's")
     func rowsKeepApart() throws {
         LocalizationManager.shared.select("en")
@@ -35,6 +35,34 @@ struct SettingsLiveKeepTests {
             .filter { $0.section == .live }
         #expect(rows.count == 2)
         #expect(Set(rows.map(\.keepIDs)) == [["m"], ["s"]])
+    }
+
+    /// One key drawing a row per Space: each row still keeps only
+    /// its own Space's leaf.
+    @Test("rows of one key keep apart")
+    func rowsOfOneKeyKeepApart() {
+        LocalizationManager.shared.select("en")
+        let model = makeTestModel()
+        let saved = model.cleanConfig.settings
+        let gaps = saved.gapsGlobal
+        var one = saved
+        one.gapsOverride[SpaceID("1")] = gaps
+        var two = saved
+        two.gapsOverride[SpaceID("2")] = gaps
+        var live = one
+        live.gapsOverride[SpaceID("2")] = gaps
+        model.cleanConfig.settings = live
+        model.config = model.cleanConfig
+        model.unsavedLive = UnsavedLiveSettings(
+            saved: saved,
+            live: live,
+            leaves: ["a": one, "b": two]
+        )
+        let rows = SettingsDiffRowSource.rows(for: model)
+            .filter { $0.section == .live }
+        #expect(rows.count == 2)
+        #expect(Set(rows.map(\.key)).count == 1)
+        #expect(Set(rows.map(\.keepIDs)) == [["a"], ["b"]])
     }
 
     /// "Odd" loaded on one 100x100 screen, keeping its own look,
