@@ -19,10 +19,10 @@ extension BehaviourKey {
         case .minWindowSize:
             return .row(.layoutDefaults, .general, .atRest)
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride,
-            .mouseHoverFocusDelay:
+            .floatScaleOnDisplayChange, .placementOverride:
             return .luaOnly
-        case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus:
+        case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus,
+            .mouseHoverFocusDelay:
             // Moved from Behavior with #1726: the Mouse &
             // trackpad drawer explains the gestures they tune.
             return .row(.shortcuts, .gestures, .showMore)
@@ -36,9 +36,10 @@ extension BehaviourKey {
         case .minWindowSize:
             return .text("layout_defaults.min_window_size")
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride,
-            .mouseHoverFocusDelay:
+            .floatScaleOnDisplayChange, .placementOverride:
             return .none
+        case .mouseHoverFocusDelay:
+            return .text("behavior.mouse.hover_focus_delay")
         case .mouseResize:
             return .text(
                 "behavior.mouse.resize_action",

@@ -215,6 +215,8 @@
   "behavior.mouse.follows_focus": "포커스를 받는 윈도우로 포인터 이동",
   "behavior.mouse.hover_focus": "포인터가 머문 윈도우에 포커스",
   "behavior.mouse.hover_focus.help": "스크롤 레이아웃에서는 화면에 일부만 보이는 윈도우에 포인터가 머물러도 포커스되지 않으므로 포인터 아래에서 행이 움직이지 않습니다 — 화면에 보이게 하려면 해당 윈도우나 App Bar 또는 Space Bar의 해당 항목을 클릭하십시오.",
+  "behavior.mouse.hover_focus_delay": "머무름 지연",
+  "behavior.mouse.milliseconds": "밀리초",
   "behavior.mouse.resize_action": "마우스 크기 조절 동작",
   "behavior.mouse.resize_action.help": "**%1$@** — 윈도우의 가장자리를 드래그하면 해당 윈도우의 크기가 조절되고 레이아웃 안의 이웃 윈도우도 다시 배치됩니다.\n**%2$@** — 드래그하는 동안에는 자유롭게 크기가 바뀌고, 놓으면 타일 크기로 돌아갑니다.",
   "behavior.mouse.resize_layout": "인접한 윈도우 크기 조절",

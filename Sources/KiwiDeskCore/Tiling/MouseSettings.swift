@@ -9,8 +9,8 @@ public struct MouseSettings: Sendable, Equatable, Codable {
     /// (#1869) — the inverse of `followsFocus`. Off by default.
     public var hoverFocus = false
     /// How long the pointer rests before hover focus acts, in
-    /// milliseconds (`mouse.hover_focus_delay`, Lua-only, #1869);
-    /// never negative.
+    /// milliseconds (`mouse.hover_focus_delay`, #1869, offered in
+    /// Settings since #2379); never negative.
     public var hoverFocusDelayMS = Self.defaultHoverFocusDelayMS {
         didSet { hoverFocusDelayMS = Self.clampedDelay(hoverFocusDelayMS) }
     }
@@ -27,7 +27,11 @@ public struct MouseSettings: Sendable, Equatable, Codable {
     public static let defaultHoverFocusDelayMS = 200
 
     /// The delay's one floor: a stored negative is no delay.
-    static func clampedDelay(_ ms: Int) -> Int { max(0, ms) }
+    public static let hoverFocusDelayFloorMS = 0
+
+    static func clampedDelay(_ ms: Int) -> Int {
+        max(hoverFocusDelayFloorMS, ms)
+    }
 
     public init() {}
 

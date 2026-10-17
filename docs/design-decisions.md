@@ -3017,10 +3017,12 @@ already has the focus and the two never loop. A dwell timed from
 ENTERING a window would steal focus whenever the hand crossed a
 wide window slowly; a rest is blind to window size. It is longer
 than the bar peek's dwell because a peek is a label and a focus
-redirects typing. The GUI keeps it fixed and Lua may tune it
-(`mouse.set_hover_focus_delay`): the GUI curates, and a user coming
-from an immediate trigger, or crossing windows on a trackpad, has a
-real reason to move it. It is per-profile because its switch is:
+redirects typing. Settings offers the delay beside the switch and
+Lua (`mouse.set_hover_focus_delay`) may go past its 2000 ms edge:
+a user coming from an immediate trigger, or crossing windows on a
+trackpad, has a real reason to move it, and nothing about a delay
+is risky enough to keep Lua-only (owner, 2026-10-17, #2379). It
+is per-profile because its switch is:
 a switch and its timing kept in different stores would disagree,
 and moving the `mouse` group app-wide is its own crossing.
 

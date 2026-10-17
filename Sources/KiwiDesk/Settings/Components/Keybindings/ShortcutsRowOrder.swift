@@ -26,6 +26,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.scrollNaturalMouse),
         .behaviour(.mouseHoverFocus),
+        .behaviour(.mouseHoverFocusDelay),
         .behaviour(.mouseFollowsFocus),
         .behaviour(.mouseResize),
     ]

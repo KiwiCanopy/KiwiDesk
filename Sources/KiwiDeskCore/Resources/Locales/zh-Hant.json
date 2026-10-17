@@ -215,6 +215,8 @@
   "behavior.mouse.follows_focus": "將指標移至取得焦點的視窗",
   "behavior.mouse.hover_focus": "讓指標停留的視窗取得焦點",
   "behavior.mouse.hover_focus.help": "在捲動佈局中，只有部分顯示在螢幕上的視窗不會因指標停留而取得焦點，因此整排不會在指標下移動 — 點按該視窗，或它在 App Bar 或 Space Bar 中的項目，即可將它移入畫面。",
+  "behavior.mouse.hover_focus_delay": "停留延遲",
+  "behavior.mouse.milliseconds": "毫秒",
   "behavior.mouse.resize_action": "滑鼠調整尺寸的動作",
   "behavior.mouse.resize_action.help": "**%1$@** — 拖移視窗邊緣會調整它的尺寸，並讓佈局中的鄰居重新排列。\n**%2$@** — 拖移期間視窗可自由縮放，放開後便彈回並排時的尺寸。",
   "behavior.mouse.resize_layout": "調整相鄰視窗",

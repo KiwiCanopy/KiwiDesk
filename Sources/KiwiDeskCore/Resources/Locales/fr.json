@@ -215,6 +215,8 @@
   "behavior.mouse.follows_focus": "Amener le pointeur sur la fenêtre qui devient active",
   "behavior.mouse.hover_focus": "Donner le focus à la fenêtre sur laquelle s'arrête le pointeur",
   "behavior.mouse.hover_focus.help": "Dans une disposition Scrolling, une fenêtre visible seulement en partie à l'écran ne reçoit pas le focus quand le pointeur s'y arrête, si bien que la rangée ne bouge jamais sous le pointeur — cliquez dessus, ou sur son élément dans l'App Bar ou la Space Bar, pour la faire apparaître.",
+  "behavior.mouse.hover_focus_delay": "Délai à l'arrêt",
+  "behavior.mouse.milliseconds": "ms",
   "behavior.mouse.resize_action": "Redimensionnement à la souris",
   "behavior.mouse.resize_action.help": "**%1$@** — Faire glisser le bord d'une fenêtre la redimensionne et réagence ses voisines dans la disposition.\n**%2$@** — La fenêtre se redimensionne librement pendant le glissement, puis retrouve sa taille en mosaïque au relâchement.",
   "behavior.mouse.resize_layout": "Redimensionner les fenêtres voisines",

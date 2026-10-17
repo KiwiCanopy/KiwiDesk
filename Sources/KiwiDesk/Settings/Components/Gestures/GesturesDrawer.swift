@@ -137,14 +137,17 @@ struct GesturesDrawer: View {
         ) {
             GesturePicture.HoverFocus(t: $0)
         } control: {
-            Toggle(
-                Self.hoverFocusLabel,
-                isOn: $model.config.settings.mouse.hoverFocus
-            )
-            .searchAnchored(
-                SettingsCatalog.shortcuts.gestures.children
-                    .hoverFocus
-            )
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle(
+                    Self.hoverFocusLabel,
+                    isOn: $model.config.settings.mouse.hoverFocus
+                )
+                .searchAnchored(
+                    SettingsCatalog.shortcuts.gestures.children
+                        .hoverFocus
+                )
+                hoverDelayRow
+            }
         }
         GestureRule()
         GestureEntry(
@@ -175,6 +178,30 @@ struct GesturesDrawer: View {
 }
 
 extension GesturesDrawer {
+    /// How long the pointer rests first (#2379): indented under the
+    /// switch it depends on, greyed — never hidden — while it is off.
+    var hoverDelayRow: some View {
+        StepperRow(
+            label: L("behavior.mouse.hover_focus_delay", "Hover delay"),
+            value: $model.config.settings.mouse.hoverFocusDelayMS,
+            in: Self.hoverDelayRange,
+            step: 50,
+            suffix: L("behavior.mouse.milliseconds", "ms")
+        )
+        .fixedSize()
+        .disabled(!model.config.settings.mouse.hoverFocus)
+        .padding(.leading, 20)
+        .searchAnchored(
+            SettingsCatalog.shortcuts.gestures.children.hoverFocusDelay
+        )
+    }
+
+    /// Core's floor; the ceiling is the GUI's curated edge, Lua
+    /// free to go past it.
+    static var hoverDelayRange: ClosedRange<Int> {
+        MouseSettings.hoverFocusDelayFloorMS...2000
+    }
+
     static var hoverFocusLabel: String {
         L(
             "behavior.mouse.hover_focus",
