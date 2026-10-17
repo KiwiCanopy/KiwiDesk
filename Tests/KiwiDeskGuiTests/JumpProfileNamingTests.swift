@@ -199,6 +199,24 @@ struct JumpProfileNamingTests {
         #expect(save == .pick(moveHere: false))
     }
 
+    @Test("the footer says ↩ saves and Esc goes back while naming")
+    func footerWhileNaming() {
+        LocalizationManager.shared.select("en")
+        let footer = JumpFooter(scope: .view, overflows: false, naming: true)
+        #expect(Array(footer.hints.prefix(2)) == ["↩ Save", "Esc Back"])
+        #expect(footer.leading == 0)
+        // A held ⌘ lights no digit: none picks while naming.
+        var held = footer
+        held.modifiers = [.command]
+        #expect(held.leading == nil)
+        let wiring = try? SourceScan.blankedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Jump/JumpPanelView+Footer.swift"
+            )
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(wiring?.contains("naming:model.isNaming") == true)
+    }
+
     @Test("the chip is last, no digit reaches it, and boot greys it")
     func chipPlacement() {
         let (model, _) = model()
