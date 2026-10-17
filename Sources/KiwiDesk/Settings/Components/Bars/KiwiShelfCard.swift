@@ -51,7 +51,8 @@ struct KiwiShelfCard: View {
         switch key {
         case .kiwishelf(let k):
             kiwishelfRow(k)
-        case .spaceBar(.spaceBarEnabled), .layoutAppBar:
+        case .spaceBar(.spaceBarEnabled), .spaceBar(.spaceCue),
+            .layoutAppBar:
             showRow(key)
         default:
             let _ = assertionFailure(

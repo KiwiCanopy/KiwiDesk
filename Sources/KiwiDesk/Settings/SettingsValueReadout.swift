@@ -39,6 +39,13 @@ enum SettingsValueReadout {
             return layoutRows(k, old: old, new: new)
         case .layoutAppBar(let k):
             return layoutAppBarRows(k, old: old, new: new)
+        case .ai:
+            // Copy buttons only — nothing in the draft.
+            return []
+        case .kiwiVision:
+            // App-wide rows write at once; the lens page's draft
+            // narrates through `lensDiffRows` (#2103).
+            return []
         case .macChecklist:
             // Read from macOS or the user's own tick — never a
             // draft leaf, so nothing to narrate.

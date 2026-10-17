@@ -133,10 +133,11 @@ struct AppRuleTitleOfferTests {
     }
 
     /// A bundle identifier cannot contain a colon, so the colon IS
-    /// the pattern marker — the same split `FloatFacet` reads. A
-    /// rule with a colon and an EMPTY pattern is still a pattern
-    /// rule as far as the storage goes, and the offer must agree
-    /// with `FloatFacet`, not with a prettier reading of it.
+    /// the pattern marker — split as `FloatRules` splits it, which
+    /// `FloatFacet` reads too. A rule ending in a bare colon carries
+    /// no fragment, so the engine reads it as a bare app and so do
+    /// both readers here (#2345): the offer agrees with
+    /// `FloatFacet`, never with a reading of its own.
     @Test("the marker is the colon, as FloatFacet reads it")
     func markerAgreesWithFloatFacet() {
         let rule = "com.apple.finder:Get Info"
@@ -147,5 +148,8 @@ struct AppRuleTitleOfferTests {
         #expect(
             offered(.simple, [rule])
         )
+        let bare = "com.apple.finder:"
+        #expect(FloatFacet.current([bare], app: bare) == .all)
+        #expect(!offered(.simple, [bare]))
     }
 }

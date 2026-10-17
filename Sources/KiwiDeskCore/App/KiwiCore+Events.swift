@@ -9,6 +9,7 @@ import Foundation
 extension KiwiCore {
     func handle(_ event: KiwiEvent) {
         tiler.meter.add(\.events)  // #1508
+        noteVisionMaskEvent(event)
         // `state.apply` folds the event in and hands back the
         // facts the write erases — the gone window's app / space /
         // focus, the pre-echo focus, a float flip, and the appear
@@ -129,6 +130,9 @@ extension KiwiCore {
             // #1207: the Desktop return's owed focus, paid where
             // the fold said it returned.
             payReturningFocus(arrived: window.id, effects: effects)
+            // #1875: Move here's focus, a plain one, into the Space
+            // the window was moved into.
+            payMoveHereFocus(arrived: window.id)
             // #1599: a launch follows its window into the Space
             // its app rule chose — claimed here, switched after
             // the arrival retile below has filed the window.
@@ -222,6 +226,7 @@ extension KiwiCore {
                 reason: .hidden
             )
         case .windowTitleChanged(let id, _):
+            noteVisionTitleChanged(id)
             if effects.floatFlipped {
                 retile()
             } else {

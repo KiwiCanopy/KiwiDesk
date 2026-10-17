@@ -267,10 +267,12 @@ struct RefusalCueSeamTests {
     /// The door every refusal pill takes draws WITHOUT the sound,
     /// so its callers are named by file: the resize wrapper, whose
     /// own callers offer the sound above, and the window actions'
-    /// cue, which lands after any hotkey fire (#1518). A third
-    /// caller would be a refusal silently exempt from
-    /// `refusal.sound` — the defect this suite exists to catch.
-    @Test("the unsounded pill door has its two named callers")
+    /// cue, which lands after any hotkey fire (#1518), and
+    /// KiwiVision's out-of-reach cue, which a profile switch draws
+    /// rather than a press (#2103 ruling 16). A further caller
+    /// would be a refusal silently exempt from `refusal.sound` —
+    /// the defect this suite exists to catch.
+    @Test("the unsounded pill door has its named callers")
     func pillDoorCallersAreNamed() throws {
         let core = Self.root.appendingPathComponent(
             "Sources/KiwiDeskCore"
@@ -287,6 +289,7 @@ struct RefusalCueSeamTests {
             callers == [
                 "KiwiCore+SizeLimitPill.swift": 1,
                 "KiwiCore+WindowActions.swift": 1,
+                "KiwiCore+VisionReach.swift": 1,
             ],
             "found: \(callers)"
         )

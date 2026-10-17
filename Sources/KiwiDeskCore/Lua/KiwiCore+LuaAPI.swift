@@ -52,25 +52,23 @@ extension KiwiCore {
         installTypoGuards(on: lua)
     }
 
-    /// UI-bridge verbs that cross Core → GUI (#330). They carry no
-    /// dispatcher `CommandResponse` — they raise a `@MainActor`
-    /// hook the app wires to a window — so, like `bind`/`on`, they
-    /// live outside `APIReference.commands` and are listed in
-    /// `luaOnly` for `help()`. The VM never holds the UI ref.
+    /// UI-bridge verbs that cross Core → GUI (#330). A Lua-only
+    /// one carries no dispatcher `CommandResponse` — it raises a
+    /// `@MainActor` hook the app wires to a window — so, like
+    /// `bind`/`on`, it lives outside `APIReference.commands` and is
+    /// listed in `luaOnly` for `help()`. `kiwihub.show` is the
+    /// dispatched one: it parses a side, so it answers, and the CLI
+    /// reaches it (#2265). The VM never holds the UI ref.
     ///
     /// **The family is four hand-mirrored lists** — a
-    /// `UIBridgeHooks` field, a `register` call here, an
-    /// `APIReference.luaOnly` entry and the `AppDelegate`
-    /// wiring — and a verb missing any one of them is a silent
-    /// no-op rather than a build error. `UIBridgeParityTests`
+    /// `UIBridgeHooks` field, a `register` call here (or a
+    /// namespace entry), an `APIReference.luaOnly` entry and the
+    /// `AppDelegate` wiring — and a verb missing any one of them is
+    /// a silent no-op rather than a build error. `UIBridgeParityTests`
     /// derives the roster from the struct's own fields and holds
     /// the other three against it (`parity-tests.md`: past two
     /// mirrors, ship the forget-proof test).
     private func registerUIAPI(on lua: LuaInterpreter) {
-        lua.register("show_shortcuts") { [weak self] _ in
-            self?.uiBridge.onShowShortcuts()
-            return .none
-        }
         lua.register("open_settings") { [weak self] _ in
             self?.uiBridge.onOpenSettings()
             return .none
@@ -200,22 +198,23 @@ extension KiwiCore {
 /// until wired.
 ///
 /// **A field's name IS its verb name**, lower-snake with the
-/// `on` dropped (`onOpenSettings` ↔ `open_settings`), which is
-/// what lets `UIBridgeParityTests` derive the roster by
-/// reflection rather than re-listing it. The two verbs do not
-/// share a prefix on purpose: `show_shortcuts` toggles a panel
-/// and `open_settings` opens-or-raises a window, and naming
-/// both `show_*` would promise one behaviour for both.
+/// `on` dropped (`onOpenSettings` ↔ `open_settings`) and a leading
+/// namespace read as its table (`onKiwihubShow` ↔ `kiwihub.show`),
+/// which is what lets `UIBridgeParityTests` derive the roster by
+/// reflection rather than re-listing it. `kiwihub.show` toggles a
+/// panel side, while `open_settings` opens-or-raises a window.
 public struct UIBridgeHooks {
-    /// `KiwiDesk.show_shortcuts()` (#330): opens (toggles) the
-    /// read-only shortcuts reference panel (#326).
-    public var onShowShortcuts: @MainActor () -> Void = {}
-
     /// `KiwiDesk.open_settings()` (#678 item 18): the bindable
     /// "Open Settings" action, seeded on ⌃⌥, (#1381). Opens or
     /// raises, never toggles — a key that closed Settings
     /// would discard the draft state the save pill narrates.
     public var onOpenSettings: @MainActor () -> Void = {}
+
+    /// `kiwihub.show(side)` (#2265): opens KiwiHub on `side`,
+    /// switches it there, or closes it when that side is up.
+    public var onKiwihubShow: @MainActor (KiwiHubSide) -> Void = {
+        _ in
+    }
 
     public init() {}
 }

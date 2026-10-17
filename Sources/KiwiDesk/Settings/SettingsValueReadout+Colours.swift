@@ -32,12 +32,6 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.liquidGlass,
                 new.settings.stickyStyle.liquidGlass
             )
-        case .spaceSwitchLiquidGlass:
-            return coloursOnOffRow(
-                census,
-                old.settings.spaceSwitchLiquidGlass,
-                new.settings.spaceSwitchLiquidGlass
-            )
         case .borderSheen:
             return coloursRow(
                 census,
@@ -61,12 +55,6 @@ extension SettingsValueReadout {
                 o.anyEnabled,
                 n.anyEnabled
             )
-        case .animationsOnSpaceChange:
-            return coloursOnOffRow(
-                census,
-                o.onSpaceChange,
-                n.onSpaceChange
-            )
         case .animationsOnWindowResize:
             return coloursOnOffRow(
                 census,
@@ -84,12 +72,6 @@ extension SettingsValueReadout {
                 census,
                 o.onRelayout,
                 n.onRelayout
-            )
-        case .animationsSpaceChangeDurationMS:
-            return coloursRow(
-                census,
-                milliseconds(Double(o.spaceChangeDurationMS)),
-                milliseconds(Double(n.spaceChangeDurationMS))
             )
         case .animationsDurationMS:
             return coloursRow(
@@ -116,18 +98,6 @@ extension SettingsValueReadout {
                 census,
                 milliseconds(Double(o.scrollDurationMS)),
                 milliseconds(Double(n.scrollDurationMS))
-            )
-        case .animationsOnMonocleFocus:
-            return coloursOnOffRow(
-                census,
-                o.onMonocleFocus,
-                n.onMonocleFocus
-            )
-        case .animationsMonocleFlipDurationMS:
-            return coloursRow(
-                census,
-                milliseconds(Double(o.monocleFlipDurationMS)),
-                milliseconds(Double(n.monocleFlipDurationMS))
             )
         case .paletteApply, .paletteSave, .paletteRename,
             .paletteExport, .paletteDelete, .paletteImport,

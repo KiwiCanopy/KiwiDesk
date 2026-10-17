@@ -38,8 +38,10 @@ struct FrameSetReaderCensusTests {
             "a scroll target is revealed once the window sits where "
                 + "it was asked to"
         ),
-        "KiwiCore+MonocleFlip.swift": (
-            .issued, "the flip plate lies on the window's frame"
+        "KiwiCore+HoverFocus.swift": (
+            .issued,
+            "a hover stands down if a focus would move any window "
+                + "from where it was asked to sit (#1869)"
         ),
         "KiwiCore+Borders.swift": (
             .slots,

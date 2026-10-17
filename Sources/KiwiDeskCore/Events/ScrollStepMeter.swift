@@ -9,10 +9,10 @@ import CoreGraphics
 /// a time each step while a fast roll or a free spin steps once.
 /// The glide after a lift never counts. Pure.
 public struct ScrollStepMeter: Sendable {
-    /// The quiet that re-arms a latched wheel, in seconds; a
+    /// The notch quiet that re-arms a wheel, in seconds; a
     /// provisional number until a device logs notch intervals.
     /// Held below `ScrollGestureRouter.wheelPause`, which ends the
-    /// burst and so resets the latch.
+    /// burst and so clears the last notch.
     static let wheelQuiet = 0.12
 
     private let longSwipes: Bool

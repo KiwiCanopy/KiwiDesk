@@ -92,7 +92,8 @@ scroll
 Required arguments are in `<angle brackets>`, optional ones in
 `[square brackets]`. A command the CLI cannot reach is marked:
 `(lua only)` for the entry points that live on the Lua table
-alone (`bind`, `on`, `exec`, …), `(cli only)` for `subscribe`.
+alone (`bind`, `on`, `exec`, …), `(cli only)` for the commands
+a config never calls, such as `subscribe`.
 
 Naming one command prints its full signature, including the legal
 values of an enum argument and the Swift type they come from:
@@ -135,12 +136,165 @@ each group carrying one object per command — `name`,
 `aliases`, and an `arguments` array whose enum entries add
 `values`.
 
+:::unreleased
+Each command object also carries `destructive`: `true` for a
+command that cannot be undone
+([Using KiwiDesk from AI Apps](#using-kiwidesk-from-ai-apps)).
+:::
+
 The Swift type an enum's values were read from is **not** a JSON
 field; it appears in the terminal rendering only. `values` is
 what answers "what may I send".
 
 Bare `kiwidesk help` (and `--help` / `-h`) still prints the short
 usage block. Add a name, or `--json`, to get the API instead.
+
+## Shell Completion
+
+:::unreleased
+`kiwidesk completion zsh`, `bash` or `fish` prints a completion
+script. It completes command names, an argument's legal values,
+event names, and — while the app runs — Space ids, window ids,
+profile names and look names. The script asks the binary for every
+answer, so it never needs regenerating after an upgrade.
+
+```sh
+# zsh: add to ~/.zshrc, after compinit
+source <(kiwidesk completion zsh)
+# bash: add to ~/.bash_profile
+eval "$(kiwidesk completion bash)"
+# fish
+kiwidesk completion fish > ~/.config/fish/completions/kiwidesk.fish
+```
+:::
+
+## Using KiwiDesk from AI Apps
+
+:::unreleased
+`kiwidesk mcp` runs a [Model Context Protocol](https://modelcontextprotocol.io)
+server on stdin and stdout, so an AI app that launches local MCP
+servers — Claude Desktop, Claude Code, Cursor, Codex — can drive
+KiwiDesk. Point the app at the binary inside the bundle; most apps
+take this entry, and one with its own config format takes the same
+`command` and `args`:
+
+```json
+{
+  "mcpServers": {
+    "kiwidesk": {
+      "command": "/Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+Settings ▸ AI ▸ **Copy Setup Prompt** puts a short prompt carrying
+this entry, with the path of the copy you are running, on the
+clipboard: paste it into the AI app, which adds the server itself
+or walks you through it. The same page has ready-made prompts that
+have the AI app ask you what you want, one question at a time.
+
+**Add to Claude Desktop…** on the same page builds a Claude Desktop
+extension for the copy you are running and opens it in Claude
+Desktop, which asks you to install it. The extension starts that
+copy, so after moving KiwiDesk add it again.
+
+In Claude Code, the KiwiDesk plugin adds the server and a skill
+(`/kiwidesk:drive`) on how to change things live and keep them:
+
+```sh
+/plugin marketplace add KiwiCanopy/kiwidesk-claude
+/plugin install kiwidesk@kiwidesk
+```
+
+It finds KiwiDesk in `/Applications`, in `~/Applications` or as
+`kiwidesk` on your `PATH`.
+
+The server speaks MCP `2026-07-28` and, after an `initialize`,
+`2025-11-25` and `2025-06-18`. It offers eleven tools:
+
+| Tool | Does |
+|---|---|
+| `list_commands` | Every command the tools can send, filtered by name, group or summary, the destructive ones marked |
+| `help` | One command's arguments, as `kiwidesk help <name> --json` returns them |
+| `get_state` | `get_state`'s answer |
+| `run` | One command that can be undone |
+| `run_batch` | Up to 100 commands in order, stopping at the first failure |
+| `run_destructive` | One command that cannot be undone |
+| `keep` | Makes this session's setting changes permanent |
+| `looks` | The `look.*` verbs as one tool: list, inspect, wear and save looks |
+| `app_rules` | The `app_rule.*` verbs as one tool: list app rules, and set or remove which Space an app opens in and which windows float |
+| `diagnose_window` | Why a window floats, tiles or opens where it does: `explain_window` for a window, `explain_app` for an app whose window KiwiDesk does not manage |
+| `kiwivision` | The `kiwivision.*` verbs as one tool: read what KiwiVision shows, turn it or a lens on and off, change its settings, and define or delete a lens |
+
+`list_commands` and `help` answer without the app; the others
+need it running. A command `list_commands --json` marks
+`destructive` goes only through `run_destructive`, and `run` and
+`run_batch` refuse it. `run_destructive` carries MCP's destructive
+hint, which an AI app that honours it turns into a question to you
+before the command runs. A shortcut verb saves at once, so `run`
+tells the AI app to show you the mapping and ask first. `subscribe` and the Lua-only verbs are
+not offered.
+
+`looks` takes an `action` — each `look.*` verb that can be undone —
+and that verb's arguments by name; `look.delete` goes through
+`run_destructive`. The AI page's **Make a new look** prompt offers to
+match your wallpaper from a screenshot you give the AI app: KiwiDesk
+never reads the wallpaper itself.
+
+`app_rules` takes the same shape over the `app_rule.*` verbs. An app
+is named by the `bundle_id` `get_state` lists for its windows.
+
+`diagnose_window` takes exactly one of `window` (an id from
+`get_state`'s `windows`) or `app` (a bundle id), and sends
+`explain_window` or `explain_app`
+([`explain_window`](lua-reference.md#explain_window)); `window` has
+no focused-window default here.
+
+`kiwivision` takes an `action`, as `looks` does, over every
+`kiwivision.*` verb, `kiwivision.current` among them;
+`define_lens` takes `table`, the lens as a JSON object string.
+`keep` cannot write a KiwiVision change: Settings ▸ KiwiVision
+keeps it, so change the setting, or define or delete the lens,
+there.
+
+A setting changed through MCP is live but not kept, and every
+command result after the change tells the AI app so, with where
+`keep` would write it: the live profile, or the shared look for a
+look setting of a profile that wears it — a kept look setting
+changes every profile wearing that look, and `keep` names them. An
+app rule the live profile does not hold for itself is kept in the
+shared rules, which every profile without its own rule for that app
+follows, and removing one of those takes it from every profile
+holding it; `keep` names every profile whose rule changed.
+Say "keep" and `keep` writes those changes as they are now; a
+change `init.lua` owns, one made while no saved profile is live, an
+app-wide one, or one belonging to a Space that is not in the
+profile is named but cannot be kept. A change a Settings Save
+stored, or one set back to its saved value, needs no keep. A config
+reload, a profile load, a built-in layout's apply or Settings that
+puts another value there before the keep replaces it, and the AI
+app is told. A command the binary does
+not know is refused rather than sent. `get_state` and
+`diagnose_window` hand the AI app your window titles.
+
+ChatGPT reaches only remote MCP servers, so it needs
+[OpenAI's Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+in front of `kiwidesk mcp`; KiwiDesk itself opens no network port.
+With a tunnel created in your OpenAI Platform organization and a
+runtime key in `CONTROL_PLANE_API_KEY`, OpenAI's `tunnel-client`
+runs the server for it:
+
+```sh
+tunnel-client init --sample sample_mcp_stdio_local \
+  --profile kiwidesk --tunnel-id <tunnel id> \
+  --mcp-command "/Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk mcp"
+tunnel-client run --profile kiwidesk
+```
+
+Then add a connector in ChatGPT whose connection is that tunnel.
+:::
 
 ## Service Control
 
@@ -166,6 +320,13 @@ KiwiDesk is already running loads the agent, whose `RunAtLoad`
 spawns one supervised launch; it finds the instance lock held,
 brings the running copy forward once — taking focus from your
 terminal — and exits cleanly.
+
+:::unreleased
+`start` and `restart` refuse a copy opened straight from
+Downloads, which macOS runs from a temporary location that
+changes each time it starts: move `KiwiDesk.app` to
+`/Applications` and run them from there.
+:::
 
 `restart` of a running service leaves your windows where they
 are: the app is told first, spreads nothing out on its way down,
@@ -256,12 +417,62 @@ failures. 1 still means the command itself did not get through.
 
 ## Commands
 
+A `set_*` command other than `set_default_profile` writes no file:
+it changes the running value only.
+[`save_profile`](lua-reference.md#save_profile-load_profile-delete_profile-set_default_profile)
+keeps what it captures, and so does a Settings Save for a setting
+the live profile stores; any other value lasts until a profile
+load or a config reload sets it again, or until KiwiDesk quits.
+
 `focus_space_previous`, `focus_space_next`, `focus_space_back`,
 `focus_space_forward` and `set_space_history` step through the
 Spaces by their order and by the ones you visited
 ([`focus_space_back`](lua-reference.md#focus_space_back--focus_space_forward)).
 `set_desktop_cue` turns off the plate a Desktop switch shows
 ([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
+
+:::unreleased
+`set_space_cue` turns off the plate naming the Space a switch
+lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
+`set_mode_cue` turns off the plate `cycle_mode` shows
+([`set_mode_cue`](lua-reference.md#set_mode_cue)).
+:::
+
+:::unreleased
+`look.list`, `look.current`, `look.apply <name>`, `look.save
+<name>` and `look.delete <name>` reach the look library
+([Looks](lua-reference.md#looks)). `look.apply` wears a look
+without writing it.
+:::
+
+:::unreleased
+`shortcut.list`, `shortcut.set <chord> <command> [argument…]` and
+`shortcut.remove <chord>` read and write the saved shortcuts; a
+write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
+:::
+
+:::unreleased
+`app_rule.list`, `app_rule.set_space <app> <space>`,
+`app_rule.remove_space <app>`, `app_rule.set_float <app> [title]`
+and `app_rule.remove_float <app> [title]` change the app rules live
+([App rule verbs](lua-reference.md#app-rule-verbs)).
+:::
+
+:::unreleased
+`explain_window [window]` says why a window floats or tiles and
+what would change it; `explain_app <bundle_id>` says what KiwiDesk
+knows of an app whose window it does not list
+([`explain_window`](lua-reference.md#explain_window)).
+:::
+
+:::unreleased
+`kiwivision.toggle [lens]`, `kiwivision.current`, the
+`kiwivision.set_*` verbs, `kiwivision.define_lens <table>` and
+`kiwivision.delete_lens <name>` reach KiwiVision and its lenses
+([KiwiVision](lua-reference.md#kiwivision)). `kiwivision.current`
+says whether KiwiVision is on, which lens is on, its settings and
+every lens with why it cannot turn on.
+:::
 
 | Category | Command | Arguments |
 |---|---|---|
@@ -302,6 +513,8 @@ Spaces by their order and by the ones you visited
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
+| | `set_space_cue` | true\|false (default `true`) — the plate naming the Space an explicit switch lands on, where no Space Bar is drawn |
+| | `set_mode_cue` | true\|false (default `true`) — the plate showing the layout a `cycle_mode` lands on |
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating or moves into a floating Space |
@@ -323,18 +536,14 @@ Spaces by their order and by the ones you visited
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | [message] |
-| Animation | `animations.set_duration` | ms (50–1000); persisted per-profile |
-| | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration, persisted per-profile |
-| | `animations.set_on_space_change` | true\|false; the plate slide on a Space switch, persisted per-profile |
-| | `animations.set_space_change_duration` | ms (150–1000, default 300); the plate slide's pace, persisted per-profile |
+| Animation | `animations.set_duration` | ms (50–1000) |
+| | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration |
 | | `animations.set_on_scrolling` | true\|false (default true) |
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
-| | `animations.set_on_monocle_focus` | true\|false (default true); the Monocle focus card flip, persisted per-profile |
-| | `animations.set_monocle_flip_duration` | ms (100–1000, default 450); the flip's turn, persisted per-profile |
-| | `animations.set_on_shelf` | true\|false (default true); the KiwiShelf motion on a Space switch, persisted per-profile |
-| | `animations.set_shelf_duration` | ms (500–2000, default 750); the shelf glide's length, persisted per-profile |
+| | `animations.set_on_shelf` | true\|false (default true); the KiwiShelf motion on a Space switch |
+| | `animations.set_shelf_duration` | ms (500–2000, default 750); the shelf glide's length |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
@@ -390,20 +599,54 @@ Spaces by their order and by the ones you visited
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-`animations.set_on_space_change` defaults to `true`, and
-`animations.set_space_change_duration` is new. A profile saved by
-an earlier release with the slide off is turned on once, unless
-its other animations are all off; while a saved profile is live,
-its value applies over `init.lua`'s.
+:::unreleased
+`animations.set_on_space_change` and `animations.set_space_change`
+are refused, naming `set_space_cue`;
+`animations.set_space_change_duration` and
+`set_space_switch_liquid_glass` are refused, since a Space switch
+is instant and no longer slides.
+`animations.set_on_monocle_focus` and
+`animations.set_monocle_flip_duration` are refused, since a
+Monocle focus change is a raise and plays no flip.
+:::
+
+:::unreleased
+`mouse.set_hover_focus` takes `true|false` (default `false`):
+focus and raise the window the pointer comes to rest on.
+`mouse.set_hover_focus_delay` takes milliseconds, `0` or more
+(default `200`): how long the pointer rests first.
+:::
 
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,
 naming the new one.
+
+:::unreleased
+`cycle_mode` (System) takes `prev` or `next` (default) and
+moves the focused Space to the next layout in its cycle list;
+`set_mode_cycle` sets that list. See
+[cycle_mode](lua-reference.md#cycle_mode).
+:::
+
+:::unreleased
+`kiwihub.show` takes `windows`, `shortcuts` or `view` and opens
+KiwiHub on that side, so a launcher reaches it without a shortcut;
+any other side is refused, naming the three. See
+[kiwihub.show](lua-reference.md#kiwihubshow).
+:::
 
 `gather` (Launch) takes an app bundle id and moves every window of
 that app into the Space you are on, from other macOS Desktops too
 where the Desktop bridge is present; it never launches the app, and
 an app with nothing to move answers with an error. See
 [gather](lua-reference.md#gather).
+
+:::unreleased
+`move_here` (Launch) takes an app bundle id and optionally a piece
+of window title, and moves that app's most recently focused window
+not yet here into the Space you are on and focuses it — a
+minimized one only once no open one is left; an app with no window
+is opened. See [move_here](lua-reference.md#move_here).
+:::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
@@ -586,6 +829,17 @@ Subscribe to nothing *but* unrecognised names and the stream
 stays silent: an empty filter is not the same request as no
 filter.
 
+:::unreleased
+The stream ends when the app quits. Add `--reconnect` to keep it
+across a quit and relaunch: it waits for the app, subscribes again
+with the same names, and notes on stderr that events in between
+were missed. Each reconnection prints the confirmation line again.
+
+```sh
+kiwidesk subscribe --reconnect space_change
+```
+:::
+
 Every window event carries `bundle_id` — the stable identity
 key (the one app rules and `focus_or_spawn` match on) — next to
 the locale-dependent display `app` name. It is JSON `null` for
@@ -720,6 +974,33 @@ names, `default` included:
  "data": {"from_layer": "default", "to_layer": "resize"}}
 ```
 
+### Running a Command per Event
+
+:::unreleased
+`watch` runs a command once per event:
+
+```sh
+kiwidesk watch space_change -- sketchybar --trigger kiwi_space
+kiwidesk watch -- sh -c 'echo "$KIWIDESK_EVENT" >> ~/events.log'
+```
+
+Event names go before `--`, as with `subscribe` (none means every
+event), and a name the app does not know is reported on stderr; the
+command and its arguments go after it and run without
+a shell, so wrap shell syntax in `sh -c`. Each run gets the event's
+JSON line on stdin, and these variables:
+
+- `KIWIDESK_EVENT` — the event name.
+- `KIWIDESK_DATA` — the event's `data` object as JSON.
+- `KIWIDESK_<KEY>` for each top-level string, number or boolean
+  in `data`, upper-cased: `KIWIDESK_SPACE_ID`, `KIWIDESK_WINDOW_ID`.
+
+Runs happen one at a time, in event order; events that arrive
+during a run wait for it. A command that exits non-zero is reported
+on stderr and the watch continues. The watch reconnects across a
+relaunch, as `subscribe --reconnect` does, and runs until stopped.
+:::
+
 ## Raw IPC Protocol
 
 Anything that can write to a UNIX socket can drive KiwiDesk —
@@ -739,3 +1020,25 @@ Response:
 
 Unknown commands come back with a did-you-mean suggestion when
 a close match exists.
+
+:::unreleased
+A request may add `"report_changes": true` — `kiwidesk mcp` does —
+and the response then carries a `changes` object: the live
+`profile`, and the setting leaves the command changed under
+`touched`, each an `id` (a JSON Pointer such as
+`/settings/border/width`, `/space_modes/2` or
+`/app_wide/refusal/sound`, `/app_rules/com.spotify.client`), an
+`owner` (`profile`, `shared_look`, `shared_rules`, `init_lua` or
+`none`), its live `value`, whether that is the
+`stored` one, and a `not_keepable` reason where no keep can write
+it. Ids sent as `"keep_watch": [...]` come back judged the same way
+under `watched`. `keep_settings` writes those ids as they are live
+and answers which ones it `kept`, which it could not
+(`not_keepable`), the live `profile`, the profiles wearing a kept
+shared look (`followers`) and the profiles whose rule a kept rule
+changed (`rule_profiles`):
+
+```sh
+kiwidesk keep_settings /settings/border/width
+```
+:::

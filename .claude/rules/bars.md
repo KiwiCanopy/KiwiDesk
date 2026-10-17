@@ -23,9 +23,6 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
   # The looks (#1684): which bar fields a look may set.
   - "Sources/KiwiDeskCore/Appearance/*Look*.swift"
-  # The app-icon readers outside Bar: one icon source (#1901).
-  - "Sources/KiwiDeskCore/App/KiwiCore+MonocleFlip.swift"
-  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay.swift"
   # The Settings preview asks ShelfArrangement and the hard floor
   # like the live plan does; a hand placement there is this
   # file's defect, not gui.md's.
@@ -42,13 +39,9 @@ paths:
   - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
   - "Sources/KiwiDeskCore/Tiling/DragMarkerView.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
-  # The Space switch's plates (#1956): untinted `.regular` glass by
-  # the issue's ruling, the shortcuts panel's.
-  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay+Plates.swift"
   # ...and the sites that decide their glass through the gate.
   - "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
-  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceSlide.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)
@@ -81,7 +74,7 @@ twice, was a question the user answered twice. The argument is
   that is not `AppBarStyle`'s; whether a NEW field is shared or
   a bar's own is review's, since no guard can tell. **And a new
   field is ruled for the looks (#1684)**: styling — how the same
-  items look or where they sit — joins `LookKeys.all`,
+  items look or where they sit — joins `LookKeys.styling`,
   functionality or a field left alone joins `LookKeys.leftOut`
   with its reason, a colour joins `ColorPaletteKeys`, which a
   look carries whole (#1752); the owner's test
@@ -94,7 +87,10 @@ twice, was a question the user answered twice. The argument is
   tour's Revert leaves it behind: `ShelfPaintRoundTripTests` ▸
   `revertRoundTripsEveryLook` reds one that reaches a glass leaf
   or a per-layout App Bar override; a write elsewhere owes that
-  fixture the field.
+  fixture the field. The per-layout indicators it clears are the
+  one `TilingSettings.layoutIndicatorLeaves`, which wearing the
+  shared look keeps (`LookBody.worn`, `isWorn`) and the undo
+  restores (#2368, `SettingsLiveFollowerTests`).
 - **Retire a bar verb by adding it to `APIReference.retired`**,
   naming its replacement or nil, and never by an alias (AGENTS.md
   §5). A field the shelf migration moves joins
@@ -261,8 +257,7 @@ twice, was a question the user answered twice. The argument is
   the bars' app icons come from the one `BarIconCache`: a fresh
   `NSImage` per read never compares equal and costs a
   LaunchServices round trip besides. Any other Core surface that
-  draws an app's icon — the Monocle flip's card, the Space
-  switch's plates — reads it there too, since an app activation
+  draws an app's icon reads it there too, since an app activation
   makes every retained `NSRunningApplication` read again (#1936,
   `AppIconSourceSeamTests`).
 - **Reuse a Space item's glyph and badge views slot by slot,
@@ -285,7 +280,11 @@ twice, was a question the user answered twice. The argument is
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
   `presentationInFrontStandsShelfDown` holds both bars through
-  it.
+  it. **A cue the shelf would sit beside — the Space, layout
+  and Desktop cues — stands down through the same verdict**,
+  never a part of it such as `showsPresentation`, which a
+  new stand-down case would leave behind (#2348,
+  `ShelfStandDownSeamTests` ▸ `cuesAskTheStandDown`).
 - **Keep a bar's `naturalLength` equal to what its render
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:
@@ -908,9 +907,9 @@ rather than the row it names makes the user search again. So:
   `discSetsTheSpan`). A session value — a Layout pick, the
   divider's reset — takes the setter alone, as its other doors
   do.
-- **The Layout rows' look is `LayoutModeRows.entries`**, which
-  the status item's Layout menu builds from too; each side hands
-  it its own words, so no sentence crosses the #96 seam.
+- **The Layout rows' look is `LayoutModeRows.entries`**, and a
+  second surface that draws those rows builds from it too,
+  handing it its own words, so no sentence crosses the #96 seam.
 
 ## A Space wears one marker, drawn after its identifier (#1790)
 
@@ -954,16 +953,13 @@ reading a bar still makes for itself:
 - A bar derivation answering *which window holds the SYSTEM
   focus* — the glyph tint, the `+n` badge's, a list peek's check,
   a glyph click's cycle, a window menu's state — reads the one
-  `KiwiCore.barFocus(on:)`: a playing Monocle flip's owed target,
-  else `workspaces.lastFocused`, gated on the active Space —
-  never on the display's own shown one and never on a Space's
-  remembered `focused` slot (`BarFocusSeamTests`, #2063). Those
-  diverge on an injected ∞ traveler, which holds `lastFocused`
-  and can never be the membership-guarded `space.focused` (#431),
-  and that is the one case the `+n` tint exists for; the owed
-  flip target keeps a glyph and its list naming one window
-  through a flip (`BarGlyphCycleTests` ▸
-  `owedMonocleFocusCounts`).
+  `KiwiCore.barFocus(on:)`: `workspaces.lastFocused`, gated on
+  the active Space — never on the display's own shown one and
+  never on a Space's remembered `focused` slot
+  (`BarFocusSeamTests`, #2063). Those diverge on an injected ∞
+  traveler, which holds `lastFocused` and can never be the
+  membership-guarded `space.focused` (#431), and that is the one
+  case the `+n` tint exists for.
 - `currentSpace(on:)` answers *which Space is this screen
   showing*: the item that draws as active, the Space a bar is
   BUILT for, chrome coverage. It is a bare alias of
@@ -1178,7 +1174,12 @@ Obligations:
   Nothing else in Core writes `.appearance =` on a view
   (`GlassTintSeamTests` ▸ one-home clause, allow map empty by
   design); a surface that needs to owes `docs/design-decisions.md`
-  an argument first.
+  an argument first. **A surface with no Fill whose own ink is
+  fixed black pins through the one Fill-less door,
+  `GlassTint.pinDark`** — KiwiVision's plate (#2103), its dark pin
+  outranking the Appearance pick as a dark Fill's does — and a new
+  caller joins `GlassTintPinDarkCallerTests`' register, since the
+  one-home scan exempts the home file and cannot see who calls it.
 - **A `Sources/KiwiDesk` surface that tints glass owes this suite
   a root.** `GlassTintSeamTests` scans Core alone, so the GUI
   tree is not covered by it — a Fill→colour derivation that lands

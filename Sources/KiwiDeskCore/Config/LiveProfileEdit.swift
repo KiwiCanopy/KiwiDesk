@@ -11,6 +11,52 @@ public enum LiveProfileEdit {
     case addSpace(SpaceID, AddedSpace)
     /// A Space removed from the profile (#1790).
     case removeSpace(SpaceID)
+    /// What `keep_settings` writes (#1685): live leaves and the
+    /// layouts of Spaces the profile already declares.
+    case kept(KeptLeaves)
+
+    /// Whether landing the shared look may repaint the live look:
+    /// a keep's values are live already, beside pending ones the
+    /// files do not hold, so it may not (#1685).
+    var repaintsLiveLook: Bool {
+        if case .kept = self { return false }
+        return true
+    }
+
+    /// Whether the edit moves which Spaces the profile declares,
+    /// so the adoption record must follow the file (#1245).
+    var redeclares: Bool {
+        switch self {
+        case .addSpace, .removeSpace: return true
+        case .settings, .kept: return false
+        }
+    }
+}
+
+/// The live values a keep writes (#1685): settings leaves by path
+/// inside `settings` — nil removes the leaf, so the decoder's
+/// default answers — and each kept Space's layout.
+public struct KeptLeaves: Equatable {
+    public var settings: [[String]: JSONValue?]
+    public var spaceModes: [SpaceID: LayoutMode]
+
+    public init(
+        settings: [[String]: JSONValue?] = [:],
+        spaceModes: [SpaceID: LayoutMode] = [:]
+    ) {
+        self.settings = settings
+        self.spaceModes = spaceModes
+    }
+
+    /// Whether the edit writes nothing.
+    var isEmpty: Bool { settings.isEmpty && spaceModes.isEmpty }
+
+    /// `settings` with the kept leaves laid over; unchanged where
+    /// the decoder refuses the result.
+    func applied(to settings: TilingSettings) -> TilingSettings {
+        self.settings.isEmpty
+            ? settings : settings.patched(self.settings) ?? settings
+    }
 }
 
 /// Where an added Space goes and what it carries: its place in
@@ -76,6 +122,9 @@ extension Profile {
             if fallbackSpace == id { fallbackSpace = nil }
             for set in monitorSets { upsert(set.pinning(id, to: nil)) }
             settings.removeSpace(id)
+        case .kept(let leaves):
+            settings = leaves.applied(to: settings)
+            spaceModes.merge(leaves.spaceModes) { $1 }
         }
     }
 }
@@ -104,6 +153,11 @@ extension GuiConfig {
             settings.spaceIcons[id] = added.icon
         case .removeSpace(let id):
             removeSpace(id)
+        case .kept(let leaves):
+            settings = leaves.applied(to: settings)
+            for (id, mode) in leaves.spaceModes {
+                spaceModes[id] = mode == .bsp ? nil : mode
+            }
         }
     }
 }

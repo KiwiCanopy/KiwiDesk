@@ -141,7 +141,7 @@ struct KeybindingConflictsTests {
                 name: "default",
                 bindings: [
                     KeyBinding(
-                        combo: "hyper+z",
+                        combo: "meta+z",
                         lua: "a",
                         label: "Bad"
                     )

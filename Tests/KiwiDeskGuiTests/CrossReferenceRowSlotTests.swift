@@ -127,6 +127,9 @@ struct CrossReferenceRowSlotTests {
         "SharedLookPointer.swift:follows?Self.sharedProse:Self.ownProse",
         "SpacesSection+LiveOnly.swift:Self.noProfileProse",
         "SpacesSection.swift:Self.shortcutsProse",
+        "AILookPointer.swift:Self.prose",
+        // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
+        "KiwiVisionSection.swift:Self.prose(chord:chord)",
     ]
 
     // MARK: - The values
@@ -135,6 +138,11 @@ struct CrossReferenceRowSlotTests {
     /// (#1827).
     @Test func theSpacesShortcutsProsePlacesItsLink() {
         #expect(SpacesSection.shortcutsProse.contains(Self.slot))
+    }
+
+    /// The Looks page's pointer to the AI page (#1685).
+    @Test func theAILookProsePlacesItsLink() {
+        #expect(AILookPointer.prose.contains(Self.slot))
     }
 
     @Test func theMotionCardProsePlacesItsLink() {

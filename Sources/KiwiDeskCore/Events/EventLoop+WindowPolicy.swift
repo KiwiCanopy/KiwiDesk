@@ -131,7 +131,7 @@ extension EventLoop {
     /// AX identity meets AppKit identity, shared by the ignore
     /// gate (`canBecomeMain`) and by `ownWindowIdentifier`'s
     /// production default (the tiling mark).
-    static func ownWindow(number: Int) -> NSWindow? {
+    public static func ownWindow(number: Int) -> NSWindow? {
         NSApplication.shared.windows.first { $0.windowNumber == number }
     }
 
@@ -324,8 +324,7 @@ extension EventLoop {
     }
 
     /// The ids the ignore gate admitted for `pid` — what the
-    /// visible-panel distrust leaves out, since it cannot see the
-    /// #2072 escape.
+    /// visible-panel distrust leaves out.
     func admittedWindows(of pid: pid_t) -> Set<WindowID> {
         Set(elements[pid]?.keys ?? [:].keys)
     }

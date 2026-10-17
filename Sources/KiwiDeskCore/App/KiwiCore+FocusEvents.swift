@@ -229,9 +229,9 @@ extension KiwiCore {
             return
         }
         // A menu-bar reveal's activation (#1532): macOS fronts
-        // the last regular app so it has a bar to show. Returned
-        // once, with the stamped raise so the report that follows
-        // is our own echo (#1281); the arm's own file argues.
+        // the last regular app so it has a bar to show. Taken and
+        // owed, the return paid once the bar hides (#2224); the
+        // arm's own file argues.
         if !selfEcho,
             returnMenuBarReveal(
                 id: id,
@@ -258,17 +258,10 @@ extension KiwiCore {
         // the user reached, and a stale raise firing after the
         // pan would steal focus back.
         pendingFocusRaise = nil
-        // A flip's owed focus is dropped the same way (#1391) —
-        // for any window but the one it is leaving, whose own
-        // duplicate echo (#887) is not the user going elsewhere.
-        if let pending = pendingMonocleFocus, id != pending.from {
-            pendingMonocleFocus = nil
-        }
         // State and the OS agree again (#1130).
         disarmWakeFocusHeal()
         retireOwnFronts(honoring: id)
-        let honoredApp: String =
-            state.windows[id]?.appName ?? "?"
+        let honoredApp = state.windows[id]?.appName ?? "?"
         let honoredBefore: String = describe(
             effects.focusBefore
         )
@@ -277,6 +270,7 @@ extension KiwiCore {
                 + "before \(honoredBefore), "
                 + "selfEcho=\(selfEcho)"
         )
+        let filedHere = payHiddenAppMove(focused: id)
         rememberHonoredFocus(id)
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)
@@ -306,9 +300,7 @@ extension KiwiCore {
         // cover this: in a focus-driven layout the click PANS
         // the row, so the clicked window's settled slot slides
         // out from under the cursor and the "warp" yanks the
-        // pointer after it (#689 device QA — pre-#689 that
-        // warp was dropped by the in-flight hold; the re-fire
-        // surfaced it).
+        // pointer after it (#689 device QA).
         if !selfEcho, effects.focusBefore != id,
             !recentClickReached(id, now: wallClock())
         {
@@ -339,6 +331,8 @@ extension KiwiCore {
             } else {
                 retileWithScrollDuration()
             }
+        } else if filedHere {
+            retile(animated: true)
         }
         // Keep floats above the just-focused tiled window
         // (#418). Skipped on a self-echo so the raise's own

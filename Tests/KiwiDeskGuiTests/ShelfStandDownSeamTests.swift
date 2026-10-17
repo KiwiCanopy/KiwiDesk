@@ -56,4 +56,40 @@ struct ShelfStandDownSeamTests {
         }
         #expect(homes == Self.allowed)
     }
+
+    /// Every cue stands down through the same verdict as the bars
+    /// (#2348): a cue reading the presentation beside it is left
+    /// behind when the verdict gains a case, so the presentation
+    /// read is spelled inside the verdict alone.
+    @Test("the cues ask the shelf's verdict, never a part of it")
+    func cuesAskTheStandDown() throws {
+        let core = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        var presentation: [String: Int] = [:]
+        for url in try SourceScan.swiftSources(under: core) {
+            let source = try SourceScan.strippedSource(at: url)
+            // A call spells the label; the declaration names its
+            // parameter (`on display:`), so it is not counted.
+            let calls =
+                source.components(separatedBy: "showsPresentation(on:")
+                .count - 1
+            if calls > 0 { presentation[url.lastPathComponent] = calls }
+        }
+        #expect(
+            presentation == ["KiwiCore+ScreenCovering.swift": 1],
+            "presentation read beside the verdict: \(presentation)"
+        )
+        for file in [
+            "Commands/SpaceSwitchCue.swift", "Commands/ModeCycleCue.swift",
+            "Profiles/KiwiCore+DesktopCue.swift",
+        ] {
+            let source = try SourceScan.strippedSource(
+                at: core.appendingPathComponent(file)
+            )
+            #expect(
+                source.contains("!shelfStandsDown(on:"),
+                "\(file) asks the stand-down"
+            )
+        }
+    }
 }

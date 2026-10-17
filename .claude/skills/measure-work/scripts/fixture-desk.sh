@@ -85,18 +85,18 @@ KiwiDesk.set_mode(6, "monocle")
 scroll.set_slot_size("50%")
 -- Every animation both releases know, pinned to the shipped
 -- defaults, so a default moving in a release cannot move a row.
--- The Space-switch animation differs between releases and is the
--- caller's to state, through [extra.lua].
+-- The Space-switch animation and the Monocle flip differ between
+-- releases (3.0.0 retired both): a 2.x bundle states each in
+-- [extra.lua], animations.set_on_monocle_focus(false) for parity
+-- with 3.0.0.
 animations.set_duration(150)
 animations.set_scroll_duration(150)
-animations.set_monocle_flip_duration(450)
 animations.set_on_shelf(true)
 animations.set_shelf_duration(750)
 animations.set_on_scrolling(true)
 animations.set_on_window_resize(true)
 animations.set_on_window_swap(true)
 animations.set_on_relayout(true)
-animations.set_on_monocle_focus(true)
 app_rules = { ["com.apple.Safari"] = "1" }
 LUA
 }

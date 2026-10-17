@@ -28,11 +28,15 @@ struct ConfigMigrationGlassRoutingTests {
         let root = coreRoot
         let prefix = root.path + "/"
         let allowed: Set<String> = [
-            "Profiles/Profile.swift",
+            "Profiles/Profile+CodingKeys.swift",
             "Config/ConfigMigration+GlassDefault.swift",
             "Config/ConfigMigration+TrackLimit.swift",
             "Config/ConfigMigration+KiwiShelf.swift",
             "Config/ConfigMigration+BarEdges.swift",
+            // The keep document's root (#1685), never a file.
+            "Commands/KiwiCore+ChangeReport.swift",
+            // `kiwivision.current`'s answer key (#2103), never a file.
+            "App/KiwiCore+VisionCurrent.swift",
         ]
         var declarers: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {
@@ -113,55 +117,6 @@ struct ConfigMigrationGlassRoutingTests {
                     + "\(declarers.sorted()) — a second stored "
                     + "`limit` key sends the lift's textual edit "
                     + "past its walk, or this map owes it an entry"
-            )
-        )
-    }
-
-    /// The slide turn-on (#1931) edits every `"animations"` object
-    /// in the TEXT while its walk reaches only `settings` by path,
-    /// so it is safe while `TilingSettings` alone stores the group:
-    /// a second stored `animations` key would send the edit past
-    /// the walk and every migration to the re-serializing
-    /// fallback. The API reference names the namespace without
-    /// storing it.
-    @Test("The slide turn-on's group key has one declarer")
-    func spaceChangeGroupKeyStaysUnique() throws {
-        let root = coreRoot
-        let prefix = root.path + "/"
-        let allowed: Set<String> = [
-            "Tiling/TilingSettings+Coding.swift",
-            "Config/ConfigMigration+SpaceChangeOn.swift",
-            "Commands/Reference/APIReference.swift",
-            "Commands/Reference/APIReference+Records.swift",
-        ]
-        var declarers: Set<String> = []
-        for file in try SourceScan.swiftSources(under: root) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            let key =
-                file.path.hasPrefix(prefix)
-                ? String(file.path.dropFirst(prefix.count))
-                : file.path
-            let declares =
-                source.range(
-                    of: "case animations(?![A-Za-z0-9_])",
-                    options: .regularExpression
-                ) != nil && source.contains("CodingKey")
-            if declares || source.contains("\"animations\"") {
-                declarers.insert(key)
-            }
-        }
-        #expect(!declarers.isEmpty)
-        #expect(
-            declarers == allowed,
-            Comment(
-                rawValue:
-                    "`animations` declared or named in: "
-                    + "\(declarers.sorted()) — a second stored "
-                    + "`animations` key sends the slide turn-on's "
-                    + "edit past its walk, or this map owes it an "
-                    + "entry"
             )
         )
     }

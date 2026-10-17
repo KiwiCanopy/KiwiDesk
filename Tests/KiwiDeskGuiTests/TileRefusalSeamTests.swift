@@ -92,6 +92,8 @@ struct TileRefusalSeamTests {
                 // The Tile picker's open guesses, which App
                 // Rules… lands on too (#2173, #2071).
                 "App/KiwiCore+AutoFloat.swift": 1,
+                // `explain_window`'s cause (#1685).
+                "Commands/KiwiCore+Explain.swift": 1,
             ]
         )
     }

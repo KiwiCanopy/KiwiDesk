@@ -39,6 +39,7 @@ extension SettingsModel {
             layers: config.layers,
             scrollGesture: config.scrollGesture,
             spaceHistory: config.spaceHistory,
+            modeCycle: config.modeCycle,
             tileRules: config.tileRules,
             floatAutomatically: config.floatAutomatically,
             profile: reachProfile,
@@ -115,6 +116,17 @@ extension SettingsModel {
             reach: reachEdits.reach[.history] ?? [:],
             removal: [:]
         )
+        snapshot.modeCycle = RuleReachDraft.encode(
+            snapshot.modeCycle,
+            current: [
+                RuleReachTable<[LayoutMode]>.modeCycleKey:
+                    config.modeCycle
+            ],
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.cycle] ?? [:],
+            removal: [:]
+        )
         snapshot.tileRules = RuleReachDraft.encode(
             snapshot.tileRules,
             current: RuleReachTable<[String]>.groupedByApp(
@@ -171,6 +183,11 @@ extension SettingsModel {
                 RuleReachTable<SpaceHistoryKind>.spaceHistoryKey,
                 for: loaded
             ) ?? stored.spaceHistory.spaceHistoryBase
+        config.modeCycle =
+            stored.modeCycle.resolved(
+                RuleReachTable<[LayoutMode]>.modeCycleKey,
+                for: loaded
+            ) ?? stored.modeCycle.modeCycleBase
         config.tileRules = stored.tileRules.resolved(for: loaded)
             .sorted { $0.key < $1.key }
             .flatMap(\.value)
@@ -201,6 +218,7 @@ extension SettingsModel {
             original: reach.storedScrollBase
         )
         sidecar.spaceHistory = reach.spaceHistory.spaceHistoryBase
+        sidecar.modeCycle = reach.modeCycle.modeCycleBase
         sidecar.tileRules = reach.tileRules.floatRuleBase(
             original: reach.storedTileBase
         )
@@ -216,7 +234,21 @@ extension SettingsModel {
     /// override is left to its Save's diff (`overwriteProfile`),
     /// which carries its layer structure too.
     func saveRuleReach() -> RuleReachWrite {
-        guard let reach = encodedReach, reach.isEdited else {
+        var written = RuleReachWrite.nothing
+        // The lenses after their chords and marks, ahead of every
+        // gui.json write of the Save — on every door (#2103).
+        core.withLensReachHeld {
+            written = writeRuleReach()
+            if written != .failed { saveLensHalf() }
+        }
+        return written
+    }
+
+    private func writeRuleReach() -> RuleReachWrite {
+        // With no page — a built-in live — the layered snapshot
+        // carries the lens crossings alone.
+        guard let reach = encodedReach ?? layeredReach, reach.isEdited
+        else {
             return .nothing
         }
         do {
@@ -246,6 +278,7 @@ extension SettingsModel {
         cleanConfig.floatRules = config.floatRules
         cleanConfig.scrollGesture = config.scrollGesture
         cleanConfig.spaceHistory = config.spaceHistory
+        cleanConfig.modeCycle = config.modeCycle
         cleanConfig.tileRules = config.tileRules
         cleanConfig.floatAutomatically = config.floatAutomatically
         // Not the layers: a stored page's own shortcut diff is the
@@ -262,8 +295,12 @@ extension SettingsModel {
         config.appRules = cleanConfig.appRules
         config.floatRules = cleanConfig.floatRules
         config.layers = cleanConfig.layers
+        // Drafted beside the layers it moves (#1870): never kept
+        // without them.
+        config.desktopShortcutBase = cleanConfig.desktopShortcutBase
         config.scrollGesture = cleanConfig.scrollGesture
         config.spaceHistory = cleanConfig.spaceHistory
+        config.modeCycle = cleanConfig.modeCycle
         config.tileRules = cleanConfig.tileRules
         config.floatAutomatically = cleanConfig.floatAutomatically
         reachEdits = RuleReachEdits()

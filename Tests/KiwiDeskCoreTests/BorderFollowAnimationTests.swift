@@ -31,7 +31,7 @@ struct BorderFollowAnimationTests {
         // Force the stream live AFTER sync (`sync` re-runs the
         // subscription, which resets `skyLightActive` while the
         // private runtime is not started in unit tests).
-        border.skyLightActive = true
+        border.watch.setActive(true)
         border.isAnimating = { _ in true }
         let tick = CGRect(x: 40, y: 40, width: 400, height: 300)
         // Pre-#594, `usesWindowServerTracking` swallowed this
@@ -47,7 +47,7 @@ struct BorderFollowAnimationTests {
         // And with both suppressors down (a teardown snap, the
         // no-display fallback): the tick still applies — pins
         // the unconditional branch of `applies`.
-        border.skyLightActive = false
+        border.watch.setActive(false)
         border.isAnimating = { _ in false }
         let snap = CGRect(x: 60, y: 60, width: 400, height: 300)
         border.follow(
@@ -67,7 +67,7 @@ struct BorderFollowAnimationTests {
         // Stream down (AX fallback path) — the WS guard alone
         // would let this echo through; the animation guard must
         // hold it back so it can't rewind the per-tick frames.
-        border.skyLightActive = false
+        border.watch.setActive(false)
         border.isAnimating = { $0 == WindowID(1) }
         let echo = CGRect(x: 7, y: 7, width: 7, height: 7)
         border.follow(
@@ -93,7 +93,7 @@ struct BorderFollowAnimationTests {
         let border = BorderManager()
         border.movePanel = { _, _ in false }
         border.sync([spec(1)])
-        border.skyLightActive = true
+        border.watch.setActive(true)
         let echo = CGRect(x: 9, y: 9, width: 9, height: 9)
         // Idle but WS-tracked: the #285 guard — a coalesced late
         // echo must not rewind the ring behind the live bounds.
@@ -130,20 +130,30 @@ struct BorderReconcileAnimationTests {
         border.movePanel = { _, _ in false }
         border.sync([spec(1)])
         let real = CGRect(x: 20, y: 20, width: 400, height: 300)
-        border.readWindowBounds = { _ in real }
-        var teed: [CGRect] = []
-        border.onFrameReconciled = { _, frame in
-            teed.append(frame)
+        var reads = 0
+        border.watch.readWindowBounds = { _ in
+            reads += 1
+            return real
         }
-        border.isAnimating = { _ in true }
+        var teed: [CGRect] = []
+        border.watch.connect(
+            .mark,
+            WindowServerWatch.Hooks(frame: { _, frame, _ in
+                teed.append(frame)
+            })
+        )
+        border.watch.request([WindowID(1)], for: .mark)
+        border.watch.isAnimating = { _ in true }
         // Mid-animation: no bounds re-read, no sticky tee, and
         // the ring keeps the frame the tick last applied.
-        #expect(border.reconcile(WindowID(1)) == false)
+        border.watch.handle(.move, window: WindowID(1))
+        #expect(reads == 0)
         #expect(border.lastFrame(WindowID(1)) != real)
         #expect(teed.isEmpty)
         // Settled: the WS bounds own the ring again.
-        border.isAnimating = { _ in false }
-        #expect(border.reconcile(WindowID(1)) == true)
+        border.watch.isAnimating = { _ in false }
+        border.watch.handle(.move, window: WindowID(1))
+        #expect(reads == 1)
         #expect(border.lastFrame(WindowID(1)) == real)
         #expect(teed == [real])
     }

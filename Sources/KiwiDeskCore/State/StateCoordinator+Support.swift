@@ -20,6 +20,7 @@ extension StateCoordinator {
         return AppliedEffects.RemovedWindow(
             app: windows[id]?.appName,
             bundleID: windows[id]?.appBundleID,
+            title: windows[id]?.title,
             pid: windows[id]?.pid,
             isTransientOverlay: windows[id]?.isTransientOverlay
                 ?? false,

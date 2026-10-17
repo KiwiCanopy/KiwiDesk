@@ -110,15 +110,15 @@ struct ShortcutsJumpReadoutTests {
                     + "if!width.collapsesChrome{captionLine}chips}"
             )
         )
-        #expect(bar.contains("L(\"shortcuts.jump.label\",\"Jumpto\")"))
-        #expect(
-            bar.contains(
-                "Text(label).font(.callout)"
-                    + ".foregroundStyle(SettingsTheme.ink2)"
-                    + ".lineLimit(1).fixedSize()"
-                    + ".accessibilityHidden(true)"
-            )
+        // The caption's font and ink are tunings; a theme ink and
+        // its hiding from VoiceOver are the shape.
+        let caption = try Regex(
+            #"Text\(label\)\.font\((?:[^()]|\([^()]*\))*\)"#
+                + #"\.foregroundStyle\(SettingsTheme\.\w+\)"#
+                + #"\.lineLimit\(1\)\.fixedSize\(\)"#
+                + #"\.accessibilityHidden\(true\)"#
         )
+        #expect(bar.contains(caption))
         // The caption, a spacer, the readout at the end: the
         // spacing and the spacer's minimum are tuning, not shape.
         let line = try Regex(

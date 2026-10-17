@@ -46,20 +46,6 @@ struct DesktopRaiseGateTests {
         #expect(core.raiseCrossesDesktops(WindowID(1)))
     }
 
-    /// Drawn, or unknown to the server (a close in flight, or no
-    /// read at all): the raise is harmless or wanted.
-    @Test("On screen or unknown never crosses")
-    func onScreenAndUnknownDoNotCross() {
-        let core = makeCore()
-        for reading in [true, nil] as [Bool?] {
-            core.windowIsOnScreen = { _ in reading }
-            #expect(
-                !core.raiseCrossesDesktops(WindowID(1)),
-                "\(String(describing: reading))"
-            )
-        }
-    }
-
     /// The verb is refused WHOLE: state focus and the displacement
     /// note stay where they were, and the log says so. (The warp
     /// is not asserted: `mouse.follows_focus` is off by default

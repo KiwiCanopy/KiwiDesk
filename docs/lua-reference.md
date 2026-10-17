@@ -125,6 +125,12 @@ or cycle to it instead
 ([Accepted limitations](accepted-limitations.md)). `swap` is
 tiled-only.
 
+:::unreleased
+While a KiwiVision lens is on with
+[`keep_focus`](#kiwivisiondefine_lens), `focus` and `swap` skip
+the windows the lens leaves out.
+:::
+
 **Example:**
 
 ```lua
@@ -569,6 +575,48 @@ KiwiDesk.set_mode(1, "stack")
 KiwiDesk.set_mode("music", "floating")
 ```
 
+:::unreleased
+### cycle_mode
+
+**Expects:** optionally a direction: `"prev"` or `"next"` (the
+default) — exactly these, no `previous` alias, as `move_to_track`.
+
+**Does:** moves the focused Space to the next layout in your
+layout cycle list (see [`set_mode_cycle`](#set_mode_cycle)), or
+to the previous one, the same way `set_mode` would. The list
+wraps: after the last layout comes the first. A Space whose
+layout is not in the list goes to the first layout on Next and
+to the last on Previous. It never creates a Space.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+c", function()
+    KiwiDesk.cycle_mode()
+end)
+```
+
+### set_mode_cycle
+
+**Expects:** a table of layout modes, in order — at least two,
+each at most once.
+
+**Does:** sets the layouts `cycle_mode` walks. The default is
+`{ "bsp", "scrolling", "floating" }`.
+
+It is stored like the shortcuts: `mode_cycle` in `gui.json` is
+the list every profile uses, and a profile may keep its own,
+which the **Layouts to cycle** row's **Applies to** writes. The
+verb sets the shared list for the running session and never
+reaches a file; a profile's own list still wins.
+
+**Example:**
+
+```lua
+KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
+```
+:::
+
 ### set_gap_global
 
 **Expects:**
@@ -864,6 +912,102 @@ changes the running value only.
 KiwiDesk.set_desktop_cue(false)
 ```
 
+:::unreleased
+### set_hyper_key
+
+**Expects:** a key name, or `off` (default `off`): `caps_lock`,
+`left_command` / `right_command`, `left_option` /
+`right_option`, `left_control` / `right_control`, `left_shift`
+/ `right_shift`, or `f1` … `f20`.
+
+**Does:** turns that key into the Hyper modifier, `hyper` in a
+combo (`"hyper+h"`), drawn ✦ (#1870). KiwiDesk remaps the key
+while it manages your windows and gives it back when it stops or
+quits, so the key stops doing its own job meanwhile — Caps Lock
+types no capitals, Right ⌘ is no longer ⌘. Left and right are different keys here. Hyper
+needs no Input Monitoring, and a shortcut on Hyper alone collides
+with nothing; combined with ⌘, ⌥ or ⌃, an enabled macOS shortcut on
+the same keys still wins. If a key mapping KiwiDesk did not set is already in place
+(another remapping tool, `hidutil` by hand), the verb refuses
+and leaves it alone.
+
+The GUI twin is **Shortcuts & Gestures ▸ Hyper key**, a recorder
+that takes one key — left and right apart. Like
+[`set_desktop_cue`](#set_desktop_cue), the setting is app-wide,
+stored in `gui.json` as `hyper.key`; the verb changes the running
+value only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_hyper_key("caps_lock")
+KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
+```
+:::
+
+:::unreleased
+### set_space_cue
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether an explicit Space switch —
+[`focus_space`](#focus_space) and the Space history and order
+steps, the [scroll Space step](#scroll_gestureset_space_step), a
+[move-and-follow](#move_to_space_and_follow), Open or Focus onto
+another Space or a launch follow — shows a plate in the middle of
+the screen that switched: the Space's name or number and its
+layout's symbol. The plate shows only where that screen draws no
+Space Bar — the Space Bar is off or that screen has none — and
+never over a full-screen app or a presentation. It takes no focus
+or click and fades after
+about a second; with Reduce Motion on it appears and leaves
+without the fade. The switch itself is always instant.
+
+The GUI twin is **KiwiShelf ▸ KiwiShelf ▸ Show ▸ Show the Space
+after a switch**. Like [`set_desktop_cue`](#set_desktop_cue), the
+setting is app-wide, stored in `gui.json` as `space.cue`; the verb
+changes the running value only. It replaces
+`animations.set_space_change` and `animations.set_on_space_change`,
+which are refused, naming it; `animations.set_space_change_duration`
+and `set_space_switch_liquid_glass` are refused, since a Space
+switch no longer slides.
+
+**Example:**
+
+```lua
+KiwiDesk.set_space_cue(false)
+```
+:::
+
+:::unreleased
+### set_mode_cue
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether [`cycle_mode`](#cycle_mode) shows a plate in
+the middle of the focused Space's screen: your layout cycle list
+(see [`set_mode_cycle`](#set_mode_cycle)) as a ring of layout
+symbols, the first at the top and the rest clockwise, with the
+layout the Space landed on large in the centre and its name
+under it (#2144). Pressing again while the plate is up moves the
+next layout from its place on the ring into the centre and the
+previous one back out; with Reduce Motion on, it jumps. It takes
+no focus or click, fades after about a second, and stays away
+from a screen showing a full-screen app or a presentation. Only
+`cycle_mode` shows it — [`set_mode`](#set_mode) and the Layout
+menu do not.
+
+Like [`set_desktop_cue`](#set_desktop_cue), the setting is
+app-wide, stored in `gui.json` as `mode.cue`; the verb changes
+the running value only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_mode_cue(false)
+```
+:::
+
 ### set_shortcut_panel_liquid_glass
 
 **Expects:** `true` or `false` (default `true`).
@@ -873,6 +1017,12 @@ shortcuts panel, the one ⌃⌥K opens (#1307). Off, or below
 macOS&nbsp;26, the panel draws `.regularMaterial`. The panel's
 glass is untinted: it draws `.regular` where the bars draw
 `.clear`, and no Fill reaches it (#1295).
+
+:::unreleased
+The shortcuts panel is a side of [KiwiHub](#kiwihubshow), so this
+leaf sets the material of all of KiwiHub — the window switcher,
+the shortcuts panel and the view picker.
+:::
 
 Stored as `shortcut_panel.liquid_glass` in the profile, so a
 profile switch can change the panel's material.
@@ -895,27 +1045,6 @@ what it writes.
 KiwiDesk.set_shortcut_panel_liquid_glass(true)
 ```
 
-### set_space_switch_liquid_glass
-
-**Expects:** `true` or `false` (default `true`).
-
-**Does:** draws the plates a Space switch slides
-([animations.set_on_space_change](#animationsset_on_space_change))
-in macOS&nbsp;26 Liquid Glass, the shortcuts panel's `.regular`
-glass. Off, or below macOS&nbsp;26, they draw a blurred material,
-as the panel does. Read at the next switch.
-
-Stored as `space_switch.liquid_glass` in the profile. Also stood
-down while macOS's Reduce transparency is on, the stored value
-untouched. The GUI twin is the one **Liquid Glass** switch on
-Looks &amp; Animations.
-
-**Example:**
-
-```lua
-KiwiDesk.set_space_switch_liquid_glass(true)
-```
-
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
@@ -933,9 +1062,10 @@ corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
-By default the switch plays the plate slide
-([animations.set_on_space_change](#animationsset_on_space_change));
-off, it is instant.
+:::unreleased
+The switch is instant; whether a plate names the Space it lands
+on is [`set_space_cue`](#set_space_cue).
+:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -2222,8 +2352,6 @@ and the sticky mark their flat look. The stored values are
 untouched, so the glass and the alpha return the moment the
 setting goes off (#1374).
 
-The Space switch's plates draw their material then too.
-
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
 shortcuts panel's
@@ -2233,9 +2361,7 @@ and the sticky mark's
 ([sticky.set_liquid_glass](#stickyset_liquid_glass)) together,
 and shows on only when all of them are on.
 
-It writes the Space switch plates' leaf too
-([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)),
-and the slow-boot notice follows the shortcuts panel's.
+The slow-boot notice follows the shortcuts panel's.
 
 This verb sets the
 bars alone; setting them apart is a Lua-only state, and the
@@ -2408,7 +2534,7 @@ kiwishelf.set_font_weight("semibold")
 `"app_image"`).
 
 **Does:** sets how app icons are drawn on both bars and in the
-shortcuts panel's Apps band. `app_image` shows the app's icon as
+shortcuts panel's Apps section. `app_image` shows the app's icon as
 macOS provides it, which follows the system-wide Icon & widget
 style the user picked; the system's Dark, Clear and Tinted looks
 are not separate choices
@@ -3588,6 +3714,271 @@ border.fit_gaps(6)  -- leave 6 pt after the reach: outer 16,
                     -- inner 16 (26 if unfocused borders are on)
 ```
 
+:::unreleased
+## KiwiVision
+
+KiwiVision keeps the focused window clear and dims every screen
+around it, the wallpaper included unless `set_clear_wallpaper`
+keeps it clear; the menu bar, the Dock and KiwiShelf stay clear.
+It is off at every launch.
+
+Its settings are app-wide: they are stored in `gui.json` as the
+`kiwivision` group (`dim`, `blur`, `appearance`,
+`clear_wallpaper`, `clear_app`, `never_dimmed`, `lenses`), no profile
+carries them, and loading a profile never changes them. Their GUI
+twin is Settings ▸ **KiwiVision**. The `set_*` verbs below change
+the running value only, never `gui.json`; in a Lua-owned setup,
+`init.lua` is where they are kept, and the KiwiVision rows are
+greyed.
+
+### kiwivision.toggle
+
+**Expects:** nothing, or a lens name.
+
+**Does:** turns KiwiVision on or off. The window kept clear follows
+the focus — a click, ⌘-Tab or a Space switch moves it — and a
+screen showing a native full-screen window or a presentation stands
+the dim down. The KiwiVision line of KiwiHub's
+[view picker](#kiwihubshow) does the same, and ⌃⌥V is its default
+shortcut.
+
+With a lens name (any case), it turns that lens on — from off, or
+from another lens — and turns KiwiVision off when that lens is the
+one on. A lens with no apps, or a name no lens has, is refused.
+
+A saved profile can leave a lens out through its
+[`lens_reach`](#profile-json-format). While that profile is live,
+turning the lens on is refused: "Writing does not reach Studio". A
+built-in Standard, and a Lua-owned setup, reach every lens. A
+profile switch (a load, a screen change or a Desktop binding) into
+a profile that leaves out the lens that is on turns KiwiVision off.
+A pill on the focused window says "Writing is off: it does not
+reach Studio.", and VoiceOver says the same. Switching back
+leaves KiwiVision off. Plain KiwiVision, with no lens — Default
+in Settings and KiwiHub — stays on across every switch.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+v", function()
+    kiwivision.toggle()
+end)
+KiwiDesk.bind("ctrl+alt+w", function()
+    kiwivision.toggle("Writing")
+end)
+```
+
+### kiwivision.current
+
+**Expects:** nothing.
+
+**Does:** returns `on`; `lens`, the lens that is on (null for plain
+KiwiVision or off); `settings`, the plain KiwiVision values under
+the `kiwivision` group's keys, without its lenses; and `lenses`,
+one entry per lens. An entry carries `lens`, its
+[`define_lens`](#kiwivisiondefine_lens) table; `saved`, whether
+`gui.json` holds that lens as it is (absent in a Lua-owned setup);
+and, where it cannot turn on, `refusal`: `{reason = "no_apps"}`,
+or `{reason = "out_of_reach", profile = "Studio"}` for the live
+profile that leaves it out. `kiwivision.toggle` returns the same
+`on` and `lens`.
+
+### kiwivision.define_lens
+
+**Expects:** a table: `name` (at most 40 characters, unique
+ignoring case), `apps` (bundle ids, or the process name of an app
+without one), and optionally `titles`, `keep_focus`, `clear_delay`,
+`reminder` and any of `dim`, `blur`, `appearance`,
+`clear_wallpaper` and `clear_app`.
+
+**Does:** adds a lens, or replaces the one of its name. While the
+lens is on, every window of its apps stays clear beside the focused
+one. `titles` maps an app to text its window titles contain: only
+those of its windows stay clear, and only windows KiwiDesk manages,
+whose titles it can read.
+
+With `keep_focus` on (the default), [`focus`](#focus) and
+[`swap`](#swap) — from a key, the CLI or Lua — and a
+[scroll gesture](#scroll-gestures) skip every window the lens leaves
+out, in every layout: other apps' windows — never-dimmed ones
+included — and a member's windows its `titles` do not match. A
+click, the bars and hover focus skip nothing.
+
+With `keep_focus` on, a window the lens leaves out that still
+takes the focus — through ⌘-Tab, the Dock, a notification, a bar
+item or the window switcher — stays under the haze for
+`clear_delay` seconds (default 2; 0 clears it at once) with a pill
+centred on it, then clears. A click
+on the window clears it at once; typing does not. The pill shows
+`reminder`, or "🥝 Keep the vision juicy 🥝" where it is blank, and
+VoiceOver reads it once. Never-dimmed apps, KiwiDesk's own windows,
+overlays such as a launcher palette, and a dialog of the window
+that was clear never wait.
+
+A setting the lens leaves out follows the
+plain KiwiVision one, and never-dimmed apps stay clear under every
+lens. Like the `set_*` verbs, it changes the running lenses only;
+`init.lua` defines them on every load. A lens defined here lasts
+until a config reload or restart and is not listed on Settings ▸
+KiwiVision; a lens made there is stored in `gui.json` and saved
+with Save, and `define_lens` never writes there.
+
+**Example:**
+
+```lua
+kiwivision.define_lens({
+    name = "Writing",
+    apps = { "com.apple.Notes", "com.apple.Safari" },
+    titles = { ["com.apple.safari"] = { "Docs" } },
+    clear_delay = 3,
+    reminder = "Back to the draft",
+    dim = 80,
+})
+```
+
+### kiwivision.delete_lens
+
+**Expects:** a lens name.
+
+**Does:** removes the lens for this session; KiwiVision turns off
+if it was the one on.
+
+### kiwivision.set_dim
+
+**Expects:** a percentage, 0–100. Default 60.
+
+**Does:** sets how far KiwiVision darkens everything but the
+focused window. 0 leaves only the blur, or nothing while the blur
+is off.
+
+### kiwivision.set_blur
+
+**Expects:** `true` or `false`. Default `true`.
+
+**Does:** blurs what KiwiVision dims, beneath the dim, with
+Liquid Glass (a plain blur on macOS 14 and 15).
+With Reduce transparency on in macOS, the blur stands down and the
+dim stays.
+
+### kiwivision.set_appearance
+
+**Expects:** `"unchanged"`, `"opposite"`, `"dark"` or `"light"`.
+Default `"unchanged"`.
+
+**Does:** switches macOS to dark or light while KiwiVision is on —
+`"opposite"` to whichever it is not showing —
+and back when it turns off — only if the system was showing the
+other one, and not if you changed the appearance yourself in the
+meantime. If KiwiDesk quits or crashes while it is on, the next
+start switches back. Automatic (light by day, dark at night) is
+turned back on where it was on.
+
+### kiwivision.set_clear_wallpaper
+
+**Expects:** `true` or `false`. Default `false`.
+
+**Does:** leaves the wallpaper clear, so KiwiVision dims and blurs
+only the windows behind the focused one; the gaps between them stay
+clear too. A window another app opens or moves joins the haze when
+the next layout pass settles.
+
+### kiwivision.set_clear_app
+
+**Expects:** `true` or `false`. Default `false`.
+
+**Does:** keeps every window of the focused app clear, not only the
+focused one — the part of each you can see; where another app's
+window covers it, that window stays dimmed. Focus a window of
+another app and its windows become the clear ones.
+
+### kiwivision.set_never_dimmed
+
+**Expects:** a list of apps, as a table or as separate strings —
+each a bundle id, or the process name of an app without one, such
+as `"sketchybar"`. Nothing clears the list.
+
+**Does:** keeps every window of these apps clear, focused or not —
+the part you can see. A window drawn beneath all others, such as
+SketchyBar's bar, shows through the haze. Settings ▸ KiwiVision ▸
+**Never dimmed** edits the same list.
+
+**Example:**
+
+```lua
+kiwivision.set_dim(30)
+kiwivision.set_blur(false)
+kiwivision.set_appearance("dark")
+kiwivision.set_clear_wallpaper(true)
+kiwivision.set_clear_app(true)
+kiwivision.set_never_dimmed({ "sketchybar", "com.apple.Music" })
+```
+:::
+
+:::unreleased
+## Looks
+
+A look is the bars' styling, Liquid Glass, the focus border's
+shape, the global gaps and the colors they wear, as on Settings ▸
+Looks & Animations; a look you saved carries the animations too. These verbs reach the same library
+from Lua, the CLI and an AI app. The global `look` table holds
+them; an `init.lua` that assigns its own global `look` replaces
+it for that config.
+
+### look.list
+
+**Expects:** nothing.
+
+**Does:** returns `looks`, every look by `name`, the bundled ones
+first, each with `bundled` and, where it is worn, `worn`:
+`"applied"`, or `"other_colors"` when its styling is worn with
+other colors.
+
+### look.current
+
+**Expects:** nothing.
+
+**Does:** returns the worn look's `style` and `colors` by path,
+`setters` naming the command that sets each path, the live
+`profile` (null when none is saved), `follows_shared_look`, and the
+profiles wearing the shared look (`followers`, empty when the
+screen does not). A setter takes its own argument
+form, which `help` gives — `set_gap_global` reads its table
+differently from the stored `gap.global`, and a bar's `set_edge`
+clears its per-screen edges, which a look keeps.
+
+### look.apply
+
+**Expects:** a look's name.
+
+**Does:** wears that look on screen and writes no file; a saved
+look carries its animations, a bundled one none. `save_profile`
+stores it, in the shared look where the profile wears it; over the
+CLI or an AI app, [`keep_settings`](cli.md#raw-ipc-protocol) keeps
+it instead.
+
+### look.save
+
+**Expects:** a new name.
+
+**Does:** saves the look on screen to your library. A name a
+bundled or saved look already has is refused; to replace a saved
+look, delete it first.
+
+### look.delete
+
+**Expects:** a saved look's name.
+
+**Does:** deletes it. A bundled look cannot be deleted.
+
+**Example:**
+
+```lua
+look.apply("Glass")
+border.set_width(4)
+look.save("Glass, thin border")
+```
+:::
+
 ## Mouse Resizing
 
 Resizing a tiled window with the mouse adjusts the layout the same
@@ -3656,6 +4047,57 @@ Mouse & trackpad**.
 ```lua
 mouse.set_follows_focus(true)
 ```
+:::unreleased
+
+### mouse.set_hover_focus
+
+**Expects:** a boolean (default `false`).
+
+**Does:** when `true`, the window the mouse pointer comes to rest
+on takes the focus and comes to the front, as a click on it
+would. The pointer has to move and then rest for 200 ms; a focus
+change made while it rests, or during those 200 ms, is never taken
+back. Nothing happens while a mouse button is held, within a
+second of a Desktop switch, over a full-screen window, or where
+something other than a managed window is in front under the
+pointer: a menu, the Dock, a bar, a panel. KiwiDesk's Settings
+window is focused like any other; its dialogs are not. A window
+whose focus would move the layout —
+a scrolling row that would pan, a parked monocle window — is not
+focused. A window on another screen makes that screen's Space
+the active one. The pointer is never warped by it, so it works
+beside [`mouse.set_follows_focus`](#mouseset_follows_focus).
+
+Also togglable in the Settings app under **Shortcuts & Gestures ▸
+Mouse & trackpad**.
+
+**Example:**
+
+```lua
+mouse.set_hover_focus(true)
+```
+
+:::
+:::unreleased
+
+### mouse.set_hover_focus_delay
+
+**Expects:** milliseconds, `0` or more (default `200`).
+
+**Does:** sets how long the pointer has to rest before
+[`mouse.set_hover_focus`](#mouseset_hover_focus) focuses the
+window under it. `0` focuses as soon as the pointer stops moving;
+a longer delay keeps a window you cross on the way to another from
+taking the focus. Settings offers it under Shortcuts & Gestures ▸
+Mouse & trackpad, up to 2000 ms.
+
+**Example:**
+
+```lua
+mouse.set_hover_focus_delay(80)
+```
+
+:::
 
 ## Scroll Gestures
 
@@ -3904,7 +4346,7 @@ window verbs. Its float rules work the same way yours do, so a
 `float_rules` entry can keep it out of the layout permanently.
 KiwiDesk's *other* windows are not managed: the setup tour and
 the Config Issues window are tracked but always floating, and its
-panels — the ⌃⌥K shortcuts panel, drag/drop overlays, App Bar
+panels — KiwiHub, drag/drop overlays, App Bar
 overlays and focus borders — are ignored outright and appear in
 no bar and no window list KiwiDesk publishes.
 
@@ -4059,18 +4501,71 @@ pins, and unlisted apps inherit the base rule. Edit it from the
 Settings app's App Rules section while editing a stored profile.
 Profile overrides resolve the same way over a Lua-owned base.
 
+:::unreleased
+### App rule verbs
+
+The `app_rule` table changes the live rules from Lua, the CLI and
+an AI app. It is not the [`app_rules`](#app_rules) and
+[`float_rules`](#float_rules) globals, which declare the rules in
+`init.lua`. A change lasts until a config reload, a profile load, a
+Settings Save of the rules or a quit; over the CLI or an AI app,
+[`keep_settings`](cli.md#raw-ipc-protocol) keeps it.
+
+#### app_rule.list
+
+**Expects:** nothing.
+
+**Does:** returns the live rules: `spaces` (bundle id → Space),
+`floats`, `tiles`, `ignores`, `float_automatically`, the `owner`
+of the rules (`gui` or `lua`) and the live `profile`.
+
+#### app_rule.set_space / app_rule.remove_space
+
+**Expects:** a bundle identifier, and for `set_space` a Space that
+exists.
+
+**Does:** the app's NEXT windows open in that Space, or stop
+doing so; windows already open stay where they are.
+`remove_space` refuses an app with no rule.
+
+#### app_rule.set_float / app_rule.remove_float
+
+**Expects:** a bundle identifier, and optionally a title fragment.
+
+**Does:** adds or removes a float rule — the app's every window,
+or those whose title contains the fragment. Open windows are
+checked again at once. `remove_float` removes exactly the rule
+named, so an app's title rules stay unless each is named, and
+refuses a rule that is not there.
+
+**Example:**
+
+```lua
+app_rule.set_space("com.spotify.client", "music")
+app_rule.set_float("com.apple.finder", "Get Info")
+```
+:::
+
 ### Finding a bundle identifier
 
-App rules and `focus_or_spawn` identify an app by its bundle
-identifier. The Settings app's pickers list installed apps by
-name and store the identifier for you. To find one by hand:
+App rules and the app verbs (`focus_or_spawn`, `spawn_new`,
+`gather`) identify an app by its bundle identifier.
+The Settings app's pickers list installed apps by name and store
+the identifier for you. To find one by hand:
 
-- Run `kiwidesk get_state` (or the `get_state` command over
+- Ask macOS: `osascript -e 'id of app "Safari"'` →
+  `com.apple.Safari`. It answers for any installed app — hidden,
+  windowless or not running.
+- Or run `kiwidesk get_state` (or the `get_state` command over
   IPC): every window carries a `bundle_id` field alongside its
-  display `app` name. Focus a window of the app and read it off.
-- Or ask macOS directly:
-  `osascript -e 'id of app "Safari"'` →  `com.apple.Safari`.
+  display `app` name.
 - Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
+
+:::unreleased
+An app verb passed a running app's name instead is still refused,
+and the refusal names that app's identifier:
+`app not found: safari — did you mean 'com.apple.Safari'?`.
+:::
 
 Identifiers are matched case-insensitively. An app with no bundle
 identifier (a rare unbundled helper process) cannot be targeted
@@ -4608,30 +5103,160 @@ end)
 It is the third choice, *Gather Windows*, in the **Action** menu
 of an Open applications shortcut in Settings.
 
+:::unreleased
+### move_here
+
+**Expects:** an app bundle identifier (e.g. `com.apple.Notes`),
+then optionally a piece of window title. See [Finding a bundle
+identifier](#finding-a-bundle-identifier).
+
+**Does:** moves one window of the app into the Space you are on
+and focuses it: the open window you focused most recently that is
+not here yet — in another Space, or up on another macOS Desktop —
+and only once none is left, a minimized one. Press it again for
+the next. The app's other windows stay where they are; to move
+them all, use [gather](#gather).
+
+With a title, only windows whose title contains it count,
+ignoring case and accents, so `"Inbox"` keeps finding Mail's
+window as its message count changes.
+
+- A window in native full screen is skipped, and so is a window
+  on another Desktop when the Desktop bridge is absent. When
+  nothing else is left, a refusal says the window can't be moved
+  here.
+- Every matching window already here, or a title no window has,
+  shows a refusal on the focused window and moves nothing. A
+  sticky window shown here counts as here.
+- A hidden app is unhidden, and the window it brings back
+  focused moves here — with a title, only if it matches.
+- An app with no window at all is opened, the same as
+  [focus_or_spawn](#focus_or_spawn).
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+shift+n", function()
+    KiwiDesk.move_here("com.apple.Notes")
+end)
+KiwiDesk.bind("ctrl+shift+i", function()
+    KiwiDesk.move_here("com.apple.mail", "Inbox")
+end)
+```
+:::
+
 ## User Interface
 
-### show_shortcuts
+:::unreleased
+### kiwihub.show
 
-**Expects:** nothing.
+**Expects:** a side: `"windows"`, `"shortcuts"` or `"view"`.
 
-**Does:** opens the read-only **shortcuts panel** — a live glance
-at the active layer's bindings — or closes it if it is already
-open. It is the panel behind the menu bar's *View Shortcuts…*
-row; the bound combo shows beside that row and in the panel's
-close hint. Seeded to **⌃⌥K** in the base layer and in every
-layer you create.
+**Does:** opens **KiwiHub** on that side, switches to it from
+another side, or closes KiwiHub when it already shows that side.
+Over the CLI it is `kiwidesk kiwihub.show windows`; any other side
+is refused, naming the three.
 
-Offered under **Shortcuts & Gestures ▸ Open applications ▸
-KiwiDesk** ("Show shortcuts panel"), where you can rebind or clear
-it per layer.
+The `"shortcuts"` side is the read-only **shortcuts panel** — a
+live glance at the active layer's bindings.
+
+- Typing narrows the list by name, the matched letters in bold.
+- **↑** **↓** and **Page Up** / **Page Down** scroll the list;
+  **Return** runs nothing.
+- **⌘,** or **Edit in Settings…** opens Shortcuts & Gestures.
+
+The `"windows"` side is the **window switcher**, its field at
+Spotlight's height on the screen under the pointer. It lists every
+window KiwiDesk knows except the one you are in — open windows
+first, most recently used first, including those up on another
+macOS Desktop, then minimized windows, then one row per hidden
+app. Typing narrows the list by app name, then by title. While a
+[KiwiVision lens](#kiwivisiondefine_lens) is on, the rows of the
+lens's apps come first and every other app's follow under **Other
+apps**, while you type too. Moving the mouse over a row selects it.
+
+- **Return** goes to the selected window, switching Space or
+  Desktop as needed; on a minimized window it brings it back, on a
+  hidden app it unhides it.
+- **⇧Return** moves the window into the Space you are on instead,
+  as [move_here](#move_here) does.
+- **⌘1** … **⌘9** pick one of the first nine results.
+
+A window in native full screen is listed, and Return activates its
+app rather than switching to its full-screen Space.
+
+The `"view"` side is the **view picker**, three lines in one
+panel, the current item on each marked ✓. The menu bar's **Open
+KiwiHub…** row opens it too, its bound combo shown beside that
+row.
+
+- **Layout** — a tile per layout for the Space shown on the screen
+  under the pointer, greyed where there is none; Return applies it
+  like `set_mode` for that Space.
+- **Profile** — one per saved profile; one that cannot load is
+  greyed. Return loads it like `load_profile`. The line ends in
+  **Save as New Profile…**: Return turns the search field into a
+  name field, and Return again saves the current arrangement under
+  that name like `save_profile`, which hands it the connected
+  screen setup; a taken name saves beside it rather than over it. Esc
+  goes back to picking, and ⌘1–9 and ↓ skip the chip.
+- **KiwiVision** — Default, which turns
+  [KiwiVision](#kiwivisiontoggle) on with no lens, then one item
+  per lens, which turns that lens on. Picking the item already on
+  turns KiwiVision off. A lens with no apps is left out until it
+  has some, and one the live profile leaves out is greyed "Not in
+  Studio". The line ends in **New Lens…**, which opens Settings ▸
+  KiwiVision ready to name a lens; ⌘1–9 and ↓ skip it, and a
+  Lua-owned setup greys it.
+
+Keys on this side:
+
+- **←** and **→**, or moving the mouse over an item, move along a
+  line; **↑** and **↓** move between lines and keep the position,
+  clamped to a shorter line. A line longer than the panel scrolls
+  sideways.
+- Typing narrows all three lines, dimming the rest, and selects
+  the first match.
+- **Return** applies the selected item and closes KiwiHub.
+  **⌘1** … **⌘9** apply the line's items by position, counted
+  among the matches while you type; holding **⌘** shows the
+  numbers.
+- **⌘,** opens the Settings page of the line the selection is on;
+  **⌘S** keeps the layouts in the profile, as Keep in a Space's
+  Layout menu does.
+
+On every side:
+
+- **Tab** steps to the next side and **⇧Tab** to the one before —
+  Windows, Shortcuts and View, wrapping — clearing the typing. The
+  switch at the end of the field shows each side's own key, read
+  from your shortcuts.
+- **Escape** clears the typing, then closes KiwiHub; **⌘W**, a
+  click elsewhere or another app taking the keyboard close it too.
+
+Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer
+you create too) and **⌃⌥L** (view), and offered under
+**Shortcuts & Gestures ▸ KiwiHub**, where you can rebind or clear
+each per layer.
 
 **Example:**
 
 ```lua
 KiwiDesk.bind("alt+space", function()
-    KiwiDesk.show_shortcuts()
+    kiwihub.show("windows")
 end)
 ```
+:::
+
+:::unreleased
+### Retired panel verbs
+
+`show_shortcuts`, `show_jump_to_window` and `show_layout_picker`
+are retired for [kiwihub.show](#kiwihubshow). A call in
+`init.lua` is reported in Config Issues, naming `kiwihub.show`;
+over the CLI it fails with `<verb> was retired — use
+kiwihub.show`. A shortcut made in Settings is updated for you.
+:::
 
 ### open_settings
 
@@ -4673,6 +5298,14 @@ end)
 
 **Modifiers:** `cmd`/`command`, `alt`/`opt`/`option`,
 `ctrl`/`control`, `shift`.
+
+:::unreleased
+`hyper` is KiwiDesk's own Hyper modifier, live once
+[`set_hyper_key`](#set_hyper_key) names a key; it combines with
+any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
+its chord without `hyper`, so an enabled macOS shortcut on that
+chord (`hyper+cmd+space` is Spotlight's) still wins.
+:::
 
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
@@ -5017,6 +5650,53 @@ Profiles re-resolve their bindings whenever they apply: on
 `load_profile`, on a screen change, and on a Desktop binding
 switch. Switching profiles also returns you to the default
 layer.
+
+:::unreleased
+### Shortcut verbs
+
+The `shortcut` table writes the saved shortcuts of the live profile
+from Lua, the CLI and an AI app, in the default layer. Shortcuts
+load only from the saved files, so a write saves at once and the
+key works straight away — the shortcut rows alone, never the rest
+of the profile. A new shortcut goes into the shared base on the
+loaded profile, as Settings ▸ Shortcuts starts one. With
+`init.lua` owning the config, or no saved profile live, the verbs
+refuse.
+
+#### shortcut.list
+
+**Expects:** nothing.
+
+**Does:** returns the live `profile` and its `layers`, each with
+its `name`, whether it is the `default`, and its `shortcuts` —
+each `chord` and the `lua` it runs.
+
+#### shortcut.set
+
+**Expects:** a chord (`"ctrl+alt+h"`), a command's name, and that
+command's arguments.
+
+**Does:** binds the chord to one call of the command, built from
+the arguments — strings, numbers and booleans. Only a command the
+CLI could run is bound: never a destructive one, never `exec` or
+another Lua-only verb, so the binding cannot run other Lua. A
+chord another action holds, or a command already bound to another
+chord, is refused; remove the old binding first.
+
+#### shortcut.remove
+
+**Expects:** a chord.
+
+**Does:** unbinds it, from every profile holding it when it is a
+shared shortcut. A chord with no shortcut is refused.
+
+**Example:**
+
+```lua
+shortcut.set("ctrl+alt+h", "focus", "left")
+shortcut.remove("ctrl+alt+h")
+```
+:::
 
 ## Events
 
@@ -5680,6 +6360,13 @@ stripped, grouped by namespace — `set_gap_override` becomes
 }
 ```
 
+:::unreleased
+`lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
+the profile. It maps a lens name, in lower case, to `false`:
+`"lens_reach": { "writing": false }`. A lens the key does not name
+reaches the profile, and without the key every lens does.
+:::
+
 ### macOS Desktops (Mission Control)
 
 KiwiDesk's spaces are its own, independent of Mission Control's
@@ -5707,7 +6394,7 @@ Space](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-wind
 **Expects:** a number (milliseconds, clamped 50–1000).
 
 **Does:** sets the general animation duration for window moves
-and layout reflowing. Persisted per profile.
+and layout reflowing ([Animation Cascade](#animation-cascade)).
 
 **Example:**
 
@@ -5719,8 +6406,8 @@ animations.set_duration(150)
 
 **Expects:** a number (milliseconds, clamped 50–1000).
 
-**Does:** sets the scrolling-layout focus-shift duration, an
-independent knob, also persisted per profile.
+**Does:** sets the scrolling-layout focus-shift duration, a knob
+independent of `set_duration` ([Animation Cascade](#animation-cascade)).
 
 **Example:**
 
@@ -5790,58 +6477,6 @@ animations.set_size_rate(30)   -- throttle a heavy app
 animations.set_size_rate(0)    -- back to per-tick default
 ```
 
-### animations.set_on_space_change
-
-**Expects:** `true` or `false`.
-
-Defaults to `true`. A profile saved by an earlier release with it
-off is turned on once, unless its other animations are all off;
-while a saved profile is live, its value applies over this call.
-
-**Does:** enables or disables the animation of an explicit
-Space switch — `focus_space`, a Space Bar click, the scroll
-Space step, a move-and-follow or a launch follow.
-
-On, a switch plays the plate slide: a plate with its app's icon
-fades in over each window on the screen, the plates slide as one
-strip one screen toward the new Space — across for a Space Bar
-on the top or bottom edge, up or down for one on a side — and
-fade out over the windows that arrive. The windows themselves
-move once each, under the plates. The plates wear Liquid Glass
-([set_space_switch_liquid_glass](#set_space_switch_liquid_glass));
-Reduce Motion keeps the switch instant
-([Accepted limitations](accepted-limitations.md)).
-
-macOS Desktop switches are never animated in either direction —
-macOS stops reporting an inactive Desktop's windows to
-Accessibility (see
-[Accepted limitations](accepted-limitations.md)).
-
-**Example:**
-
-```lua
-animations.set_on_space_change(false)
-```
-
-### animations.set_space_change_duration
-
-**Expects:** a number (milliseconds, clamped 150–1000; default
-`300`).
-
-**Does:** sets the pace of the plate slide a Space switch plays
-([animations.set_on_space_change](#animationsset_on_space_change)):
-how long the plates take to slide to the new Space, their fades
-scaling with it. It has no effect while `set_on_space_change` is
-off or Reduce Motion is on. Window motion keeps its own pace
-([animations.set_duration](#animationsset_duration)). Read at
-the next switch.
-
-**Example:**
-
-```lua
-animations.set_space_change_duration(450)
-```
-
 ### animations.set_on_scrolling
 
 **Expects:** `true` or `false` (default `true`).
@@ -5908,48 +6543,17 @@ changes.
 animations.set_on_relayout(true)
 ```
 
-### animations.set_on_monocle_focus
+:::unreleased
+### Retired Monocle flip verbs
 
-**Expects:** `true` or `false` (default `true`).
-
-**Does:** enables or disables the card flip when focus moves
-between the windows of a Monocle Space. The window blurs and a
-plate turns from the outgoing app's icon to the incoming one's;
-the focus swaps beneath it as soon as the blur covers it, so the
-keyboard reaches the new window at once. Further presses during
-the turn land instantly, the card showing the newest window's
-icon and the blur lifting a quarter second after you pause. The
-plate turns forward for the next window in the Space's order
-and back for the previous one — the way the key pointed, on a
-`focus` step — about the vertical axis in a horizontal Monocle
-and the horizontal one in a vertical Monocle. It plays only for
-a focus change KiwiDesk itself commands — a `focus` step, an App
-Bar click, `focus_or_spawn` — never for one macOS made (⌘Tab, the
-Dock), and never onto a floating window. A plate whose next
-window is smaller (an app that refuses the full slot) lands on
-that window's own frame. macOS's Reduce Motion keeps the flip
-off regardless.
-
-**Example:**
-
-```lua
-animations.set_on_monocle_focus(false)
-```
-
-### animations.set_monocle_flip_duration
-
-**Expects:** a number (milliseconds, clamped 100–1000; default
-`450`).
-
-**Does:** sets how long the Monocle flip's turn takes; the blur
-fades in and out around it on fixed times. It has no effect
-while `set_on_monocle_focus` is off.
-
-**Example:**
-
-```lua
-animations.set_monocle_flip_duration(300)
-```
+`animations.set_on_monocle_focus` and
+`animations.set_monocle_flip_duration` are retired → nothing: a
+Monocle focus change brings the window to the front and plays no
+flip. A call in `init.lua` is reported in Config Issues; over the
+CLI each fails with `…: a Monocle focus change is a raise and
+plays no flip`. A saved profile's stored values are dropped on its
+next write.
+:::
 
 ### animations.set_on_shelf, animations.set_shelf_duration
 
@@ -6007,6 +6611,14 @@ profile and **replaces** the live settings, so `animations.*`
 calls in `init.lua` apply only until a bound profile activates.
 To make a value stick on a bound Desktop, set it and re-save
 that profile (or edit the profile JSON).
+
+:::unreleased
+With a GUI-managed configuration the animations are part of the
+look: a profile using the shared look runs the shared look's
+`animations.*`, and a profile with its own look keeps its own.
+A saved look carries them; a bundled look carries none, so
+applying one leaves the animations unchanged.
+:::
 
 ### Quit & Restart
 
@@ -6220,7 +6832,8 @@ carry `track_breaks` (ids of the windows that start a track,
 #128) and, while a track holds an uneven cross-axis split,
 `track_weights` (head window id → session weight).
 
-Each window object has: `id`, `app`, `title`, `floating` (boolean).
+Each window object has: `id`, `app`, `bundle_id`, `title`,
+`floating` (boolean).
 
 **Example:**
 
@@ -6235,6 +6848,45 @@ for _, window in ipairs(state.windows) do
     end
 end
 ```
+
+:::unreleased
+### explain_window
+
+**Expects:** optionally a window id from `get_state`'s `windows`;
+the focused window otherwise.
+
+**Does:** returns why the window floats or tiles: `id`, `app`,
+`bundle_id`, `space_id`, `mode`, `floating` (its own float flag,
+as `get_state` has it), `float`, `app_rule`, `sticky` (`none`,
+`global` or `display`), `fullscreen`, `presenting` and `focused`.
+`float` holds `floats` (whether it floats, a floating-layout Space
+included), `cause` (`detection`, `user`, `space_mode` or `nil`) and
+`detection` (`reason` — `rule`, `panel`, `accessory_app` or
+`fixed_size` — `is_guess`, and `escapes`, what would let it tile:
+`set_float_automatically`, `app_rule.remove_float`, or `tile_rule`,
+a Tile rule only Settings, Lua or a profile writes). `app_rule`
+holds the app's Space rule (`space`), its float rules (`floats`),
+whether it has a Tile rule (`tile_rule`) and
+`float_automatically`. `space_id`, `mode` and `app_rule` are `nil`
+where the window has none. No window title is returned. Any other
+id is refused, an away window's included; ask `explain_app`
+instead.
+
+### explain_app
+
+**Expects:** an app's bundle identifier.
+
+**Does:** returns what KiwiDesk knows of the app, for a window
+`get_state` does not list: `bundle_id` (lowercased), `ignored`
+(`by_rule`, an ignore rule; `built_in`, KiwiDesk's own ignore list; `built_in_raised`, whether
+that list ignores the app's raised windows, as it does Ghostty's
+quick terminal),
+`running` (each process's `pid`, whether KiwiDesk `observed` it,
+its `policy` and whether it is `hidden`), `windows` (tracked
+ids), `minimized` (ids), `away` (each `id` with its `space_id`)
+and `app_rule`, as `explain_window` has it. An app nothing knows
+answers empty lists.
+:::
 
 ### help
 

@@ -9,6 +9,8 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case placementOverride = "settings.placementOverride[space]"
     case mouseResize = "settings.mouseResize"
     case mouseFollowsFocus = "settings.mouse.followsFocus"
+    case mouseHoverFocus = "settings.mouse.hoverFocus"
+    case mouseHoverFocusDelay = "settings.mouse.hoverFocusDelayMS"
 }
 
 extension BehaviourKey {
@@ -19,7 +21,8 @@ extension BehaviourKey {
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride:
             return .luaOnly
-        case .mouseResize, .mouseFollowsFocus:
+        case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus,
+            .mouseHoverFocusDelay:
             // Moved from Behavior with #1726: the Mouse &
             // trackpad drawer explains the gestures they tune.
             return .row(.shortcuts, .gestures, .showMore)
@@ -35,6 +38,8 @@ extension BehaviourKey {
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride:
             return .none
+        case .mouseHoverFocusDelay:
+            return .text("behavior.mouse.hover_focus_delay")
         case .mouseResize:
             return .text(
                 "behavior.mouse.resize_action",
@@ -42,6 +47,11 @@ extension BehaviourKey {
             )
         case .mouseFollowsFocus:
             return .text("behavior.mouse.follows_focus")
+        case .mouseHoverFocus:
+            return .text(
+                "behavior.mouse.hover_focus",
+                help: "behavior.mouse.hover_focus.help"
+            )
         }
     }
 }

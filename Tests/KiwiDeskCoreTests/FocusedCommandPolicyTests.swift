@@ -32,9 +32,41 @@ struct FocusedCommandPolicyTests {
         "delete_space",
         "focus_or_spawn",
         "spawn_new",
+        // Re-lays the focused Space out, like set_mode without a
+        // Space, moving no window between Spaces (#453).
+        "cycle_mode",
         // Names an app, never the focused window (#1510).
         "gather",
+        // Names an app too: one of its windows, never the focus
+        // (#1513).
+        "move_here",
+        // Dims every screen around the focus, moving no window
+        // (#2103).
+        "kiwivision.toggle",
+        "kiwivision.define_lens",
+        "kiwivision.delete_lens",
+        // Opens a KiwiHub side, moving no window (#2265); a focus
+        // command here would refuse ⌃⌥J/K/L under an ignored panel.
+        "kiwihub.show",
+        // Reads KiwiVision's state, naming no window (#2103).
+        "kiwivision.current",
+        // The look library and the live look: no window is
+        // named or moved between Spaces (#1685).
+        "look.list",
+        "look.current",
+        "look.apply",
+        "look.save",
+        "look.delete",
+        // The live app rules: no window is named or moved (#1685).
+        "app_rule.list",
+        "app_rule.remove_space",
+        "app_rule.remove_float",
+        // The shortcut rows, saved at once: no window moves (#1685).
+        "shortcut.list",
+        "shortcut.set",
+        "shortcut.remove",
         "get_state",
+        "explain_app",
         "get_layout_info",
         "list_monitors",
         "debug_log",
@@ -59,6 +91,9 @@ struct FocusedCommandPolicyTests {
         "get_work_counters",
         // Reads the private paths, touching no window (#1889).
         "self_test",
+        // Writes the live profile's file, touching no window
+        // (#1685).
+        "keep_settings",
     ]
 
     /// A command that does not act on the implicit focused window:

@@ -23,29 +23,30 @@ struct RolePaintTests {
         )
     }
 
-    /// The shipped default splits the ring and the ghost off the
-    /// bar's green on purpose (stroke contrast, the drag-pair
-    /// floor), so only the bar's two rows start ticked — a seed
-    /// by meaning would paint the bar green onto the ring.
+    /// A palette may split a row off the anchor's colour on
+    /// purpose (the ring's stroke contrast, the drag-pair floor),
+    /// so a fresh page ticks only the rows drawn alike — a seed by
+    /// meaning would paint the bar green onto the ring. Explicit
+    /// inputs, so a palette retune moves nothing here.
     @Test("a fresh page ticks the rows the palette draws alike")
     func seedFollowsThePalette() {
-        let settings = TilingSettings()
         #expect(
-            RolePaint.seed(.accent, settings)
+            RolePaint.seed(.accent, accentSettings())
                 == [
                     .kiwishelf(.activeItemColor),
                     .kiwishelf(.highlightColor),
                 ]
         )
-        // Second accent: the drop zone shares the focused amber at
-        // its own alpha; the follower never takes a tick.
+        // A follower drawn in the anchor's own colour still takes
+        // no tick, and a row split off the anchor takes none.
+        var settings = TilingSettings()
+        settings.spaceBarStyle.focusedItemColor = "#E0A030"
+        settings.spaceBarStyle.focusedHighlightColor = "#E0A030"
+        settings.dragDropZone.borderColor = "#3070E0"
+        let seeded = RolePaint.seed(.secondAccent, settings)
+        #expect(!seeded.contains(.borders(.dragDropZoneBorderColor)))
         #expect(
-            RolePaint.seed(.secondAccent, settings)
-                == [
-                    .spaceBar(.spaceBarFocusedItemColor),
-                    .borders(.dragDropZoneBorderColor),
-                    .borders(.dragDropZoneFillColor),
-                ]
+            !seeded.contains(.spaceBar(.spaceBarFocusedHighlightColor))
         )
     }
 

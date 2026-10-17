@@ -169,8 +169,8 @@ LATIN_LOCALES = {
 #
 # The layout names are here to stop the residue rule flagging a
 # locale that legitimately KEEPS a mode name in Latin inside its
-# own script. Only `ru` and `zh-Hant` exercise it (18 and 10
-# values); the CJK three never have, and structurally now cannot
+# own script. Only `ru` exercises it; the CJK locales never
+# have, and structurally now cannot
 # for a capitalised name, since `untranslated_mode_names` forbids
 # it there. (`de` keeps them Latin as well but needs no exemption
 # — `english_residue` is scoped away from Latin-script locales
@@ -179,8 +179,8 @@ LATIN_LOCALES = {
 # as a deliberate name rather than residue.
 #
 # Do NOT read this as "the GUI ships mode names untranslated":
-# the three CJK locales (`ja` モノクル, `ko` 트랙, `zh-Hans` 单窗)
-# render them natively, while the seven Latin-script locales keep
+# the CJK locales (`ja` モノクル, `ko` 트랙, `zh-Hans` 单窗,
+# `zh-Hant` 單窗) render them natively, while the others keep
 # them English so the picker matches the value typed into Lua and
 # the CLI (`set_mode(1, "stack")`). That is why no guard REQUIRES
 # a mode name to be KEPT, unlike `PRODUCT_NAMES`;
@@ -212,17 +212,50 @@ GLOSSARY = {
     "ko",
     "fi",
     "ide",
+    # The AI apps and the protocol the AI page names (#1685), the
+    # same class as `github`: proper nouns no locale translates.
+    # Trade: a stray English "code" or "cursor" in non-Latin
+    # prose is no longer caught.
+    "ai",
+    "claude",
+    "code",
+    "codex",
+    "cursor",
+    "mcp",
+    # The window managers the AI page's migration prompt names
+    # (`ai.prompt.migrate.text`), the same class: proper nouns no
+    # locale translates. Trade: a stray English "rectangle" or
+    # "amethyst" in non-Latin prose is no longer caught.
+    "aerospace",
+    "amethyst",
+    "rectangle",
+    "yabai",
+    # The status bar KiwiVision's never-dimmed list names as its
+    # example (#2103), the same class: a proper noun no locale
+    # translates.
+    "sketchybar",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
     # The one edge both bars sit on (#1517): a product name, kept
     # verbatim like `kiwidesk` — `bars.switch.kiwishelf` ships
     # Latin in every catalog.
     "kiwishelf",
+    # The focus mode (#2103): a product name like KiwiShelf.
+    "kiwivision",
+    # The key panel (#2265): a product name like KiwiShelf.
+    "kiwihub",
+    # The Hyper key (#1870): the keyboard tools' name for the
+    # extra modifier, kept Latin around a translated "key" in
+    # every catalog, as the site's `compare_cell_hotkeys_omniwm`
+    # does. Trade: a stray "hyper" in non-Latin prose is no
+    # longer caught.
+    "hyper",
     # Apple's `Liquid Glass`, a product name (see PRODUCT_NAMES).
     # Trade: a stray "glass" in non-Latin prose is no longer caught.
     "liquid",
     "glass",
     "lua",
+    "mac",  # the machine, in the AI page's MCP help (#1685)
     "macos",
     "tiling",
     "sip",
@@ -231,6 +264,12 @@ GLOSSARY = {
     # `system_shortcut.*` keys follow macOS per locale, but these
     # words stay English inside prose in every locale.
     "bundle",  # "Bundle identifier"
+    # "Caps Lock": Apple's own key name, which macOS's Keyboard
+    # pane keeps Latin in ja, ko, ru and pt-BR (#1870). Trade: a
+    # stray "caps" or "lock" in non-Latin prose is no longer
+    # caught.
+    "caps",
+    "lock",
     "control",  # "Mission Control"
     "desktop",  # Mission Control's own noun
     "dock",
@@ -312,6 +351,12 @@ PRODUCT_NAMES = (
     # The one edge both bars sit on (#1517, owner ruling 2026-09-24):
     # a coined name like the bars, kept verbatim in every locale.
     "KiwiShelf",
+    # The focus mode (#2103, ruling 8): a coined brand word like
+    # KiwiShelf, kept verbatim in every locale.
+    "KiwiVision",
+    # The key panel (#2265): a coined brand word like KiwiShelf,
+    # kept verbatim in every locale; its sides' names translate.
+    "KiwiHub",
     # Apple's material, named as Apple ships it (owner ruling
     # 2026-09-29): `colors.liquid_glass` is Latin in every catalog.
     "Liquid Glass",
@@ -711,9 +756,9 @@ def untranslated_mode_names(
     mode name is ordinary tiling vocabulary each locale may render
     natively, so there is no single right word to demand — this
     guard instead requires the English name to be **absent** once
-    the locale has translated the picker. `de`, `ru` and `zh-Hant`
-    keep the English names, so their picker *is* the English word
-    and they are skipped by construction, with no exemption list.
+    the locale has translated the picker. A locale that keeps the
+    English names (`de`, `ru`) has the English word as its picker,
+    so it is skipped by construction, with no exemption list.
 
     Reading `layout.<mode>.name` from the locale's own catalog is
     the whole trick: the rule is "prose agrees with your picker",

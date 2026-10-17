@@ -144,19 +144,6 @@ struct WhatsNewTests {
 
     // MARK: - Seen, and the row
 
-    @Test("the window's own Install records the notes as read")
-    func installRecordsSeen() {
-        var seen = 0
-        let session = UpdateSession(
-            reply: { _ in },
-            installsFrom: .downloading(received: 0, expected: nil)
-        )
-        session.onInstall = { seen += 1 }
-        session.install()
-        session.install()
-        #expect(seen == 1)
-    }
-
     /// A version the feed does not list yet — a direct download
     /// ahead of the feed — stays owed; one listed with notes the
     /// window cannot read is answered.

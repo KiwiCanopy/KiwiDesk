@@ -19,9 +19,12 @@ struct ShortcutsJumpTests {
         #expect(
             ShortcutsJumpGroup.allCases.map(\.control.id) == [
                 SettingsCatalog.shortcuts.gestures.control.id,
+                SettingsCatalog.shortcuts.kiwiHubKeys.id,
                 SettingsCatalog.shortcuts.focusKeys.id,
                 SettingsCatalog.shortcuts.moveWindows.id,
+                SettingsCatalog.shortcuts.layoutKeys.id,
                 SettingsCatalog.shortcuts.sizeFloat.id,
+                SettingsCatalog.shortcuts.kiwiVisionKeys.id,
                 SettingsCatalog.shortcuts.openApplications.id,
             ]
         )
@@ -40,6 +43,8 @@ struct ShortcutsJumpTests {
             .layers,
             // The tail's Lua drawer and the header's restore row.
             .luaBindings, .defaultShortcuts,
+            // One row above the first chip's card (#1870).
+            .hyperKey,
         ]
         let chipped = Set(ShortcutsJumpGroup.allCases.map(\.container))
         let rendered = ShortcutsCensusRenderTests.containers(

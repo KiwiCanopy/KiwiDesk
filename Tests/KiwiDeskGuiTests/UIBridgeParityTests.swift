@@ -17,7 +17,8 @@ import Testing
 /// (`parity-tests.md`: prefer reflection over a hand-listed
 /// mirror) and the other three lists are held against it. The
 /// field-name convention is the join: `onOpenSettings` names
-/// `open_settings`, stated on `UIBridgeHooks` itself.
+/// `open_settings` and `onKiwihubShow` names the namespaced
+/// `kiwihub.show`, stated on `UIBridgeHooks` itself.
 ///
 /// Stated limit, the one reflection cannot close: `Mirror`
 /// reports a closure field's label but not a callable value, so
@@ -28,8 +29,18 @@ import Testing
 @Suite("UI-bridge verb parity")
 @MainActor
 struct UIBridgeParityTests {
-    /// `onOpenSettings` -> `open_settings`.
+    /// `onOpenSettings` -> `open_settings`; a leading namespace
+    /// becomes its table: `onKiwihubShow` -> `kiwihub.show`.
     private func verbName(forField label: String) -> String {
+        let flat = flatName(forField: label)
+        for table in APIReference.namespaces.keys
+        where flat.hasPrefix(table + "_") {
+            return table + "." + flat.dropFirst(table.count + 1)
+        }
+        return flat
+    }
+
+    private func flatName(forField label: String) -> String {
         let stem =
             label.hasPrefix("on")
             ? String(label.dropFirst(2)) : label
@@ -58,13 +69,21 @@ struct UIBridgeParityTests {
         // assertion below by having nothing to check.
         #expect(verbs.count >= 2)
         for verb in verbs {
+            // A namespaced verb answers through the dispatcher
+            // (#2265); a bare one raises its hook and returns no
+            // `CommandResponse`, so it must NOT be dispatchable
+            // from the CLI or the IPC socket.
+            if verb.contains(".") {
+                #expect(
+                    APIReference.dispatchable.contains(verb),
+                    Comment(rawValue: verb)
+                )
+                continue
+            }
             #expect(
                 APIReference.luaOnly.contains(verb),
                 Comment(rawValue: verb)
             )
-            // A UI-bridge verb raises a hook and returns no
-            // `CommandResponse`, so it must NOT be dispatchable
-            // from the CLI or the IPC socket.
             #expect(
                 !APIReference.dispatchable.contains(verb),
                 Comment(rawValue: verb)
@@ -89,10 +108,36 @@ struct UIBridgeParityTests {
                 encoding: .utf8
             )
         )
-        for verb in verbs {
+        // A namespaced verb registers through the namespace loop,
+        // which `APIReference.namespaces` feeds (the first test).
+        for verb in verbs where !verb.contains(".") {
             #expect(
                 source.contains("lua.register(\"\(verb)\")"),
                 Comment(rawValue: verb)
+            )
+        }
+    }
+
+    /// The leg the namespace loop took from `hooksAreRegistered`:
+    /// a namespaced verb registers through the dispatcher, so only
+    /// a call of its hook in Core says its arm raises it (#2265).
+    @Test("Every hook field is raised somewhere in Core")
+    func hooksAreRaised() throws {
+        #expect(verbs.count >= 2)
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        var core = ""
+        for file in try SourceScan.swiftSources(under: root) {
+            core += SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+        }
+        for field in Mirror(reflecting: UIBridgeHooks())
+            .children.compactMap(\.label)
+        {
+            #expect(
+                core.contains("uiBridge.\(field)("),
+                Comment(rawValue: field)
             )
         }
     }

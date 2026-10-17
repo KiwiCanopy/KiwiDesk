@@ -70,6 +70,20 @@ struct SettingsCatalogArgumentTests {
         // beside the dotted-reference sweep.
         "MacSettingRow.swift: control",
         "MacHabitRow.swift: control",
+        // The AI page's ready-made prompt rows take the same
+        // shape through `AISection.control(for:)` (#1685),
+        // pinned by `AICensusRenderTests`.
+        "AIPromptRow.swift: control",
+        // A lens's own cards (#2103), UNANCHORED: a search lands on
+        // the plain card, never on a lens's draft.
+        "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.levelsCard.text",
+        "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.clearCard.text",
+        "KiwiVisionLensOverrides.swift: "
+            + "SettingsCatalog.kiwiVision.appearanceCard.text",
+        "KiwiVisionLensAppsCard.swift: KiwiVisionLensWords.appsTitle",
+        "KiwiVisionLensOtherAppsCard.swift: KiwiVisionLensWords.otherTitle",
     ]
 
     /// Sanctioned literal-`L()` `SettingsSection` titles —
@@ -83,17 +97,6 @@ struct SettingsCatalogArgumentTests {
     /// sites. **Mutual exclusion is the only admissible
     /// reason** — the sites must never co-render, or the shared
     /// id is ambiguous.
-    /// Empty since #678 turn 13b, and kept so the next mutually
-    /// exclusive pair has to be recorded on purpose rather than
-    /// pass as an ordinary double mount.
-    ///
-    /// Monitors' entry left it: the picture and the
-    /// "not connected" banner used to be if/else TWINS each
-    /// mounting `monitors.spacePlacement`, and they are now two
-    /// gated ROWS inside one mount of it — which is what the
-    /// census says they are. (The bar colour drawers left this
-    /// list earlier, when the Bars switch died: they co-render
-    /// now, so each mounts its own instance declaration.)
     private let alternatelyMounted: [String: Int] = [:]
 
     /// Every `SettingsSection(` / `SettingsDisclosure(` first
@@ -224,11 +227,18 @@ struct SettingsCatalogArgumentTests {
         // left; its two rows anchor under Open applications.
         // 100 since #1948: the two Per screen drawers'.
         // 101 since #2142: the Desktop switch cue row's.
-        // 102 since #2173: the Automatic floating card's.
-        // 100 since #1857: the Border, Drag and More colors
-        // mounts left, Window marks came, and the two role
-        // groups mount through the indirect parameter above.
-        #expect(direct.values.reduce(0, +) == 100)
+        // 102 since #453: Shortcuts' Layout group's.
+        // 104 with #2144: the cycle and plate rows (#453); 102 once
+        // #2143's picker and the slide's duration left the drawer.
+        // 103 with #2173: the Automatic floating card's. 101 since
+        // #1857: the Border, Drag and More colors mounts left,
+        // Window marks came, and the two role groups mount through
+        // the indirect parameter above. 102 since #2228: KiwiShelf's
+        // Show the Space switch. 106 since #1685: the AI page's
+        // three cards and its setup row. 107: #2265's KiwiHub group.
+        // 112-118: #2103, #1870, #2103 v2. 119 #1869, 120 #2258,
+        // 121 #2312, 122 #2103's lens strip, 123 #2379.
+        #expect(direct.values.reduce(0, +) == 123)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

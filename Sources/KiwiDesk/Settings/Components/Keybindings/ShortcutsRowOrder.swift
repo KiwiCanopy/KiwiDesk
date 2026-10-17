@@ -4,13 +4,16 @@ enum ShortcutsRowOrder {
     /// Containers holding a non-empty order list that a bespoke
     /// view draws rather than a standard list loop — Open
     /// applications for its app list, though its KiwiDesk rows
-    /// are walked (#1520).
+    /// are walked (#1520), and Layout for its cycle list and
+    /// switch above the walked shortcuts (#453).
     static let bespokeContainers: Set<SettingsContainer> = [
         .openApplications,
+        .layout,
         .layers,
         .luaBindings,
         .defaultShortcuts,
         .gestures,
+        .hyperKey,
     ]
 
     /// The Mouse & trackpad drawer's settings, in entry order
@@ -22,19 +25,35 @@ enum ShortcutsRowOrder {
         .shortcuts(.scrollSpaceStep),
         .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.scrollNaturalMouse),
-        .behaviour(.mouseResize),
+        .behaviour(.mouseHoverFocus),
+        .behaviour(.mouseHoverFocusDelay),
         .behaviour(.mouseFollowsFocus),
+        .behaviour(.mouseResize),
+    ]
+
+    /// KiwiHub group order: its sides in the order of their keys,
+    /// J K L (#2246, #2265).
+    static let kiwiHubAtRest: [SettingKey] = [
+        .shortcuts(.jumpToWindow),
+        .shortcuts(.showShortcuts),
+        .shortcuts(.viewPicker),
     ]
 
     /// Focus group order: directions, the Space steps, the
-    /// history setting above its two rows (#1655), then live
-    /// spaces.
+    /// history setting above its two rows (#1655), live spaces.
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
         .shortcuts(.spaceStep),
         .shortcuts(.spaceHistory),
         .shortcuts(.spaceHistoryStep),
         .shortcuts(.goToSpace),
+    ]
+
+    /// KiwiVision group order: its toggle (#2312), then a row
+    /// per lens (#2103 ruling 42).
+    static let kiwiVisionAtRest: [SettingKey] = [
+        .shortcuts(.toggleKiwiVision),
+        .shortcuts(.toggleLens),
     ]
 
     /// Move windows group order: swaps, then space moves.
@@ -93,6 +112,27 @@ enum ShortcutsRowOrder {
         }
     }
 
+    /// The Layout group's setting rows, above its shortcuts:
+    /// the cycle list and the plate's switch (#453, #2144),
+    /// drawn by `LayoutCycleRow` and `LayoutCueRow`.
+    static let layoutList: [SettingKey] = [
+        .shortcuts(.modeCycle),
+        .shortcuts(.modeCue),
+    ]
+
+    /// The Hyper key card's rows (#1870), drawn by `HyperKeyRow`:
+    /// the recorder, then the move offer under it.
+    static let hyperKeyList: [SettingKey] = [
+        .shortcuts(.hyperKey),
+        .shortcuts(.desktopShortcutBase),
+    ]
+
+    /// Layout group order (#453): `KeybindingCatalog
+    /// .layoutCycleRows` orders the rows inside the cycle family.
+    static let layoutAtRest: [SettingKey] = [
+        .shortcuts(.layoutCycle)
+    ]
+
     /// Size & float order: resize pairs followed by state toggles.
     static let sizeAndFloatAtRest: [SettingKey] = [
         .shortcuts(.growWidth),
@@ -120,8 +160,7 @@ enum ShortcutsRowOrder {
 
     /// Open applications ▸ KiwiDesk, below the app list (#1520).
     static let openApplicationsKiwiDesk: [SettingKey] = [
-        .shortcuts(.showShortcuts),
-        .shortcuts(.openSettings),
+        .shortcuts(.openSettings)
     ]
 
     /// Layers group order behind disclosure.

@@ -76,6 +76,19 @@ struct GreyOutParityTests {
             "active: inertReason != nil",
             1
         ),
+        // Copy Setup Prompt on a translocated copy (#1685).
+        (
+            "AISetupRow.swift",
+            "GreyOut(active: translocated)",
+            1
+        ),
+        // Add to Claude Desktop: translocated, or no Claude
+        // Desktop to open the extension (#2258).
+        (
+            "AISetupRow.swift",
+            "active: translocated || claudeInstalled == false",
+            1
+        ),
         (
             "FocusBorderEditor.swift",
             "active: glowAutoReason != nil",
@@ -107,6 +120,14 @@ struct GreyOutParityTests {
         (
             "GlassCard.swift",
             "reduceTransparency && !key.placement.exemptFromContainerGate",
+            1
+        ),
+        // Reduce Motion dims the Animations card's at-rest rows
+        // (#171) per row, so the Space switch picker's exemption
+        // holds (#2143); both conjuncts are the needle.
+        (
+            "MotionCard.swift",
+            "reduceMotion && !key.placement.exemptFromContainerGate",
             1
         ),
         // Each drag column's outer gate resolves through

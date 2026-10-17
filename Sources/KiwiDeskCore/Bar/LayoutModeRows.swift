@@ -3,9 +3,9 @@ import Foundation
 /// The Layout menu's rows (#752, #762, #1179): one per layout in
 /// `allCases` order, the live one checked with "not saved to
 /// profile" beneath it while it differs from the saved one, and
-/// the Keep row, armed on any screen's drift. The status item's
-/// Layout menu and a Space chip's (#1518) both build from this;
-/// each supplies its own words (#96) and its own actions.
+/// the Keep row, armed on any screen's drift. A Space chip's Layout
+/// menu (#1518) builds from this, supplying its own words (#96) and
+/// its own actions.
 public enum LayoutModeRows {
     /// A mode row's look.
     public struct Entry: Equatable {

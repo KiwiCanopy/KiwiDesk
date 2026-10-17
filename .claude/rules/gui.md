@@ -110,9 +110,16 @@ restated `20...80` satisfies on the day it is written.
 - **A picture whose object is NOT the draft goes in a sheet, and
   writes nothing** (#859). Choose the container by whose object the
   picture is — draft → the panel, anything the user is not editing
-  → a sheet off the thing that names it — and keep the sheet
+  → a sheet off the thing that names it, save that a page with no
+  draft whose rows write at once takes the panel for its own live
+  values (KiwiVision's Focused window chip, #2103 — a lens's chip
+  is a draft like any other; `DetailPanelTests` holds the offer
+  set) — and keep the sheet
   read-only, a sheet that grows a commit being a dialog wearing
-  the wrong chrome. A read-only sheet also answers the keyboard
+  the wrong chrome — save a ruled offer whose one commit STAGES a
+  multi-row edit into the draft through a closure its host hands
+  it, taking no model (#1870's Hyper move, owner-ruled; a further
+  one is a ruling too). A read-only sheet also answers the keyboard
   both ways: Return on its one dismissal, and Escape, which a
   `Button` cannot carry beside `.defaultAction` so the content
   view takes `.onExitCommand`. `SheetPresentationSeamTests` is the
@@ -249,13 +256,18 @@ restated `20...80` satisfies on the day it is written.
 - **A gesture picture is not a schematic.** A Mouse & trackpad
   entry on the Shortcuts & Gestures page teaches a gesture rather
   than a rest state, so its picture may move: while hovered, and
-  the card's first entry once when the user's own click opens the
-  card (owner ruling 2026-09-29) — at most once per visit, never
-  on a search, Go to or diff-jump expansion, never looped.
-  Otherwise it rests on its key frame, and always under Reduce
-  Motion, never a bundled clip, with the gate named per call
-  (`ReduceMotionGateTests`). `GestureAutoplayWiringTests` holds
-  the one entry that plays and the click as its only trigger.
+  once on the user's own click alone — the card's first entry
+  when a click opens the card, at most once per visit (owner
+  ruling 2026-09-29), and the entry a click on its picture in the
+  shut card's strip lands on, once per such click (owner ruling
+  2026-10-17) — never on a search, Go to or diff-jump expansion,
+  never looped. Otherwise it rests on its
+  key frame, and always under Reduce Motion, never a bundled clip,
+  with the gate named per call (`ReduceMotionGateTests`).
+  `GestureAutoplayWiringTests` holds the click as the only
+  trigger. An entry's sentence, picture, surface and pace live
+  once, on `GestureItem`, which the entry and the strip both read
+  (`GesturesDrawerTests` ▸ `entriesAreTheItems`, `GestureStripTests`).
   Whether it actually moves is a device check, since no headless
   suite sees an animation run (#1726; `docs/design-decisions.md`
   ▸ Shortcuts carries why).
@@ -301,18 +313,37 @@ controllers rather than as a claim about the process, is
 ## A key window without `.closable` answers Close itself (#1533)
 
 The hidden main menu carries the standard File ▸ Close on ⌘W
-with no target, so the key window answers it — which is the
-only way the chord reaches any own window. AppKit's own
+with no target, so the key window answers it. A NON-ACTIVATING
+key panel — the key panel (#1875, #2246) — hands its key
+equivalents to that menu itself, since KiwiDesk's menu is not the
+one in the menu bar while the panel is up
+(`PanelHandBackTests` ▸ `chordsReachTheMainMenu`). **A
+non-activating key panel hands its chords only through
+`MainMenu.performPanelChord`, and a row joins the File or Edit
+menu only once it is ruled safe to fire while another app is in
+front** — the user believes that app has the keyboard, so a ⌘Q
+aimed at it must never quit KiwiDesk (owner ruling 2026-10-13,
+`PanelChordTests` ▸ `onlyRuledActions`, `PanelChordTests` ▸
+`noWholeMenuForward`). **While key, such a panel claims its own
+⌘ chords before any menu, hands only the File and Edit chords on,
+and swallows any other chord a KiwiDesk menu holds**
+(`JumpPanelEventTests` ▸ `appMenuChordsAreSwallowed`,
+`JumpPanelEventTests` ▸ `panelChordsLeaveEditAlone`). AppKit's own
 validation greys that item for a window whose style mask lacks
 `.closable` (measured: a borderless `NSPanel` fails
 `validateUserInterfaceItem` for `performClose(_:)`), so a
 key-capable window built without it must validate and perform
 the item itself, routing to the close its keyboard already has,
-or ⌘W beeps at it while closing everything else. `ShortcutsPanel`
+or ⌘W beeps at it while closing everything else. `JumpPanel`
 is the instance, and `MainMenuTests` holds the item and the
 panel's verdict. Adding `.closable` instead is the wrong door: it
-routes through AppKit's `close()` and past the #952 activation
-hand-back.
+routes through AppKit's `close()` and past the panel's own close,
+which runs the exit fade.
+
+A keyboard panel is keyed through `PanelHandBack.present` and
+never activates KiwiDesk: an activation raises the Settings
+window and re-reports it focused (#1875, `PanelHandBackTests` ▸
+`panelsPresentThroughTheDoor`, `panelsAreNonActivating`).
 
 ## Unsaved edits ask at the window; a quit closes every dialog (#2049)
 
@@ -369,6 +400,18 @@ which it cannot tell anyway. The
 argument is *An own act is never a bounce* under "A placement
 bounce is the app's answer, not the user's (#1161)" in
 `docs/design-decisions.md`.
+
+**A raise Core starts takes the other order of the same two
+halves (#1869).** Hover focus issues the focus command itself and
+then hands the GUI only the window number, through
+`PointerRest.frontOwnWindow`, which `AppDelegate` wires to
+`forceFront` with no door call — the command already made the
+report intended, and only once it moved the focus does Core ask
+for the front (`HoverFocusOwnWindowTests`,
+`HoverFocusWiringTests` ▸ `frontOwnWindowIsWired`). The hook is
+hover's: a second Core-started raise of the marked window first
+moves it beside `EventLoop.ownWindow(number:)`, rather than reaching
+into the pointer rest.
 
 ## A window that finishes something already begun comes forward
 
@@ -568,11 +611,17 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles, Screens, Behaviour and the Mac Checklist
-render from it now** (#678 Phases 2-3; #1365): each
+Layouts, Profiles, Screens, Behaviour, the Mac Checklist, AI and
+KiwiVision render from it now** (#678 Phases 2-3; #1365; #1685;
+#2103 — every KiwiVision card walks its list, save the lens
+strip, one bespoke key drawing a page per live lens as Profiles
+does, a landing into KiwiVision naming no lens and a lens page's
+cards anchoring nothing (`KiwiVisionLensWiringTests`),
+`KiwiVisionCensusRenderTests` ▸ `levelsCardWiring`,
+`clearCardWiring`): each
 carries its own order list and a census-render suite pinning that
 order to the census (`MacChecklistRowOrder` /
-`MacChecklistCensusRenderTests` is the newest pair; its
+`MacChecklistCensusRenderTests` is the worked pair; its
 `bespokeContainers` is empty, and `MacChecklistCensusRenderTests`
 ▸ `containersWalkTheirLists` holds that every container walks its
 list), so a row in a
@@ -593,7 +642,10 @@ asserted by `ShortcutsBespokeContainerTests`, whose table of
 order lists is a census held against the declarations in every
 `ShortcutsRowOrder` body (#1121), so an order list added without
 a row reds — and another going bespoke has to edit that set;
-check it before assuming an edit will show up.
+check it before assuming an edit will show up. AI's setup card
+is bespoke the same way (`AIRowOrder.bespokeContainers`, its
+mount needled by `AICensusRenderTests`); its ready-made prompts
+walk their list.
 
 General, Gaps & Borders, Spaces & Layouts, Profiles, Screens
 and Behaviour push that edge wider: EVERY container in them is
@@ -704,10 +756,11 @@ trap General shipped, where the resolver was built only in tests
 (`BarsGateWiringTests`, `GapsAndBordersGateWiringTests`,
 `ShortcutsGateTests.layersCardConsultsTheResolver`), gate-granular
 so a file resolving two gates reds if EITHER goes hand-rolled.
-`ShortcutsGates.resolvedElsewhere` holds its one gate
-(`.luaImportAvailable`) because that is a live-editor-state
-predicate the saved config cannot answer — not because of any
-shape split, which no longer exists.
+A gate joins `ShortcutsGates.resolvedElsewhere` only when it is
+a live-editor-state predicate no resolver input can answer, never
+because of a shape split, which no longer exists — a fact the
+resolver can be HANDED, as the layout plate's switch is handed
+`guiManaged` (#2144), is resolved there.
 
 **A master whose followers disagree acknowledges; it never takes
 a census gate** (#1383). Dimmed means "takes no input" on every
@@ -1022,7 +1075,10 @@ must keep:
   "Simple" / "Power User", wire and label alike
   (`docs/localization-naming.md` owns the pair's policy).
 - **A card is an answer**: subtitles derive from the draft
-  (`HomeCardContentTests` holds the derivations), previews
+  (`HomeCardContentTests` holds the derivations), save AI's,
+  which is fixed because KiwiDesk cannot read an AI app's state
+  (`docs/design-decisions.md` ▸ The AI page sets an AI app up
+  and never reports on it), previews
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
   hue alone. A profile card's picture rides the desktop plate
@@ -1116,12 +1172,24 @@ must keep:
   config leaf through `SettingsDraftDiff`, whose every-leaf
   attribution net (`SettingsDraftDiffTests`) is what a new
   `GuiConfig` or `TilingSettings` field reds until its census
-  row exists, and live drift through the ONE
+  row exists, live drift through the ONE
   `SettingsModel.profileDrift` verdict the header's status line,
-  the pill's presence and `driftRows` all read — a surface
-  deriving that predicate for itself is how the pill came to
-  say "Unsaved changes" over an empty list (#1197,
-  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`). A surface stating an N beside
+  the pill's presence and `driftRows` all read (#1197,
+  `SettingsDriftRowsTests` ▸ `surfacesShareTheVerdict`), and an
+  unsaved live setting through Core's keep judgement,
+  `KiwiCore.unsavedLiveSettings`, diffing the two sides it hands
+  over and never the draft's baseline, asked again through the one
+  `refreshUnsavedLive` wherever live or that baseline can have
+  moved (#2262, `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`,
+  `UnsavedLiveSettingsTests`) — and a Settings Save lays only the
+  draft's own settings edits over live as it is AT the Save
+  (`TilingSettings.rebased`), never the draft's settings whole,
+  which would put back every live change since the seed, the
+  rows it lists as kept among them (`SettingsLiveSaveTests`). A
+  surface deriving one of those
+  verdicts for itself is how the pill came to say "Unsaved
+  changes" over an empty list, and no scan sees a second
+  derivation, so that is review's. A surface stating an N beside
   a visible list derives the N from that list's rows, never
   from the settings count — a per-instance family made the
   two disagree on sight (owner 2026-08-10).
@@ -1834,22 +1902,24 @@ being a static state it draws either way.
   responds to its action (observed on macOS 26.6.1,
   2026-08-12), so a row that WORKS cannot be dimmed while
   `autoenablesItems` is on — which is what the quick menu
-  needs during boot (#802) and what the Layout submenu's save row
-  needed before it (#68). The cost is the other half of the
-  switch: a nil-action row is no longer disabled for free, so an
-  unstated `isEnabled` ships an enabled-looking context line —
-  and a **submenu parent** is one of those rows, its nil action
-  being what opens the child.
+  needs during boot (#802) and what a Space chip's Layout menu
+  needs for its Keep row (#68, #1518). The cost is the other half
+  of the switch: a nil-action row is no longer disabled for free,
+  so an unstated `isEnabled` ships an enabled-looking context
+  line — and a **submenu parent** is one of those rows, its nil
+  action being what opens the child.
   **The flag is per `NSMenu` and does not inherit**, so a builder
   that nests menus turns it off on every one it constructs, not
   only the outermost: a nested menu left on auto-enabling
   re-enables at display time exactly the rows the switch was
-  thrown to keep dim. `QuickMenuBootRowTests` and
-  `QuickMenuProfileRowTests` hold the two menus' rows;
-  `LayoutMenuEnablementScanTests` pairs each constructed row to
-  its own `isEnabled` statement (never a per-file total, which a
+  thrown to keep dim. `QuickMenuBootRowTests` holds the quick
+  menu's rows and `BarMenuTests` ▸ `menuShape` the bar menus'
+  flag at every level; `LayoutMenuEnablementScanTests` pairs each
+  constructed row in a `QuickMenuBuilders.checked` file to its
+  own `isEnabled` statement (never a per-file total, which a
   `guard-prover` round forged) and derives the flag count from
-  the `NSMenu()` count, so a nested menu that skipped it reds.
+  the `NSMenu()` count, so a nested menu there that skipped it
+  reds.
 - **Modifiers on a bare `ForEach` apply PER CHILD, never to the
   run.** A container that hands a `ForEach` straight to its
   chrome (a background well, padding, a border) stamps that
@@ -1859,8 +1929,25 @@ being a static state it draws either way.
   before applying the chrome; `SettingsDisclosure`'s interior
   states the mechanism at the seam.
 
+## The CLI's local verbs (#1685)
+
+**A verb the CLI answers without the app joins `CLIRoute` and
+owes no API record** — a record is for a command the socket or
+Lua dispatches (core-boundaries.md). `runCLI` switches on the
+route and shell completion reads it, so a local verb is never an
+`if` ahead of that switch, and it never takes a spelling a socket
+command has, save the ruled `help` (`CLIRouteTests`,
+`CLIHelpSeamTests`).
+
 ## Strings
 
+- **A shortcut row's title is a verb phrase saying what pressing
+  it does: "Show ‹panel name›" for a panel, using the panel's
+  VoiceOver name; "Open" for a window** (#2245,
+  `JumpSideNameTests`). The pairing of a row with its panel's name
+  is [config-vocabulary.md](config-vocabulary.md)'s ▸ shortcuts
+  panel. Renaming a row leaves the verb INSIDE its panel ("Jump")
+  alone.
 - **A surface narrating the boot count reads
   `BootCountText.line(for:)`**, the one author of that sentence
   (#1715). The grant screen, the relaunched "What's new" and the
@@ -1876,6 +1963,9 @@ authoring rules apply here even though the catalogs live in Core:
 - Every user-facing string goes through `L("key", "English")`
   (issue #9). English is the source of truth, inlined at the call
   site.
+- **The AI page's setup prompt is not this carve-out** — it is
+  never drawn, only copied for an AI app's model, and is ruled
+  in [localization.md](localization.md) ▸ Call sites.
 - **One carve-out, and it is CLOSED: the four modifier
   abbreviations the tour draws.** `OnboardingModifierNames` draws
   `ctrl` / `opt` / `shift` / `cmd` under `⌃ ⌥ ⇧ ⌘` with no catalog

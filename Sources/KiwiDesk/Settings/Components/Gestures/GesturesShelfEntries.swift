@@ -8,97 +8,77 @@ import SwiftUI
 /// read and linked, never copied: its control is the Space Bar's.
 struct GesturesShelfEntries: View {
     @ObservedObject var model: SettingsModel
+    /// The entry that plays once as it appears (`GesturesDrawer`).
+    @Binding var playing: GestureItem?
 
     private var settings: TilingSettings { model.config.settings }
 
     var body: some View {
         GestureEntry(
-            L(
-                "shortcuts.gestures.drop_on_space",
-                "Drag a window onto a Space on the KiwiShelf to "
-                    + "move it there."
-            ),
-            surface: .spaceBar,
+            .dropOnSpace,
             settings: settings,
-            pace: .story
-        ) { GesturePicture.DropOnSpace(t: $0) }
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.dropOnSpace)
         GestureRule()
         GestureEntry(
-            springText,
-            surface: .spaceBar,
+            .spring,
             settings: settings,
-            pace: .story
+            gestures: model.config.scrollGesture,
+            playing: $playing
         ) {
-            GesturePicture.Spring(t: $0)
-        } control: {
             link(Self.springLinkProse)
         }
+        .gestureAnchored(.spring)
         GestureRule()
         GestureEntry(
-            L(
-                "shortcuts.gestures.glyph_click",
-                "Click an app icon to go to its Space and focus it."
-            ),
-            surface: .spaceBar,
+            .glyphClick,
             settings: settings,
-            pace: .steps
-        ) { GesturePicture.GlyphClick(t: $0) }
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.glyphClick)
         GestureRule()
         GestureEntry(
-            L(
-                "shortcuts.gestures.glyph_peek",
-                "Point at an app icon or +n to see its windows; click "
-                    + "one to go to it. Nothing switches until you do."
-            ),
-            surface: .spaceBar,
+            .glyphPeek,
             settings: settings,
-            pace: .steps
-        ) { GesturePicture.GlyphPeek(t: $0) }
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.glyphPeek)
         GestureRule()
         GestureEntry(
-            L(
-                "shortcuts.gestures.shelf_scroll",
-                "Scroll over the KiwiShelf to see the Spaces or "
-                    + "windows that run past its edge."
-            ),
-            surface: .shelf,
-            settings: settings
-        ) { GesturePicture.ShelfScroll(t: $0) }
-        GestureRule()
-        GestureEntry(
-            L(
-                "shortcuts.gestures.context_menu",
-                "Right-click the KiwiShelf for a menu of what you "
-                    + "clicked: a Space's layout and how many glyphs "
-                    + "it shows, what to do with a window or its app, "
-                    + "and the KiwiShelf's settings."
-            ),
-            surface: .shelf,
+            .shelfScroll,
             settings: settings,
-            pace: .steps
-        ) { GesturePicture.ContextMenu(t: $0) }
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.shelfScroll)
         GestureRule()
         GestureEntry(
-            L(
-                "shortcuts.gestures.app_bar",
-                "Drag an item along the App Bar to reorder its "
-                    + "windows."
-            ),
-            surface: .appBar,
+            .contextMenu,
             settings: settings,
-            pace: .steps
-        ) { GesturePicture.AppBarReorder(t: $0) }
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.contextMenu)
         GestureRule()
         GestureEntry(
-            L(
-                "shortcuts.gestures.app_bar_hover",
-                "Point at an App Bar item whose title is cut short "
-                    + "to see it in full."
-            ),
-            surface: .appBar,
+            .appBarReorder,
             settings: settings,
-            pace: .steps
-        ) { GesturePicture.AppBarHover(t: $0) }
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.appBarReorder)
+        GestureRule()
+        GestureEntry(
+            .appBarHover,
+            settings: settings,
+            gestures: model.config.scrollGesture,
+            playing: $playing
+        )
+        .gestureAnchored(.appBarHover)
         ForEach(offReasons, id: \.self) { prose in
             link(prose)
         }
@@ -109,20 +89,6 @@ struct GesturesShelfEntries: View {
         GestureSurface.allCases.compactMap { surface in
             surface.isOff(settings) ? surface.offProse : nil
         }
-    }
-
-    /// The delay read from the draft, so the sentence says what
-    /// this profile does, in the diff readout's own seconds form.
-    private var springText: String {
-        L(
-            "shortcuts.gestures.spring",
-            "Keep holding it over the Space and, after %1$@, the "
-                + "view opens that Space with the window already "
-                + "in its layout.",
-            SettingsValueReadout.spaceBarSeconds(
-                settings.spaceBarStyle.springDelay
-            )
-        )
     }
 
     /// Every pointer to KiwiShelf & Bars this group draws.

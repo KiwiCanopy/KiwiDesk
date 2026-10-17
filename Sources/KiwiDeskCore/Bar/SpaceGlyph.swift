@@ -3,7 +3,7 @@
 /// cut, a plain character) or untinted (an emoji takes no template
 /// tint). Public so the Bars preview draws Core's verdict rather
 /// than a reading of its own (#1538, #702).
-public enum SpaceGlyph: Equatable {
+public enum SpaceGlyph: Equatable, Sendable {
     case symbol(String)
     case text(String, tinted: Bool)
 }

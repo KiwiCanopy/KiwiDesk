@@ -8,11 +8,22 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
+  # The one WindowServer stream every overlay hears through
+  # (#2275), and its consumer order, live outside Borders/.
+  - "Sources/KiwiDeskCore/OS/WindowServerWatch.swift"
+  - "Sources/KiwiDeskCore/OS/SkyLightWindowEvent*.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+WindowServer.swift"
   - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
   # The window stroke below is derived and stored beside the drag
   # markers, where a per-stroke store would be re-added.
   - "Sources/KiwiDeskCore/Tiling/WindowStroke.swift"
   - "Sources/KiwiDeskCore/Tiling/DragVisual.swift"
+  # KiwiVision's plate stacks with the ring and rides its triggers.
+  - "Sources/KiwiDeskCore/Vision/**"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+VisionFocus.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+VisionHold.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+VisionCurrent.swift"
 ---
 
 # Focus ring & sticky mark overlays
@@ -24,7 +35,7 @@ table below lists,
 so they share their decisions rather than mirroring them.
 
 A new `BorderStyle` field owes a look ruling (#1739) — styling
-joins `LookKeys.all`, anything else `LookKeys.leftOut` with its
+joins `LookKeys.styling`, anything else `LookKeys.leftOut` with its
 reason; the obligation is [bars.md](bars.md)'s and
 `LookKeysCensusTests` reds an unruled field.
 
@@ -82,6 +93,18 @@ same rect**: it selects the backing scale, so a held frame paired
 with the spec's screen rasterizes the ring at the wrong display's
 scale during a cross-display move.
 
+## Every window the anchor may yield has a ring slot
+
+**The ring's slots take the active Space's own windows plus the
+one `StateCoordinator.anchorVisitors(of:tiled:)` set, the same set
+`focusAnchor` admits from outside the Space** (#2259). An anchor
+with no slot draws no focused ring, and with unfocused rings off
+every other ring goes dormant: that was a floating sticky window
+the anchor admitted and the slots did not. A new class of window
+the anchor may yield joins `anchorVisitors`, never the anchor or
+the slot list alone (`BorderTravelerFocusTests` ▸
+`floatingVisitorGetsFocusedRing`).
+
 ## The focused ring consults the own-key-window seam
 
 While the process holds an own key or modal window that is NOT
@@ -89,15 +112,23 @@ the focus anchor, the anchor is stale and the focused ring
 stands down — the anchor draws an unfocused ring instead
 (#933). A path deciding which ring is the focused one takes
 that answer from the one `EventLoop.ownKeyWindow` seam. Since
-#935 that seam returns ONE reading with two facets: the ring
-reads the broad `number` — ANY own key window stales the
-anchor — while the #929 close-return raise reads the narrow
+#935 that seam returns ONE reading with three facets: the ring
+reads the broad `number` — any own key window but a
+`floatsOverWindows` panel stales the anchor — while the #929 close-return raise reads the narrow
 `isDialog` facet. One closure resolves both, so the two
 stand-downs can never disagree about WHICH window is key —
 only about the ruled class. The why (Sparkle's alert flow, why
 a number rather than a Bool, and the split's argument) lives
 on that seam's own doc; the guard is
-`BorderOwnKeyWindowTests`.
+`BorderOwnKeyWindowTests`. **A non-modal own panel floating above
+the normal level — KiwiHub — is looked past** by the ring and
+KiwiVision's plate through the reading's `floatsOverWindows`
+facet, a plate ordered under a `.floating` panel landing behind
+the windows; the #929 raise and the #1532 reveal payment still
+read the window (#2373, `FloatingOwnPanelConsumerTests`), and
+hover focus stands down while one is key, since a focus moved
+away closes it (#2378, `HoverFocusStandDownTests` ▸
+`floatingOwnPanelStandsDown`).
 
 ## Two settle passes, two deferred keys
 
@@ -153,7 +184,15 @@ these:
   only from a ruled trigger** — `sync`'s `ordersOverlay` gate
   (`needsOrder`, a settle pass, no WindowServer stream), the
   WindowServer reorder and unhide events, the unhide's restore of
-  visibility, and the dead-end ring. A new caller is a new round
+  visibility, and the dead-end ring. The reorder event's fan-out
+  has one door, `WindowServerWatch.restack`, which the float-tier
+  raise's landing also takes for its anchor — a float the raise
+  cannot lift over the frontmost window lands between that window
+  and its ring, and the float's event re-stacks only its own
+  overlays (#2284, `FloatRaiseRingRestackTests`,
+  `FloatRaiseLandingWiringTests`); that landing pays one ring
+  order per raise even where a front-order ring needed none,
+  accepted. A new caller is a new round
   trip on the switch path and owes its ruling in
   `BorderOrderCensusTests`' `allowed` map; a front-order ring's
   level read is a second one (`levelOf`). The order is AppKit's
@@ -262,11 +301,7 @@ these:
   2026-10-05). Our own animation ticks are not the window
   arriving. A window that never reports gets its ring at
   `arrivalCap` (`BorderArrivalTests`).
-- **Never ahead of the slide's plates lifting**: the hold reads
-  `spaceSlide.play?.liftAt` live, since a burst press moves it
-  (`BorderArrivalTests` ▸ `liftGatesTheReveal`,
-  `BorderArrivalWiringTests` ▸ `holdReadsTheSlidesLift`).
-- **The reveal fades through `BarMotion.slideFade`, handed the
+- **The reveal fades through `BarMotion.opacityFade`, handed the
   manager's `reduceMotion` read**, so Reduce Motion cuts it in —
   stated, not guarded, as the section on a cue's Reduce Motion
   read below says of every cue. Both `makeTestCore` twins pin the
@@ -314,6 +349,242 @@ drawing backend back for a crisper front order —
 `BorderMissionControlTests` reds a non-AppKit ring or a panel
 without the flag, and whether the flag still hides is a device
 check no test can make.
+
+## KiwiVision's plate stacks with the ring (#2103)
+
+One plate per screen dims everything below the focused window. It
+is an AppKit `.transient` panel joining every Desktop, ordered
+only through AppKit, so the `.transient` and #1962 sections above
+bind it too (`StickyOverlaySpanTests` ▸ `plateJoinsAllSpaces`).
+Obligations:
+
+- **Stack the plate under the target's ring where the ring draws
+  behind its window, and under the window otherwise** — the anchor
+  is the one `BorderManager.ringPanel(of:)` reading, taken by the
+  sync and kept for the restack, never re-derived beside either
+  (`KiwiVisionCoreTests`).
+- **Re-stack a plate only from the ring's triggers, through the
+  ring's own `BorderManager.ordersOverlay` gate**: the sync at the
+  tail of `updateBorders` (the focus moved, a settle pass, no
+  WindowServer stream) and the watch's restack phase — a reorder
+  event, or the float-tier raise's landing (#2284) — which runs
+  the plate AFTER the ring's own re-order. Every plate order goes
+  through `VisionManager`'s one ordering door, below or above, and
+  a new caller of a plate's `order(below:` or `order(above:` owes
+  its ruling in `BorderOrderCensusTests` ▸
+  `plateOrderSitesAreCensused`, which also needles the hook's
+  place.
+- **Watch the target whatever the border setting**: the target
+  joins the WindowServer request under KiwiVision's own consumer,
+  so a plate re-stacks with borders off (`KiwiVisionCoreTests` ▸
+  `targetWatchedWithoutRings`).
+- **Floats are dimmed by the plate, never by panels of their own**
+  (#2103 owner ruling 2026-10-15, withdrawing ruling 3's per-float
+  veils): a raised float lands directly under the focused window
+  (#2287), so while a plate shows, KiwiVision's consumer also hears
+  the float tier and a float's own reorder event re-stacks the
+  target's overlays through the one watch door, the plate landing
+  above the float at once rather than at the raise's end. Gate it
+  on a shown plate, since each call is a ring and mark order on the
+  switch path (#1925) (`KiwiVisionFloatLandingTests`,
+  `BorderOrderCensusTests` ▸ `watchRestackSitesAreCensused`).
+  Re-adding a per-float panel needs a new ruling.
+- **An overlay that hears WindowServer's per-window events
+  connects to the one `WindowServerWatch` under its own
+  `Consumer` case** (#2275), whose declaration position is its
+  place in every phase's fan-out — the mark ahead of the ring so
+  it stays above a front ring, the plate after it — and calls no
+  `SkyLightWindowEvents` door itself; the watch owns the request,
+  `isActive` and the one gated bounds read
+  (`WindowServerWatchTests` ▸ `phaseOrder`,
+  `WindowServerWatchSeamTests`). A new consumer rules its
+  position in the change that adds it.
+- **Read the stand-down from the shelf's verdict**, filed once per
+  pass by `updateBars()` through `noteVisionStandDown`, never a
+  `shelfStandsDown` read of the plate's own: that read is a
+  WindowServer round trip per screen on the switch path.
+- **Stand the blur down under Reduce transparency at the one
+  `KiwiCore.kiwiVisionDrawsBlur` door, keeping the dim, and read
+  whether the blur draws through that door alone** — the plate's
+  `visionRequest` and every Settings surface naming the drawn blur
+  included, never the stored `visionBlur` beside it, which would
+  draw or name the blur under the setting. The plate draws `hud`
+  where glass cannot, so the door asks no platform glass
+  (`OverlayGlassGateTests` ▸ `overlaysTakeTheGate`,
+  `KiwiVisionCensusRenderTests` ▸ `pictureReadsTheDoors`,
+  `KiwiVisionSettingsTests` ▸ `flipRedraws`).
+- **Every change of the live app-wide values reaches the plate and
+  the appearance ledger through the one `appWideLedger` `didSet` →
+  `appWideLiveChanged`**, which compares the whole stored group, so
+  a new plate input joins `AppWideSettings.Vision` rather than
+  being compared beside it (`VisionAppearanceSeamTests` ▸
+  `transitionIsWired`, `KiwiVisionStoredTests` ▸
+  `valuesRedrawThePlate`).
+- **Switch the system appearance only through the one
+  `VisionAppearanceSwitch` seam, and move it only through the one
+  `retargetVisionAppearance`** — on, off, a new ask, `stop()` and
+  `start()` ahead of `loadConfig` — judged against the appearance
+  the debt FOUND, never a read taken right after a switch, which
+  may not have landed. Every writer of what KiwiVision draws goes
+  through the one `setVision` — the public `setKiwiVision` is a
+  gated pick over it — `stop()` pairing its clear with the
+  transition (`VisionAppearanceSeamTests`). The debt is
+  this Mac's state, so it waits in the app's defaults, never the
+  config folder, stored BEFORE switching away and cleared going
+  home only once a switch was taken; both `makeTestCore` twins
+  pin the inert machine (`VisionAppearanceSeamTests`,
+  `KiwiVisionAppearanceTests`).
+- **A plate's mask never orders, and reads its windows through
+  one list seam** (#2103 ruling 21). A mask is a `CAShapeLayer` on
+  the veil's content, which clips the blur with the dim (v2 probe
+  P8, `VisionMaskPlateTests` ▸ `realPlateTakesTheMask`); a re-mask
+  sets a path only where it changed and calls no `order(below:`,
+  since one routed through the order gate costs a WindowServer
+  round trip per pass (`VisionMaskPlateTests` ▸
+  `reshapeOnlyOnChange`). The windows run front to back in
+  `VisionMask.Window`s, each hazed or a hole; a shown Space's
+  member takes the frame the engine last sent, every other app's
+  window the cached `VisionManager.listWindows` read — the one
+  front-to-back read, `KiwiCore.liveFrontWindows`, its readers held
+  by `ScreenCoveringCallerCensusTests` ▸
+  `frontWindowSeamHasOneReader` — and a window tracked at the read
+  never re-enters it as another app's (`KiwiVisionClearWallpaperTests`
+  ▸ `departedTrackedWindowStaysOut`). A pass reads the cache; a new
+  read is owed by a settle pass, an empty cache or an event that
+  adds or removes a window, through the coalesced `oweVisionReshape`
+  — never by the pass itself — and a listed window's own WindowServer
+  event moves or drops its entry, its reorder re-masking rather than
+  re-stacking the plate (`KiwiVisionClearWallpaperTests` ▸
+  `listReadCadence`, `eventsKeepTheMaskFresh`). Both `makeTestCore`
+  twins pin the seam empty. **Every Core read of a KiwiVision
+  setting goes through the one resolver, `VisionLook`**
+  (`KiwiCore.visionLook`, `AppWideSettings.look(lens:)`), never
+  a flat `appWide.vision…` field beside it: a plain read is
+  wrong only while a lens is on, which no plain-mode suite sees
+  (#2103 v3, `VisionLookSeamTests`, `VisionLensTests` ▸
+  `resolverAppliesEveryField`). **A window's clear verdict is decided
+  once per pass, per process, in `KiwiCore.visionClearPids`**, and
+  "the same app" is the one identity door,
+  `EventLoop.names(_:appOf:lookingUp: false)` — never a bare pid
+  compare, which drops #1785's sibling processes, and never a
+  LaunchServices lookup on the pass (#1936) — so a further clear
+  source joins that function, as Never dimmed did, keyed by
+  `AppRef.listKey` — the bundle id read with the list, or the
+  process name — whose LaunchServices read runs at a list read
+  alone, only while the list is non-empty and only of a process
+  the cache has not seen; a source that judges a window rather
+  than its app — a lens member, whose title rule may clear some
+  windows and not others — is read per window in the walk through
+  the one `visionLensClear`, keyed the same way (`KiwiVisionClearAppTests` ▸
+  `siblingProcessIsClear`, `KiwiVisionNeverDimmedTests` ▸
+  `neverDimmedAreHoles`, `bundleLookupsAreBounded`,
+  `KiwiVisionLensActivationTests` ▸ `membersAreClear`). The mask
+  walks path booleans only down to the last clear window, its
+  length the one `VisionMask.walkedCount` (`VisionMaskTests` ▸
+  `walkedCountStopsAtTheLastHole`), and builds nothing for an
+  unchanged input (`VisionMaskPlateTests` ▸ `reshapeOnlyOnChange`).
+- **What KiwiVision draws — off, plain or a lens — is one value
+  with one writer, `setVision`, and the lens on follows the stored
+  lenses through the one `followActiveLens`**: a write that removes
+  or empties it turns KiwiVision off, one that stores it under
+  another spelling re-keys it, and a write that renames a lens
+  says so in `setAppWide(…renamingLens:)`, alive for that write
+  alone, so it re-keys there, never beside it, the lens page's
+  Save included (`LensPageSaveTests` ▸ `activeFollowsTheSave`,
+  `VisionAppearanceSeamTests` ▸ `oneOnOffWriter`,
+  `KiwiVisionLensActivationTests` ▸ `activeFollowsDefinition`,
+  `KiwiVisionLensRenameTests` ▸ `activeFollowsTheRename`,
+  `persistingRenameFollows`). **A lens is matched by the one
+  `AppWideSettings.sameLens`**, never a case compare beside it.
+  **Settings draws a lens row for every stored lens and every lens
+  a binding names, through the one `KeybindingCatalog.lensOffer`**,
+  never for a lens only a session `define_lens` holds, since a
+  chord outlives the session; a row owns every spelling of its
+  lens (`NavCommand.owns`), so no chord is hidden in any layer, and
+  a row for a lens no store holds stays bindable, since a Lua-owned
+  setup defines its lenses on every load (`ShortcutsLensNamingTests`). **A GUI write of the lenses seeds from
+  and writes the settled list, never the live one**, so a session
+  `define_lens` or `delete_lens` never reaches `gui.json` (ruling
+  40): the lens page's draft is `LensEdits`, seeded from
+  `kiwiVisionStoredLenses` and laid over each list it writes
+  (`LensPageSaveTests` ▸ `sessionLensStaysSession`,
+  `LensEditsTests` ▸ `appliedKeepsSessionLenses`).
+- **A lens's reach is read from adoption state, and followed on
+  every change of it** (#2103 rulings 16, 38). A profile leaves a
+  lens out through its sparse `lens_reach`, keyed by
+  `VisionLens.reachKey`; the live profile's marks ride
+  `ActiveProfile`, refiled on every write of its file, and the one
+  `profileLeavingOut` reads them over `liveHome` before the
+  ownership read, which touches disk — never the profile file on a
+  switch path (#1245). `ProfileManager`'s `active` and a config
+  load re-judge the lens on through `liveProfileChanged`, and a lens
+  turned off for reach says why through its `VisionChangeCause`
+  (`KiwiVisionLensReachTests`). A path that moves who owns the
+  setup — `gui.json` or `init.lua` written — without a config load
+  owes the same `liveProfileChanged` call. **A lens rename or delete owes
+  every profile's `lens_reach` a re-key or a clear, and every stored
+  binding naming it the same** in the same write, or a later lens of
+  that name inherits "left out" and the old chord — through the one
+  `VisionLens.reach(_:renaming:to:)` / `reach(_:deleting:)` and
+  `KeybindingCatalog.renameLens` / `deleteLens`, which compare names
+  through `sameLens` (`KiwiVisionLensRenameTests`,
+  `ShortcutsLensRowsTests`). The binding crossing rewrites the Lua a
+  rule-reach key is built from, so the lens page's Save applies both
+  crossings to the shared base, every profile file and the reach
+  snapshot in the one layer pass ahead of the row encode
+  (`lensPass`), every rename of a draft at once, as one stored →
+  page name map, or a swap merges two lenses — the chords through
+  `KeybindingCatalog.renameLenses`, the marks through
+  `RuleReachSnapshot.renameLenses` — and an "Applies to" pick
+  rewrites every saved profile's marks there too, its lenses
+  written after that rule half lands and before any `gui.json`
+  write of the Save, on every Save door (`LensPageSaveTests`).
+- **A step KiwiDesk's own navigation takes skips what a lens leaves
+  out, through the one `lensKeySkip`; a pick skips nothing**
+  (#2103 rulings 35, 44, 45). `navigate` asks it once and threads
+  it into every navigation model — the geometric search and its
+  float tier, scrolling's and monocle's rows and track's index
+  math through `Navigation.arrayStep`, whose wrap asks it too —
+  and the scroll gesture's own-order step takes it beside. A
+  navigation model takes `skip:` with no default, so a new model
+  or caller threads it rather than inheriting "skip nothing" —
+  review's, since nothing scans for a default. Membership is the
+  plates' per-window `visionLensClear`, never an app-set test,
+  while the window switcher's split stays by app (`lensHolds`,
+  ruling 36). A click, a bar item, hover focus and the window
+  switcher are picks and never ask it (`KiwiVisionLensFocusTests`,
+  `KiwiVisionLensWrapTests`, `KiwiVisionLensGestureTests`,
+  `KiwiVisionLensJumpTests`).
+- **A lens's delayed clear is ONE hold, judged at every re-draw
+  before its sync** (#2103 rulings 12, 14, 30, 34): `updateVision`
+  asks `settleVisionHold` with the target it is about to draw, so a
+  new target ends the old hold and may begin one, and a lens that
+  stops asking — off, Keep focus off, a delay of 0 — ends it there.
+  A hold begins on a CHANGE of target to a window the lens leaves
+  out, after a sync that drew the mode on a screen not standing
+  down — never KiwiVision turning on — through the one pure
+  `VisionHold.begins` verdict; its exemptions — Never dimmed, an
+  overlay, KiwiDesk's own window, the clear window's dialog, a
+  fresh click that landed it — join that verdict, not a call site.
+  It ends at its `.visionHold` deadline, on a press the stamp says
+  reached the held window (`visionPressed`, beside `stampLeftClick`
+  in the press fan-out), at a settle and at `stop()` — every end
+  through `endVisionHold`, since its pill has no timer — and never
+  on typing. The pill takes its own overlay, so a refusal flashed
+  on the held window never replaces it, and follows the frame last
+  sent at each settle, never a re-layout (`KiwiVisionHoldPillTests`).
+  While a hold stands the plates order ABOVE the held window and
+  its own reorder event re-orders them there, since an activation
+  lifts it back (v3 probe P9), and the mask walks it hazed in front
+  (`KiwiVisionHoldTests`, `KiwiVisionHoldExemptionTests`,
+  `KiwiVisionHoldWiringTests`).
+- **Nothing focused shows no plate**, a standing one included, so
+  no plate stays stacked under a window that left
+  (`VisionManagerTests` ▸ `noTargetNoPlateShown`).
+- **Its on/off is a session value, carried by no snapshot**: off at
+  every launch, an in-place restart included, and off when the
+  core stops — silently, since a stop is no toggle to announce
+  (`VisionManagerTests` ▸ `clearIsSilent`).
 
 ## Never gate an overlay pass on the global animation count
 
@@ -451,9 +722,10 @@ style for every window stroke.
 
 ## Exercising the fallback path
 
-`KIWIDESK_NO_WS_TRACKING=<anything>` keeps `skyLightActive` false
-for the whole run: the subscription never attaches and never
-watches, because a live one keeps feeding `reconcile`, which heals
+`KIWIDESK_NO_WS_TRACKING=<anything>` keeps `WindowServerWatch`'s
+`isActive` false for the whole run: the subscription never
+attaches and never watches, because a live one keeps feeding the
+ring's frames, which heals
 the very drift the fallback path exists to expose. The startup log
 line names the lever, so a QA run cannot mistake it for a real
 WindowServer failure. Device QA procedure is in

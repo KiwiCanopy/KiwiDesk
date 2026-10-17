@@ -18,10 +18,8 @@ import Testing
 /// **Mostly arithmetic, with one needle that says so.** A
 /// caption calling the seam and rendering a constant would pass
 /// any scan, so the counts are read directly over settings built
-/// here. The exception is `captionAgreesWithTheHeader`: the
-/// value half of it is a delegation tautology, so the binding
-/// claim rests on a source needle over the header's render
-/// site.
+/// here. The exception is `captionAgreesWithTheHeader`, which
+/// rests on a source needle over the header's render site.
 @Suite("Spaces panel preview")
 @MainActor
 struct SpacesPanelPreviewTests {
@@ -217,13 +215,9 @@ struct SpacesPanelPreviewTests {
     /// "1 of 6 set" beside "follows the layout defaults" (code
     /// review, 2026-08-16).
     ///
-    /// **Two halves, because the value comparison alone is a
-    /// tautology** — `overrideCount` IS
-    /// `settings.overrideFieldCount`, so comparing them proves
-    /// only that a delegation still delegates, and doubling the
-    /// header's own render left it green (guard-prover,
-    /// 2026-08-16). The needle below is what actually binds the
-    /// two surfaces: the header must render the SAME seam.
+    /// `overrideCount` delegates to `settings.overrideFieldCount`,
+    /// so the needle below is what binds the two surfaces: the
+    /// header must render the SAME seam.
     @Test("the caption counts what the header counts")
     func captionAgreesWithTheHeader() throws {
         let url = SourceScan.repoRoot(from: #filePath)
@@ -264,25 +258,6 @@ struct SpacesPanelPreviewTests {
                     rawValue:
                         "the header does arithmetic on the count "
                         + "it shares with the caption"
-                )
-            )
-        }
-
-        for mode in LayoutMode.allCases where mode != .floating {
-            var settings = TilingSettings()
-            apply(anOverrideFor: mode, to: &settings)
-            let view = panel(
-                spaces: ["1"],
-                modes: ["1": mode],
-                settings: settings
-            )
-            #expect(
-                view.overrideCount(for: "1")
-                    == settings.overrideFieldCount(mode, for: "1"),
-                Comment(
-                    rawValue:
-                        "\(mode): the caption and the header "
-                        + "count differently"
                 )
             )
         }

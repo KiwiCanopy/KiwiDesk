@@ -26,8 +26,68 @@ extension ShortcutsReferenceBuilder {
         {
             return "\(n).square"
         }
-        return "squares.below.rectangle"
+        return spaceGroupIcon
     }
+
+    /// The Spaces glyph a row naming no one Space wears.
+    static let spaceGroupIcon = "squares.below.rectangle"
+
+    /// A verb row's glyph on the key panel's Shortcuts side
+    /// (#2246): the layout cycle, the size quartet, the float and
+    /// sticky toggles — wearing the marks the windows wear — a
+    /// layer switch, and the KiwiVision toggle wearing its Settings
+    /// card's symbol (#2103). Panel-only; Settings draws glyphs only
+    /// where one names a thing.
+    static func verbIcon(for lua: String) -> String? {
+        switch lua {
+        case "KiwiDesk.cycle_mode()":
+            return "rectangle.righthalf.inset.filled.arrow.right"
+        case "KiwiDesk.cycle_mode(\"prev\")":
+            return "rectangle.lefthalf.inset.filled.arrow.left"
+        case "KiwiDesk.toggle_floating()":
+            return FloatingStyle.symbolName
+        case "KiwiDesk.toggle_sticky()":
+            return StickyStyle.symbolName
+        case "KiwiDesk.toggle_display_sticky()":
+            return StickyStyle.displaySymbolName
+        default:
+            break
+        }
+        if lua.hasPrefix("KiwiDesk.switch_layer(") {
+            return "square.3.layers.3d"
+        }
+        if lua.hasPrefix("kiwivision.toggle(") {
+            return SettingsDestination.kiwiVision.symbol
+        }
+        guard lua.hasPrefix("KiwiDesk.resize(") else { return nil }
+        let shrinks = lua.contains("-")
+        if lua.contains("\"x\"") {
+            return shrinks
+                ? "arrow.right.and.line.vertical.and.arrow.left"
+                : "arrow.left.and.line.vertical.and.arrow.right"
+        }
+        if lua.contains("\"y\"") {
+            return shrinks
+                ? "arrow.down.and.line.horizontal.and.arrow.up"
+                : "arrow.up.and.line.horizontal.and.arrow.down"
+        }
+        return nil
+    }
+
+    /// The symbols the Shortcuts side draws beyond `verbIcon`'s
+    /// Core marks — its own literals, Custom's Lua mark and the
+    /// gather badge — for the resolve guard.
+    static let verbSymbols = [
+        "rectangle.righthalf.inset.filled.arrow.right",
+        "rectangle.lefthalf.inset.filled.arrow.left",
+        "square.3.layers.3d",
+        "arrow.right.and.line.vertical.and.arrow.left",
+        "arrow.left.and.line.vertical.and.arrow.right",
+        "arrow.down.and.line.horizontal.and.arrow.up",
+        "arrow.up.and.line.horizontal.and.arrow.down",
+        "curlybraces",
+        "rectangle.stack",
+    ]
 
     /// Extracts the first quoted argument from a Lua call string.
     private static func quotedArg(in lua: String) -> String? {

@@ -13,6 +13,11 @@ struct OwnKeyWindowReading: Equatable {
     /// close-return raise stand-down governs — see
     /// `EventLoop.classifiesAsOwnDialog`.
     let isDialog: Bool
+    /// Whether that window is a non-modal panel floating over every
+    /// window — KiwiHub — which the focus ring and KiwiVision look
+    /// past to the focus beneath it (#2373). The raise stand-down
+    /// and the menu-bar reveal still read the window.
+    var floatsOverWindows = false
 }
 
 /// The close-return raise stand-down (#913/#929/#935) and the
@@ -109,7 +114,16 @@ extension EventLoop {
                 isPanel: classified is NSPanel,
                 isMarkedTilingWindow: classified.identifier?
                     .rawValue == OwnWindowTiling.identifier
-            )
+            ),
+            floatsOverWindows: classified is NSPanel
+                && app.modalWindow !== key
+                && floatsAboveWindows(key.level)
         )
+    }
+
+    /// Whether an own window at `level` floats over every app
+    /// window rather than standing among them.
+    static func floatsAboveWindows(_ level: NSWindow.Level) -> Bool {
+        level.rawValue > NSWindow.Level.normal.rawValue
     }
 }

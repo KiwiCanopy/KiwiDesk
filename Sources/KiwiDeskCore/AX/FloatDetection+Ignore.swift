@@ -43,6 +43,13 @@ extension FloatDetection {
         tracked ? min(layer, screenSaverLayer - 1) : layer
     }
 
+    /// Whether the built-in table ignores `bundleID`'s raised-layer
+    /// windows — a table read, never a window's verdict (#1685).
+    public static func ignoresRaisedWindows(bundleID: String?) -> Bool {
+        guard let bundleID else { return false }
+        return layerScopedIgnoredApps[bundleID.lowercased()] != nil
+    }
+
     public static func isBuiltInIgnoredApp(
         bundleID: String?
     ) -> Bool {
@@ -68,9 +75,7 @@ extension FloatDetection {
             || layer >= screenSaverLayer
             || layer != 0
                 && (isAccessory && !titlebarButton
-                    || bundleID.map {
-                        layerScopedIgnoredApps[$0.lowercased()] != nil
-                    } == true
+                    || ignoresRaisedWindows(bundleID: bundleID)
                         && !(escapesWithButton(bundleID)
                             && (titlebarButton || layer == modalPanelLayer)))
     }
@@ -105,9 +110,7 @@ extension FloatDetection {
         isAccessory: Bool
     ) -> Bool {
         isAccessory
-            || bundleID.map {
-                layerScopedIgnoredApps[$0.lowercased()] != nil
-            } == true
+            || ignoresRaisedWindows(bundleID: bundleID)
     }
 
     /// Whether an untracked window of `layer` is a built-in
@@ -173,13 +176,14 @@ extension FloatDetection {
 
     /// Whether process currently displays a visible ignored panel
     /// (#21, #448). A `tracked` window is none: the gate admitted
-    /// it, a buttoned one through the #2072 escape this reading
-    /// cannot see.
+    /// it. An untracked one states the title-bar button the #2072
+    /// escape decides on, through `titlebarButton` (#2344).
     public static func hasVisibleIgnoredPanel(
         pid: pid_t,
         bundleID: String?,
         isAccessory: Bool,
-        tracked: Set<WindowID>
+        tracked: Set<WindowID>,
+        titlebarButton: (WindowID) -> Bool
     ) -> Bool {
         guard
             requiresWindowLayers(
@@ -195,21 +199,49 @@ extension FloatDetection {
                 kCGNullWindowID
             ) as? [[String: Any]] ?? []
         return list.contains { info in
-            let layer =
-                info[kCGWindowLayer as String] as? Int ?? 0
-            let number = (info[kCGWindowNumber as String] as? Int)
-                .flatMap { UInt32(exactly: $0) }.map(WindowID.init)
-            return info[kCGWindowOwnerPID as String] as? pid_t
-                == pid
-                && number.map { !tracked.contains($0) } ?? true
-                && isPanelBandLayer(layer)
-                && shouldIgnore(
-                    bundleID: bundleID,
-                    layer: layer,
-                    isAccessory: isAccessory,
-                    rules: IgnoreRules(),
-                    titlebarButton: false
-                )
+            guard info[kCGWindowOwnerPID as String] as? pid_t == pid
+            else { return false }
+            return isVisibleIgnoredPanel(
+                id: (info[kCGWindowNumber as String] as? Int)
+                    .flatMap { UInt32(exactly: $0) }.map(WindowID.init),
+                layer: info[kCGWindowLayer as String] as? Int ?? 0,
+                bundleID: bundleID,
+                isAccessory: isAccessory,
+                tracked: tracked,
+                titlebarButton: titlebarButton
+            )
         }
+    }
+
+    /// One listed window's verdict for `hasVisibleIgnoredPanel`:
+    /// untracked, in the panel band, and ignored by the gate's own
+    /// predicate — its button asked only where
+    /// `needsTitlebarButton` says it decides, and a window with no
+    /// number has none.
+    static func isVisibleIgnoredPanel(
+        id: WindowID?,
+        layer: Int,
+        bundleID: String?,
+        isAccessory: Bool,
+        tracked: Set<WindowID>,
+        titlebarButton: (WindowID) -> Bool
+    ) -> Bool {
+        guard id.map({ !tracked.contains($0) }) ?? true,
+            isPanelBandLayer(layer)
+        else { return false }
+        let button =
+            needsTitlebarButton(
+                layer: layer,
+                isAccessory: isAccessory,
+                bundleID: bundleID
+            )
+            && id.map(titlebarButton) == true
+        return shouldIgnore(
+            bundleID: bundleID,
+            layer: layer,
+            isAccessory: isAccessory,
+            rules: IgnoreRules(),
+            titlebarButton: button
+        )
     }
 }

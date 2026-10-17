@@ -108,13 +108,13 @@ struct AnnouncedValuePinTests {
         "SettingsHeaderBar.swift": 1,
         // #1655: the Space history group's heading.
         "SpaceHistoryRow.swift": 1,
+        // A lens's name and the Every lens rule (#2103 PR 7).
+        "KiwiVisionLensHeader.swift": 1,
+        "KiwiVisionLensPage.swift": 1,
         "HomeScreen.swift": 1,
-        // The ⌃⌥K panel's band and subgroup headers, in the census
-        // from the moment `Sources/KiwiDesk/Shortcuts` joined
-        // `ChromeScanRoots` (#1293). #1292 gave them the trait
-        // while the directory was still outside every lens, so
-        // this is the backlog arriving rather than a new title.
-        "ShortcutsBands.swift": 2,
+        // The key panel's Shortcuts section titles (#1292, #2246),
+        // one heading level since the bands went.
+        "ShortcutsSheetView.swift": 1,
         // The update window's title, the Highlights and Before you
         // update labels (#1542), and each kind card's heading and
         // the checking state's title (#1849).
@@ -127,8 +127,18 @@ struct AnnouncedValuePinTests {
         "GestureEntry.swift": 1,
         // The tour looks step's two row headers (#1720).
         "OnboardingLooksRows.swift": 1,
+        // KiwiHub's View lines (#2309).
+        "JumpViewSide.swift": 1,
         // App Rules ▸ Automatic floating's "Tile instead" (#2173).
         "AppRulesSection+Automatic.swift": 1,
+        // Jump to window's Hidden section header (#1875).
+        "JumpPanelView.swift": 1,
+        // The Hyper move sheet's title (#1870).
+        "HyperMoveSheet.swift": 1,
+        // The app picker's two section headers, one site (#2103).
+        "AppPickerButton.swift": 1,
+        // The diff list's "Live, not saved" heading (#2262).
+        "SettingsDiffRowsView.swift": 1,
     ]
 
     @Test("title components are rotor headings")

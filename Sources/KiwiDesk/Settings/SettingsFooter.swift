@@ -25,9 +25,10 @@ struct SettingsFooter: View {
     /// a fully clean setup deliberately does NOT summon the pill —
     /// creation lives in Profiles; the pill narrates a draft.
     /// The drift half is the header's own predicate (#1197), so
-    /// the pill never claims what no surface itemises.
+    /// the pill never claims what no surface itemises; a live
+    /// change not saved has its rows too (#2262).
     private var hasWork: Bool {
-        model.isDirty || model.liveDrift
+        model.isDirty || model.liveDrift || model.liveUnsaved
     }
 
     var body: some View {

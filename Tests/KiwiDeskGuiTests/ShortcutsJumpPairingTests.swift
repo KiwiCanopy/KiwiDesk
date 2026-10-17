@@ -28,12 +28,24 @@ struct ShortcutsJumpPairingTests {
         }
         return [
             (
+                "ShortcutsRowOrder.kiwiHubAtRest",
+                ShortcutsRowOrder.kiwiHubAtRest
+            ),
+            (
                 "ShortcutsRowOrder.focusAtRest",
                 ShortcutsRowOrder.focusAtRest
             ),
             (
+                "ShortcutsRowOrder.kiwiVisionAtRest",
+                ShortcutsRowOrder.kiwiVisionAtRest
+            ),
+            (
                 "ShortcutsRowOrder.moveWindowsAtRest",
                 ShortcutsRowOrder.moveWindowsAtRest
+            ),
+            (
+                "ShortcutsRowOrder.layoutAtRest",
+                ShortcutsRowOrder.layoutAtRest
             ),
             (
                 "ShortcutsRowOrder.sizeAndFloatAtRest",

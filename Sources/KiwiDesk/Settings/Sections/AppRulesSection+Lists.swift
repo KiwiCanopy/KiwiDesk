@@ -28,7 +28,8 @@ extension AppRulesSection {
                 role: .space,
                 name: $newSpaceApp,
                 exclude: Set(spaceApps),
-                onCommit: addWithSpace
+                onCommit: addWithSpace,
+                onScreenOf: model.core
             )
             .disabled(!gates.hasSpaces)
             noSpacesNote
@@ -104,7 +105,8 @@ extension AppRulesSection {
                 role: .float,
                 name: $newFloatingApp,
                 exclude: Set(floatApps),
-                onCommit: addFloating
+                onCommit: addFloating,
+                onScreenOf: model.core
             )
         }
     }
@@ -130,9 +132,10 @@ extension AppRulesSection {
     private func deleteFloat(_ app: String, _ removal: RuleRemoval) {
         let neighbour = DeletionFocus.neighbour(after: app, in: floatApps)
         model.recordRemoval(.float, app, removal)
-        model.config.floatRules.removeAll {
-            FloatFacet.appSegment(of: $0) == app
-        }
+        model.config.floatRules = FloatFacet.removingRules(
+            of: app,
+            from: model.config.floatRules
+        )
         // Or the deleted row is the one the composing slot keeps
         // listed, and the trash appears to do nothing.
         if composingTitles == app { composingTitles = nil }

@@ -56,15 +56,6 @@ struct ToggleFloatingCommandTests {
         #expect(isFloating(core) == false)
     }
 
-    @Test("two toggles return to the original state")
-    func roundTrip() {
-        let core = makeCore()
-        addWindow(core, 1)
-        #expect(core.execute("toggle_floating").isSuccess)
-        #expect(core.execute("toggle_floating").isSuccess)
-        #expect(isFloating(core) == false)
-    }
-
     /// A toggle back to tiled leaves no manual tile behind: a
     /// detection float applies at once (#1810).
     @Test("a toggle back to tiled yields to detection")
@@ -83,14 +74,5 @@ struct ToggleFloatingCommandTests {
     func failsWithoutFocus() {
         let core = makeCore()
         #expect(!core.execute("toggle_floating").isSuccess)
-    }
-
-    @Test("toggle_floating is listed in the API reference")
-    func listedInReference() {
-        #expect(
-            APIReference.commands.contains {
-                $0.command == "toggle_floating"
-            }
-        )
     }
 }

@@ -72,11 +72,10 @@ extension SettingsModel {
 
     /// Creates new profile with unique name capturing the live screen setup.
     func saveAsNewProfile(named name: String) {
-        let trimmed = name.trimmingCharacters(
-            in: .whitespaces
-        )
-        guard !trimmed.isEmpty else { return }
-        persist(named: core.profiles.freeName(base: trimmed))
+        guard let free = core.profiles.newProfileName(typed: name) else {
+            return
+        }
+        persist(named: free)
     }
 
     /// A Settings Save is a DRAFT COMMIT, and the two lines
@@ -121,9 +120,16 @@ extension SettingsModel {
         // A failed checklist write stops the Save, as the stored
         // door's does: the ticks stay staged with its warning.
         guard saveLookReach() else { return false }
+        // Only the draft's settings edits, over live as it is now
+        // (#2262).
+        var committing = config
+        committing.settings = config.settings.rebased(
+            from: cleanConfig.settings,
+            onto: core.tiler.settings
+        )
         core.withUserMotion {
             core.applyProfileScopedState(
-                from: config,
+                from: committing,
                 applyingModesFor: edited
             )
         }

@@ -42,9 +42,8 @@ public enum ConfigMigration {
         migratingProfileLookOwn,
         migratingRetiredAppBarContent,
         migratingDuplicateSpaceChords,
-        migratingAbsentSpaceSwitchGlass,
         migratingRetiredPullOrSpawn,
-        migratingSpaceChangeOn,
+        migratingRetiredPanelVerbs,
     ]
 
     /// The file shapes a config root can take.

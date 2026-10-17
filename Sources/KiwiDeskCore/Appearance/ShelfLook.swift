@@ -35,6 +35,17 @@ public struct ShelfLook: Sendable, Equatable, Codable {
 }
 
 extension ShelfLook {
+    /// This look without its motion (#2176): what the tour's paint
+    /// reaches, which never changes how fast things move.
+    public var stylingOnly: ShelfLook {
+        let styling = Set(LookKeys.styling)
+        return ShelfLook(
+            name: name,
+            style: style.filter { styling.contains($0.key) },
+            colors: colors
+        )
+    }
+
     /// A stored look made fit for use (#1752): styling keys outside
     /// `LookKeys` and colours outside `ColorPaletteKeys` dropped,
     /// then the colours completed over the shipped ones, so a

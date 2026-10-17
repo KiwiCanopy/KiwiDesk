@@ -7,6 +7,15 @@ struct SharedLookLedger {
     /// Whether the crossing is owed: a readable, GUI-managed
     /// `gui.json` that carries no look yet.
     var owed = false
+
+    /// Whether the motion crossing is owed (#2176): a shared look
+    /// missing a motion path — adopted before animations joined it,
+    /// or before a field was added. Derived from the look, so the
+    /// write that completes it is what ends it.
+    var motionOwed: Bool {
+        guard let base else { return false }
+        return LookKeys.motion.contains { base.style[$0] == nil }
+    }
 }
 
 /// The look every profile without its own wears (#1752) — the one
@@ -55,12 +64,66 @@ extension KiwiCore {
     /// Ends an owed crossing at the first apply of a STORED
     /// profile — `apply(profile:)`, or `applyStandard` saving one
     /// — a built-in lends nothing: its look becomes the shared one
-    /// (`crossWith`).
+    /// (`crossWith`); once one exists, the same apply of a follower
+    /// settles an owed motion crossing (`settleSharedMotion`).
     func adoptSharedLook(from profile: Profile) {
-        guard sharedLookLedger.owed, isGuiManaged,
-            profiles.list().contains(profile.name)
+        // Owed first: an apply runs on every Desktop swipe, and the
+        // two reads after it touch the disk (profiles.md, #1245).
+        guard sharedLookLedger.owed || sharedLookLedger.motionOwed,
+            isGuiManaged, profiles.list().contains(profile.name)
         else { return }
+        guard sharedLookLedger.owed else {
+            settleSharedMotion(electing: profile)
+            return
+        }
         crossWith(LookBody(of: profile.settings))
+    }
+
+    /// The motion crossing (#2176): the shared look takes, for each
+    /// motion path it lacks, the value of `source` — a stored
+    /// profile that FOLLOWS it, at its first apply or its first look
+    /// write — and every other follower that then runs different
+    /// animations keeps its own look, frozen as it ran, so no stored
+    /// profile's animations move. An own `source` elects nothing and
+    /// leaves the crossing owed; an own profile is never touched.
+    /// `gui.json` first; a failed write leaves it owed and every
+    /// profile as it was (`SharedLookMotionTests`).
+    func settleSharedMotion(electing source: Profile) {
+        guard sharedLookLedger.motionOwed, source.look == nil,
+            let before = sharedLook
+        else { return }
+        var base = before
+        base.style.merge(
+            LookKeys.extract(from: source.settings, paths: LookKeys.motion)
+        ) { kept, _ in kept }
+        let ledger = sharedLookLedger
+        sharedLookLedger.base = base
+        guard persistSharedLook() else {
+            sharedLookLedger = ledger
+            return
+        }
+        let motion = base.style.filter { LookKeys.motion.contains($0.key) }
+        // The source runs exactly the elected motion, so it is never
+        // frozen.
+        for name in profiles.list() {
+            guard var stored = try? profiles.read(name: name),
+                stored.look == nil
+            else { continue }
+            let ran = before.worn(over: stored.settings)
+            let ranMotion = LookKeys.extract(
+                from: ran,
+                paths: LookKeys.motion
+            )
+            guard ranMotion != motion else { continue }
+            stored.settings = ran
+            stored.look = .own
+            do {
+                try profiles.write(stored)
+            } catch {
+                onLog("shared look: \(name) not frozen: \(error)")
+            }
+        }
+        reresolveLiveLook()
     }
 
     /// The crossing's election: `base` becomes the shared look, and

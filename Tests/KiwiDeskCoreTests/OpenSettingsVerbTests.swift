@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The `KiwiDesk.open_settings()` UI-bridge verb (#678 item 18):
-/// the bindable "Open Settings" action, same shape as
-/// `show_shortcuts` — a Lua action raising a Core hook the GUI
+/// the bindable "Open Settings" action — a Lua action raising a
+/// Core hook the GUI
 /// wires to the Settings window. It carries no dispatcher
 /// response, so it lives in `luaOnly`, not
 /// `APIReference.commands`. Seeded on `⌃⌥,` since #1381
@@ -40,10 +40,5 @@ struct OpenSettingsVerbTests {
         // so dropping the registration still runs clean
         // (guard-prover, 2026-08-12).
         #expect(fired == 1)
-    }
-
-    @Test("Listed as a Lua-only verb so help() covers it")
-    func listedLuaOnly() {
-        #expect(APIReference.luaOnly.contains("open_settings"))
     }
 }

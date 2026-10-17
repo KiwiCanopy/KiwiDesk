@@ -185,18 +185,4 @@ struct DesktopShortcutOfferTests {
         .shortcuts(.moveToDesktop),
         .shortcuts(.moveToDesktopFollow),
     ]
-
-    /// Pins every input an expansion reasons from, so a moved
-    /// default reds as a default. Two Desktops against three
-    /// spaces, deliberately: see `instanceCounts`.
-    private func fixture() -> ShortcutsFamilyRows {
-        ShortcutsFamilyRows(
-            spaces: ["1", "2", "mail"],
-            icons: [:],
-            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
-            resizeStep: 42,
-            layerNames: [KeyLayer.defaultName],
-            currentLayer: KeyLayer.defaultName
-        )
-    }
 }

@@ -21,9 +21,9 @@ extension SettingsModel {
         guard let reach = encodedReach else { return nil }
         return reading(
             reach.floatRules,
-            app.lowercased(),
+            FloatRules.appKey(app),
             reach.unreadable,
-            picked: reachEdits.reach[.float]?[app.lowercased()],
+            picked: reachEdits.reach[.float]?[FloatRules.appKey(app)],
             describe
         )
     }
@@ -192,6 +192,7 @@ extension SettingsModel {
         case .key: keyReach(app)
         case .scroll: scrollReach(app)
         case .history: historyReach()
+        case .cycle: cycleReach()
         case .tile: tileReach(app)
         case .autoFloat: autoFloatReach()
         }
@@ -301,6 +302,13 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.spaceHistory,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .cycle:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.modeCycle,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )

@@ -24,8 +24,8 @@ enum CommandTarget {
 
 extension KiwiCore {
     /// Whether a call acts on the implicit focused window: a
-    /// focused verb naming no window. The #292 preflight and the
-    /// #1391 owed-focus landing both ask this.
+    /// focused verb naming no window. The #292 preflight asks
+    /// this.
     func impliesFocus(_ command: String, _ args: [JSONValue]) -> Bool {
         FocusedCommandPolicy.isFocused(command)
             && !namesWindow(command, args)

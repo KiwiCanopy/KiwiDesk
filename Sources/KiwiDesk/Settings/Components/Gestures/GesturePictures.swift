@@ -117,6 +117,34 @@ enum GesturePicture {
         }
     }
 
+    /// The pointer travels onto the other window and rests; only
+    /// then does the focus follow it there (#1869).
+    struct HoverFocus: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
+        @Environment(\.schematicPalette) private var palette
+
+        var body: some View {
+            let ink = GestureInk(palette: palette)
+            let travel = gestureEase(gestureStage(t, 0.1, 0.45))
+            let focus = gestureStage(t, 0.7, 0.85)
+            let left = CGRect(x: 8, y: 10, width: 50, height: 52)
+            let right = CGRect(x: 62, y: 10, width: 50, height: 52)
+            ZStack(alignment: .topLeading) {
+                ink.window(left)
+                ink.window(right)
+                ink.target(left).opacity(1 - focus)
+                ink.target(right).opacity(focus)
+                ink.pointer(
+                    at: CGPoint(x: gestureLerp(30, 86, travel), y: 34)
+                )
+            }
+        }
+    }
+
     /// Scroll over the shelf: the run slides past its edge.
     struct ShelfScroll: View, Animatable {
         var t: CGFloat

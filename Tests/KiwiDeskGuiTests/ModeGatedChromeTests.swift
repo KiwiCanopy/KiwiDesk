@@ -154,6 +154,9 @@ struct ModeGatedChromeTests {
         // does.
         "AppRuleTitleOffer.swift":
             "per-row control offer; the card stays Simple",
+        // A lens's titled menu, #1022's offer (#2103 ruling 51).
+        "KiwiVisionLensAppsCard.swift":
+            "per-row control offer; the card stays Simple",
         // The reveal pipeline's promotion CHECK (did
         // ensureModeAdmits flip?) — announces the search
         // notice; it offers nothing and draws no chrome.

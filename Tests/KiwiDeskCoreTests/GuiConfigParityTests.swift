@@ -6,12 +6,13 @@ import Testing
 /// The GuiConfig global field list is hand-mirrored in four
 /// places — manual `CodingKeys`/decode/encode, the GUI's
 /// `globalsChanged` comparison, `guiConfigSeed`, and
-/// `applyStructuredRules` — past the AGENTS.md §5 two-mirror
-/// threshold. Swift reflection cannot inspect those code paths,
-/// so the net has two layers: a field-list tripwire (adding a
-/// stored property fails here until every mirror site is
-/// visited) and a rebuilt-from-JSON round-trip over every
-/// sidecar global (a forgotten encode/decode line fails there).
+/// `applyBehaviorOverrides` / `applyStructuredRules` — past the
+/// AGENTS.md §5 two-mirror threshold. Swift reflection cannot
+/// inspect those code paths, so the net has two layers: a
+/// field-list tripwire (adding a stored property fails here
+/// until every mirror site is visited) and a rebuilt-from-JSON
+/// round-trip over every sidecar global (a forgotten
+/// encode/decode line fails there).
 @Suite("GuiConfig mirror parity")
 struct GuiConfigParityTests {
     @Test("Field-list tripwire: visit every mirror site")
@@ -24,7 +25,8 @@ struct GuiConfigParityTests {
         // (#36), then update: CodingKeys + decode + encode
         // (GuiConfig.swift, globals only), `globalsChanged`
         // (SettingsModel+Profiles), `guiConfigSeed`,
-        // `applyStructuredRules` / `applyProfileScopedState`,
+        // `applyBehaviorOverrides` / `applyStructuredRules` /
+        // `applyProfileScopedState`,
         // the round-trip below — and only then this list.
         //
         // `desktopSpaces` (#1230) deliberately skips ONE of
@@ -44,7 +46,9 @@ struct GuiConfigParityTests {
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
                 "scrollGesture", "appWide", "look", "spaceHistory",
+                "modeCycle",
                 "floatAutomatically", "tileRules",
+                "desktopShortcutBase",
             ]
         )
     }
@@ -84,8 +88,10 @@ struct GuiConfigParityTests {
             stepDistance: 120
         )
         config.spaceHistory = .allScreens
+        config.modeCycle = [.grid, .monocle]
         config.floatAutomatically = false
         config.tileRules = ["com.valvesoftware.steam"]
+        config.desktopShortcutBase = .hyper
         config.layers = [
             KeyLayer(
                 name: "default",
@@ -115,8 +121,10 @@ struct GuiConfigParityTests {
         #expect(back.look == config.look)
         #expect(back.scrollGesture == config.scrollGesture)
         #expect(back.spaceHistory == config.spaceHistory)
+        #expect(back.modeCycle == config.modeCycle)
         #expect(back.floatAutomatically == config.floatAutomatically)
         #expect(back.tileRules == config.tileRules)
+        #expect(back.desktopShortcutBase == config.desktopShortcutBase)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.
         #expect(back.settings == TilingSettings())

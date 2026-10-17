@@ -67,13 +67,15 @@ extension KiwiCore {
     /// evidence for a hung app is a duration, so every boot
     /// leaves one on record.
     public func start() {
+        boot.begin()
+        guard boot.admitsStart() else { return }
         let signposter = BootSignpost.signposter
-        boot.reachedReady = false
-        // A restore belongs to the boot that armed it (#2133).
-        boot.publishRestore(.none)
         boot.interval = signposter.beginInterval("boot")
         boot.began = ContinuousClock.now
         armMachineSeams()
+        // A switch a crash left unpaid (#2103 ruling 7), before a
+        // config can turn KiwiVision on again.
+        retargetVisionAppearance(nil)
         let config = signposter.beginInterval("loadConfig")
         loadConfig()
         signposter.endInterval("loadConfig", config)
@@ -81,6 +83,7 @@ extension KiwiCore {
         sleepWake.start()
         wireReduceTransparency()
         wireFontSet()
+        applyHyperKey()
         // One retile for the whole scan instead of one per
         // discovered window (#672): windows fold into state as
         // the events arrive, geometry lands once in the tail.

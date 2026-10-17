@@ -25,7 +25,6 @@ extension KeybindingCatalog {
         makeSticky,
         makeDisplaySticky,
         makeUnsticky,
-        showShortcuts,
         openSettings,
     ]
 

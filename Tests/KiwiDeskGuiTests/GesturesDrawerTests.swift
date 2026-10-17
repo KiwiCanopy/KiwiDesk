@@ -82,45 +82,72 @@ struct GesturesDrawerTests {
         #expect(!GestureSurface.shelf.isOff(settings))
     }
 
-    /// Each entry names the surface it teaches, located by its own
-    /// text key: swapping two entries' surfaces reds here.
-    @Test(
-        "each entry greys on its own surface",
-        arguments: [
-            ("shortcuts.gestures.swap", "windows"),
-            ("shortcuts.gestures.edge", "windows"),
-            ("shortcuts.gestures.follow_focus", "windows"),
-            ("shortcuts.gestures.drop_on_space", "spaceBar"),
-            ("shortcuts.gestures.glyph_click", "spaceBar"),
-            ("shortcuts.gestures.glyph_peek", "spaceBar"),
-            ("shortcuts.gestures.shelf_scroll", "shelf"),
-            ("shortcuts.gestures.context_menu", "shelf"),
-            ("shortcuts.gestures.app_bar", "appBar"),
-            ("shortcuts.gestures.app_bar_hover", "appBar"),
+    /// Each gesture names the surface it teaches: swapping two
+    /// items' surfaces reds here. The entries take theirs from the
+    /// item (`GestureEntry+Item`), so this is the one copy.
+    @Test("each gesture greys on its own surface")
+    func itemNamesItsSurface() {
+        let expected: [GestureItem: GestureSurface] = [
+            .scrollStep: .windows, .spaceStep: .windows,
+            .hoverFocus: .windows, .followFocus: .windows,
+            .swap: .windows, .edge: .windows,
+            .dropOnSpace: .spaceBar, .spring: .spaceBar,
+            .glyphClick: .spaceBar, .glyphPeek: .spaceBar,
+            .shelfScroll: .shelf, .contextMenu: .shelf,
+            .appBarReorder: .appBar, .appBarHover: .appBar,
         ]
-    )
-    func entryNamesItsSurface(key: String, surface: String) throws {
-        var all = ""
-        for file in ["GesturesDrawer.swift", "GesturesShelfEntries.swift"] {
-            all += Self.squash(try Self.source(Self.gestures + file))
+        #expect(Set(expected.keys) == Set(GestureItem.allCases))
+        for item in GestureItem.allCases {
+            #expect(item.surface == expected[item], "\(item)")
         }
-        let start = try #require(all.range(of: "\"\(key)\""))
-        let rest = all[start.upperBound...]
-        let call =
-            rest.range(of: "GestureEntry(").map {
-                rest[..<$0.lowerBound]
-            } ?? rest
-        #expect(call.contains("surface:.\(surface),"))
     }
 
-    /// The spring text is interpolated, so it is located by its
-    /// argument rather than its key.
-    @Test("the spring entry greys on the Space Bar")
-    func springNamesItsSurface() throws {
-        let body = Self.squash(
-            try Self.source(Self.gestures + "GesturesShelfEntries.swift")
+    /// Every entry is built from its item and anchored so a strip
+    /// click lands on it, and the card draws the items in their
+    /// declared order — the strip's order IS the card's.
+    @Test("the entries are the items, in order, each anchored")
+    func entriesAreTheItems() throws {
+        var all = ""
+        for file in [
+            "GesturesScrollEntries.swift", "GesturesDrawer.swift",
+            "GesturesShelfEntries.swift",
+        ] {
+            all += Self.squash(try Self.source(Self.gestures + file))
+        }
+        var at: [GestureItem: String.Index] = [:]
+        for item in GestureItem.allCases {
+            let entry = try #require(
+                all.range(of: "GestureEntry(.\(item.rawValue),"),
+                "\(item) has no entry"
+            )
+            at[item] = entry.lowerBound
+            let next =
+                all.range(
+                    of: "GestureEntry(",
+                    range: entry.upperBound..<all.endIndex
+                )?.lowerBound ?? all.endIndex
+            #expect(
+                all[entry.upperBound..<next].contains(
+                    ".gestureAnchored(.\(item.rawValue))"
+                ),
+                "\(item) is not anchored"
+            )
+        }
+        #expect(all.components(separatedBy: "GestureEntry(").count == 15)
+        // Within a group, the items' order; across groups, the
+        // drawer body's.
+        let items = GestureItem.allCases
+        for (a, b) in zip(items, items.dropFirst()) where a.group == b.group {
+            #expect(try #require(at[a]) < (try #require(at[b])), "\(a) \(b)")
+        }
+        let drawer = Self.squash(
+            try Self.source(Self.gestures + "GesturesDrawer.swift")
         )
-        #expect(body.contains("springText,surface:.spaceBar,"))
+        let order = [
+            "GesturesScrollEntries(", "focusEntries", "windowEntries",
+            "GesturesShelfEntries(",
+        ].compactMap { drawer.range(of: $0)?.lowerBound }
+        #expect(order.count == 4 && order == order.sorted())
     }
 
     /// A reason is readable while what it explains is dimmed: the

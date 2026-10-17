@@ -62,7 +62,8 @@ extension SettingsFooter {
     private var unsavedPopover: some View {
         ScrollView {
             SettingsDiffRowsView(
-                rows: SettingsDiffRowSource.rows(for: model)
+                rows: SettingsDiffRowSource.rows(for: model),
+                keep: liveKeep
             ) { row in
                 unsavedPopoverShown = false
                 guard
@@ -135,6 +136,18 @@ extension SettingsFooter {
             "Unsaved changes to %1$@",
             target
         )
+    }
+
+    /// The live rows' Keep, on the live target alone (#2368).
+    private var liveKeep: LiveKeep? {
+        guard model.target == .live, let profile = model.activeProfile
+        else { return nil }
+        return LiveKeep(
+            profile: profile,
+            refusals: model.liveKeepRefusals
+        ) { [model] ids in
+            model.keepLive(ids)
+        }
     }
 
     private var editTargetName: String? {

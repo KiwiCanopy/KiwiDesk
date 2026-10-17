@@ -16,11 +16,15 @@ extension SettingsValueReadout {
         case .focusDir, .spaceStep, .spaceHistoryStep, .goToSpace, .swapDir,
             .moveWindowToTrack, .swapWithTrack, .moveToSpace,
             .moveToSpaceFollow, .focusDesktop, .moveToDesktop,
-            .moveToDesktopFollow, .growWidth, .shrinkWidth,
-            .growHeight, .shrinkHeight, .toggleFloating,
+            .moveToDesktopFollow, .layoutCycle, .viewPicker, .jumpToWindow,
+            .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
+            .toggleFloating, .toggleKiwiVision, .toggleLens,
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,
             .advanced, .`import`, .restoreDefaults:
+            return []
+        // App-wide, written at once, never in the draft (#1741).
+        case .modeCue, .hyperKey:
             return []
         // A layer's profiles are no config field: the checklist's own
         // rows carry them (`layerDiffRows`, #2022).
@@ -29,6 +33,15 @@ extension SettingsValueReadout {
         case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
             .scrollNaturalTrackpad, .scrollNaturalMouse, .scrollSpaceStep:
             return scrollGestureRows(key, old: old, new: new)
+        case .desktopShortcutBase:
+            return [
+                .change(
+                    census,
+                    label: HyperMoveWords.baseTitle,
+                    old: HyperMoveWords.modifiers(old.desktopShortcutBase),
+                    new: HyperMoveWords.modifiers(new.desktopShortcutBase)
+                )
+            ]
         case .spaceHistory:
             return [
                 .change(
@@ -36,6 +49,15 @@ extension SettingsValueReadout {
                     label: SpaceHistoryWords.title,
                     old: SpaceHistoryWords.value(old.spaceHistory),
                     new: SpaceHistoryWords.value(new.spaceHistory)
+                )
+            ]
+        case .modeCycle:
+            return [
+                .change(
+                    census,
+                    label: LayoutCycleWords.title,
+                    old: LayoutCycleWords.readout(old.modeCycle),
+                    new: LayoutCycleWords.readout(new.modeCycle)
                 )
             ]
         }

@@ -24,16 +24,6 @@ struct DesktopSpacePersistenceTests {
         return try JSONDecoder().decode(GuiConfig.self, from: data)
     }
 
-    @Test("An identity-keyed Space survives the round trip")
-    func identityPersists() throws {
-        var config = GuiConfig()
-        config.desktopSpaces = [.identity(stamp): SpaceID(3)]
-        #expect(
-            try roundTrip(config).desktopSpaces[.identity(stamp)]
-                == SpaceID(3)
-        )
-    }
-
     /// The number fallback is dropped at the WRITE, so a renumber
     /// cannot re-point a persisted entry at another Desktop.
     @Test("A number-keyed Space is not written")

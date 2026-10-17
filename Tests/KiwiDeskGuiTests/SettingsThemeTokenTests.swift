@@ -87,6 +87,14 @@ struct SettingsThemeTokenTests {
             0xEA_F3_EE,
             SettingsTheme.plateInk
         ),
+        // KiwiVision's veil (#2103): black in both modes, since
+        // the plate it pictures always dims with black.
+        Pin(
+            "visionVeil",
+            0x00_00_00,
+            0x00_00_00,
+            SettingsTheme.visionVeil
+        ),
         // The keyboard board's own two tokens (#678 pass 5).
         // Fixed in both modes for `previewPlate`'s reason — the
         // board is a picture of a keyboard on that same dark
@@ -148,6 +156,12 @@ struct SettingsThemeTokenTests {
             0x12_25_1A,
             0x12_25_1A,
             SettingsTheme.accentInk
+        ),
+        Pin(
+            "accentInkSecondary",
+            0x2B_41_26,
+            0x2B_41_26,
+            SettingsTheme.accentInkSecondary
         ),
         Pin(
             "accentPressed",

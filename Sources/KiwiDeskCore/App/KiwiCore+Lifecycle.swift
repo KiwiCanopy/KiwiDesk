@@ -205,10 +205,15 @@ extension KiwiCore {
         // Retire focus rings first: the gather below moves windows
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.
+        windowServer.stop()  // first: the ring's clear sends nothing
         borders.stop()
         stickyMarks.clear()
+        endVisionHold(restack: false)  // its pill has no timer
+        vision.clear()
+        retargetVisionAppearance(nil)  // a quit puts it back
         retireReduceTransparency()
         retireFontSet()
+        retireHyperKey()
         payOwedShortcutDrops()  // nothing carries the debt (#1827)
         // Captured BEFORE the gather moves anything: each float's
         // record is the frame the next launch gives back (#1864,

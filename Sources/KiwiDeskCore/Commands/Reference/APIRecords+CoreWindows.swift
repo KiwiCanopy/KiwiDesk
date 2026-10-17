@@ -159,10 +159,30 @@ extension APIReference {
                 + "identifier.",
             .text("bundle_id")
         ),
+        "cycle_mode": APIRecord(
+            "Moves the focused Space to the next layout in the cycle "
+                + "list, or the previous one.",
+            .choice(
+                "direction",
+                ModeCycleDirection.self,
+                optional: true
+            )
+        ),
+        "set_mode_cycle": APIRecord(
+            "Sets the cycle_mode layouts in order, each once: a "
+                + "table, or one per argument.",
+            .choice("layouts", LayoutMode.self)
+        ),
         "gather": APIRecord(
             "Moves every window of an app into the Space you are "
                 + "on, from other Desktops too.",
             .text("bundle_id")
+        ),
+        "move_here": APIRecord(
+            "Moves an app's most recently focused window into the "
+                + "Space you are on, or opens the app.",
+            .text("bundle_id"),
+            .text("title", optional: true)
         ),
         "set_mode": APIRecord(
             "Sets a Space's layout mode; omit the Space to set "

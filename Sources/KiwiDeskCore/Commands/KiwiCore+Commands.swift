@@ -83,13 +83,19 @@ extension KiwiCore {
             // same policy as its sibling `move_to_track`.
             return trackSwap(args)
         case "focus_or_spawn":
-            return launch(args, newInstance: false)
+            return namingBundleID(launch(args, newInstance: false), args)
         case "spawn_new":
-            return launch(args, newInstance: true)
+            return namingBundleID(launch(args, newInstance: true), args)
         case "gather":
-            return gather(args)
+            return namingBundleID(gather(args), args)
+        case "move_here":
+            return namingBundleID(moveHereCommand(args), args)
         case "set_mode":
             return setMode(args)
+        case "cycle_mode":
+            return cycleMode(args)
+        case "set_mode_cycle":
+            return setModeCycle(args)
         case "set_gap_global", "set_gap_override":
             return setGaps(command, args)
         case "set_min_window_size":
@@ -106,19 +112,18 @@ extension KiwiCore {
             return setRefusalSound(args)
         case "set_desktop_cue":
             return setDesktopCue(args)
+        case "set_hyper_key":
+            return setHyperKey(args)
+        case "set_mode_cue":
+            return setModeCue(args)
+        case "set_space_cue":
+            return setSpaceCue(args)
         case "set_space_history":
             return setSpaceHistory(args)
         case "set_float_automatically":
             return setFloatAutomatically(args)
         case "set_shortcut_panel_liquid_glass":
             return setShortcutPanelLiquidGlass(args)
-        case "set_space_switch_liquid_glass":
-            // Read at the next switch's press, so no retile.
-            guard let on = args.first?.boolValue else {
-                return .fail("expected a boolean")
-            }
-            tiler.settings.spaceSwitchLiquidGlass = on
-            return .ok()
         case "help", "list_commands":
             // With a name, one record; without, the whole
             // surface grouped (#1033). The argument used to be
@@ -138,6 +143,10 @@ extension KiwiCore {
             )
         case "get_state":
             return .ok(stateJSON())
+        case "explain_window":
+            return explainWindow(args)
+        case "explain_app":
+            return explainApp(args)
         case "get_work_counters":
             return .ok(
                 tiler.meter.report(
@@ -168,6 +177,8 @@ extension KiwiCore {
             "delete_profile", "set_default_profile",
             "list_profiles", "get_profile_status":
             return profileCommand(command, args)
+        case Self.keepSettingsCommand:
+            return keepSettings(args)
         case "bind_profile_to_desktop":
             return bindProfileToDesktop(args)
         case let quit where quit.hasPrefix("quit."):
@@ -177,6 +188,23 @@ extension KiwiCore {
             // live retile would be a pure no-op. Same policy
             // as `track.swap` above.
             return quitCommand(command, args)
+        case let hub where hub.hasPrefix("kiwihub."):
+            // No window moves: the GUI shows a panel (#2265).
+            return kiwiHubCommand(command, args)
+        case let vision where vision.hasPrefix("kiwivision."):
+            // No window moves: the plates re-draw, nothing else.
+            return visionCommand(command, args)
+        case let key where key.hasPrefix("shortcut."):
+            // The hotkeys re-register; no window moves.
+            return shortcutCommand(command, args)
+        case let rule where rule.hasPrefix("app_rule."):
+            // A rule changes where the NEXT window goes; a float
+            // rule re-checks open windows, whose events retile.
+            return appRuleCommand(command, args)
+        case let look where look.hasPrefix("look."):
+            // Its own retile where a look is worn; the rest move
+            // nothing (#1685).
+            return lookCommand(command, args)
         case let gesture where gesture.hasPrefix("scroll_gesture."):
             // No window moves: the tap's chords change, nothing
             // else, so no retile trailer (#1656).
@@ -232,7 +260,7 @@ extension KiwiCore {
 
     // MARK: - Modes and gaps
 
-    private func setMode(
+    func setMode(
         _ args: [JSONValue]
     ) -> CommandResponse {
         let spaceID: SpaceID?

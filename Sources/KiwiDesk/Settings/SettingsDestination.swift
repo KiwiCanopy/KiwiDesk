@@ -15,6 +15,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case profiles
     case shortcuts
     case appRules
+    case kiwiVision
+    case ai
     case general
     case macChecklist
 
@@ -35,7 +37,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// lists KiwiDesk's own rows before macOS's (#1365) — Home
     /// orders its cards separately (`HomeCardOrder`).
     static let wholeApp: [SettingsDestination] = [
-        .profiles, .shortcuts, .appRules, .general, .macChecklist,
+        .profiles, .shortcuts, .appRules, .kiwiVision, .ai,
+        .general, .macChecklist,
     ]
 
     @MainActor var title: String {
@@ -61,6 +64,9 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             return L("destination.shortcuts", "Shortcuts & Gestures")
         case .appRules:
             return L("destination.app_rules", "App Rules")
+        case .kiwiVision:
+            return L("destination.kiwivision", "KiwiVision")
+        case .ai: return L("destination.ai", "AI")
         case .general: return L("destination.general", "General")
         case .macChecklist:
             return L("destination.mac_checklist", "Mac Checklist")
@@ -80,9 +86,35 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .profiles: return "square.stack.3d.up"
         case .shortcuts: return "keyboard"
         case .appRules: return "app.badge.checkmark"
+        case .kiwiVision: return "binoculars"
+        case .ai: return "brain.head.profile"
         case .general: return "gearshape"
         case .macChecklist: return "checklist"
         }
+    }
+
+    /// What a tile is filled with: its tint, save KiwiVision's
+    /// Aurora gradient — teal into violet into pink, the haze as
+    /// colour, the one gradient tile (owner, #2103).
+    var tileFill: AnyShapeStyle {
+        guard self == .kiwiVision else { return AnyShapeStyle(tint) }
+        return AnyShapeStyle(
+            LinearGradient(
+                stops: [
+                    .init(color: tint, location: 0),
+                    .init(
+                        color: Color(red: 0.49, green: 0.36, blue: 0.90),
+                        location: 0.55
+                    ),
+                    .init(
+                        color: Color(red: 0.88, green: 0.33, blue: 0.61),
+                        location: 1
+                    ),
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
     }
 
     /// Tile tint color for navigation item (§6.1, `SettingsThemeTokenTests`).
@@ -110,14 +142,17 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
                 blue: 0.38
             )
         case .appRules: return .red
+        case .kiwiVision:
+            return Color(red: 0.19, green: 0.69, blue: 0.78)
+        case .ai: return .orange
         case .general: return .gray
         case .macChecklist: return .cyan
         }
     }
 
     /// Whether destination is visible when editing a stored
-    /// profile (#18): General and the Mac Checklist are global
-    /// surfaces a profile edit never writes. App Rules joined
+    /// profile (#18): General, the Mac Checklist and AI are
+    /// global surfaces a profile edit never writes. App Rules joined
     /// when its Space facet grew a per-profile override (#109) —
     /// the Float facet stays global and renders disabled there.
     var visibleWhileEditingStoredProfile: Bool {
@@ -129,9 +164,9 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         !Self.profileless.contains(self)
     }
 
-    /// Destinations no profile owns (#18, #1365).
+    /// Destinations no profile owns (#18, #1365, #1685).
     private static let profileless: Set<SettingsDestination> = [
-        .general, .macChecklist,
+        .kiwiVision, .ai, .general, .macChecklist,
     ]
 
     /// Reachability predicate for profile editing mode (#18).

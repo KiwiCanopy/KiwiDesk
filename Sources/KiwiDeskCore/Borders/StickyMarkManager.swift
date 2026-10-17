@@ -65,8 +65,8 @@ public final class StickyMarkManager {
     private(set) var overlays: [WindowID: StickyMarkOverlay] =
         [:]
 
-    /// Whether WindowServer stream tracks window
-    /// (`BorderManager.markUsesWindowServerTracking`).
+    /// Whether the WindowServer stream delivers the window's
+    /// events to the mark (`WindowServerWatch.hears`, #2275).
     public var isWindowServerTracked: @MainActor (WindowID) -> Bool = { _ in
         false
     }
@@ -152,8 +152,8 @@ public final class StickyMarkManager {
         overlays[id]?.update(frame: frame)
     }
 
-    /// Direct un-guarded reposition from reconciled bounds
-    /// (`onFrameReconciled`).
+    /// Direct un-guarded reposition from WindowServer bounds (the
+    /// watch's frame phase).
     public func reposition(_ id: WindowID, windowFrame: CGRect) {
         overlays[id]?.update(frame: windowFrame)
     }
@@ -164,7 +164,7 @@ public final class StickyMarkManager {
     }
 
     /// Re-orders mark above window following z-order changes
-    /// (`onWindowReordered`, #414).
+    /// (the watch's restack phase, #414).
     public func reassert(_ id: WindowID) {
         overlays[id]?.order()
     }

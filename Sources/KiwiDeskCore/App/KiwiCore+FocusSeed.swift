@@ -74,14 +74,13 @@ extension KiwiCore {
         guard
             let pid = frontmostPIDProvider?(),
             let app = eventLoop.processIdentity.appAt(pid),
-            !FloatDetection.hasVisibleIgnoredPanel(
+            !eventLoop.showsIgnoredPanel(
                 pid: pid,
                 bundleID: app.ref.bundleID,
                 isAccessory: EventLoop.classifiesAsOverlay(
                     pid: pid,
                     activationPolicy: app.activationPolicy
-                ),
-                tracked: eventLoop.admittedWindows(of: pid)
+                )
             )
         else { return nil }
         return eventLoop.focusedWindowID(pid: pid)

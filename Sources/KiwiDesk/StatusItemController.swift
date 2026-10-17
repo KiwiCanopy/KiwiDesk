@@ -7,12 +7,16 @@ import SwiftUI
 @MainActor
 final class StatusItemController: NSObject, NSMenuDelegate {
     var onOpenDashboard: () -> Void = {}
-    /// Opens the read-only shortcuts reference panel (#326).
-    var onShowShortcuts: () -> Void = {}
+    /// The quick menu opened and closed — Core's #1532 reveal return
+    /// waits while it is open (#2224).
+    var onMenuOpen: () -> Void = {}
+    var onMenuClose: () -> Void = {}
+    /// Opens KiwiHub on its View side (#2309 ruling 8).
+    var onOpenKiwiHub: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
-    /// The combo bound to open the shortcuts panel (#330), read
-    /// fresh on each menu open so AppKit renders the live binding.
-    var shortcutsComboProvider: () -> KeyCombo? = { nil }
+    /// The combo bound to open the View side, read fresh on each
+    /// menu open so AppKit renders the live binding.
+    var kiwiHubComboProvider: () -> KeyCombo? = { nil }
     /// The combo bound to Open Settings (#1381), read the same way;
     /// nil keeps the app menu's `⌘,`.
     var settingsComboProvider: () -> KeyCombo? = { nil }
@@ -49,20 +53,6 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     var onShowAccessibilityHelp: () -> Void = {}
     /// The Start Tiling row's action (#2050).
     var onStartTiling: () -> Void = {}
-    var onLoadProfile: (String) -> Void = { _ in }
-    /// Saved profiles, pulled fresh each menu open; broken entries
-    /// stay listed but disabled — greyed, not hidden (#246, #171).
-    var profilesProvider:
-        () -> (
-            active: String?, all: [String], broken: Set<String>
-        ) = { (nil, [], []) }
-    /// What the Layout submenu draws from, fresh per open (#752).
-    var layoutInfoProvider: () -> LayoutMenuInfo = {
-        LayoutMenuInfo.empty
-    }
-    var onSetLayoutMode: (LayoutMode, SpaceID?) -> Void = { _, _ in
-    }
-    var onSaveLayoutToProfile: () -> Void = {}
 
     /// Injected menu-bar slot so tests never register a real
     /// system item (`StatusItemHandle`, the #565-class seam).

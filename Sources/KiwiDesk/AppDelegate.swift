@@ -25,7 +25,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let bootNarration = BootNarration()
     /// The slow-boot notice (#1715).
     let bootNotice = BootNoticeController()
-    let desktopCuePlate = DesktopCueController()
+    /// The switch cues' one plate (#2142, #2144).
+    let cuePlate = CuePlateController()
     /// Cached dashboard controller to avoid constructing on refresh.
     private(set) var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
@@ -47,10 +48,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         return created
     }
     private let configIssues = ConfigIssuesWindowController()
-    /// The read-only shortcuts reference panel (#326), retained so
-    /// it survives close/reopen. Its "Edit in Settings…" bridge
-    /// opens the dashboard already navigated to Shortcuts.
-    var shortcutsPanel: ShortcutsPanelController?
+    /// The key panel: the window switcher, the shortcuts sheet
+    /// (#326, #2246) and the view picker, retained so it
+    /// survives close and reopen.
+    var jumpPanel: JumpPanelController?
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
@@ -92,70 +93,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }
-        // The quick menu's dynamic entries (#68 §3.10).
-        statusItem.profilesProvider = { [weak self] in
-            (
-                active: self?.core.profiles.currentName,
-                all: self?.core.profiles.list() ?? [],
-                broken: Set(
-                    self?.core.profiles.brokenProfiles()
-                        .map(\.name) ?? []
-                )
-            )
+        statusItem.onMenuOpen = { [weak self] in
+            self?.core.statusMenuDidOpen()
         }
-        statusItem.onLoadProfile = { [weak self] name in
-            self?.core.withUserMotion {
-                _ = self?.core.execute(
-                    "load_profile",
-                    args: [.string(name)]
-                )
-            }
-        }
-        statusItem.layoutInfoProvider = { [weak self] in
-            guard let self else { return LayoutMenuInfo.empty }
-            return LayoutMenuInfo.current(from: self.core)
-        }
-        statusItem.onSetLayoutMode = { [weak self] mode, space in
-            let args: [JSONValue] =
-                space.map { [.string($0.raw), .string(mode.rawValue)] }
-                ?? [.string(mode.rawValue)]
-            self?.core.withUserMotion {
-                _ = self?.core.execute("set_mode", args: args)
-            }
-            // Nothing to tell Settings: a quick-menu switch is
-            // session-only, and since #1179 the draft narrates
-            // the PROFILE rather than the session.
-        }
-        statusItem.onSaveLayoutToProfile = { [weak self] in
-            self?.keepLayoutInProfile()
-        }
-        let shortcutsPanel = ShortcutsPanelController(
-            core: core
-        ) { [weak self] in
-            self?.openSettingsFromTour(at: .shortcuts)
-        }
-        self.shortcutsPanel = shortcutsPanel
-        statusItem.onShowShortcuts = { [weak shortcutsPanel] in
-            shortcutsPanel?.toggle()
-        }
-        // Hotkey toggles the shortcuts reference panel (#330).
-        core.uiBridge.onShowShortcuts = { [weak shortcutsPanel] in
-            shortcutsPanel?.toggle()
+        statusItem.onMenuClose = { [weak self] in
+            self?.core.statusMenuDidClose()
         }
         // Every forceFront is an own front Core honors (#1861).
         NSApplication.ownFrontNote = { [weak core] number in
             core?.noteOwnFront(number: number)
         }
+        // Hotkey toggles the window switcher (#1875).
+        let jumpPanel = JumpPanelController(core: core)
+        self.jumpPanel = jumpPanel
+        // The Shortcuts side's bridge lands Settings on Shortcuts.
+        jumpPanel.onEditShortcuts = { [weak self] in
+            self?.openSettingsFromTour(at: .shortcuts)
+        }
+        statusItem.onOpenKiwiHub = { [weak jumpPanel] in
+            jumpPanel?.toggle(.view)
+        }
+        jumpPanel.hold = { [weak self] in self?.coreHold ?? .running }
+        // ⌃⌥J/K/L open KiwiHub on a side (#2246, #2265).
+        core.uiBridge.onKiwihubShow = { [weak jumpPanel] side in
+            jumpPanel?.toggle(side)
+        }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in
             self?.dashboard.show()
         }
+        // Hover focus fronts the own window its command focused
+        // (#1869, #1281): AppKit's half, no Settings reload.
+        core.mouse.rest.frontOwnWindow = { number in
+            guard let window = EventLoop.ownWindow(number: number)
+            else { return }
+            NSApp.forceFront(window)
+        }
         // Reads bound open-combo live for quick menu.
-        statusItem.shortcutsComboProvider = { [weak self] in
+        statusItem.kiwiHubComboProvider = { [weak self] in
             guard let self else { return nil }
             return ShortcutsOpenBinding.combo(
                 core: self.core,
-                lua: ShortcutsOpenBinding.lua
+                lua: KiwiHubSide.view.lua
             )
         }
         statusItem.settingsComboProvider = { [weak self] in
@@ -191,7 +170,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         self.statusItem = statusItem
         wireBootNotice()
-        wireDesktopCue()
+        wireCuePlate()
+        wireKiwiVision()
 
         // The error surface (#68 §3.7): the badge and the
         // standalone panel track the last config load.
@@ -225,6 +205,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onShortcutsAdded = { [weak self] rows in
             self?.dashboardIfCreated?.adoptShortcutAdd(rows)
         }
+        core.onLookLibraryChanged = { [weak self] in
+            self?.dashboardIfCreated?.refreshLooks()
+        }
+        core.onRulesKept = { [weak self] in
+            self?.dashboardIfCreated?.adoptRuleKeep()
+        }
         wireBarMenus()
         wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in
@@ -232,12 +218,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.configIssues.model.issues = issues
         }
 
-        // Close a stale shortcuts panel on layer change (#603) —
+        // Re-read a shown shortcuts sheet on layer change (#603) —
         // read off the `layer_change` event like any other
         // consumer (#1168), so Core keeps one seam.
         core.bus.addSink { [weak self] event, _ in
             guard event == .layerChange else { return }
-            self?.shortcutsPanel?.closeIfOpen()
+            self?.jumpPanel?.reloadShortcutsIfShown()
         }
         // The menu bar's layer icon and, while the Space Bar is
         // off, the active Space (#1413) — off the bar's own

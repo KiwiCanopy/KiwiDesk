@@ -115,6 +115,13 @@ enum GlassTint {
         return NSAppearance(named: .darkAqua)
     }
 
+    /// Pins `glass` dark where there is no Fill to decide it:
+    /// KiwiVision's plate, whose dim is always black (#2103).
+    @MainActor
+    static func pinDark(_ glass: NSView) {
+        glass.appearance = NSAppearance(named: .darkAqua)
+    }
+
     /// Whether `backdrop` is the subview immediately below `glass`
     /// in `parent`.
     @MainActor

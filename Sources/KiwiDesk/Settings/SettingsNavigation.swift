@@ -46,6 +46,24 @@ struct SettingsNavigation {
         shortcutsLayer ?? KeyLayer.defaultName
     }
 
+    /// The lens chip selected on KiwiVision, nil for Default —
+    /// on the model for the same reason as
+    /// `shortcutsLayer`: the side panel follows it (#2103 ruling
+    /// 29). Read it through `kiwiVisionLensSelection(in:)`.
+    var kiwiVisionLens: String?
+
+    /// A landing asked for the add-lens popover (#2359 ruling 4);
+    /// the lens strip opens it once and clears this.
+    var kiwiVisionAddRequested = false
+
+    /// The selected lens's page spelling among `lenses`, nil for
+    /// Default or a lens no longer listed.
+    func kiwiVisionLensSelection(in lenses: [VisionLens]) -> String? {
+        kiwiVisionLens.flatMap { name in
+            lenses.first { AppWideSettings.sameLens($0.name, name) }?.name
+        }
+    }
+
     /// Active space ID for pushed space overrides editor (#678).
     var spaceOverridesFocus: SpaceID?
 
@@ -74,6 +92,8 @@ struct SettingsNavigation {
     mutating func resetSurfaces() {
         layoutModeTab = nil
         shortcutsLayer = nil
+        kiwiVisionLens = nil
+        kiwiVisionAddRequested = false
         spaceOverridesFocus = nil
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states

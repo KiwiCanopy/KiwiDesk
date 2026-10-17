@@ -38,6 +38,5 @@ struct OpenSettingsClassifyTests {
             KeybindingCatalog.openSettings.lua
                 == "KiwiDesk.open_settings()"
         )
-        #expect(APIReference.luaOnly.contains("open_settings"))
     }
 }

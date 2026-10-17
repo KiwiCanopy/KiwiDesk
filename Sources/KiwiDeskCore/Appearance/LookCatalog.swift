@@ -3,9 +3,10 @@ import Foundation
 
 /// The bundled looks (#1684). Glass is DERIVED from the starter's
 /// tuning for the given screens, so it is what a first run shows
-/// and doubles as the shape reset (#1739); every other bundled
+/// and doubles as the shape reset (#1739); a bundled look carries
+/// styling alone, never motion (#2176); every other bundled
 /// look is Glass with its authored differences laid over it, so
-/// each names the whole of `LookKeys` and reproduces its picture
+/// each names the whole of `LookKeys.styling` and reproduces its picture
 /// wherever it is applied. Its colours are its authored palette's,
 /// resolved at load (#1752).
 public enum LookCatalog {
@@ -41,7 +42,8 @@ public enum LookCatalog {
         ShelfLook(
             name: defaultName,
             style: LookKeys.extract(
-                from: StarterSetup.settings(sizes: sizes)
+                from: StarterSetup.settings(sizes: sizes),
+                paths: LookKeys.styling
             ),
             colors: PaletteCatalog.defaultPalette().paintedColors
         )

@@ -87,7 +87,7 @@ struct BorderDormantRingTests {
         border.movePanel = { _, _ in false }
         defer { border.clear() }
         var requests: [Set<WindowID>] = []
-        border.watchOverride = {
+        border.watch.override = {
             requests.append($0)
             return true
         }

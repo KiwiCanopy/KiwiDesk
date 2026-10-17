@@ -27,17 +27,11 @@ struct BarMenuWiringTests {
         }
     }
 
-    /// Both Layout menus' Keep rows take one save, so a failure is
-    /// reported the one way, and the wiring runs at launch.
-    @Test("the launch wires the menus and one Keep save serves both")
-    func launchWiresOneSave() throws {
+    /// The bar menus' wiring runs at launch; their Keep reaches
+    /// the one save above, as KiwiHub's View side does.
+    @Test("the launch wires the bar menus")
+    func launchWiresTheMenus() throws {
         let delegate = try squashed("AppDelegate.swift")
         #expect(delegate.contains("wireBarMenus()"))
-        #expect(
-            delegate.contains(
-                "statusItem.onSaveLayoutToProfile={[weakself]in"
-                    + "self?.keepLayoutInProfile()}"
-            )
-        )
     }
 }

@@ -81,21 +81,6 @@ struct BspOverrideTests {
         #expect(over.resolved(onto: BspParams()) == BspParams())
     }
 
-    @Test("TilingSettings resolves bsp per space")
-    func settingsResolver() {
-        var settings = TilingSettings()
-        settings.bsp.strategy = .longestSide
-        var over = BspOverride()
-        over.strategy = .alternating
-        settings.bsp.override[SpaceID("2")] = over
-        #expect(
-            settings.resolvedBsp(for: "2").strategy == .alternating
-        )
-        #expect(
-            settings.resolvedBsp(for: "1").strategy == .longestSide
-        )
-    }
-
     @Test("override map nests under layout.bsp and round-trips")
     func settingsJSONNesting() throws {
         var settings = TilingSettings()

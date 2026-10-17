@@ -40,6 +40,30 @@ extension AutoFloatReason {
     /// non-arrow (`ResizeRefusal.pillSymbol`), SF Symbols 1.0.
     var pillSymbol: String { "nosign" }
 
+    /// The reason's wire spelling in `explain_window` (#1685) — a
+    /// stored machine contract once shipped.
+    var wireName: String {
+        switch self {
+        case .rule: "rule"
+        case .panel: "panel"
+        case .accessoryApp: "accessory_app"
+        case .fixedSize: "fixed_size"
+        }
+    }
+
+    /// What would let the window tile, as the verb that does it:
+    /// a guess yields to Float automatically off or to a Tile rule
+    /// (#2173), which no verb writes, so it is named `tile_rule`;
+    /// a rule yields to its removal, and a panel to nothing.
+    var escapes: [String] {
+        switch self {
+        case .accessoryApp, .fixedSize:
+            ["set_float_automatically", "tile_rule"]
+        case .rule: ["app_rule.remove_float"]
+        case .panel: []
+        }
+    }
+
     /// The CLI/IPC failure — English, a machine contract (#96).
     var failure: String {
         switch self {

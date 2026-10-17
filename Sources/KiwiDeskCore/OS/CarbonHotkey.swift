@@ -28,6 +28,13 @@ public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
         rawValue: UInt32(controlKey)
     )
     public static let shift = Self(rawValue: UInt32(shiftKey))
+    /// KiwiDesk's own Hyper modifier (#1870) — a bit Carbon never
+    /// sets. A Hyper combo is registered BARE while the Hyper key
+    /// is held (`KeybindingManager+Hyper`), never with this bit.
+    public static let hyper = Self(rawValue: 1 << 20)
+
+    /// The mask Carbon reads: everything but `hyper`.
+    var carbonMask: UInt32 { subtracting(.hyper).rawValue }
 }
 
 /// C callback for Carbon hotkey events. Carbon delivers exactly
@@ -116,7 +123,7 @@ public final class CarbonHotkeyCenter {
         var ref: EventHotKeyRef?
         let status = RegisterEventHotKey(
             keyCode,
-            modifiers.rawValue,
+            modifiers.carbonMask,
             hotkeyID,
             GetEventDispatcherTarget(),
             0,

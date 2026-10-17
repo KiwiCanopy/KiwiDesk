@@ -79,6 +79,11 @@ public enum DefaultKeybindings {
                 label: "Toggle display sticky"
             )
         )
+        rows.append(nextLayoutRow())
+        rows.append(previousLayoutRow())
+        rows.append(layoutPickerRow())
+        rows.append(jumpToWindowRow())
+        rows.append(kiwiVisionRow())
         rows.append(contentsOf: appChromeRows())
         return rows
     }
@@ -94,7 +99,7 @@ public enum DefaultKeybindings {
     public static func showShortcutsRow() -> KeyBinding {
         KeyBinding(
             combo: "control+option+k",
-            lua: "KiwiDesk.show_shortcuts()",
+            lua: KiwiHubSide.shortcuts.lua,
             kind: .navigation,
             label: "Show shortcuts panel"
         )

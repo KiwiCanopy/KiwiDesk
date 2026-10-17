@@ -3,7 +3,8 @@ import Foundation
 /// Retired verbs: #1517's, when the two bars moved onto one
 /// shelf, #1674's `set_float_nudge`, #1713's item padding and
 /// #1731's shelf edge, which each bar took back, #1528's App Bar
-/// content, #1810's `make_auto` and #1511's `pull_or_spawn`.
+/// content, #1810's `make_auto`, #1511's `pull_or_spawn`,
+/// #2228's slide, #2099's Monocle flip and #2265's panel verbs.
 /// No aliases (AGENTS.md §5): a retired name fails, and the
 /// failure names what replaces it — in Lua as a
 /// `ConfigIssue.Kind.retiredCall`, over IPC through
@@ -50,6 +51,10 @@ extension APIReference {
         // A window is tiled or floating, and Tile hands it back
         // to detection (#1810).
         map["make_auto"] = "make_tiled"
+        // A Space switch is instant, and names the Space where no
+        // Space Bar does (#2228).
+        map["animations.set_on_space_change"] = "set_space_cue"
+        map["animations.set_space_change"] = "set_space_cue"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
         // The centred strip draws one more glyph at a row's end,
         // so the count is a span, not a cap (#1528).
@@ -60,6 +65,12 @@ extension APIReference {
         map["drag.set_drop_zone_border_width"] = "border.set_width"
         map["drag.set_corner_radius"] = "border.set_corner_style"
         map["pull_or_spawn"] = "focus_or_spawn"
+        // KiwiHub's sides open through one verb (#2265).
+        for verb in [
+            "show_jump_to_window", "show_shortcuts", "show_layout_picker",
+        ] {
+            map[verb] = "kiwihub.show"
+        }
         for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()
@@ -68,6 +79,21 @@ extension APIReference {
     /// the one list `retired` takes its nil entries from.
     static let retiredReasons: [String: String] = {
         var map = ["space_bar.set_item_size": itemFollowsContent]
+        // The Space switch no longer slides (#2228).
+        for verb in [
+            "animations.set_space_change_duration",
+            "set_space_switch_liquid_glass",
+        ] {
+            map[verb] = switchNoLongerSlides
+        }
+        // A Monocle focus change is a raise and nothing else
+        // (#2099).
+        for verb in [
+            "animations.set_on_monocle_focus",
+            "animations.set_monocle_flip_duration",
+        ] {
+            map[verb] = monocleFocusIsARaise
+        }
         // The App Bar always draws icon and title (#1528).
         for verb in [
             "app_bar.set_content", "monocle.set_app_bar_content",
@@ -80,6 +106,10 @@ extension APIReference {
 
     private static let itemFollowsContent =
         "a Space item's length follows its content"
+    private static let switchNoLongerSlides =
+        "a Space switch is instant and no longer slides"
+    private static let monocleFocusIsARaise =
+        "a Monocle focus change is a raise and plays no flip"
     private static let appBarDrawsBoth =
         "the App Bar always draws each item's icon and title"
 

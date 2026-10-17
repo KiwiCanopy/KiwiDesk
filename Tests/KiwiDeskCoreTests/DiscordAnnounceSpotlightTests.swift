@@ -20,7 +20,7 @@ struct DiscordAnnounceSpotlightTests {
         + "{symbol:gauge.with.dots.needle.67percent}"
     private static let rowHover =
         "- **Windows on hover** — Rest on an app to list its windows. "
-        + "{setting:settings.animations.onSpaceChange} "
+        + "{setting:settings.animations.spaceChange} "
         + "{symbol:list.bullet.rectangle}"
 
     private func description(
