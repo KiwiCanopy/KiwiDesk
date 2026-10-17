@@ -32,7 +32,7 @@ struct ButtonChipStyleTests {
     func disabledIsInert() throws {
         let face = try SourceScan.blankedSource(
             at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
-                "Sources/KiwiDesk/Settings/ButtonChipStyle.swift"
+                "Sources/KiwiDesk/Settings/ChipFace.swift"
             )
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(face.contains("pressed:isEnabled&&configuration.isPressed"))
@@ -46,7 +46,7 @@ struct ButtonChipStyleTests {
     func callerFontWins() throws {
         let face = try SourceScan.blankedSource(
             at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
-                "Sources/KiwiDesk/Settings/ButtonChipStyle.swift"
+                "Sources/KiwiDesk/Settings/ChipFace.swift"
             )
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(face.contains(".font(font??.system(size:metrics.font))"))
@@ -94,14 +94,32 @@ struct ButtonChipStyleTests {
     /// the one `shape`.
     @Test("the button chip is a rounded rectangle")
     func roundedRectangle() throws {
-        let face = try SourceScan.blankedSource(
-            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+        let root = SourceScan.repoRoot(from: #filePath)
+        let style = try SourceScan.blankedSource(
+            at: root.appendingPathComponent(
                 "Sources/KiwiDesk/Settings/ButtonChipStyle.swift"
             )
         )
-        #expect(!face.contains("Capsule("))
-        #expect(face.contains("RoundedRectangle("))
+        #expect(!style.contains("Capsule("))
+        #expect(
+            style.contains(
+                "ChipFace(configuration: configuration, popUp: false)"
+            )
+        )
+        let face = try SourceScan.blankedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/ChipFace.swift"
+            )
+        ).split(whereSeparator: \.isWhitespace).joined()
+        // The capsule is the pop-up arm's alone (`PopUpTriggerTests`).
+        #expect(face.contains(":AnyShape(bezel)"))
         #expect(face.contains("shape.fill("))
-        #expect(face.contains("shape.strokeBorder("))
+        #expect(face.contains("bezel.strokeBorder("))
+        #expect(
+            face.contains("privatevarbezel:RoundedRectangle{RoundedRectangle(")
+        )
+        #expect(
+            face.contains(".contentShape([.interaction,.focusEffect],shape)")
+        )
     }
 }

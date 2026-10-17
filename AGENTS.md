@@ -1826,8 +1826,10 @@ Touching `Sources/KiwiDesk` (the GUI).
   tints a picker's label while the window is key (#1502,
   `SettingsLabelNeutralityTests`), a `.bordered` action button takes the
   `settingsActionButton()` seal, an accent-filled button takes the
-  `kiwiProminentButton()` seal because `.borderedProminent` picks white
-  (`SettingsButtonStyleConventionTests` counts both), and a raw `.bordered` is
+  `kiwiProminentButton()` seal because `.borderedProminent` picks white, a
+  pop-up trigger the edgeless `settingsPopUpTrigger()` (`PopUpTriggerTests`;
+  `SettingsButtonStyleConventionTests` counts all three), and a raw
+  `.bordered` is
   legal only via `SettingsBorderedSealTests`' `borderedExempt`, whose entries
   name the source token that IS each exemption's reason
 - `Color.accentColor` is retired because it ignores `.tint`

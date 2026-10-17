@@ -1221,14 +1221,15 @@ must keep:
   neutral fill lift says where the pointer is (the idiom
   `hoverHighlight` and `ShortcutLayerChip` already keep — the
   accent is reserved for identity and selection). The two then
-  compose instead of one erasing the other. A searchable
-  dropdown's `DropdownCursor` IS the selection Return reads, so
-  real pointer motion may move it there and nowhere else — a list
-  whose selection anything beyond Return reads (KiwiHub) keeps the
-  pointer apart (`DropdownCursorWiringTests`).
+  compose instead of one erasing the other.
   `HomeCardChromeTests` holds the split, its negative half
   located by `cardStroke`'s brace-balanced body rather than by
-  a spelling a retune may move.
+  a spelling a retune may move. A searchable dropdown's
+  `DropdownCursor` IS the selection Return reads, so real
+  pointer motion may move it there (`DropdownCursorWiringTests`)
+  and nowhere else — a list whose selection anything beyond
+  Return reads keeps the pointer apart, as KiwiHub does
+  (`JumpHoverTests`).
 
 ## Responsive width (#678 turn 17a)
 
@@ -1607,6 +1608,18 @@ Every surface, border and ink in the Settings tree comes from
   seal as a finished sweep: a site still on `.borderedProminent`
   is drawing white on the accent, and adopting the seal there is
   its own change and its own eye-confirm.
+- **A button that opens a pop-up of its own takes the third
+  seal, `settingsPopUpTrigger()`** — the Font and app pickers'
+  triggers and the profile chip — so from outside it reads as the
+  native pop-up beside it: a capsule with no edge on the chip fill
+  ladder, still lifting under the pointer (owner ruling
+  2026-10-17). It drops `chipEdge` for these triggers alone; an
+  action button keeps the edge. The seal pairs
+  `PopUpTriggerStyle` with `neutralButtonLabel()` by
+  construction, and that style is spelled nowhere else
+  (`PopUpTriggerTests`); it counts as naming a style in
+  `SettingsButtonStyleConventionTests` and is banned on fixed-dark
+  grounds with the others (`SettingsFixedGroundTests`).
 - **A state on the accent seal is a FILL swap, never an opacity
   over the ground.** A translucent state composites against
   whatever the button sits on, so one modifier pressed darker on

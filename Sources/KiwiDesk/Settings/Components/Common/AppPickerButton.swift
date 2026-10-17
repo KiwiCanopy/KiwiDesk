@@ -39,15 +39,15 @@ struct AppPickerButton: View {
             showing = true
         } label: {
             // Hugs the name, as a native pop-up does: no spacer in
-            // the label, the floor on the name alone.
+            // the label, the chevron right after the name.
             HStack(spacing: 4) {
                 Text(selection ?? placeholder)
                     .lineLimit(1)
-                    .frame(minWidth: minWidth, alignment: .leading)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
+            .frame(minWidth: minWidth, alignment: .leading)
         }
         .settingsPopUpTrigger()
         .controlSize(.large)

@@ -41,26 +41,41 @@ struct PopUpTriggerTests {
         )
     }
 
+    /// The pop-up face is the shared chip face's capsule arm, which
+    /// draws no edge; the press and hover gates live there once and
+    /// are `ButtonChipStyleTests`'.
     @Test("the pop-up face is a capsule with no edge")
     func capsuleWithoutEdge() throws {
-        let face = try Self.source("PopUpTriggerStyle.swift")
-        #expect(face.contains("Capsule().fill("))
+        let style = try Self.source("PopUpTriggerStyle.swift")
         #expect(
-            face.contains(
-                ".contentShape([.interaction, .focusEffect], Capsule())"
+            style.contains(
+                "ChipFace(configuration: configuration, popUp: true)"
             )
         )
-        #expect(!face.contains("strokeBorder"))
-        #expect(!face.contains("stroke("))
-        #expect(!face.contains("RoundedRectangle"))
+        #expect(!style.contains("stroke"))
+        let face = try Self.source("ChipFace.swift")
         let squashed = face.split(whereSeparator: \.isWhitespace)
             .joined()
-        #expect(
-            squashed.contains("pressed:isEnabled&&configuration.isPressed")
-        )
-        // It lifts under the pointer, gated like the action chip.
-        #expect(squashed.contains("hovered:isEnabled&&hovered"))
-        #expect(squashed.contains(".onHover{hovered=$0}"))
+        #expect(squashed.contains("popUp?AnyShape(Capsule())"))
+        // The one edge sits under exactly `if !popUp`.
+        #expect(squashed.contains("if!popUp{bezel.strokeBorder("))
+        #expect(face.occurrences(of: "strokeBorder(") == 1)
+        #expect(face.occurrences(of: "stroke(") == 0)
+    }
+
+    /// The style is spelled once in the tree, in the seal, so no
+    /// trigger takes the face without the neutral label.
+    @Test("the pop-up style is reached only through its seal")
+    func styleOnlyInSeal() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var sites: [String: Int] = [:]
+        for url in try SourceScan.swiftSources(under: root) {
+            let count = try SourceScan.strippedSource(at: url)
+                .occurrences(of: "PopUpTriggerStyle()")
+            if count > 0 { sites[url.lastPathComponent] = count }
+        }
+        #expect(sites == ["SettingsActionButton.swift": 1])
     }
 
     /// Each trigger takes the seal and no action-button face, and
@@ -76,7 +91,17 @@ struct PopUpTriggerTests {
             let label = try Self.body("} label: {", in: path)
             #expect(!label.contains("Spacer("), "\(path)'s trigger is greedy")
             #expect(label.contains(".lineLimit(1)"))
+            // The floor bounds the whole trigger, name and chevron,
+            // never the name alone.
+            let squashed = label.split(whereSeparator: \.isWhitespace)
+                .joined()
+            #expect(squashed.occurrences(of: ".frame(minWidth:") == 1)
+            #expect(squashed.contains(")}.frame(minWidth:"))
         }
+        // A tall face keeps the system line box.
+        let fontLabel = try Self.body("} label: {", in: font)
+        #expect(fontLabel.contains(".frame(height: Self.systemLineHeight)"))
+        #expect(fontLabel.contains(".clipped()"))
         let button = try Self.source(picker)
         #expect(button.occurrences(of: ".settingsPopUpTrigger()") == 1)
         #expect(!button.contains("settingsActionButton"))
