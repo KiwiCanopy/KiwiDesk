@@ -73,14 +73,21 @@ struct UpdateNotesSpotlightTests {
         #expect(Self.titles(digest) == ["C"])
     }
 
-    @Test("the cap trims the oldest version's rows first")
-    func capTrimsOldestFirst() throws {
+    /// The row count is a curation guideline and the notes
+    /// scroll, so nothing is trimmed (owner ruling 2026-10-17).
+    @Test("every covered version's rows show, newest first")
+    func nothingIsTrimmed() throws {
+        let old = (1...5).map { "O\($0)" }
+        let new = (1...7).map { "N\($0)" }
         let digest = try Self.digest([
-            ("2.1.0", Self.notes(summary: "Old.", rows: ["O1", "O2", "O3"])),
-            ("2.2.0", Self.notes(summary: "New.", rows: ["N1", "N2"])),
+            ("2.1.0", Self.notes(summary: "Old.", rows: old)),
+            ("2.2.0", Self.notes(summary: "New.", rows: new)),
         ])
-        #expect(Self.titles(digest) == ["N1", "N2", "O1", "O2"])
-        #expect(Self.tags(digest) == [nil, nil, "2.1.0", "2.1.0"])
+        #expect(Self.titles(digest) == new + old)
+        let expected: [String?] =
+            Array(repeating: nil, count: new.count)
+            + Array(repeating: "2.1.0", count: old.count)
+        #expect(Self.tags(digest) == expected)
     }
 
     @Test("a rowless minor stands alone: older rows dropped")

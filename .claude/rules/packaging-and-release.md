@@ -531,9 +531,10 @@ present only when it carries a bullet, one bullet per change
 (#1542, held by `ChangelogParserTests` ▸ `malformedBodyRefused`;
 a release before 2.0.0 keeps its free titles, and
 `--body <file> --tag <tag>` checks one of those). A release MAY
-open its sections with `### Spotlight` (#2038): up to
-`SPOTLIGHT_MAX_ROWS` rows
-`- **Title** — one line. {setting:<id>} {symbol:<sf name>}`,
+open its sections with `### Spotlight` (#2038): rows — past
+`SPOTLIGHT_ROW_GUIDELINE` of them, or a line past
+`SPOTLIGHT_LINE_GUIDELINE`, `--body` warns and never refuses —
+each `- **Title** — one line. {setting:<id>} {symbol:<sf name>}`,
 both tokens optional, the summary then ONE intro sentence; a
 `{setting:…}` names an id "Show me" can land on, listed
 build-free in `scripts/spotlight-setting-ids.txt` and held to
