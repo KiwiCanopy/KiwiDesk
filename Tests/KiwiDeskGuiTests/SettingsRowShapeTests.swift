@@ -117,10 +117,34 @@ struct SettingsRowShapeTests {
         )
         #expect(
             source.contains(
-                ".frame(width:stacked?nil:labelColumn,"
+                "letcolumn=stacked||labelFills?nil:labelColumn"
+            )
+        )
+        #expect(
+            source.occurrences(of: ".frame(width:column,alignment:.leading)")
+                == 1
+        )
+    }
+
+    /// `labelFills` (AI ▸ Set up, owner ruling 2026-10-17) is an
+    /// argument to the SAME layout swap, never a second layout or
+    /// an `if`: it drops the column and lets the label take the
+    /// free width, through modifiers that stay in the chain.
+    @Test("the label-fills option rides the one layout swap")
+    func labelFillsRidesTheSwap() throws {
+        let source = try squashed(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "SettingsRowShape.swift"
+        )
+        #expect(source.occurrences(of: "AnyLayout(") == 2)
+        #expect(source.occurrences(of: "labelFills") == 3)
+        #expect(
+            source.contains(
+                ".frame(maxWidth:labelFills?.infinity:nil,"
                     + "alignment:.leading)"
             )
         )
+        #expect(!source.contains("iflabelFills"))
     }
 
     /// The shared row vocabulary goes through the shape. A

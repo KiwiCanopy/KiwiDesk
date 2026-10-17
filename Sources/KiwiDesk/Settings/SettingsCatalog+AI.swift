@@ -5,12 +5,12 @@ import KiwiDeskCore
 struct AIControls: Sendable {
     let setupCard = SettingsControl("ai.setup.title", "Set up")
     let addToClaudeDesktop = SettingsControl(
-        "ai.setup.claude_desktop",
-        "Add to Claude Desktop…"
+        "ai.setup.desktop",
+        "Claude Desktop"
     )
     let copySetupPrompt = SettingsControl(
-        "ai.setup.copy",
-        "Copy Setup Prompt"
+        "ai.setup.coding_apps",
+        "Other AI apps"
     )
     let capabilitiesCard = SettingsControl(
         "ai.capabilities.title",

@@ -30,13 +30,14 @@ struct AISetupRowWiringTests {
         // Tied to the button, so a grey on the `?` reds.
         #expect(
             row.occurrences(
-                of: "AICopyButton(title:title,text:prompt)"
+                of: "AICopyButton(title:copyTitle,text:prompt)"
                     + ".modifier(GreyOut(active:translocated))"
             ) == 1
         )
         #expect(
-            row.occurrences(of: "Text(translocated?movedCaption:caption)")
-                == 1
+            row.occurrences(
+                of: "caption:translocated?movedCaption:caption"
+            ) == 1
         )
         #expect(
             row.occurrences(
@@ -62,7 +63,9 @@ struct AISetupRowWiringTests {
         )
         // Its own caption is withheld while translocated, so the
         // move sentence under Copy is the one reason drawn.
-        #expect(row.occurrences(of: "if!translocated{Text(addCaption)") == 1)
+        #expect(
+            row.occurrences(of: "caption:translocated?nil:addCaption") == 1
+        )
         #expect(
             row.occurrences(
                 of: "NSApplication.didBecomeActiveNotification"
@@ -83,6 +86,14 @@ struct AISetupRowWiringTests {
         // A build in flight greys the button; a Claude Desktop
         // removed since the last read re-reads instead of failing.
         #expect(row.occurrences(of: "||building") == 1)
+        // "Add…" alone names nothing: VoiceOver hears the target,
+        // on the Add button's own chain.
+        #expect(
+            row.occurrences(
+                of: ".settingsActionButton()"
+                    + ".accessibilityLabel(L(\"ai.setup.add.ax\","
+            ) == 1
+        )
         // …and the grey always lifts, whatever the build answered.
         #expect(row.occurrences(of: "defer{building=false}") == 1)
         #expect(
@@ -106,7 +117,7 @@ struct AISetupRowWiringTests {
         )
         #expect(
             row.occurrences(
-                of: "Text(AIReadyPrompt.caption(for:key)??\"\")"
+                of: "caption:AIReadyPrompt.caption(for:key)??\"\""
             ) == 1
         )
     }
