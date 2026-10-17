@@ -123,6 +123,30 @@ struct HoverFocusStandDownTests {
         #expect(core.focusedWindowID == WindowID(1))
     }
 
+    /// KiwiHub, a panel floating over every window, holds the key:
+    /// the pointer resting elsewhere moves nothing (#2378). An own
+    /// key window that does not float — the Settings window — is
+    /// the control, and hover focus leaves it.
+    @Test("KiwiHub open stands down; Settings key does not")
+    func floatingOwnPanelStandsDown() throws {
+        let core = try makeCore()
+        let point = GeometryUtils.axPoint(try overW2(core))
+        core.eventLoop.ownKeyWindow = {
+            OwnKeyWindowReading(
+                number: 900_001,
+                isDialog: false,
+                floatsOverWindows: true
+            )
+        }
+        core.focusUnderRestingPointer(at: point, armedFocus: WindowID(1))
+        #expect(core.focusedWindowID == WindowID(1))
+        core.eventLoop.ownKeyWindow = {
+            OwnKeyWindowReading(number: 900_001, isDialog: false)
+        }
+        core.focusUnderRestingPointer(at: point, armedFocus: WindowID(1))
+        #expect(core.focusedWindowID == WindowID(2))
+    }
+
     @Test("The focused window is still reached while its app is not")
     func focusedButNotFrontIsReached() throws {
         let core = try makeCore()

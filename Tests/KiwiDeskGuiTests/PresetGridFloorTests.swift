@@ -89,9 +89,10 @@ struct PresetGridFloorTests {
     /// AppKit's own intrinsic width at the control size the
     /// card draws its buttons at.
     ///
-    /// The card draws SwiftUI `.bordered` through
+    /// The card draws `ButtonChipStyle` through
     /// `settingsActionButton()`; this measures an `NSButton`
-    /// with the matching bezel. The pairing is UNGUARDED — a
+    /// as a stand-in for that face's metrics at the same control
+    /// size. The pairing is UNGUARDED — a
     /// change to `.controlSize` in `PresetCard` silently
     /// re-rates every width the floor rests on, and
     /// `cardDrawsItsDeclaredMetrics` needles the two spacing

@@ -184,4 +184,38 @@ struct HoverFocusWiringTests {
             "AppDelegate no longer fronts the own window hover focused"
         )
     }
+
+    /// Moves go to the active app (#2378): while a KiwiDesk window
+    /// is key only a LOCAL monitor hears the pointer leave it, and
+    /// only once that window accepts mouse-moved events. Each half
+    /// alone leaves hover focus deaf there; no fake monitor in a
+    /// suite can tell.
+    @Test("the rest hears the pointer while KiwiDesk is active")
+    func ownActiveMovesAreHeard() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let rest = SourceScan.stripComments(
+            try String(
+                contentsOf: root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/Events/PointerRest.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        let live = try #require(
+            rest.range(of: "private static func live(")
+        )
+        let body = String(rest[live.lowerBound...])
+        #expect(body.contains("addGlobalMonitorForEvents("))
+        #expect(body.contains("addLocalMonitorForEvents("))
+        let window = SourceScan.stripComments(
+            try String(
+                contentsOf: root.appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/"
+                        + "SettingsWindowController.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(window.contains("window.acceptsMouseMovedEvents = true"))
+    }
 }
