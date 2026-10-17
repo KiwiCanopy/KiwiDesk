@@ -84,8 +84,10 @@ struct UpdateNotesSpotlightTests {
             ("2.2.0", Self.notes(summary: "New.", rows: new)),
         ])
         #expect(Self.titles(digest) == new + old)
-        #expect(Self.tags(digest).first == .some(nil))
-        #expect(Self.tags(digest).last == "2.1.0")
+        let expected: [String?] =
+            Array(repeating: nil, count: new.count)
+            + Array(repeating: "2.1.0", count: old.count)
+        #expect(Self.tags(digest) == expected)
     }
 
     @Test("a rowless minor stands alone: older rows dropped")

@@ -85,13 +85,14 @@ HEADS_MARKER = "**Before you update:**"
 
 # The optional spotlight (#2038): a typed release's Highlights
 # tab is EITHER the prose summary OR one intro sentence and its
-# rows — design-decisions ▸ *What's new leads with a spotlight*. It is the first `###`, it is no type (each row's
+# rows — design-decisions ▸ *What's new leads with a
+# spotlight*. It is the first `###`, it is no type (each row's
 # change stays a bullet in its own section), and it travels as
 # the entry's `spotlight` list.
 SPOTLIGHT_HEADING = "Spotlight"
-# Guidelines, never refusals (owner ruling 2026-10-17): past
-# them `--body` warns. Six one-line rows fit the window unscrolled;
-# a line past the length wraps to two.
+# Curation guidelines, never refusals (owner ruling 2026-10-17):
+# past them `--body` warns. The window scrolls whatever the count;
+# design-decisions ▸ the spotlight entry argues both numbers.
 SPOTLIGHT_ROW_GUIDELINE = 6
 SPOTLIGHT_LINE_GUIDELINE = 70
 # "One intro sentence": one paragraph, one sentence, no longer
