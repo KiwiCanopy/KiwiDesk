@@ -232,4 +232,19 @@ struct PaletteShelfChromeTests {
             }
         }
     }
+
+    /// The pointer lifts a tile with a grey FILL, apart from the
+    /// applied stroke (#1173), and the applied tile — whose click
+    /// changes nothing — stays flat (owner, 2026-10-17).
+    @Test("the pointer lifts a tile; the applied one stays flat")
+    func hoverLiftsATile() throws {
+        let tile = try squashed("PaletteTile.swift")
+        #expect(tile.contains(".background(lift)"))
+        #expect(tile.contains(".onHover{hovered=$0}"))
+        #expect(
+            tile.contains(
+                "hovered&&isEnabled&&!isApplied?SettingsTheme.chipRest"
+            )
+        )
+    }
 }

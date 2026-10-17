@@ -45,19 +45,19 @@ struct JumpClickWiringTests {
         #expect(
             panel.contains(
                 "isLifted:JumpHover.lifts(.row(index),hover:model.hover,"
-                    + "selected:index==list.selection)"
+                    + "selected:index==list.selection,clickable:true)"
             )
         )
         #expect(panel.contains("hover:model.hover,onApply:"))
         let side = try Self.squashed("JumpViewSide.swift")
         #expect(
             side.contains(
-                "JumpHover.lifts(.item(pick),hover:hover,"
-                    + "selected:isSelected(line,index))"
+                "JumpHover.lifts(.item(item.pick),hover:hover,"
+                    + "selected:isSelected(line,index),"
             )
         )
         #expect(
-            side.occurrences(of: "isLifted:isLifted(item.pick,") == 2
+            side.occurrences(of: "isLifted:isLifted(item,") == 2
         )
     }
 

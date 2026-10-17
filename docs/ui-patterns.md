@@ -1141,7 +1141,10 @@ still drops a duplicate silently, and owes the same channel.
 affordance.** A bordered action button (`settingsActionButton()`,
 KiwiHub's footer buttons) is a button chip: `chipRest`, `chipHover`
 under the pointer, `chipPressed` while pressed, under a constant
-`chipEdge`, no animation, a disabled one not reacting (#2377). A
+`chipEdge`, no animation, a disabled one not reacting, in the
+system bezel's rounded rectangle (#2377). A palette or look tile
+lifts with `chipRest` as a fill apart from its applied stroke, and
+nothing a click would leave alone lifts. A
 prominent (accent-filled) button, a menu picker, a stepper, a
 checkbox, a toggle, a slider, a field and a sidebar keep system
 behaviour: their shape already says "control". Ambiguous

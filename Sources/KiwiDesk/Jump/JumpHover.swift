@@ -9,13 +9,16 @@ enum JumpHover: Equatable {
     case item(ViewPickList.Pick)
 
     /// Whether `target` draws the lift: the item under the pointer,
-    /// never the selected one, whose accent wins (#1173).
+    /// never the selected one, whose accent wins (#1173), and never
+    /// one a click would leave alone — the lift promises the click
+    /// (owner ruling 2026-10-17).
     static func lifts(
         _ target: JumpHover,
         hover: JumpHover?,
-        selected: Bool
+        selected: Bool,
+        clickable: Bool
     ) -> Bool {
-        hover == target && !selected
+        hover == target && !selected && clickable
     }
 }
 

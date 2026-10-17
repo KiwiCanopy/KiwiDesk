@@ -7325,7 +7325,7 @@ draws on the button-chip tier and lifts one grey step under the
 pointer, one more while pressed (owner ruling 2026-10-17).** A
 system bordered button does not hover on macOS, and Apple-native
 binds behaviour, which argued for leaving it alone. But a bordered
-text button is a capsule with a word in it: beside labels and
+text button is a box with a word in it: beside labels and
 chips that do lift, it reads as a tag and is overlooked, and
 KiwiHub's footer buttons were the one thing in the panel that did
 not answer the pointer. One small grey lift, on the same ladder
@@ -7335,8 +7335,12 @@ be mistaken for text: an accent-filled primary is the loudest thing
 on its surface, and a menu picker's chevron, a stepper's arrows and
 a checkbox's box already say "control", so they keep system
 behaviour (`docs/ui-patterns.md` ▸ *Hover confirms custom hit
-areas*). A segmented picker keeps its own base — one step over its
-track — since the selected pill is its press feedback.
+areas*). The chip keeps the system bezel's rounded rectangle: the
+lift is the change, not the shape. A segmented picker's unselected
+segment lifts one step over its track and presses one step further,
+the same order. A palette or look tile lifts too. **A lift promises
+the click:** what a click would leave alone — the applied tile, a
+KiwiHub item the query dims — stays flat (owner ruling 2026-10-17).
 :::
 
 ### Hover help appears sooner than AppKit's default
