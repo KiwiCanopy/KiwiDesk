@@ -116,8 +116,10 @@ extension HeaderSearch {
     func row(
         _ result: SettingsSearchResult
     ) -> some View {
-        SettingsSearchRow(
+        let onCursor = result.id == cursor.highlighted
+        return SettingsSearchRow(
             result: result,
+            onCursor: onCursor,
             value: value,
             switchesMode: SettingsSearch.switchesMode(
                 result,
@@ -130,15 +132,9 @@ extension HeaderSearch {
         )
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .rowHoverHighlight()
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(
-                    result.id == highlighted
-                        ? SettingsTheme.accent.opacity(0.16)
-                        : .clear
-                )
-        )
+        .dropdownCursorRow(onCursor, cornerRadius: 6) {
+            cursor.hover(result.id, pointer: DropdownPointer.live())
+        }
     }
 
     /// Accessibility description for profiles spotlight badge.
