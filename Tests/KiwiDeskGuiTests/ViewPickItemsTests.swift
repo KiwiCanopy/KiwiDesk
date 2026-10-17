@@ -102,9 +102,10 @@ struct ViewPickItemsTests {
     }
 
     /// Ruling 41: a chip per lens after Default, the lens on
-    /// marked, New Lens… still last (ruling 57); a lens Core
-    /// refuses greys with the reason it names.
-    @Test("each lens gets a chip, an empty one greyed")
+    /// marked, New Lens… still last (ruling 57); a lens with no
+    /// apps is left out, Settings being where it gains some (owner
+    /// ruling 2026-10-17).
+    @Test("each lens gets a chip, an empty one is left out")
     func lensChips() {
         LocalizationManager.shared.select("en")
         let lenses = [
@@ -115,19 +116,10 @@ struct ViewPickItemsTests {
         let chips = line ?? []
         #expect(
             chips.map(\.pick) == [
-                .vision(lens: nil), .vision(lens: "Writing"),
-                .vision(lens: "Calls"), .newLens,
+                .vision(lens: nil), .vision(lens: "Writing"), .newLens,
             ]
         )
-        let lensChips = Array(chips.dropFirst().dropLast())
-        #expect(lensChips.map(\.name) == ["Writing", "Calls"])
-        #expect(chips.map(\.isCurrent) == [false, true, false, false])
-        #expect(lensChips.map(\.isApplicable) == [true, false])
-        #expect(lensChips.last?.refusal == "No apps yet")
-        #expect(
-            lensChips.last.map { ViewPickText.spoken($0, on: .vision) }
-                == "KiwiVision: Calls, No apps yet"
-        )
+        #expect(chips.map(\.isCurrent) == [false, true, false])
         // Ruling 15: a lens the live profile leaves out says which.
         let away = items(
             vision: .off,

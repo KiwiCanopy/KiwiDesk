@@ -140,8 +140,10 @@ extension JumpPanelController {
 
     /// Default, each lens, then New Lens… (#2103 rulings 55–57); no
     /// Off chip, the current chip turning KiwiVision off. A lens
-    /// Core refuses greys with its reason; the lens on is never
-    /// refused, since `followActiveLens` turns a refused one off.
+    /// with no apps is left out, Settings being where it gains some
+    /// (owner ruling 2026-10-17); a lens Core refuses otherwise
+    /// greys with its reason, and the lens on is never refused,
+    /// since `followActiveLens` turns a refused one off.
     private static func visionItems(
         _ vision: (active: VisionActive, lenses: [VisionLensChoice]),
         chord: String?,
@@ -156,16 +158,17 @@ extension JumpPanelController {
             inertReason: inert,
             chord: chord
         )
-        let lenses = vision.lenses.map { lens in
-            ViewPickList.Item(
-                pick: .vision(lens: lens.name),
-                name: lens.name,
-                isCurrent: vision.active == .lens(lens.name),
-                inertReason: inert,
-                refusal: lens.refusal.map(ViewPickText.lensRefusal),
-                chord: lensChord(lens.name)
-            )
-        }
+        let lenses = vision.lenses.filter { $0.refusal != .noApps }
+            .map { lens in
+                ViewPickList.Item(
+                    pick: .vision(lens: lens.name),
+                    name: lens.name,
+                    isCurrent: vision.active == .lens(lens.name),
+                    inertReason: inert,
+                    refusal: lens.refusal.map(ViewPickText.lensRefusal),
+                    chord: lensChord(lens.name)
+                )
+            }
         // Opening Settings is no machine act, so no boot grey; a
         // Lua-owned setup greys it, its reason short enough for a chip.
         let create = ViewPickList.Item(

@@ -5202,8 +5202,8 @@ row.
 - **KiwiVision** — Default, which turns
   [KiwiVision](#kiwivisiontoggle) on with no lens, then one item
   per lens, which turns that lens on. Picking the item already on
-  turns KiwiVision off. A lens with no apps is greyed, "No apps
-  yet", and one the live profile leaves out is greyed "Not in
+  turns KiwiVision off. A lens with no apps is left out until it
+  has some, and one the live profile leaves out is greyed "Not in
   Studio". The line ends in **New Lens…**, which opens Settings ▸
   KiwiVision ready to name a lens; ⌘1–9 and ↓ skip it, and a
   Lua-owned setup greys it.
