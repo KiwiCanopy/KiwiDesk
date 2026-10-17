@@ -107,6 +107,20 @@ struct PopUpTriggerTests {
         #expect(!button.contains("settingsActionButton"))
     }
 
+    /// The header's profile chip is the third trigger: its menu
+    /// takes the seal in place of a plain style and a hover lift.
+    @Test("the profile chip takes the seal")
+    func profileChip() throws {
+        let menu = try Self.body(
+            "private var menu:",
+            in: "ProfileHeader.swift"
+        )
+        #expect(menu.occurrences(of: ".settingsPopUpTrigger()") == 1)
+        #expect(!menu.contains(".buttonStyle("))
+        #expect(!menu.contains("hoverHighlight"))
+        #expect(!menu.contains("settingsActionButton"))
+    }
+
     @Test("a long family name truncates in the middle")
     func familyNameMiddle() throws {
         let name = try Self.body(

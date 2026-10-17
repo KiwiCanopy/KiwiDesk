@@ -45,15 +45,15 @@ struct ProfileEditTargetMenu: View {
             chipLabel
         }
         // The button style draws the label whole — a borderless
-        // menu's AppKit label drops the dot and the chip's padding
-        // — so the whole chip is the menu's hit area.
+        // menu's AppKit label drops the dot — and the pop-up
+        // trigger's face makes the whole chip the menu's hit area.
         .menuStyle(.button)
-        .buttonStyle(.plain)
+        .settingsPopUpTrigger()
         .neutralMenuLabel()
         .menuIndicator(.hidden)
+        // The large face's room matches the header's other chips.
+        .controlSize(.large)
         .fixedSize()
-        // A button chip: it lifts under the pointer (#2377).
-        .hoverHighlight(cornerRadius: SettingsTheme.chipRadius, padding: 0)
         // Closed, the menu shows only its VALUE, so VoiceOver
         // heard a name with no noun — name the control, keep the
         // value (#812, the App Rules facet shape).
@@ -79,9 +79,6 @@ struct ProfileEditTargetMenu: View {
                     .foregroundStyle(SettingsTheme.ink2)
             }
         }
-        .padding(.horizontal, ChipMetrics.padH)
-        .padding(.vertical, ChipMetrics.padV)
-        .contentShape(ChipMetrics.shape)
     }
 
     /// One circle either way — filled, or a ring — so the dot

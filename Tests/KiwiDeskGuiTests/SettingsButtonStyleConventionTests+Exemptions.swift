@@ -136,9 +136,9 @@ extension SettingsButtonStyleConventionTests {
             // The profile chip's menu draws its label whole
             // through the button menu style (owner, 2026-10-17).
             "ProfileHeader.swift": (
-                1, ".buttonStyle(.plain)",
-                "The profile chip's Menu taking plain style, so "
-                    + "the whole chip is the menu's hit area"
+                1, ".settingsPopUpTrigger()",
+                "The profile chip's Menu taking the pop-up trigger "
+                    + "seal, so the whole chip is the menu's hit area"
             ),
             // Moved from `PresetsSection.swift` with the card
             // itself in #859. The reason is also CORRECTED: the
