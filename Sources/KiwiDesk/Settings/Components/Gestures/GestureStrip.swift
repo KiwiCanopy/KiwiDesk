@@ -48,7 +48,7 @@ struct GestureStrip: View {
         .accessibilityHidden(true)
     }
 
-    private static let space = "gestureStrip"
+    nonisolated private static let space = "gestureStrip"
 
     /// The room ahead of `item`: none for the first, a group's gap
     /// where a group starts, the pictures' gap otherwise.
