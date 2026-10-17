@@ -76,8 +76,10 @@ reaches people who did not ask to read anything.
    release adds something — a patch included — and prose only
    for a fixes-only release** (owner, 2026-10-09). Say which you picked; the owner may still
    overrule it for a release. A spotlight is one
-   intro sentence and up to `SPOTLIGHT_MAX_ROWS` `### Spotlight`
-   rows, drawn from the New and Improved bullets a user would
+   intro sentence and `### Spotlight` rows — about
+   `SPOTLIGHT_ROW_GUIDELINE`, each line within
+   `SPOTLIGHT_LINE_GUIDELINE` characters, `--body` warning past
+   either — drawn from the New and Improved bullets a user would
    want to FIND in Settings — `{setting:…}` naming the control's
    id (`scripts/changelog-sync --census-ids` lists them) — plus
    behaviour noticed without configuring anything, as a row

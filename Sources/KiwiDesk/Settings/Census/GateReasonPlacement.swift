@@ -78,6 +78,7 @@ extension SettingRuntimeGate {
         switch self {
         case .editingStoredProfile, .screenCountMismatch,
             .loginItemServiceStatus, .autoStartServiceLoaded,
+            .runningCopyTranslocated,
             .automaticInstallUnavailable, .luaOwnsConfig,
             .spaceHasNoOverrides, .reduceMotion, .reduceTransparency,
             .noBindingStore:
@@ -101,6 +102,7 @@ extension SettingRuntimeGate {
             return true
         case .reduceMotion, .reduceTransparency,
             .loginItemServiceStatus, .autoStartServiceLoaded,
+            .runningCopyTranslocated,
             .automaticInstallUnavailable, .noBindingStore,
             .luaOwnsConfig:
             return false

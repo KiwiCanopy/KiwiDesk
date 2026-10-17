@@ -156,7 +156,17 @@ extension APIReference {
             "Warps the mouse pointer to the center of the "
                 + "focused window.",
             .boolean("enabled")
-        )
+        ),
+        "set_hover_focus": APIRecord(
+            "Focuses and raises the window the mouse pointer comes "
+                + "to rest on.",
+            .boolean("enabled")
+        ),
+        "set_hover_focus_delay": APIRecord(
+            "Sets how long the pointer rests before hover focus acts, "
+                + "in milliseconds.",
+            .integer("milliseconds")
+        ),
     ]
 
     static let scrollGestureRecords: [String: APIRecord] = [
@@ -198,5 +208,63 @@ extension APIReference {
                 + "cell.",
             .integer("depth")
         ),
+    ]
+
+    static let kiwivisionRecords: [String: APIRecord] = [
+        "toggle": APIRecord(
+            "Turns KiwiVision on or off; named, turns that lens on, "
+                + "or off while it is on.",
+            .text("lens", optional: true)
+        ),
+        "current": APIRecord(
+            "Returns whether KiwiVision is on, the lens on, the settings "
+                + "and every lens with its refusal."
+        ),
+        "define_lens": APIRecord(
+            "Adds or replaces a lens: a Lua table, or a JSON object "
+                + "string over the CLI.",
+            .text("table")
+        ),
+        "delete_lens": APIRecord(
+            "Removes a lens for this session; KiwiVision turns off "
+                + "if it was the one on.",
+            .text("lens")
+        ),
+        "set_dim": APIRecord(
+            "Sets how far KiwiVision dims, in percent (0-100).",
+            .number("percent")
+        ),
+        "set_blur": APIRecord(
+            "Blurs what KiwiVision dims; on by default.",
+            .boolean("enabled")
+        ),
+        "set_appearance": APIRecord(
+            "Sets the system appearance KiwiVision switches to "
+                + "while on; unchanged by default.",
+            .choice("appearance", VisionAppearance.self)
+        ),
+        "set_clear_wallpaper": APIRecord(
+            "Leaves the wallpaper clear so KiwiVision dims only the "
+                + "windows; off by default.",
+            .boolean("enabled")
+        ),
+        "set_never_dimmed": APIRecord(
+            "Replaces the never-dimmed apps: bundle ids or process "
+                + "names, one or more; none clears it.",
+            .text("app", optional: true)
+        ),
+        "set_clear_app": APIRecord(
+            "Keeps every window of the focused app clear, not only "
+                + "the focused one; off by default.",
+            .boolean("enabled")
+        ),
+    ]
+
+    static let kiwihubRecords: [String: APIRecord] = [
+        "show": APIRecord(
+            "Opens KiwiHub on a side, switches it there, or closes "
+                + "it if that side is open.",
+            .choice("side", KiwiHubSide.self)
+        )
     ]
 }

@@ -48,9 +48,12 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Settings/SettingsModel+LiveWrite.swift":
             (
-                1,
+                2,
                 "draft adopts a top-up's rows: refuses an action the"
-                    + " layer already runs (DesktopShortcutDraftTests)"
+                    + " layer already runs (DesktopShortcutDraftTests);"
+                    + " and an outside shortcut write's rows: one row per"
+                    + " action by sameAction, the written chord taken"
+                    + " from any other row (RuleKeepDraftTests)"
             ),
         "KiwiDesk/Settings/SettingsModel+Reset.swift":
             (
@@ -75,10 +78,33 @@ struct LayerRowWriterCensusTests {
                 "layer rename: rewrites Lua in place, adds no row;"
                     + " layer delete: removes rows, adds none"
             ),
+        "KiwiDesk/Settings/Components/Keybindings/"
+            + "KeybindingCatalog+Lenses.swift":
+            (
+                3,
+                "lens rename: drops a stale row of the new name, then"
+                    + " rewrites Lua in place, adds no row; lens delete:"
+                    + " removes rows, adds none (#2103,"
+                    + " ShortcutsLensRowsTests)"
+            ),
         "KiwiDesk/Shortcuts/ShortcutsReference.swift":
             (1, "shortcuts panel: removes rows from a copy it draws"),
+        "KiwiDeskCore/Config/HyperShortcutMove.swift":
+            (
+                1,
+                "Hyper move: rewrites a row's chord in place, adds no"
+                    + " row, then takes the dedupe (#1870,"
+                    + " HyperShortcutMoveTests)"
+            ),
         "KiwiDeskCore/Config/KeyLayer.swift":
             (1, "the initializer"),
+        "KiwiDesk/Settings/Components/KiwiVision/"
+            + "KiwiVisionLensHeader.swift":
+            (
+                1,
+                "a lens's header (#2103): the NavRow's binding setter,"
+                    + " writing back the rows the row itself edited"
+            ),
     ]
 
     /// File → (writable `[KeyBinding]` holders, why it holds the rule).
@@ -96,12 +122,26 @@ struct LayerRowWriterCensusTests {
             (1, "custom rows, which are no navigation action"),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingAppGroup.swift":
             (1, "application rows, which are no navigation action"),
+        "KiwiDeskCore/Config/HyperShortcutMove.swift":
+            (1, "the Hyper move: rewrites chords in place, adds no row"),
         "KiwiDeskCore/Keys/KeybindingMerge.swift":
             (1, "the import merge; its caller takes the dedupe"),
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":
             (1, "the layer's rows handed down, written back whole"),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingGroups.swift":
-            (5, "catalog groups: hand the holder to their rows"),
+            (6, "catalog groups: hand the holder to their rows"),
+        "KiwiDesk/Settings/Components/Keybindings/KiwiHubGroup.swift":
+            (1, "the KiwiHub group: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/Keybindings/"
+            + "KiwiVisionShortcutsGroup.swift":
+            (1, "the KiwiVision group: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/KiwiVision/"
+            + "KiwiVisionLensHeader.swift":
+            (
+                1,
+                "a lens's header (#2103): hands the base layer's rows"
+                    + " to the lens's one NavRow"
+            ),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "OrphanedShortcutsGroup.swift":
             (1, "Inactive rows: hands the holder to its rows"),

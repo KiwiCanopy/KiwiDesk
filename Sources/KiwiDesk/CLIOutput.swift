@@ -55,3 +55,19 @@ enum CLIOutput {
         }
     }
 }
+
+extension JSONValue {
+    /// An object's member, or nil for any other value.
+    subscript(_ key: String) -> JSONValue? {
+        if case .object(let members) = self { return members[key] }
+        return nil
+    }
+
+    /// A scalar as text — a number through `stringValue`'s
+    /// whole-number rendering (#386), a boolean as `true`/`false`;
+    /// nil for null, an object or an array.
+    var scalarText: String? {
+        if case .bool(let flag) = self { return flag ? "true" : "false" }
+        return stringValue
+    }
+}

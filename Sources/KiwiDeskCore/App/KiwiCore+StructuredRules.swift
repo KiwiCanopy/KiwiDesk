@@ -6,16 +6,9 @@ import Foundation
 extension KiwiCore {
     // MARK: - Rules
 
-    /// Sets window rules and native-space profile bindings
-    /// directly from GuiConfig — overrides what the managed
-    /// block in `init.lua` set via Lua globals. Each rule family
-    /// resolves through the active profile's sparse override.
-    func applyStructuredRules(
-        from config: GuiConfig,
-        profile: WindowRuleOverrides
-    ) {
-        captureGlobalWindowRuleBase(from: config)
-        setResolvedWindowRules(profile)
+    /// Adopts the sidecar's Desktop bindings and Desktop memory,
+    /// over what the managed block in `init.lua` set.
+    func applyStructuredRules(from config: GuiConfig) {
         desktopBindings = config.profileBindings
         // #1230: what each Desktop was showing, so a restart does
         // not re-scatter them.
@@ -58,23 +51,48 @@ extension KiwiCore {
             return
         }
         let profile = activeProfileOverrides()
-        captureGlobalWindowRuleBase(from: config)
-        setResolvedWindowRules(WindowRuleOverrides(profile))
-        applyScrollGestures(
-            base: config.scrollGesture,
-            profile: profile?.scrollGesture
-        )
-        applySpaceHistory(
-            base: config.spaceHistory,
-            profile: profile?.spaceHistory
-        )
-        guard changed, let lua = keys.lua else { return }
+        applyBehaviorOverrides(base: config, profile: profile)
+        guard changed else { return }
+        reregisterStoredKeys(config, profile: profile)
+    }
+
+    /// Re-registers the shortcuts from the saved files alone, in
+    /// the running layer, touching no other family — the rule
+    /// refresh's tail and an outside shortcut write (#1685).
+    func reregisterStoredKeys(
+        _ config: GuiConfig? = nil,
+        profile: Profile? = nil
+    ) {
+        guard isGuiManaged,
+            let config = config ?? loadStructuredConfig(),
+            let lua = keys.lua
+        else { return }
         applyStructuredKeybindings(
             layers: config.layers,
-            profile: profile?.layers,
+            profile: (profile ?? activeProfileOverrides())?.layers,
             lua: lua,
             preferredLayer: keys.currentLayer
         )
+    }
+
+    /// Every behaviour-override family but the shortcuts, resolved
+    /// over `base` — the sidecar's, or nil to keep what `init.lua`'s
+    /// verbs left — with `profile`'s sparse overrides on top. A new
+    /// family applies here, never at a call site
+    /// (`RuleReachFamilyParityTests`); the shortcuts stay with each
+    /// caller, which owns the VM and the layer to land on.
+    func applyBehaviorOverrides(base: GuiConfig?, profile: Profile?) {
+        if let base { captureGlobalWindowRuleBase(from: base) }
+        setResolvedWindowRules(WindowRuleOverrides(profile))
+        applyScrollGestures(
+            base: base?.scrollGesture,
+            profile: profile?.scrollGesture
+        )
+        applySpaceHistory(
+            base: base?.spaceHistory,
+            profile: profile?.spaceHistory
+        )
+        applyModeCycle(base: base?.modeCycle, profile: profile?.modeCycle)
     }
 
     /// The one resolve of the window-rule families — a config load,

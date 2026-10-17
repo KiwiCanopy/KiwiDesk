@@ -24,9 +24,10 @@ extension KiwiCore {
     }
 
     /// The observer body: both bars from their drivers, then the
-    /// sticky marks.
+    /// sticky marks and KiwiVision's blur (#2103).
     func reduceTransparencyDidChange() {
         updateBars()
         updateStickyMarks()
+        updateVision()
     }
 }

@@ -34,7 +34,7 @@ struct SettingsCodingTests {
                 "mouse_resize", "new_window_placement_override",
                 "shortcut_panel",
                 "floating", "resize", "space",
-                "space_bar", "space_switch",
+                "space_bar",
                 "sticky", "swap_skips_cascade",
             ]
         )
@@ -100,6 +100,15 @@ struct SettingsCodingTests {
         // (#186), off by default.
         let mouse = try object(root["mouse"])
         #expect(mouse["follows_focus"] as? Bool == false)
+        // `mouse.set_hover_focus` → `mouse.hover_focus` (#1869),
+        // off by default.
+        #expect(mouse["hover_focus"] as? Bool == false)
+        // `mouse.set_hover_focus_delay` → `mouse.hover_focus_delay`
+        // (#1869), in milliseconds.
+        #expect(
+            mouse["hover_focus_delay"] as? Int
+                == MouseSettings.defaultHoverFocusDelayMS
+        )
         // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
         // (#172), on by default.
         #expect(root["swap_skips_cascade"] as? Bool == true)
@@ -134,7 +143,6 @@ struct SettingsCodingTests {
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.
         let animations = try object(root["animations"])
-        #expect(animations["on_space_change"] as? Bool == true)
         #expect(animations["on_scrolling"] as? Bool == true)
         #expect(animations["on_window_resize"] as? Bool == true)
         #expect(animations["on_window_swap"] as? Bool == true)

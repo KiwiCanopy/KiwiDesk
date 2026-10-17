@@ -16,6 +16,8 @@ struct PaletteTile<Plate: View>: View {
     /// ends level.
     var captionLines = 1
     @ViewBuilder var plate: () -> Plate
+    @State private var hovered = false
+    @Environment(\.isEnabled) private var isEnabled
 
     /// The plate's height matching `PaletteSceneThumbnail.baseHeight`.
     static var plateHeight: CGFloat {
@@ -40,7 +42,22 @@ struct PaletteTile<Plate: View>: View {
         }
         .padding(Self.inset)
         .frame(maxWidth: .infinity)
+        .background(lift)
         .overlay(frame)
+        .onHover { hovered = $0 }
+    }
+
+    /// The pointer's grey lift, a fill apart from the applied
+    /// stroke (#1173); the applied tile, whose click changes
+    /// nothing, stays flat (owner, 2026-10-17).
+    private var lift: some View {
+        RoundedRectangle(
+            cornerRadius: SettingsTheme.disclosureRadius
+        )
+        .fill(
+            hovered && isEnabled && !isApplied
+                ? SettingsTheme.chipRest : .clear
+        )
     }
 
     /// Leading checkmark indicator for active palette

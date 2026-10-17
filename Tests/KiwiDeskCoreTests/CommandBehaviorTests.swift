@@ -35,20 +35,29 @@ struct CommandBehaviorTests {
             args: [.number(300)]
         )
         #expect(core.tiler.animation.durationMS == 300)
-        // Defaults: space change on (#1931), scrolling on (#11).
-        #expect(core.tiler.settings.animations.onSpaceChange)
+        // Defaults: the Space cue (#2143, #2228), scrolling on (#11).
+        #expect(core.appWide.spaceCue)
         #expect(core.tiler.settings.animations.onScrolling)
-        // Each toggle round-trips in *both* directions.
-        core.execute(
+        core.execute("set_space_cue", args: [.bool(false)])
+        #expect(!core.appWide.spaceCue)
+        core.execute("set_space_cue", args: [.bool(true)])
+        #expect(core.appWide.spaceCue)
+        // The 2.x toggle and #2143's picker retire, naming it; the
+        // slide's own knobs retire with no replacement.
+        for verb in [
             "animations.set_on_space_change",
-            args: [.bool(false)]
-        )
-        #expect(!core.tiler.settings.animations.onSpaceChange)
-        core.execute(
-            "animations.set_on_space_change",
-            args: [.bool(true)]
-        )
-        #expect(core.tiler.settings.animations.onSpaceChange)
+            "animations.set_space_change",
+        ] {
+            let retired = core.execute(verb, args: [.bool(true)])
+            #expect(retired.error?.contains("set_space_cue") == true)
+        }
+        for verb in [
+            "animations.set_space_change_duration",
+            "set_space_switch_liquid_glass",
+        ] {
+            let retired = core.execute(verb, args: [.number(300)])
+            #expect(retired.error?.contains("no longer slides") == true)
+        }
         core.execute(
             "animations.set_on_scrolling",
             args: [.bool(false)]

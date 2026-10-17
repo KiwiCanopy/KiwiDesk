@@ -31,6 +31,14 @@ enum SettingsMetrics {
     /// Destination icon square tile (#678).
     static let sidebarTile: CGFloat = 22
 
+    /// The layout cycle list's well (#453): wide enough for the
+    /// longest layout name with its symbol and handle.
+    static let cycleListWidth: CGFloat = 320
+
+    /// The icon slot a Shortcuts setting row reserves so its label
+    /// starts where a shortcut row's does (#264, #1655, #453).
+    static let shortcutIconSlot: CGFloat = 18
+
     /// Trailing readout of a slider row (#406). Sized for proportional
     /// digits with `monospacedDigit()`.
     static let readoutColumn: CGFloat = 72

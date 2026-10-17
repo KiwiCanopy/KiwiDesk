@@ -311,7 +311,7 @@ struct KeyboardLayerNamingTests {
     ///
     /// This arm asserts WHERE an unwritten selection lands, so
     /// retuning `shortcutsLayerSelection` owes this test and
-    /// `SpaceOverridesNavTests` together — a behaviour claim
+    /// `SettingsNavigationResetTests` together — a behaviour claim
     /// about an opening the user sees, not a #1021 value pin.
     @Test("an unwritten selection still names what it drew")
     func labelNamesTheDrawnLayer() {

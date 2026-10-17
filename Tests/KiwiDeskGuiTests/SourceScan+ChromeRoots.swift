@@ -32,7 +32,7 @@ enum ChromeScanRoots {
     ///
     /// Shortcuts joined for the same reason one tree over
     /// (#1293/#1295), and it is the #828 lesson repeating: the
-    /// ⌃⌥K panel drew the retired `Color.accentColor` and a
+    /// old ⌃⌥K panel drew the retired `Color.accentColor` and a
     /// `Button` with no style at all, so on a Mac whose system
     /// accent is not green it rendered a pink chip and a pink
     /// button inside a kiwi app — shipped, and invisible to
@@ -40,13 +40,17 @@ enum ChromeScanRoots {
     /// directory was not partly covered but silently exempt.
     /// The membership test is met: a raw colour there ships a
     /// defect the tint makes visible.
+    ///
+    /// Jump joined in the change that created it (#1875): its
+    /// panel draws a selection fill and plain buttons.
     static let paths = [
         "Sources/KiwiDesk/Settings",
         "Sources/KiwiDesk/Onboarding",
         "Sources/KiwiDesk/Shortcuts",
         "Sources/KiwiDesk/Updates",
         "Sources/KiwiDesk/BootNotice",
-        "Sources/KiwiDesk/DesktopCue",
+        "Sources/KiwiDesk/CuePlate",
+        "Sources/KiwiDesk/Jump",
     ]
 
     static func urls(from filePath: String) -> [URL] {

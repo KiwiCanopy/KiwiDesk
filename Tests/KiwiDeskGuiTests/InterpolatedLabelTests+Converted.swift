@@ -66,6 +66,11 @@ extension InterpolatedLabelTests {
     /// translation that pronominalises it. `gui.md` ▸ Strings
     /// now bans it outright.
     static let converted: [String: Int] = [
+        // The key panel's Layout Defaults… button (#2229).
+        "layout_picker.layout_defaults": 1,
+        // The quick menu's Open KiwiHub… row names the product
+        // through its one key (#2309).
+        "menu.open_kiwihub": 1,
         // The two per-space remote-gate pointers (#841). One
         // control label each — the second specifier is
         // `CrossReferenceRow.linkSlot`, a destination link
@@ -97,7 +102,8 @@ extension InterpolatedLabelTests {
         // names interpolated from their own keys, authored that
         // way from the start.
         "monocle.hide_style.help": 2,
-        // #1683: the Other Spaces `?` names its three segments.
+        // #1683: the Windows in other Spaces `?` names its
+        // segments.
         "space_bar.inactive_content.help": 2,
         // #1535: the Space label `?` names both segments.
         "space_bar.item_label.help": 2,
@@ -184,7 +190,6 @@ extension InterpolatedLabelTests {
         // #1799: the floating mark's help names the layout.
         "floating.mark.help": 1,
         "scroll_grid.scroll_duration.animation_off": 1,
-        "monocle.flip_duration.flip_off": 1,
         "track.auto_tracks.limit_inert": 1,
         "monitors.not_connected.caption": 1,
         "menu.status.config_error.tooltip": 1,
@@ -230,7 +235,6 @@ extension InterpolatedLabelTests {
         "drag.disabled.help": 1,
         "border.fit_gaps.updated_new": 1,
         "scroll_grid.animate_focus_shifts.help": 1,
-        "monocle.flip.help": 1,
         "sticky.caption": 2,
         "general.login_item.managed_by_service": 1,
         // 4. #1094. The help quoted "Toggle sticky" as literal
@@ -249,6 +253,9 @@ extension InterpolatedLabelTests {
         //    same card as the entry above, reached from the
         //    other end of the app.
         "shortcuts.desktops.help": 1,
+        // #1870. The Hyper move's KiwiHub line names the panel by
+        //    its product key, beside the Open Settings row's name.
+        "shortcuts.hyper_move.kiwihub": 1,
         // 7. #1394. A screen-count mismatch is the one drift
         //    Save cannot take up, so the hint that greys Save
         //    and the header's status line both name the button
@@ -294,7 +301,7 @@ extension InterpolatedLabelTests {
         // the scan does not count as a label).
         "looks.shared.xref_link": 1,
         "onboarding.looks.draft_pending": 2,
-        "onboarding.looks.hint": 2,
+        "onboarding.looks.hint_ai": 2,
         // The Float card's `?` names the float VALUE it explains
         // (#1022, #1608).
         "app_rules.section.help.titles": 1,
@@ -305,5 +312,14 @@ extension InterpolatedLabelTests {
         "colors.front_app_off.help": 2,
         // A layer's locked box points at Delete layer (#2022).
         "shortcuts.layer_reach.locked_help": 1,
+        // KiwiVision's pointer names Shortcuts ▸ Focus by its
+        // labels (#2103).
+        "kiwivision.xref_link": 1,
+        // The lens page's other-layer caption names Shortcuts
+        // (#2103).
+        "kiwivision.lens.chord_elsewhere": 1,
+        // #2258: the Add to Claude Desktop failure names Copy Setup
+        // Prompt.
+        "ai.setup.claude_desktop.failed": 1,
     ]
 }

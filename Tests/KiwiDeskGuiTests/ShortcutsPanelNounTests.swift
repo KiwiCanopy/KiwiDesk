@@ -1,10 +1,13 @@
 import Foundation
 import Testing
 
-/// The ⌃⌥K surface has ONE name per catalog: whatever a locale
+/// Each key panel has ONE name per catalog: whatever a locale
 /// calls the panel when it points AT it, the panel's own
 /// accessibility name uses (#1316,
-/// `.claude/rules/config-vocabulary.md` ▸ shortcuts panel).
+/// `.claude/rules/config-vocabulary.md` ▸ shortcuts panel). The
+/// pairing covers every panel a shortcut row shows: each side of
+/// KiwiHub, whose row reads "Show" and that side's VoiceOver name
+/// (#2245, `.claude/rules/gui.md` ▸ a row's title).
 ///
 /// The defect this reds on is not inconsistency in the abstract.
 /// `shortcuts.panel.ax_label` shipped as "Shortcuts reference"
@@ -50,30 +53,100 @@ import Testing
 ///
 /// An empty value does NOT pass vacuously: `contains("")` is
 /// false in Swift, so an untranslated-empty merge reds.
-@Suite("The shortcuts panel has one name per catalog")
+@Suite("Each key panel has one name per catalog")
 struct ShortcutsPanelNounTests {
-    /// The panel's own accessibility name.
-    static let panelName = "shortcuts.panel.ax_label"
-    /// The verb that opens it, which names it in passing.
-    static let opener = "keybinding.show_shortcuts"
+    /// A panel's own accessibility name, and the row that opens
+    /// it, which names it in passing.
+    struct Pair {
+        let panelName: String
+        let opener: String
+        /// Whether translations of the pair have shipped, so a
+        /// run comparing English alone means they were lost. A
+        /// pair left false reds once a translation lands, so the
+        /// round that lands one sets it.
+        var translated = false
+    }
+
+    /// Every panel a shortcut row opens.
+    static let pairs = [
+        Pair(
+            panelName: "shortcuts.panel.ax_label",
+            opener: "keybinding.show_shortcuts",
+            translated: true
+        ),
+        Pair(
+            panelName: "jump.panel.ax_label",
+            opener: "keybinding.show_window_switcher",
+            translated: true
+        ),
+        Pair(
+            panelName: "view_picker.panel.ax_label",
+            opener: "keybinding.show_view_picker",
+            translated: true
+        ),
+    ]
+
+    /// Panel names authored before their translation round, whose
+    /// opener a catalog already carries — the one copy of who may
+    /// be absent beside it. Such a side announces the English name
+    /// beside a translated row until its round; an entry reds once
+    /// any translation carries the key, so that round retires it.
+    /// EMPTY: #2245's round translated both panel sides.
+    static let awaitingTranslation: Set<String> = []
 
     /// Locales whose grammar inflects the noun inside the verb
-    /// phrase, valued by the form the OPENER carries — **the one
-    /// copy of who may**.
+    /// phrase, keyed by panel name and then locale, valued by the
+    /// form the OPENER carries — **the one copy of who may**.
     ///
     /// The value is checked, not decoration: an entry narrows
     /// the comparison to that form rather than dropping the
     /// locale out of it, so an exemption still holds the pairing
     /// it was granted for. EMPTY: nothing shipped inflects it.
-    static let allowed: [String: String] = [:]
+    static let allowed: [String: [String: String]] = [:]
 
-    @Test("the panel's own name is the noun its opener uses")
-    func oneNounPerCatalog() throws {
+    @Test("every awaiting panel name is a pair's")
+    func awaitingNamesAPair() {
+        let names = Set(Self.pairs.map(\.panelName))
+        #expect(Self.awaitingTranslation.isSubset(of: names))
+    }
+
+    @Test(
+        "the panel's own name is the noun its opener uses",
+        arguments: pairs.map(\.panelName)
+    )
+    func oneNounPerCatalog(panelName: String) throws {
+        let pair = try #require(
+            Self.pairs.first { $0.panelName == panelName }
+        )
         var compared = 0
         for locale in try Self.catalogNames() {
             let catalog = try Self.catalog(locale)
-            let name = catalog[Self.panelName]
-            let opens = catalog[Self.opener]
+            let name = catalog[pair.panelName]
+            let opens = catalog[pair.opener]
+            if !pair.translated, locale != "en",
+                !Self.awaitingTranslation.contains(pair.panelName),
+                name != nil || opens != nil
+            {
+                Issue.record(
+                    """
+                    \(locale) translates \(pair.panelName) / \
+                    \(pair.opener): set the pair's `translated`, \
+                    so the floor holds its translations.
+                    """
+                )
+            }
+            if Self.awaitingTranslation.contains(pair.panelName) {
+                if locale != "en", name != nil {
+                    Issue.record(
+                        """
+                        \(locale) translates \(pair.panelName), so \
+                        its round has come: remove it from \
+                        `awaitingTranslation`.
+                        """
+                    )
+                }
+                if locale != "en", name == nil { continue }
+            }
             // ONE of the two present is the defect wearing the
             // English fallback: `drop-key --locale` retires a bad
             // translation, after which that locale announces the
@@ -83,8 +156,8 @@ struct ShortcutsPanelNounTests {
             if (name == nil) != (opens == nil) {
                 Issue.record(
                     """
-                    \(locale) carries one of \(Self.panelName) / \
-                    \(Self.opener) and not the other, so the \
+                    \(locale) carries one of \(pair.panelName) / \
+                    \(pair.opener) and not the other, so the \
                     surface is named by a translation on one \
                     channel and by the English fallback on the \
                     other — the #1316 split, wearing a fallback.
@@ -94,7 +167,7 @@ struct ShortcutsPanelNounTests {
             }
             guard let name, let opens else { continue }
             compared += 1
-            let expected = Self.allowed[locale] ?? name
+            let expected = Self.allowed[pair.panelName]?[locale] ?? name
             #expect(
                 opens.lowercased().contains(expected.lowercased()),
                 """
@@ -109,9 +182,10 @@ struct ShortcutsPanelNounTests {
         }
         // The floor counts COMPARISONS, never files: every
         // catalog losing the key passes a file count and
-        // compares nothing (`guard-prover`, #1316).
+        // compares nothing (`guard-prover`, #1316). A pair before
+        // its translation round compares English alone.
         #expect(
-            compared > 1,
+            compared > (pair.translated ? 1 : 0),
             """
             \(compared) catalog(s) actually compared — this \
             suite passed for having looked at nothing.

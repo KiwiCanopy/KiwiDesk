@@ -115,3 +115,6 @@ extension ConfigIssue.Kind {
         return false
     }
 }
+
+/// `KiwiCore.onConfigIssuesChange`'s shape.
+public typealias ConfigIssuesChanged = @MainActor ([ConfigIssue]) -> Void

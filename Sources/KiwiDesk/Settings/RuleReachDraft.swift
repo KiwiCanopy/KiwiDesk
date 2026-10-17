@@ -13,6 +13,9 @@ enum RuleFamily: Hashable {
     /// The Space history setting, keyed by
     /// `RuleReachTable.spaceHistoryKey` (#1655).
     case history
+    /// The layout cycle, keyed by `RuleReachTable.modeCycleKey`
+    /// (#453).
+    case cycle
     /// A Tile rule, keyed like a float rule (#2173).
     case tile
     /// The "Float windows automatically" switch, keyed by
@@ -20,12 +23,14 @@ enum RuleFamily: Hashable {
     case autoFloat
 
     /// How a row's subject keys its table: app rules by the
-    /// lowercased bundle id, a shortcut's action and a scroll
-    /// setting verbatim.
+    /// lowercased bundle id — a float rule's app by the engine's
+    /// own `FloatRules.appKey` (#2345) — a shortcut's action and a
+    /// scroll setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
-        case .key, .scroll, .history, .autoFloat: subject
-        case .space, .float, .tile: subject.lowercased()
+        case .key, .scroll, .history, .cycle, .autoFloat: subject
+        case .float: FloatRules.appKey(subject)
+        case .space, .tile: subject.lowercased()
         }
     }
 }
@@ -42,11 +47,13 @@ struct RuleReachEdits: Equatable {
     var layers: [String: LayerEdit] = [:]
     /// Stored layers the draft deleted, and how far.
     var deletedLayers: [String: RuleRemoval] = [:]
+    /// The lens page's draft (#2103), nil while it changes nothing.
+    var lenses: LensEdits?
 
     var isEmpty: Bool {
         reach.values.allSatisfy(\.isEmpty)
             && removal.values.allSatisfy(\.isEmpty)
-            && layers.isEmpty && deletedLayers.isEmpty
+            && layers.isEmpty && deletedLayers.isEmpty && lenses == nil
     }
 }
 
@@ -82,10 +89,7 @@ enum RuleReachDraft {
         editing: String,
         isLoaded: Bool
     ) -> RuleReach {
-        if stored.resolved(key, for: editing) != nil {
-            return stored.reach(of: key, editing: editing)
-        }
-        return isLoaded ? .shared(joining: []) : .listed([editing])
+        stored.defaultReach(of: key, editing: editing, isLoaded: isLoaded)
     }
 
     /// `stored` with the draft applied: `current` is the edited

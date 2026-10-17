@@ -41,6 +41,8 @@ struct AnnouncedValueTests {
     private static let labelled: [String: Int] = [
         "AppRuleSpaceRow.swift": 1,
         "AppRuleFloatRow.swift": 1,
+        // A lens app's All windows / Windows titled… menu (#2103).
+        "KiwiVisionLensAppsCard.swift": 1,
         // #1393: the trash that asks where a shared rule goes.
         "AppRuleIdentity.swift": 1,
         "SpacesSection+ModePicker.swift": 1,

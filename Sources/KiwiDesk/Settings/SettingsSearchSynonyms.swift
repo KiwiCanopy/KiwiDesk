@@ -36,6 +36,17 @@ enum SettingsSearchSynonyms {
     ) -> [String] {
         switch destination {
         case .screens: return ["monitors", "displays"]
+        // The title is just "AI" (#1685), so the app names and
+        // the protocol a user arrives with reach the page.
+        case .ai:
+            return [
+                "mcp", "model context protocol", "claude",
+                "cursor", "codex", "assistant", "llm",
+            ]
+        // A brand word (#2103): the effect's own words reach it;
+        // never "zen" (ruling 5).
+        case .kiwiVision:
+            return ["dim", "blur", "haze", "focus"]
         default: return []
         }
     }
@@ -99,14 +110,8 @@ enum SettingsSearchSynonyms {
         // the setting stores (#1020).
         case .colours(.animationsDurationMS):
             return ["speed", "animation speed"]
-        case .colours(.animationsSpaceChangeDurationMS):
-            return ["speed", "space speed", "slide speed", "transition"]
         case .colours(.animationsScrollDurationMS):
             return ["speed", "scroll speed", "scrolling speed"]
-        case .colours(.animationsOnMonocleFocus):
-            return ["card flip", "transition", "blur"]
-        case .colours(.animationsMonocleFlipDurationMS):
-            return ["speed", "flip speed"]
         case .colours(.animationsOnShelf):
             return ["bar", "app bar", "space bar", "grow", "fade", "slide"]
         case .colours(.animationsShelfDurationMS):
@@ -137,7 +142,8 @@ enum SettingsSearchSynonyms {
                 "reset", "reset shortcuts", "factory",
                 "original shortcuts", "stock shortcuts",
             ]
-        case .behaviour(.mouseFollowsFocus):
+        // The tilers' name for it (#1869).
+        case .behaviour(.mouseHoverFocus):
             return ["focus follows mouse", "hover focus"]
         case .behaviour(.minWindowSize):
             return ["minimum size"]

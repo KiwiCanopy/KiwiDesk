@@ -68,10 +68,6 @@ struct LayoutCard: View {
             animateFocusShiftsRow
         case .colours(.animationsScrollDurationMS):
             scrollDurationRow
-        case .colours(.animationsOnMonocleFocus):
-            monocleFlipRow
-        case .colours(.animationsMonocleFlipDurationMS):
-            monocleFlipDurationRow
         default:
             let _ = assertionFailure(
                 "unrendered Layout Defaults key: \(key.id)"
@@ -148,8 +144,9 @@ enum LayoutCardText {
         case (.monocle, false):
             return L(
                 "monocle.app_bar_xref_off",
-                "The monocle App Bar (currently off) is "
-                    + "configured in %1$@.",
+                "The monocle App Bar is off, so nothing lists "
+                    + "the windows behind the focused one. Turn it "
+                    + "on in %1$@.",
                 CrossReferenceRow.linkSlot
             )
         case (.scrolling, true):

@@ -47,7 +47,7 @@ struct WindowRootTintTests {
     private static let roots = [
         "SettingsView.swift",
         "OnboardingView.swift",
-        "ShortcutsPanelView.swift",
+        "JumpPanelView.swift",
     ]
 
     /// What a root must spell. The TOKEN family, never which

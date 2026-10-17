@@ -102,30 +102,27 @@ struct GlassCard: View {
     private var caption: String {
         L(
             "colors.glass.caption",
-            "A translucent material over both bars, the "
-                + "shortcuts panel, the drag ghost and drop zone, "
-                + "the sticky mark and the plates a Space switch "
-                + "slides."
+            "A translucent material over both bars, %1$@, the "
+                + "drag ghost and drop zone, and the sticky mark.",
+            JumpScope.panelName
         )
     }
 
     /// The material's NAME is deliberately absent from both help
-    /// strings: it survives verbatim in every catalog, and a
-    /// Latin name inside a translated sentence trips the
-    /// residue guard in the non-Latin ones. The card's title
-    /// carries it directly above.
+    /// strings: the card's title carries it directly above.
+    /// KiwiHub is named by its key (#818, #2265).
     private var baseHelp: String {
         L(
             "colors.liquid_glass.help",
             "Lays macOS's translucent material over the Space "
-                + "Bar, the App Bar, the shortcuts panel, the drag "
-                + "ghost and drop zone, the sticky mark and the "
-                + "plates a Space switch slides. KiwiShelf's %1$@ "
+                + "Bar, the App Bar, %2$@, the drag ghost and drop "
+                + "zone, and the sticky mark. KiwiShelf's %1$@ "
                 + "color tints the bars, fading from its screen "
                 + "edge; the drag ghost, drop zone and sticky mark "
                 + "take their own colors, fading downward; the "
-                + "shortcuts panel and the plates stay untinted.",
-            L("kiwishelf.color.fill", "Fill")
+                + "panel stays untinted.",
+            L("kiwishelf.color.fill", "Fill"),
+            JumpScope.panelName
         )
     }
 

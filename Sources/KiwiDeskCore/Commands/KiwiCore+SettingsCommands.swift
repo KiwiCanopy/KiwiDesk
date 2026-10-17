@@ -101,9 +101,8 @@ extension KiwiCore {
         // knob whose arm was gone (#1009, `CommandDispatchReachTests`).
         switch command {
         case "animations.set_duration":
-            // Persisted per-profile (issue #51). Writes both
-            // the settings struct and the engine so the value
-            // is live immediately AND captured on next save.
+            // Live only: a later save_profile captures it, into
+            // the shared look for a profile wearing it (#1685).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
@@ -118,14 +117,6 @@ extension KiwiCore {
             }
             tiler.settings.animations.scrollDurationMS = ms
             return .ok()
-        case "animations.set_monocle_flip_duration":
-            // The Monocle flip's turn (#1391), its own knob
-            // like `set_scroll_duration`.
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.settings.animations.monocleFlipDurationMS = ms
-            return .ok()
         case "animations.set_on_shelf":
             // The shelf's glide on and off (#1838).
             guard let on = args.first?.boolValue else {
@@ -133,13 +124,6 @@ extension KiwiCore {
             }
             tiler.settings.animations.onShelf = on
             updateBars()
-            return .ok()
-        case "animations.set_space_change_duration":
-            // The plate slide's pace (#1931); read at each press.
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.settings.animations.spaceChangeDurationMS = ms
             return .ok()
         case "animations.set_shelf_duration":
             // The shelf glide's pace (#1838).
@@ -167,10 +151,6 @@ extension KiwiCore {
             }
             tiler.animation.sizeRateHz = hz > 0 ? hz : nil
             return .ok()
-        case "animations.set_on_space_change":
-            return setBool(args) {
-                tiler.settings.animations.onSpaceChange = $0
-            }
         case "animations.set_on_scrolling":
             return setBool(args) {
                 tiler.settings.animations.onScrolling = $0
@@ -187,32 +167,32 @@ extension KiwiCore {
             return setBool(args) {
                 tiler.settings.animations.onRelayout = $0
             }
-        case "animations.set_on_monocle_focus":
-            return setBool(args) {
-                tiler.settings.animations.onMonocleFocus = $0
-            }
         default:
             return .fail("unknown command: \(command)")
         }
     }
 
-    /// `mouse.*` pointer-behaviour toggles (#186). Persist in
+    /// `mouse.*` pointer-behaviour toggles (#186, #1869). Persist in
     /// `settings.mouse` so they ride the profile split like
     /// the animation toggles above.
     func mouseCommand(
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
-        guard let enabled = args.first?.boolValue else {
-            return .fail("expected boolean")
-        }
         switch command {
         case "mouse.set_follows_focus":
-            tiler.settings.mouse.followsFocus = enabled
+            return setBool(args) { tiler.settings.mouse.followsFocus = $0 }
+        case "mouse.set_hover_focus":
+            return setBool(args) { tiler.settings.mouse.hoverFocus = $0 }
+        case "mouse.set_hover_focus_delay":
+            guard let ms = args.first?.intValue, ms >= 0 else {
+                return .fail("expected milliseconds, 0 or more")
+            }
+            tiler.settings.mouse.hoverFocusDelayMS = ms
+            return .ok()
         default:
             return .fail("unknown command: \(command)")
         }
-        return .ok()
     }
 
     /// `quit.*` teardown placement (#197), app-wide (#1741) and

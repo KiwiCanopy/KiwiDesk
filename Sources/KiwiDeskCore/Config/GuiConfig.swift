@@ -50,16 +50,22 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
+    /// The layouts the cycle walks (#453); a profile diverges
+    /// through `Profile.modeCycle`.
+    public var modeCycle = ModeCycle.defaultList
     /// Whether detection floats windows on a guess — a fixed size,
     /// no Dock icon — (#2173); a profile diverges through
     /// `Profile.floatAutomatically`.
     public var floatAutomatically = FloatGuess.enabledByDefault
     /// Apps whose guessed floats tile (`tile_rules`, #2173).
     public var tileRules: [String] = []
-    /// The settings no profile carries (#1741); nil until this
-    /// file has adopted them. Stamped at the write
-    /// (`GuiConfigStore.liveAppWide`) rather than drafted: General
-    /// writes them the moment they change.
+    /// The modifiers the Go to Desktop rows sit on
+    /// (`desktop_shortcut_base`, #1870): app-wide, drafted with
+    /// `layers` so a Save moves the rows and the base together.
+    public var desktopShortcutBase = DesktopShortcutBase.standard
+    /// The settings no profile carries (#1741); nil until adopted.
+    /// Stamped at the write (`GuiConfigStore.liveAppWide`), never
+    /// drafted: General writes them the moment they change.
     public var appWide: AppWideSettings?
     /// The shared look every profile without its own wears
     /// (#1752); nil until this file has adopted one. Stamped at the
@@ -99,11 +105,17 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case layers
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
+        case modeCycle = "mode_cycle"
         case floatAutomatically = "float_automatically"
         case tileRules = "tile_rules"
+        case desktopShortcutBase = "desktop_shortcut_base"
         case refusal
         case quit
         case desktop
+        case space
+        case mode
+        case kiwivision
+        case hyper
         case look
     }
 
@@ -177,6 +189,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 SpaceHistoryKind.self,
                 forKey: .spaceHistory
             ) ?? .defaultKind
+        // Additive since #453: absence is the default list.
+        modeCycle = try ModeCycle.decoded(container, forKey: .modeCycle)
         // Additive since #2173: absence is the defaults.
         floatAutomatically =
             try container.decodeIfPresent(
@@ -188,6 +202,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 [String].self,
                 forKey: .tileRules
             ) ?? []
+        // Additive since #1870: absence is the seeded tier.
+        desktopShortcutBase =
+            try container.decodeIfPresent(
+                DesktopShortcutBase.self,
+                forKey: .desktopShortcutBase
+            ) ?? .standard
         // Additive since #1741, like `desktopSpaces`: absence is
         // "not adopted yet", which the adoption reads.
         appWide = AppWideSettings(
@@ -202,6 +222,22 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             desktop: try container.decodeIfPresent(
                 AppWideSettings.Desktop.self,
                 forKey: .desktop
+            ),
+            space: try container.decodeIfPresent(
+                AppWideSettings.Space.self,
+                forKey: .space
+            ),
+            mode: try container.decodeIfPresent(
+                AppWideSettings.Mode.self,
+                forKey: .mode
+            ),
+            vision: try container.decodeIfPresent(
+                AppWideSettings.Vision.self,
+                forKey: .kiwivision
+            ),
+            hyper: try container.decodeIfPresent(
+                AppWideSettings.Hyper.self,
+                forKey: .hyper
             )
         )
         // Additive since #1752: absence is "no shared look adopted
@@ -223,9 +259,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// Strict, per AGENTS.md §5: format 1's `"2": "Work"` is
     /// rewritten once by `ConfigMigration`, never read leniently
-    /// here — a lenient reader never ends, so nothing would ever
-    /// signal that the last file carrying the retired shape is
-    /// gone.
+    /// here — a lenient reader never ends.
     private func decodeProfileBindings(
         from container: KeyedDecodingContainer<CodingKeys>
     ) throws -> [DesktopKey: DesktopBinding] {
@@ -255,15 +289,24 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)
         try container.encode(spaceHistory, forKey: .spaceHistory)
+        try container.encode(modeCycle, forKey: .modeCycle)
         try container.encode(
             floatAutomatically,
             forKey: .floatAutomatically
         )
         try container.encode(tileRules, forKey: .tileRules)
+        try container.encode(
+            desktopShortcutBase,
+            forKey: .desktopShortcutBase
+        )
         if let appWide {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)
             try container.encode(appWide.desktop, forKey: .desktop)
+            try container.encode(appWide.space, forKey: .space)
+            try container.encode(appWide.mode, forKey: .mode)
+            try container.encode(appWide.vision, forKey: .kiwivision)
+            try container.encode(appWide.hyper, forKey: .hyper)
         }
         try container.encodeIfPresent(look, forKey: .look)
     }

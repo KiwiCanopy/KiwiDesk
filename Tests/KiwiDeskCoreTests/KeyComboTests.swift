@@ -107,7 +107,7 @@ struct KeyComboTests {
 
     @Test("Rejects unknown keys and modifiers")
     func rejects() {
-        #expect(KeyCombo.parse("hyper+x") == nil)
+        #expect(KeyCombo.parse("meta+x") == nil)
         #expect(KeyCombo.parse("cmd+notakey") == nil)
         #expect(KeyCombo.parse("") == nil)
     }

@@ -42,7 +42,7 @@ struct SpaceHistoryRow: View {
         }
     }
 
-    private static let iconSlot: CGFloat = 18
+    private static let iconSlot = SettingsMetrics.shortcutIconSlot
 
     private var menu: some View {
         Picker(

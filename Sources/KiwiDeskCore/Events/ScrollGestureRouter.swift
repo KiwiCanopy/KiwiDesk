@@ -43,8 +43,8 @@ struct ScrollGestureRouter {
     /// none by then the gesture has ended.
     static let momentumGrace = 0.1
     /// A wheel's notches of one burst arrive well inside this;
-    /// held above `ScrollStepMeter.wheelQuiet`, whose latch the
-    /// burst's end resets.
+    /// held above `ScrollStepMeter.wheelQuiet`, the notch quiet
+    /// the burst's end clears.
     static let wheelPause = 0.25
 
     private struct Owner {

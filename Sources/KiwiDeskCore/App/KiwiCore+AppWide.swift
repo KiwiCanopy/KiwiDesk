@@ -52,6 +52,12 @@ extension KiwiCore {
     func prepareAppWide() {
         guard isGuiManaged else {
             appWideLedger.owed = nil
+            // `init.lua` is the store, and the Hyper key a remapped
+            // physical key: a reload whose file no longer calls
+            // `set_hyper_key` gives it back, as a relaunch would.
+            // The change only owes a deferred remap, so `init.lua`
+            // setting it again remaps nothing in between (#1870).
+            appWideLedger.live.hyperKey = nil
             return
         }
         guard let config = guiConfigStore.load() else { return }
@@ -108,16 +114,37 @@ extension KiwiCore {
         endCrossing(adopting: owed[profile.name] ?? appWideLedger.settled)
     }
 
+    /// The settled lenses: what the Settings lens page seeds its
+    /// draft from and writes back, so a session `define_lens` or
+    /// `delete_lens` never reaches `gui.json` (ruling 40).
+    public var kiwiVisionStoredLenses: [VisionLens] {
+        appWideLedger.settled.visionLenses
+    }
+
+    /// The lenses `gui.json` holds now — none before its group is
+    /// stored, since settled values a crossing owes are in no file —
+    /// and nil for a Lua-owned setup, whose store is `init.lua`.
+    var kiwiVisionLensesInGuiJSON: [VisionLens]? {
+        isGuiManaged ? appWideStamp?.visionLenses ?? [] : nil
+    }
+
     /// A General row (`persisting`) or a verb changing a value. A
     /// row writes `gui.json` at once — ending an owed crossing
     /// through the same door the first apply takes, after which
     /// the engine runs what was stored — and a verb changes the
     /// session alone, as every `set_*` does. No default: a caller
-    /// says which it is.
+    /// says which it is. A write that renames a lens says so in
+    /// `renamingLens`, so the lens on follows it — for this write
+    /// alone (#2103); the writer re-keys the stored bindings and
+    /// every profile's `lens_reach` in the same save
+    /// (`VisionLens.reach`).
     public func setAppWide(
         persisting: Bool,
+        renamingLens: (from: String, to: String)? = nil,
         _ change: (inout AppWideSettings) -> Void
     ) {
+        vision.renamedLens = renamingLens
+        defer { vision.renamedLens = nil }
         change(&appWideLedger.live)
         // A Lua-owned config has no store to write (its rows grey).
         guard persisting, isGuiManaged else { return }
@@ -212,6 +239,8 @@ extension KiwiCore {
         for name in profiles.list() {
             guard let url = try? profiles.fileURL(name: name),
                 let data = try? Data(contentsOf: url),
+                // A newer build's file is not this build's (#2325).
+                (try? NewerFormatOnDisk.refuseProfile(url)) != nil,
                 let stripped = ConfigMigration.withoutLegacyAppWide(
                     data
                 )

@@ -27,6 +27,7 @@ public enum FocusedCommandPolicy {
         "track.swap",
         "stack.promote",
         "stack.demote",
+        "explain_window",
     ]
 
     /// Focused verbs the #292 preflight lets through while

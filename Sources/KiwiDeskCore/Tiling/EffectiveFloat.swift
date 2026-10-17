@@ -74,7 +74,11 @@
 /// (#1810, `TileReturnsToRulesTests`): a floating-mode member is
 /// no refusal, the flag being what the Tile writes. The bar menus'
 /// Float/Tile row and its submenu ticks (#1518) stay on the flag
-/// for the same reason: they label what their verbs write. Every
+/// for the same reason: they label what their verbs write.
+/// `explain_window` (#1685) reports the flag AND this predicate's
+/// answer, and names the flag as the cause only where
+/// `tileRefusal(of:)` gives none, since #1810 makes a flag without
+/// a verdict the user's. Every
 /// other reader
 /// is the flag's own
 /// identity, a net already routed here, or a "tiled member"

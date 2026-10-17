@@ -100,9 +100,8 @@ extension KiwiCore {
                     > DesktopSwitch.settle
             else { return }
             // Deliberately NOT `spaceSwitchRetile()`: a dropped
-            // frame lands in one instant set, and a write the
-            // plate slide still holds folds into the held one
-            // (#1956).
+            // frame lands in one instant set, and the settle is
+            // not a second switch — it re-arms no ring hold.
             self.tiler.meter.settle {
                 self.retile(animated: false, pass: .reissue)
             }

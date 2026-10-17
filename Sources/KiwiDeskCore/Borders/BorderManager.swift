@@ -66,16 +66,9 @@ public final class BorderManager {
     var cornerRadii: [WindowID: CGFloat] = [:]
     /// Global draw order (#367).
     private var activeOrder: BorderGeometry.Order = .below
-    var eventSource: SkyLightWindowEvents?
-    var triedEventSource = false
     var privateRuntimeStarted = false
-    var skyLightActive = false
-    /// QA lever forcing the AX-fallback path (#596): set from
-    /// `KIWIDESK_NO_WS_TRACKING` at wiring — the settle-tail
-    /// symptoms are AX-fallback-only and the WS stream is up on
-    /// every developer Mac, so without a lever they are
-    /// unobservable.
-    var windowServerTrackingDisabled = false
+    /// The WindowServer stream the ring hears through (#2275).
+    let watch: WindowServerWatch
     /// A front-order ring's read of its target's window level,
     /// live by default; a test core pins it (#1868).
     var windowLevel: (CGWindowID) -> Int? =
@@ -89,15 +82,12 @@ public final class BorderManager {
     var readCornerRadius: (CGWindowID) -> CGFloat? =
         SkyLight.windowCornerRadius
     #if DEBUG
-        /// Test-only: builds ring backends in the manager's order and
-        /// stands in for the WindowServer request. Production must
-        /// not set them; every test core sets the factory to the
-        /// inert backend, so a real panel needs its own manager.
+        /// Test-only: builds ring backends in the manager's order.
+        /// Production must not set it; every test core sets it to
+        /// the inert backend, so a real panel needs its own manager.
         var backendFactory:
             ((BorderGeometry.Order) -> any BorderOverlayBackend)?
-        var watchOverride: ((Set<WindowID>) -> Bool)?
     #endif
-    var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// True while local animation drives this window (#594).
     var isAnimating: @MainActor (WindowID) -> Bool = { _ in false }
@@ -111,20 +101,6 @@ public final class BorderManager {
     var commandedFrame: @MainActor (WindowID) -> CGRect? = {
         _ in nil
     }
-    /// WindowServer bounds query seam for testability.
-    var readWindowBounds: @MainActor (WindowID) -> CGRect? = {
-        SkyLight.windowBounds($0.raw)
-    }
-    /// WindowServer bounds reconcile tee for sticky marks (QA 2026-07-21).
-    var onFrameReconciled: @MainActor (WindowID, CGRect) -> Void = { _, _ in }
-    /// WindowServer z-order reorder tee (owner QA 2026-07-21): a
-    /// re-click on an ALREADY-focused window raises it above its
-    /// own mark yet fires no AX focus event, so the focus-driven
-    /// re-sync never runs — this is what reaches the mark instead.
-    var onWindowReordered: @MainActor (WindowID) -> Void = { _ in }
-    /// Windows tracked for state mark z-order without active rings
-    /// — every window wearing a mark (#414, #1799).
-    var markTracked: Set<WindowID> = []
     /// The ring a Space switch keeps dormant until its window
     /// arrives (#1959, `BorderManager+Arrival`).
     var arrival: ArrivalHold?
@@ -147,6 +123,9 @@ public final class BorderManager {
     let bumpAnimator = BorderBumpAnimator()
     /// Overlay pill for minimum size refusal cues (#933).
     let sizeLimitOverlay = SizeLimitOverlay()
+    /// A lens hold's reminder pill (#2103): its own overlay, so a
+    /// refusal flashed on the held window never replaces it.
+    let holdPillOverlay = SizeLimitOverlay()
 
     /// Test observation seam for resize refusal cues (#933).
     var onResizeRefusal: (ResizeRefusal) -> Void = { _ in }
@@ -156,7 +135,13 @@ public final class BorderManager {
     /// Observers for key window transitions (#933).
     var ownKeyWindowObservers: [NSObjectProtocol] = []
 
-    public init() {}
+    /// `watch` is the core's one stream, built by `KiwiCore`; a
+    /// test's standalone default is never started, so it never
+    /// attaches.
+    public init(watch: WindowServerWatch = WindowServerWatch()) {
+        self.watch = watch
+        connectRing()
+    }
 
     /// Enables private WindowServer tracking after application startup.
     func start() {
@@ -167,8 +152,6 @@ public final class BorderManager {
     func stop() {
         clear()
         privateRuntimeStarted = false
-        skyLightActive = false
-        reportedTrackingActive = nil
     }
 
     /// Windows currently wearing a ring.
@@ -186,6 +169,16 @@ public final class BorderManager {
         overlays.removeAll()
         dormant.removeAll()
         activeOrder = mapped
+        watch.request([], for: .ring)
+    }
+
+    /// The panel of `id`'s ring where it is ordered in BEHIND its
+    /// window — what a KiwiVision plate stacks under, or it covers
+    /// the ring (#2103). Nil for a front ring, which clears the
+    /// plate by sitting above its window.
+    func ringPanel(of id: WindowID) -> CGWindowID? {
+        guard activeOrder == .below else { return nil }
+        return overlays[id]?.backend.orderedPanelNumber
     }
 
     /// Window corner radius from SkyLight or system fallback (#357).
@@ -209,9 +202,8 @@ public final class BorderManager {
         bumpTransients = [:]
         specs = [:]
         cornerRadii = [:]
-        markTracked = []
         arrival = nil
-        _ = eventSource?.watch([])
+        watch.request([], for: .ring)
     }
 
     /// Settles in-flight bounces when displays change.

@@ -108,6 +108,9 @@ struct ReduceMotionCensusTests {
         "NSAnimation", "CATransaction", "CATransition",
         "CABasicAnimation", "CAKeyframeAnimation",
         "CASpringAnimation", "CAAnimationGroup",
+        // A window frame's own animation (#2229): the argument
+        // label is the whole spelling.
+        "animate:",
     ]
 
     /// Sites ruled to keep an uncensused spelling, keyed
@@ -132,7 +135,11 @@ struct ReduceMotionCensusTests {
         // story's start frame; the gated `withAnimation` after
         // it is the one call that moves.
         "LayoutStoryThumbnail.swift: withTransaction":
-            "a story's jump to its start frame starts no motion"
+            "a story's jump to its start frame starts no motion",
+        // #2229: the key panel's height glide names its gate in
+        // the argument itself, `animated && !reduceMotion()`.
+        "JumpPanelController+Sizing.swift: animate:":
+            "gated in its own argument",
     ]
 
     @Test("No uncensused way to start motion ships")

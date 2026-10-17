@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDesk
 
 /// The panel never lists its own opener (#602 fallout): every
-/// `KiwiDesk.show_shortcuts()` binding is dropped from the
+/// `kiwihub.show` binding is dropped from the
 /// builder's working set before any band builds, because the
 /// footer's dismiss hint already teaches that combo wherever the
 /// bindings are live. Without the suppression it leaks into
@@ -54,7 +54,9 @@ struct ShortcutsSelfRowTests {
         reset()
         let reference = build(DefaultKeybindings.appChromeRows())
         #expect(!reference.isEmpty)
-        let rows = reference.controls.flatMap(\.rows)
+        // Open Settings leads Apps (#2246), never Controls.
+        #expect(reference.controls.isEmpty)
+        let rows = reference.apps
         #expect(rows.count == 1)
         #expect(reference.custom.isEmpty)
         #expect(

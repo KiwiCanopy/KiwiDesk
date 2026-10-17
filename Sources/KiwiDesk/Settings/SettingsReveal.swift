@@ -131,6 +131,12 @@ extension View {
         self.searchFlash(anchor).searchAnchor(anchor)
     }
 
+    /// Anchors and flashes a Mouse & trackpad entry, which a click
+    /// on its picture in the shut card's strip lands on.
+    func gestureAnchored(_ item: GestureItem) -> some View {
+        self.searchFlash(item.anchor).searchAnchor(item.anchor)
+    }
+
     /// Hoisted scroll target marker at section top
     /// (`SettingsAnchorPrimitiveTests`, #610).
     func searchScrollAnchor(

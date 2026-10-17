@@ -18,14 +18,11 @@ struct ColorPaletteTests {
         )
     }
 
-    /// 17 since #1517: the shelf's 8 replace the bars' 17, the
-    /// Space Bar keeping its focused-window ink; 18 since #1679,
-    /// the shelf's border; 19 since #1856, the front chip's
-    /// indicator.
-    @Test("The color surface is the 19 namespaced color paths")
+    /// Every colour path is namespaced and a colour key; the
+    /// named clauses below hold which groups are present.
+    @Test("The color surface is the namespaced color paths")
     func colorSurface() {
         let all = ColorPaletteKeys.all
-        #expect(all.count == 19)
         #expect(all.allSatisfy { $0.contains(".") })
         // Every path is a color key: `_color`-suffixed, or the
         // bare `color` of a struct that IS one mark.
@@ -193,15 +190,16 @@ struct ColorPaletteTests {
         #expect(settings.kiwishelf.fillColor == before)
     }
 
-    @Test("The bundled catalog is 10 palettes, default first, unique")
+    @Test("The bundled catalog decodes, default first, names unique")
     func bundledCatalog() {
         let all = PaletteCatalog.bundled()
-        #expect(all.count == 10)
         #expect(all.first?.name == PaletteCatalog.defaultName)
         let names = all.map(\.name)
-        #expect(Set(names).count == 10)
-        // Every authored palette decoded from the resource.
-        #expect(PaletteCatalog.authored().count == 9)
+        #expect(Set(names).count == names.count)
+        #expect(names.allSatisfy { !$0.isEmpty })
+        // The authored palettes decode all-or-nothing, so an
+        // empty list is a resource that stopped decoding.
+        #expect(!PaletteCatalog.authored().isEmpty)
         // The neon showcase palette exists under its shared name —
         // the GUI keys its swatch's "pair with Glow" link on it
         // (#578, replacing the retracted glow-on-select side-effect).

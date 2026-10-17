@@ -208,6 +208,22 @@ struct SettingKeyModelParityTests {
         }
     }
 
+    /// An undrafted field never has a census row: a field listed
+    /// there to wait for its Settings group (#453's `modeCycle`)
+    /// must leave the list when its row lands, or its edits would
+    /// never reach the draft diff and the save pill.
+    @Test func undraftedFieldsHaveNoCensusRow() {
+        let configIDs = SettingKey.allCases.map(\.id)
+        for field in GuiConfig.undraftedFields {
+            let rows = configIDs.filter {
+                $0 == "config.\(field)"
+                    || $0.hasPrefix("config.\(field)[")
+                    || $0.hasPrefix("config.\(field).")
+            }
+            #expect(rows.isEmpty, "\(field) is undrafted yet censused")
+        }
+    }
+
     /// `AppWideSettings` (#1741) and the census's `appWide.*` rows
     /// cover each other field for field: `appWide` is undrafted,
     /// so the `GuiConfig` walk above skips it.

@@ -1,0 +1,14 @@
+#!/bin/sh
+# Starts KiwiDesk's MCP server for the Claude Code plugin (#2258).
+# KiwiDesk is a separate app; this finds the installed copy.
+for KIWIDESK in \
+    /Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk \
+    "$HOME/Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk" \
+    "$(command -v kiwidesk 2>/dev/null)"; do
+  if [ -n "$KIWIDESK" ] && [ -x "$KIWIDESK" ]; then
+    exec "$KIWIDESK" mcp
+  fi
+done
+echo "KiwiDesk is not installed. Get it from" \
+  "https://kiwidesk.kiwicanopy.com, then restart Claude Code." >&2
+exit 1

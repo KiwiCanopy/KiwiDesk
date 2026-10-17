@@ -46,7 +46,10 @@ public enum APIReference {
             ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),
             ("gather", "gather"),
+            ("move_here", "move_here"),
             ("set_mode", "set_mode"),
+            ("cycle_mode", "cycle_mode"),
+            ("set_mode_cycle", "set_mode_cycle"),
             ("set_gap_global", "set_gap_global"),
             ("set_gap_override", "set_gap_override"),
             ("set_min_window_size", "set_min_window_size"),
@@ -66,15 +69,14 @@ public enum APIReference {
                 "set_refusal_sound"
             ),
             ("set_desktop_cue", "set_desktop_cue"),
+            ("set_hyper_key", "set_hyper_key"),
+            ("set_mode_cue", "set_mode_cue"),
+            ("set_space_cue", "set_space_cue"),
             ("set_space_history", "set_space_history"),
             ("set_float_automatically", "set_float_automatically"),
             (
                 "set_shortcut_panel_liquid_glass",
                 "set_shortcut_panel_liquid_glass"
-            ),
-            (
-                "set_space_switch_liquid_glass",
-                "set_space_switch_liquid_glass"
             ),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),
@@ -83,6 +85,8 @@ public enum APIReference {
                 "set_new_window_placement_override"
             ),
             ("get_state", "get_state"),
+            ("explain_window", "explain_window"),
+            ("explain_app", "explain_app"),
             ("get_layout_info", "get_layout_info"),
             ("list_monitors", "list_monitors"),
             ("debug_log", "debug_log"),
@@ -119,11 +123,9 @@ public enum APIReference {
     public static let namespaces: [String: [String]] = [
         "animations": [
             "set_duration", "set_scroll_duration",
-            "set_on_space_change", "set_space_change_duration",
             "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",
-            "set_on_monocle_focus", "set_monocle_flip_duration",
             "set_on_shelf", "set_shelf_duration",
             "set_size_policy", "set_size_rate",
         ],
@@ -215,7 +217,8 @@ public enum APIReference {
             "set_overflow_style_override",
         ],
         "mouse": [
-            "set_follows_focus"
+            "set_follows_focus", "set_hover_focus",
+            "set_hover_focus_delay",
         ],
         "scroll_gesture": [
             "set_pan", "set_space_step", "set_natural_scrolling",
@@ -250,12 +253,26 @@ public enum APIReference {
         "floating": [
             "set_mark", "set_color",
         ],
+        "kiwivision": [
+            "toggle", "current", "set_dim", "set_blur", "set_appearance",
+            "set_clear_wallpaper", "set_clear_app", "set_never_dimmed",
+            "define_lens", "delete_lens",
+        ],
+        "kiwihub": ["show"],
+        "look": [
+            "list", "current", "apply", "save", "delete",
+        ],
+        "app_rule": [
+            "list", "set_space", "remove_space", "set_float",
+            "remove_float",
+        ],
+        "shortcut": ["list", "set", "remove"],
     ]
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).
     public static let luaOnly: [String] = [
         "exec", "bind", "on", "define_layer", "switch_layer",
-        "show_shortcuts", "open_settings",
+        "open_settings",
     ]
 
     /// Command names reachable through dispatcher and CLI/IPC (#37).

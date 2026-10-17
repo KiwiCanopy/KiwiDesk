@@ -61,8 +61,8 @@ struct UpdateStateRow: View {
                     L("menu.update_available", "Update Available…"),
                     action: check
                 )
-                // The seal ignores `.controlSize`, so it drew at full
-                // size in a 12 pt line; the dot carries the accent.
+                // Small, to sit in a 12 pt line; the dot carries
+                // the accent.
                 .controlSize(.small)
                 .settingsActionButton()
             case .failed:

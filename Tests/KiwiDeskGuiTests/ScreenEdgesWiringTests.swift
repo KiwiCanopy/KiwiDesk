@@ -90,12 +90,16 @@ struct ScreenEdgesWiringTests {
         )
         #expect(count("guard!lockedelse{return}", in: style) == 1)
         #expect(count(".allowsHitTesting(!locked)", in: style) == 1)
-        #expect(
-            count(
-                ".foregroundStyle(locked?SettingsTheme.ink3"
-                    + ":SettingsTheme.ink2)",
-                in: style
-            ) == 1
+        // A locked chevron takes another theme ink than an open
+        // one — which two is a tuning.
+        let ink = try Regex(
+            #"\.foregroundStyle\(locked\?SettingsTheme\.(\w+)"#
+                + #":SettingsTheme\.(\w+)\)"#
         )
+        let inks = style.matches(of: ink)
+        #expect(inks.count == 1)
+        if let arms = inks.first?.output {
+            #expect(arms[1].substring != arms[2].substring)
+        }
     }
 }

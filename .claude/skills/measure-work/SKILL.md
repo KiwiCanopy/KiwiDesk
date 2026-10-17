@@ -126,10 +126,14 @@ $F down <scratch>/fx-<label>
 The fixture pins only the animation settings every measured
 release shares; a setting one release changes or lacks is stated
 per bundle in `extra.lua`, which `up` appends to the config — a
-*slide off* bundle appends `animations.set_on_space_change(false)`.
-Compare like with like: every release with all animations off,
-and every release with its Space-switch animation on at one
-shared pace, each set through `extra.lua`. Pass `--gap` past the
+2.x *slide off* bundle appends
+`animations.set_on_space_change(false)`. 3.0.0 has no slide
+(#2228), and its Space plate stays away while the Space Bar is
+on — the default the fixture leaves — so a 3.0.0 bundle needs no
+line for it. Compare
+like with like: every release with all animations off, and every
+release that has the slide with it on at one shared pace, each
+set through `extra.lua`. Pass `--gap` past the
 longest animation measured, or a press cuts it short and the run
 reads cheaper than the motion is.
 
@@ -148,12 +152,17 @@ a `frame clock stalled` count is no comparison across releases,
 since it fires only while the window-animation clock runs and a
 release whose switch pass is instant never starts it.
 
-Then add the release's own section to `docs/performance.md` —
-one table per pair, a row per bundle and load, the date, macOS
-version and commits named above it — measuring the previous
-release again in the same sitting, since times compare only
-within a table. `docs.md`'s row for that page says what may never
-change in an earlier section.
+Then replace the comparison in `docs/performance.md` with the
+release's own — one table per pair, a row per bundle and load, the
+date, macOS version and commits named above it — measuring the
+previous release again in the same sitting, since times compare
+only within a table. The comparison it replaces becomes a link
+under *Earlier comparisons* to the page at the tag that shipped
+it; `docs.md`'s row for that page owns the rule. **Explain every
+counter that grows** against the previous release, by the PR that
+grew it (accessibility.md asks a change to state its per-switch
+cost); a growth nobody can name is a finding, written as
+unattributed and bisected, never left as a footnote.
 
 ## What this is not
 

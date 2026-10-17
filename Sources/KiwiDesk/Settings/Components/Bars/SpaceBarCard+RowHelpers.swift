@@ -39,7 +39,7 @@ extension SpaceBarCard {
         )
     }
 
-    /// The Other Spaces `?` (#1683): each segment's own label
+    /// The Windows in other Spaces `?` (#1683): each segment's own label
     /// interpolated, so the prose cannot drift from it (#818).
     var inactiveContentHelp: String {
         L(
@@ -55,7 +55,7 @@ extension SpaceBarCard {
     }
 
     /// The Space label `?` (#1535), its segments interpolated
-    /// like the Other Spaces one above.
+    /// like the Windows in other Spaces one above.
     var itemLabelHelp: String {
         L(
             "space_bar.item_label.help",

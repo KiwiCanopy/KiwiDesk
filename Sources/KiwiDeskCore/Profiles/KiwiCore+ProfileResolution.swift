@@ -144,17 +144,10 @@ extension KiwiCore {
         ) {
             setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
         }
-        // Per-profile override tiers — keybindings (#55 phase
-        // 6) and app rules (#109): register THIS profile's
-        // overrides (base survives unmentioned). Passed
-        // explicitly — callers adopt after apply, so
+        // THIS profile's override tiers (#55, #109), passed
+        // explicitly: callers adopt after apply, so
         // `currentName` may still be the old profile.
-        reapplyStructuredOverrides(
-            profileModes: profile.layers,
-            profileRules: WindowRuleOverrides(profile),
-            profileScrollGesture: profile.scrollGesture,
-            profileSpaceHistory: profile.spaceHistory
-        )
+        reapplyStructuredOverrides(profile)
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
@@ -239,12 +232,7 @@ extension KiwiCore {
         // A transient Standard has no keybinding or app-rule
         // override — revert to the base gui.json config
         // (#55 phase 6, #109).
-        reapplyStructuredOverrides(
-            profileModes: nil,
-            profileRules: WindowRuleOverrides(nil),
-            profileScrollGesture: nil,
-            profileSpaceHistory: nil
-        )
+        reapplyStructuredOverrides(nil)
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)

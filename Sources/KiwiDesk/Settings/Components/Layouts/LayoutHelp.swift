@@ -111,14 +111,13 @@ enum LayoutHelp {
     @MainActor static var monocleHideStyle: String {
         L(
             "monocle.hide_style.help",
-            "**%1$@** — Hidden windows stay behind the focused "
-                + "one, at full size.\n**%2$@** — Hidden "
-                + "windows park in a corner instead, and focus "
-                + "changes instantly. Choose this when the "
-                + "windows behind show — through a transparent "
-                + "window, or around one that can't fill the "
-                + "whole screen. A thin edge of each parked "
-                + "window stays visible in the corner.",
+            "Other windows showing through the focused one, "
+                + "or around it? Choose **%2$@**: hidden windows "
+                + "park in a corner instead, and focus changes "
+                + "instantly. A thin edge of each parked window "
+                + "stays visible there.\n**%1$@** — Hidden "
+                + "windows stay behind the focused one, at full "
+                + "size.",
             L("monocle.hide_style.stack", "Stack behind"),
             L("monocle.hide_style.park", "Park in corner")
         )
@@ -170,21 +169,6 @@ enum LayoutHelp {
                 + "the movement takes and has no effect while "
                 + "animation is off.",
             L("scroll_grid.scroll_duration", "Scroll duration")
-        )
-    }
-
-    /// Monocle flip help (#1391).
-    @MainActor static var monocleFlip: String {
-        L(
-            "monocle.flip.help",
-            "Blurs the window and turns a card from one app's "
-                + "icon to the next when focus changes in a "
-                + "Monocle Space, so you can see which window "
-                + "came in. Turn this off to switch at once. %1$@ "
-                + "sets how long the turn takes and has no effect "
-                + "while the flip is off. macOS's Reduce Motion "
-                + "also keeps it off.",
-            L("monocle.flip_duration", "Flip duration")
         )
     }
 

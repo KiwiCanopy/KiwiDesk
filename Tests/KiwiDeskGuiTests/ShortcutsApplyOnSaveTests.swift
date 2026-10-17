@@ -98,7 +98,11 @@ struct ShortcutsApplyOnSaveTests {
                     + " saved gui.json"
             ),
         "KiwiDeskCore/App/KiwiCore+StructuredRules.swift":
-            (1, "the rule refresh, from the saved gui.json"),
+            (
+                1,
+                "the rule refresh and an outside shortcut write"
+                    + " (#1685), each from the saved gui.json"
+            ),
         "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift":
             (1, "the top-ups' append, from the sidecar it just saved"),
         "KiwiDeskCore/App/KiwiCore+Config.swift":

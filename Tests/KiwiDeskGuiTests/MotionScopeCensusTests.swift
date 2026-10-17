@@ -47,17 +47,24 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift": 2,
         // Every bar menu row's action.
         "KiwiDeskCore/App/KiwiCore+BarMenus.swift": 1,
+        // The view picker's layout apply (#2229), a profile load
+        // from it or the quick menu (#2309), and its Save as New
+        // Profile… (#2359).
+        "KiwiDeskCore/App/KiwiCore+LayoutPicker.swift": 3,
+        // Jump to window's Jump and Bring here (#1875).
+        "KiwiDeskCore/App/KiwiCore+JumpActions.swift": 2,
         // The scroll gestures' two consumers.
         "KiwiDeskCore/App/KiwiCore+ScrollPan.swift": 1,
         "KiwiDeskCore/App/KiwiCore+ScrollSpaceStep.swift": 1,
+        // Hover focus at the resting pointer (#1869).
+        "KiwiDeskCore/App/KiwiCore+HoverFocus.swift": 1,
         // The window drag: its moves and its drop, a live display
         // crossing, the Space Bar spring switch.
         "KiwiDeskCore/Tiling/KiwiCore+Drag.swift": 2,
         "KiwiDeskCore/Tiling/KiwiCore+DragCrossing.swift": 1,
         "KiwiDeskCore/Bar/KiwiCore+SpaceBarDrop.swift": 1,
-        // The status menu's profile and layout rows, Config
-        // Issues' reload and delete.
-        "KiwiDesk/AppDelegate.swift": 4,
+        // Config Issues' reload and delete.
+        "KiwiDesk/AppDelegate.swift": 2,
         // The tour's shelf paint and its revert.
         "KiwiDesk/AppDelegate+OnboardingLooks.swift": 2,
         // Settings: Save and its config reload, load, delete, set
@@ -69,6 +76,8 @@ struct MotionScopeCensusTests {
         "KiwiDesk/Settings/SettingsModel+Backup.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Reset.swift": 1,
         "KiwiDesk/Settings/SettingsModel+AppWide.swift": 1,
+        // The lens page's Save writing its lenses (#2103).
+        "KiwiDesk/Settings/SettingsModel+Lenses.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ScreenSetups.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Persistence.swift": 1,
     ]

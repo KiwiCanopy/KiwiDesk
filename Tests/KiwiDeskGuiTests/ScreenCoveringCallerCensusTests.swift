@@ -107,30 +107,37 @@ struct ScreenCoveringCallerCensusTests {
         #expect(counts == showAllowed)
     }
 
-    /// The raw front-to-back read (#1788 item 4): `presents`,
-    /// `showsPresentation` and `shelfStandsDown` are the doors,
-    /// so the seam, its live default and the CGWindowList read
-    /// beneath it are each spelled in their one home only. A new
-    /// z-order need widens THIS seam's element type, never a
-    /// second front-to-back read beside it.
+    /// The raw front-to-back read (#1788 item 4): the seam, its
+    /// live default and the CGWindowList read beneath it are each
+    /// spelled in their one home, and a reader is ruled here — the
+    /// presentation verdict, and hover focus's hit test (#1869). A
+    /// new z-order need reads THIS seam's element, never a second
+    /// front-to-back read beside it.
     private let frontSeamAllowed: [String: Int] = [
         // The seam's declaration and its live default.
         "App/KiwiCore.swift": 2,
         // The stand-down's one read, the default's definition and
-        // the CGWindowList call it wraps.
-        "App/KiwiCore+ScreenCovering.swift": 3,
+        // the CGWindowList call it wraps, and KiwiVision's
+        // chrome-free view's definition and its own raw read, the
+        // desktop's elements kept.
+        "App/KiwiCore+ScreenCovering.swift": 5,
         // The CGWindowList read's own definition.
         "AX/FloatDetection.swift": 1,
+        // KiwiVision's mask (#2103 ruling 21): its one list seam's
+        // live default, read at a settle or with nothing cached.
+        "Vision/VisionManager.swift": 1,
+        // Hover focus's hit test at the resting pointer (#1869).
+        "App/KiwiCore+HoverFocus.swift": 1,
     ]
 
-    @Test("only the presentation verdict reads the front windows")
-    func frontWindowSeamHasOneReader() throws {
+    @Test("every front-window seam reader is ruled")
+    func frontWindowSeamReadersAreRuled() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDeskCore")
         let prefix = root.path + "/"
         let pattern = try NSRegularExpression(
-            pattern: #"\b(frontWindowFrames|liveFrontFrames|"#
-                + #"frontToBackNormalFrames)\b"#
+            pattern: #"\b(frontStack|liveFrontStack|"#
+                + #"liveFrontWindows|frontToBackWindows)\b"#
         )
         var counts: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: root) {
@@ -144,7 +151,71 @@ struct ScreenCoveringCallerCensusTests {
         }
         #expect(
             counts == frontSeamAllowed,
-            "the front-window seam is read through showsPresentation"
+            "a front-window seam reader is ruled in frontSeamAllowed"
+        )
+    }
+
+    /// KiwiVision's read keeps the desktop's elements: macOS counts
+    /// SketchyBar's layer −20 bar among them, and Never dimmed must
+    /// see it (#2103). Hover and the presentation verdict read the
+    /// other way, through `liveFrontStack`.
+    @Test("KiwiVision's read keeps the desktop's elements")
+    func visionReadKeepsDesktop() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDeskCore/App/KiwiCore+ScreenCovering.swift"
+                )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            source.contains(
+                "staticfuncliveFrontWindows()->[FrontWindow]{"
+                    + "withoutOwnChrome(FloatDetection.frontToBackWindows("
+                    + "includingDesktopElements:true"
+            )
+        )
+        #expect(
+            source.contains(
+                "staticfuncliveFrontStack()->[FrontWindow]{"
+                    + "FloatDetection.frontToBackWindows{"
+            )
+        )
+    }
+
+    /// The raw spellings beneath the seam stay in their homes, so a
+    /// reader cannot swap the seam for the live read and keep its
+    /// file's count — which would read the host's real windows
+    /// past every test pin.
+    @Test("the seam's live default is read only behind it")
+    func rawFrontReadsStayHome() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        let prefix = root.path + "/"
+        let raw = try NSRegularExpression(
+            pattern: #"\b(liveFrontStack|frontToBackWindows)\b"#
+        )
+        var homes: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = try SourceScan.strippedSource(at: file)
+            let hits = raw.numberOfMatches(
+                in: source,
+                range: NSRange(source.startIndex..., in: source)
+            )
+            guard hits > 0 else { continue }
+            homes[String(file.path.dropFirst(prefix.count))] = hits
+        }
+        #expect(
+            homes == [
+                // The seam's default.
+                "App/KiwiCore.swift": 1,
+                // The default's definition, the read it wraps, and
+                // KiwiVision's own raw read, the desktop's elements
+                // kept.
+                "App/KiwiCore+ScreenCovering.swift": 3,
+                // The read's own definition.
+                "AX/FloatDetection.swift": 1,
+            ],
+            "\(homes)"
         )
     }
 }

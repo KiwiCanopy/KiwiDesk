@@ -203,6 +203,11 @@ struct GesturePlate<Content: View>: View {
         .clipShape(
             RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
         )
+        // A dark plate on a dark card needs the inset edge.
+        .overlay(
+            RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
+                .strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
+        )
     }
 }
 

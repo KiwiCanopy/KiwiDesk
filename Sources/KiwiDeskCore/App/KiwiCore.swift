@@ -25,14 +25,10 @@ public final class KiwiCore {
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
     /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
-    public let borders = BorderManager()
+    public let borders = BorderManager(watch: WindowServerWatch())
     public let stickyMarks = StickyMarkManager()
-    /// Drawn transitions: Monocle flip (#1391), plate slide (#1956).
-    let monocleFlip = MonocleFlipOverlay()
-    let spaceSlide = SpaceSlideOverlay()
-    /// The focus a playing flip owes at its landing (#1391) —
-    /// landed, dropped and carried in `KiwiCore+MonocleFlip`.
-    var pendingMonocleFocus: (from: WindowID, to: WindowID, warp: Bool)?
+    /// KiwiVision's plates (#2103), driven with the rings.
+    public let vision = VisionManager()
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
@@ -66,10 +62,11 @@ public final class KiwiCore {
     var defersEventRetiles = false
     /// A Desktop switch's re-sync, folded alike (`+SwitchResync`).
     var switchResync: SwitchResyncBatch?
-
     /// A z-order restore is waiting for the current animations
     /// to settle (`runPendingZOrderRestore`).
     var pendingZOrderRestore = false
+    /// The float raise owed behind the tiled plane (#2284).
+    let floatRaiseDebt = FloatRaiseDebt()
 
     /// A command reordered windows but its paired retile is the
     /// dispatcher's trailing `retile(pass: .apply)` (#153), so
@@ -92,7 +89,6 @@ public final class KiwiCore {
     var pendingFocusRaise: WindowID?
     /// A `focus` press's raise in flight (#1812).
     var raiseFlight: RaiseFlight?
-
     /// When KiwiDesk's own AX raise of each window was issued
     /// (#152): a report for a window raised within
     /// `selfRaiseEchoWindow` is our echo, not a user action, and
@@ -189,8 +185,8 @@ public final class KiwiCore {
     /// #2002 delayed-close debt; `KiwiCore+DelayedCloseReturn`.
     var delayedCloseDebt: DelayedCloseDebt?
 
-    /// The last #1532 reveal return; `KiwiCore+MenuBarRevealReturn`.
-    var menuBarRevealReturnAt: Date?
+    /// #1532/#2224 reveal state; `KiwiCore+MenuBarRevealReturn`.
+    var menuBarReveal = MenuBarRevealState()
 
     /// Z-order restores not yet re-asserted (#186): their echoes
     /// lack provenance (#152), so the warp holds while one is in
@@ -206,40 +202,40 @@ public final class KiwiCore {
     /// The warp's machine tail (#186); nil until `start()` wires it.
     var pointerWarp: (@MainActor (CGRect) -> Void)?
 
-    /// The deferred one-shot settle tasks (focus follow, startup
-    /// sweep, space settles), keyed so `stop()` cancels them all
-    /// without a hand-kept list (#49); bodies at the `schedule*`
-    /// call sites.
+    /// The deferred one-shot settle tasks, keyed so `stop()` cancels
+    /// them all without a hand-kept list (#49).
     let deferred = DeferredTasks()
     /// The in-flight boot's phase, spans and timestamps (#801).
     let boot = BootRun()
     /// The tunable waits; tests assign milliseconds.
     var timings = CoreTimings()
+    /// The Hyper key's `hidutil` host (#1870); tests pin it inert.
+    var hyperRemapHost = HyperKeyRemap.Host.live
 
-    /// Four intent ledgers, each type doc carrying its argument:
-    /// the move latch (#482/#483), the follow focus debt (#1007),
-    /// a hidden-Desktop move's Space (#1150), a launch's (#1599).
+    /// The intent ledgers; each type's doc carries its argument
+    /// (#482/#483, #1007, #1150, #1599, #1875).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
     let launchFollow = LaunchFollowIntent()
+    let jump = JumpState()
 
-    /// The MAIN display's current native Desktop (#888) — the
-    /// binding authority, and the per-Desktop Space memory
-    /// restored on returning to one. Keyed, not numbered (#1147).
+    /// The MAIN display's current native Desktop (#888): the binding
+    /// authority and the Space memory's key (#1147), never a number.
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
     let desktopCue = DesktopCueLedger()
+    let cueHooks = CueHooks()
     /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 
     /// The WindowServer window reads, all pinned by `makeTestCore`: the
     /// Desktop raise gate's on-screen flag and shown host (#1345/#1410),
-    /// and the front-to-back frames, one door by census (#1788).
+    /// and the front-to-back windows, one door by census (#1788).
     var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
     var windowIsOnShownDesktop: (WindowID) -> Bool? =
         NativeSpaces.isOnShownDesktop
-    var frontWindowFrames: @MainActor () -> [CGRect] = liveFrontFrames
+    var frontStack: @MainActor () -> [FrontWindow] = liveFrontStack
     /// A move verb's departures, claimed at the vanish (#1345).
     var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).
@@ -269,22 +265,24 @@ public final class KiwiCore {
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
-    /// The space the empty-display heal seeded per monitor fingerprint
-    /// (#1175), so a pin reset that did not prune re-pins the same seed
-    /// instead of minting another. Session state, retired where a
-    /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
+    /// The empty-display heal's seed per monitor fingerprint (#1175),
+    /// re-pinned rather than re-minted; session state, retired by a
+    /// declaration (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
-    /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
-    var appWideLedger = AppWideLedger()
+    /// Settings no profile carries (#1741); `appWideLiveChanged`.
+    var appWideLedger = AppWideLedger() {
+        didSet { appWideLiveChanged(from: oldValue.live) }
+    }
+    public var onAppWideChange: @MainActor () -> Void = {}
     /// Space history and its setting (#1655, `KiwiCore+SpaceHistory`).
     var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
     var sharedLookLedger = SharedLookLedger()
-    /// The live arrangement's explicit rehome target (#68) —
-    /// adopted from the active profile, edited by the GUI, and
-    /// captured back on save. nil falls back to the space
-    /// order's first survivor on a profile-switch reconcile.
+    /// Rehome target (#68): adopted from the active profile, GUI-edited,
+    /// saved back; nil falls back to the space order's first survivor.
     var fallbackSpace: SpaceID?
+    /// The layouts `cycle_mode` walks (#453, `KiwiCore+ModeCycle`).
+    var modeCycle = ModeCycleState()
     /// The announced in-place restart (#930, `KiwiCore+InPlaceRestart`).
     var inPlaceRestart = InPlaceRestartState()
     /// Profile bound per macOS Desktop, keyed by the Desktop
@@ -314,13 +312,15 @@ public final class KiwiCore {
     /// inside a keybinding closure) to log-only.
     var typoIssues: [ConfigIssue]?
     /// Fired whenever `configIssues` changes, back to empty too.
-    public var onConfigIssuesChange:
-        @MainActor ([ConfigIssue])
-            -> Void = { _ in }
+    public var onConfigIssuesChange: ConfigIssuesChanged = { _ in }
     /// Fired on every live-profile write from outside Settings.
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
     public var onShortcutsAdded: ShortcutsAdded = { _ in }
+    /// A verb saved or deleted a look (#1685): Settings re-reads.
+    public var onLookLibraryChanged: @MainActor () -> Void = {}
+    /// An outside rule write landed (#1685): a draft adopts it.
+    public var onRulesKept: @MainActor () -> Void = {}
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
     /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.

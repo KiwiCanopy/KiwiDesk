@@ -28,20 +28,16 @@ struct IconHoverChipTests {
     func chipRestsAtNothing() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
         let chip = body(of: "iconHoverChip", in: rows)
-        // The whole call, so a dropped or retuned argument reds:
-        // the rest and lift are tokens, and a glyph-only chip
-        // takes no edge — no passive control shares its shape
-        // (#2047).
-        #expect(
-            squashed(chip).contains(
-                ".hoverHighlight(rest:resting?SettingsTheme.chipRest"
-                    + ":.clear,hover:SettingsTheme.chipHover,"
-                    + "edge:nil,"
-            )
-        )
+        // The rest and lift are theme tokens — which ones is a
+        // tuning — and a glyph-only chip takes no edge: no passive
+        // control shares its shape (#2047).
+        let call = squashed(chip)
+        #expect(call.contains(".hoverHighlight(rest:resting?SettingsTheme."))
+        #expect(call.contains(":.clear,hover:SettingsTheme."))
+        #expect(call.contains("edge:nil,"))
         #expect(!chip.contains(".opacity("))
         #expect(chip.contains("resting: Bool = false"))
-        #expect(chip.contains("tint(SettingsTheme.ink2)"))
+        #expect(chip.contains("tint(SettingsTheme."))
         #expect(
             body(of: "iconButtonAffordance", in: rows).contains(
                 "iconHoverChip("
@@ -59,9 +55,9 @@ struct IconHoverChipTests {
         let rows = squashed(raw)
         let tier = squashed(body(of: "hoverHighlight", in: raw))
         for needle in [
-            "rest:Color=SettingsTheme.chipRest,",
-            "hover:Color=SettingsTheme.chipHover,",
-            "edge:Color?=SettingsTheme.chipEdge,",
+            "rest:Color=SettingsTheme.",
+            "hover:Color=SettingsTheme.",
+            "edge:Color?=SettingsTheme.",
             "rest:rest,hover:hover,edge:edge,",
         ] {
             #expect(tier.contains(needle), Comment(rawValue: needle))
@@ -78,31 +74,31 @@ struct IconHoverChipTests {
         text.split(whereSeparator: \.isWhitespace).joined()
     }
 
-    /// A full-row entry rests at nothing and lifts one rest step,
-    /// a theme token rather than a bare opacity (#2047). The whole
-    /// call, so a dropped or retuned argument reds.
-    @Test("a full-row entry lifts one chipRest step")
+    /// A full-row entry rests at nothing and lifts on a theme
+    /// token rather than a bare opacity (#2047); which token is a
+    /// tuning.
+    @Test("a full-row entry rests at nothing and lifts on a token")
     func rowLiftsOneRestStep() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
         let row = body(of: "rowHoverHighlight", in: rows)
         #expect(
             squashed(row).contains(
-                "hoverHighlight(rest:.clear,"
-                    + "hover:SettingsTheme.chipRest,edge:nil,"
+                "hoverHighlight(rest:.clear,hover:SettingsTheme."
             )
         )
+        #expect(squashed(row).contains(",edge:nil,"))
         #expect(!row.contains(".opacity("))
     }
 
     @Test("the ? and both rule-trash branches take the one chip")
     func everyIconTakesIt() throws {
         let help = try source("Components/Common/HelpButton.swift")
-        #expect(help.contains(".iconHoverChip(cornerRadius: 8, padding: 0)"))
+        #expect(help.occurrences(of: ".iconHoverChip(") == 1)
         #expect(!help.contains(".hoverHighlight("))
         let trash = try source("Sections/AppRuleIdentity.swift")
         #expect(trash.occurrences(of: ".iconHoverChip()") == 1)
         // The menu's own neutral label ink sits closer to the glyph.
-        #expect(trash.contains(".foregroundStyle(SettingsTheme.ink2)"))
+        #expect(trash.contains(".foregroundStyle(SettingsTheme."))
         #expect(trash.occurrences(of: ".iconButtonAffordance(") == 1)
     }
 

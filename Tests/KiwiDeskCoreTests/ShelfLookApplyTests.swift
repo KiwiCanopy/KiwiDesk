@@ -163,6 +163,15 @@ struct ShelfLookApplyTests {
             outer: .init(top: 3, bottom: 4, left: 5, right: 6),
             inner: .init(horizontal: 7, vertical: 8)
         )
+        // #2176: a saved look carries motion too.
+        source.animations.onScrolling = false
+        source.animations.onWindowResize = false
+        source.animations.onWindowSwap = false
+        source.animations.onRelayout = false
+        source.animations.durationMS = 250
+        source.animations.scrollDurationMS = 260
+        source.animations.onShelf = false
+        source.animations.shelfDurationMS = 900
         let saved = ShelfLook(
             name: "T",
             style: LookKeys.extract(from: source),

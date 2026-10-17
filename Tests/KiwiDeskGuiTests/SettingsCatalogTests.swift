@@ -126,8 +126,26 @@ struct SettingsCatalogTests {
         // two rows stay as Open applications' controls.
         // 130 since #1948: Each bar's two Per screen drawers.
         // 131 since #2142: the Desktop switch cue row.
-        // 132 since #2173: App Rules ▸ Automatic floating.
-        #expect(allEntries.count == 132)
+        // 132 since #453: Shortcuts' Layout group.
+        // 134 with #2144: the cycle and plate rows (#453); 132 once
+        // #2143's picker and the slide's duration left the drawer.
+        // 133 since #2173: App Rules ▸ Automatic floating.
+        // 134 since #2228: KiwiShelf's Show the Space switch.
+        // 139 since #1685: the AI page's three cards and two rows.
+        // 140 since #2265: Shortcuts' KiwiHub group.
+        // 141 since #1685: the AI page's look prompt row.
+        // 146 since #2103: KiwiVision's two cards and three rows.
+        // 147 since #1870: Shortcuts' Hyper key card.
+        // 149 since #1685: the AI page's migration and app rules
+        // prompt rows.
+        // 151 since #2103 v2: KiwiVision's Stays clear card and row.
+        // 152 since #2103 v2: its current app's other windows row.
+        // 155 since #1869: Mouse & trackpad ▸ hover focus.
+        // 156 since #2258: AI ▸ Add to Claude Desktop.
+        // 157 since #2312: KiwiVision's own shortcuts group.
+        // 158 since #2103 PR 7: the lens strip.
+        // 159 since #2379: Mouse & trackpad ▸ hover delay.
+        #expect(allEntries.count == 159)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
@@ -240,6 +258,8 @@ struct SettingsCatalogTests {
                 #expect(destination == .spaces)
             case .appRule:
                 #expect(destination == .appRules)
+            case .newLens:
+                #expect(destination == .kiwiVision)
             }
         }
     }
@@ -306,14 +326,5 @@ struct SettingsCatalogTests {
         }
         #expect(gapsCard != nil)
         #expect(gapsCard?.parent == nil)
-    }
-
-    /// Drawers sharing a label key stay distinct by instance —
-    /// the shelf's Style drawer against a future bar drawer — so
-    /// no two resolve to one `scrollTo` id (#1517).
-    @Test("shared-label drawers carry an instance id")
-    func instanceIdsAreDistinct() {
-        let style = SettingsCatalog.bars.kiwishelfStyle
-        #expect(style.control.id == "kiwishelf/bars.style")
     }
 }

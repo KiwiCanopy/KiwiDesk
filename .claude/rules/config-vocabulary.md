@@ -160,8 +160,10 @@ synonym:
   register. It is not the palette picker's source-only
   `PaletteShelf` type: do not name a bar concept after that type,
   or a palette concept after KiwiShelf.
-- **look** — a named set of KiwiShelf STYLING and the colours
-  it wears (#1684, #1752, `LookKeys` and `ColorPaletteKeys`); a
+- **look** — a named set of presentation STYLING — the bars,
+  Liquid Glass, the focus border's shape, the global gaps and, in
+  a saved look, the animations — and the colours it wears (#1684,
+  #1752, `LookKeys` and `ColorPaletteKeys`); a
   palette is a colour recipe painted into it.
   Never a *theme* or *skin*, and never a *preset*, which names
   a layout arrangement — in English copy and, by owner ruling
@@ -397,7 +399,26 @@ synonym:
   section is where the two collide), and not "tier" either:
   *tier* is already spoken for twice over by `SettingTier` /
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
-- **shortcuts panel** — the read-only surface ⌃⌥K opens (#326).
+- **lens** — a named KiwiVision: the apps it keeps clear, its
+  own shortcut and any KiwiVision setting it overrides (#2103
+  ruling 28; JSON `kiwivision.lenses`, its Lua verbs
+  `kiwivision.define_lens` and `kiwivision.toggle(lens)`). Each catalog translates the common noun,
+  and the user names each one ("Writing"). Retired as names for
+  it: *set*, *room*, *scene*, *session*, *focus*, *layer* and
+  *mode*, each already spoken for or rejected on #2103.
+- **KiwiHub** — the product name of the key panel and its three
+  sides (Lua `kiwihub.show(side)`, #2265). Write **KiwiHub** where
+  copy — a label, a catalog value, `docs/` prose — names the whole
+  panel, and a side's own name where it names one; a row title
+  stays a verb phrase on the side's name (#2245). As a product
+  name it appears verbatim in every catalog —
+  `scripts/localization_guards.py`'s `PRODUCT_NAMES` is the
+  register — and a string naming the panel takes the
+  `kiwihub.name` key rather than a second key spelling it.
+  Retired as its name in a label, a catalog value or a user doc:
+  *key panel*, which `docs/design-decisions.md` may still argue in.
+- **shortcuts panel** — the key panel's Shortcuts side, the
+  read-only list ⌃⌥K opens (#326, #2246); its VoiceOver name.
   Retired as names for it: *shortcuts reference*, *reference
   panel*. Binds **copy** — a label, a catalog value, CLI help
   text, `docs/` prose — and not identifiers, so
@@ -414,8 +435,25 @@ synonym:
   cannot see — but THIS surface is held:
   `ShortcutsPanelNounTests` asks, per catalog, that the panel's
   own accessibility name is the noun the shortcut opening it
-  already uses. A second surface naming itself twice is still
-  review's until someone gives it the same pairing.
+  already uses, and the same of every side of the key panel
+  (#2245). **A panel a shortcut row opens joins that suite's
+  `pairs` in the change that adds it.**
+- **window switcher** / **view picker** — the key panel's
+  Windows and View sides, which ⌃⌥J and ⌃⌥L open, by their
+  VoiceOver names (#2245, #2309); with the shortcuts panel between
+  them the panel has three sides, J, K and L (#2246); a side
+  name is translated, never kept as an English word. Retired as
+  the panel's NAME: *Jump to window*, which stays its field
+  prompt — the panel's own verb is *Jump* — and never a brand
+  name.
+- **View** — the ⌃⌥L side's name (Lua `kiwihub.show("view")`,
+  #2309): one chord reaching the Layout, Profile and KiwiVision
+  lines, each a **line** of chips or tiles. Write **View** as the
+  side's name and **view picker** where its VoiceOver name is
+  meant. Retired as the side's name: *Layouts*, which names its
+  Layout line alone, and *layout picker*. The word binds copy
+  naming that side; it does not reach a sentence about a window
+  or a screen.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename

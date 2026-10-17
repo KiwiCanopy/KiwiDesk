@@ -26,7 +26,8 @@ extension KiwiCore {
         space: Space,
         focused: WindowID,
         swapping: Bool,
-        warp: Bool
+        warp: Bool,
+        skip: (WindowID) -> Bool
     ) -> CommandResponse? {
         let horizontal =
             tiler.settings.resolvedScrolling(for: space.id)
@@ -42,28 +43,29 @@ extension KiwiCore {
         let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
-        let targetIndex = index + step
-        let target: WindowID
-        if tiled.indices.contains(targetIndex) {
-            target = tiled[targetIndex]
-        } else if !swapping, tiled.count > 1,
-            tiler.settings.resolvedScrolling(for: space.id)
-                .wrapFocus,
-            let wrapped = step > 0 ? tiled.first : tiled.last
-        {
-            // Opt-in wrap past an end (#168). The wrap keeps
-            // array-index order, so the deferred-raise classifier
-            // (#143/#158) reads it right without a special case:
-            // wrapping forward to index 0 is a lower-index move —
-            // a backward pan, raise deferred; wrapping backward to
-            // the last index is a higher-index move — a forward
-            // pan, raise immediate. Each matches a plain step in
-            // that direction. `count > 1` skips a pointless
-            // wrap-to-self on a single-window row.
-            target = wrapped
-        } else {
-            return nil
-        }
+        // Opt-in wrap past an end (#168). The wrap keeps
+        // array-index order, so the deferred-raise classifier
+        // (#143/#158) reads it right without a special case:
+        // wrapping forward to index 0 is a lower-index move —
+        // a backward pan, raise deferred; wrapping backward to
+        // the last index is a higher-index move — a forward
+        // pan, raise immediate. Each matches a plain step in
+        // that direction. `count > 1` skips a pointless
+        // wrap-to-self on a single-window row.
+        let wrap =
+            !swapping && tiled.count > 1
+            && tiler.settings.resolvedScrolling(for: space.id)
+                .wrapFocus
+        guard
+            let targetIndex = Navigation.arrayStep(
+                from: index,
+                step: step,
+                count: tiled.count,
+                wrap: wrap,
+                skip: { skip(tiled[$0]) }
+            )
+        else { return nil }
+        let target = tiled[targetIndex]
         if swapping {
             if refuseSwapOntoTraveler(target, in: space) {
                 return .ok()

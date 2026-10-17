@@ -118,29 +118,9 @@ struct FloatRuleTests {
         )
     }
 
-    @Test("Ghostty's quick terminal panel is never managed")
+    @Test("another app's raised panel floats rather than being ignored")
     func ignoreDetection() throws {
         let noRules = IgnoreRules()
-        // The quick terminal: Ghostty + non-zero layer.
-        #expect(
-            FloatDetection.shouldIgnore(
-                bundleID: "com.mitchellh.ghostty",
-                layer: 3,
-                isAccessory: false,
-                rules: noRules,
-                titlebarButton: false
-            )
-        )
-        // Ghostty's normal windows tile as usual.
-        #expect(
-            !FloatDetection.shouldIgnore(
-                bundleID: "com.mitchellh.ghostty",
-                layer: 0,
-                isAccessory: false,
-                rules: noRules,
-                titlebarButton: false
-            )
-        )
         // Other regular apps' panels merely float; the ignore
         // is layer-scoped per app (#21) or accessory-wide
         // (#448), never blanket raised-layer.

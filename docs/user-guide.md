@@ -49,21 +49,26 @@ and every card and panel title is a heading for its rotor.
 
 ## The Status Bar Quick Menu
 
-A layout switched from the menu bar's **Layout** submenu is
-**session-only**: it does not rewrite the profile, and the menu
-shows a "not saved to profile" subtitle while it drifts. **Keep
-Layout in Profile "‹name›"** writes what is on screen, every
-screen at once, into the active profile — the layouts, not a
-keyboard or mouse resize, which is session-only. A Settings
-Save does not
-touch a temporary layout, which stays on screen through it; the
-one exception is a Space whose layout you changed in **Settings
-→ Spaces**, which wins on Save.
+:::unreleased
+**Open KiwiHub…** opens KiwiHub on its view picker
+([`kiwihub.show`](lua-reference.md#kiwihubshow)), the side `⌃⌥L`
+opens, and shows that side's shortcut beside it. While KiwiDesk
+is starting, or until you press **Start Tiling**, the row still
+opens it, with the view picker's items greyed and the reason
+shown.
 
-With more than one screen the submenu nests: **All Screens**
-first, then a row per screen in desk order. A layout belongs to
-a Space, so a screen's row sets the layout of whatever Space is
-showing there.
+A layout switched from the view picker, or from a Space's
+right-click **Layout** menu, is **session-only**: it does not
+rewrite the profile, and both say "not saved to profile" while
+it drifts. **Keep in Profile "‹name›"** (`⌘S` in the view
+picker), or **Keep Layout in Profile "‹name›"** in the Layout
+menu, writes what is on screen, every screen at once, into the
+active profile — the layouts, not a keyboard or mouse resize,
+which is session-only. A Settings Save does not touch a
+temporary layout, which stays on screen through it; the one
+exception is a Space whose layout you changed in **Settings →
+Spaces**, which wins on Save.
+:::
 
 KiwiDesk checks for updates on its own in the background, and a
 found update shows as a dot on the menu-bar icon and an
@@ -182,6 +187,14 @@ backup does not carry the folder, and Reset All Settings leaves
 it. In a synced or dotfiles folder, add `migration-backups/` to
 its `.gitignore`.
 
+:::unreleased
+An older KiwiDesk never writes over `gui.json` or a profile that a
+newer one migrated: it reports the file as unreadable, and a save
+to it fails until that Mac is updated. Versions before 3.0.0 do
+not have this check, so update every Mac sharing a synced folder
+together.
+:::
+
 ```json
 {
   "spaces": [ "1", "2", "mail" ],
@@ -291,6 +304,15 @@ with its own look the list is greyed. A new profile shares the
 look if the profile it was saved from does. With a Lua-owned
 `init.lua` there is no shared look.
 
+:::unreleased
+The animations are part of the look too: a profile using the
+shared look takes its animations, and a look you save keeps them.
+Applying a bundled look, or picking one in the tour, leaves your
+animations as they are. When you first run this version, a profile
+whose animations differ from the shared look's starts keeping its
+own look, so nothing changes on screen.
+:::
+
 The General section leaves the grid while you edit a stored
 profile without switching to it.
 
@@ -337,10 +359,6 @@ track shortcut bound.
 
 That grid's windows per pile is set at **General ▸ Windows per
 pile on quit**.
-
-**Monocle** — a focus change flips a card from one app's icon
-to the next over a blur; the flip and its duration live here
-too, beside the layout.
 
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or the shares
@@ -535,8 +553,6 @@ flat look instead.
 
 It covers the floating mark too.
 
-It covers the plates a Space switch slides too.
-
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
 each surface draws its look without glass — the bars their Boxed
@@ -574,9 +590,9 @@ be hidden, that glyph shows in its place.
 
 While your pointer rests on
 a Space it holds still, so a second click lands where the first
-did; it re-centres once the pointer leaves. With **Other Spaces** set to *Window count*, a
-Space not on screen draws no glyphs, so a click anywhere on it
-switches.
+did; it re-centres once the pointer leaves. With **Windows in
+other Spaces** set to *Window count*, a Space not on screen draws
+no glyphs, so a click anywhere on it switches.
 
 While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,
@@ -870,6 +886,20 @@ also carries the space history on `Tab`, `⇧` stepping it the
 other way as it does everywhere on macOS. A space past the tenth,
 or one with a name, has no digit: the space steps and the history
 reach it, and Shortcuts & Gestures can give it a key of its own.
+
+:::unreleased
+`⌃⌥C` moves the focused space to its next layout
+([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
+previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J`, `⌃⌥K`
+and `⌃⌥L` open **KiwiHub**
+([`kiwihub.show`](lua-reference.md#kiwihubshow)), one panel with
+three sides, listed together under Shortcuts & Gestures ▸ KiwiHub:
+`⌃⌥J` the **window switcher**, `⌃⌥K` the **shortcuts panel**, where
+typing searches your shortcuts, and `⌃⌥L` the **view picker**,
+which switches the layout of the space under the pointer, the
+profile and KiwiVision. `Tab` and `⇧Tab` step through the three
+sides.
+:::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you

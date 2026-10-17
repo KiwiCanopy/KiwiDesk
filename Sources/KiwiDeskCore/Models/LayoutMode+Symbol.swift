@@ -10,11 +10,11 @@ extension LayoutMode {
         case .stack:
             return "rectangle.leadinghalf.inset.filled"
         case .scrolling:
-            return "arrow.left.and.right.square"
+            return "appwindow.swipe.rectangle"
         case .grid:
             return "square.grid.3x3"
         case .monocle:
-            return "rectangle.inset.filled"
+            return "square.arrowtriangle.4.outward"
         case .track:
             return "rectangle.split.3x1"
         case .floating:

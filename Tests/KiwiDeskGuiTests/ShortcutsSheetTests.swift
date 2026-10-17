@@ -1,0 +1,201 @@
+import AppKit
+import Foundation
+import Testing
+
+@testable import KiwiDesk
+@testable import KiwiDeskCore
+
+/// The key panel's Shortcuts side (#2246): the query narrows the
+/// sheet by name, every verb row wears a glyph, and the sheet lists
+/// none of the panel's own openers.
+@Suite("The key panel's Shortcuts side")
+@MainActor
+struct ShortcutsSheetTests {
+    private static func row(_ label: String) -> ShortcutRow {
+        ShortcutRow(id: label, label: label, combo: "⌃⌥X")
+    }
+
+    private static let reference = ShortcutsReference(
+        layerName: KeyLayer.defaultName,
+        controls: [
+            ShortcutSubgroup(
+                title: "Focus",
+                rows: [row("Go to Space 2"), row("Focus window above")]
+            ),
+            ShortcutSubgroup(
+                title: "Move windows",
+                rows: [row("Move to Space 2")]
+            ),
+        ],
+        inactive: [row("Go to Space 9")],
+        desktopAway: [row("Go to Desktop 6")],
+        apps: [row("Open Settings"), row("Safari")],
+        custom: [row("KiwiDesk.notify()")]
+    )
+
+    @Test("the query keeps matching rows and their sections' titles")
+    func queryNarrows() {
+        var sheet = ShortcutsSheet(reference: Self.reference)
+        sheet.setQuery("  space 2 ")
+        let shown = sheet.shown
+        #expect(shown?.controls.map(\.title) == ["Focus", "Move windows"])
+        #expect(shown?.controls.first?.rows.map(\.label) == ["Go to Space 2"])
+        #expect(shown?.apps.isEmpty == true)
+        #expect(shown?.inactive.isEmpty == true)
+        #expect(sheet.matchCount == 2)
+    }
+
+    @Test("a section the query empties is dropped, the rest kept")
+    func emptiedSectionDrops() {
+        var sheet = ShortcutsSheet(reference: Self.reference)
+        sheet.setQuery("above")
+        #expect(sheet.shown?.controls.map(\.title) == ["Focus"])
+        LocalizationManager.shared.select("en")
+        let shown = try! #require(sheet.shown)
+        let view = ShortcutsSheetView(reference: shown, needle: "above")
+        #expect(view.sections(shown).map(\.title) == ["Focus"])
+    }
+
+    @Test("an empty query shows the whole sheet")
+    func emptyShowsAll() {
+        let sheet = ShortcutsSheet(reference: Self.reference)
+        #expect(sheet.matchCount == 8)
+    }
+
+    @Test("a match ignores case and diacritics")
+    func matchIsLoose() {
+        #expect(ShortcutsSheet.matchRange(of: "SAFA", in: "Safari") != nil)
+        #expect(ShortcutsSheet.matchRange(of: "x", in: "Space") == nil)
+        #expect(ShortcutsSheet.matchRange(of: "e", in: "Café") != nil)
+        #expect(ShortcutsSheet.matchRange(of: "", in: "Safari") == nil)
+    }
+
+    @Test("the column reads Controls, Apps, Custom, Inactive, Unavailable")
+    func sectionOrder() {
+        LocalizationManager.shared.select("en")
+        let view = ShortcutsSheetView(reference: Self.reference, needle: "")
+        let titles = view.sections(Self.reference).map(\.title)
+        #expect(
+            titles == [
+                "Focus", "Move windows", "Apps", "Custom",
+                "Inactive shortcuts", "Unavailable shortcuts",
+            ]
+        )
+        // Only Inactive dims as a section; an unavailable row
+        // dims itself.
+        let dimmed = view.sections(Self.reference).filter(\.dims)
+        #expect(dimmed.map(\.title) == ["Inactive shortcuts"])
+    }
+
+    @Test("every verb row wears a glyph that resolves")
+    func verbGlyphsResolve() {
+        let verbs = [
+            "KiwiDesk.cycle_mode()", "KiwiDesk.cycle_mode(\"prev\")",
+            "KiwiDesk.resize(\"x\", 50)", "KiwiDesk.resize(\"x\", -50)",
+            "KiwiDesk.resize(\"y\", 50)", "KiwiDesk.resize(\"y\", -50)",
+            "KiwiDesk.toggle_floating()", "KiwiDesk.toggle_sticky()",
+            "KiwiDesk.toggle_display_sticky()",
+            "KiwiDesk.switch_layer(\"vim\")", "kiwivision.toggle()",
+        ]
+        let glyphs = verbs.map {
+            ShortcutsReferenceBuilder.verbIcon(for: $0)
+        }
+        #expect(!glyphs.contains(nil))
+        // Grow and shrink, width and height: four shapes.
+        #expect(Set(glyphs[2...5].compactMap { $0 }).count == 4)
+        // KiwiVision wears its Settings card's symbol.
+        #expect(glyphs.last == SettingsDestination.kiwiVision.symbol)
+        for symbol in Set(
+            glyphs.compactMap { $0 } + ShortcutsReferenceBuilder.verbSymbols
+        ) {
+            #expect(
+                NSImage(
+                    systemSymbolName: symbol,
+                    accessibilityDescription: nil
+                ) != nil,
+                "\(symbol) does not resolve"
+            )
+        }
+    }
+
+    @Test("the sheet lists none of the panel's own openers")
+    func openersDropped() {
+        var layer = KeyLayer(name: KeyLayer.defaultName, bindings: [])
+        for (index, scope) in JumpScope.allCases.enumerated() {
+            layer.bindings.append(
+                KeyBinding(
+                    combo: "control+option+\(index)",
+                    lua: scope.lua,
+                    kind: .navigation
+                )
+            )
+        }
+        let reference = ShortcutsReferenceBuilder.build(
+            layer: layer,
+            spaces: [],
+            spaceIcons: [:],
+            desktops: [],
+            resizeStep: 50,
+            layerNames: [KeyLayer.defaultName]
+        )
+        #expect(reference.isEmpty)
+    }
+
+    @Test("Open Settings leads Apps on KiwiDesk's own icon")
+    func openSettingsLeadsApps() {
+        let layer = KeyLayer(
+            name: KeyLayer.defaultName,
+            bindings: [
+                KeyBinding(
+                    combo: "control+option+comma",
+                    lua: KeybindingCatalog.openSettings.lua,
+                    kind: .navigation
+                )
+            ]
+        )
+        let reference = ShortcutsReferenceBuilder.build(
+            layer: layer,
+            spaces: [],
+            spaceIcons: [:],
+            desktops: [],
+            resizeStep: 50,
+            layerNames: [KeyLayer.defaultName]
+        )
+        #expect(reference.controls.isEmpty)
+        #expect(reference.apps.first?.ownApp == true)
+        #expect(reference.custom.isEmpty)
+    }
+
+    /// The glyphs set at their own sites — Custom's Lua mark and
+    /// the gather badge — resolve where they are used.
+    @Test("Custom's and the gather badge's glyphs resolve at their sites")
+    func siteGlyphsResolve() throws {
+        let layer = KeyLayer(
+            name: KeyLayer.defaultName,
+            bindings: [
+                KeyBinding(combo: "control+option+9", lua: "print(1)")
+            ]
+        )
+        let reference = ShortcutsReferenceBuilder.build(
+            layer: layer,
+            spaces: [],
+            spaceIcons: [:],
+            desktops: [],
+            resizeStep: 50,
+            layerNames: [KeyLayer.defaultName]
+        )
+        let custom = try #require(reference.custom.first?.icon)
+        let gather = try #require(
+            ShortcutsReferenceBuilder.actionBadge(.gather)?.0
+        )
+        for symbol in [custom, gather] {
+            #expect(
+                NSImage(
+                    systemSymbolName: symbol,
+                    accessibilityDescription: nil
+                ) != nil,
+                "\(symbol) does not resolve"
+            )
+        }
+    }
+}

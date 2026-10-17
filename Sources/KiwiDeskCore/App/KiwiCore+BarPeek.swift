@@ -45,13 +45,12 @@ extension KiwiCore {
     }
 
     /// The window holding the system focus as a bar list reads it
-    /// (#2063): a playing Monocle flip's owed target, else
-    /// `lastFocused`, and only for the active Space — the one that
-    /// carries it (#1214). `space` is a Space Bar chip's; an App
+    /// (#2063): `lastFocused`, and only for the active Space —
+    /// the one that carries it (#1214). `space` is a Space Bar chip's; an App
     /// Bar list has none, and a group never spans Spaces.
     func barFocus(on space: SpaceID?) -> WindowID? {
         guard space == nil || space == activeSpace?.id else { return nil }
-        return pendingMonocleFocus?.to ?? state.workspaces.lastFocused
+        return state.workspaces.lastFocused
     }
 
     /// The window a click on a multi-window glyph focuses (#2063):

@@ -120,12 +120,22 @@ struct SettingsBorderedSealTests {
                     + "until this fix — its sealed sibling is "
                     + "rename (moved from the strip, #2022)"
             ),
+            "KiwiVisionLensHeader.swift": (
+                1, "role: .destructive",
+                "Delete Lens…, the layer header's twin (#2103 "
+                    + "ruling 49): the system red IS the warning"
+            ),
             "KeyRecorderField.swift": (
                 1, ".tint(buttonTint)",
                 "resolves its own tint per state: red on a "
                     + "rejected chord, ink otherwise. The recording "
                     + "signal is the chrome's own accent fill, "
                     + "which never reads the tint"
+            ),
+            "HyperKeyField.swift": (
+                1, ".tint(buttonTint)",
+                "the Hyper key's recorder (#1870), the key "
+                    + "recorder's own field and tint"
             ),
             "ScrollChordRecorderField.swift": (
                 1, ".tint(buttonTint)",
@@ -214,23 +224,24 @@ struct SettingsBorderedSealTests {
         let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
+        // Since #2377 the seal's style is the button-chip face.
         #expect(
-            source.occurrences(of: "buttonStyle(.bordered)") == 1,
-            "the seal applies the bordered style exactly once"
+            source.occurrences(of: "buttonStyle(ButtonChipStyle())") == 1,
+            "the seal applies the button-chip style exactly once"
         )
         #expect(
             SourceScan.adjacentPairs(
                 in: source,
-                line: "buttonStyle(.bordered)",
+                line: "buttonStyle(ButtonChipStyle())",
                 followedBy: ".neutralButtonLabel()"
             ) == 1,
             Comment(
                 rawValue:
                     "the seal's `.neutralButtonLabel()` must sit "
                     + "directly beneath its `buttonStyle"
-                    + "(.bordered)` — a seal that styles without "
-                    + "neutralising re-opens #759 at every call "
-                    + "site at once."
+                    + "(ButtonChipStyle())` — a seal that styles "
+                    + "without neutralising re-opens #759 at every "
+                    + "call site at once."
             )
         )
     }

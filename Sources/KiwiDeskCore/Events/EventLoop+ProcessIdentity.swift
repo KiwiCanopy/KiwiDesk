@@ -236,19 +236,28 @@ extension EventLoop {
     /// Whether two processes are one app's: one of them unlisted
     /// and both of one bundle. A pair of listed processes is
     /// never asked, so an app with one pid pays no lookup.
-    func areSiblings(_ pid: pid_t, _ other: pid_t) -> Bool {
+    /// Without `lookingUp`, only what attach and the census filed
+    /// answers, never LaunchServices: a process never filed is no
+    /// sibling (KiwiVision's per-pass verdict, #1936).
+    func areSiblings(
+        _ pid: pid_t,
+        _ other: pid_t,
+        lookingUp: Bool = true
+    ) -> Bool {
         guard pid != other,
             processIdentity.unlisted[pid] != nil
                 || processIdentity.unlisted[other] != nil,
-            let bundleID = bundle(of: pid)
+            let bundleID = bundle(of: pid, lookingUp: lookingUp)
         else { return false }
-        return bundle(of: other) == bundleID
+        return bundle(of: other, lookingUp: lookingUp) == bundleID
     }
 
-    private func bundle(of pid: pid_t) -> String? {
+    /// A process's bundle id: what attach filed, else — where
+    /// `lookingUp` — LaunchServices. A caller spells the flag.
+    func bundle(of pid: pid_t, lookingUp: Bool) -> String? {
         processIdentity.observed[pid]?.ref.bundleID
             ?? processIdentity.unlisted[pid]
-            ?? processIdentity.appAt(pid)?.ref.bundleID
+            ?? (lookingUp ? processIdentity.appAt(pid)?.ref.bundleID : nil)
     }
 
     /// An activation of an app running as several processes
@@ -274,22 +283,27 @@ struct RunningApp {
     let pid: pid_t
     let activationPolicy: NSApplication.ActivationPolicy
     let ref: AppRef
+    /// Hidden with ⌘H when the list was read (#1875 lists it).
+    let isHidden: Bool
 
     init(
         pid: pid_t,
         activationPolicy: NSApplication.ActivationPolicy,
-        ref: AppRef
+        ref: AppRef,
+        isHidden: Bool = false
     ) {
         self.pid = pid
         self.activationPolicy = activationPolicy
         self.ref = ref
+        self.isHidden = isHidden
     }
 
     init(_ app: NSRunningApplication) {
         self.init(
             pid: app.processIdentifier,
             activationPolicy: app.activationPolicy,
-            ref: AppRef(app)
+            ref: AppRef(app),
+            isHidden: app.isHidden
         )
     }
 }

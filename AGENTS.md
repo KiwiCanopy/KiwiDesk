@@ -95,10 +95,11 @@ file list; grep within a subsystem for specifics:
 | `Keys` | Carbon hotkey registration |
 | `Events` | Event listening / mouse drag taps |
 | `Tabs` | Native-tab reconciliation (`windowRekeyed` coalescing) |
-| `Animation` | Per-monitor `DisplayLink` animation, and the Monocle flip overlay (#1391) |
+| `Animation` | Per-monitor `DisplayLink` animation |
 | `IPC` | CLI / external command IPC |
 | `Bar` | KiwiShelf: one panel per display carrying the App Bar & Space Bar sections |
 | `Borders` | Focus & sticky overlays (rings, sticky marks) |
+| `Vision` | KiwiVision: a dim plate per screen below the focus (#2103) |
 | `Power` | Power / display-state handling |
 | `Permissions` | AX / permission prompts |
 | `Localization` | `L()` string routing & locale catalogs |
@@ -353,7 +354,10 @@ These apply everywhere, whatever you touch:
   Nothing external depends on the current command names, Lua/CLI
   verbs or event names — rename and restructure those outright
   (#42 renamed the space commands), and add no compatibility
-  aliases or deprecation layers for them.
+  aliases or deprecation layers for them — save `kiwidesk mcp`'s
+  verb and server name, which installed Claude Desktop extensions
+  and the published plugin store (packaging-and-release.md,
+  `MCPInvocationContractTests`).
   **File formats are no longer in that set.** The old rule read
   "pre-release, single user… re-editing the config *is* the
   migration", and that premise expired the day v0.9.7 went to
@@ -408,11 +412,15 @@ Touching Anywhere in `Sources/KiwiDeskCore`.
   summary — save a `.window` argument, which exempts a named call from the #292
   preflight and so is read only through `commandTarget` (#1518,
   `WindowArgumentReachTests`)
+- a new command answers whether it is destructive in
+  `APIReference.destructive`, a name the census cannot read being review's
+  (#1685, `APIDestructiveCensusTests`)
 - the #292 preflight's one verb bypass is
   `FocusedCommandPolicy.raiseFlightExempt`, joined only by a verb that changes
   no window's content, size or membership and judged by the app the raise LEFT,
-  never by stamp presence, its `RaiseFlight` written by the `focus` verb alone
-  (#1812, `FocusRaiseFlightGuardTests`, `RaiseFlightWriterCensusTests`)
+  never by stamp presence, its `RaiseFlight` written by the `focus` verb and
+  hover focus alone, through the one recorder (#1812, #1869,
+  `FocusRaiseFlightGuardTests`, `RaiseFlightWriterCensusTests`)
 - a class storing a panel orders it out in its own `isolated deinit` (#1868,
   `OverlayPanelDeinitCensusTests`)
 
@@ -523,6 +531,10 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
 - a switch landing on a Space it un-stashes raises that Space's float layer
   once after its own retile, handing focus back to the ANCHOR (#412/#1727,
   `FollowSwitchFloatRaiseTests`)
+- a commanded focus onto another window owes the float-tier raise at the
+  command, since its report is our own echo, OWED while `tiledPlaneMoving`
+  and paid at rest through the one `tiledPlaneCameToRest`, a direct raise
+  superseding it (#2284, #2343, `CommandedFocusFloatRaiseTests`)
 - a mutation that changes which windows overlap arms the matching z-order
   restore after its own retile, and narrowly (#674) — and a removal whose
   close-return raise stood down arms no track restore either, the one
@@ -707,10 +719,13 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   accessibility-steal return debt is its sibling, owned the same one-machine
   way by `KiwiCore+AccessibilityReturn.swift` (`AccessibilityReturnTests`)
 - the #1532 menu-bar reveal return the third,
-  `KiwiCore+MenuBarRevealReturn.swift` deciding at the report and re-asserting
-  with the STAMPED raise so the report arrives as our own echo, the strip read
-  pinned false by every `makeTestCore` twin (`MenuBarRevealReturnTests`,
-  `MenuBarRevealSeamTests`)
+  `KiwiCore+MenuBarRevealReturn.swift` deciding at the report, owing the return
+  while the bar shows or the quick menu is open — the open looking back within
+  `menuBarRevealOpenGrace` for the one report it declined, since the quick
+  menu's activation reports ahead of `menuWillOpen` — and paying it once with
+  the STAMPED raise so the report arrives as our own echo (#2224), the strip
+  read pinned false by every `makeTestCore` twin (`MenuBarRevealReturnTests`,
+  `MenuBarRevealPaymentTests`, `MenuBarRevealSeamTests`)
 - a window that lands on a display other than the one its space lays out on
   takes the space THAT display shows, through the one `screenHome` predicate
   its two routes share — the create fold deciding from the `arrivalDisplay` its
@@ -731,13 +746,19 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
 - a launch follows its window into its app rule's Space as a whole
   `followSwitch` in place of the arrival's event retile, owed only through the
   one `oweLaunchFollow` door by Open or Focus opening something, by
-  `new_window` — retired when its press opened nothing (#1518) — or an
-  OPEN-shaped activation — a press within a second, of a process that just
-  started or shows no window (a reopen, an un-minimize), outside a Desktop
-  switch, a window landing before that activation paid by it — never by the app
-  being active or a press alone, keyed by bundle id and paid on the fold's own
-  rule verdict (#1599, `LaunchFollowTests`, `LaunchFollowRetireTests`,
-  `LaunchFollowReopenTests`, `LaunchFollowSeamTests`)
+  `new_window` — retired when its press opened nothing (#1518) — by the window
+  switcher's un-minimize (#1875), or an OPEN-shaped activation — a press within
+  a second, of a process that just started or shows no window (a reopen, an
+  un-minimize), or a press at most a second before a process started that
+  activates within `coldStartGrace` (#2201, never a press older than KiwiDesk's
+  start), outside a Desktop switch, a window landing before that activation
+  paid by it — never by the app being active or a press alone, keyed by bundle
+  id and paid on the fold's own rule verdict (#1599, `LaunchFollowTests`,
+  `LaunchFollowRetireTests`, `LaunchFollowReopenTests`,
+  `LaunchFollowColdStartTests`, `LaunchFollowSeamTests`)
+- a Move here on a hidden app is paid at that app's first honored focus REPORT,
+  ahead of the #1207 memory and the follow, the handler deciding the retile
+  (#1513, `JumpHiddenAppTests`)
 - a Desktop switch is not a close — each space's last HONORED focus is
   remembered at the focus REPORT — and by the frontmost seed, OS truth, the one
   other writer in `ReturningFocusSeamTests`' register (#1345) — never by a fold
@@ -831,27 +852,30 @@ Touching `Config`, `Profiles`, `Commands`.
   sparsely-encoded leaf owes the same crossing, since absence was a stored
   value (#1369, `GlassDefaultMigrationTests`), while re-defaulting a
   WHOLE-written leaf's stored old value is a ruling bounded by a stored signal
-  that keeps a real choice (#1931, `SpaceChangeOnMigrationTests`) — and so does
-  renaming a verb a Settings row writes into a stored binding, whose exact
-  spelling crosses whoever typed it (#1511, `FocusOrSpawnMigrationTests`) — as
-  does a value whose MEANING changes under the same key, which moves the
-  default with it and reads the file's format to end, since a re-scaled 3 is a
-  typed 3 (#1354, `TrackLimitMigrationTests`) — the one bounded exemption being
-  a re-scale that moves every value by under one inner gap AND whose old
-  reading was the defect, both bounds stated in its design entry (#1382)
+  that keeps a real choice (#1931) — and so does renaming a verb a Settings row
+  writes into a stored binding, whose exact spelling crosses whoever typed it
+  (#1511, `FocusOrSpawnMigrationTests`) — as does a value whose MEANING changes
+  under the same key, which moves the default with it and reads the file's
+  format to end, since a re-scaled 3 is a typed 3 (#1354,
+  `TrackLimitMigrationTests`) — the one bounded exemption being a re-scale that
+  moves every value by under one inner gap AND whose old reading was the
+  defect, both bounds stated in its design entry (#1382)
 - the seeded keymap is TWO bases plus one key and the Desktop tier — `⌥⌘`
   carries the verbs you HOLD (size) and one pressed exception pinned to `Tab`,
   the Space history (#1655, `SizeLayerSeedTests` ▸ `sizeLayerCarriesOnlySize`),
-  `⌃⌥` the verbs you PRESS (the positional ladder on arrows and digits, the
-  toggles on letters), and `⌃⌥K` and `⌃⌥,` are app chrome rather than window
-  verbs, seeded from the one `appChromeRows` every layer-authoring site takes
-  (#1381, `LayerChromeSeedTests`)
-- never spend `⇧` on a lettered row — it qualifies a positional verb, "act on
-  the window" (swap on an arrow, send on a digit), or off a positional key
-  reverses its unshifted twin as `⇧Tab` does, or on `⌃⌥⇧⌘` + digit lifts the
-  ladder to Go to Desktop, topped up past a per-Mac mark through the one
-  `topUpDesktopShortcuts` (`DesktopShortcutTopUpTests`) (#1094/#1655,
-  `DefaultKeybindingsTests` ▸ `shiftNeverQualifiesALetter`,
+  `⌃⌥` the verbs you PRESS (the positional ladder on arrows and digits,
+  mnemonic letters for the rest), and `⌃⌥K` and `⌃⌥,` are app chrome rather
+  than window verbs, seeded from the one `appChromeRows` every layer-authoring
+  site takes (#1381, `LayerChromeSeedTests`)
+- never spend `⇧` on a lettered toggle — it qualifies a positional verb, "act
+  on the window" (swap on an arrow, send on a digit), or off a positional key
+  reverses its unshifted stepping twin as `⇧Tab` and `⌃⌥⇧C` do (#453), or on
+  `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past a per-Mac
+  mark through the one `topUpDesktopShortcuts` on the stored
+  `desktopShortcutBase`, a writer of the base moving the Desktop rows in the
+  same draft write (#1870, `DesktopShortcutTopUpTests`,
+  `HyperShortcutMoveDesktopTests`)
+  (#1094/#1655, `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`,
   `DefaultKeybindingLadderTests` ▸ `shiftReversesItsTwin`), and `⌘` on an arrow
   steps the Spaces (`DefaultKeybindingLadderTests` ▸ `arrowsRideTheirOwnTiers`)
 - a default added after the first-run seed joins the next generation and
@@ -958,7 +982,18 @@ Touching `Config`, `Profiles`, `Commands`.
   one `writeThroughLiveProfile` door every write of the live profile from
   outside Settings takes, its draft policy ruled once in
   `SettingsModel.adoptLiveWrite` (#1720, #1518, `ShelfPaintTests`,
-  `BarMenuLandingTests`)
+  `BarMenuLandingTests`) — save a rule write, which takes `saveRuleReach`
+  with the `.outside` origin and `SettingsModel.adoptRuleKeep` (#1685,
+  `AppRuleKeepTests`, `RuleKeepDraftTests`)
+- a change report reads one judgement — where a leaf is kept, why not and
+  whether it already is answered by the one `KeepJudge` over one read of the
+  stored profile and the rule snapshot, taken only where a caller holds leaves
+  — save Settings' live rows, the one ruled reader that diffs the root, its
+  Keep taking the reading's own keep ids (#2262, #2368,
+  `UnsavedLiveSettingsTests`, `SettingsLiveKeepTests`) — (`ChangeReportTests`,
+  `KeepSettingsEdgeTests`), a keep landing the shared look without repainting
+  live, and a live store a verb writes joining the keep document or reporting
+  nothing, which is review's (#1685)
 - the starter setup is DERIVED from the connected screens and its tuning is ONE
   `TilingSettings` — each layout tuned for the screen `StarterSetup.hosts`
   names — Scrolling for the widest screen that leads it — minimum size by the
@@ -979,6 +1014,9 @@ Touching `Config`, `Profiles`, `Commands`.
   `PresetShapeTuningSeamTests`)
 - a new file in the config directory joins `ConfigArtifact` AND answers "does
   this travel in a backup?" in the same change set, neither alone
+- a write of `gui.json` or a profile file goes through its store's door, which
+  refuses a file a newer build wrote, and a raw rewrite beside it asks
+  `NewerFormatOnDisk.check` first (#2325, `NewerFormatWriteRefusalTests`)
 - a change breaking the decoded shape of anything a bundle carries bumps
   `SetupBundle.currentFormat`, breaking Profile or GuiConfig schema bumps
   `Profile.currentFormat` / `GuiConfig.currentFormat`, and a breaking palette
@@ -988,7 +1026,12 @@ Touching `Config`, `Profiles`, `Commands`.
   owing the same answers for `LookDocument.currentFormat` and its sidecar
   (#1684) — none of which anything can guard — and a look's stored setting and
   colour paths (#1752) a migration crossing when renamed, which
-  `LookKeysCensusTests` notices for the styling ones and review must pay
+  `LookKeysCensusTests` notices and review must pay — a new `AnimationSettings`
+  field joining every look by derivation while a bundled look and the tour's
+  paint carry styling alone (#2176, `LookMotionTests`)
+- a long-lived release branch keeps every `currentFormat` above `main`'s at
+  each sync, or a `main` patch stamping the same number skips the release
+  branch's step — review's, the two branches never sharing a tree (#2265)
 - `SetupBundleTests` holds the bundle's shape both ways by reflection and
   `SetupBundleArtifactTests` the register, but neither sees a store that never
   joined (#606)
@@ -1044,7 +1087,8 @@ Touching `AX`, the boot scan's, the bulk passes', the sweep's and the
 adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
 `+ReconcileAll`, `+ReconcileOffMain`, `+ListedWindows`, `+Heal`,
 `+WindowPolicy`, `+FloatVerdict`, `+Tabs`, `+RemovalDistrust`, `+Tracking`,
-`+ProcessIdentity`, `+ShadowWindows`, `+WindowServerWakeUp`).
+`+ProcessIdentity`, `+ShadowWindows`, `+WindowServerWakeUp`,
+`+PanelButton`).
 
 - AX calls are slow and can block — snapshot before layout math, and the
   activation, focus, hide and undeferred-close arms and the distrust and
@@ -1136,7 +1180,8 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   `InPlaceRestartNoMotionTests`)
 - every AX message to another app runs inside `WorkMeter.shared.ax`, or the
   per-switch count a performance change is measured by lies (#1508,
-  `WorkMeterAXSeamTests`)
+  `WorkMeterAXSeamTests`), and a change adding AX messages on the Space-switch
+  path states how many per switch, and why, in its PR and at the read
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
   destroy re-reads the app still tracking it — never tracking, filing or
@@ -1154,6 +1199,8 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   (`CommandBarIgnoreTests`), a screen-saver-level window refused at adoption
   alone, a tracked one judged through the one `FloatDetection.judgedLayer`
   (#2069, `ScreenSaverLayerWiringTests`)
+- a float rule is read only through `FloatRules.parse` and spelled only
+  through `FloatRules.rule(app:title:)` (#2345, `FloatRuleGrammarSeamTests`)
 
 ### [os-private-apis](.claude/rules/os-private-apis.md)
 
@@ -1196,6 +1243,9 @@ Touching `Lua`.
 Touching `Keys`, `Events`, `Animation`.
 
 - Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per screen
+- hover focus is armed by user pointer motion alone, so KiwiDesk moves the
+  pointer with a bare warp and never synthesizes a mouse event (#1869,
+  `HoverFocusWiringTests`)
 - the running hotkey table is written only from saved files — no Settings
   control registers a chord ahead of Save, and a new writer joins
   `ShortcutsApplyOnSaveTests`' census
@@ -1260,19 +1310,10 @@ Touching `Keys`, `Events`, `Animation`.
 - a keypad digit IS its number-row twin — stated once in `KeypadKeys` and read
   by both registration and naming, the aliased set closed to the ten digits, a
   twin's refusal never reported as the binding's (#1074, `KeypadKeysTests`)
-- the Monocle focus flip is a drawn card over a behind-window blur, never a
-  transform or a capture of the real window — a COMMANDED focus takes the one
-  `focusWithMonocleFlip` door and owes its focus as the `pendingMonocleFocus`
-  ledger, an OS-reported one never takes the door, a focused-window command
-  lands the owed focus ahead of its dispatch and an honored report for another
-  window drops it, and its animations are `BarMotion`'s (#1391,
-  `MonocleFlipPlanTests`, `MonocleFlipDoorTests`, `MonocleFlipSeamTests`)
-- a Space switch's motion is DRAWN, never an animation of its windows — keep
-  its pass the instant one, stage an incoming window's writes in
-  `FrameApplier`'s hold through every write path and release them from the
-  app's own queue, and move KiwiDesk's own window through AppKit in the
-  caller's turn (#1956, `SpaceSlideSwitchTests`, `FrameApplierHeldTests`,
-  `FrameApplierOwnWindowTests`, `SpaceSlideSeamTests`)
+- a Space switch is instant — keep its pass the instant one, move KiwiDesk's
+  own window through AppKit in the caller's turn, and pay the Space cue from
+  `spaceSwitchRetile` alone, `paySpaceCue` the one Core reader of `space.cue`
+  (#2228, `FrameApplierOwnWindowTests`, `SpaceCueSeamTests`)
 - every `.windowFocused` the loop emits comes from the app macOS activated last
   — a non-activating panel flips its app's focused window without the app ever
   being frontmost — so a new emitter in `Events/` asks `reportsFromActiveApp`
@@ -1299,9 +1340,7 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 `Layouts` files, the Settings shelf preview,
 `Commands/Reference/APIReference+Retired.swift`, the glass hosts outside `Bar`
 (`Tiling/DragOverlay.swift`, `Tiling/DragMarkerView.swift`,
-`Borders/StickyMarkPlate+Glass.swift`,
-`Animation/SpaceSlideOverlay+Plates.swift`), the app-icon readers outside `Bar`
-(`App/KiwiCore+MonocleFlip.swift`, `Animation/SpaceSlideOverlay.swift`).
+`Borders/StickyMarkPlate+Glass.swift`).
 
 - A bar item's title is shown on two channels — drawn AND announced (#937) — so
   a title consumer's stand-down asks whether the title reaches either, never
@@ -1310,12 +1349,12 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   cost bound is the refresh pipeline's own debounce, never a consumer
   pre-filter (`BarTitleRefreshTests`, `AppBarAccessibilityTests`)
 - a bar derivation answering WHICH WINDOW HOLDS THE SYSTEM FOCUS reads the one
-  `KiwiCore.barFocus(on:)` — an owed Monocle flip's target, else `lastFocused`,
-  gated on the active Space (#2063, `BarFocusSeamTests`) — never the display's
-  own `currentSpace(on:)` nor a Space's remembered slot — they diverge on the
-  injected ∞ traveler the `+n` tint exists for — while a read of
-  `currentSpace(on:)` answers only what a screen is SHOWING and says which of
-  the two it means (#1214, `SpaceBarStickyScreenTests`)
+  `KiwiCore.barFocus(on:)` — `lastFocused`, gated on the active Space (#2063,
+  `BarFocusSeamTests`) — never the display's own `currentSpace(on:)` nor a
+  Space's remembered slot — they diverge on the injected ∞ traveler the `+n`
+  tint exists for — while a read of `currentSpace(on:)` answers only what a
+  screen is SHOWING and says which of the two it means (#1214,
+  `SpaceBarStickyScreenTests`)
 - a bar animation is gated on Reduce Motion in ONE home — an AppKit frame write
   carries no animation argument to name a gate in, so the bars take the routed
   shape rather than the GUI tree's per-call one: every motion-starting spelling
@@ -1404,7 +1443,8 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   `KiwiCore.updateBars()`, never a single-bar sync (`ShelfArrangementTests`,
   `ShelfDriverTests`, `ShelfGeometryTests`, `ShelfNeedParityTests`), standing
   down through the one `shelfStandsDown(on:)` — native fullscreen or a
-  presentation in front (#1787, `ShelfStandDownSeamTests`)
+  presentation in front, the cues through it too (#1787, #2348,
+  `ShelfStandDownSeamTests`)
 - an overlay skips a show whose input repeats, so a draw-time read joins the
   one `BarDrawEnvironment` and a path leaving views where a redraw of the same
   input would not put them (the App Bar drop) invalidates its overlay, and app
@@ -1535,13 +1575,19 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 
 ### [borders](.claude/rules/borders.md)
 
-Touching `Borders`.
+Touching `Borders`, `Vision`.
 
+- Floats are dimmed by the plate, never by panels of their own: while a plate
+  shows, a float's landing re-stacks the target's overlays through the one
+  watch door (#2103, `KiwiVisionFloatLandingTests`)
 - A ring stays on its window's Desktop and spans every Desktop only while its
   window is carried, the sticky mark always spanning, and a ring is re-homed
   through `BorderOverlay` only where it stopped spanning or `sync` orders it on
   another Desktop (#2149, #1145, `StickyOverlaySpanTests`,
   `BorderDesktopSpanTests`)
+- every window `focusAnchor` may yield has a ring slot — the slots and the
+  anchor read the one `anchorVisitors(of:tiled:)` (#2259,
+  `BorderTravelerFocusTests`)
 - `FollowSource` owns which frame the ring AND mark render — never re-implement
   it beside a call site, and a new decision input enters through its signature
   (the #677 size pin rides the tick this way)
@@ -1550,8 +1596,10 @@ Touching `Borders`.
 - the settle passes are two keys, early visibility and late geometry
 - an own key window that is not the focus anchor stands the focused ring down,
   read from the one `EventLoop.ownKeyWindow` seam the #929 raise stand-down
-  shares — one reading, two ruled facets: the ring takes the broad `number`,
-  the raise the narrow `isDialog` (#933/#935)
+  shares — one reading, three ruled facets: the ring takes the broad `number`,
+  the raise the narrow `isDialog`, and the ring and KiwiVision look past a
+  `floatsOverWindows` panel such as KiwiHub, under which hover focus stands
+  down (#933/#935/#2373/#2378)
 - the sheen is one `BorderSheen` ramp every surface paints — ring, bar
   highlight and border, drag borders, and their Settings pictures — the surface
   clearing its flat ink while it paints, and the ramp's flat band staying the
@@ -1579,18 +1627,70 @@ Touching `Borders`.
   and pops about its centre, a resizing one setting the room for the whole
   resize at once (#2033, `SizeLimitPillPopTests`, `StickyMarkPopTests`)
 - after a Space switch the focused ring is ordered in dormant and revealed on
-  its window's own report near the sent frame, at a cap, and never before the
-  slide's plates lift (#1959, `BorderArrivalTests`)
+  its window's own report near the sent frame, or at a cap (#1959,
+  `BorderArrivalTests`)
 - a panel that keeps the ring's size moves through `SkyLight.moveWindow`, never
   AppKit's fenced `setFrame`, outside a pass AppKit placed it in, the backend's
   `placedFrame` its frame of record (#1956, `BorderPanelMoveTests`,
   `BorderPanelSeamTests`)
 
+- a KiwiVision plate stacks under its target's behind ring through
+  the one `ringPanel(of:)` reading, re-stacks only through the
+  ring's `ordersOverlay` gate and the watch's post-ring restack,
+  keeps its target watched with borders off, reads the
+  shelf's stand-down verdict, stands its blur down at the one
+  `kiwiVisionDrawsBlur` door every reader of the drawn blur takes,
+  takes every live app-wide change through the one
+  `appWideLiveChanged`, which compares the whole stored group,
+  reads every KiwiVision setting through the one `VisionLook`
+  resolver (`VisionLookSeamTests`),
+  masks itself through a reshape that never orders, its window
+  list read at a settle pass through one seam
+  (`VisionMaskPlateTests`, `KiwiVisionClearWallpaperTests`),
+  decides its clear verdict once per pass in `visionClearPids`
+  through `names(_:appOf:lookingUp: false)`, Never dimmed
+  joining it, a lens member judged per window through the one
+  `visionLensClear` (`KiwiVisionClearAppTests`,
+  `KiwiVisionNeverDimmedTests`), the lens on written by
+  `setVision` alone and following the stored lenses through
+  `followActiveLens` (`KiwiVisionLensActivationTests`),
+  switches the system appearance through one seam whose debt every
+  way out pays, and its on/off is a session value no snapshot
+  carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
+  `VisionManagerTests`, `OverlayGlassGateTests`,
+  `VisionAppearanceSeamTests`, `KiwiVisionStoredTests`)
+- a navigation step — a focus or swap key, the scroll gesture — skips what
+  a lens leaves out through the one `lensKeySkip`, threaded with no default
+  into every navigation model and judged per window by `visionLensClear`,
+  and a pick never asks it (#2103, `KiwiVisionLensFocusTests`,
+  `KiwiVisionLensGestureTests`)
+- an overlay hearing WindowServer's per-window events connects to the one
+  `WindowServerWatch` under its own `Consumer` case, whose position is its
+  place in the fan-out, and calls no `SkyLightWindowEvents` door itself
+  (#2275, `WindowServerWatchTests`, `WindowServerWatchSeamTests`)
+- a lens's delayed clear is one hold judged at every KiwiVision re-draw
+  through the pure `VisionHold.begins`, ended by its deadline, a press on
+  the held window, a new target or the lens letting go, the plates ordered
+  above it through the manager's one ordering door (#2103,
+  `KiwiVisionHoldTests`, `BorderOrderCensusTests`)
+- a lens's reach is read from the live profile's adoption state through
+  the one `profileLeavingOut` and re-judged on every change of it, and a
+  lens rename or delete re-keys or clears every profile's `lens_reach`
+  and every stored binding naming it through the one pair of crossings,
+  a rename carried by its own write so the lens on follows it, a lens
+  matched by the one `sameLens`, a Settings row drawn through `lensOffer`
+  — the lens page's Save laying every rename, delete and reach pick in
+  the one layer pass and writing the settled list (#2103,
+  `KiwiVisionLensReachTests`, `KiwiVisionLensRenameTests`,
+  `ShortcutsLensRowsTests`, `ShortcutsLensNamingTests`,
+  `LensPageSaveTests`, `LensEditsTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).
 
 - North-star and settled conventions
+- a verb the CLI answers without the app joins `CLIRoute` and owes no record,
+  never shadowing a socket command (#1685, `CLIRouteTests`)
 - grey don't hide — and an `NSMenu` greying a row for its own reason turns
   auto-enabling off — per menu, every nested submenu included — after which
   every row states `isEnabled`, submenu parents too (#802,
@@ -1685,11 +1785,15 @@ Touching `Sources/KiwiDesk` (the GUI).
   save pill exists only while the draft does (`DetailPanelTests`,
   `HomeSurfacingTests`) and every reason it appears owes a row in its own list
   — config leaves through `SettingsDraftDiff`, live drift through the ONE
-  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`)
+  `profileDrift` verdict the header reads too (#1197, `SettingsDriftRowsTests`),
+  an unsaved live setting through Core's `unsavedLiveSettings`, asked again
+  wherever live or the baseline can have moved (#2262, `SettingsLiveRowsTests`)
 - a picture whose object is NOT the draft takes a read-only sheet instead,
   which answers Return AND Escape and is hosted above the subtree that opens it
   (#859, `SheetPresentationSeamTests` is the register of who may host one,
-  `PresetPreviewSheetTests` the structural no-draft half)
+  `PresetPreviewSheetTests` the structural no-draft half) — save that a page
+  with no draft whose rows write at once takes the panel for its own live
+  values (KiwiVision's Focused window chip, #2103, `DetailPanelTests`)
 - a presentation built from ONE row is handed that row by `item:`, sheet or
   popover alike (#843)
 - a diff row narrates through `SettingsValueReadout`, whose totality net covers
@@ -1764,6 +1868,9 @@ Touching `Sources/KiwiDesk` (the GUI).
 - a picture speaks as ONE description read from the drawing's own predicates
   (`KeyboardBoardSpokenTests`)
 - a title component carries `.isHeader`
+- a shortcut row's title is a verb phrase — "Show" and the panel's VoiceOver
+  name for a panel, "Open" for a window, each pair held per catalog (#2245,
+  `ShortcutsPanelNounTests`)
 - a window that finishes something ALREADY BEGUN comes forward at the moment it
   appears — one a framework opened included, through the seam that names that
   moment rather than a nearby callback, refusing any affordance that parks it
@@ -1796,13 +1903,21 @@ Touching `Sources/KiwiDesk` (the GUI).
   declares cannot see what it is wired to (#1011, `UpdatePromptWiringTests`)
 - the marked own window's raise goes through `KiwiCore.focusOwnWindow(number:)`
   BEFORE `forceFront`, so its report arrives intended rather than as the
-  clickless focus #1161's distrust bounces — the gate and the window-number
+  clickless focus #1161's distrust bounces — a raise Core starts commanding
+  the focus itself and handing the GUI only the front through
+  `PointerRest.frontOwnWindow` (#1869, `HoverFocusWiringTests`) — the gate and the window-number
   bridge are Core's, this tree never spells the verb, and
   `SettingsOpenFocusSeamTests`' `allowed` map is the one copy of who may call
   the door (#1281)
 - a key-capable own window built without `.closable` validates and performs
-  File ▸ Close itself, or ⌘W beeps at it — `ShortcutsPanel` is the instance,
-  `MainMenuTests` the guard (#1533)
+  File ▸ Close itself, or ⌘W beeps at it — `JumpPanel` is the instance,
+  `MainMenuTests` the guard (#1533) — and a non-activating key panel hands the
+  main menu only the File and Edit chords, through
+  `MainMenu.performPanelChord`, a row joining those menus only once ruled safe
+  to fire while another app is in front (`PanelChordTests`) — and a keyboard
+  panel is keyed through `PanelHandBack.present`, never activating KiwiDesk,
+  handing its key equivalents to the main menu itself (#1875,
+  `PanelHandBackTests`)
 - a surface narrating the boot count reads the one `BootCountText.line(for:)`
   (#1715)
 - window management starts only through `startManaging()`, which refuses until
@@ -1868,7 +1983,10 @@ Touching `Tests/**`.
 - split suites early
 - generous hang-guards, never tight deadlines (#344)
 - reach the machine only through injected seams (hotkeys #565, menu-bar slots —
-  `MachineTouchTests`, `StatusItemSeamGuardTests`)
+  `MachineTouchTests`, `StatusItemSeamGuardTests`; the live app list, an
+  attach to or frame for another app refused — #2289, `LiveAppListSeamTests`;
+  a test core's boot refused — #2294, `TestCoreStartTripwireTests`,
+  `TestCoreStartSeamTests`)
 - a change owes a test that reds when it is reverted, and a test whose
   assertions are new or changed owes a `guard-prover` run whatever shape that
   test is — spawned `isolation: "worktree"`, or run alone
@@ -1902,7 +2020,7 @@ Touching Any hand-mirrored field list.
 ### [packaging-and-release](.claude/rules/packaging-and-release.md)
 
 Touching `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`,
-workflows.
+workflows, `plugins/`, `MCPInvocation.swift`.
 
 - Every distributable artifact needs its own notarization ticket, and the build
   machine is the one place that failure is invisible
@@ -1969,6 +2087,10 @@ workflows.
   outside the groups that step downgrades (#1780, `WarningGateTests`)
 - a minor or major release is preceded by a `profile-tests` run against the
   last baseline, the owner's session only (#1868)
+- the Claude Code plugin advances only from a published tag's `plugins/`,
+  the version stamped by the sync alone, and `kiwidesk mcp`'s verb and server
+  name are stored outside the repo, so renaming them is a crossing (#2258,
+  `ClaudePluginSyncWorkflowTests`, `MCPInvocationContractTests`)
 
 ### [rule-authoring](.claude/rules/rule-authoring.md)
 

@@ -3,6 +3,7 @@ paths:
   - "Sources/KiwiDeskCore/Profiles/**"
   - "Sources/KiwiDeskCore/Config/**"
   - "Sources/KiwiDeskCore/Commands/**"
+  - "Sources/KiwiDeskCore/App/KiwiCore+AppWide*.swift"
 ---
 
 # Profiles & config ownership
@@ -51,10 +52,11 @@ because two real clients now remove drift — see
   user holds, so it is the only held thing on `⌥⌘`, and no other
   pressed verb joins the history pair there — a second key is a
   ruling of its own, argued in `docs/design-decisions.md` ▸ "One
-  pressed exception rides `⌥⌘`". The toggles (`⌃⌥F`, `⌃⌥S`,
-  `⌃⌥P`) and app chrome (`⌃⌥K`, `⌃⌥,`) are pressed, so they stay
-  on the base tier as mnemonic keys (`SizeLayerSeedTests` ▸
-  `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`).
+  pressed exception rides `⌥⌘`". Every other pressed verb off
+  the ladder — the toggles, the layout cycle, app chrome — stays on
+  the base tier as a mnemonic letter (`SizeLayerSeedTests` ▸
+  `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`,
+  `LayoutCycleSeedTests`).
 - **App chrome is seeded from the ONE `appChromeRows`, and
   every site that authors a layer takes it (#602/#1381).** The
   base seed and a GUI-created layer are two authoring sites, and
@@ -70,8 +72,11 @@ because two real clients now remove drift — see
   `⇧Tab` does everywhere on macOS (#1655).** It qualifies a
   positional row, so a lettered toggle never carries it: `⌃⌥⇧S`
   did, and it was the one chord in the seed a user who had
-  learned the ladder read wrong (#1094, `DefaultKeybindingsTests`
-  ▸ `shiftNeverQualifiesALetter`). On the ladder `⇧` acts on the
+  learned the ladder read wrong (#1094,
+  `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`).
+  A letter whose unshifted row STEPS may take the reversal — the
+  layout cycle's `⌃⌥⇧C` (#453) — and a further pair joins that
+  suite's `reversals` register as a ruling. On the ladder `⇧` acts on the
   window on an arrow (swap) and on a digit (send it to a Space),
   and `⌘` steps the Spaces on an arrow and sends-and-follows on a
   digit, which is #1655's re-ruling of #1176; the tier an arrow
@@ -93,7 +98,13 @@ because two real clients now remove drift — see
   `gui.json` clears that mark and the generation mark below (`DesktopShortcutTopUpTests`,
   `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
-  its own.
+  its own. The tier's modifiers are the stored
+  `GuiConfig.desktopShortcutBase` (#1870): a writer of a Desktop
+  row writes it on that base — the top-up, Restore Defaults, and a
+  top-up row adopted into a draft that staged a move — and a writer
+  of the base moves the Desktop rows in the same draft write, and a
+  path that drops the draft's rows drops the base with them
+  (`HyperShortcutMoveDesktopTests`, `HyperMoveDraftTests`).
 - **A default row added after the first-run seed joins the next
   generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
   and list the row in `rows(ofGeneration:)`, beside adding it to
@@ -564,10 +575,9 @@ holds the secondary-switch decision including its nil case.
   one only where a stored signal tells a deliberate choice apart
   and that signal keeps it, the step reads the file's format as
   the meaning-change clause above requires, and the design entry
-  states the cost to a user who chose the old value. The slide
-  turn-on is the precedent and its bound (#1931,
-  `SpaceChangeOnMigrationTests`: 2.1.1's master-off write keeps
-  the `false`); a flip with no such signal keeps #1359's answer.
+  states the cost to a user who chose the old value; #1931
+  argued the bound (2.1.1's master-off write kept the `false`).
+  A flip with no such signal keeps #1359's answer.
 - **A per-profile value moving app-wide crosses by ADOPTION, a
   ruled shape beside `ConfigMigration` (#1741).** N profile
   files → one value is an election, and a byte-level step cannot
@@ -576,6 +586,11 @@ holds the secondary-switch decision including its nil case.
   which does. The obligations:
   - Write `appWideLedger` only in `KiwiCore+AppWide.swift`
     (`AppWideSeamTests` ▸ `ledgerHasOneHome`).
+  - Reach every consumer of a live app-wide change — KiwiVision's
+    plate, the Hyper remap, the next one — from the one
+    `appWideLiveChanged` (`KiwiCore+AppWideLive.swift`), which the
+    ledger's `didSet` calls, never from a writer
+    (`VisionAppearanceSeamTests` ▸ `transitionIsWired`).
   - Run the capture before anything that may rewrite a profile
     file — first in `loadConfig`, ahead of the #1530 settle —
     or the rewrite destroys the copy the election reads
@@ -624,11 +639,15 @@ holds the secondary-switch decision including its nil case.
     `profiles.delete(` or `profiles.rename(` takes the same call
     (`AppWideSeamTests` ▸ `captureFollowsEveryDoor`).
   - Give a new member of `AppWideSettings` a crossing of its
-    own: the ledger's crossing is per group of settings, and on
+    own where a per-profile value with the same meaning precedes
+    it: the ledger's crossing is per group of settings, and on
     an install that has adopted it has already ended, so a
-    member added later inherits nothing from it. The member also
-    joins the census (`SettingKeyModelParityTests` ▸
-    `appWideFieldsAreCensused`).
+    member added later inherits nothing from it. A member with
+    no such predecessor states so in its design entry — the
+    Space cue's is the worked case (#2228: the per-profile slide
+    toggle before it meant something else). The member also
+    joins the census
+    (`SettingKeyModelParityTests` ▸ `appWideFieldsAreCensused`).
 
   The argument, and the trade (the first profile applied
   decides; a Lua-owned setup crosses nothing), is
@@ -751,6 +770,22 @@ The obligations below bind this directory:
 clauses, scoped to the doors' own bodies rather than to their
 file.
 
+## A file a newer build wrote is never overwritten (#2325)
+
+**Write `gui.json` and a profile file through its store's door,
+which refuses a file a newer build wrote.** `GuiConfigStore.save`
+and `ProfileManager.write` / `save` throw `NewerFormatOnDisk` over
+a `format` this build does not know: its decoder refuses that
+file, so a write would replace a setup it never read — on a
+synced config folder, another Mac's. A sequence that writes
+something else first refuses before it (`save`'s sibling
+defaults, the Lua adoption's ledger). A raw rewrite beside the
+doors asks `NewerFormatOnDisk.check` first, as the app-wide strip
+does, unless it rewrites only below the current format by
+construction, as `MigrationBackup` does; nothing scans for a new
+raw writer, so that is review's (`NewerFormatWriteRefusalTests`,
+`NewerFormatWriteRefusalCallerTests`).
+
 ## A new file in the config directory answers the backup question
 
 A backup carries an **allow-list, never a directory sweep**, and
@@ -806,8 +841,16 @@ inside a stored value such as `gap.global`'s `{outer, inner}`
 owes (§5), reaching every home of a stored look named above — since
 `ShelfLook.apply` and `ShelfLook.admitted` skip a path they do
 not know, an unmigrated rename drops the user's styling
-silently. `LookKeysCensusTests` reds the rename; the migration
-crossing is review's.
+silently. `LookKeysCensusTests` reds the rename — the motion paths
+through its frozen wire list (`LookKeysCensusTests` ▸
+`motionWirePathsAreFrozen`), since `LookKeys.motion` is derived
+from `AnimationSettings`' keys; the migration crossing is review's.
+**A stored `AnimationSettings` field joins every look and the
+shared look by that derivation (#2176)**, so adding one is a look
+change too, and a shared look missing it owes
+`settleSharedMotion` its value; **a bundled look, the tour's paint
+and its Revert carry `LookKeys.styling` alone**, never motion
+(`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
 
 Nothing can guard the format bumps above, and they are the
 obligation the format integers rest on: `<=` is decoder tolerance rather than a
@@ -816,6 +859,18 @@ right, and which silently becomes a lie the first time a
 `GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
 actively encourages that rename, so the bump is the reader's
 responsibility here.
+
+**A long-lived release branch keeps every `currentFormat` above
+`main`'s (#2265).** `needsMigration` stops at the stamp, and a
+step with no floor of its own runs only below it — so a 2.x patch
+on `main` that takes a number the release branch already spent
+stamps its files past the release branch's step, which then never
+runs there. At each `main` → release sync, a bump on either side
+moves the release branch's `GuiConfig`, `Profile`, `SetupBundle`,
+`PaletteDocument` and `LookDocument` formats above `main`'s, and
+the merge re-numbers the release branch's steps rather than
+reusing a number `main` stamped. Nothing guards it: the two
+branches are never in one tree.
 
 When removing an old migration from `ConfigMigration`, the removal
 advances the supported format floor: files below the floor are
@@ -926,10 +981,10 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
   temporary retire, since every membership change retiles
   (`UndeclaredSpaceDisplayTests` ▸ `setModeTargetHasAChip`). A
   path that reads a new Space's screen BEFORE its own retile
-  places it first: the switch ahead of `spaceSlideIntent`
-  (`UndeclaredSpaceDisplayTests` ▸ `firstVisitSlides`), the one
+  places it first: the switch ahead of `spaceSwitchDisplay`
+  (`FullscreenStandDownTests` ▸ `firstVisitIsNamed`), the one
   `followSwitch` likewise, a launch follow's rule Space included
-  (`UndeclaredSpaceDisplayTests` ▸ `launchFollowSlides`), the one
+  (`FullscreenStandDownTests` ▸ `launchFollowIsNamed`), the one
   `fileMembership` ahead of the float re-anchor, and boot ahead
   of its activation — those two read `NSScreen` and the
   frontmost app, which no fixture pins, so they have no test;
@@ -1302,6 +1357,65 @@ in the profile*. The obligations:
   (`SpaceShortcutDropTests`, `SpaceShortcutDropOwedTests`,
   `LiveOnlyShortcutRowsTests`, `LayerRowWriterCensusTests`).
 
+## A change report reads one judgement (#1685)
+
+`kiwidesk mcp` learns what a command changed, and whether it is
+still unkept, from Core's change report alone. The argument is
+`docs/design-decisions.md` ▸ *Whether a setting lasts is not a
+fact about its command*. The obligations:
+
+- **Answer where a leaf would be kept, why it cannot be, and
+  whether it already is through the one `KeepJudge`** — the
+  report and `keep_settings` both read it, so a keep and the
+  report it follows never disagree (`ChangeReportTests`,
+  `KeepSettingsEdgeTests`).
+- **A value a verb changes live is reported only where the keep
+  document carries it** (`KiwiCore.keepDocument`'s roots). A new
+  live store a verb writes joins one of those roots, or its verb
+  reports nothing and the AI app is never told the change is
+  unkept; nothing scans for a store left out, so that is
+  review's.
+- **A keep moves nothing live.** Its edit lands the shared look
+  without repainting the live one (`LiveProfileEdit.repaintsLiveLook`),
+  so a look leaf the keep did not name stays pending rather than
+  taking the stored value (`KeepSettingsEdgeTests` ▸
+  `partialKeepKeepsOthersLive`), and its rule write passes
+  `saveRuleReach` the `.outside` origin, which leaves the rules as
+  live holds them and registers only the shortcuts — which have no
+  live layer — from the files (`AppRuleKeepTests` ▸
+  `partialKeepMovesNothingLive`).
+- **Judge a leaf against the stored profile, read once per
+  judgement and only where a caller holds leaves, and against the
+  rule snapshot only where a rule leaf is judged — built over that
+  same read (`ruleReachSnapshot(reading:)`).** A rule leaf's owner is read off the reach the
+  keep's write takes (`RuleReachTable.keepIsShared`), never off
+  the file's raw keys, so the report and the keep agree
+  (`AppRuleKeepTests` ▸ `leftOutRuleIsShared`). The stored
+  values are no adoption state — #1245's rule answers a question
+  about the live profile from `ActiveProfile` because the switch
+  path asks it; a change report asks only for an MCP session, so
+  `keepJudge` reads the file once and every verdict of that
+  answer takes that one read. `look.current` is the second such
+  MCP-time reader, through `liveWearsSharedLook`; a new reader on
+  the switch path answers from adoption state instead.
+  Settings' **Live, not saved** rows are the one ruled reader that
+  diffs the settings root itself (#2262): `unsavedLiveSettings`
+  judges each leaf through the same `KeepJudge` and hands Settings
+  its leaves by keep id (`UnsavedLiveSettings.leaves`); a row's
+  Keep takes its ids from there alone, never derived in the GUI,
+  and writes through `keepUnsavedLive`, the verb's own typed
+  `keep(paths:)` (#2368, `SettingsLiveKeepTests`). Settings asks it
+  again wherever the live settings or the draft's baseline can have
+  moved — which is review's, the rows' freshness alone riding on it
+  — never per render (`UnsavedLiveSettingsTests`,
+  `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`). A further
+  reader of that shape is a ruling here.
+- **A look verb paints live only (#1685).** `look.apply` writes no
+  file; a wear that must also WRITE takes `writeThroughLiveProfile`
+  as the tour's paint does, never a grown `wearLook`, and a verb
+  that changes `looks.json` tells an open Settings through
+  `onLookLibraryChanged` (`LookCommandsTests`).
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by
@@ -1362,6 +1476,15 @@ to are not the same verb. Keep them apart, in both directions:
   `ProfileManager.onCapturedLive`, told which `CapturedWrite` it
   was so the baseline moves for exactly what was written
   (`SpaceChipLifecycleRowsTests` ▸ `keepKeepsLayouts`).
+- **An AI app's keep keeps the leaves one session changed
+  (#1685).** A layout write that keeps every declared Space takes
+  `keepLayouts`; one that keeps the Spaces a change report named
+  takes `keep_settings`, which writes the settings leaves and only
+  Spaces the profile declares through `writeThroughLiveProfile`,
+  so their draft debt is that door's (`adoptLiveWrite`, the edit on
+  both sides of a dirty draft) and never `onCapturedLive`
+  (`KeepSettingsTests` ▸ `ownProfileKeeps`) — and its rule leaves
+  through `saveRuleReach`, below.
 - **A Settings Save against the LIVE target = a draft commit.**
   "Save what I edited." It applies and persists the modes of the
   spaces the draft actually edited and nothing else —
@@ -1396,7 +1519,20 @@ is not rewritten (`RuleReachTableTests` ▸
 write in the same Save, since that write reloads the config,
 which re-reads the loaded profile's rules. Its profile writes
 stay non-adopting (`ProfileManager.write`), so reaching another
-profile never moves `currentName` (#1249).
+profile never moves `currentName` (#1249). **A rule write from
+outside Settings takes the same door with the `.outside` origin
+(#1685)**, never `writeThroughLiveProfile`, whose one
+`LiveProfileEdit` cannot reach another profile or the shared base:
+`keep_settings` and the `shortcut.*` verbs write at the encoder's
+own `RuleReachTable.defaultReach` on the loaded profile — a
+shortcut write re-registering the keys from the saved files through
+`reregisterStoredKeys` (`ShortcutCommandsTests`) — snapshot
+the files after any `gui.json` write it follows, and the door —
+not the caller — tells an open draft of ANY target through
+`onRulesKept`, whose policy is `SettingsModel.adoptRuleKeep`: a
+clean draft re-reads, a dirty one takes each rule the keep changed
+on its page on both sides of its diff (`AppRuleKeepTests`,
+`RuleKeepDraftTests`).
 
 **The look checklist is that door's sibling, with the same
 obligations (#1752).** "Look applies to" reaches every profile it
@@ -1446,7 +1582,9 @@ and the tour owns its undo*.
 bar menu's row (#1518), a Space added to or removed from the
 profile (#1790: the bar's confirmed Delete, `create_space` /
 `delete_space` with `profile`, Settings ▸ Spaces' add button,
-which is the one in-Settings caller) — carrying one
+which is the one in-Settings caller), and `keep_settings`'s
+settings and layout leaves (#1685; its rule leaves take
+`saveRuleReach`, above) — carrying one
 `LiveProfileEdit` that the file and the draft each apply — which
 writes the file non-adopting and
 then hands the SAME edit to an open draft through
@@ -1469,7 +1607,10 @@ clean draft still re-reads, the tour's shipped behaviour, while a
 dirty draft takes nothing of it, since taking it on both sides
 would call a session value saved
 (`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
-`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). A writer that paints
+`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). Its Save
+still keeps the value: a Settings Save lays only the draft's own
+edits over live as it is at the Save (#2262,
+`SettingsLiveSaveTests`). A writer that paints
 more than the leaves it names — the tour's whole look — refuses
 while a live-profile draft is dirty instead
 (`OnboardingLooksTests` ▸ `draftBlocks`).
@@ -1592,9 +1733,9 @@ behaviour, the mixed case and the source scan; the sparse
 encoding's omitted `.bsp` resolves in one place,
 `GuiConfig.modes(for:)`.
 
-`docs/design-decisions.md` ▸ *Quick-menu layout switch is
-session-only* owns the product half, including the two residues
-this deliberately leaves visible.
+`docs/design-decisions.md` ▸ *A picked layout is session-only*
+owns the product half, including the two residues this
+deliberately leaves visible.
 
 ## Applies force or don't, explicitly
 

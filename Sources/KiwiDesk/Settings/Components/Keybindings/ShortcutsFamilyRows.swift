@@ -24,6 +24,9 @@ struct ShortcutsFamilyRows {
     /// Available layer names and active editing layer.
     let layerNames: [String]
     let currentLayer: String
+    /// The lenses to draw a row for (`KeybindingCatalog.lensOffer`,
+    /// #2103 ruling 42).
+    var lenses: [String] = []
 
     func rows(for key: SettingKey) -> [NavCommand]? {
         guard case .shortcuts(let family) = key else {
@@ -69,6 +72,16 @@ struct ShortcutsFamilyRows {
                 desktops.desktops,
                 absent: desktops.absent
             )
+        case .layoutCycle:
+            return KeybindingCatalog.layoutCycleRows
+        case .viewPicker:
+            return [KeybindingCatalog.showLayoutPicker]
+        case .jumpToWindow:
+            return [KeybindingCatalog.jumpToWindow]
+        case .toggleKiwiVision:
+            return [KeybindingCatalog.toggleKiwiVision]
+        case .toggleLens:
+            return lenses.map(KeybindingCatalog.toggleLens)
         case .growWidth:
             return [resizeRow(.growWidth)]
         case .shrinkWidth:
@@ -96,7 +109,8 @@ struct ShortcutsFamilyRows {
             .advanced,
             .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
-            .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory:
+            .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
+            .modeCycle, .modeCue, .hyperKey, .desktopShortcutBase:
             return nil
         }
     }

@@ -9,8 +9,8 @@ struct MonocleSchematic: View {
     @Environment(\.schematicPalette) private var palette
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
-    /// Tour story phase (`SchematicMotion.turn`, #1750).
-    var turn: Double = 0
+    /// Tour story phase (`SchematicMotion.arrival`, #1750, #2099).
+    var arrival: Double = 0
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -47,6 +47,7 @@ struct MonocleSchematic: View {
         ) {
             ZStack(alignment: .bottomTrailing) {
                 cards
+                leavingCard
                 if drawsParkedPile {
                     parkedPile
                 }
@@ -64,28 +65,58 @@ struct MonocleSchematic: View {
                 Array((0...fanDepth).reversed()),
                 id: \.self
             ) { level in
-                card(front: level == 0)
+                fanCard(level: level)
                     .padding(10)
-                    .rotation3DEffect(
-                        .degrees(level == 0 ? turn * 180 : 0),
-                        axis: turnAxis,
-                        perspective: 0.6
-                    )
+                    .opacity(opacity(ofLevel: level))
                     .offset(
-                        x: CGFloat(level) * 5,
-                        y: -CGFloat(level) * 5
+                        x: drawnLevel(level) * 5,
+                        y: -drawnLevel(level) * 5
                     )
             }
         }
     }
 
-    /// The axis the front card turns about: the live flip's own
-    /// (`MonocleFlipPlan.axis(for:)`, #1391).
-    private var turnAxis: (x: CGFloat, y: CGFloat, z: CGFloat) {
-        switch MonocleFlipPlan.axis(for: orientation) {
-        case .vertical: return (0, 1, 0)
-        case .horizontal: return (1, 0, 0)
+    /// The card resting at `level`: the front one crossfades from
+    /// a back card to the focus mark as it arrives (#2099).
+    private func fanCard(level: Int) -> some View {
+        ZStack {
+            card(front: false)
+                .opacity(level == 0 ? arrival : 1)
+            if level == 0 {
+                card(front: true).opacity(focusWeight)
+            }
         }
+    }
+
+    /// How much of the focus mark the arriving card wears: none
+    /// while the window it replaces is in front, all at rest.
+    var focusWeight: Double { 1 - arrival }
+
+    /// Where the card resting at `level` is drawn, in fan steps:
+    /// one step further back while the story's step is still to
+    /// come, so the fan steps forward as the front card fades.
+    /// The backmost card fades in where it rests instead.
+    func drawnLevel(_ level: Int) -> CGFloat {
+        guard fanDepth > 0, level < fanDepth else {
+            return CGFloat(level)
+        }
+        return CGFloat(level) + CGFloat(arrival)
+    }
+
+    /// The backmost card of a fan appears as the fan steps
+    /// forward; every other card is always drawn.
+    func opacity(ofLevel level: Int) -> Double {
+        fanDepth > 0 && level == fanDepth ? 1 - arrival : 1
+    }
+
+    /// The window the story's step replaces: in front at the
+    /// start, gone at rest — fill and focus stroke together — so
+    /// the rest frame draws nothing here.
+    private var leavingCard: some View {
+        card(front: true)
+            .padding(10)
+            .opacity(arrival)
+            .allowsHitTesting(false)
     }
 
     /// Parked window pile schematic at bottom corner (#881).
@@ -163,14 +194,16 @@ struct MonocleSchematic: View {
         case (false, true):
             return L(
                 "layout.schematic.monocle.caption_h",
-                "All windows fill the screen; new ones come to "
-                    + "the front, and focus cycles left/right."
+                "One window at a time; the rest wait behind it. "
+                    + "Stepping left/right brings the next to the "
+                    + "front, and nothing moves."
             )
         case (false, false):
             return L(
                 "layout.schematic.monocle.caption_v",
-                "All windows fill the screen; new ones come to "
-                    + "the front, and focus cycles up/down."
+                "One window at a time; the rest wait behind it. "
+                    + "Stepping up/down brings the next to the "
+                    + "front, and nothing moves."
             )
         case (true, true):
             return L(
@@ -199,8 +232,10 @@ struct MonocleSchematic: View {
             )
             : L(
                 "layout.schematic.monocle.ax",
-                "Monocle preview: one window fills the screen; "
-                    + "focus cycles through the others."
+                "Monocle preview: one window fills the screen "
+                    + "and the others wait behind it; focus "
+                    + "brings the next to the front without "
+                    + "moving any window."
             )
     }
 }

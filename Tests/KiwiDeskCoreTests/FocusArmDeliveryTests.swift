@@ -151,7 +151,7 @@ struct FocusArmDeliveryTests {
     /// A report received before a `focusWindow` and delivered
     /// after it describes the state the command superseded; the
     /// command's own echo follows. Honoring it dropped the
-    /// scrolling raise and a Monocle flip's owed focus.
+    /// scrolling raise.
     @Test("A report older than a commanded focus is dropped")
     func staleAfterCommandedFocus() {
         let (loop, box) = makeLoop()

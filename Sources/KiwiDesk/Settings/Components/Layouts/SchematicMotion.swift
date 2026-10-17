@@ -8,9 +8,10 @@ struct SchematicMotion: Equatable {
     /// focus; the row rests wherever the engine pans it for that
     /// focus. A step landing on the incoming window skips past it.
     var focus = 0
-    /// Monocle: the front card's turn in half-turns about the
-    /// focus axis; any whole number is the resting card.
-    var turn: Double = 0
+    /// Monocle: how far the next window still has to come, 1
+    /// while the window it replaces is in front and 0 once it has
+    /// grown into the front (#2099).
+    var arrival: Double = 0
     /// Floating: how far the front window's drag has come, 0 at
     /// the pick-up and 1 where it is left.
     var drag: Double = 1

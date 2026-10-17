@@ -45,7 +45,7 @@ extension SettingsModel {
     }
 
     /// Discards the staged draft. Model-only, as before #123
-    /// and again since #1179: a quick-menu layout switch is the
+    /// and again since #1179: a layout picked outside Settings is the
     /// session's, not the draft's, so Revert has nothing to say
     /// about it — ending a temporary layout is the quick menu's
     /// job (switch back, or Keep).

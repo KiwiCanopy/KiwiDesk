@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
 
-/// Every machine touch Open or Focus makes — both branches of
+/// Every machine touch the app verbs make — both branches of
 /// `launch` — in one place, so a test can state the world and
 /// record what the command did to it (#673). `new_window`
 /// brings its app forward through the same `activate` (#1518).
@@ -24,6 +24,16 @@ struct OpenOrFocusSeams {
         NSWorkspace.shared.runningApplications.first {
             $0.bundleIdentifier?.lowercased() == bundleID
         }?.processIdentifier
+    }
+
+    /// The bundle id of a running app whose localized name is
+    /// `name`, case-insensitively — read only to name the id in an
+    /// app verb's refusal (#2222), never to resolve the verb.
+    var bundleIDNamed: @MainActor (String) -> String? = { name in
+        NSWorkspace.shared.runningApplications.first {
+            $0.localizedName?.caseInsensitiveCompare(name)
+                == .orderedSame
+        }?.bundleIdentifier
     }
 
     /// How many windows the app has up, and which are parked.

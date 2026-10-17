@@ -23,9 +23,10 @@ struct LoginItemGuardWiringTests {
             flat.occurrences(of: "guardedWrite(") == 1,
             "setEnabled no longer calls guardedWrite once"
         )
-        // A fixed `.app` path here would pass every refusal.
+        // A fixed `.app` path here would pass every refusal; the
+        // running copy is read through `RunningCopy` (#1685).
         #expect(
-            flat.occurrences(of: "at:Bundle.main.bundleURL,") == 1,
+            flat.occurrences(of: "at:RunningCopy.bundleURL,") == 1,
             "setEnabled no longer judges the running copy"
         )
         // Split so this file never spells the raw write itself.

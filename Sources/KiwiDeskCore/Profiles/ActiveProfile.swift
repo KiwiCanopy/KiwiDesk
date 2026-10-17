@@ -30,6 +30,11 @@ struct ActiveProfile {
     /// Spaces it follows every write of the file, since a claim
     /// moves a set without an apply (`refiled(_:)`).
     let monitorSets: [MonitorSet]
+    /// The lenses it leaves out, by `VisionLens.reachKey` — what
+    /// KiwiVision judges the lens on against (#2103 ruling 38).
+    /// Like the monitor sets it follows every write of the file,
+    /// an "Applies to" edit included.
+    let lensesLeftOut: Set<String>
 
     init(_ profile: Profile) {
         name = profile.name
@@ -37,6 +42,7 @@ struct ActiveProfile {
         monitorCount = profile.monitorCount
         isStarterSetup = profile.isStarterSetup
         monitorSets = profile.monitorSets
+        lensesLeftOut = Self.leftOut(profile)
     }
 
     private init(
@@ -44,13 +50,22 @@ struct ActiveProfile {
         declaredSpaces: Set<SpaceID>,
         monitorCount: Int,
         isStarterSetup: Bool,
-        monitorSets: [MonitorSet]
+        monitorSets: [MonitorSet],
+        lensesLeftOut: Set<String>
     ) {
         self.name = name
         self.declaredSpaces = declaredSpaces
         self.monitorCount = monitorCount
         self.isStarterSetup = isStarterSetup
         self.monitorSets = monitorSets
+        self.lensesLeftOut = lensesLeftOut
+    }
+
+    private static func leftOut(_ profile: Profile) -> Set<String> {
+        Set(
+            (profile.lensReach ?? [:]).filter { !$0.value }.keys
+                .map(VisionLens.reachKey)
+        )
     }
 
     /// A rename moves the name; the Spaces are unchanged by it.
@@ -60,12 +75,14 @@ struct ActiveProfile {
             declaredSpaces: declaredSpaces,
             monitorCount: monitorCount,
             isStarterSetup: isStarterSetup,
-            monitorSets: monitorSets
+            monitorSets: monitorSets,
+            lensesLeftOut: lensesLeftOut
         )
     }
 
     /// The live profile after a write of its file: the monitor
-    /// sets follow it; the name and Spaces stay the apply's.
+    /// sets and the lens reach follow it; the name and Spaces stay
+    /// the apply's.
     func refiled(_ profile: Profile) -> ActiveProfile {
         guard profile.name == name else { return self }
         return ActiveProfile(
@@ -73,7 +90,8 @@ struct ActiveProfile {
             declaredSpaces: declaredSpaces,
             monitorCount: monitorCount,
             isStarterSetup: isStarterSetup,
-            monitorSets: profile.monitorSets
+            monitorSets: profile.monitorSets,
+            lensesLeftOut: Self.leftOut(profile)
         )
     }
 }

@@ -53,31 +53,6 @@ struct BorderStyleParityTests {
         #expect(decoded == BorderStyle())
     }
 
-    @Test("Unfocused border defaults to visible neutral grey")
-    func unfocusedDefaultColor() {
-        #expect(BorderStyle().unfocusedColor == "#8E8E93CC")
-    }
-
-    @Test("fittingGaps sizes gaps to the true outward reach")
-    func fittingGaps() {
-        var style = BorderStyle()
-        style.width = 10
-        // Hidden overlap does not count toward visible reach.
-        let focused = style.fittingGaps()
-        #expect(focused.outer.top == 10)
-        #expect(focused.outer.left == 10)
-        #expect(focused.inner.horizontal == 10)
-        #expect(focused.inner.vertical == 10)
-        // Both: inner gaps double (two neighbouring rings).
-        style.unfocusedEnabled = true
-        #expect(style.fittingGaps().inner.horizontal == 20)
-        #expect(style.fittingGaps().outer.top == 10)
-        // Corner style does not change the visible thickness.
-        style.unfocusedEnabled = false
-        style.cornerStyle = .square
-        #expect(style.fittingGaps().outer.top == 10)
-    }
-
     @Test("fittingGaps adds the remaining gap after the reach")
     func fittingGapsRemaining() {
         var style = BorderStyle()

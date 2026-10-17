@@ -15,6 +15,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+FloatVerdict.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+PanelButton.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowServerWakeUp.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+WindowServerWakeUp.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
@@ -114,9 +115,13 @@ editing AX code:
   `FloatDetection.shouldIgnore` and `isBuiltInIgnoredPanel` take
   the button with no default, so a new caller decides it, and the
   untracked-focus classifier reads it from the report's element.
-  `hasVisibleIgnoredPanel` cannot see buttons, so it takes the
-  gate's admitted ids through `admittedWindows(of:)`
-  (`CommandBarIgnoreTests`, `AXDumpCorpusTests`). The escape
+  A reader of the visible-panel distrust asks the one
+  `EventLoop.showsIgnoredPanel`, which leaves out the gate's
+  admitted ids and hands the scan an untracked window's button
+  reader, never `FloatDetection.hasVisibleIgnoredPanel` beside it
+  (#2344, `VisiblePanelWiringTests` the door,
+  `VisiblePanelButtonTests` the verdict; `CommandBarIgnoreTests`,
+  `AXDumpCorpusTests`). The escape
   stops at the screen-saver level (#2069), whose arm takes no
   button, arms the ignored-panel distrust for any app, and
   refuses ADOPTION only: a tracked window rising to it is judged
@@ -125,13 +130,29 @@ editing AX code:
   A fixed size (#2070) is judged at adoption: a recheck never
   floats a tiled window on a disabled zoom button alone, since a
   sheet can grey it for a moment.
+- **A float rule is read only through `FloatRules.parse` and
+  spelled only through `FloatRules.rule(app:title:)` (#2345).**
+  The engine, the profile reach and the Settings Float list all
+  read the same `app` / `app:title` grammar, and every split or
+  colon test written beside that reading has disagreed with it on
+  some input — a mixed-case app, a bare trailing colon. So a
+  reader asks `app(of:)`, `title(of:)` or `parse`, a key folds
+  through `appKey`, and a writer spells through `rule(app:title:)`;
+  `FloatRuleGrammarSeamTests` counts every colon split, colon test
+  and `\(…):\(…)` spelling in both trees against its register,
+  and `FloatRuleGrammarTests` holds the grammar itself.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever
   in Core they are spelled. The per-switch AX count is what a
   performance change is measured by (the `measure-work` skill),
   and an unmetered call makes that count lie in the change that
-  adds it. `WorkMeterAXSeamTests` reds a bare call.
+  adds it. `WorkMeterAXSeamTests` reds a bare call. **A change
+  that adds AX messages on the Space-switch path states how many
+  per switch, and why, in its PR and at the read's docstring**
+  (owner, 2026-10-17): a release comparison that finds the count
+  grown then reads a decision, not a bug to chase — 3.0.0's +14 on
+  bsp ↔ scrolling was left unattributed for want of that line.
 - Electron/WebKit apps answer AX queries lazily (100–300 ms).
   `AXEnhancedUserInterface` is set to `true` on managed apps to
   keep their AX tree warm; do not remove it without a replacement.

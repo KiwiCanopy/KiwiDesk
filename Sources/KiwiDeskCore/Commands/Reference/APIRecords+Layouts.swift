@@ -18,12 +18,6 @@ extension APIReference {
                 + "milliseconds.",
             .integer("milliseconds")
         ),
-        "set_on_space_change": APIRecord(
-            "Enables or disables the plate slide when switching "
-                + "Spaces.",
-            .boolean("enabled")
-        ),
-
         "set_on_scrolling": APIRecord(
             "Enables or disables the layout slide when scrolling.",
             .boolean("enabled")
@@ -40,19 +34,6 @@ extension APIReference {
         "set_on_relayout": APIRecord(
             "Enables or disables animation on layout reflows.",
             .boolean("enabled")
-        ),
-        "set_space_change_duration": APIRecord(
-            "Sets the Space-switch slide's pace in milliseconds.",
-            .integer("milliseconds")
-        ),
-        "set_on_monocle_focus": APIRecord(
-            "Enables or disables the card flip when focus moves "
-                + "between Monocle windows.",
-            .boolean("enabled")
-        ),
-        "set_monocle_flip_duration": APIRecord(
-            "Sets the Monocle card flip's turn in milliseconds.",
-            .integer("milliseconds")
         ),
         "set_on_shelf": APIRecord(
             "Enables or disables the shelf's glide — a bar growing "

@@ -22,49 +22,21 @@ import Testing
 @MainActor
 @Suite("Layers card offer")
 struct LayersCardOfferTests {
-    /// The predicate as the card computes it, over the two inputs
-    /// it reads. Kept in the test rather than reaching into the
-    /// view because the view is a `View` — what matters is that
-    /// the resolver answers this way, and
-    /// `ShortcutsGateTests.layersCardConsultsTheResolver` already
-    /// pins that the card asks the resolver at all.
-    private func layersExist(_ config: GuiConfig) -> Bool {
-        ShortcutsGates(config: config)
-            .inertReason(for: .shortcuts(.switchToLayer)) == nil
-    }
-
     private func config(layers: [String]) -> GuiConfig {
         var config = GuiConfig()
         config.layers = layers.map { KeyLayer(name: $0) }
         return config
     }
 
-    @Test("only the default layer means no layers configured")
-    func defaultAloneIsNotALayer() {
-        #expect(!layersExist(config(layers: ["default"])))
-    }
-
-    @Test("a second layer is what counts as configured")
-    func aSecondLayerCounts() {
-        #expect(layersExist(config(layers: ["default", "resize"])))
-        // Presence, not a count — three still reads "exists", so
-        // an off-by-one cannot pass the boundary pair.
-        #expect(
-            layersExist(
-                config(layers: ["default", "resize", "media"])
-            )
-        )
-    }
-
     /// The card's own gate, which is what the owner ruling
     /// changed: shown when layers exist OR when Power User is on,
-    /// withheld otherwise.
+    /// withheld otherwise — asked of the card's static predicate,
+    /// the one its view and the strip read.
     private func offered(
         layers: [String],
         mode: SettingsMode
     ) -> Bool {
-        layersExist(config(layers: layers))
-            || mode == .powerUser
+        LayersCard.isOffered(config: config(layers: layers), mode: mode)
     }
 
     @Test("Simple with only the default layer is withheld")

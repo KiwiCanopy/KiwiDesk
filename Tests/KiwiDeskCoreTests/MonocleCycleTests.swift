@@ -67,6 +67,28 @@ struct MonocleCycleTests {
         #expect(core.activeSpace?.focused == w3)
     }
 
+    @Test("wrap_focus off makes focus stop at the ends")
+    func wrapOffStopsAtEnds() {
+        let core = makeMonocleCore()
+        core.execute(
+            "monocle.set_wrap_focus",
+            args: [.bool(false)]
+        )
+        // At the first window, left no longer wraps.
+        #expect(
+            !core.execute("focus", args: [.string("left")])
+                .isSuccess
+        )
+        #expect(core.activeSpace?.focused == w1)
+        // Mid-array stepping is unaffected.
+        core.state.workspaces.focus(w2, in: SpaceID(1))
+        #expect(
+            core.execute("focus", args: [.string("right")])
+                .isSuccess
+        )
+        #expect(core.activeSpace?.focused == w3)
+    }
+
     @Test("Cross-axis directions fall through to geometry")
     func crossAxisFallsThrough() {
         let core = makeMonocleCore()
@@ -109,9 +131,10 @@ struct MonocleCycleTests {
         #expect(
             core.activeSpace?.windows == [w2, w1, w3]
         )
-        // swap never wraps (#168): from the first slot, left is a
-        // no-op — a wrapping swap would teleport the window end to
-        // end. focus wrapping is a separate, opt-out toggle.
+        // swap never wraps (#168), even with focus wrap on: from
+        // the first slot, left is a no-op — a wrapping swap would
+        // teleport the window end to end.
+        core.execute("monocle.set_wrap_focus", args: [.bool(true)])
         core.state.workspaces.focus(w2, in: SpaceID(1))
         #expect(
             !core.execute("swap", args: [.string("left")])

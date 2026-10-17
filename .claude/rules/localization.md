@@ -21,12 +21,16 @@ Canonical for this subsystem (AGENTS.md §5 indexes it).
 Every GUI string routes through `L("key", "English")`
 (`LocalizationManager.swift`). English is the source of truth,
 inlined at the call site, with per-key fallback when a locale
-omits a key. The one exception is ruled: everything drawn INSIDE
+omits a key. Two exceptions are ruled. Everything drawn INSIDE
 an update-notes card — headings, dates, links — reads
 `UpdateNotesEnglish` and never `L()`, because the notes it frames
 are English (#1849); the strip, the title and the buttons around
 the cards stay `L()` (`NextOnMyListTests` ▸
-`cardsSpellNoLocalizedString`).
+`cardsSpellNoLocalizedString`). The AI page's setup prompt is
+the second ruled exception (#1685): it is copied for an AI app's
+model, which needs its command path and JSON verbatim, so it is
+English with a "Reply in <language>." line and never `L()`
+(`AISetupRowWiringTests` ▸ `setupPromptStaysEnglish`).
 
 A value interpolated into a sentence (a name, a count) MUST go
 through the `L(key, english, args...)` overload with **positional**
@@ -328,8 +332,9 @@ every name in `PRODUCT_NAMES` — the register; do not list its
 members here — **present** in every locale, script irrelevant
 (deliberately *not* the residue rule's mirror);
 `untranslated_mode_names` requires the English mode name
-**absent** in the three CJK locales, which render them natively,
-and skips the seven that keep the English word. A new name joins
+**absent** in the CJK locales, which render them natively, and
+skips the ones that keep the English word
+(`LocalizationModeNamePolicyTests` holds which are which). A new name joins
 a family by one checkable question — *does its own label key ship
 untranslated in all eleven catalogs?* — never by arguing whether
 it is a coinage. Matched as a phrase, not as tokens: `GLOSSARY`

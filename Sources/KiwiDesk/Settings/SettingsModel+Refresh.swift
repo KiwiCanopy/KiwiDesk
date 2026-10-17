@@ -73,7 +73,13 @@ extension SettingsModel {
     /// (#2183) or, in the Lua editor, changed at all (#2206) —
     /// file reads cheap enough for every window-key.
     func refreshOwner() {
-        if ownerMoved || luaChangedOnDisk, !isDirty { reload() }
+        if ownerMoved || luaChangedOnDisk, !isDirty {
+            reload()
+        } else {
+            // A live setting a verb moved while the window was away
+            // calls nothing back (#2262).
+            refreshUnsavedLive()
+        }
     }
 
     /// Re-reads what each draft binding loads (#1609). Owed by

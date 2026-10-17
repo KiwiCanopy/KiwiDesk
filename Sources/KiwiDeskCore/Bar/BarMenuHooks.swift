@@ -14,10 +14,20 @@ public enum SettingsLanding: Equatable, Sendable {
     case space(SpaceID)
     /// App Rules, on this app's row, by its lower-cased bundle id.
     case appRule(String)
+    /// Layout Defaults, on this layout's tab (#2229).
+    case layoutDefaults(LayoutMode)
+    /// Profiles (#2309).
+    case profiles
+    /// KiwiVision (#2309).
+    case kiwiVision
+    /// KiwiVision with its add-lens popover open (#2359 ruling 4).
+    case newLens
 }
 
 /// What a bar menu asks of the GUI (#1518) — set at the GUI's
-/// bootstrap, beside `uiBridge`.
+/// bootstrap, beside `uiBridge`. KiwiHub's View side (#2229, #2309)
+/// is a GUI caller of the same doors, so a Settings landing has
+/// one route.
 public struct BarMenuHooks {
     /// Opens Settings on `landing`.
     public var openSettings: @MainActor (SettingsLanding) -> Void = {

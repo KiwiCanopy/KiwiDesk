@@ -70,7 +70,10 @@ public struct GuiConfigStore {
         )
     }
 
+    /// Writes the sidecar; throws `NewerFormatOnDisk` rather than
+    /// replace one a newer build wrote (#2325).
     public func save(_ config: GuiConfig) throws {
+        try NewerFormatOnDisk.refuse(url, GuiConfig.currentFormat)
         var config = config
         if let liveDesktopSpaces {
             config.desktopSpaces = liveDesktopSpaces

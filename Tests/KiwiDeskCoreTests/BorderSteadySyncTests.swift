@@ -162,9 +162,9 @@ struct StickyMarkSteadySyncTests {
         // permanently, `sync` being the steady-state path.
         //
         // This test lives on the MARK, not the ring, and that
-        // asymmetry is the point. `BorderManager.sync` ends with
-        // `updateSkyLightSubscription`, which recomputes
-        // `skyLightActive` from scratch — so a ring-side version
+        // asymmetry is the point. `BorderManager.sync` re-requests
+        // the ring's windows from `WindowServerWatch`, which
+        // recomputes `isActive` from scratch — so a ring-side version
         // of this test reads `false` no matter what it set, and
         // could never fail in the direction it claims (a guard
         // that cannot fire is worse than none). The mark's

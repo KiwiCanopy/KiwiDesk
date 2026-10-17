@@ -47,6 +47,8 @@ struct SettingsAnchor: Hashable {
             return destination == .spaces ? surface : .main
         case .appRule:
             return destination == .appRules ? surface : .main
+        case .newLens:
+            return destination == .kiwiVision ? surface : .main
         }
     }
 }
@@ -60,6 +62,8 @@ enum SettingsSurface: Hashable {
     case space(SpaceID)
     /// One app's rule row on App Rules (#1518).
     case appRule(String)
+    /// KiwiVision's add-lens popover (#2359 ruling 4).
+    case newLens
 }
 
 extension SettingsAnchor {
@@ -80,6 +84,17 @@ extension SettingsAnchor {
             self.init(destination: .spaces, surface: .space(space))
         case .appRule(let app):
             self.init(destination: .appRules, surface: .appRule(app))
+        case .layoutDefaults(let mode):
+            self.init(
+                destination: .layoutDefaults,
+                surface: .layoutMode(mode)
+            )
+        case .profiles:
+            self.init(destination: .profiles)
+        case .kiwiVision:
+            self.init(destination: .kiwiVision)
+        case .newLens:
+            self.init(destination: .kiwiVision, surface: .newLens)
         }
     }
 }

@@ -27,6 +27,10 @@ public struct AppRef: Sendable, Equatable {
         self.bundleID = bundleID.map { $0.lowercased() }
         self.name = name
     }
+
+    /// How a user's app list names this app (#2103 ruling 26): its
+    /// bundle id, or its process name where it has none, lowercased.
+    public var listKey: String { bundleID ?? name.lowercased() }
 }
 
 /// Stickiness scope across Spaces (#414, #445).
@@ -134,6 +138,9 @@ public struct AwayWindow: Sendable, Equatable {
     public let pid: pid_t
     public let appName: String
     public let appBundleID: String?
+    /// Its title when it left; empty for a boot-seeded entry,
+    /// which no AX read named (#1875 lists it by app name).
+    public let title: String
     /// The native Space hosting it at the last reading.
     public var nativeSpace: SkyLight.SpaceID
     /// Up on that Desktop at the last reading; a window parked
@@ -146,6 +153,7 @@ public struct AwayWindow: Sendable, Equatable {
         pid: pid_t,
         appName: String,
         appBundleID: String?,
+        title: String = "",
         nativeSpace: SkyLight.SpaceID,
         isUp: Bool = true
     ) {
@@ -153,6 +161,7 @@ public struct AwayWindow: Sendable, Equatable {
         self.pid = pid
         self.appName = appName
         self.appBundleID = appBundleID
+        self.title = title
         self.nativeSpace = nativeSpace
         self.isUp = isUp
     }
@@ -164,6 +173,7 @@ public struct AwayWindow: Sendable, Equatable {
             pid: pid,
             appName: appName,
             appBundleID: appBundleID,
+            title: title,
             nativeSpace: nativeSpace,
             isUp: isUp
         )

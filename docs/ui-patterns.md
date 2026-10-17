@@ -167,8 +167,8 @@ controls (#291).** The override editor is a full pushed pane
 trailing OVERRIDE checkbox column (`overrideStateColumn`,
 88 pt) and the `OverrideChrome` accent bar, so a 2–4-peer field
 has no room for a segmented render; `OverridePickerRow`
-renders `.menu` and has no `.segmented` branch, since the
-per-space editor is the only override surface. Restore a
+renders `.menu` and has no `.segmented` branch, since every
+override surface sits in a bounded column. Restore a
 required-style parameter only if a genuinely *full-width*
 override surface arrives. The inherited (unchecked) state
 collapses to a quiet "follows `<Layout>` defaults · `<value>`"
@@ -179,6 +179,11 @@ the one segmented label tight at minimum width; it stays
 segmented by width headroom and is re-checked for truncation
 when each new locale ships (#95), as the help-glyph labels
 are.
+
+:::unreleased
+A KiwiVision lens's rows (#2103) are such a surface too: an
+unchecked row reads "follows Default · `<value>`".
+:::
 
 **Numeric controls pick one of three idioms by a single
 test:** *would a user say a specific number out loud?* — never
@@ -194,6 +199,13 @@ by which pane the setting lives in:
 
 Minimum window size is a `StepperRow` on this rule (#204): a
 precise pt threshold, not a feel knob.
+
+:::unreleased
+KiwiVision's **Dim** is a ruled exception: a proportion,
+yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on
+the desk behind Settings shows the effect as it steps (#2103,
+[design decisions](design-decisions.md#kiwivision-has-its-own-page-and-its-rows-apply-at-once-2103)).
+:::
 
 A stored SHARE keeps its slider and gains an exact chooser
 beneath it where the share has a second reading a user names
@@ -333,6 +345,13 @@ clicking the words opens the drawer. It stays beside the title
 rather than under it because it states a VALUE and disappears
 on expand, where a caption explains what a thing IS and stays.
 The ruling is in `docs/design-decisions.md`.
+
+:::unreleased
+
+A collapsible section may also take a `preview:` drawn under its
+row while shut — the Mouse & trackpad card's picture strip is the
+one instance, ruled in `docs/design-decisions.md` ▸ Shortcuts.
+:::
 
 **A section header's trailing readout is words only.** A
 `SettingsSection` takes `trailing:` — a short value at the
@@ -719,6 +738,15 @@ carry no duplicate preview (`DetailPanelTests` holds the offer
 set and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).
 
+:::unreleased
+KiwiVision is in that set too (#2103). Its Default rows
+write at once, so on that chip the panel draws the live values
+they wrote; a lens's page is a draft saved with Save, so on a
+lens's chip the panel draws the draft's lens. *Why* is
+[Design decisions](design-decisions.md) ▸ the panel's object is
+the DRAFT.
+:::
+
 **The panel keeps its column only above 1200 pt.** Below that
 it waits behind a "Show preview" button, which opens it as a
 card floating over the content — draggable by its grab bar,
@@ -826,12 +854,12 @@ and its menu.
 
 **"+N" governs a bounded container that cannot scroll; content
 past the fold of a SCROLLING container is cued in words
-instead** (#1292). The ⌃⌥K shortcuts panel is the case: its
-bands are non-uniform (headers, a caption, two-column layouts),
-the fold cuts *through* a row, and the controller knows heights
-rather than rows, so any N would be an estimate wearing a
-precise shape. The panel says "Scroll for more shortcuts" and
-counts nothing; it is read-only, so the hidden items have no
+instead** (#1292). KiwiHub's Shortcuts side is the case
+(#2246): its sections are non-uniform (titles, a caption), the
+fold cuts *through* a row, and the sheet knows heights rather
+than rows, so any N would be an estimate wearing a precise
+shape. The side says "Scroll for more shortcuts" and counts
+nothing; it is read-only, so the hidden items have no
 controls to lose and a label is admissible.
 
 The middle clause is arithmetic, so it is code:
@@ -1029,10 +1057,13 @@ The shelf's own glide is the one chrome motion with rows on that
 card — **Animate KiwiShelf** and its duration — and Reduce Motion
 still wins over them (#1838).
 
-The Space-switch plate slide is the second: drawn chrome that
-moves no window, with **Animate Space switches** and **Space
-switch duration** on that card, and Reduce Motion winning over
-both (#1956, #1931).
+:::unreleased
+The plate naming the Space after a switch is not on that card:
+it is a cue rather than motion, so its row, **Show the Space after
+a switch**, sits on KiwiShelf under the Space Bar switch, and
+neither Reduce Motion nor the animations master greys it. Reduce
+Motion drops only its fade (#2228).
+:::
 
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
@@ -1107,8 +1138,16 @@ number. The app rules row
 still drops a duplicate silently, and owes the same channel.
 
 **Hover confirms custom hit areas; it never creates the only
-affordance.** Native bordered/prominent buttons, sidebars,
-toggles, sliders, and fields keep system hover. Ambiguous
+affordance.** A bordered action button (`settingsActionButton()`,
+KiwiHub's footer buttons) is a button chip: `chipRest`, `chipHover`
+under the pointer, `chipPressed` while pressed, under a constant
+`chipEdge`, no animation, a disabled one not reacting, in the
+system bezel's rounded rectangle (#2377). A palette or look tile
+lifts with `chipRest` as a fill apart from its applied stroke, and
+nothing a click would leave alone lifts. A
+prominent (accent-filled) button, a menu picker, a stepper, a
+checkbox, a toggle, a slider, a field and a sidebar keep system
+behaviour: their shape already says "control". Ambiguous
 icon-only borderless actions use the shared adaptive chip on
 hover only, resting as the bare glyph in `ink2` at a row's end
 (`iconHoverChip`) — the accent is a control fill's, not a
@@ -1184,6 +1223,15 @@ floating pill. Below 900 pt the same three verbs and the same
 count dock into a full-width bar at the foot of the window —
 one view, two containers, because at that width the floating
 form covers the rows it is about. No draft, no bar.
+
+:::unreleased
+The pill's list also carries a **Live, not saved** section: each
+stored setting changed live outside Settings, narrated saved →
+live and counted with the rest. While one stands the pill and its
+bar stay, a clean draft included, and Save keeps it; the detail
+panel's "Changed in this draft" list leaves these rows to the
+pill.
+:::
 
 **Rows go two-line below 900 pt.** A labelled row's control
 normally hangs off the shared 210 pt label axis; below the row
@@ -1460,7 +1508,7 @@ the grey reads too. The argument is
 A control whose *only* consumer is off may still have a second
 one. KiwiShelf's "App glyph style" stays live even when no
 bar shows, because `iconSource` also drives the shortcuts
-panel's Apps band — check for a second reader before dimming.
+panel's Apps section — check for a second reader before dimming.
 
 The tree-wide half of the convention is guarded by suites that
 scan for a *shape* rather than listing the greyed controls,

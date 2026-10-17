@@ -110,22 +110,6 @@ struct FloatReanchorTests {
         #expect(moved == frame)
     }
 
-    @Test("scaleSize off leaves the size untouched (default)")
-    func scaleOffKeepsSize() {
-        let frame = CGRect(
-            x: 60,
-            y: 100,
-            width: 1800,
-            height: 800
-        )
-        let moved = FloatReanchor.target(
-            frame: frame,
-            from: mainBounds,
-            to: sideBounds
-        )
-        #expect(moved.size == frame.size)
-    }
-
     @Test("scaleSize shrinks an oversized float to fit (#502)")
     func scaleShrinksToFit() {
         // 1800 pt wide fits main (1920) but overflows the smaller

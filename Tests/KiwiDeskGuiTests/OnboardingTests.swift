@@ -6,24 +6,6 @@ import Testing
 @Suite("Onboarding flow")
 @MainActor
 struct OnboardingTests {
-    /// The flow: grant → spaces → looks → keys → done, with no
-    /// machine-gated step. (#828's separate-Spaces recommendation
-    /// retired with the ruling it recommended around — bindings
-    /// key to the main display's Desktop now, so they are
-    /// well-defined under the macOS default.) The route still
-    /// varies by its DOOR, which is why the progress row derives
-    /// its length instead of drawing a fixed counter
-    /// (`OnboardingProgressTests`).
-    @Test("the grant step hands off to the spaces step")
-    func grantLeadsToSpaces() {
-        let model = OnboardingModel()
-        model.beginPresentation(at: .grant)
-        model.continueAfterAccessibility()
-        #expect(model.step == .spaces)
-        // Nothing has been said yet, so the close seam must not
-        // have counted this as reaching the end.
-        #expect(!model.reachedEnd)
-    }
 
     /// The keys step is unconditional since #828: it was gated on
     /// the persisted discovery flag, which meant everyone who had
@@ -106,6 +88,11 @@ struct OnboardingTests {
     /// the coach mark was a third until #828). A step dropped
     /// from `isClosingBeat` reds here even though the sweep above
     /// cannot see it.
+    ///
+    /// The flow: grant → spaces → looks → keys → done, with no
+    /// machine-gated step. The route still varies by its DOOR,
+    /// which is why the progress row derives its length instead
+    /// of drawing a fixed counter (`OnboardingProgressTests`).
     @Test("every terminal route arrives having reached the end")
     func everyTerminalRouteReachesTheEnd() {
         // Route 1 — the full tour: grant, spaces, keys, done. The

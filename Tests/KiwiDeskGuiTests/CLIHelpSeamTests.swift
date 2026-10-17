@@ -44,10 +44,22 @@ struct CLIHelpSeamTests {
     @Test("the help verbs route to CLIHelp, not the socket")
     func routing() throws {
         let main = try Self.source("CLIMain.swift")
+        let route = try Self.source("CLIRoute.swift")
         let oneList =
             "runCLI must recognise the help verbs through "
             + "CLIHelp's own list, not a second one"
-        #expect(main.contains("CLIHelp.verbs.contains"), "\(oneList)")
+        #expect(
+            route.contains("case .help: return CLIHelp.verbs"),
+            "\(oneList)"
+        )
+        #expect(
+            main.contains("switch CLIRoute.of(arguments[1])"),
+            "runCLI must dispatch through the one local-verb register"
+        )
+        #expect(
+            !main.contains("CLIHelp.verbs"),
+            "a second help dispatch ahead of the route"
+        )
         #expect(
             main.contains("CLIHelp.run(arguments)"),
             "the help verbs must reach CLIHelp"

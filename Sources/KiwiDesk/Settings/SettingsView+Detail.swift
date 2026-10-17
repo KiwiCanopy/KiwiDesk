@@ -29,6 +29,10 @@ extension SettingsView {
             ShortcutsSection(model: model)
         case .appRules:
             AppRulesSection(model: model)
+        case .kiwiVision:
+            KiwiVisionSection(model: model)
+        case .ai:
+            AISection()
         case .general:
             GeneralSection(model: model)
         case .macChecklist:

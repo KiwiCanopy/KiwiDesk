@@ -26,19 +26,20 @@ struct DestinationParityTests {
         )
     }
 
-    // General and the Mac Checklist are the profile-agnostic
+    // General, the Mac Checklist and AI are the profile-agnostic
     // surfaces: they alone omit the profile-context header AND
     // hide while a stored profile is edited (#1365 joined the
-    // checklist — it reads macOS, never a profile). The two
+    // checklist — it reads macOS, never a profile; #1685 the AI
+    // page, which stores nothing). The two
     // predicates coincide since #109 (App Rules joined the
     // edit-visible set with its per-profile Space facet) but
     // stay separate concepts — header presence vs edit
     // reachability. Pin both so a new case can't silently land
     // in the wrong bucket.
-    @Test("only the profileless pair omits the profile context")
+    @Test("only the profileless four omit the profile context")
     func profileContextExcludesOnlyProfileless() {
         let profileless: Set<SettingsDestination> = [
-            .general, .macChecklist,
+            .ai, .general, .kiwiVision, .macChecklist,
         ]
         for dest in SettingsDestination.allCases {
             let global = profileless.contains(dest)

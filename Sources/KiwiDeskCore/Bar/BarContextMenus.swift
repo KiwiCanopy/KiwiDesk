@@ -34,6 +34,10 @@ final class BarContextMenus {
     var terminateApp: @MainActor (pid_t) -> Void = {
         NSRunningApplication(processIdentifier: $0)?.terminate()
     }
+    /// The pointer, in Cocoa screen coordinates: the layout
+    /// picker's Space is the one on the screen under it (#762).
+    /// Pinned in both `makeTestCore` twins.
+    var pointer: @MainActor () -> NSPoint = { NSEvent.mouseLocation }
 
     func menu(for hit: BarHit) -> NSMenu? {
         let rows = rows(hit)

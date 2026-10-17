@@ -23,6 +23,9 @@ struct ShortcutsSection: View {
     @State var jumpTracker = ShortcutsJumpTracker()
     @StateObject private var coordinator =
         RecorderCoordinator()
+    /// The Hyper move sheet (#1870), hosted here because the card
+    /// that opens it can leave the page under its own commit.
+    @State var hyperMoveRequest: HyperMoveRequest?
 
     /// The selected layer lives on `nav` rather than here
     /// (#1127): the live preview panel is this section's
@@ -99,7 +102,23 @@ struct ShortcutsSection: View {
                 \.disabledSystemShortcuts,
                 model.disabledSystemShortcuts()
             )
+            // Hyper rows dim in place while no key is set (#1870).
+            .environment(\.hyperKeyIsOff, model.appWide.hyperKey == nil)
             .environmentObject(coordinator)
+        }
+        .sheet(item: $hyperMoveRequest) { request in
+            HyperMoveSheet(
+                request: request,
+                onMove: { items, desktop in
+                    model.applyHyperMove(
+                        request,
+                        items: items,
+                        desktop: desktop
+                    )
+                    hyperMoveRequest = nil
+                },
+                onCancel: { hyperMoveRequest = nil }
+            )
         }
         .shortcutsJumpSlot(.viewport)
         // The chips' groups report under their anchor ids.
@@ -118,6 +137,7 @@ struct ShortcutsSection: View {
         // after its chip, so nothing in it reads as per-layer
         // (#1726, #1520; amending the 2026-08-04 ruling that the
         // layers card leads the section).
+        HyperKeyRow(model: model, moveRequest: $hyperMoveRequest)
         GesturesDrawer(model: model, expanded: $gesturesExpanded)
         ShortcutsHeader(model: model, selected: selection)
         layersCard
@@ -133,6 +153,11 @@ struct ShortcutsSection: View {
     }
 
     @ViewBuilder private var actionGroups: some View {
+        KiwiHubGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         FocusGroup(
             model: model,
             bindings: bindingsBinding,
@@ -143,7 +168,17 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
+        LayoutGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         SizeFloatGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+        KiwiVisionShortcutsGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
@@ -236,7 +271,11 @@ struct ShortcutsSection: View {
             ),
             resizeStep: Int(model.config.settings.resizeStep),
             layerNames: model.config.layers.map(\.name),
-            currentLayer: selected
+            currentLayer: selected,
+            lenses: KeybindingCatalog.lensOffer(
+                stored: model.draftLenses.map(\.name),
+                bindings: model.config.layers.flatMap(\.bindings)
+            )
         )
     }
 

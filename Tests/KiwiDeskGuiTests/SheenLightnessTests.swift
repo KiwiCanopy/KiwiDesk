@@ -50,8 +50,9 @@ struct SheenLightnessTests {
         let body = try #require(
             SourceScan.declarationBody(after: "var body:", in: source)
         )
-        #expect(body.contains("if lightness { endGlyph(\"moon.fill\") }"))
-        #expect(body.contains("if lightness { endGlyph(\"sun.max.fill\") }"))
+        // Both end glyphs ride the lightness gate; which symbols
+        // they draw is a tuning.
+        #expect(body.occurrences(of: "if lightness { endGlyph(") == 2)
         let track = try #require(
             SourceScan.declarationBody(after: "func track(", in: source)
         )

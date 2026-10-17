@@ -13,6 +13,14 @@ struct DefaultShortcutGenerationTests {
     private let forward = "KiwiDesk.focus_space_forward()"
     private let previous = "KiwiDesk.focus_space_previous()"
     private let next = "KiwiDesk.focus_space_next()"
+    /// Generations 2 to 4: 3.0.0's layout keys (#453, #762), the
+    /// window switcher (#1875) and KiwiVision (#2103).
+    private let layoutKeys = [
+        "KiwiDesk.cycle_mode()", "KiwiDesk.cycle_mode(\"prev\")",
+        "kiwihub.show(\"view\")",
+        "kiwihub.show(\"windows\")",
+        "kiwivision.toggle()",
+    ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.
     private var swapOnSteps: [KeyBinding] {
@@ -31,16 +39,27 @@ struct DefaultShortcutGenerationTests {
             existing: swapOnSteps,
             above: 0
         )
-        #expect(rows.map(\.lua) == [back, forward])
+        #expect(rows.map(\.lua) == [back, forward] + layoutKeys)
     }
 
-    @Test("Free chords get all four rows")
+    @Test("KiwiVision is generation 4, alone")
+    func kiwiVisionGeneration() {
+        #expect(
+            DefaultKeybindings.rows(ofGeneration: 4)
+                == [DefaultKeybindings.kiwiVisionRow()]
+        )
+    }
+
+    @Test("Free chords get every generation's rows")
     func freeChordsGetAll() {
         let rows = DefaultKeybindings.generationTopUp(
             existing: [],
             above: 0
         )
-        #expect(Set(rows.map(\.lua)) == [back, forward, previous, next])
+        #expect(
+            Set(rows.map(\.lua))
+                == Set([back, forward, previous, next] + layoutKeys)
+        )
     }
 
     @Test("An action bound elsewhere is left alone")
@@ -97,7 +116,9 @@ struct DefaultShortcutGenerationTests {
 
     /// The actions the 2.2.0 seed bound, its digit and Desktop
     /// families aside, which their own top-ups own. Frozen: a later
-    /// seed row joins a generation, never this list.
+    /// seed row joins a generation, never this list — save a
+    /// spelling a migration renamed, which the stored row now
+    /// carries (#2265).
     private let seededBeforeGenerations: Set<String> = [
         "KiwiDesk.focus(\"left\")", "KiwiDesk.focus(\"down\")",
         "KiwiDesk.focus(\"up\")", "KiwiDesk.focus(\"right\")",
@@ -107,7 +128,7 @@ struct DefaultShortcutGenerationTests {
         "KiwiDesk.resize(\"y\", 10)", "KiwiDesk.resize(\"y\", -10)",
         "KiwiDesk.toggle_floating()", "KiwiDesk.toggle_sticky()",
         "KiwiDesk.toggle_display_sticky()",
-        "KiwiDesk.show_shortcuts()", "KiwiDesk.open_settings()",
+        "kiwihub.show(\"shortcuts\")", "KiwiDesk.open_settings()",
     ]
 
     /// The direction a release forgets: a seed row added with no

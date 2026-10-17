@@ -47,7 +47,7 @@ struct ShortcutsFamilyRowsTests {
         //    strip and the icon row that rides it, the app list,
         //    the raw-Lua list and its Import action);
         //  - the rows here that are not shortcuts at all — the
-        //    Mouse & trackpad drawer's two mouse settings (#1726),
+        //    Mouse & trackpad drawer's mouse settings (#1726, #2379),
         //    whose census cases live in the Behaviour sub-enum,
         //    and its scroll gestures (#1656, #1519) — controls the
         //    drawer's entries draw — and Focus's Space history
@@ -62,6 +62,8 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.restoreDefaults),
             .behaviour(.mouseResize),
             .behaviour(.mouseFollowsFocus),
+            .behaviour(.mouseHoverFocus),
+            .behaviour(.mouseHoverFocusDelay),
             .shortcuts(.scrollPan),
             .shortcuts(.scrollLongSwipes),
             .shortcuts(.scrollStepDistance),
@@ -69,6 +71,10 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse),
             .shortcuts(.spaceHistory),
+            .shortcuts(.modeCycle),
+            .shortcuts(.modeCue),
+            .shortcuts(.hyperKey),
+            .shortcuts(.desktopShortcutBase),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {
@@ -330,7 +336,8 @@ struct ShortcutsFamilyRowsTests {
             desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
             resizeStep: 42,
             layerNames: [KeyLayer.defaultName, "resize"],
-            currentLayer: KeyLayer.defaultName
+            currentLayer: KeyLayer.defaultName,
+            lenses: ["Writing"]
         )
     }
 }

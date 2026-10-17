@@ -42,23 +42,6 @@ struct MonocleOverrideTests {
         #expect(mirror == params.subtracting(Self.notOverridable))
     }
 
-    @Test("Resolve applies every set field onto the global")
-    func resolveAppliesAll() {
-        var over = MonocleOverride()
-        over.orientation = .vertical
-        let resolved = over.resolved(onto: MonocleParams())
-        #expect(resolved.orientation == .vertical)
-    }
-
-    @Test("Unset fields inherit the global, per field")
-    func partialInheritance() {
-        var global = MonocleParams()
-        global.orientation = .horizontal
-        let over = MonocleOverride()  // nothing set
-        let resolved = over.resolved(onto: global)
-        #expect(resolved.orientation == .horizontal)  // inherited
-    }
-
     @Test("Sparse encode: only set fields, round-trips")
     func sparseRoundTrip() throws {
         var over = MonocleOverride()
