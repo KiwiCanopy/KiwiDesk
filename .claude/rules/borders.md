@@ -112,9 +112,9 @@ the focus anchor, the anchor is stale and the focused ring
 stands down — the anchor draws an unfocused ring instead
 (#933). A path deciding which ring is the focused one takes
 that answer from the one `EventLoop.ownKeyWindow` seam. Since
-#935 that seam returns ONE reading with two facets: the ring
-reads the broad `number` — ANY own key window stales the
-anchor — while the #929 close-return raise reads the narrow
+#935 that seam returns ONE reading with three facets: the ring
+reads the broad `number` — any own key window but a
+`floatsOverWindows` panel stales the anchor — while the #929 close-return raise reads the narrow
 `isDialog` facet. One closure resolves both, so the two
 stand-downs can never disagree about WHICH window is key —
 only about the ruled class. The why (Sparkle's alert flow, why
