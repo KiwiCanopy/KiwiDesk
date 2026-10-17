@@ -49,7 +49,6 @@ and every card and panel title is a heading for its rotor.
 
 ## The Status Bar Quick Menu
 
-:::unreleased
 **Open KiwiHub…** opens KiwiHub on its view picker
 ([`kiwihub.show`](lua-reference.md#kiwihubshow)), the side `⌃⌥L`
 opens, and shows that side's shortcut beside it. While KiwiDesk
@@ -68,7 +67,6 @@ which is session-only. A Settings Save does not touch a
 temporary layout, which stays on screen through it; the one
 exception is a Space whose layout you changed in **Settings →
 Spaces**, which wins on Save.
-:::
 
 KiwiDesk checks for updates on its own in the background, and a
 found update shows as a dot on the menu-bar icon and an
@@ -187,13 +185,11 @@ backup does not carry the folder, and Reset All Settings leaves
 it. In a synced or dotfiles folder, add `migration-backups/` to
 its `.gitignore`.
 
-:::unreleased
 An older KiwiDesk never writes over `gui.json` or a profile that a
 newer one migrated: it reports the file as unreadable, and a save
 to it fails until that Mac is updated. Versions before 3.0.0 do
 not have this check, so update every Mac sharing a synced folder
 together.
-:::
 
 ```json
 {
@@ -304,14 +300,12 @@ with its own look the list is greyed. A new profile shares the
 look if the profile it was saved from does. With a Lua-owned
 `init.lua` there is no shared look.
 
-:::unreleased
 The animations are part of the look too: a profile using the
 shared look takes its animations, and a look you save keeps them.
 Applying a bundled look, or picking one in the tour, leaves your
 animations as they are. When you first run this version, a profile
 whose animations differ from the shared look's starts keeping its
 own look, so nothing changes on screen.
-:::
 
 The General section leaves the grid while you edit a stored
 profile without switching to it.
@@ -887,7 +881,6 @@ other way as it does everywhere on macOS. A space past the tenth,
 or one with a name, has no digit: the space steps and the history
 reach it, and Shortcuts & Gestures can give it a key of its own.
 
-:::unreleased
 `⌃⌥C` moves the focused space to its next layout
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
 previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J`, `⌃⌥K`
@@ -899,7 +892,6 @@ typing searches your shortcuts, and `⌃⌥L` the **view picker**,
 which switches the layout of the space under the pointer, the
 profile and KiwiVision. `Tab` and `⇧Tab` step through the three
 sides.
-:::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you

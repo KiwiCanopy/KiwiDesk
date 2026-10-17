@@ -716,7 +716,6 @@ window's own Install the card is best effort: it shows what the
 offer fetched before the install began, since that relaunch opens
 before anything could be fetched again.
 
-:::unreleased
 **Any release's notes stay one menu away (#2308).** What's new
 carries a release menu under its title, because the notes of an
 update are read once and wanted again later — a release's
@@ -742,7 +741,6 @@ the notes say they are online. Home's What's new answers nothing
 — owed notes keep their own window and their Done, and an offer
 on screen comes forward instead, since it carries the notes worth
 reading.
-:::
 
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates
@@ -782,7 +780,6 @@ that adds something, a patch included; prose is for a fixes-only
 release, which has nothing new to find, and the owner may overrule
 either for a release.
 
-:::unreleased
 **The row count and a row's line length are guidelines, not
 limits (owner ruling 2026-10-17).** Six one-line rows fill the
 notes at the window's tallest; past that the notes scroll, which
@@ -794,7 +791,6 @@ two into one line. The line guideline matters more: a line past
 about seventy characters wraps to two, and two-line rows are what
 held the old cap at four. Rows merged in from skipped versions
 are not trimmed either: kept short, they scroll like the rest.
-:::
 
 **A row's symbol depicts the object, never a state or an
 action.** Sparkles read as Apple Intelligence and an up-arrow as
@@ -1091,7 +1087,6 @@ would trade a drift problem for a much worse documentation one.
 Generating its *signature tables* from this data is a genuine
 follow-up, and it is the reason the data is shaped this way.
 
-:::unreleased
 ### `kiwidesk mcp` is hand-rolled, and holds no state
 
 **[Rationale]**
@@ -1194,7 +1189,6 @@ app's rules quietly profile-local while the page's are shared, and
 a user switching profiles would find the rule gone. The keep
 answers every profile whose rule it changed, so the AI app can say
 so.
-:::
 
 ### The landing page argues from the papercut, not from the mess
 
@@ -1717,7 +1711,6 @@ nothing could navigate back in. Array-order layouts reach the
 float tier through their existing edge fall-through to the
 geometric search.
 
-:::unreleased
 A KiwiVision lens that keeps focus on its apps adds one more
 filter, orthogonal to both models like the float tier
 ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)):
@@ -1734,7 +1727,6 @@ gesture's steps skip too, through `navigate` on a row and its
 own-order step everywhere else. A new layout's navigation takes
 that predicate too, or the lens stops steering the keys on it
 ([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
-:::
 
 ```mermaid
 flowchart TD
@@ -2993,7 +2985,6 @@ shape one would take (owner, 2026-10-07).
 `FocusRaiseFlightGuardTests` holds the bypass, each refusal it
 keeps, and every other verb.
 
-:::unreleased
 
 ### Hover focus fires on a pointer at REST, never a pointer that is merely there (#1869)
 
@@ -3065,7 +3056,6 @@ display follow is. The setting lives beside `mouse.follows_focus`
 and shares its per-profile scope
 ([accepted limitations](accepted-limitations.md)).
 
-:::
 
 ### Layout and resize behavior
 
@@ -3360,7 +3350,6 @@ another native Space is the SIP list above; ordering lower in z
 changes nothing — they are already behind, and a transparent
 body shows whatever is behind it).
 
-:::unreleased
 **A Monocle focus change is a raise and nothing else, with no
 cue (#2099).** A `focus` step, an App Bar click or
 `focus_or_spawn` in a Monocle Space lands the ordinary
@@ -3400,7 +3389,6 @@ drops them on its next write.
 Revisit this only on device evidence that a wordless step leaves
 users unsure which window came in — and then try a title-only
 plate behind the App-Bar-off gate first, never an always-on cue.
-:::
 
 **Monocle is not Scrolling at 100 %, because it moves
 differently (#2099).** At rest the two look alike: Scrolling's
@@ -3418,7 +3406,6 @@ in "Scrolling, special setting". A Monocle with no chrome needs
 no layout of its own either: its per-layout App Bar row turned
 off is that already.
 
-:::unreleased
 **A Space switch is instant, and names the Space only where no
 Space Bar does (#2228).** Every KiwiDesk Space switch lands in one
 instant pass. After an explicit one — `focus_space` and the Space
@@ -3478,7 +3465,6 @@ decoders skip keys they do not know, so a stored
 gets the default. The cost: a user who had turned the slide off
 now sees the plate, only on a screen with no Space Bar, one click
 from off. The retired verbs are refused rather than aliased.
-:::
 
 *The focused ring waits for its window.* A slow app's window can
 land after the switch, so the ring appears on the window's own
@@ -6306,10 +6292,8 @@ how many), dots alone (counted, not read, past about five), a pill
 by KiwiShelf (hidden whenever the shelf is), a mini-map of the
 screens, and the KiwiDesk Space.
 
-:::unreleased
 A Space switch names its own Space with the same plate where no
 Space Bar does (#2228).
-:::
 
 ### Cycling layouts shows the cycle, on its own switch (#2144)
 
@@ -6472,7 +6456,6 @@ ruling: the next tiled space on that screen re-tiles the window,
 and a remembered per-window float frame is a separate decision,
 ruled only if the transience shows on a device.
 
-:::unreleased
 ### KiwiVision's blur is Liquid Glass clear, behind one switch (#2103)
 
 **[Rationale]**
@@ -6688,7 +6671,6 @@ because the user did not ask for the change. A switch back does
 not turn the lens on again, since a switch is not a press. Plain
 KiwiVision is app-wide and has no reach, so it stays on across
 every switch.
-:::
 
 ## Settings GUI & UX
 
@@ -7101,7 +7083,6 @@ Saved profiles card's one anchored control is Load — the verb
 that replaces a layout — which is the wrong thing to flash under
 a note that says *save as a profile*.
 
-:::unreleased
 ### A live change nobody saved is a row of its own (#2262)
 
 **[Rationale]**
@@ -7140,7 +7121,6 @@ alone, since that edit is what its Save commits. Undoing a live row means
 applying the saved value live, a Core verb rather than a draft
 writeback, so it waits for per-row revert (#792), as does whether
 Revert all reaches live state.
-:::
 
 ### The header search is a field, not a button that opens one
 
@@ -7325,7 +7305,6 @@ page instead would move it somewhere the user was not looking
 narrow). `HomeSurfacingTests` needles the query-only panel and the
 collapse.
 
-:::unreleased
 ### A bordered action button lifts grey under the pointer (#2377)
 
 **[Principle]**
@@ -7351,7 +7330,6 @@ segment lifts one step over its track and presses one step further,
 the same order. A palette or look tile lifts too. **A lift promises
 the click:** what a click would leave alone — the applied tile, a
 KiwiHub item the query dims — stays flat (owner ruling 2026-10-17).
-:::
 
 ### Hover help appears sooner than AppKit's default
 
@@ -8114,7 +8092,6 @@ check cannot tell a down site from a captive portal from a
 machine that is simply offline, and a wrong "you are offline"
 beside a working link is worse than the browser's own error page.
 
-:::unreleased
 ### The AI page sets an AI app up and never reports on it
 
 **[Rationale]**
@@ -8162,7 +8139,6 @@ hands the AI app; KiwiDesk never reads the wallpaper itself, since
 reading the desktop picture raised a macOS folder-access prompt
 (measured 2026-10-05, #1685 ▸ Ruling 6b). A wallpaper-colour verb
 reopens this only with a read that raises no prompt.
-:::
 
 ### Open at login
 
@@ -8896,7 +8872,6 @@ something unrelated, and would quietly turn Profiles back into a
 draft-preview surface — the one line the whole ruling above rests
 on.
 
-:::unreleased
 **A page with no draft, whose rows write at once, takes the panel
 for a picture of its own live values** — KiwiVision's Default
 chip (#2103). The
@@ -8912,7 +8887,6 @@ picture of anything else on such a page, a catalog entry or a
 stored file, still takes a sheet, and a page that grows a draft
 has its panel watch that draft like any other — on a KiwiVision
 lens's chip, the draft's lens.
-:::
 
 **A composite question needs a composite picture, in the colours
 the user actually set.** (#793, owner 2026-08-16.) Advanced
@@ -9647,7 +9621,6 @@ carries the why. The blocked tooltip's monitor wording appears
 only when a monitor set really is the only thing a save would
 write.
 
-:::unreleased
 **A picked layout is session-only, and Settings does not narrate
 it.** Changing a space's layout from KiwiHub's view picker or a
 Space's Layout menu updates the running state immediately and
@@ -9661,7 +9634,6 @@ one the surface names, since the verb keeps every screen's at
 once; a failed keep raises one alert whichever surface asked,
 because a menu has no surface to warn in and the two must not
 fail differently.
-:::
 
 **The profile has three write paths, and each writes exactly
 what its words say (#1179, re-ruled by #1790).**
@@ -9715,7 +9687,6 @@ counts as un-edited, exactly as that popover row disappears.
 Two consequences are the model rather than bugs, and are named
 here so they read that way:
 
-:::unreleased
 - After an unrelated Save, screen and file may disagree about a
   space you did not touch. That is what "temporary" means. The
   pickers' **"not saved to profile"** — the view picker's
@@ -9726,7 +9697,6 @@ here so they read that way:
 - Editing a mode back to its saved value neither saves nor ends
   a standing temporary layout. Ending one is the pickers' job:
   switch back, or Keep.
-:::
 
 **Settings surfaces no temporary-layout drift.** No pill row,
 no drift-armed Save and no caption under the Spaces mode picker
@@ -9863,7 +9833,6 @@ recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
 
-:::unreleased
 **The Hyper key is a modifier KiwiDesk owns, and needs no
 Input Monitoring (#1870).** The usual hyper key is an event
 tap rewriting Caps Lock into `⌃⌥⇧⌘`, which needs the permission
@@ -9884,7 +9853,6 @@ only where it is exactly the one KiwiDesk recorded writing —
 Caps Lock → F18 is also a common Hammerspoon setup — and refuses
 otherwise. The trade: "tap Hyper alone for Escape" needs a posted
 key event, which is Input Monitoring, so it stays with #1874.
-:::
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
@@ -9922,7 +9890,6 @@ because a laptop was undocked, which is routine and temporary;
 reshuffling rows to the bottom of the page on every undock
 reports a normal state as debris.
 
-:::unreleased
 **KiwiHub's Shortcuts side lifts those rows out instead**, into
 an Unavailable shortcuts band at the end of its column (owner
 ruling 2026-10-16). The reason Settings keeps them in place is
@@ -9934,7 +9901,6 @@ is not the Inactive one, for the first reason above — its
 caption promises the key still fires — and it takes the caption
 Settings puts over the same rows, so both surfaces say the same
 thing about them.
-:::
 
 **Config presence expands the Simple surface.** The simple
 mode is not a smaller product, it is a smaller *offer*. Anything
@@ -10441,7 +10407,6 @@ Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
 
-:::unreleased
 **Next layout is `⌃⌥C` (#453), the first prediction the rule
 paid.** Stepping a Space to its next layout is a verb you tap, so
 it takes a mnemonic letter on `⌃⌥` — C for cycle — beside the
@@ -10492,7 +10457,6 @@ from the live binding. A word mnemonic links only in English, so
 `G K L` for "Go to" was dropped, and the side names stay
 translated rather than kept as English words that read as missing
 translations.
-:::
 
 **One pressed exception rides `⌥⌘`: the Space history on `Tab`
 (#1655, owner ruling 2026-10-09).** Back and Forward through the
@@ -10532,7 +10496,6 @@ separate modifier and off by default, so the seed cannot depend on
 it, and the users the four-modifier chord serves are the ones whose
 own tool already presses all four.
 
-:::unreleased
 **The Hyper move is an offer, and it moves the Desktop base with
 the rows (#1870).** Turning Hyper on moves nothing, and seeding
 Hyper copies beside the `⌃⌥` rows is refused, since nothing
@@ -10572,7 +10535,6 @@ Turning Hyper off moves nothing back silently. The Hyper rows dim
 in place, dimmed and never disabled, since re-recording one is a
 way off Hyper, and the reverse offer appears; it is the only door
 that resets the base, and it moves the rows back with it.
-:::
 
 The rows are topped up rather than seeded once, because Desktops
 come and go: at boot, and at a switch that shows a Desktop numbered
@@ -10767,12 +10729,10 @@ claim nothing enforces (#614), since `goToDesktop` and
 any letter they like. So `⇧` means exactly one thing everywhere,
 and so does `⌘`.
 
-:::unreleased
 Amended since: off a positional key `⇧` reverses its unshifted
 twin — `Tab` (#1655), and a letter whose unshifted row steps,
 the layout cycle's `⌃⌥⇧C` (#453) — and `⌃⌥⇧⌘` + digit lifts the
 ladder to Go to Desktop. A toggle still never carries it.
-:::
 
 The ergonomics agree. Resize is the one verb a user HOLDS (#1056),
 and tier 3 is the heaviest chord in the scheme — three modifiers
@@ -11330,7 +11290,6 @@ with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
 re-leaks the seed into Custom. (#602, PR #638, #2246)
 
-:::unreleased
 **The key panel never takes activation, so there is none to
 hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
 non-activating panel (#1875): it takes the keyboard while the
@@ -11354,9 +11313,7 @@ KiwiDesk menu holds, since the user believes the app behind it
 has the keyboard and a ⌘Q aimed there must not quit KiwiDesk.
 `JumpPanelControllerTests` pins the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
-:::
 
-:::unreleased
 **The shortcuts sheet is the key panel's middle side (#2246).**
 ⌃⌥J, ⌃⌥K and ⌃⌥L open one panel on its Windows, Shortcuts and
 Layouts sides, in the order of the keys under the right hand; ⇥
@@ -11418,9 +11375,7 @@ motion. The way here follows the chord's reach: ⇧ alone moves the
 selected row, so only it shows its "Space n → Space m"; under ⇧⌘
 every numbered row is a target through its digit, so each shows
 its own.
-:::
 
-:::unreleased
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
 brings arrows, type-select, Return, Escape and VoiceOver for free.
@@ -11465,9 +11420,7 @@ selection: the pill marks where ↩ goes, the ✓ what the Space
 shows. One verb opens every side, `kiwihub.show`, and the CLI
 reaches it (▸ *The key panel is KiwiHub*). `JumpScopeModelTests`,
 `ViewPickListTests` and `JumpKeyTests` hold the keys. (#2229)
-:::
 
-:::unreleased
 **In KiwiHub the pointer lifts and the keys select (#2365, owner
 ruling 2026-10-17).** The item under the pointer takes a neutral
 grey lift; the green selection moves only by a key or a click.
@@ -11492,9 +11445,7 @@ Settings already uses and never the accent, a border or an ink
 change, and the selected item draws none, since a durable marking
 and a pointer state never share a property (#1173). VoiceOver
 follows the selection only. `JumpHoverTests` holds the rule.
-:::
 
-:::unreleased
 **[Trade-off] A searchable dropdown's pointer and keys share one
 cursor (owner ruling 2026-10-17).** The font family picker, the
 app picker and the header search draw one highlight, solid
@@ -11514,9 +11465,7 @@ pointer never scrolls the list. The stored family's ✓ stays a
 mark of its own, inked to read on the accent, and `.isSelected`
 stays on it (#1173). `DropdownCursorTests` holds the rule and
 `DropdownCursorWiringTests` the three lists' routing.
-:::
 
-:::unreleased
 **The ⌃⌥L side is View: one chord reaches every daily switch
 (#2309, owner ruling 2026-10-15).** #2229 and #2246 admitted a
 side for its search alone. The layout, the profile and KiwiVision
@@ -11549,9 +11498,7 @@ instead of the side being stepped past, because the other two
 lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
-:::
 
-:::unreleased
 **KiwiHub's KiwiVision line has no Off chip: the item already on
 turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**
 Every other chip on the line turns something on, and
@@ -11589,9 +11536,7 @@ anything else, and the filter finds it by name. A Lua-owned setup
 draws New Lens… greyed with its reason rather than hiding it.
 `ViewPickVisionLineTests`, `ViewPickItemsTests` and
 `JumpProfileNamingTests` hold it.
-:::
 
-:::unreleased
 **The key panel is KiwiHub, and one verb opens its sides
 (#2265).** Since the three panels became one, a user met three
 names and no parent: the Shortcuts page filed the window switcher
@@ -11620,7 +11565,6 @@ for a side it does not know, which is something a CLI caller can
 read, and a launcher (Raycast, Shortcuts, skhd) then opens KiwiHub
 without a keybinding. It moves no window, so it is no focused
 command for the #292 preflight.
-:::
 
 **An accessibility steal is returned, not refused (#958).**
 Starting VoiceOver activates `com.apple.universalaccesscontrol`,
@@ -11646,7 +11590,6 @@ never fought. The accepted trade is the one clickless
 cross-app focus inside that window being returned once.
 (`AccessibilityReturnTests`)
 
-:::unreleased
 **A menu-bar reveal's activation is returned, once the bar hides
 (#1532, #2224).** With the menu bar set to auto-hide, macOS 27
 answers the pointer reaching the top edge by activating the last
@@ -11716,7 +11659,6 @@ no macOS 27 or auto-hide gate: no foreign activation while
 KiwiDesk's own menu tracks is the user's. The accepted trade: while
 the bar shows, the Settings window looks inactive and the other
 app's menus are in the bar.
-:::
 (`MenuBarRevealReturnTests`, `MenuBarRevealPaymentTests`,
 `MenuBarRevealSeamTests`)
 
@@ -11981,7 +11923,6 @@ on the click — a search hit, Go to or a diff jump opens the card
 to reach one row, whose wash is the motion that answers them —
 and never under Reduce Motion.
 
-:::unreleased
 
 **Shut, the card shows every entry's picture (owner ruling
 2026-10-17).** A collapsible section's shut state is its summary
@@ -12004,7 +11945,6 @@ summary states a value. Every entry is drawn rather than one per
 group because each picture is its entry's own way in; the cost is
 weight, so a strip that reads as a solid band in light mode is
 the signal to cut it back to one picture per group.
-:::
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
@@ -15139,7 +15079,6 @@ never did. A restore takes the bundle's shared look ahead of the
 none, its step stamps its profiles own, and the crossing is owed
 again and elects among them, the shape #1741's crossing takes.
 
-:::unreleased
 **Wearing the shared look keeps a per-layout App Bar indicator;
 only picking a look clears it (#2368).** A pick says "draw this
 look's indicator", so it clears the per-layout ones that would
@@ -15152,9 +15091,7 @@ the next shared-look write stripped the value from the file. The
 leaves are one list, `TilingSettings.layoutIndicatorLeaves`,
 which the pick clears, the tour's undo restores and the wear keeps
 (`SettingsLiveFollowerTests`).
-:::
 
-:::unreleased
 **Motion shares the look so it travels between profiles, but a
 bundled look and the tour's paint say nothing about it: picking a
 picture never changes how fast things move (#2176).** Animations
@@ -15186,7 +15123,6 @@ look's, as it already runs the shared styling. No
 format moves: the look's style is a sparse map an older build
 reads past, keeping only the paths it knows, and a `LookExport`
 sidecar with motion imports there without it.
-:::
 
 **The shared look changes through one door, `landSharedLook`:
 `gui.json` first, then every follower's file copy re-stamped,
@@ -16893,7 +16829,6 @@ reachable without opening Settings. Profile issues also
 refresh on save/delete, so repairing one clears its badge
 immediately. (#68 §3.7, #39/#31 own the validation cores)
 
-:::unreleased
 **An undecodable profile is greyed, never hidden.** A profile
 whose JSON won't decode yields no summary, but hiding it stranded
 a broken file with no reachable remedy (#246). It stays listed
@@ -16904,7 +16839,6 @@ it can't load (the remedy is the Config Issues window, which the
 menu bar offers while a load has failed). Grey-don't-hide (#171);
 re-saving was never reachable for a file that can't be read, so
 the warning no longer suggests it. (#246)
-:::
 
 **A typo is non-fatal, but never invisible.** An unknown call
 on `KiwiDesk` or a layout namespace table is a guarded no-op
@@ -16916,7 +16850,6 @@ badge and window above. Runtime hits (a typo inside a
 keybinding closure) only log; a persistent "config error"
 badge for a transient slip would mislead. (#39)
 
-:::unreleased
 **The quick menu is the pointer's way into the daily switches,
 and KiwiHub holds them (#2309).** The layout, the profile and
 KiwiVision are what a user changes through the day, and they live
@@ -16957,7 +16890,6 @@ the fix path); a **View Shortcuts…** row (the shortcuts are
 KiwiHub's middle side, one ⇧⇥ from where the row lands); and a
 **Support** row (it lives in Settings as a discreet link — a menu
 opened daily is no place for a recurring support ask).
-:::
 
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain
@@ -17002,7 +16934,6 @@ count row is the sentence that explains the grey). The mark
 returning to full strength IS the ready signal
 ([#802](https://github.com/KiwiCanopy/KiwiDesk/issues/802)).
 
-:::unreleased
 The grey sits on the switches, not on the row that leads to them
 (#2309). **Open KiwiHub…** stays enabled while KiwiDesk starts,
 waits for Start Tiling or lacks the Accessibility permission, and
@@ -17011,7 +16942,6 @@ with the reason as text. A greyed row leaves its reason to a
 neighbouring row; the panel puts it on the item itself, and since
 the row and the chord open the same side, the pointer and the
 keyboard meet the same explanation.
-:::
 
 **[Trade-off]**
 
@@ -17388,7 +17318,6 @@ opens, so it needs no search entry — About beside it has none
 either. One permanent door only: a second one elsewhere would
 make the reader ask whether they differ.
 
-:::unreleased
 **"What's new" leads the footer's links (#2308).** The notes
 were reachable once, after an update, and then never again from
 inside the app — a user who jumped 2.3 to 3.1 and pressed Done
@@ -17401,7 +17330,6 @@ permanent door, so About's *Release Notes* link left with it
 the window narrows: below its width the links wrap to a second,
 trailing line, the way every other control keeps its reach
 (*Narrow windows drop the preview before they drop a control*).
-:::
 
 **The update state is one component.** What the channel last
 said lands in one store (`UpdateStateStore`, written by the
