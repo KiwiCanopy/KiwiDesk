@@ -170,6 +170,25 @@ struct SettingsLiveKeepTests {
         #expect(keep.refusal(for: stays) != nil)
     }
 
+    /// Each refusal reason reads its own sentence.
+    @Test("a conflicting leaf and an unwritten one read apart")
+    func refusalWording() {
+        LocalizationManager.shared.select("en")
+        var row = SettingsDiffRow.change(
+            .borders(.borderWidth),
+            label: "Width",
+            old: nil,
+            new: nil
+        )
+        row.keepIDs = ["x"]
+        func text(_ reason: NotKeepable) -> String? {
+            LiveKeep(profile: "Odd", refusals: ["x": reason]) { _ in nil }
+                .refusal(for: row)
+        }
+        #expect(text(.conflicting)?.contains("doesn't fit") == true)
+        #expect(text(.notWritten) == "Couldn't keep this setting.")
+    }
+
     /// The pill offers Keep on the live target alone, through the
     /// model's one door.
     @Test("the popover wires the Keep")

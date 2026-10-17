@@ -77,7 +77,25 @@ struct SettingsLiveFollowerTests {
         )
         let outcome = model.keepLive(row.keepIDs)
         #expect(outcome?.refused.isEmpty == true)
+        // A per-layout indicator is the profile's, not the look's.
+        #expect(outcome?.sharedLook == false)
         #expect(!model.liveUnsaved)
+    }
+
+    /// A look leaf on a follower lands in the shared look, and the
+    /// outcome says so, which the spoken sentence reads.
+    @Test("a kept look leaf on a follower reports the shared look")
+    func lookLeafReportsSharedLook() throws {
+        let model = try makeModel()
+        _ = model.core.execute("border.set_width", args: [.number(9)])
+        model.refreshOwner()
+        let row = try #require(
+            SettingsDiffRowSource.rows(for: model)
+                .first { $0.key == .borders(.borderWidth) }
+        )
+        let outcome = model.keepLive(row.keepIDs)
+        #expect(outcome?.refused.isEmpty == true)
+        #expect(outcome?.sharedLook == true)
     }
 
     /// `look.apply` is a pick, never a wear (#2368).
@@ -91,6 +109,9 @@ struct SettingsLiveFollowerTests {
 
     @Test("wearing keeps every per-layout indicator, a pick clears")
     func pickClears() {
+        let leaves = TilingSettings.layoutIndicatorLeaves
+        #expect(leaves.contains(\.monocle.appBar.activeIndicator))
+        #expect(leaves.contains(\.scrolling.appBar.activeIndicator))
         let look = LookBody(of: TilingSettings())
         for leaf in TilingSettings.layoutIndicatorLeaves {
             var settings = TilingSettings()
