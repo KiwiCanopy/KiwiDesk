@@ -52,6 +52,16 @@ extension JumpModel {
         }
     }
 
+    /// A click selects the item, then does what ↩ does on it, so
+    /// the footer never describes something else (#2365); an item
+    /// the query dims takes no selection, so no click either.
+    func clickItem(_ item: ViewPickList.Item) {
+        guard scope == .view else { return }
+        view?.select(item.pick)
+        guard view?.selected?.pick == item.pick else { return }
+        applyView(item)
+    }
+
     /// The one door every View pick takes — ↩, a ⌘ digit, a click
     /// — so what an item does is decided once: the KiwiVision item
     /// already on turns KiwiVision off (#2103 ruling 56).

@@ -21,6 +21,30 @@ extension SettingsThemeContrastTests {
             SettingsTheme.accentInkSecondary,
             on: SettingsTheme.accent
         ),
+        // A row, tile or chip the pointer lifts (#2365): its
+        // vibrant `.secondary` and `.tertiary` stand as `ink2` and
+        // `ink3`; `.primary` on both lifts is the jump chips' `ink`.
+        Pairing(
+            "ink2 on a lifted KiwiHub row",
+            SettingsTheme.ink2,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipRest]
+        ),
+        Pairing(
+            "ink2 on a lifted KiwiHub chip",
+            SettingsTheme.ink2,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipHover]
+        ),
+        // `.tertiary` names an item that cannot be applied: the
+        // disabled floor.
+        Pairing(
+            "ink3 on a lifted KiwiHub chip",
+            SettingsTheme.ink3,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.chipHover],
+            floor: 3.0
+        ),
         // The scope switch's chord hints (#2245): the selected
         // segment's is `accentInkSecondary` on the accent, above,
         // and a hovered one's is `ink`, which the segment
@@ -78,9 +102,13 @@ extension SettingsThemeContrastTests {
                 encoding: .utf8
             )
         )
-        #expect(source.occurrences(of: ".fill(") == 1)
+        // The selection's accent, and the hover lift (#2365).
+        #expect(source.occurrences(of: ".fill(") == 2)
         #expect(
             source.occurrences(of: ".fill(SettingsTheme.accent)") == 1
+        )
+        #expect(
+            source.occurrences(of: ".fill(SettingsTheme.chipRest)") == 1
         )
     }
 

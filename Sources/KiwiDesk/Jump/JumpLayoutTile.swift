@@ -10,6 +10,8 @@ struct JumpLayoutTile: View {
     let number: Int?
     let settings: TilingSettings
     let isSelected: Bool
+    /// The pointer lifts this tile, grey (#2365).
+    let isLifted: Bool
     let isCurrent: Bool
     let isDimmed: Bool
     /// ⌘ is held on this line and the tile has a number.
@@ -21,6 +23,7 @@ struct JumpLayoutTile: View {
     static let schematicScale: CGFloat = 0.52
     let onActivate: () -> Void
     let onHover: () -> Void
+    let onHoverEnd: () -> Void
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
@@ -36,7 +39,7 @@ struct JumpLayoutTile: View {
             // explores without holding it.
             .accessibilityHint(chordHint)
             .onContinuousHover { phase in
-                if case .active = phase { onHover() }
+                if case .active = phase { onHover() } else { onHoverEnd() }
             }
     }
 
@@ -112,6 +115,12 @@ struct JumpLayoutTile: View {
                 style: .continuous
             )
             .fill(SettingsTheme.accent)
+        } else if isLifted {
+            RoundedRectangle(
+                cornerRadius: KeyPanelStyle.selectionRadius,
+                style: .continuous
+            )
+            .fill(SettingsTheme.chipRest)
         }
     }
 

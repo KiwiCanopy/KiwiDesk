@@ -40,8 +40,33 @@ final class JumpModel: ObservableObject {
 
     func leave() { leaving = true }
     /// Where the pointer last moved, so a row sliding under a
-    /// still pointer selects nothing (#2229).
+    /// still pointer lifts nothing (#2229).
     private var lastPointer: CGPoint
+    /// The item the pointer lifts, grey; never the selection
+    /// (#2365).
+    @Published private(set) var hover: JumpHover?
+
+    func clearHover() {
+        if hover != nil { hover = nil }
+    }
+
+    /// A key, a re-rank or a side switch slides items under a still
+    /// pointer: the lift clears until the next real move (#2365).
+    private func restPointer() {
+        lastPointer = currentPointer()
+        clearHover()
+    }
+
+    /// Lifts `target` on a real pointer move; an item sliding under
+    /// a still one drops the lift instead.
+    func noteHover(_ target: JumpHover, pointer: CGPoint) {
+        if pointer != lastPointer {
+            lastPointer = pointer
+            if hover != target { hover = target }
+        } else if hover != target {
+            clearHover()
+        }
+    }
     /// The pointer now — the panel's one live read; a test pins
     /// it, and passes `pointer:` to `init`.
     static let livePointer: () -> CGPoint = { NSEvent.mouseLocation }
@@ -114,7 +139,7 @@ final class JumpModel: ObservableObject {
                 return
             }
             // What re-ranks under the pointer is no pointer move.
-            lastPointer = currentPointer()
+            restPointer()
             switch scope {
             case .windows: break
             case .shortcuts:
@@ -132,6 +157,7 @@ final class JumpModel: ObservableObject {
 
     func handle(_ key: JumpKey) {
         guard !leaving else { return }
+        restPointer()
         if case .stepScope(let forward) = key {
             setScope(scope.stepped(forward: forward))
             return
@@ -187,29 +213,17 @@ final class JumpModel: ObservableObject {
         view?.setQuery("")
         shortcuts?.setQuery("")
         self.scope = scope
-        lastPointer = currentPointer()
+        restPointer()
         onScopeChange()
         onAnnounce(scope.title)
     }
 
-    /// The selection follows the pointer, on a real move only
-    /// (#2229 ▸ designer ruling): the panel opening under it, a
-    /// re-rank or a scroll slides rows under a still pointer and
-    /// moves nothing.
-    func hoverRow(_ index: Int, pointer: CGPoint) {
-        guard scope == .windows, pointerMoved(to: pointer) else { return }
+    /// A click selects the row, then does what ↩ does on it
+    /// (#2365).
+    func clickRow(_ index: Int, moveHere: Bool) {
+        guard scope == .windows else { return }
         list.select(index)
-    }
-
-    func hoverItem(_ pick: ViewPickList.Pick, pointer: CGPoint) {
-        guard scope == .view, pointerMoved(to: pointer) else { return }
-        view?.select(pick)
-    }
-
-    private func pointerMoved(to point: CGPoint) -> Bool {
-        guard point != lastPointer else { return false }
-        lastPointer = point
-        return true
+        if let match = list.selected { onPick(match.entry, moveHere) }
     }
 
     /// ⇧ and ⌘ as held now, for the footer's one lit hint.

@@ -11,6 +11,8 @@ struct ViewChip: View {
     let line: ViewPickList.Line
     let number: Int?
     let isSelected: Bool
+    /// The pointer lifts this chip, grey (#2365).
+    let isLifted: Bool
     let isDimmed: Bool
     let showsNumber: Bool
     /// Whether the KiwiVision line shows nothing on, which the
@@ -18,6 +20,7 @@ struct ViewChip: View {
     var visionOff = false
     let onActivate: () -> Void
     let onHover: () -> Void
+    let onHoverEnd: () -> Void
 
     /// The number slot, wide enough for "⌘9" at the chip's size.
     static let slot: CGFloat = 22
@@ -33,7 +36,7 @@ struct ViewChip: View {
             .accessibilityAddTraits(isSelected ? .isSelected : [])
             .accessibilityHint(hint)
             .onContinuousHover { phase in
-                if case .active = phase { onHover() }
+                if case .active = phase { onHover() } else { onHoverEnd() }
             }
     }
 
@@ -109,7 +112,9 @@ struct ViewChip: View {
         if isSelected {
             Capsule().fill(SettingsTheme.accent)
         } else {
-            Capsule().strokeBorder(.separator)
+            Capsule()
+                .fill(isLifted ? SettingsTheme.chipHover : .clear)
+                .overlay(Capsule().strokeBorder(.separator))
         }
     }
 }

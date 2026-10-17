@@ -97,9 +97,10 @@ struct ViewPickVisionLineTests {
         #expect(side.occurrences(of: "onActivate:{onApply(item)}") == 2)
         #expect(!side.contains("action(of:"))
         let panel = try squashed("JumpPanelView.swift")
-        #expect(panel.contains("onApply:{model.applyView($0)}"))
+        // A click selects, then takes the door (#2365).
+        #expect(panel.contains("onApply:{model.clickItem($0)}"))
         let model = try squashed("JumpModel+View.swift")
-        #expect(model.occurrences(of: "applyView(item)") == 2)
+        #expect(model.occurrences(of: "applyView(item)") == 3)
         #expect(model.contains("letaction=ViewPickList.action(of:item)"))
         #expect(model.contains("onApplyView(action)"))
         #expect(model.occurrences(of: "onApplyView(") == 1)
@@ -117,6 +118,7 @@ struct ViewPickVisionLineTests {
 
     @Test("New Lens… is last and no ⌘ digit reaches it")
     func digitsSkipTheCreateChip() {
+        LocalizationManager.shared.select("en")
         var list = list()
         let vision = list.items(.vision)
         #expect(vision.last?.pick == .newLens)

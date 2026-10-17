@@ -8,6 +8,8 @@ struct JumpRowView: View {
     let match: JumpSearch.Match
     let icon: NSImage?
     let isSelected: Bool
+    /// The pointer lifts this row, grey (#2365).
+    var isLifted = false
     /// The ⌘ number this row takes, nil from row 10 on.
     let number: Int?
     let commandHeld: Bool
@@ -18,6 +20,7 @@ struct JumpRowView: View {
     let onActivate: (_ moveHere: Bool) -> Void
     /// The pointer moved over this row.
     var onHover: () -> Void = {}
+    var onHoverEnd: () -> Void = {}
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -63,7 +66,7 @@ struct JumpRowView: View {
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .modifier(MoveHereAction(entry: match.entry, run: onActivate))
         .onContinuousHover { phase in
-            if case .active = phase { onHover() }
+            if case .active = phase { onHover() } else { onHoverEnd() }
         }
     }
 
@@ -133,6 +136,12 @@ struct JumpRowView: View {
                 style: .continuous
             )
             .fill(SettingsTheme.accent)
+        } else if isLifted {
+            RoundedRectangle(
+                cornerRadius: KeyPanelStyle.selectionRadius,
+                style: .continuous
+            )
+            .fill(SettingsTheme.chipRest)
         }
     }
 }

@@ -23,10 +23,12 @@ struct ViewChipHeightTests {
             line: .profile,
             number: 1,
             isSelected: true,
+            isLifted: false,
             isDimmed: false,
             showsNumber: showsNumber,
             onActivate: {},
-            onHover: {}
+            onHover: {},
+            onHoverEnd: {}
         )
     }
 
