@@ -75,10 +75,10 @@ struct GestureAutoplayWiringTests {
         #expect(source.components(separatedBy: "clicked").count == 3)
     }
 
-    /// Per visit: armed only by a click — the open's hook, gated on
-    /// the visit's `played`, or a strip picture's land — and spent
-    /// by the entry that plays, so a search open, a second click or
-    /// a re-mount rests.
+    /// Armed only by a click: the open's hook, once per visit
+    /// through `played`, or a strip picture's land, once per such
+    /// click; spent by the entry that plays, so a search open or a
+    /// re-mount rests.
     @Test("the drawer plays once per visit, on a click")
     func oncePerVisit() throws {
         let drawer = try Self.squashed(
@@ -152,5 +152,35 @@ struct GestureAutoplayWiringTests {
             body.contains("withAnimation(reduceMotion?nil:pace.animation)")
         )
         #expect(!body.contains("repeatForever"))
+    }
+
+    /// The click is the only trigger tree-wide: nothing in the
+    /// card's files writes `playing` but the drawer's two arming
+    /// sites and the item initializer's spend, so an entry file
+    /// cannot start a play on its own appear.
+    @Test("only the drawer arms a play; only the entry spends it")
+    func playWriters() throws {
+        let allowed: [String: Int] = [
+            "GesturesDrawer.swift": 2,
+            "GestureEntry+Item.swift": 1,
+        ]
+        let dir = Self.root.appendingPathComponent(
+            "Settings/Components/Gestures"
+        )
+        let files = try SourceScan.swiftSources(under: dir)
+        #expect(files.count > 10)
+        var found: [String: Int] = [:]
+        for url in files {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            // An assignment to `playing` itself, never a comparison's
+            // `==` nor another name ending in it (`autoplaying`).
+            let count = source.matches(
+                of: try Regex(#"\bplaying(\.wrappedValue)?\s*=(?!=)"#)
+            ).count
+            if count > 0 { found[url.lastPathComponent] = count }
+        }
+        #expect(found == allowed)
     }
 }

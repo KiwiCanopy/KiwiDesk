@@ -11964,9 +11964,10 @@ the disclosure above it opens the card where every entry is
 reachable. It breaks the "summary is words only" convention for
 this one card, which is a section — a peer of the page — rather
 than a drawer: a picture is the content arriving, where a drawer's
-summary states a value. Four plates, one per group, was the
-designer's first answer and stays the fallback if the full strip
-reads as a band.
+summary states a value. Every entry is drawn rather than one per
+group because each picture is its entry's own way in; the cost is
+weight, so a strip that reads as a solid band in light mode is
+the signal to cut it back to one picture per group.
 :::
 
 **An entry lands with its feature, and greys where its surface is

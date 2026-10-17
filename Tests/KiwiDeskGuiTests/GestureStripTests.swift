@@ -1,5 +1,6 @@
 import Foundation
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -12,6 +13,7 @@ import Testing
 struct GestureStripTests {
     private static let gestures =
         "Sources/KiwiDesk/Settings/Components/Gestures/"
+    private static let plate = GesturePlate<EmptyView>.size
 
     private static func squashed(_ file: String) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
@@ -41,7 +43,7 @@ struct GestureStripTests {
         let total =
             GestureItem.allCases.reduce(CGFloat(0)) {
                 $0 + GestureStrip.leading(of: $1)
-            } + CGFloat(GestureItem.allCases.count) * 120
+            } + CGFloat(GestureItem.allCases.count) * Self.plate.width
         let viewport: CGFloat = 664
         let rest = GestureStrip.fades(offset: 0, viewport: viewport)
         #expect(rest.leading == 0)
@@ -59,7 +61,7 @@ struct GestureStripTests {
         #expect(
             rest.trailing
                 == ShelfOverflow.fadeLength(
-                    thickness: 72,
+                    thickness: Self.plate.height,
                     visible: viewport
                 )
         )
@@ -97,6 +99,10 @@ struct GestureStripTests {
         let strip = try Self.squashed(Self.gestures + "GestureStrip.swift")
         #expect(strip.contains(".accessibilityHidden(true)"))
         #expect(strip.contains(".mask(GestureStripFade(fades:fades))"))
+        // The offset reads the run's leading edge in the scroller's
+        // own space, negated: a dropped sign never fades the lead.
+        #expect(strip.contains("-$0.frame(in:.named(Self.space)).minX"))
+        #expect(strip.contains(".coordinateSpace(.named(Self.space))"))
         let plate = try Self.squashed(
             Self.gestures + "GestureStripPlate.swift"
         )

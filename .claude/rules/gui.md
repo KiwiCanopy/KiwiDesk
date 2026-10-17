@@ -256,11 +256,12 @@ restated `20...80` satisfies on the day it is written.
 - **A gesture picture is not a schematic.** A Mouse & trackpad
   entry on the Shortcuts & Gestures page teaches a gesture rather
   than a rest state, so its picture may move: while hovered, and
-  ONE entry once per visit on the user's own click — the card's
-  first when the click opens the card (owner ruling 2026-09-29),
-  or the entry a click on its picture in the shut card's strip
-  lands on (owner ruling 2026-10-17) — never on a search, Go to
-  or diff-jump expansion, never looped. Otherwise it rests on its
+  once on the user's own click alone — the card's first entry
+  when a click opens the card, at most once per visit (owner
+  ruling 2026-09-29), and the entry a click on its picture in the
+  shut card's strip lands on, once per such click (owner ruling
+  2026-10-17) — never on a search, Go to or diff-jump expansion,
+  never looped. Otherwise it rests on its
   key frame, and always under Reduce Motion, never a bundled clip,
   with the gate named per call (`ReduceMotionGateTests`).
   `GestureAutoplayWiringTests` holds the click as the only
