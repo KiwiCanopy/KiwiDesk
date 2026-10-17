@@ -64,9 +64,9 @@ struct ButtonChipStyleTests {
         #expect(button.contains(".settingsActionButton()"))
     }
 
-    /// A segment's press keeps its hover tone: `.plain` faded it
-    /// lighter than the hover.
-    @Test("a segment's press does not fade")
+    /// A segment's press goes one step past its hover lift (rest →
+    /// hover on the chip ladder): `.plain` faded it lighter instead.
+    @Test("a segment's press steps darker, never fades")
     func segmentPressKeepsTone() throws {
         let picker = try SourceScan.blankedSource(
             at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
@@ -74,7 +74,34 @@ struct ButtonChipStyleTests {
                     + "SegmentedPicker.swift"
             )
         )
-        #expect(picker.contains(".buttonStyle(SegmentPressStyle())"))
+        let squashed = picker.split(whereSeparator: \.isWhitespace)
+            .joined()
+        #expect(
+            squashed.contains(
+                "SegmentPressStyle(presses:isEnabled&&!selected)"
+            )
+        )
+        #expect(
+            squashed.contains(
+                "presses&&configuration.isPressed?SettingsTheme.chipHover"
+            )
+        )
         #expect(!picker.contains(".buttonStyle(.plain)"))
+    }
+
+    /// The chip keeps the system bezel's rounded rectangle, never
+    /// a capsule (owner, 2026-10-17): fill, edge and hit shape are
+    /// the one `shape`.
+    @Test("the button chip is a rounded rectangle")
+    func roundedRectangle() throws {
+        let face = try SourceScan.blankedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Settings/ButtonChipStyle.swift"
+            )
+        )
+        #expect(!face.contains("Capsule("))
+        #expect(face.contains("RoundedRectangle("))
+        #expect(face.contains("shape.fill("))
+        #expect(face.contains("shape.strokeBorder("))
     }
 }
