@@ -87,12 +87,6 @@ extension SettingsModel {
         return outcome
     }
 
-    /// Every unsaved leaf, for Keep All: a leaf no row narrates is
-    /// kept with the rest.
-    var liveKeepIDs: [String] {
-        (unsavedLive?.leaves.keys).map { Array($0).sorted() } ?? []
-    }
-
     /// Asks Core again — the one writer of `unsavedLive` and
     /// `liveUnsaved`. Owed wherever the live settings or the
     /// draft's baseline can have moved: the seed, a window-key

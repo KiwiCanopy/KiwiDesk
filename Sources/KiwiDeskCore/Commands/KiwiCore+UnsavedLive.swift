@@ -78,9 +78,11 @@ extension KiwiCore {
     /// `keep_settings` does (#2368); ids come from `leaves`.
     @discardableResult
     public func keepUnsavedLive(_ ids: [String]) -> LiveKeepOutcome {
-        let paths = ids.compactMap(KeepPointer.path(_:))
-        let outcome = keep(paths: paths)
         var refused: [String: NotKeepable] = [:]
+        for id in ids where KeepPointer.path(id) == nil {
+            refused[id] = .notWritten
+        }
+        let outcome = keep(paths: ids.compactMap(KeepPointer.path(_:)))
         for leaf in outcome.refused {
             refused[leaf.id] = leaf.notKeepable ?? .notWritten
         }

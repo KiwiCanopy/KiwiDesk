@@ -2,21 +2,23 @@ import KiwiDeskCore
 import SwiftUI
 
 /// What the pill's live rows may keep into the live profile
-/// (#2368): its name for the sentences, every unsaved leaf for
-/// Keep All, the keep itself, and the leaves the last keep refused.
+/// (#2368): its name for the sentences, the keep itself, and the
+/// leaves the last keep refused.
 @MainActor
 struct LiveKeep {
     let profile: String
-    let allIDs: [String]
     let refusals: [String: NotKeepable]
     let perform: ([String]) -> LiveKeepOutcome?
 
     /// Keeps `ids` and speaks the outcome once: a kept row leaves
     /// the list silently and a refusal draws under a row, so the
-    /// sentence is VoiceOver's only feedback for either.
-    func keep(_ ids: [String]) {
-        guard let outcome = perform(ids) else { return }
+    /// sentence is VoiceOver's only feedback for either. Answers
+    /// whether every leaf was kept.
+    @discardableResult
+    func keep(_ ids: [String]) -> Bool {
+        guard let outcome = perform(ids) else { return false }
         _ = DelayedAnnouncement.schedule(sentence(for: outcome))
+        return outcome.refused.isEmpty
     }
 
     private func sentence(for outcome: LiveKeepOutcome) -> String {
@@ -67,14 +69,16 @@ struct LiveKeepButton: View {
     }
 }
 
-/// The live section's Keep All: every unsaved leaf, folded rows
-/// and any leaf no row narrates included (#2368).
+/// The live section's Keep All: every listed live row, folded
+/// rows included, never a setting the draft edits, whose row is
+/// the draft's (#2368).
 struct LiveKeepAllButton: View {
+    let rows: [SettingsDiffRow]
     let keep: LiveKeep
 
     var body: some View {
         Button(L("diff.live.keep_all", "Keep All")) {
-            keep.keep(keep.allIDs)
+            keep.keep(Array(Set(rows.flatMap(\.keepIDs))).sorted())
         }
         .settingsActionButton()
         .controlSize(.small)

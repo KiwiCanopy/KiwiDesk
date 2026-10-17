@@ -37,7 +37,7 @@ struct SettingsDiffRowsView: View {
                 Spacer(minLength: 8)
                 // One row's Keep is the whole list's (#2368).
                 if let keep, live.count > 1 {
-                    LiveKeepAllButton(keep: keep)
+                    LiveKeepAllButton(rows: live, keep: keep)
                 }
             }
             .padding(.top, live.count == rows.count ? 0 : 8)
@@ -103,17 +103,20 @@ struct SettingsDiffRowsView: View {
         }
     }
 
-    /// Keeps one row; a keyboard press hands focus to the
-    /// neighbouring row's Keep, read before the row leaves (#816).
+    /// Keeps one row; where the row leaves under a keyboard press,
+    /// focus moves to the neighbouring row's Keep, read before the
+    /// row goes (#816). The last row's leaving empties the popover,
+    /// whose close hands focus back to the pill.
     private func keepRow(
         _ row: SettingsDiffRow,
         among shown: [SettingsDiffRow],
         with keep: LiveKeep
     ) {
         let next = DeletionFocus.neighbour(after: row, in: shown)
-        keep.keep(row.keepIDs)
-        guard SettingsInputSource.movesFocus else { return }
-        focusedKeep = next?.id
+        guard keep.keep(row.keepIDs), SettingsInputSource.movesFocus,
+            let next
+        else { return }
+        focusedKeep = next.id
     }
 
     private func rowButton(_ row: SettingsDiffRow) -> some View {

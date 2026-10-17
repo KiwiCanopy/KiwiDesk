@@ -165,7 +165,6 @@ struct SettingsLiveKeepTests {
         )
         let keep = LiveKeep(
             profile: "Odd",
-            allIDs: [],
             refusals: model.liveKeepRefusals
         ) { _ in nil }
         #expect(keep.refusal(for: stays) != nil)
@@ -184,17 +183,28 @@ struct SettingsLiveKeepTests {
         #expect(source.contains("keep:liveKeep"))
         #expect(source.contains("guardmodel.target==.live"))
         #expect(source.contains("model.keepLive(ids)"))
-        #expect(source.contains("allIDs:model.liveKeepIDs"))
         let list = try SourceScan.blankedSource(
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(
                     "Sources/KiwiDesk/Settings/SettingsDiffRowsView.swift"
                 )
         ).split(whereSeparator: \.isWhitespace).joined()
-        #expect(list.contains("LiveKeepButton(row:row,keep:keep)"))
         #expect(
             list.contains(
-                "ifletkeep,live.count>1{LiveKeepAllButton(keep:keep)"
+                "LiveKeepButton(row:row,keep:keep){"
+                    + "keepRow(row,among:shown,with:keep)}"
+            )
+        )
+        #expect(
+            list.contains(
+                "guardkeep.keep(row.keepIDs),"
+                    + "SettingsInputSource.movesFocus,letnext"
+            )
+        )
+        #expect(
+            list.contains(
+                "ifletkeep,live.count>1{"
+                    + "LiveKeepAllButton(rows:live,keep:keep)"
             )
         )
     }
