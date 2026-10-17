@@ -89,7 +89,6 @@ struct UpdateSpotlightRow: View {
                 Button(action: link) {
                     HStack(spacing: 3) {
                         Text(UpdateSpotlightWords.showMe)
-                            .foregroundStyle(SettingsTheme.ink)
                         Image(systemName: "chevron.right")
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(SettingsTheme.ink3)
@@ -97,7 +96,7 @@ struct UpdateSpotlightRow: View {
                     .font(.system(size: 12.5, weight: .medium))
                 }
                 .buttonStyle(.plain)
-                .pointingHandCursor()
+                .linkHover()
             }
         }
         .accessibilityElement(children: .ignore)

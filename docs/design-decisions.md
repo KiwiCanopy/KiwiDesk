@@ -11495,6 +11495,28 @@ follows the selection only. `JumpHoverTests` holds the rule.
 :::
 
 :::unreleased
+**[Trade-off] A searchable dropdown's pointer and keys share one
+cursor (owner ruling 2026-10-17).** The font family picker, the
+app picker and the header search draw one highlight, solid
+accent, moved by ↑/↓ and by the pointer alike, as a native menu's
+is. KiwiHub keeps the two apart because its footer, its hints and
+its ⌘ shortcuts read the selection. In these lists nothing but
+Return reads the cursor, so a pointer that moves it changes only
+what Return picks, and a grey lift beside it would be a second,
+near-identical state to tell apart. The cost of a shared cursor is
+a row taking it under a resting hand, so the pointer moves it only
+when its location changed since a row or a key last heard it, the
+rule #2229 gave KiwiHub: the list opening under the pointer, a
+re-filter or a scroll takes nothing, and every key, query edit and
+Return re-records where the pointer rests. Unlike a menu, leaving
+the list keeps the cursor, so Return always has a target, and the
+pointer never scrolls the list. The stored family's ✓ stays a
+mark of its own, inked to read on the accent, and `.isSelected`
+stays on it (#1173). `DropdownCursorTests` holds the rule and
+`DropdownCursorWiringTests` the three lists' routing.
+:::
+
+:::unreleased
 **The ⌃⌥L side is View: one chord reaches every daily switch
 (#2309, owner ruling 2026-10-15).** #2229 and #2246 admitted a
 side for its search alone. The layout, the profile and KiwiVision

@@ -12,21 +12,9 @@ struct ScopeChip: View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(
-                    isOn
-                        ? SettingsTheme.plateInk
-                        : SettingsTheme.ink2
-                )
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(
-                    RoundedRectangle(cornerRadius: 7)
-                        .fill(
-                            isOn
-                                ? SettingsTheme.previewPlate
-                                : SettingsTheme.sunken
-                        )
-                )
+                .choiceChip(selected: isOn)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)

@@ -18,6 +18,7 @@ struct LayoutCycleList: View {
     @State private var dragged: LayoutMode?
     @State private var rowFrames: [LayoutMode: CGRect] = [:]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.controlActiveState) private var activeState
 
     private static let listSpace = "layoutCycleList"
 
@@ -60,24 +61,56 @@ struct LayoutCycleList: View {
         picked.flatMap { model.config.modeCycle.contains($0) ? $0 : nil }
     }
 
+    /// Whether the list holds keyboard focus in the key window — a
+    /// click selects without it, so the accent row is the
+    /// keyboard's alone, and focus outlives the window resigning.
+    private var listFocused: Bool {
+        focused != nil && activeState == .key
+    }
+
+    /// The selected row is the accent while the list holds focus
+    /// and the grey selection otherwise, as a macOS list draws it.
+    private func rowFill(_ mode: LayoutMode) -> Color {
+        guard selected == mode else { return .clear }
+        return listFocused ? SettingsTheme.accent : SettingsTheme.rowSelected
+    }
+
     private func item(_ mode: LayoutMode) -> some View {
-        HStack(spacing: 8) {
+        let onAccent = selected == mode && listFocused
+        return HStack(spacing: 8) {
             handle(mode)
             Image(systemName: mode.symbol)
                 .frame(width: 18)
-                .foregroundStyle(SettingsTheme.ink2)
+                .foregroundStyle(
+                    onAccent
+                        ? SettingsTheme.accentInkSecondary
+                        : SettingsTheme.ink2
+                )
                 .accessibilityHidden(true)
             Text(mode.displayName)
-                .foregroundStyle(SettingsTheme.ink)
+                .foregroundStyle(
+                    onAccent ? SettingsTheme.accentInk : SettingsTheme.ink
+                )
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
-        .background(
-            selected == mode ? SettingsTheme.rowSelected : Color.clear
-        )
+        // The pointer's lift, a fill apart from the selection's
+        // (#1173); the selected row, whose click changes nothing,
+        // stays flat.
+        .rowHoverHighlight(lifts: selected != mode, cornerRadius: 0)
+        .background(rowFill(mode))
         .contentShape(Rectangle())
-        .onTapGesture { picked = mode }
+        // A click always lands grey: focus a click kept — the row
+        // already focused, or one the focus refusal missed — is
+        // cleared on a MOUSE tap alone, so VoiceOver's press keeps
+        // its focus (#991).
+        .onTapGesture {
+            picked = mode
+            if ClickBornFocus.isClickBorn(focusMayBeADescendant: false) {
+                focused = nil
+            }
+        }
         .focusable()
         .focused($focused, equals: mode)
         .onDeleteCommand { remove(mode) }
@@ -124,6 +157,7 @@ struct LayoutCycleList: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(SettingsTheme.ink2)
+            .iconHoverChip(padding: 0)
             .disabled(selected == nil || !model.modeCycleCanRemove)
             .help(LayoutCycleWords.remove)
             Spacer(minLength: 0)
@@ -153,6 +187,7 @@ struct LayoutCycleList: View {
         .neutralMenuLabel()
         .menuIndicator(.hidden)
         .fixedSize()
+        .iconHoverChip()
         .disabled(model.modeCycleAddable.isEmpty)
         .help(LayoutCycleWords.add)
     }
@@ -174,7 +209,11 @@ struct LayoutCycleList: View {
     /// changes use `set()`, never push/pop (gui.md).
     private func handle(_ mode: LayoutMode) -> some View {
         Image(systemName: "line.3.horizontal")
-            .foregroundStyle(SettingsTheme.ink2)
+            .foregroundStyle(
+                selected == mode && listFocused
+                    ? SettingsTheme.accentInkSecondary
+                    : SettingsTheme.ink2
+            )
             .frame(width: 20, height: 22)
             .contentShape(Rectangle())
             .help(LayoutCycleWords.dragHelp)

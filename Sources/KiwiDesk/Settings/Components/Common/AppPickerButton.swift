@@ -4,6 +4,9 @@ import SwiftUI
 
 /// Searchable app picker button and popover (#263, `IconPicker`,
 /// `AppSelector`, `appMenu`, `AppRef`, `AppIconCache`, `InstalledApp`).
+/// ↑/↓ and real pointer motion move one cursor over the rows and
+/// the escape (`DropdownCursor`, `AppPickerButton+Cursor`); Return
+/// picks it.
 struct AppPickerButton: View {
     /// Shown on the trigger when nothing is chosen yet.
     let placeholder: String
@@ -25,23 +28,28 @@ struct AppPickerButton: View {
     @State private var showing = false
     @State private var search = ""
     @State private var onScreenApps: [OnScreenApp] = []
+    @State var cursor = DropdownCursor<AppPickerSlot>()
+    /// Where the list scrolls — set by the keyboard alone, so the
+    /// pointer never scrolls the list out from under itself.
+    @State var scrollTarget: AppPickerSlot?
     @FocusState private var searchFocused: Bool
 
     var body: some View {
         Button {
             showing = true
         } label: {
+            // Hugs the name, as a native pop-up does: no spacer in
+            // the label, the chevron right after the name.
             HStack(spacing: 4) {
                 Text(selection ?? placeholder)
                     .lineLimit(1)
-                Spacer(minLength: 4)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
             .frame(minWidth: minWidth, alignment: .leading)
         }
-        .settingsActionButton()
+        .settingsPopUpTrigger()
         .controlSize(.large)
         .onAppear {
             AppIconCache.shared.warm()
@@ -61,7 +69,10 @@ struct AppPickerButton: View {
         // on-screen apps are read at the opening one.
         .onChange(of: showing) { _, isShowing in
             if !isShowing { search = "" }
-            if isShowing { onScreenApps = onScreen?() ?? [] }
+            if isShowing {
+                onScreenApps = onScreen?() ?? []
+                opened()
+            }
         }
     }
 
@@ -78,12 +89,21 @@ struct AppPickerButton: View {
             )
             .textFieldStyle(.roundedBorder)
             .focused($searchFocused)
-            .onSubmit { pickFirst(lists) }
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    sectionsBody(lists)
+            .onSubmit { commit(lists) }
+            .onKeyPress(.downArrow) { move(1, in: lists) }
+            .onKeyPress(.upArrow) { move(-1, in: lists) }
+            .onChange(of: search) { _, _ in searched() }
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        sectionsBody(lists)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .onChange(of: scrollTarget) { _, slot in
+                    guard let id = slot?.rowID else { return }
+                    proxy.scrollTo(id)
+                }
             }
             Divider()
             escapeRow
@@ -93,7 +113,7 @@ struct AppPickerButton: View {
         .onAppear { searchFocused = true }
     }
 
-    private var sections: (onScreen: [OnScreenApp], all: [InstalledApp]) {
+    var sections: (onScreen: [OnScreenApp], all: [InstalledApp]) {
         AppPickerSections.lists(
             onScreen: onScreenApps,
             installed: KeybindingCatalog.installedAppsSnapshot,
@@ -119,9 +139,12 @@ struct AppPickerButton: View {
         if !lists.onScreen.isEmpty {
             section(Self.onScreenTitle, headed: both) {
                 ForEach(lists.onScreen, id: \.key) { app in
+                    let slot = AppPickerSlot.onScreen(app.key)
                     AppPickerRow(
                         name: app.name,
-                        bundleID: app.bundleID
+                        bundleID: app.bundleID,
+                        onCursor: cursor.highlighted == slot,
+                        onPoint: { hover(slot) }
                     ) {
                         pick(.init(bundleID: app.key, name: app.name))
                     }
@@ -131,7 +154,13 @@ struct AppPickerButton: View {
         if !lists.all.isEmpty {
             section(Self.allTitle, headed: both) {
                 ForEach(lists.all) { app in
-                    AppPickerRow(name: app.name, bundleID: app.bundleID) {
+                    let slot = AppPickerSlot.installed(app.bundleID)
+                    AppPickerRow(
+                        name: app.name,
+                        bundleID: app.bundleID,
+                        onCursor: cursor.highlighted == slot,
+                        onPoint: { hover(slot) }
+                    ) {
                         pick(app)
                     }
                 }
@@ -167,20 +196,9 @@ struct AppPickerButton: View {
         L("app_picker.section.all", "All apps")
     }
 
-    private func pick(_ app: InstalledApp) {
+    func pick(_ app: InstalledApp) {
         onPick(app)
         showing = false
-    }
-
-    /// Return picks the first row the search left.
-    private func pickFirst(
-        _ lists: (onScreen: [OnScreenApp], all: [InstalledApp])
-    ) {
-        if let first = lists.onScreen.first {
-            pick(.init(bundleID: first.key, name: first.name))
-        } else if let first = lists.all.first {
-            pick(first)
-        }
     }
 
     /// The Tile picker's list (#2071): no search over a short list,
@@ -193,7 +211,9 @@ struct AppPickerButton: View {
                 onPick: { app in
                     onPick(app)
                     showing = false
-                }
+                },
+                cursor: cursor.highlighted.flatMap(\.installedID),
+                onPoint: { hover(.installed($0)) }
             )
             Divider()
             Text(GuessedAppRows.hint)
@@ -208,21 +228,25 @@ struct AppPickerButton: View {
     }
 
     private var escapeRow: some View {
-        Button {
-            showing = false
-            DispatchQueue.main.async { onEscape() }
-        } label: {
+        let onCursor = cursor.highlighted == .escape
+        return Button(action: escape) {
             HStack(spacing: 8) {
                 Image(systemName: "ellipsis.circle")
                     .frame(width: AppIconCache.side)
                 Text(escapeLabel)
                 Spacer()
             }
+            .foregroundStyle(DropdownRowStyle.ink(onCursor))
             .contentShape(Rectangle())
             .padding(.vertical, 3)
         }
         .buttonStyle(.plain)
-        .rowHoverHighlight()
+        .dropdownCursorRow(onCursor) { hover(.escape) }
+    }
+
+    func escape() {
+        showing = false
+        DispatchQueue.main.async { onEscape() }
     }
 }
 

@@ -72,35 +72,12 @@ struct SpacesPanelPreview: View {
     }
 
     private func chip(_ candidate: SpaceID) -> some View {
-        let isOn = candidate == space
-        return Button {
+        SpacePreviewChip(
+            title: candidate.raw,
+            isOn: candidate == space
+        ) {
             pick(candidate)
-        } label: {
-            Text(candidate.raw)
-                .font(.caption)
-                .fontWeight(.medium)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(
-                    Capsule()
-                        .fill(
-                            SettingsTheme.accent
-                                .opacity(isOn ? 0.22 : 0.08)
-                        )
-                )
-                .overlay(
-                    Capsule().strokeBorder(
-                        SettingsTheme.accent
-                            .opacity(isOn ? 0.7 : 0.25),
-                        lineWidth: isOn ? 1.5 : 1
-                    )
-                )
-                .foregroundStyle(SettingsTheme.ink)
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(
-            isOn ? [.isButton, .isSelected] : .isButton
-        )
     }
 
     // MARK: - The scene
@@ -227,5 +204,28 @@ struct SpacesPanelPreview: View {
                 .font(.caption.monospacedDigit())
                 .settingsReadout()
         }
+    }
+}
+
+/// One Space's chip in the preview's row: a choice chip, lifting
+/// under the pointer and washed with the accent while shown.
+private struct SpacePreviewChip: View {
+    let title: String
+    let isOn: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.caption)
+                .fontWeight(.medium)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .choiceChip(selected: isOn)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(
+            isOn ? [.isButton, .isSelected] : .isButton
+        )
     }
 }

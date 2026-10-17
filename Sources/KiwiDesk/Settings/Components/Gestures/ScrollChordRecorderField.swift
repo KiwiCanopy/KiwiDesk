@@ -61,7 +61,9 @@ struct ScrollChordRecorderField: View {
         .controlSize(.regular)
         .tint(buttonTint)
         .foregroundStyle(buttonTint)
-        .modifier(RecorderButtonChrome(recording: recording))
+        .modifier(
+            RecorderButtonChrome(recording: recording, flashing: flashing)
+        )
         .help(Self.recordHelp)
         .accessibilityLabel(name)
         .accessibilityValue(spokenValue)

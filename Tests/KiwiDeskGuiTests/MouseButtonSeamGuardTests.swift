@@ -71,6 +71,10 @@ struct MouseButtonSeamGuardTests {
         // The pointer rest's location at a rest (#1869), read
         // only after a monitor both twins pin inert delivered a move.
         "PointerRest.swift",
+        // A searchable dropdown's cursor moves on a real pointer
+        // move (owner ruling 2026-10-17); `DropdownCursorTests`
+        // hands the model its pointer.
+        "DropdownCursor.swift",
     ]
 
     @Test("the live pointer read stays in its seam homes")

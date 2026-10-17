@@ -42,7 +42,7 @@ struct ConflictRowTreatmentTests {
         ],
         "Recorder/KeyRecorderField.swift": [
             // The chrome is handed the flag…
-            "RecorderButtonChrome(recording:recording,dead:isDead)",
+            "RecorderButtonChrome(recording:recording,dead:isDead,",
             // …the caption is mounted under the field…
             "clearButton}deadCaption",
             // …and the tier and its sentence arrive as ONE

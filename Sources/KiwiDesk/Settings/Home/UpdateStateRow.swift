@@ -112,6 +112,7 @@ struct UpdateStateRow: View {
                 .font(.system(size: 11, weight: .medium))
         }
         .buttonStyle(.borderless)
+        .iconHoverChip()
         .foregroundStyle(SettingsTheme.ink2)
         .help(label)
         .accessibilityLabel(label)
@@ -139,6 +140,7 @@ struct UpdateStateRow: View {
                 .font(.system(size: 11, weight: .medium))
         }
         .buttonStyle(.borderless)
+        .iconHoverChip()
         .foregroundStyle(enabled ? SettingsTheme.ink2 : SettingsTheme.ink3)
         .disabled(!enabled)
         .help(enabled ? label : why)

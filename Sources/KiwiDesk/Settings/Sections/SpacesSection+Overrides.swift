@@ -66,10 +66,13 @@ extension SpacesSection {
                 returningRow = space
                 model.nav.spaceOverridesFocus = nil
             } label: {
+                // Inside the label, so its ink lift outranks the
+                // neutral label's ink below.
                 Label(
                     SettingsDestination.spaces.title,
                     systemImage: "chevron.backward"
                 )
+                .linkHover()
             }
             .focused($overridesBackFocused)
             .buttonStyle(.borderless)

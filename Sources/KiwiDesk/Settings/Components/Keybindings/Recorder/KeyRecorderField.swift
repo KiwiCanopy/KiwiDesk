@@ -105,7 +105,11 @@ struct KeyRecorderField: View {
         .tint(buttonTint)
         .foregroundStyle(buttonTint)
         .modifier(
-            RecorderButtonChrome(recording: recording, dead: isDead)
+            RecorderButtonChrome(
+                recording: recording,
+                dead: isDead,
+                flashing: flashing
+            )
         )
         // Dim, never disable: re-recording is how a row leaves
         // Hyper (#1870, `keybindingRowStyle`'s rule).

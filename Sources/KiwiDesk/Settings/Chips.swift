@@ -85,17 +85,35 @@ enum ChoiceChip {
 }
 
 extension View {
-    /// Paints a choice chip's capsule behind the label; `hovering`
-    /// arrives already gated on `isEnabled`.
+    /// Paints a choice chip's capsule behind the label and owns its
+    /// hover, as `HoverChip` does: a disabled chip never lifts, and
+    /// under Reduce Motion the lift is immediate.
     func choiceChip(
         selected: Bool = false,
-        hovering: Bool,
         edged: Bool = true
     ) -> some View {
-        foregroundStyle(SettingsTheme.ink)
+        modifier(ChoiceChipSurface(selected: selected, edged: edged))
+    }
+}
+
+/// The one home of a choice chip's surface and hover state.
+private struct ChoiceChipSurface: ViewModifier {
+    let selected: Bool
+    let edged: Bool
+    @State private var hovering = false
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(SettingsTheme.ink)
             .background(
                 Capsule().fill(
-                    ChoiceChip.fill(selected: selected, hovering: hovering)
+                    ChoiceChip.fill(
+                        selected: selected,
+                        hovering: hovering && isEnabled
+                    )
                 )
             )
             .overlay {
@@ -105,6 +123,14 @@ extension View {
                         lineWidth: 1
                     )
                 }
+            }
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: hovering
+            )
+            .onHover { hovering = isEnabled && $0 }
+            .onChange(of: isEnabled) { _, now in
+                if !now { hovering = false }
             }
     }
 }

@@ -42,3 +42,47 @@ enum AppPickerSections {
         )
     }
 }
+
+/// A row the app picker's cursor can sit on: an app in either
+/// section, or the escape pinned below them.
+enum AppPickerSlot: Hashable {
+    case onScreen(String)
+    case installed(String)
+    case escape
+
+    typealias Lists = (
+        onScreen: [OnScreenApp],
+        all: [KeybindingCatalog.InstalledApp]
+    )
+
+    /// The cursor's sequence over `lists`, in drawn order: on
+    /// screen, all apps, then the escape, which ↓ past the last
+    /// app reaches.
+    static func sequence(of lists: Lists) -> [AppPickerSlot] {
+        lists.onScreen.map { .onScreen($0.key) }
+            + lists.all.map { .installed($0.bundleID) } + [.escape]
+    }
+
+    /// Where the cursor starts: the first app, nil for none — the
+    /// escape is reached by a key or the pointer, never seeded.
+    static func firstApp(of lists: Lists) -> AppPickerSlot? {
+        sequence(of: lists).first { $0 != .escape }
+    }
+
+    /// The identity its row's `ForEach` gives it, which
+    /// `ScrollViewProxy.scrollTo` reaches; nil for the escape,
+    /// which sits outside the list.
+    var rowID: String? {
+        switch self {
+        case .onScreen(let key): return key
+        case .installed(let id): return id
+        case .escape: return nil
+        }
+    }
+
+    /// The bundle id of an installed app's row, nil otherwise.
+    var installedID: String? {
+        if case .installed(let id) = self { return id }
+        return nil
+    }
+}
