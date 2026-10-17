@@ -61,17 +61,23 @@ struct JumpClickWiringTests {
         )
     }
 
-    /// Each view draws its lift on `isLifted` and nothing else. The
-    /// radius in the run is glue that keeps the needle contiguous.
+    /// Each view draws its lift on `isLifted` and nothing else.
     @Test("each view draws the lift on its flag")
     func viewsDrawTheLift() throws {
-        let fill =
-            "}elseifisLifted{RoundedRectangle(cornerRadius:"
-            + "KeyPanelStyle.selectionRadius,style:.continuous)"
-            + ".fill(SettingsTheme.chipRest)"
         for file in ["JumpRowView.swift", "JumpLayoutTile.swift"] {
             let source = try Self.squashed(file)
-            #expect(source.occurrences(of: fill) == 1, "\(file)")
+            let branch = source.range(of: "}elseifisLifted{")
+            let fill = source.range(of: ".fill(SettingsTheme.chipRest)")
+            #expect(source.occurrences(of: "}elseifisLifted{") == 1)
+            #expect(
+                source.occurrences(of: ".fill(SettingsTheme.chipRest)") == 1
+            )
+            #expect(
+                (branch?.upperBound).map { b in
+                    fill.map { $0.lowerBound > b } ?? false
+                } ?? false,
+                "\(file)"
+            )
         }
         let chip = try Self.squashed("ViewChip.swift")
         #expect(

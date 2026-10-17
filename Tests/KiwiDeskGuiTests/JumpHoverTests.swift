@@ -13,7 +13,7 @@ import Testing
 @MainActor
 struct JumpHoverTests {
     private func model() -> JumpModel {
-        JumpModel(
+        let model = JumpModel(
             snapshot: JumpSnapshot(
                 entries: [
                     JumpListTests.row(1, "Mail", "Inbox"),
@@ -26,6 +26,8 @@ struct JumpHoverTests {
             rowCap: 8,
             pointer: CGPoint(x: 10, y: 10)
         )
+        model.currentPointer = { CGPoint(x: 10, y: 10) }
+        return model
     }
 
     @Test("a moved pointer lifts without selecting, a still one lifts none")
