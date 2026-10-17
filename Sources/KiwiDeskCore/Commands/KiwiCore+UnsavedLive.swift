@@ -18,7 +18,7 @@ public struct UnsavedLiveSettings: Equatable {
     public init(
         saved: TilingSettings,
         live: TilingSettings,
-        leaves: [String: TilingSettings] = [:]
+        leaves: [String: TilingSettings]
     ) {
         self.saved = saved
         self.live = live
@@ -76,26 +76,25 @@ extension KiwiCore {
 
     /// Keeps the named unsaved leaves into the live profile, as
     /// `keep_settings` does (#2368); ids come from `leaves`.
-    /// Answers the ids it could not keep, with the reason.
     @discardableResult
-    public func keepUnsavedLive(_ ids: [String]) -> [String: NotKeepable] {
-        let answer = keepSettings(ids.map(JSONValue.string))
-        guard answer.isSuccess else {
-            return Dictionary(
-                ids.map { ($0, .notWritten) },
-                uniquingKeysWith: { first, _ in first }
-            )
+    public func keepUnsavedLive(_ ids: [String]) -> LiveKeepOutcome {
+        let paths = ids.compactMap(KeepPointer.path(_:))
+        let outcome = keep(paths: paths)
+        var refused: [String: NotKeepable] = [:]
+        for leaf in outcome.refused {
+            refused[leaf.id] = leaf.notKeepable ?? .notWritten
         }
-        guard case .object(let map)? = answer.data,
-            case .array(let refused)? = map["not_keepable"]
-        else { return [:] }
-        var reasons: [String: NotKeepable] = [:]
-        for case .object(let leaf) in refused {
-            guard let id = leaf["id"]?.stringValue else { continue }
-            reasons[id] =
-                leaf["not_keepable"]?.stringValue
-                .flatMap(NotKeepable.init(rawValue:)) ?? .notWritten
-        }
-        return reasons
+        return LiveKeepOutcome(
+            refused: refused,
+            sharedLook: outcome.kept.contains { $0.owner == .sharedLook }
+        )
     }
+}
+
+/// What a Settings Keep did (#2368): the leaves it could not write,
+/// by keep id, and whether a kept leaf landed in the shared look,
+/// which every profile wearing it then carries.
+public struct LiveKeepOutcome: Equatable {
+    public let refused: [String: NotKeepable]
+    public let sharedLook: Bool
 }

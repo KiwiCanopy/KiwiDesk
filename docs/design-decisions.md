@@ -7105,15 +7105,9 @@ each row's **Keep**, and **Keep All** once the section lists more
 than one, write exactly the leaves that row narrates through the
 same `keep_settings` judgement, so keeping one layout's value
 never keeps its sibling's, and a leaf the keep cannot write stays
-listed with the reason under it.
-
-A per-layout App Bar indicator survives wearing the shared look
-(#2368, owner ruling 2026-10-17). Picking a look clears it, since
-the pick says "draw the look's indicator"; following the shared
-look is no pick, and clearing it there made the stored value
-unreadable to the keep judgement — the row survived every Save.
-So `LookBody.worn(over:)` keeps it and `painted(over:)`, the
-explicit pick, clears it. Closing Settings reverts
+listed with the reason under it. A per-layout App Bar indicator on a
+profile wearing the shared look keeps like any other leaf (▸
+*Profiles share one look*). Closing Settings reverts
 nothing live and never asks the leave question: these are not the
 window's edits. A setting the draft also edits is the draft's row
 alone, since that edit is what its Save commits. Undoing a live row means
@@ -15043,6 +15037,21 @@ never did. A restore takes the bundle's shared look ahead of the
 `gui.json` write that stamps it; a bundle from before carries
 none, its step stamps its profiles own, and the crossing is owed
 again and elects among them, the shape #1741's crossing takes.
+
+:::unreleased
+**Wearing the shared look keeps a per-layout App Bar indicator;
+only picking a look clears it (#2368).** A pick says "draw this
+look's indicator", so it clears the per-layout ones that would
+hide it, for the profile whose settings it paints. Following the
+shared look is no pick. Clearing there made a follower's stored
+per-layout indicator unreadable — the keep judgement reads a
+follower's settings with the shared look worn over them — so a
+"Live, not saved" row for one survived every Save and Keep, and
+the next shared-look write stripped the value from the file. The
+leaves are one list, `TilingSettings.layoutIndicatorLeaves`,
+which the pick clears, the tour's undo restores and the wear keeps
+(`SettingsLiveFollowerTests`).
+:::
 
 :::unreleased
 **Motion shares the look so it travels between profiles, but a

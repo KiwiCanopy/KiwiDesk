@@ -75,23 +75,22 @@ struct SettingsLiveFollowerTests {
             SettingsDiffRowSource.rows(for: model)
                 .first { $0.section == .live }
         )
-        #expect(model.keepLive(row.keepIDs))
+        let outcome = model.keepLive(row.keepIDs)
+        #expect(outcome?.refused.isEmpty == true)
         #expect(!model.liveUnsaved)
     }
 
-    @Test("a picked look still clears the per-layout indicator")
+    @Test("wearing keeps every per-layout indicator, a pick clears")
     func pickClears() {
-        var settings = TilingSettings()
-        settings.monocle.appBar.activeIndicator = .edgeMark
         let look = LookBody(of: TilingSettings())
-        #expect(
-            look.worn(over: settings).monocle.appBar.activeIndicator
-                == .edgeMark
-        )
-        #expect(look.isWorn(by: settings))
-        #expect(
-            look.painted(over: settings).monocle.appBar.activeIndicator
-                == nil
-        )
+        for leaf in TilingSettings.layoutIndicatorLeaves {
+            var settings = TilingSettings()
+            settings[keyPath: leaf] = .edgeMark
+            #expect(look.worn(over: settings)[keyPath: leaf] == .edgeMark)
+            #expect(look.isWorn(by: settings))
+            var picked = settings
+            look.named("").admitted.apply(to: &picked)
+            #expect(picked[keyPath: leaf] == nil)
+        }
     }
 }

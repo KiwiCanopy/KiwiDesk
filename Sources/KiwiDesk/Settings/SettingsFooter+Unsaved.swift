@@ -144,6 +144,7 @@ extension SettingsFooter {
         else { return nil }
         return LiveKeep(
             profile: profile,
+            allIDs: model.liveKeepIDs,
             refusals: model.liveKeepRefusals
         ) { [model] ids in
             model.keepLive(ids)

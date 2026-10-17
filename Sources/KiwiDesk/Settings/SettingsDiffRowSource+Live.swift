@@ -76,15 +76,21 @@ extension SettingsModel {
     /// Keeps a live row's leaves into the live profile through
     /// Core's keep (#2368), then asks Core again; the write moves
     /// an open draft's baseline through `adoptLiveWrite`.
-    /// Answers whether every leaf was kept; the rest stay listed
-    /// with their reason in `liveKeepRefusals`.
+    /// Leaves it could not write stay listed with their reason in
+    /// `liveKeepRefusals`.
     @discardableResult
-    func keepLive(_ ids: [String]) -> Bool {
-        guard target == .live, !ids.isEmpty else { return false }
-        let refused = core.keepUnsavedLive(ids)
+    func keepLive(_ ids: [String]) -> LiveKeepOutcome? {
+        guard target == .live, !ids.isEmpty else { return nil }
+        let outcome = core.keepUnsavedLive(ids)
         refreshUnsavedLive()
-        liveKeepRefusals = refused
-        return refused.isEmpty
+        liveKeepRefusals = outcome.refused
+        return outcome
+    }
+
+    /// Every unsaved leaf, for Keep All: a leaf no row narrates is
+    /// kept with the rest.
+    var liveKeepIDs: [String] {
+        (unsavedLive?.leaves.keys).map { Array($0).sorted() } ?? []
     }
 
     /// Asks Core again — the one writer of `unsavedLive` and

@@ -11,6 +11,8 @@ struct SettingsDiffRowsView: View {
     /// The live section draws this many rows until opened (#2262).
     static let liveCap = 5
     @State private var showsAllLive = false
+    /// The live row whose Keep holds focus after a keep (#2368).
+    @FocusState private var focusedKeep: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -35,7 +37,7 @@ struct SettingsDiffRowsView: View {
                 Spacer(minLength: 8)
                 // One row's Keep is the whole list's (#2368).
                 if let keep, live.count > 1 {
-                    LiveKeepAllButton(rows: live, keep: keep)
+                    LiveKeepAllButton(keep: keep)
                 }
             }
             .padding(.top, live.count == rows.count ? 0 : 8)
@@ -43,7 +45,7 @@ struct SettingsDiffRowsView: View {
                 showsAllLive || live.count <= Self.liveCap + 1
                 ? live : Array(live.prefix(Self.liveCap))
             ForEach(shown) { row in
-                liveRow(row)
+                liveRow(row, among: shown)
             }
             if shown.count < live.count {
                 moreButton(hidden: live.count - shown.count)
@@ -70,12 +72,18 @@ struct SettingsDiffRowsView: View {
 
     /// A live row, with its Keep and any refusal under it.
     @ViewBuilder
-    private func liveRow(_ row: SettingsDiffRow) -> some View {
+    private func liveRow(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow]
+    ) -> some View {
         if let keep, !row.keepIDs.isEmpty {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     rowButton(row)
-                    LiveKeepButton(row: row, keep: keep)
+                    LiveKeepButton(row: row, keep: keep) {
+                        keepRow(row, among: shown, with: keep)
+                    }
+                    .focused($focusedKeep, equals: row.id)
                 }
                 if let refusal = keep.refusal(for: row) {
                     Label(refusal, systemImage: "exclamationmark.triangle")
@@ -86,13 +94,26 @@ struct SettingsDiffRowsView: View {
             .rowActions {
                 // A menu row: the style is the menu's.
                 Button(L("diff.live.keep", "Keep")) {
-                    keep.keep(row.keepIDs)
+                    keepRow(row, among: shown, with: keep)
                 }
                 .buttonStyle(.plain)
             }
         } else {
             rowButton(row)
         }
+    }
+
+    /// Keeps one row; a keyboard press hands focus to the
+    /// neighbouring row's Keep, read before the row leaves (#816).
+    private func keepRow(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow],
+        with keep: LiveKeep
+    ) {
+        let next = DeletionFocus.neighbour(after: row, in: shown)
+        keep.keep(row.keepIDs)
+        guard SettingsInputSource.movesFocus else { return }
+        focusedKeep = next?.id
     }
 
     private func rowButton(_ row: SettingsDiffRow) -> some View {

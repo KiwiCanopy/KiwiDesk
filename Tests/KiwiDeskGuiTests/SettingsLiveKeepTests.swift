@@ -90,7 +90,8 @@ struct SettingsLiveKeepTests {
         #expect(rows.count == 2)
         #expect(!border.keepIDs.isEmpty)
 
-        #expect(model.keepLive(border.keepIDs))
+        let kept = model.keepLive(border.keepIDs)
+        #expect(kept?.refused.isEmpty == true)
         let stored = try core.profiles.read(name: "Odd").settings
         #expect(stored.borderStyle.width == 9)
         #expect(stored.appBarStyle.titleCap != 12)
@@ -100,6 +101,46 @@ struct SettingsLiveKeepTests {
         #expect(left.count == 1)
         #expect(model.liveKeepRefusals.isEmpty)
         #expect(!model.isDirty)
+    }
+
+    /// A keep whose write cannot land leaves the row listed with
+    /// its reason, and answers it.
+    @Test("a refused keep stays listed with its reason")
+    func refusedKeepStays() throws {
+        LocalizationManager.shared.select("en")
+        let model = try makeModel()
+        let core = model.core
+        _ = core.execute("border.set_width", args: [.number(9)])
+        model.refreshOwner()
+        let row = try #require(
+            SettingsDiffRowSource.rows(for: model)
+                .first { $0.section == .live }
+        )
+        let file = core.configDirectory
+            .appendingPathComponent("profiles/Odd.json")
+        try FileManager.default.setAttributes(
+            [.immutable: true],
+            ofItemAtPath: file.path
+        )
+        defer {
+            try? FileManager.default.setAttributes(
+                [.immutable: false],
+                ofItemAtPath: file.path
+            )
+        }
+        let outcome = try #require(model.keepLive(row.keepIDs))
+        #expect(!outcome.refused.isEmpty)
+        #expect(!model.liveKeepRefusals.isEmpty)
+        let stays = try #require(
+            SettingsDiffRowSource.rows(for: model)
+                .first { $0.section == .live }
+        )
+        let keep = LiveKeep(
+            profile: "Odd",
+            allIDs: [],
+            refusals: model.liveKeepRefusals
+        ) { _ in nil }
+        #expect(keep.refusal(for: stays) != nil)
     }
 
     /// The pill offers Keep on the live target alone, through the
@@ -115,5 +156,18 @@ struct SettingsLiveKeepTests {
         #expect(source.contains("keep:liveKeep"))
         #expect(source.contains("guardmodel.target==.live"))
         #expect(source.contains("model.keepLive(ids)"))
+        #expect(source.contains("allIDs:model.liveKeepIDs"))
+        let list = try SourceScan.blankedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/SettingsDiffRowsView.swift"
+                )
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(list.contains("LiveKeepButton(row:row,keep:keep)"))
+        #expect(
+            list.contains(
+                "ifletkeep,live.count>1{LiveKeepAllButton(keep:keep)"
+            )
+        )
     }
 }

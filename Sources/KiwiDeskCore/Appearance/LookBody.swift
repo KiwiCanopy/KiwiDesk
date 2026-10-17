@@ -31,24 +31,15 @@ public struct LookBody: Codable, Sendable, Equatable {
     }
 
     /// `settings` wearing this look — `isWorn`'s pair (#1752).
-    /// A per-layout App Bar indicator stays: wearing is no pick,
-    /// and only `painted(over:)` clears it (#2368).
+    /// Wearing is no pick, so a per-layout App Bar indicator stays,
+    /// which a picked look (`ShelfLook.apply`) clears (#2368).
     public func worn(over settings: TilingSettings) -> TilingSettings {
-        var worn = painted(over: settings)
-        worn.monocle.appBar.activeIndicator =
-            settings.monocle.appBar.activeIndicator
-        worn.scrolling.appBar.activeIndicator =
-            settings.scrolling.appBar.activeIndicator
+        var worn = settings
+        named("").admitted.apply(to: &worn)
+        for leaf in TilingSettings.layoutIndicatorLeaves {
+            worn[keyPath: leaf] = settings[keyPath: leaf]
+        }
         return worn
-    }
-
-    /// `settings` with this look picked: the one copy of the paint,
-    /// which clears the per-layout indicators that would hide its
-    /// own.
-    public func painted(over settings: TilingSettings) -> TilingSettings {
-        var painted = settings
-        named("").admitted.apply(to: &painted)
-        return painted
     }
 
     /// Whether `settings` already wear this look — `isApplied`'s
@@ -56,8 +47,9 @@ public struct LookBody: Codable, Sendable, Equatable {
     /// left out as `worn(over:)` leaves it.
     public func isWorn(by settings: TilingSettings) -> Bool {
         var probe = settings
-        probe.monocle.appBar.activeIndicator = nil
-        probe.scrolling.appBar.activeIndicator = nil
+        for leaf in TilingSettings.layoutIndicatorLeaves {
+            probe[keyPath: leaf] = nil
+        }
         return named("").admitted.isApplied(to: probe)
     }
 
