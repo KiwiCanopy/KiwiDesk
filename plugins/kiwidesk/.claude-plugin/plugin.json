@@ -1,5 +1,6 @@
 {
   "name": "kiwidesk",
+  "displayName": "KiwiDesk",
   "description": "Set up and control the KiwiDesk tiling window manager by asking Claude.",
   "author": {
     "name": "Maikel Hajiabadi",
