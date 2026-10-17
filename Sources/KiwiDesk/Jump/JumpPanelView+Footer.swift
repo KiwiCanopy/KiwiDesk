@@ -116,7 +116,7 @@ struct JumpFooterRow<Leading: View, Trailing: View>: View {
     /// A row of buttons takes room around them; a row of captions
     /// alone stays as low as the captions.
     static func height(carriesControls: Bool) -> CGFloat {
-        carriesControls ? 40 : 28
+        carriesControls ? 31 : 28
     }
 
     var body: some View {
