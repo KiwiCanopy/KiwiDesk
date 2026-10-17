@@ -189,7 +189,7 @@ struct SegmentedPicker<Value: Hashable>: View {
                 index: index
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SegmentPressStyle())
         // Only the focus stop goes, to the track; click,
         // VoiceOver and `isEnabled` stay (#997).
         .focusable(false)
@@ -302,5 +302,14 @@ struct SegmentedPicker<Value: Hashable>: View {
     private var pill: some View {
         Capsule()
             .fill(SettingsTheme.accent)
+    }
+}
+
+/// A segment's button: `.plain` fades its label while pressed, which
+/// read lighter than the hover; the segment keeps its hover tone and
+/// the sliding pill is the press's feedback (#2377).
+private struct SegmentPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
     }
 }

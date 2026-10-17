@@ -1131,8 +1131,13 @@ number. The app rules row
 still drops a duplicate silently, and owes the same channel.
 
 **Hover confirms custom hit areas; it never creates the only
-affordance.** Native bordered/prominent buttons, sidebars,
-toggles, sliders, and fields keep system hover. Ambiguous
+affordance.** A bordered action button (`settingsActionButton()`,
+KiwiHub's footer buttons) is a button chip: `chipRest`, `chipHover`
+under the pointer, `chipPressed` while pressed, under a constant
+`chipEdge`, no animation, a disabled one not reacting (#2377). A
+prominent (accent-filled) button, a menu picker, a stepper, a
+checkbox, a toggle, a slider, a field and a sidebar keep system
+behaviour: their shape already says "control". Ambiguous
 icon-only borderless actions use the shared adaptive chip on
 hover only, resting as the bare glyph in `ink2` at a row's end
 (`iconHoverChip`) — the accent is a control fill's, not a
