@@ -27,6 +27,16 @@ public final class PointerRest {
     public var frontOwnWindow: @MainActor (Int) -> Void = { _ in }
     /// The focus now, read each time a move arms the dwell.
     var noteArm: (() -> WindowID?)?
+    /// The tracked windows whose frames hold a point (Cocoa screen
+    /// space), read from state on every move while a hold is taken
+    /// or owed — never a WindowServer read.
+    var windowsAt: ((CGPoint) -> Set<WindowID>)?
+    /// The windows under the pointer when the first move after a
+    /// focus change the pointer did not make arrived (owner ruling
+    /// 2026-10-17): a rest on one of them stands down until a move
+    /// lands outside all of them, so a nudge never takes the focus
+    /// back to the window the pointer was merely left over.
+    public private(set) var held: Set<WindowID> = []
     /// Installs the mouse-moved monitors, live in production and
     /// pinned inert by both `makeTestCore` twins as the scroll tap
     /// is (tests.md ▸ machine touch). A move delivered without a
@@ -48,6 +58,10 @@ public final class PointerRest {
     private var lastRest: CGPoint?
     private var lastMove: CGPoint?
     private var armedFocus: WindowID?
+    /// The focus as the last move or rest saw it; unknown until the
+    /// first, which takes no hold.
+    private var knownFocus: WindowID?
+    private var focusKnown = false
     private var timer: Task<Void, Never>?
 
     public init() {}
@@ -104,7 +118,26 @@ public final class PointerRest {
         }
         lastRest = nil
         armedFocus = noteArm?()
+        updateHold(at: point)
         arm(at: point)
+    }
+
+    /// Takes the hold at the first move after the focus moved
+    /// without a rest, and releases it once a move leaves every held
+    /// window — the hold is the window the pointer was left over,
+    /// or one that slid under it.
+    private func updateHold(at point: CGPoint) {
+        if !focusKnown {
+            focusKnown = true
+            knownFocus = armedFocus
+        } else if armedFocus != knownFocus {
+            knownFocus = armedFocus
+            held = windowsAt?(point) ?? []
+        } else if !held.isEmpty,
+            held.isDisjoint(with: windowsAt?(point) ?? [])
+        {
+            held = []
+        }
     }
 
     /// Starts the dwell from `point`. A re-arm keeps the focus the
@@ -135,6 +168,9 @@ public final class PointerRest {
         }
         lastRest = point
         onRest?(point, armedFocus)
+        // A rest that moved the focus moved it on purpose.
+        knownFocus = noteArm?()
+        focusKnown = true
     }
 
     private func sync() {
@@ -151,6 +187,9 @@ public final class PointerRest {
             timer = nil
             lastRest = nil
             lastMove = nil
+            held = []
+            knownFocus = nil
+            focusKnown = false
         }
     }
 

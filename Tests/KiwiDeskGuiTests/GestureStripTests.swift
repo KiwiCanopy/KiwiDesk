@@ -107,7 +107,11 @@ struct GestureStripTests {
             Self.gestures + "GestureStripPlate.swift"
         )
         #expect(plate.contains(".onTapGesture{onLand(item)}"))
-        #expect(plate.contains(".help(item.sentence(settings))"))
+        #expect(
+            plate.contains(
+                ".overlay(PlateToolTip(text:item.sentence(settings)))"
+            )
+        )
         #expect(!plate.contains("GreyOut("))
     }
 }
