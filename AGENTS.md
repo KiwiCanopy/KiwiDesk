@@ -1180,7 +1180,8 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   `InPlaceRestartNoMotionTests`)
 - every AX message to another app runs inside `WorkMeter.shared.ax`, or the
   per-switch count a performance change is measured by lies (#1508,
-  `WorkMeterAXSeamTests`)
+  `WorkMeterAXSeamTests`), and a change adding AX messages on the Space-switch
+  path states how many per switch, and why, in its PR and at the read
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
   destroy re-reads the app still tracking it — never tracking, filing or

@@ -147,7 +147,12 @@ editing AX code:
   in Core they are spelled. The per-switch AX count is what a
   performance change is measured by (the `measure-work` skill),
   and an unmetered call makes that count lie in the change that
-  adds it. `WorkMeterAXSeamTests` reds a bare call.
+  adds it. `WorkMeterAXSeamTests` reds a bare call. **A change
+  that adds AX messages on the Space-switch path states how many
+  per switch, and why, in its PR and at the read's docstring**
+  (owner, 2026-10-17): a release comparison that finds the count
+  grown then reads a decision, not a bug to chase — 3.0.0's +14 on
+  bsp ↔ scrolling was left unattributed for want of that line.
 - Electron/WebKit apps answer AX queries lazily (100–300 ms).
   `AXEnhancedUserInterface` is set to `true` on managed apps to
   keep their AX tree warm; do not remove it without a replacement.
