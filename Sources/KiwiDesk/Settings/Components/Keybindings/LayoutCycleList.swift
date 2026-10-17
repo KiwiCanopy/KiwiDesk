@@ -103,10 +103,13 @@ struct LayoutCycleList: View {
         .contentShape(Rectangle())
         // A click always lands grey: focus a click kept — the row
         // already focused, or one the focus refusal missed — is
-        // cleared here, so only the keyboard draws the accent.
+        // cleared on a MOUSE tap alone, so VoiceOver's press keeps
+        // its focus (#991).
         .onTapGesture {
             picked = mode
-            focused = nil
+            if ClickBornFocus.isClickBorn(focusMayBeADescendant: false) {
+                focused = nil
+            }
         }
         .focusable()
         .focused($focused, equals: mode)

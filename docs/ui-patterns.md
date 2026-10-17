@@ -1142,9 +1142,9 @@ affordance.** A bordered action button (`settingsActionButton()`,
 KiwiHub's footer buttons) is a button chip: `chipRest`, `chipHover`
 under the pointer, `chipPressed` while pressed, under a constant
 `chipEdge`, no animation, a disabled one not reacting, in the
-system bezel's rounded rectangle (#2377). A palette, look or
-Layouts strip tile lifts with `chipRest` as a fill apart from its
-selection stroke, and nothing a click would leave alone lifts. A
+system bezel's rounded rectangle (#2377). A palette or look tile
+lifts with `chipRest` as a fill apart from its applied stroke, and
+nothing a click would leave alone lifts. A
 prominent (accent-filled) button, a menu picker, a stepper, a
 checkbox, a toggle, a slider, a field and a sidebar keep system
 behaviour: their shape already says "control". Ambiguous
@@ -1154,12 +1154,7 @@ hover only, resting as the bare glyph in `ink2` at a row's end
 glyph's — while a glyph standing alone beside text keeps the
 chip's rest fill (`resting: true`), nothing else marking it as a
 button, and the `?` rests bare with no inset, its own circle
-being its shape; a borderless value-menu or popover trigger
-whose label is TEXT takes that glyph chip's lift without its
-`ink2` tint (`menuTriggerHover`) — chosen by role, since a
-value's label must not go `ink2` — drawn on the control, as a
-borderless `Menu`'s label is AppKit's, the menu itself native;
-a chip-shaped control keeps its rest fill,
+being its shape; a chip-shaped control keeps its rest fill,
 which is its shape; custom full-row picker entries rest at
 nothing and take the chip's rest fill on hover alone; an
 unselected custom segment lifts by one rest step over its track,
@@ -1179,6 +1174,16 @@ Every such control also needs an explicit accessibility label
 keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
+
+:::unreleased
+A Layouts strip tile lifts like a palette tile, with the
+selection drawn as its stroke alone. A borderless value-menu or
+popover trigger whose label is text takes the glyph chip's lift
+without its `ink2` tint (`menuTriggerHover`), chosen by role
+since a value's label must not go `ink2`, and drawn on the
+control because AppKit draws a borderless `Menu`'s label; the
+menu itself stays native.
+:::
 
 Every chip fill in that ladder is a theme token, never a bare
 opacity. A chip rests at `chipRest`, lifts to `chipHover` and,

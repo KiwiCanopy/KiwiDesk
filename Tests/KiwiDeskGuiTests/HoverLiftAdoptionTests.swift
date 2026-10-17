@@ -93,7 +93,14 @@ struct HoverLiftAdoptionTests {
             "Settings/Components/Keybindings/LayoutCycleList.swift"
         )
         let item = try body("private func item(", in: list)
-        #expect(item.contains(".onTapGesture{picked=modefocused=nil}"))
+        // Cleared on a mouse tap alone, never on VoiceOver's press.
+        #expect(
+            item.contains(
+                ".onTapGesture{picked=mode"
+                    + "ifClickBornFocus.isClickBorn("
+                    + "focusMayBeADescendant:false){focused=nil}}"
+            )
+        )
         let lift = try #require(
             item.range(of: ".rowHoverHighlight(lifts:selected!=mode")
         )
@@ -196,16 +203,29 @@ struct HoverLiftAdoptionTests {
         #expect(
             gate.contains("hovering&&isEnabled&&!recording&&!flashing")
         )
-        for path in [
-            "Settings/Components/Keybindings/Recorder/"
-                + "KeyRecorderField.swift",
-            "Settings/Components/Keybindings/HyperKeyField.swift",
-        ] {
-            #expect(
-                try squashed(path).contains("flashing:flashing)"),
-                Comment(rawValue: path)
+        // Every caller hands its flash in, read off every call site
+        // rather than a list a new recorder could miss.
+        var callers = 0
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        for url in try SourceScan.swiftSources(under: root) {
+            let text = squash(
+                SourceScan.stripComments(
+                    try String(contentsOf: url, encoding: .utf8)
+                )
             )
+            for call in text.components(
+                separatedBy: "RecorderButtonChrome("
+            ).dropFirst() {
+                let args = call.prefix { $0 != ")" }
+                callers += 1
+                #expect(
+                    args.contains("flashing:flashing"),
+                    Comment(rawValue: url.lastPathComponent)
+                )
+            }
         }
+        #expect(callers >= 3)
         let well = squash(chrome)
         #expect(well.contains(".fill(lifted?SettingsTheme."))
         #expect(well.contains(".animation(reduceMotion?nil:"))
@@ -226,7 +246,11 @@ struct HoverLiftAdoptionTests {
         #expect(shortcut.contains(".buttonStyle(PopoverRowStyle())"))
         #expect(!shortcut.contains(".buttonStyle(.plain)"))
         let style = try body("struct PopoverRowStyle", in: raw)
-        #expect(style.occurrences(of: ".rowHoverHighlight()") == 1)
+        // The press stands in for the lift: one fill, not two.
+        #expect(
+            style.occurrences(of: ".rowHoverHighlight(lifts:!pressed)")
+                == 1
+        )
         #expect(style.contains("pressed:configuration.isPressed"))
         #expect(style.contains("pressed&&isEnabled?SettingsTheme."))
     }

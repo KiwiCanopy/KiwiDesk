@@ -87,7 +87,6 @@ struct IconHoverChipTests {
             )
         )
         #expect(squashed(row).contains(":.clear,edge:nil,"))
-        #expect(squashed(row).contains(",edge:nil,"))
         #expect(!row.contains(".opacity("))
     }
 

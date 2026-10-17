@@ -108,11 +108,13 @@ private struct PopoverRowStyle: ButtonStyle {
                 .padding(.vertical, 3)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
-                .rowHoverHighlight()
+                // While pressed the press's own token stands in for
+                // the lift, one fill rather than two stacked.
+                .rowHoverHighlight(lifts: !pressed)
                 .background(
                     RoundedRectangle(cornerRadius: 5).fill(
                         pressed && isEnabled
-                            ? SettingsTheme.chipRest : .clear
+                            ? SettingsTheme.chipPressed : .clear
                     )
                 )
         }
