@@ -181,6 +181,10 @@ struct GesturesControls: Sendable {
         "behavior.mouse.hover_focus",
         "Focus the window the pointer rests on"
     )
+    let hoverFocusDelay = SettingsControl(
+        "behavior.mouse.hover_focus_delay",
+        "Hover delay"
+    )
     let followsFocus = SettingsControl(
         "behavior.mouse.follows_focus",
         "Move the pointer to the window that gets focus"

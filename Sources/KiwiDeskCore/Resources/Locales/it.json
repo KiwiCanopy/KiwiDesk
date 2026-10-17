@@ -215,6 +215,8 @@
   "behavior.mouse.follows_focus": "Porta il puntatore sulla finestra che riceve il focus",
   "behavior.mouse.hover_focus": "Dai il focus alla finestra su cui si ferma il puntatore",
   "behavior.mouse.hover_focus.help": "In un layout Scrolling, una finestra visibile solo in parte sullo schermo non riceve il focus quando il puntatore si ferma su di essa, così la fila non si sposta mai sotto il puntatore — fai clic su di essa, o sul suo elemento nella App Bar o nella Space Bar, per portarla in vista.",
+  "behavior.mouse.hover_focus_delay": "Ritardo a puntatore fermo",
+  "behavior.mouse.milliseconds": "ms",
   "behavior.mouse.resize_action": "Ridimensionamento col mouse",
   "behavior.mouse.resize_action.help": "**%1$@** — Trascinare il bordo di una finestra la ridimensiona e ridispone quelle vicine nel layout.\n**%2$@** — La finestra si ridimensiona liberamente mentre trascini, poi torna alla dimensione affiancata quando rilasci.",
   "behavior.mouse.resize_layout": "Ridimensiona le finestre adiacenti",

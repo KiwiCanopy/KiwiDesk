@@ -215,6 +215,8 @@
   "behavior.mouse.follows_focus": "フォーカスされたウインドウにポインタを移動",
   "behavior.mouse.hover_focus": "ポインタを止めたウインドウにフォーカス",
   "behavior.mouse.hover_focus.help": "スクロールレイアウトでは、画面に一部しか表示されていないウインドウにはポインタを止めてもフォーカスされないため、ポインタの下で列が動くことはありません。表示するには、そのウインドウか、App BarまたはSpace Barにあるその項目をクリックしてください。",
+  "behavior.mouse.hover_focus_delay": "停止時の遅延",
+  "behavior.mouse.milliseconds": "ミリ秒",
   "behavior.mouse.resize_action": "マウスでのサイズ変更の動作",
   "behavior.mouse.resize_action.help": "**%1$@** — ウインドウの端をドラッグするとそのウインドウがサイズ変更され、レイアウト内の隣のウインドウも再配置されます。\n**%2$@** — ドラッグ中は自由にサイズ変更でき、放すとタイル表示のサイズに戻ります。",
   "behavior.mouse.resize_layout": "隣接するウインドウをサイズ変更",

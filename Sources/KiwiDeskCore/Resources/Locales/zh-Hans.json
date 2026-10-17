@@ -215,6 +215,8 @@
   "behavior.mouse.follows_focus": "将指针移到获得焦点的窗口",
   "behavior.mouse.hover_focus": "让指针停留的窗口获得焦点",
   "behavior.mouse.hover_focus.help": "在滚动布局中，只有部分显示在屏幕上的窗口不会因指针停留而获得焦点，因此整行不会在指针下移动——点按该窗口，或它在 App Bar 或 Space Bar 中的项目，即可将它移入画面。",
+  "behavior.mouse.hover_focus_delay": "停留延迟",
+  "behavior.mouse.milliseconds": "毫秒",
   "behavior.mouse.resize_action": "鼠标调整大小的行为",
   "behavior.mouse.resize_action.help": "**%1$@** — 拖移窗口边缘会调整其大小，并重排布局中的相邻窗口。\n**%2$@** — 拖移过程中窗口可自由调整大小，松开后会回到平铺时的尺寸。",
   "behavior.mouse.resize_layout": "调整相邻窗口",

@@ -4088,7 +4088,8 @@ mouse.set_hover_focus(true)
 [`mouse.set_hover_focus`](#mouseset_hover_focus) focuses the
 window under it. `0` focuses as soon as the pointer stops moving;
 a longer delay keeps a window you cross on the way to another from
-taking the focus. Not offered in the Settings app.
+taking the focus. Settings offers it under Shortcuts & Gestures ▸
+Mouse & trackpad, up to 2000 ms.
 
 **Example:**
 
