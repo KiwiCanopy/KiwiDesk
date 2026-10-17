@@ -190,9 +190,45 @@ struct JumpHoverTests {
     @Test("the selected item draws no lift; the accent wins")
     func selectedDrawsNoLift() {
         let hover = JumpHover.row(2)
-        #expect(JumpHover.lifts(.row(2), hover: hover, selected: false))
-        #expect(!JumpHover.lifts(.row(2), hover: hover, selected: true))
-        #expect(!JumpHover.lifts(.row(1), hover: hover, selected: false))
-        #expect(!JumpHover.lifts(.row(1), hover: nil, selected: false))
+        func lifts(_ row: Int, _ hover: JumpHover?, _ selected: Bool) -> Bool {
+            JumpHover.lifts(
+                .row(row),
+                hover: hover,
+                selected: selected,
+                clickable: true
+            )
+        }
+        #expect(lifts(2, hover, false))
+        #expect(!lifts(2, hover, true))
+        #expect(!lifts(1, hover, false))
+        #expect(!lifts(1, nil, false))
+    }
+
+    /// The lift promises the click (owner ruling 2026-10-17): an
+    /// item the query dims, or one that cannot apply, stays flat.
+    @Test("an item a click leaves alone draws no lift")
+    func inertDrawsNoLift() throws {
+        #expect(
+            !JumpHover.lifts(
+                .row(2),
+                hover: .row(2),
+                selected: false,
+                clickable: false
+            )
+        )
+        let side = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/JumpViewSide.swift"
+                    ),
+                encoding: .utf8
+            )
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            side.contains(
+                "clickable:!list.isDimmed(line,index)&&item.isApplicable"
+            )
+        )
     }
 }

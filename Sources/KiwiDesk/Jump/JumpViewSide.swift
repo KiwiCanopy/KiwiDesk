@@ -87,7 +87,7 @@ struct JumpViewSide: View {
                         number: list.number(.layout, index),
                         settings: settings,
                         isSelected: isSelected(.layout, index),
-                        isLifted: isLifted(item.pick, .layout, index),
+                        isLifted: isLifted(item, .layout, index),
                         isCurrent: item.isCurrent,
                         isDimmed: list.isDimmed(.layout, index)
                             || !item.isApplicable,
@@ -113,7 +113,7 @@ struct JumpViewSide: View {
                     line: line,
                     number: list.number(line, index),
                     isSelected: isSelected(line, index),
-                    isLifted: isLifted(item.pick, line, index),
+                    isLifted: isLifted(item, line, index),
                     isDimmed: list.isDimmed(line, index),
                     showsNumber: commandHeld && selectedLine == line,
                     visionOff: list.visionIsOff,
@@ -130,15 +130,18 @@ struct JumpViewSide: View {
         list.selection == ViewPickList.Position(line: line, index: index)
     }
 
+    /// A query-dimmed or inapplicable item takes no click
+    /// (`clickItem`, `applyView`), so it takes no lift either.
     private func isLifted(
-        _ pick: ViewPickList.Pick,
+        _ item: ViewPickList.Item,
         _ line: ViewPickList.Line,
         _ index: Int
     ) -> Bool {
         JumpHover.lifts(
-            .item(pick),
+            .item(item.pick),
             hover: hover,
-            selected: isSelected(line, index)
+            selected: isSelected(line, index),
+            clickable: !list.isDimmed(line, index) && item.isApplicable
         )
     }
 

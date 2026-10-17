@@ -36,7 +36,7 @@ struct ButtonChipStyle: ButtonStyle {
                 .padding(.horizontal, metrics.horizontal)
                 .padding(.vertical, metrics.vertical)
                 .background {
-                    Capsule().fill(
+                    shape.fill(
                         ButtonChipStyle.fill(
                             pressed: isEnabled && configuration.isPressed,
                             hovered: isEnabled && hovered
@@ -44,23 +44,55 @@ struct ButtonChipStyle: ButtonStyle {
                     )
                 }
                 .overlay {
-                    Capsule().strokeBorder(
+                    shape.strokeBorder(
                         SettingsTheme.chipEdge,
                         lineWidth: 1
                     )
                 }
-                .contentShape([.interaction, .focusEffect], Capsule())
+                .contentShape([.interaction, .focusEffect], shape)
                 .onHover { hovered = $0 }
+        }
+
+        /// The system bezel's rounded rectangle, not a capsule
+        /// (owner, 2026-10-17).
+        private var shape: RoundedRectangle {
+            RoundedRectangle(
+                cornerRadius: metrics.radius,
+                style: .continuous
+            )
         }
 
         /// The system font and the bezel's room per control size.
         private var metrics: Metrics {
             switch controlSize {
-            case .mini: return Metrics(font: 9, horizontal: 6, vertical: 2)
-            case .small: return Metrics(font: 11, horizontal: 8, vertical: 3)
+            case .mini:
+                return Metrics(
+                    font: 9,
+                    horizontal: 6,
+                    vertical: 2,
+                    radius: 4
+                )
+            case .small:
+                return Metrics(
+                    font: 11,
+                    horizontal: 8,
+                    vertical: 3,
+                    radius: 5
+                )
             case .large, .extraLarge:
-                return Metrics(font: 13, horizontal: 14, vertical: 6)
-            default: return Metrics(font: 13, horizontal: 10, vertical: 4)
+                return Metrics(
+                    font: 13,
+                    horizontal: 14,
+                    vertical: 6,
+                    radius: 8
+                )
+            default:
+                return Metrics(
+                    font: 13,
+                    horizontal: 10,
+                    vertical: 4,
+                    radius: 6
+                )
             }
         }
     }
@@ -69,5 +101,6 @@ struct ButtonChipStyle: ButtonStyle {
         let font: CGFloat
         let horizontal: CGFloat
         let vertical: CGFloat
+        let radius: CGFloat
     }
 }
