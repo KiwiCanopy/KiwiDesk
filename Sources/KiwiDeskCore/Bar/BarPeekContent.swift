@@ -23,10 +23,12 @@ enum BarPeekSource: Equatable {
 
     /// Whether this is a LIST — an overflow disc or a collapsed
     /// Space, which stand for windows the chip did not draw however
-    /// few, or more than one window — the one predicate a click,
-    /// VoiceOver's press and the hull's hold read (#1946). A
+    /// few, or more than one window — the one predicate a glyph's
+    /// click, VoiceOver's press and the hold read (#1946). A
     /// one-window glyph or App Bar item is a label: its click
-    /// picks, its peek never holds.
+    /// picks, its peek never holds. A collapsed chip is clicked as
+    /// a chip, so its list reads at the hold and the check alone
+    /// (#1945).
     var isList: Bool {
         switch self {
         case .overflow, .space: true

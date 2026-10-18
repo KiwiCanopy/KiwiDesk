@@ -688,12 +688,14 @@ Obligations:
   `BarPeekClickTests` ▸ `pressOnTheShelfCloses`). A press the
   press fan-out hears is a click outside KiwiDesk, since neither
   of its arms hears a bar or the peek; the `anchors` map in
-  `BarPeekSeamTests` ▸ `anchorsAreListed`, derived from the
-  `peek?.pointer(` callers, is the one copy of who anchors it.
+  `BarPeekAnchorSeamTests`, derived from the `peek?.pointer(`
+  callers (▸ `anchorsAreListed`) and the anchors each one hands
+  (▸ `anchorValuesAreListed`), is the one copy of who anchors it.
   **Whether a source is a LIST is the one
   `BarPeekSource.isList`** — an overflow disc, however few
-  windows it hides, or more than one window — read by the click,
-  VoiceOver's press and the hold alike, never a count beside it
+  windows it hides, a collapsed Space's chip (#1945), or more
+  than one window — read by the click, VoiceOver's press and the
+  hold alike, never a count beside it
   (`BarPeekHoldTests` ▸ `overflowOfOneHolds`, `BarPeekSeamTests`
   ▸ `glyphClickRouting`). **Only a list's peek holds, while the
   pointer is inside `BarPeekHull`** — the item, the peek and the
@@ -752,7 +754,12 @@ Obligations:
   The cycle steps over a window the focus door refuses (#1345),
   or the walk stalls on it (`BarGlyphCycleTests` ▸
   `refusedWindowIsSteppedOver`); a click that switches Spaces
-  shows no peek, its chip having moved. The panel takes
+  shows no peek, its chip having moved. A collapsed chip is the
+  one list anchor that is no glyph (#1945): its press closes the
+  peek at the panel's one point and its click and VoiceOver's
+  press stay the chip's switch, so its list reads at the hold
+  and the check alone (`SpaceBarCollapsedPeekTests` ▸
+  `pressOnTheChipCloses`). The panel takes
   the mouse but is non-activating and never key, and hidden from
   accessibility (`BarPeekTests` ▸
   `panelTakesClicksWithoutActivating`). The argument is

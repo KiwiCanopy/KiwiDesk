@@ -77,7 +77,7 @@ public final class SpaceBarOverlay {
         /// go with the glyphs, and the discs with them.
         func collapsed(
             to content: SpaceBarStyle.InactiveContent,
-            peeking: Bool = false
+            peeking: Bool
         ) -> Self {
             guard !active, space != nil, collapse == nil else {
                 return self

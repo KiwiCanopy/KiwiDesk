@@ -56,7 +56,10 @@ extension SpaceBarOverlay {
     private static func samePlace(_ old: Item, _ new: Item) -> Bool {
         old.identity == new.identity && old.active == new.active
             && old.spaceGlyph == new.spaceGlyph
-            && old.marker == new.marker && old.collapse == new.collapse
+            && old.marker == new.marker
+            // A collapse's peek is content (#1945): only its count
+            // and presence place anything.
+            && old.collapse?.windows == new.collapse?.windows
     }
 
     /// Reconfigures the items that changed since `last` and the

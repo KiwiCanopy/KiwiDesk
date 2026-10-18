@@ -1876,7 +1876,7 @@
   "space_bar.menu.untitled": "Ohne Titel",
   "space_bar.overflow.after.ax": "Nachfolgende nicht angezeigte Fenster: %1$d",
   "space_bar.overflow.before.ax": "Vorherige nicht angezeigte Fenster: %1$d",
-  "space_bar.peek_on_hover": "Apps beim Überfahren anzeigen",
+  "space_bar.peek_on_hover": "Apps beim Ruhen des Mauszeigers anzeigen",
   "space_bar.peek_on_hover.count_only": "Nur wenn „%1$@“ auf „%2$@“ steht.",
   "space_bar.peek_on_hover.help": "Lass den Mauszeiger auf einem Space ruhen, der eine Fensteranzahl zeigt, um seine Apps und Fenster aufzulisten. Klicke auf ein Fenster, um dorthin zu wechseln.",
   "space_bar.show_front_app": "Vordergrund-App anzeigen",

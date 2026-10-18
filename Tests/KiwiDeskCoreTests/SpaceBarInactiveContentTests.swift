@@ -137,7 +137,7 @@ struct SpaceBarInactiveContentTests {
                 holdsFocus: true
             ),
             drawn: .init(window: 1..<3, count: 4)
-        ).collapsed(to: .count)
+        ).collapsed(to: .count, peeking: false)
         #expect(item.collapse?.windows == 6)
         #expect(item.after.windows.count == 0)
         #expect(!item.after.holdsFocus)
@@ -153,7 +153,7 @@ struct SpaceBarInactiveContentTests {
     func collapseIsIdempotent() throws {
         let built = items(seededCore(), .count)
         let once = try #require(built[SpaceID("2")])
-        let twice = once.collapsed(to: .count)
+        let twice = once.collapsed(to: .count, peeking: false)
         #expect(twice.collapse == once.collapse)
         #expect(twice.collapse?.windows == 3)
     }
@@ -165,7 +165,7 @@ struct SpaceBarInactiveContentTests {
             layer: "L",
             glyph: .text("L", tinted: false)
         )
-        #expect(layer.collapsed(to: .count).collapse == nil)
+        #expect(layer.collapsed(to: .count, peeking: false).collapse == nil)
     }
 
     /// `hide_empty` reads the glyphs the collapse drops, so it

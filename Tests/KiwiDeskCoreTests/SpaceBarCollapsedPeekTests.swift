@@ -126,6 +126,57 @@ struct SpaceBarCollapsedPeekTests {
         #expect(rig.shownTitles == ["Window 2", "Window 3"])
     }
 
+    @Test("A press on the chip closes its peek; the click switches")
+    func pressOnTheChipCloses() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        let actions = SpaceBarGlyphActions()
+        let ids = [WindowID(2), WindowID(3)]
+        let view = chip(in: rig, actions: actions, peek: ids)
+        view.applyHover(true, target: nil)
+        rig.step()
+        #expect(rig.shownTitles != nil)
+        rig.peek.pressed(on: view, type: .leftMouseDown)
+        #expect(rig.shownTitles == nil)
+    }
+
+    @Test("A reorder of the peeked windows moves no frame")
+    func peekReorderKeepsGeometry() {
+        let item = { (ids: [Int]) in
+            var mail = SpaceBarItemView.App(
+                name: "Mail",
+                icon: nil,
+                glyph: nil,
+                focused: false,
+                count: ids.count
+            )
+            mail.windows = ids.map { WindowID(UInt32($0)) }
+            return SpaceBarOverlay.Item(
+                space: SpaceID("2"),
+                spaceGlyph: .text("2", tinted: true),
+                apps: [mail],
+                active: false,
+                after: .none
+            ).collapsed(to: .count, peeking: true)
+        }
+        let shown = { (ids: [Int]) in
+            SpaceBarOverlay.Shown(
+                items: [item(ids)],
+                frontApp: nil,
+                strip: CGRect(x: 0, y: 0, width: 400, height: 30),
+                style: SpaceBarLook(),
+                stateMarkColors: StateMarkColors(
+                    sticky: "#ffffff",
+                    floating: "#ffffff"
+                )
+            )
+        }
+        let overlay = SpaceBarOverlay()
+        #expect(shown([4, 5]) != shown([5, 4]))
+        #expect(overlay.keepsGeometry(shown([4, 5]), shown([5, 4])))
+        #expect(!overlay.keepsGeometry(shown([4, 5]), shown([4, 5, 6])))
+    }
+
     @Test("With the toggle off a collapsed chip peeks nothing")
     func offPeeksNothing() {
         let rig = BarPeekRig()

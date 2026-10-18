@@ -14519,10 +14519,15 @@ run does not change, so nothing moves under a resting pointer and
 the shelf's plan is untouched. Growing the chip in place to draw
 its glyphs was the rejected shape — it slides the neighbours under
 the pointer, which is the stuck-hover class #1665 re-reads hover
-to survive, and it changes the length the shelf planned. A click
-on the chip still switches, the row's own click picks a window,
-and a drag over a collapsed chip opens nothing, the spring switch
-already showing what it holds. The toggle is greyed unless Other
+to survive; the grown chip can leave the pointer outside it, which
+collapses it again, so the hover oscillates rather than merely
+sticking; and it changes the length the shelf planned. A click on
+the chip still switches — the chip's own action, which a list's
+open-on-click would take away — the row's own click picks a
+window, and a drag over a collapsed chip opens nothing, the spring
+switch already showing what it holds. The peek is the pointer's,
+as every hover peek is: VoiceOver's press on the chip switches,
+and its window list waits on a ruling of its own. The toggle is greyed unless Other
 Spaces is Window count, since Apps already draws every glyph.
 :::
 
