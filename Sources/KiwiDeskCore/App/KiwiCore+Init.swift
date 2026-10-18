@@ -25,10 +25,12 @@ extension KiwiCore {
             .appendingPathComponent(".config/KiwiDesk")
     }
 
-    /// The config and machine folders. The launch that makes the
+    /// The config and machine folders. The first launch with a
     /// machine folder is handed this Mac's files a pre-#2324 build
-    /// left in the config folder — that launch alone, since a Mac
-    /// still on an older build may share the folder later.
+    /// left in the config folder — that launch alone, marked by
+    /// `MachineLocation.adoptedMarker`, since a Mac still on an
+    /// older build may share the folder later and `main.swift`'s
+    /// lock makes the folder before any core.
     /// `makeTestCore` names both, so no test reaches `~/Library`
     /// (`CoreInitPathTests`).
     static func resolveDirectories(
@@ -38,14 +40,17 @@ extension KiwiCore {
         let directory = resolveConfigDirectory(config)
         let machine = machine ?? MachineLocation.directory
         let files = FileManager.default
-        guard !files.fileExists(atPath: machine.path) else {
-            return (directory, machine)
-        }
         try? files.createDirectory(
             at: machine,
             withIntermediateDirectories: true
         )
-        MachineLocation.adoptLegacyFiles(from: directory, into: machine)
+        let marker = machine.appendingPathComponent(
+            MachineLocation.adoptedMarker
+        )
+        if !files.fileExists(atPath: marker.path) {
+            MachineLocation.adoptLegacyFiles(from: directory, into: machine)
+            files.createFile(atPath: marker.path, contents: nil)
+        }
         return (directory, machine)
     }
 

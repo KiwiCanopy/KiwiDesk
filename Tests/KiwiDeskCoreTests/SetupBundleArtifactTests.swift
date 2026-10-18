@@ -217,6 +217,7 @@ struct SetupBundleArtifactTests {
                 .map { core.url(of: $0).lastPathComponent }
         ).union([
             MachineLocation.socketName, MachineLocation.lockName,
+            MachineLocation.adoptedMarker,
             CrashRecovery.autosaveName, CrashRecovery.sessionName,
         ])
         let present = try FileManager.default.contentsOfDirectory(

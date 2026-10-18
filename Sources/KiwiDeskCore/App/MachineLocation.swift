@@ -36,6 +36,8 @@ public enum MachineLocation {
 
     static let socketName = "KiwiDesk.sock"
     static let lockName = "KiwiDesk.lock"
+    /// Written once the legacy hand-over ran (`resolveDirectories`).
+    static let adoptedMarker = ".legacy-adopted"
 
     /// Where builds before #2324 kept the lock: a build updated
     /// while an older one still runs must not start beside it.
@@ -57,8 +59,8 @@ public enum MachineLocation {
     /// `config` into `machine` and drops the old socket, so an
     /// update keeps the arrangement it quit with. A file the
     /// machine folder already holds wins and the legacy copy
-    /// stays, as does a file that fails to move. Run once, by the
-    /// launch that makes the machine folder.
+    /// stays, as does a file that fails to move. Run once, gated
+    /// by `adoptedMarker`.
     static func adoptLegacyFiles(from config: URL, into machine: URL) {
         guard
             config.resolvingSymlinksInPath().path

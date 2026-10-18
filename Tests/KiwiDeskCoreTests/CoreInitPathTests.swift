@@ -135,9 +135,11 @@ struct CoreInitPathTests {
     }
 
     /// A Mac still on an older build may share the config folder,
-    /// so only the launch that makes the machine folder takes the
-    /// legacy files; a later one would take that Mac's (#2324).
-    @Test("only the launch that makes the machine folder adopts")
+    /// so only the first launch takes the legacy files; a later one
+    /// would take that Mac's (#2324). The folder already holds the
+    /// lock by then — `main.swift` takes it before any core — so a
+    /// launch is told apart by the marker, never by the folder.
+    @Test("only the first launch adopts, the lock already there")
     func adoptionRunsOnce() throws {
         let root = URL(fileURLWithPath: "/tmp")
             .appendingPathComponent("kd-\(UUID().uuidString.prefix(8))")
@@ -146,20 +148,29 @@ struct CoreInitPathTests {
         let machine = root.appendingPathComponent("machine")
         let name = CrashRecovery.sessionName
         let legacy = config.appendingPathComponent(name)
-        try FileManager.default.createDirectory(
-            at: config,
-            withIntermediateDirectories: true
+        let files = FileManager.default
+        for dir in [config, machine] {
+            try files.createDirectory(
+                at: dir,
+                withIntermediateDirectories: true
+            )
+        }
+        // What `main.swift` leaves before the core starts.
+        let lock = SingleInstanceLock(
+            path: machine.appendingPathComponent("KiwiDesk.lock").path
         )
+        #expect(lock.acquire())
+        defer { lock.release() }
         try Data("first".utf8).write(to: legacy)
         _ = KiwiCore.resolveDirectories(config, machine)
         let moved = machine.appendingPathComponent(name)
-        #expect(FileManager.default.fileExists(atPath: moved.path))
-        #expect(!FileManager.default.fileExists(atPath: legacy.path))
+        #expect(files.fileExists(atPath: moved.path))
+        #expect(!files.fileExists(atPath: legacy.path))
         // The boot consumes it; the older Mac writes its own.
-        try FileManager.default.removeItem(at: moved)
+        try files.removeItem(at: moved)
         try Data("other Mac".utf8).write(to: legacy)
         _ = KiwiCore.resolveDirectories(config, machine)
-        #expect(FileManager.default.fileExists(atPath: legacy.path))
-        #expect(!FileManager.default.fileExists(atPath: moved.path))
+        #expect(files.fileExists(atPath: legacy.path))
+        #expect(!files.fileExists(atPath: moved.path))
     }
 }
