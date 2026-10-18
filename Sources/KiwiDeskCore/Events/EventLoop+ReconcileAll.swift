@@ -9,7 +9,9 @@ import os
 /// joined it.
 extension EventLoop {
     /// Re-syncs every attached app against its live AX window
-    /// list: the Desktop switch's pass and the config reload's.
+    /// list, on the main actor: the config reload's pass and a
+    /// rule install's. A Desktop switch reads the same gated apps
+    /// off the main actor instead (`requestSwitchReads`, #2347).
     /// The pass one second after boot is `beginSweep`'s own
     /// (#801) — chunked, and deliberately NOT gated as below:
     /// its warm is the #662 promise to apps the boot prefilter
@@ -48,12 +50,28 @@ extension EventLoop {
         let span = signposter.beginInterval("reconcileAll")
         defer { signposter.endInterval("reconcileAll", span) }
         WorkMeter.shared.add(\.bulkReconciles)
+        // Suppress native-tab coalescing here: a native-space switch
+        // presents the departed space's windows as vanished and the
+        // arrived space's as appeared in one pass, and same-app
+        // windows tile to identical frames — they would false-merge
+        // into a re-key (#308 review). Genuine switches coalesce via
+        // the per-window reconciles the AX notifications drive.
+        for pid in bulkTargets() {
+            reconcile(pid: pid, app: appRef(of: pid), coalesceTabs: false)
+        }
+    }
+
+    /// The prologue every bulk pass shares, `reconcileAll` and the
+    /// switch's batch (#2347): the app-level observation boundary,
+    /// then the WindowServer gate. Returns the apps to read, in
+    /// the gate's order.
+    func bulkTargets() -> [pid_t] {
         // Rules can detach an already-observed app or make a
         // formerly ignored app observable. Synchronize that
         // app-level boundary without reading ignored AX trees.
-        // A fresh attach defers its scan to the gated loop
-        // below rather than reading the list twice (#672); one
-        // the gate skips shows nothing, and is scanned by the
+        // A fresh attach defers its scan to the gated reads
+        // that follow rather than reading the list twice (#672);
+        // one the gate skips shows nothing, and is scanned by the
         // first pass that reaches it.
         // Before `start()` the raw list is enough: nothing attaches
         // yet (#672), and `liveApps` would read the WindowServer for
@@ -68,22 +86,13 @@ extension EventLoop {
         // read there would be pure cost, and one every suite
         // driving `loadConfig` inherits (review).
         let observed = Array(observers.keys)
-        guard !observed.isEmpty else { return }
+        guard !observed.isEmpty else { return [] }
         let census = onScreenNormalWindowIDs()
         let targets = Self.reconcileAllTargets(
             observed: observed,
             census: census,
             tracks: { !(elements[$0]?.isEmpty ?? true) }
         )
-        // Suppress native-tab coalescing here: a native-space switch
-        // presents the departed space's windows as vanished and the
-        // arrived space's as appeared in one pass, and same-app
-        // windows tile to identical frames — they would false-merge
-        // into a re-key (#308 review). Genuine switches coalesce via
-        // the per-window reconciles the AX notifications drive.
-        for pid in targets {
-            reconcile(pid: pid, app: appRef(of: pid), coalesceTabs: false)
-        }
         let skipped = observed.count - targets.count
         if skipped > 0 {
             onLog(
@@ -91,6 +100,7 @@ extension EventLoop {
                     + "show nothing — not asked"
             )
         }
+        return targets
     }
 
     /// Which observed apps a bulk pass reads: those tracking a
@@ -143,6 +153,9 @@ extension EventLoop {
         guard isRunning else { return }
         let census = onScreenNormalWindowIDs()
         for (pid, ids) in census where observers[pid] != nil {
+            // A switch read still owed answers for this app, and
+            // reading it here would block on the slow one (#2347).
+            guard !switchReads.isOutstanding(pid) else { continue }
             let tracked = Set(elements[pid, default: [:]].keys)
             guard !ids.subtracting(tracked).isEmpty else { continue }
             reconcile(pid: pid, app: appRef(of: pid), coalesceTabs: false)

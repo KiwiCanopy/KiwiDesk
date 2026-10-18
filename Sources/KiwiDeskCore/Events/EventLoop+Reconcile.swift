@@ -106,6 +106,14 @@ extension EventLoop {
         // not drop what the unhide adopted: only the live seam
         // may say hidden (#1936).
         let hidden = prefetched?.hidden == false ? false : appIsHidden(pid)
+        // An answer about the app: a later switch batch read
+        // begun before this one stands down for it (#2347).
+        if hidden || prefetched?.listRead != false {
+            switchReads.noteApplied(
+                pid,
+                readAt: prefetched?.readStarted ?? .now
+            )
+        }
         guard !hidden else {
             reconcileTabsAndSweep(
                 pid: pid,
@@ -293,7 +301,8 @@ extension EventLoop {
             appeared: appeared,
             live: live,
             minimized: minimized,
-            coalesceTabs: coalesceTabs && !recentSpaceSwitch
+            coalesceTabs: coalesceTabs && !recentSpaceSwitch,
+            switchGrace: prefetched?.switchGrace
         )
         // Past the sweep, so a spent budget here abandons nothing
         // of the list; the app is completed after the pass (#803).

@@ -75,6 +75,32 @@ editing AX code:
     close-return raise is
     [state-and-layout.md](state-and-layout.md)'s.
 
+  **A Desktop switch's bulk pass reads off the main actor as
+  ONE batch (#2347).** Between two busy Desktops its synchronous
+  list reads held the main actor 90–100 ms per switch (device,
+  2026-10-18). `desktopChanged` opens the batch before the
+  handler and requests the gated apps' lists after it, on each
+  app's list lane; they apply in one switch fold once every read
+  lands or `SwitchReconcile.bound` passes, a straggler alone
+  after. Four obligations, each the place an inline pass once
+  ordered things for free:
+  - **An app's readings apply in read order**: a batch reading
+    begun before a newer applied one answers nothing
+    (`SwitchReconcile.appliedRead`, stamped in `reconcile`).
+  - **The census is judged by the switch grace the read began
+    in**, carried on `PrefetchedWindows.switchGrace`, never the
+    apply's clock, or a slow sibling opens #1157 episodes against
+    a double-exposed census.
+  - **What read the switch's result in the same turn waits for
+    the fold**: the Desktop settle in one latest-wins slot a
+    newer switch empties (#49), every bar refresh through the one
+    hold in `updateBars`, and the settle's arrival sweep skips an
+    app whose switch read is still owed.
+  - **A stop drops the batch** with every debt.
+  `SwitchReconcileTests` holds the batch, `SwitchReconcileBarsTests`
+  the bars, `SwitchReconcileSeamTests` the wirings. The count of AX
+  messages per switch is unchanged; they left the main actor.
+
   **What the apply needs of each window is read WITH the list
   (#1933)** — what `ListedWindow` and `TrackedReading` carry —
   through `ListedWindowReader`, built on the loop's own seams;
@@ -668,10 +694,17 @@ editing AX code:
   sweep run inside the handler finds the arm open: filed at the
   top, a bound Desktop's in-handler sweep found every arm closed
   and removed the window the carry was about to move (device,
-  2026-09-21, Desktop 2 bound). **A bound Desktop's apply leaves
-  its window-rule sweep to the switch's own folded
-  `reconcileAll`** (#2347): `EventLoop.desktopChanged` runs that
-  pass right after the handler, the handler has that one caller,
+  2026-09-21, Desktop 2 bound). Since #2347 the switch's own
+  sweep is the off-main batch (the first bullet's), requested
+  after the filing
+  and applied up to `SwitchReconcile.bound` later, so this arm is
+  closed when it lands and the CARRIED arm keeps the window — a
+  straggler older than its in-flight span is re-read rather than
+  applied (`SwitchReconcileTests` ▸ `boundsAreOrdered`).
+  **A bound Desktop's apply leaves its window-rule sweep to the
+  switch's own batched sweep** (#2347): `EventLoop
+  .desktopChanged` requests it right after the handler, the
+  handler has that one caller,
   and the deferral is raised only around the binding apply
   (`DesktopSwitchRuleSweepSeamTests`; `DesktopBindingRuleSweepTests`
   holds the skip). A new path into `handleDesktopChange` owes the

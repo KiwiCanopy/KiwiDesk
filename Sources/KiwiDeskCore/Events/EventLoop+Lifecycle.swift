@@ -28,6 +28,7 @@ extension EventLoop {
         lastActivePid = nil
         lastCommandedFocus = nil
         offMain.dropDebts()
+        switchReads.drop()
         displayWatch.stop()
         for observer in observers.values {
             observer.invalidate()

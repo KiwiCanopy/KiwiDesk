@@ -31,7 +31,11 @@ extension KiwiCore {
             .desktopSettle,
             after: .milliseconds(600)
         ) { [weak self] in
-            self?.desktopSettle(ifStill: desktop)
+            // After the switch's batch has applied its arrivals
+            // (#2347); a later switch empties the slot.
+            self?.eventLoop.settleAfterSwitchReads { [weak self] in
+                self?.desktopSettle(ifStill: desktop)
+            }
         }
     }
 

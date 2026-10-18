@@ -1185,8 +1185,12 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   `WorkMeterAXSeamTests`), and a change adding AX messages on the Space-switch
   path states how many per switch, and why, in its PR and at the read
 - a bound Desktop's apply leaves its window-rule sweep to the switch's own
-  folded `reconcileAll`, so a new path into `handleDesktopChange` owes that
-  sweep after it (#2347, `DesktopSwitchRuleSweepSeamTests`)
+  batched sweep, so a new path into `handleDesktopChange` owes that sweep
+  after it (#2347, `DesktopSwitchRuleSweepSeamTests`)
+- a Desktop switch's bulk pass reads off the main actor as one batch applied
+  in one fold: an app's readings apply in read order, the census is judged by
+  the grace the read began in, and the settle and the bars wait for the fold
+  (#2347, `SwitchReconcileTests`, `SwitchReconcileSeamTests`)
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
   destroy re-reads the app still tracking it — never tracking, filing or

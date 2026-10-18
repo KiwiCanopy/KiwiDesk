@@ -22,6 +22,11 @@ struct PrefetchedWindows {
     var hidden: Bool?
     /// False where the read skipped a hidden app's list (#2027).
     var listRead = true
+    /// When the read began, for `SwitchReconcile.appliedRead`.
+    var readStarted: ContinuousClock.Instant?
+    /// A switch batch's grace verdict, taken as its read began
+    /// (#2347); nil asks the sweep's own clock.
+    var switchGrace: Bool?
 
     /// What was read of the `index`th listed window, if anything.
     func window(at index: Int) -> ListedWindow? {
@@ -208,36 +213,15 @@ extension EventLoop {
         let ticket = offMain.startRead(pid: pid, then: then)
         let tracked = Set(elements[pid]?.keys ?? [:].keys)
         let writesAtRead = offMain.writes
-        let reader = listedWindowReader(
+        let read = windowListRead(
             pid: pid,
-            bundleID: app.bundleID,
-            tracked: tracked
+            app: app,
+            tracked: tracked,
+            listsWhenHidden: listsWhenHidden
         )
-        nonisolated(unsafe) let read = axWindows
-        nonisolated(unsafe) let readPolicy = activationPolicy
-        nonisolated(unsafe) let readHidden = appIsHidden
-        axReads.requestWindows(pid: pid) {
-            let hidden = readHidden(pid)
-            guard !hidden || listsWhenHidden else {
-                return WindowListReading(
-                    elements: [],
-                    windows: [],
-                    layers: [:],
-                    policy: readPolicy(pid),
-                    hidden: true,
-                    listRead: false
-                )
-            }
-            let elements = read(pid)
-            let layers = FloatDetection.windowLayers(pid: pid)
-            return WindowListReading(
-                elements: elements,
-                windows: reader.read(elements, layers: layers),
-                layers: layers,
-                policy: readPolicy(pid),
-                hidden: hidden
-            )
-        } onList: { [weak self] reading in
+        let started = ContinuousClock.now
+        axReads.requestWindows(pid: pid, read: read) {
+            [weak self] reading in
             self?.applyWindowList(
                 reading,
                 pid: pid,
@@ -245,6 +229,7 @@ extension EventLoop {
                 coalesceTabs: coalesceTabs,
                 tracked: tracked,
                 writesAtRead: writesAtRead,
+                started: started,
                 ticket: ticket
             )
         }
@@ -257,6 +242,7 @@ extension EventLoop {
         coalesceTabs: Bool,
         tracked: Set<WindowID>,
         writesAtRead: Int,
+        started: ContinuousClock.Instant,
         ticket: Int
     ) {
         guard offMain.reading[pid]?.ticket == ticket else { return }
@@ -274,7 +260,8 @@ extension EventLoop {
                 writesAtRead: writesAtRead,
                 policy: reading.policy,
                 hidden: reading.hidden,
-                listRead: reading.listRead
+                listRead: reading.listRead,
+                readStarted: started
             )
         )
         // A skipped list met an unhide: what waited is owed by a
@@ -308,24 +295,5 @@ extension EventLoop {
             }
         }
         for then in owed { then() }
-    }
-}
-
-extension EventLoop {
-    /// The reader for `pid`'s next off-main list read.
-    func listedWindowReader(
-        pid: pid_t,
-        bundleID: String?,
-        tracked: Set<WindowID>
-    ) -> ListedWindowReader {
-        ListedWindowReader(
-            resolve: resolveWindowID,
-            fullscreen: readFullscreen,
-            traits: shadows.traits,
-            bundleID: bundleID,
-            rules: floatRules,
-            tracked: tracked,
-            isAccessory: classifiesAsOverlay(pid: pid)
-        )
     }
 }

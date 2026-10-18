@@ -2,13 +2,13 @@ import Foundation
 import Testing
 
 /// A bound Desktop's apply skips its window-rule sweep because the
-/// switch's own folded `reconcileAll` runs right after the handler
+/// switch's own batched sweep is requested right after the handler
 /// (#2347). That promise lives in another file, so it is pinned as
-/// spellings: `desktopChanged` runs the event before the folded
-/// sweep, the handler has that one caller, and the deferral wraps
-/// the binding apply in the handler alone. The trade: a second
-/// path into the handler spelled through a closure, not a call, is
-/// invisible here — review's.
+/// spellings: `desktopChanged` opens the batch, runs the event,
+/// then requests the reads, the handler has that one caller, and
+/// the deferral wraps the binding apply in the handler alone. The
+/// trade: a second path into the handler spelled through a
+/// closure, not a call, is invisible here — review's.
 @Suite("A bound switch's skipped sweep is the switch's (#2347)")
 struct DesktopSwitchRuleSweepSeamTests {
     private static let core = SourceScan.repoRoot(from: #filePath)
@@ -27,18 +27,20 @@ struct DesktopSwitchRuleSweepSeamTests {
         )
     }
 
-    @Test("the switch event runs before the folded sweep")
+    @Test("the batch opens before the handler and reads after it")
     func sweepFollowsTheHandler() throws {
         let body = try Self.body(
             of: "func desktopChanged()",
             in: "Events/EventLoop+Apps.swift"
         )
+        let open = try #require(body.range(of: "beginSwitchReconcile()"))
         let event = try #require(
             body.range(of: "onEvent(.desktopChanged)")
         )
-        let sweep = try #require(
-            body.range(of: "foldsSwitchResync { reconcileAll() }")
-        )
+        let sweep = try #require(body.range(of: "requestSwitchReads()"))
+        // Open first, so the handler's bar refresh waits for the
+        // arrivals; read after, so the bound profile's rules gate.
+        #expect(open.upperBound < event.lowerBound)
         #expect(event.upperBound < sweep.lowerBound)
     }
 

@@ -108,7 +108,7 @@ flowchart LR
     A["AX: a window disappears"] --> C{"same frame within the<br/>coalesce window, and an<br/>AXTabGroup on either side?"}
     B["AX: a window appears<br/>at the same frame"] --> C
     C -->|yes| R[".windowRekeyed<br/>slot kept, id swapped in place"]
-    C -->|no, or Desktop-switch reconcileAll| D["destroy + create<br/>two separate windows"]
+    C -->|no, or the Desktop-switch batch| D["destroy + create<br/>two separate windows"]
     E["AX: a tracked id is listed<br/>under a fresh element"] --> F["same id re-elemented<br/>no event (a carried sticky<br/>window crossing Desktops)"]
 ```
 

@@ -195,6 +195,11 @@ extension KiwiCore {
             guard let self else { return body() }
             self.foldingSwitchResync(body)
         }
+        eventLoop.switchReads.onApplied = { [weak self] in
+            guard let self, self.eventLoop.switchReads.barsOwed
+            else { return }
+            self.updateBars()
+        }
         eventLoop.onIgnoredPanelFocus = {
             [weak self] pid, bundleID in
             self?.armIgnoredPanel(pid)

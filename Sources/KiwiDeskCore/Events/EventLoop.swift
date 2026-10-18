@@ -28,7 +28,6 @@ public final class EventLoop {
         _,
         _ in
     }
-
     /// Fired when a transient filter drops a window mid-launch
     /// (#675), queued in `pendingRetrack` for the core's one-shot
     /// re-track (`scheduleTransientRetrack`).
@@ -76,7 +75,6 @@ public final class EventLoop {
     var ownKeyWindow: () -> OwnKeyWindowReading? = {
         EventLoop.ownKeyWindowReading()
     }
-
     var observers: [pid_t: any AppObserving] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
     /// AXEnhancedUserInterface state observed before this loop
@@ -113,8 +111,10 @@ public final class EventLoop {
     /// Per-app off-main AX reads (#618, #1088, #1930); the type
     /// owns the coalescing argument.
     let axReads = AXReadCoalescer()
-    /// The off-main reconciles owed per app (#1930).
+    /// The off-main reconciles owed per app (#1930), and a Desktop
+    /// switch's batch read (#2347).
     var offMain = OffMainReconcile()
+    var switchReads = SwitchReconcile()
     /// Which focus report may still land (#1930).
     var focusOrder = FocusReportOrder()
     /// Tracked windows that carry (or last carried) an `AXTabGroup`.

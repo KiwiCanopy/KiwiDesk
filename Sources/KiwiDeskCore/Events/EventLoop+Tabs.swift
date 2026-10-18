@@ -64,7 +64,8 @@ extension EventLoop {
         live: Set<WindowID>,
         minimized: Set<WindowID>,
         coalesceTabs: Bool,
-        hidden: Bool = false
+        hidden: Bool = false,
+        switchGrace graceAtRead: Bool? = nil
     ) {
         let vanishedIDs = elements[pid, default: [:]].keys
             .filter { !live.contains($0) }
@@ -111,7 +112,7 @@ extension EventLoop {
         // A candidate is checked against ONE census per sweep; a
         // window the compositor still shows was not closed
         // (#1157 — the exempt arms are accessibility.md's).
-        let switchGrace = isWithinSpaceSwitchGrace()
+        let switchGrace = graceAtRead ?? isWithinSpaceSwitchGrace()
         var onScreen: Set<WindowID>?
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })
         where !consumed.contains(id) {
