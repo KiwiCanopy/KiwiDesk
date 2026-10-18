@@ -664,12 +664,18 @@ editing AX code:
   finds the window in state, MOVES it, stamps it in flight and
   only THEN files the switch (`fileDisplaySpaces`, at the
   handler's tail), after which the carried arm takes over and
-  this one is closed. **The filing must follow the carry**: a
-  bound Desktop's profile apply runs a full reconcile inside the
-  handler, and filed at the top that sweep found every arm closed
+  this one is closed. **The filing must follow the carry**, so a
+  sweep run inside the handler finds the arm open: filed at the
+  top, a bound Desktop's in-handler sweep found every arm closed
   and removed the window the carry was about to move (device,
-  2026-09-21, Desktop 2 bound; the notification can land on
-  either side of the handler). No behavior test drives that
+  2026-09-21, Desktop 2 bound). **A bound Desktop's apply leaves
+  its window-rule sweep to the switch's own folded
+  `reconcileAll`** (#2347): `EventLoop.desktopChanged` runs that
+  pass right after the handler, the handler has that one caller,
+  and the deferral is raised only around the binding apply
+  (`DesktopSwitchRuleSweepSeamTests`; `DesktopBindingRuleSweepTests`
+  holds the skip). A new path into `handleDesktopChange` owes the
+  switch's sweep after it. No behavior test drives that
   sweep, so `ReachFilingOrderSeamTests` pins the order and the
   store's one writer beside the boot seed. Residue, recorded in
   `docs/accepted-limitations.md`: a reach-enabled sticky window
