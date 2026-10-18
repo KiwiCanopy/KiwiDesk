@@ -29,6 +29,8 @@ struct HeaderSearch: View {
     @State var cursor = DropdownCursor<String>()
     @FocusState var focused: Bool
     @State var panelHovered = false
+    /// What `SearchPanelWidth` sizes the results panel from.
+    @State var panelRoom = SearchPanelRoom()
     @Environment(\.settingsWidth) private var width
 
     var searching: Bool { !query.trimmed.isEmpty }
@@ -58,6 +60,10 @@ struct HeaderSearch: View {
             shortcutHint: true
         )
         .frame(minWidth: 110, maxWidth: .infinity)
+        .onGeometryChange(
+            for: SearchPanelRoom.self,
+            of: SearchPanelRoom.measured
+        ) { panelRoom = $0 }
         .overlay(alignment: .topLeading) { resultPanel }
         .background { focusShortcut }
         .onChange(of: query) { _, _ in resetCursor() }
