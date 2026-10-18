@@ -30,7 +30,18 @@ extension KiwiCore {
     /// pairing one display's `monitor` with another's
     /// `desktop` describes a switch that never happened
     /// (review, 2026-08-18).
+    /// Sent once the switch's batch has tracked the arrivals, so a
+    /// consumer re-querying on the event sees them (#2347).
     func emitDesktopChange(
+        _ snapshot: DesktopSnapshot,
+        changed: [String]
+    ) {
+        eventLoop.afterSwitchReads { [weak self] in
+            self?.emitDesktopChangeNow(snapshot, changed: changed)
+        }
+    }
+
+    private func emitDesktopChangeNow(
         _ snapshot: DesktopSnapshot,
         changed: [String]
     ) {

@@ -1090,7 +1090,7 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
 `+ReconcileAll`, `+ReconcileOffMain`, `+ListedWindows`, `+Heal`,
 `+WindowPolicy`, `+FloatVerdict`, `+Tabs`, `+RemovalDistrust`, `+Tracking`,
 `+ProcessIdentity`, `+ShadowWindows`, `+WindowServerWakeUp`,
-`+PanelButton`).
+`+PanelButton`, `+SwitchReconcile`, and `SwitchReconcile`).
 
 - AX calls are slow and can block — snapshot before layout math, and the
   activation, focus, hide and undeferred-close arms and the distrust and
@@ -1188,9 +1188,10 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   batched sweep, so a new path into `handleDesktopChange` owes that sweep
   after it (#2347, `DesktopSwitchRuleSweepSeamTests`)
 - a Desktop switch's bulk pass reads off the main actor as one batch applied
-  in one fold: an app's readings apply in read order, the census is judged by
-  the grace the read began in, and the settle and the bars wait for the fold
-  (#2347, `SwitchReconcileTests`, `SwitchReconcileSeamTests`)
+  in one fold: an app's readings apply in the order they ran, a per-app read
+  the batch awaits applies inside it, and the settle, `desktop_change` and
+  the bars wait for the fold (#2347, `SwitchReconcileTests`,
+  `SwitchReconcileSeamTests`)
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
   destroy re-reads the app still tracking it — never tracking, filing or

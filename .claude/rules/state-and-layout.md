@@ -2277,7 +2277,7 @@ that pair into a `.windowRekeyed` (id swapped in place — no tree,
 one slot per group) instead of a destroy + create. The gate needs
 an `AXTabGroup` on **either** side (Ghostty exposes one only at 2+
 tabs, so the 1↔2 boundary window has none). Coalescing is
-suppressed on the native-Space-switch `reconcileAll`
+suppressed on the Desktop switch's batched sweep
 (`coalesceTabs: false`) — same-app windows across spaces tile to
 identical frames and would false-merge.
 

@@ -53,6 +53,9 @@ struct WindowListReading: @unchecked Sendable {
     /// False where a hidden app's list was skipped (#2027): the
     /// empty list then speaks for no window.
     var listRead = true
+    /// When the read RAN, off the main actor: a queued read runs
+    /// after one asked later, so the ask's time cannot order them.
+    var readStarted: ContinuousClock.Instant?
 }
 
 /// Reads a list's windows OFF the main actor (#1933). The seams
@@ -159,6 +162,7 @@ extension EventLoop {
         nonisolated(unsafe) let readPolicy = activationPolicy
         nonisolated(unsafe) let readHidden = appIsHidden
         return {
+            let started = ContinuousClock.now
             let hidden = readHidden(pid)
             guard !hidden || listsWhenHidden else {
                 return WindowListReading(
@@ -167,7 +171,8 @@ extension EventLoop {
                     layers: [:],
                     policy: readPolicy(pid),
                     hidden: true,
-                    listRead: false
+                    listRead: false,
+                    readStarted: started
                 )
             }
             let elements = read(pid)
@@ -177,7 +182,8 @@ extension EventLoop {
                 windows: reader.read(elements, layers: layers),
                 layers: layers,
                 policy: readPolicy(pid),
-                hidden: hidden
+                hidden: hidden,
+                readStarted: started
             )
         }
     }

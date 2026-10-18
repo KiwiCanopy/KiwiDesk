@@ -45,7 +45,7 @@ struct ShelfRetireWiringTests {
         // shelf starts leaving: each call's preceding text, back to
         // the previous call or the function head, holds a sync.
         let head = try #require(
-            source.range(of: "func updateBars()")?.upperBound
+            source.range(of: "func updateBars(")?.upperBound
         )
         let decl = try #require(
             source.range(of: "private func retireDepartedBars")?.lowerBound

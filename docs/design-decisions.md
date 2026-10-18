@@ -17393,11 +17393,12 @@ Accessibility is the only reader that can say what a window *is*,
 and the only one that can block: a message to an app not servicing
 AX — one App-Napped with every window on another Desktop, or a
 headless agent — returns when the messaging timeout fires, not
-before. The bulk re-sync a Desktop switch runs, sent to every
-observed app, stalls the main actor on a session with a handful of
-such apps for ~1 s per app, in series, with the arrived window's
-ring, retile and raise queued behind — an empty target Desktop
-costs exactly as much, because the price was never the windows
+before. A bulk re-sync sent to every observed app waits ~1 s on each such
+app — in series on the main actor for a config reload, and for a
+Desktop switch, whose reads run off it (#2347), the switch's one
+fold held to its bound with that app's departures left standing
+until its read returns — and an empty target Desktop costs exactly
+as much, because the price was never the windows
 that arrived but the apps that did not answer
 ([#1037](https://github.com/KiwiCanopy/KiwiDesk/issues/1037)). The
 WindowServer census answers the one question a bulk pass needs

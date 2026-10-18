@@ -198,7 +198,7 @@ extension KiwiCore {
         eventLoop.switchReads.onApplied = { [weak self] in
             guard let self, self.eventLoop.switchReads.barsOwed
             else { return }
-            self.updateBars()
+            self.repaintBarsAndFloatNet(animated: false)
         }
         eventLoop.onIgnoredPanelFocus = {
             [weak self] pid, bundleID in

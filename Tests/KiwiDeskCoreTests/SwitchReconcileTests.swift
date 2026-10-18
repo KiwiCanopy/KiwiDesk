@@ -28,6 +28,9 @@ struct SwitchReconcileTests {
     @MainActor
     private final class Box {
         var destroyed: [WindowID] = []
+        /// Destroys that landed inside a fold, while it applied.
+        var foldedDestroys: [WindowID] = []
+        var inFold = false
         var folds = 0
         var listed: [pid_t: WindowID] = [:]
         var census: [pid_t: Set<WindowID>] = [:]
@@ -86,11 +89,16 @@ struct SwitchReconcileTests {
         }
         loop.foldsSwitchResync = { body in
             box.folds += 1
+            box.inFold = true
             body()
+            box.inFold = false
         }
-        loop.onEvent = { event in
+        loop.onEvent = { [weak loop] event in
             if case .windowDestroyed(let id, _) = event {
                 box.destroyed.append(id)
+                if box.inFold, loop?.switchReads.applying == true {
+                    box.foldedDestroys.append(id)
+                }
             }
         }
         #expect(loop.beginScan())
@@ -178,17 +186,61 @@ struct SwitchReconcileTests {
         #expect(loop.elements[first]?[firstID] != nil)
     }
 
-    @Test("the census is judged by the grace the read began in")
-    func graceIsTakenAtTheRead() {
+    @Test("a per-app read landing first applies inside the fold")
+    func perAppReadIsHeldForTheFold() {
         let (loop, box) = makeLoop()
-        // The compositor still shows both windows, as it does
-        // through a switch's transition (#1023).
-        box.census = [first: [firstID], second: [secondID]]
         switchDesktop(loop)
-        // The apply lands after the grace has passed.
-        loop.lastDesktopChange = .distantPast
+        // An activation's read of the first app lands before the
+        // batch's own.
+        loop.reconcileOffMain(
+            pid: first,
+            app: AppRef(pid: first),
+            coalesceTabs: false
+        )
+        box.runLast()
+        #expect(box.destroyed.isEmpty, "applied outside the fold")
         box.drain()
-        #expect(Set(box.destroyed) == [firstID, secondID])
+        #expect(box.folds == 1)
+        #expect(Set(box.foldedDestroys) == [firstID, secondID])
+    }
+
+    @Test("a queued read is ordered by when it ran, not when asked")
+    func queuedReadOrdersByWhenItRan() {
+        let (loop, box) = makeLoop()
+        box.listed = [first: firstID, second: secondID]
+        switchDesktop(loop)
+        // The newer switch's reads queue behind the first's.
+        switchDesktop(loop)
+        loop.reconcileOffMain(
+            pid: first,
+            app: AppRef(pid: first),
+            coalesceTabs: false
+        )
+        // The stale batch's two reads run; the newer batch's are
+        // dispatched only then, behind the per-app read.
+        box.runOne()
+        box.runOne()
+        box.runOne()  // the per-app read: lists the window
+        // The first app's window closes; the newer batch's read,
+        // asked BEFORE the per-app read but run after it, sees it.
+        box.listed[first] = nil
+        box.drain()
+        #expect(box.destroyed.contains(firstID))
+        #expect(!box.destroyed.contains(secondID))
+    }
+
+    @Test("owed work runs after the fold, in order")
+    func afterFoldWaitsForTheFold() {
+        let (loop, box) = makeLoop()
+        var ran: [Int] = []
+        switchDesktop(loop)
+        loop.afterSwitchReads { ran.append(box.destroyed.count) }
+        loop.afterSwitchReads { ran.append(9) }
+        #expect(ran.isEmpty)
+        box.drain()
+        #expect(ran == [2, 9])
+        loop.afterSwitchReads { ran.append(3) }
+        #expect(ran == [2, 9, 3], "no batch pending: at once")
     }
 
     @Test("the settle waits for the fold, and a newer switch drops it")
@@ -238,7 +290,7 @@ struct SwitchReconcileTests {
         )
         #expect(SwitchReconcile.bound < 0.6, "the settle's delay")
         #expect(
-            SwitchReconcile.stragglerLimit <= KiwiCore.inFlightWindow
+            SwitchReconcile.stragglerLimit < KiwiCore.inFlightWindow
         )
     }
 }

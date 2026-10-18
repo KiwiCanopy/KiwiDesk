@@ -115,7 +115,10 @@ flowchart LR
 At a Desktop switch, `App` carries every reach-enabled sticky
 window onto the arriving Desktop through `WMBridge` (#1145); the
 reconcile that follows sees those ids vanish and return under
-fresh AX elements, and re-registers them in place.
+fresh AX elements, and re-registers them in place. That
+reconcile reads each app's window list off the main actor and
+applies them in one fold; the 600 ms settle, the bars and
+`desktop_change` wait for it (#2347).
 
 Every other window of the left Desktop *is* destroyed and
 re-created by that reconcile, and the destroy fold walks

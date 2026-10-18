@@ -923,6 +923,14 @@ numbering a screen argument takes), and the active profile:
           "profile": "Creator Studio"}}
 ```
 
+:::unreleased
+`desktop_change` fires once KiwiDesk has read the arriving
+Desktop's windows, after that switch's `vanished` and `returned`
+bursts, so a state query sent on it sees them — save an app slow
+to answer, whose windows follow within a few seconds
+([#2347](https://github.com/KiwiCanopy/KiwiDesk/issues/2347)).
+:::
+
 With "Displays have separate Spaces" on, each screen switches
 Desktops on its own, so watch `monitor` to tell them apart:
 only a switch on the main screen (`monitor: 1`) selects a

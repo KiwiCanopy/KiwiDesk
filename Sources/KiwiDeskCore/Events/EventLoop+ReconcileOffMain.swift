@@ -24,9 +24,6 @@ struct PrefetchedWindows {
     var listRead = true
     /// When the read began, for `SwitchReconcile.appliedRead`.
     var readStarted: ContinuousClock.Instant?
-    /// A switch batch's grace verdict, taken as its read began
-    /// (#2347); nil asks the sweep's own clock.
-    var switchGrace: Bool?
 
     /// What was read of the `index`th listed window, if anything.
     func window(at index: Int) -> ListedWindow? {
@@ -88,6 +85,8 @@ struct OffMainReconcile {
 
     var reading: [pid_t: Read] = [:]
     var next: [pid_t: Debt] = [:]
+    /// A Desktop switch's batch read (#2347).
+    var switchBatch = SwitchReconcile()
     /// When each app's last list read began.
     private(set) var readStarted: [pid_t: ContinuousClock.Instant] =
         [:]
@@ -138,6 +137,7 @@ struct OffMainReconcile {
         reading = [:]
         next = [:]
         readStarted = [:]
+        switchBatch.drop()
     }
 }
 
@@ -245,25 +245,52 @@ extension EventLoop {
         started: ContinuousClock.Instant,
         ticket: Int
     ) {
+        // An app the switch's batch awaits applies in its fold
+        // (#2347), in read order with the batch's own reading.
+        if switchReads.holdsApply(pid) {
+            switchReads.held.append(
+                .init(start: reading.readStarted ?? started) {
+                    [weak self] in
+                    self?.applyWindowList(
+                        reading,
+                        pid: pid,
+                        app: app,
+                        coalesceTabs: coalesceTabs,
+                        tracked: tracked,
+                        writesAtRead: writesAtRead,
+                        started: started,
+                        ticket: ticket
+                    )
+                }
+            )
+            return
+        }
         guard offMain.reading[pid]?.ticket == ticket else { return }
         var owed = offMain.reading.removeValue(forKey: pid)?.then ?? []
         var debt = offMain.next.removeValue(forKey: pid)
-        let answered = reconcile(
-            pid: pid,
-            app: app,
-            coalesceTabs: coalesceTabs,
-            prefetched: PrefetchedWindows(
-                elements: reading.elements,
-                trackedAtRead: tracked,
-                windows: reading.windows,
-                layers: reading.layers,
-                writesAtRead: writesAtRead,
-                policy: reading.policy,
-                hidden: reading.hidden,
-                listRead: reading.listRead,
-                readStarted: started
+        // Held for a switch's fold behind a newer reading of the
+        // app, it settles what waits on it and sweeps nothing.
+        let stale =
+            switchReads.applying
+            && switchReads.answeredSince(pid, reading.readStarted ?? started)
+        let answered =
+            stale
+            || reconcile(
+                pid: pid,
+                app: app,
+                coalesceTabs: coalesceTabs,
+                prefetched: PrefetchedWindows(
+                    elements: reading.elements,
+                    trackedAtRead: tracked,
+                    windows: reading.windows,
+                    layers: reading.layers,
+                    writesAtRead: writesAtRead,
+                    policy: reading.policy,
+                    hidden: reading.hidden,
+                    listRead: reading.listRead,
+                    readStarted: reading.readStarted ?? started
+                )
             )
-        )
         // A skipped list met an unhide: what waited is owed by a
         // read that lists, the parked one or a fresh one (#2027).
         if !answered {

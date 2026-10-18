@@ -2,11 +2,11 @@ import Foundation
 import Testing
 
 /// The Desktop switch batch's wirings no unit test reaches
-/// (#2347): the settle's deferred task parks behind the batch, and
-/// bootstrap pays the held bars from the batch's fold. Both seams
-/// default inert — the settle would run unparked and the bars stay
-/// owed with every behaviour suite green — so each is pinned by
-/// exact count to its file.
+/// (#2347): the settle and the switch's event park behind the
+/// batch, bootstrap pays the held bars from its fold, a switch
+/// reveal claims no launch follow, and a per-app read the batch
+/// awaits is held for it. Each deleted line leaves the behaviour
+/// suites green, so each is pinned by exact count to its file.
 @Suite("Switch reconcile wirings (#2347)")
 struct SwitchReconcileSeamTests {
     private static let core = SourceScan.repoRoot(from: #filePath)
@@ -24,8 +24,23 @@ struct SwitchReconcileSeamTests {
         ),
         // The one door that holds a refresh.
         (
-            "guard !eventLoop.switchReads.isPending else {",
+            "guard !holdingForSwitch || !eventLoop.switchReads.isPending",
             "KiwiCore+Shelf.swift", 1
+        ),
+        // The switch's public event waits for its arrivals.
+        (
+            "eventLoop.afterSwitchReads {",
+            "KiwiCore+DesktopEvents.swift", 1
+        ),
+        // A switch reveal never claims a launch's follow (#1599).
+        (
+            "guard !eventLoop.switchReads.applying,",
+            "KiwiCore+LaunchFollow.swift", 1
+        ),
+        // A per-app read the batch awaits is held for the fold.
+        (
+            "if switchReads.holdsApply(pid) {",
+            "EventLoop+ReconcileOffMain.swift", 1
         ),
     ]
 
