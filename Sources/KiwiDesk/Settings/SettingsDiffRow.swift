@@ -60,12 +60,10 @@ struct SettingsDiffRow: Identifiable, Hashable {
     /// can name the same one: the fold joins on it, never on the
     /// label (#792).
     var subject: ReachSubject?
-    /// A reach row's words for its profiles, set where its change
-    /// is the edited profile's own: the source folds it into the
-    /// row carrying its `subject` (`SettingsDiffRowFold`).
-    var foldReach: String?
-    /// The other profiles a folded change also reached, drawn
-    /// after the label.
+    /// The profiles a change also reached, drawn after the label. A
+    /// reach row sets it where its change is the edited profile's
+    /// own, and `SettingsDiffRowFold` moves it onto the rows of its
+    /// `subject`.
     var reach: String?
 
     /// A plain value-pair row.

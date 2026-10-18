@@ -92,6 +92,34 @@ struct ReachRowFoldTests {
         #expect(home.oldValue == L("app_rules.reach.diff.none", "No rule"))
     }
 
+    /// A rule ticked into every profile one by one is not shared: a
+    /// profile made later will not get it, so its reach is a count.
+    @Test("only a shared rule reads All profiles")
+    func unsharedIsCounted() throws {
+        LocalizationManager.shared.select("en")
+        let core = makeTestCore()
+        var config = GuiConfig()
+        config.spaces = [SpaceID("1"), SpaceID("2")]
+        try core.guiConfigStore.save(config)
+        let own = AppRuleOverride(rules: ["spotify": "1"])
+        try core.profiles.save(profile("Work", own))
+        try core.profiles.write(profile("Home", own))
+        try core.profiles.write(profile("Away", own))
+        let model = makeTestModel(core: core)
+        model.reload()
+        model.config.appRules["spotify"] = SpaceID("2")
+        model.setProfile(.space, "spotify", "Home", true)
+        model.setProfile(.space, "spotify", "Away", true)
+
+        let base = model.encodedReach?.appRules.base["spotify"]
+        // Vacuity: the rule reached every profile but the base.
+        #expect(base == nil)
+        let row = try #require(
+            mailRows(model).first { $0.instance == "spotify" }
+        )
+        #expect(row.reach == RuleReachWords.group(["Away", "Home", "Work"]))
+    }
+
     @Test("profiles that changed alike share one row")
     func alikeGroup() throws {
         LocalizationManager.shared.select("en")

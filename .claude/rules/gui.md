@@ -1251,9 +1251,12 @@ family beside `dropRuleHalf` and `adoptRuleHalf` by
 `ListEntryInstance`, minted and parsed by that one type. **Other
 profiles that changed exactly as the edited one did fold into its
 row as a reach label, joined on `SettingsDiffRow.subject` and
-never on the label** — only in `SettingsDiffRowFold`, and a
-producer whose rows another profile's reach can name sets the
-subject (`ReachRowFoldTests`).
+never on the label** — in `SettingsDiffRowFold`, which review
+holds as the one fold — and a producer whose rows another
+profile's reach can name states the subject's family, the list
+producer taking it as a required argument (`ReachRowFoldTests`,
+and `ReachRowFoldFamilyTests` per family, which reds on a reach
+row left unfolded).
 
 ## Responsive width (#678 turn 17a)
 

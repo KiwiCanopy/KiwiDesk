@@ -44,7 +44,8 @@ extension SettingsValueReadout {
                     "Ignore rule"
                 ),
                 old: old.ignoreRules,
-                new: new.ignoreRules
+                new: new.ignoreRules,
+                family: nil
             )
         case .floatAutomatically:
             return [
@@ -60,7 +61,8 @@ extension SettingsValueReadout {
                 census,
                 base: label(for: census),
                 old: old.tileRules,
-                new: new.tileRules
+                new: new.tileRules,
+                family: .tile
             )
         case .appRulesAddSpace, .appRulesAddFloat, .spaceRuleDelete,
             .floatRuleDelete, .appRulesAddTile, .tileRuleDelete:
@@ -103,7 +105,9 @@ extension SettingsValueReadout {
         base: String,
         old: [String],
         new: [String],
-        family: RuleFamily? = nil
+        // Required, so a list another profile's reach can name never
+        // forgets its subject (#792): nil only where none can.
+        family: RuleFamily?
     ) -> [SettingsDiffRow] {
         var remaining = new
         var removed: [String] = []

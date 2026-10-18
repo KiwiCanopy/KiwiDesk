@@ -8,27 +8,29 @@ struct ReachSubject: Hashable {
 }
 
 /// Profiles that changed exactly as the edited one did read as its
-/// row's reach rather than a row each (#792, owner 2026-10-18).
+/// rows' reach rather than a row each (#792, owner 2026-10-18).
 @MainActor
 enum SettingsDiffRowFold {
-    /// `own` with every folding reach row's words drawn on the own
-    /// row of its subject, followed by the reach rows left over.
+    /// `own` with each folding reach row's words drawn on EVERY own
+    /// row of its subject — a float rule's Added and Removed notes
+    /// alike — followed by the reach rows left over, which draw
+    /// none: their profiles are their label.
     static func folded(
         _ own: [SettingsDiffRow],
         reach: [SettingsDiffRow]
     ) -> [SettingsDiffRow] {
         var own = own
         var rest: [SettingsDiffRow] = []
-        for row in reach {
-            guard let words = row.foldReach, let subject = row.subject,
-                let at = own.firstIndex(where: {
-                    $0.subject == subject && $0.reach == nil
-                })
-            else {
+        for var row in reach {
+            let matches = own.indices.filter {
+                own[$0].subject != nil && own[$0].subject == row.subject
+            }
+            guard let words = row.reach, !matches.isEmpty else {
+                row.reach = nil
                 rest.append(row)
                 continue
             }
-            own[at].reach = words
+            for at in matches { own[at].reach = words }
         }
         return own + rest
     }

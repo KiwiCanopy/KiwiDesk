@@ -131,9 +131,11 @@ extension SettingsModel {
                 if own.old != own.new, group.old == own.old,
                     group.new == own.new
                 {
-                    row.foldReach = foldWords(
+                    row.reach = foldWords(
                         [editing] + group.profiles,
-                        of: encoded.profiles
+                        of: encoded.profiles,
+                        shared: encoded.base[app] != nil
+                            && encoded.base[app] == own.new
                     )
                 }
                 appRows.append(row)
@@ -177,13 +179,15 @@ extension SettingsModel {
     }
 
     /// The reach column's words for `profiles`, in the table's
-    /// order — every profile, else the ladder past one.
+    /// order: "All profiles" only for a SHARED rule, which a
+    /// profile made later gets too, else the ladder past one.
     private func foldWords(
         _ profiles: [String],
-        of all: [String]
+        of all: [String],
+        shared: Bool
     ) -> String {
         let reached = all.filter(profiles.contains)
-        return reached.count == all.count
+        return shared && reached.count == all.count
             ? RuleReachWords.allProfiles
             : RuleReachWords.group(reached)
     }
