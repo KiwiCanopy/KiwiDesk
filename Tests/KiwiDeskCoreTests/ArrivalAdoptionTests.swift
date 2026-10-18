@@ -32,6 +32,10 @@ struct ArrivalAdoptionTests {
     final class Box {
         /// Main-actor AX calls made while a list applied.
         var applyCalls = 0
+        /// Per-window seams asked while a list applied: their
+        /// fakes answer outside `WorkMeter`.
+        var applySeams: [String] = []
+        var applying = false
         var created: [ManagedWindow] = []
     }
 
@@ -75,7 +79,12 @@ struct ArrivalAdoptionTests {
         loop.resolveWindowID = { element in
             elements.firstIndex { CFEqual($0, element) }.map { ids[$0] }
         }
-        loop.readFullscreen = { _ in false }
+        loop.readFullscreen = { _ in
+            MainActor.assumeIsolated {
+                if box.applying { box.applySeams.append("fullscreen") }
+            }
+            return false
+        }
         loop.offMain.readFacts = { _, layer in
             WindowFacts(
                 role: kAXWindowRole,
@@ -84,7 +93,10 @@ struct ArrivalAdoptionTests {
             ) { "Arrived" }
         }
         loop.shadows.traits = { _, id in
-            id.map {
+            MainActor.assumeIsolated {
+                if box.applying { box.applySeams.append("traits") }
+            }
+            return id.map {
                 WindowTraits(
                     id: $0,
                     hasTitlebarButton: true,
@@ -96,7 +108,9 @@ struct ArrivalAdoptionTests {
         loop.axReads.deliver = { work in
             MainActor.assumeIsolated {
                 let before = Self.mainCalls
+                box.applying = true
                 work()
+                box.applying = false
                 box.applyCalls += Self.mainCalls - before
             }
         }
@@ -129,6 +143,7 @@ struct ArrivalAdoptionTests {
         #expect(box.created.allSatisfy { $0.title == "Arrived" })
         #expect(Set(loop.elements[pid]?.keys ?? [:].keys).count == 3)
         #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
+        #expect(box.applySeams.isEmpty, "\(box.applySeams)")
     }
 
     @Test("a switch batch's arrivals cost the main actor no AX call")
@@ -137,6 +152,7 @@ struct ArrivalAdoptionTests {
         loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
         #expect(box.created.map(\.id) == arrivals)
         #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
+        #expect(box.applySeams.isEmpty, "\(box.applySeams)")
     }
 
     /// The negative control: the same arrivals reconciled on the
