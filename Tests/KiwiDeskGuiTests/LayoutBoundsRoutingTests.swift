@@ -78,10 +78,6 @@ struct LayoutBoundsRoutingTests {
         // placement lies past the screen's edge, which is what
         // the placement-bounce distrust keys on.
         "App/KiwiCore+FocusDistrust.swift": 1,
-        // A containment box, not a span (#2234): whether an App
-        // Bar item's window lies wholly on its screen, which is
-        // what the item's dim and half-moon key on.
-        "App/KiwiCore+AppBarVisibility.swift": 1,
         // The `layoutBounds(on:)` seam — the one legitimate
         // consumer, and what every span reads through.
         "Tiling/TilingEngine+LayoutBounds.swift": 1,

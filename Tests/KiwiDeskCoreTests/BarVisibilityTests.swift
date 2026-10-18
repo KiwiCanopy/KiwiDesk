@@ -67,4 +67,17 @@ struct BarVisibilityTests {
         let touching = CGRect(x: 600, y: 0, width: 400, height: 600)
         #expect(judge(window, above: [touching]) == .visible)
     }
+
+    @Test("A cover that contains the window hides it, in any order")
+    func containingCoverWins() {
+        let window = CGRect(x: 0, y: 0, width: 600, height: 600)
+        let corner = CGRect(x: 400, y: 400, width: 400, height: 300)
+        #expect(judge(window, above: [corner, screen]) == .hidden)
+    }
+
+    @Test("A window cut at both ends of an axis names no side")
+    func bothEndsCutNameNoSide() {
+        let wide = CGRect(x: -100, y: 0, width: 1200, height: 800)
+        #expect(judge(wide) == .partly(shown: nil))
+    }
 }

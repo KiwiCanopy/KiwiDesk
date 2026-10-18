@@ -25,8 +25,8 @@ extension AppBarOverlay {
         /// the row, so no drag.
         public let floating: Bool
         /// Where the window a click focuses sits (#2234): the dim
-        /// reads it. Core's verdict, set after the item is built.
-        public var visibility: BarVisibility = .visible
+        /// and the half-moon read it.
+        public let visibility: BarVisibility
 
         public init(
             id: WindowID,
@@ -37,7 +37,8 @@ extension AppBarOverlay {
             count: Int = 1,
             members: [WindowID]? = nil,
             titleCut: Bool = false,
-            floating: Bool = false
+            floating: Bool = false,
+            visibility: BarVisibility = .visible
         ) {
             self.id = id
             self.name = name
@@ -48,6 +49,7 @@ extension AppBarOverlay {
             self.members = members ?? [id]
             self.titleCut = titleCut
             self.floating = floating
+            self.visibility = visibility
         }
     }
 }

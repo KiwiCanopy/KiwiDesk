@@ -97,4 +97,41 @@ struct AppBarVisibilityTests {
         #expect(seen[WindowID(1)] == .visible)
         #expect(seen[WindowID(2)] == .partly(shown: .left))
     }
+
+    @Test("Monocle with a float focused keeps the rest hidden")
+    func monocleFloatFocusKeepsTheStack() throws {
+        var float = window(3, floating: true)
+        float.frame = CGRect(x: 100, y: 100, width: 300, height: 200)
+        let core = try makeCore(
+            mode: "monocle",
+            windows: [window(1), window(2), float]
+        )
+        core.state.apply(.windowFocused(WindowID(1)))
+        core.state.apply(.windowFocused(WindowID(3)))
+        let seen = try verdicts(core)
+        let tiles = [seen[WindowID(1)], seen[WindowID(2)]]
+        #expect(tiles.filter { $0 == .hidden }.count == 1)
+        #expect(!tiles.contains(.visible))
+    }
+
+    @Test("A float's own move refreshes the bars")
+    func floatMoveRefreshesTheBars() throws {
+        var float = window(3, floating: true)
+        float.frame = CGRect(x: 100, y: 100, width: 300, height: 200)
+        let core = try makeCore(
+            mode: "monocle",
+            windows: [window(1), float]
+        )
+        #expect(core.appBarListsShownFloat(WindowID(3)))
+        #expect(!core.appBarListsShownFloat(WindowID(1)))
+        core.handleFloatGeometryForBars(WindowID(1))
+        #expect(core.deferred.task(for: .barVisibilityRefresh) == nil)
+        // Through the event arms, not only the door.
+        let moved = CGRect(x: 300, y: 300, width: 300, height: 200)
+        core.handle(.windowMoved(WindowID(3), moved))
+        #expect(core.deferred.task(for: .barVisibilityRefresh) != nil)
+        core.deferred.cancel(.barVisibilityRefresh)
+        core.handle(.windowResized(WindowID(3), moved))
+        #expect(core.deferred.task(for: .barVisibilityRefresh) != nil)
+    }
 }

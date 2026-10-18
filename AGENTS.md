@@ -1574,6 +1574,10 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   `SpaceBarInactiveContentTests`)
 - a row of floats alone keeps its mark and draws no rule
   (`AppBarFloatOverlayTests`)
+- an App Bar item's visibility is judged once in
+  `KiwiCore.appBarVisibility` from KiwiDesk's issued frames and intended
+  order, never a WindowServer read, a new frame input owing the bar refresh
+  an arm (#2234, `AppBarVisibilityTests`, `FrameSetReaderCensusTests`)
 
 ### [borders](.claude/rules/borders.md)
 

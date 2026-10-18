@@ -59,6 +59,11 @@ final class AppBarHalfMoon: NSView {
         super.layout()
         guard let drawn else { return }
         let box = bounds.insetBy(dx: 0.5, dy: 0.5)
+        // Its own layers: AppKit's implicit tween would run beside
+        // `BarMotion`, ungated on Reduce Motion.
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        defer { CATransaction.commit() }
         ring.frame = bounds
         half.frame = bounds
         ring.strokeColor = drawn.ink.cgColor

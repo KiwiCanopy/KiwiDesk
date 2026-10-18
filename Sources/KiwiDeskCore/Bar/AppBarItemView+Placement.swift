@@ -138,11 +138,35 @@ extension AppBarItemView {
         guard let square = verticalIconSquare(in: size) else {
             return 0...length
         }
-        let moon =
-            visibility.drawsHalfMoon
-            ? AppBarHalfMoon.reserve(
-                contentDepth: style.contentDepth(forDepth: size.width)
-            ) : 0
-        return (square.minY - moon)...square.maxY
+        let moon = visibility.drawsHalfMoon ? halfMoonFrame(in: size) : nil
+        return (moon?.minY ?? square.minY)...square.maxY
+    }
+
+    /// The half-moon's disc in a slot of `size` — the one home of
+    /// where it sits in its reserved slot (#2234): at the slot's
+    /// start on the run, centred on the icon's cross axis; nil on a
+    /// side bar item drawing no icon.
+    func halfMoonFrame(in size: CGSize) -> CGRect? {
+        let depth = style.contentDepth(
+            forDepth: horizontal ? size.height : size.width
+        )
+        let diameter = AppBarHalfMoon.diameter(contentDepth: depth)
+        if horizontal {
+            return CGRect(
+                x: horizontalPlacement(in: size).x,
+                y: (size.height - diameter) / 2,
+                width: diameter,
+                height: diameter
+            )
+        }
+        guard let square = verticalIconSquare(in: size) else {
+            return nil
+        }
+        return CGRect(
+            x: square.midX - diameter / 2,
+            y: square.minY - AppBarHalfMoon.reserve(contentDepth: depth),
+            width: diameter,
+            height: diameter
+        )
     }
 }

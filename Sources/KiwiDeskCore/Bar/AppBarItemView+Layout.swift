@@ -106,13 +106,7 @@ extension AppBarItemView {
     private func layoutHorizontal() {
         let placed = horizontalPlacement(in: bounds.size)
         label.isHidden = !placed.showsLabel
-        let diameter = placed.moon - Self.contentPadding / 2
-        halfMoon.frame = CGRect(
-            x: placed.x,
-            y: (bounds.height - diameter) / 2,
-            width: diameter,
-            height: diameter
-        )
+        halfMoon.frame = halfMoonFrame(in: bounds.size) ?? .zero
         var x = placed.x + placed.moon
         if !iconSlotHidden {
             layoutIconSlot(
@@ -151,15 +145,7 @@ extension AppBarItemView {
         guard let square = verticalIconSquare(in: bounds.size) else {
             return
         }
-        let diameter = AppBarHalfMoon.diameter(
-            contentDepth: style.contentDepth(forDepth: bounds.width)
-        )
-        halfMoon.frame = CGRect(
-            x: square.midX - diameter / 2,
-            y: square.minY - Self.contentPadding / 2 - diameter,
-            width: diameter,
-            height: diameter
-        )
+        halfMoon.frame = halfMoonFrame(in: bounds.size) ?? .zero
         layoutIconSlot(in: square)
     }
 

@@ -1447,6 +1447,19 @@ reaches.
   (`appBarActiveIndex`). `AppBarFloatTests` ▸ `floatsTrailTheRow`
   holds the order and `AppBarFloatOverlayTests` ▸
   `floatDoesNotReorder` the drop.
+- **Judge an App Bar item's visibility once, in
+  `KiwiCore.appBarVisibility`, from the frames KiwiDesk issued and
+  the order it intends, never a WindowServer read** (#2234): the
+  bars refresh on every switch and focus report, and a compositor
+  round trip there stalls under GPU load (#1925). The verdict is
+  `BarVisibility.judge`'s, a group taking the window its click
+  focuses, and a reader asks the item's `visibility` rather than
+  judging again. A new frame input to the verdict owes the bar
+  refresh an arm, as a float's own move or resize has
+  (`AppBarVisibilityTests` ▸ `floatMoveRefreshesTheBars`).
+  `FrameSetReaderCensusTests` holds which frame set it reads; that
+  no compositor read joins it is review's. The trade is
+  `docs/design-decisions.md` ▸ App Bar.
 - **A bar click, menu row or drop is user motion (#804)** and
   opens `withUserMotion`; a held layout pass still refreshes the
   bars at once — state-and-layout.md ▸ Window motion says whose

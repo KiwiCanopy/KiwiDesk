@@ -217,13 +217,16 @@ extension KiwiCore {
         // A group takes its first member's: the window its click
         // focuses (#2234).
         let items =
-            (groups.map { barItem(for: $0, style: style) }
+            groups.map {
+                barItem(for: $0, style: style, visibility: seen)
+            }
             + floats.map {
-                barItem(for: [$0], style: style, floating: true)
-            }).map { item in
-                var item = item
-                item.visibility = seen[item.id] ?? .visible
-                return item
+                barItem(
+                    for: [$0],
+                    style: style,
+                    floating: true,
+                    visibility: seen
+                )
             }
         return AppBarContent(
             space: space,

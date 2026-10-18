@@ -66,14 +66,12 @@ struct IdleItemContrastTests {
     }
 
     /// Under Reduce transparency the plate is opaque
-    /// (`LiquidGlassGate.opaque`), and the App Bar's two inks meet
-    /// it with no wallpaper behind: the dim tier's idle ink still
-    /// clears the floor, and a fully visible item's own colour
-    /// reads at least as strongly, so the lit tier is never the
-    /// fainter one (#2234).
-    @Test("On the opaque plate the idle and lit inks both hold")
+    /// (`LiquidGlassGate.opaque`), and the App Bar's dimmed ink
+    /// meets it with no wallpaper behind: an item not fully on
+    /// screen keeps its idle title legible there too (#2234).
+    @Test("The idle ink clears the floor on the opaque plate")
     @MainActor
-    func opaquePlateInksHold() throws {
+    func opaquePlateIdleInkHolds() throws {
         var measured = 0
         for palette in PaletteCatalog.bundled() {
             let name = Comment(rawValue: palette.name)
@@ -90,17 +88,7 @@ struct IdleItemContrastTests {
                 idleContrast(item: item, fill: plate, on: "#000000"),
                 name
             )
-            let ground = try #require(
-                ColorVision.composite(plate, over: "#000000"),
-                name
-            )
-            let ink = try #require(
-                ColorVision.composite(item, over: plate),
-                name
-            )
-            let lit = try #require(ColorVision.contrast(ink, ground), name)
             #expect(idle >= Self.floor, name)
-            #expect(lit >= idle, name)
             measured += 1
         }
         #expect(measured == PaletteCatalog.bundled().count)

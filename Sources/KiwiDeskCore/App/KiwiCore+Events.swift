@@ -145,6 +145,7 @@ extension KiwiCore {
             // retile below delivers it.
             payRestoredFrame(arrived: window.id, effects: effects)
         case .windowMoved(let id, let frame):
+            handleFloatGeometryForBars(id)
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already
             // tracks the ring (#285) and while our own animation
@@ -200,6 +201,7 @@ extension KiwiCore {
             )
         case .windowResized(let id, let frame):
             handleWindowResized(id, frame: frame, previous: preEventFrame)
+            handleFloatGeometryForBars(id)
         case .windowDestroyed(let id, let wasMinimized):
             forgetGoneWindow(id, pid: goneWindowPID)
             // Classified on the compositor's word, and an away

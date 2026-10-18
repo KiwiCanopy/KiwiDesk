@@ -81,12 +81,12 @@ synonym:
   Never a *badge*, which counts or marks window state.
 - **half-moon** — the small disc an App Bar item draws before its
   icon while its window is partly visible (#2234,
-  `AppBarHalfMoon`): its filled half is the side still on screen,
+  `AppBarHalfMoon`): its filled half is the side still in view,
   and a covered window draws it empty. It says where a window sits
   in the layout, never a window's state, so it is neither a
-  *badge* nor a *mark*. A *dot* is #761's Space dots, and *pill*
-  and *indicator* are spoken for above. The name is the owner's to
-  rule before it reaches copy.
+  *badge* nor a *mark*, and copy naming it says *half-moon*. Not a
+  *dot*, which #2142's Desktop plate and #761's Space dots spend,
+  nor a *pill* or an *indicator* (below).
 - **held Space** — a Space with windows kept live for the
   arrangement it left, when a switch does not name it (#1507,
   #1790). *Held* is the word in copy and

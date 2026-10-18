@@ -98,14 +98,15 @@ struct FrameSetReaderCensusTests {
             let name = url.lastPathComponent
             let text = try SourceScan.strippedSource(at: url)
             // A call, never the declaration; the argument label
-            // may sit on the next line.
+            // may sit on the next line. The issued set has a
+            // one-space overload (`of:`, #2234).
             let slots = SourceScan.allMatches(
                 in: text,
                 pattern: "((?<!func )calculatedFrames\\(\\s*state)"
             ).count
             let issued = SourceScan.allMatches(
                 in: text,
-                pattern: "((?<!func )placedFrames\\(\\s*state)"
+                pattern: "((?<!func )placedFrames\\(\\s*(state|of))"
             ).count
             #expect(
                 !(slots > 0 && issued > 0),

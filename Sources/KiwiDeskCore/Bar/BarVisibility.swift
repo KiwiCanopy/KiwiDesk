@@ -47,31 +47,38 @@ public enum BarVisibility: Equatable, Sendable {
         if cutX > tolerance || cutY > tolerance {
             return .partly(shown: side(of: shown, in: frame, cutX, cutY))
         }
-        for cover in above {
+        let overlapping = above.filter { cover in
             let overlap = shown.intersection(cover)
-            guard !overlap.isNull, overlap.width > tolerance,
-                overlap.height > tolerance
-            else { continue }
-            if cover.insetBy(dx: -tolerance, dy: -tolerance)
-                .contains(shown)
-            {
-                return .hidden
-            }
-            return .partly(shown: nil)
+            return !overlap.isNull && overlap.width > tolerance
+                && overlap.height > tolerance
         }
+        if overlapping.contains(where: {
+            $0.insetBy(dx: -tolerance, dy: -tolerance).contains(shown)
+        }) {
+            return .hidden
+        }
+        if !overlapping.isEmpty { return .partly(shown: nil) }
         return .visible
     }
 
-    /// The side of `frame` that `shown` keeps, on the axis cut more.
+    /// The side of `frame` that `shown` keeps, on the axis cut more
+    /// — nil where that axis is cut at both ends, which points no
+    /// way to scroll.
     private static func side(
         of shown: CGRect,
         in frame: CGRect,
         _ cutX: CGFloat,
         _ cutY: CGFloat
-    ) -> Side {
+    ) -> Side? {
         if cutX >= cutY {
-            return shown.midX < frame.midX ? .left : .right
+            let left = shown.minX - frame.minX > tolerance
+            let right = frame.maxX - shown.maxX > tolerance
+            guard left != right else { return nil }
+            return right ? .left : .right
         }
-        return shown.midY < frame.midY ? .top : .bottom
+        let top = shown.minY - frame.minY > tolerance
+        let bottom = frame.maxY - shown.maxY > tolerance
+        guard top != bottom else { return nil }
+        return bottom ? .top : .bottom
     }
 }

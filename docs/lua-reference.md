@@ -2557,8 +2557,10 @@ Lua-only (no GUI).
 
 :::unreleased
 On the App Bar the dim marks a window that is not fully on screen
-— cut by the screen's edge, covered, or hidden. A fully visible
-item stays undimmed whether or not it holds the focus.
+— cut by the screen's edge, partly under another of its Space's
+windows, or hidden. A fully visible item stays undimmed whether or
+not it holds the focus. Another app's window or an untracked panel
+over it does not count.
 :::
 
 **Example:**
@@ -2609,9 +2611,13 @@ which follows the focused window's colour until you set it.
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
-An App Bar window that is not focused draws its title and glyph
-in the same idle ink as an identifier on a Space you are not on:
-`kiwishelf.set_item_color` at 60% of its own alpha.
+:::unreleased
+An App Bar window not fully on screen draws its title and glyph in
+the same idle ink as an identifier on a Space you are not on:
+`kiwishelf.set_item_color` at 60% of its own alpha. A fully visible
+one draws them in the item colour, and the focused one in
+`active_item_color`.
+:::
 
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
