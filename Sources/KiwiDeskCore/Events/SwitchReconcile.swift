@@ -19,7 +19,8 @@ struct SwitchReconcile {
 
     struct Batch {
         let generation: Int
-        /// The gate's order, which the apply keeps.
+        /// The gate's targets; the fold applies newest reading
+        /// first, across apps.
         var order: [pid_t] = []
         var reads: [pid_t: Read] = [:]
         /// The fold of what landed by the bound, or of every read,
