@@ -102,4 +102,23 @@ struct GlassBoxContentFitTests {
         )
         #expect(box.content.frame == box.glass.bounds)
     }
+
+    /// The device state after an animated grow: the host has its
+    /// new size, the glass and its content the old one, and the
+    /// next place would keep them there. The landing's settle
+    /// writes both to the host.
+    @Test("A settle lands a glass left behind by a glide")
+    func settleLandsAStrandedGlass() throws {
+        guard
+            let box = try hostedBox(
+                at: CGRect(x: 10, y: 0, width: 107.7, height: 30)
+            )
+        else { return }
+        box.glass.frame = CGRect(x: 0, y: 0, width: 62.5, height: 30)
+        box.content.frame = box.glass.bounds
+        GlassBox.settle(box.glass)
+        let host = try #require(GlassBox.host(of: box.glass))
+        #expect(box.glass.frame == host.bounds)
+        #expect(box.content.frame == box.glass.bounds)
+    }
 }

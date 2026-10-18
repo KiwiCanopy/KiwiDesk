@@ -100,6 +100,7 @@ struct BarMotionSeamTests {
     private static let members: [String: [String]] = [
         "isReduced": [],
         "runLayout": ["duration(", "isReduced"],
+        "runLayoutLanding": ["duration(", "isReduced"],
         "duration": [],
         "runPlateGlide": ["plateGlideDuration(", "isReduced"],
         "plateGlideDuration": [],

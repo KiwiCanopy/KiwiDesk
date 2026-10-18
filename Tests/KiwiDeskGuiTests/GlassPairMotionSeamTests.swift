@@ -111,4 +111,58 @@ struct GlassPairMotionSeamTests {
             )
         }
     }
+
+    /// A box settles to its host once the run's glide has landed
+    /// (#2425): written after the motion, its body starts none.
+    @Test("a box's settle starts no motion")
+    func settleStartsNoMotion() throws {
+        let declaration = "static func settle("
+        let source = try SourceScan.strippedSource(
+            at: Self.bar.appendingPathComponent("GlassBox.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(after: declaration, in: source),
+            "\(declaration) is gone from GlassBox.swift"
+        )
+        #expect(body.contains("glass.frame = host.bounds"), "\(body)")
+        for spelling in Self.motionStarts {
+            #expect(
+                !body.contains(spelling),
+                "a box's settle starts motion: \(spelling)"
+            )
+        }
+    }
+
+    /// The Space run's glass install settles its boxes on the
+    /// glide's own landing, never a timer beside it (#2425).
+    @Test("the Space run settles its boxes when its glide lands")
+    func spaceRunSettlesOnLanding() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.bar.appendingPathComponent(
+                "SpaceBarOverlay+Render.swift"
+            )
+        )
+        let install = try #require(
+            source.range(of: "installGlassHosting(")
+        )
+        let before = source[..<install.lowerBound]
+        let call = try #require(
+            before.range(
+                of: "BarMotion.runLayoutLanding {",
+                options: .backwards
+            )
+        )
+        let after = source[install.upperBound...]
+        let landed = try #require(
+            after.range(of: "} landed: {"),
+            "the glass install's group takes no landing"
+        )
+        let tail = after[landed.upperBound...].prefix(80)
+        #expect(tail.contains("settleBoxGlasses()"), "\(tail)")
+        #expect(
+            !source[call.upperBound..<landed.lowerBound]
+                .contains("BarMotion.run"),
+            "the landing belongs to another group"
+        )
+    }
 }

@@ -49,6 +49,27 @@ enum BarMotion {
         }
     }
 
+    /// `runLayout`, then `landed` once the group's animations have
+    /// finished — on the next turn under Reduce Motion (#2425).
+    @MainActor
+    static func runLayoutLanding(
+        _ body: () -> Void,
+        landed: @escaping @MainActor () -> Void
+    ) {
+        let reduceMotion = isReduced
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = duration(
+                reduceMotion: reduceMotion
+            )
+            context.timingFunction = CAMediaTimingFunction(
+                name: .easeOut
+            )
+            body()
+        } completionHandler: {
+            MainActor.assumeIsolated { landed() }
+        }
+    }
+
     /// One view's part in a Space chip's strip walk (#1528 item
     /// 21), as offsets from where the view already stands: it
     /// starts `slide` away, in its own superview's coordinates,

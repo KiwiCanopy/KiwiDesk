@@ -1148,6 +1148,17 @@ Obligations:
   (#2425, device 2026-10-18; `GlassBoxContentFitTests`). A glass
   resized another way calls it too. It starts no motion
   (`GlassPairMotionSeamTests` ▸ `contentFitStartsNoMotion`).
+- **Settle a box glass on its glide's own landing, through the
+  one `GlassBox.settle`** — the Space run's glass install runs in
+  `BarMotion.runLayoutLanding`, whose landing settles every box.
+  During an animated host move Auto Layout can leave a growing
+  glass at its old size, and the next `place` then keeps it
+  there, so a chip drew one switch behind for good (#2425, device
+  2026-10-18: a window moved out of the shown Space and back).
+  Never settle on a timer beside the group, whose length is not
+  the glide's (`GlassPairMotionSeamTests` ▸
+  `spaceRunSettlesOnLanding`, `settleStartsNoMotion`,
+  `GlassBoxContentFitTests` ▸ `settleLandsAStrandedGlass`).
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

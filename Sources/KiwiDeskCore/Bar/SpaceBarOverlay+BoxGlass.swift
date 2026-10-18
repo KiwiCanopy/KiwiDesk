@@ -39,6 +39,11 @@ extension SpaceBarOverlay {
         }
     }
 
+    /// Settles every box once the run's glide has landed (#2425).
+    func settleBoxGlasses() {
+        boxGlasses.forEach(GlassBox.settle)
+    }
+
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
             // Its item left in this render's `syncItemViewCount`.

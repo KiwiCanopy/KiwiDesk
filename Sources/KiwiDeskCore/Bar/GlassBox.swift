@@ -103,6 +103,18 @@ enum GlassBox {
         move(host, frame, animated && host.frame != .zero)
     }
 
+    /// Writes a box's glass, and the glass's content, to its
+    /// host's bounds once a glide has landed: during an animated
+    /// host move Auto Layout can leave a growing glass at its old
+    /// size, and the next `place` keeps it there (#2425, device).
+    static func settle(_ glass: NSView) {
+        guard let host = host(of: glass) else { return }
+        if !GlassPlate.fills(glass.frame, host.bounds) {
+            glass.frame = host.bounds
+        }
+        GlassPlate.fitContent(glass)
+    }
+
     /// Takes a box out for good — glass released (#1730), tint and
     /// host removed.
     static func drop(_ glass: NSView, _ tint: GlassBackdrop?) {
