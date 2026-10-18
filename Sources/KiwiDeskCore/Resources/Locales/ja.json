@@ -753,6 +753,7 @@
   "keybinding.next_layout": "次のレイアウトに切り替える",
   "keybinding.open_settings": "設定を開く",
   "keybinding.previous_layout": "前のレイアウトに切り替える",
+  "keybinding.reset_sizes": "このスペースのサイズをリセット",
   "keybinding.show_shortcuts": "ショートカットパネルを表示",
   "keybinding.show_view_picker": "表示ピッカーを表示",
   "keybinding.show_window_switcher": "ウインドウスイッチャーを表示",

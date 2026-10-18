@@ -48,6 +48,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case shrinkWidth = "keybinding.shrink_width"
     case growHeight = "keybinding.grow_height"
     case shrinkHeight = "keybinding.shrink_height"
+    /// `reset_layout_sizing` on the active Space (#2303).
+    case resetSizes = "keybinding.reset_sizes"
     case toggleFloating = "keybinding.toggle_floating"
     case toggleSticky = "keybinding.toggle_sticky"
     case toggleDisplaySticky = "keybinding.toggle_display_sticky"
@@ -137,7 +139,8 @@ extension ShortcutsKey {
                 gate: .runtime(.luaOwnsConfig)
             )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
-            .toggleFloating, .toggleSticky, .toggleDisplaySticky:
+            .resetSizes, .toggleFloating, .toggleSticky,
+            .toggleDisplaySticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -195,6 +198,8 @@ extension ShortcutsKey {
             return .text("keybinding.grow_height")
         case .shrinkHeight:
             return .text("keybinding.shrink_height")
+        case .resetSizes:
+            return .text("keybinding.reset_sizes")
         case .toggleFloating:
             return .text("keybinding.toggle_floating")
         case .toggleKiwiVision:

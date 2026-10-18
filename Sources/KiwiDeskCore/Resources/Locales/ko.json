@@ -753,6 +753,7 @@
   "keybinding.next_layout": "다음 레이아웃으로 전환",
   "keybinding.open_settings": "설정 열기",
   "keybinding.previous_layout": "이전 레이아웃으로 전환",
+  "keybinding.reset_sizes": "이 공간의 크기 재설정",
   "keybinding.show_shortcuts": "단축키 패널 보기",
   "keybinding.show_view_picker": "보기 선택기 보기",
   "keybinding.show_window_switcher": "윈도우 전환기 보기",

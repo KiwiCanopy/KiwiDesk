@@ -753,6 +753,7 @@
   "keybinding.next_layout": "Alternar para o layout seguinte",
   "keybinding.open_settings": "Abrir Ajustes",
   "keybinding.previous_layout": "Alternar para o layout anterior",
+  "keybinding.reset_sizes": "Redefinir os tamanhos deste espaço",
   "keybinding.show_shortcuts": "Mostrar o painel de atalhos",
   "keybinding.show_view_picker": "Mostrar o seletor de visualização",
   "keybinding.show_window_switcher": "Mostrar o seletor de janelas",

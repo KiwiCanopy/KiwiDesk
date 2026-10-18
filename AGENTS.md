@@ -882,7 +882,9 @@ Touching `Config`, `Profiles`, `Commands`.
   reaches an existing install once through `topUpGenerationShortcuts`, only
   where its action is unbound and its chord free, its mark cleared with a
   discarded `gui.json` (#2211, `DefaultShortcutGenerationTests` ▸
-  `everySeedRowHasAGeneration`)
+  `everySeedRowHasAGeneration`), a `⌃⌥` letter landing on the base the
+  layer's letters took through the one `HyperShortcutMove.onLettersBase`
+  (#2303, `ResetSizesSeedTests`)
 - a temporary Space's shortcuts go when it drops and a held Space's when its
   hold ends, through the one `retireLiveOnlyShortcuts`, a binding another
   arrangement declares staying #92's (#1827, `SpaceShortcutDropTests`)
@@ -1182,6 +1184,9 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   per-switch count a performance change is measured by lies (#1508,
   `WorkMeterAXSeamTests`), and a change adding AX messages on the Space-switch
   path states how many per switch, and why, in its PR and at the read
+- a bound Desktop's apply leaves its window-rule sweep to the switch's own
+  folded `reconcileAll`, so a new path into `handleDesktopChange` owes that
+  sweep after it (#2347, `DesktopSwitchRuleSweepSeamTests`)
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
   destroy re-reads the app still tracking it — never tracking, filing or

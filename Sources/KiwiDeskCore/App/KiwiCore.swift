@@ -55,6 +55,8 @@ public final class KiwiCore {
     /// it costs, and why it is not keyed on `BootPhase` are
     /// argued at its one reader, `mayReconcileWindowRulesNow`.
     var defersWindowRuleReconcileToSweep = false
+    /// A bound Desktop switch's apply; its sweep follows (#2347).
+    var defersRuleSweepToSwitchPass = false
 
     /// Boot and the startup sweep surface N windows in one burst
     /// (#672): while raised, `handle` skips its structural retile
@@ -129,10 +131,8 @@ public final class KiwiCore {
     /// deliberate focus (#689).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
-    /// The wall clock every `Date`-stamped ledger on the core
-    /// stamps and ages on; the focus-report ledgers are its first
-    /// readers. A test freezes it (#1852, tests.md ▸ age-bounded
-    /// ledgers).
+    /// The wall clock the core's `Date`-stamped ledgers stamp and age
+    /// on; a test freezes it (#1852, tests.md ▸ age-bounded ledgers).
     var wallClock: () -> Date = Date.init
 
     /// Bumped per z-order raise sequence so a stale sequence's

@@ -139,12 +139,19 @@ extension KiwiCore {
     /// the per-app budget is raised for a queued STEP and never
     /// for a pass, so an OS- or config-driven reconcile is never
     /// cut short (accessibility.md). That makes it the wrong
-    /// thing to run twice, and boot ran it twice (#836); the two
+    /// thing to run twice, and boot ran it twice (#836); the three
     /// flags below are each a caller saying "not from here".
     ///
     /// - `defersWindowRuleReconcile` — `loadConfig` writes the
     ///   rules several times over and runs one pass itself
     ///   afterwards.
+    /// - `defersRuleSweepToSwitchPass` — a bound Desktop switch's
+    ///   apply (`applyBindingDeferringRuleSweep`, #2347): the
+    ///   switch's own folded `reconcileAll` runs right after the
+    ///   handler, which `DesktopSwitchRuleSweepSeamTests` holds.
+    ///   Its cost is the one below, for one main-actor turn: the
+    ///   apply's pass and the handler's run under the outgoing
+    ///   profile's verdicts, and the folded pass re-places.
     /// - `defersWindowRuleReconcileToSweep` — boot. It is a flag
     ///   raised in `start()` and lowered beside the sweep's arm,
     ///   NOT a read of `BootPhase`: the phase is a readiness
@@ -186,9 +193,10 @@ extension KiwiCore {
     /// for a refused-observer app (#675) along with the rules.
     /// All three are backstopped — the sweep and the drain cover
     /// the first two, `healSweep` the third — which is why the
-    /// deferral is bounded to boot, where those passes are about
-    /// to run anyway, and is NOT extended to a steady-state apply
-    /// where nothing is queued behind it. Everything visible from
+    /// deferral is bounded to where a pass is about to run anyway
+    /// — boot, a config load's tail, a Desktop switch's fold — and
+    /// is NOT extended to a steady-state apply where nothing is
+    /// queued behind it. Everything visible from
     /// this is the residue `docs/accepted-limitations.md` carries
     /// a row for.
     ///
@@ -208,6 +216,7 @@ extension KiwiCore {
     var mayReconcileWindowRulesNow: Bool {
         !defersWindowRuleReconcile
             && !defersWindowRuleReconcileToSweep
+            && !defersRuleSweepToSwitchPass
     }
 
     /// The one write of the resolved app-rule tier — shared by

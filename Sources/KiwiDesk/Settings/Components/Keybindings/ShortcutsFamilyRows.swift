@@ -90,6 +90,8 @@ struct ShortcutsFamilyRows {
             return [resizeRow(.growHeight)]
         case .shrinkHeight:
             return [resizeRow(.shrinkHeight)]
+        case .resetSizes:
+            return [KeybindingCatalog.resetSizes]
         case .toggleFloating:
             return [KeybindingCatalog.toggleFloating]
         case .toggleSticky:
