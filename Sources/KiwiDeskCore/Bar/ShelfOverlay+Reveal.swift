@@ -1,9 +1,9 @@
 import AppKit
 
-/// A hiding shelf's reveal and retract (#761): its content grows
-/// out of the hidden mark and back into it through
-/// `BarMotion.playReveal`, each taking over from where the other
-/// stands, the panel ordered out only once the retract lands.
+/// A hiding shelf's reveal and retract (#761): its plate grows out
+/// of the hidden mark and its items fade up on it, and back,
+/// through `BarMotion.playReveal`, each taking over from where the
+/// other stands, the panel ordered out only once the retract lands.
 extension ShelfOverlay {
     /// Where the hidden mark sits in the content, from its frame
     /// and the shelf's strip, both AX coordinates.
@@ -50,7 +50,9 @@ extension ShelfOverlay {
         }
         BarMotion.playReveal(
             content,
+            items: stripView,
             origin: origin,
+            plate: revealPlate,
             entering: true,
             held: true
         )
@@ -64,7 +66,9 @@ extension ShelfOverlay {
     private func start(lead: Bool) -> TimeInterval {
         BarMotion.playReveal(
             content,
+            items: stripView,
             origin: origin,
+            plate: revealPlate,
             entering: true,
             lead: lead
         )
@@ -77,7 +81,7 @@ extension ShelfOverlay {
             guard let self, self.revealing == token, self.leaving == nil
             else { return }
             self.revealing = nil
-            BarMotion.endReveal(self.content)
+            BarMotion.endReveal(self.content, items: self.stripView)
         }
     }
 
@@ -98,7 +102,9 @@ extension ShelfOverlay {
         revealing = nil
         let span = BarMotion.playReveal(
             content,
+            items: stripView,
             origin: origin,
+            plate: revealPlate,
             entering: false
         )
         afterReveal(span) { [weak self] in
@@ -106,7 +112,7 @@ extension ShelfOverlay {
             self.leaving = nil
             self.leavingSlides = false
             self.panel?.orderOut(nil)
-            BarMotion.endReveal(self.content)
+            BarMotion.endReveal(self.content, items: self.stripView)
             self.onLeft()
         }
         return true

@@ -11,9 +11,11 @@ final class ShelfIndicatorView: NSView {
     var onPress: @MainActor () -> Void = {}
 
     /// Holds the plate and the dots; it fades out under a shelf
-    /// growing out of it, the view itself staying for VoiceOver.
+    /// revealing over it and back as it retracts, the view itself
+    /// staying for VoiceOver.
     let body = AppBarOverlay.FlippedView()
     let plate = NSView()
+    let rim = ShelfIndicatorRim()
     let dots = ShelfIndicatorDots()
 
     override init(frame: NSRect) {
@@ -22,6 +24,7 @@ final class ShelfIndicatorView: NSView {
         plate.wantsLayer = true
         addSubview(body)
         body.addSubview(plate)
+        body.addSubview(rim)
         body.addSubview(dots)
     }
 
@@ -40,22 +43,23 @@ final class ShelfIndicatorView: NSView {
         dots.frame = mark
         dots.spec = spec
         plate.layer?.backgroundColor = NSColor(kiwiHex: spec.fill).cgColor
-        plate.layer?.borderColor =
-            NSColor(kiwiHex: spec.highlight).cgColor
+        rim.color = NSColor(kiwiHex: spec.highlight)
         BarMotion.placeHoverPlate(
             plate,
+            rim: rim,
             mark: mark,
             hovered: spec.hovered,
-            rim: spec.hovered ? ShelfIndicatorSpec.hoverBorder : 0,
             animated: animated && was?.hovered != spec.hovered
         )
-        // Under the shelf it reveals the plate gives way; back
-        // at once as the shelf retracts into it.
-        if spec.shown, was?.shown == false, animated {
-            BarMotion.runLayout {
-                BarMotion.setAlpha(body, to: 0, animated: true)
-            }
-        } else {
+        // The plate gives way under the shelf it reveals and
+        // comes back as the shelf retracts into it.
+        if let was, was.shown != spec.shown, animated {
+            BarMotion.fadeMark(
+                body,
+                showing: !spec.shown,
+                morphs: spec.morphs
+            )
+        } else if was?.shown != spec.shown || !animated {
             body.alphaValue = spec.shown ? 0 : 1
         }
     }
@@ -78,6 +82,27 @@ final class ShelfIndicatorView: NSView {
     override func accessibilityPerformPress() -> Bool {
         onPress()
         return true
+    }
+}
+
+/// The hovered plate's rim in the highlight colour, stroked inside
+/// its own bounds — drawn, never a layer border, which is the
+/// shelf border's one painter's (bars.md).
+final class ShelfIndicatorRim: NSView {
+    var color = NSColor.clear { didSet { needsDisplay = true } }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let width = ShelfIndicatorSpec.hoverBorder
+        let rect = bounds.insetBy(dx: width / 2, dy: width / 2)
+        let radius = max(min(rect.width, rect.height) / 2, 0)
+        let path = NSBezierPath(
+            roundedRect: rect,
+            xRadius: radius,
+            yRadius: radius
+        )
+        path.lineWidth = width
+        color.setStroke()
+        path.stroke()
     }
 }
 

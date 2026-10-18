@@ -99,7 +99,8 @@ extension KiwiCore {
                     emptyInk: shelf.emptyItemColor,
                     highlight: shelf.highlightColor,
                     shown: shown,
-                    hovered: hovered
+                    hovered: hovered,
+                    morphs: shelf.drawsPlate
                 ),
                 carriesSpace
             )

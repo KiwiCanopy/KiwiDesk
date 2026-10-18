@@ -27,7 +27,7 @@ struct BarMotionSeamTests {
     /// extensions split at the §2.1 ceiling, one home.
     private static let homes = [
         "BarMotion.swift", "BarMotion+Fade.swift",
-        "BarMotion+Reveal.swift",
+        "BarMotion+Reveal.swift", "BarMotion+Mark.swift",
     ]
 
     /// Ways to start AppKit or Core Animation motion. Type
@@ -126,6 +126,8 @@ struct BarMotionSeamTests {
         "afterCommit": [],
         "endReveal": [],
         "afterReveal": [],
+        "markFade": ["reduceMotion"],
+        "fadeMark": ["markFade(", "isReduced"],
         "hoverPlate": ["reduceMotion"],
         "placeHoverPlate": ["hoverPlate(", "isReduced"],
     ]

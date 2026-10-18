@@ -49,6 +49,10 @@ final class ShelfOverlay {
     /// A hiding shelf's mark in the content's coordinates, which a
     /// reveal grows out of (#761); set by `ShelfManager`.
     var revealOrigin: CGRect?
+    /// The plate a morph grows to, in the content's coordinates,
+    /// with its corner radius; nil where the shelf draws none, which
+    /// cross-fades instead (#761). Set by each show.
+    var revealPlate: (frame: CGRect, radius: CGFloat)?
     /// Lands a reveal or a retract after its length — the reveal's
     /// own timer; a test hands a queue it drains by hand.
     var afterReveal: (TimeInterval, @escaping @MainActor () -> Void) -> Void =
@@ -170,6 +174,7 @@ final class ShelfOverlay {
             shelf: shelf
         )
         let radius = shelf.resolvedCornerRadius(forThickness: depth)
+        revealPlate = shelf.drawsPlate ? plate.map { ($0, radius) } : nil
         let travels = BarMotion.shelfGlideLength > 0
         if glides, travels {
             standGlideStarts(sections, in: strip, horizontal: horizontal)

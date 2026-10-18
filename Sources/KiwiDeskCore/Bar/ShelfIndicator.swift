@@ -36,6 +36,9 @@ struct ShelfIndicatorSpec: Equatable {
     /// The pointer rests in the band, the reveal delay running:
     /// the plate grows and takes the highlight's border.
     let hovered: Bool
+    /// Whether its shelf draws a plate, which morphs out of the
+    /// mark; a Boxed shelf cross-fades with it instead.
+    var morphs = true
 
     /// A dot's ink, by the bar's own ladder: current, then held
     /// windows, then empty.

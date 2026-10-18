@@ -5,15 +5,18 @@ import Testing
 @testable import KiwiDeskCore
 
 /// How a hiding shelf's reveal and its mark's hover MOVE (#761):
-/// the grow clips the content's own layer and starts only after
-/// the pass that orders the panel in, and the hovered plate grows
-/// its frame rather than cross-fading a redraw. Whether it reads
-/// smoothly is the device's; this holds the shapes that made it
-/// stutter. Main-actor spend: a handful of unwindowed views.
+/// the plate morphs out of the pill as a clip of the content's own
+/// layer while the items fade on it, starting only after the pass
+/// that orders the panel in, and the hovered plate grows its frame
+/// rather than cross-fading a redraw. Whether it reads well is the
+/// device's; this holds the decisions and the start order, never
+/// the tuned values. Main-actor spend: a handful of unwindowed
+/// views.
 @Suite("Shelf reveal motion (#761)")
 @MainActor
 struct ShelfRevealMotionTests {
     private static let mark = CGRect(x: 100, y: 0, width: 60, height: 8)
+    private static let plate = CGRect(x: 20, y: 0, width: 360, height: 40)
 
     @Test("The hovered plate grows on every side, never under Reduce Motion")
     func hoverPlateGrows() {
@@ -40,26 +43,89 @@ struct ShelfRevealMotionTests {
         )
     }
 
-    @Test("A grow starts at the hovered plate the hover leaves")
-    func growStartsAtTheHoveredPlate() {
-        let bounds = CGRect(x: 0, y: 0, width: 400, height: 40)
+    private func morph(entering: Bool) -> BarMotion.Morph? {
         let motion = BarMotion.revealMotion(
             reduceMotion: false,
+            entering: entering,
             origin: Self.mark,
-            bounds: bounds
+            plate: Self.plate,
+            plateRadius: 10
         )
-        let plate = BarMotion.hoverPlate(
+        guard case .morph(let morph) = motion else { return nil }
+        return morph
+    }
+
+    @Test("A reveal grows the plate out of the hovered pill, items after")
+    func revealMorphsOutOfThePill() throws {
+        let morph = try #require(morph(entering: true))
+        let pill = BarMotion.hoverPlate(
             mark: Self.mark,
             hovered: true,
             reduceMotion: false
         )
-        guard case .grow(let from, let to, let radius, _) = motion else {
-            Issue.record("no grow: \(motion)")
-            return
+        #expect(morph.pill == pill)
+        #expect(morph.plate == Self.plate)
+        // The items fade up once the plate moves, while it still
+        // grows: one overlapping sequence.
+        #expect(morph.itemsStart > morph.plateStart)
+        #expect(morph.itemsStart < morph.plateStart + morph.plateLength)
+    }
+
+    @Test("A retract fades the items before the plate shrinks")
+    func retractFadesItemsFirst() throws {
+        let morph = try #require(morph(entering: false))
+        #expect(morph.plateStart >= morph.itemsStart + morph.itemsLength)
+    }
+
+    @Test("A Boxed shelf and Reduce Motion cross-fade in place")
+    func boxedAndReducedFade() {
+        for entering in [true, false] {
+            let boxed = BarMotion.revealMotion(
+                reduceMotion: false,
+                entering: entering,
+                origin: Self.mark,
+                plate: nil,
+                plateRadius: 0
+            )
+            let reduced = BarMotion.revealMotion(
+                reduceMotion: true,
+                entering: entering,
+                origin: Self.mark,
+                plate: Self.plate,
+                plateRadius: 10
+            )
+            #expect(boxed == .fade(BarMotion.revealFade))
+            #expect(reduced == .fade(BarMotion.revealFade))
         }
-        #expect(from == plate)
-        #expect(to == bounds)
-        #expect(radius == plate.height / 2)
+    }
+
+    @Test("The mark lands with a morph's retract, and cross-fades else")
+    func markFadeFollowsTheShelf() throws {
+        let retract = try #require(morph(entering: false))
+        let back = BarMotion.markFade(
+            showing: true,
+            morphs: true,
+            reduceMotion: false
+        )
+        #expect(back.delay > 0)
+        #expect(abs(back.delay + back.length - retract.length) < 1e-9)
+        let out = BarMotion.markFade(
+            showing: false,
+            morphs: true,
+            reduceMotion: false
+        )
+        #expect(out.delay == 0)
+        for (morphs, reduced) in [(false, false), (true, true)] {
+            for showing in [true, false] {
+                let fade = BarMotion.markFade(
+                    showing: showing,
+                    morphs: morphs,
+                    reduceMotion: reduced
+                )
+                #expect(fade.delay == 0)
+                #expect(fade.length == BarMotion.revealFade)
+            }
+        }
     }
 
     private func spec(hovered: Bool, shown: Bool = false)
@@ -100,12 +166,12 @@ struct ShelfRevealMotionTests {
         let resting = view.bounds.insetBy(dx: room, dy: room)
         #expect(view.plate.frame == resting)
         #expect(view.dots.frame == resting)
+        #expect(view.rim.alphaValue == 0)
         view.render(spec(hovered: true), animated: false)
         #expect(view.plate.frame == view.bounds)
+        #expect(view.rim.frame == view.bounds)
         #expect(view.dots.frame == resting)
-        #expect(
-            view.plate.layer?.borderWidth == ShelfIndicatorSpec.hoverBorder
-        )
+        #expect(view.rim.alphaValue == 1)
     }
 
     @Test("Under Reduce Motion a hover takes the rim alone")
@@ -116,87 +182,7 @@ struct ShelfRevealMotionTests {
         view.render(spec(hovered: true), animated: true)
         let room = ShelfIndicatorSpec.hoverGrowth
         #expect(view.plate.frame == view.bounds.insetBy(dx: room, dy: room))
-        #expect(
-            view.plate.layer?.borderWidth == ShelfIndicatorSpec.hoverBorder
-        )
-    }
-
-    @Test("A reveal ordering the panel in holds its start for one pass")
-    func orderingRevealWaitsForTheCommit() throws {
-        BarMotion.reducedOverride = false
-        defer { BarMotion.reducedOverride = nil }
-        let overlay = ShelfOverlay()
-        var commits: [() -> Void] = []
-        overlay.afterCommit = { commits.append($0) }
-        overlay.afterReveal = { _, _ in }
-        overlay.content.frame = CGRect(x: 0, y: 0, width: 400, height: 40)
-        overlay.revealIn(ordering: true)
-        let layer = try #require(overlay.content.layer)
-        // No mask is rendered off screen per frame: the content's
-        // own layer is the clip.
-        #expect(layer.mask == nil)
-        let held = try #require(layer.animation(forKey: "kiwi.reveal"))
-        #expect(held.speed == 0)
-        #expect(commits.count == 1)
-        commits.first?()
-        let running = try #require(layer.animation(forKey: "kiwi.reveal"))
-        #expect(running.speed == 1)
-        #expect(running.beginTime > 0)
-    }
-
-    @Test("A reveal on a shown panel starts at once")
-    func shownRevealStartsAtOnce() throws {
-        BarMotion.reducedOverride = false
-        defer { BarMotion.reducedOverride = nil }
-        let overlay = ShelfOverlay()
-        var commits = 0
-        overlay.afterCommit = { _ in commits += 1 }
-        overlay.afterReveal = { _, _ in }
-        overlay.content.frame = CGRect(x: 0, y: 0, width: 400, height: 40)
-        overlay.revealIn()
-        let layer = try #require(overlay.content.layer)
-        let running = try #require(layer.animation(forKey: "kiwi.reveal"))
-        #expect(running.speed == 1)
-        #expect(commits == 0)
-    }
-
-    @Test("The reveal delay ends the hover in the reveal's own pass")
-    func revealEndsTheHoverInOnePass() {
-        let key = ShelfManager.Key(display: DisplayID(1), edge: .top)
-        let revealer = ShelfRevealer()
-        var timers: [() -> Void] = []
-        let point = CGPoint(x: 500, y: 770)
-        var changes: [(Bool, Bool)] = []
-        revealer.makeMonitor = { _ in nil }
-        revealer.location = { point }
-        revealer.schedule = { _, body in
-            timers.append(body)
-            return ShelfRevealTimer()
-        }
-        revealer.onChange = {
-            changes.append(
-                (
-                    revealer.arming.contains(key),
-                    revealer.reveal(of: key).isShown
-                )
-            )
-        }
-        revealer.sync([
-            key: ShelfRevealer.Target(
-                edge: .top,
-                strip: CGRect(x: 0, y: 735, width: 1000, height: 40),
-                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-                bars: [.space]
-            )
-        ])
-        revealer.moved(to: point)
-        #expect(changes.map(\.0) == [true])
-        changes = []
-        timers.removeFirst()()
-        // One redraw, already shown: no pass un-hovers the plate
-        // first.
-        #expect(changes.count == 1)
-        #expect(changes.first?.0 == false)
-        #expect(changes.first?.1 == true)
+        #expect(view.rim.frame == view.plate.frame)
+        #expect(view.rim.alphaValue == 1)
     }
 }
