@@ -94,7 +94,9 @@ struct DesktopBindingByIDTests {
             kind == "corrupt"
             ? #"{"id":"\#(work.id.raw)","name":"Work"}"#
             : #"{"format":999,"id":"\#(work.id.raw)","name":"Work"}"#
-        try Data(body.utf8).write(to: url)
+        // Atomic, as a sync client replaces a file: the index must
+        // reach it by its raw id, not by a stale entry.
+        try Data(body.utf8).write(to: url, options: .atomic)
         let result = core.boundProfile(
             of: binding(.init(id: work.id, name: "Work"))
         )
@@ -119,6 +121,14 @@ struct DesktopBindingByIDTests {
             core.bindingResolution(of: .init(id: work.id, name: "Work"))
                 == .unreadable(nil)
         )
+        // The gate cannot prove the profile gone, so never "missing".
+        let result = core.boundProfile(
+            of: binding(.init(id: work.id, name: "Work"))
+        )
+        guard case .failure(.unreadable) = result else {
+            Issue.record("expected unreadable, got \(result)")
+            return
+        }
     }
 
     /// A Finder duplicate carries its original's id; named by a

@@ -166,11 +166,17 @@ extension SettingsModel {
     private func persistGlobalsIfNeeded() {
         guard globalsChanged else { return }
         do {
-            try core.withUserMotion {
-                try core.saveGuiConfig(sidecarConfig)
+            try savingBindingEdits {
+                try core.withUserMotion {
+                    try core.saveGuiConfig(sidecarConfig)
+                }
             }
-            try persistBindingEdits()
         } catch {
+            profileWarning = L(
+                "settings.globals_save_failed",
+                "Saving settings failed: %1$@",
+                "\(error)"
+            )
             core.onLog("settings save failed: \(error)")
         }
     }

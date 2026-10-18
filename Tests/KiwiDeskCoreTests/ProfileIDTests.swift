@@ -129,7 +129,8 @@ struct ProfileIDTests {
     func indexKeeper() {
         let shared = ProfileID.fresh()
         let index = ProfileIndex([
-            entry("Work copy", "Work", shared),
+            // The copy sorts first, so only the own-name rule picks.
+            entry("Backup", "Work", shared),
             entry("Work", "Work", shared),
         ])
         #expect(index.holder(of: shared)?.file == "Work")

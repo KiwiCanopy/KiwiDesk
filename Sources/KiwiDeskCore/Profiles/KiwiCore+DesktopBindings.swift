@@ -74,9 +74,17 @@ extension KiwiCore {
         edit(&map)
         try guiConfigStore.saveBindings(map)
         guard isGuiManaged else { return }
+        var changed = false
         for key in Set(before.keys).union(map.keys)
         where !DesktopBinding.sameStored(before[key], map[key]) {
             desktopBindings[key] = map[key]
+            changed = true
+        }
+        // A rebound Desktop takes effect now, as it did when this
+        // write went through a reload — unless the engine has not
+        // started (a paused cold boot), which applies it at start.
+        if changed, lua != nil {
+            _ = applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
         }
     }
 

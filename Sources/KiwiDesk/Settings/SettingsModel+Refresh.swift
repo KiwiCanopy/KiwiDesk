@@ -165,11 +165,24 @@ struct BindingEdits {
 }
 
 extension SettingsModel {
+    /// Runs a Save's `gui.json` write with the draft's binding edits
+    /// ordered around it (#2324): before it where the config exists,
+    /// so the reload it triggers applies the new bindings, and after
+    /// it only where this Save mints the config the binding door
+    /// requires.
+    func savingBindingEdits(_ save: () throws -> Void) throws {
+        guard core.guiConfigStore.exists else {
+            try save()
+            try persistBindingEdits()
+            return
+        }
+        try persistBindingEdits()
+        try save()
+    }
+
     /// Writes the draft's binding edits, per entry, into the stored
     /// map (#2324): a Save carries only what the user changed, so a
     /// re-key or a promotion made since the draft was read stands.
-    /// Runs after the `gui.json` write, which may have minted the
-    /// config the binding door requires.
     func persistBindingEdits() throws {
         let edits = bindingEdits
         guard !edits.isEmpty else { return }

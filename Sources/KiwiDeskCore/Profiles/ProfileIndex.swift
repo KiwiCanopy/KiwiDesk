@@ -14,8 +14,6 @@ struct ProfileIndex: Equatable {
     struct Holder: Equatable {
         let file: String
         let readable: Bool
-        /// The name the file stores, so a label refresh reads none.
-        var storedName: String = ""
     }
 
     /// One profile file as the index reads it.
@@ -41,8 +39,7 @@ struct ProfileIndex: Equatable {
             }
             holders[entry.id] = Holder(
                 file: entry.file,
-                readable: entry.readable,
-                storedName: entry.storedName
+                readable: entry.readable
             )
             own[entry.id] = isOwn
         }
@@ -60,7 +57,7 @@ struct ProfileIndex: Equatable {
     mutating func recordWrite(file: String, id: ProfileID) {
         holders = holders.filter { $0.value.file != file }
         unparseable.removeAll { $0 == file }
-        holders[id] = Holder(file: file, readable: true, storedName: file)
+        holders[id] = Holder(file: file, readable: true)
     }
 
     /// A file removed or moved away.
