@@ -111,9 +111,11 @@ struct ListedWindowReader: @unchecked Sendable {
     let tracked: Set<WindowID>
     /// The app's overlay class, resolved at request time.
     let isAccessory: Bool
-    /// What spares an untracked window the arrival read, resolved
-    /// at request time: the ignore rules, KiwiDesk's own process
-    /// (its gate asks AppKit) and the app's known shadows.
+    /// What spares an untracked window the arrival read where
+    /// `track` might refuse it, resolved at request time: the
+    /// ignore rules, KiwiDesk's own process (its gate asks AppKit)
+    /// and the app's known shadows. A prefilter: a window it lets
+    /// through costs reads, one it holds back is read live.
     let ignoreRules: IgnoreRules
     let ownProcess: Bool
     let shadowed: Set<WindowID>
@@ -156,7 +158,7 @@ struct ListedWindowReader: @unchecked Sendable {
         // One traits read serves the shadow rule and the escape.
         let traitsRead =
             button
-            ?? (isTracked == true && many || arrives
+            ?? (!asksButton && (isTracked == true && many || arrives)
                 ? traits(element, id) : nil)
         let detect = {
             FloatDetection.autoFloatReason(
@@ -202,10 +204,7 @@ struct ListedWindowReader: @unchecked Sendable {
     /// title, frame, fullscreen state, batched traits, children
     /// and each child's role, and detection's title and zoom
     /// reads where it asks them: about 6 + children AX messages
-    /// moved off the main actor per arriving window. Only a window
-    /// `track` could adopt is read; the ignore check here is a
-    /// prefilter, and a window it lets through that the main
-    /// actor then ignores costs those reads for nothing.
+    /// moved off the main actor per arriving window.
     private func arrival(
         _ id: WindowID,
         _ element: AXUIElement,

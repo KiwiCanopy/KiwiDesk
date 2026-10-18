@@ -186,27 +186,50 @@ struct ArrivalAdoptionTests {
         #expect(Self.mainCalls - before >= arrivals.count)
     }
 
-    /// A window closed after the read listed it, before the list
-    /// applied, is read live by `track` — which the fabricated
-    /// element refuses — and never adopted from the reading.
-    @Test("a window closed during the read is not adopted from it")
-    func closedDuringTheReadIsNotAdopted() throws {
+    /// Lands a read that listed every window after `note` arrived
+    /// for the third, which the app then stops listing; `tracked`
+    /// first files that window as the create arm would have.
+    private func departDuringTheRead(
+        _ note: String,
+        trackedFirst: Bool
+    ) throws -> [WindowID] {
         let (loop, box, elements, listing) = makeLoop()
         box.held = []
         loop.reconcileOffMain(pid: pid, app: ref)
         let delivery = box.held ?? []
         try #require(delivery.count == 1)
-        loop.handle(
-            kAXUIElementDestroyedNotification,
-            elements[2],
-            pid: pid,
-            app: ref
-        )
-        // Gone from the list too, so the read the close owes
-        // answers for it as well.
+        if trackedFirst {
+            loop.elements[pid]?[arrivals[1]] = elements[2]
+        }
+        loop.handle(note, elements[2], pid: pid, app: ref)
+        // Gone from the live list too, so the read the departure
+        // owes answers for it as well.
         listing.count = 2
         box.held = nil
         for work in delivery { work() }
-        #expect(box.created.map(\.id) == [arrivals[0]])
+        return box.created.map(\.id)
+    }
+
+    /// The reading predates the departure: `track` reads the
+    /// window live, which the fabricated element refuses.
+    @Test("a window minimized during the read is not adopted from it")
+    func minimizedDuringTheReadIsNotAdopted() throws {
+        let created = try departDuringTheRead(
+            kAXWindowMiniaturizedNotification,
+            trackedFirst: false
+        )
+        #expect(created == [arrivals[0]])
+    }
+
+    /// A close reaches the loop only for a window observed at
+    /// `track`: one tracked during the read, released by its close
+    /// and listed by the reading again.
+    @Test("a window tracked and closed during the read is not adopted")
+    func closedDuringTheReadIsNotAdopted() throws {
+        let created = try departDuringTheRead(
+            kAXUIElementDestroyedNotification,
+            trackedFirst: true
+        )
+        #expect(created == [arrivals[0]])
     }
 }

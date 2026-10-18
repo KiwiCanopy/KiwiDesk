@@ -282,6 +282,7 @@ extension EventLoop {
         pendingRetrack.remove(pid)
         pendingRemovalRecheck.remove(pid)
         switchReads.forget(pid)
+        offMain.departures.forget(pid: pid)
         for id in Array(elements[pid, default: [:]].keys) {
             releaseWindowRegistration(id, pid: pid)
             onEvent(.windowDestroyed(id, wasMinimized: false))

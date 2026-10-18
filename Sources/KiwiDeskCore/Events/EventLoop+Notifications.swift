@@ -55,6 +55,9 @@ extension EventLoop {
             }
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
+            // An arrival a list read in flight found is not adopted
+            // from it — tracked meanwhile or not.
+            offMain.departures.note(element, pid: pid)
             var deferred = false
             if let id = trackedWindowID(
                 of: element,
@@ -88,10 +91,6 @@ extension EventLoop {
                         )
                     )
                 }
-            } else {
-                // An arrival a list read in flight found is not
-                // adopted from it.
-                offMain.departures.note(element, pid: pid)
             }
             // Some apps skip the notification, so always diff
             // against the live window list, read off main (#1888).

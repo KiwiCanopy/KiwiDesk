@@ -1,9 +1,11 @@
 import ApplicationServices
 
-/// Untracked windows whose destroy or minimize landed, per app and
-/// when. An arrival an off-main list read found before that is not
-/// adopted from the reading: `track` reads it live, and a dead or
-/// minimized element refuses itself there.
+/// Windows whose destroy or minimize landed, per app and when. An
+/// arrival an off-main list read found before that is not adopted
+/// from the reading: `track` reads it live, and a dead or
+/// minimized element refuses itself there. A close only a window
+/// observed at `track` reports; one that stayed untracked through
+/// the read is adopted dead until its app's next reconcile.
 struct FlightDepartures {
     private typealias Departure = (
         element: AXUIElement, at: ContinuousClock.Instant
@@ -24,6 +26,8 @@ struct FlightDepartures {
         noted[pid] = recent.isEmpty ? nil : recent
         return recent.map(\.element)
     }
+
+    mutating func forget(pid: pid_t) { noted[pid] = nil }
 
     mutating func forgetAll() { noted = [:] }
 }
