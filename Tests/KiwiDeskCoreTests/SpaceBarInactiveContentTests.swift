@@ -90,7 +90,8 @@ struct SpaceBarInactiveContentTests {
     func countCollapsesTheOthers() throws {
         let built = items(seededCore(), .count)
         let other = try #require(built[SpaceID("2")])
-        #expect(other.collapse == .init(windows: 3))
+        // The peek's ids are `SpaceBarCollapsedPeekTests`'.
+        #expect(other.collapse?.windows == 3)
         // The glyphs and their state badges go; the count is
         // windows, and `overflow` keeps its one meaning.
         #expect(other.apps.isEmpty)

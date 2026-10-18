@@ -14577,6 +14577,30 @@ passes all day, while Settings' help answers a reader who stopped
 to ask. A dwell is not motion, so Reduce Motion keeps it and
 drops only the fade.
 
+:::unreleased
+A Space collapsed to its window count (#1683) peeks too, always
+(#1945; owner 2026-10-04, and 2026-10-18 for no setting): resting
+on the chip lists every window its Space holds, as `+n` lists its
+own, and the chip anchors the peek itself since it draws no glyph.
+The peek is the answer because it is a panel beside the bar: the
+run does not change, so nothing moves under a resting pointer and
+the shelf's plan is untouched. Growing the chip in place to draw
+its glyphs was the rejected shape — it slides the neighbours under
+the pointer, which is the stuck-hover class #1665 re-reads hover
+to survive; the grown chip can leave the pointer outside it, which
+collapses it again, so the hover oscillates rather than merely
+sticking; and it changes the length the shelf planned. A click on
+the chip still switches — the chip's own action, which a list's
+open-on-click would take away — the row's own click picks a
+window, and a drag over a collapsed chip opens nothing, the spring
+switch already showing what it holds. The peek is the pointer's,
+as every hover peek is: VoiceOver's press on the chip switches,
+and its window list waits on a ruling of its own. It takes no
+setting: the peek's dwell already keeps it from firing on a pass,
+and a switch for it would be one more row a minimal bar does not
+need.
+:::
+
 **A Space's strip centres on its focus, holds under the pointer,
 and does not scroll.** (#1528 items 17–22, owner rulings
 2026-09-29 from HTML previews, graded by ui-designer.) The span's

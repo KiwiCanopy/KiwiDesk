@@ -27,6 +27,7 @@ struct BarPeekHoldTests {
         #expect(source.isList)
         #expect(!BarPeekSource.glyph([WindowID(7)]).isList)
         #expect(!BarPeekSource.appItem([WindowID(7)]).isList)
+        #expect(BarPeekSource.space([WindowID(7)]).isList)
         rig.peek.show(
             rig.first,
             source: source,

@@ -76,9 +76,11 @@ extension KiwiCore {
 
 extension BarPeekSource {
     /// The menu "N more" opens: one app's titles under its header,
-    /// or `+n`'s mixed rows.
+    /// or the mixed rows of `+n` and a collapsed Space.
     var menuKind: SpaceBarGlyphPick.Kind {
-        if case .overflow = self { return .overflow }
-        return .glyph
+        switch self {
+        case .overflow, .space: .overflow
+        case .glyph, .appItem: .glyph
+        }
     }
 }
