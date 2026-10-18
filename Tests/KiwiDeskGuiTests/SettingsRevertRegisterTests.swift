@@ -15,7 +15,10 @@ struct SettingsRevertRegisterTests {
     private let noWriter: [SettingKey: String] = [
         // A layer's reach is drafted beside the config, in the
         // layer edits, and reverts through the layers (#2022).
-        .shortcuts(.layersReach): "layer edits, not a config leaf"
+        .shortcuts(.layersReach): "layer edits, not a config leaf",
+        // A Space id stores only its name, so a rename books as the
+        // Space list's add and remove, whose writer reverts it.
+        .spaces(.spacesName): "a rename books as the list's rows",
     ]
 
     /// A census id as the register spells paths: no suffix, every
@@ -66,11 +69,13 @@ struct SettingsRevertRegisterTests {
     func writersCopyTheirPaths() {
         for (key, writer) in SettingsRevertRegister.writers {
             let id = spelled(key.id)
-            // A master writes at least its followers; a bar edge
-            // master also its per-screen maps, which the doors
-            // clear with it.
+            // A master writes exactly its followers, and beside a
+            // follower bar edge the per-screen map the doors clear
+            // with it.
             if let followers = SettingKey.masterWrites[key] {
-                #expect(Set(followers).isSubset(of: writer.paths))
+                let maps = followers.filter { $0.hasSuffix(".edge") }
+                    .map { $0 + "Override" }
+                #expect(Set(writer.paths) == Set(followers + maps))
                 continue
             }
             #expect(

@@ -46,9 +46,14 @@ struct SettingsRowRevertGroupTests {
         return config
     }
 
-    @Test("a renamed Space takes its old name and what it owns back")
-    func renameGoesBack() {
-        let clean = spaced()
+    /// A rename books as the list's add and remove: their two ↺'s
+    /// take the new Space out and the old one back as it was, what
+    /// the rename moved under the new name included.
+    @Test("a rename's two rows take the old Space back")
+    func renameGoesBack() throws {
+        LocalizationManager.shared.select("en")
+        var clean = spaced()
+        clean.appRules = [:]
         var draft = clean
         let renamed = draft.renameSpace(
             from: SpaceID("mail"),
@@ -56,7 +61,13 @@ struct SettingsRowRevertGroupTests {
         )
         #expect(renamed)
         let model = model(clean: clean, draft: draft)
-        model.revert(censusRow(.spaces(.spacesName), "post"))
+        let rows = SettingsDiffRowSource.rows(for: model)
+        #expect(rows.contains { $0.key == .spaces(.spaceList) })
+        for _ in 0..<10 {
+            guard let row = SettingsDiffRowSource.rows(for: model).first
+            else { break }
+            model.revert(row)
+        }
         #expect(model.config == clean)
     }
 

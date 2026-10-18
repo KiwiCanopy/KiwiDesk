@@ -53,7 +53,6 @@ enum SettingsRevertRegister {
             key: DesktopKey.init(stored:)
         ),
         .spaces(.spaceList): spaceList,
-        .spaces(.spacesName): spaceName,
         .spaces(.spaceModes): .entry(\.spaceModes, key: { SpaceID($0) }),
         .spaces(.fallbackSpace): .leaf(\.fallbackSpace),
     ]
@@ -77,21 +76,6 @@ enum SettingsRevertRegister {
         } else if Set(config.spaces) == Set(clean.spaces) {
             config.spaces = clean.spaces
         }
-        model.config = config
-    }
-
-    /// A renamed Space takes its old name back through the rename
-    /// door, which moves what is filed under it. The old name is
-    /// the baseline's at the same place, as the rename row reads it.
-    private static let spaceName = RevertWriter(
-        paths: ["config.spaces"]
-    ) { model, instance in
-        let clean = model.cleanConfig.spaces
-        var config = model.config
-        guard let instance, clean.count == config.spaces.count,
-            let at = config.spaces.firstIndex(of: SpaceID(instance))
-        else { return }
-        _ = config.renameSpace(from: SpaceID(instance), to: clean[at])
         model.config = config
     }
 }
