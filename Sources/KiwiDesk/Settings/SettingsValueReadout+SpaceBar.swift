@@ -32,8 +32,6 @@ extension SettingsValueReadout {
             )
         case .spaceBarHideEmpty:
             return spaceBarOnOffRow(census, o.hideEmpty, n.hideEmpty)
-        case .spaceBarPeekOnHover:
-            return spaceBarOnOffRow(census, o.peekOnHover, n.peekOnHover)
         case .spaceBarShowFrontApp:
             return spaceBarOnOffRow(
                 census,

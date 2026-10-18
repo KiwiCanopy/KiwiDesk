@@ -14510,8 +14510,8 @@ to ask. A dwell is not motion, so Reduce Motion keeps it and
 drops only the fade.
 
 :::unreleased
-A Space collapsed to its window count (#1683) peeks too, behind
-`peek_on_hover`, off by default (#1945, owner 2026-10-04): resting
+A Space collapsed to its window count (#1683) peeks too, always
+(#1945; owner 2026-10-04, and 2026-10-18 for no setting): resting
 on the chip lists every window its Space holds, as `+n` lists its
 own, and the chip anchors the peek itself since it draws no glyph.
 The peek is the answer because it is a panel beside the bar: the
@@ -14527,8 +14527,10 @@ open-on-click would take away — the row's own click picks a
 window, and a drag over a collapsed chip opens nothing, the spring
 switch already showing what it holds. The peek is the pointer's,
 as every hover peek is: VoiceOver's press on the chip switches,
-and its window list waits on a ruling of its own. The toggle is greyed unless Other
-Spaces is Window count, since Apps already draws every glyph.
+and its window list waits on a ruling of its own. It takes no
+setting: the peek's dwell already keeps it from firing on a pass,
+and a switch for it would be one more row a minimal bar does not
+need.
 :::
 
 **A Space's strip centres on its focus, holds under the pointer,

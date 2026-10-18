@@ -109,9 +109,6 @@ extension InterpolatedLabelTests {
         "space_bar.item_label.help": 2,
         "space_override.slot_size.help": 4,
         "space_bar.title_cap.front_app_only": 1,
-        // #1945: the peek toggle's grey names the control and
-        // the segment it waits on.
-        "space_bar.peek_on_hover.count_only": 2,
         "lua_editor.adopt_help.body": 1,
         "shortcuts.import.help": 1,
         "kiwishelf.background_fit.boxed_only": 1,

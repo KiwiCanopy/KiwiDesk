@@ -18,7 +18,6 @@ enum SpaceBarCommandSetting {
     case glyphGap(CGFloat)
     case groupAdjacentWindows(Bool)
     case inactiveContent(SpaceBarStyle.InactiveContent)
-    case peekOnHover(Bool)
     case itemLabel(SpaceBarStyle.ItemLabel)
     case frontAppTitleCap(Int)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
@@ -105,7 +104,6 @@ enum SpaceBarCommandSetting {
             "reserve": Self.reserve,
             "show_front_app": Self.showFrontApp,
             "hide_empty": Self.hideEmpty,
-            "peek_on_hover": Self.peekOnHover,
             "sticky_badge": Self.stickyBadge,
             "group_adjacent_windows": Self.groupAdjacentWindows,
         ]
@@ -230,7 +228,6 @@ enum SpaceBarCommandSetting {
             style.glyphGap = SpaceBarStyle.clampGlyphGap(value)
         case .inactiveContent(let value):
             style.inactiveContent = value
-        case .peekOnHover(let value): style.peekOnHover = value
         case .itemLabel(let value):
             style.itemLabel = value
         case .frontAppTitleCap(let value):

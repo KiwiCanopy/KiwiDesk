@@ -41,11 +41,6 @@ extension APIReference {
                 SpaceBarStyle.InactiveContent.self
             )
         ),
-        "set_peek_on_hover": APIRecord(
-            "Sets whether a Space showing a window count lists its "
-                + "windows on hover.",
-            .boolean("enabled")
-        ),
         "set_item_label": APIRecord(
             "Sets what names a Space item: its identifier, or its "
                 + "current layout's symbol.",

@@ -48,7 +48,7 @@ struct RoundedItemEndIdentifierTests {
         let e = Fixture.clearance(look, depth: Fixture.depth)
         #expect(e > 0)
         var items = Fixture.items(2, numbered: true)
-        items[1] = items[1].collapsed(to: .count, peeking: false)
+        items[1] = items[1].collapsed(to: .count)
         let overlay = try Fixture.spaceBar(look, items: items)
         let views = Array(overlay.itemViews.prefix(2))
         #expect(views.count == 2)

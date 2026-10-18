@@ -50,9 +50,9 @@ enum BarsRowOrder {
         .kiwishelf(.innerMargin),
     ]
 
-    /// Space Bar card — every row shown, each gate above what it
-    /// gates (#1517); rows on the label axis first, the checkbox
-    /// tier last (ui-patterns ▸ Row layout).
+    /// Space Bar card — every row shown, each gate directly
+    /// above what it gates (#1517); rows on the label axis
+    /// first, the checkbox tier last (ui-patterns ▸ Row layout).
     static let spaceBar: [SettingKey] = [
         .spaceBar(.spaceBarItemLabel),
         .spaceBar(.spaceBarInactiveContent),
@@ -62,7 +62,6 @@ enum BarsRowOrder {
         .spaceBar(.spaceBarSpringDelay),
         .spaceBar(.spaceBarGroupAdjacent),
         .spaceBar(.spaceBarHideEmpty),
-        .spaceBar(.spaceBarPeekOnHover),
         .spaceBar(.spaceBarShowFrontApp),
         .spaceBar(.spaceBarFrontAppTitleCap),
     ]

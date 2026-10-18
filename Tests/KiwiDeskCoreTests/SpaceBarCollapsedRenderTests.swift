@@ -196,7 +196,7 @@ func collapsedBar(
             apps: apps,
             active: index + 1 == active,
             after: .none
-        ).collapsed(to: content, peeking: false)
+        ).collapsed(to: content)
         if held, index == 1 {
             item.marker = .held(.init(screenName: "Dell", originName: nil))
         }

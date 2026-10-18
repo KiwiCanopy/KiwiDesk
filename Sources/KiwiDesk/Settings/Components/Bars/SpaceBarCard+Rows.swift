@@ -87,8 +87,6 @@ extension SpaceBarCard {
                     .map { ($0.1, $0.0) },
                 help: inactiveContentHelp
             )
-        case .spaceBarPeekOnHover:
-            peekOnHoverRow
         case .spaceBarItemLabel:
             SegmentedPicker(
                 L("space_bar.item_label", "Space label"),

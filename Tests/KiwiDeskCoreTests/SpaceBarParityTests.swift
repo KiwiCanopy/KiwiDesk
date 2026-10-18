@@ -61,8 +61,7 @@ struct SpaceBarCommandParityTests {
         .enabled(false), .reserve(false), .edge(.left),
         .screenEdge(.left, screen: "S:1x1"),
         .glyphSpan(8), .glyphGap(3), .frontAppTitleCap(40),
-        .inactiveContent(.count), .peekOnHover(true),
-        .itemLabel(.layout),
+        .inactiveContent(.count), .itemLabel(.layout),
         .activeIndicator(.edgeMark),
         .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
@@ -148,7 +147,7 @@ struct SpaceBarCommandParityTests {
     ) -> [JSONValue] {
         switch key {
         case .enabled, .reserve, .showFrontApp, .hideEmpty,
-            .stickyBadge, .groupAdjacentWindows, .peekOnHover:
+            .stickyBadge, .groupAdjacentWindows:
             return [.bool(true)]
         case .activeIndicator: return [.string("edge_mark")]
         case .edge: return [.string("left")]

@@ -3025,24 +3025,6 @@ drops its sticky and floating badges.
 space_bar.set_inactive_content("count")
 ```
 
-:::unreleased
-### space_bar.set_peek_on_hover
-
-**Expects:** a boolean (default `false`).
-
-**Does:** while [`set_inactive_content`](#space_barset_inactive_content)
-is `"count"`, resting the pointer on a Space that shows a window
-count opens the bar's hover list of its apps and windows. Clicking
-a window goes to it; clicking the Space still switches to it. Under
-`"apps"` it does nothing.
-
-**Example:**
-
-```lua
-space_bar.set_peek_on_hover(true)
-```
-:::
-
 ### space_bar.set_item_label
 
 **Expects:** `"identifier"` or `"layout"` (default

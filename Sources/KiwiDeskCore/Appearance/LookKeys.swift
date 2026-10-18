@@ -66,7 +66,6 @@ public enum LookKeys {
         "app_bar.reserve": functionality,
         "space_bar.glyph_span": functionality,
         "space_bar.inactive_content": functionality,
-        "space_bar.peek_on_hover": functionality,
         "space_bar.front_app_title_cap": functionality,
         "space_bar.show_front_app": functionality,
         "space_bar.hide_empty": functionality,

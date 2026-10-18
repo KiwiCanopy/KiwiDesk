@@ -84,7 +84,7 @@ extension SpaceBarItemView {
     }
 
     /// What a collapsed chip peeks — its Space's windows — or nil
-    /// where it is not collapsed or `peek_on_hover` is off (#1945).
+    /// where it is not collapsed or its Space is empty (#1945).
     var collapsedPeek: BarPeekSource? {
         guard let peek = collapse?.peek, !peek.isEmpty else { return nil }
         return .space(peek)

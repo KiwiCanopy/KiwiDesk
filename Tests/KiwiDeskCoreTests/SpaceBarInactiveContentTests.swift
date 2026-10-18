@@ -90,7 +90,8 @@ struct SpaceBarInactiveContentTests {
     func countCollapsesTheOthers() throws {
         let built = items(seededCore(), .count)
         let other = try #require(built[SpaceID("2")])
-        #expect(other.collapse == .init(windows: 3))
+        // The peek's ids are `SpaceBarCollapsedPeekTests`'.
+        #expect(other.collapse?.windows == 3)
         // The glyphs and their state badges go; the count is
         // windows, and `overflow` keeps its one meaning.
         #expect(other.apps.isEmpty)
@@ -137,7 +138,7 @@ struct SpaceBarInactiveContentTests {
                 holdsFocus: true
             ),
             drawn: .init(window: 1..<3, count: 4)
-        ).collapsed(to: .count, peeking: false)
+        ).collapsed(to: .count)
         #expect(item.collapse?.windows == 6)
         #expect(item.after.windows.count == 0)
         #expect(!item.after.holdsFocus)
@@ -153,7 +154,7 @@ struct SpaceBarInactiveContentTests {
     func collapseIsIdempotent() throws {
         let built = items(seededCore(), .count)
         let once = try #require(built[SpaceID("2")])
-        let twice = once.collapsed(to: .count, peeking: false)
+        let twice = once.collapsed(to: .count)
         #expect(twice.collapse == once.collapse)
         #expect(twice.collapse?.windows == 3)
     }
@@ -165,7 +166,7 @@ struct SpaceBarInactiveContentTests {
             layer: "L",
             glyph: .text("L", tinted: false)
         )
-        #expect(layer.collapsed(to: .count, peeking: false).collapse == nil)
+        #expect(layer.collapsed(to: .count).collapse == nil)
     }
 
     /// `hide_empty` reads the glyphs the collapse drops, so it

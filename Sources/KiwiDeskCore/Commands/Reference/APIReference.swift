@@ -162,7 +162,7 @@ public enum APIReference {
             "set_enabled", "set_reserve", "set_edge",
             "set_glyph_span", "set_glyph_gap",
             "set_group_adjacent_windows", "set_inactive_content",
-            "set_peek_on_hover", "set_item_label",
+            "set_item_label",
             "set_active_indicator",
             "set_active_dim_factor", "set_show_front_app",
             "set_front_app_title_cap", "set_hide_empty",

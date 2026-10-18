@@ -12,9 +12,7 @@ extension SpaceBarItemView {
     struct Collapse: Equatable {
         /// The windows the Space holds, drawn and announced.
         let windows: Int
-        /// The windows a hover peeks, in the strip's order (#1945);
-        /// empty while `peek_on_hover` is off, so the chip peeks
-        /// nothing.
+        /// The windows a hover peeks, in the strip's order (#1945).
         var peek: [WindowID] = []
 
         /// The disc's text: past `discCap` it reads "9+" so the

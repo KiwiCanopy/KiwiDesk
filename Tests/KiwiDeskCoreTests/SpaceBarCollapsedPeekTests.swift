@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// `space_bar.peek_on_hover` (#1945): a Space collapsed to its
-/// window count lists its apps and windows in the hover peek
-/// (#1946) while the pointer rests on it, off by default. The run
-/// does not change, so nothing moves under the pointer (#1665).
+/// A Space collapsed to its window count lists its apps and windows
+/// in the hover peek (#1946) while the pointer rests on it (#1945,
+/// always on). The run does not change, so nothing moves under the
+/// pointer (#1665).
 @Suite("Space bar collapsed peek", .serialized)
 @MainActor
 struct SpaceBarCollapsedPeekTests {
@@ -40,27 +40,23 @@ struct SpaceBarCollapsedPeekTests {
         return core
     }
 
-    private func collapsed(peeking: Bool) throws -> SpaceBarOverlay.Item {
+    private func collapsed() throws -> SpaceBarOverlay.Item {
         let core = seededCore()
         var look = SpaceBarLook()
         look.inactiveContent = .count
-        look.peekOnHover = peeking
         let item = core.spaceBarItems(display: display, style: look)
             .first { $0.space == SpaceID("2") }
         return try #require(item)
     }
 
-    @Test("The collapse carries its Space's windows only when on")
+    @Test("The collapse carries its Space's windows")
     func builderCarriesTheWindows() throws {
-        let on = try collapsed(peeking: true)
-        #expect(on.collapse?.windows == 3)
+        let item = try collapsed()
+        #expect(item.collapse?.windows == 3)
         #expect(
-            Set(on.collapse?.peek ?? [])
+            Set(item.collapse?.peek ?? [])
                 == Set([2, 3, 4].map(WindowID.init))
         )
-        let off = try collapsed(peeking: false)
-        #expect(off.collapse?.windows == 3)
-        #expect(off.collapse?.peek == [])
     }
 
     @Test("The collapse lists before, the glyphs, then after")
@@ -80,7 +76,7 @@ struct SpaceBarCollapsedPeekTests {
             active: false,
             before: .init(windows: [WindowID(4)]),
             after: .init(windows: [WindowID(6)])
-        ).collapsed(to: .count, peeking: true)
+        ).collapsed(to: .count)
         #expect(item.collapse?.peek == [4, 5, 6].map(WindowID.init))
     }
 
@@ -157,7 +153,7 @@ struct SpaceBarCollapsedPeekTests {
                 apps: [mail],
                 active: false,
                 after: .none
-            ).collapsed(to: .count, peeking: true)
+            ).collapsed(to: .count)
         }
         let shown = { (ids: [Int]) in
             SpaceBarOverlay.Shown(
@@ -177,7 +173,7 @@ struct SpaceBarCollapsedPeekTests {
         #expect(!overlay.keepsGeometry(shown([4, 5]), shown([4, 5, 6])))
     }
 
-    @Test("With the toggle off a collapsed chip peeks nothing")
+    @Test("An empty collapsed chip peeks nothing")
     func offPeeksNothing() {
         let rig = BarPeekRig()
         defer { rig.close() }
