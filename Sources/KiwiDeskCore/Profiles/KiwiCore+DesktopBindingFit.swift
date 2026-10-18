@@ -89,6 +89,10 @@ struct BoundPick {
     let entry: DesktopBinding.Entry
 }
 
+/// An id no readable file carries while a profile file too broken
+/// to name its id sits in the folder: absence is unproven (#2324).
+struct UndeterminedProfile: Error {}
+
 /// A binding whose list is empty — a shape no writer produces,
 /// named so the gate can refuse it rather than crash.
 struct EmptyDesktopBinding: Error {}
@@ -129,7 +133,10 @@ extension KiwiCore {
         for entry in ranked {
             let name: String
             switch bindingResolution(of: entry) {
-            case .profile(let file), .unreadable(let file): name = file
+            case .profile(let file), .unreadable(let file?): name = file
+            case .unreadable(nil):
+                unreadable = UndeterminedProfile()
+                continue
             case .missing:
                 missing.append(entry.name)
                 continue

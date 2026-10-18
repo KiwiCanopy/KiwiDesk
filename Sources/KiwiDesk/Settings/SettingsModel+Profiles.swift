@@ -169,6 +169,7 @@ extension SettingsModel {
             try core.withUserMotion {
                 try core.saveGuiConfig(sidecarConfig)
             }
+            try persistBindingEdits()
         } catch {
             core.onLog("settings save failed: \(error)")
         }

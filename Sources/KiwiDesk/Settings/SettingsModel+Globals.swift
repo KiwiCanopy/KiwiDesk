@@ -74,12 +74,13 @@ extension SettingsModel {
                 // retile while the dashboard says "paused". Write
                 // the store directly; start() picks the file up
                 // when permission arrives.
-                try core.guiConfigStore.saveIncludingBindings(sidecarConfig)
+                try core.guiConfigStore.save(sidecarConfig)
             } else {
                 try core.withUserMotion {
                     try core.saveGuiConfig(sidecarConfig)
                 }
             }
+            try persistBindingEdits()
         } catch {
             profileWarning = L(
                 "settings.globals_save_failed",

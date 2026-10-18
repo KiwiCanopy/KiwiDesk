@@ -238,7 +238,7 @@ extension KiwiCore {
     /// keybindings directly from the sidecar (#55). `init.lua`
     /// is not touched.
     public func saveGuiConfig(_ config: GuiConfig) throws {
-        try guiConfigStore.saveIncludingBindings(config)
+        try guiConfigStore.save(config)
         loadConfig()
     }
 

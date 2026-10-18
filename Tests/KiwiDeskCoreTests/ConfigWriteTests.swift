@@ -109,6 +109,9 @@ struct ConfigWriteTests {
     func roundTrip() throws {
         let core = makeCore()
         let config = richConfig()
+        // The bindings have their own door (#2324); the Settings
+        // Save writes its edits through it beside this one.
+        try core.guiConfigStore.saveBindings(config.profileBindings)
         try core.saveGuiConfig(config)
         core.applyProfileScopedState(from: config)
 
@@ -143,6 +146,9 @@ struct ConfigWriteTests {
     func sidecarRoundTrip() throws {
         let core = makeCore()
         let config = richConfig()
+        // The bindings have their own door (#2324); the Settings
+        // Save writes its edits through it beside this one.
+        try core.guiConfigStore.saveBindings(config.profileBindings)
         try core.saveGuiConfig(config)
         // The sidecar holds the globals; the profile-scoped
         // fields overlay from live state, so applying them
@@ -156,6 +162,9 @@ struct ConfigWriteTests {
     func deletionRoundTrip() throws {
         let core = makeCore()
         let config = richConfig()
+        // The bindings have their own door (#2324); the Settings
+        // Save writes its edits through it beside this one.
+        try core.guiConfigStore.saveBindings(config.profileBindings)
         try core.saveGuiConfig(config)
         core.applyProfileScopedState(from: config)
         #expect(core.state.appRules["spotify"] != nil)
@@ -164,6 +173,7 @@ struct ConfigWriteTests {
         )
 
         // Save a config with all sparse entries removed.
+        try core.guiConfigStore.saveBindings([:])
         try core.saveGuiConfig(GuiConfig())
         core.applyProfileScopedState(from: GuiConfig())
 

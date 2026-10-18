@@ -134,10 +134,11 @@ public struct GuiConfigStore {
         try machine.save(stored)
     }
 
-    /// `save`, with the config's Desktop bindings written first —
-    /// for the writers that AUTHOR bindings (a Settings Save, the
-    /// Lua adoption, a restore). Every other `gui.json` write
-    /// leaves `bindings.json` alone, so a caller's stale copy never
+    /// `save`, with the config's WHOLE binding map written first —
+    /// for the writers that author it whole: the Lua adoption and a
+    /// restore. A Settings Save writes its edits per entry through
+    /// `KiwiCore.rewriteSidecarBindings`, and every other `gui.json`
+    /// write leaves `bindings.json` alone, so a stale copy never
     /// reverts a re-key or a promotion made since (#2324).
     public func saveIncludingBindings(_ config: GuiConfig) throws {
         try saveBindings(config.profileBindings)

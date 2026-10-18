@@ -36,13 +36,11 @@ extension KiwiCore {
         }
     }
 
-    /// The name an id's readable profile has now.
+    /// The name an id's readable profile stores, from the index —
+    /// no file is read.
     private func currentLabel(_ id: ProfileID) -> String? {
-        guard
-            case .profile(let file) = bindingResolution(
-                of: .init(id: id, name: "")
-            )
+        guard let holder = profiles.holder(of: id), holder.readable
         else { return nil }
-        return (try? profiles.read(name: file))?.name ?? file
+        return holder.storedName.isEmpty ? holder.file : holder.storedName
     }
 }

@@ -88,7 +88,7 @@ struct ProfileBindingListMigrationTests {
         let out = try #require(
             ConfigMigration.migratedKeepingMachineLeaves(data)
         )
-        let config = try JSONDecoder().decode(GuiConfig.self, from: out)
+        _ = try JSONDecoder().decode(GuiConfig.self, from: out)
         #expect(
             try stored(out)[.number(2)]
                 == DesktopBinding(profiles: ["Work"], desktop: 2)

@@ -105,7 +105,8 @@ struct DesktopBindingByIDTests {
     }
 
     /// A file that is not even JSON hides its id; absence is then
-    /// unproven, so the id reads unreadable, never missing.
+    /// unproven, so the id reads unreadable — naming no file, since
+    /// it cannot know which — never missing.
     @Test("A garbage file leaves an id unreadable")
     func garbageFileIsUnreadable() throws {
         let core = makeCore()
@@ -116,7 +117,7 @@ struct DesktopBindingByIDTests {
         )
         #expect(
             core.bindingResolution(of: .init(id: work.id, name: "Work"))
-                == .unreadable("Work")
+                == .unreadable(nil)
         )
     }
 
@@ -178,6 +179,26 @@ struct DesktopBindingByIDTests {
             Issue.record("expected missing, got \(result)")
             return
         }
+    }
+
+    /// The label follows a rename through the write door's
+    /// promotion, read from the index (#2324).
+    @Test("A rename relabels an id binding in the stored map")
+    func renameRelabelsStored() throws {
+        let core = makeCore()
+        try core.guiConfigStore.save(GuiConfig())
+        let work = try save(core, "Work")
+        try core.guiConfigStore.saveBindings([
+            .number(1): DesktopBinding(
+                entries: [.init(id: work.id, name: "Work")],
+                desktop: 1
+            )
+        ])
+        try core.renameProfile(from: "Work", to: "Office")
+        #expect(
+            core.guiConfigStore.bindingsFile.load()
+                .profileBindings[.number(1)]?.names == ["Office"]
+        )
     }
 
     @Test("The verb binds a saved profile by its id")

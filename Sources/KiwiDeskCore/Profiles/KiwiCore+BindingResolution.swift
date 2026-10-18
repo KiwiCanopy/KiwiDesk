@@ -6,8 +6,10 @@ import Foundation
 public enum BindingResolution: Equatable, Sendable {
     /// A readable profile, by its file name.
     case profile(String)
-    /// A profile file that exists and will not decode.
-    case unreadable(String)
+    /// A profile file that exists and will not decode — by name,
+    /// or nil where a file whose id cannot be read leaves absence
+    /// unproven and names no file.
+    case unreadable(String?)
     /// No profile carries the id, or the pending name names none.
     case missing
 }
@@ -37,9 +39,9 @@ extension KiwiCore {
     /// while it names none.
     func pendingID(_ name: String) -> ProfileID? {
         switch bindingResolution(of: .init(name: name)) {
-        case .profile(let file), .unreadable(let file):
+        case .profile(let file), .unreadable(let file?):
             profiles.currentIndex().id(ofFile: file)
-        case .missing:
+        case .unreadable(nil), .missing:
             nil
         }
     }
@@ -48,8 +50,7 @@ extension KiwiCore {
         let index = profiles.currentIndex()
         guard let holder = index.holder(of: id) else {
             // A file whose id cannot be read may be this one.
-            return index.unparseable.first.map(BindingResolution.unreadable)
-                ?? .missing
+            return index.unparseable.isEmpty ? .missing : .unreadable(nil)
         }
         return holder.readable
             ? .profile(holder.file) : .unreadable(holder.file)

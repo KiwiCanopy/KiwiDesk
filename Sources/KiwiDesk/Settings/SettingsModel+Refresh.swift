@@ -165,6 +165,17 @@ struct BindingEdits {
 }
 
 extension SettingsModel {
+    /// Writes the draft's binding edits, per entry, into the stored
+    /// map (#2324): a Save carries only what the user changed, so a
+    /// re-key or a promotion made since the draft was read stands.
+    /// Runs after the `gui.json` write, which may have minted the
+    /// config the binding door requires.
+    func persistBindingEdits() throws {
+        let edits = bindingEdits
+        guard !edits.isEmpty else { return }
+        try core.rewriteSidecarBindings { edits.apply(to: &$0) }
+    }
+
     /// The draft's binding edits against the clean baseline —
     /// the one derivation the re-key adopt and the
     /// stored-profile Save both read.
