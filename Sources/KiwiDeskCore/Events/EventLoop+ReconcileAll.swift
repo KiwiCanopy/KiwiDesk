@@ -47,6 +47,7 @@ extension EventLoop {
         let signposter = BootSignpost.signposter
         let span = signposter.beginInterval("reconcileAll")
         defer { signposter.endInterval("reconcileAll", span) }
+        WorkMeter.shared.add(\.bulkReconciles)
         // Rules can detach an already-observed app or make a
         // formerly ignored app observable. Synchronize that
         // app-level boundary without reading ignored AX trees.
