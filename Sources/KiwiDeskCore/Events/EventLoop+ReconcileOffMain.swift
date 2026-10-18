@@ -50,15 +50,6 @@ struct PrefetchedWindows {
         }
     }
 
-    /// What the read found of each window untracked when it began.
-    var arrivals: [WindowID: ArrivalReading] {
-        windows.reduce(into: [:]) { arrivals, window in
-            if let id = window.id, let read = window.arrival {
-                arrivals[id] = read
-            }
-        }
-    }
-
     /// Keeps the flight out of the sweep: a window tracked during
     /// the read stays live (the list predates it), and one that
     /// left during the read is not re-adopted from the list.
@@ -100,8 +91,10 @@ struct OffMainReconcile {
     var next: [pid_t: Debt] = [:]
     /// A Desktop switch's batch read (#2347).
     var switchBatch = SwitchReconcile()
-    /// The list read's `WindowFacts` door (#1883); a test hands a
-    /// fabricated element a role through it.
+    var departures = FlightDepartures()
+    /// The list reader's `WindowFacts` door (#1883) — `track` and
+    /// the recheck read theirs directly; a test hands a fabricated
+    /// element a role through it.
     var readFacts: (AXUIElement, Int?) -> WindowFacts = {
         WindowFacts.read($0, layer: $1)
     }
@@ -156,6 +149,7 @@ struct OffMainReconcile {
         next = [:]
         readStarted = [:]
         switchBatch.drop()
+        departures.forgetAll()
     }
 }
 

@@ -36,6 +36,8 @@ struct ArrivalAdoptionTests {
         /// fakes answer outside `WorkMeter`.
         var applySeams: [String] = []
         var applying = false
+        /// Deliveries held back, where a test lands them by hand.
+        var held: [() -> Void]?
         var created: [ManagedWindow] = []
     }
 
@@ -54,7 +56,9 @@ struct ArrivalAdoptionTests {
 
     /// A loop tracking one window of `pid` and listing two more,
     /// which the facts seam answers as standard windows.
-    private func makeLoop() -> (loop: EventLoop, box: Box) {
+    private func makeLoop() -> (
+        loop: EventLoop, box: Box, elements: [AXUIElement]
+    ) {
         let loop = EventLoop()
         let box = Box()
         loop.onLog = { _ in }
@@ -107,6 +111,10 @@ struct ArrivalAdoptionTests {
         }
         loop.axReads.deliver = { work in
             MainActor.assumeIsolated {
+                if box.held != nil {
+                    box.held?.append(work)
+                    return
+                }
                 let before = Self.mainCalls
                 box.applying = true
                 work()
@@ -131,12 +139,12 @@ struct ArrivalAdoptionTests {
             scanWindowsAtAttach: false
         )
         loop.elements[pid] = [tracked: elements[0]]
-        return (loop, box)
+        return (loop, box, elements)
     }
 
     @Test("an arrival costs the main actor no AX call")
     func arrivalAsksNothingOnMain() {
-        let (loop, box) = makeLoop()
+        let (loop, box, _) = makeLoop()
         loop.reconcileOffMain(pid: pid, app: ref)
         // Adopted from the read: the live title read answers "".
         #expect(box.created.map(\.id) == arrivals)
@@ -146,9 +154,11 @@ struct ArrivalAdoptionTests {
         #expect(box.applySeams.isEmpty, "\(box.applySeams)")
     }
 
-    @Test("a switch batch's arrivals cost the main actor no AX call")
-    func batchArrivalAsksNothingOnMain() {
-        let (loop, box) = makeLoop()
+    /// The bulk shape a Desktop switch's fold applies: no tab
+    /// match, so `track` alone consumes the reading.
+    @Test("a bulk-shaped read's arrivals cost the main actor no AX call")
+    func bulkArrivalAsksNothingOnMain() {
+        let (loop, box, _) = makeLoop()
         loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
         #expect(box.created.map(\.id) == arrivals)
         #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
@@ -160,9 +170,30 @@ struct ArrivalAdoptionTests {
     /// in this fixture and a zero above measures something.
     @Test("a synchronous reconcile's arrivals do ask on main")
     func syncArrivalAsksOnMain() {
-        let (loop, _) = makeLoop()
+        let (loop, _, _) = makeLoop()
         let before = Self.mainCalls
         loop.reconcile(pid: pid, app: ref)
         #expect(Self.mainCalls - before >= arrivals.count)
+    }
+
+    /// A window closed after the read listed it, before the list
+    /// applied, is read live by `track` — which the fabricated
+    /// element refuses — and never adopted from the reading.
+    @Test("a window closed during the read is not adopted from it")
+    func closedDuringTheReadIsNotAdopted() throws {
+        let (loop, box, elements) = makeLoop()
+        box.held = []
+        loop.reconcileOffMain(pid: pid, app: ref)
+        let delivery = box.held ?? []
+        try #require(delivery.count == 1)
+        loop.handle(
+            kAXUIElementDestroyedNotification,
+            elements[2],
+            pid: pid,
+            app: ref
+        )
+        box.held = nil
+        for work in delivery { work() }
+        #expect(box.created.map(\.id) == [arrivals[0]])
     }
 }

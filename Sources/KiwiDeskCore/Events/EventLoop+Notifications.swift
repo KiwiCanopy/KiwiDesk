@@ -88,6 +88,10 @@ extension EventLoop {
                         )
                     )
                 }
+            } else {
+                // An arrival a list read in flight found is not
+                // adopted from it.
+                offMain.departures.note(element, pid: pid)
             }
             // Some apps skip the notification, so always diff
             // against the live window list, read off main (#1888).

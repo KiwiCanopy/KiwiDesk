@@ -42,9 +42,15 @@ struct TrackedReading {
 /// What `track` would otherwise read on the main actor of a
 /// window untracked when the list read began, so a Desktop
 /// switch's arrivals are adopted without asking their apps again.
-/// Up to one read old, like `TrackedReading`.
+/// Up to one read old, like `TrackedReading`: a title changed or a
+/// float rule reloaded during the read lands at the window's next
+/// title change or recheck, and a window closed or minimized during
+/// it is not adopted from it (`OffMainReconcile.departures`).
 struct ArrivalReading {
     let id: WindowID
+    /// The layer detection judged on; `track` reads the window
+    /// live where the server now reports another.
+    let layer: Int?
     let role: String
     let subrole: String
     let title: String
@@ -105,6 +111,12 @@ struct ListedWindowReader: @unchecked Sendable {
     let tracked: Set<WindowID>
     /// The app's overlay class, resolved at request time.
     let isAccessory: Bool
+    /// What spares an untracked window the arrival read, resolved
+    /// at request time: the ignore rules, KiwiDesk's own process
+    /// (its gate asks AppKit) and the app's known shadows.
+    let ignoreRules: IgnoreRules
+    let ownProcess: Bool
+    let shadowed: Set<WindowID>
 
     func read(
         _ elements: [AXUIElement],
@@ -120,19 +132,32 @@ struct ListedWindowReader: @unchecked Sendable {
     ) -> ListedWindow {
         let id = resolve(element)
         let minimized = AXHelper.isMinimized(element)
-        let facts = facts(element, id.flatMap { layers[$0] })
-        let layer = id.flatMap { layers[$0] } ?? 0
+        let listedLayer = id.flatMap { layers[$0] }
+        let facts = facts(element, listedLayer)
+        let layer = listedLayer ?? 0
         let asksButton = FloatDetection.needsTitlebarButton(
             layer: layer,
             isAccessory: isAccessory,
             bundleID: bundleID
         )
         let isTracked = id.map { tracked.contains($0) }
-        let arrives = isTracked == false && !minimized
+        let button = asksButton ? traits(element, id) : nil
+        let arrives =
+            isTracked == false && !minimized && !ownProcess
+            && facts.role == kAXWindowRole
+            && id.map(shadowed.contains) == false
+            && !FloatDetection.shouldIgnore(
+                bundleID: bundleID,
+                layer: layer,
+                isAccessory: isAccessory,
+                rules: ignoreRules,
+                titlebarButton: button?.hasTitlebarButton == true
+            )
         // One traits read serves the shadow rule and the escape.
         let traitsRead =
-            isTracked == true && many || asksButton || arrives
-            ? traits(element, id) : nil
+            button
+            ?? (isTracked == true && many || arrives
+                ? traits(element, id) : nil)
         let detect = {
             FloatDetection.autoFloatReason(
                 facts,
@@ -159,24 +184,39 @@ struct ListedWindowReader: @unchecked Sendable {
                 && traitsRead?.hasTitlebarButton == true,
             tracked: reading,
             arrival: arrives
-                ? id.map { arrival($0, element, facts, traitsRead, detect) }
+                ? id.map {
+                    arrival(
+                        $0,
+                        element,
+                        facts,
+                        listedLayer,
+                        traitsRead,
+                        detect
+                    )
+                }
                 : nil
         )
     }
 
-    /// Per arrival, what `track` asked on the main actor: the
+    /// Per arrival, what `track` asked on the main actor — the
     /// title, frame, fullscreen state, batched traits, children
-    /// and each child's role, and detection's own title and
-    /// zoom-button reads where it asks them.
+    /// and each child's role, and detection's title and zoom
+    /// reads where it asks them: about 6 + children AX messages
+    /// moved off the main actor per arriving window. Only a window
+    /// `track` could adopt is read; the ignore check here is a
+    /// prefilter, and a window it lets through that the main
+    /// actor then ignores costs those reads for nothing.
     private func arrival(
         _ id: WindowID,
         _ element: AXUIElement,
         _ facts: WindowFacts,
+        _ layer: Int?,
         _ traits: WindowTraits?,
         _ detect: () -> AutoFloatReason?
     ) -> ArrivalReading {
         ArrivalReading(
             id: id,
+            layer: layer,
             role: facts.role,
             subrole: facts.subrole,
             title: facts.title(),
@@ -204,7 +244,10 @@ extension EventLoop {
             rules: floatRules,
             facts: offMain.readFacts,
             tracked: tracked,
-            isAccessory: classifiesAsOverlay(pid: pid)
+            isAccessory: classifiesAsOverlay(pid: pid),
+            ignoreRules: ignoreRules,
+            ownProcess: Self.isOwnProcess(pid),
+            shadowed: Set(shadows.hosts[pid]?.keys ?? [:].keys)
         )
     }
 

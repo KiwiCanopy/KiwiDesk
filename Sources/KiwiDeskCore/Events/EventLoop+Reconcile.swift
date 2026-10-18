@@ -302,7 +302,11 @@ extension EventLoop {
             live: live,
             minimized: minimized,
             coalesceTabs: coalesceTabs && !recentSpaceSwitch,
-            arrivals: prefetched?.arrivals ?? [:]
+            arrivals: adoptableArrivals(
+                prefetched,
+                pid: pid,
+                appeared: appeared
+            )
         )
         // Past the sweep, so a spent budget here abandons nothing
         // of the list; the app is completed after the pass (#803).
