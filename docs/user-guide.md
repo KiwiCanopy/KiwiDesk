@@ -139,6 +139,12 @@ with your settings, every profile and your saved palettes;
 and the remembered window arrangement. For continuous sync see
 [The gui.json File](#the-guijson-file).
 
+:::unreleased
+A backup does not carry which Space each Desktop remembers
+either: that stays on the Mac it was made on ([Spaces and
+Desktops](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-windows)).
+:::
+
 Restoring **replaces**, it does not merge, and what it replaces
 goes to the **Trash**. On the way, the remembered window
 arrangement on that Mac is forgotten, and KiwiDesk picks the
@@ -174,16 +180,21 @@ hand-written setup, the first time you Save in Settings.
 > screen layout and macOS Desktops to resolve against what is
 > connected there.
 
+:::unreleased
 When an update moves `gui.json`, a profile, your palettes or your
 looks to a newer file format, KiwiDesk first keeps the file as it
-was in `~/.config/KiwiDesk/migration-backups/`, under its own path
-with `.pre-v<format>` added; `<format>` is the file's own format
-number, not a KiwiDesk version. One copy is kept per file: the
-file before its latest migration. To go back to an older KiwiDesk,
-quit it, copy that file over the original and drop the suffix. A
-backup does not carry the folder, and Reset All Settings leaves
-it. In a synced or dotfiles folder, add `migration-backups/` to
-its `.gitignore`.
+was in `~/Library/Application Support/KiwiDesk/migration-backups/`,
+under its own path with `.pre-v<format>` added; `<format>` is the
+file's own format number, not a KiwiDesk version. One copy is kept
+per file: the file before its latest migration. To go back to an
+older KiwiDesk, quit it, copy that file over the original and drop
+the suffix. A backup does not carry the folder, and Reset All
+Settings leaves it.
+
+The socket, the instance lock, the saved window arrangement and
+`machine.json` live in `~/Library/Application Support/KiwiDesk/`
+itself; Reset All Settings clears `machine.json`.
+:::
 
 An older KiwiDesk never writes over `gui.json` or a profile that a
 newer one migrated: it reports the file as unreadable, and a save

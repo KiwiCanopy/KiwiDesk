@@ -67,4 +67,28 @@ struct SingleInstanceLockTests {
         #expect(second.acquire())
         second.release()
     }
+
+    /// An older build updated in place still holds the lock in
+    /// the old folder; the new build must see it (#2324).
+    @Test("A held legacy lock reads as a running old build")
+    func heldLegacyLockRuns() {
+        let path = tempLockPath()
+        let old = SingleInstanceLock(path: path)
+        #expect(old.acquire())
+        #expect(SingleInstanceLock.legacyHolderRuns(at: path))
+        #expect(FileManager.default.fileExists(atPath: path))
+        old.release()
+    }
+
+    @Test("A free legacy lock is removed, an absent one ignored")
+    func freeLegacyLockIsRemoved() {
+        let path = tempLockPath()
+        #expect(!SingleInstanceLock.legacyHolderRuns(at: path))
+        let old = SingleInstanceLock(path: path)
+        #expect(old.acquire())
+        old.release()
+        #expect(FileManager.default.fileExists(atPath: path))
+        #expect(!SingleInstanceLock.legacyHolderRuns(at: path))
+        #expect(!FileManager.default.fileExists(atPath: path))
+    }
 }

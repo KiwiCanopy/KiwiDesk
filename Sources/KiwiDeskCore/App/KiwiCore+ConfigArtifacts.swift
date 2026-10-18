@@ -22,6 +22,8 @@ public enum ConfigArtifact: CaseIterable {
     /// The copies a migration keeps of the files it rewrote
     /// (#1880, `MigrationBackup`).
     case migrationBackups
+    /// This Mac's `GuiConfig` leaves (#2324, `MachineConfig`).
+    case machineConfig
 
     /// What a backup carries.
     ///
@@ -33,13 +35,24 @@ public enum ConfigArtifact: CaseIterable {
     /// symptom is a user moving Macs and silently losing whatever
     /// it held. `palettes.json` nearly was that symptom.
     ///
-    /// So a new file under `~/.config/KiwiDesk` adds a case here
-    /// and answers this property in the same change set.
+    /// So a new file KiwiDesk keeps — in the config folder or in
+    /// `MachineLocation`'s — adds a case here and answers this
+    /// property in the same change set; `url(of:)` says where.
     /// `SetupBundleArtifactTests` holds the two together.
     public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
-        case .migrationBackups: return false
+        case .migrationBackups, .machineConfig: return false
+        }
+    }
+
+    /// Whether the file lives in `MachineLocation`'s folder rather
+    /// than the config folder; `url(of:)` follows it, and such a
+    /// file never travels (`SetupBundleArtifactTests`).
+    public var livesOnThisMac: Bool {
+        switch self {
+        case .guiConfig, .profiles, .palettes, .looks: return false
+        case .migrationBackups, .machineConfig: return true
         }
     }
 
@@ -53,6 +66,9 @@ public enum ConfigArtifact: CaseIterable {
             return "a copy of this Mac's files at an older format, "
                 + "for a downgrade here; the backup carries the "
                 + "current files"
+        case .machineConfig:
+            return "which Space each of this Mac's Desktops was "
+                + "showing; another Mac's Desktops are not these"
         }
     }
 }
@@ -60,7 +76,7 @@ public enum ConfigArtifact: CaseIterable {
 extension KiwiCore {
     /// Where a migrated rewrite keeps the original (#1880).
     var migrationBackups: URL {
-        Self.migrationBackups(in: configDirectory)
+        Self.migrationBackups(in: machineDirectory)
     }
 
     /// Where each artifact lives.
@@ -71,6 +87,7 @@ extension KiwiCore {
         case .palettes: return paletteLibrary.url
         case .looks: return lookLibrary.url
         case .migrationBackups: return migrationBackups
+        case .machineConfig: return guiConfigStore.machine.url
         }
     }
 

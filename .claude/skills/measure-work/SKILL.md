@@ -146,8 +146,10 @@ swipe — a `focus_desktop` switch leaves macOS's current Desktop
 behind, and the fixture's windows open there instead. `up` replaces
 `swap-instance.sh`: it stops the running app before pointing
 `~/.config/KiwiDesk` at a Lua-only config, which every release reads
-and none migrates, so an older bundle boots the same desk. Run `down`
-before the next bundle's `up`; every bundle starts on a fresh copy.
+and none migrates, so an older bundle boots the same desk, and sets
+the snapshots in `~/Library/Application Support/KiwiDesk` aside until
+`down` (#2324). Run `down` before the next bundle's `up`; every
+bundle starts on a fresh copy.
 
 Runs per condition follow §3; when more are added, balance their
 ORDER across the bundles, since a long GPU sitting heats the

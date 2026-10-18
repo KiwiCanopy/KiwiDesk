@@ -4,29 +4,33 @@ import Foundation
 /// keeping the original first (#1880) so a downgrade or a faulty
 /// step never strands the file.
 ///
-/// The copies live in ONE folder, `migration-backups/` in the
-/// config directory, each under its file's relative path with
-/// `.pre-v<format>` appended — one `ConfigArtifact` case, one
-/// `.gitignore` line, nothing for a scan of `profiles/` to skip.
+/// The copies live in ONE folder, `migration-backups/` in
+/// `MachineLocation`'s folder (#2324), each under its file's
+/// relative path with `.pre-v<format>` appended — nothing for a
+/// scan of `profiles/` to skip.
 /// Only a real migration writes, so a plain read stays a read
 /// (#1245).
 enum MigrationBackup {
-    /// The folder's name in the config directory.
+    /// The folder's name in the machine folder.
     static let folderName = "migration-backups"
 
     /// `data` migrated by `ConfigMigration`, rewritten over `file`
     /// once its original is kept in `backups`; `data` itself when
     /// nothing migrates. A copy that fails to land leaves the file
     /// as it was (the next read migrates again). A nil `backups` —
-    /// a store built outside a core — keeps no copy.
+    /// a store built outside a core — keeps no copy. `writesBack`
+    /// false migrates in memory only, for a read that must leave
+    /// the file for a later one (`GuiConfigStore.load`'s carry).
     static func migrateInPlace(
         _ data: Data,
         at file: URL,
-        backups: URL?
+        backups: URL?,
+        writesBack: Bool = true
     ) -> Data {
         guard let migrated = ConfigMigration.migrated(data) else {
             return data
         }
+        guard writesBack else { return migrated }
         if let backups, !keep(data, of: file, in: backups) {
             return migrated
         }

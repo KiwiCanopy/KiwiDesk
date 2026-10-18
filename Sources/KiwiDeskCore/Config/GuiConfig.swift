@@ -40,7 +40,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// because a wrong answer heals at the next departure; once
     /// persisted it does not, so the encoder drops them
     /// (profiles.md ▸ "Never carry the `.number` fallback's
-    /// collision into a PERSISTED map").
+    /// collision into a PERSISTED map"). Stored in
+    /// `machine.json`, never `gui.json` (`machineLocalFields`).
     public var desktopSpaces: [DesktopKey: SpaceID] = [:]
     /// Keybinding modes; first is default mode.
     public var layers: [KeyLayer] = [KeyLayer.defaultLayer]
@@ -88,6 +89,14 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         "format", "desktopSpaces", "appWide", "look",
     ]
 
+    /// Fields `gui.json` never carries: they mean something on
+    /// this Mac alone, so they live in `MachineConfig` (#2324),
+    /// which `GuiConfigStore` composes in at a load and splits out
+    /// at a save. The encoder and decoder below skip them.
+    public static let machineLocalFields: Set<String> = [
+        "desktopSpaces"
+    ]
+
     public init() {}
 
     /// Only the global fields persist in the sidecar — the
@@ -101,7 +110,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case profileBindings = "profile_bindings"
-        case desktopSpaces = "desktop_spaces"
         case layers
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
@@ -160,14 +168,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? []
         profileBindings =
             try decodeProfileBindings(from: container)
-        // Additive since #1230: a file written before it decodes
-        // to empty, which IS "no Desktop remembers a Space yet",
-        // so no format bump and no migration.
-        desktopSpaces =
-            try container.decodeIfPresent(
-                [DesktopKey: SpaceID].self,
-                forKey: .desktopSpaces
-            ) ?? [:]
         // A hand-edited sidecar can carry duplicate mode names or
         // an icon on the default mode (#31) — normalized here so
         // invalid entries never reach the loader or the GUI.
@@ -208,7 +208,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 DesktopShortcutBase.self,
                 forKey: .desktopShortcutBase
             ) ?? .standard
-        // Additive since #1741, like `desktopSpaces`: absence is
+        // Additive since #1741: absence is
         // "not adopted yet", which the adoption reads.
         appWide = AppWideSettings(
             refusal: try container.decodeIfPresent(
@@ -281,10 +281,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(
             profileBindings,
             forKey: .profileBindings
-        )
-        try container.encode(
-            desktopSpaces.filter { $0.key.isIdentity },
-            forKey: .desktopSpaces
         )
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)

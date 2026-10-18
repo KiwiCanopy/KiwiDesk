@@ -41,10 +41,13 @@ A directory you own works without `sudo` as long as your shell
 already searches it; `~/.local/bin` is **not** on the macOS
 default `PATH`, so it needs adding first.
 
+:::unreleased
 Commands are sent over a UNIX domain socket at
-`~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on success, 1
-on error; data goes to stdout, the error message — and, on some
-successes, a note — to stderr.
+`~/Library/Application Support/KiwiDesk/KiwiDesk.sock`.
+:::
+
+Exit code is 0 on success, 1 on error; data goes to stdout, the
+error message — and, on some successes, a note — to stderr.
 
 Data on stdout is JSON with its object keys **sorted**, indented
 when stdout is a terminal and compact — one line — when it is
@@ -983,10 +986,12 @@ relaunch, as `subscribe --reconnect` does, and runs until stopped.
 Anything that can write to a UNIX socket can drive KiwiDesk —
 newline-delimited JSON, one request per line:
 
+:::unreleased
 ```sh
 printf '{"command":"set_mode","args":["1","grid"]}\n' \
-    | nc -U ~/.config/KiwiDesk/KiwiDesk.sock
+    | nc -U ~/Library/Application\ Support/KiwiDesk/KiwiDesk.sock
 ```
+:::
 
 Response:
 

@@ -140,9 +140,14 @@ back and you land on the same Space, with the same windows in
 the same order and the same one focused — as long as they come
 back promptly ([accepted limitations](accepted-limitations.md)
 has the case where they do not). Where KiwiDesk owns your config
-and can give a Desktop an identity of its own, that memory is
-written into `gui.json` and survives quitting KiwiDesk; a
-hand-written `init.lua` setup keeps it for the session only.
+and can give a Desktop an identity of its own, that memory
+survives quitting KiwiDesk; a hand-written `init.lua` setup keeps
+it for the session only.
+
+:::unreleased
+That memory is kept on this Mac alone, in
+`~/Library/Application Support/KiwiDesk/machine.json`.
+:::
 
 **Your windows stay with their Desktop.** A Space holds whatever
 of its windows are on the Desktop you are looking at. Switch

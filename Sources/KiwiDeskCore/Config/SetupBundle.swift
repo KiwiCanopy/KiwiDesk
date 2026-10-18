@@ -68,7 +68,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// which reaches a bundle's `config` and its `[Profile]` alike.
     /// 27 = the layouts side became View (#2309), in a bundle's
     /// `config` and its `[Profile]` alike.
-    public static let currentFormat = 27
+    /// 28 = `desktop_spaces` left `config` for this Mac's
+    /// `machine.json` (#2324) and never travels.
+    public static let currentFormat = 28
 
     public let format: Int
 
@@ -124,7 +126,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         case .guiConfig: return config != nil
         case .profiles, .palettes: return true
         case .looks: return looks != nil
-        case .migrationBackups: return false
+        case .migrationBackups, .machineConfig: return false
         }
     }
 

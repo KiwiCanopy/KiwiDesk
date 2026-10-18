@@ -68,13 +68,15 @@ public final class CrashRecovery {
     private var timer: Timer?
 
     public init(directory: URL) {
-        self.fileURL = directory.appendingPathComponent(
-            ".state_snapshot"
-        )
+        self.fileURL = directory.appendingPathComponent(Self.autosaveName)
         self.sessionURL = directory.appendingPathComponent(
-            ".session_snapshot"
+            Self.sessionName
         )
     }
+
+    /// The crash autosave's and the clean-quit snapshot's names.
+    nonisolated static let autosaveName = ".state_snapshot"
+    nonisolated static let sessionName = ".session_snapshot"
 
     /// Begins autosaving (#633). The unclean shutdown's restore is
     /// `takeBootSnapshot`'s, taken before boot's first retile

@@ -900,13 +900,43 @@ into `gui.json`, so the current *look* travelled while the saved
 *library* would have been left behind.
 
 
-**State about THIS MAC stays out of the register, in the app's
-defaults.** What a Mac has run and read — the "What's new" record
-(`WhatsNewRecord`, #1542), the tour's progress, the Settings mode
-— describes the machine, not the setup, and a backup restored on
-another Mac must neither replay nor swallow it. Such state never
-moves into the config folder "for consistency" and never joins
-`ConfigArtifact`.
+**A file that means something on this Mac alone lives in
+`MachineLocation`'s folder, never in the config folder, which a
+user may sync to another Mac (#2324, `CoreInitPathTests`).** The
+socket, the lock and the arrangement snapshots are runtime and
+take no case; any other file KiwiDesk keeps there answers the
+backup question in `ConfigArtifact`, `livesOnThisMac` and never
+travelling, as the migration copies do (`SetupBundleArtifactTests`
+▸ `liveMachineDirectoryIsAccountedFor`).
+
+**A `GuiConfig` leaf that means something on this Mac alone moves
+into `MachineConfig` (`machine.json`) by one `MachineConfig.moves`
+entry, and is composed and split in `GuiConfigStore` alone
+(#2324).** The in-memory `GuiConfig` keeps the field, so the draft,
+the diff and the census stay as they were; the leaf joins
+`GuiConfig.machineLocalFields`, which the `gui.json` coder skips
+(`MachineConfigTests` ▸ `registerMatchesTheFile`,
+`guiEncodingSkipsTheLeaves`). The move entry is what both the
+carry ahead of the migration and `migratingMachineLeavesOut` read,
+so a strip never removes a leaf the carry did not take first —
+append an entry with its format bumps, never edit one that shipped
+(`MachineConfigTests` ▸ `legacyMemoryIsCarried`,
+`failedCarryKeepsTheCopy`). A write of this Mac's leaves alone
+writes no `gui.json`; a live leaf is stamped into ANY write only
+once the session adopted the stored one, through the one stamp
+read every writer takes (`persistedDesktopSpaces`,
+`DesktopSpacePersistenceWiringTests` ▸
+`unadoptedMemorySurvivesTheQuit`, `unadoptedSaveKeepsTheMemory`);
+`machine.json` never answers `isGuiManaged`.
+
+**State about THIS MAC that is no file stays out of the register,
+in the app's defaults.** What a Mac has run and read — the "What's
+new" record (`WhatsNewRecord`, #1542), the tour's progress, the
+Settings mode — describes the machine, not the setup, and a backup
+restored on another Mac must neither replay nor swallow it. Such
+state never moves into the config folder "for consistency" and
+never joins `ConfigArtifact`.
+
 ## A screen is never left with zero spaces (#1175)
 
 A connected screen the space→display resolution leaves empty

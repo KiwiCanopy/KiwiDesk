@@ -27,7 +27,7 @@ extension KiwiCore {
         forgetDesktopSpaceMemory()
         // The Desktop→Space map is the one record here that
         // outlives the process (#1230), so the discard has to
-        // reach `gui.json` — otherwise a quit right after
+        // reach `machine.json` (#2324) — otherwise a quit right after
         // "Discard Saved Window Arrangement" re-adopts it at the
         // next boot. The other records' files are deleted
         // eagerly above for the same reason.
@@ -89,7 +89,7 @@ extension KiwiCore {
         // reset. `restoreSetup` passes a different set to the
         // same policy.
         let cleared = discardArtifacts(
-            [.guiConfig, .profiles],
+            [.guiConfig, .profiles, .machineConfig],
             reason: "reset",
             trash: trash
         )

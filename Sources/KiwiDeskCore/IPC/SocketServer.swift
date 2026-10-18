@@ -14,7 +14,7 @@ public final class SocketServer {
     public weak var bus: EventBus?
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    private let path: String
+    let path: String
     private var listener: NWListener?
     private var clients: [UUID: Client] = [:]
 
@@ -32,8 +32,24 @@ public final class SocketServer {
         }
     }
 
+    /// A path a UNIX socket cannot bind — past `sun_path` — which
+    /// a long home folder reaches (#2324).
+    public struct SocketPathTooLong: Error, CustomStringConvertible {
+        public let path: String
+        public var description: String {
+            "socket path too long (\(path.utf8.count) bytes, "
+                + "limit \(SocketServer.pathLimit - 1)): \(path)"
+        }
+    }
+
+    /// `sockaddr_un.sun_path`'s size, its NUL included.
+    nonisolated static let pathLimit = 104
+
     public func start() throws {
         guard listener == nil else { return }
+        guard path.utf8.count < Self.pathLimit else {
+            throw SocketPathTooLong(path: path)
+        }
         // A live first instance's socket is never unlinked; a stale
         // file left by a crash is (#1881).
         if Self.isLive(path) { throw SocketInUse(path: path) }

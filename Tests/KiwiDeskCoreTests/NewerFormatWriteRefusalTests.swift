@@ -69,7 +69,10 @@ struct NewerFormatWriteRefusalTests {
     func guiStoreWritesOtherwise() throws {
         let dir = try scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
-        let store = GuiConfigStore(directory: dir)
+        let store = GuiConfigStore(
+            directory: dir,
+            machine: dir.appendingPathComponent("machine")
+        )
         try store.save(GuiConfig())
         try store.save(GuiConfig())
         let file = dir.appendingPathComponent("gui.json")
