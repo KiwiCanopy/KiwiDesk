@@ -71,8 +71,8 @@ public final class WorkMeter: @unchecked Sendable {
         public var axMainMaxNanos = 0
         public var axOffMainCalls = 0
         public var axOffMainNanos = 0
-        /// Passes over every observed app (`reconcileAll`): a
-        /// Desktop switch owes one (#2347).
+        /// Passes over every observed app (`reconcileAll`, #2347),
+        /// counted at the static site, so on `.shared` alone.
         public var bulkReconciles = 0
     }
 

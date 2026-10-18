@@ -46,7 +46,8 @@ public final class KiwiCore {
     /// the active native-Space binding is known. Suppress their AX
     /// reconciles and run one pass after the final profile wins.
     var defersWindowRuleReconcile = false
-
+    /// A bound Desktop switch's apply; its sweep follows (#2347).
+    var defersRuleSweepToSwitchPass = false
     /// Boot's half of the same suppression (#836). **Raised in
     /// `start()`, lowered where the startup sweep is armed** —
     /// one pair, because the skip is valid exactly while nothing
@@ -130,9 +131,8 @@ public final class KiwiCore {
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
     /// The wall clock every `Date`-stamped ledger on the core
-    /// stamps and ages on; the focus-report ledgers are its first
-    /// readers. A test freezes it (#1852, tests.md ▸ age-bounded
-    /// ledgers).
+    /// stamps and ages on; a test freezes it (#1852, tests.md ▸
+    /// age-bounded ledgers).
     var wallClock: () -> Date = Date.init
 
     /// Bumped per z-order raise sequence so a stale sequence's

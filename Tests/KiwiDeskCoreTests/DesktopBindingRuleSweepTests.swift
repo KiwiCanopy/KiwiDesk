@@ -5,11 +5,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A bound Desktop's profile apply leaves its window-rule sweep to
-/// the switch's own folded `reconcileAll` (#2347): run inside the
-/// handler it read every app's windows a second time and retiled
-/// once per window it folded — 18 passes a switch on the fixture
-/// desk. Read through `WorkMeter.shared`'s bulk count, as a delta
-/// over one synchronous stretch no other suite can interleave.
+/// the switch's own folded `reconcileAll` (#2347), which
+/// `DesktopSwitchRuleSweepSeamTests` holds to follow the handler.
+/// Read through `WorkMeter.shared`'s bulk count, as a delta over
+/// one synchronous stretch no other suite can interleave.
 /// Over the #888 fixture's main screen: Desktops 1–2 (ids 10, 11)
 /// on `UUID-A`.
 @Suite("A bound Desktop's apply defers its rule sweep (#2347)", .serialized)
@@ -69,8 +68,8 @@ struct DesktopBindingRuleSweepTests {
 
     @Test("a bound switch loads its profile with no sweep of its own")
     func boundSwitchSweepsNothing() throws {
-        let core = try makeCore()
         defer { teardown() }
+        let core = try makeCore()
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 11,
             secondaryCurrent: 20
@@ -80,13 +79,13 @@ struct DesktopBindingRuleSweepTests {
         core.handleDesktopChange()
         #expect(core.profiles.currentName == "Work")
         #expect(bulkReconciles - before == 0)
-        #expect(!core.defersWindowRuleReconcile)
+        #expect(!core.defersRuleSweepToSwitchPass)
     }
 
     @Test("a profile load outside a switch still sweeps once")
     func loadStillSweeps() throws {
-        let core = try makeCore()
         defer { teardown() }
+        let core = try makeCore()
         let before = bulkReconciles
         core.execute("load_profile", args: [.string("Work")])
         #expect(core.profiles.currentName == "Work")

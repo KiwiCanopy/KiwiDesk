@@ -1,0 +1,93 @@
+import Foundation
+import Testing
+
+/// A bound Desktop's apply skips its window-rule sweep because the
+/// switch's own folded `reconcileAll` runs right after the handler
+/// (#2347). That promise lives in another file, so it is pinned as
+/// spellings: `desktopChanged` runs the event before the folded
+/// sweep, the handler has that one caller, and the deferral wraps
+/// the binding apply in the handler alone. The trade: a second
+/// path into the handler spelled through a closure, not a call, is
+/// invisible here — review's.
+@Suite("A bound switch's skipped sweep is the switch's (#2347)")
+struct DesktopSwitchRuleSweepSeamTests {
+    private static let core = SourceScan.repoRoot(from: #filePath)
+        .appendingPathComponent("Sources/KiwiDeskCore")
+
+    private static func body(
+        of declaration: String,
+        in path: String
+    ) throws -> String {
+        let source = try SourceScan.strippedSource(
+            at: core.appendingPathComponent(path)
+        )
+        return try #require(
+            SourceScan.declarationBody(after: declaration, in: source),
+            "\(declaration) is gone from \(path)"
+        )
+    }
+
+    @Test("the switch event runs before the folded sweep")
+    func sweepFollowsTheHandler() throws {
+        let body = try Self.body(
+            of: "func desktopChanged()",
+            in: "Events/EventLoop+Apps.swift"
+        )
+        let event = try #require(
+            body.range(of: "onEvent(.desktopChanged)")
+        )
+        let sweep = try #require(
+            body.range(of: "foldsSwitchResync { reconcileAll() }")
+        )
+        #expect(event.upperBound < sweep.lowerBound)
+    }
+
+    @Test("the handler has the switch event as its one caller")
+    func handlerHasOneCaller() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "handleDesktopChange(",
+            under: Self.core
+        )
+        // The declaration and the `.desktopChanged` arm.
+        #expect(
+            sites.count == 2,
+            .init(
+                rawValue: "found "
+                    + sites.map(\.site).joined(separator: ", ")
+            )
+        )
+        let files = Set(sites.map(\.file.lastPathComponent))
+        #expect(
+            files == ["KiwiCore+Desktops.swift", "KiwiCore+Events.swift"]
+        )
+    }
+
+    @Test("the deferral wraps the handler's binding apply alone")
+    func deferralHasOneCaller() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "applyBindingDeferringRuleSweep(",
+            under: Self.core
+        )
+        #expect(sites.count == 2)
+        let handler = try Self.body(
+            of: "func handleDesktopChange",
+            in: "Profiles/KiwiCore+Desktops.swift"
+        )
+        #expect(handler.contains("applyBindingDeferringRuleSweep(in:"))
+        #expect(!handler.contains("applyDesktopBinding(in:"))
+        let flag = try SourceScan.identifierSites(
+            of: "defersRuleSweepToSwitchPass",
+            under: Self.core
+        )
+        // Declared, read by the gate, raised and restored by the
+        // wrapper.
+        #expect(
+            Set(flag.map(\.file.lastPathComponent))
+                == [
+                    "KiwiCore.swift",
+                    "KiwiCore+StructuredRules.swift",
+                    "KiwiCore+DesktopBindings.swift",
+                ]
+        )
+    }
+}

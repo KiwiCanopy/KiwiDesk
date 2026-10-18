@@ -1182,7 +1182,10 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   `InPlaceRestartNoMotionTests`)
 - every AX message to another app runs inside `WorkMeter.shared.ax`, or the
   per-switch count a performance change is measured by lies (#1508,
-  `WorkMeterAXSeamTests`), and a change adding AX messages on the Space-switch
+  `WorkMeterAXSeamTests`)
+- a bound Desktop's apply leaves its window-rule sweep to the switch's own
+  folded `reconcileAll`, so a new path into `handleDesktopChange` owes that
+  sweep after it (#2347, `DesktopSwitchRuleSweepSeamTests`), and a change adding AX messages on the Space-switch
   path states how many per switch, and why, in its PR and at the read
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
