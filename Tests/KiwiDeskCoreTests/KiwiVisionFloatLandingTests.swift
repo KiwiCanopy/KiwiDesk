@@ -85,8 +85,11 @@ struct KiwiVisionFloatLandingTests {
         #expect(core.windowServer.requested(by: .vision).contains(float))
         let platesBefore = plate.orders.count
         let ringsBefore = rings.map(\.orders).reduce(0, +)
+        // One shared fake plate per screen: the host's count.
+        let shown = core.vision.plates.values.filter(\.isShown).count
+        #expect(shown > 0)
         core.windowServer.handle(.reorder, window: float)
-        #expect(plate.orders.count == platesBefore + 1)
+        #expect(plate.orders.count == platesBefore + shown)
         #expect(plate.orders.last == 4242)
         #expect(rings.map(\.orders).reduce(0, +) == ringsBefore + 1)
     }

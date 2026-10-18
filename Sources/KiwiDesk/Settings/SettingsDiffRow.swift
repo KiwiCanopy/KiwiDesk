@@ -9,6 +9,22 @@ enum SettingsDiffSection: Hashable {
     case live
 }
 
+/// How a diff row goes back to the draft's baseline (#792).
+enum SettingsRowRevert: Hashable {
+    /// Its census key's writer, at the row's instance
+    /// (`SettingsRevertRegister`).
+    case census
+    /// The init.lua editor's text.
+    case lua
+    /// One profile's look switch (#1752).
+    case look(profile: String)
+    /// One app's rule and the reach it was given (#1393).
+    case ruleReach(app: String)
+    /// Nothing a revert can undo: profile drift, a live change, a
+    /// leaf no key claims, a reach this list only reports.
+    case none
+}
+
 /// Display-ready row of the draft diff (`SettingsDiffRowsView`, #678 turn 9).
 struct SettingsDiffRow: Identifiable, Hashable {
     /// Stable identity: census id plus instance discriminator.
@@ -32,6 +48,23 @@ struct SettingsDiffRow: Identifiable, Hashable {
     /// A live row's unsaved leaves, as keep ids — what its Keep
     /// writes (#2368); empty on a draft row.
     var keepIDs: [String] = []
+    /// The discriminator the row was minted with — a Space, an
+    /// app, a rule entry — which its revert reads.
+    var instance: String?
+    /// How a ↺ on this row reverts it (#792). None until a producer
+    /// says otherwise: `SettingsDiffRowSource` marks a key's own
+    /// readout rows `.census`, so a new producer offers no ↺ by
+    /// forgetting one.
+    var revert: SettingsRowRevert = .none
+    /// The rule this row changes, where another profile's reach row
+    /// can name the same one: the fold joins on it, never on the
+    /// label (#792).
+    var subject: ReachSubject?
+    /// The profiles a change also reached, drawn after the label. A
+    /// reach row sets it where its change is the edited profile's
+    /// own, and `SettingsDiffRowFold` moves it onto the rows of its
+    /// `subject`.
+    var reach: String?
 
     /// A plain value-pair row.
     static func change(
@@ -47,7 +80,8 @@ struct SettingsDiffRow: Identifiable, Hashable {
             label: label,
             oldValue: old,
             newValue: new,
-            changeNote: nil
+            changeNote: nil,
+            instance: instance
         )
     }
 
@@ -66,7 +100,8 @@ struct SettingsDiffRow: Identifiable, Hashable {
             oldValue: nil,
             newValue: nil,
             changeNote: note,
-            jumpsToAreaRoot: areaRoot
+            jumpsToAreaRoot: areaRoot,
+            instance: instance
         )
     }
 

@@ -26,7 +26,13 @@ struct BarEdgeWriteCensusTests {
         ),
         "AppBarStyle+Coding.swift": (3, "its coding key and decoder"),
         "SpaceBarStyle+Coding.swift": (3, "its coding key and decoder"),
+        "SettingsRevertRegister.swift": (4, revertCopy),
     ]
+
+    /// A row's ↺ puts the baseline's own value back into the draft,
+    /// each bar's edge and per-screen map as one pair (#792).
+    private static let revertCopy =
+        "the revert register copies the baseline's edge pair (#792)"
 
     private static func regexes(_ patterns: [String]) -> [NSRegularExpression]
     {
@@ -118,6 +124,7 @@ struct BarEdgeWriteCensusTests {
         ),
         "SettingKey+KiwiShelf.swift": (3, keySpelling),
         "SettingKeyMasterWrites.swift": (2, keySpelling),
+        "SettingsRevertRegister.swift": (2, revertCopy),
         "HomeCardPlate+Bars.swift": (2, pictureDeferral),
         "HomeCardContent.swift": (
             5,

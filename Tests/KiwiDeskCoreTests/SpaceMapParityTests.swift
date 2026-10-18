@@ -90,6 +90,17 @@ struct SpaceMapParityTests {
         )
     }
 
+    @Test("restoreSpace takes every per-space map back (#792)")
+    func restoreCoversEveryMap() {
+        var settings = TilingSettings()
+        settings.restoreSpace(probe, from: populated())
+        let dicts = dictionaryDescriptions(settings)
+        #expect(
+            dicts.filter { $0.contains(probe.raw) }.count
+                == dicts.count
+        )
+    }
+
     @Test("removeSpace clears every per-space map")
     func removeCoversEveryMap() {
         var settings = populated()

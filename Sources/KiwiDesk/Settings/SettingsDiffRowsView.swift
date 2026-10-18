@@ -7,20 +7,148 @@ struct SettingsDiffRowsView: View {
     var rows: [SettingsDiffRow]
     /// The live rows' Keep, where this list offers one (#2368).
     var keep: LiveKeep? = nil
+    /// The draft rows' ↺, where this list offers one (#792).
+    var revert: DiffRowRevert? = nil
     var jump: (SettingsDiffRow) -> Void
     /// The live section draws this many rows until opened (#2262).
     static let liveCap = 5
     @State private var showsAllLive = false
     /// The live row whose Keep holds focus after a keep (#2368).
     @FocusState private var focusedKeep: String?
+    /// The draft row whose ↺ holds focus, which also draws it (#792).
+    @FocusState private var focusedRevert: String?
+    /// The draft row under the pointer, whose ↺ the panel draws.
+    @State private var hoveredRow: String?
+    /// Rows a keyboard ↺ may hand focus to, nearest first.
+    @State private var focusAfterRevert: [String] = []
+    /// A group ↺ waiting on its question: the row and its list.
+    @State private var pendingGroup:
+        (row: SettingsDiffRow, shown: [SettingsDiffRow])?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            ForEach(rows.filter { $0.section == .draft }) { row in
-                rowButton(row)
+            let drafts = rows.filter { $0.section == .draft }
+            ForEach(drafts) { row in
+                draftRow(row, among: drafts)
             }
             liveSection
         }
+        .onChange(of: rows.map(\.id)) { _, _ in settleRevertFocus() }
+        .alert(
+            GroupRevertWords.title,
+            isPresented: groupQuestionShown,
+            presenting: pendingGroup?.row
+        ) { _ in
+            Button(GroupRevertWords.confirm, role: .destructive) {
+                confirmGroupRevert()
+            }
+            Button(L("footer.cancel", "Cancel"), role: .cancel) {}
+        } message: { _ in
+            Text(GroupRevertWords.message)
+        }
+    }
+
+    private var groupQuestionShown: Binding<Bool> {
+        Binding(
+            get: { pendingGroup != nil },
+            set: { if !$0 { pendingGroup = nil } }
+        )
+    }
+
+    /// A ↺ that takes its whole group asks first (owner,
+    /// 2026-10-19); any other reverts at once.
+    private func requestRevert(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow],
+        with revert: DiffRowRevert
+    ) {
+        if revert.takesGroup(row) {
+            pendingGroup = (row, shown)
+        } else {
+            revertRow(row, among: shown, with: revert)
+        }
+    }
+
+    private func confirmGroupRevert() {
+        guard let pending = pendingGroup, let revert else { return }
+        pendingGroup = nil
+        revertRow(pending.row, among: pending.shown, with: revert)
+    }
+
+    /// A draft row, with its ↺ where it has a way back (#792).
+    @ViewBuilder
+    private func draftRow(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow]
+    ) -> some View {
+        if let revert, revert.can(row) {
+            HStack(spacing: 6) {
+                rowButton(row)
+                RowRevertButton(row: row, group: revert.takesGroup(row)) {
+                    requestRevert(row, among: shown, with: revert)
+                }
+                .focused($focusedRevert, equals: row.id)
+                .opacity(showsRevert(row, revert) ? 1 : 0)
+            }
+            .onHover { inside in
+                if inside {
+                    hoveredRow = row.id
+                } else if hoveredRow == row.id {
+                    hoveredRow = nil
+                }
+            }
+            .rowActions {
+                // A menu row: the style is the menu's.
+                Button(DiffRowRevert.actionName) {
+                    requestRevert(row, among: shown, with: revert)
+                }
+                .buttonStyle(.plain)
+            }
+        } else {
+            rowButton(row)
+        }
+    }
+
+    private func showsRevert(
+        _ row: SettingsDiffRow,
+        _ revert: DiffRowRevert
+    ) -> Bool {
+        revert.alwaysVisible || hoveredRow == row.id
+            || focusedRevert == row.id
+    }
+
+    /// Reverts one row. Under a keyboard press focus moves to the
+    /// nearest row's ↺ still drawn after the revert, which may take
+    /// a neighbour with it: the candidates are read before the row
+    /// goes (#816), the survivor once the list has redrawn.
+    private func revertRow(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow],
+        with revert: DiffRowRevert
+    ) {
+        let ids = shown.map(\.id)
+        let at = ids.firstIndex(of: row.id) ?? ids.count
+        // The row itself first: a ↺ that leaves it standing keeps
+        // focus where it was.
+        let candidates =
+            [row.id] + Array(ids.suffix(from: min(at + 1, ids.count)))
+            + ids.prefix(at).reversed()
+        revert.perform(row)
+        guard SettingsInputSource.movesFocus else { return }
+        focusAfterRevert = candidates
+        // A revert that redraws no row id settles here, so the
+        // candidates never wait for an unrelated later change.
+        Task { @MainActor in settleRevertFocus() }
+    }
+
+    /// Focuses the first candidate whose ↺ the redrawn list draws.
+    private func settleRevertFocus() {
+        guard !focusAfterRevert.isEmpty, let revert else { return }
+        let next = focusAfterRevert.compactMap { id in
+            rows.first { $0.id == id && $0.section == .draft }
+        }.first(where: revert.can)
+        focusAfterRevert = []
+        if let next { focusedRevert = next.id }
     }
 
     /// Stored settings changed live and not saved, under their own
@@ -127,6 +255,14 @@ struct SettingsDiffRowsView: View {
                 Text(row.label)
                     .foregroundStyle(SettingsTheme.ink)
                     .lineLimit(1)
+                // The profiles a folded change also reached: the
+                // label truncates first (#792).
+                if let reach = row.reach {
+                    Text(reach)
+                        .foregroundStyle(SettingsTheme.ink3)
+                        .lineLimit(1)
+                        .layoutPriority(1)
+                }
                 Spacer(minLength: 12)
                 valueReadout(row)
             }
