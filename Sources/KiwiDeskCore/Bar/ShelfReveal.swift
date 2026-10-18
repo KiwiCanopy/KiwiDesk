@@ -40,41 +40,53 @@ enum ShelfReveal: Equatable {
         )
     }
 
+    /// How far the band reaches past the shelf's screen side — up
+    /// into a menu bar or a Dock — so a pointer that overshoots
+    /// still lands in it (ui-designer, #761).
+    static let overshoot: CGFloat = 4
+    /// How far around the hidden mark a pointer lights its hover
+    /// cue; only the band opens the shelf (owner, #761).
+    static let nearReach: CGFloat = 40
+
     /// The band along `edge` of `strip` — both in one coordinate
-    /// space with y growing UP (Cocoa) — that reveals the shelf.
-    static func band(of strip: CGRect, edge: AppBarEdge) -> CGRect {
-        let depth = min(
-            bandDepth,
-            edge.isHorizontal
-                ? strip.height : strip.width
-        )
+    /// space with y growing UP (Cocoa) — that reveals the shelf:
+    /// from `outward` past the strip's screen side to `inward`
+    /// into it, the whole edge long. The shelf passes the margin
+    /// and overshoot outward and the sliver's rest plus the
+    /// windows' outer gap inward, so the band ends at the windows.
+    static func band(
+        of strip: CGRect,
+        edge: AppBarEdge,
+        outward: CGFloat = 0,
+        inward: CGFloat = bandDepth
+    ) -> CGRect {
         switch edge {
         case .top:
             return CGRect(
                 x: strip.minX,
-                y: strip.maxY - depth,
+                y: strip.maxY - inward,
                 width: strip.width,
-                height: depth
+                height: inward + outward
             )
         case .bottom:
             return CGRect(
                 x: strip.minX,
-                y: strip.minY,
+                y: strip.minY - outward,
                 width: strip.width,
-                height: depth
+                height: inward + outward
             )
         case .left:
             return CGRect(
-                x: strip.minX,
+                x: strip.minX - outward,
                 y: strip.minY,
-                width: depth,
+                width: inward + outward,
                 height: strip.height
             )
         case .right:
             return CGRect(
-                x: strip.maxX - depth,
+                x: strip.maxX - inward,
                 y: strip.minY,
-                width: depth,
+                width: inward + outward,
                 height: strip.height
             )
         }
@@ -89,7 +101,7 @@ enum ShelfReveal: Equatable {
         edge: AppBarEdge,
         screen: CGRect
     ) -> Bool {
-        let band = band(of: strip, edge: edge)
+        let band = band(of: strip, edge: edge, outward: pushReach)
         guard
             band.insetBy(dx: -pushReach, dy: -pushReach)
                 .contains(point)

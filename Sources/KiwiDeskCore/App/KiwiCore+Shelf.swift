@@ -93,6 +93,8 @@ extension KiwiCore {
                 screen: screen,
                 items: items,
                 reveal: shelves.reveal,
+                gaps: state.workspaces.currentSpace(on: display.id)
+                    .map(shown.gaps(for:)) ?? shown.gapsGlobal,
                 settings: shown
             )
             strips += plans.map {

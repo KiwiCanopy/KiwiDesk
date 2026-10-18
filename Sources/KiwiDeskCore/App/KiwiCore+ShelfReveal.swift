@@ -35,6 +35,7 @@ extension KiwiCore {
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
             reveal: ShelfRevealer,
+            gaps: Gaps,
             settings: TilingSettings
         ) -> [ShelfPlan] {
             var drawn: [ShelfPlan] = []
@@ -52,6 +53,7 @@ extension KiwiCore {
                     items: items,
                     shown: shown,
                     hovered: reveal.arming.contains(key),
+                    gaps: gaps,
                     settings: settings
                 )
                 if shown { drawn.append(plan) }
@@ -67,23 +69,46 @@ extension KiwiCore {
             items: [SpaceBarOverlay.Item]?,
             shown: Bool,
             hovered: Bool,
+            gaps: Gaps,
             settings: TilingSettings
         ) {
             let carriesSpace = plan.arrangement.space != nil
             var bars: Set<ShelfBar> = []
             if carriesSpace { bars.insert(.space) }
             if plan.arrangement.app != nil { bars.insert(.app) }
-            targets[key] = ShelfRevealer.Target(
-                edge: plan.edge,
-                strip: GeometryUtils.flip(
-                    plan.strip,
-                    primaryHeight: GeometryUtils.primaryHeight
-                ),
-                screen: screen.frame,
-                bars: bars
-            )
             let shelf = settings.kiwishelf
             let mark = Self.mark(items: carriesSpace ? items : nil)
+            let primary = GeometryUtils.primaryHeight
+            let strip = GeometryUtils.flip(plan.strip, primaryHeight: primary)
+            // The band reaches past the screen side into a menu bar
+            // or a Dock, and in to the windows: the sliver's rest and
+            // their outer gap (ui-designer, #761).
+            let band = ShelfReveal.band(
+                of: strip,
+                edge: plan.edge,
+                outward: shelf.outerMargin + ShelfReveal.overshoot,
+                inward: KiwiShelf.hiddenDepth + shelf.innerMargin
+                    + Self.outerGap(gaps, on: plan.edge)
+            )
+            let markFrame = GeometryUtils.flip(
+                ShelfIndicatorSpec.frame(
+                    of: mark,
+                    in: plan.strip,
+                    edge: plan.edge
+                ),
+                primaryHeight: primary
+            )
+            targets[key] = ShelfRevealer.Target(
+                edge: plan.edge,
+                strip: strip,
+                screen: screen.frame,
+                bars: bars,
+                band: band,
+                near: markFrame.insetBy(
+                    dx: -ShelfReveal.nearReach,
+                    dy: -ShelfReveal.nearReach
+                )
+            )
             indicators[key] = (
                 ShelfIndicatorSpec(
                     mark: mark,
@@ -104,6 +129,16 @@ extension KiwiCore {
                 ),
                 carriesSpace
             )
+        }
+
+        /// The windows' outer gap on `edge`.
+        static func outerGap(_ gaps: Gaps, on edge: AppBarEdge) -> CGFloat {
+            switch edge {
+            case .top: return gaps.outer.top
+            case .bottom: return gaps.outer.bottom
+            case .left: return gaps.outer.left
+            case .right: return gaps.outer.right
+            }
         }
 
         /// Space dots from the Space Bar's items, else the pill.

@@ -15,8 +15,28 @@ final class ShelfRevealer {
         let screen: CGRect
         /// The bars the shelf carries, which the action names.
         let bars: Set<ShelfBar>
+        /// Where resting opens the shelf (`ShelfReveal.band`).
+        var band: CGRect
+        /// Where the pointer lights the mark's hover cue: around
+        /// the mark, and the band.
+        var near: CGRect
 
-        var band: CGRect { ShelfReveal.band(of: strip, edge: edge) }
+        init(
+            edge: AppBarEdge,
+            strip: CGRect,
+            screen: CGRect,
+            bars: Set<ShelfBar>,
+            band: CGRect? = nil,
+            near: CGRect? = nil
+        ) {
+            self.edge = edge
+            self.strip = strip
+            self.screen = screen
+            self.bars = bars
+            let band = band ?? ShelfReveal.band(of: strip, edge: edge)
+            self.band = band
+            self.near = (near ?? band).union(band)
+        }
         /// Where the pointer holds a shown shelf: the strip and its
         /// band, out to the push reach, so a pointer resting on the
         /// screen's last row is inside (`CGRect` excludes `maxY`).
@@ -59,8 +79,9 @@ final class ShelfRevealer {
 
     private(set) var targets: [Key: Target] = [:]
     private(set) var phases: [Key: ShelfReveal] = [:]
-    /// Hidden shelves whose reveal delay runs — the pointer resting
-    /// in their band — which their mark shows as a hover (#761).
+    /// Hidden shelves whose mark shows its hover cue — the pointer
+    /// near the mark or in the band, where the reveal delay runs
+    /// (#761).
     private(set) var arming: Set<Key> = []
     /// Shelves the action hid under the pointer: the hover stands
     /// down until the pointer leaves the shelf.
@@ -151,20 +172,22 @@ final class ShelfRevealer {
         }
         guard target.band.contains(point) else {
             cancelTimer(key)
-            setArming(key, false)
+            // Near the mark lights its cue; only the band opens it.
+            setArming(key, target.near.contains(point))
             return
         }
         // Movement inside the band never restarts the delay, or a
         // jittering pointer would never reveal.
-        guard timers[key] == nil else { return }
         setArming(key, true)
+        guard timers[key] == nil else { return }
         arm(key, after: ShelfReveal.revealDelay) { [weak self] in
             guard let self else { return }
             guard let target = self.targets[key],
                 self.reveal(of: key) == .hidden,
                 target.band.contains(self.location())
             else {
-                self.setArming(key, false)
+                let near = self.targets[key]?.near
+                self.setArming(key, near?.contains(self.location()) == true)
                 return
             }
             // The reveal ends the hover in its own pass: a redraw

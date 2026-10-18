@@ -3005,11 +3005,12 @@ space_bar.set_reserve(false)
 Space dots at its edge — one dot per Space, the current one wide,
 a Space holding windows brighter. The edge keeps only a sliver:
 `outer_margin`, the dots' depth and `inner_margin`, with the
-windows' outer gap below it, as the full shelf has. The pointer in
-a band a few points deep along that edge grows the dots and rims
-them in the highlight colour; resting there for 0.35 s grows the
-shelf out of them, at once when it pushes against the screen's edge
-there. The shelf shrinks back 0.5 s after the pointer leaves it,
+windows' outer gap below it, as the full shelf has. The pointer
+within about 40 points of the dots grows them and rims them in the
+highlight colour. Resting for 0.35 s in the band along that edge,
+from a few points past the shelf to where the windows start, grows
+the shelf out of the dots, at once when the pointer pushes against
+the screen's edge there. The shelf shrinks back 0.5 s after the pointer leaves it,
 and stays while a bar menu or a hover peek it opened is up. A
 revealed shelf draws over the windows and the sliver never changes,
 so a reveal moves no window, and setting the mode moves the windows

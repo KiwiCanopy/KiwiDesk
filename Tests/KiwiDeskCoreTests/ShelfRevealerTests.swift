@@ -328,4 +328,23 @@ struct ShelfRevealerTests {
         #expect(revealer.arming.isEmpty)
         #expect(revealer.reveal(of: Self.key) == .hover)
     }
+
+    @Test("Near the mark lights its cue; only the band opens the shelf")
+    func nearLightsTheCue() {
+        let target = ShelfRevealer.Target(
+            edge: .top,
+            strip: Self.underMenuBar.strip,
+            screen: Self.underMenuBar.screen,
+            bars: [.space],
+            near: CGRect(x: 400, y: 700, width: 200, height: 75)
+        )
+        let (revealer, timers, pointer) = make(target)
+        move(revealer, pointer, to: CGPoint(x: 500, y: 720))
+        #expect(revealer.arming == [Self.key])
+        #expect(timers.delays.isEmpty)
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hidden)
+        move(revealer, pointer, to: CGPoint(x: 500, y: 300))
+        #expect(revealer.arming.isEmpty)
+    }
 }
