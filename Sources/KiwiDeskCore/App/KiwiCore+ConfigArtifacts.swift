@@ -24,6 +24,10 @@ public enum ConfigArtifact: CaseIterable {
     case migrationBackups
     /// This Mac's `GuiConfig` leaves (#2324, `MachineConfig`).
     case machineConfig
+    /// The Desktop bindings (#2324 ruling 12,
+    /// `DesktopBindingsFile`): kept on this Mac, carried by a
+    /// backup as the bundle's own field.
+    case desktopBindings
 
     /// What a backup carries.
     ///
@@ -42,6 +46,7 @@ public enum ConfigArtifact: CaseIterable {
     public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
+        case .desktopBindings: return true
         case .migrationBackups, .machineConfig: return false
         }
     }
@@ -52,7 +57,8 @@ public enum ConfigArtifact: CaseIterable {
     public var livesOnThisMac: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return false
-        case .migrationBackups, .machineConfig: return true
+        case .migrationBackups, .machineConfig, .desktopBindings:
+            return true
         }
     }
 
@@ -61,7 +67,8 @@ public enum ConfigArtifact: CaseIterable {
     /// omission (`SetupBundleArtifactTests`).
     public var leftBehindBecause: String? {
         switch self {
-        case .guiConfig, .profiles, .palettes, .looks: return nil
+        case .guiConfig, .profiles, .palettes, .looks, .desktopBindings:
+            return nil
         case .migrationBackups:
             return "a copy of this Mac's files at an older format, "
                 + "for a downgrade here; the backup carries the "
@@ -88,6 +95,7 @@ extension KiwiCore {
         case .looks: return lookLibrary.url
         case .migrationBackups: return migrationBackups
         case .machineConfig: return guiConfigStore.machine.url
+        case .desktopBindings: return guiConfigStore.bindingsFile.url
         }
     }
 

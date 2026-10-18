@@ -41,8 +41,13 @@ struct SetupBundleArtifactTests {
                 artifact.livesOnThisMac
                 ? core.machineDirectory : core.configDirectory
             #expect(inside(url, home), "\(artifact) outside its folder")
-            // A file meaningful here alone never reaches another Mac.
-            #expect(!(artifact.livesOnThisMac && artifact.travelsInABackup))
+            // A file meaningful here alone never reaches another Mac,
+            // save the bindings, carried as the bundle's own field
+            // (#2324 ruling 12).
+            #expect(
+                !(artifact.livesOnThisMac && artifact.travelsInABackup)
+                    || artifact == .desktopBindings
+            )
         }
     }
 
@@ -60,7 +65,7 @@ struct SetupBundleArtifactTests {
         // rather than that this install had none of it.
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         try core.profiles.save(
             Profile(
                 name: "Desk",
@@ -103,6 +108,7 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
+                case .desktopBindings: bundle.profileBindings != nil
                 case .migrationBackups, .machineConfig: false
                 }
             #expect(
@@ -158,7 +164,7 @@ struct SetupBundleArtifactTests {
     @Test("A live config directory holds nothing unaccounted for")
     func liveDirectoryIsAccountedFor() throws {
         let core = makeTestCore()
-        try core.guiConfigStore.save(GuiConfig())
+        try core.guiConfigStore.saveIncludingBindings(GuiConfig())
         try core.paletteLibrary.save(
             ColorPalette(name: "Mine", colors: [:])
         )

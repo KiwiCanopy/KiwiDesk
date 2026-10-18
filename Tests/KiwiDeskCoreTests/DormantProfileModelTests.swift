@@ -24,7 +24,7 @@ struct DormantProfileModelTests {
     @Test("A dormant profile decodes from its monitor_count")
     func dormantDecodes() throws {
         let json = """
-            {"name": "resting", "monitor_sets": [],
+            {"id": "T", "name": "resting", "monitor_sets": [],
              "monitor_count": 2,
              "space_modes": {}, "settings": {},
              "saved_at": "2026-06-01T00:00:00Z"}
@@ -42,7 +42,7 @@ struct DormantProfileModelTests {
     @Test("A zero monitor_count does not make a dormant profile")
     func zeroCountRefused() {
         let json = """
-            {"name": "broken", "monitor_sets": [],
+            {"id": "T", "name": "broken", "monitor_sets": [],
              "monitor_count": 0,
              "space_modes": {}, "settings": {},
              "saved_at": "2026-06-01T00:00:00Z"}

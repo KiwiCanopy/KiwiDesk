@@ -88,6 +88,81 @@ struct DesktopBindingGroupTests {
         )
     }
 
+    /// The wiring the verdict rides: the refresh asks Core per
+    /// entry, and the card's resolver reads exactly that (#2324).
+    @Test("the card resolves through the model's refresh")
+    func resolutionsAreWired() throws {
+        let (card, model) = DesktopBindingFixture.makeCard()
+        let gone = ProfileID.fresh()
+        let renamed = DesktopBinding.Entry(
+            id: .legacy(name: "Laptop"),
+            name: "Old laptop"
+        )
+        model.config.profileBindings[live] = DesktopBinding(
+            entries: [renamed, .init(id: gone, name: "Gone")],
+            desktop: 1
+        )
+        model.refreshBindingReadings()
+        #expect(model.bindingResolutions[.id(gone)] == .missing)
+        #expect(card.bindingResolver.resolutions == model.bindingResolutions)
+        #expect(card.bindingResolver.shownName(of: renamed) == "Laptop")
+    }
+
+    /// The card narrates Core's verdict per entry (#2324): an id
+    /// whose profile was renamed reads by its current name, a gone
+    /// one as missing and an undecodable one as unreadable —
+    /// whatever the labels say.
+    @Test("orphans follow Core's resolution, never the label")
+    func orphansFollowCore() throws {
+        let laptop = ProfileID.legacy(name: "Laptop")
+        let gone = ProfileID.fresh()
+        let broken = ProfileID.fresh()
+        let bindings: [DesktopKey: DesktopBinding] = [
+            live: DesktopBinding(
+                entries: [
+                    .init(id: laptop, name: "Old laptop"),
+                    .init(id: gone, name: "Laptop", setup: ["X:1x1"]),
+                    .init(id: broken, name: "Broken"),
+                ],
+                desktop: 1
+            )
+        ]
+        let resolver = BindingResolver(
+            profiles,
+            resolutions: [
+                .id(laptop): .profile("Laptop"),
+                .id(gone): .missing,
+                .id(broken): .unreadable("Broken"),
+            ],
+            liveID: nil
+        )
+        let listed = rows(bindings: bindings)
+        let groups = ProfilesFamilyRows.bindingGroups(
+            rows: listed,
+            counts: BindingCounts(
+                leading: 1,
+                others: [2],
+                displaysUnknown: false
+            ),
+            resolver: resolver
+        )
+        let row = try #require(listed.first { $0.key == live })
+        #expect(
+            groups.last
+                == .orphans([
+                    OrphanBinding(row: row, profile: "Laptop"),
+                    OrphanBinding(
+                        row: row,
+                        profile: "Broken",
+                        unreadable: true
+                    ),
+                ])
+        )
+        let renamed = try #require(row.binding?.entries.first)
+        #expect(resolver.shownName(of: renamed) == "Laptop")
+        #expect(resolver.count(of: renamed) == 1)
+    }
+
     /// Every row once per count, and the orphans last.
     @Test("groups repeat the rows per count and list orphans last")
     func groupsRepeatRowsAndListOrphans() throws {
@@ -106,7 +181,7 @@ struct DesktopBindingGroupTests {
                 others: [1, 3],
                 displaysUnknown: false
             ),
-            profileCounts: counts
+            resolver: BindingResolver(counts: counts)
         )
         try #require(groups.count == 4)
         #expect(groups[0] == .count(2, leads: true, rows: listed))
@@ -129,7 +204,7 @@ struct DesktopBindingGroupTests {
                 others: [],
                 displaysUnknown: false
             ),
-            profileCounts: counts
+            resolver: BindingResolver(counts: counts)
         )
         #expect(clean.count == 1)
     }

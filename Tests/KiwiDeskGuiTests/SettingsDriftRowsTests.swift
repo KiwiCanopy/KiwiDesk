@@ -25,6 +25,7 @@ struct SettingsDriftRowsTests {
     ) -> ProfileSummary {
         ProfileSummary(
             name: name,
+            profileID: .legacy(name: name),
             count: count,
             sets: [],
             isDefault: true,

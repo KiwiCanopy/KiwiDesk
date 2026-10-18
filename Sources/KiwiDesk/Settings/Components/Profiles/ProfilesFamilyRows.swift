@@ -58,6 +58,9 @@ struct BindingCounts: Hashable {
 struct OrphanBinding: Hashable {
     let row: DesktopRow
     let profile: String
+    /// Core read the profile's file and it will not decode; else it
+    /// is missing (#2324).
+    var unreadable = false
 }
 
 /// Instance representing expanded row in Profiles census (#678).
@@ -94,6 +97,9 @@ struct ProfilesFamilyRows {
     /// Screens connected right now — which count group leads.
     let connectedScreens: Int
     let presets: [StandardLayout]
+    /// Core's verdict per binding entry (#2324); a fixture of
+    /// pending entries leaves it empty.
+    var resolutions: [DesktopBinding.Entry.Key: BindingResolution] = [:]
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
         guard case .profiles(let family) = key else { return nil }
@@ -201,7 +207,8 @@ struct ProfilesFamilyRows {
             ) {
             case nil: leading = count
             case .displaysUnknown?: unknown = true
-            case .screenCount?, .unreadable?, .otherSetups?: break
+            case .screenCount?, .unreadable?, .otherSetups?, .missing?:
+                break
             }
         }
         return BindingCounts(
@@ -211,37 +218,6 @@ struct ProfilesFamilyRows {
         )
     }
 
-    /// Each readable saved profile's screen count by name — the
-    /// one map the groups and the card's pickers read.
-    static func profileCounts(
-        _ profiles: [ProfileSummary]
-    ) -> [String: Int] {
-        Dictionary(
-            profiles.map { ($0.name, $0.count) },
-            uniquingKeysWith: { first, _ in first }
-        )
-    }
-
-    /// The card's groups over its Desktop rows: `rows` once per
-    /// count, then the orphans — each bound name whose profile
-    /// `profileCounts` cannot count, on the row it is bound to.
-    static func bindingGroups(
-        rows: [DesktopRow],
-        counts: BindingCounts,
-        profileCounts: [String: Int]
-    ) -> [BindingGroup] {
-        var groups = counts.all.map {
-            BindingGroup.count($0, leads: $0 == counts.leading, rows: rows)
-        }
-        let orphans = rows.flatMap { row in
-            (row.binding?.profiles ?? [])
-                .filter { profileCounts[$0] == nil }
-                .map { OrphanBinding(row: row, profile: $0) }
-        }
-        if !orphans.isEmpty { groups.append(.orphans(orphans)) }
-        return groups
-    }
-
     /// The slots one Desktop draws in a count group, in the
     /// ladder's own order (#1609): one per screen setup an entry
     /// of that count is scoped to, in binding order, then the
@@ -249,12 +225,12 @@ struct ProfilesFamilyRows {
     static func slots(
         of row: DesktopRow,
         count: Int,
-        profileCounts: [String: Int]
+        resolver: BindingResolver
     ) -> [BindingSlot] {
         var setups: [[String]] = []
         for entry in row.binding?.entries ?? [] {
             guard let setup = entry.setup,
-                profileCounts[entry.profile] == count,
+                resolver.count(of: entry) == count,
                 !setups.contains(setup)
             else { continue }
             setups.append(setup)
@@ -306,17 +282,25 @@ struct ProfilesFamilyRows {
                     profiles: profiles,
                     connected: connectedScreens
                 ),
-                profileCounts: Self.profileCounts(profiles)
+                resolver: BindingResolver(
+                    profiles,
+                    resolutions: resolutions,
+                    liveID: nil
+                )
             )
             .flatMap { group -> [ProfilesRowInstance] in
                 switch group {
                 case .count(let count, _, let rows):
-                    let counts = Self.profileCounts(profiles)
+                    let resolver = BindingResolver(
+                        profiles,
+                        resolutions: resolutions,
+                        liveID: nil
+                    )
                     return rows.flatMap { row in
                         Self.slots(
                             of: row,
                             count: count,
-                            profileCounts: counts
+                            resolver: resolver
                         )
                         .map { .binding(row.key, $0) }
                     }

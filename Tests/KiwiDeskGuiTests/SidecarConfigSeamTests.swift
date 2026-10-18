@@ -13,7 +13,10 @@ import Testing
 /// `sidecarConfig`.
 @Suite("gui.json writes take sidecarConfig (#1393)")
 struct SidecarConfigSeamTests {
-    private let doors = ["saveGuiConfig(", "guiConfigStore.save("]
+    private let doors = [
+        "saveGuiConfig(", "guiConfigStore.save(",
+        "guiConfigStore.saveIncludingBindings(",
+    ]
 
     /// File basename → gui.json writes of the draft it holds.
     private let writers: [String: Int] = [

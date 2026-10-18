@@ -10,6 +10,7 @@ extension KiwiCore {
     /// over what the managed block in `init.lua` set.
     func applyStructuredRules(from config: GuiConfig) {
         desktopBindings = config.profileBindings
+        promotePendingBindings()
         // #1230: what each Desktop was showing, so a restart does
         // not re-scatter them.
         adoptPersistedDesktopSpaces(config.desktopSpaces)

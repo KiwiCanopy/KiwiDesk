@@ -186,6 +186,8 @@ final class SettingsModel: ObservableObject {
     /// Keyed by the RECORD, so a row reads the reading of the
     /// record it resolved, under whichever key.
     @Published var bindingReadings: [DesktopBinding: BoundReading] = [:]
+    @Published var bindingResolutions: BindingResolutions = [:]  // #2324
+    @Published var activeProfileID: ProfileID?
 
     /// Each present Desktop's durable key by its Mission Control
     /// number (#1147) — the join a Profiles row resolves its

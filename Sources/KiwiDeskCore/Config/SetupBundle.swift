@@ -70,7 +70,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `config` and its `[Profile]` alike.
     /// 28 = `desktop_spaces` left `config` for this Mac's
     /// `machine.json` (#2324) and never travels.
-    public static let currentFormat = 28
+    /// 29 = a profile's stable `id` (#2324), on `[Profile]`, and
+    /// the Desktop bindings as the bundle's own field.
+    public static let currentFormat = 29
 
     public let format: Int
 
@@ -93,6 +95,12 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// looks travelled — ABSENT, which a restore leaves alone,
     /// where `[]` replaces the library with none.
     public let looks: [ShelfLook]?
+    /// The Desktop bindings (#2324 ruling 10), the bundle's own
+    /// field since they left `config`; nil where the source had no
+    /// GUI-managed config. Keyed by the source Mac's Desktop stamps,
+    /// so on another Mac they stay dormant until that Desktop
+    /// exists — never resolved through the Mission Control number.
+    public let profileBindings: [DesktopKey: DesktopBinding]?
 
     public init(
         format: Int = SetupBundle.currentFormat,
@@ -100,7 +108,8 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         config: GuiConfig?,
         profiles: [Profile],
         palettes: [ColorPalette],
-        looks: [ShelfLook]? = nil
+        looks: [ShelfLook]? = nil,
+        profileBindings: [DesktopKey: DesktopBinding]? = nil
     ) {
         self.format = format
         self.writtenBy = writtenBy
@@ -108,6 +117,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         self.profiles = profiles
         self.palettes = palettes
         self.looks = looks
+        self.profileBindings = profileBindings
     }
 
     /// Whether this build can read the bundle format.
@@ -126,6 +136,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         case .guiConfig: return config != nil
         case .profiles, .palettes: return true
         case .looks: return looks != nil
+        case .desktopBindings: return profileBindings != nil
         case .migrationBackups, .machineConfig: return false
         }
     }

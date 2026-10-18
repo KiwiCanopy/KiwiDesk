@@ -52,26 +52,39 @@ extension KiwiCore {
             .first
     }
 
-    /// The one sidecar rewrite of the binding table (#1392):
-    /// `edit` runs over the store's OWN map and the result goes
-    /// through `saveGuiConfig` — or the bare store on a paused
-    /// cold boot, where a reload would be the session's first
-    /// (#516). Throws `SidecarError` rather than minting or
-    /// overwriting a file.
+    /// The one rewrite of the stored binding table (#1392): `edit`
+    /// runs over `bindings.json`'s OWN map, written through its one
+    /// door (#2324). Throws `SidecarError` rather than minting a
+    /// config or editing one that no longer decodes.
     public func rewriteSidecarBindings(
         _ edit: (inout [DesktopKey: DesktopBinding]) -> Void
     ) throws {
         guard guiConfigStore.exists else {
             throw SidecarError.missing
         }
-        guard var live = guiConfigStore.load() else {
+        guard guiConfigStore.load() != nil else {
             throw SidecarError.unreadable
         }
-        edit(&live.profileBindings)
-        if lua == nil {
-            try guiConfigStore.save(live)
-        } else {
-            try saveGuiConfig(live)
+        // `bindings.json` alone (#2324): a bindings edit writes no
+        // `gui.json`. The runtime map follows the keys the edit
+        // changed only where the structured apply set it from that
+        // file; in a hybrid config it is init.lua's and stays so.
+        let before = guiConfigStore.bindingsFile.load().profileBindings
+        var map = before
+        edit(&map)
+        try guiConfigStore.saveBindings(map)
+        guard isGuiManaged else { return }
+        var changed = false
+        for key in Set(before.keys).union(map.keys)
+        where !DesktopBinding.sameStored(before[key], map[key]) {
+            desktopBindings[key] = map[key]
+            changed = true
+        }
+        // A rebound Desktop takes effect now, as it did when this
+        // write went through a reload — unless the engine has not
+        // started (a paused cold boot), which applies it at start.
+        if changed, lua != nil {
+            _ = applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
         }
     }
 
@@ -100,9 +113,10 @@ extension KiwiCore {
         // running layout into gui.json on a Desktop switch, with
         // no user Save. Neither of profiles.md's two ruled
         // profile writes is that (code review, 2026-09-04).
-        guard isGuiManaged, var live = guiConfigStore.load() else {
-            return
-        }
+        guard isGuiManaged else { return }
+        var live = GuiConfig()
+        live.profileBindings =
+            guiConfigStore.bindingsFile.load().profileBindings
         let sidecar = Self.bindingMoves(
             in: live.profileBindings,
             snapshot: snapshot,
@@ -123,8 +137,8 @@ extension KiwiCore {
             // snapshot mid-switch, which is the one-reading rule
             // (#888) broken by the lane that restates it. The
             // re-key is already applied in memory; this is
-            // persistence alone.
-            try guiConfigStore.save(live)
+            // persistence alone, of this Mac's file alone (#2324).
+            try guiConfigStore.saveBindings(live.profileBindings)
         } catch {
             onLog("desktop bindings: sidecar follow failed: \(error)")
         }

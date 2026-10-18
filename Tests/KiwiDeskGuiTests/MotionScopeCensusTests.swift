@@ -78,6 +78,9 @@ struct MotionScopeCensusTests {
         "KiwiDesk/Settings/SettingsModel+AppWide.swift": 1,
         // The lens page's Save writing its lenses (#2103).
         "KiwiDesk/Settings/SettingsModel+Lenses.swift": 1,
+        // A Desktop binding edit's write, which loads a rebound
+        // Desktop's profile (#2324).
+        "KiwiDesk/Settings/SettingsModel+Refresh.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ScreenSetups.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Persistence.swift": 1,
     ]
@@ -142,7 +145,7 @@ struct MotionScopeCensusTests {
         "applyProfileScopedState", "applyStandard", "restoreSetup",
         "restoreShelf", "paintShelf", "reapplyIfInEffect",
         "resetAllSettings", "claimMonitorSet", "commitSharedLook",
-        "setAppWide",
+        "setAppWide", "rewriteSidecarBindings",
     ]
 
     /// GUI call sites of a motion door left outside the scope on
@@ -160,7 +163,7 @@ struct MotionScopeCensusTests {
         let prefix = Self.sources.path + "/"
         let doors = Self.motionDoors.joined(separator: "|")
         let call = try NSRegularExpression(
-            pattern: #"\bcore\??\.(\#(doors))\("#
+            pattern: #"\bcore\??\.(\#(doors))(?:\(|\s*\{)"#
         )
         var unscoped: [String: Int] = [:]
         var reached = 0

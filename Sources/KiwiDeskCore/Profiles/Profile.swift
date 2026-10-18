@@ -30,14 +30,18 @@ public struct Profile: Codable, Sendable, Equatable {
     /// with the slide, #2228), 20 for #2143's step withdrawn by
     /// #2228 (kept so a development build's file loads), 21 since
     /// a stored `show_*` call opens `kiwihub.show` (#2265), 22 since
-    /// the layouts side became View (#2309).
+    /// the layouts side became View (#2309), 23 since a profile
+    /// carries a stable `id` (#2324).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 22
+    public static let currentFormat = 23
 
     public var format: Int
+    /// Stable across renames (#2324); `ProfileManager.write` keeps
+    /// the one on disk and mints a fresh one for a taken id.
+    public var id: ProfileID
     public var name: String
     /// Monitor combinations this profile covers (uniform screen
     /// count). A combination belongs to one profile (#1530), so
@@ -96,6 +100,7 @@ public struct Profile: Codable, Sendable, Equatable {
 
     public init(
         format: Int = Profile.currentFormat,
+        id: ProfileID = .fresh(),
         name: String,
         monitorSets: [MonitorSet],
         monitorCount: Int? = nil,
@@ -120,6 +125,7 @@ public struct Profile: Codable, Sendable, Equatable {
         lensReach: [String: Bool]? = nil
     ) {
         self.format = format
+        self.id = id
         self.name = name
         self.monitorSets = Self.sanitized(monitorSets)
         self.dormantMonitorCount =
@@ -168,6 +174,7 @@ public struct Profile: Codable, Sendable, Equatable {
             )
         }
         format = Self.currentFormat
+        id = try container.decode(ProfileID.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         monitorSets = Self.sanitized(
             try container.decode(

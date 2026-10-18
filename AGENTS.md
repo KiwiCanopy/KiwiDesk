@@ -1028,9 +1028,16 @@ Touching `Config`, `Profiles`, `Commands`.
 - a write of `gui.json` or a profile file goes through its store's door, which
   refuses a file a newer build wrote, and a raw rewrite beside it asks
   `NewerFormatOnDisk.check` first (#2325, `NewerFormatWriteRefusalTests`)
-- a `GuiConfig` leaf meaningful on this Mac alone moves to `machine.json` by
-  one `MachineConfig.moves` entry the carry and the strip both read, composed
-  and split in `GuiConfigStore` alone (#2324, `MachineConfigTests`)
+- a `GuiConfig` leaf meaningful on this Mac alone moves to a machine-folder
+  file by one `MachineConfig.moves` entry the carry and the strip both read,
+  composed and split in `GuiConfigStore` alone (#2324, `MachineConfigTests`)
+- a Desktop binding names its profile by the id the write door keeps, its
+  name a label nothing resolves through, every reader — gate, promotion,
+  card — taking the one `bindingResolution(of:)` (a gone profile `.missing`,
+  an undecodable one `.unreadable`), a pending name promoted through the one
+  `promotePendingBindings` at every profile write, and `bindings.json`
+  written through `saveBindings` alone (#2324, `DesktopBindingByIDTests`,
+  `ProfileIDTests`, `DesktopBindingsFileTests`)
 - a change breaking the decoded shape of anything a bundle carries bumps
   `SetupBundle.currentFormat`, breaking Profile or GuiConfig schema bumps
   `Profile.currentFormat` / `GuiConfig.currentFormat`, and a breaking palette

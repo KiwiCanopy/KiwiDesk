@@ -57,6 +57,33 @@ struct DesktopBindingDraftTests {
         NativeSpaces.activeSpaceIDOverride = 10
     }
 
+    /// A label Core refreshed (a rename on another Mac, #2324) is a
+    /// rewrite too, though `==` cannot see it: an untouched draft
+    /// takes it, or its next Save writes the stale label back.
+    @Test("an untouched draft adopts Core's relabel")
+    func untouchedDraftAdoptsRelabel() throws {
+        defer { reset() }
+        pin()
+        let model = makeModel()
+        let id = ProfileID.legacy(name: "Work")
+        var stale = GuiConfig()
+        stale.profileBindings = [
+            .number(1): DesktopBinding(
+                entries: [.init(id: id, name: "Work")],
+                desktop: 1
+            )
+        ]
+        seed(model, stale)
+        var relabelled = stale
+        relabelled.profileBindings[.number(1)] = DesktopBinding(
+            entries: [.init(id: id, name: "Office")],
+            desktop: 1
+        )
+        try model.core.guiConfigStore.saveIncludingBindings(relabelled)
+        model.refreshProfiles()
+        #expect(model.config.profileBindings[.number(1)]?.names == ["Office"])
+    }
+
     /// Core moved the binding to the stamp; the draft has not
     /// been touched, so it takes the rewrite — and the clean
     /// baseline moves with it, so nothing reads as unsaved.
@@ -78,11 +105,11 @@ struct DesktopBindingDraftTests {
                 desktop: 1
             )
         ]
-        try model.core.guiConfigStore.save(rekeyed)
+        try model.core.guiConfigStore.saveIncludingBindings(rekeyed)
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.identity(stamp)]?.profiles
+            model.config.profileBindings[.identity(stamp)]?.names
                 == ["Work"]
         )
         #expect(model.config.profileBindings[.number(1)] == nil)
@@ -183,16 +210,16 @@ struct DesktopBindingDraftTests {
             ),
             .number(2): DesktopBinding(profile: "Play", desktop: 2),
         ]
-        try model.core.guiConfigStore.save(rekeyed)
+        try model.core.guiConfigStore.saveIncludingBindings(rekeyed)
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.identity(stamp)]?.profiles
+            model.config.profileBindings[.identity(stamp)]?.names
                 == ["Work"]
         )
         #expect(model.config.profileBindings[.number(1)] == nil)
         #expect(
-            model.config.profileBindings[.number(2)]?.profiles
+            model.config.profileBindings[.number(2)]?.names
                 == ["Edited"]
         )
     }
@@ -221,11 +248,11 @@ struct DesktopBindingDraftTests {
                 desktop: 1
             )
         ]
-        try model.core.guiConfigStore.save(rekeyed)
+        try model.core.guiConfigStore.saveIncludingBindings(rekeyed)
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.number(1)]?.profiles
+            model.config.profileBindings[.number(1)]?.names
                 == ["Play"]
         )
     }

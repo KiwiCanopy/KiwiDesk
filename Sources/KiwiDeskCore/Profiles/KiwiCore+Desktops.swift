@@ -73,9 +73,8 @@ extension KiwiCore {
         }) {
             binding.screen = screen
         }
-        binding.bind(profile, setup: setup) { name in
-            (try? profiles.read(name: name))?.monitorCount
-        }
+        let entry = bindingEntry(named: profile, setup: setup)
+        binding.bind(entry, countOf: bindingCount(of:))
         desktopBindings[key] = binding
         if !profiles.list().contains(profile) {
             onLog(

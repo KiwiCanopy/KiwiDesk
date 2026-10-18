@@ -12,6 +12,23 @@ import Testing
 struct ProfileBindingListMigrationTests {
     private func json(_ raw: String) -> Data { Data(raw.utf8) }
 
+    /// The bindings `out` carries, read as `bindings.json` reads
+    /// them — they left `GuiConfig`'s coding with #2324.
+    private func stored(_ out: Data) throws -> [DesktopKey: DesktopBinding] {
+        let root = try #require(
+            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        let file = try JSONSerialization.data(
+            withJSONObject: [
+                "profile_bindings": root["profile_bindings"] ?? [:]
+            ]
+        )
+        return try JSONDecoder().decode(
+            DesktopBindingsFile.self,
+            from: file
+        ).profileBindings
+    }
+
     private func bindings(
         _ data: Data,
         at path: [String] = []
@@ -37,7 +54,9 @@ struct ProfileBindingListMigrationTests {
             "screen":"LG UltraFine"}}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(
+            ConfigMigration.migratedKeepingMachineLeaves(data)
+        )
         let entry = try #require(
             try bindings(out)["STAMP-A"] as? [String: Any]
         )
@@ -48,7 +67,7 @@ struct ProfileBindingListMigrationTests {
         let config = try JSONDecoder().decode(GuiConfig.self, from: out)
         #expect(config.spaces == [SpaceID("work")])
         #expect(
-            config.profileBindings[
+            try stored(out)[
                 .identity(DesktopIdentity(raw: "STAMP-A"))
             ]
                 == DesktopBinding(
@@ -66,10 +85,12 @@ struct ProfileBindingListMigrationTests {
         let data = json(
             #"{"format":1,"profile_bindings":{"2":"Work"}}"#
         )
-        let out = try #require(ConfigMigration.migrated(data))
-        let config = try JSONDecoder().decode(GuiConfig.self, from: out)
+        let out = try #require(
+            ConfigMigration.migratedKeepingMachineLeaves(data)
+        )
+        _ = try JSONDecoder().decode(GuiConfig.self, from: out)
         #expect(
-            config.profileBindings[.number(2)]
+            try stored(out)[.number(2)]
                 == DesktopBinding(profiles: ["Work"], desktop: 2)
         )
     }
@@ -85,7 +106,9 @@ struct ProfileBindingListMigrationTests {
             {"1":{"profile":"Desk","desktop":1}}}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(
+            ConfigMigration.migratedKeepingMachineLeaves(data)
+        )
         let entry = try #require(
             try bindings(out, at: ["config"])["1"] as? [String: Any]
         )
@@ -114,6 +137,6 @@ struct ProfileBindingListMigrationTests {
             {"2":{"profiles":["Work"],"desktop":2}}}
             """
         )
-        #expect(ConfigMigration.migrated(data) == nil)
+        #expect(ConfigMigration.migratedKeepingMachineLeaves(data) == nil)
     }
 }

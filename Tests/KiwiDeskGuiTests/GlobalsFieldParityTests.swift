@@ -57,12 +57,17 @@ struct GlobalsFieldParityTests {
     func copyGlobalsMatchesTheEncodedShape() throws {
         let edited = editedConfig()
 
-        // What the file actually round-trips.
-        let data = try JSONEncoder().encode(edited)
-        let persisted = try JSONDecoder().decode(
-            GuiConfig.self,
-            from: data
+        // What the store actually round-trips — `gui.json` and this
+        // Mac's files composed (#2324).
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("kiwi-globals-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = GuiConfigStore(
+            directory: dir,
+            machine: dir.appendingPathComponent("machine")
         )
+        try store.saveIncludingBindings(edited)
+        let persisted = try #require(store.load())
 
         // What the model carries into its clean baseline.
         var carried = GuiConfig()

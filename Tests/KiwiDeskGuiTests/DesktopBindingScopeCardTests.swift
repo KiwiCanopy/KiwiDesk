@@ -34,7 +34,7 @@ struct DesktopBindingScopeCardTests {
             ProfilesFamilyRows.slots(
                 of: try row(card),
                 count: 1,
-                profileCounts: card.profileCounts
+                resolver: card.bindingResolver
             ) == [
                 .count(1, setup: wide),
                 .count(1, setup: vision),
@@ -55,7 +55,7 @@ struct DesktopBindingScopeCardTests {
         card.write(nil, key: live, slot: .count(1, setup: vision))
         #expect(
             model.config.profileBindings[live]?.entries
-                == [.init(profile: "Laptop")]
+                .map { [$0.name] + ($0.setup ?? []) } == [["Laptop"]]
         )
         #expect(
             card.boundName(key: live, slot: .count(1, setup: vision))
@@ -74,7 +74,7 @@ struct DesktopBindingScopeCardTests {
         card.clear(try row(card), slot: .count(1, setup: vision))
         #expect(
             model.config.profileBindings[live]?.entries
-                == [.init(profile: "Laptop")]
+                .map { [$0.name] + ($0.setup ?? []) } == [["Laptop"]]
         )
         let setups = try String(
             contentsOf: SourceScan.repoRoot(from: #filePath)
@@ -156,9 +156,9 @@ struct DesktopBindingScopeCardTests {
             desktop: 1
         )
         var new = old
-        new.profileBindings[live]?.bind("Laptop", setup: vision) {
-            _ in 1
-        }
+        new.profileBindings[live]?.bind(
+            .init(name: "Laptop", setup: vision)
+        ) { _ in 1 }
         let rows = SettingsValueReadout.profilesRows(
             .profileBindings,
             old: old,

@@ -286,7 +286,7 @@ extension KiwiCore {
         guard
             let binding = mainDesktopBinding(
                 in: NativeSpaces.desktopSnapshot()
-            ), binding.profiles.contains(name),
+            ),
             case .success(let pick) = boundProfile(of: binding)
         else { return false }
         return pick.profile.name == name

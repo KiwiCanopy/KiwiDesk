@@ -294,7 +294,7 @@ extension KiwiCore {
         )
         // The executed values travel with the rest (#1741).
         storeLiveAppWide()
-        try guiConfigStore.save(config)
+        try guiConfigStore.saveIncludingBindings(config)
         stripLegacyAppWide()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"

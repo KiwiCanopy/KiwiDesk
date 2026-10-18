@@ -31,14 +31,29 @@ extension DesktopsGroup {
         guard let record = row.binding else { return nil }
         switch slot {
         case .count(let count, let setup):
+            let resolver = bindingResolver
             return record.ranked(
                 scope: setup,
-                preferring: model.activeProfile
+                preferring: resolver.live(model.activeProfile)
             )
-            .first { profileCounts[$0.profile] == count }?.profile
+            .first { resolver.count(of: $0) == count }
+            .map(resolver.shownName)
         case .orphan(let name):
-            return record.profiles.contains(name) ? name : nil
+            return orphanKeys(record, name).isEmpty ? nil : name
         }
+    }
+
+    /// The entries an orphan row labelled `name` stands for: bound
+    /// under that label and naming no saved profile.
+    func orphanKeys(
+        _ record: DesktopBinding,
+        _ name: String
+    ) -> [DesktopBinding.Entry.Key] {
+        let resolver = bindingResolver
+        return record.entries.filter {
+            $0.name == name && resolver.name(of: $0) == nil
+        }
+        .map(\.key)
     }
 
     /// `bound` by key, for a test that holds no row.
@@ -86,14 +101,21 @@ extension DesktopsGroup {
         if let twin = twin(key) {
             model.config.profileBindings[twin] = nil
         }
-        let counts = profileCounts
+        let resolver = bindingResolver
         switch (slot, profile) {
         case (.count(_, let setup), let profile?):
-            record.bind(profile, setup: setup) { counts[$0] }
+            record.bind(
+                resolver.entry(named: profile, setup: setup),
+                countOf: resolver.count(of:)
+            )
         case (.count(let count, let setup), nil):
-            record.unbind(count: count, setup: setup) { counts[$0] }
+            record.unbind(
+                count: count,
+                setup: setup,
+                countOf: resolver.count(of:)
+            )
         case (.orphan(let name), _):
-            record.unbind(name)
+            for key in orphanKeys(record, name) { record.unbind(key) }
         }
         defer { model.refreshBindingReadings() }
         guard !record.entries.isEmpty else {

@@ -15955,6 +15955,25 @@ used before this. A Desktop the user genuinely deletes takes its
 stamp with it and its binding goes dormant — kept, badged, and
 never fired for the Desktop that inherited its number.
 
+**[Principle]**
+
+**A binding names its profile, not the profile's name
+([#2324](https://github.com/KiwiCanopy/KiwiDesk/issues/2324)).**
+Keyed by name, a Desktop binding re-points silently: renaming the
+profile drops it, and a new profile saved under the old name
+inherits a binding made for something else — the stamp's failure
+one hop over. So a profile file keeps an id and a binding names
+that; the name rides along only as the label a row shows while
+the profile is gone. A profile written before ids takes an id
+derived from its name, identical on every Mac, so a shared folder
+upgraded on two Macs agrees and a binding stored by name still
+finds it — which is why that derivation must never change. A
+binding whose profile is gone reads *missing*, never *couldn't
+load*: one is fixed by re-pointing the row, the other by repairing
+a file, and one word for both sends the user to the wrong fix. A
+binding declared in `init.lua` keeps naming its profile by name,
+since that file re-declares it on every load.
+
 **A profile row counts what the profile OWNS, never what it
 resolves to.** A profile carries a *sparse diff* over the global
 config — its own keybindings are the rows it overrides, not the

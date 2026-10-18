@@ -11,6 +11,7 @@ extension SettingsModel {
         lookReachStored = core.lookReach()
         sidecarExists = core.guiConfigStore.exists
         activeProfile = core.profiles.currentName
+        activeProfileID = core.profiles.currentID
         activeStandard = core.profiles.currentStandard
         activeStandardTitle = core.profiles.currentStandardTitle
         profileDirty = core.profiles.isDirty
@@ -20,6 +21,7 @@ extension SettingsModel {
             profile in
             ProfileSummary(
                 name: profile.name,
+                profileID: profile.id,
                 count: profile.monitorCount,
                 sets: profile.monitorSets.map(\.monitors),
                 isDormant: profile.isDormant,
@@ -88,10 +90,15 @@ extension SettingsModel {
     /// today the profile refresh and the Desktops card's write.
     func refreshBindingReadings() {
         var readings: [DesktopBinding: BoundReading] = [:]
+        var resolutions: BindingResolutions = [:]
         for record in config.profileBindings.values {
             readings[record] = core.boundReading(of: record)
+            for entry in record.entries {
+                resolutions[entry.key] = core.bindingResolution(of: entry)
+            }
         }
         bindingReadings = readings
+        bindingResolutions = resolutions
     }
 
     /// Take Core's re-keyed bindings into an UNEDITED draft
@@ -112,7 +119,14 @@ extension SettingsModel {
     /// adopting Core's rewrite never reads as a pending change.
     private func adoptRekeyedBindings() {
         guard let saved = core.guiConfigStore.load(),
-            saved.profileBindings != cleanConfig.profileBindings
+            Set(saved.profileBindings.keys)
+                .union(cleanConfig.profileBindings.keys)
+                .contains(where: {
+                    !DesktopBinding.sameStored(
+                        saved.profileBindings[$0],
+                        cleanConfig.profileBindings[$0]
+                    )
+                })
         else { return }
         // PER ENTRY, not per map: ownership is per binding, so a
         // user who edited ONE row while Core re-keyed another
@@ -151,6 +165,35 @@ struct BindingEdits {
 }
 
 extension SettingsModel {
+    /// Runs a Save's `gui.json` write with the draft's binding edits
+    /// ordered around it (#2324): before it where the config reads,
+    /// so the reload it triggers applies the new bindings, and after
+    /// it where this Save mints or repairs the config the binding
+    /// door requires.
+    func savingBindingEdits(_ save: () throws -> Void) throws {
+        let store = core.guiConfigStore
+        guard store.exists, store.load() != nil else {
+            try save()
+            try persistBindingEdits()
+            return
+        }
+        try persistBindingEdits()
+        try save()
+    }
+
+    /// Writes the draft's binding edits, per entry, into the stored
+    /// map (#2324): a Save carries only what the user changed, so a
+    /// re-key or a promotion made since the draft was read stands.
+    func persistBindingEdits() throws {
+        let edits = bindingEdits
+        guard !edits.isEmpty else { return }
+        // The write loads a rebound Desktop's profile: a control's
+        // motion, never an ambient pass (#804).
+        try core.withUserMotion {
+            try core.rewriteSidecarBindings { edits.apply(to: &$0) }
+        }
+    }
+
     /// The draft's binding edits against the clean baseline —
     /// the one derivation the re-key adopt and the
     /// stored-profile Save both read.
