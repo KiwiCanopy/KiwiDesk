@@ -186,8 +186,7 @@ the suffix. A backup does not carry the folder, and Reset All
 Settings leaves it.
 
 The socket, the instance lock and the saved window arrangement
-live in that same folder, never in `~/.config/KiwiDesk`, so a
-synced or dotfiles config folder holds only your setup.
+live in that folder too.
 :::
 
 An older KiwiDesk never writes over `gui.json` or a profile that a

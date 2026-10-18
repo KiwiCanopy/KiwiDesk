@@ -43,10 +43,13 @@ default `PATH`, so it needs adding first.
 
 :::unreleased
 Commands are sent over a UNIX domain socket at
-`~/Library/Application Support/KiwiDesk/KiwiDesk.sock`. Exit code
-is 0 on success, 1 on error; data goes to stdout, the error
-message — and, on some successes, a note — to stderr.
+`~/Library/Application Support/KiwiDesk/KiwiDesk.sock`, or at
+`$TMPDIR/KiwiDesk-<hash>.sock` where a long home folder makes
+that path too long for a socket.
 :::
+
+Exit code is 0 on success, 1 on error; data goes to stdout, the
+error message — and, on some successes, a note — to stderr.
 
 Data on stdout is JSON with its object keys **sorted**, indented
 when stdout is a terminal and compact — one line — when it is
@@ -975,10 +978,12 @@ relaunch, as `subscribe --reconnect` does, and runs until stopped.
 Anything that can write to a UNIX socket can drive KiwiDesk —
 newline-delimited JSON, one request per line:
 
+:::unreleased
 ```sh
 printf '{"command":"set_mode","args":["1","grid"]}\n' \
     | nc -U ~/Library/Application\ Support/KiwiDesk/KiwiDesk.sock
 ```
+:::
 
 Response:
 

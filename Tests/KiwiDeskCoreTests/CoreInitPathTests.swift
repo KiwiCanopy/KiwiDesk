@@ -61,13 +61,60 @@ struct CoreInitPathTests {
     }
 
     /// Without the pin a test core would write its snapshots over
-    /// the running app's in `~/Library` — the twins are held
-    /// identical, so one target's check covers both.
-    @Test("a test core keeps its machine files in its scratch dir")
-    func testCorePinsTheRuntimeDirectory() {
+    /// the running app's in `~/Library`; a sibling of the config
+    /// dir keeps a file landing in the wrong folder visible. The
+    /// twins are held identical by `MachineTouchTests`.
+    @Test("a test core keeps its machine files beside its config")
+    func testCorePinsTheMachineDirectory() {
         let core = makeTestCore()
-        #expect(core.machineDirectory == core.configDirectory)
+        #expect(core.machineDirectory != core.configDirectory)
         #expect(core.machineDirectory != MachineLocation.directory)
+        #expect(
+            core.machineDirectory.deletingLastPathComponent()
+                == core.configDirectory.deletingLastPathComponent()
+        )
+    }
+
+    /// The slice's claim end to end: what the core itself writes
+    /// lands in the machine folder, and the config folder, which
+    /// a user may sync, holds none of it.
+    @Test("a core writes its socket, snapshots and backups apart")
+    func coreWritesMachineFilesApart() {
+        let core = makeTestCore()
+        defer {
+            try? FileManager.default.removeItem(at: core.configDirectory)
+            try? FileManager.default.removeItem(at: core.machineDirectory)
+        }
+        core.onLog = { _ in }
+        core.crash.onLog = { _ in }
+        core.crash.captureState = { [weak core] in
+            core?.state.snapshot()
+        }
+        core.crash.autosave()
+        core.crash.shutdownCleanly()
+        core.crash.autosave()
+        let machine = core.machineDirectory
+        #expect(
+            core.socket.path == MachineLocation.socket(in: machine).path
+        )
+        #expect(
+            core.migrationBackups
+                == machine.appendingPathComponent("migration-backups")
+        )
+        let files = FileManager.default
+        for name in [CrashRecovery.autosaveName, CrashRecovery.sessionName] {
+            #expect(
+                files.fileExists(
+                    atPath: machine.appendingPathComponent(name).path
+                )
+            )
+            #expect(
+                !files.fileExists(
+                    atPath: core.configDirectory
+                        .appendingPathComponent(name).path
+                )
+            )
+        }
     }
 
     @Test("the machine directory is created and holds the backups")
@@ -86,5 +133,25 @@ struct CoreInitPathTests {
             manager.migrationBackups
                 == machine.appendingPathComponent("migration-backups")
         )
+    }
+
+    /// A long home must not leave IPC dead: `SocketServer.isLive`
+    /// reads a path past `sun_path` as live and refuses to start.
+    @Test("a socket path past sun_path falls back to a short one")
+    func longSocketPathFallsBack() {
+        let short = URL(fileURLWithPath: "/Users/kiwi/Library/KiwiDesk")
+        #expect(
+            MachineLocation.socket(in: short).path
+                == short.appendingPathComponent("KiwiDesk.sock").path
+        )
+        let long = URL(
+            fileURLWithPath: "/Users/" + String(repeating: "k", count: 90)
+        )
+        let socket = MachineLocation.socket(in: long).path
+        #expect(socket.utf8.count < MachineLocation.socketPathLimit)
+        #expect(!socket.hasPrefix(long.path))
+        #expect(socket == MachineLocation.socket(in: long).path)
+        let other = long.appendingPathComponent("other")
+        #expect(socket != MachineLocation.socket(in: other).path)
     }
 }

@@ -124,6 +124,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         case .guiConfig: return config != nil
         case .profiles, .palettes: return true
         case .looks: return looks != nil
+        case .migrationBackups: return false
         }
     }
 

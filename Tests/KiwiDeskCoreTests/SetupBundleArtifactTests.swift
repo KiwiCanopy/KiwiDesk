@@ -95,6 +95,7 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
+                case .migrationBackups: false
                 }
             #expect(
                 carried,
@@ -113,8 +114,7 @@ struct SetupBundleArtifactTests {
         }
     }
 
-    /// Vacuous while every artifact travels — the migration
-    /// copies, the one exclusion, left the config folder (#2324).
+    /// Walks the migration copies (#1880), the one exclusion.
     ///
     /// Stated, since it is the direction this cannot see: an
     /// artifact flipped to `false` **with** a reason passes here
@@ -160,13 +160,10 @@ struct SetupBundleArtifactTests {
                     core.url(of: $0).lastPathComponent
                 }
             )
-            // Not artifacts, and each excluded for a stated reason:
-            // the `MachineLocation` files, which a test core keeps
-            // in its config dir, and the user's own `init.lua`.
-            .union([
-                "init.lua", "KiwiDesk.sock", "KiwiDesk.lock",
-                ".state_snapshot", ".session_snapshot",
-            ])
+            // The user's own script, which no backup rewrites.
+            // This Mac's files live beside, in the machine folder
+            // (#2324, `CoreInitPathTests`).
+            .union(["init.lua"])
         let present = try FileManager.default
             .contentsOfDirectory(
                 atPath: core.configDirectory.path

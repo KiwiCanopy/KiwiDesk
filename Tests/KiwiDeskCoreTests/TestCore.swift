@@ -37,8 +37,8 @@ final class NoopHotkeyRegistrar: HotkeyRegistrar {
 ///   chords for the whole run.
 /// - `configDirectory` defaults to a throwaway temp dir, not
 ///   `nil` — which `KiwiCore.init` resolves to the real
-///   `~/.config/KiwiDesk` (profiles, `init.lua`). The runtime
-///   directory takes the same temp dir, never `MachineLocation`'s
+///   `~/.config/KiwiDesk` (profiles, `init.lua`). The machine
+///   directory is its `.machine` sibling, never `MachineLocation`'s
 ///   live socket, lock and snapshots (#2324).
 ///
 /// Both are defaults production cannot carry, and both bite the
@@ -67,7 +67,7 @@ func makeTestCore(
         )
     let core = KiwiCore(
         configDirectory: directory,
-        machineDirectory: directory,
+        machineDirectory: directory.appendingPathExtension("machine"),
         hotkeyRegistrar: hotkeyRegistrar
     )
     // Bootstrap wires the real NSWorkspace Reduce-Motion read;

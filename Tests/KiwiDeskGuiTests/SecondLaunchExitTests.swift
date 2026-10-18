@@ -91,6 +91,17 @@ struct SecondLaunchExitTests {
             source.contains(legacy),
             "a running pre-#2324 build must stop the launch"
         )
+        // Before the core: its init moves the old build's
+        // snapshots out of the config folder.
+        let probe = source.range(of: legacy)
+        let core = source.range(of: "AppDelegate()")
+        #expect(core != nil)
+        if let probe, let core {
+            #expect(
+                probe.upperBound <= core.lowerBound,
+                "the legacy probe must precede the core"
+            )
+        }
     }
 
     @Test("The plist restarts only an unsuccessful exit")

@@ -14,7 +14,7 @@ public final class SocketServer {
     public weak var bus: EventBus?
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    private let path: String
+    let path: String
     private var listener: NWListener?
     private var clients: [UUID: Client] = [:]
 

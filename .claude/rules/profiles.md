@@ -900,13 +900,22 @@ into `gui.json`, so the current *look* travelled while the saved
 *library* would have been left behind.
 
 
-**State about THIS MAC stays out of the register, in the app's
-defaults.** What a Mac has run and read — the "What's new" record
-(`WhatsNewRecord`, #1542), the tour's progress, the Settings mode
-— describes the machine, not the setup, and a backup restored on
-another Mac must neither replay nor swallow it. Such state never
-moves into the config folder "for consistency" and never joins
-`ConfigArtifact`.
+**A file that means something on this Mac alone lives in
+`MachineLocation`'s folder, never in the config folder, which a
+user may sync to another Mac (#2324, `CoreInitPathTests`).** The
+socket, the lock and the arrangement snapshots are runtime and
+take no case; a file KiwiDesk keeps there as setup state still
+answers the backup question in `ConfigArtifact`, whose `url(of:)`
+says which folder, as the migration copies do.
+
+**State about THIS MAC that is no file stays out of the register,
+in the app's defaults.** What a Mac has run and read — the "What's
+new" record (`WhatsNewRecord`, #1542), the tour's progress, the
+Settings mode — describes the machine, not the setup, and a backup
+restored on another Mac must neither replay nor swallow it. Such
+state never moves into the config folder "for consistency" and
+never joins `ConfigArtifact`.
+
 ## A screen is never left with zero spaces (#1175)
 
 A connected screen the space→display resolution leaves empty

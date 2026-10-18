@@ -19,6 +19,9 @@ public enum ConfigArtifact: CaseIterable {
     case palettes
     /// The saved look library (#1684).
     case looks
+    /// The copies a migration keeps of the files it rewrote
+    /// (#1880, `MigrationBackup`).
+    case migrationBackups
 
     /// What a backup carries.
     ///
@@ -30,12 +33,14 @@ public enum ConfigArtifact: CaseIterable {
     /// symptom is a user moving Macs and silently losing whatever
     /// it held. `palettes.json` nearly was that symptom.
     ///
-    /// So a new file under `~/.config/KiwiDesk` adds a case here
-    /// and answers this property in the same change set.
+    /// So a new file KiwiDesk keeps — in the config folder or in
+    /// `MachineLocation`'s — adds a case here and answers this
+    /// property in the same change set; `url(of:)` says where.
     /// `SetupBundleArtifactTests` holds the two together.
     public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
+        case .migrationBackups: return false
         }
     }
 
@@ -45,6 +50,10 @@ public enum ConfigArtifact: CaseIterable {
     public var leftBehindBecause: String? {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return nil
+        case .migrationBackups:
+            return "a copy of this Mac's files at an older format, "
+                + "for a downgrade here; the backup carries the "
+                + "current files"
         }
     }
 }
@@ -62,6 +71,7 @@ extension KiwiCore {
         case .profiles: return profiles.directory
         case .palettes: return paletteLibrary.url
         case .looks: return lookLibrary.url
+        case .migrationBackups: return migrationBackups
         }
     }
 

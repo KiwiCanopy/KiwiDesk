@@ -42,13 +42,25 @@ struct MachineLocationLegacyTests {
     func legacyFilesMove() throws {
         let (root, config, machine) = Self.folders()
         defer { try? FileManager.default.removeItem(at: root) }
-        let backup = "migration-backups/gui.json.pre-v7"
-        for name in [".state_snapshot", ".session_snapshot", backup] {
+        let moved = [
+            ".state_snapshot", ".session_snapshot",
+            "migration-backups/gui.json.pre-v7",
+            "migration-backups/profiles/Work.json.pre-v20",
+        ]
+        for name in moved {
             try Self.write(name, config.appendingPathComponent(name))
         }
+        // The folder merges: a copy already here stays.
+        let kept = "migration-backups/looks.json.pre-v1"
+        try Self.write(kept, machine.appendingPathComponent(kept))
         MachineLocation.adoptLegacyFiles(from: config, into: machine)
-        for name in [".state_snapshot", ".session_snapshot", backup] {
+        for name in moved {
             #expect(Self.read(machine.appendingPathComponent(name)) == name)
+        }
+        #expect(Self.read(machine.appendingPathComponent(kept)) == kept)
+        for name in [
+            ".state_snapshot", ".session_snapshot", "migration-backups",
+        ] {
             #expect(
                 !FileManager.default.fileExists(
                     atPath: config.appendingPathComponent(name).path
@@ -57,7 +69,7 @@ struct MachineLocationLegacyTests {
         }
     }
 
-    @Test("a file the machine folder holds is never overwritten")
+    @Test("a file the machine folder holds wins, the old one goes")
     func machineFileWins() throws {
         let (root, config, machine) = Self.folders()
         defer { try? FileManager.default.removeItem(at: root) }
@@ -66,7 +78,7 @@ struct MachineLocationLegacyTests {
         try Self.write("new", machine.appendingPathComponent(name))
         MachineLocation.adoptLegacyFiles(from: config, into: machine)
         #expect(Self.read(machine.appendingPathComponent(name)) == "new")
-        #expect(Self.read(config.appendingPathComponent(name)) == "old")
+        #expect(Self.read(config.appendingPathComponent(name)) == nil)
     }
 
     @Test("one folder for both moves and removes nothing")
