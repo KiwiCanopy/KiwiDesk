@@ -22,6 +22,8 @@ public enum ConfigArtifact: CaseIterable {
     /// The copies a migration keeps of the files it rewrote
     /// (#1880, `MigrationBackup`).
     case migrationBackups
+    /// This Mac's `GuiConfig` leaves (#2324, `MachineConfig`).
+    case machineConfig
 
     /// What a backup carries.
     ///
@@ -40,7 +42,7 @@ public enum ConfigArtifact: CaseIterable {
     public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
-        case .migrationBackups: return false
+        case .migrationBackups, .machineConfig: return false
         }
     }
 
@@ -50,7 +52,7 @@ public enum ConfigArtifact: CaseIterable {
     public var livesOnThisMac: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return false
-        case .migrationBackups: return true
+        case .migrationBackups, .machineConfig: return true
         }
     }
 
@@ -64,6 +66,9 @@ public enum ConfigArtifact: CaseIterable {
             return "a copy of this Mac's files at an older format, "
                 + "for a downgrade here; the backup carries the "
                 + "current files"
+        case .machineConfig:
+            return "which Space each of this Mac's Desktops was "
+                + "showing; another Mac's Desktops are not these"
         }
     }
 }
@@ -82,6 +87,7 @@ extension KiwiCore {
         case .palettes: return paletteLibrary.url
         case .looks: return lookLibrary.url
         case .migrationBackups: return migrationBackups
+        case .machineConfig: return guiConfigStore.machine.url
         }
     }
 

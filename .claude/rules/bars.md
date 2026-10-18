@@ -1166,11 +1166,26 @@ Obligations:
   the glass, through the one `GlassPlate.fitContent`** — called
   by `GlassPlate.update` and by `GlassBoxHost.setFrameSize`,
   which writes its glass directly — never trusting the glass's
-  own layout to carry it: a Space chip kept its old length inside
-  a resized box, its glyph cut off, until a later layout change
-  (#2425, device 2026-10-18; `GlassBoxContentFitTests`). A glass
-  resized another way calls it too. It starts no motion
+  own layout to carry it (#2426; `GlassBoxContentFitTests`). A
+  glass resized another way calls it too. It starts no motion
   (`GlassPairMotionSeamTests` ▸ `contentFitStartsNoMotion`).
+- **Settle every box `GlassBox.place` glides, in `place` itself,
+  through its host's one landing** (`GlassBoxHost.settleAfterGlide`,
+  then `GlassBox.settle`): during an animated host move Auto
+  Layout can leave a growing glass at its old size, and the next
+  `place` then keeps it there, so a Space chip drew one switch
+  behind for good (#2425, device 2026-10-18: a window moved out of
+  the shown Space and back). The landing waits out the longest bar
+  glide on the host's `afterLanding` timer, never a transaction
+  completion, which never fires when begun inside a layout pass
+  (`BarMotion.playWalk`); only the host's latest glide settles, so
+  a superseded landing writes nothing mid-glide
+  (`GlassBoxContentFitTests` ▸ `glideLandingSettles`,
+  `supersededLandingWritesNothing`; `GlassPairMotionSeamTests` ▸
+  `settleStartsNoMotion`). This reconciles three writers of one
+  glass — `place`, the host's `setFrameSize` and the glass's own
+  layout — rather than removing them; that ownership is #2425's
+  open half.
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

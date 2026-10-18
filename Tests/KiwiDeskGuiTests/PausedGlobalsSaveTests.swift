@@ -152,7 +152,10 @@ struct PausedGlobalsSaveTests {
             )
         var authored = GuiConfig()
         authored.spaces = [SpaceID("work"), SpaceID("mail")]
-        try GuiConfigStore(directory: directory).save(authored)
+        try GuiConfigStore(
+            directory: directory,
+            machine: directory.appendingPathComponent("machine")
+        ).save(authored)
 
         let core = makeTestCore(
             configDirectory: directory,
@@ -176,7 +179,10 @@ struct PausedGlobalsSaveTests {
         model.saveGlobalsWhilePaused()
 
         let onDisk = try #require(
-            GuiConfigStore(directory: directory).load()
+            GuiConfigStore(
+                directory: directory,
+                machine: directory.appendingPathComponent("machine")
+            ).load()
         )
         #expect(
             onDisk.spaces.contains(SpaceID("work")),
@@ -211,7 +217,10 @@ struct PausedGlobalsSaveTests {
             )
         var authored = GuiConfig()
         authored.spaces = [SpaceID("work")]
-        try GuiConfigStore(directory: directory).save(authored)
+        try GuiConfigStore(
+            directory: directory,
+            machine: directory.appendingPathComponent("machine")
+        ).save(authored)
 
         let core = makeTestCore(
             configDirectory: directory,
@@ -229,7 +238,10 @@ struct PausedGlobalsSaveTests {
             "the paused save started the config engine"
         )
         let onDisk = try #require(
-            GuiConfigStore(directory: directory).load()
+            GuiConfigStore(
+                directory: directory,
+                machine: directory.appendingPathComponent("machine")
+            ).load()
         )
         #expect(onDisk.appRules["com.example.app"] != nil)
     }

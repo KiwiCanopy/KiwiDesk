@@ -18,15 +18,19 @@ enum MigrationBackup {
     /// once its original is kept in `backups`; `data` itself when
     /// nothing migrates. A copy that fails to land leaves the file
     /// as it was (the next read migrates again). A nil `backups` —
-    /// a store built outside a core — keeps no copy.
+    /// a store built outside a core — keeps no copy. `writesBack`
+    /// false migrates in memory only, for a read that must leave
+    /// the file for a later one (`GuiConfigStore.load`'s carry).
     static func migrateInPlace(
         _ data: Data,
         at file: URL,
-        backups: URL?
+        backups: URL?,
+        writesBack: Bool = true
     ) -> Data {
         guard let migrated = ConfigMigration.migrated(data) else {
             return data
         }
+        guard writesBack else { return migrated }
         if let backups, !keep(data, of: file, in: backups) {
             return migrated
         }

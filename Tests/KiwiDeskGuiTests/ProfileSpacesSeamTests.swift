@@ -145,7 +145,10 @@ struct ProfileSpacesSeamTests {
             "Profiles/DesktopMemory.swift": (1, "the Space CURSOR"),
             "App/KiwiCore.swift": (1, "the profile BINDINGS"),
             "Config/GuiConfig.swift":
-                (2, "both, persisted in the sidecar"),
+                (2, "both, as the store composes them"),
+            // The cursor's own file on this Mac (#2324).
+            "Config/MachineConfig.swift":
+                (1, "the cursor, persisted in machine.json"),
             "Config/GuiConfigStore.swift":
                 (1, "the cursor's write-time stamp"),
             "Profiles/KiwiCore+DesktopBindings.swift":
