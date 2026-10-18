@@ -62,7 +62,7 @@ extension SettingsModel {
             guard let follows = lookReachEdits[profile] else {
                 return nil
             }
-            return .note(
+            var row = SettingsDiffRow.note(
                 .colours(.lookAppliesTo),
                 instance: "look.\(profile)",
                 label: profile,
@@ -77,6 +77,8 @@ extension SettingsModel {
                         "Keeps its look as it was before these changes"
                     )
             )
+            row.revert = .look(profile: profile)
+            return row
         }
     }
 }

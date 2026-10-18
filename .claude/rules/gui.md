@@ -1231,6 +1231,33 @@ must keep:
   Return reads keeps the pointer apart, as KiwiHub does
   (`JumpHoverTests`).
 
+## A diff row's ↺ (#792)
+
+**A census key that names a model path owes a writer in
+`SettingsRevertRegister`**, written against its census id, which
+is its Swift path — `SettingsRevertRegisterTests` reds a key
+without one, a writer copying another key's path, and two parts
+naming one key. **A diff-row producer states how its rows revert**:
+a row offers no ↺ until it does, so only a key's own readout rows
+take the register (`SettingsDiffRowSource`), and a new producer
+sets `SettingsDiffRow.revert` or draws none. **A writer reverting
+state written together reverts it together** — a Space through
+the Space doors, a bar's edge with its per-screen map, a rule with
+its reach through the one `RuleFamilyField` table, held to every
+family beside `dropRuleHalf` and `adoptRuleHalf` by
+`RuleReachGuiParityTests` — and the
+`docs/design-decisions.md` entry names each such group
+(`SettingsRowRevertTests`). A rule-list row's instance is a
+`ListEntryInstance`, minted and parsed by that one type. **Other
+profiles that changed exactly as the edited one did fold into its
+row as a reach label, joined on `SettingsDiffRow.subject` and
+never on the label** — in `SettingsDiffRowFold`, which review
+holds as the one fold — and a producer whose rows another
+profile's reach can name states the subject's family, the list
+producer taking it as a required argument (`ReachRowFoldTests`,
+and `ReachRowFoldFamilyTests` per family, which reds on a reach
+row left unfolded).
+
 ## Responsive width (#678 turn 17a)
 
 The window is the user's to make narrow — tiled like any other
