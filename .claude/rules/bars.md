@@ -1130,7 +1130,7 @@ Obligations:
   never trusting autoresizing to carry it** — a hosted glass stayed
   at a fused plate's width when the shelf shrank (#2388, device
   2026-10-18) — **and leave a hosted glass that already fills its
-  host within `GlassBox.fills` alone before a glide**: Auto Layout
+  host within `GlassPlate.fills` alone before a glide**: Auto Layout
   rounds it to the backing, and rewriting that rounding is what
   stranded it (`ShelfPlateGlassHostTests` ▸
   `hostResizeFillsThePair`, `roundedGlassIsNotRewritten`). The
@@ -1139,6 +1139,15 @@ Obligations:
   frame writers, `GlassPlate.update` and `GlassTint.apply`, take
   no motion input and start no motion (`GlassPairMotionSeamTests`),
   so a call site cannot make either travel.
+- **Write a glass's content to the glass after every resize of
+  the glass, through the one `GlassPlate.fitContent`** — called
+  by `GlassPlate.update` and by `GlassBoxHost.setFrameSize`,
+  which writes its glass directly — never trusting the glass's
+  own layout to carry it: a Space chip kept its old length inside
+  a resized box, its glyph cut off, until a later layout change
+  (#2425, device 2026-10-18; `GlassBoxContentFitTests`). A glass
+  resized another way calls it too. It starts no motion
+  (`GlassPairMotionSeamTests` ▸ `contentFitStartsNoMotion`).
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

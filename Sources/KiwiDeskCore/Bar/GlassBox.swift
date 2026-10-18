@@ -17,6 +17,7 @@ final class GlassBoxHost: NSView {
         for view in subviews where view.frame != bounds {
             view.frame = bounds
         }
+        subviews.forEach(GlassPlate.fitContent)
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? {
@@ -87,7 +88,8 @@ enum GlassBox {
         // rewriting it stranded it at its old size (#2388, device).
         GlassPlate.update(
             glass,
-            frame: fills(glass.frame, bounds) ? glass.frame : bounds,
+            frame: GlassPlate.fills(glass.frame, bounds)
+                ? glass.frame : bounds,
             cornerRadius: cornerRadius
         )
         GlassTint.apply(
@@ -99,19 +101,6 @@ enum GlassBox {
             edge: edge
         )
         move(host, frame, animated && host.frame != .zero)
-    }
-
-    /// Whether a hosted glass at `frame` already fills `bounds`: each
-    /// edge within half a point, the most the backing's rounding
-    /// moves one.
-    nonisolated static func fills(
-        _ frame: CGRect,
-        _ bounds: CGRect
-    ) -> Bool {
-        abs(frame.minX - bounds.minX) <= 0.5
-            && abs(frame.minY - bounds.minY) <= 0.5
-            && abs(frame.maxX - bounds.maxX) <= 0.5
-            && abs(frame.maxY - bounds.maxY) <= 0.5
     }
 
     /// Takes a box out for good — glass released (#1730), tint and
