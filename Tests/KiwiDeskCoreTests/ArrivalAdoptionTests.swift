@@ -28,6 +28,12 @@ struct ArrivalAdoptionTests {
         func invalidate() {}
     }
 
+    /// How many of the fixture's windows the app still lists; read
+    /// on the list read's thread.
+    final class Listing: @unchecked Sendable {
+        var count = 3
+    }
+
     @MainActor
     final class Box {
         /// Main-actor AX calls made while a list applied.
@@ -57,7 +63,10 @@ struct ArrivalAdoptionTests {
     /// A loop tracking one window of `pid` and listing two more,
     /// which the facts seam answers as standard windows.
     private func makeLoop() -> (
-        loop: EventLoop, box: Box, elements: [AXUIElement]
+        loop: EventLoop,
+        box: Box,
+        elements: [AXUIElement],
+        listing: Listing
     ) {
         let loop = EventLoop()
         let box = Box()
@@ -79,7 +88,8 @@ struct ArrivalAdoptionTests {
         let elements = ids.indices.map {
             AXUIElementCreateApplication(902_001 + pid_t($0))
         }
-        loop.axWindows = { _ in elements }
+        let listing = Listing()
+        loop.axWindows = { _ in Array(elements.prefix(listing.count)) }
         loop.resolveWindowID = { element in
             elements.firstIndex { CFEqual($0, element) }.map { ids[$0] }
         }
@@ -139,12 +149,12 @@ struct ArrivalAdoptionTests {
             scanWindowsAtAttach: false
         )
         loop.elements[pid] = [tracked: elements[0]]
-        return (loop, box, elements)
+        return (loop, box, elements, listing)
     }
 
     @Test("an arrival costs the main actor no AX call")
     func arrivalAsksNothingOnMain() {
-        let (loop, box, _) = makeLoop()
+        let (loop, box, _, _) = makeLoop()
         loop.reconcileOffMain(pid: pid, app: ref)
         // Adopted from the read: the live title read answers "".
         #expect(box.created.map(\.id) == arrivals)
@@ -158,7 +168,7 @@ struct ArrivalAdoptionTests {
     /// match, so `track` alone consumes the reading.
     @Test("a bulk-shaped read's arrivals cost the main actor no AX call")
     func bulkArrivalAsksNothingOnMain() {
-        let (loop, box, _) = makeLoop()
+        let (loop, box, _, _) = makeLoop()
         loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
         #expect(box.created.map(\.id) == arrivals)
         #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
@@ -170,7 +180,7 @@ struct ArrivalAdoptionTests {
     /// in this fixture and a zero above measures something.
     @Test("a synchronous reconcile's arrivals do ask on main")
     func syncArrivalAsksOnMain() {
-        let (loop, _, _) = makeLoop()
+        let (loop, _, _, _) = makeLoop()
         let before = Self.mainCalls
         loop.reconcile(pid: pid, app: ref)
         #expect(Self.mainCalls - before >= arrivals.count)
@@ -181,7 +191,7 @@ struct ArrivalAdoptionTests {
     /// element refuses — and never adopted from the reading.
     @Test("a window closed during the read is not adopted from it")
     func closedDuringTheReadIsNotAdopted() throws {
-        let (loop, box, elements) = makeLoop()
+        let (loop, box, elements, listing) = makeLoop()
         box.held = []
         loop.reconcileOffMain(pid: pid, app: ref)
         let delivery = box.held ?? []
@@ -192,6 +202,9 @@ struct ArrivalAdoptionTests {
             pid: pid,
             app: ref
         )
+        // Gone from the list too, so the read the close owes
+        // answers for it as well.
+        listing.count = 2
         box.held = nil
         for work in delivery { work() }
         #expect(box.created.map(\.id) == [arrivals[0]])
