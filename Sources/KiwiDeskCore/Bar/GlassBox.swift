@@ -17,6 +17,7 @@ final class GlassBoxHost: NSView {
         for view in subviews where view.frame != bounds {
             view.frame = bounds
         }
+        subviews.forEach(GlassPlate.fitContent)
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? {

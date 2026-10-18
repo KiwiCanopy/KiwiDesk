@@ -51,6 +51,20 @@ enum GlassPlate {
         }
     }
 
+    /// Writes a glass's content to the glass's bounds where it is
+    /// off by more than the backing's rounding: the glass's own
+    /// layout left a Space chip at its old length inside a resized
+    /// box (#2425, device).
+    @MainActor
+    static func fitContent(_ view: NSView) {
+        guard #available(macOS 26, *),
+            let glass = view as? NSGlassEffectView,
+            let content = glass.contentView,
+            !GlassBox.fills(content.frame, glass.bounds)
+        else { return }
+        content.frame = glass.bounds
+    }
+
     /// Takes content out of a glass with frame layout restored,
     /// which hosting turned off (#1730); every exit through
     /// `GlassPlate` takes it.

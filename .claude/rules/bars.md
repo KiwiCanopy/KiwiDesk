@@ -1129,7 +1129,10 @@ Obligations:
   pair to each size the host takes in `GlassBoxHost.setFrameSize`,
   never trusting autoresizing to carry it** — a hosted glass stayed
   at a fused plate's width when the shelf shrank (#2388, device
-  2026-10-18) — **and leave a hosted glass that already fills its
+  2026-10-18) — **and the glass's content with it, through
+  `GlassPlate.fitContent`, never trusting the glass's own layout**,
+  which left a Space chip at its old length inside a resized box
+  (#2425, `GlassBoxContentFitTests`) — **and leave a hosted glass that already fills its
   host within `GlassBox.fills` alone before a glide**: Auto Layout
   rounds it to the backing, and rewriting that rounding is what
   stranded it (`ShelfPlateGlassHostTests` ▸
