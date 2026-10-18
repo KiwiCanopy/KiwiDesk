@@ -182,7 +182,7 @@ extension KiwiCore {
                 emitSpaceChange()
             }
         } else {
-            loaded = applyDesktopBinding(in: snapshot)
+            loaded = applyBindingDeferringRuleSweep(in: snapshot)
             if let key,
                 let target = virtualSpaceTarget(
                     for: key,
@@ -230,10 +230,10 @@ extension KiwiCore {
         // space and the carry follows the render. Threaded from
         // the ONE snapshot (profiles.md); the settle is the net.
         refreshStickyReach(spaces: snapshot.spaces)
-        // Filed AFTER the carry (#1215): a bound Desktop's apply
-        // runs a full reconcile above, and the reach-departure arm
-        // stays open only while this switch is unfiled — the carry
-        // stamps the window in flight before the file closes it.
+        // Filed AFTER the carry (#1215): a sweep run inside this
+        // handler must still find the reach-departure arm open,
+        // so the carry stamps the window in flight before the
+        // file closes it.
         fileDisplaySpaces(in: snapshot)
         emitDesktopChange(snapshot, changed: changed)
         payDesktopCue(in: snapshot, loadedProfile: loaded)
