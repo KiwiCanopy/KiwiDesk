@@ -194,11 +194,11 @@ struct NewerFormatLatchTests {
         ]
         for (artifact, format) in cases {
             let core = makeTestCore()
-            try core.guiConfigStore.save(GuiConfig())
+            try core.guiConfigStore.saveIncludingBindings(GuiConfig())
             try restamp(core.url(of: artifact), to: format + 1)
             #expect(core.guiConfigWriteLatch()?.artifact == artifact)
             #expect(throws: NewerFormatOnDisk.self) {
-                try core.guiConfigStore.save(GuiConfig())
+                try core.guiConfigStore.saveIncludingBindings(GuiConfig())
             }
         }
     }

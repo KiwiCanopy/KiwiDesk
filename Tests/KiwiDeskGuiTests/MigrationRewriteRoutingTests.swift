@@ -23,10 +23,12 @@ struct MigrationRewriteRoutingTests {
     ]
     /// Readers that migrate in memory only: the settle's crossing
     /// check would stamp the file it asks about (#1530), and a
-    /// backup is never rewritten.
+    /// backup is never rewritten; the corrupt-file judge (#2324
+    /// ruling 13) only asks whether a file reads.
     private let inMemory: Set<String> = [
         "Profiles/ProfileManager+Settle.swift",
         "App/KiwiCore+Backup.swift",
+        "Config/CorruptFile.swift",
     ]
 
     private func source(_ relative: String) throws -> String {

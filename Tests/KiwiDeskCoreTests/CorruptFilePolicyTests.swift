@@ -62,7 +62,7 @@ struct CorruptFilePolicyTests {
         for artifact in files { try spoil(core.url(of: artifact)) }
         var config = GuiConfig()
         config.spaces = [SpaceID("kept")]
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         #expect(core.guiConfigStore.load()?.spaces == [SpaceID("kept")])
         for artifact in files {
             let file = core.url(of: artifact)
