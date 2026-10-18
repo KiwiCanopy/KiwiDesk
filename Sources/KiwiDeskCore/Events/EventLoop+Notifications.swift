@@ -55,6 +55,9 @@ extension EventLoop {
             }
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
+            // An arrival a list read in flight found is not adopted
+            // from it — tracked meanwhile or not.
+            offMain.departures.note(element, pid: pid)
             var deferred = false
             if let id = trackedWindowID(
                 of: element,
