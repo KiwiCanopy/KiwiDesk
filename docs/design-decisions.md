@@ -7122,6 +7122,34 @@ applying the saved value live, a Core verb rather than a draft
 writeback, so it waits for per-row revert (#792), as does whether
 Revert all reaches live state.
 
+:::unreleased
+### A row's revert writes its one key back through a register (#792)
+
+**[Rationale]**
+
+A ↺ on a diff row takes that row's change back to the baseline and
+nothing else. The diff names a change by its census key, read off
+Swift property paths, so the way back is a register from each key
+to a writer — `SettingsRevertRegister` — and not a Codable splice
+of the baseline's encoded subtree. Measured on `main` 2026-10-18,
+a splice reached 59 of the 209 keys that name a model path: 139
+`settings` keys name their leaf differently on the wire, and 11
+profile-scoped config fields are not encoded by `GuiConfig` at
+all, so a splice would have needed a hand map for most keys
+anyway. The census id is the Swift path, so the register is
+generated from the ids and every writer is held to its key
+(`SettingsRevertRegisterTests`).
+
+A writer reverts at the row's instance — one Space's override
+field, one app's rule, one rule-list entry, one Space in the list —
+and whole where the row names none. A master writes its followers.
+A rule family's reach goes with its rule (#1393), and the shortcut
+layers go back whole, with the Desktop base and every key reach,
+since a binding's reach is keyed into the layers it was encoded
+against (#2022). A lens or layer edit, profile drift, a live change
+and a leaf no key claims draw no ↺.
+:::
+
 ### The header search is a field, not a button that opens one
 
 **[Trade-off]**

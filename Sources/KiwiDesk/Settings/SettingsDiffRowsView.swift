@@ -7,20 +7,85 @@ struct SettingsDiffRowsView: View {
     var rows: [SettingsDiffRow]
     /// The live rows' Keep, where this list offers one (#2368).
     var keep: LiveKeep? = nil
+    /// The draft rows' ↺, where this list offers one (#792).
+    var revert: DiffRowRevert? = nil
     var jump: (SettingsDiffRow) -> Void
     /// The live section draws this many rows until opened (#2262).
     static let liveCap = 5
     @State private var showsAllLive = false
     /// The live row whose Keep holds focus after a keep (#2368).
     @FocusState private var focusedKeep: String?
+    /// The draft row whose ↺ holds focus, which also draws it (#792).
+    @FocusState private var focusedRevert: String?
+    /// The draft row under the pointer, whose ↺ the panel draws.
+    @State private var hoveredRow: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            ForEach(rows.filter { $0.section == .draft }) { row in
-                rowButton(row)
+            let drafts = rows.filter { $0.section == .draft }
+            ForEach(drafts) { row in
+                draftRow(row, among: drafts)
             }
             liveSection
         }
+    }
+
+    /// A draft row, with its ↺ where it has a way back (#792).
+    @ViewBuilder
+    private func draftRow(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow]
+    ) -> some View {
+        if let revert, revert.can(row) {
+            HStack(spacing: 6) {
+                rowButton(row)
+                RowRevertButton(row: row) {
+                    revertRow(row, among: shown, with: revert)
+                }
+                .focused($focusedRevert, equals: row.id)
+                .opacity(showsRevert(row, revert) ? 1 : 0)
+            }
+            .onHover { inside in
+                if inside {
+                    hoveredRow = row.id
+                } else if hoveredRow == row.id {
+                    hoveredRow = nil
+                }
+            }
+            .rowActions {
+                // A menu row: the style is the menu's.
+                Button(DiffRowRevert.actionName) {
+                    revertRow(row, among: shown, with: revert)
+                }
+                .buttonStyle(.plain)
+            }
+        } else {
+            rowButton(row)
+        }
+    }
+
+    private func showsRevert(
+        _ row: SettingsDiffRow,
+        _ revert: DiffRowRevert
+    ) -> Bool {
+        revert.alwaysVisible || hoveredRow == row.id
+            || focusedRevert == row.id
+    }
+
+    /// Reverts one row; where it leaves under a keyboard press,
+    /// focus moves to the neighbouring row's ↺, read before the row
+    /// goes (#816), as a Keep does.
+    private func revertRow(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow],
+        with revert: DiffRowRevert
+    ) {
+        let next = DeletionFocus.neighbour(after: row, in: shown)
+        revert.perform(row)
+        guard SettingsInputSource.movesFocus, let next,
+            revert.can(next)
+        else { return }
+        focusedRevert = next.id
     }
 
     /// Stored settings changed live and not saved, under their own

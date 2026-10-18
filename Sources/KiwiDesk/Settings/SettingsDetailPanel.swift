@@ -139,7 +139,10 @@ struct SettingsDetailPanel: View {
             .foregroundStyle(SettingsTheme.ink3)
             .accessibilityAddTraits(.isHeader)
             if !rows.isEmpty {
-                SettingsDiffRowsView(rows: rows) { row in
+                SettingsDiffRowsView(
+                    rows: rows,
+                    revert: DiffRowRevert(model: model, alwaysVisible: false)
+                ) { row in
                     jump(to: row)
                 }
             } else if all.isEmpty {
@@ -199,29 +202,33 @@ enum SettingsDiffRowSource {
         rows += model.reachDiffRows()
         rows += model.lookReachDiffRows()
         if diff.luaChanged {
-            rows.append(
-                SettingsDiffRow.note(
-                    .general(.advancedEditLua),
-                    label: "init.lua",
-                    note: L("diff.note.edited", "Edited")
-                )
+            var lua = SettingsDiffRow.note(
+                .general(.advancedEditLua),
+                label: "init.lua",
+                note: L("diff.note.edited", "Edited")
             )
+            lua.revert = .lua
+            rows.append(lua)
         }
         for orphan in diff.unattributed {
             rows.append(
-                SettingsDiffRow.note(
-                    .general(.advancedEditLua),
-                    instance: orphan,
-                    label: orphan,
-                    note: L("diff.note.edited", "Edited")
+                SettingsModel.unrevertable(
+                    SettingsDiffRow.note(
+                        .general(.advancedEditLua),
+                        instance: orphan,
+                        label: orphan,
+                        note: L("diff.note.edited", "Edited")
+                    )
                 )
             )
         }
         // Drift the header claims but no config leaf carries
         // (#1197) — ONE list, so the footer's N is still the
-        // count of the list it opens.
-        rows += driftRows(for: model)
+        // count of the list it opens. Neither drift nor a live
+        // change is the draft's to revert (#792).
+        rows += driftRows(for: model).map(SettingsModel.unrevertable)
         rows += liveRows(for: model, leaving: diff.changedSettings)
+            .map(SettingsModel.unrevertable)
         return rows
     }
 

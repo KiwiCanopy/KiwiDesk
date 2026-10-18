@@ -10,11 +10,12 @@ extension SettingsModel {
         // The layered snapshot is what the row edits encoded against:
         // a layer edit is the layer rows' (#2022), never a row's.
         // The lenses are app-wide and need no page (#2103).
-        let lenses = lensDiffRows()
+        // A lens or layer edit has no one-row way back yet (#792).
+        let lenses = lensDiffRows().map(Self.unrevertable)
         guard let stored = layeredReach, let encoded = encodedReach,
             let editing = reachProfile
         else { return lenses }
-        return layerDiffRows() + lenses
+        return layerDiffRows().map(Self.unrevertable) + lenses
             + rows(
                 .appRules(.appRules),
                 stored.appRules,
@@ -33,6 +34,7 @@ extension SettingsModel {
                 stored.keyLayers,
                 encoded.keyLayers,
                 editing: editing,
+                revertable: false,
                 name: { key in
                     encoded.keyTemplates[key].map {
                         KeybindingCatalog.localizedName(
@@ -57,6 +59,7 @@ extension SettingsModel {
         _ stored: RuleReachTable<V>,
         _ encoded: RuleReachTable<V>,
         editing: String,
+        revertable: Bool = true,
         name: (String) -> String = {
             KeybindingCatalog.displayName(forBundleID: $0)
         },
@@ -69,11 +72,12 @@ extension SettingsModel {
         var result: [SettingsDiffRow] = []
         for app in apps.sorted() {
             let name = name(app)
+            var appRows: [SettingsDiffRow] = []
             for profile in encoded.profiles where profile != editing {
                 let old = stored.resolved(app, for: profile)
                 let new = encoded.resolved(app, for: profile)
                 guard old != new else { continue }
-                result.append(
+                appRows.append(
                     .change(
                         key,
                         instance: "reach.\(profile).\(app)",
@@ -85,25 +89,38 @@ extension SettingsModel {
             }
             let wasShared = stored.base[app] != nil
             let isShared = encoded.base[app] != nil
-            guard wasShared != isShared else { continue }
-            result.append(
-                .note(
-                    key,
-                    instance: "reach.new.\(app)",
-                    label: name,
-                    note: isShared
-                        ? L(
-                            "app_rules.reach.diff.new_profiles_get",
-                            "New profiles get this rule"
-                        )
-                        : L(
-                            "app_rules.reach.diff.new_profiles_lose",
-                            "New profiles won't get this rule"
-                        )
+            if wasShared != isShared {
+                appRows.append(
+                    .note(
+                        key,
+                        instance: "reach.new.\(app)",
+                        label: name,
+                        note: isShared
+                            ? L(
+                                "app_rules.reach.diff.new_profiles_get",
+                                "New profiles get this rule"
+                            )
+                            : L(
+                                "app_rules.reach.diff.new_profiles_lose",
+                                "New profiles won't get this rule"
+                            )
+                    )
                 )
-            )
+            }
+            // The app's rule and its reach go back as one (#792).
+            for var row in appRows {
+                row.revert = revertable ? .ruleReach(app: app) : .none
+                result.append(row)
+            }
         }
         return result
+    }
+
+    /// A row with no ↺ (#792).
+    static func unrevertable(_ row: SettingsDiffRow) -> SettingsDiffRow {
+        var row = row
+        row.revert = .none
+        return row
     }
 
     private func label(
