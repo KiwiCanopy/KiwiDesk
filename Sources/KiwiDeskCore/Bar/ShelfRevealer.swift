@@ -160,11 +160,16 @@ final class ShelfRevealer {
         setArming(key, true)
         arm(key, after: ShelfReveal.revealDelay) { [weak self] in
             guard let self else { return }
-            self.setArming(key, false)
             guard let target = self.targets[key],
                 self.reveal(of: key) == .hidden,
                 target.band.contains(self.location())
-            else { return }
+            else {
+                self.setArming(key, false)
+                return
+            }
+            // The reveal ends the hover in its own pass: a redraw
+            // of the plate ahead of it would shrink the plate the
+            // shelf grows out of, a full bar render earlier.
             self.set(.hover, for: key)
         }
     }

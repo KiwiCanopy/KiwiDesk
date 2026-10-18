@@ -105,8 +105,9 @@ struct BarEdgeWriteCensusTests {
     /// the bars' own edges.
     private static let foldCallers: [String: (Int, String)] = [
         "TilingSettings+Shelf.swift": (
-            2,
-            "the declaration, and `shelfEdges(in:on:)` over onScreen"
+            3,
+            "the declaration, and `shelfEdges(in:on:)` and its twin "
+                + "`hidingEdges(in:on:)` over onScreen (#761)"
         ),
         "KiwiCore+ShelfPlan.swift": (
             1,

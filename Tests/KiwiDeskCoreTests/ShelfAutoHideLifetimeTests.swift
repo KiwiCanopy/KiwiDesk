@@ -86,14 +86,18 @@ struct ShelfAutoHideLifetimeTests {
         let overlay = ShelfOverlay()
         var landings: [() -> Void] = []
         overlay.afterReveal = { _, body in landings.append(body) }
+        overlay.afterCommit = { $0() }
         overlay.content.frame = CGRect(x: 0, y: 0, width: 400, height: 40)
-        overlay.revealIn()
+        let motion = {
+            overlay.content.layer?.animation(forKey: "kiwi.reveal")
+        }
+        overlay.revealIn(ordering: true)
         _ = overlay.retractOut()
         overlay.revealIn()
         // The first slide-in's landing arrives during the third.
         landings[0]()
-        #expect(overlay.content.layer?.mask != nil)
+        #expect(motion() != nil)
         landings[2]()
-        #expect(overlay.content.layer?.mask == nil)
+        #expect(motion() == nil)
     }
 }

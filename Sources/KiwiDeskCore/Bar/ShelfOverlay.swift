@@ -55,6 +55,11 @@ final class ShelfOverlay {
         {
             BarMotion.afterReveal($0, $1)
         }
+    /// Runs a reveal's start in the pass after the one that ordered
+    /// the panel in; a test runs it inline.
+    var afterCommit: (@escaping @MainActor () -> Void) -> Void = {
+        BarMotion.afterCommit($0)
+    }
     /// Fires once the shelf has left the screen — at once, or when
     /// its fade-out lands; `ShelfManager` retires it there.
     var onLeft: @MainActor () -> Void = {}
@@ -219,7 +224,7 @@ final class ShelfOverlay {
             #endif
             if slides {
                 panel.orderFrontRegardless()
-                revealIn()
+                revealIn(ordering: true)
                 return
             }
             guard travels else {

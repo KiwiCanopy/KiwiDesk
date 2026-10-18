@@ -2,8 +2,8 @@ import AppKit
 
 /// A hiding shelf's reveal and retract (#761): its content grows
 /// out of the hidden mark and back into it through
-/// `BarMotion.playReveal`, the panel ordered out only once the
-/// retract lands.
+/// `BarMotion.playReveal`, each taking over from where the other
+/// stands, the panel ordered out only once the retract lands.
 extension ShelfOverlay {
     /// Where the hidden mark sits in the content, from its frame
     /// and the shelf's strip, both AX coordinates.
@@ -31,20 +31,48 @@ extension ShelfOverlay {
     }
 
     /// Grows the content out of the mark; a retract in flight is
-    /// replaced.
-    func revealIn() {
+    /// taken back from where it stands. A reveal `ordering` the
+    /// panel in stands at the mark through the pass that orders it
+    /// in — that commit also draws every section for the first
+    /// time — and starts in the next, after a short lead
+    /// (`BarMotion.revealLead`), so no frame of its travel plays
+    /// before the panel is on screen.
+    func revealIn(ordering: Bool = false) {
         // A reveal takes the shelf back from a leave in flight.
         leaving = nil
         leavingSlides = false
-        BarMotion.endReveal(content)
         content.alphaValue = 1
         let token = UUID()
         revealing = token
-        let span = BarMotion.playReveal(
+        guard ordering else {
+            land(token, after: start(lead: false))
+            return
+        }
+        BarMotion.playReveal(
             content,
             origin: origin,
-            entering: true
+            entering: true,
+            held: true
         )
+        afterCommit { [weak self] in
+            guard let self, self.revealing == token, self.leaving == nil
+            else { return }
+            self.land(token, after: self.start(lead: true))
+        }
+    }
+
+    private func start(lead: Bool) -> TimeInterval {
+        BarMotion.playReveal(
+            content,
+            origin: origin,
+            entering: true,
+            lead: lead
+        )
+    }
+
+    /// Ends the reveal `token` started once it has landed, unless
+    /// a newer reveal or a leave took the shelf meanwhile.
+    private func land(_ token: UUID, after span: TimeInterval) {
         afterReveal(span) { [weak self] in
             guard let self, self.revealing == token, self.leaving == nil
             else { return }
@@ -67,7 +95,6 @@ extension ShelfOverlay {
         where view !== divider && view !== handle {
             view.isHidden = false
         }
-        BarMotion.endReveal(content)
         revealing = nil
         let span = BarMotion.playReveal(
             content,

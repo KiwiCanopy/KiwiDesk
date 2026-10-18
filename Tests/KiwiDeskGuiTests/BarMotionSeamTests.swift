@@ -123,10 +123,11 @@ struct BarMotionSeamTests {
         "opacityFade": ["reduceMotion"],
         "revealMotion": ["reduceMotion"],
         "playReveal": ["revealMotion(", "isReduced"],
+        "afterCommit": [],
         "endReveal": [],
         "afterReveal": [],
-        "crossfade": ["crossfades(", "isReduced"],
-        "crossfades": [],
+        "hoverPlate": ["reduceMotion"],
+        "placeHoverPlate": ["hoverPlate(", "isReduced"],
     ]
 
     private static func stripped(_ home: String) throws -> String {

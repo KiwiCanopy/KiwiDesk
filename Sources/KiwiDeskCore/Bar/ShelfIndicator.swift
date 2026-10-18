@@ -51,8 +51,9 @@ struct ShelfIndicatorSpec: Equatable {
     static let dotGap: CGFloat = 4
     static let pad: CGFloat = 4
     /// How far a hovered plate grows on each side — the room the
-    /// panel keeps around it.
-    static let hoverGrowth: CGFloat = 2
+    /// panel keeps around it. Three points take the 8 pt plate to
+    /// 14, so the growth reads (device feedback, #761).
+    static let hoverGrowth: CGFloat = 3
     static let hoverBorder: CGFloat = 1.5
     static let pillLength: CGFloat = 36
     /// Its distance from the shelf's screen side, inside the band.
@@ -116,87 +117,6 @@ struct ShelfIndicatorSpec: Equatable {
     }
 }
 
-/// The view an indicator draws, and VoiceOver's way to the
-/// show/hide action: its press runs the action and its value says
-/// whether the shelf is shown.
-final class ShelfIndicatorView: NSView {
-    var spec: ShelfIndicatorSpec? { didSet { needsDisplay = true } }
-    /// The bar the action names, for the label.
-    var carriesSpaceBar = true
-    var onPress: @MainActor () -> Void = {}
-
-    override var isFlipped: Bool { true }
-
-    override func draw(_ dirtyRect: NSRect) {
-        guard let spec, !spec.shown else { return }
-        let room = ShelfIndicatorSpec.hoverGrowth
-        let mark = bounds.insetBy(dx: room, dy: room)
-        let plate = spec.hovered ? bounds : mark
-        let radius = min(plate.width, plate.height) / 2
-        let path = NSBezierPath(
-            roundedRect: plate,
-            xRadius: radius,
-            yRadius: radius
-        )
-        NSColor(kiwiHex: spec.fill).setFill()
-        path.fill()
-        if spec.hovered {
-            let width = ShelfIndicatorSpec.hoverBorder
-            let rim = NSBezierPath(
-                roundedRect: plate.insetBy(dx: width / 2, dy: width / 2),
-                xRadius: radius - width / 2,
-                yRadius: radius - width / 2
-            )
-            rim.lineWidth = width
-            NSColor(kiwiHex: spec.highlight).setStroke()
-            rim.stroke()
-        }
-        guard case .dots(let dots) = spec.mark else { return }
-        var lead =
-            (spec.horizontal ? mark.minX : mark.minY)
-            + ShelfIndicatorSpec.pad
-        let size = ShelfIndicatorSpec.dot
-        let cross =
-            (spec.horizontal ? mark.minY : mark.minX)
-            + (ShelfIndicatorSpec.depth - size) / 2
-        for dot in dots {
-            let long =
-                dot.current ? ShelfIndicatorSpec.currentDot : size
-            let rect =
-                spec.horizontal
-                ? CGRect(x: lead, y: cross, width: long, height: size)
-                : CGRect(x: cross, y: lead, width: size, height: long)
-            NSColor(kiwiHex: spec.ink(of: dot)).setFill()
-            NSBezierPath(
-                roundedRect: rect,
-                xRadius: size / 2,
-                yRadius: size / 2
-            ).fill()
-            lead += long + ShelfIndicatorSpec.dotGap
-        }
-    }
-
-    override func isAccessibilityElement() -> Bool { true }
-    override func accessibilityRole() -> NSAccessibility.Role? { .button }
-
-    override func accessibilityLabel() -> String? {
-        carriesSpaceBar
-            ? L("kiwishelf.indicator.space_bar.ax", "Space Bar")
-            : L("kiwishelf.indicator.app_bar.ax", "App Bar")
-    }
-
-    override func accessibilityValue() -> Any? {
-        spec?.shown == true
-            ? L("kiwishelf.indicator.shown.ax", "Shown")
-            : L("kiwishelf.indicator.hidden.ax", "Hidden")
-    }
-
-    override func accessibilityPerformPress() -> Bool {
-        onPress()
-        return true
-    }
-}
-
 /// One hiding shelf's indicator panel (#761). It ignores the mouse
 /// — the hover band is judged from the pointer, and a click on it
 /// pins nothing — so the windows below it keep their clicks.
@@ -219,12 +139,8 @@ final class ShelfIndicator {
         if panel?.isVisible == true, view.spec == spec { return }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        if view.spec != spec {
-            let hoverChanged = view.spec?.hovered != spec.hovered
-            view.spec = spec
-            if hoverChanged { BarMotion.crossfade(view) }
-        }
-        // Room around the mark for its hover growth.
+        // Room around the mark for its hover growth, taken once:
+        // the plate grows inside it and the panel never resizes.
         let room = ShelfIndicatorSpec.hoverGrowth
         let frame = spec.frame.insetBy(dx: -room, dy: -room)
         panel.setFrame(
@@ -232,9 +148,10 @@ final class ShelfIndicator {
                 frame,
                 primaryHeight: GeometryUtils.primaryHeight
             ),
-            display: true
+            display: false
         )
         view.frame = CGRect(origin: .zero, size: frame.size)
+        view.render(spec, animated: panel.isVisible)
         #if DEBUG
             guard ordersPanel else { return }
         #endif
