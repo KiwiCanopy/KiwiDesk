@@ -86,11 +86,17 @@ struct SettingsDiffRowsView: View {
     ) {
         let ids = shown.map(\.id)
         let at = ids.firstIndex(of: row.id) ?? ids.count
+        // The row itself first: a ↺ that leaves it standing keeps
+        // focus where it was.
         let candidates =
-            Array(ids.suffix(from: min(at + 1, ids.count)))
+            [row.id] + Array(ids.suffix(from: min(at + 1, ids.count)))
             + ids.prefix(at).reversed()
         revert.perform(row)
-        if SettingsInputSource.movesFocus { focusAfterRevert = candidates }
+        guard SettingsInputSource.movesFocus else { return }
+        focusAfterRevert = candidates
+        // A revert that redraws no row id settles here, so the
+        // candidates never wait for an unrelated later change.
+        Task { @MainActor in settleRevertFocus() }
     }
 
     /// Focuses the first candidate whose ↺ the redrawn list draws.

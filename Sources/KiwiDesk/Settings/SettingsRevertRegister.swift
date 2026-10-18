@@ -53,43 +53,45 @@ enum SettingsRevertRegister {
             key: DesktopKey.init(stored:)
         ),
         .spaces(.spaceList): spaceList,
-        .spaces(.spacesName): spaceList,
+        .spaces(.spacesName): spaceName,
         .spaces(.spaceModes): .entry(\.spaceModes, key: { SpaceID($0) }),
         .spaces(.fallbackSpace): .leaf(\.fallbackSpace),
     ]
 
     /// The Space list through its doors (#68), since a Space owns
     /// what is filed under it: an added Space leaves with all of
-    /// it, a removed one returns as the baseline held it, a renamed
-    /// one takes its old name back, and a row naming none — a
-    /// reorder — takes the baseline's order.
+    /// it, a removed one returns as the baseline held it, and a
+    /// row naming none — a reorder — takes the baseline's order.
     private static let spaceList = RevertWriter(
         paths: ["config.spaces"]
     ) { model, instance in
         let clean = model.cleanConfig
         var config = model.config
-        guard let instance else {
-            if Set(config.spaces) == Set(clean.spaces) {
-                config.spaces = clean.spaces
-            }
-            model.config = config
-            return
-        }
-        let space = SpaceID(instance)
-        if let at = config.spaces.firstIndex(of: space),
-            !clean.spaces.contains(space)
-        {
-            let old =
-                clean.spaces.count == config.spaces.count
-                ? clean.spaces[at] : nil
-            if let old, !config.spaces.contains(old) {
-                _ = config.renameSpace(from: space, to: old)
+        if let instance {
+            let space = SpaceID(instance)
+            if clean.spaces.contains(space) {
+                config.restoreSpace(space, from: clean)
             } else {
                 config.removeSpace(space)
             }
-        } else if clean.spaces.contains(space) {
-            config.restoreSpace(space, from: clean)
+        } else if Set(config.spaces) == Set(clean.spaces) {
+            config.spaces = clean.spaces
         }
+        model.config = config
+    }
+
+    /// A renamed Space takes its old name back through the rename
+    /// door, which moves what is filed under it. The old name is
+    /// the baseline's at the same place, as the rename row reads it.
+    private static let spaceName = RevertWriter(
+        paths: ["config.spaces"]
+    ) { model, instance in
+        let clean = model.cleanConfig.spaces
+        var config = model.config
+        guard let instance, clean.count == config.spaces.count,
+            let at = config.spaces.firstIndex(of: SpaceID(instance))
+        else { return }
+        _ = config.renameSpace(from: SpaceID(instance), to: clean[at])
         model.config = config
     }
 }

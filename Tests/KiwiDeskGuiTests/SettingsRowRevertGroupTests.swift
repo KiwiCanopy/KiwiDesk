@@ -81,6 +81,22 @@ struct SettingsRowRevertGroupTests {
         #expect(model.config == clean)
     }
 
+    /// A Space deleted beside one added keeps the count, yet the
+    /// added one's row is no rename: its ↺ takes that Space alone,
+    /// and what the user pointed at it stays theirs.
+    @Test("an added Space's ↺ never renames the one deleted beside it")
+    func addBesideDeleteIsNoRename() {
+        let clean = spaced()
+        var draft = clean
+        draft.removeSpace(SpaceID("code"))
+        draft.spaces.append(SpaceID("new"))
+        draft.appRules["com.apple.Notes"] = SpaceID("new")
+        let model = model(clean: clean, draft: draft)
+        model.revert(censusRow(.spaces(.spaceList), "new"))
+        #expect(model.config.spaces == [SpaceID("mail")])
+        #expect(model.config.appRules["com.apple.Notes"] == SpaceID("new"))
+    }
+
     /// The Position master clears every screen's own edge through
     /// the doors; its ↺ puts both bars' pairs back.
     @Test("the edge master puts both edges and their screens back")

@@ -116,7 +116,7 @@ struct RuleReachGuiParityTests {
             let field = try #require(Self.draftField[family])
             #expect(
                 text.contains("\\.\(field)")
-                    || text.contains(".\(field) = $1.\(field)"),
+                    || text.contains(".\(field) == $1.\(field)"),
                 "RuleFamilyField never names \(family) (\(field))"
             )
         }

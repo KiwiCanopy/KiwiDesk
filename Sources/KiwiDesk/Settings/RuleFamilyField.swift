@@ -1,13 +1,12 @@
 import KiwiDeskCore
 
-/// Where each rule family lives in the draft (#1393): the one list a
-/// dropped rule half restores, a landed one adopts, and a reverted
-/// row settles its reach against (#792).
+/// Where each rule family lives in the draft (#1393), for a
+/// reverted row to settle the family's reach against (#792); held
+/// to every family beside `dropRuleHalf` and `adoptRuleHalf` by
+/// `RuleReachGuiParityTests`.
 @MainActor
 struct RuleFamilyField {
     let family: RuleFamily
-    /// Copies the family's fields from `source` into `target`.
-    let copy: (inout GuiConfig, GuiConfig) -> Void
     /// Whether two configs hold the same rules for the family.
     let same: (GuiConfig, GuiConfig) -> Bool
 
@@ -18,10 +17,6 @@ struct RuleFamilyField {
         // (#1870): never kept or dropped without them.
         RuleFamilyField(
             family: .key,
-            copy: {
-                $0.layers = $1.layers
-                $0.desktopShortcutBase = $1.desktopShortcutBase
-            },
             same: {
                 $0.layers == $1.layers
                     && $0.desktopShortcutBase == $1.desktopShortcutBase
@@ -40,11 +35,10 @@ struct RuleFamilyField {
 
     private static func field<V: Equatable>(
         _ family: RuleFamily,
-        _ path: WritableKeyPath<GuiConfig, V>
+        _ path: KeyPath<GuiConfig, V>
     ) -> RuleFamilyField {
         RuleFamilyField(
             family: family,
-            copy: { $0[keyPath: path] = $1[keyPath: path] },
             same: { $0[keyPath: path] == $1[keyPath: path] }
         )
     }

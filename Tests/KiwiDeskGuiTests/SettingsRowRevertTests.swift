@@ -65,10 +65,11 @@ struct SettingsRowRevertTests {
             guard model.canRevert(row) else { return }
             model.revert(row)
             let after = SettingsDiffRowSource.rows(for: model)
-            #expect(
-                !after.contains { $0.id == row.id },
-                Comment(rawValue: "still listed: \(row.id)")
-            )
+            // A row that stays would be retried forever: fail once.
+            guard !after.contains(where: { $0.id == row.id }) else {
+                Issue.record("still listed: \(row.id)")
+                return
+            }
             #expect(
                 Set(after.map(\.id)) == Set(rows.dropFirst().map(\.id)),
                 Comment(rawValue: "\(row.id) took others with it")
@@ -95,6 +96,15 @@ struct SettingsRowRevertTests {
         #expect(
             model.config.settings.bsp.override[SpaceID("1")]?.splitRatioH
                 == 0.7
+        )
+        // The other way: an entry the draft dropped comes back.
+        model.config.settings.bsp.override[SpaceID("1")] = nil
+        var first = row
+        first.instance = "1"
+        model.revert(first)
+        #expect(
+            model.config.settings.bsp.override[SpaceID("1")]
+                == model.cleanConfig.settings.bsp.override[SpaceID("1")]
         )
     }
 
