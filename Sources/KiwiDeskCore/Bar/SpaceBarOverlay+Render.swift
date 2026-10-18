@@ -246,7 +246,7 @@ extension SpaceBarOverlay {
             )
             if frontMoves { growFront(horizontal: horizontal) }
         }
-        BarMotion.runLayoutLanding {
+        BarMotion.runLayout {
             installGlassHosting(
                 hosting,
                 frames: itemFrames,
@@ -254,8 +254,6 @@ extension SpaceBarOverlay {
                 depth: horizontal ? strip.height : strip.width,
                 animated: glides
             )
-        } landed: { [weak self] in
-            self?.settleBoxGlasses()
         }
         layoutOverflow(
             fades,

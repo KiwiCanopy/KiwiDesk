@@ -121,4 +121,58 @@ struct GlassBoxContentFitTests {
         #expect(box.glass.frame == host.bounds)
         #expect(box.content.frame == box.glass.bounds)
     }
+
+    /// A box whose host glides settles itself once the glide has
+    /// landed, on its host's landing seam, no sooner than the
+    /// longest bar glide (#2425).
+    @Test("A glide's landing settles its box")
+    func glideLandingSettles() throws {
+        guard
+            let box = try hostedBox(
+                at: CGRect(x: 10, y: 0, width: 63, height: 30)
+            )
+        else { return }
+        let host = try #require(GlassBox.host(of: box.glass))
+        var landings: [(TimeInterval, () -> Void)] = []
+        host.afterLanding = { landings.append(($0, $1)) }
+        place(
+            box.glass,
+            box.tint,
+            at: CGRect(x: 10, y: 0, width: 107.7, height: 30)
+        )
+        let landing = try #require(landings.last)
+        #expect(landing.0 > BarMotion.slide)
+        box.glass.frame = CGRect(x: 0, y: 0, width: 62.5, height: 30)
+        landing.1()
+        #expect(box.glass.frame == host.bounds)
+        #expect(box.content.frame == box.glass.bounds)
+    }
+
+    /// A landing a newer glide has superseded writes nothing, so a
+    /// glass is never snapped to its size mid-glide.
+    @Test("A superseded landing leaves the box to the newer glide")
+    func supersededLandingWritesNothing() throws {
+        guard
+            let box = try hostedBox(
+                at: CGRect(x: 10, y: 0, width: 63, height: 30)
+            )
+        else { return }
+        let host = try #require(GlassBox.host(of: box.glass))
+        var landings: [() -> Void] = []
+        host.afterLanding = { landings.append($1) }
+        for width in [107.7, 63.0] {
+            place(
+                box.glass,
+                box.tint,
+                at: CGRect(x: 10, y: 0, width: width, height: 30)
+            )
+        }
+        #expect(landings.count == 2)
+        let stranded = CGRect(x: 0, y: 0, width: 107.5, height: 30)
+        box.glass.frame = stranded
+        landings.first?()
+        #expect(box.glass.frame == stranded)
+        landings.last?()
+        #expect(box.glass.frame == host.bounds)
+    }
 }

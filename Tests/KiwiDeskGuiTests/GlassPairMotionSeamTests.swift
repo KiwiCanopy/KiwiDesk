@@ -132,37 +132,4 @@ struct GlassPairMotionSeamTests {
             )
         }
     }
-
-    /// The Space run's glass install settles its boxes on the
-    /// glide's own landing, never a timer beside it (#2425).
-    @Test("the Space run settles its boxes when its glide lands")
-    func spaceRunSettlesOnLanding() throws {
-        let source = try SourceScan.strippedSource(
-            at: Self.bar.appendingPathComponent(
-                "SpaceBarOverlay+Render.swift"
-            )
-        )
-        let install = try #require(
-            source.range(of: "installGlassHosting(")
-        )
-        let before = source[..<install.lowerBound]
-        let call = try #require(
-            before.range(
-                of: "BarMotion.runLayoutLanding {",
-                options: .backwards
-            )
-        )
-        let after = source[install.upperBound...]
-        let landed = try #require(
-            after.range(of: "} landed: {"),
-            "the glass install's group takes no landing"
-        )
-        let tail = after[landed.upperBound...].prefix(80)
-        #expect(tail.contains("settleBoxGlasses()"), "\(tail)")
-        #expect(
-            !source[call.upperBound..<landed.lowerBound]
-                .contains("BarMotion.run"),
-            "the landing belongs to another group"
-        )
-    }
 }
