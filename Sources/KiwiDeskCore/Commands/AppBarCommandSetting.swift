@@ -109,7 +109,9 @@ enum AppBarCommandSetting {
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
         case .reserve(let value): style.reserve = value
-        case .visibility(let value): style.visibility = value
+        // Through `TilingSettings.setVisibility(_:of:)` alone, which
+        // writes both bars while they share an edge (#761).
+        case .visibility: break
         }
     }
 

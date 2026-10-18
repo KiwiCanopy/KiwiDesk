@@ -197,7 +197,16 @@ twice, was a question the user answered twice. The argument is
   `ShelfPanelPinTests` the indicator panels), the indicator lets
   the mouse through (`ShelfAutoHideCoreTests` ▸
   `indicatorIgnoresTheMouse`), and its timings are
-  `ShelfRevealerTests`'.
+  `ShelfRevealerTests`'. **What holds a reveal although the
+  pointer left is the one `ShelfManager.surfaceHolds`** — the peek
+  anchored on that shelf's panel, or a menu anchored on it — wired
+  once in Bootstrap, and a new surface a shelf opens joins it there
+  (`ShelfAutoHideLifetimeTests` ▸ `menuHoldsItsShelf`,
+  `ShelfRevealWiringTests` ▸ `holdIsWired`). **`updateBars()` hands
+  the revealer its hiding shelves before `syncShelves`**, on both
+  paths, since a kept hiding shelf's panel is judged against this
+  pass's targets (`ShelfRevealWiringTests` ▸ `revealerSyncsFirst`,
+  `ShelfAutoHideLifetimeTests` ▸ `keptBetweenReveals`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

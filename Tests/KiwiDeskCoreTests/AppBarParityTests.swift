@@ -121,6 +121,14 @@ struct AppBarCommandParityTests {
                     on: screen,
                     among: ScreenEdgeScope(screens: ["T:1x1"])
                 )
+            } else if case .visibility(let value) = setting {
+                // Through the settings door, which `KiwiCore`
+                // takes (#761); apart here, it writes this bar.
+                var settings = TilingSettings()
+                settings.spaceBarStyle.setEdge(.top)
+                settings.appBarStyle.setEdge(.bottom)
+                settings.setVisibility(value, of: .app)
+                style.visibility = settings.appBarStyle.visibility
             } else {
                 setting.apply(to: &style)
             }

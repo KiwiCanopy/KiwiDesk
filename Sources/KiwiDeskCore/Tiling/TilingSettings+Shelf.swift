@@ -64,6 +64,16 @@ extension TilingSettings {
             && appBarStyle.visibility == .auto ? .auto : .always
     }
 
+    /// Whether `bar`'s show/hide action can act anywhere (#761):
+    /// the bar is on — the App Bar in some layout — and reads
+    /// `auto`. The one answer a shortcut row greys by and the
+    /// hotkey table registers by; a bar that is off does nothing.
+    public func revealActionLive(_ bar: ShelfBar) -> Bool {
+        let on =
+            bar == .space ? spaceBarStyle.enabled : anyAppBarCanShow
+        return on && visibility(of: bar) == .auto
+    }
+
     /// Writes `bar`'s visibility — both bars' while they are
     /// linked, so a fused shelf never holds two answers. The one
     /// door every writer takes (`BarVisibilitySeamTests`).

@@ -225,7 +225,9 @@ enum SpaceBarCommandSetting {
         switch self {
         case .enabled(let value): style.enabled = value
         case .reserve(let value): style.reserve = value
-        case .visibility(let value): style.visibility = value
+        // Through `TilingSettings.setVisibility(_:of:)` alone, which
+        // writes both bars while they share an edge (#761).
+        case .visibility: break
         case .edge(let value): style.setEdge(value)
         case .screenEdge: break
         case .glyphSpan(let value): style.glyphSpan = value

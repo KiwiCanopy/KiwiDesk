@@ -33,6 +33,7 @@ extension KiwiCore {
                 appBars.sync(fallback)
                 spaceBars.sync([])
             }
+            syncHidingShelves(HidingShelves())
             // A lone bar's slot IS its strip.
             syncShelves(
                 fallback.map {
@@ -46,7 +47,6 @@ extension KiwiCore {
                 },
                 settings: settings
             )
-            syncHidingShelves(HidingShelves())
             retireDepartedBars(live: Set(fallback.map(\.display)))
             return
         }

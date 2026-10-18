@@ -33,13 +33,15 @@ struct ShelfRevealerTests {
     private static let underMenuBar = ShelfRevealer.Target(
         edge: .top,
         strip: CGRect(x: 0, y: 735, width: 1000, height: 40),
-        screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
+        screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+        bars: [.space]
     )
     /// The same shelf flush with the screen's top.
     private static let flush = ShelfRevealer.Target(
         edge: .top,
         strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
-        screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
+        screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+        bars: [.space]
     )
 
     private func make(

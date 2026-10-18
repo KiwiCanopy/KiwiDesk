@@ -151,4 +151,16 @@ struct BarAutoHideFoldTests {
             #expect(LookKeys.leftOut[key] != nil)
         }
     }
+
+    @Test("A bar's action is live only while it is on and auto")
+    func actionLiveness() {
+        var settings = settings(space: .auto, app: .auto)
+        #expect(settings.revealActionLive(.space))
+        settings.spaceBarStyle.enabled = false
+        #expect(!settings.revealActionLive(.space))
+        settings.spaceBarStyle.enabled = true
+        settings.setVisibility(.always, of: .space)
+        #expect(!settings.revealActionLive(.space))
+        #expect(!settings.revealActionLive(.app))
+    }
 }

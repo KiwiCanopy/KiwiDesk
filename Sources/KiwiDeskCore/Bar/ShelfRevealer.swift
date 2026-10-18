@@ -14,7 +14,7 @@ final class ShelfRevealer {
         let strip: CGRect
         let screen: CGRect
         /// The bars the shelf carries, which the action names.
-        var bars: Set<ShelfBar> = [.space]
+        let bars: Set<ShelfBar>
 
         var band: CGRect { ShelfReveal.band(of: strip, edge: edge) }
         /// Where the pointer holds a shown shelf: the strip and its

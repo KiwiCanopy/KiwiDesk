@@ -11,12 +11,10 @@ import Testing
 @Suite("Bar visibility seam (#761)")
 struct BarVisibilitySeamTests {
     /// Files that may name a bar style's stored visibility: the
-    /// one reader and door, and each setter's raw `apply`, which
-    /// the dispatch bypasses for this field.
+    /// one reader and door, and the Settings files that spell its
+    /// path. A setter's `apply(to:)` writes nothing for it.
     private static let allowed: [String: String] = [
         "TilingSettings+Shelf.swift": "the reader and the door",
-        "SpaceBarCommandSetting.swift": "apply(to:), field parity",
-        "AppBarCommandSetting.swift": "apply(to:), field parity",
         // A ↺ puts the baseline's stored pair back, which was
         // one answer already (#792).
         "SettingsRevertRegister+Settings1.swift": "the App Bar's ↺",

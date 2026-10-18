@@ -6,6 +6,8 @@ import AppKit
 extension ShelfOverlay {
     /// Slides the content in; a retract in flight is replaced.
     func slideIn(edge: AppBarEdge, depth: CGFloat) {
+        // A slide-in takes the shelf back from a leave in flight.
+        leaving = nil
         leavingSlides = false
         BarMotion.endReveal(content)
         content.alphaValue = 1
