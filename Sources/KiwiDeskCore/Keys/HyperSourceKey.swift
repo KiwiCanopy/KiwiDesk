@@ -67,12 +67,16 @@ public enum HyperSourceKey: String, CaseIterable, Sendable {
         self = match.key
     }
 
-    /// F18's key code: what the remapped key arrives as, and the
-    /// key the Carbon trigger listens on.
-    static let triggerKeyCode = UInt32(HyperSourceKey.f18.keyCode)
+    /// The key the remapped key arrives as: the remap's
+    /// destination, the Carbon trigger's key, and what the GUI
+    /// recorder reads as held Hyper (#2414).
+    public static let trigger = HyperSourceKey.f18
 
-    /// F18's HID usage, the remap's destination.
-    static let triggerUsage = HyperSourceKey.f18.hidUsage
+    /// The trigger's key code, which the Carbon trigger listens on.
+    static let triggerKeyCode = UInt32(trigger.keyCode)
+
+    /// The trigger's HID usage, the remap's destination.
+    static let triggerUsage = trigger.hidUsage
 
     private static let codes:
         [HyperSourceKey: (virtual: UInt16, usage: UInt8)] = [

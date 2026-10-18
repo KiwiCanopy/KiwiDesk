@@ -151,7 +151,8 @@ struct HyperKeyField: View {
         guard let recorded = HyperSourceKey(keyCode: code) else {
             return nil
         }
-        return recorded == .f18 ? current ?? .f18 : recorded
+        let trigger = HyperSourceKey.trigger
+        return recorded == trigger ? current ?? trigger : recorded
     }
 
     private func announce(_ text: String) {
