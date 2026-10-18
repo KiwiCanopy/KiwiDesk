@@ -74,8 +74,8 @@ extension TilingEngine {
         )
     }
 
-    /// One space's issued frames on `screen` and the window its
-    /// layout put in front, read without recording like
+    /// One space's issued frames on `screen`, the window its layout
+    /// put in front and the area it fills, read without recording like
     /// `placedFrames(state:recording: false)` — the App Bar's
     /// visibility verdict (#2234), which needs only the Space its
     /// bar draws.
@@ -83,10 +83,14 @@ extension TilingEngine {
         of space: Space,
         on screen: NSScreen,
         state: StateCoordinator
-    ) -> (frames: [WindowID: CGRect], front: WindowID?) {
+    ) -> (frames: [WindowID: CGRect], front: WindowID?, usable: CGRect) {
         let held = monocleShownMembers
         defer { monocleShownMembers = held }
         let input = layoutInput(state: state, space: space, screen: screen)
-        return (laidOut(input, placed: true), input.context.focused)
+        return (
+            laidOut(input, placed: true),
+            input.context.focused,
+            input.context.usable
+        )
     }
 }

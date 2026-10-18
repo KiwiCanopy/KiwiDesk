@@ -2557,10 +2557,11 @@ Lua-only (no GUI).
 
 :::unreleased
 On the App Bar the dim marks a window that is not fully on screen
-— cut by the screen's edge, partly under another of its Space's
-windows, or hidden. A fully visible item stays undimmed whether or
-not it holds the focus. Another app's window or an untracked panel
-over it does not count.
+— in monocle every window but the one shown, in scrolling a column
+cut by the screen's edge or stacked behind another, and a float the
+screen's edge cuts or the focused window covers. A fully visible
+item stays undimmed whether or not it holds the focus. A float or a
+window KiwiDesk does not manage covering a tile does not count.
 :::
 
 **Example:**

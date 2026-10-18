@@ -80,4 +80,20 @@ struct BarVisibilityTests {
         let wide = CGRect(x: -100, y: 0, width: 1200, height: 800)
         #expect(judge(wide) == .partly(shown: nil))
     }
+
+    /// A cut window reads partly only past a scrolling row's edge
+    /// sliver; a covered one only past a fifth uncovered.
+    @Test("A sliver or an all but buried window reads hidden")
+    func slivAndBuriedReadHidden() {
+        let peek = ScrollingLayout.edgePeek
+        let sliver = CGRect(x: 1000 - peek, y: 0, width: 200, height: 800)
+        #expect(judge(sliver) == .hidden)
+        let past = CGRect(x: 1000 - peek - 10, y: 0, width: 700, height: 800)
+        #expect(judge(past) == .partly(shown: .left))
+        let window = CGRect(x: 0, y: 0, width: 400, height: 400)
+        let mostly = CGRect(x: 0, y: 0, width: 400, height: 330)
+        #expect(judge(window, above: [mostly]) == .hidden)
+        let half = CGRect(x: 0, y: 0, width: 400, height: 200)
+        #expect(judge(window, above: [half]) == .partly(shown: nil))
+    }
 }

@@ -23,6 +23,14 @@ public enum BarVisibility: Equatable, Sendable {
         return false
     }
 
+    /// The share of a covered window that must stay uncovered for
+    /// it to read partly visible: at or under it, a window all but
+    /// buried reads hidden. A CUT window reads partly once it shows
+    /// more than a scrolling row's edge sliver
+    /// (`ScrollingLayout.edgePeek`), the reach KiwiDesk leaves a
+    /// scrolled-out window (owner, #2234, 2026-10-18).
+    static let partlyFloor: CGFloat = 0.2
+
     /// A cut or overlap under this many points is no cut: an
     /// echo's rounding, a border's outset.
     static let tolerance: CGFloat = 1
@@ -45,6 +53,10 @@ public enum BarVisibility: Equatable, Sendable {
         let cutX = frame.width - shown.width
         let cutY = frame.height - shown.height
         if cutX > tolerance || cutY > tolerance {
+            let along = cutX >= cutY ? shown.width : shown.height
+            guard along > ScrollingLayout.edgePeek + tolerance else {
+                return .hidden
+            }
             return .partly(shown: side(of: shown, in: frame, cutX, cutY))
         }
         let overlapping = above.filter { cover in
@@ -57,8 +69,19 @@ public enum BarVisibility: Equatable, Sendable {
         }) {
             return .hidden
         }
-        if !overlapping.isEmpty { return .partly(shown: nil) }
-        return .visible
+        guard !overlapping.isEmpty else { return .visible }
+        // The largest single cover: several overlapping covers read
+        // as the biggest of them.
+        let covered =
+            overlapping.map { area(shown.intersection($0)) }.max() ?? 0
+        guard area(shown) - covered > partlyFloor * area(frame) else {
+            return .hidden
+        }
+        return .partly(shown: nil)
+    }
+
+    private static func area(_ rect: CGRect) -> CGFloat {
+        rect.width * rect.height
     }
 
     /// The side of `frame` that `shown` keeps, on the axis cut more
