@@ -67,4 +67,26 @@ struct GlassPairMotionSeamTests {
             }
         }
     }
+
+    /// The host writes its pair to every size it takes (#2388): a
+    /// writer whose input is the host's size, so it has no frame
+    /// signature to read — its body alone starts no motion.
+    @Test("the host's pair layout starts no motion")
+    func hostLayoutStartsNoMotion() throws {
+        let declaration = "override func setFrameSize("
+        let source = try SourceScan.strippedSource(
+            at: Self.bar.appendingPathComponent("GlassBox.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(after: declaration, in: source),
+            "\(declaration) is gone from GlassBox.swift"
+        )
+        #expect(body.contains(".frame = bounds"), "\(body)")
+        for spelling in Self.motionStarts {
+            #expect(
+                !body.contains(spelling),
+                "the host's pair layout starts motion: \(spelling)"
+            )
+        }
+    }
 }
