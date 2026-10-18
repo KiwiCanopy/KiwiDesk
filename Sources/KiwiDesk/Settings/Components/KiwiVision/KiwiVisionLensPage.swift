@@ -28,6 +28,7 @@ struct KiwiVisionLensPage: View {
             KiwiVisionNeverDimmedCard(model: model)
         }
         .environment(\.keybindingLayerName, KeyLayer.defaultName)
+        .environment(\.hyperKeyIsOff, model.appWide.hyperKey == nil)
         .environment(
             \.disabledSystemShortcuts,
             model.disabledSystemShortcuts()
