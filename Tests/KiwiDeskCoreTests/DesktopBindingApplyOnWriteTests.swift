@@ -38,6 +38,18 @@ struct DesktopBindingApplyOnWriteTests {
         NativeSpaces.activeSpaceIDOverride = 11
     }
 
+    /// The one screen the profiles are saved for, or the gate stands
+    /// aside on an unknown screen count.
+    private func connectScreen(_ core: KiwiCore) {
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "D1",
+                frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+            )
+        )
+    }
+
     private func reset() {
         NativeSpaces.spacesOverride = nil
         NativeSpaces.mainDisplayUUIDOverride = nil
@@ -49,13 +61,7 @@ struct DesktopBindingApplyOnWriteTests {
         defer { reset() }
         pinTopology()
         let core = makeTestCore()
-        core.state.workspaces.upsertDisplay(
-            Display(
-                id: DisplayID(1),
-                name: "D1",
-                frame: CGRect(x: 0, y: 0, width: 100, height: 100)
-            )
-        )
+        connectScreen(core)
         try core.guiConfigStore.save(GuiConfig())
         core.loadConfig()
         try #require(core.lua != nil)
@@ -71,5 +77,32 @@ struct DesktopBindingApplyOnWriteTests {
             )
         }
         #expect(core.profiles.currentName == "Laptop")
+    }
+
+    /// A paused cold boot has no engine yet: the write files the
+    /// binding and leaves the load to the start that follows.
+    @Test("a write before the engine starts loads nothing")
+    func pausedBootDefers() throws {
+        defer { reset() }
+        pinTopology()
+        let core = makeTestCore()
+        connectScreen(core)
+        try core.guiConfigStore.save(GuiConfig())
+        #expect(core.lua == nil)
+        for name in ["Laptop", "Other"] {
+            try core.profiles.save(profile(name))
+        }
+        #expect(core.profiles.currentName == "Other")
+        try core.rewriteSidecarBindings { map in
+            map[.identity(stamp)] = DesktopBinding(
+                entries: [core.bindingEntry(named: "Laptop")],
+                desktop: 1
+            )
+        }
+        #expect(core.profiles.currentName == "Other")
+        #expect(
+            core.guiConfigStore.bindingsFile.load()
+                .profileBindings[.identity(stamp)] != nil
+        )
     }
 }

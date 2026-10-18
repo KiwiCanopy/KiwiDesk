@@ -62,6 +62,19 @@ struct BindingEditsSaveTests {
         #expect(seenInSave == true)
     }
 
+    /// A `gui.json` that will not decode is repaired by the Save
+    /// first, or the binding door refuses and every Save fails.
+    @Test("an unreadable config is saved before the edits")
+    func unreadableConfigSavesFirst() throws {
+        let (_, model) = DesktopBindingFixture.makeCard()
+        let store = model.core.guiConfigStore
+        try Data("garbage".utf8).write(to: store.url)
+        model.config.profileBindings[.number(2)] =
+            DesktopBinding(profile: "Dual", desktop: 2)
+        try model.savingBindingEdits { try store.save(GuiConfig()) }
+        #expect(store.bindingsFile.load().profileBindings[.number(2)] != nil)
+    }
+
     /// Both live Save paths run their `gui.json` write INSIDE the
     /// one ordering seam, so the reload applies the new bindings.
     @Test("both Save paths order the write through the seam")
@@ -91,6 +104,12 @@ struct BindingEditsSaveTests {
             #expect(
                 closure.contains("saveGuiConfig(sidecarConfig)"),
                 "\(file)'s gui.json save is outside the seam"
+            )
+            // The paused cold boot writes the store directly.
+            #expect(
+                closure.contains("guiConfigStore.save(sidecarConfig)")
+                    == text.contains("guiConfigStore.save(sidecarConfig)"),
+                "\(file)'s cold-boot save is outside the seam"
             )
         }
     }

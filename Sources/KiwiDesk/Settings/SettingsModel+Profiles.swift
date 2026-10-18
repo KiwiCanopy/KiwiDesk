@@ -172,11 +172,7 @@ extension SettingsModel {
                 }
             }
         } catch {
-            profileWarning = L(
-                "settings.globals_save_failed",
-                "Saving settings failed: %1$@",
-                "\(error)"
-            )
+            profileWarning = Self.saveFailure(error)
             core.onLog("settings save failed: \(error)")
         }
     }

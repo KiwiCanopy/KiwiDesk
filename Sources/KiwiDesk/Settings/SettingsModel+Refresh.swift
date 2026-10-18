@@ -166,12 +166,13 @@ struct BindingEdits {
 
 extension SettingsModel {
     /// Runs a Save's `gui.json` write with the draft's binding edits
-    /// ordered around it (#2324): before it where the config exists,
+    /// ordered around it (#2324): before it where the config reads,
     /// so the reload it triggers applies the new bindings, and after
-    /// it only where this Save mints the config the binding door
-    /// requires.
+    /// it where this Save mints or repairs the config the binding
+    /// door requires.
     func savingBindingEdits(_ save: () throws -> Void) throws {
-        guard core.guiConfigStore.exists else {
+        let store = core.guiConfigStore
+        guard store.exists, store.load() != nil else {
             try save()
             try persistBindingEdits()
             return
@@ -186,7 +187,11 @@ extension SettingsModel {
     func persistBindingEdits() throws {
         let edits = bindingEdits
         guard !edits.isEmpty else { return }
-        try core.rewriteSidecarBindings { edits.apply(to: &$0) }
+        // The write loads a rebound Desktop's profile: a control's
+        // motion, never an ambient pass (#804).
+        try core.withUserMotion {
+            try core.rewriteSidecarBindings { edits.apply(to: &$0) }
+        }
     }
 
     /// The draft's binding edits against the clean baseline —
