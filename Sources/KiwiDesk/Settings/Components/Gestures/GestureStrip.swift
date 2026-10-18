@@ -4,8 +4,8 @@ import SwiftUI
 /// The shut Mouse & trackpad card's pictures (owner ruling
 /// 2026-10-17): every entry's, in card order, the groups set apart,
 /// scrolling sideways with the KiwiShelf's overflow fade at an end
-/// that cuts a picture. A picture plays while hovered, names its
-/// gesture in a tooltip, and a click opens the card at its entry.
+/// that cuts a picture. A picture rests still, names its gesture
+/// in a tooltip, and a click opens the card at its entry.
 /// Pointer-only: VoiceOver and the keyboard reach every entry
 /// through the disclosure above it.
 struct GestureStrip: View {

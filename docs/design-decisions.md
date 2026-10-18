@@ -12025,7 +12025,7 @@ So the shut card also draws a strip of every entry's picture at
 rest, in card order with the groups set apart, scrolling sideways
 and fading at an end where it cuts a picture, the KiwiShelf's
 overflow arithmetic (`ShelfOverflow.fades`) rather than a copy.
-A picture plays while hovered, shows its entry's own sentence as
+A picture stays still, shows its entry's own sentence as
 a tooltip after the window's 250 ms delay, and a click opens the
 card at its entry and plays that one — the same "a click asked to
 read it" argument as the first picture's, aimed. The strip is a
@@ -12037,7 +12037,13 @@ than a drawer: a picture is the content arriving, where a drawer's
 summary states a value. Every entry is drawn rather than one per
 group because each picture is its entry's own way in; the cost is
 weight, so a strip that reads as a solid band in light mode is
-the signal to cut it back to one picture per group.
+the signal to cut it back to one picture per group. It first
+played a picture while hovered, and that cost the page its
+scroll (owner ruling 2026-10-18): each picture the page carried
+under the resting pointer rebuilt and started a loop mid-scroll,
+so a wheel or swipe begun over the strip stuttered. The tooltip
+already names the gesture and the click plays it, so the hover
+loop taught nothing they do not.
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
