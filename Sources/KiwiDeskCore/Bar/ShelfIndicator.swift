@@ -39,6 +39,11 @@ struct ShelfIndicatorSpec: Equatable {
     /// Whether its shelf draws a plate, which morphs out of the
     /// mark; a Boxed shelf cross-fades with it instead.
     var morphs = true
+    /// The hover rim's width: the bars' indicator weight, capped
+    /// at the plate's growth so the dots keep their room.
+    var rimWidth: CGFloat = hoverGrowth
+    /// The bars' indicator sheen (`BorderSheen`); 0 draws flat.
+    var sheen: CGFloat = 0
 
     /// A dot's ink, by the bar's own ladder: current, then held
     /// windows, then empty.
@@ -57,7 +62,12 @@ struct ShelfIndicatorSpec: Equatable {
     /// panel keeps around it. Three points take the 8 pt plate to
     /// 14, so the growth reads (device feedback, #761).
     static let hoverGrowth: CGFloat = 3
-    static let hoverBorder: CGFloat = 1.5
+
+    /// The hover rim's width for `shelf`: its indicator weight
+    /// (bars.md ▸ an indicator's weight), at most the growth.
+    static func rimWidth(for shelf: KiwiShelf) -> CGFloat {
+        min(shelf.resolvedHighlightWidth, hoverGrowth)
+    }
     static let pillLength: CGFloat = 36
     /// Its distance from the shelf's screen side, inside the band.
     static let inset: CGFloat = 0

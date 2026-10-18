@@ -1347,7 +1347,9 @@ mark the current Space or focused window reads it.
   reach the screen) and never a point literal. The Space Bar's
   drop ring morphs into the outline, so it strokes alike.
   `HighlightWidthTests` builds both bars' item views and the
-  drop ring and holds their strokes to the width.
+  drop ring and holds their strokes to the width. A hidden
+  shelf's hover rim (#761) takes the same reading, capped at its
+  plate's growth, and the bars' sheen (`HighlightWidthMarkTests`).
 - **A preview of the bar draws the draft's width**, scaled from
   those two readings: the Settings Bars preview carries them on
   its `BarSpec` (`HighlightWidthPreviewTests` holds the spec).

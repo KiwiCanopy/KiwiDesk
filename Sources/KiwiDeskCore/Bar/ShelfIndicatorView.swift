@@ -43,7 +43,11 @@ final class ShelfIndicatorView: NSView {
         dots.frame = mark
         dots.spec = spec
         plate.layer?.backgroundColor = NSColor(kiwiHex: spec.fill).cgColor
-        rim.color = NSColor(kiwiHex: spec.highlight)
+        rim.ink = .init(
+            hex: spec.highlight,
+            width: spec.rimWidth,
+            sheen: spec.sheen
+        )
         BarMotion.placeHoverPlate(
             plate,
             rim: rim,
@@ -85,24 +89,43 @@ final class ShelfIndicatorView: NSView {
     }
 }
 
-/// The hovered plate's rim in the highlight colour, stroked inside
-/// its own bounds — drawn, never a layer border, which is the
-/// shelf border's one painter's (bars.md).
+/// The hovered plate's rim in the highlight colour and the bars'
+/// sheen, stroked inside its own bounds — drawn, never a layer
+/// border, which is the shelf border's one painter's (bars.md).
 final class ShelfIndicatorRim: NSView {
-    var color = NSColor.clear { didSet { needsDisplay = true } }
+    struct Ink: Equatable {
+        let hex: String
+        let width: CGFloat
+        let sheen: CGFloat
+    }
+
+    var ink: Ink? {
+        didSet { if ink != oldValue { needsDisplay = true } }
+    }
 
     override func draw(_ dirtyRect: NSRect) {
-        let width = ShelfIndicatorSpec.hoverBorder
-        let rect = bounds.insetBy(dx: width / 2, dy: width / 2)
-        let radius = max(min(rect.width, rect.height) / 2, 0)
-        let path = NSBezierPath(
+        guard let ink,
+            let context = NSGraphicsContext.current?.cgContext
+        else { return }
+        let inset = ink.width / 2
+        let rect = bounds.insetBy(dx: inset, dy: inset)
+        guard rect.width > 0, rect.height > 0 else { return }
+        let radius = min(rect.width, rect.height) / 2
+        let path = CGPath(
             roundedRect: rect,
-            xRadius: radius,
-            yRadius: radius
+            cornerWidth: radius,
+            cornerHeight: radius,
+            transform: nil
         )
-        path.lineWidth = width
-        color.setStroke()
-        path.stroke()
+        // Sheen 0 is the flat colour throughout.
+        BorderSheen.draw(
+            path,
+            lineWidth: ink.width,
+            extent: bounds,
+            hex: ink.hex,
+            strength: ink.sheen,
+            in: context
+        )
     }
 }
 

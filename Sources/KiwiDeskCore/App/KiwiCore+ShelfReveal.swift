@@ -76,7 +76,9 @@ extension KiwiCore {
             var bars: Set<ShelfBar> = []
             if carriesSpace { bars.insert(.space) }
             if plan.arrangement.app != nil { bars.insert(.app) }
-            let shelf = settings.kiwishelf
+            // The mark draws the shelf as rendered: Reduce
+            // transparency makes its fill opaque (#1374).
+            let shelf = LiquidGlassGate.rendered(settings.kiwishelf)
             let mark = Self.mark(items: carriesSpace ? items : nil)
             let primary = GeometryUtils.primaryHeight
             let strip = GeometryUtils.flip(plan.strip, primaryHeight: primary)
@@ -125,7 +127,9 @@ extension KiwiCore {
                     highlight: shelf.highlightColor,
                     shown: shown,
                     hovered: hovered,
-                    morphs: shelf.drawsPlate
+                    morphs: shelf.drawsPlate,
+                    rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
+                    sheen: settings.borderStyle.sheen
                 ),
                 carriesSpace
             )
