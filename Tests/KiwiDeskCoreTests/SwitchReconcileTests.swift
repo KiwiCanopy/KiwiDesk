@@ -156,6 +156,8 @@ struct SwitchReconcileTests {
         #expect(box.destroyed.count == 2)
         #expect(box.folds == 2, "the straggler's own fold")
         #expect(!loop.switchReads.isOutstanding(second))
+        // The straggler's lone apply is a late read, not a reveal.
+        #expect(box.foldedDestroys == [firstID])
     }
 
     @Test("a superseded switch's reads apply nothing")
@@ -239,18 +241,39 @@ struct SwitchReconcileTests {
         #expect(!box.destroyed.contains(secondID))
     }
 
+    @Test("an older held reading sweeps nothing the newer one lists")
+    func olderHeldReadingIsStale() {
+        let (loop, box) = makeLoop()
+        // A per-app read runs before the switch's, listing nothing…
+        loop.reconcileOffMain(
+            pid: first,
+            app: AppRef(pid: first),
+            coalesceTabs: false
+        )
+        switchDesktop(loop)
+        box.runOne()
+        #expect(box.destroyed.isEmpty, "applied outside the fold")
+        // …and the batch's newer reads list both windows.
+        box.listed = [first: firstID, second: secondID]
+        box.drain()
+        #expect(box.folds == 1)
+        #expect(box.destroyed.isEmpty)
+    }
+
     @Test("owed work runs after the fold, in order")
     func afterFoldWaitsForTheFold() {
         let (loop, box) = makeLoop()
         var ran: [Int] = []
+        loop.switchReads.onApplied = { ran.append(-1) }
         switchDesktop(loop)
         loop.afterSwitchReads { ran.append(box.destroyed.count) }
         loop.afterSwitchReads { ran.append(9) }
         #expect(ran.isEmpty)
         box.drain()
-        #expect(ran == [2, 9])
+        // The held bars are paid ahead of the owed work.
+        #expect(ran == [-1, 2, 9])
         loop.afterSwitchReads { ran.append(3) }
-        #expect(ran == [2, 9, 3], "no batch pending: at once")
+        #expect(ran == [-1, 2, 9, 3], "no batch pending: at once")
     }
 
     @Test("the settle waits for the fold, and a newer switch drops it")
@@ -309,7 +332,11 @@ struct SwitchReconcileTests {
         #expect(
             SwitchReconcile.bound < EventLoop.spaceSwitchCoalesceGrace
         )
-        #expect(SwitchReconcile.bound < 0.6, "the settle's delay")
+        #expect(
+            SwitchReconcile.bound
+                < Double(KiwiCore.desktopSettleMs) / 1000,
+            "the settle's delay"
+        )
         #expect(
             SwitchReconcile.stragglerLimit < KiwiCore.inFlightWindow
         )
