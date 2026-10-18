@@ -157,9 +157,6 @@ struct MachineFileStore<File: MachineFile> {
             for key in move.keys { owed[key] = root[key] }
         }
         guard !owed.isEmpty else { return nil }
-        // Owed leaves that will not decode hold the strip: the
-        // caller migrates in memory only, and nothing is lost.
-        guard let carried = Self.decoded(owed) else { return File() }
         var stored =
             (try? Data(contentsOf: url)).flatMap {
                 try? JSONSerialization.jsonObject(with: $0)
@@ -167,6 +164,12 @@ struct MachineFileStore<File: MachineFile> {
             } ?? [:]
         for (key, value) in owed where Self.isEmpty(stored[key]) {
             stored[key] = value
+        }
+        // Owed leaves that will not decode move as they stand: the
+        // new home keeps the bytes and refuses to overwrite them
+        // (`keepsUnreadable`), so the strip loses nothing.
+        guard let carried = Self.decoded(owed) else {
+            return writeRaw(stored) ? nil : File()
         }
         // A stored file this build cannot read leaves the legacy
         // copy owed; one it can read keeps its own leaves even
@@ -177,6 +180,32 @@ struct MachineFileStore<File: MachineFile> {
             return nil
         } catch {
             return merged
+        }
+    }
+
+    /// `root` written as it stands, stamped with this file's
+    /// format; false where it cannot land or a newer build owns
+    /// the file.
+    private func writeRaw(_ root: [String: Any]) -> Bool {
+        guard NewerFormatOnDisk.check(url, knows: File.currentFormat) == nil
+        else { return false }
+        var root = root
+        root["format"] = File.currentFormat
+        guard
+            let bytes = try? JSONSerialization.data(
+                withJSONObject: root,
+                options: [.prettyPrinted, .sortedKeys]
+            )
+        else { return false }
+        do {
+            try FileManager.default.createDirectory(
+                at: url.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try bytes.write(to: url, options: .atomic)
+            return true
+        } catch {
+            return false
         }
     }
 

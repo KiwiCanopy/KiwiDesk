@@ -88,6 +88,26 @@ struct DesktopBindingGroupTests {
         )
     }
 
+    /// The wiring the verdict rides: the refresh asks Core per
+    /// entry, and the card's resolver reads exactly that (#2324).
+    @Test("the card resolves through the model's refresh")
+    func resolutionsAreWired() throws {
+        let (card, model) = DesktopBindingFixture.makeCard()
+        let gone = ProfileID.fresh()
+        let renamed = DesktopBinding.Entry(
+            id: .legacy(name: "Laptop"),
+            name: "Old laptop"
+        )
+        model.config.profileBindings[live] = DesktopBinding(
+            entries: [renamed, .init(id: gone, name: "Gone")],
+            desktop: 1
+        )
+        model.refreshBindingReadings()
+        #expect(model.bindingResolutions[.id(gone)] == .missing)
+        #expect(card.bindingResolver.resolutions == model.bindingResolutions)
+        #expect(card.bindingResolver.shownName(of: renamed) == "Laptop")
+    }
+
     /// The card narrates Core's verdict per entry (#2324): an id
     /// whose profile was renamed reads by its current name, a gone
     /// one as missing and an undecodable one as unreadable —

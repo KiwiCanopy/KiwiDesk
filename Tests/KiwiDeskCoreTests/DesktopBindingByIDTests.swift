@@ -104,6 +104,42 @@ struct DesktopBindingByIDTests {
         }
     }
 
+    /// A file that is not even JSON hides its id; absence is then
+    /// unproven, so the id reads unreadable, never missing.
+    @Test("A garbage file leaves an id unreadable")
+    func garbageFileIsUnreadable() throws {
+        let core = makeCore()
+        let work = try save(core, "Work")
+        try Data("garbage".utf8).write(
+            to: try core.profiles.fileURL(name: "Work"),
+            options: .atomic
+        )
+        #expect(
+            core.bindingResolution(of: .init(id: work.id, name: "Work"))
+                == .unreadable("Work")
+        )
+    }
+
+    /// A Finder duplicate carries its original's id; named by a
+    /// pending entry it still reads, so it is a profile.
+    @Test("A readable duplicate named pending is a profile")
+    func duplicateIsAProfile() throws {
+        let core = makeCore()
+        let work = try save(core, "Work")
+        var copy = work
+        copy.name = "Work copy"
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        try encoder.encode(copy).write(
+            to: try core.profiles.fileURL(name: "Work copy"),
+            options: .atomic
+        )
+        #expect(
+            core.bindingResolution(of: .init(name: "Work copy"))
+                == .profile("Work copy")
+        )
+    }
+
     /// A file rewritten in place moves no folder stamp; the gate
     /// still refuses a file that no longer carries the id.
     @Test("A file that lost the id does not answer for it")

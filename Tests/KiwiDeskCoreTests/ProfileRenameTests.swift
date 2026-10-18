@@ -149,6 +149,34 @@ struct ProfileRenameTests {
             core.guiConfigStore.load()?.profileBindings
                 .mapValues(\.names) == bound((2, "studio")).mapValues(\.names)
         )
+        // The runtime map follows the edited key alone (#2324).
+        #expect(core.desktopBindings[.number(3)]?.names == ["luaOnly"])
+    }
+
+    /// In a hybrid config the runtime map is init.lua's: a rename
+    /// rewrites the stored file and never pours it over Lua's map.
+    @Test("hybrid: the runtime map stays init.lua's")
+    func hybridRuntimeStaysLua() throws {
+        let core = makeCore()
+        save(core, "desk")
+        var config = GuiConfig()
+        config.profileBindings = bound((2, "desk"))
+        try core.guiConfigStore.saveIncludingBindings(config)
+        try #"KiwiDesk.bind_profile_to_desktop(2, "lua")"#.write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        #expect(!core.isGuiManaged)
+        // Lua's own record names a second profile the stored one
+        // does not: pouring the stored record over it loses it.
+        core.desktopBindings = [
+            .number(2): DesktopBinding(profiles: ["desk", "lua"], desktop: 2)
+        ]
+        try core.renameProfile(from: "desk", to: "studio")
+        #expect(
+            core.desktopBindings[.number(2)]?.names == ["studio", "lua"]
+        )
     }
 
     @Test("rename to an invalid name throws before the move")

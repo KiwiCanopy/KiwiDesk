@@ -127,10 +127,10 @@ struct DesktopBindingsFileTests {
         #expect(try Data(contentsOf: store.bindingsFile.url) == broken)
     }
 
-    /// Owed bindings that will not decode hold the strip, so the
-    /// shared file keeps the only copy.
-    @Test("Undecodable owed bindings hold the strip")
-    func undecodableOwedHolds() throws {
+    /// Owed bindings that will not decode move as they stand, into
+    /// a file that then refuses to be overwritten — never dropped.
+    @Test("Undecodable owed bindings move raw and are kept")
+    func undecodableOwedMovesRaw() throws {
         let dir = scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
         let store = try store(dir)
@@ -139,12 +139,20 @@ struct DesktopBindingsFileTests {
                 .utf8
         ).write(to: store.url)
         _ = store.load()
-        let gui = try #require(
+        let moved = try #require(
             JSONSerialization.jsonObject(
-                with: Data(contentsOf: store.url)
+                with: Data(contentsOf: store.bindingsFile.url)
             ) as? [String: Any]
         )
-        #expect(gui["profile_bindings"] != nil)
+        #expect(moved["profile_bindings"] != nil)
+        #expect(throws: (any Error).self) { try store.saveBindings([:]) }
+        try store.save(GuiConfig())
+        let kept = try #require(
+            JSONSerialization.jsonObject(
+                with: Data(contentsOf: store.bindingsFile.url)
+            ) as? [String: Any]
+        )
+        #expect(kept["profile_bindings"] != nil)
     }
 
     /// A writer holding an old copy cannot revert a re-key or a

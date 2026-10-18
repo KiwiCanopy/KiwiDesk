@@ -22,8 +22,13 @@ extension KiwiCore {
     ) -> BindingResolution {
         if let id = entry.id { return resolution(of: id) }
         if profiles.list().contains(entry.name) {
-            let id = profiles.currentIndex().id(ofFile: entry.name)
-            return id.map(resolution(of:)) ?? .unreadable(entry.name)
+            // The file of that name answers, keeper or not: a
+            // duplicate that reads is a profile with no id to give.
+            if let id = profiles.currentIndex().id(ofFile: entry.name) {
+                return resolution(of: id)
+            }
+            return (try? profiles.read(name: entry.name)) == nil
+                ? .unreadable(entry.name) : .profile(entry.name)
         }
         return resolution(of: .legacy(name: entry.name))
     }
@@ -40,7 +45,12 @@ extension KiwiCore {
     }
 
     private func resolution(of id: ProfileID) -> BindingResolution {
-        guard let holder = profiles.holder(of: id) else { return .missing }
+        let index = profiles.currentIndex()
+        guard let holder = index.holder(of: id) else {
+            // A file whose id cannot be read may be this one.
+            return index.unparseable.first.map(BindingResolution.unreadable)
+                ?? .missing
+        }
         return holder.readable
             ? .profile(holder.file) : .unreadable(holder.file)
     }

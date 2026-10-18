@@ -119,7 +119,14 @@ extension SettingsModel {
     /// adopting Core's rewrite never reads as a pending change.
     private func adoptRekeyedBindings() {
         guard let saved = core.guiConfigStore.load(),
-            saved.profileBindings != cleanConfig.profileBindings
+            Set(saved.profileBindings.keys)
+                .union(cleanConfig.profileBindings.keys)
+                .contains(where: {
+                    !DesktopBinding.sameStored(
+                        saved.profileBindings[$0],
+                        cleanConfig.profileBindings[$0]
+                    )
+                })
         else { return }
         // PER ENTRY, not per map: ownership is per binding, so a
         // user who edited ONE row while Core re-keyed another

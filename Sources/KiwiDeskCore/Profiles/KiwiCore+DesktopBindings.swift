@@ -66,12 +66,18 @@ extension KiwiCore {
             throw SidecarError.unreadable
         }
         // `bindings.json` alone (#2324): a bindings edit writes no
-        // `gui.json`, and the runtime map, which a GUI-managed
-        // config's structured apply set from that file, follows.
-        var map = guiConfigStore.bindingsFile.load().profileBindings
+        // `gui.json`. The runtime map follows the keys the edit
+        // changed only where the structured apply set it from that
+        // file; in a hybrid config it is init.lua's and stays so.
+        let before = guiConfigStore.bindingsFile.load().profileBindings
+        var map = before
         edit(&map)
         try guiConfigStore.saveBindings(map)
-        desktopBindings = map
+        guard isGuiManaged else { return }
+        for key in Set(before.keys).union(map.keys)
+        where !DesktopBinding.sameStored(before[key], map[key]) {
+            desktopBindings[key] = map[key]
+        }
     }
 
     /// Re-keys and re-projects every binding this topology can

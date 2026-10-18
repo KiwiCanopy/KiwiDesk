@@ -160,11 +160,14 @@ struct ProfileIDTests {
     @Test("A write, rename and delete keep the index current")
     func doorsKeepTheIndex() throws {
         let profiles = manager()
+        _ = profiles.currentIndex()
         let work = try profiles.write(profile("Work"))
-        #expect(profiles.profileName(withID: work.id) == "Work")
+        // Kept, not dropped: the next lookup reads no file.
+        #expect(profiles.idIndex?.index.holder(of: work.id)?.file == "Work")
         try profiles.rename(from: "Work", to: "Office")
-        #expect(profiles.profileName(withID: work.id) == "Office")
+        #expect(profiles.idIndex?.index.holder(of: work.id)?.file == "Office")
         try profiles.delete(name: "Office")
-        #expect(profiles.profileName(withID: work.id) == nil)
+        #expect(profiles.idIndex != nil)
+        #expect(profiles.idIndex?.index.holder(of: work.id) == nil)
     }
 }

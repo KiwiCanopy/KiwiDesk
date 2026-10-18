@@ -25,8 +25,12 @@ struct ProfileIndex: Equatable {
     }
 
     private(set) var holders: [ProfileID: Holder] = [:]
+    /// Profile files that are not even a JSON object: their id is
+    /// unknown, so a lookup that misses cannot prove absence.
+    private(set) var unparseable: [String] = []
 
-    init(_ entries: [Entry]) {
+    init(_ entries: [Entry], unparseable: [String] = []) {
+        self.unparseable = unparseable.sorted()
         var own: [ProfileID: Bool] = [:]
         for entry in entries.sorted(by: { $0.file < $1.file }) {
             let isOwn = entry.storedName == entry.file
@@ -52,12 +56,14 @@ struct ProfileIndex: Equatable {
     /// The write door's own write of `file` under `id`.
     mutating func recordWrite(file: String, id: ProfileID) {
         holders = holders.filter { $0.value.file != file }
+        unparseable.removeAll { $0 == file }
         holders[id] = Holder(file: file, readable: true)
     }
 
     /// A file removed or moved away.
     mutating func remove(file: String) {
         holders = holders.filter { $0.value.file != file }
+        unparseable.removeAll { $0 == file }
     }
 }
 
@@ -96,21 +102,28 @@ extension ProfileManager {
         if let cached = idIndex, cached.stamp == stamp {
             return cached.index
         }
-        let built = ProfileIndex(
-            scan().compactMap { name, result in
-                switch result {
-                case .success(let profile):
-                    return ProfileIndex.Entry(
+        var entries: [ProfileIndex.Entry] = []
+        var unparseable: [String] = []
+        for (name, result) in scan() {
+            switch result {
+            case .success(let profile):
+                entries.append(
+                    ProfileIndex.Entry(
                         file: name,
                         id: profile.id,
                         storedName: profile.name,
                         readable: true
                     )
-                case .failure:
-                    return rawEntry(file: name)
+                )
+            case .failure:
+                if let raw = rawEntry(file: name) {
+                    entries.append(raw)
+                } else {
+                    unparseable.append(name)
                 }
             }
-        )
+        }
+        let built = ProfileIndex(entries, unparseable: unparseable)
         idIndex = (stamp, built)
         return built
     }
