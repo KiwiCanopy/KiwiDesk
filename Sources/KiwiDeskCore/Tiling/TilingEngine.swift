@@ -146,6 +146,11 @@ public final class TilingEngine {
     public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 
+    /// An animated layout frame Reduce Motion wrote instantly —
+    /// the stand-in for `AnimationEngine.onWindowSettled`, which
+    /// that write never reaches (#2187). A no-op by default.
+    var onReducedMotionFrame: @MainActor (WindowID) -> Void = { _ in }
+
     /// Where display *size* enters layout: the AX-coordinate
     /// visible frame of one screen. Every slot the layout
     /// calculates, every track capacity and every resize span

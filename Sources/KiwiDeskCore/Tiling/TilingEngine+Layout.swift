@@ -261,6 +261,7 @@ extension TilingEngine {
         } else {
             animation.cancel(window: id)
             setFrame(id, target)
+            if animated { onReducedMotionFrame(id) }
         }
     }
 

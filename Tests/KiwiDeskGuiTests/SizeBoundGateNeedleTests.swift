@@ -46,6 +46,29 @@ struct SizeBoundGateNeedleTests {
         )
     }
 
+    @Test("A Reduce Motion write schedules the settle probe")
+    func reducedMotionProbeIsWired() throws {
+        // An instant write never settles, so its probe rides
+        // `onReducedMotionFrame` (#2187) — a production wire no
+        // unit test reaches, and unwired a raw mid-resize echo
+        // confirms a false bound.
+        let source = try SourceScan.functionBody(
+            of: "bootstrapCoreServices",
+            in: "KiwiCore+Bootstrap.swift",
+            under: "App"
+        )
+        guard
+            let hook = source.range(
+                of: "tiler.onReducedMotionFrame = {"
+            )
+        else {
+            Issue.record("onReducedMotionFrame is not wired")
+            return
+        }
+        let tail = source[hook.upperBound...].prefix(160)
+        #expect(tail.contains("scheduleSizeBoundProbe(id)"))
+    }
+
     @Test("Each apply stamps at enqueue AND after the set")
     func applyStampsTwice() throws {
         // The enqueue stamp closes #1254 (the echo can precede a

@@ -57,6 +57,32 @@ struct ReduceMotionInstantWriteTests {
         #expect(engine.animation.isAnimating(window: id) == false)
     }
 
+    /// The settle probe's stand-in (#2187): an app easing its
+    /// own resize echoes a size it only passes through, and the
+    /// probe's read past it is what tells that from a refusal.
+    @Test("Only an animated frame under Reduce Motion owes a probe")
+    func reducedFrameOwesTheProbe() {
+        for (animated, reduced) in [
+            (true, true), (false, true), (true, false),
+        ] {
+            let engine = makeEngine(Log())
+            engine.animation.reduceMotion = { reduced }
+            var owed: [WindowID] = []
+            engine.onReducedMotionFrame = { owed.append($0) }
+            engine.applyFrame(
+                id,
+                from: from,
+                to: to,
+                animated: animated
+            )
+            engine.animation.cancel(window: id)
+            #expect(
+                owed == (animated && reduced ? [id] : []),
+                "animated \(animated), reduced \(reduced)"
+            )
+        }
+    }
+
     @Test("The instant set stamps the commanded frame")
     func instantSetIsCommanded() {
         let engine = makeEngine(Log())
