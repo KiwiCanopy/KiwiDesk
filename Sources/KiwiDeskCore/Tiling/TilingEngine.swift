@@ -241,6 +241,9 @@ public final class TilingEngine {
             applier.apply(id, frame, setSize: setSize)
             self?.onFrameApplied(id, frame)
         }
+        applier.resendStandsDown = { [weak self] id in
+            self?.dragExemptWindow == id
+        }
         animation.onAnimationStart = { [applier] id in
             applier.beginAnimating(id)
         }

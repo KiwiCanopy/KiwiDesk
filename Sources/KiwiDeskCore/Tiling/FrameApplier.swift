@@ -233,6 +233,10 @@ final class FrameApplier {
                 }
             }
 
+    /// Whether a window's owed resend stands down at fire time —
+    /// the engine's drag exemption, wired at its init.
+    var resendStandsDown: @MainActor (WindowID) -> Bool = { _ in false }
+
     /// Each window's set still owed its second write, cleared by
     /// any newer write to that window.
     private var pendingResends: [WindowID: CGRect] = [:]
@@ -241,9 +245,11 @@ final class FrameApplier {
     /// screen: an app easing its frame (EUI on, Zen) clamps the
     /// first one's size to the screen it left (#2187). Stands
     /// down when a newer write — a park, a later pass, a spring —
-    /// superseded it.
+    /// superseded it, or a spring or a drag holds the window.
     private func resendIfCurrent(_ id: WindowID, _ frame: CGRect) {
-        guard pendingResends[id] == frame else { return }
+        guard pendingResends[id] == frame, animatingPid[id] == nil,
+            !resendStandsDown(id)
+        else { return }
         applyInstant(id, frame, setSize: true)
     }
 

@@ -261,11 +261,11 @@ extension TilingEngine {
         } else {
             animation.cancel(window: id)
             // A parked corner may lie on a neighbour: no resend on
-            // an unpark, so a Space switch moves each window once.
+            // a park or an unpark, so a switch moves each window once.
             setFrame(
                 id,
                 target,
-                resend: !looksStashed(current)
+                resend: !looksStashed(current) && !looksStashed(target)
                     && GeometryUtils.crosses(
                         from: current,
                         to: target,

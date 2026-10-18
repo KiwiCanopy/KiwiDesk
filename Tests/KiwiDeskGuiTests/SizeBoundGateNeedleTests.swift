@@ -76,6 +76,8 @@ struct SizeBoundGateNeedleTests {
         let ask = issue.range(of: "boundLearner.recordAsk(")
         let fire = issue.range(of: "onInstantLayoutAsk(id)")
         #expect(ask != nil && fire != nil)
+        // A watched switch's fold is an `.event` pass too (#2187).
+        #expect(issue.contains("switching: motionGate.isSwitching"))
         if let ask, let fire {
             #expect(ask.upperBound < fire.lowerBound)
         }

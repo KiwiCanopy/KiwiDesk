@@ -64,6 +64,8 @@ final class MotionGate {
     private var armed = false
     private var releasing = false
     private var switching = false
+    /// Whether a watched switch's pass is running now.
+    var isSwitching: Bool { switching }
 
     /// Runs `body` as a switch the user is watching — a Space or
     /// Desktop switch, a display follow — which never waits:

@@ -88,23 +88,28 @@ struct ReduceMotionInstantWriteTests {
     /// own resize echoes a size it only passes through, and the
     /// probe's read past it is what tells that from a refusal.
     /// A re-issuing pass owes none, or a switch reads every window.
-    @Test("Only an instant event-pass ask owes the probe")
+    @Test("Only an instant ask outside a switch owes the probe")
     func instantAskOwesTheProbe() {
-        for pass in [RetilePass.event, .reissue, .apply] {
-            for animated in [true, false] {
-                for reduced in [true, false] {
-                    let owes = TilingEngine.instantAskOwesProbe(
-                        pass: pass,
-                        animated: animated,
-                        reduceMotion: reduced
-                    )
-                    let instant = !animated || reduced
-                    #expect(
-                        owes == (pass == .event && instant),
-                        "\(pass) animated \(animated) reduced \(reduced)"
-                    )
-                }
-            }
+        // (pass, switching, animated, reduced) → owes
+        let cases: [(RetilePass, Bool, Bool, Bool, Bool)] = [
+            (.event, false, true, true, true),  // Reduce Motion
+            (.event, false, false, false, true),  // animations off
+            (.event, false, true, false, false),  // a spring settles
+            (.event, true, false, false, false),  // the switch fold
+            (.event, true, true, true, false),
+            (.reissue, false, false, false, false),  // a Space switch
+            (.apply, false, true, true, false),  // an explicit apply
+        ]
+        for (pass, switching, animated, reduced, owes) in cases {
+            #expect(
+                TilingEngine.instantAskOwesProbe(
+                    pass: pass,
+                    switching: switching,
+                    animated: animated,
+                    reduceMotion: reduced
+                ) == owes,
+                "\(pass) switching \(switching) animated \(animated)"
+            )
         }
     }
 
@@ -170,6 +175,50 @@ struct ReduceMotionInstantWriteTests {
         )
         engine.applyFrame(id, from: parked, to: to, animated: false)
         #expect(resends.owed.isEmpty)
+    }
+
+    @Test("A park onto a neighbour's corner owes no resend")
+    func parkOwesNoResend() {
+        let resends = Resends()
+        let engine = makeEngine(Log(), resends: resends)
+        let parked = TilingEngine.stashFrame(
+            to,
+            in: left,
+            corner: .bottomRight
+        )
+        engine.applyFrame(id, from: to, to: parked, animated: false)
+        #expect(resends.owed.isEmpty)
+    }
+
+    /// A drag the user starts inside the delay is the newer ask.
+    @Test("A drag stands the resend down")
+    func dragStandsTheResendDown() async {
+        let log = Log()
+        let resends = Resends()
+        let engine = makeEngine(log, resends: resends)
+        engine.applyFrame(id, from: from, to: onRight, animated: true)
+        await drain()
+        let written = log.all
+        engine.dragExemptWindow = id
+        resends.fire()
+        await drain()
+        #expect(log.all == written)
+    }
+
+    /// A spring's tick writes through `apply`; the tick is the
+    /// newer ask even before the window counts as animating.
+    @Test("A spring tick cancels the resend")
+    func springTickCancelsTheResend() async {
+        let log = Log()
+        let resends = Resends()
+        let engine = makeEngine(log, resends: resends)
+        engine.applyFrame(id, from: from, to: onRight, animated: true)
+        engine.applier.apply(id, to, setSize: true)
+        await drain()
+        let written = log.all
+        resends.fire()
+        await drain()
+        #expect(log.all == written)
     }
 
     @Test("The instant set stamps the commanded frame")

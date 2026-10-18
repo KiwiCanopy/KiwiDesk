@@ -85,6 +85,7 @@ extension TilingEngine {
         )
         if Self.instantAskOwesProbe(
             pass: pass,
+            switching: motionGate.isSwitching,
             animated: animated,
             reduceMotion: animation.reduceMotion()
         ) {
@@ -94,13 +95,14 @@ extension TilingEngine {
 
     /// Whether a layout ask owes the #677 settle probe itself: an
     /// instant write never settles, so no animation schedules it
-    /// (#2187). A re-issuing pass owes none — a Space switch would
-    /// read every window it shows.
+    /// (#2187). A re-issuing pass or a watched switch's owes none
+    /// — a switch would read every window it shows.
     static func instantAskOwesProbe(
         pass: RetilePass,
+        switching: Bool,
         animated: Bool,
         reduceMotion: Bool
     ) -> Bool {
-        !pass.reissues && (!animated || reduceMotion)
+        !pass.reissues && !switching && (!animated || reduceMotion)
     }
 }

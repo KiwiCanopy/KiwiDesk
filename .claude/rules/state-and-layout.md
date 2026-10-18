@@ -1293,15 +1293,19 @@ editing here:
   `animatedFrameHoldsEUI`). An instant layout ask never settles,
   so `issueLayoutFrame` fires `onInstantLayoutAsk` after its
   `recordAsk` and the #677 settle probe rides it, save a
-  re-issuing pass, which would read every window a switch shows
+  re-issuing pass or a watched switch's fold
+  (`MotionGate.isSwitching`), either of which would read every
+  window a switch shows
   (`ReduceMotionInstantWriteTests` ▸ `instantAskOwesTheProbe`,
   `SizeBoundGateNeedleTests` ▸ `instantAskProbeIsWired`). And an
   instant set onto another screen writes its frame again after
   `crossScreenResendDelay` — an easing app clamps the first to the
   screen it left — unless a newer write reached the window first
-  or the move is an unpark from a corner, so a Space switch still
+  or the move parks into or unparks from a corner, or a spring or
+  a drag holds the window, so a Space switch still
   moves each window once (`ReduceMotionInstantWriteTests` ▸
-  `newerWriteCancelsTheResend`, `unparkOwesNoResend`).
+  `newerWriteCancelsTheResend`, `unparkOwesNoResend`,
+  `parkOwesNoResend`, `dragStandsTheResendDown`).
 - **A scrolling viewport offset travels with the slot it was
   measured against (#966).** One slot size serves the whole
   row, so anything that changes it — a resize, a window opening
