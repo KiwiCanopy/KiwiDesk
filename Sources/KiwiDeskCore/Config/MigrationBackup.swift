@@ -40,6 +40,12 @@ enum MigrationBackup {
 
     /// Where `file`'s copy at `format` lives in `backups`.
     static func url(of file: URL, format: Int, in backups: URL) -> URL {
+        url(of: file, suffix: ".pre-v\(format)", in: backups)
+    }
+
+    /// Where `file`'s copy with `suffix` lives in `backups`, under
+    /// its path relative to the machine folder.
+    static func url(of file: URL, suffix: String, in backups: URL) -> URL {
         let root = backups.deletingLastPathComponent()
             .standardizedFileURL.path
         let path = file.standardizedFileURL.path
@@ -47,9 +53,7 @@ enum MigrationBackup {
             path.hasPrefix(root + "/")
             ? String(path.dropFirst(root.count + 1))
             : file.lastPathComponent
-        return backups.appendingPathComponent(
-            relative + ".pre-v\(format)"
-        )
+        return backups.appendingPathComponent(relative + suffix)
     }
 
     /// Keeps `original` as the file's ONE copy — the latest

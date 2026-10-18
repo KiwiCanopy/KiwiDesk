@@ -27,7 +27,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.save_failed",
                 "Saving failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("screen setup claim failed: \(error)")
         }

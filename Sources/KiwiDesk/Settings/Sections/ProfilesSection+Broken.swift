@@ -66,6 +66,9 @@ extension ProfilesSection {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
+            // Another Mac's newer profile is never deleted here;
+            // the caption says why (#2324 ruling 2).
+            .disabled(broken.cause == .newerFormat)
             .iconButtonAffordance(
                 L("profiles.delete.help", "Delete profile")
             )

@@ -472,8 +472,8 @@ obligations:
   `gui.json` write leaves it alone unless its writer authors
   bindings (`saveIncludingBindings`), so a stale copy never reverts
   a re-key or a promotion, and a stored file that will not decode
-  is refused rather than replaced (`DesktopBindingsFileTests` ▸
-  `unreadableIsKept`).
+  is replaced only after its copy is kept, as every store's is
+  (#2324 ruling 13, `DesktopBindingsFileTests` ▸ `unreadableIsKept`).
 
 The argument is `docs/design-decisions.md` ▸ Profiles ▸ *A binding
 names its profile, not the profile's name*.
@@ -828,19 +828,48 @@ file.
 
 ## A file a newer build wrote is never overwritten (#2325)
 
-**Write `gui.json` and a profile file through its store's door,
+**Write a format-stamped config file through its store's door,
 which refuses a file a newer build wrote.** `GuiConfigStore.save`
-and `ProfileManager.write` / `save` throw `NewerFormatOnDisk` over
-a `format` this build does not know: its decoder refuses that
-file, so a write would replace a setup it never read — on a
-synced config folder, another Mac's. A sequence that writes
-something else first refuses before it (`save`'s sibling
-defaults, the Lua adoption's ledger). A raw rewrite beside the
-doors asks `NewerFormatOnDisk.check` first, as the app-wide strip
-does, unless it rewrites only below the current format by
-construction, as `MigrationBackup` does; nothing scans for a new
-raw writer, so that is review's (`NewerFormatWriteRefusalTests`,
-`NewerFormatWriteRefusalCallerTests`).
+(which asks `machine.json` and `bindings.json` too),
+`ProfileManager.write` / `save` / `delete` and `MachineFileStore.save`
+throw `NewerFormatOnDisk` over a `format` this build does not know,
+and the palette and look libraries refuse through the decode every
+mutating write starts with: the decoder refuses that file, so a
+write would replace a setup it never read — on a synced config
+folder, another Mac's. A sequence that writes something else first
+refuses before it (`save`'s sibling defaults, the Lua adoption's
+ledger). A raw rewrite beside the doors asks the one predicate,
+`NewerFormatOnDisk.newerFormat(of:knows:)`, first, as the app-wide
+strip does, unless it rewrites only below the current format by
+construction, as `MigrationBackup` does. Every raw `.write(to:)` in
+Core is filed with its reason and its behavioural suite in
+`ConfigWriterCensusTests`, so a new writer reds until it is
+classified (`NewerFormatWriteRefusalTests`,
+`NewerFormatWriteRefusalCallerTests`,
+`NewerFormatLibraryWriteTests`).
+
+**A newer file LATCHES its store read-only, and says so up front
+(#2324 ruling 2).** The refusal is structure — the
+`ConfigArtifact` and a profile's name — and the GUI narrates it
+(`NewerFormatText`, #96). Each store's newer file raises
+`ConfigIssue.Kind.newerFormat`, a newer `gui.json` never reading as
+unreadable; a newer profile is `ProfileBrokenCause.newerFormat`,
+whose row offers no Delete; and Settings greys every structured
+Save on `KiwiCore.guiConfigWriteLatch()`, read once per refresh,
+before any of its writes (`NewerFormatLatchTests`,
+`NewerFormatSaveLatchTests`). A new store with a format joins
+`storeNewerFormats` and the census in the same change.
+
+**A corrupt file — neither readable nor a newer build's — is
+overwritten by its store's next write, after one copy lands in
+this Mac's `migration-backups/` as `<path>.corrupt` (#2324 ruling
+13).** Every door takes `CorruptFile` after its newer-format
+refusal: `GuiConfigStore.save`, `MachineFileStore.save`,
+`ProfileManager.clearForWrite` and each library's `keepCorrupt`
+in its write; a new door takes the same call
+(`CorruptFilePolicyTests`). The ruling's cost: on a synced folder
+a file the sync client is still writing can be replaced, its copy
+on this Mac alone.
 
 ## A new file in the config directory answers the backup question
 

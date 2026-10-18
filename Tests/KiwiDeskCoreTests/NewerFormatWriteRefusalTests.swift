@@ -129,13 +129,13 @@ struct NewerFormatWriteRefusalTests {
         defer { try? FileManager.default.removeItem(at: dir) }
         let file = dir.appendingPathComponent("gui.json")
         try Data("not json".utf8).write(to: file)
-        #expect(NewerFormatOnDisk.check(file, knows: 1) == nil)
+        #expect(NewerFormatOnDisk.check(file, .guiConfig, knows: 1) == nil)
         try Data(#"{"format": "7"}"#.utf8).write(to: file)
-        #expect(NewerFormatOnDisk.check(file, knows: 1) == nil)
+        #expect(NewerFormatOnDisk.check(file, .guiConfig, knows: 1) == nil)
         try Data(#"{"format": 2}"#.utf8).write(to: file)
         #expect(
-            NewerFormatOnDisk.check(file, knows: 1)
-                == NewerFormatOnDisk(file: "gui.json", format: 2)
+            NewerFormatOnDisk.check(file, .guiConfig, knows: 1)
+                == NewerFormatOnDisk(artifact: .guiConfig, format: 2)
         )
     }
 }

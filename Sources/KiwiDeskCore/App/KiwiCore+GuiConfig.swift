@@ -290,6 +290,7 @@ extension KiwiCore {
         // Before the ledger records a store that cannot land (#2325).
         try NewerFormatOnDisk.refuse(
             guiConfigStore.url,
+            .guiConfig,
             GuiConfig.currentFormat
         )
         // The executed values travel with the rest (#1741).

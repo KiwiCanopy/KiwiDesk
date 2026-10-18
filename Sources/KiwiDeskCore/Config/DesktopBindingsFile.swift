@@ -63,5 +63,4 @@ public struct DesktopBindingsFile: Codable, Equatable, Sendable {
 extension DesktopBindingsFile: MachineFile {
     static let fileName = "bindings.json"
     static let destination = MachineConfig.Destination.bindings
-    static let keepsUnreadable = true
 }

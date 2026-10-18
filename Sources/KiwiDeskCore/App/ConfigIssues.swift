@@ -17,6 +17,10 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
         /// never localized (`core-boundaries.md`).
         case luaError(String)
         case guiConfigUnreadable
+        /// A newer KiwiDesk wrote this store's file, so this build
+        /// leaves it read-only (#2324 ruling 2). A profile takes
+        /// `profileBroken(.newerFormat)` instead.
+        case newerFormat(ConfigArtifact)
         /// Unknown API function call with optional fuzzy match
         /// suggestion (#39).
         case unknownCall(name: String, suggestion: String?)
@@ -62,7 +66,10 @@ extension KiwiCore {
 
     /// Combines load-scoped issues with fresh profile scan.
     func refreshConfigIssues() {
-        setConfigIssues(configLoadIssues + profileConfigIssues())
+        setConfigIssues(
+            configLoadIssues + newerFormatIssues()
+                + profileConfigIssues()
+        )
     }
 
     /// Re-derives the font issue against the settings live now —
@@ -100,7 +107,7 @@ extension KiwiCore {
             return ConfigIssue(
                 source: "\(name).json",
                 kind: .profileBroken(
-                    ProfileManager.cause(of: error)
+                    profiles.brokenCause(name: name, error: error)
                 ),
                 profileName: name
             )

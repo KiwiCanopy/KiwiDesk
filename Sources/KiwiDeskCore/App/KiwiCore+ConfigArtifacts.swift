@@ -10,7 +10,7 @@ import Foundation
 /// duplication §2.4 protects, but a **failure-mode policy** whose
 /// copies can diverge, and they already had (different log
 /// prefixes, one inlined and one extracted, only one callable).
-public enum ConfigArtifact: CaseIterable {
+public enum ConfigArtifact: CaseIterable, Sendable {
     /// The GUI's settings sidecar.
     case guiConfig
     /// Every saved profile.

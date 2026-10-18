@@ -29,6 +29,9 @@ enum ConfigIssueText {
                 "Couldn't be read, so your rules and shortcuts "
                     + "were not applied."
             )
+        case .newerFormat:
+            // The file name is the issue's source (#2324).
+            return NewerFormatText.issue
         case .unknownCall(let name, let suggestion):
             guard let suggestion else {
                 return L(

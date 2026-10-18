@@ -71,7 +71,7 @@ public final class PaletteStore {
         guard !isBuiltinName(palette.name) else {
             throw StoreError.reservedName(palette.name)
         }
-        var palettes = try libraryPalettes()
+        var palettes = try writableLibrary()
         if let index = palettes.firstIndex(where: {
             $0.name == palette.name
         }) {
@@ -178,6 +178,7 @@ public final class PaletteStore {
     }
 
     private func write(_ palettes: [ColorPalette]) throws {
+        keepCorrupt()
         try FileManager.default.createDirectory(
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -197,5 +198,39 @@ public final class PaletteStore {
             to: fileURL,
             options: .atomic
         )
+    }
+
+    /// The library a save starts from (#2324 ruling 13): a newer
+    /// build's still refuses, while a corrupt one starts empty and
+    /// `write` keeps its copy. A delete or rename reads through
+    /// `libraryPalettes`, since a corrupt library holds nothing to name.
+    private func writableLibrary() throws -> [ColorPalette] {
+        do {
+            return try libraryPalettes()
+        } catch StoreError.unreadableLibrary where !isNewer {
+            return []
+        }
+    }
+
+    /// Whether a newer build wrote the library.
+    private var isNewer: Bool {
+        NewerFormatOnDisk.check(
+            fileURL,
+            .palettes,
+            knows: PaletteDocument.currentFormat
+        ) != nil
+    }
+
+    /// Keeps a corrupt library's copy before `write` replaces it;
+    /// a newer one reaching here is a restore's, not corrupt.
+    private func keepCorrupt() {
+        let newer = isNewer
+        CorruptFile.keepBeforeOverwrite(fileURL, in: migrationBackups) {
+            newer
+                || (try? JSONDecoder().decode(
+                    PaletteDocument.self,
+                    from: ConfigMigration.migrated($0) ?? $0
+                )) != nil
+        }
     }
 }

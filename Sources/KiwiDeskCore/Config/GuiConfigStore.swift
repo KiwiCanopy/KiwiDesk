@@ -92,10 +92,16 @@ public struct GuiConfigStore {
     /// Writes the sidecar; throws `NewerFormatOnDisk` rather than
     /// replace one a newer build wrote (#2325).
     public func save(_ config: GuiConfig) throws {
-        try NewerFormatOnDisk.refuse(url, GuiConfig.currentFormat)
         try NewerFormatOnDisk.refuse(
-            machine.url,
-            MachineConfig.currentFormat
+            url,
+            .guiConfig,
+            GuiConfig.currentFormat
+        )
+        try machine.refuseNewer()
+        CorruptFile.keepBeforeOverwrite(
+            url,
+            as: GuiConfig.self,
+            in: migrationBackups
         )
         var config = config
         if let liveDesktopSpaces {

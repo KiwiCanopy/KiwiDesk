@@ -44,6 +44,11 @@ extension SettingsModel {
 
     /// Whether the primary Save can run now.
     var primarySaveEnabled: Bool {
+        // A newer build's file latches every structured Save up
+        // front, before any of its writes (#2324 ruling 2).
+        if writeLatch != nil, primarySaveAction != .saveLua {
+            return false
+        }
         switch primarySaveAction {
         case .saveLua, .updateStoredProfile:
             return isDirty
@@ -61,6 +66,9 @@ extension SettingsModel {
 
     /// Why the primary Save is greyed, where a reason exists.
     var primarySaveBlockedReason: String? {
+        if let writeLatch, primarySaveAction != .saveLua {
+            return NewerFormatText.saveBlocked(writeLatch)
+        }
         switch primarySaveAction {
         case .updateActiveProfile:
             return profileSaveBlockedReason ?? updateHint
@@ -74,6 +82,9 @@ extension SettingsModel {
     /// Runs the primary Save. One that needs a name asks the
     /// footer for its naming prompt (`newProfileNamingRequested`).
     func performPrimarySave() {
+        guard writeLatch == nil || primarySaveAction == .saveLua else {
+            return
+        }
         switch primarySaveAction {
         case .saveLua: saveLuaSource()
         case .updateStoredProfile: saveEditedProfile()
