@@ -1429,8 +1429,8 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   `BarTextBaselineSiteTests`, `BarTextFieldCensusTests`)
 - a bar's visibility is read through the one `visibility(of:)` and written
   through the one `setVisibility(_:of:)`, two bars sharing an edge on any screen
-  taking one mode, and a hiding edge reserves nothing, so a reveal redraws the
-  bars and never retiles (#761, `BarAutoHideFoldTests`,
+  taking one mode, and a hiding edge reserves only its constant sliver, so a
+  reveal redraws the bars and never retiles (#761, `BarAutoHideFoldTests`,
   `BarVisibilitySeamTests`, `ShelfAutoHideCoreTests`, `ShelfRevealerTests`)
 - the bars sit on KiwiShelf, one shelf per edge (#1517): a bar field lives in
   exactly one of `KiwiShelf`, `SpaceBarStyle` and `AppBarStyle`, a shelf field

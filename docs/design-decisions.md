@@ -13994,7 +13994,11 @@ reflow paragraph of *Amended* below.
 Each bar carries a visibility mode, `always` (the default) or
 `auto`; there is no `never`, which is the bar turned off. The
 unit that hides is the shelf on one edge, and a hiding edge
-reserves nothing. That makes "a reveal never retiles" true by
+reserves only a constant sliver — the full shelf's own rule with
+the dots' depth in place of its thickness, so its windows stand
+their outer gap clear of the dots, which sat lost on a window's
+border while the edge reserved nothing. That makes "a reveal never
+retiles" true by
 construction: a reveal only redraws the bars, and setting the
 mode is the one change that can move the windows. Hiding while
 still reserving was rejected (the user would give up the

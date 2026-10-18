@@ -26,7 +26,7 @@ struct BarAutoHideFoldTests {
     func loneAutoHides() {
         let edges = settings(space: .auto, app: .always, appEdge: .bottom)
             .barEdges(space: true, app: false)
-        #expect(edges == [ShelfEdge(.top, reserves: false, hides: true)])
+        #expect(edges == [ShelfEdge(.top, reserves: true, hides: true)])
     }
 
     @Test("A fused edge hides only while both bars are auto")
@@ -41,7 +41,7 @@ struct BarAutoHideFoldTests {
         )
         let both = settings(space: .auto, app: .auto)
             .barEdges(space: true, app: true)
-        #expect(both == [ShelfEdge(.top, reserves: false, hides: true)])
+        #expect(both == [ShelfEdge(.top, reserves: true, hides: true)])
     }
 
     /// The drift review found: a layout that draws no App Bar must
@@ -56,6 +56,7 @@ struct BarAutoHideFoldTests {
         let both = settings(space: .auto, app: .auto)
         for mode in LayoutMode.allCases {
             #expect(both.shelfEdges(in: mode, on: nil).isEmpty)
+            #expect(both.hidingEdges(in: mode, on: nil) == [.top])
         }
     }
 
@@ -88,17 +89,28 @@ struct BarAutoHideFoldTests {
             .barEdges(space: true, app: true)
         #expect(
             edges == [
-                ShelfEdge(.top, reserves: false, hides: true),
+                ShelfEdge(.top, reserves: true, hides: true),
                 ShelfEdge(.bottom, reserves: true, hides: false),
             ]
         )
     }
 
-    @Test("A hiding edge leaves the layout bounds whole")
-    func hidingEdgeReservesNothing() {
-        let hidden = settings(space: .auto, app: .always, appEdge: .left)
+    /// The amendment (#761, owner 2026-10-18): a hidden shelf keeps
+    /// a sliver laid out by the shelf's own rule, so its windows
+    /// stand their outer gap clear of the dots.
+    @Test("A hiding edge reserves the sliver, never the strip")
+    func hidingEdgeReservesTheSliver() {
+        var hidden = settings(space: .auto, app: .always, appEdge: .left)
+        hidden.kiwishelf.outerMargin = 3
+        hidden.kiwishelf.innerMargin = 5
         #expect(hidden.shelfEdges(in: .bsp, on: nil).isEmpty)
+        #expect(hidden.hidingEdges(in: .bsp, on: nil) == [.top])
         let visible = CGRect(x: 0, y: 0, width: 1000, height: 800)
+        let bounds = hidden.layoutBounds(from: visible, mode: .bsp, on: nil)
+        #expect(
+            visible.height - bounds.height == 3 + KiwiShelf.hiddenDepth + 5
+        )
+        hidden.spaceBarStyle.reserve = false
         #expect(
             hidden.layoutBounds(from: visible, mode: .bsp, on: nil)
                 == visible

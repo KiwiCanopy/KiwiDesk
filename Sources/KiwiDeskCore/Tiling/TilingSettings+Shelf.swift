@@ -114,7 +114,21 @@ extension TilingSettings {
         onScreen(screen).barEdges(
             space: spaceBarStyle.enabled,
             app: appBarHost(for: mode)?.appBar.enabled == true
-        ).filter(\.reserves).map(\.edge)
+        ).filter { $0.reserves && !$0.hides }.map(\.edge)
+    }
+
+    /// The hiding edges a space laid out in `mode` on `screen`
+    /// reserves its sliver on (#761) — `shelfEdges`' twin over the
+    /// same fold, apart because a float stays out of a full strip
+    /// and never a sliver.
+    public func hidingEdges(
+        in mode: LayoutMode,
+        on screen: String?
+    ) -> [AppBarEdge] {
+        onScreen(screen).barEdges(
+            space: spaceBarStyle.enabled,
+            app: appBarHost(for: mode)?.appBar.enabled == true
+        ).filter { $0.reserves && $0.hides }.map(\.edge)
     }
 
     /// The edges the shown bars sit on — the ONE list the
@@ -125,10 +139,10 @@ extension TilingSettings {
     /// (`ShelfSplitGeometryTests` ▸ `edgesPerMode`) and
     /// `ShelfGeometry.strips` measures the Space Bar's whole edge.
     /// A shared edge reserves while either bar on it does and
-    /// hides only while both do, and a hiding edge reserves
-    /// nothing — the folds are here, at the dedup, and nowhere
-    /// beside it (`BarReserveTests`, #1524; `BarAutoHideFoldTests`,
-    /// #761).
+    /// hides only while both do; a hiding edge that reserves takes
+    /// only its sliver (`hidingEdges`) — the folds are here, at the
+    /// dedup, and nowhere beside it (`BarReserveTests`, #1524;
+    /// `BarAutoHideFoldTests`, #761).
     public func barEdges(space: Bool, app: Bool) -> [ShelfEdge] {
         var edges: [ShelfEdge] = []
         if space {
@@ -157,9 +171,6 @@ extension TilingSettings {
                     )
                 )
             }
-        }
-        for index in edges.indices where edges[index].hides {
-            edges[index].reserves = false
         }
         return edges
     }
@@ -209,7 +220,9 @@ extension TilingSettings {
     ) -> ShelfReservation {
         ShelfReservation(
             edges: shelfEdges(in: mode, on: screen),
-            depth: kiwishelf.reservation
+            depth: kiwishelf.reservation,
+            hiding: hidingEdges(in: mode, on: screen),
+            hidingDepth: kiwishelf.hiddenReservation
         )
     }
 }

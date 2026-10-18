@@ -125,6 +125,8 @@ struct BarMotionSeamTests {
         "playReveal": ["revealMotion(", "isReduced"],
         "endReveal": [],
         "afterReveal": [],
+        "crossfade": ["crossfades(", "isReduced"],
+        "crossfades": [],
     ]
 
     private static func stripped(_ home: String) throws -> String {

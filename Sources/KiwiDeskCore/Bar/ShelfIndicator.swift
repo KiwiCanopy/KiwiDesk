@@ -28,9 +28,14 @@ struct ShelfIndicatorSpec: Equatable {
     let currentInk: String
     let ink: String
     let emptyInk: String
+    /// The bars' indicator colour, the hover's border.
+    let highlight: String
     /// Whether the shelf is shown over it: the indicator then
     /// draws nothing but stays for VoiceOver, its value "shown".
     let shown: Bool
+    /// The pointer rests in the band, the reveal delay running:
+    /// the plate grows and takes the highlight's border.
+    let hovered: Bool
 
     /// A dot's ink, by the bar's own ladder: current, then held
     /// windows, then empty.
@@ -40,11 +45,15 @@ struct ShelfIndicatorSpec: Equatable {
     }
 
     /// The indicator's depth across its edge (pt).
-    static let depth: CGFloat = 8
+    static let depth = KiwiShelf.hiddenDepth
     static let dot: CGFloat = 4
     static let currentDot: CGFloat = 12
     static let dotGap: CGFloat = 4
     static let pad: CGFloat = 4
+    /// How far a hovered plate grows on each side — the room the
+    /// panel keeps around it.
+    static let hoverGrowth: CGFloat = 2
+    static let hoverBorder: CGFloat = 1.5
     static let pillLength: CGFloat = 36
     /// Its distance from the shelf's screen side, inside the band.
     static let inset: CGFloat = 0
@@ -120,18 +129,36 @@ final class ShelfIndicatorView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         guard let spec, !spec.shown else { return }
-        let radius = ShelfIndicatorSpec.depth / 2
-        NSColor(kiwiHex: spec.fill).setFill()
-        NSBezierPath(
-            roundedRect: bounds,
+        let room = ShelfIndicatorSpec.hoverGrowth
+        let mark = bounds.insetBy(dx: room, dy: room)
+        let plate = spec.hovered ? bounds : mark
+        let radius = min(plate.width, plate.height) / 2
+        let path = NSBezierPath(
+            roundedRect: plate,
             xRadius: radius,
             yRadius: radius
-        ).fill()
+        )
+        NSColor(kiwiHex: spec.fill).setFill()
+        path.fill()
+        if spec.hovered {
+            let width = ShelfIndicatorSpec.hoverBorder
+            let rim = NSBezierPath(
+                roundedRect: plate.insetBy(dx: width / 2, dy: width / 2),
+                xRadius: radius - width / 2,
+                yRadius: radius - width / 2
+            )
+            rim.lineWidth = width
+            NSColor(kiwiHex: spec.highlight).setStroke()
+            rim.stroke()
+        }
         guard case .dots(let dots) = spec.mark else { return }
-        var lead = ShelfIndicatorSpec.pad
+        var lead =
+            (spec.horizontal ? mark.minX : mark.minY)
+            + ShelfIndicatorSpec.pad
         let size = ShelfIndicatorSpec.dot
         let cross =
-            (ShelfIndicatorSpec.depth - size) / 2
+            (spec.horizontal ? mark.minY : mark.minX)
+            + (ShelfIndicatorSpec.depth - size) / 2
         for dot in dots {
             let long =
                 dot.current ? ShelfIndicatorSpec.currentDot : size
@@ -192,15 +219,22 @@ final class ShelfIndicator {
         if panel?.isVisible == true, view.spec == spec { return }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        if view.spec != spec { view.spec = spec }
+        if view.spec != spec {
+            let hoverChanged = view.spec?.hovered != spec.hovered
+            view.spec = spec
+            if hoverChanged { BarMotion.crossfade(view) }
+        }
+        // Room around the mark for its hover growth.
+        let room = ShelfIndicatorSpec.hoverGrowth
+        let frame = spec.frame.insetBy(dx: -room, dy: -room)
         panel.setFrame(
             GeometryUtils.flip(
-                spec.frame,
+                frame,
                 primaryHeight: GeometryUtils.primaryHeight
             ),
             display: true
         )
-        view.frame = CGRect(origin: .zero, size: spec.frame.size)
+        view.frame = CGRect(origin: .zero, size: frame.size)
         #if DEBUG
             guard ordersPanel else { return }
         #endif

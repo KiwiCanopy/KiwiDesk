@@ -5,7 +5,8 @@ import CoreGraphics
 /// reserved are apart so a bar may draw over the windows; on an
 /// edge two bars share — one fused shelf, one strip — the edge
 /// reserves while EITHER bar does and hides only while BOTH do.
-/// A hiding edge reserves nothing: a reveal is an overlay.
+/// A hiding edge reserves only its sliver
+/// (`KiwiShelf.hiddenReservation`): a reveal is an overlay.
 public struct ShelfEdge: Sendable, Equatable {
     public let edge: AppBarEdge
     public var reserves: Bool
@@ -19,20 +20,30 @@ public struct ShelfEdge: Sendable, Equatable {
 }
 
 /// What the shelves take off a screen in one layout: the edges
-/// it reserves and each edge's depth — the whole input
+/// it reserves at the shelf's depth, the hiding edges it reserves
+/// at the sliver's (#761), and each depth — the whole input
 /// `TilingSettings.layoutBounds(from:mode:on:)` reads, so two equal
 /// values leave every layout's bounds alone (#1524).
 public struct ShelfReservation: Sendable, Equatable {
     public let edges: [AppBarEdge]
     public let depth: CGFloat
+    public var hiding: [AppBarEdge] = []
+    public var hidingDepth: CGFloat = 0
 
     /// `visible` minus each edge's reservation.
     public func remaining(in visible: CGRect) -> CGRect {
-        edges.reduce(visible) { frame, edge in
+        let full = edges.reduce(visible) { frame, edge in
             AppBarGeometry.remaining(
                 frame,
                 edge: edge,
                 reserving: depth
+            )
+        }
+        return hiding.reduce(full) { frame, edge in
+            AppBarGeometry.remaining(
+                frame,
+                edge: edge,
+                reserving: hidingDepth
             )
         }
     }

@@ -3003,13 +3003,17 @@ space_bar.set_reserve(false)
 
 **Does:** with `"auto"` the Space Bar's shelf hides to a row of
 Space dots at its edge — one dot per Space, the current one wide,
-a Space holding windows brighter. The pointer resting in a band a
-few points deep along that edge for 0.35 s reveals the shelf, at
-once when it pushes against the screen's edge there; the shelf
-retracts 0.5 s after the pointer leaves it, and stays while a bar
-menu or a hover peek it opened is up. A revealed shelf draws over
-the windows: a hiding edge reserves no strip, so a reveal moves
-no window, and setting the mode moves the windows at most once.
+a Space holding windows brighter. The edge keeps only a sliver:
+`outer_margin`, the dots' depth and `inner_margin`, with the
+windows' outer gap below it, as the full shelf has. The pointer in
+a band a few points deep along that edge grows the dots and rims
+them in the highlight colour; resting there for 0.35 s grows the
+shelf out of them, at once when it pushes against the screen's edge
+there. The shelf shrinks back 0.5 s after the pointer leaves it,
+and stays while a bar menu or a hover peek it opened is up. A
+revealed shelf draws over the windows and the sliver never changes,
+so a reveal moves no window, and setting the mode moves the windows
+at most once. A bar turned off reserves nothing.
 
 While the two bars share an edge on any screen they are one
 shelf: setting either bar's mode sets both, and where the stored

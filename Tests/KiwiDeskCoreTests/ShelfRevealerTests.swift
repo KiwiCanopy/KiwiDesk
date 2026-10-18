@@ -315,4 +315,17 @@ struct ShelfRevealerTests {
         timers.fireAll()
         #expect(revealer.reveal(of: Self.key) == .hidden)
     }
+
+    @Test("The band arms the mark's hover until the reveal or a leave")
+    func armingShowsTheHover() {
+        let (revealer, timers, pointer) = make()
+        move(revealer, pointer, to: CGPoint(x: 500, y: 770))
+        #expect(revealer.arming == [Self.key])
+        move(revealer, pointer, to: CGPoint(x: 500, y: 300))
+        #expect(revealer.arming.isEmpty)
+        move(revealer, pointer, to: CGPoint(x: 500, y: 770))
+        timers.fireAll()
+        #expect(revealer.arming.isEmpty)
+        #expect(revealer.reveal(of: Self.key) == .hover)
+    }
 }

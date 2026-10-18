@@ -155,6 +155,17 @@ public struct KiwiShelf: Sendable, Equatable {
         outerMargin + thickness + innerMargin
     }
 
+    /// The depth of a hidden shelf's mark — its Space dots or line
+    /// (#761).
+    public static let hiddenDepth: CGFloat = 8
+
+    /// What a hiding edge reserves (#761): the shelf's own rule
+    /// with the mark's depth in place of `thickness`, so its
+    /// windows stand their outer gap clear of the dots.
+    public var hiddenReservation: CGFloat {
+        outerMargin + Self.hiddenDepth + innerMargin
+    }
+
     /// True if Liquid Glass is on and the platform draws it.
     public var glassEnabled: Bool {
         liquidGlass && AppBarStyle.glassAvailable

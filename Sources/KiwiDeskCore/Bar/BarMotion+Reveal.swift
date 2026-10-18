@@ -1,86 +1,92 @@
 import AppKit
 import QuartzCore
 
-/// `BarMotion`'s reveal half (#761): a hiding shelf slides in from
-/// its edge and back out, and fades in place under Reduce Motion.
+/// `BarMotion`'s reveal half (#761): a hiding shelf grows out of
+/// its hidden mark and back into it, and fades in place under
+/// Reduce Motion.
 /// The same one home — `BarMotionSeamTests` censuses this file.
 extension BarMotion {
     /// How a reveal or a retract travels.
     enum RevealMotion: Equatable {
-        /// The shelf's content slides by this offset from (or to)
-        /// its place, in its layer's own coordinates.
-        case slide(CGVector, TimeInterval)
+        /// The shelf grows out of its hidden mark's plate — the
+        /// mark its upper end — to the whole panel, or back into
+        /// it: a mask from `from` to `to`, in the content's own
+        /// coordinates, its corners rounding off the mark's.
+        case grow(from: CGRect, to: CGRect, radius: CGFloat, TimeInterval)
         /// It fades in place: Reduce Motion drops the travel,
         /// never the reveal.
         case fade(TimeInterval)
     }
 
-    /// The slide's length (ui-designer, #761): one step longer
-    /// than `slide`, so a whole shelf reads as arriving.
+    /// The grow's length (ui-designer, #761): one step longer than
+    /// `slide`, so a whole shelf reads as arriving.
     static let revealSlide: TimeInterval = 0.2
     /// The Reduce Motion fade's, as the peek's.
     static let revealFade: TimeInterval = 0.1
 
-    /// The motion for a shelf `depth` deep on `edge`, its content
-    /// layer flipped or not.
+    /// The motion for a shelf whose content spans `bounds`, growing
+    /// out of its mark at `origin`.
     static func revealMotion(
         reduceMotion: Bool,
-        edge: AppBarEdge,
-        depth: CGFloat,
-        flipped: Bool
+        origin: CGRect,
+        bounds: CGRect
     ) -> RevealMotion {
         guard !reduceMotion else { return .fade(revealFade) }
-        let up: CGFloat = flipped ? -1 : 1
-        let offset: CGVector
-        switch edge {
-        case .top: offset = CGVector(dx: 0, dy: depth * up)
-        case .bottom: offset = CGVector(dx: 0, dy: -depth * up)
-        case .left: offset = CGVector(dx: -depth, dy: 0)
-        case .right: offset = CGVector(dx: depth, dy: 0)
-        }
-        return .slide(offset, revealSlide)
+        return .grow(
+            from: origin,
+            to: bounds,
+            radius: min(origin.width, origin.height) / 2,
+            revealSlide
+        )
     }
 
     /// Starts a reveal (`entering`) or a retract on `view`, the
-    /// panel's content, and returns its length; the caller lands it
-    /// through its own `afterReveal` seam.
+    /// panel's content, out of or into its mark at `origin`, and
+    /// returns its length; the caller lands it through its own
+    /// `afterReveal` seam.
     @MainActor
     @discardableResult
     static func playReveal(
         _ view: NSView,
-        edge: AppBarEdge,
-        depth: CGFloat,
+        origin: CGRect,
         entering: Bool
     ) -> TimeInterval {
         view.wantsLayer = true
         guard let layer = view.layer else { return 0 }
         let motion = revealMotion(
             reduceMotion: isReduced,
-            edge: edge,
-            depth: depth,
-            flipped: layer.contentsAreFlipped()
+            origin: origin,
+            bounds: view.bounds
         )
-        let span: TimeInterval
         switch motion {
-        case .slide(let offset, let duration):
-            span = duration
-            let away = CATransform3DMakeTranslation(
-                offset.dx,
-                offset.dy,
-                0
-            )
-            let slide = CABasicAnimation(keyPath: "sublayerTransform")
-            slide.fromValue = entering ? away : CATransform3DIdentity
-            slide.toValue = entering ? CATransform3DIdentity : away
-            slide.duration = duration
-            slide.timingFunction = CAMediaTimingFunction(
+        case .grow(let from, let to, let radius, let duration):
+            let mask = CALayer()
+            mask.backgroundColor = NSColor.black.cgColor
+            let start = entering ? from : to
+            let end = entering ? to : from
+            mask.frame = end
+            mask.cornerRadius = entering ? 0 : radius
+            layer.mask = mask
+            let bounds = CABasicAnimation(keyPath: "bounds")
+            bounds.fromValue = CGRect(origin: .zero, size: start.size)
+            bounds.toValue = CGRect(origin: .zero, size: end.size)
+            let position = CABasicAnimation(keyPath: "position")
+            position.fromValue = CGPoint(x: start.midX, y: start.midY)
+            position.toValue = CGPoint(x: end.midX, y: end.midY)
+            let corner = CABasicAnimation(keyPath: "cornerRadius")
+            corner.fromValue = entering ? radius : 0
+            corner.toValue = entering ? 0 : radius
+            let group = CAAnimationGroup()
+            group.animations = [bounds, position, corner]
+            group.duration = duration
+            group.timingFunction = CAMediaTimingFunction(
                 name: entering ? .easeOut : .easeIn
             )
-            slide.fillMode = .both
-            slide.isRemovedOnCompletion = false
-            layer.add(slide, forKey: "kiwi.reveal")
+            group.fillMode = .both
+            group.isRemovedOnCompletion = false
+            mask.add(group, forKey: "kiwi.reveal")
+            return duration
         case .fade(let duration):
-            span = duration
             let fade = CABasicAnimation(keyPath: "opacity")
             fade.fromValue = entering ? 0 : 1
             fade.toValue = entering ? 1 : 0
@@ -88,8 +94,8 @@ extension BarMotion {
             fade.fillMode = .both
             fade.isRemovedOnCompletion = false
             layer.add(fade, forKey: "kiwi.reveal")
+            return duration
         }
-        return span
     }
 
     /// Runs `body` once a reveal of `span` seconds has landed — the
@@ -106,9 +112,29 @@ extension BarMotion {
     }
 
     /// Ends a reveal's motion on `view`: the content stands where
-    /// it rests.
+    /// it rests, unmasked.
     @MainActor
     static func endReveal(_ view: NSView) {
         view.layer?.removeAnimation(forKey: "kiwi.reveal")
+        view.layer?.mask = nil
+    }
+
+    /// The hidden mark's hover (#761): a short cross-fade into its
+    /// grown, rimmed plate, drawn at once under Reduce Motion.
+    static let hoverFade: TimeInterval = 0.12
+
+    /// Whether the hover cross-fades: never under Reduce Motion.
+    static func crossfades(reduceMotion: Bool) -> Bool { !reduceMotion }
+
+    /// Cross-fades `view`'s next drawing over `hoverFade`; nothing
+    /// under Reduce Motion.
+    @MainActor
+    static func crossfade(_ view: NSView) {
+        guard crossfades(reduceMotion: isReduced) else { return }
+        view.wantsLayer = true
+        let fade = CATransition()
+        fade.type = .fade
+        fade.duration = hoverFade
+        view.layer?.add(fade, forKey: "kiwi.hover")
     }
 }

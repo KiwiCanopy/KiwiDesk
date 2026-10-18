@@ -44,8 +44,11 @@ final class ShelfOverlay {
     var slides = false
     /// Whether the leave in flight is a slide.
     var leavingSlides = false
-    /// The slide-in in flight, whose landing alone ends its motion.
+    /// The reveal in flight, whose landing alone ends its motion.
     var revealing: UUID?
+    /// A hiding shelf's mark in the content's coordinates, which a
+    /// reveal grows out of (#761); set by `ShelfManager`.
+    var revealOrigin: CGRect?
     /// Lands a reveal or a retract after its length — the reveal's
     /// own timer; a test hands a queue it drains by hand.
     var afterReveal: (TimeInterval, @escaping @MainActor () -> Void) -> Void =
@@ -192,7 +195,7 @@ final class ShelfOverlay {
                 BarMotion.setAlpha(content, to: 1, animated: true)
             }
         }
-        if slidesBack { slideIn(edge: edge, depth: depth) }
+        if slidesBack { revealIn() }
         layoutHandle(
             range: range,
             divider: Self.dividerFrame(
@@ -216,7 +219,7 @@ final class ShelfOverlay {
             #endif
             if slides {
                 panel.orderFrontRegardless()
-                slideIn(edge: edge, depth: depth)
+                revealIn()
                 return
             }
             guard travels else {
@@ -248,9 +251,7 @@ final class ShelfOverlay {
             onLeft()
             return true
         }
-        if animated, slides, let drawn {
-            return slideOut(edge: drawn.edge, strip: drawn.strip)
-        }
+        if animated, slides { return retractOut() }
         guard animated, BarMotion.shelfGlideLength > 0 else {
             leaving = nil
             panel.orderOut(nil)

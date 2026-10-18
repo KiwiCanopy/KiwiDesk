@@ -81,21 +81,19 @@ struct ShelfAutoHideLifetimeTests {
 
     @Test("A stale landing never ends a newer reveal's motion")
     func staleLandingKeepsTheNewerReveal() {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
         let overlay = ShelfOverlay()
         var landings: [() -> Void] = []
         overlay.afterReveal = { _, body in landings.append(body) }
-        let strip = CGRect(x: 0, y: 0, width: 400, height: 40)
-        overlay.slideIn(edge: .top, depth: 40)
-        _ = overlay.slideOut(edge: .top, strip: strip)
-        overlay.slideIn(edge: .top, depth: 40)
+        overlay.content.frame = CGRect(x: 0, y: 0, width: 400, height: 40)
+        overlay.revealIn()
+        _ = overlay.retractOut()
+        overlay.revealIn()
         // The first slide-in's landing arrives during the third.
         landings[0]()
-        #expect(
-            overlay.content.layer?.animation(forKey: "kiwi.reveal") != nil
-        )
+        #expect(overlay.content.layer?.mask != nil)
         landings[2]()
-        #expect(
-            overlay.content.layer?.animation(forKey: "kiwi.reveal") == nil
-        )
+        #expect(overlay.content.layer?.mask == nil)
     }
 }

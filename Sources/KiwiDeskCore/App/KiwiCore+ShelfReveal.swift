@@ -51,6 +51,7 @@ extension KiwiCore {
                     screen: screen,
                     items: items,
                     shown: shown,
+                    hovered: reveal.arming.contains(key),
                     settings: settings
                 )
                 if shown { drawn.append(plan) }
@@ -65,6 +66,7 @@ extension KiwiCore {
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
             shown: Bool,
+            hovered: Bool,
             settings: TilingSettings
         ) {
             let carriesSpace = plan.arrangement.space != nil
@@ -95,7 +97,9 @@ extension KiwiCore {
                     currentInk: shelf.activeItemColor,
                     ink: shelf.idleItemColor,
                     emptyInk: shelf.emptyItemColor,
-                    shown: shown
+                    highlight: shelf.highlightColor,
+                    shown: shown,
+                    hovered: hovered
                 ),
                 carriesSpace
             )

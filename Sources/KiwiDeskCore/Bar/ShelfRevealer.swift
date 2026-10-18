@@ -59,6 +59,9 @@ final class ShelfRevealer {
 
     private(set) var targets: [Key: Target] = [:]
     private(set) var phases: [Key: ShelfReveal] = [:]
+    /// Hidden shelves whose reveal delay runs — the pointer resting
+    /// in their band — which their mark shows as a hover (#761).
+    private(set) var arming: Set<Key> = []
     /// Shelves the action hid under the pointer: the hover stands
     /// down until the pointer leaves the shelf.
     private var suppressed: Set<Key> = []
@@ -80,6 +83,7 @@ final class ShelfRevealer {
         timers = [:]
         suppressed = []
         phases = [:]
+        arming = []
         syncMonitor()
     }
 
@@ -105,6 +109,7 @@ final class ShelfRevealer {
     func toggle(_ key: Key, duration: TimeInterval) -> Bool {
         guard let target = targets[key] else { return false }
         cancelTimer(key)
+        arming.remove(key)
         let next = reveal(of: key).toggled(now: now(), duration: duration)
         set(next, for: key)
         if next.isShown { suppressed.remove(key) }
@@ -146,13 +151,17 @@ final class ShelfRevealer {
         }
         guard target.band.contains(point) else {
             cancelTimer(key)
+            setArming(key, false)
             return
         }
         // Movement inside the band never restarts the delay, or a
         // jittering pointer would never reveal.
         guard timers[key] == nil else { return }
+        setArming(key, true)
         arm(key, after: ShelfReveal.revealDelay) { [weak self] in
-            guard let self, let target = self.targets[key],
+            guard let self else { return }
+            self.setArming(key, false)
+            guard let target = self.targets[key],
                 self.reveal(of: key) == .hidden,
                 target.band.contains(self.location())
             else { return }
@@ -205,7 +214,15 @@ final class ShelfRevealer {
         }
     }
 
+    /// Marks `key` arming or not, reporting a change.
+    private func setArming(_ key: Key, _ armed: Bool) {
+        guard arming.contains(key) != armed else { return }
+        if armed { arming.insert(key) } else { arming.remove(key) }
+        onChange()
+    }
+
     private func set(_ next: ShelfReveal, for key: Key) {
+        if next.isShown { arming.remove(key) }
         let was = reveal(of: key).isShown
         phases[key] = next == .hidden ? nil : next
         if was != next.isShown { onChange() }
@@ -228,6 +245,7 @@ final class ShelfRevealer {
 
     private func forget(_ key: Key) {
         cancelTimer(key)
+        arming.remove(key)
         phases[key] = nil
         suppressed.remove(key)
     }
