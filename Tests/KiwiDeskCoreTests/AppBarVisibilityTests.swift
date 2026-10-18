@@ -98,20 +98,59 @@ struct AppBarVisibilityTests {
         #expect(seen[WindowID(2)] == .partly(shown: .left))
     }
 
-    @Test("Monocle with a float focused keeps the rest hidden")
-    func monocleFloatFocusKeepsTheStack() throws {
+    /// The held member — what the layout put in front, read off
+    /// a retile — stays on top while a float holds the focus, not
+    /// the row's first.
+    @Test("Monocle with a float focused keeps its held member")
+    func monocleFloatFocusKeepsTheHold() throws {
         var float = window(3, floating: true)
         float.frame = CGRect(x: 100, y: 100, width: 300, height: 200)
         let core = try makeCore(
             mode: "monocle",
             windows: [window(1), window(2), float]
         )
-        core.state.apply(.windowFocused(WindowID(1)))
+        core.state.apply(.windowFocused(WindowID(2)))
+        core.retile()
         core.state.apply(.windowFocused(WindowID(3)))
         let seen = try verdicts(core)
-        let tiles = [seen[WindowID(1)], seen[WindowID(2)]]
-        #expect(tiles.filter { $0 == .hidden }.count == 1)
-        #expect(!tiles.contains(.visible))
+        #expect(seen[WindowID(1)] == .hidden)
+        #expect(seen[WindowID(2)] == .partly(shown: nil))
+    }
+
+    /// The box is what the layout fills: a float reaching into the
+    /// App Bar's reserved strip is not wholly shown.
+    @Test("A float under the reserved strip is partly visible")
+    func floatUnderTheStripIsPartly() throws {
+        var float = window(3, floating: true)
+        float.frame = CGRect(x: 100, y: 0, width: 300, height: 200)
+        let core = try makeCore(
+            mode: "monocle",
+            windows: [window(1), float]
+        )
+        let space = try #require(core.activeSpace)
+        let screen = try #require(
+            TilingEngine.screen(for: space.id, in: core.state)
+        )
+        try #require(core.tiler.layoutBounds(on: screen, for: space).minY > 0)
+        let seen = try verdicts(core)
+        #expect(seen[WindowID(3)] == .partly(shown: .bottom))
+    }
+
+    /// A parked member is hidden. The park leaves a 1 pt peek
+    /// inside the region it used, which the judge's cut tolerance
+    /// already reads as hidden; the stash test beside it is a net
+    /// for a wider peek, which this fixture cannot reach.
+    @Test("Monocle park hides the parked members")
+    func monocleParkHides() throws {
+        let core = try makeCore(
+            mode: "monocle",
+            windows: [window(1), window(2)]
+        )
+        core.execute("monocle.set_hide_style", args: [.string("park")])
+        core.state.apply(.windowFocused(WindowID(1)))
+        let seen = try verdicts(core)
+        #expect(seen[WindowID(1)] == .visible)
+        #expect(seen[WindowID(2)] == .hidden)
     }
 
     @Test("A float's own move refreshes the bars")

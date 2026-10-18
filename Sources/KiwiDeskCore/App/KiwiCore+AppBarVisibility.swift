@@ -3,13 +3,13 @@ import AppKit
 /// Each App Bar item's `BarVisibility` (#2234), read from the frames
 /// the retile issues and the order KiwiDesk intends — no
 /// WindowServer read on the bar's refresh path. The bar's own screen
-/// judges it: the space's screen's visible bounds.
+/// judges it: the region its layout fills there.
 extension KiwiCore {
     /// The verdict per window of `space`'s tiled members and
     /// `floats`. A float sits above every tile, the focused float
     /// above the other floats; a tile sits beneath the tiles the
-    /// scrolling raise order puts over it, the focus on top — which
-    /// is monocle's stack too.
+    /// scrolling raise order puts over it, the window the layout
+    /// put in front on top — which is monocle's stack too.
     func appBarVisibility(
         of space: Space,
         floats: [WindowID]
