@@ -217,6 +217,7 @@ settings.spaceBarStyle.groupAdjacentWindows
 settings.spaceBarStyle.hideEmpty
 settings.spaceBarStyle.inactiveContent
 settings.spaceBarStyle.itemLabel
+settings.spaceBarStyle.peekOnHover
 settings.spaceBarStyle.showFrontApp
 settings.spaceBarStyle.springDelay
 settings.stack.fillWhenAlone

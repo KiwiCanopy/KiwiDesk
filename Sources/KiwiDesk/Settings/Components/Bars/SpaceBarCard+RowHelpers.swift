@@ -39,6 +39,36 @@ extension SpaceBarCard {
         )
     }
 
+    /// A collapsed Space's hover peek (#1945): off by default, and
+    /// greyed unless Other Spaces collapses to a window count,
+    /// since the Apps segment already draws every glyph.
+    @ViewBuilder var peekOnHoverRow: some View {
+        ToggleRow(
+            label: L("space_bar.peek_on_hover", "Show apps on hover"),
+            isOn: style.peekOnHover,
+            help: L(
+                "space_bar.peek_on_hover.help",
+                "Rest the pointer on a Space that shows a window "
+                    + "count to list its apps and windows. Click a "
+                    + "window to go to it."
+            )
+        )
+        .modifier(
+            GreyOut(
+                active: style.wrappedValue.inactiveContent != .count,
+                help: L(
+                    "space_bar.peek_on_hover.count_only",
+                    "Only when \u{201C}%1$@\u{201D} is \u{201C}%2$@\u{201D}.",
+                    L(
+                        "space_bar.inactive_content",
+                        "Windows in other Spaces"
+                    ),
+                    L("space_bar.inactive_content.count", "Window count")
+                )
+            )
+        )
+    }
+
     /// The Windows in other Spaces `?` (#1683): each segment's own label
     /// interpolated, so the prose cannot drift from it (#818).
     var inactiveContentHelp: String {

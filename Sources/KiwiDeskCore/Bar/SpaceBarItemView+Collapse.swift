@@ -12,6 +12,10 @@ extension SpaceBarItemView {
     struct Collapse: Equatable {
         /// The windows the Space holds, drawn and announced.
         let windows: Int
+        /// The windows a hover peeks, in the strip's order (#1945);
+        /// empty while `peek_on_hover` is off, so the chip peeks
+        /// nothing.
+        var peek: [WindowID] = []
 
         /// The disc's text: past `discCap` it reads "9+" so the
         /// mark stays a disc; the label announces the exact count.
@@ -57,5 +61,14 @@ extension SpaceBarItemView {
                 "%1$@, not current",
                 name
             )
+    }
+}
+
+extension SpaceBarOverlay.Item {
+    /// Every window the strip stands for, in its order: the leading
+    /// disc's, the glyphs', the trailing disc's — a collapse's peek
+    /// (#1945).
+    var stripWindows: [WindowID] {
+        before.windows + apps.flatMap(\.windows) + after.windows
     }
 }

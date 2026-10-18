@@ -11,6 +11,7 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarSpringDelay = "settings.spaceBarStyle.springDelay"
     case spaceBarInactiveContent =
         "settings.spaceBarStyle.inactiveContent"
+    case spaceBarPeekOnHover = "settings.spaceBarStyle.peekOnHover"
     case spaceBarItemLabel = "settings.spaceBarStyle.itemLabel"
     case spaceBarGlyphSpan = "settings.spaceBarStyle.glyphSpan"
     case spaceBarGlyphGap = "settings.spaceBarStyle.glyphGap"
@@ -51,6 +52,14 @@ extension SpaceBarKey {
             .spaceBarGlyphSpan, .spaceBarGlyphGap,
             .spaceBarInactiveContent, .spaceBarItemLabel:
             return .row(.bars, .spaceBar, .atRest)
+        case .spaceBarPeekOnHover:
+            // Inert unless Other Spaces collapses to a count (#1945).
+            return .row(
+                .bars,
+                .spaceBar,
+                .atRest,
+                gate: .setting(.spaceBar(.spaceBarInactiveContent))
+            )
         case .spaceBarFrontAppTitleCap:
             // Inert while front segment is off.
             return .row(
@@ -124,6 +133,11 @@ extension SpaceBarKey {
             return .text(
                 "space_bar.inactive_content",
                 help: "space_bar.inactive_content.help"
+            )
+        case .spaceBarPeekOnHover:
+            return .text(
+                "space_bar.peek_on_hover",
+                help: "space_bar.peek_on_hover.help"
             )
         case .spaceBarItemLabel:
             return .text(

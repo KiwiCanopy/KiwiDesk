@@ -57,7 +57,10 @@ extension KiwiCore {
                     } ?? (isTemporary(id) ? .temporary : nil)
                 // After the `hide_empty` verdict, which reads
                 // the glyphs the collapse drops.
-                return item.collapsed(to: style.inactiveContent)
+                return item.collapsed(
+                    to: style.inactiveContent,
+                    peeking: style.peekOnHover
+                )
             }
     }
 

@@ -76,7 +76,8 @@ public final class SpaceBarOverlay {
         /// draws and the label announces; the state badges
         /// go with the glyphs, and the discs with them.
         func collapsed(
-            to content: SpaceBarStyle.InactiveContent
+            to content: SpaceBarStyle.InactiveContent,
+            peeking: Bool = false
         ) -> Self {
             guard !active, space != nil, collapse == nil else {
                 return self
@@ -84,6 +85,7 @@ public final class SpaceBarOverlay {
             let windows =
                 apps.reduce(0) { $0 + $1.count } + after.windows.count
                 + before.windows.count
+            let peek = peeking ? stripWindows : []
             var item = self
             item.apps = []
             item.after = .none
@@ -94,7 +96,7 @@ public final class SpaceBarOverlay {
             case .apps:
                 return self
             case .count:
-                item.collapse = .init(windows: windows)
+                item.collapse = .init(windows: windows, peek: peek)
             }
             return item
         }

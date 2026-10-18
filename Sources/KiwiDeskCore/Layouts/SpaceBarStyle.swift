@@ -33,6 +33,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// What a Space its screen does not show draws (#1683); the
     /// default keeps every Space's glyphs.
     public var inactiveContent: InactiveContent = .apps
+    /// Whether a collapsed Space (`inactiveContent` `.count`) peeks
+    /// its apps and windows on hover (#1945); off by default.
+    public var peekOnHover = false
     /// What a Space item names its Space by (#1535); the
     /// default keeps the identifier.
     public var itemLabel: ItemLabel = .identifier

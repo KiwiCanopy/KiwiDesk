@@ -56,8 +56,14 @@ extension SpaceBarItemView {
         _ ownsPointer: Bool,
         target: SpaceBarGlyphTarget?
     ) {
-        let peeked = ownsPointer ? target : nil
-        reportPeek(peeked, source: peeked?.peekSource)
+        if ownsPointer, target == nil, let peek = collapsedPeek {
+            // A collapsed chip draws no glyph: it anchors its own
+            // peek (#1945).
+            reportPeek(self, source: peek)
+        } else {
+            let peeked = ownsPointer ? target : nil
+            reportPeek(peeked, source: peeked?.peekSource)
+        }
         setPointerInside(ownsPointer)
         let hovered = !isActive && space != nil && ownsPointer
         guard hovered != isHovered || target !== hoveredTarget else {
@@ -75,6 +81,13 @@ extension SpaceBarItemView {
         guard inside != pointerInside else { return }
         pointerInside = inside
         if let space { onPointerInside(space, drawn, inside) }
+    }
+
+    /// What a collapsed chip peeks — its Space's windows — or nil
+    /// where it is not collapsed or `peek_on_hover` is off (#1945).
+    var collapsedPeek: BarPeekSource? {
+        guard let peek = collapse?.peek, !peek.isEmpty else { return nil }
+        return .space(peek)
     }
 
     /// Hands the peek the view under the pointer and what it shows

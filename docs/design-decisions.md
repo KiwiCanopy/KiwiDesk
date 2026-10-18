@@ -14509,6 +14509,23 @@ passes all day, while Settings' help answers a reader who stopped
 to ask. A dwell is not motion, so Reduce Motion keeps it and
 drops only the fade.
 
+:::unreleased
+A Space collapsed to its window count (#1683) peeks too, behind
+`peek_on_hover`, off by default (#1945, owner 2026-10-04): resting
+on the chip lists every window its Space holds, as `+n` lists its
+own, and the chip anchors the peek itself since it draws no glyph.
+The peek is the answer because it is a panel beside the bar: the
+run does not change, so nothing moves under a resting pointer and
+the shelf's plan is untouched. Growing the chip in place to draw
+its glyphs was the rejected shape — it slides the neighbours under
+the pointer, which is the stuck-hover class #1665 re-reads hover
+to survive, and it changes the length the shelf planned. A click
+on the chip still switches, the row's own click picks a window,
+and a drag over a collapsed chip opens nothing, the spring switch
+already showing what it holds. The toggle is greyed unless Other
+Spaces is Window count, since Apps already draws every glyph.
+:::
+
 **A Space's strip centres on its focus, holds under the pointer,
 and does not scroll.** (#1528 items 17–22, owner rulings
 2026-09-29 from HTML previews, graded by ui-designer.) The span's

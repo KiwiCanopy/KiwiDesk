@@ -14,6 +14,7 @@ extension SpaceBarStyle {
         case groupAdjacentWindows = "group_adjacent_windows"
         case glyphGap = "glyph_gap"
         case inactiveContent = "inactive_content"
+        case peekOnHover = "peek_on_hover"
         case itemLabel = "item_label"
         case frontAppTitleCap = "front_app_title_cap"
         case activeIndicator = "active_indicator"
@@ -73,6 +74,11 @@ extension SpaceBarStyle {
                 InactiveContent.self,
                 forKey: .inactiveContent
             ) ?? defaults.inactiveContent
+        peekOnHover =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .peekOnHover
+            ) ?? defaults.peekOnHover
         itemLabel =
             try container.decodeIfPresent(
                 ItemLabel.self,
