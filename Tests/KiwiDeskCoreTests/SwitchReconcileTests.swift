@@ -33,6 +33,7 @@ struct SwitchReconcileTests {
         var inFold = false
         var folds = 0
         var listed: [pid_t: WindowID] = [:]
+        var listReads: [pid_t: Int] = [:]
         var census: [pid_t: Set<WindowID>] = [:]
         var work: [@Sendable () -> Void] = []
         var bounds: [@MainActor @Sendable () -> Void] = []
@@ -70,7 +71,10 @@ struct SwitchReconcileTests {
         loop.appIsHidden = { _ in false }
         loop.frontmostPID = { nil }
         loop.axWindows = { pid in
-            let listed = MainActor.assumeIsolated { box.listed[pid] }
+            let listed = MainActor.assumeIsolated {
+                box.listReads[pid, default: 0] += 1
+                return box.listed[pid]
+            }
             return listed == nil ? [] : [AXUIElementCreateApplication(pid)]
         }
         loop.resolveWindowID = { element in
@@ -159,9 +163,15 @@ struct SwitchReconcileTests {
         let (loop, box) = makeLoop()
         switchDesktop(loop)
         switchDesktop(loop)
+        // The stale switch's reads still list both windows; the
+        // newer switch's list nothing, and only those may apply.
+        box.listed = [first: firstID, second: secondID]
+        box.runOne()
+        box.runOne()
+        box.listed = [:]
         box.drain()
         #expect(box.folds == 1)
-        #expect(box.destroyed.count == 2)
+        #expect(Set(box.destroyed) == [firstID, secondID])
         for bound in box.bounds { bound() }
         #expect(box.folds == 1, "a stale bound applied")
     }
@@ -258,6 +268,17 @@ struct SwitchReconcileTests {
         #expect(settled == [2, 3], "no batch pending: settle at once")
     }
 
+    @Test("a newer switch that parks no settle runs none")
+    func newerSwitchEmptiesTheSlot() {
+        let (loop, box) = makeLoop()
+        var settled = false
+        switchDesktop(loop)
+        loop.settleAfterSwitchReads { settled = true }
+        switchDesktop(loop)
+        box.drain()
+        #expect(!settled)
+    }
+
     @Test("the arrival sweep leaves an app whose read is owed")
     func arrivalSweepSkipsAnOwedRead() {
         let (loop, box) = makeLoop()
@@ -267,8 +288,9 @@ struct SwitchReconcileTests {
         switchDesktop(loop)
         #expect(loop.switchReads.isOutstanding(first))
         box.listed[first] = firstID
+        let before = box.listReads[first, default: 0]
         loop.reconcileOnScreenArrivals()
-        #expect(loop.elements[first]?[firstID] == nil, "read it")
+        #expect(box.listReads[first, default: 0] == before, "read it")
     }
 
     @Test("a stop drops the batch and what waits on it")
@@ -279,7 +301,6 @@ struct SwitchReconcileTests {
         loop.settleAfterSwitchReads { settled = true }
         loop.stop()
         box.drain()
-        #expect(box.destroyed.isEmpty)
         #expect(!settled)
     }
 

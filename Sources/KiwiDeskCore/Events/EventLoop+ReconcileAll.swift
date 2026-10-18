@@ -85,7 +85,9 @@ extension EventLoop {
         // of the scan, with nothing observed — a WindowServer
         // read there would be pure cost, and one every suite
         // driving `loadConfig` inherits (review).
-        let observed = Array(observers.keys)
+        // Sorted: dictionary order differs per process, and a pass
+        // should read its apps in the same order every run.
+        let observed = observers.keys.sorted()
         guard !observed.isEmpty else { return [] }
         let census = onScreenNormalWindowIDs()
         let targets = Self.reconcileAllTargets(
