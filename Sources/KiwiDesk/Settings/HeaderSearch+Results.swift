@@ -30,12 +30,18 @@ extension HeaderSearch {
                 alignment: .leading
             )
             .tint(SettingsTheme.accent)
-            .glassChrome(
-                in: shape,
-                enabled: true,
-                variant: .regular,
-                fallback: AnyShapeStyle(SettingsTheme.card)
-            )
+            // The glass is a layer UNDER the rows: content inside
+            // `glassEffect` is drawn vibrant, which washed the
+            // destination tiles out (owner eyeball, 2026-10-18).
+            .background {
+                Color.clear.glassChrome(
+                    in: shape,
+                    enabled: true,
+                    variant: .regular,
+                    fallback: AnyShapeStyle(SettingsTheme.card)
+                )
+            }
+            .clipShape(shape)
             .overlay(shape.strokeBorder(SettingsTheme.hairline))
             .overlay(
                 shape.strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
