@@ -223,13 +223,16 @@ struct DesktopSpacePersistenceWiringTests {
         #expect(trashed.contains(machine))
     }
 
-    /// The quit write reads no `gui.json`, so one this build
-    /// cannot decode — a newer Mac's — does not cost this Mac its
-    /// memory (#2324).
-    @Test("Quitting writes the memory past an unreadable gui.json")
-    func quitWritesPastAnUnreadableGuiConfig() throws {
+    /// A `gui.json` this build cannot decode — a newer Mac's —
+    /// means `machine.json` was never adopted, so a quit after one
+    /// swipe must not replace every other Desktop's entry (#2324).
+    @Test("An unadopted memory file survives the quit")
+    func unadoptedMemorySurvivesTheQuit() throws {
         let core = makeCore()
-        try core.guiConfigStore.save(GuiConfig())
+        let other = DesktopIdentity(raw: "STAMP-OTHER")
+        var config = GuiConfig()
+        config.desktopSpaces = [.identity(other): SpaceID(3)]
+        try core.guiConfigStore.save(config)
         try Data("not json".utf8).write(to: core.guiConfigStore.url)
         core.rememberVirtualSpace(
             SpaceID(6),
@@ -238,7 +241,7 @@ struct DesktopSpacePersistenceWiringTests {
         core.persistDesktopSpaceMemory()
         #expect(
             core.guiConfigStore.machine.load()
-                .desktopSpaces[.identity(stamp)] == SpaceID(6)
+                .desktopSpaces[.identity(other)] == SpaceID(3)
         )
     }
 

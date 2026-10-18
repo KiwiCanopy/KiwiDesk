@@ -129,14 +129,15 @@ struct MachineConfigStore {
         for (key, value) in owed where Self.isEmpty(stored[key]) {
             stored[key] = value
         }
+        // A stored file this build cannot read leaves the legacy
+        // copy owed; one it can read keeps its own leaves even
+        // where the write fails.
+        guard let merged = Self.decoded(stored) else { return carried }
         do {
-            guard let merged = Self.decoded(stored) else {
-                return carried
-            }
             try save(merged)
             return nil
         } catch {
-            return carried
+            return merged
         }
     }
 

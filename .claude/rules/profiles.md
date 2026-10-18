@@ -922,9 +922,10 @@ so a strip never removes a leaf the carry did not take first —
 append an entry with its format bumps, never edit one that shipped
 (`MachineConfigTests` ▸ `legacyMemoryIsCarried`,
 `failedCarryKeepsTheCopy`). A write of this Mac's leaves alone
-reads no `gui.json` (`DesktopSpacePersistenceWiringTests` ▸
-`quitWritesPastAnUnreadableGuiConfig`), and `machine.json` never
-answers `isGuiManaged`.
+writes no `gui.json`, and replaces a stored leaf only in a session
+that adopted it (`DesktopSpacePersistenceWiringTests` ▸
+`unadoptedMemorySurvivesTheQuit`); `machine.json` never answers
+`isGuiManaged`.
 
 **State about THIS MAC that is no file stays out of the register,
 in the app's defaults.** What a Mac has run and read — the "What's

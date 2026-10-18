@@ -76,13 +76,16 @@ extension KiwiCore {
     /// there — a limitation of config ownership rather than a
     /// gap, and `docs/spaces-and-desktops.md` says so.
     func persistDesktopSpaceMemory() {
-        guard isGuiManaged, desktopMemory.spaceMemoryEstablished
+        // A `gui.json` that does not decode means the stored memory
+        // was never adopted this session, so writing the live map
+        // would replace every Desktop this session did not visit.
+        guard isGuiManaged, desktopMemory.spaceMemoryEstablished,
+            guiConfigStore.load() != nil
         else { return }
         // The STORE, never `saveGuiConfig` — that reloads the
         // whole config, which at quit would rebuild the Lua VM
-        // the stop is tearing down. The write reads no `gui.json`,
-        // so one a newer build wrote cannot hold this Mac's memory
-        // back (#2324).
+        // the stop is tearing down. The write itself touches
+        // `machine.json` alone (#2324).
         do {
             try guiConfigStore.saveMachineLocal()
         } catch {
