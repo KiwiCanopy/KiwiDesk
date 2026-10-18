@@ -63,7 +63,8 @@ extension SettingsFooter {
         ScrollView {
             SettingsDiffRowsView(
                 rows: SettingsDiffRowSource.rows(for: model),
-                keep: liveKeep
+                keep: liveKeep,
+                revert: DiffRowRevert(model: model, alwaysVisible: true)
             ) { row in
                 unsavedPopoverShown = false
                 guard

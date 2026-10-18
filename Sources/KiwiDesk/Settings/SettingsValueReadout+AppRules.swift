@@ -20,7 +20,8 @@ extension SettingsValueReadout {
                 census,
                 base: label(for: census),
                 old: old.floatRules,
-                new: new.floatRules
+                new: new.floatRules,
+                family: .float
             )
         case .floatRulesPattern:
             // A `[String]` has no `.pattern` leaf for the walk to
@@ -32,7 +33,8 @@ extension SettingsValueReadout {
                     for: SettingKey.appRules(.floatRules)
                 ),
                 old: old.floatRules,
-                new: new.floatRules
+                new: new.floatRules,
+                family: .float
             )
         case .ignoreRules:
             return appRulesListNotes(
@@ -42,7 +44,8 @@ extension SettingsValueReadout {
                     "Ignore rule"
                 ),
                 old: old.ignoreRules,
-                new: new.ignoreRules
+                new: new.ignoreRules,
+                family: nil
             )
         case .floatAutomatically:
             return [
@@ -58,7 +61,8 @@ extension SettingsValueReadout {
                 census,
                 base: label(for: census),
                 old: old.tileRules,
-                new: new.tileRules
+                new: new.tileRules,
+                family: .tile
             )
         case .appRulesAddSpace, .appRulesAddFloat, .spaceRuleDelete,
             .floatRuleDelete, .appRulesAddTile, .tileRuleDelete:
@@ -78,13 +82,18 @@ extension SettingsValueReadout {
             .filter { old[$0] != new[$0] }
             .sorted()
         return touched.map { app in
-            .change(
+            var row = SettingsDiffRow.change(
                 census,
                 instance: app,
                 label: instanceLabel(base, app),
                 old: old[app]?.raw ?? unset,
                 new: new[app]?.raw ?? unset
             )
+            row.subject = ReachSubject(
+                family: .space,
+                key: RuleFamily.space.key(app)
+            )
+            return row
         }
     }
 
@@ -95,7 +104,10 @@ extension SettingsValueReadout {
         _ census: SettingKey,
         base: String,
         old: [String],
-        new: [String]
+        new: [String],
+        // Required, so a list another profile's reach can name never
+        // forgets its subject (#792): nil only where none can.
+        family: RuleFamily?
     ) -> [SettingsDiffRow] {
         var remaining = new
         var removed: [String] = []
@@ -107,28 +119,26 @@ extension SettingsValueReadout {
             }
         }
         var rows: [SettingsDiffRow] = []
-        // The enumeration index rides the instance so DUPLICATE
-        // list entries (each matched once above) still mint
-        // distinct row ids inside one ForEach.
-        for (index, entry) in remaining.enumerated() {
-            rows.append(
-                .note(
-                    census,
-                    instance: "+" + entry + "#\(index)",
-                    label: instanceLabel(base, entry),
-                    note: addedNote
-                )
+        // The copy count rides the instance so DUPLICATE list
+        // entries (each matched once above) still mint distinct
+        // row ids inside one ForEach (#792's revert parses it).
+        let instances =
+            ListEntryInstance.minted(remaining, added: true)
+            + ListEntryInstance.minted(removed, added: false)
+        for instance in instances {
+            var row = SettingsDiffRow.note(
+                census,
+                instance: instance.spelled,
+                label: instanceLabel(base, instance.entry),
+                note: instance.added ? addedNote : removedNote
             )
-        }
-        for (index, entry) in removed.enumerated() {
-            rows.append(
-                .note(
-                    census,
-                    instance: "-" + entry + "#\(index)",
-                    label: instanceLabel(base, entry),
-                    note: removedNote
+            row.subject = family.map {
+                ReachSubject(
+                    family: $0,
+                    key: $0.subject(ofRule: instance.entry)
                 )
-            )
+            }
+            rows.append(row)
         }
         // A pure reorder moves no membership; one edited note
         // keeps the key total for the readout totality guard.

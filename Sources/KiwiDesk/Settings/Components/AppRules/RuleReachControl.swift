@@ -68,18 +68,30 @@ enum RuleReachWords {
     static func label(_ reading: RuleReachReading) -> String {
         if reading.shared { return allProfiles }
         let users = reading.profiles.filter(reading.users.contains)
-        switch users.count {
+        guard users.count == 1 else { return group(users) }
+        return L("app_rules.reach.only", "%1$@ only", users[0])
+    }
+
+    /// Profiles named together: one by name, two as a pair, more as
+    /// a count — the ladder past "only", which a diff row's reach
+    /// shares (#792).
+    static func group(_ profiles: [String]) -> String {
+        switch profiles.count {
         case 1:
-            return L("app_rules.reach.only", "%1$@ only", users[0])
+            return profiles[0]
         case 2:
             return L(
                 "app_rules.reach.pair",
                 "%1$@, %2$@",
-                users[0],
-                users[1]
+                profiles[0],
+                profiles[1]
             )
         default:
-            return L("app_rules.reach.count", "Profiles: %1$d", users.count)
+            return L(
+                "app_rules.reach.count",
+                "Profiles: %1$d",
+                profiles.count
+            )
         }
     }
 

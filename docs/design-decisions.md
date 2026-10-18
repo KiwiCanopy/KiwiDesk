@@ -7122,6 +7122,52 @@ applying the saved value live, a Core verb rather than a draft
 writeback, so it waits for per-row revert (#792), as does whether
 Revert all reaches live state.
 
+:::unreleased
+### A row's revert writes its one key back through a register (#792)
+
+**[Rationale]**
+
+A ↺ on a diff row takes that row's change back to the baseline and
+nothing else. The diff names a change by its census key, read off
+Swift property paths, so the way back is a register from each key
+to a writer — `SettingsRevertRegister` — and not a Codable splice
+of the baseline's encoded subtree. Measured on `main` 2026-10-18,
+a splice reached 59 of the 209 keys that name a model path: 139
+`settings` keys name their leaf differently on the wire, and 11
+profile-scoped config fields are not encoded by `GuiConfig` at
+all, so a splice would have needed a hand map for most keys
+anyway. The census id is the Swift path, so the register is
+generated from the ids and every writer is held to its key
+(`SettingsRevertRegisterTests`).
+
+A writer reverts at the row's instance — one Space's override
+field, one app's rule, one rule-list entry, one Main Space — and
+whole where the row names none. Where state is written together it
+goes back together, so a ↺ can take more than its own row, and
+these are the groups: a Space in the list goes back through the
+Space doors, taking what is filed under it; a bar's edge goes back
+with its per-screen map, as the edge doors write them, and the
+master with both bars'; a rule takes the reach the draft gave it
+(#1393); and the shortcut layers go back whole, with the Desktop
+base, every key reach and every layer edit, since a binding's reach
+is keyed into the layers it was encoded against (#2022). That last
+group is the one a row cannot name — one binding's ↺ would take
+every other binding change with it — so its ↺ says so and asks
+first (`RevertWriter.grouped`, owner 2026-10-19). The reach rows
+are grouped the same way: a profile that changed exactly as the
+edited one did is named on the edited rows ("All profiles" for a
+shared rule, else a pair or a count) instead of in a row of its
+own, and only profiles that changed otherwise keep rows, one per
+change. Eight rows saying one thing read as eight changes, and the
+pill counted them so. Their way back is the rule's: the reach
+settles once the app's rules, or the shortcut layers, are the
+baseline's again. A row says
+how it reverts and offers no ↺ until it does: a lens or layer edit,
+profile drift, a live change and a leaf no key claims draw none.
+Whether the popover's Revert all reaches live state stays open with
+the live rows.
+:::
+
 ### The header search is a field, not a button that opens one
 
 **[Trade-off]**
