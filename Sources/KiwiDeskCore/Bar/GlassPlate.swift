@@ -37,6 +37,7 @@ enum GlassPlate {
         // (#2095), and an equal write would cancel its follow.
         if glass.frame != frame { glass.frame = frame }
         glass.cornerRadius = cornerRadius
+        fitContent(glass)
     }
 
     /// Embeds view into glass contentView.
@@ -52,7 +53,8 @@ enum GlassPlate {
     }
 
     /// Writes a glass's content to the glass's bounds where it is
-    /// off by more than the backing's rounding: the glass's own
+    /// off by more than the backing's rounding, after every resize
+    /// of the glass — `update` and the box host's: the glass's own
     /// layout left a Space chip at its old length inside a resized
     /// box (#2425, device).
     @MainActor
@@ -60,9 +62,21 @@ enum GlassPlate {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView,
             let content = glass.contentView,
-            !GlassBox.fills(content.frame, glass.bounds)
+            !fills(content.frame, glass.bounds)
         else { return }
         content.frame = glass.bounds
+    }
+
+    /// Whether `frame` already fills `bounds`: each edge within
+    /// half a point, the most the backing's rounding moves one.
+    nonisolated static func fills(
+        _ frame: CGRect,
+        _ bounds: CGRect
+    ) -> Bool {
+        abs(frame.minX - bounds.minX) <= 0.5
+            && abs(frame.minY - bounds.minY) <= 0.5
+            && abs(frame.maxX - bounds.maxX) <= 0.5
+            && abs(frame.maxY - bounds.maxY) <= 0.5
     }
 
     /// Takes content out of a glass with frame layout restored,

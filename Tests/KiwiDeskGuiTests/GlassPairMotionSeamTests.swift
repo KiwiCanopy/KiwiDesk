@@ -68,6 +68,28 @@ struct GlassPairMotionSeamTests {
         }
     }
 
+    /// The glass's content follows every resize of the glass
+    /// (#2425), a host glide's steps included: its body starts no
+    /// motion either.
+    @Test("the glass's content fit starts no motion")
+    func contentFitStartsNoMotion() throws {
+        let declaration = "static func fitContent("
+        let source = try SourceScan.strippedSource(
+            at: Self.bar.appendingPathComponent("GlassPlate.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(after: declaration, in: source),
+            "\(declaration) is gone from GlassPlate.swift"
+        )
+        #expect(body.contains("content.frame = glass.bounds"), "\(body)")
+        for spelling in Self.motionStarts {
+            #expect(
+                !body.contains(spelling),
+                "the content fit starts motion: \(spelling)"
+            )
+        }
+    }
+
     /// The host writes its pair to every size it takes (#2388): a
     /// writer whose input is the host's size, so it has no frame
     /// signature to read — its body alone starts no motion.
