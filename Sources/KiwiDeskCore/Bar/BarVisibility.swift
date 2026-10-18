@@ -16,6 +16,13 @@ public enum BarVisibility: Equatable, Sendable {
         case left, right, top, bottom
     }
 
+    /// Whether an App Bar item draws its half-moon: only a partly
+    /// visible window does.
+    var drawsHalfMoon: Bool {
+        if case .partly = self { return true }
+        return false
+    }
+
     /// A cut or overlap under this many points is no cut: an
     /// echo's rounding, a border's outset.
     static let tolerance: CGFloat = 1

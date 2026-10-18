@@ -103,7 +103,13 @@ struct GlyphSizeAppBarTests {
             thickness: Self.depth,
             capAxis: 2000
         )
-        #expect(slot == Self.content)
+        // The content square and the half-moon's slot above it
+        // (#2234).
+        #expect(
+            slot
+                == Self.content
+                + AppBarHalfMoon.reserve(contentDepth: Self.content)
+        )
         let view = item(
             frame: CGRect(x: 0, y: 0, width: Self.depth, height: slot),
             look: look

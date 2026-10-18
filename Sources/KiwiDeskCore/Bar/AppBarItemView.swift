@@ -20,6 +20,8 @@ final class AppBarItemView: NSView {
         return tf
     }()
     let accent = SheenRimView()
+    /// Where a partly visible window sits (#2234).
+    let halfMoon = AppBarHalfMoon()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.make()
@@ -102,6 +104,7 @@ final class AppBarItemView: NSView {
         addSubview(accentClip)
         accentClip.addSubview(accent)
         addSubview(badge)
+        addSubview(halfMoon)
     }
 
     @available(*, unavailable)

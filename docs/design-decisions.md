@@ -13586,6 +13586,44 @@ the user who never opens the editor.
 Bar's front segment shows the focused window's title in place of
 its app's name.
 
+:::unreleased
+**The App Bar's dim means "not fully on screen".** (#2234, owner
+rulings 2026-10-15.) It used to mean "not focused", which says
+nothing the indicator does not already say. The question a user
+brings to the App Bar is which window a focus change would move:
+in scrolling and monocle, focusing a window that is cut or buried
+pans or restacks the layout, and focusing one already in full view
+moves nothing. So an item stays lit while its window is wholly on
+screen and uncovered, and dims while it is partly visible or
+hidden. The dim stays binary. Focus keeps the indicator and the
+accent title, so it still reads apart from the lit tier, and
+monocle looks as it always did, since only its focus is on screen.
+
+The verdict comes from KiwiDesk's own state: the frames the retile
+issues for the App Bar's Space on its screen, and the order
+KiwiDesk intends (floats over tiles, the scrolling raise order with
+the focus on top, which is monocle's stack too). A WindowServer
+read would see real overlap, but it would put a compositor round
+trip on a refresh path that runs on every switch and focus report,
+and that read stalls under GPU load. The price is what KiwiDesk
+does not own. Another app's window, an untracked panel, or a stack
+the user reordered by hand reads as if it were not there, so an
+item can stay lit over a window something foreign covers.
+
+**A partly visible item carries a half-moon, the one mark the App
+Bar draws per item.** "Badges are Space-Bar-only" rules out
+*state* (sticky, floating, a count of what a Space holds), which
+the App Bar would repeat from the Space Bar. The half-moon states
+where the window sits in the layout, which nothing else draws. Its
+filled half is the side of the window still on screen, along the
+layout's scroll axis rather than the bar's, so it says which way
+to scroll. A window covered without a side (under a float) draws
+the ring empty. Its slot is reserved on every item, so a window
+sliding out of view changes no item's length and moves nothing on
+the bar, and it is never dimmed, since it appears only on dimmed
+items.
+:::
+
 **An App Bar item draws its icon AND its title.**
 ([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
 A vertical App Bar draws the icon alone, which is rendering, not

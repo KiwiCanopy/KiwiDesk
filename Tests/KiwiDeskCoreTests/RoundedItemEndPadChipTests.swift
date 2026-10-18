@@ -167,7 +167,7 @@ struct RoundedItemEndPadChipTests {
                 let view = appItem(width: slot, look: look, depth: depth)
                 let title = ceil(view.label.cell?.cellSize.width ?? 0)
                 #expect(view.label.frame.width >= title)
-                #expect(abs(view.iconView.frame.minX - ends.leading) <= 0.5)
+                #expect(abs(view.halfMoon.frame.minX - ends.leading) <= 0.5)
                 #expect(
                     abs(slot - view.label.frame.maxX - ends.trailing)
                         <= 0.5,
@@ -191,7 +191,7 @@ struct RoundedItemEndPadChipTests {
             )
             let view = appItem(width: 96, look: look)
             #expect(!view.label.isHidden)
-            #expect(abs(view.iconView.frame.minX - ends.leading) <= 0.5)
+            #expect(abs(view.halfMoon.frame.minX - ends.leading) <= 0.5)
             #expect(abs(96 - view.label.frame.maxX - ends.trailing) <= 0.5)
         }
     }

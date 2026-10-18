@@ -15,6 +15,7 @@ extension AppBarItemView {
         let alpha: CGFloat = isLit ? 1 : style.dimFactor
         iconView.alphaValue = alpha
         badge.alphaValue = alpha
+        halfMoon.show(visibility, ink: NSColor(kiwiHex: textColorHex))
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()

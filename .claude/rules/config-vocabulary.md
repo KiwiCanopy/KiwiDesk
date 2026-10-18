@@ -79,6 +79,14 @@ synonym:
   its ink and with no plate: a held Space's (#1507) or a temporary
   one's (#1790), one slot shared since a Space is never both.
   Never a *badge*, which counts or marks window state.
+- **half-moon** — the small disc an App Bar item draws before its
+  icon while its window is partly visible (#2234,
+  `AppBarHalfMoon`): its filled half is the side still on screen,
+  and a covered window draws it empty. It says where a window sits
+  in the layout, never a window's state, so it is neither a
+  *badge* nor a *mark*. A *dot* is #761's Space dots, and *pill*
+  and *indicator* are spoken for above. The name is the owner's to
+  rule before it reaches copy.
 - **held Space** — a Space with windows kept live for the
   arrangement it left, when a switch does not name it (#1507,
   #1790). *Held* is the word in copy and

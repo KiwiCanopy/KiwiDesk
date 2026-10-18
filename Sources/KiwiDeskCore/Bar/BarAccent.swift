@@ -7,9 +7,10 @@ public enum BarAccent {
     /// Inset of active capsule ring inside item slot.
     public static let capsuleInset: CGFloat = 1.5
 
-    /// Alpha for untinted content on inactive items — shape plus
-    /// this dim carry the state. 0.4 (was 0.5) for a clearer
-    /// "not active" read (owner 2026-07-20).
+    /// Alpha for untinted content on dimmed items — a Space not
+    /// current, an App Bar window not fully on screen (#2234);
+    /// shape plus this dim carry the state. 0.4 (was 0.5) for a
+    /// clearer read (owner 2026-07-20).
     public static let untintedAlpha: CGFloat = 0.4
 
     /// Space Bar MIDDLE tier: 0.6 steps clearly between the 1.0
