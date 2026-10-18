@@ -110,7 +110,7 @@
   "app_rules.reach.all": "All profiles",
   "app_rules.reach.all_caption": "Includes profiles you create later.",
   "app_rules.reach.count": "Profiles: %1$d",
-  "app_rules.reach.diff.label": "%1$@ · %2$@",
+  "app_rules.reach.diff.group": "%1$@ · %2$@",
   "app_rules.reach.diff.label_loaded": "%1$@ (loaded, applies at once) · %2$@",
   "app_rules.reach.diff.new_profiles_get": "New profiles get this rule",
   "app_rules.reach.diff.new_profiles_lose": "New profiles won't get this rule",

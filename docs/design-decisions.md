@@ -7153,7 +7153,13 @@ base, every key reach and every layer edit, since a binding's reach
 is keyed into the layers it was encoded against (#2022). That last
 group is the one a row cannot name — one binding's ↺ would take
 every other binding change with it — so its ↺ says so and asks
-first (`RevertWriter.grouped`, owner 2026-10-19). A row says
+first (`RevertWriter.grouped`, owner 2026-10-19). The reach rows
+are grouped the same way: a profile that changed exactly as the
+edited one did is named on the edited row ("All profiles", a pair,
+or a count) instead of in a row of its own, and only profiles that
+changed otherwise keep rows, one per change. Eight rows saying one
+thing read as eight changes, and the pill counted them so; the
+row's ↺ already takes every one of them back. A row says
 how it reverts and offers no ↺ until it does: a lens or layer edit,
 profile drift, a live change and a leaf no key claims draw none.
 Whether the popover's Revert all reaches live state stays open with

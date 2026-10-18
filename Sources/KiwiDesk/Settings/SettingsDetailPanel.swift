@@ -205,7 +205,10 @@ enum SettingsDiffRowSource {
                 return row
             }
         }
-        rows += model.reachDiffRows()
+        rows = SettingsDiffRowFold.folded(
+            rows,
+            reach: model.reachDiffRows()
+        )
         rows += model.lookReachDiffRows()
         if diff.luaChanged {
             var lua = SettingsDiffRow.note(

@@ -110,7 +110,7 @@
   "app_rules.reach.all": "Todos los perfiles",
   "app_rules.reach.all_caption": "Incluye los perfiles que crees más adelante.",
   "app_rules.reach.count": "Perfiles: %1$d",
-  "app_rules.reach.diff.label": "%1$@ · %2$@",
+  "app_rules.reach.diff.group": "%1$@ · %2$@",
   "app_rules.reach.diff.label_loaded": "%1$@ (cargado, se aplica al instante) · %2$@",
   "app_rules.reach.diff.new_profiles_get": "Los perfiles nuevos reciben esta regla",
   "app_rules.reach.diff.new_profiles_lose": "Los perfiles nuevos no recibirán esta regla",

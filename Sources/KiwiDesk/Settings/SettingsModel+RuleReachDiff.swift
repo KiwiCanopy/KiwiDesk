@@ -18,12 +18,14 @@ extension SettingsModel {
         return layerDiffRows() + lenses
             + rows(
                 .appRules(.appRules),
+                .space,
                 stored.appRules,
                 encoded.appRules,
                 editing: editing
             ) { $0.raw }
             + rows(
                 .appRules(.floatRules),
+                .float,
                 stored.floatRules,
                 encoded.floatRules,
                 editing: editing,
@@ -31,6 +33,7 @@ extension SettingsModel {
             )
             + rows(
                 .shortcuts(.layers),
+                .key,
                 stored.keyLayers,
                 encoded.keyLayers,
                 editing: editing,
@@ -56,6 +59,7 @@ extension SettingsModel {
 
     private func rows<V>(
         _ key: SettingKey,
+        _ family: RuleFamily,
         _ stored: RuleReachTable<V>,
         _ encoded: RuleReachTable<V>,
         editing: String,
@@ -72,20 +76,67 @@ extension SettingsModel {
         var result: [SettingsDiffRow] = []
         for app in apps.sorted() {
             let name = name(app)
+            let subject = ReachSubject(family: family, key: app)
+            let own = (
+                old: stored.resolved(app, for: editing),
+                new: encoded.resolved(app, for: editing)
+            )
             var appRows: [SettingsDiffRow] = []
+            // Profiles that changed alike are one row (owner
+            // 2026-10-18); the loaded one keeps its own, since it
+            // applies at once.
+            var groups: [(old: V?, new: V?, profiles: [String])] = []
             for profile in encoded.profiles where profile != editing {
                 let old = stored.resolved(app, for: profile)
                 let new = encoded.resolved(app, for: profile)
                 guard old != new else { continue }
-                appRows.append(
-                    .change(
-                        key,
-                        instance: "reach.\(profile).\(app)",
-                        label: label(profile, name, loaded: profile == loaded),
-                        old: old.map(describe) ?? none,
-                        new: new.map(describe) ?? none
+                guard profile != loaded else {
+                    appRows.append(
+                        .change(
+                            key,
+                            instance: "reach.\(profile).\(app)",
+                            label: loadedLabel(profile, name),
+                            old: old.map(describe) ?? none,
+                            new: new.map(describe) ?? none
+                        )
                     )
+                    continue
+                }
+                if let at = groups.firstIndex(where: {
+                    $0.old == old && $0.new == new
+                }) {
+                    groups[at].profiles.append(profile)
+                } else {
+                    groups.append((old, new, [profile]))
+                }
+            }
+            let largestFirst = groups.enumerated().sorted {
+                ($1.element.profiles.count, $0.offset)
+                    < ($0.element.profiles.count, $1.offset)
+            }
+            for (_, group) in largestFirst {
+                var row = SettingsDiffRow.change(
+                    key,
+                    instance: "reach.\(group.profiles[0]).\(app)",
+                    label: L(
+                        "app_rules.reach.diff.group",
+                        "%1$@ · %2$@",
+                        name,
+                        RuleReachWords.group(group.profiles)
+                    ),
+                    old: group.old.map(describe) ?? none,
+                    new: group.new.map(describe) ?? none
                 )
+                row.subject = subject
+                if own.old != own.new, group.old == own.old,
+                    group.new == own.new
+                {
+                    row.foldReach = foldWords(
+                        [editing] + group.profiles,
+                        of: encoded.profiles
+                    )
+                }
+                appRows.append(row)
             }
             let wasShared = stored.base[app] != nil
             let isShared = encoded.base[app] != nil
@@ -116,18 +167,24 @@ extension SettingsModel {
         return result
     }
 
-    private func label(
-        _ profile: String,
-        _ app: String,
-        loaded: Bool
+    private func loadedLabel(_ profile: String, _ app: String) -> String {
+        L(
+            "app_rules.reach.diff.label_loaded",
+            "%1$@ (loaded, applies at once) · %2$@",
+            profile,
+            app
+        )
+    }
+
+    /// The reach column's words for `profiles`, in the table's
+    /// order — every profile, else the ladder past one.
+    private func foldWords(
+        _ profiles: [String],
+        of all: [String]
     ) -> String {
-        loaded
-            ? L(
-                "app_rules.reach.diff.label_loaded",
-                "%1$@ (loaded, applies at once) · %2$@",
-                profile,
-                app
-            )
-            : L("app_rules.reach.diff.label", "%1$@ · %2$@", profile, app)
+        let reached = all.filter(profiles.contains)
+        return reached.count == all.count
+            ? RuleReachWords.allProfiles
+            : RuleReachWords.group(reached)
     }
 }

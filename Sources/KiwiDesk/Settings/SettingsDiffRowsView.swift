@@ -255,6 +255,14 @@ struct SettingsDiffRowsView: View {
                 Text(row.label)
                     .foregroundStyle(SettingsTheme.ink)
                     .lineLimit(1)
+                // The profiles a folded change also reached: the
+                // label truncates first (#792).
+                if let reach = row.reach {
+                    Text(reach)
+                        .foregroundStyle(SettingsTheme.ink3)
+                        .lineLimit(1)
+                        .layoutPriority(1)
+                }
                 Spacer(minLength: 12)
                 valueReadout(row)
             }

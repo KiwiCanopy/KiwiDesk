@@ -20,7 +20,8 @@ extension SettingsValueReadout {
                 census,
                 base: label(for: census),
                 old: old.floatRules,
-                new: new.floatRules
+                new: new.floatRules,
+                family: .float
             )
         case .floatRulesPattern:
             // A `[String]` has no `.pattern` leaf for the walk to
@@ -32,7 +33,8 @@ extension SettingsValueReadout {
                     for: SettingKey.appRules(.floatRules)
                 ),
                 old: old.floatRules,
-                new: new.floatRules
+                new: new.floatRules,
+                family: .float
             )
         case .ignoreRules:
             return appRulesListNotes(
@@ -78,13 +80,18 @@ extension SettingsValueReadout {
             .filter { old[$0] != new[$0] }
             .sorted()
         return touched.map { app in
-            .change(
+            var row = SettingsDiffRow.change(
                 census,
                 instance: app,
                 label: instanceLabel(base, app),
                 old: old[app]?.raw ?? unset,
                 new: new[app]?.raw ?? unset
             )
+            row.subject = ReachSubject(
+                family: .space,
+                key: RuleFamily.space.key(app)
+            )
+            return row
         }
     }
 
@@ -95,7 +102,8 @@ extension SettingsValueReadout {
         _ census: SettingKey,
         base: String,
         old: [String],
-        new: [String]
+        new: [String],
+        family: RuleFamily? = nil
     ) -> [SettingsDiffRow] {
         var remaining = new
         var removed: [String] = []
@@ -114,14 +122,19 @@ extension SettingsValueReadout {
             ListEntryInstance.minted(remaining, added: true)
             + ListEntryInstance.minted(removed, added: false)
         for instance in instances {
-            rows.append(
-                .note(
-                    census,
-                    instance: instance.spelled,
-                    label: instanceLabel(base, instance.entry),
-                    note: instance.added ? addedNote : removedNote
-                )
+            var row = SettingsDiffRow.note(
+                census,
+                instance: instance.spelled,
+                label: instanceLabel(base, instance.entry),
+                note: instance.added ? addedNote : removedNote
             )
+            row.subject = family.map {
+                ReachSubject(
+                    family: $0,
+                    key: $0.subject(ofRule: instance.entry)
+                )
+            }
+            rows.append(row)
         }
         // A pure reorder moves no membership; one edited note
         // keeps the key total for the readout totality guard.

@@ -56,6 +56,17 @@ struct SettingsDiffRow: Identifiable, Hashable {
     /// readout rows `.census`, so a new producer offers no ↺ by
     /// forgetting one.
     var revert: SettingsRowRevert = .none
+    /// The rule this row changes, where another profile's reach row
+    /// can name the same one: the fold joins on it, never on the
+    /// label (#792).
+    var subject: ReachSubject?
+    /// A reach row's words for its profiles, set where its change
+    /// is the edited profile's own: the source folds it into the
+    /// row carrying its `subject` (`SettingsDiffRowFold`).
+    var foldReach: String?
+    /// The other profiles a folded change also reached, drawn
+    /// after the label.
+    var reach: String?
 
     /// A plain value-pair row.
     static func change(

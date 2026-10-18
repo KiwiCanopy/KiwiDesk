@@ -1248,7 +1248,12 @@ family beside `dropRuleHalf` and `adoptRuleHalf` by
 `RuleReachGuiParityTests` — and the
 `docs/design-decisions.md` entry names each such group
 (`SettingsRowRevertTests`). A rule-list row's instance is a
-`ListEntryInstance`, minted and parsed by that one type.
+`ListEntryInstance`, minted and parsed by that one type. **Other
+profiles that changed exactly as the edited one did fold into its
+row as a reach label, joined on `SettingsDiffRow.subject` and
+never on the label** — only in `SettingsDiffRowFold`, and a
+producer whose rows another profile's reach can name sets the
+subject (`ReachRowFoldTests`).
 
 ## Responsive width (#678 turn 17a)
 

@@ -110,7 +110,7 @@
   "app_rules.reach.all": "Все профили",
   "app_rules.reach.all_caption": "Включая профили, которые ты создашь позже.",
   "app_rules.reach.count": "Профили: %1$d",
-  "app_rules.reach.diff.label": "%1$@ · %2$@",
+  "app_rules.reach.diff.group": "%1$@ · %2$@",
   "app_rules.reach.diff.label_loaded": "%1$@ (загружен, действует сразу) · %2$@",
   "app_rules.reach.diff.new_profiles_get": "Новые профили получат это правило",
   "app_rules.reach.diff.new_profiles_lose": "Новые профили не получат это правило",

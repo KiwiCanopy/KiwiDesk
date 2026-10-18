@@ -110,7 +110,7 @@
   "app_rules.reach.all": "모든 프로필",
   "app_rules.reach.all_caption": "나중에 만드는 프로필도 포함됩니다.",
   "app_rules.reach.count": "프로필: %1$d",
-  "app_rules.reach.diff.label": "%1$@ · %2$@",
+  "app_rules.reach.diff.group": "%1$@ · %2$@",
   "app_rules.reach.diff.label_loaded": "%1$@(로드됨, 즉시 적용) · %2$@",
   "app_rules.reach.diff.new_profiles_get": "새 프로필에 이 규칙 적용",
   "app_rules.reach.diff.new_profiles_lose": "새 프로필에 이 규칙 적용 안 함",
