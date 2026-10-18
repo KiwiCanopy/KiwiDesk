@@ -46,6 +46,46 @@ struct SizeBoundGateNeedleTests {
         )
     }
 
+    @Test("An instant layout ask schedules the settle probe")
+    func instantAskProbeIsWired() throws {
+        // An instant write never settles, so its probe rides
+        // `onInstantLayoutAsk` (#2187) — a production wire no
+        // unit test reaches, and unwired a raw mid-resize echo
+        // confirms a false bound.
+        let boot = try SourceScan.functionBody(
+            of: "bootstrapCoreServices",
+            in: "KiwiCore+Bootstrap.swift",
+            under: "App"
+        )
+        guard let hook = boot.range(of: "tiler.onInstantLayoutAsk = {")
+        else {
+            Issue.record("onInstantLayoutAsk is not wired")
+            return
+        }
+        #expect(
+            boot[hook.upperBound...].prefix(120)
+                .contains("scheduleSizeBoundProbe(id)")
+        )
+        // Fired after the ask is recorded, which the probe's
+        // `wantsAnswerProbe` gate reads.
+        let issue = try SourceScan.functionBody(
+            of: "issueLayoutFrame",
+            in: "TilingEngine+Issue.swift",
+            under: "Tiling"
+        )
+        let ask = issue.range(of: "boundLearner.recordAsk(")
+        let fire = issue.range(of: "onInstantLayoutAsk(id)")
+        #expect(ask != nil && fire != nil)
+        // A watched switch's fold is an `.event` pass too (#2187).
+        #expect(issue.contains("switching: motionGate.isSwitching"))
+        // The verdict is `applyFrame`'s own, never a copy of it.
+        #expect(issue.contains("let instant = applyFrame("))
+        #expect(issue.contains("wroteInstantly: instant"))
+        if let ask, let fire {
+            #expect(ask.upperBound < fire.lowerBound)
+        }
+    }
+
     @Test("Each apply stamps at enqueue AND after the set")
     func applyStampsTwice() throws {
         // The enqueue stamp closes #1254 (the echo can precede a

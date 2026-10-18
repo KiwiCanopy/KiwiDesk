@@ -1284,6 +1284,27 @@ editing here:
   fallback — cosmetic, self-correcting); geometry never may.
   The ladder is `SizeBoundLearnerTests`; the
   overlay half is [borders.md](borders.md)'s pin row.
+- **A layout frame reaches another app inside an
+  `AXEnhancedUserInterface` hold, and an instant one owes its own
+  settle (#2187).** Route a frame with no animation through the
+  instant set, never `animate`'s no-animation write, which holds
+  nothing — Reduce Motion is the instance
+  (`ReduceMotionInstantWriteTests` ▸ `animatedFrameHoldsEUI`). A
+  write path that lands a layout ask instantly takes the #677
+  settle probe from `applyFrame`'s returned verdict, never a copy
+  of its branch, through `onInstantLayoutAsk` after `recordAsk`;
+  a re-issuing pass owes none, and neither does a pass inside
+  `MotionGate.exemptingSwitch`, so a new caller of that scope
+  forgoes the probe on purpose (`ReduceMotionInstantWriteTests` ▸
+  `instantAskOwesTheProbe`, `SizeBoundGateNeedleTests` ▸
+  `instantAskProbeIsWired`). An instant set onto another screen
+  writes its frame again after `crossScreenResendDelay`, since an
+  easing app clamps the first to the screen it left; a newer write
+  cancels it, a park or an unpark owes none, and a new hold that
+  must stop it joins `FrameApplier.resendStandsDown`, wired once in
+  `TilingEngine`'s init (`ReduceMotionInstantWriteTests` ▸
+  `newerWriteCancelsTheResend`, `unparkOwesNoResend`,
+  `parkOwesNoResend`, `dragStandsTheResendDown`).
 - **A scrolling viewport offset travels with the slot it was
   measured against (#966).** One slot size serves the whole
   row, so anything that changes it — a resize, a window opening

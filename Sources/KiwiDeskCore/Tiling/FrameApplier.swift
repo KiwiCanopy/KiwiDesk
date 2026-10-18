@@ -119,6 +119,7 @@ final class FrameApplier {
         // precede the stamp (#1254).
         recent.record(id, now: clock())
         issued(id, frame)
+        pendingResends[id] = nil  // a spring supersedes a resend
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -164,11 +165,14 @@ final class FrameApplier {
     /// `EnhancedUIHolds` (#1508). Position-only unless `setSize`.
     /// Callers must `animation.cancel(window:)` first (as
     /// `retile` and `stashInactive` do) so a window is never
-    /// spring-animated and instant-set at once.
+    /// spring-animated and instant-set at once. `resend` writes
+    /// the frame once more after `crossScreenResendDelay` unless a
+    /// newer write reached the window first (#2187).
     func applyInstant(
         _ id: WindowID,
         _ frame: CGRect,
-        setSize: Bool
+        setSize: Bool,
+        resend: Bool = false
     ) {
         // Recorded before the element guard, at enqueue time: the
         // overlay sync wants the commanded frame this same turn
@@ -176,6 +180,7 @@ final class FrameApplier {
         instantTargets.record(id, frame: frame, now: clock())
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
+        pendingResends[id] = resend && setSize ? frame : nil
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -208,6 +213,47 @@ final class FrameApplier {
             holds.endInstant(pid, writer)
             recent.record(id, now: clock())  // as `apply`, #1254
         }
+        if pendingResends[id] != nil {
+            scheduleResend(crossScreenResendDelay) { [weak self] in
+                self?.resendIfCurrent(id, frame)
+            }
+        }
+    }
+
+    /// How long a cross-screen set waits before its second write.
+    var crossScreenResendDelay: TimeInterval = 0.2
+
+    /// Runs a resend after its delay, on the main actor; a test
+    /// fires it by hand.
+    var scheduleResend:
+        @MainActor (TimeInterval, @escaping @MainActor () -> Void)
+            -> Void = { delay, work in
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    MainActor.assumeIsolated(work)
+                }
+            }
+
+    /// Whether a window's owed resend stands down at fire time —
+    /// the engine's drag exemption, wired at its init.
+    var resendStandsDown: @MainActor (WindowID) -> Bool = { _ in false }
+
+    /// Each window's set still owed its second write, cleared by
+    /// any newer write to that window.
+    private var pendingResends: [WindowID: CGRect] = [:]
+
+    /// The second write of a set that moved a window onto another
+    /// screen: an app easing its frame (EUI on, Zen) clamps the
+    /// first one's size to the screen it left (#2187). Stands
+    /// down when a newer write — a park, a later pass, a spring —
+    /// superseded it, or a spring or a drag holds the window.
+    /// The same ask as the first write, so deliberately not an
+    /// engine frame: it retires no ask and stamps no placement
+    /// (#1694, #1161).
+    private func resendIfCurrent(_ id: WindowID, _ frame: CGRect) {
+        guard pendingResends[id] == frame, animatingPid[id] == nil,
+            !resendStandsDown(id)
+        else { return }
+        applyInstant(id, frame, setSize: true)
     }
 
     /// Stamps a set's return from a queue block (#1254).
