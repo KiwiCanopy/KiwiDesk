@@ -79,15 +79,41 @@ struct DesktopSwitchRuleSweepSeamTests {
             of: "defersRuleSweepToSwitchPass",
             under: Self.core
         )
-        // Declared, read by the gate, raised and restored by the
-        // wrapper.
+        // Declared; read by the gate; saved, raised and restored
+        // by the wrapper — per site, so a second read or raise in
+        // one of those files reds too.
+        let perFile = Dictionary(
+            grouping: flag,
+            by: \.file.lastPathComponent
+        ).mapValues(\.count)
         #expect(
-            Set(flag.map(\.file.lastPathComponent))
+            perFile
                 == [
-                    "KiwiCore.swift",
-                    "KiwiCore+StructuredRules.swift",
-                    "KiwiCore+DesktopBindings.swift",
+                    "KiwiCore.swift": 1,
+                    "KiwiCore+StructuredRules.swift": 1,
+                    "KiwiCore+DesktopBindings.swift": 3,
                 ]
+        )
+    }
+
+    @Test("the switch event has one emitter, the switch itself")
+    func switchEventHasOneEmitter() throws {
+        let needles = [
+            "onEvent(.desktopChanged)",
+            "handle(.desktopChanged)",
+        ]
+        let emits = try needles.flatMap {
+            try SourceScan.identifierSites(of: $0, under: Self.core)
+        }
+        // A second emitter enters the handler with no sweep after
+        // it.
+        #expect(
+            emits.map(\.file.lastPathComponent)
+                == ["EventLoop+Apps.swift"],
+            .init(
+                rawValue: "found "
+                    + emits.map(\.site).joined(separator: ", ")
+            )
         )
     }
 }
