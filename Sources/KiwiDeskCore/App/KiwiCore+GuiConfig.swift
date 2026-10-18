@@ -288,11 +288,7 @@ extension KiwiCore {
         classifying(&config)
         let dropped = NavigationChords.deduplicate(&config)
         // Before the ledger records a store that cannot land (#2325).
-        try NewerFormatOnDisk.refuse(
-            guiConfigStore.url,
-            .guiConfig,
-            GuiConfig.currentFormat
-        )
+        if let refusal = guiConfigStore.newerFormat() { throw refusal }
         // The executed values travel with the rest (#1741).
         storeLiveAppWide()
         try guiConfigStore.saveIncludingBindings(config)

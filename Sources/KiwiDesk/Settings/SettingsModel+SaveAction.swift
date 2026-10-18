@@ -46,9 +46,7 @@ extension SettingsModel {
     var primarySaveEnabled: Bool {
         // A newer build's file latches every structured Save up
         // front, before any of its writes (#2324 ruling 2).
-        if writeLatch != nil, primarySaveAction != .saveLua {
-            return false
-        }
+        if activeSaveLatch != nil { return false }
         switch primarySaveAction {
         case .saveLua, .updateStoredProfile:
             return isDirty
@@ -66,8 +64,8 @@ extension SettingsModel {
 
     /// Why the primary Save is greyed, where a reason exists.
     var primarySaveBlockedReason: String? {
-        if let writeLatch, primarySaveAction != .saveLua {
-            return NewerFormatText.saveBlocked(writeLatch)
+        if let activeSaveLatch {
+            return NewerFormatText.saveBlocked(activeSaveLatch)
         }
         switch primarySaveAction {
         case .updateActiveProfile:
@@ -79,12 +77,21 @@ extension SettingsModel {
         }
     }
 
+    /// The newer-format latch over the primary Save; an `init.lua`
+    /// Save writes no format-stamped file and is never latched.
+    var activeSaveLatch: NewerFormatOnDisk? {
+        primarySaveAction == .saveLua ? nil : writeLatch
+    }
+
     /// Runs the primary Save. One that needs a name asks the
     /// footer for its naming prompt (`newProfileNamingRequested`).
     func performPrimarySave() {
-        guard writeLatch == nil || primarySaveAction == .saveLua else {
-            return
+        // Read again here: a newer file may have landed since the
+        // last refresh, and the refusal must precede every write.
+        if primarySaveAction != .saveLua {
+            writeLatch = core.guiConfigWriteLatch()
         }
+        guard activeSaveLatch == nil else { return }
         switch primarySaveAction {
         case .saveLua: saveLuaSource()
         case .updateStoredProfile: saveEditedProfile()

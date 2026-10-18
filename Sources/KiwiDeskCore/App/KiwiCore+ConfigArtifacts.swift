@@ -80,6 +80,21 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     }
 }
 
+extension ConfigArtifact {
+    /// The file's name, nil for a folder (`profiles`, the backups);
+    /// `NewerFormatLatchTests` holds it to `KiwiCore.url(of:)`.
+    public var fileName: String? {
+        switch self {
+        case .guiConfig: return "gui.json"
+        case .palettes: return "palettes.json"
+        case .looks: return "looks.json"
+        case .machineConfig: return MachineConfig.fileName
+        case .desktopBindings: return DesktopBindingsFile.fileName
+        case .profiles, .migrationBackups: return nil
+        }
+    }
+}
+
 extension KiwiCore {
     /// Where a migrated rewrite keeps the original (#1880).
     var migrationBackups: URL {

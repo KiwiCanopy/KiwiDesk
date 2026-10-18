@@ -1028,7 +1028,7 @@ Touching `Config`, `Profiles`, `Commands`.
 - a write of a format-stamped config file goes through its store's door,
   which refuses a file a newer build wrote, every raw writer filed in
   `ConfigWriterCensusTests` (#2325), and a newer file latches its store
-  read-only — a Config Issue, no Delete, Settings' Save greyed up front
+  read-only — a Config Issue, Delete greyed, Settings' Save greyed up front
   (#2324, `NewerFormatLatchTests`, `NewerFormatSaveLatchTests`) — while a
   corrupt one is overwritten after a copy through `CorruptFile`
   (`CorruptFilePolicyTests`)

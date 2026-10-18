@@ -70,8 +70,14 @@ public struct GuiConfigStore {
         guard var data = try? Data(contentsOf: url) else {
             return nil
         }
-        let owed = machine.carry(fromLegacy: data)
-        let owedBindings = bindingsFile.carry(fromLegacy: data)
+        let owed = machine.carry(
+            fromLegacy: data,
+            backups: migrationBackups
+        )
+        let owedBindings = bindingsFile.carry(
+            fromLegacy: data,
+            backups: migrationBackups
+        )
         data = MigrationBackup.migrateInPlace(
             data,
             at: url,
@@ -92,12 +98,9 @@ public struct GuiConfigStore {
     /// Writes the sidecar; throws `NewerFormatOnDisk` rather than
     /// replace one a newer build wrote (#2325).
     public func save(_ config: GuiConfig) throws {
-        try NewerFormatOnDisk.refuse(
-            url,
-            .guiConfig,
-            GuiConfig.currentFormat
-        )
-        try machine.refuseNewer()
+        if let refusal = sidecarNewerFormat() ?? machine.newerFormat() {
+            throw refusal
+        }
         CorruptFile.keepBeforeOverwrite(
             url,
             as: GuiConfig.self,
@@ -115,7 +118,10 @@ public struct GuiConfigStore {
         }
         // This Mac's file first: a failed write here leaves the
         // shared file as it was, and with it any carry still owed.
-        try machine.save(MachineConfig(of: config))
+        try machine.save(
+            MachineConfig(of: config),
+            backups: migrationBackups
+        )
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -137,7 +143,7 @@ public struct GuiConfigStore {
         guard let liveDesktopSpaces else { return }
         var stored = machine.load()
         stored.desktopSpaces = liveDesktopSpaces
-        try machine.save(stored)
+        try machine.save(stored, backups: migrationBackups)
     }
 
     /// `save`, with the config's WHOLE binding map written first —
@@ -147,6 +153,8 @@ public struct GuiConfigStore {
     /// write leaves `bindings.json` alone, so a stale copy never
     /// reverts a re-key or a promotion made since (#2324).
     public func saveIncludingBindings(_ config: GuiConfig) throws {
+        // Every file it writes, refused before the first write.
+        if let refusal = newerFormat() { throw refusal }
         try saveBindings(config.profileBindings)
         try save(config)
     }
@@ -159,6 +167,6 @@ public struct GuiConfigStore {
     ) throws {
         var file = bindingsFile.load()
         file.profileBindings = map
-        try bindingsFile.save(file)
+        try bindingsFile.save(file, backups: migrationBackups)
     }
 }

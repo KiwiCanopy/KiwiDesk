@@ -28,6 +28,11 @@ public struct NewerFormatOnDisk: Error, Equatable, Sendable,
         self.format = format
     }
 
+    /// The refused file's name, a profile's included.
+    public var fileName: String {
+        profile.map { "\($0).json" } ?? artifact.fileName ?? "\(artifact)"
+    }
+
     /// English for the log and the CLI, which stay English.
     public var description: String {
         "\(fileName) was written by a newer KiwiDesk (format "

@@ -833,8 +833,9 @@ which refuses a file a newer build wrote.** `GuiConfigStore.save`
 (which asks `machine.json` and `bindings.json` too),
 `ProfileManager.write` / `save` / `delete` and `MachineFileStore.save`
 throw `NewerFormatOnDisk` over a `format` this build does not know,
-and the palette and look libraries refuse through the decode every
-mutating write starts with: the decoder refuses that file, so a
+and the palette and look libraries' save, delete and rename refuse
+through the decode they start with (a restore's replace writes
+only after discarding the file): the decoder refuses that file, so a
 write would replace a setup it never read — on a synced config
 folder, another Mac's. A sequence that writes something else first
 refuses before it (`save`'s sibling defaults, the Lua adoption's
@@ -842,9 +843,9 @@ ledger). A raw rewrite beside the doors asks the one predicate,
 `NewerFormatOnDisk.newerFormat(of:knows:)`, first, as the app-wide
 strip does, unless it rewrites only below the current format by
 construction, as `MigrationBackup` does. Every raw `.write(to:)` in
-Core is filed with its reason and its behavioural suite in
-`ConfigWriterCensusTests`, so a new writer reds until it is
-classified (`NewerFormatWriteRefusalTests`,
+Core is filed with its reason — a config writer's with its
+behavioural suite — in `ConfigWriterCensusTests`, so a new writer
+reds until it is classified (`NewerFormatWriteRefusalTests`,
 `NewerFormatWriteRefusalCallerTests`,
 `NewerFormatLibraryWriteTests`).
 
@@ -854,11 +855,13 @@ classified (`NewerFormatWriteRefusalTests`,
 (`NewerFormatText`, #96). Each store's newer file raises
 `ConfigIssue.Kind.newerFormat`, a newer `gui.json` never reading as
 unreadable; a newer profile is `ProfileBrokenCause.newerFormat`,
-whose row offers no Delete; and Settings greys every structured
+whose row greys Delete; and Settings greys every structured
 Save on `KiwiCore.guiConfigWriteLatch()`, read once per refresh,
 before any of its writes (`NewerFormatLatchTests`,
 `NewerFormatSaveLatchTests`). A new store with a format joins
 `storeNewerFormats` and the census in the same change.
+
+## A corrupt file is overwritten after a copy (#2324 ruling 13)
 
 **A corrupt file — neither readable nor a newer build's — is
 overwritten by its store's next write, after one copy lands in
@@ -867,9 +870,8 @@ this Mac's `migration-backups/` as `<path>.corrupt` (#2324 ruling
 refusal: `GuiConfigStore.save`, `MachineFileStore.save`,
 `ProfileManager.clearForWrite` and each library's `keepCorrupt`
 in its write; a new door takes the same call
-(`CorruptFilePolicyTests`). The ruling's cost: on a synced folder
-a file the sync client is still writing can be replaced, its copy
-on this Mac alone.
+(`CorruptFilePolicyTests`). The ruling's cost is
+`docs/accepted-limitations.md`'s.
 
 ## A new file in the config directory answers the backup question
 

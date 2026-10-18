@@ -161,30 +161,32 @@ public final class LookStore {
     private func writableLibrary() throws -> [ShelfLook] {
         do {
             return try libraryLooks()
-        } catch StoreError.unreadableLibrary where !isNewer {
+        } catch StoreError.unreadableLibrary
+            where newerFormat() == nil
+        {
             return []
         }
     }
 
-    /// Whether a newer build wrote the library.
-    private var isNewer: Bool {
+    /// The library a newer build wrote, if it did (#2325) — the
+    /// one pairing of this file with its format.
+    public func newerFormat() -> NewerFormatOnDisk? {
         NewerFormatOnDisk.check(
             fileURL,
             .looks,
             knows: LookDocument.currentFormat
-        ) != nil
+        )
     }
 
     /// Keeps a corrupt library's copy before `write` replaces it;
-    /// a newer one reaching here is a restore's, not corrupt.
+    /// a newer one reaching here is a restore's, which discarded
+    /// the file first, and is not corrupt.
     private func keepCorrupt() {
-        let newer = isNewer
-        CorruptFile.keepBeforeOverwrite(fileURL, in: migrationBackups) {
-            newer
-                || (try? JSONDecoder().decode(
-                    LookDocument.self,
-                    from: ConfigMigration.migrated($0) ?? $0
-                )) != nil
-        }
+        guard newerFormat() == nil else { return }
+        CorruptFile.keepBeforeOverwrite(
+            fileURL,
+            as: LookDocument.self,
+            in: migrationBackups
+        )
     }
 }

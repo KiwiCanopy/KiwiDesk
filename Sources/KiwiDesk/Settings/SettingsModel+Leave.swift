@@ -79,7 +79,9 @@ extension SettingsModel {
         pendingDiscard = nil
         let needsName = primarySaveAction == .saveAsNewProfile
         performPrimarySave()
-        guard !needsName else { return }
+        // A latched Save asks no name, so the leave settles now
+        // rather than wait for a prompt that never opens (#2324).
+        guard !(needsName && newProfileNamingRequested) else { return }
         finishLeave(proceeding: !isDirty)
     }
 

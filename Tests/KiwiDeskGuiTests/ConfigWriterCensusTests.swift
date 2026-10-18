@@ -34,15 +34,17 @@ struct ConfigWriterCensusTests {
         ),
         "PaletteStore.swift": (
             2,
-            "the library write follows a decode that refuses a "
-                + "newer library (NewerFormatLibraryWriteTests); "
-                + "the export writes a file the user picked"
+            "save, delete and rename decode first, which refuses a "
+                + "newer library (NewerFormatLibraryWriteTests), and "
+                + "a restore replaces after discarding the file; the "
+                + "export writes a file the user picked"
         ),
         "LookStore.swift": (
             2,
-            "the library write follows a decode that refuses a "
-                + "newer library (NewerFormatLibraryWriteTests); "
-                + "the export writes a file the user picked"
+            "save, delete and rename decode first, which refuses a "
+                + "newer library (NewerFormatLibraryWriteTests), and "
+                + "a restore replaces after discarding the file; the "
+                + "export writes a file the user picked"
         ),
         "KiwiCore+AppWide.swift": (
             1,

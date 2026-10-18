@@ -207,30 +207,32 @@ public final class PaletteStore {
     private func writableLibrary() throws -> [ColorPalette] {
         do {
             return try libraryPalettes()
-        } catch StoreError.unreadableLibrary where !isNewer {
+        } catch StoreError.unreadableLibrary
+            where newerFormat() == nil
+        {
             return []
         }
     }
 
-    /// Whether a newer build wrote the library.
-    private var isNewer: Bool {
+    /// The library a newer build wrote, if it did (#2325) — the
+    /// one pairing of this file with its format.
+    public func newerFormat() -> NewerFormatOnDisk? {
         NewerFormatOnDisk.check(
             fileURL,
             .palettes,
             knows: PaletteDocument.currentFormat
-        ) != nil
+        )
     }
 
     /// Keeps a corrupt library's copy before `write` replaces it;
-    /// a newer one reaching here is a restore's, not corrupt.
+    /// a newer one reaching here is a restore's, which discarded
+    /// the file first, and is not corrupt.
     private func keepCorrupt() {
-        let newer = isNewer
-        CorruptFile.keepBeforeOverwrite(fileURL, in: migrationBackups) {
-            newer
-                || (try? JSONDecoder().decode(
-                    PaletteDocument.self,
-                    from: ConfigMigration.migrated($0) ?? $0
-                )) != nil
-        }
+        guard newerFormat() == nil else { return }
+        CorruptFile.keepBeforeOverwrite(
+            fileURL,
+            as: PaletteDocument.self,
+            in: migrationBackups
+        )
     }
 }

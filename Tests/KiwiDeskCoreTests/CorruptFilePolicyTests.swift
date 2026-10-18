@@ -102,6 +102,22 @@ struct CorruptFilePolicyTests {
         #expect(copy(of: core.lookLibrary.url, in: core) == corrupt)
     }
 
+    @Test("a profile's copy never shares a store file's name")
+    func profileCopyIsItsOwn() throws {
+        let dir = try scratch()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let core = makeTestCore(configDirectory: dir)
+        let profileFile = try core.profiles.fileURL(name: "gui")
+        try spoil(profileFile)
+        try spoil(core.url(of: .guiConfig))
+        let other = Data("[ also broken".utf8)
+        try other.write(to: profileFile)
+        try core.guiConfigStore.save(GuiConfig())
+        try core.profiles.write(profile("gui"))
+        #expect(copy(of: core.url(of: .guiConfig), in: core) == corrupt)
+        #expect(copy(of: profileFile, in: core) == other)
+    }
+
     @Test("a readable file leaves no copy")
     func readableFileKeepsNone() throws {
         let dir = try scratch()

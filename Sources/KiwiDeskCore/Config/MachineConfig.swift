@@ -101,10 +101,10 @@ struct MachineFileStore<File: MachineFile> {
     }
 
     /// Writes the leaves; refuses a file a newer build wrote
-    /// (#2325).
-    func save(_ file: File) throws {
+    /// (#2325) and keeps a corrupt one's copy in `backups` (#2324).
+    func save(_ file: File, backups: URL?) throws {
         try refuseNewer()
-        keepCorrupt()
+        keepCorrupt(in: backups)
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -123,7 +123,7 @@ struct MachineFileStore<File: MachineFile> {
     /// every entry (#2324 ruling 10). Returns the leaves still owed
     /// where the write failed, for the caller to compose in memory
     /// without rewriting the file; nil once nothing is owed.
-    func carry(fromLegacy legacy: Data) -> File? {
+    func carry(fromLegacy legacy: Data, backups: URL?) -> File? {
         guard
             let format =
                 (try? JSONSerialization.jsonObject(with: legacy)
@@ -160,7 +160,8 @@ struct MachineFileStore<File: MachineFile> {
         // where the write fails.
         guard let merged = Self.decoded(stored) else { return carried }
         do {
-            try save(merged)
+            // A corrupt file read as empty above keeps its copy.
+            try save(merged, backups: backups)
             return nil
         } catch {
             return merged

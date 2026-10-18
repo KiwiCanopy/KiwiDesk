@@ -23,38 +23,36 @@ extension MachineFileStore {
         if let refusal = newerFormat() { throw refusal }
     }
 
-    /// Keeps a corrupt file's copy before `save` overwrites it
-    /// (#2324 ruling 13), in the backups beside it in the machine
-    /// folder. Read as-is, as `load()` reads it.
-    func keepCorrupt() {
+    /// Keeps a corrupt file's copy in `backups` before `save`
+    /// overwrites it (#2324 ruling 13). Read as-is, as `load()`
+    /// reads it.
+    func keepCorrupt(in backups: URL?) {
         CorruptFile.keepBeforeOverwrite(
             url,
             as: File.self,
             migrating: false,
-            in: url.deletingLastPathComponent()
-                .appendingPathComponent(MigrationBackup.folderName)
+            in: backups
         )
     }
 }
 
-extension ConfigArtifact {
-    /// The file's name, nil for a folder (`profiles`, the backups);
-    /// `NewerFormatLatchTests` holds it to `KiwiCore.url(of:)`.
-    public var fileName: String? {
-        switch self {
-        case .guiConfig: return "gui.json"
-        case .palettes: return "palettes.json"
-        case .looks: return "looks.json"
-        case .machineConfig: return MachineConfig.fileName
-        case .desktopBindings: return DesktopBindingsFile.fileName
-        case .profiles, .migrationBackups: return nil
-        }
+extension GuiConfigStore {
+    /// The refusal `saveIncludingBindings`, which every Settings
+    /// Save ends in, owes (#2325): `gui.json` or either machine
+    /// file a newer build wrote — the one list the Settings latch
+    /// reads too (`KiwiCore.guiConfigWriteLatch`).
+    public func newerFormat() -> NewerFormatOnDisk? {
+        sidecarNewerFormat()
+            ?? machine.newerFormat()
+            ?? bindingsFile.newerFormat()
     }
-}
 
-extension NewerFormatOnDisk {
-    /// The refused file's name, a profile's included.
-    public var fileName: String {
-        profile.map { "\($0).json" } ?? artifact.fileName ?? "\(artifact)"
+    /// `gui.json` alone, a newer one.
+    func sidecarNewerFormat() -> NewerFormatOnDisk? {
+        NewerFormatOnDisk.check(
+            url,
+            .guiConfig,
+            knows: GuiConfig.currentFormat
+        )
     }
 }

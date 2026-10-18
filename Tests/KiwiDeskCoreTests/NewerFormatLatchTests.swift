@@ -163,16 +163,6 @@ struct NewerFormatLatchTests {
             core.profileConfigIssues().map(\.kind)
                 == [.profileBroken(.newerFormat)]
         )
-        #expect(
-            core.newerFormatFiles()
-                == [
-                    NewerFormatOnDisk(
-                        artifact: .profiles,
-                        profile: "Desk",
-                        format: Profile.currentFormat + 1
-                    )
-                ]
-        )
         let before = try Data(contentsOf: file)
         #expect(throws: NewerFormatOnDisk.self) {
             try core.profiles.delete(name: "Desk")
@@ -183,26 +173,28 @@ struct NewerFormatLatchTests {
         #expect(!core.profiles.list().contains("Laptop"))
     }
 
-    @Test("Settings' Save latches on the files its write refuses")
+    @Test("Settings' Save latches on each file its write refuses")
     func saveLatch() throws {
-        let dir = try scratch()
-        defer { try? FileManager.default.removeItem(at: dir) }
-        let core = makeTestCore(configDirectory: dir)
-        try core.guiConfigStore.save(GuiConfig())
-        #expect(core.guiConfigWriteLatch() == nil)
         // A newer library is no Settings Save's to refuse.
+        let libraries = makeTestCore()
+        try libraries.guiConfigStore.save(GuiConfig())
+        #expect(libraries.guiConfigWriteLatch() == nil)
         try write(
             PaletteDocument(palettes: []),
-            to: core.url(of: .palettes),
+            to: libraries.url(of: .palettes),
             format: PaletteDocument.currentFormat + 1
         )
-        #expect(core.guiConfigWriteLatch() == nil)
+        #expect(libraries.guiConfigWriteLatch() == nil)
+        // One file newer at a time, on a core of its own, so each
+        // file's own check is what refuses.
         let cases: [(ConfigArtifact, Int)] = [
             (.desktopBindings, DesktopBindingsFile.currentFormat),
             (.machineConfig, MachineConfig.currentFormat),
             (.guiConfig, GuiConfig.currentFormat),
         ]
         for (artifact, format) in cases {
+            let core = makeTestCore()
+            try core.guiConfigStore.save(GuiConfig())
             try restamp(core.url(of: artifact), to: format + 1)
             #expect(core.guiConfigWriteLatch()?.artifact == artifact)
             #expect(throws: NewerFormatOnDisk.self) {

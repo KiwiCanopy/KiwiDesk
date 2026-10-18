@@ -61,9 +61,83 @@ struct NewerFormatSaveLatchTests {
                 == "A newer KiwiDesk saved gui.json, so this version "
                 + "won't overwrite it. Update KiwiDesk to keep syncing."
         )
-        let before = try Data(contentsOf: file)
+        #expect(model.primarySaveAction == .saveAsNewProfile)
         model.performPrimarySave()
-        #expect(try Data(contentsOf: file) == before)
+        #expect(!model.newProfileNamingRequested)
+    }
+
+    @Test("a newer file landing after the refresh still stops Save")
+    func latchIsReadAtTheSave() throws {
+        LocalizationManager.shared.select("en")
+        let model = try makeDirtyModel()
+        model.refreshProfiles()
+        #expect(model.primarySaveAction == .saveAsNewProfile)
+        // The control: without a latch the Save goes ahead.
+        model.performPrimarySave()
+        #expect(model.newProfileNamingRequested)
+        model.newProfileNamingRequested = false
+        try restamp(
+            model.core.guiConfigStore.url,
+            to: GuiConfig.currentFormat + 1
+        )
+        #expect(model.writeLatch == nil)
+        model.performPrimarySave()
+        #expect(!model.newProfileNamingRequested)
+        #expect(model.writeLatch?.artifact == .guiConfig)
+    }
+
+    /// A close question answered Save while a newer file landed
+    /// settles at once, rather than wait for a naming prompt the
+    /// latched Save never opens (`DraftLeaveTests` ▸
+    /// `saveAsNewWaitsForName` is the unlatched control).
+    @Test("a latched Save-and-close settles the leave")
+    func latchedLeaveSettles() throws {
+        LocalizationManager.shared.select("en")
+        let model = try makeDirtyModel()
+        model.refreshProfiles()
+        #expect(model.primarySaveAction == .saveAsNewProfile)
+        var proceeded = 0
+        var cancelled = 0
+        model.leavingDraft(
+            .close,
+            proceed: { proceeded += 1 },
+            cancel: { cancelled += 1 }
+        )
+        let pending = try #require(model.pendingDiscard)
+        try restamp(
+            model.core.guiConfigStore.url,
+            to: GuiConfig.currentFormat + 1
+        )
+        model.saveAndLeave(pending)
+        #expect(!model.newProfileNamingRequested)
+        #expect(proceeded == 0)
+        #expect(cancelled == 1)
+    }
+
+    /// Both Delete buttons for a broken profile grey a newer
+    /// build's, from the cause the row already carries; Core's own
+    /// refusal is `NewerFormatLatchTests`'.
+    @Test("a newer profile's Delete is greyed on both surfaces")
+    func deleteIsGreyed() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let section = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/"
+                    + "ProfilesSection+Broken.swift"
+            )
+        )
+        #expect(section.contains(".disabled(broken.cause == .newerFormat)"))
+        let window = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/ConfigIssuesWindow.swift"
+            )
+        )
+        #expect(
+            window.contains(
+                "deletable: issue.kind != .profileBroken(.newerFormat)"
+            )
+        )
+        #expect(window.contains(".disabled(!deletable)"))
     }
 
     @Test("a thrown refusal reads as its sentence, else as the log")

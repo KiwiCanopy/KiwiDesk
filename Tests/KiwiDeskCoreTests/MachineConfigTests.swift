@@ -133,7 +133,7 @@ struct MachineConfigTests {
         let store = store(dir)
         var own = MachineConfig()
         own.desktopSpaces = [.identity(stamp): SpaceID("9")]
-        try store.machine.save(own)
+        try store.machine.save(own, backups: nil)
         try writeLegacy(remembering, to: store)
         #expect(store.load()?.desktopSpaces == own.desktopSpaces)
     }
@@ -175,7 +175,7 @@ struct MachineConfigTests {
         let store = store(dir)
         var own = MachineConfig()
         own.desktopSpaces = [.identity(stamp): SpaceID("9")]
-        try store.machine.save(own)
+        try store.machine.save(own, backups: nil)
         try writeLegacy(remembering, to: store)
         let folder = store.machine.url.deletingLastPathComponent()
         try files.setAttributes(

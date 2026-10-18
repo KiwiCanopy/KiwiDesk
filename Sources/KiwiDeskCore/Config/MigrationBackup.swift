@@ -14,6 +14,11 @@ enum MigrationBackup {
     /// The folder's name in the machine folder.
     static let folderName = "migration-backups"
 
+    /// The folder in `machine`, `MachineLocation`'s folder.
+    static func folder(in machine: URL) -> URL {
+        machine.appendingPathComponent(folderName)
+    }
+
     /// `data` migrated by `ConfigMigration`, rewritten over `file`
     /// once its original is kept in `backups`; `data` itself when
     /// nothing migrates. A copy that fails to land leaves the file
@@ -49,10 +54,15 @@ enum MigrationBackup {
         let root = backups.deletingLastPathComponent()
             .standardizedFileURL.path
         let path = file.standardizedFileURL.path
+        // A config-folder file keeps its folder's relative path, so
+        // a profile named `gui` never shares `gui.json`'s copy.
+        let parent = file.deletingLastPathComponent().lastPathComponent
         let relative =
             path.hasPrefix(root + "/")
             ? String(path.dropFirst(root.count + 1))
-            : file.lastPathComponent
+            : parent == "profiles"
+                ? "profiles/" + file.lastPathComponent
+                : file.lastPathComponent
         return backups.appendingPathComponent(relative + suffix)
     }
 
