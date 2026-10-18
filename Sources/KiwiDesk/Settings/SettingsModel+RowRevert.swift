@@ -13,6 +13,13 @@ extension SettingsModel {
         }
     }
 
+    /// Whether `row`'s ↺ takes its whole group back — every shortcut
+    /// change — and so asks first.
+    func revertTakesGroup(_ row: SettingsDiffRow) -> Bool {
+        row.revert == .census
+            && SettingsRevertRegister.writers[row.key]?.takesGroup == true
+    }
+
     /// Takes `row`'s change back to the baseline.
     func revert(_ row: SettingsDiffRow) {
         switch row.revert {

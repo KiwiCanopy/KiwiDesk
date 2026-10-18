@@ -102,7 +102,7 @@ extension SettingsRevertRegister {
         model.reachEdits.removal[.key] = nil
         model.reachEdits.layers = [:]
         model.reachEdits.deletedLayers = [:]
-    }
+    }.grouped()
 
     private static func scroll<V>(
         _ path: WritableKeyPath<GuiConfig, V>

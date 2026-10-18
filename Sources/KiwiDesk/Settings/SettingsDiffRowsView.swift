@@ -21,6 +21,9 @@ struct SettingsDiffRowsView: View {
     @State private var hoveredRow: String?
     /// Rows a keyboard ↺ may hand focus to, nearest first.
     @State private var focusAfterRevert: [String] = []
+    /// A group ↺ waiting on its question: the row and its list.
+    @State private var pendingGroup:
+        (row: SettingsDiffRow, shown: [SettingsDiffRow])?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -31,6 +34,45 @@ struct SettingsDiffRowsView: View {
             liveSection
         }
         .onChange(of: rows.map(\.id)) { _, _ in settleRevertFocus() }
+        .alert(
+            GroupRevertWords.title,
+            isPresented: groupQuestionShown,
+            presenting: pendingGroup?.row
+        ) { _ in
+            Button(GroupRevertWords.confirm, role: .destructive) {
+                confirmGroupRevert()
+            }
+            Button(L("footer.cancel", "Cancel"), role: .cancel) {}
+        } message: { _ in
+            Text(GroupRevertWords.message)
+        }
+    }
+
+    private var groupQuestionShown: Binding<Bool> {
+        Binding(
+            get: { pendingGroup != nil },
+            set: { if !$0 { pendingGroup = nil } }
+        )
+    }
+
+    /// A ↺ that takes its whole group asks first (owner,
+    /// 2026-10-19); any other reverts at once.
+    private func requestRevert(
+        _ row: SettingsDiffRow,
+        among shown: [SettingsDiffRow],
+        with revert: DiffRowRevert
+    ) {
+        if revert.takesGroup(row) {
+            pendingGroup = (row, shown)
+        } else {
+            revertRow(row, among: shown, with: revert)
+        }
+    }
+
+    private func confirmGroupRevert() {
+        guard let pending = pendingGroup, let revert else { return }
+        pendingGroup = nil
+        revertRow(pending.row, among: pending.shown, with: revert)
     }
 
     /// A draft row, with its ↺ where it has a way back (#792).
@@ -42,8 +84,8 @@ struct SettingsDiffRowsView: View {
         if let revert, revert.can(row) {
             HStack(spacing: 6) {
                 rowButton(row)
-                RowRevertButton(row: row) {
-                    revertRow(row, among: shown, with: revert)
+                RowRevertButton(row: row, group: revert.takesGroup(row)) {
+                    requestRevert(row, among: shown, with: revert)
                 }
                 .focused($focusedRevert, equals: row.id)
                 .opacity(showsRevert(row, revert) ? 1 : 0)
@@ -58,7 +100,7 @@ struct SettingsDiffRowsView: View {
             .rowActions {
                 // A menu row: the style is the menu's.
                 Button(DiffRowRevert.actionName) {
-                    revertRow(row, among: shown, with: revert)
+                    requestRevert(row, among: shown, with: revert)
                 }
                 .buttonStyle(.plain)
             }

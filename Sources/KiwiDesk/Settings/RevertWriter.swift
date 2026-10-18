@@ -11,6 +11,16 @@ struct RevertWriter {
     /// writer to its key.
     let paths: [String]
     let apply: (SettingsModel, _ instance: String?) -> Void
+    /// Whether the writer takes every change of its group back, not
+    /// only the row's — its ↺ asks first (owner, 2026-10-19).
+    var takesGroup = false
+
+    /// This writer, asking before it takes its whole group back.
+    func grouped() -> Self {
+        var writer = self
+        writer.takesGroup = true
+        return writer
+    }
 
     /// One leaf, whole.
     static func leaf<V>(_ path: WritableKeyPath<GuiConfig, V>) -> Self {

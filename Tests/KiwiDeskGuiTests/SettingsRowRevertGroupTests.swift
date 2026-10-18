@@ -108,6 +108,48 @@ struct SettingsRowRevertGroupTests {
         #expect(model.config.appRules["com.apple.Notes"] == SpaceID("new"))
     }
 
+    /// Only the shortcut layers' ↺ takes a group the row does not
+    /// name, so only it asks first (owner, 2026-10-19).
+    @Test("only a shortcut row's ↺ asks before reverting")
+    func onlyShortcutsAsk() {
+        let model = makeTestModel()
+        #expect(model.revertTakesGroup(censusRow(.shortcuts(.layers), nil)))
+        #expect(
+            model.revertTakesGroup(censusRow(.shortcuts(.layersIcon), nil))
+        )
+        #expect(
+            !model.revertTakesGroup(censusRow(.borders(.borderWidth), nil))
+        )
+        #expect(
+            !model.revertTakesGroup(censusRow(.spaces(.spaceList), "1"))
+        )
+        let groups = SettingsRevertRegister.writers
+            .filter { $0.value.takesGroup }.keys
+        #expect(
+            Set(groups) == [
+                .shortcuts(.layers), .shortcuts(.layersIcon),
+                .shortcuts(.desktopShortcutBase),
+            ]
+        )
+    }
+
+    /// The ↺ and the row menu both go through the door that asks;
+    /// only that door and the confirmation revert.
+    @Test("both ways to a ↺ go through the question")
+    func revertsAskThroughOneDoor() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/SettingsDiffRowsView.swift"
+            )
+        let text = try SourceScan.strippedSource(at: url)
+        let count = { (needle: String) in
+            text.components(separatedBy: needle).count - 1
+        }
+        #expect(count("requestRevert(row, among: shown, with: revert)") == 2)
+        // The door's own branch and the confirmation.
+        #expect(count("revertRow(") == 3)
+    }
+
     /// The Position master clears every screen's own edge through
     /// the doors; its ↺ puts both bars' pairs back.
     @Test("the edge master puts both edges and their screens back")

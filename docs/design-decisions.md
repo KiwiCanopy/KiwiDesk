@@ -7150,7 +7150,10 @@ with its per-screen map, as the edge doors write them, and the
 master with both bars'; a rule takes the reach the draft gave it
 (#1393); and the shortcut layers go back whole, with the Desktop
 base, every key reach and every layer edit, since a binding's reach
-is keyed into the layers it was encoded against (#2022). A row says
+is keyed into the layers it was encoded against (#2022). That last
+group is the one a row cannot name — one binding's ↺ would take
+every other binding change with it — so its ↺ says so and asks
+first (`RevertWriter.grouped`, owner 2026-10-19). A row says
 how it reverts and offers no ↺ until it does: a lens or layer edit,
 profile drift, a live change and a leaf no key claims draw none.
 Whether the popover's Revert all reaches live state stays open with
