@@ -28,8 +28,9 @@ struct ConfigWriterCensusTests {
                 + "(NewerFormatWriteRefusalTests)"
         ),
         "MachineConfig.swift": (
-            1,
-            "a machine file's door refuses a newer one "
+            2,
+            "a machine file's door, and the raw carry of undecodable "
+                + "owed leaves, refuse a newer one "
                 + "(MachineConfigTests, NewerFormatLatchTests)"
         ),
         "PaletteStore.swift": (

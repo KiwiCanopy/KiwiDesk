@@ -149,9 +149,9 @@ struct MachineFileStore<File: MachineFile> {
         for (key, value) in owed where Self.isEmpty(stored[key]) {
             stored[key] = value
         }
-        // Owed leaves that will not decode move as they stand: the
-        // new home keeps the bytes and refuses to overwrite them
-        // (`keepsUnreadable`), so the strip loses nothing.
+        // Owed leaves that will not decode move as they stand, and
+        // the next write keeps their copy before replacing them
+        // (#2324 ruling 13), so the strip loses nothing.
         guard let carried = Self.decoded(owed) else {
             return writeRaw(stored) ? nil : File()
         }
@@ -172,8 +172,7 @@ struct MachineFileStore<File: MachineFile> {
     /// format; false where it cannot land or a newer build owns
     /// the file.
     private func writeRaw(_ root: [String: Any]) -> Bool {
-        guard NewerFormatOnDisk.check(url, knows: File.currentFormat) == nil
-        else { return false }
+        guard newerFormat() == nil else { return false }
         var root = root
         root["format"] = File.currentFormat
         guard
