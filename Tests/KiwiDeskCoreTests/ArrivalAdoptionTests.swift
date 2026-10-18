@@ -33,6 +33,9 @@ struct ArrivalAdoptionTests {
     final class Listing: @unchecked Sendable {
         var count = 3
         var layers: [WindowID: Int] = [:]
+        /// Windows whose traits read as a shell: no title-bar
+        /// button and no child (#1785).
+        var shells: Set<WindowID> = []
     }
 
     @MainActor
@@ -90,8 +93,8 @@ struct ArrivalAdoptionTests {
             AXUIElementCreateApplication(902_001 + pid_t($0))
         }
         let listing = Listing()
-        loop.axWindows = { _ in Array(elements.prefix(listing.count)) }
         loop.offMain.readLayers = { _ in listing.layers }
+        loop.axWindows = { _ in Array(elements.prefix(listing.count)) }
         loop.resolveWindowID = { element in
             elements.firstIndex { CFEqual($0, element) }.map { ids[$0] }
         }
@@ -108,15 +111,22 @@ struct ArrivalAdoptionTests {
                 layer: layer
             ) { "Arrived" }
         }
-        loop.shadows.traits = { _, id in
+        loop.shadows.traits = { element, known in
+            // A sibling read names no id.
+            let id =
+                known
+                ?? elements.firstIndex { CFEqual($0, element) }.map {
+                    ids[$0]
+                }
             MainActor.assumeIsolated {
                 if box.applying { box.applySeams.append("traits") }
             }
             return id.map {
-                WindowTraits(
+                let shell = listing.shells.contains($0)
+                return WindowTraits(
                     id: $0,
-                    hasTitlebarButton: true,
-                    childCount: 3,
+                    hasTitlebarButton: !shell,
+                    childCount: shell ? 0 : 3,
                     frame: .zero
                 )
             }
@@ -260,5 +270,16 @@ struct ArrivalAdoptionTests {
         for id in arrivals { listing.layers[id] = 0 }
         loop.reconcileOffMain(pid: pid, app: ref)
         #expect(box.applyCalls >= arrivals.count)
+    }
+
+    /// The shadow rule judges an arrival too, on the traits the
+    /// read took: a shell beside a buttoned sibling never tiles.
+    @Test("an arrival that reads as a shadow is not adopted")
+    func shadowArrivalIsRefused() {
+        let (loop, box, _, listing) = makeLoop()
+        listing.shells = [arrivals[1]]
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(box.created.map(\.id) == [arrivals[0]])
+        #expect(loop.shadows.holds(arrivals[1], pid: pid))
     }
 }
