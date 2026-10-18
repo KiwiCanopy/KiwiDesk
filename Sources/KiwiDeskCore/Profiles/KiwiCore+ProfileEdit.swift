@@ -95,7 +95,6 @@ extension KiwiCore {
             copy.look = .own
         }
         try profiles.write(copy)
-        promotePendingBindings()
         return copy.name
     }
 

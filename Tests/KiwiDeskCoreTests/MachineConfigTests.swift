@@ -71,7 +71,7 @@ struct MachineConfigTests {
         let dir = scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
         let store = store(dir)
-        try store.save(remembering)
+        try store.saveIncludingBindings(remembering)
         #expect(try root(store.url)["desktop_spaces"] == nil)
         #expect(try root(store.machine.url)["desktop_spaces"] != nil)
         #expect(store.load()?.desktopSpaces == remembering.desktopSpaces)

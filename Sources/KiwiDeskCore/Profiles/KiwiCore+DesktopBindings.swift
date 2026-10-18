@@ -52,27 +52,26 @@ extension KiwiCore {
             .first
     }
 
-    /// The one sidecar rewrite of the binding table (#1392):
-    /// `edit` runs over the store's OWN map and the result goes
-    /// through `saveGuiConfig` — or the bare store on a paused
-    /// cold boot, where a reload would be the session's first
-    /// (#516). Throws `SidecarError` rather than minting or
-    /// overwriting a file.
+    /// The one rewrite of the stored binding table (#1392): `edit`
+    /// runs over `bindings.json`'s OWN map, written through its one
+    /// door (#2324). Throws `SidecarError` rather than minting a
+    /// config or editing one that no longer decodes.
     public func rewriteSidecarBindings(
         _ edit: (inout [DesktopKey: DesktopBinding]) -> Void
     ) throws {
         guard guiConfigStore.exists else {
             throw SidecarError.missing
         }
-        guard var live = guiConfigStore.load() else {
+        guard guiConfigStore.load() != nil else {
             throw SidecarError.unreadable
         }
-        edit(&live.profileBindings)
-        if lua == nil {
-            try guiConfigStore.save(live)
-        } else {
-            try saveGuiConfig(live)
-        }
+        // `bindings.json` alone (#2324): a bindings edit writes no
+        // `gui.json`, and the runtime map, which a GUI-managed
+        // config's structured apply set from that file, follows.
+        var map = guiConfigStore.bindingsFile.load().profileBindings
+        edit(&map)
+        try guiConfigStore.saveBindings(map)
+        desktopBindings = map
     }
 
     /// Re-keys and re-projects every binding this topology can
@@ -100,9 +99,10 @@ extension KiwiCore {
         // running layout into gui.json on a Desktop switch, with
         // no user Save. Neither of profiles.md's two ruled
         // profile writes is that (code review, 2026-09-04).
-        guard isGuiManaged, var live = guiConfigStore.load() else {
-            return
-        }
+        guard isGuiManaged else { return }
+        var live = GuiConfig()
+        live.profileBindings =
+            guiConfigStore.bindingsFile.load().profileBindings
         let sidecar = Self.bindingMoves(
             in: live.profileBindings,
             snapshot: snapshot,

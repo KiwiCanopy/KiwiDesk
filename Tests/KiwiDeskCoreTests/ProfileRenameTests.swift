@@ -115,7 +115,7 @@ struct ProfileRenameTests {
         save(core, "desk")
         var config = GuiConfig()
         config.profileBindings = bound((2, "desk"))
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         core.desktopBindings = bound((2, "desk"))
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
@@ -139,7 +139,7 @@ struct ProfileRenameTests {
         save(core, "desk")
         var config = GuiConfig()
         config.profileBindings = bound((2, "desk"))
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         // Space 3 exists only in the runtime map, as if
         // init.lua registered it — the follow must not
         // materialize it into gui.json.
@@ -186,7 +186,7 @@ struct ProfileRenameTests {
         // Marker: a follow-up save would overwrite the
         // stored spaces with the live list.
         config.spaces = [SpaceID("zed")]
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         core.desktopBindings = bound((2, "other"))
         try core.renameProfile(from: "desk", to: "studio")
         let sidecar = core.guiConfigStore.load()

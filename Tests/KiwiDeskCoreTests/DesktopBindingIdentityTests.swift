@@ -229,7 +229,7 @@ struct DesktopBindingIdentityTests {
             .number(2): DesktopBinding(profile: "Work", desktop: 2)
         ]
         stored.spaces = [SpaceID("stored-only")]
-        try core.guiConfigStore.save(stored)
+        try core.guiConfigStore.saveIncludingBindings(stored)
         core.desktopBindings = stored.profileBindings
 
         _ = core.stampedDesktopSnapshot()

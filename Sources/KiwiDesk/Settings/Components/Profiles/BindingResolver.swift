@@ -1,39 +1,71 @@
 import KiwiDeskCore
 
-/// How the Desktops card reads a binding entry against the saved
-/// profiles (#2324): by id where the entry names one — so a
-/// profile renamed on another Mac shows its current name and a
-/// deleted one reads as gone, whatever its label says — and by
-/// name for a pending entry. The one lens every card reader takes,
-/// never a name→count map beside it.
+/// Core's verdict per binding entry, as the model holds it.
+typealias BindingResolutions =
+    [DesktopBinding.Entry.Key: BindingResolution]
+
+/// How the Desktops card reads a binding entry (#2324): through
+/// Core's one `BindingResolution` per entry, which the model reads
+/// at refresh — so the card never decides "missing" or "couldn't
+/// load" itself, and a profile renamed on another Mac shows its
+/// current name. The one lens every card reader takes.
 struct BindingResolver: Equatable {
-    /// Each readable saved profile's current name, by id.
-    let names: [ProfileID: String]
+    /// Core's verdict per entry, from the last refresh.
+    let resolutions: [DesktopBinding.Entry.Key: BindingResolution]
     /// Each readable saved profile's screen count, by name.
     let counts: [String: Int]
+    /// The saved profiles' ids, by name — what a picker's pick
+    /// files, never a lookup of a stored entry.
+    let pickable: [String: ProfileID]
+    /// The live profile, from adoption state.
+    let liveID: ProfileID?
 
-    init(_ profiles: [ProfileSummary]) {
-        names = Dictionary(
-            profiles.map { ($0.profileID, $0.name) },
-            uniquingKeysWith: { first, _ in first }
-        )
+    init(
+        _ profiles: [ProfileSummary],
+        resolutions: [DesktopBinding.Entry.Key: BindingResolution],
+        liveID: ProfileID?
+    ) {
+        self.resolutions = resolutions
         counts = Dictionary(
             profiles.map { ($0.name, $0.count) },
             uniquingKeysWith: { first, _ in first }
         )
+        pickable = Dictionary(
+            profiles.map { ($0.name, $0.profileID) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        self.liveID = liveID
     }
 
-    /// A resolver over profiles known by name alone — pending
-    /// entries resolve, entries naming an id do not.
+    /// A resolver over pending entries known by name alone, for a
+    /// fixture with no Core to resolve through.
     init(counts: [String: Int]) {
-        names = [:]
+        resolutions = [:]
         self.counts = counts
+        pickable = [:]
+        liveID = nil
     }
 
-    /// The saved profile `entry` names, nil where none does.
+    /// The saved profile `entry` names, nil where none does. An
+    /// entry a pick filed since the last refresh — not resolved by
+    /// Core yet — reads the name it was picked by.
     func name(of entry: DesktopBinding.Entry) -> String? {
-        if let id = entry.id { return names[id] }
-        return counts[entry.name] == nil ? nil : entry.name
+        switch resolutions[entry.key] {
+        case .profile(let file)?: return file
+        case .unreadable?, .missing?: return nil
+        case nil:
+            if let id = entry.id {
+                return pickable[entry.name] == id ? entry.name : nil
+            }
+            return counts[entry.name] == nil ? nil : entry.name
+        }
+    }
+
+    /// Whether Core read `entry`'s profile file and it will not
+    /// decode.
+    func isUnreadable(_ entry: DesktopBinding.Entry) -> Bool {
+        if case .unreadable? = resolutions[entry.key] { return true }
+        return false
     }
 
     /// What a row shows: the saved profile's name, else the label.
@@ -52,18 +84,13 @@ struct BindingResolver: Equatable {
         named name: String,
         setup: [String]? = nil
     ) -> DesktopBinding.Entry {
-        DesktopBinding.Entry(
-            id: names.first { $0.value == name }?.key,
-            name: name,
-            setup: setup
-        )
+        DesktopBinding.Entry(id: pickable[name], name: name, setup: setup)
     }
 
-    /// The live profile as a binding names it.
+    /// The live profile as a binding names it, its id from
+    /// adoption state.
     func live(_ name: String?) -> (id: ProfileID, name: String)? {
-        guard let name,
-            let id = names.first(where: { $0.value == name })?.key
-        else { return nil }
-        return (id, name)
+        guard let name, let liveID else { return nil }
+        return (liveID, name)
     }
 }

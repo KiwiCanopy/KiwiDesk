@@ -33,8 +33,9 @@ struct DesktopBindingSlotWriteTests {
                 == ["Laptop", "Dual"]
         )
         // Re-picking a count replaces that count's entry alone.
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Solo", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Solo", count: 1),
+            to: model
         )
         card.write("Solo", key: live, slot: .count(1, setup: nil))
         #expect(
@@ -56,15 +57,17 @@ struct DesktopBindingSlotWriteTests {
     @Test("a pick replaces every entry of its count")
     func pickReplacesEveryEntryOfItsCount() {
         let (card, model) = DesktopBindingFixture.makeCard()
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Solo", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Solo", count: 1),
+            to: model
         )
         model.config.profileBindings[live] = DesktopBinding(
             profiles: ["Laptop", "Solo", "Dual"],
             desktop: 7
         )
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Third", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Third", count: 1),
+            to: model
         )
         card.write("Third", key: live, slot: .count(1, setup: nil))
         #expect(
@@ -133,17 +136,20 @@ struct DesktopBindingSlotWriteTests {
     @Test("the picker names the live entry among two of one count")
     func pickerPrefersTheLiveEntry() {
         let (card, model) = DesktopBindingFixture.makeCard()
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Solo", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Solo", count: 1),
+            to: model
         )
         model.config.profileBindings[live] = DesktopBinding(
             profiles: ["Laptop", "Solo"],
             desktop: 1
         )
         model.activeProfile = "Solo"
+        model.activeProfileID = .legacy(name: "Solo")
         let all = BindingSlot.count(1, setup: nil)
         #expect(card.boundName(key: live, slot: all) == "Solo")
         model.activeProfile = "Other"
+        model.activeProfileID = .legacy(name: "Other")
         #expect(card.boundName(key: live, slot: all) == "Laptop")
     }
 

@@ -236,13 +236,14 @@ On a Mac where KiwiDesk cannot write the identifier, bindings
 key by the Mission Control number — the behaviour above minus
 the protection.
 
-
 :::unreleased
 A binding follows its **profile** the same way: it names the
 profile by an identifier the profile file keeps, so renaming the
-profile — here or on another Mac sharing your setup — keeps the
-binding. Delete the profile and the row reads *Missing profiles*;
-a new profile under the old name does not take it over.
+profile — on this Mac or on another one syncing your config
+folder — keeps the binding. Delete the profile and the binding
+moves under *Missing profiles* in the card; a new profile under
+the old name does not take it over. A binding written in
+`init.lua` names its profile on every load and follows the name.
 :::
 
 ## "Displays have separate Spaces" decides the nesting

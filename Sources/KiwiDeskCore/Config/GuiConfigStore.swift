@@ -97,10 +97,6 @@ public struct GuiConfigStore {
             machine.url,
             MachineConfig.currentFormat
         )
-        try NewerFormatOnDisk.refuse(
-            bindingsFile.url,
-            DesktopBindingsFile.currentFormat
-        )
         var config = config
         if let liveDesktopSpaces {
             config.desktopSpaces = liveDesktopSpaces
@@ -114,7 +110,6 @@ public struct GuiConfigStore {
         // This Mac's file first: a failed write here leaves the
         // shared file as it was, and with it any carry still owed.
         try machine.save(MachineConfig(of: config))
-        try bindingsFile.save(DesktopBindingsFile(of: config))
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -139,9 +134,19 @@ public struct GuiConfigStore {
         try machine.save(stored)
     }
 
+    /// `save`, with the config's Desktop bindings written first —
+    /// for the writers that AUTHOR bindings (a Settings Save, the
+    /// Lua adoption, a restore). Every other `gui.json` write
+    /// leaves `bindings.json` alone, so a caller's stale copy never
+    /// reverts a re-key or a promotion made since (#2324).
+    public func saveIncludingBindings(_ config: GuiConfig) throws {
+        try saveBindings(config.profileBindings)
+        try save(config)
+    }
+
     /// Writes the Desktop bindings into `bindings.json` alone —
-    /// this Mac's file, so a machine event (a re-key) writes
-    /// nothing another Mac shares (#2324).
+    /// its one write door, and this Mac's file, so a machine event
+    /// (a re-key) writes nothing another Mac shares (#2324).
     public func saveBindings(
         _ map: [DesktopKey: DesktopBinding]
     ) throws {

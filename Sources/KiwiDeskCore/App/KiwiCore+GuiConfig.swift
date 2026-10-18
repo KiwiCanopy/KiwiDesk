@@ -238,7 +238,7 @@ extension KiwiCore {
     /// keybindings directly from the sidecar (#55). `init.lua`
     /// is not touched.
     public func saveGuiConfig(_ config: GuiConfig) throws {
-        try guiConfigStore.save(config)
+        try guiConfigStore.saveIncludingBindings(config)
         loadConfig()
     }
 
@@ -294,7 +294,7 @@ extension KiwiCore {
         )
         // The executed values travel with the rest (#1741).
         storeLiveAppWide()
-        try guiConfigStore.save(config)
+        try guiConfigStore.saveIncludingBindings(config)
         stripLegacyAppWide()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"

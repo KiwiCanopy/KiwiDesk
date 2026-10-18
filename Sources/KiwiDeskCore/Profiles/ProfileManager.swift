@@ -86,6 +86,9 @@ public final class ProfileManager {
     /// the core that owns the config directory; nil keeps none.
     var migrationBackups: URL?
 
+    /// Fired after every profile write lands (#2324).
+    var onProfileWritten: @MainActor () -> Void = {}
+
     /// `ProfileIndex`, with the folder stamp it was built at.
     var idIndex: (stamp: Date?, index: ProfileIndex)?
 
@@ -151,10 +154,11 @@ public final class ProfileManager {
     /// Deletes a profile, repairing orphaned count defaults if needed.
     func delete(name: String) throws {
         let deleted = try? read(name: name)
+        let stamp = folderStamp()
         try FileManager.default.removeItem(
             at: url(for: validated(name))
         )
-        invalidateIndex()
+        updateIndex(stampBefore: stamp) { $0.remove(file: name) }
         if currentName == name {
             active = nil
             isDirty = true
@@ -194,32 +198,14 @@ public final class ProfileManager {
         {
             throw ProfileError.nameTaken(new)
         }
+        let stamp = folderStamp()
         try files.moveItem(at: source, to: destination)
-        invalidateIndex()
+        updateIndex(stampBefore: stamp) { $0.remove(file: old) }
         profile.name = new
         try write(profile)
         if currentName == old {
             active = active?.renamed(to: new)
             savedModesRecord = (new, profile.spaceModes)
-        }
-    }
-
-    /// Re-designates a count's default profile. A dormant profile
-    /// cannot load as a fallback, so it is refused (#1530).
-    func setDefault(name: String) throws {
-        var chosen = try read(name: name)
-        guard !chosen.isDormant else {
-            throw ProfileError.dormantDefault(name)
-        }
-        chosen.isDefault = true
-        try write(chosen)
-        for var other in allProfiles()
-        where other.name != name
-            && other.monitorCount == chosen.monitorCount
-            && other.isDefault
-        {
-            other.isDefault = false
-            try write(other)
         }
     }
 
@@ -314,7 +300,7 @@ public final class ProfileManager {
         try NewerFormatOnDisk.refuseProfile(url(for: name))
         var profile = profile
         profile.id = idForWrite(of: profile)
-        defer { invalidateIndex() }
+        let stamp = folderStamp()
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true
@@ -333,6 +319,10 @@ public final class ProfileManager {
             to: url(for: name),
             options: .atomic
         )
+        updateIndex(stampBefore: stamp) { [id = profile.id] in
+            $0.recordWrite(file: name, id: id)
+        }
+        defer { onProfileWritten() }
         // A claim moves the live profile's sets with no apply.
         active = active?.refiled(profile)
         if profile.name == currentName {

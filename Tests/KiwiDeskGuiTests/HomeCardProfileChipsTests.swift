@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -40,6 +41,7 @@ struct HomeCardProfileChipsTests {
     ) -> ProfileSummary {
         ProfileSummary(
             name: name,
+            profileID: .legacy(name: name),
             count: count,
             sets: [],
             isDefault: false,

@@ -11,6 +11,7 @@ extension SettingsModel {
         lookReachStored = core.lookReach()
         sidecarExists = core.guiConfigStore.exists
         activeProfile = core.profiles.currentName
+        activeProfileID = core.profiles.currentID
         activeStandard = core.profiles.currentStandard
         activeStandardTitle = core.profiles.currentStandardTitle
         profileDirty = core.profiles.isDirty
@@ -89,10 +90,15 @@ extension SettingsModel {
     /// today the profile refresh and the Desktops card's write.
     func refreshBindingReadings() {
         var readings: [DesktopBinding: BoundReading] = [:]
+        var resolutions: BindingResolutions = [:]
         for record in config.profileBindings.values {
             readings[record] = core.boundReading(of: record)
+            for entry in record.entries {
+                resolutions[entry.key] = core.bindingResolution(of: entry)
+            }
         }
         bindingReadings = readings
+        bindingResolutions = resolutions
     }
 
     /// Take Core's re-keyed bindings into an UNEDITED draft

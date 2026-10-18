@@ -40,7 +40,7 @@ struct StoredProfileBindingSaveTests {
             )
             try sidecarBytes.write(to: core.guiConfigStore.url)
         } else {
-            try core.guiConfigStore.save(Self.sidecar)
+            try core.guiConfigStore.saveIncludingBindings(Self.sidecar)
         }
         let profile = Profile(
             name: "Away",
@@ -94,7 +94,7 @@ struct StoredProfileBindingSaveTests {
             profile: "Late",
             desktop: 3
         )
-        try model.core.guiConfigStore.save(moved)
+        try model.core.guiConfigStore.saveIncludingBindings(moved)
         model.config.profileBindings[.number(2)] = DesktopBinding(
             profile: "Away",
             desktop: 2

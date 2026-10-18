@@ -4,18 +4,29 @@ import Foundation
 /// carried it, or one stored before ids existed — given the id of
 /// the profile they name, once it exists (#2324 ruling 11). The
 /// gate resolves a pending entry by name meanwhile, so this only
-/// makes the stored map follow a later rename.
+/// makes the stored map follow a later rename. The same pass sets
+/// an id entry's label to its profile's current name, so a rename
+/// made on another Mac reaches every row and readout here.
 extension KiwiCore {
     /// Promotes every pending entry of the stored bindings — never
     /// a Lua line's, which lives in the runtime map alone — and
-    /// mirrors the result into the runtime map. Runs at a config
-    /// load and after a profile is saved, renamed or copied.
+    /// promotes the runtime map in place. Runs at a config load and
+    /// after every profile write (`ProfileManager.onProfileWritten`).
     func promotePendingBindings() {
         guard isGuiManaged else { return }
         var map = guiConfigStore.bindingsFile.load().profileBindings
         var changed = false
-        for key in map.keys where map[key]?.promote(pendingID) == true {
-            changed = true
+        for key in map.keys {
+            if map[key]?.promote(pendingID) == true { changed = true }
+            if map[key]?.refreshLabels(currentLabel) == true {
+                changed = true
+            }
+        }
+        // The runtime map promotes in place, so an entry it holds
+        // beside the stored one keeps its record.
+        for key in desktopBindings.keys {
+            desktopBindings[key]?.promote(pendingID)
+            desktopBindings[key]?.refreshLabels(currentLabel)
         }
         guard changed else { return }
         do {
@@ -23,17 +34,15 @@ extension KiwiCore {
         } catch {
             onLog("desktop bindings: promotion write failed: \(error)")
         }
-        for (key, binding) in map { desktopBindings[key] = binding }
     }
 
-    /// The id a pending name takes: the profile saved under that
-    /// name, else one written before ids existed and renamed since,
-    /// which carries the name's legacy id.
-    func pendingID(_ name: String) -> ProfileID? {
-        if let profile = try? profiles.read(name: name) {
-            return profile.id
-        }
-        let legacy = ProfileID.legacy(name: name)
-        return profiles.profileName(withID: legacy) == nil ? nil : legacy
+    /// The name an id's readable profile has now.
+    private func currentLabel(_ id: ProfileID) -> String? {
+        guard
+            case .profile(let file) = bindingResolution(
+                of: .init(id: id, name: "")
+            )
+        else { return nil }
+        return (try? profiles.read(name: file))?.name ?? file
     }
 }

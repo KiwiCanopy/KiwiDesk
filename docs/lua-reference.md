@@ -6043,14 +6043,15 @@ the call lives in `init.lua`; when the config is GUI-managed,
 bindings are edited in the Profiles section instead.
 
 :::unreleased
-A GUI-managed config stores its bindings on this Mac, in
+A GUI-managed config keeps its bindings on this Mac, in
 `~/Library/Application Support/KiwiDesk/bindings.json`, and a
-backup carries them. A binding names its profile by an id the
-profile file keeps, so it follows a rename; a binding whose
-profile was deleted reads as missing, and a new profile under
-the old name does not take it over. Restored on another Mac, a
+backup carries them. Such a binding follows its profile through a
+rename ([Spaces and Desktops](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number));
+a call in `init.lua` names the profile again on every load, so
+there the binding follows the name. Restored on another Mac, a
 binding stays dormant until that Mac shows the Desktop it was
-made on.
+made on; one kept by Mission Control number attaches to that
+number there.
 :::
 
 A call binds the profile for all screen setups of its screen

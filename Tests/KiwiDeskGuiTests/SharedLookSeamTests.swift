@@ -135,7 +135,7 @@ struct SharedLookSeamTests {
             ),
             (
                 "KiwiDesk/Settings/SettingsModel+Globals.swift",
-                "core.guiConfigStore.save("
+                "core.guiConfigStore.saveIncludingBindings("
             ),
         ]
         // The live door applies the draft to the screen; the

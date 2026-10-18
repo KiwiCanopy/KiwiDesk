@@ -119,7 +119,7 @@ struct DesktopBindingScreenTests {
                 desktop: 2
             ),
         ]
-        try core.guiConfigStore.save(stored)
+        try core.guiConfigStore.saveIncludingBindings(stored)
         core.desktopBindings = stored.profileBindings
 
         _ = core.stampedDesktopSnapshot()

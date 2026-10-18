@@ -275,7 +275,7 @@ struct DesktopBindingPerCountTests {
         bind(core, "Dual")
         var stored = GuiConfig()
         stored.profileBindings = core.desktopBindings
-        try core.guiConfigStore.save(stored)
+        try core.guiConfigStore.saveIncludingBindings(stored)
         try core.renameProfile(from: "Dual", to: "Docked")
         #expect(
             core.desktopBindings[.identity(stamp)]?.names

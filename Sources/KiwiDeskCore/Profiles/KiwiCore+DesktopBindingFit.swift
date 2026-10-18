@@ -127,7 +127,10 @@ extension KiwiCore {
         var missing: [String] = []
         var waiting = false
         for entry in ranked {
-            guard let name = boundFile(of: entry) else {
+            let name: String
+            switch bindingResolution(of: entry) {
+            case .profile(let file), .unreadable(let file): name = file
+            case .missing:
                 missing.append(entry.name)
                 continue
             }
@@ -136,6 +139,12 @@ extension KiwiCore {
                 profile = try profiles.read(name: name)
             } catch {
                 unreadable = error
+                continue
+            }
+            // A file edited in place moves no folder stamp, so the
+            // index may name a file that no longer holds the id.
+            if let id = entry.id, profile.id != id {
+                missing.append(entry.name)
                 continue
             }
             switch DesktopBindingRefusal.of(
@@ -167,32 +176,21 @@ extension KiwiCore {
         return .failure(.missing(names: missing))
     }
 
-    /// The file an entry's profile lives in, nil where it has none:
-    /// by id through the index, a pending name by that file.
-    func boundFile(of entry: DesktopBinding.Entry) -> String? {
-        if let id = entry.id { return profiles.profileName(withID: id) }
-        guard let url = try? profiles.fileURL(name: entry.name),
-            FileManager.default.fileExists(atPath: url.path)
-        else { return nil }
-        return entry.name
-    }
-
     /// The entry a bind of `name` files: by the id of the profile
     /// saved under that name, else pending (#2324).
     func bindingEntry(
         named name: String,
         setup: [String]? = nil
     ) -> DesktopBinding.Entry {
-        let id = (try? profiles.read(name: name))?.id
-        return DesktopBinding.Entry(id: id, name: name, setup: setup)
+        DesktopBinding.Entry(id: pendingID(name), name: name, setup: setup)
     }
 
     /// The screen count an entry's profile is saved for, nil where
     /// it has no readable profile — the binding algebra's `countOf`.
     func bindingCount(of entry: DesktopBinding.Entry) -> Int? {
-        boundFile(of: entry).flatMap {
-            (try? profiles.read(name: $0))?.monitorCount
-        }
+        guard case .profile(let file) = bindingResolution(of: entry)
+        else { return nil }
+        return (try? profiles.read(name: file))?.monitorCount
     }
 
     /// The live profile as a binding names it, from adoption state.

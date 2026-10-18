@@ -65,7 +65,7 @@ struct SetupBundleArtifactTests {
         // rather than that this install had none of it.
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         try core.profiles.save(
             Profile(
                 name: "Desk",
@@ -164,7 +164,7 @@ struct SetupBundleArtifactTests {
     @Test("A live config directory holds nothing unaccounted for")
     func liveDirectoryIsAccountedFor() throws {
         let core = makeTestCore()
-        try core.guiConfigStore.save(GuiConfig())
+        try core.guiConfigStore.saveIncludingBindings(GuiConfig())
         try core.paletteLibrary.save(
             ColorPalette(name: "Mine", colors: [:])
         )

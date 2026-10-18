@@ -82,12 +82,12 @@ struct DesktopBindingsFileTests {
         config.profileBindings = [
             .number(2): DesktopBinding(profile: "Away", desktop: 2)
         ]
-        try source.guiConfigStore.save(config)
+        try source.guiConfigStore.saveIncludingBindings(config)
         let bundle = try source.exportSetup()
         #expect(bundle.profileBindings?[.number(2)]?.names == ["Away"])
 
         let target = makeTestCore()
-        try target.guiConfigStore.save(GuiConfig())
+        try target.guiConfigStore.saveIncludingBindings(GuiConfig())
         try target.restoreSetup(from: bundle) { url in
             try FileManager.default.removeItem(at: url)
         }
@@ -95,5 +95,72 @@ struct DesktopBindingsFileTests {
             target.guiConfigStore.bindingsFile.load()
                 .profileBindings[.number(2)]?.names == ["Away"]
         )
+    }
+
+    private func store(_ dir: URL) throws -> GuiConfigStore {
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        return GuiConfigStore(
+            directory: dir,
+            machine: dir.appendingPathComponent("machine")
+        )
+    }
+
+    /// The bindings are the user's: a file that will not decode is
+    /// refused rather than replaced with what memory holds.
+    @Test("An unreadable bindings file is never overwritten")
+    func unreadableIsKept() throws {
+        let dir = scratch()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = try store(dir)
+        try FileManager.default.createDirectory(
+            at: store.bindingsFile.url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        let broken = Data(#"{"profile_bindings":{"2":7}}"#.utf8)
+        try broken.write(to: store.bindingsFile.url)
+        #expect(throws: (any Error).self) {
+            try store.saveBindings([:])
+        }
+        #expect(try Data(contentsOf: store.bindingsFile.url) == broken)
+    }
+
+    /// Owed bindings that will not decode hold the strip, so the
+    /// shared file keeps the only copy.
+    @Test("Undecodable owed bindings hold the strip")
+    func undecodableOwedHolds() throws {
+        let dir = scratch()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = try store(dir)
+        try Data(
+            #"{"format":9,"spaces":["1"],"profile_bindings":{"2":7}}"#
+                .utf8
+        ).write(to: store.url)
+        _ = store.load()
+        let gui = try #require(
+            JSONSerialization.jsonObject(
+                with: Data(contentsOf: store.url)
+            ) as? [String: Any]
+        )
+        #expect(gui["profile_bindings"] != nil)
+    }
+
+    /// A writer holding an old copy cannot revert a re-key or a
+    /// promotion: only the bindings' own door writes them.
+    @Test("A gui.json save leaves the bindings file alone")
+    func plainSaveLeavesBindings() throws {
+        let dir = scratch()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = try store(dir)
+        let kept: [DesktopKey: DesktopBinding] = [
+            .number(2): DesktopBinding(profile: "Kept", desktop: 2)
+        ]
+        try store.saveBindings(kept)
+        var stale = GuiConfig()
+        stale.profileBindings = [:]
+        try store.save(stale)
+        #expect(store.bindingsFile.load().profileBindings == kept)
     }
 }

@@ -66,7 +66,7 @@ struct GlobalsFieldParityTests {
             directory: dir,
             machine: dir.appendingPathComponent("machine")
         )
-        try store.save(edited)
+        try store.saveIncludingBindings(edited)
         let persisted = try #require(store.load())
 
         // What the model carries into its clean baseline.

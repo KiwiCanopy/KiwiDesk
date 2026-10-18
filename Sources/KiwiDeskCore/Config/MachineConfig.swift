@@ -73,6 +73,10 @@ protocol MachineFile: Codable, Sendable {
     static var currentFormat: Int { get }
     /// Which `MachineConfig.moves` entries land in this file.
     static var destination: MachineConfig.Destination { get }
+    /// Whether a write refuses a stored file that will not decode,
+    /// rather than replace it: user-authored leaves (the bindings)
+    /// do, remembered ones (the Desktop memory) need not.
+    static var keepsUnreadable: Bool { get }
     init()
     init(of config: GuiConfig)
     func applied(to config: GuiConfig) -> GuiConfig
@@ -81,6 +85,13 @@ protocol MachineFile: Codable, Sendable {
 extension MachineConfig: MachineFile {
     static let fileName = "machine.json"
     static let destination = Destination.machine
+    static let keepsUnreadable = false
+}
+
+/// A write refused because the stored file will not decode and its
+/// leaves are the user's (`MachineFile.keepsUnreadable`).
+struct UnreadableMachineFile: Error, Equatable {
+    let file: String
 }
 
 /// Reads and writes one `MachineFile`.
@@ -104,6 +115,12 @@ struct MachineFileStore<File: MachineFile> {
     /// (#2325).
     func save(_ file: File) throws {
         try NewerFormatOnDisk.refuse(url, File.currentFormat)
+        if File.keepsUnreadable,
+            let stored = try? Data(contentsOf: url),
+            (try? JSONDecoder().decode(File.self, from: stored)) == nil
+        {
+            throw UnreadableMachineFile(file: File.fileName)
+        }
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -139,7 +156,10 @@ struct MachineFileStore<File: MachineFile> {
         {
             for key in move.keys { owed[key] = root[key] }
         }
-        guard let carried = Self.decoded(owed) else { return nil }
+        guard !owed.isEmpty else { return nil }
+        // Owed leaves that will not decode hold the strip: the
+        // caller migrates in memory only, and nothing is lost.
+        guard let carried = Self.decoded(owed) else { return File() }
         var stored =
             (try? Data(contentsOf: url)).flatMap {
                 try? JSONSerialization.jsonObject(with: $0)

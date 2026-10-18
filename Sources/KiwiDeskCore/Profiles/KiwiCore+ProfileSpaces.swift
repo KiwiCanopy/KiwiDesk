@@ -133,7 +133,6 @@ extension KiwiCore {
     func saveProfile(_ profile: Profile) throws -> [String] {
         recordLivePartitioning()
         try profiles.save(profile)
-        promotePendingBindings()
         return try claimLiveSet(heldBy: profile)
     }
 

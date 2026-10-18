@@ -244,7 +244,7 @@ extension SettingsModel {
 struct ProfileSummary: Identifiable {
     let name: String
     /// What a Desktop binding names (#2324).
-    var profileID = ProfileID.fresh()
+    let profileID: ProfileID
     let count: Int
     let sets: [[String]]
     /// Holds no screen combination (#1530).

@@ -43,6 +43,7 @@ struct ScreenEdgeRowsTests {
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
+                profileID: .legacy(name: "Desk"),
                 count: 4,
                 sets: [
                     [
@@ -82,6 +83,7 @@ struct ScreenEdgeRowsTests {
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
+                profileID: .legacy(name: "Desk"),
                 count: 1,
                 sets: [[main.fingerprint]],
                 isDefault: false,
@@ -103,6 +105,7 @@ struct ScreenEdgeRowsTests {
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
+                profileID: .legacy(name: "Desk"),
                 count: 1,
                 sets: [[main.fingerprint]],
                 isDefault: false,
@@ -130,6 +133,7 @@ struct ScreenEdgeRowsTests {
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
+                profileID: .legacy(name: "Desk"),
                 count: 2,
                 sets: [[dell.fingerprint, dell.fingerprint]],
                 isDefault: false,

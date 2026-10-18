@@ -79,6 +79,54 @@ struct DesktopBindingByIDTests {
         }
     }
 
+    /// An id whose file exists and will not decode — corrupt, or a
+    /// newer build's on a synced folder — is unreadable, never
+    /// missing: "missing" would offer to drop another Mac's profile.
+    @Test(
+        "An id's undecodable file stays unreadable",
+        arguments: ["corrupt", "newer"]
+    )
+    func idFileUndecodableIsUnreadable(_ kind: String) throws {
+        let core = makeCore()
+        let work = try save(core, "Work")
+        let url = try core.profiles.fileURL(name: "Work")
+        let body =
+            kind == "corrupt"
+            ? #"{"id":"\#(work.id.raw)","name":"Work"}"#
+            : #"{"format":999,"id":"\#(work.id.raw)","name":"Work"}"#
+        try Data(body.utf8).write(to: url)
+        let result = core.boundProfile(
+            of: binding(.init(id: work.id, name: "Work"))
+        )
+        guard case .failure(.unreadable) = result else {
+            Issue.record("expected unreadable, got \(result)")
+            return
+        }
+    }
+
+    /// A file rewritten in place moves no folder stamp; the gate
+    /// still refuses a file that no longer carries the id.
+    @Test("A file that lost the id does not answer for it")
+    func inPlaceEditIsChecked() throws {
+        let core = makeCore()
+        let work = try save(core, "Work")
+        _ = core.profiles.profileName(withID: work.id)
+        var other = try core.profiles.read(name: "Work")
+        other.id = .fresh()
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        try encoder.encode(other).write(
+            to: try core.profiles.fileURL(name: "Work")
+        )
+        let result = core.boundProfile(
+            of: binding(.init(id: work.id, name: "Work"))
+        )
+        guard case .failure(.missing) = result else {
+            Issue.record("expected missing, got \(result)")
+            return
+        }
+    }
+
     /// The twin of `theNumberDoesNotCarryTheBinding`: a new profile
     /// under the old name is not the one the binding names.
     @Test("The name does not carry the binding")
@@ -109,7 +157,7 @@ struct DesktopBindingByIDTests {
     @Test("A pending name gains its profile's id")
     func pendingPromotes() throws {
         let core = makeCore()
-        try core.guiConfigStore.save(GuiConfig())
+        try core.guiConfigStore.saveIncludingBindings(GuiConfig())
         let work = try save(core, "Work")
         var renamed = Profile(
             id: .legacy(name: "Old"),
@@ -119,11 +167,13 @@ struct DesktopBindingByIDTests {
             settings: TilingSettings()
         )
         renamed = try core.profiles.write(renamed)
-        try core.guiConfigStore.saveBindings([
+        let pending: [DesktopKey: DesktopBinding] = [
             .number(1): DesktopBinding(profiles: ["Work"], desktop: 1),
             .number(2): DesktopBinding(profiles: ["Old"], desktop: 2),
             .number(3): DesktopBinding(profiles: ["Nobody"], desktop: 3),
-        ])
+        ]
+        try core.guiConfigStore.saveBindings(pending)
+        core.desktopBindings = pending
         core.promotePendingBindings()
         let stored = core.guiConfigStore.bindingsFile.load().profileBindings
         #expect(stored[.number(1)]?.entries.first?.id == work.id)

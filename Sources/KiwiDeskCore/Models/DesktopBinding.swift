@@ -283,6 +283,23 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         return changed
     }
 
+    /// Each id entry's label set to the name `current` reads for its
+    /// id, where it reads one; true when any changed.
+    @discardableResult
+    public mutating func refreshLabels(
+        _ current: (ProfileID) -> String?
+    ) -> Bool {
+        var changed = false
+        entries = entries.map { entry in
+            guard let id = entry.id, let name = current(id),
+                name != entry.name
+            else { return entry }
+            changed = true
+            return entry.labelled(name)
+        }
+        return changed
+    }
+
     /// Whether `entry` names the live profile `live`: by id, or a
     /// pending entry by its name.
     public static func names(

@@ -226,7 +226,7 @@ extension KiwiCore {
             // store writes them beside `gui.json`.
             config.profileBindings = bundle.profileBindings ?? [:]
             do {
-                try guiConfigStore.save(config)
+                try guiConfigStore.saveIncludingBindings(config)
             } catch {
                 onLog("restore: gui.json write failed: \(error)")
                 throw .couldNotWrite(

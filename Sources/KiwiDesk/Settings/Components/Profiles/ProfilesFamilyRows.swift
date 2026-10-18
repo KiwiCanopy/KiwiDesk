@@ -58,6 +58,9 @@ struct BindingCounts: Hashable {
 struct OrphanBinding: Hashable {
     let row: DesktopRow
     let profile: String
+    /// Core read the profile's file and it will not decode; else it
+    /// is missing (#2324).
+    var unreadable = false
 }
 
 /// Instance representing expanded row in Profiles census (#678).
@@ -94,6 +97,9 @@ struct ProfilesFamilyRows {
     /// Screens connected right now — which count group leads.
     let connectedScreens: Int
     let presets: [StandardLayout]
+    /// Core's verdict per binding entry (#2324); a fixture of
+    /// pending entries leaves it empty.
+    var resolutions: [DesktopBinding.Entry.Key: BindingResolution] = [:]
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
         guard case .profiles(let family) = key else { return nil }
@@ -212,29 +218,6 @@ struct ProfilesFamilyRows {
         )
     }
 
-    /// The card's groups over its Desktop rows: `rows` once per
-    /// count, then the orphans — each bound entry naming no saved
-    /// profile, by its label, on the row it is bound to.
-    static func bindingGroups(
-        rows: [DesktopRow],
-        counts: BindingCounts,
-        resolver: BindingResolver
-    ) -> [BindingGroup] {
-        var groups = counts.all.map {
-            BindingGroup.count($0, leads: $0 == counts.leading, rows: rows)
-        }
-        let orphans = rows.flatMap { row in
-            unique(
-                (row.binding?.entries ?? [])
-                    .filter { resolver.name(of: $0) == nil }
-                    .map(\.name)
-            )
-            .map { OrphanBinding(row: row, profile: $0) }
-        }
-        if !orphans.isEmpty { groups.append(.orphans(orphans)) }
-        return groups
-    }
-
     /// The slots one Desktop draws in a count group, in the
     /// ladder's own order (#1609): one per screen setup an entry
     /// of that count is scoped to, in binding order, then the
@@ -299,12 +282,20 @@ struct ProfilesFamilyRows {
                     profiles: profiles,
                     connected: connectedScreens
                 ),
-                resolver: BindingResolver(profiles)
+                resolver: BindingResolver(
+                    profiles,
+                    resolutions: resolutions,
+                    liveID: nil
+                )
             )
             .flatMap { group -> [ProfilesRowInstance] in
                 switch group {
                 case .count(let count, _, let rows):
-                    let resolver = BindingResolver(profiles)
+                    let resolver = BindingResolver(
+                        profiles,
+                        resolutions: resolutions,
+                        liveID: nil
+                    )
                     return rows.flatMap { row in
                         Self.slots(
                             of: row,
@@ -328,13 +319,5 @@ struct ProfilesFamilyRows {
         case .isStarterSetup:
             return nil
         }
-    }
-}
-
-extension ProfilesFamilyRows {
-    /// `labels` once each, in order.
-    fileprivate static func unique(_ labels: [String]) -> [String] {
-        var seen = Set<String>()
-        return labels.filter { seen.insert($0).inserted }
     }
 }

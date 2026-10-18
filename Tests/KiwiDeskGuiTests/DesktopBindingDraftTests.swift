@@ -78,7 +78,7 @@ struct DesktopBindingDraftTests {
                 desktop: 1
             )
         ]
-        try model.core.guiConfigStore.save(rekeyed)
+        try model.core.guiConfigStore.saveIncludingBindings(rekeyed)
 
         model.refreshProfiles()
         #expect(
@@ -183,7 +183,7 @@ struct DesktopBindingDraftTests {
             ),
             .number(2): DesktopBinding(profile: "Play", desktop: 2),
         ]
-        try model.core.guiConfigStore.save(rekeyed)
+        try model.core.guiConfigStore.saveIncludingBindings(rekeyed)
 
         model.refreshProfiles()
         #expect(
@@ -221,7 +221,7 @@ struct DesktopBindingDraftTests {
                 desktop: 1
             )
         ]
-        try model.core.guiConfigStore.save(rekeyed)
+        try model.core.guiConfigStore.saveIncludingBindings(rekeyed)
 
         model.refreshProfiles()
         #expect(

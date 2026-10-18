@@ -148,12 +148,11 @@ struct DesktopsGroup: View {
                 desktopBlock(row, count: count, leads: leads)
             }
         case .orphans(let orphans):
-            // A profile that is gone reads as missing, never as
-            // unreadable (#2324 ruling 10); a file that exists and
-            // will not decode keeps "Couldn't load".
-            let broken = Set(model.brokenProfiles.map(\.name))
-            let unreadable = orphans.filter { broken.contains($0.profile) }
-            let missing = orphans.filter { !broken.contains($0.profile) }
+            // Core's verdict (#2324 ruling 10): a profile that is
+            // gone reads as missing, a file that exists and will
+            // not decode as "Couldn't load".
+            let unreadable = orphans.filter(\.unreadable)
+            let missing = orphans.filter { !$0.unreadable }
             if !missing.isEmpty {
                 SettingsGroupHeader(
                     L("desktops.missing.title", "Missing profiles")
@@ -268,7 +267,11 @@ struct DesktopsGroup: View {
     }
 
     var bindingResolver: BindingResolver {
-        BindingResolver(model.profileSummaries)
+        BindingResolver(
+            model.profileSummaries,
+            resolutions: model.bindingResolutions,
+            liveID: model.activeProfileID
+        )
     }
 
     /// A live Desktop's record may still sit under the number it

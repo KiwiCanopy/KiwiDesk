@@ -116,7 +116,7 @@ struct GuiConfigParityTests {
                 ]
             )
         ]
-        try store.save(config)
+        try store.saveIncludingBindings(config)
         let back = try #require(store.load())
         #expect(back.format == config.format)
         #expect(back.spaces == config.spaces)

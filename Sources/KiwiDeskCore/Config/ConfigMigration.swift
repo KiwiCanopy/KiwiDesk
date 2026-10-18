@@ -44,9 +44,14 @@ public enum ConfigMigration {
         migratingDuplicateSpaceChords,
         migratingRetiredPullOrSpawn,
         migratingRetiredPanelVerbs,
-        migratingMachineLeavesOut,
         migratingProfileIDs,
     ]
+
+    /// Runs after `steps`, and is skipped by
+    /// `migratedKeepingMachineLeaves`: the carry reads every other
+    /// step's output before the leaves leave (#2324).
+    private static let machineLeavesStep: @Sendable (Data) -> Data? =
+        migratingMachineLeavesOut
 
     /// The file shapes a config root can take.
     enum FileShape { case bundle, profile, palettes, looks, gui }
@@ -124,9 +129,24 @@ public enum ConfigMigration {
     /// moves. A stale format whose bytes no step rewrites is still
     /// stamped — a crossing must END (#938).
     public static func migrated(_ data: Data) -> Data? {
+        migrated(data, keepingMachineLeaves: false)
+    }
+
+    /// `data` migrated with the machine-local leaves still in
+    /// place, nil where nothing migrates — the carry's input
+    /// (`MachineFileStore.carry`).
+    static func migratedKeepingMachineLeaves(_ data: Data) -> Data? {
+        migrated(data, keepingMachineLeaves: true)
+    }
+
+    private static func migrated(
+        _ data: Data,
+        keepingMachineLeaves: Bool
+    ) -> Data? {
         guard needsMigration(data) else { return nil }
         var current = data
-        for step in steps {
+        let run = keepingMachineLeaves ? steps : steps + [machineLeavesStep]
+        for step in run {
             if let next = step(current) {
                 current = next
             }

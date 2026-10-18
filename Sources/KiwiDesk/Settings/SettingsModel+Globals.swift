@@ -74,7 +74,7 @@ extension SettingsModel {
                 // retile while the dashboard says "paused". Write
                 // the store directly; start() picks the file up
                 // when permission arrives.
-                try core.guiConfigStore.save(sidecarConfig)
+                try core.guiConfigStore.saveIncludingBindings(sidecarConfig)
             } else {
                 try core.withUserMotion {
                     try core.saveGuiConfig(sidecarConfig)

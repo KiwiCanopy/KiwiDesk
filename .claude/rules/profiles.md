@@ -353,8 +353,10 @@ The obligations that fall on a change here:
 
 ## A Desktop binding is a per-count, per-scope LIST, judged at the gate (#1436, #1609)
 
-`DesktopBinding.entries` lists (profile, scope) pairs — the scope
-the sorted screen fingerprints of one setup, nil for all setups —
+`DesktopBinding.entries` lists (profile, scope) entries — the
+profile named by id, as *A binding names its profile by id* below
+states — the scope the sorted screen fingerprints of one setup,
+nil for all setups —
 and never a count beside them: a count is each profile's own
 `monitorCount`, and a writer that wants one stored re-argues the
 design entry rather than adding a field. It is read by
@@ -401,7 +403,7 @@ entries and a record left empty is removed
 (`DesktopBindingSlotWriteTests` ▸ `pickEditsOneSlot`,
 `pickReplacesEveryEntryOfItsCount`; `DesktopBindingScopeCardTests`
 ▸ `pickIsScoped`), while the card draws a Desktop's slots from the
-one `ProfilesFamilyRows.slots(of:count:profileCounts:)`, setups
+one `ProfilesFamilyRows.slots(of:count:resolver:)`, setups
 first and all other setups last, which the census expands too
 (`DesktopBindingScopeCardTests` ▸ `slotsReadAsTheLadder`,
 `censusCarriesTheScope`); the binding door stands down for the
@@ -441,22 +443,40 @@ obligations:
   (`ProfileIDTests` ▸ `overwriteKeepsTheID`, `takenIDIsReminted`);
   a profile written before ids takes `ProfileID.legacy(name:)`
   through `migratingProfileIDs`, deterministic so two Macs stamp
-  one id. Never change the legacy namespace.
-- **The gate resolves an id through `ProfileManager`'s index**
-  (`profileName(withID:)`), never by name and never by reading
-  every file on a swipe; an entry whose profile has no file reads
-  `.missing`, and only a file that exists and will not decode reads
+  one id, its vectors pinned (`ProfileIDTests` ▸
+  `legacyFixedVectors`).
+- **Every reader of what an entry names takes the one
+  `KiwiCore.bindingResolution(of:)`** — the gate, the promotion
+  and, through the model's refresh, the Desktops card, which
+  narrates its verdict through the one `BindingResolver` and never
+  re-derives it (`DesktopBindingGroupTests` ▸ `orphansFollowCore`;
+  a second map beside it is review's). An id resolves through
+  `ProfileManager`'s index, whose doors update it in place, so a
+  lookup reads no profile while the profile folder is unchanged; an
+  id no file carries reads `.missing`, and one whose file exists
+  and will not decode — corrupt, or a newer build's — reads
   `.unreadable` (`DesktopBindingByIDTests` ▸ `deletedReadsMissing`,
-  `corruptReadsUnreadable`).
-- **A PENDING entry — no id — resolves by its name** until the one
-  `promotePendingBindings` door gives it one, at a config load and
-  after a profile is saved, renamed or copied; a new profile
-  mutator that can make a pending name resolvable calls it, and it
-  writes the stored map alone, so a Lua line's binding stays a
-  name (`DesktopBindingByIDTests` ▸ `pendingPromotes`).
-- **The GUI reads an entry through the one `BindingResolver`**,
-  never a name→count map beside it, which would read a dead id's
-  stale label as a live profile.
+  `idFileUndecodableIsUnreadable`). The gate checks the id of the
+  file it read, since a file rewritten in place moves no folder
+  stamp (`inPlaceEditIsChecked`).
+- **A PENDING entry — no id — resolves by its name**, else by a
+  profile carrying the name's legacy id, until the one
+  `promotePendingBindings` door gives it one; that door also sets
+  an id entry's label to its profile's current name. It runs at a
+  config load and after every profile write
+  (`ProfileManager.onProfileWritten`), and writes the stored map
+  and promotes the runtime map in place, never an entry `init.lua`
+  declared, which that file re-declares by name on every load
+  (`DesktopBindingByIDTests` ▸ `pendingPromotes`).
+- **`bindings.json` has one write door, `saveBindings`.** A
+  `gui.json` write leaves it alone unless its writer authors
+  bindings (`saveIncludingBindings`), so a stale copy never reverts
+  a re-key or a promotion, and a stored file that will not decode
+  is refused rather than replaced (`DesktopBindingsFileTests` ▸
+  `unreadableIsKept`).
+
+The argument is `docs/design-decisions.md` ▸ Profiles ▸ *A binding
+names its profile, not the profile's name*.
 
 ## The active Desktop is the MAIN display's (#888)
 
@@ -946,8 +966,9 @@ so a restore replaces that file whole and never one beside it
 **A `GuiConfig` leaf that means something on this Mac alone moves
 into a `MachineFile` — `machine.json`, or `bindings.json` for a
 leaf that travels — by one `MachineConfig.moves` entry, and is
-composed and split in `GuiConfigStore` alone (#2324).** The in-memory `GuiConfig` keeps the field, so the draft,
-the diff and the census stay as they were; the leaf joins
+composed and split in `GuiConfigStore` alone (#2324).** The
+in-memory `GuiConfig` keeps the field, so the draft, the diff and
+the census stay as they were; the leaf joins
 `GuiConfig.machineLocalFields`, which the `gui.json` coder skips
 (`MachineConfigTests` ▸ `registerMatchesTheFile`,
 `guiEncodingSkipsTheLeaves`). The move entry is what both the

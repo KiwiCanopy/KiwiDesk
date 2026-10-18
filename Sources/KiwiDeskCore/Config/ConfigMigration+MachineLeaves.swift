@@ -8,21 +8,9 @@ import Foundation
 /// bundle a leaf that travels is lifted to the bundle's top level,
 /// and one that does not is another Mac's and is dropped.
 extension ConfigMigration {
-    /// Set while the store prepares the values its carry reads:
-    /// every other step runs, this one stands down, so an old
-    /// shape is rewritten before the leaf leaves.
-    @TaskLocal static var keepsMachineLeaves = false
-
-    /// `data` migrated with the leaves still in place, nil where
-    /// nothing migrates — the carry's input.
-    static func migratedKeepingMachineLeaves(_ data: Data) -> Data? {
-        $keepsMachineLeaves.withValue(true) { migrated(data) }
-    }
-
     @Sendable
     static func migratingMachineLeavesOut(_ data: Data) -> Data? {
-        guard !keepsMachineLeaves else { return nil }
-        return surgicallyApplying(
+        surgicallyApplying(
             data,
             gate: { data in
                 MachineConfig.moves.contains { move in

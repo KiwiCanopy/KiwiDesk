@@ -36,6 +36,22 @@ struct ProfileIDTests {
         #expect(work.raw != "Work")
     }
 
+    /// The derivation is a stored value every migrated file and
+    /// carried binding rests on, so it is pinned to RFC 4122 v5
+    /// vectors computed outside Swift (`uuid.uuid5` over the same
+    /// namespace) — a changed namespace or byte order reds here.
+    @Test("The legacy id is the RFC 4122 v5 of the name")
+    func legacyFixedVectors() {
+        #expect(
+            ProfileID.legacy(name: "Work").raw
+                == "6EE682CF-1298-5959-ADDC-BC69F1CE9DC3"
+        )
+        #expect(
+            ProfileID.legacy(name: "Écran").raw
+                == "09846CAD-3160-58ED-89DC-A2A72D25DF56"
+        )
+    }
+
     /// The migration reaches a profile file and a bundle's inline
     /// profiles, both with the legacy id.
     @Test("An id-less profile is stamped its legacy id")
@@ -49,8 +65,8 @@ struct ProfileIDTests {
         )
         #expect(root["id"] as? String == ProfileID.legacy(name: "Work").raw)
         let bundle = Data(
-            #"{"format":28,"writtenBy":"t","palettes":[],"#
-                + #""profiles":[{"name":"A","monitor_sets":[]}]}"#
+            (#"{"format":28,"writtenBy":"t","palettes":[],"#
+                + #""profiles":[{"name":"A","monitor_sets":[]}]}"#)
                 .utf8
         )
         let lifted = try #require(ConfigMigration.migrated(bundle))
@@ -93,20 +109,62 @@ struct ProfileIDTests {
         #expect(profiles.profileName(withID: work.id) == "Office")
     }
 
+    private func entry(
+        _ file: String,
+        _ stored: String,
+        _ id: ProfileID,
+        readable: Bool = true
+    ) -> ProfileIndex.Entry {
+        ProfileIndex.Entry(
+            file: file,
+            id: id,
+            storedName: stored,
+            readable: readable
+        )
+    }
+
     /// Two files carrying one id: the one whose stored name is its
     /// own file name keeps it; otherwise the lowest file name.
     @Test("The index names one keeper per id")
     func indexKeeper() {
         let shared = ProfileID.fresh()
         let index = ProfileIndex([
-            ("Work copy", profile("Work", id: shared)),
-            ("Work", profile("Work", id: shared)),
+            entry("Work copy", "Work", shared),
+            entry("Work", "Work", shared),
         ])
-        #expect(index.file(of: shared) == "Work")
+        #expect(index.holder(of: shared)?.file == "Work")
         let tie = ProfileIndex([
-            ("B", profile("X", id: shared)),
-            ("A", profile("Y", id: shared)),
+            entry("B", "X", shared),
+            entry("A", "Y", shared),
         ])
-        #expect(tie.file(of: shared) == "A")
+        #expect(tie.holder(of: shared)?.file == "A")
+    }
+
+    /// A file that will not decode still holds its id, read raw, so
+    /// a binding to it reads "couldn't load", never "missing".
+    @Test("An undecodable file holds its raw id, unreadable")
+    func undecodableFileHoldsItsID() throws {
+        let profiles = manager()
+        let work = try profiles.write(profile("Work"))
+        let url = try profiles.fileURL(name: "Work")
+        // Atomic, as a sync client replaces a file.
+        try Data(#"{"id":"\#(work.id.raw)","name":"Work"}"#.utf8)
+            .write(to: url, options: .atomic)
+        let holder = profiles.holder(of: work.id)
+        #expect(holder?.file == "Work")
+        #expect(holder?.readable == false)
+    }
+
+    /// The doors update the index in place: a lookup after a write
+    /// sees it without rebuilding from the folder.
+    @Test("A write, rename and delete keep the index current")
+    func doorsKeepTheIndex() throws {
+        let profiles = manager()
+        let work = try profiles.write(profile("Work"))
+        #expect(profiles.profileName(withID: work.id) == "Work")
+        try profiles.rename(from: "Work", to: "Office")
+        #expect(profiles.profileName(withID: work.id) == "Office")
+        try profiles.delete(name: "Office")
+        #expect(profiles.profileName(withID: work.id) == nil)
     }
 }

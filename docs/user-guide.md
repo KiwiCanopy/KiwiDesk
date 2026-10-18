@@ -191,9 +191,10 @@ older KiwiDesk, quit it, copy that file over the original and drop
 the suffix. A backup does not carry the folder, and Reset All
 Settings leaves it.
 
-The socket, the instance lock, the saved window arrangement and
-`machine.json` live in `~/Library/Application Support/KiwiDesk/`
-itself; Reset All Settings clears `machine.json`.
+The socket, the instance lock, the saved window arrangement,
+`machine.json` and `bindings.json` (your Desktop bindings) live in
+`~/Library/Application Support/KiwiDesk/` itself, so a synced
+config folder carries neither file; Reset All Settings clears both.
 :::
 
 An older KiwiDesk never writes over `gui.json` or a profile that a
