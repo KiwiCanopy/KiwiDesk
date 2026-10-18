@@ -146,6 +146,28 @@ struct AppBarVisibilityTests {
         #expect(seen[WindowID(4)] == .partly(shown: nil))
         #expect(seen[WindowID(5)] == .visible)
         #expect(seen[WindowID(6)] == .hidden)
+        // No float counts against a tile: float 3 sits wholly inside
+        // tile 1, which stays lit.
+        #expect(seen[WindowID(1)] == .visible)
+    }
+
+    /// A focused float sits above the other floats; on a Space no
+    /// screen has active there is no system focus, so nothing covers
+    /// a float.
+    @Test("A focused float covers the other floats")
+    func focusedFloatCoversFloats() throws {
+        var top = window(3, floating: true)
+        top.frame = CGRect(x: 100, y: 100, width: 400, height: 300)
+        var under = window(4, floating: true)
+        under.frame = CGRect(x: 150, y: 150, width: 100, height: 100)
+        let core = try makeCore(
+            mode: "scrolling",
+            windows: [window(1), top, under]
+        )
+        core.state.apply(.windowFocused(WindowID(3)))
+        let seen = try verdicts(core)
+        #expect(seen[WindowID(3)] == .visible)
+        #expect(seen[WindowID(4)] == .hidden)
     }
 
     @Test("A float's own move refreshes the bars")

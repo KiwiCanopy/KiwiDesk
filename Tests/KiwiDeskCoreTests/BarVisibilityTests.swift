@@ -11,15 +11,9 @@ struct BarVisibilityTests {
 
     private func judge(
         _ frame: CGRect?,
-        above: [CGRect] = [],
-        parked: Bool = false
+        above: [CGRect] = []
     ) -> BarVisibility {
-        BarVisibility.judge(
-            frame,
-            on: screen,
-            above: above,
-            parked: parked
-        )
+        BarVisibility.judge(frame, on: screen, above: above)
     }
 
     @Test("A window wholly on screen and uncovered is visible")
@@ -43,17 +37,11 @@ struct BarVisibilityTests {
         #expect(judge(above) == .partly(shown: .bottom))
     }
 
-    @Test("A window past the screen, parked or unknown is hidden")
+    @Test("A window past the screen or unknown is hidden")
     func offScreenIsHidden() {
         #expect(
             judge(CGRect(x: 1200, y: 0, width: 400, height: 800))
                 == .hidden
-        )
-        #expect(
-            judge(
-                CGRect(x: 10, y: 10, width: 400, height: 400),
-                parked: true
-            ) == .hidden
         )
         #expect(judge(nil) == .hidden)
     }
@@ -95,5 +83,54 @@ struct BarVisibilityTests {
         #expect(judge(window, above: [mostly]) == .hidden)
         let half = CGRect(x: 0, y: 0, width: 400, height: 200)
         #expect(judge(window, above: [half]) == .partly(shown: nil))
+    }
+
+    /// Two covers each leaving more than a fifth uncovered read as
+    /// the larger of them, not their union.
+    @Test("Several covers read as the largest one")
+    func coversReadAsTheLargest() {
+        let window = CGRect(x: 0, y: 0, width: 400, height: 400)
+        let top = CGRect(x: 0, y: 0, width: 400, height: 160)
+        let bottom = CGRect(x: 0, y: 240, width: 400, height: 160)
+        #expect(judge(window, above: [top, bottom]) == .partly(shown: nil))
+    }
+
+    /// A float: hidden when the region cuts it at all, ends both cut
+    /// included; under the focused window hidden when wholly
+    /// covered, partly with no side when overlapped at all, with no
+    /// share floor; lit otherwise (#2234).
+    @Test("A float reads cut, covered or lit")
+    func floatVerdicts() {
+        let focus = CGRect(x: 0, y: 0, width: 600, height: 600)
+        let float = { (frame: CGRect) in
+            BarVisibility.judgeFloat(frame, on: self.screen, under: focus)
+        }
+        #expect(
+            float(CGRect(x: 100, y: 100, width: 200, height: 200)) == .hidden
+        )
+        #expect(
+            float(CGRect(x: 500, y: 100, width: 200, height: 200))
+                == .partly(shown: nil)
+        )
+        // Overlapped by most of the focus still shows the ring.
+        #expect(
+            float(CGRect(x: 0, y: 0, width: 620, height: 200))
+                == .partly(shown: nil)
+        )
+        #expect(
+            float(CGRect(x: 700, y: 100, width: 200, height: 200)) == .visible
+        )
+        #expect(
+            float(CGRect(x: 900, y: 650, width: 300, height: 100)) == .hidden
+        )
+        let wide = CGRect(x: -100, y: 650, width: 1200, height: 100)
+        #expect(float(wide) == .hidden)
+        #expect(
+            BarVisibility.judgeFloat(
+                CGRect(x: 100, y: 100, width: 200, height: 200),
+                on: screen,
+                under: nil
+            ) == .visible
+        )
     }
 }

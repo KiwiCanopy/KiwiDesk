@@ -13639,10 +13639,11 @@ scrolling row leaves every scrolled-out neighbour a fixed sliver so
 it stays reachable, and a moon on each of them said nothing. So a
 cut column reads partly only once it shows more than that sliver
 (`ScrollingLayout.edgePeek`, read from the layout and never
-restated), and a covered window only while more than a fifth of it
-is uncovered (`BarVisibility.partlyFloor`); less reads hidden. A
-share would not do for the cut: the sliver is a fixed length, so on
-a narrow slot it is a large share.
+restated), and a tile stacked behind another only while more than a
+fifth of it is uncovered (`BarVisibility.partlyFloor`); less reads
+hidden. A share would not do for the cut: the sliver is a fixed
+length, so on a narrow slot it is a large share. A float takes no
+floor: any overlap by the focused window shows the ring.
 :::
 
 **An App Bar item draws its icon AND its title.**

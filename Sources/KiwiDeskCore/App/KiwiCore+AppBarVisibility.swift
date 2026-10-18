@@ -39,23 +39,19 @@ extension KiwiCore {
         let floatFrame = { (id: WindowID) in
             self.tiler.commandedFrame(of: id) ?? self.state.windows[id]?.frame
         }
-        let focusFrame = focus.flatMap {
+        // Only the system focus sits above the floats: a Space on
+        // a screen that is not active has none (bars.md ▸ barFocus).
+        let systemFocus =
+            space.id == state.workspaces.activeSpace ? focus : nil
+        let focusFrame = systemFocus.flatMap {
             floats.contains($0) ? floatFrame($0) : laid.frames[$0]
         }
         for id in floats {
-            let seen = BarVisibility.judge(
+            verdicts[id] = BarVisibility.judgeFloat(
                 floatFrame(id),
                 on: bounds,
-                above: id == focus ? [] : focusFrame.map { [$0] } ?? [],
-                parked: false
+                under: id == systemFocus ? nil : focusFrame
             )
-            // A float takes no half-moon: its edges are where the
-            // user put it, not a way to scroll.
-            if case .partly(let side) = seen, side != nil {
-                verdicts[id] = .hidden
-            } else {
-                verdicts[id] = seen
-            }
         }
         return verdicts
     }
@@ -85,8 +81,7 @@ extension KiwiCore {
             verdicts[id] = BarVisibility.judge(
                 laid.frames[id],
                 on: laid.usable,
-                above: over.compactMap { laid.frames[$0] },
-                parked: false
+                above: over.compactMap { laid.frames[$0] }
             )
         }
         return verdicts

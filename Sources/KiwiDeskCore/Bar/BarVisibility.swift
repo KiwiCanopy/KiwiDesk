@@ -35,17 +35,15 @@ public enum BarVisibility: Equatable, Sendable {
     /// echo's rounding, a border's outset.
     static let tolerance: CGFloat = 1
 
-    /// The verdict for a window at `frame` on a screen whose usable
-    /// area is `screen`, beneath the windows at `above` — all in one
-    /// coordinate space, AX's (y grows down). `parked` is the
-    /// stash's corner verdict, which leaves a sliver on screen.
+    /// The verdict for a tile at `frame` in the area its layout
+    /// fills, `screen`, beneath the tiles at `above` — all in one
+    /// coordinate space, AX's (y grows down).
     static func judge(
         _ frame: CGRect?,
         on screen: CGRect,
-        above: [CGRect],
-        parked: Bool
+        above: [CGRect]
     ) -> BarVisibility {
-        guard let frame, !parked else { return .hidden }
+        guard let frame else { return .hidden }
         let shown = frame.intersection(screen)
         guard !shown.isNull, shown.width > tolerance,
             shown.height > tolerance
@@ -103,5 +101,30 @@ public enum BarVisibility: Equatable, Sendable {
         let bottom = frame.maxY - shown.maxY > tolerance
         guard top != bottom else { return nil }
         return bottom ? .top : .bottom
+    }
+
+    /// The verdict for a float at `frame` (#2234, owner 2026-10-18):
+    /// hidden where the region `bounds` does not hold it whole,
+    /// whatever the cut; under the focused window at `focus`, which
+    /// sits above every float (#2284), hidden when wholly covered
+    /// and partly with no side when overlapped at all; else lit. No
+    /// share floor: any overlap shows the ring.
+    static func judgeFloat(
+        _ frame: CGRect?,
+        on bounds: CGRect,
+        under focus: CGRect?
+    ) -> BarVisibility {
+        guard let frame,
+            bounds.insetBy(dx: -tolerance, dy: -tolerance).contains(frame)
+        else { return .hidden }
+        guard let focus else { return .visible }
+        let overlap = frame.intersection(focus)
+        guard !overlap.isNull, overlap.width > tolerance,
+            overlap.height > tolerance
+        else { return .visible }
+        if focus.insetBy(dx: -tolerance, dy: -tolerance).contains(frame) {
+            return .hidden
+        }
+        return .partly(shown: nil)
     }
 }
