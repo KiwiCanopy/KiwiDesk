@@ -10488,7 +10488,6 @@ only while a notebook cell has focus, where the panel wins. It
 reaches an install in a generation of its own (3), since installs
 built from `release/3.0.0` had already taken generation 2.
 
-:::unreleased
 Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
 the way back from the size keys, but a key you press once, so it
 rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
@@ -10511,7 +10510,6 @@ hotkeys and in the menus of every app running on the dev Mac, read
 through AX with the fn bit decoded (recorded on #2303); the
 nearest chord taken is macOS's own `fn⌃R`, Return to Previous
 Size.
-:::
 
 **A shortcut row says what pressing it does (#2245).** Its title
 is a verb phrase: "Show" and the panel's VoiceOver name for a

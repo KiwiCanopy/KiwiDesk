@@ -125,8 +125,11 @@ struct KiwiVisionHoldTests {
         F.focus(core, F.stranger)
         let above = plate.ordersAbove.count
         let below = plate.orders.count
+        // One shared fake plate per screen: the host's count.
+        let shown = core.vision.plates.values.filter(\.isShown).count
+        #expect(shown > 0)
         core.visionWindowRestacked(F.stranger)
-        #expect(plate.ordersAbove.count == above + 1)
+        #expect(plate.ordersAbove.count == above + shown)
         #expect(plate.orders.count == below)
     }
 

@@ -2,6 +2,46 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "3.1.0",
+      "tag": "v3.1.0",
+      "date": "2026-10-18",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v3.1.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v3.1.0/KiwiDesk-3.1.0.dmg",
+      "summary": "KiwiDesk 3.1.0 adds one key to put a Space's window sizes back, and Settings now records Hyper shortcuts.",
+      "spotlight": [
+        {
+          "title": "Window sizes back in one key",
+          "line": "Resized for a moment? ⌃⌥R returns the Space to your profile's sizes.",
+          "setting": "keybinding.reset_sizes",
+          "symbol": "rectangle.split.3x1"
+        }
+      ],
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**New: ⌃⌥R puts back the sizes in the Space you're on** — every window you resized there, by key or by dragging, returns to what your profile set. Updating adds the key where it's free and the action has no shortcut yet, as ✦R if you moved your letter shortcuts to Hyper; change or remove it in Shortcuts & Gestures ▸ Size & float."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**Switching to a Desktop that loads its own profile is now quicker**, without the brief stall it could have on the way in."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**With a Hyper key set, Settings now records Hyper shortcuts too**: they already worked from `init.lua` and the CLI, but recording one in Settings kept only the key. Now holding the Hyper key adds ✦."
+          ],
+          "type": "fixed"
+        }
+      ]
+    },
+    {
       "version": "3.0.0",
       "tag": "v3.0.0",
       "date": "2026-10-17",
