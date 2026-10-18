@@ -26,8 +26,10 @@ private struct KeybindingReservesTrashSlotKey: EnvironmentKey {
 }
 
 /// Whether no Hyper key is set (#1870), read once per section render:
-/// a recorder holding a Hyper chord then dims in place. False by
-/// default, so a mount outside `ShortcutsSection` never dims.
+/// a recorder holding a Hyper chord then dims in place, and one
+/// recording reads F18 as held Hyper only while this is false
+/// (#2414). False by default, so a mount outside `ShortcutsSection`
+/// never dims but does read F18 as Hyper.
 private struct HyperKeyIsOffKey: EnvironmentKey {
     static let defaultValue = false
 }

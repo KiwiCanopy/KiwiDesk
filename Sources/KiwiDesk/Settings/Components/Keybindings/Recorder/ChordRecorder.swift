@@ -11,6 +11,8 @@ import KiwiDeskCore
 /// largest modifier set held at once commits when all are released.
 /// In `.sourceKey` mode (the Hyper key, #1870) the first physical
 /// key pressed commits, a modifier by its own sided key code.
+/// With Hyper on, `.combo` mode reads the remapped key's F18 as
+/// the `hyper` modifier while it is held (#1870).
 @MainActor
 final class ChordRecorder {
     enum Outcome {
@@ -51,6 +53,9 @@ final class ChordRecorder {
     private(set) var mode = Mode.combo
     /// `.modifiers` mode: the largest set held so far.
     private var heldMost: NSEvent.ModifierFlags = []
+    /// `.combo` mode: whether F18 is the Hyper key, and held.
+    private var hyperOn = false
+    private var hyperHeld = false
     var onPreview: (String) -> Void = { _ in }
     var onFinish: (Outcome) -> Void = { _ in }
     var isSuppressingKeyUp: Bool { releaseMonitor != nil }
@@ -58,12 +63,15 @@ final class ChordRecorder {
     /// Installs event monitors for keyboard and click-away cancellation.
     func start(
         mode: Mode = .combo,
+        hyper: Bool = false,
         preview: @escaping (String) -> Void,
         finish: @escaping (Outcome) -> Void
     ) {
         stop()
         self.mode = mode
         heldMost = []
+        hyperOn = hyper
+        hyperHeld = false
         onPreview = preview
         onFinish = finish
         keyMonitor = NSEvent.addLocalMonitorForEvents(
@@ -149,7 +157,12 @@ final class ChordRecorder {
                 .command, .option, .control, .shift,
             ])
             suppressedKeyUps.insert(keyCode)
-            if keyCode == 53, held.isEmpty {
+            if mode == .combo, hyperOn, keyCode == Self.hyperCode {
+                hyperHeld = true
+                onPreview(previewSymbols(flags))
+                return true
+            }
+            if keyCode == 53, held.isEmpty, !hyperHeld {
                 finish(.cancelled)
                 return true
             }
@@ -164,7 +177,8 @@ final class ChordRecorder {
                     command: flags.contains(.command),
                     option: flags.contains(.option),
                     control: flags.contains(.control),
-                    shift: flags.contains(.shift)
+                    shift: flags.contains(.shift),
+                    hyper: hyperHeld
                 )
             else {
                 return true
@@ -175,6 +189,10 @@ final class ChordRecorder {
             // Only releases paired with swallowed keyDowns are
             // ours — a key held before recording still passes to
             // its original responder.
+            if keyCode == Self.hyperCode, hyperHeld {
+                hyperHeld = false
+                onPreview(previewSymbols(flags))
+            }
             return consumeSuppressedKeyUp(keyCode)
         case .flagsChanged:
             if mode == .sourceKey {
@@ -188,7 +206,7 @@ final class ChordRecorder {
                 return true
             }
             guard mode == .modifiers else {
-                onPreview(Self.modifierSymbols(flags))
+                onPreview(previewSymbols(flags))
                 return false
             }
             return modifiersChanged(flags)
@@ -212,36 +230,13 @@ final class ChordRecorder {
         return false
     }
 
-    /// Each sided modifier's device-dependent bit (IOKit's
-    /// `NX_DEVICE*KEYMASK`), keyed by `HyperSourceKey`'s own code;
-    /// Caps Lock toggles, so its every report is a press (0).
-    static let sideMask: [UInt16: UInt] = [
-        HyperSourceKey.leftControl.keyCode: 0x0001,
-        HyperSourceKey.leftShift.keyCode: 0x0002,
-        HyperSourceKey.rightShift.keyCode: 0x0004,
-        HyperSourceKey.leftCommand.keyCode: 0x0008,
-        HyperSourceKey.rightCommand.keyCode: 0x0010,
-        HyperSourceKey.leftOption.keyCode: 0x0020,
-        HyperSourceKey.rightOption.keyCode: 0x0040,
-        HyperSourceKey.rightControl.keyCode: 0x2000,
-        HyperSourceKey.capsLock.keyCode: 0,
-    ]
+    /// The key code the Hyper key arrives as (`HyperKeyRemap`).
+    static let hyperCode = HyperSourceKey.trigger.keyCode
 
-    /// The scroll chord a modifier set spells.
-    static func scrollChord(_ flags: NSEvent.ModifierFlags) -> ScrollChord {
-        var chord: ScrollChord = []
-        if flags.contains(.control) { chord.insert(.control) }
-        if flags.contains(.option) { chord.insert(.option) }
-        if flags.contains(.shift) { chord.insert(.shift) }
-        if flags.contains(.command) { chord.insert(.command) }
-        return chord
-    }
-
-    /// Formats held modifiers in standard display order (⌃⌥⇧⌘).
-    static func modifierSymbols(
-        _ flags: NSEvent.ModifierFlags
-    ) -> String {
-        ScrollChordGlyphs.text(scrollChord(flags))
+    /// `.combo` mode's preview: the held modifiers, Hyper leading.
+    private func previewSymbols(_ flags: NSEvent.ModifierFlags) -> String {
+        (hyperHeld ? ComboSymbols.hyperGlyph : "")
+            + Self.modifierSymbols(flags)
     }
 
     /// Suppresses trailing key-up events following recording completion.
