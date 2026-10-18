@@ -15,9 +15,11 @@ struct ListedWindow {
     /// it (`needsTitlebarButton`); false elsewhere and where the
     /// read did not answer.
     var titlebarButton = false
-    /// Read only for a window tracked when the read began; the
-    /// reconcile reads any other the way it always has.
+    /// Read only for a window tracked when the read began.
     let tracked: TrackedReading?
+    /// Read only for a window untracked when the read began and
+    /// not minimized: what `track` adopts it from.
+    var arrival: ArrivalReading?
 
     var isStandardWindow: Bool {
         role == kAXWindowRole && subrole == kAXStandardWindowSubrole
@@ -35,6 +37,43 @@ struct TrackedReading {
     let autoReason: AutoFloatReason?
     /// nil where the list holds one window, which spares the read.
     let traits: WindowTraits?
+}
+
+/// What `track` would otherwise read on the main actor of a
+/// window untracked when the list read began, so a Desktop
+/// switch's arrivals are adopted without asking their apps again.
+/// Up to one read old, like `TrackedReading`: a title changed or a
+/// float rule reloaded during the read lands at the window's next
+/// title change or recheck, and a window closed or minimized during
+/// it is not adopted from it (`OffMainReconcile.departures`).
+struct ArrivalReading {
+    let id: WindowID
+    /// The layer detection judged on; `track` reads the window
+    /// live where the server now reports another.
+    let layer: Int?
+    let role: String
+    let subrole: String
+    let title: String
+    let frame: CGRect
+    let fullscreen: Bool
+    let nativeTabs: Bool
+    /// Detection's verdict, before the force-float override.
+    let autoReason: AutoFloatReason?
+    /// The shadow rule's reading; nil where the read did not
+    /// answer, which `shadowVerdict` takes as the live read's nil.
+    let traits: WindowTraits?
+
+    /// `AXHelper.snapshot` over what was read.
+    func window(pid: pid_t, app: AppRef) -> ManagedWindow {
+        ManagedWindow(
+            id: id,
+            pid: pid,
+            appName: app.name,
+            appBundleID: app.bundleID,
+            title: title,
+            frame: frame
+        )
+    }
 }
 
 /// An app's window list and what was read of each window, handed
@@ -68,9 +107,18 @@ struct ListedWindowReader: @unchecked Sendable {
     let traits: (AXUIElement, WindowID?) -> WindowTraits?
     let bundleID: String?
     let rules: FloatRules
+    let facts: (AXUIElement, Int?) -> WindowFacts
     let tracked: Set<WindowID>
     /// The app's overlay class, resolved at request time.
     let isAccessory: Bool
+    /// What spares an untracked window the arrival read where
+    /// `track` might refuse it, resolved at request time: the
+    /// ignore rules, KiwiDesk's own process (its gate asks AppKit)
+    /// and the app's known shadows. A prefilter: a window it lets
+    /// through costs reads, one it holds back is read live.
+    let ignoreRules: IgnoreRules
+    let ownProcess: Bool
+    let shadowed: Set<WindowID>
 
     func read(
         _ elements: [AXUIElement],
@@ -86,31 +134,46 @@ struct ListedWindowReader: @unchecked Sendable {
     ) -> ListedWindow {
         let id = resolve(element)
         let minimized = AXHelper.isMinimized(element)
-        let facts = WindowFacts.read(
-            element,
-            layer: id.flatMap { layers[$0] }
-        )
-        let layer = id.flatMap { layers[$0] } ?? 0
+        let listedLayer = id.flatMap { layers[$0] }
+        let facts = facts(element, listedLayer)
+        let layer = listedLayer ?? 0
         let asksButton = FloatDetection.needsTitlebarButton(
             layer: layer,
             isAccessory: isAccessory,
             bundleID: bundleID
         )
+        let isTracked = id.map { tracked.contains($0) }
+        let button = asksButton ? traits(element, id) : nil
+        let arrives =
+            isTracked == false && !minimized && !ownProcess
+            && facts.role == kAXWindowRole
+            && id.map(shadowed.contains) == false
+            && !FloatDetection.shouldIgnore(
+                bundleID: bundleID,
+                layer: layer,
+                isAccessory: isAccessory,
+                rules: ignoreRules,
+                titlebarButton: button?.hasTitlebarButton == true
+            )
         // One traits read serves the shadow rule and the escape.
         let traitsRead =
-            id.map { tracked.contains($0) } == true && many || asksButton
-            ? traits(element, id) : nil
+            button
+            ?? (!asksButton && (isTracked == true && many || arrives)
+                ? traits(element, id) : nil)
+        let detect = {
+            FloatDetection.autoFloatReason(
+                facts,
+                bundleID: bundleID,
+                rules: rules
+            )
+        }
         var reading: TrackedReading?
-        if let id, !minimized, tracked.contains(id) {
+        if isTracked == true, !minimized {
             reading = TrackedReading(
                 fullscreen: fullscreen(element),
                 subrole: facts.subrole,
                 frame: AXHelper.frame(of: element),
-                autoReason: FloatDetection.autoFloatReason(
-                    facts,
-                    bundleID: bundleID,
-                    rules: rules
-                ),
+                autoReason: detect(),
                 traits: many ? traitsRead : nil
             )
         }
@@ -121,7 +184,46 @@ struct ListedWindowReader: @unchecked Sendable {
             subrole: facts.subrole,
             titlebarButton: asksButton
                 && traitsRead?.hasTitlebarButton == true,
-            tracked: reading
+            tracked: reading,
+            arrival: arrives
+                ? id.map {
+                    arrival(
+                        $0,
+                        element,
+                        facts,
+                        listedLayer,
+                        traitsRead,
+                        detect
+                    )
+                }
+                : nil
+        )
+    }
+
+    /// Per arrival, what `track` asked on the main actor — the
+    /// title, frame, fullscreen state, batched traits, children
+    /// and each child's role, and detection's title and zoom
+    /// reads where it asks them: about 6 + children AX messages
+    /// moved off the main actor per arriving window.
+    private func arrival(
+        _ id: WindowID,
+        _ element: AXUIElement,
+        _ facts: WindowFacts,
+        _ layer: Int?,
+        _ traits: WindowTraits?,
+        _ detect: () -> AutoFloatReason?
+    ) -> ArrivalReading {
+        ArrivalReading(
+            id: id,
+            layer: layer,
+            role: facts.role,
+            subrole: facts.subrole,
+            title: facts.title(),
+            frame: AXHelper.frame(of: element),
+            fullscreen: fullscreen(element),
+            nativeTabs: AXHelper.hasNativeTabs(element),
+            autoReason: detect(),
+            traits: traits
         )
     }
 }
@@ -139,8 +241,12 @@ extension EventLoop {
             traits: shadows.traits,
             bundleID: bundleID,
             rules: floatRules,
+            facts: offMain.readFacts,
             tracked: tracked,
-            isAccessory: classifiesAsOverlay(pid: pid)
+            isAccessory: classifiesAsOverlay(pid: pid),
+            ignoreRules: ignoreRules,
+            ownProcess: Self.isOwnProcess(pid),
+            shadowed: Set(shadows.hosts[pid]?.keys ?? [:].keys)
         )
     }
 
@@ -161,6 +267,7 @@ extension EventLoop {
         nonisolated(unsafe) let read = axWindows
         nonisolated(unsafe) let readPolicy = activationPolicy
         nonisolated(unsafe) let readHidden = appIsHidden
+        nonisolated(unsafe) let readLayers = offMain.readLayers
         return {
             let started = ContinuousClock.now
             let hidden = readHidden(pid)
@@ -176,7 +283,7 @@ extension EventLoop {
                 )
             }
             let elements = read(pid)
-            let layers = FloatDetection.windowLayers(pid: pid)
+            let layers = readLayers(pid)
             return WindowListReading(
                 elements: elements,
                 windows: reader.read(elements, layers: layers),

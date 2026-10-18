@@ -102,13 +102,16 @@ extension EventLoop {
     /// `track`'s question for every window, one round trip for
     /// any but a shell, which reads its siblings. Asked again each
     /// time the window is offered: one that gains content or a
-    /// button becomes a window.
+    /// button becomes a window. `known` is a reading an off-main
+    /// read already took — its inner nil a read that did not
+    /// answer; nil asks the element.
     func shadowVerdict(
         _ element: AXUIElement,
         id: WindowID,
-        pid: pid_t
+        pid: pid_t,
+        traits known: WindowTraits?? = nil
     ) -> ShadowVerdict {
-        guard let twin = shadows.traits(element, id) else {
+        guard let twin = known ?? shadows.traits(element, id) else {
             return .window
         }
         switch twin.reading {

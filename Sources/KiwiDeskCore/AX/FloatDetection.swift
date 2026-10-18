@@ -280,8 +280,8 @@ public enum FloatDetection {
 }
 
 extension AXHelper {
-    /// Detects macOS native tab group (`AXTabGroup`).
-    @MainActor
+    /// Detects macOS native tab group (`AXTabGroup`); also read
+    /// off the main actor by the list read.
     public static func hasNativeTabs(
         _ element: AXUIElement
     ) -> Bool {

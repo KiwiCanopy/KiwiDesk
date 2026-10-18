@@ -56,7 +56,9 @@ extension EventLoop {
     /// deferred so a switch is not first emitted as a create).
     /// `coalesceTabs` is false on a native-space switch, where same-app
     /// windows across spaces tile to identical frames and must not
-    /// merge (#308 review).
+    /// merge (#308 review). `arrivals` is what an off-main list
+    /// read found of the appeared windows, so neither the tab match
+    /// nor `track` asks their apps again.
     func reconcileTabsAndSweep(
         pid: pid_t,
         app: AppRef,
@@ -64,7 +66,8 @@ extension EventLoop {
         live: Set<WindowID>,
         minimized: Set<WindowID>,
         coalesceTabs: Bool,
-        hidden: Bool = false
+        hidden: Bool = false,
+        arrivals: [WindowID: ArrivalReading] = [:]
     ) {
         let vanishedIDs = elements[pid, default: [:]].keys
             .filter { !live.contains($0) }
@@ -76,7 +79,7 @@ extension EventLoop {
                 // and never a tab of its host (#1785).
                 appeared: appeared.filter {
                     !shadows.holds($0.id, pid: pid)
-                }.map(appearedTab)
+                }.map { appearedTab($0, arrivals[$0.id]) }
             )
             : []
         var elementByID = Dictionary(
@@ -103,7 +106,8 @@ extension EventLoop {
                 pair.element,
                 pid: pid,
                 app: app,
-                displayBounds: displayBounds
+                displayBounds: displayBounds,
+                arrival: arrivals[pair.id]
             )
         }
         endRemovalEpisodes(relisted: live)
@@ -204,12 +208,14 @@ extension EventLoop {
     }
 
     private func appearedTab(
-        _ pair: (element: AXUIElement, id: WindowID)
+        _ pair: (element: AXUIElement, id: WindowID),
+        _ arrival: ArrivalReading?
     ) -> TabWindow {
         TabWindow(
             id: pair.id,
-            frame: AXHelper.frame(of: pair.element),
-            hasTabGroup: AXHelper.hasNativeTabs(pair.element)
+            frame: arrival?.frame ?? AXHelper.frame(of: pair.element),
+            hasTabGroup: arrival?.nativeTabs
+                ?? AXHelper.hasNativeTabs(pair.element)
         )
     }
 
