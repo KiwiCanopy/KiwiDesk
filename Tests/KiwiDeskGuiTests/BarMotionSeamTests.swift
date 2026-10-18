@@ -124,6 +124,7 @@ struct BarMotionSeamTests {
         "revealMotion": ["reduceMotion"],
         "playReveal": ["revealMotion(", "isReduced"],
         "endReveal": [],
+        "afterReveal": [],
     ]
 
     private static func stripped(_ home: String) throws -> String {

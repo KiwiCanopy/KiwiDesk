@@ -120,6 +120,21 @@ public enum APIReference {
     /// nothing stored.
     public static let barActions = ["toggle_reveal"]
 
+    /// The bar a `space_bar.` / `app_bar.` action names, nil for
+    /// any other command — the dispatch's one reading of
+    /// `barActions`.
+    static func barAction(of command: String) -> ShelfBar? {
+        for (prefix, bar) in [
+            ("space_bar.", ShelfBar.space), ("app_bar.", .app),
+        ]
+        where command.hasPrefix(prefix)
+            && barActions.contains(String(command.dropFirst(prefix.count)))
+        {
+            return bar
+        }
+        return nil
+    }
+
     /// Layout sub-APIs exposed as global Lua tables. Keys must
     /// be fresh, valid Lua identifiers: they are interpolated
     /// bare into the typo-guard install chunk, and a name
@@ -163,9 +178,9 @@ public enum APIReference {
             "set_app_bar_title_cap",
             "set_app_bar_group_adjacent_windows",
         ],
-        "space_bar": [
+        "space_bar": barActions + [
             "set_enabled", "set_reserve", "set_visibility",
-            "toggle_reveal", "set_edge",
+            "set_edge",
             "set_glyph_span", "set_glyph_gap",
             "set_group_adjacent_windows", "set_inactive_content",
             "set_item_label",
@@ -175,9 +190,9 @@ public enum APIReference {
             "set_sticky_badge", "set_spring_delay",
             "set_focused_item_color", "set_focused_highlight_color",
         ],
-        "app_bar": [
+        "app_bar": barActions + [
             "set_edge", "set_reserve", "set_visibility",
-            "toggle_reveal", "set_active_indicator",
+            "set_active_indicator",
             "set_title_cap",
             "set_group_adjacent_windows",
         ],

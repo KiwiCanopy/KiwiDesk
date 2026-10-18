@@ -101,6 +101,10 @@ final class ShelfManager {
             // standing on this shelf leaves with it (#1946).
             peek.shelfLeft(overlay.panel)
             overlay.hide(animated: true)
+            // A kept hiding shelf whose edge stopped hiding goes.
+            if !overlay.isVisible, reveal.targets[key] == nil {
+                overlays[key] = nil
+            }
         }
         for shelf in shelves {
             let key = Self.key(shelf)
@@ -190,7 +194,9 @@ final class ShelfManager {
     /// Drops a shelf that has left the screen, unless a plan wants
     /// it again meanwhile.
     private func retire(_ key: Key) {
-        guard last[key] == nil else { return }
+        // A hiding shelf that retracted is kept, ordered out, for
+        // its next reveal (#761): a hiding edge is not an empty one.
+        guard last[key] == nil, reveal.targets[key] == nil else { return }
         overlays[key] = nil
     }
 

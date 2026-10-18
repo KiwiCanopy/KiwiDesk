@@ -23,7 +23,7 @@ extension APIReference {
         ),
         "toggle_reveal": APIRecord(
             "Shows or hides the hidden shelf the App Bar sits on, "
-                + "on the focused screen."
+                + "on the active Space's screen."
         ),
         "set_active_indicator": APIRecord(
             "Sets how the focused window's item is marked.",

@@ -44,6 +44,14 @@ final class ShelfOverlay {
     var slides = false
     /// Whether the leave in flight is a slide.
     var leavingSlides = false
+    /// The slide-in in flight, whose landing alone ends its motion.
+    var revealing: UUID?
+    /// Lands a reveal or a retract after its length — the reveal's
+    /// own timer; a test hands a queue it drains by hand.
+    var afterReveal: (TimeInterval, @escaping @MainActor () -> Void) -> Void =
+        {
+            BarMotion.afterReveal($0, $1)
+        }
     /// Fires once the shelf has left the screen — at once, or when
     /// its fade-out lands; `ShelfManager` retires it there.
     var onLeft: @MainActor () -> Void = {}

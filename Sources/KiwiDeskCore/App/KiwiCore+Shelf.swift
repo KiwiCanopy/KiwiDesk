@@ -92,7 +92,7 @@ extension KiwiCore {
                 display: display.id,
                 screen: screen,
                 items: items,
-                core: self,
+                reveal: shelves.reveal,
                 settings: shown
             )
             strips += plans.map {

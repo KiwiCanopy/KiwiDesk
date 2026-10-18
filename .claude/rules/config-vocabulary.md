@@ -87,6 +87,11 @@ synonym:
   *badge* nor a *mark*, and copy naming it says *half-moon*. Not a
   *dot*, which #2142's Desktop plate and #761's Space dots spend,
   nor a *pill* or an *indicator* (below).
+- **Space dots** — what a hidden shelf draws in place of the
+  Space Bar (#761): one dot per Space, the current one wide. A
+  lone App Bar's hidden shelf draws a short **line**. Neither is a
+  *pill*, an *indicator* or a *badge*, each spoken for here, and
+  neither is a *half-moon*.
 - **held Space** — a Space with windows kept live for the
   arrangement it left, when a switch does not name it (#1507,
   #1790). *Held* is the word in copy and

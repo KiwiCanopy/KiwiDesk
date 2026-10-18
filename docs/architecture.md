@@ -183,8 +183,8 @@ re-clamps the floats (#1524).
 :::unreleased
 A shelf whose bars are all `auto` reserves nothing and draws only
 when `ShelfManager.reveal` shows it (#761): `updateBars()` files
-each hiding plan's strip as a target and draws its indicator
-(`ShelfIndicators`) in its place, and a reveal or a retract from
+each hiding plan's strip as a target and draws its Space dots or
+line (`ShelfIndicators`) in its place, and a reveal or a retract from
 the pointer monitor or the show/hide action calls `updateBars()`
 alone — never a retile.
 :::

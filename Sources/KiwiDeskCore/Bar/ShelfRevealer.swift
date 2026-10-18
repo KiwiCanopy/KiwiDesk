@@ -13,16 +13,29 @@ final class ShelfRevealer {
         let edge: AppBarEdge
         let strip: CGRect
         let screen: CGRect
+        /// The bars the shelf carries, which the action names.
+        var bars: Set<ShelfBar> = [.space]
 
         var band: CGRect { ShelfReveal.band(of: strip, edge: edge) }
-        /// Where the pointer holds a shown shelf.
-        var zone: CGRect { strip.union(band) }
+        /// Where the pointer holds a shown shelf: the strip and its
+        /// band, out to the push reach, so a pointer resting on the
+        /// screen's last row is inside (`CGRect` excludes `maxY`).
+        var zone: CGRect {
+            strip.union(band).insetBy(
+                dx: -ShelfReveal.pushReach,
+                dy: -ShelfReveal.pushReach
+            )
+        }
     }
 
     typealias Key = ShelfManager.Key
 
     /// Fires when a shelf is shown or hidden.
     var onChange: @MainActor () -> Void = {}
+    /// Whether a surface the shelf opened holds it shown although
+    /// the pointer left — the hover peek, a bar menu; wired in
+    /// Bootstrap. A retract it holds is asked again later.
+    var holds: @MainActor () -> Bool = { false }
     /// Installs the mouse-moved monitors: live in production,
     /// pinned inert by both `makeTestCore` twins (tests.md ▸
     /// machine touch). A move delivered without a point is read
@@ -58,22 +71,22 @@ final class ShelfRevealer {
         syncMonitor()
     }
 
+    /// Ends every reveal: a stopped core owes no timer, and a pin
+    /// left without one would never end.
     func stop() {
         running = false
         for timer in timers.values { timer.cancel() }
         timers = [:]
+        suppressed = []
+        let wasShown = !phases.isEmpty
+        phases = [:]
         syncMonitor()
+        if wasShown { onChange() }
     }
 
     /// The state of `key`, hidden where nothing revealed it.
     func reveal(of key: Key) -> ShelfReveal {
         phases[key] ?? .hidden
-    }
-
-    /// Whether `key` draws its shelf: always where it does not
-    /// hide.
-    func isShown(_ key: Key) -> Bool {
-        targets[key] == nil || reveal(of: key).isShown
     }
 
     /// The hiding shelves of this pass; a shelf that stopped
@@ -95,6 +108,7 @@ final class ShelfRevealer {
         cancelTimer(key)
         let next = reveal(of: key).toggled(now: now(), duration: duration)
         set(next, for: key)
+        if next.isShown { suppressed.remove(key) }
         if next == .hidden {
             if target.zone.contains(location()) { suppressed.insert(key) }
         } else if case .pinned(let until?) = next {
@@ -164,6 +178,12 @@ final class ShelfRevealer {
         guard let target = targets[key], reveal(of: key) == .hover
         else { return }
         if target.zone.contains(location()) { return }
+        guard !holds() else {
+            arm(key, after: ShelfReveal.retractDelay) { [weak self] in
+                self?.retractIfLeft(key)
+            }
+            return
+        }
         set(.hidden, for: key)
     }
 

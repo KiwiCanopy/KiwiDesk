@@ -9,13 +9,18 @@ extension ShelfOverlay {
         leavingSlides = false
         BarMotion.endReveal(content)
         content.alphaValue = 1
-        BarMotion.playReveal(
+        let token = UUID()
+        revealing = token
+        let span = BarMotion.playReveal(
             content,
             edge: edge,
             depth: depth,
             entering: true
-        ) { [weak self] in
-            guard let self, self.leaving == nil else { return }
+        )
+        afterReveal(span) { [weak self] in
+            guard let self, self.revealing == token, self.leaving == nil
+            else { return }
+            self.revealing = nil
             BarMotion.endReveal(self.content)
         }
     }
@@ -35,12 +40,14 @@ extension ShelfOverlay {
             view.isHidden = false
         }
         BarMotion.endReveal(content)
-        BarMotion.playReveal(
+        revealing = nil
+        let span = BarMotion.playReveal(
             content,
             edge: edge,
             depth: edge.isHorizontal ? strip.height : strip.width,
             entering: false
-        ) { [weak self] in
+        )
+        afterReveal(span) { [weak self] in
             guard let self, self.leaving == token else { return }
             self.leaving = nil
             self.leavingSlides = false

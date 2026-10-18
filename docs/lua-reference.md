@@ -633,6 +633,12 @@ The one exception is a bar set not to reserve its strip
 ([`space_bar.set_reserve`](#space_barset_reserve) and
 [`app_bar.set_reserve`](#app_barset_reserve)), which draws over the windows.
 
+:::unreleased
+A revealed auto-hiding shelf draws over the windows too
+([`space_bar.set_visibility`](#space_barset_visibility),
+[`app_bar.set_visibility`](#app_barset_visibility)).
+:::
+
 **Example:**
 
 ```lua
@@ -2583,7 +2589,7 @@ clamp.
 shown. `0` keeps it until the next call; above `0` it hides after
 that many seconds, or at once on the next call. A shelf the
 pointer is over when the time runs out stays until the pointer
-leaves. Lua-only for now.
+leaves.
 
 **Example:**
 
@@ -2814,8 +2820,8 @@ app_bar.set_reserve(false)
 
 **Does:** as
 [`space_bar.set_visibility`](#space_barset_visibility), for the
-App Bar's shelf. A lone App Bar hides to a short plain pill; on
-the Space Bar's edge the shared shelf shows the Space dots.
+App Bar's shelf. A lone App Bar hides to a short line; on the
+Space Bar's edge the shared shelf shows the Space dots.
 
 Global only: no layout sets its own.
 
@@ -2830,8 +2836,8 @@ app_bar.set_visibility("auto")
 **Expects:** nothing.
 
 **Does:** as [`space_bar.toggle_reveal`](#space_bartoggle_reveal),
-for the shelf the App Bar sits on. Fails where that shelf does not
-hide, or where the active Space's layout draws no App Bar.
+for the shelf the App Bar sits on. Fails where the App Bar does
+not hide, or where the active Space's layout draws no App Bar.
 
 **Example:**
 
@@ -2995,18 +3001,20 @@ space_bar.set_reserve(false)
 
 **Expects:** `"always"` or `"auto"` (default `"always"`).
 
-**Does:** with `"auto"` the Space Bar's KiwiShelf hides to a row
-of Space dots at its edge — one dot per Space, the current one
-wide, a Space holding windows brighter. The pointer resting in a
-band a few points deep along that edge for 0.35 s reveals the
-shelf, at once where the band touches the screen's own edge; it
-retracts 0.5 s after the pointer leaves it. A revealed shelf draws
-over the windows: a hiding edge reserves no strip, so a reveal
-moves no window. Setting the mode retiles once.
+**Does:** with `"auto"` the Space Bar's shelf hides to a row of
+Space dots at its edge — one dot per Space, the current one wide,
+a Space holding windows brighter. The pointer resting in a band a
+few points deep along that edge for 0.35 s reveals the shelf, at
+once when it pushes against the screen's edge there; the shelf
+retracts 0.5 s after the pointer leaves it, and stays while a bar
+menu or a hover peek it opened is up. A revealed shelf draws over
+the windows: a hiding edge reserves no strip, so a reveal moves
+no window, and setting the mode moves the windows at most once.
 
-On an edge the two bars share, the shelf hides only while the
-App Bar is `"auto"` too, and then both hide and reveal together.
-A look never carries the mode.
+While the two bars share an edge on any screen they are one
+shelf: setting either bar's mode sets both, and where the stored
+modes disagree the shelf stays shown. A look never carries the
+mode.
 
 **Example:**
 
@@ -3023,8 +3031,9 @@ on the screen the active Space lays out on. A shown shelf stays
 until the next call, or for
 [`kiwishelf.set_reveal_duration`](#kiwishelfset_reveal_duration)
 seconds where that is above 0. Fails where the shelf does not
-hide. No shortcut is bound by default; VoiceOver's press on the
-Space dots runs it too.
+hide, or where no hiding shelf there carries the Space Bar. No
+shortcut is bound by default; VoiceOver's press on the Space dots
+runs it too.
 
 **Example:**
 

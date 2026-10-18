@@ -28,10 +28,11 @@ extension SettingsValueReadout {
         case .appBarReserve:
             return appBarOnOffRow(census, o.reserve, n.reserve)
         case .appBarVisibility:
-            return appBarOnOffRow(
+            return appBarChoiceRow(
                 census,
-                o.visibility == .auto,
-                n.visibility == .auto
+                o.visibility,
+                n.visibility,
+                AppBarOptions.visibility
             )
         case .appBarTitleCap:
             return appBarRow(

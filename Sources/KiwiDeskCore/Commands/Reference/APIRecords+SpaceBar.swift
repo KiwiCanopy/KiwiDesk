@@ -24,7 +24,7 @@ extension APIReference {
         ),
         "toggle_reveal": APIRecord(
             "Shows or hides the hidden shelf the Space Bar sits on, "
-                + "on the focused screen."
+                + "on the active Space's screen."
         ),
         "set_edge": APIRecord(
             "Sets the Space Bar's edge on all screens, or on one "

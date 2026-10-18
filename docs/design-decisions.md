@@ -13993,31 +13993,41 @@ reflow paragraph of *Amended* below.
 ([#761](https://github.com/KiwiCanopy/KiwiDesk/issues/761)).
 Each bar carries a visibility mode, `always` (the default) or
 `auto`; there is no `never`, which is the bar turned off. The
-unit that hides is the shelf on one edge, so on a fused edge it
-hides only while both bars are `auto` — the AND beside the
-reserve's OR in the one fold — and a hiding edge reserves
-nothing. That makes "a reveal never retiles" true by
-construction: setting the mode is the one pass, and a reveal
-only redraws the bars. Hiding while still reserving was rejected
-(the user would give up the information and keep paying the
-area).
+unit that hides is the shelf on one edge, and a hiding edge
+reserves nothing. That makes "a reveal never retiles" true by
+construction: a reveal only redraws the bars, and setting the
+mode is the one change that can move the windows. Hiding while
+still reserving was rejected (the user would give up the
+information and keep paying the area).
 
-The hover target is a band a few points deep along the edge,
-never the indicator's drawing, and the indicator ignores the
-mouse, so the windows under it keep their clicks. The timings
-follow the Dock and the full-screen menu bar: 0.35 s in the band
-before a reveal, which a pointer passing for a title bar does not
-reach, movement inside the band never restarting it; 0.5 s after
-leaving before a retract, which forgives an overshoot; a push
-against the screen's own edge reveals at once. There is no
-click-pin: the band sits over the indicator, so the shelf has
-revealed before a click lands, and on a revealed shelf every
-click target already does something, so nothing could release a
-pin. The show/hide action is the one pin, and it hides again by
-itself after `kiwishelf.reveal_duration` where that is above 0
-(owner, 2026-10-18). No reveal on a Space switch: the Space dots
-already show the new Space. A look never carries the mode, which
-is functionality, not styling.
+Two bars that share an edge on any screen are one shelf, so
+they read one mode, through one reader, and a write to either
+writes both (owner, 2026-10-18). Judging the shared shelf by
+what each layout draws let a layout with no App Bar hide a shelf
+that Monocle kept shown, so every layout switch moved the
+windows; judging by the configured edges cannot flip. Where the
+stored modes disagree — a look or a hand edit fused two bars —
+the shelf stays shown, since hiding needs both bars' consent. The
+price is that bars linked on one screen and split on another take
+one mode everywhere. Storing the mode per edge would have agreed
+by construction, but would change a bar's mode when it moves.
+
+The hover target is a band along the edge, never the dots'
+drawing, and the dots let the mouse through, so the windows under
+them keep their clicks. The reveal waits long enough that a
+pointer passing for a title bar does not pop it, never restarting
+for movement inside the band; the retract forgives an overshoot;
+a push against the screen's own edge reveals at once, as the Dock
+does. There is no click-pin: the band sits over the dots, so the
+shelf has revealed before a click lands, and on a revealed shelf
+every click target already does something, so nothing could
+release a pin. The show/hide action is the one pin. It stays
+until the next press by default, because a keyboard user who
+pressed to look has not said for how long; `reveal_duration`
+hides it again on its own, and is one value because a fused shelf
+is one shelf. No reveal on a Space switch: the dots already show
+the new Space. A look never carries the mode, which is
+functionality, not styling.
 :::
 
 *One placement rule, asked by every picture of it.* Where each

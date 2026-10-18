@@ -26,11 +26,8 @@ extension KiwiCore {
         }
         // The show/hide action redraws the bars and moves no
         // window: a hiding edge reserves nothing (#761).
-        if command == "space_bar.toggle_reveal" {
-            return shelfRevealCommand(spaceBar: true)
-        }
-        if command == "app_bar.toggle_reveal" {
-            return shelfRevealCommand(spaceBar: false)
+        if let action = APIReference.barAction(of: command) {
+            return shelfRevealCommand(action)
         }
         let reservation = shelfReservations
         // Raised by the bars' own arms: their write may leave the

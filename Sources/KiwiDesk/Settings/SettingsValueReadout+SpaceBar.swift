@@ -18,10 +18,11 @@ extension SettingsValueReadout {
         case .spaceBarReserve:
             return spaceBarOnOffRow(census, o.reserve, n.reserve)
         case .spaceBarVisibility:
-            return spaceBarOnOffRow(
+            return spaceBarChoiceRow(
                 census,
-                o.visibility == .auto,
-                n.visibility == .auto
+                o.visibility,
+                n.visibility,
+                AppBarOptions.visibility
             )
         case .spaceBarActiveIndicator:
             return spaceBarChoiceRow(

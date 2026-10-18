@@ -28,6 +28,22 @@ extension SpaceBarItemView {
     /// The windows this item's Space holds, collapsed or not —
     /// what the label announces and the empty ink asks.
     var heldWindows: Int {
+        Self.heldWindows(
+            collapse: collapse,
+            apps: apps,
+            before: before,
+            after: after
+        )
+    }
+
+    /// The one count of a Space item's windows, collapsed or not
+    /// — the view's and a hidden shelf's Space dot's (#761).
+    nonisolated static func heldWindows(
+        collapse: Collapse?,
+        apps: [App],
+        before: SpaceBarStrip.Disc,
+        after: SpaceBarStrip.Disc
+    ) -> Int {
         collapse?.windows
             ?? apps.reduce(0) { $0 + $1.count } + after.windows.count
             + before.windows.count

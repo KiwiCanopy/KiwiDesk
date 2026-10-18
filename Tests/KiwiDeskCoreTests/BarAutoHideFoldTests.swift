@@ -24,7 +24,7 @@ struct BarAutoHideFoldTests {
 
     @Test("A lone auto bar's edge hides and reserves nothing")
     func loneAutoHides() {
-        let edges = settings(space: .auto, app: .always)
+        let edges = settings(space: .auto, app: .always, appEdge: .bottom)
             .barEdges(space: true, app: false)
         #expect(edges == [ShelfEdge(.top, reserves: false, hides: true)])
     }
@@ -44,6 +44,44 @@ struct BarAutoHideFoldTests {
         #expect(both == [ShelfEdge(.top, reserves: false, hides: true)])
     }
 
+    /// The drift review found: a layout that draws no App Bar must
+    /// not hide a shelf the App Bar shares by edge (#761 ruling).
+    @Test("Linked bars hide alike in every layout")
+    func linkedHideIsLayoutFree() {
+        let mixed = settings(space: .auto, app: .always)
+        #expect(mixed.barsLinked)
+        for mode in LayoutMode.allCases {
+            #expect(mixed.shelfEdges(in: mode, on: nil) == [.top])
+        }
+        let both = settings(space: .auto, app: .auto)
+        for mode in LayoutMode.allCases {
+            #expect(both.shelfEdges(in: mode, on: nil).isEmpty)
+        }
+    }
+
+    @Test("A per-screen shared edge links the bars everywhere")
+    func linkedOnAnyScreen() {
+        var split = settings(space: .auto, app: .always, appEdge: .bottom)
+        #expect(!split.barsLinked)
+        #expect(split.visibility(of: .space) == .auto)
+        split.appBarStyle.edgeOverride = ["S:1x1": .top]
+        #expect(split.barsLinked)
+        #expect(split.visibility(of: .space) == .always)
+        #expect(split.onScreen(nil).spaceBarStyle.visibility == .always)
+    }
+
+    @Test("The write door writes both linked bars, one apart")
+    func writeDoor() {
+        var linked = settings(space: .always, app: .always)
+        linked.setVisibility(.auto, of: .app)
+        #expect(linked.spaceBarStyle.visibility == .auto)
+        #expect(linked.appBarStyle.visibility == .auto)
+        var apart = settings(space: .always, app: .always, appEdge: .left)
+        apart.setVisibility(.auto, of: .app)
+        #expect(apart.spaceBarStyle.visibility == .always)
+        #expect(apart.appBarStyle.visibility == .auto)
+    }
+
     @Test("Split bars hide on their own edges")
     func splitHidesApart() {
         let edges = settings(space: .auto, app: .always, appEdge: .bottom)
@@ -58,7 +96,7 @@ struct BarAutoHideFoldTests {
 
     @Test("A hiding edge leaves the layout bounds whole")
     func hidingEdgeReservesNothing() {
-        let hidden = settings(space: .auto, app: .always)
+        let hidden = settings(space: .auto, app: .always, appEdge: .left)
         #expect(hidden.shelfEdges(in: .bsp, on: nil).isEmpty)
         let visible = CGRect(x: 0, y: 0, width: 1000, height: 800)
         #expect(

@@ -41,22 +41,19 @@ extension BarMotion {
         return .slide(offset, revealSlide)
     }
 
-    /// Plays a reveal (`entering`) or a retract on `view`, the
-    /// panel's content, and runs `completion` once it lands — on a
-    /// timer of its length, as the strip walk's.
+    /// Starts a reveal (`entering`) or a retract on `view`, the
+    /// panel's content, and returns its length; the caller lands it
+    /// through its own `afterReveal` seam.
     @MainActor
+    @discardableResult
     static func playReveal(
         _ view: NSView,
         edge: AppBarEdge,
         depth: CGFloat,
-        entering: Bool,
-        completion: @escaping @MainActor () -> Void
-    ) {
+        entering: Bool
+    ) -> TimeInterval {
         view.wantsLayer = true
-        guard let layer = view.layer else {
-            completion()
-            return
-        }
+        guard let layer = view.layer else { return 0 }
         let motion = revealMotion(
             reduceMotion: isReduced,
             edge: edge,
@@ -92,9 +89,19 @@ extension BarMotion {
             fade.isRemovedOnCompletion = false
             layer.add(fade, forKey: "kiwi.reveal")
         }
+        return span
+    }
+
+    /// Runs `body` once a reveal of `span` seconds has landed — the
+    /// overlay's `afterReveal` default; a test hands a queue.
+    @MainActor
+    static func afterReveal(
+        _ span: TimeInterval,
+        _ body: @escaping @MainActor () -> Void
+    ) {
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(span))
-            completion()
+            if span > 0 { try? await Task.sleep(for: .seconds(span)) }
+            body()
         }
     }
 

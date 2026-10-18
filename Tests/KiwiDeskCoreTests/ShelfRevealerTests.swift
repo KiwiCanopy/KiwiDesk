@@ -228,7 +228,7 @@ struct ShelfRevealerTests {
         #expect(pointer.changes == 1)
         revealer.sync([:])
         #expect(revealer.reveal(of: Self.key) == .hidden)
-        #expect(revealer.isShown(Self.key))
+        #expect(revealer.targets.isEmpty)
         #expect(!revealer.toggle(Self.key, duration: 0))
     }
 
@@ -248,5 +248,53 @@ struct ShelfRevealerTests {
         revealer.sync([:])
         #expect(!revealer.isListening)
         #expect(installs == 1)
+    }
+
+    @Test("A pointer resting on the screen's last row keeps the shelf")
+    func lastRowIsInside() {
+        let (revealer, timers, pointer) = make(Self.flush)
+        move(revealer, pointer, to: CGPoint(x: 500, y: 800))
+        move(revealer, pointer, to: CGPoint(x: 520, y: 800))
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hover)
+    }
+
+    @Test("A press that shows the shelf ends an earlier suppression")
+    func showClearsSuppression() {
+        let (revealer, timers, pointer) = make()
+        move(revealer, pointer, to: CGPoint(x: 500, y: 770))
+        timers.fireAll()
+        revealer.toggle(Self.key, duration: 0)
+        revealer.toggle(Self.key, duration: 2)
+        pointer.point = CGPoint(x: 500, y: 750)
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hover)
+        move(revealer, pointer, to: CGPoint(x: 500, y: 300))
+        #expect(timers.delays == [ShelfReveal.retractDelay])
+    }
+
+    @Test("Stopping ends every reveal")
+    func stopEndsReveals() {
+        let (revealer, _, pointer) = make()
+        revealer.onChange = { pointer.changes += 1 }
+        revealer.toggle(Self.key, duration: 5)
+        revealer.stop()
+        #expect(revealer.reveal(of: Self.key) == .hidden)
+        #expect(pointer.changes == 2)
+    }
+
+    @Test("An open bar menu or peek holds a retract")
+    func holdDefersTheRetract() {
+        let (revealer, timers, pointer) = make()
+        var holding = true
+        revealer.holds = { holding }
+        move(revealer, pointer, to: CGPoint(x: 500, y: 770))
+        timers.fireAll()
+        move(revealer, pointer, to: CGPoint(x: 500, y: 300))
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hover)
+        holding = false
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hidden)
     }
 }

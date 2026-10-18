@@ -23,11 +23,21 @@ struct ShelfIndicatorSpec: Equatable {
     let frame: CGRect
     let horizontal: Bool
     let fill: String
+    /// The bar's own state inks (`SpaceBarItemView.stateColor`):
+    /// the current Space's, an idle one's, an empty one's.
+    let currentInk: String
     let ink: String
     let emptyInk: String
     /// Whether the shelf is shown over it: the indicator then
     /// draws nothing but stays for VoiceOver, its value "shown".
     let shown: Bool
+
+    /// A dot's ink, by the bar's own ladder: current, then held
+    /// windows, then empty.
+    func ink(of dot: Dot) -> String {
+        if dot.current { return currentInk }
+        return dot.occupied ? ink : emptyInk
+    }
 
     /// The indicator's depth across its edge (pt).
     static let depth: CGFloat = 8
@@ -129,10 +139,7 @@ final class ShelfIndicatorView: NSView {
                 spec.horizontal
                 ? CGRect(x: lead, y: cross, width: long, height: size)
                 : CGRect(x: cross, y: lead, width: size, height: long)
-            NSColor(
-                kiwiHex: dot.occupied || dot.current
-                    ? spec.ink : spec.emptyInk
-            ).setFill()
+            NSColor(kiwiHex: spec.ink(of: dot)).setFill()
             NSBezierPath(
                 roundedRect: rect,
                 xRadius: size / 2,
@@ -147,14 +154,14 @@ final class ShelfIndicatorView: NSView {
 
     override func accessibilityLabel() -> String? {
         carriesSpaceBar
-            ? L("shelf.indicator.space_bar", "Space Bar")
-            : L("shelf.indicator.app_bar", "App Bar")
+            ? L("kiwishelf.indicator.space_bar.ax", "Space Bar")
+            : L("kiwishelf.indicator.app_bar.ax", "App Bar")
     }
 
     override func accessibilityValue() -> Any? {
         spec?.shown == true
-            ? L("shelf.indicator.shown", "Shown")
-            : L("shelf.indicator.hidden", "Hidden")
+            ? L("kiwishelf.indicator.shown.ax", "Shown")
+            : L("kiwishelf.indicator.hidden.ax", "Hidden")
     }
 
     override func accessibilityPerformPress() -> Bool {
@@ -180,6 +187,9 @@ final class ShelfIndicator {
     }
 
     func show(_ spec: ShelfIndicatorSpec) {
+        // A shown indicator asked again for what it draws moves
+        // nothing (#1901).
+        if panel?.isVisible == true, view.spec == spec { return }
         let panel = self.panel ?? makePanel()
         self.panel = panel
         if view.spec != spec { view.spec = spec }
