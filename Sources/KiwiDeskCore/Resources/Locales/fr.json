@@ -753,6 +753,7 @@
   "keybinding.next_layout": "Passer à la disposition suivante",
   "keybinding.open_settings": "Ouvrir les Réglages",
   "keybinding.previous_layout": "Passer à la disposition précédente",
+  "keybinding.reset_sizes": "Réinitialiser les tailles de cet espace",
   "keybinding.show_shortcuts": "Afficher le panneau des raccourcis",
   "keybinding.show_view_picker": "Afficher le sélecteur de vue",
   "keybinding.show_window_switcher": "Afficher le sélecteur de fenêtres",

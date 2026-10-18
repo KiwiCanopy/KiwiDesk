@@ -7,7 +7,7 @@ import Foundation
 extension DefaultKeybindings {
     /// The newest generation. A release that adds a default row
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
-    public static let newestGeneration = 4
+    public static let newestGeneration = 5
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
@@ -23,12 +23,16 @@ extension DefaultKeybindings {
         case 3: [jumpToWindowRow()]
         // 3.0.0: KiwiVision (#2103).
         case 4: [kiwiVisionRow()]
+        // 3.1.0: Reset sizes in this Space (#2303).
+        case 5: [resetSizesRow()]
         default: []
         }
     }
 
     /// The rows of every generation above `mark` whose action no
-    /// row in `existing` binds and whose chord is free. Additive,
+    /// row in `existing` binds and whose chord is free, a letter
+    /// row on the base `existing`'s letters took
+    /// (`HyperShortcutMove.onLettersBase`). Additive,
     /// like `desktopTopUp`: a row the user deleted after its
     /// generation was offered stays deleted.
     public static func generationTopUp(
@@ -36,14 +40,21 @@ extension DefaultKeybindings {
         above mark: Int
     ) -> [KeyBinding] {
         guard mark < newestGeneration else { return [] }
-        var taken = Set(existing.compactMap { KeyCombo.parse($0.combo) })
+        // As registered: a Hyper row holds its bare chord (#1870).
+        var taken = Set(
+            existing.compactMap { KeyCombo.parse($0.combo)?.registered }
+        )
         var bound = Set(existing.map(\.lua))
         var added: [KeyBinding] = []
         for number in (max(mark, 0) + 1)...newestGeneration {
-            for row in rows(ofGeneration: number) {
+            for seeded in rows(ofGeneration: number) {
+                let row = HyperShortcutMove.onLettersBase(
+                    seeded,
+                    in: existing
+                )
                 guard !bound.contains(row.lua),
                     let combo = KeyCombo.parse(row.combo),
-                    taken.insert(combo).inserted
+                    taken.insert(combo.registered).inserted
                 else { continue }
                 bound.insert(row.lua)
                 added.append(row)

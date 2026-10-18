@@ -753,6 +753,7 @@
   "keybinding.next_layout": "切换到下一个布局",
   "keybinding.open_settings": "打开设置",
   "keybinding.previous_layout": "切换到上一个布局",
+  "keybinding.reset_sizes": "重置此空间的尺寸",
   "keybinding.show_shortcuts": "显示快捷键面板",
   "keybinding.show_view_picker": "显示视图选择器",
   "keybinding.show_window_switcher": "显示窗口切换器",

@@ -753,6 +753,7 @@
   "keybinding.next_layout": "Switch to next layout",
   "keybinding.open_settings": "Open Settings",
   "keybinding.previous_layout": "Switch to previous layout",
+  "keybinding.reset_sizes": "Reset sizes in this Space",
   "keybinding.show_shortcuts": "Show shortcuts panel",
   "keybinding.show_view_picker": "Show view picker",
   "keybinding.show_window_switcher": "Show window switcher",

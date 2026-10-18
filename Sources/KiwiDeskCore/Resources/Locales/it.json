@@ -753,6 +753,7 @@
   "keybinding.next_layout": "Passa al layout successivo",
   "keybinding.open_settings": "Apri Impostazioni",
   "keybinding.previous_layout": "Passa al layout precedente",
+  "keybinding.reset_sizes": "Ripristina le dimensioni di questo spazio",
   "keybinding.show_shortcuts": "Mostra il pannello delle scorciatoie",
   "keybinding.show_view_picker": "Mostra il selettore della vista",
   "keybinding.show_window_switcher": "Mostra il selettore di finestre",

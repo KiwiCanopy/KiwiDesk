@@ -131,6 +131,41 @@ public enum HyperShortcutMove {
         }
     }
 
+    /// `row` on the base the seeded letters of `rows` sit on: a
+    /// seeded `⌃⌥` letter row lands on `✦` where more of those
+    /// letters are on Hyper than on `⌃⌥`, so a default added after
+    /// the move joins its letters (#2303). Anything else is `row`.
+    public static func onLettersBase(
+        _ row: KeyBinding,
+        in rows: [KeyBinding]
+    ) -> KeyBinding {
+        let seeds = letterSeed
+        guard seeds.contains(where: { $0.lua == row.lua }),
+            let combo = KeyCombo.parse(row.combo),
+            let target = moved(combo, .toHyper)?.comboString()
+        else { return row }
+        var hyper = 0
+        var base = 0
+        for seed in seeds {
+            guard
+                let found = rows.first(where: {
+                    $0.kind == .navigation
+                        && NavigationChords.sameAction($0, seed)
+                }),
+                let combo = KeyCombo.parse(found.combo)
+            else { continue }
+            if combo.modifiers.contains(.hyper) {
+                hyper += 1
+            } else if moved(combo, .toHyper) != nil {
+                base += 1
+            }
+        }
+        guard hyper > base else { return row }
+        var onHyper = row
+        onHyper.combo = target
+        return onHyper
+    }
+
     /// `combo` on the other base, or nil where it is not on the
     /// base `direction` moves from.
     static func moved(_ combo: KeyCombo, _ direction: Direction) -> KeyCombo? {

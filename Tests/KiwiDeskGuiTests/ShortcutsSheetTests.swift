@@ -95,6 +95,7 @@ struct ShortcutsSheetTests {
             "KiwiDesk.resize(\"y\", 50)", "KiwiDesk.resize(\"y\", -50)",
             "KiwiDesk.toggle_floating()", "KiwiDesk.toggle_sticky()",
             "KiwiDesk.toggle_display_sticky()",
+            "KiwiDesk.reset_layout_sizing()",
             "KiwiDesk.switch_layer(\"vim\")", "kiwivision.toggle()",
         ]
         let glyphs = verbs.map {
