@@ -115,22 +115,18 @@ struct GestureAutoplayWiringTests {
         #expect(spent.lowerBound < plays.lowerBound)
     }
 
-    /// A strip picture moves only while hovered and never under
-    /// Reduce Motion: the hover is refused there, and the loop
-    /// names its gate.
-    @Test("a strip picture's hover loop stands down under Reduce Motion")
-    func stripReduceMotion() throws {
+    /// A strip picture never moves: a hover loop rebuilt each
+    /// picture the page scrolled under the pointer and stuttered
+    /// the scroll (owner ruling 2026-10-18).
+    @Test("a strip picture rests on its key frame")
+    func stripRests() throws {
         let plate = try Self.squashed(
             "Settings/Components/Gestures/GestureStripPlate.swift"
         )
-        #expect(plate.contains("hovering=inside&&!reduceMotion"))
-        #expect(
-            plate.contains(
-                "withAnimation(reduceMotion?nil:item.pace.animation"
-                    + ".repeatForever("
-            )
-        )
-        #expect(plate.contains("item.picture(t:hovering?phase:1,"))
+        #expect(plate.contains("item.picture(t:1,gestures:gestures)"))
+        #expect(!plate.contains("onHover"))
+        #expect(!plate.contains("withAnimation"))
+        #expect(!plate.contains("@State"))
     }
 
     /// Reduce Motion: the run is refused before it starts, and the
