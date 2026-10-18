@@ -150,9 +150,21 @@ if left:
     done
 }
 
+verify_desk() {  # refuse a desk that is not exactly the fifteen
+    # A stray window (TextEdit's launch panel turned document) moved
+    # a release comparison by 14 AX calls a switch (2026-10-18).
+    local n
+    n="$(tracked "$1")"
+    [ "$n" = 15 ] && return 0
+    echo "fixture-desk: $n fixture windows tracked, want 15;" \
+        "run down, close the strays, then up again" >&2
+    return 1
+}
+
 case "${1:-}" in
 file)  # re-run the filing alone against a running instance
     file_windows "${2:?bundle}/$EXE"
+    verify_desk "${2:?bundle}/$EXE" || exit 1
     ;;
 up)
     MINE="$(cd "${2:?bundle}" && pwd -P)"
@@ -185,6 +197,7 @@ up)
     sleep 4
     file_windows "$MINE/$EXE"
     sleep 1
+    verify_desk "$MINE/$EXE" || exit 1
     "$MINE/$EXE" focus_space 2 >/dev/null
     "$MINE/$EXE" get_state
     ;;
