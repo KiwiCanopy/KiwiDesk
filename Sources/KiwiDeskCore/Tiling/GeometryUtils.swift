@@ -23,15 +23,16 @@ public enum GeometryUtils {
     }
 
     /// Whether `target` lies mostly on another of `rects` than
-    /// `current` does — false when `target` overlaps none.
+    /// `current` does — false when either overlaps none.
     public static func crosses(
         from current: CGRect,
         to target: CGRect,
         among rects: [CGRect]
     ) -> Bool {
-        guard let landing = rect(mostlyContaining: target, among: rects)
+        guard let landing = rect(mostlyContaining: target, among: rects),
+            let leaving = rect(mostlyContaining: current, among: rects)
         else { return false }
-        return rect(mostlyContaining: current, among: rects) != landing
+        return leaving != landing
     }
 
     /// macOS window corner radius constant (`BorderGeometry`,

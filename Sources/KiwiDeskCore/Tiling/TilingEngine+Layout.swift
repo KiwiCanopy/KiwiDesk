@@ -260,16 +260,18 @@ extension TilingEngine {
             )
         } else {
             animation.cancel(window: id)
+            // A parked corner may lie on a neighbour: no resend on
+            // an unpark, so a Space switch moves each window once.
             setFrame(
                 id,
                 target,
-                resend: GeometryUtils.crosses(
-                    from: current,
-                    to: target,
-                    among: allScreenBounds()
-                )
+                resend: !looksStashed(current)
+                    && GeometryUtils.crosses(
+                        from: current,
+                        to: target,
+                        among: allScreenBounds()
+                    )
             )
-            if animated { onReducedMotionFrame(id) }
         }
     }
 

@@ -115,12 +115,9 @@ extension KiwiCore {
             // settle schedules a direct read-back.
             self?.scheduleSizeBoundProbe(id)
         }
-        // A Reduce Motion write settles at once (#2187); a turn
-        // later, so the loop's `recordAsk` has opened the ask.
-        tiler.onReducedMotionFrame = { [weak self] id in
-            DispatchQueue.main.async {
-                self?.scheduleSizeBoundProbe(id)
-            }
+        // An instant layout write never settles (#2187).
+        tiler.onInstantLayoutAsk = { [weak self] id in
+            self?.scheduleSizeBoundProbe(id)
         }
         tiler.onFrameApplied = { [weak self] id, frame in
             // The #677 pin: while this animation re-asks a size

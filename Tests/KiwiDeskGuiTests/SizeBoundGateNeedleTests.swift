@@ -46,27 +46,39 @@ struct SizeBoundGateNeedleTests {
         )
     }
 
-    @Test("A Reduce Motion write schedules the settle probe")
-    func reducedMotionProbeIsWired() throws {
+    @Test("An instant layout ask schedules the settle probe")
+    func instantAskProbeIsWired() throws {
         // An instant write never settles, so its probe rides
-        // `onReducedMotionFrame` (#2187) — a production wire no
+        // `onInstantLayoutAsk` (#2187) — a production wire no
         // unit test reaches, and unwired a raw mid-resize echo
         // confirms a false bound.
-        let source = try SourceScan.functionBody(
+        let boot = try SourceScan.functionBody(
             of: "bootstrapCoreServices",
             in: "KiwiCore+Bootstrap.swift",
             under: "App"
         )
-        guard
-            let hook = source.range(
-                of: "tiler.onReducedMotionFrame = {"
-            )
+        guard let hook = boot.range(of: "tiler.onInstantLayoutAsk = {")
         else {
-            Issue.record("onReducedMotionFrame is not wired")
+            Issue.record("onInstantLayoutAsk is not wired")
             return
         }
-        let tail = source[hook.upperBound...].prefix(160)
-        #expect(tail.contains("scheduleSizeBoundProbe(id)"))
+        #expect(
+            boot[hook.upperBound...].prefix(120)
+                .contains("scheduleSizeBoundProbe(id)")
+        )
+        // Fired after the ask is recorded, which the probe's
+        // `wantsAnswerProbe` gate reads.
+        let issue = try SourceScan.functionBody(
+            of: "issueLayoutFrame",
+            in: "TilingEngine+Issue.swift",
+            under: "Tiling"
+        )
+        let ask = issue.range(of: "boundLearner.recordAsk(")
+        let fire = issue.range(of: "onInstantLayoutAsk(id)")
+        #expect(ask != nil && fire != nil)
+        if let ask, let fire {
+            #expect(ask.upperBound < fire.lowerBound)
+        }
     }
 
     @Test("Each apply stamps at enqueue AND after the set")

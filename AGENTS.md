@@ -628,6 +628,11 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   `rekey` by reflection and the tombstone by hand (#1439,
   `SizeBoundCorroborationProbeTests`, `SizeBoundCorroborationProbeEngineTests`,
   `SizeBoundLearnerLifecycleParityTests`)
+- a layout frame reaches another app inside an EUI hold, a Reduce Motion frame
+  taking the instant set, an instant layout ask schedules the #677 settle probe
+  through `onInstantLayoutAsk` outside a re-issuing pass, and an instant set
+  onto another screen writes again unless superseded or unparked (#2187,
+  `ReduceMotionInstantWriteTests`, `SizeBoundGateNeedleTests`)
 - a scrolling viewport offset travels with the slot it was measured against, in
   ONE `ScrollRest` value, and `ScrollingLayout+Offset.heldBase` is the one
   place a focus change is told from a row that moved underneath an unchanged

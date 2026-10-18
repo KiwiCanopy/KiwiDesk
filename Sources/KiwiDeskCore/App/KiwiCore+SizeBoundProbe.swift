@@ -51,10 +51,11 @@ extension KiwiCore {
     static let sizeBoundProbeGraceSeconds = 0.6
 
     /// Wired to `AnimationEngine.onWindowSettled` in Bootstrap,
-    /// and under Reduce Motion to `TilingEngine.onReducedMotionFrame`,
-    /// since an instant write never settles: an app easing its own
-    /// resize echoes a size it passes through, and only a read
-    /// past it tells that from a refusal (#2187).
+    /// and to `TilingEngine.onInstantLayoutAsk` for a layout ask
+    /// written instantly (Reduce Motion, animations off), which
+    /// never settles: an app easing its own resize echoes a size
+    /// it passes through, and only a read past it tells that from
+    /// a refusal (#2187).
     /// Gated on the learner still wanting an answer for this
     /// window's last ask AND the state frame not already
     /// showing compliance — so the overwhelmingly common settle
