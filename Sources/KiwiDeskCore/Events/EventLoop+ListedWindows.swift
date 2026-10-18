@@ -267,6 +267,7 @@ extension EventLoop {
         nonisolated(unsafe) let read = axWindows
         nonisolated(unsafe) let readPolicy = activationPolicy
         nonisolated(unsafe) let readHidden = appIsHidden
+        nonisolated(unsafe) let readLayers = offMain.readLayers
         return {
             let started = ContinuousClock.now
             let hidden = readHidden(pid)
@@ -282,7 +283,7 @@ extension EventLoop {
                 )
             }
             let elements = read(pid)
-            let layers = FloatDetection.windowLayers(pid: pid)
+            let layers = readLayers(pid)
             return WindowListReading(
                 elements: elements,
                 windows: reader.read(elements, layers: layers),

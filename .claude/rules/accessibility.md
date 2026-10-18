@@ -67,6 +67,12 @@ editing AX code:
     window tracked during the read live and refuses to re-adopt
     one gone during it; one list read is outstanding per app,
     and what waits on it is owed by that read's one reconcile.
+    A path that ends or minimizes a window notes it in
+    `FlightDepartures`, and a reconcile adopts from a reading
+    only through `adoptableArrivals`, so a window that departed
+    during the read is read live rather than adopted from it
+    (`ArrivalAdoptionTests` ▸ `closedDuringTheReadIsNotAdopted`,
+    `serverDestroyedDuringTheReadIsNotAdopted`).
   - **A late report is judged at delivery**, by the gates
     [input-and-animation.md](input-and-animation.md)'s delivery
     clause owns; an untracked window waits for a reconcile begun
@@ -347,6 +353,8 @@ editing AX code:
   unlock.
 - **A WindowServer window create or destroy only WAKES the AX
   path (#1877); it never tracks, files or removes a window.** A
+  destroy also notes the departure an in-flight reading must not
+  adopt from, which changes only where `track` reads from. A
   create runs one wake sweep after a 300 ms grace, once per grace
   however many creates arrive (`WindowServerHealPullTests`); a
   create of KiwiDesk's own window wakes nothing — review's, as

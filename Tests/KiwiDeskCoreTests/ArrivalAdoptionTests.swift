@@ -28,10 +28,11 @@ struct ArrivalAdoptionTests {
         func invalidate() {}
     }
 
-    /// How many of the fixture's windows the app still lists; read
-    /// on the list read's thread.
+    /// How many of the fixture's windows the app still lists, and
+    /// their WindowServer layers; read on the list read's thread.
     final class Listing: @unchecked Sendable {
         var count = 3
+        var layers: [WindowID: Int] = [:]
     }
 
     @MainActor
@@ -90,6 +91,7 @@ struct ArrivalAdoptionTests {
         }
         let listing = Listing()
         loop.axWindows = { _ in Array(elements.prefix(listing.count)) }
+        loop.offMain.readLayers = { _ in listing.layers }
         loop.resolveWindowID = { element in
             elements.firstIndex { CFEqual($0, element) }.map { ids[$0] }
         }
@@ -186,22 +188,17 @@ struct ArrivalAdoptionTests {
         #expect(Self.mainCalls - before >= arrivals.count)
     }
 
-    /// Lands a read that listed every window after `note` arrived
-    /// for the third, which the app then stops listing; `tracked`
-    /// first files that window as the create arm would have.
+    /// Lands a read that listed every window after `depart` ended
+    /// the third, which the app then stops listing.
     private func departDuringTheRead(
-        _ note: String,
-        trackedFirst: Bool
+        _ depart: (EventLoop, [AXUIElement]) -> Void
     ) throws -> [WindowID] {
         let (loop, box, elements, listing) = makeLoop()
         box.held = []
         loop.reconcileOffMain(pid: pid, app: ref)
         let delivery = box.held ?? []
         try #require(delivery.count == 1)
-        if trackedFirst {
-            loop.elements[pid]?[arrivals[1]] = elements[2]
-        }
-        loop.handle(note, elements[2], pid: pid, app: ref)
+        depart(loop, elements)
         // Gone from the live list too, so the read the departure
         // owes answers for it as well.
         listing.count = 2
@@ -214,10 +211,14 @@ struct ArrivalAdoptionTests {
     /// window live, which the fabricated element refuses.
     @Test("a window minimized during the read is not adopted from it")
     func minimizedDuringTheReadIsNotAdopted() throws {
-        let created = try departDuringTheRead(
-            kAXWindowMiniaturizedNotification,
-            trackedFirst: false
-        )
+        let created = try departDuringTheRead { loop, elements in
+            loop.handle(
+                kAXWindowMiniaturizedNotification,
+                elements[2],
+                pid: pid,
+                app: ref
+            )
+        }
         #expect(created == [arrivals[0]])
     }
 
@@ -226,10 +227,38 @@ struct ArrivalAdoptionTests {
     /// and listed by the reading again.
     @Test("a window tracked and closed during the read is not adopted")
     func closedDuringTheReadIsNotAdopted() throws {
-        let created = try departDuringTheRead(
-            kAXUIElementDestroyedNotification,
-            trackedFirst: true
-        )
+        let created = try departDuringTheRead { loop, elements in
+            // Filed as the create arm would have.
+            loop.elements[pid]?[arrivals[1]] = elements[2]
+            loop.handle(
+                kAXUIElementDestroyedNotification,
+                elements[2],
+                pid: pid,
+                app: ref
+            )
+        }
         #expect(created == [arrivals[0]])
+    }
+
+    /// A window untracked through the read reports no AX close;
+    /// WindowServer's destroy names it by id.
+    @Test("a window WindowServer destroys during the read is not adopted")
+    func serverDestroyedDuringTheReadIsNotAdopted() throws {
+        let created = try departDuringTheRead { loop, _ in
+            loop.windowServerDestroyed(arrivals[1])
+        }
+        #expect(created == [arrivals[0]])
+    }
+
+    /// Detection judged the layer the list read saw; where the
+    /// server reports another at `track`, the window is judged live,
+    /// which asks the app on the main actor.
+    @Test("a changed layer judges the arrival live")
+    func changedLayerReadsLive() {
+        let (loop, box, _, listing) = makeLoop()
+        // The server snapshot reports no layer for these ids.
+        for id in arrivals { listing.layers[id] = 0 }
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(box.applyCalls >= arrivals.count)
     }
 }

@@ -4,8 +4,11 @@ import Foundation
 /// app again; neither tracks, files nor removes a window.
 extension EventLoop {
     /// Re-reads the app tracking `id`, off the main actor, when
-    /// it still tracks it; reads nothing from WindowServer.
+    /// it still tracks it; reads nothing from WindowServer. Notes
+    /// the departure first, so a list read in flight that found the
+    /// window untracked does not adopt it from its reading.
     func windowServerDestroyed(_ id: WindowID) {
+        offMain.departures.note(id: id)
         guard isRunning, let pid = trackingPID(of: id) else { return }
         onLog("wake-up: w\(id.raw) destroyed unanswered, pid \(pid)")
         reconcileOffMain(pid: pid, app: appRef(of: pid))
