@@ -8,6 +8,9 @@ public struct VisionLook: Equatable, Sendable {
     public var dim: Double
     public var blur: Bool
     public var appearance: VisionAppearance
+    /// The leave fade's length in ms and its curve (#2417).
+    public var fadeDuration: Int
+    public var fadeCurve: VisionFadeCurve
     public var clearWallpaper: Bool
     public var clearApp: Bool
     /// Never dimmed: always the plain list (ruling 33).
@@ -31,6 +34,8 @@ extension VisionLook {
             dim: dim,
             blur: blur,
             appearance: appearance,
+            fadeDuration: fadeDuration,
+            fadeCurve: fadeCurve,
             clearWallpaper: clearWallpaper,
             clearApp: clearApp,
             neverDimmed: neverDimmed,
@@ -49,6 +54,8 @@ extension AppWideSettings {
             dim: overrides.dim ?? visionDim,
             blur: overrides.blur ?? visionBlur,
             appearance: overrides.appearance ?? visionAppearance,
+            fadeDuration: overrides.fadeDuration ?? visionFadeDuration,
+            fadeCurve: overrides.fadeCurve ?? visionFadeCurve,
             clearWallpaper: overrides.clearWallpaper
                 ?? visionClearWallpaper,
             clearApp: overrides.clearApp ?? visionClearApp,

@@ -32,6 +32,8 @@ public struct VisionLens: Equatable, Sendable {
         public var dim: Double?
         public var blur: Bool?
         public var appearance: VisionAppearance?
+        public var fadeDuration: Int?
+        public var fadeCurve: VisionFadeCurve?
         public var clearWallpaper: Bool?
         public var clearApp: Bool?
     }
@@ -45,6 +47,8 @@ extension VisionLens: Codable {
         case keepFocus = "keep_focus"
         case clearDelay = "clear_delay"
         case dim, blur, appearance
+        case fadeDuration = "fade_duration"
+        case fadeCurve = "fade_curve"
         case clearWallpaper = "clear_wallpaper"
         case clearApp = "clear_app"
     }
@@ -79,6 +83,15 @@ extension VisionLens: Codable {
                 VisionAppearance.self,
                 forKey: .appearance
             ),
+            // A Lua table's numbers arrive as doubles.
+            fadeDuration: try c.decodeIfPresent(
+                Double.self,
+                forKey: .fadeDuration
+            ).map { AppWideSettings.clampedFade(Int($0.rounded())) },
+            fadeCurve: try c.decodeIfPresent(
+                VisionFadeCurve.self,
+                forKey: .fadeCurve
+            ),
             clearWallpaper: try c.decodeIfPresent(
                 Bool.self,
                 forKey: .clearWallpaper
@@ -98,6 +111,11 @@ extension VisionLens: Codable {
         try c.encodeIfPresent(overrides.dim, forKey: .dim)
         try c.encodeIfPresent(overrides.blur, forKey: .blur)
         try c.encodeIfPresent(overrides.appearance, forKey: .appearance)
+        try c.encodeIfPresent(
+            overrides.fadeDuration,
+            forKey: .fadeDuration
+        )
+        try c.encodeIfPresent(overrides.fadeCurve, forKey: .fadeCurve)
         try c.encodeIfPresent(
             overrides.clearWallpaper,
             forKey: .clearWallpaper

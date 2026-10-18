@@ -47,6 +47,19 @@ extension KiwiCore {
             setAppWide(persisting: false) {
                 $0.visionAppearance = appearance
             }
+        case "kiwivision.set_fade_duration":
+            guard let ms = args.first?.numberValue, ms.isFinite,
+                AppWideSettings.visionFadeRange.contains(Int(ms.rounded()))
+            else { return .fail("expected 0-1000") }
+            setAppWide(persisting: false) {
+                $0.visionFadeDuration = Int(ms.rounded())
+            }
+        case "kiwivision.set_fade_curve":
+            guard
+                let raw = args.first?.stringValue,
+                let curve = VisionFadeCurve(rawValue: raw)
+            else { return .expected(VisionFadeCurve.self) }
+            setAppWide(persisting: false) { $0.visionFadeCurve = curve }
         case "kiwivision.set_clear_wallpaper":
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")
@@ -146,6 +159,10 @@ extension KiwiCore {
         if !visionMasks { vision.forgetListedWindows() }
         requestVisionWindows(target: request.target)
         request.tracked = windowServer.isActive
+        request.leaving = visionLeaving(
+            from: vision.target,
+            to: request.target
+        )
         vision.sync(request, reassert: reassertOrder)
     }
 

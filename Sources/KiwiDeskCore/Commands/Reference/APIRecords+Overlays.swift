@@ -238,6 +238,15 @@ extension APIReference {
             "Blurs what KiwiVision dims; on by default.",
             .boolean("enabled")
         ),
+        "set_fade_duration": APIRecord(
+            "Sets how long the window focus leaves takes into the "
+                + "dim and blur, in ms (0-1000; 0 is instant).",
+            .number("ms")
+        ),
+        "set_fade_curve": APIRecord(
+            "Sets the curve of that fade; ease_out by default.",
+            .choice("curve", VisionFadeCurve.self)
+        ),
         "set_appearance": APIRecord(
             "Sets the system appearance KiwiVision switches to "
                 + "while on; unchanged by default.",

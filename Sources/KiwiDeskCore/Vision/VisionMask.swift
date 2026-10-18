@@ -69,6 +69,18 @@ public enum VisionMask {
         return base.subtracting(holes)
     }
 
+    /// `window`'s rounded shape in the plate's coordinates on
+    /// `screen`: the region a leave fade animates (#2417).
+    static func shape(of window: Window, on screen: CGRect) -> CGPath {
+        let (rect, radius) = local(window, on: screen)
+        return CGPath(
+            roundedRect: rect,
+            cornerWidth: radius,
+            cornerHeight: radius,
+            transform: nil
+        )
+    }
+
     /// How many windows, from the front, the hole walk reads: down
     /// to the last clear one, none when nothing is clear.
     static func walkedCount(_ windows: [Window]) -> Int {

@@ -35,6 +35,11 @@ public struct AppWideSettings: Equatable, Sendable {
     /// The system appearance asked for while KiwiVision is on
     /// (`kiwivision.appearance`, #2103 ruling 7).
     public var visionAppearance = VisionAppearance.unchanged
+    /// How long the window focus leaves takes into the dim and the
+    /// blur, in ms (`kiwivision.fade_duration`, #2417); 0 cuts.
+    public var visionFadeDuration = 600
+    /// The curve of that fade (`kiwivision.fade_curve`, #2417).
+    public var visionFadeCurve = VisionFadeCurve.easeOut
     /// Whether KiwiVision leaves the wallpaper clear, dimming only
     /// the windows (`kiwivision.clear_wallpaper`, #2103 ruling 17).
     /// OFF by default: v1's whole-screen haze.
@@ -68,6 +73,15 @@ public struct AppWideSettings: Equatable, Sendable {
     /// The dim's band in percent: the verb, the decode and the
     /// Settings stepper all read it.
     public static let visionDimRange: ClosedRange<Double> = 0...100
+
+    /// The fade's band in ms: the verb, the decode and the Settings
+    /// stepper all read it.
+    public static let visionFadeRange: ClosedRange<Int> = 0...1000
+
+    /// `raw` clamped into `visionFadeRange`, as `clampedDepth`.
+    static func clampedFade(_ raw: Int) -> Int {
+        min(max(raw, visionFadeRange.lowerBound), visionFadeRange.upperBound)
+    }
 
     /// A Never dimmed list as stored: each entry trimmed and
     /// lowercased — a bundle id matches as `AppRef` lowercases it,
@@ -169,6 +183,8 @@ extension AppWideSettings {
         var dim: Double?
         var blur: Bool?
         var appearance: VisionAppearance?
+        var fadeDuration: Int?
+        var fadeCurve: VisionFadeCurve?
         var clearWallpaper: Bool?
         var clearApp: Bool?
         var neverDimmed: [String]?
@@ -176,6 +192,8 @@ extension AppWideSettings {
 
         enum CodingKeys: String, CodingKey {
             case dim, blur, appearance, lenses
+            case fadeDuration = "fade_duration"
+            case fadeCurve = "fade_curve"
             case clearWallpaper = "clear_wallpaper"
             case clearApp = "clear_app"
             case neverDimmed = "never_dimmed"
@@ -207,6 +225,10 @@ extension AppWideSettings {
         if let appearance = vision?.appearance {
             visionAppearance = appearance
         }
+        if let fade = vision?.fadeDuration {
+            visionFadeDuration = Self.clampedFade(fade)
+        }
+        if let curve = vision?.fadeCurve { visionFadeCurve = curve }
         if let clear = vision?.clearWallpaper {
             visionClearWallpaper = clear
         }
@@ -237,6 +259,8 @@ extension AppWideSettings {
             dim: visionDim,
             blur: visionBlur,
             appearance: visionAppearance,
+            fadeDuration: visionFadeDuration,
+            fadeCurve: visionFadeCurve,
             clearWallpaper: visionClearWallpaper,
             clearApp: visionClearApp,
             neverDimmed: visionNeverDimmed,

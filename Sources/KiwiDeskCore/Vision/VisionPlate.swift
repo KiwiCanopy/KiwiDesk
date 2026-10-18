@@ -18,6 +18,14 @@ protocol VisionPlateBackend: AnyObject {
     /// Orders the plate in directly above `window`: a lens holds
     /// it under the haze (#2103 ruling 12).
     func order(above window: CGWindowID)
+    /// Fades `region` (its own coordinates) from clear to the
+    /// plate's dim and blur over `duration` seconds: the window
+    /// focus left (#2417). Never orders.
+    func fadeIn(
+        _ region: CGPath,
+        duration: CFTimeInterval,
+        curve: VisionFadeCurve
+    )
     /// Fades the plate in unless `reduceMotion`.
     func show(reduceMotion: Bool)
     /// Fades the plate out unless `reduceMotion`, then orders it
@@ -72,6 +80,14 @@ final class AppKitVisionPlate: VisionPlateBackend {
         veil.mask(path)
     }
 
+    func fadeIn(
+        _ region: CGPath,
+        duration: CFTimeInterval,
+        curve: VisionFadeCurve
+    ) {
+        veil.fadeIn(region, duration: duration, timing: curve.timing)
+    }
+
     /// AppKit's order: WindowServer applies no SkyLight order to
     /// an AppKit panel (#1962).
     func order(below window: CGWindowID) {
@@ -121,7 +137,14 @@ final class AppKitVisionPlate: VisionPlateBackend {
 final class VisionVeil {
     /// The panel's content view; transparent until `fade`.
     let view = NSView()
-    private let dimLayer = CALayer()
+    let dimLayer = CALayer()
+    /// Hosts the blur, so a leave fade masks it apart from the
+    /// content (#2417).
+    let blurHost = NSView()
+    /// The mask the content rests at, nil for the whole view.
+    private(set) var restingPath: CGPath?
+    /// The leave fades in flight, nil while none runs.
+    var fade: VisionVeilFade?
     /// The behind-window blur: Liquid Glass `clear` pinned dark,
     /// `hud` where glass cannot draw (#2103 ruling 10, amended
     /// 2026-10-14).
@@ -135,7 +158,9 @@ final class VisionVeil {
         view.layer?.opacity = 0
         blurView.isHidden = true
         blurView.wantsLayer = true
-        view.addSubview(blurView)
+        blurHost.wantsLayer = true
+        blurHost.addSubview(blurView)
+        view.addSubview(blurHost)
         // Above the blur: the dim darkens what the blur leaves.
         dimLayer.backgroundColor = NSColor.black.cgColor
         dimLayer.zPosition = 1
@@ -164,6 +189,7 @@ final class VisionVeil {
         CATransaction.setDisableActions(true)
         dimLayer.frame = bounds
         dimLayer.cornerRadius = cornerRadius
+        if blurHost.frame != bounds { blurHost.frame = bounds }
         if blurView.frame != bounds { blurView.frame = bounds }
         GlassPlate.update(blurView, frame: bounds, cornerRadius: cornerRadius)
         // Glass rounds itself; the `hud` fallback is masked.
@@ -180,6 +206,12 @@ final class VisionVeil {
     /// view: a layer mask on the content clips a behind-window
     /// blur too, Liquid Glass and `hud` alike (v2 probe P8).
     func mask(_ path: CGPath?) {
+        restingPath = path
+        // A fade in flight masks the dim and the blur itself.
+        if fade != nil {
+            layoutFade()
+            return
+        }
         guard let layer = view.layer else { return }
         guard let path else {
             layer.mask = nil
