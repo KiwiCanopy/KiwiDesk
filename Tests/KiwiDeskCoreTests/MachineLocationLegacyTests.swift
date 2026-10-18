@@ -69,7 +69,7 @@ struct MachineLocationLegacyTests {
         }
     }
 
-    @Test("a file the machine folder holds wins, the old one goes")
+    @Test("a file the machine folder holds wins, the old one stays")
     func machineFileWins() throws {
         let (root, config, machine) = Self.folders()
         defer { try? FileManager.default.removeItem(at: root) }
@@ -78,7 +78,8 @@ struct MachineLocationLegacyTests {
         try Self.write("new", machine.appendingPathComponent(name))
         MachineLocation.adoptLegacyFiles(from: config, into: machine)
         #expect(Self.read(machine.appendingPathComponent(name)) == "new")
-        #expect(Self.read(config.appendingPathComponent(name)) == nil)
+        // A Mac on an older build may share the config folder.
+        #expect(Self.read(config.appendingPathComponent(name)) == "old")
     }
 
     @Test("one folder for both moves and removes nothing")

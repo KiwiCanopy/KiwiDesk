@@ -26,27 +26,8 @@ public enum MachineLocation {
         lock(in: directory).path
     }
 
-    /// `directory`'s socket, or — where that path would pass
-    /// `sun_path`'s limit, a long home's case — a short one in the
-    /// per-user temp folder named by `directory`, which the app
-    /// and the CLI derive alike.
     static func socket(in directory: URL) -> URL {
-        let path = directory.appendingPathComponent(socketName)
-        guard path.path.utf8.count >= socketPathLimit else { return path }
-        return URL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent("KiwiDesk-\(digest(directory.path)).sock")
-    }
-
-    /// `sockaddr_un.sun_path`'s size, its NUL included.
-    static let socketPathLimit = 104
-
-    /// FNV-1a, stable across processes where `hashValue` is not.
-    static func digest(_ text: String) -> String {
-        var hash: UInt64 = 0xcbf2_9ce4_8422_2325
-        for byte in text.utf8 {
-            hash = (hash ^ UInt64(byte)) &* 0x100_0000_01b3
-        }
-        return String(hash, radix: 16)
+        directory.appendingPathComponent(socketName)
     }
 
     static func lock(in directory: URL) -> URL {
@@ -76,8 +57,8 @@ public enum MachineLocation {
     /// `config` into `machine` once and drops the old socket, so
     /// an update keeps the arrangement it quit with and the
     /// synced folder keeps none of it. A file the machine folder
-    /// already holds wins, and the legacy copy is dropped. A file
-    /// that fails to move stays, and the next launch retries it.
+    /// already holds wins and the legacy copy stays; a file that
+    /// fails to move stays too, and the next launch retries it.
     static func adoptLegacyFiles(from config: URL, into machine: URL) {
         guard
             config.resolvingSymlinksInPath().path
@@ -132,10 +113,9 @@ public enum MachineLocation {
 
     private static func move(_ old: URL, to new: URL) {
         let files = FileManager.default
-        guard !files.fileExists(atPath: new.path) else {
-            try? files.removeItem(at: old)
-            return
-        }
+        // A copy already here wins; the legacy one stays, since a
+        // Mac still on an older build may share the folder.
+        guard !files.fileExists(atPath: new.path) else { return }
         try? files.createDirectory(
             at: new.deletingLastPathComponent(),
             withIntermediateDirectories: true

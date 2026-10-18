@@ -179,8 +179,9 @@ bite large test PRs:
     re-enables a dangerous production default — the live
     `CarbonHotkeyCenter` (and the real `~/.config/KiwiDesk` and
     `MachineLocation` folder, #2324) seizing the developer's
-    global chords and live config, 2414 conflict lines a run. Forget-proofing every one of those
-    call sites — well over a hundred, and the count climbs with
+    global chords and live config, 2414 conflict lines a run.
+    Forget-proofing every one of those call sites — well over a
+    hundred, and the count climbs with
     each new suite, which is the point — is a legitimate basis
     for sharing; it is simply not
     the divergence-weakens-a-guard basis the closing paragraph
@@ -675,8 +676,9 @@ never through a production default it inherited.** The touch a
 test-tree grep cannot see is the one inside a *production*
 initializer the test merely calls: a bare `KiwiCore()` seizes
 the live Carbon chords, the real `~/.config/KiwiDesk` (#565)
-and the `MachineLocation` folder (#2324, `CoreInitPathTests`), and a bare `StatusItemController()` put a live item in
-the menu bar per construction — fifteen leaked slots and a
+and the `MachineLocation` folder (#2324, `CoreInitPathTests`),
+and a bare `StatusItemController()` put a live item in the menu
+bar per construction — fifteen leaked slots and a
 sustained WindowServer spike per run — while `NSStatusBar` had
 zero hits anywhere in `Tests/`. Two guards split the beat:
 `MachineTouchTests` pins `KiwiCore(` constructions to the

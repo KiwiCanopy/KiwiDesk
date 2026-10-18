@@ -186,6 +186,12 @@ up)
         echo "fixture-desk: $LINK is not a symlink; refusing" >&2
         exit 1
     fi
+    # A second `up` before `down` would set the fixture's own
+    # snapshots aside as the owner's.
+    if [ -f "$(dirname "$(readlink "$LINK")")/state" ]; then
+        echo "fixture-desk: a fixture is up; run down first" >&2
+        exit 1
+    fi
     PREV="$(running)"; PREV="${PREV%/$EXE}"
     {
         printf 'prev=%s\nmine=%s\nlink=%s\n' \

@@ -43,9 +43,7 @@ default `PATH`, so it needs adding first.
 
 :::unreleased
 Commands are sent over a UNIX domain socket at
-`~/Library/Application Support/KiwiDesk/KiwiDesk.sock`, or at
-`$TMPDIR/KiwiDesk-<hash>.sock` where a long home folder makes
-that path too long for a socket.
+`~/Library/Application Support/KiwiDesk/KiwiDesk.sock`.
 :::
 
 Exit code is 0 on success, 1 on error; data goes to stdout, the

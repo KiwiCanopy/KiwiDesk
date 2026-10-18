@@ -17,12 +17,9 @@ import Testing
 /// What a silent change here costs: the default is where a real
 /// install's `init.lua`, profiles and sidecar live.
 ///
-/// The socket FILENAME stays unpinned and is stated rather than
-/// hidden: `SocketServer.path` is private, so the join is not
-/// readable from a test, and `CLIMain` builds its own copy of the
-/// same path — so a rename on either side is silent on both. The
-/// `profiles` subdirectory is pinned only incidentally, by
-/// `ProfileListRulesEditTests`.
+/// The app and the CLI read the socket path from the one
+/// `MachineLocation.socket(in:)`. The `profiles` subdirectory is
+/// pinned only incidentally, by `ProfileListRulesEditTests`.
 @MainActor
 @Suite("Core init paths")
 struct CoreInitPathTests {
@@ -95,7 +92,8 @@ struct CoreInitPathTests {
         core.crash.autosave()
         let machine = core.machineDirectory
         #expect(
-            core.socket.path == MachineLocation.socket(in: machine).path
+            core.socket.path
+                == machine.appendingPathComponent("KiwiDesk.sock").path
         )
         #expect(
             core.migrationBackups
@@ -133,25 +131,5 @@ struct CoreInitPathTests {
             manager.migrationBackups
                 == machine.appendingPathComponent("migration-backups")
         )
-    }
-
-    /// A long home must not leave IPC dead: `SocketServer.isLive`
-    /// reads a path past `sun_path` as live and refuses to start.
-    @Test("a socket path past sun_path falls back to a short one")
-    func longSocketPathFallsBack() {
-        let short = URL(fileURLWithPath: "/Users/kiwi/Library/KiwiDesk")
-        #expect(
-            MachineLocation.socket(in: short).path
-                == short.appendingPathComponent("KiwiDesk.sock").path
-        )
-        let long = URL(
-            fileURLWithPath: "/Users/" + String(repeating: "k", count: 90)
-        )
-        let socket = MachineLocation.socket(in: long).path
-        #expect(socket.utf8.count < MachineLocation.socketPathLimit)
-        #expect(!socket.hasPrefix(long.path))
-        #expect(socket == MachineLocation.socket(in: long).path)
-        let other = long.appendingPathComponent("other")
-        #expect(socket != MachineLocation.socket(in: other).path)
     }
 }

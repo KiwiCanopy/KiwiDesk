@@ -30,11 +30,17 @@ struct SetupBundleArtifactTests {
         // stands in for the other in every discard and every
         // backup.
         #expect(Set(urls.map(\.path)).count == urls.count)
-        for url in urls {
-            #expect(
-                url.path.hasPrefix(core.configDirectory.path),
-                "an artifact outside the config directory"
-            )
+        // Each lives in one of the two folders, by whole path
+        // component; the migration copies are this Mac's (#2324).
+        func inside(_ url: URL, _ folder: URL) -> Bool {
+            url.path.hasPrefix(folder.path + "/")
+        }
+        for artifact in ConfigArtifact.allCases {
+            let url = core.url(of: artifact)
+            let home =
+                artifact == .migrationBackups
+                ? core.machineDirectory : core.configDirectory
+            #expect(inside(url, home), "\(artifact) outside its folder")
         }
     }
 
@@ -156,9 +162,12 @@ struct SetupBundleArtifactTests {
         )
         let known =
             Set(
-                ConfigArtifact.allCases.map {
-                    core.url(of: $0).lastPathComponent
-                }
+                ConfigArtifact.allCases.map(core.url(of:))
+                    .filter {
+                        $0.deletingLastPathComponent().path
+                            == core.configDirectory.path
+                    }
+                    .map(\.lastPathComponent)
             )
             // The user's own script, which no backup rewrites.
             // This Mac's files live beside, in the machine folder
