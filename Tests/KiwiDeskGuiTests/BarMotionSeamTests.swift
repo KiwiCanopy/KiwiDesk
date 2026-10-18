@@ -27,6 +27,7 @@ struct BarMotionSeamTests {
     /// extensions split at the §2.1 ceiling, one home.
     private static let homes = [
         "BarMotion.swift", "BarMotion+Fade.swift",
+        "BarMotion+Reveal.swift",
     ]
 
     /// Ways to start AppKit or Core Animation motion. Type
@@ -120,6 +121,9 @@ struct BarMotionSeamTests {
         "springSweep": ["springAnimation(", "isReduced"],
         "springAnimation": ["reduceMotion"],
         "opacityFade": ["reduceMotion"],
+        "revealMotion": ["reduceMotion"],
+        "playReveal": ["revealMotion(", "isReduced"],
+        "endReveal": [],
     ]
 
     private static func stripped(_ home: String) throws -> String {

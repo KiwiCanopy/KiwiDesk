@@ -170,6 +170,7 @@ extension KiwiCore {
         // track + actual overflow.
         scheduleTrackZOrderRestoreIfOverflowing()
         mouse.start()
+        shelves.reveal.start()
         crash.start()
         do {
             try socket.start()

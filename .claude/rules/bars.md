@@ -175,6 +175,19 @@ twice, was a question the user answered twice. The argument is
   `BarReserveTests` holds the fold, `BarReserveCoreTests` the
   float region and the skipped pass, `BarReserveVerbTests` the
   global-only refusal.
+- **Fold a bar's `visibility` into its edge in the same
+  `barEdges(space:app:)`, AND-combined at its dedup, and let a
+  hiding edge reserve nothing (#761).** A fused shelf hides only
+  while both bars are `auto`, and because a hiding edge reserves
+  no strip a reveal is an overlay: it redraws the bars through
+  `updateBars()` and never retiles, so setting the mode is the
+  one pass (`BarAutoHideFoldTests`, `ShelfAutoHideCoreTests` ▸
+  `actionRevealsWithoutARetile`). Whether a hiding shelf is
+  shown is `ShelfManager.reveal`'s alone, asked per hiding plan in
+  `updateBars()`, never a second flag beside it; its pointer
+  monitor and location are seams both `makeTestCore` twins pin
+  inert, and the indicator ignores the mouse, so the windows
+  under it keep their clicks (`ShelfRevealerTests`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

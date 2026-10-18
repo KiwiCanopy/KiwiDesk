@@ -16,6 +16,15 @@ extension APIReference {
                 + "the windows, the strip unclickable.",
             .boolean("reserve")
         ),
+        "set_visibility": APIRecord(
+            "Sets whether the App Bar's shelf stays shown or "
+                + "hides until the pointer reaches its edge.",
+            .choice("visibility", ShelfVisibility.self)
+        ),
+        "toggle_reveal": APIRecord(
+            "Shows or hides the hidden shelf the App Bar sits on, "
+                + "on the focused screen."
+        ),
         "set_active_indicator": APIRecord(
             "Sets how the focused window's item is marked.",
             .choice(

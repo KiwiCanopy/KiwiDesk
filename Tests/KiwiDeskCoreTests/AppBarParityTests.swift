@@ -104,6 +104,7 @@ struct AppBarCommandParityTests {
         .screenEdge(.left, screen: "S:1x1"),
         .activeIndicator(.outline), .titleCap(40),
         .groupAdjacentWindows(false), .reserve(false),
+        .visibility(.auto),
     ]
 
     @Test("Each command sets one matching field on style and bar")
@@ -173,6 +174,7 @@ struct AppBarCommandParityTests {
         case .edgeOverride: return [.string("left"), .string("S:1x1")]
         case .activeIndicator: return [.string("outline")]
         case .titleCap: return [.number(40)]
+        case .visibility: return [.string("auto")]
         }
     }
 
@@ -190,7 +192,8 @@ struct AppBarCommandParityTests {
             }
         )
         #expect(
-            Set(APIReference.namespaces["app_bar"] ?? []) == expected
+            Set(APIReference.namespaces["app_bar"] ?? [])
+                == expected.union(APIReference.barActions)
         )
     }
 

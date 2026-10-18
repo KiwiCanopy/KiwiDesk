@@ -1,16 +1,20 @@
 import CoreGraphics
 
-/// One edge a shown bar sits on, and whether the layout gives its
-/// strip up (#1524). Shown and reserved are apart so a bar may
-/// draw over the windows; on an edge two bars share — one fused
-/// shelf, one strip — the edge reserves while EITHER bar does.
+/// One edge a shown bar sits on, whether the layout gives its
+/// strip up (#1524) and whether its shelf hides (#761). Shown and
+/// reserved are apart so a bar may draw over the windows; on an
+/// edge two bars share — one fused shelf, one strip — the edge
+/// reserves while EITHER bar does and hides only while BOTH do.
+/// A hiding edge reserves nothing: a reveal is an overlay.
 public struct ShelfEdge: Sendable, Equatable {
     public let edge: AppBarEdge
     public var reserves: Bool
+    public var hides: Bool
 
-    public init(_ edge: AppBarEdge, reserves: Bool) {
+    public init(_ edge: AppBarEdge, reserves: Bool, hides: Bool = false) {
         self.edge = edge
         self.reserves = reserves
+        self.hides = hides
     }
 }
 

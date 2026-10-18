@@ -1,0 +1,249 @@
+import AppKit
+
+/// What a hiding shelf draws while hidden (#761): Space dots where
+/// it carries the Space Bar, alone or fused, else a plain pill.
+struct ShelfIndicatorSpec: Equatable {
+    enum Mark: Equatable {
+        /// One per Space on the screen, in bar order.
+        case dots([Dot])
+        /// A lone App Bar's: no window dots, so the App Bar has
+        /// one hidden look.
+        case pill
+    }
+
+    struct Dot: Equatable {
+        /// The Space the screen shows: drawn wide.
+        let current: Bool
+        /// A Space holding windows: drawn brighter.
+        let occupied: Bool
+    }
+
+    let mark: Mark
+    /// The indicator's frame, AX coordinates.
+    let frame: CGRect
+    let horizontal: Bool
+    let fill: String
+    let ink: String
+    let emptyInk: String
+    /// Whether the shelf is shown over it: the indicator then
+    /// draws nothing but stays for VoiceOver, its value "shown".
+    let shown: Bool
+
+    /// The indicator's depth across its edge (pt).
+    static let depth: CGFloat = 8
+    static let dot: CGFloat = 4
+    static let currentDot: CGFloat = 12
+    static let dotGap: CGFloat = 4
+    static let pad: CGFloat = 4
+    static let pillLength: CGFloat = 36
+    /// Its distance from the shelf's screen side, inside the band.
+    static let inset: CGFloat = 0
+
+    /// The indicator's length along its edge.
+    static func length(of mark: Mark) -> CGFloat {
+        switch mark {
+        case .pill:
+            return pillLength
+        case .dots(let dots):
+            let marks = dots.reduce(0) {
+                $0 + ($1.current ? currentDot : dot)
+            }
+            let gaps = CGFloat(max(0, dots.count - 1)) * dotGap
+            return marks + gaps + 2 * pad
+        }
+    }
+
+    /// Where the indicator sits on `strip` (AX, y down): centred
+    /// along `edge`, against its screen side.
+    static func frame(
+        of mark: Mark,
+        in strip: CGRect,
+        edge: AppBarEdge
+    ) -> CGRect {
+        let along = min(
+            length(of: mark),
+            edge.isHorizontal ? strip.width : strip.height
+        )
+        switch edge {
+        case .top:
+            return CGRect(
+                x: strip.midX - along / 2,
+                y: strip.minY + inset,
+                width: along,
+                height: depth
+            )
+        case .bottom:
+            return CGRect(
+                x: strip.midX - along / 2,
+                y: strip.maxY - inset - depth,
+                width: along,
+                height: depth
+            )
+        case .left:
+            return CGRect(
+                x: strip.minX + inset,
+                y: strip.midY - along / 2,
+                width: depth,
+                height: along
+            )
+        case .right:
+            return CGRect(
+                x: strip.maxX - inset - depth,
+                y: strip.midY - along / 2,
+                width: depth,
+                height: along
+            )
+        }
+    }
+}
+
+/// The view an indicator draws, and VoiceOver's way to the
+/// show/hide action: its press runs the action and its value says
+/// whether the shelf is shown.
+final class ShelfIndicatorView: NSView {
+    var spec: ShelfIndicatorSpec? { didSet { needsDisplay = true } }
+    /// The bar the action names, for the label.
+    var carriesSpaceBar = true
+    var onPress: @MainActor () -> Void = {}
+
+    override var isFlipped: Bool { true }
+
+    override func draw(_ dirtyRect: NSRect) {
+        guard let spec, !spec.shown else { return }
+        let radius = ShelfIndicatorSpec.depth / 2
+        NSColor(kiwiHex: spec.fill).setFill()
+        NSBezierPath(
+            roundedRect: bounds,
+            xRadius: radius,
+            yRadius: radius
+        ).fill()
+        guard case .dots(let dots) = spec.mark else { return }
+        var lead = ShelfIndicatorSpec.pad
+        let size = ShelfIndicatorSpec.dot
+        let cross =
+            (ShelfIndicatorSpec.depth - size) / 2
+        for dot in dots {
+            let long =
+                dot.current ? ShelfIndicatorSpec.currentDot : size
+            let rect =
+                spec.horizontal
+                ? CGRect(x: lead, y: cross, width: long, height: size)
+                : CGRect(x: cross, y: lead, width: size, height: long)
+            NSColor(
+                kiwiHex: dot.occupied || dot.current
+                    ? spec.ink : spec.emptyInk
+            ).setFill()
+            NSBezierPath(
+                roundedRect: rect,
+                xRadius: size / 2,
+                yRadius: size / 2
+            ).fill()
+            lead += long + ShelfIndicatorSpec.dotGap
+        }
+    }
+
+    override func isAccessibilityElement() -> Bool { true }
+    override func accessibilityRole() -> NSAccessibility.Role? { .button }
+
+    override func accessibilityLabel() -> String? {
+        carriesSpaceBar
+            ? L("shelf.indicator.space_bar", "Space Bar")
+            : L("shelf.indicator.app_bar", "App Bar")
+    }
+
+    override func accessibilityValue() -> Any? {
+        spec?.shown == true
+            ? L("shelf.indicator.shown", "Shown")
+            : L("shelf.indicator.hidden", "Hidden")
+    }
+
+    override func accessibilityPerformPress() -> Bool {
+        onPress()
+        return true
+    }
+}
+
+/// One hiding shelf's indicator panel (#761). It ignores the mouse
+/// — the hover band is judged from the pointer, and a click on it
+/// pins nothing — so the windows below it keep their clicks.
+@MainActor
+final class ShelfIndicator {
+    let view = ShelfIndicatorView()
+    private(set) var panel: NSPanel?
+    #if DEBUG
+        /// Set by `ShelfIndicators.ordersIndicatorPanels` (#1894).
+        var ordersPanel = true
+    #endif
+
+    isolated deinit {
+        panel?.orderOut(nil)
+    }
+
+    func show(_ spec: ShelfIndicatorSpec) {
+        let panel = self.panel ?? makePanel()
+        self.panel = panel
+        if view.spec != spec { view.spec = spec }
+        panel.setFrame(
+            GeometryUtils.flip(
+                spec.frame,
+                primaryHeight: GeometryUtils.primaryHeight
+            ),
+            display: true
+        )
+        view.frame = CGRect(origin: .zero, size: spec.frame.size)
+        #if DEBUG
+            guard ordersPanel else { return }
+        #endif
+        if !panel.isVisible { panel.orderFrontRegardless() }
+    }
+
+    func hide() {
+        panel?.orderOut(nil)
+    }
+
+    var isVisible: Bool { panel?.isVisible == true }
+
+    private func makePanel() -> NSPanel {
+        let panel = BarPanel.makeNonActivating()
+        panel.ignoresMouseEvents = true
+        panel.contentView = view
+        return panel
+    }
+}
+
+/// Every hiding shelf's indicator, keyed like its shelf.
+@MainActor
+final class ShelfIndicators {
+    typealias Key = ShelfManager.Key
+
+    private var indicators: [Key: ShelfIndicator] = [:]
+    /// The indicator's press: the show/hide action on its shelf.
+    var onPress: @MainActor (Key) -> Void = { _ in }
+    #if DEBUG
+        /// Off in both `makeTestCore` twins (#1894).
+        var ordersIndicatorPanels = true
+    #endif
+
+    /// Shows `specs`, dropping every indicator absent from them.
+    func sync(_ specs: [Key: (spec: ShelfIndicatorSpec, space: Bool)]) {
+        for key in indicators.keys where specs[key] == nil {
+            indicators.removeValue(forKey: key)?.hide()
+        }
+        for (key, entry) in specs {
+            let indicator = indicators[key] ?? ShelfIndicator()
+            indicators[key] = indicator
+            #if DEBUG
+                indicator.ordersPanel = ordersIndicatorPanels
+            #endif
+            indicator.view.carriesSpaceBar = entry.space
+            indicator.view.onPress = { [weak self] in self?.onPress(key) }
+            indicator.show(entry.spec)
+        }
+    }
+
+    #if DEBUG
+        func indicatorForTesting(_ key: Key) -> ShelfIndicator? {
+            indicators[key]
+        }
+    #endif
+}

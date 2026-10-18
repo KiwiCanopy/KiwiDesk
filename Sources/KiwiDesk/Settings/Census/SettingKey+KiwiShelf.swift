@@ -35,6 +35,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case liquidGlass = "settings.kiwishelf.liquidGlass"
     case iconSource = "settings.kiwishelf.iconSource"
     case dimFactor = "settings.kiwishelf.dimFactor"
+    case revealDuration = "settings.kiwishelf.revealDuration"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
     case itemColor = "settings.kiwishelf.itemColor"
@@ -121,6 +122,9 @@ extension KiwiShelfKey {
             // Written by the one Liquid Glass row (#1307).
             return .luaOnly
         case .dimFactor:
+            return .luaOnly
+        case .revealDuration:
+            // Lua/CLI until its Settings row lands (#761).
             return .luaOnly
         case .activeItemColor, .highlightColor, .hoverFillColor:
             // The accent's bar half (#1857).
@@ -252,7 +256,7 @@ extension KiwiShelfKey {
                 "kiwishelf.inner_margin",
                 help: "kiwishelf.inner_margin.help"
             )
-        case .liquidGlass, .dimFactor:
+        case .liquidGlass, .dimFactor, .revealDuration:
             return .none
         case .iconSource:
             return .text(

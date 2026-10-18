@@ -38,7 +38,12 @@ final class ShelfOverlay {
 
     /// The fade-out in flight, if any (#1838): its landing orders
     /// the panel out unless a show cleared it meanwhile.
-    private var leaving: UUID?
+    var leaving: UUID?
+    /// A hiding shelf (#761): it slides in on appearing and out
+    /// on leaving, set by `ShelfManager` before each show.
+    var slides = false
+    /// Whether the leave in flight is a slide.
+    var leavingSlides = false
     /// Fires once the shelf has left the screen — at once, or when
     /// its fade-out lands; `ShelfManager` retires it there.
     var onLeft: @MainActor () -> Void = {}
@@ -137,6 +142,7 @@ final class ShelfOverlay {
         // out fades back (#1838).
         let glides = panel.isVisible
         let fadesBack = glides && leaving != nil
+        let slidesBack = fadesBack && leavingSlides
         leaving = nil
         stripView.frame = CGRect(origin: .zero, size: strip.size)
         let horizontal = edge.isHorizontal
@@ -174,10 +180,11 @@ final class ShelfOverlay {
                 horizontal: horizontal,
                 animated: glides
             )
-            if fadesBack {
+            if fadesBack, !slidesBack {
                 BarMotion.setAlpha(content, to: 1, animated: true)
             }
         }
+        if slidesBack { slideIn(edge: edge, depth: depth) }
         layoutHandle(
             range: range,
             divider: Self.dividerFrame(
@@ -199,6 +206,11 @@ final class ShelfOverlay {
             #if DEBUG
                 guard ordersPanel else { return }
             #endif
+            if slides {
+                panel.orderFrontRegardless()
+                slideIn(edge: edge, depth: depth)
+                return
+            }
             guard travels else {
                 panel.orderFrontRegardless()
                 return
@@ -227,6 +239,9 @@ final class ShelfOverlay {
             leaving = nil
             onLeft()
             return true
+        }
+        if animated, slides, let drawn {
+            return slideOut(edge: drawn.edge, strip: drawn.strip)
         }
         guard animated, BarMotion.shelfGlideLength > 0 else {
             leaving = nil
@@ -281,68 +296,5 @@ final class ShelfOverlay {
                 ? stripView.bounds.height : stripView.bounds.width,
             horizontal: horizontal
         )
-    }
-
-    /// The grip: centred on the divider line, `reach` across it
-    /// and the shelf's whole depth along it.
-    nonisolated static func handleFrame(
-        divider: CGRect,
-        depth: CGFloat,
-        horizontal: Bool
-    ) -> CGRect {
-        let reach = ShelfDividerHandle.reach
-        return horizontal
-            ? CGRect(
-                x: divider.midX - reach / 2,
-                y: 0,
-                width: reach,
-                height: depth
-            )
-            : CGRect(
-                x: 0,
-                y: divider.midY - reach / 2,
-                width: depth,
-                height: reach
-            )
-    }
-
-    /// The one plate under both sections, in strip coordinates,
-    /// the shelf's whole depth over `ShelfArrangement.plateSpan`
-    /// of what each section's run asks for.
-    nonisolated static func plateFrame(
-        sections: [Section],
-        strip: CGRect,
-        horizontal: Bool,
-        shelf: KiwiShelf
-    ) -> CGRect? {
-        let asks = sections.compactMap { section -> ClosedRange<CGFloat>? in
-            guard !section.plate.isEmpty else { return nil }
-            let ask = section.plate.offsetBy(
-                dx: section.slot.minX - strip.minX,
-                dy: section.slot.minY - strip.minY
-            )
-            return horizontal ? ask.minX...ask.maxX : ask.minY...ask.maxY
-        }
-        guard
-            let span = ShelfArrangement.plateSpan(
-                asks: asks,
-                length: horizontal ? strip.width : strip.height,
-                shelf: shelf
-            )
-        else { return nil }
-        let extent = span.upperBound - span.lowerBound
-        return horizontal
-            ? CGRect(
-                x: span.lowerBound,
-                y: 0,
-                width: extent,
-                height: strip.height
-            )
-            : CGRect(
-                x: 0,
-                y: span.lowerBound,
-                width: strip.width,
-                height: extent
-            )
     }
 }

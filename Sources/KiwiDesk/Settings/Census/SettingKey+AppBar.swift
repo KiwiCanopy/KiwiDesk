@@ -7,6 +7,7 @@ enum AppBarKey: String, CaseIterable, Hashable {
     case appBarGroupAdjacentWindows =
         "settings.appBarStyle.groupAdjacentWindows"
     case appBarReserve = "settings.appBarStyle.reserve"
+    case appBarVisibility = "settings.appBarStyle.visibility"
 }
 
 extension AppBarKey {
@@ -19,6 +20,9 @@ extension AppBarKey {
             return .row(.bars, .appBar, .atRest)
         case .appBarReserve:
             // Lua/CLI only by ruling (#1524).
+            return .luaOnly
+        case .appBarVisibility:
+            // Lua/CLI until its Settings row lands (#761).
             return .luaOnly
         }
     }
@@ -39,7 +43,7 @@ extension AppBarKey {
                 "app_bar.group_adjacent",
                 help: "app_bar.group_adjacent.help"
             )
-        case .appBarReserve:
+        case .appBarReserve, .appBarVisibility:
             return .none
         }
     }

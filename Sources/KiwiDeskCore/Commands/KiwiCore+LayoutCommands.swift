@@ -24,6 +24,14 @@ extension KiwiCore {
         if let retired = APIReference.retirement(of: command) {
             return .fail(retired)
         }
+        // The show/hide action redraws the bars and moves no
+        // window: a hiding edge reserves nothing (#761).
+        if command == "space_bar.toggle_reveal" {
+            return shelfRevealCommand(spaceBar: true)
+        }
+        if command == "app_bar.toggle_reveal" {
+            return shelfRevealCommand(spaceBar: false)
+        }
         let reservation = shelfReservations
         // Raised by the bars' own arms: their write may leave the
         // layout bounds alone (#1524).
@@ -50,6 +58,8 @@ extension KiwiCore {
             barWrite = true
             response = spaceBarCommand(command, args)
         } else if command.hasPrefix("kiwishelf.") {
+            // The reveal duration is read by the action alone.
+            barWrite = command == "kiwishelf.set_reveal_duration"
             response = kiwishelfCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)

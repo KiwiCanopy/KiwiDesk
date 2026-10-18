@@ -11,6 +11,8 @@ extension SettingsRevertRegister {
         .appBar(.appBarGroupAdjacentWindows):
             .leaf(\.settings.appBarStyle.groupAdjacentWindows),
         .appBar(.appBarReserve): .leaf(\.settings.appBarStyle.reserve),
+        .appBar(.appBarVisibility):
+            .leaf(\.settings.appBarStyle.visibility),
         .behaviour(.minWindowSize): .leaf(\.settings.minWindowSize),
         .behaviour(.resizeStep): .leaf(\.settings.resizeStep),
         .behaviour(.swapSkipsCascade): .leaf(\.settings.swapSkipsCascade),

@@ -68,32 +68,42 @@ extension TilingSettings {
     /// two bars are never stacked on one edge
     /// (`ShelfSplitGeometryTests` ▸ `edgesPerMode`) and
     /// `ShelfGeometry.strips` measures the Space Bar's whole edge.
-    /// A shared edge reserves while either bar on it does — the
-    /// fold is here, at the dedup, and nowhere beside it
-    /// (`BarReserveTests`, #1524).
+    /// A shared edge reserves while either bar on it does and
+    /// hides only while both do, and a hiding edge reserves
+    /// nothing — the folds are here, at the dedup, and nowhere
+    /// beside it (`BarReserveTests`, #1524; `BarAutoHideFoldTests`,
+    /// #761).
     public func barEdges(space: Bool, app: Bool) -> [ShelfEdge] {
         var edges: [ShelfEdge] = []
         if space {
             edges.append(
                 ShelfEdge(
                     spaceBarStyle.edge,
-                    reserves: spaceBarStyle.reserve
+                    reserves: spaceBarStyle.reserve,
+                    hides: spaceBarStyle.visibility == .auto
                 )
             )
         }
-        guard app else { return edges }
-        if let shared = edges.firstIndex(where: {
-            $0.edge == appBarStyle.edge
-        }) {
-            edges[shared].reserves =
-                edges[shared].reserves || appBarStyle.reserve
-        } else {
-            edges.append(
-                ShelfEdge(
-                    appBarStyle.edge,
-                    reserves: appBarStyle.reserve
+        if app {
+            let hides = appBarStyle.visibility == .auto
+            if let shared = edges.firstIndex(where: {
+                $0.edge == appBarStyle.edge
+            }) {
+                edges[shared].reserves =
+                    edges[shared].reserves || appBarStyle.reserve
+                edges[shared].hides = edges[shared].hides && hides
+            } else {
+                edges.append(
+                    ShelfEdge(
+                        appBarStyle.edge,
+                        reserves: appBarStyle.reserve,
+                        hides: hides
+                    )
                 )
-            )
+            }
+        }
+        for index in edges.indices where edges[index].hides {
+            edges[index].reserves = false
         }
         return edges
     }

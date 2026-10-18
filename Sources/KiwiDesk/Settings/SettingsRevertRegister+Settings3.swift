@@ -171,6 +171,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.scrolling.appBar.groupAdjacentWindows),
         .spaceBar(.spaceBarEnabled): .leaf(\.settings.spaceBarStyle.enabled),
         .spaceBar(.spaceBarReserve): .leaf(\.settings.spaceBarStyle.reserve),
+        .spaceBar(.spaceBarVisibility):
+            .leaf(\.settings.spaceBarStyle.visibility),
         .spaceBar(.spaceBarActiveIndicator):
             .leaf(\.settings.spaceBarStyle.activeIndicator),
         .spaceBar(.spaceBarHideEmpty):

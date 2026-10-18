@@ -39,6 +39,7 @@ extension KiwiShelf {
         case borderColor = "border_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
+        case revealDuration = "reveal_duration"
     }
 
     /// Decodes a shelf, a missing key taking its default.
@@ -128,6 +129,10 @@ extension KiwiShelf {
         dimFactor = AppBarStyle.clampDim(
             try c.decodeIfPresent(CGFloat.self, forKey: .dimFactor)
                 ?? d.dimFactor
+        )
+        revealDuration = Self.clampRevealDuration(
+            try c.decodeIfPresent(Double.self, forKey: .revealDuration)
+                ?? d.revealDuration
         )
         try decodeColors(from: c)
     }

@@ -13,6 +13,8 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Whether the layout gives up the bar's strip (#1524); off
     /// draws the shown bar over the windows.
     public var reserve = true
+    /// Whether the bar's shelf hides to an indicator (#761).
+    public var visibility: ShelfVisibility = .always
     /// The screen edge the bar sits on (top). The App Bar on the
     /// same edge shares one shelf with it; on another, each bar
     /// is its own (#1731).

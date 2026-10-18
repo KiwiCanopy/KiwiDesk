@@ -2571,6 +2571,27 @@ window KiwiDesk does not manage covering a tile does not count.
 kiwishelf.set_dim_factor(0.4)
 ```
 
+:::unreleased
+### kiwishelf.set_reveal_duration
+
+**Expects:** seconds, 0–60 (default `0`); out-of-range values
+clamp.
+
+**Does:** how long a shelf
+[`space_bar.toggle_reveal`](#space_bartoggle_reveal) or
+[`app_bar.toggle_reveal`](#app_bartoggle_reveal) revealed stays
+shown. `0` keeps it until the next call; above `0` it hides after
+that many seconds, or at once on the next call. A shelf the
+pointer is over when the time runs out stays until the pointer
+leaves. Lua-only for now.
+
+**Example:**
+
+```lua
+kiwishelf.set_reveal_duration(5)
+```
+:::
+
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
@@ -2786,6 +2807,39 @@ Global only: no layout sets its own.
 app_bar.set_reserve(false)
 ```
 
+:::unreleased
+### app_bar.set_visibility
+
+**Expects:** `"always"` or `"auto"` (default `"always"`).
+
+**Does:** as
+[`space_bar.set_visibility`](#space_barset_visibility), for the
+App Bar's shelf. A lone App Bar hides to a short plain pill; on
+the Space Bar's edge the shared shelf shows the Space dots.
+
+Global only: no layout sets its own.
+
+**Example:**
+
+```lua
+app_bar.set_visibility("auto")
+```
+
+### app_bar.toggle_reveal
+
+**Expects:** nothing.
+
+**Does:** as [`space_bar.toggle_reveal`](#space_bartoggle_reveal),
+for the shelf the App Bar sits on. Fails where that shelf does not
+hide, or where the active Space's layout draws no App Bar.
+
+**Example:**
+
+```lua
+app_bar.toggle_reveal()
+```
+:::
+
 ### app_bar.set_active_indicator
 
 **Expects:** `"outline"` or `"edge_mark"` (default
@@ -2935,6 +2989,51 @@ its own [`app_bar.set_reserve`](#app_barset_reserve) off.
 ```lua
 space_bar.set_reserve(false)
 ```
+
+:::unreleased
+### space_bar.set_visibility
+
+**Expects:** `"always"` or `"auto"` (default `"always"`).
+
+**Does:** with `"auto"` the Space Bar's KiwiShelf hides to a row
+of Space dots at its edge — one dot per Space, the current one
+wide, a Space holding windows brighter. The pointer resting in a
+band a few points deep along that edge for 0.35 s reveals the
+shelf, at once where the band touches the screen's own edge; it
+retracts 0.5 s after the pointer leaves it. A revealed shelf draws
+over the windows: a hiding edge reserves no strip, so a reveal
+moves no window. Setting the mode retiles once.
+
+On an edge the two bars share, the shelf hides only while the
+App Bar is `"auto"` too, and then both hide and reveal together.
+A look never carries the mode.
+
+**Example:**
+
+```lua
+space_bar.set_visibility("auto")
+```
+
+### space_bar.toggle_reveal
+
+**Expects:** nothing.
+
+**Does:** shows or hides the hidden shelf the Space Bar sits on,
+on the screen the active Space lays out on. A shown shelf stays
+until the next call, or for
+[`kiwishelf.set_reveal_duration`](#kiwishelfset_reveal_duration)
+seconds where that is above 0. Fails where the shelf does not
+hide. No shortcut is bound by default; VoiceOver's press on the
+Space dots runs it too.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+b", function()
+    space_bar.toggle_reveal()
+end)
+```
+:::
 
 ### space_bar.set_edge
 

@@ -23,6 +23,8 @@ final class ShelfManager {
         let app: AppBarOverlay?
         /// Set while the shelf is full, so the divider drags.
         var divider: ShelfArrangement.Divider? = nil
+        /// A hiding shelf's reveal, which slides (#761).
+        var slides = false
     }
 
     /// A Space Bar minimum the divider reached (`committed` on
@@ -39,6 +41,9 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
+    /// Each hiding shelf's reveal and its indicator (#761).
+    let reveal = ShelfRevealer()
+    let indicators = ShelfIndicators()
     #if DEBUG
         /// Whether a shelf orders its panel in. Off in both
         /// `makeTestCore` twins, where every suite rendering a bar
@@ -146,6 +151,7 @@ final class ShelfManager {
             overlay.ordersPanel = ordersPanels
         #endif
         overlay.onLeft = { [weak self] in self?.retire(key) }
+        overlay.slides = shelf.slides
         overlay.onPress = { [weak self] in
             self?.peek.pressed(on: $0, type: $1)
         }

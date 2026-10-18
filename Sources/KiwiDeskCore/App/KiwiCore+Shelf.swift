@@ -47,12 +47,14 @@ extension KiwiCore {
                 settings: settings
             )
             retireDepartedBars(live: Set(fallback.map(\.display)))
+            syncHidingShelves(HidingShelves())
             return
         }
         var appBarsShown: [AppBarManager.Bar] = []
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         var standingDown: Set<DisplayID> = []
+        var hiding = HidingShelves()
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
             // the plan and every style a bar draws carry it.
@@ -80,11 +82,18 @@ extension KiwiCore {
             // engine's `layoutBounds(on:)` seam: one of the
             // deliberate `visibleBounds` exemptions
             // (`VisibleBoundsRoutingTests.allowed`, #537).
-            let plans = shelfPlans(
-                visible: GeometryUtils.axVisibleFrame(of: screen),
-                settings: shown,
-                spaceItems: items,
-                app: app
+            let plans = hiding.shown(
+                of: shelfPlans(
+                    visible: GeometryUtils.axVisibleFrame(of: screen),
+                    settings: shown,
+                    spaceItems: items,
+                    app: app
+                ),
+                display: display.id,
+                screen: screen,
+                items: items,
+                core: self,
+                settings: shown
             )
             strips += plans.map {
                 ShelfStrip(
@@ -93,7 +102,8 @@ extension KiwiCore {
                     strip: $0.strip,
                     carriesSpace: $0.arrangement.space != nil,
                     carriesApp: $0.arrangement.app != nil,
-                    divider: $0.arrangement.divider
+                    divider: $0.arrangement.divider,
+                    slides: $0.hides
                 )
             }
             if let app,
@@ -123,6 +133,7 @@ extension KiwiCore {
         }
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
+        syncHidingShelves(hiding)
         // KiwiVision stands down on the same verdict (#2103).
         noteVisionStandDown(standingDown)
     }
@@ -147,6 +158,8 @@ extension KiwiCore {
         let carriesSpace: Bool
         let carriesApp: Bool
         var divider: ShelfArrangement.Divider? = nil
+        /// A hiding shelf's reveal, which slides in and out (#761).
+        var slides = false
     }
 
     /// Hands each shelf the sections its bars just rendered on its
@@ -167,7 +180,8 @@ extension KiwiCore {
                         ? spaceBars.shownOverlay(on: shelf.display) : nil,
                     app: shelf.carriesApp
                         ? appBars.shownOverlay(on: shelf.display) : nil,
-                    divider: shelf.divider
+                    divider: shelf.divider,
+                    slides: shelf.slides
                 )
             }
         )

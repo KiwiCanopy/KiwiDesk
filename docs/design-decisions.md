@@ -13988,6 +13988,38 @@ layout would move windows on a layout switch.
 A split App Bar pays the same price with the Space Bar on — the
 reflow paragraph of *Amended* below.
 
+:::unreleased
+*A shelf can hide; a reveal is an overlay*
+([#761](https://github.com/KiwiCanopy/KiwiDesk/issues/761)).
+Each bar carries a visibility mode, `always` (the default) or
+`auto`; there is no `never`, which is the bar turned off. The
+unit that hides is the shelf on one edge, so on a fused edge it
+hides only while both bars are `auto` — the AND beside the
+reserve's OR in the one fold — and a hiding edge reserves
+nothing. That makes "a reveal never retiles" true by
+construction: setting the mode is the one pass, and a reveal
+only redraws the bars. Hiding while still reserving was rejected
+(the user would give up the information and keep paying the
+area).
+
+The hover target is a band a few points deep along the edge,
+never the indicator's drawing, and the indicator ignores the
+mouse, so the windows under it keep their clicks. The timings
+follow the Dock and the full-screen menu bar: 0.35 s in the band
+before a reveal, which a pointer passing for a title bar does not
+reach, movement inside the band never restarting it; 0.5 s after
+leaving before a retract, which forgives an overshoot; a push
+against the screen's own edge reveals at once. There is no
+click-pin: the band sits over the indicator, so the shelf has
+revealed before a click lands, and on a revealed shelf every
+click target already does something, so nothing could release a
+pin. The show/hide action is the one pin, and it hides again by
+itself after `kiwishelf.reveal_duration` where that is above 0
+(owner, 2026-10-18). No reveal on a Space switch: the Space dots
+already show the new Space. A look never carries the mode, which
+is functionality, not styling.
+:::
+
 *One placement rule, asked by every picture of it.* Where each
 section sits along the edge is decided in ONE pure function,
 `ShelfArrangement`, which both live bars take their segments

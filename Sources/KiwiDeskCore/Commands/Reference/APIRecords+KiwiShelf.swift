@@ -146,5 +146,10 @@ extension APIReference {
             "Sets the text color of count and overflow badges.",
             .color("hex")
         ),
+        "set_reveal_duration": APIRecord(
+            "Sets how long the show/hide action keeps a shelf shown; "
+                + "0 waits for the next press.",
+            .number("seconds")
+        ),
     ]
 }
