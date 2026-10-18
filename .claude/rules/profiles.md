@@ -904,9 +904,10 @@ into `gui.json`, so the current *look* travelled while the saved
 `MachineLocation`'s folder, never in the config folder, which a
 user may sync to another Mac (#2324, `CoreInitPathTests`).** The
 socket, the lock and the arrangement snapshots are runtime and
-take no case; a file KiwiDesk keeps there as setup state still
-answers the backup question in `ConfigArtifact`, whose `url(of:)`
-says which folder, as the migration copies do.
+take no case; any other file KiwiDesk keeps there answers the
+backup question in `ConfigArtifact`, `livesOnThisMac` and never
+travelling, as the migration copies do (`SetupBundleArtifactTests`
+▸ `liveMachineDirectoryIsAccountedFor`).
 
 **State about THIS MAC that is no file stays out of the register,
 in the app's defaults.** What a Mac has run and read — the "What's

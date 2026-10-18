@@ -58,17 +58,18 @@ struct CoreInitPathTests {
     }
 
     /// Without the pin a test core would write its snapshots over
-    /// the running app's in `~/Library`; a sibling of the config
-    /// dir keeps a file landing in the wrong folder visible. The
-    /// twins are held identical by `MachineTouchTests`.
-    @Test("a test core keeps its machine files beside its config")
+    /// the running app's in `~/Library`; a folder of its own keeps
+    /// a file landing in the wrong one visible, and nesting it
+    /// cleans it with the config dir. The twins are held identical
+    /// by `MachineTouchTests`.
+    @Test("a test core keeps its machine files in a folder of their own")
     func testCorePinsTheMachineDirectory() {
         let core = makeTestCore()
         #expect(core.machineDirectory != core.configDirectory)
         #expect(core.machineDirectory != MachineLocation.directory)
         #expect(
-            core.machineDirectory.deletingLastPathComponent()
-                == core.configDirectory.deletingLastPathComponent()
+            core.machineDirectory.deletingLastPathComponent().path
+                == core.configDirectory.path
         )
     }
 
@@ -131,5 +132,34 @@ struct CoreInitPathTests {
             manager.migrationBackups
                 == machine.appendingPathComponent("migration-backups")
         )
+    }
+
+    /// A Mac still on an older build may share the config folder,
+    /// so only the launch that makes the machine folder takes the
+    /// legacy files; a later one would take that Mac's (#2324).
+    @Test("only the launch that makes the machine folder adopts")
+    func adoptionRunsOnce() throws {
+        let root = URL(fileURLWithPath: "/tmp")
+            .appendingPathComponent("kd-\(UUID().uuidString.prefix(8))")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let config = root.appendingPathComponent("config")
+        let machine = root.appendingPathComponent("machine")
+        let name = CrashRecovery.sessionName
+        let legacy = config.appendingPathComponent(name)
+        try FileManager.default.createDirectory(
+            at: config,
+            withIntermediateDirectories: true
+        )
+        try Data("first".utf8).write(to: legacy)
+        _ = KiwiCore.resolveDirectories(config, machine)
+        let moved = machine.appendingPathComponent(name)
+        #expect(FileManager.default.fileExists(atPath: moved.path))
+        #expect(!FileManager.default.fileExists(atPath: legacy.path))
+        // The boot consumes it; the older Mac writes its own.
+        try FileManager.default.removeItem(at: moved)
+        try Data("other Mac".utf8).write(to: legacy)
+        _ = KiwiCore.resolveDirectories(config, machine)
+        #expect(FileManager.default.fileExists(atPath: legacy.path))
+        #expect(!FileManager.default.fileExists(atPath: moved.path))
     }
 }

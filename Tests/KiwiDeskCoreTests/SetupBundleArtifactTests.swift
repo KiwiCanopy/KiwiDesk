@@ -38,9 +38,11 @@ struct SetupBundleArtifactTests {
         for artifact in ConfigArtifact.allCases {
             let url = core.url(of: artifact)
             let home =
-                artifact == .migrationBackups
+                artifact.livesOnThisMac
                 ? core.machineDirectory : core.configDirectory
             #expect(inside(url, home), "\(artifact) outside its folder")
+            // A file meaningful here alone never reaches another Mac.
+            #expect(!(artifact.livesOnThisMac && artifact.travelsInABackup))
         }
     }
 
@@ -169,10 +171,10 @@ struct SetupBundleArtifactTests {
                     }
                     .map(\.lastPathComponent)
             )
-            // The user's own script, which no backup rewrites.
-            // This Mac's files live beside, in the machine folder
-            // (#2324, `CoreInitPathTests`).
-            .union(["init.lua"])
+            // The user's own script, which no backup rewrites, and
+            // a test core's machine folder, nested here only so it
+            // is cleaned with the config dir (#2324).
+            .union(["init.lua", core.machineDirectory.lastPathComponent])
         let present = try FileManager.default
             .contentsOfDirectory(
                 atPath: core.configDirectory.path
@@ -186,6 +188,47 @@ struct SetupBundleArtifactTests {
                         + "directory and no `ConfigArtifact` "
                         + "names it. Does it travel in a backup? "
                         + "Answer it in the register."
+                )
+            )
+        }
+    }
+
+    /// The machine folder's half of the census (#2324): every file
+    /// a core keeps there is a `livesOnThisMac` artifact or one of
+    /// the runtime files named by their owners. A store writing a
+    /// new file there without a case reds here.
+    @Test("A live machine directory holds nothing unaccounted for")
+    func liveMachineDirectoryIsAccountedFor() throws {
+        let core = makeTestCore()
+        core.onLog = { _ in }
+        core.crash.onLog = { _ in }
+        core.crash.captureState = { [weak core] in
+            core?.state.snapshot()
+        }
+        core.crash.autosave()
+        core.crash.shutdownCleanly()
+        core.crash.autosave()
+        try FileManager.default.createDirectory(
+            at: core.migrationBackups,
+            withIntermediateDirectories: true
+        )
+        let known = Set(
+            ConfigArtifact.allCases.filter(\.livesOnThisMac)
+                .map { core.url(of: $0).lastPathComponent }
+        ).union([
+            MachineLocation.socketName, MachineLocation.lockName,
+            CrashRecovery.autosaveName, CrashRecovery.sessionName,
+        ])
+        let present = try FileManager.default.contentsOfDirectory(
+            atPath: core.machineDirectory.path
+        )
+        #expect(!present.isEmpty)
+        for name in present {
+            #expect(
+                known.contains(name),
+                Comment(
+                    rawValue: "`\(name)` appeared in the machine "
+                        + "folder and no `ConfigArtifact` names it"
                 )
             )
         }

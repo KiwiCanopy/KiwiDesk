@@ -54,11 +54,11 @@ public enum MachineLocation {
     ]
 
     /// Moves every file under each `legacyNames` entry from
-    /// `config` into `machine` once and drops the old socket, so
-    /// an update keeps the arrangement it quit with and the
-    /// synced folder keeps none of it. A file the machine folder
-    /// already holds wins and the legacy copy stays; a file that
-    /// fails to move stays too, and the next launch retries it.
+    /// `config` into `machine` and drops the old socket, so an
+    /// update keeps the arrangement it quit with. A file the
+    /// machine folder already holds wins and the legacy copy
+    /// stays, as does a file that fails to move. Run once, by the
+    /// launch that makes the machine folder.
     static func adoptLegacyFiles(from config: URL, into machine: URL) {
         guard
             config.resolvingSymlinksInPath().path

@@ -44,6 +44,16 @@ public enum ConfigArtifact: CaseIterable {
         }
     }
 
+    /// Whether the file lives in `MachineLocation`'s folder rather
+    /// than the config folder; `url(of:)` follows it, and such a
+    /// file never travels (`SetupBundleArtifactTests`).
+    public var livesOnThisMac: Bool {
+        switch self {
+        case .guiConfig, .profiles, .palettes, .looks: return false
+        case .migrationBackups: return true
+        }
+    }
+
     /// Why anything answering `false` to `travelsInABackup` stays
     /// behind: an exclusion is a decision on record, never an
     /// omission (`SetupBundleArtifactTests`).
