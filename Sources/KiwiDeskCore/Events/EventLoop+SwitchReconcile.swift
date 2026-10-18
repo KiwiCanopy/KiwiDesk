@@ -145,7 +145,9 @@ extension EventLoop {
         switchReads.batch =
             batch.reads.values.allSatisfy(\.applied) ? nil : batch
         foldsSwitchResync {
-            switchReads.applying = true
+            // The batch's own fold reveals; a straggler's lone apply
+            // is an ordinary late read.
+            switchReads.applying = paysFold
             defer { switchReads.applying = false }
             // Newest first: an older reading of an app the newest
             // answered applies nothing, or it would sweep a window

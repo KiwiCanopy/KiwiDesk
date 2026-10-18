@@ -27,6 +27,16 @@ struct SwitchReconcileSeamTests {
             "guard !holdingForSwitch || !eventLoop.switchReads.isPending",
             "KiwiCore+Shelf.swift", 1
         ),
+        // A shelf stand-down for a fullscreen arrival passes the
+        // hold, on the main arm and the secondary one.
+        (
+            "updateBars(holdingForSwitch: false)",
+            "KiwiCore+Desktops.swift", 1
+        ),
+        (
+            "updateBars(holdingForSwitch: snapshot.showsUserSpaces(changed))",
+            "KiwiCore+Desktops.swift", 1
+        ),
         // The switch's public event waits for its arrivals.
         (
             "eventLoop.afterSwitchReads {",

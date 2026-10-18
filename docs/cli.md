@@ -929,6 +929,8 @@ Desktop's windows, after that switch's `vanished` and `returned`
 bursts, so a state query sent on it sees them — save an app slow
 to answer, whose windows follow within a few seconds
 ([#2347](https://github.com/KiwiCanopy/KiwiDesk/issues/2347)).
+Switches in quick succession deliver their events in order, after
+the last one's windows are read.
 :::
 
 With "Displays have separate Spaces" on, each screen switches
