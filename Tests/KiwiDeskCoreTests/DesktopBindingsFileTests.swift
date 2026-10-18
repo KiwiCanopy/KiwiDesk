@@ -114,7 +114,9 @@ struct DesktopBindingsFileTests {
     func unreadableIsKept() throws {
         let dir = scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
-        let store = try store(dir)
+        var store = try store(dir)
+        let backups = dir.appendingPathComponent("backups")
+        store.migrationBackups = backups
         try FileManager.default.createDirectory(
             at: store.bindingsFile.url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -126,9 +128,7 @@ struct DesktopBindingsFileTests {
         let copy = MigrationBackup.url(
             of: store.bindingsFile.url,
             suffix: CorruptFile.suffix,
-            in: MigrationBackup.folder(
-                in: store.bindingsFile.url.deletingLastPathComponent()
-            )
+            in: backups
         )
         #expect(try Data(contentsOf: copy) == broken)
     }
