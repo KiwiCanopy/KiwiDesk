@@ -240,7 +240,9 @@ extension TilingEngine {
         // ever asked.
         boundLearner.supersedeAsk(id)
         placements.stamp(id, target: target)
-        if animated,
+        // Reduce Motion takes the instant set, whose EUI hold the
+        // engine's no-animation write lacks (#2187).
+        if animated, !animation.reduceMotion(),
             let screen = Self.screen(containing: target)
                 ?? ScreenList.mainOrFirst
         {
