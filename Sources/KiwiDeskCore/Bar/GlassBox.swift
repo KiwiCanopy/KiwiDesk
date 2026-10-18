@@ -9,12 +9,12 @@ import AppKit
 final class GlassBoxHost: NSView {
     override var isFlipped: Bool { true }
 
-    /// The pair follows every size the host takes. A glass in a
-    /// host stayed at the fused plate's width when the host shrank,
-    /// autoresizing never reaching it (#2388, device).
+    /// The host writes its pair to every size it takes, glass and
+    /// tint alike: autoresizing left a hosted glass at the fused
+    /// plate's width when the host shrank (#2388, device).
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        for view in subviews where !GlassPlate.fills(view.frame, bounds) {
+        for view in subviews where view.frame != bounds {
             view.frame = bounds
         }
     }
@@ -29,7 +29,8 @@ final class GlassBoxHost: NSView {
 enum GlassBox {
     /// A fresh glass and tint inside a box-sized host added to
     /// `parent` — beneath `sibling` where one is named — that the
-    /// pair fills by autoresizing.
+    /// pair fills: the host writes it on every resize. The masks
+    /// stay as the device-checked shape and are not relied on.
     static func make(
         in parent: NSView,
         below sibling: NSView? = nil
@@ -61,8 +62,9 @@ enum GlassBox {
     }
 
     /// Lays a box out at `frame`: the pair takes the host's CURRENT
-    /// bounds, then the host — the one view that travels (#2095) —
-    /// moves, and lays the pair out to each size it takes
+    /// bounds — the one write a host whose size stays the same gets
+    /// — then the host, the one view that travels (#2095), moves
+    /// and writes the pair to each size it takes
     /// (`GlassBoxHost.setFrameSize`). A fresh host lands rather
     /// than gliding from nowhere. `visible` false hides the whole
     /// box, which still takes its slot; `hex` is the Fill its tint
@@ -81,7 +83,13 @@ enum GlassBox {
         guard let host = host(of: glass) else { return }
         host.isHidden = !visible
         let bounds = host.bounds
-        GlassPlate.update(glass, frame: bounds, cornerRadius: cornerRadius)
+        // A glass Auto Layout rounded to the backing is left there:
+        // rewriting it stranded it at its old size (#2388, device).
+        GlassPlate.update(
+            glass,
+            frame: fills(glass.frame, bounds) ? glass.frame : bounds,
+            cornerRadius: cornerRadius
+        )
         GlassTint.apply(
             tint,
             below: glass,
@@ -91,6 +99,19 @@ enum GlassBox {
             edge: edge
         )
         move(host, frame, animated && host.frame != .zero)
+    }
+
+    /// Whether a hosted glass at `frame` already fills `bounds`: each
+    /// edge within half a point, the most the backing's rounding
+    /// moves one.
+    nonisolated static func fills(
+        _ frame: CGRect,
+        _ bounds: CGRect
+    ) -> Bool {
+        abs(frame.minX - bounds.minX) <= 0.5
+            && abs(frame.minY - bounds.minY) <= 0.5
+            && abs(frame.maxX - bounds.maxX) <= 0.5
+            && abs(frame.maxY - bounds.maxY) <= 0.5
     }
 
     /// Takes a box out for good — glass released (#1730), tint and

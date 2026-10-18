@@ -1118,14 +1118,17 @@ Obligations:
   before the host moves — and a drag moves the host
   too (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
   `boxGlassFillsItsHost`, `AppBarBoxHostTests` ▸
-  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). **The host
-  lays its pair out to every size it takes**, never autoresizing,
-  which left a hosted glass at a fused plate's width when the
-  shelf shrank (#2388, device 2026-10-18); and **a glass within a
-  point of its target is not rewritten** — Auto Layout rounds it
-  to the backing, and that rewrite is what stranded it
-  (`ShelfPlateGlassHostTests` ▸ `hostResizeFillsThePair`,
-  `roundedGlassIsNotRewritten`). The pair's own
+  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). **Write the
+  pair to each size the host takes in `GlassBoxHost.setFrameSize`,
+  never trusting autoresizing to carry it** — a hosted glass stayed
+  at a fused plate's width when the shelf shrank (#2388, device
+  2026-10-18) — **and leave a hosted glass that already fills its
+  host within `GlassBox.fills` alone before a glide**: Auto Layout
+  rounds it to the backing, and rewriting that rounding is what
+  stranded it (`ShelfPlateGlassHostTests` ▸
+  `hostResizeFillsThePair`, `roundedGlassIsNotRewritten`). The
+  host's writer joins the pair's writers below
+  (`GlassPairMotionSeamTests` ▸ `hostLayoutStartsNoMotion`). The pair's own
   frame writers, `GlassPlate.update` and `GlassTint.apply`, take
   no motion input and start no motion (`GlassPairMotionSeamTests`),
   so a call site cannot make either travel.

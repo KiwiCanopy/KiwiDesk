@@ -99,7 +99,7 @@ struct ShelfPlateGlassHostTests {
 
     /// The door every gliding glass takes: only the host travels,
     /// and the pair is written to the host's bounds before it
-    /// moves, so autoresizing carries it the rest of the way.
+    /// moves; the host writes it to each size after (#2388).
     @Test("GlassBox.place moves the host and fills it with the pair")
     func placeMovesOnlyTheHost() throws {
         guard #available(macOS 26, *) else { return }
@@ -141,7 +141,7 @@ struct ShelfPlateGlassHostTests {
     /// Auto Layout rounds the glass to the backing, and rewriting
     /// that sub-point difference left the glass at the fused 962.5
     /// when the shelf shrank to the Space Bar's 539 (#2388, device):
-    /// a glass within a point of its target is left alone.
+    /// a glass within half a point of its host is left alone.
     @Test("A glass already filling its host is not rewritten")
     func roundedGlassIsNotRewritten() throws {
         guard #available(macOS 26, *) else { return }
@@ -165,8 +165,9 @@ struct ShelfPlateGlassHostTests {
             move: { _, _, _ in }
         )
         #expect(box.glass.frame == rounded)
-        // A glass a whole point off its host is still laid out.
-        box.glass.frame = CGRect(x: 0, y: 0, width: 600, height: 40)
+        // A glass a whole point off its host is still laid out, by
+        // the place's own write: the host's size does not change.
+        box.glass.frame = CGRect(x: 0, y: 0, width: 961, height: 40)
         GlassBox.place(
             box.glass,
             tint: box.tint,
@@ -175,8 +176,8 @@ struct ShelfPlateGlassHostTests {
             hex: "#202020B3",
             edge: .top,
             visible: true,
-            animated: false,
-            move: { view, frame, _ in view.frame = frame }
+            animated: true,
+            move: { _, _, _ in }
         )
         #expect(box.glass.frame == host.bounds)
     }
@@ -205,7 +206,7 @@ struct ShelfPlateGlassHostTests {
         box.glass.autoresizingMask = []
         box.tint.autoresizingMask = []
         host.frame = CGRect(x: 594.5, y: 0, width: 539, height: 40)
-        #expect(GlassPlate.fills(box.glass.frame, host.bounds))
-        #expect(GlassPlate.fills(box.tint.frame, host.bounds))
+        #expect(box.glass.frame == host.bounds)
+        #expect(box.tint.frame == host.bounds)
     }
 }
