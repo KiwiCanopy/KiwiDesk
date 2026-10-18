@@ -108,14 +108,17 @@ flowchart LR
     A["AX: a window disappears"] --> C{"same frame within the<br/>coalesce window, and an<br/>AXTabGroup on either side?"}
     B["AX: a window appears<br/>at the same frame"] --> C
     C -->|yes| R[".windowRekeyed<br/>slot kept, id swapped in place"]
-    C -->|no, or Desktop-switch reconcileAll| D["destroy + create<br/>two separate windows"]
+    C -->|no, or the Desktop-switch batch| D["destroy + create<br/>two separate windows"]
     E["AX: a tracked id is listed<br/>under a fresh element"] --> F["same id re-elemented<br/>no event (a carried sticky<br/>window crossing Desktops)"]
 ```
 
 At a Desktop switch, `App` carries every reach-enabled sticky
 window onto the arriving Desktop through `WMBridge` (#1145); the
 reconcile that follows sees those ids vanish and return under
-fresh AX elements, and re-registers them in place.
+fresh AX elements, and re-registers them in place. That
+reconcile reads each app's window list off the main actor and
+applies them in one fold; the 600 ms settle, the bars and
+`desktop_change` wait for it (#2347).
 
 Every other window of the left Desktop *is* destroyed and
 re-created by that reconcile, and the destroy fold walks

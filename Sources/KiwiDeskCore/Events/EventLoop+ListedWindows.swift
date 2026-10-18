@@ -53,6 +53,9 @@ struct WindowListReading: @unchecked Sendable {
     /// False where a hidden app's list was skipped (#2027): the
     /// empty list then speaks for no window.
     var listRead = true
+    /// When the read RAN, off the main actor: a queued read runs
+    /// after one asked later, so the ask's time cannot order them.
+    var readStarted: ContinuousClock.Instant?
 }
 
 /// Reads a list's windows OFF the main actor (#1933). The seams
@@ -120,5 +123,68 @@ struct ListedWindowReader: @unchecked Sendable {
                 && traitsRead?.hasTitlebarButton == true,
             tracked: reading
         )
+    }
+}
+
+extension EventLoop {
+    /// The reader for `pid`'s next off-main list read.
+    func listedWindowReader(
+        pid: pid_t,
+        bundleID: String?,
+        tracked: Set<WindowID>
+    ) -> ListedWindowReader {
+        ListedWindowReader(
+            resolve: resolveWindowID,
+            fullscreen: readFullscreen,
+            traits: shadows.traits,
+            bundleID: bundleID,
+            rules: floatRules,
+            tracked: tracked,
+            isAccessory: classifiesAsOverlay(pid: pid)
+        )
+    }
+
+    /// The blocking list read behind an off-main reconcile, built
+    /// on the main actor and run off it: a hidden app's list is
+    /// skipped unless `listsWhenHidden` (#2027).
+    func windowListRead(
+        pid: pid_t,
+        app: AppRef,
+        tracked: Set<WindowID>,
+        listsWhenHidden: Bool
+    ) -> @Sendable () -> WindowListReading {
+        let reader = listedWindowReader(
+            pid: pid,
+            bundleID: app.bundleID,
+            tracked: tracked
+        )
+        nonisolated(unsafe) let read = axWindows
+        nonisolated(unsafe) let readPolicy = activationPolicy
+        nonisolated(unsafe) let readHidden = appIsHidden
+        return {
+            let started = ContinuousClock.now
+            let hidden = readHidden(pid)
+            guard !hidden || listsWhenHidden else {
+                return WindowListReading(
+                    elements: [],
+                    windows: [],
+                    layers: [:],
+                    policy: readPolicy(pid),
+                    hidden: true,
+                    listRead: false,
+                    readStarted: started
+                )
+            }
+            let elements = read(pid)
+            let layers = FloatDetection.windowLayers(pid: pid)
+            return WindowListReading(
+                elements: elements,
+                windows: reader.read(elements, layers: layers),
+                layers: layers,
+                policy: readPolicy(pid),
+                hidden: hidden,
+                readStarted: started
+            )
+        }
     }
 }

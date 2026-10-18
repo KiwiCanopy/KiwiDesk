@@ -40,8 +40,12 @@ struct SyncReconcileCensusTests {
         // Its gate admits only an app the census shows with an
         // untracked window.
         "Events/EventLoop+Heal.swift": 2,
-        // The Desktop-switch bulk pass (#308).
+        // The bulk pass a config reload and a rule install run
+        // (#308), and the settle's arrival sweep (#1037).
         "Events/EventLoop+ReconcileAll.swift": 2,
+        // The Desktop switch's batch apply: the list was read off
+        // main (#2347).
+        "Events/EventLoop+SwitchReconcile.swift": 1,
         // The tabbed create, and a close the arm deferred, whose
         // removal must precede the successor's focus report
         // (#936); every other close reads off main (#1888).

@@ -29,9 +29,13 @@ extension KiwiCore {
     func settleAfterDesktopSwitch(_ desktop: SkyLight.SpaceID?) {
         deferred.schedule(
             .desktopSettle,
-            after: .milliseconds(600)
+            after: .milliseconds(Self.desktopSettleMs)
         ) { [weak self] in
-            self?.desktopSettle(ifStill: desktop)
+            // After the switch's batch has applied its arrivals
+            // (#2347); a later switch empties the slot.
+            self?.eventLoop.settleAfterSwitchReads { [weak self] in
+                self?.desktopSettle(ifStill: desktop)
+            }
         }
     }
 
@@ -112,6 +116,10 @@ extension KiwiCore {
             )
         }
     }
+
+    /// The settle's delay, which the switch batch's bound sits
+    /// under (`SwitchReconcileTests` ▸ `boundsAreOrdered`).
+    static let desktopSettleMs = 600
 
     /// How long a filed departure is kept: the settle that reads
     /// one runs within the switch grace plus 600 ms, so this only

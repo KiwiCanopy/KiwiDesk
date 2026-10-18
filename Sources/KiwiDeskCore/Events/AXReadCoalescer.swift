@@ -46,6 +46,10 @@ final class AXReadCoalescer {
         /// most the read a completing one starts, or one asked
         /// after a stop, each begun when the read in flight ends.
         case windowList(pid_t)
+        /// One per app: a Desktop switch's batch read (#2347), on
+        /// the list lane but never coalesced with a `.windowList`
+        /// read, whose queued request it would replace.
+        case switchList(pid_t)
         /// One per app, newest-wins like `.focus`: an activation's
         /// focused-window read (#1930).
         case focusedWindow(pid_t)
@@ -55,7 +59,7 @@ final class AXReadCoalescer {
             case .frame: .frames
             case .focus, .focusedWindow: .focus
             case .title: .titles
-            case .windowList: .windowList
+            case .windowList, .switchList: .windowList
             }
         }
     }
@@ -169,6 +173,20 @@ final class AXReadCoalescer {
         onList: @escaping @MainActor (WindowListReading) -> Void
     ) {
         enqueue(.windowList(pid), pid: pid) {
+            .windowList(read())
+        } onReading: {
+            if case .windowList(let reading) = $0 { onList(reading) }
+        }
+    }
+
+    /// Requests an app's window list for a Desktop switch's
+    /// batch (#2347), serial with the app's other list reads.
+    func requestSwitchList(
+        pid: pid_t,
+        read: @escaping @Sendable () -> WindowListReading,
+        onList: @escaping @MainActor (WindowListReading) -> Void
+    ) {
+        enqueue(.switchList(pid), pid: pid) {
             .windowList(read())
         } onReading: {
             if case .windowList(let reading) = $0 { onList(reading) }

@@ -16,7 +16,16 @@ extension KiwiCore {
     /// change — plus the few changes that retile nothing (a
     /// focus, a layer switch, a title, Reduce transparency). The
     /// menu bar's stand-in rides the same refresh (#1413).
-    func updateBars() {
+    func updateBars(holdingForSwitch: Bool = true) {
+        // A Desktop switch's batch is still reading its arrivals;
+        // its fold refreshes the bars once they are tracked (#2347).
+        // A stand-down that cannot wait passes `false`.
+        guard !holdingForSwitch || !eventLoop.switchReads.isPending
+        else {
+            eventLoop.switchReads.barsOwed = true
+            return
+        }
+        eventLoop.switchReads.barsOwed = false
         let measured = tiler.meter.begin(.bars)  // #1508
         defer {
             measured()
