@@ -90,27 +90,33 @@ struct ReduceMotionInstantWriteTests {
     /// A re-issuing pass owes none, or a switch reads every window.
     @Test("Only an instant ask outside a switch owes the probe")
     func instantAskOwesTheProbe() {
-        // (pass, switching, animated, reduced) → owes
-        let cases: [(RetilePass, Bool, Bool, Bool, Bool)] = [
-            (.event, false, true, true, true),  // Reduce Motion
-            (.event, false, false, false, true),  // animations off
-            (.event, false, true, false, false),  // a spring settles
-            (.event, true, false, false, false),  // the switch fold
-            (.event, true, true, true, false),
-            (.reissue, false, false, false, false),  // a Space switch
-            (.apply, false, true, true, false),  // an explicit apply
+        // (pass, switching, wrote instantly) → owes
+        let cases: [(RetilePass, Bool, Bool, Bool)] = [
+            (.event, false, true, true),  // Reduce Motion, animations off
+            (.event, false, false, false),  // a spring settles
+            (.event, true, true, false),  // the switch fold
+            (.reissue, false, true, false),  // a Space switch
+            (.apply, false, true, false),  // an explicit apply
         ]
-        for (pass, switching, animated, reduced, owes) in cases {
+        for (pass, switching, instant, owes) in cases {
             #expect(
                 TilingEngine.instantAskOwesProbe(
                     pass: pass,
                     switching: switching,
-                    animated: animated,
-                    reduceMotion: reduced
+                    wroteInstantly: instant
                 ) == owes,
-                "\(pass) switching \(switching) animated \(animated)"
+                "\(pass) switching \(switching) instant \(instant)"
             )
         }
+    }
+
+    /// The probe keys on `applyFrame`'s own verdict, never a copy
+    /// of its branch.
+    @Test("applyFrame reports an instant write")
+    func applyFrameReportsInstantWrite() {
+        let engine = makeEngine(Log())
+        #expect(engine.applyFrame(id, from: from, to: to, animated: true))
+        #expect(engine.applyFrame(id, from: from, to: to, animated: false))
     }
 
     /// An app easing its frame clamps the first set's size to

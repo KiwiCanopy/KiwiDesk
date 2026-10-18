@@ -78,6 +78,9 @@ struct SizeBoundGateNeedleTests {
         #expect(ask != nil && fire != nil)
         // A watched switch's fold is an `.event` pass too (#2187).
         #expect(issue.contains("switching: motionGate.isSwitching"))
+        // The verdict is `applyFrame`'s own, never a copy of it.
+        #expect(issue.contains("let instant = applyFrame("))
+        #expect(issue.contains("wroteInstantly: instant"))
         if let ask, let fire {
             #expect(ask.upperBound < fire.lowerBound)
         }

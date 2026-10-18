@@ -71,7 +71,8 @@ final class MotionGate {
     /// Desktop switch, a display follow — which never waits:
     /// holding it would split the desk, the bars showing a Space
     /// whose windows are not there (owner ruling 2026-10-06). Boot,
-    /// the wake replay and a switch's settle are not switches.
+    /// the wake replay and a switch's settle are not switches. A
+    /// pass inside also owes no #677 settle probe (#2187).
     func exemptingSwitch(_ body: () -> Void) {
         let outer = switching
         switching = true

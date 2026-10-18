@@ -1286,24 +1286,23 @@ editing here:
   overlay half is [borders.md](borders.md)'s pin row.
 - **A layout frame reaches another app inside an
   `AXEnhancedUserInterface` hold, and an instant one owes its own
-  settle (#2187).** `applyFrame` sends a Reduce Motion frame
-  through the instant set rather than `animate`'s no-animation
-  write, which holds nothing, so an app with EUI on eases its own
-  resize (`ReduceMotionInstantWriteTests` ▸
-  `animatedFrameHoldsEUI`). An instant layout ask never settles,
-  so `issueLayoutFrame` fires `onInstantLayoutAsk` after its
-  `recordAsk` and the #677 settle probe rides it, save a
-  re-issuing pass or a watched switch's fold
-  (`MotionGate.isSwitching`), either of which would read every
-  window a switch shows
-  (`ReduceMotionInstantWriteTests` ▸ `instantAskOwesTheProbe`,
-  `SizeBoundGateNeedleTests` ▸ `instantAskProbeIsWired`). And an
-  instant set onto another screen writes its frame again after
-  `crossScreenResendDelay` — an easing app clamps the first to the
-  screen it left — unless a newer write reached the window first
-  or the move parks into or unparks from a corner, or a spring or
-  a drag holds the window, so a Space switch still
-  moves each window once (`ReduceMotionInstantWriteTests` ▸
+  settle (#2187).** Route a frame with no animation through the
+  instant set, never `animate`'s no-animation write, which holds
+  nothing — Reduce Motion is the instance
+  (`ReduceMotionInstantWriteTests` ▸ `animatedFrameHoldsEUI`). A
+  write path that lands a layout ask instantly takes the #677
+  settle probe from `applyFrame`'s returned verdict, never a copy
+  of its branch, through `onInstantLayoutAsk` after `recordAsk`;
+  a re-issuing pass owes none, and neither does a pass inside
+  `MotionGate.exemptingSwitch`, so a new caller of that scope
+  forgoes the probe on purpose (`ReduceMotionInstantWriteTests` ▸
+  `instantAskOwesTheProbe`, `SizeBoundGateNeedleTests` ▸
+  `instantAskProbeIsWired`). An instant set onto another screen
+  writes its frame again after `crossScreenResendDelay`, since an
+  easing app clamps the first to the screen it left; a newer write
+  cancels it, a park or an unpark owes none, and a new hold that
+  must stop it joins `FrameApplier.resendStandsDown`, wired once in
+  `TilingEngine`'s init (`ReduceMotionInstantWriteTests` ▸
   `newerWriteCancelsTheResend`, `unparkOwesNoResend`,
   `parkOwesNoResend`, `dragStandsTheResendDown`).
 - **A scrolling viewport offset travels with the slot it was

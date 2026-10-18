@@ -246,6 +246,9 @@ final class FrameApplier {
     /// first one's size to the screen it left (#2187). Stands
     /// down when a newer write — a park, a later pass, a spring —
     /// superseded it, or a spring or a drag holds the window.
+    /// The same ask as the first write, so deliberately not an
+    /// engine frame: it retires no ask and stamps no placement
+    /// (#1694, #1161).
     private func resendIfCurrent(_ id: WindowID, _ frame: CGRect) {
         guard pendingResends[id] == frame, animatingPid[id] == nil,
             !resendStandsDown(id)

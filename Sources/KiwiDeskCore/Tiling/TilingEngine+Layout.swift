@@ -225,7 +225,9 @@ extension TilingEngine {
     /// it reaches `SizeStep` through the animation and decides
     /// whether a shrinking axis may slide instead of snapping.
     /// `.mayInstantSize` is the default because mismarking is asymmetric —
-    /// see `BatchSizing`.
+    /// see `BatchSizing`. Returns whether the frame was written
+    /// instantly, the verdict an ask's settle probe keys on (#2187).
+    @discardableResult
     public func applyFrame(
         _ id: WindowID,
         from current: CGRect,
@@ -233,7 +235,7 @@ extension TilingEngine {
         animated: Bool,
         isNewWindow: Bool = false,
         sizing: BatchSizing = .mayInstantSize
-    ) {
+    ) -> Bool {
         // Every engine frame retires the open size ask (#1694);
         // the layout loop re-opens one with `recordAsk` right
         // after its own `applyFrame`, so only a LAYOUT frame is
@@ -258,6 +260,7 @@ extension TilingEngine {
                 isNewWindow: isNewWindow,
                 sizing: sizing
             )
+            return false
         } else {
             animation.cancel(window: id)
             // A parked corner may lie on a neighbour: no resend on
@@ -272,6 +275,7 @@ extension TilingEngine {
                         among: allScreenBounds()
                     )
             )
+            return true
         }
     }
 
