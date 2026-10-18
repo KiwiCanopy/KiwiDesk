@@ -1,8 +1,8 @@
 import KiwiDeskCore
 
-/// The revert register's settings writers, part 3 (#792),
-/// generated from the census ids and held to them by
-/// `SettingsRevertRegisterTests`.
+/// The revert register's settings writers, part 3 (#792): one
+/// per model-path key, written against its census id and held to
+/// it by `SettingsRevertRegisterTests`.
 extension SettingsRevertRegister {
     static let settings3: [SettingKey: RevertWriter] = [
         .layout(.gridRows): .leaf(\.settings.grid.rows),

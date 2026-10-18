@@ -107,26 +107,19 @@ extension SettingsValueReadout {
             }
         }
         var rows: [SettingsDiffRow] = []
-        // The enumeration index rides the instance so DUPLICATE
-        // list entries (each matched once above) still mint
-        // distinct row ids inside one ForEach.
-        for (index, entry) in remaining.enumerated() {
+        // The copy count rides the instance so DUPLICATE list
+        // entries (each matched once above) still mint distinct
+        // row ids inside one ForEach (#792's revert parses it).
+        let instances =
+            ListEntryInstance.minted(remaining, added: true)
+            + ListEntryInstance.minted(removed, added: false)
+        for instance in instances {
             rows.append(
                 .note(
                     census,
-                    instance: "+" + entry + "#\(index)",
-                    label: instanceLabel(base, entry),
-                    note: addedNote
-                )
-            )
-        }
-        for (index, entry) in removed.enumerated() {
-            rows.append(
-                .note(
-                    census,
-                    instance: "-" + entry + "#\(index)",
-                    label: instanceLabel(base, entry),
-                    note: removedNote
+                    instance: instance.spelled,
+                    label: instanceLabel(base, instance.entry),
+                    note: instance.added ? addedNote : removedNote
                 )
             )
         }

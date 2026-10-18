@@ -430,7 +430,7 @@
   "diff.note.removed": "Entfernt",
   "diff.revert": "Verwerfen",
   "diff.revert.change": "Diese Änderung verwerfen",
-  "diff.revert.to": "Zurücksetzen auf %1$@",
+  "diff.revert.to": "Verwerfen (vorher: %1$@)",
   "diff.value.binding_setup": "%1$@ bei %2$@",
   "diff.value.border_alignment.inside": "Innen",
   "diff.value.border_alignment.outside": "Außen",

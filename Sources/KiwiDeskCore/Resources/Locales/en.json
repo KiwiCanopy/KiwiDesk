@@ -430,7 +430,7 @@
   "diff.note.removed": "Removed",
   "diff.revert": "Revert",
   "diff.revert.change": "Revert this change",
-  "diff.revert.to": "Revert to %1$@",
+  "diff.revert.to": "Revert (was %1$@)",
   "diff.value.binding_setup": "%1$@ on %2$@",
   "diff.value.border_alignment.inside": "Inside",
   "diff.value.border_alignment.outside": "Outside",

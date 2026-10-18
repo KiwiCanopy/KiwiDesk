@@ -193,11 +193,17 @@ enum SettingsDiffRowSource {
         )
         var rows: [SettingsDiffRow] = []
         for key in diff.changedSettings {
+            // A key's own readout rows revert through its writer
+            // (#792); every other row states its own way back.
             rows += SettingsValueReadout.rows(
                 for: key,
                 old: model.cleanConfig,
                 new: model.config
-            )
+            ).map {
+                var row = $0
+                row.revert = .census
+                return row
+            }
         }
         rows += model.reachDiffRows()
         rows += model.lookReachDiffRows()
@@ -212,23 +218,19 @@ enum SettingsDiffRowSource {
         }
         for orphan in diff.unattributed {
             rows.append(
-                SettingsModel.unrevertable(
-                    SettingsDiffRow.note(
-                        .general(.advancedEditLua),
-                        instance: orphan,
-                        label: orphan,
-                        note: L("diff.note.edited", "Edited")
-                    )
+                SettingsDiffRow.note(
+                    .general(.advancedEditLua),
+                    instance: orphan,
+                    label: orphan,
+                    note: L("diff.note.edited", "Edited")
                 )
             )
         }
         // Drift the header claims but no config leaf carries
         // (#1197) — ONE list, so the footer's N is still the
-        // count of the list it opens. Neither drift nor a live
-        // change is the draft's to revert (#792).
-        rows += driftRows(for: model).map(SettingsModel.unrevertable)
+        // count of the list it opens.
+        rows += driftRows(for: model)
         rows += liveRows(for: model, leaving: diff.changedSettings)
-            .map(SettingsModel.unrevertable)
         return rows
     }
 

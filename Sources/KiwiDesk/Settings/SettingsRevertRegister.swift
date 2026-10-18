@@ -2,23 +2,31 @@ import KiwiDeskCore
 
 /// Every census key's way back to the draft's baseline (#792): the
 /// one register a diff row's revert reads, total over the keys that
-/// name a model path (`SettingsRevertRegisterTests`). The settings
-/// half is generated from the census ids; this file holds the
-/// config half, whose fields couple to the rule reach (#1393).
+/// name a model path (`SettingsRevertRegisterTests`). A writer is
+/// written against its key's census id, which is its Swift path;
+/// this file holds the masters and the config fields, `+Rules` the
+/// rule families, whose reach goes with them (#1393).
 @MainActor
 enum SettingsRevertRegister {
     static let writers: [SettingKey: RevertWriter] =
-        settings1.merging(settings2) { a, _ in a }
-        .merging(settings3) { a, _ in a }
-        .merging(masters) { _, b in b }
-        .merging(config) { _, b in b }
+        parts.reduce(into: [:]) { $0.merge($1) { a, _ in a } }
+
+    /// The register's parts, whose keys never overlap
+    /// (`SettingsRevertRegisterTests`).
+    static let parts: [[SettingKey: RevertWriter]] = [
+        settings1, settings2, settings3, masters, config, rules,
+    ]
 
     /// A master writes its followers (`SettingKey.masterWrites`).
+    /// A bar's edge and its per-screen map go back as one pair,
+    /// since the edge doors write them together (`ScreenEdged`):
+    /// a pair the baseline held is never a pin the doors forbid.
     static let masters: [SettingKey: RevertWriter] = [
-        .kiwishelf(.edge): .all([
-            .leaf(\.settings.spaceBarStyle.edge),
-            .leaf(\.settings.appBarStyle.edge),
-        ]),
+        .kiwishelf(.edge): .all([spaceBarEdge, appBarEdge]),
+        .kiwishelf(.spaceBarEdge): spaceBarEdge,
+        .kiwishelf(.spaceBarScreenEdge): spaceBarEdge,
+        .kiwishelf(.appBarEdge): appBarEdge,
+        .kiwishelf(.appBarScreenEdge): appBarEdge,
         .colours(.liquidGlassMaster): .all([
             .leaf(\.settings.kiwishelf.liquidGlass),
             .leaf(\.settings.shortcutPanelLiquidGlass),
@@ -27,134 +35,61 @@ enum SettingsRevertRegister {
         ]),
     ]
 
+    private static let spaceBarEdge = RevertWriter.all([
+        .leaf(\.settings.spaceBarStyle.edge),
+        .leaf(\.settings.spaceBarStyle.edgeOverride),
+    ])
+    private static let appBarEdge = RevertWriter.all([
+        .leaf(\.settings.appBarStyle.edge),
+        .leaf(\.settings.appBarStyle.edgeOverride),
+    ])
+
     static let config: [SettingKey: RevertWriter] = [
-        .appRules(.appRules): RevertWriter.entry(
-            \.appRules,
-            key: { $0 }
-        ).then { model, app in
-            settleSubject(model, .space, app ?? "", \.appRules) {
-                $0.lowercased()
-            }
-        },
-        .appRules(.floatRules): floatRules,
-        .appRules(.floatRulesPattern): floatRules,
         .appRules(.ignoreRules): .list(\.ignoreRules),
-        .appRules(.tileRules): RevertWriter.list(\.tileRules).then {
-            settleListSubject($0, .tile, $1, \.tileRules)
-        },
-        .appRules(.floatAutomatically): RevertWriter.leaf(
-            \.floatAutomatically
-        ).then(settles(.autoFloat, \.floatAutomatically)),
         .screens(.spacePins): .entry(\.spacePins, key: { SpaceID($0) }),
-        .screens(.mainSpaces): .leaf(\.mainSpaces),
+        .screens(.mainSpaces): .setMember(\.mainSpaces) { SpaceID($0) },
         .profiles(.profileBindings): .entry(
             \.profileBindings,
             key: DesktopKey.init(stored:)
         ),
-        .shortcuts(.layers): layers,
-        .shortcuts(.layersIcon): layers,
-        .shortcuts(.desktopShortcutBase): layers,
-        .shortcuts(.spaceHistory): RevertWriter.leaf(
-            \.spaceHistory
-        ).then(settles(.history, \.spaceHistory)),
-        .shortcuts(.modeCycle): RevertWriter.leaf(\.modeCycle)
-            .then(settles(.cycle, \.modeCycle)),
-        .shortcuts(.scrollPan): scroll(\.scrollGesture.pan),
-        .shortcuts(.scrollLongSwipes): scroll(\.scrollGesture.longSwipes),
-        .shortcuts(.scrollStepDistance): scroll(
-            \.scrollGesture.stepDistance
-        ),
-        .shortcuts(.scrollNaturalTrackpad): scroll(
-            \.scrollGesture.naturalTrackpad
-        ),
-        .shortcuts(.scrollNaturalMouse): scroll(
-            \.scrollGesture.naturalMouse
-        ),
-        .shortcuts(.scrollSpaceStep): scroll(\.scrollGesture.spaceStep),
-        .spaces(.spaceList): .members(\.spaces, key: { SpaceID($0) }),
-        .spaces(.spacesName): .members(\.spaces, key: { SpaceID($0) }),
+        .spaces(.spaceList): spaceList,
+        .spaces(.spacesName): spaceList,
         .spaces(.spaceModes): .entry(\.spaceModes, key: { SpaceID($0) }),
         .spaces(.fallbackSpace): .leaf(\.fallbackSpace),
     ]
 
-    /// The float rules, the subject's reach settling with them.
-    private static let floatRules = RevertWriter.list(\.floatRules)
-        .then { settleListSubject($0, .float, $1, \.floatRules) }
-
-    /// The shortcut layers whole, with the Desktop base drafted
-    /// beside them (#1870) and every key reach and layer edit, as
-    /// `dropRuleHalf` drops them: a binding's reach is keyed into
-    /// the layers it was encoded against (#2022).
-    private static let layers = RevertWriter.all([
-        .leaf(\.layers), .leaf(\.desktopShortcutBase),
-    ]).then { model, _ in
-        model.reachEdits.reach[.key] = nil
-        model.reachEdits.removal[.key] = nil
-        model.reachEdits.layers = [:]
-        model.reachEdits.deletedLayers = [:]
-    }
-
-    private static func scroll<V: Equatable>(
-        _ path: WritableKeyPath<GuiConfig, V>
-    ) -> RevertWriter {
-        RevertWriter.leaf(path).then(settles(.scroll, \.scrollGesture))
-    }
-
-    /// A family's reach goes once its field is the baseline's.
-    private static func settles<V: Equatable>(
-        _ family: RuleFamily,
-        _ path: KeyPath<GuiConfig, V>
-    ) -> (SettingsModel, String?) -> Void {
-        { model, _ in
-            let clean = model.cleanConfig[keyPath: path]
-            guard model.config[keyPath: path] == clean else { return }
-            model.reachEdits.reach[family] = nil
-            model.reachEdits.removal[family] = nil
-        }
-    }
-
-    /// One app's reach goes once its rule is the baseline's.
-    private static func settleSubject<V: Equatable>(
-        _ model: SettingsModel,
-        _ family: RuleFamily,
-        _ app: String,
-        _ path: KeyPath<GuiConfig, [String: V]>,
-        key: @escaping (String) -> String
-    ) {
-        let subject = key(app)
-        let match = { (map: [String: V]) in
-            map.filter { key($0.key) == subject }
-        }
-        guard
-            match(model.config[keyPath: path])
-                == match(model.cleanConfig[keyPath: path])
-        else { return }
-        model.reachEdits.reach[family]?[subject] = nil
-        model.reachEdits.removal[family]?[subject] = nil
-    }
-
-    /// A list rule's app reach goes once its rules are the
-    /// baseline's.
-    private static func settleListSubject(
-        _ model: SettingsModel,
-        _ family: RuleFamily,
-        _ instance: String?,
-        _ path: KeyPath<GuiConfig, [String]>
-    ) {
-        guard let instance, let entry = RevertWriter.listEntry(instance)
-        else {
-            settles(family, path)(model, nil)
+    /// The Space list through its doors (#68), since a Space owns
+    /// what is filed under it: an added Space leaves with all of
+    /// it, a removed one returns as the baseline held it, a renamed
+    /// one takes its old name back, and a row naming none — a
+    /// reorder — takes the baseline's order.
+    private static let spaceList = RevertWriter(
+        paths: ["config.spaces"]
+    ) { model, instance in
+        let clean = model.cleanConfig
+        var config = model.config
+        guard let instance else {
+            if Set(config.spaces) == Set(clean.spaces) {
+                config.spaces = clean.spaces
+            }
+            model.config = config
             return
         }
-        let subject = family.key(entry.entry)
-        let match = { (list: [String]) in
-            list.filter { family.key($0) == subject }
+        let space = SpaceID(instance)
+        if let at = config.spaces.firstIndex(of: space),
+            !clean.spaces.contains(space)
+        {
+            let old =
+                clean.spaces.count == config.spaces.count
+                ? clean.spaces[at] : nil
+            if let old, !config.spaces.contains(old) {
+                _ = config.renameSpace(from: space, to: old)
+            } else {
+                config.removeSpace(space)
+            }
+        } else if clean.spaces.contains(space) {
+            config.restoreSpace(space, from: clean)
         }
-        guard
-            match(model.config[keyPath: path])
-                == match(model.cleanConfig[keyPath: path])
-        else { return }
-        model.reachEdits.reach[family]?[subject] = nil
-        model.reachEdits.removal[family]?[subject] = nil
+        model.config = config
     }
 }

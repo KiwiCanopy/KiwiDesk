@@ -65,14 +65,16 @@ struct RevertWriter {
         }
     }
 
-    /// One entry of a rule list, named by its row as `+entry#n`
-    /// (added: the draft's last copy leaves) or `-entry#n`
-    /// (removed: it returns at its baseline place); a row naming
-    /// no entry — a reorder — takes the whole list back.
+    /// One entry of a rule list, named by its row's
+    /// `ListEntryInstance`: an added copy leaves (the draft's last),
+    /// a removed one returns at its baseline place; a row naming no
+    /// entry — a reorder — takes the whole list back.
     static func list(_ path: WritableKeyPath<GuiConfig, [String]>) -> Self {
         Self(paths: [spelled(path)]) { model, instance in
             let clean = model.cleanConfig[keyPath: path]
-            guard let instance, let parsed = listEntry(instance) else {
+            guard let instance,
+                let parsed = ListEntryInstance(parsing: instance)
+            else {
                 model.config[keyPath: path] = clean
                 return
             }
@@ -89,28 +91,24 @@ struct RevertWriter {
         }
     }
 
-    /// One member of an ordered list, named by its row: back at
-    /// its baseline place, or out where the baseline lacked it. A
-    /// row naming no member, or one both sides hold, takes the
-    /// whole list back.
-    static func members<E: Equatable>(
-        _ path: WritableKeyPath<GuiConfig, [E]>,
+    /// One member of a set, named by its row: in or out as the
+    /// baseline has it, and the whole set for a row naming none.
+    static func setMember<E: Hashable>(
+        _ path: WritableKeyPath<GuiConfig, Set<E>>,
         key: @escaping (String) -> E
     ) -> Self {
         Self(paths: [spelled(path)]) { model, instance in
             let clean = model.cleanConfig[keyPath: path]
-            var draft = model.config[keyPath: path]
-            let member = instance.map(key)
-            switch (member, member.map(clean.contains)) {
-            case (let member?, true?) where !draft.contains(member):
-                let at = clean.firstIndex(of: member) ?? draft.count
-                draft.insert(member, at: min(at, draft.count))
-            case (let member?, false?):
-                draft.removeAll { $0 == member }
-            default:
-                draft = clean
+            guard let instance else {
+                model.config[keyPath: path] = clean
+                return
             }
-            model.config[keyPath: path] = draft
+            let member = key(instance)
+            if clean.contains(member) {
+                model.config[keyPath: path].insert(member)
+            } else {
+                model.config[keyPath: path].remove(member)
+            }
         }
     }
 
@@ -130,18 +128,6 @@ struct RevertWriter {
             apply(model, instance)
             after(model, instance)
         }
-    }
-
-    /// A `+entry#n` / `-entry#n` row instance, split.
-    static func listEntry(
-        _ instance: String
-    ) -> (added: Bool, entry: String)? {
-        guard let sign = instance.first, sign == "+" || sign == "-",
-            let hash = instance.lastIndex(of: "#"),
-            hash > instance.startIndex
-        else { return nil }
-        let start = instance.index(after: instance.startIndex)
-        return (sign == "+", String(instance[start..<hash]))
     }
 
     /// `\GuiConfig.settings.bsp.override` as `settings.bsp.override`,

@@ -42,31 +42,11 @@ extension SettingsModel {
     private func revertRuleReach(of key: SettingKey, app: String) {
         switch key {
         case .appRules(.appRules):
-            let mine = { (rule: (key: String, value: SpaceID)) in
-                RuleFamily.space.key(rule.key) == app
-            }
-            var rules = config.appRules.filter { !mine($0) }
-            for rule in cleanConfig.appRules where mine(rule) {
-                rules[rule.key] = rule.value
-            }
-            config.appRules = rules
-            clearReach(.space, app)
+            SettingsRevertRegister.revertSubject(self, .space, app)
         case .appRules(.floatRules):
-            let mine = { RuleFamily.float.key($0) == app }
-            let at = config.floatRules.firstIndex(where: mine)
-            var rules = config.floatRules.filter { !mine($0) }
-            let back = cleanConfig.floatRules.filter(mine)
-            let place = min(at ?? rules.count, rules.count)
-            rules.insert(contentsOf: back, at: place)
-            config.floatRules = rules
-            clearReach(.float, app)
+            SettingsRevertRegister.revertSubject(self, .float, app)
         default:
             break
         }
-    }
-
-    private func clearReach(_ family: RuleFamily, _ subject: String) {
-        reachEdits.reach[family]?[subject] = nil
-        reachEdits.removal[family]?[subject] = nil
     }
 }

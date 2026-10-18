@@ -1,19 +1,13 @@
 import KiwiDeskCore
 
-/// The revert register's settings writers, part 2 (#792),
-/// generated from the census ids and held to them by
-/// `SettingsRevertRegisterTests`.
+/// The revert register's settings writers, part 2 (#792): one
+/// per model-path key, written against its census id and held to
+/// it by `SettingsRevertRegisterTests`.
 extension SettingsRevertRegister {
     static let settings2: [SettingKey: RevertWriter] = [
         .gaps(.inner): .leaf(\.settings.gapsGlobal.inner),
         .gaps(.perSpaceOverride):
             .entry(\.settings.gapsOverride, key: { SpaceID($0) }),
-        .kiwishelf(.spaceBarEdge): .leaf(\.settings.spaceBarStyle.edge),
-        .kiwishelf(.appBarEdge): .leaf(\.settings.appBarStyle.edge),
-        .kiwishelf(.spaceBarScreenEdge):
-            .entry(\.settings.spaceBarStyle.edgeOverride, key: { $0 }),
-        .kiwishelf(.appBarScreenEdge):
-            .entry(\.settings.appBarStyle.edgeOverride, key: { $0 }),
         .kiwishelf(.thickness): .leaf(\.settings.kiwishelf.thickness),
         .kiwishelf(.alignment): .leaf(\.settings.kiwishelf.alignment),
         .kiwishelf(.order): .leaf(\.settings.kiwishelf.order),

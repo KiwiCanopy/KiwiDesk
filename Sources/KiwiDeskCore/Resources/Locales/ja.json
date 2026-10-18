@@ -430,7 +430,7 @@
   "diff.note.removed": "削除",
   "diff.revert": "元に戻す",
   "diff.revert.change": "この変更を元に戻す",
-  "diff.revert.to": "%1$@ に戻す",
+  "diff.revert.to": "元に戻す（変更前: %1$@）",
   "diff.value.binding_setup": "%1$@（%2$@向け）",
   "diff.value.border_alignment.inside": "内側",
   "diff.value.border_alignment.outside": "外側",

@@ -18,12 +18,15 @@ struct DiffRowRevert {
     }
 
     /// The ↺'s words: the value it returns to, where the row
-    /// states one.
+    /// states one. A label rather than a sentence, since a value
+    /// may be a clause ("Opens its own track") no preposition takes.
     static func label(for row: SettingsDiffRow) -> String {
-        guard row.changeNote == nil, let old = row.oldValue else {
+        guard row.changeNote == nil, let old = row.oldValue,
+            old != SettingsValueReadout.unset
+        else {
             return L("diff.revert.change", "Revert this change")
         }
-        return L("diff.revert.to", "Revert to %1$@", old)
+        return L("diff.revert.to", "Revert (was %1$@)", old)
     }
 
     /// The row menu's and VoiceOver's action name.

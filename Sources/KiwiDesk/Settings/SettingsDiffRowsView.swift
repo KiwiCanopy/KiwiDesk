@@ -19,6 +19,8 @@ struct SettingsDiffRowsView: View {
     @FocusState private var focusedRevert: String?
     /// The draft row under the pointer, whose ↺ the panel draws.
     @State private var hoveredRow: String?
+    /// Rows a keyboard ↺ may hand focus to, nearest first.
+    @State private var focusAfterRevert: [String] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -28,6 +30,7 @@ struct SettingsDiffRowsView: View {
             }
             liveSection
         }
+        .onChange(of: rows.map(\.id)) { _, _ in settleRevertFocus() }
     }
 
     /// A draft row, with its ↺ where it has a way back (#792).
@@ -72,20 +75,32 @@ struct SettingsDiffRowsView: View {
             || focusedRevert == row.id
     }
 
-    /// Reverts one row; where it leaves under a keyboard press,
-    /// focus moves to the neighbouring row's ↺, read before the row
-    /// goes (#816), as a Keep does.
+    /// Reverts one row. Under a keyboard press focus moves to the
+    /// nearest row's ↺ still drawn after the revert, which may take
+    /// a neighbour with it: the candidates are read before the row
+    /// goes (#816), the survivor once the list has redrawn.
     private func revertRow(
         _ row: SettingsDiffRow,
         among shown: [SettingsDiffRow],
         with revert: DiffRowRevert
     ) {
-        let next = DeletionFocus.neighbour(after: row, in: shown)
+        let ids = shown.map(\.id)
+        let at = ids.firstIndex(of: row.id) ?? ids.count
+        let candidates =
+            Array(ids.suffix(from: min(at + 1, ids.count)))
+            + ids.prefix(at).reversed()
         revert.perform(row)
-        guard SettingsInputSource.movesFocus, let next,
-            revert.can(next)
-        else { return }
-        focusedRevert = next.id
+        if SettingsInputSource.movesFocus { focusAfterRevert = candidates }
+    }
+
+    /// Focuses the first candidate whose ↺ the redrawn list draws.
+    private func settleRevertFocus() {
+        guard !focusAfterRevert.isEmpty, let revert else { return }
+        let next = focusAfterRevert.compactMap { id in
+            rows.first { $0.id == id && $0.section == .draft }
+        }.first(where: revert.can)
+        focusAfterRevert = []
+        if let next { focusedRevert = next.id }
     }
 
     /// Stored settings changed live and not saved, under their own

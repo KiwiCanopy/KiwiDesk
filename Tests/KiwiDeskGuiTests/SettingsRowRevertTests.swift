@@ -20,9 +20,10 @@ struct SettingsRowRevertTests {
         return config
     }
 
-    /// One edit per writer shape: a leaf, a master's follower, two
-    /// instances of one override field, a map entry, a rule list
-    /// both ways, a Space list member.
+    /// One edit per writer shape: a leaf, one side of a gap, two
+    /// instances of one override field, a map entry, two Main
+    /// Spaces, a rule list both ways with two added entries (one
+    /// titled), and an added Space.
     private func edited() -> GuiConfig {
         var config = baseline()
         config.settings.borderStyle.width += 3
@@ -32,8 +33,11 @@ struct SettingsRowRevertTests {
         second.splitRatioH = 0.3
         config.settings.bsp.override[SpaceID("2")] = second
         config.spaceModes[SpaceID("2")] = .grid
+        config.mainSpaces = [SpaceID("1"), SpaceID("2")]
         config.appRules["com.apple.Notes"] = SpaceID("2")
-        config.floatRules = ["Notes", "Calculator"]
+        config.floatRules = [
+            "Notes", "Calculator", "com.apple.finder:Info",
+        ]
         config.spaces = [SpaceID("1"), SpaceID("2"), SpaceID("3")]
         return config
     }
@@ -78,15 +82,15 @@ struct SettingsRowRevertTests {
     @Test("a removed override entry comes back, an added one goes")
     func overrideEntriesSettle() {
         let model = model()
-        model.revert(
-            .change(
-                .layout(.bspOverrideSplitRatioH),
-                instance: "2",
-                label: "",
-                old: nil,
-                new: nil
-            )
+        var row = SettingsDiffRow.change(
+            .layout(.bspOverrideSplitRatioH),
+            instance: "2",
+            label: "",
+            old: nil,
+            new: nil
         )
+        row.revert = .census
+        model.revert(row)
         #expect(model.config.settings.bsp.override[SpaceID("2")] == nil)
         #expect(
             model.config.settings.bsp.override[SpaceID("1")]?.splitRatioH
@@ -112,12 +116,29 @@ struct SettingsRowRevertTests {
         #expect(model.reachEdits.reach[.space]?["com.apple.notes"] == nil)
     }
 
-    @Test("drift, live and unclaimed rows offer no ↺")
-    func reportedRowsHaveNone() {
-        let model = model()
-        let row = SettingsModel.unrevertable(
-            .note(.general(.advancedEditLua), label: "x", note: "")
-        )
-        #expect(!model.canRevert(row))
+    /// The real drift producer's row: a row no producer marked
+    /// offers nothing, and drift is never the draft's to revert.
+    @Test("a drift row offers no ↺")
+    func driftRowHasNone() throws {
+        LocalizationManager.shared.select("en")
+        let model = makeTestModel()
+        model.activeProfile = "Desk"
+        model.profileSummaries = [
+            ProfileSummary(
+                name: "Desk",
+                count: 0,
+                sets: [],
+                isDefault: true,
+                matchesLive: false,
+                matchesConnectedCount: true,
+                spaceCount: 0,
+                shortcutOverrideCount: 0
+            )
+        ]
+        model.profileDirty = true
+        let rows = SettingsDiffRowSource.rows(for: model)
+        let drift = try #require(rows.first)
+        #expect(drift.key == .screens(.fingerprints))
+        #expect(!model.canRevert(drift))
     }
 }

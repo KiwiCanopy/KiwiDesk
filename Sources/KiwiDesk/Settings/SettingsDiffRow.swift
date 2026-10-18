@@ -51,8 +51,11 @@ struct SettingsDiffRow: Identifiable, Hashable {
     /// The discriminator the row was minted with — a Space, an
     /// app, a rule entry — which its revert reads.
     var instance: String?
-    /// How a ↺ on this row reverts it (#792).
-    var revert: SettingsRowRevert = .census
+    /// How a ↺ on this row reverts it (#792). None until a producer
+    /// says otherwise: `SettingsDiffRowSource` marks a key's own
+    /// readout rows `.census`, so a new producer offers no ↺ by
+    /// forgetting one.
+    var revert: SettingsRowRevert = .none
 
     /// A plain value-pair row.
     static func change(

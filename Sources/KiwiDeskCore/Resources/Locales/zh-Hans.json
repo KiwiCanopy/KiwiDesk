@@ -430,7 +430,7 @@
   "diff.note.removed": "已移除",
   "diff.revert": "还原",
   "diff.revert.change": "还原此更改",
-  "diff.revert.to": "还原为 %1$@",
+  "diff.revert.to": "还原（原为：%1$@）",
   "diff.value.binding_setup": "%1$@（在 %2$@ 下）",
   "diff.value.border_alignment.inside": "内侧",
   "diff.value.border_alignment.outside": "外侧",

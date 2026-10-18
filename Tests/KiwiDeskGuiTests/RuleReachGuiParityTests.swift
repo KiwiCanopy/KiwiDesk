@@ -103,6 +103,25 @@ struct RuleReachGuiParityTests {
         }
     }
 
+    /// A row's ↺ settles a family's reach through this table (#792),
+    /// so a family it misses leaves its reach behind.
+    @Test("the revert's family table names every family's field")
+    func revertTableNamesEveryFamily() throws {
+        // The whole file: the table is an array literal, and the
+        // file holds nothing else that names a draft field.
+        let text = try source("RuleFamilyField.swift")
+        let families = try families()
+        #expect(!families.isEmpty)
+        for family in families {
+            let field = try #require(Self.draftField[family])
+            #expect(
+                text.contains("\\.\(field)")
+                    || text.contains(".\(field) = $1.\(field)"),
+                "RuleFamilyField never names \(family) (\(field))"
+            )
+        }
+    }
+
     @Test("the encode memo keys on every family's field")
     func memoKeysEveryFamily() throws {
         let cache = try body(

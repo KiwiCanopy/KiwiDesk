@@ -11,11 +11,11 @@ extension SettingsModel {
         // a layer edit is the layer rows' (#2022), never a row's.
         // The lenses are app-wide and need no page (#2103).
         // A lens or layer edit has no one-row way back yet (#792).
-        let lenses = lensDiffRows().map(Self.unrevertable)
+        let lenses = lensDiffRows()
         guard let stored = layeredReach, let encoded = encodedReach,
             let editing = reachProfile
         else { return lenses }
-        return layerDiffRows().map(Self.unrevertable) + lenses
+        return layerDiffRows() + lenses
             + rows(
                 .appRules(.appRules),
                 stored.appRules,
@@ -114,13 +114,6 @@ extension SettingsModel {
             }
         }
         return result
-    }
-
-    /// A row with no ↺ (#792).
-    static func unrevertable(_ row: SettingsDiffRow) -> SettingsDiffRow {
-        var row = row
-        row.revert = .none
-        return row
     }
 
     private func label(

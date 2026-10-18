@@ -7141,13 +7141,20 @@ generated from the ids and every writer is held to its key
 (`SettingsRevertRegisterTests`).
 
 A writer reverts at the row's instance — one Space's override
-field, one app's rule, one rule-list entry, one Space in the list —
-and whole where the row names none. A master writes its followers.
-A rule family's reach goes with its rule (#1393), and the shortcut
-layers go back whole, with the Desktop base and every key reach,
-since a binding's reach is keyed into the layers it was encoded
-against (#2022). A lens or layer edit, profile drift, a live change
-and a leaf no key claims draw no ↺.
+field, one app's rule, one rule-list entry, one Main Space — and
+whole where the row names none. Where state is written together it
+goes back together, so a ↺ can take more than its own row, and
+these are the groups: a Space in the list goes back through the
+Space doors, taking what is filed under it; a bar's edge goes back
+with its per-screen map, as the edge doors write them, and the
+master with both bars'; a rule takes the reach the draft gave it
+(#1393); and the shortcut layers go back whole, with the Desktop
+base, every key reach and every layer edit, since a binding's reach
+is keyed into the layers it was encoded against (#2022). A row says
+how it reverts and offers no ↺ until it does: a lens or layer edit,
+profile drift, a live change and a leaf no key claims draw none.
+Whether the popover's Revert all reaches live state stays open with
+the live rows.
 :::
 
 ### The header search is a field, not a button that opens one

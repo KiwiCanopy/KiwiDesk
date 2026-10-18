@@ -1730,6 +1730,10 @@ Touching `Sources/KiwiDesk` (the GUI).
   since doing it after lands new drawing on a surface nothing watches (#1293) —
   one that renders a schematic joins `LayoutSchematicPlacementScanTests`'
   narrower roots as well, and each guard carries a root-coverage check
+- a census key naming a model path owes a writer in
+  `SettingsRevertRegister`, a diff-row producer states how its rows revert
+  or they draw no ↺, and state written together reverts together (#792,
+  `SettingsRevertRegisterTests`, `SettingsRowRevertTests`)
 - a Settings-row change updates its `SettingKey` census entry in the same
   change set (#678), and a census row placed in a container a
   `SettingsDisclosure` draws collapsed is a catalog CHILD of that drawer, keyed

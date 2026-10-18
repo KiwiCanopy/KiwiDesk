@@ -52,6 +52,13 @@ struct SettingsRevertRegisterTests {
         }
     }
 
+    /// Two parts naming one key would leave one writer shadowed.
+    @Test("the register's parts name each key once")
+    func partsAreDisjoint() {
+        let keys = SettingsRevertRegister.parts.flatMap(\.keys)
+        #expect(Set(keys).count == keys.count)
+    }
+
     /// A writer copies its key's own path, or the container that
     /// path lives in (a rule list, the Space list, the layers); a
     /// master copies exactly its followers.
@@ -59,8 +66,11 @@ struct SettingsRevertRegisterTests {
     func writersCopyTheirPaths() {
         for (key, writer) in SettingsRevertRegister.writers {
             let id = spelled(key.id)
+            // A master writes at least its followers; a bar edge
+            // master also its per-screen maps, which the doors
+            // clear with it.
             if let followers = SettingKey.masterWrites[key] {
-                #expect(writer.paths.sorted() == followers.sorted())
+                #expect(Set(followers).isSubset(of: writer.paths))
                 continue
             }
             #expect(
