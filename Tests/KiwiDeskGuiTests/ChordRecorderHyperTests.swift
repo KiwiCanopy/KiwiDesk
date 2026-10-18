@@ -32,7 +32,7 @@ private final class HyperCapture {
 @Suite("Chord recorder records the Hyper key (#1870)")
 @MainActor
 struct ChordRecorderHyperTests {
-    private let f18 = HyperSourceKey.f18.keyCode
+    private let f18 = HyperSourceKey.trigger.keyCode
 
     @Test("Held F18 records as hyper, and alone commits nothing")
     func heldHyperLeadsTheChord() {
@@ -43,6 +43,13 @@ struct ChordRecorderHyperTests {
         #expect(recorder.handle(.keyDown, keyCode: f18, flags: []))
         #expect(capture.outcomes.isEmpty)
         #expect(capture.previews.last == ComboSymbols.hyperGlyph)
+        recorder.handle(.flagsChanged, keyCode: 56, flags: [.shift])
+        #expect(
+            capture.previews.last
+                == ComboSymbols.hyperGlyph
+                + ChordRecorder.modifierSymbols([.shift])
+        )
+        recorder.handle(.flagsChanged, keyCode: 56, flags: [])
         recorder.handle(.keyDown, keyCode: 48, flags: [])
         #expect(capture.lockedCombo == "hyper+tab")
     }
@@ -77,6 +84,7 @@ struct ChordRecorderHyperTests {
         capture.attach(recorder, hyper: true)
         recorder.handle(.keyDown, keyCode: f18, flags: [])
         recorder.handle(.keyUp, keyCode: f18, flags: [])
+        #expect(capture.previews.last == "")
         recorder.handle(.keyDown, keyCode: 48, flags: [])
         #expect(capture.lockedCombo == "tab")
     }
