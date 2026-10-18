@@ -38,5 +38,9 @@ extension GuiConfig {
     /// **8 (#2309)**: the layouts side became View before release,
     /// so a stored `kiwihub.show("layouts")` is renamed. Above
     /// main's, as 7 is.
-    public static let currentFormat = 8
+    ///
+    /// **9 (#2324)**: `desktop_spaces` moved to `machine.json`
+    /// (`MachineConfig.movedAtFormat`), so the key is stripped here
+    /// once the store has carried it across.
+    public static let currentFormat = 9
 }

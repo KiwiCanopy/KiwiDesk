@@ -291,7 +291,10 @@ struct ConfigMigrationWiringTests {
     func guiConfigFileMigratesOnLoad() throws {
         let dir = try scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
-        let store = GuiConfigStore(directory: dir)
+        let store = GuiConfigStore(
+            directory: dir,
+            machine: dir.appendingPathComponent("machine")
+        )
         var config = GuiConfig()
         config.spaces = [SpaceID("code")]
         try store.save(config)

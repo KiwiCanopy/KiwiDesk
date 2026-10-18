@@ -3,9 +3,12 @@ import Foundation
 /// Reads and writes GUI configuration sidecar `gui.json` — the
 /// visual editor's source of truth; it also captures what live
 /// Lua state can't reconstruct (keybinding actions, mode
-/// icons).
+/// icons). The `GuiConfig.machineLocalFields` ride
+/// `machine.json` in the machine folder instead (#2324): this
+/// store is the one place the two files are composed and split.
 public struct GuiConfigStore {
     let url: URL
+    let machine: MachineConfigStore
 
     /// The Space each Desktop is showing RIGHT NOW (#1230), which
     /// every write stamps in over whatever the caller's copy
@@ -44,17 +47,22 @@ public struct GuiConfigStore {
     /// the core that owns the config directory; nil keeps none.
     var migrationBackups: URL?
 
-    public init(directory: URL) {
+    /// `machine` is `MachineLocation`'s folder, or a test's own;
+    /// no default, so no store writes the real one by accident.
+    public init(directory: URL, machine: URL) {
         self.url = directory.appendingPathComponent("gui.json")
+        self.machine = MachineConfigStore(directory: machine)
     }
 
     public var exists: Bool {
         FileManager.default.fileExists(atPath: url.path)
     }
 
-    /// Loads the sidecar, or nil on failure. Migrates older
-    /// formats through `ConfigMigration` first and writes the
-    /// migrated bytes back.
+    /// Loads the sidecar with this Mac's leaves composed in, or
+    /// nil on failure. Migrates older formats through
+    /// `ConfigMigration` first and writes the migrated bytes back
+    /// — once the leaves that step strips are carried into
+    /// `machine.json`; a failed carry migrates in memory only.
     public func load() -> GuiConfig? {
         guard var data = try? Data(contentsOf: url) else {
             return nil
@@ -62,18 +70,26 @@ public struct GuiConfigStore {
         data = MigrationBackup.migrateInPlace(
             data,
             at: url,
-            backups: migrationBackups
+            backups: migrationBackups,
+            writesBack: machine.carry(fromLegacy: data)
         )
-        return try? JSONDecoder().decode(
-            GuiConfig.self,
-            from: data
-        )
+        guard
+            let config = try? JSONDecoder().decode(
+                GuiConfig.self,
+                from: data
+            )
+        else { return nil }
+        return machine.load().applied(to: config)
     }
 
     /// Writes the sidecar; throws `NewerFormatOnDisk` rather than
     /// replace one a newer build wrote (#2325).
     public func save(_ config: GuiConfig) throws {
         try NewerFormatOnDisk.refuse(url, GuiConfig.currentFormat)
+        try NewerFormatOnDisk.refuse(
+            machine.url,
+            MachineConfig.currentFormat
+        )
         var config = config
         if let liveDesktopSpaces {
             config.desktopSpaces = liveDesktopSpaces
@@ -96,5 +112,16 @@ public struct GuiConfigStore {
             to: url,
             options: .atomic
         )
+        try machine.save(MachineConfig(of: config))
+    }
+
+    /// Writes this Mac's leaves alone, leaving `gui.json` — which
+    /// another Mac may share — untouched; stamped like `save`.
+    public func saveMachineLocal(_ config: GuiConfig) throws {
+        var config = config
+        if let liveDesktopSpaces {
+            config.desktopSpaces = liveDesktopSpaces
+        }
+        try machine.save(MachineConfig(of: config))
     }
 }

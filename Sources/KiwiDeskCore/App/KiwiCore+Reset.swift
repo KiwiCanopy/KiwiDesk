@@ -89,7 +89,7 @@ extension KiwiCore {
         // reset. `restoreSetup` passes a different set to the
         // same policy.
         let cleared = discardArtifacts(
-            [.guiConfig, .profiles],
+            [.guiConfig, .profiles, .machineConfig],
             reason: "reset",
             trash: trash
         )

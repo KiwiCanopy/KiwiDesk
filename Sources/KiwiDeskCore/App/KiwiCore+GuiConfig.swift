@@ -13,7 +13,10 @@ import Foundation
 /// hooks-only, owned by the user.
 extension KiwiCore {
     public var guiConfigStore: GuiConfigStore {
-        var store = GuiConfigStore(directory: configDirectory)
+        var store = GuiConfigStore(
+            directory: configDirectory,
+            machine: machineDirectory
+        )
         store.migrationBackups = migrationBackups
         // #1230: read here so every write stamps the CURRENT
         // Desktop memory — the accessor runs immediately before

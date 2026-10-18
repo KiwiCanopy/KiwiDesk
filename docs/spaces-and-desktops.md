@@ -139,10 +139,15 @@ Every Desktop remembers which Space it was on. Switch away and
 back and you land on the same Space, with the same windows in
 the same order and the same one focused — as long as they come
 back promptly ([accepted limitations](accepted-limitations.md)
-has the case where they do not). Where KiwiDesk owns your config
-and can give a Desktop an identity of its own, that memory is
-written into `gui.json` and survives quitting KiwiDesk; a
-hand-written `init.lua` setup keeps it for the session only.
+has the case where they do not).
+
+:::unreleased
+Where KiwiDesk owns your config and can give a Desktop an
+identity of its own, that memory is written into
+`~/Library/Application Support/KiwiDesk/machine.json`, survives
+quitting KiwiDesk and never travels in a backup; a hand-written
+`init.lua` setup keeps it for the session only.
+:::
 
 **Your windows stay with their Desktop.** A Space holds whatever
 of its windows are on the Desktop you are looking at. Switch

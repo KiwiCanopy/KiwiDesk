@@ -5,8 +5,9 @@ import Foundation
 /// own subject seam: that file decides which Space a Desktop
 /// shows, this one is how the answer outlives the process.
 ///
-/// It rides `gui.json`, so it exists only where KiwiDesk owns
-/// the config; a Lua-owned setup keeps the memory session-only.
+/// It rides `machine.json` beside `gui.json`, so it exists only
+/// where KiwiDesk owns the config; a Lua-owned setup keeps the
+/// memory session-only.
 extension KiwiCore {
     /// The Desktop memory as the FILE should carry it (#1230).
     ///
@@ -60,7 +61,8 @@ extension KiwiCore {
         desktopMemory.spaceMemoryEstablished = true
     }
 
-    /// Writes the Desktop→Space memory to `gui.json` (#1230).
+    /// Writes the Desktop→Space memory to `machine.json` (#1230,
+    /// #2324), leaving `gui.json` as it stands.
     ///
     /// Nothing else does at a moment that matters: the eight
     /// sidecar writers are all user actions, so without this the
@@ -79,15 +81,12 @@ extension KiwiCore {
         else { return }
         // The STORE, never `saveGuiConfig` — that reloads the
         // whole config, which at quit would rebuild the Lua VM
-        // the stop is tearing down. The write-time stamp fills
-        // `desktopSpaces` in, so this hands the file back
-        // unchanged otherwise.
-        // No assignment here: `GuiConfigStore.save` stamps the
-        // live memory in, and doing it twice is the two-mechanism
-        // shape that produced the restore bug. This site exists
-        // for the MOMENT, not for the value.
+        // the stop is tearing down. No assignment here: the write
+        // stamps the live memory in, and doing it twice is the
+        // two-mechanism shape that produced the restore bug. This
+        // site exists for the MOMENT, not for the value.
         do {
-            try guiConfigStore.save(live)
+            try guiConfigStore.saveMachineLocal(live)
         } catch {
             onLog("desktop spaces: write failed: \(error)")
         }

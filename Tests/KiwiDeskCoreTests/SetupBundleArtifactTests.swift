@@ -103,7 +103,7 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
-                case .migrationBackups: false
+                case .migrationBackups, .machineConfig: false
                 }
             #expect(
                 carried,

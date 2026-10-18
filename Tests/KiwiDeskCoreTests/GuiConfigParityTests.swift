@@ -34,8 +34,10 @@ struct GuiConfigParityTests {
         // an edited setting, so counting it would light the save
         // pill on every Desktop swipe. It is stamped at the write
         // instead (`GuiConfigStore.liveDesktopSpaces`), which is
-        // why no caller has to carry it. `appWide` (#1741) is
-        // stamped the same way (`GuiConfigStore.liveAppWide`)
+        // why no caller has to carry it, and rides `machine.json`
+        // (`GuiConfig.machineLocalFields`, `MachineConfig`).
+        // `appWide` (#1741) is stamped the same way
+        // (`GuiConfigStore.liveAppWide`)
         // and read by `applyStructuredConfig`; so is the shared
         // `look` (#1752, `GuiConfigStore.liveLook`), read by
         // `prepareSharedLook`.
@@ -53,8 +55,17 @@ struct GuiConfigParityTests {
         )
     }
 
+    /// Through the store, which composes `machine.json`'s leaves
+    /// in (#2324), so a field dropped from either file reds here.
     @Test("Every sidecar global round-trips non-default")
     func globalsRoundTrip() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("kiwi-parity-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = GuiConfigStore(
+            directory: dir,
+            machine: dir.appendingPathComponent("machine")
+        )
         var config = GuiConfig()
         config.spaces = [SpaceID("a"), SpaceID("b")]
         config.appRules = ["Mail": SpaceID("a")]
@@ -105,10 +116,8 @@ struct GuiConfigParityTests {
                 ]
             )
         ]
-        let back = try JSONDecoder().decode(
-            GuiConfig.self,
-            from: JSONEncoder().encode(config)
-        )
+        try store.save(config)
+        let back = try #require(store.load())
         #expect(back.format == config.format)
         #expect(back.spaces == config.spaces)
         #expect(back.appRules == config.appRules)

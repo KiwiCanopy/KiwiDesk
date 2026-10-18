@@ -19,9 +19,12 @@ import Testing
 struct DesktopSpacePersistenceTests {
     private let stamp = DesktopIdentity(raw: "STAMP-P")
 
+    /// Through `machine.json`'s coding, where the map lives
+    /// since #2324.
     private func roundTrip(_ config: GuiConfig) throws -> GuiConfig {
-        let data = try JSONEncoder().encode(config)
-        return try JSONDecoder().decode(GuiConfig.self, from: data)
+        let data = try JSONEncoder().encode(MachineConfig(of: config))
+        return try JSONDecoder().decode(MachineConfig.self, from: data)
+            .applied(to: GuiConfig())
     }
 
     /// The number fallback is dropped at the WRITE, so a renumber
@@ -40,19 +43,13 @@ struct DesktopSpacePersistenceTests {
         )
     }
 
-    /// Additive: a file written before #1230 has no such key, and
-    /// decodes to "no Desktop remembers a Space yet" — which is
-    /// why this needed no format bump and no migration.
+    /// A Mac that remembers nothing yet has a file without the
+    /// key, and decodes to "no Desktop remembers a Space yet".
     @Test("A file without the key decodes to empty")
     func absentKeyDecodesEmpty() throws {
-        let json = """
-            {"format":2,"spaces":["1"],"app_rules":{},
-             "float_rules":[],"ignore_rules":[],
-             "profile_bindings":{},"layers":[]}
-            """
         let config = try JSONDecoder().decode(
-            GuiConfig.self,
-            from: Data(json.utf8)
+            MachineConfig.self,
+            from: Data(#"{"format":1}"#.utf8)
         )
         #expect(config.desktopSpaces.isEmpty)
     }
@@ -63,7 +60,7 @@ struct DesktopSpacePersistenceTests {
     func storedKeyIsTheStamp() throws {
         var config = GuiConfig()
         config.desktopSpaces = [.identity(stamp): SpaceID(1)]
-        let data = try JSONEncoder().encode(config)
+        let data = try JSONEncoder().encode(MachineConfig(of: config))
         let text = String(decoding: data, as: UTF8.self)
         #expect(text.contains("STAMP-P"))
         #expect(text.contains("desktop_spaces"))
@@ -197,10 +194,33 @@ struct DesktopSpacePersistenceWiringTests {
             SpaceID(6),
             leaving: .identity(stamp)
         )
+        let shared = try Data(contentsOf: core.guiConfigStore.url)
         core.persistDesktopSpaceMemory()
         #expect(
             core.guiConfigStore.load()?
                 .desktopSpaces[.identity(stamp)] == SpaceID(6)
+        )
+        // A quit writes this Mac's file alone (#2324): `gui.json`
+        // may be another Mac's too.
+        #expect(try Data(contentsOf: core.guiConfigStore.url) == shared)
+    }
+
+    /// Reset All Settings forgets the memory with the settings it
+    /// clears (#2324: it no longer rides `gui.json`).
+    @Test("Reset clears the Desktop memory file")
+    func resetClearsTheMemory() throws {
+        let core = makeCore()
+        var config = GuiConfig()
+        config.desktopSpaces = [.identity(stamp): SpaceID(4)]
+        try core.guiConfigStore.save(config)
+        let machine = core.url(of: .machineConfig)
+        #expect(FileManager.default.fileExists(atPath: machine.path))
+        core.resetAllSettings(trash: { url in
+            try FileManager.default.removeItem(at: url)
+        })
+        #expect(
+            core.guiConfigStore.machine.load()
+                .desktopSpaces[.identity(stamp)] == nil
         )
     }
 
