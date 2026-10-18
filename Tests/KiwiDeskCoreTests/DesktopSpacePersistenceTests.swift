@@ -19,9 +19,12 @@ import Testing
 struct DesktopSpacePersistenceTests {
     private let stamp = DesktopIdentity(raw: "STAMP-P")
 
+    /// Through `machine.json`'s coding, where the map lives
+    /// since #2324.
     private func roundTrip(_ config: GuiConfig) throws -> GuiConfig {
-        let data = try JSONEncoder().encode(config)
-        return try JSONDecoder().decode(GuiConfig.self, from: data)
+        let data = try JSONEncoder().encode(MachineConfig(of: config))
+        return try JSONDecoder().decode(MachineConfig.self, from: data)
+            .applied(to: GuiConfig())
     }
 
     /// The number fallback is dropped at the WRITE, so a renumber
@@ -40,19 +43,13 @@ struct DesktopSpacePersistenceTests {
         )
     }
 
-    /// Additive: a file written before #1230 has no such key, and
-    /// decodes to "no Desktop remembers a Space yet" — which is
-    /// why this needed no format bump and no migration.
+    /// A Mac that remembers nothing yet has a file without the
+    /// key, and decodes to "no Desktop remembers a Space yet".
     @Test("A file without the key decodes to empty")
     func absentKeyDecodesEmpty() throws {
-        let json = """
-            {"format":2,"spaces":["1"],"app_rules":{},
-             "float_rules":[],"ignore_rules":[],
-             "profile_bindings":{},"layers":[]}
-            """
         let config = try JSONDecoder().decode(
-            GuiConfig.self,
-            from: Data(json.utf8)
+            MachineConfig.self,
+            from: Data(#"{"format":1}"#.utf8)
         )
         #expect(config.desktopSpaces.isEmpty)
     }
@@ -63,7 +60,7 @@ struct DesktopSpacePersistenceTests {
     func storedKeyIsTheStamp() throws {
         var config = GuiConfig()
         config.desktopSpaces = [.identity(stamp): SpaceID(1)]
-        let data = try JSONEncoder().encode(config)
+        let data = try JSONEncoder().encode(MachineConfig(of: config))
         let text = String(decoding: data, as: UTF8.self)
         #expect(text.contains("STAMP-P"))
         #expect(text.contains("desktop_spaces"))
@@ -130,6 +127,8 @@ struct DesktopSpacePersistenceWiringTests {
         // A config held from before the Desktop was ever shown.
         var stale = GuiConfig()
         stale.desktopSpaces = [:]
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
         core.rememberVirtualSpace(
             SpaceID(7),
             leaving: .identity(stamp)
@@ -148,6 +147,8 @@ struct DesktopSpacePersistenceWiringTests {
     @Test("A cleared memory clears the file")
     func clearedMemoryClearsTheFile() throws {
         let core = makeCore()
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
         core.rememberVirtualSpace(
             SpaceID(4),
             leaving: .identity(stamp)
@@ -173,6 +174,8 @@ struct DesktopSpacePersistenceWiringTests {
     @Test("A saved seed carries the live memory")
     func savedSeedCarriesTheMemory() throws {
         let core = makeCore()
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
         core.rememberVirtualSpace(
             SpaceID(5),
             leaving: .identity(stamp)
@@ -193,14 +196,85 @@ struct DesktopSpacePersistenceWiringTests {
     func quitPersistsTheMemory() throws {
         let core = makeCore()
         try core.guiConfigStore.save(GuiConfig())
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
+        core.rememberVirtualSpace(
+            SpaceID(6),
+            leaving: .identity(stamp)
+        )
+        // Bytes the encoder never writes, so a rewrite of the same
+        // config cannot pass for no write at all.
+        let shared = Data(#"{"format":9,"spaces":[]}"#.utf8)
+        try shared.write(to: core.guiConfigStore.url)
+        core.persistDesktopSpaceMemory()
+        #expect(
+            core.guiConfigStore.load()?
+                .desktopSpaces[.identity(stamp)] == SpaceID(6)
+        )
+        // A quit writes this Mac's file alone (#2324): `gui.json`
+        // may be another Mac's too.
+        #expect(try Data(contentsOf: core.guiConfigStore.url) == shared)
+    }
+
+    /// Reset All Settings forgets the memory with the settings it
+    /// clears (#2324: it no longer rides `gui.json`).
+    @Test("Reset clears the Desktop memory file")
+    func resetClearsTheMemory() throws {
+        let core = makeCore()
+        var config = GuiConfig()
+        config.desktopSpaces = [.identity(stamp): SpaceID(4)]
+        try core.guiConfigStore.save(config)
+        let machine = core.url(of: .machineConfig)
+        #expect(FileManager.default.fileExists(atPath: machine.path))
+        var trashed: [URL] = []
+        core.resetAllSettings(trash: { url in
+            trashed.append(url)
+            try FileManager.default.removeItem(at: url)
+        })
+        #expect(trashed.contains(machine))
+    }
+
+    /// A `gui.json` this build cannot decode — a newer Mac's —
+    /// means `machine.json` was never adopted, so a quit after one
+    /// swipe must not replace every other Desktop's entry (#2324).
+    @Test("An unadopted memory file survives the quit")
+    func unadoptedMemorySurvivesTheQuit() throws {
+        let core = makeCore()
+        let other = DesktopIdentity(raw: "STAMP-OTHER")
+        var config = GuiConfig()
+        config.desktopSpaces = [.identity(other): SpaceID(3)]
+        try core.guiConfigStore.save(config)
+        try Data("not json".utf8).write(to: core.guiConfigStore.url)
         core.rememberVirtualSpace(
             SpaceID(6),
             leaving: .identity(stamp)
         )
         core.persistDesktopSpaceMemory()
         #expect(
-            core.guiConfigStore.load()?
-                .desktopSpaces[.identity(stamp)] == SpaceID(6)
+            core.guiConfigStore.machine.load()
+                .desktopSpaces[.identity(other)] == SpaceID(3)
+        )
+    }
+
+    /// Every writer stamps through the one adoption-gated read,
+    /// so a Settings-style save in a session that never adopted
+    /// the file keeps what it holds as well (#2324).
+    @Test("An unadopted session's save keeps the stored memory")
+    func unadoptedSaveKeepsTheMemory() throws {
+        let core = makeCore()
+        let other = DesktopIdentity(raw: "STAMP-OTHER")
+        var config = GuiConfig()
+        config.desktopSpaces = [.identity(other): SpaceID(3)]
+        try core.guiConfigStore.save(config)
+        core.rememberVirtualSpace(
+            SpaceID(6),
+            leaving: .identity(stamp)
+        )
+        let loaded = try #require(core.guiConfigStore.load())
+        try core.guiConfigStore.save(loaded)
+        #expect(
+            core.guiConfigStore.machine.load()
+                .desktopSpaces[.identity(other)] == SpaceID(3)
         )
     }
 
@@ -209,6 +283,10 @@ struct DesktopSpacePersistenceWiringTests {
     @Test("A Lua-owned config is not written")
     func luaOwnedConfigIsNotWritten() {
         let core = makeCore()
+        // An adopted memory — the discard adopts whoever owns the
+        // config — so only the ownership gate stands between this
+        // quit and a written file.
+        core.forgetDesktopSpaceMemory()
         core.rememberVirtualSpace(
             SpaceID(6),
             leaving: .identity(stamp)
@@ -217,5 +295,10 @@ struct DesktopSpacePersistenceWiringTests {
         // load finds nothing, so this must not create one.
         core.persistDesktopSpaceMemory()
         #expect(core.guiConfigStore.load() == nil)
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: core.url(of: .machineConfig).path
+            )
+        )
     }
 }

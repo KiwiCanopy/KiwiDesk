@@ -139,6 +139,12 @@ with your settings, every profile and your saved palettes;
 and the remembered window arrangement. For continuous sync see
 [The gui.json File](#the-guijson-file).
 
+:::unreleased
+A backup does not carry which Space each Desktop remembers
+either: that stays on the Mac it was made on ([Spaces and
+Desktops](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-windows)).
+:::
+
 Restoring **replaces**, it does not merge, and what it replaces
 goes to the **Trash**. On the way, the remembered window
 arrangement on that Mac is forgotten, and KiwiDesk picks the
@@ -185,8 +191,9 @@ older KiwiDesk, quit it, copy that file over the original and drop
 the suffix. A backup does not carry the folder, and Reset All
 Settings leaves it.
 
-The socket, the instance lock and the saved window arrangement
-live in that folder too.
+The socket, the instance lock, the saved window arrangement and
+`machine.json` live in `~/Library/Application Support/KiwiDesk/`
+itself; Reset All Settings clears `machine.json`.
 :::
 
 An older KiwiDesk never writes over `gui.json` or a profile that a

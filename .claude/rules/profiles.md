@@ -909,6 +909,26 @@ backup question in `ConfigArtifact`, `livesOnThisMac` and never
 travelling, as the migration copies do (`SetupBundleArtifactTests`
 ▸ `liveMachineDirectoryIsAccountedFor`).
 
+**A `GuiConfig` leaf that means something on this Mac alone moves
+into `MachineConfig` (`machine.json`) by one `MachineConfig.moves`
+entry, and is composed and split in `GuiConfigStore` alone
+(#2324).** The in-memory `GuiConfig` keeps the field, so the draft,
+the diff and the census stay as they were; the leaf joins
+`GuiConfig.machineLocalFields`, which the `gui.json` coder skips
+(`MachineConfigTests` ▸ `registerMatchesTheFile`,
+`guiEncodingSkipsTheLeaves`). The move entry is what both the
+carry ahead of the migration and `migratingMachineLeavesOut` read,
+so a strip never removes a leaf the carry did not take first —
+append an entry with its format bumps, never edit one that shipped
+(`MachineConfigTests` ▸ `legacyMemoryIsCarried`,
+`failedCarryKeepsTheCopy`). A write of this Mac's leaves alone
+writes no `gui.json`; a live leaf is stamped into ANY write only
+once the session adopted the stored one, through the one stamp
+read every writer takes (`persistedDesktopSpaces`,
+`DesktopSpacePersistenceWiringTests` ▸
+`unadoptedMemorySurvivesTheQuit`, `unadoptedSaveKeepsTheMemory`);
+`machine.json` never answers `isGuiManaged`.
+
 **State about THIS MAC that is no file stays out of the register,
 in the app's defaults.** What a Mac has run and read — the "What's
 new" record (`WhatsNewRecord`, #1542), the tour's progress, the

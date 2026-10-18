@@ -24,6 +24,11 @@ final class DesktopMemory {
     /// filed, and by the discard, which is a cleared memory
     /// rather than an absent one.
     var spaceMemoryEstablished = false
+    /// Whether this session has read the stored memory — the load
+    /// adopting it, or the discard clearing it (#2324). A memory
+    /// established by a departure alone is NOT adopted: written,
+    /// it would replace every Desktop the session did not visit.
+    var spaceMemoryAdopted = false
 
     /// The Desktop the last switch arrived on, by its NATIVE id
     /// (#1230) — the same Desktop `KiwiCore.lastDesktop` names by
