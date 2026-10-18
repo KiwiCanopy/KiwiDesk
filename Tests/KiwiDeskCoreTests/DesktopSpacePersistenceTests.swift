@@ -127,6 +127,8 @@ struct DesktopSpacePersistenceWiringTests {
         // A config held from before the Desktop was ever shown.
         var stale = GuiConfig()
         stale.desktopSpaces = [:]
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
         core.rememberVirtualSpace(
             SpaceID(7),
             leaving: .identity(stamp)
@@ -145,6 +147,8 @@ struct DesktopSpacePersistenceWiringTests {
     @Test("A cleared memory clears the file")
     func clearedMemoryClearsTheFile() throws {
         let core = makeCore()
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
         core.rememberVirtualSpace(
             SpaceID(4),
             leaving: .identity(stamp)
@@ -170,6 +174,8 @@ struct DesktopSpacePersistenceWiringTests {
     @Test("A saved seed carries the live memory")
     func savedSeedCarriesTheMemory() throws {
         let core = makeCore()
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
         core.rememberVirtualSpace(
             SpaceID(5),
             leaving: .identity(stamp)
@@ -190,6 +196,8 @@ struct DesktopSpacePersistenceWiringTests {
     func quitPersistsTheMemory() throws {
         let core = makeCore()
         try core.guiConfigStore.save(GuiConfig())
+        // The boot load adopted the (empty) stored memory.
+        core.adoptPersistedDesktopSpaces([:])
         core.rememberVirtualSpace(
             SpaceID(6),
             leaving: .identity(stamp)
@@ -239,6 +247,28 @@ struct DesktopSpacePersistenceWiringTests {
             leaving: .identity(stamp)
         )
         core.persistDesktopSpaceMemory()
+        #expect(
+            core.guiConfigStore.machine.load()
+                .desktopSpaces[.identity(other)] == SpaceID(3)
+        )
+    }
+
+    /// Every writer stamps through the one adoption-gated read,
+    /// so a Settings-style save in a session that never adopted
+    /// the file keeps what it holds as well (#2324).
+    @Test("An unadopted session's save keeps the stored memory")
+    func unadoptedSaveKeepsTheMemory() throws {
+        let core = makeCore()
+        let other = DesktopIdentity(raw: "STAMP-OTHER")
+        var config = GuiConfig()
+        config.desktopSpaces = [.identity(other): SpaceID(3)]
+        try core.guiConfigStore.save(config)
+        core.rememberVirtualSpace(
+            SpaceID(6),
+            leaving: .identity(stamp)
+        )
+        let loaded = try #require(core.guiConfigStore.load())
+        try core.guiConfigStore.save(loaded)
         #expect(
             core.guiConfigStore.machine.load()
                 .desktopSpaces[.identity(other)] == SpaceID(3)

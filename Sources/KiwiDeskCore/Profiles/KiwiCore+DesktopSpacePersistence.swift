@@ -17,8 +17,12 @@ extension KiwiCore {
     /// over what the session learned. The `.number` entries are
     /// dropped by the encoder rather than here — one rule, one
     /// place — so this hands over everything.
+    /// nil until the stored memory was adopted this session, so
+    /// no writer replaces a file the session never read.
     func persistedDesktopSpaces() -> [DesktopKey: SpaceID]? {
-        guard desktopMemory.spaceMemoryEstablished else {
+        guard desktopMemory.spaceMemoryEstablished,
+            desktopMemory.spaceMemoryAdopted
+        else {
             return nil
         }
         return desktopMemory.virtualSpaces
@@ -32,6 +36,7 @@ extension KiwiCore {
     func adoptPersistedDesktopSpaces(
         _ stored: [DesktopKey: SpaceID]
     ) {
+        desktopMemory.spaceMemoryAdopted = true
         // REPLACE once established, never merge. A merge returns
         // every key absent from live, so a memory the user just
         // discarded is resurrected by the next config load — and
@@ -59,6 +64,7 @@ extension KiwiCore {
     func forgetDesktopSpaceMemory() {
         desktopMemory.virtualSpaces = [:]
         desktopMemory.spaceMemoryEstablished = true
+        desktopMemory.spaceMemoryAdopted = true
     }
 
     /// Writes the Desktop→Space memory to `machine.json` (#1230,
@@ -76,12 +82,9 @@ extension KiwiCore {
     /// there — a limitation of config ownership rather than a
     /// gap, and `docs/spaces-and-desktops.md` says so.
     func persistDesktopSpaceMemory() {
-        // A `gui.json` that does not decode means the stored memory
-        // was never adopted this session, so writing the live map
-        // would replace every Desktop this session did not visit.
-        guard isGuiManaged, desktopMemory.spaceMemoryEstablished,
-            guiConfigStore.load() != nil
-        else { return }
+        // `saveMachineLocal` writes nothing while the stamp is nil:
+        // a memory this session never adopted stays as stored.
+        guard isGuiManaged else { return }
         // The STORE, never `saveGuiConfig` — that reloads the
         // whole config, which at quit would rebuild the Lua VM
         // the stop is tearing down. The write itself touches
