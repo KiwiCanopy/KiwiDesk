@@ -450,6 +450,14 @@ bite large test PRs:
   `.claude/agents/guard-prover.md` owns what the agent itself
   does about it.
 
+  **Hand it the commit to prove, and every guard at once.** Commit
+  the change's current head first and name that sha in the spawn:
+  a prover that ran on an earlier commit reports coverage of code
+  later fix rounds changed. The agent runs the whole batch as one
+  driver script under one `scripts/gate-lock` slot rather than a
+  gate wait per mutation (owner, 2026-10-18) — its own file owns
+  the driver.
+
   **Remove an isolated prover's worktree and its branch once it
   reports or is stopped** (owner, 2026-10-16). A prover always
   changes its tree, so the harness never cleans it up, and the

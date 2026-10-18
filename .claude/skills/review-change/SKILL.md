@@ -50,8 +50,9 @@ judgement call:
 | touches `site/` | `site-engineer` |
 
 `guard-prover` is the one lane that **mutates the source every
-other lane is reading**. Spawn it with `isolation: "worktree"`, as
-its own file requires — isolated, its mutations never reach the
+other lane is reading**. Spawn it with `isolation: "worktree"` and
+the sha of the committed head under review, as its own file
+requires — isolated, its mutations never reach the
 tree, it is as independent as the rest, and it belongs in the same
 parallel message.
 
