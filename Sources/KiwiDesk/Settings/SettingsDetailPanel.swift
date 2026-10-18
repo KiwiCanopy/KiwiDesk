@@ -139,7 +139,10 @@ struct SettingsDetailPanel: View {
             .foregroundStyle(SettingsTheme.ink3)
             .accessibilityAddTraits(.isHeader)
             if !rows.isEmpty {
-                SettingsDiffRowsView(rows: rows) { row in
+                SettingsDiffRowsView(
+                    rows: rows,
+                    revert: DiffRowRevert(model: model, alwaysVisible: false)
+                ) { row in
                     jump(to: row)
                 }
             } else if all.isEmpty {
@@ -190,22 +193,31 @@ enum SettingsDiffRowSource {
         )
         var rows: [SettingsDiffRow] = []
         for key in diff.changedSettings {
+            // A key's own readout rows revert through its writer
+            // (#792); every other row states its own way back.
             rows += SettingsValueReadout.rows(
                 for: key,
                 old: model.cleanConfig,
                 new: model.config
-            )
+            ).map {
+                var row = $0
+                row.revert = .census
+                return row
+            }
         }
-        rows += model.reachDiffRows()
+        rows = SettingsDiffRowFold.folded(
+            rows,
+            reach: model.reachDiffRows()
+        )
         rows += model.lookReachDiffRows()
         if diff.luaChanged {
-            rows.append(
-                SettingsDiffRow.note(
-                    .general(.advancedEditLua),
-                    label: "init.lua",
-                    note: L("diff.note.edited", "Edited")
-                )
+            var lua = SettingsDiffRow.note(
+                .general(.advancedEditLua),
+                label: "init.lua",
+                note: L("diff.note.edited", "Edited")
             )
+            lua.revert = .lua
+            rows.append(lua)
         }
         for orphan in diff.unattributed {
             rows.append(

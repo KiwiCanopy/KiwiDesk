@@ -214,6 +214,7 @@ struct KeyRecorderField: View {
             previewBinding.wrappedValue = ""
         }
         recorder.start(
+            hyper: !hyperKeyIsOff,
             preview: { display in
                 preview = display
             },

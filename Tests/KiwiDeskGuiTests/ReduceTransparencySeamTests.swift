@@ -197,6 +197,7 @@ struct ReduceTransparencySeamTests {
         "SettingsSlider.swift": "stands the knob's edge down under glass",
         "KiwiVisionLevelsCard.swift": "greys Blur with its reason",
         "KiwiVisionPanelPreview.swift": "redraws on a flip (#2103)",
+        "HeaderSearch.swift": "shadows the search card's fallback (#2399)",
     ]
 
     @Test("the OS flag has one home per tree")

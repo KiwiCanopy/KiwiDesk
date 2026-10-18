@@ -10,22 +10,30 @@ enum BarPeekSource: Equatable {
     case overflow([WindowID])
     /// An App Bar item that hides text (#1514): its members.
     case appItem([WindowID])
+    /// A collapsed Space chip (#1945): every window its Space holds.
+    case space([WindowID])
 
     var windows: [WindowID] {
         switch self {
-        case .glyph(let ids), .overflow(let ids), .appItem(let ids):
+        case .glyph(let ids), .overflow(let ids), .appItem(let ids),
+            .space(let ids):
             ids
         }
     }
 
-    /// Whether this is a LIST — an overflow disc, which stands for
-    /// windows the chip did not draw however few, or more than one
-    /// window — the one predicate a click, VoiceOver's press and
-    /// the hull's hold read (#1946). A one-window glyph or App Bar
-    /// item is a label: its click picks, its peek never holds.
+    /// Whether this is a LIST — an overflow disc or a collapsed
+    /// Space, which stand for windows the chip did not draw however
+    /// few, or more than one window — the one predicate a glyph's
+    /// click, VoiceOver's press and the hold read (#1946). A
+    /// one-window glyph or App Bar item is a label: its click
+    /// picks, its peek never holds. A collapsed chip is clicked as
+    /// a chip, so its list reads at the hold and the check alone
+    /// (#1945).
     var isList: Bool {
-        if case .overflow = self { return true }
-        return windows.count > 1
+        switch self {
+        case .overflow, .space: true
+        case .glyph, .appItem: windows.count > 1
+        }
     }
 }
 

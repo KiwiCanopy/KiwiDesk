@@ -144,5 +144,16 @@ struct HyperMoveOfferTests {
         )
         #expect(field.contains(".opacity(hyperDormant ?"))
         #expect(field.contains("hyperKeyIsOff && !recording"))
+        // The recorder hears held Hyper only through this (#2414).
+        #expect(field.contains("hyper: !hyperKeyIsOff,"))
+        // The lens page mounts the field outside Shortcuts.
+        let lens = try source(
+            "Components/KiwiVision/KiwiVisionLensPage.swift"
+        )
+        #expect(
+            lens.contains(
+                ".environment(\\.hyperKeyIsOff, model.appWide.hyperKey == nil)"
+            )
+        )
     }
 }

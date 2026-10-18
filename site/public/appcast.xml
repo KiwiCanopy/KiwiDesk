@@ -14,6 +14,20 @@
     <description>Updates for KiwiDesk, a tiling window manager for macOS.</description>
     <language>en</language>
     <item>
+      <title>3.1.0</title>
+      <pubDate>Sun, 18 Oct 2026 09:24:05 +0000</pubDate>
+      <sparkle:version>3.1.0</sparkle:version>
+      <sparkle:shortVersionString>3.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<style>:root{color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;}body{margin:0;padding:2px 4px 16px 4px;}h3{font-size:13px;font-weight:600;margin:12px 0 6px 0;}p{margin:0 0 8px 0;}ul{margin:0 0 10px 0;padding-left:18px;}li{margin-bottom:5px;}code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:11.5px;padding:1px 4px;border-radius:4px;background:rgba(128,128,128,0.15);}::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.65);}</style><p>KiwiDesk 3.1.0 adds one key to put a Space's window sizes back, and Settings now records Hyper shortcuts.</p><h3>New</h3><ul><li><strong>New: ⌃⌥R puts back the sizes in the Space you're on</strong> — every window you resized there, by key or by dragging, returns to what your profile set. Updating adds the key where it's free and the action has no shortcut yet, as ✦R if you moved your letter shortcuts to Hyper; change or remove it in Shortcuts &amp; Gestures ▸ Size &amp; float.</li></ul><h3>Improved</h3><ul><li><strong>Switching to a Desktop that loads its own profile is now quicker</strong>, without the brief stall it could have on the way in.</li></ul><h3>Fixed</h3><ul><li><strong>With a Hyper key set, Settings now records Hyper shortcuts too</strong>: they already worked from <code>init.lua</code> and the CLI, but recording one in Settings kept only the key. Now holding the Hyper key adds ✦.</li></ul>]]></description>
+      <kiwidesk:notes><![CDATA[{"format":1,"summary":"KiwiDesk 3.1.0 adds one key to put a Space's window sizes back, and Settings now records Hyper shortcuts.","sections":[{"type":"new","title":"New","items":["**New: ⌃⌥R puts back the sizes in the Space you're on** — every window you resized there, by key or by dragging, returns to what your profile set. Updating adds the key where it's free and the action has no shortcut yet, as ✦R if you moved your letter shortcuts to Hyper; change or remove it in Shortcuts & Gestures ▸ Size & float."]},{"type":"improved","title":"Improved","items":["**Switching to a Desktop that loads its own profile is now quicker**, without the brief stall it could have on the way in."]},{"type":"fixed","title":"Fixed","items":["**With a Hyper key set, Settings now records Hyper shortcuts too**: they already worked from `init.lua` and the CLI, but recording one in Settings kept only the key. Now holding the Hyper key adds ✦."]}],"spotlight":[{"title":"Window sizes back in one key","line":"Resized for a moment? ⌃⌥R returns the Space to your profile's sizes.","setting":"keybinding.reset_sizes","symbol":"rectangle.split.3x1"}]}]]></kiwidesk:notes>
+      <enclosure
+        url="https://github.com/KiwiCanopy/KiwiDesk/releases/download/v3.1.0/KiwiDesk-3.1.0.zip"
+        length="13496204"
+        type="application/octet-stream"
+        sparkle:edSignature="a0EDdMW9C/2GrYnRTagwLRuypijxQxSjpVk07YVXnUjf9S7QXXwnWqWG0LuZBguG7EDwAjo4tNUdddXdrEZhCw==" />
+    </item>
+    <item>
       <title>3.0.0</title>
       <pubDate>Sat, 17 Oct 2026 21:43:50 +0000</pubDate>
       <sparkle:version>3.0.0</sparkle:version>

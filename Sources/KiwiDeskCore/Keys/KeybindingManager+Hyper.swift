@@ -60,7 +60,8 @@ extension KeybindingManager {
 
     /// The `deactivate` half: the held bare keys go (their refs
     /// may be released), the trigger stays unless Hyper is off or
-    /// the hotkeys are suspended for the recorder.
+    /// the hotkeys are suspended for the recorder — which hears F18
+    /// only because the suspend disarms it (#2414).
     func dropHyperRows() {
         unregisterHeldRows()
         hyper.rows = []

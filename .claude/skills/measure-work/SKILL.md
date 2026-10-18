@@ -123,6 +123,10 @@ $F up <scratch>/<label>/KiwiDesk.app <scratch>/fx-<label> [extra.lua]
 $F down <scratch>/fx-<label>
 ```
 
+`up` refuses a desk that does not track exactly its fifteen
+windows, since one stray window moves a per-switch count: run
+`down`, close the strays, then `up` again.
+
 The fixture pins only the animation settings every measured
 release shares; a setting one release changes or lacks is stated
 per bundle in `extra.lua`, which `up` appends to the config — a

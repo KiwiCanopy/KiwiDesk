@@ -4,9 +4,10 @@ extension WorkMeter {
     /// The `get_work_counters` reply: raw counts plus the
     /// derived rates #1508 asks for — durations in ms, per-call
     /// means in µs. `retile_ms` includes `bar_ms` and `border_ms`.
-    /// The AX fields are null unless `countsAX`, which defaults to
-    /// whether this is `.shared`: the static AX sites count only
-    /// there, so an injected meter's AX columns cannot move.
+    /// The AX fields and `bulk_reconciles` are null unless
+    /// `countsAX`, which defaults to whether this is `.shared`: the
+    /// static sites count only there, so an injected meter's
+    /// columns for them cannot move.
     func report(reset: Bool, countsAX: Bool? = nil) -> JSONValue {
         let (c, seconds) = snapshot(reset: reset)
         let ax = countsAX ?? (self === Self.shared)
@@ -80,6 +81,8 @@ extension WorkMeter {
                 c.axMainCalls + c.axOffMainCalls,
                 c.spaceSwitches
             ),
+            // Static like the AX sites, so `.shared`'s alone (#2347).
+            "bulk_reconciles": count(c.bulkReconciles),
         ]
         for (key, value) in axFields { out[key] = ax ? value : .null }
         return .object(out)

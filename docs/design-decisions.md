@@ -7122,6 +7122,52 @@ applying the saved value live, a Core verb rather than a draft
 writeback, so it waits for per-row revert (#792), as does whether
 Revert all reaches live state.
 
+:::unreleased
+### A row's revert writes its one key back through a register (#792)
+
+**[Rationale]**
+
+A ↺ on a diff row takes that row's change back to the baseline and
+nothing else. The diff names a change by its census key, read off
+Swift property paths, so the way back is a register from each key
+to a writer — `SettingsRevertRegister` — and not a Codable splice
+of the baseline's encoded subtree. Measured on `main` 2026-10-18,
+a splice reached 59 of the 209 keys that name a model path: 139
+`settings` keys name their leaf differently on the wire, and 11
+profile-scoped config fields are not encoded by `GuiConfig` at
+all, so a splice would have needed a hand map for most keys
+anyway. The census id is the Swift path, so the register is
+generated from the ids and every writer is held to its key
+(`SettingsRevertRegisterTests`).
+
+A writer reverts at the row's instance — one Space's override
+field, one app's rule, one rule-list entry, one Main Space — and
+whole where the row names none. Where state is written together it
+goes back together, so a ↺ can take more than its own row, and
+these are the groups: a Space in the list goes back through the
+Space doors, taking what is filed under it; a bar's edge goes back
+with its per-screen map, as the edge doors write them, and the
+master with both bars'; a rule takes the reach the draft gave it
+(#1393); and the shortcut layers go back whole, with the Desktop
+base, every key reach and every layer edit, since a binding's reach
+is keyed into the layers it was encoded against (#2022). That last
+group is the one a row cannot name — one binding's ↺ would take
+every other binding change with it — so its ↺ says so and asks
+first (`RevertWriter.grouped`, owner 2026-10-19). The reach rows
+are grouped the same way: a profile that changed exactly as the
+edited one did is named on the edited rows ("All profiles" for a
+shared rule, else a pair or a count) instead of in a row of its
+own, and only profiles that changed otherwise keep rows, one per
+change. Eight rows saying one thing read as eight changes, and the
+pill counted them so. Their way back is the rule's: the reach
+settles once the app's rules, or the shortcut layers, are the
+baseline's again. A row says
+how it reverts and offers no ↺ until it does: a lens or layer edit,
+profile drift, a live change and a leaf no key claims draw none.
+Whether the popover's Revert all reaches live state stays open with
+the live rows.
+:::
+
 ### The header search is a field, not a button that opens one
 
 **[Trade-off]**
@@ -7150,6 +7196,30 @@ What breaks if this is ignored: the `zIndex` goes and the results
 become invisible while every test still passes, since nothing
 about paint order is observable from the view tree. (Owner report
 2026-08-04, in chat.)
+
+:::unreleased
+### The search results are as wide as the field, and on glass (#2399)
+
+**[Trade-off]**
+
+The results follow the search field's width, clamped to 380–560 pt
+and never past the header's trailing edge. A fixed 380 pt panel read
+as detached from a wide field. Full field width is not on the table:
+a row's value would drift a thousand points from its title, and the
+suggestion lists in Safari, Spotlight and Xcode's Open Quickly are
+bounded too.
+
+The card is the one surface on Settings' own content plane that
+takes Liquid Glass. The pill and the KiwiVision picture read badly
+on glass, because they sit inside the page and carry their meaning
+in fills and hues the glass washes. The results card floats over
+the page, appears only while a query is typed, and is a list of
+words. The glass is a layer under the rows, not around them: content
+drawn inside the glass is drawn vibrant, which washed the
+destination tiles out on the first device look. Under Reduce
+transparency the card falls back to its opaque fill and takes its
+shadow back. The owner kept both on the device, 2026-10-18.
+:::
 
 ### Search: one result per setting, and a fast path kept pure
 
@@ -10442,7 +10512,6 @@ only while a notebook cell has focus, where the panel wins. It
 reaches an install in a generation of its own (3), since installs
 built from `release/3.0.0` had already taken generation 2.
 
-:::unreleased
 Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
 the way back from the size keys, but a key you press once, so it
 rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
@@ -10465,7 +10534,6 @@ hotkeys and in the menus of every app running on the dev Mac, read
 through AX with the fn bit decoded (recorded on #2303); the
 nearest chord taken is macOS's own `fn⌃R`, Return to Previous
 Size.
-:::
 
 **A shortcut row says what pressing it does (#2245).** Its title
 is a verb phrase: "Show" and the panel's VoiceOver name for a
@@ -14568,6 +14636,30 @@ it: a bar item's peek answers a glance at a strip the pointer
 passes all day, while Settings' help answers a reader who stopped
 to ask. A dwell is not motion, so Reduce Motion keeps it and
 drops only the fade.
+
+:::unreleased
+A Space collapsed to its window count (#1683) peeks too, always
+(#1945; owner 2026-10-04, and 2026-10-18 for no setting): resting
+on the chip lists every window its Space holds, as `+n` lists its
+own, and the chip anchors the peek itself since it draws no glyph.
+The peek is the answer because it is a panel beside the bar: the
+run does not change, so nothing moves under a resting pointer and
+the shelf's plan is untouched. Growing the chip in place to draw
+its glyphs was the rejected shape — it slides the neighbours under
+the pointer, which is the stuck-hover class #1665 re-reads hover
+to survive; the grown chip can leave the pointer outside it, which
+collapses it again, so the hover oscillates rather than merely
+sticking; and it changes the length the shelf planned. A click on
+the chip still switches — the chip's own action, which a list's
+open-on-click would take away — the row's own click picks a
+window, and a drag over a collapsed chip opens nothing, the spring
+switch already showing what it holds. The peek is the pointer's,
+as every hover peek is: VoiceOver's press on the chip switches,
+and its window list waits on a ruling of its own. It takes no
+setting: the peek's dwell already keeps it from firing on a pass,
+and a switch for it would be one more row a minimal bar does not
+need.
+:::
 
 **A Space's strip centres on its focus, holds under the pointer,
 and does not scroll.** (#1528 items 17–22, owner rulings

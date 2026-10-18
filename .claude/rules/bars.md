@@ -688,12 +688,14 @@ Obligations:
   `BarPeekClickTests` ▸ `pressOnTheShelfCloses`). A press the
   press fan-out hears is a click outside KiwiDesk, since neither
   of its arms hears a bar or the peek; the `anchors` map in
-  `BarPeekSeamTests` ▸ `anchorsAreListed`, derived from the
-  `peek?.pointer(` callers, is the one copy of who anchors it.
+  `BarPeekAnchorSeamTests`, derived from the `peek?.pointer(`
+  callers (▸ `anchorsAreListed`) and the anchors each one hands
+  (▸ `anchorValuesAreListed`), is the one copy of who anchors it.
   **Whether a source is a LIST is the one
   `BarPeekSource.isList`** — an overflow disc, however few
-  windows it hides, or more than one window — read by the click,
-  VoiceOver's press and the hold alike, never a count beside it
+  windows it hides, a collapsed Space's chip (#1945), or more
+  than one window — read by the click, VoiceOver's press and the
+  hold alike, never a count beside it
   (`BarPeekHoldTests` ▸ `overflowOfOneHolds`, `BarPeekSeamTests`
   ▸ `glyphClickRouting`). **Only a list's peek holds, while the
   pointer is inside `BarPeekHull`** — the item, the peek and the
@@ -752,7 +754,12 @@ Obligations:
   The cycle steps over a window the focus door refuses (#1345),
   or the walk stalls on it (`BarGlyphCycleTests` ▸
   `refusedWindowIsSteppedOver`); a click that switches Spaces
-  shows no peek, its chip having moved. The panel takes
+  shows no peek, its chip having moved. A collapsed chip is the
+  one list anchor that is no glyph (#1945): its press closes the
+  peek at the panel's one point and its click and VoiceOver's
+  press stay the chip's switch, so its list reads at the hold
+  and the check alone (`SpaceBarCollapsedPeekTests` ▸
+  `pressOnTheChipCloses`). The panel takes
   the mouse but is non-activating and never key, and hidden from
   accessibility (`BarPeekTests` ▸
   `panelTakesClicksWithoutActivating`). The argument is
@@ -1115,11 +1122,20 @@ Obligations:
   box. A glass pair that travels is minted, laid out and taken
   out through the one `GlassBox` — laid out through its one
   `place`, which writes the pair to the host's CURRENT bounds
-  before the host moves, since AppKit steps a travelling frame and
-  autoresizes the pair at every step — and a drag moves the host
+  before the host moves — and a drag moves the host
   too (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
   `boxGlassFillsItsHost`, `AppBarBoxHostTests` ▸
-  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). The pair's own
+  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). **Write the
+  pair to each size the host takes in `GlassBoxHost.setFrameSize`,
+  never trusting autoresizing to carry it** — a hosted glass stayed
+  at a fused plate's width when the shelf shrank (#2388, device
+  2026-10-18) — **and leave a hosted glass that already fills its
+  host within `GlassBox.fills` alone before a glide**: Auto Layout
+  rounds it to the backing, and rewriting that rounding is what
+  stranded it (`ShelfPlateGlassHostTests` ▸
+  `hostResizeFillsThePair`, `roundedGlassIsNotRewritten`). The
+  host's writer joins the pair's writers below
+  (`GlassPairMotionSeamTests` ▸ `hostLayoutStartsNoMotion`). The pair's own
   frame writers, `GlassPlate.update` and `GlassTint.apply`, take
   no motion input and start no motion (`GlassPairMotionSeamTests`),
   so a call site cannot make either travel.

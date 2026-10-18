@@ -101,15 +101,25 @@ app_rules = { ["com.apple.Safari"] = "1" }
 LUA
 }
 
+window_count() {  # how many windows app $1 shows, 0 if not running
+    pgrep -xq "$1" || { echo 0; return; }
+    osascript -e "tell application \"$1\" to count windows" \
+        2>/dev/null || echo 0
+}
+
 open_windows() {  # $1 = app, $2 = how many
-    local cmd
-    cmd='make new document'
+    local want
+    want=$(( $(window_count "$1") + $2 ))
     # Activate first: a window an app makes while inactive opens on
     # the Desktop macOS last had current, not the one shown.
     osascript -e "tell application \"$1\" to activate" >/dev/null
     sleep 1
+    # Counted, not looped blind: a fresh TextEdit opens an untitled
+    # document of its own at launch, the stray sixteenth window.
     for _ in $(seq "$2"); do
-        osascript -e "tell application \"$1\" to $cmd" >/dev/null
+        [ "$(window_count "$1")" -ge "$want" ] && break
+        osascript -e "tell application \"$1\" to make new document" \
+            >/dev/null
     done
 }
 
@@ -150,9 +160,21 @@ if left:
     done
 }
 
+verify_desk() {  # refuse a desk that is not exactly the fifteen
+    # A stray window (TextEdit's launch panel turned document) moved
+    # a release comparison by 14 AX calls a switch (2026-10-18).
+    local n
+    n="$(tracked "$1")"
+    [ "$n" = 15 ] && return 0
+    echo "fixture-desk: $n fixture windows tracked, want 15;" \
+        "run down, close the strays, then up again" >&2
+    return 1
+}
+
 case "${1:-}" in
 file)  # re-run the filing alone against a running instance
     file_windows "${2:?bundle}/$EXE"
+    verify_desk "${2:?bundle}/$EXE" || exit 1
     ;;
 up)
     MINE="$(cd "${2:?bundle}" && pwd -P)"
@@ -185,6 +207,7 @@ up)
     sleep 4
     file_windows "$MINE/$EXE"
     sleep 1
+    verify_desk "$MINE/$EXE" || exit 1
     "$MINE/$EXE" focus_space 2 >/dev/null
     "$MINE/$EXE" get_state
     ;;

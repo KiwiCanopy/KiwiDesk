@@ -208,7 +208,7 @@ extension SettingsValueReadout {
         let label =
             layer.isDefault
             ? action : instanceLabel(layer.name, action)
-        return .change(
+        var row = SettingsDiffRow.change(
             census,
             instance: layer.name + "/" + binding.lua + "/"
                 + instance,
@@ -216,6 +216,14 @@ extension SettingsValueReadout {
             old: old,
             new: new
         )
+        row.subject = ReachSubject(
+            family: .key,
+            key: RuleReachTable<String>.keyID(
+                layer: layer.name,
+                lua: binding.lua
+            )
+        )
+        return row
     }
 
     /// Computes unmatched binding pairs across old and new binding sets.

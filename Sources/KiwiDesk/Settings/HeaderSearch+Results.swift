@@ -14,42 +14,50 @@ extension HeaderSearch {
         }
     }
 
+    /// The card on Liquid Glass, `.regular` and untinted (#1295,
+    /// #2399), the card fill as the fallback. The rings draw on
+    /// both branches; the shadow only where the fallback draws,
+    /// since a composited glass loses its backdrop.
     var resultCard: some View {
-        resultList
+        let shape = RoundedRectangle(
+            cornerRadius: SettingsTheme.cardRadius
+        )
+        return
+            resultList
             .padding(8)
-            .frame(width: 380, alignment: .leading)
-            .background(
-                RoundedRectangle(
-                    cornerRadius: SettingsTheme.cardRadius
-                )
-                .fill(SettingsTheme.card)
-                .overlay(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.cardRadius
-                    )
-                    .strokeBorder(SettingsTheme.hairline)
-                )
-                .overlay(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.cardRadius
-                    )
-                    .strokeBorder(
-                        SettingsTheme.planeRing,
-                        lineWidth: 1
-                    )
-                )
-                // Without this the shadow halos EVERY
-                // primitive — the hairline ring casts its own
-                // shadow INWARD, reading as a line ghosting
-                // through the panel (#758's lesson, hit again;
-                // owner report 2026-08-10).
-                .compositingGroup()
-                .shadow(
-                    color: .black.opacity(0.16),
-                    radius: 12,
-                    y: 4
-                )
+            .frame(
+                width: SearchPanelWidth.width(for: panelRoom),
+                alignment: .leading
             )
+            .tint(SettingsTheme.accent)
+            // The glass is a layer UNDER the rows: content inside
+            // `glassEffect` is drawn vibrant, which washed the
+            // destination tiles out (owner eyeball, 2026-10-18).
+            .background {
+                Color.clear.glassChrome(
+                    in: shape,
+                    enabled: true,
+                    variant: .regular,
+                    fallback: AnyShapeStyle(SettingsTheme.card)
+                )
+            }
+            .clipShape(shape)
+            .overlay(shape.strokeBorder(SettingsTheme.hairline))
+            .overlay(
+                shape.strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
+            )
+            .background {
+                if !GlassChromeVariant.drawable || reduceTransparency {
+                    // #758: composited, or the rings halo inward.
+                    shape.fill(SettingsTheme.card)
+                        .compositingGroup()
+                        .shadow(
+                            color: .black.opacity(0.16),
+                            radius: 12,
+                            y: 4
+                        )
+                }
+            }
             .offset(y: 40)
             .onHover { panelHovered = $0 }
     }

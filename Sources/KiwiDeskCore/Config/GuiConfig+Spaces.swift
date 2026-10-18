@@ -79,6 +79,25 @@ extension GuiConfig {
         settings.removeSpace(space)
     }
 
+    /// Puts `space` back as `other` holds it — its place in the
+    /// list, its mode, pin, Main role, fallback and per-space
+    /// settings — the inverse of `removeSpace` (#792).
+    public mutating func restoreSpace(
+        _ space: SpaceID,
+        from other: GuiConfig
+    ) {
+        if !spaces.contains(space),
+            let at = other.spaces.firstIndex(of: space)
+        {
+            spaces.insert(space, at: min(at, spaces.count))
+        }
+        spaceModes[space] = other.spaceModes[space]
+        spacePins[space] = other.spacePins[space]
+        if other.mainSpaces.contains(space) { mainSpaces.insert(space) }
+        if other.fallbackSpace == space { fallbackSpace = space }
+        settings.restoreSpace(space, from: other.settings)
+    }
+
     /// True if deleting space would drop custom overrides (#205).
     /// The settings half probes by mutating a copy and comparing,
     /// so it can never drift from `TilingSettings.removeSpace`'s

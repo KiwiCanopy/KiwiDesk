@@ -34,6 +34,24 @@ extension TilingSettings {
         track.override[space] = nil
     }
 
+    /// Takes `space`'s entry in every per-space map from `other`,
+    /// an absent one included — the settings half of putting back
+    /// a deleted Space (#792).
+    public mutating func restoreSpace(
+        _ space: SpaceID,
+        from other: TilingSettings
+    ) {
+        gapsOverride[space] = other.gapsOverride[space]
+        placementOverride[space] = other.placementOverride[space]
+        spaceIcons[space] = other.spaceIcons[space]
+        bsp.override[space] = other.bsp.override[space]
+        stack.override[space] = other.stack.override[space]
+        scrolling.override[space] = other.scrolling.override[space]
+        grid.override[space] = other.grid.override[space]
+        monocle.override[space] = other.monocle.override[space]
+        track.override[space] = other.track.override[space]
+    }
+
     private func move<T>(
         _ map: inout [SpaceID: T],
         _ from: SpaceID,

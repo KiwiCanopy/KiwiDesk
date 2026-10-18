@@ -1184,6 +1184,9 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   per-switch count a performance change is measured by lies (#1508,
   `WorkMeterAXSeamTests`), and a change adding AX messages on the Space-switch
   path states how many per switch, and why, in its PR and at the read
+- a bound Desktop's apply leaves its window-rule sweep to the switch's own
+  folded `reconcileAll`, so a new path into `handleDesktopChange` owes that
+  sweep after it (#2347, `DesktopSwitchRuleSweepSeamTests`)
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
   destroy re-reads the app still tracking it — never tracking, filing or
@@ -1734,6 +1737,10 @@ Touching `Sources/KiwiDesk` (the GUI).
   since doing it after lands new drawing on a surface nothing watches (#1293) —
   one that renders a schematic joins `LayoutSchematicPlacementScanTests`'
   narrower roots as well, and each guard carries a root-coverage check
+- a census key naming a model path owes a writer in
+  `SettingsRevertRegister`, a diff-row producer states how its rows revert
+  or they draw no ↺, and state written together reverts together (#792,
+  `SettingsRevertRegisterTests`, `SettingsRowRevertTests`)
 - a Settings-row change updates its `SettingKey` census entry in the same
   change set (#678), and a census row placed in a container a
   `SettingsDisclosure` draws collapsed is a catalog CHILD of that drawer, keyed

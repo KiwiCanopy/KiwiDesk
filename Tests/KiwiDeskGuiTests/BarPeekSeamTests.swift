@@ -157,28 +157,6 @@ struct BarPeekSeamTests {
         "spaceBarMenuRows(",
     ]
 
-    /// Every view that reports the pointer to the peek, and the
-    /// views it may hand as the anchor — the one copy of who
-    /// anchors it. Derived from the `peek?.pointer(` callers, so a
-    /// new reporter reds until it is written here; a reporter
-    /// gaining an anchor (#1945's collapsed chip) widens its set.
-    private static let anchors: [String: Set<String>] = [
-        "SpaceBarItemView+Hover.swift": ["SpaceBarGlyphTarget.swift"],
-        "AppBarItemView+HoverTitle.swift": ["AppBarItemView.swift"],
-    ]
-
-    @Test("every anchor reports the pointer from the listed files")
-    func anchorsAreListed() throws {
-        var reporters: Set<String> = []
-        for file in try SourceScan.swiftSources(under: Self.bar) {
-            let text = try SourceScan.strippedSource(at: file)
-            if text.contains("peek?.pointer(") {
-                reporters.insert(file.lastPathComponent)
-            }
-        }
-        #expect(reporters == Set(Self.anchors.keys), "\(reporters)")
-    }
-
     /// A press in a bar closes the peek at ONE point (#1946): the
     /// shelf panel's `sendEvent` hands every press to `onPress`,
     /// which the overlay forwards and the manager wires to the

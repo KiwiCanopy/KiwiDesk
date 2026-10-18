@@ -94,7 +94,7 @@ public final class SpaceBarOverlay {
             case .apps:
                 return self
             case .count:
-                item.collapse = .init(windows: windows)
+                item.collapse = .init(windows: windows, peek: stripWindows)
             }
             return item
         }
