@@ -7197,6 +7197,30 @@ become invisible while every test still passes, since nothing
 about paint order is observable from the view tree. (Owner report
 2026-08-04, in chat.)
 
+:::unreleased
+### The search results are as wide as the field, and on glass (#2399)
+
+**[Trade-off]**
+
+The results follow the search field's width, clamped to 380–560 pt
+and never past the header's trailing edge. A fixed 380 pt panel read
+as detached from a wide field. Full field width is not on the table:
+a row's value would drift a thousand points from its title, and the
+suggestion lists in Safari, Spotlight and Xcode's Open Quickly are
+bounded too.
+
+The card is the one surface on Settings' own content plane that
+takes Liquid Glass. The pill and the KiwiVision picture read badly
+on glass, because they sit inside the page and carry their meaning
+in fills and hues the glass washes. The results card floats over
+the page, appears only while a query is typed, and is a list of
+words. The glass is a layer under the rows, not around them: content
+drawn inside the glass is drawn vibrant, which washed the
+destination tiles out on the first device look. Under Reduce
+transparency the card falls back to its opaque fill and takes its
+shadow back. The owner kept both on the device, 2026-10-18.
+:::
+
 ### Search: one result per setting, and a fast path kept pure
 
 **[Principle]**
