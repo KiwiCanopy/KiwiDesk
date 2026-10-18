@@ -14,10 +14,10 @@ extension HeaderSearch {
         }
     }
 
-    /// SPIKE (#2399): the card on Liquid Glass, `.regular` and
-    /// untinted (#1295), today's card fill as the fallback. The
-    /// rings draw on both branches; the shadow only where glass
-    /// cannot draw, since a composited glass loses its backdrop.
+    /// The card on Liquid Glass, `.regular` and untinted (#1295,
+    /// #2399), the card fill as the fallback. The rings draw on
+    /// both branches; the shadow only where the fallback draws,
+    /// since a composited glass loses its backdrop.
     var resultCard: some View {
         let shape = RoundedRectangle(
             cornerRadius: SettingsTheme.cardRadius
@@ -47,7 +47,7 @@ extension HeaderSearch {
                 shape.strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
             )
             .background {
-                if !GlassChromeVariant.drawable {
+                if !GlassChromeVariant.drawable || reduceTransparency {
                     // #758: composited, or the rings halo inward.
                     shape.fill(SettingsTheme.card)
                         .compositingGroup()
