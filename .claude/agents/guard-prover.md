@@ -104,11 +104,16 @@ driver:
 Run it as **one** command, so the whole batch takes one slot:
 
 ```
-scripts/gate-lock python3 <scratchpad>/prove-<topic>/driver.py <worktree>
+KIWIDESK_GATE_WAIT=7200 \
+    scripts/gate-lock python3 <scratchpad>/prove-<topic>/driver.py <worktree>
 ```
 
 The `swift test` calls inside it then run straight through: the
-lock is held for them. The batch outlives the Bash tool's
+lock is held for them. A gate that waits past `KIWIDESK_GATE_WAIT`
+gives up with exit status 75 and never starts the driver, so read
+the command's exit status before the summary: the driver deletes
+any old `summary.txt` first, and a summary you find after a
+give-up is a stale one from an earlier run. The batch outlives the Bash tool's
 10-minute cap, so start it with `run_in_background` and read the
 summary when it exits. Do not wrap a mutation in its own
 `swift test` command outside the driver, and do not kill a run
@@ -149,6 +154,10 @@ def run(flt, log):
         return "RED"
     return "GREEN"
 
+summary = os.path.join(OUT, "summary.txt")
+if os.path.exists(summary):
+    os.remove(summary)  # never leave a stale verdict to be read
+
 for name, path, old, new, flt in M:
     n = open(os.path.join(ROOT, path)).read().count(old)
     if n != 1:
@@ -160,7 +169,7 @@ for i, flt in enumerate(filters):
     v = run(flt, f"base{i:02d}.log")
     lines.append(f"base {v:5} [{flt}]")
     if v != "GREEN":
-        open(os.path.join(OUT, "summary.txt"), "w").write(
+        open(summary, "w").write(
             "\n".join(lines) + "\nbaseline not green; stopped\n")
         sys.exit(1)
 
@@ -179,8 +188,7 @@ dirty = git("status", "--porcelain")
 lines.append("tree clean" if not dirty else f"TREE DIRTY\n{dirty}")
 for i, flt in enumerate(filters):
     lines.append(f"after {run(flt, f'after{i:02d}.log'):5} [{flt}]")
-open(os.path.join(OUT, "summary.txt"), "w").write(
-    "\n".join(lines) + "\n")
+open(summary, "w").write("\n".join(lines) + "\n")
 ```
 
 Each row is one mutation, so a guard may take several rows — one
