@@ -174,16 +174,21 @@ hand-written setup, the first time you Save in Settings.
 > screen layout and macOS Desktops to resolve against what is
 > connected there.
 
+:::unreleased
 When an update moves `gui.json`, a profile, your palettes or your
 looks to a newer file format, KiwiDesk first keeps the file as it
-was in `~/.config/KiwiDesk/migration-backups/`, under its own path
-with `.pre-v<format>` added; `<format>` is the file's own format
-number, not a KiwiDesk version. One copy is kept per file: the
-file before its latest migration. To go back to an older KiwiDesk,
-quit it, copy that file over the original and drop the suffix. A
-backup does not carry the folder, and Reset All Settings leaves
-it. In a synced or dotfiles folder, add `migration-backups/` to
-its `.gitignore`.
+was in `~/Library/Application Support/KiwiDesk/migration-backups/`,
+under its own path with `.pre-v<format>` added; `<format>` is the
+file's own format number, not a KiwiDesk version. One copy is kept
+per file: the file before its latest migration. To go back to an
+older KiwiDesk, quit it, copy that file over the original and drop
+the suffix. A backup does not carry the folder, and Reset All
+Settings leaves it.
+
+The socket, the instance lock and the saved window arrangement
+live in that same folder, never in `~/.config/KiwiDesk`, so a
+synced or dotfiles config folder holds only your setup.
+:::
 
 An older KiwiDesk never writes over `gui.json` or a profile that a
 newer one migrated: it reports the file as unreadable, and a save

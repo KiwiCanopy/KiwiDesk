@@ -40,4 +40,51 @@ struct CoreInitPathTests {
         let named = URL(fileURLWithPath: "/tmp/kiwi-init-probe")
         #expect(KiwiCore.resolveConfigDirectory(named) == named)
     }
+
+    /// The machine-local half never follows the config folder,
+    /// which a user may sync to another Mac (#2324).
+    @Test("machine files live in Application Support")
+    func machineDirectoryIsApplicationSupport() {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let support = home.appendingPathComponent(
+            "Library/Application Support/KiwiDesk"
+        )
+        #expect(MachineLocation.directory == support)
+        #expect(
+            MachineLocation.socketPath
+                == support.appendingPathComponent("KiwiDesk.sock").path
+        )
+        #expect(
+            MachineLocation.lockPath
+                == support.appendingPathComponent("KiwiDesk.lock").path
+        )
+    }
+
+    /// Without the pin a test core would write its snapshots over
+    /// the running app's in `~/Library` — the twins are held
+    /// identical, so one target's check covers both.
+    @Test("a test core keeps its machine files in its scratch dir")
+    func testCorePinsTheRuntimeDirectory() {
+        let core = makeTestCore()
+        #expect(core.machineDirectory == core.configDirectory)
+        #expect(core.machineDirectory != MachineLocation.directory)
+    }
+
+    @Test("the machine directory is created and holds the backups")
+    func machineDirectoryHoldsBackups() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("kiwi-init-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let config = root.appendingPathComponent("config")
+        let machine = root.appendingPathComponent("machine")
+        let resolved = KiwiCore.resolveDirectories(config, machine)
+        #expect(resolved.config == config)
+        #expect(resolved.machine == machine)
+        #expect(FileManager.default.fileExists(atPath: machine.path))
+        let manager = KiwiCore.makeProfileManager(config, machine)
+        #expect(
+            manager.migrationBackups
+                == machine.appendingPathComponent("migration-backups")
+        )
+    }
 }

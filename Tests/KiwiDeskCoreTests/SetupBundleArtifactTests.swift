@@ -95,7 +95,6 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
-                case .migrationBackups: false
                 }
             #expect(
                 carried,
@@ -114,7 +113,8 @@ struct SetupBundleArtifactTests {
         }
     }
 
-    /// Walks the migration copies (#1880), the one exclusion.
+    /// Vacuous while every artifact travels — the migration
+    /// copies, the one exclusion, left the config folder (#2324).
     ///
     /// Stated, since it is the direction this cannot see: an
     /// artifact flipped to `false` **with** a reason passes here
@@ -161,8 +161,8 @@ struct SetupBundleArtifactTests {
                 }
             )
             // Not artifacts, and each excluded for a stated reason:
-            // runtime plumbing and the machine-specific snapshots
-            // `SetupBundle`'s doc comment already argues about.
+            // the `MachineLocation` files, which a test core keeps
+            // in its config dir, and the user's own `init.lua`.
             .union([
                 "init.lua", "KiwiDesk.sock", "KiwiDesk.lock",
                 ".state_snapshot", ".session_snapshot",

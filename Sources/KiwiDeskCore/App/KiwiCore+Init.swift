@@ -25,26 +25,42 @@ extension KiwiCore {
             .appendingPathComponent(".config/KiwiDesk")
     }
 
-    static func makeSocketServer(in directory: URL) -> SocketServer {
-        SocketServer(
-            path:
-                directory
-                .appendingPathComponent("KiwiDesk.sock").path
+    /// The config and machine folders, the machine one created
+    /// and handed this Mac's files a pre-#2324 build left in the
+    /// config folder. `makeTestCore` names both, so no test
+    /// reaches `~/Library` (`CoreInitPathTests`).
+    static func resolveDirectories(
+        _ config: URL?,
+        _ machine: URL?
+    ) -> (config: URL, machine: URL) {
+        let directory = resolveConfigDirectory(config)
+        let machine = machine ?? MachineLocation.directory
+        try? FileManager.default.createDirectory(
+            at: machine,
+            withIntermediateDirectories: true
         )
+        MachineLocation.adoptLegacyFiles(from: directory, into: machine)
+        return (directory, machine)
+    }
+
+    static func makeSocketServer(in machine: URL) -> SocketServer {
+        SocketServer(path: MachineLocation.socket(in: machine).path)
     }
 
     static func makeProfileManager(
-        in directory: URL
+        _ directory: URL,
+        _ machine: URL
     ) -> ProfileManager {
         let manager = ProfileManager(
             directory: directory.appendingPathComponent("profiles")
         )
-        manager.migrationBackups = migrationBackups(in: directory)
+        manager.migrationBackups = migrationBackups(in: machine)
         return manager
     }
 
-    /// The one home of the migration copies (#1880).
-    static func migrationBackups(in directory: URL) -> URL {
-        directory.appendingPathComponent(MigrationBackup.folderName)
+    /// The one home of the migration copies (#1880), in the
+    /// machine folder since #2324.
+    static func migrationBackups(in machine: URL) -> URL {
+        machine.appendingPathComponent(MigrationBackup.folderName)
     }
 }

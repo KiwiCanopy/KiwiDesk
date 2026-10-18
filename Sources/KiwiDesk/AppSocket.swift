@@ -8,7 +8,7 @@ enum AppSocket {
     /// and read after the connect; nil waits as long as the app
     /// takes.
     static func connect(timeout seconds: Int? = nil) throws -> SocketClient {
-        let client = try SocketClient(path: KiwiCore.defaultSocketPath)
+        let client = try SocketClient(path: MachineLocation.socketPath)
         if let seconds { client.setTimeout(seconds: seconds) }
         return client
     }
