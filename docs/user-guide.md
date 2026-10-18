@@ -869,6 +869,7 @@ and the same setup is always available as a preset of that name.
 | Toggle floating | `⌃⌥F` |
 | Toggle sticky everywhere | `⌃⌥S` |
 | Toggle sticky on this screen | `⌃⌥P` |
+| Toggle KiwiVision | `⌃⌥V` |
 | Show shortcuts panel | `⌃⌥K` |
 
 **Open Settings** ships on `⌃⌥,` as well.
