@@ -82,7 +82,7 @@ struct DesktopBindingDraftTests {
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.identity(stamp)]?.profiles
+            model.config.profileBindings[.identity(stamp)]?.names
                 == ["Work"]
         )
         #expect(model.config.profileBindings[.number(1)] == nil)
@@ -187,12 +187,12 @@ struct DesktopBindingDraftTests {
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.identity(stamp)]?.profiles
+            model.config.profileBindings[.identity(stamp)]?.names
                 == ["Work"]
         )
         #expect(model.config.profileBindings[.number(1)] == nil)
         #expect(
-            model.config.profileBindings[.number(2)]?.profiles
+            model.config.profileBindings[.number(2)]?.names
                 == ["Edited"]
         )
     }
@@ -225,7 +225,7 @@ struct DesktopBindingDraftTests {
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.number(1)]?.profiles
+            model.config.profileBindings[.number(1)]?.names
                 == ["Play"]
         )
     }

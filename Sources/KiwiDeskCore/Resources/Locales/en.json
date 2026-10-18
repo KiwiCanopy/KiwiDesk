@@ -361,6 +361,7 @@
   "desktops.for_count.one": "For 1 screen",
   "desktops.help": "Only a Desktop on your main screen selects a profile, because macOS's \"Displays have separate Spaces\" gives every screen its own Desktops by default. Turn it off, in System Settings ▸ Desktop & Dock, and every Desktop is shared across your screens instead — all of them able to select one, at the cost of each screen's own menu bar, its own Dock, and fullscreen windows that no longer blank the others. For each screen count, a Desktop can load a profile on each screen setup you add, and one on all other screen setups. A screen setup you added comes first; otherwise the profile for all other screen setups loads, even over the profile that holds those screens.",
   "desktops.intro": "These are your Mac's own Desktops, from Mission Control — not KiwiDesk's Spaces; under each is the screen it is on, or was last seen on while it isn't present. Pick a profile to load automatically when a Desktop activates on your main screen (the one with the menu bar).",
+  "desktops.missing.title": "Missing profiles",
   "desktops.no_binding": "No binding",
   "desktops.no_profile_for_count.many": "No profile is saved for %1$d screens yet, so no Desktop binding applies right now.",
   "desktops.no_profile_for_count.one": "No profile is saved for 1 screen yet, so no Desktop binding applies right now.",

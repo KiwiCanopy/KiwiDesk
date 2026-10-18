@@ -69,16 +69,16 @@ struct StoredProfileBindingSaveTests {
         model.saveEditedProfile()
 
         let sidecar = try #require(model.core.guiConfigStore.load())
-        #expect(sidecar.profileBindings[.number(2)]?.profiles == ["Away"])
+        #expect(sidecar.profileBindings[.number(2)]?.names == ["Away"])
         // The untouched entry and the store's own non-binding
         // value both survive: neither the draft's table nor the
         // live overlay was written wholesale.
-        #expect(sidecar.profileBindings[.number(1)]?.profiles == ["Kept"])
+        #expect(sidecar.profileBindings[.number(1)]?.names == ["Kept"])
         #expect(sidecar.spaces == [SpaceID("side")])
         // The draft re-seeded clean from the file it just wrote.
         #expect(!model.isDirty)
         #expect(
-            model.config.profileBindings[.number(2)]?.profiles
+            model.config.profileBindings[.number(2)]?.names
                 == ["Away"]
         )
     }
@@ -103,8 +103,8 @@ struct StoredProfileBindingSaveTests {
         model.saveEditedProfile()
 
         let sidecar = try #require(model.core.guiConfigStore.load())
-        #expect(sidecar.profileBindings[.number(3)]?.profiles == ["Late"])
-        #expect(sidecar.profileBindings[.number(2)]?.profiles == ["Away"])
+        #expect(sidecar.profileBindings[.number(3)]?.names == ["Late"])
+        #expect(sidecar.profileBindings[.number(2)]?.names == ["Away"])
     }
 
     /// With a VM up the write reloads, so the runtime map follows
@@ -122,7 +122,7 @@ struct StoredProfileBindingSaveTests {
         model.saveEditedProfile()
 
         #expect(
-            model.core.desktopBindings[.number(2)]?.profiles == ["Away"]
+            model.core.desktopBindings[.number(2)]?.names == ["Away"]
         )
     }
 

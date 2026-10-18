@@ -123,8 +123,8 @@ extension KiwiCore {
             // snapshot mid-switch, which is the one-reading rule
             // (#888) broken by the lane that restates it. The
             // re-key is already applied in memory; this is
-            // persistence alone.
-            try guiConfigStore.save(live)
+            // persistence alone, of this Mac's file alone (#2324).
+            try guiConfigStore.saveBindings(live.profileBindings)
         } catch {
             onLog("desktop bindings: sidecar follow failed: \(error)")
         }

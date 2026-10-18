@@ -1,15 +1,28 @@
 import Foundation
 
-/// Drops the machine-local leaves from `gui.json` and from a
+/// Moves the machine-local leaves out of `gui.json` and out of a
 /// bundle's inline `config` (#2324, `MachineConfigTests`): each
 /// `MachineConfig.moves` entry's keys, below that entry's format.
-/// `GuiConfigStore.load` carries a `gui.json`'s copy into
-/// `machine.json` before this step rewrites the file; a bundle's
-/// copy is another Mac's and is dropped.
+/// `GuiConfigStore.load` carries a `gui.json`'s copy into its
+/// machine-folder file before this step rewrites the file. In a
+/// bundle a leaf that travels is lifted to the bundle's top level,
+/// and one that does not is another Mac's and is dropped.
 extension ConfigMigration {
+    /// Set while the store prepares the values its carry reads:
+    /// every other step runs, this one stands down, so an old
+    /// shape is rewritten before the leaf leaves.
+    @TaskLocal static var keepsMachineLeaves = false
+
+    /// `data` migrated with the leaves still in place, nil where
+    /// nothing migrates — the carry's input.
+    static func migratedKeepingMachineLeaves(_ data: Data) -> Data? {
+        $keepsMachineLeaves.withValue(true) { migrated(data) }
+    }
+
     @Sendable
     static func migratingMachineLeavesOut(_ data: Data) -> Data? {
-        surgicallyApplying(
+        guard !keepsMachineLeaves else { return nil }
+        return surgicallyApplying(
             data,
             gate: { data in
                 MachineConfig.moves.contains { move in
@@ -28,16 +41,20 @@ extension ConfigMigration {
         )
     }
 
-    /// The keys a root at `format` still owes the move, for its
-    /// shape's floor.
-    private static func owedKeys(format: Int, bundle: Bool) -> [String] {
+    /// The moves a root at `format` still owes, for its shape's
+    /// floor.
+    private static func owedMoves(
+        format: Int,
+        bundle: Bool
+    ) -> [MachineConfig.Move] {
         MachineConfig.moves.filter {
             format < (bundle ? $0.bundleFormat : $0.guiFormat)
-        }.flatMap(\.keys)
+        }
     }
 
-    /// The root with each owed key gone from a `gui.json` root or
-    /// a bundle's `config`; nothing else is walked.
+    /// The root with each owed key gone from a `gui.json` root, or
+    /// from a bundle's `config` — lifted to the bundle's top level
+    /// where the move travels; nothing else is walked.
     static func machineLeavesDropped(_ node: Any) -> (Any, Bool) {
         guard var root = node as? [String: Any] else {
             return (node, false)
@@ -45,26 +62,36 @@ extension ConfigMigration {
         let format = root["format"] as? Int ?? 0
         switch shape(of: root) {
         case .gui:
-            let keys = owedKeys(format: format, bundle: false)
+            let keys = owedMoves(format: format, bundle: false)
+                .flatMap(\.keys)
             let changed = keys.contains { root[$0] != nil }
             for key in keys { root[key] = nil }
             return (root, changed)
         case .bundle:
-            let keys = owedKeys(format: format, bundle: true)
-            guard var config = root["config"] as? [String: Any],
-                keys.contains(where: { config[$0] != nil })
+            guard var config = root["config"] as? [String: Any]
             else { return (root, false) }
-            for key in keys { config[key] = nil }
+            var changed = false
+            for move in owedMoves(format: format, bundle: true) {
+                for key in move.keys where config[key] != nil {
+                    if let field = move.bundleField, root[field] == nil {
+                        root[field] = config[key]
+                    }
+                    config[key] = nil
+                    changed = true
+                }
+            }
             root["config"] = config
-            return (root, true)
+            return (root, changed)
         case .profile, .palettes, .looks:
             return (root, false)
         }
     }
 
-    /// The textual edit: each `"key" : { … }` entry removed with
-    /// one neighbouring comma. The maps are flat, so `[^{}]*` spans
-    /// one; the envelope's re-parse refuses anything else.
+    /// The textual edit: each flat `"key" : { … }` entry removed
+    /// with one neighbouring comma. A nested value (the bindings)
+    /// or a lift never matches it, so those take the envelope's
+    /// re-serialized fallback — accepted, since a `gui.json`
+    /// crosses once.
     private static func droppingMachineLeaves(_ text: String) -> Data? {
         var out = text
         for key in MachineConfig.moves.flatMap(\.keys) {

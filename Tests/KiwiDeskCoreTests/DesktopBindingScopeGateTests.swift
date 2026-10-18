@@ -120,7 +120,9 @@ struct DesktopBindingScopeGateTests {
         _ = bind(core, "Starter")
         #expect(core.profiles.currentName == "Starter")
         let key = try #require(snapshot.mainCurrentKey)
-        core.desktopBindings[key]?.bind("Vision", setup: here) { _ in 1 }
+        core.desktopBindings[key]?.bind(
+            .init(name: "Vision", setup: here)
+        ) { _ in 1 }
         core.applyDesktopBinding(in: snapshot)
         #expect(core.profiles.currentName == "Vision")
         // Live AND the pick: stands down with no file read.
@@ -186,7 +188,7 @@ struct DesktopBindingScopeGateTests {
         let core = try seeded()
         core.state.workspaces.removeDisplay(DisplayID(1))
         let binding = DesktopBinding(
-            entries: [.init(profile: "Starter", setup: elsewhere)],
+            entries: [.init(name: "Starter", setup: elsewhere)],
             desktop: 1
         )
         guard case .failure(.displaysUnknown) = core.boundProfile(of: binding)
@@ -225,7 +227,7 @@ struct DesktopBindingScopeGateTests {
         #expect(bind(core, "Vision", screens: here) == .ok())
         #expect(
             core.desktopBindings[.identity(stamp)]?.entries
-                == [.init(profile: "Vision", setup: here)]
+                .map { [$0.name] + ($0.setup ?? []) } == [["Vision"] + here]
         )
         let refused = core.execute(
             "bind_profile_to_desktop",
@@ -238,7 +240,7 @@ struct DesktopBindingScopeGateTests {
         #expect(bind(core, "Vision", screens: [""]) != .ok())
         #expect(
             core.desktopBindings[.identity(stamp)]?.entries
-                == [.init(profile: "Vision", setup: here)]
+                .map { [$0.name] + ($0.setup ?? []) } == [["Vision"] + here]
         )
     }
 }

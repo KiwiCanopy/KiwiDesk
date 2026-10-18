@@ -53,7 +53,7 @@ struct ProfileModesTests {
     @Test("nil layers decodes from JSON without layers key")
     func nilModesMissingKeyDecodesOK() throws {
         let json = """
-            {"name":"p",
+            {"id":"T","name":"p",
              "monitor_sets":[{"monitors":["A:1x1"]}],
              "space_modes":{},
              "settings":{},

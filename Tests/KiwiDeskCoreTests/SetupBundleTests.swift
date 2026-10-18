@@ -83,7 +83,7 @@ struct SetupBundleTests {
         #expect(!bundle.isEmpty)
     }
 
-    @Test("The bundle carries these five keys and nothing else")
+    @Test("The bundle carries these keys and nothing else")
     func theAllowListIsPinned() throws {
         let core = makeTestCore()
         try core.guiConfigStore.save(GuiConfig())
@@ -152,7 +152,7 @@ struct SetupBundleTests {
             Set(top.keys)
                 == [
                     "format", "writtenBy", "config", "profiles",
-                    "palettes", "looks",
+                    "palettes", "looks", "profileBindings",
                 ]
         )
         let text = String(decoding: data, as: UTF8.self)

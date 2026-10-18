@@ -388,7 +388,7 @@ what the gate reads, re-reads them through
 `refreshBindingReadings`; a scope names a setup of its profile's
 own count, the verb refusing any other since it could never fire
 (`DesktopBindingScopeGateTests` ▸ `verbTakesScreens`); a
-writer files through `DesktopBinding.bind(_:setup:countOf:)` —
+writer files through `DesktopBinding.bind(_:countOf:)` —
 same count AND same scope replaces, anything else adds, an unsaved
 name replaces an unsaved name of the same scope
 (`recordAlgebra`, `verbAddsAndReplaces`;
@@ -426,6 +426,37 @@ older reader owes, with no `ConfigMigration` step beside it
 The card's shape — count groups, no count control, setup rows
 top-down in the ladder's order — is `docs/design-decisions.md`
 ▸ Profiles' ruling, not restated here.
+
+## A binding names its profile by id (#2324 ruling 11)
+
+A `DesktopBinding.Entry` names its profile by the `ProfileID` the
+profile file keeps; its `name` is a LABEL a row reads while the
+profile is away, and nothing resolves an entry with an id through
+it (`DesktopBindingByIDTests` ▸ `nameDoesNotCarry`). The
+obligations:
+
+- **The write door owns the id.** `ProfileManager.write` keeps the
+  id the file of that name carries and mints a fresh one for an id
+  another file keeps, so every builder may hand it a fresh profile
+  (`ProfileIDTests` ▸ `overwriteKeepsTheID`, `takenIDIsReminted`);
+  a profile written before ids takes `ProfileID.legacy(name:)`
+  through `migratingProfileIDs`, deterministic so two Macs stamp
+  one id. Never change the legacy namespace.
+- **The gate resolves an id through `ProfileManager`'s index**
+  (`profileName(withID:)`), never by name and never by reading
+  every file on a swipe; an entry whose profile has no file reads
+  `.missing`, and only a file that exists and will not decode reads
+  `.unreadable` (`DesktopBindingByIDTests` ▸ `deletedReadsMissing`,
+  `corruptReadsUnreadable`).
+- **A PENDING entry — no id — resolves by its name** until the one
+  `promotePendingBindings` door gives it one, at a config load and
+  after a profile is saved, renamed or copied; a new profile
+  mutator that can make a pending name resolvable calls it, and it
+  writes the stored map alone, so a Lua line's binding stays a
+  name (`DesktopBindingByIDTests` ▸ `pendingPromotes`).
+- **The GUI reads an entry through the one `BindingResolver`**,
+  never a name→count map beside it, which would read a dead id's
+  stale label as a live profile.
 
 ## The active Desktop is the MAIN display's (#888)
 
@@ -907,12 +938,15 @@ socket, the lock and the arrangement snapshots are runtime and
 take no case; any other file KiwiDesk keeps there answers the
 backup question in `ConfigArtifact`, `livesOnThisMac` and never
 travelling, as the migration copies do (`SetupBundleArtifactTests`
-▸ `liveMachineDirectoryIsAccountedFor`).
+▸ `liveMachineDirectoryIsAccountedFor`) — save one that travels as
+the bundle's OWN field, as `bindings.json` does (#2324 ruling 12),
+so a restore replaces that file whole and never one beside it
+(`DesktopBindingsFileTests` ▸ `restoreWritesBindings`).
 
 **A `GuiConfig` leaf that means something on this Mac alone moves
-into `MachineConfig` (`machine.json`) by one `MachineConfig.moves`
-entry, and is composed and split in `GuiConfigStore` alone
-(#2324).** The in-memory `GuiConfig` keeps the field, so the draft,
+into a `MachineFile` — `machine.json`, or `bindings.json` for a
+leaf that travels — by one `MachineConfig.moves` entry, and is
+composed and split in `GuiConfigStore` alone (#2324).** The in-memory `GuiConfig` keeps the field, so the draft,
 the diff and the census stay as they were; the leaf joins
 `GuiConfig.machineLocalFields`, which the `gui.json` coder skips
 (`MachineConfigTests` ▸ `registerMatchesTheFile`,
@@ -921,7 +955,10 @@ carry ahead of the migration and `migratingMachineLeavesOut` read,
 so a strip never removes a leaf the carry did not take first —
 append an entry with its format bumps, never edit one that shipped
 (`MachineConfigTests` ▸ `legacyMemoryIsCarried`,
-`failedCarryKeepsTheCopy`). A write of this Mac's leaves alone
+`failedCarryKeepsTheCopy`). The carry reads values every OTHER
+step has rewritten, or a leaf of an older shape is stripped
+before it can decode (`DesktopBindingsFileTests` ▸
+`oldShapeIsCarried`). A write of this Mac's leaves alone
 writes no `gui.json`; a live leaf is stamped into ANY write only
 once the session adopted the stored one, through the one stamp
 read every writer takes (`persistedDesktopSpaces`,

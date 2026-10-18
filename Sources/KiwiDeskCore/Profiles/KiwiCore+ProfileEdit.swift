@@ -74,6 +74,7 @@ extension KiwiCore {
                 in: .whitespacesAndNewlines
             )
         )
+        copy.id = .fresh()
         copy.isDefault = false
         // A save-as-new copy is the user's own profile, never the
         // beginner-Starter baseline — the sibling of `isDefault`
@@ -94,6 +95,7 @@ extension KiwiCore {
             copy.look = .own
         }
         try profiles.write(copy)
+        promotePendingBindings()
         return copy.name
     }
 

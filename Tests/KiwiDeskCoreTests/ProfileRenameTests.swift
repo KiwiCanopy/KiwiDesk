@@ -120,7 +120,7 @@ struct ProfileRenameTests {
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
-                == bound((2, "studio"))
+                .mapValues(\.names) == bound((2, "studio")).mapValues(\.names)
         )
     }
 
@@ -147,7 +147,7 @@ struct ProfileRenameTests {
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
-                == bound((2, "studio"))
+                .mapValues(\.names) == bound((2, "studio")).mapValues(\.names)
         )
     }
 

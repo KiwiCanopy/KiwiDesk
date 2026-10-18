@@ -41,8 +41,13 @@ struct SetupBundleArtifactTests {
                 artifact.livesOnThisMac
                 ? core.machineDirectory : core.configDirectory
             #expect(inside(url, home), "\(artifact) outside its folder")
-            // A file meaningful here alone never reaches another Mac.
-            #expect(!(artifact.livesOnThisMac && artifact.travelsInABackup))
+            // A file meaningful here alone never reaches another Mac,
+            // save the bindings, carried as the bundle's own field
+            // (#2324 ruling 12).
+            #expect(
+                !(artifact.livesOnThisMac && artifact.travelsInABackup)
+                    || artifact == .desktopBindings
+            )
         }
     }
 
@@ -103,6 +108,7 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
+                case .desktopBindings: bundle.profileBindings != nil
                 case .migrationBackups, .machineConfig: false
                 }
             #expect(

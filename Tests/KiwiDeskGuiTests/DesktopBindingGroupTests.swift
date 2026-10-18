@@ -106,7 +106,7 @@ struct DesktopBindingGroupTests {
                 others: [1, 3],
                 displaysUnknown: false
             ),
-            profileCounts: counts
+            resolver: BindingResolver(counts: counts)
         )
         try #require(groups.count == 4)
         #expect(groups[0] == .count(2, leads: true, rows: listed))
@@ -129,7 +129,7 @@ struct DesktopBindingGroupTests {
                 others: [],
                 displaysUnknown: false
             ),
-            profileCounts: counts
+            resolver: BindingResolver(counts: counts)
         )
         #expect(clean.count == 1)
     }

@@ -11,6 +11,8 @@ public final class ProfileManager {
     /// holding the name already treat `markClean()` as a whole
     /// re-adopt.
     public var currentName: String? { active?.name }
+    /// The live profile's id, from adoption state (#2324).
+    public var currentID: ProfileID? { active?.id }
     /// The live profile's screen count, from adoption state
     /// (#1436, #1245).
     public var currentMonitorCount: Int? { active?.monitorCount }
@@ -84,6 +86,9 @@ public final class ProfileManager {
     /// the core that owns the config directory; nil keeps none.
     var migrationBackups: URL?
 
+    /// `ProfileIndex`, with the folder stamp it was built at.
+    var idIndex: (stamp: Date?, index: ProfileIndex)?
+
     public init(directory: URL) {
         self.directory = directory
         owesSetSettle = Self.owesSettle(in: directory)
@@ -138,8 +143,7 @@ public final class ProfileManager {
             profile.isDefault = true
             try clearDormantDefaults(count: profile.monitorCount)
         }
-        try write(profile)
-        adopt(profile)
+        adopt(try write(profile))
         standard = nil
         isDirty = false
     }
@@ -150,6 +154,7 @@ public final class ProfileManager {
         try FileManager.default.removeItem(
             at: url(for: validated(name))
         )
+        invalidateIndex()
         if currentName == name {
             active = nil
             isDirty = true
@@ -190,6 +195,7 @@ public final class ProfileManager {
             throw ProfileError.nameTaken(new)
         }
         try files.moveItem(at: source, to: destination)
+        invalidateIndex()
         profile.name = new
         try write(profile)
         if currentName == old {
@@ -301,9 +307,14 @@ public final class ProfileManager {
     }
 
     /// Non-adopting write (#18, #82); refuses a newer file (#2325).
-    func write(_ profile: Profile) throws {
+    /// Returns the profile as written, its id settled (#2324).
+    @discardableResult
+    func write(_ profile: Profile) throws -> Profile {
         let name = try validated(profile.name)
         try NewerFormatOnDisk.refuseProfile(url(for: name))
+        var profile = profile
+        profile.id = idForWrite(of: profile)
+        defer { invalidateIndex() }
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true
@@ -327,6 +338,7 @@ public final class ProfileManager {
         if profile.name == currentName {
             savedModesRecord = (profile.name, profile.spaceModes)
         }
+        return profile
     }
 
     private func url(for name: String) -> URL {

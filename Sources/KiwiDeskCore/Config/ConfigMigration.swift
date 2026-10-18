@@ -45,6 +45,7 @@ public enum ConfigMigration {
         migratingRetiredPullOrSpawn,
         migratingRetiredPanelVerbs,
         migratingMachineLeavesOut,
+        migratingProfileIDs,
     ]
 
     /// The file shapes a config root can take.

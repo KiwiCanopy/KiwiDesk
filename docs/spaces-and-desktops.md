@@ -236,6 +236,15 @@ On a Mac where KiwiDesk cannot write the identifier, bindings
 key by the Mission Control number — the behaviour above minus
 the protection.
 
+
+:::unreleased
+A binding follows its **profile** the same way: it names the
+profile by an identifier the profile file keeps, so renaming the
+profile — here or on another Mac sharing your setup — keeps the
+binding. Delete the profile and the row reads *Missing profiles*;
+a new profile under the old name does not take it over.
+:::
+
 ## "Displays have separate Spaces" decides the nesting
 
 This macOS switch (System Settings ▸ Desktop & Dock) changes

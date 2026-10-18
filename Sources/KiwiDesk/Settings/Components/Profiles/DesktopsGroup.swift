@@ -148,11 +148,27 @@ struct DesktopsGroup: View {
                 desktopBlock(row, count: count, leads: leads)
             }
         case .orphans(let orphans):
-            SettingsGroupHeader(
-                L("profiles.broken.title", "Couldn't load")
-            )
-            ForEach(orphans, id: \.self) { orphan in
-                orphanRow(orphan.row, profile: orphan.profile)
+            // A profile that is gone reads as missing, never as
+            // unreadable (#2324 ruling 10); a file that exists and
+            // will not decode keeps "Couldn't load".
+            let broken = Set(model.brokenProfiles.map(\.name))
+            let unreadable = orphans.filter { broken.contains($0.profile) }
+            let missing = orphans.filter { !broken.contains($0.profile) }
+            if !missing.isEmpty {
+                SettingsGroupHeader(
+                    L("desktops.missing.title", "Missing profiles")
+                )
+                ForEach(missing, id: \.self) { orphan in
+                    orphanRow(orphan.row, profile: orphan.profile)
+                }
+            }
+            if !unreadable.isEmpty {
+                SettingsGroupHeader(
+                    L("profiles.broken.title", "Couldn't load")
+                )
+                ForEach(unreadable, id: \.self) { orphan in
+                    orphanRow(orphan.row, profile: orphan.profile)
+                }
             }
         }
     }
@@ -240,7 +256,7 @@ struct DesktopsGroup: View {
         ProfilesFamilyRows.bindingGroups(
             rows: desktopRows,
             counts: counts,
-            profileCounts: profileCounts
+            resolver: bindingResolver
         )
     }
 
@@ -251,8 +267,8 @@ struct DesktopsGroup: View {
         )
     }
 
-    var profileCounts: [String: Int] {
-        ProfilesFamilyRows.profileCounts(model.profileSummaries)
+    var bindingResolver: BindingResolver {
+        BindingResolver(model.profileSummaries)
     }
 
     /// A live Desktop's record may still sit under the number it

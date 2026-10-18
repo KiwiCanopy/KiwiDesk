@@ -204,7 +204,9 @@ struct DesktopSpacePersistenceWiringTests {
         )
         // Bytes the encoder never writes, so a rewrite of the same
         // config cannot pass for no write at all.
-        let shared = Data(#"{"format":9,"spaces":[]}"#.utf8)
+        let shared = Data(
+            #"{"format":\#(GuiConfig.currentFormat),"spaces":[]}"#.utf8
+        )
         try shared.write(to: core.guiConfigStore.url)
         core.persistDesktopSpaceMemory()
         #expect(

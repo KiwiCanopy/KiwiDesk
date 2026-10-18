@@ -34,6 +34,9 @@ struct MachineConfigTests {
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
         config.desktopSpaces = [.identity(stamp): SpaceID("1")]
+        config.profileBindings = [
+            .number(2): DesktopBinding(profile: "Work", desktop: 2)
+        ]
         return config
     }
 
@@ -41,9 +44,9 @@ struct MachineConfigTests {
     /// is a `MachineConfig` field and the other way round.
     @Test("machineLocalFields is MachineConfig's field list")
     func registerMatchesTheFile() {
-        let fields = Set(fieldNames(MachineConfig())).subtracting(
-            ["format"]
-        )
+        let fields = Set(fieldNames(MachineConfig()))
+            .union(fieldNames(DesktopBindingsFile()))
+            .subtracting(["format"])
         #expect(fields == GuiConfig.machineLocalFields)
         let gui = Set(fieldNames(GuiConfig()))
         #expect(GuiConfig.machineLocalFields.isSubset(of: gui))
@@ -55,12 +58,11 @@ struct MachineConfigTests {
             decoding: try JSONEncoder().encode(remembering),
             as: UTF8.self
         )
-        for key in MachineConfig.CodingKeys.allCases
-        where key != .format {
-            #expect(
-                !text.contains("\"\(key.rawValue)\""),
-                "\(key.rawValue) in gui.json"
-            )
+        let keys =
+            MachineConfig.CodingKeys.allCases.map(\.rawValue)
+            + DesktopBindingsFile.CodingKeys.allCases.map(\.rawValue)
+        for key in keys where key != "format" {
+            #expect(!text.contains("\"\(key)\""), "\(key) in gui.json")
         }
     }
 
@@ -73,6 +75,11 @@ struct MachineConfigTests {
         #expect(try root(store.url)["desktop_spaces"] == nil)
         #expect(try root(store.machine.url)["desktop_spaces"] != nil)
         #expect(store.load()?.desktopSpaces == remembering.desktopSpaces)
+        #expect(try root(store.url)["profile_bindings"] == nil)
+        #expect(try root(store.bindingsFile.url)["profile_bindings"] != nil)
+        #expect(
+            store.load()?.profileBindings == remembering.profileBindings
+        )
     }
 
     /// Writes `config` as a `gui.json` from before the move: its

@@ -15,16 +15,54 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
     /// One bound profile and the screen setup it is scoped to
     /// (#1609). An entry's identity is the PAIR: one profile may
     /// be bound for several setups on one Desktop.
+    ///
+    /// The profile is named by its stable `id` (#2324 ruling 11);
+    /// `name` is then a LABEL a row reads while the profile is
+    /// away, and nothing resolves the entry through it. An entry
+    /// with no id is PENDING — a name bound before any profile
+    /// carried it, or written before ids existed — and resolves by
+    /// that name until `KiwiCore.promotePendingBindings` gives it
+    /// the id of the file it names.
     public struct Entry: Hashable, Sendable, Codable {
-        public let profile: String
+        public let id: ProfileID?
+        public let name: String
         /// The setup's screens as sorted fingerprints, as a
         /// `MonitorSet` keeps them; nil is ALL screen setups —
         /// what every entry written before the scope means.
         public let setup: [String]?
 
-        public init(profile: String, setup: [String]? = nil) {
-            self.profile = profile
+        public init(
+            id: ProfileID? = nil,
+            name: String,
+            setup: [String]? = nil
+        ) {
+            self.id = id
+            self.name = name
             self.setup = Self.canonical(setup)
+        }
+
+        /// What the entry names: its id, else its pending name.
+        public enum Key: Hashable, Sendable {
+            case id(ProfileID)
+            case pending(String)
+        }
+
+        public var key: Key { id.map(Key.id) ?? .pending(name) }
+
+        /// The same entry under the label `name`.
+        func labelled(_ name: String) -> Entry {
+            Entry(id: id, name: name, setup: setup)
+        }
+
+        /// Equal by what it names and its scope, never its label,
+        /// which may be stale on another Mac.
+        public static func == (lhs: Entry, rhs: Entry) -> Bool {
+            lhs.key == rhs.key && lhs.setup == rhs.setup
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(key)
+            hasher.combine(setup)
         }
 
         /// A setup in `MonitorSet`'s canonical order; nil or empty
@@ -34,51 +72,75 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
             return MonitorSet(monitors: setup).monitors
         }
 
-        /// Stored as a bare name when scoped to all setups — the
-        /// shape every record had before #1609 — and as an object
-        /// naming its setup otherwise.
+        /// A pending entry is stored as before ids: a bare name
+        /// when scoped to all setups, `{profile, setup}` otherwise.
+        /// An entry with an id is `{id, name, setup?}`.
         public init(from decoder: Decoder) throws {
             if let name = try? decoder.singleValueContainer()
                 .decode(String.self)
             {
-                self.init(profile: name)
+                self.init(name: name)
                 return
             }
             let container = try decoder.container(
                 keyedBy: CodingKeys.self
             )
-            let setup = try container.decode(
+            let setup = try container.decodeIfPresent(
                 [String].self,
                 forKey: .setup
             )
-            guard !setup.isEmpty else {
+            if let setup, setup.isEmpty {
                 throw DecodingError.dataCorruptedError(
                     forKey: .setup,
                     in: container,
                     debugDescription: "a scoped entry names no screens"
                 )
             }
+            if let id = try container.decodeIfPresent(
+                ProfileID.self,
+                forKey: .id
+            ) {
+                self.init(
+                    id: id,
+                    name: try container.decode(String.self, forKey: .name),
+                    setup: setup
+                )
+                return
+            }
+            guard let setup else {
+                throw DecodingError.dataCorruptedError(
+                    forKey: .setup,
+                    in: container,
+                    debugDescription: "a pending entry object is scoped"
+                )
+            }
             self.init(
-                profile: try container.decode(
-                    String.self,
-                    forKey: .profile
-                ),
+                name: try container.decode(String.self, forKey: .profile),
                 setup: setup
             )
         }
 
         public func encode(to encoder: Encoder) throws {
-            guard let setup else {
-                var single = encoder.singleValueContainer()
-                try single.encode(profile)
+            guard let id else {
+                guard let setup else {
+                    var single = encoder.singleValueContainer()
+                    try single.encode(name)
+                    return
+                }
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(name, forKey: .profile)
+                try container.encode(setup, forKey: .setup)
                 return
             }
             var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(profile, forKey: .profile)
-            try container.encode(setup, forKey: .setup)
+            try container.encode(id, forKey: .id)
+            try container.encode(name, forKey: .name)
+            try container.encodeIfPresent(setup, forKey: .setup)
         }
 
         private enum CodingKeys: String, CodingKey {
+            case id
+            case name
             case profile
             case setup
         }
@@ -112,60 +174,61 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         self.screen = screen
     }
 
-    /// Entries for all screen setups, one per name.
+    /// Pending entries for all screen setups, one per name.
     public init(
         profiles: [String],
         desktop: Int,
         screen: String? = nil
     ) {
         self.init(
-            entries: profiles.map { Entry(profile: $0) },
+            entries: profiles.map { Entry(name: $0) },
             desktop: desktop,
             screen: screen
         )
     }
 
-    /// One bound profile — the shape every binding had before
+    /// One pending profile — the shape every binding had before
     /// #1436, and the one a single-count user still writes.
     public init(profile: String, desktop: Int, screen: String? = nil) {
         self.init(profiles: [profile], desktop: desktop, screen: screen)
     }
 
-    /// Every bound name once, in binding order.
-    public var profiles: [String] {
+    /// Every entry's label once, in binding order.
+    public var names: [String] {
         var seen = Set<String>()
-        return entries.map(\.profile).filter { seen.insert($0).inserted }
+        return entries.map(\.name).filter { seen.insert($0).inserted }
     }
 
-    /// Files `name` on this Desktop, scoped to `setup` (nil: all
-    /// screen setups): every OVERLAPPING entry goes — saved for
-    /// the same screen count AND scoped alike — and the others
-    /// stay (#1436, #1609). `countOf` reads a profile's count —
-    /// nil for one not saved yet, which is a class of its own:
-    /// two unsaved names cannot be told apart, so the newer
-    /// replaces the older, and each is judged once its file
-    /// exists. An entry already filed keeps its place and still
-    /// evicts an overlapping sibling, since a profile re-saved at
-    /// another count can put two on one.
+    /// Files `entry` on this Desktop: every OVERLAPPING entry goes
+    /// — saved for the same screen count AND scoped alike — and the
+    /// others stay (#1436, #1609). `countOf` reads an entry's
+    /// profile count — nil for one with no profile yet, which is a
+    /// class of its own: two such entries cannot be told apart, so
+    /// the newer replaces the older, and each is judged once its
+    /// file exists. An entry already filed keeps its place, its
+    /// label refreshed, and still evicts an overlapping sibling,
+    /// since a profile re-saved at another count can put two on one.
     public mutating func bind(
-        _ name: String,
-        setup: [String]? = nil,
-        countOf: (String) -> Int?
+        _ entry: Entry,
+        countOf: (Entry) -> Int?
     ) {
-        let entry = Entry(profile: name, setup: setup)
-        let count = countOf(name)
+        let count = countOf(entry)
         entries.removeAll {
             $0 != entry && $0.setup == entry.setup
-                && countOf($0.profile) == count
+                && countOf($0) == count
         }
-        if !entries.contains(entry) { entries.append(entry) }
+        if let at = entries.firstIndex(of: entry) {
+            entries[at] = entry
+        } else {
+            entries.append(entry)
+        }
     }
 
-    /// Drops every entry naming `name`; true when the record is
-    /// now empty.
+    /// Drops every entry naming `key`; true when the record is now
+    /// empty.
     @discardableResult
-    public mutating func unbind(_ name: String) -> Bool {
-        entries.removeAll { $0.profile == name }
+    public mutating func unbind(_ key: Entry.Key) -> Bool {
+        entries.removeAll { $0.key == key }
         return entries.isEmpty
     }
 
@@ -177,20 +240,58 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
     public mutating func unbind(
         count: Int,
         setup: [String]? = nil,
-        countOf: (String) -> Int?
+        countOf: (Entry) -> Int?
     ) -> Bool {
         let scope = Entry.canonical(setup)
         entries.removeAll {
-            $0.setup == scope && countOf($0.profile) == count
+            $0.setup == scope && countOf($0) == count
         }
         return entries.isEmpty
     }
 
-    /// A profile rename, followed into every entry in place.
-    public mutating func rename(_ old: String, to new: String) {
-        entries = entries.map {
-            $0.profile == old ? Entry(profile: new, setup: $0.setup) : $0
+    /// A profile rename: the label of every entry naming `id`
+    /// follows, and a pending entry naming `old` follows by name,
+    /// as it would have before ids.
+    public mutating func relabel(
+        _ id: ProfileID?,
+        from old: String,
+        to new: String
+    ) {
+        entries = entries.map { entry in
+            if let id, entry.id == id { return entry.labelled(new) }
+            if entry.id == nil, entry.name == old {
+                return entry.labelled(new)
+            }
+            return entry
         }
+    }
+
+    /// Each pending entry given the id `resolve` finds for its
+    /// name, its label kept; true when any changed.
+    @discardableResult
+    public mutating func promote(
+        _ resolve: (String) -> ProfileID?
+    ) -> Bool {
+        var changed = false
+        entries = entries.map { entry in
+            guard entry.id == nil, let id = resolve(entry.name) else {
+                return entry
+            }
+            changed = true
+            return Entry(id: id, name: entry.name, setup: entry.setup)
+        }
+        return changed
+    }
+
+    /// Whether `entry` names the live profile `live`: by id, or a
+    /// pending entry by its name.
+    public static func names(
+        _ entry: Entry,
+        _ live: (id: ProfileID, name: String)?
+    ) -> Bool {
+        guard let live else { return false }
+        if let id = entry.id { return id == live.id }
+        return entry.name == live.name
     }
 
     /// The entries that APPLY to the screens `fingerprints` name,
@@ -202,7 +303,7 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
     /// entry scoped to another setup is not among them.
     public func ranked(
         for fingerprints: [String],
-        preferring live: String?
+        preferring live: (id: ProfileID, name: String)?
     ) -> [Entry] {
         let here = Entry.canonical(fingerprints)
         let scoped = here.map { ranked(scope: $0, preferring: live) }
@@ -214,11 +315,11 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
     /// one copy a slot's picker reads too.
     public func ranked(
         scope setup: [String]?,
-        preferring live: String?
+        preferring live: (id: ProfileID, name: String)?
     ) -> [Entry] {
         let listed = entries.filter { $0.setup == Entry.canonical(setup) }
-        return listed.filter { $0.profile == live }
-            + listed.filter { $0.profile != live }
+        return listed.filter { Self.names($0, live) }
+            + listed.filter { !Self.names($0, live) }
     }
 
     private enum CodingKeys: String, CodingKey {

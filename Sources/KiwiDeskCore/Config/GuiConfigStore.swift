@@ -9,6 +9,7 @@ import Foundation
 public struct GuiConfigStore {
     let url: URL
     let machine: MachineConfigStore
+    let bindingsFile: DesktopBindingsStore
 
     /// The Space each Desktop is showing RIGHT NOW (#1230), which
     /// every write stamps in over whatever the caller's copy
@@ -52,6 +53,7 @@ public struct GuiConfigStore {
     public init(directory: URL, machine: URL) {
         self.url = directory.appendingPathComponent("gui.json")
         self.machine = MachineConfigStore(directory: machine)
+        self.bindingsFile = DesktopBindingsStore(directory: machine)
     }
 
     public var exists: Bool {
@@ -69,11 +71,12 @@ public struct GuiConfigStore {
             return nil
         }
         let owed = machine.carry(fromLegacy: data)
+        let owedBindings = bindingsFile.carry(fromLegacy: data)
         data = MigrationBackup.migrateInPlace(
             data,
             at: url,
             backups: migrationBackups,
-            writesBack: owed == nil
+            writesBack: owed == nil && owedBindings == nil
         )
         guard
             let config = try? JSONDecoder().decode(
@@ -81,7 +84,9 @@ public struct GuiConfigStore {
                 from: data
             )
         else { return nil }
-        return (owed ?? machine.load()).applied(to: config)
+        return (owedBindings ?? bindingsFile.load()).applied(
+            to: (owed ?? machine.load()).applied(to: config)
+        )
     }
 
     /// Writes the sidecar; throws `NewerFormatOnDisk` rather than
@@ -91,6 +96,10 @@ public struct GuiConfigStore {
         try NewerFormatOnDisk.refuse(
             machine.url,
             MachineConfig.currentFormat
+        )
+        try NewerFormatOnDisk.refuse(
+            bindingsFile.url,
+            DesktopBindingsFile.currentFormat
         )
         var config = config
         if let liveDesktopSpaces {
@@ -105,6 +114,7 @@ public struct GuiConfigStore {
         // This Mac's file first: a failed write here leaves the
         // shared file as it was, and with it any carry still owed.
         try machine.save(MachineConfig(of: config))
+        try bindingsFile.save(DesktopBindingsFile(of: config))
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -127,5 +137,16 @@ public struct GuiConfigStore {
         var stored = machine.load()
         stored.desktopSpaces = liveDesktopSpaces
         try machine.save(stored)
+    }
+
+    /// Writes the Desktop bindings into `bindings.json` alone —
+    /// this Mac's file, so a machine event (a re-key) writes
+    /// nothing another Mac shares (#2324).
+    public func saveBindings(
+        _ map: [DesktopKey: DesktopBinding]
+    ) throws {
+        var file = bindingsFile.load()
+        file.profileBindings = map
+        try bindingsFile.save(file)
     }
 }

@@ -243,6 +243,8 @@ extension SettingsModel {
 /// Saved profile summary for profile list and resolution (#36, #789, #678).
 struct ProfileSummary: Identifiable {
     let name: String
+    /// What a Desktop binding names (#2324).
+    var profileID = ProfileID.fresh()
     let count: Int
     let sets: [[String]]
     /// Holds no screen combination (#1530).

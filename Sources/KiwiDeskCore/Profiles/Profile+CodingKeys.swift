@@ -4,6 +4,7 @@ import Foundation
 extension Profile {
     enum CodingKeys: String, CodingKey {
         case format
+        case id
         case name
         case monitorSets = "monitor_sets"
         case dormantMonitorCount = "monitor_count"

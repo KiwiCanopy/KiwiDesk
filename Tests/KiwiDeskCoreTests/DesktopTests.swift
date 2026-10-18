@@ -228,12 +228,8 @@ struct DesktopBindingTests {
         )
         #expect(response.isSuccess)
         #expect(
-            core.desktopBindings == [
-                .number(2): DesktopBinding(
-                    profile: "Coding",
-                    desktop: 2
-                )
-            ]
+            core.desktopBindings.mapValues(\.names)
+                == [.number(2): ["Coding"]]
         )
     }
 
@@ -247,7 +243,7 @@ struct DesktopBindingTests {
         )
         #expect(response.isSuccess)
         #expect(
-            core.desktopBindings[.number(3)]?.profiles == ["Studio"]
+            core.desktopBindings[.number(3)]?.names == ["Studio"]
         )
     }
 

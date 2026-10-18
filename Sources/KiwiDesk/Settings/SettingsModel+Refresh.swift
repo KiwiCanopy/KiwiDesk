@@ -20,6 +20,7 @@ extension SettingsModel {
             profile in
             ProfileSummary(
                 name: profile.name,
+                profileID: profile.id,
                 count: profile.monitorCount,
                 sets: profile.monitorSets.map(\.monitors),
                 isDormant: profile.isDormant,
