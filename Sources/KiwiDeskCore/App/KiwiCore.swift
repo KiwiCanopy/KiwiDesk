@@ -325,26 +325,26 @@ public final class KiwiCore {
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
     /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.
     public var uiBridge = UIBridgeHooks()
-
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
-
+    public let machineDirectory: URL  // never synced (#2324)
     public let socket: SocketServer
 
     public init(
         configDirectory: URL? = nil,
+        machineDirectory: URL? = nil,
         hotkeyRegistrar: HotkeyRegistrar = CarbonHotkeyCenter()
     ) {
-        // The helpers live in `KiwiCore+Init`; a designated
-        // initializer cannot.
-        let directory = Self.resolveConfigDirectory(
-            configDirectory
+        let (directory, machine) = Self.resolveDirectories(
+            configDirectory,
+            machineDirectory
         )
         self.configDirectory = directory
+        self.machineDirectory = machine
         self.keys = KeybindingManager(registrar: hotkeyRegistrar)
-        self.socket = Self.makeSocketServer(in: directory)
-        self.profiles = Self.makeProfileManager(in: directory)
-        self.crash = CrashRecovery(directory: directory)
+        self.socket = Self.makeSocketServer(in: machine)
+        self.profiles = Self.makeProfileManager(directory, machine)
+        self.crash = CrashRecovery(directory: machine)
         bootstrapCoreServices()
     }
 }

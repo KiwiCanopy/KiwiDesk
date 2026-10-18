@@ -26,10 +26,10 @@ struct ResetEscapeHatchTests {
         // it directly through the same store.
         core.crash.shutdownCleanly()
         core.crash.autosave()
-        let marker = dir.appendingPathComponent(
+        let marker = core.machineDirectory.appendingPathComponent(
             ".state_snapshot"
         )
-        let session = dir.appendingPathComponent(
+        let session = core.machineDirectory.appendingPathComponent(
             ".session_snapshot"
         )
         let files = FileManager.default

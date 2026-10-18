@@ -13,12 +13,20 @@ public final class SingleInstanceLock {
         release()
     }
 
-    /// Default file lock path beside IPC socket (`SocketServer.start()`).
-    public nonisolated static var defaultPath: String {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(
-                ".config/KiwiDesk/KiwiDesk.lock"
-            ).path
+    /// Whether a pre-#2324 build holds the lock it kept at `path`
+    /// — the old folder, which the new lock never contends with.
+    /// A free one is removed, so a running old build is the only
+    /// thing it is ever kept for.
+    public static func legacyHolderRuns(at path: String) -> Bool {
+        let fd = open(path, O_RDWR)
+        guard fd >= 0 else { return false }
+        defer { close(fd) }
+        guard flock(fd, LOCK_EX | LOCK_NB) == 0 else {
+            return errno == EWOULDBLOCK
+        }
+        unlink(path)
+        flock(fd, LOCK_UN)
+        return false
     }
 
     /// Acquires non-blocking flock. Returns false if already held (#196).

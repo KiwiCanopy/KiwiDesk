@@ -115,6 +115,10 @@ extension KiwiCore {
             // settle schedules a direct read-back.
             self?.scheduleSizeBoundProbe(id)
         }
+        // An instant layout write never settles (#2187).
+        tiler.onInstantLayoutAsk = { [weak self] id in
+            self?.scheduleSizeBoundProbe(id)
+        }
         tiler.onFrameApplied = { [weak self] id, frame in
             // The #677 pin: while this animation re-asks a size
             // the app has refused, the truthful render is the

@@ -33,13 +33,24 @@ public enum ConfigArtifact: CaseIterable {
     /// symptom is a user moving Macs and silently losing whatever
     /// it held. `palettes.json` nearly was that symptom.
     ///
-    /// So a new file under `~/.config/KiwiDesk` adds a case here
-    /// and answers this property in the same change set.
+    /// So a new file KiwiDesk keeps — in the config folder or in
+    /// `MachineLocation`'s — adds a case here and answers this
+    /// property in the same change set; `url(of:)` says where.
     /// `SetupBundleArtifactTests` holds the two together.
     public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
         case .migrationBackups: return false
+        }
+    }
+
+    /// Whether the file lives in `MachineLocation`'s folder rather
+    /// than the config folder; `url(of:)` follows it, and such a
+    /// file never travels (`SetupBundleArtifactTests`).
+    public var livesOnThisMac: Bool {
+        switch self {
+        case .guiConfig, .profiles, .palettes, .looks: return false
+        case .migrationBackups: return true
         }
     }
 
@@ -60,7 +71,7 @@ public enum ConfigArtifact: CaseIterable {
 extension KiwiCore {
     /// Where a migrated rewrite keeps the original (#1880).
     var migrationBackups: URL {
-        Self.migrationBackups(in: configDirectory)
+        Self.migrationBackups(in: machineDirectory)
     }
 
     /// Where each artifact lives.

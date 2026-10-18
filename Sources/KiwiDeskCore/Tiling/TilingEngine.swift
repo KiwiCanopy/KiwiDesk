@@ -146,6 +146,11 @@ public final class TilingEngine {
     public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 
+    /// A layout ask written instantly, its ask already recorded —
+    /// the stand-in for `AnimationEngine.onWindowSettled`, which
+    /// that write never reaches (#2187). A no-op by default.
+    var onInstantLayoutAsk: @MainActor (WindowID) -> Void = { _ in }
+
     /// Where display *size* enters layout: the AX-coordinate
     /// visible frame of one screen. Every slot the layout
     /// calculates, every track capacity and every resize span
@@ -235,6 +240,9 @@ public final class TilingEngine {
         animation.apply = { [weak self, applier] id, frame, setSize in
             applier.apply(id, frame, setSize: setSize)
             self?.onFrameApplied(id, frame)
+        }
+        applier.resendStandsDown = { [weak self] id in
+            self?.dragExemptWindow == id
         }
         animation.onAnimationStart = { [applier] id in
             applier.beginAnimating(id)

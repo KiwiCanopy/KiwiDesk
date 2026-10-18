@@ -69,7 +69,7 @@ extension TilingEngine {
         }
         meter.add(\.framesIssued)
         let issued = probe?.frame ?? target
-        applyFrame(
+        let instant = applyFrame(
             id,
             from: sent ?? current,
             to: issued,
@@ -83,5 +83,25 @@ extension TilingEngine {
             settledFrom: settledNow
                 ? current.size : probe?.baseline
         )
+        if Self.instantAskOwesProbe(
+            pass: pass,
+            switching: motionGate.isSwitching,
+            wroteInstantly: instant
+        ) {
+            onInstantLayoutAsk(id)
+        }
+    }
+
+    /// Whether a layout ask owes the #677 settle probe itself: an
+    /// instant write never settles, so no animation schedules it
+    /// (#2187). `wroteInstantly` is `applyFrame`'s own verdict. A
+    /// re-issuing pass or a watched switch's owes none — a switch
+    /// would read every window it shows.
+    static func instantAskOwesProbe(
+        pass: RetilePass,
+        switching: Bool,
+        wroteInstantly: Bool
+    ) -> Bool {
+        wroteInstantly && !pass.reissues && !switching
     }
 }

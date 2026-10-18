@@ -628,6 +628,12 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   `rekey` by reflection and the tombstone by hand (#1439,
   `SizeBoundCorroborationProbeTests`, `SizeBoundCorroborationProbeEngineTests`,
   `SizeBoundLearnerLifecycleParityTests`)
+- a layout frame reaches another app inside an EUI hold, a Reduce Motion frame
+  taking the instant set, an instant layout ask schedules the #677 settle probe
+  from `applyFrame`'s own verdict outside a re-issuing pass or a switch's
+  fold, and an instant set onto another screen writes again unless superseded,
+  parked, unparked or held (#2187, `ReduceMotionInstantWriteTests`,
+  `SizeBoundGateNeedleTests`)
 - a scrolling viewport offset travels with the slot it was measured against, in
   ONE `ScrollRest` value, and `ScrollingLayout+Offset.heldBase` is the one
   place a focus change is told from a row that moved underneath an unchanged
@@ -1014,8 +1020,11 @@ Touching `Config`, `Profiles`, `Commands`.
   preset's settings are its sparse `PresetTuning` over that shape tuning,
   merged ONCE in `StandardLayout.settings(sizes:)` (#1663,
   `PresetShapeTuningSeamTests`)
-- a new file in the config directory joins `ConfigArtifact` AND answers "does
-  this travel in a backup?" in the same change set, neither alone
+- a new file KiwiDesk keeps, in the config folder or `MachineLocation`'s,
+  joins `ConfigArtifact` AND answers "does this travel in a backup?" in the
+  same change set, neither alone, and a file meaningful on this Mac alone lives
+  in `MachineLocation`'s folder, never the config folder (#2324,
+  `CoreInitPathTests`, `SetupBundleArtifactTests`)
 - a write of `gui.json` or a profile file goes through its store's door, which
   refuses a file a newer build wrote, and a raw rewrite beside it asks
   `NewerFormatOnDisk.check` first (#2325, `NewerFormatWriteRefusalTests`)

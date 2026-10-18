@@ -132,7 +132,7 @@ struct InPlaceRestartTests {
             core.boot.reachedReady = true
             if announced { core.announceUpdateRelaunch() }
             core.stop()
-            let url = core.configDirectory.appendingPathComponent(
+            let url = core.machineDirectory.appendingPathComponent(
                 ".session_snapshot"
             )
             let text = try String(contentsOf: url, encoding: .utf8)
@@ -143,6 +143,9 @@ struct InPlaceRestartTests {
             )
             try? FileManager.default.removeItem(
                 at: core.configDirectory
+            )
+            try? FileManager.default.removeItem(
+                at: core.machineDirectory
             )
         }
     }
@@ -167,7 +170,7 @@ struct InPlaceRestartTests {
             core.crash.freezeForLogout()
             if announced { core.announceUpdateRelaunch() }
             core.stop()
-            let url = core.configDirectory.appendingPathComponent(
+            let url = core.machineDirectory.appendingPathComponent(
                 ".session_snapshot"
             )
             let text = try? String(contentsOf: url, encoding: .utf8)
@@ -178,6 +181,9 @@ struct InPlaceRestartTests {
             }
             try? FileManager.default.removeItem(
                 at: core.configDirectory
+            )
+            try? FileManager.default.removeItem(
+                at: core.machineDirectory
             )
         }
     }

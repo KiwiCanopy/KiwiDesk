@@ -132,7 +132,7 @@ public enum ServiceManager {
     static func announceInPlaceRestart() {
         guard
             let client = try? SocketClient(
-                path: KiwiCore.defaultSocketPath
+                path: MachineLocation.socketPath
             )
         else { return }
         client.setTimeout(seconds: 2)

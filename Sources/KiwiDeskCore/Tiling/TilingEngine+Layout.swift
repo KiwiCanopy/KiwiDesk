@@ -225,7 +225,9 @@ extension TilingEngine {
     /// it reaches `SizeStep` through the animation and decides
     /// whether a shrinking axis may slide instead of snapping.
     /// `.mayInstantSize` is the default because mismarking is asymmetric —
-    /// see `BatchSizing`.
+    /// see `BatchSizing`. Returns whether the frame was written
+    /// instantly, the verdict an ask's settle probe keys on (#2187).
+    @discardableResult
     public func applyFrame(
         _ id: WindowID,
         from current: CGRect,
@@ -233,14 +235,16 @@ extension TilingEngine {
         animated: Bool,
         isNewWindow: Bool = false,
         sizing: BatchSizing = .mayInstantSize
-    ) {
+    ) -> Bool {
         // Every engine frame retires the open size ask (#1694);
         // the layout loop re-opens one with `recordAsk` right
         // after its own `applyFrame`, so only a LAYOUT frame is
         // ever asked.
         boundLearner.supersedeAsk(id)
         placements.stamp(id, target: target)
-        if animated,
+        // Reduce Motion takes the instant set, whose EUI hold the
+        // engine's no-animation write lacks (#2187).
+        if animated, !animation.reduceMotion(),
             let screen = Self.screen(containing: target)
                 ?? ScreenList.mainOrFirst
         {
@@ -256,9 +260,22 @@ extension TilingEngine {
                 isNewWindow: isNewWindow,
                 sizing: sizing
             )
+            return false
         } else {
             animation.cancel(window: id)
-            setFrame(id, target)
+            // A parked corner may lie on a neighbour: no resend on
+            // a park or an unpark, so a switch moves each window once.
+            setFrame(
+                id,
+                target,
+                resend: !looksStashed(current) && !looksStashed(target)
+                    && GeometryUtils.crosses(
+                        from: current,
+                        to: target,
+                        among: allScreenBounds()
+                    )
+            )
+            return true
         }
     }
 
@@ -274,11 +291,17 @@ extension TilingEngine {
     public func setFrame(
         _ id: WindowID,
         _ frame: CGRect,
-        setSize: Bool = true
+        setSize: Bool = true,
+        resend: Bool = false
     ) {
         boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
         placements.stamp(id, target: frame)
-        applier.applyInstant(id, frame, setSize: setSize)
+        applier.applyInstant(
+            id,
+            frame,
+            setSize: setSize,
+            resend: resend
+        )
     }
 
     /// The commanded frame of a recent instant set whose echo
