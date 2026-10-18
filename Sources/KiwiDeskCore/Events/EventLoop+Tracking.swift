@@ -12,11 +12,14 @@ extension EventLoop {
     /// and deminiaturized notification arms — so the hidden
     /// refusal below is stated once instead of at each of them.
     /// A rule enforced at three of four doors is not a rule.
+    /// `arrival`, an off-main read of an un-minimized window,
+    /// spares every AX read below; every verdict stays here.
     func track(
         _ element: AXUIElement,
         pid: pid_t,
         app: AppRef,
-        displayBounds: [CGRect]? = nil
+        displayBounds: [CGRect]? = nil,
+        arrival: ArrivalReading? = nil
     ) {
         // A hidden app's windows are on screen nowhere, so
         // adopting one would hand a tile to something the user
@@ -31,14 +34,11 @@ extension EventLoop {
         // discriminates it (`HiddenAppWindowTests` says so in
         // its own words).
         guard !appIsHidden(pid) else { return }
-        let role = AXHelper.role(of: element)
+        let role = arrival?.role ?? AXHelper.role(of: element)
         guard role == kAXWindowRole,
-            !AXHelper.isMinimized(element),
-            var window = AXHelper.snapshot(
-                element: element,
-                pid: pid,
-                app: app
-            )
+            arrival != nil || !AXHelper.isMinimized(element),
+            var window = arrival?.window(pid: pid, app: app)
+                ?? AXHelper.snapshot(element: element, pid: pid, app: app)
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
         // One WindowServer round trip feeds every
@@ -47,8 +47,16 @@ extension EventLoop {
             of: window.id
         )
         let layer = server.layer
-        let facts = WindowFacts.read(element, role: role, layer: layer)
-        let subrole = facts.subrole
+        let detection: FloatDetectionSource
+        let subrole: String
+        if let arrival {
+            detection = .read(arrival.autoReason)
+            subrole = arrival.subrole
+        } else {
+            let facts = WindowFacts.read(element, role: role, layer: layer)
+            detection = .facts(facts)
+            subrole = facts.subrole
+        }
         let displays =
             layer == nil || layer == 0
             ? []
@@ -90,11 +98,15 @@ extension EventLoop {
         guard
             !shouldIgnore(
                 element,
+                id: window.id,
                 pid: pid,
                 app: app,
                 layer: layer ?? 0,
                 isAccessory: isAccessory,
-                tracked: false
+                tracked: false,
+                titlebarButton: arrival.map {
+                    $0.traits?.hasTitlebarButton == true
+                }
             )
         else {
             return
@@ -102,10 +114,15 @@ extension EventLoop {
         // Every subrole: Orion's twin reads AXUnknown as often
         // as AXStandardWindow (#1785, device 2026-09-30).
         guard
-            shadowVerdict(element, id: window.id, pid: pid) == .window
+            shadowVerdict(
+                element,
+                id: window.id,
+                pid: pid,
+                traits: arrival.map(\.traits)
+            ) == .window
         else { return }
         let verdict = autoFloatVerdict(
-            .facts(facts),
+            detection,
             id: window.id,
             pid: pid,
             bundleID: app.bundleID
@@ -125,7 +142,7 @@ extension EventLoop {
         // Native fullscreen suppresses the focus ring (a ring
         // around a display-filling window shows only at the
         // corners); snapshot it here, refresh on reconcile.
-        window.isFullscreen = readFullscreen(element)
+        window.isFullscreen = arrival?.fullscreen ?? readFullscreen(element)
         window.carriesOwnMark = tilesAsOwnWindow(pid: pid, id: window.id)
         detectedFloating[window.id] = verdict
         detectedFullscreen[window.id] = window.isFullscreen
@@ -138,7 +155,7 @@ extension EventLoop {
         // re-key instead of a destroy + create (#308).
         trackedFrames[window.id] = window.frame
         offMain.noteFreshWrite(window.id)
-        if AXHelper.hasNativeTabs(element) {
+        if arrival?.nativeTabs ?? AXHelper.hasNativeTabs(element) {
             tabCarriers.insert(window.id)
         }
         onEvent(.windowCreated(window))

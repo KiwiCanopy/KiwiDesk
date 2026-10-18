@@ -301,7 +301,8 @@ extension EventLoop {
             appeared: appeared,
             live: live,
             minimized: minimized,
-            coalesceTabs: coalesceTabs && !recentSpaceSwitch
+            coalesceTabs: coalesceTabs && !recentSpaceSwitch,
+            arrivals: prefetched?.arrivals ?? [:]
         )
         // Past the sweep, so a spent budget here abandons nothing
         // of the list; the app is completed after the pass (#803).

@@ -37,11 +37,24 @@ struct PrefetchedWindows {
             ? nil : windows.contains(where: \.isStandardWindow)
     }
 
-    /// The shadow traits read of each tracked window.
+    /// The shadow traits read of each tracked window, and of each
+    /// arrival the reconcile adopts.
     var traits: [WindowID: WindowTraits] {
         windows.reduce(into: [:]) { traits, window in
-            if let id = window.id, let read = window.tracked?.traits {
+            if let id = window.id,
+                let read = window.tracked?.traits
+                    ?? window.arrival?.traits
+            {
                 traits[id] = read
+            }
+        }
+    }
+
+    /// What the read found of each window untracked when it began.
+    var arrivals: [WindowID: ArrivalReading] {
+        windows.reduce(into: [:]) { arrivals, window in
+            if let id = window.id, let read = window.arrival {
+                arrivals[id] = read
             }
         }
     }
@@ -87,6 +100,11 @@ struct OffMainReconcile {
     var next: [pid_t: Debt] = [:]
     /// A Desktop switch's batch read (#2347).
     var switchBatch = SwitchReconcile()
+    /// The list read's `WindowFacts` door (#1883); a test hands a
+    /// fabricated element a role through it.
+    var readFacts: (AXUIElement, Int?) -> WindowFacts = {
+        WindowFacts.read($0, layer: $1)
+    }
     /// When each app's last list read began.
     private(set) var readStarted: [pid_t: ContinuousClock.Instant] =
         [:]

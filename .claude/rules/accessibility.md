@@ -121,9 +121,14 @@ editing AX code:
   to need joins the reader rather than being read beside it, and
   a seam the reader captures reads no `EventLoop` state — it runs
   off the main actor; one that needs loop state is resolved at
-  request time, as the tracked set is. A window the read did not
-  cover (tracked during the flight, or appeared and handed to
-  `track`) is read the way the synchronous reconcile reads it.
+  request time, as the tracked set is. A window untracked when
+  the read began is read for its adoption too (`ArrivalReading`),
+  and `track` takes that reading in place of its own AX reads, so
+  a Desktop switch's arrivals cost the main actor no AX call per
+  window (`ArrivalAdoptionTests`); the hidden refusal, the
+  observer registration and every verdict stay on the main
+  actor. A window the read did not cover is read the way the
+  synchronous reconcile reads it.
   `ReconcileOffMainTests`, `ReconcileOffMainDebtTests`,
   `ReconcileOffMainRecheckTests` and `ReconcileSnapshotTests`
   hold the behaviour.

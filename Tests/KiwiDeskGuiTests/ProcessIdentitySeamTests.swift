@@ -61,9 +61,12 @@ struct ProcessIdentitySeamTests {
             under: "Events"
         )
         try #require(!tracking.isEmpty)
+        // The off-main read's traits, where it took them, are the
+        // same verdict's input (#2347).
         let pattern =
-            #"guard\s+shadowVerdict\(element, id: window\.id, "#
-            + #"pid: pid\)\s*== \.window\s+else \{ return \}"#
+            #"guard\s+shadowVerdict\(\s*element,\s*id: window\.id,"#
+            + #"\s*pid: pid,\s*traits: arrival\.map\(\\\.traits\)\s*\)"#
+            + #"\s*== \.window\s+else \{ return \}"#
         let verdict = try #require(
             tracking.range(of: pattern, options: .regularExpression),
             "track no longer refuses a shadow before it becomes a tile"
@@ -154,7 +157,7 @@ struct ProcessIdentitySeamTests {
         let pattern =
             #"appeared: appeared\.filter \{\s*"#
             + #"!shadows\.holds\(\$0\.id, pid: pid\)\s*"#
-            + #"\}\.map\(appearedTab\)"#
+            + #"\}\.map \{ appearedTab\(\$0, arrivals\[\$0\.id\]\) \}"#
         #expect(
             sweep.range(of: pattern, options: .regularExpression) != nil
         )

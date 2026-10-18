@@ -47,8 +47,9 @@ struct WindowFactsSeamTests {
                 // The recheck's element, read only where nothing
                 // forces the float.
                 "Events/EventLoop+FloatVerdict.swift": 1,
-                // The off-main list read (#1933).
-                "Events/EventLoop+ListedWindows.swift": 1,
+                // The off-main list read's seam default (#1933),
+                // which `ListedWindowReader` captures.
+                "Events/EventLoop+ReconcileOffMain.swift": 1,
             ]
         )
         // Only the door assembles the value: a producer building
