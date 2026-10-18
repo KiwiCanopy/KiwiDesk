@@ -43,6 +43,10 @@ struct FrameSetReaderCensusTests {
             "a hover stands down if a focus would move any window "
                 + "from where it was asked to sit (#1869)"
         ),
+        "KiwiCore+AppBarVisibility.swift": (
+            .issued,
+            "an App Bar item dims by where its window sits (#2234)"
+        ),
         "KiwiCore+Borders.swift": (
             .slots,
             "membership and fallback geometry; rings draw "

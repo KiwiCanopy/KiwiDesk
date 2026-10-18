@@ -295,6 +295,7 @@ public final class AppBarOverlay {
                 count: item.count,
                 titleCut: item.titleCut,
                 floating: item.floating,
+                visibility: item.visibility,
                 active: active,
                 horizontal: m.horizontal,
                 style: style

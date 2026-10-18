@@ -3,9 +3,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// An App Bar group-count badge dims with its item's focus —
-/// full ink only while the item is focused or hovered, as the
-/// Space Bar's badges read, whatever the item draws.
+/// An App Bar group-count badge dims with its item — full ink
+/// while the item is focused, hovered or fully on screen (#2234),
+/// as the icon does, whatever the item draws.
 @Suite("App Bar badge dims with its item")
 @MainActor
 struct AppBarBadgeDimTests {
@@ -14,7 +14,8 @@ struct AppBarBadgeDimTests {
 
     private func makeView(
         active: Bool,
-        glyph: String? = nil
+        glyph: String? = nil,
+        visibility: BarVisibility = .hidden
     ) -> AppBarItemView {
         var style = AppBarLook()
         style.shelf.dimFactor = Self.dim
@@ -28,6 +29,7 @@ struct AppBarBadgeDimTests {
             icon: nil,
             glyph: glyph,
             count: 3,
+            visibility: visibility,
             active: active,
             horizontal: true,
             style: style
@@ -45,6 +47,15 @@ struct AppBarBadgeDimTests {
         let view = makeView(active: false, glyph: "A")
         #expect(!view.glyphLabel.isHidden)
         #expect(view.badge.alphaValue == Self.dim)
+    }
+
+    @Test("Only a fully visible unfocused item's badge is lit")
+    func visibleBadgeLifts() {
+        let lit = makeView(active: false, visibility: .visible)
+        #expect(lit.badge.alphaValue == 1)
+        #expect(lit.iconView.alphaValue == 1)
+        let partly = makeView(active: false, visibility: .partly(shown: nil))
+        #expect(partly.badge.alphaValue == Self.dim)
     }
 
     @Test("A hovered unfocused item's badge reads full ink")

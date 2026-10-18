@@ -24,6 +24,9 @@ extension AppBarOverlay {
         /// A float listed after the row's break (#1826): no slot in
         /// the row, so no drag.
         public let floating: Bool
+        /// Where the window a click focuses sits (#2234): the dim
+        /// reads it. Core's verdict, set after the item is built.
+        public var visibility: BarVisibility = .visible
 
         public init(
             id: WindowID,
