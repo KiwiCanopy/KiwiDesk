@@ -93,7 +93,8 @@ struct AppBarBoxHostTests {
         for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
             let host = try #require(GlassBox.host(of: glass))
             #expect(tint.superview === host)
-            #expect(glass.frame == host.bounds)
+            // Within a point: the backing's rounding is left (#2388).
+            #expect(GlassPlate.fills(glass.frame, host.bounds))
         }
     }
 

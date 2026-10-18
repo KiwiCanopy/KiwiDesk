@@ -9,6 +9,16 @@ import AppKit
 final class GlassBoxHost: NSView {
     override var isFlipped: Bool { true }
 
+    /// The pair follows every size the host takes. A glass in a
+    /// host stayed at the fused plate's width when the host shrank,
+    /// autoresizing never reaching it (#2388, device).
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        for view in subviews where !GlassPlate.fills(view.frame, bounds) {
+            view.frame = bounds
+        }
+    }
+
     override func hitTest(_ point: NSPoint) -> NSView? {
         let hit = super.hitTest(point)
         return hit === self ? nil : hit
@@ -52,10 +62,11 @@ enum GlassBox {
 
     /// Lays a box out at `frame`: the pair takes the host's CURRENT
     /// bounds, then the host — the one view that travels (#2095) —
-    /// moves; AppKit steps a travelling frame and autoresizes the
-    /// pair at each step. A fresh host lands rather than gliding
-    /// from nowhere. `visible` false hides the whole box, which
-    /// still takes its slot; `hex` is the Fill its tint paints.
+    /// moves, and lays the pair out to each size it takes
+    /// (`GlassBoxHost.setFrameSize`). A fresh host lands rather
+    /// than gliding from nowhere. `visible` false hides the whole
+    /// box, which still takes its slot; `hex` is the Fill its tint
+    /// paints.
     static func place(
         _ glass: NSView,
         tint: GlassBackdrop,

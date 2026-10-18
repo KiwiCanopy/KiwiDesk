@@ -137,4 +137,75 @@ struct ShelfPlateGlassHostTests {
         #expect(box.glass.frame == host.bounds)
         #expect(box.tint.frame == host.bounds)
     }
+
+    /// Auto Layout rounds the glass to the backing, and rewriting
+    /// that sub-point difference left the glass at the fused 962.5
+    /// when the shelf shrank to the Space Bar's 539 (#2388, device):
+    /// a glass within a point of its target is left alone.
+    @Test("A glass already filling its host is not rewritten")
+    func roundedGlassIsNotRewritten() throws {
+        guard #available(macOS 26, *) else { return }
+        let parent = NSView(
+            frame: CGRect(x: 0, y: 0, width: 1200, height: 40)
+        )
+        let box = try #require(GlassBox.make(in: parent))
+        let host = try #require(GlassBox.host(of: box.glass))
+        host.frame = CGRect(x: 382.8, y: 0, width: 962.4, height: 40)
+        let rounded = CGRect(x: 0, y: 0, width: 962.5, height: 40)
+        box.glass.frame = rounded
+        GlassBox.place(
+            box.glass,
+            tint: box.tint,
+            at: CGRect(x: 594.5, y: 0, width: 539, height: 40),
+            cornerRadius: 8,
+            hex: "#202020B3",
+            edge: .top,
+            visible: true,
+            animated: true,
+            move: { _, _, _ in }
+        )
+        #expect(box.glass.frame == rounded)
+        // A glass a whole point off its host is still laid out.
+        box.glass.frame = CGRect(x: 0, y: 0, width: 600, height: 40)
+        GlassBox.place(
+            box.glass,
+            tint: box.tint,
+            at: CGRect(x: 594.5, y: 0, width: 539, height: 40),
+            cornerRadius: 8,
+            hex: "#202020B3",
+            edge: .top,
+            visible: true,
+            animated: false,
+            move: { view, frame, _ in view.frame = frame }
+        )
+        #expect(box.glass.frame == host.bounds)
+    }
+
+    /// On the device autoresizing never reached a hosted glass once
+    /// the host shrank (#2388), so the host lays its pair out
+    /// itself: modelled here by a pair autoresizing does not move.
+    @Test("A host resize lays its glass and tint out to its bounds")
+    func hostResizeFillsThePair() throws {
+        guard #available(macOS 26, *) else { return }
+        let parent = NSView(
+            frame: CGRect(x: 0, y: 0, width: 1200, height: 40)
+        )
+        let box = try #require(GlassBox.make(in: parent))
+        let host = try #require(GlassBox.host(of: box.glass))
+        GlassBox.place(
+            box.glass,
+            tint: box.tint,
+            at: CGRect(x: 382.8, y: 0, width: 962.4, height: 40),
+            cornerRadius: 8,
+            hex: "#202020B3",
+            edge: .top,
+            visible: true,
+            animated: false
+        )
+        box.glass.autoresizingMask = []
+        box.tint.autoresizingMask = []
+        host.frame = CGRect(x: 594.5, y: 0, width: 539, height: 40)
+        #expect(GlassPlate.fills(box.glass.frame, host.bounds))
+        #expect(GlassPlate.fills(box.tint.frame, host.bounds))
+    }
 }

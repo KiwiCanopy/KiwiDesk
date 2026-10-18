@@ -34,9 +34,21 @@ enum GlassPlate {
             let glass = view as? NSGlassEffectView
         else { return }
         // Never travels: a gliding glass rides its `GlassBox` host
-        // (#2095), and an equal write would cancel its follow.
-        if glass.frame != frame { glass.frame = frame }
+        // (#2095), and an equal write would cancel its follow. Within
+        // a point is equal: Auto Layout rounds the glass to the
+        // backing, and rewriting that leaves it at its old size when
+        // the host next glides (#2388, device).
+        if !fills(glass.frame, frame) { glass.frame = frame }
         glass.cornerRadius = cornerRadius
+    }
+
+    /// Whether `frame` already stands at `target`, each edge within
+    /// a point — the most the backing's rounding moves it.
+    static func fills(_ frame: CGRect, _ target: CGRect) -> Bool {
+        abs(frame.minX - target.minX) < 1
+            && abs(frame.minY - target.minY) < 1
+            && abs(frame.maxX - target.maxX) < 1
+            && abs(frame.maxY - target.maxY) < 1
     }
 
     /// Embeds view into glass contentView.
