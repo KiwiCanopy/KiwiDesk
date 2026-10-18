@@ -103,41 +103,73 @@ struct MachineConfigStore {
     /// Takes the machine-local leaves out of a `gui.json` written
     /// before they moved (`legacy`, its raw bytes) — the one
     /// crossing, run ahead of the migration that strips them
-    /// there. On a `gui.json` other Macs share, the first Mac to
-    /// migrate takes every entry (#2324 ruling 10). Returns whether
-    /// the bytes may be migrated: false only where leaves were
-    /// owed and the write failed, so the next read carries again.
-    func carry(fromLegacy legacy: Data) -> Bool {
+    /// there, over every `MachineConfig.moves` entry the file is
+    /// below. A leaf this Mac already holds outranks the shared
+    /// copy; otherwise the first Mac to migrate a shared file
+    /// takes every entry (#2324 ruling 10). Returns the leaves
+    /// still owed where the write failed, for the caller to
+    /// compose in memory without rewriting the file; nil once
+    /// nothing is owed.
+    func carry(fromLegacy legacy: Data) -> MachineConfig? {
         guard
             let root = try? JSONSerialization.jsonObject(with: legacy)
-                as? [String: Any],
-            (root["format"] as? Int ?? 0) < MachineConfig.movedAtFormat
-        else { return true }
-        let key = MachineConfig.CodingKeys.desktopSpaces.rawValue
-        guard let value = root[key],
-            let bytes = try? JSONSerialization.data(
-                withJSONObject: [key: value]
-            ),
-            let carried = try? JSONDecoder().decode(
-                MachineConfig.self,
-                from: bytes
-            )
-        else { return true }
-        var stored = load()
-        guard stored.desktopSpaces.isEmpty else { return true }
-        stored.desktopSpaces = carried.desktopSpaces
+                as? [String: Any]
+        else { return nil }
+        let format = root["format"] as? Int ?? 0
+        var owed: [String: Any] = [:]
+        for move in MachineConfig.moves where format < move.guiFormat {
+            for key in move.keys { owed[key] = root[key] }
+        }
+        guard let carried = Self.decoded(owed) else { return nil }
+        var stored =
+            (try? Data(contentsOf: url)).flatMap {
+                try? JSONSerialization.jsonObject(with: $0)
+                    as? [String: Any]
+            } ?? [:]
+        for (key, value) in owed where Self.isEmpty(stored[key]) {
+            stored[key] = value
+        }
         do {
-            try save(stored)
-            return true
+            guard let merged = Self.decoded(stored) else {
+                return carried
+            }
+            try save(merged)
+            return nil
         } catch {
-            return false
+            return carried
+        }
+    }
+
+    private static func decoded(_ root: [String: Any]) -> MachineConfig? {
+        guard !root.isEmpty,
+            let bytes = try? JSONSerialization.data(withJSONObject: root)
+        else { return nil }
+        return try? JSONDecoder().decode(MachineConfig.self, from: bytes)
+    }
+
+    private static func isEmpty(_ value: Any?) -> Bool {
+        switch value {
+        case nil: true
+        case let map as [String: Any]: map.isEmpty
+        case let list as [Any]: list.isEmpty
+        default: false
         }
     }
 }
 
 extension MachineConfig {
-    /// The `GuiConfig.currentFormat` that moved the leaves out of
-    /// `gui.json`, spelled as history: the strip step and the
-    /// carry stand down at it.
-    static let movedAtFormat = 9
+    /// One move of leaves out of `gui.json`: the `GuiConfig` and
+    /// `SetupBundle` formats whose step strips them, and their
+    /// keys there, spelled as history. Append-only: the carry and
+    /// `migratingMachineLeavesOut` both read this one table, so a
+    /// leaf the strip removes is a leaf the carry took first.
+    struct Move: Sendable {
+        let guiFormat: Int
+        let bundleFormat: Int
+        let keys: [String]
+    }
+
+    static let moves = [
+        Move(guiFormat: 9, bundleFormat: 28, keys: ["desktop_spaces"])
+    ]
 }

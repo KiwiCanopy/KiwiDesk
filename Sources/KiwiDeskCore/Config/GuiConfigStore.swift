@@ -62,16 +62,18 @@ public struct GuiConfigStore {
     /// nil on failure. Migrates older formats through
     /// `ConfigMigration` first and writes the migrated bytes back
     /// — once the leaves that step strips are carried into
-    /// `machine.json`; a failed carry migrates in memory only.
+    /// `machine.json`; a failed carry migrates in memory only and
+    /// composes the leaves it still owes.
     public func load() -> GuiConfig? {
         guard var data = try? Data(contentsOf: url) else {
             return nil
         }
+        let owed = machine.carry(fromLegacy: data)
         data = MigrationBackup.migrateInPlace(
             data,
             at: url,
             backups: migrationBackups,
-            writesBack: machine.carry(fromLegacy: data)
+            writesBack: owed == nil
         )
         guard
             let config = try? JSONDecoder().decode(
@@ -79,7 +81,7 @@ public struct GuiConfigStore {
                 from: data
             )
         else { return nil }
-        return machine.load().applied(to: config)
+        return (owed ?? machine.load()).applied(to: config)
     }
 
     /// Writes the sidecar; throws `NewerFormatOnDisk` rather than
@@ -100,6 +102,9 @@ public struct GuiConfigStore {
         if let liveLook {
             config.look = liveLook
         }
+        // This Mac's file first: a failed write here leaves the
+        // shared file as it was, and with it any carry still owed.
+        try machine.save(MachineConfig(of: config))
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -112,16 +117,15 @@ public struct GuiConfigStore {
             to: url,
             options: .atomic
         )
-        try machine.save(MachineConfig(of: config))
     }
 
-    /// Writes this Mac's leaves alone, leaving `gui.json` — which
-    /// another Mac may share — untouched; stamped like `save`.
-    public func saveMachineLocal(_ config: GuiConfig) throws {
-        var config = config
-        if let liveDesktopSpaces {
-            config.desktopSpaces = liveDesktopSpaces
-        }
-        try machine.save(MachineConfig(of: config))
+    /// Writes the live Desktop memory into `machine.json` alone,
+    /// leaving `gui.json` — which another Mac may share — unread
+    /// and untouched; nothing to write while there is no stamp.
+    public func saveMachineLocal() throws {
+        guard let liveDesktopSpaces else { return }
+        var stored = machine.load()
+        stored.desktopSpaces = liveDesktopSpaces
+        try machine.save(stored)
     }
 }

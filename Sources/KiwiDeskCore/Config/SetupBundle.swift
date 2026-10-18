@@ -72,10 +72,6 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `machine.json` (#2324) and never travels.
     public static let currentFormat = 28
 
-    /// The format whose step drops a bundle's machine-local leaves,
-    /// spelled as history (`migratingMachineLeavesOut`).
-    static let machineLeavesDroppedAtFormat = 28
-
     public let format: Int
 
     /// Top-level key `ConfigMigration.targetFormat` routes a bundle on

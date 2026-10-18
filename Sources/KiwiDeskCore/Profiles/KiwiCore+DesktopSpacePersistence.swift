@@ -76,17 +76,15 @@ extension KiwiCore {
     /// there — a limitation of config ownership rather than a
     /// gap, and `docs/spaces-and-desktops.md` says so.
     func persistDesktopSpaceMemory() {
-        guard isGuiManaged, desktopMemory.spaceMemoryEstablished,
-            let live = guiConfigStore.load()
+        guard isGuiManaged, desktopMemory.spaceMemoryEstablished
         else { return }
         // The STORE, never `saveGuiConfig` — that reloads the
         // whole config, which at quit would rebuild the Lua VM
-        // the stop is tearing down. No assignment here: the write
-        // stamps the live memory in, and doing it twice is the
-        // two-mechanism shape that produced the restore bug. This
-        // site exists for the MOMENT, not for the value.
+        // the stop is tearing down. The write reads no `gui.json`,
+        // so one a newer build wrote cannot hold this Mac's memory
+        // back (#2324).
         do {
-            try guiConfigStore.saveMachineLocal(live)
+            try guiConfigStore.saveMachineLocal()
         } catch {
             onLog("desktop spaces: write failed: \(error)")
         }

@@ -215,12 +215,30 @@ struct DesktopSpacePersistenceWiringTests {
         try core.guiConfigStore.save(config)
         let machine = core.url(of: .machineConfig)
         #expect(FileManager.default.fileExists(atPath: machine.path))
+        var trashed: [URL] = []
         core.resetAllSettings(trash: { url in
+            trashed.append(url)
             try FileManager.default.removeItem(at: url)
         })
+        #expect(trashed.contains(machine))
+    }
+
+    /// The quit write reads no `gui.json`, so one this build
+    /// cannot decode — a newer Mac's — does not cost this Mac its
+    /// memory (#2324).
+    @Test("Quitting writes the memory past an unreadable gui.json")
+    func quitWritesPastAnUnreadableGuiConfig() throws {
+        let core = makeCore()
+        try core.guiConfigStore.save(GuiConfig())
+        try Data("not json".utf8).write(to: core.guiConfigStore.url)
+        core.rememberVirtualSpace(
+            SpaceID(6),
+            leaving: .identity(stamp)
+        )
+        core.persistDesktopSpaceMemory()
         #expect(
             core.guiConfigStore.machine.load()
-                .desktopSpaces[.identity(stamp)] == nil
+                .desktopSpaces[.identity(stamp)] == SpaceID(6)
         )
     }
 
@@ -237,5 +255,10 @@ struct DesktopSpacePersistenceWiringTests {
         // load finds nothing, so this must not create one.
         core.persistDesktopSpaceMemory()
         #expect(core.guiConfigStore.load() == nil)
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: core.url(of: .machineConfig).path
+            )
+        )
     }
 }

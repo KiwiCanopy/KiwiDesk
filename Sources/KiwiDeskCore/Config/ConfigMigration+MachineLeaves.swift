@@ -1,52 +1,60 @@
 import Foundation
 
 /// Drops the machine-local leaves from `gui.json` and from a
-/// bundle's inline `config` (#2324, `MachineConfigMigrationTests`):
-/// `desktop_spaces` lives in `machine.json` from
-/// `MachineConfig.movedAtFormat` and never travels.
-/// `GuiConfigStore.load` carries a `gui.json`'s copy across before
-/// this step rewrites the file; a bundle's copy is another Mac's
-/// memory and is dropped.
+/// bundle's inline `config` (#2324, `MachineConfigTests`): each
+/// `MachineConfig.moves` entry's keys, below that entry's format.
+/// `GuiConfigStore.load` carries a `gui.json`'s copy into
+/// `machine.json` before this step rewrites the file; a bundle's
+/// copy is another Mac's and is dropped.
 extension ConfigMigration {
-    /// Spelled here rather than derived: a historical step keeps
-    /// the names it was written for.
-    static let movedMachineKeys = ["desktop_spaces"]
-
     @Sendable
     static func migratingMachineLeavesOut(_ data: Data) -> Data? {
         surgicallyApplying(
             data,
             gate: { data in
-                stampBelow(
-                    data,
-                    file: MachineConfig.movedAtFormat,
-                    bundle: SetupBundle.machineLeavesDroppedAtFormat
-                )
-                    && movedMachineKeys.contains {
-                        data.range(of: Data("\"\($0)\"".utf8)) != nil
-                    }
+                MachineConfig.moves.contains { move in
+                    stampBelow(
+                        data,
+                        file: move.guiFormat,
+                        bundle: move.bundleFormat
+                    )
+                        && move.keys.contains {
+                            data.range(of: Data("\"\($0)\"".utf8)) != nil
+                        }
+                }
             },
             rewriting: machineLeavesDropped,
             editing: droppingMachineLeaves
         )
     }
 
-    /// The root with each moved key gone from a `gui.json` root
-    /// or a bundle's `config`; nothing else is walked.
+    /// The keys a root at `format` still owes the move, for its
+    /// shape's floor.
+    private static func owedKeys(format: Int, bundle: Bool) -> [String] {
+        MachineConfig.moves.filter {
+            format < (bundle ? $0.bundleFormat : $0.guiFormat)
+        }.flatMap(\.keys)
+    }
+
+    /// The root with each owed key gone from a `gui.json` root or
+    /// a bundle's `config`; nothing else is walked.
     static func machineLeavesDropped(_ node: Any) -> (Any, Bool) {
         guard var root = node as? [String: Any] else {
             return (node, false)
         }
+        let format = root["format"] as? Int ?? 0
         switch shape(of: root) {
         case .gui:
-            let changed = movedMachineKeys.contains { root[$0] != nil }
-            for key in movedMachineKeys { root[key] = nil }
+            let keys = owedKeys(format: format, bundle: false)
+            let changed = keys.contains { root[$0] != nil }
+            for key in keys { root[key] = nil }
             return (root, changed)
         case .bundle:
+            let keys = owedKeys(format: format, bundle: true)
             guard var config = root["config"] as? [String: Any],
-                movedMachineKeys.contains(where: { config[$0] != nil })
+                keys.contains(where: { config[$0] != nil })
             else { return (root, false) }
-            for key in movedMachineKeys { config[key] = nil }
+            for key in keys { config[key] = nil }
             root["config"] = config
             return (root, true)
         case .profile, .palettes, .looks:
@@ -55,11 +63,11 @@ extension ConfigMigration {
     }
 
     /// The textual edit: each `"key" : { … }` entry removed with
-    /// one neighbouring comma. The map is flat, so `[^{}]*` spans
-    /// it; the envelope's re-parse refuses anything else.
+    /// one neighbouring comma. The maps are flat, so `[^{}]*` spans
+    /// one; the envelope's re-parse refuses anything else.
     private static func droppingMachineLeaves(_ text: String) -> Data? {
         var out = text
-        for key in movedMachineKeys {
+        for key in MachineConfig.moves.flatMap(\.keys) {
             let entry = "\"\(key)\"\\s*:\\s*\\{[^{}]*\\}"
             for pattern in ["\\s*\(entry)\\s*,", ",\\s*\(entry)"] {
                 guard let regex = try? NSRegularExpression(pattern: pattern)

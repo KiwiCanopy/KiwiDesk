@@ -90,7 +90,7 @@ struct MachineConfigTests {
                 with: JSONEncoder().encode(MachineConfig(of: config))
             ) as? [String: Any]
         )
-        gui["format"] = MachineConfig.movedAtFormat - 1
+        gui["format"] = MachineConfig.moves[0].guiFormat - 1
         gui["desktop_spaces"] = machine["desktop_spaces"]
         try FileManager.default.createDirectory(
             at: store.url.deletingLastPathComponent(),
@@ -145,8 +145,47 @@ struct MachineConfigTests {
         )
         // A newer build's machine.json refuses the write.
         try Data(#"{"format":999}"#.utf8).write(to: store.machine.url)
-        #expect(store.load() != nil)
+        let loaded = try #require(store.load())
+        // Composed in memory, so the session still has it.
+        #expect(loaded.desktopSpaces == remembering.desktopSpaces)
         #expect(try root(store.url)["desktop_spaces"] != nil)
+        // A save refuses before the shared file is rewritten.
+        #expect(throws: NewerFormatOnDisk.self) {
+            try store.save(loaded)
+        }
+        #expect(try root(store.url)["desktop_spaces"] != nil)
+    }
+
+    /// The strip is a textual edit: only the moved entry and its
+    /// comma leave, and every other byte — a Double above all,
+    /// which re-serializing re-encodes — stays as written.
+    @Test("The strip removes the entry and nothing else")
+    func stripIsSurgical() throws {
+        var config = remembering
+        config.scrollGesture.stepDistance = 0.4
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let current = String(
+            decoding: try encoder.encode(config),
+            as: UTF8.self
+        )
+        let old = MachineConfig.moves[0].guiFormat - 1
+        let stamp = "\"format\" : \(GuiConfig.currentFormat),"
+        let base = current.replacingOccurrences(
+            of: stamp,
+            with: "\"format\" : \(old),"
+        )
+        let anchor = "  \"float_automatically\""
+        let entry = "  \"desktop_spaces\" : {\n    \"k\" : \"1\"\n  },\n"
+        #expect(base.contains(anchor) && base != current)
+        let legacy = base.replacingOccurrences(
+            of: anchor,
+            with: entry + anchor
+        )
+        let migrated = try #require(
+            ConfigMigration.migrated(Data(legacy.utf8))
+        )
+        #expect(String(decoding: migrated, as: UTF8.self) == current)
     }
 
     /// Another Mac's memory never travels: an old backup's copy is
@@ -154,7 +193,7 @@ struct MachineConfigTests {
     @Test("An old bundle's Desktop memory is dropped")
     func bundleDropsTheMemory() throws {
         let bundle: [String: Any] = [
-            "format": SetupBundle.machineLeavesDroppedAtFormat - 1,
+            "format": MachineConfig.moves[0].bundleFormat - 1,
             "writtenBy": "test",
             "config": [
                 "spaces": ["1"],

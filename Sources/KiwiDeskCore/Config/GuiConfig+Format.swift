@@ -40,7 +40,7 @@ extension GuiConfig {
     /// main's, as 7 is.
     ///
     /// **9 (#2324)**: `desktop_spaces` moved to `machine.json`
-    /// (`MachineConfig.movedAtFormat`), so the key is stripped here
+    /// (`MachineConfig.moves`), so the key is stripped here
     /// once the store has carried it across.
     public static let currentFormat = 9
 }
