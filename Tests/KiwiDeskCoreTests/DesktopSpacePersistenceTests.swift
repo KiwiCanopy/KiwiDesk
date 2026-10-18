@@ -202,7 +202,10 @@ struct DesktopSpacePersistenceWiringTests {
             SpaceID(6),
             leaving: .identity(stamp)
         )
-        let shared = try Data(contentsOf: core.guiConfigStore.url)
+        // Bytes the encoder never writes, so a rewrite of the same
+        // config cannot pass for no write at all.
+        let shared = Data(#"{"format":9,"spaces":[]}"#.utf8)
+        try shared.write(to: core.guiConfigStore.url)
         core.persistDesktopSpaceMemory()
         #expect(
             core.guiConfigStore.load()?
@@ -280,6 +283,10 @@ struct DesktopSpacePersistenceWiringTests {
     @Test("A Lua-owned config is not written")
     func luaOwnedConfigIsNotWritten() {
         let core = makeCore()
+        // An adopted memory — the discard adopts whoever owns the
+        // config — so only the ownership gate stands between this
+        // quit and a written file.
+        core.forgetDesktopSpaceMemory()
         core.rememberVirtualSpace(
             SpaceID(6),
             leaving: .identity(stamp)

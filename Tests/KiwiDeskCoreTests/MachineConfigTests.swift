@@ -156,6 +156,38 @@ struct MachineConfigTests {
         #expect(try root(store.url)["desktop_spaces"] != nil)
     }
 
+    /// A machine folder that reads but cannot be written: this
+    /// Mac's own memory still outranks the legacy copy for the
+    /// session, and a save writes nothing shared before the
+    /// machine file fails (#2324).
+    @Test("An unwritable machine folder keeps both copies")
+    func unwritableMachineFolderKeepsBoth() throws {
+        let dir = scratch()
+        let files = FileManager.default
+        defer { try? files.removeItem(at: dir) }
+        let store = store(dir)
+        var own = MachineConfig()
+        own.desktopSpaces = [.identity(stamp): SpaceID("9")]
+        try store.machine.save(own)
+        try writeLegacy(remembering, to: store)
+        let folder = store.machine.url.deletingLastPathComponent()
+        try files.setAttributes(
+            [.posixPermissions: 0o555],
+            ofItemAtPath: folder.path
+        )
+        defer {
+            try? files.setAttributes(
+                [.posixPermissions: 0o755],
+                ofItemAtPath: folder.path
+            )
+        }
+        let loaded = try #require(store.load())
+        #expect(loaded.desktopSpaces == own.desktopSpaces)
+        #expect(try root(store.url)["desktop_spaces"] != nil)
+        #expect(throws: (any Error).self) { try store.save(loaded) }
+        #expect(try root(store.url)["desktop_spaces"] != nil)
+    }
+
     /// The strip is a textual edit: only the moved entry and its
     /// comma leave, and every other byte — a Double above all,
     /// which re-serializing re-encodes — stays as written.
