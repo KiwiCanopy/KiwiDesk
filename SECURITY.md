@@ -26,7 +26,9 @@ Facts that matter when assessing KiwiDesk's attack surface:
   and resize windows). KiwiDesk never requests Input
   Monitoring; global hotkeys use the Carbon API, which does
   not observe keystrokes.
-- The **IPC socket** (`~/.config/KiwiDesk/KiwiDesk.sock`) is a
+- The **IPC socket**
+  (`~/Library/Application Support/KiwiDesk/KiwiDesk.sock`;
+  `~/.config/KiwiDesk/` before 3.2) is a
   UNIX domain socket in the user's home directory, reachable
   only by processes of the same user. Anything reachable over
   it can rearrange windows and read window titles — the same

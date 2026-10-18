@@ -1020,8 +1020,11 @@ Touching `Config`, `Profiles`, `Commands`.
   preset's settings are its sparse `PresetTuning` over that shape tuning,
   merged ONCE in `StandardLayout.settings(sizes:)` (#1663,
   `PresetShapeTuningSeamTests`)
-- a new file in the config directory joins `ConfigArtifact` AND answers "does
-  this travel in a backup?" in the same change set, neither alone
+- a new file KiwiDesk keeps, in the config folder or `MachineLocation`'s,
+  joins `ConfigArtifact` AND answers "does this travel in a backup?" in the
+  same change set, neither alone, and a file meaningful on this Mac alone lives
+  in `MachineLocation`'s folder, never the config folder (#2324,
+  `CoreInitPathTests`, `SetupBundleArtifactTests`)
 - a write of `gui.json` or a profile file goes through its store's door, which
   refuses a file a newer build wrote, and a raw rewrite beside it asks
   `NewerFormatOnDisk.check` first (#2325, `NewerFormatWriteRefusalTests`)

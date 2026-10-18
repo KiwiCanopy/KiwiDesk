@@ -4,14 +4,14 @@ import Foundation
 /// keeping the original first (#1880) so a downgrade or a faulty
 /// step never strands the file.
 ///
-/// The copies live in ONE folder, `migration-backups/` in the
-/// config directory, each under its file's relative path with
-/// `.pre-v<format>` appended — one `ConfigArtifact` case, one
-/// `.gitignore` line, nothing for a scan of `profiles/` to skip.
+/// The copies live in ONE folder, `migration-backups/` in
+/// `MachineLocation`'s folder (#2324), each under its file's
+/// relative path with `.pre-v<format>` appended — nothing for a
+/// scan of `profiles/` to skip.
 /// Only a real migration writes, so a plain read stays a read
 /// (#1245).
 enum MigrationBackup {
-    /// The folder's name in the config directory.
+    /// The folder's name in the machine folder.
     static let folderName = "migration-backups"
 
     /// `data` migrated by `ConfigMigration`, rewritten over `file`

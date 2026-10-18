@@ -28,6 +28,9 @@
 set -uo pipefail
 EXE="Contents/MacOS/KiwiDesk"
 LINK="$HOME/.config/KiwiDesk"
+# A build from #2324 on keeps its snapshots here, outside the link.
+MACHINE="$HOME/Library/Application Support/KiwiDesk"
+SNAPSHOTS=(".state_snapshot" ".session_snapshot")
 APPS=("TextEdit" "Script Editor" "Visual Studio Code")
 CODE="/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
 
@@ -183,6 +186,12 @@ up)
         echo "fixture-desk: $LINK is not a symlink; refusing" >&2
         exit 1
     fi
+    # A second `up` before `down` would set the fixture's own
+    # snapshots aside as the owner's.
+    if [ -f "$(dirname "$(readlink "$LINK")")/state" ]; then
+        echo "fixture-desk: a fixture is up; run down first" >&2
+        exit 1
+    fi
     PREV="$(running)"; PREV="${PREV%/$EXE}"
     {
         printf 'prev=%s\nmine=%s\nlink=%s\n' \
@@ -192,8 +201,13 @@ up)
         done
     } > "$DIR/state"
     # Stop first, so the owner's build writes its snapshot into its
-    # own config, never into the fixture.
+    # own folders, never into the fixture; then set the machine
+    # folder's aside, which the link does not separate.
     [ -n "$PREV" ] && { stop "$PREV" || exit 1; }
+    mkdir -p "$DIR/aside"
+    for f in "${SNAPSHOTS[@]}"; do
+        [ -e "$MACHINE/$f" ] && mv "$MACHINE/$f" "$DIR/aside/"
+    done
     write_config "$DIR/config"
     [ -n "${4:-}" ] && cat "$4" >> "$DIR/config/init.lua"
     ln -sfn "$DIR/config" "$LINK"
@@ -233,6 +247,10 @@ document saving no" >/dev/null 2>&1
                 || osascript -e "tell application \"$app\" to close \
 (window id $id)" >/dev/null 2>&1
         done
+    done
+    for f in "${SNAPSHOTS[@]}"; do
+        rm -f "$MACHINE/$f"
+        [ -e "$DIR/aside/$f" ] && mv "$DIR/aside/$f" "$MACHINE/"
     done
     ln -sfn "$(get link)" "$LINK"
     echo "config link: $(readlink "$LINK")"

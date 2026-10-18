@@ -49,7 +49,7 @@ struct MigrationBackupTests {
     private func store(in dir: URL, _ name: String, _ bytes: Data) throws
         -> ProfileManager
     {
-        let profiles = KiwiCore.makeProfileManager(in: dir)
+        let profiles = KiwiCore.makeProfileManager(dir, dir)
         try FileManager.default.createDirectory(
             at: profiles.directory,
             withIntermediateDirectories: true

@@ -34,6 +34,8 @@ final class NoopHotkeyRegistrar: HotkeyRegistrar {
 /// Defaults a test must never inherit, all neutralized here:
 /// - `hotkeyRegistrar` — no-op, not the live Carbon center.
 /// - `configDirectory` — throwaway temp dir, not `~/.config`.
+/// - `machineDirectory` — the config dir's `.machine` child,
+///   not the live `MachineLocation` (#2324).
 /// - `reduceMotion` — pinned false, not the host's real
 ///   `NSWorkspace` Reduce-Motion state.
 /// - `windowServer.trackingDisabled` — pinned false, not the
@@ -58,6 +60,7 @@ func makeTestCore(
         )
     let core = KiwiCore(
         configDirectory: directory,
+        machineDirectory: directory.appendingPathComponent(".machine"),
         hotkeyRegistrar: hotkeyRegistrar
     )
     core.tiler.animation.reduceMotion = { false }

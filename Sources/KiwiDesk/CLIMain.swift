@@ -163,7 +163,7 @@ private func runSocketCommand(
 /// The note a socket verb prints when no app answers.
 func cannotConnectMessage(_ error: Error) -> String {
     """
-    KiwiDesk: cannot connect to \(KiwiCore.defaultSocketPath)
+    KiwiDesk: cannot connect to \(MachineLocation.socketPath)
     Is the KiwiDesk app running? (\(error))
     """
 }

@@ -80,6 +80,28 @@ struct SecondLaunchExitTests {
             source.contains(branch),
             "a second launch must route through the guard"
         )
+        // An older build updated in place still holds the lock in
+        // the old folder, which the new lock never sees (#2324).
+        let legacy = """
+            if SingleInstanceLock.legacyHolderRuns(at: legacyLock) {
+                surfaceRunningInstanceAndExit()
+            }
+            """
+        #expect(
+            source.contains(legacy),
+            "a running pre-#2324 build must stop the launch"
+        )
+        // Before the core: its init moves the old build's
+        // snapshots out of the config folder.
+        let probe = source.range(of: legacy)
+        let core = source.range(of: "AppDelegate()")
+        #expect(core != nil)
+        if let probe, let core {
+            #expect(
+                probe.upperBound <= core.lowerBound,
+                "the legacy probe must precede the core"
+            )
+        }
     }
 
     @Test("The plist restarts only an unsuccessful exit")

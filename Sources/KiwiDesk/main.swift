@@ -15,10 +15,13 @@ let app = KiwiApplication.shared
 // Single-instance lock held for process lifetime (#196). Must
 // run before the delegate exists: a second KiwiCore would
 // clobber the running instance's IPC socket.
-let instanceLock = SingleInstanceLock(
-    path: SingleInstanceLock.defaultPath
-)
+let instanceLock = SingleInstanceLock(path: MachineLocation.lockPath)
 if !instanceLock.acquire() {
+    surfaceRunningInstanceAndExit()
+}
+// A pre-#2324 build still running holds the lock's old home.
+let legacyLock = MachineLocation.legacyLockPath
+if SingleInstanceLock.legacyHolderRuns(at: legacyLock) {
     surfaceRunningInstanceAndExit()
 }
 

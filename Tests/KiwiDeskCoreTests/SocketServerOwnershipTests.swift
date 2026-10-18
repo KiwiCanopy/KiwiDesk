@@ -39,6 +39,18 @@ struct SocketServerOwnershipTests {
         #expect(SocketServer.isLive(path))
     }
 
+    /// A long home folder must read as what it is, never as
+    /// another process holding the socket (#2324).
+    @Test("a path past sun_path is refused as too long")
+    func tooLongPathIsNamed() {
+        let path = "/tmp/" + String(repeating: "k", count: 120) + ".sock"
+        let server = SocketServer(path: path)
+        #expect(throws: SocketServer.SocketPathTooLong.self) {
+            try server.start()
+        }
+        #expect(!server.isRunning)
+    }
+
     @Test("a second server never unlinks a live socket")
     func liveSocketIsKept() async throws {
         let path = throwawayPath()
