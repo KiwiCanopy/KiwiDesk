@@ -273,21 +273,37 @@ struct ShelfRevealerTests {
         #expect(timers.delays == [ShelfReveal.retractDelay])
     }
 
-    @Test("Stopping ends every reveal")
+    @Test("Stopping ends every reveal, silently")
     func stopEndsReveals() {
-        let (revealer, _, pointer) = make()
+        let (revealer, timers, pointer) = make()
         revealer.onChange = { pointer.changes += 1 }
         revealer.toggle(Self.key, duration: 5)
         revealer.stop()
         #expect(revealer.reveal(of: Self.key) == .hidden)
-        #expect(pointer.changes == 2)
+        // The core is tearing its bars down; no redraw rides it.
+        #expect(pointer.changes == 1)
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hidden)
+    }
+
+    @Test("A timed pin under an open menu waits for it")
+    func pinWaitsForTheMenu() {
+        let (revealer, timers, _) = make()
+        var holding = true
+        revealer.holds = { _ in holding }
+        revealer.toggle(Self.key, duration: 3)
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hover)
+        holding = false
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hidden)
     }
 
     @Test("An open bar menu or peek holds a retract")
     func holdDefersTheRetract() {
         let (revealer, timers, pointer) = make()
         var holding = true
-        revealer.holds = { holding }
+        revealer.holds = { _ in holding }
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
         timers.fireAll()
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))

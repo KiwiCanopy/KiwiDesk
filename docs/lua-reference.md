@@ -3013,8 +3013,10 @@ no window, and setting the mode moves the windows at most once.
 
 While the two bars share an edge on any screen they are one
 shelf: setting either bar's mode sets both, and where the stored
-modes disagree the shelf stays shown. A look never carries the
-mode.
+modes disagree the shelf stays shown. Both bars start on the top
+edge, so in `init.lua` set the edges before the modes: a mode set
+while they are joined is kept by both after they split. A look
+never carries the mode.
 
 **Example:**
 

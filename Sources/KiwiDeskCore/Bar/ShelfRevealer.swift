@@ -35,7 +35,7 @@ final class ShelfRevealer {
     /// Whether a surface the shelf opened holds it shown although
     /// the pointer left — the hover peek, a bar menu; wired in
     /// Bootstrap. A retract it holds is asked again later.
-    var holds: @MainActor () -> Bool = { false }
+    var holds: @MainActor (Key) -> Bool = { _ in false }
     /// Installs the mouse-moved monitors: live in production,
     /// pinned inert by both `makeTestCore` twins (tests.md ▸
     /// machine touch). A move delivered without a point is read
@@ -72,16 +72,15 @@ final class ShelfRevealer {
     }
 
     /// Ends every reveal: a stopped core owes no timer, and a pin
-    /// left without one would never end.
+    /// left without one would never end. Silent — the core is
+    /// tearing its bars down, and its next start redraws them.
     func stop() {
         running = false
         for timer in timers.values { timer.cancel() }
         timers = [:]
         suppressed = []
-        let wasShown = !phases.isEmpty
         phases = [:]
         syncMonitor()
-        if wasShown { onChange() }
     }
 
     /// The state of `key`, hidden where nothing revealed it.
@@ -178,7 +177,7 @@ final class ShelfRevealer {
         guard let target = targets[key], reveal(of: key) == .hover
         else { return }
         if target.zone.contains(location()) { return }
-        guard !holds() else {
+        guard !holds(key) else {
             arm(key, after: ShelfReveal.retractDelay) { [weak self] in
                 self?.retractIfLeft(key)
             }
@@ -193,7 +192,17 @@ final class ShelfRevealer {
         guard let target = targets[key],
             case .pinned = reveal(of: key)
         else { return }
-        set(target.zone.contains(location()) ? .hover : .hidden, for: key)
+        if target.zone.contains(location()) {
+            set(.hover, for: key)
+        } else if holds(key) {
+            // Its menu or peek is up: retract once that closes.
+            set(.hover, for: key)
+            arm(key, after: ShelfReveal.retractDelay) { [weak self] in
+                self?.retractIfLeft(key)
+            }
+        } else {
+            set(.hidden, for: key)
+        }
     }
 
     private func set(_ next: ShelfReveal, for key: Key) {

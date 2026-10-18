@@ -71,6 +71,9 @@ final class BarPeek {
     /// click left on the item (#1946).
     private var menuTokens: [NSObjectProtocol] = []
     private var menusTracking = 0
+    /// Whether a menu tracks now — a bar's right-click, "N more" —
+    /// which holds a hiding shelf the menu opened on (#761).
+    var menuTracking: Bool { menusTracking > 0 }
     private let menuCentre: NotificationCenter
 
     /// `menus` posts the menus' tracking: the app's, or a test's

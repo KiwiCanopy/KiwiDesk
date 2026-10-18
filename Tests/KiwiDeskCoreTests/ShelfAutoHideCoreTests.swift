@@ -204,4 +204,31 @@ struct ShelfAutoHideCoreTests {
         )
         #expect(panel.ignoresMouseEvents)
     }
+
+    /// Each verb names its own bar where the two are apart, so a
+    /// swapped `of:` in either dispatcher reds here.
+    @Test(
+        "Apart, each verb writes its own bar alone",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func apartWritesOneBar() throws {
+        let (core, _) = try #require(makeCore(.always))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.settings.appBarStyle.setEdge(.bottom)
+        for (verb, space) in [
+            ("space_bar.set_visibility", true),
+            ("app_bar.set_visibility", false),
+        ] {
+            core.tiler.settings.setVisibility(.always, of: .space)
+            core.tiler.settings.setVisibility(.always, of: .app)
+            #expect(core.execute(verb, args: [.string("auto")]).isSuccess)
+            let settings = core.tiler.settings
+            #expect(
+                (settings.spaceBarStyle.visibility == .auto) == space
+            )
+            #expect(
+                (settings.appBarStyle.visibility == .auto) == !space
+            )
+        }
+    }
 }

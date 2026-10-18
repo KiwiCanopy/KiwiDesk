@@ -86,11 +86,8 @@ extension KiwiCore {
             self?.updateBars()
         }
         shelves.reveal.onChange = { [weak self] in self?.updateBars() }
-        // A menu tracks in the event-tracking mode; the peek is the
-        // shelf's own panel (#761).
-        shelves.reveal.holds = { [weak self] in
-            self?.shelves.peek.panel.isShown == true
-                || RunLoop.current.currentMode == .eventTracking
+        shelves.reveal.holds = { [weak self] key in
+            self?.shelves.surfaceHolds(key) == true
         }
         shelves.indicators.onPress = { [weak self] key in
             self?.toggleShelfReveal(key)

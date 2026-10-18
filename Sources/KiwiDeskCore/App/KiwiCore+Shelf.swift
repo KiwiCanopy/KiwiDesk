@@ -46,8 +46,8 @@ extension KiwiCore {
                 },
                 settings: settings
             )
-            retireDepartedBars(live: Set(fallback.map(\.display)))
             syncHidingShelves(HidingShelves())
+            retireDepartedBars(live: Set(fallback.map(\.display)))
             return
         }
         var appBarsShown: [AppBarManager.Bar] = []
@@ -131,9 +131,11 @@ extension KiwiCore {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
         }
+        // The revealer first, so the shelves judge this pass's
+        // hiding edges (#761).
+        syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
-        syncHidingShelves(hiding)
         // KiwiVision stands down on the same verdict (#2103).
         noteVisionStandDown(standingDown)
     }

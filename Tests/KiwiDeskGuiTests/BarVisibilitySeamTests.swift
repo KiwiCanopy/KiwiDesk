@@ -5,7 +5,9 @@ import Testing
 /// `TilingSettings.visibility(of:)` and `setVisibility(_:of:)`,
 /// beside the fields in the bar styles and their coding. A raw
 /// read elsewhere could fold two linked bars apart again, which is
-/// the layout drift the ruling closed.
+/// the layout drift the ruling closed. Residue: a needle is one
+/// spelling, so an access split across lines or through a local
+/// binding passes; that half is review's.
 @Suite("Bar visibility seam (#761)")
 struct BarVisibilitySeamTests {
     /// Files that may name a bar style's stored visibility: the
@@ -15,6 +17,13 @@ struct BarVisibilitySeamTests {
         "TilingSettings+Shelf.swift": "the reader and the door",
         "SpaceBarCommandSetting.swift": "apply(to:), field parity",
         "AppBarCommandSetting.swift": "apply(to:), field parity",
+        // A ↺ puts the baseline's stored pair back, which was
+        // one answer already (#792).
+        "SettingsRevertRegister+Settings1.swift": "the App Bar's ↺",
+        "SettingsRevertRegister+Settings3.swift": "the Space Bar's ↺",
+        // A census row's id spells its path, a string (#678).
+        "SettingKey+SpaceBar.swift": "the census id",
+        "SettingKey+AppBar.swift": "the census id",
     ]
 
     private static let needles = [
@@ -22,13 +31,21 @@ struct BarVisibilitySeamTests {
         "style.visibility",
     ]
 
-    @Test("Core reads a bar's visibility only through the door")
+    @Test("Both trees read a bar's visibility only through the door")
     func oneReader() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDeskCore")
+        let repo = SourceScan.repoRoot(from: #filePath)
+        // Settings writes through the door too (the ruling's
+        // rows).
+        let files =
+            try SourceScan.swiftSources(
+                under: repo.appendingPathComponent("Sources/KiwiDeskCore")
+            )
+            + SourceScan.swiftSources(
+                under: repo.appendingPathComponent("Sources/KiwiDesk")
+            )
         var hits: [String: Int] = [:]
         var scanned = 0
-        for file in try SourceScan.swiftSources(under: root) {
+        for file in files {
             scanned += 1
             let name = file.lastPathComponent
             if name.hasPrefix("SpaceBarStyle")

@@ -44,6 +44,20 @@ final class ShelfManager {
     /// Each hiding shelf's reveal and its indicator (#761).
     let reveal = ShelfRevealer()
     let indicators = ShelfIndicators()
+    /// The shelf the last press landed on, whose menu that press
+    /// may have opened.
+    private var pressedShelf: Key?
+
+    /// Whether a surface `key`'s shelf opened is up: the peek
+    /// anchored on its panel, or a menu a press on it opened — what
+    /// holds a hover reveal although the pointer left (#761).
+    func surfaceHolds(_ key: Key) -> Bool {
+        guard let panel = overlays[key]?.panel else { return false }
+        if peek.panel.isShown, peek.shown?.view?.window === panel {
+            return true
+        }
+        return peek.menuTracking && pressedShelf == key
+    }
     #if DEBUG
         /// Whether a shelf orders its panel in. Off in both
         /// `makeTestCore` twins, where every suite rendering a bar
@@ -157,6 +171,7 @@ final class ShelfManager {
         overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.slides = shelf.slides
         overlay.onPress = { [weak self] in
+            self?.pressedShelf = key
             self?.peek.pressed(on: $0, type: $1)
         }
         overlay.contextMenus = contextMenus
