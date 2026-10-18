@@ -144,7 +144,9 @@ extension KiwiCore {
     ///
     /// - `defersWindowRuleReconcile` — `loadConfig` writes the
     ///   rules several times over and runs one pass itself
-    ///   afterwards.
+    ///   afterwards; a Desktop switch's binding apply leaves it to
+    ///   the switch's own pass (`applyBindingDeferringRuleSweep`,
+    ///   #2347).
     /// - `defersWindowRuleReconcileToSweep` — boot. It is a flag
     ///   raised in `start()` and lowered beside the sweep's arm,
     ///   NOT a read of `BootPhase`: the phase is a readiness

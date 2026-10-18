@@ -665,11 +665,12 @@ editing AX code:
   only THEN files the switch (`fileDisplaySpaces`, at the
   handler's tail), after which the carried arm takes over and
   this one is closed. **The filing must follow the carry**: a
-  bound Desktop's profile apply runs a full reconcile inside the
-  handler, and filed at the top that sweep found every arm closed
-  and removed the window the carry was about to move (device,
-  2026-09-21, Desktop 2 bound; the notification can land on
-  either side of the handler). No behavior test drives that
+  sweep inside the handler — a bound Desktop's profile apply ran
+  a full reconcile there until #2347 left it to the switch's own
+  folded pass, and a destroy can still land on either side of the
+  handler — found every arm closed when the switch was filed at
+  the top, and removed the window the carry was about to move
+  (device, 2026-09-21, Desktop 2 bound). No behavior test drives that
   sweep, so `ReachFilingOrderSeamTests` pins the order and the
   store's one writer beside the boot seed. Residue, recorded in
   `docs/accepted-limitations.md`: a reach-enabled sticky window

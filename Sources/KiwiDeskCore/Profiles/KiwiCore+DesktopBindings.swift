@@ -217,3 +217,19 @@ extension KiwiCore {
         return out
     }
 }
+
+extension KiwiCore {
+    /// The switch handler's binding apply, its window-rule sweep
+    /// left to the switch's own folded `reconcileAll`, which runs
+    /// right after the handler (`EventLoop.desktopChanged`): run
+    /// here, it read every app's windows twice per bound switch and
+    /// retiled once per window it folded (#2347).
+    func applyBindingDeferringRuleSweep(
+        in snapshot: DesktopSnapshot
+    ) -> String? {
+        let deferring = defersWindowRuleReconcile
+        defersWindowRuleReconcile = true
+        defer { defersWindowRuleReconcile = deferring }
+        return applyDesktopBinding(in: snapshot)
+    }
+}

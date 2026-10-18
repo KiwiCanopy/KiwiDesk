@@ -34,6 +34,7 @@ extension WorkMeter {
             "retile_ms_max": ms(c.retileMaxNanos),
             "events_per_retile": per(c.events, c.retiles),
             "reissue_passes": count(c.reissuePasses),
+            "bulk_reconciles": count(c.bulkReconciles),
             "space_switches": count(c.spaceSwitches),
             "bar_renders": count(c.barRenders),
             "bar_ms_mean": perMs(c.barNanos, c.barRenders),

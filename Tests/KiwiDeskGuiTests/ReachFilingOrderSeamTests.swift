@@ -4,8 +4,8 @@ import Testing
 /// The switch handler FILES a switch only after it carried
 /// (#1215). The reach-departure arm is open exactly while the
 /// display's filed Space is the one the window sits on, and a
-/// bound Desktop's apply runs a full reconcile inside the
-/// handler: filed at the top, that sweep found every arm closed
+/// bound Desktop's apply ran a full reconcile inside the handler
+/// until #2347: filed at the top, that sweep found every arm closed
 /// and removed the sticky window the carry was about to move
 /// (device, 2026-09-21, Desktop 2 bound). No behavior test drives
 /// that sweep, so the ORDER is pinned here as spellings: the one
