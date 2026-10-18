@@ -14,45 +14,44 @@ extension HeaderSearch {
         }
     }
 
+    /// SPIKE (#2399): the card on Liquid Glass, `.regular` and
+    /// untinted (#1295), today's card fill as the fallback. The
+    /// rings draw on both branches; the shadow only where glass
+    /// cannot draw, since a composited glass loses its backdrop.
     var resultCard: some View {
-        resultList
+        let shape = RoundedRectangle(
+            cornerRadius: SettingsTheme.cardRadius
+        )
+        return
+            resultList
             .padding(8)
             .frame(
                 width: SearchPanelWidth.width(for: panelRoom),
                 alignment: .leading
             )
-            .background(
-                RoundedRectangle(
-                    cornerRadius: SettingsTheme.cardRadius
-                )
-                .fill(SettingsTheme.card)
-                .overlay(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.cardRadius
-                    )
-                    .strokeBorder(SettingsTheme.hairline)
-                )
-                .overlay(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.cardRadius
-                    )
-                    .strokeBorder(
-                        SettingsTheme.planeRing,
-                        lineWidth: 1
-                    )
-                )
-                // Without this the shadow halos EVERY
-                // primitive — the hairline ring casts its own
-                // shadow INWARD, reading as a line ghosting
-                // through the panel (#758's lesson, hit again;
-                // owner report 2026-08-10).
-                .compositingGroup()
-                .shadow(
-                    color: .black.opacity(0.16),
-                    radius: 12,
-                    y: 4
-                )
+            .tint(SettingsTheme.accent)
+            .glassChrome(
+                in: shape,
+                enabled: true,
+                variant: .regular,
+                fallback: AnyShapeStyle(SettingsTheme.card)
             )
+            .overlay(shape.strokeBorder(SettingsTheme.hairline))
+            .overlay(
+                shape.strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
+            )
+            .background {
+                if !GlassChromeVariant.drawable {
+                    // #758: composited, or the rings halo inward.
+                    shape.fill(SettingsTheme.card)
+                        .compositingGroup()
+                        .shadow(
+                            color: .black.opacity(0.16),
+                            radius: 12,
+                            y: 4
+                        )
+                }
+            }
             .offset(y: 40)
             .onHover { panelHovered = $0 }
     }
