@@ -22,6 +22,18 @@ public enum GeometryUtils {
             .max { overlap($0) < overlap($1) }
     }
 
+    /// Whether `target` lies mostly on another of `rects` than
+    /// `current` does — false when `target` overlaps none.
+    public static func crosses(
+        from current: CGRect,
+        to target: CGRect,
+        among rects: [CGRect]
+    ) -> Bool {
+        guard let landing = rect(mostlyContaining: target, among: rects)
+        else { return false }
+        return rect(mostlyContaining: current, among: rects) != landing
+    }
+
     /// macOS window corner radius constant (`BorderGeometry`,
     /// `TilingSettings.windowStroke`).
     public static let systemWindowCornerRadius: CGFloat = 16

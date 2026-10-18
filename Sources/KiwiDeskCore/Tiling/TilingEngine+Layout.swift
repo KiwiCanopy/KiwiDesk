@@ -260,7 +260,15 @@ extension TilingEngine {
             )
         } else {
             animation.cancel(window: id)
-            setFrame(id, target)
+            setFrame(
+                id,
+                target,
+                resend: GeometryUtils.crosses(
+                    from: current,
+                    to: target,
+                    among: allScreenBounds()
+                )
+            )
             if animated { onReducedMotionFrame(id) }
         }
     }
@@ -277,11 +285,17 @@ extension TilingEngine {
     public func setFrame(
         _ id: WindowID,
         _ frame: CGRect,
-        setSize: Bool = true
+        setSize: Bool = true,
+        resend: Bool = false
     ) {
         boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
         placements.stamp(id, target: frame)
-        applier.applyInstant(id, frame, setSize: setSize)
+        applier.applyInstant(
+            id,
+            frame,
+            setSize: setSize,
+            resend: resend
+        )
     }
 
     /// The commanded frame of a recent instant set whose echo

@@ -37,6 +37,8 @@ struct ReduceMotionInstantWriteTests {
             writeEUI: { _, on in log.add(on ? "on" : "off") }
         )
         engine.applier.clock = { 1_000 }
+        engine.applier.crossScreenResendDelay = 0
+        engine.allScreenBounds = { [] }
         engine.animation.reduceMotion = { true }
         return engine
     }
@@ -80,6 +82,27 @@ struct ReduceMotionInstantWriteTests {
                 owed == (animated && reduced ? [id] : []),
                 "animated \(animated), reduced \(reduced)"
             )
+        }
+    }
+
+    /// An app easing its frame clamps the first set's size to
+    /// the screen it left (#2187, Zen at 588 + 529 = the laptop's
+    /// 1117), so a set onto another screen writes twice, inside
+    /// one hold.
+    @Test("A set onto another screen writes twice, in one hold")
+    func crossScreenSetWritesTwice() async {
+        let left = CGRect(x: 0, y: 0, width: 1728, height: 1117)
+        let right = CGRect(x: 1728, y: -151, width: 2560, height: 1440)
+        let onRight = CGRect(x: 3773, y: 588, width: 508, height: 687)
+        for (landing, writes) in [(onRight, 2), (to, 1)] {
+            let log = Log()
+            let engine = makeEngine(log)
+            engine.allScreenBounds = { [left, right] }
+            engine.applyFrame(id, from: from, to: landing, animated: true)
+            await drain()
+            await drain()
+            let frames = Array(repeating: "frame", count: writes)
+            #expect(log.all == ["off"] + frames + ["on"])
         }
     }
 

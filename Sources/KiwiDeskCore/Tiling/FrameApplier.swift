@@ -164,11 +164,14 @@ final class FrameApplier {
     /// `EnhancedUIHolds` (#1508). Position-only unless `setSize`.
     /// Callers must `animation.cancel(window:)` first (as
     /// `retile` and `stashInactive` do) so a window is never
-    /// spring-animated and instant-set at once.
+    /// spring-animated and instant-set at once. `resend` writes
+    /// the frame once more after `crossScreenResendDelay`, inside
+    /// the same EUI hold (#2187).
     func applyInstant(
         _ id: WindowID,
         _ frame: CGRect,
-        setSize: Bool
+        setSize: Bool,
+        resend: Bool = false
     ) {
         // Recorded before the element guard, at enqueue time: the
         // overlay sync wants the commanded frame this same turn
@@ -207,6 +210,41 @@ final class FrameApplier {
             }
             holds.endInstant(pid, writer)
             recent.record(id, now: clock())  // as `apply`, #1254
+        }
+        if resend, setSize {
+            resendInstant(id, frame, element: target, pid: pid)
+        }
+    }
+
+    /// How long a cross-screen set waits before its second write.
+    var crossScreenResendDelay: TimeInterval = 0.2
+
+    /// The second write of a set that moved a window onto another
+    /// screen: an app easing its frame (EUI on, Zen) clamps the
+    /// first one's size to the screen it left (#2187). Noted at
+    /// enqueue, so the first set's hold stays open until it runs.
+    private func resendInstant(
+        _ id: WindowID,
+        _ frame: CGRect,
+        element: AXUIElement,
+        pid: pid_t
+    ) {
+        nonisolated(unsafe) let target = element
+        let writer = writer
+        let holds = enhancedUI
+        let stamp = recentStamp
+        holds.noteQueued(
+            pid,
+            atRest: enhancedUIAtRest(pid),
+            instant: true
+        )
+        queue(for: pid).asyncAfter(
+            deadline: .now() + crossScreenResendDelay
+        ) {
+            holds.beginInstant(pid, writer)
+            writer.setFrame(frame, target)
+            holds.endInstant(pid, writer)
+            stamp(id)
         }
     }
 
