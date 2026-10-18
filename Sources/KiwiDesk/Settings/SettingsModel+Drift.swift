@@ -70,7 +70,14 @@ extension SettingsModel {
     /// Why a dirty live draft cannot be saved — the ONE refusal
     /// every gui.json door reads first, owner ahead of page.
     var staleDraftReason: String? {
-        ownerMovedReason ?? pageMovedReason
+        ownerMovedReason ?? pageMovedReason ?? writeLatchReason
+    }
+
+    /// A newer build's file every structured Save would write,
+    /// read FRESH at the door before its first write — not the
+    /// refresh's copy, which a synced file can outrun (#2324).
+    var writeLatchReason: String? {
+        core.guiConfigWriteLatch().map(NewerFormatText.saveBlocked)
     }
 
     /// `init.lua` now owns what the draft would write, so the load

@@ -86,6 +86,30 @@ struct NewerFormatSaveLatchTests {
         #expect(model.writeLatch?.artifact == .guiConfig)
     }
 
+    /// The naming prompt outlives the button's read: a newer file
+    /// landing while it is open stops the named Save at its door,
+    /// before any profile file is written.
+    @Test("a newer file landing under the naming prompt stops it")
+    func namedSaveReadsTheLatch() throws {
+        LocalizationManager.shared.select("en")
+        let model = try makeDirtyModel()
+        model.refreshProfiles()
+        model.performPrimarySave()
+        #expect(model.newProfileNamingRequested)
+        try restamp(
+            model.core.guiConfigStore.url,
+            to: GuiConfig.currentFormat + 1
+        )
+        let before = model.core.profiles.list()
+        model.saveAsNewProfile(named: "Desk")
+        #expect(model.core.profiles.list() == before)
+        #expect(
+            model.profileWarning
+                == "A newer KiwiDesk saved gui.json, so this version "
+                + "won't overwrite it. Update KiwiDesk to keep syncing."
+        )
+    }
+
     /// A close question answered Save while a newer file landed
     /// settles at once, rather than wait for a naming prompt the
     /// latched Save never opens (`DraftLeaveTests` ▸

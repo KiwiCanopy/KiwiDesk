@@ -197,6 +197,11 @@ struct NewerFormatLatchTests {
             try core.guiConfigStore.saveIncludingBindings(GuiConfig())
             try restamp(core.url(of: artifact), to: format + 1)
             #expect(core.guiConfigWriteLatch()?.artifact == artifact)
+            // A greyed Save always has its Config Issue beside it.
+            #expect(
+                core.newerFormatIssues().map(\.kind)
+                    == [.newerFormat(artifact)]
+            )
             #expect(throws: NewerFormatOnDisk.self) {
                 try core.guiConfigStore.saveIncludingBindings(GuiConfig())
             }

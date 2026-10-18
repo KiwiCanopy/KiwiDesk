@@ -856,9 +856,10 @@ reds until it is classified (`NewerFormatWriteRefusalTests`,
 `ConfigIssue.Kind.newerFormat`, a newer `gui.json` never reading as
 unreadable; a newer profile is `ProfileBrokenCause.newerFormat`,
 whose row greys Delete; and Settings greys every structured
-Save on `KiwiCore.guiConfigWriteLatch()`, read once per refresh,
-before any of its writes (`NewerFormatLatchTests`,
-`NewerFormatSaveLatchTests`). A new store with a format joins
+Save on `KiwiCore.guiConfigWriteLatch()` — greyed from the
+refresh's reading, refused from a fresh one at each commit door
+through `staleDraftReason` and `writeLatchReason`, before any of
+its writes (`NewerFormatLatchTests`, `NewerFormatSaveLatchTests`). A new store with a format joins
 `storeNewerFormats` and the census in the same change.
 
 ## A corrupt file is overwritten after a copy (#2324 ruling 13)

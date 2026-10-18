@@ -32,6 +32,10 @@ extension SettingsModel {
     /// Overwrites stored profile with staged configuration (#18).
     func saveEditedProfile() {
         guard let name = editingProfile else { return }
+        if let latched = writeLatchReason {
+            profileWarning = latched
+            return
+        }
         // The rule half first: a failed write keeps the draft
         // whole rather than committing the tiling alone.
         // Its own shortcut override is the diff `overwriteProfile`
