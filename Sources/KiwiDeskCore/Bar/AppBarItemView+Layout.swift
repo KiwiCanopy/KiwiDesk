@@ -106,7 +106,8 @@ extension AppBarItemView {
     private func layoutHorizontal() {
         let placed = horizontalPlacement(in: bounds.size)
         label.isHidden = !placed.showsLabel
-        var x = placed.x
+        halfMoon.frame = halfMoonFrame(in: bounds.size) ?? .zero
+        var x = placed.x + placed.moon
         if !iconSlotHidden {
             layoutIconSlot(
                 in: CGRect(
@@ -144,6 +145,7 @@ extension AppBarItemView {
         guard let square = verticalIconSquare(in: bounds.size) else {
             return
         }
+        halfMoon.frame = halfMoonFrame(in: bounds.size) ?? .zero
         layoutIconSlot(in: square)
     }
 

@@ -24,6 +24,9 @@ extension AppBarOverlay {
         /// A float listed after the row's break (#1826): no slot in
         /// the row, so no drag.
         public let floating: Bool
+        /// Where the window a click focuses sits (#2234): the dim
+        /// and the half-moon read it.
+        public let visibility: BarVisibility
 
         public init(
             id: WindowID,
@@ -34,7 +37,8 @@ extension AppBarOverlay {
             count: Int = 1,
             members: [WindowID]? = nil,
             titleCut: Bool = false,
-            floating: Bool = false
+            floating: Bool = false,
+            visibility: BarVisibility = .visible
         ) {
             self.id = id
             self.name = name
@@ -45,6 +49,7 @@ extension AppBarOverlay {
             self.members = members ?? [id]
             self.titleCut = titleCut
             self.floating = floating
+            self.visibility = visibility
         }
     }
 }

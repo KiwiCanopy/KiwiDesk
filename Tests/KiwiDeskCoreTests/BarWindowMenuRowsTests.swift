@@ -303,7 +303,8 @@ struct BarWindowMenuRowsTests {
         let core = seededCore()
         let item = core.barItem(
             for: [WindowID(2), WindowID(3)],
-            style: AppBarLook()
+            style: AppBarLook(),
+            visibility: [:]
         )
         #expect(item.members == [WindowID(2), WindowID(3)])
     }

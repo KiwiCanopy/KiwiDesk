@@ -3,18 +3,19 @@ import AppKit
 /// Visual styling and layer color application for `AppBarItemView`.
 extension AppBarItemView {
     /// Applies active and hover colors to text, icon, and
-    /// background layers. The icon's dim is deliberately the full
-    /// 0.4, NOT the Space Bar's 0.6 middle tier: a binary signal
-    /// with no lower tier to collide with
+    /// background layers. The dim means "not fully on screen"
+    /// (#2234) and stays binary: the full 0.4, NOT the Space Bar's
+    /// 0.6 middle tier, having no lower tier to collide with
     /// (`BarAccent.activeUnfocusedAlpha`). The group-count badge
-    /// dims with the item's focus, as a Space Bar badge does,
-    /// whatever the item draws — a glyph or title is tinted.
+    /// dims with the icon, whatever the item draws — a glyph or
+    /// title is tinted.
     func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
         glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
-        let alpha: CGFloat = isActive || isHovered ? 1 : style.dimFactor
+        let alpha: CGFloat = isLit ? 1 : style.dimFactor
         iconView.alphaValue = alpha
         badge.alphaValue = alpha
+        halfMoon.show(visibility, ink: NSColor(kiwiHex: textColorHex))
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()
@@ -58,12 +59,20 @@ extension AppBarItemView {
         )
     }
 
-    /// An idle item's text takes the Space Bar's idle ink (#1938).
+    /// Undimmed: focused, hovered, or fully on screen — an item
+    /// whose focus moves nothing (#2234).
+    var isLit: Bool {
+        isActive || isHovered || visibility == .visible
+    }
+
+    /// The focused item's text takes the accent, a fully visible
+    /// one the item colour at its own alpha, and the rest the
+    /// Space Bar's idle ink (#1938, #2234).
     var textColorHex: String {
         if isHovered { return style.hoverItemColor }
-        return isActive
-            ? style.activeItemColor
-            : style.idleItemColor
+        if isActive { return style.activeItemColor }
+        return visibility == .visible
+            ? style.itemColor : style.idleItemColor
     }
 
     /// Whether a box background should be painted

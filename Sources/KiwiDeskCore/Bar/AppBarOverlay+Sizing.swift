@@ -178,8 +178,10 @@ extension AppBarOverlay {
         thickness: CGFloat
     ) -> CGFloat {
         let depth = style.contentDepth(forDepth: thickness)
+        // Every item reserves the half-moon's slot (#2234).
+        let moon = AppBarHalfMoon.reserve(contentDepth: depth)
         // Vertical circle slots take no end inset (#1763).
-        guard horizontal else { return depth }
+        guard horizontal else { return depth + moon }
         let pad = AppBarItemView.contentPadding
         let font = style.shelf.textFont(
             ofSize: style.resolvedFontSize(forDepth: thickness)
@@ -208,7 +210,7 @@ extension AppBarOverlay {
                 ? AppBarItemView.badgeSide(contentSide: depth) + pad
                 : 0
             let natural =
-                iconSide + spacing + text + badge
+                moon + iconSide + spacing + text + badge
                 + edge.total
             return max(widest, natural)
         }

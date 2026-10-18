@@ -213,14 +213,26 @@ extension KiwiCore {
         )
         let floats = appBarFloats(in: space)
         guard !groups.isEmpty || !floats.isEmpty else { return nil }
+        let seen = appBarVisibility(of: space, floats: floats)
+        // A group takes its first member's: the window its click
+        // focuses (#2234).
+        let items =
+            groups.map {
+                barItem(for: $0, style: style, visibility: seen)
+            }
+            + floats.map {
+                barItem(
+                    for: [$0],
+                    style: style,
+                    floating: true,
+                    visibility: seen
+                )
+            }
         return AppBarContent(
             space: space,
             style: style,
             groups: groups,
-            items: groups.map { barItem(for: $0, style: style) }
-                + floats.map {
-                    barItem(for: [$0], style: style, floating: true)
-                }
+            items: items
         )
     }
 

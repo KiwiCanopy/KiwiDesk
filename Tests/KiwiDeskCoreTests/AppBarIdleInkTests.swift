@@ -3,15 +3,17 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// An unfocused App Bar item's text dims the way an idle Space
-/// identifier does — the shelf's one `idleItemColor` (#1938),
-/// on the title and the App Font glyph alike.
+/// An App Bar item not fully on screen dims its text the way an
+/// idle Space identifier does — the shelf's one `idleItemColor`
+/// (#1938), on the title and the App Font glyph alike — while a
+/// fully visible one keeps the item colour (#2234).
 @Suite("App Bar idle text takes the Space Bar's idle ink")
 @MainActor
 struct AppBarIdleInkTests {
     private func makeView(
         active: Bool,
-        glyph: String? = nil
+        glyph: String? = nil,
+        visibility: BarVisibility = .hidden
     ) -> AppBarItemView {
         var style = AppBarLook()
         style.shelf.itemColor = "#EAF3EE"
@@ -28,6 +30,7 @@ struct AppBarIdleInkTests {
             icon: nil,
             glyph: glyph,
             count: 1,
+            visibility: visibility,
             active: active,
             horizontal: true,
             style: style
@@ -46,6 +49,15 @@ struct AppBarIdleInkTests {
                 view.label.textColor
                     != NSColor(kiwiHex: view.style.itemColor)
             )
+        }
+    }
+
+    @Test("A fully visible unfocused item keeps the item colour")
+    func visibleTextIsItemInk() {
+        for seen in [BarVisibility.visible, .partly(shown: .left)] {
+            let view = makeView(active: false, visibility: seen)
+            let item = NSColor(kiwiHex: view.style.itemColor)
+            #expect((view.label.textColor == item) == (seen == .visible))
         }
     }
 

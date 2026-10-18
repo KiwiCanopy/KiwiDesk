@@ -36,24 +36,14 @@ extension TilingEngine {
     ) -> [WindowID: CGRect] {
         var frames: [WindowID: CGRect] = [:]
         for placement in visiblePlacements(state: state) {
-            let input = layoutInput(
-                state: state,
-                space: placement.space,
-                screen: placement.screen
+            let computed = laidOut(
+                layoutInput(
+                    state: state,
+                    space: placement.space,
+                    screen: placement.screen
+                ),
+                placed: placed
             )
-            let slots = LayoutEngine.calculate(
-                mode: input.space.mode,
-                windows: input.tiled,
-                context: input.context
-            )
-            let computed =
-                placed
-                ? SplitOverflow.placed(
-                    mode: input.space.mode,
-                    frames: slots,
-                    context: input.context
-                )
-                : slots
             // Each visible space is a distinct space on a distinct
             // display, so their window sets are disjoint and the
             // union is lossless — the `new` tie-break never fires
@@ -63,5 +53,44 @@ extension TilingEngine {
             frames.merge(computed) { _, new in new }
         }
         return frames
+    }
+
+    /// One space's frames from its layout input: the slots, or the
+    /// issued frames with the split layouts' residue placed.
+    private func laidOut(
+        _ input: (space: Space, tiled: [WindowID], context: LayoutContext),
+        placed: Bool
+    ) -> [WindowID: CGRect] {
+        let slots = LayoutEngine.calculate(
+            mode: input.space.mode,
+            windows: input.tiled,
+            context: input.context
+        )
+        guard placed else { return slots }
+        return SplitOverflow.placed(
+            mode: input.space.mode,
+            frames: slots,
+            context: input.context
+        )
+    }
+
+    /// One space's issued frames on `screen`, the window its layout
+    /// put in front and the area it fills, read without recording like
+    /// `placedFrames(state:recording: false)` — the App Bar's
+    /// visibility verdict (#2234), which needs only the Space its
+    /// bar draws.
+    func placedFrames(
+        of space: Space,
+        on screen: NSScreen,
+        state: StateCoordinator
+    ) -> (frames: [WindowID: CGRect], front: WindowID?, usable: CGRect) {
+        let held = monocleShownMembers
+        defer { monocleShownMembers = held }
+        let input = layoutInput(state: state, space: space, screen: screen)
+        return (
+            laidOut(input, placed: true),
+            input.context.focused,
+            input.context.usable
+        )
     }
 }

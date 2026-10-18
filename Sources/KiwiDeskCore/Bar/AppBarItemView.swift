@@ -20,6 +20,8 @@ final class AppBarItemView: NSView {
         return tf
     }()
     let accent = SheenRimView()
+    /// Where a partly visible window sits (#2234).
+    let halfMoon = AppBarHalfMoon()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.make()
@@ -51,6 +53,8 @@ final class AppBarItemView: NSView {
     /// A float after the row's break (#1826): it reorders nothing,
     /// so a press never becomes a drag.
     private(set) var isFloatItem = false
+    /// Core's verdict on where its window sits (#2234).
+    private(set) var visibility: BarVisibility = .visible
     /// The windows its menu names (#1518); set beside `configure`.
     var members: [WindowID] = []
     /// Leading/trailing position within current item run; they
@@ -100,6 +104,7 @@ final class AppBarItemView: NSView {
         addSubview(accentClip)
         accentClip.addSubview(accent)
         addSubview(badge)
+        addSubview(halfMoon)
     }
 
     @available(*, unavailable)
@@ -195,6 +200,7 @@ final class AppBarItemView: NSView {
         count: Int,
         titleCut: Bool = false,
         floating: Bool = false,
+        visibility: BarVisibility = .visible,
         active: Bool,
         horizontal: Bool,
         style: AppBarLook
@@ -205,6 +211,7 @@ final class AppBarItemView: NSView {
         self.text = text
         self.count = count
         self.isFloatItem = floating
+        self.visibility = visibility
         self.horizontal = horizontal
         self.isActive = active
         self.style = style

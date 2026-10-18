@@ -32,7 +32,8 @@ struct AppBarItemTextTests {
     ) -> String {
         core.barItem(
             for: group.map(WindowID.init),
-            style: style
+            style: style,
+            visibility: [:]
         ).text
     }
 
@@ -144,7 +145,11 @@ struct AppBarItemTextTests {
     @Test("The item draws the title, not the app name")
     func itemDrawsTheTitle() {
         let core = seeded([titledWindow(1, title: "Downloads")])
-        let item = core.barItem(for: [WindowID(1)], style: AppBarLook())
+        let item = core.barItem(
+            for: [WindowID(1)],
+            style: AppBarLook(),
+            visibility: [:]
+        )
         #expect(item.text == "Downloads")
         #expect(item.text != "Finder")
     }

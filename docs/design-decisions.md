@@ -13654,6 +13654,66 @@ the user who never opens the editor.
 Bar's front segment shows the focused window's title in place of
 its app's name.
 
+:::unreleased
+**The App Bar's dim means "not fully on screen".** (#2234, owner
+rulings 2026-10-15 and 2026-10-18.) It used to mean "not focused",
+which says nothing the indicator does not already say. The question
+a user brings to the App Bar is which windows are on their screen,
+and with it which window a focus change would move: focusing a
+scrolling column that is cut, or a tile stacked behind another,
+pans or restacks the layout, and focusing one already in full view
+moves nothing. The dim stays binary, and focus keeps the indicator
+and the accent title, so it still reads apart from the lit tier.
+
+Each layout answers it as simply as it can. Monocle shows one tile,
+so the one its layout puts in front is lit and every other is dim
+wherever it is parked, with no frames read: monocle looks as it
+always did. Scrolling is the one layout judged from frames — the
+ones it issues for the App Bar's Space on its screen, against the
+area it fills, in the order it stacks them (the scrolling raise
+order with the window in front on top). A float never counts
+against a tile: the App Bar answers what is on screen, and floats
+are the edge case, so a tile under a float stays lit. A float
+itself is judged against what does cover it. The focused window
+sits above every float — a quiet raise cannot beat the frontmost
+app's key window (#2284) — so a float it covers wholly is dim, one
+it overlaps reads partly with no side, one the screen's edge cuts
+is dim, and the rest are lit. Two unfocused floats are not judged
+against each other, their order being unknown.
+
+A WindowServer read would see real overlap, but it would put a
+compositor round trip on a refresh path that runs on every switch
+and focus report, and that read stalls under GPU load (#1925). So
+a window KiwiDesk does not manage covering a tile leaves its item
+lit. While a held pass waits for the hand to rest, the frames are
+the ones it owes rather than the ones on screen, and the bars lead
+them as they lead every held pass.
+
+**A partly visible item carries a half-moon.** "Badges are
+Space-Bar-only" rules out *state* badges (sticky, floating), which
+the App Bar would repeat from the Space Bar. The half-moon states
+where the window sits in the layout, which nothing else draws. Its
+filled half is the side of a scrolling column still in view, along
+the scroll axis rather than the bar's, so it says which way to
+scroll. A tile stacked behind another, or a float partly under the
+focused window, draws the ring empty: it is not scrolled away, so
+there is no way to point. A float never takes the filled half — its
+edges are where the user put it. The slot is reserved on every
+item, so a window sliding out of view changes no item's length, and
+the disc is drawn at full alpha whatever the item's dim.
+
+**A sliver is not a part.** (Owner and ui-designer, 2026-10-18.) A
+scrolling row leaves every scrolled-out neighbour a fixed sliver so
+it stays reachable, and a moon on each of them said nothing. So a
+cut column reads partly only once it shows more than that sliver
+(`ScrollingLayout.edgePeek`, read from the layout and never
+restated), and a tile stacked behind another only while more than a
+fifth of it is uncovered (`BarVisibility.partlyFloor`); less reads
+hidden. A share would not do for the cut: the sliver is a fixed
+length, so on a narrow slot it is a large share. A float takes no
+floor: any overlap by the focused window shows the ring.
+:::
+
 **An App Bar item draws its icon AND its title.**
 ([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
 A vertical App Bar draws the icon alone, which is rendering, not

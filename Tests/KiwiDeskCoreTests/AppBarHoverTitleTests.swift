@@ -50,12 +50,22 @@ struct AppBarHoverTitleTests {
         let core = core(title: String(repeating: "x", count: 80))
         var style = AppBarLook()
         style.titleCap = 20
-        #expect(core.barItem(for: [WindowID(1)], style: style).titleCut)
-        style.titleCap = 100
-        #expect(!core.barItem(for: [WindowID(1)], style: style).titleCut)
         #expect(
-            !core.barItem(for: [WindowID(1), WindowID(1)], style: style)
+            core.barItem(for: [WindowID(1)], style: style, visibility: [:])
                 .titleCut
+        )
+        style.titleCap = 100
+        #expect(
+            !core.barItem(for: [WindowID(1)], style: style, visibility: [:])
+                .titleCut
+        )
+        #expect(
+            !core.barItem(
+                for: [WindowID(1), WindowID(1)],
+                style: style,
+                visibility: [:]
+            )
+            .titleCut
         )
     }
 

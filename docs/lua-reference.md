@@ -2547,11 +2547,20 @@ values clamp.
 
 **Does:** sets the opacity of untinted idle content on both bars
 — an emoji identifier or app image on a Space you are not on, an
-inactive App Bar item's icon and count badge; tinted content
+App Bar item's icon and count badge; tinted content
 takes the item
 colour instead. The Space Bar's middle tier is
 [`space_bar.set_active_dim_factor`](#space_barset_active_dim_factor).
 Lua-only (no GUI).
+
+:::unreleased
+On the App Bar the dim marks a window that is not fully on screen
+— in monocle every window but the one shown, in scrolling a column
+cut by the screen's edge or stacked behind another, and a float the
+screen's edge cuts or the focused window covers. A fully visible
+item stays undimmed whether or not it holds the focus. A float or a
+window KiwiDesk does not manage covering a tile does not count.
+:::
 
 **Example:**
 
@@ -2601,9 +2610,13 @@ which follows the focused window's colour until you set it.
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
-An App Bar window that is not focused draws its title and glyph
-in the same idle ink as an identifier on a Space you are not on:
-`kiwishelf.set_item_color` at 60% of its own alpha.
+:::unreleased
+An App Bar window not fully on screen draws its title and glyph in
+the same idle ink as an identifier on a Space you are not on:
+`kiwishelf.set_item_color` at 60% of its own alpha. A fully visible
+one draws them in the item colour, and the focused one in
+`active_item_color`.
+:::
 
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the

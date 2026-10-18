@@ -118,6 +118,10 @@ The focused-window shortcut row above has one exception: `focus` itself runs thr
 
 The Layout menu subtitle row above has a remedy on every macOS: KiwiHub's view picker (`⌃⌥L`) names the layout of the Space under the pointer and adds "not saved to profile" while it drifts.
 
+:::unreleased
+An App Bar item reads KiwiDesk's own layout, not what the screen draws ([#2234](https://github.com/KiwiCanopy/KiwiDesk/issues/2234)). A window KiwiDesk does not manage — a picture-in-picture video, another app's panel — covering a tile leaves the tile's item lit, a float covering a tile does too by ruling, and two unfocused floats that overlap both read lit, since only the focused window is known to be on top. Asking the WindowServer what is drawn would see all of it, at the price of a round trip on every bar refresh, which stalls under GPU load ([#1925](https://github.com/KiwiCanopy/KiwiDesk/issues/1925)).
+:::
+
 
 The sticky-window row above covers the *gesture* switch too: a
 sticky window whose app drops its Accessibility element before

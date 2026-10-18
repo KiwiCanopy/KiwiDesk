@@ -65,6 +65,35 @@ struct IdleItemContrastTests {
         #expect(measured == PaletteCatalog.bundled().count * 2)
     }
 
+    /// Under Reduce transparency the plate is opaque
+    /// (`LiquidGlassGate.opaque`), and the App Bar's dimmed ink
+    /// meets it with no wallpaper behind: an item not fully on
+    /// screen keeps its idle title legible there too (#2234).
+    @Test("The idle ink clears the floor on the opaque plate")
+    @MainActor
+    func opaquePlateIdleInkHolds() throws {
+        var measured = 0
+        for palette in PaletteCatalog.bundled() {
+            let name = Comment(rawValue: palette.name)
+            let item = try #require(
+                palette.colors["kiwishelf.item_color"],
+                name
+            )
+            let fill = try #require(
+                palette.colors["kiwishelf.fill_color"],
+                name
+            )
+            let plate = LiquidGlassGate.opaque(fill)
+            let idle = try #require(
+                idleContrast(item: item, fill: plate, on: "#000000"),
+                name
+            )
+            #expect(idle >= Self.floor, name)
+            measured += 1
+        }
+        #expect(measured == PaletteCatalog.bundled().count)
+    }
+
     /// The idle ink is relative to the colour's own alpha, so a
     /// translucent item colour dims further rather than being
     /// pinned to one absolute alpha.

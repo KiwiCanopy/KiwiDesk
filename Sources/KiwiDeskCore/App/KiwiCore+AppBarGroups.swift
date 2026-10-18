@@ -155,7 +155,8 @@ extension KiwiCore {
     func barItem(
         for group: [WindowID],
         style: AppBarLook,
-        floating: Bool = false
+        floating: Bool = false,
+        visibility: [WindowID: BarVisibility]
     ) -> AppBarOverlay.Item {
         let window = group.first.flatMap {
             state.windows[$0]
@@ -188,7 +189,8 @@ extension KiwiCore {
                     AppBarStyle.cappedTitle($0, to: style.resolvedTitleCap)
                         != $0
                 } ?? false,
-            floating: floating
+            floating: floating,
+            visibility: group.first.flatMap { visibility[$0] } ?? .visible
         )
     }
 }

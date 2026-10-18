@@ -28,14 +28,16 @@ struct AppBarScrollLayoutTests {
         // A longer name yields a wider slot; measured, not fixed.
         #expect(longW > shortW)
         // Vertical bars render icon-only: the slot is the
-        // icon square (QA 2026-07-19).
+        // icon square (QA 2026-07-19) and the half-moon's slot
+        // above it (#2234).
+        let depth = style.contentDepth(forDepth: 32)
         #expect(
             AppBarOverlay.autoSlotWidth(
                 items: long,
                 style: style,
                 horizontal: false,
                 thickness: 32
-            ) == 32
+            ) == depth + AppBarHalfMoon.reserve(contentDepth: depth)
         )
     }
 

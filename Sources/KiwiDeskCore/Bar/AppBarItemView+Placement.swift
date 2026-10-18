@@ -6,8 +6,14 @@ import AppKit
 /// is mid-glide while a render reads it.
 extension AppBarItemView {
     struct HorizontalPlacement {
-        /// Where the icon-and-title group starts.
+        /// Where the half-moon's slot starts, which leads the
+        /// icon-and-title group (#2234).
         var x: CGFloat
+        /// The half-moon's slot, reserved on every item.
+        var moon: CGFloat
+        /// Whether the half-moon draws in it: a hidden one is no
+        /// drawn content (#1779).
+        var moonShown: Bool
         /// The icon square's side; 0 without one.
         var side: CGFloat
         var spacing: CGFloat
@@ -20,7 +26,8 @@ extension AppBarItemView {
         /// badge hangs off them, sized by its own text, and is not
         /// part of it (#1779).
         var span: ClosedRange<CGFloat> {
-            x...(x + side + spacing + text.width)
+            (moonShown ? x : x + moon)...(x + moon + side + spacing
+                + text.width)
         }
     }
 
@@ -57,6 +64,9 @@ extension AppBarItemView {
         label.lineBreakMode = .byTruncatingTail
         label.stringValue = text
         let side = iconSlotHidden ? 0 : max(contentSide - pad * 2, 0)
+        let moon = AppBarHalfMoon.reserve(
+            contentDepth: style.contentDepth(forDepth: depth)
+        )
         var textSize = label.cell?.cellSize ?? .zero
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
@@ -67,7 +77,8 @@ extension AppBarItemView {
             : 0
         textSize.width = min(
             textSize.width,
-            size.width - side - spacing - edge.total - badgeReserve
+            size.width - moon - side - spacing - edge.total
+                - badgeReserve
         )
         if textSize.width < 8 {
             textSize.width = 0
@@ -78,12 +89,14 @@ extension AppBarItemView {
             ? badgeReserve - pad + 2
             : 0
         let x = max(
-            (size.width - side - spacing - textSize.width
+            (size.width - moon - side - spacing - textSize.width
                 - badgeExtent + edge.leading - edge.trailing) / 2,
             edge.leading
         )
         return HorizontalPlacement(
             x: x,
+            moon: moon,
+            moonShown: visibility.drawsHalfMoon,
             side: side,
             spacing: spacing,
             text: textSize,
@@ -92,16 +105,20 @@ extension AppBarItemView {
         )
     }
 
-    /// The icon square in a vertical slot of `size`, centred and
-    /// kept `contentPadding` off the leading end; nil where the
-    /// item draws no icon.
+    /// The icon square in a vertical slot of `size`, centred with
+    /// the half-moon's slot above it (#2234) and kept
+    /// `contentPadding` off the leading end; nil where the item
+    /// draws no icon.
     func verticalIconSquare(in size: CGSize) -> CGRect? {
         let pad = Self.contentPadding
         let side = iconSlotHidden ? 0 : max(contentSide(in: size) - pad * 2, 0)
         guard side > 0 else { return nil }
+        let moon = AppBarHalfMoon.reserve(
+            contentDepth: style.contentDepth(forDepth: size.width)
+        )
         return CGRect(
             x: (size.width - side) / 2,
-            y: max((size.height - side) / 2, pad),
+            y: max((size.height - side - moon) / 2, pad) + moon,
             width: side,
             height: side
         )
@@ -121,6 +138,35 @@ extension AppBarItemView {
         guard let square = verticalIconSquare(in: size) else {
             return 0...length
         }
-        return square.minY...square.maxY
+        let moon = visibility.drawsHalfMoon ? halfMoonFrame(in: size) : nil
+        return (moon?.minY ?? square.minY)...square.maxY
+    }
+
+    /// The half-moon's disc in a slot of `size` — the one home of
+    /// where it sits in its reserved slot (#2234): at the slot's
+    /// start on the run, centred on the icon's cross axis; nil on a
+    /// side bar item drawing no icon.
+    func halfMoonFrame(in size: CGSize) -> CGRect? {
+        let depth = style.contentDepth(
+            forDepth: horizontal ? size.height : size.width
+        )
+        let diameter = AppBarHalfMoon.diameter(contentDepth: depth)
+        if horizontal {
+            return CGRect(
+                x: horizontalPlacement(in: size).x,
+                y: (size.height - diameter) / 2,
+                width: diameter,
+                height: diameter
+            )
+        }
+        guard let square = verticalIconSquare(in: size) else {
+            return nil
+        }
+        return CGRect(
+            x: square.midX - diameter / 2,
+            y: square.minY - AppBarHalfMoon.reserve(contentDepth: depth),
+            width: diameter,
+            height: diameter
+        )
     }
 }

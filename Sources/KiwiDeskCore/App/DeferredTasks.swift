@@ -54,6 +54,10 @@ final class DeferredTasks {
         /// whose reschedule is the POINT: cancel-and-replace turns
         /// a keystroke-rate burst into one refresh when it stops.
         case barTitleRefresh
+        /// Bar re-render on a float's own move or resize (#2234):
+        /// it changes which tiles an App Bar item finds covered
+        /// without a retile, debounced like a title.
+        case barVisibilityRefresh
         /// Re-centres a Space chip whose strip hold ended (#1528
         /// item 21), after the render or relayout that ended it
         /// unwinds — never a bar refresh nested inside one.
@@ -109,6 +113,7 @@ final class DeferredTasks {
                 .borderResync, .adoptionHeal, .adoptionHealRead,
                 .adoptionHealWake,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
+                .barVisibilityRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
                 .menuBarRevealReturn, .hyperRemap, .visionMask,
