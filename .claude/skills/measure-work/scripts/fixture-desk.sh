@@ -101,15 +101,25 @@ app_rules = { ["com.apple.Safari"] = "1" }
 LUA
 }
 
+window_count() {  # how many windows app $1 shows, 0 if not running
+    pgrep -xq "$1" || { echo 0; return; }
+    osascript -e "tell application \"$1\" to count windows" \
+        2>/dev/null || echo 0
+}
+
 open_windows() {  # $1 = app, $2 = how many
-    local cmd
-    cmd='make new document'
+    local want
+    want=$(( $(window_count "$1") + $2 ))
     # Activate first: a window an app makes while inactive opens on
     # the Desktop macOS last had current, not the one shown.
     osascript -e "tell application \"$1\" to activate" >/dev/null
     sleep 1
+    # Counted, not looped blind: a fresh TextEdit opens an untitled
+    # document of its own at launch, the stray sixteenth window.
     for _ in $(seq "$2"); do
-        osascript -e "tell application \"$1\" to $cmd" >/dev/null
+        [ "$(window_count "$1")" -ge "$want" ] && break
+        osascript -e "tell application \"$1\" to make new document" \
+            >/dev/null
     done
 }
 
