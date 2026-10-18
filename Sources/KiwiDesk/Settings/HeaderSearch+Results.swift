@@ -17,7 +17,10 @@ extension HeaderSearch {
     var resultCard: some View {
         resultList
             .padding(8)
-            .frame(width: 380, alignment: .leading)
+            .frame(
+                width: SearchPanelWidth.width(for: panelRoom),
+                alignment: .leading
+            )
             .background(
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius

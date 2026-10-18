@@ -94,6 +94,8 @@ struct SettingsHeaderBar: View {
             modeSegment
         }
         .padding(.leading, SettingsHeaderBar.trafficLightInset)
+        // The search panel's room ends at this row's trailing edge.
+        .coordinateSpace(.named(SearchPanelRoom.headerSpace))
     }
 
     /// "← Home" navigation back button.
