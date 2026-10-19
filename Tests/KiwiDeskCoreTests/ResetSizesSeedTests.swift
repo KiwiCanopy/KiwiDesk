@@ -31,7 +31,7 @@ struct ResetSizesSeedTests {
         #expect(DefaultKeybindings.rows(ofGeneration: 5) == [row])
         #expect(
             DefaultKeybindings.generationTopUp(existing: [], above: 4)
-                == [row]
+                == [row] + DefaultKeybindings.rows(ofGeneration: 6)
         )
     }
 
@@ -47,7 +47,7 @@ struct ResetSizesSeedTests {
             DefaultKeybindings.generationTopUp(
                 existing: [mine],
                 above: 4
-            ).isEmpty
+            ) == DefaultKeybindings.rows(ofGeneration: 6)
         )
     }
 

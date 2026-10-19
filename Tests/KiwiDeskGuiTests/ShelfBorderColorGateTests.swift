@@ -35,17 +35,16 @@ struct ShelfBorderColorGateTests {
         #expect(on.verdict(for: .kiwishelf(.borderColor)) == nil)
     }
 
-    @Test("With no bar shown the header's reason stands instead")
-    func headerOutranksTheLink() {
+    /// A hidden bar's shortcut still shows it, so no bar value
+    /// greys the shelf's colours: the border row keeps its own
+    /// sentence with every bar hidden (#761).
+    @Test("With every bar hidden the row keeps its own sentence")
+    func hiddenBarsKeepTheLink() {
         let gates = AdvancedColorsGates(
             settings: Self.settings(border: false, barShows: false)
         )
         #expect(gates.shelfBorderOff)
-        #expect(!gates.needsOwnSentence(.kiwishelf(.borderColor)))
-        #expect(
-            gates.verdict(for: .kiwishelf(.borderColor))?.help
-                == AdvancedColorsHelp.kiwishelfOff
-        )
+        #expect(gates.needsOwnSentence(.kiwishelf(.borderColor)))
     }
 
     /// One branch, one value (`CrossReferenceRowSlotTests`).

@@ -48,6 +48,11 @@ struct ShortcutsBespokeContainerTests {
                 "kiwiVisionAtRest", .kiwiVisionShortcuts,
                 ShortcutsRowOrder.kiwiVisionAtRest
             ),
+            // The bars' show/hide shortcuts (#761).
+            (
+                "kiwishelfAtRest", .kiwishelfShortcuts,
+                ShortcutsRowOrder.kiwishelfAtRest
+            ),
             (
                 "moveWindowsAtRest", .moveWindows,
                 ShortcutsRowOrder.moveWindowsAtRest

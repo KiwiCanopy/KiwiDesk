@@ -320,7 +320,7 @@ struct GlyphGapPlanTests {
             )
         }
         let app = KiwiCore.AppBarContent(
-            space: Space(id: "s", windows: []),
+            space: Space(id: "s", mode: .monocle),
             style: settings.appBarLook(for: settings.monocle.appBar),
             groups: windows.map { [$0.id] },
             items: windows

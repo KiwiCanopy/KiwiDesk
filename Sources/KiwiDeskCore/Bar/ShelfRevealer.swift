@@ -138,13 +138,8 @@ final class ShelfRevealer {
 
     /// Whether any hiding bar sits on `shelf`, which a retracted
     /// shelf's panel is kept for.
-    func covers(_ shelf: ShelfManager.Key) -> Bool {
+    func hasTarget(on shelf: ShelfManager.Key) -> Bool {
         targets.keys.contains { $0.shelf == shelf }
-    }
-
-    /// Whether `shelf` has a bar the pointer has armed.
-    func arming(_ shelf: ShelfManager.Key) -> Bool {
-        arming.contains { $0.shelf == shelf }
     }
 
     /// The hiding bars of this pass; a bar that stopped hiding

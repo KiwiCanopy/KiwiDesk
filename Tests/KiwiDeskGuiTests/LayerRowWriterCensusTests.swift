@@ -135,6 +135,9 @@ struct LayerRowWriterCensusTests {
         "KiwiDesk/Settings/Components/Keybindings/"
             + "KiwiVisionShortcutsGroup.swift":
             (1, "the KiwiVision group: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/Keybindings/"
+            + "KiwiShelfShortcutsGroup.swift":
+            (1, "the KiwiShelf group (#761): hands the holder to its rows"),
         "KiwiDesk/Settings/Components/KiwiVision/"
             + "KiwiVisionLensHeader.swift":
             (

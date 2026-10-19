@@ -58,7 +58,7 @@ struct ShelfAutoHideCoreTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let key = ShelfManager.Key(display: display, edge: .top)
         #expect(core.spaceBars.shownStrips.isEmpty)
-        #expect(core.shelves.reveal.covers(key))
+        #expect(core.shelves.reveal.hasTarget(on: key))
         let indicator = try #require(
             core.shelves.indicators.indicatorForTesting(key)
         )

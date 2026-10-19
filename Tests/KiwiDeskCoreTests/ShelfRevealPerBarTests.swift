@@ -67,6 +67,35 @@ struct ShelfRevealPerBarTests {
         #expect(!settings.revealActionLive(.app, in: .bsp))
     }
 
+    /// A `hidden` bar's target has no band: the pointer never
+    /// opens it, no monitor listens for it, and its shortcut does.
+    @Test("a band-less target opens on its shortcut alone")
+    func bandlessOpensOnTheShortcut() {
+        let key = ShelfRevealer.Key(
+            shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+            bar: .app
+        )
+        let revealer = ShelfRevealer()
+        revealer.makeMonitor = { _ in nil }
+        revealer.schedule = { _, _ in ShelfRevealTimer() }
+        revealer.location = { CGPoint(x: 500, y: 799) }
+        revealer.sync([
+            key: ShelfRevealer.Target(
+                edge: .top,
+                strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
+                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+                band: nil
+            )
+        ])
+        revealer.start()
+        defer { revealer.stop() }
+        revealer.moved(to: CGPoint(x: 500, y: 799))
+        #expect(revealer.reveal(of: key) == .hidden)
+        #expect(!revealer.isListening)
+        #expect(revealer.toggle(key, duration: 0))
+        #expect(revealer.reveal(of: key) == .pinned(until: nil))
+    }
+
     // MARK: - Through the drivers
 
     /// A core on the primary screen with one window in a monocle

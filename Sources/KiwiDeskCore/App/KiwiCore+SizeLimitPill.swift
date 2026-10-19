@@ -31,7 +31,7 @@ extension KiwiCore {
         symbol: String
     ) -> Bool {
         guard let frame = refusalPillFrame(window) else { return false }
-        return flashRefusalPill(
+        return flashPillPrimitive(
             key: window,
             frame: frame,
             text: text,
@@ -48,7 +48,7 @@ extension KiwiCore {
         text: String,
         symbol: String
     ) -> Bool {
-        flashRefusalPill(
+        flashPillPrimitive(
             key: Self.shelfPillKey,
             frame: Self.pillRoom(beside: strip, edge: edge),
             text: text,
@@ -57,7 +57,7 @@ extension KiwiCore {
     }
 
     /// The one primitive call both doors share.
-    private func flashRefusalPill(
+    private func flashPillPrimitive(
         key: WindowID,
         frame: CGRect,
         text: String,

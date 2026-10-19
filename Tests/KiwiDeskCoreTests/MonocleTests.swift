@@ -98,7 +98,7 @@ struct MonocleSettingsTests {
         )
         #expect(global["title_cap"] as? Int == 10)
         // The per-layout bar under monocle only carries its
-        // own enabled flag until a field is overridden.
+        // own visibility until a field is overridden.
         let layout = try #require(
             json["layout"] as? [String: Any]
         )
@@ -108,7 +108,7 @@ struct MonocleSettingsTests {
         let bar = try #require(
             monocle["app_bar"] as? [String: Any]
         )
-        #expect(bar["enabled"] as? Bool == true)
+        #expect(bar["visibility"] as? String == "always")
         #expect(bar["title_cap"] == nil)
     }
 

@@ -172,19 +172,20 @@ struct ColorsGateTests {
             ).isEmpty
         )
 
-        // Every bar off, the ring off and the ghost's border off:
-        // both pages, once each, the shelf rows' first.
+        // Every bar hidden, the ring off and the ghost's border
+        // off: a hidden bar greys no colour (#761), so the ring's
+        // page alone.
         settings.spaceBarStyle.visibility = .hidden
         settings.monocle.appBar.visibility = .hidden
         settings.scrolling.appBar.visibility = .hidden
         settings.borderStyle.enabled = false
         settings.dragGhost.border = false
         gates = AdvancedColorsGates(settings: settings)
-        #expect(!gates.shelfDraws)
+        #expect(gates.shelfDraws)
         #expect(
             gates.dimmedDestinations(
                 of: ColorsRowOrder.accentAtRest
-            ) == [.bars, .gapsAndBorders]
+            ) == [.gapsAndBorders]
         )
 
         // The drop zone off dims only the Second accent's drag

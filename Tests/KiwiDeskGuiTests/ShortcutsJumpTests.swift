@@ -25,6 +25,7 @@ struct ShortcutsJumpTests {
                 SettingsCatalog.shortcuts.layoutKeys.id,
                 SettingsCatalog.shortcuts.sizeFloat.id,
                 SettingsCatalog.shortcuts.kiwiVisionKeys.id,
+                SettingsCatalog.shortcuts.kiwishelfKeys.id,
                 SettingsCatalog.shortcuts.openApplications.id,
             ]
         )

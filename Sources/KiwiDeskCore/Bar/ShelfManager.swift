@@ -128,7 +128,7 @@ final class ShelfManager {
             peek.shelfLeft(overlay.panel)
             overlay.hide(animated: true)
             // A kept hiding shelf whose edge stopped hiding goes.
-            if !overlay.isVisible, !reveal.covers(key) {
+            if !overlay.isVisible, !reveal.hasTarget(on: key) {
                 overlays[key] = nil
             }
         }
@@ -227,7 +227,7 @@ final class ShelfManager {
     private func retire(_ key: Key) {
         // A hiding shelf that retracted is kept, ordered out, for
         // its next reveal (#761): a hiding edge is not an empty one.
-        guard last[key] == nil, !reveal.covers(key) else { return }
+        guard last[key] == nil, !reveal.hasTarget(on: key) else { return }
         overlays[key] = nil
     }
 

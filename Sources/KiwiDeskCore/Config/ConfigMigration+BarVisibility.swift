@@ -11,9 +11,10 @@ import Foundation
 ///
 /// Reaches a profile's `settings` and a bundle's inline profiles,
 /// the two shapes that carry `TilingSettings`; `gui.json` carries
-/// none (`GuiConfig.currentFormat`'s note). A tree walk alone: the
-/// edit spans three keys at two depths, which no textual edit can
-/// scope, and the walk is the correct fallback either way.
+/// none (`GuiConfig.currentFormat`'s note). The textual edit keeps
+/// a user's file byte for byte where it can; a global App Bar
+/// value, or an `enabled` beside a stored `visibility`, stands down
+/// to the walk.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps naming
     /// what it was written to name.
@@ -31,8 +32,101 @@ extension ConfigMigration {
                 $0.range(of: needle) != nil || $0.range(of: moved) != nil
             },
             rewriting: withBarVisibility,
-            editing: { _ in nil }
+            editing: surgicallyBarVisibility
         )
+    }
+
+    /// Each `space_bar` / `app_bar` object's own `enabled` pair:
+    /// `true` dropped, `false` rewritten as `"visibility":"hidden"`,
+    /// back to front so earlier offsets stay valid. Nil where a bar
+    /// object also carries `visibility`, which the walk resolves.
+    static func surgicallyBarVisibility(_ text: String) -> Data? {
+        let opener = "\"(\(shelfSpaceBarKey)|\(shelfAppBarKey))\"\\s*:\\s*\\{"
+        guard let regex = try? NSRegularExpression(pattern: opener)
+        else { return nil }
+        let utf16 = Array(text.utf16)
+        var spans: [NSRange] = []
+        for match in regex.matches(
+            in: text,
+            range: NSRange(text.startIndex..., in: text)
+        ) {
+            let brace = match.range.location + match.range.length - 1
+            guard let close = closingBrace(from: brace, in: utf16)
+            else { return nil }
+            spans.append(
+                NSRange(location: brace, length: close - brace + 1)
+            )
+        }
+        let ns = text as NSString
+        var out = text
+        for span in spans.reversed() {
+            let object = ns.substring(with: span)
+            guard
+                !object.contains("\"\(barVisibilityKey)\""),
+                let pair = try? NSRegularExpression(
+                    pattern: "\"\(retiredBarEnabledKey)\"\\s*:\\s*(true|false)"
+                ),
+                case let found = pair.matches(
+                    in: object,
+                    range: NSRange(
+                        location: 0,
+                        length: (object as NSString).length
+                    )
+                ),
+                found.count <= 1
+            else { return nil }
+            guard let match = found.first else { continue }
+            let on = (object as NSString).substring(with: match.range(at: 1))
+            let edited =
+                on == "true"
+                ? removingPair(match.range, fromObject: object)
+                : (object as NSString).replacingCharacters(
+                    in: match.range,
+                    with: "\"\(barVisibilityKey)\":\"\(barHiddenValue)\""
+                )
+            out = (out as NSString).replacingCharacters(in: span, with: edited)
+        }
+        return out == text ? nil : out.data(using: .utf8)
+    }
+
+    /// `object` without the pair at `range` and the comma joining
+    /// it to a neighbour.
+    private static func removingPair(
+        _ range: NSRange,
+        fromObject object: String
+    ) -> String {
+        let ns = object as NSString
+        let tail = NSRange(
+            location: range.location + range.length,
+            length: ns.length - range.location - range.length
+        )
+        if let comma = try? NSRegularExpression(pattern: "^\\s*,\\s*"),
+            let after = comma.firstMatch(in: object, range: tail),
+            after.range.location == tail.location
+        {
+            return ns.replacingCharacters(
+                in: NSRange(
+                    location: range.location,
+                    length: range.length + after.range.length
+                ),
+                with: ""
+            )
+        }
+        let head = ns.substring(to: range.location)
+        if let comma = head.range(of: ",\\s*$", options: .regularExpression) {
+            let start = head.distance(
+                from: head.startIndex,
+                to: comma.lowerBound
+            )
+            return ns.replacingCharacters(
+                in: NSRange(
+                    location: start,
+                    length: range.location + range.length - start
+                ),
+                with: ""
+            )
+        }
+        return ns.replacingCharacters(in: range, with: "")
     }
 
     /// Rewrites every `TilingSettings` object found at any depth —

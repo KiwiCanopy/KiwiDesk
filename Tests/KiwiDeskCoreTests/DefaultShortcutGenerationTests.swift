@@ -13,15 +13,16 @@ struct DefaultShortcutGenerationTests {
     private let forward = "KiwiDesk.focus_space_forward()"
     private let previous = "KiwiDesk.focus_space_previous()"
     private let next = "KiwiDesk.focus_space_next()"
-    /// Generations 2 to 5: 3.0.0's layout keys (#453, #762), the
-    /// window switcher (#1875), KiwiVision (#2103) and 3.1.0's
-    /// Reset sizes (#2303).
+    /// Generations 2 to 6: 3.0.0's layout keys (#453, #762), the
+    /// window switcher (#1875), KiwiVision (#2103), 3.1.0's Reset
+    /// sizes (#2303) and the bars' shortcuts (#761).
     private let layoutKeys = [
         "KiwiDesk.cycle_mode()", "KiwiDesk.cycle_mode(\"prev\")",
         "kiwihub.show(\"view\")",
         "kiwihub.show(\"windows\")",
         "kiwivision.toggle()",
         "KiwiDesk.reset_layout_sizing()",
+        "space_bar.toggle_reveal()", "app_bar.toggle_reveal()",
     ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.

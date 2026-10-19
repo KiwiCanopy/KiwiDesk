@@ -33,9 +33,7 @@ extension APIReference {
             .choice("placement", SpawnPlacement.self)
         ),
         "set_app_bar_visibility": APIRecord(
-            "Sets whether the monocle layout's App Bar stays "
-                + "shown, hides until the pointer reaches its edge, "
-                + "or shows only on its shortcut.",
+            "Sets the monocle App Bar to always, auto or hidden.",
             .choice("visibility", ShelfVisibility.self)
         ),
         "set_app_bar_active_indicator": APIRecord(

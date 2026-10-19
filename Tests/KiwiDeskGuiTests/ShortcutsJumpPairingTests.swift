@@ -40,6 +40,10 @@ struct ShortcutsJumpPairingTests {
                 ShortcutsRowOrder.kiwiVisionAtRest
             ),
             (
+                "ShortcutsRowOrder.kiwishelfAtRest",
+                ShortcutsRowOrder.kiwishelfAtRest
+            ),
+            (
                 "ShortcutsRowOrder.moveWindowsAtRest",
                 ShortcutsRowOrder.moveWindowsAtRest
             ),

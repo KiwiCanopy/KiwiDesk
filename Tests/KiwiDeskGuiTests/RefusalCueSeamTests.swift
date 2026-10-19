@@ -75,6 +75,10 @@ struct RefusalCueSeamTests {
             + joined.occurrences(
                 of: "soundIfDrawn(stickyMarks.flash("
             )
+            // A bar shortcut's refusal (#761), through the door.
+            + joined.occurrences(
+                of: "soundIfDrawn(flashRefusalPill("
+            )
         #expect(drawn > 0)
         #expect(joined.occurrences(of: "soundIfDrawn(") == drawn + 1)
         // And the speaker is reached only THROUGH that gate. The
@@ -290,6 +294,9 @@ struct RefusalCueSeamTests {
                 "KiwiCore+SizeLimitPill.swift": 1,
                 "KiwiCore+WindowActions.swift": 1,
                 "KiwiCore+VisionReach.swift": 1,
+                // A bar's shortcut refused (#761), sounded
+                // through `soundIfDrawn`.
+                "KiwiCore+ShelfRevealCue.swift": 2,
             ],
             "found: \(callers)"
         )
@@ -303,7 +310,7 @@ struct RefusalCueSeamTests {
         }
         let door = Self.stripped(
             try SourceScan.functionBody(
-                of: "flashRefusalPill",
+                of: "flashPillPrimitive",
                 in: "KiwiCore+SizeLimitPill.swift",
                 under: "App"
             )

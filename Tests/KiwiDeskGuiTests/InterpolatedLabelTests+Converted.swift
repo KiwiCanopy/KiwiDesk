@@ -239,6 +239,10 @@ extension InterpolatedLabelTests {
         //    the sentence would have named a control that no
         //    longer exists under that name in any locale.
         "keybinding.toggle_display_sticky.help": 1,
+        // #761: a bar shortcut's grey names the segments and, for
+        // the App Bar, the layouts that carry it.
+        "keybinding.toggle_space_bar.inert": 2,
+        "keybinding.toggle_app_bar.inert": 4,
         // 5. #1241, #1609. The ladder lives in the Which profile
         //    loads card's one `?`, where it names the card
         //    that sets the binding — the interpolated title is also

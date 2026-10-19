@@ -99,18 +99,11 @@ struct GreyOutParityTests {
             "gatedIsInert: glowSizeReason != nil ? true : nil",
             1
         ),
-        // The two census-rendered bar cards (#678 Phase 2)
-        // carry their container gates per row, resolved from
-        // the census — the needle is the per-row wrap that
-        // honors `exemptFromContainerGate`.
+        // A bar's shortcut row greys while its bar is `always`
+        // everywhere (#761).
         (
-            "SpaceBarCard.swift",
-            "active: !allows",
-            1
-        ),
-        (
-            "AppBarCard.swift",
-            "active: !allows",
+            "KiwiShelfShortcutsGroup.swift",
+            "active: Self.inert(key, model.config.settings)",
             1
         ),
         // Reduce transparency dims the Liquid Glass card's rows

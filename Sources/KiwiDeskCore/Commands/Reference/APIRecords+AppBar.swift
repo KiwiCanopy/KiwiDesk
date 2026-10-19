@@ -18,7 +18,7 @@ extension APIReference {
         ),
         "toggle_reveal": APIRecord(
             "Shows or hides the App Bar over the windows on the "
-                + "active Space's screen, unless it is set to always."
+                + "active Space's screen."
         ),
         "set_active_indicator": APIRecord(
             "Sets how the focused window's item is marked.",

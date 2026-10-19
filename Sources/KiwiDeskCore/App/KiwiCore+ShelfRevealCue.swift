@@ -19,20 +19,19 @@ extension KiwiCore {
             on: display,
             preferring: refusal.bar
         ) {
-            if flashRefusalPill(
-                near: drawn.strip,
-                edge: drawn.edge,
-                text: text,
-                symbol: symbol
-            ) {
-                soundRefusal()
-            }
-            return
+            soundIfDrawn(
+                flashRefusalPill(
+                    near: drawn.strip,
+                    edge: drawn.edge,
+                    text: text,
+                    symbol: symbol
+                )
+            )
+        } else if let window = focusedWindowID {
+            soundIfDrawn(
+                flashRefusalPill(window, text: text, symbol: symbol)
+            )
         }
-        guard let window = focusedWindowID,
-            flashRefusalPill(window, text: text, symbol: symbol)
-        else { return }
-        soundRefusal()
     }
 
     /// The pill's sentence: a fact, the fix living on the shortcut

@@ -14,14 +14,12 @@ extension APIReference {
             .boolean("reserve")
         ),
         "set_visibility": APIRecord(
-            "Sets whether the Space Bar stays shown, hides until "
-                + "the pointer reaches its edge, or shows only on "
-                + "its shortcut.",
+            "Sets the Space Bar to always, auto or hidden.",
             .choice("visibility", ShelfVisibility.self)
         ),
         "toggle_reveal": APIRecord(
             "Shows or hides the Space Bar over the windows on the "
-                + "active Space's screen, unless it is set to always."
+                + "active Space's screen."
         ),
         "set_edge": APIRecord(
             "Sets the Space Bar's edge on all screens, or on one "

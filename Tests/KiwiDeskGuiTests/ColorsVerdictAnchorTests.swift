@@ -78,7 +78,7 @@ struct ColorsVerdictAnchorTests {
     @Test("every dimmed row is explained beneath its card")
     func everyDimmedRowIsAnchored() {
         let all = states()
-        #expect(all.count == 8192)
+        #expect(all.count == 2048)
         var dimmed = 0
         for settings in all {
             let gates = AdvancedColorsGates(settings: settings)

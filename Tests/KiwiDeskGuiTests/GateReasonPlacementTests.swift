@@ -126,7 +126,7 @@ struct GateReasonPlacementTests {
         // switches that live on the Bars destination, which is
         // the case `AdvancedColorsHelp`'s anchors answer.
         #expect(
-            channel(.kiwishelf(.activeItemColor)) == .remote
+            channel(.kiwishelf(.borderColor)) == .remote
         )
         // A row with no gate has no channel at all.
         #expect(channel(.spaceBar(.spaceBarVisibility)) == nil)
