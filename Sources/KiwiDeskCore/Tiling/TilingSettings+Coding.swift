@@ -19,6 +19,7 @@ extension TilingSettings: Codable {
         case gap
         case layout
         case minWindowSizes = "min_window_size"
+        case minWindowSizeOverride = "min_window_size_override"
         case swapSkipsCascade = "swap_skips_cascade"
         case floatPlacement = "float_placement"
         case floatScaleOnDisplayChange =
@@ -79,6 +80,11 @@ extension TilingSettings: Codable {
                 MinWindowSizes.self,
                 forKey: .minWindowSizes
             ) ?? MinWindowSizes()
+        minWindowSizeOverride =
+            try container.decodeIfPresent(
+                [SpaceID: MinSize].self,
+                forKey: .minWindowSizeOverride
+            ) ?? [:]
         swapSkipsCascade =
             try container.decodeIfPresent(
                 Bool.self,

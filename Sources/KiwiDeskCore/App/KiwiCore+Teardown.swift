@@ -219,6 +219,9 @@ extension KiwiCore {
                         + "\(Int($0.axFrame.height))"
                 }.joined(separator: "; ")
         )
+        // Per display, never per Space: the grid mixes every
+        // Space's windows, so a Space's own floor (#2422) has no
+        // one grid to apply to and Floating's stands (#2237).
         let frames = WindowGather.targets(
             groups: groups,
             style: appWide.quitLayout,

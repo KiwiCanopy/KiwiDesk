@@ -116,6 +116,10 @@ struct SettingsValueReadoutTests {
         expectRows(.gaps(.perSpaceOverride), clean, edited)
 
         edited = clean
+        edited.settings.minWindowSizeOverride[SpaceID("mail")] = 200
+        expectRows(.behaviour(.minSizePerSpaceOverride), clean, edited)
+
+        edited = clean
         edited.spaces = [SpaceID("a")]
         edited.spaceModes[SpaceID("a")] = .monocle
         var base = clean

@@ -149,8 +149,10 @@ editing here:
   read, and its `allowed` map is the exemption list. Hand the
   resolver the Space the floor is asked for, and nil only where
   none exists (the quit grid, a preview of a layout's own value):
-  the Space argument is how #2422's per-Space level joins without
-  touching a consumer. A new `LayoutMode` gets a floor in
+  the Space argument is where #2422's per-Space level
+  (`minWindowSizeOverride`) outranks the layout's, so a consumer
+  handing nil for a Space it has drops that Space's own value. A
+  new `LayoutMode` gets a floor in
   `MinWindowSizes` or an `exempt` entry with its reason
   (`MinWindowSizesParityTests`); the argument is
   `docs/design-decisions.md` ▸ *Minimum window size: per layout,

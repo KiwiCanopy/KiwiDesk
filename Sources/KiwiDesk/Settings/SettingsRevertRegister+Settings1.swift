@@ -41,6 +41,8 @@ extension SettingsRevertRegister {
         .behaviour(.floatPlacement): .leaf(\.settings.floatPlacement),
         .behaviour(.floatScaleOnDisplayChange):
             .leaf(\.settings.floatScaleOnDisplayChange),
+        .behaviour(.minSizePerSpaceOverride):
+            .entry(\.settings.minWindowSizeOverride, key: { SpaceID($0) }),
         .behaviour(.placementOverride):
             .entry(\.settings.placementOverride, key: { SpaceID($0) }),
         .behaviour(.mouseResize): .leaf(\.settings.mouseResize),

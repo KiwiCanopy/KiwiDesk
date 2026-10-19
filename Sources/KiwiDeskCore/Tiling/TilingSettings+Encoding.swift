@@ -15,6 +15,10 @@ extension TilingSettings {
             forKey: .minWindowSizes
         )
         try container.encode(
+            minWindowSizeOverride,
+            forKey: .minWindowSizeOverride
+        )
+        try container.encode(
             swapSkipsCascade,
             forKey: .swapSkipsCascade
         )

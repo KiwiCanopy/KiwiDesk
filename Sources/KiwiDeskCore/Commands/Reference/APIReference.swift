@@ -54,6 +54,10 @@ public enum APIReference {
             ("set_gap_override", "set_gap_override"),
             ("set_min_window_size", "set_min_window_size"),
             (
+                "set_min_window_size_override",
+                "set_min_window_size_override"
+            ),
+            (
                 "set_swap_skips_cascade",
                 "set_swap_skips_cascade"
             ),

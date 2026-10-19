@@ -5904,7 +5904,8 @@ layouts, Monocle exempt with its reason.
 
 **One window, one floor.** A float is placed by no layout, so
 every window `EffectiveFloat.applies` to takes Floating's,
-whatever layout its space uses, and so does the quit grid,
+whatever layout its space uses — unless the Space has its own
+value (below) — and so does the quit grid,
 which gathers windows from every layout into a grid none of
 them owns. Without that, a window floated in a Grid space would
 resize to Grid's floor and change floors on every move to
@@ -5921,10 +5922,24 @@ slot size keeps its pt, % and count units because it is a
 target, not a floor. A value per screen fails a laptop that
 docks at dozens of desks: the list grows with every one, and
 none of it is visible from the screen in front of you. Screen
-size enters once, at the seed (below). A per-Space level is
-#2422; the one resolver, `TilingSettings.minWindowSize(for:in:)`,
-already takes the Space, so that level joins without touching a
-consumer.
+size enters once, at the seed (below).
+
+**A Space may carry its own value, and it outranks its layout's**
+(#2422). Two Spaces sharing a layout can have different jobs — a
+Grid that watches servers wants small windows, a Grid that holds
+work wants the usual floor — so `min_window_size_override` keys a
+width and height by Space id, beside `gap.override`. It replaces
+whichever value the Space's windows would otherwise take, a
+float's included, so one window still has one floor and the user
+never has to know which layout value it replaced. Monocle still
+applies none. The value travels with the Space when the Space
+moves to another screen; that is the cost the per-screen ruling
+named, and the row's `?` states it before the move. The quit grid
+mixes every Space's windows per screen, so no Space's value has
+one grid to apply to, and it keeps Floating's. The map is config,
+not session state: a held Space's renumber and a Space drop leave
+it alone, as they leave `gap.override`, because the value belongs
+to the arrangement that declared the Space and comes back with it.
 
 **The starter setup seeds every layout from the main screen's
 width ÷ 8, rounded to 10 pt and clamped to 260–460 pt, the same

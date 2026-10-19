@@ -14,6 +14,7 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case minSizeScrollingHeight = "settings.minWindowSizes.scrolling.height"
     case minSizeFloatingWidth = "settings.minWindowSizes.floating.width"
     case minSizeFloatingHeight = "settings.minWindowSizes.floating.height"
+    case minSizePerSpaceOverride = "settings.minWindowSizeOverride[space]"
     case resizeStep = "settings.resizeStep"
     case swapSkipsCascade = "settings.swapSkipsCascade"
     case floatPlacement = "settings.floatPlacement"
@@ -46,6 +47,15 @@ extension BehaviourKey {
             .minSizeFloatingHeight:
             // The master's "Per layout" drawer (#2237).
             return .row(.layoutDefaults, .general, .showMore)
+        case .minSizePerSpaceOverride:
+            // A Space's own floor (#2422), beside its gaps; inert
+            // while the Space is Monocle, which applies none.
+            return .row(
+                .spacesAndLayouts,
+                .perSpaceOverrides,
+                .atRest,
+                gate: .setting(.spaces(.spaceModes))
+            )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride:
             return .luaOnly
@@ -87,6 +97,11 @@ extension BehaviourKey {
             return .text("layout_defaults.min_size.floating_width")
         case .minSizeFloatingHeight:
             return .text("layout_defaults.min_size.floating_height")
+        case .minSizePerSpaceOverride:
+            return .text(
+                "layout_defaults.min_window_size",
+                help: "space_override.min_size.help"
+            )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride:
             return .none

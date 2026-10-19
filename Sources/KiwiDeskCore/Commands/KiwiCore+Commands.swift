@@ -100,6 +100,8 @@ extension KiwiCore {
             return setGaps(command, args)
         case "set_min_window_size":
             return setMinWindowSize(args)
+        case "set_min_window_size_override":
+            return setMinWindowSizeOverride(args)
         case "set_swap_skips_cascade":
             return setSwapSkipsCascade(args)
         case "set_float_placement":
