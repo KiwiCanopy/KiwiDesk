@@ -21,8 +21,11 @@ extension APIReference {
             .number("size")
         ),
         "set_min_window_size": APIRecord(
-            "Sets the minimum window size before cascading.",
-            .number("points")
+            "Sets one layout's or every layout's minimum window "
+                + "size; (width, layout) sets both axes.",
+            .number("width"),
+            .number("height", optional: true),
+            .choice("layout", MinWindowSizes.Layout.self, optional: true)
         ),
         "set_swap_skips_cascade": APIRecord(
             "Sets whether swapping from a pile steps past it.",

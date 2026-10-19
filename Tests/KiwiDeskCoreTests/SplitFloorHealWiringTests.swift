@@ -27,7 +27,7 @@ struct SplitFloorHealWiringTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1200, height: 800)
         }
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         for id in 1...count {
             core.state.apply(
                 .windowCreated(

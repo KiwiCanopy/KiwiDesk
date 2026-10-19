@@ -72,7 +72,7 @@ struct ScrollingColumnCapTests {
     @Test("the door derives from the layout's own carve")
     func doorReadsTheCarve() {
         var settings = TilingSettings()
-        settings.minWindowSize = 300
+        settings.minWindowSizes = MinWindowSizes(all: 300)
         settings.gapsGlobal = Gaps(
             outer: Gaps.Outer(top: 0, bottom: 0, left: 0, right: 0),
             inner: Gaps.Inner(horizontal: 10, vertical: 10)

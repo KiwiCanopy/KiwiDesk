@@ -43,7 +43,10 @@ struct FloatGatherEntryTests {
             members: [inside, scrolledOut, partly],
             frames: frames,
             region: bounds,
-            minSize: TilingSettings().minWindowSize,
+            minSize: TilingSettings().minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: AppWideSettings().quitGridTargetDepth,
             placingLast: core.state.workspaces[space]?.focused
         )
@@ -136,7 +139,10 @@ struct FloatGatherEntryTests {
                 uniqueKeysWithValues: members.map { ($0, full) }
             ),
             region: Self.bounds,
-            minSize: core.tiler.settings.minWindowSize,
+            minSize: core.tiler.settings.minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: core.appWide.quitGridTargetDepth,
             placingLast: core.state.workspaces[Self.space]?.focused
         )
@@ -173,7 +179,10 @@ struct FloatGatherEntryTests {
                 uniqueKeysWithValues: members.map { ($0, parked) }
             ),
             region: Self.bounds,
-            minSize: core.tiler.settings.minWindowSize,
+            minSize: core.tiler.settings.minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: core.appWide.quitGridTargetDepth,
             placingLast: core.state.workspaces[Self.space]?.focused
         )

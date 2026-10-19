@@ -195,6 +195,8 @@ struct SettingsRowShapeTests {
         "GeneralSection+AppWide.swift": 1,
         "KiwiVisionLevelsCard.swift": 2,
         "KiwiVisionLensOverrides.swift": 2,
+        // The minimum window size master and its layout rows.
+        "MinWindowSizeRows.swift": 2,
         // Titled action rows (AI page, General ▸ Advanced).
         "SettingsActionRow.swift": 1,
     ]

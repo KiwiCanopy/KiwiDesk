@@ -61,7 +61,7 @@ struct ScrollingAppCeilingTests {
         // Pin the default the exact expectations reason from
         // (#660): the `== 715` / `== 800` / `== 900` assertions
         // hold only while the global floor sits below them.
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return (core, space)
     }
 

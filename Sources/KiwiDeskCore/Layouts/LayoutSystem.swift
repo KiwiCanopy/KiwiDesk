@@ -81,8 +81,9 @@ public struct LayoutContext: Sendable {
     public var gaps: Gaps
     /// Focused window or pan anchor (#431, #881).
     public var focused: WindowID?
-    /// Overlap Stack trigger dimension threshold.
-    public var minWindowSize: CGFloat
+    /// The layout's minimum window size, resolved for this Space
+    /// (`TilingSettings.minWindowSize(for:in:)`, #2237).
+    public var minWindowSize: MinSize
     /// Stack column share per window (#67).
     public var stackWeights: [WindowID: Double]
     /// Viewport offset and anchor slot from last scrolling tile (#66, #966).
@@ -120,7 +121,7 @@ public struct LayoutContext: Sendable {
         bounds: CGRect,
         gaps: Gaps = Gaps(),
         focused: WindowID? = nil,
-        minWindowSize: CGFloat = 300,
+        minWindowSize: MinSize = 300,
         stackWeights: [WindowID: Double] = [:],
         scrollRest: ScrollRest? = nil,
         trackBreaks: Set<WindowID> = [],

@@ -171,8 +171,12 @@ extension KiwiCore {
         write: (Double, Double) -> Void
     ) {
         guard !low.isEmpty, !high.isEmpty else { return }
-        let lowMin = effectiveMinSize(of: low, axis: axis)
-        let highMin = effectiveMinSize(of: high, axis: axis)
+        let lowMin = effectiveMinSize(of: low, axis: axis, in: space)
+        let highMin = effectiveMinSize(
+            of: high,
+            axis: axis,
+            in: space
+        )
         let horizontal = axis == "x"
         let gap =
             horizontal
@@ -186,7 +190,7 @@ extension KiwiCore {
         let verdict = SplitDomain.healedRatio(
             current: before,
             available: available,
-            globalFloor: Double(context.minWindowSize),
+            globalFloor: Double(context.minWindowSize.on(axis: axis)),
             low: .init(size: lowMin.size, learned: lowMin.carrier != nil),
             high: .init(
                 size: highMin.size,

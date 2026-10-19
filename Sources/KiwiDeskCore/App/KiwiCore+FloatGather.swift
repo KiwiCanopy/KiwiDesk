@@ -67,7 +67,10 @@ extension KiwiCore {
             frames: frames,
             region: region,
             grid: grid,
-            minSize: tiler.settings.minWindowSize,
+            minSize: tiler.settings.minWindowSize(
+                for: .floating,
+                in: space.id
+            ),
             targetDepth: appWide.quitGridTargetDepth,
             placingLast: space.focused
         )

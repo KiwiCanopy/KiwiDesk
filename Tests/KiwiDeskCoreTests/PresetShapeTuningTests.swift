@@ -86,9 +86,12 @@ struct PresetShapeTuningTests {
         #expect(settings.stack.masterCount == 2)
         #expect(settings.grid.columns == 2)
         #expect(settings.grid.rows == 2)
-        // Profile-wide leaves stay the main screen's: not the
-        // ultrawide's 420 pt floor.
-        #expect(settings.minWindowSize == TilingSettings().minWindowSize)
+        // The floor is seeded from the MAIN screen's width, never
+        // the ultrawide's (#2237).
+        #expect(
+            settings.minWindowSizes
+                == StarterTuning.minWindowSizes(mainWidth: laptop.width)
+        )
     }
 
     /// An undeclared Space on an ultrawide second screen takes

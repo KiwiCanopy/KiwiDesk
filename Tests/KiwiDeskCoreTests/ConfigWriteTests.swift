@@ -22,7 +22,7 @@ private func richConfig() -> GuiConfig {
     )
     config.settings.gapsOverride[SpaceID("browser")] =
         .uniform(0)
-    config.settings.minWindowSize = 250
+    config.settings.minWindowSizes = MinWindowSizes(all: 250)
     config.settings.bsp.splitRatioH = 0.62
     config.settings.bsp.strategy = .alternating
     config.settings.stack.masterCount = 2

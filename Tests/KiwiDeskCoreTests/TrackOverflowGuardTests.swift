@@ -73,7 +73,7 @@ struct TrackOverflowGuardTests {
                     1,
                     TrackLayout.fitCap(
                         crossSpan: context.usable.width,
-                        minSize: context.minWindowSize,
+                        minSize: context.minWindowSize.width,
                         gap: context.gaps.inner.horizontal
                     )
                 )
@@ -86,7 +86,7 @@ struct TrackOverflowGuardTests {
                     1,
                     TrackLayout.fitCap(
                         crossSpan: context.usable.height,
-                        minSize: context.minWindowSize,
+                        minSize: context.minWindowSize.height,
                         gap: context.gaps.inner.vertical
                     )
                 )

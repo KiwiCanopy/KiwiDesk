@@ -113,7 +113,7 @@ struct BspFocusReachabilityTests {
         // asserted here. That threshold is what a narrow host
         // display used to trip. Pinned, not assumed — this suite
         // now describes something else if the default moves.
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         spawn(core, count: 4)
         return SpaceID("1")
     }

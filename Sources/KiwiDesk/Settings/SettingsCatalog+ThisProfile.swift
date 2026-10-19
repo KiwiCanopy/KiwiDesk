@@ -16,6 +16,11 @@ struct LayoutDefaultsControls: Sendable {
         "layout_defaults.min_window_size",
         "Minimum window size"
     )
+    let minSizePerLayout = SettingsDrawer(
+        "layout_defaults.min_size.per_layout",
+        "Per layout",
+        children: MinSizeDrawerControls()
+    )
     let livePreview = SettingsControl(
         "layout_defaults.live_preview",
         "Live preview"
@@ -23,6 +28,59 @@ struct LayoutDefaultsControls: Sendable {
     let spacesUsing = SettingsControl(
         "layout_defaults.spaces_using",
         "Spaces using this layout"
+    )
+}
+
+/// The minimum window size's "Per layout" drawer (#2237): one
+/// child per layout and axis, each a search anchor.
+struct MinSizeDrawerControls: Sendable {
+    let stackWidth = SettingsControl(
+        "layout_defaults.min_size.stack_width",
+        "Stack width"
+    )
+    let stackHeight = SettingsControl(
+        "layout_defaults.min_size.stack_height",
+        "Stack height"
+    )
+    let gridWidth = SettingsControl(
+        "layout_defaults.min_size.grid_width",
+        "Grid width"
+    )
+    let gridHeight = SettingsControl(
+        "layout_defaults.min_size.grid_height",
+        "Grid height"
+    )
+    let trackWidth = SettingsControl(
+        "layout_defaults.min_size.track_width",
+        "Track width"
+    )
+    let trackHeight = SettingsControl(
+        "layout_defaults.min_size.track_height",
+        "Track height"
+    )
+    let bspWidth = SettingsControl(
+        "layout_defaults.min_size.bsp_width",
+        "BSP width"
+    )
+    let bspHeight = SettingsControl(
+        "layout_defaults.min_size.bsp_height",
+        "BSP height"
+    )
+    let scrollingWidth = SettingsControl(
+        "layout_defaults.min_size.scrolling_width",
+        "Scrolling width"
+    )
+    let scrollingHeight = SettingsControl(
+        "layout_defaults.min_size.scrolling_height",
+        "Scrolling height"
+    )
+    let floatingWidth = SettingsControl(
+        "layout_defaults.min_size.floating_width",
+        "Floating width"
+    )
+    let floatingHeight = SettingsControl(
+        "layout_defaults.min_size.floating_height",
+        "Floating height"
     )
 }
 

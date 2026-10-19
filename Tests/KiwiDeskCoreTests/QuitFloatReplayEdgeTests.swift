@@ -124,7 +124,10 @@ struct QuitFloatReplayEdgeTests: CrossSessionFixture {
             state: a.state,
             primaryHeight: GeometryUtils.primaryHeight,
             style: .grid,
-            minSize: a.tiler.settings.minWindowSize,
+            minSize: a.tiler.settings.minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: a.appWide.quitGridTargetDepth
         )
         left.merge(grid) { _, gathered in gathered }

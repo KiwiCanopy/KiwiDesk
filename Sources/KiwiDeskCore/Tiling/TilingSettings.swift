@@ -7,7 +7,9 @@ public struct TilingSettings: Sendable, Equatable {
     public var gapsGlobal = Gaps()
     /// Space gap overrides (`gap.override[space_id]`).
     public var gapsOverride: [SpaceID: Gaps] = [:]
-    public var minWindowSize: CGFloat = 300
+    /// The minimum window size per layout (`min_window_size`,
+    /// #2237); read through `minWindowSize(for:in:)`.
+    public var minWindowSizes = MinWindowSizes()
     /// Global magnitude (points) the catalog AUTHORS Grow/Shrink
     /// keybindings with (`resize.step`, #58). Layout math never
     /// reads this — the bound row's own literal delta drives an
