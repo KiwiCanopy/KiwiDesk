@@ -38,6 +38,9 @@ public final class VisionManager {
         /// The target a lens holds under the haze (#2103 ruling
         /// 12): the plates order directly above it, nil otherwise.
         var holding: CGWindowID?
+        /// The window focus left and its fade into the veil
+        /// (#2417), nil where none is owed.
+        var leaving: Leaving?
     }
 
     /// What the mode draws now.
@@ -211,6 +214,9 @@ public final class VisionManager {
                 blur: request.blur
             )
             reshape(plate, on: screen, request)
+            if plate.isShown, !motion, !holding {
+                fadeLeaving(request.leaving, on: plate, screen: screen.frame)
+            }
             let stack = Stack(target: target, above: holding)
             if BorderManager.ordersOverlay(
                 reassert: reassert,

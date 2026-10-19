@@ -3864,6 +3864,28 @@ Liquid Glass (a plain blur on macOS 14 and 15).
 With Reduce transparency on in macOS, the blur stands down and the
 dim stays.
 
+:::unreleased
+### kiwivision.set_fade_duration
+
+**Expects:** milliseconds, 0–1000. Default 300.
+
+**Does:** sets how long the window focus leaves takes to dim and
+blur; the window you focus clears at once. 0 makes the change
+instant, as Reduce Motion in macOS does. A Space switch is always
+instant. Stored as `fade_duration` in the `kiwivision` group, and a
+lens table takes it too.
+
+### kiwivision.set_fade_curve
+
+**Expects:** `"ease_out"`, `"ease_in_out"`, `"ease_in"` or
+`"linear"`. Default `"ease_out"`.
+
+**Does:** sets how that fade is paced: `"ease_out"` dims fastest at
+the start, `"ease_in"` slowest, `"linear"` evenly. Stored as
+`fade_curve` in the `kiwivision` group, and a lens table takes it
+too.
+:::
+
 ### kiwivision.set_appearance
 
 **Expects:** `"unchanged"`, `"opposite"`, `"dark"` or `"light"`.

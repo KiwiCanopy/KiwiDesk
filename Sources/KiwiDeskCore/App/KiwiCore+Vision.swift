@@ -47,6 +47,22 @@ extension KiwiCore {
             setAppWide(persisting: false) {
                 $0.visionAppearance = appearance
             }
+        case "kiwivision.set_fade_duration":
+            let band = AppWideSettings.visionFadeRange
+            guard let ms = args.first?.numberValue,
+                ms >= Double(band.lowerBound), ms <= Double(band.upperBound)
+            else {
+                return .fail("expected \(AppWideSettings.visionFadeBand)")
+            }
+            setAppWide(persisting: false) {
+                $0.visionFadeDuration = AppWideSettings.clampedFade(ms)
+            }
+        case "kiwivision.set_fade_curve":
+            guard
+                let raw = args.first?.stringValue,
+                let curve = VisionFadeCurve(rawValue: raw)
+            else { return .expected(VisionFadeCurve.self) }
+            setAppWide(persisting: false) { $0.visionFadeCurve = curve }
         case "kiwivision.set_clear_wallpaper":
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")
@@ -137,6 +153,8 @@ extension KiwiCore {
             vision.isOn || vision.hasShownPlates
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
+        // Read before the settle, which may end the hold.
+        let heldBefore = vision.hold?.window.raw
         let focus = visionTarget()
         settleVisionHold(target: focus.target)
         var request = visionRequest(
@@ -146,6 +164,11 @@ extension KiwiCore {
         if !visionMasks { vision.forgetListedWindows() }
         requestVisionWindows(target: request.target)
         request.tracked = windowServer.isActive
+        request.leaving = visionLeaving(
+            from: vision.target,
+            to: request.target,
+            heldBefore: heldBefore
+        )
         vision.sync(request, reassert: reassertOrder)
     }
 

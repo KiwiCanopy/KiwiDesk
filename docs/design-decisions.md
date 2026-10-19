@@ -6489,6 +6489,44 @@ surface owns up to. Should `hud` be wanted on macOS 26 after all,
 it comes as a separate Lua-only style verb, never by turning the
 stored boolean into an enum, which would owe a migration.
 
+### Only the window focus leaves eases into KiwiVision (#2417)
+
+**[Rationale]**
+
+When focus moves with KiwiVision on, the window you leave fades into
+the dim and the blur, and the window you focus clears at once. The
+arrival is instant for two reasons, and tuning cannot remove either.
+First, macOS fronts the new window before KiwiDesk hears the focus
+change. The window is already above the plate and clear when the
+report arrives, so a fade can only dim it again and clear it a
+second time. On the device that read as the window flashing bright
+and then dimming. Second, dimming that window at all would need the
+plate above it. Its focus ring would sit under the plate too, so the
+ring dims and pops back, and every focus change pays two more
+WindowServer orders, which took up to 390 ms each under GPU load
+(#1925). With the leave fade alone, the plate stays where it already
+was, below the new focus. The fade adds no order and no second
+panel, only a mask region whose opacity runs from clear to covered.
+That mask must reach WindowServer before the order that puts the
+window under the plate, or the window is covered whole for a frame.
+
+The blur fades with the dim, through the same mask opacity. The
+recorded colour shift of a partly faded Liquid Glass still holds,
+and it is why the blur has no strength control. Over a fade of at
+most a second it reads as the blur arriving, and switching the blur
+on at the start or once the dim lands was the visible step the
+owner compared it against. Because the window you focus never
+waits, a long fade on the window you leave costs no responsiveness.
+That is why the band reaches 1000 ms, where a fade on both windows
+had been capped near 300 ms; the default of 300 ms is the owner's
+pick on the desk between 150, which read as hard to see, and 600. The curve
+is the user's choice from ease out, ease in and out, ease in and
+linear. At this length they differ mostly in the first 200 ms, and
+the owner ruled that a matter of taste. macOS's mild `default`
+curve stays out because it is ease out under a confusing name.
+Reduce Motion, a Space switch (#2228) and a lens hold change the
+dim at once.
+
 ### KiwiVision switches the appearance and owes it back (#2103)
 
 **[Rationale]**

@@ -30,6 +30,21 @@ import AppKit
         func order(above window: CGWindowID) {
             ordersAbove.append(window)
         }
+        /// Test-only: every leave fade handed in.
+        private(set) var fades:
+            [(
+                region: CGPath, window: CGWindowID,
+                duration: CFTimeInterval, curve: VisionFadeCurve
+            )] = []
+        func fadeIn(
+            _ region: CGPath,
+            of window: CGWindowID,
+            duration: CFTimeInterval,
+            curve: VisionFadeCurve,
+            reduceMotion: Bool
+        ) {
+            fades.append((region, window, duration, curve))
+        }
         func show(reduceMotion: Bool) { isShown = true }
         func hide(reduceMotion: Bool) { isShown = false }
     }
