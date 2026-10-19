@@ -39,6 +39,8 @@ struct SyncModelTests {
             return
         }
         #expect(model.keepThisMacsSetup(in: folder) == nil)
+        // A blocked Save is never attempted, so it asks for nothing.
+        #expect(!model.newProfileNamingRequested)
         let names = try FileManager.default.contentsOfDirectory(
             atPath: folder.path
         )

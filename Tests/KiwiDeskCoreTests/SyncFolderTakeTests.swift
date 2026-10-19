@@ -76,7 +76,17 @@ struct SyncFolderTakeTests {
     func luaOwnedFolderLandsWhole() throws {
         let core = try guiCore()
         let source = try filled(lua: foreign)
+        // The folder's gui.json carries a gap its init.lua owns over;
+        // the take must not push it live beside the Lua setup.
+        let gui = GuiConfigStore(
+            directory: source,
+            machine: source.appendingPathComponent("machine")
+        )
+        var config = try #require(gui.load())
+        config.settings.gapsGlobal.outer.top = 77
+        try gui.save(config)
         try core.keepFoldersSetup(from: source, trash: remove)
+        #expect(core.tiler.settings.gapsGlobal.outer.top != 77)
         let lua = try String(contentsOf: core.configURL, encoding: .utf8)
         #expect(lua == foreign)
         #expect(!core.isGuiManaged)
@@ -180,11 +190,30 @@ struct SyncFolderTakeTests {
             )
         }
         #expect(throws: SyncRefusal.self) {
-            try core.keepThisMacsSetup(in: target) { _ in }
+            try core.keepThisMacsSetup(in: target, trash: remove)
         }
         let names = try files.contentsOfDirectory(
             atPath: target.appendingPathComponent("profiles").path
         )
         #expect(names == ["Theirs.json"])
+    }
+
+    @Test("a take whose write fails still lands init.lua and reloads")
+    func failedWriteStillLandsInitLua() throws {
+        let core = try guiCore()
+        try write("-- mine", to: core.configURL)
+        let source = try filled(lua: "-- theirs")
+        let file = source.appendingPathComponent("profiles/Theirs.json")
+        var root = try #require(
+            JSONSerialization.jsonObject(with: Data(contentsOf: file))
+                as? [String: Any]
+        )
+        root["name"] = "../Escapes"
+        try JSONSerialization.data(withJSONObject: root).write(to: file)
+        #expect(throws: SyncRefusal.self) {
+            try core.keepFoldersSetup(from: source, trash: remove)
+        }
+        let lua = try String(contentsOf: core.configURL, encoding: .utf8)
+        #expect(lua == "-- theirs")
     }
 }

@@ -34,6 +34,11 @@ enum SyncText {
         L("general.sync.compare", "Compare and Copy…")
     }
 
+    /// The button's label without its ellipsis, for a sentence.
+    private static var compareName: String {
+        compare.hasSuffix("…") ? String(compare.dropLast()) : compare
+    }
+
     static var noFolderCaption: String {
         L(
             "general.sync.caption.none",
@@ -45,8 +50,9 @@ enum SyncText {
     static func chosenCaption(_ path: String) -> String {
         L(
             "general.sync.caption.chosen",
-            "%1$@ · Copies only when you ask it to.",
-            path
+            "%1$@ · Copies only when you choose %2$@.",
+            path,
+            compareName
         )
     }
 

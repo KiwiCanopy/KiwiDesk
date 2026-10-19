@@ -128,10 +128,20 @@ extension KiwiCore {
         _ folder: URL,
         _ side: SyncSide
     ) -> SyncRefusal? {
+        if let refusal = refusalBeforeReading(folder, side) {
+            return refusal
+        }
+        return folderIsWhole(folder) ? nil : .folderUnreadable
+    }
+
+    /// Keep the Folder's refusals that need no read of the setup.
+    func refusalBeforeReading(
+        _ folder: URL,
+        _ side: SyncSide
+    ) -> SyncRefusal? {
         if let refusal = syncFolderRefusal(folder) { return refusal }
         if side.isEmpty { return .folderEmpty }
         if let newer = thisMacNewer() { return .thisMacNewer(newer) }
-        if !folderIsWhole(folder) { return .folderUnreadable }
         return nil
     }
 
@@ -147,8 +157,13 @@ extension KiwiCore {
         trash: (URL) throws -> Void
     ) throws(SyncRefusal) {
         let files = FileManager.default
+        // A stage a crash left behind would otherwise sync forever.
+        for stale in SyncFolder.contents(of: target)
+        where stale.lastPathComponent.hasPrefix(Self.incomingPrefix) {
+            try? files.removeItem(at: stale)
+        }
         let stage = target.appendingPathComponent(
-            ".kiwidesk-incoming-\(UUID().uuidString)"
+            Self.incomingPrefix + UUID().uuidString
         )
         defer { try? files.removeItem(at: stage) }
         var incoming: [String] = []
@@ -172,7 +187,10 @@ extension KiwiCore {
             onLog("sync: could not stage the copy: \(error)")
             throw .copy(.couldNotWrite(name: target.lastPathComponent))
         }
-        for name in SyncFolder.setupNames + [SyncFolder.stampName] {
+        // The old stamp goes first, so a swap failing partway never
+        // leaves a mixed folder named after the other Mac.
+        try discard(target.appendingPathComponent(SyncFolder.stampName), trash)
+        for name in SyncFolder.setupNames {
             let into = target.appendingPathComponent(name)
             try discard(into, trash)
             guard incoming.contains(name) else { continue }
@@ -187,6 +205,8 @@ extension KiwiCore {
             }
         }
     }
+
+    static let incomingPrefix = ".kiwidesk-incoming-"
 
     /// Moves `url` to the Trash, deleting it where the Trash
     /// refuses — a surviving file would make the replace a merge.

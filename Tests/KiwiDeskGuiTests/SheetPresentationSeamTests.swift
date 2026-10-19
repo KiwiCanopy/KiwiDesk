@@ -94,9 +94,13 @@ struct SheetPresentationSeamTests {
                         + "object is not the draft)"
                 )
             )
+            // `onDismiss:` may follow the item: it runs once the sheet
+            // has gone, where an alert it raises is not dropped.
             #expect(
                 squashed.occurrences(of: ".sheet(item:\(state))")
-                    == hits,
+                    + squashed.occurrences(
+                        of: ".sheet(item:\(state),onDismiss:"
+                    ) == hits,
                 Comment(
                     rawValue:
                         "\(name) presents a sheet by something "

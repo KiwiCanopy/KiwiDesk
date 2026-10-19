@@ -44,12 +44,7 @@ struct SyncAcrossMacsRow: View {
             folder = model.syncFolder
             refresh()
         }
-        .onChange(of: request == nil) { _, closed in
-            guard closed, let pending = pendingFailure else { return }
-            failure = pending
-            pendingFailure = nil
-        }
-        .sheet(item: $request) { request in
+        .sheet(item: $request, onDismiss: showFailure) { request in
             SyncCompareSheet(
                 request: request,
                 onKeepThisMac: { keepThisMac(request) },
@@ -175,6 +170,11 @@ struct SyncAcrossMacsRow: View {
                 && comparison.keepThisMacRefusal == nil
                 && !(model.isDirty && model.syncSaveBlockedReason != nil)
         )
+    }
+
+    private func showFailure() {
+        failure = pendingFailure
+        pendingFailure = nil
     }
 
     private func keepThisMac(_ request: SyncCompareRequest) {

@@ -120,7 +120,9 @@ extension KiwiCore {
         case .machineConfig: return guiConfigStore.machine.url
         case .desktopBindings: return guiConfigStore.bindingsFile.url
         case .syncStamp:
-            return configDirectory.appendingPathComponent("sync.json")
+            return configDirectory.appendingPathComponent(
+                SyncFolder.stampName
+            )
         }
     }
 

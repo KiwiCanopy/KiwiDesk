@@ -131,13 +131,23 @@ extension KiwiCore {
         } else {
             forgetAppWideCaptures()
         }
-        let outcome = try writeIncoming(
-            bundle,
-            keepingBindings: take != nil
-        )
-        // A failed copy still reloads, so the core never runs the
-        // old setup over the new files; the failure is thrown after.
-        let luaFailed = take.map(copyInitLua) == false
+        // A take has already discarded init.lua, so a failed write
+        // still copies it and reloads before the failure is thrown:
+        // the core never runs the old setup over new files.
+        var failed: SetupBundleError?
+        var outcome = RestoreOutcome(skippedProfiles: [], refusedPalettes: 0)
+        do {
+            outcome = try writeIncoming(
+                bundle,
+                keepingBindings: take != nil
+            )
+        } catch {
+            guard take != nil else { throw error }
+            failed = error
+        }
+        if take.map(copyInitLua) == false, failed == nil {
+            failed = .couldNotWrite(name: SyncFolder.initLua)
+        }
 
         // Adoption is the one piece of live profile state the
         // incoming config cannot speak for: it records which
@@ -221,7 +231,7 @@ extension KiwiCore {
                     + "\(outcome.skippedProfiles.count) profile(s) "
                     + "and \(outcome.refusedPalettes) palette(s)"
         )
-        if luaFailed { throw .couldNotWrite(name: SyncFolder.initLua) }
+        if let failed { throw failed }
         return outcome
     }
 

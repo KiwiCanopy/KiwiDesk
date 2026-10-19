@@ -28,9 +28,14 @@ extension KiwiCore {
         from folder: URL,
         trash: (URL) throws -> Void
     ) throws(SyncRefusal) -> RestoreOutcome {
-        if let refusal = keepFolderRefusal(folder) { throw refusal }
+        let side = SyncFolder.side(in: folder, mac: nil)
+        if let refusal = refusalBeforeReading(folder, side) {
+            throw refusal
+        }
+        // One scratch copy serves the wholeness check and the take.
         let stage = try staged(folder)
         defer { try? FileManager.default.removeItem(at: stage) }
+        guard stagedIsWhole(stage) else { throw .folderUnreadable }
         let bundle = try stagedBundle(in: stage)
         let lua = stage.appendingPathComponent(SyncFolder.initLua)
         let hasLua = FileManager.default.fileExists(atPath: lua.path)
@@ -46,12 +51,19 @@ extension KiwiCore {
         }
     }
 
-    /// Whether `folder`'s setup reads whole: every profile decodes,
-    /// and there are settings for them — `gui.json`, or an
-    /// `init.lua` that owns the setup itself. Reads a scratch copy.
+    /// Whether `folder`'s setup reads whole, judged on a scratch
+    /// copy (`stagedIsWhole`).
     func folderIsWhole(_ folder: URL) -> Bool {
         guard let stage = try? staged(folder) else { return false }
         defer { try? FileManager.default.removeItem(at: stage) }
+        return stagedIsWhole(stage)
+    }
+
+    /// Whether a staged setup reads whole: its bundle builds, every
+    /// profile decodes, and there are settings for them — `gui.json`,
+    /// or an `init.lua` that owns the setup itself.
+    private func stagedIsWhole(_ stage: URL) -> Bool {
+        guard (try? stagedBundle(in: stage)) != nil else { return false }
         let profiles = ProfileManager(
             directory: stage.appendingPathComponent(
                 SyncFolder.name(of: .profiles)

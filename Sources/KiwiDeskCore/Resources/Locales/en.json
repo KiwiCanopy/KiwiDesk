@@ -617,7 +617,7 @@
   "general.refusal_sound": "Play a sound when an action is blocked",
   "general.refusal_sound.help": "A blocked action always shows a message on the window — at a size limit, or where the layout has nothing to resize. This adds the system alert sound to it.",
   "general.sync": "Sync across Macs",
-  "general.sync.caption.chosen": "%1$@ · Copies only when you ask it to.",
+  "general.sync.caption.chosen": "%1$@ · Copies only when you choose %2$@.",
   "general.sync.caption.icloud_off": "iCloud Drive is turned off on this Mac.",
   "general.sync.caption.missing": "Can't find this folder. It may have been moved, renamed or deleted.",
   "general.sync.caption.newer": "A newer KiwiDesk wrote this folder. Update to keep syncing.",

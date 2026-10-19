@@ -62,12 +62,20 @@ struct SyncFolderCopyTests {
         try core.profiles.write(profile("Mine"))
         try write("-- mine", to: core.configURL)
         let target = try filledFolder(profile: "Theirs")
+        // A store this Mac lacks must not survive in the folder.
+        try write("{}", to: target.appendingPathComponent("looks.json"))
+        try? files.removeItem(at: core.lookLibrary.url)
         var trashed: [String] = []
         try core.keepThisMacsSetup(in: target) { url in
             trashed.append(url.lastPathComponent)
             try FileManager.default.removeItem(at: url)
         }
         #expect(profileNames(in: target) == ["Mine"])
+        #expect(
+            !files.fileExists(
+                atPath: target.appendingPathComponent("looks.json").path
+            )
+        )
         let lua = try String(
             contentsOf: target.appendingPathComponent("init.lua"),
             encoding: .utf8
