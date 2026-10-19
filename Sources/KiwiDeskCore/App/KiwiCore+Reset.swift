@@ -83,6 +83,9 @@ extension KiwiCore {
     public func resetAllSettings(
         trash: (URL) throws -> Void
     ) -> Bool {
+        // A reset is this Mac's: following would empty the folder
+        // every other Mac reads, so it stops first (#2324).
+        followSyncFolder(nil)
         // The palettes and looks are deliberately NOT in this list — this
         // action's whole name rests on their surviving it, which
         // is why it is "Reset All Settings" rather than a total

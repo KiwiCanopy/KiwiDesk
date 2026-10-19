@@ -45,5 +45,9 @@ extension GuiConfig {
     ///
     /// **10 (#2324)**: `profile_bindings` moved to `bindings.json`,
     /// stripped here once the store has carried it across.
-    public static let currentFormat = 10
+    ///
+    /// **11 (#2324)**: the top-ups' `shortcut_offer` travels in the
+    /// file, so an older build latches read-only rather than drop
+    /// the offer on a write. No step: the stamp alone crosses.
+    public static let currentFormat = 11
 }

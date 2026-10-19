@@ -109,7 +109,8 @@ struct SetupBundleArtifactTests {
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
                 case .desktopBindings: bundle.profileBindings != nil
-                case .migrationBackups, .machineConfig, .syncStamp:
+                case .migrationBackups, .machineConfig, .syncStamp,
+                    .syncLedger:
                     false
                 }
             #expect(

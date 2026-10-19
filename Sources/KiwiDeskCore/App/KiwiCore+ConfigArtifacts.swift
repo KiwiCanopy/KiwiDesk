@@ -31,6 +31,9 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     /// The stamp a copy into a sync folder writes, naming the Mac
     /// it came from (#2324 slice 2). Only a sync folder holds one.
     case syncStamp
+    /// Which version of each synced file this Mac and its sync
+    /// folder last agreed on (#2324 slice 3, `SyncLedger`).
+    case syncLedger
 
     /// What a backup carries.
     ///
@@ -50,9 +53,16 @@ public enum ConfigArtifact: CaseIterable, Sendable {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
         case .desktopBindings: return true
-        case .migrationBackups, .machineConfig, .syncStamp: return false
+        case .migrationBackups, .machineConfig, .syncStamp, .syncLedger:
+            return false
         }
     }
+
+    /// Whether following a sync folder keeps the file in step with
+    /// it (#2324 slice 3): the setup a backup carries that lives in
+    /// the config folder. `init.lua` syncs too, and is no artifact
+    /// (`SyncFolder.setupNames`).
+    public var syncs: Bool { travelsInABackup && !livesOnThisMac }
 
     /// Whether the file lives in `MachineLocation`'s folder rather
     /// than the config folder; `url(of:)` follows it, and such a
@@ -61,7 +71,8 @@ public enum ConfigArtifact: CaseIterable, Sendable {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks, .syncStamp:
             return false
-        case .migrationBackups, .machineConfig, .desktopBindings:
+        case .migrationBackups, .machineConfig, .desktopBindings,
+            .syncLedger:
             return true
         }
     }
@@ -83,6 +94,9 @@ public enum ConfigArtifact: CaseIterable, Sendable {
         case .syncStamp:
             return "names the Mac that last copied into a sync "
                 + "folder; a backup is no sync folder"
+        case .syncLedger:
+            return "which versions this Mac last matched with its "
+                + "sync folder; another Mac's folder is not this one"
         }
     }
 }
@@ -98,6 +112,7 @@ extension ConfigArtifact {
         case .machineConfig: return MachineConfig.fileName
         case .desktopBindings: return DesktopBindingsFile.fileName
         case .syncStamp: return "sync.json"
+        case .syncLedger: return SyncLedger.fileName
         case .profiles, .migrationBackups: return nil
         }
     }
@@ -123,6 +138,10 @@ extension KiwiCore {
             return configDirectory.appendingPathComponent(
                 SyncFolder.stampName
             )
+        case .syncLedger:
+            return machineDirectory.appendingPathComponent(
+                SyncLedger.fileName
+            )
         }
     }
 
@@ -147,11 +166,12 @@ extension KiwiCore {
     ) -> Bool {
         let files = FileManager.default
         var cleared = true
-        // Both shortcut marks vouch for rows in this file, so a
-        // discarded sidecar offers every Desktop and generation again.
+        // The shortcut offer vouches for rows in this file, so a
+        // discarded sidecar offers every Desktop and generation
+        // again — the pre-#2324 copy in the defaults included.
         if artifacts.contains(.guiConfig) {
-            desktopMemory.writeShortcutMark(0)
-            desktopMemory.writeDefaultsGeneration(0)
+            desktopMemory.clearLegacyShortcutOffer()
+            desktopMemory.knownShortcutOffer = nil
             desktopMemory.shortcutTopUpDeclined = 0
         }
         for url in artifacts.map(url(of:))

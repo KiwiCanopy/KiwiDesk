@@ -50,7 +50,9 @@ extension KiwiCore {
     /// the number in the same apply), whose chords are its own. A
     /// failed write keeps the debt, and the number stays taken.
     func payOwedShortcutDrops() {
-        guard profiles.arrangementInFlight == 0,
+        // A synced change in flight keeps the debt (#2324): the
+        // drop rewrites files the other Mac shares.
+        guard profiles.arrangementInFlight == 0, sync.adopting == 0,
             !state.owedShortcutDrops.isEmpty
         else { return }
         let owed = state.owedShortcutDrops

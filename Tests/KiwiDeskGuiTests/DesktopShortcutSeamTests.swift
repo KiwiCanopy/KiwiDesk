@@ -5,8 +5,8 @@ import Testing
 /// boot and the switch handler both read the live topology.
 /// `DesktopShortcutTopUpTests` holds what the top-up does; this
 /// holds that both moments still ask it, and that both test-core
-/// twins pin the defaults-backed mark, which a fixture would
-/// otherwise read from and write to the host.
+/// twins pin the defaults-backed legacy marks (#2324), which a
+/// fixture would otherwise read from and clear on the host.
 @Suite("The Desktop shortcut top-up stays wired")
 struct DesktopShortcutSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -30,24 +30,28 @@ struct DesktopShortcutSeamTests {
             "Sources/KiwiDeskCore/App", "KiwiCore+Boot.swift"
         ),
         (
-            "desktopMemory.readShortcutMark = { .max }",
+            "ShortcutOffer(desktop: .max, generation: .max)",
             "Tests/KiwiDeskCoreTests", "TestCore.swift"
         ),
         (
-            "desktopMemory.readShortcutMark = { .max }",
+            "ShortcutOffer(desktop: .max, generation: .max)",
             "Tests/KiwiDeskGuiTests", "TestCore.swift"
         ),
         (
-            "desktopMemory.readDefaultsGeneration = { .max }",
+            "desktopMemory.clearLegacyShortcutOffer = {}",
             "Tests/KiwiDeskCoreTests", "TestCore.swift"
         ),
         (
-            "desktopMemory.readDefaultsGeneration = { .max }",
+            "desktopMemory.clearLegacyShortcutOffer = {}",
             "Tests/KiwiDeskGuiTests", "TestCore.swift"
         ),
         (
-            "desktopMemory.writeDefaultsGeneration(0)",
+            "desktopMemory.clearLegacyShortcutOffer()",
             "Sources/KiwiDeskCore/App", "KiwiCore+ConfigArtifacts.swift"
+        ),
+        (
+            "crossLegacyShortcutOffer()",
+            "Sources/KiwiDeskCore/App", "KiwiCore+Boot.swift"
         ),
     ]
 

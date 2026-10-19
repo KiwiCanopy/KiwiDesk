@@ -200,10 +200,14 @@ func makeTestCore(
     core.desktopMemory.writeStamp = { _, _ in false }
     // The Desktop shortcut mark lives in the app's defaults; a
     // fixture offers nothing unless it states a mark.
-    core.desktopMemory.readShortcutMark = { .max }
-    core.desktopMemory.writeShortcutMark = { _ in }
-    core.desktopMemory.readDefaultsGeneration = { .max }
-    core.desktopMemory.writeDefaultsGeneration = { _ in }
+    core.desktopMemory.readLegacyShortcutOffer = {
+        ShortcutOffer(desktop: .max, generation: .max)
+    }
+    core.desktopMemory.clearLegacyShortcutOffer = {}
+    // No live folder watch, no real Trash (#2324 slice 3).
+    core.sync.makeWatch = { _, _ in nil }
+    core.sync.storedFolder = { nil }
+    core.sync.trash = { try FileManager.default.removeItem(at: $0) }
     // Same class, eighth time (#1103/#1199): the mouse-button
     // read defaults LIVE, and three gesture decisions consult
     // it — the warp gate, `isResizeGesture` and the drag

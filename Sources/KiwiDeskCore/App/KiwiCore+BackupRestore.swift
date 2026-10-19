@@ -40,7 +40,9 @@ extension KiwiCore {
         from bundle: SetupBundle,
         trash: (URL) throws -> Void
     ) throws(SetupBundleError) -> RestoreOutcome {
-        try replaceSetup(with: bundle, trash: trash, take: nil)
+        try pausingSync { () throws(SetupBundleError) in
+            try replaceSetup(with: bundle, trash: trash, take: nil)
+        }
     }
 
     /// `restoreSetup`, or with `take` a sync folder's setup

@@ -45,7 +45,9 @@ extension KiwiCore {
                 && !Self.foreignCode(at: lua)
         )
         do {
-            return try replaceSetup(with: bundle, trash: trash, take: take)
+            return try pausingSync { () throws(SetupBundleError) in
+                try replaceSetup(with: bundle, trash: trash, take: take)
+            }
         } catch {
             throw .copy(error)
         }
