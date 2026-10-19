@@ -92,6 +92,8 @@ extension SettingsModel {
             writeLatch = core.guiConfigWriteLatch()
         }
         guard activeSaveLatch == nil else { return }
+        // Settings another Mac changed too are asked first (#2324).
+        guard !askNextSyncConflict() else { return }
         switch primarySaveAction {
         case .saveLua: saveLuaSource()
         case .updateStoredProfile: saveEditedProfile()

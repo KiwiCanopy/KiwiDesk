@@ -46,7 +46,13 @@ extension KiwiCore {
         )
         do {
             return try pausingSync { () throws(SetupBundleError) in
-                try replaceSetup(with: bundle, trash: trash, take: take)
+                let outcome = try replaceSetup(
+                    with: bundle,
+                    trash: trash,
+                    take: take
+                )
+                agreeOnFolder(folder)
+                return outcome
             }
         } catch {
             throw .copy(error)

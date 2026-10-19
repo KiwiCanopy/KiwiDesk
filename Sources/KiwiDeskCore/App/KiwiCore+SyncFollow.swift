@@ -18,8 +18,13 @@ extension KiwiCore {
             sync.status = .off
             return
         }
-        sync.watch = sync.makeWatch([configDirectory, folder]) {
-            [weak self] in self?.scheduleSyncPass()
+        // FSEvents watches the path it is handed; a config folder
+        // linked into dotfiles is watched where its files live.
+        let paths = [configDirectory, folder].map {
+            $0.resolvingSymlinksInPath()
+        }
+        sync.watch = sync.makeWatch(paths) { [weak self] in
+            self?.scheduleSyncPass()
         }
         runSyncPass()
     }
@@ -185,14 +190,18 @@ extension KiwiCore {
     }
 
     /// Names this Mac in the folder after copying into it.
-    private func stampSyncFolder(_ folder: URL) {
+    func stampSyncFolder(_ folder: URL) {
         guard let mac = Self.thisMacName(),
             let data = try? JSONEncoder().encode(SyncStamp(mac: mac))
         else { return }
-        try? data.write(
-            to: folder.appendingPathComponent(SyncFolder.stampName),
-            options: .atomic
-        )
+        do {
+            try data.write(
+                to: folder.appendingPathComponent(SyncFolder.stampName),
+                options: .atomic
+            )
+        } catch {
+            onLog("sync: could not stamp the folder: \(error)")
+        }
     }
 
     /// The one door a change from the sync folder enters by
@@ -206,6 +215,23 @@ extension KiwiCore {
         onLog("sync: \(change.paths.count) file(s) came in")
         loadConfig()
         sync.onSyncedIn(change)
+    }
+
+    /// Records the folder's files as what both sides agree on, once
+    /// a Compare and Copy settled which setup stays: the next pass
+    /// then copies outward only what this Mac rewrote in taking it
+    /// — a take re-encodes what it reads — and never finds both
+    /// sides changed.
+    func agreeOnFolder(_ folder: URL) {
+        let ledger = SyncLedger(
+            folder: folder.standardizedFileURL.path,
+            agreed: SyncScan.hashes(in: folder)
+        )
+        do {
+            try ledger.save(to: url(of: .syncLedger))
+        } catch {
+            onLog("sync: could not record the agreement: \(error)")
+        }
     }
 
     /// Holds every pass while `body` rewrites either side, then

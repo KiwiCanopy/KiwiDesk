@@ -5,10 +5,13 @@ import SwiftUI
 /// General's last top-level row (#2324 slice 2): the sync folder,
 /// remembered on this Mac, and Compare and Copy beside it. It hosts
 /// the sheet, since the row outlives the menu that opens it, and the
-/// one-way alert an empty folder takes instead (ruling 14).
+/// one-way alert an empty folder takes instead (ruling 14). The
+/// switch under it keeps the folder in step on its own (slice 3,
+/// ruling 15), and the line under that says how it stands.
 struct SyncAcrossMacsRow: View {
     @ObservedObject var model: SettingsModel
     @State private var folder: URL?
+    @State private var follows = false
     @State private var refusal: SyncRefusal?
     @State private var request: SyncCompareRequest?
     /// A copy into an empty folder: one side, so one question.
@@ -34,6 +37,11 @@ struct SyncAcrossMacsRow: View {
                     .settingsActionButton()
                     .disabled(folder == nil || refusal != nil)
             }
+            ToggleRow(
+                label: SyncText.follow,
+                isOn: followsBinding,
+                disabled: folder == nil
+            )
             .alert(
                 firstCopy.map { SyncText.firstCopyTitle($0.folderName) }
                     ?? "",
@@ -42,7 +50,9 @@ struct SyncAcrossMacsRow: View {
                 actions: firstCopyActions,
                 message: { Text(firstCopyMessage($0)) }
             )
-            if folder != nil, refusal != nil {
+            if folder != nil,
+                refusal != nil || (follows && SyncText.warns(status))
+            {
                 SyncWarning(text: caption)
             } else {
                 Text(caption)
@@ -55,6 +65,7 @@ struct SyncAcrossMacsRow: View {
         }
         .onAppear {
             folder = model.syncFolder
+            follows = model.syncFollows
             refresh()
         }
         .sheet(item: $request, onDismiss: showFailure) { request in
@@ -127,12 +138,25 @@ struct SyncAcrossMacsRow: View {
 
     private var caption: String {
         guard let folder else { return SyncText.noFolderCaption }
-        guard let refusal else {
-            return SyncText.chosenCaption(
-                SyncFolderDisplay.path(folder)
-            )
+        let path = SyncFolderDisplay.path(folder)
+        if follows, status != .off {
+            return SyncText.status(status, folder: path)
         }
+        guard let refusal else { return SyncText.chosenCaption(path) }
         return SyncText.caption(for: refusal)
+    }
+
+    private var status: SyncStatus { model.sync.status }
+
+    private var followsBinding: Binding<Bool> {
+        Binding(
+            get: { follows && folder != nil },
+            set: { on in
+                follows = on
+                model.syncFollows = on
+                if on { offerCompareIfDiverged() }
+            }
+        )
     }
 
     private var firstCopyBinding: Binding<Bool> {
@@ -206,17 +230,32 @@ struct SyncAcrossMacsRow: View {
         store(url)
     }
 
+    /// A chosen folder is followed from the start (ruling 15); one
+    /// that already holds another setup opens Compare and Copy with
+    /// Keep the Folder's as its default.
     private func store(_ url: URL?) {
+        if url != nil {
+            follows = true
+            SyncFolderLocation.storeFollows(true, in: model.preferences)
+        }
         model.syncFolder = url
         folder = url
         refresh()
+        offerCompareIfDiverged()
+    }
+
+    private func offerCompareIfDiverged() {
+        guard follows, model.sync.status == .changedOnBoth else { return }
+        compare(keepingFolder: true)
     }
 
     private func refresh() {
         refusal = folder.flatMap(model.syncFolderRefusal)
     }
 
-    private func compare() {
+    private func compare() { compare(keepingFolder: false) }
+
+    private func compare(keepingFolder: Bool) {
         guard let folder else { return }
         refresh()
         guard refusal == nil else { return }
@@ -234,7 +273,8 @@ struct SyncAcrossMacsRow: View {
             ),
             comparison: comparison,
             unsaved: model.isDirty,
-            saveBlocked: model.isDirty ? model.syncSaveBlockedReason : nil
+            saveBlocked: model.isDirty ? model.syncSaveBlockedReason : nil,
+            keepsFolderByDefault: keepingFolder
         )
         if comparison.folder.isEmpty {
             firstCopy = request

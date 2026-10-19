@@ -46,18 +46,9 @@ extension KiwiCore {
                 from: configDirectory,
                 trash: trash
             )
+            agreeOnFolder(folder)
         }
-        guard let mac = Self.thisMacName(),
-            let data = try? JSONEncoder().encode(SyncStamp(mac: mac))
-        else { return }
-        do {
-            try data.write(
-                to: folder.appendingPathComponent(SyncFolder.stampName),
-                options: .atomic
-            )
-        } catch {
-            onLog("sync: could not stamp the folder: \(error)")
-        }
+        stampSyncFolder(folder)
     }
 
     /// This Mac's name as Sharing shows it, nil where unreadable.

@@ -211,6 +211,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onRulesKept = { [weak self] in
             self?.dashboardIfCreated?.adoptRuleKeep()
         }
+        core.sync.onSyncedIn = { [weak self] change in
+            self?.dashboardIfCreated?.adoptSyncedChange(change)
+        }
+        core.sync.onStatusChange = { [weak self] status in
+            self?.dashboardIfCreated?.syncStatusChanged(status)
+        }
         wireBarMenus()
         wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in

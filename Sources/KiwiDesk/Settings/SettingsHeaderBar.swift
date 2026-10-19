@@ -48,6 +48,10 @@ struct SettingsHeaderBar: View {
             {
                 warningRow(warning)
             }
+            // Another Mac's change landed under unsaved edits (#2324).
+            if let arrived = model.sync.arrived {
+                arrivedRow(arrived)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)

@@ -126,6 +126,33 @@ struct SyncFollowTests {
         #expect(read("init.lua", in: core.configDirectory) == nil)
     }
 
+    @Test("After Keep the Folder's the two sides are in step")
+    func keepFolderSettles() throws {
+        let (core, folder) = try setup()
+        let other = makeTestCore(configDirectory: temporary("other"))
+        other.onLog = { _ in }
+        var theirs = GuiConfig()
+        theirs.spaceHistory = .allScreens
+        try other.guiConfigStore.save(theirs)
+        try other.profiles.write(
+            Profile(
+                name: "Theirs",
+                monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        try other.keepThisMacsSetup(in: folder) { _ in }
+        core.followSyncFolder(folder)
+        #expect(core.sync.status == .changedOnBoth)
+        try core.keepFoldersSetup(from: folder) {
+            try FileManager.default.removeItem(at: $0)
+        }
+        core.runSyncPass()
+        #expect(core.sync.status == .upToDate)
+        #expect(core.guiConfigStore.load()?.spaceHistory == .allScreens)
+    }
+
     @Test("A missing folder or a placeholder holds the pass")
     func unavailableHolds() throws {
         let (core, folder) = try setup()
