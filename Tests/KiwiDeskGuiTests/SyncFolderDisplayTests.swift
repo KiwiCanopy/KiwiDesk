@@ -35,4 +35,14 @@ struct SyncFolderDisplayTests {
         let shown = SyncFolderDisplay.path(url)
         #expect(shown == "~ ▸ kiwi-no-such-dir ▸ Sync")
     }
+
+    @Test("each folder takes Finder's localized name")
+    func componentsAreDisplayNames() {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let url = home.appendingPathComponent("Documents/Sync")
+        let shown = SyncFolderDisplay.path(url) {
+            "<" + ($0 as NSString).lastPathComponent + ">"
+        }
+        #expect(shown == "~ ▸ <Documents> ▸ <Sync>")
+    }
 }

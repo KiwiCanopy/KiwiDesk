@@ -128,9 +128,7 @@ struct SyncCompareSheet: View {
     private var notes: some View {
         VStack(alignment: .leading, spacing: 4) {
             note(SyncText.includes)
-            if !comparison.folder.isEmpty {
-                note(SyncText.trashNote)
-            }
+            note(SyncText.trashNote)
             if request.unsaved, comparison.keepFolderRefusal == nil {
                 SyncWarning(text: SyncText.replacesEdits, font: .callout)
                     .padding(.top, 4)
@@ -170,8 +168,8 @@ struct SyncCompareSheet: View {
 
 /// One side of the comparison, with the button that keeps it. Rows
 /// common to both sides line up — In, Changed, On, Profiles — each a
-/// grey glyph and a bare value, the words kept for VoiceOver (owner,
-/// 2026-10-19).
+/// grey glyph and a bare value, the words kept for VoiceOver (#2324
+/// ruling 14).
 private struct SyncSideCard: View {
     let heading: String
     let location: String
@@ -191,8 +189,7 @@ private struct SyncSideCard: View {
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 10)
             keep
-            // An empty side says so in its lines; no warning repeats it.
-            if let refusal, !side.isEmpty {
+            if let refusal {
                 SyncWarning(text: refusal)
             }
         }

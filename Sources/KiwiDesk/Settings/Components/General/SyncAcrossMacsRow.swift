@@ -76,7 +76,7 @@ struct SyncAcrossMacsRow: View {
     }
 
     /// The group's heading inside General's card: the feature's name
-    /// and its `?` (owner, 2026-10-19).
+    /// and its `?` (#2324 ruling 14).
     private var heading: some View {
         HStack(spacing: 5) {
             Text(SyncText.label)
@@ -243,8 +243,8 @@ struct SyncAcrossMacsRow: View {
         }
     }
 
-    /// The alert has gone by the time its action runs, so a failure
-    /// alert raised next is not dropped.
+    /// The alert's binding is still set while its action runs, so a
+    /// failure is raised on the next turn or the alert drops it.
     private func copyFirst(_ copy: SyncCompareRequest) {
         let failed = model.keepThisMacsSetup(in: copy.folder)
         refresh()
