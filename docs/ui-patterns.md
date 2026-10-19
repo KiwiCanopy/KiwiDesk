@@ -672,8 +672,8 @@ instead trail at their natural width against the row's right
 edge (`SettingsRowShape(controlTrails: true)`;
 `SettingsRowShapeTests` ▸ `compactControlsTrail`, whose
 `trailing` register is the one copy of which rows trail), and
-an override row's inheriting readout trails wherever its live
-control does. The **Windows on screen** stepper is the one
+every override row's inheriting readout trails, whatever its
+live control, so the unchecked readouts form one column. The **Windows on screen** stepper is the one
 stepper on the axis, since it is its slider's second reading
 (Choosing a control, above). Rows read the column from the
 environment (`\.settingsLabelColumn`), and `OverrideChrome`
