@@ -65,6 +65,15 @@ struct SettingsView: View {
                 check: { model.updater.checkForUpdates() }
             ) { aboutRequest = nil }
         }
+        // The sync sheet (#2450) is the shell's: the footer that
+        // asks for it reflows between two mounts at 900 pt.
+        .sheet(item: $model.sync.review) { review in
+            SyncReviewSheet(
+                review: review,
+                onSave: { model.answerSyncReview($0) },
+                onCancel: { model.cancelSyncReview() }
+            )
+        }
         // The one discard dialog (#515), hosted above the
         // `editingLua` branch: `chrome` is instantiated per arm
         // and two gated actions flip `editingLua`, so a dialog

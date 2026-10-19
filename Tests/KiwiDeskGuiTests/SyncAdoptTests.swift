@@ -8,8 +8,8 @@ import Testing
 /// ruling 4): a clean draft re-reads; a draft with edits takes the
 /// other Mac's changes to the settings it did not edit and keeps
 /// its own, with a strip saying so; a setting both changed is one
-/// question at Save. Main-actor cost: one test core and model per
-/// test, no scans.
+/// row of the sheet at Save (#2450, `SyncReviewTests`).
+/// Main-actor cost: one test core and model per test, no scans.
 @Suite("A synced change enters the draft", .serialized)
 @MainActor
 struct SyncAdoptTests {
@@ -63,7 +63,7 @@ struct SyncAdoptTests {
         #expect(model.sync.conflicts.isEmpty)
     }
 
-    @Test("A setting both changed is asked about once, at Save")
+    @Test("A setting both changed is one sheet row, at Save")
     func sameSettingAsks() throws {
         let (core, model) = try setup()
         model.config.spaceHistory = .allScreens
@@ -88,31 +88,31 @@ struct SyncAdoptTests {
         )
 
         model.performPrimarySave()
-        #expect(model.sync.question?.key == .shortcuts(.modeCycle))
+        #expect(model.sync.review?.rows.map(\.key) == [.shortcuts(.modeCycle)])
         #expect(model.config.modeCycle == [.stack, .monocle])
     }
 
-    @Test("Use Theirs takes the other Mac's value back")
+    @Test("A Theirs pick takes the other Mac's value back")
     func useTheirsTakesIt() throws {
         let (core, model) = try setup()
         model.config.modeCycle = [.stack, .monocle]
         try theirs(core) { $0.modeCycle = [.bsp, .stack] }
         model.adoptSyncedChange(change)
-        #expect(model.askNextSyncConflict())
-        model.answerSyncConflict(useTheirs: true)
+        #expect(model.reviewSyncConflicts())
+        model.answerSyncReview([SettingKey.shortcuts(.modeCycle).id: .theirs])
         #expect(model.config.modeCycle == [.bsp, .stack])
         #expect(model.sync.conflicts.isEmpty)
-        #expect(model.sync.question == nil)
+        #expect(model.sync.review == nil)
     }
 
-    @Test("Keep Yours keeps the draft's value")
+    @Test("A Yours pick keeps the draft's value")
     func keepYoursKeepsIt() throws {
         let (core, model) = try setup()
         model.config.modeCycle = [.stack, .monocle]
         try theirs(core) { $0.modeCycle = [.bsp, .stack] }
         model.adoptSyncedChange(change)
-        #expect(model.askNextSyncConflict())
-        model.answerSyncConflict(useTheirs: false)
+        #expect(model.reviewSyncConflicts())
+        model.answerSyncReview([SettingKey.shortcuts(.modeCycle).id: .yours])
         #expect(model.config.modeCycle == [.stack, .monocle])
         #expect(model.sync.conflicts.isEmpty)
     }
@@ -124,7 +124,7 @@ struct SyncAdoptTests {
         try theirs(core) { $0.modeCycle = [.bsp, .stack] }
         model.adoptSyncedChange(change)
         model.config.modeCycle = model.cleanConfig.modeCycle
-        #expect(!model.askNextSyncConflict())
+        #expect(!model.reviewSyncConflicts())
     }
 
     @Test("A second arrival keeps the first arrival's question")
@@ -193,8 +193,8 @@ struct SyncAdoptTests {
         #expect(model.luaSource == "-- mine\n")
         #expect(model.sync.conflicts.count == 1)
         #expect(model.sync.conflicts.first?.key == nil)
-        #expect(model.askNextSyncConflict())
-        model.answerSyncConflict(useTheirs: true)
+        #expect(model.reviewSyncConflicts())
+        model.answerSyncReview([SyncConflict.initLua: .theirs])
         #expect(model.luaSource == "-- theirs\n")
     }
 }

@@ -27,20 +27,23 @@ extension SettingsDiffRowSource {
         )
         let skip = Set(edited)
         let owners = leafOwners(unsaved, saved: saved)
-        return diff.changedSettings.filter { !skip.contains($0) }
-            .flatMap { key in
-                SettingsValueReadout.rows(
-                    for: key,
-                    old: saved,
-                    new: live
-                ).map { row in
-                    var row = row
-                    row.keepIDs = owners[row.id, default: []].sorted()
-                    row.id += "#" + liveInstance
-                    row.section = .live
-                    return row
-                }
+        return SettingKey.summarized(
+            diff.changedSettings.filter { !skip.contains($0) },
+            in: live
+        )
+        .flatMap { key in
+            SettingsValueReadout.rows(
+                for: key,
+                old: saved,
+                new: live
+            ).map { row in
+                var row = row
+                row.keepIDs = owners[row.id, default: []].sorted()
+                row.id += "#" + liveInstance
+                row.section = .live
+                return row
             }
+        }
     }
 
     /// Which unsaved leaves each row carries, by row id: a leaf
@@ -58,7 +61,8 @@ extension SettingsDiffRowSource {
                 config: one,
                 cleanConfig: saved
             ).changedSettings
-            for key in keys {
+            // A leaf also belongs to its group's folded row.
+            for key in keys + keys.compactMap(\.summaryMaster) {
                 for row in SettingsValueReadout.rows(
                     for: key,
                     old: saved,

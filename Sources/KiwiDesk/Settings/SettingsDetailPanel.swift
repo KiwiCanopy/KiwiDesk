@@ -192,7 +192,11 @@ enum SettingsDiffRowSource {
             cleanLuaSource: model.cleanLuaSource
         )
         var rows: [SettingsDiffRow] = []
-        for key in diff.changedSettings {
+        // One control's edges are one row while they agree (#2450).
+        for key in SettingKey.summarized(
+            diff.changedSettings,
+            in: model.config
+        ) {
             // A key's own readout rows revert through its writer
             // (#792); every other row states its own way back.
             rows += SettingsValueReadout.rows(

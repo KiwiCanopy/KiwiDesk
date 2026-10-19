@@ -8,10 +8,13 @@ struct SettingsSyncState: Equatable {
     /// The last change another Mac brought in while the draft held
     /// edits — the strip's subject; nil once the draft is clean.
     var arrived: SyncedChange?
-    /// Settings both Macs changed, asked about one by one at Save.
+    /// Settings both Macs changed, picked in one sheet at Save.
     var conflicts: [SyncConflict] = []
-    /// The conflict Save is asking about now.
-    var question: SyncConflict?
+    /// Settings another Mac changed that the draft took in without
+    /// a question, for the sheet's summary line.
+    var taken: Set<SettingKey> = []
+    /// The sheet Save is showing now (#2450).
+    var review: SyncReview?
 }
 
 /// A setting this draft and another Mac both changed (#2324 ruling
@@ -46,6 +49,7 @@ extension SettingsModel {
         let reach = reachEdits
         let look = lookReachEdits
         let previous = sync.conflicts
+        let previousTaken = sync.taken
         reload()
         let theirs = cleanConfig
         let theirsLua = cleanLuaSource
@@ -111,8 +115,19 @@ extension SettingsModel {
         lookReachEdits = look
         suppressDirty = false
         recomputeDirty()
+        let asked = Set(conflicts.compactMap(\.key))
         sync.arrived = isDirty ? change : nil
         sync.conflicts = isDirty ? conflicts : []
+        sync.taken =
+            isDirty
+            ? previousTaken.union(
+                SettingKey.summarized(
+                    incoming.filter { !asked.contains($0) }.sorted {
+                        $0.id < $1.id
+                    },
+                    in: theirs
+                )
+            ).subtracting(asked) : []
     }
 
     private func conflict(
@@ -188,53 +203,6 @@ extension SettingsModel {
             theirs: SyncText.theirEdits,
             mac: mac
         )
-    }
-
-    // MARK: - The question at Save
-
-    /// Asks about the next conflict, or answers false when none is
-    /// left and Save may write.
-    func askNextSyncConflict() -> Bool {
-        // A setting reverted since stops being a question.
-        let edited = SettingsDraftDiff.between(
-            config: config,
-            cleanConfig: cleanConfig
-        ).changedSettings
-        sync.conflicts.removeAll { conflict in
-            guard let key = conflict.key else {
-                return luaSource == cleanLuaSource
-            }
-            return !edited.contains(key)
-        }
-        guard let next = sync.conflicts.first else { return false }
-        sync.question = next
-        return true
-    }
-
-    /// Settles the question: theirs takes the setting back from the
-    /// baseline, which holds the other Mac's value; yours keeps the
-    /// draft. The next question follows, then the Save.
-    func answerSyncConflict(useTheirs: Bool) {
-        guard let question = sync.question else { return }
-        sync.question = nil
-        sync.conflicts.removeAll { $0.id == question.id }
-        if useTheirs {
-            if let key = question.key {
-                SettingsRevertRegister.writers[key]?.apply(self, nil)
-            } else {
-                luaSource = cleanLuaSource
-            }
-            recomputeDirty()
-        }
-        DispatchQueue.main.async { [weak self] in
-            self?.performPrimarySave()
-        }
-    }
-
-    /// Cancel: nothing saves, and every question waits for the
-    /// next Save.
-    func cancelSyncConflict() {
-        sync.question = nil
     }
 }
 

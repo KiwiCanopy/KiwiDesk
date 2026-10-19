@@ -1396,9 +1396,21 @@ folder every other Mac reads.
 
 Unsaved Settings edits meet an arriving change per setting (ruling
 4): a setting only the other Mac changed is taken, one only the
-draft changed stays, and one both changed is one Keep Yours / Use
-Theirs question at Save — an alert, since it is a question with
-two values, not a picture. The automatic switch is its own row
+draft changed stays, and one both changed waits for Save. Save then
+shows every such setting in ONE sheet (#2450), not an alert per
+setting: an alert per setting asked four times for one nudge of the
+Outer gap, and a list the user can see whole is easier to answer
+than a run of questions. Each row starts with neither Yours nor
+Theirs picked, and Save stays dimmed beside an amber warning band
+until every row has a side: a conflict is two Macs disagreeing, and
+a default would let one side win unread. Theirs on a row whose
+draft edges agree moves the whole group, since a merge of one Mac's
+top edge with the other's left is a setup neither had; a side whose
+edges differ lists them, so a pick shows what it overwrites. A line
+under the title counts what took no question, so the settings
+missing from the list do not read as lost. The sheet commits
+through closures its host hands it, the ruled exception to a
+read-only sheet that Compare and Copy also takes. The automatic switch is its own row
 under the folder (ruling 15): "no folder" and "folder kept,
 manual" are different states and get different controls.
 
@@ -7334,7 +7346,15 @@ edited one did is named on the edited rows ("All profiles" for a
 shared rule, else a pair or a count) instead of in a row of its
 own, and only profiles that changed otherwise keep rows, one per
 change. Eight rows saying one thing read as eight changes, and the
-pill counted them so. Their way back is the rule's: the reach
+pill counted them so. The same holds for the settings one control
+writes together (#2450, `SettingKey.summaryGroups`): the Outer gap's
+four edges and the Inner gap's two are one row named for the
+control while every edge holds one value, and a row per changed
+edge once they differ, so one nudge of the slider is one change.
+The fold happens where rows are narrated and never in the diff,
+whose per-edge keys the live rows and the sync adopt compare
+across different diffs; the folded row's ↺ takes the group back
+without asking, since the row names it. Their way back is the rule's: the reach
 settles once the app's rules, or the shortcut layers, are the
 baseline's again. A row says
 how it reverts and offers no ↺ until it does: a lens or layer edit,

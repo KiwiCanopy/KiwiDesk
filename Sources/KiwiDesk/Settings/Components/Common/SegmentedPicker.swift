@@ -6,6 +6,9 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// A name for VoiceOver alone, where the row's own sentence
     /// already names the control and a drawn label would crowd it.
     private let spokenLabel: String?
+    /// What VoiceOver reads for the selection, where the option's
+    /// title alone would not say it — or nothing is selected.
+    private let spokenValue: String?
     /// Left at its natural width, a strip normally measures its
     /// labels' sum and shares that equally, which shortens the
     /// longest. A strip that hugs its content (#1726) sizes every
@@ -36,6 +39,7 @@ struct SegmentedPicker<Value: Hashable>: View {
     init(
         _ label: String? = nil,
         spokenLabel: String? = nil,
+        spokenValue: String? = nil,
         hugsLabels: Bool = false,
         reservesWeight: Bool = false,
         hints: [Value: String] = [:],
@@ -46,6 +50,7 @@ struct SegmentedPicker<Value: Hashable>: View {
     ) {
         self.label = label
         self.spokenLabel = spokenLabel
+        self.spokenValue = spokenValue
         self.hugsLabels = hugsLabels
         self.reservesWeight = reservesWeight
         self.hints = hints
@@ -147,7 +152,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         .accessibilityElement(children: .contain)
         // Group value announcement for accessibility (#812, 2026-08-24).
         .accessibilityValue(
-            selectedIndex.map { options[$0].title } ?? ""
+            spokenValue ?? selectedIndex.map { options[$0].title } ?? ""
         )
         .onChange(of: isEnabled) { _, now in
             if !now { hoveredIndex = nil }

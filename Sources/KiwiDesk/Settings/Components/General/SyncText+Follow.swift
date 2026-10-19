@@ -79,40 +79,96 @@ extension SyncText {
         )
     }
 
-    // MARK: - The question at Save
+    // MARK: - The sheet at Save (#2450)
 
-    static func conflictTitle(_ conflict: SyncConflict) -> String {
-        guard let mac = conflict.mac else {
+    static func reviewTitle(mac: String?) -> String {
+        guard let mac else {
             return L(
-                "general.sync.conflict.title_unnamed",
-                "%1$@ Also Changed on Another Mac",
-                conflict.label
+                "general.sync.review.title_unnamed",
+                "Settings Also Changed on Another Mac"
             )
         }
         return L(
-            "general.sync.conflict.title",
-            "%1$@ Also Changed on %2$@",
-            conflict.label,
+            "general.sync.review.title",
+            "Settings Also Changed on %1$@",
             mac
         )
     }
 
-    static func conflictMessage(_ conflict: SyncConflict) -> String {
+    static func taken(_ count: Int) -> String {
         L(
-            "general.sync.conflict.message",
-            "Yours: %1$@\nTheirs: %2$@",
-            conflict.yours,
-            conflict.theirs
+            "general.sync.review.taken",
+            "Their other changes, already taken in: %1$d",
+            count
         )
     }
 
-    static var keepYours: String {
-        L("general.sync.conflict.keep_yours", "Keep Yours")
+    static func yourOthers(_ count: Int) -> String {
+        L(
+            "general.sync.review.your_others",
+            "Your other edits, saved as they are: %1$d",
+            count
+        )
     }
 
-    static var useTheirs: String {
-        L("general.sync.conflict.use_theirs", "Use Theirs")
+    static var pickEach: String {
+        L(
+            "general.sync.review.pick_each",
+            "Choose the value to keep for each setting."
+        )
     }
+
+    static var yours: String { L("general.sync.review.yours", "Yours") }
+
+    static var theirs: String {
+        L("general.sync.review.theirs", "Theirs")
+    }
+
+    static func values(yours: String, theirs: String) -> String {
+        L(
+            "general.sync.conflict.message",
+            "Yours: %1$@\nTheirs: %2$@",
+            yours,
+            theirs
+        )
+    }
+
+    /// What a row's picker announces.
+    static func spokenPick(_ pick: SyncChoice?, row: SyncReview.Row)
+        -> String
+    {
+        switch pick {
+        case nil:
+            return L("general.sync.review.not_picked", "Not picked")
+        case .yours:
+            return L(
+                "general.sync.review.spoken_yours",
+                "Yours, %1$@",
+                row.yours
+            )
+        case .theirs:
+            return L(
+                "general.sync.review.spoken_theirs",
+                "Theirs, %1$@",
+                row.theirs
+            )
+        }
+    }
+
+    /// A group whose members differ, each member named.
+    static func mixed(_ members: [String]) -> String {
+        L(
+            "general.sync.review.mixed",
+            "mixed (%1$@)",
+            ListFormatter.localizedString(byJoining: members)
+        )
+    }
+
+    static func memberValue(_ label: String, _ value: String) -> String {
+        L("general.sync.review.member", "%1$@: %2$@", label, value)
+    }
+
+    static var save: String { L("footer.save", "Save") }
 
     static var yourEdits: String {
         L("general.sync.conflict.your_edits", "your edits to the file")
