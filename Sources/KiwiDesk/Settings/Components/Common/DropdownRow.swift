@@ -4,7 +4,7 @@ import SwiftUI
 /// Standard settings dropdown row: `labelsHidden` drops a `.menu`
 /// picker's AX title, so the row NAMES the control and `spokenValue`
 /// gives the choice back as the VALUE (`AnnouncedValueTests`).
-struct DropdownRow<P: View>: View {
+struct DropdownRow<P: View, T: View>: View {
     let label: String
     /// Selected option's title, spoken as the value. Required: an
     /// on/off control takes `ToggleRow`, never this row (#2032).
@@ -12,6 +12,9 @@ struct DropdownRow<P: View>: View {
     /// Optional help popover text (#94).
     var help: String? = nil
     @ViewBuilder let picker: P
+    /// A control beside the pop-up, sharing its row (#2324's
+    /// Compare and Copy…).
+    @ViewBuilder var trailing: T
 
     var body: some View {
         SettingsRowShape {
@@ -28,8 +31,26 @@ struct DropdownRow<P: View>: View {
                     .controlSize(.large)
                     .accessibilityLabel(label)
                     .accessibilityValue(spokenValue)
+                trailing
                 Spacer()
             }
         }
+    }
+}
+
+extension DropdownRow where T == EmptyView {
+    init(
+        label: String,
+        spokenValue: String,
+        help: String? = nil,
+        @ViewBuilder picker: () -> P
+    ) {
+        self.init(
+            label: label,
+            spokenValue: spokenValue,
+            help: help,
+            picker: picker,
+            trailing: { EmptyView() }
+        )
     }
 }

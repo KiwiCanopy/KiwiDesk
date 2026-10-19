@@ -40,6 +40,17 @@ extension KiwiCore {
         from bundle: SetupBundle,
         trash: (URL) throws -> Void
     ) throws(SetupBundleError) -> RestoreOutcome {
+        try replaceSetup(with: bundle, trash: trash) {}
+    }
+
+    /// `restoreSetup`, with `beforeReload` writing what a bundle
+    /// cannot carry — a sync folder's `init.lua` (#2324) — after
+    /// the bundle lands and before the reload reads it.
+    func replaceSetup(
+        with bundle: SetupBundle,
+        trash: (URL) throws -> Void,
+        beforeReload: () throws(SetupBundleError) -> Void
+    ) throws(SetupBundleError) -> RestoreOutcome {
         // **Refuse before touching anything** when this Mac's
         // config is Lua-owned and the backup carries settings.
         // `loadConfig` would take the `applyConfigGlobals` branch,
@@ -110,6 +121,7 @@ extension KiwiCore {
             forgetAppWideCaptures()
         }
         let outcome = try writeIncoming(bundle)
+        try beforeReload()
 
         // Adoption is the one piece of live profile state the
         // incoming config cannot speak for: it records which

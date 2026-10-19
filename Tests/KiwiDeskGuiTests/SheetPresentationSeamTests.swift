@@ -42,6 +42,10 @@ struct SheetPresentationSeamTests {
         // stages into the draft through a closure the section
         // hands it, so the content still takes no model.
         "ShortcutsSection.swift": "$hyperMoveRequest",
+        // Compare and Copy (#2324) is the row's: it outlives the
+        // button that opens it, and its commit runs through the
+        // closures the row hands it, so the content takes no model.
+        "SyncAcrossMacsRow.swift": "$request",
     ]
 
     private var trees: [URL] {

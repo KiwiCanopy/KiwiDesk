@@ -75,6 +75,8 @@ struct MotionScopeCensusTests {
         "KiwiDesk/Settings/SettingsModel+ProfileOverrides.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Backup.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Reset.swift": 1,
+        // Keep the Folder's replaces the setup and retiles (#2324).
+        "KiwiDesk/Settings/SettingsModel+Sync.swift": 1,
         "KiwiDesk/Settings/SettingsModel+AppWide.swift": 1,
         // The lens page's Save writing its lenses (#2103).
         "KiwiDesk/Settings/SettingsModel+Lenses.swift": 1,

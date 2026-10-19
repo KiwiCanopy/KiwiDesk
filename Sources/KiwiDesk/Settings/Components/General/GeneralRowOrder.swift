@@ -10,6 +10,7 @@ enum GeneralRowOrder {
         .general(.installUpdatesAutomatically),
         .general(.refusalSound),
         .general(.quitGridTargetDepth),
+        .general(.syncFolder),
     ]
 
     /// Advanced configuration and reset rows in ascending severity
