@@ -200,7 +200,7 @@ struct SettingsRowShapeTests {
         // Titled action rows (AI page, General ▸ Advanced).
         "SettingsActionRow.swift": 1,
         // Every override row's inheriting readout, whatever its
-        // live control (owner eyeball 2026-10-19).
+        // live control (#2439, owner eyeball 2026-10-19).
         "OverrideControls.swift": 1,
     ]
 

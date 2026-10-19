@@ -673,9 +673,10 @@ edge (`SettingsRowShape(controlTrails: true)`;
 `SettingsRowShapeTests` ▸ `compactControlsTrail`, whose
 `trailing` register is the one copy of which rows trail), and
 every override row's inheriting readout trails, whatever its
-live control, so the unchecked readouts form one column. The **Windows on screen** stepper is the one
-stepper on the axis, since it is its slider's second reading
-(Choosing a control, above). Rows read the column from the
+live control, so the unchecked readouts form one column. The
+**Windows on screen** stepper is the one stepper on the axis,
+since it is its slider's second reading (Choosing a control,
+above). Rows read the column from the
 environment (`\.settingsLabelColumn`), and `OverrideChrome`
 narrows it once (`overrideLabelColumn`, paying for its trailing
 OVERRIDE checkbox), so a shared row dropped into override chrome

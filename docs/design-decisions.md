@@ -6926,7 +6926,8 @@ readout that trailed only for a menu or stepper left that column
 ragged on any Space mixing row kinds (owner, on device,
 2026-10-19). Ticking a menu or stepper row moves nothing; ticking
 a slider row moves the value onto the axis, and a toggle row's
-value becomes its checkbox.
+value becomes its checkbox. The slot-size pair has no one-line
+readout and keeps its dimmed live control instead (#290).
 
 Two exceptions are ruled. The **Windows on screen** stepper
 sits on its slider's control axis, since the count is the
