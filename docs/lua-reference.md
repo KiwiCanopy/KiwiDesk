@@ -2960,8 +2960,9 @@ scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
 `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
-are retired: `false` is `"hidden"`. An `auto` App Bar alone on its
-edge hides to a short line.
+are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
+short line, which grows when the pointer comes near and opens as
+the Space dots do.
 :::
 
 ## Space Bar
@@ -3027,16 +3028,20 @@ space_bar.set_reserve(false)
 - `"always"` keeps the bar shown and reserves its strip.
 - `"auto"` hides it to a row of Space dots at its edge — one dot
   per Space, the current one wide, a Space holding windows
-  brighter — and the edge keeps only a sliver: `outer_margin`,
+  brighter, at most six: past six Spaces the dots follow the
+  current Space, and an end with more Spaces beyond it draws a
+  small dot — and the edge keeps only a sliver: `outer_margin`,
   the dots' depth and `inner_margin`, with the windows' outer gap
   below it. The pointer within about 40 points of the dots grows
-  the plate behind them and rims it as the bars draw their active
-  item. Resting 0.35 s in the band along that edge, from a few
-  points past the shelf to where the windows start, grows the bar
-  out of the dots, at once when the pointer pushes against the
-  screen's edge there. It shrinks back 0.5 s after the pointer
-  leaves, and stays while a bar menu or a hover peek it opened is
-  up.
+  the plate behind them, rims it as the bars draw their active
+  item and shows the current Space's icon, number or first two
+  letters in its dot. Resting 0.35 s in the dots' band — 64
+  points along the edge, centred on the dots, from a few points
+  past the shelf to where the windows start — grows the bar out
+  of the dots, at once when the pointer pushes against the
+  screen's edge inside that band. It shrinks back 0.5 s after the
+  pointer leaves the bar and its band, and stays while a bar menu
+  or a hover peek it opened is up.
 - `"hidden"` draws nothing and reserves nothing; only
   [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it.
   The menu bar then shows the Space each screen is on.
@@ -3050,7 +3055,13 @@ nothing in any mode.
 Each bar keeps its own value. On an edge the two bars share, the
 edge reserves for its more present bar: beside an `"always"` bar
 an `"auto"` one stays shown, while a `"hidden"` one still shows
-only on its shortcut. A look never carries the value.
+only on its shortcut. Two `"auto"` bars on one edge draw two marks
+side by side — the Space dots and the App Bar's line, in the
+shelf's [order](#kiwishelfset_order), where a lone bar would sit
+— each with its own 64-point band, the two meeting between the
+marks. The pointer opens one bar at a time: while a bar is shown,
+the other's mark and band go away. A second bar's shortcut shows
+it beside the first. A look never carries the value.
 
 **Example:**
 
