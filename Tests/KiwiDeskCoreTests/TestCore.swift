@@ -155,6 +155,10 @@ func makeTestCore(
     core.mouse.scroll.makeTap = { _ in nil }
     // The pointer rest's mouse-moved monitor (#1869).
     core.mouse.rest.makeMonitor = { _ in nil }
+    // The hiding shelves' pointer monitor (#761) hears the
+    // developer's real pointer; a suite moves it by hand.
+    core.shelves.reveal.makeMonitor = { _ in nil }
+    core.shelves.reveal.location = { CGPoint(x: -10_000, y: -10_000) }
     // Same class, fourth time (#878): the per-retile neighbor
     // scan defaults to the real screen list, so on a
     // multi-screen dev Mac an engine fixture would inherit the
@@ -265,6 +269,7 @@ func makeTestCore(
     // and a core outlives its test while a task still holds it
     // (#1894): placed, never ordered in, unless the suite asks.
     core.shelves.ordersPanels = false
+    core.shelves.indicators.ordersIndicatorPanels = false
     // The drawn-menu-bar read (#1386) lists the host's real
     // WindowServer windows; a test's displays are fake.
     core.eventLoop.displayWatch.readDrawnMenuBars = { [] }

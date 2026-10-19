@@ -24,6 +24,9 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Whether the layout gives up the bar's strip (#1524); off
     /// draws the bar over the windows. Global only, like `edge`.
     public var reserve = true
+    /// Whether the bar's shelf hides to an indicator (#761).
+    /// Global only, like `reserve`.
+    public var visibility: ShelfVisibility = .always
 
     public init() {}
 
@@ -35,7 +38,9 @@ public struct AppBarStyle: Sendable, Equatable {
     /// the reservation is the bar's, never a layout's (#1524),
     /// and a screen's edge is written by `set_edge` (#1948).
     static let layoutFixedKeys: [CodingKeys: String] = {
-        let keys: [CodingKeys] = [.edge, .edgeOverride, .reserve]
+        let keys: [CodingKeys] = [
+            .edge, .edgeOverride, .reserve, .visibility,
+        ]
         return Dictionary(
             uniqueKeysWithValues: keys.map { key in
                 let field = BarStyleKeys.setterField(

@@ -17,6 +17,15 @@ extension APIReference {
                 + "the windows, the strip unclickable.",
             .boolean("reserve")
         ),
+        "set_visibility": APIRecord(
+            "Sets whether the Space Bar's shelf stays shown or "
+                + "hides until the pointer reaches its edge.",
+            .choice("visibility", ShelfVisibility.self)
+        ),
+        "toggle_reveal": APIRecord(
+            "Shows or hides the hidden shelf the Space Bar sits on, "
+                + "on the active Space's screen."
+        ),
         "set_edge": APIRecord(
             "Sets the Space Bar's edge on all screens, or on one "
                 + "named by number, fingerprint or name.",

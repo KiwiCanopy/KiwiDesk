@@ -58,7 +58,8 @@ struct SpaceBarCommandParityTests {
     /// One representative setting per case, each value chosen
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
-        .enabled(false), .reserve(false), .edge(.left),
+        .enabled(false), .reserve(false), .visibility(.auto),
+        .edge(.left),
         .screenEdge(.left, screen: "S:1x1"),
         .glyphSpan(8), .glyphGap(3), .frontAppTitleCap(40),
         .inactiveContent(.count), .itemLabel(.layout),
@@ -85,6 +86,14 @@ struct SpaceBarCommandParityTests {
                     on: screen,
                     among: ScreenEdgeScope(screens: ["T:1x1"])
                 )
+            } else if case .visibility(let value) = setting {
+                // Through the settings door, which `KiwiCore`
+                // takes (#761); apart here, it writes this bar.
+                var settings = TilingSettings()
+                settings.spaceBarStyle.setEdge(.top)
+                settings.appBarStyle.setEdge(.bottom)
+                settings.setVisibility(value, of: .space)
+                style.visibility = settings.spaceBarStyle.visibility
             } else {
                 setting.apply(to: &style)
             }
@@ -159,6 +168,7 @@ struct SpaceBarCommandParityTests {
         case .glyphGap: return [.number(3)]
         case .inactiveContent: return [.string("count")]
         case .itemLabel: return [.string("layout")]
+        case .visibility: return [.string("auto")]
         case .frontAppTitleCap: return [.number(40)]
         default:
             return [.string("#123456")]

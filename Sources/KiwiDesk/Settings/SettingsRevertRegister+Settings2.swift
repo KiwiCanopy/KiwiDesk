@@ -32,6 +32,8 @@ extension SettingsRevertRegister {
         .kiwishelf(.liquidGlass): .leaf(\.settings.kiwishelf.liquidGlass),
         .kiwishelf(.iconSource): .leaf(\.settings.kiwishelf.iconSource),
         .kiwishelf(.dimFactor): .leaf(\.settings.kiwishelf.dimFactor),
+        .kiwishelf(.revealDuration):
+            .leaf(\.settings.kiwishelf.revealDuration),
         .kiwishelf(.fillColor): .leaf(\.settings.kiwishelf.fillColor),
         .kiwishelf(.borderColor): .leaf(\.settings.kiwishelf.borderColor),
         .kiwishelf(.itemColor): .leaf(\.settings.kiwishelf.itemColor),

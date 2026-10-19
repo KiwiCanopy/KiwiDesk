@@ -25,6 +25,7 @@ enum KiwiShelfCommandSetting {
     case fontWeight(Int)
     case iconSource(BarAppIconSource)
     case dimFactor(CGFloat)
+    case revealDuration(Double)
     case color(WritableKeyPath<KiwiShelf, String>, String)
 
     /// Parses a setter's field (the verb minus `set_`) and args.
@@ -105,6 +106,11 @@ enum KiwiShelfCommandSetting {
                 return .failure("expected boolean")
             }
             return .success(.border(flag))
+        case "reveal_duration":
+            guard let value = args.first?.numberValue,
+                value.isFinite
+            else { return .failure("expected seconds") }
+            return .success(.revealDuration(value))
         default:
             return nil
         }
@@ -194,6 +200,8 @@ enum KiwiShelfCommandSetting {
         case .iconSource(let value): shelf.iconSource = value
         case .dimFactor(let value):
             shelf.dimFactor = AppBarStyle.clampDim(value)
+        case .revealDuration(let value):
+            shelf.revealDuration = KiwiShelf.clampRevealDuration(value)
         case .color(let path, let hex): shelf[keyPath: path] = hex
         }
     }

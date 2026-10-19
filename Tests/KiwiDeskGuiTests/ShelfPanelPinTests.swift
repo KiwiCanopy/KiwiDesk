@@ -20,7 +20,13 @@ struct ShelfPanelPinTests {
             #expect(
                 source.components(separatedBy: "ordersPanels =").count
                     == 2
-                    && source.contains("core.shelves.ordersPanels = false"),
+                    && source.contains("core.shelves.ordersPanels = false")
+                    // A hidden shelf's indicator is a panel too
+                    // (#761).
+                    && source.contains(
+                        "core.shelves.indicators.ordersIndicatorPanels"
+                            + " = false"
+                    ),
                 .init(rawValue: "\(target) misses the pin")
             )
         }

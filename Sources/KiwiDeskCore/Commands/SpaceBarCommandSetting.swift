@@ -7,6 +7,7 @@ import Foundation
 enum SpaceBarCommandSetting {
     case enabled(Bool)
     case reserve(Bool)
+    case visibility(ShelfVisibility)
     case edge(AppBarEdge)
     /// `set_edge(edge, screen)` — one screen's edge (#1948), the
     /// screen resolved to its fingerprint. It needs the screens a
@@ -78,6 +79,9 @@ enum SpaceBarCommandSetting {
                     .screenEdge(parsed.edge, screen: $0)
                 } ?? .edge(parsed.edge)
             }
+        case "visibility":
+            return BarSettingChoice.value(args, ShelfVisibility.self)
+                .map(Self.visibility)
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -221,6 +225,9 @@ enum SpaceBarCommandSetting {
         switch self {
         case .enabled(let value): style.enabled = value
         case .reserve(let value): style.reserve = value
+        // Through `TilingSettings.setVisibility(_:of:)` alone, which
+        // writes both bars while they share an edge (#761).
+        case .visibility: break
         case .edge(let value): style.setEdge(value)
         case .screenEdge: break
         case .glyphSpan(let value): style.glyphSpan = value

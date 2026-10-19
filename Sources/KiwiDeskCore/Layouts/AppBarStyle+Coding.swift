@@ -16,6 +16,7 @@ extension AppBarStyle {
         case titleCap = "title_cap"
         case groupAdjacentWindows = "group_adjacent_windows"
         case reserve
+        case visibility
     }
 
     /// Decodes AppBarStyle falling back to defaults for missing keys.
@@ -54,5 +55,10 @@ extension AppBarStyle {
                 Bool.self,
                 forKey: .reserve
             ) ?? defaults.reserve
+        visibility =
+            try container.decodeIfPresent(
+                ShelfVisibility.self,
+                forKey: .visibility
+            ) ?? defaults.visibility
     }
 }

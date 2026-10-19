@@ -21,6 +21,9 @@ struct BarEdgeWriteCensusTests {
     private static let allowed: [String: (Int, String)] = [
         "ScreenEdged.swift": (4, "the doors themselves"),
         "ShelfEdge.swift": (1, "`ShelfEdge`'s own field, no bar's"),
+        "ShelfRevealer.swift": (
+            1, "`ShelfRevealer.Target`'s own field, no bar's (#761)"
+        ),
         "KiwiCore+ShelfFrames.swift": (
             1, "`ShelfFrame`'s own field, a drawn strip's, no bar's"
         ),
@@ -105,8 +108,9 @@ struct BarEdgeWriteCensusTests {
     /// the bars' own edges.
     private static let foldCallers: [String: (Int, String)] = [
         "TilingSettings+Shelf.swift": (
-            2,
-            "the declaration, and `shelfEdges(in:on:)` over onScreen"
+            3,
+            "the declaration, and `shelfEdges(in:on:)` and its twin "
+                + "`hidingEdges(in:on:)` over onScreen (#761)"
         ),
         "KiwiCore+ShelfPlan.swift": (
             1,

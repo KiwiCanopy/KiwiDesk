@@ -83,12 +83,15 @@ struct SpaceBarCommandTests {
         let commands = APIReference.namespaces["space_bar"]
         #expect(commands != nil)
         // The registered verb list mirrors the CodingKeys —
-        // every field has a `set_<key>` and nothing else.
+        // every field has a `set_<key>`, beside the bar actions.
         let expected = Set(
             SpaceBarStyle.CodingKeys.allCases.map {
                 "set_\(BarStyleKeys.setterField(of: $0.stringValue))"
             }
         )
-        #expect(Set(commands ?? []) == expected)
+        #expect(
+            Set(commands ?? [])
+                == expected.union(APIReference.barActions)
+        )
     }
 }

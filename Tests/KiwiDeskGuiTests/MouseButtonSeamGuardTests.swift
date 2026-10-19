@@ -75,6 +75,10 @@ struct MouseButtonSeamGuardTests {
         // move (owner ruling 2026-10-17); `DropdownCursorTests`
         // hands the model its pointer.
         "DropdownCursor.swift",
+        // A hiding shelf's band and retract read the pointer
+        // (#761); both twins pin its monitor inert and its
+        // location off every screen.
+        "ShelfRevealer.swift",
     ]
 
     @Test("the live pointer read stays in its seam homes")
@@ -217,6 +221,12 @@ struct MouseButtonSeamGuardTests {
                     && source.contains(
                         "BarHoverHit.pointerOverride = { _ in"
                             + " BarHoverHit.offWindow }"
+                    )
+                    && source.contains(
+                        "shelves.reveal.makeMonitor = { _ in nil }"
+                    )
+                    && source.contains(
+                        "shelves.reveal.location = {"
                     ),
                 .init(rawValue: "\(target) misses a pin")
             )

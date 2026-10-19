@@ -23,6 +23,10 @@ final class ShelfManager {
         let app: AppBarOverlay?
         /// Set while the shelf is full, so the divider drags.
         var divider: ShelfArrangement.Divider? = nil
+        /// A hiding shelf's reveal, which grows out of its mark at
+        /// `mark`, AX coordinates (#761).
+        var slides = false
+        var mark: CGRect? = nil
     }
 
     /// A Space Bar minimum the divider reached (`committed` on
@@ -39,6 +43,20 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
+    /// Each hiding shelf's reveal and its indicator (#761).
+    let reveal = ShelfRevealer()
+    let indicators = ShelfIndicators()
+
+    /// Whether a surface `key`'s shelf opened is up: the peek
+    /// anchored on its panel, or a menu a press on it opened — what
+    /// holds a hover reveal although the pointer left (#761).
+    func surfaceHolds(_ key: Key) -> Bool {
+        guard let panel = overlays[key]?.panel else { return false }
+        if peek.panel.isShown, peek.shown?.view?.window === panel {
+            return true
+        }
+        return peek.menuTracks(on: panel)
+    }
     #if DEBUG
         /// Whether a shelf orders its panel in. Off in both
         /// `makeTestCore` twins, where every suite rendering a bar
@@ -96,6 +114,10 @@ final class ShelfManager {
             // standing on this shelf leaves with it (#1946).
             peek.shelfLeft(overlay.panel)
             overlay.hide(animated: true)
+            // A kept hiding shelf whose edge stopped hiding goes.
+            if !overlay.isVisible, reveal.targets[key] == nil {
+                overlays[key] = nil
+            }
         }
         for shelf in shelves {
             let key = Self.key(shelf)
@@ -146,7 +168,13 @@ final class ShelfManager {
             overlay.ordersPanel = ordersPanels
         #endif
         overlay.onLeft = { [weak self] in self?.retire(key) }
-        overlay.onPress = { [weak self] in
+        overlay.slides = shelf.slides
+        overlay.setRevealOrigin(mark: shelf.mark, strip: shelf.strip)
+        overlay.onPress = { [weak self, weak overlay] in
+            // A right-click opens the shelf's menu on its panel.
+            if $1 == .rightMouseDown {
+                self?.peek.noteMenuAnchor(overlay?.panel)
+            }
             self?.peek.pressed(on: $0, type: $1)
         }
         overlay.contextMenus = contextMenus
@@ -184,7 +212,9 @@ final class ShelfManager {
     /// Drops a shelf that has left the screen, unless a plan wants
     /// it again meanwhile.
     private func retire(_ key: Key) {
-        guard last[key] == nil else { return }
+        // A hiding shelf that retracted is kept, ordered out, for
+        // its next reveal (#761): a hiding edge is not an empty one.
+        guard last[key] == nil, reveal.targets[key] == nil else { return }
         overlays[key] = nil
     }
 

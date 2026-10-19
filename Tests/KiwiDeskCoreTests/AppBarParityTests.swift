@@ -104,6 +104,7 @@ struct AppBarCommandParityTests {
         .screenEdge(.left, screen: "S:1x1"),
         .activeIndicator(.outline), .titleCap(40),
         .groupAdjacentWindows(false), .reserve(false),
+        .visibility(.auto),
     ]
 
     @Test("Each command sets one matching field on style and bar")
@@ -120,6 +121,14 @@ struct AppBarCommandParityTests {
                     on: screen,
                     among: ScreenEdgeScope(screens: ["T:1x1"])
                 )
+            } else if case .visibility(let value) = setting {
+                // Through the settings door, which `KiwiCore`
+                // takes (#761); apart here, it writes this bar.
+                var settings = TilingSettings()
+                settings.spaceBarStyle.setEdge(.top)
+                settings.appBarStyle.setEdge(.bottom)
+                settings.setVisibility(value, of: .app)
+                style.visibility = settings.appBarStyle.visibility
             } else {
                 setting.apply(to: &style)
             }
@@ -173,6 +182,7 @@ struct AppBarCommandParityTests {
         case .edgeOverride: return [.string("left"), .string("S:1x1")]
         case .activeIndicator: return [.string("outline")]
         case .titleCap: return [.number(40)]
+        case .visibility: return [.string("auto")]
         }
     }
 
@@ -190,7 +200,8 @@ struct AppBarCommandParityTests {
             }
         )
         #expect(
-            Set(APIReference.namespaces["app_bar"] ?? []) == expected
+            Set(APIReference.namespaces["app_bar"] ?? [])
+                == expected.union(APIReference.barActions)
         )
     }
 

@@ -17,6 +17,15 @@ extension SettingsValueReadout {
             return spaceBarOnOffRow(census, o.enabled, n.enabled)
         case .spaceBarReserve:
             return spaceBarOnOffRow(census, o.reserve, n.reserve)
+        case .spaceBarVisibility:
+            // The stored value, as every diff row narrates; while
+            // the bars share an edge the door writes both (#761).
+            return spaceBarChoiceRow(
+                census,
+                o.visibility,
+                n.visibility,
+                AppBarOptions.visibility
+            )
         case .spaceBarActiveIndicator:
             return spaceBarChoiceRow(
                 census,
