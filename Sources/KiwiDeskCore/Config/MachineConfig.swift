@@ -73,10 +73,6 @@ protocol MachineFile: Codable, Sendable {
     static var currentFormat: Int { get }
     /// Which `MachineConfig.moves` entries land in this file.
     static var destination: MachineConfig.Destination { get }
-    /// Whether a write refuses a stored file that will not decode,
-    /// rather than replace it: user-authored leaves (the bindings)
-    /// do, remembered ones (the Desktop memory) need not.
-    static var keepsUnreadable: Bool { get }
     init()
     init(of config: GuiConfig)
     func applied(to config: GuiConfig) -> GuiConfig
@@ -85,13 +81,6 @@ protocol MachineFile: Codable, Sendable {
 extension MachineConfig: MachineFile {
     static let fileName = "machine.json"
     static let destination = Destination.machine
-    static let keepsUnreadable = false
-}
-
-/// A write refused because the stored file will not decode and its
-/// leaves are the user's (`MachineFile.keepsUnreadable`).
-struct UnreadableMachineFile: Error, Equatable {
-    let file: String
 }
 
 /// Reads and writes one `MachineFile`.
@@ -112,15 +101,10 @@ struct MachineFileStore<File: MachineFile> {
     }
 
     /// Writes the leaves; refuses a file a newer build wrote
-    /// (#2325).
-    func save(_ file: File) throws {
-        try NewerFormatOnDisk.refuse(url, File.currentFormat)
-        if File.keepsUnreadable,
-            let stored = try? Data(contentsOf: url),
-            (try? JSONDecoder().decode(File.self, from: stored)) == nil
-        {
-            throw UnreadableMachineFile(file: File.fileName)
-        }
+    /// (#2325) and keeps a corrupt one's copy in `backups` (#2324).
+    func save(_ file: File, backups: URL?) throws {
+        try refuseNewer()
+        keepCorrupt(in: backups)
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -139,7 +123,7 @@ struct MachineFileStore<File: MachineFile> {
     /// every entry (#2324 ruling 10). Returns the leaves still owed
     /// where the write failed, for the caller to compose in memory
     /// without rewriting the file; nil once nothing is owed.
-    func carry(fromLegacy legacy: Data) -> File? {
+    func carry(fromLegacy legacy: Data, backups: URL?) -> File? {
         guard
             let format =
                 (try? JSONSerialization.jsonObject(with: legacy)
@@ -165,9 +149,9 @@ struct MachineFileStore<File: MachineFile> {
         for (key, value) in owed where Self.isEmpty(stored[key]) {
             stored[key] = value
         }
-        // Owed leaves that will not decode move as they stand: the
-        // new home keeps the bytes and refuses to overwrite them
-        // (`keepsUnreadable`), so the strip loses nothing.
+        // Owed leaves that will not decode move as they stand, and
+        // the next write keeps their copy before replacing them
+        // (#2324 ruling 13), so the strip loses nothing.
         guard let carried = Self.decoded(owed) else {
             return writeRaw(stored) ? nil : File()
         }
@@ -176,7 +160,8 @@ struct MachineFileStore<File: MachineFile> {
         // where the write fails.
         guard let merged = Self.decoded(stored) else { return carried }
         do {
-            try save(merged)
+            // A corrupt file read as empty above keeps its copy.
+            try save(merged, backups: backups)
             return nil
         } catch {
             return merged
@@ -187,8 +172,7 @@ struct MachineFileStore<File: MachineFile> {
     /// format; false where it cannot land or a newer build owns
     /// the file.
     private func writeRaw(_ root: [String: Any]) -> Bool {
-        guard NewerFormatOnDisk.check(url, knows: File.currentFormat) == nil
-        else { return false }
+        guard newerFormat() == nil else { return false }
         var root = root
         root["format"] = File.currentFormat
         guard

@@ -258,7 +258,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.save_failed",
                 "Saving failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("rule reach save failed: \(error)")
             return .failed

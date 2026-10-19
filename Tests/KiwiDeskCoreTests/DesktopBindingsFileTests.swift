@@ -108,51 +108,59 @@ struct DesktopBindingsFileTests {
         )
     }
 
-    /// The bindings are the user's: a file that will not decode is
-    /// refused rather than replaced with what memory holds.
-    @Test("An unreadable bindings file is never overwritten")
+    /// A bindings file that will not decode is replaced only after
+    /// its copy lands in the backups (#2324 ruling 13).
+    @Test("An unreadable bindings file is kept before it is replaced")
     func unreadableIsKept() throws {
         let dir = scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
-        let store = try store(dir)
+        var store = try store(dir)
+        let backups = dir.appendingPathComponent("backups")
+        store.migrationBackups = backups
         try FileManager.default.createDirectory(
             at: store.bindingsFile.url.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
         let broken = Data(#"{"profile_bindings":{"2":7}}"#.utf8)
         try broken.write(to: store.bindingsFile.url)
-        #expect(throws: (any Error).self) {
-            try store.saveBindings([:])
-        }
-        #expect(try Data(contentsOf: store.bindingsFile.url) == broken)
+        try store.saveBindings([:])
+        #expect(try Data(contentsOf: store.bindingsFile.url) != broken)
+        let copy = MigrationBackup.url(
+            of: store.bindingsFile.url,
+            suffix: CorruptFile.suffix,
+            in: backups
+        )
+        #expect(try Data(contentsOf: copy) == broken)
     }
 
-    /// Owed bindings that will not decode move as they stand, into
-    /// a file that then refuses to be overwritten — never dropped.
+    /// Owed bindings that will not decode move as they stand, and
+    /// the next write keeps their copy — never dropped.
     @Test("Undecodable owed bindings move raw and are kept")
     func undecodableOwedMovesRaw() throws {
         let dir = scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
-        let store = try store(dir)
+        var store = try store(dir)
+        let backups = dir.appendingPathComponent("backups")
+        store.migrationBackups = backups
         try Data(
             #"{"format":9,"spaces":["1"],"profile_bindings":{"2":7}}"#
                 .utf8
         ).write(to: store.url)
         _ = store.load()
-        let moved = try #require(
-            JSONSerialization.jsonObject(
-                with: Data(contentsOf: store.bindingsFile.url)
-            ) as? [String: Any]
+        let moved = try Data(contentsOf: store.bindingsFile.url)
+        let root = try #require(
+            JSONSerialization.jsonObject(with: moved) as? [String: Any]
         )
-        #expect(moved["profile_bindings"] != nil)
-        #expect(throws: (any Error).self) { try store.saveBindings([:]) }
-        try store.save(GuiConfig())
-        let kept = try #require(
-            JSONSerialization.jsonObject(
-                with: Data(contentsOf: store.bindingsFile.url)
-            ) as? [String: Any]
+        #expect(root["profile_bindings"] != nil)
+        // The next write keeps the raw bytes before replacing them
+        // (#2324 ruling 13).
+        try store.saveBindings([:])
+        let copy = MigrationBackup.url(
+            of: store.bindingsFile.url,
+            suffix: CorruptFile.suffix,
+            in: backups
         )
-        #expect(kept["profile_bindings"] != nil)
+        #expect(try Data(contentsOf: copy) == moved)
     }
 
     /// A writer holding an old copy cannot revert a re-key or a

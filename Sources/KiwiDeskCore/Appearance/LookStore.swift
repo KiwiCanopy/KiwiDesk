@@ -74,7 +74,7 @@ public final class LookStore {
         guard !isBuiltinName(look.name) else {
             throw StoreError.reservedName(look.name)
         }
-        var looks = try libraryLooks()
+        var looks = try writableLibrary()
         if let index = looks.firstIndex(where: { $0.name == look.name }) {
             looks[index] = look
         } else {
@@ -141,6 +141,7 @@ public final class LookStore {
     private static var encoder: JSONEncoder { LookDocument.encoder }
 
     private func write(_ looks: [ShelfLook]) throws {
+        keepCorrupt()
         try FileManager.default.createDirectory(
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -150,6 +151,42 @@ public final class LookStore {
         try Self.encoder.encode(LookDocument(looks: looks)).write(
             to: fileURL,
             options: .atomic
+        )
+    }
+
+    /// The library a save starts from (#2324 ruling 13): a newer
+    /// build's still refuses, while a corrupt one starts empty and
+    /// `write` keeps its copy. A delete or rename reads through
+    /// `libraryLooks`, since a corrupt library holds nothing to name.
+    private func writableLibrary() throws -> [ShelfLook] {
+        do {
+            return try libraryLooks()
+        } catch StoreError.unreadableLibrary
+            where newerFormat() == nil
+        {
+            return []
+        }
+    }
+
+    /// The library a newer build wrote, if it did (#2325) — the
+    /// one pairing of this file with its format.
+    public func newerFormat() -> NewerFormatOnDisk? {
+        NewerFormatOnDisk.check(
+            fileURL,
+            .looks,
+            knows: LookDocument.currentFormat
+        )
+    }
+
+    /// Keeps a corrupt library's copy before `write` replaces it;
+    /// a newer one reaching here is a restore's, which discarded
+    /// the file first, and is not corrupt.
+    private func keepCorrupt() {
+        guard newerFormat() == nil else { return }
+        CorruptFile.keepBeforeOverwrite(
+            fileURL,
+            as: LookDocument.self,
+            in: migrationBackups
         )
     }
 }

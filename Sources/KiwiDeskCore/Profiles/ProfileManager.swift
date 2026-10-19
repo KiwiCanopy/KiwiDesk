@@ -151,8 +151,10 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    /// Deletes a profile, repairing orphaned count defaults if needed.
+    /// Deletes a profile, repairing orphaned count defaults; refuses
+    /// a file a newer build wrote (#2324).
     func delete(name: String) throws {
+        try NewerFormatOnDisk.refuseProfile(url(for: validated(name)))
         let deleted = try? read(name: name)
         let stamp = folderStamp()
         try FileManager.default.removeItem(
@@ -292,12 +294,12 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    /// Non-adopting write (#18, #82); refuses a newer file (#2325).
+    /// Non-adopting write (#18, #82); `clearForWrite` first (#2324).
     /// Returns the profile as written, its id settled (#2324).
     @discardableResult
     func write(_ profile: Profile) throws -> Profile {
         let name = try validated(profile.name)
-        try NewerFormatOnDisk.refuseProfile(url(for: name))
+        try clearForWrite(url(for: name))
         var profile = profile
         profile.id = idForWrite(of: profile)
         let stamp = folderStamp()

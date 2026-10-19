@@ -46,7 +46,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.save_failed",
                 "Saving failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("look reach save failed: \(error)")
             return false

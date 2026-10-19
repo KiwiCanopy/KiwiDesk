@@ -23,7 +23,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.copy_failed",
                 "Copying failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("profile copy failed: \(error)")
         }
@@ -32,6 +32,10 @@ extension SettingsModel {
     /// Overwrites stored profile with staged configuration (#18).
     func saveEditedProfile() {
         guard let name = editingProfile else { return }
+        if let latched = writeLatchReason {
+            profileWarning = latched
+            return
+        }
         // The rule half first: a failed write keeps the draft
         // whole rather than committing the tiling alone.
         // Its own shortcut override is the diff `overwriteProfile`
@@ -59,7 +63,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.save_failed",
                 "Saving failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("profile edit save failed: \(error)")
             // A rule half that landed is the draft's clean state;
@@ -97,7 +101,7 @@ extension SettingsModel {
             return L(
                 "settings.globals_save_failed",
                 "Saving settings failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
         }
         return sidecarRefusal(refusal)

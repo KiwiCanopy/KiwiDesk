@@ -59,6 +59,7 @@ struct ConfigIssueTextTests {
             .luaVMUnavailable,
             .luaError("attempt to index a nil value"),
             .guiConfigUnreadable,
+            .newerFormat(.guiConfig),
             .unknownCall(
                 name: "KiwiDesk.focsu",
                 suggestion: "focus"
@@ -80,13 +81,13 @@ struct ConfigIssueTextTests {
     func everyKindRenders() {
         pinEnglish()
         defer { reset() }
-        // Seven cases; the fixture count is three causes plus the
-        // eight hand-listed entries (`unknownCall` and
+        // Eight cases; the fixture count is the causes plus the
+        // nine hand-listed entries (`unknownCall` and
         // `retiredCall` twice each). The cause half derives, so
-        // only the hand-listed half is pinned — bump the 8
+        // only the hand-listed half is pinned — bump the 9
         // deliberately when a `Kind` is added, which is the
         // reminder the compiler cannot give.
-        #expect(kinds.count == ProfileBrokenCause.allCases.count + 8)
+        #expect(kinds.count == ProfileBrokenCause.allCases.count + 9)
         var seen: Set<String> = []
         for kind in kinds {
             let text = ConfigIssueText.message(for: kind)

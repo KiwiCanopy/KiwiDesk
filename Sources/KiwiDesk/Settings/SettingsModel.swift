@@ -123,11 +123,11 @@ final class SettingsModel: ObservableObject {
     /// Whether screen placement canvas is editable for current target (#18).
     @Published var placementEditable = true
     @Published var profiles: [String] = []
-    /// `KiwiCore.isGuiManaged` and the sidecar's presence, read
-    /// once per refresh — the first re-reads init.lua, so never
-    /// per render (#1392).
+    /// `isGuiManaged`, the sidecar's presence and its latch (#2324),
+    /// read once per refresh: the first re-reads init.lua (#1392).
     @Published var guiManaged = true
     @Published var sidecarExists = true
+    @Published var writeLatch: NewerFormatOnDisk?
     /// Rich rows for saved profiles: screen setups, screen count, matches
     /// (#36).
     @Published var profileSummaries: [ProfileSummary] = []

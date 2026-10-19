@@ -10,6 +10,7 @@ extension SettingsModel {
         // outside Settings moves them; the draft's ticks stay.
         lookReachStored = core.lookReach()
         sidecarExists = core.guiConfigStore.exists
+        writeLatch = core.guiConfigWriteLatch()
         activeProfile = core.profiles.currentName
         activeProfileID = core.profiles.currentID
         activeStandard = core.profiles.currentStandard

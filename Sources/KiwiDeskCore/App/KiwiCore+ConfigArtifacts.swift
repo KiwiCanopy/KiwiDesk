@@ -10,7 +10,7 @@ import Foundation
 /// duplication §2.4 protects, but a **failure-mode policy** whose
 /// copies can diverge, and they already had (different log
 /// prefixes, one inlined and one extracted, only one callable).
-public enum ConfigArtifact: CaseIterable {
+public enum ConfigArtifact: CaseIterable, Sendable {
     /// The GUI's settings sidecar.
     case guiConfig
     /// Every saved profile.
@@ -76,6 +76,21 @@ public enum ConfigArtifact: CaseIterable {
         case .machineConfig:
             return "which Space each of this Mac's Desktops was "
                 + "showing; another Mac's Desktops are not these"
+        }
+    }
+}
+
+extension ConfigArtifact {
+    /// The file's name, nil for a folder (`profiles`, the backups);
+    /// `NewerFormatLatchTests` holds it to `KiwiCore.url(of:)`.
+    public var fileName: String? {
+        switch self {
+        case .guiConfig: return "gui.json"
+        case .palettes: return "palettes.json"
+        case .looks: return "looks.json"
+        case .machineConfig: return MachineConfig.fileName
+        case .desktopBindings: return DesktopBindingsFile.fileName
+        case .profiles, .migrationBackups: return nil
         }
     }
 }

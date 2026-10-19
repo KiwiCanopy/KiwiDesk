@@ -25,6 +25,8 @@ enum ProfileBrokenText {
                 "profiles.broken.unreadable",
                 "The file may have been moved or deleted."
             )
+        case .newerFormat:
+            return NewerFormatText.profile
         }
     }
 }

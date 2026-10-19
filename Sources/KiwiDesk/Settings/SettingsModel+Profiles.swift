@@ -147,7 +147,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.save_failed",
                 "Saving failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("profile save failed: \(error)")
             saved = false
@@ -217,7 +217,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.rename_failed",
                 "Renaming failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             return
         }
@@ -235,7 +235,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.apply_failed",
                 "Applying failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("preset apply failed: \(error)")
         }
