@@ -23,6 +23,10 @@ extension SpaceBarItemView {
         }
 
         static let discCap = 9
+
+        /// Whether the disc draws: an empty Space's collapse has
+        /// none, so it badges nothing and its ends stay round.
+        var drawsDisc: Bool { windows > 0 }
     }
 
     /// The windows this item's Space holds, collapsed or not —

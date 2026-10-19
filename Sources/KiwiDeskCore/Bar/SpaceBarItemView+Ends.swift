@@ -9,7 +9,8 @@ import AppKit
 /// none, and neither does a lone glyph that fits the round end.
 extension SpaceBarItemView {
     /// Whether the identifier cell carries a corner badge — a
-    /// collapse's count or the Space marker, at its trailing top.
+    /// collapse's drawn count disc or the Space marker, at its
+    /// trailing top.
     static func badgesIdentifier(collapsed: Bool, marked: Bool) -> Bool {
         collapsed || marked
     }
@@ -109,7 +110,7 @@ extension SpaceBarItemView {
 
     private var badged: Bool {
         Self.badgesIdentifier(
-            collapsed: collapse != nil,
+            collapsed: collapse?.drawsDisc ?? false,
             marked: marker != nil
         )
     }
