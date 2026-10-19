@@ -9,11 +9,14 @@ extension TilingSettings {
     /// `space` is the Space the floor is asked for, nil where none
     /// exists (the quit grid, a GUI preview of the layout's own
     /// value). It is required so a per-Space level (#2422) joins
-    /// here without touching a consumer.
+    /// here without touching a consumer. Monocle applies none.
     public func minWindowSize(
         for mode: LayoutMode,
         in space: SpaceID?
     ) -> MinSize {
-        .square(minWindowSize)
+        guard let layout = MinWindowSizes.Layout(mode) else {
+            return .square(0)
+        }
+        return minWindowSizes[layout]
     }
 }

@@ -492,7 +492,7 @@ every lens with why it cannot turn on.
 | | `mouse.set_follows_focus` | true\|false (default `false`) — warp the pointer to the newly-focused window |
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
-| | `set_min_window_size` | pt (default 300) |
+| | `set_min_window_size` | width[, height][, layout] in pt (default 300 × 300 every layout) |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |

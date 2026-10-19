@@ -33,13 +33,36 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// `set_min_window_size(width, height?, layout?)` (#2237): no
+    /// layout sets every layout, no height takes the width, and a
+    /// layout name in second place stands for both.
     func setMinWindowSize(
         _ args: [JSONValue]
     ) -> CommandResponse {
-        guard let size = args.first?.numberValue else {
-            return .fail("expected size")
+        guard let width = args.first?.numberValue else {
+            return .fail("expected width")
         }
-        tiler.settings.minWindowSize = CGFloat(size)
+        var rest = args.dropFirst()
+        var height = width
+        switch rest.first {
+        case .number(let value)?:
+            height = value
+            rest = rest.dropFirst()
+        case .null?:
+            rest = rest.dropFirst()
+        default:
+            break
+        }
+        var layout: MinWindowSizes.Layout?
+        if case .string(let name)? = rest.first {
+            guard let named = MinWindowSizes.Layout(rawValue: name)
+            else { return .expected(MinWindowSizes.Layout.self) }
+            layout = named
+        }
+        tiler.settings.minWindowSizes.set(
+            MinSize(width: CGFloat(width), height: CGFloat(height)),
+            for: layout
+        )
         // Promises, like the gap edit above (#593): the floor
         // only re-divides room among the windows already placed.
         // It can flip a track into an overflow cascade, where

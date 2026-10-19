@@ -673,17 +673,27 @@ KiwiDesk.set_gap_override("editor", {
 
 ### set_min_window_size
 
-**Expects:** a number (points).
+:::unreleased
+**Expects:** a width in points, then optionally a height in
+points and a layout: `stack`, `grid`, `track`, `bsp`,
+`scrolling` or `floating`. Without a height the width serves
+both; a layout may stand in the height's place.
 
 **Does:** windows below this width or height
 [cascade](#when-windows-no-longer-fit) instead of shrinking
-further.
+further. Without a layout it sets every layout; with one, only
+that layout. Scrolling applies only the axis it scrolls along,
+and Floating's value bounds every floating window. Monocle
+keeps no minimum.
 
 **Example:**
 
 ```lua
-KiwiDesk.set_min_window_size(300)
+KiwiDesk.set_min_window_size(300)            -- every layout
+KiwiDesk.set_min_window_size(220, 160, "grid")
+KiwiDesk.set_min_window_size(480, "scrolling")
 ```
+:::
 
 ### set_resize_step
 
@@ -1417,7 +1427,8 @@ or `0` (auto, default).
 **Does:** sets the size of columns (horizontal) or rows
 (vertical) in scrolling layouts. Auto is 95%, horizontal and
 vertical alike. Any resolved size is floored at the global
-minimum window size (`set_min_window_size`) and capped at the
+Scrolling's minimum window size (`set_min_window_size`) along
+that axis and capped at the
 axis length.
 
 A percentage is a share of the **pitch**, one window plus one

@@ -9,7 +9,7 @@ import Testing
 // Display 1: x=[0, 1920), primaryH = 1080
 // Display 2: x=[1920, 3840), same height
 private let pH: CGFloat = 1080
-private let minSize: CGFloat = 300
+private let minSize: MinSize = 300
 
 private let display1 = Display(
     id: DisplayID(1),

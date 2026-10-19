@@ -50,7 +50,7 @@ struct StackArrangementResizeTests {
         // display did not. The clamped case has its own coverage.
         // Pinned, not assumed — a moved default would silently
         // change what the ratio assertions below describe.
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         for index in 1...3 {
             core.state.apply(
                 .windowCreated(

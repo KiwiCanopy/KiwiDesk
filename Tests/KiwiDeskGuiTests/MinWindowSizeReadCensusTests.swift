@@ -5,37 +5,32 @@ import Testing
 /// resolver, `TilingSettings.minWindowSize(for:in:)` (#2237): the
 /// floor is per layout, so a raw read of the stored value answers
 /// for no layout and disagrees with the one the layout draws. A
-/// stored-value read outside `allowed` reds until it routes or is
-/// given its reason here.
+/// stored-value read (`.minWindowSizes`) outside `allowed` reds
+/// until it routes or is given its reason here.
 @Suite("minimum window size read census (#2237)")
 struct MinWindowSizeReadCensusTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
     /// File → why it may name the stored value.
     private static let allowed: [String: String] = [
+        "TilingSettings+Coding.swift": "decodes it",
+        "TilingSettings+Encoding.swift": "encodes it",
         "KiwiCore+GapCommands.swift": "the Lua setter writes it",
-        "StarterTuning.swift": "the first-run seed writes it",
-        "LayoutDefaultsSection.swift": "the Settings row edits it",
+        "StarterSetup.swift": "the first-run seed writes it",
+        "SettingKey+Behaviour.swift":
+            "the census ids spell its stored paths",
+        "SettingsModel+MinWindowSize.swift":
+            "the Settings master and its rows edit it",
         "SettingsRevertRegister+Settings1.swift":
-            "the row's revert writes it back",
-        "HomeCardContent.swift": "the card shows the stored value",
-        "HomeCardPlate.swift": "the card shows the stored value",
+            "a row's revert writes it back",
+        "SettingsValueReadout+Behaviour.swift":
+            "the unsaved-changes rows compare it",
+        "HomeCardContent.swift": "the card names the stored value",
     ]
 
-    /// Reads of the stored value in `text`: `settings.minWindowSize`
-    /// not followed by `(`, which is the resolver's call.
+    /// Member reads of the stored value, `.minWindowSizes`.
     private static func rawReads(in text: String) -> Int {
-        var count = 0
-        var cursor = text.startIndex
-        while let hit = text.range(
-            of: "settings.minWindowSize",
-            range: cursor..<text.endIndex
-        ) {
-            cursor = hit.upperBound
-            if text[hit.upperBound...].hasPrefix("(") { continue }
-            count += 1
-        }
-        return count
+        text.components(separatedBy: ".minWindowSizes").count - 1
     }
 
     private func sources() throws -> [URL] {

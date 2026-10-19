@@ -72,7 +72,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `machine.json` (#2324) and never travels.
     /// 29 = a profile's stable `id` (#2324), on `[Profile]`, and
     /// the Desktop bindings as the bundle's own field.
-    public static let currentFormat = 29
+    /// 30 = `min_window_size` per layout (#2237), on `[Profile]`
+    /// alone.
+    public static let currentFormat = 30
 
     public let format: Int
 

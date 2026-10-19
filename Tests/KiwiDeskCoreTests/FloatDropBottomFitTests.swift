@@ -69,7 +69,7 @@ struct FloatDropBottomFitTests {
         let core = makeTestCore()
         // Pin the display rather than inherit it (#531).
         core.tiler.visibleBounds = { _ in screen.frame }
-        core.tiler.settings.minWindowSize = 200
+        core.tiler.settings.minWindowSizes = MinWindowSizes(all: 200)
         core.state.apply(.displaysChanged([display]))
         core.state.apply(
             .windowCreated(
@@ -177,7 +177,7 @@ struct FloatDropBottomFitTests {
         let core = makeTestCore()
         let bounds = CGRect(x: 0, y: 0, width: 1440, height: 900)
         core.tiler.visibleBounds = { _ in bounds }
-        core.tiler.settings.minWindowSize = 200
+        core.tiler.settings.minWindowSizes = MinWindowSizes(all: 200)
         core.state.apply(.displaysChanged([display]))
         let drop = CGRect(x: 100, y: 600, width: 600, height: 500)
         core.state.apply(
