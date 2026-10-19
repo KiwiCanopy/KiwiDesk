@@ -52,7 +52,13 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.layers",
         "Layers"
     )
-    /// The KiwiHub group (#2265), titled by the product name.
+    /// The Show & hide card: KiwiHub, KiwiShelf and KiwiVision,
+    /// each a sub-group titled by its product name below.
+    let showHideKeys = SettingsControl(
+        "shortcuts.section.show_hide",
+        "Show & hide"
+    )
+    /// The Show & hide card's KiwiHub sub-group (#2265).
     let kiwiHubKeys = SettingsControl(
         "kiwihub.name",
         "KiwiHub"
@@ -61,13 +67,13 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.focus",
         "Focus"
     )
-    /// The KiwiVision group (#2312), titled by the product name's
-    /// one key.
+    /// The Show & hide card's KiwiVision sub-group (#2312),
+    /// titled by the product name's one key.
     let kiwiVisionKeys = SettingsControl(
         "destination.kiwivision",
         "KiwiVision"
     )
-    /// The KiwiShelf group (#761), titled by the product name.
+    /// The Show & hide card's KiwiShelf sub-group (#761).
     let kiwishelfKeys = SettingsControl(
         "bars.switch.kiwishelf",
         "KiwiShelf"

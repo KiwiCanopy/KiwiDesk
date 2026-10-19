@@ -28,20 +28,20 @@ struct ShortcutsJumpPairingTests {
         }
         return [
             (
-                "ShortcutsRowOrder.kiwiHubAtRest",
+                "KiwiHubKeyRows(",
                 ShortcutsRowOrder.kiwiHubAtRest
+            ),
+            (
+                "KiwiShelfKeyRows(",
+                ShortcutsRowOrder.kiwishelfAtRest
+            ),
+            (
+                "KiwiVisionKeyRows(",
+                ShortcutsRowOrder.kiwiVisionAtRest
             ),
             (
                 "ShortcutsRowOrder.focusAtRest",
                 ShortcutsRowOrder.focusAtRest
-            ),
-            (
-                "ShortcutsRowOrder.kiwiVisionAtRest",
-                ShortcutsRowOrder.kiwiVisionAtRest
-            ),
-            (
-                "ShortcutsRowOrder.kiwishelfAtRest",
-                ShortcutsRowOrder.kiwishelfAtRest
             ),
             (
                 "ShortcutsRowOrder.moveWindowsAtRest",
@@ -111,15 +111,24 @@ struct ShortcutsJumpPairingTests {
         for (_, keys) in witnesses {
             #expect(!keys.isEmpty)
         }
-        let kiwiDeskRows = declarations.filter {
-            $0.hasPrefix("structKiwiDeskKeyRows:")
-        }
-        #expect(kiwiDeskRows.count == 1)
-        #expect(
-            kiwiDeskRows.allSatisfy {
-                $0.contains("ShortcutsRowOrder.openApplicationsKiwiDesk")
+        // A rows view a card mounts walks the list it stands for.
+        for (rows, list) in [
+            ("KiwiDeskKeyRows", "openApplicationsKiwiDesk"),
+            ("KiwiHubKeyRows", "kiwiHubAtRest"),
+            ("KiwiShelfKeyRows", "kiwishelfAtRest"),
+            ("KiwiVisionKeyRows", "kiwiVisionAtRest"),
+        ] {
+            let found = declarations.filter {
+                $0.hasPrefix("struct\(rows):")
             }
-        )
+            #expect(found.count == 1, "\(rows)")
+            #expect(
+                found.allSatisfy {
+                    $0.contains("ShortcutsRowOrder.\(list)")
+                },
+                "\(rows)"
+            )
+        }
         for group in ShortcutsJumpGroup.allCases {
             let name = try #require(Self.spelling(of: group))
             let title = "SettingsCatalog.shortcuts.\(name)"

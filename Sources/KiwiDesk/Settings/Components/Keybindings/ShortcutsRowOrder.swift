@@ -31,7 +31,7 @@ enum ShortcutsRowOrder {
         .behaviour(.mouseResize),
     ]
 
-    /// KiwiHub group order: its sides in the order of their keys,
+    /// Show & hide ▸ KiwiHub order: its sides in the order of their keys,
     /// J K L (#2246, #2265).
     static let kiwiHubAtRest: [SettingKey] = [
         .shortcuts(.jumpToWindow),
@@ -49,15 +49,15 @@ enum ShortcutsRowOrder {
         .shortcuts(.goToSpace),
     ]
 
-    /// KiwiVision group order: its toggle (#2312), then a row
+    /// Show & hide ▸ KiwiVision order: its toggle (#2312), then a row
     /// per lens (#2103 ruling 42).
     static let kiwiVisionAtRest: [SettingKey] = [
         .shortcuts(.toggleKiwiVision),
         .shortcuts(.toggleLens),
     ]
 
-    /// KiwiShelf group order: the bars' show/hide shortcuts, Space
-    /// Bar first as in the Show group (#761).
+    /// Show & hide ▸ KiwiShelf order: Space Bar first, as in the
+    /// Show group (#761).
     static let kiwishelfAtRest: [SettingKey] = [
         .shortcuts(.toggleSpaceBar),
         .shortcuts(.toggleAppBar),

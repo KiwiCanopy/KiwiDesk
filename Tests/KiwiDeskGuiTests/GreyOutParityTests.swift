@@ -102,7 +102,7 @@ struct GreyOutParityTests {
         // A bar's shortcut row greys while its bar is `always`
         // everywhere (#761).
         (
-            "KiwiShelfShortcutsGroup.swift",
+            "KiwiShelfKeyRows.swift",
             "GreyOut(active: inert)",
             1
         ),

@@ -1,25 +1,22 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// KiwiHub's shortcut section (#2265): one group for the one
-/// panel, its sides in the order of their keys, J K L.
-struct KiwiHubGroup: View {
+/// KiwiHub's rows in the Show & hide card (#2265): one panel, its
+/// sides in the order of their keys, J K L.
+struct KiwiHubKeyRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let expander: ShortcutsFamilyRows
 
     var body: some View {
-        SettingsSection(SettingsCatalog.shortcuts.kiwiHubKeys) {
-            ForEach(ShortcutsRowOrder.kiwiHubAtRest, id: \.id) {
-                key in
-                anchored(key) {
-                    KeybindingFamilyRows(
-                        model: model,
-                        bindings: $bindings,
-                        key: key,
-                        expander: expander
-                    )
-                }
+        ForEach(ShortcutsRowOrder.kiwiHubAtRest, id: \.id) { key in
+            anchored(key) {
+                KeybindingFamilyRows(
+                    model: model,
+                    bindings: $bindings,
+                    key: key,
+                    expander: expander
+                )
             }
         }
     }

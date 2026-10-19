@@ -1,21 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The bars' show/hide shortcuts (#761), a group of their own as
-/// KiwiHub's and KiwiVision's are. A row greys while its bar is
-/// `always` everywhere — its shortcut then only refuses — and links
-/// to where its bar is set.
-struct KiwiShelfShortcutsGroup: View {
+/// The bars' rows in the Show & hide card (#761). A row greys
+/// while its bar is `always` everywhere — its shortcut then only
+/// refuses — and links to where its bar is set.
+struct KiwiShelfKeyRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let expander: ShortcutsFamilyRows
 
     var body: some View {
-        SettingsSection(SettingsCatalog.shortcuts.kiwishelfKeys) {
-            ForEach(ShortcutsRowOrder.kiwishelfAtRest, id: \.id) {
-                key in
-                row(key)
-            }
+        ForEach(ShortcutsRowOrder.kiwishelfAtRest, id: \.id) { key in
+            row(key)
         }
     }
 

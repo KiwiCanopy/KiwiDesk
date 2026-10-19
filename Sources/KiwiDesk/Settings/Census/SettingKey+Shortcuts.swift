@@ -86,13 +86,12 @@ extension ShortcutsKey {
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
             .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
-        case .toggleKiwiVision, .toggleLens:
-            return .row(.shortcuts, .kiwiVisionShortcuts, .atRest)
-        case .toggleSpaceBar, .toggleAppBar:
-            return .row(.shortcuts, .kiwishelfShortcuts, .atRest)
-        // KiwiHub's three sides, one group for one panel (#2265).
-        case .jumpToWindow, .showShortcuts, .viewPicker:
-            return .row(.shortcuts, .kiwiHub, .atRest)
+        // One card for what shows and hides: KiwiHub's sides
+        // (#2265), the bars (#761), KiwiVision and its lenses.
+        case .jumpToWindow, .showShortcuts, .viewPicker,
+            .toggleSpaceBar, .toggleAppBar,
+            .toggleKiwiVision, .toggleLens:
+            return .row(.shortcuts, .showHide, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
         // An OFFER until the Track layout is in play (#1440).

@@ -147,7 +147,8 @@ struct SettingsCatalogTests {
         // 159 since #2379: Mouse & trackpad ▸ hover delay.
         // 161 since #2417: KiwiVision's fade duration and curve.
         // 162 since #761: Shortcuts' KiwiShelf group.
-        #expect(allEntries.count == 162)
+        // 163: the Show & hide card over the three groups above.
+        #expect(allEntries.count == 163)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

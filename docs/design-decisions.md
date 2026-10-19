@@ -11826,8 +11826,9 @@ never its name. The sides keep their own names, which their rows
 and VoiceOver already use, and the panel's container speaks the
 product name around them, so a side announces "KiwiHub, window
 switcher". The Shortcuts page groups the three rows under one
-KiwiHub card, J K L in key order, because the panel is the topic
-and the trio reads as one. Open applications ▸ KiwiDesk keeps
+KiwiHub heading, J K L in key order, because the panel is the
+topic and the trio reads as one — a sub-group of Show & hide
+since that card took the products' shortcuts together (below). Open applications ▸ KiwiDesk keeps
 Open Settings under its subheading, one row and all: there the
 heading says whose window the row opens, among rows that open
 other apps, which a lone row still needs.
@@ -12444,11 +12445,31 @@ General drawer — two rows, Show shortcuts panel and Open
 Settings — folds into Open applications under a "KiwiDesk"
 subheading: both open something by key, and a two-row drawer was
 a disclosure guarding almost nothing. (Show shortcuts panel has
-since moved to the KiwiHub group, #2265.) Focus and Move windows stay
+since moved to Show & hide ▸ KiwiHub, #2265.) Focus and Move windows stay
 apart although they share keys: merged they run 17–23 rows, and
 the header is what tells "where focus goes" from "where a window
 goes" on the same arrows. The section keeps its name: *Controls*
 stays refused, every row in Settings being a control.
+
+:::unreleased
+**One card for what shows and hides.** KiwiHub, KiwiShelf and
+KiwiVision each arrived with a card of their own (#2265, #761,
+#2312), so the page grew a card and a chip per product, and
+three chips named a product rather than a job. The three are one
+job — each key puts something on screen or takes it away and
+moves no window — so they share one card named by that job,
+*Show & hide*, each product a sub-heading. KiwiHub leads, the
+panel being what a new user reaches for first; KiwiShelf
+follows; KiwiVision goes last because it grows a row per lens.
+The card leads the page, ahead of Focus, for the same reason
+KiwiHub leads the card. Focus, Move windows and Layout stay
+apart, by the header argument above. *KiwiDesk* was refused as
+the card's name: every row on the page is KiwiDesk's, and it is
+already the sub-heading naming whose window Open Settings opens.
+The ⌃⌥K shortcuts panel keeps its own bands, KiwiVision among
+them: it reads a layer as a reference rather than an editor, and
+regrouping it is a ruling of its own.
+:::
 
 **The marked chip is the group under the bar.** A group is
 current once its header has reached the bar and while its card

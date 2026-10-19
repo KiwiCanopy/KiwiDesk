@@ -279,12 +279,11 @@ struct ShortcutsCensusRenderTests {
     /// renderer to publish its mounted containers as data, which
     /// no area does yet — until one does, a deleted card is a
     /// reviewer's catch.
-    @Test("Shortcuts holds exactly the thirteen rendered containers")
+    @Test("Shortcuts holds exactly the eleven rendered containers")
     func shortcutsContainers() {
         #expect(
             Self.containers(of: .shortcuts) == [
-                .kiwiHub, .focus, .moveWindows, .layout, .sizeAndFloat,
-                .kiwiVisionShortcuts, .kiwishelfShortcuts,
+                .showHide, .focus, .moveWindows, .layout, .sizeAndFloat,
                 .openApplications, .layers,
                 .luaBindings, .defaultShortcuts, .gestures, .hyperKey,
             ]
