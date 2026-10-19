@@ -59,6 +59,7 @@
 AutoStartManager (no stored pref)
 UserDefaults.SUAutomaticallyUpdate (Sparkle)
 UserDefaults.appearance
+UserDefaults.general.syncFolder
 UserDefaults.language
 appWide.desktopCue
 appWide.hyperKey

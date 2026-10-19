@@ -71,6 +71,7 @@ struct GeneralSection: View {
             AutoInstallRow(model: model, setting: model.updater.autoInstall)
             refusalSoundRow
             quitPileDepthRow
+            SyncAcrossMacsRow(model: model)
         }
     }
 

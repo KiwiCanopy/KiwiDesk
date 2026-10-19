@@ -8,6 +8,8 @@ enum GeneralKey: String, CaseIterable, Hashable {
     case appearance = "UserDefaults.appearance"
     case refusalSound = "appWide.refusalSound"
     case quitGridTargetDepth = "appWide.quitGridTargetDepth"
+    /// This Mac's sync folder, never stored in the folder (#2324).
+    case syncFolder = "UserDefaults.general.syncFolder"
     /// Lua-only while `grid` is the one strategy (#197).
     case quitLayout = "appWide.quitLayout"
     case startAtLogin = "AutoStartManager (no stored pref)"
@@ -35,6 +37,8 @@ extension GeneralKey {
         case .language:
             return .row(.general, .appliesImmediately, .atRest)
         case .appearance:
+            return .row(.general, .appliesImmediately, .atRest)
+        case .syncFolder:
             return .row(.general, .appliesImmediately, .atRest)
         case .refusalSound, .quitGridTargetDepth:
             return .row(
@@ -82,6 +86,8 @@ extension GeneralKey {
             return .text("general.language.display")
         case .appearance:
             return .text("general.appearance")
+        case .syncFolder:
+            return .text("general.sync", help: "general.sync.help")
         case .refusalSound:
             return .text(
                 "general.refusal_sound",

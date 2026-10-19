@@ -118,9 +118,11 @@ restated `20...80` satisfies on the day it is written.
   read-only, a sheet that grows a commit being a dialog wearing
   the wrong chrome — save a ruled offer whose one commit STAGES a
   multi-row edit into the draft through a closure its host hands
-  it, taking no model (#1870's Hyper move, owner-ruled; a further
-  one is a ruling too). A read-only sheet also answers the keyboard
-  both ways: Return on its one dismissal, and Escape, which a
+  it, taking no model (#1870's Hyper move, owner-ruled), and
+  Compare and Copy, whose two Keeps run through the closures its
+  row hands it (#2324 ruling 14; a further one is a ruling
+  too). A read-only sheet also answers the keyboard both ways:
+  Return on its one dismissal, and Escape, which a
   `Button` cannot carry beside `.defaultAction` so the content
   view takes `.onExitCommand`. `SheetPresentationSeamTests` is the
   register of which files may host one and holds the dismissal

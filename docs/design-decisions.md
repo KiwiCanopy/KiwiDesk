@@ -1317,6 +1317,50 @@ per-profile export is a smaller, separate feature, and
 `ProfileManager` already has the primitives whenever it is
 wanted.
 
+### Compare and Copy keeps one setup, from a sheet that commits
+
+**[Principle]** (#2324 ruling 14)
+
+Sync across Macs copies a whole setup between this Mac and a
+folder the user's sync app shares — one direction at a time, the
+direction the user picks after seeing both sides. It is the
+restore above, run against a folder instead of a backup file, and
+it inherits that entry's answer: the side being replaced goes to
+the Trash, and nothing merges. A merge would make the result
+depend on what both Macs happened to hold, which is the thing a
+person syncing two Macs wants to stop thinking about.
+
+The choice is made in a SHEET that commits, the second ruled
+exception to "a sheet is read-only" after the Hyper move. An
+alert cannot show two dated sides next to each other, and the
+choice is only safe when it is made looking at both — which side
+changed last, and on which Mac. The sheet still takes no model:
+its two Keep buttons run through closures the row hands it.
+Return cancels, since every Keep replaces something. A folder
+holding no setup yet is no comparison: one side exists, so it takes
+one alert — copy this Mac's setup into the folder, Return copying —
+since the sheet's only claim to commit is showing two dated sides
+next to each other.
+
+Unsaved Settings edits fold into that same sheet rather than
+stacking a dialog on it, which #1619's one-dialog rule asks for.
+Keep This Mac's becomes Save and Keep This Mac's and saves through
+the one primary Save first; Keep the Folder's says the edits are
+replaced, the way the restore's confirm names the draft it drops.
+There is no third button that copies the saved setup and keeps
+the edits on screen: afterwards the folder would differ from what
+Settings shows, which is the confusion the feature exists to end.
+
+The folder is remembered on this Mac and never written into it,
+and Desktop bindings stay this Mac's (ruling 12): Keep the
+Folder's carries this Mac's bindings across the replace. A folder
+a newer KiwiDesk wrote refuses both directions, so an older Mac
+never writes over a setup it cannot read (ruling 2).
+
+Trade-off: a copy is whole. Someone who wants one profile from
+the other Mac takes the whole setup or exports that profile by
+hand. Accepted for the same reason the restore accepts it.
+
 ### Feature names: which stay English, which translate
 
 **[Principle]**

@@ -28,6 +28,9 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     /// `DesktopBindingsFile`): kept on this Mac, carried by a
     /// backup as the bundle's own field.
     case desktopBindings
+    /// The stamp a copy into a sync folder writes, naming the Mac
+    /// it came from (#2324 slice 2). Only a sync folder holds one.
+    case syncStamp
 
     /// What a backup carries.
     ///
@@ -47,7 +50,7 @@ public enum ConfigArtifact: CaseIterable, Sendable {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
         case .desktopBindings: return true
-        case .migrationBackups, .machineConfig: return false
+        case .migrationBackups, .machineConfig, .syncStamp: return false
         }
     }
 
@@ -56,7 +59,8 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     /// file never travels (`SetupBundleArtifactTests`).
     public var livesOnThisMac: Bool {
         switch self {
-        case .guiConfig, .profiles, .palettes, .looks: return false
+        case .guiConfig, .profiles, .palettes, .looks, .syncStamp:
+            return false
         case .migrationBackups, .machineConfig, .desktopBindings:
             return true
         }
@@ -76,6 +80,9 @@ public enum ConfigArtifact: CaseIterable, Sendable {
         case .machineConfig:
             return "which Space each of this Mac's Desktops was "
                 + "showing; another Mac's Desktops are not these"
+        case .syncStamp:
+            return "names the Mac that last copied into a sync "
+                + "folder; a backup is no sync folder"
         }
     }
 }
@@ -90,6 +97,7 @@ extension ConfigArtifact {
         case .looks: return "looks.json"
         case .machineConfig: return MachineConfig.fileName
         case .desktopBindings: return DesktopBindingsFile.fileName
+        case .syncStamp: return "sync.json"
         case .profiles, .migrationBackups: return nil
         }
     }
@@ -111,6 +119,10 @@ extension KiwiCore {
         case .migrationBackups: return migrationBackups
         case .machineConfig: return guiConfigStore.machine.url
         case .desktopBindings: return guiConfigStore.bindingsFile.url
+        case .syncStamp:
+            return configDirectory.appendingPathComponent(
+                SyncFolder.stampName
+            )
         }
     }
 

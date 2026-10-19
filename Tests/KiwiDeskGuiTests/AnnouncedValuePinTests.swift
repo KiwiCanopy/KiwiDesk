@@ -135,6 +135,10 @@ struct AnnouncedValuePinTests {
         "JumpPanelView.swift": 1,
         // The Hyper move sheet's title (#1870).
         "HyperMoveSheet.swift": 1,
+        // Compare and Copy's title and side cards, and the Sync
+        // across Macs group heading in General (#2324).
+        "SyncCompareSheet.swift": 2,
+        "SyncAcrossMacsRow.swift": 1,
         // The app picker's two section headers, one site (#2103).
         "AppPickerButton.swift": 1,
         // The diff list's "Live, not saved" heading (#2262).
