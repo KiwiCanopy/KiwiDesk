@@ -170,7 +170,8 @@ struct SettingsRowShapeTests {
                 "Sources/KiwiDesk/Settings/" + file
             )
             #expect(
-                source.contains("SettingsRowShape{"),
+                source.contains("SettingsRowShape{")
+                    || source.contains("SettingsRowShape(labelFills:"),
                 Comment(
                     rawValue:
                         "\(file) no longer builds its rows "
@@ -178,6 +179,60 @@ struct SettingsRowShapeTests {
                 )
             )
         }
+    }
+
+    /// The rows whose compact control trails — menus, steppers
+    /// and action buttons — while sliders and strips keep the axis
+    /// (owner ruling 2026-10-19, #2439). File → how many trailing
+    /// shapes it builds; the one copy of who trails.
+    private static let trailing: [String: Int] = [
+        // Menus.
+        "DropdownRow.swift": 1,
+        "KiwiShelfCard+Font.swift": 1,
+        "SharedLookSection.swift": 1,
+        // Steppers labelled by the shape rather than `StepperRow`.
+        "GeneralSection+AppWide.swift": 1,
+        "KiwiVisionLevelsCard.swift": 2,
+        "KiwiVisionLensOverrides.swift": 2,
+        "SlotCountRow.swift": 1,
+        // Titled action rows (AI page, General ▸ Advanced).
+        "SettingsActionRow.swift": 1,
+    ]
+
+    @Test("menus and steppers trail; the register is exact")
+    func compactControlsTrail() throws {
+        let root = Self.root.appendingPathComponent("Sources/KiwiDesk")
+        var found: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .filter { !$0.isWhitespace }
+            let n = source.occurrences(
+                of: "SettingsRowShape(labelFills:true){"
+            )
+            if n > 0 { found[file.lastPathComponent] = n }
+        }
+        #expect(found == Self.trailing)
+        // The menu row adds no `Spacer` of its own, which is what
+        // pinned the menu to the axis before.
+        let dropdown = try squashed(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "DropdownRow.swift"
+        )
+        #expect(!dropdown.contains("Spacer("))
+        // An inheriting override value trails where its live menu
+        // or stepper does, so ticking the box moves nothing.
+        let chrome = try squashed(
+            "Sources/KiwiDesk/Settings/Components/SpaceOverrides/"
+                + "OverrideControls.swift"
+        )
+        #expect(
+            chrome.occurrences(
+                of: "SettingsRowShape(labelFills:trailingValue){"
+            ) == 1
+        )
+        #expect(chrome.occurrences(of: "trailingValue:true") == 2)
     }
 
     private func squashed(_ path: String) throws -> String {

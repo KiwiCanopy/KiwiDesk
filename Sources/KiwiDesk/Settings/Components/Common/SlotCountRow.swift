@@ -56,7 +56,7 @@ struct SlotCountRow: View {
     }
 
     var body: some View {
-        SettingsRowShape {
+        SettingsRowShape(labelFills: true) {
             SettingsRowLabel(
                 label: label,
                 help: L(

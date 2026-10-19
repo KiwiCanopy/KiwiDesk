@@ -6787,6 +6787,43 @@ the improvements the redesign exists for, or — the inverse failure
 which is the half that stays bound. (Owner ruling 2026-08-02, in
 chat.)
 
+### Wide controls share the label axis; compact ones trail (#2439)
+
+**[Principle]**
+
+**A slider or segmented strip starts on the shared label column
+and fills the row; a menu, a stepper and an action row's buttons
+trail at their natural width against the row's right edge; an
+on/off is a leading checkbox with its label beside it, never a
+switch.** A wide control needs the room the column leaves it, and
+starting every wide control on one line is what makes a section
+comparable at a glance. A compact control on that same column
+leaves a long empty tail after it, and before this ruling the
+stepper already sat trailing while menus did not, so two compact
+kinds sat on two sides. Moving menus to the stepper's side makes
+the split one rule: wide on the axis, compact at the edge. An
+override row's inheriting readout trails wherever its live menu or
+stepper draws, so ticking the OVERRIDE box moves nothing.
+
+Two alternatives were weighed. Moving everything trailing, as
+System Settings does, changed every row type, gave segmented
+controls and sliders a width rule of their own, and turned every
+toggle into a switch. Moving the stepper onto the axis instead
+kept one column but left menus and steppers with the long tail.
+Checkboxes stay leading rather than becoming trailing switches:
+in a per-Space override row a switch would sit right beside the
+OVERRIDE checkbox, two toggles meaning different things in one
+row, and switch-alone-but-checkbox-in-a-list is a second on/off
+control to learn. The stated cost: a card that mixes row kinds
+puts controls on both sides — checkboxes left, menus and steppers
+right, sliders and strips between — which is not System Settings'
+look (the principle above says it need not be). The 900 pt row
+breakpoint and the 980 pt content cap are unchanged: below 900 a
+trailing row stacks like every other, and at full screen a menu
+sits as far from its label as the stepper already did. Owner
+ruling 2026-10-19, `SettingsRowShapeTests` ▸
+`compactControlsTrail`, `ToggleStyleConventionTests`.
+
 ### An action lives on the card whose values it writes
 
 **[Principle]**

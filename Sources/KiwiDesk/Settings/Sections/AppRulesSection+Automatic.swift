@@ -9,7 +9,7 @@ extension AppRulesSection {
             SettingsCatalog.appRules.automaticList,
             caption: AutoFloatWords.caption
         ) {
-            AutoFloatSwitchRow(model: model, showsReach: showsReach)
+            AutoFloatToggleRow(model: model, showsReach: showsReach)
             if !automaticOn, !tileApps.isEmpty {
                 Text(AutoFloatWords.offNote)
                     .font(.caption)
@@ -77,8 +77,9 @@ extension AppRulesSection {
     }
 }
 
-/// The "Float windows automatically" switch and its "Applies to".
-struct AutoFloatSwitchRow: View {
+/// The "Float windows automatically" checkbox and its "Applies
+/// to" — a leading checkbox like every on/off (#2439).
+struct AutoFloatToggleRow: View {
     @ObservedObject var model: SettingsModel
     let showsReach: Bool
 
@@ -91,8 +92,7 @@ struct AutoFloatSwitchRow: View {
                 AutoFloatWords.title,
                 isOn: $model.config.floatAutomatically
             )
-            .toggleStyle(.switch)
-            .controlSize(.small)
+            .toggleStyle(.checkbox)
             .accessibilityValue(
                 AutoFloatWords.value(model.config.floatAutomatically)
             )

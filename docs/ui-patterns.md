@@ -120,7 +120,9 @@ when any of: five or more choices; dynamic or user-generated
 choices; long, explanatory, or localization-risk labels; or
 a constrained repeated surface where showing every choice
 would crowd or truncate. A binary — on/off, where off means the
-thing is absent — is a **toggle**, never two segments; two named
+thing is absent — is a **toggle**, never two segments, drawn as a
+leading checkbox with its label beside it and never a switch
+(#2439); two named
 peer behaviours, neither an "off", are a pick-one under this rule
 (App glyph style; Space history, #1655). Fixed editor-navigation tabs (the icon picker's
 Emoji / Symbol / Glyph strip) may exceed four — they switch the
@@ -650,28 +652,29 @@ mid-cluster to dodge adding a divider. All five layout editors
 place new-window placement last among their schematic-tied
 rows (#291).
 
-**Rows share one label axis and one readout column.** Every
-labeled control row (slider, segmented picker, dropdown) puts
-its label in the same fixed-width column
-(`SettingsMetrics.labelColumn`), so controls start on one line
-across sections; slider readouts share one trailing column the
-same way. Rows read the column from the environment
+**Wide controls share one label axis; compact controls trail
+(#2439).** Every labeled slider and segmented picker puts its
+label in the same fixed-width column
+(`SettingsMetrics.labelColumn`), so those controls start on one
+line across sections; slider readouts share one trailing column
+the same way. A menu, a stepper and an action row's buttons
+instead trail at their natural width against the row's right
+edge (`SettingsRowShape(labelFills: true)`), and an override
+row's inheriting readout trails wherever its live control does. Rows read the column from the environment
 (`\.settingsLabelColumn`), and `OverrideChrome` narrows it once
 (`overrideLabelColumn`, paying for its checkbox prefix), so a
 shared row dropped into override chrome lands on the plain
-rows' control axis by construction. Numeric steppers are the
-exception: label leading, then an **editable monospaced
-field** plus arrows trailing (the native System Settings
-numeric layout) — a value embedded in the label string
+rows' control axis by construction. A numeric stepper is an
+**editable monospaced field** plus arrows — a value embedded in the label string
 ("Columns: 3") or a plain readout beside arrows reads as
 passive, so the value is a real `TextField` that commits and
 clamps on Return / focus loss, with an optional unit `suffix`
 ("ms") between the field and the arrows. The color grid is the
 other exception: its two-column `HexColorField` layout keeps
 its own label width (`colorLabelColumn`), because the shared
-axis would misalign the grid's second column. Dropdowns ride
-the axis via `DropdownRow` and take `.controlSize(.large)` so a
-menu button's height sits with the capsule tracks around it.
+axis would misalign the grid's second column. Dropdowns go
+through `DropdownRow` and take `.controlSize(.large)` so a menu
+button's height sits with the capsule tracks around it.
 Within a section, a `Divider` separates geometry controls from
 the behavior dropdowns (overflow, new-window placement).
 
@@ -1239,8 +1242,8 @@ panel's "Changed in this draft" list leaves these rows to the
 pill.
 
 **Rows go two-line below 900 pt.** A labelled row's control
-normally hangs off the shared 210 pt label axis; below the row
-breakpoint the label moves above it and the control starts at
+normally hangs off the shared 210 pt label axis or trails at the
+row's edge; below the row breakpoint the label moves above it and the control starts at
 the row's leading edge with the whole width in front of it,
 every row in the window at once, so the alignment that makes a
 section scannable is traded whole rather than per-row. Nothing

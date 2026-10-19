@@ -3,7 +3,8 @@ import SwiftUI
 
 /// Standard settings dropdown row: `labelsHidden` drops a `.menu`
 /// picker's AX title, so the row NAMES the control and `spokenValue`
-/// gives the choice back as the VALUE (`AnnouncedValueTests`).
+/// gives the choice back as the VALUE (`AnnouncedValueTests`). The
+/// menu trails at its natural width, like the stepper (#2439).
 struct DropdownRow<P: View, T: View>: View {
     let label: String
     /// Selected option's title, spoken as the value. Required: an
@@ -17,7 +18,7 @@ struct DropdownRow<P: View, T: View>: View {
     @ViewBuilder var trailing: T
 
     var body: some View {
-        SettingsRowShape {
+        SettingsRowShape(labelFills: true) {
             SettingsRowLabel(label: label, help: help)
         } control: {
             HStack {
@@ -29,10 +30,10 @@ struct DropdownRow<P: View, T: View>: View {
                     .pickerStyle(.menu)
                     .neutralMenuLabel()
                     .controlSize(.large)
+                    .fixedSize()
                     .accessibilityLabel(label)
                     .accessibilityValue(spokenValue)
                 trailing
-                Spacer()
             }
         }
     }

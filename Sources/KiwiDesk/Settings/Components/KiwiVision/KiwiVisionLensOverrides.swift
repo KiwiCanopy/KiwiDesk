@@ -71,9 +71,10 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: plain.visionDim),
             inherited: (label, Self.percent(plain.visionDim)),
-            inheritsName: defaultName
+            inheritsName: defaultName,
+            trailingValue: true
         ) {
-            SettingsRowShape {
+            SettingsRowShape(labelFills: true) {
                 SettingsRowLabel(label: label, help: nil)
             } control: {
                 StepperRow(
@@ -98,9 +99,10 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, Self.milliseconds(global)),
-            inheritsName: defaultName
+            inheritsName: defaultName,
+            trailingValue: true
         ) {
-            SettingsRowShape {
+            SettingsRowShape(labelFills: true) {
                 SettingsRowLabel(label: label, help: nil)
             } control: {
                 StepperRow(
@@ -126,7 +128,8 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, KiwiVisionLevelsCard.curveTitle(global)),
-            inheritsName: defaultName
+            inheritsName: defaultName,
+            trailingValue: true
         ) {
             DropdownRow(
                 label: label,
@@ -178,7 +181,8 @@ struct KiwiVisionLensOverrides: View {
             inherited: (
                 label, KiwiVisionAppearanceCard.title(plain.visionAppearance)
             ),
-            inheritsName: defaultName
+            inheritsName: defaultName,
+            trailingValue: true
         ) {
             DropdownRow(
                 label: label,

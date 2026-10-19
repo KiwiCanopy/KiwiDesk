@@ -95,9 +95,6 @@ struct StepperRow: View {
                     suffix.map { "\(value) \($0)" }
                         ?? "\(value)"
                 )
-            if labelHidden {
-                Spacer()
-            }
         }
         // Keep the field in step with arrow taps and external
         // changes — but never mid-edit, or a background write
