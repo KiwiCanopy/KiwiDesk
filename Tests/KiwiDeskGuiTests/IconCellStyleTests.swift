@@ -27,21 +27,13 @@ struct IconCellStyleTests {
         )
     }
 
-    /// The mark is its own layer, so a press never
-    /// unmarks the chosen icon (#1173).
+    /// The mark is its own layer, so a press never unmarks the
+    /// chosen icon (#1173), and the chip ladder's one wash.
     @Test("the mark rides above the press layer")
     func markLayer() throws {
-        #expect(
-            IconCellStyle.markFill(false)
-                == SettingsTheme.accent.opacity(0)
-        )
-        #expect(
-            IconCellStyle.markFill(true)
-                == SettingsTheme.accent.opacity(
-                    SettingsTheme.jumpChipMarkedOpacity
-                )
-        )
         let face = try squashed("IconCellStyle.swift")
+        // One marked wash: the chip ladder's, never a copy.
+        #expect(face.contains("ButtonChipStyle.markFill(marked)"))
         let pointer = try #require(
             face.range(of: "shape.fill(IconCellStyle.fill(")
         )
@@ -51,7 +43,7 @@ struct IconCellStyleTests {
         #expect(pointer.lowerBound < mark.lowerBound)
         // A tile, not a chip: an edge on a 40 pt grid reads hard.
         #expect(!face.contains("strokeBorder"))
-        // No hover lift: this popover's hover tracking lags.
+        // No hover lift until the popover's hover works (#2440).
         #expect(!face.contains(".onHover"))
     }
 

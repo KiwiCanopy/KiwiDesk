@@ -125,13 +125,13 @@ struct IconPicker: View {
         .padding(12)
         .frame(width: 340, height: 400)
         // The search card's glass, `.regular` and untinted
-        // (#1295), in place of the popover's own material.
+        // (#1295, #2399); the fallback keeps a popover's material.
         .presentationBackground {
             Color.clear.glassChrome(
                 in: Rectangle(),
                 enabled: true,
                 variant: .regular,
-                fallback: AnyShapeStyle(SettingsTheme.card)
+                fallback: AnyShapeStyle(.regularMaterial)
             )
         }
     }

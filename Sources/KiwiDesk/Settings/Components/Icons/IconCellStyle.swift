@@ -4,8 +4,8 @@ import SwiftUI
 /// a picker tile, not a chip — sized to the grid column it is placed
 /// in rather than padded past it, the press step on a press and the
 /// chosen icon's accent mark on a layer of its own above it (#1173).
-/// No hover lift: hover tracking in this popover lags the pointer,
-/// so a lift lands on the wrong cell. No animation.
+/// No hover lift until this popover's hover tracks the pointer
+/// (#2440). No animation.
 struct IconCellStyle: ButtonStyle {
     let marked: Bool
 
@@ -18,12 +18,9 @@ struct IconCellStyle: ButtonStyle {
         ButtonChipStyle.fill(pressed: pressed, hovered: false)
     }
 
-    /// The marking's layer, over the press — the jump chip's
-    /// marked strength.
+    /// The marking's layer, over the press — the chip ladder's.
     static func markFill(_ marked: Bool) -> Color {
-        SettingsTheme.accent.opacity(
-            marked ? SettingsTheme.jumpChipMarkedOpacity : 0
-        )
+        ButtonChipStyle.markFill(marked)
     }
 
     static let radius: CGFloat = 6

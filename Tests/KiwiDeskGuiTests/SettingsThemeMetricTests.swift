@@ -52,7 +52,7 @@ struct SettingsThemeMetricTests {
         "panelWidth": "SettingsDetailPanel.swift",
         "contentMaxWidth": "SettingsView+Detail.swift",
         "searchNoticeFillOpacity": "SettingsSearchNotice.swift",
-        "jumpChipMarkedOpacity": "ShortcutsJumpBar.swift",
+        "chipMarkedOpacity": "ButtonChipStyle.swift",
         "highlightWashOpacity": "UpdateNotesGroups.swift",
     ]
 
