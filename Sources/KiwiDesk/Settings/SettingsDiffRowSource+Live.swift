@@ -16,16 +16,11 @@ extension SettingsDiffRowSource {
         for model: SettingsModel,
         leaving edited: [SettingKey]
     ) -> [SettingsDiffRow] {
-        guard let unsaved = model.unsavedLive else { return [] }
-        var saved = model.cleanConfig
-        saved.settings = unsaved.saved
-        var live = model.cleanConfig
-        live.settings = unsaved.live
-        let diff = SettingsDraftDiff.between(
-            config: live,
-            cleanConfig: saved
-        )
+        guard let (saved, live, diff) = liveDiff(for: model) else {
+            return []
+        }
         let skip = Set(edited)
+        guard let unsaved = model.unsavedLive else { return [] }
         let owners = leafOwners(unsaved, saved: saved)
         return SettingKey.summarized(
             diff.changedSettings.filter { !skip.contains($0) },
@@ -45,6 +40,28 @@ extension SettingsDiffRowSource {
                 return row
             }
         }
+    }
+
+    /// The settings the live rows narrate, before the draft's own
+    /// edits are left out.
+    static func liveKeys(for model: SettingsModel) -> [SettingKey] {
+        liveDiff(for: model)?.2.changedSettings ?? []
+    }
+
+    /// Saved and live as configs, and the diff between them.
+    private static func liveDiff(
+        for model: SettingsModel
+    ) -> (GuiConfig, GuiConfig, SettingsDraftDiff)? {
+        guard let unsaved = model.unsavedLive else { return nil }
+        var saved = model.cleanConfig
+        saved.settings = unsaved.saved
+        var live = model.cleanConfig
+        live.settings = unsaved.live
+        let diff = SettingsDraftDiff.between(
+            config: live,
+            cleanConfig: saved
+        )
+        return (saved, live, diff)
     }
 
     /// Which unsaved leaves each row carries, by row id: a leaf

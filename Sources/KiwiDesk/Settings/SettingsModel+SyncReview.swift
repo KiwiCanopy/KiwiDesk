@@ -136,8 +136,10 @@ extension SettingsModel {
             in: config,
             apart: asked
         )
+        // A taken setting the draft edited since is the draft's.
         let taken = SettingKey.summarized(
-            sync.taken.subtracting(asked).sorted { $0.id < $1.id },
+            sync.taken.subtracting(asked).subtracting(edited)
+                .sorted { $0.id < $1.id },
             in: cleanConfig,
             apart: asked
         )
@@ -166,7 +168,11 @@ extension SettingsModel {
                 new: side
             ).first?.newValue ?? ""
         }
-        let members = SettingKey.summaryGroups[master] ?? []
+        // Only an axis that differs is listed member by member.
+        let leaves = SettingsDraftDiff.leaves(of: side)
+        let members = (SettingKey.summaryAxes[master] ?? [])
+            .filter { Set($0.map { leaves[$0.id] }).count > 1 }
+            .joined()
         return SyncText.mixed(
             members.compactMap { member in
                 SettingsValueReadout.rows(

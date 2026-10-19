@@ -73,6 +73,55 @@ struct SyncReviewCountTests {
         #expect(review.yourOthers == 0)
     }
 
+    /// A question asked again on a second arrival keeps the
+    /// settings its writer covered.
+    @Test("a re-asked question keeps what it covered")
+    func reaskKeepsCovers() throws {
+        let (core, model) = try setup()
+        model.config.settings.spaceBarStyle.edge = .bottom
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["S": .left]
+        model.adoptSyncedChange(change)
+        core.tiler.settings.spaceBarStyle.edge = .left
+        model.adoptSyncedChange(change)
+        #expect(model.reviewSyncConflicts())
+        let review = try #require(model.sync.review)
+        #expect(review.rows.count == 1, "\(review.rows.map(\.id))")
+        #expect(review.yourOthers == 0)
+    }
+
+    /// A setting taken in and edited by the draft since is the
+    /// draft's edit, never also "taken in".
+    @Test("a taken setting edited since counts once, as yours")
+    func takenThenEditedIsYours() throws {
+        let (core, model) = try setup()
+        model.config.modeCycle = [.stack, .monocle]
+        try theirs(core) {
+            $0.modeCycle = [.bsp, .stack]
+            $0.spaceHistory = .allScreens
+        }
+        model.adoptSyncedChange(change)
+        model.config.spaceHistory = .perScreen
+        #expect(model.reviewSyncConflicts())
+        let review = try #require(model.sync.review)
+        #expect(review.taken == 0)
+        #expect(review.yourOthers == 1)
+    }
+
+    /// A mixed minimum size lists only the axis that differs.
+    @Test("a mixed group lists only its differing axis")
+    func mixedListsOnlyItsAxis() throws {
+        LocalizationManager.shared.select("en")
+        let (core, model) = try setup()
+        model.setMinSize(420, axis: .width, for: nil)
+        core.tiler.settings.minWindowSizes.stack.width = 250
+        model.adoptSyncedChange(change)
+        #expect(model.reviewSyncConflicts())
+        let row = try #require(model.sync.review?.rows.first)
+        #expect(row.key == .behaviour(.minWindowSize))
+        // Six widths listed, no height.
+        #expect(row.theirs.components(separatedBy: ": ").count == 7)
+    }
+
     /// A conflict the sheet never showed stays for the next Save.
     @Test("an answer settles only the conflicts it showed")
     func answerKeepsUnshown() throws {
@@ -121,6 +170,30 @@ struct SyncReviewCountTests {
                     .gaps(.outerRight),
                 ]
         )
+    }
+
+    /// The draft's row never folds a group whose other edges the
+    /// live rows list.
+    @Test("a draft group with live edges lists apart")
+    func draftFoldStandsApartFromLive() {
+        let model = makeTestModel()
+        var saved = model.cleanConfig.settings
+        saved.gapsGlobal.outer = .init(top: 2, bottom: 2, left: 2, right: 2)
+        var live = saved
+        live.gapsGlobal.outer.top = 9
+        live.gapsGlobal.outer.bottom = 9
+        model.cleanConfig.settings = live
+        model.config = model.cleanConfig
+        model.config.settings.gapsGlobal.outer.left = 9
+        model.config.settings.gapsGlobal.outer.right = 9
+        model.unsavedLive = UnsavedLiveSettings(
+            saved: saved,
+            live: live,
+            leaves: [:]
+        )
+        let draftKeys = SettingsDiffRowSource.rows(for: model)
+            .filter { $0.section != .live }.map(\.key)
+        #expect(draftKeys == [.gaps(.outerLeft), .gaps(.outerRight)])
     }
 
     /// The pick runs the footer's Save, so the sheet names it the

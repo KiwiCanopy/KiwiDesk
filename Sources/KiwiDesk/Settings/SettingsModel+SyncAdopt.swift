@@ -77,11 +77,17 @@ extension SettingsModel {
             return mine.contains(key)
         }
         func ask(_ key: SettingKey, yours: GuiConfig) {
+            // A question asked again keeps what it covered before.
+            let covered = conflicts.first { $0.key == key }?.covers ?? []
             conflicts.removeAll { $0.key == key }
-            conflicts.append(
-                conflict(key, yours: yours, theirs: theirs, base: base)
-                    .with(mac: change.mac)
-            )
+            var question = conflict(
+                key,
+                yours: yours,
+                theirs: theirs,
+                base: base
+            ).with(mac: change.mac)
+            question.covers = covered
+            conflicts.append(question)
         }
         for key in mine where incoming.contains(key) {
             ask(key, yours: yours)
