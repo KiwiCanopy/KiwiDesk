@@ -111,24 +111,17 @@ struct ShortcutsJumpPairingTests {
         for (_, keys) in witnesses {
             #expect(!keys.isEmpty)
         }
-        // A rows view a card mounts walks the list it stands for.
-        for (rows, list) in [
-            ("KiwiDeskKeyRows", "openApplicationsKiwiDesk"),
-            ("KiwiHubKeyRows", "kiwiHubAtRest"),
-            ("KiwiShelfKeyRows", "kiwishelfAtRest"),
-            ("KiwiVisionKeyRows", "kiwiVisionAtRest"),
-        ] {
-            let found = declarations.filter {
-                $0.hasPrefix("struct\(rows):")
-            }
-            #expect(found.count == 1, "\(rows)")
-            #expect(
-                found.allSatisfy {
-                    $0.contains("ShortcutsRowOrder.\(list)")
-                },
-                "\(rows)"
-            )
+        let kiwiDeskRows = declarations.filter {
+            $0.hasPrefix("structKiwiDeskKeyRows:")
         }
+        #expect(kiwiDeskRows.count == 1)
+        #expect(
+            kiwiDeskRows.allSatisfy {
+                $0.contains("ShortcutsRowOrder.openApplicationsKiwiDesk")
+            }
+        )
+        // Show & hide's rows views walk their lists:
+        // `ShowHideCensusRenderTests` ▸ `rowsAreAllDrawn`.
         for group in ShortcutsJumpGroup.allCases {
             let name = try #require(Self.spelling(of: group))
             let title = "SettingsCatalog.shortcuts.\(name)"

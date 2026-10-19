@@ -56,13 +56,42 @@ struct ShowHideCensusRenderTests {
         .joined()
     }
 
-    /// Each rows view walks its WHOLE list as it stands.
-    @Test("each sub-group draws every row")
+    /// Each needle once, and in order.
+    private func expectInOrder(
+        _ needles: [String],
+        in text: String,
+        _ what: String
+    ) {
+        var cursor = text.startIndex
+        for needle in needles {
+            #expect(text.occurrences(of: needle) == 1, "\(what): \(needle)")
+            guard
+                let hit = text.range(
+                    of: needle,
+                    range: cursor..<text.endIndex
+                )
+            else {
+                Issue.record("\(what): \(needle) out of order")
+                return
+            }
+            cursor = hit.upperBound
+        }
+    }
+
+    /// Each rows view draws its product's heading, anchors that
+    /// product's search hit on it, then walks its WHOLE list.
+    @Test("each sub-group draws its heading and every row")
     func rowsAreAllDrawn() throws {
-        for (rows, list) in [
-            ("KiwiHubKeyRows", "kiwiHubAtRest"),
-            ("KiwiShelfKeyRows", "kiwishelfAtRest"),
-            ("KiwiVisionKeyRows", "kiwiVisionAtRest"),
+        for (rows, control, follows, list) in [
+            ("KiwiHubKeyRows", "kiwiHubKeys", "", "kiwiHubAtRest"),
+            (
+                "KiwiShelfKeyRows", "kiwishelfKeys",
+                ",followsGroup:true", "kiwishelfAtRest"
+            ),
+            (
+                "KiwiVisionKeyRows", "kiwiVisionKeys",
+                ",followsGroup:true", "kiwiVisionAtRest"
+            ),
         ] {
             let body = try #require(
                 SourceScan.declarationBody(
@@ -73,17 +102,26 @@ struct ShowHideCensusRenderTests {
                 ),
                 "\(rows)"
             )
-            #expect(
-                body.contains("ForEach(ShortcutsRowOrder.\(list),id:\\.id)"),
-                "\(rows)"
+            let catalog = "SettingsCatalog.shortcuts.\(control)"
+            expectInOrder(
+                [
+                    "SettingsGroupHeading(title:\(catalog).text"
+                        + "\(follows))",
+                    ".searchAnchored(\(catalog))",
+                    "ForEach(ShortcutsRowOrder.\(list),id:\\.id)",
+                ],
+                in: body,
+                rows
             )
         }
     }
 
-    /// One card, mounted once, each sub-group under its own
-    /// heading in the ruled order: KiwiHub, KiwiShelf, then
-    /// KiwiVision, which grows a row per lens and so goes last.
-    @Test("the card mounts its sub-groups in order, under headings")
+    /// One card, mounted once, its sub-groups in the ruled order:
+    /// KiwiHub, KiwiShelf, then KiwiVision, which grows a row per
+    /// lens and so goes last. Which product a key sits under is
+    /// held by the three lists alone — the tier test pins their
+    /// union — the residue Open applications ▸ KiwiDesk shares.
+    @Test("the card mounts its sub-groups in order")
     func subGroupsInOrder() throws {
         let card = try #require(
             SourceScan.declarationBody(
@@ -93,32 +131,16 @@ struct ShowHideCensusRenderTests {
                 )
             )
         )
-        let needles = [
-            "SettingsSection(SettingsCatalog.shortcuts.showHideKeys)",
-            "heading(SettingsCatalog.shortcuts.kiwiHubKeys)",
-            ".searchAnchored(SettingsCatalog.shortcuts.kiwiHubKeys)",
-            "KiwiHubKeyRows(",
-            "heading(SettingsCatalog.shortcuts.kiwishelfKeys,follows:true)",
-            ".searchAnchored(SettingsCatalog.shortcuts.kiwishelfKeys)",
-            "KiwiShelfKeyRows(",
-            "heading(SettingsCatalog.shortcuts.kiwiVisionKeys,follows:true)",
-            ".searchAnchored(SettingsCatalog.shortcuts.kiwiVisionKeys)",
-            "KiwiVisionKeyRows(",
-        ]
-        var cursor = card.startIndex
-        for needle in needles {
-            #expect(card.occurrences(of: needle) == 1, "\(needle)")
-            guard
-                let hit = card.range(
-                    of: needle,
-                    range: cursor..<card.endIndex
-                )
-            else {
-                Issue.record("\(needle) out of order")
-                return
-            }
-            cursor = hit.upperBound
-        }
+        expectInOrder(
+            [
+                "SettingsSection(SettingsCatalog.shortcuts.showHideKeys)",
+                "KiwiHubKeyRows(",
+                "KiwiShelfKeyRows(",
+                "KiwiVisionKeyRows(",
+            ],
+            in: card,
+            "ShowHideGroup"
+        )
         let section = try squeezed("Sections/ShortcutsSection.swift")
         #expect(section.occurrences(of: "ShowHideGroup(") == 1)
     }

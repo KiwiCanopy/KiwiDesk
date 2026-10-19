@@ -10,6 +10,11 @@ struct KiwiVisionKeyRows: View {
     let expander: ShortcutsFamilyRows
 
     var body: some View {
+        SettingsGroupHeading(
+            title: SettingsCatalog.shortcuts.kiwiVisionKeys.text,
+            followsGroup: true
+        )
+        .searchAnchored(SettingsCatalog.shortcuts.kiwiVisionKeys)
         ForEach(ShortcutsRowOrder.kiwiVisionAtRest, id: \.id) { key in
             KeybindingFamilyRows(
                 model: model,

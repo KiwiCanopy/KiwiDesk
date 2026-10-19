@@ -10,6 +10,11 @@ struct KiwiShelfKeyRows: View {
     let expander: ShortcutsFamilyRows
 
     var body: some View {
+        SettingsGroupHeading(
+            title: SettingsCatalog.shortcuts.kiwishelfKeys.text,
+            followsGroup: true
+        )
+        .searchAnchored(SettingsCatalog.shortcuts.kiwishelfKeys)
         ForEach(ShortcutsRowOrder.kiwishelfAtRest, id: \.id) { key in
             row(key)
         }

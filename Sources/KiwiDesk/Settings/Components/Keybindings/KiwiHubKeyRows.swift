@@ -9,6 +9,11 @@ struct KiwiHubKeyRows: View {
     let expander: ShortcutsFamilyRows
 
     var body: some View {
+        // The in-card heading idiom, heading trait included.
+        SettingsGroupHeading(
+            title: SettingsCatalog.shortcuts.kiwiHubKeys.text
+        )
+        .searchAnchored(SettingsCatalog.shortcuts.kiwiHubKeys)
         ForEach(ShortcutsRowOrder.kiwiHubAtRest, id: \.id) { key in
             anchored(key) {
                 KeybindingFamilyRows(
