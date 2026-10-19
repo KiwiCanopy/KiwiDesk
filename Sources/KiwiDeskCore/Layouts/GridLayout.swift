@@ -8,96 +8,141 @@ import CoreGraphics
 public struct GridLayout: LayoutSystem {
     public init() {}
 
-    public func calculateGeometry(
-        for windows: [WindowID],
-        in context: LayoutContext
-    ) -> [WindowID: CGRect] {
-        let usable = context.usable
-        let count = windows.count
-        guard count > 0 else { return [:] }
+    /// What the grid draws for `count` windows: its dimensions,
+    /// fill order and how many cells it lays — the last holding
+    /// the overflow pile when `piles`. Nil where an equal cell
+    /// would fall under `min_window_size`, which cascades the
+    /// whole Space instead. The resize reads this too (#763), so
+    /// a press finds a window's tracks where they were drawn.
+    public struct Shape: Equatable, Sendable {
+        public let columns: Int
+        public let rows: Int
+        public let rowMajor: Bool
+        public let fillLast: Bool
+        /// Cells laid: the window count, or the capacity once it
+        /// overflows.
+        public let cells: Int
+        public let piles: Bool
+    }
 
+    public static func shape(
+        count: Int,
+        in context: LayoutContext
+    ) -> Shape? {
+        guard count > 0 else { return nil }
         let params = context.grid
         let gapH = context.gaps.inner.horizontal
         let gapV = context.gaps.inner.vertical
-        let cap = capDimensions(
+        let cap = GridLayout().capDimensions(
             params: params,
-            usable: usable,
+            usable: context.usable,
             gapH: gapH,
             gapV: gapV,
             minSize: context.minWindowSize
         )
-        let (columns, rows) = Self.dimensions(
+        let (columns, rows) = dimensions(
             count: count,
             params: params,
             cap: cap
         )
-
-        let size = Self.cellSize(
+        let size = cellSize(
             columns: columns,
             rows: rows,
-            in: usable,
+            in: context.usable,
             gapH: gapH,
             gapV: gapV
         )
         let floor = context.minWindowSize
-        if size.width < floor.width || size.height < floor.height {
+        guard size.width >= floor.width, size.height >= floor.height
+        else { return nil }
+        let capacity = columns * rows
+        if count > capacity {
+            return Shape(
+                columns: columns,
+                rows: rows,
+                rowMajor: true,
+                fillLast: false,
+                cells: capacity,
+                piles: true
+            )
+        }
+        // Both grid types honor arrangement order (#217).
+        return Shape(
+            columns: columns,
+            rows: rows,
+            rowMajor: params.splitDirection == .horizontal,
+            fillLast: params.type == .dynamic && params.fillEmptyCells,
+            cells: count,
+            piles: false
+        )
+    }
+
+    /// `windows` in the order the grid lays them: a sticky window
+    /// keeps a fully-tiled cell ahead of the pile (#414 v2).
+    public static func laidOrder(
+        _ windows: [WindowID],
+        shape: Shape,
+        sticky: Set<WindowID>
+    ) -> [WindowID] {
+        guard shape.piles else { return windows }
+        return Array(
+            OverlapStack.stickyExempt(
+                windows,
+                tiled: shape.cells - 1,
+                sticky: sticky
+            )
+        )
+    }
+
+    public func calculateGeometry(
+        for windows: [WindowID],
+        in context: LayoutContext
+    ) -> [WindowID: CGRect] {
+        guard !windows.isEmpty else { return [:] }
+        guard let shape = Self.shape(count: windows.count, in: context)
+        else {
             return OverlapStack.frames(
                 for: windows,
-                in: usable,
+                in: context.usable,
                 minSize: context.minWindowSize
             )
         }
-
-        var result: [WindowID: CGRect] = [:]
-        let capacity = columns * rows
-
-        if count > capacity {
-            let cells = Self.cellFrames(
-                count: capacity,
-                columns: columns,
-                rows: rows,
-                in: usable,
-                gapH: gapH,
-                gapV: gapV,
-                rowMajor: true,
-                fillLast: false
-            )
-            // Sticky windows preserve a fully-tiled cell (#414 v2).
-            let ordered = OverlapStack.stickyExempt(
-                windows,
-                tiled: capacity - 1,
-                sticky: context.sticky
-            )
-            for (index, window)
-                in ordered[..<(capacity - 1)].enumerated()
-            {
-                result[window] = cells[index]
-            }
-            result.merge(
-                OverlapStack.frames(
-                    for: ordered[(capacity - 1)...],
-                    in: cells[capacity - 1],
-                    minSize: context.minWindowSize
-                )
-            ) { _, new in new }
-            return result
-        }
-
-        // Both grid types honor arrangement order (#217).
-        let cells = Self.cellFrames(
-            count: count,
-            columns: columns,
-            rows: rows,
-            in: usable,
-            gapH: gapH,
-            gapV: gapV,
-            rowMajor: params.splitDirection == .horizontal,
-            fillLast: params.type == .dynamic
-                && params.fillEmptyCells
+        let ordered = Self.laidOrder(
+            windows,
+            shape: shape,
+            sticky: context.sticky
         )
-        for (window, frame) in zip(windows, cells) {
-            result[window] = frame
+        let tracks = Self.trackLengths(
+            windows: ordered,
+            shape: shape,
+            context: context
+        )
+        let cells = Self.cellFrames(
+            count: shape.cells,
+            widths: tracks.widths,
+            heights: tracks.heights,
+            in: context.usable,
+            gapH: context.gaps.inner.horizontal,
+            gapV: context.gaps.inner.vertical,
+            rowMajor: shape.rowMajor,
+            fillLast: shape.fillLast
+        )
+        guard shape.piles else {
+            return Dictionary(
+                uniqueKeysWithValues: zip(ordered, cells)
+            )
         }
+        var result: [WindowID: CGRect] = [:]
+        for (index, window) in ordered[..<(shape.cells - 1)].enumerated() {
+            result[window] = cells[index]
+        }
+        result.merge(
+            OverlapStack.frames(
+                for: ordered[(shape.cells - 1)...],
+                in: cells[shape.cells - 1],
+                minSize: context.minWindowSize
+            )
+        ) { _, new in new }
         return result
     }
 
@@ -115,48 +160,6 @@ public struct GridLayout: LayoutSystem {
             height: (region.height - gapV * CGFloat(rows - 1))
                 / CGFloat(rows)
         )
-    }
-
-    /// The first `count` cells of a `columns`×`rows` grid over
-    /// `region`, in arrangement order — row by row when
-    /// `rowMajor`, else column by column — the last spanning
-    /// the rest of its row (column) when `fillLast`
-    /// (`fill_empty_cells`). The quit grid lays its cells
-    /// through this too, so the two shapes cannot drift (#1709).
-    static func cellFrames(
-        count: Int,
-        columns: Int,
-        rows: Int,
-        in region: CGRect,
-        gapH: CGFloat,
-        gapV: CGFloat,
-        rowMajor: Bool,
-        fillLast: Bool
-    ) -> [CGRect] {
-        let size = cellSize(
-            columns: columns,
-            rows: rows,
-            in: region,
-            gapH: gapH,
-            gapV: gapV
-        )
-        return (0..<count).map { index in
-            let col = rowMajor ? index % columns : index / rows
-            let row = rowMajor ? index / columns : index % rows
-            let fills = fillLast && index == count - 1
-            let colSpan = fills && rowMajor ? columns - col : 1
-            let rowSpan = fills && !rowMajor ? rows - row : 1
-            return CGRect(
-                x: region.minX
-                    + CGFloat(col) * (size.width + gapH),
-                y: region.minY
-                    + CGFloat(row) * (size.height + gapV),
-                width: size.width * CGFloat(colSpan)
-                    + gapH * CGFloat(colSpan - 1),
-                height: size.height * CGFloat(rowSpan)
-                    + gapV * CGFloat(rowSpan - 1)
-            )
-        }
     }
 
     /// Computes cell capacity ceiling under auto-size or fixed parameters.

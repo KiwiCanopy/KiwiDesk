@@ -11,6 +11,8 @@ public struct GridOverride: Sendable, Equatable {
     public var columns: Int?
     public var rows: Int?
     public var autoSize: Bool?
+    public var columnWeights: [Double]?
+    public var rowWeights: [Double]?
 
     public init() {}
 
@@ -27,6 +29,8 @@ public struct GridOverride: Sendable, Equatable {
         if let columns { out.columns = columns }
         if let rows { out.rows = rows }
         if let autoSize { out.autoSize = autoSize }
+        if let columnWeights { out.columnWeights = columnWeights }
+        if let rowWeights { out.rowWeights = rowWeights }
         // Merged params hold no override map (see
         // ScrollingOverride).
         out.override = [:]
@@ -38,6 +42,7 @@ public struct GridOverride: Sendable, Equatable {
         type == nil && fillEmptyCells == nil
             && splitDirection == nil && columns == nil
             && rows == nil && autoSize == nil
+            && columnWeights == nil && rowWeights == nil
     }
 }
 
@@ -49,6 +54,8 @@ extension GridOverride: Codable {
         case columns
         case rows
         case autoSize = "auto_size"
+        case columnWeights = "column_weights"
+        case rowWeights = "row_weights"
     }
 
     public init(from decoder: Decoder) throws {
@@ -79,6 +86,14 @@ extension GridOverride: Codable {
             Bool.self,
             forKey: .autoSize
         )
+        columnWeights = try container.decodeIfPresent(
+            [Double].self,
+            forKey: .columnWeights
+        )
+        rowWeights = try container.decodeIfPresent(
+            [Double].self,
+            forKey: .rowWeights
+        )
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -95,5 +110,13 @@ extension GridOverride: Codable {
         try container.encodeIfPresent(columns, forKey: .columns)
         try container.encodeIfPresent(rows, forKey: .rows)
         try container.encodeIfPresent(autoSize, forKey: .autoSize)
+        try container.encodeIfPresent(
+            columnWeights,
+            forKey: .columnWeights
+        )
+        try container.encodeIfPresent(
+            rowWeights,
+            forKey: .rowWeights
+        )
     }
 }

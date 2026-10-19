@@ -28,6 +28,8 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case gridColumns = "settings.grid.columns"
     case gridRows = "settings.grid.rows"
     case gridNewWindowPlacement = "settings.grid.newWindowPlacement"
+    case gridColumnWeights = "settings.grid.columnWeights"
+    case gridRowWeights = "settings.grid.rowWeights"
     case monocleOrientation = "settings.monocle.orientation"
     case monocleHideStyle = "settings.monocle.hideStyle"
     case monocleWrapFocus = "settings.monocle.wrapFocus"
@@ -65,6 +67,10 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case gridOverrideColumns = "settings.grid.override[space].columns"
     case gridOverrideRows = "settings.grid.override[space].rows"
     case gridOverrideAutoSize = "settings.grid.override[space].autoSize"
+    case gridOverrideColumnWeights =
+        "settings.grid.override[space].columnWeights"
+    case gridOverrideRowWeights =
+        "settings.grid.override[space].rowWeights"
     case monocleOverrideOrientation =
         "settings.monocle.override[space].orientation"
     case trackOverrideAxis = "settings.track.override[space].axis"
@@ -103,6 +109,11 @@ extension LayoutKey {
         case .gridType, .gridSplitDirection, .gridAutoSize,
             .gridNewWindowPlacement:
             return .row(.layoutDefaults, .grid, .atRest)
+        case .gridColumnWeights, .gridRowWeights,
+            .gridOverrideColumnWeights, .gridOverrideRowWeights:
+            // Lua/CLI and `resize` until a Settings row is ruled
+            // (#763).
+            return .luaOnly
         case .gridFillEmptyCells:
             return .row(
                 .layoutDefaults,

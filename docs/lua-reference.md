@@ -757,6 +757,12 @@ own minimum binds, the next retile's floor heal moves the ratio
 back off that value by as much. Retiles at once. Bind it from
 `init.lua` or the Shortcuts & Gestures ▸ Lua bindings drawer.
 
+:::unreleased
+A grid's column and row sizes from `resize` are sizing too, and
+return to the weights `grid.set_column_weight` and
+`grid.set_row_weight` set.
+:::
+
 `⌃⌥R` runs it on the active space by default, listed as **Reset
 sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
 `"all"` has no default key.
@@ -1744,6 +1750,62 @@ gap))` rows, at least 1 each.
 grid.set_auto_size(true)
 ```
 
+:::unreleased
+### grid.set_column_weight
+
+**Expects:**
+
+- A column number, counting from 1 at the left.
+- A positive number: that column's share of the width, `1` being
+  an equal share.
+
+**Does:** sets one column's width relative to the others (#763).
+`grid.set_column_weight(1, 2)` in a three-column grid makes the
+first column twice as wide as each of the other two. A column
+with no weight set takes `1`, so a column the grid adds later
+takes an ordinary share.
+
+The weights belong to **positions, not windows**, like a
+spreadsheet's column widths: a grid fills in arrangement order,
+so when a window closes the windows after it move forward into
+columns that keep their sizes. A grid that shows fewer columns
+than you have weights for — a dynamic grid with fewer windows,
+an auto-size grid on a smaller screen — uses the first ones and
+keeps the rest for when the columns come back. With
+[`fill_empty_cells`](#gridset_fill_empty_cells) on, the last
+window of a short row spans the columns left in its row, so the
+columns stay lined up in every row.
+
+A column is never drawn narrower than the grid's minimum window
+width ([`set_min_window_size`](#set_min_window_size)), or the
+minimum its app enforces: it takes the room from the other
+columns by their weights. `resize` and mouse resizes write a
+session layer over this value, which this setter clears on every
+space.
+
+**Example:**
+
+```lua
+grid.set_column_weight(1, 2)
+```
+
+### grid.set_row_weight
+
+**Expects:**
+
+- A row number, counting from 1 at the top.
+- A positive number: that row's share of the height.
+
+**Does:** the row twin of
+[`grid.set_column_weight`](#gridset_column_weight).
+
+**Example:**
+
+```lua
+grid.set_row_weight(1, 1.5)
+```
+:::
+
 ### grid.set_new_window_placement
 
 **Expects:** `"first"`, `"last"`, `"before_focused"`, or
@@ -1832,6 +1894,43 @@ grid.set_dimensions_override("3", 4, 3)
 ```lua
 grid.set_auto_size_override("3", true)
 ```
+
+:::unreleased
+### grid.set_column_weight_override
+
+**Expects:**
+
+- A space identifier.
+- A column number, counting from 1.
+- A positive weight.
+
+**Does:** sets one column's weight for one space, starting from
+the weights that space had, and clears that space's resize
+session layer for the columns.
+
+**Example:**
+
+```lua
+grid.set_column_weight_override("3", 2, 1.5)
+```
+
+### grid.set_row_weight_override
+
+**Expects:**
+
+- A space identifier.
+- A row number, counting from 1.
+- A positive weight.
+
+**Does:** the row twin of
+[`grid.set_column_weight_override`](#gridset_column_weight_override).
+
+**Example:**
+
+```lua
+grid.set_row_weight_override("3", 1, 2)
+```
+:::
 
 ### monocle.set_orientation
 
@@ -5566,10 +5665,19 @@ strips on that space, so a float cannot be grown underneath a
 bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
 
-Tiled windows resize only in bsp, stack, scrolling, and track
-layouts; monocle and grid report "not supported" and flash a
-pill on the focused window saying the layout has no resizing
-(#1255). `set_refusal_sound(true)` adds the system alert sound
+:::unreleased
+Tiled windows resize in bsp, stack, scrolling, track and grid
+layouts; monocle reports "not supported" and flashes a pill on
+the focused window saying the layout has no resizing (#1255). In
+a grid, `"x"` moves the edge the focused cell shares with the
+column after it — or, for the last column, the one before — and
+`"y"` does the same for rows, so the neighbour gives exactly what
+the focused column takes and no other column moves (#763). A
+mouse drag on a cell's inner edge moves that edge the same way.
+The sizes are kept as [column and row weights](#gridset_column_weight)
+in a session layer that
+[`reset_layout_sizing`](#reset_layout_sizing) clears.
+::: `set_refusal_sound(true)` adds the system alert sound
 to that pill; only a hotkey fire sounds, so CLI and IPC callers
 see the pill and read the error JSON without hearing anything.
 

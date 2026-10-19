@@ -151,8 +151,10 @@ struct SplitOverflowTests {
         #expect(try #require(frames[w2]).width < 600)
     }
 
-    @Test("Grid keeps the slot")
-    func gridKeepsTheSlot() throws {
+    /// Grid lifts the column itself (#763), so nothing is left
+    /// for the overflow post-pass to place.
+    @Test("Grid widens the column to a learned floor")
+    func gridWidensTheColumn() throws {
         let w1 = WindowID(1)
         let w2 = WindowID(2)
         let frames = placed(
@@ -160,7 +162,13 @@ struct SplitOverflowTests {
             [w1, w2],
             context(bounds: [w2: floor(700)])
         )
-        #expect(try #require(frames[w2]).width < 700)
+        #expect(try #require(frames[w2]).width >= 700)
+        let forced = placed(
+            .grid,
+            [w1, w2],
+            context(bounds: [w2: floor(700)], probing: true)
+        )
+        #expect(try #require(forced[w2]).width < 700)
     }
 
     @Test("The origin pulls back to the trailing edge, never past the lead")

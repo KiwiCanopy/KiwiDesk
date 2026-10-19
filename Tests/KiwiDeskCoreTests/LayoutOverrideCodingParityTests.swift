@@ -127,6 +127,8 @@ struct LayoutOverrideCodingParityTests {
         over.columns = 7
         over.rows = 5
         over.autoSize = true
+        over.columnWeights = [1.5, 1]
+        over.rowWeights = [2]
         return over
     }
 

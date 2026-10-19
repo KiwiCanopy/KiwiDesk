@@ -260,7 +260,7 @@ struct SessionRatioTests {
     @Test("SessionRatios carries exactly the mirrored fields")
     func fieldCountPinsTheMirrors() {
         let mirror = Mirror(reflecting: SessionRatios())
-        #expect(mirror.children.count == 4)
+        #expect(mirror.children.count == 6)
     }
 
     @Test("Scrolling slot resize stays per-space too")

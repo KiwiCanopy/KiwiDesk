@@ -42,6 +42,8 @@ struct SpaceOverrideFieldCountTests {
         grid.columns = 3
         grid.rows = 2
         grid.autoSize = true
+        grid.columnWeights = [2, 1]
+        grid.rowWeights = [1, 2]
 
         var monocle = MonocleOverride()
         monocle.orientation = .vertical

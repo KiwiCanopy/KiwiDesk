@@ -78,6 +78,9 @@ extension SettingsRevertRegister {
         .layout(.gridSplitDirection): .leaf(\.settings.grid.splitDirection),
         .layout(.gridFillEmptyCells): .leaf(\.settings.grid.fillEmptyCells),
         .layout(.gridAutoSize): .leaf(\.settings.grid.autoSize),
+        .layout(.gridColumnWeights):
+            .leaf(\.settings.grid.columnWeights),
+        .layout(.gridRowWeights): .leaf(\.settings.grid.rowWeights),
         .layout(.gridColumns): .leaf(\.settings.grid.columns),
     ]
 }

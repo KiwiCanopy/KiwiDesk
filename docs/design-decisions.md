@@ -5265,6 +5265,36 @@ floating-mode Space still floats every member through
 `EffectiveFloat`; that is the Space's layout, not a verdict about
 the window, and Tile does not reach it.
 
+**A grid's track sizes belong to positions, and outlive the
+column count (#763).** [Trade-off] A grid stores one unnormalised
+weight per column index and per row index, `1` an equal share and
+absent meaning all equal; the render applies the first n and
+draws a track past the list at `1`. Three things fall out, and
+each is what breaks without it. *Per window* is impossible: a
+grid fills in arrangement order, so a size that followed its
+window would re-cut every column whenever one closed — a size
+belongs to the place, like a spreadsheet's column width, and a
+track can only leave from the end. *Truncating* the list when the
+count drops would make opening and closing one window a lossy
+round trip, and an auto-size grid crossing a screen change the
+same; a writer therefore never shortens it. *Applying weights only
+to a rigid grid* is cheaper and defensible, but makes one drag
+work or not depending on a setting the user set once and forgot.
+A resize moves the edge between two adjacent tracks with their
+weight sum held, so no third track moves — the bsp arm's shared
+edge, per index — and, since weights are shares, the store is
+bounded by construction and needs no ceiling (the scrolling slot,
+an absolute length, is the one store that does). The floor is the
+render's: a track is lifted to Grid's `min_window_size` and the
+learned minimum of every window alone in it, taking the room from
+the others by weight, rather than rewriting the stored weights at
+retile — a heal that wrote them would trade the user's proportions
+for one screen's arithmetic and keep the smaller screen's answer
+after a re-dock. Under `fill_empty_cells` the short last row keeps
+the grid's columns and its last cell spans the rest, so the
+columns line up in every row; re-dividing the short row would give
+its cells widths no column carries.
+
 ### Spaces, profiles & config ownership
 
 **[Principle]**
