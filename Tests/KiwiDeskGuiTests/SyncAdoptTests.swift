@@ -151,6 +151,27 @@ struct SyncAdoptTests {
         #expect(model.luaSource == "-- mine\n")
     }
 
+    /// The Space Bar's edge and its per-screen map revert as one
+    /// pair: the draft's edge laid back over the other Mac's map
+    /// is asked about, once, as the edge.
+    @Test("A pair writer laid over the other Mac's change asks once")
+    func pairWriterAsks() throws {
+        let (core, model) = try setup()
+        model.config.settings.spaceBarStyle.edge = .bottom
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["S": .left]
+        model.adoptSyncedChange(change)
+        // One question for the pair, whichever key the census books
+        // the edit to.
+        #expect(
+            model.sync.conflicts.count == 1,
+            "\(model.sync.conflicts.map(\.id))"
+        )
+        let question = try #require(model.sync.conflicts.first)
+        #expect(!question.yours.isEmpty)
+        #expect(!question.theirs.isEmpty)
+        #expect(model.config.settings.spaceBarStyle.edge == .bottom)
+    }
+
     @Test("init.lua edited on both Macs is one question")
     func luaIsOneQuestion() throws {
         let (core, model) = try setup()

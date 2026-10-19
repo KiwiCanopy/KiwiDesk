@@ -180,6 +180,9 @@ struct SyncFollowTests {
         core.sync.watchRequired = true
         core.followSyncFolder(folder)
         #expect(core.sync.status == .folderUnavailable)
+        // A later pass — after a Compare and Copy, say — keeps it.
+        core.runSyncPass()
+        #expect(core.sync.status == .folderUnavailable)
     }
 
     @Test("Reset and restore forget the agreement: no copy goes out")
@@ -281,11 +284,16 @@ struct SyncFollowTests {
         core.runSyncPass()
         try write("-- two\n", to: "init.lua", in: folder)
         core.runSyncPass()
-        #expect(core.sync.status == .upToDate)
         #expect(
             read("init.lua", in: core.configDirectory)
                 == Data("-- two\n".utf8)
         )
+        // A stale agreement would read this one-sided change as a
+        // change on both sides.
+        try write("-- three\n", to: "init.lua", in: core.configDirectory)
+        core.runSyncPass()
+        #expect(core.sync.status == .upToDate)
+        #expect(read("init.lua", in: folder) == Data("-- three\n".utf8))
     }
 
     @Test("A conflict copy is reported, and never copied")

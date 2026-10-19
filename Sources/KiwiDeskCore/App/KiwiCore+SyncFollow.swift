@@ -27,11 +27,8 @@ extension KiwiCore {
             self?.scheduleSyncPass()
         }
         runSyncPass()
-        // A watch that would not start hears nothing: the folder is
-        // not kept in step, whatever the one pass found.
         if sync.watch == nil, sync.watchRequired {
             onLog("sync: could not watch \(folder.path)")
-            sync.status = .folderUnavailable
         }
     }
 
@@ -99,7 +96,12 @@ extension KiwiCore {
         case nil: break
         }
         if let newer = thisMacNewer() { return .newerHere(newer) }
-        let placeholders = SyncScan.placeholders(in: folder)
+        // A watch that would not start hears nothing: the folder is
+        // not kept in step, whatever a pass finds.
+        if sync.watch == nil, sync.watchRequired { return .folderUnavailable }
+        let placeholders =
+            SyncScan.placeholders(in: folder)
+            + SyncScan.dataless(in: folder)
         guard placeholders.isEmpty else {
             for placeholder in placeholders {
                 try? FileManager.default.startDownloadingUbiquitousItem(
@@ -255,7 +257,15 @@ extension KiwiCore {
     /// finds them apart copies nothing until Compare and Copy says
     /// which side stays.
     func forgetSyncAgreement() {
-        try? FileManager.default.removeItem(at: url(of: .syncLedger))
+        let ledger = url(of: .syncLedger)
+        guard FileManager.default.fileExists(atPath: ledger.path) else {
+            return
+        }
+        do {
+            try FileManager.default.removeItem(at: ledger)
+        } catch {
+            onLog("sync: could not forget the agreement: \(error)")
+        }
     }
 
     /// Holds every pass while `body` rewrites either side, then

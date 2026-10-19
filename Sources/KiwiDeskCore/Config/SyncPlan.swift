@@ -91,6 +91,13 @@ enum SyncScan {
         return result
     }
 
+    /// The synced files under `root` whose bytes live only in the
+    /// cloud — iCloud's Optimize Mac Storage evicts them in place.
+    static func dataless(in root: URL) -> [URL] {
+        syncedPaths(in: root).map { root.appendingPathComponent($0) }
+            .filter(isDataless)
+    }
+
     /// Whether the file's bytes live only in the cloud: a read
     /// would block on the download (iCloud Drive, a File Provider).
     static func isDataless(_ url: URL) -> Bool {
