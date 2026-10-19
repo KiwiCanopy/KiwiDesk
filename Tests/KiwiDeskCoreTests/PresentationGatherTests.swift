@@ -42,7 +42,7 @@ struct PresentationGatherTests {
         core.tiler.allScreenBounds = { [Self.bounds] }
         core.tiler.allScreenFrames = { pinsScreen ? [Self.screen] : [] }
         core.tiler.settings.animations.onRelayout = false
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.tiler.settings.borderStyle.enabled = false
         core.state.apply(.displaysChanged([display]))
         let frames: [(WindowID, CGRect)] = [

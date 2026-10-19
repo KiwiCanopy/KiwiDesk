@@ -83,6 +83,25 @@ extension BorderManager {
         )
     }
 
+    /// Flashes a refusal pill beside a shelf (#761).
+    @discardableResult
+    func flashShelfPill(
+        display: DisplayID,
+        edge: AppBarEdge,
+        frame: CGRect,
+        text: String,
+        symbol: String
+    ) -> Bool {
+        guard privateRuntimeStarted else { return false }
+        return sizeLimitOverlay.flash(
+            shelf: display,
+            edge: edge,
+            frame: frame,
+            text: text,
+            symbol: symbol
+        )
+    }
+
     /// Shows the reminder pill on a window a lens holds, centred
     /// on it, until `releaseHoldPill` (#2103 ruling 12).
     func showHoldPill(window: WindowID, frame: CGRect, text: String) {

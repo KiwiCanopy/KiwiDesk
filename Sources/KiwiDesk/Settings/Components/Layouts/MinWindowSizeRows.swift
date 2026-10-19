@@ -64,6 +64,7 @@ struct MinWindowSizeRows: View {
     private var drawer: some View {
         SettingsDisclosure(
             SettingsCatalog.layoutDefaults.minSizePerLayout,
+            chrome: .attached,
             isExpanded: $expanded,
             summary: model.minSizesDiffer
                 ? nil

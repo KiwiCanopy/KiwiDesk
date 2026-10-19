@@ -67,6 +67,11 @@ struct ShortcutsControls: Sendable {
         "destination.kiwivision",
         "KiwiVision"
     )
+    /// The KiwiShelf group (#761), titled by the product name.
+    let kiwishelfKeys = SettingsControl(
+        "bars.switch.kiwishelf",
+        "KiwiShelf"
+    )
     let moveWindows = SettingsControl(
         "shortcuts.section.move_windows",
         "Move windows"

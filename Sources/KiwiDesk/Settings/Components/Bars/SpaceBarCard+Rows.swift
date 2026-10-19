@@ -124,7 +124,7 @@ extension SpaceBarCard {
                         + "window there without switching."
                 )
             )
-        case .spaceBarEnabled, .spaceBarReserve, .spaceBarVisibility,
+        case .spaceBarReserve, .spaceBarVisibility,
             .spaceBarActiveDimFactor,
             .spaceBarStickyBadge, .spaceBarFocusedItemColor,
             .spaceBarFocusedHighlightColor, .spaceCue:

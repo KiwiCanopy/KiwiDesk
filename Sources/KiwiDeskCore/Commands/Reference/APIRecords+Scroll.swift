@@ -56,9 +56,10 @@ extension APIReference {
                 ScrollingParams.Orientation.self
             )
         ),
-        "set_app_bar_enabled": APIRecord(
-            "Shows or hides the App Bar in the scrolling layout.",
-            .boolean("enabled")
+        "set_app_bar_visibility": APIRecord(
+            "Sets the scrolling App Bar to always, auto or "
+                + "hidden.",
+            .choice("visibility", ShelfVisibility.self)
         ),
         "set_app_bar_active_indicator": APIRecord(
             "Overrides the App Bar's focus marker for this "

@@ -183,6 +183,11 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
+        KiwiShelfShortcutsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         ApplicationsGroup(
             model: model,
             bindings: bindingsBinding,

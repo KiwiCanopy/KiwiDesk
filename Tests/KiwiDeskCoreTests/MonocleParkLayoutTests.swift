@@ -29,7 +29,7 @@ struct MonocleParkLayoutTests {
             ),
             gaps: .uniform(10)
         )
-        context.monocle.appBar.enabled = false
+        context.monocle.appBar.visibility = .hidden
         context.monocle.hideStyle = .park
         return context
     }
@@ -154,7 +154,7 @@ struct MonocleParkLayoutTests {
         // already outside `bounds` (#1517), so the park anchors
         // to them and nothing else.
         var context = makeContext()
-        context.monocle.appBar.enabled = true
+        context.monocle.appBar.visibility = .always
         context.focused = w1
         let frames = layout.calculateGeometry(
             for: [w1, w2],

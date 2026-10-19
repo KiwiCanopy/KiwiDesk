@@ -130,7 +130,8 @@ struct KiwiShelfMigrationTests {
         #expect(bar["edge"] == nil)
         #expect(bar["thickness"] == nil)
         #expect(bar["content"] == nil)
-        #expect(bar["enabled"] as? Bool == true)
+        // On/off became visibility (#761): stored on is always.
+        #expect(bar["enabled"] == nil)
         // A layout's colour is the shelf's now, and its Gap is
         // gone like the global bar's.
         #expect(bar["fill_color"] == nil)

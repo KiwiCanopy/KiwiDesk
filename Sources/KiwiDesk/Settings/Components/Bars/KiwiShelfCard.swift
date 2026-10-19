@@ -3,12 +3,13 @@ import SwiftUI
 
 /// Settings card for the shelf the bars sit on (#1517): which
 /// bars it shows, where each hangs (#1731), how the two share an
-/// edge, and the look they share. No container gate — the Show rows that
-/// switch the bars on live here — so every other row greys as a
-/// block while no bar shows (`BarsGates.shelfShows`).
+/// edge, and the look they share. No container gate: a hidden
+/// bar's shortcut still shows it, so its look always matters
+/// (#761).
 struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
     @State var edgesExpanded = false
+    @State var showExpanded = false
     @State private var styleExpanded = false
     @State private var marginsExpanded = false
 
@@ -31,19 +32,19 @@ struct KiwiShelfCard: View {
                 destination: .looks
             )
             showGroup
+            Divider()
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(BarsRowOrder.kiwishelfAtRest, id: \.id) {
+                ForEach(BarsRowOrder.kiwishelfPlacement, id: \.id) {
+                    row(for: $0)
+                }
+                // Where the bars sit, then how deep the strip is.
+                Divider()
+                ForEach(BarsRowOrder.kiwishelfDepth, id: \.id) {
                     row(for: $0)
                 }
                 styleDisclosure
                 marginsDisclosure
             }
-            .modifier(
-                GreyOut(
-                    active: !gates.shelfShows,
-                    help: BarsGateHelp.sentence(for: .shelfEmpty)
-                )
-            )
         }
     }
 
@@ -51,7 +52,7 @@ struct KiwiShelfCard: View {
         switch key {
         case .kiwishelf(let k):
             kiwishelfRow(k)
-        case .spaceBar(.spaceBarEnabled), .spaceBar(.spaceCue),
+        case .spaceBar(.spaceBarVisibility), .spaceBar(.spaceCue),
             .layoutAppBar:
             showRow(key)
         default:
@@ -112,9 +113,9 @@ struct KiwiShelfCard: View {
     static var lookReference: String {
         L(
             "bars.kiwishelf.looks_xref",
-            "A look sets this card's style, both indicators, "
-                + "the focus border's shape and sheen, and the "
-                + "window gaps in one click — in %1$@.",
+            "A look sets where the bars sit and how they look, "
+                + "both indicators, the focus border's shape and "
+                + "sheen, and the window gaps in one click — in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

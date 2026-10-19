@@ -28,9 +28,9 @@ struct AppBarXrefSentenceTests {
     private static let rowKeys: [(mode: LayoutMode, on: Bool, key: String)] =
         [
             (.monocle, true, "monocle.app_bar_xref_on"),
-            (.monocle, false, "monocle.app_bar_xref_off"),
+            (.monocle, false, "monocle.app_bar_xref_hidden"),
             (.scrolling, true, "scroll_grid.app_bar_xref_on"),
-            (.scrolling, false, "scroll_grid.app_bar_xref_off"),
+            (.scrolling, false, "scroll_grid.app_bar_xref_hidden"),
         ]
 
     /// The two frames the participle went into. A NEGATIVE

@@ -112,7 +112,7 @@ extension KiwiCore {
         )
         return shown.contains { shownID in
             guard let space = state.workspaces[shownID],
-                let host = barHost(for: space), host.appBar.enabled
+                barHost(for: space) != nil
             else { return false }
             return appBarFloats(in: space).contains(id)
         }

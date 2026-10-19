@@ -126,7 +126,7 @@ struct LayoutParamsCodingParityTests {
         params.newWindowPlacement = .first
         params.wrapFocus = true
         params.fillWhenAlone = false
-        params.appBar.enabled = false
+        params.appBar.visibility = .hidden
         var over = ScrollingOverride()
         over.anchor = .end
         params.override[space] = over
@@ -139,7 +139,7 @@ struct LayoutParamsCodingParityTests {
         params.hideStyle = .park
         params.wrapFocus = true
         params.newWindowPlacement = .last
-        params.appBar.enabled = false
+        params.appBar.visibility = .hidden
         var over = MonocleOverride()
         over.orientation = .horizontal
         params.override[space] = over

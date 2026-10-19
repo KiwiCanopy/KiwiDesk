@@ -45,6 +45,7 @@ public enum ConfigMigration {
         migratingRetiredPullOrSpawn,
         migratingRetiredPanelVerbs,
         migratingProfileIDs,
+        migratingBarVisibility,
         migratingMinWindowSizePerLayout,
     ]
 

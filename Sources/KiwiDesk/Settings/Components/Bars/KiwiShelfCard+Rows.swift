@@ -7,6 +7,8 @@ import SwiftUI
 extension KiwiShelfCard {
     @ViewBuilder func kiwishelfRow(_ key: KiwiShelfKey) -> some View {
         switch key {
+        case .visibility:
+            visibilityRows
         case .edge:
             edgeRows
         case .spaceBarEdge:

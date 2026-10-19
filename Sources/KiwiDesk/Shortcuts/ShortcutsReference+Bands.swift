@@ -81,6 +81,16 @@ extension ShortcutsReferenceBuilder {
                         + lenses.map(KeybindingCatalog.toggleLens)
                 )
             ),
+            // The bars' show/hide shortcuts (#761).
+            ShortcutSubgroup(
+                title: L("bars.switch.kiwishelf", "KiwiShelf"),
+                rows: rows(
+                    [
+                        KeybindingCatalog.toggleSpaceBar,
+                        KeybindingCatalog.toggleAppBar,
+                    ]
+                )
+            ),
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.switch_layers",

@@ -634,9 +634,9 @@ The one exception is a bar set not to reserve its strip
 [`app_bar.set_reserve`](#app_barset_reserve)), which draws over the windows.
 
 :::unreleased
-A revealed auto-hiding shelf draws over the windows too
+A revealed `auto` or `hidden` bar draws over the windows too
 ([`space_bar.set_visibility`](#space_barset_visibility),
-[`app_bar.set_visibility`](#app_barset_visibility)).
+[Per-Layout App Bar Overrides](#per-layout-app-bar-overrides)).
 :::
 
 **Example:**
@@ -2837,30 +2837,13 @@ app_bar.set_reserve(false)
 ```
 
 :::unreleased
-### app_bar.set_visibility
-
-**Expects:** `"always"` or `"auto"` (default `"always"`).
-
-**Does:** as
-[`space_bar.set_visibility`](#space_barset_visibility), for the
-App Bar's shelf. A lone App Bar hides to a short line; on the
-Space Bar's edge the shared shelf shows the Space dots.
-
-Global only: no layout sets its own.
-
-**Example:**
-
-```lua
-app_bar.set_visibility("auto")
-```
-
 ### app_bar.toggle_reveal
 
 **Expects:** nothing.
 
 **Does:** as [`space_bar.toggle_reveal`](#space_bartoggle_reveal),
-for the shelf the App Bar sits on. Fails where the App Bar does
-not hide, or where the active Space's layout draws no App Bar.
+for the App Bar of the active Space's layout. Fails where that
+layout carries no App Bar, or where its App Bar is `"always"`.
 
 **Example:**
 
@@ -2924,20 +2907,23 @@ collapses it again.
 app_bar.set_group_adjacent_windows(true)
 ```
 
+:::unreleased
 ### Per-Layout App Bar Overrides
 
-Each bar-hosting layout (monocle, scrolling) can override the
-App Bar's own fields for itself — `enabled`, `active_indicator`,
-`title_cap` and `group_adjacent_windows`. Only these
-two layouts show a bar, so only they expose `set_app_bar_*`.
-Unset fields inherit the global value.
+Each bar-hosting layout (monocle, scrolling) sets its own App
+Bar `visibility` — `"always"`, `"auto"` or `"hidden"`, as
+[`space_bar.set_visibility`](#space_barset_visibility) — and can
+override the App Bar's own fields for itself: `active_indicator`,
+`title_cap` and `group_adjacent_windows`. Only these two layouts
+show a bar, so only they expose `set_app_bar_*`. Unset fields
+inherit the global value.
 [KiwiShelf](#kiwishelf)'s fields — its colours, glyph style and
 `dim_factor` included — take no per-layout override. The
 overrides are the same setters prefixed with the layout name:
 
-- `monocle.set_app_bar_enabled`,
+- `monocle.set_app_bar_visibility`,
   `monocle.set_app_bar_title_cap`, etc.
-- `scroll.set_app_bar_enabled`,
+- `scroll.set_app_bar_visibility`,
   `scroll.set_app_bar_active_indicator`,
   `scroll.set_app_bar_group_adjacent_windows`, etc.
 
@@ -2947,10 +2933,15 @@ no per-layout override either.
 **Example:**
 
 ```lua
-monocle.set_app_bar_enabled(true)
-scroll.set_app_bar_enabled(true)
+monocle.set_app_bar_visibility("always")
+scroll.set_app_bar_visibility("hidden")
 scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
+
+`monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
+are retired: `false` is `"hidden"`. An `auto` App Bar alone on its
+edge hides to a short line.
+:::
 
 ## Space Bar
 
@@ -2976,22 +2967,6 @@ The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its thickness, margins,
 background, colours and app glyph style; every `space_bar.*`
 setting is global, with no per-layout override.
-
-### space_bar.set_enabled
-
-**Expects:** boolean (default `true`).
-
-**Does:** shows or hides the Space Bar.
-
-With the Space Bar off, [KiwiShelf](#kiwishelf) reserves its
-edge only in the layouts whose App Bar is on, and nowhere when
-none is.
-
-**Example:**
-
-```lua
-space_bar.set_enabled(true)
-```
 
 ### space_bar.set_reserve
 
@@ -3022,33 +2997,39 @@ space_bar.set_reserve(false)
 :::unreleased
 ### space_bar.set_visibility
 
-**Expects:** `"always"` or `"auto"` (default `"always"`).
+**Expects:** `"always"`, `"auto"` or `"hidden"` (default
+`"always"`). Replaces the retired `space_bar.set_enabled`:
+`false` is `"hidden"`.
 
-**Does:** with `"auto"` the Space Bar's shelf hides to a row of
-Space dots at its edge — one dot per Space, the current one wide,
-a Space holding windows brighter. The edge keeps only a sliver:
-`outer_margin`, the dots' depth and `inner_margin`, with the
-windows' outer gap below it, as the full shelf has. The pointer
-within about 40 points of the dots grows the plate behind them and
-rims it as the bars draw their active item: the highlight colour,
-its width up to 3 points, and the border sheen. Resting for 0.35 s
-in the band along that edge, from a few points past the shelf to
-where the windows start, grows the shelf out of the dots, at once
-when the pointer pushes against the screen's edge there. The shelf
-shrinks back 0.5 s after the pointer leaves it, and stays while a
-bar menu or a hover peek it opened is up. A revealed shelf draws
-over the windows and the sliver never changes, so a reveal moves no
-window, and setting the mode moves the windows at most once. A bar
-turned off reserves nothing, nor does one set not to reserve
-([`space_bar.set_reserve`](#space_barset_reserve)); its dots draw
-over the windows.
+**Does:**
 
-While the two bars share an edge on any screen they are one
-shelf: setting either bar's mode sets both, and where the stored
-modes disagree the shelf stays shown. Both bars start on the top
-edge, so in `init.lua` set the edges before the modes: a mode set
-while they are joined is kept by both after they split. A look
-never carries the mode.
+- `"always"` keeps the bar shown and reserves its strip.
+- `"auto"` hides it to a row of Space dots at its edge — one dot
+  per Space, the current one wide, a Space holding windows
+  brighter — and the edge keeps only a sliver: `outer_margin`,
+  the dots' depth and `inner_margin`, with the windows' outer gap
+  below it. The pointer within about 40 points of the dots grows
+  the plate behind them and rims it as the bars draw their active
+  item. Resting 0.35 s in the band along that edge, from a few
+  points past the shelf to where the windows start, grows the bar
+  out of the dots, at once when the pointer pushes against the
+  screen's edge there. It shrinks back 0.5 s after the pointer
+  leaves, and stays while a bar menu or a hover peek it opened is
+  up.
+- `"hidden"` draws nothing and reserves nothing; only
+  [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it.
+  The menu bar then shows the Space each screen is on.
+
+A shown `auto` or `hidden` bar draws over the windows, so a
+reveal moves no window; setting the value moves the windows at
+most once. A bar set not to reserve
+([`space_bar.set_reserve`](#space_barset_reserve)) reserves
+nothing in any mode.
+
+Each bar keeps its own value. On an edge the two bars share, the
+edge reserves for its more present bar: beside an `"always"` bar
+an `"auto"` one stays shown, while a `"hidden"` one still shows
+only on its shortcut. A look never carries the value.
 
 **Example:**
 
@@ -3060,14 +3041,13 @@ space_bar.set_visibility("auto")
 
 **Expects:** nothing.
 
-**Does:** shows or hides the hidden shelf the Space Bar sits on,
-on the screen the active Space lays out on. A shown shelf stays
-until the next call, or for
+**Does:** shows or hides the Space Bar over the windows on the
+screen the active Space lays out on, and no other bar. A shown bar
+stays until the next call, or for
 [`kiwishelf.set_reveal_duration`](#kiwishelfset_reveal_duration)
-seconds where that is above 0. Fails where the shelf does not
-hide, or where no hiding shelf there carries the Space Bar. No
-shortcut is bound by default; VoiceOver's press on the Space dots
-runs it too.
+seconds where that is above 0. Fails, with a pill beside the bar,
+where the Space Bar is `"always"`. VoiceOver's press on the Space
+dots runs it too.
 
 **Example:**
 

@@ -38,30 +38,11 @@ struct GreyOutAnchorTests {
             "help: blockReason.map(GapsBordersGateHelp.sentence)",
             1
         ),
-        // The header `?` anchors now read the resolver's reason
-        // (2026-08-03 convergence): nil while the bar is shown,
-        // the block sentence while it is off — outside the greyed
-        // block, and worded once in `BarsGateHelp`.
-        (
-            "SpaceBarCard.swift",
-            "help: reason.map(BarsGateHelp.sentence)",
-            1
-        ),
-        (
-            "AppBarCard.swift",
-            "help: reason.map(BarsGateHelp.sentence)",
-            1
-        ),
         // Advanced Colours (#678 Phase 3). Every gate on this
         // page names a switch on ANOTHER page, so the header
         // anchor is not a nicety here — the hover string on a
         // dimmed row is the only other channel, and it cannot
         // say where to go without one.
-        (
-            "BarColorCards.swift",
-            "help: gates.shelfDraws ? nil : AdvancedColorsHelp",
-            1
-        ),
         // The shelf card's ONE greyed row in a live card takes a
         // live link beneath the grid instead of the header `?`,
         // which scopes the card (#1310, owner ruling 2026-09-14;

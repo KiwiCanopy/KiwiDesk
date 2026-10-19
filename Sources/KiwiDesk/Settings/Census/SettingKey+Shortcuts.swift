@@ -20,6 +20,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case toggleKiwiVision = "keybinding.toggle_kiwivision"
     /// One row per live lens (#2103 ruling 42).
     case toggleLens = "keybinding.toggle_lens (x N lenses)"
+    /// Each bar's show/hide shortcut (#761).
+    case toggleSpaceBar = "keybinding.toggle_space_bar"
+    case toggleAppBar = "keybinding.toggle_app_bar"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =
         "keybinding.move_window_to_{prev,next}_track"
@@ -85,6 +88,8 @@ extension ShortcutsKey {
             return .row(.shortcuts, .focus, .atRest)
         case .toggleKiwiVision, .toggleLens:
             return .row(.shortcuts, .kiwiVisionShortcuts, .atRest)
+        case .toggleSpaceBar, .toggleAppBar:
+            return .row(.shortcuts, .kiwishelfShortcuts, .atRest)
         // KiwiHub's three sides, one group for one panel (#2265).
         case .jumpToWindow, .showShortcuts, .viewPicker:
             return .row(.shortcuts, .kiwiHub, .atRest)
@@ -204,6 +209,10 @@ extension ShortcutsKey {
             return .text("keybinding.toggle_floating")
         case .toggleKiwiVision:
             return .text("keybinding.toggle_kiwivision")
+        case .toggleSpaceBar:
+            return .text("keybinding.toggle_space_bar")
+        case .toggleAppBar:
+            return .text("keybinding.toggle_app_bar")
         case .toggleSticky:
             return .text(
                 "keybinding.toggle_sticky",

@@ -77,8 +77,8 @@ struct ScrollingColumnCapTests {
             outer: Gaps.Outer(top: 0, bottom: 0, left: 0, right: 0),
             inner: Gaps.Inner(horizontal: 10, vertical: 10)
         )
-        settings.scrolling.appBar.enabled = false
-        settings.spaceBarStyle.enabled = false
+        settings.scrolling.appBar.visibility = .hidden
+        settings.spaceBarStyle.visibility = .hidden
         let visible = CGRect(x: 0, y: 0, width: 1920, height: 1080)
         #expect(
             settings.scrollingColumnCap(bounds: visible, space: SpaceID("1"))
@@ -120,7 +120,7 @@ struct ScrollingColumnCapTests {
             left: 0,
             right: 0
         )
-        settings.scrolling.appBar.enabled = true
+        settings.scrolling.appBar.visibility = .always
         settings.barEdge = .left
         settings.kiwishelf.thickness = 100
         #expect(
@@ -133,7 +133,7 @@ struct ScrollingColumnCapTests {
                 space: SpaceID("1")
             ) == 5
         )
-        settings.scrolling.appBar.enabled = false
+        settings.scrolling.appBar.visibility = .hidden
         settings.gapsGlobal.outer = Gaps.Outer(
             top: 0,
             bottom: 0,

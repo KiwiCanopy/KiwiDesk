@@ -1,21 +1,68 @@
 import CoreGraphics
 
-/// One edge a shown bar sits on, whether the layout gives its
-/// strip up (#1524) and whether its shelf hides (#761). Shown and
-/// reserved are apart so a bar may draw over the windows; on an
-/// edge two bars share — one fused shelf, one strip — the edge
-/// reserves while EITHER bar does and hides only while BOTH do.
-/// A hiding edge reserves only its sliver
-/// (`KiwiShelf.hiddenReservation`): a reveal is an overlay.
+/// One edge a bar sits on, each bar's own visibility there (#761)
+/// and which of them the layout gives a strip up for (#1524).
+/// Shown and reserved are apart so a bar may draw over the
+/// windows; on an edge two bars share — one fused shelf, one strip
+/// — the edge reserves at the depth its most present RESERVING bar
+/// asks: the full strip for `always`, the sliver
+/// (`KiwiShelf.hiddenReservation`) for `auto`, nothing for
+/// `hidden`. A reveal is an overlay.
 public struct ShelfEdge: Sendable, Equatable {
     public let edge: AppBarEdge
-    public var reserves: Bool
-    public var hides: Bool
+    /// Each bar on this edge and its stored visibility.
+    public var bars: [ShelfBar: ShelfVisibility]
+    /// The bars on this edge whose `reserve` is on.
+    public var reserving: Set<ShelfBar>
 
-    public init(_ edge: AppBarEdge, reserves: Bool, hides: Bool = false) {
+    public init(
+        _ edge: AppBarEdge,
+        reserves: Bool,
+        bars: [ShelfBar: ShelfVisibility] = [:]
+    ) {
         self.edge = edge
-        self.reserves = reserves
-        self.hides = hides
+        self.bars = bars
+        self.reserving = reserves ? Set(bars.keys) : []
+    }
+
+    /// Adds `bar` at `visibility`, reserving where `reserves`.
+    mutating func add(
+        _ bar: ShelfBar,
+        _ visibility: ShelfVisibility,
+        reserves: Bool
+    ) {
+        bars[bar] = visibility
+        if reserves { reserving.insert(bar) }
+    }
+
+    /// What the edge reserves for: its most present reserving
+    /// bar as it reads on this edge (`shown`), nil where no bar
+    /// reserves — an `auto` bar beside an `always` one never asks
+    /// for a sliver on an edge that does not hide.
+    public var reservation: ShelfVisibility? {
+        reserving.compactMap { shown($0) }
+            .max { $0.presence < $1.presence }
+    }
+
+    /// The edge's visibility: its most present bar's.
+    public var visibility: ShelfVisibility {
+        bars.values.max { $0.presence < $1.presence } ?? .hidden
+    }
+
+    /// Whether the edge hides to a mark and reserves its sliver.
+    public var hides: Bool { visibility == .auto }
+
+    /// What `bar` reads on this edge: an `auto` bar beside an
+    /// `always` one reads `always` — hiding inside a strip already
+    /// paid for saves nothing — and `hidden` stays hidden.
+    public func shown(_ bar: ShelfBar) -> ShelfVisibility? {
+        guard let own = bars[bar] else { return nil }
+        return own == .auto && visibility == .always ? .always : own
+    }
+
+    /// The bars an edge draws at rest, before any reveal.
+    public var drawnAtRest: Set<ShelfBar> {
+        Set(bars.keys.filter { shown($0) == .always })
     }
 }
 

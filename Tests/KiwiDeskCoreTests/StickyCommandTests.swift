@@ -141,8 +141,8 @@ struct StickyCommandTests {
         // with the Space Bar also off (Lua is open, #414).
         #expect(
             core.execute(
-                "space_bar.set_enabled",
-                args: [.bool(false)]
+                "space_bar.set_visibility",
+                args: [.string("hidden")]
             ).isSuccess
         )
         #expect(!core.tiler.settings.stickyStyle.mark)

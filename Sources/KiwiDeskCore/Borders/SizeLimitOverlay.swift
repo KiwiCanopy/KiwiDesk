@@ -4,16 +4,24 @@ import CoreGraphics
 /// Visual plate and overlay panel for minimum-size refusal pill
 /// (#933). One panel PER window: a blocked grow pills BOTH ends —
 /// the resized window and the blocking one — so two pills must be
-/// able to stand at once (owner ruling 2026-08-22).
+/// able to stand at once (owner ruling 2026-08-22). A shelf's
+/// pill (#761) stands beside its shelf, keyed by the shelf and
+/// ordered by level alone, since no window anchors it.
 @MainActor
 final class SizeLimitOverlay {
+    /// What a pill stands on: a window it orders above, or a shelf.
+    enum Anchor: Hashable {
+        case window(CGWindowID)
+        case shelf(DisplayID, AppBarEdge)
+    }
+
     private struct Pill {
         let panel: NSPanel
         let plate: SizeLimitPillPlate
         var hideWork: DispatchWorkItem?
     }
 
-    private var pills: [CGWindowID: Pill] = [:]
+    private var pills: [Anchor: Pill] = [:]
 
     /// AppKit keeps a visible panel alive after its owner is gone,
     /// so a dropped overlay would leave it on screen (#1868).
@@ -67,7 +75,25 @@ final class SizeLimitOverlay {
         text: String,
         symbol: String
     ) -> Bool {
-        present(window: window, frame: frame, text: text, symbol: symbol)
+        present(.window(window), frame: frame, text: text, symbol: symbol)
+    }
+
+    /// Flashes a refusal pill beside a shelf (#761), in the room
+    /// `frame` (AX coordinates) gives it.
+    @discardableResult
+    func flash(
+        shelf display: DisplayID,
+        edge: AppBarEdge,
+        frame: CGRect,
+        text: String,
+        symbol: String
+    ) -> Bool {
+        present(
+            .shelf(display, edge),
+            frame: frame,
+            text: text,
+            symbol: symbol
+        )
     }
 
     /// Shows a lens's reminder pill centred on a held window, with
@@ -76,22 +102,23 @@ final class SizeLimitOverlay {
     /// popping again.
     @discardableResult
     func hold(window: CGWindowID, frame: CGRect, text: String) -> Bool {
-        present(window: window, frame: frame, text: text, symbol: nil)
+        present(.window(window), frame: frame, text: text, symbol: nil)
     }
 
     /// Fades a pill out now, a held one included.
     func release(_ window: CGWindowID) {
-        guard let pill = pills[window] else { return }
+        let key = Anchor.window(window)
+        guard let pill = pills[key] else { return }
         pill.hideWork?.cancel()
-        pills[window]?.hideWork = nil
-        fadeOut(window)
+        pills[key]?.hideWork = nil
+        fadeOut(key)
     }
 
     /// Shows the pill: a refusal's at the window's top with its
     /// symbol, faded after `holdDuration`; a hold's centred, with
     /// no symbol, until released.
     private func present(
-        window: CGWindowID,
+        _ window: Anchor,
         frame: CGRect,
         text: String,
         symbol: String?
@@ -148,7 +175,12 @@ final class SizeLimitOverlay {
         )
         pill.panel.setFrame(panelRect, display: true)
         pill.panel.invalidateShadow()
-        pill.panel.order(.above, relativeTo: Int(window))
+        switch window {
+        case .window(let id):
+            pill.panel.order(.above, relativeTo: Int(id))
+        case .shelf:
+            pill.panel.orderFrontRegardless()
+        }
         pill.panel.alphaValue = 1
 
         if symbol != nil || !shown,
@@ -171,7 +203,7 @@ final class SizeLimitOverlay {
         return true
     }
 
-    private func fadeOut(_ window: CGWindowID) {
+    private func fadeOut(_ window: Anchor) {
         guard let pill = pills[window], pill.panel.isVisible
         else {
             retire(window)
@@ -207,7 +239,7 @@ final class SizeLimitOverlay {
 
     /// Closes and forgets a window's pill; ids are reused, so
     /// the map holds only pills currently showing or fading.
-    private func retire(_ window: CGWindowID) {
+    private func retire(_ window: Anchor) {
         guard let pill = pills.removeValue(forKey: window)
         else { return }
         pill.hideWork?.cancel()
@@ -252,7 +284,7 @@ final class SizeLimitOverlay {
         func pillForTest(
             _ window: CGWindowID
         ) -> (panel: CGRect, content: NSView?, plate: NSView)? {
-            pills[window].map {
+            pills[.window(window)].map {
                 ($0.panel.frame, $0.panel.contentView, $0.plate)
             }
         }

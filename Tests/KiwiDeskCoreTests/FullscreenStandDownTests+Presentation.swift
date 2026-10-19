@@ -70,8 +70,8 @@ extension FullscreenStandDownTests {
         core.resolveSpaceDisplays(mainID: display.id)
         let space = core.state.workspaces.space(of: Self.show)!
         core.state.workspaces.setMode(space, .scrolling)
-        core.tiler.settings.scrolling.appBar.enabled = true
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.scrolling.appBar.visibility = .always
+        core.tiler.settings.spaceBarStyle.visibility = .always
         core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }

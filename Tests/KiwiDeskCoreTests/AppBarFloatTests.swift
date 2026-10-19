@@ -91,7 +91,8 @@ struct AppBarFloatTests {
                 visible: CGRect(x: 0, y: 0, width: 1440, height: 900),
                 settings: core.tiler.settings,
                 spaceItems: nil,
-                app: app
+                app: app,
+                drawn: { $0.drawnAtRest }
             ).first
         )
         let bar = try #require(

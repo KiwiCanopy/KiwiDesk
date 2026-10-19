@@ -198,7 +198,7 @@ struct UnsolicitedResizeTests {
         core.resolveSpaceDisplays(mainID: display.id)
         let space = try #require(core.state.workspaces.space(of: w))
         core.state.workspaces.setMode(space, .floating)
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.visibility = .always
         core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }

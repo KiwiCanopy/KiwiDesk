@@ -14,15 +14,21 @@ struct ShelfShowLabelTests {
     func labelsNameTheirLayout() {
         LocalizationManager.shared.select("en")
         let monocle = SettingsCensusLabel.label(
-            for: .layoutAppBar(.monocleAppBarEnabled)
+            for: .layoutAppBar(.monocleAppBarVisibility)
         )
         #expect(monocle == "App Bar in Monocle")
-        #expect(SettingsCatalog.bars.monocleShowIn.text == monocle)
+        #expect(
+            SettingsCatalog.bars.kiwishelfShowEach.children.monocleShowIn.text
+                == monocle
+        )
         let scrolling = SettingsCensusLabel.label(
-            for: .layoutAppBar(.scrollingAppBarEnabled)
+            for: .layoutAppBar(.scrollingAppBarVisibility)
         )
         #expect(scrolling == "App Bar in Scrolling")
-        #expect(SettingsCatalog.bars.scrollingShowIn.text == scrolling)
+        #expect(
+            SettingsCatalog.bars.kiwishelfShowEach.children.scrollingShowIn
+                .text == scrolling
+        )
     }
 
     /// Which layout a label names is declared twice — on the

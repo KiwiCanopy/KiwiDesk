@@ -19,7 +19,7 @@ struct MinSizeAxisChoiceTests {
             gaps: Gaps(),
             minWindowSize: floor
         )
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         return context
     }
 

@@ -89,7 +89,10 @@ struct ShelfRevealStartTests {
 
     @Test("The reveal delay ends the hover in the reveal's own pass")
     func revealEndsTheHoverInOnePass() {
-        let key = ShelfManager.Key(display: DisplayID(1), edge: .top)
+        let key = ShelfRevealer.Key(
+            shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+            bar: .space
+        )
         let revealer = ShelfRevealer()
         var timers: [() -> Void] = []
         let point = CGPoint(x: 500, y: 770)
@@ -109,11 +112,10 @@ struct ShelfRevealStartTests {
             )
         }
         revealer.sync([
-            key: ShelfRevealer.Target(
+            key: ShelfRevealer.Target.hovering(
                 edge: .top,
                 strip: CGRect(x: 0, y: 735, width: 1000, height: 40),
-                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-                bars: [.space]
+                screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
             )
         ])
         revealer.moved(to: point)

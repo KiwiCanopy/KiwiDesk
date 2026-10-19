@@ -74,7 +74,7 @@ struct RestoredFrameDebtTests {
         core.tiler.visibleBounds = { _ in Self.bounds }
         core.tiler.allScreenBounds = { [Self.bounds] }
         core.tiler.settings.animations.onRelayout = false
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.state.apply(.displaysChanged([display]))
         core.state.apply(
             .windowCreated(

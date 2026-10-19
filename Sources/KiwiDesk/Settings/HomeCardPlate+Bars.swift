@@ -105,10 +105,10 @@ struct HomeCardBarsTile: View {
         shelf.drawnBorderWidth * Self.indicatorPerPoint * scale
     }
 
-    /// The App Bar the preview draws: the first layout that
-    /// shows one, or nil when none does.
+    /// The App Bar the preview draws: the first layout whose bar
+    /// is not hidden (#761), or nil when none is.
     private var appBarLook: AppBarLook? {
-        settings.appBarHosts.first(where: \.enabled).map {
+        settings.appBarHosts.first { $0.visibility.showsUnprompted }.map {
             settings.appBarLook(for: $0)
         }
     }
@@ -134,8 +134,8 @@ struct HomeCardBarsTile: View {
     /// edge `barEdges` lists first (`ShelfGeometry.strips`, #1731).
     var rowsRunFullWidth: Bool {
         settings.barEdges(
-            space: settings.spaceBarStyle.enabled,
-            app: showsAppBar && appBarLook != nil
+            space: spaceSpecIfShown != nil ? .always : nil,
+            app: showsAppBar && appBarLook != nil ? .always : nil
         ).first?.edge.isHorizontal ?? false
     }
 
@@ -220,7 +220,7 @@ struct HomeCardBarsTile: View {
     }
 
     private var spaceSpecIfShown: BarSpec? {
-        settings.spaceBarStyle.enabled
+        settings.spaceBarStyle.visibility.showsUnprompted
             ? spaceSpec(settings.spaceBarLook) : nil
     }
 

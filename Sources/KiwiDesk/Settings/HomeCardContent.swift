@@ -39,8 +39,9 @@ enum HomeCardContent {
                 inner
             )
         case .bars:
+            let spaceShown = settings.spaceBarStyle.visibility.showsUnprompted
             let edge = edgeName(
-                settings.spaceBarStyle.enabled
+                spaceShown
                     ? settings.spaceBarStyle.edge : settings.appBarStyle.edge
             )
             if settings.bothBarsCanShow, settings.sharedBarEdge == nil {
@@ -51,7 +52,7 @@ enum HomeCardContent {
                     edgeName(settings.appBarStyle.edge)
                 )
             }
-            if settings.spaceBarStyle.enabled {
+            if spaceShown {
                 return L(
                     "home.card.bars.shelf_subtitle",
                     "KiwiShelf · %1$@",
@@ -59,8 +60,8 @@ enum HomeCardContent {
                 )
             }
             return L(
-                "home.card.bars.shelf_subtitle_space_off",
-                "KiwiShelf · %1$@ · Space Bar off",
+                "home.card.bars.shelf_subtitle_space_hidden",
+                "KiwiShelf · %1$@ · Space Bar hidden",
                 edge
             )
         case .looks:

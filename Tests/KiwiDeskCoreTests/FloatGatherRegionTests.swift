@@ -44,7 +44,7 @@ struct FloatGatherRegionTests {
         // Pin the bar with the display (#660): the region is the
         // bounds with the painted strips carved off, and the
         // strip clause below turns one on deliberately.
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         // And the ring: the grid is laid over the grow bound,
         // which reserves the ring's reach on every edge (#1091).
         core.tiler.settings.borderStyle.enabled = false
@@ -82,7 +82,7 @@ struct FloatGatherRegionTests {
         // tell them apart (guard-prover).
         core.tiler.settings.borderStyle.enabled = true
         #expect(core.floatRingInset > 0)
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.visibility = .always
         core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
         core.updateBars()

@@ -46,7 +46,7 @@ struct FloatGatherRepartitionTests {
         core.tiler.visibleBounds = { _ in Self.bounds }
         core.tiler.allScreenBounds = { [Self.bounds] }
         core.tiler.settings.animations.onRelayout = false
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.tiler.settings.borderStyle.enabled = false
         core.tiler.settings.monocle.hideStyle = .park
         core.state.apply(.displaysChanged([display]))

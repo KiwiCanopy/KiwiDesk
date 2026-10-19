@@ -320,7 +320,7 @@ struct GlyphGapPlanTests {
             )
         }
         let app = KiwiCore.AppBarContent(
-            space: Space(id: "s", windows: []),
+            space: Space(id: "s", mode: .monocle),
             style: settings.appBarLook(for: settings.monocle.appBar),
             groups: windows.map { [$0.id] },
             items: windows
@@ -330,7 +330,8 @@ struct GlyphGapPlanTests {
                 visible: CGRect(x: 0, y: 0, width: 3000, height: 800),
                 settings: settings,
                 spaceItems: items,
-                app: app
+                app: app,
+                drawn: { $0.drawnAtRest }
             ).first,
             let slot = plan.arrangement.space
         else { return -1 }

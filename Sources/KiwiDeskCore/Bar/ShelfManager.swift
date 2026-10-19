@@ -95,6 +95,19 @@ final class ShelfManager {
     }
     private var last: [Key: Shelf] = [:]
 
+    /// The strip last laid on `display` carrying `bar`, else any on
+    /// that display, in AX coordinates (#761).
+    func drawnStrip(
+        on display: DisplayID,
+        preferring bar: ShelfBar
+    ) -> (strip: CGRect, edge: AppBarEdge)? {
+        let shown = last.values.filter { $0.display == display }
+        let carrying = shown.first {
+            bar == .space ? $0.space != nil : $0.app != nil
+        }
+        return (carrying ?? shown.first).map { ($0.strip, $0.edge) }
+    }
+
     /// Every shelf strip last laid, in AX coordinates, with the
     /// edge it sits on.
     var drawnStrips: [(strip: CGRect, edge: AppBarEdge)] {
@@ -115,7 +128,7 @@ final class ShelfManager {
             peek.shelfLeft(overlay.panel)
             overlay.hide(animated: true)
             // A kept hiding shelf whose edge stopped hiding goes.
-            if !overlay.isVisible, reveal.targets[key] == nil {
+            if !overlay.isVisible, !reveal.hasTarget(on: key) {
                 overlays[key] = nil
             }
         }
@@ -214,7 +227,7 @@ final class ShelfManager {
     private func retire(_ key: Key) {
         // A hiding shelf that retracted is kept, ordered out, for
         // its next reveal (#761): a hiding edge is not an empty one.
-        guard last[key] == nil, reveal.targets[key] == nil else { return }
+        guard last[key] == nil, !reveal.hasTarget(on: key) else { return }
         overlays[key] = nil
     }
 

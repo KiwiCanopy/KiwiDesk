@@ -49,9 +49,9 @@ struct ShelfDriverTests {
             $0.focused = Self.window
         }
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         settings.spaceBarStyle.showFrontApp = true
-        settings.scrolling.appBar.enabled = appBar
+        settings.scrolling.appBar.visibility = appBar ? .always : .hidden
         settings.barEdge = .top
         settings.kiwishelf.thickness = 40
         core.tiler.settings = settings

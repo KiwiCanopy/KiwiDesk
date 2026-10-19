@@ -65,6 +65,13 @@ extension APIReference {
         map["drag.set_drop_zone_border_width"] = "border.set_width"
         map["drag.set_corner_radius"] = "border.set_corner_style"
         map["pull_or_spawn"] = "focus_or_spawn"
+        // A bar is never off, only hidden until its shortcut (#761).
+        map["space_bar.set_enabled"] = "space_bar.set_visibility"
+        for layout in ["monocle", "scroll"] {
+            map["\(layout).set_app_bar_enabled"] =
+                "\(layout).set_app_bar_visibility"
+        }
+        map["app_bar.set_visibility"] = "monocle.set_app_bar_visibility"
         // KiwiHub's sides open through one verb (#2265).
         for verb in [
             "show_jump_to_window", "show_shortcuts", "show_layout_picker",

@@ -91,7 +91,7 @@ extension FullscreenStandDownTests {
         core.state.apply(.windowCreated(barTitleWindow()))
         core.resolveSpaceDisplays(mainID: display.id)
         core.state.apply(.windowFocused(barWindow))
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.visibility = .always
         core.tiler.settings.spaceBarStyle.showFrontApp = true
         // Since #937 an icon-only App Bar no longer stands down;
         // it stays silent here only because no App Bar is ever

@@ -61,11 +61,9 @@ public enum LookKeys {
     static let leftOut: [String: String] = [
         "kiwishelf.minimum": "how much of each bar shows once the "
             + "shelf is full — which items are visible",
-        "space_bar.enabled": functionality,
         "space_bar.reserve": functionality,
         "app_bar.reserve": functionality,
         "space_bar.visibility": functionality,
-        "app_bar.visibility": functionality,
         "kiwishelf.reveal_duration": functionality,
         "space_bar.glyph_span": functionality,
         "space_bar.inactive_content": functionality,

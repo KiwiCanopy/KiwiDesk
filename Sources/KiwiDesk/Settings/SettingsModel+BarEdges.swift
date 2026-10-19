@@ -24,6 +24,23 @@ extension SettingsModel {
         )
     }
 
+    /// Master Show binding (#761) — OPTIONAL, nil while the bars
+    /// show differently (`TilingSettings.uniformBarVisibility`). A
+    /// pick writes every bar's own value in one write; the getter
+    /// never stores.
+    var barVisibilityMaster: Binding<ShelfVisibility?> {
+        Binding(
+            get: { self.config.settings.uniformBarVisibility },
+            set: { visibility in
+                guard let visibility else { return }
+                var next = self.config.settings
+                next.setEveryBarVisibility(visibility)
+                guard next != self.config.settings else { return }
+                self.config.settings = next
+            }
+        )
+    }
+
     /// One bar's edge row — OPTIONAL, nil while its screens draw
     /// different edges (#1948); a pick sets that bar on every
     /// screen, clearing each screen's own edge.

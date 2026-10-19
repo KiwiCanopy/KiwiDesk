@@ -18,7 +18,7 @@ struct GestureStripPlate: View {
         GesturePlate {
             item.picture(t: 1, gestures: gestures)
         }
-        .opacity(item.isOff(settings, gestures) ? 0.5 : 1)
+        .opacity(item.isOff(gestures) ? 0.5 : 1)
         .contentShape(Rectangle())
         .onTapGesture { onLand(item) }
         .overlay(PlateToolTip(text: item.sentence(settings)))

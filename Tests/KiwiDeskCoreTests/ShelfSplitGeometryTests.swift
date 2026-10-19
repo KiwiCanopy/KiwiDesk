@@ -18,11 +18,11 @@ struct ShelfSplitGeometryTests {
     ) -> TilingSettings {
         var settings = TilingSettings()
         settings.kiwishelf.thickness = 32
-        settings.spaceBarStyle.enabled = spaceBar
+        settings.spaceBarStyle.visibility = spaceBar ? .always : .hidden
         settings.spaceBarStyle.edge = space
         settings.appBarStyle.edge = app
-        settings.monocle.appBar.enabled = true
-        settings.scrolling.appBar.enabled = true
+        settings.monocle.appBar.visibility = .always
+        settings.scrolling.appBar.visibility = .always
         return settings
     }
 
@@ -102,7 +102,7 @@ struct ShelfSplitPlanTests {
             )
         }
         return KiwiCore.AppBarContent(
-            space: Space(id: "s", windows: []),
+            space: Space(id: "s", mode: .monocle),
             style: settings.appBarLook(for: settings.monocle.appBar),
             groups: windows.map { [$0.id] },
             items: windows
@@ -121,7 +121,8 @@ struct ShelfSplitPlanTests {
             visible: CGRect(x: 0, y: 0, width: 1600, height: 1000),
             settings: settings,
             spaceItems: items(),
-            app: app(settings)
+            app: app(settings),
+            drawn: { $0.drawnAtRest }
         )
     }
 
@@ -132,8 +133,8 @@ struct ShelfSplitPlanTests {
     func stripsClearTheLayout() {
         let core = makeTestCore()
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.monocle.appBar.enabled = true
+        settings.spaceBarStyle.visibility = .always
+        settings.monocle.appBar.visibility = .always
         settings.spaceBarStyle.edge = .top
         settings.appBarStyle.edge = .left
         let visible = CGRect(x: 0, y: 0, width: 1600, height: 1000)
@@ -141,7 +142,8 @@ struct ShelfSplitPlanTests {
             visible: visible,
             settings: settings,
             spaceItems: items(),
-            app: app(settings)
+            app: app(settings),
+            drawn: { $0.drawnAtRest }
         )
         #expect(plans.count == 2)
         let bounds =

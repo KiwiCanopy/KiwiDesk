@@ -41,6 +41,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     /// Shortcuts' KiwiVision group: its toggle and, with #2103
     /// v3, each lens's (#2312).
     case kiwiVisionShortcuts
+    /// The bars' show/hide shortcuts (#761).
+    case kiwishelfShortcuts
     case kiwishelf
     case appliesImmediately
     case layers
@@ -87,13 +89,6 @@ enum SettingsContainer: CaseIterable, Hashable {
             // as a unit under Reduce transparency (#1418), the
             // Motion card's shape.
             return .runtime(.reduceTransparency)
-        case .appBar:
-            return .anyOf([
-                .layoutAppBar(.monocleAppBarEnabled),
-                .layoutAppBar(.scrollingAppBarEnabled),
-            ])
-        case .spaceBar:
-            return .setting(.spaceBar(.spaceBarEnabled))
         case .focusBorder:
             return .setting(.borders(.borderEnabled))
         case .motion:
@@ -102,13 +97,17 @@ enum SettingsContainer: CaseIterable, Hashable {
             // Glass's shape (#1418): the blur greys under Reduce
             // transparency, the dim is exempt.
             return .runtime(.reduceTransparency)
+        case .appBar, .spaceBar:
+            // A hidden bar's shortcut still shows it, so its style
+            // always matters (#761).
+            return nil
         case .accent, .advanced, .aiSetup, .readyMadePrompts,
             .kiwiVisionAppearance, .kiwiVisionClear,
             .kiwiVisionNeverDimmed, .kiwiVisionLenses,
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .grid, .kiwiHub,
-            .kiwiVisionShortcuts,
+            .kiwiVisionShortcuts, .kiwishelfShortcuts,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .layout,
             .looks, .luaBindings,

@@ -14261,30 +14261,48 @@ reflow paragraph of *Amended* below.
 :::unreleased
 *A shelf can hide; a reveal is an overlay*
 ([#761](https://github.com/KiwiCanopy/KiwiDesk/issues/761)).
-Each bar carries a visibility mode, `always` (the default) or
-`auto`; there is no `never`, which is the bar turned off. The
-unit that hides is the shelf on one edge, and a hiding edge
-reserves only a constant sliver — the full shelf's own rule with
-the dots' depth in place of its thickness, so its windows stand
-their outer gap clear of the dots, which sat lost on a window's
-border while the edge reserved nothing. That makes "a reveal never
-retiles" true by
-construction: a reveal only redraws the bars, and setting the
-mode is the one change that can move the windows. Hiding while
-still reserving the full strip was rejected (the user would give up the
-information and keep paying the area).
+Each bar carries one of three values, `always`, `auto` or
+`hidden` (owner, 2026-10-19); the on/off switches are retired,
+`hidden` taking their place. A bar turned off and a bar shown
+only on its shortcut look alike at rest, so two of them asked
+every user to tell apart two states the screen does not, and an
+off bar's shortcut doing nothing was a dead key. The App Bar's
+value is per layout, replacing the per-layout switch one for one:
+a switch between layouts with different values moves the windows
+by the strip, the cost the per-layout switch already carried. An
+`auto` edge reserves only a constant sliver — the full shelf's
+own rule with the dots' depth in place of its thickness, so its
+windows stand their outer gap clear of the dots, which sat lost
+on a window's border while the edge reserved nothing — and a
+`hidden` one nothing. That makes "a reveal never retiles" true by
+construction: a reveal only redraws the bars, and setting a value
+is the one change that can move the windows. Hiding while still
+reserving the full strip was rejected (the user would give up the
+information and keep paying the area). An update changes nothing
+a user sees: a bar stored on becomes `always`, one stored off
+`hidden`; a fresh install's starter takes `auto`.
 
-Two bars that share an edge on any screen are one shelf, so
-they read one mode, through one reader, and a write to either
-writes both (owner, 2026-10-18). Judging the shared shelf by
-what each layout draws let a layout with no App Bar hide a shelf
-that Monocle kept shown, so every layout switch moved the
-windows; judging by the configured edges cannot flip. Where the
-stored modes disagree — a look or a hand edit fused two bars —
-the shelf stays shown, since hiding needs both bars' consent. The
-price is that bars linked on one screen and split on another take
-one mode everywhere. Storing the mode per edge would have agreed
-by construction, but would change a bar's mode when it moves.
+Each bar stores its own value, and an edge two bars share reserves
+for its MORE present bar: `always` over `auto` over `hidden`.
+Hiding inside a strip already paid for saves nothing, so an `auto`
+bar beside an `always` one stays shown, while a `hidden` one beside
+it still shows only on its shortcut, growing into the shelf. This
+replaced linking the two values (2026-10-18), which existed only
+because an edge hid as a unit; once a reveal names a bar, a fused
+edge needs no single answer, and a precedence fold cannot flip on
+a layout switch any more than the link could, since it reads the
+stored values and never what a layout draws. A shelf-wide master
+was refused for the reason the reserve refuses one: the bars may
+sit on different edges. That refuses a stored, linked value, not a
+Settings row: the Show master writes each bar's own value, as the
+Position master writes each bar's own edge, selects nothing while
+they differ, and links nothing — most setups give every bar one
+answer, so the master is the one decision a new user meets, and
+Each bar holds the rest.
+
+A shortcut shows only the bar it names. On an `always` bar it
+refuses with a pill on the bar, since the verb cannot show more of
+a bar already shown and must not hide one by writing a setting.
 
 The hover target is a band along the edge, never the dots'
 drawing, and the dots let the mouse through, so the windows under
@@ -14298,8 +14316,7 @@ every click target already does something, so nothing could
 release a pin. The show/hide action is the one pin. It stays
 until the next press by default, because a keyboard user who
 pressed to look has not said for how long; `reveal_duration`
-hides it again on its own, and is one value because a fused shelf
-is one shelf. No reveal on a Space switch: the dots already show
+hides it again on its own, one value for every bar. No reveal on a Space switch: the dots already show
 the new Space. A look never carries the mode, which is
 functionality, not styling.
 :::
@@ -15316,9 +15333,11 @@ fade where it says arrow.
 
 **The bar cards share one canonical row order.** (#374, re-cut
 by the #678 Phase 2 census render and by #1517.) The KiwiShelf
-card owns existence and placement: the Show group, then
-Position, Thickness, Alignment, Order and Space Bar minimum, then
-its Style and Margins drawers. Each bar's card shows every row,
+card owns existence and placement: the Show master and its Each
+bar drawer, then Position and its Each bar drawer, Alignment,
+Order and Space Bar minimum — where the bars sit, coarse to fine —
+then Thickness and its Style and Margins drawers. A master's drawer
+hangs under it with no rule, since a rule marks a new topic. Each bar's card shows every row,
 with no drawer, each gate directly above what it gates. Colours
 live in the one KiwiShelf colour card — signature colours
 inline, the rest behind a shut disclosure, the Space Bar's

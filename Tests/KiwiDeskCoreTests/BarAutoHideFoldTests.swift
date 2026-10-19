@@ -4,10 +4,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The auto-hide fold (#761) in `barEdges(space:app:)`: an edge
-/// hides only while every bar on it is `auto`, and a hiding edge
-/// reserves nothing, so a reveal draws over the windows.
-@Suite("Bar auto-hide fold (#761)")
+/// The visibility fold (#761) in `barEdges(space:app:)`: each bar
+/// is handed its own value, an edge two bars share reads its more
+/// present bar's, an `auto` edge reserves only its sliver and a
+/// `hidden` one nothing, so a reveal draws over the windows.
+@Suite("Bar visibility fold (#761)")
 struct BarAutoHideFoldTests {
     private func settings(
         space: ShelfVisibility,
@@ -18,41 +19,42 @@ struct BarAutoHideFoldTests {
         settings.spaceBarStyle.setEdge(.top)
         settings.appBarStyle.setEdge(appEdge)
         settings.spaceBarStyle.visibility = space
-        settings.appBarStyle.visibility = app
+        settings.monocle.appBar.visibility = app
+        settings.scrolling.appBar.visibility = app
         return settings
     }
 
-    @Test("A lone auto bar's edge hides and reserves nothing")
+    @Test("A lone auto bar's edge hides")
     func loneAutoHides() {
         let edges = settings(space: .auto, app: .always, appEdge: .bottom)
-            .barEdges(space: true, app: false)
-        #expect(edges == [ShelfEdge(.top, reserves: true, hides: true)])
-    }
-
-    @Test("A fused edge hides only while both bars are auto")
-    func fusedHidesOnlyTogether() {
-        let mixed = settings(space: .auto, app: .always)
-            .barEdges(space: true, app: true)
-        #expect(mixed == [ShelfEdge(.top, reserves: true, hides: false)])
-        let otherMixed = settings(space: .always, app: .auto)
-            .barEdges(space: true, app: true)
+            .barEdges(space: .auto, app: nil)
         #expect(
-            otherMixed == [ShelfEdge(.top, reserves: true, hides: false)]
+            edges == [ShelfEdge(.top, reserves: true, bars: [.space: .auto])]
         )
-        let both = settings(space: .auto, app: .auto)
-            .barEdges(space: true, app: true)
-        #expect(both == [ShelfEdge(.top, reserves: true, hides: true)])
+        #expect(edges[0].hides)
     }
 
-    /// The drift review found: a layout that draws no App Bar must
-    /// not hide a shelf the App Bar shares by edge (#761 ruling).
-    @Test("Linked bars hide alike in every layout")
-    func linkedHideIsLayoutFree() {
+    @Test("A fused edge hides only while no bar on it is always")
+    func fusedHidesOnlyTogether() {
+        let base = TilingSettings()
+        #expect(!base.barEdges(space: .auto, app: .always)[0].hides)
+        #expect(!base.barEdges(space: .always, app: .auto)[0].hides)
+        #expect(base.barEdges(space: .auto, app: .auto)[0].hides)
+        #expect(base.barEdges(space: .auto, app: .hidden)[0].hides)
+    }
+
+    /// A layout switch moves windows only where the two layouts'
+    /// App Bar values differ — the fold reads stored values, never
+    /// what a layout draws.
+    @Test("A layout switch moves nothing between equal App Bar values")
+    func layoutSwitchIsValueBound() {
         let mixed = settings(space: .auto, app: .always)
-        #expect(mixed.barsLinked)
-        for mode in LayoutMode.allCases {
+        for mode in [LayoutMode.monocle, .scrolling] {
             #expect(mixed.shelfEdges(in: mode, on: nil) == [.top])
         }
+        // A layout with no App Bar reads the Space Bar alone.
+        #expect(mixed.shelfEdges(in: .bsp, on: nil).isEmpty)
+        #expect(mixed.hidingEdges(in: .bsp, on: nil) == [.top])
         let both = settings(space: .auto, app: .auto)
         for mode in LayoutMode.allCases {
             #expect(both.shelfEdges(in: mode, on: nil).isEmpty)
@@ -60,37 +62,23 @@ struct BarAutoHideFoldTests {
         }
     }
 
-    @Test("A per-screen shared edge links the bars everywhere")
-    func linkedOnAnyScreen() {
-        var split = settings(space: .auto, app: .always, appEdge: .bottom)
-        #expect(!split.barsLinked)
-        #expect(split.visibility(of: .space) == .auto)
-        split.appBarStyle.edgeOverride = ["S:1x1": .top]
-        #expect(split.barsLinked)
-        #expect(split.visibility(of: .space) == .always)
-        #expect(split.onScreen(nil).spaceBarStyle.visibility == .always)
-    }
-
-    @Test("The write door writes both linked bars, one apart")
-    func writeDoor() {
-        var linked = settings(space: .always, app: .always)
-        linked.setVisibility(.auto, of: .app)
-        #expect(linked.spaceBarStyle.visibility == .auto)
-        #expect(linked.appBarStyle.visibility == .auto)
-        var apart = settings(space: .always, app: .always, appEdge: .left)
-        apart.setVisibility(.auto, of: .app)
-        #expect(apart.spaceBarStyle.visibility == .always)
-        #expect(apart.appBarStyle.visibility == .auto)
+    @Test("Each bar keeps its own value on a shared edge")
+    func valuesAreNotLinked() {
+        var shared = settings(space: .always, app: .always)
+        shared.monocle.appBar.visibility = .auto
+        #expect(shared.spaceBarStyle.visibility == .always)
+        #expect(shared.appBarVisibility(in: .monocle) == .auto)
+        #expect(shared.appBarVisibility(in: .scrolling) == .always)
     }
 
     @Test("Split bars hide on their own edges")
     func splitHidesApart() {
         let edges = settings(space: .auto, app: .always, appEdge: .bottom)
-            .barEdges(space: true, app: true)
+            .barEdges(space: .auto, app: .always)
         #expect(
             edges == [
-                ShelfEdge(.top, reserves: true, hides: true),
-                ShelfEdge(.bottom, reserves: true, hides: false),
+                ShelfEdge(.top, reserves: true, bars: [.space: .auto]),
+                ShelfEdge(.bottom, reserves: true, bars: [.app: .always]),
             ]
         )
     }
@@ -128,14 +116,16 @@ struct BarAutoHideFoldTests {
             try JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         let space = try #require(root["space_bar"] as? [String: Any])
-        let app = try #require(root["app_bar"] as? [String: Any])
+        let layouts = try #require(root["layout"] as? [String: Any])
+        let monocle = try #require(layouts["monocle"] as? [String: Any])
+        let app = try #require(monocle["app_bar"] as? [String: Any])
         let shelf = try #require(root["kiwishelf"] as? [String: Any])
         #expect(space["visibility"] as? String == "auto")
         #expect(app["visibility"] as? String == "auto")
         #expect(shelf["reveal_duration"] as? Double == 5)
         let back = try JSONDecoder().decode(TilingSettings.self, from: data)
         #expect(back.spaceBarStyle.visibility == .auto)
-        #expect(back.appBarStyle.visibility == .auto)
+        #expect(back.monocle.appBar.visibility == .auto)
         #expect(back.kiwishelf.revealDuration == 5)
     }
 
@@ -156,23 +146,24 @@ struct BarAutoHideFoldTests {
     @Test("The visibility mode is functionality, never a look's")
     func lookLeavesItOut() {
         for key in [
-            "space_bar.visibility", "app_bar.visibility",
-            "kiwishelf.reveal_duration",
+            "space_bar.visibility", "kiwishelf.reveal_duration",
         ] {
             #expect(!LookKeys.all.contains(key))
             #expect(LookKeys.leftOut[key] != nil)
         }
     }
 
-    @Test("A bar's action is live only while it is on and auto")
+    @Test("A bar's action is live wherever it is not always")
     func actionLiveness() {
         var settings = settings(space: .auto, app: .auto)
-        #expect(settings.revealActionLive(.space))
-        settings.spaceBarStyle.enabled = false
-        #expect(!settings.revealActionLive(.space))
-        settings.spaceBarStyle.enabled = true
-        settings.setVisibility(.always, of: .space)
-        #expect(!settings.revealActionLive(.space))
-        #expect(!settings.revealActionLive(.app))
+        #expect(settings.revealActionLive(.space, in: .bsp))
+        settings.spaceBarStyle.visibility = .hidden
+        #expect(settings.revealActionLive(.space, in: .bsp))
+        settings.spaceBarStyle.visibility = .always
+        #expect(!settings.revealActionLive(.space, in: .bsp))
+        #expect(settings.revealActionLive(.app, in: .monocle))
+        #expect(!settings.revealActionLive(.app, in: .bsp))
+        settings.monocle.appBar.visibility = .always
+        #expect(!settings.revealActionLive(.app, in: .monocle))
     }
 }

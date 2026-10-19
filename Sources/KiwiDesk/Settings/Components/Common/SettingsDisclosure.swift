@@ -9,6 +9,9 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     enum Chrome {
         /// Inside a section card under a hairline rule.
         case inline
+        /// Inside a section card, under the master row it details:
+        /// no rule, since a rule marks a new topic.
+        case attached
         /// Standalone card with background and padding.
         case card
     }
@@ -79,14 +82,14 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
 
     var body: some View {
         switch chrome {
-        case .inline:
+        case .inline, .attached:
             if scrollHoisted {
-                inlineRuled.preference(
+                inlineBody.preference(
                     key: HoistedRevealAnchorsKey.self,
                     value: [control]
                 )
             } else {
-                inlineRuled.searchAnchorCard(control)
+                inlineBody.searchAnchorCard(control)
             }
         case .card:
             group
@@ -119,9 +122,11 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         }
     }
 
-    private var inlineRuled: some View {
+    private var inlineBody: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SettingsTheme.hairline.frame(height: 1)
+            if chrome == .inline {
+                SettingsTheme.hairline.frame(height: 1)
+            }
             group
         }
         .padding(.top, 4)

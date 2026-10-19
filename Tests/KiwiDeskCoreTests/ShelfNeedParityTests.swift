@@ -187,7 +187,7 @@ struct ShelfFloorWiringTests {
             )
         }
         let app = KiwiCore.AppBarContent(
-            space: Space(id: "s", windows: []),
+            space: Space(id: "s", mode: .monocle),
             style: settings.appBarLook(for: settings.monocle.appBar),
             groups: windows.map { [$0.id] },
             items: windows
@@ -196,7 +196,8 @@ struct ShelfFloorWiringTests {
             visible: CGRect(x: 0, y: 0, width: 600, height: 400),
             settings: settings,
             spaceItems: spaces,
-            app: app
+            app: app,
+            drawn: { $0.drawnAtRest }
         )
         #expect(plans.count == 1)
         let plan = try #require(plans.first)

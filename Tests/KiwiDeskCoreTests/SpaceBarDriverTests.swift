@@ -276,14 +276,14 @@ struct SpaceBarSameEdgeTests {
     @Test("Predicate honors each bar's enablement")
     func predicate() {
         var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         #expect(settings.bothBarsCanShow)
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         #expect(!settings.bothBarsCanShow)
-        settings.monocle.appBar.enabled = true
+        settings.monocle.appBar.visibility = .always
         #expect(settings.bothBarsCanShow)
-        settings.spaceBarStyle.enabled = false
+        settings.spaceBarStyle.visibility = .hidden
         #expect(!settings.bothBarsCanShow)
     }
 }

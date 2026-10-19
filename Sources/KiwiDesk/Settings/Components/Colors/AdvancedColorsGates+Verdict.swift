@@ -25,16 +25,10 @@ struct ColorRowVerdict: Equatable {
 }
 
 extension AdvancedColorsGates {
-    /// The verdict for one row; nil while it draws. The shelf's
-    /// block gate outranks a row's own reason, so the outer switch
-    /// is the one named (#527).
+    /// The verdict for one row; nil while it draws. No bar's
+    /// visibility greys a colour: a hidden bar's shortcut still
+    /// shows it (#761).
     func verdict(for key: SettingKey) -> ColorRowVerdict? {
-        if !shelfDraws, Self.takesShelfGate(key) {
-            return ColorRowVerdict(
-                help: AdvancedColorsHelp.kiwishelfOff,
-                link: .page(.bars)
-            )
-        }
         switch key {
         case .kiwishelf(.borderColor):
             return shelfBorderOff
@@ -44,20 +38,16 @@ extension AdvancedColorsGates {
                 ) : nil
         case .spaceBar(.spaceBarFocusedItemColor):
             guard focusedItemInert else { return nil }
-            return spaceBarOff
-                ? spaceBarOffVerdict
-                : ColorRowVerdict(
-                    help: AdvancedColorsHelp.focusedItemHelp,
-                    link: .ownSentence(.bars)
-                )
+            return ColorRowVerdict(
+                help: AdvancedColorsHelp.focusedItemHelp,
+                link: .ownSentence(.bars)
+            )
         case .spaceBar(.spaceBarFocusedHighlightColor):
             guard focusedHighlightInert else { return nil }
-            return !settings.spaceBarLook.enabled
-                ? spaceBarOffVerdict
-                : ColorRowVerdict(
-                    help: AdvancedColorsHelp.frontAppOff,
-                    link: .page(.bars)
-                )
+            return ColorRowVerdict(
+                help: AdvancedColorsHelp.frontAppOff,
+                link: .page(.bars)
+            )
         case .borders(.borderFocusedColor):
             return borderOn ? nil : borderOffVerdict
         case .borders(.borderUnfocusedColor):
@@ -78,20 +68,6 @@ extension AdvancedColorsGates {
             return dragVerdict(ghost: false, fill: true)
         default:
             return nil
-        }
-    }
-
-    /// Whether the shelf's block gate reaches `key`: the bar rows,
-    /// save one the census exempts from its container gate.
-    nonisolated static func takesShelfGate(
-        _ key: SettingKey
-    ) -> Bool {
-        guard !key.placement.exemptFromContainerGate else {
-            return false
-        }
-        switch key {
-        case .kiwishelf, .spaceBar: return true
-        default: return false
         }
     }
 
@@ -118,17 +94,6 @@ extension AdvancedColorsGates {
     func needsOwnSentence(_ key: SettingKey) -> Bool {
         if case .ownSentence = verdict(for: key)?.link { return true }
         return false
-    }
-
-    private var spaceBarOff: Bool {
-        bars.containerReason(for: .spaceBar) != nil
-    }
-
-    private var spaceBarOffVerdict: ColorRowVerdict {
-        ColorRowVerdict(
-            help: BarsGateHelp.sentence(for: .spaceBarOff),
-            link: .page(.bars)
-        )
     }
 
     private var borderOffVerdict: ColorRowVerdict {

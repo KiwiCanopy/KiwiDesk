@@ -50,8 +50,6 @@ struct ColorsVerdictAnchorTests {
     /// Every combination of the switches the area's gates read.
     private func states() -> [TilingSettings] {
         let flags: [WritableKeyPath<TilingSettings, Bool>] = [
-            \.spaceBarStyle.enabled,
-            \.monocle.appBar.enabled,
             \.spaceBarStyle.showFrontApp,
             \.kiwishelf.border,
             \.borderStyle.enabled,
@@ -66,7 +64,7 @@ struct ColorsVerdictAnchorTests {
         var out: [TilingSettings] = []
         for mask in 0..<(1 << (flags.count + 1)) {
             var settings = TilingSettings()
-            settings.scrolling.appBar.enabled = false
+            settings.scrolling.appBar.visibility = .hidden
             for (bit, flag) in flags.enumerated() {
                 settings[keyPath: flag] = mask & (1 << bit) != 0
             }
@@ -80,7 +78,7 @@ struct ColorsVerdictAnchorTests {
     @Test("every dimmed row is explained beneath its card")
     func everyDimmedRowIsAnchored() {
         let all = states()
-        #expect(all.count == 8192)
+        #expect(all.count == 2048)
         var dimmed = 0
         for settings in all {
             let gates = AdvancedColorsGates(settings: settings)
@@ -109,9 +107,9 @@ struct ColorsVerdictAnchorTests {
                                 "\(key.id): no link to \(destination)"
                             )
                         } else {
-                            // The header `?` answers it: only the
-                            // block gate may reach this card.
-                            #expect(!gates.shelfDraws, "\(key.id)")
+                            // No block gate is left to answer a
+                            // page link in a card that draws none.
+                            Issue.record("\(key.id): unanswered link")
                         }
                     }
                 }

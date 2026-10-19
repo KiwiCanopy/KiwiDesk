@@ -11,10 +11,8 @@ struct KiwiShelfColorCard: View {
     }
 
     var body: some View {
-        // Section header help provides the block gate anchor (#527).
         SettingsSection(
-            SettingsCatalog.advancedColors.kiwishelfGroup,
-            help: gates.shelfDraws ? nil : AdvancedColorsHelp.kiwishelfOff
+            SettingsCatalog.advancedColors.kiwishelfGroup
         ) {
             ColorGrid {
                 AdvancedColorRows(

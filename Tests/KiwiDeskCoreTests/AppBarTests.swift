@@ -125,7 +125,7 @@ struct ScrollingBarGeometryTests {
             gaps: .uniform(10)
         )
         context.scrolling.orientation = orientation
-        context.scrolling.appBar.enabled = barEnabled
+        context.scrolling.appBar.visibility = barEnabled ? .always : .hidden
         return context
     }
 
