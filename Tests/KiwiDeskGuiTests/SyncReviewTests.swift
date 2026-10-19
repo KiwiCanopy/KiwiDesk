@@ -81,6 +81,26 @@ struct SyncReviewTests {
         #expect(row.key == .gaps(.outer))
         #expect(row.theirs.hasPrefix("mixed ("), "\(row.theirs)")
         #expect(row.theirs.contains("Left: 4 pt"), "\(row.theirs)")
+        // The folded row answers every edge the draft wrote.
+        #expect(model.sync.review?.yourOthers == 0)
+    }
+
+    /// The edge list is joined in the app's language, never the
+    /// Mac's: asked in two languages, so a join that follows the
+    /// host reds on any host whatever its own language.
+    @Test("a mixed side's list joins in the app's language")
+    func mixedListJoinsInTheAppLanguage() throws {
+        defer { LocalizationManager.shared.select("en") }
+        for (language, conjunction) in [("en", " and "), ("de", " und ")] {
+            LocalizationManager.shared.select(language)
+            let (core, model) = try setup()
+            model.config.settings.gapsGlobal.outer = outer(12)
+            theirSettings(core) { $0.gapsGlobal.outer.left = 4 }
+            model.adoptSyncedChange(change)
+            #expect(model.reviewSyncConflicts())
+            let row = try #require(model.sync.review?.rows.first)
+            #expect(row.theirs.contains(conjunction), "\(row.theirs)")
+        }
     }
 
     @Test("edges the draft set apart are a row each")

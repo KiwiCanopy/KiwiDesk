@@ -57,6 +57,46 @@ struct SyncReviewCountTests {
         #expect(model.sync.review?.taken == 1)
     }
 
+    /// A group taken in whole and split by a later arrival counts
+    /// each edge it now holds apart.
+    @Test("a group split by a later arrival counts per edge")
+    func takenSplitsLater() throws {
+        let (core, model) = try setup()
+        model.config.modeCycle = [.stack, .monocle]
+        core.tiler.settings.gapsGlobal.outer = .init(
+            top: 6,
+            bottom: 6,
+            left: 6,
+            right: 6
+        )
+        model.adoptSyncedChange(change)
+        core.tiler.settings.gapsGlobal.outer.top = 2
+        try theirs(core) { $0.modeCycle = [.bsp, .stack] }
+        model.adoptSyncedChange(change)
+        #expect(model.reviewSyncConflicts())
+        #expect(model.sync.review?.taken == 4)
+    }
+
+    /// A taken edge in a group whose other edges are questions is
+    /// counted apart, never folded over them.
+    @Test("taken edges beside question edges count apart")
+    func takenBesideQuestionsCountsApart() throws {
+        let (core, model) = try setup()
+        model.config.settings.gapsGlobal.outer.top = 20
+        model.config.settings.gapsGlobal.outer.left = 30
+        core.tiler.settings.gapsGlobal.outer = .init(
+            top: 5,
+            bottom: 5,
+            left: 5,
+            right: 5
+        )
+        model.adoptSyncedChange(change)
+        #expect(model.reviewSyncConflicts())
+        let review = try #require(model.sync.review)
+        #expect(review.rows.count == 2)
+        #expect(review.taken == 2)
+    }
+
     /// The Space Bar's edge writer lays the draft's edge back over
     /// the other Mac's per-screen map: that map is the question's,
     /// never "taken in" nor one of the draft's other edits.
@@ -118,8 +158,14 @@ struct SyncReviewCountTests {
         #expect(model.reviewSyncConflicts())
         let row = try #require(model.sync.review?.rows.first)
         #expect(row.key == .behaviour(.minWindowSize))
-        // Six widths listed, no height.
-        #expect(row.theirs.components(separatedBy: ": ").count == 7)
+        // Every width listed, no height.
+        let widths =
+            SettingKey.summaryAxes[.behaviour(.minWindowSize)]?.first?
+            .count ?? 0
+        #expect(widths > 0)
+        #expect(
+            row.theirs.components(separatedBy: ": ").count == widths + 1
+        )
     }
 
     /// An arrival while the sheet is up closes it: the values it

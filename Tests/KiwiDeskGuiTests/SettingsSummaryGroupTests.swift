@@ -112,7 +112,9 @@ struct SettingsSummaryGroupTests {
                 checked += 1
             }
         }
-        #expect(checked == fixtures.count * 3)
+        #expect(
+            checked == fixtures.count * SettingKey.summaryAxes.count
+        )
     }
 
     /// An axis holds one kind of value: a group of one axis may mix
@@ -120,7 +122,9 @@ struct SettingsSummaryGroupTests {
     /// component (width, height).
     @Test("each axis of a multi-axis group is one kind")
     func axesAreHomogeneous() {
+        var checked = 0
         for (master, axes) in SettingKey.summaryAxes where axes.count > 1 {
+            checked += 1
             for axis in axes {
                 let kinds = Set(
                     axis.map { $0.id.split(separator: ".").last ?? "" }
@@ -128,6 +132,8 @@ struct SettingsSummaryGroupTests {
                 #expect(kinds.count == 1, "\(master): \(kinds)")
             }
         }
+        // The minimum window size group is the multi-axis case.
+        #expect(checked > 0)
     }
 
     @Test("every group is a master over members under its path")

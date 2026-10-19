@@ -133,15 +133,11 @@ extension SettingsModel {
         lookReachEdits = look
         suppressDirty = false
         recomputeDirty()
-        let asked = conflicts.reduce(into: Set<SettingKey>()) {
-            $0.formUnion($1.answers)
-        }
         sync.arrived = isDirty ? change : nil
         sync.conflicts = isDirty ? conflicts : []
-        // Kept per member: the sheet folds it where it counts.
-        sync.taken =
-            isDirty
-            ? previousTaken.union(incoming).subtracting(asked) : []
+        // Every setting the other Mac changed, per member: the sheet
+        // leaves out what is still a question and folds the rest.
+        sync.taken = isDirty ? previousTaken.union(incoming) : []
     }
 
     private func conflict(
