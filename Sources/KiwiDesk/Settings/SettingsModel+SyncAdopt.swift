@@ -125,7 +125,7 @@ extension SettingsModel {
         let other = SettingsValueReadout.rows(for: key, old: base, new: theirs)
         return SyncConflict(
             key: key,
-            label: mine.first?.label ?? other.first?.label ?? key.id,
+            label: SettingsValueReadout.label(for: key),
             yours: Self.value(of: mine.first),
             theirs: Self.value(of: other.first),
             mac: nil
@@ -160,7 +160,7 @@ extension SettingsModel {
         let other = SettingsValueReadout.rows(for: key, old: base, new: theirs)
         return SyncConflict(
             key: owner,
-            label: lost.first?.label ?? key.id,
+            label: SettingsValueReadout.label(for: owner),
             yours: mine ?? "",
             theirs: Self.value(of: other.first),
             mac: nil

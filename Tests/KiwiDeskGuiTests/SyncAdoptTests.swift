@@ -81,6 +81,11 @@ struct SyncAdoptTests {
         #expect(model.config.modeCycle == [.stack, .monocle])
         #expect(model.sync.conflicts.map(\.key) == [.shortcuts(.modeCycle)])
         #expect(model.sync.conflicts.first?.mac == "Studio")
+        // Named as the setting, never as one of its readout rows.
+        #expect(
+            model.sync.conflicts.first?.label
+                == SettingsValueReadout.label(for: .shortcuts(.modeCycle))
+        )
 
         model.performPrimarySave()
         #expect(model.sync.question?.key == .shortcuts(.modeCycle))
