@@ -102,6 +102,18 @@ extension SettingsButtonStyleConventionTests {
                 "Invisible zero-size shortcut sink — Escape, "
                     + "focus-independently"
             ),
+            // And on Compare and Copy (#2324).
+            "SyncCompareSheet.swift": (
+                1, "escapeRoute",
+                "Invisible zero-size shortcut sink — Escape, "
+                    + "focus-independently"
+            ),
+            // The empty-folder alert's verbs, built in a property
+            // the `.alert` places (#2324).
+            "SyncAcrossMacsRow.swift": (
+                3, "firstCopyActions",
+                "Returned to the empty-folder alert's actions"
+            ),
         ]
     }
 
