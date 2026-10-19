@@ -9,21 +9,37 @@ import SwiftUI
 struct SettingsActionRow<Action: View>: View {
     let title: String
     let caption: String?
+    /// The caption is a file path: one selectable monospaced line,
+    /// cut in the middle.
+    var captionIsPath = false
     var help: String? = nil
+    /// What the `?` names for VoiceOver where the drawn title is
+    /// shorter than the action it explains; the title otherwise.
+    var helpSubject: String? = nil
     @ViewBuilder let button: Action
 
     var body: some View {
-        SettingsRowShape(labelFills: true) {
+        SettingsRowShape(controlTrails: true) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
                     // Drawn, not spoken: the button names itself.
                     Text(title)
                         .accessibilityHidden(true)
                     if let help {
-                        HelpButton(explanation: help, subject: title)
+                        HelpButton(
+                            explanation: help,
+                            subject: helpSubject ?? title
+                        )
                     }
                 }
-                if let caption {
+                if let caption, captionIsPath {
+                    Text(caption)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+                } else if let caption {
                     Text(caption)
                         .font(.caption)
                         .foregroundStyle(.secondary)

@@ -184,6 +184,7 @@ struct GeneralSection: View {
             title: "init.lua",
             caption: (model.configURL.path as NSString)
                 .abbreviatingWithTildeInPath,
+            captionIsPath: true,
             help: L(
                 "general.advanced.init_lua.help",
                 "Your Lua configuration file, for scripting "

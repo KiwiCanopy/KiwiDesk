@@ -45,7 +45,9 @@ extension GeneralSection {
                     + "Discarding it makes the next "
                     + "restore start clean — settings "
                     + "and profiles are untouched."
-            )
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.discardArrangement.text
         ) {
             Button(
                 L(
@@ -84,7 +86,9 @@ extension GeneralSection {
                     + "everything returns to a "
                     + "known-good default, the same "
                     + "state as a first launch."
-            )
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.resetAll.text
         ) {
             Button(L("general.advanced.reset_all.short", "Reset…")) {
                 confirmingReset = true

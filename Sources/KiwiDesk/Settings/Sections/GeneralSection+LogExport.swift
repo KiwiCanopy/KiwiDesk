@@ -23,7 +23,9 @@ extension GeneralSection {
                     + "macOS log; it names the apps and "
                     + "windows it managed in that time, so "
                     + "glance through it before attaching."
-            )
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.exportLog.text
         ) {
             HStack(spacing: 6) {
                 // Always drawn, faded when idle (gui.md ▸ grey,

@@ -7,16 +7,16 @@ import SwiftUI
 struct SettingsRowShape<Label: View, Control: View>: View {
     @Environment(\.settingsWidth) private var width
     @Environment(\.settingsLabelColumn) private var labelColumn
-    /// The label takes the row's free width and the control sits
-    /// trailing, instead of the shared label column — a titled,
-    /// captioned row with one action (the AI page's action rows).
-    var labelFills = false
+    /// A compact control — a menu, a stepper, an action row's
+    /// buttons — trails at its natural width and the label takes
+    /// the free width, instead of the shared label column (#2439).
+    var controlTrails = false
     @ViewBuilder let label: Label
     @ViewBuilder let control: Control
 
     var body: some View {
         let stacked = width.stacksRows
-        let column = stacked || labelFills ? nil : labelColumn
+        let column = stacked || controlTrails ? nil : labelColumn
         let layout =
             stacked
             ? AnyLayout(
@@ -31,7 +31,7 @@ struct SettingsRowShape<Label: View, Control: View>: View {
                 // away the identity `AnyLayout` is here to keep.
                 .frame(width: column, alignment: .leading)
                 .frame(
-                    maxWidth: labelFills ? .infinity : nil,
+                    maxWidth: controlTrails ? .infinity : nil,
                     alignment: .leading
                 )
             control

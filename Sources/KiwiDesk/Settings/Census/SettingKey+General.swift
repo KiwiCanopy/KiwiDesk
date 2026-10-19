@@ -113,12 +113,14 @@ extension GeneralKey {
                 help: "general.updates.install_automatically.help"
             )
         case .advancedConfigFile:
-            return .text("general.advanced.config_file")
-        case .advancedEditLua:
+            // The init.lua row (#2439): the search label names the
+            // file, the row draws its `?`.
             return .text(
-                "general.advanced.edit_lua",
+                "general.advanced.config_file",
                 help: "general.advanced.init_lua.help"
             )
+        case .advancedEditLua:
+            return .text("general.advanced.edit_lua")
         case .advancedDiscardArrangement:
             return .text(
                 "general.advanced.discard_arrangement",

@@ -27,7 +27,7 @@ extension GeneralSection {
     /// #281). Grid dimensions stay automatic
     /// (`QuitGridLayout.shape`, #1709).
     @ViewBuilder var quitPileDepthRow: some View {
-        SettingsRowShape(labelFills: true) {
+        SettingsRowShape(controlTrails: true) {
             SettingsRowLabel(label: pileLabel, help: pileHelp)
         } control: {
             StepperRow(

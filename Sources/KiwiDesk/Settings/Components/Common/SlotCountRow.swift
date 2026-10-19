@@ -56,7 +56,9 @@ struct SlotCountRow: View {
     }
 
     var body: some View {
-        SettingsRowShape(labelFills: true) {
+        // On the slider's control axis, not trailing: the count is
+        // the Percent slider's own second reading (#1382, #2439).
+        SettingsRowShape {
             SettingsRowLabel(
                 label: label,
                 help: L(

@@ -579,7 +579,7 @@
   "general.advanced.edit_lua.short": "Modifica…",
   "general.advanced.group.configuration": "Configurazione",
   "general.advanced.group.export": "Esportazione",
-  "general.advanced.group.recovery": "Recupero",
+  "general.advanced.group.recovery": "Risoluzione dei problemi",
   "general.advanced.init_lua.help": "Il tuo file di configurazione Lua, per script che vanno oltre i controlli visuali. L'editor Lua integrato di KiwiDesk lo apre.",
   "general.advanced.log.error.empty": "Il log non contiene voci di KiwiDesk in quell'intervallo di tempo. Scegli un intervallo più lungo, oppure riproduci il problema ed esporta in quel momento.",
   "general.advanced.log.error.empty_title": "Niente da esportare",

@@ -74,7 +74,7 @@ struct KiwiVisionLensOverrides: View {
             inheritsName: defaultName,
             trailingValue: true
         ) {
-            SettingsRowShape(labelFills: true) {
+            SettingsRowShape(controlTrails: true) {
                 SettingsRowLabel(label: label, help: nil)
             } control: {
                 StepperRow(
@@ -102,7 +102,7 @@ struct KiwiVisionLensOverrides: View {
             inheritsName: defaultName,
             trailingValue: true
         ) {
-            SettingsRowShape(labelFills: true) {
+            SettingsRowShape(controlTrails: true) {
                 SettingsRowLabel(label: label, help: nil)
             } control: {
                 StepperRow(

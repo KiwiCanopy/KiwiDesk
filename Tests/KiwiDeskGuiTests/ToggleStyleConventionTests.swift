@@ -2,10 +2,8 @@ import Foundation
 import Testing
 
 /// Every on/off in this tree is a leading checkbox, never a switch
-/// (owner ruling 2026-10-19, #2439): a trailing switch beside the
-/// override chrome's OVERRIDE checkbox would put two toggles meaning
-/// different things in one row, and a switch-alone, checkbox-in-a-
-/// list split is a second on/off control to learn.
+/// (#2439; design-decisions ▸ "Wide controls share the label axis;
+/// compact ones trail").
 @Suite("Toggle style convention")
 struct ToggleStyleConventionTests {
     /// Files that may draw a switch, and why. The one copy of who

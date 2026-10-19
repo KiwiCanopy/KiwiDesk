@@ -52,7 +52,7 @@ struct KiwiVisionLevelsCard: View {
     /// a stored fraction from Lua shows rounded.
     private var dimRow: some View {
         let label = SettingsCatalog.kiwiVision.dim.text
-        return SettingsRowShape(labelFills: true) {
+        return SettingsRowShape(controlTrails: true) {
             SettingsRowLabel(label: label, help: nil)
         } control: {
             StepperRow(
@@ -110,7 +110,7 @@ struct KiwiVisionLevelsCard: View {
     /// 0–1000 ms in 50 ms steps; 0 is instant (#2417).
     private var fadeDurationRow: some View {
         let label = SettingsCatalog.kiwiVision.fadeDuration.text
-        return SettingsRowShape(labelFills: true) {
+        return SettingsRowShape(controlTrails: true) {
             SettingsRowLabel(label: label, help: Self.fadeDurationHelp)
         } control: {
             StepperRow(

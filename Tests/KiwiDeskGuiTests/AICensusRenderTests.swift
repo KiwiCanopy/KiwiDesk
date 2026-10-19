@@ -182,7 +182,10 @@ struct AICensusRenderTests {
                         + "SettingsActionRow.swift"
                 )
         ).split(whereSeparator: \.isWhitespace).joined()
-        #expect(row.occurrences(of: "SettingsRowShape(labelFills:true)") == 1)
+        #expect(
+            row.occurrences(of: "SettingsRowShape(controlTrails:true)")
+                == 1
+        )
         // The button names itself, so the title is drawn, not spoken.
         #expect(
             row.occurrences(of: "Text(title).accessibilityHidden(true)")

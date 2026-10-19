@@ -579,7 +579,7 @@
   "general.advanced.edit_lua.short": "Изменить…",
   "general.advanced.group.configuration": "Конфигурация",
   "general.advanced.group.export": "Экспорт",
-  "general.advanced.group.recovery": "Восстановление",
+  "general.advanced.group.recovery": "Устранение неполадок",
   "general.advanced.init_lua.help": "Твой файл конфигурации на Lua — для скриптов, выходящих за рамки визуальных настроек. Он открывается во встроенном редакторе Lua в KiwiDesk.",
   "general.advanced.log.error.empty": "В журнале нет записей KiwiDesk за этот период. Выбери более длинный период или воспроизведи проблему и экспортируй после этого.",
   "general.advanced.log.error.empty_title": "Нечего экспортировать",

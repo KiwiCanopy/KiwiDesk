@@ -1302,8 +1302,8 @@ wrong is one drag rather than a reconstruction.
 
 The same reasoning puts the restore at the end of the Advanced
 drawer's severity ladder rather than beside its export. Reset All
-Settings is *named* for what it spares — `init.lua` and the
-colour palettes visibly survive it — so an action that replaces
+Settings says what it spares — its caption names `init.lua` and
+the colour palettes, which visibly survive it — so an action that replaces
 the palettes too is strictly the wider one. Ordering it before
 Reset All would put the harsher action above the milder and break
 the only thing that ladder communicates. The price is that the
@@ -3490,16 +3490,16 @@ plate says neither. The Space Bar's indicator, where it is drawn,
 and the key the user pressed carry the direction; a follow shows
 the moved window in place and focused.
 
-*A switch, app-wide, on by default.* It is stored as `space.cue`
+*A toggle, app-wide, on by default.* It is stored as `space.cue`
 beside `desktop.cue` and `mode.cue`, and nobody varies it per
 profile (#1741). Its row sits under the Space Bar switch rather
 than on the Animations card, because it is a cue rather than
 motion: neither Reduce Motion nor the animations master greys it,
 Reduce Motion drops only its fade, and the Space Bar switch does
 not grey it either, since it matters exactly when the bar is off.
-A two-state choice is a switch; "Always", showing the plate where
+A two-state choice is a toggle; "Always", showing the plate where
 a Space Bar is drawn too, waits until someone asks for it, and
-turning the switch into a picker then owes `space.cue` a crossing.
+turning the toggle into a picker then owes `space.cue` a crossing.
 
 *No crossing out of the slide.* Neither the stored slide nor what
 #2143 would have crossed it to survives, and the settings
@@ -6794,16 +6794,24 @@ chat.)
 **A slider or segmented strip starts on the shared label column
 and fills the row; a menu, a stepper and an action row's buttons
 trail at their natural width against the row's right edge; an
-on/off is a leading checkbox with its label beside it, never a
-switch.** A wide control needs the room the column leaves it, and
-starting every wide control on one line is what makes a section
-comparable at a glance. A compact control on that same column
-leaves a long empty tail after it, and before this ruling the
-stepper already sat trailing while menus did not, so two compact
-kinds sat on two sides. Moving menus to the stepper's side makes
-the split one rule: wide on the axis, compact at the edge. An
-override row's inheriting readout trails wherever its live menu or
-stepper draws, so ticking the OVERRIDE box moves nothing.
+on/off is a checkbox, never a switch, and a setting's own
+checkbox leads with its label beside it.** A wide control needs
+the room the column leaves it, and starting every wide control on
+one line is what makes a section comparable at a glance. A
+compact control on that same column leaves a long empty tail
+after it. A stepper trails by its own anatomy, so a menu left on
+the axis would put two compact kinds on two sides; moving menus
+to the stepper's side makes the split one rule: wide on the axis,
+compact at the edge. An override row's inheriting readout trails
+wherever its live menu or stepper draws, so ticking the OVERRIDE
+box moves nothing.
+
+Two exceptions are ruled. The **Windows on screen** stepper
+sits on its slider's control axis, since the count is the
+slider's own second reading (#1382). The override chrome's
+OVERRIDE column (`overrideStateColumn`) is the one trailing
+checkbox: it answers whether this Space deviates, not the
+setting's own on/off.
 
 Two alternatives were weighed. Moving everything trailing, as
 System Settings does, changed every row type, gave segmented
@@ -6817,12 +6825,15 @@ row, and switch-alone-but-checkbox-in-a-list is a second on/off
 control to learn. The stated cost: a card that mixes row kinds
 puts controls on both sides — checkboxes left, menus and steppers
 right, sliders and strips between — which is not System Settings'
-look (the principle above says it need not be). The 900 pt row
-breakpoint and the 980 pt content cap are unchanged: below 900 a
-trailing row stacks like every other, and at full screen a menu
-sits as far from its label as the stepper already did. Owner
-ruling 2026-10-19, `SettingsRowShapeTests` ▸
-`compactControlsTrail`, `ToggleStyleConventionTests`.
+look ([Apple-native binds
+behavior](#apple-native-binds-behavior-not-the-settings-guis-visual-idiom)
+says it need not be). Below the row breakpoint
+(`SettingsWidthClass.rowBreakpoint`) a trailing row stacks like
+every other, and at the content cap
+(`SettingsTheme.contentMaxWidth`) a menu sits as far from its
+label as a stepper does. Owner ruling 2026-10-19,
+`SettingsRowShapeTests` ▸ `compactControlsTrail`,
+`ToggleStyleConventionTests`.
 
 ### An action lives on the card whose values it writes
 
@@ -17053,11 +17064,11 @@ the Float row it qualifies (`AppRuleListsWiringTests` ▸
 `patternEditorScopesToFloat`). An app may sit in both lists.
 This is the storage's own shape, so it costs the engine nothing.
 A third card, **Automatic floating**, carries the escape for a
-guess (#2173): the "Float windows automatically" switch on top
-and the **Tile instead** list it gates below it, so the Tile rows
-read as the switch's exceptions. It is one card rather than a
-list and a switch apart because the switch is what gives the
-list meaning — with it off nothing floats on a guess, so its rows
+guess (#2173): the "Float windows automatically" checkbox on
+top and the **Tile instead** list it gates below it, so the Tile
+rows read as the checkbox's exceptions. It is one card rather
+than a list and a checkbox apart because the checkbox is what
+gives the list meaning — with it off nothing floats on a guess, so its rows
 grey (the trash and "Applies to" stay live, since other profiles
 may have it on).
 
@@ -17069,8 +17080,8 @@ guessed window can belong to a helper process no disk scan offers
 itself leaves it floating. Apps with a guessed window open lead,
 captioned with its title; the rest follow by recency, capped at
 `GuessedApps.cap` with the least recently seen dropped, and never
-persisted. A Dock-less app is recorded whatever the switch and
-the Tile rules say, so a profile whose live counterpart already
+persisted. A Dock-less app is recorded whatever the checkbox
+and the Tile rules say, so a profile whose live counterpart already
 tiles it still finds it; a fixed-size window is seen only where
 the live guess reads its zoom button. *Other…* and Lua reach the
 rest.
@@ -17634,23 +17645,27 @@ exactly the moment trust is lowest; the boundary is what makes
 the button safe to press under stress. Corollaries that fall out
 of it, rather than separate rulings:
 
-- The label is **"Reset All Settings…"**, mirroring iOS
-  (config wiped, content kept) — never "Total reset" or
-  "Factory reset", which over-promise the moment `init.lua`
-  visibly survives.
+- The action is named **"Reset All Settings…"** — its search
+  and VoiceOver name; the row reads *All settings* over a
+  **Reset…** button, its caption saying what it keeps —
+  mirroring iOS (config wiped, content kept); never "Total
+  reset" or "Factory reset", which over-promise the moment
+  `init.lua` visibly survives.
 - Onboarding does **not** re-run: the person resetting is an
   existing user fixing a live problem, not a newcomer.
 - The deleted files go to the **Trash**, not a bespoke backup
   folder — one drag undoes a mistaken reset, and a dated-backup
   subsystem would be new state the "start fresh" action then
   fails to clean up.
-- The tier-1 **Discard Saved Window Arrangement** confirms
+- The tier-1 **Discard Saved Window Arrangement** (the
+  *Saved window arrangement* row's **Discard**) confirms
   nothing: the snapshots regenerate from live state within one
   autosave cycle, so it loses nothing that cannot come back. The
   tier-2 wipe confirms every time, through its own dialog —
   never the staged-edit discard gate, which only fires while
   dirty.
-- **Export Log…** sits above the ladder as its rung zero
+- **Export Log…** (the *Log* row's **Export…**) sits above the
+  ladder as its rung zero
   (#1209): it changes nothing, so it is the first thing a user in
   trouble should do, and the bug report template sends them
   there before any hatch. It reads the log macOS already keeps

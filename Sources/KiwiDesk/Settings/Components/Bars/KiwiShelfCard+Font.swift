@@ -45,7 +45,7 @@ struct FontFamilyRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             // The trigger trails like every menu (#2439).
-            SettingsRowShape(labelFills: true) {
+            SettingsRowShape(controlTrails: true) {
                 SettingsRowLabel(
                     label: label,
                     help: L(

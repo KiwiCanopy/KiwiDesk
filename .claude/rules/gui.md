@@ -1597,7 +1597,7 @@ Every surface, border and ink in the Settings tree comes from
   to full strength). The argument is in
   `docs/design-decisions.md` ▸ a focus ring is the platform's.
 - **The accent marks control FILLS, never text naming a value.**
-  A toggle track, a selected segment, a prominent Save.
+  A checked checkbox, a selected segment, a prominent Save.
   **A control style that colours its label from the tint owes a
   neutralisation a guard can count** — the menus pair it per
   call site, `.menuStyle(.borderlessButton)` →

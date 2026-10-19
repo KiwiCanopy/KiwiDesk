@@ -579,7 +579,7 @@
   "general.advanced.edit_lua.short": "编辑…",
   "general.advanced.group.configuration": "配置",
   "general.advanced.group.export": "导出",
-  "general.advanced.group.recovery": "修复",
+  "general.advanced.group.recovery": "故障排除",
   "general.advanced.init_lua.help": "你的 Lua 配置文件，用于编写可视化编辑器之外的脚本。KiwiDesk 内置的 Lua 编辑器会打开它。",
   "general.advanced.log.error.empty": "该时间范围内的日志中没有 KiwiDesk 的条目。请选择更长的范围，或者让问题再次出现后再导出。",
   "general.advanced.log.error.empty_title": "没有可导出的内容",

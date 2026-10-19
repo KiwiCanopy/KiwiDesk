@@ -125,7 +125,7 @@ struct OverrideChrome<Content: View>: View {
         // Through the shared shape so an inheriting row stacks
         // with its live siblings below the row breakpoint (code
         // review, 2026-08-11).
-        SettingsRowShape(labelFills: trailingValue) {
+        SettingsRowShape(controlTrails: trailingValue) {
             HStack(spacing: 4) {
                 Text(inherited.label).lineLimit(1)
                 helpButton

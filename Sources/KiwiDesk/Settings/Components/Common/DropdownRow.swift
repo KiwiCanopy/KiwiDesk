@@ -18,7 +18,7 @@ struct DropdownRow<P: View, T: View>: View {
     @ViewBuilder var trailing: T
 
     var body: some View {
-        SettingsRowShape(labelFills: true) {
+        SettingsRowShape(controlTrails: true) {
             SettingsRowLabel(label: label, help: help)
         } control: {
             HStack {

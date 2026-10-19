@@ -27,7 +27,9 @@ extension GeneralSection {
                     + "backups on its own — export again "
                     + "whenever you want an up-to-date "
                     + "copy."
-            )
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.exportBackup.text
         ) {
             Button(advancedExportLabel) {
                 backupError = model.exportBackup()
@@ -67,7 +69,9 @@ extension GeneralSection {
                     + "in the chosen file. The versions "
                     + "being replaced go to the Trash. "
                     + "init.lua is never touched."
-            )
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.restoreBackup.text
         ) {
             Button(
                 L("general.advanced.backup.restore.short", "Restore…")

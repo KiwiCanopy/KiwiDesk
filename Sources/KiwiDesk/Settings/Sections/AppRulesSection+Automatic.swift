@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// App Rules ▸ Automatic floating (#2173): the switch on top, and
+/// App Rules ▸ Automatic floating (#2173): the checkbox on top, and
 /// the Tile list it gates — its exceptions — below it.
 extension AppRulesSection {
     var automaticList: some View {
@@ -93,9 +93,6 @@ struct AutoFloatToggleRow: View {
                 isOn: $model.config.floatAutomatically
             )
             .toggleStyle(.checkbox)
-            .accessibilityValue(
-                AutoFloatWords.value(model.config.floatAutomatically)
-            )
             HelpButton(
                 explanation: AutoFloatWords.help,
                 subject: AutoFloatWords.title
@@ -119,7 +116,7 @@ struct AutoFloatToggleRow: View {
 }
 
 /// One row of the Tile list: an app, which profiles it reaches,
-/// and the trash. Its identity dims while the switch is off, the
+/// and the trash. Its identity dims while the checkbox is off, the
 /// trash and the reach staying live for other profiles.
 struct AppRuleTileRow: View {
     @ObservedObject var model: SettingsModel

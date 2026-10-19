@@ -121,8 +121,10 @@ choices; long, explanatory, or localization-risk labels; or
 a constrained repeated surface where showing every choice
 would crowd or truncate. A binary — on/off, where off means the
 thing is absent — is a **toggle**, never two segments, drawn as a
-leading checkbox with its label beside it and never a switch
-(#2439); two named
+checkbox and never a switch (#2439, `ToggleStyleConventionTests`):
+a setting's own toggle leads with its label beside it, and the
+override chrome's OVERRIDE column is the one trailing checkbox;
+two named
 peer behaviours, neither an "off", are a pick-one under this rule
 (App glyph style; Space history, #1655). Fixed editor-navigation tabs (the icon picker's
 Emoji / Symbol / Glyph strip) may exceed four — they switch the
@@ -659,24 +661,37 @@ label in the same fixed-width column
 line across sections; slider readouts share one trailing column
 the same way. A menu, a stepper and an action row's buttons
 instead trail at their natural width against the row's right
-edge (`SettingsRowShape(labelFills: true)`), and an override
-row's inheriting readout trails wherever its live control does. Rows read the column from the environment
-(`\.settingsLabelColumn`), and `OverrideChrome` narrows it once
-(`overrideLabelColumn`, paying for its checkbox prefix), so a
-shared row dropped into override chrome lands on the plain
-rows' control axis by construction. A numeric stepper is an
-**editable monospaced field** plus arrows — a value embedded in the label string
-("Columns: 3") or a plain readout beside arrows reads as
-passive, so the value is a real `TextField` that commits and
-clamps on Return / focus loss, with an optional unit `suffix`
-("ms") between the field and the arrows. The color grid is the
-other exception: its two-column `HexColorField` layout keeps
-its own label width (`colorLabelColumn`), because the shared
-axis would misalign the grid's second column. Dropdowns go
-through `DropdownRow` and take `.controlSize(.large)` so a menu
-button's height sits with the capsule tracks around it.
-Within a section, a `Divider` separates geometry controls from
-the behavior dropdowns (overflow, new-window placement).
+edge (`SettingsRowShape(controlTrails: true)`;
+`SettingsRowShapeTests` ▸ `compactControlsTrail`, whose
+`trailing` register is the one copy of which rows trail), and
+an override row's inheriting readout trails wherever its live
+control does. The **Windows on screen** stepper is the one
+stepper on the axis, since it is its slider's second reading
+(Choosing a control, above). Rows read the column from the
+environment (`\.settingsLabelColumn`), and `OverrideChrome`
+narrows it once (`overrideLabelColumn`, paying for its trailing
+OVERRIDE checkbox), so a shared row dropped into override chrome
+lands on the plain rows' control axis by construction. A numeric
+stepper is an **editable monospaced field** plus arrows — a
+value embedded in the label string ("Columns: 3") or a plain
+readout beside arrows reads as passive, so the value is a real
+`TextField` that commits and clamps on Return / focus loss, with
+an optional unit `suffix` ("ms") between the field and the
+arrows. The color grid is the exception to the shared axis: its
+two-column `HexColorField` layout keeps its own label width
+(`colorLabelColumn`), because the shared axis would misalign the
+grid's second column. Dropdowns go through `DropdownRow` and
+take `.controlSize(.large)` so a menu button's height sits with
+the capsule tracks around it. Within a section, a `Divider`
+separates geometry controls from the behavior dropdowns
+(overflow, new-window placement).
+
+An **action row** (`SettingsActionRow`) is a title, a caption
+and a `?`, with short trailing buttons ("Export…", "Reset…").
+Each button is named for VoiceOver and anchored for search by
+its full action name from the destination's catalog, so the
+short word never stands alone. Groups of action rows inside one
+card take a `SettingsGroupHeading`.
 
 The readout column is sized by a **word**, not a number
 (R6/#406): an Auto-gated slider prints "Automatic" there. The
