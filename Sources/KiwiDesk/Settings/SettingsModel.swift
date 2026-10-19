@@ -33,11 +33,11 @@ final class SettingsModel: ObservableObject {
     @Published var droppedChords: [NavigationChords.Dropped] = []
     /// Layers the last import took under a free name (#2022).
     @Published var importRenames: [LayerImportRename] = []
-    /// True when init.lua has harmless custom Lua (coexistence banner).
-    /// Always false when `forcedLuaEditor` is true.
+    /// Harmless custom Lua in init.lua (never with `forcedLuaEditor`).
     @Published var hasCustomLua = false
-    /// User toggle to edit init.lua directly.
-    @Published var showLuaEditor = false
+    /// Following the sync folder, as Settings shows it (#2324).
+    @Published var sync = SettingsSyncState()
+    @Published var showLuaEditor = false  // edit init.lua directly
     /// Live comparison against as-loaded baselines indicating pending edits.
     @Published var isDirty = false
     /// Transient navigation state: reveal request, scroll/flash, tab (#277).

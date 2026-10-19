@@ -92,11 +92,16 @@ because two real clients now remove drift — see
 - **The Desktop tier, `⌃⌥⇧⌘` + digit → Go to Desktop, is the one
   other sense of `⇧`, and it lifts the ladder to macOS's Desktops
   (owner ruling 2026-10-10).** A Desktop row the seed adds goes
-  through `topUpDesktopShortcuts`, which advances the per-Mac mark
-  only once its rows landed — a writer that adds them beside it
-  re-offers a row the user deleted — and a writer that discards
-  `gui.json` clears that mark and the generation mark below (`DesktopShortcutTopUpTests`,
-  `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
+  through `topUpDesktopShortcuts`, which advances the setup's
+  offer only once its rows landed — a writer that adds them beside
+  it re-offers a row the user deleted — and a writer that discards
+  `gui.json` clears the session's copy and this Mac's pre-#2324
+  marks with it (`DesktopShortcutTopUpTests`,
+  `DesktopShortcutSeamTests`). The offer — the Desktop and the
+  generation marks — is `GuiConfig.shortcutOffer`, so it travels
+  with the setup and a Mac sharing it never re-adds a deleted row;
+  `GuiConfigStore.save` merges it upward, so no writer lowers it
+  (#2324, `ShortcutOfferTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
   its own. The tier's modifiers are the stored
   `GuiConfig.desktopShortcutBase` (#1870): a writer of a Desktop
@@ -1018,6 +1023,23 @@ read every writer takes (`persistedDesktopSpaces`,
 `DesktopSpacePersistenceWiringTests` ▸
 `unadoptedMemorySurvivesTheQuit`, `unadoptedSaveKeepsTheMemory`);
 `machine.json` never answers `isGuiManaged`.
+
+**A followed sync folder is a mirror, and a change it brings is
+answered with no write (#2324 slice 3).** What crosses is decided
+by `SyncPlan` over content hashes against `SyncLedger`, never by
+date, and a pass where both sides changed one file copies nothing
+(`SyncPlanTests`, `SyncFollowTests`). A file follows the folder
+when its `ConfigArtifact` answers `syncs`, read off the register,
+so a new travelling store syncs with no second list. A change
+that came in enters through the one `adoptSyncedChange`; while
+`sync.adopting` is raised no machine event writes a synced file. A
+new Core writer of `gui.json` or a profile is ruled in
+`SyncWriterCensusTests` — a machine event stands down on the
+door and joins `SyncDoorTests` — in the same change. A path that
+rewrites a whole side runs inside `pausingSync`, so no pass copies
+it half-done, and one that is no Compare and Copy (a reset, a
+restore) forgets the agreement, so the next pass copies nothing
+until the user picks a side.
 
 **State about THIS MAC that is no file stays out of the register,
 in the app's defaults.** What a Mac has run and read — the "What's

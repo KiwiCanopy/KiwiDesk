@@ -46,7 +46,29 @@ extension SettingsModel {
     /// This Mac's sync folder, kept in the model's preferences.
     var syncFolder: URL? {
         get { SyncFolderLocation.stored(in: preferences) }
-        set { SyncFolderLocation.store(newValue, in: preferences) }
+        set {
+            SyncFolderLocation.store(newValue, in: preferences)
+            applySyncFollowing()
+        }
+    }
+
+    /// Whether this Mac keeps its folder in step on its own
+    /// (#2324 ruling 15); writing it starts or stops following.
+    var syncFollows: Bool {
+        get { SyncFolderLocation.follows(in: preferences) }
+        set {
+            SyncFolderLocation.storeFollows(newValue, in: preferences)
+            applySyncFollowing()
+        }
+    }
+
+    /// Hands Core the folder to follow now. Before management
+    /// starts there is no config to keep in step: boot reads the
+    /// same preference once it is ready.
+    func applySyncFollowing() {
+        guard coreHold == .running else { return }
+        core.followSyncFolder(SyncFolderLocation.followed(in: preferences))
+        sync.status = core.sync.status
     }
 
     /// Why `folder` refuses both directions, if it does.

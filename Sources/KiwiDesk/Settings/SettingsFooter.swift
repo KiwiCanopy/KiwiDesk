@@ -124,6 +124,32 @@ struct SettingsFooter: View {
         } message: {
             Text(saveCopyMessage)
         }
+        .alert(
+            model.sync.question.map(SyncText.conflictTitle) ?? "",
+            isPresented: syncQuestionBinding,
+            presenting: model.sync.question
+        ) { _ in
+            Button(SyncText.keepYours) {
+                model.answerSyncConflict(useTheirs: false)
+            }
+            .keyboardShortcut(.defaultAction)
+            Button(SyncText.useTheirs) {
+                model.answerSyncConflict(useTheirs: true)
+            }
+            Button(L("footer.cancel", "Cancel"), role: .cancel) {
+                model.cancelSyncConflict()
+            }
+        } message: { conflict in
+            Text(SyncText.conflictMessage(conflict))
+        }
+    }
+
+    /// One question per setting both Macs changed (#2324 ruling 4).
+    private var syncQuestionBinding: Binding<Bool> {
+        Binding(
+            get: { model.sync.question != nil },
+            set: { if !$0 { model.cancelSyncConflict() } }
+        )
     }
 
     private var verbs: some View {

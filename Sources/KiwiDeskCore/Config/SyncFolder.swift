@@ -11,9 +11,7 @@ public enum SyncFolder {
     /// carries that lives in the config folder, plus `init.lua`.
     /// Read off the register, so a new travelling store syncs too.
     static let setupNames: [String] =
-        ConfigArtifact.allCases
-        .filter { $0.travelsInABackup && !$0.livesOnThisMac }
-        .map(name(of:)) + [initLua]
+        ConfigArtifact.allCases.filter(\.syncs).map(name(of:)) + [initLua]
 
     /// `init.lua`, which carries no format and is no artifact.
     static let initLua = "init.lua"

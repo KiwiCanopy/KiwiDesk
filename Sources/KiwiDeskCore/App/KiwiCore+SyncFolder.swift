@@ -40,22 +40,15 @@ extension KiwiCore {
         trash: (URL) throws -> Void
     ) throws(SyncRefusal) {
         if let refusal = keepThisMacRefusal(folder) { throw refusal }
-        try replaceSetupFiles(
-            in: folder,
-            from: configDirectory,
-            trash: trash
-        )
-        guard let mac = Self.thisMacName(),
-            let data = try? JSONEncoder().encode(SyncStamp(mac: mac))
-        else { return }
-        do {
-            try data.write(
-                to: folder.appendingPathComponent(SyncFolder.stampName),
-                options: .atomic
+        try pausingSync { () throws(SyncRefusal) in
+            try replaceSetupFiles(
+                in: folder,
+                from: configDirectory,
+                trash: trash
             )
-        } catch {
-            onLog("sync: could not stamp the folder: \(error)")
+            agreeOnFolder(folder)
         }
+        stampSyncFolder(folder)
     }
 
     /// This Mac's name as Sharing shows it, nil where unreadable.
