@@ -6919,9 +6919,15 @@ compact control on that same column leaves a long empty tail
 after it. A stepper trails by its own anatomy, so a menu left on
 the axis would put two compact kinds on two sides; moving menus
 to the stepper's side makes the split one rule: wide on the axis,
-compact at the edge. An override row's inheriting readout trails
-wherever its live menu or stepper draws, so ticking the OVERRIDE
-box moves nothing.
+compact at the edge. Every override row's inheriting readout
+trails, whatever its live control: the unchecked list is read as
+a table of inherited values beside the OVERRIDE column, and a
+readout that trailed only for a menu or stepper left that column
+ragged on any Space mixing row kinds (owner, on device,
+2026-10-19). Ticking a menu or stepper row moves nothing; ticking
+a slider row moves the value onto the axis, and a toggle row's
+value becomes its checkbox. The slot-size pair has no one-line
+readout and keeps its dimmed live control instead (#290).
 
 Two exceptions are ruled. The **Windows on screen** stepper
 sits on its slider's control axis, since the count is the
