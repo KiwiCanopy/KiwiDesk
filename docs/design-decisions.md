@@ -12942,6 +12942,20 @@ second admitted class, not the start of a generic per-Space
 settings override — each further class owes the same three
 tests and its own entry. (#1775, owner ruling 2026-10-09)
 
+:::unreleased
+**A Space's own minimum window size is the third class, on the
+gaps' tests** (#2422). It floors every window in the Space,
+whichever layout places it; it resolves before any layout runs,
+inside the one resolver that fills `LayoutContext`; and the
+value its layout would use is an unambiguous "off", which the
+unchecked row names ("follows Grid", or "follows Minimum window
+size" while every layout agrees). Its row sits below the gaps,
+apart from the layout rows, and survives a layout switch. Unlike
+the gaps it is live on a Floating Space, since it floors every
+float there, so it greys only on Monocle, which applies no
+minimum.
+:::
+
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the
 total overrides it carries across every layout. A Floating space
@@ -12953,13 +12967,18 @@ the cell to a dead "—") on a Floating space recreates the
 configuration the user cannot see, which reactivates on
 switch-back so the layout appears to "change by itself". So a
 Floating space with parked values shows a muted **N saved** cell
-that still opens the editor, keeping them reachable; only a
-Floating space with nothing parked is genuinely inert and
-disables. This extends *Overrides are visible-but-inherited* and
+that still opens the editor, keeping them reachable. This extends *Overrides are visible-but-inherited* and
 *grey, don't hide* (AGENTS.md §2.7) from the override rows to the
 space-list cell that summarises them — the count is the scannable
 signal, and dropping it is the one way the data goes invisible.
 (`OverrideCellState`, owner ruling 2026-08-04; #678 8a)
+
+:::unreleased
+A Floating space's cell never disables: its own minimum window
+size still applies there, so the cell offers **Customize…** with
+nothing saved, and counts as **N custom** once that value is set
+(#2422).
+:::
 
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge

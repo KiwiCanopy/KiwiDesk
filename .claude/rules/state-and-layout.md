@@ -29,7 +29,10 @@ editing here:
   end (#1655).** One keyed by `SpaceID` rekeys where a held Space
   is renumbered (`moveMembers`) and forgets in the one Space drop,
   `forwardWindows(of:to:)`; the Space history's trails are the
-  instance (`SpaceDropHookNeedleTests`).
+  instance (`SpaceDropHookNeedleTests`). A Space-keyed CONFIG map
+  in `TilingSettings` (`gap.override`, `min_window_size_override`)
+  does neither: it belongs to the arrangement that declared the
+  Space and returns with it (`MinWindowSizeOverrideHoldTests`).
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load

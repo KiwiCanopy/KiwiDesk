@@ -19,7 +19,8 @@ struct OverrideMinSizeRow: View {
                 inherited: (Self.label, size(followed)),
                 help: Self.help,
                 subject: Self.label,
-                inheritsName: followedName) {
+                inheritsName: followedName
+            ) {
                 SettingsRowShape(controlTrails: true) {
                     Text(Self.label).lineLimit(1)
                 } control: {
@@ -52,9 +53,10 @@ struct OverrideMinSizeRow: View {
     static var help: String {
         L(
             "space_override.min_size.help",
-            "Windows in this Space never tile smaller than this, "
-                + "whatever its layout. The value stays with this "
-                + "Space when it moves to another screen."
+            "Windows in this Space, floating ones included, never "
+                + "go smaller than this, whatever its layout. The value "
+                + "stays with this Space when it moves to another "
+                + "screen."
         )
     }
 

@@ -5,7 +5,8 @@ import Testing
 /// resolver, `TilingSettings.minWindowSize(for:in:)` (#2237): the
 /// floor is per layout, so a raw read of the stored value answers
 /// for no layout and disagrees with the one the layout draws. A
-/// stored-value read (`.minWindowSizes`) outside `allowed` reds
+/// stored-value read (`.minWindowSizes`, or a Space's own
+/// `.minWindowSizeOverride`, #2422) outside its `allowed` map reds
 /// until it routes or is given its reason here.
 @Suite("minimum window size read census (#2237)")
 struct MinWindowSizeReadCensusTests {
@@ -31,15 +32,44 @@ struct MinWindowSizeReadCensusTests {
         "HomeCardContent.swift": "the card names the stored value",
     ]
 
+    /// File → why it may name a Space's own stored floor (#2422).
+    private static let overrideAllowed: [String: String] = [
+        "TilingSettings.swift": "declares it",
+        "TilingSettings+MinWindowSize.swift": "the resolver",
+        "TilingSettings+Coding.swift": "decodes it",
+        "TilingSettings+Encoding.swift": "encodes it",
+        "TilingSettings+SpaceRename.swift":
+            "a Space's rename, removal and restore carry it",
+        "TilingSettings+SpaceOverrideReset.swift":
+            "counts it among the Space's overrides",
+        "KiwiCore+GapCommands.swift": "the Lua setter writes it",
+        "KiwiCore+Config.swift": "a reload resets it",
+        "SettingKey+Behaviour.swift":
+            "the census id spells its stored path",
+        "SpaceOverrideRows+MinSize.swift": "the Space's row edits it",
+        "SettingsRevertRegister+Settings1.swift":
+            "a row's revert writes it back",
+        "SettingsValueReadout+Behaviour.swift":
+            "the unsaved-changes rows compare it",
+    ]
+
+    private static let needles = [
+        ("minWindowSizes", allowed),
+        ("minWindowSizeOverride", overrideAllowed),
+    ]
+
     /// Reads of the stored value: `.minWindowSizes` on any
     /// receiver, or the bare name (implicit `self`) a `TilingSettings`
     /// extension would spell. A string literal naming it ("…") is
     /// not a read, which the quote before it tells.
-    private static func rawReads(in text: String) -> Int {
+    private static func rawReads(
+        of needle: String,
+        in text: String
+    ) -> Int {
         var count = 0
         var cursor = text.startIndex
         while let hit = text.range(
-            of: "minWindowSizes",
+            of: needle,
             range: cursor..<text.endIndex
         ) {
             cursor = hit.upperBound
@@ -75,9 +105,13 @@ struct MinWindowSizeReadCensusTests {
         var offenders: [String] = []
         for file in try sources() {
             let name = file.lastPathComponent
-            guard Self.allowed[name] == nil else { continue }
             let text = try SourceScan.strippedSource(at: file)
-            if Self.rawReads(in: text) > 0 { offenders.append(name) }
+            for (needle, allowed) in Self.needles
+            where allowed[name] == nil
+                && Self.rawReads(of: needle, in: text) > 0
+            {
+                offenders.append("\(name) (\(needle))")
+            }
         }
         #expect(
             offenders.isEmpty,
@@ -88,15 +122,17 @@ struct MinWindowSizeReadCensusTests {
     @Test("every allowed file still names it")
     func allowedIsLive() throws {
         let files = try sources()
-        for name in Self.allowed.keys {
-            let file = try #require(
-                files.first { $0.lastPathComponent == name }
-            )
-            let text = try SourceScan.strippedSource(at: file)
-            #expect(
-                Self.rawReads(in: text) > 0,
-                .init(rawValue: "\(name) no longer names it")
-            )
+        for (needle, allowed) in Self.needles {
+            for name in allowed.keys {
+                let file = try #require(
+                    files.first { $0.lastPathComponent == name }
+                )
+                let text = try SourceScan.strippedSource(at: file)
+                #expect(
+                    Self.rawReads(of: needle, in: text) > 0,
+                    .init(rawValue: "\(name) no longer names \(needle)")
+                )
+            }
         }
     }
 

@@ -29,10 +29,10 @@ extension SpaceOverrideRows {
         }
     }
 
-    /// The layout whose floor the Space follows; a Monocle Space
-    /// shows the value its next layout would follow, BSP's.
+    /// The layout whose floor the Space follows; a Monocle Space,
+    /// which applies none, shows the profile's reference layout's.
     private var minSizeMode: LayoutMode {
-        mode == .monocle ? .bsp : mode
+        mode == .monocle ? model.minSizeMostUsed.mode : mode
     }
 
     /// "Follows Grid" where the Space's layout stands apart from

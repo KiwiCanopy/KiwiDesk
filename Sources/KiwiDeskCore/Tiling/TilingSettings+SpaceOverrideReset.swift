@@ -48,6 +48,13 @@ extension TilingSettings {
         }
     }
 
+    /// The overrides among `spaceOverrideCount` that still apply
+    /// while the Space floats: its own minimum window size, which
+    /// floors every float (#2422). Gaps and layout fields wait.
+    public func floatingLiveOverrideCount(for space: SpaceID) -> Int {
+        minWindowSizeOverride[space] == nil ? 0 : 1
+    }
+
     /// Dormant layout overrides for inactive layouts on space (#290).
     public func dormantOverrides(
         for space: SpaceID,
