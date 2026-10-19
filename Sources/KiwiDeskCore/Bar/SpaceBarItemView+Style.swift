@@ -197,6 +197,10 @@ extension SpaceBarItemView {
         return NSColor(kiwiHex: style.idleItemColor)
     }
 
+    /// A symbol identifier's weight, here and in a hidden bar's
+    /// hovered mark (#761), so the two draw one Space alike.
+    static let identifierSymbolWeight: NSFont.Weight = .regular
+
     private func styleIdentifier() {
         switch spaceGlyph {
         case .symbol(let name):
@@ -209,7 +213,7 @@ extension SpaceBarItemView {
             identifierImage.symbolConfiguration =
                 NSImage.SymbolConfiguration(
                     pointSize: identifierFont,
-                    weight: .regular
+                    weight: Self.identifierSymbolWeight
                 )
             identifierImage.contentTintColor = stateColor
         case .text(let text, let tinted):

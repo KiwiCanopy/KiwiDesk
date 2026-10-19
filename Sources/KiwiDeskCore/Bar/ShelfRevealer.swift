@@ -185,7 +185,11 @@ final class ShelfRevealer {
                 target.band?.contains(self.location()) == true
             else {
                 let near = self.targets[key]?.near
-                self.setArming(key, near?.contains(self.location()) == true)
+                self.setArming(
+                    key,
+                    !self.yields(key)
+                        && near?.contains(self.location()) == true
+                )
                 return
             }
             // The reveal ends the hover in its own pass: a redraw

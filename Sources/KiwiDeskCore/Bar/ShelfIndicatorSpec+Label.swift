@@ -50,11 +50,14 @@ extension ShelfIndicatorSpec {
     }
 
     /// The SF Symbol `name` at `font`'s size, in the Space Bar's
-    /// identifier weight (`SpaceBarItemView.styleIdentifier`).
+    /// identifier weight.
     static func symbol(_ name: String, font: NSFont) -> NSImage? {
         NSImage(systemSymbolName: name, accessibilityDescription: nil)?
             .withSymbolConfiguration(
-                .init(pointSize: font.pointSize, weight: .regular)
+                .init(
+                    pointSize: font.pointSize,
+                    weight: SpaceBarItemView.identifierSymbolWeight
+                )
             )
     }
 }

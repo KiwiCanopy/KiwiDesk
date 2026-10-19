@@ -201,6 +201,7 @@ struct ShelfRevealBandTests {
         // The delay it had armed reveals nothing.
         box.timers.forEach { $0() }
         #expect(revealer.reveal(of: Self.key) == .hidden)
+        #expect(!revealer.arming.contains(Self.key))
         #expect(!revealer.yields(app))
     }
 
