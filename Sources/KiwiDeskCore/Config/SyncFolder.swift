@@ -7,17 +7,19 @@ import Foundation
 /// stamp naming the Mac that last copied into it. This Mac's own
 /// files (`MachineLocation`'s) never reach it.
 public enum SyncFolder {
-    /// The setup's names inside a folder, in copy order.
+    /// The setup's names inside a folder: every artifact a backup
+    /// carries that lives in the config folder, plus `init.lua`.
+    /// Read off the register, so a new travelling store syncs too.
     static let setupNames: [String] =
-        [
-            ConfigArtifact.guiConfig, .profiles, .palettes, .looks,
-        ].map(name(of:)) + [initLua]
+        ConfigArtifact.allCases
+        .filter { $0.travelsInABackup && !$0.livesOnThisMac }
+        .map(name(of:)) + [initLua]
 
     /// `init.lua`, which carries no format and is no artifact.
     static let initLua = "init.lua"
 
     /// The stamp a copy into the folder writes.
-    static let stampName = "sync.json"
+    static let stampName = name(of: .syncStamp)
 
     static func name(of artifact: ConfigArtifact) -> String {
         artifact.fileName ?? "profiles"
@@ -117,12 +119,18 @@ public struct SyncSide: Equatable, Sendable {
 public enum SyncRefusal: Error, Equatable, Sendable {
     /// The folder is gone, renamed or unreadable.
     case folderUnavailable
-    /// The folder is KiwiDesk's own config folder.
+    /// The folder is in iCloud Drive, which is off on this Mac.
+    case iCloudDriveOff
+    /// The folder is KiwiDesk's own config folder, or holds it, or
+    /// sits inside it.
     case sameFolder
     /// A newer KiwiDesk wrote a store in the folder (ruling 2).
     case folderNewer(NewerFormatOnDisk)
     /// The folder holds no setup to take.
     case folderEmpty
+    /// The folder's setup cannot be read whole — a profile that
+    /// will not decode, or profiles with no settings to go with.
+    case folderUnreadable
     /// A newer KiwiDesk wrote a store on this Mac (#2324 slice 1c).
     case thisMacNewer(NewerFormatOnDisk)
     /// The copy itself failed; `SetupBundleError` names how.

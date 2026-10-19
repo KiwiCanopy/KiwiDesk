@@ -12,6 +12,8 @@ struct SyncCompareRequest: Identifiable {
     let unsaved: Bool
     /// Why Save cannot run first, where it cannot.
     let saveBlocked: String?
+    /// Return presses Keep This Mac's rather than Cancel.
+    let returnKeepsThisMac: Bool
 }
 
 /// Compare and Copy's sheet (#2324 slice 2): both setups side by
@@ -44,11 +46,7 @@ struct SyncCompareSheet: View {
 
     private var comparison: SyncComparison { request.comparison }
 
-    /// Nothing is replaced into an empty folder, so Return may
-    /// copy there (#2324 ruling 14); everywhere else it cancels.
-    private var returnKeepsThisMac: Bool {
-        comparison.folder.isEmpty && thisMacRefusal == nil
-    }
+    private var returnKeepsThisMac: Bool { request.returnKeepsThisMac }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -125,6 +123,7 @@ struct SyncCompareSheet: View {
     // MARK: - Notes and footer
 
     @ViewBuilder private var notes: some View {
+        note(SyncText.includes, warn: false)
         if !comparison.folder.isEmpty {
             note(SyncText.trashNote, warn: false)
         }

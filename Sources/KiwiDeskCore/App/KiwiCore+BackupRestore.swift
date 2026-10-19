@@ -40,16 +40,16 @@ extension KiwiCore {
         from bundle: SetupBundle,
         trash: (URL) throws -> Void
     ) throws(SetupBundleError) -> RestoreOutcome {
-        try replaceSetup(with: bundle, trash: trash) {}
+        try replaceSetup(with: bundle, trash: trash, take: nil)
     }
 
-    /// `restoreSetup`, with `beforeReload` writing what a bundle
-    /// cannot carry — a sync folder's `init.lua` (#2324) — after
-    /// the bundle lands and before the reload reads it.
+    /// `restoreSetup`, or with `take` a sync folder's setup
+    /// (#2324): every travelling artifact and `init.lua` replaced,
+    /// absent ones by nothing, and this Mac's bindings kept.
     func replaceSetup(
         with bundle: SetupBundle,
         trash: (URL) throws -> Void,
-        beforeReload: () throws(SetupBundleError) -> Void
+        take: SyncTake?
     ) throws(SetupBundleError) -> RestoreOutcome {
         // **Refuse before touching anything** when this Mac's
         // config is Lua-owned and the backup carries settings.
@@ -62,7 +62,9 @@ extension KiwiCore {
         // DESTINATION, not of the file: the same backup restores
         // cleanly onto a GUI-managed Mac, so it must not be
         // refused at read time.
-        if bundle.config != nil, !isGuiManaged {
+        // A take replaces init.lua too, so its ownership is the
+        // folder's, judged by `SyncTake.guiManaged` below.
+        if take == nil, bundle.config != nil, !isGuiManaged {
             throw .luaOwnsThisMac
         }
 
@@ -92,7 +94,9 @@ extension KiwiCore {
         // `false` stops being discarded and stops being written,
         // which is the whole meaning of not travelling.
         let replacing = ConfigArtifact.allCases.filter {
-            $0.travelsInABackup && bundle.replaces($0)
+            $0.travelsInABackup
+                && (bundle.replaces($0)
+                    || (take != nil && $0 == .guiConfig))
         }
         guard
             discardArtifacts(
@@ -104,6 +108,13 @@ extension KiwiCore {
             throw .couldNotWrite(
                 name: profiles.directory.lastPathComponent
             )
+        }
+        if take != nil {
+            do {
+                try discard(configURL, trash)
+            } catch {
+                throw .couldNotWrite(name: SyncFolder.initLua)
+            }
         }
 
         // BEFORE the write (#1230): every sidecar write stamps
@@ -120,8 +131,13 @@ extension KiwiCore {
         } else {
             forgetAppWideCaptures()
         }
-        let outcome = try writeIncoming(bundle)
-        try beforeReload()
+        let outcome = try writeIncoming(
+            bundle,
+            keepingBindings: take != nil
+        )
+        // A failed copy still reloads, so the core never runs the
+        // old setup over the new files; the failure is thrown after.
+        let luaFailed = take.map(copyInitLua) == false
 
         // Adoption is the one piece of live profile state the
         // incoming config cannot speak for: it records which
@@ -163,7 +179,7 @@ extension KiwiCore {
         // crossing inside `loadConfig` cannot see them.
         settleSharedSets()
         loadConfig()
-        if let config = bundle.config {
+        if let config = bundle.config, take?.guiManaged ?? true {
             applyProfileScopedState(from: config)
         }
 
@@ -205,6 +221,7 @@ extension KiwiCore {
                     + "\(outcome.skippedProfiles.count) profile(s) "
                     + "and \(outcome.refusedPalettes) palette(s)"
         )
+        if luaFailed { throw .couldNotWrite(name: SyncFolder.initLua) }
         return outcome
     }
 
@@ -231,14 +248,20 @@ extension KiwiCore {
     /// available, strictly worse than finishing or refusing up
     /// front.
     private func writeIncoming(
-        _ bundle: SetupBundle
+        _ bundle: SetupBundle,
+        keepingBindings: Bool
     ) throws(SetupBundleError) -> RestoreOutcome {
         if var config = bundle.config {
             // The bindings ride the bundle's own field (#2324); the
-            // store writes them beside `gui.json`.
+            // store writes them beside `gui.json`, save where they
+            // stay this Mac's, which a plain save leaves alone.
             config.profileBindings = bundle.profileBindings ?? [:]
             do {
-                try guiConfigStore.saveIncludingBindings(config)
+                if keepingBindings {
+                    try guiConfigStore.save(config)
+                } else {
+                    try guiConfigStore.saveIncludingBindings(config)
+                }
             } catch {
                 onLog("restore: gui.json write failed: \(error)")
                 throw .couldNotWrite(

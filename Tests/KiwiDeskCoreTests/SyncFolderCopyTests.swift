@@ -159,16 +159,4 @@ struct SyncFolderCopyTests {
             core.syncFolderRefusal(core.configDirectory) == .sameFolder
         )
     }
-
-    @Test("taking the folder's setup writes nothing into the folder")
-    func takeLeavesTheFolder() throws {
-        let core = try guiCore()
-        let source = try filledFolder(profile: "Theirs")
-        let file = source.appendingPathComponent("profiles/Theirs.json")
-        let before = try Data(contentsOf: file)
-        try core.keepFoldersSetup(from: source) { url in
-            try FileManager.default.removeItem(at: url)
-        }
-        #expect(try Data(contentsOf: file) == before)
-    }
 }

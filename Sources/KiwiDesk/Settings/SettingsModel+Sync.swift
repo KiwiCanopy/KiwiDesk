@@ -1,61 +1,27 @@
 import AppKit
 import KiwiDeskCore
 
-/// The sync folder, remembered on this Mac alone and never in the
-/// folder (#2324 ruling 14): a per-Mac preference in the app's
-/// defaults, like the Settings mode.
-enum SyncFolderPreference {
-    static let key = "general.syncFolder"
-
-    static var stored: URL? {
-        get {
-            UserDefaults.standard.string(forKey: key)
-                .map { URL(fileURLWithPath: $0, isDirectory: true) }
-        }
-        set { UserDefaults.standard.set(newValue?.path, forKey: key) }
-    }
-
-    /// iCloud Drive's own folder; absent while Drive is off.
-    static var iCloudDrive: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(
-                "Library/Mobile Documents/com~apple~CloudDocs",
-                isDirectory: true
-            )
-    }
-
-    static var iCloudDriveIsOn: Bool {
-        FileManager.default.fileExists(atPath: iCloudDrive.path)
-    }
-
-    /// The folder the iCloud Drive pick keeps the setup in.
-    static var iCloudFolder: URL {
-        iCloudDrive.appendingPathComponent("KiwiDesk", isDirectory: true)
-    }
-
-    static func isICloudFolder(_ url: URL) -> Bool {
-        url.standardizedFileURL == iCloudFolder.standardizedFileURL
-    }
-
-    /// The folder as Finder names it: "iCloud Drive ▸ KiwiDesk".
-    static func displayPath(_ url: URL) -> String {
+/// The folder as Finder names it, for the row and the sheet.
+enum SyncFolderDisplay {
+    /// "iCloud Drive ▸ KiwiDesk", or "~ ▸ Dotfiles ▸ KiwiDesk".
+    static func path(_ url: URL) -> String {
+        let files = FileManager.default
         let parts =
-            FileManager.default.componentsToDisplay(
-                forPath: url.path
-            ) ?? [url.lastPathComponent]
-        let home =
-            FileManager.default.componentsToDisplay(
-                forPath: FileManager.default.homeDirectoryForCurrentUser.path
-            ) ?? []
-        if isICloudFolder(url) || url.path.hasPrefix(iCloudDrive.path) {
-            let drive = FileManager.default.displayName(
-                atPath: iCloudDrive.path
+            files.componentsToDisplay(forPath: url.path)
+            ?? [url.lastPathComponent]
+        let drive = SyncFolderLocation.iCloudDrive
+        if url.path.hasPrefix(drive.path),
+            let index = parts.firstIndex(
+                of: files.displayName(atPath: drive.path)
             )
-            if let index = parts.firstIndex(of: drive) {
-                return parts[index...].joined(separator: " ▸ ")
-            }
+        {
+            return parts[index...].joined(separator: " ▸ ")
         }
-        if parts.starts(with: home) {
+        let home =
+            files.componentsToDisplay(
+                forPath: files.homeDirectoryForCurrentUser.path
+            ) ?? []
+        if !home.isEmpty, parts.starts(with: home) {
             return (["~"] + parts.dropFirst(home.count))
                 .joined(separator: " ▸ ")
         }
@@ -65,6 +31,12 @@ enum SyncFolderPreference {
 
 /// Compare and Copy's doors into Core (#2324 slice 2).
 extension SettingsModel {
+    /// This Mac's sync folder, kept in the model's preferences.
+    var syncFolder: URL? {
+        get { SyncFolderLocation.stored(in: preferences) }
+        set { SyncFolderLocation.store(newValue, in: preferences) }
+    }
+
     /// Why `folder` refuses both directions, if it does.
     func syncFolderRefusal(_ folder: URL) -> SyncRefusal? {
         core.syncFolderRefusal(folder)
@@ -74,9 +46,15 @@ extension SettingsModel {
         core.compareSync(with: folder)
     }
 
-    /// Copies this Mac's setup into `folder`; nothing on this Mac
-    /// changes, so nothing reloads.
+    /// Saves the draft first where it holds edits, then copies this
+    /// Mac's setup into `folder`. A Save that does not land copies
+    /// nothing and answers nil, its own surface saying why.
     func keepThisMacsSetup(in folder: URL) -> SyncRefusal? {
+        if isDirty {
+            guard syncSaveBlockedReason == nil else { return nil }
+            performPrimarySave()
+            guard !isDirty else { return nil }
+        }
         do {
             try core.keepThisMacsSetup(
                 in: folder,
@@ -88,10 +66,10 @@ extension SettingsModel {
         }
     }
 
-    /// Replaces this Mac's setup with `folder`'s. Drops the draft
-    /// through `reload()`, as a restore does: the sheet said so.
+    /// Replaces this Mac's setup with `folder`'s. Reloads — which
+    /// drops the draft, as the sheet said — only once this Mac's
+    /// setup was touched; a refusal before that keeps the edits.
     func keepFoldersSetup(from folder: URL) -> SyncRefusal? {
-        defer { reload() }
         do {
             let outcome = try core.withUserMotion {
                 () throws(SyncRefusal) in
@@ -100,9 +78,11 @@ extension SettingsModel {
                     trash: KiwiCore.moveToTrash
                 )
             }
+            reload()
             lastRestoreOutcome = outcome.isClean ? nil : outcome
             return nil
         } catch {
+            if case .copy(.couldNotWrite) = error { reload() }
             return error
         }
     }
@@ -114,8 +94,7 @@ extension SettingsModel {
         guard primarySaveAction == .saveAsNewProfile else { return nil }
         return L(
             "general.sync.save_needs_name",
-            "Save needs a name for a new profile. Save first, "
-                + "then copy."
+            "A new profile needs a name first. Name it, then copy."
         )
     }
 }

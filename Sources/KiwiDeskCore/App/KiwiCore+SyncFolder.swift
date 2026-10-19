@@ -6,11 +6,12 @@ import SystemConfiguration
 /// picks. The side being replaced goes to the Trash; nothing merges.
 ///
 /// The folder is whatever the user's sync app keeps up to date, so
-/// KiwiDesk only reads it here and writes it in Keep This Mac's —
-/// no load of the folder migrates or rewrites a file in it.
+/// KiwiDesk writes it only in Keep This Mac's, and no read of the
+/// folder migrates or rewrites a file in it.
 extension KiwiCore {
     /// Both sides of `folder`'s comparison, and what refuses each
-    /// direction. Reads files only.
+    /// direction. Reads the folder only; reading this Mac's stores
+    /// may migrate them, as every load does.
     public func compareSync(with folder: URL) -> SyncComparison {
         let folderSide = SyncFolder.side(
             in: folder,
@@ -28,10 +29,12 @@ extension KiwiCore {
     }
 
     /// Keep This Mac's: replaces the folder's setup with this
-    /// Mac's, the folder's going to `trash`, and stamps this Mac's
-    /// name into the folder. Changes nothing on this Mac.
+    /// Mac's, the folder's going to `trash`, then stamps this Mac's
+    /// name. Changes nothing on this Mac.
     ///
-    /// `trash` has no default, as every discard's does not.
+    /// Copies land in a staging folder inside `folder` first, so a
+    /// copy that fails leaves the folder as it was; only then is
+    /// each item swapped in. `trash` has no default.
     public func keepThisMacsSetup(
         in folder: URL,
         trash: (URL) throws -> Void
@@ -62,7 +65,13 @@ extension KiwiCore {
 
     // MARK: - Refusals
 
+    /// Why `folder` refuses both directions, if it does.
     public func syncFolderRefusal(_ folder: URL) -> SyncRefusal? {
+        if SyncFolderLocation.isInICloudDrive(folder),
+            !SyncFolderLocation.iCloudDriveIsOn
+        {
+            return .iCloudDriveOff
+        }
         var isDirectory: ObjCBool = false
         guard
             FileManager.default.fileExists(
@@ -70,21 +79,33 @@ extension KiwiCore {
                 isDirectory: &isDirectory
             ), isDirectory.boolValue
         else { return .folderUnavailable }
-        if folder.resolvingSymlinksInPath().standardizedFileURL
-            == configDirectory.resolvingSymlinksInPath()
-            .standardizedFileURL
-        {
-            return .sameFolder
-        }
+        if Self.nests(folder, configDirectory) { return .sameFolder }
         return SyncFolder.newerFormat(in: folder).map {
             .folderNewer($0)
         }
+    }
+
+    /// Whether either folder is the other or lies inside it, which
+    /// would make a copy trash files it reads or recurse.
+    static func nests(_ one: URL, _ other: URL) -> Bool {
+        let a = one.resolvingSymlinksInPath().standardizedFileURL.path
+        let b = other.resolvingSymlinksInPath().standardizedFileURL.path
+        return a == b || a.hasPrefix(b + "/") || b.hasPrefix(a + "/")
+    }
+
+    /// A newer store on this Mac, which a Keep the Folder's would
+    /// replace and Keep This Mac's could not read (slice 1c).
+    func thisMacNewer() -> NewerFormatOnDisk? {
+        guiConfigWriteLatch()
+            ?? paletteLibrary.newerFormat()
+            ?? lookLibrary.newerFormat()
     }
 
     /// The export's own refusals (#606): a file this Mac cannot
     /// read would travel as a setup nobody can open.
     func keepThisMacRefusal(_ folder: URL) -> SyncRefusal? {
         if let refusal = syncFolderRefusal(folder) { return refusal }
+        if let newer = thisMacNewer() { return .thisMacNewer(newer) }
         if guiConfigStore.exists, guiConfigStore.load() == nil {
             return .copy(.unreadableSettings)
         }
@@ -97,53 +118,71 @@ extension KiwiCore {
         return nil
     }
 
+    /// Why Keep the Folder's cannot run, judged before anything on
+    /// this Mac is touched.
+    public func keepFolderRefusal(_ folder: URL) -> SyncRefusal? {
+        keepFolderRefusal(folder, SyncFolder.side(in: folder, mac: nil))
+    }
+
     func keepFolderRefusal(
         _ folder: URL,
         _ side: SyncSide
     ) -> SyncRefusal? {
         if let refusal = syncFolderRefusal(folder) { return refusal }
         if side.isEmpty { return .folderEmpty }
-        if let latch = guiConfigWriteLatch()
-            ?? paletteLibrary.newerFormat()
-            ?? lookLibrary.newerFormat()
-        {
-            return .thisMacNewer(latch)
-        }
-        let carriesSettings = FileManager.default.fileExists(
-            atPath: folder.appendingPathComponent(
-                SyncFolder.name(of: .guiConfig)
-            ).path
-        )
-        if carriesSettings, !isGuiManaged {
-            return .copy(.luaOwnsThisMac)
-        }
+        if let newer = thisMacNewer() { return .thisMacNewer(newer) }
+        if !folderIsWhole(folder) { return .folderUnreadable }
         return nil
     }
 
     // MARK: - Files
 
-    /// Trashes every setup file `target` holds, its stamp included,
-    /// then copies `source`'s in. A removal that fails refuses
-    /// before anything is copied, or a replace would merge.
+    /// Copies `source`'s setup into a staging folder inside
+    /// `target`, then swaps each item in, the one it replaces going
+    /// to `trash`, and trashes what `source` does not hold. A copy
+    /// that fails refuses before `target` is touched.
     func replaceSetupFiles(
         in target: URL,
         from source: URL,
         trash: (URL) throws -> Void
     ) throws(SyncRefusal) {
         let files = FileManager.default
-        for name in SyncFolder.setupNames + [SyncFolder.stampName] {
-            try discard(target.appendingPathComponent(name), trash)
-        }
-        for name in SyncFolder.setupNames {
-            let from = source.appendingPathComponent(name)
-            guard files.fileExists(atPath: from.path) else { continue }
-            do {
+        let stage = target.appendingPathComponent(
+            ".kiwidesk-incoming-\(UUID().uuidString)"
+        )
+        defer { try? files.removeItem(at: stage) }
+        var incoming: [String] = []
+        do {
+            try files.createDirectory(
+                at: stage,
+                withIntermediateDirectories: true
+            )
+            for name in SyncFolder.setupNames {
+                let from = source.appendingPathComponent(name)
+                guard files.fileExists(atPath: from.path) else {
+                    continue
+                }
                 try files.copyItem(
                     at: from,
-                    to: target.appendingPathComponent(name)
+                    to: stage.appendingPathComponent(name)
+                )
+                incoming.append(name)
+            }
+        } catch {
+            onLog("sync: could not stage the copy: \(error)")
+            throw .copy(.couldNotWrite(name: target.lastPathComponent))
+        }
+        for name in SyncFolder.setupNames + [SyncFolder.stampName] {
+            let into = target.appendingPathComponent(name)
+            try discard(into, trash)
+            guard incoming.contains(name) else { continue }
+            do {
+                try files.moveItem(
+                    at: stage.appendingPathComponent(name),
+                    to: into
                 )
             } catch {
-                onLog("sync: could not copy \(name): \(error)")
+                onLog("sync: could not move \(name) in: \(error)")
                 throw .copy(.couldNotWrite(name: name))
             }
         }

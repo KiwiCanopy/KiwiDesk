@@ -137,7 +137,8 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         case .profiles, .palettes: return true
         case .looks: return looks != nil
         case .desktopBindings: return profileBindings != nil
-        case .migrationBackups, .machineConfig: return false
+        case .migrationBackups, .machineConfig, .syncStamp:
+            return false
         }
     }
 

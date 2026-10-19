@@ -7,10 +7,13 @@ import SwiftUI
 /// the sheet, since the row outlives the menu that opens it.
 struct SyncAcrossMacsRow: View {
     @ObservedObject var model: SettingsModel
-    @State private var folder = SyncFolderPreference.stored
+    @State private var folder: URL?
     @State private var refusal: SyncRefusal?
     @State private var request: SyncCompareRequest?
     @State private var failure: SyncRefusal?
+    /// A copy's failure, shown once its sheet has gone: an alert
+    /// raised while the sheet closes is dropped.
+    @State private var pendingFailure: SyncRefusal?
 
     private enum Pick: Hashable { case none, iCloud, chosen, choose }
 
@@ -37,7 +40,15 @@ struct SyncAcrossMacsRow: View {
                 .truncationMode(.middle)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .onAppear(perform: refresh)
+        .onAppear {
+            folder = model.syncFolder
+            refresh()
+        }
+        .onChange(of: request == nil) { _, closed in
+            guard closed, let pending = pendingFailure else { return }
+            failure = pending
+            pendingFailure = nil
+        }
         .sheet(item: $request) { request in
             SyncCompareSheet(
                 request: request,
@@ -61,8 +72,8 @@ struct SyncAcrossMacsRow: View {
             Text(SyncText.none).tag(Pick.none)
             Divider()
             Text(SyncText.iCloudDrive).tag(Pick.iCloud)
-                .selectionDisabled(!SyncFolderPreference.iCloudDriveIsOn)
-            if let folder, !SyncFolderPreference.isICloudFolder(folder) {
+                .selectionDisabled(!SyncFolderLocation.iCloudDriveIsOn)
+            if let folder, !SyncFolderLocation.isICloudFolder(folder) {
                 Text(folder.lastPathComponent).tag(Pick.chosen)
             }
             Divider()
@@ -72,7 +83,7 @@ struct SyncAcrossMacsRow: View {
 
     private var pick: Pick {
         guard let folder else { return .none }
-        return SyncFolderPreference.isICloudFolder(folder)
+        return SyncFolderLocation.isICloudFolder(folder)
             ? .iCloud : .chosen
     }
 
@@ -92,14 +103,8 @@ struct SyncAcrossMacsRow: View {
         guard let folder else { return SyncText.noFolderCaption }
         guard let refusal else {
             return SyncText.chosenCaption(
-                SyncFolderPreference.displayPath(folder)
+                SyncFolderDisplay.path(folder)
             )
-        }
-        if refusal == .folderUnavailable,
-            SyncFolderPreference.isICloudFolder(folder),
-            !SyncFolderPreference.iCloudDriveIsOn
-        {
-            return SyncText.iCloudOff
         }
         return SyncText.caption(for: refusal)
     }
@@ -118,7 +123,7 @@ struct SyncAcrossMacsRow: View {
         case .none:
             store(nil)
         case .iCloud:
-            let url = SyncFolderPreference.iCloudFolder
+            let url = SyncFolderLocation.iCloudFolder
             try? FileManager.default.createDirectory(
                 at: url,
                 withIntermediateDirectories: true
@@ -144,7 +149,7 @@ struct SyncAcrossMacsRow: View {
     }
 
     private func store(_ url: URL?) {
-        SyncFolderPreference.stored = url
+        model.syncFolder = url
         folder = url
         refresh()
     }
@@ -157,30 +162,30 @@ struct SyncAcrossMacsRow: View {
         guard let folder else { return }
         refresh()
         guard refusal == nil else { return }
+        let comparison = model.compareSync(with: folder)
         request = SyncCompareRequest(
             folder: folder,
-            folderName: SyncFolderPreference.displayPath(folder),
-            comparison: model.compareSync(with: folder),
+            folderName: SyncFolderDisplay.path(folder),
+            comparison: comparison,
             unsaved: model.isDirty,
-            saveBlocked: model.isDirty ? model.syncSaveBlockedReason : nil
+            saveBlocked: model.isDirty ? model.syncSaveBlockedReason : nil,
+            // Nothing is replaced into an empty folder, so Return
+            // copies there; everywhere else it cancels (ruling 14).
+            returnKeepsThisMac: comparison.folder.isEmpty
+                && comparison.keepThisMacRefusal == nil
+                && !(model.isDirty && model.syncSaveBlockedReason != nil)
         )
     }
 
-    /// Saves the draft first where it has edits; a Save that did
-    /// not land leaves the folder alone.
     private func keepThisMac(_ request: SyncCompareRequest) {
         self.request = nil
-        if request.unsaved {
-            model.performPrimarySave()
-            guard !model.isDirty else { return }
-        }
-        failure = model.keepThisMacsSetup(in: request.folder)
+        pendingFailure = model.keepThisMacsSetup(in: request.folder)
         refresh()
     }
 
     private func keepFolder(_ request: SyncCompareRequest) {
         self.request = nil
-        failure = model.keepFoldersSetup(from: request.folder)
+        pendingFailure = model.keepFoldersSetup(from: request.folder)
         refresh()
     }
 }

@@ -45,7 +45,7 @@ enum SyncText {
     static func chosenCaption(_ path: String) -> String {
         L(
             "general.sync.caption.chosen",
-            "%1$@ · Copies only when you choose Compare and Copy.",
+            "%1$@ · Copies only when you ask it to.",
             path
         )
     }
@@ -66,11 +66,13 @@ enum SyncText {
                 "Can't find this folder. It may have been moved, "
                     + "renamed or deleted."
             )
+        case .iCloudDriveOff:
+            return iCloudOff
         case .sameFolder:
             return L(
                 "general.sync.caption.same",
-                "That's the folder KiwiDesk keeps its own settings "
-                    + "in. Choose another one."
+                "That folder holds KiwiDesk's own settings, or sits "
+                    + "inside them. Choose another one."
             )
         case .folderNewer:
             return L(
@@ -86,8 +88,14 @@ enum SyncText {
     /// A refusal or a failed copy, as one sentence.
     static func sentence(for refusal: SyncRefusal) -> String {
         switch refusal {
-        case .folderUnavailable, .sameFolder, .folderNewer:
+        case .folderUnavailable, .iCloudDriveOff, .sameFolder,
+            .folderNewer:
             return caption(for: refusal)
+        case .folderUnreadable:
+            return L(
+                "general.sync.refusal.unreadable_folder",
+                "KiwiDesk couldn't read the setup in the folder."
+            )
         case .folderEmpty:
             return L(
                 "general.sync.refusal.empty",
@@ -121,10 +129,7 @@ enum SyncText {
                     + "configuration first."
             )
         case .unreadable, .notABackup, .newerFormat, .empty:
-            return L(
-                "general.sync.refusal.unreadable_folder",
-                "KiwiDesk couldn't read the setup in the folder."
-            )
+            return sentence(for: .folderUnreadable)
         case .couldNotWrite:
             return SetupBackupText.sentence(for: error)
         }
@@ -149,6 +154,14 @@ enum SyncText {
     }
 
     static var thisMac: String { L("general.sync.this_mac", "This Mac") }
+
+    static var includes: String {
+        L(
+            "general.sync.sheet.includes",
+            "Settings, profiles, color palettes, looks and init.lua "
+                + "are copied together."
+        )
+    }
 
     static var trashNote: String {
         L(
@@ -224,6 +237,11 @@ enum SyncText {
     /// "Today at 14:02", in this Mac's locale.
     private static func format(_ date: Date) -> String {
         let formatter = DateFormatter()
+        // The language KiwiDesk speaks, not the system's.
+        if let code = LocalizationManager.shared.selection {
+            formatter.locale = Locale(identifier: code)
+        }
+        formatter.formattingContext = .middleOfSentence
         formatter.doesRelativeDateFormatting = true
         formatter.dateStyle = .medium
         formatter.timeStyle = .short

@@ -37,6 +37,25 @@ extension KiwiCore {
     /// loss later — refusal must outrank convenience on the
     /// one path whose output outlives this build.
     public func exportSetup() throws -> SetupBundle {
+        try Self.setupBundle(
+            gui: guiConfigStore,
+            profiles: profiles,
+            palettes: paletteLibrary,
+            looks: lookLibrary,
+            bindings: true
+        )
+    }
+
+    /// The bundle a set of stores holds — this install's for an
+    /// export, a sync folder's staged copy for a take (#2324),
+    /// which passes `bindings: false` to keep this Mac's.
+    static func setupBundle(
+        gui: GuiConfigStore,
+        profiles: ProfileManager,
+        palettes: PaletteStore,
+        looks: LookStore,
+        bindings: Bool
+    ) throws -> SetupBundle {
         // Each field asks the register whether it travels, so
         // `travelsInABackup` is the switch rather than a comment
         // beside one: flip a case to `false` and it stops being
@@ -46,16 +65,16 @@ extension KiwiCore {
         SetupBundle(
             writtenBy: KiwiDeskVersion.semantic,
             config: ConfigArtifact.guiConfig.travelsInABackup
-                ? guiConfigStore.load() : nil,
+                ? gui.load() : nil,
             profiles: ConfigArtifact.profiles.travelsInABackup
                 ? profiles.allProfiles() : [],
             palettes: ConfigArtifact.palettes.travelsInABackup
-                ? try paletteLibrary.libraryPalettes() : [],
+                ? try palettes.libraryPalettes() : [],
             looks: ConfigArtifact.looks.travelsInABackup
-                ? try lookLibrary.libraryLooks() : nil,
-            profileBindings: ConfigArtifact.desktopBindings
-                .travelsInABackup
-                ? guiConfigStore.load()?.profileBindings : nil
+                ? try looks.libraryLooks() : nil,
+            profileBindings: bindings
+                && ConfigArtifact.desktopBindings.travelsInABackup
+                ? gui.load()?.profileBindings : nil
         )
     }
 
