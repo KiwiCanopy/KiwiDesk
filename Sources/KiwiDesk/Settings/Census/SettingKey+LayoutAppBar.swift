@@ -1,18 +1,19 @@
 import KiwiDeskCore
 
 /// Per-layout App Bar census slice (`LayoutAppBar`, Monocle and
-/// Scrolling): whether each layout shows one — drawn in the
+/// Scrolling): how each layout shows its bar (#761) — drawn in the
 /// KiwiShelf card — and its Lua-only overrides of the bar's OWN
 /// fields; the shelf's fields have none (#1517).
 
 enum LayoutAppBarKey: String, CaseIterable, Hashable {
-    case monocleAppBarEnabled = "settings.monocle.appBar.enabled"
+    case monocleAppBarVisibility = "settings.monocle.appBar.visibility"
     case monocleAppBarActiveIndicator =
         "settings.monocle.appBar.activeIndicator"
     case monocleAppBarTitleCap = "settings.monocle.appBar.titleCap"
     case monocleAppBarGroupAdjacentWindows =
         "settings.monocle.appBar.groupAdjacentWindows"
-    case scrollingAppBarEnabled = "settings.scrolling.appBar.enabled"
+    case scrollingAppBarVisibility =
+        "settings.scrolling.appBar.visibility"
     case scrollingAppBarActiveIndicator =
         "settings.scrolling.appBar.activeIndicator"
     case scrollingAppBarTitleCap = "settings.scrolling.appBar.titleCap"
@@ -23,7 +24,7 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
 extension LayoutAppBarKey {
     var placement: SettingPlacement {
         switch self {
-        case .monocleAppBarEnabled, .scrollingAppBarEnabled:
+        case .monocleAppBarVisibility, .scrollingAppBarVisibility:
             // Drawn in the KiwiShelf card's Show group, which has
             // no container gate.
             return .row(.bars, .kiwishelf, .atRest)
@@ -40,9 +41,9 @@ extension LayoutAppBarKey {
 extension LayoutAppBarKey {
     var text: SettingRowText {
         switch self {
-        case .monocleAppBarEnabled:
+        case .monocleAppBarVisibility:
             return .text("kiwishelf.show.monocle")
-        case .scrollingAppBarEnabled:
+        case .scrollingAppBarVisibility:
             return .text("kiwishelf.show.scrolling")
         case .monocleAppBarActiveIndicator,
             .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
@@ -61,8 +62,8 @@ extension SettingKey {
     /// search row and the diff row read one sentence.
     var labelMode: LayoutMode? {
         switch self {
-        case .layoutAppBar(.monocleAppBarEnabled): return .monocle
-        case .layoutAppBar(.scrollingAppBarEnabled): return .scrolling
+        case .layoutAppBar(.monocleAppBarVisibility): return .monocle
+        case .layoutAppBar(.scrollingAppBarVisibility): return .scrolling
         default: return nil
         }
     }

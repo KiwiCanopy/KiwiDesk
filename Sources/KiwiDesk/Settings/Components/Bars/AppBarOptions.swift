@@ -105,8 +105,9 @@ enum AppBarOptions {
     @MainActor
     static var visibility: [(ShelfVisibility, String)] {
         [
-            (.always, L("bar.visibility.always", "Always shown")),
-            (.auto, L("bar.visibility.auto", "Hide automatically")),
+            (.always, L("bar.visibility.always", "Always")),
+            (.auto, L("bar.visibility.auto", "Auto")),
+            (.hidden, L("bar.visibility.hidden", "Hidden")),
         ]
     }
 

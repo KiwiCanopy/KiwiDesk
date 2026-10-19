@@ -30,9 +30,11 @@ extension KiwiCore {
                     on: screen,
                     among: liveScreenEdgeScope
                 )
-            } else if case .visibility(let value) = setting {
-                // Both bars' while they share an edge (#761).
-                tiler.settings.setVisibility(value, of: .app)
+            } else if case .visibility = setting {
+                // Each layout's own (#761): the global verb sets
+                // every layout that carries an App Bar.
+                setting.apply(to: &tiler.settings.monocle.appBar)
+                setting.apply(to: &tiler.settings.scrolling.appBar)
             } else {
                 setting.apply(to: &tiler.settings.appBarStyle)
             }
@@ -70,9 +72,6 @@ extension KiwiCore {
                     on: screen,
                     among: liveScreenEdgeScope
                 )
-            } else if case .visibility(let value) = setting {
-                // Both bars' while they share an edge (#761).
-                tiler.settings.setVisibility(value, of: .space)
             } else {
                 setting.apply(to: &tiler.settings.spaceBarStyle)
             }
@@ -106,20 +105,13 @@ extension KiwiCore {
     }
 
     /// Applies a layout's `*.set_app_bar_<field>` override.
-    /// `enabled` is the layout's own concrete toggle; every
-    /// other field writes an override of the global style.
+    /// `visibility` is the layout's own concrete value (#761);
+    /// every other field writes an override of the global style.
     func applyBarOverride(
         field: String,
         _ args: [JSONValue],
         into bar: inout LayoutAppBar
     ) -> CommandResponse {
-        if field == "enabled" {
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            bar.enabled = enabled
-            return .ok()
-        }
         if let global = AppBarStyle.layoutFixedKeys.first(where: {
             $0.key.stringValue == field
         })?.value {

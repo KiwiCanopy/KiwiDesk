@@ -27,7 +27,7 @@ struct LayoutCard: View {
         if let host = model.config.settings.appBarHost(for: mode),
             let appBarProse = LayoutCardText.appBarState(
                 mode,
-                on: host.appBar.enabled
+                on: host.appBar.visibility != .hidden
             )
         {
             CrossReferenceRow(
@@ -143,10 +143,10 @@ enum LayoutCardText {
             )
         case (.monocle, false):
             return L(
-                "monocle.app_bar_xref_off",
-                "The monocle App Bar is off, so nothing lists "
-                    + "the windows behind the focused one. Turn it "
-                    + "on in %1$@.",
+                "monocle.app_bar_xref_hidden",
+                "The monocle App Bar is hidden, so nothing lists "
+                    + "the windows behind the focused one until its "
+                    + "shortcut shows it. Change it in %1$@.",
                 CrossReferenceRow.linkSlot
             )
         case (.scrolling, true):
@@ -158,8 +158,8 @@ enum LayoutCardText {
             )
         case (.scrolling, false):
             return L(
-                "scroll_grid.app_bar_xref_off",
-                "The scrolling App Bar (currently off) is "
+                "scroll_grid.app_bar_xref_hidden",
+                "The scrolling App Bar (currently hidden) is "
                     + "configured in %1$@.",
                 CrossReferenceRow.linkSlot
             )

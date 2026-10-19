@@ -10,7 +10,7 @@ extension LayoutAppBar: Codable {
 
     /// JSON coding keys for LayoutAppBar (`AppBarParityTests`).
     enum Key: String, CodingKey, CaseIterable {
-        case enabled
+        case visibility
         case activeIndicator = "active_indicator"
         case titleCap = "title_cap"
         case groupAdjacentWindows = "group_adjacent_windows"
@@ -18,11 +18,11 @@ extension LayoutAppBar: Codable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Key.self)
-        enabled =
+        visibility =
             try container.decodeIfPresent(
-                Bool.self,
-                forKey: .enabled
-            ) ?? true
+                ShelfVisibility.self,
+                forKey: .visibility
+            ) ?? .always
         activeIndicator = try container.decodeIfPresent(
             ActiveIndicator.self,
             forKey: .activeIndicator
@@ -39,7 +39,7 @@ extension LayoutAppBar: Codable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: Key.self)
-        try container.encode(enabled, forKey: .enabled)
+        try container.encode(visibility, forKey: .visibility)
         try container.encodeIfPresent(
             activeIndicator,
             forKey: .activeIndicator

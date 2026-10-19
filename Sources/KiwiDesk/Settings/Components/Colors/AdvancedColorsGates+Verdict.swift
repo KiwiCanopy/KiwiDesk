@@ -44,20 +44,16 @@ extension AdvancedColorsGates {
                 ) : nil
         case .spaceBar(.spaceBarFocusedItemColor):
             guard focusedItemInert else { return nil }
-            return spaceBarOff
-                ? spaceBarOffVerdict
-                : ColorRowVerdict(
-                    help: AdvancedColorsHelp.focusedItemHelp,
-                    link: .ownSentence(.bars)
-                )
+            return ColorRowVerdict(
+                help: AdvancedColorsHelp.focusedItemHelp,
+                link: .ownSentence(.bars)
+            )
         case .spaceBar(.spaceBarFocusedHighlightColor):
             guard focusedHighlightInert else { return nil }
-            return !settings.spaceBarLook.enabled
-                ? spaceBarOffVerdict
-                : ColorRowVerdict(
-                    help: AdvancedColorsHelp.frontAppOff,
-                    link: .page(.bars)
-                )
+            return ColorRowVerdict(
+                help: AdvancedColorsHelp.frontAppOff,
+                link: .page(.bars)
+            )
         case .borders(.borderFocusedColor):
             return borderOn ? nil : borderOffVerdict
         case .borders(.borderUnfocusedColor):
@@ -118,17 +114,6 @@ extension AdvancedColorsGates {
     func needsOwnSentence(_ key: SettingKey) -> Bool {
         if case .ownSentence = verdict(for: key)?.link { return true }
         return false
-    }
-
-    private var spaceBarOff: Bool {
-        bars.containerReason(for: .spaceBar) != nil
-    }
-
-    private var spaceBarOffVerdict: ColorRowVerdict {
-        ColorRowVerdict(
-            help: BarsGateHelp.sentence(for: .spaceBarOff),
-            link: .page(.bars)
-        )
     }
 
     private var borderOffVerdict: ColorRowVerdict {

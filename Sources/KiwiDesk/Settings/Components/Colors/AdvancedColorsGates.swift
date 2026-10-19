@@ -53,16 +53,14 @@ struct AdvancedColorsGates {
         // Inert only where no screen draws the name (#1948).
         settings.screenVariants.allSatisfy { screen in
             let style = screen.spaceBarLook
-            return !style.enabled
-                || style.iconSource == .appImage
-                    && !(style.showFrontApp && style.edge.isHorizontal)
+            return style.iconSource == .appImage
+                && !(style.showFrontApp && style.edge.isHorizontal)
         }
     }
 
     /// The front chip's indicator draws only while the segment
     /// does (#1856).
     var focusedHighlightInert: Bool {
-        let style = settings.spaceBarLook
-        return !style.enabled || !style.showFrontApp
+        !settings.spaceBarLook.showFrontApp
     }
 }

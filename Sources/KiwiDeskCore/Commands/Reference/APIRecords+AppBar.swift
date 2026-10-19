@@ -17,13 +17,14 @@ extension APIReference {
             .boolean("reserve")
         ),
         "set_visibility": APIRecord(
-            "Sets whether the App Bar's shelf stays shown or "
-                + "hides until the pointer reaches its edge.",
+            "Sets whether every layout's App Bar stays shown, "
+                + "hides until the pointer reaches its edge, or "
+                + "shows only on its shortcut.",
             .choice("visibility", ShelfVisibility.self)
         ),
         "toggle_reveal": APIRecord(
-            "Shows or hides the hidden shelf the App Bar sits on, "
-                + "on the active Space's screen."
+            "Shows or hides the App Bar over the windows on the "
+                + "active Space's screen, unless it is set to always."
         ),
         "set_active_indicator": APIRecord(
             "Sets how the focused window's item is marked.",

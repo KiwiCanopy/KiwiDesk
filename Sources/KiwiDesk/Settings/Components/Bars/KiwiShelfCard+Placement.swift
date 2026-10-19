@@ -5,18 +5,21 @@ import SwiftUI
 /// bars along the edge: alignment for a lone bar, order and share
 /// once both show.
 extension KiwiShelfCard {
-    /// Which bars the shelf carries — the Space Bar in every
-    /// layout, the App Bar only where a layout can carry one.
+    /// How each bar shows (#761) — the Space Bar in every layout,
+    /// the App Bar only where a layout can carry one: always, until
+    /// the pointer reaches its edge, or only on its shortcut.
     var showGroup: some View {
         SettingsRowShape {
             SettingsRowLabel(
                 label: L("kiwishelf.show.label", "Show"),
                 help: L(
-                    "kiwishelf.show.help",
-                    "The Space Bar shows in every layout. Only "
-                        + "%1$@ and %2$@ can carry an App Bar — "
-                        + "the other layouts keep every window "
-                        + "visible. With the Space Bar off, the "
+                    "kiwishelf.show.visibility.help",
+                    "Always keeps a bar on screen. Auto hides it "
+                        + "to a thin mark until the pointer reaches "
+                        + "its edge. Hidden draws nothing: its "
+                        + "shortcut still shows it, over your "
+                        + "windows. Only %1$@ and %2$@ can carry an "
+                        + "App Bar. With the Space Bar hidden, the "
                         + "menu bar shows the Space each screen is "
                         + "on.",
                     L("layout.monocle.name", "Monocle"),
@@ -34,23 +37,23 @@ extension KiwiShelfCard {
 
     @ViewBuilder func showRow(_ key: SettingKey) -> some View {
         switch key {
-        case .spaceBar(.spaceBarEnabled):
-            Toggle(
+        case .spaceBar(.spaceBarVisibility):
+            visibilityRow(
                 L("kiwishelf.show.space_bar", "Space Bar"),
-                isOn: $model.config.settings.spaceBarStyle.enabled
+                $model.config.settings.spaceBarStyle.visibility
             )
         case .spaceBar(.spaceCue):
             spaceCueRow
-        case .layoutAppBar(.monocleAppBarEnabled):
-            Toggle(
+        case .layoutAppBar(.monocleAppBarVisibility):
+            visibilityRow(
                 SettingsCatalog.bars.monocleShowIn.text,
-                isOn: $model.config.settings.monocle.appBar.enabled
+                $model.config.settings.monocle.appBar.visibility
             )
             .searchAnchored(SettingsCatalog.bars.monocleShowIn)
-        case .layoutAppBar(.scrollingAppBarEnabled):
-            Toggle(
+        case .layoutAppBar(.scrollingAppBarVisibility):
+            visibilityRow(
                 SettingsCatalog.bars.scrollingShowIn.text,
-                isOn: $model.config.settings.scrolling.appBar.enabled
+                $model.config.settings.scrolling.appBar.visibility
             )
             .searchAnchored(SettingsCatalog.bars.scrollingShowIn)
         default:
@@ -58,6 +61,23 @@ extension KiwiShelfCard {
                 "unrendered Show key: \(key.id)"
             )
             EmptyView()
+        }
+    }
+
+    /// One bar's Always · Auto · Hidden strip, named by `title`.
+    private func visibilityRow(
+        _ title: String,
+        _ selection: Binding<ShelfVisibility>
+    ) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .accessibilityHidden(true)
+            Spacer(minLength: 8)
+            SegmentedPicker(
+                spokenLabel: title,
+                selection: selection,
+                options: AppBarOptions.visibility.map { ($0.1, $0.0) }
+            )
         }
     }
 
@@ -87,7 +107,8 @@ extension KiwiShelfCard {
     /// aligned anywhere but the run's own end moves — Core's own
     /// verdict names the alignment that holds it still (#1517).
     private var alignmentNote: String? {
-        guard gates.bothBarsShow, gates.bothBarsReason == nil,
+        guard model.config.settings.bothBarsCanShow,
+            gates.bothBarsReason == nil,
             let steady = ShelfArrangement.spaceBarMoves(
                 shelf: shelf.wrappedValue
             )

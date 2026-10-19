@@ -12,36 +12,22 @@ struct AppBarCard: View {
     var gates: BarsGates {
         BarsGates(settings: model.config.settings)
     }
-    /// The census container gate, resolved live to a reason.
-    private var reason: BarsGates.InertReason? {
-        gates.containerReason(for: .appBar)
-    }
-    private var allows: Bool { reason == nil }
 
     var body: some View {
-        // Section header help provides the gate anchor (#527).
         SettingsSection(
             SettingsCatalog.bars.appBarCard,
-            caption: cardCaption,
-            help: reason.map(BarsGateHelp.sentence)
+            caption: cardCaption
         ) {
             // Preview strip renders in BarsPanelPreview (#678).
             rows(BarsRowOrder.appBar)
         }
     }
 
-    /// Parallel per-row gates (#520), respecting census exemptions.
+    /// The card's rows, in census order; none greys, since a
+    /// hidden bar's shortcut still shows it (#761).
     private func rows(_ keys: [SettingKey]) -> some View {
         ForEach(keys, id: \.id) { key in
             row(for: key)
-                .modifier(
-                    GreyOut(
-                        active: !allows
-                            && !key.placement
-                                .exemptFromContainerGate,
-                        help: BarsGateHelp.sentence(for: .noBarShown)
-                    )
-                )
         }
     }
 

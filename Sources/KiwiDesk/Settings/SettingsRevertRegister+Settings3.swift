@@ -153,24 +153,25 @@ extension SettingsRevertRegister {
                 \.autoTracks,
                 key: { SpaceID($0) }
             ),
-        .layoutAppBar(.monocleAppBarEnabled):
-            .leaf(\.settings.monocle.appBar.enabled),
+        .layoutAppBar(.monocleAppBarVisibility):
+            .leaf(\.settings.monocle.appBar.visibility),
         .layoutAppBar(.monocleAppBarActiveIndicator):
             .leaf(\.settings.monocle.appBar.activeIndicator),
         .layoutAppBar(.monocleAppBarTitleCap):
             .leaf(\.settings.monocle.appBar.titleCap),
         .layoutAppBar(.monocleAppBarGroupAdjacentWindows):
             .leaf(\.settings.monocle.appBar.groupAdjacentWindows),
-        .layoutAppBar(.scrollingAppBarEnabled):
-            .leaf(\.settings.scrolling.appBar.enabled),
+        .layoutAppBar(.scrollingAppBarVisibility):
+            .leaf(\.settings.scrolling.appBar.visibility),
         .layoutAppBar(.scrollingAppBarActiveIndicator):
             .leaf(\.settings.scrolling.appBar.activeIndicator),
         .layoutAppBar(.scrollingAppBarTitleCap):
             .leaf(\.settings.scrolling.appBar.titleCap),
         .layoutAppBar(.scrollingAppBarGroupAdjacentWindows):
             .leaf(\.settings.scrolling.appBar.groupAdjacentWindows),
-        .spaceBar(.spaceBarEnabled): .leaf(\.settings.spaceBarStyle.enabled),
         .spaceBar(.spaceBarReserve): .leaf(\.settings.spaceBarStyle.reserve),
+        .spaceBar(.spaceBarVisibility):
+            .leaf(\.settings.spaceBarStyle.visibility),
         .spaceBar(.spaceBarActiveIndicator):
             .leaf(\.settings.spaceBarStyle.activeIndicator),
         .spaceBar(.spaceBarHideEmpty):

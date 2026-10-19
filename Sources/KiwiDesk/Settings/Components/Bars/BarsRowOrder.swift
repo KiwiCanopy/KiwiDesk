@@ -2,10 +2,10 @@
 enum BarsRowOrder {
     /// KiwiShelf card, Show group: which bars the shelf carries.
     static let kiwishelfShow: [SettingKey] = [
-        .spaceBar(.spaceBarEnabled),
+        .spaceBar(.spaceBarVisibility),
         .spaceBar(.spaceCue),
-        .layoutAppBar(.monocleAppBarEnabled),
-        .layoutAppBar(.scrollingAppBarEnabled),
+        .layoutAppBar(.monocleAppBarVisibility),
+        .layoutAppBar(.scrollingAppBarVisibility),
     ]
 
     /// KiwiShelf card, at rest below the Show group.

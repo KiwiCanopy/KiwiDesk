@@ -31,12 +31,84 @@ extension KiwiCore {
         symbol: String
     ) -> Bool {
         guard let frame = refusalPillFrame(window) else { return false }
-        return borders.flashSizeLimitPill(
-            window: window,
+        return flashRefusalPill(
+            key: window,
             frame: frame,
             text: text,
             symbol: symbol
         )
+    }
+
+    /// The door's shelf twin (#761): a pill on the window side of a
+    /// bar's `strip` (AX coordinates), keyed apart from every window.
+    @discardableResult
+    func flashRefusalPill(
+        near strip: CGRect,
+        edge: AppBarEdge,
+        text: String,
+        symbol: String
+    ) -> Bool {
+        flashRefusalPill(
+            key: Self.shelfPillKey,
+            frame: Self.pillRoom(beside: strip, edge: edge),
+            text: text,
+            symbol: symbol
+        )
+    }
+
+    /// The one primitive call both doors share.
+    private func flashRefusalPill(
+        key: WindowID,
+        frame: CGRect,
+        text: String,
+        symbol: String
+    ) -> Bool {
+        borders.flashSizeLimitPill(
+            window: key,
+            frame: frame,
+            text: text,
+            symbol: symbol
+        )
+    }
+
+    /// The key a shelf's pill takes: no window carries it.
+    static let shelfPillKey = WindowID(CGWindowID.max)
+
+    /// The room a shelf's pill draws in: a band on the strip's
+    /// window side, its pill near the strip.
+    static func pillRoom(beside strip: CGRect, edge: AppBarEdge) -> CGRect {
+        let depth: CGFloat = 48
+        let width = max(strip.width, 320)
+        switch edge {
+        case .top:
+            return CGRect(
+                x: strip.minX,
+                y: strip.maxY,
+                width: strip.width,
+                height: depth
+            )
+        case .bottom:
+            return CGRect(
+                x: strip.minX,
+                y: strip.minY - depth,
+                width: strip.width,
+                height: depth
+            )
+        case .left:
+            return CGRect(
+                x: strip.maxX,
+                y: strip.minY,
+                width: width,
+                height: strip.height
+            )
+        case .right:
+            return CGRect(
+                x: strip.minX - width,
+                y: strip.minY,
+                width: width,
+                height: strip.height
+            )
+        }
     }
 
     /// The audible half of a refusal (#1255): a drawn pill may

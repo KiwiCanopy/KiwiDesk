@@ -14,14 +14,17 @@ enum GestureSurface: CaseIterable {
     /// The KiwiShelf as a whole — either bar.
     case shelf
 
-    /// Whether the gesture has nothing to act on. Core's own
-    /// predicates, never a re-derivation beside them.
+    /// Whether the gesture has nothing to act on at rest — every
+    /// bar it reaches `hidden` (#761). Core's own predicates, never
+    /// a re-derivation beside them.
     func isOff(_ settings: TilingSettings) -> Bool {
         switch self {
         case .windows: return false
-        case .spaceBar: return !settings.spaceBarStyle.enabled
+        case .spaceBar: return settings.spaceBarStyle.visibility == .hidden
         case .appBar: return !settings.anyAppBarCanShow
-        case .shelf: return !settings.shelfShows
+        case .shelf:
+            return settings.spaceBarStyle.visibility == .hidden
+                && !settings.anyAppBarCanShow
         }
     }
 
@@ -35,14 +38,14 @@ enum GestureSurface: CaseIterable {
             return nil
         case .spaceBar:
             return L(
-                "shortcuts.gestures.space_bar_off",
-                "The Space Bar is off. Turn it on in %1$@.",
+                "shortcuts.gestures.space_bar_hidden",
+                "The Space Bar is hidden. Show it in %1$@.",
                 CrossReferenceRow.linkSlot
             )
         case .appBar:
             return L(
-                "shortcuts.gestures.app_bar_off",
-                "No layout shows an App Bar. Turn one on in %1$@.",
+                "shortcuts.gestures.app_bar_hidden",
+                "Every layout's App Bar is hidden. Show one in %1$@.",
                 CrossReferenceRow.linkSlot
             )
         }

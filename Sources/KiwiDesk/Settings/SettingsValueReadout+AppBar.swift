@@ -27,15 +27,6 @@ extension SettingsValueReadout {
             )
         case .appBarReserve:
             return appBarOnOffRow(census, o.reserve, n.reserve)
-        case .appBarVisibility:
-            // The stored value, as every diff row narrates; while
-            // the bars share an edge the door writes both (#761).
-            return appBarChoiceRow(
-                census,
-                o.visibility,
-                n.visibility,
-                AppBarOptions.visibility
-            )
         case .appBarTitleCap:
             return appBarRow(
                 census,

@@ -42,7 +42,10 @@ struct BarsPanelPreview: View {
     /// order Core lists its hosts — the frame they share.
     private var hostNames: String {
         LayoutMode.allCases
-            .filter { settings.appBarHost(for: $0)?.appBar.enabled == true }
+            .filter {
+                settings.appBarVisibility(in: $0).map { $0 != .hidden }
+                    == true
+            }
             .map(\.displayName)
             .joined(separator: " · ")
     }

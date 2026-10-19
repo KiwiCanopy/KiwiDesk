@@ -5,7 +5,6 @@ import Foundation
 /// (#293). Reuses the App Bar's error type: the two parsers speak
 /// one vocabulary and their messages must not drift.
 enum SpaceBarCommandSetting {
-    case enabled(Bool)
     case reserve(Bool)
     case visibility(ShelfVisibility)
     case edge(AppBarEdge)
@@ -104,7 +103,6 @@ enum SpaceBarCommandSetting {
 
     private static var boolFields: [String: (Bool) -> SpaceBarCommandSetting] {
         [
-            "enabled": Self.enabled,
             "reserve": Self.reserve,
             "show_front_app": Self.showFrontApp,
             "hide_empty": Self.hideEmpty,
@@ -223,11 +221,8 @@ enum SpaceBarCommandSetting {
     /// Applies setting value to SpaceBarStyle.
     func apply(to style: inout SpaceBarStyle) {
         switch self {
-        case .enabled(let value): style.enabled = value
         case .reserve(let value): style.reserve = value
-        // Through `TilingSettings.setVisibility(_:of:)` alone, which
-        // writes both bars while they share an edge (#761).
-        case .visibility: break
+        case .visibility(let value): style.visibility = value
         case .edge(let value): style.setEdge(value)
         case .screenEdge: break
         case .glyphSpan(let value): style.glyphSpan = value

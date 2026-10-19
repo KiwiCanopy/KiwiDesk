@@ -174,12 +174,12 @@ public enum APIReference {
             "set_new_window_placement", "set_wrap_focus",
             "set_fill_when_alone", "set_slot_size_override",
             "set_anchor_override", "set_orientation_override",
-            "set_app_bar_enabled", "set_app_bar_active_indicator",
+            "set_app_bar_visibility", "set_app_bar_active_indicator",
             "set_app_bar_title_cap",
             "set_app_bar_group_adjacent_windows",
         ],
         "space_bar": barActions + [
-            "set_enabled", "set_reserve", "set_visibility",
+            "set_reserve", "set_visibility",
             "set_edge",
             "set_glyph_span", "set_glyph_gap",
             "set_group_adjacent_windows", "set_inactive_content",
@@ -226,7 +226,7 @@ public enum APIReference {
         "monocle": [
             "set_orientation", "set_orientation_override",
             "set_hide_style", "set_wrap_focus",
-            "set_new_window_placement", "set_app_bar_enabled",
+            "set_new_window_placement", "set_app_bar_visibility",
             "set_app_bar_active_indicator", "set_app_bar_title_cap",
             "set_app_bar_group_adjacent_windows",
         ],

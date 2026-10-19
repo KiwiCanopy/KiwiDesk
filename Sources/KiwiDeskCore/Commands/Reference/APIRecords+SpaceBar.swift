@@ -8,23 +8,20 @@ import Foundation
 /// `SpaceBarCommandSetting.parse`.
 extension APIReference {
     static let spaceBarRecords: [String: APIRecord] = [
-        "set_enabled": APIRecord(
-            "Shows or hides the Space Bar.",
-            .boolean("enabled")
-        ),
         "set_reserve": APIRecord(
             "Reserves the Space Bar's strip; false draws it over "
                 + "the windows, the strip unclickable.",
             .boolean("reserve")
         ),
         "set_visibility": APIRecord(
-            "Sets whether the Space Bar's shelf stays shown or "
-                + "hides until the pointer reaches its edge.",
+            "Sets whether the Space Bar stays shown, hides until "
+                + "the pointer reaches its edge, or shows only on "
+                + "its shortcut.",
             .choice("visibility", ShelfVisibility.self)
         ),
         "toggle_reveal": APIRecord(
-            "Shows or hides the hidden shelf the Space Bar sits on, "
-                + "on the active Space's screen."
+            "Shows or hides the Space Bar over the windows on the "
+                + "active Space's screen, unless it is set to always."
         ),
         "set_edge": APIRecord(
             "Sets the Space Bar's edge on all screens, or on one "
