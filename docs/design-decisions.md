@@ -10950,6 +10950,28 @@ carries its own mark. A Lua-owned setup leaves the mark alone, so
 moving to Settings later still offers every Desktop. Restore Defaults restores the
 tier for the Desktops the Mac has.
 
+:::unreleased
+**A row moves itself, from either base (#2420).** Once a key is
+set, any shortcut row on `⌃⌥` or `⌥⌘` offers Move to Hyper on its
+own row menu, swapping the base for `✦` and keeping `⇧`, so
+`⌃⌥←` and `⌃⌥⇧←` never land on one chord. The offer's rule that
+the ladder and the size base stay put is about rows the user did
+not ask about; a row the user picks is the user's call, and "any
+chord on either base" is one rule where a per-row exception list
+would be a second one to learn. App chrome stays, since KiwiHub's
+sides move only as a set, and so does the `⌃⌥⇧⌘` Desktop tier,
+whose rows move with the base on the sheet's Desktop line. With no
+key set the item is absent, not greyed: a move then writes a chord
+no key can press. A target another row holds greys the item and
+names the holder, since the user can free it on the same page;
+nothing is doubled and no old chord is remembered, so the way back
+is re-recording or the reverse offer. The top-up of a new default
+letter still follows where the layer's letters sit
+(`onLettersBase`), never whether a key is set: a layer whose
+letters stayed on `⌃⌥` gets the new one there too, and one moved
+row at a time feeds that same count.
+:::
+
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never
 the active app, so `⌘,` reaches a new user only once they have

@@ -251,7 +251,7 @@ public enum HyperShortcutMove {
     }
 
     /// KiwiHub's sides and the app chrome they travel with.
-    private static func isChrome(_ row: KeyBinding) -> Bool {
+    static func isChrome(_ row: KeyBinding) -> Bool {
         let lua =
             KiwiHubSide.allCases.map(\.lua)
             + DefaultKeybindings.appChromeRows().map(\.lua)

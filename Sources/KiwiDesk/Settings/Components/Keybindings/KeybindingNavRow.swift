@@ -13,6 +13,8 @@ struct NavRow: View {
     private var disabledSystemShortcuts
     @Environment(\.keybindingReservesTrashSlot)
     private var reservesTrashSlot
+    @Environment(\.hyperKeyIsOff)
+    private var hyperKeyIsOff
     /// A clear of a shortcut other profiles share asks where it
     /// goes, as the trash does (#1393).
     @State private var confirmingClear = false
@@ -64,6 +66,18 @@ struct NavRow: View {
             }
         }
         .keybindingRowStyle(unavailable: command.unavailable?())
+        .modifier(
+            HyperRowMoveActions(
+                move: hyperMove,
+                name: {
+                    KeybindingCatalog.localizedName(
+                        of: $0,
+                        config: model.config
+                    )
+                },
+                onMove: moveToHyper
+            )
+        )
         .confirmationDialog(
             L(
                 "shortcuts.clear_shared.title",
@@ -109,6 +123,18 @@ struct NavRow: View {
             config: model.config,
             commit: { record($0) }
         )
+    }
+
+    /// This row's Move to Hyper, offered only while a key is set.
+    private var hyperMove: HyperShortcutMove.RowMove? {
+        guard !hyperKeyIsOff, let index else { return nil }
+        return HyperShortcutMove.rowMove(bindings[index], in: bindings)
+    }
+
+    /// Stages the move into the draft, judged again at the click.
+    private func moveToHyper() {
+        guard case .move(let to) = hyperMove else { return }
+        record(to)
     }
 
     private func record(

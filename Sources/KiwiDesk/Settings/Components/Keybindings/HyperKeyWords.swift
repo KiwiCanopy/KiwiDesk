@@ -50,6 +50,17 @@ enum HyperKeyWords {
         }
     }
 
+    /// The second caption line while a key is set: where one
+    /// shortcut moves onto Hyper (#2420).
+    static var rowMoveHint: String {
+        L(
+            "shortcuts.hyper_key.row_move_hint",
+            "To put one shortcut on Hyper, right-click it and choose "
+                + "%1$@.",
+            HyperMoveWords.rowAction
+        )
+    }
+
     /// What the recorded key now does, or the invitation when no
     /// key is set.
     static func caption(_ key: HyperSourceKey?) -> String {

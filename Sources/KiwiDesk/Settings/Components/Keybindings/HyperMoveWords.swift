@@ -93,6 +93,21 @@ enum HyperMoveWords {
         L("shortcuts.hyper_move.cancel", "Cancel")
     }
 
+    /// A shortcut row's own move (#2420).
+    static var rowAction: String {
+        L("shortcuts.hyper_move.row_action", "Move to Hyper")
+    }
+
+    /// The sheet's pointer to the row move, under the list.
+    static var sheetHint: String {
+        L(
+            "shortcuts.hyper_move.sheet_hint",
+            "Leave a shortcut out and you can still move it later: "
+                + "right-click it and choose %1$@.",
+            rowAction
+        )
+    }
+
     /// The KiwiHub line, which moves with Open Settings.
     static func kiwiHub(settings: String) -> String {
         L(

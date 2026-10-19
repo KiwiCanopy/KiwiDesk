@@ -140,6 +140,21 @@ struct HyperMoveSheet: View {
     }
 
     private var footer: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Only forward: the row move goes to Hyper alone (#2420).
+            if request.direction == .toHyper {
+                spoken(HyperMoveWords.sheetHint)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            buttons
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Self.pad)
+    }
+
+    private var buttons: some View {
         HStack {
             Spacer()
             Button(HyperMoveWords.cancel, action: onCancel)
@@ -153,6 +168,5 @@ struct HyperMoveSheet: View {
                 .disabled(picks.isEmpty && !desktop)
         }
         .frame(maxWidth: .infinity)
-        .padding(Self.pad)
     }
 }

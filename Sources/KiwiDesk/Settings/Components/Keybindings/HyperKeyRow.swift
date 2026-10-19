@@ -101,13 +101,30 @@ struct HyperKeyRow: View {
     }
 
     private var captions: some View {
-        caption(
-            Self.captionText(
-                key: model.appWide.hyperKey,
-                status: model.hyperStatus,
-                luaOwned: reason == .appWideLuaOwned
+        VStack(alignment: .leading, spacing: 4) {
+            caption(
+                Self.captionText(
+                    key: model.appWide.hyperKey,
+                    status: model.hyperStatus,
+                    luaOwned: reason == .appWideLuaOwned
+                )
             )
-        )
+            if Self.offersRowMoveHint(
+                key: model.appWide.hyperKey,
+                luaOwned: reason == .appWideLuaOwned
+            ) {
+                caption(HyperKeyWords.rowMoveHint)
+            }
+        }
+    }
+
+    /// Whether the caption also points at a row's Move to Hyper:
+    /// only while a key is set, since the row action needs one.
+    static func offersRowMoveHint(
+        key: HyperSourceKey?,
+        luaOwned: Bool
+    ) -> Bool {
+        key != nil && !luaOwned
     }
 
     /// The one sentence under the field.

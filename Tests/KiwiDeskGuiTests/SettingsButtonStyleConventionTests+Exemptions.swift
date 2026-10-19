@@ -72,6 +72,12 @@ extension SettingsButtonStyleConventionTests {
                 "Menu item from the one builder the rowActions "
                     + "seam feeds (#845)"
             ),
+            // A shortcut row's Move to Hyper and its refusal (#2420).
+            "HyperRowMoveActions.swift": (
+                3, "rowActions",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845)"
+            ),
             // A temporary Space's one row action (#1790).
             "LiveOnlySpaceRow.swift": (
                 1, "rowActions",
