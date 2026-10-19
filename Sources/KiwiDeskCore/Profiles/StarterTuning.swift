@@ -31,8 +31,8 @@ public enum StarterTuning {
     /// Starter Scrolling slot fraction on both ultrawides (#1018):
     /// three readable columns. Read from the screen Scrolling first
     /// lands on, so an ultrawide hosting it imposes 30% on a laptop
-    /// that also scrolls (~518 pt — tight, above the 420 pt
-    /// minimum this branch sets). One `slotSize` per profile.
+    /// that also scrolls (~518 pt — tight, above the seeded
+    /// minimum's 460 pt ceiling). One `slotSize` per profile.
     static let ultrawideSlot = 0.3
 
     /// Settings for a setup whose main screen is `mainShape`, each
@@ -44,7 +44,6 @@ public enum StarterTuning {
         hosts: [LayoutMode: ScreenClass]
     ) -> TilingSettings {
         var settings = base()
-        tuneProfileWide(&settings, for: mainShape)
         tuneScrolling(&settings, for: hosts[.scrolling] ?? mainShape)
         tuneStack(&settings, for: hosts[.stack] ?? mainShape)
         tuneGrid(&settings, for: hosts[.grid] ?? mainShape)
@@ -52,20 +51,22 @@ public enum StarterTuning {
         return settings
     }
 
-    private static func tuneProfileWide(
-        _ settings: inout TilingSettings,
-        for shape: ScreenClass
-    ) {
-        switch shape {
-        // No App Bar switch here: `LayoutAppBar` already defaults
-        // it on for monocle and scrolling, per LAYOUT, so setting
-        // it would be a no-op that reads like a decision.
-        case .superUltrawide, .ultrawide:
-            settings.minWindowSize = 420
-        case .desktop, .pivoted, .laptop:
-            break
-        }
+    /// The minimum window size every layout starts with (#2237,
+    /// #821): the main screen's width over `minSizeDivisor`,
+    /// rounded to the Settings stepper's 10 pt and clamped into
+    /// `minSizeRange`, the same on both axes.
+    static func minWindowSizes(mainWidth: CGFloat) -> MinWindowSizes {
+        let raw = (mainWidth / minSizeDivisor / 10).rounded() * 10
+        let side = min(
+            max(raw, minSizeRange.lowerBound),
+            minSizeRange.upperBound
+        )
+        return MinWindowSizes(all: .square(side))
     }
+
+    /// A laptop seeds the floor, a 5K screen the ceiling.
+    static let minSizeRange: ClosedRange<CGFloat> = 260...460
+    static let minSizeDivisor: CGFloat = 8
 
     /// Both ultrawides centre the focused column and keep a lone
     /// window at its slot rather than filling 32:9 (#1662).
