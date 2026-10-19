@@ -117,7 +117,7 @@ struct SettingsRowShapeTests {
         )
         #expect(
             source.contains(
-                "letcolumn=stacked||labelFills?nil:labelColumn"
+                "letcolumn=stacked||controlTrails?nil:labelColumn"
             )
         )
         #expect(
@@ -126,25 +126,25 @@ struct SettingsRowShapeTests {
         )
     }
 
-    /// `labelFills` (AI ▸ Set up, owner ruling 2026-10-17) is an
+    /// `controlTrails` — a compact control trailing (#2439) — is an
     /// argument to the SAME layout swap, never a second layout or
     /// an `if`: it drops the column and lets the label take the
     /// free width, through modifiers that stay in the chain.
-    @Test("the label-fills option rides the one layout swap")
-    func labelFillsRidesTheSwap() throws {
+    @Test("the trailing option rides the one layout swap")
+    func controlTrailsRidesTheSwap() throws {
         let source = try squashed(
             "Sources/KiwiDesk/Settings/Components/Common/"
                 + "SettingsRowShape.swift"
         )
         #expect(source.occurrences(of: "AnyLayout(") == 2)
-        #expect(source.occurrences(of: "labelFills") == 3)
+        #expect(source.occurrences(of: "controlTrails") == 3)
         #expect(
             source.contains(
-                ".frame(maxWidth:labelFills?.infinity:nil,"
+                ".frame(maxWidth:controlTrails?.infinity:nil,"
                     + "alignment:.leading)"
             )
         )
-        #expect(!source.contains("iflabelFills"))
+        #expect(!source.contains("ifcontrolTrails"))
     }
 
     /// The shared row vocabulary goes through the shape. A
@@ -170,7 +170,8 @@ struct SettingsRowShapeTests {
                 "Sources/KiwiDesk/Settings/" + file
             )
             #expect(
-                source.contains("SettingsRowShape{"),
+                source.contains("SettingsRowShape{")
+                    || source.contains("SettingsRowShape(controlTrails:"),
                 Comment(
                     rawValue:
                         "\(file) no longer builds its rows "
@@ -178,6 +179,71 @@ struct SettingsRowShapeTests {
                 )
             )
         }
+    }
+
+    /// The rows whose compact control trails — menus, steppers
+    /// and action buttons — while sliders and strips keep the axis
+    /// (owner ruling 2026-10-19, #2439). File → how many trailing
+    /// shapes it builds; the one copy of who trails.
+    private static let trailing: [String: Int] = [
+        // Menus.
+        "DropdownRow.swift": 1,
+        "KiwiShelfCard+Font.swift": 1,
+        "SharedLookSection.swift": 1,
+        // Steppers: the labelled row, and those a parent labels.
+        "StepperRow.swift": 1,
+        "GeneralSection+AppWide.swift": 1,
+        "KiwiVisionLevelsCard.swift": 2,
+        "KiwiVisionLensOverrides.swift": 2,
+        // Titled action rows (AI page, General ▸ Advanced).
+        "SettingsActionRow.swift": 1,
+    ]
+
+    @Test("menus and steppers trail; the register is exact")
+    func compactControlsTrail() throws {
+        let root = Self.root.appendingPathComponent("Sources/KiwiDesk")
+        var found: [String: Int] = [:]
+        var readouts: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .filter { !$0.isWhitespace }
+            let name = file.lastPathComponent
+            let n = source.occurrences(
+                of: "SettingsRowShape(controlTrails:true){"
+            )
+            if n > 0 { found[name] = n }
+            let r = source.occurrences(of: "trailingValue:true")
+            if r > 0 { readouts[name] = r }
+        }
+        #expect(found == Self.trailing)
+        // Every override row wrapping a menu or stepper: the two
+        // typed wrappers and the lens's four.
+        #expect(
+            readouts == [
+                "OverrideControls.swift": 2,
+                "KiwiVisionLensOverrides.swift": 4,
+            ]
+        )
+        // The menu row adds no `Spacer` of its own, which is what
+        // pinned the menu to the axis before.
+        let dropdown = try squashed(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "DropdownRow.swift"
+        )
+        #expect(!dropdown.contains("Spacer("))
+        // An inheriting override value trails where its live menu
+        // or stepper does, so ticking the box moves nothing.
+        let chrome = try squashed(
+            "Sources/KiwiDesk/Settings/Components/SpaceOverrides/"
+                + "OverrideControls.swift"
+        )
+        #expect(
+            chrome.occurrences(
+                of: "SettingsRowShape(controlTrails:trailingValue){"
+            ) == 1
+        )
     }
 
     private func squashed(_ path: String) throws -> String {

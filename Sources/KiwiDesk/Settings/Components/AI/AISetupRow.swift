@@ -24,7 +24,7 @@ struct AISetupRow: View {
     var body: some View {
         let translocated = RunningCopy.location == .translocated
         VStack(alignment: .leading, spacing: 8) {
-            AIActionRow(
+            SettingsActionRow(
                 title: SettingsCatalog.ai.addToClaudeDesktop.text,
                 caption: translocated ? nil : addCaption
             ) {
@@ -32,7 +32,7 @@ struct AISetupRow: View {
             }
             .searchAnchored(SettingsCatalog.ai.addToClaudeDesktop)
             Divider()
-            AIActionRow(
+            SettingsActionRow(
                 title: SettingsCatalog.ai.copySetupPrompt.text,
                 caption: translocated ? movedCaption : caption,
                 help: help

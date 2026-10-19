@@ -8,52 +8,37 @@ extension GeneralSection {
     // MARK: - Export (read-only, above the ladder)
 
     var exportBackupRow: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Button {
-                    backupError = model.exportBackup()
-                } label: {
-                    Label(
-                        L(
-                            "general.advanced.backup.export",
-                            "Export KiwiDesk Backup…"
-                        ),
-                        systemImage: "square.and.arrow.up"
-                    )
-                }
-                .settingsActionButton()
-                HelpButton(
-                    // A concept, not a live fact, which is what
-                    // `ui-patterns.md` gives the `?`. It is also
-                    // the defusing of a real misread: "KiwiDesk
-                    // Backup" pattern-matches "iCloud Backup" —
-                    // proper names for automatic, ongoing systems
-                    // — and KiwiDesk keeps none.
-                    explanation: L(
-                        "general.advanced.backup.export.help",
-                        "A one-time snapshot, saved to a file you "
-                            + "choose. KiwiDesk doesn't keep "
-                            + "backups on its own — export again "
-                            + "whenever you want an up-to-date "
-                            + "copy."
-                    ),
-                    subject: L(
-                        "general.advanced.backup.export",
-                        "Export KiwiDesk Backup…"
-                    )
-                )
+        SettingsActionRow(
+            title: L("general.advanced.backup.row", "KiwiDesk backup"),
+            caption: L(
+                "general.advanced.backup.export.caption",
+                "Your settings, profiles, color palettes and "
+                    + "looks, in one file. Doesn't include "
+                    + "init.lua."
+            ),
+            // A concept, not a live fact, which is what
+            // `ui-patterns.md` gives the `?`. It also defuses a
+            // real misread: "KiwiDesk Backup" pattern-matches
+            // "iCloud Backup", and KiwiDesk keeps none.
+            help: L(
+                "general.advanced.backup.export.help",
+                "A one-time snapshot, saved to a file you "
+                    + "choose. KiwiDesk doesn't keep "
+                    + "backups on its own — export again "
+                    + "whenever you want an up-to-date "
+                    + "copy."
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.exportBackup.text
+        ) {
+            Button(advancedExportLabel) {
+                backupError = model.exportBackup()
             }
-            Text(
-                L(
-                    "general.advanced.backup.export.caption",
-                    "Saves your settings, profiles, color "
-                        + "palettes and looks to a file you "
-                        + "choose. Doesn't "
-                        + "include init.lua."
-                )
+            .settingsActionButton()
+            .accessibilityLabel(
+                SettingsCatalog.general.generalAdvanced.children
+                    .exportBackup.text
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
         }
         .searchAnchored(
             SettingsCatalog.general.generalAdvanced.children
@@ -64,55 +49,47 @@ extension GeneralSection {
     // MARK: - Restore (the ladder's final rung)
 
     var restoreBackupRow: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Button {
-                    switch model.readBackupToRestore() {
-                    case .success(let bundle):
-                        pendingRestore = bundle
-                    case .failure(let error):
-                        backupError = error
-                    case nil:
-                        break  // the user cancelled the panel
-                    }
-                } label: {
-                    Label(
-                        L(
-                            "general.advanced.backup.restore",
-                            "Restore from Backup…"
-                        ),
-                        systemImage: "square.and.arrow.down"
-                    )
+        SettingsActionRow(
+            title: L(
+                "general.advanced.backup.restore.row",
+                "Restore from backup"
+            ),
+            caption: L(
+                "general.advanced.backup.restore.caption",
+                "Replaces your settings, profiles, color "
+                    + "palettes and looks with a backup's. "
+                    + "Doesn't touch init.lua."
+            ),
+            help: L(
+                "general.advanced.backup.restore.help",
+                "Replaces everything currently saved — "
+                    + "your settings, every profile, and "
+                    + "your color palettes and looks — "
+                    + "with what's "
+                    + "in the chosen file. The versions "
+                    + "being replaced go to the Trash. "
+                    + "init.lua is never touched."
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.restoreBackup.text
+        ) {
+            Button(
+                L("general.advanced.backup.restore.short", "Restore…")
+            ) {
+                switch model.readBackupToRestore() {
+                case .success(let bundle):
+                    pendingRestore = bundle
+                case .failure(let error):
+                    backupError = error
+                case nil:
+                    break  // the user cancelled the panel
                 }
-                .settingsActionButton()
-                HelpButton(
-                    explanation: L(
-                        "general.advanced.backup.restore.help",
-                        "Replaces everything currently saved — "
-                            + "your settings, every profile, and "
-                            + "your color palettes and looks — "
-                            + "with what's "
-                            + "in the chosen file. The versions "
-                            + "being replaced go to the Trash. "
-                            + "init.lua is never touched."
-                    ),
-                    subject: L(
-                        "general.advanced.backup.restore",
-                        "Restore from Backup…"
-                    )
-                )
             }
-            Text(
-                L(
-                    "general.advanced.backup.restore.caption",
-                    "Replaces your settings, profiles, color "
-                        + "palettes and looks with what's in a "
-                        + "backup file. "
-                        + "Doesn't touch init.lua."
-                )
+            .settingsActionButton()
+            .accessibilityLabel(
+                SettingsCatalog.general.generalAdvanced.children
+                    .restoreBackup.text
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
         }
         .searchAnchored(
             SettingsCatalog.general.generalAdvanced.children

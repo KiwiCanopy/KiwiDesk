@@ -123,8 +123,9 @@ struct AnnouncedValuePinTests {
         "UpdateCheckingWindowController.swift": 1,
         // What's new's "Next on my list" label (#1813).
         "NextOnMyListPanel.swift": 1,
-        // The Mouse & trackpad drawer's group headings (#1726).
-        "GestureEntry.swift": 1,
+        // The in-card group heading — Mouse & trackpad (#1726),
+        // General ▸ Advanced (#2439).
+        "SettingsGroupHeading.swift": 1,
         // The tour looks step's two row headers (#1720).
         "OnboardingLooksRows.swift": 1,
         // KiwiHub's View lines (#2309).

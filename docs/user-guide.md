@@ -129,13 +129,13 @@ rest (on by default, after a 1500 ms delay) and puts focus back
 on the window you were in. A wake restore is skipped when the
 screen setup changed during sleep; the screen-change profile
 switch takes over. If a restore leaves things wrong, **General ▸
-Advanced ▸ Discard Saved Window Arrangement** clears it.
+Advanced ▸ Saved window arrangement ▸ Discard** clears it.
 
 ## Moving to Another Mac: Backups
 
-**General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
-with your settings, every profile and your saved palettes;
-**Restore from Backup…** puts it back. Not included: `init.lua`
+**General ▸ Advanced ▸ KiwiDesk backup ▸ Export…** writes one
+file with your settings, every profile and your saved palettes;
+**Restore from backup ▸ Restore…** puts it back. Not included: `init.lua`
 and the remembered window arrangement. For continuous sync see
 [The gui.json File](#the-guijson-file).
 
@@ -156,7 +156,7 @@ one carrying settings when this Mac's settings come from
 restore that skips a profile or a palette says so.
 
 Saved looks travel in a backup beside the palettes, and restore
-wherever they do; **Reset All Settings…** keeps them too. The
+wherever they do; **All settings ▸ Reset…** keeps them too. The
 shared look travels with the settings, and each profile keeps
 whether it uses it. Restoring a backup written before profiles
 could share a look gives every profile its own, then the first
@@ -1155,20 +1155,21 @@ never starts a second one: the second launch brings the running
 instance forward and exits with `already running`.
 
 **Windows come back in the wrong spaces after a restart or wake?**  
-**General ▸ Advanced ▸ Discard Saved Window Arrangement** clears
-the remembered arrangement without changing settings. **Reset
-All Settings…** below it is the last resort: it deletes every
+**General ▸ Advanced ▸ Saved window arrangement ▸ Discard**
+clears the remembered arrangement without changing settings.
+**All settings ▸ Reset…** below it is the last resort: it deletes every
 profile, your spaces, layouts and keybindings and reseeds the
 defaults, keeping `init.lua`, your palettes, the display language,
 the login item and onboarding; the old files go to the Trash.
 
 **Reporting a bug?**  
-**General ▸ Advanced ▸ Export Log…** saves KiwiDesk's log for a
-time range to a file. Make the problem happen again first: the
-range counts back from now, and "since KiwiDesk started" means
-this run. The file names the apps and windows KiwiDesk managed,
-so glance through it before attaching it. The terminal form is in
-the [CLI reference](cli.md#exporting-the-log).
+**General ▸ Advanced ▸ Log**: pick a time range and press
+**Export…** to save KiwiDesk's log for it to a file. Make the
+problem happen again first: the range counts back from now, and
+"since KiwiDesk started" means this run. The file names the apps
+and windows KiwiDesk managed, so glance through it before
+attaching it. The terminal form is in the [CLI
+reference](cli.md#exporting-the-log).
 
 **Shortcut not working?**  
 Check Shortcuts for a ⚠️ marker ([Conflict

@@ -3,23 +3,37 @@ import SwiftUI
 
 /// General ▸ Advanced: the log export (#1209) — rung zero of the
 /// recovery ladder, the first thing a user in trouble should do,
-/// because it changes nothing. The sibling action rows' shape
-/// (owner ruling 2026-09-02): the button first, the range menu it
-/// takes beside it, then the help mark, the caption below.
+/// because it changes nothing. The action-row shape (#2439): the
+/// range menu, then the button it feeds, trailing.
 extension GeneralSection {
     @ViewBuilder var exportLogRows: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        SettingsActionRow(
+            title: L("general.advanced.log.row", "Log"),
+            caption: L(
+                "general.advanced.log.export.caption",
+                "The log for that time range, to attach to a "
+                    + "bug report. Changes nothing."
+            ),
+            help: L(
+                "general.advanced.log.export.help",
+                "If you can make the problem happen again, "
+                    + "do that first, then export — the range "
+                    + "counts back from now. The file holds "
+                    + "only what KiwiDesk itself wrote to the "
+                    + "macOS log; it names the apps and "
+                    + "windows it managed in that time, so "
+                    + "glance through it before attaching."
+            ),
+            helpSubject: SettingsCatalog.general.generalAdvanced
+                .children.exportLog.text
+        ) {
             HStack(spacing: 6) {
-                Button {
-                    let choice = logRange
-                    Task { await model.exportLog(choice) }
-                } label: {
-                    Label(
-                        L("general.advanced.log.export", "Export Log…"),
-                        systemImage: "doc.text.magnifyingglass"
-                    )
-                }
-                .settingsActionButton()
+                // Always drawn, faded when idle (gui.md ▸ grey,
+                // don't hide).
+                ProgressView()
+                    .controlSize(.small)
+                    .opacity(model.isExportingLog ? 1 : 0)
+                    .accessibilityHidden(!model.isExportingLog)
                 // Named for VoiceOver by the range key: nothing
                 // visible names the menu, the button names the
                 // export.
@@ -40,44 +54,27 @@ extension GeneralSection {
                     SettingsCatalog.general.generalAdvanced
                         .children.logRange
                 )
-                HelpButton(
-                    explanation: L(
-                        "general.advanced.log.export.help",
-                        "If you can make the problem happen again, "
-                            + "do that first, then export — the range "
-                            + "counts back from now. The file holds "
-                            + "only what KiwiDesk itself wrote to the "
-                            + "macOS log; it names the apps and "
-                            + "windows it managed in that time, so "
-                            + "glance through it before attaching."
-                    ),
-                    subject: L(
-                        "general.advanced.log.export",
-                        "Export Log…"
-                    )
+                Button(advancedExportLabel) {
+                    let choice = logRange
+                    Task { await model.exportLog(choice) }
+                }
+                .settingsActionButton()
+                .accessibilityLabel(
+                    SettingsCatalog.general.generalAdvanced
+                        .children.exportLog.text
                 )
-                // Always drawn, faded when idle (gui.md ▸ grey,
-                // don't hide).
-                ProgressView()
-                    .controlSize(.small)
-                    .opacity(model.isExportingLog ? 1 : 0)
-                    .accessibilityHidden(!model.isExportingLog)
             }
-            Text(
-                L(
-                    "general.advanced.log.export.caption",
-                    "Saves KiwiDesk's log for that time range to a "
-                        + "text file you choose — the file to attach "
-                        + "to a bug report. Changes nothing."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
         }
         .searchAnchored(
             SettingsCatalog.general.generalAdvanced.children
                 .exportLog
         )
+    }
+
+    /// The short label both export buttons wear; each names its
+    /// export for VoiceOver.
+    var advancedExportLabel: String {
+        L("general.advanced.action.export", "Export…")
     }
 
     /// The problem alert — built from the problem it narrates

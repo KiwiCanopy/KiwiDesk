@@ -14,8 +14,8 @@ body:
         helps us most — a plainly broken setting or wrong label
         doesn't need one. If you can, make the problem happen
         again first. Then open KiwiDesk Settings ▸ General ▸
-        Advanced, pick a time range beside **Export Log…** that
-        reaches back to before it happened, press the button, and
+        Advanced, and on the **Log** row pick a time range that
+        reaches back to before it happened, press **Export…**, and
         drag the file into *Extra context* below. Can't open
         Settings? The CLI reference shows the same export from a
         terminal:

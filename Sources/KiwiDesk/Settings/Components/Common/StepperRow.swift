@@ -49,17 +49,31 @@ struct StepperRow: View {
     }
 
     var body: some View {
-        HStack {
-            if !labelHidden {
-                Text(label)
-                if let help {
-                    HelpButton(
-                        explanation: help,
-                        subject: label
-                    )
+        // `labelHidden` is fixed per row, so the branch never swaps
+        // a live field's identity.
+        Group {
+            if labelHidden {
+                controls
+            } else {
+                // Trails, and stacks below the row breakpoint, like
+                // every compact control (#2439).
+                SettingsRowShape(controlTrails: true) {
+                    SettingsRowLabel(label: label, help: help)
+                } control: {
+                    controls
                 }
-                Spacer()
             }
+        }
+        // Keep the field in step with arrow taps and external
+        // changes — but never mid-edit, or a background write
+        // would discard the user's partial entry.
+        .onChange(of: value) { _, now in
+            if !focused { text = "\(now)" }
+        }
+    }
+
+    private var controls: some View {
+        HStack {
             TextField("", text: $text)
                 .labelsHidden()
                 // The field is its own control beside the arrows,
@@ -95,15 +109,6 @@ struct StepperRow: View {
                     suffix.map { "\(value) \($0)" }
                         ?? "\(value)"
                 )
-            if labelHidden {
-                Spacer()
-            }
-        }
-        // Keep the field in step with arrow taps and external
-        // changes — but never mid-edit, or a background write
-        // would discard the user's partial entry.
-        .onChange(of: value) { _, now in
-            if !focused { text = "\(now)" }
         }
     }
 

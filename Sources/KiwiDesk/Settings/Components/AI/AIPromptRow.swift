@@ -8,7 +8,7 @@ struct AIPromptRow: View {
     let control: SettingsControl
 
     var body: some View {
-        AIActionRow(
+        SettingsActionRow(
             title: control.text,
             caption: AIReadyPrompt.caption(for: key) ?? ""
         ) {

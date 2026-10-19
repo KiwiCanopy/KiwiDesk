@@ -43,34 +43,32 @@ struct FontFamilyRow: View {
     private var missing: Bool { !BarFont.isInstalled(family) }
 
     var body: some View {
-        SettingsRowShape {
-            SettingsRowLabel(
-                label: label,
-                help: L(
-                    "kiwishelf.font_family.help",
-                    "The typeface of both bars' text — Space "
-                        + "identifiers, titles and counts. App "
-                        + "glyphs keep their own."
-                )
-            )
-        } control: {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    trigger
-                    Spacer(minLength: 0)
-                }
-                // Its own wrapping line: beside the trigger it
-                // truncated in a narrow window.
-                if missing {
-                    Label(
-                        BarFontText.missing,
-                        systemImage: "exclamationmark.triangle.fill"
+        VStack(alignment: .leading, spacing: 4) {
+            // The trigger trails like every menu (#2439).
+            SettingsRowShape(controlTrails: true) {
+                SettingsRowLabel(
+                    label: label,
+                    help: L(
+                        "kiwishelf.font_family.help",
+                        "The typeface of both bars' text — Space "
+                            + "identifiers, titles and counts. App "
+                            + "glyphs keep their own."
                     )
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(SettingsTheme.warningInk)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityHidden(true)
-                }
+                )
+            } control: {
+                trigger
+            }
+            // A caption under the row: under a trailing trigger
+            // it would sit stranded on the right.
+            if missing {
+                Label(
+                    BarFontText.missing,
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(SettingsTheme.warningInk)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityHidden(true)
             }
         }
     }

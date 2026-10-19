@@ -77,6 +77,7 @@ struct LayoutDefaultsSection: View {
                 suffix: "pt",
                 labelHidden: true
             )
+            .frame(maxWidth: .infinity, alignment: .leading)
         default:
             let _ = assertionFailure(
                 "unrendered Layout Defaults general row: \(key.id)"

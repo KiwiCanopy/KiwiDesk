@@ -25,7 +25,7 @@ struct SharedLookSection: View {
                     + "gaps and the animations."
             )
         ) {
-            SettingsRowShape {
+            SettingsRowShape(controlTrails: true) {
                 SettingsRowLabel(label: appliesTo)
             } control: {
                 LookReachControl(model: model, edited: edited ?? "")
