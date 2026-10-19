@@ -23,12 +23,17 @@ extension KiwiCore {
     /// and synced once at its end.
     struct HidingShelves {
         var targets: [ShelfRevealer.Key: ShelfRevealer.Target] = [:]
-        var indicators:
-            [ShelfManager.Key: (spec: ShelfIndicatorSpec, space: Bool)] =
-                [:]
+        var indicators: [ShelfRevealer.Key: ShelfIndicatorSpec] = [:]
+        /// The mark each hiding shelf's reveal grows out of: its
+        /// shown bar's, else its first mark's. AX coordinates.
+        var marks: [ShelfManager.Key: CGRect] = [:]
+        /// Each Space mark's first dot shown, carried from the last
+        /// pass so the dots slide only when they must
+        /// (`ShelfDotWindow`); a mark that stops drawing forgets it.
+        var dotStarts: [ShelfRevealer.Key: Int] = [:]
 
         /// Files each hiding bar of `plans` — its target, and its
-        /// edge's mark where the edge hides to one.
+        /// mark where it hides to one.
         @MainActor mutating func file(
             _ plans: [ShelfPlan],
             display: DisplayID,
@@ -56,8 +61,12 @@ extension KiwiCore {
             }
         }
 
-        /// Files one plan's hiding bars and, where its edge hides to
-        /// a mark, the mark.
+        /// Files one plan's hiding bars: an `auto` bar's mark, band
+        /// and near cue at its place in the edge's row of marks
+        /// (`ShelfMarkPlacement`), a `hidden` bar's band-less
+        /// target. A hidden bar whose sibling on the edge shows
+        /// yields — no band, its mark standing aside — so the
+        /// mouse opens one bar at a time (owner, 2026-10-19).
         @MainActor private mutating func file(
             _ plan: ShelfPlan,
             bars: Set<ShelfBar>,
@@ -69,58 +78,93 @@ extension KiwiCore {
             settings: TilingSettings
         ) {
             let primary = GeometryUtils.primaryHeight
-            let strip = GeometryUtils.flip(plan.strip, primaryHeight: primary)
-            let auto = bars.filter { plan.shelfEdge.shown($0) == .auto }
-            for bar in bars where !auto.contains(bar) {
-                targets[.init(shelf: key, bar: bar)] = ShelfRevealer.Target(
-                    edge: plan.edge,
-                    strip: strip,
-                    screen: screen.frame,
-                    band: nil
-                )
+            let flip = { GeometryUtils.flip($0, primaryHeight: primary) }
+            let strip = flip(plan.strip)
+            let barKey = { ShelfRevealer.Key(shelf: key, bar: $0) }
+            let shown = { reveal.reveal(of: barKey($0)).isShown }
+            // Where a shown bar draws: its run inside its slot, never
+            // the whole slot, which spans the edge for a lone bar.
+            let section = { (bar: ShelfBar) -> CGRect? in
+                let slot =
+                    bar == .space
+                    ? plan.arrangement.space : plan.arrangement.app
+                return slot.map { slot in
+                    let drawn = plan.needs[bar].map(slot.drawing) ?? slot
+                    return flip(plan.segment(drawn))
+                }
             }
-            guard !auto.isEmpty else { return }
             // The mark draws the shelf as rendered: Reduce
             // transparency makes its fill opaque (#1374).
             let shelf = LiquidGlassGate.rendered(settings.kiwishelf)
-            let carriesSpace = auto.contains(.space)
-            let mark = Self.mark(items: carriesSpace ? items : nil)
-            // The band reaches past the screen side into a menu bar
-            // or a Dock, and in to the windows: the sliver's rest and
-            // their outer gap (ui-designer, #761).
-            let band = ShelfReveal.band(
-                of: strip,
-                edge: plan.edge,
-                outward: shelf.outerMargin + ShelfReveal.overshoot,
-                inward: KiwiShelf.hiddenDepth + shelf.innerMargin
-                    + Self.outerGap(gaps, on: plan.edge)
+            let auto = ShelfArrangement.ordered(
+                bars.filter { plan.shelfEdge.shown($0) == .auto },
+                shelf
             )
-            let markIn = ShelfIndicatorSpec.frame(
-                of: mark,
-                in: plan.strip,
-                edge: plan.edge
-            )
-            let near = GeometryUtils.flip(markIn, primaryHeight: primary)
-                .insetBy(
-                    dx: -ShelfReveal.nearReach,
-                    dy: -ShelfReveal.nearReach
+            for bar in bars where !auto.contains(bar) {
+                targets[barKey(bar)] = ShelfRevealer.Target(
+                    edge: plan.edge,
+                    strip: strip,
+                    screen: screen.frame,
+                    band: nil,
+                    section: section(bar)
                 )
-            var shown = true
-            var hovered = false
-            for bar in auto {
-                let barKey = ShelfRevealer.Key(shelf: key, bar: bar)
-                targets[barKey] = ShelfRevealer.Target(
+            }
+            let spans = ShelfMarkPlacement.bands(
+                for: Set(auto),
+                length: plan.length,
+                shelf: shelf
+            )
+            for (index, bar) in auto.enumerated() {
+                guard let span = spans[bar] else { continue }
+                let dots =
+                    bar == .space
+                    ? spaceDots(items, key: barKey(bar), settings: settings)
+                    : nil
+                let mark = dots?.mark ?? .line
+                let markIn = ShelfIndicatorSpec.frame(
+                    of: mark,
+                    in: plan.strip,
+                    edge: plan.edge,
+                    centre: (span.lowerBound + span.upperBound) / 2
+                )
+                // The band reaches past the screen side into a menu
+                // bar or a Dock, and in to the windows: the sliver's
+                // rest and their outer gap (ui-designer, #761).
+                let band = ShelfReveal.band(
+                    of: strip,
+                    edge: plan.edge,
+                    along: flip(Self.span(span, of: plan)),
+                    outward: shelf.outerMargin + ShelfReveal.overshoot,
+                    inward: KiwiShelf.hiddenDepth + shelf.innerMargin
+                        + Self.outerGap(gaps, on: plan.edge)
+                )
+                // Near the mark lights its cue, cut where its band
+                // meets a sibling's so one mark lights at a time.
+                let near = flip(
+                    Self.near(
+                        markIn,
+                        between: index > 0 ? span.lowerBound : nil,
+                        and: index < auto.count - 1 ? span.upperBound : nil,
+                        of: plan
+                    )
+                )
+                targets[barKey(bar)] = ShelfRevealer.Target(
                     edge: plan.edge,
                     strip: strip,
                     screen: screen.frame,
                     band: band,
-                    near: near
+                    near: near,
+                    section: section(bar)
                 )
-                shown = shown && reveal.reveal(of: barKey).isShown
-                hovered = hovered || reveal.arming.contains(barKey)
-            }
-            indicators[key] = (
-                ShelfIndicatorSpec(
+                // The reveal grows out of the leading shown bar's
+                // mark, else the leading mark.
+                if marks[key] == nil
+                    || (shown(bar)
+                        && !auto.prefix(index).contains(where: shown))
+                {
+                    marks[key] = markIn
+                }
+                indicators[barKey(bar)] = ShelfIndicatorSpec(
                     mark: mark,
                     frame: markIn,
                     horizontal: plan.horizontal,
@@ -129,14 +173,65 @@ extension KiwiCore {
                     ink: shelf.idleItemColor,
                     emptyInk: shelf.emptyItemColor,
                     highlight: shelf.highlightColor,
-                    shown: shown,
-                    hovered: hovered,
+                    shown: shown(bar),
+                    hovered: reveal.arming.contains(barKey(bar)),
                     morphs: shelf.drawsPlate,
                     rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
-                    sheen: settings.borderStyle.sheen
-                ),
-                carriesSpace
+                    sheen: settings.borderStyle.sheen,
+                    yields: reveal.yields(barKey(bar)),
+                    label: plan.horizontal ? dots?.label : nil,
+                    position: dots?.position
+                )
+            }
+        }
+
+        /// `span`, an offset range along `plan`'s edge, as a rect
+        /// across the plan's strip (AX).
+        static func span(
+            _ span: ClosedRange<CGFloat>,
+            of plan: ShelfPlan
+        ) -> CGRect {
+            ShelfArrangement.Slot(
+                offset: span.lowerBound,
+                length: span.upperBound - span.lowerBound,
+                alignment: .center
+            ).rect(in: plan.strip, horizontal: plan.horizontal)
+        }
+
+        /// The mark's near cue: `nearReach` around it, cut along the
+        /// edge at `lead` and `trail` — offsets where its band meets
+        /// a sibling's. AX coordinates.
+        static func near(
+            _ mark: CGRect,
+            between lead: CGFloat?,
+            and trail: CGFloat?,
+            of plan: ShelfPlan
+        ) -> CGRect {
+            var near = mark.insetBy(
+                dx: -ShelfReveal.nearReach,
+                dy: -ShelfReveal.nearReach
             )
+            let origin = plan.horizontal ? plan.strip.minX : plan.strip.minY
+            let low = lead.map { origin + $0 } ?? -.greatestFiniteMagnitude
+            let high = trail.map { origin + $0 } ?? .greatestFiniteMagnitude
+            if plan.horizontal {
+                let minX = max(near.minX, low)
+                near = CGRect(
+                    x: minX,
+                    y: near.minY,
+                    width: min(near.maxX, high) - minX,
+                    height: near.height
+                )
+            } else {
+                let minY = max(near.minY, low)
+                near = CGRect(
+                    x: near.minX,
+                    y: minY,
+                    width: near.width,
+                    height: min(near.maxY, high) - minY
+                )
+            }
+            return near
         }
 
         /// The windows' outer gap on `edge`.
@@ -148,36 +243,14 @@ extension KiwiCore {
             case .right: return gaps.outer.right
             }
         }
-
-        /// Space dots from the Space Bar's items, else the line.
-        static func mark(
-            items: [SpaceBarOverlay.Item]?
-        ) -> ShelfIndicatorSpec.Mark {
-            guard let items else { return .line }
-            let dots = items.filter { $0.space != nil }.map {
-                ShelfIndicatorSpec.Dot(
-                    current: $0.active,
-                    occupied: $0.windowCount > 0
-                )
-            }
-            return dots.isEmpty ? .line : .dots(dots)
-        }
     }
 
     /// Hands the pass's hiding bars to the revealer and their marks
     /// to the panels.
     func syncHidingShelves(_ hiding: HidingShelves) {
         shelves.reveal.sync(hiding.targets)
+        shelves.indicators.dotStarts = hiding.dotStarts
         shelves.indicators.sync(hiding.indicators)
-    }
-
-    /// A press on `key`'s mark: one direction for every bar the
-    /// pointer can open there.
-    func toggleShelfReveal(_ key: ShelfManager.Key) {
-        shelves.reveal.toggleShelf(
-            key,
-            duration: tiler.settings.kiwishelf.revealDuration
-        )
     }
 
     /// The show/hide action on one bar.

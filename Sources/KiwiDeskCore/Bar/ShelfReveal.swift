@@ -51,57 +51,71 @@ enum ShelfReveal: Equatable {
     /// The band along `edge` of `strip` — both in one coordinate
     /// space with y growing UP (Cocoa) — that reveals the shelf:
     /// from `outward` past the strip's screen side to `inward`
-    /// into it, the whole edge long. The shelf passes the margin
-    /// and overshoot outward and the sliver's rest plus the
-    /// windows' outer gap inward, so the band ends at the windows.
+    /// into it, along the extent of `span` (a rect whose along
+    /// axis is the mark's band, `ShelfMarkPlacement`), else
+    /// `ShelfMarkPlacement.bandLength` centred on the strip. The
+    /// shelf passes the margin and overshoot outward and the
+    /// sliver's rest plus the windows' outer gap inward, so the
+    /// band ends at the windows.
     static func band(
         of strip: CGRect,
         edge: AppBarEdge,
+        along span: CGRect? = nil,
         outward: CGFloat = 0,
         inward: CGFloat = bandDepth
     ) -> CGRect {
+        let length = ShelfMarkPlacement.bandLength
+        let span =
+            span
+            ?? CGRect(
+                x: strip.midX - length / 2,
+                y: strip.midY - length / 2,
+                width: length,
+                height: length
+            )
         switch edge {
         case .top:
             return CGRect(
-                x: strip.minX,
+                x: span.minX,
                 y: strip.maxY - inward,
-                width: strip.width,
+                width: span.width,
                 height: inward + outward
             )
         case .bottom:
             return CGRect(
-                x: strip.minX,
+                x: span.minX,
                 y: strip.minY - outward,
-                width: strip.width,
+                width: span.width,
                 height: inward + outward
             )
         case .left:
             return CGRect(
                 x: strip.minX - outward,
-                y: strip.minY,
+                y: span.minY,
                 width: inward + outward,
-                height: strip.height
+                height: span.height
             )
         case .right:
             return CGRect(
                 x: strip.maxX - inward,
-                y: strip.minY,
+                y: span.minY,
                 width: inward + outward,
-                height: strip.height
+                height: span.height
             )
         }
     }
 
     /// Whether `point` pushes against the physical edge of
-    /// `screen` the band of `strip` touches — never where a menu
-    /// bar or a margin stands between them. Cocoa coordinates.
+    /// `screen` inside `band` — the mark's own, never the whole
+    /// edge or a corner — and never where a menu bar or a margin
+    /// stands between `strip` and that edge. Cocoa coordinates.
     static func pushes(
         _ point: CGPoint,
+        band: CGRect,
         strip: CGRect,
         edge: AppBarEdge,
         screen: CGRect
     ) -> Bool {
-        let band = band(of: strip, edge: edge, outward: pushReach)
         guard
             band.insetBy(dx: -pushReach, dy: -pushReach)
                 .contains(point)

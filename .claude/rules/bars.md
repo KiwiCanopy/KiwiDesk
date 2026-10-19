@@ -220,7 +220,21 @@ twice, was a question the user answered twice. The argument is
   the revealer its hiding shelves before `syncShelves`**, on both
   paths, since a kept hiding shelf's panel is judged against this
   pass's targets (`ShelfRevealWiringTests` ▸ `revealerSyncsFirst`,
-  `ShelfAutoHideLifetimeTests` ▸ `keptBetweenReveals`).
+  `ShelfAutoHideLifetimeTests` ▸ `keptBetweenReveals`). **Place
+  a hiding bar's mark and band through the one
+  `ShelfMarkPlacement`**, every band its fixed length centred on
+  its mark, the marks of an edge one row whose bands meet edge to
+  edge, and never a band along the edge or the bar's drawn
+  length; a push counts only inside the band, a shown bar is held
+  over its own section and band, and a hidden bar whose edge
+  sibling shows has no band, its mark standing aside
+  (`ShelfRevealBandTests`, `ShelfRevealPairTests`; the argument is
+  `docs/design-decisions.md` ▸ A shelf can hide). The Space dots
+  stay inside that band through the one `ShelfDotWindow`
+  (`ShelfDotWindowTests` ▸ `markFitsTheBand`). Whether a bar
+  yields is the revealer's one `ShelfRevealer.yields`, which the
+  pointer and the mark both read; a second placement or yield
+  beside them is review's.
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

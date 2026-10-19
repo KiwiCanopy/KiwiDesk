@@ -60,7 +60,9 @@ struct ShelfAutoHideCoreTests {
         #expect(core.spaceBars.shownStrips.isEmpty)
         #expect(core.shelves.reveal.hasTarget(on: key))
         let indicator = try #require(
-            core.shelves.indicators.indicatorForTesting(key)
+            core.shelves.indicators.indicatorForTesting(
+                .init(shelf: key, bar: .space)
+            )
         )
         let spec = try #require(indicator.view.spec)
         guard case .dots(let dots) = spec.mark else {
@@ -94,7 +96,9 @@ struct ShelfAutoHideCoreTests {
         #expect(counts.retiles + counts.passesHeld == 0)
         #expect(counts.barRenders > 0)
         let spec = try #require(
-            core.shelves.indicators.indicatorForTesting(key)?.view.spec
+            core.shelves.indicators.indicatorForTesting(
+                .init(shelf: key, bar: .space)
+            )?.view.spec
         )
         #expect(spec.shown)
         #expect(
@@ -219,7 +223,9 @@ struct ShelfAutoHideCoreTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let key = ShelfManager.Key(display: display, edge: .top)
         let panel = try #require(
-            core.shelves.indicators.indicatorForTesting(key)?.panel
+            core.shelves.indicators.indicatorForTesting(
+                .init(shelf: key, bar: .space)
+            )?.panel
         )
         #expect(panel.ignoresMouseEvents)
     }

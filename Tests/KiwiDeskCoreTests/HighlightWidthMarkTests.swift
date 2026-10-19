@@ -57,7 +57,9 @@ struct HighlightWidthMarkTests {
         core.updateBars()
         let key = ShelfManager.Key(display: display.id, edge: .top)
         let view = try #require(
-            core.shelves.indicators.indicatorForTesting(key)?.view
+            core.shelves.indicators.indicatorForTesting(
+                .init(shelf: key, bar: .space)
+            )?.view
         )
         let spec = try #require(view.spec)
         #expect(spec.rimWidth == 2)

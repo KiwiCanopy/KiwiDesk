@@ -38,9 +38,9 @@ final class ShelfIndicatorView: NSView {
         let was = self.spec
         self.spec = spec
         body.frame = bounds
-        let room = ShelfIndicatorSpec.hoverGrowth
-        let mark = bounds.insetBy(dx: room, dy: room)
-        dots.frame = mark
+        let mark = ShelfIndicator.mark(of: spec, in: bounds)
+        dots.frame = bounds
+        dots.mark = mark
         dots.spec = spec
         plate.layer?.backgroundColor = NSColor(kiwiHex: spec.fill).cgColor
         rim.ink = .init(
@@ -52,19 +52,21 @@ final class ShelfIndicatorView: NSView {
             plate,
             rim: rim,
             mark: mark,
+            widen: spec.labelExtra,
+            horizontal: spec.horizontal,
             hovered: spec.hovered,
             animated: animated && was?.hovered != spec.hovered
         )
         // The plate gives way under the shelf it reveals and
         // comes back as the shelf retracts into it.
-        if let was, was.shown != spec.shown, animated {
+        if let was, was.standsAside != spec.standsAside, animated {
             BarMotion.fadeMark(
                 body,
-                showing: !spec.shown,
+                showing: !spec.standsAside,
                 morphs: spec.morphs
             )
-        } else if was?.shown != spec.shown || !animated {
-            body.alphaValue = spec.shown ? 0 : 1
+        } else if was?.standsAside != spec.standsAside || !animated {
+            body.alphaValue = spec.standsAside ? 0 : 1
         }
     }
 
@@ -78,9 +80,26 @@ final class ShelfIndicatorView: NSView {
     }
 
     override func accessibilityValue() -> Any? {
-        spec?.shown == true
-            ? L("kiwishelf.indicator.shown.ax", "Shown")
-            : L("kiwishelf.indicator.hidden.ax", "Hidden")
+        let shown = spec?.shown == true
+        // The dots may not all show, so the place is spoken whole.
+        guard let place = spec?.position else {
+            return shown
+                ? L("kiwishelf.indicator.shown.ax", "Shown")
+                : L("kiwishelf.indicator.hidden.ax", "Hidden")
+        }
+        return shown
+            ? L(
+                "kiwishelf.indicator.shown_position.ax",
+                "Shown, Space %1$d of %2$d",
+                place.index,
+                place.count
+            )
+            : L(
+                "kiwishelf.indicator.hidden_position.ax",
+                "Hidden, Space %1$d of %2$d",
+                place.index,
+                place.count
+            )
     }
 
     override func accessibilityPerformPress() -> Bool {
@@ -130,24 +149,35 @@ final class ShelfIndicatorRim: NSView {
 }
 
 /// The Space dots on an indicator's plate, drawn over the mark's
-/// resting frame so a hover moves none of them.
+/// resting frame: a hover widens the current one into the label's
+/// pill about the row's middle, the others moving out by half the
+/// widening each side.
 final class ShelfIndicatorDots: NSView {
     var spec: ShelfIndicatorSpec? { didSet { needsDisplay = true } }
+    /// The mark's resting frame in this view.
+    var mark: CGRect = .zero { didSet { needsDisplay = true } }
 
     override var isFlipped: Bool { true }
 
     override func draw(_ dirtyRect: NSRect) {
         guard let spec, case .dots(let dots) = spec.mark else { return }
+        let labelled = spec.hovered && spec.label != nil
+        let extra = labelled ? spec.labelExtra : 0
         var lead =
-            (spec.horizontal ? bounds.minX : bounds.minY)
-            + ShelfIndicatorSpec.pad
-        let size = ShelfIndicatorSpec.dot
-        let cross =
-            (spec.horizontal ? bounds.minY : bounds.minX)
-            + (ShelfIndicatorSpec.depth - size) / 2
+            (spec.horizontal ? mark.minX : mark.minY)
+            + ShelfIndicatorSpec.pad - extra / 2
+        let middle = spec.horizontal ? mark.midY : mark.midX
         for dot in dots {
+            let pill = dot.current && labelled
+            let size =
+                pill
+                ? ShelfIndicatorSpec.labelDepth
+                : dot.small
+                    ? ShelfIndicatorSpec.smallDot : ShelfIndicatorSpec.dot
             let long =
-                dot.current ? ShelfIndicatorSpec.currentDot : size
+                dot.current
+                ? ShelfIndicatorSpec.currentDot + extra : size
+            let cross = middle - size / 2
             let rect =
                 spec.horizontal
                 ? CGRect(x: lead, y: cross, width: long, height: size)
@@ -158,7 +188,67 @@ final class ShelfIndicatorDots: NSView {
                 xRadius: size / 2,
                 yRadius: size / 2
             ).fill()
+            if pill, let label = spec.label {
+                // Ink against the pill itself, never the shelf's
+                // translucent fill, which read faint on a light pill.
+                draw(
+                    label,
+                    in: rect,
+                    ink: NSColor(kiwiHex: spec.ink(of: dot))
+                        .contrastingGlyph
+                )
+            }
             lead += long + ShelfIndicatorSpec.dotGap
+        }
+    }
+
+    /// The label centred in its pill: text by its ink
+    /// (`BarTextGlyph.Metrics`) on its band's baseline
+    /// (`BarTextGlyph.lineTop`), a symbol by its image.
+    private func draw(
+        _ label: ShelfIndicatorSpec.Label,
+        in pill: CGRect,
+        ink color: NSColor
+    ) {
+        switch label.glyph {
+        case .symbol(let name):
+            guard
+                let image = ShelfIndicatorSpec.symbol(name, font: label.font)
+            else { return }
+            let tinted = NSImage(size: image.size, flipped: false) { rect in
+                image.draw(in: rect)
+                color.set()
+                rect.fill(using: .sourceAtop)
+                return true
+            }
+            tinted.draw(
+                in: CGRect(
+                    x: pill.midX - image.size.width / 2,
+                    y: pill.midY - image.size.height / 2,
+                    width: image.size.width,
+                    height: image.size.height
+                )
+            )
+        case .text(let text, let tinted):
+            var attributes: [NSAttributedString.Key: Any] = [
+                .font: label.font
+            ]
+            if tinted { attributes[.foregroundColor] = color }
+            let metrics = BarTextGlyph.metrics(text, font: label.font)
+            (text as NSString).draw(
+                at: CGPoint(
+                    x: metrics.originX(
+                        centringInkOn: pill.midX,
+                        frameWidth: metrics.advance
+                    ),
+                    y: BarTextGlyph.lineTop(
+                        centredOn: pill.midY,
+                        band: .of(identifier: text),
+                        font: label.font
+                    )
+                ),
+                withAttributes: attributes
+            )
         }
     }
 }

@@ -95,7 +95,7 @@ extension KiwiCore {
             self?.shelves.surfaceHolds(key) == true
         }
         shelves.indicators.onPress = { [weak self] key in
-            self?.toggleShelfReveal(key)
+            self?.toggleBarReveal(key)
         }
         shelves.onMinimum = { [weak self] percent, committed in
             self?.withUserMotion {

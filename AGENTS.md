@@ -1465,6 +1465,10 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   the bars without a retile (#761,
   `BarAutoHideFoldTests`, `ShelfRevealPerBarTests`, `ShelfAutoHideCoreTests`,
   `ShelfRevealerTests`)
+- a hiding bar's mark and its fixed band are placed through the one
+  `ShelfMarkPlacement`, its Space dots capped by the one `ShelfDotWindow`, and
+  whether it yields to a shown sibling is the revealer's one `yields` (#761,
+  `ShelfRevealBandTests`, `ShelfRevealPairTests`, `ShelfDotWindowTests`)
 - the bars sit on KiwiShelf, one shelf per edge (#1517): a bar field lives in
   exactly one of `KiwiShelf`, `SpaceBarStyle` and `AppBarStyle`, a shelf field
   taking no `LayoutAppBar` override (`KiwiShelfParityTests`,

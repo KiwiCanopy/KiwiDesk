@@ -72,6 +72,15 @@ final class ShelfRevealer {
         syncMonitor()
     }
 
+    /// Whether `key`'s bar stands aside: hidden while a sibling on
+    /// its shelf shows, so the mouse opens one bar at a time (owner,
+    /// 2026-10-19) — its band opens nothing and its mark gives way.
+    /// Only a shortcut shows it, beside the sibling.
+    func yields(_ key: Key) -> Bool {
+        reveal(of: key) == .hidden
+            && phases.keys.contains { $0.shelf == key.shelf && $0 != key }
+    }
+
     /// The state of `key`, hidden where nothing revealed it.
     func reveal(of key: Key) -> ShelfReveal {
         phases[key] ?? .hidden
@@ -93,19 +102,6 @@ final class ShelfRevealer {
                 reveal(of: Key(shelf: shelf, bar: $0)).isShown
             }
         )
-    }
-
-    /// The action on a whole shelf — a press on its mark: one
-    /// direction for every bar the pointer can open there, so a
-    /// press never swaps one bar for its sibling. Any shown is
-    /// hidden; else every one is shown.
-    func toggleShelf(_ shelf: ShelfManager.Key, duration: TimeInterval) {
-        let keys = targets.filter { $0.key.shelf == shelf && $0.value.hovers }
-            .map(\.key)
-        let shown = keys.filter { reveal(of: $0).isShown }
-        for key in shown.isEmpty ? keys : shown {
-            toggle(key, duration: duration)
-        }
     }
 
     /// The hiding bars of this pass; a bar that stopped hiding
@@ -146,6 +142,11 @@ final class ShelfRevealer {
                 continue
             }
             switch reveal(of: key) {
+            // Asked per target: a sibling this move revealed — a
+            // push at the seam of two bands — stands this one down.
+            case .hidden where yields(key):
+                cancelTimer(key)
+                setArming(key, false)
             case .hidden: hiddenMove(key, target, point)
             case .hover: hoverMove(key, target, point)
             case .pinned: break
@@ -157,6 +158,7 @@ final class ShelfRevealer {
         guard let band = target.band else { return }
         if ShelfReveal.pushes(
             point,
+            band: band,
             strip: target.strip,
             edge: target.edge,
             screen: target.screen
@@ -179,10 +181,15 @@ final class ShelfRevealer {
             guard let self else { return }
             guard let target = self.targets[key],
                 self.reveal(of: key) == .hidden,
+                !self.yields(key),
                 target.band?.contains(self.location()) == true
             else {
                 let near = self.targets[key]?.near
-                self.setArming(key, near?.contains(self.location()) == true)
+                self.setArming(
+                    key,
+                    !self.yields(key)
+                        && near?.contains(self.location()) == true
+                )
                 return
             }
             // The reveal ends the hover in its own pass: a redraw

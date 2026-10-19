@@ -20,6 +20,22 @@ public struct ShelfArrangement: Equatable, Sendable {
         public var length: CGFloat
         public var alignment: KiwiShelf.Alignment
 
+        /// The part of the slot a run `need` long draws in: placed
+        /// by the slot's alignment, never longer than the slot.
+        public func drawing(_ need: CGFloat) -> Slot {
+            let length = min(need, self.length)
+            let lead = ShelfArrangement.lead(
+                length,
+                in: self.length,
+                alignment
+            )
+            return Slot(
+                offset: offset + lead,
+                length: length,
+                alignment: alignment
+            )
+        }
+
         /// The segment as a rect within `strip`, in the strip's
         /// own (top-left origin) coordinates.
         public func rect(in strip: CGRect, horizontal: Bool) -> CGRect {
@@ -215,7 +231,7 @@ public struct ShelfArrangement: Equatable, Sendable {
     }
 
     /// Where a run `length` long starts on an edge `whole` long.
-    private static func lead(
+    static func lead(
         _ length: CGFloat,
         in whole: CGFloat,
         _ alignment: KiwiShelf.Alignment
@@ -226,5 +242,15 @@ public struct ShelfArrangement: Equatable, Sendable {
         case .center: return slack / 2
         case .end: return slack
         }
+    }
+
+    /// `bars` in the order they lead the edge: the shelf's `order`.
+    public static func ordered(
+        _ bars: Set<ShelfBar>,
+        _ shelf: KiwiShelf
+    ) -> [ShelfBar] {
+        let order: [ShelfBar] =
+            shelf.order == .spacesFirst ? [.space, .app] : [.app, .space]
+        return order.filter(bars.contains)
     }
 }

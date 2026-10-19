@@ -29,8 +29,8 @@ extension KiwiShelfCard {
             : L(
                 "kiwishelf.show.visibility.help",
                 "Always keeps a bar on screen. Auto hides it "
-                    + "to a thin mark until the pointer reaches "
-                    + "its edge. Hidden draws nothing: its "
+                    + "to a thin mark until the pointer rests "
+                    + "on it. Hidden draws nothing: its "
                     + "shortcut still shows it, over your "
                     + "windows. Only %1$@ and %2$@ can carry an "
                     + "App Bar. With the Space Bar hidden, the "

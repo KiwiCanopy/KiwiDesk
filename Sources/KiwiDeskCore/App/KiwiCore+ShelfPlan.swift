@@ -14,6 +14,9 @@ extension KiwiCore {
         /// The edge's bars and their visibility (#761); the
         /// arrangement places only the ones drawn this pass.
         var shelfEdge: ShelfEdge
+        /// Each drawn bar's natural run length, which its slot
+        /// draws in (`ShelfArrangement.Slot.drawing`).
+        var needs: [ShelfBar: CGFloat] = [:]
 
         /// Whether the edge hides to a mark (#761).
         var hides: Bool { shelfEdge.hides }
@@ -126,7 +129,10 @@ extension KiwiCore {
                 spaceFloor: spaceFloor,
                 shelf: shelf
             ),
-            shelfEdge: shelfEdge
+            shelfEdge: shelfEdge,
+            needs: [.space: spaceNeed, .app: appNeed].compactMapValues {
+                $0
+            }
         )
     }
 }

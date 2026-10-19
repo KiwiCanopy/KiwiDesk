@@ -247,7 +247,13 @@ struct ShelfRevealPerBarTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let shelf = ShelfManager.Key(display: display, edge: .top)
         #expect(core.spaceBars.shownStrips.isEmpty)
-        #expect(core.shelves.indicators.indicatorForTesting(shelf) == nil)
+        for bar in [ShelfBar.space, .app] {
+            #expect(
+                core.shelves.indicators.indicatorForTesting(
+                    .init(shelf: shelf, bar: bar)
+                ) == nil
+            )
+        }
         let target = try #require(
             core.shelves.reveal.targets[.init(shelf: shelf, bar: .space)]
         )

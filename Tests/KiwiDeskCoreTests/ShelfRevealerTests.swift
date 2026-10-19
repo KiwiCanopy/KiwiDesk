@@ -29,17 +29,20 @@ struct ShelfRevealerTests {
         bar: .space
     )
     /// A top shelf 40 pt deep under a 25 pt menu bar on a
-    /// 1000 x 800 screen, Cocoa coordinates.
+    /// 1000 x 800 screen, Cocoa coordinates, its bar drawing 300 pt
+    /// in the middle while shown.
     private static let underMenuBar = ShelfRevealer.Target.hovering(
         edge: .top,
         strip: CGRect(x: 0, y: 735, width: 1000, height: 40),
-        screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
+        screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+        section: CGRect(x: 350, y: 735, width: 300, height: 40)
     )
     /// The same shelf flush with the screen's top.
     private static let flush = ShelfRevealer.Target.hovering(
         edge: .top,
         strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
-        screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
+        screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+        section: CGRect(x: 350, y: 760, width: 300, height: 40)
     )
 
     private func make(
@@ -123,18 +126,6 @@ struct ShelfRevealerTests {
         move(revealer, pointer, to: CGPoint(x: 500, y: 800))
         #expect(revealer.reveal(of: Self.key) == .hover)
         #expect(timers.delays.isEmpty)
-    }
-
-    @Test("No push where a menu bar stands between")
-    func noPushUnderMenuBar() {
-        #expect(
-            !ShelfReveal.pushes(
-                CGPoint(x: 500, y: 775),
-                strip: Self.underMenuBar.strip,
-                edge: .top,
-                screen: Self.underMenuBar.screen
-            )
-        )
     }
 
     @Test("Leaving a hover reveal retracts after the delay")

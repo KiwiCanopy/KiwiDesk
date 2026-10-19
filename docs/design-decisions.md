@@ -14387,21 +14387,50 @@ A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
 a bar already shown and must not hide one by writing a setting.
 
-The hover target is a band along the edge, never the dots'
-drawing, and the dots let the mouse through, so the windows under
-them keep their clicks. The reveal waits long enough that a
-pointer passing for a title bar does not pop it, never restarting
-for movement inside the band; the retract forgives an overshoot;
-a push against the screen's own edge reveals at once, as the Dock
-does. There is no click-pin: the band sits over the dots, so the
-shelf has revealed before a click lands, and on a revealed shelf
-every click target already does something, so nothing could
-release a pin. The show/hide action is the one pin. It stays
-until the next press by default, because a keyboard user who
-pressed to look has not said for how long; `reveal_duration`
-hides it again on its own, one value for every bar. No reveal on a Space switch: the dots already show
-the new Space. A look never carries the mode, which is
-functionality, not styling.
+The hover target is a band over the bar's own mark, never the
+mark's drawing and never the edge: one length for every bar, alone
+or paired, centred on its mark (owner, 2026-10-19). A band along
+the whole edge, or half of it split between two bars, opened a
+bar far from the pointer, so the user could not tell what the
+pointer was about to open; a band under the mark shows the answer
+before the reveal. It is not the bar's drawn length either: a busy
+Space's App Bar would bring the whole-edge band back. A shown bar
+is held over its own drawn run and band, so a bar wider than its
+band stays open while the pointer moves along it.
+
+Two marks on one edge sit as one row where a lone bar would, their
+bands meeting edge to edge, so a point opens one bar. The mouse
+opens one bar at a time — while a bar shows, its sibling's mark
+stands aside — and each opens at its lone place under the pair;
+the keyboard merges both into one strip. That replaced two marks
+over the merged run opening in place with a hover swap: a short
+Space Bar and a long App Bar put the marks at unequal distances
+from the middle, where they read as unrelated.
+
+The dots cap at six, so a mark at rest never outgrows its band — a
+growing band gives up the one target size, a growing App line
+would signal a count it does not show — following the current
+Space with small end dots, as iOS page dots do; the open bar shows
+every Space anyway. On a top or bottom edge a hover names the
+current Space in its dot; a vertical mark is a dot wide, with no
+room across it for a name. The App line only grows, since the App
+Bar opens 0.35 s later and icons in a 14-point mark would not read.
+
+The marks let the mouse through, so the windows under them keep
+their clicks. The reveal waits long enough that a pointer passing
+for a title bar does not pop it, never restarting for movement
+inside the band; the retract forgives an overshoot; a push against
+the screen's own edge reveals at once, as the Dock does — inside
+the band only, as the Dock's push counts along the Dock alone.
+There is no click-pin: the band sits over the mark, so the shelf
+has revealed before a click lands, and on a revealed shelf every
+click target already does something, so nothing could release a
+pin. The show/hide action is the one pin. It stays until the next
+press by default, because a keyboard user who pressed to look has
+not said for how long; `reveal_duration` hides it again on its
+own, one value for every bar. No reveal on a Space switch: the
+dots already show the new Space. A look never carries the mode,
+which is functionality, not styling.
 :::
 
 *One placement rule, asked by every picture of it.* Where each
