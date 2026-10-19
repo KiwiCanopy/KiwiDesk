@@ -6159,8 +6159,19 @@ takes effect when that Desktop next activates. With "Displays
 have separate Spaces" off, or with a single screen, the main
 screen's Desktop is *the* Desktop. In a hand-written config
 the call lives in `init.lua`; when the config is GUI-managed,
-bindings are stored in `gui.json` (`profile_bindings`) and
-edited in the Profiles section instead.
+bindings are edited in the Profiles section instead.
+
+:::unreleased
+A GUI-managed config keeps its bindings on this Mac, in
+`~/Library/Application Support/KiwiDesk/bindings.json`, and a
+backup carries them. Such a binding follows its profile through a
+rename ([Spaces and Desktops](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number));
+a call in `init.lua` names the profile again on every load, so
+there the binding follows the name. Restored on another Mac, a
+binding stays dormant until that Mac shows the Desktop it was
+made on; one kept by Mission Control number attaches to that
+number there.
+:::
 
 A call binds the profile for all screen setups of its screen
 count, and a Desktop holds one such profile per count: a second

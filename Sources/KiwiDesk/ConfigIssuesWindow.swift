@@ -154,7 +154,10 @@ struct ConfigIssuesView: View {
             }
             // Profile rows include delete and reveal actions (#246).
             if let name = issue.profileName {
-                profileActions(name)
+                profileActions(
+                    name,
+                    deletable: issue.kind != .profileBroken(.newerFormat)
+                )
             }
         }
         .padding(10)
@@ -165,7 +168,12 @@ struct ConfigIssuesView: View {
         )
     }
 
-    private func profileActions(_ name: String) -> some View {
+    /// `deletable` false greys Delete: a newer build's profile is
+    /// never deleted here, as its text says (#2324 ruling 2).
+    private func profileActions(
+        _ name: String,
+        deletable: Bool
+    ) -> some View {
         HStack(spacing: 8) {
             Button(
                 L("config_issues.delete", "Delete…"),
@@ -173,6 +181,7 @@ struct ConfigIssuesView: View {
             ) {
                 confirmDelete(name)
             }
+            .disabled(!deletable)
             Button(
                 L("config_issues.reveal", "Reveal in Finder")
             ) {

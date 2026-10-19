@@ -20,94 +20,99 @@ struct DesktopBindingScopeModelTests {
     @Test("same count and scope replaces; another scope adds")
     func overlapReplaces() {
         var record = record()
-        record.bind("Starter") { counts[$0] }
-        record.bind("Vision", setup: vision) { counts[$0] }
-        record.bind("Vision", setup: wide) { counts[$0] }
+        record.bind(.init(name: "Starter")) { counts[$0.name] }
+        record.bind(.init(name: "Vision", setup: vision)) { counts[$0.name] }
+        record.bind(.init(name: "Vision", setup: wide)) { counts[$0.name] }
         #expect(
             record.entries == [
-                .init(profile: "Starter"),
-                .init(profile: "Vision", setup: vision),
-                .init(profile: "Vision", setup: wide),
+                .init(name: "Starter"),
+                .init(name: "Vision", setup: vision),
+                .init(name: "Vision", setup: wide),
             ]
         )
         // Same count, all setups: replaces Starter only.
-        record.bind("Solo") { counts[$0] }
+        record.bind(.init(name: "Solo")) { counts[$0.name] }
         // Same count, same setup: replaces that one entry only.
-        record.bind("Starter", setup: wide) { counts[$0] }
+        record.bind(.init(name: "Starter", setup: wide)) { counts[$0.name] }
         #expect(
             record.entries == [
-                .init(profile: "Vision", setup: vision),
-                .init(profile: "Solo"),
-                .init(profile: "Starter", setup: wide),
+                .init(name: "Vision", setup: vision),
+                .init(name: "Solo"),
+                .init(name: "Starter", setup: wide),
             ]
         )
         // Another count never overlaps.
-        record.bind("Dual") { counts[$0] }
+        record.bind(.init(name: "Dual")) { counts[$0.name] }
         #expect(record.entries.count == 4)
     }
 
     @Test("an unbind of one scope leaves the others")
     func unbindIsScoped() {
         var record = record()
-        record.bind("Starter") { counts[$0] }
-        record.bind("Vision", setup: vision) { counts[$0] }
+        record.bind(.init(name: "Starter")) { counts[$0.name] }
+        record.bind(.init(name: "Vision", setup: vision)) { counts[$0.name] }
         let scopedEmptied = record.unbind(count: 1, setup: vision) {
-            counts[$0]
+            counts[$0.name]
         }
         #expect(!scopedEmptied)
-        #expect(record.entries == [.init(profile: "Starter")])
-        record.bind("Vision", setup: vision) { counts[$0] }
-        let allEmptied = record.unbind(count: 1) { counts[$0] }
+        #expect(record.entries == [.init(name: "Starter")])
+        record.bind(.init(name: "Vision", setup: vision)) { counts[$0.name] }
+        let allEmptied = record.unbind(count: 1) { counts[$0.name] }
         #expect(!allEmptied)
         #expect(
-            record.entries == [.init(profile: "Vision", setup: vision)]
+            record.entries == [.init(name: "Vision", setup: vision)]
         )
-        let emptied = record.unbind("Vision")
+        let emptied = record.unbind(.pending("Vision"))
         #expect(emptied)
     }
 
     @Test("a rename keeps each entry's scope")
     func renameKeepsScope() {
         var record = record()
-        record.bind("Vision", setup: vision) { counts[$0] }
-        record.bind("Vision") { counts[$0] }
-        record.rename("Vision", to: "AVP")
+        record.bind(.init(name: "Vision", setup: vision)) { counts[$0.name] }
+        record.bind(.init(name: "Vision")) { counts[$0.name] }
+        record.relabel(nil, from: "Vision", to: "AVP")
         #expect(
             record.entries == [
-                .init(profile: "AVP", setup: vision),
-                .init(profile: "AVP"),
+                .init(name: "AVP", setup: vision),
+                .init(name: "AVP"),
             ]
         )
-        #expect(record.profiles == ["AVP"])
+        #expect(record.names == ["AVP"])
     }
 
     @Test("the rank: this setup's entries, then all setups'")
     func rankedTiers() {
         var record = record()
-        record.bind("Starter") { counts[$0] }
-        record.bind("Dual") { counts[$0] }
-        record.bind("Vision", setup: vision) { counts[$0] }
-        record.bind("Solo", setup: wide) { counts[$0] }
+        record.bind(.init(name: "Starter")) { counts[$0.name] }
+        record.bind(.init(name: "Dual")) { counts[$0.name] }
+        record.bind(.init(name: "Vision", setup: vision)) { counts[$0.name] }
+        record.bind(.init(name: "Solo", setup: wide)) { counts[$0.name] }
         #expect(
-            record.ranked(for: vision, preferring: nil).map(\.profile)
+            record.ranked(for: vision, preferring: nil).map(\.name)
                 == ["Vision", "Starter", "Dual"]
         )
         // The live profile leads ITS tier, never another's.
         #expect(
-            record.ranked(for: vision, preferring: "Dual")
-                .map(\.profile) == ["Vision", "Dual", "Starter"]
+            record.ranked(
+                for: vision,
+                preferring: (ProfileID.legacy(name: "Dual"), "Dual")
+            )
+            .map(\.name) == ["Vision", "Dual", "Starter"]
         )
         #expect(
             record.ranked(for: ["Other:1x1"], preferring: nil)
-                .map(\.profile) == ["Starter", "Dual"]
+                .map(\.name) == ["Starter", "Dual"]
         )
     }
 
     @Test("a bare name is all setups on disk; a scope is an object")
     func storedShape() throws {
         var record = record()
-        record.bind("Starter") { counts[$0] }
-        record.bind("Vision", setup: ["B:1x1", "A:1x1"]) { counts[$0] }
+        record.bind(.init(name: "Starter")) { counts[$0.name] }
+        record.bind(.init(name: "Vision", setup: ["B:1x1", "A:1x1"])) {
+            counts[$0.name]
+        }
         let data = try JSONEncoder().encode(record)
         let object = try #require(
             try JSONSerialization.jsonObject(with: data)
@@ -126,7 +131,7 @@ struct DesktopBindingScopeModelTests {
         let legacy = Data(#"{"profiles":["Work"],"desktop":2}"#.utf8)
         #expect(
             try JSONDecoder().decode(DesktopBinding.self, from: legacy)
-                .entries == [.init(profile: "Work")]
+                .entries == [.init(name: "Work")]
         )
     }
 

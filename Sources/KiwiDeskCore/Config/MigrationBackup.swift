@@ -14,6 +14,11 @@ enum MigrationBackup {
     /// The folder's name in the machine folder.
     static let folderName = "migration-backups"
 
+    /// The folder in `machine`, `MachineLocation`'s folder.
+    static func folder(in machine: URL) -> URL {
+        machine.appendingPathComponent(folderName)
+    }
+
     /// `data` migrated by `ConfigMigration`, rewritten over `file`
     /// once its original is kept in `backups`; `data` itself when
     /// nothing migrates. A copy that fails to land leaves the file
@@ -40,16 +45,25 @@ enum MigrationBackup {
 
     /// Where `file`'s copy at `format` lives in `backups`.
     static func url(of file: URL, format: Int, in backups: URL) -> URL {
+        url(of: file, suffix: ".pre-v\(format)", in: backups)
+    }
+
+    /// Where `file`'s copy with `suffix` lives in `backups`, under
+    /// its path relative to the machine folder.
+    static func url(of file: URL, suffix: String, in backups: URL) -> URL {
         let root = backups.deletingLastPathComponent()
             .standardizedFileURL.path
         let path = file.standardizedFileURL.path
+        // A config-folder file keeps its folder's relative path, so
+        // a profile named `gui` never shares `gui.json`'s copy.
+        let parent = file.deletingLastPathComponent().lastPathComponent
         let relative =
             path.hasPrefix(root + "/")
             ? String(path.dropFirst(root.count + 1))
-            : file.lastPathComponent
-        return backups.appendingPathComponent(
-            relative + ".pre-v\(format)"
-        )
+            : parent == "profiles"
+                ? "profiles/" + file.lastPathComponent
+                : file.lastPathComponent
+        return backups.appendingPathComponent(relative + suffix)
     }
 
     /// Keeps `original` as the file's ONE copy — the latest

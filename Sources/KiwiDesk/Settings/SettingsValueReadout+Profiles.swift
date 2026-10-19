@@ -80,11 +80,11 @@ extension SettingsValueReadout {
     /// An entry as the diff names it: the profile, and for a
     /// scoped one the screens of its setup by name.
     private static func entryName(_ entry: DesktopBinding.Entry) -> String {
-        guard let setup = entry.setup else { return entry.profile }
+        guard let setup = entry.setup else { return entry.name }
         return L(
             "diff.value.binding_setup",
             "%1$@ on %2$@",
-            entry.profile,
+            entry.name,
             LocalizedList.join(
                 setup.map { Display.fingerprintParts($0).name }
             )

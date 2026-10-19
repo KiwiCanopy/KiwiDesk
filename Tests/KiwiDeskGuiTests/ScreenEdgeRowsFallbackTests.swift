@@ -39,6 +39,7 @@ struct ScreenEdgeRowsFallbackTests {
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
+                profileID: .legacy(name: "Desk"),
                 count: 3,
                 sets: [[main.fingerprint, dell.fingerprint, absent]],
                 isDefault: false,

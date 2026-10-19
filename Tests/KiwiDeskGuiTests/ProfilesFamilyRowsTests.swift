@@ -33,6 +33,7 @@ struct ProfilesFamilyRowsTests {
     ) -> ProfileSummary {
         ProfileSummary(
             name: name,
+            profileID: .legacy(name: name),
             count: count,
             sets: [],
             isDefault: false,
@@ -51,8 +52,7 @@ struct ProfilesFamilyRowsTests {
     ///
     /// Every row also carries the SAME `matchesCount`, so they
     /// tie on that key too and `matchesLive` is the only thing
-    /// left to decide — which is what this test claims to
-    /// observe.
+    /// left to decide — which this test claims to observe.
     @Test("profiles matching the live displays lead")
     func orderPutsMatchingFirst() {
         let ordered = ProfilesFamilyRows.orderedProfiles([

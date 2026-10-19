@@ -31,6 +31,7 @@ struct ProfilesCensusRenderTests {
     private func summary(_ name: String) -> ProfileSummary {
         ProfileSummary(
             name: name,
+            profileID: .legacy(name: name),
             count: 1,
             sets: [],
             isDefault: false,

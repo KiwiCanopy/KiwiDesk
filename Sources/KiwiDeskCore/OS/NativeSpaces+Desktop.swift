@@ -139,6 +139,11 @@ public struct DesktopSnapshot: Sendable {
             .sorted()
     }
 
+    /// Every display in `uuids` shows a user Space.
+    public func showsUserSpaces(_ uuids: [String]) -> Bool {
+        uuids.allSatisfy { currentSpaceIsUser(on: $0) }
+    }
+
     /// True if the current space on the display is a user space
     /// (#670). True for an unknown screen: standing down needs
     /// positive evidence of a fullscreen/system space, never a

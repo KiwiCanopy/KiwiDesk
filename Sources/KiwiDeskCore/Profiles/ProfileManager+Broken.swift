@@ -9,6 +9,10 @@ public enum ProfileBrokenCause: Sendable, Equatable, CaseIterable {
     case unexpectedShape
     /// File cannot be accessed or read from disk.
     case unreadable
+    /// A newer KiwiDesk wrote the file (#2324 ruling 2): this
+    /// build leaves it as it is, so it is never offered for
+    /// deletion.
+    case newerFormat
 }
 
 extension ProfileManager {
@@ -21,8 +25,20 @@ extension ProfileManager {
             guard case .failure(let error) = result else {
                 return nil
             }
-            return (name, Self.cause(of: error))
+            return (name, brokenCause(name: name, error: error))
         }
+    }
+
+    /// Why the profile `name` failed to read with `error`: a file
+    /// a newer build wrote is told apart first, by the one
+    /// predicate, since its decode error reads as a wrong shape.
+    func brokenCause(name: String, error: Error) -> ProfileBrokenCause {
+        if let url = try? fileURL(name: name),
+            NewerFormatOnDisk.checkProfile(url) != nil
+        {
+            return .newerFormat
+        }
+        return Self.cause(of: error)
     }
 
     /// Classifies a decoding or file read error into a broken profile cause.
@@ -36,5 +52,22 @@ extension ProfileManager {
             return .malformedJSON
         }
         return .unexpectedShape
+    }
+}
+
+extension ProfileManager {
+    /// The profile door's guard before a write over `file`: refuses
+    /// a newer build's file (#2325) and keeps a corrupt one's copy
+    /// (#2324 ruling 13).
+    func clearForWrite(_ file: URL) throws {
+        try NewerFormatOnDisk.refuseProfile(file)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        CorruptFile.keepBeforeOverwrite(
+            file,
+            as: Profile.self,
+            decoder: decoder,
+            in: migrationBackups
+        )
     }
 }

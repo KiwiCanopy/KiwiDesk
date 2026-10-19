@@ -115,12 +115,12 @@ struct ProfileRenameTests {
         save(core, "desk")
         var config = GuiConfig()
         config.profileBindings = bound((2, "desk"))
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         core.desktopBindings = bound((2, "desk"))
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
-                == bound((2, "studio"))
+                .mapValues(\.names) == bound((2, "studio")).mapValues(\.names)
         )
     }
 
@@ -139,7 +139,7 @@ struct ProfileRenameTests {
         save(core, "desk")
         var config = GuiConfig()
         config.profileBindings = bound((2, "desk"))
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         // Space 3 exists only in the runtime map, as if
         // init.lua registered it — the follow must not
         // materialize it into gui.json.
@@ -147,7 +147,35 @@ struct ProfileRenameTests {
         try core.renameProfile(from: "desk", to: "studio")
         #expect(
             core.guiConfigStore.load()?.profileBindings
-                == bound((2, "studio"))
+                .mapValues(\.names) == bound((2, "studio")).mapValues(\.names)
+        )
+        // The runtime map follows the edited key alone (#2324).
+        #expect(core.desktopBindings[.number(3)]?.names == ["luaOnly"])
+    }
+
+    /// In a hybrid config the runtime map is init.lua's: a rename
+    /// rewrites the stored file and never pours it over Lua's map.
+    @Test("hybrid: the runtime map stays init.lua's")
+    func hybridRuntimeStaysLua() throws {
+        let core = makeCore()
+        save(core, "desk")
+        var config = GuiConfig()
+        config.profileBindings = bound((2, "desk"))
+        try core.guiConfigStore.saveIncludingBindings(config)
+        try #"KiwiDesk.bind_profile_to_desktop(2, "lua")"#.write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        #expect(!core.isGuiManaged)
+        // Lua's own record names a second profile the stored one
+        // does not: pouring the stored record over it loses it.
+        core.desktopBindings = [
+            .number(2): DesktopBinding(profiles: ["desk", "lua"], desktop: 2)
+        ]
+        try core.renameProfile(from: "desk", to: "studio")
+        #expect(
+            core.desktopBindings[.number(2)]?.names == ["studio", "lua"]
         )
     }
 
@@ -186,7 +214,7 @@ struct ProfileRenameTests {
         // Marker: a follow-up save would overwrite the
         // stored spaces with the live list.
         config.spaces = [SpaceID("zed")]
-        try core.guiConfigStore.save(config)
+        try core.guiConfigStore.saveIncludingBindings(config)
         core.desktopBindings = bound((2, "other"))
         try core.renameProfile(from: "desk", to: "studio")
         let sidecar = core.guiConfigStore.load()

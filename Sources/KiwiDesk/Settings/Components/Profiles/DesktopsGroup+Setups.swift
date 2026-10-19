@@ -71,10 +71,10 @@ extension DesktopsGroup {
     /// setups or more — with one, there is nothing to add — or the
     /// record already scopes one of that count (#1609).
     func offersSetups(count: Int, row: DesktopRow) -> Bool {
-        let counts = profileCounts
+        let resolver = bindingResolver
         return (model.bindableSetups[count]?.count ?? 0) >= 2
             || row.binding?.entries.contains {
-                $0.setup != nil && counts[$0.profile] == count
+                $0.setup != nil && resolver.count(of: $0) == count
             } == true
     }
 

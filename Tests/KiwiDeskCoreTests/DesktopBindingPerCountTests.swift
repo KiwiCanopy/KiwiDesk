@@ -112,18 +112,18 @@ struct DesktopBindingPerCountTests {
         bind(core, "Laptop")
         bind(core, "Dual")
         #expect(
-            core.desktopBindings[.identity(stamp)]?.profiles
+            core.desktopBindings[.identity(stamp)]?.names
                 == ["Laptop", "Dual"]
         )
         bind(core, "Solo")
         #expect(
-            core.desktopBindings[.identity(stamp)]?.profiles
+            core.desktopBindings[.identity(stamp)]?.names
                 == ["Dual", "Solo"]
         )
         // Re-binding a listed name moves nothing.
         bind(core, "Dual")
         #expect(
-            core.desktopBindings[.identity(stamp)]?.profiles
+            core.desktopBindings[.identity(stamp)]?.names
                 == ["Dual", "Solo"]
         )
     }
@@ -213,7 +213,7 @@ struct DesktopBindingPerCountTests {
 
     /// A list whose files are all gone is unreadable; one whose
     /// screens are unknown waits.
-    @Test("an unreadable list and an unknown display reading")
+    @Test("a missing list and an unknown display reading")
     func unreadableAndWaiting() throws {
         defer { reset() }
         pinTopology()
@@ -222,9 +222,10 @@ struct DesktopBindingPerCountTests {
             profiles: ["Gone", "Also gone"],
             desktop: 1
         )
-        guard case .failure(.unreadable) = core.boundProfile(of: ghosts)
+        // Missing, never unreadable (#2324 ruling 10).
+        guard case .failure(.missing) = core.boundProfile(of: ghosts)
         else {
-            Issue.record("two missing files did not refuse as unreadable")
+            Issue.record("two missing files did not refuse as missing")
             return
         }
         connect(core, 0)
@@ -274,15 +275,15 @@ struct DesktopBindingPerCountTests {
         bind(core, "Dual")
         var stored = GuiConfig()
         stored.profileBindings = core.desktopBindings
-        try core.guiConfigStore.save(stored)
+        try core.guiConfigStore.saveIncludingBindings(stored)
         try core.renameProfile(from: "Dual", to: "Docked")
         #expect(
-            core.desktopBindings[.identity(stamp)]?.profiles
+            core.desktopBindings[.identity(stamp)]?.names
                 == ["Laptop", "Docked"]
         )
         let sidecar = try #require(core.guiConfigStore.load())
         #expect(
-            sidecar.profileBindings[.identity(stamp)]?.profiles
+            sidecar.profileBindings[.identity(stamp)]?.names
                 == ["Laptop", "Docked"]
         )
     }
@@ -296,27 +297,27 @@ struct DesktopBindingPerCountTests {
     func recordAlgebra() {
         var counts = ["A1": 1, "B1": 1, "C2": 2]
         var record = DesktopBinding(profiles: [], desktop: 1)
-        record.bind("A1") { counts[$0] }
-        record.bind("C2") { counts[$0] }
-        record.bind("B1") { counts[$0] }
-        #expect(record.profiles == ["C2", "B1"])
-        record.bind("Unsaved") { counts[$0] }
-        record.bind("Unsaved too") { counts[$0] }
-        #expect(record.profiles == ["C2", "B1", "Unsaved too"])
+        record.bind(.init(name: "A1")) { counts[$0.name] }
+        record.bind(.init(name: "C2")) { counts[$0.name] }
+        record.bind(.init(name: "B1")) { counts[$0.name] }
+        #expect(record.names == ["C2", "B1"])
+        record.bind(.init(name: "Unsaved")) { counts[$0.name] }
+        record.bind(.init(name: "Unsaved too")) { counts[$0.name] }
+        #expect(record.names == ["C2", "B1", "Unsaved too"])
         // "Unsaved too" is saved at 1 screen: two on one count
         // until the next bind of either evicts the other.
         counts["Unsaved too"] = 1
-        record.bind("B1") { counts[$0] }
-        #expect(record.profiles == ["C2", "B1"])
-        record.rename("C2", to: "Docked")
-        #expect(record.profiles == ["Docked", "B1"])
+        record.bind(.init(name: "B1")) { counts[$0.name] }
+        #expect(record.names == ["C2", "B1"])
+        record.relabel(nil, from: "C2", to: "Docked")
+        #expect(record.names == ["Docked", "B1"])
         counts["Docked"] = 2
-        let stillBound = record.unbind(count: 2) { counts[$0] }
+        let stillBound = record.unbind(count: 2) { counts[$0.name] }
         #expect(!stillBound)
-        #expect(record.profiles == ["B1"])
-        let emptied = record.unbind("B1")
+        #expect(record.names == ["B1"])
+        let emptied = record.unbind(.pending("B1"))
         #expect(emptied)
-        #expect(record.profiles.isEmpty)
+        #expect(record.names.isEmpty)
     }
 
     /// A Desktop bound to the profile ALREADY live is answered
@@ -338,11 +339,11 @@ struct DesktopBindingPerCountTests {
         core.onLog = { log.append($0) }
         core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
         #expect(core.profiles.currentName == "Laptop")
-        #expect(!log.contains { $0.contains("cannot load") })
+        #expect(!log.contains { $0.contains("no longer exist") })
         // The stand-down is for a live profile that FITS: with
         // the screens changed under it, the gate re-judges.
         connect(core, 2)
         core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
-        #expect(log.contains { $0.contains("cannot load") })
+        #expect(log.contains { $0.contains("no longer exist") })
     }
 }

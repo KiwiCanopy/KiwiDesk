@@ -45,6 +45,11 @@ extension KiwiCore {
         profiles.onActiveChange = { [weak self] in
             self?.liveProfileChanged()
         }
+        // A pending binding gains its id at the write that makes its
+        // name resolvable, whichever door wrote (#2324).
+        profiles.onProfileWritten = { [weak self] in
+            self?.promotePendingBindings()
+        }
         borders.onLog = log
         socket.onLog = log
         bus.onLog = log
@@ -205,6 +210,11 @@ extension KiwiCore {
         eventLoop.foldsSwitchResync = { [weak self] body in
             guard let self else { return body() }
             self.foldingSwitchResync(body)
+        }
+        eventLoop.switchReads.onApplied = { [weak self] in
+            guard let self, self.eventLoop.switchReads.barsOwed
+            else { return }
+            self.repaintBarsAndFloatNet(animated: false)
         }
         eventLoop.onIgnoredPanelFocus = {
             [weak self] pid, bundleID in

@@ -136,6 +136,7 @@ struct SettingsRowRevertTests {
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
+                profileID: .legacy(name: "Desk"),
                 count: 0,
                 sets: [],
                 isDefault: true,

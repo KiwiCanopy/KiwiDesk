@@ -106,14 +106,16 @@ extension KiwiCore {
     /// Claims the follow when the create fold filed `window` by
     /// its app rule into another Space; the Space to switch to, or
     /// nil. A transient overlay never claims, so a launch's splash
-    /// panel cannot spend the debt. Paid by `payLaunchFollow`
-    /// after the arrival retile.
+    /// panel cannot spend the debt, and neither does a window a
+    /// Desktop switch's batch reveals (#2347). Paid by
+    /// `payLaunchFollow` after the arrival retile.
     func claimLaunchFollow(
         arrived window: ManagedWindow,
         effects: AppliedEffects,
         now: Date = Date()
     ) -> SpaceID? {
-        guard let space = effects.placedByAppRule,
+        guard !eventLoop.switchReads.applying,
+            let space = effects.placedByAppRule,
             let bundleID = window.appBundleID,
             state.workspaces.space(of: window.id) == space,
             state.windows[window.id]?.isTransientOverlay == false

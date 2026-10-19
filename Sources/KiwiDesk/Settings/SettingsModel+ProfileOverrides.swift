@@ -23,7 +23,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.copy_failed",
                 "Copying failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("profile copy failed: \(error)")
         }
@@ -32,6 +32,10 @@ extension SettingsModel {
     /// Overwrites stored profile with staged configuration (#18).
     func saveEditedProfile() {
         guard let name = editingProfile else { return }
+        if let latched = writeLatchReason {
+            profileWarning = latched
+            return
+        }
         // The rule half first: a failed write keeps the draft
         // whole rather than committing the tiling alone.
         // Its own shortcut override is the diff `overwriteProfile`
@@ -59,7 +63,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.save_failed",
                 "Saving failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("profile edit save failed: \(error)")
             // A rule half that landed is the draft's clean state;
@@ -83,21 +87,26 @@ extension SettingsModel {
         let edits = bindingEdits
         guard !edits.isEmpty else { return }
         do {
-            try core.rewriteSidecarBindings { edits.apply(to: &$0) }
-        } catch let error as SidecarError {
-            profileWarning = Self.sidecarRefusal(error)
-            core.onLog("desktop bindings save refused: \(error)")
+            try persistBindingEdits()
         } catch {
-            profileWarning = L(
-                "settings.globals_save_failed",
-                "Saving settings failed: %1$@",
-                "\(error)"
-            )
+            profileWarning = Self.saveFailure(error)
             core.onLog("desktop bindings save failed: \(error)")
         }
     }
 
-    /// Core names the refusal; the GUI narrates it (#96).
+    /// A failed Save's sentence: Core names a binding refusal and the
+    /// GUI narrates it (#96); any other error is reported as is.
+    static func saveFailure(_ error: Error) -> String {
+        guard let refusal = error as? SidecarError else {
+            return L(
+                "settings.globals_save_failed",
+                "Saving settings failed: %1$@",
+                NewerFormatText.detail(error)
+            )
+        }
+        return sidecarRefusal(refusal)
+    }
+
     private static func sidecarRefusal(_ error: SidecarError) -> String {
         switch error {
         case .missing:

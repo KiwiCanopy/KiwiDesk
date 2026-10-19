@@ -67,25 +67,23 @@ extension SettingsModel {
         saveLookReach()
         if saveRuleReach() == .failed { dropRuleHalf() }
         do {
-            if core.lua == nil {
-                // Cold paused boot: core.start() never ran, so a
-                // reload here would be the session's FIRST — it
-                // would execute init.lua, register hotkeys and
-                // retile while the dashboard says "paused". Write
-                // the store directly; start() picks the file up
-                // when permission arrives.
-                try core.guiConfigStore.save(sidecarConfig)
-            } else {
-                try core.withUserMotion {
-                    try core.saveGuiConfig(sidecarConfig)
+            try savingBindingEdits {
+                if core.lua == nil {
+                    // Cold paused boot: core.start() never ran, so a
+                    // reload here would be the session's FIRST — it
+                    // would execute init.lua, register hotkeys and
+                    // retile while the dashboard says "paused". Write
+                    // the store directly; start() picks the file up
+                    // when permission arrives.
+                    try core.guiConfigStore.save(sidecarConfig)
+                } else {
+                    try core.withUserMotion {
+                        try core.saveGuiConfig(sidecarConfig)
+                    }
                 }
             }
         } catch {
-            profileWarning = L(
-                "settings.globals_save_failed",
-                "Saving settings failed: %1$@",
-                "\(error)"
-            )
+            profileWarning = Self.saveFailure(error)
             core.onLog("globals save failed: \(error)")
             return
         }

@@ -353,8 +353,10 @@ The obligations that fall on a change here:
 
 ## A Desktop binding is a per-count, per-scope LIST, judged at the gate (#1436, #1609)
 
-`DesktopBinding.entries` lists (profile, scope) pairs — the scope
-the sorted screen fingerprints of one setup, nil for all setups —
+`DesktopBinding.entries` lists (profile, scope) entries — the
+profile named by id, as *A binding names its profile by id* below
+states — the scope the sorted screen fingerprints of one setup,
+nil for all setups —
 and never a count beside them: a count is each profile's own
 `monitorCount`, and a writer that wants one stored re-argues the
 design entry rather than adding a field. It is read by
@@ -388,7 +390,7 @@ what the gate reads, re-reads them through
 `refreshBindingReadings`; a scope names a setup of its profile's
 own count, the verb refusing any other since it could never fire
 (`DesktopBindingScopeGateTests` ▸ `verbTakesScreens`); a
-writer files through `DesktopBinding.bind(_:setup:countOf:)` —
+writer files through `DesktopBinding.bind(_:countOf:)` —
 same count AND same scope replaces, anything else adds, an unsaved
 name replaces an unsaved name of the same scope
 (`recordAlgebra`, `verbAddsAndReplaces`;
@@ -401,7 +403,7 @@ entries and a record left empty is removed
 (`DesktopBindingSlotWriteTests` ▸ `pickEditsOneSlot`,
 `pickReplacesEveryEntryOfItsCount`; `DesktopBindingScopeCardTests`
 ▸ `pickIsScoped`), while the card draws a Desktop's slots from the
-one `ProfilesFamilyRows.slots(of:count:profileCounts:)`, setups
+one `ProfilesFamilyRows.slots(of:count:resolver:)`, setups
 first and all other setups last, which the census expands too
 (`DesktopBindingScopeCardTests` ▸ `slotsReadAsTheLadder`,
 `censusCarriesTheScope`); the binding door stands down for the
@@ -426,6 +428,55 @@ older reader owes, with no `ConfigMigration` step beside it
 The card's shape — count groups, no count control, setup rows
 top-down in the ladder's order — is `docs/design-decisions.md`
 ▸ Profiles' ruling, not restated here.
+
+## A binding names its profile by id (#2324 ruling 11)
+
+A `DesktopBinding.Entry` names its profile by the `ProfileID` the
+profile file keeps; its `name` is a LABEL a row reads while the
+profile is away, and nothing resolves an entry with an id through
+it (`DesktopBindingByIDTests` ▸ `nameDoesNotCarry`). The
+obligations:
+
+- **The write door owns the id.** `ProfileManager.write` keeps the
+  id the file of that name carries and mints a fresh one for an id
+  another file keeps, so every builder may hand it a fresh profile
+  (`ProfileIDTests` ▸ `overwriteKeepsTheID`, `takenIDIsReminted`);
+  a profile written before ids takes `ProfileID.legacy(name:)`
+  through `migratingProfileIDs`, deterministic so two Macs stamp
+  one id, its vectors pinned (`ProfileIDTests` ▸
+  `legacyFixedVectors`).
+- **Every reader of what an entry names takes the one
+  `KiwiCore.bindingResolution(of:)`** — the gate, the promotion
+  and, through the model's refresh, the Desktops card, which
+  narrates its verdict through the one `BindingResolver` and never
+  re-derives it (`DesktopBindingGroupTests` ▸ `orphansFollowCore`;
+  a second map beside it is review's). An id resolves through
+  `ProfileManager`'s index, whose doors update it in place, so a
+  lookup reads no profile while the profile folder is unchanged; an
+  id no file carries reads `.missing`, and one whose file exists
+  and will not decode — corrupt, or a newer build's — reads
+  `.unreadable` (`DesktopBindingByIDTests` ▸ `deletedReadsMissing`,
+  `idFileUndecodableIsUnreadable`). The gate checks the id of the
+  file it read, since a file rewritten in place moves no folder
+  stamp (`inPlaceEditIsChecked`).
+- **A PENDING entry — no id — resolves by its name**, else by a
+  profile carrying the name's legacy id, until the one
+  `promotePendingBindings` door gives it one; that door also sets
+  an id entry's label to its profile's current name. It runs at a
+  config load and after every profile write
+  (`ProfileManager.onProfileWritten`), and writes the stored map
+  and promotes the runtime map in place, never an entry `init.lua`
+  declared, which that file re-declares by name on every load
+  (`DesktopBindingByIDTests` ▸ `pendingPromotes`).
+- **`bindings.json` has one write door, `saveBindings`.** A
+  `gui.json` write leaves it alone unless its writer authors
+  bindings (`saveIncludingBindings`), so a stale copy never reverts
+  a re-key or a promotion, and a stored file that will not decode
+  is replaced only after its copy is kept, as every store's is
+  (#2324 ruling 13, `DesktopBindingsFileTests` ▸ `unreadableIsKept`).
+
+The argument is `docs/design-decisions.md` ▸ Profiles ▸ *A binding
+names its profile, not the profile's name*.
 
 ## The active Desktop is the MAIN display's (#888)
 
@@ -777,19 +828,51 @@ file.
 
 ## A file a newer build wrote is never overwritten (#2325)
 
-**Write `gui.json` and a profile file through its store's door,
+**Write a format-stamped config file through its store's door,
 which refuses a file a newer build wrote.** `GuiConfigStore.save`
-and `ProfileManager.write` / `save` throw `NewerFormatOnDisk` over
-a `format` this build does not know: its decoder refuses that
-file, so a write would replace a setup it never read — on a
-synced config folder, another Mac's. A sequence that writes
-something else first refuses before it (`save`'s sibling
-defaults, the Lua adoption's ledger). A raw rewrite beside the
-doors asks `NewerFormatOnDisk.check` first, as the app-wide strip
-does, unless it rewrites only below the current format by
-construction, as `MigrationBackup` does; nothing scans for a new
-raw writer, so that is review's (`NewerFormatWriteRefusalTests`,
-`NewerFormatWriteRefusalCallerTests`).
+(which asks `machine.json` and `bindings.json` too),
+`ProfileManager.write` / `save` / `delete` and `MachineFileStore.save`
+throw `NewerFormatOnDisk` over a `format` this build does not know,
+and the palette and look libraries' save, delete and rename refuse
+through the decode they start with (a restore's replace writes
+only after discarding the file): the decoder refuses that file, so a
+write would replace a setup it never read — on a synced config
+folder, another Mac's. A sequence that writes something else first
+refuses before it (`save`'s sibling defaults, the Lua adoption's
+ledger). A raw rewrite beside the doors asks the one predicate,
+`NewerFormatOnDisk.newerFormat(of:knows:)`, first, as the app-wide
+strip does, unless it rewrites only below the current format by
+construction, as `MigrationBackup` does. Every raw `.write(to:)` in
+Core is filed with its reason — a config writer's with its
+behavioural suite — in `ConfigWriterCensusTests`, so a new writer
+reds until it is classified (`NewerFormatWriteRefusalTests`,
+`NewerFormatWriteRefusalCallerTests`,
+`NewerFormatLibraryWriteTests`).
+
+**A newer file LATCHES its store read-only, and says so up front
+(#2324 ruling 2).** The refusal is structure — the
+`ConfigArtifact` and a profile's name — and the GUI narrates it
+(`NewerFormatText`, #96). Each store's newer file raises
+`ConfigIssue.Kind.newerFormat`, a newer `gui.json` never reading as
+unreadable; a newer profile is `ProfileBrokenCause.newerFormat`,
+whose row greys Delete; and Settings greys every structured
+Save on `KiwiCore.guiConfigWriteLatch()` — greyed from the
+refresh's reading, refused from a fresh one at each commit door
+through `staleDraftReason` and `writeLatchReason`, before any of
+its writes (`NewerFormatLatchTests`, `NewerFormatSaveLatchTests`). A new store with a format joins
+`storeNewerFormats` and the census in the same change.
+
+## A corrupt file is overwritten after a copy (#2324 ruling 13)
+
+**A corrupt file — neither readable nor a newer build's — is
+overwritten by its store's next write, after one copy lands in
+this Mac's `migration-backups/` as `<path>.corrupt` (#2324 ruling
+13).** Every door takes `CorruptFile` after its newer-format
+refusal: `GuiConfigStore.save`, `MachineFileStore.save`,
+`ProfileManager.clearForWrite` and each library's `keepCorrupt`
+in its write; a new door takes the same call
+(`CorruptFilePolicyTests`). The ruling's cost is
+`docs/accepted-limitations.md`'s.
 
 ## A new file in the config directory answers the backup question
 
@@ -907,13 +990,17 @@ socket, the lock and the arrangement snapshots are runtime and
 take no case; any other file KiwiDesk keeps there answers the
 backup question in `ConfigArtifact`, `livesOnThisMac` and never
 travelling, as the migration copies do (`SetupBundleArtifactTests`
-▸ `liveMachineDirectoryIsAccountedFor`).
+▸ `liveMachineDirectoryIsAccountedFor`) — save one that travels as
+the bundle's OWN field, as `bindings.json` does (#2324 ruling 12),
+so a restore replaces that file whole and never one beside it
+(`DesktopBindingsFileTests` ▸ `restoreWritesBindings`).
 
 **A `GuiConfig` leaf that means something on this Mac alone moves
-into `MachineConfig` (`machine.json`) by one `MachineConfig.moves`
-entry, and is composed and split in `GuiConfigStore` alone
-(#2324).** The in-memory `GuiConfig` keeps the field, so the draft,
-the diff and the census stay as they were; the leaf joins
+into a `MachineFile` — `machine.json`, or `bindings.json` for a
+leaf that travels — by one `MachineConfig.moves` entry, and is
+composed and split in `GuiConfigStore` alone (#2324).** The
+in-memory `GuiConfig` keeps the field, so the draft, the diff and
+the census stay as they were; the leaf joins
 `GuiConfig.machineLocalFields`, which the `gui.json` coder skips
 (`MachineConfigTests` ▸ `registerMatchesTheFile`,
 `guiEncodingSkipsTheLeaves`). The move entry is what both the
@@ -921,7 +1008,10 @@ carry ahead of the migration and `migratingMachineLeavesOut` read,
 so a strip never removes a leaf the carry did not take first —
 append an entry with its format bumps, never edit one that shipped
 (`MachineConfigTests` ▸ `legacyMemoryIsCarried`,
-`failedCarryKeepsTheCopy`). A write of this Mac's leaves alone
+`failedCarryKeepsTheCopy`). The carry reads values every OTHER
+step has rewritten, or a leaf of an older shape is stripped
+before it can decode (`DesktopBindingsFileTests` ▸
+`oldShapeIsCarried`). A write of this Mac's leaves alone
 writes no `gui.json`; a live leaf is stamped into ANY write only
 once the session adopted the stored one, through the one stamp
 read every writer takes (`persistedDesktopSpaces`,

@@ -149,6 +149,11 @@ struct ProfileSpacesSeamTests {
             // The cursor's own file on this Mac (#2324).
             "Config/MachineConfig.swift":
                 (1, "the cursor, persisted in machine.json"),
+            // The bindings' own file and the backup field (#2324).
+            "Config/DesktopBindingsFile.swift":
+                (1, "the profile BINDINGS, persisted in bindings.json"),
+            "Config/SetupBundle.swift":
+                (1, "the BINDINGS a backup carries"),
             "Config/GuiConfigStore.swift":
                 (1, "the cursor's write-time stamp"),
             "Profiles/KiwiCore+DesktopBindings.swift":

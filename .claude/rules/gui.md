@@ -261,7 +261,9 @@ restated `20...80` satisfies on the day it is written.
   ruling 2026-09-29), and the entry a click on its picture in the
   shut card's strip lands on, once per such click (owner ruling
   2026-10-17) — never on a search, Go to or diff-jump expansion,
-  never looped. Otherwise it rests on its
+  never looped, and never in the shut card's strip, whose
+  pictures stay still (owner ruling 2026-10-18). Otherwise it
+  rests on its
   key frame, and always under Reduce Motion, never a bundled clip,
   with the gate named per call (`ReduceMotionGateTests`).
   `GestureAutoplayWiringTests` holds the click as the only

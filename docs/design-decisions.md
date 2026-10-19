@@ -12025,7 +12025,7 @@ So the shut card also draws a strip of every entry's picture at
 rest, in card order with the groups set apart, scrolling sideways
 and fading at an end where it cuts a picture, the KiwiShelf's
 overflow arithmetic (`ShelfOverflow.fades`) rather than a copy.
-A picture plays while hovered, shows its entry's own sentence as
+A picture stays still, shows its entry's own sentence as
 a tooltip after the window's 250 ms delay, and a click opens the
 card at its entry and plays that one — the same "a click asked to
 read it" argument as the first picture's, aimed. The strip is a
@@ -12037,7 +12037,13 @@ than a drawer: a picture is the content arriving, where a drawer's
 summary states a value. Every entry is drawn rather than one per
 group because each picture is its entry's own way in; the cost is
 weight, so a strip that reads as a solid band in light mode is
-the signal to cut it back to one picture per group.
+the signal to cut it back to one picture per group. It first
+played a picture while hovered, and that cost the page its
+scroll (owner ruling 2026-10-18): each picture the page carried
+under the resting pointer rebuilt and started a loop mid-scroll,
+so a wheel or swipe begun over the strip stuttered. The tooltip
+already names the gesture and the click plays it, so the hover
+loop taught nothing they do not.
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
@@ -15995,6 +16001,25 @@ used before this. A Desktop the user genuinely deletes takes its
 stamp with it and its binding goes dormant — kept, badged, and
 never fired for the Desktop that inherited its number.
 
+**[Principle]**
+
+**A binding names its profile, not the profile's name
+([#2324](https://github.com/KiwiCanopy/KiwiDesk/issues/2324)).**
+Keyed by name, a Desktop binding re-points silently: renaming the
+profile drops it, and a new profile saved under the old name
+inherits a binding made for something else — the stamp's failure
+one hop over. So a profile file keeps an id and a binding names
+that; the name rides along only as the label a row shows while
+the profile is gone. A profile written before ids takes an id
+derived from its name, identical on every Mac, so a shared folder
+upgraded on two Macs agrees and a binding stored by name still
+finds it — which is why that derivation must never change. A
+binding whose profile is gone reads *missing*, never *couldn't
+load*: one is fixed by re-pointing the row, the other by repairing
+a file, and one word for both sends the user to the wrong fix. A
+binding declared in `init.lua` keeps naming its profile by name,
+since that file re-declares it on every load.
+
 **A profile row counts what the profile OWNS, never what it
 resolves to.** A profile carries a *sparse diff* over the global
 config — its own keybindings are the rows it overrides, not the
@@ -17439,11 +17464,12 @@ Accessibility is the only reader that can say what a window *is*,
 and the only one that can block: a message to an app not servicing
 AX — one App-Napped with every window on another Desktop, or a
 headless agent — returns when the messaging timeout fires, not
-before. The bulk re-sync a Desktop switch runs, sent to every
-observed app, stalls the main actor on a session with a handful of
-such apps for ~1 s per app, in series, with the arrived window's
-ring, retile and raise queued behind — an empty target Desktop
-costs exactly as much, because the price was never the windows
+before. A bulk re-sync sent to every observed app waits ~1 s on each such
+app — in series on the main actor for a config reload, and for a
+Desktop switch, whose reads run off it (#2347), the switch's one
+fold held to its bound with that app's departures left standing
+until its read returns — and an empty target Desktop costs exactly
+as much, because the price was never the windows
 that arrived but the apps that did not answer
 ([#1037](https://github.com/KiwiCanopy/KiwiDesk/issues/1037)). The
 WindowServer census answers the one question a bulk pass needs

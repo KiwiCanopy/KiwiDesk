@@ -40,7 +40,7 @@ extension KiwiCore {
                     kind: .luaVMUnavailable
                 )
             )
-            if guiConfigStore.exists,
+            if guiConfigStore.exists, !guiConfigIsNewer,
                 guiConfigStore.load() == nil
             {
                 issues.append(unreadableSidecarIssue)
@@ -118,7 +118,9 @@ extension KiwiCore {
         // A sidecar that exists but no longer decodes means
         // the visual editor (and the structured loader) can't
         // see the user's rules — half-loaded, must be visible.
-        if guiConfigStore.exists, guiConfigStore.load() == nil {
+        if guiConfigStore.exists, !guiConfigIsNewer,
+            guiConfigStore.load() == nil
+        {
             issues.append(unreadableSidecarIssue)
         }
         // Two mutually exclusive config owners (#55, O7):

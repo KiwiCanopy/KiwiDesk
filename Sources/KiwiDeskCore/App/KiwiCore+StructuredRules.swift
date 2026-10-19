@@ -10,6 +10,7 @@ extension KiwiCore {
     /// over what the managed block in `init.lua` set.
     func applyStructuredRules(from config: GuiConfig) {
         desktopBindings = config.profileBindings
+        promotePendingBindings()
         // #1230: what each Desktop was showing, so a restart does
         // not re-scatter them.
         adoptPersistedDesktopSpaces(config.desktopSpaces)
@@ -147,11 +148,12 @@ extension KiwiCore {
     ///   afterwards.
     /// - `defersRuleSweepToSwitchPass` — a bound Desktop switch's
     ///   apply (`applyBindingDeferringRuleSweep`, #2347): the
-    ///   switch's own folded `reconcileAll` runs right after the
+    ///   switch's own batched sweep is requested right after the
     ///   handler, which `DesktopSwitchRuleSweepSeamTests` holds.
-    ///   Its cost is the one below, for one main-actor turn: the
-    ///   apply's pass and the handler's run under the outgoing
-    ///   profile's verdicts, and the folded pass re-places.
+    ///   Its cost is the one below until that batch's fold lands,
+    ///   at most `SwitchReconcile.bound` later: the apply's pass
+    ///   and the handler's run under the outgoing profile's
+    ///   verdicts, and the fold re-places.
     /// - `defersWindowRuleReconcileToSweep` — boot. It is a flag
     ///   raised in `start()` and lowered beside the sweep's arm,
     ///   NOT a read of `BootPhase`: the phase is a readiness

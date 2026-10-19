@@ -23,7 +23,7 @@ extension DesktopsGroup {
         let slots = ProfilesFamilyRows.slots(
             of: row,
             count: count,
-            profileCounts: profileCounts
+            resolver: bindingResolver
         )
         let others = BindingSlot.count(count, setup: nil)
         let fallback = fallbackLabel(count: count, scoped: slots.count > 1)

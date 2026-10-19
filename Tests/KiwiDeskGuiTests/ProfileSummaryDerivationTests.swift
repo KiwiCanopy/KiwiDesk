@@ -62,7 +62,7 @@ struct ProfileSummaryDerivationTests {
         named name: String,
         monitors: [String]
     ) {
-        try? model.core.profiles.write(
+        _ = try? model.core.profiles.write(
             Profile(
                 name: name,
                 monitorSets: [MonitorSet(monitors: monitors)],

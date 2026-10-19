@@ -123,11 +123,11 @@ final class SettingsModel: ObservableObject {
     /// Whether screen placement canvas is editable for current target (#18).
     @Published var placementEditable = true
     @Published var profiles: [String] = []
-    /// `KiwiCore.isGuiManaged` and the sidecar's presence, read
-    /// once per refresh — the first re-reads init.lua, so never
-    /// per render (#1392).
+    /// `isGuiManaged`, the sidecar's presence and its latch (#2324),
+    /// read once per refresh: the first re-reads init.lua (#1392).
     @Published var guiManaged = true
     @Published var sidecarExists = true
+    @Published var writeLatch: NewerFormatOnDisk?
     /// Rich rows for saved profiles: screen setups, screen count, matches
     /// (#36).
     @Published var profileSummaries: [ProfileSummary] = []
@@ -186,6 +186,8 @@ final class SettingsModel: ObservableObject {
     /// Keyed by the RECORD, so a row reads the reading of the
     /// record it resolved, under whichever key.
     @Published var bindingReadings: [DesktopBinding: BoundReading] = [:]
+    @Published var bindingResolutions: BindingResolutions = [:]  // #2324
+    @Published var activeProfileID: ProfileID?
 
     /// Each present Desktop's durable key by its Mission Control
     /// number (#1147) — the join a Profiles row resolves its

@@ -1025,12 +1025,23 @@ Touching `Config`, `Profiles`, `Commands`.
   same change set, neither alone, and a file meaningful on this Mac alone lives
   in `MachineLocation`'s folder, never the config folder (#2324,
   `CoreInitPathTests`, `SetupBundleArtifactTests`)
-- a write of `gui.json` or a profile file goes through its store's door, which
-  refuses a file a newer build wrote, and a raw rewrite beside it asks
-  `NewerFormatOnDisk.check` first (#2325, `NewerFormatWriteRefusalTests`)
-- a `GuiConfig` leaf meaningful on this Mac alone moves to `machine.json` by
-  one `MachineConfig.moves` entry the carry and the strip both read, composed
-  and split in `GuiConfigStore` alone (#2324, `MachineConfigTests`)
+- a write of a format-stamped config file goes through its store's door,
+  which refuses a file a newer build wrote, every raw writer filed in
+  `ConfigWriterCensusTests` (#2325), and a newer file latches its store
+  read-only — a Config Issue, Delete greyed, Settings' Save greyed up front
+  (#2324, `NewerFormatLatchTests`, `NewerFormatSaveLatchTests`) — while a
+  corrupt one is overwritten after a copy through `CorruptFile`
+  (`CorruptFilePolicyTests`)
+- a `GuiConfig` leaf meaningful on this Mac alone moves to a machine-folder
+  file by one `MachineConfig.moves` entry the carry and the strip both read,
+  composed and split in `GuiConfigStore` alone (#2324, `MachineConfigTests`)
+- a Desktop binding names its profile by the id the write door keeps, its
+  name a label nothing resolves through, every reader — gate, promotion,
+  card — taking the one `bindingResolution(of:)` (a gone profile `.missing`,
+  an undecodable one `.unreadable`), a pending name promoted through the one
+  `promotePendingBindings` at every profile write, and `bindings.json`
+  written through `saveBindings` alone (#2324, `DesktopBindingByIDTests`,
+  `ProfileIDTests`, `DesktopBindingsFileTests`)
 - a change breaking the decoded shape of anything a bundle carries bumps
   `SetupBundle.currentFormat`, breaking Profile or GuiConfig schema bumps
   `Profile.currentFormat` / `GuiConfig.currentFormat`, and a breaking palette
@@ -1102,7 +1113,7 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
 `+ReconcileAll`, `+ReconcileOffMain`, `+ListedWindows`, `+Heal`,
 `+WindowPolicy`, `+FloatVerdict`, `+Tabs`, `+RemovalDistrust`, `+Tracking`,
 `+ProcessIdentity`, `+ShadowWindows`, `+WindowServerWakeUp`,
-`+PanelButton`).
+`+PanelButton`, `+SwitchReconcile`, and `SwitchReconcile`).
 
 - AX calls are slow and can block — snapshot before layout math, and the
   activation, focus, hide and undeferred-close arms and the distrust and
@@ -1197,8 +1208,13 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   `WorkMeterAXSeamTests`), and a change adding AX messages on the Space-switch
   path states how many per switch, and why, in its PR and at the read
 - a bound Desktop's apply leaves its window-rule sweep to the switch's own
-  folded `reconcileAll`, so a new path into `handleDesktopChange` owes that
-  sweep after it (#2347, `DesktopSwitchRuleSweepSeamTests`)
+  batched sweep, so a new path into `handleDesktopChange` owes that sweep
+  after it (#2347, `DesktopSwitchRuleSweepSeamTests`)
+- a Desktop switch's bulk pass reads off the main actor as one batch applied
+  in one fold: an app's readings apply in the order they ran, a per-app read
+  the batch awaits applies inside it, and the settle, `desktop_change` and
+  the bars wait for the fold (#2347, `SwitchReconcileTests`,
+  `SwitchReconcileSeamTests`)
 - a WindowServer window create or destroy only WAKES the AX path — a create
   runs one wake sweep that reads the heal's quiet ledger and never writes it, a
   destroy re-reads the app still tracking it — never tracking, filing or

@@ -72,6 +72,6 @@ extension KiwiCore {
     /// The one home of the migration copies (#1880), in the
     /// machine folder since #2324.
     static func migrationBackups(in machine: URL) -> URL {
-        machine.appendingPathComponent(MigrationBackup.folderName)
+        MigrationBackup.folder(in: machine)
     }
 }

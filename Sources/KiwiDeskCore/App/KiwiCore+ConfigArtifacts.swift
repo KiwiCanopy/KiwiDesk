@@ -10,7 +10,7 @@ import Foundation
 /// duplication §2.4 protects, but a **failure-mode policy** whose
 /// copies can diverge, and they already had (different log
 /// prefixes, one inlined and one extracted, only one callable).
-public enum ConfigArtifact: CaseIterable {
+public enum ConfigArtifact: CaseIterable, Sendable {
     /// The GUI's settings sidecar.
     case guiConfig
     /// Every saved profile.
@@ -24,6 +24,10 @@ public enum ConfigArtifact: CaseIterable {
     case migrationBackups
     /// This Mac's `GuiConfig` leaves (#2324, `MachineConfig`).
     case machineConfig
+    /// The Desktop bindings (#2324 ruling 12,
+    /// `DesktopBindingsFile`): kept on this Mac, carried by a
+    /// backup as the bundle's own field.
+    case desktopBindings
 
     /// What a backup carries.
     ///
@@ -42,6 +46,7 @@ public enum ConfigArtifact: CaseIterable {
     public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
+        case .desktopBindings: return true
         case .migrationBackups, .machineConfig: return false
         }
     }
@@ -52,7 +57,8 @@ public enum ConfigArtifact: CaseIterable {
     public var livesOnThisMac: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return false
-        case .migrationBackups, .machineConfig: return true
+        case .migrationBackups, .machineConfig, .desktopBindings:
+            return true
         }
     }
 
@@ -61,7 +67,8 @@ public enum ConfigArtifact: CaseIterable {
     /// omission (`SetupBundleArtifactTests`).
     public var leftBehindBecause: String? {
         switch self {
-        case .guiConfig, .profiles, .palettes, .looks: return nil
+        case .guiConfig, .profiles, .palettes, .looks, .desktopBindings:
+            return nil
         case .migrationBackups:
             return "a copy of this Mac's files at an older format, "
                 + "for a downgrade here; the backup carries the "
@@ -69,6 +76,21 @@ public enum ConfigArtifact: CaseIterable {
         case .machineConfig:
             return "which Space each of this Mac's Desktops was "
                 + "showing; another Mac's Desktops are not these"
+        }
+    }
+}
+
+extension ConfigArtifact {
+    /// The file's name, nil for a folder (`profiles`, the backups);
+    /// `NewerFormatLatchTests` holds it to `KiwiCore.url(of:)`.
+    public var fileName: String? {
+        switch self {
+        case .guiConfig: return "gui.json"
+        case .palettes: return "palettes.json"
+        case .looks: return "looks.json"
+        case .machineConfig: return MachineConfig.fileName
+        case .desktopBindings: return DesktopBindingsFile.fileName
+        case .profiles, .migrationBackups: return nil
         }
     }
 }
@@ -88,6 +110,7 @@ extension KiwiCore {
         case .looks: return lookLibrary.url
         case .migrationBackups: return migrationBackups
         case .machineConfig: return guiConfigStore.machine.url
+        case .desktopBindings: return guiConfigStore.bindingsFile.url
         }
     }
 

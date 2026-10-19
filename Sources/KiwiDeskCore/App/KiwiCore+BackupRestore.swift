@@ -221,9 +221,12 @@ extension KiwiCore {
     private func writeIncoming(
         _ bundle: SetupBundle
     ) throws(SetupBundleError) -> RestoreOutcome {
-        if let config = bundle.config {
+        if var config = bundle.config {
+            // The bindings ride the bundle's own field (#2324); the
+            // store writes them beside `gui.json`.
+            config.profileBindings = bundle.profileBindings ?? [:]
             do {
-                try guiConfigStore.save(config)
+                try guiConfigStore.saveIncludingBindings(config)
             } catch {
                 onLog("restore: gui.json write failed: \(error)")
                 throw .couldNotWrite(

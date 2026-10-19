@@ -11,6 +11,8 @@ public final class ProfileManager {
     /// holding the name already treat `markClean()` as a whole
     /// re-adopt.
     public var currentName: String? { active?.name }
+    /// The live profile's id, from adoption state (#2324).
+    public var currentID: ProfileID? { active?.id }
     /// The live profile's screen count, from adoption state
     /// (#1436, #1245).
     public var currentMonitorCount: Int? { active?.monitorCount }
@@ -84,6 +86,12 @@ public final class ProfileManager {
     /// the core that owns the config directory; nil keeps none.
     var migrationBackups: URL?
 
+    /// Fired after every profile write lands (#2324).
+    var onProfileWritten: @MainActor () -> Void = {}
+
+    /// `ProfileIndex`, with the folder stamp it was built at.
+    var idIndex: (stamp: Date?, index: ProfileIndex)?
+
     public init(directory: URL) {
         self.directory = directory
         owesSetSettle = Self.owesSettle(in: directory)
@@ -138,18 +146,21 @@ public final class ProfileManager {
             profile.isDefault = true
             try clearDormantDefaults(count: profile.monitorCount)
         }
-        try write(profile)
-        adopt(profile)
+        adopt(try write(profile))
         standard = nil
         isDirty = false
     }
 
-    /// Deletes a profile, repairing orphaned count defaults if needed.
+    /// Deletes a profile, repairing orphaned count defaults; refuses
+    /// a file a newer build wrote (#2324).
     func delete(name: String) throws {
+        try NewerFormatOnDisk.refuseProfile(url(for: validated(name)))
         let deleted = try? read(name: name)
+        let stamp = folderStamp()
         try FileManager.default.removeItem(
             at: url(for: validated(name))
         )
+        updateIndex(stampBefore: stamp) { $0.remove(file: name) }
         if currentName == name {
             active = nil
             isDirty = true
@@ -189,31 +200,14 @@ public final class ProfileManager {
         {
             throw ProfileError.nameTaken(new)
         }
+        let stamp = folderStamp()
         try files.moveItem(at: source, to: destination)
+        updateIndex(stampBefore: stamp) { $0.remove(file: old) }
         profile.name = new
         try write(profile)
         if currentName == old {
             active = active?.renamed(to: new)
             savedModesRecord = (new, profile.spaceModes)
-        }
-    }
-
-    /// Re-designates a count's default profile. A dormant profile
-    /// cannot load as a fallback, so it is refused (#1530).
-    func setDefault(name: String) throws {
-        var chosen = try read(name: name)
-        guard !chosen.isDormant else {
-            throw ProfileError.dormantDefault(name)
-        }
-        chosen.isDefault = true
-        try write(chosen)
-        for var other in allProfiles()
-        where other.name != name
-            && other.monitorCount == chosen.monitorCount
-            && other.isDefault
-        {
-            other.isDefault = false
-            try write(other)
         }
     }
 
@@ -300,10 +294,15 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    /// Non-adopting write (#18, #82); refuses a newer file (#2325).
-    func write(_ profile: Profile) throws {
+    /// Non-adopting write (#18, #82); `clearForWrite` first (#2324).
+    /// Returns the profile as written, its id settled (#2324).
+    @discardableResult
+    func write(_ profile: Profile) throws -> Profile {
         let name = try validated(profile.name)
-        try NewerFormatOnDisk.refuseProfile(url(for: name))
+        try clearForWrite(url(for: name))
+        var profile = profile
+        profile.id = idForWrite(of: profile)
+        let stamp = folderStamp()
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true
@@ -322,11 +321,16 @@ public final class ProfileManager {
             to: url(for: name),
             options: .atomic
         )
+        updateIndex(stampBefore: stamp) { [id = profile.id] in
+            $0.recordWrite(file: name, id: id)
+        }
+        defer { onProfileWritten() }
         // A claim moves the live profile's sets with no apply.
         active = active?.refiled(profile)
         if profile.name == currentName {
             savedModesRecord = (profile.name, profile.spaceModes)
         }
+        return profile
     }
 
     private func url(for name: String) -> URL {

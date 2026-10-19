@@ -185,22 +185,30 @@ When an update moves `gui.json`, a profile, your palettes or your
 looks to a newer file format, KiwiDesk first keeps the file as it
 was in `~/Library/Application Support/KiwiDesk/migration-backups/`,
 under its own path with `.pre-v<format>` added; `<format>` is the
-file's own format number, not a KiwiDesk version. One copy is kept
-per file: the file before its latest migration. To go back to an
+file's own format number, not a KiwiDesk version. One migration
+copy is kept per file: the file before its latest migration. To go
+back to an
 older KiwiDesk, quit it, copy that file over the original and drop
-the suffix. A backup does not carry the folder, and Reset All
-Settings leaves it.
+the suffix. A file KiwiDesk cannot read at all — a hand edit that
+broke the JSON, say — is replaced by the next save that writes it,
+after the broken file is kept in the same folder with `.corrupt`
+added, one copy per file. A backup does not carry the folder, and
+Reset All Settings leaves it.
 
-The socket, the instance lock, the saved window arrangement and
-`machine.json` live in `~/Library/Application Support/KiwiDesk/`
-itself; Reset All Settings clears `machine.json`.
+The socket, the instance lock, the saved window arrangement,
+`machine.json` and `bindings.json` (your Desktop bindings) live in
+`~/Library/Application Support/KiwiDesk/` itself, so a synced
+config folder carries neither file; Reset All Settings clears both.
 :::
 
-An older KiwiDesk never writes over `gui.json` or a profile that a
-newer one migrated: it reports the file as unreadable, and a save
-to it fails until that Mac is updated. Versions before 3.0.0 do
-not have this check, so update every Mac sharing a synced folder
-together.
+:::unreleased
+An older KiwiDesk never writes over `gui.json`, a profile, your
+palettes or your looks once a newer one has saved them. It lists
+the file under menu bar › Config Issues…, and a save that would
+write it is refused until that Mac is updated. Versions before
+3.0.0 do not have this check, so update every Mac sharing a synced
+folder together.
+:::
 
 ```json
 {

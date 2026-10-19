@@ -5,8 +5,11 @@ import Foundation
 /// (#1394): Core decides it, the Desktops rows only narrate it
 /// (`DesktopBindingFitSeamTests`).
 public enum DesktopBindingRefusal: Error {
-    /// No bound profile's file could be read.
+    /// A bound profile's file exists and could not be read.
     case unreadable(Error)
+    /// No bound profile exists any more: its id names no file, or
+    /// a pending name has none (#2324). `names` are the labels.
+    case missing(names: [String])
     /// No bound profile is saved for the connected count;
     /// `saved` is each READABLE one with its count, in binding
     /// order (#1436) — an unreadable sibling is not among them.
@@ -42,10 +45,15 @@ public enum DesktopBindingRefusal: Error {
 
     /// The log line's tail, after the door names itself.
     func narrative(binding: DesktopBinding) -> String {
-        let names = binding.profiles.map { "'\($0)'" }
+        let names = binding.names.map { "'\($0)'" }
             .joined(separator: ", ")
-        let plural = binding.profiles.count > 1
+        let plural = binding.names.count > 1
         switch self {
+        case .missing(let gone):
+            return "profile\(gone.count > 1 ? "s" : "") "
+                + gone.map { "'\($0)'" }.joined(separator: ", ")
+                + " no longer exist\(gone.count > 1 ? "" : "s"); "
+                + "the binding stands aside"
         case .unreadable(let error):
             return "cannot load profile\(plural ? "s" : "") "
                 + "\(names): \(error)"
@@ -81,6 +89,10 @@ struct BoundPick {
     let entry: DesktopBinding.Entry
 }
 
+/// An id no readable file carries while a profile file too broken
+/// to name its id sits in the folder: absence is unproven (#2324).
+struct UndeterminedProfile: Error {}
+
 /// A binding whose list is empty — a shape no writer produces,
 /// named so the gate can refuse it rather than crash.
 struct EmptyDesktopBinding: Error {}
@@ -107,7 +119,7 @@ extension KiwiCore {
         let connected = state.workspaces.allDisplays.count
         let ranked = binding.ranked(
             for: liveFingerprints,
-            preferring: profiles.currentName
+            preferring: liveProfileRef
         )
         if ranked.isEmpty, !binding.entries.isEmpty {
             return .failure(
@@ -115,15 +127,31 @@ extension KiwiCore {
             )
         }
         var saved: [DesktopBindingRefusal.SavedCount] = []
-        var unreadable: Error = EmptyDesktopBinding()
+        var unreadable: Error?
+        var missing: [String] = []
         var waiting = false
         for entry in ranked {
-            let name = entry.profile
+            let name: String
+            switch bindingResolution(of: entry) {
+            case .profile(let file), .unreadable(let file?): name = file
+            case .unreadable(nil):
+                unreadable = UndeterminedProfile()
+                continue
+            case .missing:
+                missing.append(entry.name)
+                continue
+            }
             let profile: Profile
             do {
                 profile = try profiles.read(name: name)
             } catch {
                 unreadable = error
+                continue
+            }
+            // A file edited in place moves no folder stamp, so the
+            // index may name a file that no longer holds the id.
+            if let id = entry.id, profile.id != id {
+                missing.append(entry.name)
                 continue
             }
             switch DesktopBindingRefusal.of(
@@ -138,7 +166,7 @@ extension KiwiCore {
                 saved.append(
                     .init(name: name, count: profile.monitorCount)
                 )
-            case .unreadable?, .otherSetups?:
+            case .unreadable?, .otherSetups?, .missing?:
                 break
             }
         }
@@ -148,7 +176,36 @@ extension KiwiCore {
                 .screenCount(saved: saved, connected: connected)
             )
         }
-        return .failure(.unreadable(unreadable))
+        if let unreadable { return .failure(.unreadable(unreadable)) }
+        guard !missing.isEmpty else {
+            return .failure(.unreadable(EmptyDesktopBinding()))
+        }
+        return .failure(.missing(names: missing))
+    }
+
+    /// The entry a bind of `name` files: by the id of the profile
+    /// saved under that name, else pending (#2324).
+    func bindingEntry(
+        named name: String,
+        setup: [String]? = nil
+    ) -> DesktopBinding.Entry {
+        DesktopBinding.Entry(id: pendingID(name), name: name, setup: setup)
+    }
+
+    /// The screen count an entry's profile is saved for, nil where
+    /// it has no readable profile — the binding algebra's `countOf`.
+    func bindingCount(of entry: DesktopBinding.Entry) -> Int? {
+        guard case .profile(let file) = bindingResolution(of: entry)
+        else { return nil }
+        return (try? profiles.read(name: file))?.monitorCount
+    }
+
+    /// The live profile as a binding names it, from adoption state.
+    var liveProfileRef: (id: ProfileID, name: String)? {
+        guard let id = profiles.currentID,
+            let name = profiles.currentName
+        else { return nil }
+        return (id, name)
     }
 
     /// Whether the gate would pick the profile ALREADY live —
@@ -159,12 +216,13 @@ extension KiwiCore {
     /// the connected count. The binding door's stand-down; false
     /// sends it to `boundProfile(of:)`.
     func bindingPicksLiveProfile(_ binding: DesktopBinding) -> Bool {
-        guard let live = profiles.currentName,
+        guard let live = liveProfileRef,
             let count = profiles.currentMonitorCount,
-            binding.ranked(
+            let first = binding.ranked(
                 for: liveFingerprints,
                 preferring: live
-            ).first?.profile == live
+            ).first,
+            DesktopBinding.names(first, live)
         else { return false }
         return DesktopBindingRefusal.of(
             profileCount: count,

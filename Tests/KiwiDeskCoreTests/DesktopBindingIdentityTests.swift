@@ -168,7 +168,7 @@ struct DesktopBindingIdentityTests {
         _ = core.stampedDesktopSnapshot()
         #expect(core.desktopBindings[.number(2)] == nil)
         #expect(
-            core.desktopBindings[.identity(stampB)]?.profiles
+            core.desktopBindings[.identity(stampB)]?.names
                 == ["Work"]
         )
     }
@@ -205,7 +205,7 @@ struct DesktopBindingIdentityTests {
         _ = core.stampedDesktopSnapshot()
         #expect(core.desktopBindings[.number(2)] == nil)
         #expect(
-            core.desktopBindings[.identity(stampB)]?.profiles
+            core.desktopBindings[.identity(stampB)]?.names
                 == ["Work"]
         )
     }
@@ -229,7 +229,7 @@ struct DesktopBindingIdentityTests {
             .number(2): DesktopBinding(profile: "Work", desktop: 2)
         ]
         stored.spaces = [SpaceID("stored-only")]
-        try core.guiConfigStore.save(stored)
+        try core.guiConfigStore.saveIncludingBindings(stored)
         core.desktopBindings = stored.profileBindings
 
         _ = core.stampedDesktopSnapshot()
@@ -237,7 +237,7 @@ struct DesktopBindingIdentityTests {
         let after = try #require(core.guiConfigStore.load())
         #expect(after.profileBindings[.number(2)] == nil)
         #expect(
-            after.profileBindings[.identity(stampB)]?.profiles
+            after.profileBindings[.identity(stampB)]?.names
                 == ["Work"]
         )
         // The live space list never entered the file.

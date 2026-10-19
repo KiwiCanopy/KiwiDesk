@@ -147,7 +147,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.save_failed",
                 "Saving failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("profile save failed: \(error)")
             saved = false
@@ -166,10 +166,13 @@ extension SettingsModel {
     private func persistGlobalsIfNeeded() {
         guard globalsChanged else { return }
         do {
-            try core.withUserMotion {
-                try core.saveGuiConfig(sidecarConfig)
+            try savingBindingEdits {
+                try core.withUserMotion {
+                    try core.saveGuiConfig(sidecarConfig)
+                }
             }
         } catch {
+            profileWarning = Self.saveFailure(error)
             core.onLog("settings save failed: \(error)")
         }
     }
@@ -214,7 +217,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.rename_failed",
                 "Renaming failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             return
         }
@@ -232,7 +235,7 @@ extension SettingsModel {
             profileWarning = L(
                 "profiles.apply_failed",
                 "Applying failed: %1$@",
-                "\(error)"
+                NewerFormatText.detail(error)
             )
             core.onLog("preset apply failed: \(error)")
         }
@@ -243,6 +246,8 @@ extension SettingsModel {
 /// Saved profile summary for profile list and resolution (#36, #789, #678).
 struct ProfileSummary: Identifiable {
     let name: String
+    /// What a Desktop binding names (#2324).
+    let profileID: ProfileID
     let count: Int
     let sets: [[String]]
     /// Holds no screen combination (#1530).

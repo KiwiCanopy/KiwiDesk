@@ -42,6 +42,7 @@ struct SpaceHistoryReachModelTests {
     private func summary(_ name: String, count: Int) -> ProfileSummary {
         ProfileSummary(
             name: name,
+            profileID: .legacy(name: name),
             count: count,
             sets: [],
             isDefault: false,

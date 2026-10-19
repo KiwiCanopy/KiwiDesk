@@ -68,7 +68,7 @@ struct ProfileSpacesPersistenceTests {
         // Parity test: legacy profiles without the `spaces`
         // key must decode without error and default to [].
         let json = """
-            {"name":"old",
+            {"id":"T","name":"old",
              "monitor_sets":[{"monitors":["A:1x1"]}],
              "space_modes":{},
              "settings":{},
@@ -126,7 +126,7 @@ struct ProfileSpacesPersistenceTests {
         // Legacy profiles predate the key — they decode to false,
         // never the ladder baseline.
         let json = """
-            {"name":"old",
+            {"id":"T","name":"old",
              "monitor_sets":[{"monitors":["A:1x1"]}],
              "space_modes":{},
              "settings":{},

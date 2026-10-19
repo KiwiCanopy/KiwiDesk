@@ -15,10 +15,11 @@ struct SwitchResyncSeamTests {
 
     /// needle → (tree, the file that carries it, how often).
     private static let wirings: [(String, String, String, Int)] = [
-        // The switch handler runs its re-sync through the seam.
+        // The switch's batch applies its reads through the seam
+        // (#2347).
         (
-            "foldsSwitchResync { reconcileAll() }",
-            "Sources/KiwiDeskCore", "EventLoop+Apps.swift", 1
+            "foldsSwitchResync {",
+            "Sources/KiwiDeskCore", "EventLoop+SwitchReconcile.swift", 1
         ),
         // Bootstrap wires the seam to the fold.
         (

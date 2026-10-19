@@ -73,9 +73,8 @@ extension KiwiCore {
         }) {
             binding.screen = screen
         }
-        binding.bind(profile, setup: setup) { name in
-            (try? profiles.read(name: name))?.monitorCount
-        }
+        let entry = bindingEntry(named: profile, setup: setup)
+        binding.bind(entry, countOf: bindingCount(of:))
         desktopBindings[key] = binding
         if !profiles.list().contains(profile) {
             onLog(
@@ -173,7 +172,8 @@ extension KiwiCore {
             tiler.motionGate.exemptingSwitch {
                 retile(animated: false, pass: .reissue)
             }
-            updateBars()
+            // A fullscreen arrival retires its panels now (#2347).
+            updateBars(holdingForSwitch: snapshot.showsUserSpaces(changed))
             // Swiping the display that HOLDS the active Space
             // moves it, and a silent active-Space change is one
             // Lua and the CLI cannot see — the main arm emits for
@@ -219,8 +219,8 @@ extension KiwiCore {
                 // fullscreen main display with focus on a
                 // secondary user space skipped both branches
                 // and left the bars painted over the
-                // fullscreen app.
-                updateBars()
+                // fullscreen app — not held for the batch (#2347).
+                updateBars(holdingForSwitch: false)
             }
         }
         // #1145: carry the sticky windows onto the Desktop this

@@ -15,6 +15,7 @@ enum DesktopBindingFixture {
     static func summary(_ name: String, count: Int) -> ProfileSummary {
         ProfileSummary(
             name: name,
+            profileID: .legacy(name: name),
             count: count,
             sets: [],
             isDefault: false,
@@ -33,6 +34,28 @@ enum DesktopBindingFixture {
         ]
     }
 
+    /// `summary` saved in the model's core as a profile file — so
+    /// Core resolves a binding to it as the app would (#2324) —
+    /// and listed on the model.
+    static func add(_ summary: ProfileSummary, to model: SettingsModel) {
+        _ = try? model.core.profiles.write(
+            Profile(
+                id: summary.profileID,
+                name: summary.name,
+                monitorSets: [
+                    MonitorSet(
+                        monitors: (1...summary.count).map {
+                            "\(summary.name)\($0):100x100"
+                        }
+                    )
+                ],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        model.profileSummaries.append(summary)
+    }
+
     /// A card over a model with the fixture's profiles, one live
     /// Desktop on "Built-in".
     static func makeCard() -> (DesktopsGroup, SettingsModel) {
@@ -45,7 +68,7 @@ enum DesktopBindingFixture {
                     )
             )
         )
-        model.profileSummaries = profiles
+        for summary in profiles { add(summary, to: model) }
         model.mainDesktops = [1]
         model.desktopKeys = [1: live]
         model.presentDesktopKeys = [live, .number(1)]

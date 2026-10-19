@@ -232,19 +232,20 @@ extension EventLoop {
         requestActivationFocus(pid: pid, app: app, event: event)
     }
 
-    /// The user switched native macOS Spaces. AX only reports
-    /// windows on the current space, so reconcile every app:
-    /// windows of the previous space leave the layout, windows
-    /// of the new space are picked up. The event goes out
-    /// first so a bound profile is in place before the new
-    /// space's windows are tiled.
+    /// The user switched macOS Desktops. AX only reports windows
+    /// on the current Desktop, so every gated app is re-read:
+    /// windows of the previous Desktop leave the layout, windows
+    /// of the new one are picked up — read off the main actor and
+    /// applied in one fold (#2347). The event goes out first so a
+    /// bound profile is in place before the new windows are tiled.
     private func desktopChanged() {
-        // Stamp before the resync so both the bulk reconcileAll and
-        // any targeted reconcile racing it suppress tab coalescing
-        // (departed/arrived windows tile to identical frames, #308).
+        // Stamp before the batch so it and any targeted reconcile
+        // racing it suppress tab coalescing (departed/arrived
+        // windows tile to identical frames, #308).
         lastDesktopChange = Date()
+        beginSwitchReconcile()
         onEvent(.desktopChanged)
-        foldsSwitchResync { reconcileAll() }
+        requestSwitchReads()
     }
 
     // MARK: - Displays

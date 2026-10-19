@@ -22,28 +22,29 @@ struct DesktopBindingSlotWriteTests {
         let (card, model) = DesktopBindingFixture.makeCard()
         card.write("Laptop", key: live, slot: .count(1, setup: nil))
         #expect(
-            model.config.profileBindings[live]?.profiles == ["Laptop"]
+            model.config.profileBindings[live]?.names == ["Laptop"]
         )
         // The projections come from the row it was built from.
         #expect(model.config.profileBindings[live]?.desktop == 1)
         #expect(model.config.profileBindings[live]?.screen == "Built-in")
         card.write("Dual", key: live, slot: .count(2, setup: nil))
         #expect(
-            model.config.profileBindings[live]?.profiles
+            model.config.profileBindings[live]?.names
                 == ["Laptop", "Dual"]
         )
         // Re-picking a count replaces that count's entry alone.
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Solo", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Solo", count: 1),
+            to: model
         )
         card.write("Solo", key: live, slot: .count(1, setup: nil))
         #expect(
-            model.config.profileBindings[live]?.profiles
+            model.config.profileBindings[live]?.names
                 == ["Dual", "Solo"]
         )
         card.write(nil, key: live, slot: .count(2, setup: nil))
         #expect(
-            model.config.profileBindings[live]?.profiles == ["Solo"]
+            model.config.profileBindings[live]?.names == ["Solo"]
         )
         card.write(nil, key: live, slot: .count(1, setup: nil))
         #expect(model.config.profileBindings[live] == nil)
@@ -56,19 +57,21 @@ struct DesktopBindingSlotWriteTests {
     @Test("a pick replaces every entry of its count")
     func pickReplacesEveryEntryOfItsCount() {
         let (card, model) = DesktopBindingFixture.makeCard()
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Solo", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Solo", count: 1),
+            to: model
         )
         model.config.profileBindings[live] = DesktopBinding(
             profiles: ["Laptop", "Solo", "Dual"],
             desktop: 7
         )
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Third", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Third", count: 1),
+            to: model
         )
         card.write("Third", key: live, slot: .count(1, setup: nil))
         #expect(
-            model.config.profileBindings[live]?.profiles
+            model.config.profileBindings[live]?.names
                 == ["Dual", "Third"]
         )
         // …and the stale number projection took the row's.
@@ -79,7 +82,7 @@ struct DesktopBindingSlotWriteTests {
             desktop: seeded?.desktop ?? 1
         )
         card.write(nil, key: live, slot: .count(1, setup: nil))
-        #expect(model.config.profileBindings[live]?.profiles == ["Dual"])
+        #expect(model.config.profileBindings[live]?.names == ["Dual"])
     }
 
     /// An orphan slot's None drops that name and nothing else.
@@ -92,7 +95,7 @@ struct DesktopBindingSlotWriteTests {
         )
         card.write(nil, key: live, slot: .orphan("Vanished"))
         #expect(
-            model.config.profileBindings[live]?.profiles == ["Laptop"]
+            model.config.profileBindings[live]?.names == ["Laptop"]
         )
     }
 
@@ -110,7 +113,7 @@ struct DesktopBindingSlotWriteTests {
         card.write("Laptop", key: live, slot: .count(1, setup: nil))
         #expect(model.config.profileBindings[.number(1)] == nil)
         #expect(
-            model.config.profileBindings[live]?.profiles
+            model.config.profileBindings[live]?.names
                 == ["Dual", "Laptop"]
         )
         model.config.profileBindings[.number(1)] = DesktopBinding(
@@ -124,7 +127,7 @@ struct DesktopBindingSlotWriteTests {
         card.write(nil, key: gone, slot: .count(1, setup: nil))
         #expect(model.config.profileBindings[gone] == nil)
         #expect(
-            model.config.profileBindings[.number(1)]?.profiles == ["Dual"]
+            model.config.profileBindings[.number(1)]?.names == ["Dual"]
         )
     }
 
@@ -133,17 +136,20 @@ struct DesktopBindingSlotWriteTests {
     @Test("the picker names the live entry among two of one count")
     func pickerPrefersTheLiveEntry() {
         let (card, model) = DesktopBindingFixture.makeCard()
-        model.profileSummaries.append(
-            DesktopBindingFixture.summary("Solo", count: 1)
+        DesktopBindingFixture.add(
+            DesktopBindingFixture.summary("Solo", count: 1),
+            to: model
         )
         model.config.profileBindings[live] = DesktopBinding(
             profiles: ["Laptop", "Solo"],
             desktop: 1
         )
         model.activeProfile = "Solo"
+        model.activeProfileID = .legacy(name: "Solo")
         let all = BindingSlot.count(1, setup: nil)
         #expect(card.boundName(key: live, slot: all) == "Solo")
         model.activeProfile = "Other"
+        model.activeProfileID = .legacy(name: "Other")
         #expect(card.boundName(key: live, slot: all) == "Laptop")
     }
 

@@ -39,7 +39,7 @@ private func storeProfile(
     )
     // `write`, not `save` — saving adopts (#18) and these
     // tests need a profile that is NOT the active one.
-    try? model.core.profiles.write(profile)
+    _ = try? model.core.profiles.write(profile)
     model.reload()
 }
 

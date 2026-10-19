@@ -66,7 +66,7 @@ extension AppDelegate {
         alert.informativeText = L(
             "profiles.save_failed",
             "Saving failed: %1$@",
-            "\(error)"
+            NewerFormatText.detail(error)
         )
         NSApp.activate()
         alert.runModal()

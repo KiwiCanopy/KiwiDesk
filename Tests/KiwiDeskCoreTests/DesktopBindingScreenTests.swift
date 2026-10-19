@@ -119,7 +119,7 @@ struct DesktopBindingScreenTests {
                 desktop: 2
             ),
         ]
-        try core.guiConfigStore.save(stored)
+        try core.guiConfigStore.saveIncludingBindings(stored)
         core.desktopBindings = stored.profileBindings
 
         _ = core.stampedDesktopSnapshot()
@@ -210,16 +210,21 @@ struct DesktopBindingScreenTests {
         config.profileBindings = [
             .number(1): DesktopBinding(profile: "Work", desktop: 1)
         ]
-        let bare = try JSONEncoder().encode(config)
+        // Through `bindings.json`'s coding, where the bindings live
+        // since #2324.
+        let bare = try JSONEncoder().encode(DesktopBindingsFile(of: config))
         let bareText = try #require(String(data: bare, encoding: .utf8))
         #expect(!bareText.contains("\"screen\""))
-        let decoded = try JSONDecoder().decode(GuiConfig.self, from: bare)
+        let decoded = try JSONDecoder().decode(
+            DesktopBindingsFile.self,
+            from: bare
+        )
         #expect(decoded.profileBindings[.number(1)]?.screen == nil)
 
         config.profileBindings[.number(1)]?.screen = "Built-in"
-        let named = try JSONEncoder().encode(config)
+        let named = try JSONEncoder().encode(DesktopBindingsFile(of: config))
         let roundTrip = try JSONDecoder().decode(
-            GuiConfig.self,
+            DesktopBindingsFile.self,
             from: named
         )
         #expect(

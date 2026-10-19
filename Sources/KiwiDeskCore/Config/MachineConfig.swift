@@ -65,62 +65,82 @@ public struct MachineConfig: Codable, Equatable, Sendable {
     }
 }
 
-/// Reads and writes `machine.json`.
-struct MachineConfigStore {
-    static let fileName = "machine.json"
+/// A file of `GuiConfig` leaves kept in `MachineLocation`'s folder
+/// (#2324): `machine.json`, which never travels, and
+/// `bindings.json`, which travels as the bundle's own field.
+protocol MachineFile: Codable, Sendable {
+    static var fileName: String { get }
+    static var currentFormat: Int { get }
+    /// Which `MachineConfig.moves` entries land in this file.
+    static var destination: MachineConfig.Destination { get }
+    init()
+    init(of config: GuiConfig)
+    func applied(to config: GuiConfig) -> GuiConfig
+}
 
+extension MachineConfig: MachineFile {
+    static let fileName = "machine.json"
+    static let destination = Destination.machine
+}
+
+/// Reads and writes one `MachineFile`.
+struct MachineFileStore<File: MachineFile> {
     let url: URL
 
     init(directory: URL) {
-        url = directory.appendingPathComponent(Self.fileName)
+        url = directory.appendingPathComponent(File.fileName)
     }
 
     /// The stored leaves; empty where the file is absent or does
     /// not decode, which is a Mac that remembers nothing yet.
-    func load() -> MachineConfig {
+    func load() -> File {
         guard let data = try? Data(contentsOf: url),
-            let config = try? JSONDecoder().decode(
-                MachineConfig.self,
-                from: data
-            )
-        else { return MachineConfig() }
-        return config
+            let file = try? JSONDecoder().decode(File.self, from: data)
+        else { return File() }
+        return file
     }
 
     /// Writes the leaves; refuses a file a newer build wrote
-    /// (#2325).
-    func save(_ config: MachineConfig) throws {
-        try NewerFormatOnDisk.refuse(url, MachineConfig.currentFormat)
+    /// (#2325) and keeps a corrupt one's copy in `backups` (#2324).
+    func save(_ file: File, backups: URL?) throws {
+        try refuseNewer()
+        keepCorrupt(in: backups)
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        try encoder.encode(config).write(to: url, options: .atomic)
+        try encoder.encode(file).write(to: url, options: .atomic)
     }
 
-    /// Takes the machine-local leaves out of a `gui.json` written
-    /// before they moved (`legacy`, its raw bytes) — the one
-    /// crossing, run ahead of the migration that strips them
-    /// there, over every `MachineConfig.moves` entry the file is
+    /// Takes this file's leaves out of a `gui.json` written before
+    /// they moved (`legacy`, its raw bytes) — the one crossing, run
+    /// ahead of the migration that strips them there, over every
+    /// `MachineConfig.moves` entry for this file the bytes are
     /// below. A leaf this Mac already holds outranks the shared
-    /// copy; otherwise the first Mac to migrate a shared file
-    /// takes every entry (#2324 ruling 10). Returns the leaves
-    /// still owed where the write failed, for the caller to
-    /// compose in memory without rewriting the file; nil once
-    /// nothing is owed.
-    func carry(fromLegacy legacy: Data) -> MachineConfig? {
+    /// copy; otherwise the first Mac to migrate a shared file takes
+    /// every entry (#2324 ruling 10). Returns the leaves still owed
+    /// where the write failed, for the caller to compose in memory
+    /// without rewriting the file; nil once nothing is owed.
+    func carry(fromLegacy legacy: Data, backups: URL?) -> File? {
         guard
-            let root = try? JSONSerialization.jsonObject(with: legacy)
-                as? [String: Any]
+            let format =
+                (try? JSONSerialization.jsonObject(with: legacy)
+                as? [String: Any]).map({ $0["format"] as? Int ?? 0 }),
+            let root = try? JSONSerialization.jsonObject(
+                with: ConfigMigration.migratedKeepingMachineLeaves(legacy)
+                    ?? legacy
+            ) as? [String: Any]
         else { return nil }
-        let format = root["format"] as? Int ?? 0
         var owed: [String: Any] = [:]
-        for move in MachineConfig.moves where format < move.guiFormat {
+        for move in MachineConfig.moves
+        where move.destination == File.destination
+            && format < move.guiFormat
+        {
             for key in move.keys { owed[key] = root[key] }
         }
-        guard let carried = Self.decoded(owed) else { return nil }
+        guard !owed.isEmpty else { return nil }
         var stored =
             (try? Data(contentsOf: url)).flatMap {
                 try? JSONSerialization.jsonObject(with: $0)
@@ -129,23 +149,55 @@ struct MachineConfigStore {
         for (key, value) in owed where Self.isEmpty(stored[key]) {
             stored[key] = value
         }
+        // Owed leaves that will not decode move as they stand, and
+        // the next write keeps their copy before replacing them
+        // (#2324 ruling 13), so the strip loses nothing.
+        guard let carried = Self.decoded(owed) else {
+            return writeRaw(stored) ? nil : File()
+        }
         // A stored file this build cannot read leaves the legacy
         // copy owed; one it can read keeps its own leaves even
         // where the write fails.
         guard let merged = Self.decoded(stored) else { return carried }
         do {
-            try save(merged)
+            // A corrupt file read as empty above keeps its copy.
+            try save(merged, backups: backups)
             return nil
         } catch {
             return merged
         }
     }
 
-    private static func decoded(_ root: [String: Any]) -> MachineConfig? {
+    /// `root` written as it stands, stamped with this file's
+    /// format; false where it cannot land or a newer build owns
+    /// the file.
+    private func writeRaw(_ root: [String: Any]) -> Bool {
+        guard newerFormat() == nil else { return false }
+        var root = root
+        root["format"] = File.currentFormat
+        guard
+            let bytes = try? JSONSerialization.data(
+                withJSONObject: root,
+                options: [.prettyPrinted, .sortedKeys]
+            )
+        else { return false }
+        do {
+            try FileManager.default.createDirectory(
+                at: url.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try bytes.write(to: url, options: .atomic)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private static func decoded(_ root: [String: Any]) -> File? {
         guard !root.isEmpty,
             let bytes = try? JSONSerialization.data(withJSONObject: root)
         else { return nil }
-        return try? JSONDecoder().decode(MachineConfig.self, from: bytes)
+        return try? JSONDecoder().decode(File.self, from: bytes)
     }
 
     private static func isEmpty(_ value: Any?) -> Bool {
@@ -158,6 +210,9 @@ struct MachineConfigStore {
     }
 }
 
+typealias MachineConfigStore = MachineFileStore<MachineConfig>
+typealias DesktopBindingsStore = MachineFileStore<DesktopBindingsFile>
+
 extension MachineConfig {
     /// One move of leaves out of `gui.json`: the `GuiConfig` and
     /// `SetupBundle` formats whose step strips them, and their
@@ -168,9 +223,31 @@ extension MachineConfig {
         let guiFormat: Int
         let bundleFormat: Int
         let keys: [String]
+        /// The machine-folder file the leaves move into.
+        let destination: Destination
+        /// The bundle's top-level field a backup carries them in,
+        /// lifted out of its `config`; nil drops them there.
+        let bundleField: String?
     }
 
+    /// The two files of `MachineLocation`'s folder that hold
+    /// `GuiConfig` leaves.
+    enum Destination: Sendable { case machine, bindings }
+
     static let moves = [
-        Move(guiFormat: 9, bundleFormat: 28, keys: ["desktop_spaces"])
+        Move(
+            guiFormat: 9,
+            bundleFormat: 28,
+            keys: ["desktop_spaces"],
+            destination: .machine,
+            bundleField: nil
+        ),
+        Move(
+            guiFormat: 10,
+            bundleFormat: 29,
+            keys: ["profile_bindings"],
+            destination: .bindings,
+            bundleField: "profileBindings"
+        ),
     ]
 }

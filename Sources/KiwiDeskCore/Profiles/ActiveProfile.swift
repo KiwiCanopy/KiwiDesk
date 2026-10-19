@@ -16,6 +16,9 @@ import Foundation
 /// live Spaces no apply had changed.
 struct ActiveProfile {
     let name: String
+    /// Its stable id — what a binding names (#2324), so the gate
+    /// asks it without reading the file (#1245).
+    let id: ProfileID
     let declaredSpaces: Set<SpaceID>
     /// The screen count the profile is saved for — what the
     /// binding door asks about the profile ALREADY live (#1436),
@@ -38,6 +41,7 @@ struct ActiveProfile {
 
     init(_ profile: Profile) {
         name = profile.name
+        id = profile.id
         declaredSpaces = profile.declaredSpaces
         monitorCount = profile.monitorCount
         isStarterSetup = profile.isStarterSetup
@@ -47,6 +51,7 @@ struct ActiveProfile {
 
     private init(
         name: String,
+        id: ProfileID,
         declaredSpaces: Set<SpaceID>,
         monitorCount: Int,
         isStarterSetup: Bool,
@@ -54,6 +59,7 @@ struct ActiveProfile {
         lensesLeftOut: Set<String>
     ) {
         self.name = name
+        self.id = id
         self.declaredSpaces = declaredSpaces
         self.monitorCount = monitorCount
         self.isStarterSetup = isStarterSetup
@@ -72,6 +78,7 @@ struct ActiveProfile {
     func renamed(to new: String) -> ActiveProfile {
         ActiveProfile(
             name: new,
+            id: id,
             declaredSpaces: declaredSpaces,
             monitorCount: monitorCount,
             isStarterSetup: isStarterSetup,
@@ -87,6 +94,7 @@ struct ActiveProfile {
         guard profile.name == name else { return self }
         return ActiveProfile(
             name: name,
+            id: id,
             declaredSpaces: declaredSpaces,
             monitorCount: monitorCount,
             isStarterSetup: isStarterSetup,

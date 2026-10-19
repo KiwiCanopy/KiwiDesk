@@ -30,14 +30,20 @@ extension KiwiCore {
         to new: String
     ) throws {
         try profiles.rename(from: old, to: new)
+        defer { promotePendingBindings() }
         // #1230: the partitioning is keyed by profile NAME, so it
         // follows the rename or the profile loses its own Spaces.
         state.profilePartitioning.rename(old, to: new)
         renameAppWideCapture(old, to: new)
+        // A binding naming the id needs nothing here: the write
+        // door's promotion refreshes its label (#2324). A PENDING
+        // entry follows by name, as before ids.
+        func names(_ binding: DesktopBinding) -> Bool {
+            binding.entries.contains { $0.id == nil && $0.name == old }
+        }
         var chased = false
-        for (key, binding) in desktopBindings
-        where binding.profiles.contains(old) {
-            desktopBindings[key]?.rename(old, to: new)
+        for (key, binding) in desktopBindings where names(binding) {
+            desktopBindings[key]?.relabel(nil, from: old, to: new)
             chased = true
         }
         guard chased else { return }
@@ -47,9 +53,8 @@ extension KiwiCore {
         // resurrect the binding).
         do {
             try rewriteSidecarBindings { bindings in
-                for (key, binding) in bindings
-                where binding.profiles.contains(old) {
-                    bindings[key]?.rename(old, to: new)
+                for (key, binding) in bindings where names(binding) {
+                    bindings[key]?.relabel(nil, from: old, to: new)
                 }
             }
         } catch SidecarError.missing {

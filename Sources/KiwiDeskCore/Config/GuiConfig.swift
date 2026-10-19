@@ -29,6 +29,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Desktop's own stamp where it carries one, so a binding
     /// survives a renumber; by its Mission Control number where
     /// it does not (no bridge on this macOS, or a stamp declined).
+    /// Stored in `bindings.json`, never `gui.json` (#2324).
     public var profileBindings: [DesktopKey: DesktopBinding] = [:]
     /// The Space each Desktop was last showing (#1230), so a
     /// restart does not re-scatter them.
@@ -94,7 +95,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// which `GuiConfigStore` composes in at a load and splits out
     /// at a save. The encoder and decoder below skip them.
     public static let machineLocalFields: Set<String> = [
-        "desktopSpaces"
+        "desktopSpaces", "profileBindings",
     ]
 
     public init() {}
@@ -109,7 +110,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case appRules = "app_rules"
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
-        case profileBindings = "profile_bindings"
         case layers
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
@@ -166,8 +166,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 [String].self,
                 forKey: .ignoreRules
             ) ?? []
-        profileBindings =
-            try decodeProfileBindings(from: container)
         // A hand-edited sidecar can carry duplicate mode names or
         // an icon on the default mode (#31) — normalized here so
         // invalid entries never reach the loader or the GUI.
@@ -257,18 +255,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         appRules = appRules.filter { !$0.value.raw.isEmpty }
     }
 
-    /// Strict, per AGENTS.md §5: format 1's `"2": "Work"` is
-    /// rewritten once by `ConfigMigration`, never read leniently
-    /// here — a lenient reader never ends.
-    private func decodeProfileBindings(
-        from container: KeyedDecodingContainer<CodingKeys>
-    ) throws -> [DesktopKey: DesktopBinding] {
-        try container.decodeIfPresent(
-            [DesktopKey: DesktopBinding].self,
-            forKey: .profileBindings
-        ) ?? [:]
-    }
-
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(
             keyedBy: CodingKeys.self
@@ -278,10 +264,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(appRules, forKey: .appRules)
         try container.encode(floatRules, forKey: .floatRules)
         try container.encode(ignoreRules, forKey: .ignoreRules)
-        try container.encode(
-            profileBindings,
-            forKey: .profileBindings
-        )
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)
         try container.encode(spaceHistory, forKey: .spaceHistory)

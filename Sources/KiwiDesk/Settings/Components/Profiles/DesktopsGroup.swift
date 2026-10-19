@@ -148,11 +148,26 @@ struct DesktopsGroup: View {
                 desktopBlock(row, count: count, leads: leads)
             }
         case .orphans(let orphans):
-            SettingsGroupHeader(
-                L("profiles.broken.title", "Couldn't load")
-            )
-            ForEach(orphans, id: \.self) { orphan in
-                orphanRow(orphan.row, profile: orphan.profile)
+            // Core's verdict (#2324 ruling 10): a profile that is
+            // gone reads as missing, a file that exists and will
+            // not decode as "Couldn't load".
+            let unreadable = orphans.filter(\.unreadable)
+            let missing = orphans.filter { !$0.unreadable }
+            if !missing.isEmpty {
+                SettingsGroupHeader(
+                    L("desktops.missing.title", "Missing profiles")
+                )
+                ForEach(missing, id: \.self) { orphan in
+                    orphanRow(orphan.row, profile: orphan.profile)
+                }
+            }
+            if !unreadable.isEmpty {
+                SettingsGroupHeader(
+                    L("profiles.broken.title", "Couldn't load")
+                )
+                ForEach(unreadable, id: \.self) { orphan in
+                    orphanRow(orphan.row, profile: orphan.profile)
+                }
             }
         }
     }
@@ -240,7 +255,7 @@ struct DesktopsGroup: View {
         ProfilesFamilyRows.bindingGroups(
             rows: desktopRows,
             counts: counts,
-            profileCounts: profileCounts
+            resolver: bindingResolver
         )
     }
 
@@ -251,8 +266,12 @@ struct DesktopsGroup: View {
         )
     }
 
-    var profileCounts: [String: Int] {
-        ProfilesFamilyRows.profileCounts(model.profileSummaries)
+    var bindingResolver: BindingResolver {
+        BindingResolver(
+            model.profileSummaries,
+            resolutions: model.bindingResolutions,
+            liveID: model.activeProfileID
+        )
     }
 
     /// A live Desktop's record may still sit under the number it

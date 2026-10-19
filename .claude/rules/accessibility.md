@@ -9,6 +9,8 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileOffMain.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+SwitchReconcile.swift"
+  - "Sources/KiwiDeskCore/Events/SwitchReconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ListedWindows.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+RemovalDistrust.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Tabs.swift"
@@ -65,6 +67,12 @@ editing AX code:
     window tracked during the read live and refuses to re-adopt
     one gone during it; one list read is outstanding per app,
     and what waits on it is owed by that read's one reconcile.
+    A path that ends or minimizes a window notes it in
+    `FlightDepartures`, and a reconcile adopts from a reading
+    only through `adoptableArrivals`, so a window that departed
+    during the read is read live rather than adopted from it
+    (`ArrivalAdoptionTests` ▸ `closedDuringTheReadIsNotAdopted`,
+    `serverDestroyedDuringTheReadIsNotAdopted`).
   - **A late report is judged at delivery**, by the gates
     [input-and-animation.md](input-and-animation.md)'s delivery
     clause owns; an untracked window waits for a reconcile begun
@@ -75,6 +83,42 @@ editing AX code:
     close-return raise is
     [state-and-layout.md](state-and-layout.md)'s.
 
+  **A Desktop switch's bulk pass reads off the main actor as
+  ONE batch (#2347).** Between two busy Desktops its synchronous
+  list reads held the main actor 90–100 ms per switch (device,
+  2026-10-18). `desktopChanged` opens the batch before the
+  handler and requests the gated apps' lists after it, on each
+  app's list lane; they apply in one switch fold once every read
+  lands or `SwitchReconcile.bound` passes, a straggler alone
+  after. The obligations, each the place an inline pass once
+  ordered things for free:
+  - **An app's readings apply in read order, stamped when the
+    read RAN** — a read queued behind another runs after one
+    asked later — and a reading older than one applied sweeps
+    nothing (`SwitchReconcileTests` ▸ `appliesInReadOrder`,
+    `SwitchReconcileTests` ▸ `queuedReadOrdersByWhenItRan`).
+  - **A per-app read landing for an app the batch still awaits
+    applies inside its fold**, newest reading first, so the
+    batch's one pass places every arrival
+    (`SwitchReconcileTests` ▸ `perAppReadIsHeldForTheFold`).
+  - **Whatever reads the switch's result in the same turn waits
+    for the fold**: the Desktop settle in one latest-wins slot a
+    newer switch empties (#49, `SwitchReconcileTests` ▸
+    `settleTakesOneSlot`), the `desktop_change` event through
+    `afterSwitchReads`, and every bar refresh through the hold
+    in `updateBars` — save a shelf stand-down for a fullscreen
+    arrival, which passes `holdingForSwitch: false`
+    (`SwitchReconcileBarsTests` ▸ `barsWaitForTheFold`); the
+    settle's arrival sweep skips an app whose switch read is
+    still owed (`SwitchReconcileTests` ▸
+    `arrivalSweepSkipsAnOwedRead`), and a window the fold
+    reveals claims no launch follow (#1599).
+  - **A stop drops the batch** with every debt
+    (`SwitchReconcileTests` ▸ `stopDropsTheBatch`).
+  `SwitchReconcileSeamTests` pins the wirings no behaviour suite
+  reaches. #2347 added no AX message to the switch path; it
+  moved the reads off the main actor.
+
   **What the apply needs of each window is read WITH the list
   (#1933)** — what `ListedWindow` and `TrackedReading` carry —
   through `ListedWindowReader`, built on the loop's own seams;
@@ -83,9 +127,14 @@ editing AX code:
   to need joins the reader rather than being read beside it, and
   a seam the reader captures reads no `EventLoop` state — it runs
   off the main actor; one that needs loop state is resolved at
-  request time, as the tracked set is. A window the read did not
-  cover (tracked during the flight, or appeared and handed to
-  `track`) is read the way the synchronous reconcile reads it.
+  request time, as the tracked set is. A window untracked when
+  the read began is read for its adoption too (`ArrivalReading`),
+  and `track` takes that reading in place of its own AX reads, so
+  a Desktop switch's arrivals cost the main actor no AX call per
+  window (`ArrivalAdoptionTests`); the hidden refusal, the
+  observer registration and every verdict stay on the main
+  actor. A window the read did not cover is read the way the
+  synchronous reconcile reads it.
   `ReconcileOffMainTests`, `ReconcileOffMainDebtTests`,
   `ReconcileOffMainRecheckTests` and `ReconcileSnapshotTests`
   hold the behaviour.
@@ -237,7 +286,7 @@ editing AX code:
   -sweep pair, and the scoping that matters most: the budget is
   raised for a queued STEP, never for the pass, because the run
   loop is live between chunks and an activation reconcile or a
-  Desktop-switch `reconcileAll` landing inside a pass must never
+  Desktop switch's batch apply landing inside a pass must never
   be cut short. The budget's value is argued on
   `EventLoop.bootAppBudget` against the band in this file's
   second bullet and `EventLoop.axMessagingTimeoutSeconds`; read
@@ -304,6 +353,8 @@ editing AX code:
   unlock.
 - **A WindowServer window create or destroy only WAKES the AX
   path (#1877); it never tracks, files or removes a window.** A
+  destroy also notes the departure an in-flight reading must not
+  adopt from, which changes only where `track` reads from. A
   create runs one wake sweep after a 300 ms grace, once per grace
   however many creates arrive (`WindowServerHealPullTests`); a
   create of KiwiDesk's own window wakes nothing — review's, as
@@ -422,8 +473,10 @@ editing AX code:
   focus report naming a shadow does is
   [input-and-animation.md](input-and-animation.md)'s.
 - **A bulk pass asks the WindowServer before it asks AX
-  (#1037).** `reconcileAll` — the Desktop-switch re-sync and the
-  config reload's — reads one on-screen census and skips an
+  (#1037).** Every bulk pass — `reconcileAll` (the config
+  reload's and a rule install's) and the Desktop switch's batch
+  (#2347) — takes the gate through the one `bulkTargets()`
+  prologue, which reads one on-screen census and skips an
   observed app that tracks no window and shows none: it has
   nothing to remove and nothing to adopt, and if it is not
   servicing AX (App-Napped with its windows on other Desktops, a
@@ -668,10 +721,18 @@ editing AX code:
   sweep run inside the handler finds the arm open: filed at the
   top, a bound Desktop's in-handler sweep found every arm closed
   and removed the window the carry was about to move (device,
-  2026-09-21, Desktop 2 bound). **A bound Desktop's apply leaves
-  its window-rule sweep to the switch's own folded
-  `reconcileAll`** (#2347): `EventLoop.desktopChanged` runs that
-  pass right after the handler, the handler has that one caller,
+  2026-09-21, Desktop 2 bound). The switch's own sweep is the
+  off-main batch (the second bullet's #2347 paragraph),
+  requested after the filing and applied up to
+  `SwitchReconcile.bound` later, so this arm is closed when it
+  lands and the CARRIED arm must keep the window: keep
+  `SwitchReconcile.stragglerLimit` under `KiwiCore.inFlightWindow`
+  (`SwitchReconcileTests` ▸ `boundsAreOrdered`), and re-read a
+  straggler past it rather than apply it — that branch has no
+  test. **A bound Desktop's apply leaves its window-rule sweep to
+  the switch's own batched sweep** (#2347):
+  `EventLoop.desktopChanged` requests it right after the handler,
+  the handler has that one caller,
   and the deferral is raised only around the binding apply
   (`DesktopSwitchRuleSweepSeamTests`; `DesktopBindingRuleSweepTests`
   holds the skip). A new path into `handleDesktopChange` owes the
