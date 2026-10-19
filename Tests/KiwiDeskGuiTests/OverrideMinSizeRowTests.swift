@@ -77,6 +77,25 @@ struct OverrideMinSizeRowTests {
         #expect(row.contains("Text(sentence)"))
     }
 
+    /// The cell's live count is what keeps a Floating Space's
+    /// editor reachable; the pure verdict cannot see the call.
+    @Test("the Customize cell hands the live count to its verdict")
+    func cellPassesTheLiveCount() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let cell = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/"
+                    + "SpacesSection+Customize.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            cell.contains(
+                "OverrideCellState.resolve(count:count,live:model.config"
+                    + ".settings.floatingLiveOverrideCount(for:space)"
+            )
+        )
+    }
+
     @Test("the row seeds and steps from what it follows")
     func rowSeedsFromTheFollowed() throws {
         let row = try Self.source("OverrideMinSizeRow.swift")

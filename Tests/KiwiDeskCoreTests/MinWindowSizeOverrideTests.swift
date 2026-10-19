@@ -120,6 +120,37 @@ struct MinWindowSizeOverrideTests {
         #expect(bare.minWindowSizeOverride.isEmpty)
     }
 
+    /// An init.lua-only reload: no gui.json replaces the settings
+    /// and the Space stays declared, so only the sparse reset in
+    /// `resetDeclarativeState` drops a value the script stopped
+    /// setting.
+    @Test("a reload drops a value init.lua no longer sets")
+    func reloadDropsIt() throws {
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent("kiwi-2422-\(UUID().uuidString)")
+        )
+        let declare = "KiwiDesk.set_mode(\"monitoring\", \"grid\")\n"
+        try FileManager.default.createDirectory(
+            at: core.configURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try
+            (declare
+            + "KiwiDesk.set_min_window_size_override(\"monitoring\", 220)\n")
+            .write(to: core.configURL, atomically: true, encoding: .utf8)
+        core.loadConfig()
+        #expect(core.tiler.settings.minWindowSizeOverride[mine] == 220)
+        try declare.write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        #expect(core.state.workspaces[mine] != nil)
+        #expect(core.tiler.settings.minWindowSizeOverride[mine] == nil)
+    }
+
     @Test("it counts as one of the Space's overrides")
     func countsAsOne() {
         var s = TilingSettings()

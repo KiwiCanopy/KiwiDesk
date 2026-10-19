@@ -4,10 +4,12 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A Space's own minimum window size across a switch (#2422). The
-/// map is config, as `gap.override` is: a held Space's renumber
-/// carries neither to its new number, the claiming arrangement's
-/// Space of that name does not inherit them, and going home brings
-/// both back with the arrangement that declared them.
+/// map is config, as `gap.override` is: it comes back with the
+/// arrangement that declared the Space. The renumber clause holds
+/// because an apply replaces the settings wholesale, so a rekey in
+/// `moveMembers` would not red it (guard-prover, 2026-10-19); what
+/// this pins is that neither number shows the value while held and
+/// that going home brings both maps back.
 @MainActor
 @Suite("Per-Space minimum window size across a hold")
 struct MinWindowSizeOverrideHoldTests {

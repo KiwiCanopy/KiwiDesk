@@ -32,7 +32,9 @@ editing here:
   instance (`SpaceDropHookNeedleTests`). A Space-keyed CONFIG map
   in `TilingSettings` (`gap.override`, `min_window_size_override`)
   does neither: it belongs to the arrangement that declared the
-  Space and returns with it (`MinWindowSizeOverrideHoldTests`).
+  Space and returns with it (`MinWindowSizeOverrideHoldTests`
+  holds the return; a rekey added there is review's, since the
+  apply's wholesale settings replace would hide it).
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load
