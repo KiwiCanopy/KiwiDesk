@@ -126,11 +126,11 @@ struct SettingsRowShapeTests {
         )
     }
 
-    /// `controlTrails` (AI ▸ Set up, owner ruling 2026-10-17) is an
+    /// `controlTrails` — a compact control trailing (#2439) — is an
     /// argument to the SAME layout swap, never a second layout or
     /// an `if`: it drops the column and lets the label take the
     /// free width, through modifiers that stay in the chain.
-    @Test("the label-fills option rides the one layout swap")
+    @Test("the trailing option rides the one layout swap")
     func controlTrailsRidesTheSwap() throws {
         let source = try squashed(
             "Sources/KiwiDesk/Settings/Components/Common/"
