@@ -191,7 +191,7 @@ public enum APIReference {
             "set_focused_item_color", "set_focused_highlight_color",
         ],
         "app_bar": barActions + [
-            "set_edge", "set_reserve", "set_visibility",
+            "set_edge", "set_reserve",
             "set_active_indicator",
             "set_title_cap",
             "set_group_adjacent_windows",

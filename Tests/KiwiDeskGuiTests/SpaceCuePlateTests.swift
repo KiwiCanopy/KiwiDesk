@@ -49,7 +49,7 @@ struct SpaceCuePlateTests {
     func switchSitsUnderTheSpaceBar() throws {
         let show = BarsRowOrder.kiwishelfShow
         let bar = try #require(
-            show.firstIndex(of: .spaceBar(.spaceBarEnabled))
+            show.firstIndex(of: .spaceBar(.spaceBarVisibility))
         )
         #expect(show.firstIndex(of: .spaceBar(.spaceCue)) == bar + 1)
         let placement = SettingKey.spaceBar(.spaceCue).placement

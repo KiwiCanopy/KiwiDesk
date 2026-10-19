@@ -51,9 +51,9 @@ struct GesturesDrawerTests {
     )
     func surfaceMatrix(spaceBar: Bool, appBar: Bool) {
         var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = spaceBar
-        settings.monocle.appBar.enabled = appBar
-        settings.scrolling.appBar.enabled = appBar
+        settings.spaceBarStyle.visibility = spaceBar ? .always : .hidden
+        settings.monocle.appBar.visibility = appBar ? .always : .hidden
+        settings.scrolling.appBar.visibility = appBar ? .always : .hidden
         #expect(settings.anyAppBarCanShow == appBar)
         #expect(!GestureSurface.windows.isOff(settings))
         #expect(GestureSurface.spaceBar.isOff(settings) == !spaceBar)
@@ -67,7 +67,7 @@ struct GesturesDrawerTests {
     func surfacesAskCore() {
         var settings = TilingSettings()
         #expect(!GestureSurface.windows.isOff(settings))
-        settings.spaceBarStyle.enabled = false
+        settings.spaceBarStyle.visibility = .hidden
         #expect(GestureSurface.spaceBar.isOff(settings))
         #expect(
             GestureSurface.shelf.isOff(settings)
@@ -77,7 +77,7 @@ struct GesturesDrawerTests {
             GestureSurface.appBar.isOff(settings)
                 == !settings.anyAppBarCanShow
         )
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         #expect(!GestureSurface.spaceBar.isOff(settings))
         #expect(!GestureSurface.shelf.isOff(settings))
     }

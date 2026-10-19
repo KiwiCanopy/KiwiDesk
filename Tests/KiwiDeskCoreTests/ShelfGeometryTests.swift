@@ -72,9 +72,9 @@ struct ShelfGeometryTests {
         var settings = TilingSettings()
         settings.kiwishelf = shelf()
         settings.barEdge = .left
-        settings.spaceBarStyle.enabled = false
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        settings.spaceBarStyle.visibility = .hidden
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         let reserved = ShelfGeometry.remainingFrame(
             in: visible,
             edges: [.left],
@@ -87,17 +87,17 @@ struct ShelfGeometryTests {
             #expect(bounds(settings, mode) == visible, "\(mode)")
         }
         var spaceBar = settings
-        spaceBar.spaceBarStyle.enabled = true
+        spaceBar.spaceBarStyle.visibility = .always
         for mode in LayoutMode.allCases {
             #expect(bounds(spaceBar, mode) == reserved, "\(mode)")
         }
         var monocle = settings
-        monocle.monocle.appBar.enabled = true
+        monocle.monocle.appBar.visibility = .always
         #expect(bounds(monocle, .monocle) == reserved)
         #expect(bounds(monocle, .scrolling) == visible)
         #expect(bounds(monocle, .bsp) == visible)
         var scrolling = settings
-        scrolling.scrolling.appBar.enabled = true
+        scrolling.scrolling.appBar.visibility = .always
         #expect(bounds(scrolling, .scrolling) == reserved)
         #expect(bounds(scrolling, .monocle) == visible)
     }

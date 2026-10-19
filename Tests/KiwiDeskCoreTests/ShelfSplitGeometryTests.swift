@@ -18,11 +18,11 @@ struct ShelfSplitGeometryTests {
     ) -> TilingSettings {
         var settings = TilingSettings()
         settings.kiwishelf.thickness = 32
-        settings.spaceBarStyle.enabled = spaceBar
+        settings.spaceBarStyle.visibility = spaceBar ? .always : .hidden
         settings.spaceBarStyle.edge = space
         settings.appBarStyle.edge = app
-        settings.monocle.appBar.enabled = true
-        settings.scrolling.appBar.enabled = true
+        settings.monocle.appBar.visibility = .always
+        settings.scrolling.appBar.visibility = .always
         return settings
     }
 
@@ -132,8 +132,8 @@ struct ShelfSplitPlanTests {
     func stripsClearTheLayout() {
         let core = makeTestCore()
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.monocle.appBar.enabled = true
+        settings.spaceBarStyle.visibility = .always
+        settings.monocle.appBar.visibility = .always
         settings.spaceBarStyle.edge = .top
         settings.appBarStyle.edge = .left
         let visible = CGRect(x: 0, y: 0, width: 1600, height: 1000)

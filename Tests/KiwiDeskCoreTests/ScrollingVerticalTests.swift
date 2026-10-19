@@ -91,7 +91,7 @@ struct ScrollingVerticalTests {
         // end so the viewport is scrolled all the way down.
         var context = makeContext(focused: w3)
         context.scrolling.orientation = .vertical
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .points(400)
         // Read the rest the way `persistScrollRest` does: a
         // pinned row's frame no longer exposes the raw offset.
@@ -131,7 +131,7 @@ struct ScrollingVerticalTests {
         // its upper strip peeks above the focused row.
         var context = makeContext(focused: w2)
         context.scrolling.orientation = .vertical
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .points(800)
         context.scrollRest = ScrollRest(offset: 0)
         let frames = layout.calculateGeometry(
@@ -153,7 +153,7 @@ struct ScrollingVerticalTests {
         // pins at the border just like a straddling row.
         var context = makeContext(focused: w3)
         context.scrolling.orientation = .vertical
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .points(800)
         context.scrollRest = ScrollRest(offset: -550)
         let frames = layout.calculateGeometry(
@@ -178,7 +178,7 @@ struct ScrollingVerticalTests {
         // frames to its own minimum anyway).
         var context = makeContext(focused: w1)
         context.scrolling.orientation = .vertical
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .points(800)
         context.scrollRest = ScrollRest(offset: 0)
         let frames = layout.calculateGeometry(

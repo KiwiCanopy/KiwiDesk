@@ -33,7 +33,7 @@ struct StatusSpaceMarkTests {
                     "kiwi-status-mark-\(UUID().uuidString)"
                 )
         )
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.state.workspaces.upsertDisplay(display(built, x: 0))
         core.state.workspaces.assign(SpaceID("main"), to: built)
         core.state.workspaces.assign(SpaceID("2"), to: built)
@@ -53,11 +53,11 @@ struct StatusSpaceMarkTests {
         let core = makeCore()
         core.keys.defineLayer("resize", bindings: [:], icon: "star")
         core.keys.switchLayer("resize")
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.visibility = .always
         let on = core.statusSpaceMark()
         #expect(on.screens.isEmpty)
         #expect(on.layer?.name == "resize")
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         #expect(!core.statusSpaceMark().screens.isEmpty)
     }
 
@@ -151,7 +151,7 @@ struct StatusSpaceMarkTests {
         core.updateBars()
         #expect(published.count == 2)
         #expect(published.last?.screens.first?.space == SpaceID("2"))
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.visibility = .always
         core.updateBars()
         #expect(published.count == 3)
         #expect(published.last?.screens.isEmpty == true)

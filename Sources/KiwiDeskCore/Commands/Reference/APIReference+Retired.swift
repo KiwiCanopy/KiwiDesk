@@ -71,6 +71,7 @@ extension APIReference {
             map["\(layout).set_app_bar_enabled"] =
                 "\(layout).set_app_bar_visibility"
         }
+        map["app_bar.set_visibility"] = "monocle.set_app_bar_visibility"
         // KiwiHub's sides open through one verb (#2265).
         for verb in [
             "show_jump_to_window", "show_shortcuts", "show_layout_picker",

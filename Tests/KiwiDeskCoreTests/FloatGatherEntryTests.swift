@@ -62,7 +62,7 @@ struct FloatGatherEntryTests {
         // Pin the bar with the display (#660): the region is the
         // bounds with the painted strips carved off, and the
         // strip clause below turns one on deliberately.
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         // And the ring: the grid is laid over the grow bound,
         // which reserves the ring's reach on every edge (#1091).
         core.tiler.settings.borderStyle.enabled = false

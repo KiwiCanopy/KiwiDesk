@@ -19,9 +19,9 @@ struct ShelfBorderColorGateTests {
     ) -> TilingSettings {
         var settings = TilingSettings()
         settings.kiwishelf.border = border
-        settings.spaceBarStyle.enabled = barShows
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        settings.spaceBarStyle.visibility = barShows ? .always : .hidden
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         return settings
     }
 

@@ -43,9 +43,9 @@ struct BarMarginTests {
         var settings = TilingSettings()
         settings.kiwishelf = shelf
         settings.barEdge = edge
-        settings.spaceBarStyle.enabled = spaceBar
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = true
+        settings.spaceBarStyle.visibility = spaceBar ? .always : .hidden
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .always
         return settings
     }
 

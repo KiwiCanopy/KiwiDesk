@@ -50,8 +50,6 @@ struct ColorsVerdictAnchorTests {
     /// Every combination of the switches the area's gates read.
     private func states() -> [TilingSettings] {
         let flags: [WritableKeyPath<TilingSettings, Bool>] = [
-            \.spaceBarStyle.enabled,
-            \.monocle.appBar.enabled,
             \.spaceBarStyle.showFrontApp,
             \.kiwishelf.border,
             \.borderStyle.enabled,
@@ -66,7 +64,7 @@ struct ColorsVerdictAnchorTests {
         var out: [TilingSettings] = []
         for mask in 0..<(1 << (flags.count + 1)) {
             var settings = TilingSettings()
-            settings.scrolling.appBar.enabled = false
+            settings.scrolling.appBar.visibility = .hidden
             for (bit, flag) in flags.enumerated() {
                 settings[keyPath: flag] = mask & (1 << bit) != 0
             }

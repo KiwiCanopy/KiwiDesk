@@ -13,8 +13,8 @@ import Testing
 struct BarEdgeMasterTests {
     private func split() -> SettingsModel {
         let model = makeTestModel()
-        model.config.settings.spaceBarStyle.enabled = true
-        model.config.settings.monocle.appBar.enabled = true
+        model.config.settings.spaceBarStyle.visibility = .always
+        model.config.settings.monocle.appBar.visibility = .always
         model.config.settings.spaceBarStyle.edge = .top
         model.config.settings.appBarStyle.edge = .bottom
         return model

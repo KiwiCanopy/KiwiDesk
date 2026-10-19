@@ -112,7 +112,7 @@ struct TravelerRehomeConsumerTests {
     func movedFrameClearsTheBar() throws {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        f.core.tiler.settings.spaceBarStyle.enabled = true
+        f.core.tiler.settings.spaceBarStyle.visibility = .always
         f.core.tiler.settings.barEdge = .top
         f.core.tiler.settings.kiwishelf.thickness = 40
         f.core.updateBars()
@@ -146,7 +146,7 @@ struct TravelerRehomeConsumerTests {
     func oversizedTravelerIsFitted() throws {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        f.core.tiler.settings.spaceBarStyle.enabled = true
+        f.core.tiler.settings.spaceBarStyle.visibility = .always
         f.core.tiler.settings.barEdge = .top
         f.core.tiler.settings.kiwishelf.thickness = 40
         f.core.tiler.settings.floatScaleOnDisplayChange = false

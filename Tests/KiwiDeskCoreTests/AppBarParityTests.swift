@@ -27,14 +27,14 @@ struct AppBarParityTests {
 
     @Test("LayoutAppBar mirrors every AppBarStyle field")
     func propertyParity() {
-        // `enabled` is the one layout-only field; every look
-        // field but the layout-fixed ones is an optional override
-        // of the global style.
+        // `visibility` is the one layout-only field (#761); every
+        // look field but the layout-fixed ones is an optional
+        // override of the global style.
         #expect(
             Self.layoutFixed.count == AppBarStyle.layoutFixedKeys.count
         )
         #expect(
-            fieldNames(LayoutAppBar()).subtracting(["enabled"])
+            fieldNames(LayoutAppBar()).subtracting(["visibility"])
                 == fieldNames(AppBarStyle()).subtracting(Self.layoutFixed)
         )
     }
@@ -121,22 +121,19 @@ struct AppBarCommandParityTests {
                     on: screen,
                     among: ScreenEdgeScope(screens: ["T:1x1"])
                 )
-            } else if case .visibility(let value) = setting {
-                // Through the settings door, which `KiwiCore`
-                // takes (#761); apart here, it writes this bar.
-                var settings = TilingSettings()
-                settings.spaceBarStyle.setEdge(.top)
-                settings.appBarStyle.setEdge(.bottom)
-                settings.setVisibility(value, of: .app)
-                style.visibility = settings.appBarStyle.visibility
             } else {
                 setting.apply(to: &style)
             }
             setting.apply(to: &bar)
             let onStyle = changedFields(style, from: AppBarStyle())
-            // `enabled` is bar-only, never a command target.
             let onBar = changedFields(bar, from: LayoutAppBar())
-                .subtracting(["enabled"])
+            // `visibility` is a layout's own (#761): it writes the
+            // bar alone, never the global style.
+            if case .visibility = setting {
+                #expect(onStyle.isEmpty)
+                #expect(onBar == ["visibility"])
+                continue
+            }
             #expect(onStyle.count == 1)
             // A layout-fixed field writes the style alone.
             #expect(

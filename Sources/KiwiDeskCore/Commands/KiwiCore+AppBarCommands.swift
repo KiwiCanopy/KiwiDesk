@@ -31,10 +31,11 @@ extension KiwiCore {
                     among: liveScreenEdgeScope
                 )
             } else if case .visibility = setting {
-                // Each layout's own (#761): the global verb sets
-                // every layout that carries an App Bar.
-                setting.apply(to: &tiler.settings.monocle.appBar)
-                setting.apply(to: &tiler.settings.scrolling.appBar)
+                // Each layout's own (#761), never the global bar's.
+                return .fail(
+                    "the App Bar's visibility is each layout's: "
+                        + "monocle.set_app_bar_visibility"
+                )
             } else {
                 setting.apply(to: &tiler.settings.appBarStyle)
             }

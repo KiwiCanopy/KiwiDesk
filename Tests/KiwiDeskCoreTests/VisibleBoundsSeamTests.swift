@@ -47,13 +47,14 @@ struct VisibleBoundsSeamTests {
         // only blur what these assertions are about.
         core.execute("set_gap_global", args: [.number(0)])
         for verb in [
-            "space_bar.set_enabled",
-            "monocle.set_app_bar_enabled",
-            "scroll.set_app_bar_enabled",
+            "space_bar.set_visibility",
+            "monocle.set_app_bar_visibility",
+            "scroll.set_app_bar_visibility",
         ] {
-            core.execute(verb, args: [.bool(false)])
+            core.execute(verb, args: [.string("hidden")])
         }
-        #expect(!core.tiler.settings.shelfShows)
+        #expect(core.tiler.settings.spaceBarStyle.visibility == .hidden)
+        #expect(!core.tiler.settings.anyAppBarCanShow)
         // Pin the default this fixture reasons from, the rule
         // this change set wrote into §5: the pile threshold
         // below is 2 * min.

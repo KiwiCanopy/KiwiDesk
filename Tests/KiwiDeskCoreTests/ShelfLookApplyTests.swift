@@ -252,14 +252,14 @@ struct ShelfLookApplyTests {
     @Test("a look sets an off bar's edge without switching it on")
     func edgesLeaveOnOffAlone() {
         var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = false
-        settings.monocle.appBar.enabled = false
+        settings.spaceBarStyle.visibility = .hidden
+        settings.monocle.appBar.visibility = .hidden
         look([
             "space_bar.edge": .string("left"),
             "app_bar.edge": .string("bottom"),
         ]).apply(to: &settings)
-        #expect(!settings.spaceBarStyle.enabled)
-        #expect(!settings.monocle.appBar.enabled)
+        #expect(settings.spaceBarStyle.visibility == .hidden)
+        #expect(settings.monocle.appBar.visibility == .hidden)
         #expect(settings.spaceBarStyle.edge == .left)
         #expect(settings.appBarStyle.edge == .bottom)
     }

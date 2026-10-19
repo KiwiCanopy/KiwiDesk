@@ -24,11 +24,11 @@ struct SpaceBarCommandTests {
         let core = makeCore()
         #expect(
             core.execute(
-                "space_bar.set_enabled",
-                args: [.bool(true)]
+                "space_bar.set_visibility",
+                args: [.string("hidden")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.enabled)
+        #expect(core.tiler.settings.spaceBarStyle.visibility == .hidden)
         #expect(
             core.execute(
                 "space_bar.set_edge",

@@ -1443,11 +1443,13 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   figures, by the site's role — never a centred line box nor a string's own
   ink, and never in `usesSingleLineMode` (#1707, `BarTextBaselineTests`,
   `BarTextBaselineSiteTests`, `BarTextFieldCensusTests`)
-- a bar's visibility is read through the one `visibility(of:)` and written
-  through the one `setVisibility(_:of:)`, two bars sharing an edge on any screen
-  taking one mode, and a hiding edge reserves only its constant sliver, so a
-  reveal redraws the bars and never retiles (#761, `BarAutoHideFoldTests`,
-  `BarVisibilitySeamTests`, `ShelfAutoHideCoreTests`, `ShelfRevealerTests`)
+- each bar's own visibility — `always`, `auto` or `hidden`, the App Bar's per
+  layout — folds into its edge in the one `barEdges(space:app:)`, an edge
+  reserving for its more present bar through `ShelfEdge.visibility`, an `auto`
+  edge only its constant sliver and a `hidden` one nothing, a reveal naming one
+  bar (`ShelfRevealer.Key`) and redrawing the bars without a retile (#761,
+  `BarAutoHideFoldTests`, `ShelfRevealPerBarTests`, `ShelfAutoHideCoreTests`,
+  `ShelfRevealerTests`)
 - the bars sit on KiwiShelf, one shelf per edge (#1517): a bar field lives in
   exactly one of `KiwiShelf`, `SpaceBarStyle` and `AppBarStyle`, a shelf field
   taking no `LayoutAppBar` override (`KiwiShelfParityTests`,

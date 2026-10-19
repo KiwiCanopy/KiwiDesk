@@ -25,8 +25,8 @@ struct ScrollingColumnCapDoorTests {
             outer: Gaps.Outer(top: 0, bottom: 0, left: 0, right: 0),
             inner: Gaps.Inner(horizontal: 10, vertical: 10)
         )
-        settings.scrolling.appBar.enabled = false
-        settings.spaceBarStyle.enabled = false
+        settings.scrolling.appBar.visibility = .hidden
+        settings.spaceBarStyle.visibility = .hidden
         return settings
     }
 
@@ -38,7 +38,7 @@ struct ScrollingColumnCapDoorTests {
         let pinned = CGRect(x: 0, y: 0, width: 3100, height: 1080)
         core.tiler.visibleBounds = { _ in pinned }
         // The live bar is wide and on the left; the draft has none.
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.visibility = .always
         core.tiler.settings.barEdge = .left
         core.tiler.settings.kiwishelf.thickness = 700
         // 3100 across at 300 + 10: ten — the live bar's 700 pt
@@ -46,7 +46,7 @@ struct ScrollingColumnCapDoorTests {
         #expect(core.scrollingColumnCap(for: nil, settings: draft()) == 10)
         // And the draft's own strip is reserved.
         var barred = draft()
-        barred.spaceBarStyle.enabled = true
+        barred.spaceBarStyle.visibility = .always
         barred.barEdge = .left
         barred.kiwishelf.thickness = 700
         #expect(core.scrollingColumnCap(for: nil, settings: barred) == 7)

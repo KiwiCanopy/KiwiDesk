@@ -70,48 +70,21 @@ struct BarsCensusRenderTests {
         #expect(containers == [.kiwishelf, .spaceBar, .appBar])
     }
 
-    /// Each bar container's block gate resolves to a reason
-    /// against the live draft — the wholesale grey each editor
-    /// had, now returned as a `BarsGates.InertReason` rather than
-    /// a Bool. `onlyTwoContainers` pins WHICH containers gate;
-    /// this pins that the resolver answers each correctly.
-    @Test("container gates resolve against the draft")
-    func containerGatesResolve() {
+    /// A hidden bar's shortcut still shows it, so no bar
+    /// container greys for a bar's value (#761): every container's
+    /// gate is gone, and the resolver answers nil for each even
+    /// with every bar hidden.
+    @Test("no bar container greys for a bar's value")
+    func noContainerGreys() {
         var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = false
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
-        var gates = BarsGates(settings: settings)
-        #expect(gates.containerReason(for: .spaceBar) == .spaceBarOff)
-        #expect(gates.containerReason(for: .appBar) == .noBarShown)
-
-        settings.spaceBarStyle.enabled = true
-        settings.scrolling.appBar.enabled = true
-        gates = BarsGates(settings: settings)
-        #expect(gates.containerReason(for: .spaceBar) == nil)
-        #expect(gates.containerReason(for: .appBar) == nil)
-
-        settings.scrolling.appBar.enabled = false
-        settings.monocle.appBar.enabled = true
-        gates = BarsGates(settings: settings)
-        #expect(gates.containerReason(for: .appBar) == nil)
-    }
-
-    /// The bar cards' gate owners — the Show rows — live on the
-    /// KiwiShelf card, which has no gate, so none of them needs
-    /// an exemption to stay live (#1517); the one rider is the
-    /// glyph-style picker the ⌃⌥K panel reads. A red here asks
-    /// the real question: is this new exemption a rider with an
-    /// argument?
-    @Test("gate owners sit on the ungated shelf; one rider")
-    func exemptSet() {
-        let owners = [SettingsContainer.spaceBar, .appBar]
-            .flatMap { $0.gate?.settings ?? [] }
-        #expect(!owners.isEmpty)
-        for owner in owners {
-            #expect(owner.placement.container == .kiwishelf)
+        settings.spaceBarStyle.visibility = .hidden
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
+        let gates = BarsGates(settings: settings)
+        for container in [SettingsContainer.kiwishelf, .spaceBar, .appBar] {
+            #expect(container.gate == nil)
+            #expect(gates.containerReason(for: container) == nil)
         }
-        #expect(SettingsContainer.kiwishelf.gate == nil)
         let exempt = Set(
             SettingKey.allCases.filter {
                 $0.placement.area == .bars
@@ -122,17 +95,19 @@ struct BarsCensusRenderTests {
     }
 
     /// Core's `appBarHost(for:)` is "the one place that decides
-    /// which layouts host an App Bar"; the census's `.appBar`
-    /// container gate re-lists that set as its `anyOf` owners.
-    /// Pin the two together, derived from Core: a third hosting
-    /// layout added in Core must red here until the census
-    /// `.appBar` gate's owners learn it — otherwise that layout's
-    /// own Show toggle is missing from the KiwiShelf card and no
-    /// row can switch that layout's bar on (#527's failure).
-    @Test("the App Bar gate's owners are Core's hosting set")
-    func appBarGateOwnersMatchCoreHosting() {
-        let owners = Set(
-            (SettingsContainer.appBar.gate?.settings ?? [])
+    /// which layouts host an App Bar"; the Show group draws one
+    /// visibility row per such layout. Pin the two together,
+    /// derived from Core: a third hosting layout added in Core reds
+    /// here until the Show group learns it — otherwise no row could
+    /// set that layout's App Bar (#527's failure).
+    @Test("the Show group's App Bar rows are Core's hosting set")
+    func appBarRowsMatchCoreHosting() {
+        let rows = Set(
+            BarsRowOrder.kiwishelfShow
+                .filter {
+                    if case .layoutAppBar = $0 { return true }
+                    return false
+                }
                 .map(\.id)
         )
         let hosts = Set(
@@ -140,8 +115,8 @@ struct BarsCensusRenderTests {
                 .filter {
                     TilingSettings().appBarHost(for: $0) != nil
                 }
-                .map { "settings.\($0.rawValue).appBar.enabled" }
+                .map { "settings.\($0.rawValue).appBar.visibility" }
         )
-        #expect(owners == hosts)
+        #expect(rows == hosts)
     }
 }

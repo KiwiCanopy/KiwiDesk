@@ -109,8 +109,8 @@ enum AppBarCommandSetting {
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
         case .reserve(let value): style.reserve = value
-        // A layout's own value (#761): the global verb writes
-        // every layout's through `apply(to: LayoutAppBar)`.
+        // A layout's own value (#761), written through
+        // `apply(to: LayoutAppBar)` alone.
         case .visibility: break
         }
     }

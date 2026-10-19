@@ -33,7 +33,7 @@ struct LayoutBoundsResizeSeamTests {
         let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in bounds }
         core.execute("set_gap_global", args: [.number(0)])
-        core.execute("space_bar.set_enabled", args: [.bool(true)])
+        core.execute("space_bar.set_visibility", args: [.string("always")])
         core.execute("space_bar.set_edge", args: [.string(edge)])
         core.execute(
             "kiwishelf.set_thickness",
@@ -47,7 +47,7 @@ struct LayoutBoundsResizeSeamTests {
         core.execute("set_min_window_size", args: [.number(200)])
         #expect(core.tiler.settings.minWindowSize == 200)
         #expect(core.tiler.settings.mouseResize == .layout)
-        #expect(core.tiler.settings.spaceBarStyle.enabled)
+        #expect(core.tiler.settings.spaceBarStyle.visibility == .always)
         #expect(core.tiler.settings.kiwishelf.thickness == 400)
         core.execute(
             "set_mode",

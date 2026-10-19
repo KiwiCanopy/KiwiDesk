@@ -59,7 +59,7 @@ struct ScreenEdgeRowsTests {
             )
         ]
         model.target = .storedProfile("Desk")
-        model.config.settings.spaceBarStyle.enabled = true
+        model.config.settings.spaceBarStyle.visibility = .always
         model.config.settings.spaceBarStyle.setEdge(.top)
         model.config.settings.appBarStyle.setEdge(.top)
         return model

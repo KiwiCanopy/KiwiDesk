@@ -42,8 +42,8 @@ struct ShelfSplitDriverTests {
         let id = core.state.workspaces.space(of: Self.window)!
         core.state.workspaces.setMode(id, .scrolling)
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.scrolling.appBar.enabled = true
+        settings.spaceBarStyle.visibility = .always
+        settings.scrolling.appBar.visibility = .always
         settings.spaceBarStyle.edge = space
         settings.appBarStyle.edge = app
         core.tiler.settings = settings

@@ -61,22 +61,15 @@ struct ColorsGateTests {
     @Test("the bar groups' gates resolve against the draft")
     func barGroupGatesResolve() {
         var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = false
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
-        var gates = AdvancedColorsGates(settings: settings)
-        #expect(
-            gates.bars.containerReason(for: .spaceBar) == .spaceBarOff
-        )
-        #expect(
-            gates.bars.containerReason(for: .appBar) == .noBarShown
-        )
-
-        settings.spaceBarStyle.enabled = true
-        settings.monocle.appBar.enabled = true
-        gates = AdvancedColorsGates(settings: settings)
+        settings.spaceBarStyle.visibility = .hidden
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
+        // A hidden bar's shortcut still shows it, so its colours
+        // never grey for its value (#761).
+        let gates = AdvancedColorsGates(settings: settings)
         #expect(gates.bars.containerReason(for: .spaceBar) == nil)
         #expect(gates.bars.containerReason(for: .appBar) == nil)
+        #expect(gates.shelfDraws)
     }
 
     /// The off-page gates each pick a sentence, and the OUTERMOST
@@ -111,30 +104,14 @@ struct ColorsGateTests {
                 .verdict(for: unfocused) == nil
         )
 
-        // The focused-item row: every bar off names the shelf;
-        // the Space Bar off with an App Bar on names the Space
-        // Bar's switch, never the glyph style; the bar on with
-        // App icons takes the row's own sentence; Symbols draws.
-        settings.spaceBarStyle.enabled = false
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        // The focused-item row: with App icons and no front-app
+        // name it takes its own sentence whatever the bars'
+        // visibility (#761); Symbols draws.
+        settings.spaceBarStyle.visibility = .hidden
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         settings.kiwishelf.iconSource = .appImage
         settings.spaceBarStyle.showFrontApp = false
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .verdict(for: focusedItem)?.help
-                == AdvancedColorsHelp.kiwishelfOff
-        )
-        settings.monocle.appBar.enabled = true
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .verdict(for: focusedItem)
-                == ColorRowVerdict(
-                    help: BarsGateHelp.sentence(for: .spaceBarOff),
-                    link: .page(.bars)
-                )
-        )
-        settings.spaceBarStyle.enabled = true
         #expect(
             AdvancedColorsGates(settings: settings)
                 .verdict(for: focusedItem)
@@ -181,7 +158,7 @@ struct ColorsGateTests {
     @Test("a role group links each page that dims one of its rows")
     func roleGroupLinksEachDimmingPage() {
         var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         settings.spaceBarStyle.showFrontApp = true
         var gates = AdvancedColorsGates(settings: settings)
         #expect(
@@ -197,9 +174,9 @@ struct ColorsGateTests {
 
         // Every bar off, the ring off and the ghost's border off:
         // both pages, once each, the shelf rows' first.
-        settings.spaceBarStyle.enabled = false
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        settings.spaceBarStyle.visibility = .hidden
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         settings.borderStyle.enabled = false
         settings.dragGhost.border = false
         gates = AdvancedColorsGates(settings: settings)
@@ -212,7 +189,7 @@ struct ColorsGateTests {
 
         // The drop zone off dims only the Second accent's drag
         // rows; with the bars back, Gaps & Borders alone.
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         settings.dragDropZone.enabled = false
         gates = AdvancedColorsGates(settings: settings)
         #expect(
@@ -226,7 +203,7 @@ struct ColorsGateTests {
         // own sentence, to Bars) and the front-app segment off
         // dims its indicator (a page link to Bars too).
         settings = TilingSettings()
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         settings.kiwishelf.iconSource = .appImage
         settings.spaceBarStyle.showFrontApp = false
         gates = AdvancedColorsGates(settings: settings)

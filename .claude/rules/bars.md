@@ -178,21 +178,29 @@ twice, was a question the user answered twice. The argument is
   `BarReserveTests` holds the fold, `BarReserveCoreTests` the
   float region and the skipped pass, `BarReserveVerbTests` the
   global-only refusal.
-- **Read a bar's visibility through the one
-  `TilingSettings.visibility(of:)` and write it through the one
-  `setVisibility(_:of:)` (#761).** Two bars that share an edge on
-  any screen (`barsLinked`) are one shelf: the reader answers
-  `auto` only where both stored modes are, and the door writes
-  both, so no layout, look or hand edit can fold them apart —
-  judging a shared shelf by what each layout draws moved the
-  windows on every layout switch. `barEdges(space:app:)` folds the
-  reader's answer, a hiding edge reserving only its constant sliver
-  (`hidingEdges`, `KiwiShelf.hiddenReservation`), so a reveal is
-  an overlay that redraws the bars through `updateBars()` and
-  never retiles (`BarAutoHideFoldTests`, `BarVisibilitySeamTests`,
-  `ShelfAutoHideCoreTests` ▸ `actionRevealsWithoutARetile`).
-  Whether a hiding shelf is shown is asked of `ShelfManager.reveal`
-  per hiding plan in `updateBars()`, and a second shown-answer
+- **Fold each bar's own visibility into its edge inside the one
+  `barEdges(space:app:)` (#761)** — the Space Bar's stored value,
+  and the App Bar's for the layout being laid out, read through the
+  one `appBarVisibility(in:)` — and never link the two values.
+  An edge two bars share reserves for its more present bar
+  (`ShelfEdge.visibility`: `always` over `auto` over `hidden`), an
+  `auto` edge only its constant sliver (`hidingEdges`,
+  `KiwiShelf.hiddenReservation`) and a `hidden` one nothing; what a
+  bar shows at rest beside its sibling is the one `ShelfEdge.shown`,
+  never a comparison at a call site. The fold reads stored values,
+  never what a layout draws, so a layout switch moves windows only
+  where the two layouts' App Bar values differ; a reveal is an
+  overlay that redraws the bars through `updateBars()` and never
+  retiles (`BarAutoHideFoldTests`, `ShelfAutoHideCoreTests` ▸
+  `actionRevealsWithoutARetile`). **A reveal names a bar**
+  (`ShelfRevealer.Key`): a shortcut shows only its own, a `hidden`
+  bar's target has no hover band, and the bars an edge draws this
+  pass are the one `HidingShelves.drawn`, which the live plan hands
+  `shelfPlans` (`ShelfRevealPerBarTests`). A shortcut on an
+  `always` bar refuses through the refusal-pill door's shelf twin,
+  `flashRefusalPill(near:edge:text:symbol:)`.
+  Whether a hiding bar is shown is asked of `ShelfManager.reveal`
+  per bar in `updateBars()`, and a second shown-answer
   beside it is review's; its pointer monitor and location are
   seams both `makeTestCore` twins pin (`MouseButtonSeamGuardTests`,
   `ShelfPanelPinTests` the indicator panels), the indicator lets

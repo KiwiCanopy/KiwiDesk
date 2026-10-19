@@ -27,7 +27,7 @@ struct MonocleBoundCenterTests {
             ),
             gaps: .uniform(10)
         )
-        context.monocle.appBar.enabled = false
+        context.monocle.appBar.visibility = .hidden
         return context
     }
 

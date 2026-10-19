@@ -16,12 +16,6 @@ extension APIReference {
                 + "the windows, the strip unclickable.",
             .boolean("reserve")
         ),
-        "set_visibility": APIRecord(
-            "Sets whether every layout's App Bar stays shown, "
-                + "hides until the pointer reaches its edge, or "
-                + "shows only on its shortcut.",
-            .choice("visibility", ShelfVisibility.self)
-        ),
         "toggle_reveal": APIRecord(
             "Shows or hides the App Bar over the windows on the "
                 + "active Space's screen, unless it is set to always."

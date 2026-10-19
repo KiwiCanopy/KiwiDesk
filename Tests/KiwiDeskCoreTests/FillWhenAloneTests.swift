@@ -17,7 +17,7 @@ private func makeContext(
         focused: w1
     )
     // Isolate the slot mechanics from the now-default app bar.
-    context.scrolling.appBar.enabled = false
+    context.scrolling.appBar.visibility = .hidden
     return context
 }
 

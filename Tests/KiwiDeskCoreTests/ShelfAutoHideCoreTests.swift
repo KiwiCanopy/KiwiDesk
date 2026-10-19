@@ -39,12 +39,10 @@ struct ShelfAutoHideCoreTests {
         )
         core.resolveSpaceDisplays(mainID: display.id)
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         settings.barEdge = .top
-        // Linked on the top edge: the door writes both bars.
-        settings.setVisibility(visibility, of: .space)
+        settings.spaceBarStyle.visibility = visibility
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
@@ -60,7 +58,7 @@ struct ShelfAutoHideCoreTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let key = ShelfManager.Key(display: display, edge: .top)
         #expect(core.spaceBars.shownStrips.isEmpty)
-        #expect(core.shelves.reveal.targets[key] != nil)
+        #expect(core.shelves.reveal.covers(key))
         let indicator = try #require(
             core.shelves.indicators.indicatorForTesting(key)
         )
@@ -86,7 +84,10 @@ struct ShelfAutoHideCoreTests {
         core.tiler.meter = meter
         let response = core.execute("space_bar.toggle_reveal", args: [])
         #expect(response.isSuccess)
-        #expect(core.shelves.reveal.reveal(of: key) == .pinned(until: nil))
+        #expect(
+            core.shelves.reveal.reveal(of: .init(shelf: key, bar: .space))
+                == .pinned(until: nil)
+        )
         #expect(!core.spaceBars.shownStrips.isEmpty)
         // The reveal redraws the bars and runs no layout pass.
         let counts = meter.snapshot(reset: false).counts
@@ -137,6 +138,13 @@ struct ShelfAutoHideCoreTests {
                 args: [.string("never")]
             ).isSuccess
         )
+        #expect(
+            core.execute(
+                "space_bar.set_visibility",
+                args: [.string("hidden")]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.spaceBarStyle.visibility == .hidden)
     }
 
     @Test(
@@ -155,7 +163,7 @@ struct ShelfAutoHideCoreTests {
         #expect(core.tiler.settings.kiwishelf.revealDuration == 60)
         #expect(
             !core.execute(
-                "app_bar.set_visibility",
+                "monocle.set_app_bar_visibility",
                 args: [.bool(true)]
             ).isSuccess
         )
@@ -190,33 +198,16 @@ struct ShelfAutoHideCoreTests {
     }
 
     @Test(
-        "The App Bar's action refuses a shelf only the Space Bar holds",
+        "The App Bar's action refuses where the layout carries none",
         .enabled(if: NSScreen.main != nil)
     )
     func actionNamesItsBar() throws {
         let (core, _) = try #require(makeCore(.auto))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        // Linked on the top edge, so both read auto; the App Bar
-        // draws in no layout here, so no shelf carries it.
+        // The active Space lays out in BSP, which carries no App
+        // Bar, so its action refuses while the Space Bar's acts.
         #expect(!core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         #expect(core.execute("space_bar.toggle_reveal", args: []).isSuccess)
-    }
-
-    @Test(
-        "A visibility write while linked writes both bars",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func linkedWriteWritesBoth() throws {
-        let (core, _) = try #require(makeCore(.always))
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        #expect(
-            core.execute(
-                "app_bar.set_visibility",
-                args: [.string("auto")]
-            ).isSuccess
-        )
-        #expect(core.tiler.settings.spaceBarStyle.visibility == .auto)
-        #expect(core.tiler.settings.appBarStyle.visibility == .auto)
     }
 
     @Test(
@@ -231,32 +222,5 @@ struct ShelfAutoHideCoreTests {
             core.shelves.indicators.indicatorForTesting(key)?.panel
         )
         #expect(panel.ignoresMouseEvents)
-    }
-
-    /// Each verb names its own bar where the two are apart, so a
-    /// swapped `of:` in either dispatcher reds here.
-    @Test(
-        "Apart, each verb writes its own bar alone",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func apartWritesOneBar() throws {
-        let (core, _) = try #require(makeCore(.always))
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        core.tiler.settings.appBarStyle.setEdge(.bottom)
-        for (verb, space) in [
-            ("space_bar.set_visibility", true),
-            ("app_bar.set_visibility", false),
-        ] {
-            core.tiler.settings.setVisibility(.always, of: .space)
-            core.tiler.settings.setVisibility(.always, of: .app)
-            #expect(core.execute(verb, args: [.string("auto")]).isSuccess)
-            let settings = core.tiler.settings
-            #expect(
-                (settings.spaceBarStyle.visibility == .auto) == space
-            )
-            #expect(
-                (settings.appBarStyle.visibility == .auto) == !space
-            )
-        }
     }
 }
