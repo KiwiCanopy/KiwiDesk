@@ -19,9 +19,7 @@ struct OverrideMinSizeRow: View {
                 inherited: (Self.label, size(followed)),
                 help: Self.help,
                 subject: Self.label,
-                inheritsName: followedName,
-                trailingValue: true
-            ) {
+                inheritsName: followedName) {
                 SettingsRowShape(controlTrails: true) {
                     Text(Self.label).lineLimit(1)
                 } control: {

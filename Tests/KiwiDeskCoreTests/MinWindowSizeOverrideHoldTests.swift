@@ -25,6 +25,15 @@ struct MinWindowSizeOverrideHoldTests {
         #expect(core.tiler.settings.minWindowSizeOverride[three] == 200)
         try core.profiles.write(
             desk.profile(
+                "pair",
+                screens: [desk.builtIn.fingerprint, desk.dell.fingerprint],
+                spaces: [SpaceID(1), SpaceID(2)]
+            )
+        )
+        core.execute("load_profile", args: [.string("pair")])
+        #expect(core.state.heldSpaces[three]?.name == three)
+        try core.profiles.write(
+            desk.profile(
                 "claim",
                 screens: [desk.builtIn.fingerprint, desk.dell.fingerprint],
                 spaces: [SpaceID(1), SpaceID(2), three]
