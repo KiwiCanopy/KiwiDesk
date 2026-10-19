@@ -1,3 +1,4 @@
+import CoreGraphics
 import KiwiDeskCore
 import Testing
 
