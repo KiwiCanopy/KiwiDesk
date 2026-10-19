@@ -807,7 +807,11 @@ readout from their own per-axis agreement, read through
 `SettingsModel.minSizeShared(_:)` and `minSizesDiffer` alone —
 the drawer's hold-open reads the same verdict, and the rows'
 view compares no stored value itself (`MinWindowSizeMasterTests` ▸
-`masterReadsOneVerdict`).
+`masterReadsOneVerdict`). The narration fold
+(`SettingKey.summarizes`, #2450) is a ruled second reader of the
+gap and minimum-size masters' agreement, held to each master's
+own readout by `SettingsSummaryGroupTests` ▸
+`foldAgreesWithTheReadout`.
 
 A role group's colour on Advanced Colours (#1857) is another
 home, ruled: its followers are the group's ticks — scratch state
@@ -1280,7 +1284,8 @@ agree, folded where rows are narrated and never in the diff**
 one table, `SettingKey.summaryAxes`; a surface that counts or asks per
 census key — the pill's rows, the live rows, the sync sheet — folds
 through `SettingKey.summarized`, never a fold of its own, and hands
-it the members another surface already narrates as `apart`.
+it the members a list beside it already narrates as `apart`,
+stated at every call.
 `SettingsDraftDiff` stays per member, since the live rows and the
 sync adopt compare key sets taken from different diffs. A key added
 under a master's path joins its group (`SettingsSummaryGroupTests`

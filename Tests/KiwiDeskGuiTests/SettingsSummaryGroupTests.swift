@@ -60,6 +60,76 @@ struct SettingsSummaryGroupTests {
         }
     }
 
+    /// Every member's leaf, so a fixture can move one alone.
+    private static let leaf:
+        [SettingKey: WritableKeyPath<GuiConfig, CGFloat>] =
+            [
+                .gaps(.outerTop): \.settings.gapsGlobal.outer.top,
+                .gaps(.outerBottom): \.settings.gapsGlobal.outer.bottom,
+                .gaps(.outerLeft): \.settings.gapsGlobal.outer.left,
+                .gaps(.outerRight): \.settings.gapsGlobal.outer.right,
+                .gaps(.innerHorizontal):
+                    \.settings.gapsGlobal.inner.horizontal,
+                .gaps(.innerVertical): \.settings.gapsGlobal.inner.vertical,
+                .behaviour(.minSizeStackWidth):
+                    \.settings.minWindowSizes.stack.width,
+                .behaviour(.minSizeStackHeight):
+                    \.settings.minWindowSizes.stack.height,
+                .behaviour(.minSizeFloatingWidth):
+                    \.settings.minWindowSizes.floating.width,
+                .behaviour(.minSizeFloatingHeight):
+                    \.settings.minWindowSizes.floating.height,
+            ]
+
+    /// The fold names one value exactly when the master's own
+    /// readout does, so a folded row never reads "mixed".
+    @Test("the fold agrees with each master's readout")
+    func foldAgreesWithTheReadout() {
+        pinEnglish()
+        let mixed = L("diff.value.mixed", "mixed")
+        var fixtures = [GuiConfig()]
+        for path in Self.leaf.values {
+            var one = GuiConfig()
+            one[keyPath: path] += 7
+            fixtures.append(one)
+        }
+        var square = GuiConfig()
+        square.settings.minWindowSizes = .init(all: .init(width: 4, height: 9))
+        fixtures.append(square)
+        var checked = 0
+        for config in fixtures {
+            for master in SettingKey.summaryAxes.keys {
+                let readout = SettingsValueReadout.rows(
+                    for: master,
+                    old: config,
+                    new: config
+                ).first?.newValue
+                #expect(
+                    SettingKey.summarizes(master, in: config)
+                        == (readout != mixed),
+                    "\(master): \(readout ?? "nil")"
+                )
+                checked += 1
+            }
+        }
+        #expect(checked == fixtures.count * 3)
+    }
+
+    /// An axis holds one kind of value: a group of one axis may mix
+    /// edges, but a multi-axis group's axes split by the last path
+    /// component (width, height).
+    @Test("each axis of a multi-axis group is one kind")
+    func axesAreHomogeneous() {
+        for (master, axes) in SettingKey.summaryAxes where axes.count > 1 {
+            for axis in axes {
+                let kinds = Set(
+                    axis.map { $0.id.split(separator: ".").last ?? "" }
+                )
+                #expect(kinds.count == 1, "\(master): \(kinds)")
+            }
+        }
+    }
+
     @Test("every group is a master over members under its path")
     func groupsAreWellFormed() {
         for (master, members) in SettingKey.summaryGroups {

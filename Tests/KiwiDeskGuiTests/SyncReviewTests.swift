@@ -183,7 +183,8 @@ struct SyncReviewTests {
             key: .gaps(.outer),
             label: "Outer gap",
             yours: "12 pt",
-            theirs: "4 pt"
+            theirs: "4 pt",
+            answers: []
         )
         #expect(SyncText.spokenPick(nil, row: row) == "Not picked")
         #expect(SyncText.spokenPick(.theirs, row: row) == "Theirs, 4 pt")

@@ -64,11 +64,12 @@ extension SettingKey {
 
     /// `keys` with each group whose members all agree in `config`
     /// narrated as its master, at its first member's place. A group
-    /// with a member in `apart` — narrated elsewhere — never folds.
+    /// with a member in `apart` — narrated elsewhere — never folds;
+    /// every caller states it, `[]` included.
     static func summarized(
         _ keys: [SettingKey],
         in config: GuiConfig,
-        apart: Set<SettingKey> = []
+        apart: Set<SettingKey>
     ) -> [SettingKey] {
         var folded: [SettingKey: Bool] = [:]
         var result: [SettingKey] = []

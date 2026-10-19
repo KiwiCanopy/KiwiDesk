@@ -25,9 +25,14 @@ struct SyncConflict: Identifiable, Equatable {
     let yours: String
     let theirs: String
     let mac: String?
-    /// Every setting the question answers: its own key, and any
-    /// the key's writer laid an edit over.
+    /// The settings the key's writer laid an edit over, which the
+    /// answer moves with it.
     var covers: Set<SettingKey> = []
+
+    /// Every setting the question answers.
+    var answers: Set<SettingKey> {
+        covers.union(key.map { [$0] } ?? [])
+    }
 
     var id: String { key?.id ?? Self.initLua }
 
@@ -40,6 +45,9 @@ struct SyncConflict: Identifiable, Equatable {
 /// own, and remembers each setting both changed for one question at
 /// Save. The strip says the setup changed meanwhile.
 extension SettingsModel {
+    /// Both paths reload, which resets `sync`: an open sheet closes
+    /// and its picks go, since the values it showed moved
+    /// (`SyncReviewCountTests` ▸ `arrivalClosesTheSheet`).
     func adoptSyncedChange(_ change: SyncedChange) {
         guard isDirty else {
             reload()
@@ -114,7 +122,7 @@ extension SettingsModel {
                 theirs: theirs,
                 base: base
             ).with(mac: change.mac)
-            question.covers = covered.union([owner, key])
+            question.covers = covered.union([key])
             conflicts.append(question)
         }
         if yoursLua != baseLua, theirsLua != baseLua {
@@ -126,8 +134,7 @@ extension SettingsModel {
         suppressDirty = false
         recomputeDirty()
         let asked = conflicts.reduce(into: Set<SettingKey>()) {
-            $0.formUnion($1.covers)
-            if let key = $1.key { $0.insert(key) }
+            $0.formUnion($1.answers)
         }
         sync.arrived = isDirty ? change : nil
         sync.conflicts = isDirty ? conflicts : []

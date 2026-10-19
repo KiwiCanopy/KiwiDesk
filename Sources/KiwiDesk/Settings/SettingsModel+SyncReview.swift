@@ -18,6 +18,8 @@ struct SyncReview: Identifiable, Equatable {
         let label: String
         let yours: String
         let theirs: String
+        /// The conflicts the row's pick answers, by id.
+        let answers: Set<String>
 
         var id: String { key?.id ?? SyncConflict.initLua }
     }
@@ -59,14 +61,10 @@ extension SettingsModel {
     func answerSyncReview(_ picks: [String: SyncChoice]) {
         guard let review = sync.review else { return }
         sync.review = nil
-        let shown = Set(review.rows.compactMap(\.key))
-        sync.conflicts.removeAll { conflict in
-            guard let key = conflict.key else {
-                return review.rows.contains { $0.key == nil }
-            }
-            return shown.contains(key)
-                || key.summaryMaster.map(shown.contains) == true
+        let answered = review.rows.reduce(into: Set<String>()) {
+            $0.formUnion($1.answers)
         }
+        sync.conflicts.removeAll { answered.contains($0.id) }
         for row in review.rows where picks[row.id] == .theirs {
             if let key = row.key {
                 SettingsRevertRegister.writers[key]?.apply(self, nil)
@@ -87,11 +85,13 @@ extension SettingsModel {
     }
 
     private func syncReview(edited: [SettingKey]) -> SyncReview {
-        // The one fold the pill takes, over the draft's side.
+        // The pill's fold over the draft's side; the sheet lists no
+        // other rows beside it, so nothing stands apart.
         let shown = Set(
             SettingKey.summarized(
                 sync.conflicts.compactMap(\.key),
-                in: config
+                in: config,
+                apart: []
             )
         )
         var rows: [SyncReview.Row] = []
@@ -104,7 +104,8 @@ extension SettingsModel {
                         key: conflict.key,
                         label: conflict.label,
                         yours: conflict.yours,
-                        theirs: conflict.theirs
+                        theirs: conflict.theirs,
+                        answers: [conflict.id]
                     )
                 )
                 continue
@@ -112,19 +113,23 @@ extension SettingsModel {
             guard !rows.contains(where: { $0.key == master }) else {
                 continue
             }
+            let members = Set(
+                sync.conflicts.filter { $0.key?.summaryMaster == master }
+                    .map(\.id)
+            )
             rows.append(
                 SyncReview.Row(
                     key: master,
                     label: SettingsValueReadout.label(for: master),
                     yours: groupValue(master, in: config, from: cleanConfig),
-                    theirs: groupValue(master, in: cleanConfig, from: config)
+                    theirs: groupValue(master, in: cleanConfig, from: config),
+                    answers: members
                 )
             )
         }
         var asked = Set(rows.compactMap(\.key))
         for conflict in sync.conflicts {
-            asked.formUnion(conflict.covers)
-            if let key = conflict.key { asked.insert(key) }
+            asked.formUnion(conflict.answers)
         }
         for row in rows {
             asked.formUnion(

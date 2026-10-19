@@ -122,6 +122,21 @@ struct SyncReviewCountTests {
         #expect(row.theirs.components(separatedBy: ": ").count == 7)
     }
 
+    /// An arrival while the sheet is up closes it: the values it
+    /// showed moved, and the next Save asks again.
+    @Test("an arrival closes an open sheet")
+    func arrivalClosesTheSheet() throws {
+        let (core, model) = try setup()
+        model.config.modeCycle = [.stack, .monocle]
+        try theirs(core) { $0.modeCycle = [.bsp, .stack] }
+        model.adoptSyncedChange(change)
+        #expect(model.reviewSyncConflicts())
+        try theirs(core) { $0.modeCycle = [.grid, .stack] }
+        model.adoptSyncedChange(change)
+        #expect(model.sync.review == nil)
+        #expect(model.sync.conflicts.map(\.key) == [.shortcuts(.modeCycle)])
+    }
+
     /// A conflict the sheet never showed stays for the next Save.
     @Test("an answer settles only the conflicts it showed")
     func answerKeepsUnshown() throws {
