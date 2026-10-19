@@ -203,8 +203,8 @@ extension ConfigMigration {
         // A sparse file missing a layout's App Bar still keeps the
         // global value there, since the global key is gone.
         if let global {
-            var layouts = out["layout"] as? [String: Any] ?? [:]
-            for name in ["monocle", "scroll"] {
+            var layouts = out[shelfLayoutKey] as? [String: Any] ?? [:]
+            for name in shelfLayoutHosts {
                 var layout = layouts[name] as? [String: Any] ?? [:]
                 var bar = layout[shelfAppBarKey] as? [String: Any] ?? [:]
                 guard bar[barVisibilityKey] == nil else { continue }
@@ -212,7 +212,7 @@ extension ConfigMigration {
                 layout[shelfAppBarKey] = bar
                 layouts[name] = layout
             }
-            out["layout"] = layouts
+            out[shelfLayoutKey] = layouts
         }
         return (out, changed)
     }

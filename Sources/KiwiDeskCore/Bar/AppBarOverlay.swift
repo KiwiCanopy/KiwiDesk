@@ -223,6 +223,10 @@ public final class AppBarOverlay {
                 width: strip.width,
                 height: m.viewport
             )
+        // A new slot is the shelf's glide to carry: the run snaps
+        // with the content the shelf measured, as the Space Bar's
+        // does (#761), or the two glides add up.
+        let slotChanged = itemContainer.frame.size != viewport.size
         itemContainer.frame = viewport
         let runFrame = ShelfOverflow.runFrame(
             in: itemContainer.bounds,
@@ -263,7 +267,7 @@ public final class AppBarOverlay {
         // the re-centring are one motion (#1831).
         let groups = !glide.departures.isEmpty || !glide.arrivals.isEmpty
         (groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {
-            moveFrame(itemRun, runFrame, !lands)
+            moveFrame(itemRun, runFrame, !lands && !slotChanged)
             for (index, view) in itemViews.enumerated()
             where view.superview === itemRun {
                 moveFrame(view, frames[index], !lands)

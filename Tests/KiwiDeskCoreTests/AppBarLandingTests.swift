@@ -46,6 +46,39 @@ struct AppBarLandingTests {
         #expect(travels.allSatisfy { !$0 })
     }
 
+    /// A new slot is the shelf's to glide (#761): the run snaps to
+    /// the content the shelf measured, as the Space Bar's does, so
+    /// the section's glide and the run's never add up — the App
+    /// Bar jumped aside when the Space Bar left a fused shelf.
+    @Test("A render into a new slot snaps the run")
+    func newSlotSnapsTheRun() {
+        let overlay = AppBarOverlay()
+        var runMoves: [Bool] = []
+        overlay.moveFrame = { view, frame, animated in
+            if view === overlay.itemRun { runMoves.append(animated) }
+            view.frame = frame
+        }
+        let items = [item(1), item(2)]
+        show(overlay, items)
+        runMoves = []
+        overlay.show(
+            items: items,
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 300, height: 30),
+            style: AppBarLook()
+        )
+        #expect(runMoves == [false])
+        // The same slot again travels, as a scroll-follow does.
+        runMoves = []
+        overlay.show(
+            items: items + [item(3)],
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 300, height: 30),
+            style: AppBarLook()
+        )
+        #expect(runMoves == [true])
+    }
+
     /// `contentFrame` is the drawn span in the section's own
     /// coordinates: the run's span moved by the run's origin AND the
     /// viewport's inset, which an overflowing run sets (#1837).

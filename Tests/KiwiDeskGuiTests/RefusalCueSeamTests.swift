@@ -317,5 +317,22 @@ struct RefusalCueSeamTests {
         )
         #expect(primitive == 1)
         #expect(door.occurrences(of: "borders.flashSizeLimitPill(") == 1)
+        // The shelf twin's primitive likewise (#761): once, from its
+        // own door's body.
+        var shelfPrimitive = 0
+        for file in try SourceScan.swiftSources(under: core) {
+            shelfPrimitive += try Self.file(file).occurrences(
+                of: "borders.flashShelfPill("
+            )
+        }
+        let shelfDoor = Self.stripped(
+            try SourceScan.functionBody(
+                of: "flashRefusalPill",
+                in: "KiwiCore+ShelfPill.swift",
+                under: "App"
+            )
+        )
+        #expect(shelfPrimitive == 1)
+        #expect(shelfDoor.occurrences(of: "borders.flashShelfPill(") == 1)
     }
 }

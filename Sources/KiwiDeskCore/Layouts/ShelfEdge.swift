@@ -36,9 +36,11 @@ public struct ShelfEdge: Sendable, Equatable {
     }
 
     /// What the edge reserves for: its most present reserving
-    /// bar's visibility, nil where no bar reserves.
+    /// bar as it reads on this edge (`shown`), nil where no bar
+    /// reserves — an `auto` bar beside an `always` one never asks
+    /// for a sliver on an edge that does not hide.
     public var reservation: ShelfVisibility? {
-        reserving.compactMap { bars[$0] }
+        reserving.compactMap { shown($0) }
             .max { $0.presence < $1.presence }
     }
 

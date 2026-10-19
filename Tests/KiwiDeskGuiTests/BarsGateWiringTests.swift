@@ -45,6 +45,14 @@ struct BarsGateWiringTests {
     @Test("each bar block gate is wired to the resolver")
     func blocksConsultTheResolver() throws {
         let consults: [String: [String]] = [
+            // An auto bar beside an always one is noted under each
+            // row it can be set on (#761), over every screen's edges.
+            "Components/Bars/KiwiShelfCard+Placement.swift": [
+                "besideAlwaysNote(.space,in:[.monocle,.scrolling])",
+                "besideAlwaysNote(.app,in:[.monocle])",
+                "besideAlwaysNote(.app,in:[.scrolling])",
+                "model.config.settings.screenVariants",
+            ],
             // The one row gate the area answers (#2228): the Space
             // cue's Lua-owned grey — the whole constructor, since
             // `guiManaged` has a default a dropped argument would
@@ -55,7 +63,7 @@ struct BarsGateWiringTests {
                     + ".inertReason(for:.spaceBar(.spaceCue))",
                 "disabled:reason!=nil",
                 "BarsGateHelp.sentence(for:reason)",
-            ]
+            ],
         ]
         for (path, needles) in consults {
             let source = try squashed(path)
