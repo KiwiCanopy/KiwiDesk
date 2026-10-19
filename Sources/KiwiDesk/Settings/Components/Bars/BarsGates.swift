@@ -11,12 +11,6 @@ struct BarsGates {
 
     /// Why a bar block or shown-bar-gated row is inert.
     enum InertReason: Hashable {
-        /// No layout shows an App Bar.
-        case noBarShown
-        /// The Space Bar is switched off.
-        case spaceBarOff
-        /// No bar shows, so the shelf draws nothing to shape.
-        case shelfEmpty
         /// Boxed draws a box per item — no plate to size.
         case boxedShelf
         /// The bars sit on different edges, so nothing shares one
@@ -50,49 +44,19 @@ struct BarsGates {
         }
     }
 
-    /// Resolves container gate to an inert reason, or nil if active.
-    func containerReason(
-        for container: SettingsContainer
-    ) -> InertReason? {
-        switch container {
-        case .appBar:
-            return anyBarShown ? nil : .noBarShown
-        case .spaceBar:
-            return settings.spaceBarStyle.enabled
-                ? nil : .spaceBarOff
-        case .kiwishelf:
-            return shelfShows ? nil : .shelfEmpty
-        default:
-            return nil
-        }
-    }
+    // MARK: - Shelf row predicates (wiring)
 
-    // MARK: - App Bar row predicates (wiring)
-
-    var anyBarShown: Bool { settings.anyAppBarCanShow }
-
-    /// True when the Space Bar and an App Bar both show, so the
-    /// shelf's order and share apply (#1517).
-    var bothBarsShow: Bool { settings.bothBarsCanShow }
-
-    /// Why order and share are inert: whichever of the two bars
-    /// is missing, so the sentence names only that one, else the
-    /// two sitting on different edges (#1731). Nil while no bar
-    /// shows: the card's block grey answers then.
+    /// Why order and share are inert: the two bars sit on
+    /// different edges, so nothing shares one (#1731). A hidden
+    /// bar's shortcut still lays it beside the other, so order and
+    /// share stay live whatever the visibilities (#761).
     var bothBarsReason: InertReason? {
-        guard settings.shelfShows else { return nil }
-        if !settings.spaceBarStyle.enabled { return .spaceBarOff }
-        guard anyBarShown else { return .noBarShown }
         // Split only where no screen fuses them (#1948).
         let fused = settings.screenVariants.contains {
             $0.sharedBarEdge != nil
         }
         return fused ? nil : .barsSplit
     }
-
-    /// True while any bar can show — Core's one predicate — so
-    /// the shelf has something to place and shape.
-    var shelfShows: Bool { settings.shelfShows }
 
     /// True when the shelf draws a box per item, so no plate is
     /// there for the background size to fit.
@@ -123,6 +87,17 @@ enum BarsGateHelp {
         )
     }
 
+    /// The Show master's acknowledgement while the bars show
+    /// differently (#761): the master stays live, and a pick sets
+    /// every bar.
+    static var visibilityDiffers: String {
+        L(
+            "kiwishelf.show.differ.help",
+            "Your bars show differently right now; choosing here "
+                + "sets every bar."
+        )
+    }
+
     /// A bar row's `?` while its screens differ (#1948), naming
     /// that bar's own Per screen drawer.
     static func screensDiffer(appBar: Bool) -> String {
@@ -139,30 +114,6 @@ enum BarsGateHelp {
 
     static func sentence(for reason: BarsGates.InertReason) -> String {
         switch reason {
-        case .noBarShown:
-            // Points to the block holding the switches (#705, #818).
-            return L(
-                "app_bar.no_layout.shelf_help",
-                "No layout shows an App Bar — turn one on under "
-                    + "“%1$@” in %2$@.",
-                L("kiwishelf.show.label", "Show"),
-                L("bars.switch.kiwishelf", "KiwiShelf")
-            )
-        case .spaceBarOff:
-            return L(
-                "space_bar.disabled.shelf_help",
-                "Turn on the Space Bar under “%1$@” in %2$@ to edit "
-                    + "these settings.",
-                L("kiwishelf.show.label", "Show"),
-                L("bars.switch.kiwishelf", "KiwiShelf")
-            )
-        case .shelfEmpty:
-            return L(
-                "kiwishelf.empty.help",
-                "Turn on a bar under \u{201C}%1$@\u{201D} to edit "
-                    + "these settings.",
-                L("kiwishelf.show.label", "Show")
-            )
         case .boxedShelf:
             return L(
                 "kiwishelf.background_fit.boxed_only",

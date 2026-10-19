@@ -6,12 +6,11 @@ import SwiftUI
 /// rather than being a destination, and is absent in Simple.
 enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case gestures
-    case kiwiHub
+    case showHide
     case focus
     case moveWindows
     case layout
     case sizeFloat
-    case kiwiVision
     case openApplications
 
     /// The group's own title control: its text is the chip's
@@ -21,12 +20,11 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     @MainActor var control: SettingsControl {
         switch self {
         case .gestures: return SettingsCatalog.shortcuts.gestures.control
-        case .kiwiHub: return SettingsCatalog.shortcuts.kiwiHubKeys
+        case .showHide: return SettingsCatalog.shortcuts.showHideKeys
         case .focus: return SettingsCatalog.shortcuts.focusKeys
         case .moveWindows: return SettingsCatalog.shortcuts.moveWindows
         case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
-        case .kiwiVision: return SettingsCatalog.shortcuts.kiwiVisionKeys
         case .openApplications:
             return SettingsCatalog.shortcuts.openApplications
         }
@@ -36,12 +34,11 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     var container: SettingsContainer {
         switch self {
         case .gestures: return .gestures
-        case .kiwiHub: return .kiwiHub
+        case .showHide: return .showHide
         case .focus: return .focus
         case .moveWindows: return .moveWindows
         case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
-        case .kiwiVision: return .kiwiVisionShortcuts
         case .openApplications: return .openApplications
         }
     }

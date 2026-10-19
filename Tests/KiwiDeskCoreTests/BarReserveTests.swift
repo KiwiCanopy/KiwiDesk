@@ -21,13 +21,13 @@ struct BarReserveTests {
     ) -> TilingSettings {
         var settings = TilingSettings()
         settings.kiwishelf.thickness = 32
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         settings.spaceBarStyle.edge = space
         settings.spaceBarStyle.reserve = spaceReserves
         settings.appBarStyle.edge = app
         settings.appBarStyle.reserve = appReserves
-        settings.monocle.appBar.enabled = true
-        settings.scrolling.appBar.enabled = true
+        settings.monocle.appBar.visibility = .always
+        settings.scrolling.appBar.visibility = .always
         return settings
     }
 
@@ -83,10 +83,10 @@ struct BarReserveTests {
             appReserves: false
         )
         #expect(
-            neither.barEdges(space: true, app: true)
+            neither.barEdges(space: .always, app: .always)
                 == [
-                    ShelfEdge(.top, reserves: false),
-                    ShelfEdge(.bottom, reserves: false),
+                    ShelfEdge(.top, reserves: false, bars: [.space: .always]),
+                    ShelfEdge(.bottom, reserves: false, bars: [.app: .always]),
                 ]
         )
     }

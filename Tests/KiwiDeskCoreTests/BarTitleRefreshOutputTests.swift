@@ -33,7 +33,7 @@ struct BarTitleRefreshOutputTests {
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
         core.state.workspaces.setMode(SpaceID("1"), .monocle)
-        core.tiler.settings.monocle.appBar.enabled = true
+        core.tiler.settings.monocle.appBar.visibility = .always
         core.tiler.settings.barEdge = .top
         core.state.apply(
             .windowCreated(titledWindow(1, title: "Downloads"))

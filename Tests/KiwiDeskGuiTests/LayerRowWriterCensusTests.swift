@@ -130,11 +130,16 @@ struct LayerRowWriterCensusTests {
             (1, "the layer's rows handed down, written back whole"),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingGroups.swift":
             (6, "catalog groups: hand the holder to their rows"),
-        "KiwiDesk/Settings/Components/Keybindings/KiwiHubGroup.swift":
-            (1, "the KiwiHub group: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/Keybindings/ShowHideGroup.swift":
+            (1, "the Show & hide card: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/Keybindings/KiwiHubKeyRows.swift":
+            (1, "Show & hide ▸ KiwiHub: hands the holder to its rows"),
         "KiwiDesk/Settings/Components/Keybindings/"
-            + "KiwiVisionShortcutsGroup.swift":
-            (1, "the KiwiVision group: hands the holder to its rows"),
+            + "KiwiVisionKeyRows.swift":
+            (1, "Show & hide ▸ KiwiVision: hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/Keybindings/"
+            + "KiwiShelfKeyRows.swift":
+            (1, "Show & hide ▸ KiwiShelf (#761): hands the holder on"),
         "KiwiDesk/Settings/Components/KiwiVision/"
             + "KiwiVisionLensHeader.swift":
             (

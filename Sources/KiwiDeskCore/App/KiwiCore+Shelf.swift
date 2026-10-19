@@ -91,21 +91,25 @@ extension KiwiCore {
             // engine's `layoutBounds(on:)` seam: one of the
             // deliberate `visibleBounds` exemptions
             // (`VisibleBoundsRoutingTests.allowed`, #537).
-            let plans = hiding.shown(
-                of: shelfPlans(
-                    visible: GeometryUtils.axVisibleFrame(of: screen),
-                    settings: shown,
-                    spaceItems: items,
-                    app: app
-                ),
+            let reveal = shelves.reveal
+            let planned = shelfPlans(
+                visible: GeometryUtils.axVisibleFrame(of: screen),
+                settings: shown,
+                spaceItems: items,
+                app: app,
+                drawn: { reveal.drawn($0, display: display.id) }
+            )
+            hiding.file(
+                planned,
                 display: display.id,
                 screen: screen,
                 items: items,
-                reveal: shelves.reveal,
+                reveal: reveal,
                 gaps: state.workspaces.currentSpace(on: display.id)
                     .map(shown.gaps(for:)) ?? shown.gapsGlobal,
                 settings: shown
             )
+            let plans = planned.filter(\.drawsAny)
             strips += plans.map {
                 ShelfStrip(
                     display: display.id,
@@ -134,7 +138,11 @@ extension KiwiCore {
                     items,
                     display: display.id,
                     plan: plan,
-                    appBarShows: app != nil,
+                    // Drawn, not merely built: a hidden App Bar
+                    // leaves the front-app segment its room (#761).
+                    appBarShows: plans.contains {
+                        $0.arrangement.app != nil
+                    },
                     style: look
                 )
             {
@@ -217,7 +225,7 @@ extension KiwiCore {
     }
 
     /// The App Bar content for the space shown on `display`, or
-    /// nil when that space hosts no enabled, non-empty bar.
+    /// nil when that space hosts no non-empty bar.
     func appBarContent(
         on display: DisplayID,
         settings: TilingSettings
@@ -229,14 +237,14 @@ extension KiwiCore {
         return appBarContent(space: space, settings: settings)
     }
 
-    /// The App Bar content for `space`, or nil when its layout
-    /// hosts no enabled bar or it has no items.
+    /// The App Bar content for `space`, or nil when its layout hosts
+    /// no bar or it has no items — built whatever the bar's
+    /// visibility, since a hidden bar's shortcut may show it (#761).
     func appBarContent(
         space: Space,
         settings: TilingSettings
     ) -> AppBarContent? {
-        guard let host = barHost(for: space), host.appBar.enabled
-        else { return nil }
+        guard let host = barHost(for: space) else { return nil }
         let style = host.resolvedBar(
             global: settings.appBarGlobalLook
         )
@@ -270,13 +278,13 @@ extension KiwiCore {
     }
 
     /// The Space Bar's items on `display` — the layer item
-    /// leading — or nil when the bar is off or has nothing to
-    /// show there.
+    /// leading — or nil when it has nothing to show there; built
+    /// whatever the bar's visibility, since a hidden bar's shortcut
+    /// may show it (#761).
     func spaceBarContent(
         on display: DisplayID,
         style: SpaceBarLook
     ) -> [SpaceBarOverlay.Item]? {
-        guard style.enabled else { return nil }
         var items = spaceBarItems(display: display, style: style)
         guard !items.isEmpty else { return nil }
         // After the emptiness guard: a layer never draws a bar

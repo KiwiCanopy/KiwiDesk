@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// Per-layout App Bar settings: whether the layout shows one, and
+/// Per-layout App Bar settings: how the layout shows its bar, and
 /// overrides of the bar's OWN fields (`AppBarStyle`). The shelf's
 /// fields — colours, glyph style and dim included — have no
 /// per-layout override (#1517): one shelf, one look, so a layout
@@ -9,8 +9,10 @@ import Foundation
 public struct LayoutAppBar: Sendable, Equatable {
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
 
-    /// Whether this layout displays an App Bar.
-    public var enabled = true
+    /// Whether this layout's App Bar stays shown, hides to a mark,
+    /// or shows only on its shortcut (#761) — the layout's own
+    /// value, since only some layouts carry the bar.
+    public var visibility: ShelfVisibility = .always
 
     public var activeIndicator: ActiveIndicator?
     public var titleCap: Int?
@@ -40,4 +42,10 @@ public struct LayoutAppBar: Sendable, Equatable {
             sheen: base.sheen
         )
     }
+}
+
+/// A layout's App Bar hosts itself, so `TilingSettings.appBarHost`
+/// reads it through the one `appBarPath(for:)`.
+extension LayoutAppBar: AppBarHosting {
+    public var appBar: LayoutAppBar { self }
 }

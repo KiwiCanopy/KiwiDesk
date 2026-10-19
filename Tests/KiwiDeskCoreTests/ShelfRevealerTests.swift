@@ -24,24 +24,22 @@ struct ShelfRevealerTests {
         var delays: [TimeInterval] { queue.filter(\.live).map(\.delay) }
     }
 
-    private static let key = ShelfManager.Key(
-        display: DisplayID(1),
-        edge: .top
+    private static let key = ShelfRevealer.Key(
+        shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+        bar: .space
     )
     /// A top shelf 40 pt deep under a 25 pt menu bar on a
     /// 1000 x 800 screen, Cocoa coordinates.
-    private static let underMenuBar = ShelfRevealer.Target(
+    private static let underMenuBar = ShelfRevealer.Target.hovering(
         edge: .top,
         strip: CGRect(x: 0, y: 735, width: 1000, height: 40),
-        screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-        bars: [.space]
+        screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
     )
     /// The same shelf flush with the screen's top.
-    private static let flush = ShelfRevealer.Target(
+    private static let flush = ShelfRevealer.Target.hovering(
         edge: .top,
         strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
-        screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-        bars: [.space]
+        screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
     )
 
     private func make(
@@ -331,11 +329,10 @@ struct ShelfRevealerTests {
 
     @Test("Near the mark lights its cue; only the band opens the shelf")
     func nearLightsTheCue() {
-        let target = ShelfRevealer.Target(
+        let target = ShelfRevealer.Target.hovering(
             edge: .top,
             strip: Self.underMenuBar.strip,
             screen: Self.underMenuBar.screen,
-            bars: [.space],
             near: CGRect(x: 400, y: 700, width: 200, height: 75)
         )
         let (revealer, timers, pointer) = make(target)

@@ -172,6 +172,9 @@ public enum StarterSetup {
             hosts: hosts(sizes)
         )
         settings.appBarStyle.setEdge(appBarEdge)
+        settings.spaceBarStyle.visibility = barVisibility
+        settings.monocle.appBar.visibility = barVisibility
+        settings.scrolling.appBar.visibility = barVisibility
         if sizes[0].height < compactMainHeight {
             settings.kiwishelf.thickness = compactThickness
         }
@@ -182,6 +185,12 @@ public enum StarterSetup {
     /// — which Glass also carries; a preset keeps the type
     /// default `.top`, so no stored profile moves (#1528).
     public static let appBarEdge = AppBarEdge.bottom
+
+    /// The starter's bars hide until the pointer reaches their edge
+    /// (#761): a first run gets the whole screen. Starter-only, like
+    /// `appBarEdge` — the type default stays `always`, so no stored
+    /// profile and no preset moves.
+    public static let barVisibility = ShelfVisibility.auto
 
     /// A MAIN screen whose full frame (not visible) height is under
     /// this (pt) gets `compactThickness` on every screen's shelf

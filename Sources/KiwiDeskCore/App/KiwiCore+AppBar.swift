@@ -28,7 +28,9 @@ extension KiwiCore {
                 visible: GeometryUtils.axVisibleFrame(of: screen),
                 settings: settings,
                 spaceItems: nil,
-                app: app
+                app: app,
+                // Before any display, no reveal can stand: at rest.
+                drawn: { $0.drawnAtRest }
             ).first,
             let bar = placedBar(
                 app,

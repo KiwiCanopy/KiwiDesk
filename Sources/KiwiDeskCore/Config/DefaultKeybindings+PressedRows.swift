@@ -59,6 +59,27 @@ extension DefaultKeybindings {
         )
     }
 
+    /// The bars' shortcuts (#761): the Space Bar on `⌃⌥G`, the App
+    /// Bar on `⌃⌥H` — the home row beside KiwiHub's J K L, the keys
+    /// that show something (owner, 2026-10-19). Free in the seed and
+    /// in `SystemShortcuts.map` (checked 2026-10-19).
+    public static func barRevealRows() -> [KeyBinding] {
+        [
+            KeyBinding(
+                combo: "control+option+g",
+                lua: "space_bar.toggle_reveal()",
+                kind: .navigation,
+                label: "Show or hide the Space Bar"
+            ),
+            KeyBinding(
+                combo: "control+option+h",
+                lua: "app_bar.toggle_reveal()",
+                kind: .navigation,
+                label: "Show or hide the App Bar"
+            ),
+        ]
+    }
+
     /// Previous layout on `⌃⌥⇧C`, `⇧` reversing its twin as on
     /// `Tab` (#453, widening #1655 to a letter).
     public static func previousLayoutRow() -> KeyBinding {

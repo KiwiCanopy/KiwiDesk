@@ -36,7 +36,7 @@ extension FullscreenStandDownTests {
         core.frontStack = { [] }
         core.setAppWide(persisting: false) { $0.spaceCue = cue }
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = spaceBar
+        settings.spaceBarStyle.visibility = spaceBar ? .always : .hidden
         core.tiler.settings = settings
         core.updateBars()
         let box = SpaceCueBox()

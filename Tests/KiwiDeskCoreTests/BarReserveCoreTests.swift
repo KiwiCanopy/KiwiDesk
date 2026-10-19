@@ -64,10 +64,10 @@ struct BarReserveCoreTests {
             }
         }
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.visibility = .always
         settings.spaceBarStyle.reserve = spaceReserves
         settings.appBarStyle.reserve = appReserves
-        settings.monocle.appBar.enabled = true
+        settings.monocle.appBar.visibility = .always
         settings.barEdge = .top
         settings.kiwishelf.thickness = 40
         core.tiler.settings = settings
@@ -158,13 +158,13 @@ struct BarReserveCoreTests {
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
         #expect(
-            core.execute("space_bar.set_enabled", args: [.bool(false)])
+            core.execute("space_bar.set_visibility", args: [.string("hidden")])
                 .isSuccess
         )
         // The repaint ran: the hidden bar left the screen.
         #expect(core.spaceBars.shownStrips.isEmpty)
         for (verb, value) in [
-            ("space_bar.set_enabled", JSONValue.bool(true)),
+            ("space_bar.set_visibility", JSONValue.string("always")),
             ("space_bar.set_glyph_span", .number(8)),
             ("app_bar.set_title_cap", .number(30)),
         ] {

@@ -11,8 +11,6 @@ import Foundation
 enum SpaceBarFixtures {
     static func everyField() -> SpaceBarStyle {
         var style = SpaceBarStyle()
-        // Non-default: the bar ships enabled (QA 2026-07-19).
-        style.enabled = false
         style.reserve = false
         style.visibility = .auto
         style.edge = .left

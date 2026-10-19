@@ -100,9 +100,11 @@ keybinding.reset_sizes
 keybinding.show_shortcuts
 keybinding.shrink_height
 keybinding.shrink_width
+keybinding.toggle_app_bar
 keybinding.toggle_display_sticky
 keybinding.toggle_floating
 keybinding.toggle_kiwivision
+keybinding.toggle_space_bar
 keybinding.toggle_sticky
 profile.isDefault
 settings.animations (master)
@@ -203,7 +205,7 @@ settings.minWindowSizes.stack.height
 settings.minWindowSizes.stack.width
 settings.minWindowSizes.track.height
 settings.minWindowSizes.track.width
-settings.monocle.appBar.enabled
+settings.monocle.appBar.visibility
 settings.monocle.hideStyle
 settings.monocle.newWindowPlacement
 settings.monocle.orientation
@@ -213,7 +215,7 @@ settings.mouse.hoverFocus
 settings.mouse.hoverFocusDelayMS
 settings.mouseResize
 settings.scrolling.anchor
-settings.scrolling.appBar.enabled
+settings.scrolling.appBar.visibility
 settings.scrolling.fillWhenAlone
 settings.scrolling.newWindowPlacement
 settings.scrolling.orientation
@@ -223,7 +225,6 @@ settings.spaceBarStyle.activeIndicator
 settings.spaceBarStyle.edge
 settings.spaceBarStyle.edge (master)
 settings.spaceBarStyle.edgeOverride[screen]
-settings.spaceBarStyle.enabled
 settings.spaceBarStyle.focusedHighlightColor
 settings.spaceBarStyle.focusedItemColor
 settings.spaceBarStyle.frontAppTitleCap
@@ -235,6 +236,8 @@ settings.spaceBarStyle.inactiveContent
 settings.spaceBarStyle.itemLabel
 settings.spaceBarStyle.showFrontApp
 settings.spaceBarStyle.springDelay
+settings.spaceBarStyle.visibility
+settings.spaceBarStyle.visibility (master)
 settings.stack.fillWhenAlone
 settings.stack.masterCount
 settings.stack.masterOrientation

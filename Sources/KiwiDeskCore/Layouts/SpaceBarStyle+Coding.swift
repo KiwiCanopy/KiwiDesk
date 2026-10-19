@@ -6,7 +6,6 @@ import Foundation
 extension SpaceBarStyle {
     /// JSON coding keys for SpaceBarStyle (`SpaceBarParityTests`).
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case enabled
         case reserve
         case visibility
         case edge
@@ -33,11 +32,6 @@ extension SpaceBarStyle {
             keyedBy: CodingKeys.self
         )
         let defaults = Self()
-        enabled =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .enabled
-            ) ?? defaults.enabled
         reserve =
             try container.decodeIfPresent(
                 Bool.self,

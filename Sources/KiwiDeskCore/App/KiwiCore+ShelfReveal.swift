@@ -13,76 +13,78 @@ extension SpaceBarOverlay.Item {
     }
 }
 
-/// The hiding shelves (#761): which plans `updateBars()` draws,
-/// what a hidden shelf's indicator shows, and the show/hide
-/// action. A reveal redraws the bars and never retiles — a hiding
-/// edge reserves only its constant sliver
-/// (`KiwiShelf.hiddenReservation`).
+/// The hiding bars (#761): which bars `updateBars()` draws, what
+/// a hiding edge's mark shows, and each bar's shortcut. A reveal
+/// redraws the bars and never retiles — an `auto` edge reserves
+/// only its constant sliver (`KiwiShelf.hiddenReservation`) and a
+/// `hidden` one nothing.
 extension KiwiCore {
-    /// One `updateBars()` pass's hiding shelves, gathered per
-    /// display and synced once at its end.
+    /// One `updateBars()` pass's hiding bars, gathered per display
+    /// and synced once at its end.
     struct HidingShelves {
-        var targets: [ShelfManager.Key: ShelfRevealer.Target] = [:]
+        var targets: [ShelfRevealer.Key: ShelfRevealer.Target] = [:]
         var indicators:
             [ShelfManager.Key: (spec: ShelfIndicatorSpec, space: Bool)] =
                 [:]
 
-        /// The plans to draw: every plan that does not hide, and
-        /// each hiding one `reveal` shows; every hiding plan files
-        /// its target, its bars and its indicator.
-        @MainActor mutating func shown(
-            of plans: [ShelfPlan],
+        /// Files each hiding bar of `plans` — its target, and its
+        /// edge's mark where the edge hides to one.
+        @MainActor mutating func file(
+            _ plans: [ShelfPlan],
             display: DisplayID,
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
             reveal: ShelfRevealer,
             gaps: Gaps,
             settings: TilingSettings
-        ) -> [ShelfPlan] {
-            var drawn: [ShelfPlan] = []
+        ) {
             for plan in plans {
-                guard plan.hides else {
-                    drawn.append(plan)
-                    continue
+                let hiding = plan.shelfEdge.bars.keys.filter {
+                    plan.shelfEdge.shown($0)?.revealable == true
                 }
-                let key = ShelfManager.Key(display: display, edge: plan.edge)
-                let shown = reveal.reveal(of: key).isShown
+                guard !hiding.isEmpty else { continue }
                 file(
                     plan,
-                    key: key,
+                    bars: Set(hiding),
+                    key: ShelfManager.Key(display: display, edge: plan.edge),
                     screen: screen,
                     items: items,
-                    shown: shown,
-                    hovered: reveal.arming.contains(key),
+                    reveal: reveal,
                     gaps: gaps,
                     settings: settings
                 )
-                if shown { drawn.append(plan) }
             }
-            return drawn
         }
 
-        /// Files one hiding plan's target, bars and indicator.
+        /// Files one plan's hiding bars and, where its edge hides to
+        /// a mark, the mark.
         @MainActor private mutating func file(
             _ plan: ShelfPlan,
+            bars: Set<ShelfBar>,
             key: ShelfManager.Key,
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
-            shown: Bool,
-            hovered: Bool,
+            reveal: ShelfRevealer,
             gaps: Gaps,
             settings: TilingSettings
         ) {
-            let carriesSpace = plan.arrangement.space != nil
-            var bars: Set<ShelfBar> = []
-            if carriesSpace { bars.insert(.space) }
-            if plan.arrangement.app != nil { bars.insert(.app) }
+            let primary = GeometryUtils.primaryHeight
+            let strip = GeometryUtils.flip(plan.strip, primaryHeight: primary)
+            let auto = bars.filter { plan.shelfEdge.shown($0) == .auto }
+            for bar in bars where !auto.contains(bar) {
+                targets[.init(shelf: key, bar: bar)] = ShelfRevealer.Target(
+                    edge: plan.edge,
+                    strip: strip,
+                    screen: screen.frame,
+                    band: nil
+                )
+            }
+            guard !auto.isEmpty else { return }
             // The mark draws the shelf as rendered: Reduce
             // transparency makes its fill opaque (#1374).
             let shelf = LiquidGlassGate.rendered(settings.kiwishelf)
+            let carriesSpace = auto.contains(.space)
             let mark = Self.mark(items: carriesSpace ? items : nil)
-            let primary = GeometryUtils.primaryHeight
-            let strip = GeometryUtils.flip(plan.strip, primaryHeight: primary)
             // The band reaches past the screen side into a menu bar
             // or a Dock, and in to the windows: the sliver's rest and
             // their outer gap (ui-designer, #761).
@@ -93,33 +95,34 @@ extension KiwiCore {
                 inward: KiwiShelf.hiddenDepth + shelf.innerMargin
                     + Self.outerGap(gaps, on: plan.edge)
             )
-            let markFrame = GeometryUtils.flip(
-                ShelfIndicatorSpec.frame(
-                    of: mark,
-                    in: plan.strip,
-                    edge: plan.edge
-                ),
-                primaryHeight: primary
+            let markIn = ShelfIndicatorSpec.frame(
+                of: mark,
+                in: plan.strip,
+                edge: plan.edge
             )
-            targets[key] = ShelfRevealer.Target(
-                edge: plan.edge,
-                strip: strip,
-                screen: screen.frame,
-                bars: bars,
-                band: band,
-                near: markFrame.insetBy(
+            let near = GeometryUtils.flip(markIn, primaryHeight: primary)
+                .insetBy(
                     dx: -ShelfReveal.nearReach,
                     dy: -ShelfReveal.nearReach
                 )
-            )
+            var shown = true
+            var hovered = false
+            for bar in auto {
+                let barKey = ShelfRevealer.Key(shelf: key, bar: bar)
+                targets[barKey] = ShelfRevealer.Target(
+                    edge: plan.edge,
+                    strip: strip,
+                    screen: screen.frame,
+                    band: band,
+                    near: near
+                )
+                shown = shown && reveal.reveal(of: barKey).isShown
+                hovered = hovered || reveal.arming.contains(barKey)
+            }
             indicators[key] = (
                 ShelfIndicatorSpec(
                     mark: mark,
-                    frame: ShelfIndicatorSpec.frame(
-                        of: mark,
-                        in: plan.strip,
-                        edge: plan.edge
-                    ),
+                    frame: markIn,
                     horizontal: plan.horizontal,
                     fill: shelf.fillColor,
                     currentInk: shelf.activeItemColor,
@@ -161,15 +164,24 @@ extension KiwiCore {
         }
     }
 
-    /// Hands the pass's hiding shelves to the revealer and their
-    /// indicators to the panels.
+    /// Hands the pass's hiding bars to the revealer and their marks
+    /// to the panels.
     func syncHidingShelves(_ hiding: HidingShelves) {
         shelves.reveal.sync(hiding.targets)
         shelves.indicators.sync(hiding.indicators)
     }
 
-    /// The show/hide action on `key`'s shelf.
+    /// A press on `key`'s mark: one direction for every bar the
+    /// pointer can open there.
     func toggleShelfReveal(_ key: ShelfManager.Key) {
+        shelves.reveal.toggleShelf(
+            key,
+            duration: tiler.settings.kiwishelf.revealDuration
+        )
+    }
+
+    /// The show/hide action on one bar.
+    func toggleBarReveal(_ key: ShelfRevealer.Key) {
         shelves.reveal.toggle(
             key,
             duration: tiler.settings.kiwishelf.revealDuration
@@ -177,24 +189,44 @@ extension KiwiCore {
     }
 
     /// `space_bar.toggle_reveal` / `app_bar.toggle_reveal` (#761):
-    /// the action on the hiding shelf that carries the bar, on the
-    /// screen the active Space lays out on. Refused where the bar
-    /// reads `always` — it never hides an `always` bar — or draws
-    /// on no hiding shelf there.
+    /// shows or hides the bar on the screen the active Space lays
+    /// out on, over the windows, and only that bar. A bar set to
+    /// `always` is refused with a pill on the bar, since it is
+    /// already shown; the App Bar is refused where the active
+    /// Space's layout carries none.
     func shelfRevealCommand(_ bar: ShelfBar) -> CommandResponse {
         let name = bar == .space ? "Space Bar" : "App Bar"
-        guard tiler.settings.revealActionLive(bar) else {
-            return .fail("the \(name) does not hide")
-        }
         let workspaces = state.workspaces
-        guard
-            let space = workspaces.activeSpace,
-            let display = workspaces.display(of: space),
-            let key = shelves.reveal.targets.first(where: {
-                $0.key.display == display && $0.value.bars.contains(bar)
-            })?.key
+        guard let space = workspaces.activeSpace,
+            let display = workspaces.display(of: space)
         else { return .fail("the \(name) draws on no screen here") }
-        toggleShelfReveal(key)
+        let mode = workspaces[space]?.mode ?? .bsp
+        let settings = tiler.settings
+        guard bar == .space || settings.appBarVisibility(in: mode) != nil
+        else {
+            cueRevealRefusal(.noAppBarHere, display: display)
+            return .fail("no App Bar in this layout")
+        }
+        guard settings.revealActionLive(bar, in: mode) else {
+            cueRevealRefusal(.alwaysShown(bar), display: display)
+            return .fail("the \(name) is set to always")
+        }
+        // The edge's own fold answers whether the bar hides here: an
+        // `auto` bar beside an `always` one reads `always` (#761).
+        if settings.autoReadsAlways(
+            bar,
+            in: mode,
+            on: screenFingerprint(of: display)
+        ) {
+            cueRevealRefusal(.shownBesideAlways(bar), display: display)
+            return .fail("the \(name) is shown beside an always bar")
+        }
+        guard
+            let key = shelves.reveal.targets.keys.first(where: {
+                $0.shelf.display == display && $0.bar == bar
+            })
+        else { return .fail("the \(name) has nothing to show here") }
+        toggleBarReveal(key)
         return .ok()
     }
 }

@@ -20,6 +20,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case toggleKiwiVision = "keybinding.toggle_kiwivision"
     /// One row per live lens (#2103 ruling 42).
     case toggleLens = "keybinding.toggle_lens (x N lenses)"
+    /// Each bar's show/hide shortcut (#761).
+    case toggleSpaceBar = "keybinding.toggle_space_bar"
+    case toggleAppBar = "keybinding.toggle_app_bar"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =
         "keybinding.move_window_to_{prev,next}_track"
@@ -83,11 +86,12 @@ extension ShortcutsKey {
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
             .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
-        case .toggleKiwiVision, .toggleLens:
-            return .row(.shortcuts, .kiwiVisionShortcuts, .atRest)
-        // KiwiHub's three sides, one group for one panel (#2265).
-        case .jumpToWindow, .showShortcuts, .viewPicker:
-            return .row(.shortcuts, .kiwiHub, .atRest)
+        // One card for what shows and hides: KiwiHub's sides
+        // (#2265), the bars (#761), KiwiVision and its lenses.
+        case .jumpToWindow, .showShortcuts, .viewPicker,
+            .toggleSpaceBar, .toggleAppBar,
+            .toggleKiwiVision, .toggleLens:
+            return .row(.shortcuts, .showHide, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
         // An OFFER until the Track layout is in play (#1440).
@@ -204,6 +208,10 @@ extension ShortcutsKey {
             return .text("keybinding.toggle_floating")
         case .toggleKiwiVision:
             return .text("keybinding.toggle_kiwivision")
+        case .toggleSpaceBar:
+            return .text("keybinding.toggle_space_bar")
+        case .toggleAppBar:
+            return .text("keybinding.toggle_app_bar")
         case .toggleSticky:
             return .text(
                 "keybinding.toggle_sticky",

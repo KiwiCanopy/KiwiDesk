@@ -84,7 +84,7 @@ struct KiwiVisionPointer: View {
             "kiwivision.xref_link",
             "%1$@ ▸ %2$@",
             SettingsDestination.shortcuts.title,
-            SettingsCatalog.shortcuts.focusKeys.text
+            SettingsCatalog.shortcuts.showHideKeys.text
         )
     }
 }

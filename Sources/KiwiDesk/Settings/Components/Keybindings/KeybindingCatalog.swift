@@ -154,6 +154,10 @@ enum KeybindingCatalog {
             ),
             NavGroup(title: "KiwiVision", commands: [toggleKiwiVision]),
             NavGroup(
+                title: "KiwiShelf",
+                commands: [toggleSpaceBar, toggleAppBar]
+            ),
+            NavGroup(
                 title: "Window Management",
                 commands: swapDirections
                     + trackRows
@@ -195,6 +199,24 @@ enum KeybindingCatalog {
         lua: "kiwivision.toggle()",
         displayLabel: {
             L("keybinding.toggle_kiwivision", "Toggle KiwiVision")
+        }
+    )
+
+    /// The Space Bar's show/hide shortcut (#761).
+    static let toggleSpaceBar = NavCommand(
+        label: "Show or hide the Space Bar",
+        lua: "space_bar.toggle_reveal()",
+        displayLabel: {
+            L("keybinding.toggle_space_bar", "Show or hide the Space Bar")
+        }
+    )
+
+    /// The App Bar's show/hide shortcut (#761).
+    static let toggleAppBar = NavCommand(
+        label: "Show or hide the App Bar",
+        lua: "app_bar.toggle_reveal()",
+        displayLabel: {
+            L("keybinding.toggle_app_bar", "Show or hide the App Bar")
         }
     )
 

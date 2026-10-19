@@ -55,8 +55,8 @@ struct ScreenEdgeCoreTests {
         else { return nil }
         core.state.workspaces.setMode(space, mode)
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.scrolling.appBar.enabled = true
+        settings.spaceBarStyle.visibility = .always
+        settings.scrolling.appBar.visibility = .always
         settings.barEdge = .top
         settings.kiwishelf.thickness = 40
         core.tiler.settings = settings

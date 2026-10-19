@@ -4,9 +4,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// KiwiVision's shortcuts are a section of their own (#2312), in
-/// the overview as in Settings: a view mode is no Focus verb, and
-/// a section with no bound key is dropped.
+/// KiwiVision's shortcuts are a section of their own in the
+/// overview (#2312) and a sub-group of Show & hide in Settings: a
+/// view mode is no Focus verb, and a section with no bound key is
+/// dropped.
 @Suite("Shortcuts ▸ KiwiVision section", .serialized)
 @MainActor
 struct ShortcutsKiwiVisionSectionTests {
@@ -65,64 +66,23 @@ struct ShortcutsKiwiVisionSectionTests {
         )
     }
 
-    private func censusRows(
-        _ tier: SettingTier
-    ) -> Set<SettingKey> {
-        Set(
-            SettingKey.allCases.filter {
-                $0.placement.area == .shortcuts
-                    && $0.placement.container == .kiwiVisionShortcuts
-                    && $0.placement.tier == tier
-            }
-        )
-    }
-
-    /// The group's one tier is the census's, so a lens key placed
-    /// in the container and left off the list reds here.
-    @Test("KiwiVision's one tier is the census's")
+    /// The toggle is a Show & hide row, never a Focus verb, and
+    /// every row on the KiwiVision list sits in that card
+    /// (`ShowHideCensusRenderTests` holds the card whole).
+    @Test("KiwiVision's rows sit in Show & hide")
     func kiwiVisionTier() {
         let keys = ShortcutsRowOrder.kiwiVisionAtRest
-        #expect(Set(keys) == censusRows(.atRest))
-        #expect(keys.count == Set(keys).count)
         #expect(keys.contains(.shortcuts(.toggleKiwiVision)))
-        #expect(censusRows(.showMore).isEmpty)
-        #expect(censusRows(.immediate).isEmpty)
+        #expect(
+            keys.allSatisfy {
+                $0.placement.container == .showHide
+                    && $0.placement.tier == .atRest
+            }
+        )
         #expect(
             !ShortcutsRowOrder.focusAtRest.contains(
                 .shortcuts(.toggleKiwiVision)
             )
         )
-    }
-
-    /// The group draws its WHOLE list, and the section mounts it.
-    @Test("KiwiVision draws every row")
-    func rowsAreAllDrawn() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
-        func squeezed(_ file: String) throws -> String {
-            SourceScan.stripComments(
-                try String(
-                    contentsOf: root.appendingPathComponent(file),
-                    encoding: .utf8
-                )
-            )
-            .split(whereSeparator: \.isWhitespace)
-            .joined()
-        }
-        let group = try #require(
-            SourceScan.declarationBody(
-                after: "structKiwiVisionShortcutsGroup",
-                in: try squeezed(
-                    "Components/Keybindings/KiwiVisionShortcutsGroup.swift"
-                )
-            )
-        )
-        #expect(
-            group.contains(
-                "ForEach(ShortcutsRowOrder.kiwiVisionAtRest,id:\\.id)"
-            )
-        )
-        let section = try squeezed("Sections/ShortcutsSection.swift")
-        #expect(section.occurrences(of: "KiwiVisionShortcutsGroup(") == 1)
     }
 }

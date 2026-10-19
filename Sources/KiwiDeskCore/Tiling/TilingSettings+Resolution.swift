@@ -83,15 +83,22 @@ extension TilingSettings {
         return params
     }
 
-    /// True if any layout's App Bar is switched on.
+    /// True if any layout's App Bar shows without its shortcut —
+    /// `always` or `auto` (#761).
     public var anyAppBarCanShow: Bool {
-        appBarHosts.contains { $0.enabled }
+        appBarHosts.contains { $0.visibility.showsUnprompted }
     }
 
-    /// True if the Space Bar and a layout's App Bar can both show,
-    /// splitting the shelf between them (`ShelfArrangement`).
+    /// True if the Space Bar and a layout's App Bar can both show
+    /// without a shortcut, splitting the shelf between them
+    /// (`ShelfArrangement`).
     public var bothBarsCanShow: Bool {
-        spaceBarStyle.enabled && anyAppBarCanShow
+        spaceBarStyle.visibility.showsUnprompted && anyAppBarCanShow
+    }
+
+    /// True while any bar shows without its shortcut.
+    public var shelfShows: Bool {
+        spaceBarStyle.visibility.showsUnprompted || anyAppBarCanShow
     }
 
     /// What the Space Bar draws from: the shelf and its own style.
@@ -121,20 +128,28 @@ extension TilingSettings {
         bar.look(on: appBarGlobalLook)
     }
 
-    /// The bar-hosting layout for a mode — the ONE place that
-    /// decides which layouts host an App Bar (#527): everything
-    /// asking "does this mode show a bar?" derives from here, so
-    /// a third hosting layout is one edit. `KiwiCore`'s per-space
-    /// twin keeps its own switch by necessity — two mirrors, which
-    /// §2.4 allows, never three.
+    /// Where a mode's App Bar is stored — the ONE place that
+    /// decides which layouts host an App Bar (#527): reading
+    /// (`appBarHost(for:)`) and writing (`setAppBarVisibility`)
+    /// both derive from here, so a third hosting layout is one
+    /// edit. `KiwiCore`'s per-space twin keeps its own switch by
+    /// necessity — two mirrors, which §2.4 allows, never three.
+    public static func appBarPath(
+        for mode: LayoutMode
+    ) -> WritableKeyPath<TilingSettings, LayoutAppBar>? {
+        switch mode {
+        case .monocle: return \.monocle.appBar
+        case .scrolling: return \.scrolling.appBar
+        default: return nil
+        }
+    }
+
+    /// The bar-hosting layout for a mode, or nil for one that
+    /// carries no App Bar (`appBarPath(for:)`).
     public func appBarHost(
         for mode: LayoutMode
     ) -> AppBarHosting? {
-        switch mode {
-        case .monocle: return monocle
-        case .scrolling: return scrolling
-        default: return nil
-        }
+        Self.appBarPath(for: mode).map { self[keyPath: $0] }
     }
 
     /// Every bar-hosting layout's bar configuration.

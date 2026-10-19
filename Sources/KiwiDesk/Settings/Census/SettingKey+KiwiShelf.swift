@@ -1,9 +1,12 @@
 /// The shelf both bars sit on (`KiwiShelf`, #1517) slice of the
-/// census. Its card also draws the three Show rows, whose keys
-/// stay with the value they write (`spaceBarEnabled`, the two
-/// layout App Bar toggles).
+/// census. Its card also draws the three Show rows behind the Show
+/// master, whose keys stay with the value they write
+/// (`spaceBarVisibility`, the two layout App Bar visibilities).
 
 enum KiwiShelfKey: String, CaseIterable, Hashable {
+    /// The Show master: every bar's visibility (#761), which it
+    /// writes through `masterWrites`.
+    case visibility = "settings.spaceBarStyle.visibility (master)"
     /// The Position master: both bars' edges (#1731), which it
     /// writes through `masterWrites`.
     case edge = "settings.spaceBarStyle.edge (master)"
@@ -48,40 +51,21 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
 }
 
 extension KiwiShelfKey {
-    /// The three Show switches: every row but those greys while
-    /// none is on. Order and minimum further need BOTH bars, which
-    /// is their wiring's predicate (`BarsGates.bothBarsShow`).
-    static let showGate = SettingGate.anyOf([
-        .spaceBar(.spaceBarEnabled),
-        .layoutAppBar(.monocleAppBarEnabled),
-        .layoutAppBar(.scrollingAppBarEnabled),
-    ])
-
     var placement: SettingPlacement {
         switch self {
-        case .edge:
+        case .edge, .visibility:
             // A master acknowledges divergence through its `?`
             // and carries no gate (`GapsBordersGates.acknowledged`).
             return .row(.bars, .kiwishelf, .atRest)
         case .thickness, .alignment, .order, .minimum:
-            return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
+            return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
             .appBarScreenEdge:
-            return .row(
-                .bars,
-                .kiwishelf,
-                .showMore,
-                gate: Self.showGate
-            )
+            return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
             .outerMargin, .innerMargin, .iconSource:
-            return .row(
-                .bars,
-                .kiwishelf,
-                .showMore,
-                gate: Self.showGate
-            )
+            return .row(.bars, .kiwishelf, .showMore)
         case .backgroundFit:
             return .row(
                 .bars,
@@ -128,35 +112,28 @@ extension KiwiShelfKey {
             return .luaOnly
         case .activeItemColor, .highlightColor, .hoverFillColor:
             // The accent's bar half (#1857).
-            return .row(
-                .advancedColours,
-                .accent,
-                .atRest,
-                gate: Self.showGate
-            )
+            return .row(.advancedColours, .accent, .atRest)
         case .fillColor, .itemColor, .hoverItemColor,
             .groupBadgeColor, .groupBadgeTextColor:
-            return .row(
-                .advancedColours,
-                .kiwishelf,
-                .atRest,
-                gate: Self.showGate
-            )
+            return .row(.advancedColours, .kiwishelf, .atRest)
         case .borderColor:
-            // Inert while no bar shows or the border is off (#1679).
+            // Inert while the border is off (#1679).
             return .row(
                 .advancedColours,
                 .kiwishelf,
                 .atRest,
-                gate: .anyOf(
-                    Self.showGate.settings + [.kiwishelf(.border)]
-                )
+                gate: .setting(.kiwishelf(.border))
             )
         }
     }
 
     var text: SettingRowText {
         switch self {
+        case .visibility:
+            return .text(
+                "kiwishelf.show.label",
+                help: "kiwishelf.show.visibility.help"
+            )
         case .edge:
             return .text(
                 "kiwishelf.edge.label",

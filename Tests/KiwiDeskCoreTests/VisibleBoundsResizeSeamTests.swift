@@ -29,8 +29,8 @@ struct VisibleBoundsResizeSeamTests {
         // (#537); this suite pins that it follows the hook at all.
         core.execute("set_gap_global", args: [.number(0)])
         core.execute(
-            "space_bar.set_enabled",
-            args: [.bool(false)]
+            "space_bar.set_visibility",
+            args: [.string("hidden")]
         )
         // Pin the defaults these fixtures reason from, the rule
         // this change set wrote into §5: a finished mouse resize

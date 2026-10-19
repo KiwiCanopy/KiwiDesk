@@ -1,10 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Mouse & trackpad ▸ On the KiwiShelf (#1726). Each entry greys
-/// on its own `GestureSurface`; the reason for every off surface is
-/// said once, at the group's foot, outside every grey — grey,
-/// don't hide, and a dim is not a sentence. The Spring delay is
+/// Mouse & trackpad ▸ On the KiwiShelf (#1726). The Spring delay is
 /// read and linked, never copied: its control is the Space Bar's.
 struct GesturesShelfEntries: View {
     @ObservedObject var model: SettingsModel
@@ -79,16 +76,6 @@ struct GesturesShelfEntries: View {
             playing: $playing
         )
         .gestureAnchored(.appBarHover)
-        ForEach(offReasons, id: \.self) { prose in
-            link(prose)
-        }
-    }
-
-    /// One sentence per surface that is off, in declaration order.
-    private var offReasons: [String] {
-        GestureSurface.allCases.compactMap { surface in
-            surface.isOff(settings) ? surface.offProse : nil
-        }
     }
 
     /// Every pointer to KiwiShelf & Bars this group draws.

@@ -183,7 +183,7 @@ struct ScreenEdgeTests {
     @Test("One screen fuses the bars, another splits them")
     func foldPerScreen() {
         var settings = settings(studioEdge: .top)
-        settings.monocle.appBar.enabled = true
+        settings.monocle.appBar.visibility = .always
         settings.appBarStyle.setEdge(
             .bottom,
             on: Self.studio,

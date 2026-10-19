@@ -52,6 +52,7 @@ struct SettingsSearchDrawerAnchorTests {
             (
                 .bars, "KiwiShelf", .kiwishelf,
                 [
+                    SettingsCatalog.bars.kiwishelfShowEach,
                     SettingsCatalog.bars.kiwishelfEdges,
                     SettingsCatalog.bars.kiwishelfStyle,
                     SettingsCatalog.bars.kiwishelfMargins,

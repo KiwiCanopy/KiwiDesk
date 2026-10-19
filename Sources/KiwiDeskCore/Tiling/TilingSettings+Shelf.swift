@@ -5,13 +5,6 @@ import Foundation
 /// for them (#1517, #1524, #1731), each answered per screen
 /// (#1948). Split from `TilingSettings+Resolution.swift`.
 extension TilingSettings {
-    /// Whether the KiwiShelf carries any bar in some layout — the
-    /// Space Bar or any layout's App Bar is on. The Settings gates
-    /// ask it; the reservation asks `shelfEdges(in:on:)`.
-    public var shelfShows: Bool {
-        spaceBarStyle.enabled || anyAppBarCanShow
-    }
-
     /// Whether either bar gives some screen an edge of its own.
     public var hasScreenEdges: Bool {
         !spaceBarStyle.edgeOverride.isEmpty
@@ -30,64 +23,60 @@ extension TilingSettings {
         var out = self
         out.spaceBarStyle.setEdge(spaceBarStyle.edge(on: screen))
         out.appBarStyle.setEdge(appBarStyle.edge(on: screen))
-        // Linked on another screen is linked here too (#761): the
-        // copy carries the one reading, since it keeps no entries.
-        out.spaceBarStyle.visibility = visibility(of: .space)
-        out.appBarStyle.visibility = visibility(of: .app)
         return out
     }
 
-    /// Whether the bars share an edge on ANY screen they can draw
-    /// on (#761) — each bar's own edge and every per-screen one,
-    /// whether a bar is on and whatever a layout draws. Linked
-    /// bars are one shelf, so they take one visibility.
-    public var barsLinked: Bool {
-        // Read through `edge(on:)`, never `onScreen`, which asks
-        // this to resolve the copy's visibility.
-        let screens = Set(spaceBarStyle.edgeOverride.keys)
-            .union(appBarStyle.edgeOverride.keys)
-        return ([nil] + screens.map { Optional($0) }).contains {
-            spaceBarStyle.edge(on: $0) == appBarStyle.edge(on: $0)
+    /// The App Bar's visibility in `mode` (#761) — its layout's
+    /// own value, or nil where the layout carries no App Bar.
+    public func appBarVisibility(in mode: LayoutMode) -> ShelfVisibility? {
+        appBarHost(for: mode)?.appBar.visibility
+    }
+
+    /// The visibility every bar shares — the Space Bar's and each
+    /// hosting layout's App Bar — or nil while they differ: what
+    /// Settings' Show master selects (#761).
+    public var uniformBarVisibility: ShelfVisibility? {
+        let all = [spaceBarStyle.visibility] + appBarHosts.map(\.visibility)
+        return Set(all).count == 1 ? all.first : nil
+    }
+
+    /// Sets every bar's own visibility at once — each still stored
+    /// per bar and per layout, nothing linked (#761).
+    public mutating func setEveryBarVisibility(_ visibility: ShelfVisibility) {
+        spaceBarStyle.visibility = visibility
+        for mode in LayoutMode.allCases {
+            setAppBarVisibility(visibility, in: mode)
         }
     }
 
-    /// `bar`'s visibility as the shelves read it — the ONE reader
-    /// (`BarVisibilitySeamTests`): its own while the bars are
-    /// apart, and while linked `auto` only where both stored
-    /// values are, since hiding needs both bars' consent.
-    public func visibility(of bar: ShelfBar) -> ShelfVisibility {
-        guard barsLinked else {
-            return bar == .space
-                ? spaceBarStyle.visibility : appBarStyle.visibility
-        }
-        return spaceBarStyle.visibility == .auto
-            && appBarStyle.visibility == .auto ? .auto : .always
-    }
-
-    /// Whether `bar`'s show/hide action can act anywhere (#761):
-    /// the bar is on — the App Bar in some layout — and reads
-    /// `auto`. The verb's own gate (`shelfRevealCommand`), and
-    /// the one a shortcut row or the hotkey table asks beside it;
-    /// a bar that is off does nothing.
-    public func revealActionLive(_ bar: ShelfBar) -> Bool {
-        let on =
-            bar == .space ? spaceBarStyle.enabled : anyAppBarCanShow
-        return on && visibility(of: bar) == .auto
-    }
-
-    /// Writes `bar`'s visibility — both bars' while they are
-    /// linked, so a fused shelf never holds two answers. The one
-    /// door every writer takes (`BarVisibilitySeamTests`).
-    public mutating func setVisibility(
-        _ value: ShelfVisibility,
-        of bar: ShelfBar
+    /// `mode`'s App Bar visibility, where the mode hosts one —
+    /// through the one `appBarPath(for:)`.
+    public mutating func setAppBarVisibility(
+        _ visibility: ShelfVisibility,
+        in mode: LayoutMode
     ) {
-        if bar == .space || barsLinked {
-            spaceBarStyle.visibility = value
+        guard let path = Self.appBarPath(for: mode) else { return }
+        self[keyPath: path].visibility = visibility
+    }
+
+    /// Whether `bar`'s shortcut can show it in `mode` (#761): the
+    /// bar is not `always` — and, for the App Bar, the layout
+    /// carries one. The verb's own gate (`shelfRevealCommand`); a
+    /// bar set to `always` refuses with a pill.
+    public func revealActionLive(
+        _ bar: ShelfBar,
+        in mode: LayoutMode
+    ) -> Bool {
+        switch bar {
+        case .space: spaceBarStyle.visibility.revealable
+        case .app: appBarVisibility(in: mode)?.revealable == true
         }
-        if bar == .app || barsLinked {
-            appBarStyle.visibility = value
-        }
+    }
+
+    /// Whether `bar`'s shortcut can show it in SOME layout — what
+    /// a Settings shortcut row asks to grey (#761).
+    public func revealActionLiveAnywhere(_ bar: ShelfBar) -> Bool {
+        LayoutMode.allCases.contains { revealActionLive(bar, in: $0) }
     }
 
     /// These settings as each screen they can draw on shows them
@@ -101,21 +90,22 @@ extension TilingSettings {
         return [onScreen(nil)] + screens.sorted().map { onScreen($0) }
     }
 
-    /// The edges a space laid out in `mode` on `screen` reserves —
-    /// of the edges `barEdges` lists for the Space Bar, which draws
-    /// in every layout, and that layout's own App Bar where it is
-    /// on (#1517, #1731), the ones that reserve (#1524). A layout
-    /// that draws no bar keeps the whole screen; the price is that
-    /// a switch into a layout whose App Bar draws on an edge
-    /// nothing else holds moves windows by the strip.
+    /// The edges a space laid out in `mode` on `screen` reserves
+    /// in full — of the edges `barEdges` lists for the Space Bar,
+    /// which sits in every layout, and that layout's own App Bar
+    /// (#1517, #1731), the ones that reserve (#1524) and read
+    /// `always` (#761). A layout whose bars are hidden keeps the
+    /// whole screen; the price is that a switch into a layout whose
+    /// App Bar is shown on an edge nothing else holds moves windows
+    /// by the strip.
     public func shelfEdges(
         in mode: LayoutMode,
         on screen: String?
     ) -> [AppBarEdge] {
         onScreen(screen).barEdges(
-            space: spaceBarStyle.enabled,
-            app: appBarHost(for: mode)?.appBar.enabled == true
-        ).filter { $0.reserves && !$0.hides }.map(\.edge)
+            space: spaceBarStyle.visibility,
+            app: appBarVisibility(in: mode)
+        ).filter { $0.reservation == .always }.map(\.edge)
     }
 
     /// The hiding edges a space laid out in `mode` on `screen`
@@ -127,48 +117,63 @@ extension TilingSettings {
         on screen: String?
     ) -> [AppBarEdge] {
         onScreen(screen).barEdges(
-            space: spaceBarStyle.enabled,
-            app: appBarHost(for: mode)?.appBar.enabled == true
-        ).filter { $0.reserves && $0.hides }.map(\.edge)
+            space: spaceBarStyle.visibility,
+            app: appBarVisibility(in: mode)
+        ).filter { $0.reservation == .auto }.map(\.edge)
     }
 
-    /// The edges the shown bars sit on — the ONE list the
-    /// reservation and the live plan both take, over settings
-    /// already resolved for a screen (`onScreen(_:)`): the Space
-    /// Bar's first, then the App Bar's unless the two share it, so
-    /// two bars are never stacked on one edge
-    /// (`ShelfSplitGeometryTests` ▸ `edgesPerMode`) and
-    /// `ShelfGeometry.strips` measures the Space Bar's whole edge.
-    /// A shared edge reserves while either bar on it does and
-    /// hides only while both do; a hiding edge that reserves takes
-    /// only its sliver (`hidingEdges`) — the folds are here, at the
-    /// dedup, and nowhere beside it (`BarReserveTests`, #1524;
+    /// Whether `bar`, stored `auto`, reads `always` in `mode` on
+    /// `screen` — beside an `always` bar on its edge (#761), which
+    /// keeps it shown: the note Settings draws under its row, and
+    /// why its shortcut refuses.
+    public func autoReadsAlways(
+        _ bar: ShelfBar,
+        in mode: LayoutMode,
+        on screen: String?
+    ) -> Bool {
+        onScreen(screen).barEdges(
+            space: spaceBarStyle.visibility,
+            app: appBarVisibility(in: mode)
+        ).contains { $0.bars[bar] == .auto && $0.shown(bar) == .always }
+    }
+
+    /// The edges the bars sit on — the ONE list the reservation
+    /// and the live plan both take, over settings already resolved
+    /// for a screen (`onScreen(_:)`), each bar handed in with its
+    /// visibility or nil where it is absent: the Space Bar's first,
+    /// then the App Bar's unless the two share it, so two bars are
+    /// never stacked on one edge (`ShelfSplitGeometryTests` ▸
+    /// `edgesPerMode`) and `ShelfGeometry.strips` measures the
+    /// Space Bar's whole edge. A shared edge reserves at the depth
+    /// its most present RESERVING bar asks
+    /// (`ShelfEdge.reservation`) — the folds are here, at the dedup,
+    /// and nowhere beside it (`BarReserveTests`, #1524;
     /// `BarAutoHideFoldTests`, #761).
-    public func barEdges(space: Bool, app: Bool) -> [ShelfEdge] {
+    public func barEdges(
+        space: ShelfVisibility?,
+        app: ShelfVisibility?
+    ) -> [ShelfEdge] {
         var edges: [ShelfEdge] = []
-        if space {
+        if let space {
             edges.append(
                 ShelfEdge(
                     spaceBarStyle.edge,
                     reserves: spaceBarStyle.reserve,
-                    hides: visibility(of: .space) == .auto
+                    bars: [.space: space]
                 )
             )
         }
-        if app {
-            let hides = visibility(of: .app) == .auto
+        if let app {
             if let shared = edges.firstIndex(where: {
                 $0.edge == appBarStyle.edge
             }) {
-                edges[shared].reserves =
-                    edges[shared].reserves || appBarStyle.reserve
-                edges[shared].hides = edges[shared].hides && hides
+                edges[shared].add(.app, app, reserves: appBarStyle.reserve)
             } else {
                 edges.append(
                     ShelfEdge(
                         appBarStyle.edge,
                         reserves: appBarStyle.reserve,
-                        hides: hides
+                        bars: [.app: app]
                     )
                 )
             }

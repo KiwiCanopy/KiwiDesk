@@ -34,72 +34,6 @@ struct GesturesDrawerTests {
         LocalizationManager.shared.select("en")
         let slot = CrossReferenceRow.linkSlot
         #expect(GesturesShelfEntries.springLinkProse.contains(slot))
-        for surface in [GestureSurface.spaceBar, .appBar] {
-            #expect(surface.offProse?.contains(slot) == true)
-        }
-        #expect(GestureSurface.windows.offProse == nil)
-    }
-
-    /// The surfaces ask Core's own shelf predicates, across every
-    /// pairing of the two bars — the default draft has an App Bar
-    /// on, so without the off fixtures half of this could not fail.
-    @Test(
-        "a surface is off exactly when its bar is",
-        arguments: [
-            (true, true), (true, false), (false, true), (false, false),
-        ]
-    )
-    func surfaceMatrix(spaceBar: Bool, appBar: Bool) {
-        var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = spaceBar
-        settings.monocle.appBar.enabled = appBar
-        settings.scrolling.appBar.enabled = appBar
-        #expect(settings.anyAppBarCanShow == appBar)
-        #expect(!GestureSurface.windows.isOff(settings))
-        #expect(GestureSurface.spaceBar.isOff(settings) == !spaceBar)
-        #expect(GestureSurface.appBar.isOff(settings) == !appBar)
-        #expect(
-            GestureSurface.shelf.isOff(settings) == !(spaceBar || appBar)
-        )
-    }
-
-    @Test("the default draft: the Space Bar on, a surface too")
-    func surfacesAskCore() {
-        var settings = TilingSettings()
-        #expect(!GestureSurface.windows.isOff(settings))
-        settings.spaceBarStyle.enabled = false
-        #expect(GestureSurface.spaceBar.isOff(settings))
-        #expect(
-            GestureSurface.shelf.isOff(settings)
-                == !settings.anyAppBarCanShow
-        )
-        #expect(
-            GestureSurface.appBar.isOff(settings)
-                == !settings.anyAppBarCanShow
-        )
-        settings.spaceBarStyle.enabled = true
-        #expect(!GestureSurface.spaceBar.isOff(settings))
-        #expect(!GestureSurface.shelf.isOff(settings))
-    }
-
-    /// Each gesture names the surface it teaches: swapping two
-    /// items' surfaces reds here. The entries take theirs from the
-    /// item (`GestureEntry+Item`), so this is the one copy.
-    @Test("each gesture greys on its own surface")
-    func itemNamesItsSurface() {
-        let expected: [GestureItem: GestureSurface] = [
-            .scrollStep: .windows, .spaceStep: .windows,
-            .hoverFocus: .windows, .followFocus: .windows,
-            .swap: .windows, .edge: .windows,
-            .dropOnSpace: .spaceBar, .spring: .spaceBar,
-            .glyphClick: .spaceBar, .glyphPeek: .spaceBar,
-            .shelfScroll: .shelf, .contextMenu: .shelf,
-            .appBarReorder: .appBar, .appBarHover: .appBar,
-        ]
-        #expect(Set(expected.keys) == Set(GestureItem.allCases))
-        for item in GestureItem.allCases {
-            #expect(item.surface == expected[item], "\(item)")
-        }
     }
 
     /// Every entry is built from its item and anchored so a strip
@@ -159,7 +93,7 @@ struct GesturesDrawerTests {
             Self.gestures + "GesturesShelfEntries.swift"
         )
         #expect(!group.contains("GreyOut("))
-        #expect(group.contains("ForEach(offReasons"))
+        #expect(!group.contains("offReasons"))
         let drawer = try Self.source(
             Self.gestures + "GesturesDrawer.swift"
         )
@@ -172,7 +106,7 @@ struct GesturesDrawerTests {
         #expect(entry.components(separatedBy: "GreyOut(").count == 2)
         #expect(
             entry.contains(
-                "privatevardim:GreyOut{GreyOut(active:surface.isOff("
+                "privatevardim:GreyOut{GreyOut(active:off)}"
             )
         )
         // The plate's chain and the sentence's each end on `dim`;

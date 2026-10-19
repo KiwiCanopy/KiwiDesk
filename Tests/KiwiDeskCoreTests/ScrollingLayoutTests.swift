@@ -33,7 +33,7 @@ struct ScrollingLayoutTests {
         // Isolate the column mechanics from the now-default
         // app bar (its strip carving is covered separately).
         var context = makeContext()
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         let frames = layout.calculateGeometry(
             for: [w1],
             in: context
@@ -63,7 +63,7 @@ struct ScrollingLayoutTests {
         // old first-placement-only seed would have held it), the
         // viewport pans to re-center — it is not `follow`.
         var context = makeContext(focused: w3)
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.anchor = .center
         context.scrolling.slotSize = .points(400)
         context.bounds = CGRect(x: 0, y: 0, width: 1420, height: 1080)
@@ -108,7 +108,7 @@ struct ScrollingLayoutTests {
     @Test("Columns keep fixed width and full height")
     func columnDimensions() throws {
         var context = makeContext(focused: w2)
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .points(800)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
@@ -128,7 +128,7 @@ struct ScrollingLayoutTests {
             bounds: CGRect(x: 0, y: 0, width: 1000, height: 800),
             focused: w1
         )
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.minWindowSize = 300
         context.scrolling.slotSize = .fraction(0.05)
         let frames = layout.calculateGeometry(
@@ -156,7 +156,7 @@ struct ScrollingLayoutTests {
         // plus one inner gap, less that gap (#1382) — on both
         // orientations (width here, height below).
         var horizontal = makeContext(focused: w1)
-        horizontal.scrolling.appBar.enabled = false
+        horizontal.scrolling.appBar.visibility = .hidden
         horizontal.scrolling.slotSize = .auto
         let hFrames = layout.calculateGeometry(
             for: [w1, w2, w3],
@@ -168,7 +168,7 @@ struct ScrollingLayoutTests {
         )
 
         var vertical = makeContext(focused: w1)
-        vertical.scrolling.appBar.enabled = false
+        vertical.scrolling.appBar.visibility = .hidden
         vertical.scrolling.orientation = .vertical
         vertical.scrolling.slotSize = .auto
         let vFrames = layout.calculateGeometry(
@@ -219,7 +219,7 @@ struct ScrollingLayoutTests {
             bounds: CGRect(x: 0, y: 0, width: 1020, height: 1080),
             focused: focused
         )
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .points(400)
         context.gaps.inner.horizontal = 0
         return context
@@ -291,7 +291,7 @@ struct ScrollingLayoutTests {
             bounds: CGRect(x: 0, y: 0, width: 900, height: 1080),
             focused: many[19]
         )
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .fraction(0.05)
         let frames = layout.calculateGeometry(
             for: many,

@@ -1,21 +1,37 @@
 /// Display order for the Bars settings area (#678, `BarsCensusRenderTests`).
 enum BarsRowOrder {
-    /// KiwiShelf card, Show group: which bars the shelf carries.
+    /// KiwiShelf card, Show group: the master, its Each bar
+    /// drawer, then the Space cue (#761).
     static let kiwishelfShow: [SettingKey] = [
-        .spaceBar(.spaceBarEnabled),
+        .kiwishelf(.visibility),
         .spaceBar(.spaceCue),
-        .layoutAppBar(.monocleAppBarEnabled),
-        .layoutAppBar(.scrollingAppBarEnabled),
     ]
 
-    /// KiwiShelf card, at rest below the Show group.
-    static let kiwishelfAtRest: [SettingKey] = [
+    /// KiwiShelf card, behind Show's Each bar disclosure (#761).
+    static let kiwishelfShowEach: [SettingKey] = [
+        .spaceBar(.spaceBarVisibility),
+        .layoutAppBar(.monocleAppBarVisibility),
+        .layoutAppBar(.scrollingAppBarVisibility),
+    ]
+
+    /// KiwiShelf card, at rest below the Show group: where the
+    /// bars sit, coarse to fine.
+    static let kiwishelfPlacement: [SettingKey] = [
         .kiwishelf(.edge),
-        .kiwishelf(.thickness),
         .kiwishelf(.alignment),
         .kiwishelf(.order),
         .kiwishelf(.minimum),
     ]
+
+    /// KiwiShelf card, after a rule: how deep the strip is.
+    static let kiwishelfDepth: [SettingKey] = [
+        .kiwishelf(.thickness)
+    ]
+
+    /// KiwiShelf card, every at-rest row below the Show group.
+    static var kiwishelfAtRest: [SettingKey] {
+        kiwishelfPlacement + kiwishelfDepth
+    }
 
     /// KiwiShelf card, behind Position's Each bar disclosure
     /// (#1731).

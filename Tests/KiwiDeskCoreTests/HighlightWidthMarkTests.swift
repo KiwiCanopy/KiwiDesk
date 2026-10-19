@@ -45,11 +45,11 @@ struct HighlightWidthMarkTests {
         )
         core.resolveSpaceDisplays(mainID: display.id)
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        settings.spaceBarStyle.visibility = .always
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         settings.barEdge = .top
-        settings.setVisibility(.auto, of: .space)
+        settings.spaceBarStyle.visibility = .auto
         settings.kiwishelf.highlightWidth = 2
         settings.borderStyle.sheen = 0.5
         core.tiler.settings = settings

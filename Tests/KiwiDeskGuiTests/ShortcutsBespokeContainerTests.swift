@@ -34,19 +34,23 @@ struct ShortcutsBespokeContainerTests {
         }
         // Each order list, and the container it serves.
         let lists: [(String, SettingsContainer, [SettingKey])] = [
-            // KiwiHub's three sides (#2265).
+            // Show & hide's three sub-groups: KiwiHub's sides
+            // (#2265), the bars (#761), KiwiVision (#2312).
             (
-                "kiwiHubAtRest", .kiwiHub,
+                "kiwiHubAtRest", .showHide,
                 ShortcutsRowOrder.kiwiHubAtRest
             ),
             (
                 "focusAtRest", .focus,
                 ShortcutsRowOrder.focusAtRest
             ),
-            // KiwiVision's toggle, and its lenses' later (#2312).
             (
-                "kiwiVisionAtRest", .kiwiVisionShortcuts,
+                "kiwiVisionAtRest", .showHide,
                 ShortcutsRowOrder.kiwiVisionAtRest
+            ),
+            (
+                "kiwishelfAtRest", .showHide,
+                ShortcutsRowOrder.kiwishelfAtRest
             ),
             (
                 "moveWindowsAtRest", .moveWindows,

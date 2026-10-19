@@ -35,12 +35,10 @@ enum SettingsContainer: CaseIterable, Hashable {
     case glass
     case grid
     case habits
-    /// Shortcuts' KiwiHub group: the key panel's three sides
-    /// (#2265).
-    case kiwiHub
-    /// Shortcuts' KiwiVision group: its toggle and, with #2103
-    /// v3, each lens's (#2312).
-    case kiwiVisionShortcuts
+    /// Shortcuts' Show & hide card: KiwiHub's three sides
+    /// (#2265), the bars' show/hide (#761), and KiwiVision's
+    /// toggle and lenses (#2312), one sub-group each.
+    case showHide
     case kiwishelf
     case appliesImmediately
     case layers
@@ -87,13 +85,6 @@ enum SettingsContainer: CaseIterable, Hashable {
             // as a unit under Reduce transparency (#1418), the
             // Motion card's shape.
             return .runtime(.reduceTransparency)
-        case .appBar:
-            return .anyOf([
-                .layoutAppBar(.monocleAppBarEnabled),
-                .layoutAppBar(.scrollingAppBarEnabled),
-            ])
-        case .spaceBar:
-            return .setting(.spaceBar(.spaceBarEnabled))
         case .focusBorder:
             return .setting(.borders(.borderEnabled))
         case .motion:
@@ -102,13 +93,16 @@ enum SettingsContainer: CaseIterable, Hashable {
             // Glass's shape (#1418): the blur greys under Reduce
             // transparency, the dim is exempt.
             return .runtime(.reduceTransparency)
+        case .appBar, .spaceBar:
+            // A hidden bar's shortcut still shows it, so its style
+            // always matters (#761).
+            return nil
         case .accent, .advanced, .aiSetup, .readyMadePrompts,
             .kiwiVisionAppearance, .kiwiVisionClear,
             .kiwiVisionNeverDimmed, .kiwiVisionLenses,
             .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
-            .focus, .gaps, .general, .grid, .kiwiHub,
-            .kiwiVisionShortcuts,
+            .focus, .gaps, .general, .grid, .showHide,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .layout,
             .looks, .luaBindings,

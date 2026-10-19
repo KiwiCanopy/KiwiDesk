@@ -1,7 +1,6 @@
 /// The Space Bar (`SpaceBarStyle`) slice of the census.
 
 enum SpaceBarKey: String, CaseIterable, Hashable {
-    case spaceBarEnabled = "settings.spaceBarStyle.enabled"
     case spaceBarReserve = "settings.spaceBarStyle.reserve"
     case spaceBarVisibility = "settings.spaceBarStyle.visibility"
     case spaceBarActiveIndicator = "settings.spaceBarStyle.activeIndicator"
@@ -30,14 +29,15 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
 extension SpaceBarKey {
     var placement: SettingPlacement {
         switch self {
-        case .spaceBarEnabled:
-            // Owns the .spaceBar container gate, and is drawn in
-            // the KiwiShelf card's Show group, which has none.
-            return .row(.bars, .kiwishelf, .atRest)
+        case .spaceBarVisibility:
+            // Behind the Show master's Each bar drawer (#761); a
+            // hidden bar's shortcut still shows it, so it gates
+            // nothing.
+            return .row(.bars, .kiwishelf, .showMore)
         case .spaceCue:
-            // Under the Space Bar switch in the Show group, which
-            // has no block gate: it matters most while the bar is
-            // off, where the Space Bar card greys (#2228). App-wide
+            // Under the Space Bar row in the Show group, which has
+            // no block gate: it matters most while the bar is
+            // hidden (#2228, #761). App-wide
             // (#1741), so it greys where init.lua owns the config,
             // as the Desktop cue does (#2142).
             return .row(
@@ -66,9 +66,6 @@ extension SpaceBarKey {
             // Lua/CLI only by ruling (#1524): its dead zone
             // is a cost a row would have to explain.
             return .luaOnly
-        case .spaceBarVisibility:
-            // Lua/CLI until its Settings row lands (#761).
-            return .luaOnly
         case .spaceBarFocusedItemColor:
             // Inert when front-app is off or icon source does not tint.
             return .row(
@@ -76,7 +73,6 @@ extension SpaceBarKey {
                 .secondAccent,
                 .atRest,
                 gate: .anyOf([
-                    .spaceBar(.spaceBarEnabled),
                     .kiwishelf(.iconSource),
                     .spaceBar(.spaceBarShowFrontApp),
                     .kiwishelf(.spaceBarEdge),
@@ -88,10 +84,7 @@ extension SpaceBarKey {
                 .advancedColours,
                 .secondAccent,
                 .atRest,
-                gate: .anyOf([
-                    .spaceBar(.spaceBarEnabled),
-                    .spaceBar(.spaceBarShowFrontApp),
-                ])
+                gate: .setting(.spaceBar(.spaceBarShowFrontApp))
             )
         }
     }
@@ -100,7 +93,7 @@ extension SpaceBarKey {
 extension SpaceBarKey {
     var text: SettingRowText {
         switch self {
-        case .spaceBarEnabled:
+        case .spaceBarVisibility:
             return .text("kiwishelf.show.space_bar")
         case .spaceBarActiveIndicator:
             return .text("space_bar.active_indicator.label")
@@ -150,7 +143,7 @@ extension SpaceBarKey {
                 help: "space_bar.front_app_title_cap.help"
             )
         case .spaceBarActiveDimFactor, .spaceBarStickyBadge,
-            .spaceBarReserve, .spaceBarVisibility:
+            .spaceBarReserve:
             return .none
         case .spaceCue:
             return .text("space_bar.cue", help: "space_bar.cue.help")

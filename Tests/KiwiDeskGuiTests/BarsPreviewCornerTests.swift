@@ -17,8 +17,8 @@ struct BarsPreviewCornerTests {
         spaceBar: Bool = true
     ) -> HomeCardBarsTile {
         var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = spaceBar
-        settings.monocle.appBar.enabled = true
+        settings.spaceBarStyle.visibility = spaceBar ? .always : .hidden
+        settings.monocle.appBar.visibility = .always
         settings.spaceBarStyle.edge = space
         settings.appBarStyle.edge = app
         return HomeCardBarsTile(settings: settings)
@@ -36,10 +36,10 @@ struct BarsPreviewCornerTests {
         var settings = TilingSettings()
         settings.spaceBarStyle.edge = .bottom
         settings.appBarStyle.edge = .right
-        settings.monocle.appBar.enabled = true
+        settings.monocle.appBar.visibility = .always
         #expect(
             HomeCardBarsTile(settings: settings).rowsRunFullWidth
-                == settings.barEdges(space: true, app: true)
+                == settings.barEdges(space: .always, app: .always)
                 .first?.edge.isHorizontal
         )
     }

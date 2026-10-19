@@ -37,8 +37,8 @@ struct BspFocusResizeTests {
         // (`LayoutBoundsResizeSeamTests`); this one is about the
         // #383 cap.
         core.execute(
-            "space_bar.set_enabled",
-            args: [.bool(false)]
+            "space_bar.set_visibility",
+            args: [.string("hidden")]
         )
         return core
     }

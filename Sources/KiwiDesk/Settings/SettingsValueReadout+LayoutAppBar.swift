@@ -12,15 +12,18 @@ extension SettingsValueReadout {
         let o = layoutBar(old, mode)
         let n = layoutBar(new, mode)
         switch key {
-        case .monocleAppBarEnabled, .scrollingAppBarEnabled:
+        case .monocleAppBarVisibility, .scrollingAppBarVisibility:
             // The one always-present field; the census label is
             // already the layout's own name.
+            let words = Dictionary(
+                uniqueKeysWithValues: AppBarOptions.visibility
+            )
             return [
                 .change(
                     census,
                     label: label(for: census),
-                    old: onOff(o.enabled),
-                    new: onOff(n.enabled)
+                    old: words[o.visibility] ?? "",
+                    new: words[n.visibility] ?? ""
                 )
             ]
         case .monocleAppBarActiveIndicator,
@@ -74,11 +77,11 @@ extension SettingsValueReadout {
         _ key: LayoutAppBarKey
     ) -> LayoutMode {
         switch key {
-        case .monocleAppBarEnabled, .monocleAppBarActiveIndicator,
+        case .monocleAppBarVisibility, .monocleAppBarActiveIndicator,
             .monocleAppBarTitleCap,
             .monocleAppBarGroupAdjacentWindows:
             return .monocle
-        case .scrollingAppBarEnabled, .scrollingAppBarActiveIndicator,
+        case .scrollingAppBarVisibility, .scrollingAppBarActiveIndicator,
             .scrollingAppBarTitleCap,
             .scrollingAppBarGroupAdjacentWindows:
             return .scrolling

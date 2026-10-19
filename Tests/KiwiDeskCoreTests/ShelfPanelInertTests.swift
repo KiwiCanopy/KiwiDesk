@@ -40,8 +40,8 @@ struct ShelfPanelInertTests {
         let id = core.state.workspaces.space(of: Self.window)!
         core.state.workspaces.setMode(id, .scrolling)
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.scrolling.appBar.enabled = true
+        settings.spaceBarStyle.visibility = .always
+        settings.scrolling.appBar.visibility = .always
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()

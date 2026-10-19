@@ -29,11 +29,11 @@ struct ShelfAutoHideLifetimeTests {
         )
         core.resolveSpaceDisplays(mainID: display.id)
         var settings = core.tiler.settings
-        settings.spaceBarStyle.enabled = true
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
+        settings.spaceBarStyle.visibility = .always
+        settings.monocle.appBar.visibility = .hidden
+        settings.scrolling.appBar.visibility = .hidden
         settings.barEdge = .top
-        settings.setVisibility(.auto, of: .space)
+        settings.spaceBarStyle.visibility = .auto
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
@@ -41,7 +41,7 @@ struct ShelfAutoHideLifetimeTests {
     }
 
     @Test(
-        "A retracted hiding shelf is kept; one that stops hiding goes",
+        "A retracted hiding shelf is kept; one that stops hiding draws",
         .enabled(if: NSScreen.main != nil)
     )
     func keptBetweenReveals() throws {
@@ -53,9 +53,14 @@ struct ShelfAutoHideLifetimeTests {
         )
         _ = core.execute("space_bar.toggle_reveal", args: [])
         #expect(core.shelves.overlayForTesting(display, edge: .top) === shown)
-        core.tiler.settings.spaceBarStyle.enabled = false
+        // Hidden, the bar still waits for its shortcut: kept.
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.updateBars()
-        #expect(core.shelves.overlayForTesting(display, edge: .top) == nil)
+        #expect(core.shelves.overlayForTesting(display, edge: .top) === shown)
+        // Always, it draws.
+        core.tiler.settings.spaceBarStyle.visibility = .always
+        core.updateBars()
+        #expect(core.shelves.overlayForTesting(display, edge: .top) != nil)
     }
 
     @Test(

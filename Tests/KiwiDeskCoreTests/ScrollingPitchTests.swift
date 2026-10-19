@@ -47,8 +47,8 @@ struct ScrollingPitchTests {
         )
         // And no bar strip on the x axis (#660): both bars off,
         // so the carve is the region on the axis measured.
-        core.tiler.settings.scrolling.appBar.enabled = false
-        core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.scrolling.appBar.visibility = .hidden
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         for id: UInt32 in 1...2 {
             core.state.apply(
                 .windowCreated(
@@ -104,7 +104,7 @@ struct ScrollingPitchTests {
             gaps: .uniform(gap),
             focused: focused
         )
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .fraction(fraction)
         return context
     }

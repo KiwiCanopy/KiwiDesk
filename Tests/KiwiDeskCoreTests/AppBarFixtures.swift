@@ -21,13 +21,12 @@ enum AppBarFixtures {
         style.edge = .left
         style.edgeOverride = ["Screen:1x1": .right]
         style.reserve = false
-        style.visibility = .auto
         return style
     }
 
     static func everyOverrideField() -> LayoutAppBar {
         var bar = LayoutAppBar()
-        bar.enabled = false
+        bar.visibility = .hidden
         bar.activeIndicator = .edgeMark
         bar.titleCap = 60
         bar.groupAdjacentWindows = true

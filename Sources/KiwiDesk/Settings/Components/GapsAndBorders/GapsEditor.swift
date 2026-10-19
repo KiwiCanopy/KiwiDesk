@@ -36,6 +36,7 @@ struct GapsEditor: View {
             )
             SettingsDisclosure(
                 perEdge,
+                chrome: .attached,
                 isExpanded: outerDisclosure,
                 scrollHoisted: true
             ) {
@@ -71,6 +72,7 @@ struct GapsEditor: View {
             )
             SettingsDisclosure(
                 perAxis,
+                chrome: .attached,
                 isExpanded: innerDisclosure,
                 scrollHoisted: true
             ) {

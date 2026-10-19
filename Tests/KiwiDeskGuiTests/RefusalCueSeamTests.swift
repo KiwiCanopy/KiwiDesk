@@ -75,6 +75,10 @@ struct RefusalCueSeamTests {
             + joined.occurrences(
                 of: "soundIfDrawn(stickyMarks.flash("
             )
+            // A bar shortcut's refusal (#761), through the door.
+            + joined.occurrences(
+                of: "soundIfDrawn(flashRefusalPill("
+            )
         #expect(drawn > 0)
         #expect(joined.occurrences(of: "soundIfDrawn(") == drawn + 1)
         // And the speaker is reached only THROUGH that gate. The
@@ -290,6 +294,9 @@ struct RefusalCueSeamTests {
                 "KiwiCore+SizeLimitPill.swift": 1,
                 "KiwiCore+WindowActions.swift": 1,
                 "KiwiCore+VisionReach.swift": 1,
+                // A bar's shortcut refused (#761), sounded
+                // through `soundIfDrawn`.
+                "KiwiCore+ShelfRevealCue.swift": 2,
             ],
             "found: \(callers)"
         )
@@ -310,5 +317,22 @@ struct RefusalCueSeamTests {
         )
         #expect(primitive == 1)
         #expect(door.occurrences(of: "borders.flashSizeLimitPill(") == 1)
+        // The shelf twin's primitive likewise (#761): once, from its
+        // own door's body.
+        var shelfPrimitive = 0
+        for file in try SourceScan.swiftSources(under: core) {
+            shelfPrimitive += try Self.file(file).occurrences(
+                of: "borders.flashShelfPill("
+            )
+        }
+        let shelfDoor = Self.stripped(
+            try SourceScan.functionBody(
+                of: "flashRefusalPill",
+                in: "KiwiCore+ShelfPill.swift",
+                under: "App"
+            )
+        )
+        #expect(shelfPrimitive == 1)
+        #expect(shelfDoor.occurrences(of: "borders.flashShelfPill(") == 1)
     }
 }

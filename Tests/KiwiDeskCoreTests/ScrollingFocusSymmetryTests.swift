@@ -23,7 +23,7 @@ private func makeContext(
         gaps: .uniform(10),
         focused: focused
     )
-    context.scrolling.appBar.enabled = false
+    context.scrolling.appBar.visibility = .hidden
     context.scrolling.slotSize = .points(400)
     context.gaps.inner.horizontal = 0
     context.scrolling.anchor = anchor

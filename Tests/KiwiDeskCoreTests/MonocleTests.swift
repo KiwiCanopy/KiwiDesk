@@ -38,7 +38,9 @@ struct MonocleGeometryTests {
         arguments: [true, false]
     )
     func fillsUsable(barEnabled: Bool) throws {
-        let context = makeContext { $0.appBar.enabled = barEnabled }
+        let context = makeContext {
+            $0.appBar.visibility = barEnabled ? .always : .hidden
+        }
         let frames = layout.calculateGeometry(
             for: ids(3),
             in: context
@@ -70,7 +72,7 @@ struct MonocleSettingsTests {
     func codableRoundTrip() throws {
         var settings = TilingSettings()
         settings.monocle.orientation = .vertical
-        settings.monocle.appBar.enabled = false
+        settings.monocle.appBar.visibility = .hidden
         settings.monocle.appBar.activeIndicator = .outline
         settings.monocle.appBar.titleCap = 7
         settings.monocle.appBar.groupAdjacentWindows = false
@@ -96,7 +98,7 @@ struct MonocleSettingsTests {
         )
         #expect(global["title_cap"] as? Int == 10)
         // The per-layout bar under monocle only carries its
-        // own enabled flag until a field is overridden.
+        // own visibility until a field is overridden.
         let layout = try #require(
             json["layout"] as? [String: Any]
         )
@@ -106,7 +108,7 @@ struct MonocleSettingsTests {
         let bar = try #require(
             monocle["app_bar"] as? [String: Any]
         )
-        #expect(bar["enabled"] as? Bool == true)
+        #expect(bar["visibility"] as? String == "always")
         #expect(bar["title_cap"] == nil)
     }
 
@@ -118,7 +120,7 @@ struct MonocleSettingsTests {
             from: Data(json.utf8)
         )
         #expect(decoded.monocle == MonocleParams())
-        #expect(decoded.monocle.appBar.enabled)
+        #expect(decoded.monocle.appBar.visibility == .always)
         // Nothing is overridden, so every look field inherits.
         #expect(decoded.monocle.appBar.titleCap == nil)
         #expect(decoded.monocle.orientation == .horizontal)
@@ -138,6 +140,6 @@ struct MonocleSettingsTests {
         #expect(decoded.monocle.appBar.titleCap == 30)
         // Unlisted fields stay nil (inherit the global style).
         #expect(decoded.monocle.appBar.activeIndicator == nil)
-        #expect(decoded.monocle.appBar.enabled)
+        #expect(decoded.monocle.appBar.visibility == .always)
     }
 }

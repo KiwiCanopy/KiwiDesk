@@ -32,9 +32,9 @@ extension APIReference {
             "Sets where a new window lands in the monocle cycle.",
             .choice("placement", SpawnPlacement.self)
         ),
-        "set_app_bar_enabled": APIRecord(
-            "Shows or hides the App Bar in the monocle layout.",
-            .boolean("enabled")
+        "set_app_bar_visibility": APIRecord(
+            "Sets the monocle App Bar to always, auto or hidden.",
+            .choice("visibility", ShelfVisibility.self)
         ),
         "set_app_bar_active_indicator": APIRecord(
             "Overrides the App Bar's focus marker for this "

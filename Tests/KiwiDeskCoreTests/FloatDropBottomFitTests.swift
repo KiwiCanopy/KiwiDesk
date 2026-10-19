@@ -83,7 +83,7 @@ struct FloatDropBottomFitTests {
             )
         )
         core.resolveSpaceDisplays(mainID: display.id)
-        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.visibility = .always
         core.tiler.settings.barEdge = edge
         core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }

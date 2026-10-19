@@ -109,8 +109,8 @@ enum AppBarCommandSetting {
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
         case .reserve(let value): style.reserve = value
-        // Through `TilingSettings.setVisibility(_:of:)` alone, which
-        // writes both bars while they share an edge (#761).
+        // A layout's own value (#761), written through
+        // `apply(to: LayoutAppBar)` alone.
         case .visibility: break
         }
     }
@@ -119,7 +119,8 @@ enum AppBarCommandSetting {
     /// field in `AppBarStyle.layoutFixedKeys` has none to write.
     func apply(to bar: inout LayoutAppBar) {
         switch self {
-        case .edge, .screenEdge, .reserve, .visibility: break
+        case .edge, .screenEdge, .reserve: break
+        case .visibility(let value): bar.visibility = value
         case .activeIndicator(let value):
             bar.activeIndicator = value
         case .titleCap(let value): bar.titleCap = value

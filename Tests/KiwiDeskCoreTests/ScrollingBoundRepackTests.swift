@@ -33,7 +33,7 @@ struct ScrollingBoundRepackTests {
             gaps: .uniform(10),
             focused: focused
         )
-        context.scrolling.appBar.enabled = false
+        context.scrolling.appBar.visibility = .hidden
         context.scrolling.slotSize = .points(600)
         return context
     }

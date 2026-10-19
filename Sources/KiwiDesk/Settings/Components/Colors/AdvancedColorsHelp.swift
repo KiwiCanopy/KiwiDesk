@@ -142,18 +142,6 @@ enum AdvancedColorsHelp {
         )
     }
 
-    /// No bar shows, so the shelf draws no colour (#705, #818).
-    static var kiwishelfOff: String {
-        L(
-            "colors.kiwishelf_off.help",
-            "No bar shows, so these colors aren't drawn. In %1$@, "
-                + "turn one on under “%2$@” in %3$@.",
-            SettingsDestination.bars.title,
-            L("kiwishelf.show.label", "Show"),
-            L("bars.switch.kiwishelf", "KiwiShelf")
-        )
-    }
-
     /// The icon mode is INTERPOLATED from the picker entry's own
     /// key rather than named as text (#818) — this help lives on
     /// another page than the picker it names, which is exactly
