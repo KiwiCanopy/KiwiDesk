@@ -14,19 +14,24 @@ extension ShelfRevealer {
         /// Where the pointer lights the mark's hover cue: around
         /// the mark, and the band.
         var near: CGRect?
+        /// Where the bar draws while shown, nil while it is not —
+        /// with the band, what holds a hover reveal open.
+        var section: CGRect?
 
         init(
             edge: AppBarEdge,
             strip: CGRect,
             screen: CGRect,
             band: CGRect?,
-            near: CGRect? = nil
+            near: CGRect? = nil,
+            section: CGRect? = nil
         ) {
             self.edge = edge
             self.strip = strip
             self.screen = screen
             self.band = band
             self.near = band.map { (near ?? $0).union($0) }
+            self.section = section
         }
 
         /// A target the pointer can open: the band and its cue.
@@ -35,25 +40,30 @@ extension ShelfRevealer {
             strip: CGRect,
             screen: CGRect,
             band: CGRect? = nil,
-            near: CGRect? = nil
+            near: CGRect? = nil,
+            section: CGRect? = nil
         ) -> Target {
             Target(
                 edge: edge,
                 strip: strip,
                 screen: screen,
                 band: band ?? ShelfReveal.band(of: strip, edge: edge),
-                near: near
+                near: near,
+                section: section
             )
         }
 
         /// Whether the pointer can open it.
         var hovers: Bool { band != nil }
 
-        /// Where the pointer holds a shown bar: the strip and its
-        /// band, out to the push reach, so a pointer resting on the
-        /// screen's last row is inside (`CGRect` excludes `maxY`).
+        /// Where the pointer holds a shown bar: the section it
+        /// draws and its band — never the rest of the edge — out to
+        /// the push reach, so a pointer resting on the screen's
+        /// last row is inside (`CGRect` excludes `maxY`).
         var zone: CGRect {
-            strip.union(band ?? strip).insetBy(
+            let held = [section, band].compactMap { $0 }
+                .reduce(CGRect.null) { $0.union($1) }
+            return (held.isNull ? strip : held).insetBy(
                 dx: -ShelfReveal.pushReach,
                 dy: -ShelfReveal.pushReach
             )

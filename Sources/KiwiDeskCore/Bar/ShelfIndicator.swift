@@ -1,13 +1,14 @@
 import AppKit
 
-/// What a hiding shelf draws while hidden (#761): Space dots where
-/// it carries the Space Bar, alone or fused, else a short line.
+/// What a hiding bar draws while hidden (#761): Space dots for the
+/// Space Bar, a short line for the App Bar — one mark per bar, two
+/// on an edge both bars hide on.
 struct ShelfIndicatorSpec: Equatable {
     enum Mark: Equatable {
         /// One per Space on the screen, in bar order.
         case dots([Dot])
-        /// A lone App Bar's: no window dots, so the App Bar has
-        /// one hidden look.
+        /// The App Bar's: no window dots, so the App Bar has one
+        /// hidden look.
         case line
     }
 
@@ -30,7 +31,7 @@ struct ShelfIndicatorSpec: Equatable {
     let emptyInk: String
     /// The bars' indicator colour, the hover's border.
     let highlight: String
-    /// Whether the shelf is shown over it: the indicator then
+    /// Whether its bar is shown over it: the indicator then
     /// draws nothing but stays for VoiceOver, its value "shown".
     let shown: Bool
     /// The pointer rests in the band, the reveal delay running:
@@ -44,6 +45,13 @@ struct ShelfIndicatorSpec: Equatable {
     var rimWidth: CGFloat = hoverGrowth
     /// The bars' indicator sheen (`BorderSheen`); 0 draws flat.
     var sheen: CGFloat = 0
+    /// Its bar is hidden while a sibling on its edge shows: the
+    /// mouse opens one bar at a time, so the mark gives way as
+    /// under its own bar, VoiceOver still reading it hidden.
+    var yields = false
+
+    /// Whether the mark draws nothing: its bar or a sibling shows.
+    var standsAside: Bool { shown || yields }
 
     /// A dot's ink, by the bar's own ladder: current, then held
     /// windows, then empty.
@@ -87,27 +95,33 @@ struct ShelfIndicatorSpec: Equatable {
     }
 
     /// Where the indicator sits on `strip` (AX, y down): centred
-    /// along `edge`, against its screen side.
+    /// on `centre` — an offset along `edge` from the strip's start,
+    /// its band's middle — else on the strip, against its screen
+    /// side.
     static func frame(
         of mark: Mark,
         in strip: CGRect,
-        edge: AppBarEdge
+        edge: AppBarEdge,
+        centre: CGFloat? = nil
     ) -> CGRect {
+        let horizontal = edge.isHorizontal
         let along = min(
             length(of: mark),
-            edge.isHorizontal ? strip.width : strip.height
+            horizontal ? strip.width : strip.height
         )
+        let midX = centre.map { strip.minX + $0 } ?? strip.midX
+        let midY = centre.map { strip.minY + $0 } ?? strip.midY
         switch edge {
         case .top:
             return CGRect(
-                x: strip.midX - along / 2,
+                x: midX - along / 2,
                 y: strip.minY + inset,
                 width: along,
                 height: depth
             )
         case .bottom:
             return CGRect(
-                x: strip.midX - along / 2,
+                x: midX - along / 2,
                 y: strip.maxY - inset - depth,
                 width: along,
                 height: depth
@@ -115,14 +129,14 @@ struct ShelfIndicatorSpec: Equatable {
         case .left:
             return CGRect(
                 x: strip.minX + inset,
-                y: strip.midY - along / 2,
+                y: midY - along / 2,
                 width: depth,
                 height: along
             )
         case .right:
             return CGRect(
                 x: strip.maxX - inset - depth,
-                y: strip.midY - along / 2,
+                y: midY - along / 2,
                 width: depth,
                 height: along
             )
@@ -185,13 +199,13 @@ final class ShelfIndicator {
     }
 }
 
-/// Every hiding shelf's indicator, keyed like its shelf.
+/// Every hiding bar's indicator, keyed like its reveal.
 @MainActor
 final class ShelfIndicators {
-    typealias Key = ShelfManager.Key
+    typealias Key = ShelfRevealer.Key
 
     private var indicators: [Key: ShelfIndicator] = [:]
-    /// The indicator's press: the show/hide action on its shelf.
+    /// The indicator's press: the show/hide action on its bar.
     var onPress: @MainActor (Key) -> Void = { _ in }
     #if DEBUG
         /// Off in both `makeTestCore` twins (#1894).
@@ -199,19 +213,19 @@ final class ShelfIndicators {
     #endif
 
     /// Shows `specs`, dropping every indicator absent from them.
-    func sync(_ specs: [Key: (spec: ShelfIndicatorSpec, space: Bool)]) {
+    func sync(_ specs: [Key: ShelfIndicatorSpec]) {
         for key in indicators.keys where specs[key] == nil {
             indicators.removeValue(forKey: key)?.hide()
         }
-        for (key, entry) in specs {
+        for (key, spec) in specs {
             let indicator = indicators[key] ?? ShelfIndicator()
             indicators[key] = indicator
             #if DEBUG
                 indicator.ordersPanel = ordersIndicatorPanels
             #endif
-            indicator.view.carriesSpaceBar = entry.space
+            indicator.view.carriesSpaceBar = key.bar == .space
             indicator.view.onPress = { [weak self] in self?.onPress(key) }
-            indicator.show(entry.spec)
+            indicator.show(spec)
         }
     }
 

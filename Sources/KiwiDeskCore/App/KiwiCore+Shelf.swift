@@ -119,9 +119,9 @@ extension KiwiCore {
                     carriesApp: $0.arrangement.app != nil,
                     divider: $0.arrangement.divider,
                     slides: $0.hides,
-                    mark: hiding.indicators[
+                    mark: hiding.marks[
                         ShelfManager.Key(display: display.id, edge: $0.edge)
-                    ]?.spec.frame
+                    ]
                 )
             }
             if let app,

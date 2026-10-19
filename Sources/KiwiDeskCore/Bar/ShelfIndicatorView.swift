@@ -57,14 +57,14 @@ final class ShelfIndicatorView: NSView {
         )
         // The plate gives way under the shelf it reveals and
         // comes back as the shelf retracts into it.
-        if let was, was.shown != spec.shown, animated {
+        if let was, was.standsAside != spec.standsAside, animated {
             BarMotion.fadeMark(
                 body,
-                showing: !spec.shown,
+                showing: !spec.standsAside,
                 morphs: spec.morphs
             )
-        } else if was?.shown != spec.shown || !animated {
-            body.alphaValue = spec.shown ? 0 : 1
+        } else if was?.standsAside != spec.standsAside || !animated {
+            body.alphaValue = spec.standsAside ? 0 : 1
         }
     }
 

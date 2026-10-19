@@ -95,24 +95,18 @@ final class ShelfRevealer {
         )
     }
 
-    /// The action on a whole shelf — a press on its mark: one
-    /// direction for every bar the pointer can open there, so a
-    /// press never swaps one bar for its sibling. Any shown is
-    /// hidden; else every one is shown.
-    func toggleShelf(_ shelf: ShelfManager.Key, duration: TimeInterval) {
-        let keys = targets.filter { $0.key.shelf == shelf && $0.value.hovers }
-            .map(\.key)
-        let shown = keys.filter { reveal(of: $0).isShown }
-        for key in shown.isEmpty ? keys : shown {
-            toggle(key, duration: duration)
-        }
-    }
-
     /// The hiding bars of this pass; a bar that stopped hiding
     /// forgets its state.
     func sync(_ next: [Key: Target]) {
         for key in targets.keys where next[key] == nil {
             forget(key)
+        }
+        // A hidden bar whose band went — its sibling shown, the
+        // mouse opening one bar at a time — drops its pending hover.
+        for (key, target) in next
+        where !target.hovers && reveal(of: key) == .hidden {
+            cancelTimer(key)
+            arming.remove(key)
         }
         targets = next
         syncMonitor()
@@ -157,6 +151,7 @@ final class ShelfRevealer {
         guard let band = target.band else { return }
         if ShelfReveal.pushes(
             point,
+            band: band,
             strip: target.strip,
             edge: target.edge,
             screen: target.screen
