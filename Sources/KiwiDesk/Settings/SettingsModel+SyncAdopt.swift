@@ -45,6 +45,7 @@ extension SettingsModel {
         let baseLua = cleanLuaSource
         let reach = reachEdits
         let look = lookReachEdits
+        let previous = sync.conflicts
         reload()
         let theirs = cleanConfig
         let theirsLua = cleanLuaSource
@@ -62,22 +63,39 @@ extension SettingsModel {
             SettingsRevertRegister.writers[key]?.apply(self, nil)
         }
         cleanConfig = theirs
-        var conflicts = sync.conflicts.filter { old in
-            mine.contains { $0 == old.key }
+        if yoursLua != baseLua { luaSource = yoursLua }
+        // An earlier arrival's question stands while its edit does.
+        var conflicts = previous.filter { old in
+            guard let key = old.key else { return luaSource != theirsLua }
+            return mine.contains(key)
         }
-        for key in mine where incoming.contains(key) {
+        func ask(_ key: SettingKey, yours: GuiConfig) {
             conflicts.removeAll { $0.key == key }
             conflicts.append(
                 conflict(key, yours: yours, theirs: theirs, base: base)
                     .with(mac: change.mac)
             )
         }
-        if yoursLua != baseLua {
-            luaSource = yoursLua
-            if theirsLua != baseLua {
-                conflicts.removeAll { $0.key == nil }
-                conflicts.append(Self.luaConflict(mac: change.mac))
-            }
+        for key in mine where incoming.contains(key) {
+            ask(key, yours: yours)
+        }
+        // A writer that copies more than its own key — a master and
+        // its followers, a whole per-instance map — may have laid an
+        // edit back over the other Mac's change to a setting the
+        // draft never touched: that becomes a question, not a loss.
+        let clobbered = Set(
+            SettingsDraftDiff.between(config: config, cleanConfig: theirs)
+                .changedSettings
+        )
+        for key in incoming
+        where !mine.contains(key)
+            && clobbered.contains(key)
+        {
+            ask(key, yours: config)
+        }
+        if yoursLua != baseLua, theirsLua != baseLua {
+            conflicts.removeAll { $0.key == nil }
+            conflicts.append(Self.luaConflict(mac: change.mac))
         }
         reachEdits = reach
         lookReachEdits = look

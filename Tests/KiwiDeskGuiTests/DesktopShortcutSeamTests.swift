@@ -12,48 +12,66 @@ struct DesktopShortcutSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
     /// needle → (tree, the file that carries it once).
-    private static let wirings: [(String, String, String)] = [
-        (
-            "self?.topUpDesktopShortcuts(desktops: desktops)",
-            "Sources/KiwiDeskCore", "KiwiCore+Desktops.swift"
-        ),
-        (
-            "self?.dashboardIfCreated?.adoptShortcutAdd(rows)",
-            "Sources/KiwiDesk", "AppDelegate.swift"
-        ),
-        (
-            "onShortcutsAdded(rows)",
-            "Sources/KiwiDeskCore", "KiwiCore+ShortcutTopUp.swift"
-        ),
-        (
-            "topUpDesktopShortcuts(",
-            "Sources/KiwiDeskCore/App", "KiwiCore+Boot.swift"
-        ),
-        (
-            "ShortcutOffer(desktop: .max, generation: .max)",
-            "Tests/KiwiDeskCoreTests", "TestCore.swift"
-        ),
-        (
-            "ShortcutOffer(desktop: .max, generation: .max)",
-            "Tests/KiwiDeskGuiTests", "TestCore.swift"
-        ),
-        (
-            "desktopMemory.clearLegacyShortcutOffer = {}",
-            "Tests/KiwiDeskCoreTests", "TestCore.swift"
-        ),
-        (
-            "desktopMemory.clearLegacyShortcutOffer = {}",
-            "Tests/KiwiDeskGuiTests", "TestCore.swift"
-        ),
-        (
-            "desktopMemory.clearLegacyShortcutOffer()",
-            "Sources/KiwiDeskCore/App", "KiwiCore+ConfigArtifacts.swift"
-        ),
-        (
-            "crossLegacyShortcutOffer()",
-            "Sources/KiwiDeskCore/App", "KiwiCore+Boot.swift"
-        ),
-    ]
+    private static let wirings: [(String, String, String)] =
+        [
+            (
+                "self?.topUpDesktopShortcuts(desktops: desktops)",
+                "Sources/KiwiDeskCore", "KiwiCore+Desktops.swift"
+            ),
+            (
+                "self?.dashboardIfCreated?.adoptShortcutAdd(rows)",
+                "Sources/KiwiDesk", "AppDelegate.swift"
+            ),
+            (
+                "onShortcutsAdded(rows)",
+                "Sources/KiwiDeskCore", "KiwiCore+ShortcutTopUp.swift"
+            ),
+            (
+                "topUpDesktopShortcuts(",
+                "Sources/KiwiDeskCore/App", "KiwiCore+Boot.swift"
+            ),
+            (
+                "ShortcutOffer(desktop: .max, generation: .max)",
+                "Tests/KiwiDeskCoreTests", "TestCore.swift"
+            ),
+            (
+                "ShortcutOffer(desktop: .max, generation: .max)",
+                "Tests/KiwiDeskGuiTests", "TestCore.swift"
+            ),
+            (
+                "desktopMemory.clearLegacyShortcutOffer = {}",
+                "Tests/KiwiDeskCoreTests", "TestCore.swift"
+            ),
+            (
+                "desktopMemory.clearLegacyShortcutOffer = {}",
+                "Tests/KiwiDeskGuiTests", "TestCore.swift"
+            ),
+            (
+                "desktopMemory.clearLegacyShortcutOffer()",
+                "Sources/KiwiDeskCore/App", "KiwiCore+ConfigArtifacts.swift"
+            ),
+            (
+                "crossLegacyShortcutOffer()",
+                "Sources/KiwiDeskCore/App", "KiwiCore+Boot.swift"
+            ),
+            // Following a sync folder (#2324): boot asks the stored
+            // pick, and both twins pin the watch, the pick and the
+            // Trash, which would otherwise reach the host.
+            (
+                "followSyncFolder(sync.storedFolder())",
+                "Sources/KiwiDeskCore/App", "KiwiCore+Boot.swift"
+            ),
+        ]
+        + ["Tests/KiwiDeskCoreTests", "Tests/KiwiDeskGuiTests"].flatMap {
+            tree in
+            [
+                "core.sync.makeWatch = { _, _ in nil }",
+                "core.sync.watchRequired = false",
+                "core.sync.storedFolder = { nil }",
+                "core.sync.trash = { try FileManager.default"
+                    + ".removeItem(at: $0) }",
+            ].map { ($0, tree, "TestCore.swift") }
+        }
 
     @Test("each wiring exists exactly once, in its own file")
     func wiringsAreSingular() throws {

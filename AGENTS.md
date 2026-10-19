@@ -1029,8 +1029,8 @@ Touching `Config`, `Profiles`, `Commands`.
 - a followed sync folder is a mirror decided by content hashes (`SyncPlan`,
   `SyncLedger`), a file syncing where its `ConfigArtifact` answers `syncs`,
   and a change it brings enters through the one `adoptSyncedChange`, inside
-  which no machine event writes a synced file (#2324, `SyncDoorTests`,
-  `SyncFollowTests`)
+  which no machine event writes a synced file, every such writer ruled in
+  `SyncWriterCensusTests` (#2324, `SyncDoorTests`, `SyncFollowTests`)
 - a write of a format-stamped config file goes through its store's door,
   which refuses a file a newer build wrote, every raw writer filed in
   `ConfigWriterCensusTests` (#2325), and a newer file latches its store

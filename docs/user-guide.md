@@ -195,7 +195,9 @@ nothing is copied until you choose a side with Compare and Copy.
 KiwiDesk never reads a conflict copy a sync app leaves beside the
 files (`gui 2.json`, a "conflicted copy"); the line under the
 switch names it. Reset All Settings turns the switch off, so the
-folder keeps the setup the other Macs use.
+folder keeps the setup the other Macs use; turning it back on, or
+restoring a backup while it is on, asks which setup to keep with
+Compare and Copy.
 :::
 
 :::unreleased

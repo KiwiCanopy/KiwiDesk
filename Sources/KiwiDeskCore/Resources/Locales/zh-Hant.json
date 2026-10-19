@@ -683,6 +683,7 @@
   "general.sync.status.both": "這部電腦和檔案夾都有更改。請用「%1$@」選擇要保留的配置。",
   "general.sync.status.conflict_copy": "同步 App 留下了衝突副本「%1$@」。KiwiDesk 不會使用它；檢查後請將其刪除。",
   "general.sync.status.newer": "另一部電腦上較新版本的 KiwiDesk 更改了此配置。請更新以繼續同步。",
+  "general.sync.status.newer_here": "較新版本的 KiwiDesk 更改了這部電腦的配置。請更新以繼續同步。",
   "general.sync.status.unavailable": "暫時無法存取該檔案夾。在這部電腦上所做的更改會留在這裡，直到檔案夾恢復。",
   "general.sync.status.up_to_date": "%1$@ · 已是最新。",
   "general.sync.this_mac": "這部電腦",

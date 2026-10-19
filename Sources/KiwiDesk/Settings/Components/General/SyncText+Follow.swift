@@ -45,6 +45,12 @@ extension SyncText {
                 "A newer KiwiDesk on another Mac changed this setup. "
                     + "Update to keep syncing."
             )
+        case .newerHere:
+            return L(
+                "general.sync.status.newer_here",
+                "A newer KiwiDesk changed this Mac's setup. Update to "
+                    + "keep syncing."
+            )
         }
     }
 

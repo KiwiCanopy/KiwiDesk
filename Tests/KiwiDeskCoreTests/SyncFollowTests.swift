@@ -153,6 +153,71 @@ struct SyncFollowTests {
         #expect(core.guiConfigStore.load()?.spaceHistory == .allScreens)
     }
 
+    @Test("A file the folder cannot read is never read as deleted")
+    func unreadableIsNotDeleted() throws {
+        let (core, folder) = try setup()
+        try write("x", to: "init.lua", in: core.configDirectory)
+        core.followSyncFolder(folder)
+        let theirs = folder.appendingPathComponent("init.lua")
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0],
+            ofItemAtPath: theirs.path
+        )
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o644],
+                ofItemAtPath: theirs.path
+            )
+        }
+        core.runSyncPass()
+        #expect(core.sync.status == .folderUnavailable)
+        #expect(read("init.lua", in: core.configDirectory) != nil)
+    }
+
+    @Test("A watch that will not start says the folder is unreachable")
+    func deadWatchIsReported() throws {
+        let (core, folder) = try setup()
+        core.sync.watchRequired = true
+        core.followSyncFolder(folder)
+        #expect(core.sync.status == .folderUnavailable)
+    }
+
+    @Test("Reset and restore forget the agreement: no copy goes out")
+    func resetForgetsTheAgreement() throws {
+        let (core, folder) = try setup()
+        try write("{}", to: "profiles/Keep.json", in: core.configDirectory)
+        core.followSyncFolder(folder)
+        #expect(read("profiles/Keep.json", in: folder) != nil)
+        core.resetAllSettings { try FileManager.default.removeItem(at: $0) }
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: core.url(of: .syncLedger).path
+            )
+        )
+        core.followSyncFolder(folder)
+        #expect(core.sync.status == .changedOnBoth)
+        #expect(read("profiles/Keep.json", in: folder) != nil)
+    }
+
+    @Test("A restore forgets the agreement too")
+    func restoreForgetsTheAgreement() throws {
+        let (core, folder) = try setup()
+        core.followSyncFolder(folder)
+        #expect(
+            FileManager.default.fileExists(
+                atPath: core.url(of: .syncLedger).path
+            )
+        )
+        _ = try core.restoreSetup(from: core.exportSetup()) {
+            try FileManager.default.removeItem(at: $0)
+        }
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: core.url(of: .syncLedger).path
+            )
+        )
+    }
+
     @Test("A missing folder or a placeholder holds the pass")
     func unavailableHolds() throws {
         let (core, folder) = try setup()
@@ -177,6 +242,50 @@ struct SyncFollowTests {
             Issue.record("expected the newer-format hold")
             return
         }
+    }
+
+    @Test("A newer KiwiDesk's file on this Mac holds the pass")
+    func newerHereHolds() throws {
+        let (core, folder) = try setup()
+        try write(
+            #"{"format": 999}"#,
+            to: "gui.json",
+            in: core.configDirectory
+        )
+        core.followSyncFolder(folder)
+        guard case .newerHere = core.sync.status else {
+            Issue.record("expected this Mac's newer-format hold")
+            return
+        }
+        #expect(read("gui.json", in: folder) == nil)
+    }
+
+    @Test("A file deleted here leaves the folder too")
+    func localDeletionGoesOut() throws {
+        let (core, folder) = try setup()
+        let gone = "profiles/Gone.json"
+        try write("{}", to: gone, in: core.configDirectory)
+        core.followSyncFolder(folder)
+        try FileManager.default.removeItem(
+            at: core.configDirectory.appendingPathComponent(gone)
+        )
+        core.runSyncPass()
+        #expect(read(gone, in: folder) == nil)
+    }
+
+    @Test("A second change to the same file comes in too")
+    func agreementAdvances() throws {
+        let (core, folder) = try setup()
+        core.followSyncFolder(folder)
+        try write("-- one\n", to: "init.lua", in: folder)
+        core.runSyncPass()
+        try write("-- two\n", to: "init.lua", in: folder)
+        core.runSyncPass()
+        #expect(core.sync.status == .upToDate)
+        #expect(
+            read("init.lua", in: core.configDirectory)
+                == Data("-- two\n".utf8)
+        )
     }
 
     @Test("A conflict copy is reported, and never copied")

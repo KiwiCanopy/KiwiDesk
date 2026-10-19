@@ -683,6 +683,7 @@
   "general.sync.status.both": "このコンピュータとフォルダの両方が変更されました。「%1$@」で、残す構成を選んでください。",
   "general.sync.status.conflict_copy": "同期アプリが競合コピー「%1$@」を残しました。KiwiDeskはこれを使用しません。確認したら削除してください。",
   "general.sync.status.newer": "ほかのコンピュータのより新しいKiwiDeskがこの構成を変更しました。同期を続けるには、アップデートしてください。",
+  "general.sync.status.newer_here": "より新しいKiwiDeskがこのコンピュータの構成を変更しました。同期を続けるには、アップデートしてください。",
   "general.sync.status.unavailable": "現在フォルダにアクセスできません。このコンピュータでの変更は、フォルダが戻るまでここで待機します。",
   "general.sync.status.up_to_date": "%1$@ · 最新の状態です。",
   "general.sync.this_mac": "このコンピュータ",

@@ -224,6 +224,7 @@ func makeTestCore(
     core.desktopMemory.clearLegacyShortcutOffer = {}
     // No live folder watch, no real Trash (#2324 slice 3).
     core.sync.makeWatch = { _, _ in nil }
+    core.sync.watchRequired = false
     core.sync.storedFolder = { nil }
     core.sync.trash = { try FileManager.default.removeItem(at: $0) }
     // Same class, eighth time (#1103/#1199): the mouse-button

@@ -76,19 +76,31 @@ struct SyncPlan: Equatable, Sendable {
 /// an iCloud placeholder, a temporary file — is never copied; a
 /// conflict copy is reported, a placeholder holds the pass.
 enum SyncScan {
-    /// Path → SHA-256 of every synced file under `root`.
-    static func hashes(in root: URL) -> [String: String] {
+    /// Path → SHA-256 of every synced file under `root`; nil where
+    /// one is listed and cannot be read now — not downloaded yet,
+    /// or refused — since a file read as absent would be deleted
+    /// on the other side.
+    static func hashes(in root: URL) -> [String: String]? {
         var result: [String: String] = [:]
         for path in syncedPaths(in: root) {
-            guard
-                let data = try? Data(
-                    contentsOf: root.appendingPathComponent(path)
-                )
-            else { continue }
+            let url = root.appendingPathComponent(path)
+            guard !isDataless(url), let data = try? Data(contentsOf: url)
+            else { return nil }
             result[path] = SyncLedger.hash(data)
         }
         return result
     }
+
+    /// Whether the file's bytes live only in the cloud: a read
+    /// would block on the download (iCloud Drive, a File Provider).
+    static func isDataless(_ url: URL) -> Bool {
+        var info = stat()
+        guard lstat(url.path, &info) == 0 else { return false }
+        return info.st_flags & datalessFlag != 0
+    }
+
+    /// `SF_DATALESS`, which Swift does not import.
+    private static let datalessFlag: UInt32 = 0x4000_0000
 
     /// The synced paths under `root`: the setup's files, and each
     /// profile file in its folder.
@@ -100,9 +112,10 @@ enum SyncScan {
                 paths.append(name)
             }
         }
-        for file in names(in: root.appendingPathComponent(profiles))
+        let folder = root.appendingPathComponent(profiles)
+        for file in names(in: folder)
         where file.hasSuffix(".json") && !isIgnored(file)
-            && !isConflictCopy(file, of: nil)
+            && !isProfileConflictCopy(file, in: folder)
         {
             paths.append(profiles + "/" + file)
         }
@@ -115,8 +128,9 @@ enum SyncScan {
         let top = names(in: root).filter { file in
             SyncFolder.setupNames.contains { isConflictCopy(file, of: $0) }
         }
-        let nested = names(in: root.appendingPathComponent(profiles))
-            .filter { isConflictCopy($0, of: nil) }
+        let folder = root.appendingPathComponent(profiles)
+        let nested = names(in: folder)
+            .filter { isProfileConflictCopy($0, in: folder) }
             .map { profiles + "/" + $0 }
         return (top + nested).sorted()
     }
@@ -160,6 +174,31 @@ enum SyncScan {
         }
         return middle.first == " " && !middle.dropFirst().isEmpty
             && middle.dropFirst().allSatisfy(\.isNumber)
+    }
+
+    /// A profile file a sync app copied: one that says "conflict",
+    /// or iCloud's "Work 2.json" beside a "Work.json" carrying the
+    /// same profile id — a profile really named "Work 2" has its own.
+    static func isProfileConflictCopy(_ file: String, in folder: URL) -> Bool {
+        if isConflictCopy(file, of: nil) { return true }
+        let stem = (file as NSString).deletingPathExtension
+        guard let space = stem.lastIndex(of: " "),
+            !stem[stem.index(after: space)...].isEmpty,
+            stem[stem.index(after: space)...].allSatisfy(\.isNumber)
+        else { return false }
+        let twin = String(stem[..<space]) + ".json"
+        guard let id = profileID(folder.appendingPathComponent(file)) else {
+            return false
+        }
+        return profileID(folder.appendingPathComponent(twin)) == id
+    }
+
+    private static func profileID(_ url: URL) -> String? {
+        guard !isDataless(url), let data = try? Data(contentsOf: url),
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { return nil }
+        return root["id"] as? String
     }
 
     private static func names(in folder: URL) -> [String] {

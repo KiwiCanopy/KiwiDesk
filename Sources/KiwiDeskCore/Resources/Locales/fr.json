@@ -685,6 +685,7 @@
   "general.sync.status.both": "Ce Mac et le dossier ont tous deux changé. Choisissez la configuration à garder avec « %1$@ ».",
   "general.sync.status.conflict_copy": "Votre app de synchronisation a laissé une copie en conflit : %1$@. KiwiDesk ne l'utilise pas ; supprimez-la une fois vérifiée.",
   "general.sync.status.newer": "Un KiwiDesk plus récent sur un autre Mac a modifié cette configuration. Mettez à jour pour continuer la synchronisation.",
+  "general.sync.status.newer_here": "Un KiwiDesk plus récent a modifié la configuration de ce Mac. Mettez à jour pour continuer la synchronisation.",
   "general.sync.status.unavailable": "Impossible d'accéder au dossier pour le moment. Les modifications faites sur ce Mac attendent ici son retour.",
   "general.sync.status.up_to_date": "%1$@ · À jour.",
   "general.sync.this_mac": "Ce Mac",

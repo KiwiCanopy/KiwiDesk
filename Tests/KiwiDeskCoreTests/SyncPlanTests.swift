@@ -97,7 +97,8 @@ struct SyncScanTests {
     func syncedPaths() throws {
         let root = try folder([
             "gui.json", "init.lua", "palettes.json", "looks.json",
-            "profiles/Work.json", "sync.json", "notes.txt",
+            "profiles/Work.json", "profiles/~Work.json", "sync.json",
+            "notes.txt",
             "gui 2.json", ".gui.json.icloud", "profiles/.DS_Store",
             "profiles/Work (conflicted copy 2026-10-19).json",
             ".kiwidesk-incoming-1", "machine.json",
@@ -108,7 +109,7 @@ struct SyncScanTests {
                 "profiles/Work.json",
             ]
         )
-        #expect(Set(SyncScan.hashes(in: root).keys).count == 5)
+        #expect(Set((SyncScan.hashes(in: root) ?? [:]).keys).count == 5)
     }
 
     @Test("Each sync app's conflict copy is reported")
@@ -128,6 +129,48 @@ struct SyncScanTests {
                 "profiles/Home.sync-conflict-1.json",
             ]
         )
+    }
+
+    @Test("iCloud's numbered twin of a profile is a conflict copy")
+    func numberedProfileTwin() throws {
+        let root = try folder([])
+        let profiles = root.appendingPathComponent("profiles")
+        try FileManager.default.createDirectory(
+            at: profiles,
+            withIntermediateDirectories: true
+        )
+        for (name, id) in [
+            ("Work", "A"), ("Work 2", "A"), ("Home", "B"),
+            ("Home 2", "C"),
+        ] {
+            try Data(#"{"id": "\#(id)"}"#.utf8).write(
+                to: profiles.appendingPathComponent(name + ".json")
+            )
+        }
+        #expect(SyncScan.conflictCopies(in: root) == ["profiles/Work 2.json"])
+        #expect(
+            SyncScan.syncedPaths(in: root) == [
+                "profiles/Home 2.json", "profiles/Home.json",
+                "profiles/Work.json",
+            ]
+        )
+    }
+
+    @Test("A file that cannot be read holds the whole scan")
+    func unreadableHolds() throws {
+        let root = try folder(["gui.json", "looks.json"])
+        let looks = root.appendingPathComponent("looks.json")
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0],
+            ofItemAtPath: looks.path
+        )
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o644],
+                ofItemAtPath: looks.path
+            )
+        }
+        #expect(SyncScan.hashes(in: root) == nil)
     }
 
     @Test("An iCloud placeholder is found, top level or in profiles")

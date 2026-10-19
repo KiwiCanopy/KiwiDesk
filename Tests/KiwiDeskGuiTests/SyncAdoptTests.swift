@@ -122,6 +122,35 @@ struct SyncAdoptTests {
         #expect(!model.askNextSyncConflict())
     }
 
+    @Test("A second arrival keeps the first arrival's question")
+    func questionsSurviveASecondArrival() throws {
+        let (core, model) = try setup()
+        model.config.modeCycle = [.stack, .monocle]
+        try theirs(core) { $0.modeCycle = [.bsp, .stack] }
+        model.adoptSyncedChange(change)
+        try theirs(core) { $0.spaceHistory = .allScreens }
+        model.adoptSyncedChange(change)
+        #expect(model.sync.conflicts.map(\.key) == [.shortcuts(.modeCycle)])
+        #expect(model.config.spaceHistory == .allScreens)
+    }
+
+    @Test("init.lua's question survives a gui.json-only arrival")
+    func luaQuestionSurvives() throws {
+        let (core, model) = try setup()
+        model.luaSource = "-- mine\n"
+        try "-- theirs\n".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        model.adoptSyncedChange(SyncedChange(paths: ["init.lua"], mac: nil))
+        try theirs(core) { $0.spaceHistory = .allScreens }
+        model.adoptSyncedChange(change)
+        #expect(model.sync.conflicts.contains { $0.key == nil })
+        #expect(model.luaSource == "-- mine\n")
+    }
+
     @Test("init.lua edited on both Macs is one question")
     func luaIsOneQuestion() throws {
         let (core, model) = try setup()

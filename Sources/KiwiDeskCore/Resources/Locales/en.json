@@ -687,6 +687,7 @@
   "general.sync.status.both": "This Mac and the folder both changed. Choose which setup to keep with %1$@.",
   "general.sync.status.conflict_copy": "Your sync app left a conflict copy, %1$@. KiwiDesk doesn't use it; delete it once you've checked it.",
   "general.sync.status.newer": "A newer KiwiDesk on another Mac changed this setup. Update to keep syncing.",
+  "general.sync.status.newer_here": "A newer KiwiDesk changed this Mac's setup. Update to keep syncing.",
   "general.sync.status.unavailable": "Can't reach the folder right now. Changes made on this Mac wait here until it's back.",
   "general.sync.status.up_to_date": "%1$@ · Up to date.",
   "general.sync.this_mac": "This Mac",

@@ -18,6 +18,8 @@ public enum SyncStatus: Equatable, Sendable {
     case conflictCopy(String)
     /// A newer KiwiDesk wrote a file on the other side (ruling 2).
     case newerOnAnotherMac(NewerFormatOnDisk)
+    /// A newer KiwiDesk wrote a file on this Mac (slice 1c's latch).
+    case newerHere(NewerFormatOnDisk)
 }
 
 /// A change the sync folder brought in (#2324 ruling 4), handed to
@@ -60,6 +62,9 @@ public final class SyncFollower {
     /// Where a removed file goes; pinned to a delete by both twins,
     /// so no suite fills the developer's Trash.
     var trash: (URL) throws -> Void = KiwiCore.moveToTrash
+    /// Whether a watch that does not start is reported; off in both
+    /// `makeTestCore` twins, whose watch is pinned inert.
+    var watchRequired = true
     /// How long the watch waits for quiet before a pass.
     var quietDelay: TimeInterval = 1
 

@@ -1032,13 +1032,14 @@ date, and a pass where both sides changed one file copies nothing
 when its `ConfigArtifact` answers `syncs`, read off the register,
 so a new travelling store syncs with no second list. A change
 that came in enters through the one `adoptSyncedChange`; while
-`sync.adopting` is raised no machine event writes a synced file —
-the three top-ups, the legacy offer's crossing, a gone Space's
-shortcut drop and the Space-list mirror stand down — and a new
-writer of a synced file that an apply or a reload can reach joins
-that stand-down and `SyncDoorTests` in the same change. A path
-that rewrites a whole side runs inside `pausingSync`, so no pass
-copies it half-done.
+`sync.adopting` is raised no machine event writes a synced file. A
+new Core writer of `gui.json` or a profile is ruled in
+`SyncWriterCensusTests` — a machine event stands down on the
+door and joins `SyncDoorTests` — in the same change. A path that
+rewrites a whole side runs inside `pausingSync`, so no pass copies
+it half-done, and one that is no Compare and Copy (a reset, a
+restore) forgets the agreement, so the next pass copies nothing
+until the user picks a side.
 
 **State about THIS MAC that is no file stays out of the register,
 in the app's defaults.** What a Mac has run and read — the "What's

@@ -27,6 +27,12 @@ extension KiwiCore {
             self?.scheduleSyncPass()
         }
         runSyncPass()
+        // A watch that would not start hears nothing: the folder is
+        // not kept in step, whatever the one pass found.
+        if sync.watch == nil, sync.watchRequired {
+            onLog("sync: could not watch \(folder.path)")
+            sync.status = .folderUnavailable
+        }
     }
 
     /// Runs a pass once both folders have been quiet a moment.
@@ -50,11 +56,17 @@ extension KiwiCore {
             sync.status = status
             return
         }
+        guard let here = SyncScan.hashes(in: configDirectory),
+            let there = SyncScan.hashes(in: folder)
+        else {
+            sync.status = .folderUnavailable
+            return
+        }
         let ledgerURL = url(of: .syncLedger)
         let ledger = SyncLedger.load(from: ledgerURL, for: folder)
         let plan = SyncPlan.plan(
-            here: SyncScan.hashes(in: configDirectory),
-            folder: SyncScan.hashes(in: folder),
+            here: here,
+            folder: there,
             agreed: ledger?.agreed
         )
         guard plan.diverged.isEmpty else {
@@ -86,7 +98,7 @@ extension KiwiCore {
         case _?: return .folderUnavailable
         case nil: break
         }
-        if let newer = thisMacNewer() { return .newerOnAnotherMac(newer) }
+        if let newer = thisMacNewer() { return .newerHere(newer) }
         let placeholders = SyncScan.placeholders(in: folder)
         guard placeholders.isEmpty else {
             for placeholder in placeholders {
@@ -129,8 +141,9 @@ extension KiwiCore {
         over ledger: SyncLedger?,
         at url: URL
     ) {
-        let here = SyncScan.hashes(in: configDirectory)
-        let there = SyncScan.hashes(in: folder)
+        guard let here = SyncScan.hashes(in: configDirectory),
+            let there = SyncScan.hashes(in: folder)
+        else { return }
         var agreed = ledger?.agreed ?? [:]
         for path in Set(here.keys).union(there.keys).union(agreed.keys) {
             if here[path] == there[path] { agreed[path] = here[path] }
@@ -223,15 +236,26 @@ extension KiwiCore {
     /// — a take re-encodes what it reads — and never finds both
     /// sides changed.
     func agreeOnFolder(_ folder: URL) {
+        guard let agreed = SyncScan.hashes(in: folder) else {
+            forgetSyncAgreement()
+            return
+        }
         let ledger = SyncLedger(
             folder: folder.standardizedFileURL.path,
-            agreed: SyncScan.hashes(in: folder)
+            agreed: agreed
         )
         do {
             try ledger.save(to: url(of: .syncLedger))
         } catch {
             onLog("sync: could not record the agreement: \(error)")
         }
+    }
+
+    /// Drops what this Mac and its folder agreed on, so a pass that
+    /// finds them apart copies nothing until Compare and Copy says
+    /// which side stays.
+    func forgetSyncAgreement() {
+        try? FileManager.default.removeItem(at: url(of: .syncLedger))
     }
 
     /// Holds every pass while `body` rewrites either side, then

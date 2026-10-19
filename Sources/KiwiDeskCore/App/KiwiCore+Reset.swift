@@ -84,7 +84,9 @@ extension KiwiCore {
         trash: (URL) throws -> Void
     ) -> Bool {
         // A reset is this Mac's: following would empty the folder
-        // every other Mac reads, so it stops first (#2324).
+        // every other Mac reads, so it stops, and the agreement
+        // goes too, so following again offers Compare and Copy
+        // rather than copying the reset out (#2324).
         followSyncFolder(nil)
         // The palettes and looks are deliberately NOT in this list — this
         // action's whole name rests on their surviving it, which
@@ -92,7 +94,10 @@ extension KiwiCore {
         // reset. `restoreSetup` passes a different set to the
         // same policy.
         let cleared = discardArtifacts(
-            [.guiConfig, .profiles, .machineConfig, .desktopBindings],
+            [
+                .guiConfig, .profiles, .machineConfig, .desktopBindings,
+                .syncLedger,
+            ],
             reason: "reset",
             trash: trash
         )

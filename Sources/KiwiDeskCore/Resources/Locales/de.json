@@ -685,6 +685,7 @@
   "general.sync.status.both": "Dieser Mac und der Ordner wurden beide geändert. Wähle mit „%1$@“, welches Setup du behältst.",
   "general.sync.status.conflict_copy": "Deine Sync-App hat eine Konfliktkopie hinterlassen: %1$@. KiwiDesk verwendet sie nicht; lösche sie, sobald du sie geprüft hast.",
   "general.sync.status.newer": "Ein neueres KiwiDesk auf einem anderen Mac hat dieses Setup geändert. Aktualisiere, um weiter zu synchronisieren.",
+  "general.sync.status.newer_here": "Ein neueres KiwiDesk hat das Setup dieses Macs geändert. Aktualisiere, um weiter zu synchronisieren.",
   "general.sync.status.unavailable": "Der Ordner ist gerade nicht erreichbar. Änderungen auf diesem Mac warten hier, bis er wieder da ist.",
   "general.sync.status.up_to_date": "%1$@ · Auf dem neuesten Stand.",
   "general.sync.this_mac": "Dieser Mac",
