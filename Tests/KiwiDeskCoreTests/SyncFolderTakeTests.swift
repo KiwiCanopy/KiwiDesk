@@ -76,17 +76,19 @@ struct SyncFolderTakeTests {
     func luaOwnedFolderLandsWhole() throws {
         let core = try guiCore()
         let source = try filled(lua: foreign)
-        // The folder's gui.json carries a gap its init.lua owns over;
-        // the take must not push it live beside the Lua setup.
+        // The folder's gui.json declares a Space its init.lua owns
+        // over; the take must not push it live beside the Lua setup.
         let gui = GuiConfigStore(
             directory: source,
             machine: source.appendingPathComponent("machine")
         )
         var config = try #require(gui.load())
-        config.settings.gapsGlobal.outer.top = 77
+        config.spaces.append(SpaceID("sidecar-only"))
+        config.spaceModes[SpaceID("sidecar-only")] = .monocle
         try gui.save(config)
         try core.keepFoldersSetup(from: source, trash: remove)
-        #expect(core.tiler.settings.gapsGlobal.outer.top != 77)
+        let live = core.state.workspaces.allSpaces.map(\.id)
+        #expect(!live.contains(SpaceID("sidecar-only")))
         let lua = try String(contentsOf: core.configURL, encoding: .utf8)
         #expect(lua == foreign)
         #expect(!core.isGuiManaged)
@@ -97,6 +99,9 @@ struct SyncFolderTakeTests {
         let core = try guiCore()
         let source = try filled(lua: "-- theirs", gui: false)
         #expect(core.keepFolderRefusal(source) == .folderUnreadable)
+        #expect(throws: SyncRefusal.folderUnreadable) {
+            try core.keepFoldersSetup(from: source, trash: remove)
+        }
     }
 
     @Test("a folder whose own init.lua owns it replaces gui.json too")
