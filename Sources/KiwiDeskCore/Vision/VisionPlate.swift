@@ -18,13 +18,16 @@ protocol VisionPlateBackend: AnyObject {
     /// Orders the plate in directly above `window`: a lens holds
     /// it under the haze (#2103 ruling 12).
     func order(above window: CGWindowID)
-    /// Fades `region` (its own coordinates) from clear to the
-    /// plate's dim and blur over `duration` seconds: the window
-    /// focus left (#2417). Never orders.
+    /// Fades `window`'s `region` (its own coordinates) from clear
+    /// to the plate's dim and blur over `duration` seconds — the
+    /// window focus left (#2417) — cut in under `reduceMotion`.
+    /// Never orders.
     func fadeIn(
         _ region: CGPath,
+        of window: CGWindowID,
         duration: CFTimeInterval,
-        curve: VisionFadeCurve
+        curve: VisionFadeCurve,
+        reduceMotion: Bool
     )
     /// Fades the plate in unless `reduceMotion`.
     func show(reduceMotion: Bool)
@@ -82,10 +85,18 @@ final class AppKitVisionPlate: VisionPlateBackend {
 
     func fadeIn(
         _ region: CGPath,
+        of window: CGWindowID,
         duration: CFTimeInterval,
-        curve: VisionFadeCurve
+        curve: VisionFadeCurve,
+        reduceMotion: Bool
     ) {
-        veil.fadeIn(region, duration: duration, timing: curve.timing)
+        veil.fadeIn(
+            region,
+            of: window,
+            duration: duration,
+            timing: curve.timing,
+            reduceMotion: reduceMotion
+        )
     }
 
     /// AppKit's order: WindowServer applies no SkyLight order to

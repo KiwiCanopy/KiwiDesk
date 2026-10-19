@@ -87,7 +87,7 @@ extension VisionLens: Codable {
             fadeDuration: try c.decodeIfPresent(
                 Double.self,
                 forKey: .fadeDuration
-            ).map { AppWideSettings.clampedFade(Int($0.rounded())) },
+            ).map(AppWideSettings.clampedFade),
             fadeCurve: try c.decodeIfPresent(
                 VisionFadeCurve.self,
                 forKey: .fadeCurve

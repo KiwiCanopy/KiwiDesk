@@ -240,7 +240,8 @@ extension APIReference {
         ),
         "set_fade_duration": APIRecord(
             "Sets how long the window focus leaves takes into the "
-                + "dim and blur, in ms (0-1000; 0 is instant).",
+                + "dim and blur, in ms "
+                + "(\(AppWideSettings.visionFadeBand); 0 is instant).",
             .number("ms")
         ),
         "set_fade_curve": APIRecord(

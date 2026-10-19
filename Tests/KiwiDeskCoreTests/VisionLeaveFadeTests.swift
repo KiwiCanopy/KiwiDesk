@@ -29,14 +29,15 @@ struct VisionLeaveFadeTests {
     }
 
     /// The window left lies on the left screen (x 100–200).
-    private func leaving(seconds: Double = 0.6) -> VisionManager.Leaving {
+    private func leaving() -> VisionManager.Leaving {
         VisionManager.Leaving(
+            id: 9,
             window: VisionMask.Window(
                 frame: CGRect(x: 110, y: 10, width: 40, height: 30),
                 cornerRadius: 8,
                 clear: false
             ),
-            duration: seconds,
+            duration: 0.6,
             curve: .linear
         )
     }
@@ -77,6 +78,7 @@ struct VisionLeaveFadeTests {
         #expect(fades[0].count == 1)
         #expect(fades[1].isEmpty)
         let fade = try #require(fades[0].first)
+        #expect(fade.window == 9)
         #expect(fade.duration == 0.6)
         #expect(fade.curve == .linear)
         // The plate's own coordinates: the screen's origin is 100.
@@ -86,15 +88,17 @@ struct VisionLeaveFadeTests {
         )
     }
 
-    @Test("the same target, or a first show, fades nothing")
-    func onlyAMoveFades() {
+    /// Whether a fade is owed at all is `visionLeaving`'s
+    /// (`KiwiVisionLeavingTests`); the plate only refuses one it
+    /// cannot draw.
+    @Test("a first show fades nothing")
+    func firstShowFadesNothing() {
         let (vision, made) = manager()
-        vision.sync(request(target: 7, leaving: leaving()), reassert: false)
-        vision.sync(request(target: 7, leaving: leaving()), reassert: false)
+        vision.sync(request(target: 8, leaving: leaving()), reassert: false)
         #expect(made().allSatisfy { $0.fades.isEmpty })
     }
 
-    @Test("Reduce Motion, a hold and a duration of 0 stand it down")
+    @Test("Reduce Motion and a hold stand it down")
     func standDowns() {
         let (calm, calmMade) = manager(reduceMotion: true)
         calm.sync(request(target: 7), reassert: false)
@@ -108,13 +112,5 @@ struct VisionLeaveFadeTests {
             reassert: false
         )
         #expect(heldMade().allSatisfy { $0.fades.isEmpty })
-
-        let (instant, instantMade) = manager()
-        instant.sync(request(target: 7), reassert: false)
-        instant.sync(
-            request(target: 8, leaving: leaving(seconds: 0)),
-            reassert: false
-        )
-        #expect(instantMade().allSatisfy { $0.fades.isEmpty })
     }
 }

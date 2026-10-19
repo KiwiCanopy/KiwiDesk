@@ -1701,6 +1701,10 @@ Touching `Borders`, `Vision`.
   into every navigation model and judged per window by `visionLensClear`,
   and a pick never asks it (#2103, `KiwiVisionLensFocusTests`,
   `KiwiVisionLensGestureTests`)
+- only the window focus leaves fades into KiwiVision, its fade owed only
+  through `visionLeaving` and started and committed through the one
+  `fadeLeaving` ahead of the plate's order (#2417,
+  `VisionLeaveFadeSeamTests`)
 - an overlay hearing WindowServer's per-window events connects to the one
   `WindowServerWatch` under its own `Consumer` case, whose position is its
   place in the fan-out, and calls no `SkyLightWindowEvents` door itself

@@ -78,9 +78,22 @@ public struct AppWideSettings: Equatable, Sendable {
     /// stepper all read it.
     public static let visionFadeRange: ClosedRange<Int> = 0...1000
 
-    /// `raw` clamped into `visionFadeRange`, as `clampedDepth`.
-    static func clampedFade(_ raw: Int) -> Int {
-        min(max(raw, visionFadeRange.lowerBound), visionFadeRange.upperBound)
+    /// `raw` ms clamped into `visionFadeRange` before it becomes an
+    /// `Int`, which a huge value would trap; non-finite is the
+    /// default. The one reading of a stored or verb value (#2417).
+    static func clampedFade(_ raw: Double) -> Int {
+        guard raw.isFinite else { return AppWideSettings().visionFadeDuration }
+        let band = visionFadeRange
+        let clamped = min(
+            max(raw, Double(band.lowerBound)),
+            Double(band.upperBound)
+        )
+        return Int(clamped.rounded())
+    }
+
+    /// The fade's band as the verb and the API record spell it.
+    static var visionFadeBand: String {
+        "\(visionFadeRange.lowerBound)-\(visionFadeRange.upperBound)"
     }
 
     /// A Never dimmed list as stored: each entry trimmed and
@@ -183,7 +196,8 @@ extension AppWideSettings {
         var dim: Double?
         var blur: Bool?
         var appearance: VisionAppearance?
-        var fadeDuration: Int?
+        /// Read as a number: a Lua table's arrives as a double.
+        var fadeDuration: Double?
         var fadeCurve: VisionFadeCurve?
         var clearWallpaper: Bool?
         var clearApp: Bool?
@@ -259,7 +273,7 @@ extension AppWideSettings {
             dim: visionDim,
             blur: visionBlur,
             appearance: visionAppearance,
-            fadeDuration: visionFadeDuration,
+            fadeDuration: Double(visionFadeDuration),
             fadeCurve: visionFadeCurve,
             clearWallpaper: visionClearWallpaper,
             clearApp: visionClearApp,

@@ -7,6 +7,7 @@ import QuartzCore
 extension VisionManager {
     /// The window focus left and how it fades.
     struct Leaving: Equatable {
+        var id: CGWindowID
         /// The window, AppKit global frame; its `clear` is unread.
         var window: VisionMask.Window
         var duration: CFTimeInterval
@@ -14,7 +15,8 @@ extension VisionManager {
     }
 
     /// Starts `leaving`'s fade on `plate` where the window lies on
-    /// `screen`, then commits it: the order that puts the window
+    /// `screen` — `KiwiCore.visionLeaving` alone decides one is
+    /// owed — then commits it: the order that puts the window
     /// under the plate must not reach WindowServer ahead of the
     /// mask, or the window is covered whole for a frame.
     func fadeLeaving(
@@ -22,13 +24,14 @@ extension VisionManager {
         on plate: any VisionPlateBackend,
         screen: CGRect
     ) {
-        guard let leaving, leaving.duration > 0,
-            leaving.window.frame.intersects(screen)
+        guard let leaving, leaving.window.frame.intersects(screen)
         else { return }
         plate.fadeIn(
             VisionMask.shape(of: leaving.window, on: screen),
+            of: leaving.id,
             duration: leaving.duration,
-            curve: leaving.curve
+            curve: leaving.curve,
+            reduceMotion: reduceMotion()
         )
         CATransaction.flush()
     }

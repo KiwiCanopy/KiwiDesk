@@ -183,7 +183,6 @@ public final class VisionManager {
             shapes[display] = nil
             shapeInputs[display] = nil
         }
-        let left = target
         target = request.target
         below = request.target.map { request.below ?? $0 }
         holding = request.holding != nil && request.holding == target
@@ -215,7 +214,7 @@ public final class VisionManager {
                 blur: request.blur
             )
             reshape(plate, on: screen, request)
-            if plate.isShown, !motion, !holding, left != target {
+            if plate.isShown, !motion, !holding {
                 fadeLeaving(request.leaving, on: plate, screen: screen.frame)
             }
             let stack = Stack(target: target, above: holding)

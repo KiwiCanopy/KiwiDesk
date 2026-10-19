@@ -48,11 +48,14 @@ extension KiwiCore {
                 $0.visionAppearance = appearance
             }
         case "kiwivision.set_fade_duration":
-            guard let ms = args.first?.numberValue, ms.isFinite,
-                AppWideSettings.visionFadeRange.contains(Int(ms.rounded()))
-            else { return .fail("expected 0-1000") }
+            let band = AppWideSettings.visionFadeRange
+            guard let ms = args.first?.numberValue,
+                ms >= Double(band.lowerBound), ms <= Double(band.upperBound)
+            else {
+                return .fail("expected \(AppWideSettings.visionFadeBand)")
+            }
             setAppWide(persisting: false) {
-                $0.visionFadeDuration = Int(ms.rounded())
+                $0.visionFadeDuration = AppWideSettings.clampedFade(ms)
             }
         case "kiwivision.set_fade_curve":
             guard
@@ -150,6 +153,8 @@ extension KiwiCore {
             vision.isOn || vision.hasShownPlates
                 || !windowServer.requested(by: .vision).isEmpty
         else { return }
+        // Read before the settle, which may end the hold.
+        let heldBefore = vision.hold?.window.raw
         let focus = visionTarget()
         settleVisionHold(target: focus.target)
         var request = visionRequest(
@@ -161,7 +166,8 @@ extension KiwiCore {
         request.tracked = windowServer.isActive
         request.leaving = visionLeaving(
             from: vision.target,
-            to: request.target
+            to: request.target,
+            heldBefore: heldBefore
         )
         vision.sync(request, reassert: reassertOrder)
     }

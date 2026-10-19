@@ -8,19 +8,29 @@ import AppKit
 /// the same mask opacity as the dim.
 @MainActor
 final class VisionVeilFade {
+    /// One window's region in flight. `token` names the fade that
+    /// last started it, so an older fade's end retires nothing.
+    struct Region {
+        var path: CGPath
+        var dim: CAShapeLayer
+        var blur: CAShapeLayer
+        var token: Int
+    }
+
     let dimMask = CALayer()
     let blurMask = CALayer()
     let dimBase = CAShapeLayer()
     let blurBase = CAShapeLayer()
-    /// Each region in flight, with its dim and its blur layer.
-    var regions: [(path: CGPath, dim: CAShapeLayer, blur: CAShapeLayer)] =
-        []
-    /// Bumped per fade: only the newest fade's end ends them all.
-    var generation = 0
+    /// Each window's region in flight, keyed by the window.
+    var regions: [CGWindowID: Region] = [:]
+    /// Bumped per fade started.
+    var token = 0
 
     init() {
         dimMask.addSublayer(dimBase)
         blurMask.addSublayer(blurBase)
+        dimBase.fillColor = NSColor.black.cgColor
+        blurBase.fillColor = NSColor.black.cgColor
     }
 
     static func shapeLayer() -> CAShapeLayer {
@@ -31,13 +41,17 @@ final class VisionVeilFade {
 }
 
 extension VisionVeil {
-    /// Fades `region` (the view's coordinates) from clear to the
-    /// veil over `duration` seconds on `timing`, the dim and the
-    /// blur together. A fade already running keeps going beside it.
+    /// Fades `window`'s `region` (the view's coordinates) from clear
+    /// to the veil over `duration` seconds on `timing`, the dim and
+    /// the blur together; cut in under `reduceMotion`. A window
+    /// left again mid-fade carries on from where its region is now,
+    /// and other windows' fades keep going beside it.
     func fadeIn(
         _ region: CGPath,
+        of window: CGWindowID,
         duration: CFTimeInterval,
-        timing: CAMediaTimingFunction
+        timing: CAMediaTimingFunction,
+        reduceMotion: Bool
     ) {
         guard let root = view.layer, duration > 0 else { return }
         CATransaction.begin()
@@ -45,36 +59,51 @@ extension VisionVeil {
         let fade = self.fade ?? VisionVeilFade()
         if self.fade == nil {
             self.fade = fade
-            fade.dimBase.fillColor = NSColor.black.cgColor
-            fade.blurBase.fillColor = NSColor.black.cgColor
             root.mask = nil
             dimLayer.mask = fade.dimMask
             blurHost.layer?.mask = fade.blurMask
         }
-        let dim = VisionVeilFade.shapeLayer()
-        let blur = VisionVeilFade.shapeLayer()
-        fade.dimMask.addSublayer(dim)
-        fade.blurMask.addSublayer(blur)
-        fade.regions.append((region, dim, blur))
+        fade.token += 1
+        let token = fade.token
+        var entry =
+            fade.regions[window]
+            ?? VisionVeilFade.Region(
+                path: region,
+                dim: VisionVeilFade.shapeLayer(),
+                blur: VisionVeilFade.shapeLayer(),
+                token: token
+            )
+        if fade.regions[window] == nil {
+            entry.dim.opacity = 0
+            entry.blur.opacity = 0
+            fade.dimMask.addSublayer(entry.dim)
+            fade.blurMask.addSublayer(entry.blur)
+        }
+        entry.path = region
+        entry.token = token
+        fade.regions[window] = entry
         layoutFade()
-        fade.generation += 1
-        let generation = fade.generation
         CATransaction.setCompletionBlock { [weak self] in
-            MainActor.assumeIsolated { self?.fadeEnded(generation) }
+            MainActor.assumeIsolated {
+                self?.fadeEnded(window, token: token)
+            }
         }
         let begin = CACurrentMediaTime()
-        for layer in [dim, blur] {
+        for layer in [entry.dim, entry.blur] {
+            let from = layer.presentation()?.opacity ?? layer.opacity
+            layer.removeAnimation(forKey: "fade")
             layer.add(
                 BarMotion.opacityFade(
-                    from: 0,
+                    from: from,
                     to: 1,
                     begin: begin,
                     duration: duration,
-                    reduceMotion: false,
+                    reduceMotion: reduceMotion,
                     timing: timing
                 ),
                 forKey: "fade"
             )
+            layer.opacity = 1
         }
         CATransaction.commit()
     }
@@ -86,9 +115,9 @@ extension VisionVeil {
         guard let fade, let root = view.layer else { return }
         let bounds = root.bounds
         let whole = restingPath ?? CGPath(rect: bounds, transform: nil)
-        let fading = fade.regions.reduce(CGPath(rect: .zero, transform: nil)) {
-            $0.union($1.path)
-        }
+        let fading = fade.regions.values.reduce(
+            CGPath(rect: .zero, transform: nil)
+        ) { $0.union($1.path) }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         for layer in [
@@ -99,7 +128,7 @@ extension VisionVeil {
         let base = whole.subtracting(fading)
         fade.dimBase.path = base
         fade.blurBase.path = base
-        for region in fade.regions {
+        for region in fade.regions.values {
             let path = region.path.intersection(whole)
             region.dim.frame = bounds
             region.blur.frame = bounds
@@ -109,16 +138,27 @@ extension VisionVeil {
         CATransaction.commit()
     }
 
-    /// The newest fade landed: every region is covered, so the
-    /// content takes its resting mask again.
-    private func fadeEnded(_ generation: Int) {
-        guard let fade, fade.generation == generation else { return }
+    /// `window`'s fade landed, unless a newer one restarted it: its
+    /// region joins the base, and once none is left the content
+    /// takes its resting mask again — in one transaction, so no
+    /// frame draws the veil unmasked.
+    func fadeEnded(_ window: CGWindowID, token: Int) {
+        guard let fade, let region = fade.regions[window],
+            region.token == token
+        else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        dimLayer.mask = nil
-        blurHost.layer?.mask = nil
-        self.fade = nil
+        region.dim.removeFromSuperlayer()
+        region.blur.removeFromSuperlayer()
+        fade.regions[window] = nil
+        if fade.regions.isEmpty {
+            self.fade = nil
+            mask(restingPath)
+            dimLayer.mask = nil
+            blurHost.layer?.mask = nil
+        } else {
+            layoutFade()
+        }
         CATransaction.commit()
-        mask(restingPath)
     }
 }

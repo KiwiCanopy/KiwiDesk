@@ -80,6 +80,54 @@ struct KiwiVisionLeavingTests {
         #expect(core.visionLeaving(from: gone.raw, to: nil) == nil)
     }
 
+    /// The wiring: a real focus change reaches the plate as one
+    /// fade of the window left, and a Space switch reaches it as
+    /// none.
+    @Test("a focus change fades through the real path; a switch doesn't")
+    func wiring() throws {
+        let core = makeCore()
+        core.vision.reduceMotion = { false }
+        // A frame on the main screen: the fade draws where the window
+        // left lies.
+        for id in [w1, w2] {
+            core.state.apply(
+                .windowMoved(
+                    id,
+                    CGRect(x: 100, y: 100, width: 300, height: 200)
+                )
+            )
+        }
+        _ = core.execute("kiwivision.toggle")
+        core.state.apply(.windowFocused(w1))
+        core.updateVision()
+        let plates = core.vision.plates.values.compactMap {
+            $0 as? InertVisionPlate
+        }
+        #expect(!plates.isEmpty)
+        let before = plates.flatMap(\.fades).count
+        core.state.apply(.windowFocused(w2))
+        #expect(core.visionTarget().target == w2.raw)
+        core.updateVision()
+        let fades = plates.flatMap(\.fades)
+        #expect(fades.count == before + 1)
+        #expect(fades.last?.window == w1.raw)
+
+        _ = core.execute("move_to_space", args: [.string("9")])
+        _ = core.execute("focus_space", args: [.string("9")])
+        let after = plates.flatMap(\.fades)
+        #expect(after.count == fades.count)
+    }
+
+    @Test("a window a lens held was hazed already: no fade")
+    func heldWindowOwesNothing() {
+        let core = makeCore()
+        _ = core.execute("kiwivision.toggle")
+        #expect(
+            core.visionLeaving(from: w1.raw, to: w2.raw, heldBefore: w1.raw)
+                == nil
+        )
+    }
+
     @Test("the verbs take the ruled band and spellings")
     func verbs() {
         let core = makeCore()
@@ -98,6 +146,13 @@ struct KiwiVisionLeavingTests {
             !core.execute("kiwivision.set_fade_duration", args: [.number(-1)])
                 .isSuccess
         )
+        // A huge number is refused, never converted (it would trap).
+        #expect(
+            !core.execute(
+                "kiwivision.set_fade_duration",
+                args: [.number(1e300)]
+            ).isSuccess
+        )
         #expect(
             core.execute(
                 "kiwivision.set_fade_curve",
@@ -113,10 +168,22 @@ struct KiwiVisionLeavingTests {
         )
     }
 
+    @Test("a lens table clamps a huge duration instead of trapping")
+    func lensClamps() throws {
+        let json =
+            #"{"name":"R","fade_duration":1e300,"fade_curve":"ease_in"}"#
+        let lens = try JSONDecoder().decode(
+            VisionLens.self,
+            from: Data(json.utf8)
+        )
+        #expect(lens.overrides.fadeDuration == 1000)
+        #expect(lens.overrides.fadeCurve == .easeIn)
+    }
+
     @Test("the stored group clamps the duration and keeps the curve")
     func storedGroup() throws {
         var group = AppWideSettings.Vision()
-        group.fadeDuration = 5000
+        group.fadeDuration = 1e300
         group.fadeCurve = .easeInOut
         let settings = try #require(
             AppWideSettings(

@@ -34,7 +34,7 @@ extension VisionLook {
             dim: dim,
             blur: blur,
             appearance: appearance,
-            fadeDuration: fadeDuration,
+            fadeDuration: Double(fadeDuration),
             fadeCurve: fadeCurve,
             clearWallpaper: clearWallpaper,
             clearApp: clearApp,
