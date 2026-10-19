@@ -19,7 +19,7 @@ struct VisionLensTests {
         lens.overrides.dim = 30
         lens.overrides.blur = false
         lens.overrides.appearance = .dark
-        lens.overrides.fadeDuration = 300
+        lens.overrides.fadeDuration = 250
         lens.overrides.fadeCurve = .linear
         lens.overrides.clearWallpaper = true
         lens.overrides.clearApp = true

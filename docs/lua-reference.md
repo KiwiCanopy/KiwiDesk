@@ -3867,7 +3867,7 @@ dim stays.
 :::unreleased
 ### kiwivision.set_fade_duration
 
-**Expects:** milliseconds, 0–1000. Default 600.
+**Expects:** milliseconds, 0–1000. Default 300.
 
 **Does:** sets how long the window focus leaves takes to dim and
 blur; the window you focus clears at once. 0 makes the change

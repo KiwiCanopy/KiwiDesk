@@ -6517,8 +6517,9 @@ most a second it reads as the blur arriving, and switching the blur
 on at the start or once the dim lands was the visible step the
 owner compared it against. Because the window you focus never
 waits, a long fade on the window you leave costs no responsiveness.
-That is why the band reaches 1000 ms and the default is 600 ms,
-where a fade on both windows had been capped near 300 ms. The curve
+That is why the band reaches 1000 ms, where a fade on both windows
+had been capped near 300 ms; the default of 300 ms is the owner's
+pick on the desk between 150, which read as hard to see, and 600. The curve
 is the user's choice from ease out, ease in and out, ease in and
 linear. At this length they differ mostly in the first 200 ms, and
 the owner ruled that a matter of taste. macOS's mild `default`

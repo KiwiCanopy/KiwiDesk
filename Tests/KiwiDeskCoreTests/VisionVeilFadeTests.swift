@@ -117,7 +117,11 @@ struct VisionVeilFadeTests {
             reduceMotion: false
         )
         #expect(try #require(veil.fade).regions.count == 2)
-        // A window left again mid-fade keeps its one region.
+        let fade = try #require(veil.fade)
+        let layer = try #require(fade.regions[1]?.dim)
+        let sublayers = fade.dimMask.sublayers?.count
+        // A window left again mid-fade keeps its one region, and the
+        // same layer carries on.
         veil.fadeIn(
             region,
             of: 1,
@@ -126,6 +130,8 @@ struct VisionVeilFadeTests {
             reduceMotion: false
         )
         #expect(try #require(veil.fade).regions.count == 2)
+        #expect(fade.regions[1]?.dim === layer)
+        #expect(fade.dimMask.sublayers?.count == sublayers)
     }
 
     @Test("a fade's end restores the resting mask, a stale one waits")

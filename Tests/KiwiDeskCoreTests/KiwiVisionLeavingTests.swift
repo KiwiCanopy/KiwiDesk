@@ -52,7 +52,7 @@ struct KiwiVisionLeavingTests {
         let leaving = try #require(
             core.visionLeaving(from: w1.raw, to: w2.raw)
         )
-        #expect(leaving.duration == 0.6)
+        #expect(leaving.duration == 0.3)
         #expect(leaving.curve == .easeIn)
     }
 
@@ -116,6 +116,40 @@ struct KiwiVisionLeavingTests {
         _ = core.execute("focus_space", args: [.string("9")])
         let after = plates.flatMap(\.fades)
         #expect(after.count == fades.count)
+    }
+
+    /// The wiring reads the hold before the settle that may end it.
+    @Test("leaving a held window fades nothing through the real path")
+    func heldWindowWiring() {
+        let core = makeCore()
+        core.vision.reduceMotion = { false }
+        for id in [w1, w2] {
+            core.state.apply(
+                .windowMoved(
+                    id,
+                    CGRect(x: 100, y: 100, width: 300, height: 200)
+                )
+            )
+        }
+        _ = core.execute("kiwivision.toggle")
+        core.state.apply(.windowFocused(w1))
+        core.updateVision()
+        let plates = core.vision.plates.values.compactMap {
+            $0 as? InertVisionPlate
+        }
+        let before = plates.flatMap(\.fades).count
+        core.vision.hold = VisionHold(window: w1)
+        core.state.apply(.windowFocused(w2))
+        core.updateVision()
+        #expect(plates.flatMap(\.fades).count == before)
+    }
+
+    @Test("a non-finite duration reads as the default")
+    func nonFiniteDuration() {
+        let fallback = AppWideSettings().visionFadeDuration
+        #expect(AppWideSettings.clampedFade(.nan) == fallback)
+        #expect(AppWideSettings.clampedFade(.infinity) == fallback)
+        #expect(AppWideSettings.clampedFade(450.4) == 450)
     }
 
     @Test("a window a lens held was hazed already: no fade")

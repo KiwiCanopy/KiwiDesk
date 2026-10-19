@@ -37,7 +37,7 @@ public struct AppWideSettings: Equatable, Sendable {
     public var visionAppearance = VisionAppearance.unchanged
     /// How long the window focus leaves takes into the dim and the
     /// blur, in ms (`kiwivision.fade_duration`, #2417); 0 cuts.
-    public var visionFadeDuration = 600
+    public var visionFadeDuration = 300
     /// The curve of that fade (`kiwivision.fade_curve`, #2417).
     public var visionFadeCurve = VisionFadeCurve.easeOut
     /// Whether KiwiVision leaves the wallpaper clear, dimming only
