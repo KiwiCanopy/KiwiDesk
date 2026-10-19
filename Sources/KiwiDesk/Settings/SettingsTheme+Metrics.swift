@@ -54,9 +54,9 @@ extension SettingsTheme {
     /// (`SettingsSearchNotice`, #678).
     static let searchNoticeFillOpacity: CGFloat = 0.12
 
-    /// The marked jump chip's accent wash over `page`
-    /// (`SettingsThemeContrastTests`, #1520).
-    static let jumpChipMarkedOpacity: CGFloat = 0.18
+    /// A marked chip's accent wash — the jump chip on `page`, the
+    /// icon cell on `card` (`SettingsThemeContrastTests`, #1520).
+    static let chipMarkedOpacity: CGFloat = 0.18
 
     /// The update window's Highlights wash over `card`
     /// (`SettingsThemeContrastTests`, #1542).

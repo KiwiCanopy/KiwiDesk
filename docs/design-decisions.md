@@ -7301,6 +7301,16 @@ drawn inside the glass is drawn vibrant, which washed the
 destination tiles out on the first device look. Under Reduce
 transparency the card falls back to its opaque fill and takes its
 shadow back. The owner kept both on the device, 2026-10-18.
+
+The icon picker's popover is the second surface, by the same test:
+it floats over the page and is only up while the user is choosing.
+Its symbols are ink, and its emoji are pictures in their own colour
+that are drawn on top of the glass, not inside it. The chosen icon's
+accent wash sits on the cell's own fill, so it reads against that
+fill rather than against the glass. Its fallback stays a popover
+material, since that was its design before the glass. The owner kept
+it on the device, 2026-10-19. A further popover takes glass only by
+passing the same test, ruled here.
 :::
 
 ### Search: one result per setting, and a fast path kept pure

@@ -3,7 +3,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Shortcuts & Gestures jump chips' pairings (#1520), measured
+/// The Shortcuts & Gestures jump chips' pairings (#1520) and the
+/// icon picker cells that share their mark, measured
 /// by the one contrast suite and kept here for their length: the
 /// label over the chip's rest fill, its hover lift and its press
 /// on the bar's page ground, each with and without the marked
@@ -12,7 +13,7 @@ import Testing
 extension SettingsThemeContrastTests {
     private static let markedWash = (
         color: SettingsTheme.accent,
-        alpha: Double(SettingsTheme.jumpChipMarkedOpacity)
+        alpha: Double(SettingsTheme.chipMarkedOpacity)
     )
 
     static let jumpChips: [Pairing] = [
@@ -52,6 +53,24 @@ extension SettingsThemeContrastTests {
             "ink on the pressed marked jump chip",
             SettingsTheme.ink,
             on: SettingsTheme.page,
+            layers: [SettingsTheme.chipPressed],
+            washedWith: markedWash
+        ),
+        // The icon picker's cells take the same rest, press and
+        // mark on its popover, measured on `card` as the nearest
+        // token to that popover's material fallback; the glass
+        // composite has no token to measure.
+        Pairing(
+            "ink on the marked icon cell",
+            SettingsTheme.ink,
+            on: SettingsTheme.card,
+            layers: [SettingsTheme.chipRest],
+            washedWith: markedWash
+        ),
+        Pairing(
+            "ink on the pressed marked icon cell",
+            SettingsTheme.ink,
+            on: SettingsTheme.card,
             layers: [SettingsTheme.chipPressed],
             washedWith: markedWash
         ),

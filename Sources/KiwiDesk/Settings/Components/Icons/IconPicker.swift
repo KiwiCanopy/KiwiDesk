@@ -124,6 +124,16 @@ struct IconPicker: View {
         }
         .padding(12)
         .frame(width: 340, height: 400)
+        // The search card's glass, `.regular` and untinted
+        // (#1295, #2399); the fallback keeps a popover's material.
+        .presentationBackground {
+            Color.clear.glassChrome(
+                in: Rectangle(),
+                enabled: true,
+                variant: .regular,
+                fallback: AnyShapeStyle(.regularMaterial)
+            )
+        }
     }
 
     // MARK: - Result sections
@@ -214,16 +224,16 @@ struct IconPicker: View {
     }
 
     private func cell(_ glyph: String) -> some View {
-        Button {
+        let marked = !icon.isEmpty && glyph == icon
+        return Button {
             choose(glyph)
         } label: {
             IconGlyphLabel(icon: glyph)
-                .frame(width: 32, height: 28)
-                .contentShape(Rectangle())
         }
-        .settingsActionButton()
+        .buttonStyle(IconCellStyle(marked: marked))
         .help(glyph)
         .accessibilityLabel(glyph)
+        .accessibilityAddTraits(marked ? .isSelected : [])
     }
 
     // MARK: - Data
