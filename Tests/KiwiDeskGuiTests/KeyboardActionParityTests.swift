@@ -135,8 +135,8 @@ struct KeyboardActionParityTests {
             try String(contentsOf: file, encoding: .utf8)
         )
         for needle in [
-            ".contextMenu { menu() }",
-            ".accessibilityActions { menu() }",
+            ".contextMenu { if offered { menu() } }",
+            ".accessibilityActions { if offered { menu() } }",
             ".focusedValue(\\.rowActionFocus, catcher)",
             "charactersIgnoringModifiers == \".\"",
             "== .control",

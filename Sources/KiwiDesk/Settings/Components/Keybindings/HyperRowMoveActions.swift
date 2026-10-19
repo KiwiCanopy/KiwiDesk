@@ -12,18 +12,20 @@ struct HyperRowMoveActions: ViewModifier {
     /// Re-judges the move against the rows at the click.
     let onMove: () -> Void
 
+    /// Whether rows offer the move at all: a move with no key writes
+    /// a chord nothing can press. The Hyper key row's hint reads it.
+    static func isOffered(key: HyperSourceKey?) -> Bool { key != nil }
+
+    /// One structure whether or not the row can move, so the move
+    /// retiring its own item keeps the row's identity and focus.
     func body(content: Content) -> some View {
-        if let move {
-            content.rowActions { actions(move) }
-        } else {
-            content
-        }
+        content.rowActions(offered: move != nil) { actions }
     }
 
-    @ViewBuilder private func actions(
-        _ move: HyperShortcutMove.RowMove
-    ) -> some View {
+    @ViewBuilder private var actions: some View {
         switch move {
+        case nil:
+            EmptyView()
         case .move:
             Button(HyperMoveWords.rowAction, action: onMove)
         case .taken(let to, let holder):

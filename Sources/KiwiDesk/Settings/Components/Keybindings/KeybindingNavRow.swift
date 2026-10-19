@@ -13,8 +13,6 @@ struct NavRow: View {
     private var disabledSystemShortcuts
     @Environment(\.keybindingReservesTrashSlot)
     private var reservesTrashSlot
-    @Environment(\.hyperKeyIsOff)
-    private var hyperKeyIsOff
     /// A clear of a shortcut other profiles share asks where it
     /// goes, as the trash does (#1393).
     @State private var confirmingClear = false
@@ -127,7 +125,10 @@ struct NavRow: View {
 
     /// This row's Move to Hyper, offered only while a key is set.
     private var hyperMove: HyperShortcutMove.RowMove? {
-        guard !hyperKeyIsOff, let index else { return nil }
+        guard
+            HyperRowMoveActions.isOffered(key: model.appWide.hyperKey),
+            let index
+        else { return nil }
         return HyperShortcutMove.rowMove(bindings[index], in: bindings)
     }
 

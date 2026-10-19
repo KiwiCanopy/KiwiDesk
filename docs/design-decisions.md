@@ -10965,7 +10965,9 @@ key set the item is absent, not greyed: a move then writes a chord
 no key can press. A target another row holds greys the item and
 names the holder, since the user can free it on the same page;
 nothing is doubled and no old chord is remembered, so the way back
-is re-recording or the reverse offer. The top-up of a new default
+is re-recording — or, for a seeded `⌃⌥` letter, the reverse offer,
+which reads the letter seed alone and so never puts a row that came
+from `⌥⌘` on `⌃⌥`, where held and pressed verbs would mix. The top-up of a new default
 letter still follows where the layer's letters sit
 (`onLettersBase`), never whether a key is set: a layer whose
 letters stayed on `⌃⌥` gets the new one there too, and one moved

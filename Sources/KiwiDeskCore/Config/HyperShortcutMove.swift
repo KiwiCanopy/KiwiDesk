@@ -166,10 +166,13 @@ public enum HyperShortcutMove {
         return onHyper
     }
 
+    /// The base the seeded letters sit on and the offer moves from.
+    static let letterBase: HotkeyModifiers = [.control, .option]
+
     /// `combo` on the other base, or nil where it is not on the
     /// base `direction` moves from.
     static func moved(_ combo: KeyCombo, _ direction: Direction) -> KeyCombo? {
-        let base: HotkeyModifiers = [.control, .option]
+        let base = letterBase
         let modifiers = combo.modifiers
         switch direction {
         case .toHyper:

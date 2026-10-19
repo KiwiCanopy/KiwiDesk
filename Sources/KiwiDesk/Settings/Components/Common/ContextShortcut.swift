@@ -31,14 +31,19 @@ extension FocusedValues {
 extension View {
     /// Attaches action menu to right-click, accessibility actions, and `⌃.`
     /// chord (#845).
+    /// `offered: false` keeps the row's structure while it has no
+    /// actions, so a row whose own action retires it keeps its
+    /// identity and focus (#2420).
     func rowActions<MenuContent: View>(
+        offered: Bool = true,
         @ViewBuilder _ menu: @escaping () -> MenuContent
     ) -> some View {
-        modifier(RowActions(menu: menu))
+        modifier(RowActions(offered: offered, menu: menu))
     }
 }
 
 private struct RowActions<MenuContent: View>: ViewModifier {
+    let offered: Bool
     let menu: () -> MenuContent
     @State private var catcher = RowChordCatcher.Token()
     @State private var chordMenuShown = false
@@ -46,12 +51,15 @@ private struct RowActions<MenuContent: View>: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .contextMenu { menu() }
-            .accessibilityActions { menu() }
+            .contextMenu { if offered { menu() } }
+            .accessibilityActions { if offered { menu() } }
             .focusedValue(\.rowActionFocus, catcher)
             .background(RowChordCatcher(token: catcher))
             .popover(
-                isPresented: $chordMenuShown,
+                isPresented: Binding(
+                    get: { offered && chordMenuShown },
+                    set: { chordMenuShown = $0 }
+                ),
                 attachmentAnchor: .rect(.bounds)
             ) {
                 VStack(alignment: .leading, spacing: 2) {

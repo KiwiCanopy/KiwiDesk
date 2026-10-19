@@ -109,22 +109,11 @@ struct HyperKeyRow: View {
                     luaOwned: reason == .appWideLuaOwned
                 )
             )
-            if Self.offersRowMoveHint(
-                key: model.appWide.hyperKey,
-                luaOwned: reason == .appWideLuaOwned
-            ) {
+            // Points at the row move exactly where rows offer it.
+            if HyperRowMoveActions.isOffered(key: model.appWide.hyperKey) {
                 caption(HyperKeyWords.rowMoveHint)
             }
         }
-    }
-
-    /// Whether the caption also points at a row's Move to Hyper:
-    /// only while a key is set, since the row action needs one.
-    static func offersRowMoveHint(
-        key: HyperSourceKey?,
-        luaOwned: Bool
-    ) -> Bool {
-        key != nil && !luaOwned
     }
 
     /// The one sentence under the field.

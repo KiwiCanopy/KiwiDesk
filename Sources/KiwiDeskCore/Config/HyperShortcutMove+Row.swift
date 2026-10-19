@@ -16,7 +16,7 @@ extension HyperShortcutMove {
     /// The bases a row moves from: exactly one of them, plus `⇧` at
     /// most, so the `⌃⌥⇧⌘` Desktop tier and `⌘`-only chords stay.
     static let rowBases: [HotkeyModifiers] = [
-        [.control, .option], [.option, .command],
+        letterBase, [.option, .command],
     ]
 
     /// `row`'s move among `rows`, or nil where it is offered none:
@@ -35,10 +35,12 @@ extension HyperShortcutMove {
         return .move(to: to)
     }
 
-    /// `combo` with its base swapped for `✦`, or nil off both bases.
+    /// `combo` with its base swapped for `✦`, or nil off both bases;
+    /// the `⌃⌥` base takes the offer's own `moved`.
     static func rowTarget(_ combo: KeyCombo) -> KeyCombo? {
         let base = combo.modifiers.subtracting(.shift)
         guard rowBases.contains(base) else { return nil }
+        if base == letterBase { return moved(combo, .toHyper) }
         return KeyCombo(
             keyCode: combo.keyCode,
             modifiers: combo.modifiers.subtracting(base).union(.hyper)

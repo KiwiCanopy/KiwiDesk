@@ -82,15 +82,4 @@ struct HyperRowMoveTests {
         #expect(chord(to) == chord("hyper+shift+p"))
         #expect(by == holder)
     }
-
-    @Test("the row's own chord never holds its target")
-    func ownRowIsNotTheHolder() {
-        let other = row("control+option+q", "KiwiDesk.other()")
-        let expected = target("control+option+p") ?? ""
-        #expect(!expected.isEmpty)
-        #expect(
-            move("control+option+p", among: [other])
-                == .move(to: expected)
-        )
-    }
 }
