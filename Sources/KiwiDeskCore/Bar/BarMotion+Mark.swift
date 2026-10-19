@@ -51,16 +51,23 @@ extension BarMotion {
 
     /// Where the mark's plate stands in its view: `mark`, grown by
     /// `ShelfIndicatorSpec.hoverGrowth` on every side while
-    /// hovered — never under Reduce Motion, which keeps the rim
-    /// alone.
+    /// hovered and along the edge by `widen`, a label's room —
+    /// never under Reduce Motion, which keeps the rim alone, save
+    /// for a label, which is content rather than motion and takes
+    /// its room at once.
     static func hoverPlate(
         mark: CGRect,
+        widen: CGFloat = 0,
+        horizontal: Bool = true,
         hovered: Bool,
         reduceMotion: Bool
     ) -> CGRect {
-        guard hovered, !reduceMotion else { return mark }
+        guard hovered, !reduceMotion || widen > 0 else { return mark }
         let growth = ShelfIndicatorSpec.hoverGrowth
-        return mark.insetBy(dx: -growth, dy: -growth)
+        let along = growth + widen / 2
+        return horizontal
+            ? mark.insetBy(dx: -along, dy: -growth)
+            : mark.insetBy(dx: -growth, dy: -along)
     }
 
     /// Places the mark's `plate` for `hovered` and shows its
@@ -73,16 +80,22 @@ extension BarMotion {
         _ plate: NSView,
         rim: NSView,
         mark: CGRect,
+        widen: CGFloat = 0,
+        horizontal: Bool = true,
         hovered: Bool,
         animated: Bool
     ) {
         let frame = hoverPlate(
             mark: mark,
+            widen: widen,
+            horizontal: horizontal,
             hovered: hovered,
             reduceMotion: isReduced
         )
         rim.frame = hoverPlate(
             mark: mark,
+            widen: widen,
+            horizontal: horizontal,
             hovered: true,
             reduceMotion: isReduced
         )
@@ -92,7 +105,7 @@ extension BarMotion {
             plate.layer?.cornerRadius = min(frame.width, frame.height) / 2
             rim.alphaValue = hovered ? 1 : 0
         }
-        guard animated, plate.frame != frame else {
+        guard animated, !isReduced, plate.frame != frame else {
             write()
             return
         }

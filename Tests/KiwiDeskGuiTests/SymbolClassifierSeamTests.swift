@@ -60,6 +60,8 @@ struct SymbolClassifierSeamTests {
             "builds the overflow count's chevron from a fixed name",
         "Sources/KiwiDeskCore/Bar/AppBarOverlay+FloatBreak.swift":
             "builds the App Bar's float mark from a fixed name",
+        "Sources/KiwiDeskCore/Bar/ShelfIndicatorSpec+Label.swift":
+            "draws a Space icon spaceIdentifier already classified",
         "Tests/KiwiDeskCoreTests/ShelfCountTests.swift":
             "asserts every count chevron RESOLVES; classifies nothing",
     ]

@@ -165,12 +165,12 @@ struct ShelfRevealMotionTests {
         let room = ShelfIndicatorSpec.hoverGrowth
         let resting = view.bounds.insetBy(dx: room, dy: room)
         #expect(view.plate.frame == resting)
-        #expect(view.dots.frame == resting)
+        #expect(view.dots.mark == resting)
         #expect(view.rim.alphaValue == 0)
         view.render(spec(hovered: true), animated: false)
         #expect(view.plate.frame == view.bounds)
         #expect(view.rim.frame == view.bounds)
-        #expect(view.dots.frame == resting)
+        #expect(view.dots.mark == resting)
         #expect(view.rim.alphaValue == 1)
     }
 

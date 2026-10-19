@@ -63,7 +63,9 @@ extension KiwiCore {
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         var standingDown: Set<DisplayID> = []
-        var hiding = HidingShelves()
+        var hiding = HidingShelves(
+            dotStarts: shelves.indicators.dotStarts
+        )
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
             // the plan and every style a bar draws carry it.

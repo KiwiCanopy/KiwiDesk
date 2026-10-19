@@ -27,6 +27,10 @@ extension KiwiCore {
         /// The mark each hiding shelf's reveal grows out of: its
         /// shown bar's, else its first mark's. AX coordinates.
         var marks: [ShelfManager.Key: CGRect] = [:]
+        /// Each shelf's first Space dot shown, carried from the last
+        /// pass so the dots slide only when they must
+        /// (`ShelfDotWindow`).
+        var dotStarts: [ShelfManager.Key: Int] = [:]
 
         /// Files each hiding bar of `plans` — its target, and its
         /// mark where it hides to one.
@@ -115,8 +119,11 @@ extension KiwiCore {
                     !shown.contains(bar) && !shown.subtracting([bar]).isEmpty
                 // The mark draws the shelf as rendered: Reduce
                 // transparency makes its fill opaque (#1374).
-                let mark: ShelfIndicatorSpec.Mark =
-                    bar == .space ? Self.mark(items: items) : .line
+                let dots =
+                    bar == .space
+                    ? spaceDots(items, key: key, settings: settings)
+                    : nil
+                let mark = dots?.mark ?? .line
                 let markIn = ShelfIndicatorSpec.frame(
                     of: mark,
                     in: plan.strip,
@@ -170,7 +177,9 @@ extension KiwiCore {
                     morphs: shelf.drawsPlate,
                     rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
                     sheen: settings.borderStyle.sheen,
-                    yields: yields
+                    yields: yields,
+                    label: plan.horizontal ? dots?.label : nil,
+                    position: dots?.position
                 )
             }
         }
@@ -233,20 +242,6 @@ extension KiwiCore {
             case .right: return gaps.outer.right
             }
         }
-
-        /// Space dots from the Space Bar's items, else the line.
-        static func mark(
-            items: [SpaceBarOverlay.Item]?
-        ) -> ShelfIndicatorSpec.Mark {
-            guard let items else { return .line }
-            let dots = items.filter { $0.space != nil }.map {
-                ShelfIndicatorSpec.Dot(
-                    current: $0.active,
-                    occupied: $0.windowCount > 0
-                )
-            }
-            return dots.isEmpty ? .line : .dots(dots)
-        }
     }
 
     /// Hands the pass's hiding bars to the revealer and their marks
@@ -254,6 +249,7 @@ extension KiwiCore {
     func syncHidingShelves(_ hiding: HidingShelves) {
         shelves.reveal.sync(hiding.targets)
         shelves.indicators.sync(hiding.indicators)
+        shelves.indicators.dotStarts = hiding.dotStarts
     }
 
     /// The show/hide action on one bar.

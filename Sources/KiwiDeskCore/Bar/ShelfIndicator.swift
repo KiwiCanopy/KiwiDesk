@@ -17,6 +17,9 @@ struct ShelfIndicatorSpec: Equatable {
         let current: Bool
         /// A Space holding windows: drawn brighter.
         let occupied: Bool
+        /// An end dot with Spaces beyond it (`ShelfDotWindow`):
+        /// drawn small, as iOS page dots are.
+        var small = false
     }
 
     let mark: Mark
@@ -50,6 +53,13 @@ struct ShelfIndicatorSpec: Equatable {
     /// under its own bar, VoiceOver still reading it hidden.
     var yields = false
 
+    /// The current Space's name, drawn in its dot while the mark
+    /// is hovered (`label`, `ShelfIndicatorSpec+Label`).
+    var label: Label?
+    /// Where the current Space sits, for VoiceOver: its place
+    /// from 1 and the Space count, which the dots may not all show.
+    var position: Position?
+
     /// Whether the mark draws nothing: its bar or a sibling shows.
     var standsAside: Bool { shown || yields }
 
@@ -63,6 +73,7 @@ struct ShelfIndicatorSpec: Equatable {
     /// The indicator's depth across its edge (pt).
     static let depth = KiwiShelf.hiddenDepth
     static let dot: CGFloat = 4
+    static let smallDot: CGFloat = 2
     static let currentDot: CGFloat = 12
     static let dotGap: CGFloat = 4
     static let pad: CGFloat = 4
@@ -87,7 +98,7 @@ struct ShelfIndicatorSpec: Equatable {
             return lineLength
         case .dots(let dots):
             let marks = dots.reduce(0) {
-                $0 + ($1.current ? currentDot : dot)
+                $0 + ($1.current ? currentDot : $1.small ? smallDot : dot)
             }
             let gaps = CGFloat(max(0, dots.count - 1)) * dotGap
             return marks + gaps + 2 * pad
@@ -166,10 +177,11 @@ final class ShelfIndicator {
         if panel?.isVisible == true, view.spec == spec { return }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        // Room around the mark for its hover growth, taken once:
-        // the plate grows inside it and the panel never resizes.
-        let room = ShelfIndicatorSpec.hoverGrowth
-        let frame = spec.frame.insetBy(dx: -room, dy: -room)
+        // Room around the mark for its hover growth and its
+        // label, taken once: the plate grows inside it and a hover
+        // never resizes the panel.
+        let room = Self.room(of: spec)
+        let frame = spec.frame.insetBy(dx: -room.width, dy: -room.height)
         panel.setFrame(
             GeometryUtils.flip(
                 frame,
@@ -189,6 +201,26 @@ final class ShelfIndicator {
         panel?.orderOut(nil)
     }
 
+    /// The room the panel keeps around `spec`'s mark on each side:
+    /// the hover's growth, and along the edge half its label's.
+    static func room(of spec: ShelfIndicatorSpec) -> CGSize {
+        let growth = ShelfIndicatorSpec.hoverGrowth
+        let along = growth + spec.labelExtra / 2
+        return spec.horizontal
+            ? CGSize(width: along, height: growth)
+            : CGSize(width: growth, height: along)
+    }
+
+    /// The mark's resting frame inside a view `bounds` sized by
+    /// `room(of:)`.
+    static func mark(
+        of spec: ShelfIndicatorSpec,
+        in bounds: CGRect
+    ) -> CGRect {
+        let room = room(of: spec)
+        return bounds.insetBy(dx: room.width, dy: room.height)
+    }
+
     var isVisible: Bool { panel?.isVisible == true }
 
     private func makePanel() -> NSPanel {
@@ -205,6 +237,9 @@ final class ShelfIndicators {
     typealias Key = ShelfRevealer.Key
 
     private var indicators: [Key: ShelfIndicator] = [:]
+    /// Each shelf's first Space dot shown last pass
+    /// (`ShelfDotWindow`), handed to the next.
+    var dotStarts: [ShelfManager.Key: Int] = [:]
     /// The indicator's press: the show/hide action on its bar.
     var onPress: @MainActor (Key) -> Void = { _ in }
     #if DEBUG
