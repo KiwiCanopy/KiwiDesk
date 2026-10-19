@@ -578,6 +578,15 @@ Obligations:
   lifts it back (v3 probe P9), and the mask walks it hazed in front
   (`KiwiVisionHoldTests`, `KiwiVisionHoldExemptionTests`,
   `KiwiVisionHoldWiringTests`).
+- **Only the window focus leaves fades, and its fade starts and
+  commits through the one `fadeLeaving` ahead of the plate's order
+  in `sync`** (#2417). Whether a fade is owed is the one
+  `KiwiCore.visionLeaving` — a tracked window on a shown Space, so
+  a Space switch stays instant (#2228), never a window a lens held
+  — and the plate never orders above the new focus for it. The
+  fade's masks reach WindowServer before the order, or the window
+  left is covered whole for a frame (`VisionLeaveFadeSeamTests`,
+  `VisionLeaveFadeTests`, `KiwiVisionLeavingTests`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

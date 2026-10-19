@@ -24,6 +24,11 @@ extension KiwiCore {
         if let retired = APIReference.retirement(of: command) {
             return .fail(retired)
         }
+        // The show/hide action redraws the bars and moves no
+        // window: a hiding edge reserves only its sliver (#761).
+        if let action = APIReference.barAction(of: command) {
+            return shelfRevealCommand(action)
+        }
         let reservation = shelfReservations
         // Raised by the bars' own arms: their write may leave the
         // layout bounds alone (#1524).
@@ -50,6 +55,9 @@ extension KiwiCore {
             barWrite = true
             response = spaceBarCommand(command, args)
         } else if command.hasPrefix("kiwishelf.") {
+            // The shelf's look, like a bar's: the reservation
+            // comparison forces the pass where the depth moved.
+            barWrite = true
             response = kiwishelfCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)

@@ -198,6 +198,7 @@ struct EchoClockSeamTests {
         "KiwiCore+StickyReach.swift": 3,  // debt
         "KiwiCore+UnsolicitedResize.swift": 1,  // debt
         "TilingEngine+SizeBounds.swift": 2,  // debt
+        "ShelfRevealer.swift": 1,  // seam: a timed pin's deadline
     ]
 
     @Test("the wall clock is read only where the register says")

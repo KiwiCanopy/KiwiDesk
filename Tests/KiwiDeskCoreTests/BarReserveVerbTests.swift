@@ -55,10 +55,17 @@ struct BarReserveVerbTests {
     /// the shelf must then prove the depth clause.
     @Test("No bar verb writes the shelf")
     func barVerbsLeaveTheShelf() {
+        // The bar actions write nothing stored (#761).
+        let setters = { (keys: Dictionary<String, APIRecord>.Keys) in
+            keys.filter { !APIReference.barActions.contains($0) }
+        }
         let verbs =
-            APIReference.spaceBarRecords.keys.map {
+            setters(APIReference.spaceBarRecords.keys).map {
                 "space_bar.\($0)"
-            } + APIReference.appBarRecords.keys.map { "app_bar.\($0)" }
+            }
+            + setters(APIReference.appBarRecords.keys).map {
+                "app_bar.\($0)"
+            }
         #expect(verbs.count > 10)
         for verb in verbs.sorted() {
             for variant in 0..<2 {

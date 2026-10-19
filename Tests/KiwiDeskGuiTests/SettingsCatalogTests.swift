@@ -145,7 +145,8 @@ struct SettingsCatalogTests {
         // 157 since #2312: KiwiVision's own shortcuts group.
         // 158 since #2103 PR 7: the lens strip.
         // 159 since #2379: Mouse & trackpad ▸ hover delay.
-        #expect(allEntries.count == 159)
+        // 161 since #2417: KiwiVision's fade duration and curve.
+        #expect(allEntries.count == 161)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

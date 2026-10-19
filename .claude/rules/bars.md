@@ -33,6 +33,9 @@ paths:
   - "Sources/KiwiDeskCore/Layouts/AppBarStyle*.swift"
   - "Sources/KiwiDeskCore/Layouts/LayoutAppBar*.swift"
   - "Sources/KiwiDeskCore/Commands/Reference/APIReference+Retired.swift"
+  # The edge folds (reserve, hide) and the bars' visibility door
+  # (#1524, #761).
+  - "Sources/KiwiDeskCore/Tiling/TilingSettings+Shelf.swift"
   # Glass hosts outside Bar/ (#1620, #1621): they take their tint
   # through GlassTint.apply and their stand-down through the gate,
   # whose obligations live here.
@@ -175,6 +178,36 @@ twice, was a question the user answered twice. The argument is
   `BarReserveTests` holds the fold, `BarReserveCoreTests` the
   float region and the skipped pass, `BarReserveVerbTests` the
   global-only refusal.
+- **Read a bar's visibility through the one
+  `TilingSettings.visibility(of:)` and write it through the one
+  `setVisibility(_:of:)` (#761).** Two bars that share an edge on
+  any screen (`barsLinked`) are one shelf: the reader answers
+  `auto` only where both stored modes are, and the door writes
+  both, so no layout, look or hand edit can fold them apart —
+  judging a shared shelf by what each layout draws moved the
+  windows on every layout switch. `barEdges(space:app:)` folds the
+  reader's answer, a hiding edge reserving only its constant sliver
+  (`hidingEdges`, `KiwiShelf.hiddenReservation`), so a reveal is
+  an overlay that redraws the bars through `updateBars()` and
+  never retiles (`BarAutoHideFoldTests`, `BarVisibilitySeamTests`,
+  `ShelfAutoHideCoreTests` ▸ `actionRevealsWithoutARetile`).
+  Whether a hiding shelf is shown is asked of `ShelfManager.reveal`
+  per hiding plan in `updateBars()`, and a second shown-answer
+  beside it is review's; its pointer monitor and location are
+  seams both `makeTestCore` twins pin (`MouseButtonSeamGuardTests`,
+  `ShelfPanelPinTests` the indicator panels), the indicator lets
+  the mouse through (`ShelfAutoHideCoreTests` ▸
+  `indicatorIgnoresTheMouse`), and its timings are
+  `ShelfRevealerTests`'. **What holds a reveal although the
+  pointer left is the one `ShelfManager.surfaceHolds`** — the peek
+  anchored on that shelf's panel, or a menu anchored on it — wired
+  once in Bootstrap, and a new surface a shelf opens joins it there
+  (`ShelfAutoHideLifetimeTests` ▸ `menuHoldsItsShelf`,
+  `ShelfRevealWiringTests` ▸ `holdIsWired`). **`updateBars()` hands
+  the revealer its hiding shelves before `syncShelves`**, on both
+  paths, since a kept hiding shelf's panel is judged against this
+  pass's targets (`ShelfRevealWiringTests` ▸ `revealerSyncsFirst`,
+  `ShelfAutoHideLifetimeTests` ▸ `keptBetweenReveals`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one
@@ -1314,7 +1347,9 @@ mark the current Space or focused window reads it.
   reach the screen) and never a point literal. The Space Bar's
   drop ring morphs into the outline, so it strokes alike.
   `HighlightWidthTests` builds both bars' item views and the
-  drop ring and holds their strokes to the width.
+  drop ring and holds their strokes to the width. A hidden
+  shelf's hover rim (#761) takes the same reading, capped at its
+  plate's growth, and the bars' sheen (`HighlightWidthMarkTests`).
 - **A preview of the bar draws the draft's width**, scaled from
   those two readings: the Settings Bars preview carries them on
   its `BarSpec` (`HighlightWidthPreviewTests` holds the spec).

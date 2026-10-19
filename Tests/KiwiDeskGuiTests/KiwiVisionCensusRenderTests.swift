@@ -44,12 +44,16 @@ struct KiwiVisionCensusRenderTests {
         #expect(declared == Set(KiwiVisionRowOrder.byContainer.keys))
     }
 
-    /// Dim, then Blur; the appearance on its own card.
+    /// Dim, then Blur, then the fade they gate (#2417); the
+    /// appearance on its own card.
     @Test("the rows keep their order")
     func rowOrder() {
         #expect(
             KiwiVisionRowOrder.levels
-                == [.kiwiVision(.dim), .kiwiVision(.blur)]
+                == [
+                    .kiwiVision(.dim), .kiwiVision(.blur),
+                    .kiwiVision(.fadeDuration), .kiwiVision(.fadeCurve),
+                ]
         )
         #expect(
             KiwiVisionRowOrder.appearance == [.kiwiVision(.appearance)]

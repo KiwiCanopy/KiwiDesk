@@ -6489,6 +6489,44 @@ surface owns up to. Should `hud` be wanted on macOS 26 after all,
 it comes as a separate Lua-only style verb, never by turning the
 stored boolean into an enum, which would owe a migration.
 
+### Only the window focus leaves eases into KiwiVision (#2417)
+
+**[Rationale]**
+
+When focus moves with KiwiVision on, the window you leave fades into
+the dim and the blur, and the window you focus clears at once. The
+arrival is instant for two reasons, and tuning cannot remove either.
+First, macOS fronts the new window before KiwiDesk hears the focus
+change. The window is already above the plate and clear when the
+report arrives, so a fade can only dim it again and clear it a
+second time. On the device that read as the window flashing bright
+and then dimming. Second, dimming that window at all would need the
+plate above it. Its focus ring would sit under the plate too, so the
+ring dims and pops back, and every focus change pays two more
+WindowServer orders, which took up to 390 ms each under GPU load
+(#1925). With the leave fade alone, the plate stays where it already
+was, below the new focus. The fade adds no order and no second
+panel, only a mask region whose opacity runs from clear to covered.
+That mask must reach WindowServer before the order that puts the
+window under the plate, or the window is covered whole for a frame.
+
+The blur fades with the dim, through the same mask opacity. The
+recorded colour shift of a partly faded Liquid Glass still holds,
+and it is why the blur has no strength control. Over a fade of at
+most a second it reads as the blur arriving, and switching the blur
+on at the start or once the dim lands was the visible step the
+owner compared it against. Because the window you focus never
+waits, a long fade on the window you leave costs no responsiveness.
+That is why the band reaches 1000 ms, where a fade on both windows
+had been capped near 300 ms; the default of 300 ms is the owner's
+pick on the desk between 150, which read as hard to see, and 600. The curve
+is the user's choice from ease out, ease in and out, ease in and
+linear. At this length they differ mostly in the first 200 ms, and
+the owner ruled that a matter of taste. macOS's mild `default`
+curve stays out because it is ease out under a confusing name.
+Reduce Motion, a Space switch (#2228) and a lens hold change the
+dim at once.
+
 ### KiwiVision switches the appearance and owes it back (#2103)
 
 **[Rationale]**
@@ -14003,6 +14041,52 @@ layout would move windows on a layout switch.
 
 A split App Bar pays the same price with the Space Bar on — the
 reflow paragraph of *Amended* below.
+
+:::unreleased
+*A shelf can hide; a reveal is an overlay*
+([#761](https://github.com/KiwiCanopy/KiwiDesk/issues/761)).
+Each bar carries a visibility mode, `always` (the default) or
+`auto`; there is no `never`, which is the bar turned off. The
+unit that hides is the shelf on one edge, and a hiding edge
+reserves only a constant sliver — the full shelf's own rule with
+the dots' depth in place of its thickness, so its windows stand
+their outer gap clear of the dots, which sat lost on a window's
+border while the edge reserved nothing. That makes "a reveal never
+retiles" true by
+construction: a reveal only redraws the bars, and setting the
+mode is the one change that can move the windows. Hiding while
+still reserving the full strip was rejected (the user would give up the
+information and keep paying the area).
+
+Two bars that share an edge on any screen are one shelf, so
+they read one mode, through one reader, and a write to either
+writes both (owner, 2026-10-18). Judging the shared shelf by
+what each layout draws let a layout with no App Bar hide a shelf
+that Monocle kept shown, so every layout switch moved the
+windows; judging by the configured edges cannot flip. Where the
+stored modes disagree — a look or a hand edit fused two bars —
+the shelf stays shown, since hiding needs both bars' consent. The
+price is that bars linked on one screen and split on another take
+one mode everywhere. Storing the mode per edge would have agreed
+by construction, but would change a bar's mode when it moves.
+
+The hover target is a band along the edge, never the dots'
+drawing, and the dots let the mouse through, so the windows under
+them keep their clicks. The reveal waits long enough that a
+pointer passing for a title bar does not pop it, never restarting
+for movement inside the band; the retract forgives an overshoot;
+a push against the screen's own edge reveals at once, as the Dock
+does. There is no click-pin: the band sits over the dots, so the
+shelf has revealed before a click lands, and on a revealed shelf
+every click target already does something, so nothing could
+release a pin. The show/hide action is the one pin. It stays
+until the next press by default, because a keyboard user who
+pressed to look has not said for how long; `reveal_duration`
+hides it again on its own, and is one value because a fused shelf
+is one shelf. No reveal on a Space switch: the dots already show
+the new Space. A look never carries the mode, which is
+functionality, not styling.
+:::
 
 *One placement rule, asked by every picture of it.* Where each
 section sits along the edge is decided in ONE pure function,

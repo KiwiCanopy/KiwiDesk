@@ -42,6 +42,7 @@ extension KiwiCore {
                 appBars.sync(fallback)
                 spaceBars.sync([])
             }
+            syncHidingShelves(HidingShelves())
             // A lone bar's slot IS its strip.
             syncShelves(
                 fallback.map {
@@ -62,6 +63,7 @@ extension KiwiCore {
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         var standingDown: Set<DisplayID> = []
+        var hiding = HidingShelves()
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
             // the plan and every style a bar draws carry it.
@@ -89,11 +91,20 @@ extension KiwiCore {
             // engine's `layoutBounds(on:)` seam: one of the
             // deliberate `visibleBounds` exemptions
             // (`VisibleBoundsRoutingTests.allowed`, #537).
-            let plans = shelfPlans(
-                visible: GeometryUtils.axVisibleFrame(of: screen),
-                settings: shown,
-                spaceItems: items,
-                app: app
+            let plans = hiding.shown(
+                of: shelfPlans(
+                    visible: GeometryUtils.axVisibleFrame(of: screen),
+                    settings: shown,
+                    spaceItems: items,
+                    app: app
+                ),
+                display: display.id,
+                screen: screen,
+                items: items,
+                reveal: shelves.reveal,
+                gaps: state.workspaces.currentSpace(on: display.id)
+                    .map(shown.gaps(for:)) ?? shown.gapsGlobal,
+                settings: shown
             )
             strips += plans.map {
                 ShelfStrip(
@@ -102,7 +113,11 @@ extension KiwiCore {
                     strip: $0.strip,
                     carriesSpace: $0.arrangement.space != nil,
                     carriesApp: $0.arrangement.app != nil,
-                    divider: $0.arrangement.divider
+                    divider: $0.arrangement.divider,
+                    slides: $0.hides,
+                    mark: hiding.indicators[
+                        ShelfManager.Key(display: display.id, edge: $0.edge)
+                    ]?.spec.frame
                 )
             }
             if let app,
@@ -130,6 +145,9 @@ extension KiwiCore {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
         }
+        // The revealer first, so the shelves judge this pass's
+        // hiding edges (#761).
+        syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
         // KiwiVision stands down on the same verdict (#2103).
@@ -156,6 +174,10 @@ extension KiwiCore {
         let carriesSpace: Bool
         let carriesApp: Bool
         var divider: ShelfArrangement.Divider? = nil
+        /// A hiding shelf's reveal, which grows out of its mark at
+        /// `mark` and back into it (#761).
+        var slides = false
+        var mark: CGRect? = nil
     }
 
     /// Hands each shelf the sections its bars just rendered on its
@@ -176,7 +198,9 @@ extension KiwiCore {
                         ? spaceBars.shownOverlay(on: shelf.display) : nil,
                     app: shelf.carriesApp
                         ? appBars.shownOverlay(on: shelf.display) : nil,
-                    divider: shelf.divider
+                    divider: shelf.divider,
+                    slides: shelf.slides,
+                    mark: shelf.mark
                 )
             }
         )

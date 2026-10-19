@@ -30,7 +30,64 @@ extension TilingSettings {
         var out = self
         out.spaceBarStyle.setEdge(spaceBarStyle.edge(on: screen))
         out.appBarStyle.setEdge(appBarStyle.edge(on: screen))
+        // Linked on another screen is linked here too (#761): the
+        // copy carries the one reading, since it keeps no entries.
+        out.spaceBarStyle.visibility = visibility(of: .space)
+        out.appBarStyle.visibility = visibility(of: .app)
         return out
+    }
+
+    /// Whether the bars share an edge on ANY screen they can draw
+    /// on (#761) — each bar's own edge and every per-screen one,
+    /// whether a bar is on and whatever a layout draws. Linked
+    /// bars are one shelf, so they take one visibility.
+    public var barsLinked: Bool {
+        // Read through `edge(on:)`, never `onScreen`, which asks
+        // this to resolve the copy's visibility.
+        let screens = Set(spaceBarStyle.edgeOverride.keys)
+            .union(appBarStyle.edgeOverride.keys)
+        return ([nil] + screens.map { Optional($0) }).contains {
+            spaceBarStyle.edge(on: $0) == appBarStyle.edge(on: $0)
+        }
+    }
+
+    /// `bar`'s visibility as the shelves read it — the ONE reader
+    /// (`BarVisibilitySeamTests`): its own while the bars are
+    /// apart, and while linked `auto` only where both stored
+    /// values are, since hiding needs both bars' consent.
+    public func visibility(of bar: ShelfBar) -> ShelfVisibility {
+        guard barsLinked else {
+            return bar == .space
+                ? spaceBarStyle.visibility : appBarStyle.visibility
+        }
+        return spaceBarStyle.visibility == .auto
+            && appBarStyle.visibility == .auto ? .auto : .always
+    }
+
+    /// Whether `bar`'s show/hide action can act anywhere (#761):
+    /// the bar is on — the App Bar in some layout — and reads
+    /// `auto`. The verb's own gate (`shelfRevealCommand`), and
+    /// the one a shortcut row or the hotkey table asks beside it;
+    /// a bar that is off does nothing.
+    public func revealActionLive(_ bar: ShelfBar) -> Bool {
+        let on =
+            bar == .space ? spaceBarStyle.enabled : anyAppBarCanShow
+        return on && visibility(of: bar) == .auto
+    }
+
+    /// Writes `bar`'s visibility — both bars' while they are
+    /// linked, so a fused shelf never holds two answers. The one
+    /// door every writer takes (`BarVisibilitySeamTests`).
+    public mutating func setVisibility(
+        _ value: ShelfVisibility,
+        of bar: ShelfBar
+    ) {
+        if bar == .space || barsLinked {
+            spaceBarStyle.visibility = value
+        }
+        if bar == .app || barsLinked {
+            appBarStyle.visibility = value
+        }
     }
 
     /// These settings as each screen they can draw on shows them
@@ -58,7 +115,21 @@ extension TilingSettings {
         onScreen(screen).barEdges(
             space: spaceBarStyle.enabled,
             app: appBarHost(for: mode)?.appBar.enabled == true
-        ).filter(\.reserves).map(\.edge)
+        ).filter { $0.reserves && !$0.hides }.map(\.edge)
+    }
+
+    /// The hiding edges a space laid out in `mode` on `screen`
+    /// reserves its sliver on (#761) — `shelfEdges`' twin over the
+    /// same fold, apart because a float stays out of a full strip
+    /// and never a sliver.
+    public func hidingEdges(
+        in mode: LayoutMode,
+        on screen: String?
+    ) -> [AppBarEdge] {
+        onScreen(screen).barEdges(
+            space: spaceBarStyle.enabled,
+            app: appBarHost(for: mode)?.appBar.enabled == true
+        ).filter { $0.reserves && $0.hides }.map(\.edge)
     }
 
     /// The edges the shown bars sit on — the ONE list the
@@ -68,32 +139,39 @@ extension TilingSettings {
     /// two bars are never stacked on one edge
     /// (`ShelfSplitGeometryTests` ▸ `edgesPerMode`) and
     /// `ShelfGeometry.strips` measures the Space Bar's whole edge.
-    /// A shared edge reserves while either bar on it does — the
-    /// fold is here, at the dedup, and nowhere beside it
-    /// (`BarReserveTests`, #1524).
+    /// A shared edge reserves while either bar on it does and
+    /// hides only while both do; a hiding edge that reserves takes
+    /// only its sliver (`hidingEdges`) — the folds are here, at the
+    /// dedup, and nowhere beside it (`BarReserveTests`, #1524;
+    /// `BarAutoHideFoldTests`, #761).
     public func barEdges(space: Bool, app: Bool) -> [ShelfEdge] {
         var edges: [ShelfEdge] = []
         if space {
             edges.append(
                 ShelfEdge(
                     spaceBarStyle.edge,
-                    reserves: spaceBarStyle.reserve
+                    reserves: spaceBarStyle.reserve,
+                    hides: visibility(of: .space) == .auto
                 )
             )
         }
-        guard app else { return edges }
-        if let shared = edges.firstIndex(where: {
-            $0.edge == appBarStyle.edge
-        }) {
-            edges[shared].reserves =
-                edges[shared].reserves || appBarStyle.reserve
-        } else {
-            edges.append(
-                ShelfEdge(
-                    appBarStyle.edge,
-                    reserves: appBarStyle.reserve
+        if app {
+            let hides = visibility(of: .app) == .auto
+            if let shared = edges.firstIndex(where: {
+                $0.edge == appBarStyle.edge
+            }) {
+                edges[shared].reserves =
+                    edges[shared].reserves || appBarStyle.reserve
+                edges[shared].hides = edges[shared].hides && hides
+            } else {
+                edges.append(
+                    ShelfEdge(
+                        appBarStyle.edge,
+                        reserves: appBarStyle.reserve,
+                        hides: hides
+                    )
                 )
-            )
+            }
         }
         return edges
     }
@@ -143,7 +221,9 @@ extension TilingSettings {
     ) -> ShelfReservation {
         ShelfReservation(
             edges: shelfEdges(in: mode, on: screen),
-            depth: kiwishelf.reservation
+            depth: kiwishelf.reservation,
+            hiding: hidingEdges(in: mode, on: screen),
+            hidingDepth: kiwishelf.hiddenReservation
         )
     }
 }

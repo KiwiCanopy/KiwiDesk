@@ -1443,6 +1443,11 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   figures, by the site's role — never a centred line box nor a string's own
   ink, and never in `usesSingleLineMode` (#1707, `BarTextBaselineTests`,
   `BarTextBaselineSiteTests`, `BarTextFieldCensusTests`)
+- a bar's visibility is read through the one `visibility(of:)` and written
+  through the one `setVisibility(_:of:)`, two bars sharing an edge on any screen
+  taking one mode, and a hiding edge reserves only its constant sliver, so a
+  reveal redraws the bars and never retiles (#761, `BarAutoHideFoldTests`,
+  `BarVisibilitySeamTests`, `ShelfAutoHideCoreTests`, `ShelfRevealerTests`)
 - the bars sit on KiwiShelf, one shelf per edge (#1517): a bar field lives in
   exactly one of `KiwiShelf`, `SpaceBarStyle` and `AppBarStyle`, a shelf field
   taking no `LayoutAppBar` override (`KiwiShelfParityTests`,
@@ -1701,6 +1706,10 @@ Touching `Borders`, `Vision`.
   into every navigation model and judged per window by `visionLensClear`,
   and a pick never asks it (#2103, `KiwiVisionLensFocusTests`,
   `KiwiVisionLensGestureTests`)
+- only the window focus leaves fades into KiwiVision, its fade owed only
+  through `visionLeaving` and started and committed through the one
+  `fadeLeaving` ahead of the plate's order (#2417,
+  `VisionLeaveFadeSeamTests`)
 - an overlay hearing WindowServer's per-window events connects to the one
   `WindowServerWatch` under its own `Consumer` case, whose position is its
   place in the fan-out, and calls no `SkyLightWindowEvents` door itself

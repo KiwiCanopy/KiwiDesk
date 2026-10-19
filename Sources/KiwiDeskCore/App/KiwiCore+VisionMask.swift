@@ -184,7 +184,7 @@ extension KiwiCore {
     /// A window's corner radius: the ring's reading, read from the
     /// WindowServer only where `reading` allows, else its cache or
     /// the system radius.
-    private func windowRadius(_ id: WindowID, reading: Bool) -> CGFloat {
+    func windowRadius(_ id: WindowID, reading: Bool) -> CGFloat {
         if reading, state.windows[id] != nil {
             return borders.cornerRadius(for: id)
         }
@@ -211,7 +211,7 @@ extension KiwiCore {
         )
     }
 
-    private func memberFrame(_ id: WindowID) -> CGRect? {
+    func memberFrame(_ id: WindowID) -> CGRect? {
         tiler.commandedFrame(of: id) ?? state.windows[id]?.frame
     }
 

@@ -242,6 +242,7 @@ extension KiwiCore {
         // next start's arrivals (#1385).
         closeCrossSession()
         mouse.stop()
+        shelves.reveal.stop()
         eventLoop.stop()
         sleepWake.stop()
         socket.stop()

@@ -30,6 +30,9 @@ extension KiwiCore {
                     on: screen,
                     among: liveScreenEdgeScope
                 )
+            } else if case .visibility(let value) = setting {
+                // Both bars' while they share an edge (#761).
+                tiler.settings.setVisibility(value, of: .app)
             } else {
                 setting.apply(to: &tiler.settings.appBarStyle)
             }
@@ -67,6 +70,9 @@ extension KiwiCore {
                     on: screen,
                     among: liveScreenEdgeScope
                 )
+            } else if case .visibility(let value) = setting {
+                // Both bars' while they share an edge (#761).
+                tiler.settings.setVisibility(value, of: .space)
             } else {
                 setting.apply(to: &tiler.settings.spaceBarStyle)
             }

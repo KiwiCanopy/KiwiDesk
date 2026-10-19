@@ -101,8 +101,22 @@ public struct KiwiShelf: Sendable, Equatable {
     /// Group count badge colours (#955).
     public var groupBadgeColor = "#636366"
     public var groupBadgeTextColor = "#FFFFFF"
+    /// How long a shelf the show/hide action revealed stays shown,
+    /// in seconds (#761); 0 keeps it until the next press.
+    public var revealDuration: Double = 0
 
     public init() {}
+
+    /// Bounds of `revealDuration` in seconds (#761).
+    public static let revealDurationRange: ClosedRange<Double> = 0...60
+
+    /// `value` within `revealDurationRange`.
+    public static func clampRevealDuration(_ value: Double) -> Double {
+        min(
+            max(value, revealDurationRange.lowerBound),
+            revealDurationRange.upperBound
+        )
+    }
 
     /// Floor of `thickness` (QA 2026-07-19): below it the plate
     /// stroke and glyph run collide. Decode, setter and the GUI
@@ -139,6 +153,17 @@ public struct KiwiShelf: Sendable, Equatable {
     /// strip and inner margin (#1516).
     public var reservation: CGFloat {
         outerMargin + thickness + innerMargin
+    }
+
+    /// The depth of a hidden shelf's mark — its Space dots or line
+    /// (#761).
+    public static let hiddenDepth: CGFloat = 8
+
+    /// What a hiding edge reserves (#761): the shelf's own rule
+    /// with the mark's depth in place of `thickness`, so its
+    /// windows stand their outer gap clear of the dots.
+    public var hiddenReservation: CGFloat {
+        outerMargin + Self.hiddenDepth + innerMargin
     }
 
     /// True if Liquid Glass is on and the platform draws it.

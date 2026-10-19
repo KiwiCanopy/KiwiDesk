@@ -183,6 +183,17 @@ A `space_bar.*` or `app_bar.*` write that leaves every layout's
 unchanged on every screen runs no pass at all: it repaints the bars and
 re-clamps the floats (#1524).
 
+:::unreleased
+A shelf whose bars are all `auto` reserves only its sliver
+(`TilingSettings.hidingEdges`, `KiwiShelf.hiddenReservation`) and
+draws only
+when `ShelfManager.reveal` shows it (#761): `updateBars()` files
+each hiding plan's strip as a target and draws its Space dots or
+line (`ShelfIndicators`) in its place, and a reveal or a retract from
+the pointer monitor or the show/hide action calls `updateBars()`
+alone — never a retile.
+:::
+
 A Space switch is always that one instant reissue. After an
 explicit switch, Core hands the GUI the Space and its layout for
 the screen that switched (`paySpaceCue`, in

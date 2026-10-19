@@ -196,6 +196,8 @@ struct KiwiVisionCurrentTests {
             dim: 50,
             blur: true,
             appearance: .dark,
+            fadeDuration: 250,
+            fadeCurve: .linear,
             clearWallpaper: true,
             clearApp: true
         )

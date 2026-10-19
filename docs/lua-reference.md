@@ -633,6 +633,12 @@ The one exception is a bar set not to reserve its strip
 ([`space_bar.set_reserve`](#space_barset_reserve) and
 [`app_bar.set_reserve`](#app_barset_reserve)), which draws over the windows.
 
+:::unreleased
+A revealed auto-hiding shelf draws over the windows too
+([`space_bar.set_visibility`](#space_barset_visibility),
+[`app_bar.set_visibility`](#app_barset_visibility)).
+:::
+
 **Example:**
 
 ```lua
@@ -2571,6 +2577,27 @@ window KiwiDesk does not manage covering a tile does not count.
 kiwishelf.set_dim_factor(0.4)
 ```
 
+:::unreleased
+### kiwishelf.set_reveal_duration
+
+**Expects:** seconds, 0–60 (default `0`); out-of-range values
+clamp.
+
+**Does:** how long a shelf
+[`space_bar.toggle_reveal`](#space_bartoggle_reveal) or
+[`app_bar.toggle_reveal`](#app_bartoggle_reveal) revealed stays
+shown. `0` keeps it until the next call; above `0` it hides after
+that many seconds, or at once on the next call. A shelf the
+pointer is over when the time runs out stays until the pointer
+leaves.
+
+**Example:**
+
+```lua
+kiwishelf.set_reveal_duration(5)
+```
+:::
+
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
@@ -2786,6 +2813,39 @@ Global only: no layout sets its own.
 app_bar.set_reserve(false)
 ```
 
+:::unreleased
+### app_bar.set_visibility
+
+**Expects:** `"always"` or `"auto"` (default `"always"`).
+
+**Does:** as
+[`space_bar.set_visibility`](#space_barset_visibility), for the
+App Bar's shelf. A lone App Bar hides to a short line; on the
+Space Bar's edge the shared shelf shows the Space dots.
+
+Global only: no layout sets its own.
+
+**Example:**
+
+```lua
+app_bar.set_visibility("auto")
+```
+
+### app_bar.toggle_reveal
+
+**Expects:** nothing.
+
+**Does:** as [`space_bar.toggle_reveal`](#space_bartoggle_reveal),
+for the shelf the App Bar sits on. Fails where the App Bar does
+not hide, or where the active Space's layout draws no App Bar.
+
+**Example:**
+
+```lua
+app_bar.toggle_reveal()
+```
+:::
+
 ### app_bar.set_active_indicator
 
 **Expects:** `"outline"` or `"edge_mark"` (default
@@ -2935,6 +2995,65 @@ its own [`app_bar.set_reserve`](#app_barset_reserve) off.
 ```lua
 space_bar.set_reserve(false)
 ```
+
+:::unreleased
+### space_bar.set_visibility
+
+**Expects:** `"always"` or `"auto"` (default `"always"`).
+
+**Does:** with `"auto"` the Space Bar's shelf hides to a row of
+Space dots at its edge — one dot per Space, the current one wide,
+a Space holding windows brighter. The edge keeps only a sliver:
+`outer_margin`, the dots' depth and `inner_margin`, with the
+windows' outer gap below it, as the full shelf has. The pointer
+within about 40 points of the dots grows the plate behind them and
+rims it as the bars draw their active item: the highlight colour,
+its width up to 3 points, and the border sheen. Resting for 0.35 s
+in the band along that edge, from a few points past the shelf to
+where the windows start, grows the shelf out of the dots, at once
+when the pointer pushes against the screen's edge there. The shelf
+shrinks back 0.5 s after the pointer leaves it, and stays while a
+bar menu or a hover peek it opened is up. A revealed shelf draws
+over the windows and the sliver never changes, so a reveal moves no
+window, and setting the mode moves the windows at most once. A bar
+turned off reserves nothing, nor does one set not to reserve
+([`space_bar.set_reserve`](#space_barset_reserve)); its dots draw
+over the windows.
+
+While the two bars share an edge on any screen they are one
+shelf: setting either bar's mode sets both, and where the stored
+modes disagree the shelf stays shown. Both bars start on the top
+edge, so in `init.lua` set the edges before the modes: a mode set
+while they are joined is kept by both after they split. A look
+never carries the mode.
+
+**Example:**
+
+```lua
+space_bar.set_visibility("auto")
+```
+
+### space_bar.toggle_reveal
+
+**Expects:** nothing.
+
+**Does:** shows or hides the hidden shelf the Space Bar sits on,
+on the screen the active Space lays out on. A shown shelf stays
+until the next call, or for
+[`kiwishelf.set_reveal_duration`](#kiwishelfset_reveal_duration)
+seconds where that is above 0. Fails where the shelf does not
+hide, or where no hiding shelf there carries the Space Bar. No
+shortcut is bound by default; VoiceOver's press on the Space dots
+runs it too.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+b", function()
+    space_bar.toggle_reveal()
+end)
+```
+:::
 
 ### space_bar.set_edge
 
@@ -3863,6 +3982,28 @@ is off.
 Liquid Glass (a plain blur on macOS 14 and 15).
 With Reduce transparency on in macOS, the blur stands down and the
 dim stays.
+
+:::unreleased
+### kiwivision.set_fade_duration
+
+**Expects:** milliseconds, 0–1000. Default 300.
+
+**Does:** sets how long the window focus leaves takes to dim and
+blur; the window you focus clears at once. 0 makes the change
+instant, as Reduce Motion in macOS does. A Space switch is always
+instant. Stored as `fade_duration` in the `kiwivision` group, and a
+lens table takes it too.
+
+### kiwivision.set_fade_curve
+
+**Expects:** `"ease_out"`, `"ease_in_out"`, `"ease_in"` or
+`"linear"`. Default `"ease_out"`.
+
+**Does:** sets how that fade is paced: `"ease_out"` dims fastest at
+the start, `"ease_in"` slowest, `"linear"` evenly. Stored as
+`fade_curve` in the `kiwivision` group, and a lens table takes it
+too.
+:::
 
 ### kiwivision.set_appearance
 
