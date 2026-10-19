@@ -61,6 +61,29 @@ struct BarVisibilityMasterTests {
         )
     }
 
+    /// Where the bars sit runs coarse to fine and the strip's depth
+    /// follows after a rule, in the card body (#761).
+    @Test("placement rows run coarse to fine, depth after them")
+    func placementOrder() {
+        #expect(
+            BarsRowOrder.kiwishelfPlacement == [
+                .kiwishelf(.edge), .kiwishelf(.alignment),
+                .kiwishelf(.order), .kiwishelf(.minimum),
+            ]
+        )
+        #expect(BarsRowOrder.kiwishelfDepth == [.kiwishelf(.thickness)])
+    }
+
+    @Test("the readout names the shared value, or mixed")
+    func readoutNamesTheValue() {
+        LocalizationManager.shared.select("en")
+        var settings = TilingSettings()
+        settings.setEveryBarVisibility(.auto)
+        #expect(SettingsValueReadout.agreedVisibility(settings) == "Auto")
+        settings.scrolling.appBar.visibility = .hidden
+        #expect(SettingsValueReadout.agreedVisibility(settings) == "mixed")
+    }
+
     @Test("the followers sit behind Each bar, the master at rest")
     func followersBehindTheDrawer() {
         #expect(BarsRowOrder.kiwishelfShow.first == .kiwishelf(.visibility))

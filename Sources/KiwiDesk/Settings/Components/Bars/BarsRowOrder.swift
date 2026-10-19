@@ -15,14 +15,23 @@ enum BarsRowOrder {
     ]
 
     /// KiwiShelf card, at rest below the Show group: where the
-    /// bars sit, coarse to fine, then how deep the strip is.
-    static let kiwishelfAtRest: [SettingKey] = [
+    /// bars sit, coarse to fine.
+    static let kiwishelfPlacement: [SettingKey] = [
         .kiwishelf(.edge),
         .kiwishelf(.alignment),
         .kiwishelf(.order),
         .kiwishelf(.minimum),
-        .kiwishelf(.thickness),
     ]
+
+    /// KiwiShelf card, after a rule: how deep the strip is.
+    static let kiwishelfDepth: [SettingKey] = [
+        .kiwishelf(.thickness)
+    ]
+
+    /// KiwiShelf card, every at-rest row below the Show group.
+    static var kiwishelfAtRest: [SettingKey] {
+        kiwishelfPlacement + kiwishelfDepth
+    }
 
     /// KiwiShelf card, behind Position's Each bar disclosure
     /// (#1731).

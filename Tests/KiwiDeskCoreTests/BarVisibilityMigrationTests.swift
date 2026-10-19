@@ -46,10 +46,13 @@ struct BarVisibilityMigrationTests {
         return settings
     }
 
-    private func profile(_ settings: [String: Any]) throws -> Data {
+    private func profile(
+        _ settings: [String: Any],
+        format: Int = 23
+    ) throws -> Data {
         try JSONSerialization.data(
             withJSONObject: [
-                "format": 23,
+                "format": format,
                 "monitor_sets": [String: Any](),
                 "settings": settings,
             ],
@@ -158,6 +161,43 @@ struct BarVisibilityMigrationTests {
         let out = try #require(ConfigMigration.migrated(bundle))
         let root = try #require(
             JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        let profiles = try #require(root["profiles"] as? [[String: Any]])
+        let settings = try JSONDecoder().decode(
+            TilingSettings.self,
+            from: JSONSerialization.data(
+                withJSONObject: try #require(profiles.first?["settings"])
+            )
+        )
+        #expect(settings.spaceBarStyle.visibility == .hidden)
+    }
+
+    /// A build without #761 stamped profiles 25 and bundles 32
+    /// (#2237) while still writing `enabled`: those files cross this
+    /// step too, or a bar switched off comes back shown.
+    @Test("a file a build without this step stamped still crosses")
+    func mainStampedFileCrosses() throws {
+        let legacy = try legacySettings(
+            space: false,
+            monocle: true,
+            scrolling: true
+        )
+        let data = try profile(legacy, format: 25)
+        let out = try #require(ConfigMigration.migrated(data))
+        #expect(try decoded(out).spaceBarStyle.visibility == .hidden)
+        let inner = try #require(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        let bundle = try JSONSerialization.data(
+            withJSONObject: [
+                "format": 32,
+                SetupBundle.shapeMarker: "test",
+                "profiles": [inner],
+            ]
+        )
+        let crossed = try #require(ConfigMigration.migrated(bundle))
+        let root = try #require(
+            JSONSerialization.jsonObject(with: crossed) as? [String: Any]
         )
         let profiles = try #require(root["profiles"] as? [[String: Any]])
         let settings = try JSONDecoder().decode(

@@ -43,3 +43,9 @@ public struct LayoutAppBar: Sendable, Equatable {
         )
     }
 }
+
+/// A layout's App Bar hosts itself, so `TilingSettings.appBarHost`
+/// reads it through the one `appBarPath(for:)`.
+extension LayoutAppBar: AppBarHosting {
+    public var appBar: LayoutAppBar { self }
+}

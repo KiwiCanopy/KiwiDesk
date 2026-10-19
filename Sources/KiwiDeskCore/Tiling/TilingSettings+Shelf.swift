@@ -49,17 +49,14 @@ extension TilingSettings {
         }
     }
 
-    /// The write twin of `appBarHost(for:)`: `mode`'s App Bar
-    /// visibility, where the mode hosts one.
+    /// `mode`'s App Bar visibility, where the mode hosts one —
+    /// through the one `appBarPath(for:)`.
     public mutating func setAppBarVisibility(
         _ visibility: ShelfVisibility,
         in mode: LayoutMode
     ) {
-        switch mode {
-        case .monocle: monocle.appBar.visibility = visibility
-        case .scrolling: scrolling.appBar.visibility = visibility
-        default: break
-        }
+        guard let path = Self.appBarPath(for: mode) else { return }
+        self[keyPath: path].visibility = visibility
     }
 
     /// Whether `bar`'s shortcut can show it in `mode` (#761): the

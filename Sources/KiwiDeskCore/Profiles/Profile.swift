@@ -35,12 +35,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// switch became `visibility: hidden` (#761).
     /// 25 since the minimum window
     /// size is one width × height per layout (#2237; 24 is #761's,
-    /// a parallel branch, so a file either stamped crosses here).
+    /// a parallel branch, so a file either stamped crosses here),
+    /// 26 so a file a build without #761 stamped 25 crosses #761's
+    /// step too, which reads content and so runs twice harmlessly.
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 25
+    public static let currentFormat = 26
 
     public var format: Int
     /// Stable across renames (#2324); `ProfileManager.write` keeps
