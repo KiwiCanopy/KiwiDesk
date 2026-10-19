@@ -81,6 +81,36 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// `set_min_window_size_override(space, width, height?)`
+    /// (#2422): one Space's own floor, outranking its layout's; no
+    /// height takes the width.
+    func setMinWindowSizeOverride(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let space = args.first?.stringValue,
+            let width = args.dropFirst().first?.numberValue
+        else {
+            return .fail("expected space id and width")
+        }
+        var height = width
+        switch args.dropFirst(2).first {
+        case .number(let value)?:
+            height = value
+        case nil, .null?:
+            break
+        default:
+            return .fail("expected height")
+        }
+        guard args.count <= 3 else {
+            return .fail("expected at most space, width, height")
+        }
+        tiler.settings.minWindowSizeOverride[SpaceID(space)] =
+            MinSize(width: CGFloat(width), height: CGFloat(height))
+        // Promises as `set_min_window_size` above (#593).
+        retile(pass: .apply, sizing: .allSpringSized)
+        return .ok()
+    }
+
     func setSwapSkipsCascade(
         _ args: [JSONValue]
     ) -> CommandResponse {

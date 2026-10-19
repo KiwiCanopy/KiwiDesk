@@ -493,6 +493,7 @@ every lens with why it cannot turn on.
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
 | | `set_min_window_size` | width[, height][, layout] in pt (default 300 × 300 every layout) |
+| | `set_min_window_size_override` | space, width[, height] in pt — that Space's own minimum, whatever its layout |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
@@ -589,6 +590,9 @@ every lens with why it cannot turn on.
 layout ([Lua reference](lua-reference.md#set_min_window_size)).
 The starter setup seeds every layout from the main screen's
 width instead of the 300 × 300 default.
+`set_min_window_size_override` gives one Space a value that
+replaces its layout's
+([Lua reference](lua-reference.md#set_min_window_size_override)).
 :::
 
 `animations.set_on_space_change` and `animations.set_space_change`

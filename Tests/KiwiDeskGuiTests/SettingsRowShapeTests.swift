@@ -197,6 +197,8 @@ struct SettingsRowShapeTests {
         "KiwiVisionLensOverrides.swift": 2,
         // The minimum window size master and its layout rows.
         "MinWindowSizeRows.swift": 2,
+        // A Space's own minimum window size (#2422).
+        "OverrideMinSizeRow.swift": 1,
         // Titled action rows (AI page, General ▸ Advanced).
         "SettingsActionRow.swift": 1,
         // Every override row's inheriting readout, whatever its

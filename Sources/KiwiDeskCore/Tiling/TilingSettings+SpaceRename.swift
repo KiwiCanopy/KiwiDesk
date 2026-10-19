@@ -9,6 +9,7 @@ extension TilingSettings {
         to: SpaceID
     ) {
         move(&gapsOverride, from, to)
+        move(&minWindowSizeOverride, from, to)
         move(&placementOverride, from, to)
         move(&spaceIcons, from, to)
         move(&bsp.override, from, to)
@@ -24,6 +25,7 @@ extension TilingSettings {
     /// id, of pruning hand-edited empty keys).
     public mutating func removeSpace(_ space: SpaceID) {
         gapsOverride[space] = nil
+        minWindowSizeOverride[space] = nil
         placementOverride[space] = nil
         spaceIcons[space] = nil
         bsp.override[space] = nil
@@ -42,6 +44,8 @@ extension TilingSettings {
         from other: TilingSettings
     ) {
         gapsOverride[space] = other.gapsOverride[space]
+        minWindowSizeOverride[space] =
+            other.minWindowSizeOverride[space]
         placementOverride[space] = other.placementOverride[space]
         spaceIcons[space] = other.spaceIcons[space]
         bsp.override[space] = other.bsp.override[space]

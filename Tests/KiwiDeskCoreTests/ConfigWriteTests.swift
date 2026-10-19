@@ -23,6 +23,7 @@ private func richConfig() -> GuiConfig {
     config.settings.gapsOverride[SpaceID("browser")] =
         .uniform(0)
     config.settings.minWindowSizes = MinWindowSizes(all: 250)
+    config.settings.minWindowSizeOverride[SpaceID("browser")] = 200
     config.settings.bsp.splitRatioH = 0.62
     config.settings.bsp.strategy = .alternating
     config.settings.stack.masterCount = 2
@@ -181,6 +182,7 @@ struct ConfigWriteTests {
         #expect(core.eventLoop.floatRules.rawRules.isEmpty)
         #expect(core.eventLoop.ignoreRules.rawRules.isEmpty)
         #expect(core.tiler.settings.gapsOverride.isEmpty)
+        #expect(core.tiler.settings.minWindowSizeOverride.isEmpty)
         #expect(core.tiler.settings.placementOverride.isEmpty)
         #expect(core.desktopBindings.isEmpty)
         #expect(

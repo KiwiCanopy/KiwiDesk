@@ -83,6 +83,11 @@ struct SpacesGateWiringTests {
             overrides + "SpaceOverrideRows.swift": [
                 "gates.inertReason(for:.gaps(.perSpaceOverride))"
             ],
+            // A Space's own minimum size (#2422), inert on Monocle.
+            overrides + "SpaceOverrideRows+MinSize.swift": [
+                "gates.inertReason("
+                    + "for:.behaviour(.minSizePerSpaceOverride))"
+            ],
         ]
         for (name, needles) in consults {
             let source = try squashed(name)

@@ -13,6 +13,7 @@ struct SpaceOverrideRows: View {
             VStack(alignment: .leading, spacing: 8) {
                 captionRow
                 gapsRow
+                minSizeRow
                 Divider()
                 modeRows
             }

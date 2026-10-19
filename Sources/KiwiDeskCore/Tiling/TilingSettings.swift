@@ -10,6 +10,10 @@ public struct TilingSettings: Sendable, Equatable {
     /// The minimum window size per layout (`min_window_size`,
     /// #2237); read through `minWindowSize(for:in:)`.
     public var minWindowSizes = MinWindowSizes()
+    /// Space minimum window size overrides
+    /// (`min_window_size_override[space_id]`, #2422); outranks
+    /// the layout's value in `minWindowSize(for:in:)`.
+    public var minWindowSizeOverride: [SpaceID: MinSize] = [:]
     /// Global magnitude (points) the catalog AUTHORS Grow/Shrink
     /// keybindings with (`resize.step`, #58). Layout math never
     /// reads this — the bound row's own literal delta drives an

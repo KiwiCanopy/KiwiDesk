@@ -207,7 +207,7 @@ extension KiwiCore {
     /// Clears every setting the config declares *sparsely* so a
     /// reload is authoritative, not additive: the writer omits
     /// deleted entries (removed app/float rules, gap or
-    /// placement overrides, a space reverted to `bsp`, a
+    /// placement or minimum size overrides, a space reverted to `bsp`, a
     /// cleared space icon or fallback space), and without this
     /// reset the stale live value would survive.
     /// Fully-emitted settings (global gaps, min size, per-layout
@@ -233,6 +233,7 @@ extension KiwiCore {
         spaceHistory.profileOverride = nil
         modeCycle = ModeCycleState()
         tiler.settings.gapsOverride = [:]
+        tiler.settings.minWindowSizeOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil

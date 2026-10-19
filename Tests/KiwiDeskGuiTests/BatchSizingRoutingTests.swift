@@ -151,7 +151,7 @@ struct BatchSizingRoutingTests {
         // Gap edits and the min-size floor: pure geometry over
         // the same windows in the same slots.
         "KiwiDeskCore/Commands/KiwiCore+GapCommands.swift":
-            Site(names: 4, promises: 2),
+            Site(names: 6, promises: 3),
         // NOT LISTED, deliberately, and worth knowing why:
         // `Tiling/KiwiCore+MouseResizeEnd.swift`. A mouse settle
         // looks like the keyboard `resize` verb — it writes a

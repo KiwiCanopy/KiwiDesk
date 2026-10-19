@@ -452,9 +452,10 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
 - every minimum-window-size read goes through
   `TilingSettings.minWindowSize(for:in:)` and a window's through
   `KiwiCore.minWindowSize(of:)` — Floating's for every effective float —
-  handed the Space so #2422 adds a level without touching a consumer, and a
-  new `LayoutMode` takes a floor or an exempt reason (#2237,
-  `MinWindowSizeReadCensusTests`, `MinWindowSizesParityTests`)
+  handed the Space, whose own value outranks the layout's there (#2422,
+  `MinWindowSizeOverrideTests`), and a new `LayoutMode` takes a floor or an
+  exempt reason (#2237, `MinWindowSizeReadCensusTests`,
+  `MinWindowSizesParityTests`)
 - a native tab switch is a re-key, not destroy+create (#308)
 - the sticky render verdict is DERIVED rather than handed in —
   `stickyRenderSpace(of:)` and its three derivations read the one active Space

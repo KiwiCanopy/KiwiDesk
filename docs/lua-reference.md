@@ -695,6 +695,27 @@ KiwiDesk.set_min_window_size(480, "scrolling")
 ```
 :::
 
+### set_min_window_size_override
+
+:::unreleased
+**Expects:** a space identifier, a width in points, then
+optionally a height in points. Without a height the width serves
+both.
+
+**Does:** gives one Space its own minimum window size, which
+replaces whatever value its layout has in
+[`set_min_window_size`](#set_min_window_size), floating windows
+included. The value stays with the Space when the Space moves to
+another screen. Monocle still keeps no minimum. The quit gather
+lays windows out per screen and keeps Floating's value.
+
+**Example:**
+
+```lua
+KiwiDesk.set_min_window_size_override("monitoring", 220, 160)
+```
+:::
+
 ### set_resize_step
 
 **Expects:** a number (points).

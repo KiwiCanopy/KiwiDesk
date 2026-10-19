@@ -58,6 +58,9 @@ extension SpacesSection {
             (model.config.spaceModes[space] ?? .bsp) == .floating
         let state = OverrideCellState.resolve(
             count: count,
+            live: model.config.settings.floatingLiveOverrideCount(
+                for: space
+            ),
             isFloating: isFloating
         )
         return Button {
@@ -81,7 +84,6 @@ extension SpacesSection {
                 ? overridesButtonWidth : nil,
             alignment: .center
         )
-        .disabled(state.isInert)
         .help(overrideCellHelp(state))
         .accessibilityLabel(
             L(
@@ -98,8 +100,6 @@ extension SpacesSection {
         _ state: OverrideCellState
     ) -> some View {
         switch state {
-        case .inert:
-            Text(verbatim: "—")
         case .saved(let count):
             Text(L("spaces.overrides.saved", "%1$d saved", count))
                 .foregroundStyle(.secondary)
@@ -112,11 +112,6 @@ extension SpacesSection {
 
     private func overrideCellHelp(_ state: OverrideCellState) -> String {
         switch state {
-        case .inert:
-            return L(
-                "spaces.overrides.floating.help",
-                "Floating has no layout overrides."
-            )
         case .saved:
             return L(
                 "spaces.overrides.saved_any.help",
