@@ -31,21 +31,24 @@ struct SheetPresentationSeamTests {
     /// the same reasoning `SettingsView` follows for the one discard
     /// dialog, hosted above the `editingLua` branch its own confirm
     /// button flips.
-    private static let allowed: [String: String] = [
-        "PresetsSection.swift": "$previewRequest",
+    private static let allowed: [String: [String]] = [
+        "PresetsSection.swift": ["$previewRequest"],
         // About (#1536) is the shell's: its footer opener sits in
         // Home, which reflows under it, and the shell outlives both.
-        "SettingsView.swift": "$aboutRequest",
+        // The sync sheet (#2450) is the shell's too: the footer that
+        // asks for it rebuilds at 900 pt. Its one commit runs
+        // through the closures the shell hands it.
+        "SettingsView.swift": ["$aboutRequest", "$model.sync.review"],
         // The Hyper move sheet (#1870) is the section's: the card
         // that opens it leaves the page once its last Hyper row
         // moves back, and the section outlives it. Its one commit
         // stages into the draft through a closure the section
         // hands it, so the content still takes no model.
-        "ShortcutsSection.swift": "$hyperMoveRequest",
+        "ShortcutsSection.swift": ["$hyperMoveRequest"],
         // Compare and Copy (#2324) is the row's: it outlives the
         // button that opens it, and its commit runs through the
         // closures the row hands it, so the content takes no model.
-        "SyncAcrossMacsRow.swift": "$request",
+        "SyncAcrossMacsRow.swift": ["$request"],
     ]
 
     private var trees: [URL] {
@@ -82,7 +85,7 @@ struct SheetPresentationSeamTests {
             seen += hits
 
             let name = file.lastPathComponent
-            let state = try #require(
+            let states = try #require(
                 Self.allowed[name],
                 Comment(
                     rawValue:
@@ -96,15 +99,18 @@ struct SheetPresentationSeamTests {
             )
             // `onDismiss:` may follow the item: it runs once the sheet
             // has gone, where an alert it raises is not dropped.
-            #expect(
+            let byItem = states.map { state in
                 squashed.occurrences(of: ".sheet(item:\(state))")
                     + squashed.occurrences(
                         of: ".sheet(item:\(state),onDismiss:"
-                    ) == hits,
+                    )
+            }
+            #expect(
+                byItem.reduce(0, +) == hits && !byItem.contains(0),
                 Comment(
                     rawValue:
                         "\(name) presents a sheet by something "
-                        + "other than `item: \(state)` — "
+                        + "other than `item: \(states)` — "
                         + "`isPresented:` builds its content from "
                         + "parent state written in the same tick "
                         + "(#843)"
@@ -223,7 +229,7 @@ struct SheetPresentationSeamTests {
                 checked += 1
             }
         }
-        #expect(checked == Self.allowed.count)
+        #expect(checked == Self.allowed.values.joined().count)
     }
 
     /// A read-only sheet takes no `SettingsModel` (#859): reaching
@@ -249,7 +255,7 @@ struct SheetPresentationSeamTests {
                 checked += 1
             }
         }
-        #expect(checked == Self.allowed.count)
+        #expect(checked == Self.allowed.values.joined().count)
     }
 
     /// The content types a host presents, read from its own

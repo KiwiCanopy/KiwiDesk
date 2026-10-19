@@ -1795,6 +1795,10 @@ Touching `Sources/KiwiDesk` (the GUI).
   `SettingsRevertRegister`, a diff-row producer states how its rows revert
   or they draw no ↺, and state written together reverts together (#792,
   `SettingsRevertRegisterTests`, `SettingsRowRevertTests`)
+- the settings one control writes together are one row while they agree,
+  folded through the one `SettingKey.summarized` where rows are narrated —
+  the pill, the live rows, the sync sheet — and never in `SettingsDraftDiff`
+  (#2450, `SettingsSummaryGroupTests`)
 - a Settings-row change updates its `SettingKey` census entry in the same
   change set (#678), and a census row placed in a container a
   `SettingsDisclosure` draws collapsed is a catalog CHILD of that drawer, keyed

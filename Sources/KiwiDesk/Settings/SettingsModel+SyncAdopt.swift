@@ -8,10 +8,13 @@ struct SettingsSyncState: Equatable {
     /// The last change another Mac brought in while the draft held
     /// edits — the strip's subject; nil once the draft is clean.
     var arrived: SyncedChange?
-    /// Settings both Macs changed, asked about one by one at Save.
+    /// Settings both Macs changed, picked in one sheet at Save.
     var conflicts: [SyncConflict] = []
-    /// The conflict Save is asking about now.
-    var question: SyncConflict?
+    /// Settings another Mac changed that the draft took in without
+    /// a question, for the sheet's summary line.
+    var taken: Set<SettingKey> = []
+    /// The sheet Save is showing now (#2450).
+    var review: SyncReview?
 }
 
 /// A setting this draft and another Mac both changed (#2324 ruling
@@ -22,6 +25,14 @@ struct SyncConflict: Identifiable, Equatable {
     let yours: String
     let theirs: String
     let mac: String?
+    /// The settings the key's writer laid an edit over, which the
+    /// answer moves with it.
+    var covers: Set<SettingKey> = []
+
+    /// Every setting the question answers.
+    var answers: Set<SettingKey> {
+        covers.union(key.map { [$0] } ?? [])
+    }
 
     var id: String { key?.id ?? Self.initLua }
 
@@ -34,6 +45,9 @@ struct SyncConflict: Identifiable, Equatable {
 /// own, and remembers each setting both changed for one question at
 /// Save. The strip says the setup changed meanwhile.
 extension SettingsModel {
+    /// Both paths reload, which resets `sync`: an open sheet closes
+    /// and its picks go, since the values it showed moved
+    /// (`SyncReviewCountTests` ▸ `arrivalClosesTheSheet`).
     func adoptSyncedChange(_ change: SyncedChange) {
         guard isDirty else {
             reload()
@@ -46,6 +60,7 @@ extension SettingsModel {
         let reach = reachEdits
         let look = lookReachEdits
         let previous = sync.conflicts
+        let previousTaken = sync.taken
         reload()
         let theirs = cleanConfig
         let theirsLua = cleanLuaSource
@@ -70,11 +85,17 @@ extension SettingsModel {
             return mine.contains(key)
         }
         func ask(_ key: SettingKey, yours: GuiConfig) {
+            // A question asked again keeps what it covered before.
+            let covered = conflicts.first { $0.key == key }?.covers ?? []
             conflicts.removeAll { $0.key == key }
-            conflicts.append(
-                conflict(key, yours: yours, theirs: theirs, base: base)
-                    .with(mac: change.mac)
-            )
+            var question = conflict(
+                key,
+                yours: yours,
+                theirs: theirs,
+                base: base
+            ).with(mac: change.mac)
+            question.covers = covered
+            conflicts.append(question)
         }
         for key in mine where incoming.contains(key) {
             ask(key, yours: yours)
@@ -92,16 +113,17 @@ extension SettingsModel {
         for key in incoming
         where !mine.contains(key) && clobbered.contains(key) {
             let owner = mine.first { Self.sharesWriter($0, key) } ?? key
+            let covered = conflicts.first { $0.key == owner }?.covers ?? []
             conflicts.removeAll { $0.key == owner }
-            conflicts.append(
-                clobberConflict(
-                    key,
-                    asking: owner,
-                    yours: yours,
-                    theirs: theirs,
-                    base: base
-                ).with(mac: change.mac)
-            )
+            var question = clobberConflict(
+                key,
+                asking: owner,
+                yours: yours,
+                theirs: theirs,
+                base: base
+            ).with(mac: change.mac)
+            question.covers = covered.union([key])
+            conflicts.append(question)
         }
         if yoursLua != baseLua, theirsLua != baseLua {
             conflicts.removeAll { $0.key == nil }
@@ -113,6 +135,9 @@ extension SettingsModel {
         recomputeDirty()
         sync.arrived = isDirty ? change : nil
         sync.conflicts = isDirty ? conflicts : []
+        // Every setting the other Mac changed, per member: the sheet
+        // leaves out what is still a question and folds the rest.
+        sync.taken = isDirty ? previousTaken.union(incoming) : []
     }
 
     private func conflict(
@@ -189,53 +214,6 @@ extension SettingsModel {
             mac: mac
         )
     }
-
-    // MARK: - The question at Save
-
-    /// Asks about the next conflict, or answers false when none is
-    /// left and Save may write.
-    func askNextSyncConflict() -> Bool {
-        // A setting reverted since stops being a question.
-        let edited = SettingsDraftDiff.between(
-            config: config,
-            cleanConfig: cleanConfig
-        ).changedSettings
-        sync.conflicts.removeAll { conflict in
-            guard let key = conflict.key else {
-                return luaSource == cleanLuaSource
-            }
-            return !edited.contains(key)
-        }
-        guard let next = sync.conflicts.first else { return false }
-        sync.question = next
-        return true
-    }
-
-    /// Settles the question: theirs takes the setting back from the
-    /// baseline, which holds the other Mac's value; yours keeps the
-    /// draft. The next question follows, then the Save.
-    func answerSyncConflict(useTheirs: Bool) {
-        guard let question = sync.question else { return }
-        sync.question = nil
-        sync.conflicts.removeAll { $0.id == question.id }
-        if useTheirs {
-            if let key = question.key {
-                SettingsRevertRegister.writers[key]?.apply(self, nil)
-            } else {
-                luaSource = cleanLuaSource
-            }
-            recomputeDirty()
-        }
-        DispatchQueue.main.async { [weak self] in
-            self?.performPrimarySave()
-        }
-    }
-
-    /// Cancel: nothing saves, and every question waits for the
-    /// next Save.
-    func cancelSyncConflict() {
-        sync.question = nil
-    }
 }
 
 extension SyncConflict {
@@ -245,7 +223,8 @@ extension SyncConflict {
             label: label,
             yours: yours,
             theirs: theirs,
-            mac: mac
+            mac: mac,
+            covers: covers
         )
     }
 }

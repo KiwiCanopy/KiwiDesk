@@ -187,9 +187,11 @@ Mac; screen layouts, macOS Desktops and Desktop bindings stay with
 each Mac.
 
 A change from another Mac that lands while Settings holds unsaved
-edits leaves your edits in place, and Save writes them on top; a
-setting both Macs changed asks Keep Yours or Use Theirs at Save,
-and `init.lua` edited on both asks once for the whole file. When
+edits leaves your edits in place, and Save writes them on top. A
+setting both Macs changed waits for Save, which lists each one in
+a sheet where you pick Yours or Theirs; Save stays dimmed until
+every row is picked, and `init.lua` edited on both is one row for
+the whole file. When
 both Macs changed the setup while the folder could not be reached,
 nothing is copied until you choose a side with Compare and Copy.
 KiwiDesk never reads a conflict copy a sync app leaves beside the

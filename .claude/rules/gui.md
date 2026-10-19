@@ -120,8 +120,10 @@ restated `20...80` satisfies on the day it is written.
   multi-row edit into the draft through a closure its host hands
   it, taking no model (#1870's Hyper move, owner-ruled), and
   Compare and Copy, whose two Keeps run through the closures its
-  row hands it (#2324 ruling 14; a further one is a ruling
-  too). A read-only sheet also answers the keyboard both ways:
+  row hands it (#2324 ruling 14), and the sync sheet at Save,
+  whose one Save runs through the closure the shell hands it
+  (#2450; a further one is a ruling too). A read-only sheet also
+  answers the keyboard both ways:
   Return on its one dismissal, and Escape, which a
   `Button` cannot carry beside `.defaultAction` so the content
   view takes `.onExitCommand`. `SheetPresentationSeamTests` is the
@@ -805,7 +807,11 @@ readout from their own per-axis agreement, read through
 `SettingsModel.minSizeShared(_:)` and `minSizesDiffer` alone —
 the drawer's hold-open reads the same verdict, and the rows'
 view compares no stored value itself (`MinWindowSizeMasterTests` ▸
-`masterReadsOneVerdict`).
+`masterReadsOneVerdict`). The narration fold
+(`SettingKey.summarizes`, #2450) is a ruled second reader of the
+gap and minimum-size masters' agreement, held to each master's
+own readout by `SettingsSummaryGroupTests` ▸
+`foldAgreesWithTheReadout`.
 
 A role group's colour on Advanced Colours (#1857) is another
 home, ruled: its followers are the group's ticks — scratch state
@@ -1271,6 +1277,21 @@ profile's reach can name states the subject's family, the list
 producer taking it as a required argument (`ReachRowFoldTests`,
 and `ReachRowFoldFamilyTests` per family, which reds on a reach
 row left unfolded).
+
+**The settings one control writes together are one row while they
+agree, folded where rows are narrated and never in the diff**
+(#2450). A group is a master over its members, by axis, in the
+one table, `SettingKey.summaryAxes`; a surface that counts or asks per
+census key — the pill's rows, the live rows, the sync sheet — folds
+through `SettingKey.summarized`, never a fold of its own, and hands
+it the members a list beside it already narrates as `apart`,
+stated at every call.
+`SettingsDraftDiff` stays per member, since the live rows and the
+sync adopt compare key sets taken from different diffs. A key added
+under a master's path joins its group (`SettingsSummaryGroupTests`
+▸ `membersAreComplete`), and a new acknowledging master either owns
+its followers through `masterWrites` or joins the table
+(`SettingsSummaryGroupTests` ▸ `groupsMatchTheMasters`).
 
 ## Responsive width (#678 turn 17a)
 

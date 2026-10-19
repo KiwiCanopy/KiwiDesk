@@ -16,7 +16,43 @@ extension SettingsDiffRowSource {
         for model: SettingsModel,
         leaving edited: [SettingKey]
     ) -> [SettingsDiffRow] {
+        guard let (saved, live, diff) = liveDiff(for: model) else {
+            return []
+        }
+        let skip = Set(edited)
         guard let unsaved = model.unsavedLive else { return [] }
+        let owners = leafOwners(unsaved, saved: saved)
+        return SettingKey.summarized(
+            diff.changedSettings.filter { !skip.contains($0) },
+            in: live,
+            apart: skip
+        )
+        .flatMap { key in
+            SettingsValueReadout.rows(
+                for: key,
+                old: saved,
+                new: live
+            ).map { row in
+                var row = row
+                row.keepIDs = owners[row.id, default: []].sorted()
+                row.id += "#" + liveInstance
+                row.section = .live
+                return row
+            }
+        }
+    }
+
+    /// The settings the live rows narrate, before the draft's own
+    /// edits are left out.
+    static func liveKeys(for model: SettingsModel) -> [SettingKey] {
+        liveDiff(for: model)?.2.changedSettings ?? []
+    }
+
+    /// Saved and live as configs, and the diff between them.
+    private static func liveDiff(
+        for model: SettingsModel
+    ) -> (GuiConfig, GuiConfig, SettingsDraftDiff)? {
+        guard let unsaved = model.unsavedLive else { return nil }
         var saved = model.cleanConfig
         saved.settings = unsaved.saved
         var live = model.cleanConfig
@@ -25,22 +61,7 @@ extension SettingsDiffRowSource {
             config: live,
             cleanConfig: saved
         )
-        let skip = Set(edited)
-        let owners = leafOwners(unsaved, saved: saved)
-        return diff.changedSettings.filter { !skip.contains($0) }
-            .flatMap { key in
-                SettingsValueReadout.rows(
-                    for: key,
-                    old: saved,
-                    new: live
-                ).map { row in
-                    var row = row
-                    row.keepIDs = owners[row.id, default: []].sorted()
-                    row.id += "#" + liveInstance
-                    row.section = .live
-                    return row
-                }
-            }
+        return (saved, live, diff)
     }
 
     /// Which unsaved leaves each row carries, by row id: a leaf
@@ -58,7 +79,8 @@ extension SettingsDiffRowSource {
                 config: one,
                 cleanConfig: saved
             ).changedSettings
-            for key in keys {
+            // A leaf also belongs to its group's folded row.
+            for key in keys + keys.compactMap(\.summaryMaster) {
                 for row in SettingsValueReadout.rows(
                     for: key,
                     old: saved,
