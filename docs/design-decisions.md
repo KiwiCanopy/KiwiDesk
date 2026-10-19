@@ -5922,7 +5922,8 @@ layouts, Monocle exempt with its reason.
 
 **One window, one floor.** A float is placed by no layout, so
 every window `EffectiveFloat.applies` to takes Floating's,
-whatever layout its space uses, and so does the quit grid,
+whatever layout its space uses — unless the Space has its own
+value (below) — and so does the quit grid,
 which gathers windows from every layout into a grid none of
 them owns. Without that, a window floated in a Grid space would
 resize to Grid's floor and change floors on every move to
@@ -5939,10 +5940,24 @@ slot size keeps its pt, % and count units because it is a
 target, not a floor. A value per screen fails a laptop that
 docks at dozens of desks: the list grows with every one, and
 none of it is visible from the screen in front of you. Screen
-size enters once, at the seed (below). A per-Space level is
-#2422; the one resolver, `TilingSettings.minWindowSize(for:in:)`,
-already takes the Space, so that level joins without touching a
-consumer.
+size enters once, at the seed (below).
+
+**A Space may carry its own value, and it outranks its layout's**
+(#2422). Two Spaces sharing a layout can have different jobs — a
+Grid that watches servers wants small windows, a Grid that holds
+work wants the usual floor — so `min_window_size_override` keys a
+width and height by Space id, beside `gap.override`. It replaces
+whichever value the Space's windows would otherwise take, a
+float's included, so one window still has one floor and the user
+never has to know which layout value it replaced. Monocle still
+applies none. The value travels with the Space when the Space
+moves to another screen; that is the cost the per-screen ruling
+named, and the row's `?` states it before the move. The quit grid
+mixes every Space's windows per screen, so no Space's value has
+one grid to apply to, and it keeps Floating's. The map is config,
+not session state: a held Space's renumber and a Space drop leave
+it alone, as they leave `gap.override`, because the value belongs
+to the arrangement that declared the Space and comes back with it.
 
 **The starter setup seeds every layout from the main screen's
 width ÷ 8, rounded to 10 pt and clamped to 260–460 pt, the same
@@ -12955,6 +12970,20 @@ second admitted class, not the start of a generic per-Space
 settings override — each further class owes the same three
 tests and its own entry. (#1775, owner ruling 2026-10-09)
 
+:::unreleased
+**A Space's own minimum window size is the third class, on the
+gaps' tests** (#2422). It floors every window in the Space,
+whichever layout places it; it resolves before any layout runs,
+inside the one resolver that fills `LayoutContext`; and the
+value its layout would use is an unambiguous "off", which the
+unchecked row names ("follows Grid", or "follows Minimum window
+size" while every layout agrees). Its row sits below the gaps,
+apart from the layout rows, and survives a layout switch. Unlike
+the gaps it is live on a Floating Space, since it floors every
+float there, so it greys only on Monocle, which applies no
+minimum.
+:::
+
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the
 total overrides it carries across every layout. A Floating space
@@ -12966,13 +12995,18 @@ the cell to a dead "—") on a Floating space recreates the
 configuration the user cannot see, which reactivates on
 switch-back so the layout appears to "change by itself". So a
 Floating space with parked values shows a muted **N saved** cell
-that still opens the editor, keeping them reachable; only a
-Floating space with nothing parked is genuinely inert and
-disables. This extends *Overrides are visible-but-inherited* and
+that still opens the editor, keeping them reachable. This extends *Overrides are visible-but-inherited* and
 *grey, don't hide* (AGENTS.md §2.7) from the override rows to the
 space-list cell that summarises them — the count is the scannable
 signal, and dropping it is the one way the data goes invisible.
 (`OverrideCellState`, owner ruling 2026-08-04; #678 8a)
+
+:::unreleased
+A Floating space's cell never disables: its own minimum window
+size still applies there, so the cell offers **Customize…** with
+nothing saved, and counts as **N custom** once that value is set
+(#2422).
+:::
 
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge

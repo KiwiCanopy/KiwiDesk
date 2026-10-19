@@ -15,6 +15,7 @@ struct SpacesGates {
         case autoSizedGrid
         case autoTracks
         case floatingPlacesNone
+        case monocleAppliesNone
     }
 
     /// Evaluates inert reason for given setting key on this space.
@@ -39,6 +40,8 @@ struct SpacesGates {
                 ? .autoTracks : nil
         case .gaps(.perSpaceOverride):
             return mode == .floating ? .floatingPlacesNone : nil
+        case .behaviour(.minSizePerSpaceOverride):
+            return mode == .monocle ? .monocleAppliesNone : nil
         default:
             assertionFailure(
                 "unhandled Spaces & Layouts gate: \(key.id)"
@@ -55,6 +58,7 @@ struct SpacesGates {
         .layout(.gridOverrideRows),
         .layout(.trackOverrideLimit),
         .gaps(.perSpaceOverride),
+        .behaviour(.minSizePerSpaceOverride),
     ]
 
     static let resolvedElsewhere: Set<SettingKey> = []
@@ -108,6 +112,13 @@ enum SpacesGateHelp {
                 "space_override.gaps.floating",
                 "Floating places no windows, so these gaps apply when "
                     + "this Space tiles."
+            )
+        case .monocleAppliesNone:
+            return L(
+                "space_override.min_size.monocle",
+                "Monocle shows one window at a time and applies no "
+                    + "minimum, so this size applies when this Space "
+                    + "uses another layout."
             )
         }
     }

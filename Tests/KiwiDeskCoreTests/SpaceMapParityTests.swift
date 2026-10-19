@@ -23,6 +23,7 @@ private let renamed = SpaceID("parityRenamed")
 private func populated() -> TilingSettings {
     var settings = TilingSettings()
     settings.gapsOverride[probe] = .uniform(4)
+    settings.minWindowSizeOverride[probe] = 200
     settings.placementOverride[probe] = .first
     settings.spaceIcons[probe] = "globe"
     settings.bsp.override[probe] = BspOverride()

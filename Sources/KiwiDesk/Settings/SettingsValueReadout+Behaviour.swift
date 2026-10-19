@@ -75,6 +75,12 @@ extension SettingsValueReadout {
                     new: after.floatScaleOnDisplayChange
                 )
             ]
+        case .minSizePerSpaceOverride:
+            return minSizeOverrideRows(
+                census,
+                old: before.minWindowSizeOverride,
+                new: after.minWindowSizeOverride
+            )
         case .placementOverride:
             return behaviourPlacementRows(
                 census,
@@ -164,6 +170,31 @@ extension SettingsValueReadout {
                 label: instanceLabel(base, space.raw),
                 old: old[space].map(behaviourPlacement) ?? unset,
                 new: new[space].map(behaviourPlacement) ?? unset
+            )
+        }
+    }
+
+    /// A row per Space whose own minimum window size was added,
+    /// removed or edited (#2422).
+    private static func minSizeOverrideRows(
+        _ census: SettingKey,
+        old: [SpaceID: MinSize],
+        new: [SpaceID: MinSize]
+    ) -> [SettingsDiffRow] {
+        let base = L(
+            "diff.label.min_size_override",
+            "Minimum size override"
+        )
+        let touched = Set(old.keys).union(new.keys)
+            .filter { old[$0] != new[$0] }
+            .sorted { $0.raw < $1.raw }
+        return touched.map { space in
+            .change(
+                census,
+                instance: space.raw,
+                label: instanceLabel(base, space.raw),
+                old: old[space].map(minSize) ?? unset,
+                new: new[space].map(minSize) ?? unset
             )
         }
     }

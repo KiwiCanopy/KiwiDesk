@@ -29,7 +29,12 @@ editing here:
   end (#1655).** One keyed by `SpaceID` rekeys where a held Space
   is renumbered (`moveMembers`) and forgets in the one Space drop,
   `forwardWindows(of:to:)`; the Space history's trails are the
-  instance (`SpaceDropHookNeedleTests`).
+  instance (`SpaceDropHookNeedleTests`). A Space-keyed CONFIG map
+  in `TilingSettings` (`gap.override`, `min_window_size_override`)
+  does neither: it belongs to the arrangement that declared the
+  Space and returns with it (`MinWindowSizeOverrideHoldTests`
+  holds the return; a rekey added there is review's, since the
+  apply's wholesale settings replace would hide it).
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load
@@ -149,8 +154,10 @@ editing here:
   read, and its `allowed` map is the exemption list. Hand the
   resolver the Space the floor is asked for, and nil only where
   none exists (the quit grid, a preview of a layout's own value):
-  the Space argument is how #2422's per-Space level joins without
-  touching a consumer. A new `LayoutMode` gets a floor in
+  the Space argument is where #2422's per-Space level
+  (`minWindowSizeOverride`) outranks the layout's, so a consumer
+  handing nil for a Space it has drops that Space's own value. A
+  new `LayoutMode` gets a floor in
   `MinWindowSizes` or an `exempt` entry with its reason
   (`MinWindowSizesParityTests`); the argument is
   `docs/design-decisions.md` ▸ *Minimum window size: per layout,

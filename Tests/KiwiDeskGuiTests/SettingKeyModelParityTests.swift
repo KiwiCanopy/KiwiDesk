@@ -24,6 +24,7 @@ struct SettingKeyModelParityTests {
     private static func seededSettings() -> TilingSettings {
         var settings = TilingSettings()
         settings.gapsOverride["1"] = Gaps()
+        settings.minWindowSizeOverride["1"] = 200
         settings.spaceIcons["1"] = "star"
         settings.placementOverride["1"] = .first
         settings.bsp.override["1"] = BspOverride()

@@ -57,7 +57,7 @@ struct RetilePassRoutingTests {
         "KiwiDeskCore/Commands/KiwiCore+Commands.swift":
             Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+GapCommands.swift":
-            Site(applies: 2, reissues: 0),
+            Site(applies: 3, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+LayoutCommands.swift":
             Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+SpaceDisplayCommands.swift":

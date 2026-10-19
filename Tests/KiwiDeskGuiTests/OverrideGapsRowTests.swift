@@ -106,7 +106,9 @@ struct OverrideGapsRowTests {
     @Test("the box draws the gaps row first through its gate")
     func boxDrawsTheRow() throws {
         let box = try Self.source("SpaceOverrideRows.swift")
-        #expect(box.contains("captionRowgapsRowDivider()modeRows"))
+        #expect(
+            box.contains("captionRowgapsRowminSizeRowDivider()modeRows")
+        )
         #expect(
             box.contains(
                 Self.squashed(

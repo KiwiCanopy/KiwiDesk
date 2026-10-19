@@ -27,6 +27,13 @@ extension APIReference {
             .number("height", optional: true),
             .choice("layout", MinWindowSizes.Layout.self, optional: true)
         ),
+        "set_min_window_size_override": APIRecord(
+            "Overrides one Space's minimum window size, whatever "
+                + "its layout; (space, width) sets both axes.",
+            .space("space"),
+            .number("width"),
+            .number("height", optional: true)
+        ),
         "set_swap_skips_cascade": APIRecord(
             "Sets whether swapping from a pile steps past it.",
             .boolean("enabled")
