@@ -993,6 +993,7 @@
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Bleibt sichtbar, solange sie sich ihre Kante mit einer App Bar auf „%1$@“ teilt.",
+  "kiwishelf.show.visibility.help": "„Immer“ hält eine Leiste auf dem Bildschirm. „Auto“ blendet sie bis auf einen schmalen Streifen aus, bis der Mauszeiger darauf ruht. „Ausgeblendet“ zeichnet nichts: Ihr Tastenkürzel zeigt sie trotzdem an, über deinen Fenstern. Nur %1$@ und %2$@ können eine App Bar tragen. Ist die Space Bar ausgeblendet, zeigt die Menüleiste, auf welchem Space jeder Bildschirm gerade ist.",
   "kiwishelf.thickness": "Dicke",
   "kiwishelf.thickness.help": "Eine Dicke für beide Leisten. Eine automatische Glyphengröße folgt ihr.",
   "kiwivision.announce.off": "KiwiVision aus",
