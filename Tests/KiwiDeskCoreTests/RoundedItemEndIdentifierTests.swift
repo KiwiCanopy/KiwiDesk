@@ -62,4 +62,39 @@ struct RoundedItemEndIdentifierTests {
         )
         #expect(measured[1] == views[1].frame.width)
     }
+
+    /// An empty Space collapses to no disc, so nothing sits at its
+    /// ends: it stays the round chip it is when shown.
+    @Test("An empty collapsed Space keeps its round ends")
+    func emptyCollapseTakesNoEnds() throws {
+        let look = Fixture.spaceLook(100)
+        #expect(Fixture.clearance(look, depth: Fixture.depth) > 0)
+        let empty = { (id: String) in
+            SpaceBarOverlay.Item(
+                space: SpaceID(id),
+                spaceGlyph: .text(id, tinted: true),
+                apps: [],
+                active: false,
+                after: .none
+            )
+        }
+        let items = [
+            Fixture.items(1, numbered: true)[0], empty("2"),
+            empty("3").collapsed(to: .count),
+        ]
+        #expect(items[2].collapse?.windows == 0)
+        let overlay = try Fixture.spaceBar(look, items: items)
+        let views = Array(overlay.itemViews.prefix(3))
+        #expect(views.count == 3)
+        #expect(views[2].ends == .zero)
+        // Collapsed or not, an empty item draws the same chip.
+        #expect(views[2].frame.width == views[1].frame.width)
+        let measured = SpaceBarOverlay.itemLengths(
+            items,
+            depth: Fixture.depth,
+            look: look,
+            frontFollows: false
+        )
+        #expect(measured[2] == views[2].frame.width)
+    }
 }
