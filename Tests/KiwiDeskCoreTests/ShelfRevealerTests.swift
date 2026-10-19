@@ -70,6 +70,8 @@ struct ShelfRevealerTests {
         var point = CGPoint(x: 500, y: 300)
         var now = Date(timeIntervalSince1970: 1_000)
         var changes = 0
+        /// A bar menu or peek holding the shelf.
+        var holding = true
     }
 
     private func move(
@@ -290,13 +292,12 @@ struct ShelfRevealerTests {
 
     @Test("A timed pin under an open menu waits for it")
     func pinWaitsForTheMenu() {
-        let (revealer, timers, _) = make()
-        var holding = true
-        revealer.holds = { _ in holding }
+        let (revealer, timers, pointer) = make()
+        revealer.holds = { _ in pointer.holding }
         revealer.toggle(Self.key, duration: 3)
         timers.fireAll()
         #expect(revealer.reveal(of: Self.key) == .hover)
-        holding = false
+        pointer.holding = false
         timers.fireAll()
         #expect(revealer.reveal(of: Self.key) == .hidden)
     }
@@ -304,14 +305,13 @@ struct ShelfRevealerTests {
     @Test("An open bar menu or peek holds a retract")
     func holdDefersTheRetract() {
         let (revealer, timers, pointer) = make()
-        var holding = true
-        revealer.holds = { _ in holding }
+        revealer.holds = { _ in pointer.holding }
         move(revealer, pointer, to: CGPoint(x: 500, y: 770))
         timers.fireAll()
         move(revealer, pointer, to: CGPoint(x: 500, y: 300))
         timers.fireAll()
         #expect(revealer.reveal(of: Self.key) == .hover)
-        holding = false
+        pointer.holding = false
         timers.fireAll()
         #expect(revealer.reveal(of: Self.key) == .hidden)
     }
