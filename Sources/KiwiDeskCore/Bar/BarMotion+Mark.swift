@@ -53,8 +53,9 @@ extension BarMotion {
     /// `ShelfIndicatorSpec.hoverGrowth` on every side while
     /// hovered and along the edge by `widen`, a label's room —
     /// never under Reduce Motion, which keeps the rim alone, save
-    /// for a label, which is content rather than motion and takes
-    /// its room at once.
+    /// for a mark carrying a label: the pill is content rather than
+    /// motion and needs the grown plate's depth as well as its
+    /// length, so the plate takes its whole hovered frame at once.
     static func hoverPlate(
         mark: CGRect,
         widen: CGFloat = 0,

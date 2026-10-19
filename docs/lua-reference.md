@@ -3034,8 +3034,8 @@ space_bar.set_reserve(false)
   the dots' depth and `inner_margin`, with the windows' outer gap
   below it. The pointer within about 40 points of the dots grows
   the plate behind them, rims it as the bars draw their active
-  item and shows the current Space's icon, number or first two
-  letters in its dot. Resting 0.35 s in the dots' band — 64
+  item and, on a top or bottom edge, shows the current Space's
+  icon, number or first two letters in its dot. Resting 0.35 s in the dots' band — 64
   points along the edge, centred on the dots, from a few points
   past the shelf to where the windows start — grows the bar out
   of the dots, at once when the pointer pushes against the

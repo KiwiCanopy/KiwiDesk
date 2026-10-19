@@ -8,7 +8,7 @@ extension KiwiCore.HidingShelves {
     /// Spaces, where the bar hides to a line.
     @MainActor mutating func spaceDots(
         _ items: [SpaceBarOverlay.Item]?,
-        key: ShelfManager.Key,
+        key: ShelfRevealer.Key,
         settings: TilingSettings
     ) -> (
         mark: ShelfIndicatorSpec.Mark,
@@ -18,11 +18,19 @@ extension KiwiCore.HidingShelves {
         let spaces = (items ?? []).filter { $0.space != nil }
         guard !spaces.isEmpty else { return nil }
         let current = spaces.firstIndex(where: \.active)
-        let start = ShelfDotWindow.start(
-            count: spaces.count,
-            current: current ?? 0,
-            previous: dotStarts[key]
-        )
+        // No Space shown here: the row stays where it was.
+        let start =
+            current.map {
+                ShelfDotWindow.start(
+                    count: spaces.count,
+                    current: $0,
+                    previous: dotStarts[key]
+                )
+            }
+            ?? min(
+                dotStarts[key] ?? 0,
+                max(0, spaces.count - ShelfDotWindow.cap)
+            )
         dotStarts[key] = start
         let shown = ShelfDotWindow.shown(count: spaces.count, start: start)
         let dots = shown.range.map { index in

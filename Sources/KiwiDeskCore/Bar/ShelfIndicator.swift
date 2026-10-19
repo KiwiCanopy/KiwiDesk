@@ -237,9 +237,10 @@ final class ShelfIndicators {
     typealias Key = ShelfRevealer.Key
 
     private var indicators: [Key: ShelfIndicator] = [:]
-    /// Each shelf's first Space dot shown last pass
-    /// (`ShelfDotWindow`), handed to the next.
-    var dotStarts: [ShelfManager.Key: Int] = [:]
+    /// Each Space mark's first dot shown last pass
+    /// (`ShelfDotWindow`), handed to the next; kept only beside a
+    /// mark still drawn.
+    var dotStarts: [Key: Int] = [:]
     /// The indicator's press: the show/hide action on its bar.
     var onPress: @MainActor (Key) -> Void = { _ in }
     #if DEBUG
@@ -252,6 +253,7 @@ final class ShelfIndicators {
         for key in indicators.keys where specs[key] == nil {
             indicators.removeValue(forKey: key)?.hide()
         }
+        dotStarts = dotStarts.filter { specs[$0.key] != nil }
         for (key, spec) in specs {
             let indicator = indicators[key] ?? ShelfIndicator()
             indicators[key] = indicator

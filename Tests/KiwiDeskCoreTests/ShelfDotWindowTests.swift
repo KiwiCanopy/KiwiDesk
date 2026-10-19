@@ -12,9 +12,9 @@ import Testing
 @Suite("Shelf Space dots (#761)")
 @MainActor
 struct ShelfDotWindowTests {
-    private static let key = ShelfManager.Key(
-        display: DisplayID(1),
-        edge: .top
+    private static let key = ShelfRevealer.Key(
+        shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+        bar: .space
     )
 
     private func items(_ count: Int, active: Int) -> [SpaceBarOverlay.Item] {
@@ -122,6 +122,37 @@ struct ShelfDotWindowTests {
         #expect(
             BarMotion.hoverPlate(mark: mark, hovered: true, reduceMotion: true)
                 == mark
+        )
+    }
+}
+
+/// The mark's VoiceOver value names the whole place, since the dots
+/// may not all show (#761).
+@Suite("Shelf Space dots spoken (#761)")
+@MainActor
+struct ShelfDotSpokenTests {
+    @Test("the value names the Space and the count")
+    func valueNamesThePlace() {
+        LocalizationManager.shared.select("en")
+        let view = ShelfIndicatorView()
+        view.render(
+            ShelfIndicatorSpec(
+                mark: .dots([.init(current: true, occupied: true)]),
+                frame: CGRect(x: 0, y: 0, width: 20, height: 8),
+                horizontal: true,
+                fill: "#000000",
+                currentInk: "#FFFFFF",
+                ink: "#AAAAAA",
+                emptyInk: "#555555",
+                highlight: "#FF9900",
+                shown: false,
+                hovered: false,
+                position: .init(index: 7, count: 10)
+            ),
+            animated: false
+        )
+        #expect(
+            view.accessibilityValue() as? String == "Hidden, Space 7 of 10"
         )
     }
 }

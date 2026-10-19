@@ -993,7 +993,6 @@
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Resta visibile finché una App Bar impostata su «%1$@» condivide il suo bordo.",
-  "kiwishelf.show.visibility.help": "«Sempre» tiene la barra sullo schermo. «Auto» la nasconde lasciando una sottile striscia finché il puntatore non raggiunge il suo bordo. «Nascosta» non disegna nulla: la sua scorciatoia la mostra comunque, sopra le tue finestre. Solo %1$@ e %2$@ possono avere una App Bar. Con la Space Bar nascosta, la barra dei menu mostra lo spazio in cui si trova ogni schermo.",
   "kiwishelf.thickness": "Spessore",
   "kiwishelf.thickness.help": "Un solo spessore per entrambe le barre. La dimensione glifi automatica lo segue.",
   "kiwivision.announce.off": "KiwiVision disattivata",

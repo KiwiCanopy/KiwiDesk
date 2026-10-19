@@ -993,7 +993,6 @@
   "kiwishelf.show.scrolling": "App Bar en %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Sigue visible mientras una App Bar en «%1$@» comparte su borde.",
-  "kiwishelf.show.visibility.help": "«Siempre» mantiene la barra en pantalla. «Auto» la oculta dejando una franja fina hasta que el puntero llega a su borde. «Oculta» no dibuja nada: su atajo aún la muestra, sobre tus ventanas. Solo %1$@ y %2$@ pueden llevar una App Bar. Con la Space Bar oculta, la barra de menús muestra el espacio en el que está cada pantalla.",
   "kiwishelf.thickness": "Grosor",
   "kiwishelf.thickness.help": "Un solo grosor para ambas barras. Un tamaño de glifo automático lo sigue.",
   "kiwivision.announce.off": "KiwiVision desactivado",

@@ -27,10 +27,10 @@ extension KiwiCore {
         /// The mark each hiding shelf's reveal grows out of: its
         /// shown bar's, else its first mark's. AX coordinates.
         var marks: [ShelfManager.Key: CGRect] = [:]
-        /// Each shelf's first Space dot shown, carried from the last
+        /// Each Space mark's first dot shown, carried from the last
         /// pass so the dots slide only when they must
-        /// (`ShelfDotWindow`).
-        var dotStarts: [ShelfManager.Key: Int] = [:]
+        /// (`ShelfDotWindow`); a mark that stops drawing forgets it.
+        var dotStarts: [ShelfRevealer.Key: Int] = [:]
 
         /// Files each hiding bar of `plans` — its target, and its
         /// mark where it hides to one.
@@ -81,24 +81,25 @@ extension KiwiCore {
             let flip = { GeometryUtils.flip($0, primaryHeight: primary) }
             let strip = flip(plan.strip)
             let barKey = { ShelfRevealer.Key(shelf: key, bar: $0) }
-            let shown = Set(
-                plan.shelfEdge.bars.keys.filter {
-                    reveal.reveal(of: barKey($0)).isShown
-                }
-            )
+            let shown = { reveal.reveal(of: barKey($0)).isShown }
+            // Where a shown bar draws: its run inside its slot, never
+            // the whole slot, which spans the edge for a lone bar.
             let section = { (bar: ShelfBar) -> CGRect? in
                 let slot =
                     bar == .space
                     ? plan.arrangement.space : plan.arrangement.app
-                return slot.map { flip(plan.segment($0)) }
+                return slot.map { slot in
+                    let drawn = plan.needs[bar].map(slot.drawing) ?? slot
+                    return flip(plan.segment(drawn))
+                }
             }
-            // A shelf's order: the bar that leads the edge first.
+            // The mark draws the shelf as rendered: Reduce
+            // transparency makes its fill opaque (#1374).
             let shelf = LiquidGlassGate.rendered(settings.kiwishelf)
-            let ordered: [ShelfBar] =
-                shelf.order == .spacesFirst ? [.space, .app] : [.app, .space]
-            let auto = ordered.filter {
-                bars.contains($0) && plan.shelfEdge.shown($0) == .auto
-            }
+            let auto = ShelfArrangement.ordered(
+                bars.filter { plan.shelfEdge.shown($0) == .auto },
+                shelf
+            )
             for bar in bars where !auto.contains(bar) {
                 targets[barKey(bar)] = ShelfRevealer.Target(
                     edge: plan.edge,
@@ -109,19 +110,15 @@ extension KiwiCore {
                 )
             }
             let spans = ShelfMarkPlacement.bands(
-                count: auto.count,
+                for: Set(auto),
                 length: plan.length,
-                alignment: shelf.alignment
+                shelf: shelf
             )
             for (index, bar) in auto.enumerated() {
-                let span = spans[index]
-                let yields =
-                    !shown.contains(bar) && !shown.subtracting([bar]).isEmpty
-                // The mark draws the shelf as rendered: Reduce
-                // transparency makes its fill opaque (#1374).
+                guard let span = spans[bar] else { continue }
                 let dots =
                     bar == .space
-                    ? spaceDots(items, key: key, settings: settings)
+                    ? spaceDots(items, key: barKey(bar), settings: settings)
                     : nil
                 let mark = dots?.mark ?? .line
                 let markIn = ShelfIndicatorSpec.frame(
@@ -130,14 +127,13 @@ extension KiwiCore {
                     edge: plan.edge,
                     centre: (span.lowerBound + span.upperBound) / 2
                 )
-                let spanIn = Self.span(span, of: plan)
                 // The band reaches past the screen side into a menu
                 // bar or a Dock, and in to the windows: the sliver's
                 // rest and their outer gap (ui-designer, #761).
                 let band = ShelfReveal.band(
                     of: strip,
                     edge: plan.edge,
-                    along: flip(spanIn),
+                    along: flip(Self.span(span, of: plan)),
                     outward: shelf.outerMargin + ShelfReveal.overshoot,
                     inward: KiwiShelf.hiddenDepth + shelf.innerMargin
                         + Self.outerGap(gaps, on: plan.edge)
@@ -156,11 +152,16 @@ extension KiwiCore {
                     edge: plan.edge,
                     strip: strip,
                     screen: screen.frame,
-                    band: yields ? nil : band,
-                    near: yields ? nil : near,
+                    band: band,
+                    near: near,
                     section: section(bar)
                 )
-                if marks[key] == nil || shown.contains(bar) {
+                // The reveal grows out of the leading shown bar's
+                // mark, else the leading mark.
+                if marks[key] == nil
+                    || (shown(bar)
+                        && !auto.prefix(index).contains(where: shown))
+                {
                     marks[key] = markIn
                 }
                 indicators[barKey(bar)] = ShelfIndicatorSpec(
@@ -172,12 +173,12 @@ extension KiwiCore {
                     ink: shelf.idleItemColor,
                     emptyInk: shelf.emptyItemColor,
                     highlight: shelf.highlightColor,
-                    shown: shown.contains(bar),
+                    shown: shown(bar),
                     hovered: reveal.arming.contains(barKey(bar)),
                     morphs: shelf.drawsPlate,
                     rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
                     sheen: settings.borderStyle.sheen,
-                    yields: yields,
+                    yields: reveal.yields(barKey(bar)),
                     label: plan.horizontal ? dots?.label : nil,
                     position: dots?.position
                 )
@@ -248,8 +249,8 @@ extension KiwiCore {
     /// to the panels.
     func syncHidingShelves(_ hiding: HidingShelves) {
         shelves.reveal.sync(hiding.targets)
-        shelves.indicators.sync(hiding.indicators)
         shelves.indicators.dotStarts = hiding.dotStarts
+        shelves.indicators.sync(hiding.indicators)
     }
 
     /// The show/hide action on one bar.

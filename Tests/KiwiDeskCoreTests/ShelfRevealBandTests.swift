@@ -53,37 +53,47 @@ struct ShelfRevealBandTests {
         revealer.moved(to: box.point)
     }
 
-    @Test("marks sit as one row where a lone bar would")
+    @Test("marks sit as one row where a lone bar would, in order")
     func bandsFormOneRow() {
         let length = ShelfMarkPlacement.bandLength
+        var shelf = KiwiShelf()
+        shelf.alignment = .center
+        shelf.order = .spacesFirst
         let lone = ShelfMarkPlacement.bands(
-            count: 1,
+            for: [.space],
             length: 1000,
-            alignment: .center
+            shelf: shelf
         )
-        #expect(lone == [(500 - length / 2)...(500 + length / 2)])
+        #expect(lone[.space] == (500 - length / 2)...(500 + length / 2))
         let pair = ShelfMarkPlacement.bands(
-            count: 2,
+            for: [.space, .app],
             length: 1000,
-            alignment: .center
+            shelf: shelf
         )
-        #expect(pair.count == 2)
         // Edge to edge, meeting at the middle of the edge.
-        #expect(pair[0].upperBound == 500)
-        #expect(pair[1].lowerBound == 500)
-        #expect(pair.allSatisfy { $0.upperBound - $0.lowerBound == length })
+        #expect(pair[.space]?.upperBound == 500)
+        #expect(pair[.app]?.lowerBound == 500)
+        shelf.order = .appsFirst
+        let swapped = ShelfMarkPlacement.bands(
+            for: [.space, .app],
+            length: 1000,
+            shelf: shelf
+        )
+        #expect(swapped[.app]?.upperBound == 500)
+        shelf.alignment = .start
         let start = ShelfMarkPlacement.bands(
-            count: 2,
+            for: [.space, .app],
             length: 1000,
-            alignment: .start
+            shelf: shelf
         )
-        #expect(start[0].lowerBound == 0)
+        #expect(start[.app]?.lowerBound == 0)
+        shelf.alignment = .end
         let end = ShelfMarkPlacement.bands(
-            count: 2,
+            for: [.space, .app],
             length: 1000,
-            alignment: .end
+            shelf: shelf
         )
-        #expect(end[1].upperBound == 1000)
+        #expect(end[.space]?.upperBound == 1000)
     }
 
     @Test("the band is the mark's, never the whole edge")
@@ -156,27 +166,51 @@ struct ShelfRevealBandTests {
         #expect(box.delays == [ShelfReveal.retractDelay])
     }
 
-    @Test("a bar losing its band while hidden drops its pending hover")
-    func yieldDropsTheHover() {
-        let hovering = ShelfRevealer.Target.hovering(
-            edge: .top,
-            strip: Self.strip,
-            screen: Self.screen
-        )
-        let (revealer, box) = make(hovering)
-        move(revealer, box, 500, 795)
-        #expect(revealer.arming.contains(Self.key))
-        revealer.sync([
-            Self.key: .init(
+    /// Two marks on one edge, the Space Bar's band left of the
+    /// middle and the App Bar's right of it.
+    private func pair() -> (ShelfRevealer, Box, ShelfRevealer.Key) {
+        let app = ShelfRevealer.Key(shelf: Self.key.shelf, bar: .app)
+        let length = ShelfMarkPlacement.bandLength
+        let target = { (minX: CGFloat) in
+            ShelfRevealer.Target.hovering(
                 edge: .top,
                 strip: Self.strip,
                 screen: Self.screen,
-                band: nil
+                band: ShelfReveal.band(
+                    of: Self.strip,
+                    edge: .top,
+                    along: CGRect(x: minX, y: 760, width: length, height: 40),
+                    outward: ShelfReveal.pushReach
+                )
             )
-        ])
+        }
+        let (revealer, box) = make(target(500 - length))
+        revealer.sync([Self.key: target(500 - length), app: target(500)])
+        return (revealer, box, app)
+    }
+
+    @Test("a sibling shown stands a hidden bar's hover down")
+    func siblingShownYields() {
+        let (revealer, box, app) = pair()
+        move(revealer, box, 480, 795)
+        #expect(revealer.arming.contains(Self.key))
+        #expect(revealer.toggle(app, duration: 0))
+        #expect(revealer.yields(Self.key))
+        move(revealer, box, 481, 795)
         #expect(!revealer.arming.contains(Self.key))
         // The delay it had armed reveals nothing.
         box.timers.forEach { $0() }
         #expect(revealer.reveal(of: Self.key) == .hidden)
+        #expect(!revealer.yields(app))
+    }
+
+    @Test("a push at the seam of two bands opens one bar")
+    func seamPushOpensOne() {
+        let (revealer, box, app) = pair()
+        move(revealer, box, 500, 800)
+        let shown = [Self.key, app].filter {
+            revealer.reveal(of: $0).isShown
+        }
+        #expect(shown.count == 1)
     }
 }

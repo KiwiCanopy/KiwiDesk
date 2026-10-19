@@ -1005,7 +1005,7 @@
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Stays shown while an App Bar set to %1$@ shares its edge.",
-  "kiwishelf.show.visibility.help": "Always keeps a bar on screen. Auto hides it to a thin mark until the pointer reaches its edge. Hidden draws nothing: its shortcut still shows it, over your windows. Only %1$@ and %2$@ can carry an App Bar. With the Space Bar hidden, the menu bar shows the Space each screen is on.",
+  "kiwishelf.show.visibility.help": "Always keeps a bar on screen. Auto hides it to a thin mark until the pointer rests on it. Hidden draws nothing: its shortcut still shows it, over your windows. Only %1$@ and %2$@ can carry an App Bar. With the Space Bar hidden, the menu bar shows the Space each screen is on.",
   "kiwishelf.thickness": "Thickness",
   "kiwishelf.thickness.help": "One thickness for both bars. An automatic glyph size follows it.",
   "kiwivision.announce.off": "KiwiVision off",

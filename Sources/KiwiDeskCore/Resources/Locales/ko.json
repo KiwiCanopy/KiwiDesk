@@ -991,7 +991,6 @@
   "kiwishelf.show.scrolling": "%1$@의 App Bar",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "‘%1$@’(으)로 설정된 App Bar가 같은 가장자리에 있는 동안 계속 표시됩니다.",
-  "kiwishelf.show.visibility.help": "‘항상’은 바를 화면에 계속 둡니다. ‘자동’은 포인터가 가장자리에 닿을 때까지 바를 가는 띠만 남기고 가립니다. ‘가려짐’은 아무것도 그리지 않으며, 단축키를 누르면 윈도우 위에 표시됩니다. App Bar를 둘 수 있는 것은 %1$@, %2$@뿐입니다. Space Bar가 가려져 있으면 메뉴 막대에 각 화면이 어느 공간에 있는지 표시됩니다.",
   "kiwishelf.thickness": "두께",
   "kiwishelf.thickness.help": "두 바에 공통인 두께입니다. 자동 글리프 크기는 이 두께를 따릅니다.",
   "kiwivision.announce.off": "KiwiVision 끔",

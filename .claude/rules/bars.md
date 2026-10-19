@@ -231,7 +231,10 @@ twice, was a question the user answered twice. The argument is
   (`ShelfRevealBandTests`, `ShelfRevealPairTests`; the argument is
   `docs/design-decisions.md` ▸ A shelf can hide). The Space dots
   stay inside that band through the one `ShelfDotWindow`
-  (`ShelfDotWindowTests` ▸ `markFitsTheBand`).
+  (`ShelfDotWindowTests` ▸ `markFitsTheBand`). Whether a bar
+  yields is the revealer's one `ShelfRevealer.yields`, which the
+  pointer and the mark both read; a second placement or yield
+  beside them is review's.
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

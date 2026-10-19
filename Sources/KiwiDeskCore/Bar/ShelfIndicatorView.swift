@@ -149,8 +149,9 @@ final class ShelfIndicatorRim: NSView {
 }
 
 /// The Space dots on an indicator's plate, drawn over the mark's
-/// resting frame so a hover moves none of them but the current
-/// one, which widens about its middle into the label's pill.
+/// resting frame: a hover widens the current one into the label's
+/// pill about the row's middle, the others moving out by half the
+/// widening each side.
 final class ShelfIndicatorDots: NSView {
     var spec: ShelfIndicatorSpec? { didSet { needsDisplay = true } }
     /// The mark's resting frame in this view.
@@ -194,7 +195,8 @@ final class ShelfIndicatorDots: NSView {
         }
     }
 
-    /// The label centred in its pill: text on its band's baseline
+    /// The label centred in its pill: text by its ink
+    /// (`BarTextGlyph.Metrics`) on its band's baseline
     /// (`BarTextGlyph.lineTop`), a symbol by its image.
     private func draw(
         _ label: ShelfIndicatorSpec.Label,
@@ -226,9 +228,13 @@ final class ShelfIndicatorDots: NSView {
                 .font: label.font
             ]
             if tinted { attributes[.foregroundColor] = color }
+            let metrics = BarTextGlyph.metrics(text, font: label.font)
             (text as NSString).draw(
                 at: CGPoint(
-                    x: pill.midX - label.width / 2,
+                    x: metrics.originX(
+                        centringInkOn: pill.midX,
+                        frameWidth: metrics.advance
+                    ),
                     y: BarTextGlyph.lineTop(
                         centredOn: pill.midY,
                         band: .of(identifier: text),

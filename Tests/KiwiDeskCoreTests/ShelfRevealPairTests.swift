@@ -94,6 +94,14 @@ struct ShelfRevealPairTests {
         #expect(!spaceBand.intersects(appBand))
         let middle = (space.frame.midX + app.frame.midX) / 2
         #expect(abs(spaceBand.maxX - middle) < 0.5)
+        // Each near cue stops where the bands meet: one mark lights.
+        let spaceNear = try #require(target(core, shelf, .space)?.near)
+        let appNear = try #require(target(core, shelf, .app)?.near)
+        #expect(spaceNear.maxX <= appBand.minX)
+        #expect(appNear.minX >= spaceBand.maxX)
+        // A top edge's Space mark names its Space on hover.
+        #expect(space.label != nil)
+        #expect(space.position?.count == 1)
     }
 
     @Test(
@@ -108,14 +116,19 @@ struct ShelfRevealPairTests {
         let app = try #require(spec(core, shelf, .app))
         #expect(app.yields)
         #expect(!app.shown)
-        #expect(target(core, shelf, .app)?.hovers == false)
+        #expect(core.shelves.reveal.yields(.init(shelf: shelf, bar: .app)))
         #expect(core.appBars.shownStrips.isEmpty)
+        // The shown bar is held over the run it draws, never the
+        // whole edge its lone slot spans.
+        let held = try #require(target(core, shelf, .space))
+        let section = try #require(held.section)
+        #expect(section.width < held.strip.width / 2)
         // Its shortcut still shows it, beside the Space Bar.
         #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         #expect(!core.spaceBars.shownStrips.isEmpty)
         #expect(!core.appBars.shownStrips.isEmpty)
         #expect(spec(core, shelf, .app)?.yields == false)
-        #expect(target(core, shelf, .app)?.hovers == true)
+        #expect(!core.shelves.reveal.yields(.init(shelf: shelf, bar: .app)))
     }
 
     @Test(
