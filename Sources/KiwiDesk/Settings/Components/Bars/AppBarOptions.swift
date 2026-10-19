@@ -101,6 +101,15 @@ enum AppBarOptions {
         ]
     }
 
+    /// Whether a bar's shelf stays shown or hides (#761).
+    @MainActor
+    static var visibility: [(ShelfVisibility, String)] {
+        [
+            (.always, L("bar.visibility.always", "Always shown")),
+            (.auto, L("bar.visibility.auto", "Hide automatically")),
+        ]
+    }
+
     /// What names a Space item (#1535).
     @MainActor
     static var itemLabel: [(SpaceBarStyle.ItemLabel, String)] {

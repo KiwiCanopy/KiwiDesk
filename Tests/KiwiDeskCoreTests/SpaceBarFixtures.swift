@@ -14,6 +14,7 @@ enum SpaceBarFixtures {
         // Non-default: the bar ships enabled (QA 2026-07-19).
         style.enabled = false
         style.reserve = false
+        style.visibility = .auto
         style.edge = .left
         style.edgeOverride = ["Screen:1x1": .right]
         style.glyphSpan = 8

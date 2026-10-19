@@ -11,6 +11,8 @@ extension KiwiCore {
         let strip: CGRect
         let horizontal: Bool
         let arrangement: ShelfArrangement
+        /// Whether every bar on this edge is `auto` (#761).
+        var hides = false
 
         /// The strip's length along the edge.
         var length: CGFloat {
@@ -34,17 +36,18 @@ extension KiwiCore {
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?
     ) -> [ShelfPlan] {
-        let edges = settings.barEdges(
+        let folded = settings.barEdges(
             space: spaceItems != nil,
             app: app != nil
-        ).map(\.edge)
+        )
         let strips = ShelfGeometry.strips(
             in: visible,
-            edges: edges,
+            edges: folded.map(\.edge),
             shelf: settings.kiwishelf
         )
-        return zip(edges, strips).map { edge, strip in
-            shelfPlan(
+        return zip(folded, strips).map { shelfEdge, strip in
+            let edge = shelfEdge.edge
+            var plan = shelfPlan(
                 edge: edge,
                 strip: strip,
                 settings: settings,
@@ -52,6 +55,8 @@ extension KiwiCore {
                     ? spaceItems : nil,
                 app: settings.appBarStyle.edge == edge ? app : nil
             )
+            plan.hides = shelfEdge.hides
+            return plan
         }
     }
 

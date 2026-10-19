@@ -162,14 +162,17 @@ extension BarMotion {
         to: Float,
         begin: CFTimeInterval,
         duration: CFTimeInterval,
-        reduceMotion: Bool
+        reduceMotion: Bool,
+        timing: CAMediaTimingFunction = CAMediaTimingFunction(
+            name: .easeOut
+        )
     ) -> CAAnimation {
         let fade = CABasicAnimation(keyPath: "opacity")
         fade.fromValue = reduceMotion ? to : from
         fade.toValue = to
         fade.beginTime = begin
         fade.duration = max(duration, 0.001)
-        fade.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        fade.timingFunction = timing
         fade.fillMode = .forwards
         fade.isRemovedOnCompletion = false
         return fade

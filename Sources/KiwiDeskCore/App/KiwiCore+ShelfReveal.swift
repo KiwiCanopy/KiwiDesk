@@ -1,0 +1,200 @@
+import AppKit
+
+extension SpaceBarOverlay.Item {
+    /// The windows the Space holds, by the one count the item's
+    /// view announces and inks by (#761).
+    var windowCount: Int {
+        SpaceBarItemView.heldWindows(
+            collapse: collapse,
+            apps: apps,
+            before: before,
+            after: after
+        )
+    }
+}
+
+/// The hiding shelves (#761): which plans `updateBars()` draws,
+/// what a hidden shelf's indicator shows, and the show/hide
+/// action. A reveal redraws the bars and never retiles — a hiding
+/// edge reserves only its constant sliver
+/// (`KiwiShelf.hiddenReservation`).
+extension KiwiCore {
+    /// One `updateBars()` pass's hiding shelves, gathered per
+    /// display and synced once at its end.
+    struct HidingShelves {
+        var targets: [ShelfManager.Key: ShelfRevealer.Target] = [:]
+        var indicators:
+            [ShelfManager.Key: (spec: ShelfIndicatorSpec, space: Bool)] =
+                [:]
+
+        /// The plans to draw: every plan that does not hide, and
+        /// each hiding one `reveal` shows; every hiding plan files
+        /// its target, its bars and its indicator.
+        @MainActor mutating func shown(
+            of plans: [ShelfPlan],
+            display: DisplayID,
+            screen: NSScreen,
+            items: [SpaceBarOverlay.Item]?,
+            reveal: ShelfRevealer,
+            gaps: Gaps,
+            settings: TilingSettings
+        ) -> [ShelfPlan] {
+            var drawn: [ShelfPlan] = []
+            for plan in plans {
+                guard plan.hides else {
+                    drawn.append(plan)
+                    continue
+                }
+                let key = ShelfManager.Key(display: display, edge: plan.edge)
+                let shown = reveal.reveal(of: key).isShown
+                file(
+                    plan,
+                    key: key,
+                    screen: screen,
+                    items: items,
+                    shown: shown,
+                    hovered: reveal.arming.contains(key),
+                    gaps: gaps,
+                    settings: settings
+                )
+                if shown { drawn.append(plan) }
+            }
+            return drawn
+        }
+
+        /// Files one hiding plan's target, bars and indicator.
+        @MainActor private mutating func file(
+            _ plan: ShelfPlan,
+            key: ShelfManager.Key,
+            screen: NSScreen,
+            items: [SpaceBarOverlay.Item]?,
+            shown: Bool,
+            hovered: Bool,
+            gaps: Gaps,
+            settings: TilingSettings
+        ) {
+            let carriesSpace = plan.arrangement.space != nil
+            var bars: Set<ShelfBar> = []
+            if carriesSpace { bars.insert(.space) }
+            if plan.arrangement.app != nil { bars.insert(.app) }
+            // The mark draws the shelf as rendered: Reduce
+            // transparency makes its fill opaque (#1374).
+            let shelf = LiquidGlassGate.rendered(settings.kiwishelf)
+            let mark = Self.mark(items: carriesSpace ? items : nil)
+            let primary = GeometryUtils.primaryHeight
+            let strip = GeometryUtils.flip(plan.strip, primaryHeight: primary)
+            // The band reaches past the screen side into a menu bar
+            // or a Dock, and in to the windows: the sliver's rest and
+            // their outer gap (ui-designer, #761).
+            let band = ShelfReveal.band(
+                of: strip,
+                edge: plan.edge,
+                outward: shelf.outerMargin + ShelfReveal.overshoot,
+                inward: KiwiShelf.hiddenDepth + shelf.innerMargin
+                    + Self.outerGap(gaps, on: plan.edge)
+            )
+            let markFrame = GeometryUtils.flip(
+                ShelfIndicatorSpec.frame(
+                    of: mark,
+                    in: plan.strip,
+                    edge: plan.edge
+                ),
+                primaryHeight: primary
+            )
+            targets[key] = ShelfRevealer.Target(
+                edge: plan.edge,
+                strip: strip,
+                screen: screen.frame,
+                bars: bars,
+                band: band,
+                near: markFrame.insetBy(
+                    dx: -ShelfReveal.nearReach,
+                    dy: -ShelfReveal.nearReach
+                )
+            )
+            indicators[key] = (
+                ShelfIndicatorSpec(
+                    mark: mark,
+                    frame: ShelfIndicatorSpec.frame(
+                        of: mark,
+                        in: plan.strip,
+                        edge: plan.edge
+                    ),
+                    horizontal: plan.horizontal,
+                    fill: shelf.fillColor,
+                    currentInk: shelf.activeItemColor,
+                    ink: shelf.idleItemColor,
+                    emptyInk: shelf.emptyItemColor,
+                    highlight: shelf.highlightColor,
+                    shown: shown,
+                    hovered: hovered,
+                    morphs: shelf.drawsPlate,
+                    rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
+                    sheen: settings.borderStyle.sheen
+                ),
+                carriesSpace
+            )
+        }
+
+        /// The windows' outer gap on `edge`.
+        static func outerGap(_ gaps: Gaps, on edge: AppBarEdge) -> CGFloat {
+            switch edge {
+            case .top: return gaps.outer.top
+            case .bottom: return gaps.outer.bottom
+            case .left: return gaps.outer.left
+            case .right: return gaps.outer.right
+            }
+        }
+
+        /// Space dots from the Space Bar's items, else the line.
+        static func mark(
+            items: [SpaceBarOverlay.Item]?
+        ) -> ShelfIndicatorSpec.Mark {
+            guard let items else { return .line }
+            let dots = items.filter { $0.space != nil }.map {
+                ShelfIndicatorSpec.Dot(
+                    current: $0.active,
+                    occupied: $0.windowCount > 0
+                )
+            }
+            return dots.isEmpty ? .line : .dots(dots)
+        }
+    }
+
+    /// Hands the pass's hiding shelves to the revealer and their
+    /// indicators to the panels.
+    func syncHidingShelves(_ hiding: HidingShelves) {
+        shelves.reveal.sync(hiding.targets)
+        shelves.indicators.sync(hiding.indicators)
+    }
+
+    /// The show/hide action on `key`'s shelf.
+    func toggleShelfReveal(_ key: ShelfManager.Key) {
+        shelves.reveal.toggle(
+            key,
+            duration: tiler.settings.kiwishelf.revealDuration
+        )
+    }
+
+    /// `space_bar.toggle_reveal` / `app_bar.toggle_reveal` (#761):
+    /// the action on the hiding shelf that carries the bar, on the
+    /// screen the active Space lays out on. Refused where the bar
+    /// reads `always` — it never hides an `always` bar — or draws
+    /// on no hiding shelf there.
+    func shelfRevealCommand(_ bar: ShelfBar) -> CommandResponse {
+        let name = bar == .space ? "Space Bar" : "App Bar"
+        guard tiler.settings.revealActionLive(bar) else {
+            return .fail("the \(name) does not hide")
+        }
+        let workspaces = state.workspaces
+        guard
+            let space = workspaces.activeSpace,
+            let display = workspaces.display(of: space),
+            let key = shelves.reveal.targets.first(where: {
+                $0.key.display == display && $0.value.bars.contains(bar)
+            })?.key
+        else { return .fail("the \(name) draws on no screen here") }
+        toggleShelfReveal(key)
+        return .ok()
+    }
+}

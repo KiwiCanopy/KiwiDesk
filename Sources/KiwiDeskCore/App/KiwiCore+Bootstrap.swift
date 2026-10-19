@@ -90,6 +90,13 @@ extension KiwiCore {
         appFont.onLoad = { [weak self] in
             self?.updateBars()
         }
+        shelves.reveal.onChange = { [weak self] in self?.updateBars() }
+        shelves.reveal.holds = { [weak self] key in
+            self?.shelves.surfaceHolds(key) == true
+        }
+        shelves.indicators.onPress = { [weak self] key in
+            self?.toggleShelfReveal(key)
+        }
         shelves.onMinimum = { [weak self] percent, committed in
             self?.withUserMotion {
                 self?.dragShelfMinimum(percent, committed: committed)

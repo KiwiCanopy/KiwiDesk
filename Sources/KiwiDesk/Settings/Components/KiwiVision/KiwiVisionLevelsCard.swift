@@ -38,6 +38,8 @@ struct KiwiVisionLevelsCard: View {
         switch key {
         case .kiwiVision(.dim): dimRow
         case .kiwiVision(.blur): blurRow
+        case .kiwiVision(.fadeDuration): fadeDurationRow
+        case .kiwiVision(.fadeCurve): fadeCurveRow
         default:
             let _ = assertionFailure(
                 "unrendered KiwiVision census key: \(key.id)"
@@ -94,6 +96,94 @@ struct KiwiVisionLevelsCard: View {
             disabled: gates.inertReason(for: .kiwiVision(.blur)) != nil
         )
         .searchAnchored(SettingsCatalog.kiwiVision.blur)
+    }
+
+    /// Nothing to fade while the dim is 0 % and the blur is off.
+    private var nothingFades: Bool {
+        model.appWide.visionDim == 0 && !model.appWide.visionBlur
+    }
+
+    private func fadeInert(_ key: SettingKey) -> Bool {
+        nothingFades || gates.inertReason(for: key) != nil
+    }
+
+    /// 0–1000 ms in 50 ms steps; 0 is instant (#2417).
+    private var fadeDurationRow: some View {
+        let label = SettingsCatalog.kiwiVision.fadeDuration.text
+        return SettingsRowShape {
+            SettingsRowLabel(label: label, help: Self.fadeDurationHelp)
+        } control: {
+            StepperRow(
+                label: label,
+                value: Binding(
+                    get: { model.appWide.visionFadeDuration },
+                    set: { ms in
+                        model.setAppWide { $0.visionFadeDuration = ms }
+                    }
+                ),
+                in: AppWideSettings.visionFadeRange,
+                step: 50,
+                suffix: "ms",
+                labelHidden: true
+            )
+            .disabled(fadeInert(.kiwiVision(.fadeDuration)))
+        }
+        .searchAnchored(SettingsCatalog.kiwiVision.fadeDuration)
+    }
+
+    private var fadeCurveRow: some View {
+        let label = SettingsCatalog.kiwiVision.fadeCurve.text
+        let current = model.appWide.visionFadeCurve
+        return DropdownRow(
+            label: label,
+            spokenValue: Self.curveTitle(current),
+            help: Self.fadeCurveHelp
+        ) {
+            Picker(
+                label,
+                selection: Binding(
+                    get: { current },
+                    set: { curve in
+                        model.setAppWide { $0.visionFadeCurve = curve }
+                    }
+                )
+            ) {
+                ForEach(VisionFadeCurve.allCases, id: \.self) {
+                    Text(Self.curveTitle($0)).tag($0)
+                }
+            }
+            .disabled(fadeInert(.kiwiVision(.fadeCurve)))
+        }
+        .searchAnchored(SettingsCatalog.kiwiVision.fadeCurve)
+    }
+
+    static var fadeDurationHelp: String {
+        L(
+            "kiwivision.fade_duration.help",
+            "How long the window you leave takes to dim and blur. The "
+                + "window you focus clears at once; at 0, or with "
+                + "Reduce Motion, the change is instant."
+        )
+    }
+
+    static var fadeCurveHelp: String {
+        L(
+            "kiwivision.fade_curve.help",
+            "How the fade is paced: Ease out dims fastest at the "
+                + "start, Ease in slowest, and Linear evenly."
+        )
+    }
+
+    /// A curve's name, as the menu and a lens's inherited value
+    /// read it.
+    static func curveTitle(_ curve: VisionFadeCurve) -> String {
+        switch curve {
+        case .easeOut: L("kiwivision.fade_curve.ease_out", "Ease out")
+        case .easeInOut:
+            L("kiwivision.fade_curve.ease_in_out", "Ease in and out")
+        case .easeIn: L("kiwivision.fade_curve.ease_in", "Ease in")
+        case .linear: L("kiwivision.fade_curve.linear", "Linear")
+        }
     }
 
     /// The Lua-owned reason under its row, and Reduce

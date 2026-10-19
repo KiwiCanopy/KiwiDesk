@@ -21,6 +21,7 @@ enum AppBarFixtures {
         style.edge = .left
         style.edgeOverride = ["Screen:1x1": .right]
         style.reserve = false
+        style.visibility = .auto
         return style
     }
 
@@ -65,6 +66,7 @@ enum AppBarFixtures {
         shelf.hoverItemColor = "#070707"
         shelf.groupBadgeColor = "#090909"
         shelf.groupBadgeTextColor = "#0A0A0A"
+        shelf.revealDuration = 5
         return shelf
     }
 }

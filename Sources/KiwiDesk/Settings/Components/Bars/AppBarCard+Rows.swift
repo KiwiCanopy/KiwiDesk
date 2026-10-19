@@ -35,7 +35,7 @@ extension AppBarCard {
             )
         case .appBarTitleCap:
             titleCapRow
-        case .appBarReserve:
+        case .appBarReserve, .appBarVisibility:
             // Lua/CLI only (#1524): no row draws it.
             let _ = assertionFailure(
                 "unrendered App Bar census key: \(key.rawValue)"

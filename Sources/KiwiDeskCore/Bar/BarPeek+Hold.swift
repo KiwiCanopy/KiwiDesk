@@ -88,6 +88,7 @@ extension BarPeek {
     /// as any menu does.
     func openedMore() {
         guard let shown, let view = shown.view else { return }
+        noteMenuAnchor(view.window)
         openMenu(shown.source, shown.space, view)
     }
 

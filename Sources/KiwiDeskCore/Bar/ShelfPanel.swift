@@ -15,9 +15,14 @@ final class ShelfPanel: NSPanel {
     override func sendEvent(_ event: NSEvent) {
         switch event.type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            // A Control-click is AppKit's right-click (#761: its
+            // menu opens on this panel).
+            let controlClick =
+                event.type == .leftMouseDown
+                && event.modifierFlags.contains(.control)
             onPress(
                 contentView?.hitTest(event.locationInWindow),
-                event.type
+                controlClick ? .rightMouseDown : event.type
             )
         default:
             break

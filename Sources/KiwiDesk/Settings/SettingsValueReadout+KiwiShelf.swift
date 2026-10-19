@@ -152,6 +152,12 @@ extension SettingsValueReadout {
                 trimmed(o.dimFactor),
                 trimmed(n.dimFactor)
             )
+        case .revealDuration:
+            return spaceBarRow(
+                census,
+                spaceBarSeconds(Int(o.revealDuration * 1000)),
+                spaceBarSeconds(Int(n.revealDuration * 1000))
+            )
         case .fillColor, .borderColor, .itemColor, .activeItemColor,
             .highlightColor, .hoverFillColor, .hoverItemColor,
             .groupBadgeColor, .groupBadgeTextColor:

@@ -72,6 +72,8 @@ appWide.visionBlur
 appWide.visionClearApp
 appWide.visionClearWallpaper
 appWide.visionDim
+appWide.visionFadeCurve
+appWide.visionFadeDuration
 appWide.visionLenses
 appWide.visionNeverDimmed
 config.appRules[app]
