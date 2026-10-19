@@ -11,8 +11,8 @@ extension TilingSettings {
             keyedBy: CodingKeys.self
         )
         try container.encode(
-            minWindowSize,
-            forKey: .minWindowSize
+            minWindowSizes,
+            forKey: .minWindowSizes
         )
         try container.encode(
             swapSkipsCascade,

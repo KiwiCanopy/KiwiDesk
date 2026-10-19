@@ -75,7 +75,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 30 = gui config 11 (#2324), the top-ups' `shortcut_offer`,
     /// reaches a bundle's `config` inline: an older build refuses
     /// the bundle as newer rather than as no backup.
-    public static let currentFormat = 30
+    /// 32 = `min_window_size` per layout (#2237), on `[Profile]`
+    /// alone; 31 is #761's, a parallel branch.
+    public static let currentFormat = 32
 
     public let format: Int
 

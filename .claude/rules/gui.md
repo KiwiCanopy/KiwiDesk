@@ -778,18 +778,18 @@ converging every follower (`MasterDivergenceRegisterTests` ▸
 `acknowledgedRegisterIsExact`, `GapsAndBordersGateWiringTests`
 ▸ `gapMastersAcknowledgeAtTheLabel`).
 
-The Liquid Glass master is the one ruled exception to that
+The Liquid Glass master is a ruled exception to that
 register: it answers its `?` from `LiquidGlassAgreement`
 (`Sources/KiwiDesk/Settings/SettingsModel+Glass.swift`), the ONE
 comparison both its binding and its row read, and never joins
 `GapsBordersGates.acknowledged` (`LiquidGlassMasterTests` ▸
 `divergenceSeen`, `LiquidGlassMasterTests` ▸
 `rowConsultsTheAgreement`). A new master answers through one of
-those two homes; a third one is ruled here before it ships, or
-the two registers stop being the whole census of who
-acknowledges.
+the homes this section rules, or a home of its own is ruled here
+before it ships — otherwise the homes ruled here stop being the
+whole census of who acknowledges.
 
-A Space's own gap masters (#1775) are not a third home: they
+A Space's own gap masters (#1775) are not a home of their own: they
 are the gap masters again, drawn by the one `GapsMasterRow` and
 reading `GapsBordersGates.outerDiffers` / `innerDiffers` over the
 Space's own value instead of the global one. A further editor of
@@ -797,7 +797,17 @@ a `Gaps` value takes the same row and the same two comparisons,
 never a copy of either (`OverrideGapsRowTests` ▸
 `gapsRowSharesTheMasters`).
 
-A role group's colour on Advanced Colours (#1857) is the third
+The minimum window size master (#2237) is a ruled home beside
+`GapsBordersGates.acknowledged` and `LiquidGlassAgreement`, and
+joins neither: its followers are the per-layout values in
+`MinWindowSizes`, so it answers its `?` and each axis's "Mixed"
+readout from their own per-axis agreement, read through
+`SettingsModel.minSizeShared(_:)` and `minSizesDiffer` alone —
+the drawer's hold-open reads the same verdict, and the rows'
+view compares no stored value itself (`MinWindowSizeMasterTests` ▸
+`masterReadsOneVerdict`).
+
+A role group's colour on Advanced Colours (#1857) is another
 home, ruled: its followers are the group's ticks — scratch state
 no stored-setting register can read — so it answers its title's
 `?` and its "mixed" readout from `RolePaint.mixed` alone, both

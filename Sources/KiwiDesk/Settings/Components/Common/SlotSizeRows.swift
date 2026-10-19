@@ -30,9 +30,14 @@ struct SlotSizeRows: View {
             : L("slot_size.column_width", "Column width")
     }
 
-    /// Points slider floor clamped by global minimum window size.
+    /// Points slider floor: Scrolling's minimum window size along
+    /// its axis (#2237), clamped below the slider's top.
     private var minPointsFloor: Double {
-        Double(min(model.config.settings.minWindowSize, 1990))
+        let floor = model.config.settings.minWindowSize(
+            for: .scrolling,
+            in: space
+        )
+        return Double(min(floor.along(horizontal: !isVertical), 1990))
     }
 
     /// Range for percentage slider (`SlotSizePercentRangeTests`).

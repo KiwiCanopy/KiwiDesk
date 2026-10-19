@@ -29,7 +29,7 @@ struct SettingsCodingDecodeTests {
         settings.track.limit = 3
         settings.track.newWindow = .focusedTrack
         settings.track.wrapFocus = true
-        settings.minWindowSize = 200
+        settings.minWindowSizes = MinWindowSizes(all: 200)
         settings.swapSkipsCascade = false
         settings.floatPlacement = .keep
         settings.floatScaleOnDisplayChange = false

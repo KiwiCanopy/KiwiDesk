@@ -45,6 +45,7 @@ public enum ConfigMigration {
         migratingRetiredPullOrSpawn,
         migratingRetiredPanelVerbs,
         migratingProfileIDs,
+        migratingMinWindowSizePerLayout,
     ]
 
     /// Runs after `steps`, and is skipped by

@@ -257,7 +257,7 @@ struct ScrollingFixedSpanCueTests {
             args: [.string(space.raw), .string("scrolling")]
         )
         core.state.workspaces.focus(WindowID(1), in: space)
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
 
         // The device shape: grow-side asks (above the span)
         // teach the corroborated ceiling; ONE shrink-side ask

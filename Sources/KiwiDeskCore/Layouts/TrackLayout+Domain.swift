@@ -92,7 +92,9 @@ extension TrackLayout {
             1,
             fitCap(
                 crossSpan: crossSpan,
-                minSize: context.minWindowSize,
+                minSize: context.minWindowSize.along(
+                    horizontal: vertical
+                ),
                 gap: gap
             )
         )
@@ -133,10 +135,12 @@ extension TrackLayout {
         in context: LayoutContext
     ) -> CGFloat {
         let bound = context.sizeBounds[id]
-        let learned =
-            context.track.axis == .vertical
-            ? bound?.minWidth : bound?.minHeight
-        return max(context.minWindowSize, learned ?? 0)
+        let vertical = context.track.axis == .vertical
+        let learned = vertical ? bound?.minWidth : bound?.minHeight
+        return max(
+            context.minWindowSize.along(horizontal: vertical),
+            learned ?? 0
+        )
     }
 
     /// `learnedFloor`'s mirror (#1488): one window's corroborated
@@ -183,7 +187,9 @@ extension TrackLayout {
             ? context.usable.height : context.usable.width
         let cap = fitCap(
             crossSpan: span,
-            minSize: context.minWindowSize,
+            minSize: context.minWindowSize.along(
+                horizontal: !vertical
+            ),
             gap: gap
         )
         return cap == .max ? .max : max(1, cap)

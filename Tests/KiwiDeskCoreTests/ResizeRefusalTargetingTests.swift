@@ -42,7 +42,7 @@ struct ResizeRefusalTargetingTests {
             ),
             inner: Gaps.Inner(horizontal: 16, vertical: 16)
         )
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         // The arrangement every case below reasons from: the
         // FIRST split is side-by-side whatever the display's
         // shape, so the dwindle head spans the whole height and

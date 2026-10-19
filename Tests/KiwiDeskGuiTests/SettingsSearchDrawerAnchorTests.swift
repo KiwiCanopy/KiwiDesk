@@ -62,6 +62,10 @@ struct SettingsSearchDrawerAnchorTests {
                 [SettingsCatalog.profiles.desktops]
             ),
             (
+                .layoutDefaults, "Layout Defaults", .general,
+                [SettingsCatalog.layoutDefaults.minSizePerLayout]
+            ),
+            (
                 .looks, "Looks & Animations", .motion,
                 [SettingsCatalog.colors.motionMore]
             ),

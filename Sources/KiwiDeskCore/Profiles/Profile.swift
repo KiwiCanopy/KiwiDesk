@@ -31,12 +31,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// #2228 (kept so a development build's file loads), 21 since
     /// a stored `show_*` call opens `kiwihub.show` (#2265), 22 since
     /// the layouts side became View (#2309), 23 since a profile
-    /// carries a stable `id` (#2324).
+    /// carries a stable `id` (#2324), 25 since the minimum window
+    /// size is one width × height per layout (#2237; 24 is #761's,
+    /// a parallel branch, so a file either stamped crosses here).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 23
+    public static let currentFormat = 25
 
     public var format: Int
     /// Stable across renames (#2324); `ProfileManager.write` keeps

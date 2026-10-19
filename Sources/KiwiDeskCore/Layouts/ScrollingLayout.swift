@@ -96,7 +96,13 @@ public struct ScrollingLayout: LayoutSystem {
         // BSP/Stack/Grid use minWindowSize as a TRIGGER to spill
         // into a pile; scrolling has no pile (its overflow is the
         // scroll itself), so it floors the slot instead.
-        let size = min(along, max(resolved, context.minWindowSize))
+        let size = min(
+            along,
+            max(
+                resolved,
+                context.minWindowSize.along(horizontal: horizontal)
+            )
+        )
         let spans = windows.map { window -> CGFloat in
             let bound = context.sizeBounds[window]
             let generalizing = !context.probesBeyondBounds

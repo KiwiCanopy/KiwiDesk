@@ -492,7 +492,7 @@ every lens with why it cannot turn on.
 | | `mouse.set_follows_focus` | true\|false (default `false`) — warp the pointer to the newly-focused window |
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
-| | `set_min_window_size` | pt (default 300) |
+| | `set_min_window_size` | width[, height][, layout] in pt (default 300 × 300 every layout) |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
@@ -582,6 +582,14 @@ every lens with why it cannot turn on.
 | | `track.set_overflow_style` | `cascade_all\|cascade_overflow` (default `cascade_all` for track) |
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+`set_min_window_size`'s layout is `stack`, `grid`, `track`,
+`bsp`, `scrolling` or `floating`, and without one it sets every
+layout ([Lua reference](lua-reference.md#set_min_window_size)).
+The starter setup seeds every layout from the main screen's
+width instead of the 300 × 300 default.
+:::
 
 `animations.set_on_space_change` and `animations.set_space_change`
 are refused, naming `set_space_cue`;
@@ -687,8 +695,14 @@ floating focused window resizes itself directly in any mode
 splitting the delta between both edges and pinning one that is
 already against the screen edge or a bar (#1091). "Floating" is
 the effective float (#1184): the window's own flag, or any window
-in a floating-layout space, which places nothing. A focused
-window in native full screen is refused ahead of every layout,
+in a floating-layout space, which places nothing.
+
+:::unreleased
+That floor is Floating's `min_window_size` on the axis
+resized, whatever layout the window's space uses.
+:::
+
+A focused window in native full screen is refused ahead of every layout,
 whatever its float state, with `the focused window is
 fullscreen` (#1298): nothing is written and no neighbour moves;
 the pill and sound rule below apply to it as to the monocle/grid

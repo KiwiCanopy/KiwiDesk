@@ -59,7 +59,7 @@ struct ScrollingFreshLedgerPressTests {
         // Pin the default the exact expectations reason from
         // (#660): the `== 665` assertion holds only while the
         // global floor sits below it.
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return (core, space)
     }
 
@@ -99,7 +99,7 @@ struct ScrollingFreshLedgerPressTests {
                     gap: context.gaps.inner.horizontal,
                     horizontal: true
                 ),
-                context.minWindowSize
+                context.minWindowSize.width
             )
         )
         // The premise the regression rests on, derived rather

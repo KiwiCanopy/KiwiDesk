@@ -47,9 +47,10 @@ struct LayoutDefaultsSection: View {
         SettingsSection(
             SettingsCatalog.layoutDefaults.minWindowSize,
             caption: L(
-                "layout_defaults.min_window_size_caption",
-                "Windows never tile smaller than this — it also "
-                    + "caps auto-sized grids and track limits."
+                "layout_defaults.min_size.caption",
+                "Windows never tile smaller than this. Set a layout "
+                    + "apart under %1$@.",
+                MinWindowSizeRows.perLayout
             )
         ) {
             ForEach(LayoutDefaultsRowOrder.general, id: \.id) {
@@ -63,35 +64,16 @@ struct LayoutDefaultsSection: View {
     private func generalRow(_ key: SettingKey) -> some View {
         switch key {
         case .behaviour(.minWindowSize):
-            // Label hidden (#275): the section header already
-            // names this sole control (Dock "Size" pattern);
-            // `label` still carries the accessibility name.
-            StepperRow(
-                label: L(
-                    "layout_defaults.min_window_size",
-                    "Minimum window size"
-                ),
-                value: minSizeBinding,
-                in: 100...800,
-                step: 10,
-                suffix: "pt",
-                labelHidden: true
-            )
-            .frame(maxWidth: .infinity, alignment: .leading)
+            MinWindowSizeRows(model: model)
+        case .behaviour(let follower)
+        where MinSizeText.followers.contains(follower):
+            // Drawn by the master's drawer above.
+            EmptyView()
         default:
             let _ = assertionFailure(
                 "unrendered Layout Defaults general row: \(key.id)"
             )
             EmptyView()
         }
-    }
-
-    private var minSizeBinding: Binding<Int> {
-        Binding(
-            get: { Int(model.config.settings.minWindowSize) },
-            set: {
-                model.config.settings.minWindowSize = CGFloat($0)
-            }
-        )
     }
 }

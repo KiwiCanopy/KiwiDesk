@@ -85,7 +85,7 @@ extension KiwiCore {
         let ranges = TrackLayout.ranges(of: counts)
         let vertical = params.axis == .vertical
         let gaps = tiler.settings.gaps(for: space.id)
-        let minSize = Double(tiler.settings.minWindowSize)
+        let floor = minWindowSize(in: space)
         healTrackWeights(
             of: space,
             tiled: tiled,
@@ -93,7 +93,7 @@ extension KiwiCore {
             vertical: vertical,
             bounds: bounds,
             gaps: gaps,
-            minSize: minSize
+            minSize: Double(floor.along(horizontal: vertical))
         )
         healTrackFloors(
             of: space,
@@ -111,7 +111,7 @@ extension KiwiCore {
                 vertical: vertical,
                 bounds: bounds,
                 gaps: gaps,
-                minSize: minSize
+                minSize: Double(floor.along(horizontal: !vertical))
             )
         }
     }

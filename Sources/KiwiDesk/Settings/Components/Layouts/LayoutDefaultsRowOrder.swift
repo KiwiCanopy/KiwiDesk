@@ -4,10 +4,11 @@ import KiwiDeskCore
 /// (`LayoutDefaultsCensusRenderTests`,
 /// `noRowIsBehindADisclosure`, #678 Phase 3).
 enum LayoutDefaultsRowOrder {
-    /// Shared minimum window size setting.
-    static let general: [SettingKey] = [
-        .behaviour(.minWindowSize)
-    ]
+    /// The minimum window size master, then its per-layout
+    /// followers, which its drawer draws (#2237).
+    static let general: [SettingKey] =
+        [.behaviour(.minWindowSize)]
+        + MinSizeText.followers.map(SettingKey.behaviour)
 
     static let bsp: [SettingKey] = [
         .layout(.bspStrategy),
