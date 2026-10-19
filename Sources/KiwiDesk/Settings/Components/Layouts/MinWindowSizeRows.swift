@@ -4,8 +4,8 @@ import SwiftUI
 /// Layout Standards ▸ Minimum window size (#2237): the "All
 /// layouts" master over a "Per layout" drawer. The master stays
 /// live over a "Mixed" axis and answers its `?` from
-/// `SettingsModel.minSizesDiffer`; the drawer opens by itself and
-/// stays open while any axis is mixed, as the bar-edge drawer does.
+/// `SettingsModel.minSizesDiffer`; the drawer stays open while
+/// any axis is mixed, as the bar-edge drawer does.
 struct MinWindowSizeRows: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = false
@@ -59,30 +59,21 @@ struct MinWindowSizeRows: View {
         }
     }
 
+    /// A catalog drawer, so a search hit on a layout's axis opens
+    /// it (#1250); held open while any axis is mixed.
     private var drawer: some View {
-        let locked = model.minSizesDiffer
-        return VStack(alignment: .leading, spacing: 8) {
-            SettingsDisclosureButton(
-                isExpanded: $expanded,
-                locked: locked,
-                isHeading: false
-            ) {
-                Text(Self.perLayout)
-                    .font(.callout)
-                    .foregroundStyle(SettingsTheme.ink)
-                if !(expanded || locked) {
-                    Text(
-                        L(
-                            "layout_defaults.min_size.same",
-                            "Same for every layout"
-                        )
-                    )
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                }
-                Spacer(minLength: 0)
-            }
-            if expanded || locked {
+        SettingsDisclosure(
+            SettingsCatalog.layoutDefaults.minSizePerLayout,
+            isExpanded: $expanded,
+            summary: model.minSizesDiffer
+                ? nil
+                : L(
+                    "layout_defaults.min_size.same",
+                    "Same for every layout"
+                ),
+            locked: model.minSizesDiffer
+        ) {
+            VStack(alignment: .leading, spacing: 8) {
                 ForEach(MinWindowSizes.Layout.allCases, id: \.self) {
                     layoutRow($0)
                 }
@@ -109,7 +100,8 @@ struct MinWindowSizeRows: View {
                     width: model.minSize(layout, .width),
                     height: model.minSize(layout, .height),
                     base: { model.minSize(layout, $0) },
-                    set: { model.setMinSize($1, axis: $0, for: layout) }
+                    set: { model.setMinSize($1, axis: $0, for: layout) },
+                    anchor: { MinSizeText.control(layout, $0) }
                 )
             }
             if layout == .scrolling {
@@ -125,7 +117,6 @@ struct MinWindowSizeRows: View {
                 .frame(width: 3)
                 .accessibilityHidden(true)
         }
-        .padding(.leading, 14)
     }
 
     /// Which axis Scrolling's direction makes apply.

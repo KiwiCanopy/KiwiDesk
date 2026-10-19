@@ -130,6 +130,10 @@ struct LayoutDefaultsCensusRenderTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
+            // The one ruled drawer: the minimum window size's
+            // per layout rows (#2237), a catalog drawer.
+            guard file.lastPathComponent != "MinWindowSizeRows.swift"
+            else { continue }
             #expect(
                 !source.contains("SettingsDisclosure("),
                 Comment(

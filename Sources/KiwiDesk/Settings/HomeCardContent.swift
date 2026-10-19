@@ -281,24 +281,23 @@ extension HomeCardContent {
     /// Layout Standards' line: the minimum window size every layout
     /// shares, or that layouts differ (#2237).
     static func layoutSubtitle(_ settings: TilingSettings) -> String {
-        let sizes = Set(
-            MinWindowSizes.Layout.allCases.map {
-                settings.minWindowSizes[$0]
-            }
-        )
-        guard sizes.count == 1, let size = sizes.first else {
+        let sizes = settings.minWindowSizes
+        guard let width = sizes.shared(.width),
+            let height = sizes.shared(.height)
+        else {
             return L(
                 "home.card.layout.subtitle_mixed",
-                "%1$d modes · min window size per layout",
+                "Modes: %1$d · min window size per layout",
                 LayoutMode.allCases.count
             )
         }
         return L(
             "home.card.layout.subtitle_size",
-            "%1$d modes · min window %2$d × %3$d pt",
+            "Modes: %1$d · min window %2$d × %3$d pt",
             LayoutMode.allCases.count,
-            Int(size.width),
-            Int(size.height)
+            Int(width),
+            Int(height)
         )
     }
+
 }

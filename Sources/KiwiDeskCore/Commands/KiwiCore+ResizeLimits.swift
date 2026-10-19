@@ -84,10 +84,16 @@ extension KiwiCore {
         axis: String,
         in space: Space
     ) -> (size: Double, carrier: WindowID?) {
+        // Every member takes the Space's own floor, never one
+        // resolved again per window: a gap between the two would
+        // read as a learned bound (#2237).
         var size = Double(minWindowSize(in: space).on(axis: axis))
         var carrier: WindowID? = nil
         for member in members {
-            let min = effectiveMinSize(of: member, axis: axis)
+            let bound = tiler.sizeBound(for: member)
+            let min = Double(
+                (axis == "x" ? bound?.minWidth : bound?.minHeight) ?? 0
+            )
             if min > size {
                 size = min
                 carrier = member

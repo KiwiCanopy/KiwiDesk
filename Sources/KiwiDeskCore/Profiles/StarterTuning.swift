@@ -64,7 +64,8 @@ public enum StarterTuning {
         return MinWindowSizes(all: .square(side))
     }
 
-    /// A laptop seeds the floor, a 5K screen the ceiling.
+    /// A laptop seeds the floor; a screen from about 3680 pt wide
+    /// the ceiling.
     static let minSizeRange: ClosedRange<CGFloat> = 260...460
     static let minSizeDivisor: CGFloat = 8
 

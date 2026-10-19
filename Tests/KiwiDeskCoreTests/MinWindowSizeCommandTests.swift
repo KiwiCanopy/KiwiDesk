@@ -57,4 +57,19 @@ struct MinWindowSizeCommandTests {
         )
         #expect(core.tiler.settings.minWindowSizes == MinWindowSizes())
     }
+
+    @Test("an argument it cannot read is refused, not ignored")
+    func strayArgumentRefused() {
+        let core = makeTestCore()
+        for args: [JSONValue] in [
+            [.number(480), .number(300), .number(1)],
+            [.number(480), .string("grid"), .string("stack")],
+        ] {
+            #expect(
+                !core.execute("set_min_window_size", args: args)
+                    .isSuccess
+            )
+        }
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes())
+    }
 }

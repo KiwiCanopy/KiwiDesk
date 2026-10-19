@@ -58,6 +58,10 @@ struct SettingsCatalogArgumentTests {
         // `SettingsCatalogSiteTests` only asks for one reference
         // apiece, which a swapped pair satisfies.
         "DesktopShortcutsOffer.swift: drawer",
+        // #2237's axis fields: `MinSizeText.control`'s children
+        // (`MinWindowSizeMasterTests` ▸ `anchorsAreOneToOne`).
+        "MinSizeFields.swift: optional: anchor(.width)",
+        "MinSizeFields.swift: optional: anchor(.height)",
         // The Track offer takes the same shape (#1440); its one
         // mount's `keys:` / `drawer:` pair is pinned by
         // `ShortcutsTrackOfferTests`.
@@ -175,16 +179,10 @@ struct SettingsCatalogArgumentTests {
         // not-connected banner are gated rows inside one card
         // rather than two cards sharing an anchor id.
         // 49 since #754: the Borders card, mounted once.
-        // 50 since #793: Advanced Colours' panel scene, mounted
-        // once — in the panel rather than in the section body.
-        // 51 since #794: the Spaces panel's preview, likewise
-        // mounted in the panel and not in the section.
+        // 50 since #793, 51 since #794: two panel-mounted scenes.
         // 51 since #875: deleted the install inventory card.
-        // 52 since #1019: About's Guide link self-anchors, so
-        // a search hit lands ON the link rather than on the
-        // card around it.
-        // 53 since #1307: the Liquid Glass card, mounted once
-        // on Colours & Animations.
+        // 52 since #1019: About's Guide link self-anchors.
+        // 53 since #1307: the Liquid Glass card.
         // 61 since #1250: General ▸ Advanced's eight rows
         // self-anchor as the drawer's CHILDREN, each mounted
         // once — the first direct child mounts (the gap rows
@@ -237,8 +235,9 @@ struct SettingsCatalogArgumentTests {
         // Show the Space switch. 106 since #1685: the AI page's
         // three cards and its setup row. 107: #2265's KiwiHub group.
         // 112-118: #2103, #1870, #2103 v2. 119 #1869, 120 #2258,
-        // 121 #2312, 122 #2103's lens strip, 123 #2379, 125 #2417.
-        #expect(direct.values.reduce(0, +) == 125)
+        // 121 #2312, 122 #2103's lens strip, 123 #2379, 125 #2417,
+        // 126 #2237.
+        #expect(direct.values.reduce(0, +) == 126)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

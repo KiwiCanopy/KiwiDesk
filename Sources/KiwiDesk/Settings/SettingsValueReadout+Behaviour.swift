@@ -246,10 +246,10 @@ extension SettingsValueReadout {
     /// The master's readout: the size every layout shares, or
     /// "Mixed" while they differ.
     private static func minSizeSummary(_ sizes: MinWindowSizes) -> String {
-        let all = Set(MinWindowSizes.Layout.allCases.map { sizes[$0] })
-        guard all.count == 1, let size = all.first else {
-            return L("layout_defaults.min_size.mixed", "Mixed")
-        }
-        return minSize(size)
+        guard let width = sizes.shared(.width),
+            let height = sizes.shared(.height)
+        else { return L("diff.value.mixed", "mixed") }
+        return minSize(MinSize(width: width, height: height))
     }
+
 }

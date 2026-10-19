@@ -3801,14 +3801,16 @@ layout (#128), where every
 window sits in exactly one track and every resize has one true
 target. A **floating** focused window is exempt from all of
 this: it resizes itself directly, in every mode (width for x,
-height for y, floored at `min_window_size`) — "floating" being
+height for y, floored at [Floating's](#minimum-window-size-per-layout-one-per-window-2237)
+`min_window_size`) — "floating" being
 the *effective* float since
 [#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184), whose
 entry below is the ruling's home. (#122, #124, #129)
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
-resize floor is the configured `min_window_size`, raised where
+resize floor is the `min_window_size` of the layout that places
+it ([Floating's for a float](#minimum-window-size-per-layout-one-per-window-2237)), raised where
 its app enforces a larger physical minimum of its own — learned
 from the engine's refused asks (`SizeBoundLearner`, #677), since
 AX exposes no minimum-size attribute. Keyboard and mouse resizes
@@ -4368,11 +4370,11 @@ candidate's. (`SizeBoundCorroborationProbeTests`,
 **Track's automatic count reads learned minimums; a fixed limit
 does not.** With `auto_tracks` on there is no stored count: the
 number of tracks is derived on every retile as the geometric
-fit. A fit dividing the span by the one global `min_window_size`
+fit. A fit dividing the span by `min_window_size` alone
 opens as many tracks for a row of Xcode, System Settings and an
 Electron app with a `minWidth` as 300 pt windows would, and they
 overlap (#1355). The derivation takes the largest prefix whose
-tracks — each at the larger of the global
+tracks — each at the larger of Track's own
 minimum and its members' corroborated floor on the cross axis
 (#677, the same ledger Scrolling and Monocle consume, read as
 the raw corroborated floor the #933 clamp reads rather than the
@@ -5724,9 +5726,9 @@ worst (owner ruling, #1662).
 
 **One tuning per profile: a layout's is its screen's, the rest
 is the main screen's or the shipped default's.** `TilingSettings`
-is profile-wide, so a laptop beside a 27" has exactly one minimum
-window size to give, and the only question is which screen names
-it. For a layout the
+is profile-wide, so a laptop beside a 27" has exactly one tuning
+of each layout to give, and the only question is which screen
+names it. For a layout the
 allocator places on ONE screen — Stack, Grid, Track — that
 question has an answer that is not a guess: the screen it sits
 on, so a Stack on a portrait secondary puts its stack along the
@@ -5735,7 +5737,9 @@ and can be forced onto the narrowest one as a repeat, so it
 takes the widest screen that LEADS it — the ultrawide wherever
 one is connected, and past a narrow portrait or laptop main,
 which leads Monocle, its neighbour. What stays the main
-screen's is what no layout owns — the minimum window size; the
+screen's is the minimum window size: every layout's is seeded
+from the main screen's width, not from the screen that layout
+sits on ([the entry below](#minimum-window-size-per-layout-one-per-window-2237)); the
 gaps stay the shipped default on every screen, since a tighter
 laptop gap let two neighbouring rings touch and made Glass, the
 look a first run shows, move windows (owner, 2026-09-28, #1739).
@@ -5823,6 +5827,74 @@ the live profile; the script's half is a run ledger of what
 `init.lua` ASKED for, never a before/after diff of the space set:
 a reload's `create_space` of a space already live changes nothing
 a diff can see, which is exactly the path the hint exists for.
+
+### Minimum window size: per layout, one per window (#2237)
+
+**[Principle]**
+
+:::unreleased
+**Each layout that tiles to a floor keeps its own minimum window
+size, as a width and a height, and a window always has exactly
+one.** A floor protects an app's own contents, and what a
+layout must protect depends on how it divides the screen: Grid
+on both axes, BSP, Stack and Track along their orientation,
+Scrolling along its scroll axis. A window's height can often go
+lower than its width, too. One shared value has to suit the
+tightest layout, so it either piles a Grid early or lets a split
+crush an app.
+
+**Six values, always stored, with no fallback behind them.**
+Stack, Grid, Track, BSP, Scrolling and Floating each store a
+width and a height, written whole; the Settings master "All
+layouts" is a write to all six, not a seventh value. A stored
+fallback would make an untouched layout show a value it only
+inherits, and a later change to the fallback would move it
+unseen. Monocle stores none: it shows one window at a time and
+divides nothing. Scrolling applies only the axis it scrolls
+along — the other spans the layout's whole area — but stores
+both, so
+flipping its direction later finds a value already set.
+`MinWindowSizesParityTests` holds the stored fields to the
+layouts, Monocle exempt with its reason.
+
+**One window, one floor.** A float is placed by no layout, so
+every window `EffectiveFloat.applies` to takes Floating's,
+whatever layout its space uses, and so does the quit grid,
+which gathers windows from every layout into a grid none of
+them owns. Without that, a window floated in a Grid space would
+resize to Grid's floor and change floors on every move to
+another space, though nothing about the window changed; and a
+resize clamp and a placement could judge one window by two
+floors. For the same reason, switching a space's layout
+re-floors nothing: each heal reads its own layout's stores.
+
+**Points only, and no per-screen list.** A floor protects
+contents whose size is absolute, so a percentage — of the
+layout's region or of the whole screen — would let a window's
+floor change with the screen it is dragged to. The Scrolling
+slot size keeps its pt, % and count units because it is a
+target, not a floor. A value per screen fails a laptop that
+docks at dozens of desks: the list grows with every one, and
+none of it is visible from the screen in front of you. Screen
+size enters once, at the seed (below). A per-Space level is
+#2422; the one resolver, `TilingSettings.minWindowSize(for:in:)`,
+already takes the Space, so that level joins without touching a
+consumer.
+
+**The starter setup seeds every layout from the main screen's
+width ÷ 8, rounded to 10 pt and clamped to 260–460 pt, the same
+on both axes** (#821). 300 pt was right on a 2560 pt screen,
+generous on a laptop and mean on an ultrawide; the division
+gives 320 pt at 2560 and 430 pt on a 3440 pt ultrawide, and the
+clamp keeps a laptop from a floor below 260 pt and a 5120 pt
+super ultrawide (640 pt by the division) from one above 460.
+The rounding lands on the Settings stepper's 10 pt step.
+One rule replaces the starter's fixed 420 pt for the ultrawides,
+so the two never become separate rules. Every layout takes the
+main screen's answer rather than its own screen's: seeded from
+different screens, the master would open on "Mixed" for a first
+run, showing a new user a difference they never made.
+:::
 
 ### Sticky reach spans macOS Desktops (#1145)
 

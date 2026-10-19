@@ -583,6 +583,14 @@ every lens with why it cannot turn on.
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
+:::unreleased
+`set_min_window_size`'s layout is `stack`, `grid`, `track`,
+`bsp`, `scrolling` or `floating`, and without one it sets every
+layout ([Lua reference](lua-reference.md#set_min_window_size)).
+The starter setup seeds every layout from the main screen's
+width instead of the 300 × 300 default.
+:::
+
 `animations.set_on_space_change` and `animations.set_space_change`
 are refused, naming `set_space_cue`;
 `animations.set_space_change_duration` and
@@ -687,8 +695,14 @@ floating focused window resizes itself directly in any mode
 splitting the delta between both edges and pinning one that is
 already against the screen edge or a bar (#1091). "Floating" is
 the effective float (#1184): the window's own flag, or any window
-in a floating-layout space, which places nothing. A focused
-window in native full screen is refused ahead of every layout,
+in a floating-layout space, which places nothing.
+
+:::unreleased
+That floor is Floating's `min_window_size` on the axis
+resized, whatever layout the window's space uses.
+:::
+
+A focused window in native full screen is refused ahead of every layout,
 whatever its float state, with `the focused window is
 fullscreen` (#1298): nothing is written and no neighbour moves;
 the pill and sound rule below apply to it as to the monocle/grid

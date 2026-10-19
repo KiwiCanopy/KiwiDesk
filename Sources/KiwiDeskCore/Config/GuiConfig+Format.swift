@@ -45,5 +45,8 @@ extension GuiConfig {
     ///
     /// **10 (#2324)**: `profile_bindings` moved to `bindings.json`,
     /// stripped here once the store has carried it across.
+    ///
+    /// Not bumped by #2237: `min_window_size` lives in
+    /// `TilingSettings`, which `gui.json` does not encode.
     public static let currentFormat = 10
 }

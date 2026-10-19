@@ -21,8 +21,8 @@ extension APIReference {
             .number("size")
         ),
         "set_min_window_size": APIRecord(
-            "Sets the minimum window size, one layout's or all; "
-                + "a missing height reuses the width.",
+            "Sets one layout's or every layout's minimum window "
+                + "size; (width, layout) sets both axes.",
             .number("width"),
             .number("height", optional: true),
             .choice("layout", MinWindowSizes.Layout.self, optional: true)

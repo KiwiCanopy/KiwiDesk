@@ -1426,10 +1426,15 @@ or `0` (auto, default).
 
 **Does:** sets the size of columns (horizontal) or rows
 (vertical) in scrolling layouts. Auto is 95%, horizontal and
-vertical alike. Any resolved size is floored at the global
-Scrolling's minimum window size (`set_min_window_size`) along
-that axis and capped at the
-axis length.
+vertical alike.
+
+:::unreleased
+Any resolved size is floored at Scrolling's minimum window size
+([`set_min_window_size`](#set_min_window_size)) on the axis it
+scrolls along — its width when it scrolls horizontally, its
+height when it scrolls vertically — and capped at the axis
+length.
+:::
 
 A percentage is a share of the **pitch**, one window plus one
 inner gap: `"50%"` is two windows, gaps included, `"33.33%"`
@@ -1699,11 +1704,18 @@ grid.set_dimensions(3, 2)
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** when true, derives the grid's dimensions from the
-screen — as many columns and rows as fit at `min_window_size`
-(`floor(usable / (min_window_size + gap))` per axis, at least
-1) — over the typed `columns`/`rows`. It caps a dynamic grid
+screen over the typed `columns`/`rows`. It caps a dynamic grid
 and fixes a rigid one alike. Windows past the resulting
 capacity cascade in the last cell.
+
+:::unreleased
+The grid takes as many columns as fit at Grid's minimum window
+width and as many rows as fit at its minimum height
+([`set_min_window_size`](#set_min_window_size)):
+`floor(usable width / (min width + horizontal inner gap))`
+columns and `floor(usable height / (min height + vertical inner
+gap))` rows, at least 1 each.
+:::
 
 **Example:**
 
@@ -5528,6 +5540,12 @@ own float flag — set by a toggle, `make_floating`, a
 `float_rules` entry or KiwiDesk's own detection — **or**
 membership of a space set to the floating layout.
 
+:::unreleased
+A floating window's `min_window_size` is Floating's
+([`set_min_window_size`](#set_min_window_size)), whatever layout
+its space uses: its width for `"x"`, its height for `"y"`.
+:::
+
 The delta is split between **both** edges (#1091), so a float
 grows and shrinks around its own centre. An edge already against
 the boundary is *pinned* and the whole delta goes to the other
@@ -6426,6 +6444,7 @@ Keys mirror the Lua API: the command name with the `set_` verb
 stripped, grouped by namespace — `set_gap_override` becomes
 `gap.override`, `bsp.set_ratio_h` becomes `layout.bsp.ratio_h`.
 
+:::unreleased
 **Example:**
 
 ```jsonc
@@ -6486,7 +6505,14 @@ stripped, grouped by namespace — `set_gap_override` becomes
                  "overflow_style": "cascade_overflow",
                  "new_window_placement": "first" }
     },
-    "min_window_size": 300,
+    "min_window_size": {          // per layout, in pt
+      "bsp": { "height": 300, "width": 300 },
+      "floating": { "height": 300, "width": 300 },
+      "grid": { "height": 160, "width": 220 },
+      "scrolling": { "height": 300, "width": 300 },
+      "stack": { "height": 300, "width": 300 },
+      "track": { "height": 300, "width": 300 }
+    },
     "new_window_placement_override": {},  // per space id
     "space": { "icon": { "2": "envelope" } }  // per space id
   },
@@ -6505,6 +6531,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
   ]
 }
 ```
+:::
 
 `lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
 the profile. It maps a lens name, in lower case, to `false`:
@@ -6865,8 +6892,8 @@ tiles, so quitting with it frontmost places it last like any
 other window.
 
 A pile's windows also shrink so the cascade ends at its own
-cell's bottom edge (floored at `min_window_size`), keeping piles
-from spilling into the row below. Each screen sizes its own
+cell's bottom edge (floored at Floating's `min_window_size`),
+keeping piles from spilling into the row below. Each screen sizes its own
 grid from its window count `N` and the density target `T` (see
 `quit.set_grid_target_depth` below), never past 4×4. One-shot
 teardown placement: windows stay on their own screen, and

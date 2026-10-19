@@ -50,24 +50,56 @@ struct MinWindowSizeMasterTests {
             #expect(model.minSizeShared(.width) == nil, "\(layout)")
             #expect(model.minSizeShared(.height) == 300, "\(layout)")
             #expect(model.minSizesDiffer, "\(layout)")
-            #expect(model.minSizeStandsApart(layout), "\(layout)")
+            // Measured against the most-used layout's value: the
+            // one that moved stands apart, or every other does.
+            let used = MinWindowSizes.Layout(
+                LayoutUsage.mostUsed(in: model.config)
+            )
+            #expect(
+                layout == used
+                    ? model.minSizeStandsApart(
+                        layout == .stack ? .grid : .stack
+                    )
+                    : model.minSizeStandsApart(layout),
+                "\(layout)"
+            )
             model.setMinSize(300, axis: .width, for: layout)
             #expect(!model.minSizesDiffer, "\(layout)")
         }
     }
 
-    @Test("a mixed axis steps from the value most layouts share")
-    func referenceIsTheMajority() {
+    @Test("a mixed axis steps from the most-used layout's value")
+    func referenceIsTheMostUsed() {
         let model = makeTestModel()
-        model.setMinSize(220, axis: .width, for: .grid)
-        model.setMinSize(480, axis: .width, for: .scrolling)
-        #expect(model.minSizeReference(.width) == 300)
-        #expect(!model.minSizeStandsApart(.stack))
-        #expect(model.minSizeStandsApart(.grid))
+        let used =
+            MinWindowSizes.Layout(LayoutUsage.mostUsed(in: model.config))
+            ?? .bsp
+        model.setMinSize(220, axis: .width, for: used)
+        model.setMinSize(480, axis: .width, for: .floating)
+        #expect(model.minSizeReference(.width) == 220)
+        #expect(!model.minSizeStandsApart(used))
+    }
+    /// Each axis's search anchor is that layout's own child of the
+    /// Per layout drawer, so a hit opens it on the right field.
+    @Test("each axis anchors its own drawer child")
+    func anchorsAreOneToOne() {
+        var ids: Set<String> = []
+        for layout in MinWindowSizes.Layout.allCases {
+            for axis in MinSizeAxis.allCases {
+                let control = MinSizeText.control(layout, axis)
+                ids.insert(control.id)
+                #expect(
+                    control.key
+                        == "layout_defaults.min_size."
+                        + "\(layout.rawValue)_\(axis)"
+                )
+            }
+        }
+        #expect(ids.count == 12)
     }
 
     /// The master's `?`, both "Mixed" readouts and the drawer's
-    /// hold-open are drawn from the model's verdict — never a
+    /// summary and hold-open are drawn from the model's verdict — never a
     /// comparison re-derived in the view.
     @Test("the master reads one verdict")
     func masterReadsOneVerdict() throws {
@@ -78,7 +110,7 @@ struct MinWindowSizeMasterTests {
         let text = try SourceScan.strippedSource(at: file)
         #expect(
             text.components(separatedBy: "model.minSizesDiffer")
-                .count - 1 == 2
+                .count - 1 == 3
         )
         #expect(text.contains("width: model.minSizeShared(.width)"))
         #expect(text.contains("height: model.minSizeShared(.height)"))

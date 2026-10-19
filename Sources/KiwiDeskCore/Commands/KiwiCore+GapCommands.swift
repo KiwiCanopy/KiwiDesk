@@ -54,10 +54,18 @@ extension KiwiCore {
             break
         }
         var layout: MinWindowSizes.Layout?
-        if case .string(let name)? = rest.first {
+        switch rest.first {
+        case .string(let name)?:
             guard let named = MinWindowSizes.Layout(rawValue: name)
             else { return .expected(MinWindowSizes.Layout.self) }
             layout = named
+        case nil, .null?:
+            break
+        default:
+            return .expected(MinWindowSizes.Layout.self)
+        }
+        guard rest.count <= 1 else {
+            return .fail("expected at most width, height, layout")
         }
         tiler.settings.minWindowSizes.set(
             MinSize(width: CGFloat(width), height: CGFloat(height)),

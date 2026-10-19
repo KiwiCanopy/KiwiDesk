@@ -79,4 +79,12 @@ public struct MinWindowSizes: Sendable, Equatable, Codable {
         }
         self[layout] = size
     }
+
+    /// The value every layout holds on `axis`, nil while they
+    /// differ — the one "do the layouts agree" verdict the
+    /// Settings master, its readout and the Home card read.
+    public func shared(_ axis: MinSizeAxis) -> CGFloat? {
+        let values = Set(Layout.allCases.map { self[$0][axis] })
+        return values.count == 1 ? values.first : nil
+    }
 }

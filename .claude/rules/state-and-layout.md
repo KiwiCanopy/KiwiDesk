@@ -138,6 +138,23 @@ editing here:
   their parity check reds an override that gains it until the
   entry leaves that list too; taking it out is the one edit that
   unlocks the move, and it owes a per-space reservation first.
+- **Every read of the minimum window size goes through the one
+  resolver, `TilingSettings.minWindowSize(for:in:)` (#2237)**, and
+  a read for one window through `KiwiCore.minWindowSize(of:)`,
+  which hands every window `EffectiveFloat.applies` to Floating's
+  floor, so one window has one floor. Never read the stored
+  `minWindowSizes` beside a call site: the value is per layout, so
+  a raw read answers for no layout and disagrees with the one the
+  layout draws. `MinWindowSizeReadCensusTests` reds an unrouted
+  read, and its `allowed` map is the exemption list. Hand the
+  resolver the Space the floor is asked for, and nil only where
+  none exists (the quit grid, a preview of a layout's own value):
+  the Space argument is how #2422's per-Space level joins without
+  touching a consumer. A new `LayoutMode` gets a floor in
+  `MinWindowSizes` or an `exempt` entry with its reason
+  (`MinWindowSizesParityTests`); the argument is
+  `docs/design-decisions.md` ▸ *Minimum window size: per layout,
+  one per window*.
 - Space identifiers are **strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
 - A retile may **promise** that every window it touches is

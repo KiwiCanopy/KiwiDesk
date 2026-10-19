@@ -13,10 +13,13 @@ struct MinWindowSizeReadCensusTests {
 
     /// File → why it may name the stored value.
     private static let allowed: [String: String] = [
+        "TilingSettings.swift": "declares it",
+        "TilingSettings+MinWindowSize.swift": "the resolver",
         "TilingSettings+Coding.swift": "decodes it",
         "TilingSettings+Encoding.swift": "encodes it",
         "KiwiCore+GapCommands.swift": "the Lua setter writes it",
         "StarterSetup.swift": "the first-run seed writes it",
+        "StarterTuning.swift": "the seed's builder is named for it",
         "SettingKey+Behaviour.swift":
             "the census ids spell its stored paths",
         "SettingsModel+MinWindowSize.swift":
@@ -28,9 +31,32 @@ struct MinWindowSizeReadCensusTests {
         "HomeCardContent.swift": "the card names the stored value",
     ]
 
-    /// Member reads of the stored value, `.minWindowSizes`.
+    /// Reads of the stored value: `.minWindowSizes` on any
+    /// receiver, or the bare name (implicit `self`) a `TilingSettings`
+    /// extension would spell. A string literal naming it ("…") is
+    /// not a read, which the quote before it tells.
     private static func rawReads(in text: String) -> Int {
-        text.components(separatedBy: ".minWindowSizes").count - 1
+        var count = 0
+        var cursor = text.startIndex
+        while let hit = text.range(
+            of: "minWindowSizes",
+            range: cursor..<text.endIndex
+        ) {
+            cursor = hit.upperBound
+            let before =
+                hit.lowerBound == text.startIndex
+                ? " " : text[text.index(before: hit.lowerBound)]
+            let after =
+                hit.upperBound == text.endIndex
+                ? " " : text[hit.upperBound]
+            if before.isLetter || before.isNumber || before == "_"
+                || before == "\"" || after.isLetter || after.isNumber
+            {
+                continue
+            }
+            count += 1
+        }
+        return count
     }
 
     private func sources() throws -> [URL] {

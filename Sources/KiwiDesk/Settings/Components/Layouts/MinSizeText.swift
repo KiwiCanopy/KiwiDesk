@@ -75,4 +75,26 @@ enum MinSizeText {
         MinWindowSizes.Layout.allCases.flatMap { layout in
             MinSizeAxis.allCases.map { key(layout, $0) }
         }
+
+    /// The drawer child anchoring `layout`'s `axis`.
+    static func control(
+        _ layout: MinWindowSizes.Layout,
+        _ axis: MinSizeAxis
+    ) -> SettingsControl {
+        let c = SettingsCatalog.layoutDefaults.minSizePerLayout.children
+        switch (layout, axis) {
+        case (.stack, .width): return c.stackWidth
+        case (.stack, .height): return c.stackHeight
+        case (.grid, .width): return c.gridWidth
+        case (.grid, .height): return c.gridHeight
+        case (.track, .width): return c.trackWidth
+        case (.track, .height): return c.trackHeight
+        case (.bsp, .width): return c.bspWidth
+        case (.bsp, .height): return c.bspHeight
+        case (.scrolling, .width): return c.scrollingWidth
+        case (.scrolling, .height): return c.scrollingHeight
+        case (.floating, .width): return c.floatingWidth
+        case (.floating, .height): return c.floatingHeight
+        }
+    }
 }

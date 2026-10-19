@@ -30,9 +30,18 @@ public struct MinSize: Sendable, Equatable, Hashable {
         axis == "x" ? width : height
     }
 
-    /// The larger of the two axes — the side a square pile needs
-    /// to keep both floors.
-    public var larger: CGFloat { max(width, height) }
+    public subscript(axis: MinSizeAxis) -> CGFloat {
+        get { axis == .width ? width : height }
+        set {
+            if axis == .width { width = newValue } else { height = newValue }
+        }
+    }
+}
+
+/// One axis of a minimum window size (#2237).
+public enum MinSizeAxis: CaseIterable, Hashable, Sendable {
+    case width
+    case height
 }
 
 extension MinSize: ExpressibleByIntegerLiteral,
