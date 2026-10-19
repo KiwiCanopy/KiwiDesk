@@ -29,7 +29,8 @@ extension SettingsDiffRowSource {
         let owners = leafOwners(unsaved, saved: saved)
         return SettingKey.summarized(
             diff.changedSettings.filter { !skip.contains($0) },
-            in: live
+            in: live,
+            apart: skip
         )
         .flatMap { key in
             SettingsValueReadout.rows(

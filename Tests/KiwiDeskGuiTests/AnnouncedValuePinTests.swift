@@ -141,6 +141,9 @@ struct AnnouncedValuePinTests {
         "SyncCompareSheet.swift": 1,
         "SyncSideCard.swift": 1,
         "SyncAcrossMacsRow.swift": 1,
+        // The sync sheet's title and each conflict row's setting
+        // name (#2450).
+        "SyncReviewSheet.swift": 2,
         // The app picker's two section headers, one site (#2103).
         "AppPickerButton.swift": 1,
         // The diff list's "Live, not saved" heading (#2262).

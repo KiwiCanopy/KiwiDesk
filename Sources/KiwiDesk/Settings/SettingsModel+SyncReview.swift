@@ -54,11 +54,19 @@ extension SettingsModel {
     }
 
     /// Applies the sheet's picks — Theirs takes a row back from the
-    /// baseline, which holds the other Mac's value — then saves.
+    /// baseline, which holds the other Mac's value — then saves; a
+    /// conflict the sheet did not show is shown at that Save.
     func answerSyncReview(_ picks: [String: SyncChoice]) {
         guard let review = sync.review else { return }
         sync.review = nil
-        sync.conflicts = []
+        let shown = Set(review.rows.compactMap(\.key))
+        sync.conflicts.removeAll { conflict in
+            guard let key = conflict.key else {
+                return review.rows.contains { $0.key == nil }
+            }
+            return shown.contains(key)
+                || key.summaryMaster.map(shown.contains) == true
+        }
         for row in review.rows where picks[row.id] == .theirs {
             if let key = row.key {
                 SettingsRevertRegister.writers[key]?.apply(self, nil)
@@ -79,12 +87,17 @@ extension SettingsModel {
     }
 
     private func syncReview(edited: [SettingKey]) -> SyncReview {
+        // The one fold the pill takes, over the draft's side.
+        let shown = Set(
+            SettingKey.summarized(
+                sync.conflicts.compactMap(\.key),
+                in: config
+            )
+        )
         var rows: [SyncReview.Row] = []
-        var folded: Set<SettingKey> = []
         for conflict in sync.conflicts {
-            guard let key = conflict.key,
-                let master = key.summaryMaster,
-                SettingKey.summarizes(master, in: config)
+            guard let key = conflict.key, !shown.contains(key),
+                let master = key.summaryMaster
             else {
                 rows.append(
                     SyncReview.Row(
@@ -96,7 +109,9 @@ extension SettingsModel {
                 )
                 continue
             }
-            guard folded.insert(master).inserted else { continue }
+            guard !rows.contains(where: { $0.key == master }) else {
+                continue
+            }
             rows.append(
                 SyncReview.Row(
                     key: master,
@@ -106,23 +121,39 @@ extension SettingsModel {
                 )
             )
         }
-        let macs = Set(sync.conflicts.map(\.mac))
-        let asked = Set(rows.compactMap(\.key))
-            .union(sync.conflicts.compactMap(\.key))
-        let others = SettingKey.summarized(edited, in: config)
-            .filter { !asked.contains($0) }
+        var asked = Set(rows.compactMap(\.key))
+        for conflict in sync.conflicts {
+            asked.formUnion(conflict.covers)
+            if let key = conflict.key { asked.insert(key) }
+        }
+        for row in rows {
+            asked.formUnion(
+                row.key.flatMap { SettingKey.summaryGroups[$0] } ?? []
+            )
+        }
+        let others = SettingKey.summarized(
+            edited.filter { !asked.contains($0) },
+            in: config,
+            apart: asked
+        )
+        let taken = SettingKey.summarized(
+            sync.taken.subtracting(asked).sorted { $0.id < $1.id },
+            in: cleanConfig,
+            apart: asked
+        )
         let luaOther =
             luaSource != cleanLuaSource && !rows.contains { $0.key == nil }
+        let macs = Set(sync.conflicts.map(\.mac))
         return SyncReview(
             rows: rows,
             mac: macs.count == 1 ? macs.first ?? nil : nil,
-            taken: sync.taken.count,
+            taken: taken.count,
             yourOthers: others.count + (luaOther ? 1 : 0)
         )
     }
 
-    /// A group's value in `side`: one value while its members
-    /// agree, else "mixed" with each member's value.
+    /// A group's value in `side`: its master's readout while every
+    /// axis agrees, else "mixed" with each member's own row.
     private func groupValue(
         _ master: SettingKey,
         in side: GuiConfig,
@@ -137,15 +168,14 @@ extension SettingsModel {
         }
         let members = SettingKey.summaryGroups[master] ?? []
         return SyncText.mixed(
-            members.map { member in
-                SyncText.memberValue(
-                    SettingsValueReadout.label(for: member),
-                    SettingsValueReadout.rows(
-                        for: member,
-                        old: other,
-                        new: side
-                    ).first?.newValue ?? ""
-                )
+            members.compactMap { member in
+                SettingsValueReadout.rows(
+                    for: member,
+                    old: other,
+                    new: side
+                ).first.map {
+                    SyncText.memberValue($0.label, $0.newValue ?? "")
+                }
             }
         )
     }

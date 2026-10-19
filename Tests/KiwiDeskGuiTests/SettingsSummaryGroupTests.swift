@@ -22,6 +22,44 @@ struct SettingsSummaryGroupTests {
         }
     }
 
+    /// A master that only gates its followers — a switch, not a
+    /// value they share — writes nothing to fold.
+    private static let gatingMasters: Set<SettingKey> = [
+        .colours(.animationsMaster)
+    ]
+
+    /// Every census master is a group, owns its followers outright
+    /// (`masterWrites`) or only gates them.
+    @Test("the groups are the masters whose followers list apart")
+    func groupsMatchTheMasters() {
+        let masters = Set(
+            SettingKey.allCases.filter { $0.id.hasSuffix(" (master)") }
+        )
+        #expect(!SettingKey.summaryGroups.isEmpty)
+        #expect(
+            Set(SettingKey.summaryGroups.keys)
+                == masters.subtracting(SettingKey.masterWrites.keys)
+                .subtracting(Self.gatingMasters)
+        )
+    }
+
+    /// A key added under a master's path joins its group, or one
+    /// nudge lists it as a change of its own.
+    @Test("every key under a master's path is a member")
+    func membersAreComplete() {
+        for (master, members) in SettingKey.summaryGroups {
+            let base = master.id.replacingOccurrences(
+                of: " (master)",
+                with: ""
+            )
+            let under = SettingKey.allCases.filter {
+                $0.id.hasPrefix(base + ".")
+            }
+            #expect(!under.isEmpty)
+            #expect(Set(under) == Set(members), "\(master)")
+        }
+    }
+
     @Test("every group is a master over members under its path")
     func groupsAreWellFormed() {
         for (master, members) in SettingKey.summaryGroups {
@@ -61,6 +99,7 @@ struct SettingsSummaryGroupTests {
 
     @Test("the inner slider's nudge is one Inner gap row")
     func innerNudgeIsOneRow() {
+        pinEnglish()
         let model = makeTestModel()
         model.config.settings.gapsGlobal.inner.horizontal = 3
         model.config.settings.gapsGlobal.inner.vertical = 3
@@ -69,6 +108,7 @@ struct SettingsSummaryGroupTests {
 
     @Test("edges that differ list each changed edge alone")
     func differingEdgesListApart() {
+        pinEnglish()
         let model = makeTestModel()
         model.config.settings.gapsGlobal.outer.top = 2
         model.config.settings.gapsGlobal.outer.left = 4
@@ -82,6 +122,7 @@ struct SettingsSummaryGroupTests {
     /// edge brought level with the rest is the whole group's row.
     @Test("one edge brought level with the rest folds the group")
     func levellingEdgeFolds() {
+        pinEnglish()
         let model = makeTestModel()
         model.cleanConfig.settings.gapsGlobal.outer.right = 4
         model.config = model.cleanConfig
@@ -92,6 +133,7 @@ struct SettingsSummaryGroupTests {
 
     @Test("a folded row's revert takes every edge back")
     func foldedRevertTakesAll() throws {
+        pinEnglish()
         let model = makeTestModel()
         let clean = model.cleanConfig.settings.gapsGlobal.outer
         model.config.settings.gapsGlobal.outer = .init(
@@ -108,6 +150,7 @@ struct SettingsSummaryGroupTests {
 
     @Test("a live change of every edge is one live row")
     func liveRowFolds() throws {
+        pinEnglish()
         let model = makeTestModel()
         var saved = model.cleanConfig.settings
         saved.gapsGlobal.outer = .init(top: 2, bottom: 2, left: 2, right: 2)
@@ -139,5 +182,47 @@ struct SettingsSummaryGroupTests {
         #expect(row.section == .live)
         // Its Keep carries the leaves of every edge.
         #expect(row.keepIDs.count == 4)
+    }
+}
+
+/// The minimum window size master (#2237) folds per axis: one row
+/// while every layout shares its width and its height.
+@MainActor
+@Suite("Minimum window size folds per axis (#2450)")
+struct MinSizeSummaryTests {
+    private func sizeRows(_ model: SettingsModel) -> [SettingKey] {
+        SettingsDiffRowSource.rows(for: model).map(\.key).filter {
+            if case .behaviour = $0 { return true }
+            return false
+        }
+    }
+
+    @Test("a master width nudge is one row")
+    func widthNudgeIsOneRow() {
+        LocalizationManager.shared.select("en")
+        let model = makeTestModel()
+        model.setMinSize(420, axis: .width, for: nil)
+        #expect(sizeRows(model) == [.behaviour(.minWindowSize)])
+    }
+
+    @Test("one layout's width is that row alone")
+    func layoutEditListsApart() {
+        LocalizationManager.shared.select("en")
+        let model = makeTestModel()
+        model.setMinSize(420, axis: .width, for: .stack)
+        #expect(sizeRows(model) == [.behaviour(.minSizeStackWidth)])
+    }
+
+    /// The master's readout says "mixed" while heights differ, so
+    /// a width nudge then lists each layout's width.
+    @Test("a width nudge over differing heights lists apart")
+    func differingHeightsListApart() {
+        LocalizationManager.shared.select("en")
+        let model = makeTestModel()
+        model.cleanConfig.settings.minWindowSizes.stack.height = 150
+        model.config = model.cleanConfig
+        model.setMinSize(420, axis: .width, for: nil)
+        #expect(sizeRows(model).count == 6)
+        #expect(!sizeRows(model).contains(.behaviour(.minWindowSize)))
     }
 }

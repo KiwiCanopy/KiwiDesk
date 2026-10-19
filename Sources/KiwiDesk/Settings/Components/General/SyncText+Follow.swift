@@ -160,15 +160,13 @@ extension SyncText {
         L(
             "general.sync.review.mixed",
             "mixed (%1$@)",
-            ListFormatter.localizedString(byJoining: members)
+            LocalizedList.join(members)
         )
     }
 
     static func memberValue(_ label: String, _ value: String) -> String {
         L("general.sync.review.member", "%1$@: %2$@", label, value)
     }
-
-    static var save: String { L("footer.save", "Save") }
 
     static var yourEdits: String {
         L("general.sync.conflict.your_edits", "your edits to the file")

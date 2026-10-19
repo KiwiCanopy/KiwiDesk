@@ -70,6 +70,7 @@ struct SettingsView: View {
         .sheet(item: $model.sync.review) { review in
             SyncReviewSheet(
                 review: review,
+                saveLabel: model.primarySaveLabel,
                 onSave: { model.answerSyncReview($0) },
                 onCancel: { model.cancelSyncReview() }
             )

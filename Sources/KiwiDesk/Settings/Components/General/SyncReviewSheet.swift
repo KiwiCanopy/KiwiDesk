@@ -9,6 +9,8 @@ import SwiftUI
 /// (`SheetPresentationSeamTests`).
 struct SyncReviewSheet: View {
     let review: SyncReview
+    /// The footer's own Save label, since the pick runs that Save.
+    let saveLabel: String
     let onSave: ([String: SyncChoice]) -> Void
     let onCancel: () -> Void
 
@@ -125,7 +127,7 @@ struct SyncReviewSheet: View {
                 .controlSize(.large)
                 .keyboardShortcut(.cancelAction)
                 .settingsActionButton()
-            Button(SyncText.save) { onSave(picks) }
+            Button(saveLabel) { onSave(picks) }
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
                 .kiwiProminentButton()

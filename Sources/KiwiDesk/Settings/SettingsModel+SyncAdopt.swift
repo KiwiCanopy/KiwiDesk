@@ -25,6 +25,9 @@ struct SyncConflict: Identifiable, Equatable {
     let yours: String
     let theirs: String
     let mac: String?
+    /// Every setting the question answers: its own key, and any
+    /// the key's writer laid an edit over.
+    var covers: Set<SettingKey> = []
 
     var id: String { key?.id ?? Self.initLua }
 
@@ -96,16 +99,17 @@ extension SettingsModel {
         for key in incoming
         where !mine.contains(key) && clobbered.contains(key) {
             let owner = mine.first { Self.sharesWriter($0, key) } ?? key
+            let covered = conflicts.first { $0.key == owner }?.covers ?? []
             conflicts.removeAll { $0.key == owner }
-            conflicts.append(
-                clobberConflict(
-                    key,
-                    asking: owner,
-                    yours: yours,
-                    theirs: theirs,
-                    base: base
-                ).with(mac: change.mac)
-            )
+            var question = clobberConflict(
+                key,
+                asking: owner,
+                yours: yours,
+                theirs: theirs,
+                base: base
+            ).with(mac: change.mac)
+            question.covers = covered.union([owner, key])
+            conflicts.append(question)
         }
         if yoursLua != baseLua, theirsLua != baseLua {
             conflicts.removeAll { $0.key == nil }
@@ -115,19 +119,16 @@ extension SettingsModel {
         lookReachEdits = look
         suppressDirty = false
         recomputeDirty()
-        let asked = Set(conflicts.compactMap(\.key))
+        let asked = conflicts.reduce(into: Set<SettingKey>()) {
+            $0.formUnion($1.covers)
+            if let key = $1.key { $0.insert(key) }
+        }
         sync.arrived = isDirty ? change : nil
         sync.conflicts = isDirty ? conflicts : []
+        // Kept per member: the sheet folds it where it counts.
         sync.taken =
             isDirty
-            ? previousTaken.union(
-                SettingKey.summarized(
-                    incoming.filter { !asked.contains($0) }.sorted {
-                        $0.id < $1.id
-                    },
-                    in: theirs
-                )
-            ).subtracting(asked) : []
+            ? previousTaken.union(incoming).subtracting(asked) : []
     }
 
     private func conflict(
@@ -213,7 +214,8 @@ extension SyncConflict {
             label: label,
             yours: yours,
             theirs: theirs,
-            mac: mac
+            mac: mac,
+            covers: covers
         )
     }
 }
