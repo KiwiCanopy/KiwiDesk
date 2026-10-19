@@ -60,7 +60,7 @@ public struct BspLayout: LayoutSystem {
             guard
                 let range = SplitDomain.effectiveRatioRange(
                     available: Double(available),
-                    minSize: Double(context.minWindowSize)
+                    minSize: Double(context.minWindowSize.width)
                 )
             else {
                 overlap(windows, in: region, context, &result)
@@ -93,7 +93,7 @@ public struct BspLayout: LayoutSystem {
             guard
                 let range = SplitDomain.effectiveRatioRange(
                     available: Double(available),
-                    minSize: Double(context.minWindowSize)
+                    minSize: Double(context.minWindowSize.height)
                 )
             else {
                 overlap(windows, in: region, context, &result)

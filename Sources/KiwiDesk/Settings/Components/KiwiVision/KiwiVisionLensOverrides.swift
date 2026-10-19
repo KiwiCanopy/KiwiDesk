@@ -71,8 +71,7 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: plain.visionDim),
             inherited: (label, Self.percent(plain.visionDim)),
-            inheritsName: defaultName,
-            trailingValue: true
+            inheritsName: defaultName
         ) {
             SettingsRowShape(controlTrails: true) {
                 SettingsRowLabel(label: label, help: nil)
@@ -99,8 +98,7 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, Self.milliseconds(global)),
-            inheritsName: defaultName,
-            trailingValue: true
+            inheritsName: defaultName
         ) {
             SettingsRowShape(controlTrails: true) {
                 SettingsRowLabel(label: label, help: nil)
@@ -128,8 +126,7 @@ struct KiwiVisionLensOverrides: View {
         return OverrideChrome(
             isOn: overrideToggle(value, global: global),
             inherited: (label, KiwiVisionLevelsCard.curveTitle(global)),
-            inheritsName: defaultName,
-            trailingValue: true
+            inheritsName: defaultName
         ) {
             DropdownRow(
                 label: label,
@@ -181,8 +178,7 @@ struct KiwiVisionLensOverrides: View {
             inherited: (
                 label, KiwiVisionAppearanceCard.title(plain.visionAppearance)
             ),
-            inheritsName: defaultName,
-            trailingValue: true
+            inheritsName: defaultName
         ) {
             DropdownRow(
                 label: label,

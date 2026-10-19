@@ -194,13 +194,21 @@ by which pane the setting lives in:
 - **`StepperRow`** (typeable field + arrows) for discrete,
   exact values a user names: counts, ms durations, pt
   thresholds — master count, columns/rows, track limit,
-  minimum window size, animation duration.
+  animation duration.
 - **Slider + readout** (no typing) for a continuous feel or
   proportion tuned by eye: split ratios, master ratio, gaps.
 - **Segmented / toggle** for a non-numeric choice.
 
-Minimum window size is a `StepperRow` on this rule (#204): a
-precise pt threshold, not a feel knob.
+:::unreleased
+Minimum window size takes the same idiom on each axis (#204,
+#2237): a precise pt threshold, not a feel knob, drawn as Width
+× Height on one line, each a typeable field with its own
+stepper (100–800 pt, 10 pt steps). An "All layouts" master sits
+over a "Per layout" drawer, one row per layout. The master takes
+the gap masters' acknowledging shape over an axis that reads
+"Mixed" ([Interaction states](#interaction-states)), and the
+drawer stays open while any axis is mixed.
+:::
 
 KiwiVision's **Dim** is a ruled exception: a proportion,
 yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on
@@ -229,9 +237,9 @@ strip of **live schematic thumbnails**, not a segmented strip
 of words: the layout names are ones only a tiler user knows,
 so the drawing is the label — each tile also carrying the
 count of spaces using it. The strip lands on the profile's
-most-used layout. The global minimum window size is pinned
-*above* the strip because it feeds every layout (and gates the
-`OverlapStack` overflow cascade). The rows come from the
+most-used layout. The minimum window size is pinned *above* the
+strip because its master and drawer set every layout's at once
+(and it gates the `OverlapStack` overflow cascade). The rows come from the
 settings census and one `LayoutCard` renders whichever layout
 is selected.
 
@@ -664,10 +672,11 @@ instead trail at their natural width against the row's right
 edge (`SettingsRowShape(controlTrails: true)`;
 `SettingsRowShapeTests` ▸ `compactControlsTrail`, whose
 `trailing` register is the one copy of which rows trail), and
-an override row's inheriting readout trails wherever its live
-control does. The **Windows on screen** stepper is the one
-stepper on the axis, since it is its slider's second reading
-(Choosing a control, above). Rows read the column from the
+every override row's inheriting readout trails, whatever its
+live control, so the unchecked readouts form one column. The
+**Windows on screen** stepper is the one stepper on the axis,
+since it is its slider's second reading (Choosing a control,
+above). Rows read the column from the
 environment (`\.settingsLabelColumn`), and `OverrideChrome`
 narrows it once (`overrideLabelColumn`, paying for its trailing
 OVERRIDE checkbox), so a shared row dropped into override chrome

@@ -147,7 +147,7 @@ extension KiwiCore {
         let capped = min(
             max(
                 current,
-                CGFloat(tiler.settings.minWindowSize)
+                minWindowSize(in: space).along(horizontal: horizontal)
             ),
             drawnAlong
         )

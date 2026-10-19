@@ -146,9 +146,10 @@ struct SettingsCatalogTests {
         // 158 since #2103 PR 7: the lens strip.
         // 159 since #2379: Mouse & trackpad ▸ hover delay.
         // 161 since #2417: KiwiVision's fade duration and curve.
-        // 162 since #761: Shortcuts' KiwiShelf group.
-        // 164 since #761's Show master: its drawer and Space Bar row.
-        #expect(allEntries.count == 164)
+        // 174 since #2237: the Per layout drawer and its twelve.
+        // 177 since #761: Shortcuts' KiwiShelf group, the Show
+        // master's drawer and its Space Bar row.
+        #expect(allEntries.count == 177)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

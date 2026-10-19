@@ -83,7 +83,7 @@ struct SettingsModeNavigationTests {
         model.config.settings.gapsGlobal.outer.top += 4
         #expect(model.isDirty)
         #expect(model.draftChangeCount == 1)
-        model.config.settings.minWindowSize += 40
+        model.config.settings.minWindowSizes.stack.width += 40
         #expect(model.draftChangeCount == 2)
         // Hand-undoing the edits clears the count with the
         // flag — a live comparison, never a latch.

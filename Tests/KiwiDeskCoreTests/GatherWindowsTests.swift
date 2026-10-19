@@ -28,7 +28,7 @@ private let axVisible = CGRect(
     height: 1055
 )
 private let primaryH: CGFloat = 1080
-private let minSize: CGFloat = 300
+private let minSize: MinSize = 300
 
 // MARK: - Helpers
 

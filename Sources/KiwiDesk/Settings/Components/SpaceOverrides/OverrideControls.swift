@@ -26,9 +26,6 @@ struct OverrideChrome<Content: View>: View {
     /// defaults — the gaps row's Gaps & Borders page (#1775), a
     /// lens row's Default (#2103 rulings 46, 55).
     var inheritsName: String? = nil
-    /// The inheriting value trails, on the side its live menu or
-    /// stepper draws (#2439), so ticking the box moves nothing.
-    var trailingValue = false
     @ViewBuilder let content: Content
     @Environment(\.isInsideGreyOut) private var alreadyDimmed
     @Environment(\.overrideLayoutName) private var layoutName
@@ -125,7 +122,9 @@ struct OverrideChrome<Content: View>: View {
         // Through the shared shape so an inheriting row stacks
         // with its live siblings below the row breakpoint (code
         // review, 2026-08-11).
-        SettingsRowShape(controlTrails: trailingValue) {
+        // Every inheriting value trails, one column down the
+        // list whatever the live control's kind (#2439).
+        SettingsRowShape(controlTrails: true) {
             HStack(spacing: 4) {
                 Text(inherited.label).lineLimit(1)
                 helpButton
@@ -133,7 +132,8 @@ struct OverrideChrome<Content: View>: View {
         } control: {
             Text(inheritedText(inherited.value))
                 .lineLimit(1)
-                .truncationMode(.tail)
+                .truncationMode(.middle)
+                .help(inheritedText(inherited.value))
         }
         .environment(
             \.settingsLabelColumn,
@@ -221,8 +221,7 @@ struct OverrideStepperRow: View {
     var body: some View {
         OverrideChrome(
             isOn: overrideToggle($value, global: global),
-            inherited: (label, "\(global)"),
-            trailingValue: true
+            inherited: (label, "\(global)")
         ) {
             StepperRow(
                 label: label,
@@ -273,8 +272,7 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
                 options.first { $0.0 == global }?.1 ?? ""
             ),
             help: help,
-            subject: label,
-            trailingValue: true
+            subject: label
         ) {
             DropdownRow(
                 label: label,

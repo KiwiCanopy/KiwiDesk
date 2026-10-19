@@ -29,7 +29,7 @@ struct PerSpaceResizeTests {
             )
         let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in Self.display }
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return core
     }
 

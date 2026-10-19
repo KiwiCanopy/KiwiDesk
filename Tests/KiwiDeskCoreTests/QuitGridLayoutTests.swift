@@ -17,7 +17,7 @@ private let portraitFrame = CGRect(
     width: 1080,
     height: 1895
 )
-private let minSize: CGFloat = 300
+private let minSize: MinSize = 300
 
 private func ids(_ range: Range<UInt32>) -> [WindowID] {
     range.map { WindowID($0) }
@@ -315,8 +315,8 @@ struct QuitGridPileTests {
         for frame in placed.values {
             #expect(frame.minX >= axFrame.minX)
             #expect(frame.minY >= axFrame.minY)
-            #expect(frame.minX <= axFrame.maxX - minSize)
-            #expect(frame.minY <= axFrame.maxY - minSize)
+            #expect(frame.minX <= axFrame.maxX - minSize.width)
+            #expect(frame.minY <= axFrame.maxY - minSize.height)
         }
     }
 

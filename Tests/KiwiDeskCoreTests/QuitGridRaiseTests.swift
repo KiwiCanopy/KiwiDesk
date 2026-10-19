@@ -12,7 +12,7 @@ private let portraitFrame = CGRect(
     width: 1080,
     height: 1895
 )
-private let minSize: CGFloat = 300
+private let minSize: MinSize = 300
 // The density target these counts reason from, pinned (#660).
 private let depth = 5
 

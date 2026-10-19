@@ -32,7 +32,9 @@ public struct StackLayout: LayoutSystem {
         // Cascades if min-size zones cannot coexist (#44).
         let range = SplitDomain.effectiveRatioRange(
             available: Double(available),
-            minSize: Double(context.minWindowSize)
+            minSize: Double(
+                context.minWindowSize.along(horizontal: horizontal)
+            )
         )
 
         guard let stack else {
@@ -244,7 +246,9 @@ public struct StackLayout: LayoutSystem {
         let limit = Self.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(available),
-            minSize: Double(context.minWindowSize)
+            minSize: Double(
+                context.minWindowSize.along(horizontal: !vertical)
+            )
         )
         if total > limit {
             if context.stack.overflowStyle == .cascadeAll {

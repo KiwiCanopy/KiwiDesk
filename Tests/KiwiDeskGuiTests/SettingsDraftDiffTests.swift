@@ -106,7 +106,7 @@ struct SettingsDraftDiffTests {
     func distinctSettingsAddUp() {
         let clean = seeded()
         var edited = clean
-        edited.settings.minWindowSize = 420
+        edited.settings.minWindowSizes.stack.width = 420
         edited.settings.borderStyle.width = 9
         edited.spaces = ["work", "notes"]
         let diff = SettingsDraftDiff.between(

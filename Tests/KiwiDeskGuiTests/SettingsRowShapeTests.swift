@@ -195,15 +195,19 @@ struct SettingsRowShapeTests {
         "GeneralSection+AppWide.swift": 1,
         "KiwiVisionLevelsCard.swift": 2,
         "KiwiVisionLensOverrides.swift": 2,
+        // The minimum window size master and its layout rows.
+        "MinWindowSizeRows.swift": 2,
         // Titled action rows (AI page, General ▸ Advanced).
         "SettingsActionRow.swift": 1,
+        // Every override row's inheriting readout, whatever its
+        // live control (#2439, owner eyeball 2026-10-19).
+        "OverrideControls.swift": 1,
     ]
 
     @Test("menus and steppers trail; the register is exact")
     func compactControlsTrail() throws {
         let root = Self.root.appendingPathComponent("Sources/KiwiDesk")
         var found: [String: Int] = [:]
-        var readouts: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: root) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
@@ -214,18 +218,8 @@ struct SettingsRowShapeTests {
                 of: "SettingsRowShape(controlTrails:true){"
             )
             if n > 0 { found[name] = n }
-            let r = source.occurrences(of: "trailingValue:true")
-            if r > 0 { readouts[name] = r }
         }
         #expect(found == Self.trailing)
-        // Every override row wrapping a menu or stepper: the two
-        // typed wrappers and the lens's four.
-        #expect(
-            readouts == [
-                "OverrideControls.swift": 2,
-                "KiwiVisionLensOverrides.swift": 4,
-            ]
-        )
         // The menu row adds no `Spacer` of its own, which is what
         // pinned the menu to the axis before.
         let dropdown = try squashed(
@@ -233,17 +227,14 @@ struct SettingsRowShapeTests {
                 + "DropdownRow.swift"
         )
         #expect(!dropdown.contains("Spacer("))
-        // An inheriting override value trails where its live menu
-        // or stepper does, so ticking the box moves nothing.
+        // Every inheriting override value trails, so the unchecked
+        // readouts form one column: no per-row opt-in remains.
         let chrome = try squashed(
             "Sources/KiwiDesk/Settings/Components/SpaceOverrides/"
                 + "OverrideControls.swift"
         )
-        #expect(
-            chrome.occurrences(
-                of: "SettingsRowShape(controlTrails:trailingValue){"
-            ) == 1
-        )
+        #expect(!chrome.contains("controlTrails:trailingValue"))
+        #expect(!chrome.contains("SettingsRowShape{"))
     }
 
     private func squashed(_ path: String) throws -> String {

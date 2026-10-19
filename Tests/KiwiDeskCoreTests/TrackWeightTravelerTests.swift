@@ -28,7 +28,7 @@ struct TrackWeightTravelerTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 800, height: 1400)
         }
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return core
     }
 

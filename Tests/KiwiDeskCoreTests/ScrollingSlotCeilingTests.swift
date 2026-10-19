@@ -260,7 +260,7 @@ struct ScrollingSlotCeilingTests {
         // grow spends a dead press walking the invisible
         // store up to the floor first.
         let (core, space) = makeCore()
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         core.execute(
             "scroll.set_slot_size",
             args: [.number(150)]
@@ -286,7 +286,7 @@ struct ScrollingSlotCeilingTests {
         // the floor is never pulled below it by the narrow
         // drawn area — not that a smaller store is snapped up.
         let (core, space) = makeCore(width: 200)
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         core.execute(
             "scroll.set_slot_size",
             args: [.number(300)]

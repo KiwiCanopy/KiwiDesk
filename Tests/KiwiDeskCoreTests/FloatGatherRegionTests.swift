@@ -107,7 +107,10 @@ struct FloatGatherRegionTests {
             frames: Self.frames,
             region: region,
             grid: grid,
-            minSize: core.tiler.settings.minWindowSize,
+            minSize: core.tiler.settings.minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: core.appWide.quitGridTargetDepth
         )
         #expect(seeded == carved[Self.scrolledOut])
@@ -115,7 +118,10 @@ struct FloatGatherRegionTests {
             members: [Self.inside, Self.scrolledOut, Self.partly],
             frames: Self.frames,
             region: try #require(core.floatBounds(on: Self.space)),
-            minSize: core.tiler.settings.minWindowSize,
+            minSize: core.tiler.settings.minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: core.appWide.quitGridTargetDepth
         )
         #expect(seeded != bare[Self.scrolledOut])

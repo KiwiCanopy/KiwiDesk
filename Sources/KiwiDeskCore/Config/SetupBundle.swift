@@ -77,7 +77,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// the bundle as newer rather than as no backup.
     /// 31 = a bar's on/off switch became `visibility: hidden`
     /// (#761), on `[Profile]` alone.
-    public static let currentFormat = 31
+    /// 32 = `min_window_size` per layout (#2237), on `[Profile]`
+    /// alone; 31 is #761's, a parallel branch.
+    public static let currentFormat = 32
 
     public let format: Int
 

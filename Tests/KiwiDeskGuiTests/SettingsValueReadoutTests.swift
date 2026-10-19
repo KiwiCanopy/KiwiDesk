@@ -281,7 +281,7 @@ struct SettingsValueReadoutTests {
         let clean = GuiConfig()
         var edited = clean
         edited.settings.gapsGlobal.inner.horizontal = 4
-        edited.settings.minWindowSize = 350
+        edited.settings.minWindowSizes = MinWindowSizes(all: 350)
         edited.settings.borderStyle.enabled.toggle()
         edited.settings.kiwishelf.thickness += 4
         edited.spaces = [SpaceID("a"), SpaceID("b")]
