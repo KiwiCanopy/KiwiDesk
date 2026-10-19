@@ -56,9 +56,13 @@ struct LayoutDefaultsCensusRenderTests {
     /// it sits in its own container and not inside one of them.
     @Test("the shared row is the general container's census row")
     func generalRow() {
+        // The master at rest, its per-layout followers in its
+        // drawer (#2237).
         #expect(
             Set(LayoutDefaultsRowOrder.general)
-                == censusRows(.general)
+                == censusRows(.general).union(
+                    censusRows(.general, .showMore)
+                )
         )
     }
 
@@ -101,10 +105,18 @@ struct LayoutDefaultsCensusRenderTests {
         // knob buys nothing (`SettingPlacement.luaOnly` carries
         // `area: nil`, so a real one never lands here) and drops
         // the only reading that catches the contradictory one.
+        // The one ruled exception: the minimum window size's
+        // per-layout followers sit in the master's own drawer
+        // (#2237), drawn by `MinWindowSizeRows`.
+        let drawer = Set(
+            MinSizeText.followers.map(SettingKey.behaviour)
+        )
         let deeper = SettingKey.allCases.filter {
             $0.placement.area == .layoutDefaults
                 && $0.placement.tier != .atRest
+                && !drawer.contains($0)
         }
+        #expect(drawer.allSatisfy { $0.placement.tier == .showMore })
         #expect(
             deeper.isEmpty,
             Comment(

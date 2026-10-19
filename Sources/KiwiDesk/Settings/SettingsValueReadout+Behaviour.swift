@@ -16,10 +16,17 @@ extension SettingsValueReadout {
                 .change(
                     census,
                     label: label(for: census),
-                    old: points(before.minWindowSize),
-                    new: points(after.minWindowSize)
+                    old: minSizeSummary(before.minWindowSizes),
+                    new: minSizeSummary(after.minWindowSizes)
                 )
             ]
+        case .minSizeStackWidth, .minSizeStackHeight,
+            .minSizeGridWidth, .minSizeGridHeight,
+            .minSizeTrackWidth, .minSizeTrackHeight,
+            .minSizeBspWidth, .minSizeBspHeight,
+            .minSizeScrollingWidth, .minSizeScrollingHeight,
+            .minSizeFloatingWidth, .minSizeFloatingHeight:
+            return minSizeRows(key, census, before, after)
         case .resizeStep:
             return [
                 .change(
@@ -211,5 +218,38 @@ extension SettingsValueReadout {
                 "Snap back to slot"
             )
         }
+    }
+
+    /// One per-layout axis of the minimum window size (#2237).
+    private static func minSizeRows(
+        _ key: BehaviourKey,
+        _ census: SettingKey,
+        _ before: TilingSettings,
+        _ after: TilingSettings
+    ) -> [SettingsDiffRow] {
+        for layout in MinWindowSizes.Layout.allCases {
+            for axis in MinSizeAxis.allCases
+            where MinSizeText.key(layout, axis) == key {
+                return [
+                    .change(
+                        census,
+                        label: MinSizeText.name(layout, axis),
+                        old: points(before.minWindowSizes[layout][axis]),
+                        new: points(after.minWindowSizes[layout][axis])
+                    )
+                ]
+            }
+        }
+        return []
+    }
+
+    /// The master's readout: the size every layout shares, or
+    /// "Mixed" while they differ.
+    private static func minSizeSummary(_ sizes: MinWindowSizes) -> String {
+        let all = Set(MinWindowSizes.Layout.allCases.map { sizes[$0] })
+        guard all.count == 1, let size = all.first else {
+            return L("layout_defaults.min_size.mixed", "Mixed")
+        }
+        return minSize(size)
     }
 }

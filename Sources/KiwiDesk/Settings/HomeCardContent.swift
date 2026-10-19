@@ -76,12 +76,7 @@ enum HomeCardContent {
                 "Window animations off"
             )
         case .layoutDefaults:
-            return L(
-                "home.card.layout.subtitle",
-                "%1$d modes · min window %2$d pt",
-                LayoutMode.allCases.count,
-                Int(settings.minWindowSize)
-            )
+            return Self.layoutSubtitle(settings)
         case .screens:
             return L(
                 "home.card.monitors.subtitle",
@@ -281,5 +276,29 @@ extension HomeCardContent {
                 "On · Dim %1$@, blur off",
                 dim
             )
+    }
+
+    /// Layout Standards' line: the minimum window size every layout
+    /// shares, or that layouts differ (#2237).
+    static func layoutSubtitle(_ settings: TilingSettings) -> String {
+        let sizes = Set(
+            MinWindowSizes.Layout.allCases.map {
+                settings.minWindowSizes[$0]
+            }
+        )
+        guard sizes.count == 1, let size = sizes.first else {
+            return L(
+                "home.card.layout.subtitle_mixed",
+                "%1$d modes · min window size per layout",
+                LayoutMode.allCases.count
+            )
+        }
+        return L(
+            "home.card.layout.subtitle_size",
+            "%1$d modes · min window %2$d × %3$d pt",
+            LayoutMode.allCases.count,
+            Int(size.width),
+            Int(size.height)
+        )
     }
 }

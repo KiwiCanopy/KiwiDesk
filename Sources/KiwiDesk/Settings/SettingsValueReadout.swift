@@ -79,6 +79,16 @@ extension SettingsValueReadout {
         L("diff.value.points", "%1$@ pt", trimmed(value))
     }
 
+    /// Formats a minimum window size (e.g. "300 × 240 pt").
+    static func minSize(_ size: MinSize) -> String {
+        L(
+            "diff.value.min_size",
+            "%1$@ × %2$@ pt",
+            trimmed(size.width),
+            trimmed(size.height)
+        )
+    }
+
     /// Formats millisecond duration string (e.g. "150 ms").
     static func milliseconds(_ value: Double) -> String {
         L("diff.value.milliseconds", "%1$@ ms", trimmed(value))

@@ -797,7 +797,14 @@ a `Gaps` value takes the same row and the same two comparisons,
 never a copy of either (`OverrideGapsRowTests` ▸
 `gapsRowSharesTheMasters`).
 
-A role group's colour on Advanced Colours (#1857) is the third
+The minimum window size master (#2237) is a home of the same
+kind, ruled: its followers are the per-layout values, so it
+answers its `?` and each axis's "Mixed" readout from
+`SettingsModel.minSizesDiffer` and `minSizeShared(_:)` alone —
+the drawer's hold-open reads the same verdict — and joins neither
+register (`MinWindowSizeMasterTests` ▸ `masterReadsOneVerdict`).
+
+A role group's colour on Advanced Colours (#1857) is another
 home, ruled: its followers are the group's ticks — scratch state
 no stored-setting register can read — so it answers its title's
 `?` and its "mixed" readout from `RolePaint.mixed` alone, both
