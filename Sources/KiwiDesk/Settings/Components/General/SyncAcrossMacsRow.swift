@@ -4,12 +4,15 @@ import SwiftUI
 
 /// General's last top-level row (#2324 slice 2): the sync folder,
 /// remembered on this Mac, and Compare and Copy beside it. It hosts
-/// the sheet, since the row outlives the menu that opens it.
+/// the sheet, since the row outlives the menu that opens it, and the
+/// one-way alert an empty folder takes instead (ruling 14).
 struct SyncAcrossMacsRow: View {
     @ObservedObject var model: SettingsModel
     @State private var folder: URL?
     @State private var refusal: SyncRefusal?
     @State private var request: SyncCompareRequest?
+    /// A copy into an empty folder: one side, so one question.
+    @State private var firstCopy: SyncCompareRequest?
     @State private var failure: SyncRefusal?
     /// A copy's failure, shown once its sheet has gone: an alert
     /// raised while the sheet closes is dropped.
@@ -19,10 +22,11 @@ struct SyncAcrossMacsRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
+            Divider()
+            heading
             DropdownRow(
-                label: SyncText.label,
-                spokenValue: spokenValue,
-                help: SyncText.help
+                label: SyncText.folderLabel,
+                spokenValue: spokenValue
             ) {
                 picker
             } trailing: {
@@ -30,15 +34,24 @@ struct SyncAcrossMacsRow: View {
                     .settingsActionButton()
                     .disabled(folder == nil || refusal != nil)
             }
-            Text(caption)
-                .font(.caption)
-                .foregroundStyle(
-                    folder != nil && refusal != nil
-                        ? SettingsTheme.warningInk : SettingsTheme.ink2
-                )
-                .lineLimit(2)
-                .truncationMode(.middle)
-                .fixedSize(horizontal: false, vertical: true)
+            .alert(
+                firstCopy.map { SyncText.firstCopyTitle($0.folderName) }
+                    ?? "",
+                isPresented: firstCopyBinding,
+                presenting: firstCopy,
+                actions: firstCopyActions,
+                message: { Text(firstCopyMessage($0)) }
+            )
+            if folder != nil, refusal != nil {
+                SyncWarning(text: caption)
+            } else {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .onAppear {
             folder = model.syncFolder
@@ -62,17 +75,35 @@ struct SyncAcrossMacsRow: View {
         }
     }
 
+    /// The group's heading inside General's card: the feature's name
+    /// and its `?` (owner, 2026-10-19).
+    private var heading: some View {
+        HStack(spacing: 5) {
+            Text(SyncText.label)
+                .textCase(.uppercase)
+                .accessibilityAddTraits(.isHeader)
+            HelpButton(explanation: SyncText.help, subject: SyncText.label)
+        }
+        .font(.caption.weight(.semibold))
+        .foregroundStyle(SettingsTheme.groupHeading)
+        .padding(.top, 6)
+    }
+
+    /// Each item carries its icon, as a macOS folder picker does.
     private var picker: some View {
-        Picker(SyncText.label, selection: pickBinding) {
+        Picker(SyncText.folderLabel, selection: pickBinding) {
             Text(SyncText.none).tag(Pick.none)
             Divider()
-            Text(SyncText.iCloudDrive).tag(Pick.iCloud)
+            Label(SyncText.iCloudDrive, systemImage: "icloud").tag(Pick.iCloud)
                 .selectionDisabled(!SyncFolderLocation.iCloudDriveIsOn)
             if let folder, !SyncFolderLocation.isICloudFolder(folder) {
-                Text(folder.lastPathComponent).tag(Pick.chosen)
+                Label(folder.lastPathComponent, systemImage: "folder")
+                    .tag(Pick.chosen)
             }
             Divider()
-            Text(SyncText.chooseFolder).tag(Pick.choose)
+            Label(SyncText.chooseFolder, systemImage: "folder").tag(
+                Pick.choose
+            )
         }
     }
 
@@ -102,6 +133,38 @@ struct SyncAcrossMacsRow: View {
             )
         }
         return SyncText.caption(for: refusal)
+    }
+
+    private var firstCopyBinding: Binding<Bool> {
+        Binding(
+            get: { firstCopy != nil },
+            set: { if !$0 { firstCopy = nil } }
+        )
+    }
+
+    /// Why a first copy cannot run, if it cannot: this Mac's own
+    /// refusal, or a Save that has to land first and cannot.
+    private func firstCopyRefusal(_ copy: SyncCompareRequest) -> String? {
+        copy.comparison.keepThisMacRefusal.map(SyncText.sentence(for:))
+            ?? (copy.unsaved ? copy.saveBlocked : nil)
+    }
+
+    private func firstCopyMessage(_ copy: SyncCompareRequest) -> String {
+        firstCopyRefusal(copy) ?? SyncText.firstCopyMessage
+    }
+
+    @ViewBuilder
+    private func firstCopyActions(_ copy: SyncCompareRequest) -> some View {
+        if firstCopyRefusal(copy) != nil {
+            Button(SyncText.ok) {}
+        } else {
+            Button(
+                copy.unsaved
+                    ? SyncText.saveAndCopyToFolder : SyncText.copyToFolder
+            ) { copyFirst(copy) }
+            .keyboardShortcut(.defaultAction)
+            Button(SyncText.cancel, role: .cancel) {}
+        }
     }
 
     private var failureBinding: Binding<Bool> {
@@ -158,18 +221,34 @@ struct SyncAcrossMacsRow: View {
         refresh()
         guard refusal == nil else { return }
         let comparison = model.compareSync(with: folder)
-        request = SyncCompareRequest(
+        let request = SyncCompareRequest(
             folder: folder,
-            folderName: SyncFolderDisplay.path(folder),
+            folderName: FileManager.default.displayName(
+                atPath: folder.path
+            ),
+            folderLocation: SyncFolderDisplay.path(
+                folder.deletingLastPathComponent()
+            ),
+            thisMacLocation: SyncFolderDisplay.path(
+                model.configURL.deletingLastPathComponent()
+            ),
             comparison: comparison,
             unsaved: model.isDirty,
-            saveBlocked: model.isDirty ? model.syncSaveBlockedReason : nil,
-            // Nothing is replaced into an empty folder, so Return
-            // copies there; everywhere else it cancels (ruling 14).
-            returnKeepsThisMac: comparison.folder.isEmpty
-                && comparison.keepThisMacRefusal == nil
-                && !(model.isDirty && model.syncSaveBlockedReason != nil)
+            saveBlocked: model.isDirty ? model.syncSaveBlockedReason : nil
         )
+        if comparison.folder.isEmpty {
+            firstCopy = request
+        } else {
+            self.request = request
+        }
+    }
+
+    /// The alert has gone by the time its action runs, so a failure
+    /// alert raised next is not dropped.
+    private func copyFirst(_ copy: SyncCompareRequest) {
+        let failed = model.keepThisMacsSetup(in: copy.folder)
+        refresh()
+        DispatchQueue.main.async { failure = failed }
     }
 
     private func showFailure() {

@@ -1336,9 +1336,11 @@ alert cannot show two dated sides next to each other, and the
 choice is only safe when it is made looking at both — which side
 changed last, and on which Mac. The sheet still takes no model:
 its two Keep buttons run through closures the row hands it.
-Return cancels, since every Keep replaces something; the one
-exception is a folder holding no setup yet, where Keep This Mac's
-replaces nothing and takes Return.
+Return cancels, since every Keep replaces something. A folder
+holding no setup yet is no comparison: one side exists, so it takes
+one alert — copy this Mac's setup into the folder, Return copying —
+since the sheet's only claim to commit is showing two dated sides
+next to each other.
 
 Unsaved Settings edits fold into that same sheet rather than
 stacking a dialog on it, which #1619's one-dialog rule asks for.

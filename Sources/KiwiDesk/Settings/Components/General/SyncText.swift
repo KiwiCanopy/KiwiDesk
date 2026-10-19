@@ -9,6 +9,11 @@ enum SyncText {
         L("general.sync", "Sync across Macs")
     }
 
+    /// The row's label under the heading: what the pop-up picks.
+    static var folderLabel: String {
+        L("general.sync.folder_label", "Folder")
+    }
+
     static var help: String {
         L(
             "general.sync.help",
@@ -184,9 +189,39 @@ enum SyncText {
         )
     }
 
-    static var unsavedLine: String {
-        L("general.sync.sheet.unsaved", "Plus edits you haven't saved")
+    /// Where a side lies: "In ~ ▸ .config".
+    static func inLocation(_ path: String) -> String {
+        L("general.sync.sheet.in", "In %1$@", path)
     }
+
+    // MARK: - The empty folder's alert
+
+    static func firstCopyTitle(_ folder: String) -> String {
+        L(
+            "general.sync.first_copy.title",
+            "Copy This Mac's Setup to “%1$@”?",
+            folder
+        )
+    }
+
+    static var firstCopyMessage: String {
+        L(
+            "general.sync.first_copy.message",
+            "The folder doesn't hold a KiwiDesk setup yet. Settings, "
+                + "profiles, color palettes, looks and init.lua are "
+                + "copied."
+        )
+    }
+
+    static var copyToFolder: String {
+        L("general.sync.first_copy.copy", "Copy to Folder")
+    }
+
+    static var saveAndCopyToFolder: String {
+        L("general.sync.first_copy.save_and_copy", "Save and Copy to Folder")
+    }
+
+    static var ok: String { L("general.sync.ok", "OK") }
 
     static var nothingHere: String {
         L("general.sync.sheet.empty", "Nothing here yet")
@@ -201,6 +236,9 @@ enum SyncText {
     static func changed(_ date: Date) -> String {
         L("general.sync.sheet.changed", "Changed %1$@", format(date))
     }
+
+    /// The date alone, for the row whose glyph says "Changed".
+    static func date(_ date: Date) -> String { format(date) }
 
     static func on(_ mac: String) -> String {
         L("general.sync.sheet.on", "On %1$@", mac)

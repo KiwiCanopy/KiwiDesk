@@ -1,31 +1,34 @@
 import AppKit
 import KiwiDeskCore
 
-/// The folder as Finder names it, for the row and the sheet.
+/// A folder as KiwiDesk names it, for the row and the sheet:
+/// "iCloud Drive ▸ KiwiDesk" or "~ ▸ .config ▸ KiwiDesk". Never
+/// follows a symlink, so a dotfiles link stays as the user named it.
 enum SyncFolderDisplay {
-    /// "iCloud Drive ▸ KiwiDesk", or "~ ▸ Dotfiles ▸ KiwiDesk".
     static func path(_ url: URL) -> String {
-        let files = FileManager.default
-        let parts =
-            files.componentsToDisplay(forPath: url.path)
-            ?? [url.lastPathComponent]
-        let drive = SyncFolderLocation.iCloudDrive
-        if url.path.hasPrefix(drive.path),
-            let index = parts.firstIndex(
-                of: files.displayName(atPath: drive.path)
-            )
-        {
-            return parts[index...].joined(separator: " ▸ ")
+        let path = url.standardizedFileURL.path
+        let drive = SyncFolderLocation.iCloudDrive.standardizedFileURL.path
+        let home = FileManager.default.homeDirectoryForCurrentUser
+            .standardizedFileURL.path
+        if let rest = remainder(of: path, under: drive) {
+            let name = FileManager.default.displayName(atPath: drive)
+            return ([name] + rest).joined(separator: " ▸ ")
         }
-        let home =
-            files.componentsToDisplay(
-                forPath: files.homeDirectoryForCurrentUser.path
-            ) ?? []
-        if !home.isEmpty, parts.starts(with: home) {
-            return (["~"] + parts.dropFirst(home.count))
-                .joined(separator: " ▸ ")
+        if let rest = remainder(of: path, under: home) {
+            return (["~"] + rest).joined(separator: " ▸ ")
         }
-        return parts.joined(separator: " ▸ ")
+        return path.split(separator: "/").joined(separator: " ▸ ")
+    }
+
+    /// The components below `root`, or nil where `path` is not in it.
+    private static func remainder(
+        of path: String,
+        under root: String
+    ) -> [String]? {
+        guard path == root || path.hasPrefix(root + "/") else { return nil }
+        return path.dropFirst(root.count).split(separator: "/").map(
+            String.init
+        )
     }
 }
 
