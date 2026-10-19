@@ -43,7 +43,7 @@ struct IconCellStyleTests {
         #expect(pointer.lowerBound < mark.lowerBound)
         // A tile, not a chip: an edge on a 40 pt grid reads hard.
         #expect(!face.contains("strokeBorder"))
-        // No hover lift until the popover's hover works (#2440).
+        // No hover lift, by ruling (#2440).
         #expect(!face.contains(".onHover"))
     }
 

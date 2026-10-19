@@ -4,8 +4,7 @@ import SwiftUI
 /// a picker tile, not a chip — sized to the grid column it is placed
 /// in rather than padded past it, the press step on a press and the
 /// chosen icon's accent mark on a layer of its own above it (#1173).
-/// No hover lift until this popover's hover tracks the pointer
-/// (#2440). No animation.
+/// No hover lift, by ruling (#2440). No animation.
 struct IconCellStyle: ButtonStyle {
     let marked: Bool
 
