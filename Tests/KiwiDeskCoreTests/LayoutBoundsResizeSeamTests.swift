@@ -45,7 +45,7 @@ struct LayoutBoundsResizeSeamTests {
         // clip the ratios below and mask the very difference this
         // suite measures.
         core.execute("set_min_window_size", args: [.number(200)])
-        #expect(core.tiler.settings.minWindowSize == 200)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 200))
         #expect(core.tiler.settings.mouseResize == .layout)
         #expect(core.tiler.settings.spaceBarStyle.visibility == .always)
         #expect(core.tiler.settings.kiwishelf.thickness == 400)

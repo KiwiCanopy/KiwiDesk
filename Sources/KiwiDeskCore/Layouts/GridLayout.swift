@@ -39,7 +39,8 @@ public struct GridLayout: LayoutSystem {
             gapH: gapH,
             gapV: gapV
         )
-        if min(size.width, size.height) < context.minWindowSize {
+        let floor = context.minWindowSize
+        if size.width < floor.width || size.height < floor.height {
             return OverlapStack.frames(
                 for: windows,
                 in: usable,
@@ -164,16 +165,16 @@ public struct GridLayout: LayoutSystem {
         usable: CGRect,
         gapH: CGFloat,
         gapV: CGFloat,
-        minSize: CGFloat
+        minSize: MinSize
     ) -> (columns: Int, rows: Int) {
         guard params.autoSize else {
             return (max(1, params.columns), max(1, params.rows))
         }
         let cols = Int(
-            (usable.width / (minSize + gapH)).rounded(.down)
+            (usable.width / (minSize.width + gapH)).rounded(.down)
         )
         let rows = Int(
-            (usable.height / (minSize + gapV)).rounded(.down)
+            (usable.height / (minSize.height + gapV)).rounded(.down)
         )
         return (max(1, cols), max(1, rows))
     }

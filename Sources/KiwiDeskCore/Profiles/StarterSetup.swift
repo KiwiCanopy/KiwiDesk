@@ -228,6 +228,9 @@ public enum StarterSetup {
             mainShape: ScreenClass.of(sizes[0]),
             hosts: hosts
         )
+        settings.minWindowSizes = StarterTuning.minWindowSizes(
+            mainWidth: sizes[0].width
+        )
         settings.scrolling.override = scrollingOverrides(
             of: slots,
             sizes: sizes,

@@ -34,7 +34,12 @@ extension KiwiCore {
                     of: space,
                     horizontal: stack.stackPosition.splitsHorizontally
                 ),
-                minSize: Double(tiler.settings.minWindowSize)
+                minSize: Double(
+                    minWindowSize(in: space).along(
+                        horizontal:
+                            stack.stackPosition.splitsHorizontally
+                    )
+                )
             )
         )
     }
@@ -71,10 +76,15 @@ extension KiwiCore {
             tiled,
             masterCount: stack.masterCount
         )
-        let masterMin = effectiveMinSize(of: master, axis: axis)
+        let masterMin = effectiveMinSize(
+            of: master,
+            axis: axis,
+            in: space
+        )
         let stackMin = effectiveMinSize(
             of: stackZone ?? ArraySlice([]),
-            axis: axis
+            axis: axis,
+            in: space
         )
         let outcome = SplitDomain.cappedRatioWrite(
             proposed,
@@ -206,11 +216,13 @@ extension KiwiCore {
         }
         let lowMin = effectiveMinSize(
             of: sides?.first ?? [],
-            axis: axis
+            axis: axis,
+            in: space
         )
         let highMin = effectiveMinSize(
             of: sides?.second ?? [],
-            axis: axis
+            axis: axis,
+            in: space
         )
         let outcome = SplitDomain.cappedRatioWrite(
             proposed,

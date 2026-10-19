@@ -28,7 +28,7 @@ struct ResizeRefusalAppBoundTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1200, height: 800)
         }
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         for id in 1...2 {
             core.state.apply(
                 .windowCreated(
@@ -131,7 +131,7 @@ struct ResizeRefusalAppBoundTests {
         // goes to 80 (architect review, 2026-09-14).
         let (core, space) = makeCore(mode: "scrolling")
         core.execute("set_min_window_size", args: [.number(60)])
-        #expect(core.tiler.settings.minWindowSize == 60)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 60))
         for asked in [CGFloat(60), 40] {
             for _ in 0..<2 {
                 core.tiler.boundLearner.recordAsk(

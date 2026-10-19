@@ -27,7 +27,7 @@ struct TrackWeightHealTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1200, height: 800)
         }
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return core
     }
 
@@ -118,7 +118,10 @@ struct TrackWeightHealTests {
                 smallestWeight: weights.min() ?? 1,
                 span: span,
                 minSize: Double(
-                    core.tiler.settings.minWindowSize
+                    core.tiler.settings.minWindowSize(
+                        for: .track,
+                        in: nil
+                    ).along(horizontal: vertical)
                 )
             ),
             span,

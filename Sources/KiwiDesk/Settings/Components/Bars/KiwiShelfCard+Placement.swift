@@ -5,30 +5,63 @@ import SwiftUI
 /// bars along the edge: alignment for a lone bar, order and share
 /// once both show.
 extension KiwiShelfCard {
-    /// How each bar shows (#761) — the Space Bar in every layout,
-    /// the App Bar only where a layout can carry one: always, until
-    /// the pointer reaches its edge, or only on its shortcut.
+    /// How the bars show (#761): one master for every bar, each
+    /// bar behind Each bar — the Space Bar in every layout, the
+    /// App Bar only where a layout can carry one — then the Space
+    /// cue. The master selects nothing while the bars differ and
+    /// says why through its `?`; the drawer then stays open.
     var showGroup: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SettingsRowLabel(
-                label: L("kiwishelf.show.label", "Show"),
-                help: L(
-                    "kiwishelf.show.visibility.help",
-                    "Always keeps a bar on screen. Auto hides it "
-                        + "to a thin mark until the pointer reaches "
-                        + "its edge. Hidden draws nothing: its "
-                        + "shortcut still shows it, over your "
-                        + "windows. Only %1$@ and %2$@ can carry an "
-                        + "App Bar. With the Space Bar hidden, the "
-                        + "menu bar shows the Space each screen is "
-                        + "on.",
-                    L("layout.monocle.name", "Monocle"),
-                    L("layout.scrolling.name", "Scrolling")
-                )
-            )
+        VStack(alignment: .leading, spacing: 8) {
             ForEach(BarsRowOrder.kiwishelfShow, id: \.id) {
                 row(for: $0)
             }
+        }
+    }
+
+    var visibilitySplit: Bool {
+        GapsBordersGates(settings: model.config.settings)
+            .followersDiffer(for: .kiwishelf(.visibility))
+    }
+
+    var visibilityMasterHelp: String {
+        visibilitySplit
+            ? BarsGateHelp.visibilityDiffers
+            : L(
+                "kiwishelf.show.visibility.help",
+                "Always keeps a bar on screen. Auto hides it "
+                    + "to a thin mark until the pointer reaches "
+                    + "its edge. Hidden draws nothing: its "
+                    + "shortcut still shows it, over your "
+                    + "windows. Only %1$@ and %2$@ can carry an "
+                    + "App Bar. With the Space Bar hidden, the "
+                    + "menu bar shows the Space each screen is "
+                    + "on.",
+                L("layout.monocle.name", "Monocle"),
+                L("layout.scrolling.name", "Scrolling")
+            )
+    }
+
+    /// The Show master and its Each bar drawer, attached to it.
+    @ViewBuilder var visibilityRows: some View {
+        SegmentedPicker(
+            L("kiwishelf.show.label", "Show"),
+            selection: model.barVisibilityMaster,
+            options: AppBarOptions.visibility.map { ($0.1, $0.0) },
+            help: visibilityMasterHelp
+        )
+        SettingsDisclosure(
+            SettingsCatalog.bars.kiwishelfShowEach,
+            chrome: .attached,
+            isExpanded: $showExpanded,
+            scrollHoisted: true,
+            locked: visibilitySplit
+        ) {
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(BarsRowOrder.kiwishelfShowEach, id: \.id) {
+                    showRow($0)
+                }
+            }
+            .padding(.top, 8)
         }
     }
 
@@ -36,25 +69,38 @@ extension KiwiShelfCard {
         switch key {
         case .spaceBar(.spaceBarVisibility):
             visibilityRow(
-                L("kiwishelf.show.space_bar", "Space Bar"),
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .spaceBarShow.text,
                 $model.config.settings.spaceBarStyle.visibility
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .spaceBarShow
             )
             besideAlwaysNote(.space, in: [.monocle, .scrolling])
         case .spaceBar(.spaceCue):
             spaceCueRow
         case .layoutAppBar(.monocleAppBarVisibility):
             visibilityRow(
-                SettingsCatalog.bars.monocleShowIn.text,
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .monocleShowIn.text,
                 $model.config.settings.monocle.appBar.visibility
             )
-            .searchAnchored(SettingsCatalog.bars.monocleShowIn)
+            .searchAnchored(
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .monocleShowIn
+            )
             besideAlwaysNote(.app, in: [.monocle])
         case .layoutAppBar(.scrollingAppBarVisibility):
             visibilityRow(
-                SettingsCatalog.bars.scrollingShowIn.text,
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .scrollingShowIn.text,
                 $model.config.settings.scrolling.appBar.visibility
             )
-            .searchAnchored(SettingsCatalog.bars.scrollingShowIn)
+            .searchAnchored(
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .scrollingShowIn
+            )
             besideAlwaysNote(.app, in: [.scrolling])
         default:
             let _ = assertionFailure(

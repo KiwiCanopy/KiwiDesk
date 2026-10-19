@@ -42,7 +42,7 @@ struct NothingToDivideBspTests {
             ),
             inner: Gaps.Inner(horizontal: 16, vertical: 16)
         )
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return core
     }
 

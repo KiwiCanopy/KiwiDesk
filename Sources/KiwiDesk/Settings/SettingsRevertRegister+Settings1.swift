@@ -11,7 +11,31 @@ extension SettingsRevertRegister {
         .appBar(.appBarGroupAdjacentWindows):
             .leaf(\.settings.appBarStyle.groupAdjacentWindows),
         .appBar(.appBarReserve): .leaf(\.settings.appBarStyle.reserve),
-        .behaviour(.minWindowSize): .leaf(\.settings.minWindowSize),
+        .behaviour(.minWindowSize): .leaf(\.settings.minWindowSizes),
+        .behaviour(.minSizeStackWidth):
+            .leaf(\.settings.minWindowSizes.stack.width),
+        .behaviour(.minSizeStackHeight):
+            .leaf(\.settings.minWindowSizes.stack.height),
+        .behaviour(.minSizeGridWidth):
+            .leaf(\.settings.minWindowSizes.grid.width),
+        .behaviour(.minSizeGridHeight):
+            .leaf(\.settings.minWindowSizes.grid.height),
+        .behaviour(.minSizeTrackWidth):
+            .leaf(\.settings.minWindowSizes.track.width),
+        .behaviour(.minSizeTrackHeight):
+            .leaf(\.settings.minWindowSizes.track.height),
+        .behaviour(.minSizeBspWidth):
+            .leaf(\.settings.minWindowSizes.bsp.width),
+        .behaviour(.minSizeBspHeight):
+            .leaf(\.settings.minWindowSizes.bsp.height),
+        .behaviour(.minSizeScrollingWidth):
+            .leaf(\.settings.minWindowSizes.scrolling.width),
+        .behaviour(.minSizeScrollingHeight):
+            .leaf(\.settings.minWindowSizes.scrolling.height),
+        .behaviour(.minSizeFloatingWidth):
+            .leaf(\.settings.minWindowSizes.floating.width),
+        .behaviour(.minSizeFloatingHeight):
+            .leaf(\.settings.minWindowSizes.floating.height),
         .behaviour(.resizeStep): .leaf(\.settings.resizeStep),
         .behaviour(.swapSkipsCascade): .leaf(\.settings.swapSkipsCascade),
         .behaviour(.floatPlacement): .leaf(\.settings.floatPlacement),

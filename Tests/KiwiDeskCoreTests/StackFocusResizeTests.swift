@@ -213,7 +213,7 @@ struct StackFocusResizeTests {
         // and one inner gap for a 2-window column) plus the
         // quarter-point cascade margin. All pinned, not
         // assumed.
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         core.tiler.settings.gapsGlobal = Gaps.uniform(10)
         let span = Double(Self.display.height) - 20 - 10
         let minSize = 300 + StackLayout.minSizeMargin

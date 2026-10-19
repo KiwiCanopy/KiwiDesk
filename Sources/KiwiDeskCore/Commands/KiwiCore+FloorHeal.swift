@@ -59,7 +59,9 @@ extension KiwiCore {
                 span: span,
                 floors: floors,
                 ceilings: ceilings,
-                globalFloor: Double(context.minWindowSize),
+                globalFloor: Double(
+                    context.minWindowSize.along(horizontal: vertical)
+                ),
                 margin: StackLayout.minSizeMargin
             )
         else { return }

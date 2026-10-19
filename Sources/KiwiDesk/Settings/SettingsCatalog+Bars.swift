@@ -15,6 +15,12 @@ struct BarsControls: Sendable {
         instance: "kiwishelf",
         children: KiwiShelfEdgeControls()
     )
+    let kiwishelfShowEach = SettingsDrawer(
+        "kiwishelf.show.each_bar",
+        "Each bar",
+        instance: "kiwishelf",
+        children: KiwiShelfShowControls()
+    )
     let kiwishelfStyle = SettingsDrawer(
         "bars.style",
         "Style",
@@ -31,6 +37,23 @@ struct BarsControls: Sendable {
         "space_bar.cue",
         "Show the Space after a switch"
     )
+    let spaceBarCard = SettingsControl(
+        "bars.switch.space_bar",
+        "Space Bar"
+    )
+    let appBarCard = SettingsControl(
+        "bars.switch.app_bar",
+        "App Bar"
+    )
+}
+
+/// KiwiShelf ▸ Show ▸ Each bar rows (#761), in
+/// `BarsRowOrder.kiwishelfShowEach`' order.
+struct KiwiShelfShowControls: Sendable {
+    let spaceBarShow = SettingsControl(
+        "kiwishelf.show.space_bar",
+        "Space Bar"
+    )
     let monocleShowIn = SettingsControl(
         "kiwishelf.show.monocle",
         "App Bar in %1$@",
@@ -40,14 +63,6 @@ struct BarsControls: Sendable {
         "kiwishelf.show.scrolling",
         "App Bar in %1$@",
         naming: .scrolling
-    )
-    let spaceBarCard = SettingsControl(
-        "bars.switch.space_bar",
-        "Space Bar"
-    )
-    let appBarCard = SettingsControl(
-        "bars.switch.app_bar",
-        "App Bar"
     )
 }
 

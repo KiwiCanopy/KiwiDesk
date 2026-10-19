@@ -36,7 +36,7 @@ struct VisibleBoundsResizeSeamTests {
         // this change set wrote into §5: a finished mouse resize
         // only reaches the layout in `.layout` mode, and the caps
         // every span feeds derive from the minimum.
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         #expect(core.tiler.settings.mouseResize == .layout)
         core.execute(
             "set_mode",

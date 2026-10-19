@@ -71,13 +71,13 @@ struct SettingsSaveTemporaryLayoutTests {
         // draft never touches.
         core.state.workspaces.setMode(Self.kept, .monocle)
         // An unrelated Settings edit, the kind the pill counts.
-        model.config.settings.minWindowSize = 321
+        model.config.settings.minWindowSizes = MinWindowSizes(all: 321)
         #expect(model.isDirty)
 
         model.updateActiveProfile()
 
         // The unrelated edit landed...
-        #expect(core.tiler.settings.minWindowSize == 321)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 321))
         // ...the temp is still on screen...
         #expect(
             core.state.workspaces[Self.kept]?.mode == .monocle
@@ -140,7 +140,7 @@ struct SettingsSaveTemporaryLayoutTests {
         core.state.workspaces.setMode(Self.kept, .monocle)
         model.config.spaceModes[Self.kept] = .stack
         model.config.spaceModes[Self.kept] = nil
-        model.config.settings.minWindowSize = 321
+        model.config.settings.minWindowSizes = MinWindowSizes(all: 321)
 
         model.updateActiveProfile()
 
@@ -170,7 +170,7 @@ struct SettingsSaveTemporaryLayoutTests {
 
         core.state.workspaces.setMode(Self.kept, .monocle)
         model.config.spaceModes[Self.edited] = .stack
-        model.config.settings.minWindowSize = 321
+        model.config.settings.minWindowSizes = MinWindowSizes(all: 321)
 
         let diff = SettingsDraftDiff.between(
             config: model.config,
@@ -210,7 +210,7 @@ struct SettingsSaveTemporaryLayoutTests {
         _ = core
 
         model.config.spaceModes[Self.edited] = .stack
-        model.config.settings.minWindowSize = 321
+        model.config.settings.minWindowSizes = MinWindowSizes(all: 321)
 
         let diff = SettingsDraftDiff.between(
             config: model.config,
@@ -250,7 +250,7 @@ struct SettingsSaveTemporaryLayoutTests {
         // ...and a draft commit does not: it wrote the draft's
         // own modes, so the baseline is already right.
         captured = []
-        model.config.settings.minWindowSize = 321
+        model.config.settings.minWindowSizes = MinWindowSizes(all: 321)
         model.updateActiveProfile()
         #expect(captured.isEmpty)
     }

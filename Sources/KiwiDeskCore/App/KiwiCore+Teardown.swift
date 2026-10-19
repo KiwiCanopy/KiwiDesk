@@ -119,7 +119,7 @@ public enum WindowGather {
         state: StateCoordinator,
         primaryHeight: CGFloat,
         style: QuitLayoutStyle,
-        minSize: CGFloat,
+        minSize: MinSize,
         targetDepth: Int,
         placingLast: WindowID? = nil
     ) -> [WindowID: CGRect] {
@@ -141,7 +141,7 @@ public enum WindowGather {
     public static func targets(
         groups: [Group],
         style: QuitLayoutStyle,
-        minSize: CGFloat,
+        minSize: MinSize,
         targetDepth: Int
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
@@ -222,7 +222,10 @@ extension KiwiCore {
         let frames = WindowGather.targets(
             groups: groups,
             style: appWide.quitLayout,
-            minSize: tiler.settings.minWindowSize,
+            minSize: tiler.settings.minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: targetDepth
         )
         guard !frames.isEmpty else { return }

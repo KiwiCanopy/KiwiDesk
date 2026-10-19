@@ -74,7 +74,10 @@ struct QuitFloatReturnTests {
             state: core.state,
             primaryHeight: GeometryUtils.primaryHeight,
             style: .grid,
-            minSize: core.tiler.settings.minWindowSize,
+            minSize: core.tiler.settings.minWindowSize(
+                for: .floating,
+                in: nil
+            ),
             targetDepth: core.appWide.quitGridTargetDepth
         )
         left.merge(grid) { _, gathered in gathered }

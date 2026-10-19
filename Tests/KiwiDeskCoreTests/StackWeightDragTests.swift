@@ -36,7 +36,7 @@ struct StackWeightDragTests {
         core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.tiler.settings.monocle.appBar.visibility = .hidden
         core.tiler.settings.scrolling.appBar.visibility = .hidden
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return core
     }
 

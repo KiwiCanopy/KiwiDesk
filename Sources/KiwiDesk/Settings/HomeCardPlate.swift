@@ -176,11 +176,24 @@ enum LayoutReadout {
                 + "\(settings.grid.rows)"
         case .track:
             return "\(settings.track.limit)"
-        case .scrolling, .monocle, .floating:
+        case .monocle:
+            // One window at a time; Monocle keeps no floor (#2237).
+            return "1"
+        case .scrolling:
+            // The floor along the scroll axis, the one that applies.
             return L(
                 "home.plate.readout.points",
                 "%1$d pt",
-                Int(settings.minWindowSize)
+                Int(
+                    settings.minWindowSize(for: .scrolling, in: nil)
+                        .along(
+                            horizontal: settings.scrolling.axisIsHorizontal
+                        )
+                )
+            )
+        case .floating:
+            return SettingsValueReadout.minSize(
+                settings.minWindowSize(for: .floating, in: nil)
             )
         }
     }

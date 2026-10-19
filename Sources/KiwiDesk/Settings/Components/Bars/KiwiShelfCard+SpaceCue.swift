@@ -4,8 +4,8 @@ import SwiftUI
 /// The Space switch plate's switch (#2228): app-wide (#1741),
 /// written at once like the Desktop cue's row, and greyed only
 /// where `init.lua` owns the config, as `BarsGates` answers it. It
-/// sits under the Space Bar switch and is never greyed by it: the
-/// plate is for a screen the bar does not draw on.
+/// closes the Show group and is never greyed by the Space Bar's
+/// value: the plate is for a screen the bar does not draw on.
 extension KiwiShelfCard {
     @ViewBuilder var spaceCueRow: some View {
         let reason = BarsGates(

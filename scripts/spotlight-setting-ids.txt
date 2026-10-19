@@ -192,7 +192,19 @@ settings.kiwishelf.minimum
 settings.kiwishelf.order
 settings.kiwishelf.outerMargin
 settings.kiwishelf.thickness
-settings.minWindowSize
+settings.minWindowSizes (master)
+settings.minWindowSizes.bsp.height
+settings.minWindowSizes.bsp.width
+settings.minWindowSizes.floating.height
+settings.minWindowSizes.floating.width
+settings.minWindowSizes.grid.height
+settings.minWindowSizes.grid.width
+settings.minWindowSizes.scrolling.height
+settings.minWindowSizes.scrolling.width
+settings.minWindowSizes.stack.height
+settings.minWindowSizes.stack.width
+settings.minWindowSizes.track.height
+settings.minWindowSizes.track.width
 settings.monocle.appBar.visibility
 settings.monocle.hideStyle
 settings.monocle.newWindowPlacement
@@ -225,6 +237,7 @@ settings.spaceBarStyle.itemLabel
 settings.spaceBarStyle.showFrontApp
 settings.spaceBarStyle.springDelay
 settings.spaceBarStyle.visibility
+settings.spaceBarStyle.visibility (master)
 settings.stack.fillWhenAlone
 settings.stack.masterCount
 settings.stack.masterOrientation

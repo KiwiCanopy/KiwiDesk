@@ -133,7 +133,7 @@ public enum QuitGridLayout {
     public static func frames(
         for windows: [WindowID],
         in axFrame: CGRect,
-        minSize: CGFloat,
+        minSize: MinSize,
         targetDepth: Int
     ) -> [WindowID: CGRect] {
         guard !windows.isEmpty else { return [:] }
@@ -187,16 +187,16 @@ public enum QuitGridLayout {
     private static func pinned(
         _ frame: CGRect,
         in axFrame: CGRect,
-        minSize: CGFloat
+        minSize: MinSize
     ) -> CGRect {
         var frame = frame
         frame.origin.x = max(
             axFrame.minX,
-            min(frame.origin.x, axFrame.maxX - minSize)
+            min(frame.origin.x, axFrame.maxX - minSize.width)
         )
         frame.origin.y = max(
             axFrame.minY,
-            min(frame.origin.y, axFrame.maxY - minSize)
+            min(frame.origin.y, axFrame.maxY - minSize.height)
         )
         return frame
     }

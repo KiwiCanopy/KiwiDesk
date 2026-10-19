@@ -169,7 +169,8 @@ extension TilingSettings {
         return ScrollSize.maxCount(
             along: horizontal ? area.width : area.height,
             gap: horizontal ? gaps.inner.horizontal : gaps.inner.vertical,
-            minimum: minWindowSize
+            minimum: minWindowSize(for: .scrolling, in: space)
+                .along(horizontal: horizontal)
         )
     }
 
@@ -193,7 +194,7 @@ extension TilingSettings {
             bounds: bounds,
             gaps: gaps(for: space.id),
             focused: focusedOverride ?? space.focused,
-            minWindowSize: minWindowSize,
+            minWindowSize: minWindowSize(for: space.mode, in: space.id),
             stackWeights: space.stackWeights,
             scrollRest: space.scrollRest,
             trackBreaks: space.trackBreaks,

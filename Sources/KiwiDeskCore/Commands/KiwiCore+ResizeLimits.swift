@@ -16,20 +16,25 @@ extension KiwiCore {
     static let resizeTruncationEpsilon: CGFloat =
         ScrollSlotDomain.truncationEpsilon
 
-    /// One window's effective minimum on `axis`: the global
-    /// `min_window_size` raised by the window's learned
-    /// app-enforced bound (#677).
+    /// One window's effective minimum on `axis`: its layout's
+    /// `min_window_size` (`minWindowSize(of:)`) raised by the
+    /// window's learned app-enforced bound (#677).
     func effectiveMinSize(
         of id: WindowID,
         axis: String
     ) -> Double {
+        max(
+            Double(minWindowSize(of: id).on(axis: axis)),
+            learnedMinSize(of: id, axis: axis)
+        )
+    }
+
+    /// One window's learned app-enforced minimum on `axis` (#677),
+    /// 0 where none — the one reading both minimums take.
+    func learnedMinSize(of id: WindowID, axis: String) -> Double {
         let bound = tiler.sizeBound(for: id)
-        let appMin =
-            (axis == "x" ? bound?.minWidth : bound?.minHeight)
-            ?? 0
-        return max(
-            Double(tiler.settings.minWindowSize),
-            Double(appMin)
+        return Double(
+            (axis == "x" ? bound?.minWidth : bound?.minHeight) ?? 0
         )
     }
 
@@ -45,7 +50,10 @@ extension KiwiCore {
         raisedBy floor: Double = 0
     ) -> Bool {
         effectiveMinSize(of: id, axis: axis)
-            > max(Double(tiler.settings.minWindowSize), floor)
+            > max(
+                Double(minWindowSize(of: id).on(axis: axis)),
+                floor
+            )
     }
 
     /// One window's learned app-enforced maximum on `axis`
@@ -65,11 +73,11 @@ extension KiwiCore {
     /// The largest effective minimum among `members` — a track
     /// or a stack zone spans every member on its axis, so the
     /// tightest window binds the whole group — plus the member
-    /// that carries a LEARNED bound above the global floor, the
+    /// that carries a LEARNED bound above `space`'s floor, the
     /// honest anchor for a refusal cue. `carrier` is nil when
-    /// only the global floor binds (every member is at the
-    /// minimum at once). An EMPTY group still answers the
-    /// global floor: the ratio caps protect the REGION, not
+    /// only the configured floor binds (every member is at the
+    /// minimum at once). An EMPTY group still answers `space`'s
+    /// floor: the ratio caps protect the REGION, not
     /// only the windows currently in it (#383/#44 — an
     /// oversized drag must not ratchet the stored ratio to the
     /// store clamp), while the phantom-neighbor problem an
@@ -78,13 +86,16 @@ extension KiwiCore {
     /// exists.
     func effectiveMinSize(
         of members: some Collection<WindowID>,
-        axis: String
+        axis: String,
+        in space: Space
     ) -> (size: Double, carrier: WindowID?) {
-        let global = Double(tiler.settings.minWindowSize)
-        var size = global
+        // Every member takes the Space's own floor, never one
+        // resolved again per window: a gap between the two would
+        // read as a learned bound (#2237).
+        var size = Double(minWindowSize(in: space).on(axis: axis))
         var carrier: WindowID? = nil
         for member in members {
-            let min = effectiveMinSize(of: member, axis: axis)
+            let min = learnedMinSize(of: member, axis: axis)
             if min > size {
                 size = min
                 carrier = member

@@ -18,7 +18,7 @@ struct StackWeightTests {
 
     private func makeContext(
         weights: [WindowID: Double] = [:],
-        minWindowSize: CGFloat = 100
+        minWindowSize: MinSize = 100
     ) -> LayoutContext {
         LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),

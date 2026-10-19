@@ -58,7 +58,7 @@ struct VisibleBoundsSeamTests {
         // Pin the default this fixture reasons from, the rule
         // this change set wrote into §5: the pile threshold
         // below is 2 * min.
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         return core
     }
 

@@ -61,7 +61,6 @@ struct StarterTuningTests {
         )
         #expect(wide.stack.masterCount == 2)
         #expect(wide.track.autoTracks)
-        #expect(wide.minWindowSize == 420)
         // The Scrolling slot is the one tuning value that
         // shipped without a row here (#1018): `.auto` resolves
         // near-full, which is the "my windows were squashed into
@@ -90,6 +89,33 @@ struct StarterTuningTests {
         #expect(
             StarterTuning.ultrawideSlot * 3440
                 < StarterTuning.standardSlot * 2560
+        )
+    }
+
+    /// The first-run floor is the main screen's width over eight,
+    /// rounded to 10 pt and clamped (#2237, #821), the same on both
+    /// axes and every layout — which retired the ultrawide's 420.
+    @Test("the floor is seeded from the main screen's width")
+    func floorFollowsMainWidth() {
+        let cases: [(CGFloat, CGFloat)] = [
+            (1512, 260), (2560, 320), (3440, 430), (5120, 460),
+        ]
+        for (width, side) in cases {
+            #expect(
+                StarterTuning.minWindowSizes(mainWidth: width)
+                    == MinWindowSizes(all: .square(side)),
+                "\(width)"
+            )
+        }
+        let wide = CGSize(width: 3440, height: 1440)
+        let laptop = CGSize(width: 1512, height: 982)
+        #expect(
+            StarterSetup.settings(sizes: [wide, laptop]).minWindowSizes
+                == MinWindowSizes(all: 430)
+        )
+        #expect(
+            StarterSetup.settings(sizes: [laptop, wide]).minWindowSizes
+                == MinWindowSizes(all: 260)
         )
     }
 }

@@ -142,7 +142,7 @@ struct BspFocusResizeTests {
         // (1600 − 300) / 1600 = 0.8125, below the 0.9 clamp — so a
         // removed cap would store 0.9 and fail here. (The mouse
         // twin is `MouseResizeApplyTests.bspRatioHDragCapped`.)
-        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         core.execute("resize", args: [.string("x"), .number(9000)])
         #expect(
             abs(resolvedBsp(core).splitRatioH - 0.8125) < 1e-9

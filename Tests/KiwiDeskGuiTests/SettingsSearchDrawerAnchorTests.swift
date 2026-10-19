@@ -52,6 +52,7 @@ struct SettingsSearchDrawerAnchorTests {
             (
                 .bars, "KiwiShelf", .kiwishelf,
                 [
+                    SettingsCatalog.bars.kiwishelfShowEach,
                     SettingsCatalog.bars.kiwishelfEdges,
                     SettingsCatalog.bars.kiwishelfStyle,
                     SettingsCatalog.bars.kiwishelfMargins,
@@ -60,6 +61,10 @@ struct SettingsSearchDrawerAnchorTests {
             (
                 .profiles, "Profiles", .profilesPerMacOSSpace,
                 [SettingsCatalog.profiles.desktops]
+            ),
+            (
+                .layoutDefaults, "Layout Defaults", .general,
+                [SettingsCatalog.layoutDefaults.minSizePerLayout]
             ),
             (
                 .looks, "Looks & Animations", .motion,
