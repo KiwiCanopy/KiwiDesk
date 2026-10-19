@@ -29,10 +29,11 @@ extension KiwiCore {
                 > DesktopSwitch.settle
         else { return }
         // Only a click inside a screen's VISIBLE frame re-homes:
-        // that area excludes the menu bar and Dock, so clicking
-        // either never moves the focused display. KiwiDesk's own
-        // bar overlays are exempt for free — a global monitor
-        // never sees events routed to our own windows.
+        // that area excludes the menu bar and a shown Dock, so
+        // clicking either never moves the focused display.
+        // KiwiDesk's own bar overlays are exempt for free — a
+        // global monitor never sees events routed to our own
+        // windows.
         guard
             let screen = ScreenList.all.first(where: {
                 GeometryUtils.visibleFrame(of: $0)
@@ -41,6 +42,14 @@ extension KiwiCore {
             let display = screen.kiwiDisplayID
         else { return }
         guard display != focusedScreen else { return }
+        // An auto-hidden Dock reserves no visible frame, so a Dock
+        // click passes the check above: ask what was hit instead.
+        guard
+            !Self.pressHitsDock(
+                at: GeometryUtils.axPoint(cocoaPoint),
+                in: frontStack()
+            )
+        else { return }
         // Move focus to that display's shown space. Nothing to do
         // if the display has no assigned space, or its space is
         // already the active one (single-display collapse).
@@ -57,6 +66,19 @@ extension KiwiCore {
         // float raise: the target is already shown, so nothing
         // was stashed (#1727).
         applyFocusedSpaceSwitch(to: target)
+    }
+
+    /// Whether the front window under `point` (AX space) in
+    /// `stack` is the Dock's — KiwiDesk's chrome looked past, since
+    /// a moving ring's panel spans its screen (#1937).
+    static func pressHitsDock(
+        at point: CGPoint,
+        in stack: [FrontWindow]
+    ) -> Bool {
+        let front = withoutOwnChrome(stack).first {
+            $0.frame.contains(point)
+        }
+        return front?.layer == Int(CGWindowLevelForKey(.dockWindow))
     }
 
     /// Commits a focused-display / space switch to `space`: makes
