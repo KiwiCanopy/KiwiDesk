@@ -30,8 +30,6 @@ struct HyperShortcutMoveDesktopTests {
         )
     }
 
-    private final class Mark { var value = 0 }
-
     private func lua(_ number: Int) -> String {
         "KiwiDesk.focus_desktop(\(number))"
     }
@@ -200,9 +198,7 @@ struct HyperShortcutMoveDesktopTests {
         var stored = GuiConfig()
         stored.desktopShortcutBase = .hyper
         try core.guiConfigStore.save(stored)
-        let mark = Mark()
-        core.desktopMemory.readShortcutMark = { mark.value }
-        core.desktopMemory.writeShortcutMark = { mark.value = $0 }
+        core.desktopMemory.readLegacyShortcutOffer = { nil }
         core.topUpDesktopShortcuts(desktops: [1])
         let rows = core.persistedGuiConfig()?.layers.first(where: \.isDefault)?
             .bindings.filter { $0.lua == lua(1) }

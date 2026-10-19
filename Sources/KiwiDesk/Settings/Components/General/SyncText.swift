@@ -40,7 +40,7 @@ enum SyncText {
     }
 
     /// The button's label without its ellipsis, for a sentence.
-    private static var compareName: String {
+    static var compareName: String {
         compare.hasSuffix("…") ? String(compare.dropLast()) : compare
     }
 

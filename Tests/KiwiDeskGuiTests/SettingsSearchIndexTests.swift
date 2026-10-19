@@ -254,8 +254,8 @@ struct SettingsSearchIndexTests {
                 // item stay anchor-less. 4 since #1542: the
                 // automatic-install row — a new census row. 6
                 // since #1741: the alert sound and the pile
-                // depth; 7 with #2324's sync row, all at rest.
-                .general: 7,
+                // depth; 7 and 8: #2324's sync row and switch.
+                .general: 8,
             ]
         )
     }

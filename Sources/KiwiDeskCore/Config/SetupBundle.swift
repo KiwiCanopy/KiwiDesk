@@ -72,9 +72,12 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `machine.json` (#2324) and never travels.
     /// 29 = a profile's stable `id` (#2324), on `[Profile]`, and
     /// the Desktop bindings as the bundle's own field.
-    /// 30 = `min_window_size` per layout (#2237), on `[Profile]`
+    /// 30 = gui config 11 (#2324), the top-ups' `shortcut_offer`,
+    /// reaches a bundle's `config` inline: an older build refuses
+    /// the bundle as newer rather than as no backup.
+    /// 31 = `min_window_size` per layout (#2237), on `[Profile]`
     /// alone.
-    public static let currentFormat = 30
+    public static let currentFormat = 31
 
     public let format: Int
 
@@ -139,7 +142,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         case .profiles, .palettes: return true
         case .looks: return looks != nil
         case .desktopBindings: return profileBindings != nil
-        case .migrationBackups, .machineConfig, .syncStamp:
+        case .migrationBackups, .machineConfig, .syncStamp, .syncLedger:
             return false
         }
     }

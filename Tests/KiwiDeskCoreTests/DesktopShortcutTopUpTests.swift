@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The Desktop tier's seed: `⌃⌥⇧⌘` + digit goes to that Desktop,
-/// topped up for each Desktop past a per-Mac mark, so a row the
-/// user deleted is never added back.
+/// topped up for each Desktop past the setup's offer (#2324), so a
+/// row the user deleted is never added back.
 @Suite("Desktop shortcuts are topped up past the mark", .serialized)
 @MainActor
 struct DesktopShortcutTopUpTests {
@@ -45,9 +45,11 @@ struct DesktopShortcutTopUpTests {
         #expect(rows.map(\.lua) == [lua(1)])
     }
 
-    private final class Mark { var value = 0 }
+    private func offered(_ core: KiwiCore) -> ShortcutOffer {
+        core.persistedGuiConfig()?.shortcutOffer ?? ShortcutOffer()
+    }
 
-    private func makeCore(mark: Mark) throws -> KiwiCore {
+    private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
             configDirectory: FileManager.default.temporaryDirectory
                 .appendingPathComponent(
@@ -55,8 +57,7 @@ struct DesktopShortcutTopUpTests {
                 )
         )
         try core.guiConfigStore.save(GuiConfig())
-        core.desktopMemory.readShortcutMark = { mark.value }
-        core.desktopMemory.writeShortcutMark = { mark.value = $0 }
+        core.desktopMemory.readLegacyShortcutOffer = { nil }
         return core
     }
 
@@ -68,11 +69,10 @@ struct DesktopShortcutTopUpTests {
 
     @Test("Each Desktop is offered once, and a deleted row stays gone")
     func offeredOnce() throws {
-        let mark = Mark()
-        let core = try makeCore(mark: mark)
+        let core = try makeCore()
         core.topUpDesktopShortcuts(desktops: [1, 2, 3])
         #expect(desktopRows(core) == [lua(1), lua(2), lua(3)])
-        #expect(mark.value == 3)
+        #expect(offered(core).desktop == 3)
 
         var config = try #require(core.persistedGuiConfig())
         let index = try #require(config.layers.firstIndex { $0.isDefault })
@@ -81,37 +81,42 @@ struct DesktopShortcutTopUpTests {
 
         core.topUpDesktopShortcuts(desktops: [1, 2, 3, 4])
         #expect(desktopRows(core) == [lua(1), lua(3), lua(4)])
-        #expect(mark.value == 4)
+        #expect(offered(core).desktop == 4)
     }
 
-    @Test("A setup the GUI does not manage keeps its mark")
+    @Test("A setup the GUI does not manage keeps its marks")
     func luaOwnedKeepsTheMark() throws {
-        let mark = Mark()
+        var cleared = 0
         let core = makeTestCore(
             configDirectory: FileManager.default.temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-desktop-topup-lua-\(UUID().uuidString)"
                 )
         )
-        core.desktopMemory.readShortcutMark = { mark.value }
-        core.desktopMemory.writeShortcutMark = { mark.value = $0 }
+        core.desktopMemory.readLegacyShortcutOffer = { ShortcutOffer() }
+        core.desktopMemory.clearLegacyShortcutOffer = { cleared += 1 }
         #expect(!core.isGuiManaged)
         core.topUpDesktopShortcuts(desktops: [1, 2])
-        #expect(mark.value == 0)
+        core.crossLegacyShortcutOffer()
+        #expect(cleared == 0)
+        #expect(!core.guiConfigStore.exists)
     }
 
     @Test("Discarding gui.json offers every Desktop again")
     func discardClearsTheMark() throws {
-        let mark = Mark()
-        let core = try makeCore(mark: mark)
+        let core = try makeCore()
+        var cleared = 0
+        core.desktopMemory.clearLegacyShortcutOffer = { cleared += 1 }
         core.topUpDesktopShortcuts(desktops: [1, 2])
-        #expect(mark.value == 2)
+        #expect(offered(core).desktop == 2)
+        cleared = 0
         _ = core.discardArtifacts(
             [.guiConfig],
             reason: "test",
             trash: { try FileManager.default.removeItem(at: $0) }
         )
-        #expect(mark.value == 0)
+        #expect(cleared == 1)
+        #expect(core.desktopMemory.knownShortcutOffer == nil)
         try core.guiConfigStore.save(GuiConfig())
         core.topUpDesktopShortcuts(desktops: [1, 2])
         #expect(desktopRows(core) == [lua(1), lua(2)])
@@ -119,22 +124,18 @@ struct DesktopShortcutTopUpTests {
 
     @Test("A declining setup is asked once a session")
     func declineIsLatched() throws {
-        let mark = Mark()
-        var reads = 0
         let core = makeTestCore(
             configDirectory: FileManager.default.temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-desktop-topup-latch-\(UUID().uuidString)"
                 )
         )
-        core.desktopMemory.readShortcutMark = {
-            reads += 1
-            return mark.value
-        }
-        core.desktopMemory.writeShortcutMark = { mark.value = $0 }
+        core.desktopMemory.readLegacyShortcutOffer = { nil }
         core.topUpDesktopShortcuts(desktops: [1, 2])
+        #expect(core.desktopMemory.shortcutTopUpDeclined == 2)
+        // Managed now, but the session already declined these.
+        try core.guiConfigStore.save(GuiConfig())
         core.topUpDesktopShortcuts(desktops: [1, 2])
-        #expect(reads == 1)
-        #expect(mark.value == 0)
+        #expect(core.persistedGuiConfig()?.shortcutOffer == nil)
     }
 }

@@ -39,8 +39,13 @@ extension KiwiCore {
     /// GUI-managed only (no sidecar otherwise); writes the store
     /// directly — NOT `saveGuiConfig`, which would reload the
     /// config mid-command. A no-op when the list already matches.
+    ///
+    /// Never inside the door a synced change enters by (#2324): the
+    /// list is this Mac's live set, so answering another Mac's
+    /// change with it would hand that Mac this one's Spaces.
     func syncGuiSpacesToLive() {
-        guard isGuiManaged, var config = guiConfigStore.load()
+        guard sync.adopting == 0, isGuiManaged,
+            var config = guiConfigStore.load()
         else { return }
         let live = SpaceID.deduplicated(capturedSpaces.map(\.id))
         guard config.spaces != live else { return }

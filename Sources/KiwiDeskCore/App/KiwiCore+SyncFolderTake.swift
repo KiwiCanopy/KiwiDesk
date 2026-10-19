@@ -45,7 +45,15 @@ extension KiwiCore {
                 && !Self.foreignCode(at: lua)
         )
         do {
-            return try replaceSetup(with: bundle, trash: trash, take: take)
+            return try pausingSync { () throws(SetupBundleError) in
+                let outcome = try replaceSetup(
+                    with: bundle,
+                    trash: trash,
+                    take: take
+                )
+                agreeOnFolder(folder)
+                return outcome
+            }
         } catch {
             throw .copy(error)
         }

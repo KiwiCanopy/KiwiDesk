@@ -45,6 +45,7 @@ extension SettingsModel {
     func reload() {
         droppedChords = []
         importRenames = []
+        sync = SettingsSyncState(status: core.sync.status)
         // A load can make the stored target the loaded one.
         // Core's name, not `activeProfile`, which `refreshProfiles`
         // updates only after this.

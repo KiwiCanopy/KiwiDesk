@@ -1361,6 +1361,51 @@ Trade-off: a copy is whole. Someone who wants one profile from
 the other Mac takes the whole setup or exports that profile by
 hand. Accepted for the same reason the restore accepts it.
 
+### Following a sync folder mirrors it, one side's change at a time
+
+**[Principle]** (#2324 rulings 4, 15; slice 3)
+
+Following a folder never moves the config folder: it stays in
+`~/.config/KiwiDesk`, and the folder is kept in step with it, file
+by file. A relocated config would make a missing folder — iCloud
+signed out, a disk unplugged — a missing setup at launch, and
+turning following on or off would need a relaunch. A mirror
+pauses instead, and Compare and Copy already copies whole setups
+in both directions.
+
+What crosses is decided by content, never by date: each synced
+file's hash is recorded once both sides hold it alike, so a side
+still holding the agreed version did not change and the other
+side's change is the one to copy. A sync app rewrites dates; it
+cannot fake a hash, and our own copies leave both sides alike, so
+nothing echoes. A file both sides changed since they last agreed
+stops the whole pass: no rule picks the newer side safely when two
+Macs were offline, so the user picks one with Compare and Copy,
+which is why following a folder that already holds another setup
+opens that sheet with Keep the Folder's as its default.
+
+A change that came in enters through one door that writes no
+synced file: the shortcut top-ups, a gone Space's shortcut drop
+and the Space-list mirror stand down inside it, since the Mac that
+made the change already did its own bookkeeping, and an answer
+here would echo there. The top-ups' "already offered" marks
+travel in `gui.json` for the same reason — a row deleted on one
+Mac is never re-added by another. Reset All Settings stops
+following: a reset is this Mac's, and following would empty the
+folder every other Mac reads.
+
+Unsaved Settings edits meet an arriving change per setting (ruling
+4): a setting only the other Mac changed is taken, one only the
+draft changed stays, and one both changed is one Keep Yours / Use
+Theirs question at Save — an alert, since it is a question with
+two values, not a picture. The automatic switch is its own row
+under the folder (ruling 15): "no folder" and "folder kept,
+manual" are different states and get different controls.
+
+Trade-off: a Save writes several files, and the other Mac may
+apply the first before the second has landed; it catches up at the
+next pass, a second later.
+
 ### Feature names: which stay English, which translate
 
 **[Principle]**
@@ -10843,17 +10888,17 @@ that resets the base, and it moves the rows back with it.
 
 The rows are topped up rather than seeded once, because Desktops
 come and go: at boot, and at a switch that shows a Desktop numbered
-past a per-Mac mark, each such Desktop up to the tenth gets its row
-when no row goes there and the chord is free. The mark is what
+past the setup's mark, each such Desktop up to the tenth gets its
+row when no row goes there and the chord is free. The mark is what
 keeps a deleted row deleted — a Desktop at or below it was offered
-before — and it lives in the app's defaults, not in `gui.json`,
-because the Desktops belong to the Mac rather than to the setup a
-backup carries. The mark vouches for rows in one `gui.json`, so
-discarding that file — Reset All Settings, a restore — clears it,
-and a restored backup's deleted row can come back once; that is
-the trade for keeping a per-Mac count out of a file that travels.
-A Lua-owned setup leaves the mark alone, so moving to Settings
-later still offers every Desktop. Restore Defaults restores the
+before — and it lives in `gui.json` (#2324): the rows it vouches
+for are the setup's, and a Mac sharing that setup must not re-add
+a row the user deleted on another. A Mac with more Desktops still
+gets its extra rows, since its count is past the mark. Every write
+keeps the larger mark, so no Mac lowers it, and discarding
+`gui.json` — Reset All Settings — takes it along. A restored backup
+carries its own mark. A Lua-owned setup leaves the mark alone, so
+moving to Settings later still offers every Desktop. Restore Defaults restores the
 tier for the Desktops the Mac has.
 
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
@@ -10961,8 +11006,9 @@ run, so a row added later was invisible to everyone who updated,
 including a spotlight feature's own keys. Each such row joins a
 numbered generation (`DefaultKeybindings.rows(ofGeneration:)`),
 and the first launch after an update appends the rows of every
-generation past the Mac's mark where the action is unbound and
-the chord free, then advances the mark. Adding is not moving: an
+generation past the setup's mark where the action is unbound and
+the chord free, then advances the mark — kept in `gui.json` beside
+the Desktop tier's, so one Mac's offer is every Mac's (#2324). Adding is not moving: an
 occupied chord keeps its binding, and a row deleted after its
 generation was offered is never added back. A fresh seed carries
 every generation, so it tops up nothing.

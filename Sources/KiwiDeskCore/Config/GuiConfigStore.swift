@@ -116,6 +116,11 @@ public struct GuiConfigStore {
         if let liveLook {
             config.look = liveLook
         }
+        // An offer never goes back (#2324): a writer holding an
+        // older copy keeps what the file already records.
+        if let stored = ShortcutOffer.stored(at: url) {
+            config.shortcutOffer = stored.merged(config.shortcutOffer)
+        }
         // This Mac's file first: a failed write here leaves the
         // shared file as it was, and with it any carry still owed.
         try machine.save(

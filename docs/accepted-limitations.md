@@ -120,6 +120,10 @@ The focused-window shortcut row above has one exception: `focus` itself runs thr
 The Layout menu subtitle row above has a remedy on every macOS: KiwiHub's view picker (`⌃⌥L`) names the layout of the Space under the pointer and adds "not saved to profile" while it drifts.
 
 :::unreleased
+Keeping a sync folder in step ([#2324](https://github.com/KiwiCanopy/KiwiDesk/issues/2324); the ruling is in [design decisions](design-decisions.md#following-a-sync-folder-mirrors-it-one-sides-change-at-a-time)) copies one file at a time. A Save that writes several files can reach the other Mac a file at a time, so for about a second that Mac may show part of the change. A profile whose name contains "conflict" is taken for a sync app's conflict copy and does not sync. Deleting `gui.json` or `init.lua` does not delete it on the other Macs: KiwiDesk writes a starter file back on its next load, and that file syncs. A list both Macs edited — the app rules, say — is one Keep Yours / Use Theirs question for the whole list, so the choice keeps one Mac's entries and drops the other's. Loading a profile or deleting a Space writes that Mac's Space list into `gui.json`, which the other Macs read only at their next launch, before a profile applies.
+:::
+
+:::unreleased
 An App Bar item reads KiwiDesk's own layout, not what the screen draws ([#2234](https://github.com/KiwiCanopy/KiwiDesk/issues/2234)). A window KiwiDesk does not manage — a picture-in-picture video, another app's panel — covering a tile leaves the tile's item lit, a float covering a tile does too by ruling, and two unfocused floats that overlap both read lit, since only the focused window is known to be on top. Asking the WindowServer what is drawn would see all of it, at the price of a round trip on every bar refresh, which stalls under GPU load ([#1925](https://github.com/KiwiCanopy/KiwiDesk/issues/1925)).
 :::
 

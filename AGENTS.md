@@ -882,8 +882,8 @@ Touching `Config`, `Profiles`, `Commands`.
 - never spend `⇧` on a lettered toggle — it qualifies a positional verb, "act
   on the window" (swap on an arrow, send on a digit), or off a positional key
   reverses its unshifted stepping twin as `⇧Tab` and `⌃⌥⇧C` do (#453), or on
-  `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past a per-Mac
-  mark through the one `topUpDesktopShortcuts` on the stored
+  `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past the
+  setup's `shortcut_offer` through the one `topUpDesktopShortcuts` on the stored
   `desktopShortcutBase`, a writer of the base moving the Desktop rows in the
   same draft write (#1870, `DesktopShortcutTopUpTests`,
   `HyperShortcutMoveDesktopTests`)
@@ -892,8 +892,9 @@ Touching `Config`, `Profiles`, `Commands`.
   steps the Spaces (`DefaultKeybindingLadderTests` ▸ `arrowsRideTheirOwnTiers`)
 - a default added after the first-run seed joins the next generation and
   reaches an existing install once through `topUpGenerationShortcuts`, only
-  where its action is unbound and its chord free, its mark cleared with a
-  discarded `gui.json` (#2211, `DefaultShortcutGenerationTests` ▸
+  where its action is unbound and its chord free, the offer travelling in
+  `gui.json` and only ever raised (#2324, `ShortcutOfferTests`) and cleared
+  with a discarded `gui.json` (#2211, `DefaultShortcutGenerationTests` ▸
   `everySeedRowHasAGeneration`), a `⌃⌥` letter landing on the base the
   layer's letters took through the one `HyperShortcutMove.onLettersBase`
   (#2303, `ResetSizesSeedTests`)
@@ -1031,6 +1032,11 @@ Touching `Config`, `Profiles`, `Commands`.
   same change set, neither alone, and a file meaningful on this Mac alone lives
   in `MachineLocation`'s folder, never the config folder (#2324,
   `CoreInitPathTests`, `SetupBundleArtifactTests`)
+- a followed sync folder is a mirror decided by content hashes (`SyncPlan`,
+  `SyncLedger`), a file syncing where its `ConfigArtifact` answers `syncs`,
+  and a change it brings enters through the one `adoptSyncedChange`, inside
+  which no machine event writes a synced file, every such writer ruled in
+  `SyncWriterCensusTests` (#2324, `SyncDoorTests`, `SyncFollowTests`)
 - a write of a format-stamped config file goes through its store's door,
   which refuses a file a newer build wrote, every raw writer filed in
   `ConfigWriterCensusTests` (#2325), and a newer file latches its store

@@ -46,6 +46,20 @@ extension SettingsHeaderBar {
         }
     }
 
+    /// The setup changed on another Mac while this draft held
+    /// edits (#2324 ruling 4): said once, no question until Save.
+    func arrivedRow(_ change: SyncedChange) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .foregroundStyle(SettingsTheme.ink2)
+                .accessibilityHidden(true)
+            Text(SyncText.arrived(on: change.mac))
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink2)
+            Spacer()
+        }
+    }
+
     func warningRow(_ warning: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.bubble")

@@ -13,6 +13,8 @@ extension SettingsModel {
         core.withUserMotion {
             core.resetAllSettings(trash: KiwiCore.moveToTrash)
         }
+        // The reset stopped following; the switch says so (#2324).
+        SyncFolderLocation.storeFollows(false, in: preferences)
         reload()
     }
 

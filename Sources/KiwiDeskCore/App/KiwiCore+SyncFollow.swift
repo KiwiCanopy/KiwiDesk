@@ -1,0 +1,283 @@
+import Foundation
+
+/// Following a sync folder (#2324 slice 3): the config folder stays
+/// on this Mac and a watch keeps the folder in step with it. A
+/// change made here is copied out; a change the folder brings is
+/// copied in and enters through `adoptSyncedChange`, the one door.
+/// What changed is read off content hashes (`SyncLedger`,
+/// `SyncPlan`), so our own copies never echo.
+extension KiwiCore {
+    /// Follows `folder`, or stops following with nil. Stopping
+    /// keeps this Mac's copy and touches neither side.
+    public func followSyncFolder(_ folder: URL?) {
+        sync.watch = nil
+        sync.pending?.cancel()
+        sync.pending = nil
+        sync.folder = folder
+        guard let folder else {
+            sync.status = .off
+            return
+        }
+        // FSEvents watches the path it is handed; a config folder
+        // linked into dotfiles is watched where its files live.
+        let paths = [configDirectory, folder].map {
+            $0.resolvingSymlinksInPath()
+        }
+        sync.watch = sync.makeWatch(paths) { [weak self] in
+            self?.scheduleSyncPass()
+        }
+        runSyncPass()
+        if sync.watch == nil, sync.watchRequired {
+            onLog("sync: could not watch \(folder.path)")
+        }
+    }
+
+    /// Runs a pass once both folders have been quiet a moment.
+    func scheduleSyncPass() {
+        sync.pending?.cancel()
+        let pass = DispatchWorkItem { [weak self] in self?.runSyncPass() }
+        sync.pending = pass
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + sync.quietDelay,
+            execute: pass
+        )
+    }
+
+    /// One pass: copies what one side changed to the other and
+    /// records what the two now agree on. Copies nothing while a
+    /// Compare and Copy runs, while either side is unreadable or
+    /// newer, or while both changed the same files.
+    func runSyncPass() {
+        guard let folder = sync.folder, sync.paused == 0 else { return }
+        if let status = syncHold(folder) {
+            sync.status = status
+            return
+        }
+        guard let here = SyncScan.hashes(in: configDirectory),
+            let there = SyncScan.hashes(in: folder)
+        else {
+            sync.status = .folderUnavailable
+            return
+        }
+        let ledgerURL = url(of: .syncLedger)
+        let ledger = SyncLedger.load(from: ledgerURL, for: folder)
+        let plan = SyncPlan.plan(
+            here: here,
+            folder: there,
+            agreed: ledger?.agreed
+        )
+        guard plan.diverged.isEmpty else {
+            sync.status = .changedOnBoth
+            return
+        }
+        let copied = applySyncPlan(plan, with: folder)
+        recordAgreement(with: folder, over: ledger, at: ledgerURL)
+        if !plan.push.isEmpty || !plan.removeFromFolder.isEmpty {
+            stampSyncFolder(folder)
+        }
+        sync.status =
+            SyncScan.conflictCopies(in: folder).first
+            .map(SyncStatus.conflictCopy) ?? .upToDate
+        if !copied.isEmpty {
+            adoptSyncedChange(
+                SyncedChange(
+                    paths: copied,
+                    mac: SyncFolder.stampedMac(in: folder)
+                )
+            )
+        }
+    }
+
+    /// Why no pass may run, as the status it shows; nil to run.
+    private func syncHold(_ folder: URL) -> SyncStatus? {
+        switch syncFolderRefusal(folder) {
+        case .folderNewer(let newer)?: return .newerOnAnotherMac(newer)
+        case _?: return .folderUnavailable
+        case nil: break
+        }
+        if let newer = thisMacNewer() { return .newerHere(newer) }
+        // A watch that would not start hears nothing: the folder is
+        // not kept in step, whatever a pass finds.
+        if sync.watch == nil, sync.watchRequired { return .folderUnavailable }
+        let placeholders =
+            SyncScan.placeholders(in: folder)
+            + SyncScan.dataless(in: folder)
+        guard placeholders.isEmpty else {
+            for placeholder in placeholders {
+                try? FileManager.default.startDownloadingUbiquitousItem(
+                    at: placeholder
+                )
+            }
+            return .folderUnavailable
+        }
+        return nil
+    }
+
+    /// Carries `plan` out; answers the paths that came in.
+    private func applySyncPlan(
+        _ plan: SyncPlan,
+        with folder: URL
+    ) -> [String] {
+        for path in plan.push {
+            syncCopy(path, from: configDirectory, to: folder)
+        }
+        for path in plan.removeFromFolder {
+            syncRemove(folder.appendingPathComponent(path))
+        }
+        var copied: [String] = []
+        for path in plan.pull
+        where syncCopy(path, from: folder, to: configDirectory) {
+            copied.append(path)
+        }
+        for path in plan.removeHere
+        where syncRemove(configDirectory.appendingPathComponent(path)) {
+            copied.append(path)
+        }
+        return copied
+    }
+
+    /// Records every path the two sides now hold alike; a path a
+    /// failed copy left apart keeps its earlier agreement.
+    private func recordAgreement(
+        with folder: URL,
+        over ledger: SyncLedger?,
+        at url: URL
+    ) {
+        guard let here = SyncScan.hashes(in: configDirectory),
+            let there = SyncScan.hashes(in: folder)
+        else { return }
+        var agreed = ledger?.agreed ?? [:]
+        for path in Set(here.keys).union(there.keys).union(agreed.keys) {
+            if here[path] == there[path] { agreed[path] = here[path] }
+        }
+        let next = SyncLedger(
+            folder: folder.standardizedFileURL.path,
+            agreed: agreed
+        )
+        guard next != ledger else { return }
+        do {
+            try next.save(to: url)
+        } catch {
+            onLog("sync: could not record the agreement: \(error)")
+        }
+    }
+
+    /// Copies `path` from `source` to `target` through a hidden
+    /// temporary beside it, so a reader never sees half a file.
+    @discardableResult
+    private func syncCopy(_ path: String, from source: URL, to target: URL)
+        -> Bool
+    {
+        let files = FileManager.default
+        let into = target.appendingPathComponent(path)
+        let temporary = into.deletingLastPathComponent()
+            .appendingPathComponent(Self.incomingPrefix + UUID().uuidString)
+        do {
+            try files.createDirectory(
+                at: into.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try files.copyItem(
+                at: source.appendingPathComponent(path),
+                to: temporary
+            )
+            if files.fileExists(atPath: into.path) {
+                _ = try files.replaceItemAt(into, withItemAt: temporary)
+            } else {
+                try files.moveItem(at: temporary, to: into)
+            }
+            return true
+        } catch {
+            try? files.removeItem(at: temporary)
+            onLog("sync: could not copy \(path): \(error)")
+            return false
+        }
+    }
+
+    @discardableResult
+    private func syncRemove(_ url: URL) -> Bool {
+        do {
+            try discard(url, sync.trash)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Names this Mac in the folder after copying into it.
+    func stampSyncFolder(_ folder: URL) {
+        guard let mac = Self.thisMacName(),
+            let data = try? JSONEncoder().encode(SyncStamp(mac: mac))
+        else { return }
+        do {
+            try data.write(
+                to: folder.appendingPathComponent(SyncFolder.stampName),
+                options: .atomic
+            )
+        } catch {
+            onLog("sync: could not stamp the folder: \(error)")
+        }
+    }
+
+    /// The one door a change from the sync folder enters by
+    /// (#2324 ruling 4): the config reloads with no machine event
+    /// writing a synced file — the top-ups and the shortcut drop
+    /// stand down while `sync.adopting` is raised — then Settings
+    /// is told what came in.
+    func adoptSyncedChange(_ change: SyncedChange) {
+        sync.adopting += 1
+        defer { sync.adopting -= 1 }
+        onLog("sync: \(change.paths.count) file(s) came in")
+        loadConfig()
+        sync.onSyncedIn(change)
+    }
+
+    /// Records the folder's files as what both sides agree on, once
+    /// a Compare and Copy settled which setup stays: the next pass
+    /// then copies outward only what this Mac rewrote in taking it
+    /// — a take re-encodes what it reads — and never finds both
+    /// sides changed.
+    func agreeOnFolder(_ folder: URL) {
+        guard let agreed = SyncScan.hashes(in: folder) else {
+            forgetSyncAgreement()
+            return
+        }
+        let ledger = SyncLedger(
+            folder: folder.standardizedFileURL.path,
+            agreed: agreed
+        )
+        do {
+            try ledger.save(to: url(of: .syncLedger))
+        } catch {
+            onLog("sync: could not record the agreement: \(error)")
+        }
+    }
+
+    /// Drops what this Mac and its folder agreed on, so a pass that
+    /// finds them apart copies nothing until Compare and Copy says
+    /// which side stays.
+    func forgetSyncAgreement() {
+        let ledger = url(of: .syncLedger)
+        guard FileManager.default.fileExists(atPath: ledger.path) else {
+            return
+        }
+        do {
+            try FileManager.default.removeItem(at: ledger)
+        } catch {
+            onLog("sync: could not forget the agreement: \(error)")
+        }
+    }
+
+    /// Holds every pass while `body` rewrites either side, then
+    /// runs one, so a Compare and Copy is never copied half-done.
+    func pausingSync<T, E: Error>(
+        _ body: () throws(E) -> T
+    ) throws(E) -> T {
+        sync.paused += 1
+        defer {
+            sync.paused -= 1
+            if sync.paused == 0, sync.folder != nil { scheduleSyncPass() }
+        }
+        return try body()
+    }
+}
