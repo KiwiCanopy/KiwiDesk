@@ -75,6 +75,11 @@ struct ConfigWriterCensusTests {
             1,
             "a backup bundle written where the user picked"
         ),
+        "KiwiCore+SyncFolder.swift": (
+            1,
+            "the sync folder's stamp, which names the Mac and carries "
+                + "no setup (SyncFolderCopyTests)"
+        ),
         "LogExport.swift": (1, "a log export the user picked"),
         "CrashRecovery.swift": (
             1,

@@ -18,7 +18,7 @@ extension SettingsValueReadout {
             .advancedResetAll, .onboardingDiscoveryShown,
             .iconPickerRecents, .onboardingOpenAtLogin,
             .advancedExportBackup, .advancedRestoreBackup,
-            .advancedExportLogRange, .advancedExportLog:
+            .advancedExportLogRange, .advancedExportLog, .syncFolder:
             // Non-model keys produce no diff rows.
             return []
         }
