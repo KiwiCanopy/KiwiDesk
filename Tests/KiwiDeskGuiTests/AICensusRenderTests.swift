@@ -158,13 +158,13 @@ struct AICensusRenderTests {
     }
 
     /// Both cards draw one row shape (owner ruling 2026-10-17):
-    /// the setup row mounts `AIActionRow` twice — Claude Desktop
-    /// before Other AI apps (#2258 ▸ Ruling 7) — and a prompt row
+    /// the setup row mounts `SettingsActionRow` twice — Claude
+    /// Desktop before Other AI apps (#2258 ▸ Ruling 7) — and a prompt row
     /// once, so the two cards cannot drift apart.
     @Test("both cards draw the shared action row")
     func cardsShareTheActionRow() throws {
         let setup = try squashedAI("AISetupRow.swift")
-        #expect(setup.occurrences(of: "AIActionRow(") == 2)
+        #expect(setup.occurrences(of: "SettingsActionRow(") == 2)
         let add = try #require(
             setup.range(of: "title:SettingsCatalog.ai.addToClaudeDesktop")
         )
@@ -173,9 +173,15 @@ struct AICensusRenderTests {
         )
         #expect(add.lowerBound < copy.lowerBound)
         let prompt = try squashedAI("AIPromptRow.swift")
-        #expect(prompt.occurrences(of: "AIActionRow(") == 1)
+        #expect(prompt.occurrences(of: "SettingsActionRow(") == 1)
         // The shared row lays out through the one row axis.
-        let row = try squashedAI("AIActionRow.swift")
+        let row = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Common/"
+                        + "SettingsActionRow.swift"
+                )
+        ).split(whereSeparator: \.isWhitespace).joined()
         #expect(row.occurrences(of: "SettingsRowShape(labelFills:true)") == 1)
         // The button names itself, so the title is drawn, not spoken.
         #expect(

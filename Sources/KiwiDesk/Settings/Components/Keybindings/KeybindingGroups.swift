@@ -273,7 +273,7 @@ struct KiwiDeskKeyRows: View {
 
     var body: some View {
         // The in-card heading idiom, heading trait included.
-        GestureGroupHeading(
+        SettingsGroupHeading(
             title: L("app.name", "KiwiDesk"),
             followsGroup: true
         )

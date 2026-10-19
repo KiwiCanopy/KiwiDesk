@@ -14,6 +14,10 @@ import SwiftUI
 extension GeneralSection {
     @ViewBuilder var resetLadder: some View {
         Divider()
+        SettingsGroupHeading(
+            title: L("general.advanced.group.recovery", "Recovery"),
+            followsGroup: true
+        )
         discardArrangementRow
         Divider()
         resetAllRow
@@ -22,47 +26,40 @@ extension GeneralSection {
     }
 
     private var discardArrangementRow: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Button {
-                    model.discardSavedArrangement()
-                } label: {
-                    Label(
-                        L(
-                            "general.advanced.discard_arrangement",
-                            "Discard Saved Window Arrangement"
-                        ),
-                        systemImage: "clock.arrow.circlepath"
-                    )
-                }
-                .settingsActionButton()
-                HelpButton(
-                    explanation: L(
-                        "general.advanced.discard_arrangement.help",
-                        "If windows come back in the wrong "
-                            + "Spaces or positions after a "
-                            + "restart or wake, a stale saved "
-                            + "arrangement is the usual cause. "
-                            + "Discarding it makes the next "
-                            + "restore start clean — settings "
-                            + "and profiles are untouched."
-                    ),
-                    subject: L(
-                        "general.advanced.discard_arrangement",
-                        "Discard Saved Window Arrangement"
-                    )
-                )
-            }
-            Text(
-                L(
-                    "general.advanced.discard_arrangement.caption",
-                    "Clears the arrangement KiwiDesk remembered "
-                        + "from your last session or wake, "
-                        + "without changing any settings."
-                )
+        SettingsActionRow(
+            title: L(
+                "general.advanced.discard_arrangement.row",
+                "Saved window arrangement"
+            ),
+            caption: L(
+                "general.advanced.discard_arrangement.caption",
+                "What KiwiDesk remembered from your last session "
+                    + "or wake."
+            ),
+            help: L(
+                "general.advanced.discard_arrangement.help",
+                "If windows come back in the wrong "
+                    + "Spaces or positions after a "
+                    + "restart or wake, a stale saved "
+                    + "arrangement is the usual cause. "
+                    + "Discarding it makes the next "
+                    + "restore start clean — settings "
+                    + "and profiles are untouched."
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+        ) {
+            Button(
+                L(
+                    "general.advanced.discard_arrangement.short",
+                    "Discard"
+                )
+            ) {
+                model.discardSavedArrangement()
+            }
+            .settingsActionButton()
+            .accessibilityLabel(
+                SettingsCatalog.general.generalAdvanced.children
+                    .discardArrangement.text
+            )
         }
         .searchAnchored(
             SettingsCatalog.general.generalAdvanced.children
@@ -71,48 +68,32 @@ extension GeneralSection {
     }
 
     private var resetAllRow: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Button {
-                    confirmingReset = true
-                } label: {
-                    Label(
-                        L(
-                            "general.advanced.reset_all",
-                            "Reset All Settings…"
-                        ),
-                        systemImage: "arrow.counterclockwise"
-                    )
-                }
-                .settingsActionButton()
-                HelpButton(
-                    explanation: L(
-                        "general.advanced.reset_all.help",
-                        "The last resort when KiwiDesk keeps "
-                            + "misbehaving and discarding the "
-                            + "saved arrangement didn't help: "
-                            + "everything returns to a "
-                            + "known-good default, the same "
-                            + "state as a first launch."
-                    ),
-                    subject: L(
-                        "general.advanced.reset_all",
-                        "Reset All Settings…"
-                    )
-                )
-            }
-            Text(
-                L(
-                    "general.advanced.reset_all.caption",
-                    "Deletes your profiles, Spaces, layouts, "
-                        + "and keybindings, then starts fresh "
-                        + "with KiwiDesk's defaults. Doesn't "
-                        + "touch init.lua, your color "
-                        + "palettes or your looks."
-                )
+        SettingsActionRow(
+            title: L("general.advanced.reset_all.row", "All settings"),
+            caption: L(
+                "general.advanced.reset_all.caption",
+                "Starts fresh with KiwiDesk's defaults. Keeps "
+                    + "init.lua, your color palettes and your "
+                    + "looks."
+            ),
+            help: L(
+                "general.advanced.reset_all.help",
+                "The last resort when KiwiDesk keeps "
+                    + "misbehaving and discarding the "
+                    + "saved arrangement didn't help: "
+                    + "everything returns to a "
+                    + "known-good default, the same "
+                    + "state as a first launch."
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+        ) {
+            Button(L("general.advanced.reset_all.short", "Reset…")) {
+                confirmingReset = true
+            }
+            .settingsActionButton()
+            .accessibilityLabel(
+                SettingsCatalog.general.generalAdvanced.children
+                    .resetAll.text
+            )
         }
         .searchAnchored(
             SettingsCatalog.general.generalAdvanced.children

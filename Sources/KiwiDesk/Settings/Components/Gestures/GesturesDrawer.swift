@@ -37,7 +37,7 @@ struct GesturesDrawer: View {
             }
         ) {
             VStack(alignment: .leading, spacing: 10) {
-                GestureGroupHeading(
+                SettingsGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.scroll",
                         "Scroll gestures — anywhere, holding a modifier"
@@ -45,7 +45,7 @@ struct GesturesDrawer: View {
                 )
                 GesturesScrollEntries(model: model, playing: $playing)
                 GestureRule()
-                GestureGroupHeading(
+                SettingsGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.focus",
                         "Focus and the pointer"
@@ -54,7 +54,7 @@ struct GesturesDrawer: View {
                 )
                 focusEntries
                 GestureRule()
-                GestureGroupHeading(
+                SettingsGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.windows",
                         "On your windows"
@@ -63,7 +63,7 @@ struct GesturesDrawer: View {
                 )
                 windowEntries
                 GestureRule()
-                GestureGroupHeading(
+                SettingsGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.shelf",
                         "On the KiwiShelf"

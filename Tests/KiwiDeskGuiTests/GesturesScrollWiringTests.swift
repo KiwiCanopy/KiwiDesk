@@ -215,19 +215,19 @@ struct GesturesScrollWiringTests {
     func groupsClose() throws {
         let drawer = Self.squash(try Self.source("GesturesDrawer.swift"))
         let headings =
-            drawer.components(separatedBy: "GestureGroupHeading(")
+            drawer.components(separatedBy: "SettingsGroupHeading(")
             .count - 1
         #expect(headings >= 2)
         #expect(
             drawer.components(
-                separatedBy: "GestureRule()GestureGroupHeading("
+                separatedBy: "GestureRule()SettingsGroupHeading("
             ).count - 1 == headings - 1
         )
         #expect(
             drawer.components(separatedBy: "followsGroup:true").count - 1
                 == headings - 1
         )
-        let first = try #require(drawer.range(of: "GestureGroupHeading("))
+        let first = try #require(drawer.range(of: "SettingsGroupHeading("))
         #expect(
             !drawer[..<first.lowerBound].hasSuffix("GestureRule()")
         )

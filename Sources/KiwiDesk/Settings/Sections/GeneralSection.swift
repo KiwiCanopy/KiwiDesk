@@ -124,11 +124,24 @@ struct GeneralSection: View {
             chrome: .card,
             isExpanded: $advancedExpanded
         ) {
+            // Grouped where `GeneralRowOrder.advanced` already
+            // changes topic; the order itself is ruled (#2439).
             VStack(alignment: .leading, spacing: 8) {
-                configFileRow
+                SettingsGroupHeading(
+                    title: L(
+                        "general.advanced.group.configuration",
+                        "Configuration"
+                    )
+                )
+                initLuaRow
                 Divider()
-                editLuaRow
-                Divider()
+                SettingsGroupHeading(
+                    title: L(
+                        "general.advanced.group.export",
+                        "Export"
+                    ),
+                    followsGroup: true
+                )
                 exportBackupRow
                 Divider()
                 exportLogRows
@@ -163,30 +176,22 @@ struct GeneralSection: View {
         }
     }
 
-    private var configFileRow: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(
-                L(
-                    "general.advanced.config_file",
-                    "Configuration file"
-                )
+    /// The config file's two actions on one row (#2439): both
+    /// catalog anchors stay mounted, the file's on the row and
+    /// the editor's on its button.
+    private var initLuaRow: some View {
+        SettingsActionRow(
+            title: "init.lua",
+            caption: (model.configURL.path as NSString)
+                .abbreviatingWithTildeInPath,
+            help: L(
+                "general.advanced.init_lua.help",
+                "Your Lua configuration file, for scripting "
+                    + "beyond the visual controls. KiwiDesk's "
+                    + "integrated Lua editor opens it."
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            HStack {
-                Image(systemName: "doc.text")
-                    .foregroundStyle(.secondary)
-                Text(model.configURL.path)
-                    .font(
-                        .system(
-                            .body,
-                            design: .monospaced
-                        )
-                    )
-                    .textSelection(.enabled)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Spacer()
+        ) {
+            HStack(spacing: 6) {
                 Button(L("general.advanced.reveal", "Reveal")) {
                     NSWorkspace.shared
                         .activateFileViewerSelecting(
@@ -194,6 +199,13 @@ struct GeneralSection: View {
                         )
                 }
                 .settingsActionButton()
+                .accessibilityLabel(
+                    L(
+                        "general.advanced.reveal.ax",
+                        "Reveal init.lua in Finder"
+                    )
+                )
+                editLuaButton
             }
         }
         .searchAnchored(
@@ -202,41 +214,32 @@ struct GeneralSection: View {
         )
     }
 
-    private var editLuaRow: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Opening the raw editor swaps the primary Save to
-            // `.saveLua`, dropping staged visual edits — gated
-            // like every other discard path (#515).
-            Button {
-                model.discardingEdits(
-                    message: L(
-                        "discard.lua_editor.message",
-                        "The raw editor saves init.lua as "
-                            + "text, so the edits you "
-                            + "haven't saved are dropped."
-                    ),
-                    confirmLabel: L(
-                        "discard.lua_editor.confirm",
-                        "Discard & edit init.lua"
-                    )
-                ) {
-                    model.showLuaEditor = true
-                    model.reload()
-                }
-            } label: {
-                Label(
-                    L(
-                        "general.advanced.edit_lua",
-                        "Edit init.lua directly"
-                    ),
-                    systemImage: "curlybraces"
+    private var editLuaButton: some View {
+        // Opening the raw editor swaps the primary Save to
+        // `.saveLua`, dropping staged visual edits — gated like
+        // every other discard path (#515).
+        Button(L("general.advanced.edit_lua.short", "Edit…")) {
+            model.discardingEdits(
+                message: L(
+                    "discard.lua_editor.message",
+                    "The raw editor saves init.lua as "
+                        + "text, so the edits you "
+                        + "haven't saved are dropped."
+                ),
+                confirmLabel: L(
+                    "discard.lua_editor.confirm",
+                    "Discard & edit init.lua"
                 )
+            ) {
+                model.showLuaEditor = true
+                model.reload()
             }
-            .settingsActionButton()
-            Text(editLuaCaption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
+        .settingsActionButton()
+        .accessibilityLabel(
+            SettingsCatalog.general.generalAdvanced.children
+                .editLua.text
+        )
         .searchAnchored(
             SettingsCatalog.general.generalAdvanced.children
                 .editLua
@@ -254,14 +257,6 @@ struct GeneralSection: View {
         Binding(
             get: { backupError != nil },
             set: { if !$0 { backupError = nil } }
-        )
-    }
-
-    private var editLuaCaption: String {
-        L(
-            "general.advanced.edit_lua.caption",
-            "Opens the integrated Lua editor for custom "
-                + "scripting beyond the visual controls."
         )
     }
 }

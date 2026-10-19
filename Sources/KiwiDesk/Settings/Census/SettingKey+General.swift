@@ -117,7 +117,7 @@ extension GeneralKey {
         case .advancedEditLua:
             return .text(
                 "general.advanced.edit_lua",
-                caption: "general.advanced.edit_lua.caption"
+                help: "general.advanced.init_lua.help"
             )
         case .advancedDiscardArrangement:
             return .text(

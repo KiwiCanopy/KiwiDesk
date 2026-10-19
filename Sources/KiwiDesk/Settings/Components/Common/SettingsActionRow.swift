@@ -1,11 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One AI page row: a title, an optional `?` and caption on the
-/// left, its one button trailing — the shape both the setup and
-/// the prompts cards draw (owner ruling 2026-10-17). Below
-/// `stacksRows` the button goes under the caption.
-struct AIActionRow<Action: View>: View {
+/// A titled action row: a title, an optional `?` and caption on
+/// the left, its buttons trailing — the AI page's cards and
+/// General ▸ Advanced (owner rulings 2026-10-17, #2439). Below
+/// `stacksRows` the buttons go under the caption. Each button
+/// names itself for VoiceOver (#812).
+struct SettingsActionRow<Action: View>: View {
     let title: String
     let caption: String?
     var help: String? = nil
