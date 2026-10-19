@@ -237,6 +237,7 @@ settings.spaceBarStyle.itemLabel
 settings.spaceBarStyle.showFrontApp
 settings.spaceBarStyle.springDelay
 settings.spaceBarStyle.visibility
+settings.spaceBarStyle.visibility (master)
 settings.stack.fillWhenAlone
 settings.stack.masterCount
 settings.stack.masterOrientation
