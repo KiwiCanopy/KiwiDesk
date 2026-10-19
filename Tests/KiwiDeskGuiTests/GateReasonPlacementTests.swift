@@ -103,6 +103,7 @@ struct GateReasonPlacementTests {
                 // Lua-owned config, a cause shown nowhere on its
                 // page, so each draws its sentence.
                 .kiwiVision(.dim), .kiwiVision(.blur),
+                .kiwiVision(.fadeDuration), .kiwiVision(.fadeCurve),
                 .kiwiVision(.appearance), .kiwiVision(.clearWallpaper),
                 .kiwiVision(.clearApp), .kiwiVision(.neverDimmed),
                 // A lens's page draws it under its draft cards.

@@ -26,6 +26,8 @@ struct KiwiVisionLensOverrides: View {
                         \.blur,
                         plain.visionBlur
                     )
+                    fadeDurationRow
+                    fadeCurveRow
                 }
             }
             SettingsSection(SettingsCatalog.kiwiVision.clearCard.text) {
@@ -89,6 +91,63 @@ struct KiwiVisionLensOverrides: View {
         }
     }
 
+    private var fadeDurationRow: some View {
+        let value = override(\.fadeDuration)
+        let label = SettingsCatalog.kiwiVision.fadeDuration.text
+        let global = plain.visionFadeDuration
+        return OverrideChrome(
+            isOn: overrideToggle(value, global: global),
+            inherited: (label, Self.milliseconds(global)),
+            inheritsName: defaultName
+        ) {
+            SettingsRowShape {
+                SettingsRowLabel(label: label, help: nil)
+            } control: {
+                StepperRow(
+                    label: label,
+                    value: Binding(
+                        get: { value.wrappedValue ?? global },
+                        set: { value.wrappedValue = $0 }
+                    ),
+                    in: AppWideSettings.visionFadeRange,
+                    step: 50,
+                    suffix: "ms",
+                    labelHidden: true
+                )
+            }
+        }
+    }
+
+    private var fadeCurveRow: some View {
+        let value = override(\.fadeCurve)
+        let label = SettingsCatalog.kiwiVision.fadeCurve.text
+        let global = plain.visionFadeCurve
+        let current = value.wrappedValue ?? global
+        return OverrideChrome(
+            isOn: overrideToggle(value, global: global),
+            inherited: (label, KiwiVisionLevelsCard.curveTitle(global)),
+            inheritsName: defaultName
+        ) {
+            DropdownRow(
+                label: label,
+                spokenValue: KiwiVisionLevelsCard.curveTitle(current),
+                help: nil
+            ) {
+                Picker(
+                    label,
+                    selection: Binding(
+                        get: { current },
+                        set: { value.wrappedValue = $0 }
+                    )
+                ) {
+                    ForEach(VisionFadeCurve.allCases, id: \.self) {
+                        Text(KiwiVisionLevelsCard.curveTitle($0)).tag($0)
+                    }
+                }
+            }
+        }
+    }
+
     private func toggleRow(
         _ label: String,
         _ path: WritableKeyPath<VisionLens.Overrides, Bool?>,
@@ -146,6 +205,10 @@ struct KiwiVisionLensOverrides: View {
 
     static func percent(_ dim: Double) -> String {
         L("kiwivision.lens.value.percent", "%1$d %%", Int(dim.rounded()))
+    }
+
+    static func milliseconds(_ ms: Int) -> String {
+        L("kiwivision.lens.value.milliseconds", "%1$d ms", ms)
     }
 
     static func onOff(_ on: Bool) -> String {
