@@ -1,14 +1,14 @@
 import AppKit
 
 /// What a hiding shelf draws while hidden (#761): Space dots where
-/// it carries the Space Bar, alone or fused, else a plain pill.
+/// it carries the Space Bar, alone or fused, else a short line.
 struct ShelfIndicatorSpec: Equatable {
     enum Mark: Equatable {
         /// One per Space on the screen, in bar order.
         case dots([Dot])
         /// A lone App Bar's: no window dots, so the App Bar has
         /// one hidden look.
-        case pill
+        case line
     }
 
     struct Dot: Equatable {
@@ -68,15 +68,15 @@ struct ShelfIndicatorSpec: Equatable {
     static func rimWidth(for shelf: KiwiShelf) -> CGFloat {
         min(shelf.resolvedHighlightWidth, hoverGrowth)
     }
-    static let pillLength: CGFloat = 36
+    static let lineLength: CGFloat = 36
     /// Its distance from the shelf's screen side, inside the band.
     static let inset: CGFloat = 0
 
     /// The indicator's length along its edge.
     static func length(of mark: Mark) -> CGFloat {
         switch mark {
-        case .pill:
-            return pillLength
+        case .line:
+            return lineLength
         case .dots(let dots):
             let marks = dots.reduce(0) {
                 $0 + ($1.current ? currentDot : dot)

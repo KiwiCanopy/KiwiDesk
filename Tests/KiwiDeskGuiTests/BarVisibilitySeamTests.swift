@@ -15,10 +15,9 @@ struct BarVisibilitySeamTests {
     /// path. A setter's `apply(to:)` writes nothing for it.
     private static let allowed: [String: String] = [
         "TilingSettings+Shelf.swift": "the reader and the door",
-        // A ↺ puts the baseline's stored pair back, which was
-        // one answer already (#792).
-        "SettingsRevertRegister+Settings1.swift": "the App Bar's ↺",
-        "SettingsRevertRegister+Settings3.swift": "the Space Bar's ↺",
+        // A ↺ puts the baseline back, the pair together while
+        // either side has the bars linked (#792).
+        "SettingsRevertRegister.swift": "the bars' ↺, one writer",
         // A census row's id spells its path, a string (#678).
         "SettingKey+SpaceBar.swift": "the census id",
         "SettingKey+AppBar.swift": "the census id",

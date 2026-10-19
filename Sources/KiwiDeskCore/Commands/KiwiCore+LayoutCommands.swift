@@ -25,7 +25,7 @@ extension KiwiCore {
             return .fail(retired)
         }
         // The show/hide action redraws the bars and moves no
-        // window: a hiding edge reserves nothing (#761).
+        // window: a hiding edge reserves only its sliver (#761).
         if let action = APIReference.barAction(of: command) {
             return shelfRevealCommand(action)
         }
@@ -55,8 +55,9 @@ extension KiwiCore {
             barWrite = true
             response = spaceBarCommand(command, args)
         } else if command.hasPrefix("kiwishelf.") {
-            // The reveal duration is read by the action alone.
-            barWrite = command == "kiwishelf.set_reveal_duration"
+            // The shelf's look, like a bar's: the reservation
+            // comparison forces the pass where the depth moved.
+            barWrite = true
             response = kiwishelfCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)

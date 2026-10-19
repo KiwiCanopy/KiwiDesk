@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// How a hiding shelf's reveal and its mark's hover MOVE (#761):
-/// the plate morphs out of the pill as a clip of the content's own
+/// the plate morphs out of the mark as a clip of the content's own
 /// layer while the items fade on it, starting only after the pass
 /// that orders the panel in, and the hovered plate grows its frame
 /// rather than cross-fading a redraw. Whether it reads well is the
@@ -55,15 +55,15 @@ struct ShelfRevealMotionTests {
         return morph
     }
 
-    @Test("A reveal grows the plate out of the hovered pill, items after")
+    @Test("A reveal grows the plate out of the hovered mark, items after")
     func revealMorphsOutOfThePill() throws {
         let morph = try #require(morph(entering: true))
-        let pill = BarMotion.hoverPlate(
+        let mark = BarMotion.hoverPlate(
             mark: Self.mark,
             hovered: true,
             reduceMotion: false
         )
-        #expect(morph.pill == pill)
+        #expect(morph.mark == mark)
         #expect(morph.plate == Self.plate)
         // The items fade up once the plate moves, while it still
         // grows: one overlapping sequence.

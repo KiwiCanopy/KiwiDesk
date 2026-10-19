@@ -4,8 +4,9 @@ import Foundation
 /// `auto`, which hides it to an indicator the pointer reveals.
 /// Read through `TilingSettings.visibility(of:)`, which makes two
 /// bars sharing an edge on any screen one answer, and written
-/// through `setVisibility(_:of:)`; a hiding edge reserves nothing,
-/// so a reveal draws over the windows.
+/// through `setVisibility(_:of:)`; a hiding edge reserves only its
+/// constant sliver (`KiwiShelf.hiddenReservation`), so a reveal
+/// draws over the windows.
 public enum ShelfVisibility: String, Sendable, Codable, CaseIterable {
     case always
     case auto

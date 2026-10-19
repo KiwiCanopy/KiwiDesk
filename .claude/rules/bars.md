@@ -187,7 +187,7 @@ twice, was a question the user answered twice. The argument is
   judging a shared shelf by what each layout draws moved the
   windows on every layout switch. `barEdges(space:app:)` folds the
   reader's answer, a hiding edge reserving only its constant sliver
-(`hidingEdges`, `KiwiShelf.hiddenReservation`), so a reveal is
+  (`hidingEdges`, `KiwiShelf.hiddenReservation`), so a reveal is
   an overlay that redraws the bars through `updateBars()` and
   never retiles (`BarAutoHideFoldTests`, `BarVisibilitySeamTests`,
   `ShelfAutoHideCoreTests` ▸ `actionRevealsWithoutARetile`).

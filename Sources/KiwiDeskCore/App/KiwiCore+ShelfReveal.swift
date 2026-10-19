@@ -16,7 +16,8 @@ extension SpaceBarOverlay.Item {
 /// The hiding shelves (#761): which plans `updateBars()` draws,
 /// what a hidden shelf's indicator shows, and the show/hide
 /// action. A reveal redraws the bars and never retiles — a hiding
-/// edge reserves nothing (`TilingSettings.barEdges(space:app:)`).
+/// edge reserves only its constant sliver
+/// (`KiwiShelf.hiddenReservation`).
 extension KiwiCore {
     /// One `updateBars()` pass's hiding shelves, gathered per
     /// display and synced once at its end.
@@ -145,18 +146,18 @@ extension KiwiCore {
             }
         }
 
-        /// Space dots from the Space Bar's items, else the pill.
+        /// Space dots from the Space Bar's items, else the line.
         static func mark(
             items: [SpaceBarOverlay.Item]?
         ) -> ShelfIndicatorSpec.Mark {
-            guard let items else { return .pill }
+            guard let items else { return .line }
             let dots = items.filter { $0.space != nil }.map {
                 ShelfIndicatorSpec.Dot(
                     current: $0.active,
                     occupied: $0.windowCount > 0
                 )
             }
-            return dots.isEmpty ? .pill : .dots(dots)
+            return dots.isEmpty ? .line : .dots(dots)
         }
     }
 
@@ -182,7 +183,7 @@ extension KiwiCore {
     /// on no hiding shelf there.
     func shelfRevealCommand(_ bar: ShelfBar) -> CommandResponse {
         let name = bar == .space ? "Space Bar" : "App Bar"
-        guard tiler.settings.visibility(of: bar) == .auto else {
+        guard tiler.settings.revealActionLive(bar) else {
             return .fail("the \(name) does not hide")
         }
         let workspaces = state.workspaces

@@ -14001,7 +14001,7 @@ border while the edge reserved nothing. That makes "a reveal never
 retiles" true by
 construction: a reveal only redraws the bars, and setting the
 mode is the one change that can move the windows. Hiding while
-still reserving was rejected (the user would give up the
+still reserving the full strip was rejected (the user would give up the
 information and keep paying the area).
 
 Two bars that share an edge on any screen are one shelf, so

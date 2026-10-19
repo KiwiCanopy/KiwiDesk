@@ -27,6 +27,8 @@ enum SettingsRevertRegister {
         .kiwishelf(.spaceBarScreenEdge): spaceBarEdge,
         .kiwishelf(.appBarEdge): appBarEdge,
         .kiwishelf(.appBarScreenEdge): appBarEdge,
+        .spaceBar(.spaceBarVisibility): barVisibility(.space),
+        .appBar(.appBarVisibility): barVisibility(.app),
         .colours(.liquidGlassMaster): .all([
             .leaf(\.settings.kiwishelf.liquidGlass),
             .leaf(\.settings.shortcutPanelLiquidGlass),
@@ -43,6 +45,26 @@ enum SettingsRevertRegister {
         .leaf(\.settings.appBarStyle.edge),
         .leaf(\.settings.appBarStyle.edgeOverride),
     ])
+
+    /// A bar's visibility, and its partner's while the bars share
+    /// an edge on either side of the revert: `setVisibility` writes
+    /// the pair, so one leaf alone would split it (#761).
+    private static func barVisibility(_ bar: ShelfBar) -> RevertWriter {
+        let space = RevertWriter.leaf(\.settings.spaceBarStyle.visibility)
+        let app = RevertWriter.leaf(\.settings.appBarStyle.visibility)
+        let own = bar == .space ? space : app
+        return RevertWriter(
+            paths: own.paths + (bar == .space ? app : space).paths
+        ) {
+            model,
+            instance in
+            let linked =
+                model.config.settings.barsLinked
+                || model.cleanConfig.settings.barsLinked
+            (linked ? RevertWriter.all([space, app]) : own)
+                .apply(model, instance)
+        }
+    }
 
     static let config: [SettingKey: RevertWriter] = [
         .appRules(.ignoreRules): .list(\.ignoreRules),

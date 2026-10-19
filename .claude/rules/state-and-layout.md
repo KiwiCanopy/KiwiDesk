@@ -2156,7 +2156,7 @@ editing here:
   nothing). Every retile triggered by an explicit `set_*` from
   Lua/CLI applies — `applyProfileScopedState`, `set_gap_*`,
   `set_min_window_size`, `set_mode`, the whole `layoutCommand`
-  dispatch — save that a `space_bar.*` or `app_bar.*` write may
+  dispatch — save that a `space_bar.*`, `app_bar.*` or `kiwishelf.*` write may
   skip the pass, running the one `repaintBarsAndFloatNet` tail
   (the bars, then every strip reader) instead, only while it leaves every layout's
   `TilingSettings.shelfReservation(in:on:)` on every connected

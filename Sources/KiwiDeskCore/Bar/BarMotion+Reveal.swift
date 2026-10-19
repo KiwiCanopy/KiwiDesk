@@ -19,13 +19,13 @@ extension BarMotion {
     }
 
     /// A morph's two channels, timed from the motion's start: a
-    /// clip from `pill` to `plate` (the content layer's own
+    /// clip from `mark` to `plate` (the content layer's own
     /// coordinates) and the items' fade.
     struct Morph: Equatable {
         let entering: Bool
-        let pill: CGRect
+        let mark: CGRect
         let plate: CGRect
-        let pillRadius: CGFloat
+        let markRadius: CGFloat
         let plateRadius: CGFloat
         let plateStart: TimeInterval
         let plateLength: TimeInterval
@@ -67,7 +67,7 @@ extension BarMotion {
         plateRadius: CGFloat
     ) -> RevealMotion {
         guard !reduceMotion, let plate else { return .fade(revealFade) }
-        let pill = origin.insetBy(
+        let mark = origin.insetBy(
             dx: -ShelfIndicatorSpec.hoverGrowth,
             dy: -ShelfIndicatorSpec.hoverGrowth
         )
@@ -78,9 +78,9 @@ extension BarMotion {
         return .morph(
             Morph(
                 entering: entering,
-                pill: pill,
+                mark: mark,
                 plate: plate,
-                pillRadius: min(pill.width, pill.height) / 2,
+                markRadius: min(mark.width, mark.height) / 2,
                 plateRadius: plateRadius,
                 plateStart: plateStart,
                 plateLength: plateLength,
@@ -167,8 +167,8 @@ extension BarMotion {
                     y: frame.minY + anchor.y * frame.height
                 )
             }
-            let from = entering ? morph.pill : morph.plate
-            let to = entering ? morph.plate : morph.pill
+            let from = entering ? morph.mark : morph.plate
+            let to = entering ? morph.plate : morph.mark
             let bounds = CABasicAnimation(keyPath: "bounds")
             bounds.fromValue = current?.bounds ?? from
             bounds.toValue = to
@@ -178,8 +178,8 @@ extension BarMotion {
             let corner = CABasicAnimation(keyPath: "cornerRadius")
             corner.fromValue =
                 current?.cornerRadius
-                ?? (entering ? morph.pillRadius : morph.plateRadius)
-            corner.toValue = entering ? morph.plateRadius : morph.pillRadius
+                ?? (entering ? morph.markRadius : morph.plateRadius)
+            corner.toValue = entering ? morph.plateRadius : morph.markRadius
             let clip = CAAnimationGroup()
             clip.animations = [bounds, position, corner]
             clip.duration = morph.plateLength

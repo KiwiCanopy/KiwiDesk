@@ -66,8 +66,9 @@ extension TilingSettings {
 
     /// Whether `bar`'s show/hide action can act anywhere (#761):
     /// the bar is on — the App Bar in some layout — and reads
-    /// `auto`. The one answer a shortcut row greys by and the
-    /// hotkey table registers by; a bar that is off does nothing.
+    /// `auto`. The verb's own gate (`shelfRevealCommand`), and
+    /// the one a shortcut row or the hotkey table asks beside it;
+    /// a bar that is off does nothing.
     public func revealActionLive(_ bar: ShelfBar) -> Bool {
         let on =
             bar == .space ? spaceBarStyle.enabled : anyAppBarCanShow

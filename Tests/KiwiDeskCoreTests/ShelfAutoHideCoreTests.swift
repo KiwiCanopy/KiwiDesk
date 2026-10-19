@@ -162,6 +162,34 @@ struct ShelfAutoHideCoreTests {
     }
 
     @Test(
+        "A shelf write runs a pass only where the reservation moved",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func shelfWriteSkipsAnIdlePass() throws {
+        let (core, _) = try #require(makeCore(.always))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
+        let passes = { () -> Int in
+            let counts = meter.snapshot(reset: true).counts
+            return counts.retiles + counts.passesHeld
+        }
+        #expect(
+            core.execute("kiwishelf.set_glyph_size", args: [.number(12)])
+                .isSuccess
+        )
+        #expect(passes() == 0)
+        let depth = core.tiler.settings.kiwishelf.thickness
+        #expect(
+            core.execute(
+                "kiwishelf.set_thickness",
+                args: [.number(Double(depth) + 6)]
+            ).isSuccess
+        )
+        #expect(passes() > 0)
+    }
+
+    @Test(
         "The App Bar's action refuses a shelf only the Space Bar holds",
         .enabled(if: NSScreen.main != nil)
     )
