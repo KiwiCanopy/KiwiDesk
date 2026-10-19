@@ -199,7 +199,7 @@ extension SpaceBarItemView {
 
     /// A symbol identifier's weight, here and in a hidden bar's
     /// hovered mark (#761), so the two draw one Space alike.
-    static let identifierSymbolWeight: NSFont.Weight = .regular
+    nonisolated static let identifierSymbolWeight: NSFont.Weight = .regular
 
     private func styleIdentifier() {
         switch spaceGlyph {
