@@ -112,8 +112,13 @@ struct SettingsHeaderBar: View {
                         .scaledToFit()
                         .frame(width: 22, height: 22)
                 }
-                Text(L("home.back", "Home"))
-                    .font(.callout)
+                // Shed with the chrome; never wrapped, or a squeezed
+                // row stacks it a letter per line.
+                if !width.collapsesChrome {
+                    Text(L("home.back", "Home"))
+                        .font(.callout)
+                        .fixedSize()
+                }
             }
             .foregroundStyle(SettingsTheme.ink)
             .padding(.horizontal, ChipMetrics.padH)

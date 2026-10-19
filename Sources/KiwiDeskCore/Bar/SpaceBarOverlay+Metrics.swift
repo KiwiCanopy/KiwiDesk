@@ -77,7 +77,7 @@ extension SpaceBarOverlay {
             frontFollows: frontFollows
         )
         let badged = SpaceBarItemView.badgesIdentifier(
-            collapsed: item.collapse != nil,
+            collapsed: item.collapse?.drawsDisc ?? false,
             marked: item.marker != nil
         )
         return SpaceBarItemView.ends(
