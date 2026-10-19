@@ -7,7 +7,7 @@ import Testing
 /// while its bar is `always` wherever it can show, and its reason
 /// is a live pointer to KiwiShelf & Bars.
 @Suite("KiwiShelf shortcut rows (#761)")
-struct KiwiShelfShortcutsGroupTests {
+struct KiwiShelfKeyRowsTests {
     @Test("each row's caption places its link")
     @MainActor
     func captionsPlaceTheirLink() {
@@ -16,7 +16,7 @@ struct KiwiShelfShortcutsGroupTests {
         for key in [
             SettingKey.shortcuts(.toggleSpaceBar), .shortcuts(.toggleAppBar),
         ] {
-            #expect(KiwiShelfShortcutsGroup.caption(key).contains(slot))
+            #expect(KiwiShelfKeyRows.caption(key).contains(slot))
         }
     }
 
@@ -28,11 +28,11 @@ struct KiwiShelfShortcutsGroupTests {
         settings.scrolling.appBar.visibility = .always
         let space = SettingKey.shortcuts(.toggleSpaceBar)
         let app = SettingKey.shortcuts(.toggleAppBar)
-        #expect(KiwiShelfShortcutsGroup.inert(space, settings))
-        #expect(KiwiShelfShortcutsGroup.inert(app, settings))
+        #expect(KiwiShelfKeyRows.inert(space, settings))
+        #expect(KiwiShelfKeyRows.inert(app, settings))
         settings.spaceBarStyle.visibility = .hidden
         settings.scrolling.appBar.visibility = .auto
-        #expect(!KiwiShelfShortcutsGroup.inert(space, settings))
-        #expect(!KiwiShelfShortcutsGroup.inert(app, settings))
+        #expect(!KiwiShelfKeyRows.inert(space, settings))
+        #expect(!KiwiShelfKeyRows.inert(app, settings))
     }
 }

@@ -149,7 +149,8 @@ struct SettingsCatalogTests {
         // 174 since #2237: the Per layout drawer and its twelve.
         // 177 since #761: Shortcuts' KiwiShelf group, the Show
         // master's drawer and its Space Bar row.
-        #expect(allEntries.count == 177)
+        // 178: the Show & hide card over Shortcuts' three groups.
+        #expect(allEntries.count == 178)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

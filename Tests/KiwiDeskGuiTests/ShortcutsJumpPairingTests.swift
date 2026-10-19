@@ -28,20 +28,20 @@ struct ShortcutsJumpPairingTests {
         }
         return [
             (
-                "ShortcutsRowOrder.kiwiHubAtRest",
+                "KiwiHubKeyRows(",
                 ShortcutsRowOrder.kiwiHubAtRest
+            ),
+            (
+                "KiwiShelfKeyRows(",
+                ShortcutsRowOrder.kiwishelfAtRest
+            ),
+            (
+                "KiwiVisionKeyRows(",
+                ShortcutsRowOrder.kiwiVisionAtRest
             ),
             (
                 "ShortcutsRowOrder.focusAtRest",
                 ShortcutsRowOrder.focusAtRest
-            ),
-            (
-                "ShortcutsRowOrder.kiwiVisionAtRest",
-                ShortcutsRowOrder.kiwiVisionAtRest
-            ),
-            (
-                "ShortcutsRowOrder.kiwishelfAtRest",
-                ShortcutsRowOrder.kiwishelfAtRest
             ),
             (
                 "ShortcutsRowOrder.moveWindowsAtRest",
@@ -120,6 +120,8 @@ struct ShortcutsJumpPairingTests {
                 $0.contains("ShortcutsRowOrder.openApplicationsKiwiDesk")
             }
         )
+        // Show & hide's rows views walk their lists:
+        // `ShowHideCensusRenderTests` ▸ `rowsAreAllDrawn`.
         for group in ShortcutsJumpGroup.allCases {
             let name = try #require(Self.spelling(of: group))
             let title = "SettingsCatalog.shortcuts.\(name)"

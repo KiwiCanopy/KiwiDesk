@@ -1940,6 +1940,7 @@
   "shortcuts.section.layout": "レイアウト",
   "shortcuts.section.move_windows": "ウインドウを移動",
   "shortcuts.section.open_applications": "アプリを開く",
+  "shortcuts.section.show_hide": "表示と非表示",
   "shortcuts.section.size_float": "サイズとフローティング",
   "shortcuts.section.switch_layers": "レイヤーの切り替え",
   "shortcuts.section.unavailable": "利用できないショートカット",

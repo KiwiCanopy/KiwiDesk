@@ -153,7 +153,7 @@ struct ShortcutsSection: View {
     }
 
     @ViewBuilder private var actionGroups: some View {
-        KiwiHubGroup(
+        ShowHideGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
@@ -174,16 +174,6 @@ struct ShortcutsSection: View {
             expander: expander
         )
         SizeFloatGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        KiwiVisionShortcutsGroup(
-            model: model,
-            bindings: bindingsBinding,
-            expander: expander
-        )
-        KiwiShelfShortcutsGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
