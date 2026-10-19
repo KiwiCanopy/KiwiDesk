@@ -963,6 +963,8 @@
   "kiwishelf.highlight_width.help": "目前空間與焦點視窗上標記的寬度 — 外框直接採用此值，邊緣標記則依比例繪製。",
   "kiwishelf.icon_source.help": "App 圖形在兩個列上的繪製方式。「%1$@」會顯示單色符號，以 KiwiShelf 的項目顏色著色（在%2$@中設定）；沒有符號的 App 保留其 App 圖像。",
   "kiwishelf.icon_source.label": "App 圖形樣式",
+  "kiwishelf.indicator.hidden_position.ax": "已隱藏，空間 %1$d，共 %2$d 個",
+  "kiwishelf.indicator.shown_position.ax": "已顯示，空間 %1$d，共 %2$d 個",
   "kiwishelf.inner_margin": "內側邊距",
   "kiwishelf.inner_margin.help": "視窗一側的額外邊距，加在該處已有的間距之上；為 0 時僅由該間距決定。",
   "kiwishelf.item_gap": "項目間距",

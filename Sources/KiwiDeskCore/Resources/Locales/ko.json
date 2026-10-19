@@ -963,6 +963,8 @@
   "kiwishelf.highlight_width.help": "현재 공간과 포커스된 윈도우를 표시하는 마크의 두께입니다 — 아웃라인은 이 두께로, 모서리 마크는 그에 비례해 그려집니다.",
   "kiwishelf.icon_source.help": "두 바에서 앱 글리프를 그리는 방식입니다. ‘%1$@’은(는) %2$@에서 설정한 KiwiShelf 항목 색상으로 칠한 단색 심볼을 표시하며, 심볼이 없는 앱은 앱 아이콘을 유지합니다.",
   "kiwishelf.icon_source.label": "앱 글리프 스타일",
+  "kiwishelf.indicator.hidden_position.ax": "가려짐, 공간 %1$d (전체 %2$d개)",
+  "kiwishelf.indicator.shown_position.ax": "표시됨, 공간 %1$d (전체 %2$d개)",
   "kiwishelf.inner_margin": "안쪽 여백",
   "kiwishelf.inner_margin.help": "윈도우 쪽의 추가 여백으로, 그 자리에 이미 있는 간격에 더해집니다. 0이면 그 간격만 적용됩니다.",
   "kiwishelf.item_gap": "항목 간격",

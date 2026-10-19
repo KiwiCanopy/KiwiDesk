@@ -965,6 +965,8 @@
   "kiwishelf.highlight_width.help": "Con qué grosor se dibuja la marca del Espacio actual y de la ventana enfocada: el recuadro o, en proporción, la marca de borde.",
   "kiwishelf.icon_source.help": "Cómo se dibujan los glifos de aplicación en ambas barras. «%1$@» muestra un símbolo monocromo teñido con los colores de elemento de KiwiShelf, definidos en %2$@; las aplicaciones sin símbolo conservan su icono.",
   "kiwishelf.icon_source.label": "Estilo de glifo de aplicación",
+  "kiwishelf.indicator.hidden_position.ax": "Oculta, espacio %1$d de %2$d",
+  "kiwishelf.indicator.shown_position.ax": "Visible, espacio %1$d de %2$d",
   "kiwishelf.inner_margin": "Margen interior",
   "kiwishelf.inner_margin.help": "Margen adicional en el lado de las ventanas, sumado al espaciado que ya haya ahí; con 0 manda ese espaciado.",
   "kiwishelf.item_gap": "Espaciado entre elementos",
