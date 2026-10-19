@@ -14,7 +14,7 @@ struct GestureItemPicture: View {
 }
 
 extension GestureEntry where Picture == GestureItemPicture {
-    /// The entry for `item`: its sentence, picture, surface and
+    /// The entry for `item`: its sentence, picture and
     /// pace, greyed where `item.isOff` says. It plays once as it
     /// appears while `playing` names it, and spends that.
     init(
@@ -28,10 +28,8 @@ extension GestureEntry where Picture == GestureItemPicture {
     ) {
         self.init(
             item.sentence(settings),
-            surface: item.surface,
-            settings: settings,
             pace: item.pace,
-            off: item.isOff(settings, gestures),
+            off: item.isOff(gestures),
             help: help,
             helpSubject: helpSubject,
             playsOnAppear: Binding(

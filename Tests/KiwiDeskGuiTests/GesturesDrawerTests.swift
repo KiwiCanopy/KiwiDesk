@@ -36,41 +36,6 @@ struct GesturesDrawerTests {
         #expect(GesturesShelfEntries.springLinkProse.contains(slot))
     }
 
-    /// No surface greys for a bar's visibility (#761): a hidden
-    /// bar's shortcut shows it, and its gestures then act on it.
-    @Test("a hidden bar greys no gesture")
-    func hiddenGreysNothing() {
-        var settings = TilingSettings()
-        settings.spaceBarStyle.visibility = .hidden
-        settings.monocle.appBar.visibility = .hidden
-        settings.scrolling.appBar.visibility = .hidden
-        let gestures = ScrollGestureBase.defaults
-        for item in GestureItem.allCases
-        where item != .scrollStep && item != .spaceStep {
-            #expect(!item.isOff(settings, gestures), "\(item)")
-        }
-    }
-
-    /// Each gesture names the surface it teaches: swapping two
-    /// items' surfaces reds here. The entries take theirs from the
-    /// item (`GestureEntry+Item`), so this is the one copy.
-    @Test("each gesture greys on its own surface")
-    func itemNamesItsSurface() {
-        let expected: [GestureItem: GestureSurface] = [
-            .scrollStep: .windows, .spaceStep: .windows,
-            .hoverFocus: .windows, .followFocus: .windows,
-            .swap: .windows, .edge: .windows,
-            .dropOnSpace: .spaceBar, .spring: .spaceBar,
-            .glyphClick: .spaceBar, .glyphPeek: .spaceBar,
-            .shelfScroll: .shelf, .contextMenu: .shelf,
-            .appBarReorder: .appBar, .appBarHover: .appBar,
-        ]
-        #expect(Set(expected.keys) == Set(GestureItem.allCases))
-        for item in GestureItem.allCases {
-            #expect(item.surface == expected[item], "\(item)")
-        }
-    }
-
     /// Every entry is built from its item and anchored so a strip
     /// click lands on it, and the card draws the items in their
     /// declared order — the strip's order IS the card's.

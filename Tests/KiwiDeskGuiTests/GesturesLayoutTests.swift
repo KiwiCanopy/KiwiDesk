@@ -103,22 +103,13 @@ struct GesturesLayoutTests {
     /// once trapped.
     @Test("an entry grows only where its control drops below")
     func entriesLayOut() throws {
-        let settings = TilingSettings()
         let wide: CGFloat = 700
         let narrow: CGFloat = 380
         func bare() -> some View {
-            GestureEntry(
-                "Bare",
-                surface: .windows,
-                settings: settings
-            ) { GesturePicture.Swap(t: $0) }
+            GestureEntry("Bare") { GesturePicture.Swap(t: $0) }
         }
         func controlled() -> some View {
-            GestureEntry(
-                "With a control",
-                surface: .windows,
-                settings: settings
-            ) {
+            GestureEntry("With a control") {
                 GesturePicture.Edge(t: $0)
             } control: {
                 MouseResizePicker(selection: .constant(.layout))
@@ -141,14 +132,9 @@ struct GesturesLayoutTests {
     /// drawing it over what follows.
     @Test("a wrapping control is measured at the width it gets")
     func wrappingControlGrows() throws {
-        let settings = TilingSettings()
         let long = String(repeating: "Move the pointer along ", count: 4)
         func entry() -> some View {
-            GestureEntry(
-                "Short",
-                surface: .windows,
-                settings: settings
-            ) {
+            GestureEntry("Short") {
                 GesturePicture.FollowFocus(t: $0)
             } control: {
                 Toggle(long, isOn: .constant(true))

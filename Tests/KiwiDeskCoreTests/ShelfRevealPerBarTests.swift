@@ -164,6 +164,25 @@ struct ShelfRevealPerBarTests {
         #expect(auto.hiding.isEmpty)
     }
 
+    /// An `auto` bar beside an `always` one reads `always`, so a
+    /// reserving `auto` bar asks the full strip, never a sliver on
+    /// an edge that does not hide — whichever of the two reserves.
+    @Test("an auto bar beside an always one reserves the full strip")
+    func autoBesideAlwaysReservesFull() {
+        for spaceAlways in [true, false] {
+            var settings = TilingSettings()
+            settings.spaceBarStyle.setEdge(.top)
+            settings.appBarStyle.setEdge(.top)
+            settings.spaceBarStyle.visibility = spaceAlways ? .always : .auto
+            settings.monocle.appBar.visibility = spaceAlways ? .auto : .always
+            settings.spaceBarStyle.reserve = !spaceAlways
+            settings.appBarStyle.reserve = spaceAlways
+            let reserved = settings.shelfReservation(in: .monocle, on: nil)
+            #expect(reserved.edges == [.top])
+            #expect(reserved.hiding.isEmpty)
+        }
+    }
+
     /// A first run's bars hide until the pointer asks (#761), so
     /// the starter gives the windows the whole screen.
     @Test("the starter's bars are auto")

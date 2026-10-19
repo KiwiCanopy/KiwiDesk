@@ -7,16 +7,14 @@ import SwiftUI
 /// it appears where `playsOnAppear` says so (owner ruling
 /// 2026-09-29), and rests on its key frame otherwise; under Reduce
 /// Motion it never moves.
-/// An entry whose `surface` is off greys its picture and sentence
+/// An entry whose gesture is off greys its picture and sentence
 /// and never its control — a greyed control says "you cannot
 /// change this", and switching a setting on is always allowed.
 struct GestureEntry<Picture: View, Control: View>: View {
     let text: String
-    let surface: GestureSurface
-    let settings: TilingSettings
     let pace: GesturePace
-    /// The gesture itself is off (a cleared chord) though its
-    /// surface is on: greyed the same way.
+    /// The gesture is off (a cleared chord): picture and sentence
+    /// grey.
     let off: Bool
     /// The `?` after the sentence, which names the entry's control
     /// (#94), and what it is about for VoiceOver.
@@ -37,8 +35,6 @@ struct GestureEntry<Picture: View, Control: View>: View {
 
     init(
         _ text: String,
-        surface: GestureSurface,
-        settings: TilingSettings,
         pace: GesturePace = .quick,
         off: Bool = false,
         help: String? = nil,
@@ -51,8 +47,6 @@ struct GestureEntry<Picture: View, Control: View>: View {
         self.help = help
         self.helpSubject = helpSubject
         self.text = text
-        self.surface = surface
-        self.settings = settings
         self.pace = pace
         self.off = off
         self.picture = picture
@@ -90,7 +84,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
     }
 
     /// The sentence, and its `?` outside the grey: help stays
-    /// readable whatever the surface says.
+    /// readable whatever the gesture says.
     private var sentence: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Text(text)
@@ -146,15 +140,11 @@ struct GestureEntry<Picture: View, Control: View>: View {
 extension GestureEntry where Control == EmptyView {
     init(
         _ text: String,
-        surface: GestureSurface,
-        settings: TilingSettings,
         pace: GesturePace = .quick,
         @ViewBuilder picture: @escaping (CGFloat) -> Picture
     ) {
         self.init(
             text,
-            surface: surface,
-            settings: settings,
             pace: pace,
             picture: picture
         ) { EmptyView() }

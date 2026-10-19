@@ -31,18 +31,6 @@ enum GestureItem: String, CaseIterable, Identifiable {
         }
     }
 
-    var surface: GestureSurface {
-        switch self {
-        case .scrollStep, .spaceStep, .hoverFocus, .followFocus,
-            .swap, .edge:
-            return .windows
-        case .dropOnSpace, .spring, .glyphClick, .glyphPeek:
-            return .spaceBar
-        case .shelfScroll, .contextMenu: return .shelf
-        case .appBarReorder, .appBarHover: return .appBar
-        }
-    }
-
     var pace: GesturePace {
         switch self {
         case .edge, .shelfScroll: return .quick
@@ -53,9 +41,7 @@ enum GestureItem: String, CaseIterable, Identifiable {
 
     /// Whether the gesture does nothing on this draft: its chord is
     /// cleared (Core's verdict, so a hand-edited lone ⌃ greys too).
-    func isOff(_ settings: TilingSettings, _ gestures: ScrollGestureBase)
-        -> Bool
-    {
+    func isOff(_ gestures: ScrollGestureBase) -> Bool {
         switch self {
         case .scrollStep: return gestures.sanitized.pan.isEmpty
         case .spaceStep: return gestures.sanitized.spaceStep.isEmpty

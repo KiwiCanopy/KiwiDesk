@@ -9,7 +9,7 @@ extension KiwiShelfCard {
     /// the App Bar only where a layout can carry one: always, until
     /// the pointer reaches its edge, or only on its shortcut.
     var showGroup: some View {
-        SettingsRowShape {
+        VStack(alignment: .leading, spacing: 6) {
             SettingsRowLabel(
                 label: L("kiwishelf.show.label", "Show"),
                 help: L(
@@ -26,11 +26,8 @@ extension KiwiShelfCard {
                     L("layout.scrolling.name", "Scrolling")
                 )
             )
-        } control: {
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(BarsRowOrder.kiwishelfShow, id: \.id) {
-                    row(for: $0)
-                }
+            ForEach(BarsRowOrder.kiwishelfShow, id: \.id) {
+                row(for: $0)
             }
         }
     }
@@ -68,15 +65,17 @@ extension KiwiShelfCard {
     }
 
     /// Under an `auto` bar beside an `always` one on its edge: it
-    /// stays shown there (#761) — Core's verdict, over the bars'
-    /// own edges.
+    /// stays shown there (#761) — Core's verdict, on any screen's
+    /// edges (`screenVariants`).
     @ViewBuilder private func besideAlwaysNote(
         _ bar: ShelfBar,
         in modes: [LayoutMode]
     ) -> some View {
-        let settings = model.config.settings
-        if modes.contains(where: {
-            settings.autoReadsAlways(bar, in: $0, on: nil)
+        let screens = model.config.settings.screenVariants
+        if screens.contains(where: { screen in
+            modes.contains {
+                screen.autoReadsAlways(bar, in: $0, on: nil)
+            }
         }) {
             BarNoteRow(
                 text: bar == .space
@@ -96,21 +95,17 @@ extension KiwiShelfCard {
         }
     }
 
-    /// One bar's Always · Auto · Hidden strip, named by `title`.
+    /// One bar's Always · Auto · Hidden strip, on the shared label
+    /// axis like every labelled picker (#2439).
     private func visibilityRow(
         _ title: String,
         _ selection: Binding<ShelfVisibility>
     ) -> some View {
-        HStack(spacing: 8) {
-            Text(title)
-                .accessibilityHidden(true)
-            Spacer(minLength: 8)
-            SegmentedPicker(
-                spokenLabel: title,
-                selection: selection,
-                options: AppBarOptions.visibility.map { ($0.1, $0.0) }
-            )
-        }
+        SegmentedPicker(
+            title,
+            selection: selection,
+            options: AppBarOptions.visibility.map { ($0.1, $0.0) }
+        )
     }
 
     @ViewBuilder var alignmentRow: some View {
