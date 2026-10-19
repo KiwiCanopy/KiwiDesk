@@ -156,7 +156,8 @@ extension KiwiCore {
         let trackMins = ranges.map {
             effectiveMinSize(
                 of: tiled[$0],
-                axis: acrossAxis
+                axis: acrossAxis,
+                in: space
             )
         }
         // A track whose members all stop at a learned ceiling

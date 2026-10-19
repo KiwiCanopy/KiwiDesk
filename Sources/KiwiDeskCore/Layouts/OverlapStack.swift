@@ -9,17 +9,17 @@ public enum OverlapStack {
     public static func frames(
         for windows: some Collection<WindowID>,
         in region: CGRect,
-        minSize: CGFloat,
+        minSize: MinSize,
         fitToRegion: Bool = false
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
         let cascade =
             CGFloat(max(windows.count - 1, 0)) * offset
-        let fullHeight = max(region.height, minSize)
+        let fullHeight = max(region.height, minSize.height)
         let size = CGSize(
-            width: max(region.width, minSize),
+            width: max(region.width, minSize.width),
             height: fitToRegion
-                ? max(fullHeight - cascade, minSize)
+                ? max(fullHeight - cascade, minSize.height)
                 : fullHeight
         )
         for (index, window) in windows.enumerated() {
@@ -38,15 +38,18 @@ public enum OverlapStack {
     /// ALWAYS offset downward — a horizontal offset would reveal
     /// side slivers, not title bars — and this is the single
     /// authority behind the stack column overflow and both track
-    /// axes, so the geometry cannot drift between them.
+    /// axes, so the geometry cannot drift between them. A tile
+    /// keeps the floor along `vertical`'s axis; a buried slot is
+    /// the height floor tall either way.
     public static func overflowFrames(
         count: Int,
         in region: CGRect,
         vertical: Bool,
-        minSize: CGFloat,
+        minSize floor: MinSize,
         gap: CGFloat
     ) -> (rects: [CGRect], tiled: Int)? {
         guard count > 0 else { return ([], 0) }
+        let minSize = floor.along(horizontal: !vertical)
         let primary = vertical ? region.height : region.width
         for tiled in stride(from: count - 1, through: 1, by: -1) {
             let buried = CGFloat(count - tiled - 1)
@@ -79,13 +82,13 @@ public enum OverlapStack {
                             x: region.minX,
                             y: pos + step,
                             width: region.width,
-                            height: minSize
+                            height: floor.height
                         )
                         : CGRect(
                             x: pos,
                             y: region.minY + step,
                             width: region.maxX - pos,
-                            height: minSize
+                            height: floor.height
                         )
                 )
             }

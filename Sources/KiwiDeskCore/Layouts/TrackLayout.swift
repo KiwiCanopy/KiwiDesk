@@ -36,7 +36,9 @@ public struct TrackLayout: LayoutSystem {
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(span),
-            minSize: Double(context.minWindowSize)
+            minSize: Double(
+                context.minWindowSize.along(horizontal: vertical)
+            )
         )
         guard span > 0, total <= limit else {
             return OverlapStack.frames(
@@ -132,7 +134,9 @@ public struct TrackLayout: LayoutSystem {
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(available),
-            minSize: Double(context.minWindowSize)
+            minSize: Double(
+                context.minWindowSize.along(horizontal: !vertical)
+            )
         )
         guard available > 0, total <= limit else {
             // cascade_all piles every window from the top; the

@@ -81,7 +81,7 @@ public enum FloatGather {
         frames: [WindowID: CGRect],
         region: CGRect,
         grid: CGRect? = nil,
-        minSize: CGFloat,
+        minSize: MinSize,
         targetDepth: Int,
         placingLast: WindowID? = nil
     ) -> [WindowID: CGRect] {
