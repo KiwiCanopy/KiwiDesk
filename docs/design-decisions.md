@@ -14215,7 +14215,12 @@ edge needs no single answer, and a precedence fold cannot flip on
 a layout switch any more than the link could, since it reads the
 stored values and never what a layout draws. A shelf-wide master
 was refused for the reason the reserve refuses one: the bars may
-sit on different edges.
+sit on different edges. That refuses a stored, linked value, not a
+Settings row: the Show master writes each bar's own value, as the
+Position master writes each bar's own edge, selects nothing while
+they differ, and links nothing — most setups give every bar one
+answer, so the master is the one decision a new user meets, and
+Each bar holds the rest.
 
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
@@ -15250,9 +15255,11 @@ fade where it says arrow.
 
 **The bar cards share one canonical row order.** (#374, re-cut
 by the #678 Phase 2 census render and by #1517.) The KiwiShelf
-card owns existence and placement: the Show group, then
-Position, Thickness, Alignment, Order and Space Bar minimum, then
-its Style and Margins drawers. Each bar's card shows every row,
+card owns existence and placement: the Show master and its Each
+bar drawer, then Position and its Each bar drawer, Alignment,
+Order and Space Bar minimum — where the bars sit, coarse to fine —
+then Thickness and its Style and Margins drawers. A master's drawer
+hangs under it with no rule, since a rule marks a new topic. Each bar's card shows every row,
 with no drawer, each gate directly above what it gates. Colours
 live in the one KiwiShelf colour card — signature colours
 inline, the rest behind a shut disclosure, the Space Bar's

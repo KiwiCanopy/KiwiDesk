@@ -25,9 +25,9 @@ extension LayoutAppBarKey {
     var placement: SettingPlacement {
         switch self {
         case .monocleAppBarVisibility, .scrollingAppBarVisibility:
-            // Drawn in the KiwiShelf card's Show group, which has
-            // no container gate.
-            return .row(.bars, .kiwishelf, .atRest)
+            // Behind the Show master's Each bar drawer (#761),
+            // which has no container gate.
+            return .row(.bars, .kiwishelf, .showMore)
         case .monocleAppBarActiveIndicator,
             .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
             .scrollingAppBarActiveIndicator,

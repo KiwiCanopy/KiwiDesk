@@ -9,6 +9,7 @@ import SwiftUI
 struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
     @State var edgesExpanded = false
+    @State var showExpanded = false
     @State private var styleExpanded = false
     @State private var marginsExpanded = false
 
@@ -31,6 +32,7 @@ struct KiwiShelfCard: View {
                 destination: .looks
             )
             showGroup
+            Divider()
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(BarsRowOrder.kiwishelfAtRest, id: \.id) {
                     row(for: $0)
@@ -106,9 +108,9 @@ struct KiwiShelfCard: View {
     static var lookReference: String {
         L(
             "bars.kiwishelf.looks_xref",
-            "A look sets this card's style, both indicators, "
-                + "the focus border's shape and sheen, and the "
-                + "window gaps in one click — in %1$@.",
+            "A look sets where the bars sit and how they look, "
+                + "both indicators, the focus border's shape and "
+                + "sheen, and the window gaps in one click — in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

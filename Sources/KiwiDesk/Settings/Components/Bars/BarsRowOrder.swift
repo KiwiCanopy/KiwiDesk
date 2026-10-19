@@ -1,20 +1,27 @@
 /// Display order for the Bars settings area (#678, `BarsCensusRenderTests`).
 enum BarsRowOrder {
-    /// KiwiShelf card, Show group: which bars the shelf carries.
+    /// KiwiShelf card, Show group: the master, its Each bar
+    /// drawer, then the Space cue (#761).
     static let kiwishelfShow: [SettingKey] = [
-        .spaceBar(.spaceBarVisibility),
+        .kiwishelf(.visibility),
         .spaceBar(.spaceCue),
+    ]
+
+    /// KiwiShelf card, behind Show's Each bar disclosure (#761).
+    static let kiwishelfShowEach: [SettingKey] = [
+        .spaceBar(.spaceBarVisibility),
         .layoutAppBar(.monocleAppBarVisibility),
         .layoutAppBar(.scrollingAppBarVisibility),
     ]
 
-    /// KiwiShelf card, at rest below the Show group.
+    /// KiwiShelf card, at rest below the Show group: where the
+    /// bars sit, coarse to fine, then how deep the strip is.
     static let kiwishelfAtRest: [SettingKey] = [
         .kiwishelf(.edge),
-        .kiwishelf(.thickness),
         .kiwishelf(.alignment),
         .kiwishelf(.order),
         .kiwishelf(.minimum),
+        .kiwishelf(.thickness),
     ]
 
     /// KiwiShelf card, behind Position's Each bar disclosure

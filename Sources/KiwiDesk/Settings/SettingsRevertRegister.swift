@@ -23,6 +23,11 @@ enum SettingsRevertRegister {
     /// a pair the baseline held is never a pin the doors forbid.
     static let masters: [SettingKey: RevertWriter] = [
         .kiwishelf(.edge): .all([spaceBarEdge, appBarEdge]),
+        .kiwishelf(.visibility): .all([
+            .leaf(\.settings.spaceBarStyle.visibility),
+            .leaf(\.settings.monocle.appBar.visibility),
+            .leaf(\.settings.scrolling.appBar.visibility),
+        ]),
         .kiwishelf(.spaceBarEdge): spaceBarEdge,
         .kiwishelf(.spaceBarScreenEdge): spaceBarEdge,
         .kiwishelf(.appBarEdge): appBarEdge,

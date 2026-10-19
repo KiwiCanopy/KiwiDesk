@@ -16,6 +16,7 @@ struct MasterDivergenceRegisterTests {
         settings.gapsGlobal.outer.bottom += 3
         settings.gapsGlobal.inner.vertical += 3
         settings.appBarStyle.edge = .bottom
+        settings.scrolling.appBar.visibility = .hidden
         return GapsBordersGates(settings: settings)
     }
 

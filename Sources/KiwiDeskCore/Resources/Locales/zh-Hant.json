@@ -191,7 +191,6 @@
   "bar.visibility.hidden": "隱藏",
   "bars.app_bar.shelf_caption": "目前空間中的視窗 — 僅限%1$@與%2$@。由 KiwiShelf 放置。",
   "bars.kiwishelf.caption": "在一處設定兩個列：各自所在的邊緣、如何共用一個邊緣，以及共同的樣式。",
-  "bars.kiwishelf.looks_xref": "在%1$@中，造型可一鍵設定此卡片的樣式、兩個指示器、焦點邊框的形狀與光澤，以及視窗間距。",
   "bars.preview.other_layouts": "其他佈局",
   "bars.space_bar.shelf_caption": "每個空間一個項目 — 每個螢幕一個列，適用於每個佈局。這個列由 KiwiShelf 放置。",
   "bars.style": "樣式",

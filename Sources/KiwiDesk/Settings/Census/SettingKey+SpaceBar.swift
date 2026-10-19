@@ -30,10 +30,10 @@ extension SpaceBarKey {
     var placement: SettingPlacement {
         switch self {
         case .spaceBarVisibility:
-            // Drawn in the KiwiShelf card's Show group (#761); a
+            // Behind the Show master's Each bar drawer (#761); a
             // hidden bar's shortcut still shows it, so it gates
             // nothing.
-            return .row(.bars, .kiwishelf, .atRest)
+            return .row(.bars, .kiwishelf, .showMore)
         case .spaceCue:
             // Under the Space Bar row in the Show group, which has
             // no block gate: it matters most while the bar is

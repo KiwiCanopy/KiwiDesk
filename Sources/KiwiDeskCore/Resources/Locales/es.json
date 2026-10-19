@@ -191,7 +191,6 @@
   "bar.visibility.hidden": "Oculta",
   "bars.app_bar.shelf_caption": "Las ventanas del Espacio actual — solo en %1$@ y %2$@. KiwiShelf la coloca.",
   "bars.kiwishelf.caption": "Un solo lugar para ambas barras: dónde se sitúa cada una, cómo comparten un borde y el estilo que tienen en común.",
-  "bars.kiwishelf.looks_xref": "Un look ajusta el estilo de esta tarjeta, ambos indicadores, la forma y el reflejo del contorno de foco, y el espaciado de las ventanas con un clic: en %1$@.",
   "bars.preview.other_layouts": "Otros diseños",
   "bars.space_bar.shelf_caption": "Un elemento por Espacio — una barra por pantalla, en cada diseño. KiwiShelf la coloca.",
   "bars.style": "Estilo",

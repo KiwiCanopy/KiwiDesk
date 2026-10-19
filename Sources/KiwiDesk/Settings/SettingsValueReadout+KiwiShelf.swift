@@ -13,6 +13,12 @@ extension SettingsValueReadout {
         let o = old.settings.kiwishelf
         let n = new.settings.kiwishelf
         switch key {
+        case .visibility:
+            return spaceBarRow(
+                census,
+                agreedVisibility(old.settings),
+                agreedVisibility(new.settings)
+            )
         case .edge:
             return spaceBarRow(
                 census,
@@ -181,6 +187,15 @@ extension SettingsValueReadout {
         case .groupBadgeColor: return \.groupBadgeColor
         default: return \.groupBadgeTextColor
         }
+    }
+
+    /// The Show master's value, "mixed" while the bars differ.
+    static func agreedVisibility(_ settings: TilingSettings) -> String {
+        guard let visibility = settings.uniformBarVisibility else {
+            return L("diff.value.mixed", "mixed")
+        }
+        return AppBarOptions.visibility
+            .first { $0.0 == visibility }?.1 ?? ""
     }
 
     /// The Position master's value: the edge both bars share, or

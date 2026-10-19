@@ -87,6 +87,17 @@ enum BarsGateHelp {
         )
     }
 
+    /// The Show master's acknowledgement while the bars show
+    /// differently (#761): the master stays live, and a pick sets
+    /// every bar.
+    static var visibilityDiffers: String {
+        L(
+            "kiwishelf.show.differ.help",
+            "Your bars show differently right now; choosing here "
+                + "sets every bar."
+        )
+    }
+
     /// A bar row's `?` while its screens differ (#1948), naming
     /// that bar's own Per screen drawer.
     static func screensDiffer(appBar: Bool) -> String {

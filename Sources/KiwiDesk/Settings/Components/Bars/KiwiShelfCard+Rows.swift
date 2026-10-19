@@ -7,6 +7,8 @@ import SwiftUI
 extension KiwiShelfCard {
     @ViewBuilder func kiwishelfRow(_ key: KiwiShelfKey) -> some View {
         switch key {
+        case .visibility:
+            visibilityRows
         case .edge:
             edgeRows
         case .spaceBarEdge:
@@ -30,6 +32,8 @@ extension KiwiShelfCard {
             orderRow
         case .minimum:
             minimumRow
+            // Closes where the bars sit; the strip's depth follows.
+            Divider()
         case .background:
             backgroundStyleRow
         case .backgroundFit:

@@ -32,6 +32,36 @@ extension TilingSettings {
         appBarHost(for: mode)?.appBar.visibility
     }
 
+    /// The visibility every bar shares — the Space Bar's and each
+    /// hosting layout's App Bar — or nil while they differ: what
+    /// Settings' Show master selects (#761).
+    public var uniformBarVisibility: ShelfVisibility? {
+        let all = [spaceBarStyle.visibility] + appBarHosts.map(\.visibility)
+        return Set(all).count == 1 ? all.first : nil
+    }
+
+    /// Sets every bar's own visibility at once — each still stored
+    /// per bar and per layout, nothing linked (#761).
+    public mutating func setEveryBarVisibility(_ visibility: ShelfVisibility) {
+        spaceBarStyle.visibility = visibility
+        for mode in LayoutMode.allCases {
+            setAppBarVisibility(visibility, in: mode)
+        }
+    }
+
+    /// The write twin of `appBarHost(for:)`: `mode`'s App Bar
+    /// visibility, where the mode hosts one.
+    public mutating func setAppBarVisibility(
+        _ visibility: ShelfVisibility,
+        in mode: LayoutMode
+    ) {
+        switch mode {
+        case .monocle: monocle.appBar.visibility = visibility
+        case .scrolling: scrolling.appBar.visibility = visibility
+        default: break
+        }
+    }
+
     /// Whether `bar`'s shortcut can show it in `mode` (#761): the
     /// bar is not `always` — and, for the App Bar, the layout
     /// carries one. The verb's own gate (`shelfRevealCommand`); a

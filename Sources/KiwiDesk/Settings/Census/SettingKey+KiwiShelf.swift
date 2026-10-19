@@ -1,9 +1,12 @@
 /// The shelf both bars sit on (`KiwiShelf`, #1517) slice of the
-/// census. Its card also draws the three Show rows, whose keys
-/// stay with the value they write (`spaceBarVisibility`, the two
-/// layout App Bar visibilities).
+/// census. Its card also draws the three Show rows behind the Show
+/// master, whose keys stay with the value they write
+/// (`spaceBarVisibility`, the two layout App Bar visibilities).
 
 enum KiwiShelfKey: String, CaseIterable, Hashable {
+    /// The Show master: every bar's visibility (#761), which it
+    /// writes through `masterWrites`.
+    case visibility = "settings.spaceBarStyle.visibility (master)"
     /// The Position master: both bars' edges (#1731), which it
     /// writes through `masterWrites`.
     case edge = "settings.spaceBarStyle.edge (master)"
@@ -50,7 +53,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
 extension KiwiShelfKey {
     var placement: SettingPlacement {
         switch self {
-        case .edge:
+        case .edge, .visibility:
             // A master acknowledges divergence through its `?`
             // and carries no gate (`GapsBordersGates.acknowledged`).
             return .row(.bars, .kiwishelf, .atRest)
@@ -126,6 +129,11 @@ extension KiwiShelfKey {
 
     var text: SettingRowText {
         switch self {
+        case .visibility:
+            return .text(
+                "kiwishelf.show.label",
+                help: "kiwishelf.show.visibility.help"
+            )
         case .edge:
             return .text(
                 "kiwishelf.edge.label",

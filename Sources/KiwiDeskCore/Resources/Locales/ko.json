@@ -191,7 +191,6 @@
   "bar.visibility.hidden": "가려짐",
   "bars.app_bar.shelf_caption": "현재 공간의 윈도우입니다 — %1$@, %2$@ 레이아웃에서만 표시됩니다. 배치는 KiwiShelf가 맡습니다.",
   "bars.kiwishelf.caption": "두 바를 한곳에서 설정하며, 각 바가 놓일 가장자리, 같은 가장자리를 나누는 방식, 공통 스타일을 정합니다.",
-  "bars.kiwishelf.looks_xref": "%1$@에서 디자인을 한 번 클릭하면 이 카드의 스타일, 두 인디케이터, 포커스 테두리의 모양과 광택, 윈도우 간격이 한꺼번에 설정됩니다.",
   "bars.preview.other_layouts": "다른 레이아웃",
   "bars.space_bar.shelf_caption": "공간마다 항목 하나 — 화면마다 바 하나가 모든 레이아웃에서 표시됩니다. 이 바의 배치는 KiwiShelf가 맡습니다.",
   "bars.style": "스타일",
