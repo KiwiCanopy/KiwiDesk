@@ -164,6 +164,18 @@ struct ShelfRevealPerBarTests {
         #expect(auto.hiding.isEmpty)
     }
 
+    /// A first run's bars hide until the pointer asks (#761), so
+    /// the starter gives the windows the whole screen.
+    @Test("the starter's bars are auto")
+    func starterBarsAreAuto() {
+        let settings = StarterSetup.settings(
+            sizes: [CGSize(width: 1728, height: 1117)]
+        )
+        #expect(settings.spaceBarStyle.visibility == .auto)
+        #expect(settings.monocle.appBar.visibility == .auto)
+        #expect(settings.scrolling.appBar.visibility == .auto)
+    }
+
     // MARK: - Through the drivers
 
     /// A core on the primary screen with one window in a monocle
@@ -252,7 +264,10 @@ struct ShelfRevealPerBarTests {
         let (core, _) = try #require(makeCore(space: .always, app: .hidden))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let before = core.tiler.settings
-        #expect(!core.execute("space_bar.toggle_reveal", args: []).isSuccess)
+        // The refusal names its reason: an `always` bar has no target
+        // either, so a bare failure would not tell the gate apart.
+        let refused = core.execute("space_bar.toggle_reveal", args: [])
+        #expect(refused.error == "the Space Bar is set to always")
         #expect(core.tiler.settings == before)
         // The Always Space Bar draws; its hidden sibling joins it on
         // its own shortcut.
@@ -270,7 +285,10 @@ struct ShelfRevealPerBarTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         // It reads `always` on the edge: shown, and no target.
         #expect(!core.spaceBars.shownStrips.isEmpty)
-        #expect(!core.execute("space_bar.toggle_reveal", args: []).isSuccess)
+        let refused = core.execute("space_bar.toggle_reveal", args: [])
+        #expect(
+            refused.error == "the Space Bar is shown beside an always bar"
+        )
         #expect(!core.spaceBars.shownStrips.isEmpty)
     }
 }
