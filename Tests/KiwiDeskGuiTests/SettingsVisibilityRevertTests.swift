@@ -10,11 +10,20 @@ import Testing
 @MainActor
 @Suite("Bar visibility revert (#761)")
 struct SettingsVisibilityRevertTests {
-    private func model(split: Bool) -> SettingsModel {
+    /// Both bars set to auto on a draft with the App Bar on the
+    /// bottom where `split`, over a baseline split where
+    /// `splitInBaseline` (by default as the draft).
+    private func model(
+        split: Bool,
+        splitInBaseline: Bool? = nil
+    ) -> SettingsModel {
         var baseline = GuiConfig()
         baseline.settings.spaceBarStyle.setEdge(.top)
-        baseline.settings.appBarStyle.setEdge(split ? .bottom : .top)
+        baseline.settings.appBarStyle.setEdge(
+            (splitInBaseline ?? split) ? .bottom : .top
+        )
         var edited = baseline
+        edited.settings.appBarStyle.setEdge(split ? .bottom : .top)
         edited.settings.setVisibility(.auto, of: .space)
         edited.settings.setVisibility(.auto, of: .app)
         let model = makeTestModel()
@@ -34,6 +43,14 @@ struct SettingsVisibilityRevertTests {
         try revert(.appBar(.appBarVisibility), in: model)
         #expect(model.config.settings.spaceBarStyle.visibility == .always)
         #expect(model.config.settings.appBarStyle.visibility == .always)
+    }
+
+    @Test("Split in the draft alone, the ↺ takes back its own bar")
+    func draftSplitRevertsOne() throws {
+        let model = model(split: true, splitInBaseline: false)
+        try revert(.spaceBar(.spaceBarVisibility), in: model)
+        #expect(model.config.settings.spaceBarStyle.visibility == .always)
+        #expect(model.config.settings.appBarStyle.visibility == .auto)
     }
 
     @Test("Apart, each bar's ↺ takes back its own bar")

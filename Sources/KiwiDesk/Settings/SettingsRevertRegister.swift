@@ -46,9 +46,10 @@ enum SettingsRevertRegister {
         .leaf(\.settings.appBarStyle.edgeOverride),
     ])
 
-    /// A bar's visibility, and its partner's while the bars share
-    /// an edge on either side of the revert: `setVisibility` writes
-    /// the pair, so one leaf alone would split it (#761).
+    /// A bar's visibility, and its partner's while the draft has
+    /// the bars on one edge: `setVisibility` wrote the pair there,
+    /// so one leaf alone would split it (#761). Apart, each bar's
+    /// edit was its own.
     private static func barVisibility(_ bar: ShelfBar) -> RevertWriter {
         let space = RevertWriter.leaf(\.settings.spaceBarStyle.visibility)
         let app = RevertWriter.leaf(\.settings.appBarStyle.visibility)
@@ -58,10 +59,8 @@ enum SettingsRevertRegister {
         ) {
             model,
             instance in
-            let linked =
-                model.config.settings.barsLinked
-                || model.cleanConfig.settings.barsLinked
-            (linked ? RevertWriter.all([space, app]) : own)
+            (model.config.settings.barsLinked
+                ? RevertWriter.all([space, app]) : own)
                 .apply(model, instance)
         }
     }

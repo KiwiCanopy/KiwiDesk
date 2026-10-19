@@ -56,7 +56,7 @@ struct ShelfRevealMotionTests {
     }
 
     @Test("A reveal grows the plate out of the hovered mark, items after")
-    func revealMorphsOutOfThePill() throws {
+    func revealMorphsOutOfTheMark() throws {
         let morph = try #require(morph(entering: true))
         let mark = BarMotion.hoverPlate(
             mark: Self.mark,
