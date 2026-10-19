@@ -103,7 +103,7 @@ struct GreyOutParityTests {
         // everywhere (#761).
         (
             "KiwiShelfShortcutsGroup.swift",
-            "active: Self.inert(key, model.config.settings)",
+            "GreyOut(active: inert)",
             1
         ),
         // Reduce transparency dims the Liquid Glass card's rows

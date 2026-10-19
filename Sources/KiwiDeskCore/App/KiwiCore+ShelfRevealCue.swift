@@ -7,6 +7,9 @@ import AppKit
 extension KiwiCore {
     enum RevealRefusal: Equatable {
         case alwaysShown(ShelfBar)
+        /// Set to Auto, but reading Always beside an Always bar on
+        /// its edge.
+        case shownBesideAlways(ShelfBar)
         case noAppBarHere
     }
 
@@ -22,6 +25,7 @@ extension KiwiCore {
             soundIfDrawn(
                 flashRefusalPill(
                     near: drawn.strip,
+                    on: display,
                     edge: drawn.edge,
                     text: text,
                     symbol: symbol
@@ -40,13 +44,25 @@ extension KiwiCore {
         switch refusal {
         case .alwaysShown(.space):
             L(
-                "shelf.reveal_refused.space_always",
-                "Space Bar is set to Always"
+                "shelf.reveal_refused.space_set",
+                "Space Bar is set to %1$@",
+                L("bar.visibility.always", "Always")
             )
         case .alwaysShown(.app):
             L(
-                "shelf.reveal_refused.app_always",
-                "App Bar is set to Always"
+                "shelf.reveal_refused.app_set",
+                "App Bar is set to %1$@",
+                L("bar.visibility.always", "Always")
+            )
+        case .shownBesideAlways(.space):
+            L(
+                "shelf.reveal_refused.space_beside",
+                "Space Bar stays shown beside the App Bar"
+            )
+        case .shownBesideAlways(.app):
+            L(
+                "shelf.reveal_refused.app_beside",
+                "App Bar stays shown beside the Space Bar"
             )
         case .noAppBarHere:
             L(
@@ -61,7 +77,7 @@ extension KiwiCore.RevealRefusal {
     /// The bar whose shelf the pill stands beside.
     var bar: ShelfBar {
         switch self {
-        case .alwaysShown(let bar): bar
+        case .alwaysShown(let bar), .shownBesideAlways(let bar): bar
         case .noAppBarHere: .space
         }
     }

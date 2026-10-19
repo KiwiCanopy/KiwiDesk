@@ -83,10 +83,10 @@ struct GestureEntry<Picture: View, Control: View>: View {
 
     private var moving: Bool { hovering || autoplaying }
 
-    /// The grey an off surface puts on the picture and the
+    /// The grey a cleared chord puts on the picture and the
     /// sentence — never on the control, which stays live.
     private var dim: GreyOut {
-        GreyOut(active: surface.isOff(settings) || off)
+        GreyOut(active: off)
     }
 
     /// The sentence, and its `?` outside the grey: help stays

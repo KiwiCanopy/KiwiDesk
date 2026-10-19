@@ -310,7 +310,7 @@ struct RefusalCueSeamTests {
         }
         let door = Self.stripped(
             try SourceScan.functionBody(
-                of: "flashPillPrimitive",
+                of: "flashRefusalPill",
                 in: "KiwiCore+SizeLimitPill.swift",
                 under: "App"
             )

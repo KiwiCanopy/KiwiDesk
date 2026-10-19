@@ -39,7 +39,7 @@ enum HomeCardContent {
                 inner
             )
         case .bars:
-            let spaceShown = settings.spaceBarStyle.visibility != .hidden
+            let spaceShown = settings.spaceBarStyle.visibility.showsUnprompted
             let edge = edgeName(
                 spaceShown
                     ? settings.spaceBarStyle.edge : settings.appBarStyle.edge

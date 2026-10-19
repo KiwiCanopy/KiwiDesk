@@ -78,7 +78,7 @@ extension TilingSettings {
         onScreen(screen).barEdges(
             space: spaceBarStyle.visibility,
             app: appBarVisibility(in: mode)
-        ).filter { $0.reserves && $0.visibility == .always }.map(\.edge)
+        ).filter { $0.reservation == .always }.map(\.edge)
     }
 
     /// The hiding edges a space laid out in `mode` on `screen`
@@ -92,7 +92,22 @@ extension TilingSettings {
         onScreen(screen).barEdges(
             space: spaceBarStyle.visibility,
             app: appBarVisibility(in: mode)
-        ).filter { $0.reserves && $0.hides }.map(\.edge)
+        ).filter { $0.reservation == .auto }.map(\.edge)
+    }
+
+    /// Whether `bar`, stored `auto`, reads `always` in `mode` on
+    /// `screen` — beside an `always` bar on its edge (#761), which
+    /// keeps it shown: the note Settings draws under its row, and
+    /// why its shortcut refuses.
+    public func autoReadsAlways(
+        _ bar: ShelfBar,
+        in mode: LayoutMode,
+        on screen: String?
+    ) -> Bool {
+        onScreen(screen).barEdges(
+            space: spaceBarStyle.visibility,
+            app: appBarVisibility(in: mode)
+        ).contains { $0.bars[bar] == .auto && $0.shown(bar) == .always }
     }
 
     /// The edges the bars sit on — the ONE list the reservation
@@ -102,9 +117,9 @@ extension TilingSettings {
     /// then the App Bar's unless the two share it, so two bars are
     /// never stacked on one edge (`ShelfSplitGeometryTests` ▸
     /// `edgesPerMode`) and `ShelfGeometry.strips` measures the
-    /// Space Bar's whole edge. A shared edge reserves while either
-    /// bar on it does, at the depth its most present bar asks
-    /// (`ShelfEdge.visibility`) — the folds are here, at the dedup,
+    /// Space Bar's whole edge. A shared edge reserves at the depth
+    /// its most present RESERVING bar asks
+    /// (`ShelfEdge.reservation`) — the folds are here, at the dedup,
     /// and nowhere beside it (`BarReserveTests`, #1524;
     /// `BarAutoHideFoldTests`, #761).
     public func barEdges(
@@ -125,9 +140,7 @@ extension TilingSettings {
             if let shared = edges.firstIndex(where: {
                 $0.edge == appBarStyle.edge
             }) {
-                edges[shared].reserves =
-                    edges[shared].reserves || appBarStyle.reserve
-                edges[shared].bars[.app] = app
+                edges[shared].add(.app, app, reserves: appBarStyle.reserve)
             } else {
                 edges.append(
                     ShelfEdge(

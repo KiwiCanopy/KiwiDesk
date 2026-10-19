@@ -25,14 +25,6 @@ struct ColorsGateTests {
         let plain = SettingKey.kiwishelf(.itemColor)
         #expect(exempt.placement.exemptFromContainerGate)
         #expect(!plain.placement.exemptFromContainerGate)
-        #expect(AdvancedColorsGates.takesShelfGate(plain))
-        #expect(!AdvancedColorsGates.takesShelfGate(exempt))
-        // Window rows never take the shelf's gate.
-        #expect(
-            !AdvancedColorsGates.takesShelfGate(
-                .borders(.borderFocusedColor)
-            )
-        )
     }
 
     /// Advanced Colours exempts no row from a container gate
@@ -67,9 +59,10 @@ struct ColorsGateTests {
         // A hidden bar's shortcut still shows it, so its colours
         // never grey for its value (#761).
         let gates = AdvancedColorsGates(settings: settings)
-        #expect(gates.bars.containerReason(for: .spaceBar) == nil)
-        #expect(gates.bars.containerReason(for: .appBar) == nil)
-        #expect(gates.shelfDraws)
+        for key in ColorsRowOrder.kiwishelfAtRest
+        where key != .kiwishelf(.borderColor) {
+            #expect(gates.verdict(for: key) == nil, "\(key.id)")
+        }
     }
 
     /// The off-page gates each pick a sentence, and the OUTERMOST
@@ -181,7 +174,6 @@ struct ColorsGateTests {
         settings.borderStyle.enabled = false
         settings.dragGhost.border = false
         gates = AdvancedColorsGates(settings: settings)
-        #expect(gates.shelfDraws)
         #expect(
             gates.dimmedDestinations(
                 of: ColorsRowOrder.accentAtRest

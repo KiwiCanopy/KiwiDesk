@@ -42,6 +42,7 @@ extension KiwiShelfCard {
                 L("kiwishelf.show.space_bar", "Space Bar"),
                 $model.config.settings.spaceBarStyle.visibility
             )
+            besideAlwaysNote(.space, in: [.monocle, .scrolling])
         case .spaceBar(.spaceCue):
             spaceCueRow
         case .layoutAppBar(.monocleAppBarVisibility):
@@ -50,17 +51,48 @@ extension KiwiShelfCard {
                 $model.config.settings.monocle.appBar.visibility
             )
             .searchAnchored(SettingsCatalog.bars.monocleShowIn)
+            besideAlwaysNote(.app, in: [.monocle])
         case .layoutAppBar(.scrollingAppBarVisibility):
             visibilityRow(
                 SettingsCatalog.bars.scrollingShowIn.text,
                 $model.config.settings.scrolling.appBar.visibility
             )
             .searchAnchored(SettingsCatalog.bars.scrollingShowIn)
+            besideAlwaysNote(.app, in: [.scrolling])
         default:
             let _ = assertionFailure(
                 "unrendered Show key: \(key.id)"
             )
             EmptyView()
+        }
+    }
+
+    /// Under an `auto` bar beside an `always` one on its edge: it
+    /// stays shown there (#761) — Core's verdict, over the bars'
+    /// own edges.
+    @ViewBuilder private func besideAlwaysNote(
+        _ bar: ShelfBar,
+        in modes: [LayoutMode]
+    ) -> some View {
+        let settings = model.config.settings
+        if modes.contains(where: {
+            settings.autoReadsAlways(bar, in: $0, on: nil)
+        }) {
+            BarNoteRow(
+                text: bar == .space
+                    ? L(
+                        "kiwishelf.show.space_bar.beside_always",
+                        "Stays shown while an App Bar set to %1$@ "
+                            + "shares its edge.",
+                        L("bar.visibility.always", "Always")
+                    )
+                    : L(
+                        "kiwishelf.show.app_bar.beside_always",
+                        "Stays shown: the Space Bar on its edge is "
+                            + "set to %1$@.",
+                        L("bar.visibility.always", "Always")
+                    )
+            )
         }
     }
 

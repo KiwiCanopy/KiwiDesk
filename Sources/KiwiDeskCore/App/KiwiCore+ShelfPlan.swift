@@ -46,7 +46,7 @@ extension KiwiCore {
         settings: TilingSettings,
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?,
-        drawn: (ShelfEdge) -> Set<ShelfBar> = { $0.drawnAtRest }
+        drawn: (ShelfEdge) -> Set<ShelfBar>
     ) -> [ShelfPlan] {
         let folded = settings.barEdges(
             space: spaceItems != nil

@@ -43,7 +43,7 @@ struct BarsPanelPreview: View {
     private var hostNames: String {
         LayoutMode.allCases
             .filter {
-                settings.appBarVisibility(in: $0).map { $0 != .hidden }
+                settings.appBarVisibility(in: $0).map(\.showsUnprompted)
                     == true
             }
             .map(\.displayName)

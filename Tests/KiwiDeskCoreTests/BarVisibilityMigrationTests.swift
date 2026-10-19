@@ -116,6 +116,25 @@ struct BarVisibilityMigrationTests {
         #expect(app["visibility"] == nil)
     }
 
+    /// A sparse file whose layout carries no App Bar keeps the
+    /// global value there rather than losing it with the key.
+    @Test("a global value reaches a layout the file left out")
+    func globalSeedsAMissingLayout() throws {
+        var settings = try legacySettings(
+            space: true,
+            monocle: true,
+            scrolling: true,
+            appGlobal: "auto"
+        )
+        var layouts = try #require(settings["layout"] as? [String: Any])
+        layouts["scroll"] = nil
+        settings["layout"] = layouts
+        let out = try #require(ConfigMigration.migrated(profile(settings)))
+        let migrated = try decoded(out)
+        #expect(migrated.scrolling.appBar.visibility == .auto)
+        #expect(migrated.monocle.appBar.visibility == .auto)
+    }
+
     @Test("a backup's inline profiles cross too")
     func bundleProfilesCross() throws {
         let inner = try #require(

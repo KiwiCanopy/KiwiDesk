@@ -51,16 +51,15 @@ enum GestureItem: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Whether the gesture does nothing on this draft: its surface
-    /// is off, or its chord is cleared (Core's verdict, so a
-    /// hand-edited lone ⌃ greys too).
+    /// Whether the gesture does nothing on this draft: its chord is
+    /// cleared (Core's verdict, so a hand-edited lone ⌃ greys too).
     func isOff(_ settings: TilingSettings, _ gestures: ScrollGestureBase)
         -> Bool
     {
         switch self {
         case .scrollStep: return gestures.sanitized.pan.isEmpty
         case .spaceStep: return gestures.sanitized.spaceStep.isEmpty
-        default: return surface.isOff(settings)
+        default: return false
         }
     }
 

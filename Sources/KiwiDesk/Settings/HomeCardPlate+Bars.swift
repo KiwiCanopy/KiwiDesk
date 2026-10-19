@@ -108,7 +108,7 @@ struct HomeCardBarsTile: View {
     /// The App Bar the preview draws: the first layout whose bar
     /// is not hidden (#761), or nil when none is.
     private var appBarLook: AppBarLook? {
-        settings.appBarHosts.first { $0.visibility != .hidden }.map {
+        settings.appBarHosts.first { $0.visibility.showsUnprompted }.map {
             settings.appBarLook(for: $0)
         }
     }
@@ -220,7 +220,7 @@ struct HomeCardBarsTile: View {
     }
 
     private var spaceSpecIfShown: BarSpec? {
-        settings.spaceBarStyle.visibility != .hidden
+        settings.spaceBarStyle.visibility.showsUnprompted
             ? spaceSpec(settings.spaceBarLook) : nil
     }
 

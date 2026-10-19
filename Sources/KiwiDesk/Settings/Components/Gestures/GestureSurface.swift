@@ -1,9 +1,9 @@
 import KiwiDeskCore
 
-/// Where a Mouse & trackpad gesture happens (#1726), and so what
-/// must be switched on for it to work. Every entry names one — a
-/// required argument — and greys on its surface; the drawer
-/// states each off surface's reason once, outside the grey.
+/// Where a Mouse & trackpad gesture happens (#1726). Every entry
+/// names one — a required argument. No surface greys for a bar's
+/// visibility: a hidden bar's shortcut shows it, and the gesture
+/// then acts on it (#761).
 enum GestureSurface: CaseIterable {
     /// Any window: always available.
     case windows
@@ -13,41 +13,4 @@ enum GestureSurface: CaseIterable {
     case appBar
     /// The KiwiShelf as a whole — either bar.
     case shelf
-
-    /// Whether the gesture has nothing to act on at rest — every
-    /// bar it reaches `hidden` (#761). Core's own predicates, never
-    /// a re-derivation beside them.
-    func isOff(_ settings: TilingSettings) -> Bool {
-        switch self {
-        case .windows: return false
-        case .spaceBar: return settings.spaceBarStyle.visibility == .hidden
-        case .appBar: return !settings.anyAppBarCanShow
-        case .shelf:
-            return settings.spaceBarStyle.visibility == .hidden
-                && !settings.anyAppBarCanShow
-        }
-    }
-
-    /// The sentence pointing where the surface turns on, its link
-    /// at `CrossReferenceRow.linkSlot`. Nil for a surface that is
-    /// never off, and for the shelf, which is off exactly when
-    /// both bars are, so their two sentences already say why.
-    @MainActor var offProse: String? {
-        switch self {
-        case .windows, .shelf:
-            return nil
-        case .spaceBar:
-            return L(
-                "shortcuts.gestures.space_bar_hidden",
-                "The Space Bar is hidden. Show it in %1$@.",
-                CrossReferenceRow.linkSlot
-            )
-        case .appBar:
-            return L(
-                "shortcuts.gestures.app_bar_hidden",
-                "Every layout's App Bar is hidden. Show one in %1$@.",
-                CrossReferenceRow.linkSlot
-            )
-        }
-    }
 }

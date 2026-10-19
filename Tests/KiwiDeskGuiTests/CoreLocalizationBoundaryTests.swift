@@ -141,7 +141,7 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+VisionReach.swift": 1,
         // A bar shortcut's refusal pill (#761), drawn beside the
         // shelf.
-        "App/KiwiCore+ShelfRevealCue.swift": 3,
+        "App/KiwiCore+ShelfRevealCue.swift": 7,
         // A lens's default reminder, on the hold pill Core draws
         // (#2103 ruling 42a).
         "App/KiwiCore+VisionHold.swift": 1,

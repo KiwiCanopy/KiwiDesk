@@ -44,15 +44,6 @@ struct BarsGates {
         }
     }
 
-    /// Resolves container gate to an inert reason, or nil if
-    /// active. No bars container greys: a hidden bar's shortcut
-    /// still shows it, so its look always matters (#761).
-    func containerReason(
-        for container: SettingsContainer
-    ) -> InertReason? {
-        nil
-    }
-
     // MARK: - Shelf row predicates (wiring)
 
     /// Why order and share are inert: the two bars sit on

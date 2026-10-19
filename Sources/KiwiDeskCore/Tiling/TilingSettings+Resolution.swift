@@ -86,14 +86,19 @@ extension TilingSettings {
     /// True if any layout's App Bar shows without its shortcut —
     /// `always` or `auto` (#761).
     public var anyAppBarCanShow: Bool {
-        appBarHosts.contains { $0.visibility != .hidden }
+        appBarHosts.contains { $0.visibility.showsUnprompted }
     }
 
     /// True if the Space Bar and a layout's App Bar can both show
     /// without a shortcut, splitting the shelf between them
     /// (`ShelfArrangement`).
     public var bothBarsCanShow: Bool {
-        spaceBarStyle.visibility != .hidden && anyAppBarCanShow
+        spaceBarStyle.visibility.showsUnprompted && anyAppBarCanShow
+    }
+
+    /// True while any bar shows without its shortcut.
+    public var shelfShows: Bool {
+        spaceBarStyle.visibility.showsUnprompted || anyAppBarCanShow
     }
 
     /// What the Space Bar draws from: the shelf and its own style.

@@ -330,7 +330,8 @@ struct GlyphGapPlanTests {
                 visible: CGRect(x: 0, y: 0, width: 3000, height: 800),
                 settings: settings,
                 spaceItems: items,
-                app: app
+                app: app,
+                drawn: { $0.drawnAtRest }
             ).first,
             let slot = plan.arrangement.space
         else { return -1 }

@@ -112,9 +112,9 @@ twice, was a question the user answered twice. The argument is
   `barEdges` whole, so the strips drawn and the edges reserved
   come from one derivation — the Space
   Bar's edge in every layout
-  while it is on, the App Bar's only in the layouts whose own
-  App Bar is on and only where the Space Bar does not already
-  hold it — never a layout, a bar or a mode carving a strip of
+  while it is not `hidden`, the App Bar's only in the layouts
+  whose own App Bar is not `hidden` and only where the Space Bar
+  does not already hold it — never a layout, a bar or a mode carving a strip of
   its own, and never a second "does a bar draw here" predicate
   beside it. A switch between two layouts that draw on the same
   edges moves no window; a switch into or out of a layout whose
@@ -182,8 +182,9 @@ twice, was a question the user answered twice. The argument is
   `barEdges(space:app:)` (#761)** — the Space Bar's stored value,
   and the App Bar's for the layout being laid out, read through the
   one `appBarVisibility(in:)` — and never link the two values.
-  An edge two bars share reserves for its more present bar
-  (`ShelfEdge.visibility`: `always` over `auto` over `hidden`), an
+  An edge two bars share reserves for its more present RESERVING
+  bar (`ShelfEdge.reservation`: `always` over `auto` over
+  `hidden`, so a `hidden` bar's `reserve` reserves nothing), an
   `auto` edge only its constant sliver (`hidingEdges`,
   `KiwiShelf.hiddenReservation`) and a `hidden` one nothing; what a
   bar shows at rest beside its sibling is the one `ShelfEdge.shown`,
@@ -195,10 +196,14 @@ twice, was a question the user answered twice. The argument is
   `actionRevealsWithoutARetile`). **A reveal names a bar**
   (`ShelfRevealer.Key`): a shortcut shows only its own, a `hidden`
   bar's target has no hover band, and the bars an edge draws this
-  pass are the one `HidingShelves.drawn`, which the live plan hands
-  `shelfPlans` (`ShelfRevealPerBarTests`). A shortcut on an
-  `always` bar refuses through the refusal-pill door's shelf twin,
-  `flashRefusalPill(near:edge:text:symbol:)`.
+  pass are the one `ShelfRevealer.drawn`, which the live plan hands
+  `shelfPlans` (`ShelfRevealPerBarTests`). A shortcut on a bar
+  that reads `always` — stored so, or `auto` beside an `always`
+  sibling, judged by the one `TilingSettings.autoReadsAlways`,
+  which Settings' note asks too — refuses through the
+  refusal-pill door's shelf twin,
+  `flashRefusalPill(near:on:edge:text:symbol:)`; a `hidden` bar's
+  timed pin ends hidden, since no hover can retract it.
   Whether a hiding bar is shown is asked of `ShelfManager.reveal`
   per bar in `updateBars()`, and a second shown-answer
   beside it is review's; its pointer monitor and location are
@@ -712,8 +717,8 @@ Obligations:
   its item, and its shelf leaving**: `ShelfManager.relayout`
   re-checks the peeked item after the hover re-read, and
   `ShelfManager.sync`'s hide arm is the one home for "its shelf
-  left" — a fullscreen or presentation stand-down, the bars
-  turned off, a display gone — since the panel joins every Space
+  left" — a fullscreen or presentation stand-down, every bar on it
+  hidden, a display gone — since the panel joins every Space
   and would stay up over the fullscreen app (`BarPeekSeamTests` ▸
   `relayoutChecksAfterTheReRead`, `BarPeekWiringTests` ▸
   `shelfLeavingCloses`). **A press in a bar closes the peek at

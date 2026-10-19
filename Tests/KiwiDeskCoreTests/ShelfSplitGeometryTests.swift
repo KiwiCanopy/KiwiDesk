@@ -121,7 +121,8 @@ struct ShelfSplitPlanTests {
             visible: CGRect(x: 0, y: 0, width: 1600, height: 1000),
             settings: settings,
             spaceItems: items(),
-            app: app(settings)
+            app: app(settings),
+            drawn: { $0.drawnAtRest }
         )
     }
 
@@ -141,7 +142,8 @@ struct ShelfSplitPlanTests {
             visible: visible,
             settings: settings,
             spaceItems: items(),
-            app: app(settings)
+            app: app(settings),
+            drawn: { $0.drawnAtRest }
         )
         #expect(plans.count == 2)
         let bounds =

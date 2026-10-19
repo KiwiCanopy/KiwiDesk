@@ -96,6 +96,74 @@ struct ShelfRevealPerBarTests {
         #expect(revealer.reveal(of: key) == .pinned(until: nil))
     }
 
+    /// A timed pin on a band-less bar ends hidden whatever the
+    /// pointer does, since no hover can ever retract it: under the
+    /// pointer at once, and while a menu holds it once released.
+    @Test("a timed pin on a hidden bar never strands it shown")
+    func bandlessPinEnds() {
+        let key = ShelfRevealer.Key(
+            shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+            bar: .space
+        )
+        let revealer = ShelfRevealer()
+        final class Hold { var on = false }
+        var due: [() -> Void] = []
+        let hold = Hold()
+        revealer.makeMonitor = { _ in nil }
+        revealer.schedule = { _, body in
+            due.append(body)
+            return ShelfRevealTimer()
+        }
+        revealer.holds = { _ in hold.on }
+        // Resting on the strip, inside the zone.
+        revealer.location = { CGPoint(x: 500, y: 780) }
+        revealer.sync([
+            key: ShelfRevealer.Target(
+                edge: .top,
+                strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
+                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+                band: nil
+            )
+        ])
+        revealer.start()
+        defer { revealer.stop() }
+        func fire() {
+            let now = due
+            due = []
+            now.forEach { $0() }
+        }
+        #expect(revealer.toggle(key, duration: 2))
+        fire()
+        #expect(revealer.reveal(of: key) == .hidden)
+        hold.on = true
+        #expect(revealer.toggle(key, duration: 2))
+        fire()
+        #expect(revealer.reveal(of: key).isShown)
+        hold.on = false
+        fire()
+        #expect(revealer.reveal(of: key) == .hidden)
+    }
+
+    /// A hidden bar's `reserve` never reserves: an edge's strip is
+    /// asked by the bars that draw on it (#1524).
+    @Test("a hidden bar's reserve reserves nothing beside its sibling")
+    func hiddenReserveReservesNothing() {
+        var settings = TilingSettings()
+        settings.spaceBarStyle.setEdge(.top)
+        settings.appBarStyle.setEdge(.top)
+        settings.spaceBarStyle.visibility = .hidden
+        settings.spaceBarStyle.reserve = true
+        settings.appBarStyle.reserve = false
+        settings.monocle.appBar.visibility = .always
+        let always = settings.shelfReservation(in: .monocle, on: nil)
+        #expect(always.edges.isEmpty)
+        #expect(always.hiding.isEmpty)
+        settings.monocle.appBar.visibility = .auto
+        let auto = settings.shelfReservation(in: .monocle, on: nil)
+        #expect(auto.edges.isEmpty)
+        #expect(auto.hiding.isEmpty)
+    }
+
     // MARK: - Through the drivers
 
     /// A core on the primary screen with one window in a monocle
@@ -191,5 +259,18 @@ struct ShelfRevealPerBarTests {
         #expect(core.appBars.shownStrips.isEmpty)
         #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         #expect(!core.appBars.shownStrips.isEmpty)
+    }
+
+    @Test(
+        "An auto bar beside an always one refuses its shortcut",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func autoBesideAlwaysRefuses() throws {
+        let (core, _) = try #require(makeCore(space: .auto, app: .always))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        // It reads `always` on the edge: shown, and no target.
+        #expect(!core.spaceBars.shownStrips.isEmpty)
+        #expect(!core.execute("space_bar.toggle_reveal", args: []).isSuccess)
+        #expect(!core.spaceBars.shownStrips.isEmpty)
     }
 }

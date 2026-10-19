@@ -25,16 +25,10 @@ struct ColorRowVerdict: Equatable {
 }
 
 extension AdvancedColorsGates {
-    /// The verdict for one row; nil while it draws. The shelf's
-    /// block gate outranks a row's own reason, so the outer switch
-    /// is the one named (#527).
+    /// The verdict for one row; nil while it draws. No bar's
+    /// visibility greys a colour: a hidden bar's shortcut still
+    /// shows it (#761).
     func verdict(for key: SettingKey) -> ColorRowVerdict? {
-        if !shelfDraws, Self.takesShelfGate(key) {
-            return ColorRowVerdict(
-                help: AdvancedColorsHelp.kiwishelfOff,
-                link: .page(.bars)
-            )
-        }
         switch key {
         case .kiwishelf(.borderColor):
             return shelfBorderOff
@@ -74,20 +68,6 @@ extension AdvancedColorsGates {
             return dragVerdict(ghost: false, fill: true)
         default:
             return nil
-        }
-    }
-
-    /// Whether the shelf's block gate reaches `key`: the bar rows,
-    /// save one the census exempts from its container gate.
-    nonisolated static func takesShelfGate(
-        _ key: SettingKey
-    ) -> Bool {
-        guard !key.placement.exemptFromContainerGate else {
-            return false
-        }
-        switch key {
-        case .kiwishelf, .spaceBar: return true
-        default: return false
         }
     }
 

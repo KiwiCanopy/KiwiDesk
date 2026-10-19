@@ -196,7 +196,8 @@ struct ShelfFloorWiringTests {
             visible: CGRect(x: 0, y: 0, width: 600, height: 400),
             settings: settings,
             spaceItems: spaces,
-            app: app
+            app: app,
+            drawn: { $0.drawnAtRest }
         )
         #expect(plans.count == 1)
         let plan = try #require(plans.first)

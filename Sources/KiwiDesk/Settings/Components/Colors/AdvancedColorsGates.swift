@@ -35,11 +35,6 @@ struct AdvancedColorsGates {
             : AdvancedColorsHelp.dragBorderOff
     }
 
-    /// Whether any bar shows, so the shelf's colours draw.
-    var shelfDraws: Bool {
-        bars.containerReason(for: .kiwishelf) == nil
-    }
-
     // MARK: - KiwiShelf
 
     /// The shelf draws no border, so its colour is inert (#1679).

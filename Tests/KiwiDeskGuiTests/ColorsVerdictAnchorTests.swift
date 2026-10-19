@@ -107,9 +107,9 @@ struct ColorsVerdictAnchorTests {
                                 "\(key.id): no link to \(destination)"
                             )
                         } else {
-                            // The header `?` answers it: only the
-                            // block gate may reach this card.
-                            #expect(!gates.shelfDraws, "\(key.id)")
+                            // No block gate is left to answer a
+                            // page link in a card that draws none.
+                            Issue.record("\(key.id): unanswered link")
                         }
                     }
                 }

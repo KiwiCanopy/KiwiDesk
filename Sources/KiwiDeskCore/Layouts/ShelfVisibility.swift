@@ -22,6 +22,10 @@ public enum ShelfVisibility: String, Sendable, Codable, CaseIterable {
         }
     }
 
+    /// Whether the bar shows without its shortcut — at rest or on
+    /// hover; the one answer a surface picturing the bars asks.
+    public var showsUnprompted: Bool { self != .hidden }
+
     /// Whether the bar's shortcut can show it (#761): every value
     /// but `always`, which is already shown.
     public var revealable: Bool { self != .always }

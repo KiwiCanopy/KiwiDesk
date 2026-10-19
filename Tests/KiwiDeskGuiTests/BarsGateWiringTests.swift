@@ -45,17 +45,6 @@ struct BarsGateWiringTests {
     @Test("each bar block gate is wired to the resolver")
     func blocksConsultTheResolver() throws {
         let consults: [String: [String]] = [
-            // The colour cards read the shelf's block gate through
-            // the one `shelfDraws` (#1857), which asks the resolver.
-            "Components/Colors/AdvancedColorsGates.swift": [
-                "bars.containerReason(for:.kiwishelf)"
-            ],
-            "Components/Colors/BarColorCards.swift": [
-                "gates.shelfDraws"
-            ],
-            "Components/Colors/AdvancedColorsGates+Verdict.swift": [
-                "if!shelfDraws,Self.takesShelfGate(key)"
-            ],
             // The one row gate the area answers (#2228): the Space
             // cue's Lua-owned grey — the whole constructor, since
             // `guiManaged` has a default a dropped argument would
@@ -66,7 +55,7 @@ struct BarsGateWiringTests {
                     + ".inertReason(for:.spaceBar(.spaceCue))",
                 "disabled:reason!=nil",
                 "BarsGateHelp.sentence(for:reason)",
-            ],
+            ]
         ]
         for (path, needles) in consults {
             let source = try squashed(path)

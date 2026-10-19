@@ -14,65 +14,6 @@ final class ShelfRevealer {
         let bar: ShelfBar
     }
 
-    /// A hiding bar as `updateBars()` last laid it, in Cocoa
-    /// coordinates (y grows up): its shelf's strip and its screen's
-    /// frame.
-    struct Target: Equatable {
-        let edge: AppBarEdge
-        let strip: CGRect
-        let screen: CGRect
-        /// Where resting opens the bar (`ShelfReveal.band`); nil for
-        /// a `hidden` bar, which only its shortcut shows.
-        var band: CGRect?
-        /// Where the pointer lights the mark's hover cue: around
-        /// the mark, and the band.
-        var near: CGRect?
-
-        init(
-            edge: AppBarEdge,
-            strip: CGRect,
-            screen: CGRect,
-            band: CGRect?,
-            near: CGRect? = nil
-        ) {
-            self.edge = edge
-            self.strip = strip
-            self.screen = screen
-            self.band = band
-            self.near = band.map { (near ?? $0).union($0) }
-        }
-
-        /// A target the pointer can open: the band and its cue.
-        static func hovering(
-            edge: AppBarEdge,
-            strip: CGRect,
-            screen: CGRect,
-            band: CGRect? = nil,
-            near: CGRect? = nil
-        ) -> Target {
-            Target(
-                edge: edge,
-                strip: strip,
-                screen: screen,
-                band: band ?? ShelfReveal.band(of: strip, edge: edge),
-                near: near
-            )
-        }
-
-        /// Whether the pointer can open it.
-        var hovers: Bool { band != nil }
-
-        /// Where the pointer holds a shown bar: the strip and its
-        /// band, out to the push reach, so a pointer resting on the
-        /// screen's last row is inside (`CGRect` excludes `maxY`).
-        var zone: CGRect {
-            strip.union(band ?? strip).insetBy(
-                dx: -ShelfReveal.pushReach,
-                dy: -ShelfReveal.pushReach
-            )
-        }
-    }
-
     /// Fires when a shelf is shown or hidden.
     var onChange: @MainActor () -> Void = {}
     /// Whether a surface the shelf opened holds it shown although
@@ -140,6 +81,31 @@ final class ShelfRevealer {
     /// shelf's panel is kept for.
     func hasTarget(on shelf: ShelfManager.Key) -> Bool {
         targets.keys.contains { $0.shelf == shelf }
+    }
+
+    /// The bars `edge` draws on `display` this pass: those shown at
+    /// rest, and each a reveal shows (#761) — the one answer the
+    /// live plan takes.
+    func drawn(_ edge: ShelfEdge, display: DisplayID) -> Set<ShelfBar> {
+        let shelf = ShelfManager.Key(display: display, edge: edge.edge)
+        return edge.drawnAtRest.union(
+            edge.bars.keys.filter {
+                reveal(of: Key(shelf: shelf, bar: $0)).isShown
+            }
+        )
+    }
+
+    /// The action on a whole shelf — a press on its mark: one
+    /// direction for every bar the pointer can open there, so a
+    /// press never swaps one bar for its sibling. Any shown is
+    /// hidden; else every one is shown.
+    func toggleShelf(_ shelf: ShelfManager.Key, duration: TimeInterval) {
+        let keys = targets.filter { $0.key.shelf == shelf && $0.value.hovers }
+            .map(\.key)
+        let shown = keys.filter { reveal(of: $0).isShown }
+        for key in shown.isEmpty ? keys : shown {
+            toggle(key, duration: duration)
+        }
     }
 
     /// The hiding bars of this pass; a bar that stopped hiding
@@ -242,7 +208,9 @@ final class ShelfRevealer {
     private func retractIfLeft(_ key: Key) {
         guard let target = targets[key], reveal(of: key) == .hover
         else { return }
-        if target.zone.contains(location()) { return }
+        // A band-less bar is held by its zone only while the pointer
+        // can re-open it, which it cannot (#761).
+        if target.hovers, target.zone.contains(location()) { return }
         guard !holds(key.shelf) else {
             arm(key, after: ShelfReveal.retractDelay) { [weak self] in
                 self?.retractIfLeft(key)
@@ -258,7 +226,7 @@ final class ShelfRevealer {
         guard let target = targets[key],
             case .pinned = reveal(of: key)
         else { return }
-        if target.zone.contains(location()) {
+        if target.hovers, target.zone.contains(location()) {
             set(.hover, for: key)
         } else if holds(key.shelf) {
             // Its menu or peek is up: retract once that closes.

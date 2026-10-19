@@ -27,7 +27,7 @@ struct LayoutCard: View {
         if let host = model.config.settings.appBarHost(for: mode),
             let appBarProse = LayoutCardText.appBarState(
                 mode,
-                on: host.appBar.visibility != .hidden
+                on: host.appBar.visibility.showsUnprompted
             )
         {
             CrossReferenceRow(

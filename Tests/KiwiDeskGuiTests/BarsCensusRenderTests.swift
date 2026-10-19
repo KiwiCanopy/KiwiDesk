@@ -80,10 +80,8 @@ struct BarsCensusRenderTests {
         settings.spaceBarStyle.visibility = .hidden
         settings.monocle.appBar.visibility = .hidden
         settings.scrolling.appBar.visibility = .hidden
-        let gates = BarsGates(settings: settings)
         for container in [SettingsContainer.kiwishelf, .spaceBar, .appBar] {
             #expect(container.gate == nil)
-            #expect(gates.containerReason(for: container) == nil)
         }
         let exempt = Set(
             SettingKey.allCases.filter {

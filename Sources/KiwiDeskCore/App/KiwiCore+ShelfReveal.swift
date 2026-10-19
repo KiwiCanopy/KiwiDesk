@@ -27,21 +27,6 @@ extension KiwiCore {
             [ShelfManager.Key: (spec: ShelfIndicatorSpec, space: Bool)] =
                 [:]
 
-        /// The bars `edge` draws on `display` this pass: those
-        /// shown at rest, and each a reveal shows.
-        @MainActor static func drawn(
-            _ edge: ShelfEdge,
-            display: DisplayID,
-            reveal: ShelfRevealer
-        ) -> Set<ShelfBar> {
-            let shelf = ShelfManager.Key(display: display, edge: edge.edge)
-            return edge.drawnAtRest.union(
-                edge.bars.keys.filter {
-                    reveal.reveal(of: .init(shelf: shelf, bar: $0)).isShown
-                }
-            )
-        }
-
         /// Files each hiding bar of `plans` — its target, and its
         /// edge's mark where the edge hides to one.
         @MainActor mutating func file(
@@ -186,13 +171,13 @@ extension KiwiCore {
         shelves.indicators.sync(hiding.indicators)
     }
 
-    /// A press on `key`'s mark: the show/hide action on every bar
-    /// the pointer can open there.
+    /// A press on `key`'s mark: one direction for every bar the
+    /// pointer can open there.
     func toggleShelfReveal(_ key: ShelfManager.Key) {
-        for (barKey, target) in shelves.reveal.targets
-        where barKey.shelf == key && target.hovers {
-            toggleBarReveal(barKey)
-        }
+        shelves.reveal.toggleShelf(
+            key,
+            duration: tiler.settings.kiwishelf.revealDuration
+        )
     }
 
     /// The show/hide action on one bar.
@@ -226,11 +211,21 @@ extension KiwiCore {
             cueRevealRefusal(.alwaysShown(bar), display: display)
             return .fail("the \(name) is set to always")
         }
+        // The edge's own fold answers whether the bar hides here: an
+        // `auto` bar beside an `always` one reads `always` (#761).
+        if settings.autoReadsAlways(
+            bar,
+            in: mode,
+            on: screenFingerprint(of: display)
+        ) {
+            cueRevealRefusal(.shownBesideAlways(bar), display: display)
+            return .fail("the \(name) is shown beside an always bar")
+        }
         guard
             let key = shelves.reveal.targets.keys.first(where: {
                 $0.shelf.display == display && $0.bar == bar
             })
-        else { return .fail("the \(name) draws on no screen here") }
+        else { return .fail("the \(name) has nothing to show here") }
         toggleBarReveal(key)
         return .ok()
     }

@@ -128,7 +128,6 @@ extension InterpolatedLabelTests {
         // "turn one on" having left the referent to the reader.
         // Its Bars-page twin joins the register for the same
         // change.
-        "colors.kiwishelf_off.help": 3,
         "kiwishelf.icon_source.help": 2,
         "scroll_grid.app_bar_xref_link": 2,
         "colors.border_off.help": 1,
@@ -241,8 +240,10 @@ extension InterpolatedLabelTests {
         "keybinding.toggle_display_sticky.help": 1,
         // #761: a bar shortcut's grey names the segments and, for
         // the App Bar, the layouts that carry it.
-        "keybinding.toggle_space_bar.inert": 2,
-        "keybinding.toggle_app_bar.inert": 4,
+        "keybinding.toggle_space_bar.inert_link": 2,
+        "kiwishelf.show.space_bar.beside_always": 1,
+        "kiwishelf.show.app_bar.beside_always": 1,
+        "keybinding.toggle_app_bar.inert_link": 4,
         // 5. #1241, #1609. The ladder lives in the Which profile
         //    loads card's one `?`, where it names the card
         //    that sets the binding — the interpolated title is also

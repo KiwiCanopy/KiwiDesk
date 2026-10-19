@@ -97,13 +97,7 @@ extension KiwiCore {
                 settings: shown,
                 spaceItems: items,
                 app: app,
-                drawn: {
-                    HidingShelves.drawn(
-                        $0,
-                        display: display.id,
-                        reveal: reveal
-                    )
-                }
+                drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(
                 planned,

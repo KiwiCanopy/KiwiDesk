@@ -43,11 +43,6 @@ struct GreyOutAnchorTests {
         // anchor is not a nicety here — the hover string on a
         // dimmed row is the only other channel, and it cannot
         // say where to go without one.
-        (
-            "BarColorCards.swift",
-            "help: gates.shelfDraws ? nil : AdvancedColorsHelp",
-            1
-        ),
         // The shelf card's ONE greyed row in a live card takes a
         // live link beneath the grid instead of the header `?`,
         // which scopes the card (#1310, owner ruling 2026-09-14;

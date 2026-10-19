@@ -59,7 +59,7 @@ extension KiwiCore {
                 hasIcon: $0.hasIcon
             )
         }
-        guard tiler.settings.spaceBarStyle.visibility == .hidden else {
+        guard !tiler.settings.spaceBarStyle.visibility.showsUnprompted else {
             return StatusSpaceMark(layer: layer, screens: [])
         }
         let screens = state.workspaces.allDisplays.compactMap {
