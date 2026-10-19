@@ -128,6 +128,9 @@ struct ScreenCoveringCallerCensusTests {
         "Vision/VisionManager.swift": 1,
         // Hover focus's hit test at the resting pointer (#1869).
         "App/KiwiCore+HoverFocus.swift": 1,
+        // The display follow's Dock hit test at a press: an
+        // auto-hidden Dock reserves no visible frame.
+        "Commands/KiwiCore+DisplayFocus.swift": 1,
     ]
 
     @Test("every front-window seam reader is ruled")
