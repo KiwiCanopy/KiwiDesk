@@ -78,9 +78,10 @@ struct ShelfIndicatorSpec: Equatable {
     static let dotGap: CGFloat = 4
     static let pad: CGFloat = 4
     /// How far a hovered plate grows on each side — the room the
-    /// panel keeps around it. Three points take the 8 pt plate to
-    /// 14, so the growth reads (device feedback, #761).
-    static let hoverGrowth: CGFloat = 3
+    /// panel keeps around it. Six points take the 8 pt plate to
+    /// 20, deep enough for the Space's name to read in the 0.35 s
+    /// before the bar opens (device feedback, #761).
+    static let hoverGrowth: CGFloat = 6
 
     /// The hover rim's width for `shelf`: its indicator weight
     /// (bars.md ▸ an indicator's weight), at most the growth.

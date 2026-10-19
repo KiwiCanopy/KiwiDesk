@@ -189,7 +189,14 @@ final class ShelfIndicatorDots: NSView {
                 yRadius: size / 2
             ).fill()
             if pill, let label = spec.label {
-                draw(label, in: rect, ink: spec.fill)
+                // Ink against the pill itself, never the shelf's
+                // translucent fill, which read faint on a light pill.
+                draw(
+                    label,
+                    in: rect,
+                    ink: NSColor(kiwiHex: spec.ink(of: dot))
+                        .contrastingGlyph
+                )
             }
             lead += long + ShelfIndicatorSpec.dotGap
         }
@@ -201,9 +208,8 @@ final class ShelfIndicatorDots: NSView {
     private func draw(
         _ label: ShelfIndicatorSpec.Label,
         in pill: CGRect,
-        ink: String
+        ink color: NSColor
     ) {
-        let color = NSColor(kiwiHex: ink)
         switch label.glyph {
         case .symbol(let name):
             guard

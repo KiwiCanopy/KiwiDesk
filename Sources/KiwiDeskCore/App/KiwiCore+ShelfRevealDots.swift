@@ -47,9 +47,14 @@ extension KiwiCore.HidingShelves {
         let label = current.map {
             ShelfIndicatorSpec.label(
                 spaces[$0].spaceGlyph,
+                // The Space Bar's own identifier size, held inside
+                // the pill.
                 font: look.shelf.textFont(
-                    ofSize: look.identifierFontSize(
-                        forContentDepth: ShelfIndicatorSpec.labelDepth
+                    ofSize: min(
+                        look.identifierFontSize(
+                            forDepth: look.shelf.thickness
+                        ),
+                        ShelfIndicatorSpec.labelDepth - 4
                     )
                 )
             )
