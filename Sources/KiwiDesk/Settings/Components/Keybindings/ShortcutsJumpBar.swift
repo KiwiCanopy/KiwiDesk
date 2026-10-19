@@ -177,9 +177,7 @@ struct ShortcutsJumpChip: View {
 
     /// The marking's layer, over the pointer's.
     static func markFill(_ marked: Bool) -> Color {
-        SettingsTheme.accent.opacity(
-            marked ? SettingsTheme.jumpChipMarkedOpacity : 0
-        )
+        ButtonChipStyle.markFill(marked)
     }
 }
 
