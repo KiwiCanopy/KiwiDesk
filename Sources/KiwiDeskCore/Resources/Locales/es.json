@@ -617,7 +617,7 @@
   "general.refusal_sound": "Emitir un sonido cuando se rechaza una acción",
   "general.refusal_sound.help": "Una acción rechazada siempre muestra un mensaje en la ventana — al llegar a un límite de tamaño o donde el diseño no tiene nada que redimensionar. Esto le añade la alerta sonora del sistema.",
   "general.sync": "Sincronizar entre Macs",
-  "general.sync.caption.chosen": "%1$@ · Solo copia cuando tú se lo pides.",
+  "general.sync.caption.chosen": "%1$@ · Solo copia cuando eliges «%2$@».",
   "general.sync.caption.icloud_off": "iCloud Drive está desactivado en este Mac.",
   "general.sync.caption.missing": "No se encuentra esta carpeta. Puede que se haya movido, renombrado o eliminado.",
   "general.sync.caption.newer": "Un KiwiDesk más reciente escribió esta carpeta. Actualiza para seguir sincronizando.",

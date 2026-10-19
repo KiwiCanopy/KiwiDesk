@@ -617,7 +617,7 @@
   "general.refusal_sound": "Ton abspielen, wenn eine Aktion abgelehnt wird",
   "general.refusal_sound.help": "Eine abgelehnte Aktion zeigt immer eine Meldung am Fenster — bei einer Größengrenze oder wenn das Layout keine Größenänderung kennt. Diese Option ergänzt sie um den Systemwarnton.",
   "general.sync": "Zwischen Macs synchronisieren",
-  "general.sync.caption.chosen": "%1$@ · Kopiert nur, wenn du es verlangst.",
+  "general.sync.caption.chosen": "%1$@ · Kopiert nur, wenn du „%2$@“ wählst.",
   "general.sync.caption.icloud_off": "iCloud Drive ist auf diesem Mac deaktiviert.",
   "general.sync.caption.missing": "Dieser Ordner wurde nicht gefunden. Er wurde vielleicht verschoben, umbenannt oder gelöscht.",
   "general.sync.caption.newer": "Ein neueres KiwiDesk hat diesen Ordner geschrieben. Aktualisiere, um weiter zu synchronisieren.",

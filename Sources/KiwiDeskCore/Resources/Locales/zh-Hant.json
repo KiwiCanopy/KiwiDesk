@@ -617,7 +617,7 @@
   "general.refusal_sound": "動作被拒絕時播放聲音",
   "general.refusal_sound.help": "被拒絕的動作一定會在視窗上顯示一則說明 — 例如達到尺寸上限，或佈局中沒有可調整尺寸的內容。此選項會為它加上系統警告聲。",
   "general.sync": "在電腦間同步",
-  "general.sync.caption.chosen": "%1$@ · 只在你要求時拷貝。",
+  "general.sync.caption.chosen": "%1$@ · 只在你選擇「%2$@」時拷貝。",
   "general.sync.caption.missing": "找不到此檔案夾。它可能已被搬移、重新命名或刪除。",
   "general.sync.caption.newer": "較新版本的 KiwiDesk 寫入了此檔案夾。請更新以繼續同步。",
   "general.sync.caption.same": "此檔案夾包含 KiwiDesk 自身的設定，或位於其中。請選擇其他檔案夾。",
