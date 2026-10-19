@@ -56,6 +56,13 @@ enum ShortcutsRowOrder {
         .shortcuts(.toggleLens),
     ]
 
+    /// KiwiShelf group order: the bars' show/hide shortcuts, Space
+    /// Bar first as in the Show group (#761).
+    static let kiwishelfAtRest: [SettingKey] = [
+        .shortcuts(.toggleSpaceBar),
+        .shortcuts(.toggleAppBar),
+    ]
+
     /// Move windows group order: swaps, then space moves.
     static let moveWindowsAtRest: [SettingKey] = [
         .shortcuts(.swapDir),

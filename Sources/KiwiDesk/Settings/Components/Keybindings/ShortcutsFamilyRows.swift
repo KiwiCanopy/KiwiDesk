@@ -80,6 +80,10 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.jumpToWindow]
         case .toggleKiwiVision:
             return [KeybindingCatalog.toggleKiwiVision]
+        case .toggleSpaceBar:
+            return [KeybindingCatalog.toggleSpaceBar]
+        case .toggleAppBar:
+            return [KeybindingCatalog.toggleAppBar]
         case .toggleLens:
             return lenses.map(KeybindingCatalog.toggleLens)
         case .growWidth:

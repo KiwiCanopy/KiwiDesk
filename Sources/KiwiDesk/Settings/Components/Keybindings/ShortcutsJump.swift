@@ -12,6 +12,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case layout
     case sizeFloat
     case kiwiVision
+    case kiwishelf
     case openApplications
 
     /// The group's own title control: its text is the chip's
@@ -27,6 +28,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
         case .kiwiVision: return SettingsCatalog.shortcuts.kiwiVisionKeys
+        case .kiwishelf: return SettingsCatalog.shortcuts.kiwishelfKeys
         case .openApplications:
             return SettingsCatalog.shortcuts.openApplications
         }
@@ -42,6 +44,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
         case .kiwiVision: return .kiwiVisionShortcuts
+        case .kiwishelf: return .kiwishelfShortcuts
         case .openApplications: return .openApplications
         }
     }

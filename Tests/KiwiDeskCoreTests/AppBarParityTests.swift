@@ -179,7 +179,6 @@ struct AppBarCommandParityTests {
         case .edgeOverride: return [.string("left"), .string("S:1x1")]
         case .activeIndicator: return [.string("outline")]
         case .titleCap: return [.number(40)]
-        case .visibility: return [.string("auto")]
         }
     }
 

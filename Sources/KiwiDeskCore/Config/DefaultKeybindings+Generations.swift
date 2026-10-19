@@ -7,7 +7,7 @@ import Foundation
 extension DefaultKeybindings {
     /// The newest generation. A release that adds a default row
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
-    public static let newestGeneration = 5
+    public static let newestGeneration = 6
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
@@ -25,6 +25,8 @@ extension DefaultKeybindings {
         case 4: [kiwiVisionRow()]
         // 3.1.0: Reset sizes in this Space (#2303).
         case 5: [resetSizesRow()]
+        // The bars' shortcuts (#761).
+        case 6: barRevealRows()
         default: []
         }
     }
