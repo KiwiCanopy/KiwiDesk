@@ -25,10 +25,17 @@ extension SettingsModel {
     /// The value the master steps from on a mixed `axis`, and a
     /// row is compared to: the profile's most-used layout's.
     func minSizeReference(_ axis: MinSizeAxis) -> Int {
-        let used =
-            MinWindowSizes.Layout(LayoutUsage.mostUsed(in: config))
-            ?? .bsp
-        return Int(minSizes[used][axis])
+        Int(minSizes[minSizeMostUsed][axis])
+    }
+
+    /// The profile's most-used layout among those keeping a floor,
+    /// BSP where no Space uses one — Monocle has none to step from.
+    var minSizeMostUsed: MinWindowSizes.Layout {
+        let counts = MinWindowSizes.Layout.allCases.map {
+            ($0, LayoutUsage.spaces(on: $0.mode, in: config).count)
+        }
+        return counts.max { $0.1 < $1.1 }
+            .flatMap { $0.1 > 0 ? $0.0 : nil } ?? .bsp
     }
 
     /// Whether `layout` differs from the others on either axis —

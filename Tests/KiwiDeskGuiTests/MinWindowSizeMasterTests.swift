@@ -52,9 +52,7 @@ struct MinWindowSizeMasterTests {
             #expect(model.minSizesDiffer, "\(layout)")
             // Measured against the most-used layout's value: the
             // one that moved stands apart, or every other does.
-            let used = MinWindowSizes.Layout(
-                LayoutUsage.mostUsed(in: model.config)
-            )
+            let used = model.minSizeMostUsed
             #expect(
                 layout == used
                     ? model.minSizeStandsApart(
@@ -71,9 +69,7 @@ struct MinWindowSizeMasterTests {
     @Test("a mixed axis steps from the most-used layout's value")
     func referenceIsTheMostUsed() {
         let model = makeTestModel()
-        let used =
-            MinWindowSizes.Layout(LayoutUsage.mostUsed(in: model.config))
-            ?? .bsp
+        let used = model.minSizeMostUsed
         model.setMinSize(220, axis: .width, for: used)
         model.setMinSize(480, axis: .width, for: .floating)
         #expect(model.minSizeReference(.width) == 220)
@@ -88,6 +84,13 @@ struct MinWindowSizeMasterTests {
             for axis in MinSizeAxis.allCases {
                 let control = MinSizeText.control(layout, axis)
                 ids.insert(control.id)
+                // The census follower the field writes names the
+                // same layout and axis as its anchor.
+                #expect(
+                    MinSizeText.key(layout, axis).rawValue
+                        == "settings.minWindowSizes."
+                        + "\(layout.rawValue).\(axis)"
+                )
                 #expect(
                     control.key
                         == "layout_defaults.min_size."
@@ -115,5 +118,15 @@ struct MinWindowSizeMasterTests {
         #expect(text.contains("width: model.minSizeShared(.width)"))
         #expect(text.contains("height: model.minSizeShared(.height)"))
         #expect(!text.contains("minWindowSizes"))
+    }
+
+    /// Monocle keeps no floor, so a Monocle-led profile steps from
+    /// the most-used layout that does.
+    @Test("a Monocle-led profile steps from a layout with a floor")
+    func monocleLedSkipsMonocle() {
+        let model = makeTestModel()
+        model.config.spaces = ["1", "2", "3"]
+        model.config.spaceModes = ["1": .monocle, "2": .monocle, "3": .stack]
+        #expect(model.minSizeMostUsed == .stack)
     }
 }

@@ -133,7 +133,18 @@ struct LayoutDefaultsCensusRenderTests {
             // The one ruled drawer: the minimum window size's
             // per layout rows (#2237), a catalog drawer.
             guard file.lastPathComponent != "MinWindowSizeRows.swift"
-            else { continue }
+            else {
+                #expect(
+                    source.components(separatedBy: "SettingsDisclosure(")
+                        .count == 2
+                )
+                #expect(
+                    source.contains(
+                        "SettingsCatalog.layoutDefaults.minSizePerLayout"
+                    )
+                )
+                continue
+            }
             #expect(
                 !source.contains("SettingsDisclosure("),
                 Comment(

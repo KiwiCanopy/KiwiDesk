@@ -23,13 +23,18 @@ extension KiwiCore {
         of id: WindowID,
         axis: String
     ) -> Double {
-        let bound = tiler.sizeBound(for: id)
-        let appMin =
-            (axis == "x" ? bound?.minWidth : bound?.minHeight)
-            ?? 0
-        return max(
+        max(
             Double(minWindowSize(of: id).on(axis: axis)),
-            Double(appMin)
+            learnedMinSize(of: id, axis: axis)
+        )
+    }
+
+    /// One window's learned app-enforced minimum on `axis` (#677),
+    /// 0 where none — the one reading both minimums take.
+    func learnedMinSize(of id: WindowID, axis: String) -> Double {
+        let bound = tiler.sizeBound(for: id)
+        return Double(
+            (axis == "x" ? bound?.minWidth : bound?.minHeight) ?? 0
         )
     }
 
@@ -90,10 +95,7 @@ extension KiwiCore {
         var size = Double(minWindowSize(in: space).on(axis: axis))
         var carrier: WindowID? = nil
         for member in members {
-            let bound = tiler.sizeBound(for: member)
-            let min = Double(
-                (axis == "x" ? bound?.minWidth : bound?.minHeight) ?? 0
-            )
+            let min = learnedMinSize(of: member, axis: axis)
             if min > size {
                 size = min
                 carrier = member
