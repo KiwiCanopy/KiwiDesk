@@ -52,6 +52,14 @@ struct BarsGateWiringTests {
                 "besideAlwaysNote(.app,in:[.monocle])",
                 "besideAlwaysNote(.app,in:[.scrolling])",
                 "model.config.settings.screenVariants",
+                // The Show drawer hangs under its master unruled.
+                "SettingsCatalog.bars.kiwishelfShowEach,"
+                    + "chrome:.attached,",
+            ],
+            // So does Position's (#761).
+            "Components/Bars/KiwiShelfCard+Edge.swift": [
+                "SettingsCatalog.bars.kiwishelfEdges,"
+                    + "chrome:.attached,"
             ],
             // The one row gate the area answers (#2228): the Space
             // cue's Lua-owned grey — the whole constructor, since

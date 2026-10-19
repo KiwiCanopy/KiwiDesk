@@ -32,8 +32,6 @@ extension KiwiShelfCard {
             orderRow
         case .minimum:
             minimumRow
-            // Closes where the bars sit; the strip's depth follows.
-            Divider()
         case .background:
             backgroundStyleRow
         case .backgroundFit:

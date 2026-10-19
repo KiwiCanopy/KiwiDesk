@@ -128,20 +128,28 @@ extension TilingSettings {
         bar.look(on: appBarGlobalLook)
     }
 
-    /// The bar-hosting layout for a mode — the ONE place that
-    /// decides which layouts host an App Bar (#527): everything
-    /// asking "does this mode show a bar?" derives from here, so
-    /// a third hosting layout is one edit. `KiwiCore`'s per-space
-    /// twin keeps its own switch by necessity — two mirrors, which
-    /// §2.4 allows, never three.
+    /// Where a mode's App Bar is stored — the ONE place that
+    /// decides which layouts host an App Bar (#527): reading
+    /// (`appBarHost(for:)`) and writing (`setAppBarVisibility`)
+    /// both derive from here, so a third hosting layout is one
+    /// edit. `KiwiCore`'s per-space twin keeps its own switch by
+    /// necessity — two mirrors, which §2.4 allows, never three.
+    public static func appBarPath(
+        for mode: LayoutMode
+    ) -> WritableKeyPath<TilingSettings, LayoutAppBar>? {
+        switch mode {
+        case .monocle: return \.monocle.appBar
+        case .scrolling: return \.scrolling.appBar
+        default: return nil
+        }
+    }
+
+    /// The bar-hosting layout for a mode, or nil for one that
+    /// carries no App Bar (`appBarPath(for:)`).
     public func appBarHost(
         for mode: LayoutMode
     ) -> AppBarHosting? {
-        switch mode {
-        case .monocle: return monocle
-        case .scrolling: return scrolling
-        default: return nil
-        }
+        Self.appBarPath(for: mode).map { self[keyPath: $0] }
     }
 
     /// Every bar-hosting layout's bar configuration.

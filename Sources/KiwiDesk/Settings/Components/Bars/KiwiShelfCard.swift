@@ -34,7 +34,12 @@ struct KiwiShelfCard: View {
             showGroup
             Divider()
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(BarsRowOrder.kiwishelfAtRest, id: \.id) {
+                ForEach(BarsRowOrder.kiwishelfPlacement, id: \.id) {
+                    row(for: $0)
+                }
+                // Where the bars sit, then how deep the strip is.
+                Divider()
+                ForEach(BarsRowOrder.kiwishelfDepth, id: \.id) {
                     row(for: $0)
                 }
                 styleDisclosure
