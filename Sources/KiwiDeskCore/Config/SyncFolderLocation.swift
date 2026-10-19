@@ -17,6 +17,25 @@ public enum SyncFolderLocation {
         defaults.set(folder?.path, forKey: key)
     }
 
+    static let followsKey = "general.syncFollows"
+
+    /// Whether this Mac keeps its folder in step on its own
+    /// (#2324 ruling 15): on once a folder is chosen, until the
+    /// user switches it off.
+    public static func follows(in defaults: UserDefaults) -> Bool {
+        defaults.object(forKey: followsKey) as? Bool ?? true
+    }
+
+    public static func storeFollows(_ on: Bool, in defaults: UserDefaults) {
+        defaults.set(on, forKey: followsKey)
+    }
+
+    /// The folder to keep in step, nil while none is chosen or the
+    /// switch is off.
+    public static func followed(in defaults: UserDefaults) -> URL? {
+        follows(in: defaults) ? stored(in: defaults) : nil
+    }
+
     /// iCloud Drive's own folder; absent while Drive is off.
     public static var iCloudDrive: URL {
         FileManager.default.homeDirectoryForCurrentUser

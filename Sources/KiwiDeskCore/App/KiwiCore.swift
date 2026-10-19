@@ -35,9 +35,9 @@ public final class KiwiCore {
     public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
     public let exec = ExecLauncher()
-
-    /// Structured keybinding sources installed in `keys`, read by
-    /// the shortcuts reference panel (`liveKeybindingSnapshot`).
+    /// Following a sync folder (#2324 slice 3, `+SyncFollow`).
+    public let sync = SyncFollower()
+    /// Keybindings installed in `keys` (`liveKeybindingSnapshot`).
     var appliedStructuredLayers: [KeyLayer]?
 
     /// The global window-rule bases (`GlobalRuleBase`).

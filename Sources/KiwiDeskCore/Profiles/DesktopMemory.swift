@@ -83,33 +83,30 @@ final class DesktopMemory {
     /// Mission Control number for them.
     var unstampable: Set<SkyLight.SpaceID> = []
 
-    /// The highest Desktop number the shortcut top-up has offered
-    /// on this Mac (`KiwiCore+DesktopShortcuts`) — live in the
-    /// app's defaults, since the Desktops are the Mac's, and
-    /// pinned by both `makeTestCore` twins.
-    var readShortcutMark: @MainActor () -> Int = {
-        UserDefaults.standard.integer(forKey: DesktopMemory.shortcutMarkKey)
+    /// The two marks a build before #2324 kept in this Mac's
+    /// defaults, read by the top-ups and carried into `gui.json`
+    /// once (`crossLegacyShortcutOffer`); nil where neither is set.
+    /// Pinned by both `makeTestCore` twins.
+    var readLegacyShortcutOffer: @MainActor () -> ShortcutOffer? = {
+        let defaults = UserDefaults.standard
+        let keys = [shortcutMarkKey, defaultsGenerationKey]
+        guard keys.contains(where: { defaults.object(forKey: $0) != nil })
+        else { return nil }
+        return ShortcutOffer(
+            desktop: defaults.integer(forKey: shortcutMarkKey),
+            generation: defaults.integer(forKey: defaultsGenerationKey)
+        )
     }
-    var writeShortcutMark: @MainActor (Int) -> Void = {
-        UserDefaults.standard.set($0, forKey: DesktopMemory.shortcutMarkKey)
+    var clearLegacyShortcutOffer: @MainActor () -> Void = {
+        UserDefaults.standard.removeObject(forKey: shortcutMarkKey)
+        UserDefaults.standard.removeObject(forKey: defaultsGenerationKey)
     }
     nonisolated static let shortcutMarkKey = "desktopShortcutMark"
-    /// The newest default-shortcut generation this Mac was
-    /// offered (#2211) — live in the app's defaults, pinned by both
-    /// `makeTestCore` twins. Zero on an install that predates it.
-    var readDefaultsGeneration: @MainActor () -> Int = {
-        UserDefaults.standard.integer(
-            forKey: DesktopMemory.defaultsGenerationKey
-        )
-    }
-    var writeDefaultsGeneration: @MainActor (Int) -> Void = {
-        UserDefaults.standard.set(
-            $0,
-            forKey: DesktopMemory.defaultsGenerationKey
-        )
-    }
     nonisolated static let defaultsGenerationKey =
         "defaultShortcutsGeneration"
+    /// The offer the top-ups last read or wrote this session, so a
+    /// Desktop switch with nothing new to offer reads no file.
+    var knownShortcutOffer: ShortcutOffer?
     /// The highest Desktop a declining setup (Lua-owned, no
     /// sidecar) was asked about this session, so a switch does not
     /// ask again.

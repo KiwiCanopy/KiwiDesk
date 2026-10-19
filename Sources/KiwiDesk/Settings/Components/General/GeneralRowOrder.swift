@@ -11,6 +11,7 @@ enum GeneralRowOrder {
         .general(.refusalSound),
         .general(.quitGridTargetDepth),
         .general(.syncFolder),
+        .general(.syncFollows),
     ]
 
     /// Advanced configuration and reset rows in ascending severity

@@ -73,6 +73,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// (#1752); nil until this file has adopted one. Stamped at the
     /// write (`GuiConfigStore.liveLook`), like `appWide`.
     public var look: LookBody?
+    /// The default rows this setup was offered (#2324); nil on a
+    /// file written before the offer travelled. Merged upward at
+    /// the write (`GuiConfigStore.save`), never drafted.
+    public var shortcutOffer: ShortcutOffer?
 
     /// Fields that ride `gui.json` without being settings the
     /// user DRAFTS — the Settings walk, the census guard and the
@@ -85,9 +89,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// save pill constantly, and it is stamped at the write
     /// (`GuiConfigStore.liveDesktopSpaces`) rather than drafted.
     /// `appWide` (#1741) and the shared `look` (#1752) are
-    /// stamped the same way.
+    /// stamped the same way, and `shortcutOffer` (#2324) is the
+    /// top-ups' bookkeeping, merged at the write.
     public static let undraftedFields: Set<String> = [
-        "format", "desktopSpaces", "appWide", "look",
+        "format", "desktopSpaces", "appWide", "look", "shortcutOffer",
     ]
 
     /// Fields `gui.json` never carries: they mean something on
@@ -125,6 +130,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case kiwivision
         case hyper
         case look
+        case shortcutOffer = "shortcut_offer"
     }
 
     public init(from decoder: Decoder) throws {
@@ -244,6 +250,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             LookBody.self,
             forKey: .look
         )
+        // Additive since #2324: absence is "never offered here".
+        shortcutOffer = try container.decodeIfPresent(
+            ShortcutOffer.self,
+            forKey: .shortcutOffer
+        )
         dropEmptyNamedSpaces()
     }
 
@@ -287,5 +298,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.encode(appWide.hyper, forKey: .hyper)
         }
         try container.encodeIfPresent(look, forKey: .look)
+        try container.encodeIfPresent(
+            shortcutOffer,
+            forKey: .shortcutOffer
+        )
     }
 }

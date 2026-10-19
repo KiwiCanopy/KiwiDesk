@@ -161,10 +161,11 @@ struct DefaultShortcutGenerationTests {
         #expect(actions == seededBeforeGenerations.union(generations))
     }
 
-    private final class Mark { var value = 0 }
+    private func offered(_ core: KiwiCore) -> ShortcutOffer {
+        core.persistedGuiConfig()?.shortcutOffer ?? ShortcutOffer()
+    }
 
     private func makeCore(
-        mark: Mark,
         base: [KeyBinding]
     ) throws -> KiwiCore {
         let core = makeTestCore(
@@ -177,8 +178,7 @@ struct DefaultShortcutGenerationTests {
         let index = try #require(config.layers.firstIndex { $0.isDefault })
         config.layers[index].bindings = base
         try core.guiConfigStore.save(config)
-        core.desktopMemory.readDefaultsGeneration = { mark.value }
-        core.desktopMemory.writeDefaultsGeneration = { mark.value = $0 }
+        core.desktopMemory.readLegacyShortcutOffer = { nil }
         return core
     }
 
@@ -189,13 +189,14 @@ struct DefaultShortcutGenerationTests {
 
     @Test("An update adds the rows once; a deleted one stays gone")
     func offeredOnce() throws {
-        let mark = Mark()
-        let core = try makeCore(mark: mark, base: swapOnSteps)
+        let core = try makeCore(base: swapOnSteps)
         core.topUpGenerationShortcuts()
         #expect(baseLua(core).contains(back))
         #expect(baseLua(core).contains(forward))
         #expect(!baseLua(core).contains(next))
-        #expect(mark.value == DefaultKeybindings.newestGeneration)
+        #expect(
+            offered(core).generation == DefaultKeybindings.newestGeneration
+        )
 
         var config = try #require(core.persistedGuiConfig())
         let index = try #require(config.layers.firstIndex { $0.isDefault })
@@ -206,27 +207,30 @@ struct DefaultShortcutGenerationTests {
         #expect(!baseLua(core).contains(back))
     }
 
-    /// The mark vouches for rows in gui.json, so a discarded or
-    /// replaced sidecar — a restored backup, a reset — is offered
-    /// every generation again.
-    @Test("Discarding gui.json resets the generation mark")
+    /// The offer lives in gui.json, so a discarded sidecar takes it
+    /// along; the session's copy and this Mac's pre-#2324 marks go
+    /// with it, or a reset would never be offered a generation.
+    @Test("Discarding gui.json resets the generation offer")
     func discardClearsTheMark() throws {
-        let mark = Mark()
-        let core = try makeCore(mark: mark, base: swapOnSteps)
+        let core = try makeCore(base: swapOnSteps)
+        var cleared = 0
+        core.desktopMemory.clearLegacyShortcutOffer = { cleared += 1 }
         core.topUpGenerationShortcuts()
-        #expect(mark.value == DefaultKeybindings.newestGeneration)
+        #expect(
+            offered(core).generation == DefaultKeybindings.newestGeneration
+        )
         _ = core.discardArtifacts(
             [.guiConfig],
             reason: "test",
             trash: { try FileManager.default.removeItem(at: $0) }
         )
-        #expect(mark.value == 0)
+        #expect(cleared == 2)
+        #expect(core.desktopMemory.knownShortcutOffer == nil)
     }
 
     @Test("A profile's own row for the action counts as bound")
     func profileRowCountsAsBound() throws {
-        let mark = Mark()
-        let core = try makeCore(mark: mark, base: swapOnSteps)
+        let core = try makeCore(base: swapOnSteps)
         var profile = Profile(
             name: "Work",
             monitorSets: [MonitorSet(monitors: [])],
@@ -256,8 +260,7 @@ struct DefaultShortcutGenerationTests {
     /// the managed vocabulary.
     @Test("A setup the GUI does not manage keeps its mark")
     func luaOwnedKeepsTheMark() throws {
-        let mark = Mark()
-        let core = try makeCore(mark: mark, base: swapOnSteps)
+        let core = try makeCore(base: swapOnSteps)
         try "KiwiDesk.bind(\"cmd+1\", function() end)".write(
             to: core.configURL,
             atomically: true,
@@ -265,7 +268,7 @@ struct DefaultShortcutGenerationTests {
         )
         #expect(!core.isGuiManaged)
         core.topUpGenerationShortcuts()
-        #expect(mark.value == 0)
+        #expect(offered(core).generation == 0)
         #expect(!baseLua(core).contains(back))
     }
 }

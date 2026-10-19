@@ -40,7 +40,13 @@ extension KiwiCore {
         from bundle: SetupBundle,
         trash: (URL) throws -> Void
     ) throws(SetupBundleError) -> RestoreOutcome {
-        try replaceSetup(with: bundle, trash: trash, take: nil)
+        // A restore is this Mac's choice, never the folder's: with
+        // the agreement gone, the next pass offers Compare and
+        // Copy rather than copying the backup out (#2324).
+        try pausingSync { () throws(SetupBundleError) in
+            defer { forgetSyncAgreement() }
+            return try replaceSetup(with: bundle, trash: trash, take: nil)
+        }
     }
 
     /// `restoreSetup`, or with `take` a sync folder's setup

@@ -174,11 +174,31 @@ configuration. On a fresh install it is created at first launch
 with the [default shortcuts](#default-shortcuts); on a
 hand-written setup, the first time you Save in Settings.
 
-> **Keeping multiple Macs in sync.** Symlink `~/.config/KiwiDesk`
-> into an iCloud Drive or Dropbox folder. Machine-specific state
-> does not travel: grant Accessibility on each Mac, and expect
-> screen layout and macOS Desktops to resolve against what is
-> connected there.
+:::unreleased
+**Keeping several Macs in sync.** Pick a folder under Settings ›
+General › Sync across Macs: iCloud Drive, or any folder Dropbox,
+Syncthing, Nextcloud or a similar app keeps in step. With **Keep
+in sync automatically** on, KiwiDesk copies `gui.json`, your
+profiles, palettes, looks and `init.lua` into the folder as they
+change, and applies what another Mac copies there. Your config
+stays in `~/.config/KiwiDesk`; turning the switch off keeps it
+there and leaves the folder as it is. Grant Accessibility on each
+Mac; screen layouts, macOS Desktops and Desktop bindings stay with
+each Mac.
+
+A change from another Mac that lands while Settings holds unsaved
+edits leaves your edits in place, and Save writes them on top; a
+setting both Macs changed asks Keep Yours or Use Theirs at Save,
+and `init.lua` edited on both asks once for the whole file. When
+both Macs changed the setup while the folder could not be reached,
+nothing is copied until you choose a side with Compare and Copy.
+KiwiDesk never reads a conflict copy a sync app leaves beside the
+files (`gui 2.json`, a "conflicted copy"); the line under the
+switch names it. Reset All Settings turns the switch off, so the
+folder keeps the setup the other Macs use; turning it back on, or
+restoring a backup while it is on, asks which setup to keep with
+Compare and Copy.
+:::
 
 :::unreleased
 When an update moves `gui.json`, a profile, your palettes or your
