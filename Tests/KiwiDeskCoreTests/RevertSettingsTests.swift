@@ -50,7 +50,7 @@ struct RevertSettingsTests {
         return core
     }
 
-    @Test("a named leaf goes back live; the file is untouched")
+    @Test("a named leaf goes back live")
     func namedLeafGoesBack() throws {
         for core in [try ownLookCore(), try KeepFixture.core()] {
             let stored = core.tiler.settings.borderStyle.width
