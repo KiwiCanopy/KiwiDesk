@@ -5,7 +5,7 @@ import { createImageUrlBuilder } from "@sanity/image-url";
  * build from Sanity (#2369) so their names and photos stay out of
  * this public repo: a withdrawn consent is a Sanity delete, not a
  * commit. The documents are `kiwideskVoice` in the KiwiCanopy
- * Studio (KiwiCanopy/KiwiCV-Sanity-Studio).
+ * Studio (KiwiCanopy/KiwiCanopy-Sanity-Studio).
  *
  * Build time, not in the browser, like `stars.ts`: the CSP
  * (`public/_headers`) and the privacy policy promise no
