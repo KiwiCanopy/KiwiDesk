@@ -35,18 +35,22 @@ extension KiwiCore {
         )
     }
 
-    /// Each screen with its frame and the area windows lay out
-    /// in, in the AX coordinates `list_windows` reports (#2492).
+    /// Each screen with its frame and the area its shown Space lays
+    /// windows out in, in the AX coordinates `list_windows`
+    /// reports (#2492).
     func listMonitors() -> CommandResponse {
-        let displays = state.workspaces.allDisplays
-        let primary = Self.primaryHeight(of: displays)
-        let monitors = displays.map { display in
+        let primary = GeometryUtils.primaryHeight
+        let monitors = state.workspaces.allDisplays.map { display in
             let frame = GeometryUtils.flip(
                 display.frame,
                 primaryHeight: primary
             )
-            let usable = TilingEngine.screen(for: display.id)
-                .map { tiler.visibleBounds($0) }
+            let shown = state.workspaces.currentSpace(on: display.id)
+                .flatMap { state.workspaces[$0] }
+            let laid = TilingEngine.screen(for: display.id).flatMap {
+                screen in
+                shown.map { tiler.layoutBounds(on: screen, for: $0) }
+            }
             return JSONValue.object([
                 "id": .number(Double(display.id.raw)),
                 "name": .string(display.name),
@@ -56,18 +60,11 @@ extension KiwiCore {
                 "height": .number(
                     Double(display.frame.height)
                 ),
-                "visible_frame": usable.map(Self.json(rect:)) ?? .null,
+                "layout_frame": laid.map(Self.json(rect:)) ?? .null,
                 "fingerprint": .string(display.fingerprint),
             ])
         }
         return .ok(.array(monitors))
-    }
-
-    /// The height of the screen AppKit's global origin sits on,
-    /// which the AX flip measures from.
-    static func primaryHeight(of displays: [Display]) -> CGFloat {
-        displays.first { $0.frame.origin == .zero }?.frame.height
-            ?? displays.first?.frame.height ?? 0
     }
 
     func stateJSON() -> JSONValue {

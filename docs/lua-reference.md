@@ -7221,20 +7221,26 @@ answers empty lists.
 ### list_windows
 
 **Expects:** optionally a Space id; every tracked window otherwise.
+An unknown Space is refused.
 
 **Does:** returns where each window sits, one entry per window, in
 Space order: `id` (as `get_state` has it, which keeps the app and
-title), `space_id`, `display` (the screen it draws on), `shown`,
-`frame` (`x`, `y`, `width`, `height`), `visibility` (`visible`,
-`partly`, `partly_left`/`_right`/`_top`/`_bottom` for the side
-still in view, or `hidden`), `floats`, `focused` and `fullscreen`.
-The frame is the one KiwiDesk sent the window — during an
-animation, where it is going — in screen points from the top-left
-of the main screen, y growing down. A window on a Space no screen
-shows has `shown` false and no `frame` or `visibility`.
+title), `space_id`, `display` (the `list_monitors` id of the screen
+it draws on), `shown`, `frame` (`x`, `y`, `width`, `height`),
+`visibility`, `floats`, `focused` and `fullscreen`. `visibility` is
+`visible`, `hidden`, `partly` (another window covers part of it), or
+`partly_left`, `_right`, `_top` or `_bottom` (the screen's edge cuts
+it, and that side is still in view). A tile's frame is where its
+layout places it; a float's is where KiwiDesk is moving it, else
+its last reported frame. No app is asked. Frames are in screen
+points from the top-left of the main screen, y growing down. A
+window on a Space no screen shows, or parked out of sight, has
+`frame` `null`, and `visibility` too where no screen shows it; a
+full-screen window has no `visibility`.
 
 `list_monitors` reports each screen's `x` and `y` in the same
-coordinates, and `visible_frame`, the area its windows lay out in.
+coordinates, and `layout_frame`, the area its shown Space lays
+windows out in.
 
 **Example:**
 

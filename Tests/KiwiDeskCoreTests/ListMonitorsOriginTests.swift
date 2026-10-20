@@ -5,10 +5,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `list_monitors` reports each screen's origin in the AX
-/// coordinates `list_windows` uses (#2492): top-left, y down,
-/// measured from the screen AppKit's origin sits on. A screen
-/// above the main one reads a NEGATIVE y, where a flip that
-/// measured from the wrong screen goes wrong.
+/// coordinates `list_windows` uses (#2492): top-left, y down, flipped
+/// against the one `GeometryUtils.primaryHeight` every other AX
+/// frame in Core is. A screen above the main one reads a y further
+/// up than the main's, where an unflipped report reads it lower.
 @Suite("list_monitors origins", .serialized)
 @MainActor
 struct ListMonitorsOriginTests {
@@ -57,11 +57,14 @@ struct ListMonitorsOriginTests {
             frame: CGRect(x: -1440, y: 0, width: 1440, height: 900)
         )
         let seen = try origins([above, main, left])
+        let top = Double(GeometryUtils.primaryHeight)
         #expect(seen[1]?.x == 0)
-        #expect(seen[1]?.y == 0)
+        #expect(seen[1]?.y == top - 1080)
         #expect(seen[2]?.x == 200)
-        #expect(seen[2]?.y == -900)
+        #expect(seen[2]?.y == top - 1980)
         #expect(seen[3]?.x == -1440)
-        #expect(seen[3]?.y == 180)
+        #expect(seen[3]?.y == top - 900)
+        // Above is above: its top sits higher than the main's.
+        #expect((seen[2]?.y ?? 0) < (seen[1]?.y ?? 0))
     }
 }

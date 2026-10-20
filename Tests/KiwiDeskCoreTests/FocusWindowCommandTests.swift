@@ -68,6 +68,33 @@ struct FocusWindowCommandTests {
         #expect(core.activeSpace?.focused == WindowID(3))
     }
 
+    @Test("A full-screen window is refused")
+    func fullscreenRefused() {
+        let core = makeCore()
+        seed(core)
+        if var window = core.state.windows[WindowID(2)] {
+            window.isFullscreen = true
+            core.state.windows.upsert(window)
+        }
+        #expect(
+            !core.execute("focus_window", args: [.number(2)]).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
+    /// The #1345 gate's verdict, stated on the instance: a raise of
+    /// a window no screen draws would switch Desktops.
+    @Test("A window on a Desktop no screen shows is refused")
+    func crossDesktopRefused() {
+        let core = makeCore()
+        seed(core)
+        core.windowIsOnScreen = { $0 == WindowID(2) ? false : nil }
+        #expect(
+            !core.execute("focus_window", args: [.number(2)]).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
     @Test("An unknown or missing id is refused, never the focus")
     func refusals() {
         let core = makeCore()

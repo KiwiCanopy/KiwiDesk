@@ -1651,7 +1651,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 - an App Bar item's visibility is judged once in
   `KiwiCore.appBarVisibility` from KiwiDesk's issued frames and intended
   order, never a WindowServer read, a new frame input owing the bar refresh
-  an arm (#2234, `AppBarVisibilityTests`, `FrameSetReaderCensusTests`)
+  an arm (#2234, `AppBarVisibilityTests`, `FrameSetReaderCensusTests`), its
+  second reader `list_windows` taking the one `windowPlacements` (#2492,
+  `ListWindowsLayoutTests`)
 
 ### [borders](.claude/rules/borders.md)
 

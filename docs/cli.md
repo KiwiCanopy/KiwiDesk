@@ -483,9 +483,7 @@ knows of an app whose window it does not list
 
 :::unreleased
 `list_windows [space]` returns every window's frame, screen and
-visibility, in the same top-left coordinates `list_monitors` now
-gives each screen's origin in
-([`list_windows`](lua-reference.md#list_windows)), and
+visibility ([`list_windows`](lua-reference.md#list_windows)), and
 `focus_window <window>` focuses one by its id
 ([`focus_window`](lua-reference.md#focus_window)). Pick one window
 with `jq`:
@@ -505,7 +503,6 @@ every lens with why it cannot turn on.
 | Category | Command | Arguments |
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |
-| | `focus_window` | window id |
 | | `swap` | `left\|right\|up\|down` |
 | | `focus_space` | space id |
 | | `focus_space_previous` / `focus_space_next` | — (the focused screen's order; stops at the ends) |
@@ -565,7 +562,6 @@ every lens with why it cannot turn on.
 | | `bind_profile_to_desktop` | Desktop number, profile, screen fingerprints… (optional; scopes the binding to that setup) (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
-| | `list_windows` | [space] |
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000) |
 | | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration |

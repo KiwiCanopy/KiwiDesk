@@ -1,9 +1,11 @@
 import Foundation
 
 /// `focus_window <window>` (#2492): focuses a window by the id
-/// `list_windows` and `get_state` report, through the pick a bar
-/// row takes — a window on another Space switches there, landing
-/// on it. Ambient motion, like every CLI verb.
+/// `list_windows` and `get_state` report, on the Space it draws on
+/// — another Space switches through the Space Bar's own pick,
+/// landing on it. Where that pick would fall back to a bare switch
+/// (a Desktop no screen shows), the verb refuses with the reason
+/// instead. Ambient motion, like every CLI verb.
 extension KiwiCore {
     func focusWindowCommand(_ args: [JSONValue]) -> CommandResponse {
         guard let first = args.first, first != .null else {
@@ -25,9 +27,8 @@ extension KiwiCore {
                     "window \(id.raw) is on a Desktop no screen shows"
                 )
             }
-            let space = state.workspaces.space(of: id)
-            if let space, space != state.workspaces.activeSpace,
-                !window.isSticky
+            if let space = renderSpace(of: window),
+                space != state.workspaces.activeSpace
             {
                 focusFromSpaceBar(id, on: space)
             } else {
