@@ -425,6 +425,7 @@
   "diff.live.keep": "Conserva",
   "diff.live.keep.conflicting": "Impossibile conservarla: non è compatibile con il profilo salvato.",
   "diff.live.keep.hint": "Conserva questa modifica applicata perché resti dopo un riavvio.",
+  "diff.live.keep.newer_format": "Impossibile conservarla: un KiwiDesk più recente ha salvato il suo file.",
   "diff.live.keep.not_written": "Impossibile conservare questa impostazione.",
   "diff.live.keep_all": "Conserva tutto",
   "diff.live.keep_all.hint": "Conserva tutte le modifiche applicate perché restino dopo un riavvio.",

@@ -425,6 +425,7 @@
   "diff.live.keep": "保留",
   "diff.live.keep.conflicting": "无法保留 — 它与已存储的描述文件不符。",
   "diff.live.keep.hint": "保留此项已生效的更改，使其在重新启动后依然有效。",
+  "diff.live.keep.newer_format": "无法保留 — 其文件由更新版本的 KiwiDesk 保存。",
   "diff.live.keep.not_written": "无法保留此设置。",
   "diff.live.keep_all": "全部保留",
   "diff.live.keep_all.hint": "保留所有已生效的更改，使其在重新启动后依然有效。",

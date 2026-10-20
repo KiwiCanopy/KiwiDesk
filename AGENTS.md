@@ -1010,6 +1010,8 @@ Touching `Config`, `Profiles`, `Commands`.
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
   stored profile and the rule snapshot, taken only where a caller holds leaves
+  — a store latch refusing a keep judged there from a reading taken
+  before the write, never after it (#2490, `ConfigStatusTests`)
   — save Settings' live rows and `revert_settings`, the ruled readers that
   diff the root, the rows' Keep taking the reading's own keep ids (#2262,
   #2368, `UnsavedLiveSettingsTests`, `SettingsLiveKeepTests`) and the revert

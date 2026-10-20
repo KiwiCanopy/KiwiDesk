@@ -1539,6 +1539,13 @@ fact about its command*. The obligations:
   report and `keep_settings` both read it, so a keep and the
   report it follows never disagree (`ChangeReportTests`,
   `KeepSettingsEdgeTests`).
+- **A store latch that refuses a keep is judged in `KeepJudge`
+  from a reading taken before the write, never re-derived after
+  it (#2490)** — `KeepJudge.latch(of:)` maps each owner to the
+  files its write lands in, so the report says `newer_format`
+  before the keep runs and `not_written` stays a write that truly
+  failed (`ConfigStatusTests` ▸ `sharedLookLeafNamesTheLatch`). A
+  new refusal reason joins the judge the same way.
 - **A value a verb changes live is reported only where the keep
   document carries it** (`KiwiCore.keepDocument`'s roots). A new
   live store a verb writes joins one of those roots, or its verb

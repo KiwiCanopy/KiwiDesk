@@ -13,6 +13,12 @@ extension KiwiCore {
         guiConfigStore.newerFormat()
     }
 
+    /// Whether a newer build wrote the live profile's file, read
+    /// at the moment asked, as the Save latch is (#2490).
+    func liveProfileIsNewer() -> Bool {
+        profiles.currentName.flatMap(profiles.newerFormat(name:)) != nil
+    }
+
     /// Whether `gui.json` itself is newer, which its unreadable
     /// issue stands down for: the newer-format one says it.
     var guiConfigIsNewer: Bool {

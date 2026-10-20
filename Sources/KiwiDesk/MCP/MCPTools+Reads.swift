@@ -48,7 +48,9 @@ extension MCPTools {
             getState,
             title: "Read KiwiDesk state",
             "Returns the Spaces, their layouts and windows, the screens "
-                + "and the focused window.",
+                + "and the focused window. Config Issues and the sync "
+                + "folder's status come from run with "
+                + "\(KiwiCore.configStatusCommand).",
             readOnly: true
         ),
         handle: { tools, _ in

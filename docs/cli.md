@@ -236,6 +236,13 @@ before the command runs. A shortcut verb saves at once, so `run`
 tells the AI app to show you the mapping and ask first. `subscribe` and the Lua-only verbs are
 not offered.
 
+:::unreleased
+An AI app reads Config Issues and the sync folder's status by
+sending `get_config_status` through `run`. When `keep` cannot write
+a change because a newer KiwiDesk wrote the file it goes to, it
+says so (`newer_format`) instead of reporting a plain failed write.
+:::
+
 `looks` takes an `action` — each `look.*` verb that can be undone —
 and that verb's arguments by name; `look.delete` goes through
 `run_destructive`. The AI page's **Make a new look** prompt offers to
@@ -438,6 +445,21 @@ left in place when it is exactly the one KiwiDesk would write for
 the chosen key ([`set_hyper_key`](lua-reference.md#set_hyper_key)).
 KiwiDesk then removes it when it quits, and an app still listening
 for F18 keeps hearing the key. CLI only — Lua cannot call it.
+:::
+
+:::unreleased
+`get_config_status` returns `{issues, sync}`. Each issue carries
+its `source` file, a `kind` (`profile_broken` with its `cause`,
+`lua_vm_unavailable`, `lua_error` with its `message`,
+`gui_config_unreadable`, `newer_format` (its `source` is the
+file a newer KiwiDesk wrote),
+`unknown_call` and `retired_call` with their `name`,
+`missing_font_family` with its `name`) and, where one applies, the
+`profile`. `sync` carries the followed `folder` (`null` when none)
+and a `status`: `off`, `up_to_date`, `folder_unavailable`,
+`changed_on_both`, `conflict_copy` with its `path`, or
+`newer_on_another_mac` / `newer_here` with the `file` a newer
+KiwiDesk wrote.
 :::
 
 `look.list`, `look.current`, `look.apply <name>`, `look.save
