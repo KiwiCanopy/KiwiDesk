@@ -14,7 +14,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var spaceHistory: RuleReachTable<SpaceHistoryKind>
     /// The layout cycle, one key (#453).
     public var modeCycle: RuleReachTable<[LayoutMode]>
-    /// The Tile list and the "Float windows automatically" switch
+    /// The Tile list and the Automatic floating switch
     /// (#2173).
     public var tileRules: RuleReachTable<[String]>
     public var floatAutomatically: RuleReachTable<Bool>

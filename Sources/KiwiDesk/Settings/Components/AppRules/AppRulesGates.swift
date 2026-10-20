@@ -15,7 +15,7 @@ struct AppRulesGates {
         /// No float rule matches by title
         /// (`.titlePatternsExist`).
         case noTitlePatterns
-        /// "Float windows automatically" is off, so nothing floats
+        /// Automatic floating is off, so nothing floats
         /// on a guess for a Tile rule to change (#2173).
         case automaticOff
     }

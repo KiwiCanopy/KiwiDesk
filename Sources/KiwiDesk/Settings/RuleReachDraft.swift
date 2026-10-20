@@ -18,7 +18,7 @@ enum RuleFamily: Hashable {
     case cycle
     /// A Tile rule, keyed like a float rule (#2173).
     case tile
-    /// The "Float windows automatically" switch, keyed by
+    /// The Automatic floating switch, keyed by
     /// `RuleReachTable.floatAutomaticallyKey` (#2173).
     case autoFloat
 
