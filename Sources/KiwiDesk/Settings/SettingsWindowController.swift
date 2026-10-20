@@ -246,7 +246,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             NSApp.forceFront(window)
             return
         }
-        let window = NSWindow(
+        let window = SettingsWindow(
             contentRect: NSRect(
                 x: 0,
                 y: 0,
@@ -276,8 +276,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.isReleasedWhenClosed = false
         window.delegate = self
         // While it is key, hover focus hears the pointer leave
-        // through Core's local monitor alone (#2378).
-        window.acceptsMouseMovedEvents = true
+        // through Core's local monitor alone (#2378); off while a
+        // popover hangs from it (#2501).
+        window.syncMouseMoves()
         // Tiled window ID for AX bridge discrimination
         // (#678, OwnWindowTiling).
         window.identifier = NSUserInterfaceItemIdentifier(
