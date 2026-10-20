@@ -100,7 +100,22 @@ struct HyperKeyRowTests {
         #expect(HyperKeyWords.caption(nil).contains("Caps Lock"))
         #expect(HyperKeyWords.name(.rightShift) == "Right ⇧")
         #expect(HyperKeyWords.paused.contains("manages"))
-        #expect(HyperKeyWords.trouble(.refused) != nil)
+        let named = HyperForeignRemap(source: .capsLock, destination: .f18)
+        #expect(
+            HyperKeyWords.trouble(.refused(named))?.hasPrefix(
+                "Caps Lock is already remapped to F18"
+            ) == true
+        )
+        #expect(
+            HyperKeyWords.trouble(.refused(nil))?.hasPrefix(
+                "Another app already remaps a key"
+            ) == true
+        )
+        #expect(
+            HyperKeyWords.trouble(.refused(nil))?.contains(
+                "the Mac restarts"
+            ) == true
+        )
         #expect(HyperKeyWords.trouble(.on) == nil)
     }
 
@@ -188,8 +203,8 @@ struct HyperKeyRowTests {
         LocalizationManager.shared.select("en")
         let text = HyperKeyRow.captionText
         #expect(
-            text(.capsLock, .refused, false)
-                == HyperKeyWords.trouble(.refused)
+            text(.capsLock, .refused(nil), false)
+                == HyperKeyWords.trouble(.refused(nil))
         )
         #expect(
             text(.capsLock, .failed, false)
