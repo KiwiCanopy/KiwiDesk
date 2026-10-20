@@ -77,6 +77,8 @@ struct FocusFloatTierTests {
             "set_mode",
             args: [.string("1"), .string("track")]
         )
+        // wrap_focus defaults on; this pins the dead end.
+        core.execute("track.set_wrap_focus", args: [.bool(false)])
         return (
             SpaceID("1"),
             core.tiler.calculatedFrames(state: core.state)

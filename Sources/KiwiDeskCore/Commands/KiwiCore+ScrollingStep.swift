@@ -43,7 +43,7 @@ extension KiwiCore {
         let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
-        // Opt-in wrap past an end (#168). The wrap keeps
+        // Wrap past an end (#168, on by default). It keeps
         // array-index order, so the deferred-raise classifier
         // (#143/#158) reads it right without a special case:
         // wrapping forward to index 0 is a lower-index move —

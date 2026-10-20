@@ -55,6 +55,8 @@ struct MonocleParkNavigationTests {
             "monocle.set_hide_style",
             args: [.string("park")]
         )
+        // wrap_focus defaults on; this pins the dead end.
+        core.execute("monocle.set_wrap_focus", args: [.bool(false)])
         core.state.workspaces.focus(w3, in: space)
         return core
     }

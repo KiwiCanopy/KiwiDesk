@@ -132,7 +132,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
     public var orientation: Orientation = .horizontal
     public var newWindowPlacement: SpawnPlacement = .afterFocused
     /// Whether focus wraps past row ends (#168).
-    public var wrapFocus = false
+    public var wrapFocus = true
     /// A lone window takes the whole area rather than one slot
     /// (#1389). Off keeps the slot size even alone.
     public var fillWhenAlone = true
@@ -187,7 +187,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
             try container.decodeIfPresent(
                 Bool.self,
                 forKey: .wrapFocus
-            ) ?? false
+            ) ?? true
         fillWhenAlone =
             try container.decodeIfPresent(
                 Bool.self,

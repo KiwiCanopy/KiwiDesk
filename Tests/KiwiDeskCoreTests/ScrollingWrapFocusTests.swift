@@ -59,7 +59,7 @@ private func startDummyPan(_ core: KiwiCore) -> Bool {
     return core.tiler.animation.activeCount > 0
 }
 
-/// Opt-in `scroll.set_wrap_focus` (#168): with the toggle on,
+/// `scroll.set_wrap_focus` (#168, on by default): with the toggle on,
 /// stepping `focus` past a row end lands on the far end; `swap`
 /// still never wraps.
 @Suite("Scrolling wrap focus (#168)", .serialized)
@@ -201,7 +201,7 @@ struct ScrollingWrapFocusTests {
     func offKeepsStopAtEnds() {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 3, focus: WindowID(3))
-        // Default off — no set call.
+        core.execute("scroll.set_wrap_focus", args: [.bool(false)])
         let right = core.execute(
             "focus",
             args: [.string("right")]

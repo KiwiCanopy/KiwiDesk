@@ -170,8 +170,8 @@ struct SettingsCodingTests {
         // by default (#239 — the minimal-pan behavior).
         #expect(scroll["anchor"] as? String == "follow")
         // `scroll.set_wrap_focus` → `layout.scroll.wrap_focus`,
-        // off by default (#168).
-        #expect(scroll["wrap_focus"] as? Bool == false)
+        // on by default (#168).
+        #expect(scroll["wrap_focus"] as? Bool == true)
         // `scroll.set_fill_when_alone` →
         // `layout.scroll.fill_when_alone`, on by default (#1389).
         #expect(scroll["fill_when_alone"] as? Bool == true)
@@ -180,9 +180,9 @@ struct SettingsCodingTests {
         let grid = try object(layout["grid"])
         #expect(grid["auto_size"] as? Bool == false)
         // `monocle.set_wrap_focus` → `layout.monocle.wrap_focus`
-        // (#168), off by default like scrolling/track (#257).
+        // (#168), on by default like scrolling/track (#257).
         let monocle = try object(layout["monocle"])
-        #expect(monocle["wrap_focus"] as? Bool == false)
+        #expect(monocle["wrap_focus"] as? Bool == true)
         // `monocle.set_hide_style` → `layout.monocle.hide_style`
         // (#881), `stack` by default — today's behavior.
         #expect(monocle["hide_style"] as? String == "stack")
@@ -207,7 +207,7 @@ struct SettingsCodingTests {
         #expect(track["auto_tracks"] as? Bool == true)
         #expect(track["limit"] as? Int == TrackParams().limit)
         #expect(track["new_window"] as? String == "focused_track")
-        #expect(track["wrap_focus"] as? Bool == false)
+        #expect(track["wrap_focus"] as? Bool == true)
         // SpaceID-keyed maps encode as objects, not arrays.
         let gap = try object(root["gap"])
         let gapOverride = try object(gap["override"])
