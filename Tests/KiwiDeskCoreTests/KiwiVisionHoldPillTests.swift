@@ -45,7 +45,12 @@ struct KiwiVisionHoldPillTests {
         try #require(
             core.borders.holdPillOverlay.pillForTest(F.stranger.raw) != nil
         )
-        core.flashRefusalPill(F.stranger, text: "No", symbol: "nosign")
+        core.flashRefusalPill(
+            F.stranger,
+            text: "No",
+            symbol: "nosign",
+            announce: false
+        )
         #expect(
             core.borders.holdPillOverlay.pillForTest(F.stranger.raw) != nil
         )

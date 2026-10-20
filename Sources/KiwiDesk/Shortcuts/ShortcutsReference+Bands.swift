@@ -215,4 +215,21 @@ extension ShortcutsReferenceBuilder {
                 )
             }
     }
+
+    /// Rows for Lua-owned chords whose action `init.lua` does not
+    /// spell inline (a named handler, a C function): the chord is
+    /// registered, so it is listed, under a generic name (#2482).
+    static func buildUnread(_ chords: [String]) -> [ShortcutRow] {
+        chords.map { chord in
+            ShortcutRow(
+                id: "unread:" + chord,
+                label: L(
+                    "shortcuts.panel.lua_function",
+                    "Lua function"
+                ),
+                combo: glyphs(chord),
+                icon: "curlybraces"
+            )
+        }
+    }
 }

@@ -135,6 +135,18 @@ enum HyperKeyWords {
         }
     }
 
+    /// Hyper is on and the active layer has no ✦ row, so pressing
+    /// the key does nothing (#2480); one sentence for every key kind.
+    static func noShortcut(_ key: HyperSourceKey) -> String {
+        L(
+            "shortcuts.hyper_key.caption.no_shortcut",
+            "%1$@ is now Hyper, but no active shortcut uses ✦, so "
+                + "pressing it does nothing. Quitting KiwiDesk gives it "
+                + "back.",
+            name(key)
+        )
+    }
+
     /// A key chosen while KiwiDesk manages no windows: the remap
     /// waits for Start Tiling.
     static var paused: String {

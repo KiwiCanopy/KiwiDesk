@@ -253,12 +253,7 @@ extension KiwiCore {
         return KeybindingImporter.layers(
             from: keys,
             interpreter: lua,
-            readFile: { path in
-                try? String(
-                    contentsOfFile: path,
-                    encoding: .utf8
-                )
-            }
+            readFile: KeybindingImporter.readSource
         )
     }
 

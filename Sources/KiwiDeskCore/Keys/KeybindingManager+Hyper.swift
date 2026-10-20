@@ -13,6 +13,8 @@ struct HyperLayer {
     /// The bare registrations of the current hold.
     var heldIDs: [UInt32] = []
     var isHeld = false
+    /// The last `hyperHasShortcuts` reported (#2480).
+    var hadShortcuts = false
     /// Cancels the watchdog of the current hold.
     var cancelWatchdog: (() -> Void)?
 
@@ -37,16 +39,19 @@ extension KeybindingManager {
     /// Takes the active layer's Hyper rows at the end of every
     /// `activate`. A registrar with no release channel arms
     /// nothing: a held layer that never hears its release
-    /// swallows its keys.
+    /// swallows its keys. The trigger arms with no rows too, or
+    /// F18 reaches the frontmost app and beeps (#2480).
     func armHyper(_ rows: [(KeyCombo, Int32)]) {
         hyper.rows = rows
-        guard hyperEnabled, !rows.isEmpty else {
+        guard hyperEnabled else {
             disarmHyperTrigger()
             return
         }
         guard holdGlide.releaseCapable else {
             activationFailures.formUnion(rows.map(\.0))
-            onLog("hyper: registrar reports no releases")
+            if !rows.isEmpty {
+                onLog("hyper: registrar reports no releases")
+            }
             return
         }
         if hyper.triggerIDs.isEmpty { registerHyperTrigger() }
@@ -68,6 +73,24 @@ extension KeybindingManager {
         if isSuspended || !hyperEnabled { disarmHyperTrigger() }
     }
 
+    /// Whether the active layer gives Hyper anything to do — what
+    /// the Settings caption reads (#2480). Read off the layer, so a
+    /// recorder's suspend, which drops the registered rows, moves
+    /// nothing.
+    public var hyperHasShortcuts: Bool {
+        bindings(for: currentLayer).keys.contains {
+            $0.modifiers.contains(.hyper)
+        }
+    }
+
+    /// Reports a flip of `hyperHasShortcuts` once per change.
+    func noteHyperShortcuts() {
+        let now = hyperHasShortcuts
+        guard now != hyper.hadShortcuts else { return }
+        hyper.hadShortcuts = now
+        onHyperShortcutsChange()
+    }
+
     func disarmHyperTrigger() {
         hyperReleased()
         for id in hyper.triggerIDs { registrar.unregister(id: id) }
@@ -86,6 +109,8 @@ extension KeybindingManager {
 
     func hyperPressed() {
         guard !hyper.isHeld, !isSuspended else { return }
+        // Once per hold: key repeat never re-enters past the guard.
+        if hyper.rows.isEmpty { onBareHyper() }
         hyper.isHeld = true
         registerHeldRows()
         hyper.cancelWatchdog = hyperSchedule(HyperLayer.maxHoldSeconds) {

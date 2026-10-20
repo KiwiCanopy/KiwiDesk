@@ -28,12 +28,18 @@ extension KiwiCore {
                     on: display,
                     edge: drawn.edge,
                     text: text,
-                    symbol: symbol
+                    symbol: symbol,
+                    announce: false
                 )
             )
         } else if let window = focusedWindowID {
             soundIfDrawn(
-                flashRefusalPill(window, text: text, symbol: symbol)
+                flashRefusalPill(
+                    window,
+                    text: text,
+                    symbol: symbol,
+                    announce: false
+                )
             )
         }
     }

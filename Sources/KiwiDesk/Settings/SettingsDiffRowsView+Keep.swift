@@ -36,12 +36,24 @@ struct LiveKeep {
     }
 
     private static func text(for reason: NotKeepable) -> String {
-        reason == .conflicting
-            ? L(
+        switch reason {
+        case .conflicting:
+            return L(
                 "diff.live.keep.conflicting",
                 "Couldn't keep this — it doesn't fit the saved profile."
             )
-            : L("diff.live.keep.not_written", "Couldn't keep this setting.")
+        case .newerFormat:
+            return L(
+                "diff.live.keep.newer_format",
+                "Couldn't keep this — a newer KiwiDesk wrote its file."
+            )
+        case .luaOwned, .noProfile, .appWide, .temporarySpace,
+            .notWritten, .unknown:
+            return L(
+                "diff.live.keep.not_written",
+                "Couldn't keep this setting."
+            )
+        }
     }
 }
 

@@ -11,9 +11,11 @@ extension KiwiCore {
         on display: DisplayID,
         edge: AppBarEdge,
         text: String,
-        symbol: String
+        symbol: String,
+        announce: Bool
     ) -> Bool {
-        borders.flashShelfPill(
+        if announce { borders.announceRefusal(text) }
+        return borders.flashShelfPill(
             display: display,
             edge: edge,
             frame: Self.pillRoom(beside: strip, edge: edge),

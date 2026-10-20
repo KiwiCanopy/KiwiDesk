@@ -33,12 +33,13 @@ extension ProfileManager {
     /// a newer build wrote is told apart first, by the one
     /// predicate, since its decode error reads as a wrong shape.
     func brokenCause(name: String, error: Error) -> ProfileBrokenCause {
-        if let url = try? fileURL(name: name),
-            NewerFormatOnDisk.checkProfile(url) != nil
-        {
-            return .newerFormat
-        }
-        return Self.cause(of: error)
+        newerFormat(name: name) != nil ? .newerFormat : Self.cause(of: error)
+    }
+
+    /// The refusal a write over profile `name` owes because a newer
+    /// build wrote its file; nil where none did (#2325).
+    func newerFormat(name: String) -> NewerFormatOnDisk? {
+        (try? fileURL(name: name)).flatMap(NewerFormatOnDisk.checkProfile)
     }
 
     /// Classifies a decoding or file read error into a broken profile cause.

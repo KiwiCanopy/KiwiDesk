@@ -37,8 +37,8 @@ public final class KiwiCore {
     public let exec = ExecLauncher()
     /// Following a sync folder (#2324 slice 3, `+SyncFollow`).
     public let sync = SyncFollower()
-    /// Keybindings installed in `keys` (`liveKeybindingSnapshot`).
-    var appliedStructuredLayers: [KeyLayer]?
+    /// What `keys` holds, by the apply that installed it (#2482).
+    var installedKeybindings: InstalledKeybindings?
 
     /// The global window-rule bases (`GlobalRuleBase`).
     var globalRuleBase = GlobalRuleBase()

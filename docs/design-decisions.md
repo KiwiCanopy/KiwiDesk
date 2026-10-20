@@ -17503,9 +17503,11 @@ the Float row it qualifies (`AppRuleListsWiringTests` ▸
 `patternEditorScopesToFloat`). An app may sit in both lists.
 This is the storage's own shape, so it costs the engine nothing.
 A third card, **Automatic floating**, carries the escape for a
-guess (#2173): the "Float windows automatically" checkbox on
-top and the **Tile instead** list it gates below it, so the Tile
-rows read as the checkbox's exceptions. It is one card rather
+guess (#2173): its checkbox on top and the **Tile instead** list
+it gates below it, so the Tile rows read as the checkbox's
+exceptions. The checkbox names the windows the guess floats —
+fixed-size and menu-bar app windows (#2486) — since a bare "Float
+windows automatically" read as every window. It is one card rather
 than a list and a checkbox apart because the checkbox is what
 gives the list meaning — with it off nothing floats on a guess, so its rows
 grey (the trash and "Applies to" stay live, since other profiles

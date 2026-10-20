@@ -77,7 +77,7 @@ extension AppRulesSection {
     }
 }
 
-/// The "Float windows automatically" checkbox and its "Applies
+/// The Automatic floating checkbox and its "Applies
 /// to" — a leading checkbox like every on/off (#2439).
 struct AutoFloatToggleRow: View {
     @ObservedObject var model: SettingsModel
@@ -188,23 +188,27 @@ enum AutoFloatWords {
     static var caption: String {
         L(
             "app_rules.auto_list.caption",
-            "KiwiDesk floats windows that can’t be resized, like many "
-                + "apps’ Settings windows, and apps without a Dock "
-                + "icon, like menu-bar apps."
+            "Like many apps’ Settings and About windows, and menu-bar "
+                + "apps without a Dock icon."
         )
     }
 
     static var title: String {
-        L("app_rules.auto_float", "Float windows automatically")
+        L(
+            "app_rules.auto_float",
+            "Float fixed-size and menu-bar app windows"
+        )
     }
 
     static var help: String {
         L(
             "app_rules.auto_float.help",
-            "Usually that guess is right. Edit the list below where "
-                + "it is wrong for an app.\n\nTurn it off and only your "
+            "KiwiDesk’s guess is usually right. Where it is wrong for "
+                + "an app, add the app to %1$@ below.\n\n"
+                + "Turn it off and only your "
                 + "Float rules float a window. Dialogs, sheets and "
-                + "panels float either way."
+                + "panels float either way.",
+            L("app_rules.tile", "Tile instead")
         )
     }
 

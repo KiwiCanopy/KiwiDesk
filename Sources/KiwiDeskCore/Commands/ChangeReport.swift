@@ -94,6 +94,9 @@ public enum NotKeepable: String, Codable, Sendable, CaseIterable {
     /// The write did not land: the profile's file, or `gui.json`
     /// for the shared look, was not written.
     case notWritten = "not_written"
+    /// The write did not land because a newer KiwiDesk wrote the
+    /// file it goes to, which this build leaves read-only (#2490).
+    case newerFormat = "newer_format"
     /// The leaf cannot be laid over the stored profile — alone, or
     /// with the leaves kept beside it — so nothing was written.
     case conflicting
@@ -105,7 +108,8 @@ public enum NotKeepable: String, Codable, Sendable, CaseIterable {
     /// leaf kept alone — so a caller holding it asks again.
     public var isLiftable: Bool {
         switch self {
-        case .temporarySpace, .notWritten, .conflicting: return true
+        case .temporarySpace, .notWritten, .newerFormat, .conflicting:
+            return true
         case .luaOwned, .noProfile, .appWide, .unknown: return false
         }
     }

@@ -1010,6 +1010,8 @@ Touching `Config`, `Profiles`, `Commands`.
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
   stored profile and the rule snapshot, taken only where a caller holds leaves
+  — a store latch refusing a keep judged there from a reading taken
+  before the write, never after it (#2490, `ConfigStatusTests`)
   — save Settings' live rows and `revert_settings`, the ruled readers that
   diff the root, the rows' Keep taking the reading's own keep ids (#2262,
   #2368, `UnsavedLiveSettingsTests`, `SettingsLiveKeepTests`) and the revert
@@ -1704,6 +1706,9 @@ Touching `Borders`, `Vision`.
 - a cue popping past its resting size takes a room `PopRoom` grows by the peak
   and pops about its centre, a resizing one setting the room for the whole
   resize at once (#2033, `SizeLimitPillPopTests`, `StickyMarkPopTests`)
+- a refusal pill states at its door whether VoiceOver hears it — a required
+  `announce:`, spoken through the one `announceRefusal` seam both
+  `makeTestCore` twins pin inert (#2480, `HyperBarePressCueTests`)
 - after a Space switch the focused ring is ordered in dormant and revealed on
   its window's own report near the sent frame, or at a cap (#1959,
   `BorderArrivalTests`)

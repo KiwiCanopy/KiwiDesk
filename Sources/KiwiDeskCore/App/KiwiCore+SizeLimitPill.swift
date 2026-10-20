@@ -12,7 +12,12 @@ extension KiwiCore {
         symbol: String,
         text: String
     ) -> Bool {
-        flashRefusalPill(window, text: text, symbol: symbol)
+        flashRefusalPill(
+            window,
+            text: text,
+            symbol: symbol,
+            announce: false
+        )
     }
 
     /// The frame a refusal pill draws on: the one the window was
@@ -23,19 +28,37 @@ extension KiwiCore {
     }
 
     /// The one door every refusal pill takes, the resize family's
-    /// and the window actions' (#1518) alike.
+    /// and the window actions' (#1518) alike. `announce` is each
+    /// caller's to state: a pill VoiceOver must hear speaks through
+    /// `announceRefusal` (#2480).
     @discardableResult
     func flashRefusalPill(
         _ window: WindowID,
         text: String,
-        symbol: String
+        symbol: String,
+        announce: Bool
     ) -> Bool {
+        if announce { borders.announceRefusal(text) }
         guard let frame = refusalPillFrame(window) else { return false }
         return borders.flashSizeLimitPill(
             window: window,
             frame: frame,
             text: text,
             symbol: symbol
+        )
+    }
+
+    /// `announceRefusal`'s live default: a VoiceOver announcement.
+    /// `NSApp` is nil in a process with no `NSApplication`.
+    static func postAnnouncement(_ text: String) {
+        guard let app = NSApp else { return }
+        NSAccessibility.post(
+            element: app,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: text,
+                .priority: NSAccessibilityPriorityLevel.high.rawValue,
+            ]
         )
     }
 
