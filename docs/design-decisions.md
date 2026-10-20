@@ -11007,12 +11007,17 @@ row of the page holds is refused and named with its holder, since
 nothing KiwiDesk writes gives an action a second chord in a layer —
 a holder in another profile's own rows is not looked for, the
 residue of moving a keymap that profile only inherits. A shared
-row the page's profile leaves out is not moved either: the
-profile names it by its old chord, and moving it would bring it
-back. Every row still on `⌃⌥` is listed under the switch with its
-reason — the row predates the update, another row holds the key,
-the user set it, this profile leaves it out, or another profile
-sets its own — and is re-recorded by hand; there is no "move these too", since each reason is one the
+row a profile leaves out moves too, and the mark that leaves it
+out moves with it (owner and ui-designer ruling, 2026-10-20): a
+profile names a left-out row by its chord, so moving the row
+alone would bring it back there, while leaving the row behind
+split the shared keymap for every other profile over one
+profile's choice. The same holds for a profile whose own row took
+the moved row's old chord — it went without the shared row, and
+still does on the new one. Every row still on `⌃⌥` is listed under
+the switch with its reason — the row predates the update, another
+row holds the key, the user set it, or another profile sets its
+own — and is re-recorded by hand; there is no "move these too", since each reason is one the
 user should read before the row moves. `⌃⌥` moves back what the
 mapping can produce, derived from the pure reverse mapping rather
 than a stored list: a row on any other `✦` chord stays (`✦⇧⌘3`,

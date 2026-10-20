@@ -94,13 +94,6 @@ enum ShortcutBaseWords {
                 name,
                 chord
             )
-        case .leftOutHere:
-            return L(
-                "shortcuts.base.left.left_out",
-                "%1$@ (%2$@): this profile leaves it out",
-                name,
-                chord
-            )
         case .profile(let profile):
             return L(
                 "shortcuts.base.left.profile",
