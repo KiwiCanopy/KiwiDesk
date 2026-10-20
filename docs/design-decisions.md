@@ -14621,7 +14621,7 @@ Space with small end dots, as iOS page dots do; the open bar shows
 every Space anyway. On a top or bottom edge a hover names the
 current Space in its dot; a vertical mark is a dot wide, with no
 room across it for a name. The App line only grows, since the App
-Bar opens 0.35 s later and icons in a 14-point mark would not read.
+Bar opens a moment later and icons in a 14-point mark would not read.
 
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing

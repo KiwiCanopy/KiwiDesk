@@ -17,10 +17,10 @@ enum ShelfReveal: Equatable {
     var isShown: Bool { self != .hidden }
 
     /// How long the pointer rests in the band before the shelf
-    /// reveals (ui-designer, from the Dock, the full-screen menu
-    /// bar and the hover peek's 0.12 s dwell): long enough that a
-    /// pointer passing for a title bar does not pop it.
-    static let revealDelay: TimeInterval = 0.35
+    /// reveals: the band sits on the mark alone, so the wait only
+    /// filters a pointer crossing it for a title bar below, as the
+    /// drag crossing's and hover peek's dwells do (owner, 2026-10-20).
+    static let revealDelay: TimeInterval = 0.15
     /// How long after the pointer leaves the shelf it retracts —
     /// forgiving an overshoot.
     static let retractDelay: TimeInterval = 0.5
