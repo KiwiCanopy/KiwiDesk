@@ -1413,6 +1413,96 @@ def check_raster_favicon(dist: pathlib.Path) -> None:
     print(f"raster favicon: declared on all {len(pages)} built page(s)")
 
 
+def check_no_sanity_in_dist(dist: pathlib.Path) -> None:
+    """No built page loads an image from another host, and no built
+    file names a Sanity host (#2369).
+
+    The CSP (`public/_headers`) and the privacy policy promise a
+    visitor's page asks no third party, so every `<img>` `src` and
+    `srcset` entry is site-relative or `data:` — the class, which
+    also covers a later `image.remotePatterns` host. The voices'
+    photos come from Sanity at BUILD time and must reach dist/
+    through astro:assets; a photo handed to a bare `<img>`, or a
+    fetch moved into a client script, still builds, so the artifact
+    is what is held.
+    """
+    remote = []
+    img = re.compile(r"<img\b[^>]*>")
+    attr = re.compile(r"\b(?:src|srcset)=\"([^\"]*)\"")
+    for page in sorted(dist.rglob("*.html")):
+        for tag in img.findall(page.read_text()):
+            for value in attr.findall(tag):
+                for entry in value.split(","):
+                    url = entry.strip().split(" ")[0]
+                    if url and not url.startswith(("/", "data:", ".")):
+                        remote.append(f"{page.relative_to(dist)}: {url}")
+    if remote:
+        fail(
+            f"{len(remote)} <img> source(s) load from another host "
+            f"(e.g. {remote[0]}). Route the image through astro:assets "
+            "so the page serves it itself."
+        )
+    host = re.compile(r"(?:cdn|api|apicdn)\.sanity\.io")
+    texts = (".html", ".css", ".js", ".mjs", ".json", ".xml", ".txt")
+    hits = [
+        p for p in sorted(dist.rglob("*"))
+        if p.suffix in texts and p.is_file()
+        and host.search(p.read_text(errors="ignore"))
+    ]
+    if hits:
+        listed = ", ".join(str(p.relative_to(dist)) for p in hits[:5])
+        fail(
+            f"{len(hits)} built file(s) name a Sanity host (e.g. "
+            f"{listed}). Voice photos must go through astro:assets so "
+            "the page serves them itself."
+        )
+    print("third-party images: none, and no Sanity host in dist/")
+
+
+LANDINGS = ("index.html", "nerd/index.html")
+
+
+def check_voices_rendered(dist: pathlib.Path) -> None:
+    """Every landing page draws the voices section with a voice in it.
+
+    `voices.ts` reads Sanity at build time and, on any failure, draws
+    NO section so a Pages deploy never breaks on it (#2369). That
+    leniency is silent by construction, so this gate is the watcher:
+    a broken read — a dataset turned private, a renamed field in the
+    Studio, a retired API version — reds the site gate instead of
+    quietly emptying production. Every photo it draws is self-served.
+    """
+    voice = re.compile(r"<figure\b[^>]*\bclass=\"[^\"]*\bvoice\b")
+    avatar = re.compile(
+        r"<img\b[^>]*\bclass=\"[^\"]*\bvoice__avatar\b[^>]*>"
+    )
+    pages = [
+        dist / locale / landing
+        for locale in ("", "de", "ja")
+        for landing in LANDINGS
+    ]
+    drawn = 0
+    for page in pages:
+        if not page.exists():
+            fail(f"landing page {page.relative_to(dist)} was not built")
+        html = page.read_text()
+        count = len(voice.findall(html))
+        if count == 0:
+            fail(
+                f"{page.relative_to(dist)} draws no voice. The build's "
+                "Sanity read failed or returned nothing; its "
+                "`[voices]` warning in the build log says why."
+            )
+        for tag in avatar.findall(html):
+            if not re.search(r"\bsrc=\"/_astro/", tag):
+                fail(
+                    f"{page.relative_to(dist)}: a voice photo is not "
+                    f"served from /_astro/: {tag[:120]}"
+                )
+        drawn += count
+    print(f"voices: {drawn} drawn across {len(pages)} landing page(s)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1437,6 +1527,8 @@ def main() -> None:
     check_typed_changelog(dist)
     check_roadmap_feed(dist)
     check_raster_favicon(dist)
+    check_no_sanity_in_dist(dist)
+    check_voices_rendered(dist)
 
 
 if __name__ == "__main__":
