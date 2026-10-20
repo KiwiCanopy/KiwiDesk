@@ -17,6 +17,7 @@ extension KeybindingManager {
     func activate(_ layer: String) {
         deactivate()
         activationFailures = []
+        noteHyperShortcuts()
         guard !isSuspended else { return }
         var hyperRows: [(KeyCombo, Int32)] = []
         for (combo, ref) in bindings(for: layer) {

@@ -196,6 +196,7 @@ struct HyperKeyRowTests {
         // status (`captionStates` holds what it answers).
         #expect(row.contains("Self.captionText("))
         #expect(row.contains("status: model.hyperStatus"))
+        #expect(row.contains("hasShortcuts: model.hyperHasShortcuts"))
     }
 
     @Test("the caption names the state the key is in")
@@ -203,20 +204,38 @@ struct HyperKeyRowTests {
         LocalizationManager.shared.select("en")
         let text = HyperKeyRow.captionText
         #expect(
-            text(.capsLock, .refused(nil), false)
+            text(.capsLock, .refused(nil), true, false)
                 == HyperKeyWords.trouble(.refused(nil))
         )
         #expect(
-            text(.capsLock, .failed, false)
+            text(.capsLock, .failed, true, false)
                 == HyperKeyWords.trouble(.failed)
         )
-        #expect(text(.capsLock, .off, false) == HyperKeyWords.paused)
+        #expect(text(.capsLock, .off, true, false) == HyperKeyWords.paused)
         #expect(
-            text(.capsLock, .on, false)
+            text(.capsLock, .on, true, false)
                 == HyperKeyWords.caption(.capsLock)
         )
-        #expect(text(nil, .off, false) == HyperKeyWords.caption(nil))
-        #expect(text(.capsLock, .on, true) != HyperKeyWords.caption(.capsLock))
+        #expect(text(nil, .off, true, false) == HyperKeyWords.caption(nil))
+        #expect(
+            text(.capsLock, .on, true, true)
+                != HyperKeyWords.caption(.capsLock)
+        )
+        // On with no ✦ row (#2480), below trouble and the pause.
+        #expect(
+            text(.capsLock, .on, false, false)
+                == HyperKeyWords.noShortcut(.capsLock)
+        )
+        #expect(
+            text(.capsLock, .failed, false, false)
+                == HyperKeyWords.trouble(.failed)
+        )
+        #expect(text(.capsLock, .off, false, false) == HyperKeyWords.paused)
+        #expect(
+            HyperKeyWords.noShortcut(.capsLock).hasPrefix(
+                "Caps Lock is now Hyper, but no active shortcut uses ✦"
+            )
+        )
     }
 
     @Test("pressing the Hyper key again keeps the key it is")

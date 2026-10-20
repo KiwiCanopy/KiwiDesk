@@ -94,6 +94,7 @@ struct HyperKeyRow: View {
                 Self.captionText(
                     key: model.appWide.hyperKey,
                     status: model.hyperStatus,
+                    hasShortcuts: model.hyperHasShortcuts,
                     luaOwned: reason == .appWideLuaOwned
                 )
             )
@@ -124,6 +125,7 @@ struct HyperKeyRow: View {
     static func captionText(
         key: HyperSourceKey?,
         status: HyperKeyStatus,
+        hasShortcuts: Bool,
         luaOwned: Bool
     ) -> String {
         if luaOwned { return GeneralGateHelp.sentence(for: .luaOwned) }
@@ -133,6 +135,9 @@ struct HyperKeyRow: View {
         if let trouble = HyperKeyWords.trouble(status) { return trouble }
         // Chosen, not applied: KiwiDesk is not managing yet.
         if status == .off { return HyperKeyWords.paused }
+        // On, but the active layer gives it nothing to do (#2480):
+        // Core's live answer, never the draft's rows.
+        if let key, !hasShortcuts { return HyperKeyWords.noShortcut(key) }
         return HyperKeyWords.caption(key)
     }
 

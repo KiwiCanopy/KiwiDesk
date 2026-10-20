@@ -137,7 +137,8 @@ extension KiwiCore {
         flashRefusalPill(
             window,
             text: refusal.sentence,
-            symbol: refusal.pillSymbol
+            symbol: refusal.pillSymbol,
+            announce: false
         )
     }
 

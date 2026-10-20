@@ -699,6 +699,19 @@ principle is the moving ring's room (#1937, above) one level
 down: a surface that changes size while it moves takes its room
 once and moves inside it.
 
+## A refusal pill says at its door whether VoiceOver hears it
+
+**Both `flashRefusalPill` doors take a required `announce:`, and a
+pill that speaks does so through the one `BorderManager.announceRefusal`
+seam, which both `makeTestCore` twins pin inert** (#2480). A pill is
+drawn for the eye alone, so a refusal that is ONLY a pill — the
+Hyper key with nothing to do, whose beep it replaced — leaves a
+VoiceOver user with nothing; a cue whose cause the GUI already
+announces (KiwiVision's reach) passes `false` rather than speaking
+twice. The argument is required so every caller writes the choice
+down; an announcement posted beside a door, rather than through it,
+is review's (`HyperBarePressCueTests`, `RefusalCueSeamTests`).
+
 ## The sheen is one ramp, painted by the surface that owns the stroke
 
 `border.sheen` (#1644) reaches the focused ring, the shelf's
