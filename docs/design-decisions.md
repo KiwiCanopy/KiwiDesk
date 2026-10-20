@@ -2876,7 +2876,8 @@ the #1785 entry below.
 
 **A shadow is a window with no title-bar button and no
 accessibility child beside a buttoned window of its own process**
-— Orion's "Orion Preview", which sits at 1×1 in a screen corner
+— its own title element counting as no child, since NoMachine's
+twin lists nothing else (#2346) — Orion's "Orion Preview", which sits at 1×1 in a screen corner
 and comes forward, listed and focused, the moment its process
 steps back, hiding again as the process activates (device,
 2026-09-30). Tiled, it took a slot and traded focus with its host

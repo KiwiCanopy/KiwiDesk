@@ -436,10 +436,13 @@ editing AX code:
 - **A shadow window never becomes a tile (#1785).** A window
   with no title-bar button and no AX child beside a buttoned
   window of its own process (Orion's "Orion Preview") is refused
-  at `track`, whatever its subrole reads. Six obligations. **Ask
-  the verdict of every window `track` offers, in ONE batched
-  round trip** (`AXHelper.windowTraits`, the four buttons, the
-  children and the frame in one call): the twin read `AXUnknown`
+  at `track`, whatever its subrole reads — its own title element
+  counting as no child, since NoMachine's twin lists nothing else
+  (#2346, `ShadowRuleTests` ▸ `titleChildIsNoContent`). Six
+  obligations. **Ask the verdict of every window `track`
+  offers, in ONE batched round trip** (`AXHelper.windowTraits`,
+  the four buttons, the children, the title element and the
+  frame in one call): the twin read `AXUnknown`
   as often as `AXStandardWindow` (device, 2026-09-30), and a
   subrole gate let it in as a float; only a shell reads its
   siblings, since `track` runs inside the boot scan's budget,

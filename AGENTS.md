@@ -1211,9 +1211,10 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   LaunchServices on a notification path, a new filer joining
   `ProcessIdentitySeamTests`' census (#1936), which keeps a running process
   whose LaunchServices record went missing for a moment, while a window with no
-  title-bar button and no AX child beside a buttoned window of its own process
-  is a shadow refused at `track` on any subrole, in one batched read — a lone
-  shell waiting for a host only in a process that shows no tile yet — handed
+  title-bar button and no AX child but its own title text beside a buttoned
+  window of its own process is a shadow refused at `track` on any subrole, in
+  one batched read — a lone shell waiting for a host only in a process that
+  shows no tile yet — handed
   back as a hide when tracked first, its record dying with its host, and never
   a tab (#1785, `ProcessIdentityTests`, `ProcessPolicyReadingTests`,
   `ShadowRuleTests`, `ShadowWindowTests`, `ShadowWindowReconcileTests`)
