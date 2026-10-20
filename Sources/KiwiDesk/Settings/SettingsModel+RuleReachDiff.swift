@@ -160,15 +160,7 @@ extension SettingsModel {
                         key,
                         instance: "reach.new.\(app)",
                         label: name,
-                        note: isShared
-                            ? L(
-                                "app_rules.reach.diff.new_profiles_get",
-                                "New profiles get this rule"
-                            )
-                            : L(
-                                "app_rules.reach.diff.new_profiles_lose",
-                                "New profiles won't get this rule"
-                            )
+                        note: Self.newProfilesNote(family, isShared)
                     )
                 )
             }
@@ -202,5 +194,44 @@ extension SettingsModel {
         return shared && reached.count == all.count
             ? RuleReachWords.allProfiles
             : RuleReachWords.group(reached)
+    }
+}
+
+extension SettingsModel {
+    /// Whether new profiles get an entry the base gained or lost,
+    /// named by what the entry is (owner eyeball, 2026-10-20).
+    static func newProfilesNote(_ family: RuleFamily, _ gets: Bool) -> String {
+        switch (family, gets) {
+        case (.space, true), (.float, true), (.tile, true):
+            L(
+                "app_rules.reach.diff.new_profiles_get",
+                "New profiles get this rule"
+            )
+        case (.space, false), (.float, false), (.tile, false):
+            L(
+                "app_rules.reach.diff.new_profiles_lose",
+                "New profiles won't get this rule"
+            )
+        case (.key, true):
+            L(
+                "app_rules.reach.diff.new_profiles_get.shortcut",
+                "New profiles get this shortcut"
+            )
+        case (.key, false):
+            L(
+                "app_rules.reach.diff.new_profiles_lose.shortcut",
+                "New profiles won't get this shortcut"
+            )
+        case (_, true):
+            L(
+                "app_rules.reach.diff.new_profiles_get.setting",
+                "New profiles get this setting"
+            )
+        case (_, false):
+            L(
+                "app_rules.reach.diff.new_profiles_lose.setting",
+                "New profiles won't get this setting"
+            )
+        }
     }
 }

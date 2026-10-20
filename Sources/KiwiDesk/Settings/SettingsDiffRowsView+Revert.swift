@@ -97,15 +97,16 @@ struct RowRevertButton: View {
 /// (#2412) — what goes, then the one way to let it go.
 @MainActor
 enum GroupRevertWords {
-    /// The layer or lens a row's ↺ puts back, by the name it shows.
+    /// The layer or lens a row's ↺ puts back, by the name it shows;
+    /// `added` where nothing is saved, so the ↺ removes it.
     private static func subject(
         _ row: SettingsDiffRow
-    ) -> (layer: Bool, name: String)? {
+    ) -> (layer: Bool, name: String, added: Bool)? {
         switch row.revert {
         case .layer(let stored, let page):
-            (page ?? stored).map { (true, $0) }
+            (page ?? stored).map { (true, $0, stored == nil) }
         case .lens(let stored, let page):
-            (page ?? stored).map { (false, $0) }
+            (page ?? stored).map { (false, $0, stored == nil) }
         default:
             nil
         }
@@ -113,9 +114,13 @@ enum GroupRevertWords {
 
     static func button(for row: SettingsDiffRow) -> String {
         switch subject(row) {
-        case (true, let name)?:
+        case (true, let name, true)?:
+            L("diff.revert.layer.added", "Remove the “%1$@” layer", name)
+        case (true, let name, false)?:
             L("diff.revert.layer", "Revert the “%1$@” layer", name)
-        case (false, let name)?:
+        case (false, let name, true)?:
+            L("diff.revert.lens.added", "Remove the “%1$@” lens", name)
+        case (false, let name, false)?:
             L("diff.revert.lens", "Revert the “%1$@” lens", name)
         case nil:
             L("diff.revert.group", "Revert all shortcut changes")
@@ -124,9 +129,21 @@ enum GroupRevertWords {
 
     static func title(for row: SettingsDiffRow) -> String {
         switch subject(row) {
-        case (true, let name)?:
+        case (true, let name, true)?:
+            L(
+                "diff.revert.layer.added.title",
+                "Remove the “%1$@” layer?",
+                name
+            )
+        case (true, let name, false)?:
             L("diff.revert.layer.title", "Revert the “%1$@” layer?", name)
-        case (false, let name)?:
+        case (false, let name, true)?:
+            L(
+                "diff.revert.lens.added.title",
+                "Remove the “%1$@” lens?",
+                name
+            )
+        case (false, let name, false)?:
             L("diff.revert.lens.title", "Revert the “%1$@” lens?", name)
         case nil:
             L("diff.revert.group.title", "Revert all shortcut changes?")
@@ -135,13 +152,25 @@ enum GroupRevertWords {
 
     static func message(for row: SettingsDiffRow) -> String {
         switch subject(row) {
-        case (true, _)?:
+        case (true, _, true)?:
+            L(
+                "diff.revert.layer.added.message",
+                "It isn’t saved yet, so reverting removes it and its "
+                    + "shortcuts."
+            )
+        case (false, _, true)?:
+            L(
+                "diff.revert.lens.added.message",
+                "It isn’t saved yet, so reverting removes it and its "
+                    + "shortcut."
+            )
+        case (true, _, false)?:
             L(
                 "diff.revert.layer.message",
                 "This puts the layer back as it was saved, with its "
                     + "shortcuts."
             )
-        case (false, _)?:
+        case (false, _, false)?:
             L(
                 "diff.revert.lens.message",
                 "This puts the lens back as it was saved, with its "
@@ -158,8 +187,14 @@ enum GroupRevertWords {
 
     static func confirm(for row: SettingsDiffRow) -> String {
         switch subject(row) {
-        case (true, _)?: L("diff.revert.layer.confirm", "Revert Layer")
-        case (false, _)?: L("diff.revert.lens.confirm", "Revert Lens")
+        case (true, _, true)?:
+            L("diff.revert.layer.added.confirm", "Remove Layer")
+        case (true, _, false)?:
+            L("diff.revert.layer.confirm", "Revert Layer")
+        case (false, _, true)?:
+            L("diff.revert.lens.added.confirm", "Remove Lens")
+        case (false, _, false)?:
+            L("diff.revert.lens.confirm", "Revert Lens")
         case nil: L("diff.revert.group.confirm", "Revert Shortcuts")
         }
     }
