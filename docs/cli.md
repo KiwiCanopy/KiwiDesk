@@ -481,6 +481,18 @@ what would change it; `explain_app <bundle_id>` says what KiwiDesk
 knows of an app whose window it does not list
 ([`explain_window`](lua-reference.md#explain_window)).
 
+:::unreleased
+`list_windows [space]` returns every window's frame, screen and
+visibility ([`list_windows`](lua-reference.md#list_windows)), and
+`focus_window <window>` focuses one by its id
+([`focus_window`](lua-reference.md#focus_window)). Pick one window
+with `jq`:
+
+```bash
+kiwidesk list_windows | jq '.[] | select(.focused)'
+```
+:::
+
 `kiwivision.toggle [lens]`, `kiwivision.current`, the
 `kiwivision.set_*` verbs, `kiwivision.define_lens <table>` and
 `kiwivision.delete_lens <name>` reach KiwiVision and its lenses

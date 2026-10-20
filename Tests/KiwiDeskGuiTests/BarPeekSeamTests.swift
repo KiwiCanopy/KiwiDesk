@@ -297,7 +297,8 @@ struct BarPeekSeamTests {
         )
         #expect(picked.contains("pick(window, shown.space)"))
         // Sources-wide: one menu builder, three focus call sites —
-        // the row door and the glyph click's two arms.
+        // the row door and the glyph click's two arms — and
+        // `focus_window`, which takes the same pick (#2492).
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
         var builders = 0
@@ -311,7 +312,12 @@ struct BarPeekSeamTests {
             if calls > 0 { focuses[file.lastPathComponent] = calls }
         }
         #expect(builders == 1)
-        #expect(focuses == ["KiwiCore+SpaceBarClick.swift": 3])
+        #expect(
+            focuses == [
+                "KiwiCore+SpaceBarClick.swift": 3,
+                "KiwiCore+FocusWindowCommand.swift": 1,
+            ]
+        )
         let glyphClick = try #require(
             SourceScan.declarationBody(
                 after: "func pickFromSpaceBar(",

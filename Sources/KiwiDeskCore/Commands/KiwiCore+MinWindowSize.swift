@@ -15,7 +15,7 @@ extension KiwiCore {
     /// no Space holds takes Floating's, since no layout places it.
     func minWindowSize(of id: WindowID) -> MinSize {
         let space =
-            state.windows[id].flatMap(state.stickyRenderSpace(of:))
+            state.windows[id].flatMap(state.renderSpace(of:))
             ?? state.workspaces.space(of: id)
         let mode = space.flatMap { state.workspaces[$0]?.mode }
         let floats = EffectiveFloat.applies(

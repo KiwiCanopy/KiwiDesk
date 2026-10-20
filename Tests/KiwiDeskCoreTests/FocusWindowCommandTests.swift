@@ -1,0 +1,126 @@
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// `focus_window <window>` (#2492): focuses a window by id, on its
+/// own Space — switching there where another Space holds it — and
+/// refuses an id no tracked window carries and a missing one,
+/// rather than falling back to the focus.
+@Suite("focus_window", .serialized)
+@MainActor
+struct FocusWindowCommandTests {
+    private func makeCore() -> KiwiCore {
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent(
+                    "kiwidesk-focus-window-\(UUID().uuidString)"
+                )
+        )
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1000, height: 800)
+        }
+        return core
+    }
+
+    /// Space 1 (active) holds 1 and 2, Space 2 holds 3; 1 focused.
+    private func seed(_ core: KiwiCore) {
+        for space in ["1", "2"] {
+            core.state.workspaces.ensureSpace(SpaceID(space))
+        }
+        core.state.workspaces.activate("1")
+        for (id, space) in [(1, "1"), (2, "1"), (3, "2")] {
+            core.state.windows.upsert(
+                ManagedWindow(
+                    id: WindowID(UInt32(id)),
+                    pid: Int32(920_000 + id),
+                    appName: "App\(id)",
+                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+                )
+            )
+            core.state.workspaces.add(
+                WindowID(UInt32(id)),
+                to: SpaceID(space)
+            )
+        }
+        core.state.workspaces.focus(WindowID(3), in: "2")
+        core.state.workspaces.focus(WindowID(1), in: "1")
+    }
+
+    @Test("A window on the active Space takes the focus")
+    func sameSpace() {
+        let core = makeCore()
+        seed(core)
+        let response = core.execute("focus_window", args: [.number(2)])
+        #expect(response.isSuccess)
+        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
+        #expect(core.activeSpace?.focused == WindowID(2))
+    }
+
+    @Test("A window on another Space switches there")
+    func otherSpace() {
+        let core = makeCore()
+        seed(core)
+        let response = core.execute("focus_window", args: [.number(3)])
+        #expect(response.isSuccess)
+        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        #expect(core.activeSpace?.focused == WindowID(3))
+    }
+
+    /// The flight names the app in front BEFORE the focus ran, so
+    /// a chained `focus` passes the #292 preflight (#1812, #2492).
+    @Test("A focus that moved records the raise flight")
+    func recordsAFlight() throws {
+        let core = makeCore()
+        seed(core)
+        core.frontmostPIDProvider = { [weak core] in
+            core?.focusedWindowID == WindowID(2) ? 12 : 11
+        }
+        _ = core.execute("focus_window", args: [.number(2)])
+        let flight = try #require(core.raiseFlight)
+        #expect(flight.target == WindowID(2))
+        #expect(flight.leftPID == 11)
+        core.raiseFlight = nil
+        _ = core.execute("focus_window", args: [.number(2)])
+        #expect(core.raiseFlight == nil)
+    }
+
+    @Test("A full-screen window is refused")
+    func fullscreenRefused() {
+        let core = makeCore()
+        seed(core)
+        if var window = core.state.windows[WindowID(2)] {
+            window.isFullscreen = true
+            core.state.windows.upsert(window)
+        }
+        #expect(
+            !core.execute("focus_window", args: [.number(2)]).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
+    /// The #1345 gate's verdict, stated on the instance: a raise of
+    /// a window no screen draws would switch Desktops.
+    @Test("A window on a Desktop no screen shows is refused")
+    func crossDesktopRefused() {
+        let core = makeCore()
+        seed(core)
+        core.windowIsOnScreen = { $0 == WindowID(2) ? false : nil }
+        #expect(
+            !core.execute("focus_window", args: [.number(2)]).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
+    @Test("An unknown or missing id is refused, never the focus")
+    func refusals() {
+        let core = makeCore()
+        seed(core)
+        #expect(
+            !core.execute("focus_window", args: [.number(99)]).isSuccess
+        )
+        #expect(!core.execute("focus_window").isSuccess)
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+}

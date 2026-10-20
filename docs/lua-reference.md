@@ -142,6 +142,24 @@ the windows the lens leaves out.
 KiwiDesk.focus("left")
 ```
 
+:::unreleased
+### focus_window
+
+**Expects:** a window id, as `list_windows` and `get_state` report
+it.
+
+**Does:** focuses that window. One on another Space switches to
+that Space, landing on it, as clicking it in the Space Bar does. A
+window in native full screen, on a Desktop no screen shows, or
+unknown to KiwiDesk is refused.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_window(1234)
+```
+:::
+
 ### swap
 
 **Expects:** a direction (`"left"`, `"right"`, `"up"`, or
@@ -7172,7 +7190,7 @@ the focused window otherwise.
 as `get_state` has it), `float`, `app_rule`, `sticky` (`none`,
 `global` or `display`), `fullscreen`, `presenting` and `focused`.
 `float` holds `floats` (whether it floats, a floating-layout Space
-included), `cause` (`detection`, `user`, `space_mode` or `nil`) and
+included — for a sticky window, the Space it is drawn on), `cause` (`detection`, `user`, `space_mode` or `nil`) and
 `detection` (`reason` — `rule`, `panel`, `accessory_app` or
 `fixed_size` — `is_guess`, and `escapes`, what would let it tile:
 `set_float_automatically`, `app_rule.remove_float`, or `tile_rule`,
@@ -7198,6 +7216,42 @@ its `policy` and whether it is `hidden`), `windows` (tracked
 ids), `minimized` (ids), `away` (each `id` with its `space_id`)
 and `app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
+
+:::unreleased
+### list_windows
+
+**Expects:** optionally a Space id; every tracked window otherwise.
+An unknown Space is refused.
+
+**Does:** returns where each window sits, one entry per window, in
+Space order: `id` (as `get_state` has it, which keeps the app and
+title), `space_id`, `display` (the `list_monitors` id of the screen
+it draws on), `shown`, `frame` (`x`, `y`, `width`, `height`),
+`visibility`, `floats`, `focused` and `fullscreen`. `visibility` is
+`visible`, `hidden`, `partly` (another window covers part of it), or
+`partly_left`, `_right`, `_top` or `_bottom` (the screen's edge cuts
+it, and that side is still in view). A tile's frame is where its
+layout places it; a float's is where KiwiDesk is moving it, else
+its last reported frame. No app is asked. Frames are in screen
+points from the top-left of the main screen, y growing down. A
+window on a Space no screen shows, or parked out of sight, has
+`frame` `null`, and `visibility` too where no screen shows it; a
+full-screen window has no `visibility`.
+
+`list_monitors` reports each screen's `x` and `y` in the same
+coordinates, and `layout_frame`, the area its shown Space lays
+windows out in.
+
+**Example:**
+
+```lua
+for _, w in ipairs(KiwiDesk.list_windows()) do
+    if w.focused then
+        print(w.frame.x, w.frame.y, w.frame.width, w.frame.height)
+    end
+end
+```
+:::
 
 ### help
 

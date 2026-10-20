@@ -35,16 +35,32 @@ extension KiwiCore {
         )
     }
 
+    /// Each screen with its frame and the area its shown Space lays
+    /// windows out in, in the AX coordinates `list_windows`
+    /// reports (#2492).
     func listMonitors() -> CommandResponse {
-        let monitors = state.workspaces.allDisplays.map {
-            display in
-            JSONValue.object([
+        let primary = GeometryUtils.primaryHeight
+        let monitors = state.workspaces.allDisplays.map { display in
+            let frame = GeometryUtils.flip(
+                display.frame,
+                primaryHeight: primary
+            )
+            let shown = state.workspaces.currentSpace(on: display.id)
+                .flatMap { state.workspaces[$0] }
+            let laid = TilingEngine.screen(for: display.id).flatMap {
+                screen in
+                shown.map { tiler.layoutBounds(on: screen, for: $0) }
+            }
+            return JSONValue.object([
                 "id": .number(Double(display.id.raw)),
                 "name": .string(display.name),
+                "x": .number(Double(frame.minX)),
+                "y": .number(Double(frame.minY)),
                 "width": .number(Double(display.frame.width)),
                 "height": .number(
                     Double(display.frame.height)
                 ),
+                "layout_frame": laid.map(Self.json(rect:)) ?? .null,
                 "fingerprint": .string(display.fingerprint),
             ])
         }

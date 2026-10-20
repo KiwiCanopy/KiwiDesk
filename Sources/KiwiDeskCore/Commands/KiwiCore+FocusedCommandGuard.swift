@@ -161,6 +161,19 @@ extension KiwiCore {
         return response
     }
 
+    /// `focus_window`'s flight (#2492, owner ruling 2026-10-20): a
+    /// fresh act naming its window, so `front` — read before its
+    /// focus ran — is the app the raise leaves.
+    func focusWindowRecordingFlight(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        let front = frontmostPIDProvider?()
+        let before = focusedWindowID
+        let response = focusWindowCommand(args)
+        recordRaiseFlight(from: front, before: before)
+        return response
+    }
+
     /// Hover focus's flight (#1869): a fresh user act like the
     /// verb, so `front` — read before its focus ran — is the app
     /// the raise leaves.

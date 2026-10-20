@@ -22,6 +22,8 @@ extension KiwiCore {
             return focusRecordingFlight(args)
         case "swap":
             return navigate(args, swapping: true)
+        case "focus_window":
+            return focusWindowRecordingFlight(args)
         case "focus_space":
             return focusSpace(args)
         case "focus_space_back":
@@ -165,6 +167,8 @@ extension KiwiCore {
             return layoutInfo()
         case "list_monitors":
             return listMonitors()
+        case "list_windows":
+            return listWindows(args)
         case "debug_log":
             onLog(args.first?.stringValue ?? "")
             return .ok()

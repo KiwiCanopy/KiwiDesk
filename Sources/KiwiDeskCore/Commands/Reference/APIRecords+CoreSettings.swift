@@ -141,6 +141,11 @@ extension APIReference {
         "list_monitors": APIRecord(
             "Lists connected screens with IDs and geometry."
         ),
+        "list_windows": APIRecord(
+            "Lists every window's frame, screen and visibility, "
+                + "or only one Space's.",
+            .space("space", optional: true)
+        ),
         "debug_log": APIRecord(
             "Writes a message to the unified log.",
             .text("message", optional: true)

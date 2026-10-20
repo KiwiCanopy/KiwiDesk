@@ -418,8 +418,9 @@ Touching Anywhere in `Sources/KiwiDeskCore`.
 - the #292 preflight's one verb bypass is
   `FocusedCommandPolicy.raiseFlightExempt`, joined only by a verb that changes
   no window's content, size or membership and judged by the app the raise LEFT,
-  never by stamp presence, its `RaiseFlight` written by the `focus` verb and
-  hover focus alone, through the one recorder (#1812, #1869,
+  never by stamp presence, its `RaiseFlight` written by the `focus` verb,
+  hover focus and `focus_window` alone, through the one recorder (#1812,
+  #1869, #2492,
   `FocusRaiseFlightGuardTests`, `RaiseFlightWriterCensusTests`)
 - a class storing a panel orders it out in its own `isolated deinit` (#1868,
   `OverlayPanelDeinitCensusTests`)
@@ -1651,7 +1652,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 - an App Bar item's visibility is judged once in
   `KiwiCore.appBarVisibility` from KiwiDesk's issued frames and intended
   order, never a WindowServer read, a new frame input owing the bar refresh
-  an arm (#2234, `AppBarVisibilityTests`, `FrameSetReaderCensusTests`)
+  an arm (#2234, `AppBarVisibilityTests`, `FrameSetReaderCensusTests`), its
+  second reader `list_windows` taking the one `windowPlacements` (#2492,
+  `ListWindowsLayoutTests`)
 
 ### [borders](.claude/rules/borders.md)
 

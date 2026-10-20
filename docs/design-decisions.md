@@ -1138,6 +1138,32 @@ would put every save behind `run_destructive`, so the verb stays
 one `run` can send, and replacing a look is the destructive
 `look.delete` followed by a save.
 
+:::unreleased
+### A window's frame is reported from KiwiDesk's own placement
+
+**[Rationale]**
+
+`list_windows` (#2492) answers from what KiwiDesk already holds —
+a tile's placed frame, a float's target while it moves and its
+last report after — and asks no app, since a query that messaged
+every app would wait on the slowest one. A frame parked out of
+sight, on a Space no screen shows or behind a monocle (#881),
+reports none: a corner position would win every "nearest window"
+search a script runs. Whether a window is in view is the App
+Bar's own verdict, read through the one placement both take, so
+on Monocle and Scrolling the bar and the CLI agree; the other
+layouts have no bar, and there a tile another tile covers — a
+pile — reads covered unless it is in front, since KiwiDesk keeps
+no order for the rest. Coordinates are top-left with y growing
+down, as AX, yabai and Hammerspoon report them, and
+`list_monitors` gives each screen's origin in the same space. The
+verb takes no window argument: a window-taking verb left without
+one means the focused window here (#1518), so a bare call would
+answer one window; a script picks one with `jq`. The trade: an
+app that refuses its size shows the frame the layout asked for,
+and a float an app moved itself shows its last report.
+:::
+
 ### Whether a setting lasts is not a fact about its command
 
 **[Rationale]**

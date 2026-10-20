@@ -80,6 +80,13 @@ extension StateCoordinator {
         }
     }
 
+    /// The Space a window draws on: a sticky one's render Space,
+    /// else its own — the one reading of "where the window is"
+    /// that a frame, a floor or a float verdict asks (#1217, #2492).
+    func renderSpace(of window: ManagedWindow) -> SpaceID? {
+        stickyRenderSpace(of: window) ?? workspaces.space(of: window.id)
+    }
+
     /// Display assigned to a window's home space (#445) — the one
     /// primitive the "home display = display of home space"
     /// invariant rests on, shared so `stickyRenderSpace`,
