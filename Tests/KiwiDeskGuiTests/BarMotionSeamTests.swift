@@ -124,6 +124,7 @@ struct BarMotionSeamTests {
         "revealOffset": [],
         "revealShift": [],
         "revealMotion": ["reduceMotion"],
+        "resolvedReveal": ["revealMotion(", "isReduced"],
         "playReveal": ["revealMotion(", "isReduced"],
         "afterCommit": [],
         "endReveal": [],

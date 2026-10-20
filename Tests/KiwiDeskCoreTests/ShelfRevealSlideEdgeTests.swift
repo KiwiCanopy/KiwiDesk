@@ -114,7 +114,7 @@ struct ShelfRevealSlideEdgeTests {
         BarMotion.playReveal(
             view,
             items: NSView(),
-            path: .init(style: .slide, offset: CGVector(dx: 0, dy: -46)),
+            path: .init(kind: .slide, offset: CGVector(dx: 0, dy: -46)),
             entering: true,
             from: standing
         )

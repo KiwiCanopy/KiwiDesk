@@ -39,10 +39,7 @@ extension BarMotion {
             return (revealSlide - markReturn, markReturn)
         case .grow:
             guard showing else { return (0, ShelfGrow.plateGrow / 2) }
-            return (
-                ShelfGrow.itemsFadeOut + ShelfGrow.plateShrink - markReturn,
-                markReturn
-            )
+            return (ShelfGrow.retractLength - markReturn, markReturn)
         }
     }
 

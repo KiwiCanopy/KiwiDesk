@@ -174,10 +174,13 @@ extension KiwiShelfCard {
                 "kiwishelf.reveal_style.label.help",
                 "How a hidden bar appears: \u{201C}%1$@\u{201D} brings "
                     + "the whole bar in from the screen edge; "
-                    + "\u{201C}%2$@\u{201D} grows it out of its mark. "
-                    + "With Reduce Motion on, both fade.",
+                    + "\u{201C}%2$@\u{201D} grows it out of its mark, or "
+                    + "from the screen edge when it has none. A "
+                    + "\u{201C}%3$@\u{201D} background fades instead of "
+                    + "growing, and with Reduce Motion on, both fade.",
                 L("kiwishelf.reveal_style.slide", "Slide"),
-                L("kiwishelf.reveal_style.grow", "Grow")
+                L("kiwishelf.reveal_style.grow", "Grow"),
+                L("app_bar.background_style.boxed", "Boxed")
             )
         )
         .searchAnchored(

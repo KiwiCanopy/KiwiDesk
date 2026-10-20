@@ -548,9 +548,12 @@ render content into it (#1517). Obligations:
   strip coordinates inside it, so no section's arithmetic sees the
   room. A plate glide whose resting room moved holds both ends
   until it lands (`holdRoomForGlide`) and one that moved none
-  holds nothing; a reveal or retract opens the slide's room
-  (`openSlideRoom`) until its own landing; and a leave that cuts a
-  reveal short clears it, or the room never settles.
+  holds nothing; a reveal or retract opens the room of the motion
+  it resolves to (`openRevealRoom` over
+  `BarMotion.resolvedReveal`) until its own landing — a slide's
+  run out over the margin, a grow's plate and hovered mark, a
+  fade's none — and a leave that cuts a reveal short clears it, or
+  the room never settles.
   `ShelfPanelRoomTests` holds the rest — a fitting run, an
   overflowing one, Boxed, a side edge, an unchanged refresh —
   `ShelfPanelRoomMotionTests` the glide, the slide and the cut
@@ -576,8 +579,9 @@ render content into it (#1517). Obligations:
   and one taken back continues from `BarMotion.revealShift`, read
   before that pass moves the room. A grow clips the content's own
   layer from the mark to the plate (`ShelfGrow`), placed in the
-  panel's coordinates, so its room is the whole strip until it
-  lands. A leave that is no reveal ends the reveal's motion with
+  panel's coordinates, so its room — the plate and the hovered
+  mark, or the middle of the screen side where the edge draws no
+  mark — holds still until it lands (`growing`). A leave that is no reveal ends the reveal's motion with
   its token (`cutReveal`). The mark keeps time with the motion
   through `BarMotion.markFade` and its `RevealKind`, and Reduce
   Motion cross-fades in place either way. `ShelfRevealMotionTests`

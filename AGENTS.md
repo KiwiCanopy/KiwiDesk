@@ -1540,8 +1540,8 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   down at `ShelfManager.relayout` (`ShelfOverlayTests`,
   `ShelfPlateGlassGateTests`)
 - the shelf panel takes the drawn plate or runs, never the strip — the one
-  `ShelfOverlay.restingRoom` at rest, a glide's two ends or a slide's room
-  while it travels, settled on its landing (#2497, `ShelfPanelRoomTests`,
+  `ShelfOverlay.restingRoom` at rest, a glide's two ends or the room of the
+  reveal it resolves to while it travels, settled on its landing (#2497, `ShelfPanelRoomTests`,
   `ShelfPanelRoomMotionTests`) — and a shelf revealed onto an edge that
   draws nothing at rest, by the one `ShelfEdge.drawsNothingAtRest`, slides
   or grows as the one `reveal_style` says inside a still panel through

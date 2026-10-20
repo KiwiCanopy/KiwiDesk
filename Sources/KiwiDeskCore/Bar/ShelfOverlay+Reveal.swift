@@ -26,25 +26,43 @@ extension ShelfOverlay {
             )
     }
 
-    /// What the reveal plays along: the shelf's `reveal_style`, the
-    /// slide's start past the strip's screen side and the margin to
-    /// the usable area's edge, the grow's mark and plate. A shelf
-    /// not yet shown slides nowhere, which fades.
+    /// What the reveal plays along: the shelf's reveal kind — its
+    /// `reveal_style`, a grow with no plate cross-fading, the one
+    /// verdict its mark reads too — the slide's start past the
+    /// strip's screen side and the margin, the grow's mark (the
+    /// middle of the screen side where the edge draws none, a
+    /// Hidden bar's) and plate. A shelf not yet shown fades.
     var revealPath: BarMotion.RevealPath {
-        guard let drawn else { return .init(style: .slide) }
+        guard let drawn else { return .init(kind: .fade) }
         let strip = drawn.strip
         return BarMotion.RevealPath(
-            style: drawn.shelf.revealStyle,
+            kind: BarMotion.RevealKind(drawn.shelf),
             offset: BarMotion.revealOffset(
                 edge: drawn.edge,
                 depth: drawn.edge.isHorizontal ? strip.height : strip.width,
                 gap: revealGap
             ),
             origin: revealOrigin
-                ?? CGRect(x: content.bounds.midX, y: 0, width: 0, height: 0),
+                ?? Self.screenSide(of: restRoom, edge: drawn.edge),
             plate: revealPlate?.frame,
             plateRadius: revealPlate?.radius ?? 0
         )
+    }
+
+    /// The middle of `rest`'s screen side, as a point-sized rect in
+    /// the content's flipped coordinates.
+    nonisolated static func screenSide(
+        of rest: CGRect,
+        edge: AppBarEdge
+    ) -> CGRect {
+        let point: CGPoint
+        switch edge {
+        case .top: point = CGPoint(x: rest.midX, y: rest.minY)
+        case .bottom: point = CGPoint(x: rest.midX, y: rest.maxY)
+        case .left: point = CGPoint(x: rest.minX, y: rest.midY)
+        case .right: point = CGPoint(x: rest.maxX, y: rest.midY)
+        }
+        return CGRect(origin: point, size: .zero)
     }
 
     /// Where the content starts a slide from, in its own
@@ -59,6 +77,7 @@ extension ShelfOverlay {
     /// so its motion and its token end here.
     func cutReveal() {
         revealing = nil
+        growing = false
         BarMotion.endReveal(content, items: stripView)
     }
 
@@ -79,7 +98,7 @@ extension ShelfOverlay {
         content.alphaValue = 1
         let token = UUID()
         revealing = token
-        openSlideRoom()
+        openRevealRoom(entering: true)
         guard ordering else {
             land(token, after: start(lead: false, from: from))
             return
@@ -118,6 +137,7 @@ extension ShelfOverlay {
             guard let self, self.revealing == token, self.leaving == nil
             else { return }
             self.revealing = nil
+            self.growing = false
             BarMotion.endReveal(self.content, items: self.stripView)
             self.settleRoom()
         }
@@ -139,7 +159,7 @@ extension ShelfOverlay {
         }
         revealing = nil
         let from = BarMotion.revealShift(of: content)
-        openSlideRoom()
+        openRevealRoom(entering: false)
         let span = BarMotion.playReveal(
             content,
             items: stripView,
@@ -151,6 +171,7 @@ extension ShelfOverlay {
             guard let self, self.leaving == token else { return }
             self.leaving = nil
             self.leavingSlides = false
+            self.growing = false
             self.panel?.orderOut(nil)
             BarMotion.endReveal(self.content, items: self.stripView)
             self.onLeft()

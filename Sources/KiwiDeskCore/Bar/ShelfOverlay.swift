@@ -46,15 +46,18 @@ final class ShelfOverlay {
     /// The fade-out in flight, if any (#1838): its landing orders
     /// the panel out unless a show cleared it meanwhile.
     var leaving: UUID?
-    /// A hiding shelf (#761): it slides in on appearing and out
-    /// on leaving, set by `ShelfManager` before each show.
+    /// A shelf revealed onto an empty edge (#761, #2497): it plays
+    /// its reveal on appearing and its retract on leaving; set by
+    /// `ShelfManager` before each show.
     var slides = false
-    /// Whether the leave in flight is a slide.
+    /// Whether the leave in flight is a retract.
     var leavingSlides = false
     /// The reveal in flight, whose landing alone ends its motion.
     var revealing: UUID?
-    /// A hiding shelf's mark in the content's coordinates, which a
-    /// grow reveal grows out of (#761); set by `ShelfManager`.
+    /// A grow reveal or retract plays, so the room holds still.
+    var growing = false
+    /// The mark in the content's coordinates a grow grows out of,
+    /// nil where the edge draws none (#761); set by `ShelfManager`.
     var revealOrigin: CGRect?
     /// The plate a grow reaches, in the content's coordinates, with
     /// its corner radius; nil where the shelf draws none, which

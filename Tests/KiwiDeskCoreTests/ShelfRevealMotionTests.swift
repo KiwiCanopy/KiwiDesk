@@ -43,7 +43,7 @@ struct ShelfRevealMotionTests {
 
     /// A slide along `offset`.
     private func slide(_ offset: CGVector) -> BarMotion.RevealPath {
-        BarMotion.RevealPath(style: .slide, offset: offset)
+        BarMotion.RevealPath(kind: .slide, offset: offset)
     }
 
     @Test("A reveal slides from past the screen side, by edge")
@@ -76,7 +76,7 @@ struct ShelfRevealMotionTests {
     @Test("Reduce Motion, or nothing to travel, cross-fades in place")
     func reducedFades() {
         let offset = CGVector(dx: 0, dy: -46)
-        for path in [slide(offset), .init(style: .grow, plate: Self.mark)] {
+        for path in [slide(offset), .init(kind: .grow, plate: Self.mark)] {
             #expect(
                 BarMotion.revealMotion(
                     reduceMotion: true,
@@ -135,7 +135,8 @@ struct ShelfRevealMotionTests {
             emptyInk: "#555555",
             highlight: "#FF0000",
             shown: shown,
-            hovered: hovered
+            hovered: hovered,
+            reveal: .slide
         )
     }
 

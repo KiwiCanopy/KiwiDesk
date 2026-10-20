@@ -1024,7 +1024,7 @@
   "kiwishelf.outer_margin.help": "Distance from the screen edge; 0 is flush.",
   "kiwishelf.reveal_style.grow": "Grow",
   "kiwishelf.reveal_style.label": "Reveal",
-  "kiwishelf.reveal_style.label.help": "How a hidden bar appears: “%1$@” brings the whole bar in from the screen edge; “%2$@” grows it out of its mark. With Reduce Motion on, both fade.",
+  "kiwishelf.reveal_style.label.help": "How a hidden bar appears: “%1$@” brings the whole bar in from the screen edge; “%2$@” grows it out of its mark, or from the screen edge when it has none. A “%3$@” background fades instead of growing, and with Reduce Motion on, both fade.",
   "kiwishelf.reveal_style.slide": "Slide",
   "kiwishelf.show.app_bar.beside_always": "Stays shown: the Space Bar on its edge is set to %1$@.",
   "kiwishelf.show.differ.help": "Your bars show differently right now; choosing here sets every bar.",

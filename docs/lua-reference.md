@@ -2788,9 +2788,10 @@ kiwishelf.set_reveal_duration(5)
 **Does:** how an `"auto"` or `"hidden"` bar comes onto an edge
 that shows nothing else. `"slide"` brings the whole bar in from
 the screen's edge — out from under the menu bar where it shows —
-and back out; `"grow"` grows the bar out of its mark and back into
-it. A bar shown beside an `"always"` bar joins it instead, either
-way. With Reduce Motion on, both fade in place.
+and back out; `"grow"` grows the bar out of its mark — from the
+screen edge where it has none — and back into it, and fades on a
+`"boxed"` shelf. A bar shown beside an `"always"` bar joins it
+instead, either way. With Reduce Motion on, both fade in place.
 
 **Example:**
 

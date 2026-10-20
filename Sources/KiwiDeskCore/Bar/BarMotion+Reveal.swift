@@ -20,11 +20,11 @@ extension BarMotion {
         case fade(TimeInterval)
     }
 
-    /// A reveal's inputs, whichever style plays it: the slide's
+    /// A reveal's inputs, whichever kind plays it: the slide's
     /// `offset`, the grow's mark `origin` and `plate`, all in the
     /// content's coordinates.
     struct RevealPath: Equatable {
-        var style: KiwiShelf.RevealStyle
+        var kind: RevealKind
         var offset: CGVector = .zero
         var origin: CGRect = .zero
         var plate: CGRect?
@@ -72,7 +72,7 @@ extension BarMotion {
         path: RevealPath
     ) -> RevealMotion {
         guard !reduceMotion else { return .fade(revealFade) }
-        switch path.style {
+        switch path.kind {
         case .slide:
             guard path.offset != .zero else { return .fade(revealFade) }
             return .slide(offset: path.offset, length: revealSlide)
@@ -81,12 +81,29 @@ extension BarMotion {
             return .morph(
                 ShelfGrow.morph(
                     entering: entering,
-                    origin: path.origin,
+                    // Out of the mark as its hover leaves it.
+                    mark: hoverPlate(
+                        mark: path.origin,
+                        hovered: true,
+                        reduceMotion: false
+                    ),
                     plate: plate,
                     plateRadius: path.plateRadius
                 )
             )
+        case .fade:
+            return .fade(revealFade)
         }
+    }
+
+    /// The motion a reveal along `path` plays now — what the
+    /// panel's room is opened for before it starts.
+    @MainActor
+    static func resolvedReveal(
+        _ path: RevealPath,
+        entering: Bool
+    ) -> RevealMotion {
+        revealMotion(reduceMotion: isReduced, entering: entering, path: path)
     }
 
     /// The reveal's animation key, on the content and the items.

@@ -116,7 +116,7 @@ struct ShelfRevealStyleTests {
         let overlay = try #require(
             core.shelves.overlayForTesting(display, edge: .top)
         )
-        #expect(overlay.revealPath.style == .grow)
+        #expect(overlay.revealPath.kind == .grow)
         // The mark keeps time with the grow.
         let key = ShelfRevealer.Key(
             shelf: ShelfManager.Key(display: display, edge: .top),
@@ -126,6 +126,39 @@ struct ShelfRevealStyleTests {
             core.shelves.indicators.indicatorForTesting(key)?.view.spec?
                 .reveal == .grow
         )
+    }
+
+    @Test(
+        "A Hidden bar's grow starts at its screen side, having no mark",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func hiddenGrowStartsAtTheScreenSide() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, display) = try #require(
+            makeCore(space: .hidden, app: .hidden)
+        )
+        core.tiler.settings.kiwishelf.revealStyle = .grow
+        #expect(core.execute("space_bar.toggle_reveal", args: []).isSuccess)
+        let overlay = try #require(
+            core.shelves.overlayForTesting(display, edge: .top)
+        )
+        #expect(overlay.revealOrigin == nil)
+        #expect(
+            overlay.revealPath.origin
+                == ShelfOverlay.screenSide(of: overlay.restRoom, edge: .top)
+        )
+    }
+
+    @Test("A bundled look never changes the reveal style")
+    func lookKeepsTheStyle() {
+        for look in LookCatalog.bundled(sizes: [
+            CGSize(width: 1728, height: 1117)
+        ]) {
+            var settings = TilingSettings()
+            settings.kiwishelf.revealStyle = .grow
+            look.apply(to: &settings)
+            #expect(settings.kiwishelf.revealStyle == .grow, "\(look.name)")
+        }
     }
 
     @Test("A missing reveal_style reads slide; a stored one round-trips")

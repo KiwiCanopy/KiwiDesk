@@ -109,19 +109,24 @@ extension ShelfOverlay {
         }
     }
 
-    /// The room a reveal or a retract moves through: a slide's run
-    /// out over the margin; a grow's the whole strip, since its clip
-    /// is placed in the panel's coordinates and the room must not
-    /// move under it mid-motion.
-    func openSlideRoom() {
+    /// The room the reveal or retract about to play moves through,
+    /// read off the motion it resolves to: a slide's run out over
+    /// the margin, a grow's the plate and the hovered mark, a fade's
+    /// none. A grow's clip is placed in the panel's coordinates, so
+    /// its room then holds still until it lands (`growing`).
+    func openRevealRoom(entering: Bool) {
         guard let drawn else { return }
-        switch drawn.shelf.revealStyle {
+        growing = false
+        switch BarMotion.resolvedReveal(revealPath, entering: entering) {
         case .slide:
             widenRoom(
                 to: Self.slideRoom(restRoom, edge: drawn.edge, gap: revealGap)
             )
-        case .grow:
-            widenRoom(to: CGRect(origin: .zero, size: drawn.strip.size))
+        case .morph(let morph):
+            widenRoom(to: restRoom.union(morph.mark))
+            growing = true
+        case .fade:
+            break
         }
     }
 
@@ -129,15 +134,16 @@ extension ShelfOverlay {
     /// still in flight: a glide's and a reveal's landing settle
     /// again, and a leave ends ordered out, the next show settling.
     func settleRoom() {
-        guard roomGlide == nil, revealing == nil, leaving == nil,
+        guard roomGlide == nil, revealing == nil, leaving == nil, !growing,
             let strip = drawn?.strip
         else { return }
         placeRoom(restRoom, strip: strip)
     }
 
-    /// The room placed now, grown to cover `rect` as well.
+    /// The room placed now, grown to cover `rect` as well — save
+    /// while a grow plays, whose clip a moved room would displace.
     private func widenRoom(to rect: CGRect) {
-        guard let strip = drawn?.strip else { return }
+        guard !growing, let strip = drawn?.strip else { return }
         placeRoom(placedRoom.map { $0.union(rect) } ?? rect, strip: strip)
     }
 

@@ -51,7 +51,7 @@ public enum LookKeys {
         "background_fit", "corner_roundness", "border",
         "border_width", "highlight_width", "item_gap", "glyph_size",
         "font_size", "font_family", "font_weight", "icon_source",
-        "dim_factor", "reveal_style",
+        "dim_factor",
     ]
 
     /// Paths of the stores a look reaches that it leaves alone,
@@ -65,6 +65,9 @@ public enum LookKeys {
         "app_bar.reserve": functionality,
         "space_bar.visibility": functionality,
         "kiwishelf.reveal_duration": functionality,
+        "kiwishelf.reveal_style": "how a revealed bar moves — motion, "
+            + "which a bundled look and the tour's paint never change "
+            + "(#2176)",
         "space_bar.glyph_span": functionality,
         "space_bar.inactive_content": functionality,
         "space_bar.front_app_title_cap": functionality,

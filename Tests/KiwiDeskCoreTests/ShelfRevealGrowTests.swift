@@ -22,7 +22,7 @@ struct ShelfRevealGrowTests {
             reduceMotion: false,
             entering: entering,
             path: .init(
-                style: .grow,
+                kind: .grow,
                 origin: Self.mark,
                 plate: Self.plate,
                 plateRadius: 10
@@ -58,7 +58,7 @@ struct ShelfRevealGrowTests {
             BarMotion.revealMotion(
                 reduceMotion: false,
                 entering: true,
-                path: .init(style: .grow, origin: Self.mark)
+                path: .init(kind: .grow, origin: Self.mark)
             ) == .fade(BarMotion.revealFade)
         )
         var shelf = KiwiShelf()
@@ -107,29 +107,110 @@ struct ShelfRevealGrowTests {
         return overlay
     }
 
-    @Test("A grow clips the content's own layer and fades the items")
+    @Test("A grow clips the content's own layer from the mark to the plate")
     func growPlaysBothChannels() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
         let overlay = overlay()
         defer { overlay.hide() }
         overlay.revealIn()
-        #expect(overlay.content.layer?.mask == nil)
-        let plate = try #require(
-            overlay.content.layer?.animation(forKey: BarMotion.revealKey)
+        let layer = try #require(overlay.content.layer)
+        let clip = try #require(
+            layer.animation(forKey: BarMotion.revealKey) as? CAAnimationGroup
         )
+        let bounds = try #require(
+            clip.animations?.first {
+                ($0 as? CABasicAnimation)?.keyPath == "bounds"
+            }
+                as? CABasicAnimation
+        )
+        let hovered = BarMotion.hoverPlate(
+            mark: Self.mark,
+            hovered: true,
+            reduceMotion: false
+        )
+        // Out of the hovered mark onto the plate, never the reverse.
+        #expect((bounds.fromValue as? NSValue)?.rectValue == hovered)
+        #expect((bounds.toValue as? NSValue)?.rectValue == Self.plate)
         let items = try #require(
             overlay.stripView.layer?.animation(forKey: BarMotion.revealKey)
+                as? CABasicAnimation
         )
-        #expect(plate is CAAnimationGroup)
-        #expect(items.beginTime > plate.beginTime)
-        // The clip is placed in the panel's coordinates, so the room
-        // is the whole strip while it plays.
+        #expect(items.keyPath == "opacity")
+        #expect(items.beginTime > clip.beginTime)
+        // The room holds the plate and the mark, never the strip.
         let panel = try #require(overlay.panel)
-        let whole = GeometryUtils.flip(
-            Self.strip,
-            primaryHeight: GeometryUtils.primaryHeight
+        let room = Self.plate.union(hovered).offsetBy(
+            dx: Self.strip.minX,
+            dy: Self.strip.minY
+        ).integral
+        #expect(
+            panel.frame
+                == GeometryUtils.flip(
+                    room,
+                    primaryHeight: GeometryUtils.primaryHeight
+                )
         )
-        #expect(panel.frame == whole)
+    }
+
+    /// A grow's clip is placed in the panel's coordinates, so a
+    /// glide inside it moves no room until the grow lands.
+    @Test("A grow's room holds still under a glide")
+    func growRoomHoldsStill() throws {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        pinShelfGlide()
+        let overlay = ShelfOverlay()
+        defer { overlay.hide() }
+        var landings: [() -> Void] = []
+        overlay.afterReveal = { _, body in landings.append(body) }
+        overlay.afterGlide = { landings.append($0) }
+        var shelf = KiwiShelf()
+        shelf.liquidGlass = false
+        shelf.revealStyle = .grow
+        let view = NSView()
+        let show = { (plate: CGRect) in
+            overlay.show(
+                strip: Self.strip,
+                edge: .top,
+                shelf: shelf,
+                sheen: 0,
+                sections: [
+                    .init(
+                        view: view,
+                        slot: Self.strip,
+                        plate: plate,
+                        content: plate
+                    )
+                ]
+            )
+        }
+        show(Self.plate)
+        overlay.revealOrigin = Self.mark
+        overlay.revealIn()
+        let panel = try #require(overlay.panel)
+        let held = panel.frame
+        show(Self.plate.offsetBy(dx: 400, dy: 0))
+        #expect(panel.frame == held)
+        for landing in landings { landing() }
+        #expect(panel.frame != held)
+    }
+
+    @Test("A grow onto an edge with no mark starts at its screen side")
+    func marklessGrowStartsAtTheScreenSide() {
+        let rest = CGRect(x: 0, y: 200, width: 40, height: 300)
+        let cases: [(AppBarEdge, CGPoint)] = [
+            (.top, CGPoint(x: 20, y: 200)),
+            (.bottom, CGPoint(x: 20, y: 500)),
+            (.left, CGPoint(x: 0, y: 350)),
+            (.right, CGPoint(x: 40, y: 350)),
+        ]
+        for (edge, point) in cases {
+            #expect(
+                ShelfOverlay.screenSide(of: rest, edge: edge)
+                    == CGRect(origin: point, size: .zero),
+                "\(edge)"
+            )
+        }
     }
 }

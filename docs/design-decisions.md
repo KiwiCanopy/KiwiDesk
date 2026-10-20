@@ -14642,8 +14642,11 @@ window frame lagged on the device, the compositor moving it per
 frame and the glass re-sampling, so for the slide's length the
 panel's room runs out over the outer margin and its own edge clips
 the bar; a grow's clip is placed in the panel's coordinates, so
-its room is the whole strip until it lands. Reduce Motion
-cross-fades in place either way.
+its room — the plate and the mark it grows from — holds still
+until it lands. A grow on an edge with no mark, a Hidden bar's,
+starts at the middle of its screen side, and a Boxed shelf, having
+no plate to grow, fades. Reduce Motion cross-fades in place either
+way.
 
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing
