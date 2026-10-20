@@ -91,29 +91,27 @@ extension SettingsValueReadout {
                     config: new
                 )
             } else {
-                rows.append(
-                    .note(
-                        census,
-                        instance: "layer+" + layer.name,
-                        label: instanceLabel(
-                            layerBase,
-                            layer.name
-                        ),
-                        note: addedNote
-                    )
+                var row = SettingsDiffRow.note(
+                    census,
+                    instance: "layer+" + layer.name,
+                    label: instanceLabel(layerBase, layer.name),
+                    note: addedNote
                 )
+                // The whole layer, its saved name resolved there.
+                row.revert = .layer(stored: nil, page: layer.name)
+                rows.append(row)
             }
         }
         for layer in old.layers
         where newByName[layer.name] == nil {
-            rows.append(
-                .note(
-                    census,
-                    instance: "layer-" + layer.name,
-                    label: instanceLabel(layerBase, layer.name),
-                    note: removedNote
-                )
+            var row = SettingsDiffRow.note(
+                census,
+                instance: "layer-" + layer.name,
+                label: instanceLabel(layerBase, layer.name),
+                note: removedNote
             )
+            row.revert = .layer(stored: layer.name, page: nil)
+            rows.append(row)
         }
         if rows.isEmpty, old.layers != new.layers {
             rows.append(
@@ -231,6 +229,7 @@ extension SettingsValueReadout {
                 lua: binding.lua
             )
         )
+        row.revert = .binding(layer: layer.name, lua: binding.lua)
         return row
     }
 

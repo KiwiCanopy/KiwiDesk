@@ -18,8 +18,8 @@ extension SettingsRevertRegister {
             \.floatAutomatically
         ).then { model, _ in settle(model, .autoFloat, nil) },
         .shortcuts(.layers): layers,
-        .shortcuts(.layersIcon): layers,
-        .shortcuts(.shortcutBase): layers,
+        .shortcuts(.layersIcon): layerIcon,
+        .shortcuts(.shortcutBase): shortcutBase,
         .shortcuts(.spaceHistory): RevertWriter.leaf(
             \.spaceHistory
         ).then { model, _ in settle(model, .history, nil) },
@@ -92,9 +92,9 @@ extension SettingsRevertRegister {
 
     /// The shortcut layers whole, with the Desktop base drafted
     /// beside them (#1870) and every key reach and layer edit, as
-    /// `dropRuleHalf` drops them: a binding's reach is keyed into
-    /// the layers it was encoded against (#2022), so a shortcut
-    /// row's ↺ takes the layer rows with it.
+    /// `dropRuleHalf` drops them: the way back of a "Layers edited"
+    /// row, which names no binding or layer. A binding's or a
+    /// layer's own row reverts through its own case (#2412).
     private static let layers = RevertWriter.all([
         .leaf(\.layers), .leaf(\.shortcutBase),
     ]).then { model, _ in
@@ -103,6 +103,49 @@ extension SettingsRevertRegister {
         model.reachEdits.layers = [:]
         model.reachEdits.deletedLayers = [:]
     }.grouped()
+
+    /// One layer's icon, named by its row; every layer's for a row
+    /// naming none.
+    private static let layerIcon = RevertWriter(
+        paths: ["config.layers[].icon"]
+    ) { model, instance in
+        let clean = model.cleanConfig.layers
+        for at in model.config.layers.indices {
+            let name = model.config.layers[at].name
+            guard instance == nil || instance == name,
+                let saved = clean.first(where: { $0.name == name })
+            else { continue }
+            model.config.layers[at].icon = saved.icon
+        }
+    }
+
+    /// The shortcut base back: every row moves back as the switch
+    /// moves it, a row added on the staged base included, and a row
+    /// that is then a saved row in all but spelling takes the saved
+    /// spelling, so the switch's own rows leave the list (#2460).
+    private static let shortcutBase = RevertWriter(
+        paths: ["config.shortcutBase"]
+    ) { model, _ in
+        let clean = model.cleanConfig
+        model.setShortcutBase(clean.shortcutBase)
+        for at in model.config.layers.indices {
+            let saved = model.savedLayerName(model.config.layers[at].name)
+            let was = clean.layers.first { $0.name == saved }?.bindings ?? []
+            model.config.layers[at].bindings =
+                model.config.layers[at].bindings.map { row in
+                    was.first { sameRow($0, row) } ?? row
+                }
+        }
+    }
+
+    /// Whether two rows run one action on one chord, however each
+    /// spells it.
+    private static func sameRow(_ a: KeyBinding, _ b: KeyBinding) -> Bool {
+        guard a.lua == b.lua else { return false }
+        return a.combo == b.combo
+            || (KeyCombo.parse(a.combo).map { $0 == KeyCombo.parse(b.combo) }
+                ?? false)
+    }
 
     private static func scroll<V>(
         _ path: WritableKeyPath<GuiConfig, V>

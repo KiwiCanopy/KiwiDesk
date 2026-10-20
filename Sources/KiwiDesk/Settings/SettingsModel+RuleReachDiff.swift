@@ -10,7 +10,6 @@ extension SettingsModel {
         // The layered snapshot is what the row edits encoded against:
         // a layer edit is the layer rows' (#2022), never a row's.
         // The lenses are app-wide and need no page (#2103).
-        // A lens or layer edit has no one-row way back yet (#792).
         let lenses = lensDiffRows()
         guard let stored = layeredReach, let encoded = encodedReach,
             let editing = reachProfile
@@ -37,7 +36,6 @@ extension SettingsModel {
                 stored.keyLayers,
                 encoded.keyLayers,
                 editing: editing,
-                revertable: false,
                 explained: explainedBySwitch,
                 name: { key in
                     encoded.keyTemplates[key].map {

@@ -1810,7 +1810,10 @@ Touching `Sources/KiwiDesk` (the GUI).
 - a census key naming a model path owes a writer in
   `SettingsRevertRegister`, a diff-row producer states how its rows revert
   or they draw no ↺, and state written together reverts together (#792,
-  `SettingsRevertRegisterTests`, `SettingsRowRevertTests`)
+  `SettingsRevertRegisterTests`, `SettingsRowRevertTests`) — a binding with
+  the bindings its chord moved between, through the one `BindingRevertSet`
+  its words read too, and a ↺ taking more than its words name asking first
+  (#2412, `BindingRevertSetTests`, `SettingsRowRevertGroupTests`)
 - the settings one control writes together are one row while they agree,
   folded through the one `SettingKey.summarized` where rows are narrated —
   the pill, the live rows, the sync sheet — and never in `SettingsDraftDiff`
