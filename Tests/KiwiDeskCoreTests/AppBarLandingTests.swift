@@ -79,6 +79,41 @@ struct AppBarLandingTests {
         #expect(runMoves == [true])
     }
 
+    /// Its items snap too: a re-centred row gliding inside the
+    /// section the shelf glides swung the bar left, then right,
+    /// when the Space Bar left a fused shelf (device, 2026-10-20).
+    @Test("A render into a new slot snaps the items")
+    func newSlotSnapsTheItems() {
+        let overlay = AppBarOverlay()
+        var itemMoves: [Bool] = []
+        overlay.moveFrame = { view, frame, animated in
+            if view.superview === overlay.itemRun {
+                itemMoves.append(animated)
+            }
+            view.frame = frame
+        }
+        let items = [item(1), item(2)]
+        show(overlay, items)
+        itemMoves = []
+        overlay.show(
+            items: items,
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 300, height: 30),
+            style: AppBarLook()
+        )
+        #expect(!itemMoves.isEmpty)
+        #expect(!itemMoves.contains(true))
+        // The same slot again travels.
+        itemMoves = []
+        overlay.show(
+            items: items,
+            activeIndex: 1,
+            strip: CGRect(x: 0, y: 0, width: 300, height: 30),
+            style: AppBarLook()
+        )
+        #expect(itemMoves.contains(true))
+    }
+
     /// `contentFrame` is the drawn span in the section's own
     /// coordinates: the run's span moved by the run's origin AND the
     /// viewport's inset, which an overflowing run sets (#1837).

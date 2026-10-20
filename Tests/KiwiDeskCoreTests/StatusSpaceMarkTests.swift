@@ -61,6 +61,32 @@ struct StatusSpaceMarkTests {
         #expect(!core.statusSpaceMark().screens.isEmpty)
     }
 
+    /// An Auto bar is hidden at rest, so it takes the stand-in too
+    /// (owner, 2026-10-20); only Always keeps the brand icon.
+    @Test("an auto bar lists the screens as a hidden one does")
+    func autoListsTheScreens() {
+        let core = makeCore()
+        core.tiler.settings.spaceBarStyle.visibility = .auto
+        #expect(core.statusSpaceMark().screens.count == 1)
+        core.tiler.settings.spaceBarStyle.visibility = .always
+        #expect(core.statusSpaceMark().screens.isEmpty)
+    }
+
+    /// An Auto Space Bar beside an Always App Bar on its edge is
+    /// drawn at rest, so its screen keeps the brand icon.
+    @Test("an auto bar beside an always one lists no screen")
+    func autoBesideAlwaysListsNoScreen() {
+        let core = makeCore()
+        core.state.workspaces.setMode(SpaceID("main"), .monocle)
+        core.tiler.settings.spaceBarStyle.visibility = .auto
+        core.tiler.settings.monocle.appBar.visibility = .always
+        core.tiler.settings.appBarStyle.edge =
+            core.tiler.settings.spaceBarStyle.edge
+        #expect(core.statusSpaceMark().screens.isEmpty)
+        core.tiler.settings.monocle.appBar.visibility = .auto
+        #expect(core.statusSpaceMark().screens.count == 1)
+    }
+
     @Test("an icon-less Space shows its full name, not the monogram")
     func fullNameWithoutIcon() {
         let mark = makeCore().statusSpaceMark()

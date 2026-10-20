@@ -17,8 +17,6 @@ struct HyperTakeOverButton: View {
             confirming = true
         }
         .settingsActionButton()
-        .controlSize(.small)
-        .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
         .accessibilityLabel(
             L(
                 "shortcuts.hyper_key.take_over.ax",
@@ -44,6 +42,9 @@ struct HyperTakeOverButton: View {
                 model.takeOverHyperRemap()
                 if model.hyperStatus == .on { onTakenOver() }
             }
+            // The user already chose Take Over and the message says
+            // what it does, so Return confirms (owner, 2026-10-20).
+            .keyboardShortcut(.defaultAction)
         } message: {
             Text(Self.message(foreign))
         }
@@ -52,10 +53,11 @@ struct HyperTakeOverButton: View {
     static func message(_ foreign: HyperForeignRemap) -> String {
         L(
             "shortcuts.hyper_key.take_over.message",
-            "KiwiDesk will use the remap of %1$@ to %2$@ as Hyper, and "
-                + "remove the remap when KiwiDesk quits. If another app "
-                + "still listens for %2$@, it also responds when you "
-                + "press %1$@.",
+            "%1$@ → %2$@ is the remap KiwiDesk sets itself, so a "
+                + "remapping app may have left it behind when it quit. "
+                + "KiwiDesk will use it as Hyper and remove it when "
+                + "KiwiDesk quits. If another app still listens for "
+                + "%2$@, it also responds when you press %1$@.",
             HyperKeyWords.name(foreign.source),
             HyperKeyWords.name(foreign.destination)
         )

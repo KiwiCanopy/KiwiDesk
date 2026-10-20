@@ -42,6 +42,21 @@ struct HyperTakeOverOfferTests {
         )
         #expect(row.contains("Self.takeOverOffer("))
         #expect(row.contains("HyperTakeOverButton(model: model"))
+        // The offer is drawn as a warning beside its fix, and the
+        // key row carries its drawn label (owner eyeball, 2026-10-20).
+        #expect(row.contains("WarningBox(text: text)"))
+        #expect(row.contains("Text(HyperKeyWords.useAs)"))
+        let button = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Keybindings/HyperTakeOverButton.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(button.contains(".keyboardShortcut(.defaultAction)"))
         // Core decides what is claimable: the row reads the
         // foreign remap's keys nowhere, so it cannot compare them.
         #expect(!row.contains(".source"))
@@ -52,9 +67,10 @@ struct HyperTakeOverOfferTests {
     func messageNamesTheRemap() {
         LocalizationManager.shared.select("en")
         let text = HyperTakeOverButton.message(Self.claimable)
-        #expect(text.contains("the remap of Caps Lock to F18"))
+        #expect(text.contains("Caps Lock → F18 is the remap"))
         #expect(text.contains("listens for F18"))
         let caption = HyperKeyWords.trouble(.refused(Self.claimable))
-        #expect(caption?.contains("KiwiDesk would set itself") == true)
+        #expect(caption?.hasPrefix("Hyper is off: Caps Lock") == true)
+        #expect(caption?.contains("Take it over") == true)
     }
 }

@@ -61,18 +61,21 @@ struct HyperKeyRow: View {
                 keyRow
                 captions
                 ShortcutBaseRow(model: model, reason: offerReason)
-                    .padding(.top, 4)
+                    .padding(.top, 6)
             }
         }
     }
 
-    /// The recorder in the recorder column, ✦ in the icon slot; the
-    /// card's header is the row's label, and the record button names
-    /// itself with it.
+    /// The recorder in the recorder column, ✦ in the icon slot and
+    /// the row's drawn label beside it; the record button names
+    /// itself.
     private var keyRow: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(ComboSymbols.hyperGlyph)
                 .frame(width: SettingsMetrics.shortcutIconSlot)
+                .accessibilityHidden(true)
+            // The recorder names itself; this is its drawn twin.
+            Text(HyperKeyWords.useAs)
                 .accessibilityHidden(true)
             Spacer()
             HyperKeyField(
@@ -88,24 +91,28 @@ struct HyperKeyRow: View {
         }
     }
 
-    private var captions: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            caption(
-                Self.captionText(
-                    key: model.appWide.hyperKey,
-                    status: model.hyperStatus,
-                    hasShortcuts: model.hyperHasShortcuts,
-                    luaOwned: reason == .appWideLuaOwned
-                )
-            )
-            if let foreign = Self.takeOverOffer(
-                status: model.hyperStatus,
-                luaOwned: reason == .appWideLuaOwned
-            ) {
+    /// The caption, or — while a leftover remap keeps Hyper off —
+    /// the same sentence in a warning box beside its one fix, the
+    /// paused banner's shape (owner eyeball, 2026-10-20).
+    @ViewBuilder private var captions: some View {
+        let text = Self.captionText(
+            key: model.appWide.hyperKey,
+            status: model.hyperStatus,
+            hasShortcuts: model.hyperHasShortcuts,
+            luaOwned: reason == .appWideLuaOwned
+        )
+        if let foreign = Self.takeOverOffer(
+            status: model.hyperStatus,
+            luaOwned: reason == .appWideLuaOwned
+        ) {
+            WarningBox(text: text) {
                 HyperTakeOverButton(model: model, foreign: foreign) {
                     recorderFocused = true
                 }
             }
+            .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
+        } else {
+            caption(text)
         }
     }
 

@@ -130,9 +130,11 @@ struct OverrideChrome<Content: View>: View {
                 helpButton
             }
         } control: {
+            // Wraps in the trailing column, never cut (owner eyeball,
+            // 2026-10-20).
             Text(inheritedText(inherited.value))
-                .lineLimit(1)
-                .truncationMode(.middle)
+                .multilineTextAlignment(.trailing)
+                .fixedSize(horizontal: false, vertical: true)
                 .help(inheritedText(inherited.value))
         }
         .environment(

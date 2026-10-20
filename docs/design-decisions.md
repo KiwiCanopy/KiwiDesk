@@ -10609,6 +10609,14 @@ every trigger the bar has reaches the item) and the GUI draws
 and names it; the name says the layer and each screen's Space,
 so VoiceOver reads what the eye does.
 
+:::unreleased
+"Off" became Auto and Hidden with #761, and the stand-in follows
+the edge's own fold (owner, 2026-10-20): a screen is listed wherever
+its Space Bar is not drawn at rest — Hidden, or Auto unless an
+Always bar shares its edge — since the menu bar is then the one
+place that names the Space until the pointer reveals the bar.
+:::
+
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed and
 released freely — the preview mirrors what is held — and the first
@@ -14614,7 +14622,7 @@ Space with small end dots, as iOS page dots do; the open bar shows
 every Space anyway. On a top or bottom edge a hover names the
 current Space in its dot; a vertical mark is a dot wide, with no
 room across it for a name. The App line only grows, since the App
-Bar opens 0.35 s later and icons in a 14-point mark would not read.
+Bar opens a moment later and icons in a 14-point mark would not read.
 
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing

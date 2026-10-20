@@ -22,6 +22,7 @@ struct LiveOnlySpaceRow: View {
                     Image(systemName: "line.3.horizontal")
                         .foregroundStyle(.secondary)
                         .frame(width: 20, height: 24)
+                        .accessibilityHidden(true)
                     IconPicker(
                         icon: .constant(space.icon ?? ""),
                         preview: .chip
@@ -40,6 +41,7 @@ struct LiveOnlySpaceRow: View {
                     Image(systemName: "trash")
                         .foregroundStyle(.secondary)
                         .frame(width: 20, height: 24)
+                        .accessibilityHidden(true)
                 }
                 .modifier(GreyOut(active: true, help: lockedHelp))
             }
