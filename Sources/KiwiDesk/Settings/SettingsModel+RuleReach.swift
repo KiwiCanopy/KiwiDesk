@@ -43,7 +43,9 @@ extension SettingsModel {
             tileRules: config.tileRules,
             floatAutomatically: config.floatAutomatically,
             profile: reachProfile,
-            isLoaded: reachIsLoaded
+            isLoaded: reachIsLoaded,
+            switchedBase: switchedShortcutBase,
+            spaces: config.spaces
         )
         if let cache = encodedCache, cache.key == key { return cache.value }
         let value = encodeReach()
