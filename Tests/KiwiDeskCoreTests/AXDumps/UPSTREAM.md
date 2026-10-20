@@ -13,3 +13,5 @@ tile detection against an expected table KiwiDesk keeps itself
 (#1883). The `Aero.*` keys that record AeroSpace's own verdicts are
 never read. Refresh by copying the directory from a newer commit
 whole and updating the commit above; never hand-edit a dump.
+Dumps KiwiDesk records itself live beside this directory, in
+`../AXDumpsKiwiDesk/`, so a refresh never touches them.

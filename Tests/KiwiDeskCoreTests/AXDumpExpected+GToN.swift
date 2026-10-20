@@ -42,6 +42,13 @@ extension AXDumpExpected {
         .row("karabiner_event_viewer", .tiles, .kept, .furnished),
         .row("karabiner_settings", .tiles, .kept, .furnished),
         .row("kitty_quick_access", .floats(.accessoryApp), .ignored, nil),
+        .row(
+            "kiwidesk/macos27_spotlight",
+            .floats(.accessoryApp),
+            .ignored,
+            .furnished,
+            .ruled(issue: 2236)
+        ),
         .row("macos_capslock_popup_safari", .floats(.panel), .kept, nil),
         .row("macos_capslock_popup_textedit", .floats(.panel), .kept, nil),
         .row(

@@ -1271,7 +1271,12 @@ state written together reverts it together** — a Space through
 the Space doors, a bar's edge with its per-screen map, a rule with
 its reach through the one `RuleFamilyField` table, held to every
 family beside `dropRuleHalf` and `adoptRuleHalf` by
-`RuleReachGuiParityTests` — and the
+`RuleReachGuiParityTests`, a shortcut binding with the bindings its
+chord moved between, read from the one `BindingRevertSet` the ↺'s
+words read too (#2412, `BindingRevertSetTests`) — and a ↺ that
+takes more than its row asks first, a whole layer or lens and the
+"Layers edited" row (`SettingsRowRevertGroupTests` ▸
+`onlyShortcutsAsk`) — and the
 `docs/design-decisions.md` entry names each such group
 (`SettingsRowRevertTests`). A rule-list row's instance is a
 `ListEntryInstance`, minted and parsed by that one type. **Other

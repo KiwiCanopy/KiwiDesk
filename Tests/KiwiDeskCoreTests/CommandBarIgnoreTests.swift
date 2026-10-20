@@ -63,38 +63,6 @@ struct CommandBarIgnoreTests {
         )
     }
 
-    /// Spotlight's macOS 27 panel lists title-bar buttons and still
-    /// takes no escape (#2236); a layer-0 window of its app tiles.
-    @Test("Spotlight's panel takes no button escape")
-    func spotlightPanelIgnored() {
-        #expect(
-            FloatDetection.shouldIgnore(
-                bundleID: "com.apple.campo",
-                layer: 23,
-                isAccessory: true,
-                rules: noRules,
-                titlebarButton: true
-            )
-        )
-        #expect(
-            !FloatDetection.shouldIgnore(
-                bundleID: "com.apple.campo",
-                layer: 0,
-                isAccessory: true,
-                rules: noRules,
-                titlebarButton: true
-            )
-        )
-        #expect(
-            FloatDetection.isBuiltInIgnoredPanel(
-                bundleID: "com.apple.campo",
-                layer: 23,
-                isAccessory: true,
-                titlebarButton: true
-            )
-        )
-    }
-
     @Test("Accessory layer-0 windows stay managed floats")
     func accessoryNormalWindowTracked() {
         #expect(

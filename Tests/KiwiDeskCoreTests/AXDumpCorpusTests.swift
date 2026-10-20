@@ -6,7 +6,8 @@ import Testing
 /// Real apps' recorded AX facts replayed through float and tile
 /// detection (#1883): AeroSpace's MIT `axDumps/` corpus, vendored
 /// under `AXDumps/`, against the table KiwiDesk keeps itself in
-/// `AXDumpExpected`. Off the main actor: it reads about 125 small
+/// `AXDumpExpected`, plus the few KiwiDesk recorded itself under
+/// `AXDumpsKiwiDesk/`. Off the main actor: it reads about 125 small
 /// files and touches no AppKit state.
 ///
 /// The shell column is half a check: AeroSpace's dumper skips
@@ -20,8 +21,25 @@ struct AXDumpCorpusTests {
         .deletingLastPathComponent()
         .appendingPathComponent("AXDumps")
 
-    /// Every dump under `AXDumps/`, by its path there.
+    /// The dumps KiwiDesk recorded itself, beside the vendored
+    /// directory that a refresh replaces whole.
+    static let ownDirectory = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent()
+        .appendingPathComponent("AXDumpsKiwiDesk")
+
+    /// Every dump under `AXDumps/` by its path there, and every
+    /// one under `AXDumpsKiwiDesk/` as `kiwidesk/<path>`.
     static func corpus() throws -> [AXDump] {
+        let dumps =
+            try dumps(under: directory, prefix: "")
+            + dumps(under: ownDirectory, prefix: "kiwidesk/")
+        return dumps.sorted { $0.name < $1.name }
+    }
+
+    private static func dumps(
+        under directory: URL,
+        prefix: String
+    ) throws -> [AXDump] {
         let base = directory.standardizedFileURL.path
         let walker = FileManager.default.enumerator(
             at: directory,
@@ -34,12 +52,12 @@ struct AXDumpCorpusTests {
                 .deletingPathExtension().path
             dumps.append(
                 try AXDump(
-                    name: String(path.dropFirst(base.count + 1)),
+                    name: prefix + String(path.dropFirst(base.count + 1)),
                     data: Data(contentsOf: url)
                 )
             )
         }
-        return dumps.sorted { $0.name < $1.name }
+        return dumps
     }
 
     @Test("every dump has exactly one row, and every row a dump")
@@ -47,6 +65,10 @@ struct AXDumpCorpusTests {
         let dumps = try Self.corpus().map(\.name)
         let rows = AXDumpExpected.all.map(\.name)
         #expect(dumps.count > 100, "the corpus read too little")
+        #expect(
+            dumps.contains { $0.hasPrefix("kiwidesk/") },
+            "the recorded dumps were not read"
+        )
         #expect(Set(rows).count == rows.count, "a row is listed twice")
         #expect(Set(dumps) == Set(rows))
     }
@@ -122,6 +144,25 @@ struct AXDumpCorpusTests {
                 #expect(!source.contains(key), "\(file) reads \(key)")
             }
         }
+    }
+
+    /// A dump has no element identity, so it cannot leave the
+    /// title element out the way the live read does (#2346).
+    @Test("a recorded title element leaves the children undecided")
+    func titleElementUndecides() throws {
+        func dump(_ body: String) throws -> AXDump {
+            try AXDump(name: "fixture", data: Data(body.utf8))
+        }
+        let bare = try dump(#"{"AXChildren": ["a", "b"]}"#)
+        #expect(bare.childCount == 2)
+        let nulled = try dump(
+            #"{"AXChildren": ["a"], "AXTitleUIElement": null}"#
+        )
+        #expect(nulled.childCount == 1)
+        let titled = try dump(
+            #"{"AXChildren": ["a"], "AXTitleUIElement": "t"}"#
+        )
+        #expect(titled.childCount == nil)
     }
 
     @Test("the MIT notice and the pinned commit sit beside the data")

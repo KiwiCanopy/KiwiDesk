@@ -1988,10 +1988,20 @@ its app's normal windows (#2072, the `macos_join_network` dump),
 which is the escape's weak point: a launcher that lists buttons
 anyway reads as a window.
 
-Such a launcher takes the bundle belt with no button escape.
-Spotlight's panel on macOS 27 is one (`com.apple.campo`, #2236):
-its AX lists all three buttons, and managed as a float it was
-moved off its own position by the float fit.
+So the escape asks the subrole too: a buttoned `AXSystemDialog`
+takes none (#2239). Spotlight's panel on macOS 27
+(`com.apple.campo`, #2236) lists all three buttons on that subrole,
+and managed as a float it was moved off its own position by the
+float fit. A bundle id cannot carry that verdict: the process
+that draws a panel is not stable across releases (macOS 27 moved
+Spotlight's panel out of `com.apple.Spotlight` into Siri's
+`com.apple.campo`), and it names one launcher where the next
+buttoned one would slip through. The subrole is the launcher's
+own evidence. Every other corpus window with it is buttonless,
+non-accessory or ignored by name, so the narrowing changed no recorded row
+(`AXDumpCorpusTests`, the `kiwidesk/macos27_spotlight` row). The
+bundle belt stays for a launcher that shows a Dock icon, which
+the accessory branch never sees.
 
 Above that class sits the **screen-saver level** (#2069): a
 window at CG layer 1000 or above is ignored whatever its app and
@@ -2884,7 +2894,9 @@ on every click: KiwiDesk raised it, Orion hid it, the close-return
 raise fronted the host, Orion showed it again. What separates it
 from a frameless real window (a terminal, an Electron app) is the
 buttoned sibling: a real frameless window has none, and its
-content lists. The rule asks that of every window, whatever its
+content lists. A window's own title element is no content:
+NoMachine's twin, glued over its host's content area, lists that
+and nothing else (#2346). The rule asks that of every window, whatever its
 subrole reads — the twin read `AXUnknown` as often as
 `AXStandardWindow` (device, 2026-09-30), and a subrole gate let it
 in as a float — and reads a window in one round trip, since Orion
@@ -7468,12 +7480,28 @@ these are the groups: a Space in the list goes back through the
 Space doors, taking what is filed under it; a bar's edge goes back
 with its per-screen map, as the edge doors write them, and the
 master with both bars'; a rule takes the reach the draft gave it
-(#1393); and the shortcut layers go back whole, with the Desktop
-base, every key reach and every layer edit, since a binding's reach
-is keyed into the layers it was encoded against (#2022). That last
-group is the one a row cannot name — one binding's ↺ would take
-every other binding change with it — so its ↺ says so and asks
-first (`RevertWriter.grouped`, owner 2026-10-19). The reach rows
+(#1393); and a shortcut binding goes back with every changed
+binding of its layer that its saved chord, or the chord it now
+holds, was moved to or from (#2412, owner 2026-10-20) — the
+recorder's steal writes both in one gesture, so the ↺ on either
+row undoes the move and both rows leave. The set is read from who
+holds each chord at revert time, never from a stored history, so a
+later edit still counts; it never crosses a layer or takes an
+unchanged binding, and one pure function (`BindingRevertSet`) gives
+the ↺ both its set and its words ("Revert, with Swap Left"). The
+binding's reach picks go with it. The alternative, taking the chord
+back alone, leaves the binding it was moved to unbound — a state
+nobody saved — and still needs a second press. A ↺ that takes more
+than its own words name asks first (a binding's names every
+binding it takes): a layer's or a lens's create, delete
+or rename puts the whole layer or lens back with its bindings, and
+a "Layers edited" row, which names nothing, takes every shortcut
+change (`RevertWriter.grouped`). A row for a layer's switch or a lens's
+toggle goes back with that layer or lens, since alone it would
+bring back a row for a name the page no longer has, and a layer or
+lens whose saved name another one now holds draws no ↺: it cannot
+come back under that name, and taking the newer one's name away is
+not a revert. The reach rows
 are grouped the same way: a profile that changed exactly as the
 edited one did is named on the edited rows ("All profiles" for a
 shared rule, else a pair or a count) instead of in a row of its
@@ -7491,9 +7519,8 @@ compare across different diffs; the folded row's ↺ takes the
 group back without asking, since the row names it. Their way
 back is the rule's: the reach
 settles once the app's rules, or the shortcut layers, are the
-baseline's again. A row says
-how it reverts and offers no ↺ until it does: a lens or layer edit,
-profile drift and a leaf no key claims draw none.
+baseline's again. A row says how it reverts and offers no ↺ until
+it does: profile drift and a leaf no key claims draw none.
 
 A live row's ↺ is not a draft writeback (#2411): it puts the row's
 leaves back to the value the live profile or its shared look

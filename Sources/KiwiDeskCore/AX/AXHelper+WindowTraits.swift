@@ -3,7 +3,8 @@ import CoreGraphics
 
 /// How one window reads to the shadow rule (#1785).
 enum ShellReading: Equatable {
-    /// A title-bar button or an AX child: a window.
+    /// A title-bar button or an AX child other than the window's
+    /// own title text: a window.
     case furnished
     /// Neither, and every read answered.
     case shell
@@ -25,7 +26,8 @@ struct WindowTraits: Equatable {
     /// Close, minimize, zoom or full-screen button present; nil
     /// when the read did not answer.
     let hasTitlebarButton: Bool?
-    /// nil when the read did not answer.
+    /// Children other than the window's own title element; nil
+    /// when the read did not answer.
     let childCount: Int?
     let frame: CGRect
 
@@ -88,10 +90,11 @@ extension AXHelper {
         id known: WindowID?
     ) -> WindowTraits? {
         guard let id = known ?? windowID(of: element) else { return nil }
+        // The title element stays last: `items.last` reads it.
         let names =
             titlebarButtons + [
                 kAXChildrenAttribute, kAXPositionAttribute,
-                kAXSizeAttribute,
+                kAXSizeAttribute, kAXTitleUIElementAttribute,
             ]
         var values: CFArray?
         let error = WorkMeter.shared.ax {
@@ -118,13 +121,26 @@ extension AXHelper {
         return WindowTraits(
             id: id,
             hasTitlebarButton: WindowTraits.titlebarButton(from: buttons),
-            childCount: (children as? [AnyObject])?.count
-                ?? (carries(children) == false ? 0 : nil),
+            childCount: (children as? [AnyObject]).map {
+                contentChildren($0, title: items.last)
+            } ?? (carries(children) == false ? 0 : nil),
             frame: frame(
                 position: items[titlebarButtons.count + 1],
                 size: items[titlebarButtons.count + 2]
             )
         )
+    }
+
+    /// `children` without the window's own title element, which
+    /// furnishes nothing: NoMachine's buttonless twin carries one
+    /// and nothing else (#2346, device 2026-10-20).
+    static func contentChildren(
+        _ children: [AnyObject],
+        title: AnyObject?
+    ) -> Int {
+        guard let title, CFGetTypeID(title) == AXUIElementGetTypeID()
+        else { return children.count }
+        return children.filter { !CFEqual($0, title) }.count
     }
 
     /// Whether a batched read's item carries a value: false where

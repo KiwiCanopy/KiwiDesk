@@ -65,6 +65,7 @@ extension SettingsModel {
             from: old,
             to: new
         )
+        rekeyLensPicks(from: old, to: new)
         return nil
     }
 
@@ -73,21 +74,65 @@ extension SettingsModel {
     func deleteLens(_ name: String) {
         guard let old = draftName(name) else { return }
         editLenses { edits in
-            guard
-                let at = edits.lenses.firstIndex(where: {
-                    $0.lens.name == old
-                })
-            else { return }
-            if let stored = edits.lenses[at].stored {
-                edits.deleted.append(stored)
-            }
-            edits.lenses.remove(at: at)
-            edits.reach[old] = nil
+            let draft = edits.lenses.first { $0.lens.name == old }
+            if let stored = draft?.stored { edits.deleted.append(stored) }
+        }
+        dropDraftLens(old)
+    }
+
+    /// The page's lens `page` out of the draft, as a delete and a
+    /// revert both stage it (#2412): the lens, its reach, its chords
+    /// on this page and their key picks.
+    func dropDraftLens(_ page: String) {
+        editLenses { edits in
+            edits.lenses.removeAll { $0.lens.name == page }
+            edits.reach[page] = nil
         }
         config.layers = KeybindingCatalog.deleteLens(
             in: config.layers,
-            named: old
+            named: page
         )
+        let lua = KeybindingCatalog.toggleLens(page).lua
+        let mine = { (key: String) in
+            RuleReachTable<String>.keyParts(key).lua == lua
+        }
+        var edits = reachEdits
+        for key in (edits.reach[.key] ?? [:]).keys where mine(key) {
+            edits.reach[.key]?[key] = nil
+        }
+        for key in (edits.removal[.key] ?? [:]).keys where mine(key) {
+            edits.removal[.key]?[key] = nil
+        }
+        if edits != reachEdits { reachEdits = edits }
+    }
+
+    /// A lens's toggle picks follow its rename, as a layer's switch
+    /// picks do (`LayerRowPicks.renamed`).
+    private func rekeyLensPicks(from old: String, to new: String) {
+        let was = KeybindingCatalog.toggleLens(old).lua
+        let now = KeybindingCatalog.toggleLens(new).lua
+        func moved<V>(_ map: [String: V]?) -> [String: V]? {
+            map.map { map in
+                Dictionary(
+                    map.map { key, value in
+                        let parts = RuleReachTable<String>.keyParts(key)
+                        guard parts.lua == was else { return (key, value) }
+                        return (
+                            RuleReachTable<String>.keyID(
+                                layer: parts.layer,
+                                lua: now
+                            ),
+                            value
+                        )
+                    },
+                    uniquingKeysWith: { _, renamed in renamed }
+                )
+            }
+        }
+        var edits = reachEdits
+        edits.reach[.key] = moved(edits.reach[.key])
+        edits.removal[.key] = moved(edits.removal[.key])
+        if edits != reachEdits { reachEdits = edits }
     }
 
     /// Changes `name`'s apps or settings; a rename is
@@ -115,14 +160,11 @@ extension SettingsModel {
     }
 
     /// `name` reaches exactly `reached` of the saved profiles; a
-    /// pick of a stored lens's own reach is no edit.
+    /// pick of what the lens reaches without it is no edit.
     func setLensReach(_ name: String, _ reached: Set<String>) {
         guard let page = draftName(name) else { return }
+        let before = lensReachWithoutPick(page)
         editLenses { edits in
-            let stored = edits.lenses.first { $0.lens.name == page }?.stored
-            let before = stored.flatMap {
-                ruleReachStored?.profilesReaching($0)
-            }
             edits.reach[page] = before == reached ? nil : reached
         }
     }
@@ -155,7 +197,7 @@ extension SettingsModel {
     }
 
     /// Edits the draft, dropping it once it changes nothing.
-    private func editLenses(_ change: (inout LensEdits) -> Void) {
+    func editLenses(_ change: (inout LensEdits) -> Void) {
         let stored = core.kiwiVisionStoredLenses
         var edits = reachEdits.lenses ?? LensEdits(stored: stored)
         change(&edits)

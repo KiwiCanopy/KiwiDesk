@@ -10,14 +10,21 @@ extension SettingsModel {
         guard name != KeyLayer.defaultName else { return }
         let stored = storedLayer(name)
         var edits = reachEdits
-        edits.layers[name] = nil
         if let stored { edits.deletedLayers[stored] = removal }
+        dropDraftLayer(name, in: &edits)
+        reachEdits = edits
+    }
+
+    /// The page's layer `name` out of the draft, as a delete and a
+    /// revert both stage it (#2412): its rows and every row
+    /// switching to it, its edit and its picks.
+    func dropDraftLayer(_ name: String, in edits: inout RuleReachEdits) {
+        edits.layers[name] = nil
         LayerRowPicks.deleted(&edits, layer: name)
         config.layers = KeybindingCatalog.deleteLayer(
             in: config.layers,
             named: name
         )
-        reachEdits = edits
     }
 
     /// Renames the page's layer, and its switch rows, in every
