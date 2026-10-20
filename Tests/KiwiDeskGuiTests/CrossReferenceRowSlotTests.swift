@@ -113,15 +113,15 @@ struct CrossReferenceRowSlotTests {
         "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
         "LayoutCard.swift:appBarProse",
         "SpaceOverrideRows+ModeRows.swift:prose",
-        "RoleColorCards.swift:AdvancedColorsHelp.focusedItemReference",
-        "RoleColorCards.swift:AdvancedColorsHelp.dimmedReference",
-        "WindowMarksColorCard.swift:AdvancedColorsHelp.unfocusedReference",
-        "WindowMarksColorCard.swift:AdvancedColorsHelp.dimmedReference",
+        "RoleColorCards.swift:ColorsAndGlassHelp.focusedItemReference",
+        "RoleColorCards.swift:ColorsAndGlassHelp.dimmedReference",
+        "WindowMarksColorCard.swift:ColorsAndGlassHelp.unfocusedReference",
+        "WindowMarksColorCard.swift:ColorsAndGlassHelp.dimmedReference",
         // Siblings assert these; ShelfBorderColorGateTests the border.
         "GesturesShelfEntries.swift:prose",  // GesturesDrawerTests
         "MacHabitRow.swift:prose",  // MacChecklistCrossReferenceTests
         "AppRulesSection+Lists.swift:Self.noSpacesProse",  // AppRulePinTests
-        "BarColorCards.swift:AdvancedColorsHelp.shelfBorderReference",
+        "BarColorCards.swift:ColorsAndGlassHelp.shelfBorderReference",
         "KiwiShelfCard.swift:Self.lookReference",  // LookReferenceTests
         "GapsEditor.swift:Self.lookReference",  // LookReferenceTests
         "SharedLookPointer.swift:follows?Self.sharedProse:Self.ownProse",
@@ -154,7 +154,7 @@ struct CrossReferenceRowSlotTests {
     /// group (#1310) — one branch, one value.
     @Test func theFocusedItemProsePlacesItsLink() {
         #expect(
-            AdvancedColorsHelp.focusedItemReference.contains(Self.slot)
+            ColorsAndGlassHelp.focusedItemReference.contains(Self.slot)
         )
     }
 
@@ -162,7 +162,7 @@ struct CrossReferenceRowSlotTests {
     /// (#1310) — one branch, one value.
     @Test func theUnfocusedProsePlacesItsLink() {
         #expect(
-            AdvancedColorsHelp.unfocusedReference.contains(Self.slot)
+            ColorsAndGlassHelp.unfocusedReference.contains(Self.slot)
         )
     }
 
@@ -170,7 +170,7 @@ struct CrossReferenceRowSlotTests {
     /// (#1857), one value at both mounts.
     @Test func theDimmedProsePlacesItsLink() {
         #expect(
-            AdvancedColorsHelp.dimmedReference.contains(Self.slot)
+            ColorsAndGlassHelp.dimmedReference.contains(Self.slot)
         )
     }
 

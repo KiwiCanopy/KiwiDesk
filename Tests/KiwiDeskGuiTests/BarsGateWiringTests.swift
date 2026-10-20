@@ -93,7 +93,7 @@ struct BarsGateWiringTests {
     /// describe one status two ways. The shelf's rows read the
     /// help for their own reasons; the two bar cards grey for no
     /// bar value (#761). (`BarColorCards` renders the block
-    /// sentence from `AdvancedColorsHelp` instead — it must name
+    /// sentence from `ColorsAndGlassHelp` instead — it must name
     /// the OTHER page — so it is not a `BarsGateHelp` consumer.)
     @Test("gate sentences come only from BarsGateHelp")
     func gateSentencesLiveInTheHelpEnum() throws {
@@ -118,7 +118,7 @@ struct BarsGateWiringTests {
             "Components/Bars/KiwiShelfCard.swift",
             "Components/Bars/KiwiShelfCard+Placement.swift",
             "Components/Bars/KiwiShelfCard+Rows.swift",
-            "Components/Colors/AdvancedColorRow+Bars.swift",
+            "Components/Colors/ColorsAndGlassRow+Bars.swift",
             "Components/Colors/BarColorCards.swift",
             "Components/Colors/RoleColorCards.swift",
         ]

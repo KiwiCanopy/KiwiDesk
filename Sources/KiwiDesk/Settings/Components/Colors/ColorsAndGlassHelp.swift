@@ -10,7 +10,7 @@ import SwiftUI
 /// sentence that points at it, in the same change set — nothing
 /// here reds when it does not.
 @MainActor
-enum AdvancedColorsHelp {
+enum ColorsAndGlassHelp {
     static var borderOff: String {
         L(
             "colors.border_off.help",

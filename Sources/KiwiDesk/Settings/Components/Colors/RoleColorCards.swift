@@ -31,8 +31,8 @@ struct RoleColorCard: View {
     /// each time the page appears (`RolePaint.seed`).
     @State private var ticked: Set<SettingKey>?
 
-    private var gates: AdvancedColorsGates {
-        AdvancedColorsGates(settings: model.config.settings)
+    private var gates: ColorsAndGlassGates {
+        ColorsAndGlassGates(settings: model.config.settings)
     }
 
     private var paint: RolePaint {
@@ -65,7 +65,7 @@ struct RoleColorCard: View {
                 gates.needsOwnSentence(.spaceBar(.spaceBarFocusedItemColor))
             {
                 CrossReferenceRow(
-                    prose: AdvancedColorsHelp.focusedItemReference,
+                    prose: ColorsAndGlassHelp.focusedItemReference,
                     linkTitle: SettingsDestination.bars.title,
                     destination: .bars
                 )
@@ -75,7 +75,7 @@ struct RoleColorCard: View {
                 id: \.self
             ) { destination in
                 CrossReferenceRow(
-                    prose: AdvancedColorsHelp.dimmedReference,
+                    prose: ColorsAndGlassHelp.dimmedReference,
                     linkTitle: destination.title,
                     destination: destination
                 )
@@ -103,7 +103,7 @@ struct RoleColorCard: View {
                 tickable: paint.tickable(key),
                 isOn: tick(key)
             )
-            AdvancedColorRow(model: model, key: key)
+            ColorsAndGlassRow(model: model, key: key)
         }
         .modifier(
             GreyOut(active: verdict != nil, help: verdict?.help ?? "")

@@ -217,13 +217,13 @@ struct ScreenEdgeRowsTests {
         model.config.settings.spaceBarStyle.showFrontApp = true
         model.barEdge(\.spaceBarStyle).wrappedValue = .left
         #expect(
-            AdvancedColorsGates(settings: model.config.settings)
+            ColorsAndGlassGates(settings: model.config.settings)
                 .focusedItemInert
         )
         model.screenEdge(\.spaceBarStyle, on: dell.fingerprint)
             .wrappedValue = .top
         #expect(
-            !AdvancedColorsGates(settings: model.config.settings)
+            !ColorsAndGlassGates(settings: model.config.settings)
                 .focusedItemInert
         )
     }

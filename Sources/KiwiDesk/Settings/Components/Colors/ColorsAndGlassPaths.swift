@@ -2,9 +2,9 @@ import KiwiDeskCore
 
 /// Where each Colors & glass row's hex is stored, for the
 /// writers that act on rows by key rather than by builder — the
-/// role groups' colour (#1857). `AdvancedColorPathsTests` holds
+/// role groups' colour (#1857). `ColorsAndGlassPathsTests` holds
 /// that every colour row resolves to its own palette colour.
-enum AdvancedColorPaths {
+enum ColorsAndGlassPaths {
     static func hex(
         _ key: SettingKey
     ) -> WritableKeyPath<TilingSettings, String>? {

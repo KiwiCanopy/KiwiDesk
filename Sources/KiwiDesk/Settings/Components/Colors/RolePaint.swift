@@ -71,7 +71,7 @@ struct RolePaint {
         guard let rgb = Self.rgb(pick) else { return settings }
         var out = settings
         for key in targets {
-            guard let path = AdvancedColorPaths.hex(key) else { continue }
+            guard let path = ColorsAndGlassPaths.hex(key) else { continue }
             out[keyPath: path] = rgb + Self.alphaSuffix(out[keyPath: path])
         }
         return out
@@ -83,7 +83,7 @@ struct RolePaint {
         of key: SettingKey,
         in settings: TilingSettings
     ) -> String? {
-        AdvancedColorPaths.hex(key).flatMap { rgb(settings[keyPath: $0]) }
+        ColorsAndGlassPaths.hex(key).flatMap { rgb(settings[keyPath: $0]) }
     }
 
     static func rgb(_ hex: String) -> String? {

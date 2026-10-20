@@ -30,7 +30,7 @@ struct ColorsGateTests {
     /// Colors & glass exempts no row from a container gate
     /// today. Pinned so that adding one is a conscious edit —
     /// the renderer already honors the flag as data
-    /// (`AdvancedColorRows`), so the census is the only half a
+    /// (`ColorsAndGlassRows`), so the census is the only half a
     /// future exemption has to touch, and this is what asks
     /// whether it has an argument.
     @Test("no Colors & glass row escapes its container gate")
@@ -56,7 +56,7 @@ struct ColorsGateTests {
         settings.scrolling.appBar.visibility = .hidden
         // A hidden bar's shortcut still shows it, so its colours
         // never grey for its value (#761).
-        let gates = AdvancedColorsGates(settings: settings)
+        let gates = ColorsAndGlassGates(settings: settings)
         for key in ColorsRowOrder.kiwishelfColorRows
         where key != .kiwishelf(.borderColor) {
             #expect(gates.verdict(for: key) == nil, "\(key.id)")
@@ -74,24 +74,24 @@ struct ColorsGateTests {
         var settings = TilingSettings()
         settings.borderStyle.enabled = false
         settings.borderStyle.unfocusedEnabled = false
-        var gates = AdvancedColorsGates(settings: settings)
+        var gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.verdict(for: unfocused)
                 == ColorRowVerdict(
-                    help: AdvancedColorsHelp.borderOff,
+                    help: ColorsAndGlassHelp.borderOff,
                     link: .page(.gapsAndBorders)
                 )
         )
         // Ring on, unfocused off: the row's own sentence (#1310).
         settings.borderStyle.enabled = true
-        gates = AdvancedColorsGates(settings: settings)
+        gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.verdict(for: unfocused)?.link
                 == .ownSentence(.gapsAndBorders)
         )
         settings.borderStyle.unfocusedEnabled = true
         #expect(
-            AdvancedColorsGates(settings: settings)
+            ColorsAndGlassGates(settings: settings)
                 .verdict(for: unfocused) == nil
         )
 
@@ -104,16 +104,16 @@ struct ColorsGateTests {
         settings.kiwishelf.iconSource = .appImage
         settings.spaceBarStyle.showFrontApp = false
         #expect(
-            AdvancedColorsGates(settings: settings)
+            ColorsAndGlassGates(settings: settings)
                 .verdict(for: focusedItem)
                 == ColorRowVerdict(
-                    help: AdvancedColorsHelp.focusedItemHelp,
+                    help: ColorsAndGlassHelp.focusedItemHelp,
                     link: .ownSentence(.bars)
                 )
         )
         settings.kiwishelf.iconSource = .appFont
         #expect(
-            AdvancedColorsGates(settings: settings)
+            ColorsAndGlassGates(settings: settings)
                 .verdict(for: focusedItem) == nil
         )
 
@@ -121,20 +121,20 @@ struct ColorsGateTests {
         // part's second.
         settings.dragGhost.enabled = false
         settings.dragGhost.border = false
-        gates = AdvancedColorsGates(settings: settings)
+        gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.verdict(for: .borders(.dragGhostBorderColor))?.help
-                == AdvancedColorsHelp.dragOff
+                == ColorsAndGlassHelp.dragOff
         )
         #expect(
             gates.verdict(for: .borders(.dragDropZoneBorderColor))
                 == nil
         )
         settings.dragGhost.enabled = true
-        gates = AdvancedColorsGates(settings: settings)
+        gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.verdict(for: .borders(.dragGhostBorderColor))?.help
-                == AdvancedColorsHelp.dragBorderOff
+                == ColorsAndGlassHelp.dragBorderOff
         )
         #expect(
             gates.verdict(for: .borders(.dragGhostFillColor)) == nil
@@ -151,7 +151,7 @@ struct ColorsGateTests {
         var settings = TilingSettings()
         settings.spaceBarStyle.visibility = .always
         settings.spaceBarStyle.showFrontApp = true
-        var gates = AdvancedColorsGates(settings: settings)
+        var gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.dimmedDestinations(
                 of: ColorsRowOrder.accentRows
@@ -171,7 +171,7 @@ struct ColorsGateTests {
         settings.scrolling.appBar.visibility = .hidden
         settings.borderStyle.enabled = false
         settings.dragGhost.border = false
-        gates = AdvancedColorsGates(settings: settings)
+        gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.dimmedDestinations(
                 of: ColorsRowOrder.accentRows
@@ -182,7 +182,7 @@ struct ColorsGateTests {
         // rows; with the bars back, Gaps & Borders alone.
         settings.spaceBarStyle.visibility = .always
         settings.dragDropZone.enabled = false
-        gates = AdvancedColorsGates(settings: settings)
+        gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.dimmedDestinations(
                 of: ColorsRowOrder.secondAccentRows
@@ -197,7 +197,7 @@ struct ColorsGateTests {
         settings.spaceBarStyle.visibility = .always
         settings.kiwishelf.iconSource = .appImage
         settings.spaceBarStyle.showFrontApp = false
-        gates = AdvancedColorsGates(settings: settings)
+        gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.needsOwnSentence(.spaceBar(.spaceBarFocusedItemColor))
         )

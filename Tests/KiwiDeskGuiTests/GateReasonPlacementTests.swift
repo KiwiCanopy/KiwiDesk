@@ -127,7 +127,7 @@ struct GateReasonPlacementTests {
         )
         // Colors & glass: its bar-colour rows are gated by
         // switches that live on the Bars destination, which is
-        // the case `AdvancedColorsHelp`'s anchors answer.
+        // the case `ColorsAndGlassHelp`'s anchors answer.
         #expect(
             channel(.kiwishelf(.borderColor)) == .remote
         )
