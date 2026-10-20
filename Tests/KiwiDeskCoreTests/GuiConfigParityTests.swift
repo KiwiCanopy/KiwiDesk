@@ -52,7 +52,7 @@ struct GuiConfigParityTests {
                 "scrollGesture", "appWide", "look", "spaceHistory",
                 "modeCycle",
                 "floatAutomatically", "tileRules",
-                "desktopShortcutBase", "shortcutOffer",
+                "shortcutBase", "shortcutOffer",
             ]
         )
     }
@@ -104,7 +104,7 @@ struct GuiConfigParityTests {
         config.modeCycle = [.grid, .monocle]
         config.floatAutomatically = false
         config.tileRules = ["com.valvesoftware.steam"]
-        config.desktopShortcutBase = .hyper
+        config.shortcutBase = .hyper
         config.shortcutOffer = ShortcutOffer(desktop: 4, generation: 2)
         config.layers = [
             KeyLayer(
@@ -136,7 +136,7 @@ struct GuiConfigParityTests {
         #expect(back.modeCycle == config.modeCycle)
         #expect(back.floatAutomatically == config.floatAutomatically)
         #expect(back.tileRules == config.tileRules)
-        #expect(back.desktopShortcutBase == config.desktopShortcutBase)
+        #expect(back.shortcutBase == config.shortcutBase)
         #expect(back.shortcutOffer == config.shortcutOffer)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.

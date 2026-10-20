@@ -77,9 +77,10 @@ struct DesktopSwitchShortcutTests {
     func seedKeepsItsTiers() throws {
         var seeded = DefaultKeybindings.bindings(
             spaces: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
-        for base in DesktopShortcutBase.allCases {
+        for base in ShortcutBase.allCases {
             seeded += (1...10).compactMap {
                 DefaultKeybindings.desktopRow($0, base: base)
             }

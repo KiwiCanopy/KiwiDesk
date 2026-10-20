@@ -20,7 +20,7 @@ struct HyperShortcutMoveDesktopTests {
         let offer = HyperShortcutMove.offer(
             direction,
             rows: rows,
-            base: config.desktopShortcutBase
+            base: config.shortcutBase
         )
         HyperShortcutMove.apply(
             offer,
@@ -43,7 +43,7 @@ struct HyperShortcutMoveDesktopTests {
                 name: KeyLayer.defaultName,
                 bindings: HyperShortcutMove.letterSeed
                     + desktops.compactMap {
-                        DefaultKeybindings.desktopRow($0)
+                        DefaultKeybindings.desktopRow($0, base: .standard)
                     }
             )
         ]
@@ -67,10 +67,10 @@ struct HyperShortcutMoveDesktopTests {
             desktop: true,
             to: &config
         )
-        #expect(combo(1, in: config) == "hyper+1")
+        #expect(combo(1, in: config) == "hyper+option+1")
         // A rebound Desktop row keeps its own chord.
         #expect(combo(2, in: config) == "control+option+2")
-        #expect(config.desktopShortcutBase == .hyper)
+        #expect(config.shortcutBase == .hyper)
     }
 
     @Test("without the line, neither the rows nor the base move")
@@ -83,13 +83,17 @@ struct HyperShortcutMoveDesktopTests {
             to: &config
         )
         #expect(combo(1, in: config) == "control+option+shift+command+1")
-        #expect(config.desktopShortcutBase == .standard)
+        #expect(config.shortcutBase == .standard)
     }
 
     @Test("a taken ✦ digit keeps that row and names its holder")
     func takenDigitStays() throws {
         var config = config(desktops: [1, 2])
-        let taker = KeyBinding(combo: "hyper+2", lua: "hs.x()", kind: .custom)
+        let taker = KeyBinding(
+            combo: "hyper+option+2",
+            lua: "hs.x()",
+            kind: .custom
+        )
         config.layers[0].bindings.append(taker)
         let line = try #require(
             HyperShortcutMove.offer(
@@ -106,7 +110,7 @@ struct HyperShortcutMoveDesktopTests {
             to: &config
         )
         #expect(combo(2, in: config) == "control+option+shift+command+2")
-        #expect(config.desktopShortcutBase == .hyper)
+        #expect(config.shortcutBase == .hyper)
     }
 
     @Test("a declined Desktop line retires with the letters")
@@ -121,7 +125,7 @@ struct HyperShortcutMoveDesktopTests {
         let after = HyperShortcutMove.offer(
             .toHyper,
             rows: config.layers[0].bindings,
-            base: config.desktopShortcutBase
+            base: config.shortcutBase
         )
         #expect(after.isEmpty)
         #expect(combo(1, in: config) == "control+option+shift+command+1")
@@ -165,7 +169,7 @@ struct HyperShortcutMoveDesktopTests {
         move(.back, items: [], desktop: true, to: &config)
         #expect(combo(1, in: config) == "control+option+shift+command+1")
         #expect(combo(3, in: config) == "control+option+shift+command+3")
-        #expect(config.desktopShortcutBase == .standard)
+        #expect(config.shortcutBase == .standard)
     }
 
     @Test("the top-up writes a new Desktop's row on the base")
@@ -176,11 +180,15 @@ struct HyperShortcutMoveDesktopTests {
             above: 0,
             base: .hyper
         )
-        #expect(rows.map(\.combo) == ["hyper+1", "hyper+2"])
+        #expect(rows.map(\.combo) == ["hyper+option+1", "hyper+option+2"])
         // A ✦ digit the user took leaves that Desktop unbound.
         let taken = DefaultKeybindings.desktopTopUp(
             existing: [
-                KeyBinding(combo: "hyper+1", lua: "hs.x()", kind: .custom)
+                KeyBinding(
+                    combo: "hyper+option+1",
+                    lua: "hs.x()",
+                    kind: .custom
+                )
             ],
             desktops: [1, 2],
             above: 0,
@@ -196,33 +204,33 @@ struct HyperShortcutMoveDesktopTests {
                 .appendingPathComponent("kiwi-hyper-base-\(UUID().uuidString)")
         )
         var stored = GuiConfig()
-        stored.desktopShortcutBase = .hyper
+        stored.shortcutBase = .hyper
         try core.guiConfigStore.save(stored)
         core.desktopMemory.readLegacyShortcutOffer = { nil }
         core.topUpDesktopShortcuts(desktops: [1])
         let rows = core.persistedGuiConfig()?.layers.first(where: \.isDefault)?
             .bindings.filter { $0.lua == lua(1) }
-        #expect(rows?.map(\.combo) == ["hyper+1"])
+        #expect(rows?.map(\.combo) == ["hyper+option+1"])
     }
 
     @Test("gui.json carries the base; absence is the seeded tier")
     func storedShape() throws {
         var config = GuiConfig()
-        config.desktopShortcutBase = .hyper
+        config.shortcutBase = .hyper
         let data = try JSONEncoder().encode(config)
         let text = String(decoding: data, as: UTF8.self)
-        #expect(text.contains("\"desktop_shortcut_base\":\"hyper\""))
+        #expect(text.contains("\"shortcut_base\":\"hyper\""))
         let back = try JSONDecoder().decode(GuiConfig.self, from: data)
-        #expect(back.desktopShortcutBase == .hyper)
+        #expect(back.shortcutBase == .hyper)
         let bare = try JSONDecoder().decode(
             GuiConfig.self,
             from: Data("{}".utf8)
         )
-        #expect(bare.desktopShortcutBase == .standard)
+        #expect(bare.shortcutBase == .standard)
         #expect(throws: DecodingError.self) {
             try JSONDecoder().decode(
                 GuiConfig.self,
-                from: Data(#"{"desktop_shortcut_base":"meta"}"#.utf8)
+                from: Data(#"{"shortcut_base":"meta"}"#.utf8)
             )
         }
     }

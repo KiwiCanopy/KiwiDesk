@@ -16,7 +16,8 @@ struct DefaultKeybindingsTests {
     func combosParse() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         for row in rows {
             #expect(
@@ -30,7 +31,8 @@ struct DefaultKeybindingsTests {
     func combosUnique() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let combos = rows.map(\.combo)
         #expect(Set(combos).count == combos.count)
@@ -40,7 +42,8 @@ struct DefaultKeybindingsTests {
     func rowShape() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(3),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         for row in rows {
             #expect(row.kind == .navigation)
@@ -58,7 +61,8 @@ struct DefaultKeybindingsTests {
     func spacesCapped() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(12),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let goTo = rows.filter {
             $0.lua.hasPrefix("KiwiDesk.focus_space(")
@@ -89,7 +93,8 @@ struct DefaultKeybindingsTests {
         let named = [SpaceID("mail"), SpaceID("web")]
         let rows = DefaultKeybindings.bindings(
             spaces: named,
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let mail = rows.first {
             $0.lua == "KiwiDesk.focus_space(\"mail\")"
@@ -106,7 +111,8 @@ struct DefaultKeybindingsTests {
         let tricky = SpaceID("a\"b")
         let rows = DefaultKeybindings.bindings(
             spaces: [tricky],
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let expected =
             "KiwiDesk.focus_space"
@@ -118,7 +124,8 @@ struct DefaultKeybindingsTests {
     func resizeStep() {
         let rows = DefaultKeybindings.bindings(
             spaces: [],
-            resizeStep: 25
+            resizeStep: 25,
+            base: .standard
         )
         #expect(
             rows.contains {
@@ -136,7 +143,8 @@ struct DefaultKeybindingsTests {
     func emptySpaces() {
         let rows = DefaultKeybindings.bindings(
             spaces: [],
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         // The step verbs name no Space (#1655); only a row
         // carrying a Space argument is per-space.
@@ -153,7 +161,8 @@ struct DefaultKeybindingsTests {
     func seedsShowShortcuts() {
         let rows = DefaultKeybindings.bindings(
             spaces: [],
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         #expect(
             rows.contains {
@@ -177,7 +186,8 @@ struct DefaultKeybindingsTests {
     func seedsOpenSettings() {
         let rows = DefaultKeybindings.bindings(
             spaces: [],
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         #expect(rows.contains(DefaultKeybindings.openSettingsRow()))
     }
@@ -202,11 +212,13 @@ struct DefaultKeybindingsTests {
         // Seeded for five spaces; the display change grew to ten.
         let existing = DefaultKeybindings.bindings(
             spaces: spaces(5),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(10)
+            spaces: spaces(10),
+            base: .standard
         )
         let combos = Set(added.map(\.combo))
         // ⌃⌥6-9 and ⌃⌥0 (tenth), across all three tiers — nothing
@@ -236,7 +248,8 @@ struct DefaultKeybindingsTests {
         // The user rebound ⌃⌥6 to something of their own.
         var existing = DefaultKeybindings.bindings(
             spaces: spaces(5),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         existing.append(
             KeyBinding(
@@ -248,7 +261,8 @@ struct DefaultKeybindingsTests {
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(10)
+            spaces: spaces(10),
+            base: .standard
         )
         // Tier 1 for space 6 is taken, so it is not re-added; the
         // shift/command tiers for space 6 are still free.
@@ -273,7 +287,8 @@ struct DefaultKeybindingsTests {
         ]
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(7)
+            spaces: spaces(7),
+            base: .standard
         )
         // The alias parses to the same physical shortcut, so the
         // focus tier for space 7 is treated as taken.
@@ -286,7 +301,8 @@ struct DefaultKeybindingsTests {
     func topUpCapsAtTen() {
         let added = DefaultKeybindings.digitTopUp(
             existing: [],
-            spaces: spaces(12)
+            spaces: spaces(12),
+            base: .standard
         )
         // Ten digits × three tiers; nothing for 11-12.
         #expect(
@@ -307,11 +323,13 @@ struct DefaultKeybindingsTests {
     func topUpIdempotent() {
         let existing = DefaultKeybindings.bindings(
             spaces: spaces(5),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(5)
+            spaces: spaces(5),
+            base: .standard
         )
         #expect(added.isEmpty)
     }

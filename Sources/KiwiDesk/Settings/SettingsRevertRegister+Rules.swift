@@ -19,7 +19,7 @@ extension SettingsRevertRegister {
         ).then { model, _ in settle(model, .autoFloat, nil) },
         .shortcuts(.layers): layers,
         .shortcuts(.layersIcon): layers,
-        .shortcuts(.desktopShortcutBase): layers,
+        .shortcuts(.shortcutBase): layers,
         .shortcuts(.spaceHistory): RevertWriter.leaf(
             \.spaceHistory
         ).then { model, _ in settle(model, .history, nil) },
@@ -96,7 +96,7 @@ extension SettingsRevertRegister {
     /// the layers it was encoded against (#2022), so a shortcut
     /// row's ↺ takes the layer rows with it.
     private static let layers = RevertWriter.all([
-        .leaf(\.layers), .leaf(\.desktopShortcutBase),
+        .leaf(\.layers), .leaf(\.shortcutBase),
     ]).then { model, _ in
         model.reachEdits.reach[.key] = nil
         model.reachEdits.removal[.key] = nil

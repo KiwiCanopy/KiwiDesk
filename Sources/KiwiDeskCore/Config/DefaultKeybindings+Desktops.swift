@@ -6,55 +6,29 @@ import Foundation
 /// tier rather than acting on the window; the ruling is
 /// `docs/design-decisions.md` ▸ *The Desktop tier is seeded*.
 extension DefaultKeybindings {
-    /// The seeded tier's row for Desktop `number`.
-    public static func desktopRow(_ number: Int) -> KeyBinding? {
-        desktopRow(number, base: .standard)
-    }
-
-    /// The row that goes to Desktop `number` on `base`, or nil past
-    /// the ten digits.
+    /// The row that goes to Desktop `number` on `base` — the seed's
+    /// chord moved through `ShortcutBase.rebased` — or nil past the
+    /// ten digits.
     public static func desktopRow(
         _ number: Int,
-        base: DesktopShortcutBase
+        base: ShortcutBase
     ) -> KeyBinding? {
         guard (1...digitCapacity).contains(number) else { return nil }
         let digit = number == digitCapacity ? "0" : String(number)
-        return KeyBinding(
-            combo: base.combo(digit),
-            lua: "KiwiDesk.focus_desktop(\(number))",
-            kind: .navigation,
-            label: "Go to Desktop \(number)"
+        return base.rebased(
+            KeyBinding(
+                combo: "control+option+shift+command+\(digit)",
+                lua: "KiwiDesk.focus_desktop(\(number))",
+                kind: .navigation,
+                label: "Go to Desktop \(number)"
+            )
         )
-    }
-
-    /// `row` moved onto `base` where it is a Go to Desktop row on
-    /// another base's seeded chord; any other row unchanged. A
-    /// top-up row adopted into a draft that staged a base move
-    /// takes the draft's base (#1870).
-    public static func rebased(
-        _ row: KeyBinding,
-        onto base: DesktopShortcutBase
-    ) -> KeyBinding {
-        for number in 1...digitCapacity {
-            guard let target = desktopRow(number, base: base),
-                target.lua == row.lua
-            else { continue }
-            let seeded = DesktopShortcutBase.allCases.contains {
-                desktopRow(number, base: $0)
-                    .map { KeyCombo.equivalent($0.combo, row.combo) }
-                    == true
-            }
-            var moved = row
-            if seeded { moved.combo = target.combo }
-            return moved
-        }
-        return row
     }
 
     /// Whether `row` goes to a Desktop — the seed's own spelling,
     /// derived from `desktopRow` rather than restated.
     public static func isDesktopRow(_ row: KeyBinding) -> Bool {
-        guard let sample = desktopRow(1)?.lua,
+        guard let sample = desktopRow(1, base: .standard)?.lua,
             let open = sample.firstIndex(of: "(")
         else { return false }
         return row.lua.hasPrefix(sample[...open])
@@ -70,7 +44,7 @@ extension DefaultKeybindings {
         existing: [KeyBinding],
         desktops: [Int],
         above mark: Int,
-        base: DesktopShortcutBase = .standard
+        base: ShortcutBase
     ) -> [KeyBinding] {
         var taken = Set(
             existing.compactMap { KeyCombo.parse($0.combo)?.registered }

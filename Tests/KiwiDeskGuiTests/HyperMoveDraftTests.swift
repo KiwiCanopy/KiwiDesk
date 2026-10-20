@@ -21,7 +21,7 @@ struct HyperMoveDraftTests {
                 name: KeyLayer.defaultName,
                 bindings: HyperShortcutMove.letterSeed
                     + [1, 2].compactMap {
-                        DefaultKeybindings.desktopRow($0)
+                        DefaultKeybindings.desktopRow($0, base: .standard)
                     }
             )
         ]
@@ -29,7 +29,7 @@ struct HyperMoveDraftTests {
         model.cleanConfig = config
         let request = try #require(model.hyperMoveRequest())
         model.applyHyperMove(request, items: [], desktop: true)
-        #expect(model.config.desktopShortcutBase == .hyper)
+        #expect(model.config.shortcutBase == .hyper)
         return model
     }
 
@@ -43,7 +43,7 @@ struct HyperMoveDraftTests {
     func dropRuleHalfDropsTheBase() throws {
         let model = try movedModel()
         model.dropRuleHalf()
-        #expect(model.config.desktopShortcutBase == .standard)
+        #expect(model.config.shortcutBase == .standard)
         #expect(desktopCombos(model).allSatisfy { !$0.hasPrefix("hyper") })
     }
 
@@ -52,14 +52,16 @@ struct HyperMoveDraftTests {
         let model = try movedModel()
         model.bindableDesktops = [1, 2]
         model.resetShortcutsToDefaults()
-        #expect(desktopCombos(model) == ["hyper+1", "hyper+2"])
+        #expect(desktopCombos(model) == ["hyper+option+1", "hyper+option+2"])
     }
 
     @Test("a top-up row adopted into a staged draft takes its base")
     func topUpRowTakesTheStagedBase() throws {
         let model = try movedModel()
-        let row = try #require(DefaultKeybindings.desktopRow(3))
+        let row = try #require(
+            DefaultKeybindings.desktopRow(3, base: .standard)
+        )
         model.adoptShortcutAdd([row])
-        #expect(desktopCombos(model).last == "hyper+3")
+        #expect(desktopCombos(model).last == "hyper+option+3")
     }
 }

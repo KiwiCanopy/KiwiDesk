@@ -40,7 +40,8 @@ struct DefaultShortcutGenerationTests {
     func takenStepsAreSkipped() {
         let rows = DefaultKeybindings.generationTopUp(
             existing: swapOnSteps,
-            above: 0
+            above: 0,
+            base: .standard
         )
         #expect(rows.map(\.lua) == [back, forward] + layoutKeys)
     }
@@ -57,7 +58,8 @@ struct DefaultShortcutGenerationTests {
     func freeChordsGetAll() {
         let rows = DefaultKeybindings.generationTopUp(
             existing: [],
-            above: 0
+            above: 0,
+            base: .standard
         )
         #expect(
             Set(rows.map(\.lua))
@@ -74,7 +76,8 @@ struct DefaultShortcutGenerationTests {
         )
         let rows = DefaultKeybindings.generationTopUp(
             existing: [mine],
-            above: 0
+            above: 0,
+            base: .standard
         )
         #expect(!rows.map(\.lua).contains(back))
         #expect(rows.map(\.lua).contains(forward))
@@ -85,7 +88,8 @@ struct DefaultShortcutGenerationTests {
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: [],
-                above: DefaultKeybindings.newestGeneration
+                above: DefaultKeybindings.newestGeneration,
+                base: .standard
             ).isEmpty
         )
     }
@@ -97,7 +101,8 @@ struct DefaultShortcutGenerationTests {
     func seedCarriesEveryGeneration() {
         let seed = DefaultKeybindings.bindings(
             spaces: [SpaceID("1")],
-            resizeStep: 10
+            resizeStep: 10,
+            base: .standard
         )
         for number in 1...DefaultKeybindings.newestGeneration {
             for row in DefaultKeybindings.rows(ofGeneration: number) {
@@ -112,7 +117,8 @@ struct DefaultShortcutGenerationTests {
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: seed,
-                above: 0
+                above: 0,
+                base: .standard
             ).isEmpty
         )
     }
@@ -140,7 +146,8 @@ struct DefaultShortcutGenerationTests {
     func everySeedRowHasAGeneration() {
         let seed = DefaultKeybindings.bindings(
             spaces: [SpaceID("1")],
-            resizeStep: 10
+            resizeStep: 10,
+            base: .standard
         )
         let families = [
             "KiwiDesk.focus_space(", "KiwiDesk.move_to_space(",

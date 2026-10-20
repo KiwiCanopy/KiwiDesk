@@ -14,7 +14,9 @@ struct DesktopShortcutDraftTests {
     @Test("The seed's row is the catalog's Go to Desktop row")
     func seedMatchesTheCatalog() throws {
         for number in 1...DefaultKeybindings.digitCapacity {
-            let row = try #require(DefaultKeybindings.desktopRow(number))
+            let row = try #require(
+                DefaultKeybindings.desktopRow(number, base: .standard)
+            )
             let catalog = try #require(
                 KeybindingCatalog.goToDesktop([number]).first
             )
@@ -33,7 +35,9 @@ struct DesktopShortcutDraftTests {
         model.reload()
         model.config.floatRules.append("com.example.dirty")
         #expect(model.isDirty)
-        let row = try #require(DefaultKeybindings.desktopRow(4))
+        let row = try #require(
+            DefaultKeybindings.desktopRow(4, base: .standard)
+        )
         model.adoptShortcutAdd([row])
         let base = { (layers: [KeyLayer]) in
             layers.first { $0.isDefault }?.bindings.map(\.lua) ?? []

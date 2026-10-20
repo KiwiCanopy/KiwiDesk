@@ -80,7 +80,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 32 = `min_window_size` per layout (#2237), on `[Profile]`
     /// alone; 31 is #761's, a parallel branch.
     /// 33 = 32's bundles cross #761's step too (Profile 26).
-    public static let currentFormat = 33
+    /// 34 = the shortcut base (#2460), in a bundle's `config` and
+    /// its `[Profile]` alike.
+    public static let currentFormat = 34
 
     public let format: Int
 

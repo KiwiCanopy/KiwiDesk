@@ -44,13 +44,14 @@ extension SettingsModel {
     }
 
     /// The seed for this config, the Desktop tier included for
-    /// the Desktops this Mac has now, on the draft's Desktop base
-    /// (#1870).
+    /// the Desktops this Mac has now, on the draft's shortcut base
+    /// (#2460).
     private var shippedDefaults: [KeyBinding] {
-        let base = config.desktopShortcutBase
+        let base = config.shortcutBase
         return DefaultKeybindings.bindings(
             spaces: config.spaces,
-            resizeStep: Int(config.settings.resizeStep)
+            resizeStep: Int(config.settings.resizeStep),
+            base: base
         )
             + bindableDesktops.compactMap {
                 DefaultKeybindings.desktopRow($0, base: base)

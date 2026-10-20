@@ -21,7 +21,7 @@ extension SettingsModel {
         let offer = HyperShortcutMove.offer(
             hyperMoveDirection,
             rows: layer.bindings,
-            base: config.desktopShortcutBase
+            base: config.shortcutBase
         )
         return offer.isEmpty ? nil : offer
     }
@@ -30,7 +30,7 @@ extension SettingsModel {
     /// Desktop base — which keeps the Hyper card in Simple with no
     /// key set, since config presence expands Simple (gui.md).
     var draftUsesHyper: Bool {
-        config.desktopShortcutBase == .hyper
+        config.shortcutBase == .hyper
             || config.layers.contains {
                 $0.bindings.contains {
                     KeyCombo.parse($0.combo)?.modifiers.contains(.hyper)

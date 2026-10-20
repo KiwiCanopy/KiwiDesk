@@ -103,13 +103,26 @@ because two real clients now remove drift — see
   `GuiConfigStore.save` merges it upward, so no writer lowers it
   (#2324, `ShortcutOfferTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
-  its own. The tier's modifiers are the stored
-  `GuiConfig.desktopShortcutBase` (#1870): a writer of a Desktop
-  row writes it on that base — the top-up, Restore Defaults, and a
-  top-up row adopted into a draft that staged a move — and a writer
-  of the base moves the Desktop rows in the same draft write, and a
-  path that drops the draft's rows drops the base with them
-  (`HyperShortcutMoveDesktopTests`, `HyperMoveDraftTests`).
+  its own.
+- **Every writer of a default row writes it on the stored
+  `GuiConfig.shortcutBase` (#2460)**, through the one
+  `ShortcutBase.rebased`: the first-run seed, the top-ups (Space
+  digits, Desktop rows, generations), Restore Defaults, and a
+  top-up row adopted into a draft that staged a base change. The
+  producers take the base as a required argument
+  (`DefaultKeybindings.bindings`, `desktopRow`, the top-ups), so a
+  new writer cannot leave it out by default. Never a guess from the
+  rows a layer holds — three sources deciding where a new row went
+  is what split a moved ladder at the next Space. A writer of the
+  base moves the rows in the same draft write, and a path that
+  drops the draft's rows drops the base with them
+  (`ShortcutBaseTests`, `HyperShortcutMoveDesktopTests`,
+  `HyperMoveDraftTests`). A writer that moves a row between the
+  bases takes `ShortcutBase.moved`, never a mapping beside it —
+  the old move sheet's `HyperShortcutMove.moved` retires with that
+  sheet. The Desktop tier takes `✦⌥` + digit because `✦⇧⌘3` is
+  macOS's screenshot chord while Hyper is held (measured
+  2026-10-20, macOS 27.0.1).
 - **A default row added after the first-run seed joins the next
   generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
   and list the row in `rows(ofGeneration:)`, beside adding it to
@@ -120,11 +133,9 @@ because two real clients now remove drift — see
   ▸ `seedCarriesEveryGeneration`). A seed action outside the
   frozen 2.2.0 baseline and every generation reds
   `DefaultShortcutGenerationTests` ▸ `everySeedRowHasAGeneration`;
-  move a row into that baseline only by ruling. A `⌃⌥` letter row
-  the top-up adds lands on the base the layer's seeded letters
-  took, through the one `HyperShortcutMove.onLettersBase`, its
-  chord judged free as registered, or the Hyper move reappears for
-  one row (#2303, `ResetSizesSeedTests` ▸ `movedLayerGetsHyper`,
+  move a row into that baseline only by ruling. The row lands on
+  the shortcut base above, its chord judged free as registered
+  (`ResetSizesSeedTests` ▸ `movedLayerGetsHyper`,
   `bareRHoldsHyperR`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only

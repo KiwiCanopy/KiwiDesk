@@ -11,11 +11,11 @@ extension HyperShortcutMove {
     static func desktopLine(
         _ direction: Direction,
         rows: [KeyBinding],
-        base: DesktopShortcutBase
+        base: ShortcutBase
     ) -> DesktopLine? {
         let toHyper = direction == .toHyper
-        let from: DesktopShortcutBase = toHyper ? .standard : .hyper
-        let to: DesktopShortcutBase = toHyper ? .hyper : .standard
+        let from: ShortcutBase = toHyper ? .standard : .hyper
+        let to: ShortcutBase = toHyper ? .hyper : .standard
         guard base == from else { return nil }
         var moves: [Move] = []
         var kept: [Kept] = []

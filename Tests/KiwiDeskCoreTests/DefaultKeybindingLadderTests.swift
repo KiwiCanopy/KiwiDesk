@@ -42,7 +42,8 @@ struct DefaultKeybindingLadderTests {
     func shiftNeverQualifiesALetter() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         // The ladder spends ⇧ on "act on the window", which only
         // ever qualifies a POSITIONAL row — an arrow or a digit.
@@ -89,7 +90,8 @@ struct DefaultKeybindingLadderTests {
     func arrowsRideTheirOwnTiers() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let arrows: Set<UInt32> = [123, 124, 125, 126]
         let base: HotkeyModifiers = [.control, .option]
@@ -134,7 +136,8 @@ struct DefaultKeybindingLadderTests {
     func shiftReversesItsTwin() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let combos = rows.compactMap { row in
             KeyCombo.parse(row.combo).map { ($0, row) }
@@ -165,7 +168,8 @@ struct DefaultKeybindingLadderTests {
     func stickyToggleLetters() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let byLua = Dictionary(
             rows.map { ($0.lua, $0.combo) },

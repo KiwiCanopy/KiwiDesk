@@ -52,5 +52,9 @@ extension GuiConfig {
     /// **11 (#2324)**: the top-ups' `shortcut_offer` travels in the
     /// file, so an older build latches read-only rather than drop
     /// the offer on a write. No step: the stamp alone crosses.
-    public static let currentFormat = 11
+    ///
+    /// **12 (#2460)**: `desktop_shortcut_base` became
+    /// `shortcut_base`, which covers every tier
+    /// (`migratingShortcutBase`).
+    public static let currentFormat = 12
 }

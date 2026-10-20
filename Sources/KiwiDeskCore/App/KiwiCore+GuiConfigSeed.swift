@@ -261,7 +261,8 @@ extension KiwiCore {
         config.layers[index].bindings =
             DefaultKeybindings.bindings(
                 spaces: config.spaces,
-                resizeStep: Int(config.settings.resizeStep)
+                resizeStep: Int(config.settings.resizeStep),
+                base: config.shortcutBase
             )
     }
 }

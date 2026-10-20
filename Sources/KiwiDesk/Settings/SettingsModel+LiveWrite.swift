@@ -68,12 +68,10 @@ extension SettingsModel {
             return
         }
         suppressDirty = true
-        // A staged Hyper move (#1870) carries its Desktop base: the
-        // draft's copy of a new Desktop row takes it, so Save writes
-        // one ladder.
-        let staged = config.desktopShortcutBase
+        // A staged base (#2460): the draft's copy of a new row takes
+        // it, so Save writes one ladder.
         Self.appendToDefault(
-            rows.map { DefaultKeybindings.rebased($0, onto: staged) },
+            rows.map(config.shortcutBase.rebased),
             in: &config.layers
         )
         Self.appendToDefault(rows, in: &cleanConfig.layers)

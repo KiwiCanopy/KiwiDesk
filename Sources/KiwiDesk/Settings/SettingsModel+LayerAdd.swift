@@ -88,11 +88,13 @@ extension SettingsModel {
             recordRejoined([name])
             return true
         case .new?:
-            // Every layer carries the app-chrome rows (#602, #1381).
+            // Every layer carries the app-chrome rows (#602, #1381),
+            // on the shortcut base (#2460).
             config.layers.append(
                 KeyLayer(
                     name: name,
                     bindings: DefaultKeybindings.appChromeRows()
+                        .map(config.shortcutBase.rebased)
                 )
             )
             recordCreated([name])

@@ -11,10 +11,12 @@ public enum DefaultKeybindings {
         ("right", "to the right"),
     ]
 
-    /// Starter keybindings for base `default` mode (#91, #466, #1094, #602).
+    /// Starter keybindings for base `default` mode (#91, #466, #1094, #602),
+    /// on `base` (#2460).
     public static func bindings(
         spaces: [SpaceID],
-        resizeStep: Int
+        resizeStep: Int,
+        base: ShortcutBase
     ) -> [KeyBinding] {
         var rows: [KeyBinding] = []
         // Tier 1 — ⌃⌥: focus window / space
@@ -87,7 +89,7 @@ public enum DefaultKeybindings {
         rows.append(resetSizesRow())
         rows.append(contentsOf: barRevealRows())
         rows.append(contentsOf: appChromeRows())
-        return rows
+        return rows.map(base.rebased)
     }
 
     /// The app-chrome rows on the `⌃⌥` base — ⌃⌥K opens the
@@ -196,15 +198,18 @@ public enum DefaultKeybindings {
     /// each Space verb with no row in `existing` takes its digit
     /// when that combo is free, and otherwise stays unbound. A
     /// Space named 1–10 claims its own number first; any other
-    /// takes its place among the first ten. Combo identity is by
-    /// parsed `KeyCombo`, so `ctrl+alt+6` counts as taken.
+    /// takes its place among the first ten. Rows land on `base`
+    /// (#2460). Combo identity is by parsed `KeyCombo` as
+    /// registered, so `ctrl+alt+6` counts as taken and a Hyper row
+    /// holds its bare chord (#1870).
     public static func digitTopUp(
         existing: [KeyBinding],
-        spaces: [SpaceID]
+        spaces: [SpaceID],
+        base: ShortcutBase
     ) -> [KeyBinding] {
         var taken = Set(
             existing.compactMap {
-                KeyCombo.parse($0.combo)
+                KeyCombo.parse($0.combo)?.registered
             }
         )
         let bound = Set(
@@ -215,14 +220,18 @@ public enum DefaultKeybindings {
         // Space needs nothing, so a positional Space never takes it.
         let reserved = Set(
             slots.filter(\.own).flatMap {
-                candidates(digit: $0.digit, space: $0.space)
-                    .compactMap { KeyCombo.parse($0.combo) }
+                candidates(digit: $0.digit, space: $0.space, base: base)
+                    .compactMap { KeyCombo.parse($0.combo)?.registered }
             }
         )
         var rows: [KeyBinding] = []
         for slot in slots {
-            for row in candidates(digit: slot.digit, space: slot.space) {
-                guard let combo = KeyCombo.parse(row.combo),
+            for row in candidates(
+                digit: slot.digit,
+                space: slot.space,
+                base: base
+            ) {
+                guard let combo = KeyCombo.parse(row.combo)?.registered,
                     let action = SpaceLuaArg.target(of: row.lua),
                     !bound.contains(action),
                     slot.own || !reserved.contains(combo),
@@ -236,13 +245,14 @@ public enum DefaultKeybindings {
 
     private static func candidates(
         digit: String,
-        space: SpaceID
+        space: SpaceID,
+        base: ShortcutBase
     ) -> [KeyBinding] {
         [
             focusSpaceRow(digit: digit, space: space),
             moveSpaceRow(digit: digit, space: space),
             followSpaceRow(digit: digit, space: space),
-        ]
+        ].map(base.rebased)
     }
 
     /// The digit each Space tops up on: a Space named 1–10 its own

@@ -57,7 +57,8 @@ struct DefaultSeedCatalogParityTests {
     func seededRowsMatchCatalog() {
         let seeded = DefaultKeybindings.bindings(
             spaces: spaces,
-            resizeStep: step
+            resizeStep: step,
+            base: .standard
         )
         let map = catalog
         #expect(!seeded.isEmpty)
@@ -82,7 +83,8 @@ struct DefaultSeedCatalogParityTests {
         var mode = KeyLayer.defaultLayer
         mode.bindings = DefaultKeybindings.bindings(
             spaces: spaces,
-            resizeStep: step
+            resizeStep: step,
+            base: .standard
         ).map { row in
             KeyBinding(
                 combo: row.combo,

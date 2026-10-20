@@ -11,7 +11,11 @@ import Testing
 @Suite("Reset sizes seed (#2303)")
 struct ResetSizesSeedTests {
     private var seeded: [KeyBinding] {
-        DefaultKeybindings.bindings(spaces: [], resizeStep: 50)
+        DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 50,
+            base: .standard
+        )
     }
 
     @Test("⌃⌥R resets the active Space's sizes in the base seed")
@@ -30,7 +34,11 @@ struct ResetSizesSeedTests {
         let row = DefaultKeybindings.resetSizesRow()
         #expect(DefaultKeybindings.rows(ofGeneration: 5) == [row])
         #expect(
-            DefaultKeybindings.generationTopUp(existing: [], above: 4)
+            DefaultKeybindings.generationTopUp(
+                existing: [],
+                above: 4,
+                base: .standard
+            )
                 == [row] + DefaultKeybindings.rows(ofGeneration: 6)
         )
     }
@@ -46,7 +54,8 @@ struct ResetSizesSeedTests {
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: [mine],
-                above: 4
+                above: 4,
+                base: .standard
             ) == DefaultKeybindings.rows(ofGeneration: 6)
         )
     }
@@ -88,7 +97,7 @@ struct ResetSizesSeedTests {
         let offer = HyperShortcutMove.offer(
             .toHyper,
             rows: config.layers[index].bindings,
-            base: config.desktopShortcutBase
+            base: config.shortcutBase
         )
         HyperShortcutMove.apply(
             offer,
@@ -99,15 +108,16 @@ struct ResetSizesSeedTests {
         return config.layers[index].bindings
     }
 
-    /// An install that took the move gets the reset on ✦R beside
+    /// An install on the Hyper base gets the reset on ✦R beside
     /// its letters, so the move is not offered again for one row.
-    @Test("a layer on Hyper gets ✦R, and no move line comes back")
+    @Test("the Hyper base gets ✦R, and no move line comes back")
     func movedLayerGetsHyper() {
         let layer = movedLayer
         #expect(layer.contains { $0.combo == "hyper+f" })
         let added = DefaultKeybindings.generationTopUp(
             existing: layer,
-            above: 4
+            above: 4,
+            base: .hyper
         )
         #expect(added.map(\.combo) == ["hyper+r"])
         let offer = HyperShortcutMove.offer(
@@ -130,18 +140,21 @@ struct ResetSizesSeedTests {
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: movedLayer + [mine],
-                above: 4
+                above: 4,
+                base: .hyper
             ).isEmpty
         )
     }
 
-    /// A layer that kept its letters on ⌃⌥ gets ⌃⌥R.
-    @Test("a layer on ⌃⌥ gets ⌃⌥R")
+    /// The ⌃⌥ base gets ⌃⌥R, wherever the letters sit: the stored
+    /// base decides, never a guess from the rows (#2460).
+    @Test("the ⌃⌥ base gets ⌃⌥R")
     func unmovedLayerGetsTheSeed() {
         let reset = DefaultKeybindings.resetSizesRow()
         let added = DefaultKeybindings.generationTopUp(
             existing: seeded.filter { $0.lua != reset.lua },
-            above: 4
+            above: 4,
+            base: .standard
         )
         #expect(added == [reset])
     }

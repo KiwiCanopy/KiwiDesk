@@ -886,10 +886,8 @@ Touching `Config`, `Profiles`, `Commands`.
   on the window" (swap on an arrow, send on a digit), or off a positional key
   reverses its unshifted stepping twin as `⇧Tab` and `⌃⌥⇧C` do (#453), or on
   `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past the
-  setup's `shortcut_offer` through the one `topUpDesktopShortcuts` on the stored
-  `desktopShortcutBase`, a writer of the base moving the Desktop rows in the
-  same draft write (#1870, `DesktopShortcutTopUpTests`,
-  `HyperShortcutMoveDesktopTests`)
+  setup's `shortcut_offer` through the one `topUpDesktopShortcuts`
+  (#1870, `DesktopShortcutTopUpTests`, `HyperShortcutMoveDesktopTests`)
   (#1094/#1655, `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`,
   `DefaultKeybindingLadderTests` ▸ `shiftReversesItsTwin`), and `⌘` on an arrow
   steps the Spaces (`DefaultKeybindingLadderTests` ▸ `arrowsRideTheirOwnTiers`)
@@ -898,9 +896,12 @@ Touching `Config`, `Profiles`, `Commands`.
   where its action is unbound and its chord free, the offer travelling in
   `gui.json` and only ever raised (#2324, `ShortcutOfferTests`) and cleared
   with a discarded `gui.json` (#2211, `DefaultShortcutGenerationTests` ▸
-  `everySeedRowHasAGeneration`), a `⌃⌥` letter landing on the base the
-  layer's letters took through the one `HyperShortcutMove.onLettersBase`
-  (#2303, `ResetSizesSeedTests`)
+  `everySeedRowHasAGeneration`)
+- every writer of a default row writes it on the stored
+  `GuiConfig.shortcutBase` through the one `ShortcutBase.rebased`, the
+  producers taking the base as a required argument, and a writer of the base
+  moves the rows in the same draft write (#2460, `ShortcutBaseTests`,
+  `ResetSizesSeedTests`)
 - a temporary Space's shortcuts go when it drops and a held Space's when its
   hold ends, through the one `retireLiveOnlyShortcuts`, a binding another
   arrangement declares staying #92's (#1827, `SpaceShortcutDropTests`)

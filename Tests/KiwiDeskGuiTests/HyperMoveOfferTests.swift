@@ -22,8 +22,11 @@ struct HyperMoveOfferTests {
                 name: KeyLayer.defaultName,
                 bindings: DefaultKeybindings.bindings(
                     spaces: config.spaces,
-                    resizeStep: 50
-                ) + [DefaultKeybindings.desktopRow(1)].compactMap { $0 }
+                    resizeStep: 50,
+                    base: .standard
+                )
+                    + [DefaultKeybindings.desktopRow(1, base: .standard)]
+                    .compactMap { $0 }
             )
         ]
         model.config = config
@@ -45,7 +48,7 @@ struct HyperMoveOfferTests {
         let model = model(key: nil)
         model.config.layers = [KeyLayer(name: KeyLayer.defaultName)]
         #expect(!model.draftUsesHyper)
-        model.config.desktopShortcutBase = .hyper
+        model.config.shortcutBase = .hyper
         #expect(model.draftUsesHyper)
     }
 
@@ -75,9 +78,9 @@ struct HyperMoveOfferTests {
         )
         let rows = model.config.layers[0].bindings
         #expect(rows.first { $0.lua == floating }?.combo == "hyper+f")
-        #expect(model.config.desktopShortcutBase == .hyper)
+        #expect(model.config.shortcutBase == .hyper)
         // Nothing reached the saved file: Save registers it.
-        #expect(model.core.persistedGuiConfig()?.desktopShortcutBase != .hyper)
+        #expect(model.core.persistedGuiConfig()?.shortcutBase != .hyper)
         #expect(model.hyperMoveOffer == nil)
         #expect(model.draftUsesHyper)
     }
@@ -93,7 +96,7 @@ struct HyperMoveOfferTests {
         let back = try #require(model.hyperMoveRequest())
         #expect(Set(back.lines.map(\.id)) == ids)
         model.applyHyperMove(back, items: ids, desktop: true)
-        #expect(model.config.desktopShortcutBase == .standard)
+        #expect(model.config.shortcutBase == .standard)
         #expect(!model.draftUsesHyper)
         #expect(model.hyperMoveOffer == nil)
     }

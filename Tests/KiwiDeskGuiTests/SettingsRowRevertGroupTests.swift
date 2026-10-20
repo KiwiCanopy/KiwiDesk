@@ -128,7 +128,7 @@ struct SettingsRowRevertGroupTests {
         #expect(
             Set(groups) == [
                 .shortcuts(.layers), .shortcuts(.layersIcon),
-                .shortcuts(.desktopShortcutBase),
+                .shortcuts(.shortcutBase),
             ]
         )
     }
