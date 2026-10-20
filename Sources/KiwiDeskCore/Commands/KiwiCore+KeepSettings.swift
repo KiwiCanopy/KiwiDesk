@@ -72,9 +72,7 @@ extension KiwiCore {
             if landed {
                 kept.append(leaf)
             } else {
-                refused.append(
-                    Self.refused(leaf, unwrittenReason(of: leaf))
-                )
+                refused.append(Self.unwritten(leaf))
             }
         }
         return KeepOutcome(kept: kept, refused: refused, reached: reached)
@@ -135,26 +133,8 @@ extension KiwiCore {
         TouchedLeaf(id: leaf.id, owner: leaf.owner, notKeepable: reason)
     }
 
-    /// Whether a newer build wrote the live profile's file (#2490).
-    func liveProfileIsNewer() -> Bool {
-        profiles.currentName
-            .flatMap { try? profiles.fileURL(name: $0) }
-            .flatMap(NewerFormatOnDisk.checkProfile) != nil
-    }
-
-    /// Why `leaf`'s write did not land: a newer build's file
-    /// latching the store it goes to, or a plain failure (#2490).
-    private func unwrittenReason(of leaf: TouchedLeaf) -> NotKeepable {
-        let profileLatched = liveProfileIsNewer()
-        let latched: Bool
-        switch leaf.owner {
-        case .profile: latched = profileLatched
-        case .sharedLook: latched = guiConfigWriteLatch() != nil
-        case .sharedRules:
-            latched = profileLatched || guiConfigWriteLatch() != nil
-        case .initLua, .none: latched = false
-        }
-        return latched ? .newerFormat : .notWritten
+    private static func unwritten(_ leaf: TouchedLeaf) -> TouchedLeaf {
+        refused(leaf, .notWritten)
     }
 
     private func keepAnswer(

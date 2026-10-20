@@ -41,11 +41,8 @@ extension KiwiCore {
             ]
         case .guiConfigUnreadable:
             return ["kind": .string("gui_config_unreadable")]
-        case .newerFormat(let artifact):
-            return [
-                "kind": .string("newer_format"),
-                "file": .string(artifact.fileName ?? "\(artifact)"),
-            ]
+        case .newerFormat:
+            return ["kind": .string("newer_format")]
         case .unknownCall(let name, let suggestion):
             return [
                 "kind": .string("unknown_call"),

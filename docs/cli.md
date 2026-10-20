@@ -451,7 +451,8 @@ for F18 keeps hearing the key. CLI only — Lua cannot call it.
 `get_config_status` returns `{issues, sync}`. Each issue carries
 its `source` file, a `kind` (`profile_broken` with its `cause`,
 `lua_vm_unavailable`, `lua_error` with its `message`,
-`gui_config_unreadable`, `newer_format` with its `file`,
+`gui_config_unreadable`, `newer_format` (its `source` is the
+file a newer KiwiDesk wrote),
 `unknown_call` and `retired_call` with their `name`,
 `missing_font_family` with its `name`) and, where one applies, the
 `profile`. `sync` carries the followed `folder` (`null` when none)

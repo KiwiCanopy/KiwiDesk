@@ -108,9 +108,9 @@ public enum NotKeepable: String, Codable, Sendable, CaseIterable {
     /// leaf kept alone — so a caller holding it asks again.
     public var isLiftable: Bool {
         switch self {
-        case .temporarySpace, .notWritten, .conflicting: return true
-        case .luaOwned, .noProfile, .appWide, .newerFormat, .unknown:
-            return false
+        case .temporarySpace, .notWritten, .newerFormat, .conflicting:
+            return true
+        case .luaOwned, .noProfile, .appWide, .unknown: return false
         }
     }
 }
