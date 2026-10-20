@@ -1542,9 +1542,10 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 - the shelf panel takes the drawn plate or runs, never the strip — the one
   `ShelfOverlay.restingRoom` at rest, a glide's two ends or a slide's room
   while it travels, settled on its landing (#2497, `ShelfPanelRoomTests`,
-  `ShelfPanelRoomMotionTests`) — and a hiding shelf slides whole from its
-  screen side inside a still panel through `BarMotion.playReveal`
-  (`ShelfRevealMotionTests`)
+  `ShelfPanelRoomMotionTests`) — and a shelf revealed onto an edge that
+  draws nothing at rest, by the one `ShelfEdge.drawsNothingAtRest`, slides
+  or grows as the one `reveal_style` says inside a still panel through
+  `BarMotion.playReveal` (`ShelfRevealStyleTests`, `ShelfRevealMotionTests`)
 - a bar joining or leaving a fused shelf never budges its neighbour — on a
   new slot the run, items, box glass and float break snap, the shelf's glide
   the one motion (`AppBarLandingTests`)

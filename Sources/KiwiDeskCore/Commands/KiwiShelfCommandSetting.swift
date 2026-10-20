@@ -26,6 +26,7 @@ enum KiwiShelfCommandSetting {
     case iconSource(BarAppIconSource)
     case dimFactor(CGFloat)
     case revealDuration(Double)
+    case revealStyle(KiwiShelf.RevealStyle)
     case color(WritableKeyPath<KiwiShelf, String>, String)
 
     /// Parses a setter's field (the verb minus `set_`) and args.
@@ -64,6 +65,11 @@ enum KiwiShelfCommandSetting {
         case "order":
             return BarSettingChoice.value(args, KiwiShelf.Order.self)
                 .map(Self.order)
+        case "reveal_style":
+            return BarSettingChoice.value(
+                args,
+                KiwiShelf.RevealStyle.self
+            ).map(Self.revealStyle)
         case "minimum":
             guard let value = args.first?.numberValue,
                 value.isFinite
@@ -170,6 +176,7 @@ enum KiwiShelfCommandSetting {
         switch self {
         case .alignment(let value): shelf.alignment = value
         case .order(let value): shelf.order = value
+        case .revealStyle(let value): shelf.revealStyle = value
         case .minimum(let value):
             shelf.minimum = min(
                 max(value, KiwiShelf.minimumRange.lowerBound),

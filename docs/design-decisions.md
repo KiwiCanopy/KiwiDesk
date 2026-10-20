@@ -14624,16 +14624,26 @@ current Space in its dot; a vertical mark is a dot wide, with no
 room across it for a name. The App line only grows, since the App
 Bar opens a moment later and icons in a 14-point mark would not read.
 
-A reveal slides the whole bar in from the shelf's screen side,
-already laid out — out from under the menu bar where it shows,
-from the screen's edge where it hides — while the mark fades, and
-the retract slides it back out the same way, the mark returning
-as it lands (owner ruling, 2026-10-20). The panel stays still and the content
-travels inside it: moving the window frame lagged on the device,
-the compositor moving it per frame and the glass re-sampling, so
-for the slide's length the panel's room runs out over the outer
-margin and its own edge clips the bar. Reduce Motion cross-fades
-in place.
+A reveal onto an edge that shows nothing else slides the whole bar
+in from the shelf's screen side, already laid out — out from under
+the menu bar where it shows, from the screen's edge where it
+hides — while the mark fades, and the retract slides it back out
+the same way, the mark returning as it lands (owner ruling,
+2026-10-20). Which reveals take that motion is decided by what the
+edge draws at rest, never by the stored value: a Hidden bar shown
+by its shortcut onto an empty edge slides as an Auto one does,
+while one shown beside an Always sibling joins it (#1838), there
+being no edge to come from. One setting, `reveal_style`, picks
+slide or the earlier grow out of the mark for every reveal (owner
+ruling, 2026-10-21): the two read differently and neither is wrong,
+so the user keeps the one they like, and Slide is the default. The
+panel stays still and the content travels inside it: moving the
+window frame lagged on the device, the compositor moving it per
+frame and the glass re-sampling, so for the slide's length the
+panel's room runs out over the outer margin and its own edge clips
+the bar; a grow's clip is placed in the panel's coordinates, so
+its room is the whole strip until it lands. Reduce Motion
+cross-fades in place either way.
 
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing

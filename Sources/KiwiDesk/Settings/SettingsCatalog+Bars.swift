@@ -125,6 +125,10 @@ struct KiwiShelfStyleControls: Sendable {
         "kiwishelf.icon_source.label",
         "App glyph style"
     )
+    let kiwishelfStyleRevealStyle = SettingsControl(
+        "kiwishelf.reveal_style.label",
+        "Reveal"
+    )
 }
 
 /// KiwiShelf ▸ Position ▸ Each bar rows (#1731), in

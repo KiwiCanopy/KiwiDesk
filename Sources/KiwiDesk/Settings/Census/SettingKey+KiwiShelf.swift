@@ -39,6 +39,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case iconSource = "settings.kiwishelf.iconSource"
     case dimFactor = "settings.kiwishelf.dimFactor"
     case revealDuration = "settings.kiwishelf.revealDuration"
+    case revealStyle = "settings.kiwishelf.revealStyle"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
     case itemColor = "settings.kiwishelf.itemColor"
@@ -64,7 +65,7 @@ extension KiwiShelfKey {
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
-            .outerMargin, .innerMargin, .iconSource:
+            .outerMargin, .innerMargin, .iconSource, .revealStyle:
             return .row(.bars, .kiwishelf, .showMore)
         case .backgroundFit:
             return .row(
@@ -239,6 +240,11 @@ extension KiwiShelfKey {
             return .text(
                 "kiwishelf.icon_source.label",
                 help: "kiwishelf.icon_source.help"
+            )
+        case .revealStyle:
+            return .text(
+                "kiwishelf.reveal_style.label",
+                help: "kiwishelf.reveal_style.label.help"
             )
         case .fillColor:
             return .text("kiwishelf.color.fill")

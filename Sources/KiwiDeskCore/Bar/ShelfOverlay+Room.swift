@@ -109,12 +109,20 @@ extension ShelfOverlay {
         }
     }
 
-    /// The room a reveal or a retract slides through.
+    /// The room a reveal or a retract moves through: a slide's run
+    /// out over the margin; a grow's the whole strip, since its clip
+    /// is placed in the panel's coordinates and the room must not
+    /// move under it mid-motion.
     func openSlideRoom() {
         guard let drawn else { return }
-        widenRoom(
-            to: Self.slideRoom(restRoom, edge: drawn.edge, gap: revealGap)
-        )
+        switch drawn.shelf.revealStyle {
+        case .slide:
+            widenRoom(
+                to: Self.slideRoom(restRoom, edge: drawn.edge, gap: revealGap)
+            )
+        case .grow:
+            widenRoom(to: CGRect(origin: .zero, size: drawn.strip.size))
+        }
     }
 
     /// The resting room, unless a glide, a reveal or a leave is

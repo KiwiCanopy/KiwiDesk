@@ -433,9 +433,10 @@ twice, was a question the user answered twice. The argument is
   `animations.shelf_duration`, `BarMotion.shelfGlide` set in
   `updateBars()` (`ShelfGlideSettingsTests`).
 - **A section joining a fused shelf grows out of the section it
-  joins and a leaving one shrinks back into it; a shelf on an
-  edge of its own fades in and out, plate included** (owner
-  ruling, #1838). The fade-out keeps the panel until it lands,
+  joins and a leaving one shrinks back into it; a shelf shown at
+  rest on an edge of its own fades in and out, plate included**
+  (owner ruling, #1838) — a revealed one takes the reveal's motion
+  (below). The fade-out keeps the panel until it lands,
   a show meanwhile fades it back, the shelf reports leaving
   exactly once, and `ShelfManager` retires it only then
   (`ShelfFadeTests`). The Space Bar's front-app segment, joining
@@ -557,21 +558,33 @@ render content into it (#1517). Obligations:
   `revealedPanelTakesThePlate` a pinned reveal through the
   drivers. A piece drawn outside its run's plate ask is clipped
   at rest, and noticing one is review's.
-- **A hiding shelf slides whole from its screen side, and the
-  panel takes no per-frame write for it (#2497)** — its room opens
-  once as the motion starts and settles at the landing; moving the
-  window frame instead lagged on the device. The reveal and the
-  retract travel the content through `BarMotion.playReveal`, an
-  ADDITIVE position slide from `BarMotion.revealOffset` — the
-  strip's depth plus the outer margin, so it starts wholly clipped
-  at the usable area's edge — and a slide taken back continues
-  from `BarMotion.revealShift`, read before that pass moves the
-  room. A leave that is no slide ends the reveal's motion with its
-  token (`cutReveal`). The mark fades out as the slide starts and
-  back as the retract lands (`BarMotion.markFade`), and Reduce
-  Motion cross-fades in place. `ShelfRevealMotionTests` holds the
-  decisions, `ShelfRevealSlideEdgeTests` the direction on every
-  edge as drawn, `ShelfRevealStartTests` the start order.
+- **A revealed shelf takes the reveal's motion only onto an edge
+  that draws nothing at rest, decided by the one
+  `ShelfEdge.drawsNothingAtRest`, never by the stored value** —
+  Hidden as well as Auto, while a bar shown beside an Always
+  sibling joins it (`ShelfRevealStyleTests` ▸ `emptyEdgeDecides`,
+  `ShelfRevealStyleTests` ▸ `hiddenSlidesThroughTheDrivers`).
+- **The motion is the shelf's one `reveal_style` — slide or grow —
+  and the panel takes no per-frame write for either (#2497)**: its
+  room opens once as the motion starts and settles at the landing;
+  moving the window frame instead lagged on the device. Both play
+  in the one `BarMotion.playReveal`, its decision the pure
+  `BarMotion.revealMotion` over a `RevealPath`. A slide travels
+  the content by an ADDITIVE position animation from
+  `BarMotion.revealOffset` — the strip's depth plus the outer
+  margin, so it starts wholly clipped at the usable area's edge —
+  and one taken back continues from `BarMotion.revealShift`, read
+  before that pass moves the room. A grow clips the content's own
+  layer from the mark to the plate (`ShelfGrow`), placed in the
+  panel's coordinates, so its room is the whole strip until it
+  lands. A leave that is no reveal ends the reveal's motion with
+  its token (`cutReveal`). The mark keeps time with the motion
+  through `BarMotion.markFade` and its `RevealKind`, and Reduce
+  Motion cross-fades in place either way. `ShelfRevealMotionTests`
+  and `ShelfRevealGrowTests` hold the decisions,
+  `ShelfRevealSlideEdgeTests` the slide's direction on every edge
+  as drawn, `ShelfRevealStartTests` the start order, and
+  `ShelfRevealSwapTests` the accepted swap's end state (#2500).
 - **Centre the live shelf's section divider between what the two
   sections DRAW, never on the slot gutter (#1779)**: each bar insets its
   run and its items' content by its own amounts, so the gutter

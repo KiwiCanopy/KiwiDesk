@@ -6,26 +6,60 @@ import QuartzCore
 /// to its shelf. The same one home — `BarMotionSeamTests`
 /// censuses this file.
 extension BarMotion {
+    /// How a shelf's reveal plays, as far as its mark keeps time
+    /// with it: the user's `reveal_style`, a grow on a shelf with no
+    /// plate cross-fading (#2497).
+    enum RevealKind: Equatable {
+        case slide, grow, fade
+
+        init(_ shelf: KiwiShelf) {
+            switch shelf.revealStyle {
+            case .slide: self = .slide
+            case .grow: self = shelf.drawsPlate ? .grow : .fade
+            }
+        }
+    }
+
     /// When the mark's plate and dots fade, and for how long, as
     /// their shelf reveals over them (`showing` false) or retracts
-    /// (`showing`): out as the slide starts, back over the end of
-    /// the retract so it lands with it; a cross-fade with the shelf
-    /// under Reduce Motion.
+    /// (`showing`): out as the motion starts — under a growing
+    /// plate, half its growth — and back over the end of the
+    /// retract so it lands with it; a cross-fade with the shelf
+    /// where it only fades.
     static func markFade(
         showing: Bool,
+        reveal: RevealKind,
         reduceMotion: Bool
     ) -> (delay: TimeInterval, length: TimeInterval) {
         guard !reduceMotion else { return (0, revealFade) }
-        guard showing else { return (0, revealFade) }
-        return (revealSlide - markReturn, markReturn)
+        switch reveal {
+        case .fade: return (0, revealFade)
+        case .slide:
+            guard showing else { return (0, revealFade) }
+            return (revealSlide - markReturn, markReturn)
+        case .grow:
+            guard showing else { return (0, ShelfGrow.plateGrow / 2) }
+            return (
+                ShelfGrow.itemsFadeOut + ShelfGrow.plateShrink - markReturn,
+                markReturn
+            )
+        }
     }
 
     /// Fades the mark's `body` in (`showing`) or out as its shelf
     /// retracts or reveals; a fade already playing continues from
     /// where it stands.
     @MainActor
-    static func fadeMark(_ body: NSView, showing: Bool) {
-        let timing = markFade(showing: showing, reduceMotion: isReduced)
+    static func fadeMark(
+        _ body: NSView,
+        showing: Bool,
+        reveal: RevealKind
+    ) {
+        let timing = markFade(
+            showing: showing,
+            reveal: reveal,
+            reduceMotion: isReduced
+        )
         body.wantsLayer = true
         let from =
             body.layer?.animationKeys()?.contains(revealKey) == true

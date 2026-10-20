@@ -138,6 +138,15 @@ enum AppBarOptions {
         ]
     }
 
+    /// How a revealed bar comes onto its edge (#2497).
+    @MainActor
+    static var revealStyle: [(KiwiShelf.RevealStyle, String)] {
+        [
+            (.slide, L("kiwishelf.reveal_style.slide", "Slide")),
+            (.grow, L("kiwishelf.reveal_style.grow", "Grow")),
+        ]
+    }
+
     /// The shelf's bar order while both show (#1517).
     @MainActor
     static var order: [(KiwiShelf.Order, String)] {

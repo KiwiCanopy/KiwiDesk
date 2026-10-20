@@ -40,6 +40,8 @@ struct ShelfIndicatorSpec: Equatable {
     /// The pointer rests in the band, the reveal delay running:
     /// the plate grows and takes the highlight's border.
     let hovered: Bool
+    /// How its shelf reveals, which the mark's fade keeps time with.
+    var reveal: BarMotion.RevealKind = .slide
     /// The hover rim's width: the bars' indicator weight, capped
     /// at the plate's growth so the dots keep their room.
     var rimWidth: CGFloat = hoverGrowth

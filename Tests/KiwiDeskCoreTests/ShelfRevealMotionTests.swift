@@ -41,6 +41,11 @@ struct ShelfRevealMotionTests {
         )
     }
 
+    /// A slide along `offset`.
+    private func slide(_ offset: CGVector) -> BarMotion.RevealPath {
+        BarMotion.RevealPath(style: .slide, offset: offset)
+    }
+
     @Test("A reveal slides from past the screen side, by edge")
     func revealSlidesFromTheEdge() {
         let depth: CGFloat = 40
@@ -59,8 +64,11 @@ struct ShelfRevealMotionTests {
             )
             #expect(found == offset)
             #expect(
-                BarMotion.revealMotion(reduceMotion: false, offset: found)
-                    == .slide(offset: offset, length: BarMotion.revealSlide)
+                BarMotion.revealMotion(
+                    reduceMotion: false,
+                    entering: true,
+                    path: slide(found)
+                ) == .slide(offset: offset, length: BarMotion.revealSlide)
             )
         }
     }
@@ -68,27 +76,49 @@ struct ShelfRevealMotionTests {
     @Test("Reduce Motion, or nothing to travel, cross-fades in place")
     func reducedFades() {
         let offset = CGVector(dx: 0, dy: -46)
+        for path in [slide(offset), .init(style: .grow, plate: Self.mark)] {
+            #expect(
+                BarMotion.revealMotion(
+                    reduceMotion: true,
+                    entering: true,
+                    path: path
+                ) == .fade(BarMotion.revealFade)
+            )
+        }
         #expect(
-            BarMotion.revealMotion(reduceMotion: true, offset: offset)
-                == .fade(BarMotion.revealFade)
-        )
-        #expect(
-            BarMotion.revealMotion(reduceMotion: false, offset: .zero)
-                == .fade(BarMotion.revealFade)
+            BarMotion.revealMotion(
+                reduceMotion: false,
+                entering: true,
+                path: slide(.zero)
+            ) == .fade(BarMotion.revealFade)
         )
     }
 
     @Test("The mark fades as the slide starts and lands with the retract")
-    func markFadeFollowsTheShelf() {
-        let back = BarMotion.markFade(showing: true, reduceMotion: false)
+    func markFadeFollowsTheSlide() {
+        let back = BarMotion.markFade(
+            showing: true,
+            reveal: .slide,
+            reduceMotion: false
+        )
         #expect(back.delay > 0)
         #expect(abs(back.delay + back.length - BarMotion.revealSlide) < 1e-9)
-        let out = BarMotion.markFade(showing: false, reduceMotion: false)
+        let out = BarMotion.markFade(
+            showing: false,
+            reveal: .slide,
+            reduceMotion: false
+        )
         #expect(out.delay == 0)
-        for showing in [true, false] {
-            let fade = BarMotion.markFade(showing: showing, reduceMotion: true)
-            #expect(fade.delay == 0)
-            #expect(fade.length == BarMotion.revealFade)
+        for kind in [BarMotion.RevealKind.slide, .grow, .fade] {
+            for showing in [true, false] {
+                let fade = BarMotion.markFade(
+                    showing: showing,
+                    reveal: kind,
+                    reduceMotion: true
+                )
+                #expect(fade.delay == 0)
+                #expect(fade.length == BarMotion.revealFade)
+            }
         }
     }
 

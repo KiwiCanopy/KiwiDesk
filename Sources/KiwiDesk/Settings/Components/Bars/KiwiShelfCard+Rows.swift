@@ -117,6 +117,8 @@ extension KiwiShelfCard {
             )
         case .iconSource:
             iconSourceRow
+        case .revealStyle:
+            revealStyleRow
         case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealDuration,
             .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
@@ -159,6 +161,28 @@ extension KiwiShelfCard {
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfStyle.children
                 .kiwishelfStyleIconSource
+        )
+    }
+
+    /// How an Auto or Hidden bar comes onto its empty edge (#2497).
+    private var revealStyleRow: some View {
+        SegmentedPicker(
+            L("kiwishelf.reveal_style.label", "Reveal"),
+            selection: shelf.revealStyle,
+            options: AppBarOptions.revealStyle.map { ($0.1, $0.0) },
+            help: L(
+                "kiwishelf.reveal_style.label.help",
+                "How a hidden bar appears: \u{201C}%1$@\u{201D} brings "
+                    + "the whole bar in from the screen edge; "
+                    + "\u{201C}%2$@\u{201D} grows it out of its mark. "
+                    + "With Reduce Motion on, both fade.",
+                L("kiwishelf.reveal_style.slide", "Slide"),
+                L("kiwishelf.reveal_style.grow", "Grow")
+            )
+        )
+        .searchAnchored(
+            SettingsCatalog.bars.kiwishelfStyle.children
+                .kiwishelfStyleRevealStyle
         )
     }
 

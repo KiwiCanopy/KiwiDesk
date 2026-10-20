@@ -23,9 +23,10 @@ final class ShelfManager {
         let app: AppBarOverlay?
         /// Set while the shelf is full, so the divider drags.
         var divider: ShelfArrangement.Divider? = nil
-        /// A hiding shelf, which slides in from its screen side
-        /// (#761, #2497).
+        /// A shelf revealed onto an empty edge (#761, #2497), and
+        /// the mark a grow reveal grows out of, AX coordinates.
         var slides = false
+        var mark: CGRect? = nil
     }
 
     /// A Space Bar minimum the divider reached (`committed` on
@@ -181,6 +182,7 @@ final class ShelfManager {
         #endif
         overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.slides = shelf.slides
+        overlay.setRevealOrigin(mark: shelf.mark, strip: shelf.strip)
         overlay.onPress = { [weak self, weak overlay] in
             // A right-click opens the shelf's menu on its panel.
             if $1 == .rightMouseDown {

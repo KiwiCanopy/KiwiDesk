@@ -53,6 +53,13 @@ final class ShelfOverlay {
     var leavingSlides = false
     /// The reveal in flight, whose landing alone ends its motion.
     var revealing: UUID?
+    /// A hiding shelf's mark in the content's coordinates, which a
+    /// grow reveal grows out of (#761); set by `ShelfManager`.
+    var revealOrigin: CGRect?
+    /// The plate a grow reaches, in the content's coordinates, with
+    /// its corner radius; nil where the shelf draws none, which
+    /// cross-fades instead (#761). Set by each show.
+    var revealPlate: (frame: CGRect, radius: CGFloat)?
     /// Lands a reveal or a retract after its length — the reveal's
     /// own timer; a test hands a queue it drains by hand.
     var afterReveal: (TimeInterval, @escaping @MainActor () -> Void) -> Void =
@@ -179,6 +186,7 @@ final class ShelfOverlay {
             shelf: shelf
         )
         let radius = shelf.resolvedCornerRadius(forThickness: depth)
+        revealPlate = shelf.drawsPlate ? plate.map { ($0, radius) } : nil
         restRoom = Self.restingRoom(
             plate: plate,
             sections: sections,

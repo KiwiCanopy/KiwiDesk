@@ -1,23 +1,55 @@
 import AppKit
 
-/// A hiding shelf's reveal and retract (#761, #2497): the whole
-/// shelf slides in from its screen side, laid out, and back out,
-/// through `BarMotion.playReveal`, each taking over from where the
-/// other stands, the panel ordered out only once the retract lands.
-/// The panel stays still and the content slides inside its room.
+/// A revealed shelf's reveal and retract (#761, #2497): the whole
+/// shelf slides in from its screen side, laid out, or grows out of
+/// its mark — the shelf's `reveal_style` — and back, through
+/// `BarMotion.playReveal`, each taking over from where the other
+/// stands, the panel ordered out only once the retract lands. The
+/// panel stays still and the content moves inside its room.
 extension ShelfOverlay {
-    /// Where the content starts a slide from, in its own
-    /// coordinates: past the strip's screen side and the margin to
-    /// the usable area's edge. Zero before a show, which fades.
-    var revealOffset: CGVector {
-        guard let drawn else { return .zero }
+    /// Where the hidden mark sits in the content, from its frame
+    /// and the shelf's strip, both AX coordinates.
+    func setRevealOrigin(mark: CGRect?, strip: CGRect) {
+        guard let mark else {
+            revealOrigin = nil
+            return
+        }
+        let local = mark.offsetBy(dx: -strip.minX, dy: -strip.minY)
+        revealOrigin =
+            content.isFlipped
+            ? local
+            : CGRect(
+                x: local.minX,
+                y: strip.height - local.maxY,
+                width: local.width,
+                height: local.height
+            )
+    }
+
+    /// What the reveal plays along: the shelf's `reveal_style`, the
+    /// slide's start past the strip's screen side and the margin to
+    /// the usable area's edge, the grow's mark and plate. A shelf
+    /// not yet shown slides nowhere, which fades.
+    var revealPath: BarMotion.RevealPath {
+        guard let drawn else { return .init(style: .slide) }
         let strip = drawn.strip
-        return BarMotion.revealOffset(
-            edge: drawn.edge,
-            depth: drawn.edge.isHorizontal ? strip.height : strip.width,
-            gap: revealGap
+        return BarMotion.RevealPath(
+            style: drawn.shelf.revealStyle,
+            offset: BarMotion.revealOffset(
+                edge: drawn.edge,
+                depth: drawn.edge.isHorizontal ? strip.height : strip.width,
+                gap: revealGap
+            ),
+            origin: revealOrigin
+                ?? CGRect(x: content.bounds.midX, y: 0, width: 0, height: 0),
+            plate: revealPlate?.frame,
+            plateRadius: revealPlate?.radius ?? 0
         )
     }
+
+    /// Where the content starts a slide from, in its own
+    /// coordinates; zero before a show.
+    var revealOffset: CGVector { revealPath.offset }
 
     /// The strip's distance to the usable area's edge — the outer
     /// margin — which the slide crosses and its room covers.
@@ -27,7 +59,7 @@ extension ShelfOverlay {
     /// so its motion and its token end here.
     func cutReveal() {
         revealing = nil
-        BarMotion.endReveal(content)
+        BarMotion.endReveal(content, items: stripView)
     }
 
     /// Slides the content in; a retract in flight is taken back
@@ -54,7 +86,8 @@ extension ShelfOverlay {
         }
         BarMotion.playReveal(
             content,
-            offset: revealOffset,
+            items: stripView,
+            path: revealPath,
             entering: true,
             from: from,
             held: true
@@ -69,7 +102,8 @@ extension ShelfOverlay {
     private func start(lead: Bool, from: CGPoint? = nil) -> TimeInterval {
         BarMotion.playReveal(
             content,
-            offset: revealOffset,
+            items: stripView,
+            path: revealPath,
             entering: true,
             from: from,
             lead: lead
@@ -84,7 +118,7 @@ extension ShelfOverlay {
             guard let self, self.revealing == token, self.leaving == nil
             else { return }
             self.revealing = nil
-            BarMotion.endReveal(self.content)
+            BarMotion.endReveal(self.content, items: self.stripView)
             self.settleRoom()
         }
     }
@@ -108,7 +142,8 @@ extension ShelfOverlay {
         openSlideRoom()
         let span = BarMotion.playReveal(
             content,
-            offset: revealOffset,
+            items: stripView,
+            path: revealPath,
             entering: false,
             from: from
         )
@@ -117,7 +152,7 @@ extension ShelfOverlay {
             self.leaving = nil
             self.leavingSlides = false
             self.panel?.orderOut(nil)
-            BarMotion.endReveal(self.content)
+            BarMotion.endReveal(self.content, items: self.stripView)
             self.onLeft()
         }
         return true

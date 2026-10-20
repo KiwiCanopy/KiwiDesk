@@ -60,7 +60,11 @@ final class ShelfIndicatorView: NSView {
         // The mark gives way to the shelf it reveals and comes
         // back as the shelf's retract lands.
         if let was, was.standsAside != spec.standsAside, animated {
-            BarMotion.fadeMark(body, showing: !spec.standsAside)
+            BarMotion.fadeMark(
+                body,
+                showing: !spec.standsAside,
+                reveal: spec.reveal
+            )
         } else if was?.standsAside != spec.standsAside || !animated {
             body.alphaValue = spec.standsAside ? 0 : 1
         }
