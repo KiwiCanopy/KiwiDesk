@@ -57,15 +57,31 @@ public enum ShortcutBaseSwitch {
         return KeyCombo.parse(new) == target
     }
 
+    /// `layer` with its rows moved onto `base`, `staying` rows left
+    /// where they are and holding their chords — the shared keymap's
+    /// move, which leaves the rows a page kept (#2460).
+    public static func moved(
+        _ layer: KeyLayer,
+        onto base: ShortcutBase,
+        staying: (KeyBinding) -> Bool
+    ) -> KeyLayer {
+        var layer = layer
+        layer.bindings = moved(layer, onto: base, staying: staying).rows
+        return layer
+    }
+
     private static func moved(
         _ layer: KeyLayer,
-        onto base: ShortcutBase
+        onto base: ShortcutBase,
+        staying: (KeyBinding) -> Bool = { _ in false }
     ) -> (rows: [KeyBinding], kept: [Kept]) {
         let rows = layer.bindings
-        let targets: [KeyCombo?] = rows.map {
-            KeyCombo.parse($0.combo).flatMap {
-                ShortcutBase.moved($0, to: base)
-            }
+        let targets: [KeyCombo?] = rows.map { row in
+            staying(row)
+                ? nil
+                : KeyCombo.parse(row.combo).flatMap {
+                    ShortcutBase.moved($0, to: base)
+                }
         }
         var out = rows
         var kept: [Kept] = []

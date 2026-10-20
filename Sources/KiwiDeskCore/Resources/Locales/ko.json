@@ -1762,7 +1762,6 @@
   "shortcuts.base.help": "✦를 선택하면 KiwiDesk의 단축키를 Hyper 키로 옮깁니다. 직접 다른 키에 지정한 단축키는 지정한 그대로 남고, ✦ 키를 다른 단축키가 이미 사용 중인 단축키는 ⌃⌥에 남습니다.",
   "shortcuts.base.key_off": "Hyper가 꺼져 있어 ✦가 포함된 단축키는 흐리게 표시되며 작동하지 않습니다. Hyper 키를 다시 기록하거나 ⌃⌥를 선택하십시오.",
   "shortcuts.base.left": "⌃⌥에 남은 단축키: %1$d",
-  "shortcuts.base.left.left_out": "%1$@(%2$@): 이 프로필에서 제외함",
   "shortcuts.base.left.own": "%1$@(%2$@): 직접 지정한 단축키",
   "shortcuts.base.left.predates": "%1$@(%2$@): 이번 업데이트 이전부터 있던 단축키",
   "shortcuts.base.left.profile": "%1$@(%2$@): ‘%3$@’에서 따로 지정함",

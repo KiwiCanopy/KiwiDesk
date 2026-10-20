@@ -123,7 +123,12 @@ because two real clients now remove drift — see
   of the draft's layers while the base changed reads the switch's
   rows through `ShortcutBaseSwitch` — replayed on the old side, or
   `explains` for a reach row — so they stay its one change
-  (`ShortcutBaseReachTests`). The Desktop tier's `✦⌥` + digit is
+  (`ShortcutBaseReachTests`). A move of the shared rows moves every
+  profile's tombstone naming one with it, through the one
+  `RuleReachSnapshot.moveShortcutBase` the layer pass lays ahead of
+  the row encode, or a row a profile left out comes back there
+  (`ShortcutBaseReachTests` ▸ `leftOutRowMovesWithItsTombstone`,
+  `KeyLayerOverrideFollowTests`). The Desktop tier's `✦⌥` + digit is
   argued in `docs/design-decisions.md` ▸ *One switch puts
   KiwiDesk's shortcuts on `⌃⌥` or on `✦`* (`ShortcutBaseTests` ▸
   `desktopTier`).

@@ -1764,7 +1764,6 @@
   "shortcuts.base.help": "Choisissez ✦ pour placer les raccourcis de KiwiDesk sur la touche Hyper. Un raccourci que vous avez placé vous-même sur une autre touche reste où vous l'avez mis, et celui dont la touche ✦ est déjà prise par un autre raccourci reste sur ⌃⌥.",
   "shortcuts.base.key_off": "Hyper est désactivé : les raccourcis avec ✦ sont grisés et ne fonctionnent pas. Enregistrez à nouveau une touche Hyper ou choisissez ⌃⌥.",
   "shortcuts.base.left": "Encore sur ⌃⌥ : %1$d",
-  "shortcuts.base.left.left_out": "%1$@ (%2$@) : ce profil l'omet",
   "shortcuts.base.left.own": "%1$@ (%2$@) : défini par vous",
   "shortcuts.base.left.predates": "%1$@ (%2$@) : antérieur à cette mise à jour",
   "shortcuts.base.left.profile": "%1$@ (%2$@) : « %3$@ » définit le sien",

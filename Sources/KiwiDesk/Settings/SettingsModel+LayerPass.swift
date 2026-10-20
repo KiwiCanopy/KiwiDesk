@@ -11,7 +11,8 @@ extension SettingsModel {
         let key = LayeredReachCache.Key(
             edits: reachEdits,
             page: config.layers,
-            profile: reachProfile
+            profile: reachProfile,
+            switchedBase: switchedShortcutBase
         )
         if let cache = layeredCache, cache.key == key { return cache.value }
         let value = layeredReach(reachEdits)
@@ -29,9 +30,10 @@ extension SettingsModel {
     /// without one of the draft's picks.
     func layeredReach(_ edits: RuleReachEdits) -> RuleReachSnapshot? {
         guard let stored = ruleReachStored else { return nil }
+        let switched = switchedShortcutBase
         guard
             !edits.layers.isEmpty || !edits.deletedLayers.isEmpty
-                || edits.lenses != nil
+                || edits.lenses != nil || switched != nil
         else {
             return stored
         }
@@ -42,22 +44,51 @@ extension SettingsModel {
             if let lenses = edits.lenses {
                 try lensPass(&snapshot, lenses)
             }
-            guard let editing = reachProfile else { return snapshot }
-            try deletePass(&snapshot, edits, editing: editing)
-            try renamePass(&snapshot, edits)
-            for (page, edit) in edits.layers.sorted(by: { $0.key < $1.key }) {
-                guard let members = edit.members,
-                    let content = config.layers.first(where: {
-                        $0.name == page
-                    })
-                else { continue }
-                try membershipPass(&snapshot, content, members, editing)
+            if let editing = reachProfile {
+                try deletePass(&snapshot, edits, editing: editing)
+                try renamePass(&snapshot, edits)
+                for (page, edit) in edits.layers.sorted(by: {
+                    $0.key < $1.key
+                }) {
+                    guard let members = edit.members,
+                        let content = config.layers.first(where: {
+                            $0.name == page
+                        })
+                    else { continue }
+                    try membershipPass(&snapshot, content, members, editing)
+                }
             }
+            if let switched { try basePass(&snapshot, onto: switched) }
         } catch {
             assertionFailure("layer pass after a row encode: \(error)")
             return stored
         }
         return snapshot
+    }
+
+    /// The base the draft switched the shortcuts onto, nil while it
+    /// keeps the stored one (#2460).
+    var switchedShortcutBase: ShortcutBase? {
+        config.shortcutBase == cleanConfig.shortcutBase
+            ? nil : config.shortcutBase
+    }
+
+    /// The switch over the files, after the layer edits so it reads
+    /// the page's layer names: every shared row moves but one the
+    /// page kept on its old chord, and the tombstones follow.
+    private func basePass(
+        _ snapshot: inout RuleReachSnapshot,
+        onto base: ShortcutBase
+    ) throws {
+        let page = config.layers
+        try snapshot.moveShortcutBase(onto: base) { layer, row in
+            page.contains { held in
+                held.name == layer
+                    && held.bindings.contains {
+                        $0.lua == row.lua && $0.combo == row.combo
+                    }
+            }
+        }
     }
 
     /// A delete reaches the edited profile, or every file holding
@@ -174,6 +205,7 @@ struct LayeredReachCache {
         let edits: RuleReachEdits
         let page: [KeyLayer]
         let profile: String?
+        let switchedBase: ShortcutBase?
     }
 
     let key: Key
@@ -197,6 +229,7 @@ struct EncodedReachCache {
         let floatAutomatically: Bool
         let profile: String?
         let isLoaded: Bool
+        let switchedBase: ShortcutBase?
     }
 
     let key: Key

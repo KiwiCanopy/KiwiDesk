@@ -6,9 +6,9 @@ import Testing
 
 /// The switch on a page other profiles share (#2460): the moved
 /// shared rows reach every profile that inherits them yet read as
-/// the switch's one row, the shared base Save writes is moved, and
-/// the rows it cannot reach are listed — another profile's own, and
-/// a shared row the page's profile leaves out.
+/// the switch's one row, the shared base Save writes is moved with
+/// every profile's tombstone, and the rows it cannot reach — another
+/// profile's own — are listed.
 @Suite("Shortcut base switch across profiles (#2460)", .serialized)
 @MainActor
 struct ShortcutBaseReachTests {
@@ -107,26 +107,115 @@ struct ShortcutBaseReachTests {
         #expect(reasons == [.profile("Home")])
     }
 
-    @Test("a shared row the page's profile leaves out is listed")
-    func leftOutRowIsListed() throws {
+    /// `name`'s resolved default layer, read back from the files.
+    private func savedDefault(
+        _ model: SettingsModel,
+        _ name: String
+    ) throws -> [KeyBinding] {
+        let base = try #require(model.core.guiConfigStore.load()).layers
+        let profile = try model.core.profiles.read(name: name)
+        let layers = profile.layers?.resolved(onto: base) ?? base
+        return layers.first { $0.name == KeyLayer.defaultName }?.bindings
+            ?? []
+    }
+
+    /// The owner's ruling (2026-10-20): a row a profile leaves out
+    /// moves with the rest, and its tombstone with it, so it stays
+    /// out there and reaches every other profile on `✦`.
+    @Test("a row the page's profile leaves out moves, still left out")
+    func leftOutRowMovesWithItsTombstone() throws {
         let leaves = KeyLayerOverride(
             removed: [KeyLayer.defaultName: ["control+option+s"]]
         )
         let model = try model(overrides: ["Work": leaves])
         model.setShortcutBase(.hyper)
-        let left = model.rowsLeftOnStandard
-        #expect(left.map(\.reason) == [.leftOutHere])
-        #expect(left.first?.row.lua == sticky)
+        #expect(model.rowsLeftOnStandard.isEmpty)
+        #expect(model.saveRuleReach() == .landed)
+        #expect(
+            try savedDefault(model, "Work").map(\.combo) == ["hyper+f"]
+        )
+        #expect(
+            try savedDefault(model, "Home").map(\.combo)
+                == ["hyper+f", "hyper+s"]
+        )
+        #expect(
+            try model.core.profiles.read(name: "Work").layers?.removed
+                == [KeyLayer.defaultName: ["hyper+s"]]
+        )
     }
 
-    @Test("a shared layer the page's profile leaves out is listed")
-    func leftOutLayerIsListed() throws {
+    /// Another profile's tombstone follows a row the page shows.
+    @Test("another profile's left-out row stays out there")
+    func otherProfileTombstoneFollows() throws {
+        let leaves = KeyLayerOverride(
+            removed: [KeyLayer.defaultName: ["control+option+f"]]
+        )
+        let model = try model(overrides: ["Home": leaves])
+        model.setShortcutBase(.hyper)
+        #expect(model.saveRuleReach() == .landed)
+        #expect(
+            try savedDefault(model, "Home").map(\.lua) == [sticky]
+        )
+        #expect(
+            try savedDefault(model, "Away").map(\.combo)
+                == ["hyper+f", "hyper+s"]
+        )
+    }
+
+    /// A profile that rebound a shared row's chord to its own action
+    /// went without that row; it still does once the row moves.
+    @Test("a profile's own row on a moved chord keeps the row out")
+    func replacedRowStaysOut() throws {
+        let rebinds = KeyLayerOverride(
+            layers: [
+                KeyLayer(
+                    name: KeyLayer.defaultName,
+                    bindings: [row("control+option+f", "hs.x()")]
+                )
+            ]
+        )
+        let model = try model(overrides: ["Home": rebinds])
+        model.setShortcutBase(.hyper)
+        #expect(model.saveRuleReach() == .landed)
+        let home = try savedDefault(model, "Home")
+        #expect(!home.contains { $0.lua == floating })
+        #expect(home.contains { $0.combo == "control+option+f" })
+    }
+
+    /// A whole layer left out is a mark on the layer's name, which
+    /// the move leaves alone: the layer moves for everyone else.
+    @Test("a shared layer the page's profile leaves out moves")
+    func leftOutLayerMoves() throws {
         let leaves = KeyLayerOverride(leftOut: ["work"])
         let model = try model(overrides: ["Work": leaves])
         model.setShortcutBase(.hyper)
-        let left = model.rowsLeftOnStandard
-        #expect(left.map(\.reason) == [.leftOutHere])
-        #expect(left.first?.row.lua == "w()")
+        #expect(model.rowsLeftOnStandard.isEmpty)
+        #expect(model.saveRuleReach() == .landed)
+        let base = try #require(model.core.guiConfigStore.load()).layers
+        #expect(
+            base.first { $0.name == "work" }?.bindings.map(\.combo)
+                == ["hyper+w"]
+        )
+        #expect(
+            try model.core.profiles.read(name: "Work").layers?.leftOut
+                == ["work"]
+        )
+    }
+
+    /// The tombstones the switch moved narrate as its one row.
+    @Test("the pill reads one row when tombstones move")
+    func pillHasOneRowWithTombstones() throws {
+        LocalizationManager.shared.select("en")
+        let leaves = KeyLayerOverride(
+            removed: [KeyLayer.defaultName: ["control+option+s"]]
+        )
+        let model = try model(overrides: ["Work": leaves, "Home": leaves])
+        model.setShortcutBase(.hyper)
+        let rows = SettingsDiffRowSource.rows(for: model)
+        #expect(
+            rows.filter { $0.key == .shortcuts(.shortcutBase) }.count == 1
+        )
+        #expect(!rows.contains { $0.key == .shortcuts(.layers) })
     }
 
     /// The draft's own edits are in the base Save writes: a layer

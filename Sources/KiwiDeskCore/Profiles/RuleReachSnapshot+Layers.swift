@@ -22,9 +22,7 @@ extension RuleReachSnapshot {
         _ transforms: [String: ([KeyLayer]) -> [KeyLayer]],
         base: (([KeyLayer]) -> [KeyLayer])? = nil
     ) throws {
-        guard keyLayers.baseTouched.isEmpty,
-            keyLayers.touched.values.allSatisfy(\.isEmpty)
-        else { throw LayerPassError.afterRowEncode }
+        try refuseAfterRowEncode()
         let profiles = keyLayers.profiles
         var before: [String: [KeyLayer]] = [:]
         for profile in profiles {
@@ -57,6 +55,20 @@ extension RuleReachSnapshot {
                 edited: old
             )
         }
+        rebuildKeyTable()
+    }
+
+    /// Refuses a structural pass once the key table holds row edits.
+    func refuseAfterRowEncode() throws {
+        guard keyLayers.baseTouched.isEmpty,
+            keyLayers.touched.values.allSatisfy(\.isEmpty)
+        else { throw LayerPassError.afterRowEncode }
+    }
+
+    /// Rebuilds the key table and its templates from the layered
+    /// base and overrides, after a pass rewrote them.
+    mutating func rebuildKeyTable() {
+        let profiles = keyLayers.profiles
         keyLayers = .keyLayers(
             base: storedKeyBase,
             overrides: profiles.map { ($0, storedKeyOverrides[$0]) }
