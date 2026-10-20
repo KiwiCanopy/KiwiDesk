@@ -899,7 +899,10 @@ const jsonLd = [
     {/* ============ Voices (both modes) ============
          People only — the star count lives in the heroes. Quotes
          stay English on every locale, and carry no quote marks:
-         the card's own mark and <blockquote> already say it. */}
+         the card's own mark and <blockquote> already say it. The
+         list comes from Sanity at build time (#2369); a failed
+         read draws no section rather than an empty one. */}
+    {voices.length > 0 && (
     <section id="voices" aria-labelledby="voicesTitle">
       <div class="wrap">
         <div class="section-head reveal">
@@ -922,7 +925,8 @@ const jsonLd = [
                 <figcaption>
                   {v.avatar ? (
                     <Image class="voice__avatar" src={v.avatar}
-                      alt="" width={88} height={88} />
+                      alt="" width={88} height={88}
+                      densities={[1, 2]} />
                   ) : (
                     <span class="voice__mono" aria-hidden="true">
                       {monogram(v.name)}
@@ -958,6 +962,7 @@ const jsonLd = [
         </div>
       </div>
     </section>
+    )}
 
     {/* ============ How it works (Simple only) ============ */}
     {isSimple && (
