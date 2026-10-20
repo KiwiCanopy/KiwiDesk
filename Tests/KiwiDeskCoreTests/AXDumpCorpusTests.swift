@@ -146,6 +146,25 @@ struct AXDumpCorpusTests {
         }
     }
 
+    /// A dump has no element identity, so it cannot leave the
+    /// title element out the way the live read does (#2346).
+    @Test("a recorded title element leaves the children undecided")
+    func titleElementUndecides() throws {
+        func dump(_ body: String) throws -> AXDump {
+            try AXDump(name: "fixture", data: Data(body.utf8))
+        }
+        let bare = try dump(#"{"AXChildren": ["a", "b"]}"#)
+        #expect(bare.childCount == 2)
+        let nulled = try dump(
+            #"{"AXChildren": ["a"], "AXTitleUIElement": null}"#
+        )
+        #expect(nulled.childCount == 1)
+        let titled = try dump(
+            #"{"AXChildren": ["a"], "AXTitleUIElement": "t"}"#
+        )
+        #expect(titled.childCount == nil)
+    }
+
     @Test("the MIT notice and the pinned commit sit beside the data")
     func noticeBesideTheData() throws {
         let license = try String(

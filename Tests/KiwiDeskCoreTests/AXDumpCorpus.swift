@@ -12,6 +12,7 @@ struct AXDump {
     /// never one of its classifications.
     static let readKeys: Set<String> = [
         "AXRole", "AXSubrole", "AXTitle", "AXChildren",
+        "AXTitleUIElement",
         "AXCloseButton", "AXMinimizeButton", "AXZoomButton",
         "AXFullScreenButton", "Aero.App.appBundleId",
         "Aero.App.nsApp.activationPolicy", "Aero.windowLevel",
@@ -98,8 +99,16 @@ struct AXDump {
     }
 
     /// AeroSpace skips `AXChildren`, so this is nil throughout
-    /// the pinned corpus.
-    var childCount: Int? { (values["AXChildren"] as? [Any])?.count }
+    /// the pinned corpus. Nil too beside a recorded
+    /// `AXTitleUIElement`: live reads leave that child out by
+    /// element identity (#2346), which a dump cannot replay.
+    var childCount: Int? {
+        guard
+            values["AXTitleUIElement"] == nil
+                || values["AXTitleUIElement"] is NSNull
+        else { return nil }
+        return (values["AXChildren"] as? [Any])?.count
+    }
 }
 
 /// Whether admission keeps a window or ignores it outright.
