@@ -2894,7 +2894,9 @@ on every click: KiwiDesk raised it, Orion hid it, the close-return
 raise fronted the host, Orion showed it again. What separates it
 from a frameless real window (a terminal, an Electron app) is the
 buttoned sibling: a real frameless window has none, and its
-content lists. The rule asks that of every window, whatever its
+content lists. A window's own title element is no content:
+NoMachine's twin, glued over its host's content area, lists that
+and nothing else (#2346). The rule asks that of every window, whatever its
 subrole reads — the twin read `AXUnknown` as often as
 `AXStandardWindow` (device, 2026-09-30), and a subrole gate let it
 in as a float — and reads a window in one round trip, since Orion

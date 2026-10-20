@@ -193,6 +193,12 @@ struct WindowFactsSeamTests {
         )
         #expect(traits.contains("WindowTraits.titlebarButton(from:"))
         #expect(!traits.contains("contains(true)"))
+        // #2346: the title element rides the batch, last, and the
+        // child count leaves it out. Blind to an attribute appended
+        // after it, which `items.last` would then read; the
+        // comment at `names` is that slot's only guard.
+        #expect(traits.contains("kAXTitleUIElementAttribute"))
+        #expect(traits.contains("contentChildren($0, title: items.last)"))
     }
 
     @Test("track hands its facts, and only the recheck an element")
