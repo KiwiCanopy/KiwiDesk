@@ -164,6 +164,9 @@ func makeTestCore(
     // the focused ring in every border suite. Pin "no own key
     // window"; the stand-down suites inject their own reading.
     core.eventLoop.ownKeyWindow = { nil }
+    // A refusal pill's VoiceOver announcement (#2480) defaults to a
+    // live post; a suite wanting it states its own sink.
+    core.borders.announceRefusal = { _ in }
     // Same class, again (#1785): the process-table and
     // LaunchServices reads behind the ownership gate and the
     // sibling focus gate default LIVE, and a fixture pid can be a

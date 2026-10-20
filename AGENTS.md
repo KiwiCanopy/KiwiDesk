@@ -1703,6 +1703,9 @@ Touching `Borders`, `Vision`.
 - a cue popping past its resting size takes a room `PopRoom` grows by the peak
   and pops about its centre, a resizing one setting the room for the whole
   resize at once (#2033, `SizeLimitPillPopTests`, `StickyMarkPopTests`)
+- a refusal pill states at its door whether VoiceOver hears it — a required
+  `announce:`, spoken through the one `announceRefusal` seam both
+  `makeTestCore` twins pin inert (#2480, `HyperBarePressCueTests`)
 - after a Space switch the focused ring is ordered in dormant and revealed on
   its window's own report near the sent frame, or at a cap (#1959,
   `BorderArrivalTests`)

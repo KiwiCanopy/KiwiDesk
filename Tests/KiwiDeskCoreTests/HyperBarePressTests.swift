@@ -93,6 +93,41 @@ struct HyperBarePressTests {
         #expect(reports == 2)
     }
 
+    @Test("a recorder's suspend leaves the answer alone")
+    func suspendKeepsTheAnswer() throws {
+        let registrar = LiveRegistrar()
+        let keys = try manager(registrar, combos: ["hyper+h"])
+        keys.suspend()
+        #expect(keys.hyperHasShortcuts)
+        keys.resume()
+        #expect(keys.hyperHasShortcuts)
+    }
+
+    @Test("a flip of the answer is reported once")
+    func flipIsReported() throws {
+        let registrar = LiveRegistrar()
+        let keys = try manager(registrar, combos: ["ctrl+j"])
+        var flips = 0
+        keys.onHyperShortcutsChange = { flips += 1 }
+        let hyperH = try #require(KeyCombo.parse("hyper+h"))
+        let layer = KeybindingManager.defaultLayer
+        keys.replaceLayers(
+            [layer: [hyperH: 1]],
+            icons: [:],
+            preferredLayer: layer
+        )
+        #expect(flips == 1)
+        keys.replaceLayers(
+            [layer: [hyperH: 1]],
+            icons: [:],
+            preferredLayer: layer
+        )
+        #expect(flips == 1)
+        keys.reset()
+        #expect(flips == 2)
+        #expect(!keys.hyperHasShortcuts)
+    }
+
     @Test("a layer with a Hyper row reports nothing")
     func rowsReportNothing() throws {
         let registrar = LiveRegistrar()
@@ -128,12 +163,59 @@ struct HyperBarePressWiringTests {
         )
     }
 
-    @Test("the cue draws a pill, announces it and never sounds")
+    @Test("bootstrap wires a flip to Settings")
+    func flipWired() throws {
+        let boot = try Self.source("App/KiwiCore+Bootstrap.swift")
+        #expect(
+            boot.contains(
+                "keys.onHyperShortcutsChange = { [weak self] in\n"
+                    + "            self?.onAppWideChange()"
+            )
+        )
+    }
+
+    @Test("the cue's pills announce and never sound")
     func silentAndAnnounced() throws {
         let cue = try Self.source("App/KiwiCore+HyperBarePress.swift")
-        #expect(cue.contains("flashRefusalPill("))
-        #expect(cue.contains("announceBareHyper(text)"))
+        #expect(cue.components(separatedBy: "announce: true").count == 3)
+        #expect(!cue.contains("announce: false"))
         #expect(!cue.contains("soundIfDrawn"))
         #expect(!cue.contains("soundRefusal"))
+    }
+}
+
+/// The cue through a real core (#2480): with nothing to draw on, it
+/// still speaks, through the one seam the test core pins.
+@MainActor
+@Suite("Hyper bare press cue")
+struct HyperBarePressCueTests {
+    @Test("a cue with no window or shelf still announces")
+    func announcesWithNothingToDrawOn() {
+        LocalizationManager.shared.select("en")
+        let core = makeTestCore()
+        var spoken: [String] = []
+        core.borders.announceRefusal = { spoken.append($0) }
+        core.cueBareHyper()
+        #expect(spoken == ["No active shortcut uses Hyper"])
+    }
+
+    @Test("the pill door speaks only when its caller says so")
+    func doorAnnouncesOnRequest() {
+        let core = makeTestCore()
+        var spoken: [String] = []
+        core.borders.announceRefusal = { spoken.append($0) }
+        core.flashRefusalPill(
+            WindowID(900_001),
+            text: "quiet",
+            symbol: "nosign",
+            announce: false
+        )
+        core.flashRefusalPill(
+            WindowID(900_001),
+            text: "spoken",
+            symbol: "nosign",
+            announce: true
+        )
+        #expect(spoken == ["spoken"])
     }
 }

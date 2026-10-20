@@ -13,6 +13,8 @@ struct HyperLayer {
     /// The bare registrations of the current hold.
     var heldIDs: [UInt32] = []
     var isHeld = false
+    /// The last `hyperHasShortcuts` reported (#2480).
+    var hadShortcuts = false
     /// Cancels the watchdog of the current hold.
     var cancelWatchdog: (() -> Void)?
 
@@ -47,7 +49,9 @@ extension KeybindingManager {
         }
         guard holdGlide.releaseCapable else {
             activationFailures.formUnion(rows.map(\.0))
-            onLog("hyper: registrar reports no releases")
+            if !rows.isEmpty {
+                onLog("hyper: registrar reports no releases")
+            }
             return
         }
         if hyper.triggerIDs.isEmpty { registerHyperTrigger() }
@@ -70,8 +74,22 @@ extension KeybindingManager {
     }
 
     /// Whether the active layer gives Hyper anything to do — what
-    /// the Settings caption reads (#2480).
-    public var hyperHasShortcuts: Bool { !hyper.rows.isEmpty }
+    /// the Settings caption reads (#2480). Read off the layer, so a
+    /// recorder's suspend, which drops the registered rows, moves
+    /// nothing.
+    public var hyperHasShortcuts: Bool {
+        bindings(for: currentLayer).keys.contains {
+            $0.modifiers.contains(.hyper)
+        }
+    }
+
+    /// Reports a flip of `hyperHasShortcuts` once per change.
+    func noteHyperShortcuts() {
+        let now = hyperHasShortcuts
+        guard now != hyper.hadShortcuts else { return }
+        hyper.hadShortcuts = now
+        onHyperShortcutsChange()
+    }
 
     func disarmHyperTrigger() {
         hyperReleased()

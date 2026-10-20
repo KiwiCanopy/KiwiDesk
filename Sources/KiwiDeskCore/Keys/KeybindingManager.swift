@@ -71,6 +71,8 @@ public final class KeybindingManager {
     /// A Hyper press while the active layer has no Hyper row
     /// (#2480); the core cues why.
     var onBareHyper: @MainActor () -> Void = {}
+    /// `hyperHasShortcuts` flipped (#2480): Settings re-reads it.
+    var onHyperShortcutsChange: @MainActor () -> Void = {}
     /// Schedules the Hyper hold's watchdog; returns its cancel.
     var hyperSchedule:
         @MainActor (
@@ -179,9 +181,10 @@ public final class KeybindingManager {
 
     /// Resets all layers and releases Lua references on config reload.
     func reset() {
+        // The trigger outlives a reset while Hyper is on, or a
+        // reload that binds no row leaves F18 beeping (#2480);
+        // `deactivate` drops it where Hyper is off.
         deactivate()
-        // No rows survive a reset, so neither does the trigger.
-        disarmHyperTrigger()
         if let lua {
             for bindings in layers.values {
                 for ref in bindings.values {
@@ -194,6 +197,7 @@ public final class KeybindingManager {
         let previous = currentLayer
         currentLayer = Self.defaultLayer
         announce(from: previous, to: Self.defaultLayer)
+        noteHyperShortcuts()
     }
 
     /// Atomically replaces layers from structured config.
