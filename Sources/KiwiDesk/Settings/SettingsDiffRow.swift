@@ -20,8 +20,11 @@ enum SettingsRowRevert: Hashable {
     case look(profile: String)
     /// One app's rule and the reach it was given (#1393).
     case ruleReach(app: String)
-    /// Nothing a revert can undo: profile drift, a live change, a
-    /// leaf no key claims, a reach this list only reports.
+    /// A live change put back to its stored value through Core
+    /// (#2411), by the row's keep ids.
+    case live
+    /// Nothing a revert can undo: profile drift, a leaf no key
+    /// claims, a reach this list only reports.
     case none
 }
 

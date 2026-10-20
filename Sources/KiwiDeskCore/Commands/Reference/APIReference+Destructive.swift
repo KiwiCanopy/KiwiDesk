@@ -34,6 +34,8 @@ extension APIReference {
         // Saved at once, and a shared shortcut leaves every profile
         // holding it (#1685 ▸ Ruling 6c).
         "shortcut.remove",
+        // Drops unsaved live changes (#2411).
+        KiwiCore.revertSettingsCommand,
         ServiceManager.prepareRestartCommand,
     ]
 

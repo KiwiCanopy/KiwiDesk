@@ -27,27 +27,19 @@ extension SettingsModel {
     }
 
     /// The rows still on `⌃⌥` while the base is `✦`, the page's
-    /// layers first, then the shared rows this page leaves out, then
-    /// the other profiles' own rows; empty on `⌃⌥`.
+    /// layers first, then the shared rows this page does not draw,
+    /// then the other profiles' own rows; empty on `⌃⌥`. A shared
+    /// row the page leaves out moves with the rest, its tombstone
+    /// with it (`moveShortcutBase`), so it is listed only where it
+    /// stayed for a reason the page's own rows could have.
     var rowsLeftOnStandard: [ShortcutBaseLeftRow] {
         guard config.shortcutBase == .hyper else { return [] }
         let seeded = seededChords
         var rows: [ShortcutBaseLeftRow] = []
         for layer in config.layers {
-            let kept = ShortcutBaseSwitch.kept(layer, onto: .hyper)
-            for row in layer.bindings where movesToHyper(row) {
-                let reason: ShortcutBaseLeftRow.Reason
-                if let hold = kept.first(where: { $0.row == row }) {
-                    reason = .taken(target: hold.target, by: hold.holder)
-                } else if seeded[row.lua, default: []].contains(row.combo) {
-                    reason = .predates
-                } else {
-                    reason = .ownChoice
-                }
-                rows.append(left(row, layer: layer.name, reason: reason))
-            }
+            rows += leftRows(of: layer, seeded: seeded) { _ in true }
         }
-        rows += hiddenSharedRows
+        rows += hiddenSharedRows(seeded: seeded)
         for (profile, override) in otherProfileOverrides {
             for layer in override.layers {
                 for row in layer.bindings where movesToHyper(row) {
@@ -60,12 +52,34 @@ extension SettingsModel {
         return rows
     }
 
-    /// Shared rows the page's profile leaves out: the switch moves
-    /// only what the page draws, and a left-out row is named by its
-    /// old chord, which a move would bring back. Read off the base
-    /// Save would write, so the draft's own layer edits and deletes
-    /// are already in it.
-    private var hiddenSharedRows: [ShortcutBaseLeftRow] {
+    /// `layer`'s rows `listed` names that are still on `⌃⌥`, each
+    /// with its reason.
+    private func leftRows(
+        of layer: KeyLayer,
+        seeded: [String: Set<String>],
+        listed: (KeyBinding) -> Bool
+    ) -> [ShortcutBaseLeftRow] {
+        let kept = ShortcutBaseSwitch.kept(layer, onto: .hyper)
+        return layer.bindings.filter { listed($0) && movesToHyper($0) }
+            .map { row in
+                let reason: ShortcutBaseLeftRow.Reason
+                if let hold = kept.first(where: { $0.row == row }) {
+                    reason = .taken(target: hold.target, by: hold.holder)
+                } else if seeded[row.lua, default: []].contains(row.combo) {
+                    reason = .predates
+                } else {
+                    reason = .ownChoice
+                }
+                return left(row, layer: layer.name, reason: reason)
+            }
+    }
+
+    /// Shared rows the page does not draw and the switch left on
+    /// `⌃⌥`, read off the base Save would write, so the draft's own
+    /// layer edits and deletes are already in it.
+    private func hiddenSharedRows(
+        seeded: [String: Set<String>]
+    ) -> [ShortcutBaseLeftRow] {
         guard let base = encodedReach?.keyBase else { return [] }
         let shown = Set(
             config.layers.flatMap { layer in
@@ -78,15 +92,14 @@ extension SettingsModel {
             }
         )
         return base.flatMap { layer in
-            layer.bindings.filter {
-                movesToHyper($0)
-                    && !shown.contains(
-                        RuleReachTable<String>.keyID(
-                            layer: layer.name,
-                            lua: $0.lua
-                        )
+            leftRows(of: layer, seeded: seeded) {
+                !shown.contains(
+                    RuleReachTable<String>.keyID(
+                        layer: layer.name,
+                        lua: $0.lua
                     )
-            }.map { left($0, layer: layer.name, reason: .leftOutHere) }
+                )
+            }
         }
     }
 
@@ -131,11 +144,13 @@ extension SettingsModel {
         }
     }
 
-    /// Every stored profile's own layer rows but the page's, by
-    /// name: the switch reaches the shared keymap and the loaded
-    /// profile alone.
+    /// Every profile's own layer rows but the page's, by name, as
+    /// the Save would write them — a row the switch kept on its old
+    /// chord for a profile included (`KeyLayerOverride.following`).
     private var otherProfileOverrides: [(String, KeyLayerOverride)] {
-        guard let stored = ruleReachStored else { return [] }
+        guard let stored = layeredReach ?? ruleReachStored else {
+            return []
+        }
         return stored.storedKeyOverrides
             .filter { $0.key != reachPage }
             .sorted { $0.key < $1.key }
@@ -152,8 +167,6 @@ struct ShortcutBaseLeftRow: Identifiable, Equatable {
         case taken(target: String, by: KeyBinding)
         /// On a `⌃⌥` chord of the user's own.
         case ownChoice
-        /// A shared row the page's profile leaves out.
-        case leftOutHere
         /// Another profile's own row, which the switch never moves.
         case profile(String)
 
@@ -162,7 +175,6 @@ struct ShortcutBaseLeftRow: Identifiable, Equatable {
             case .predates: "predates"
             case .taken: "taken"
             case .ownChoice: "own"
-            case .leftOutHere: "left_out"
             case .profile(let name): "profile:\(name)"
             }
         }

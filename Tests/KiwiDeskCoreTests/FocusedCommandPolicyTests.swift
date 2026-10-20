@@ -94,6 +94,9 @@ struct FocusedCommandPolicyTests {
         // Writes the live profile's file, touching no window
         // (#1685).
         "keep_settings",
+        // Puts stored settings back live, never acting on the
+        // focused window (#2411).
+        "revert_settings",
         // Show or hide a hiding shelf, touching no window (#761).
         "space_bar.toggle_reveal",
         "app_bar.toggle_reveal",

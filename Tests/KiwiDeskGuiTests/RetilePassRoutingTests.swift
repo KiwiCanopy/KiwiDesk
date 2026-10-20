@@ -56,6 +56,10 @@ struct RetilePassRoutingTests {
             Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+Commands.swift":
             Site(applies: 1, reissues: 0),
+        // `revert_settings` (#2411): stored values applied live,
+        // an explicit apply like the setters it undoes.
+        "KiwiDeskCore/Commands/KiwiCore+RevertSettings.swift":
+            Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+GapCommands.swift":
             Site(applies: 3, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+LayoutCommands.swift":

@@ -13,6 +13,9 @@ struct DiffRowRevert {
     /// asks first (owner, 2026-10-19).
     let takesGroup: (SettingsDiffRow) -> Bool
     let perform: (SettingsDiffRow) -> Void
+    /// A live row's revert (#2411), answering whether every leaf
+    /// went back, so the row left the list.
+    let performLive: (SettingsDiffRow) -> Bool
 
     init(model: SettingsModel, alwaysVisible: Bool) {
         self.alwaysVisible = alwaysVisible
@@ -21,6 +24,9 @@ struct DiffRowRevert {
             model?.revertTakesGroup($0) ?? false
         }
         perform = { [weak model] in model?.revert($0) }
+        performLive = { [weak model] row in
+            model?.revertLive(row.keepIDs)?.refused.isEmpty ?? false
+        }
     }
 
     /// The ↺'s words: what it takes back — every shortcut change

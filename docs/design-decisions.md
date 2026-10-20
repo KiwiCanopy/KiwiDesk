@@ -7439,8 +7439,8 @@ nothing live and never asks the leave question: these are not the
 window's edits. A setting the draft also edits is the draft's row
 alone, since that edit is what its Save commits. Undoing a live row means
 applying the saved value live, a Core verb rather than a draft
-writeback, so it waits for per-row revert (#792), as does whether
-Revert all reaches live state.
+writeback (#2411, ▸ *A row's revert writes its one key back
+through a register*).
 
 :::unreleased
 ### A row's revert writes its one key back through a register (#792)
@@ -7493,9 +7493,17 @@ back is the rule's: the reach
 settles once the app's rules, or the shortcut layers, are the
 baseline's again. A row says
 how it reverts and offers no ↺ until it does: a lens or layer edit,
-profile drift, a live change and a leaf no key claims draw none.
-Whether the popover's Revert all reaches live state stays open with
-the live rows.
+profile drift and a leaf no key claims draw none.
+
+A live row's ↺ is not a draft writeback (#2411): it puts the row's
+leaves back to the value the live profile or its shared look
+stores and applies that live, through `revert_settings`, the twin
+of `keep_settings` — so a row can be kept or reverted, and nothing
+else of it changes. The pill's Revert takes every live row back
+with the draft, so the list it was asked to clear empties. Drift is
+the one row it leaves (owner ruling 2026-10-20): drift is about the
+arrangement, and re-applying the saved profile to clear it would
+end a standing temporary layout, which Revert never does (#1179).
 :::
 
 ### The header search is a field, not a button that opens one
@@ -10999,12 +11007,17 @@ row of the page holds is refused and named with its holder, since
 nothing KiwiDesk writes gives an action a second chord in a layer —
 a holder in another profile's own rows is not looked for, the
 residue of moving a keymap that profile only inherits. A shared
-row the page's profile leaves out is not moved either: the
-profile names it by its old chord, and moving it would bring it
-back. Every row still on `⌃⌥` is listed under the switch with its
-reason — the row predates the update, another row holds the key,
-the user set it, this profile leaves it out, or another profile
-sets its own — and is re-recorded by hand; there is no "move these too", since each reason is one the
+row a profile leaves out moves too, and the mark that leaves it
+out moves with it (owner and ui-designer ruling, 2026-10-20): a
+profile names a left-out row by its chord, so moving the row
+alone would bring it back there, while leaving the row behind
+split the shared keymap for every other profile over one
+profile's choice. The same holds for a profile whose own row took
+the moved row's old chord — it went without the shared row, and
+still does on the new one. Every row still on `⌃⌥` is listed under
+the switch with its reason — the row predates the update, another
+row holds the key, the user set it, or another profile sets its
+own — and is re-recorded by hand; there is no "move these too", since each reason is one the
 user should read before the row moves. `⌃⌥` moves back what the
 mapping can produce, derived from the pure reverse mapping rather
 than a stored list: a row on any other `✦` chord stays (`✦⇧⌘3`,
