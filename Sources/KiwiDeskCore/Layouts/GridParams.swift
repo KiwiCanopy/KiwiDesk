@@ -26,6 +26,12 @@ public struct GridParams: Sendable, Equatable, Codable {
     public var autoSize = false
     /// Placement for newly created windows.
     public var newWindowPlacement: SpawnPlacement = .last
+    /// Unnormalised weight per column index, `1.0` an equal
+    /// share; a column past the end draws at `1.0`, and the list
+    /// never shrinks with the column count (#763, `GridTracks`).
+    public var columnWeights: [Double] = []
+    /// The per-row twin of `columnWeights`.
+    public var rowWeights: [Double] = []
     /// Per-space overrides resolved via `TilingSettings.resolvedGrid(for:)`.
     public var override: [SpaceID: GridOverride] = [:]
 
@@ -40,6 +46,8 @@ public struct GridParams: Sendable, Equatable, Codable {
         case rows
         case autoSize = "auto_size"
         case newWindowPlacement = "new_window_placement"
+        case columnWeights = "column_weight"
+        case rowWeights = "row_weight"
         case override
     }
 
@@ -84,6 +92,16 @@ public struct GridParams: Sendable, Equatable, Codable {
                 SpawnPlacement.self,
                 forKey: .newWindowPlacement
             ) ?? .last
+        columnWeights =
+            try container.decodeIfPresent(
+                [Double].self,
+                forKey: .columnWeights
+            ) ?? []
+        rowWeights =
+            try container.decodeIfPresent(
+                [Double].self,
+                forKey: .rowWeights
+            ) ?? []
         override =
             try container.decodeIfPresent(
                 [SpaceID: GridOverride].self,
@@ -91,8 +109,8 @@ public struct GridParams: Sendable, Equatable, Codable {
             ) ?? [:]
     }
 
-    /// Manual encode so the per-space override map stays sparse
-    /// (absent when empty), unlike the synthesized encode.
+    /// Manual encode so the per-space override map and the
+    /// track weights stay sparse (absent when empty).
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(type, forKey: .type)
@@ -111,6 +129,15 @@ public struct GridParams: Sendable, Equatable, Codable {
             newWindowPlacement,
             forKey: .newWindowPlacement
         )
+        if !columnWeights.isEmpty {
+            try container.encode(
+                columnWeights,
+                forKey: .columnWeights
+            )
+        }
+        if !rowWeights.isEmpty {
+            try container.encode(rowWeights, forKey: .rowWeights)
+        }
         if !override.isEmpty {
             try container.encode(override, forKey: .override)
         }

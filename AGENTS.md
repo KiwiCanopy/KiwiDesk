@@ -698,7 +698,9 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   `RefusalCueSeamTests` the spelling), a weight clamp divides the span the
   layout divides via the one `StackLayout.weightedSpan` copy (#933), and a
   track session weight store also rides the retile-time feasibility heal, which
-  a new store joins — the split stores joined it (#934/#1430):
+  a new store joins unless its weights cannot pile its Space and the render keeps
+  its floor without writing it, as Grid's do (#763, `GridTracksTests`) — the
+  split stores joined it (#934/#1430):
   `healSplitFloors` moves a bsp split ratio or the stack master ratio to a
   corroborated floor through the capped writers with no focus, cues an
   unfittable floor once per episode and lands its frame inward through the one

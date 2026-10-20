@@ -303,10 +303,35 @@ struct MouseResizeTests {
         )
     }
 
-    @Test("Grid and monocle have no resize parameter")
+    @Test("A grid drag names the edge that moved (#763)")
+    func gridNamesTheEdge() {
+        let slot = slot(x: 0)
+        var left = slot
+        left.origin.x -= 60
+        left.size.width += 60
+        func translate(_ frame: CGRect) -> ResizeAdjustment? {
+            MouseResize.translate(
+                mode: .grid,
+                isMaster: false,
+                stackSplitHorizontal: true,
+                trackAxisVertical: true,
+                scrollVertical: false,
+                slot: slot,
+                frame: frame,
+                bounds: bounds
+            )
+        }
+        #expect(translate(left) == .gridColumn(60, leading: true))
+        #expect(
+            translate(grown(slot, dw: 80))
+                == .gridColumn(80, leading: false)
+        )
+    }
+
+    @Test("Monocle and floating have no resize parameter")
     func unsupportedModes() {
         let slot = slot(x: 0)
-        for mode in [LayoutMode.grid, .monocle, .floating] {
+        for mode in [LayoutMode.monocle, .floating] {
             #expect(
                 MouseResize.translate(
                     mode: mode,

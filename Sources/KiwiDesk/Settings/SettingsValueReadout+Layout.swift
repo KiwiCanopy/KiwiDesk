@@ -206,6 +206,20 @@ extension SettingsValueReadout {
                 n.grid.newWindowPlacement,
                 layoutPlacement
             )
+        case .gridColumnWeights:
+            return layoutRow(
+                census,
+                o.grid.columnWeights,
+                n.grid.columnWeights,
+                layoutWeights
+            )
+        case .gridRowWeights:
+            return layoutRow(
+                census,
+                o.grid.rowWeights,
+                n.grid.rowWeights,
+                layoutWeights
+            )
         case .monocleOrientation:
             return layoutRow(
                 census,
@@ -293,6 +307,7 @@ extension SettingsValueReadout {
             .gridOverrideType, .gridOverrideSplitDirection,
             .gridOverrideFillEmptyCells, .gridOverrideColumns,
             .gridOverrideRows, .gridOverrideAutoSize,
+            .gridOverrideColumnWeights, .gridOverrideRowWeights,
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideLimit, .trackOverrideOverflowStyle,
             .trackOverrideAutoTracks:

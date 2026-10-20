@@ -83,6 +83,18 @@ extension TilingSettings {
         return params
     }
 
+    /// Grid parameters under the session layer (#763, #764).
+    public func resolvedGrid(for space: Space) -> GridParams {
+        var params = resolvedGrid(for: space.id)
+        if let value = space.sessionRatios.gridColumnWeights {
+            params.columnWeights = value
+        }
+        if let value = space.sessionRatios.gridRowWeights {
+            params.rowWeights = value
+        }
+        return params
+    }
+
     /// True if any layout's App Bar shows without its shortcut —
     /// `always` or `auto` (#761).
     public var anyAppBarCanShow: Bool {
@@ -213,7 +225,7 @@ extension TilingSettings {
             bsp: resolvedBsp(for: space),
             stack: resolvedStack(for: space),
             scrolling: resolvedScrolling(for: space),
-            grid: resolvedGrid(for: space.id),
+            grid: resolvedGrid(for: space),
             monocle: resolvedMonocle(for: space.id),
             track: resolvedTrack(for: space.id)
         )

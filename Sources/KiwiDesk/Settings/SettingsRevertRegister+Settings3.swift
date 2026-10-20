@@ -123,6 +123,18 @@ extension SettingsRevertRegister {
                 \.autoSize,
                 key: { SpaceID($0) }
             ),
+        .layout(.gridOverrideColumnWeights):
+            .entryField(
+                \.settings.grid.override,
+                \.columnWeights,
+                key: { SpaceID($0) }
+            ),
+        .layout(.gridOverrideRowWeights):
+            .entryField(
+                \.settings.grid.override,
+                \.rowWeights,
+                key: { SpaceID($0) }
+            ),
         .layout(.monocleOverrideOrientation):
             .entryField(
                 \.settings.monocle.override,

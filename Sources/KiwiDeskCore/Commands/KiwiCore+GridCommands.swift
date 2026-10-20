@@ -40,6 +40,24 @@ extension KiwiCore {
                 return Self.autoSizeError
             }
             tiler.settings.grid.autoSize = auto
+        case "grid.set_column_weight", "grid.set_row_weight":
+            guard let (track, weight) = Self.parseTrackWeight(args)
+            else { return Self.trackWeightError }
+            if command == "grid.set_column_weight" {
+                tiler.settings.grid.columnWeights = Self.setting(
+                    tiler.settings.grid.columnWeights,
+                    track: track,
+                    to: weight
+                )
+                clearSessionRatios { $0.gridColumnWeights = nil }
+            } else {
+                tiler.settings.grid.rowWeights = Self.setting(
+                    tiler.settings.grid.rowWeights,
+                    track: track,
+                    to: weight
+                )
+                clearSessionRatios { $0.gridRowWeights = nil }
+            }
         case "grid.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
@@ -109,6 +127,31 @@ extension KiwiCore {
                 return Self.autoSizeError
             }
             over.autoSize = auto
+        case "column_weight", "row_weight":
+            guard let (track, weight) = Self.parseTrackWeight(rest)
+            else { return Self.trackWeightError }
+            // Starts from what the Space resolves to, so naming one
+            // column keeps the others it drew.
+            let global = tiler.settings.grid
+            if field == "column_weight" {
+                over.columnWeights = Self.setting(
+                    over.columnWeights ?? global.columnWeights,
+                    track: track,
+                    to: weight
+                )
+                clearSessionRatios(for: SpaceID(space)) {
+                    $0.gridColumnWeights = nil
+                }
+            } else {
+                over.rowWeights = Self.setting(
+                    over.rowWeights ?? global.rowWeights,
+                    track: track,
+                    to: weight
+                )
+                clearSessionRatios(for: SpaceID(space)) {
+                    $0.gridRowWeights = nil
+                }
+            }
         default:
             return .fail(
                 "unknown command: grid.set_\(field)_override"
@@ -143,6 +186,34 @@ extension KiwiCore {
         return (max(1, cols), max(1, rows))
     }
 
+    /// A 1-based track number and a positive weight, returned
+    /// 0-based.
+    static func parseTrackWeight(
+        _ args: [JSONValue]
+    ) -> (track: Int, weight: Double)? {
+        guard let track = args.first?.intValue, track >= 1,
+            let weight = args.dropFirst().first?.numberValue,
+            weight.isFinite, weight > 0
+        else { return nil }
+        return (track - 1, weight)
+    }
+
+    /// `weights` with track `index` set, padded with equal shares
+    /// and trimmed of trailing ones (`GridTracks.trimmed`).
+    static func setting(
+        _ weights: [Double],
+        track index: Int,
+        to weight: Double
+    ) -> [Double] {
+        var out = weights
+        while out.count <= index { out.append(1) }
+        out[index] = weight
+        return GridTracks.trimmed(out)
+    }
+
+    private static let trackWeightError = CommandResponse.fail(
+        "expected a track number (1 or more) and a positive weight"
+    )
     private static let typeError = CommandResponse.expected(
         GridParams.GridType.self
     )

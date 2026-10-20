@@ -20,6 +20,10 @@ public enum ResizeAdjustment: Equatable, Sendable {
     case stackWeight(CGFloat)
     case trackAcross(CGFloat)
     case trackAlong(CGFloat)
+    /// A grid cell's growth in points across its columns or rows,
+    /// and whether its leading edge is the one dragged (#763).
+    case gridColumn(CGFloat, leading: Bool)
+    case gridRow(CGFloat, leading: Bool)
 }
 
 /// Translates mouse resizes into layout adjustments (#56, #122, #128).
@@ -194,7 +198,25 @@ public enum MouseResize {
                 }
             }
             return nil
-        case .monocle, .grid, .floating:
+        case .grid:
+            // The dominant delta decides, as bsp does; the edge
+            // that moved more is the one dragged.
+            if abs(dw) >= abs(dh), abs(dw) > threshold {
+                return .gridColumn(
+                    dw,
+                    leading: abs(frame.minX - slot.minX)
+                        > abs(frame.maxX - slot.maxX)
+                )
+            }
+            if abs(dh) > threshold {
+                return .gridRow(
+                    dh,
+                    leading: abs(frame.minY - slot.minY)
+                        > abs(frame.maxY - slot.maxY)
+                )
+            }
+            return nil
+        case .monocle, .floating:
             return nil
         }
     }
