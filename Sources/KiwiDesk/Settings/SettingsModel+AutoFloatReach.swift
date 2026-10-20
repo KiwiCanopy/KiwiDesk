@@ -13,7 +13,7 @@ extension SettingsModel {
         ) { _ in AutoFloatWords.tiles }
     }
 
-    /// The "Float windows automatically" checkbox's checklist (#2173).
+    /// The Automatic floating checkbox's checklist (#2173).
     func autoFloatReach() -> RuleReachReading? {
         guard let reach = encodedReach else { return nil }
         let key = RuleReachTable<Bool>.floatAutomaticallyKey
