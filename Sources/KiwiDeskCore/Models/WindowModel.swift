@@ -65,6 +65,14 @@ public struct ManagedWindow: Sendable, Equatable {
     /// Close, minimize, zoom or full-screen button present at
     /// adoption; nil where the read did not answer.
     public var hasTitlebarButton: Bool?
+    /// A popup no App Rule files (#1602, #2475): an overlay on a
+    /// raised layer or with no title-bar button; an unread button
+    /// is none. Adoption-time only — the layer and the button are
+    /// never refreshed.
+    public var isPopup: Bool {
+        isTransientOverlay
+            && (isRaisedLayer || hasTitlebarButton == false)
+    }
     /// Native fullscreen state (`kAXFullScreenAttribute`).
     public var isFullscreen: Bool
     /// Carries KiwiDesk's own tiling mark (`OwnWindowTiling`), so

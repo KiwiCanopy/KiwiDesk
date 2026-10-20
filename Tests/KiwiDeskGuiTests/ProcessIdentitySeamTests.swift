@@ -62,10 +62,13 @@ struct ProcessIdentitySeamTests {
         )
         try #require(!tracking.isEmpty)
         // The off-main read's traits, where it took them, are the
-        // same verdict's input (#2347).
+        // same verdict's input (#2347), read once beside the popup
+        // skip's button (#2475).
         let pattern =
-            #"guard\s+shadowVerdict\(\s*element,\s*id: window\.id,"#
-            + #"\s*pid: pid,\s*traits: arrival\.map\(\\\.traits\)\s*\)"#
+            #"let traits =\s*arrival\.map\(\\\.traits\)\s*\?\? "#
+            + #"\.some\(shadows\.traits\(element, window\.id\)\)\s*"#
+            + #"guard\s+shadowVerdict\(\s*element,\s*id: window\.id,"#
+            + #"\s*pid: pid,\s*traits: traits\s*\)"#
             + #"\s*== \.window\s+else \{ return \}"#
         let verdict = try #require(
             tracking.range(of: pattern, options: .regularExpression),

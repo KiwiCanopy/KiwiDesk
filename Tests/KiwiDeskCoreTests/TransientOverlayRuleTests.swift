@@ -176,5 +176,27 @@ struct TransientOverlayRuleTests {
                     + "app's rule again (#2475)"
             )
         )
+        // The created-window notification tracks with no arrival,
+        // so the popup's button comes from the fallback read; one
+        // run pins that read AND its hand-off to the shadow rule,
+        // which then reads nothing itself (one AX read, not two).
+        let joined = code.map {
+            $0.trimmingCharacters(in: .whitespaces)
+        }.joined(separator: " ")
+        #expect(
+            joined.contains(
+                "let traits = arrival.map(\\.traits) "
+                    + "?? .some(shadows.traits(element, window.id)) "
+                    + "guard shadowVerdict( element, id: window.id, "
+                    + "pid: pid, traits: traits ) == .window"
+            ),
+            Comment(
+                rawValue:
+                    "the synchronous track path no longer reads the "
+                    + "button once and hands it on, so the popup "
+                    + "records nil and follows its rule (#2475), or "
+                    + "the shadow rule reads the traits a second time"
+            )
+        )
     }
 }
