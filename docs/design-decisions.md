@@ -7507,9 +7507,8 @@ compare across different diffs; the folded row's ↺ takes the
 group back without asking, since the row names it. Their way
 back is the rule's: the reach
 settles once the app's rules, or the shortcut layers, are the
-baseline's again. A row says
-how it reverts and offers no ↺ until it does: profile drift and a leaf no key
-claims draw none.
+baseline's again. A row says how it reverts and offers no ↺ until
+it does: profile drift and a leaf no key claims draw none.
 
 A live row's ↺ is not a draft writeback (#2411): it puts the row's
 leaves back to the value the live profile or its shared look
