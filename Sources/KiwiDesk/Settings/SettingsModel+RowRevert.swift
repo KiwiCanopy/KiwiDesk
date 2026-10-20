@@ -9,6 +9,7 @@ extension SettingsModel {
         switch row.revert {
         case .census: SettingsRevertRegister.writers[row.key] != nil
         case .lua, .look, .ruleReach: true
+        case .live: target == .live && !row.keepIDs.isEmpty
         case .none: false
         }
     }
@@ -38,6 +39,8 @@ extension SettingsModel {
             }
         case .ruleReach(let app):
             revertRuleReach(of: row.key, app: app)
+        case .live:
+            revertLive(row.keepIDs)
         case .none:
             break
         }

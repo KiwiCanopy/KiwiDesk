@@ -172,6 +172,12 @@ extension APIReference {
                 + "live profile or its shared look.",
             .text("id")
         ),
+        KiwiCore.revertSettingsCommand: APIRecord(
+            "Puts one or more unsaved live settings leaves back to "
+                + "the value the live profile or its shared look "
+                + "stores.",
+            .text("id")
+        ),
         "save_profile": APIRecord(
             "Saves the current configuration to a profile, which "
                 + "claims the connected screen setup.",

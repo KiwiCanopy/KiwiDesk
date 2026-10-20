@@ -38,6 +38,24 @@ extension KiwiCore {
     /// per render (profiles.md ▸ A change report reads one
     /// judgement).
     public func unsavedLiveSettings() -> UnsavedLiveSettings? {
+        guard let leaves = unsavedLiveLeaves() else { return nil }
+        let current = tiler.settings
+        let saved = current.patchedLeafByLeaf(leaves)
+        guard saved != current else { return nil }
+        var each: [String: TilingSettings] = [:]
+        for path in leaves.keys {
+            var others = leaves
+            others.removeValue(forKey: path)
+            each[KeepPointer.string([KeepRoot.settings] + path)] =
+                current.patchedLeafByLeaf(others)
+        }
+        return UnsavedLiveSettings(saved: saved, live: current, leaves: each)
+    }
+
+    /// Each unsaved live leaf by its path under `settings`, mapped
+    /// to the value its owner stores, nil absent — the one
+    /// judgement `unsavedLiveSettings` and `revert_settings` read.
+    func unsavedLiveLeaves() -> [[String]: JSONValue?]? {
         let live = keepDocument
         let judge = keepJudge(live: live, judgingRules: false)
         guard let stored = judge.stored else { return nil }
@@ -61,17 +79,7 @@ extension KiwiCore {
                 forKey: Array(path.dropFirst())
             )
         }
-        let current = tiler.settings
-        let saved = current.patchedLeafByLeaf(leaves)
-        guard saved != current else { return nil }
-        var each: [String: TilingSettings] = [:]
-        for path in leaves.keys {
-            var others = leaves
-            others.removeValue(forKey: path)
-            each[KeepPointer.string([KeepRoot.settings] + path)] =
-                current.patchedLeafByLeaf(others)
-        }
-        return UnsavedLiveSettings(saved: saved, live: current, leaves: each)
+        return leaves
     }
 
     /// Keeps the named unsaved leaves into the live profile, as

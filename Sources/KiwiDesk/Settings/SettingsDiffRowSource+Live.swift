@@ -37,6 +37,7 @@ extension SettingsDiffRowSource {
                 row.keepIDs = owners[row.id, default: []].sorted()
                 row.id += "#" + liveInstance
                 row.section = .live
+                row.revert = .live
                 return row
             }
         }
@@ -107,6 +108,28 @@ extension SettingsModel {
         refreshUnsavedLive()
         liveKeepRefusals = outcome.refused
         return outcome
+    }
+
+    /// Puts a live row's leaves back to their stored values through
+    /// Core's revert (#2411), then asks Core again; the draft is
+    /// untouched, since a live row is never the draft's.
+    @discardableResult
+    func revertLive(_ ids: [String]) -> LiveRevertOutcome? {
+        guard target == .live, !ids.isEmpty else { return nil }
+        let outcome = core.revertUnsavedLive(ids)
+        refreshUnsavedLive()
+        return outcome
+    }
+
+    /// The save pill's Revert (#2411): every live row back to its
+    /// stored value, then the draft discarded. Drift is left alone
+    /// by ruling, since re-applying the profile would end a
+    /// standing temporary layout (#1179).
+    func revertAll() {
+        if let leaves = unsavedLive?.leaves.keys, target == .live {
+            core.revertUnsavedLive(leaves.sorted())
+        }
+        revert()
     }
 
     /// Asks Core again — the one writer of `unsavedLive` and

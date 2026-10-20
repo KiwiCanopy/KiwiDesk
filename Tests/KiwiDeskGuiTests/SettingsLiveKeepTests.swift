@@ -205,7 +205,7 @@ struct SettingsLiveKeepTests {
         let list = try SourceScan.blankedSource(
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(
-                    "Sources/KiwiDesk/Settings/SettingsDiffRowsView.swift"
+                    "Sources/KiwiDesk/Settings/SettingsDiffRowsView+Live.swift"
                 )
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(
