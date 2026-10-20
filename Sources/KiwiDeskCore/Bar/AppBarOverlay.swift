@@ -266,11 +266,13 @@ public final class AppBarOverlay {
         // glide: the items ride the same glide, so the fold and
         // the re-centring are one motion (#1831).
         let groups = !glide.departures.isEmpty || !glide.arrivals.isEmpty
+        // Items snap with the run, save a fold's glide (#1831).
+        let itemsSnap = slotChanged && !groups
         (groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {
             moveFrame(itemRun, runFrame, !lands && !slotChanged)
             for (index, view) in itemViews.enumerated()
             where view.superview === itemRun {
-                moveFrame(view, frames[index], !lands)
+                moveFrame(view, frames[index], !lands && !itemsSnap)
             }
             layoutFloatBreak(
                 frames: frames,
