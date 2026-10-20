@@ -4,7 +4,8 @@ import { createImageUrlBuilder } from "@sanity/image-url";
  * Users' words on the landing page's voices section, read ONCE per
  * build from Sanity (#2369) so their names and photos stay out of
  * this public repo: a withdrawn consent is a Sanity delete, not a
- * commit. The documents are `kiwideskVoice` in the KiwiCanopy
+ * commit, live at the next build (`.claude/rules/site.md` ▸ *Build-
+ * time reads*). The documents are `kiwideskVoice` in the KiwiCanopy
  * Studio (KiwiCanopy/KiwiCanopy-Sanity-Studio).
  *
  * Build time, not in the browser, like `stars.ts`: the CSP
@@ -16,8 +17,12 @@ import { createImageUrlBuilder } from "@sanity/image-url";
  * the public dataset, published documents only; Pages passes no
  * secret to a build (`.claude/rules/site.md`).
  *
- * Any failure renders NO section and says so in the build log —
- * never a committed snapshot, which would put the data back here.
+ * A failed read renders NO section and says so in the build log —
+ * never a committed snapshot, which would put the data back here —
+ * and a photo the CDN does not serve falls back to the monogram, so
+ * a Sanity hiccup never fails the deploy that would carry a
+ * withdrawal. The site gate reds instead when the landing draws no
+ * voice (`check-site-tokens.py` ▸ `check_voices_rendered`).
  */
 export const SANITY_PROJECT = "k8d0znuy";
 const DATASET = "production";
@@ -44,7 +49,8 @@ export interface Voice {
   source: string;
 }
 
-/** Edge length, in pixels, of the photo the build downloads. */
+/** Edge length, in pixels, of the photo the build downloads: 2x
+ * the 88 px the page draws (`densities` in `Landing.astro`). */
 const AVATAR_PX = 176;
 
 const images = createImageUrlBuilder({
@@ -80,6 +86,22 @@ function toVoice(row: any): Voice | null {
   return { name, role: text(row.role), quote, avatar, link, source };
 }
 
+/** `voice` with its photo dropped unless the CDN serves it now. */
+async function withReachablePhoto(voice: Voice): Promise<Voice> {
+  if (!voice.avatar) return voice;
+  try {
+    const res = await fetch(voice.avatar, {
+      method: "HEAD",
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) return voice;
+    console.warn(`[voices] photo of ${voice.name}: HTTP ${res.status}`);
+  } catch (error) {
+    console.warn(`[voices] photo of ${voice.name}: ${error}`);
+  }
+  return { ...voice, avatar: null };
+}
+
 const none = (why: string): Voice[] => {
   console.warn(`[voices] rendering no voices section: ${why}`);
   return [];
@@ -97,10 +119,12 @@ async function read(): Promise<Voice[]> {
     if (!res.ok) return none(`HTTP ${res.status}`);
     const rows = (await res.json())?.result;
     if (!Array.isArray(rows)) return none("no result in the response");
+    if (rows.length === 0) return none("no kiwideskVoice documents");
     const list = rows.map(toVoice);
     const dropped = list.filter((v) => v === null).length;
     if (dropped > 0) console.warn(`[voices] dropped ${dropped} malformed`);
-    return list.filter((v): v is Voice => v !== null);
+    const valid = list.filter((v): v is Voice => v !== null);
+    return await Promise.all(valid.map(withReachablePhoto));
   } catch (error) {
     return none(String(error));
   }

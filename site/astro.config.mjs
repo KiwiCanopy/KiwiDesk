@@ -23,7 +23,10 @@ export default defineConfig({
   prefetch: true,
   // The voices' photos come from Sanity at build time (#2369) and
   // are re-emitted under dist/, so a visitor never asks cdn.sanity.io
-  // (`check-site-tokens.py` ▸ `check_no_sanity_in_dist`).
+  // (`check-site-tokens.py` ▸ `check_no_sanity_in_dist`). The id is
+  // `SANITY_PROJECT` in `src/lib/voices.ts`, restated because importing
+  // it would run that file's fetch at config load; a drift ships the
+  // remote URL, which that check reds.
   image: {
     remotePatterns: [
       {

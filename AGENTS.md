@@ -2211,6 +2211,10 @@ Touching `site/**`.
 - `src/pages/404.astro` and `disable404Route` move together (#635)
 - the daily rebuild's Pages deploy hook lives in the `CF_PAGES_DEPLOY_HOOK`
   secret and never in a committed file (#1659)
+- a build-time read takes no secret, falls back without failing the deploy,
+  has its silent fallback watched on the site gate and sends remote media
+  through astro:assets (#2369, `check-site-tokens.py` ▸
+  `check_voices_rendered`, `check_no_sanity_in_dist`)
 - a docs block describing behaviour that has not shipped carries a version-LESS
   `:::unreleased` in the same change set — an attribute on it fails the build,
   since a hand-written version cannot know which release the block ships in and

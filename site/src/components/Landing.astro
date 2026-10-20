@@ -925,7 +925,8 @@ const jsonLd = [
                 <figcaption>
                   {v.avatar ? (
                     <Image class="voice__avatar" src={v.avatar}
-                      alt="" width={88} height={88} />
+                      alt="" width={88} height={88}
+                      densities={[1, 2]} />
                   ) : (
                     <span class="voice__mono" aria-hidden="true">
                       {monogram(v.name)}
