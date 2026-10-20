@@ -396,6 +396,15 @@ twice, was a question the user answered twice. The argument is
   glass hosting on the one plate glide the shelf re-places the
   section on, both passes taking the one groups-or-not choice
   (`AppBarGroupGlideDispatchTests`).
+- **A bar joining or leaving a fused shelf never budges its
+  neighbour: on a new slot the neighbour's run, items, box glass
+  and float break SNAP, and the shelf's glide of the section is
+  the one motion** — a piece gliding inside a section the shelf
+  re-places starts displaced and counter-glides. Save a fold or a
+  release, which rides the shelf's glide (#1831).
+  `AppBarLandingTests` ▸ `newSlotSnapsTheItems` and
+  `AppBarLandingTests` ▸ `newSlotSnapsTheBoxes` hold the App Bar;
+  a new piece in the run owes the same snap, which is review's.
 - **Stand what a glide or fade will read from and COMMIT it
   through the one `BarMotion.standCommitted`, before the group
   that reads it** (#1838) — a section's glide start in
