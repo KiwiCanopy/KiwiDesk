@@ -90,6 +90,7 @@ extension AXHelper {
         id known: WindowID?
     ) -> WindowTraits? {
         guard let id = known ?? windowID(of: element) else { return nil }
+        // The title element stays last: `items.last` reads it.
         let names =
             titlebarButtons + [
                 kAXChildrenAttribute, kAXPositionAttribute,
@@ -121,7 +122,7 @@ extension AXHelper {
             id: id,
             hasTitlebarButton: WindowTraits.titlebarButton(from: buttons),
             childCount: (children as? [AnyObject]).map {
-                contentChildren($0, title: items[titlebarButtons.count + 3])
+                contentChildren($0, title: items.last)
             } ?? (carries(children) == false ? 0 : nil),
             frame: frame(
                 position: items[titlebarButtons.count + 1],

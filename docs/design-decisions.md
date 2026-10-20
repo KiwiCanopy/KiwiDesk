@@ -2876,8 +2876,7 @@ the #1785 entry below.
 
 **A shadow is a window with no title-bar button and no
 accessibility child beside a buttoned window of its own process**
-— its own title element counting as no child, since NoMachine's
-twin lists nothing else (#2346) — Orion's "Orion Preview", which sits at 1×1 in a screen corner
+— Orion's "Orion Preview", which sits at 1×1 in a screen corner
 and comes forward, listed and focused, the moment its process
 steps back, hiding again as the process activates (device,
 2026-09-30). Tiled, it took a slot and traded focus with its host
@@ -2885,7 +2884,9 @@ on every click: KiwiDesk raised it, Orion hid it, the close-return
 raise fronted the host, Orion showed it again. What separates it
 from a frameless real window (a terminal, an Electron app) is the
 buttoned sibling: a real frameless window has none, and its
-content lists. The rule asks that of every window, whatever its
+content lists. A window's own title element is no content:
+NoMachine's twin, glued over its host's content area, lists that
+and nothing else (#2346). The rule asks that of every window, whatever its
 subrole reads — the twin read `AXUnknown` as often as
 `AXStandardWindow` (device, 2026-09-30), and a subrole gate let it
 in as a float — and reads a window in one round trip, since Orion

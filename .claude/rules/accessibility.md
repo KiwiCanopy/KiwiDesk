@@ -438,7 +438,8 @@ editing AX code:
   window of its own process (Orion's "Orion Preview") is refused
   at `track`, whatever its subrole reads — its own title element
   counting as no child, since NoMachine's twin lists nothing else
-  (#2346, `ShadowRuleTests` ▸ `titleChildIsNoContent`). Six
+  (#2346, `ShadowRuleTests` ▸ `titleChildIsNoContent`,
+  `WindowFactsSeamTests` ▸ `traitsTakeTheFold`). Six
   obligations. **Ask the verdict of every window `track`
   offers, in ONE batched round trip** (`AXHelper.windowTraits`,
   the four buttons, the children, the title element and the
