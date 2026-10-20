@@ -205,15 +205,8 @@ extension SettingsModel {
     /// shared rules are swapped back in. Every gui.json write of
     /// the draft goes through this.
     var sidecarConfig: GuiConfig {
-        guard target == .live else { return config }
-        guard let reach = encodedReach else {
-            // No page: a switch's moved base is the one the files'
-            // tombstones followed (`moveShortcutBase`).
-            var sidecar = config
-            if switchedShortcutBase != nil, let layered = layeredReach {
-                sidecar.layers = layered.keyBase
-            }
-            return sidecar
+        guard target == .live, let reach = encodedReach else {
+            return config
         }
         var sidecar = config
         sidecar.appRules = reach.appRules.appRuleBase(

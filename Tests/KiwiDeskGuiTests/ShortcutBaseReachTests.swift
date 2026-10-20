@@ -245,6 +245,25 @@ struct ShortcutBaseReachTests {
         #expect(home.contains { $0.combo == "control+option+f" })
     }
 
+    /// A row the switch keeps on its old chord for a profile whose
+    /// own row holds the new one is listed before Save, not after.
+    @Test("a row kept for another profile is listed before Save")
+    func keptForAnotherProfileIsListed() throws {
+        let holds = KeyLayerOverride(
+            layers: [
+                KeyLayer(
+                    name: KeyLayer.defaultName,
+                    bindings: [row("hyper+f", "hs.x()")]
+                )
+            ]
+        )
+        let model = try model(overrides: ["Home": holds])
+        model.setShortcutBase(.hyper)
+        let left = model.rowsLeftOnStandard
+        #expect(left.map(\.reason) == [.profile("Home")])
+        #expect(left.first?.row.lua == floating)
+    }
+
     /// A whole layer left out is a mark on the layer's name, which
     /// the move leaves alone: the layer moves for everyone else.
     @Test("a shared layer the page's profile leaves out moves")

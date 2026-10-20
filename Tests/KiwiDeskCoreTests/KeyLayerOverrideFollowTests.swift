@@ -119,4 +119,24 @@ struct KeyLayerOverrideFollowTests {
         #expect(second.moves.isEmpty)
         #expect(second.layer == first.layer)
     }
+
+    /// A moved row the dedupe drops is no move: a profile following
+    /// it would tombstone or re-add a chord the base never holds.
+    @Test("a moved row the dedupe drops is not a move")
+    func droppedRowIsNoMove() {
+        let layer = KeyLayer(
+            name: main,
+            bindings: [
+                row("hyper+g", floating),
+                row("control+option+f", floating),
+            ]
+        )
+        let result = ShortcutBaseSwitch.move(
+            layer,
+            onto: .hyper,
+            liveSpaces: []
+        ) { _ in false }
+        #expect(result.layer.bindings.map(\.combo) == ["hyper+g"])
+        #expect(result.moves.isEmpty)
+    }
 }

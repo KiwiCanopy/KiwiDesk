@@ -55,7 +55,8 @@ public enum ShortcutBaseSwitch {
 
     /// `layer` with its rows moved onto `base` — `staying` rows left
     /// where they are, holding their chords — and then deduplicated
-    /// against `liveSpaces`, with each moved row by its old chord.
+    /// against `liveSpaces`, with each moved row the dedupe kept by
+    /// its old chord.
     /// The draft's switch and the shared keymap's move (#2460) both
     /// take it, so the two cannot write different rows.
     public static func move(
@@ -65,17 +66,17 @@ public enum ShortcutBaseSwitch {
         staying: (KeyBinding) -> Bool
     ) -> (layer: KeyLayer, moves: [String: KeyBinding]) {
         let rows = moved(layer, onto: base, staying: staying).rows
+        let kept = NavigationChords.deduplicated(
+            rows,
+            liveSpaces: liveSpaces
+        ).rows
         var moves: [String: KeyBinding] = [:]
         for (old, new) in zip(layer.bindings, rows)
-        where old.combo != new.combo {
+        where old.combo != new.combo && kept.contains(new) {
             moves[old.combo] = new
         }
         var layer = layer
-        layer.bindings =
-            NavigationChords.deduplicated(
-                rows,
-                liveSpaces: liveSpaces
-            ).rows
+        layer.bindings = kept
         return (layer, moves)
     }
 

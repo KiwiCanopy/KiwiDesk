@@ -144,11 +144,13 @@ extension SettingsModel {
         }
     }
 
-    /// Every stored profile's own layer rows but the page's, by
-    /// name: the switch reaches the shared keymap and the loaded
-    /// profile alone.
+    /// Every profile's own layer rows but the page's, by name, as
+    /// the Save would write them — a row the switch kept on its old
+    /// chord for a profile included (`KeyLayerOverride.following`).
     private var otherProfileOverrides: [(String, KeyLayerOverride)] {
-        guard let stored = ruleReachStored else { return [] }
+        guard let stored = layeredReach ?? ruleReachStored else {
+            return []
+        }
         return stored.storedKeyOverrides
             .filter { $0.key != reachPage }
             .sorted { $0.key < $1.key }
