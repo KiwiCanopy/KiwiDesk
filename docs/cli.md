@@ -593,6 +593,11 @@ every lens with why it cannot turn on.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
+`wrap_focus` is on by default for `scroll`, `monocle` and
+`track`; a profile that already stores `false` keeps it.
+:::
+
+:::unreleased
 `set_min_window_size`'s layout is `stack`, `grid`, `track`,
 `bsp`, `scrolling` or `floating`, and without one it sets every
 layout ([Lua reference](lua-reference.md#set_min_window_size)).

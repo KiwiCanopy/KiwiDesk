@@ -106,13 +106,17 @@ or `"down"`.
 that direction, following the active layout's geometry. In
 monocle and scrolling layouts, directions on the layout's
 orientation axis follow the window order instead: monocle
-cycles, wrapping at the ends; scrolling steps to the
-previous/next window and stops at the row's ends unless
-`scroll.set_wrap_focus` is on. Cross-axis directions keep the
-geometric search. The track layout steps in window order on
-both axes: along the axis within the focused track, across it
-to the neighboring track (same relative position); both stop
-at the ends unless `track.set_wrap_focus` is on.
+cycles and scrolling steps to the previous/next window.
+Cross-axis directions keep the geometric search. The track
+layout steps in window order on both axes: along the axis
+within the focused track, across it to the neighboring track
+(same relative position).
+
+:::unreleased
+All three wrap at the ends by default, and stop there with
+`wrap_focus` off (`scroll.set_wrap_focus`,
+`monocle.set_wrap_focus`, `track.set_wrap_focus`).
+:::
 
 The search is two-tier: **tiled windows always win**, and only
 when no tiled window lies in the pressed direction are the
@@ -1601,12 +1605,14 @@ scroll.set_new_window_placement("after_focused")
 
 ### scroll.set_wrap_focus
 
+:::unreleased
 **Expects:** a boolean (default `true`).
+:::
 
 **Does:** `true`: stepping `focus` past either end of the row
 wraps to the far end. `false`: focus stops at the ends. Applies
 to `focus` only. Monocle has the same
-toggle (`monocle.set_wrap_focus`), default on.
+toggle (`monocle.set_wrap_focus`).
 
 **Example:**
 
@@ -1991,7 +1997,9 @@ monocle.set_hide_style("park")
 
 ### monocle.set_wrap_focus
 
+:::unreleased
 **Expects:** `true` or `false` (default `true`).
+:::
 
 **Does:** whether the focus cycle wraps past the ends. On,
 `focus` past the last window returns to the first, and vice
@@ -2173,7 +2181,9 @@ track.set_overflow_style("cascade_overflow")
 
 ### track.set_wrap_focus
 
+:::unreleased
 **Expects:** a boolean (default `true`).
+:::
 
 **Does:** the track twin of `scroll.set_wrap_focus` (#168): on,
 stepping `focus` past an end wraps — within the focused track

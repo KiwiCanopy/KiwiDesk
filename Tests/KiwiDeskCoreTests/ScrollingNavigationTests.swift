@@ -274,7 +274,7 @@ struct ScrollingNavigationTests {
             "set_mode",
             args: [.string(space.raw), .string("monocle")]
         )
-        // Wrap is opt-in (#257); enable it to cycle past the end.
+        // Pin wrap on rather than ride the default (#257).
         core.execute(
             "monocle.set_wrap_focus",
             args: [.bool(true)]
