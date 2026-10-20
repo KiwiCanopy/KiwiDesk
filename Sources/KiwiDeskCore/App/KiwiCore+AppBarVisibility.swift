@@ -6,8 +6,11 @@ import AppKit
 /// owner's (2026-10-15, 2026-10-18) and live in the issue.
 extension KiwiCore {
     /// The verdict per window of `space`'s tiled members and
-    /// `floats`. Monocle shows one tile: the one its layout put in
-    /// front is lit, the rest hidden. A scrolling tile is judged
+    /// `floats` — the App Bar's, and `list_windows`' for every
+    /// layout (#2492). Monocle shows one tile: the one its layout
+    /// put in front is lit, the rest hidden. Every other layout's
+    /// tiles share the screen, each judged by its edge alone. A
+    /// scrolling tile is judged
     /// from the layout's frames — cut by the screen's edge, or
     /// stacked behind the tiles the scrolling raise order puts over
     /// it, the window in front on top — and no float counts against
@@ -63,9 +66,20 @@ extension KiwiCore {
         laid: (frames: [WindowID: CGRect], front: WindowID?, usable: CGRect)
     ) -> [WindowID: BarVisibility] {
         var verdicts: [WindowID: BarVisibility] = [:]
-        guard space.mode == .scrolling else {
+        switch space.mode {
+        case .scrolling: break
+        case .monocle:
             for (index, id) in tiled.enumerated() {
                 verdicts[id] = index == front ? .visible : .hidden
+            }
+            return verdicts
+        default:
+            for id in tiled {
+                verdicts[id] = BarVisibility.judge(
+                    laid.frames[id],
+                    on: laid.usable,
+                    above: []
+                )
             }
             return verdicts
         }

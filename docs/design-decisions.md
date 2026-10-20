@@ -1138,6 +1138,28 @@ would put every save behind `run_destructive`, so the verb stays
 one `run` can send, and replacing a look is the destructive
 `look.delete` followed by a save.
 
+:::unreleased
+### A window's frame is reported where KiwiDesk sent it
+
+**[Rationale]**
+
+`list_windows` (#2492) reports the frame KiwiDesk last sent a
+window, never one read back from the app: a query that messaged
+every app would block on the slowest one, and mid-animation the
+destination is what a script means to act on. A window on a Space
+no screen shows sits parked at a corner, so it reports no frame
+rather than a corner position that would win every "nearest
+window" search. Whether a shown window is in view comes from the
+App Bar's own verdict, so the bar and the CLI cannot disagree.
+Coordinates are top-left with y growing down, as AX, yabai and
+Hammerspoon report them, and `list_monitors` gives each screen's
+origin in the same space. The verb takes no window argument: a
+window-taking verb left without one means the focused window here
+(#1518), so a bare call would answer one window. A script picks
+one with `jq`. The trade: a window an app moved itself shows its
+state frame, which is the app's last report.
+:::
+
 ### Whether a setting lasts is not a fact about its command
 
 **[Rationale]**

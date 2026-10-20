@@ -481,6 +481,18 @@ what would change it; `explain_app <bundle_id>` says what KiwiDesk
 knows of an app whose window it does not list
 ([`explain_window`](lua-reference.md#explain_window)).
 
+:::unreleased
+`list_windows [space]` returns every window's frame, screen and
+visibility, in the same top-left coordinates `list_monitors` now
+gives each screen's origin in
+([`list_windows`](lua-reference.md#list_windows)). Pick one window
+with `jq`:
+
+```bash
+kiwidesk list_windows | jq '.[] | select(.focused)'
+```
+:::
+
 `kiwivision.toggle [lens]`, `kiwivision.current`, the
 `kiwivision.set_*` verbs, `kiwivision.define_lens <table>` and
 `kiwivision.delete_lens <name>` reach KiwiVision and its lenses
@@ -550,6 +562,7 @@ every lens with why it cannot turn on.
 | | `bind_profile_to_desktop` | Desktop number, profile, screen fingerprints… (optional; scopes the binding to that setup) (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
+| | `list_windows` | [space] |
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000) |
 | | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration |

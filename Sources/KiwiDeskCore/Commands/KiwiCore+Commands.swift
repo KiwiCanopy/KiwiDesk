@@ -165,6 +165,8 @@ extension KiwiCore {
             return layoutInfo()
         case "list_monitors":
             return listMonitors()
+        case "list_windows":
+            return listWindows(args)
         case "debug_log":
             onLog(args.first?.stringValue ?? "")
             return .ok()

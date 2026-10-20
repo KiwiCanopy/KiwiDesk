@@ -7199,6 +7199,36 @@ ids), `minimized` (ids), `away` (each `id` with its `space_id`)
 and `app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
 
+:::unreleased
+### list_windows
+
+**Expects:** optionally a Space id; every tracked window otherwise.
+
+**Does:** returns where each window sits, one entry per window, in
+Space order: `id` (as `get_state` has it, which keeps the app and
+title), `space_id`, `display` (the screen it draws on), `shown`,
+`frame` (`x`, `y`, `width`, `height`), `visibility` (`visible`,
+`partly`, `partly_left`/`_right`/`_top`/`_bottom` for the side
+still in view, or `hidden`), `floats`, `focused` and `fullscreen`.
+The frame is the one KiwiDesk sent the window — during an
+animation, where it is going — in screen points from the top-left
+of the main screen, y growing down. A window on a Space no screen
+shows has `shown` false and no `frame` or `visibility`.
+
+`list_monitors` reports each screen's `x` and `y` in the same
+coordinates, and `visible_frame`, the area its windows lay out in.
+
+**Example:**
+
+```lua
+for _, w in ipairs(KiwiDesk.list_windows()) do
+    if w.focused then
+        print(w.frame.x, w.frame.y, w.frame.width, w.frame.height)
+    end
+end
+```
+:::
+
 ### help
 
 **Expects:** nothing, or one command name.

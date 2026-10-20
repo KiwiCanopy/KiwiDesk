@@ -35,20 +35,39 @@ extension KiwiCore {
         )
     }
 
+    /// Each screen with its frame and the area windows lay out
+    /// in, in the AX coordinates `list_windows` reports (#2492).
     func listMonitors() -> CommandResponse {
-        let monitors = state.workspaces.allDisplays.map {
-            display in
-            JSONValue.object([
+        let displays = state.workspaces.allDisplays
+        let primary = Self.primaryHeight(of: displays)
+        let monitors = displays.map { display in
+            let frame = GeometryUtils.flip(
+                display.frame,
+                primaryHeight: primary
+            )
+            let usable = TilingEngine.screen(for: display.id)
+                .map { tiler.visibleBounds($0) }
+            return JSONValue.object([
                 "id": .number(Double(display.id.raw)),
                 "name": .string(display.name),
+                "x": .number(Double(frame.minX)),
+                "y": .number(Double(frame.minY)),
                 "width": .number(Double(display.frame.width)),
                 "height": .number(
                     Double(display.frame.height)
                 ),
+                "visible_frame": usable.map(Self.json(rect:)) ?? .null,
                 "fingerprint": .string(display.fingerprint),
             ])
         }
         return .ok(.array(monitors))
+    }
+
+    /// The height of the screen AppKit's global origin sits on,
+    /// which the AX flip measures from.
+    static func primaryHeight(of displays: [Display]) -> CGFloat {
+        displays.first { $0.frame.origin == .zero }?.frame.height
+            ?? displays.first?.frame.height ?? 0
     }
 
     func stateJSON() -> JSONValue {
