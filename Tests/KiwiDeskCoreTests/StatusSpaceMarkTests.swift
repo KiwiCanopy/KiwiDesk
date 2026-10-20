@@ -61,6 +61,17 @@ struct StatusSpaceMarkTests {
         #expect(!core.statusSpaceMark().screens.isEmpty)
     }
 
+    /// An Auto bar is hidden at rest, so it takes the stand-in too
+    /// (owner, 2026-10-20); only Always keeps the brand icon.
+    @Test("an auto bar lists the screens as a hidden one does")
+    func autoListsTheScreens() {
+        let core = makeCore()
+        core.tiler.settings.spaceBarStyle.visibility = .auto
+        #expect(core.statusSpaceMark().screens.count == 1)
+        core.tiler.settings.spaceBarStyle.visibility = .always
+        #expect(core.statusSpaceMark().screens.isEmpty)
+    }
+
     @Test("an icon-less Space shows its full name, not the monogram")
     func fullNameWithoutIcon() {
         let mark = makeCore().statusSpaceMark()

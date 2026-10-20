@@ -45,8 +45,9 @@ public struct StatusSpaceMark: Equatable {
     /// nil on `default`, which has no icon.
     public let layer: Layer?
     /// One per display showing a Space, unordered — the GUI
-    /// ranks them (`DeskOrder`). Empty unless the Space Bar is
-    /// `hidden` (#761).
+    /// ranks them (`DeskOrder`). Empty while the Space Bar is
+    /// `always`: an `auto` bar is hidden at rest too (#761, owner
+    /// 2026-10-20).
     public let screens: [Screen]
 }
 
@@ -59,7 +60,7 @@ extension KiwiCore {
                 hasIcon: $0.hasIcon
             )
         }
-        guard !tiler.settings.spaceBarStyle.visibility.showsUnprompted else {
+        guard tiler.settings.spaceBarStyle.visibility.revealable else {
             return StatusSpaceMark(layer: layer, screens: [])
         }
         let screens = state.workspaces.allDisplays.compactMap {

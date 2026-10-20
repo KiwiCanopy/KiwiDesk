@@ -10609,6 +10609,13 @@ every trigger the bar has reaches the item) and the GUI draws
 and names it; the name says the layer and each screen's Space,
 so VoiceOver reads what the eye does.
 
+:::unreleased
+"Off" became Auto and Hidden with #761, and both take the stand-in
+(owner, 2026-10-20): an Auto bar is hidden at rest, so the menu bar
+is again the one place that names the Space until the pointer
+reveals the bar. Only Always keeps the brand or layer icon.
+:::
+
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed and
 released freely — the preview mirrors what is held — and the first
