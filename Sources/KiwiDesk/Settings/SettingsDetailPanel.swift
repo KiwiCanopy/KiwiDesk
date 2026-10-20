@@ -7,12 +7,12 @@ import SwiftUI
 /// An area with nothing to show hides the panel and takes the
 /// full width — absence is a stated verdict. General is
 /// deliberately NOT here (#795, owner 2026-08-16): its diff list
-/// would be a structural zero. Advanced Colours joined in #793;
-/// the extension motion is a case here plus a branch below.
+/// would be a structural zero. The extension motion is a case
+/// here plus a branch below.
 enum SettingsDetailPanelOffer {
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .looks, .layoutDefaults,
-        .shortcuts, .advancedColors, .spaces, .kiwiVision,
+        .shortcuts, .spaces, .kiwiVision,
     ]
 
     static func offers(
@@ -86,8 +86,6 @@ struct SettingsDetailPanel: View {
             BarsPanelPreview(model: model)
         case .looks:
             PaletteScenePanel(model: model)
-        case .advancedColors:
-            AdvancedColorsPanel(model: model)
         case .spaces:
             SpacesPanelPreview(model: model)
         case .shortcuts:

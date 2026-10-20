@@ -21,9 +21,9 @@ enum ColorsRowOrder {
         .colours(.paletteDelete),
     ]
 
-    /// The Glass card's rows: the #1307 master, and the sheen's
-    /// own row directly beneath it (#1644).
-    static let glassAtRest: [SettingKey] = [
+    /// The Liquid Glass group's rows: the #1307 master, and the
+    /// sheen's own row directly beneath it (#1644).
+    static let glassRows: [SettingKey] = [
         .colours(.liquidGlassMaster),
         .colours(.borderSheen),
     ]
@@ -49,12 +49,12 @@ enum ColorsRowOrder {
         .colours(.animationsShelfDurationMS),
     ]
 
-    // MARK: - Advanced Colours (the Power-User area)
+    // MARK: - Colors & glass (#2389)
 
     /// The Accent group (#1857): the hue the active Space, the
     /// focus border and the drag ghost share — one half of each
     /// colour-vision pair, beside the Second accent's other half.
-    static let accentAtRest: [SettingKey] = [
+    static let accentRows: [SettingKey] = [
         .kiwishelf(.activeItemColor),
         .kiwishelf(.highlightColor),
         .kiwishelf(.hoverFillColor),
@@ -64,7 +64,7 @@ enum ColorsRowOrder {
     ]
 
     /// The Second accent group (#1857), its follower last.
-    static let secondAccentAtRest: [SettingKey] = [
+    static let secondAccentRows: [SettingKey] = [
         .spaceBar(.spaceBarFocusedItemColor),
         .borders(.dragDropZoneBorderColor),
         .borders(.dragDropZoneFillColor),
@@ -72,7 +72,7 @@ enum ColorsRowOrder {
     ]
 
     /// The shelf's own colours — every one at rest (#1857).
-    static let kiwishelfAtRest: [SettingKey] = [
+    static let kiwishelfColorRows: [SettingKey] = [
         .kiwishelf(.fillColor),
         .kiwishelf(.itemColor),
         .kiwishelf(.hoverItemColor),
@@ -82,7 +82,7 @@ enum ColorsRowOrder {
     ]
 
     /// The marks on windows that are not the focus (#1857).
-    static let windowMarksAtRest: [SettingKey] = [
+    static let windowMarksRows: [SettingKey] = [
         .borders(.borderUnfocusedColor),
         .borders(.stickyColor),
         .borders(.floatingColor),

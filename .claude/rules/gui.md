@@ -62,10 +62,10 @@ restated `20...80` satisfies on the day it is written.
   control it gates are one decision, so the toggle sits directly
   *above* the control it gates, never in a separate "toggles"
   block. Colors, which gate nothing, may group by type for grid
-  scannability — and since #678 Phase 3 they do so wholesale, on
-  their own destinations. **A colour renders in exactly one
-  area**, which is Advanced Colours; adding a `HexColorField`
-  anywhere else in `Settings/` reds
+  scannability — and since #678 Phase 3 they do so wholesale, in
+  one place. **A colour renders in exactly one area**, which is
+  Looks & Animations ▸ Colors & glass (#2389); adding a
+  `HexColorField` anywhere else in `Settings/` reds
   `SettingsColorSurfaceTests`, whose allow-list is the one copy
   of who may. Structure (is it drawn, how wide, how round) stays
   with its feature; only the tint moves.
@@ -615,7 +615,7 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
+it. **Bars, Looks & Animations, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
 Layouts, Profiles, Screens, Behaviour, the Mac Checklist, AI and
 KiwiVision render from it now** (#678 Phases 2-3; #1365; #1685;
@@ -813,7 +813,7 @@ gap and minimum-size masters' agreement, held to each master's
 own readout by `SettingsSummaryGroupTests` ▸
 `foldAgreesWithTheReadout`.
 
-A role group's colour on Advanced Colours (#1857) is another
+A role group's colour in Colors & glass (#1857) is another
 home, ruled: its followers are the group's ticks — scratch state
 no stored-setting register can read — so it answers its title's
 `?` and its "mixed" readout from `RolePaint.mixed` alone, both
@@ -1462,8 +1462,8 @@ claim; the obligations a change here takes on:
   outside the dimmed subtree, the way `LoginItemCard`
   already does. What SHAPE the remote
   pointer takes follows from the block: a `?` where there is a
-  live label above the dimmed rows to hang one on (Advanced
-  Colours), a `CrossReferenceRow` under them where there is not
+  live label above the dimmed rows to hang one on (Colors &
+  glass), a `CrossReferenceRow` under them where there is not
   (the per-space override editor, #841) — either way it must be
   reachable while the rows it explains are inert, so it is drawn
   outside the `GreyOut`, and hover text alone never discharges
@@ -2120,8 +2120,8 @@ authoring rules apply here even though the catalogs live in Core:
   with a common noun instead. And **do not name a place
   deictically** ("below", "above") unless the thing is on this
   page: `app_bar.icon_source.help` said its colour rows were
-  below while they render on Advanced Colours, all three
-  Power-User-only.
+  below while they rendered on another page, then Power User
+  only.
 - **Never hand-edit `Resources/Locales/*.json`.** `en.json` is
   regenerated from real call sites; the other catalogs are
   translation-owned and edited only through `scripts/*-key(s)`.

@@ -15,7 +15,7 @@ import Testing
 /// for one phase, with this guard owed at the end of it.
 ///
 /// **Designed as a lens, not a list** (the #520 lesson): a
-/// hand-written "these 25 keys live in Advanced Colours" cannot
+/// hand-written "these 25 keys live in Colors & glass" cannot
 /// see key 26. So this scans for the SHAPE — every colour well in
 /// the Settings tree — and pins the set of files allowed to
 /// contain one. A new swatch anywhere else fails here until
@@ -33,7 +33,7 @@ struct SettingsColorSurfaceTests {
     private let well = "HexColorField("
 
     /// The files that may contain one, each with its reason. The
-    /// Advanced Colours row builders are the whole list: the
+    /// Colors & glass row builders are the whole list: the
     /// dispatcher itself renders no well, and `ColorField.swift`
     /// declares the type rather than using it.
     private let allowed: [String: String] = [
@@ -48,7 +48,7 @@ struct SettingsColorSurfaceTests {
             + "no setting of its own (#1857)",
     ]
 
-    @Test("every colour well lives in Advanced Colours")
+    @Test("every colour well lives in Colors & glass")
     func colorWellsAreConfinedToTheColoursArea() throws {
         var found = 0
         var offenders: [String] = []
@@ -69,7 +69,7 @@ struct SettingsColorSurfaceTests {
             offenders.isEmpty,
             Comment(
                 rawValue:
-                    "colour wells outside Advanced Colours: "
+                    "colour wells outside Colors & glass: "
                     + offenders.joined(separator: ", ")
                     + " — a colour that renders in two areas has "
                     + "two answers to \"what is this set to\" "
@@ -159,7 +159,7 @@ struct SettingsColorSurfaceTests {
         // The role groups' colours are actions writing these
         // rows, not colours of their own (#1857).
         let placed = SettingKey.allCases.filter {
-            $0.placement.area == .advancedColours
+            $0.isColourRow
                 && SettingsDraftDiff.namesModelPath($0.id)
         }
         // 17 rows since #1517: the shelf's eight colours replaced

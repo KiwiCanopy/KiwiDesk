@@ -7,7 +7,7 @@ import Testing
 /// What the palette scene draws, and what it deliberately does
 /// not (#793).
 ///
-/// Advanced Colours' whole promise is that the twenty-five
+/// Colors & glass' whole promise is that the twenty-five
 /// colours can be judged TOGETHER, which is unanswerable from
 /// four separate group previews. A panel making that promise owes
 /// a check that it keeps it — and a SwiftUI body cannot be read

@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Every dimmed Advanced Colours row is explained by a live link,
+/// Every dimmed Colors & glass row is explained by a live link,
 /// in every combination of the switches that dim them (#1857,
 /// #1310). The verdict is the one answer the grey, the links and
 /// the group well read, so this walks it rather than a hand-picked
@@ -13,7 +13,7 @@ import Testing
 /// `@MainActor` for the verdict's sentences; the walk is 2¹³
 /// settings values over 19 rows, pure value work (~1 s).
 @MainActor
-@Suite("Advanced Colours verdict anchors")
+@Suite("Colors & glass verdict anchors")
 struct ColorsVerdictAnchorTests {
     /// A card, the rows whose own sentence it draws, and whether
     /// it draws the page links (the KiwiShelf card answers its
@@ -36,12 +36,12 @@ struct ColorsVerdictAnchorTests {
             drawsPageLinks: true
         ),
         Card(
-            keys: ColorsRowOrder.kiwishelfAtRest,
+            keys: ColorsRowOrder.kiwishelfColorRows,
             ownSentences: [.kiwishelf(.borderColor)],
             drawsPageLinks: false
         ),
         Card(
-            keys: ColorsRowOrder.windowMarksAtRest,
+            keys: ColorsRowOrder.windowMarksRows,
             ownSentences: [.borders(.borderUnfocusedColor)],
             drawsPageLinks: true
         ),
@@ -126,7 +126,7 @@ struct ColorsVerdictAnchorTests {
     @Test("the verdict answers exactly the census-gated rows")
     func verdictMatchesTheCensus() {
         let keys = SettingKey.allCases.filter {
-            $0.placement.area == .advancedColours
+            $0.isColourRow
                 && SettingsDraftDiff.namesModelPath($0.id)
         }
         #expect(keys.count == 19)

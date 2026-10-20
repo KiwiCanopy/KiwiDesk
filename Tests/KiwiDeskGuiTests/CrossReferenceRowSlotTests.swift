@@ -166,7 +166,7 @@ struct CrossReferenceRowSlotTests {
         )
     }
 
-    /// The Advanced Colours groups' link for their dimmed rows
+    /// The Colors & glass groups' link for their dimmed rows
     /// (#1857), one value at both mounts.
     @Test func theDimmedProsePlacesItsLink() {
         #expect(

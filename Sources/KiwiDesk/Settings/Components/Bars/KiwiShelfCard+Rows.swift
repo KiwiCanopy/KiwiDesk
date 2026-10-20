@@ -144,7 +144,7 @@ extension KiwiShelfCard {
                     + "set in %2$@; apps without a symbol keep "
                     + "their app icon.",
                 L("app_bar.icon_source.app_font", "Symbols"),
-                SettingsDestination.advancedColors.title
+                ColorsAndGlassSection.place
             )
         ) {
             Picker(

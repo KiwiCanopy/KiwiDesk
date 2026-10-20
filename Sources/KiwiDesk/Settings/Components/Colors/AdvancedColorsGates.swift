@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Advanced Colours gating logic (#520, #527, #678).
+/// Colors & glass gating logic (#520, #527, #678).
 @MainActor
 struct AdvancedColorsGates {
     let settings: TilingSettings

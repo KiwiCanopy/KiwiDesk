@@ -201,7 +201,7 @@ struct PaletteShelfChromeTests {
         // hand-listed version when the popovers split out, which
         // is the drift a list guarantees. Scoped to `Palette*`
         // rather than the whole directory because the rule is
-        // about THIS ancestor — the card — and Advanced Colours'
+        // about THIS ancestor — the card — and Colors & glass'
         // rows next door are entitled to their own inks.
         let files = try SourceScan.swiftSources(under: colorsDir)
             .filter {

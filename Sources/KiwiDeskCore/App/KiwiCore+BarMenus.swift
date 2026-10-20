@@ -62,8 +62,8 @@ extension KiwiCore {
             ),
             landingRow(L("bar.menu.looks", "Looks…"), .looks),
             landingRow(
-                L("bar.menu.advanced_colors", "Advanced Colors…"),
-                .advancedColors
+                L("bar.menu.colors_and_glass", "Colors & Glass…"),
+                .colorsAndGlass
             ),
         ]
     }

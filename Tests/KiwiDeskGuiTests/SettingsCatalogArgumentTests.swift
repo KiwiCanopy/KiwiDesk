@@ -37,6 +37,7 @@ struct SettingsCatalogArgumentTests {
         // `accentGroup` / `secondAccentGroup` declarations, which
         // the dotted-reference sweep still covers.
         "RoleColorCards.swift: role.control",
+        "AdvancedColorRow.swift: anchor",  // #2389's children
         // The collapsible card forwards its drawer's declaration
         // to the one `SettingsSection` it is (#1741); its mount
         // takes the drawer outright (`GesturesDrawer`), which the
@@ -235,9 +236,9 @@ struct SettingsCatalogArgumentTests {
         // Show the Space switch. 106 since #1685: the AI page's
         // three cards and its setup row. 107: #2265's KiwiHub group.
         // 112-118: #2103, #1870, #2103 v2. 119 #1869, 120 #2258,
-        // 121 #2312, 122 #2103's lens strip, 123 #2379, 125 #2417,
-        // 126 #2237, 129 #761, 130 Show & hide's card.
-        #expect(direct.values.reduce(0, +) == 130)
+        // 121 #2312, 122 #2103, 123 #2379, 125 #2417, 126 #2237,
+        // 129 #761, 130 Show & hide, 131 #2389.
+        #expect(direct.values.reduce(0, +) == 131)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

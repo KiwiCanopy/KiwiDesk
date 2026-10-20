@@ -1,9 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The two role groups that open Advanced Colours, side by side,
-/// stacked where the window's rows stack (#1857): the halves of
-/// each colour-vision pair are read together.
+/// The two role groups of Colors & glass, side by side, stacked
+/// where the window's rows stack (#1857): the halves of each
+/// colour-vision pair are read together.
 struct RoleColorCards: View {
     @ObservedObject var model: SettingsModel
     @Environment(\.settingsWidth) private var width
@@ -50,7 +50,9 @@ struct RoleColorCard: View {
         SettingsSection(
             role.control,
             caption: role.caption,
-            help: paint.mixed ? RolePaintRow.mixedHelp : nil
+            subsection: true,
+            help: paint.mixed ? RolePaintRow.mixedHelp : nil,
+            plated: false
         ) {
             RolePaintRow(role: role, paint: paint, hex: wellHex)
             Divider()

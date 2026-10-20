@@ -1,6 +1,6 @@
 import KiwiDeskCore
 
-/// The two role groups that open Advanced Colours (#1857): each
+/// The two role groups of Colors & glass (#1857, #2389): each
 /// holds one half of both colour-vision pairs.
 enum ColorRole: CaseIterable {
     case accent
@@ -9,9 +9,11 @@ enum ColorRole: CaseIterable {
     @MainActor var control: SettingsControl {
         switch self {
         case .accent:
-            return SettingsCatalog.advancedColors.accentGroup
+            return SettingsCatalog.colors.colorsAndGlass.children
+                .accentGroup
         case .secondAccent:
-            return SettingsCatalog.advancedColors.secondAccentGroup
+            return SettingsCatalog.colors.colorsAndGlass.children
+                .secondAccentGroup
         }
     }
 
@@ -35,8 +37,8 @@ enum ColorRole: CaseIterable {
     /// The group's rows, in display order.
     var keys: [SettingKey] {
         switch self {
-        case .accent: return ColorsRowOrder.accentAtRest
-        case .secondAccent: return ColorsRowOrder.secondAccentAtRest
+        case .accent: return ColorsRowOrder.accentRows
+        case .secondAccent: return ColorsRowOrder.secondAccentRows
         }
     }
 

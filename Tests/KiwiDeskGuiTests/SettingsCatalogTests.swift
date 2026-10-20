@@ -65,7 +65,7 @@ struct SettingsCatalogTests {
         // apply.
         // 65 since #754: Gaps & Borders gains the Borders card
         // that holds the decisions all three strokes share.
-        // 66 since #793: Advanced Colours gains the detail
+        // 66 since #793: the colour page gained the detail
         // panel's "Every color at once" scene.
         // 67 since #794: Spaces & Layouts gains its panel's
         // per-Space preview.
@@ -150,7 +150,10 @@ struct SettingsCatalogTests {
         // 177 since #761: Shortcuts' KiwiShelf group, the Show
         // master's drawer and its Space Bar row.
         // 178: the Show & hide card over Shortcuts' three groups.
-        #expect(allEntries.count == 178)
+        // 198 since #2389: Colors & glass and its twenty-five
+        // children, for the Liquid Glass card and the old page's
+        // four group titles and its scene.
+        #expect(allEntries.count == 198)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

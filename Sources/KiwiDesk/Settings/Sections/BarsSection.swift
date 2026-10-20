@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Profile Bars settings section: the KiwiShelf card, then the
 /// Space Bar and App Bar cards (#293, #678, #1517). No colours
-/// here: a colour renders in ONE area — Advanced Colours — which
+/// here: a colour renders in ONE area — Colors & glass — which
 /// `SettingsColorSurfaceTests` pins.
 struct BarsSection: View {
     @ObservedObject var model: SettingsModel
