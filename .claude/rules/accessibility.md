@@ -151,23 +151,30 @@ editing AX code:
   `readsNoVerdict`). A row starts `.frozen` — today's verdict,
   unjudged — and changing one is a ruling on that app, made in
   its own change, that marks the row `.ruled` with its issue;
-  never an edit to make the suite pass.
+  never an edit to make the suite pass. A dump KiwiDesk records
+  itself goes under `AXDumpsKiwiDesk/`, never `AXDumps/`, which a
+  refresh replaces whole (`AXDumpCorpusTests` ▸
+  `oneRowPerDump` reads both).
 - **Every reader of the ignore predicate states the title-bar
   button the #2072 escape decides on** — an accessory app's
   raised window with a button is admitted, not ignored, and so
   is Ghostty's among the layer-scoped bundles (#2067,
   `GhosttyButtonEscapeTests`) — and Ghostty's window at the
   modal-panel level with or without one, since its quick
-  terminal never takes that level (#2200). The
-  condition is the one `FloatDetection.needsTitlebarButton`, which
-  the off-main list read and the main-actor gate both ask;
+  terminal never takes that level (#2200). A buttoned
+  `AXSystemDialog` takes no escape, since the process drawing a
+  launcher is not stable across releases (#2239,
+  `SystemDialogEscapeTests`). The condition is the one
+  `FloatDetection.needsTitlebarButton`, handed the window's
+  subrole, which every reader asks (`TitlebarButtonWiringTests`
+  the census);
   `FloatDetection.shouldIgnore` and `isBuiltInIgnoredPanel` take
   the button with no default, so a new caller decides it, and the
   untracked-focus classifier reads it from the report's element.
   A reader of the visible-panel distrust asks the one
   `EventLoop.showsIgnoredPanel`, which leaves out the gate's
   admitted ids and hands the scan an untracked window's button
-  reader, never `FloatDetection.hasVisibleIgnoredPanel` beside it
+  and subrole readers, never `FloatDetection.hasVisibleIgnoredPanel` beside it
   (#2344, `VisiblePanelWiringTests` the door,
   `VisiblePanelButtonTests` the verdict; `CommandBarIgnoreTests`,
   `AXDumpCorpusTests`). The escape

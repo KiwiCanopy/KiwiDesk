@@ -1251,7 +1251,9 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   `AXDumpCorpusTests`)
 - every reader of the ignore predicate states the title-bar button the #2072
   escape decides on, asked through the one `FloatDetection.needsTitlebarButton`
-  (`CommandBarIgnoreTests`), a screen-saver-level window refused at adoption
+  handed the window's subrole, a buttoned `AXSystemDialog` taking no escape
+  (#2239, `SystemDialogEscapeTests`, `TitlebarButtonWiringTests`), a
+  screen-saver-level window refused at adoption
   alone, a tracked one judged through the one `FloatDetection.judgedLayer`
   (#2069, `ScreenSaverLayerWiringTests`)
 - a float rule is read only through `FloatRules.parse` and spelled only

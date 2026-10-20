@@ -140,7 +140,8 @@ struct ListedWindowReader: @unchecked Sendable {
         let asksButton = FloatDetection.needsTitlebarButton(
             layer: layer,
             isAccessory: isAccessory,
-            bundleID: bundleID
+            bundleID: bundleID,
+            subrole: facts.subrole
         )
         let isTracked = id.map { tracked.contains($0) }
         let button = asksButton ? traits(element, id) : nil

@@ -1,0 +1,28 @@
+{
+  "AXCloseButton" : {
+    "AXEnabled" : 1,
+    "AXRole" : "AXButton",
+    "AXSubrole" : "AXCloseButton"
+  },
+  "AXFullScreenButton" : null,
+  "AXIdentifier" : null,
+  "AXMain" : 0,
+  "AXMinimizeButton" : {
+    "AXEnabled" : 0,
+    "AXRole" : "AXButton",
+    "AXSubrole" : "AXMinimizeButton"
+  },
+  "AXModal" : 0,
+  "AXRole" : "AXWindow",
+  "AXSubrole" : "AXSystemDialog",
+  "AXTitle" : "",
+  "AXZoomButton" : {
+    "AXEnabled" : 1,
+    "AXRole" : "AXButton",
+    "AXSubrole" : "AXZoomButton"
+  },
+  "Aero.App.appBundleId" : "com.apple.campo",
+  "Aero.App.nsApp.activationPolicy" : "accessory",
+  "Aero.AxFailed" : "",
+  "Aero.windowLevel" : 23
+}

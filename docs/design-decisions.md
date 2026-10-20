@@ -1988,10 +1988,20 @@ its app's normal windows (#2072, the `macos_join_network` dump),
 which is the escape's weak point: a launcher that lists buttons
 anyway reads as a window.
 
-Such a launcher takes the bundle belt with no button escape.
-Spotlight's panel on macOS 27 is one (`com.apple.campo`, #2236):
-its AX lists all three buttons, and managed as a float it was
-moved off its own position by the float fit.
+So the escape asks the subrole too: a buttoned `AXSystemDialog`
+takes none (#2239). Spotlight's panel on macOS 27
+(`com.apple.campo`, #2236) lists all three buttons on that subrole,
+and managed as a float it was moved off its own position by the
+float fit. A bundle id cannot carry that verdict: the process
+that draws a panel is not stable across releases (macOS 27 moved
+Spotlight's panel out of `com.apple.Spotlight` into Siri's
+`com.apple.campo`), and it names one launcher where the next
+buttoned one would slip through. The subrole is the launcher's
+own evidence. Every other corpus window with it is buttonless,
+non-accessory or ignored by name, so the narrowing changed no recorded row
+(`AXDumpCorpusTests`, the `kiwidesk/macos27_spotlight` row). The
+bundle belt stays for a launcher that shows a Dock icon, which
+the accessory branch never sees.
 
 Above that class sits the **screen-saver level** (#2069): a
 window at CG layer 1000 or above is ignored whatever its app and
