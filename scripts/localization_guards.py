@@ -273,6 +273,12 @@ GLOSSARY = {
     "control",  # "Mission Control"
     "desktop",  # Mission Control's own noun
     "dock",
+    # "iCloud Drive": Apple's service name, which macOS keeps
+    # Latin in ja, ko, ru and zh (`general.sync.icloud`, #2324).
+    # Trade: a stray "drive" in non-Latin prose is no longer
+    # caught.
+    "drive",
+    "icloud",
     "esc",
     "finder",
     "mission",
