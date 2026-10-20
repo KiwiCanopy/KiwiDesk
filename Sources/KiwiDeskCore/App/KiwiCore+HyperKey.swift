@@ -31,10 +31,11 @@ extension KiwiCore {
             applyHyperKey()
         }
         switch keys.hyperStatus {
-        case .refused:
+        case .refused(let foreign):
+            let named = foreign.map { " (\($0.wireSpelling))" } ?? ""
             return .fail(
-                "a key remap KiwiDesk did not set is in place; "
-                    + "Hyper stays off"
+                "a key remap KiwiDesk did not set is in place"
+                    + "\(named); Hyper stays off"
             )
         case .failed:
             return .fail("hidutil did not answer; Hyper stays off")
@@ -70,7 +71,7 @@ extension KiwiCore {
         // is not the user's Hyper key.
         let status = want == nil ? .off : outcome
         setHyperState(status)
-        if want != nil, outcome == .refused || outcome == .failed {
+        if want != nil, outcome != .on {
             onLog("hyper: remap \(outcome), Hyper key off")
         }
         return status

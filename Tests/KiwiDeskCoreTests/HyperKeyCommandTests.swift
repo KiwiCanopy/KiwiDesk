@@ -76,13 +76,52 @@ struct HyperKeyCommandTests {
         let reply = core.execute("set_hyper_key", args: [.string("caps_lock")])
         #expect(!reply.isSuccess)
         #expect(!core.keys.hyperEnabled)
-        #expect(core.keys.hyperStatus == .refused)
+        #expect(
+            core.keys.hyperStatus
+                == .refused(
+                    HyperForeignRemap(source: .capsLock, destination: .f18)
+                )
+        )
+        #expect(reply.error?.contains("(caps_lock -> f18)") == true)
         // Off takes the no-spawn return and still clears the
         // status the row reads.
         _ = core.execute("set_hyper_key", args: [.string("off")])
         #expect(core.keys.hyperStatus == .off)
         core.retireHyperKey()
         #expect(!fake.mapping.isEmpty)  // never cleared
+    }
+
+    @Test("a mapping no key names is refused unnamed")
+    func unnamedForeignMapping() {
+        let core = runningCore()
+        let fake = FakeHost()
+        // Caps Lock → Escape: Escape is no `HyperSourceKey`.
+        let escape = HyperKeyRemap.usage(0x29)
+        let capsLock = HyperKeyRemap.usage(0x39)
+        fake.mapping = [.init(source: capsLock, destination: escape)]
+        core.hyperRemapHost = fake.host
+        let reply = core.execute("set_hyper_key", args: [.string("f13")])
+        #expect(core.keys.hyperStatus == .refused(nil))
+        #expect(reply.error?.contains("(") == false)
+        // Two entries name no one mapping, even when both are keys.
+        fake.mapping = [
+            HyperKeyRemap.pair(for: .capsLock),
+            HyperKeyRemap.pair(for: .f13),
+        ]
+        _ = core.execute("set_hyper_key", args: [.string("f14")])
+        #expect(core.keys.hyperStatus == .refused(nil))
+    }
+
+    @Test("a HID usage names a key on the keyboard page alone")
+    func usageNamesKey() {
+        let usage = HyperKeyRemap.usage(0x39)
+        #expect(HyperSourceKey(hidUsage: usage) == .capsLock)
+        #expect(HyperSourceKey(hidUsage: usage & 0xFF) == nil)
+        #expect(HyperSourceKey(hidUsage: 0xFF_0000_0039) == nil)
+        for key in HyperSourceKey.allCases {
+            let full = HyperKeyRemap.usage(key.hidUsage)
+            #expect(HyperSourceKey(hidUsage: full) == key)
+        }
     }
 
     @Test("off clears, and an unknown key is refused by name")
