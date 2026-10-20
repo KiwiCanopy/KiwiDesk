@@ -35,16 +35,16 @@ struct SettingsDiffRowsView: View {
         }
         .onChange(of: rows.map(\.id)) { _, _ in settleRevertFocus() }
         .alert(
-            GroupRevertWords.title,
+            pendingGroup.map { GroupRevertWords.title(for: $0.row) } ?? "",
             isPresented: groupQuestionShown,
             presenting: pendingGroup?.row
-        ) { _ in
-            Button(GroupRevertWords.confirm, role: .destructive) {
+        ) { row in
+            Button(GroupRevertWords.confirm(for: row), role: .destructive) {
                 confirmGroupRevert()
             }
             Button(L("footer.cancel", "Cancel"), role: .cancel) {}
-        } message: { _ in
-            Text(GroupRevertWords.message)
+        } message: { row in
+            Text(GroupRevertWords.message(for: row))
         }
     }
 
@@ -84,7 +84,11 @@ struct SettingsDiffRowsView: View {
         if let revert, revert.can(row) {
             HStack(spacing: 6) {
                 rowButton(row)
-                RowRevertButton(row: row, group: revert.takesGroup(row)) {
+                RowRevertButton(
+                    row: row,
+                    group: revert.takesGroup(row),
+                    others: revert.companions(row)
+                ) {
                     requestRevert(row, among: shown, with: revert)
                 }
                 .focused($focusedRevert, equals: row.id)

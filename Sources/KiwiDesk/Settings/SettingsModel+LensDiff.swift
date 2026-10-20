@@ -14,7 +14,8 @@ extension SettingsModel {
                 row(
                     name,
                     "deleted",
-                    L("kiwivision.lens.diff.deleted", "deleted")
+                    L("kiwivision.lens.diff.deleted", "deleted"),
+                    .lens(stored: name, page: nil)
                 )
             )
         }
@@ -27,10 +28,11 @@ extension SettingsModel {
                     row(
                         name,
                         "new",
-                        L("kiwivision.lens.diff.new", "added")
+                        L("kiwivision.lens.diff.new", "added"),
+                        .lens(stored: nil, page: name)
                     )
                 )
-                result += reachRows(name, stored: nil)
+                result += reachRows(name)
                 continue
             }
             if old != name {
@@ -42,7 +44,8 @@ extension SettingsModel {
                             "kiwivision.lens.diff.renamed",
                             "renamed to “%1$@”",
                             name
-                        )
+                        ),
+                        .lens(stored: old, page: name)
                     )
                 )
             }
@@ -53,24 +56,21 @@ extension SettingsModel {
                     row(
                         name,
                         "edited",
-                        L("kiwivision.lens.diff.edited", "edited")
+                        L("kiwivision.lens.diff.edited", "edited"),
+                        .lensFields(page: name)
                     )
                 )
             }
-            result += reachRows(name, stored: old)
+            result += reachRows(name)
         }
         return result
     }
 
     /// One row per saved profile `name` newly reaches or leaves out;
     /// a new lens starts out reaching every one.
-    private func reachRows(
-        _ name: String,
-        stored old: String?
-    ) -> [SettingsDiffRow] {
+    private func reachRows(_ name: String) -> [SettingsDiffRow] {
         guard let after = lensReach(name), let profiles = lensProfiles,
-            let before = old.map({ ruleReachStored?.profilesReaching($0) })
-                ?? Set(profiles)
+            let before = lensReachWithoutPick(name)
         else { return [] }
         return profiles.compactMap { profile in
             let had = before.contains(profile)
@@ -89,7 +89,8 @@ extension SettingsModel {
                         "kiwivision.lens.diff.left_out",
                         "left out of %1$@",
                         profile
-                    )
+                    ),
+                .lensReach(page: name, profile: profile)
             )
         }
     }
@@ -97,13 +98,16 @@ extension SettingsModel {
     private func row(
         _ lens: String,
         _ instance: String,
-        _ note: String
+        _ note: String,
+        _ revert: SettingsRowRevert
     ) -> SettingsDiffRow {
-        .note(
+        var row = SettingsDiffRow.note(
             .kiwiVision(.lenses),
             instance: "lens.\(lens).\(instance)",
             label: L("kiwivision.lens.diff.label", "“%1$@” lens", lens),
             note: note
         )
+        row.revert = revert
+        return row
     }
 }

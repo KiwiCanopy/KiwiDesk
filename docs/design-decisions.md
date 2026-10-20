@@ -7468,12 +7468,28 @@ these are the groups: a Space in the list goes back through the
 Space doors, taking what is filed under it; a bar's edge goes back
 with its per-screen map, as the edge doors write them, and the
 master with both bars'; a rule takes the reach the draft gave it
-(#1393); and the shortcut layers go back whole, with the Desktop
-base, every key reach and every layer edit, since a binding's reach
-is keyed into the layers it was encoded against (#2022). That last
-group is the one a row cannot name — one binding's ↺ would take
-every other binding change with it — so its ↺ says so and asks
-first (`RevertWriter.grouped`, owner 2026-10-19). The reach rows
+(#1393); and a shortcut binding goes back with every changed
+binding of its layer that its saved chord, or the chord it now
+holds, was moved to or from (#2412, owner 2026-10-20) — the
+recorder's steal writes both in one gesture, so the ↺ on either
+row undoes the move and both rows leave. The set is read from who
+holds each chord at revert time, never from a stored history, so a
+later edit still counts; it never crosses a layer or takes an
+unchanged binding, and one pure function (`BindingRevertSet`) gives
+the ↺ both its set and its words ("Revert, with Swap Left"). The
+binding's reach picks go with it. The alternative, taking the chord
+back alone, leaves the binding it was moved to unbound — a state
+nobody saved — and still needs a second press. A ↺ that takes more
+than its own words name asks first (a binding's names every
+binding it takes): a layer's or a lens's create, delete
+or rename puts the whole layer or lens back with its bindings, and
+a "Layers edited" row, which names nothing, takes every shortcut
+change (`RevertWriter.grouped`). A row for a layer's switch or a lens's
+toggle goes back with that layer or lens, since alone it would
+bring back a row for a name the page no longer has, and a layer or
+lens whose saved name another one now holds draws no ↺: it cannot
+come back under that name, and taking the newer one's name away is
+not a revert. The reach rows
 are grouped the same way: a profile that changed exactly as the
 edited one did is named on the edited rows ("All profiles" for a
 shared rule, else a pair or a count) instead of in a row of its
@@ -7492,8 +7508,8 @@ group back without asking, since the row names it. Their way
 back is the rule's: the reach
 settles once the app's rules, or the shortcut layers, are the
 baseline's again. A row says
-how it reverts and offers no ↺ until it does: a lens or layer edit,
-profile drift and a leaf no key claims draw none.
+how it reverts and offers no ↺ until it does: profile drift and a leaf no key
+claims draw none.
 
 A live row's ↺ is not a draft writeback (#2411): it puts the row's
 leaves back to the value the live profile or its shared look

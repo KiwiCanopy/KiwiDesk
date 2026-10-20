@@ -23,7 +23,11 @@ struct LayerCreatorCensusTests {
     private static let creators: [String: Int] = [
         // Add's new layer and its rejoin, and Import's merge — all
         // three recorded through `layerAdmission`.
-        "Settings/SettingsModel+LayerAdd.swift": 3
+        "Settings/SettingsModel+LayerAdd.swift": 3,
+        // A layer revert puts back the layer the saved page holds
+        // and drops its edit, so the page's layer set is the
+        // stored one again and owes no record (#2412).
+        "Settings/SettingsModel+ShortcutRevert.swift": 1,
     ]
 
     /// A rename moves a layer and creates none, so it is registered
