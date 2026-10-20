@@ -1936,7 +1936,6 @@
   "shortcuts.panel.inactive.caption": "Estes atalhos apontam para espaços que não estão na lista atual. Eles continuam funcionando — pressionar um recria o seu espaço — e voltam a ficar ativos quando o espaço correspondente retorna.",
   "shortcuts.panel.no_match": "Nenhum atalho corresponde",
   "shortcuts.panel.scroll_hint": "Role para ver mais atalhos",
-  "shortcuts.panel.unavailable": "Os atalhos são gerenciados pelo seu init.lua.",
   "shortcuts.remove_binding": "Remover atalho",
   "shortcuts.rename": "Renomear",
   "shortcuts.rename_ellipsis": "Renomear…",

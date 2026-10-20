@@ -1936,7 +1936,6 @@
   "shortcuts.panel.inactive.caption": "Ces raccourcis ciblent des espaces absents de la liste actuelle. Ils fonctionnent toujours — appuyer sur l'un d'eux récrée son espace — et redeviennent actifs à la réapparition de leur espace.",
   "shortcuts.panel.no_match": "Aucun raccourci ne correspond",
   "shortcuts.panel.scroll_hint": "Faites défiler pour plus de raccourcis",
-  "shortcuts.panel.unavailable": "Les raccourcis sont gérés par votre init.lua.",
   "shortcuts.remove_binding": "Supprimer le raccourci",
   "shortcuts.rename": "Renommer",
   "shortcuts.rename_ellipsis": "Renommer…",

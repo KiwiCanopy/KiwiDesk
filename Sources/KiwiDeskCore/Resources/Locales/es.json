@@ -1936,7 +1936,6 @@
   "shortcuts.panel.inactive.caption": "Estos atajos apuntan a espacios que no están en la lista actual. Siguen funcionando — al pulsar uno se vuelve a crear su espacio — y vuelven a activarse cuando reaparece su espacio.",
   "shortcuts.panel.no_match": "Ningún atajo coincide",
   "shortcuts.panel.scroll_hint": "Desplázate para ver más atajos",
-  "shortcuts.panel.unavailable": "Los atajos están gestionados por tu init.lua.",
   "shortcuts.remove_binding": "Eliminar atajo",
   "shortcuts.rename": "Renombrar",
   "shortcuts.rename_ellipsis": "Renombrar…",

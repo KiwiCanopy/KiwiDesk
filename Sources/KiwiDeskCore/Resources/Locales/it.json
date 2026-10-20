@@ -1936,7 +1936,6 @@
   "shortcuts.panel.inactive.caption": "Queste scorciatoie puntano a spazi che non sono nell'elenco attuale degli spazi. Funzionano comunque — premendone una il suo spazio viene ricreato — e tornano attive quando il loro spazio ricompare.",
   "shortcuts.panel.no_match": "Nessuna scorciatoia corrisponde",
   "shortcuts.panel.scroll_hint": "Scorri per altre scorciatoie",
-  "shortcuts.panel.unavailable": "Le scorciatoie sono gestite dal tuo init.lua.",
   "shortcuts.remove_binding": "Rimuovi scorciatoia",
   "shortcuts.rename": "Rinomina",
   "shortcuts.rename_ellipsis": "Rinomina…",
