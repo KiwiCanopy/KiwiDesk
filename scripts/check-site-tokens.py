@@ -1413,6 +1413,38 @@ def check_raster_favicon(dist: pathlib.Path) -> None:
     print(f"raster favicon: declared on all {len(pages)} built page(s)")
 
 
+def check_no_sanity_in_dist(dist: pathlib.Path) -> None:
+    """No built file names a Sanity host (#2369).
+
+    The voices are read from Sanity at BUILD time and their photos
+    are re-emitted under dist/ by Astro's image pipeline, because
+    the CSP (`public/_headers`) and the privacy policy promise a
+    visitor's page asks no third party. A photo handed to a bare
+    `<img>`, or a fetch moved into a client script, still builds and
+    breaks that promise, so the artifact is what is held.
+    """
+    host = re.compile(r"(?:cdn|api|apicdn)\.sanity\.io")
+    texts = (".html", ".css", ".js", ".mjs", ".json", ".xml", ".txt")
+    hits = [
+        p for p in sorted(dist.rglob("*"))
+        if p.suffix in texts and p.is_file()
+        and host.search(p.read_text(errors="ignore"))
+    ]
+    if hits:
+        listed = ", ".join(str(p.relative_to(dist)) for p in hits[:5])
+        fail(
+            f"{len(hits)} built file(s) name a Sanity host (e.g. "
+            f"{listed}). Voice photos must go through astro:assets so "
+            "the page serves them itself."
+        )
+    avatars = re.compile(r"<img\b[^>]*\bclass=\"voice__avatar\"[^>]*>")
+    drawn = sum(
+        len(avatars.findall(p.read_text()))
+        for p in dist.rglob("*.html")
+    )
+    print(f"sanity: no host in dist/, {drawn} voice photo(s) self-served")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1437,6 +1469,7 @@ def main() -> None:
     check_typed_changelog(dist)
     check_roadmap_feed(dist)
     check_raster_favicon(dist)
+    check_no_sanity_in_dist(dist)
 
 
 if __name__ == "__main__":
