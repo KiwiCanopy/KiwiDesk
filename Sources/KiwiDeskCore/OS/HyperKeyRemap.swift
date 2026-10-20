@@ -50,6 +50,23 @@ enum HyperKeyRemap {
         return current == [pair] ? .none : .set(pair)
     }
 
+    /// The key a full HID usage names, through `usage(_:)` alone;
+    /// nil for a key that cannot be Hyper.
+    static func key(atUsage full: UInt64) -> HyperSourceKey? {
+        HyperSourceKey.allCases.first { usage($0.hidUsage) == full }
+    }
+
+    /// The one foreign entry as keys the GUI can name (#2470); nil
+    /// for several entries or a key outside `HyperSourceKey`, so a
+    /// reader falls back to the unnamed sentence.
+    static func foreign(in current: Set<Pair>) -> HyperForeignRemap? {
+        guard current.count == 1, let pair = current.first,
+            let source = key(atUsage: pair.source),
+            let destination = key(atUsage: pair.destination)
+        else { return nil }
+        return HyperForeignRemap(source: source, destination: destination)
+    }
+
     static func pair(for key: HyperSourceKey) -> Pair {
         Pair(
             source: usage(key.hidUsage),
@@ -150,7 +167,7 @@ extension HyperKeyRemap {
             // A record of ours the mapping no longer holds is
             // stale: someone else replaced it.
             host.writeWritten(nil)
-            return .refused
+            return .refused(foreign(in: current))
         }
         let before = host.readWritten()
         // Recorded ahead of the set: a timed-out set may still
@@ -229,16 +246,6 @@ extension HyperKeyRemap {
         guard read == 0 else { return nil }
         return String(decoding: bytes.prefix { $0 != 0 }, as: UTF8.self)
     }
-}
-
-/// What the Hyper key's remap last did, as structure for the GUI
-/// (#96, #1870).
-public enum HyperKeyStatus: Sendable, Equatable {
-    case on, off
-    /// A key mapping KiwiDesk did not write is in place.
-    case refused
-    /// `hidutil` did not answer.
-    case failed
 }
 
 extension HyperKeyRemap.Host {
