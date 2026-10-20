@@ -137,16 +137,23 @@ struct ShelfRevealStyleTests {
         let (core, display) = try #require(
             makeCore(space: .hidden, app: .hidden)
         )
+        // A bottom edge, where the screen side is not the content's
+        // top.
         core.tiler.settings.kiwishelf.revealStyle = .grow
+        core.tiler.settings.spaceBarStyle.setEdge(.bottom)
+        core.tiler.settings.appBarStyle.setEdge(.bottom)
+        core.updateBars()
         #expect(core.execute("space_bar.toggle_reveal", args: []).isSuccess)
         let overlay = try #require(
-            core.shelves.overlayForTesting(display, edge: .top)
+            core.shelves.overlayForTesting(display, edge: .bottom)
         )
         #expect(overlay.revealOrigin == nil)
+        let origin = overlay.revealPath.origin
         #expect(
-            overlay.revealPath.origin
-                == ShelfOverlay.screenSide(of: overlay.restRoom, edge: .top)
+            origin
+                == ShelfOverlay.screenSide(of: overlay.restRoom, edge: .bottom)
         )
+        #expect(origin.minY == overlay.restRoom.maxY)
     }
 
     @Test("A bundled look never changes the reveal style")
