@@ -165,6 +165,8 @@ final class ShelfOverlay {
         // out fades back (#1838).
         let glides = panel.isVisible
         let fadesBack = glides && leaving != nil
+        // Read before the room moves the content's model (#2497).
+        let inFlight = BarMotion.revealShift(of: content)
         let slidesBack = fadesBack && leavingSlides
         leaving = nil
         stripView.frame = CGRect(origin: .zero, size: strip.size)
@@ -215,7 +217,7 @@ final class ShelfOverlay {
         }
         // Its landing scheduled after the sections' own (#2497).
         if glides, travels { holdRoomForGlide() } else { settleRoom() }
-        if slidesBack { revealIn() }
+        if slidesBack { revealIn(from: inFlight) }
         layoutHandle(
             range: range,
             divider: Self.dividerFrame(
@@ -259,14 +261,14 @@ final class ShelfOverlay {
     /// its own landing.
     @discardableResult
     func hide(animated: Bool = false) -> Bool {
-        // A reveal a leave cuts short never lands (#2497).
-        revealing = nil
         guard let panel, panel.isVisible else {
+            cutReveal()
             leaving = nil
             onLeft()
             return true
         }
         if animated, slides { return retractOut() }
+        cutReveal()
         guard animated, BarMotion.shelfGlideLength > 0 else {
             leaving = nil
             panel.orderOut(nil)

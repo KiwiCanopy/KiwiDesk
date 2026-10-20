@@ -63,6 +63,22 @@ extension BarMotion {
     /// The reveal's animation key, on the content.
     static let revealKey = "kiwi.reveal"
 
+    /// The slide `view` is in, as a position shift in its
+    /// superlayer, nil where none plays. Read it before the view's
+    /// frame moves in the same pass: the presentation shows the
+    /// last commit, the model the new frame.
+    @MainActor
+    static func revealShift(of view: NSView) -> CGPoint? {
+        guard let layer = view.layer,
+            layer.animationKeys()?.contains(revealKey) == true,
+            let shown = layer.presentation()
+        else { return nil }
+        return CGPoint(
+            x: shown.position.x - layer.position.x,
+            y: shown.position.y - layer.position.y
+        )
+    }
+
     /// Plays a reveal (`entering`) or a retract on `view`, the
     /// panel's content, and returns its length; the caller lands
     /// it through its own `afterReveal` seam. A `held` start
@@ -70,14 +86,15 @@ extension BarMotion {
     /// orders the panel in holds it — and a `lead` start waits
     /// `revealLead` first. The slide is ADDITIVE on the layer's
     /// position, so a resize of the panel's room under it moves
-    /// nothing; a motion already playing continues from where it
-    /// stands.
+    /// nothing; a slide already playing continues from `from`
+    /// (`revealShift`), a fade from where it stands.
     @MainActor
     @discardableResult
     static func playReveal(
         _ view: NSView,
         offset: CGVector,
         entering: Bool,
+        from: CGPoint? = nil,
         held: Bool = false,
         lead: Bool = false
     ) -> TimeInterval {
@@ -119,16 +136,10 @@ extension BarMotion {
                 x: away.minX - rest.minX,
                 y: away.minY - rest.minY
             )
-            let now = current.map {
-                CGPoint(
-                    x: $0.position.x - layer.position.x,
-                    y: $0.position.y - layer.position.y
-                )
-            }
             let slide = CABasicAnimation(keyPath: "position")
             slide.isAdditive = true
             slide.fromValue = NSValue(
-                point: now ?? (entering ? shift : .zero)
+                point: from ?? (entering ? shift : .zero)
             )
             slide.toValue = NSValue(point: entering ? .zero : shift)
             slide.duration = span

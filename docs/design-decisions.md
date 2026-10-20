@@ -14628,8 +14628,7 @@ A reveal slides the whole bar in from the shelf's screen side,
 already laid out — out from under the menu bar where it shows,
 from the screen's edge where it hides — while the mark fades, and
 the retract slides it back out the same way, the mark returning
-as it lands (owner, device, 2026-10-20, replacing a plate that
-grew out of the mark). The panel stays still and the content
+as it lands (owner ruling, 2026-10-20). The panel stays still and the content
 travels inside it: moving the window frame lagged on the device,
 the compositor moving it per frame and the glass re-sampling, so
 for the slide's length the panel's room runs out over the outer

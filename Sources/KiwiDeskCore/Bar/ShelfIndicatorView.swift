@@ -57,8 +57,8 @@ final class ShelfIndicatorView: NSView {
             hovered: spec.hovered,
             animated: animated && was?.hovered != spec.hovered
         )
-        // The plate gives way under the shelf it reveals and
-        // comes back as the shelf retracts into it.
+        // The mark gives way to the shelf it reveals and comes
+        // back as the shelf's retract lands.
         if let was, was.standsAside != spec.standsAside, animated {
             BarMotion.fadeMark(body, showing: !spec.standsAside)
         } else if was?.standsAside != spec.standsAside || !animated {

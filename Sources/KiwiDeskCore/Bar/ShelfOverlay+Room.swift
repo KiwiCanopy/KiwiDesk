@@ -8,7 +8,9 @@ extension ShelfOverlay {
     /// What the shelf draws at rest, in strip coordinates and the
     /// strip's whole depth: `plate`, or under Boxed the span of the
     /// sections' plate asks, which hold their boxes, counts and
-    /// fades; the sections' slots where nothing asks.
+    /// fades; the sections' slots where nothing asks. Every room
+    /// keeps the strip's depth and far side, which the hover peek
+    /// reads off the panel's frame (`BarPeek`).
     nonisolated static func restingRoom(
         plate: CGRect?,
         sections: [Section],
@@ -98,6 +100,7 @@ extension ShelfOverlay {
         }
         let token = UUID()
         roomGlide = token
+        // A union, so a slide in flight keeps its margin too.
         widenRoom(to: restRoom)
         afterGlide { [weak self] in
             guard let self, self.roomGlide == token else { return }
@@ -110,11 +113,7 @@ extension ShelfOverlay {
     func openSlideRoom() {
         guard let drawn else { return }
         widenRoom(
-            to: Self.slideRoom(
-                restRoom,
-                edge: drawn.edge,
-                gap: drawn.shelf.outerMargin
-            )
+            to: Self.slideRoom(restRoom, edge: drawn.edge, gap: revealGap)
         )
     }
 

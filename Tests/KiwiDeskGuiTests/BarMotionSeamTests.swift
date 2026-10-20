@@ -122,6 +122,7 @@ struct BarMotionSeamTests {
         "springAnimation": ["reduceMotion"],
         "opacityFade": ["reduceMotion"],
         "revealOffset": [],
+        "revealShift": [],
         "revealMotion": ["reduceMotion"],
         "playReveal": ["revealMotion(", "isReduced"],
         "afterCommit": [],

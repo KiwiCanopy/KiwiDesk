@@ -558,16 +558,20 @@ render content into it (#1517). Obligations:
   drivers. A piece drawn outside its run's plate ask is clipped
   at rest, and noticing one is review's.
 - **A hiding shelf slides whole from its screen side, and the
-  panel never moves for it (#2497).** The reveal and the retract
-  travel the content through `BarMotion.playReveal`, an ADDITIVE
-  position slide from `BarMotion.revealOffset` — the strip's depth
-  plus the outer margin, so it starts wholly clipped at the usable
-  area's edge — while the panel stands in its slide room; moving
-  the window frame instead lagged on the device. The mark fades
-  out as the slide starts and back as the retract lands
-  (`BarMotion.markFade`), and Reduce Motion cross-fades in place.
-  `ShelfRevealMotionTests` holds the decisions,
-  `ShelfRevealStartTests` the start order.
+  panel takes no per-frame write for it (#2497)** — its room opens
+  once as the motion starts and settles at the landing; moving the
+  window frame instead lagged on the device. The reveal and the
+  retract travel the content through `BarMotion.playReveal`, an
+  ADDITIVE position slide from `BarMotion.revealOffset` — the
+  strip's depth plus the outer margin, so it starts wholly clipped
+  at the usable area's edge — and a slide taken back continues
+  from `BarMotion.revealShift`, read before that pass moves the
+  room. A leave that is no slide ends the reveal's motion with its
+  token (`cutReveal`). The mark fades out as the slide starts and
+  back as the retract lands (`BarMotion.markFade`), and Reduce
+  Motion cross-fades in place. `ShelfRevealMotionTests` holds the
+  decisions, `ShelfRevealSlideEdgeTests` the direction on every
+  edge as drawn, `ShelfRevealStartTests` the start order.
 - **Centre the live shelf's section divider between what the two
   sections DRAW, never on the slot gutter (#1779)**: each bar insets its
   run and its items' content by its own amounts, so the gutter

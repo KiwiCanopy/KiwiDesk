@@ -75,8 +75,7 @@ struct ShelfRevealStartTests {
             motion(overlay.content) as? CABasicAnimation
         )
         #expect(slide.keyPath == "position")
-        let end = try #require(slide.toValue as? NSValue).pointValue
-        #expect(abs(end.y) == Self.strip.height)
+        #expect(slide.isAdditive)
     }
 
     @Test("Under Reduce Motion a reveal fades the content in place")

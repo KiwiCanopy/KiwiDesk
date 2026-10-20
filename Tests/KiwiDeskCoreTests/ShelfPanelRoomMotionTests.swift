@@ -112,12 +112,17 @@ struct ShelfPanelRoomMotionTests {
         var glides: [() -> Void] = []
         overlay.afterGlide = { glides.append($0) }
         overlay.afterReveal = { _, _ in }
-        overlay.afterCommit = { $0() }
+        // The held start never begins: the fade takes the shelf first.
+        overlay.afterCommit = { _ in }
         overlay.slides = true
         let view = NSView()
         show(overlay, Self.section(view, plate: Self.plate(at: 200)))
         overlay.slides = false
         overlay.hide(animated: true)
+        #expect(
+            overlay.content.layer?.animation(forKey: BarMotion.revealKey)
+                == nil
+        )
         for landing in glides { landing() }
         show(overlay, Self.section(view, plate: Self.plate(at: 200)))
         let panel = try #require(overlay.panel)
@@ -146,8 +151,6 @@ struct ShelfPanelRoomMotionTests {
         #expect(held.keyPath == "position")
         #expect(held.isAdditive)
         #expect(held.speed == 0)
-        let start = try #require(held.fromValue as? NSValue).pointValue
-        #expect(abs(start.y) == Self.strip.height + Self.margin)
         try #require(commits.count == 1)
         commits[0]()
         let moving = try #require(

@@ -1545,6 +1545,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   `ShelfPanelRoomMotionTests`) — and a hiding shelf slides whole from its
   screen side inside a still panel through `BarMotion.playReveal`
   (`ShelfRevealMotionTests`)
+- a bar joining or leaving a fused shelf never budges its neighbour — on a
+  new slot the run, items, box glass and float break snap, the shelf's glide
+  the one motion (`AppBarLandingTests`)
 - every rule a bar draws takes `BarDivider` (`ShelfDividerWeightTests`) and
   idle ink is `KiwiShelf.idleItemColor` (`IdleItemContrastTests`)
 - overflow goes through `ShelfOverflow`, `ShelfFadeMask` and `ShelfCountView`

@@ -15,8 +15,19 @@ extension ShelfOverlay {
         return BarMotion.revealOffset(
             edge: drawn.edge,
             depth: drawn.edge.isHorizontal ? strip.height : strip.width,
-            gap: drawn.shelf.outerMargin
+            gap: revealGap
         )
+    }
+
+    /// The strip's distance to the usable area's edge — the outer
+    /// margin — which the slide crosses and its room covers.
+    var revealGap: CGFloat { drawn?.shelf.outerMargin ?? 0 }
+
+    /// A leave that is no slide cuts a reveal short: it never lands,
+    /// so its motion and its token end here.
+    func cutReveal() {
+        revealing = nil
+        BarMotion.endReveal(content)
     }
 
     /// Slides the content in; a retract in flight is taken back
@@ -26,7 +37,10 @@ extension ShelfOverlay {
     /// and starts in the next, after a short lead
     /// (`BarMotion.revealLead`), so no frame of its travel plays
     /// before the panel is on screen.
-    func revealIn(ordering: Bool = false) {
+    /// `from` is a slide in flight, read before this pass moved the
+    /// room; nil reads it now.
+    func revealIn(ordering: Bool = false, from: CGPoint? = nil) {
+        let from = from ?? BarMotion.revealShift(of: content)
         // A reveal takes the shelf back from a leave in flight.
         leaving = nil
         leavingSlides = false
@@ -35,13 +49,14 @@ extension ShelfOverlay {
         revealing = token
         openSlideRoom()
         guard ordering else {
-            land(token, after: start(lead: false))
+            land(token, after: start(lead: false, from: from))
             return
         }
         BarMotion.playReveal(
             content,
             offset: revealOffset,
             entering: true,
+            from: from,
             held: true
         )
         afterCommit { [weak self] in
@@ -51,11 +66,12 @@ extension ShelfOverlay {
         }
     }
 
-    private func start(lead: Bool) -> TimeInterval {
+    private func start(lead: Bool, from: CGPoint? = nil) -> TimeInterval {
         BarMotion.playReveal(
             content,
             offset: revealOffset,
             entering: true,
+            from: from,
             lead: lead
         )
     }
@@ -88,11 +104,13 @@ extension ShelfOverlay {
             view.isHidden = false
         }
         revealing = nil
+        let from = BarMotion.revealShift(of: content)
         openSlideRoom()
         let span = BarMotion.playReveal(
             content,
             offset: revealOffset,
-            entering: false
+            entering: false,
+            from: from
         )
         afterReveal(span) { [weak self] in
             guard let self, self.leaving == token else { return }
