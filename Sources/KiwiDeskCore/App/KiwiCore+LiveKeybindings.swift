@@ -1,30 +1,83 @@
 import Foundation
 
+/// Which owner's bindings `keys` holds, recorded by the apply that
+/// installed them — never re-read from `init.lua`, which can change
+/// on disk without a reload (#2482).
+enum InstalledKeybindings {
+    case structured([KeyLayer])
+    case lua(layers: [KeyLayer], unread: [String: [String]])
+}
+
 /// The structured bindings currently installed, for the
 /// read-only shortcuts reference panel (#326).
 public struct LiveKeybindingSnapshot: Sendable {
     let layers: [KeyLayer]
     let activeLayer: String
+    let unread: [String: [String]]
+    let luaOwned: Bool
 
-    /// The resolved key modes currently installed.
+    /// The resolved key modes currently installed. Under Lua
+    /// ownership, each row's `lua` is its recovered body.
     public var keyLayers: [KeyLayer] { layers }
     /// The runtime-active mode's name.
     public var activeLayerName: String { activeLayer }
+    /// Whether `init.lua` installed these bindings (#2482).
+    public var isLuaOwned: Bool { luaOwned }
+    /// The chords in `layer` whose action could not be read back
+    /// from `init.lua` — a named handler, a C function. Lua-owned
+    /// only; never a `KeyBinding`, so nothing can save one.
+    public func unreadChords(in layer: String) -> [String] {
+        unread[layer] ?? []
+    }
 }
 
 extension KiwiCore {
-    /// Captures the effective, successfully compiled structured
-    /// bindings currently installed. nil outside GUI ownership or
-    /// without a live VM.
+    /// Captures the effective bindings currently installed, by the
+    /// owner the last load applied. nil without a live VM.
     public func liveKeybindingSnapshot()
         -> LiveKeybindingSnapshot?
     {
-        guard isGuiManaged, keys.lua != nil,
-            let layers = appliedStructuredLayers
+        guard keys.lua != nil, let installed = installedKeybindings
         else { return nil }
-        return LiveKeybindingSnapshot(
-            layers: layers,
-            activeLayer: keys.currentLayer
+        switch installed {
+        case .structured(let layers):
+            return LiveKeybindingSnapshot(
+                layers: layers,
+                activeLayer: keys.currentLayer,
+                unread: [:],
+                luaOwned: false
+            )
+        case .lua(let layers, let unread):
+            return LiveKeybindingSnapshot(
+                layers: layers,
+                activeLayer: keys.currentLayer,
+                unread: unread,
+                luaOwned: true
+            )
+        }
+    }
+
+    /// The live settings and Spaces a Lua-owned snapshot's rows
+    /// are filed against: live state only, never `gui.json`, which
+    /// such a config does not run, and never a re-read of
+    /// `init.lua` (#2482).
+    public func liveShortcutContext() -> GuiConfig {
+        var config = GuiConfig()
+        overlayLiveProfileState(&config)
+        return config
+    }
+
+    /// Reads back the bodies `init.lua` just bound, once per load:
+    /// the file read now is the one that ran (#2482).
+    func captureLuaKeybindings(from lua: LuaInterpreter) {
+        let captured = KeybindingImporter.capture(
+            from: keys,
+            interpreter: lua,
+            readFile: KeybindingImporter.readSource
+        )
+        installedKeybindings = .lua(
+            layers: captured.layers,
+            unread: captured.unread
         )
     }
 
