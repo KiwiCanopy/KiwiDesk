@@ -1763,6 +1763,7 @@
   "shortcuts.base.help": "Scegli ✦ per mettere le scorciatoie di KiwiDesk sul tasto Hyper. Una scorciatoia che hai messo tu su un altro tasto resta dove l'hai messa, e una il cui tasto ✦ è già occupato da un'altra scorciatoia resta su ⌃⌥.",
   "shortcuts.base.key_off": "Hyper è disattivato, quindi le scorciatoie con ✦ sono attenuate e non funzionano. Registra di nuovo un tasto Hyper o scegli ⌃⌥.",
   "shortcuts.base.left": "Ancora su ⌃⌥: %1$d",
+  "shortcuts.base.left.left_out": "%1$@ (%2$@): questo profilo la omette",
   "shortcuts.base.left.own": "%1$@ (%2$@): l'hai impostata tu",
   "shortcuts.base.left.predates": "%1$@ (%2$@): precedente a questo aggiornamento",
   "shortcuts.base.left.profile": "%1$@ (%2$@): «%3$@» imposta la sua",

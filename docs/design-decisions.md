@@ -1332,16 +1332,15 @@ depend on what both Macs happened to hold, which is the thing a
 person syncing two Macs wants to stop thinking about.
 
 The choice is made in a SHEET that commits, a ruled exception to
-"a sheet is read-only". An
-alert cannot show two dated sides next to each other, and the
-choice is only safe when it is made looking at both — which side
-changed last, and on which Mac. The sheet still takes no model:
-its two Keep buttons run through closures the row hands it.
-Return cancels, since every Keep replaces something. A folder
-holding no setup yet is no comparison: one side exists, so it takes
-one alert — copy this Mac's setup into the folder, Return copying —
-since the sheet's only claim to commit is showing two dated sides
-next to each other.
+"a sheet is read-only". An alert cannot show two dated sides next
+to each other, and the choice is only safe when it is made looking
+at both — which side changed last, and on which Mac. The sheet
+still takes no model: its two Keep buttons run through closures
+the row hands it. Return cancels, since every Keep replaces
+something. A folder holding no setup yet is no comparison: one
+side exists, so it takes one alert — copy this Mac's setup into
+the folder, Return copying — since the sheet's only claim to
+commit is showing two dated sides next to each other.
 
 Unsaved Settings edits fold into that same sheet rather than
 stacking a dialog on it, which #1619's one-dialog rule asks for.
@@ -10856,20 +10855,20 @@ built from `release/3.0.0` had already taken generation 2.
 Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
 the way back from the size keys, but a key you press once, so it
 rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
-not `appChromeRows`. It resets the active space only, for the reason the
-#764 entry gives the verb's default: a key undoes what you just
-did in front of you. `"all"` gets no Settings row and no default
-key; it stays a Lua and CLI form (owner ruling 2026-10-18). The
-verb is in `APIReference.destructive`, which makes an AI app
-confirm it, and a default key does not contradict that: the
-register guards a call the user did not make, and a key press is
-the user's own. What one press loses is the hand sizing of one
-Space, which the resize keys rebuild. A default key for a verb in
-that register remains a ruling of its own. The 2026-10-18 sweep
-found `⌃⌥R` free in `SystemShortcuts.map`, in macOS's symbolic
-hotkeys and in the menus of every app running on the dev Mac, read
-through AX with the fn bit decoded (recorded on #2303); the
-nearest chord taken is macOS's own `fn⌃R`, Return to Previous
+not `appChromeRows`. It resets the active space only, for the
+reason the #764 entry gives the verb's default: a key undoes what
+you just did in front of you. `"all"` gets no Settings row and no
+default key; it stays a Lua and CLI form (owner ruling
+2026-10-18). The verb is in `APIReference.destructive`, which
+makes an AI app confirm it, and a default key does not contradict
+that: the register guards a call the user did not make, and a key
+press is the user's own. What one press loses is the hand sizing
+of one Space, which the resize keys rebuild. A default key for a
+verb in that register remains a ruling of its own. The 2026-10-18
+sweep found `⌃⌥R` free in `SystemShortcuts.map`, in macOS's
+symbolic hotkeys and in the menus of every app running on the dev
+Mac, read through AX with the fn bit decoded (recorded on #2303);
+the nearest chord taken is macOS's own `fn⌃R`, Return to Previous
 Size.
 
 **A shortcut row says what pressing it does (#2245).** Its title
@@ -10909,21 +10908,22 @@ Desktop verb a user presses as often as they swipe, so it is the
 exception to the offer rule above: it ships bound, its drawer
 opening with it, while moving a window to a Desktop, with or
 without following it, stays an offer behind its drawer for the
-reason that rule gives. `⇧` here does not act on
-the window: on top of `⌃⌥⌘` it lifts the whole ladder one tier, from
-KiwiDesk's Spaces to macOS's Desktops, which is the second sense of
-`⇧` the rule above otherwise refuses — accepted because the four
-modifiers read as one chord (the Hyper key many users map Caps Lock
-to), and the ladder has no other free tier for a digit. Measured
-before seeding (2026-10-10, macOS 27.0.1): no entry in
+reason that rule gives. `⇧` here does not act on the window: on
+top of `⌃⌥⌘` it lifts the whole ladder one tier, from KiwiDesk's
+Spaces to macOS's Desktops, which is the second sense of `⇧` the
+rule above otherwise refuses — accepted because the four modifiers
+read as one chord (the Hyper key many users map Caps Lock to), and
+the ladder has no other free tier for a digit. Measured before
+seeding (2026-10-10, macOS 27.0.1): no entry in
 `com.apple.symbolichotkeys` uses the four modifiers, and over the
 AX menu bars of fifteen running apps (858 shortcut items) one
 claimed a `⌃⌥⇧⌘` digit — Antigravity IDE's Split Terminal on 7,
 which KiwiDesk's hotkey takes from it as every seeded chord takes
-an app menu's. #1870's Hyper key does not move this tier unasked, and the seed stays here: it is a
-separate modifier and off by default, so the seed cannot depend on
-it, and the users the four-modifier chord serves are the ones whose
-own tool already presses all four.
+an app menu's. #1870's Hyper key does not move this tier unasked,
+and the seed stays here: it is a separate modifier and off by
+default, so the seed cannot depend on it, and the users the
+four-modifier chord serves are the ones whose own tool already
+presses all four.
 
 :::unreleased
 **One switch puts KiwiDesk's shortcuts on `⌃⌥` or on `✦` (#2460,
@@ -10983,12 +10983,16 @@ once beside a reverted move is the split again.
 **What the switch moves, and what it leaves.** It moves the
 shared keymap and the loaded profile's own rows. A row the user
 rebound off the base stays where they put it, and a target another
-row holds is refused and named with its holder, since nothing
-KiwiDesk writes gives an action a second chord in a layer. Every
-row still on `⌃⌥` is listed under the switch with its reason —
-the row predates the update, another row holds the key, the user
-set it, or another profile sets its own — and is re-recorded by
-hand; there is no "move these too", since each reason is one the
+row of the page holds is refused and named with its holder, since
+nothing KiwiDesk writes gives an action a second chord in a layer —
+a holder in another profile's own rows is not looked for, the
+residue of moving a keymap that profile only inherits. A shared
+row the page's profile leaves out is not moved either: the
+profile names it by its old chord, and moving it would bring it
+back. Every row still on `⌃⌥` is listed under the switch with its
+reason — the row predates the update, another row holds the key,
+the user set it, this profile leaves it out, or another profile
+sets its own — and is re-recorded by hand; there is no "move these too", since each reason is one the
 user should read before the row moves. `⌃⌥` moves back what the
 mapping can produce, derived from the pure reverse mapping rather
 than a stored list: a row on any other `✦` chord stays (`✦⇧⌘3`,
@@ -11001,8 +11005,8 @@ first time the user edits a row.
 **Without a Hyper key the switch is drawn greyed on `⌃⌥`,** since
 the setting that turns it on sits directly above it in the same
 card (gui.md ▸ Grey, don't hide). Clearing the key while rows are
-on `✦` moves nothing back silently: the rows dim in place, and the
-switch stays live as the way back.
+on `✦` moves nothing back silently: the rows dim in place, and
+while the base is `✦` the switch stays live as the way back.
 
 The stored Desktop base this replaces covered one tier and the
 new base covers every one, so the crossing is a change of meaning

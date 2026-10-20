@@ -5,7 +5,7 @@ import SwiftUI
 /// in the shortcut rows' shape (`SpaceHistoryRow`): two named peers,
 /// neither an "off", in the recorder column. Greyed on `⌃⌥` with its
 /// reason while no key is set, since the key field above turns it on
-/// (gui.md ▸ Grey, don't hide); live while rows sit on `✦` with the
+/// (gui.md ▸ Grey, don't hide); live while the base is `✦` with the
 /// key cleared, as the way back. Under it, the rows left on `⌃⌥`.
 struct ShortcutBaseRow: View {
     @ObservedObject var model: SettingsModel
@@ -29,7 +29,8 @@ struct ShortcutBaseRow: View {
                     picker.modifier(GreyOut(active: greyed, help: captionText))
                 }
             }
-            caption(captionText)
+            // Lua owning the config is the card's caption already.
+            if reason != .appWideLuaOwned { caption(captionText) }
             if !left.isEmpty { leftList }
         }
     }
@@ -49,6 +50,11 @@ struct ShortcutBaseRow: View {
             spokenValue: ShortcutBaseWords.spoken(
                 model.config.shortcutBase,
                 keySet: keySet
+            ),
+            spokenTitles: Dictionary(
+                uniqueKeysWithValues: ShortcutBase.allCases.map {
+                    ($0, ShortcutBaseWords.spoken($0, keySet: keySet))
+                }
             ),
             selection: Binding(
                 get: { model.config.shortcutBase },
@@ -78,7 +84,7 @@ struct ShortcutBaseRow: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(ShortcutBaseWords.leftHeader(left.count))
             ForEach(left) { row in
-                Text(ShortcutBaseWords.line(row))
+                Text(ShortcutBaseWords.line(row, config: model.config))
                     .padding(.leading, 12)
             }
         }

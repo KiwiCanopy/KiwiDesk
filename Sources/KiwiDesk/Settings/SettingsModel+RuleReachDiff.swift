@@ -38,6 +38,7 @@ extension SettingsModel {
                 encoded.keyLayers,
                 editing: editing,
                 revertable: false,
+                explained: explainedBySwitch,
                 name: { key in
                     encoded.keyTemplates[key].map {
                         KeybindingCatalog.localizedName(
@@ -47,6 +48,18 @@ extension SettingsModel {
                     } ?? RuleReachTable<String>.keyParts(key).lua
                 },
                 describe: { ShortcutsReferenceBuilder.glyphs($0) }
+            )
+    }
+
+    /// A shortcut another profile reached moved by the base switch
+    /// (#2460): the switch's own row narrates it, as the page's own
+    /// moved rows are (`SettingsValueReadout.shortcutsLayerRows`).
+    private func explainedBySwitch(_ old: String?, _ new: String?) -> Bool {
+        cleanConfig.shortcutBase != config.shortcutBase
+            && ShortcutBaseSwitch.explains(
+                old: old,
+                new: new,
+                onto: config.shortcutBase
             )
     }
 
@@ -64,6 +77,7 @@ extension SettingsModel {
         _ encoded: RuleReachTable<V>,
         editing: String,
         revertable: Bool = true,
+        explained: (V?, V?) -> Bool = { _, _ in false },
         name: (String) -> String = {
             KeybindingCatalog.displayName(forBundleID: $0)
         },
@@ -89,7 +103,7 @@ extension SettingsModel {
             for profile in encoded.profiles where profile != editing {
                 let old = stored.resolved(app, for: profile)
                 let new = encoded.resolved(app, for: profile)
-                guard old != new else { continue }
+                guard old != new, !explained(old, new) else { continue }
                 guard profile != loaded else {
                     appRows.append(
                         .change(

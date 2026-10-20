@@ -1763,6 +1763,7 @@
   "shortcuts.base.help": "Elige ✦ para poner los atajos de KiwiDesk en la tecla Hyper. Un atajo que pusiste tú en otra tecla se queda donde lo pusiste, y uno cuya tecla ✦ ya ocupa otro atajo se queda en ⌃⌥.",
   "shortcuts.base.key_off": "Hyper está desactivado, así que los atajos con ✦ aparecen atenuados y no funcionan. Vuelve a grabar una tecla Hyper o elige ⌃⌥.",
   "shortcuts.base.left": "Siguen en ⌃⌥: %1$d",
+  "shortcuts.base.left.left_out": "%1$@ (%2$@): este perfil lo omite",
   "shortcuts.base.left.own": "%1$@ (%2$@): lo configuraste tú",
   "shortcuts.base.left.predates": "%1$@ (%2$@): de antes de esta actualización",
   "shortcuts.base.left.profile": "%1$@ (%2$@): «%3$@» define el suyo",

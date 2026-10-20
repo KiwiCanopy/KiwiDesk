@@ -30,7 +30,7 @@ extension SettingsModel {
                 $0.name == KeyLayer.defaultName
             })
         else { return }
-        let shipped = shippedDefaults
+        let shipped = shippedDefaults(on: config.shortcutBase)
         let orphanLua = orphanLuaInDefaultLayer
         let kept = config.layers[index].bindings.filter {
             Self.survivesReset(
@@ -43,12 +43,10 @@ extension SettingsModel {
         droppedChords = []
     }
 
-    /// The seed for this config, the Desktop tier included for
-    /// the Desktops this Mac has now, on the draft's shortcut base
-    /// (#2460).
-    private var shippedDefaults: [KeyBinding] {
-        let base = config.shortcutBase
-        return DefaultKeybindings.bindings(
+    /// The seed for this config on `base`, the Desktop tier
+    /// included for the Desktops this Mac has now (#2460).
+    func shippedDefaults(on base: ShortcutBase) -> [KeyBinding] {
+        DefaultKeybindings.bindings(
             spaces: config.spaces,
             resizeStep: Int(config.settings.resizeStep),
             base: base
@@ -95,7 +93,7 @@ extension SettingsModel {
         let have = Set(
             layer.bindings.map { "\($0.combo)\u{1F}\($0.lua)" }
         )
-        return shippedDefaults.filter {
+        return shippedDefaults(on: config.shortcutBase).filter {
             !have.contains("\($0.combo)\u{1F}\($0.lua)")
         }
         .count
@@ -150,7 +148,7 @@ extension SettingsModel {
                 $0.name == KeyLayer.defaultName
             })
         else { return 0 }
-        let shipped = shippedDefaults
+        let shipped = shippedDefaults(on: config.shortcutBase)
         let orphanLua = orphanLuaInDefaultLayer
         return layer.bindings.filter { row in
             if Self.isSeedAction(row, shipped) { return false }

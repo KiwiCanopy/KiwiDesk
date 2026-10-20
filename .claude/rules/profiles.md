@@ -117,12 +117,16 @@ because two real clients now remove drift — see
   base moves the rows in the same draft write, and a path that
   drops the draft's rows drops the base with them
   (`ShortcutBaseTests`, `ShortcutBaseSwitchTests`,
-  `ShortcutBaseDraftTests`). A writer that moves a row between the
-  bases takes `ShortcutBase.moved`, never a mapping beside it —
-  the "Shortcuts use" switch's `ShortcutBaseSwitch` takes it for
-  the whole keymap. The Desktop tier takes `✦⌥` + digit because `✦⇧⌘3` is
-  macOS's screenshot chord while Hyper is held (measured
-  2026-10-20, macOS 27.0.1).
+  `ShortcutBaseSwitchModelTests`, `ShortcutBaseDraftTests`). A
+  writer that moves a row between the bases takes
+  `ShortcutBase.moved`, never a mapping beside it, and a narration
+  of the draft's layers while the base changed reads the switch's
+  rows through `ShortcutBaseSwitch` — replayed on the old side, or
+  `explains` for a reach row — so they stay its one change
+  (`ShortcutBaseReachTests`). The Desktop tier's `✦⌥` + digit is
+  argued in `docs/design-decisions.md` ▸ *One switch puts
+  KiwiDesk's shortcuts on `⌃⌥` or on `✦`* (`ShortcutBaseTests` ▸
+  `desktopTier`).
 - **A default row added after the first-run seed joins the next
   generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
   and list the row in `rows(ofGeneration:)`, beside adding it to

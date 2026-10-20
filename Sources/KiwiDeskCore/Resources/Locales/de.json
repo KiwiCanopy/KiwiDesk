@@ -1763,6 +1763,7 @@
   "shortcuts.base.help": "Wähle ✦, um die Tastenkürzel von KiwiDesk auf die Hyper-Taste zu legen. Ein Tastenkürzel, das du selbst auf eine andere Taste gelegt hast, bleibt, wo du es hingelegt hast, und eines, dessen ✦-Taste schon ein anderes Tastenkürzel belegt, bleibt auf ⌃⌥.",
   "shortcuts.base.key_off": "Hyper ist aus, daher sind Tastenkürzel mit ✦ ausgegraut und funktionieren nicht. Nimm wieder eine Hyper-Taste auf oder wähle ⌃⌥.",
   "shortcuts.base.left": "Noch auf ⌃⌥: %1$d",
+  "shortcuts.base.left.left_out": "%1$@ (%2$@): dieses Profil lässt es weg",
   "shortcuts.base.left.own": "%1$@ (%2$@): hast du selbst festgelegt",
   "shortcuts.base.left.predates": "%1$@ (%2$@): stammt aus der Zeit vor diesem Update",
   "shortcuts.base.left.profile": "%1$@ (%2$@): „%3$@“ legt ein eigenes fest",

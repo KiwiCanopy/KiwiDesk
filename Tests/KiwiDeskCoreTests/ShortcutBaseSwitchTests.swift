@@ -39,8 +39,10 @@ struct ShortcutBaseSwitchTests {
     @Test("the seed moves onto ✦ whole, the size tier stays")
     func seedMoves() {
         var config = config([KeyLayer.defaultName: seeded])
-        let kept = ShortcutBaseSwitch.apply(.hyper, to: &config)
-        #expect(kept.isEmpty)
+        #expect(
+            ShortcutBaseSwitch.kept(config.layers[0], onto: .hyper).isEmpty
+        )
+        ShortcutBaseSwitch.apply(.hyper, to: &config)
         #expect(config.shortcutBase == .hyper)
         let moved = combos(config, KeyLayer.defaultName)
         #expect(
@@ -61,7 +63,10 @@ struct ShortcutBaseSwitchTests {
                 row("f", "holder()"),
             ],
         ])
-        let kept = ShortcutBaseSwitch.apply(.hyper, to: &config)
+        let kept = config.layers.flatMap {
+            ShortcutBaseSwitch.kept($0, onto: .hyper)
+        }
+        ShortcutBaseSwitch.apply(.hyper, to: &config)
         #expect(combos(config, KeyLayer.defaultName) == ["hyper+f"])
         #expect(combos(config, "work") == ["control+option+f", "f"])
         #expect(kept.map(\.layer) == ["work"])
@@ -74,8 +79,9 @@ struct ShortcutBaseSwitchTests {
     @Test("a held target keeps its row and names the holder")
     func heldTargetStays() {
         let rows = [row("control+option+s", "s()"), row("s", "mine()")]
+        let layer = KeyLayer(name: KeyLayer.defaultName, bindings: rows)
         #expect(
-            ShortcutBaseSwitch.kept(rows, onto: .hyper).map(\.holder.lua)
+            ShortcutBaseSwitch.kept(layer, onto: .hyper).map(\.holder.lua)
                 == ["mine()"]
         )
     }
@@ -142,5 +148,35 @@ struct ShortcutBaseSwitchTests {
             base: .hyper
         )
         #expect(taken.map(\.lua) == ["KiwiDesk.focus_desktop(2)"])
+    }
+
+    @Test("a moved row's change is the switch's, any other is not")
+    func explainsTheMove() {
+        let explains = ShortcutBaseSwitch.explains
+        #expect(explains("control+option+f", "hyper+f", .hyper))
+        #expect(
+            explains(
+                "hyper+option+3",
+                "control+option+shift+command+3",
+                .standard
+            )
+        )
+        #expect(!explains("control+option+f", "hyper+g", .hyper))
+        #expect(!explains("control+option+f", "hyper+f", .standard))
+        #expect(!explains(nil, "hyper+f", .hyper))
+    }
+
+    /// An action already on ✦ beside its ⌃⌥ row would hold two
+    /// chords after the move; the switch ends in the one dedupe.
+    @Test("the switch leaves one chord per action")
+    func endsInTheDedupe() {
+        var config = config([
+            KeyLayer.defaultName: [
+                row("control+option+f", "KiwiDesk.toggle_floating()"),
+                row("hyper+g", "KiwiDesk.toggle_floating()"),
+            ]
+        ])
+        ShortcutBaseSwitch.apply(.hyper, to: &config)
+        #expect(combos(config, KeyLayer.defaultName).count == 1)
     }
 }

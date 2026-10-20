@@ -255,8 +255,9 @@ extension InterpolatedLabelTests {
         //    same card as the entry above, reached from the
         //    other end of the app.
         "shortcuts.desktops.help": 1,
-        // #1870. The Hyper move's KiwiHub line names the panel by
-        //    its product key, beside the Open Settings row's name.
+        // #2460. The switch's caption names the Go to Desktop row
+        //    by its label key.
+        "shortcuts.base.caption": 1,
         // 7. #1394. A screen-count mismatch is the one drift
         //    Save cannot take up, so the hint that greys Save
         //    and the header's status line both name the button

@@ -4,8 +4,10 @@ import Foundation
 /// `ShortcutBase.moved` mapping covers onto `base`, in every layer of
 /// `config`, and sets the base — the rows and the base in one draft
 /// write. Pure over the config; the GUI stages it, Save writes it.
-/// The ruling is `docs/design-decisions.md` ▸ *One switch puts
-/// KiwiDesk's shortcuts on `⌃⌥` or on `✦`*.
+/// A narration of the draft takes the same replay, so the rows the
+/// switch moved read as the switch's own change (`explains`). The
+/// ruling is `docs/design-decisions.md` ▸ *One switch puts KiwiDesk's
+/// shortcuts on `⌃⌥` or on `✦`*.
 public enum ShortcutBaseSwitch {
     /// A row the switch could move and did not: another row of its
     /// layer holds the target, compared as registered.
@@ -17,55 +19,56 @@ public enum ShortcutBaseSwitch {
         public let holder: KeyBinding
     }
 
-    /// `config` with its rows moved onto `base` and the base set;
-    /// returns the rows a holder kept.
-    @discardableResult
+    /// `config` with its rows moved onto `base` and the base set.
     public static func apply(
         _ base: ShortcutBase,
         to config: inout GuiConfig
-    ) -> [Kept] {
-        var kept: [Kept] = []
+    ) {
         for index in config.layers.indices {
-            let layer = config.layers[index]
-            let (rows, refused) = moved(layer.bindings, onto: base)
-            config.layers[index].bindings = rows
-            kept += refused.map {
-                Kept(
-                    layer: layer.name,
-                    row: $0.row,
-                    target: $0.target,
-                    holder: $0.holder
-                )
-            }
+            config.layers[index].bindings =
+                moved(
+                    config.layers[index],
+                    onto: base
+                ).rows
         }
         config.shortcutBase = base
         NavigationChords.deduplicate(&config)
-        return kept
     }
 
-    /// The rows the switch would leave on the other base, read off
-    /// `rows` as they stand: a holder keeps each.
+    /// The rows of `layer` the switch would leave where they are,
+    /// each with the row that holds its target.
     public static func kept(
-        _ rows: [KeyBinding],
+        _ layer: KeyLayer,
         onto base: ShortcutBase
-    ) -> [(row: KeyBinding, target: String, holder: KeyBinding)] {
-        moved(rows, onto: base).refused
+    ) -> [Kept] {
+        moved(layer, onto: base).kept
+    }
+
+    /// Whether `new` is `old` moved onto `base` — a change the switch
+    /// made rather than one the user did.
+    public static func explains(
+        old: String?,
+        new: String?,
+        onto base: ShortcutBase
+    ) -> Bool {
+        guard let old, let new, let combo = KeyCombo.parse(old),
+            let target = ShortcutBase.moved(combo, to: base)
+        else { return false }
+        return KeyCombo.parse(new) == target
     }
 
     private static func moved(
-        _ rows: [KeyBinding],
+        _ layer: KeyLayer,
         onto base: ShortcutBase
-    ) -> (
-        rows: [KeyBinding],
-        refused: [(row: KeyBinding, target: String, holder: KeyBinding)]
-    ) {
+    ) -> (rows: [KeyBinding], kept: [Kept]) {
+        let rows = layer.bindings
         let targets: [KeyCombo?] = rows.map {
             KeyCombo.parse($0.combo).flatMap {
                 ShortcutBase.moved($0, to: base)
             }
         }
         var out = rows
-        var refused: [(KeyBinding, String, KeyBinding)] = []
+        var kept: [Kept] = []
         for (index, target) in targets.enumerated() {
             guard let target, let text = target.comboString() else {
                 continue
@@ -78,11 +81,18 @@ public enum ShortcutBaseSwitch {
                         == target.registered
             }
             if let holder {
-                refused.append((rows[index], text, rows[holder]))
+                kept.append(
+                    Kept(
+                        layer: layer.name,
+                        row: rows[index],
+                        target: text,
+                        holder: rows[holder]
+                    )
+                )
             } else {
                 out[index].combo = text
             }
         }
-        return (out, refused)
+        return (out, kept)
     }
 }

@@ -1761,6 +1761,7 @@
   "shortcuts.base.help": "選擇 ✦ 即可將 KiwiDesk 的快速鍵放到 Hyper 鍵上。你自己設在其他按鍵上的快速鍵會留在原處；對應的 ✦ 按鍵已被其他快速鍵占用的，仍保留在 ⌃⌥ 上。",
   "shortcuts.base.key_off": "Hyper 已關閉，因此含 ✦ 的快速鍵會變暗且無法使用。請重新錄製一個 Hyper 鍵，或選擇 ⌃⌥。",
   "shortcuts.base.left": "仍在 ⌃⌥ 上：%1$d",
+  "shortcuts.base.left.left_out": "%1$@（%2$@）：此描述檔已將其排除",
   "shortcuts.base.left.own": "%1$@（%2$@）：由你自己設定",
   "shortcuts.base.left.predates": "%1$@（%2$@）：本次更新之前就已存在",
   "shortcuts.base.left.profile": "%1$@（%2$@）：「%3$@」有自己的設定",

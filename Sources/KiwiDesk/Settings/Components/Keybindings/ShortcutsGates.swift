@@ -13,8 +13,8 @@ struct ShortcutsGates {
     /// `SettingsModel.guiManaged`; read by the plate switch alone,
     /// which writes `gui.json` at once (#2144).
     var guiManaged = true
-    /// `SettingsModel.editingStoredProfile`; read by the Hyper move
-    /// offer alone, whose Save must write the shared rows (#1870).
+    /// `SettingsModel.editingStoredProfile`; read by the Shortcuts use
+    /// switch alone, whose Save must write the shared rows (#2460).
     var editingStoredProfile = false
 
     /// Reason why a Shortcuts setting is withheld or gated.
@@ -29,8 +29,8 @@ struct ShortcutsGates {
         /// has no store to write (`.luaOwnsConfig`, #2144).
         case appWideLuaOwned
         /// A saved profile other than the loaded one is being
-        /// edited, so the Hyper move has no shared rows to write
-        /// (#1870).
+        /// edited, so the Shortcuts use switch has no shared rows to
+        /// write (#2460).
         case storedProfilePage
     }
 

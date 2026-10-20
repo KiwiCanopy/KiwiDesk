@@ -1775,6 +1775,7 @@
   "shortcuts.base.help": "Pick ✦ to put KiwiDesk's shortcuts on the Hyper key. A shortcut you set on another key stays where you put it, and one whose ✦ key another shortcut holds stays on ⌃⌥.",
   "shortcuts.base.key_off": "Hyper is off, so shortcuts with ✦ are dimmed and don't work. Record a Hyper key again, or pick ⌃⌥.",
   "shortcuts.base.left": "Still on ⌃⌥: %1$d",
+  "shortcuts.base.left.left_out": "%1$@ (%2$@): this profile leaves it out",
   "shortcuts.base.left.own": "%1$@ (%2$@): you set this one yourself",
   "shortcuts.base.left.predates": "%1$@ (%2$@): from before this update",
   "shortcuts.base.left.profile": "%1$@ (%2$@): “%3$@” sets its own",

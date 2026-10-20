@@ -61,37 +61,52 @@ enum ShortcutBaseWords {
     }
 
     /// One left-behind row, its reason in the same frame.
-    static func line(_ row: ShortcutBaseLeftRow) -> String {
-        switch row.reason {
+    static func line(
+        _ left: ShortcutBaseLeftRow,
+        config: GuiConfig
+    ) -> String {
+        let name = KeybindingCatalog.localizedName(
+            of: left.row,
+            config: config
+        )
+        let chord = chord(left.row.combo)
+        switch left.reason {
         case .predates:
-            L(
+            return L(
                 "shortcuts.base.left.predates",
                 "%1$@ (%2$@): from before this update",
-                row.name,
-                row.chord
+                name,
+                chord
             )
-        case .taken(let chord, let holder):
-            L(
+        case .taken(let target, let holder):
+            return L(
                 "shortcuts.base.left.taken",
                 "%1$@ (%2$@): %3$@ is taken by %4$@",
-                row.name,
-                row.chord,
+                name,
                 chord,
-                holder
+                Self.chord(target),
+                KeybindingCatalog.localizedName(of: holder, config: config)
             )
         case .ownChoice:
-            L(
+            return L(
                 "shortcuts.base.left.own",
                 "%1$@ (%2$@): you set this one yourself",
-                row.name,
-                row.chord
+                name,
+                chord
+            )
+        case .leftOutHere:
+            return L(
+                "shortcuts.base.left.left_out",
+                "%1$@ (%2$@): this profile leaves it out",
+                name,
+                chord
             )
         case .profile(let profile):
-            L(
+            return L(
                 "shortcuts.base.left.profile",
                 "%1$@ (%2$@): “%3$@” sets its own",
-                row.name,
-                row.chord,
+                name,
+                chord,
                 profile
             )
         }

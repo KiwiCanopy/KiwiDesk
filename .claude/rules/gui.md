@@ -789,6 +789,14 @@ the homes this section rules, or a home of its own is ruled here
 before it ships — otherwise the homes ruled here stop being the
 whole census of who acknowledges.
 
+The "Shortcuts use" switch (#2460) is a ruled home of its own: its
+followers are the rows on the other base, which no stored setting
+names, so it acknowledges them with the list under it — each row
+and its reason, read through the one
+`SettingsModel.rowsLeftOnStandard` — rather than the label's `?`,
+and joins neither register (`ShortcutBaseSwitchModelTests` ▸
+`leftRowsAreReasoned`, `ShortcutBaseReachTests`).
+
 A Space's own gap masters (#1775) are not a home of their own: they
 are the gap masters again, drawn by the one `GapsMasterRow` and
 reading `GapsBordersGates.outerDiffers` / `innerDiffers` over the

@@ -64,7 +64,8 @@ struct HyperKeyRow: View {
     }
 
     /// The recorder in the recorder column, ✦ in the icon slot; the
-    /// card's header is the row's label.
+    /// card's header is the row's label, and the record button names
+    /// itself with it.
     private var keyRow: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(ComboSymbols.hyperGlyph)
@@ -80,7 +81,6 @@ struct HyperKeyRow: View {
                 ),
                 disabled: reason == .appWideLuaOwned
             )
-            .accessibilityLabel(HyperKeyWords.title)
         }
     }
 

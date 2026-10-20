@@ -6,7 +6,7 @@ import Testing
 /// Reset sizes in this Space's seed (#2303, narrowed by the owner
 /// 2026-10-18): `⌃⌥R` runs `reset_layout_sizing` on the active
 /// Space, reaches an existing install in generation 5, and moves
-/// with the `⌃⌥` letters in the Hyper move. Chord hygiene is the
+/// with the `⌃⌥` letters onto the shortcut base. Chord hygiene is the
 /// generic nets' in `DefaultKeybindingsTests`.
 @Suite("Reset sizes seed (#2303)")
 struct ResetSizesSeedTests {

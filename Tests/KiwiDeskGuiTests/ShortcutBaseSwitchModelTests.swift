@@ -95,13 +95,13 @@ struct ShortcutBaseSwitchModelTests {
         }
     }
 
-    @Test("a switch back leaves nothing listed")
-    func backListsNothing() {
+    @Test("a switch back restores the seed")
+    func backRestores() {
         let model = model(seed)
         model.setShortcutBase(.hyper)
         model.setShortcutBase(.standard)
         #expect(model.config.layers[0].bindings == seed)
-        #expect(model.rowsLeftOnStandard.isEmpty)
+        #expect(model.config.shortcutBase == .standard)
     }
 
     /// The surfacing branches only a scan sees (gui.md): the row in
