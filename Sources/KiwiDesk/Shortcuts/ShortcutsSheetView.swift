@@ -118,8 +118,8 @@ struct ShortcutsSheetView: View {
         )
     }
 
-    /// The empty sheet: nothing matches, nothing bound, or
-    /// `init.lua` owns the shortcuts.
+    /// The empty sheet: nothing matches, nothing bound, or an
+    /// `init.lua` that owns the shortcuts has not loaded (#2482).
     private var placeholder: some View {
         Text(placeholderText)
             .font(.callout)
@@ -132,7 +132,8 @@ struct ShortcutsSheetView: View {
         guard reference != nil else {
             return L(
                 "shortcuts.panel.unavailable",
-                "Shortcuts are managed by your init.lua."
+                "Your init.lua\u{2019}s shortcuts appear here once "
+                    + "KiwiDesk loads it."
             )
         }
         guard needle.isEmpty else {

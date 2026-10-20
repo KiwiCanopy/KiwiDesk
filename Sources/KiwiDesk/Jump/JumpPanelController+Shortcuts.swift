@@ -26,16 +26,31 @@ extension JumpPanelController {
     /// Builds the shortcuts reference for the active key layer
     /// (`ShortcutsReferenceBuilder`, #820).
     func buildReference() -> ShortcutsReference? {
-        let layers: [KeyLayer]
+        var layers: [KeyLayer]
         let activeLayer: String
         let config: GuiConfig
+        var unread: [String] = []
         if let snapshot = core.liveKeybindingSnapshot() {
             layers = snapshot.keyLayers
             activeLayer = snapshot.activeLayerName
-            config = core.loadGuiConfig()
+            config =
+                snapshot.isLuaOwned
+                ? core.liveShortcutContext() : core.loadGuiConfig()
+            if snapshot.isLuaOwned {
+                // Recovered bodies arrive as raw Lua; sort the ones
+                // the catalog knows into its bands, as Settings ▸
+                // Import does (#2482).
+                var classified = config
+                classified.layers = layers
+                KeybindingImportClassifier.classify(&classified)
+                layers = classified.layers
+                unread = snapshot.unreadChords(in: activeLayer)
+            }
         } else if core.isGuiManaged,
             let raw = core.persistedGuiConfig()
         {
+            // No live VM, so no load recorded an owner and the
+            // file's is the only answer.
             // Paused (no Accessibility): the engine discovered no
             // spaces, so loadGuiConfig would overlay an EMPTY live
             // space list and misfile every space shortcut into
@@ -70,7 +85,8 @@ extension JumpPanelController {
             ),
             resizeStep: Int(config.settings.resizeStep),
             layerNames: layers.map(\.name),
-            lenses: core.kiwiVisionLensChoices.map(\.name)
+            lenses: core.kiwiVisionLensChoices.map(\.name),
+            unread: unread
         )
         return withAppGlyphs(
             reference,

@@ -7,36 +7,65 @@ import Foundation
 /// save.
 @MainActor
 enum KeybindingImporter {
+    /// Reads a binding's source file as the importer expects.
+    static func readSource(_ path: String) -> String? {
+        try? String(contentsOfFile: path, encoding: .utf8)
+    }
+
     /// Builds layers from manager reading binding source bodies
-    /// (`KiwiCore.recoverKeybindings`).
+    /// (`KiwiCore.recoverKeybindings`). Drop-only: a row whose
+    /// body cannot be read back is absent.
     static func layers(
         from manager: KeybindingManager,
         interpreter: LuaInterpreter,
         readFile: (String) -> String?
     ) -> [KeyLayer] {
+        capture(
+            from: manager,
+            interpreter: interpreter,
+            readFile: readFile
+        ).layers
+    }
+
+    /// The recovered layers, and per layer the chords whose body
+    /// could not be read back (#2482). The unread chords are
+    /// plain strings and never a `KeyBinding`, so no save path
+    /// can turn one into a no-op row.
+    static func capture(
+        from manager: KeybindingManager,
+        interpreter: LuaInterpreter,
+        readFile: (String) -> String?
+    ) -> (layers: [KeyLayer], unread: [String: [String]]) {
         var cache: [String: String] = [:]
-        return manager.definedLayers.map { name in
+        var unread: [String: [String]] = [:]
+        let layers = manager.definedLayers.map { name in
             var rows: [KeyBinding] = []
             for (combo, ref) in manager.bindings(for: name) {
-                guard let text = combo.comboString(),
+                guard let text = combo.comboString() else { continue }
+                guard
                     let lua = action(
                         ref: ref,
                         interpreter: interpreter,
                         readFile: readFile,
                         cache: &cache
                     )
-                else { continue }
+                else {
+                    unread[name, default: []].append(text)
+                    continue
+                }
                 rows.append(
                     KeyBinding(combo: text, lua: lua, kind: .custom)
                 )
             }
             rows.sort { $0.combo < $1.combo }
+            unread[name]?.sort()
             return KeyLayer(
                 name: name,
                 icon: manager.icon(for: name),
                 bindings: rows
             )
         }
+        return (layers, unread)
     }
 
     /// The recovered, non-empty action body for one binding, or

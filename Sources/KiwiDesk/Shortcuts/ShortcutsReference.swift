@@ -14,7 +14,8 @@ enum ShortcutsReferenceBuilder {
         desktops: [Int],
         resizeStep: Int,
         layerNames: [String],
-        lenses: [String] = []
+        lenses: [String] = [],
+        unread: [String] = []
     ) -> ShortcutsReference {
         // Drop the key panel's three openers from the working set
         // BEFORE any band builds, so the suppression holds by
@@ -114,7 +115,9 @@ enum ShortcutsReferenceBuilder {
                 return row
             }
             + buildApps(layer, consumed: &consumed)
-        let custom = buildCustom(layer, consumed: consumed)
+        let custom =
+            buildCustom(layer, consumed: consumed)
+            + buildUnread(unread)
 
         // A key that does nothing until its Desktop returns leaves
         // its group, so the groups list only keys that work.

@@ -21,7 +21,7 @@ extension KiwiCore {
             settleSharedSets()
         }
         bus.resetLuaCallbacks()
-        appliedStructuredLayers = nil
+        installedKeybindings = nil
         keys.reset()
         desktopBindings = [:]
         resetDeclarativeState()
@@ -143,6 +143,7 @@ extension KiwiCore {
             seedGuiSpaces()
         } else {
             applyConfigGlobals(from: fresh)
+            captureLuaKeybindings(from: fresh)
         }
         // Lua declarations are only the global base. Put the
         // active profile's tiling and sparse behavior overrides
