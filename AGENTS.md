@@ -1539,6 +1539,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   section at its own `shownStrip`, and Reduce transparency standing the plate
   down at `ShelfManager.relayout` (`ShelfOverlayTests`,
   `ShelfPlateGlassGateTests`)
+- the shelf panel takes the drawn plate or runs, never the strip — the one
+  `ShelfOverlay.restingRoom` at rest, the strip only while a glide or a
+  reveal travels, settled on its landing (#2497, `ShelfPanelRoomTests`)
 - every rule a bar draws takes `BarDivider` (`ShelfDividerWeightTests`) and
   idle ink is `KiwiShelf.idleItemColor` (`IdleItemContrastTests`)
 - overflow goes through `ShelfOverflow`, `ShelfFadeMask` and `ShelfCountView`

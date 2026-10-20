@@ -44,6 +44,7 @@ extension ShelfOverlay {
         content.alphaValue = 1
         let token = UUID()
         revealing = token
+        openRoom()
         guard ordering else {
             land(token, after: start(lead: false))
             return
@@ -82,6 +83,7 @@ extension ShelfOverlay {
             else { return }
             self.revealing = nil
             BarMotion.endReveal(self.content, items: self.stripView)
+            self.settleRoom()
         }
     }
 
@@ -100,6 +102,7 @@ extension ShelfOverlay {
             view.isHidden = false
         }
         revealing = nil
+        openRoom()
         let span = BarMotion.playReveal(
             content,
             items: stripView,

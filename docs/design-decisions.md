@@ -14631,9 +14631,13 @@ inside the band; the retract forgives an overshoot; a push against
 the screen's own edge reveals at once, as the Dock does — inside
 the band only, as the Dock's push counts along the Dock alone.
 There is no click-pin: the band sits over the mark, so the shelf
-has revealed before a click lands, and on a revealed shelf every
-click target already does something, so nothing could release a
-pin. The show/hide action is the one pin. It stays until the next
+has revealed before a click lands, and a revealed shelf has no
+click to spare for one — each item already does something, and
+the shelf lets the mouse through outside what it draws, as the
+marks do, so a title bar beside the plate keeps its click. Only
+while the shelf glides or reveals does it cover its whole strip,
+for that beat, since a motion's frames sit wherever it travels.
+The show/hide action is the one pin. It stays until the next
 press by default, because a keyboard user who pressed to look has
 not said for how long; `reveal_duration` hides it again on its
 own, one value for every bar. No reveal on a Space switch: the

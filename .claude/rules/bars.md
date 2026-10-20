@@ -526,6 +526,25 @@ render content into it (#1517). Obligations:
   and Boxed, and ▸ `dividerInTheDrawnGap` the divider; no suite
   scans a bar overlay for a plate of its own, so a section growing
   one is review's.
+- **The shelf panel takes the drawn plate or runs, never the
+  strip (#2497).** A panel takes every press inside its frame —
+  a `hitTest` answering nil passes nothing on, and
+  `ignoresMouseEvents` is whole-window — so the clear strip beside
+  a hugging plate ate the clicks meant for the windows under it.
+  At rest the panel covers the one `ShelfOverlay.restingRoom`: the
+  plate's span, under Boxed the span of the sections' plate asks,
+  which hold their boxes, counts and fades, at the strip's whole
+  depth; the content keeps strip coordinates inside it, so no
+  section's arithmetic sees the room. A motion whose frames leave
+  that room opens it to the strip for its length and settles it
+  on its own landing — a plate glide through `holdRoomForGlide`, a
+  reveal or retract through `openRoom` and the reveal's landing —
+  since a reveal's clip is placed in the panel's coordinates and
+  the room must not move under it; a new piece drawn outside the
+  runs' asks joins `restingRoom`. `ShelfPanelRoomTests` holds the
+  rest, Boxed, the glide and the reveal, and
+  `ShelfAutoHideCoreTests` ▸ `revealedPanelTakesThePlate` a
+  pinned reveal through the drivers.
 - **Centre the live shelf's section divider between what the two
   sections DRAW, never on the slot gutter (#1779)**: each bar insets its
   run and its items' content by its own amounts, so the gutter

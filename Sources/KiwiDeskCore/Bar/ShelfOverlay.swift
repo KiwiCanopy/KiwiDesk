@@ -22,7 +22,15 @@ final class ShelfOverlay {
     }
 
     /// The last input laid out.
-    private var drawn: Drawn?
+    private(set) var drawn: Drawn?
+    /// What the panel covers at rest, in strip coordinates (#2497).
+    var restRoom: CGRect = .zero
+    /// Plate glides still holding the room open.
+    var roomHolds = 0
+    /// Lands a room hold with the plate glide; a test drains it.
+    var afterRoomGlide: (@escaping @MainActor () -> Void) -> Void = {
+        BarMotion.afterGroupGlide($0)
+    }
 
     private(set) var panel: NSPanel?
     #if DEBUG
@@ -86,6 +94,9 @@ final class ShelfOverlay {
     /// Each section's drawn content at its last placement, in its
     /// own coordinates — where a glide starts it from (#1838).
     var placedContent: [ObjectIdentifier: CGRect] = [:]
+    /// The panel's own view, sized to the room; `content` keeps
+    /// the strip's size inside it (#2497).
+    let root = AppBarOverlay.FlippedView()
     let content = BarMenuView()
     /// Holds both sections and the divider, above the plate.
     let stripView = BarMenuView()
@@ -174,8 +185,15 @@ final class ShelfOverlay {
             shelf: shelf
         )
         let radius = shelf.resolvedCornerRadius(forThickness: depth)
+        restRoom = Self.restingRoom(
+            sections: sections,
+            strip: strip,
+            horizontal: horizontal,
+            shelf: shelf
+        )
         revealPlate = shelf.drawsPlate ? plate.map { ($0, radius) } : nil
         let travels = BarMotion.shelfGlideLength > 0
+        if glides, travels { holdRoomForGlide() } else { settleRoom() }
         if glides, travels {
             standGlideStarts(sections, in: strip, horizontal: horizontal)
         }
@@ -215,13 +233,6 @@ final class ShelfOverlay {
                 horizontal: horizontal
             ),
             horizontal: horizontal
-        )
-        panel.setFrame(
-            GeometryUtils.flip(
-                strip,
-                primaryHeight: GeometryUtils.primaryHeight
-            ),
-            display: true
         )
         if !panel.isVisible {
             #if DEBUG
