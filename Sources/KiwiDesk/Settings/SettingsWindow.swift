@@ -1,12 +1,8 @@
 import AppKit
 
-/// The Settings window. It accepts mouse-moved events, which hover
-/// focus needs to hear the pointer leave it (#2378, #2381), except
-/// while a window hangs from it: the flag breaks SwiftUI
-/// hover in a popover over it (#2501; Apple DTS, developer forums
-/// thread 736594). Derived from the children, never set and reset;
-/// a popover is the one child it gets — sheets and alerts attach
-/// as sheets.
+/// The Settings window: it takes mouse-moved events, which hover
+/// focus needs (#2378), only while no window hangs from it — the flag
+/// breaks hover in a popover (#2501, Apple DTS forums thread 736594).
 final class SettingsWindow: NSWindow {
     override func addChildWindow(
         _ child: NSWindow,
@@ -18,6 +14,12 @@ final class SettingsWindow: NSWindow {
 
     override func removeChildWindow(_ child: NSWindow) {
         super.removeChildWindow(child)
+        syncMouseMoves()
+    }
+
+    /// A detach AppKit makes past the override is caught here.
+    override func becomeKey() {
+        super.becomeKey()
         syncMouseMoves()
     }
 

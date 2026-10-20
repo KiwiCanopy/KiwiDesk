@@ -70,4 +70,42 @@ struct SettingsWindowMouseMovesTests {
         second.orderOut(nil)
         #expect(settings.acceptsMouseMovedEvents)
     }
+
+    /// A detach that skipped the override costs nothing past the
+    /// window's next key: hover focus leaving needs the moves.
+    @Test("becoming key re-derives the moves")
+    func keyReDerives() {
+        let (settings, _) = pair()
+        settings.acceptsMouseMovedEvents = false
+        settings.becomeKey()
+        #expect(settings.acceptsMouseMovedEvents)
+    }
+
+    /// The doc's claim that a popover is the one child Settings
+    /// gets: no GUI file attaches a window by hand, so a lasting
+    /// child cannot switch hover focus's moves off unseen.
+    @Test("nothing in the GUI attaches a child or writes the flag")
+    func noHandAttachedChildren() throws {
+        let tree = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let files = try SourceScan.swiftSources(under: tree)
+        #expect(files.count > 100)
+        var home = false
+        for file in files {
+            let source = try SourceScan.blankedSource(at: file)
+            // Attaching a child, or writing the flag beside the one
+            // derivation, both switch the moves unseen.
+            let attaches =
+                source.contains("addChildWindow(")
+                || source.contains(".parent =")
+                || source.contains("acceptsMouseMovedEvents =")
+            if file.lastPathComponent == "SettingsWindow.swift" {
+                home = attaches
+                continue
+            }
+            #expect(!attaches, "\(file.lastPathComponent)")
+        }
+        // The scan sees the overrides it exempts.
+        #expect(home)
+    }
 }
