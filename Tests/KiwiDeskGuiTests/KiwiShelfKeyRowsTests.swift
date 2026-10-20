@@ -21,6 +21,7 @@ struct KiwiShelfKeyRowsTests {
     }
 
     @Test("a row greys only while its bar is always everywhere")
+    @MainActor
     func inertFollowsTheBars() {
         var settings = TilingSettings()
         settings.spaceBarStyle.visibility = .always

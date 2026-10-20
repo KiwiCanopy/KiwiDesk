@@ -63,10 +63,27 @@ struct WarningGateTests {
         #expect(try gate(over: log).status == 1)
     }
 
+    /// A warning inside a macro names the expansion, not a file.
+    @Test("A warning inside a macro expansion reds the gate")
+    func macroExpansionFails() throws {
+        let log = """
+            macro expansion #expect:2:6: warning: call to main \
+            actor-isolated static method 'inert' in a synchronous \
+            nonisolated context
+
+            """
+        let run = try gate(over: log)
+        #expect(run.status == 1)
+        #expect(run.stderr.contains("macro expansion #expect:2:6"))
+    }
+
     @Test("A downgraded group, a C warning and a clean log pass")
     func exemptionsPass() throws {
         let clang = "/r/Vendor/CLua/src/l.c:9:1: warning: unused"
-        for log in [Self.tagged, clang, "Build complete!"] {
+        let macro =
+            "macro expansion #require:2:3: warning: 'x' is "
+            + "deprecated [#\(Self.group)]"
+        for log in [Self.tagged, clang, macro, "Build complete!"] {
             #expect(try gate(over: log + "\n").status == 0, "\(log)")
         }
     }
