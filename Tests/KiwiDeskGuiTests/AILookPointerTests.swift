@@ -9,6 +9,7 @@ import Testing
 @Suite("AI look pointer")
 struct AILookPointerTests {
     @Test("drawn only where the AI page is reachable")
+    @MainActor
     func gate() {
         #expect(AILookPointer.isDrawn(editingStoredProfile: false))
         #expect(!AILookPointer.isDrawn(editingStoredProfile: true))

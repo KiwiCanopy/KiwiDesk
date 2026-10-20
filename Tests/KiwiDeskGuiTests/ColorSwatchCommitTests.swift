@@ -11,6 +11,7 @@ import Testing
 @Suite("Colour field commit")
 struct ColorSwatchCommitTests {
     @Test("a commit of the stored colour writes nothing")
+    @MainActor
     func sameColourWritesNothing() {
         for draft in ["#8DB354", "#8db354", "8DB354", "#8DB354FF"] {
             #expect(
@@ -25,6 +26,7 @@ struct ColorSwatchCommitTests {
     }
 
     @Test("an edit writes the normalised colour")
+    @MainActor
     func editWrites() {
         #expect(
             ColorSwatch.committed(
@@ -66,6 +68,7 @@ struct ColorSwatchCommitTests {
     }
 
     @Test("clearing an Automatic field writes Automatic once")
+    @MainActor
     func automaticClears() {
         #expect(
             ColorSwatch.committed(

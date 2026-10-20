@@ -66,6 +66,7 @@ struct GesturesHoverDelayWiringTests {
     }
 
     @Test("the floor is Core's")
+    @MainActor
     func floorIsCore() {
         #expect(
             GesturesDrawer.hoverDelayRange.lowerBound

@@ -7,9 +7,11 @@
 # (`NSView`), so those reach the output as warnings and would
 # land green (packaging-and-release.md ▸ the ratchet).
 #
-# Only `.swift` diagnostics count: Vendor/'s C is clang's, which
-# the ratchet does not reach. A cached build re-emits nothing,
-# so a local run proves only what it compiled.
+# Only Swift diagnostics count: Vendor/'s C is clang's, which
+# the ratchet does not reach. A warning inside a macro such as
+# `#expect` names the expansion rather than a `.swift` file. A
+# cached build re-emits nothing, so a local run proves only what
+# it compiled.
 #
 # Usage: scripts/warning-gate <command ...>
 set -uo pipefail
@@ -49,7 +51,7 @@ exempted() {
 # around the warning and its `[#Group]` tag.
 LEFT="$(
     perl -pe 's/\e\[[0-9;]*m//g; s/\e\]8;;.*?\e\\//g' "$LOG" |
-        grep -E '^.+\.swift:[0-9]+:[0-9]+: warning:' |
+        grep -E '^(.+\.swift|macro expansion [^:]+):[0-9]+:[0-9]+: warning:' |
         exempted |
         sort -u
 )"
