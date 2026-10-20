@@ -142,6 +142,24 @@ the windows the lens leaves out.
 KiwiDesk.focus("left")
 ```
 
+:::unreleased
+### focus_window
+
+**Expects:** a window id, as `list_windows` and `get_state` report
+it.
+
+**Does:** focuses that window. One on another Space switches to
+that Space, landing on it, as clicking it in the Space Bar does. A
+window in native full screen, on a Desktop no screen shows, or
+unknown to KiwiDesk is refused.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_window(1234)
+```
+:::
+
 ### swap
 
 **Expects:** a direction (`"left"`, `"right"`, `"up"`, or

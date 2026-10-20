@@ -70,6 +70,10 @@ struct FocusedCommandPolicyTests {
         "explain_app",
         "get_layout_info",
         "list_monitors",
+        // Every window's frame; reads, acts on none (#2492).
+        "list_windows",
+        // Names its window, never the implied focus (#2492).
+        "focus_window",
         "debug_log",
         "reload_config",
         "help",

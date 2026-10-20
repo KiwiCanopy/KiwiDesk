@@ -11,6 +11,7 @@ public enum APIReference {
         [
             ("focus", "focus"),
             ("swap", "swap"),
+            ("focus_window", "focus_window"),
             // Bare `space` is canonical (#42): aligned with the
             // event namespace, which uses bare `space` for a
             // Space and `desktop` for macOS desktops.

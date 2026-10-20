@@ -11,6 +11,11 @@ extension APIReference {
             "Moves keyboard focus to the neighboring window.",
             .choice("direction", Direction.self)
         ),
+        "focus_window": APIRecord(
+            "Focuses a window by id, switching to its Space "
+                + "where another Space holds it.",
+            .window("window")
+        ),
         "swap": APIRecord(
             "Swaps the focused window with the neighboring "
                 + "window.",
