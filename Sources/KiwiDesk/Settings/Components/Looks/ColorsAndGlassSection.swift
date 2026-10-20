@@ -32,7 +32,7 @@ struct ColorsAndGlassSection: View {
     /// The control a landing on the section reveals: its first
     /// group, since a drawer opens only for a child (#1250) — so a
     /// reorder of the groups moves this one line.
-    static var head: SettingsControl {
+    nonisolated static var head: SettingsControl {
         SettingsCatalog.colors.colorsAndGlass.children.liquidGlassGroup
     }
 
