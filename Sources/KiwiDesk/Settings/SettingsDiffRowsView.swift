@@ -160,16 +160,16 @@ struct SettingsDiffRowsView: View {
             jump(row)
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
+                // Wraps rather than truncates: the list is the one
+                // place a change is named (owner eyeball, 2026-10-20).
                 Text(row.label)
                     .foregroundStyle(SettingsTheme.ink)
-                    .lineLimit(1)
-                // The profiles a folded change also reached: the
-                // label truncates first (#792).
+                    .fixedSize(horizontal: false, vertical: true)
+                // The profiles a folded change also reached (#792).
                 if let reach = row.reach {
                     Text(reach)
                         .foregroundStyle(SettingsTheme.ink3)
-                        .lineLimit(1)
-                        .layoutPriority(1)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 12)
                 valueReadout(row)
@@ -182,7 +182,18 @@ struct SettingsDiffRowsView: View {
         .buttonStyle(.plain)
         .rowHoverHighlight()
         .padding(.horizontal, -6)
+        .help(Self.fullText(row))
         .accessibilityElement(children: .combine)
+    }
+
+    /// The row in full, for its hover text.
+    static func fullText(_ row: SettingsDiffRow) -> String {
+        let change =
+            row.changeNote
+            ?? "\(row.oldValue ?? "—") → \(row.newValue ?? "—")"
+        return [row.label, row.reach, change]
+            .compactMap { $0 }
+            .joined(separator: " · ")
     }
 
     /// Renders old -> new value change readout.
