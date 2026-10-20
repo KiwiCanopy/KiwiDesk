@@ -98,16 +98,17 @@ struct ListWindowsLayoutTests {
     }
 
     /// Two minimum-size windows do not fit side by side, so bsp
-    /// piles them: the focused one is in front, the other covered.
-    @Test("A pile's covered member does not read visible")
+    /// piles them, the second 40 pt lower. Focused, the lower one is
+    /// in front and covers the upper one, which the screen's edge
+    /// does not cut — so only the coverage judgement hides it.
+    @Test("A pile's covered member reads hidden")
     func pileCoveredMember() throws {
         let core = makeCore(mode: "bsp", windows: [window(1), window(2)])
         core.execute("set_min_window_size", args: [.number(600)])
-        core.state.apply(.windowFocused(WindowID(1)))
+        core.state.apply(.windowFocused(WindowID(2)))
         let seen = try entries(core)
-        #expect(seen[1]?["visibility"] == .string("visible"))
-        #expect(seen[2]?["visibility"] != .string("visible"))
-        #expect(seen[2]?["shown"] == .bool(true))
+        #expect(seen[1]?["visibility"] == .string("hidden"))
+        #expect(seen[1]?["shown"] == .bool(true))
     }
 
     @Test("A monocle park reports no frame")
