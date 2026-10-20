@@ -14,8 +14,10 @@ struct KeyLayerOverrideFollowTests {
         KeyBinding(combo: combo, lua: lua, kind: .navigation, label: "")
     }
 
-    private var moves: [String: [String: String]] {
-        [main: ["control+option+f": "hyper+f"]]
+    private let floating = "KiwiDesk.toggle_floating()"
+
+    private var moves: [String: [String: KeyBinding]] {
+        [main: ["control+option+f": row("hyper+f", floating)]]
     }
 
     @Test("a tombstone on the old chord takes the new one")
@@ -45,7 +47,7 @@ struct KeyLayerOverrideFollowTests {
         let base = [
             KeyLayer(
                 name: main,
-                bindings: [row("hyper+f", "KiwiDesk.toggle_floating()")]
+                bindings: [row("hyper+f", floating)]
             )
         ]
         let followed = over.following(moves)
@@ -66,8 +68,55 @@ struct KeyLayerOverrideFollowTests {
             leftOut: ["work"]
         )
         let followed = over.following([
-            "work": ["control+option+w": "hyper+w"]
+            "work": ["control+option+w": row("hyper+w", "w()")]
         ])
         #expect(followed == over)
+    }
+
+    /// The mirror case: the profile's own row already held the new
+    /// chord, which would replace the moved row there; the row
+    /// stays on its old chord as the profile's own.
+    @Test("an own row on the new chord keeps the moved row on the old")
+    func ownRowOnTheNewChordKeepsTheRow() {
+        let over = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: main, bindings: [row("hyper+f", "hs.x()")])
+            ]
+        )
+        let base = [
+            KeyLayer(name: main, bindings: [row("hyper+f", floating)])
+        ]
+        let followed = over.following(moves)
+        #expect(followed.removed.isEmpty)
+        let resolved =
+            followed.resolved(onto: base).first?.bindings ?? []
+        #expect(Set(resolved.map(\.lua)) == ["hs.x()", floating])
+        #expect(
+            resolved.first { $0.lua == floating }?.combo
+                == "control+option+f"
+        )
+    }
+
+    /// The draft and the files may each take the switch once more
+    /// before a Save lands; a second move must move nothing.
+    @Test("moving onto the base the rows are on moves nothing")
+    func secondMoveIsInert() {
+        let layer = KeyLayer(
+            name: main,
+            bindings: [row("control+option+f", floating)]
+        )
+        let first = ShortcutBaseSwitch.move(
+            layer,
+            onto: .hyper,
+            liveSpaces: []
+        ) { _ in false }
+        let second = ShortcutBaseSwitch.move(
+            first.layer,
+            onto: .hyper,
+            liveSpaces: []
+        ) { _ in false }
+        #expect(first.moves.count == 1)
+        #expect(second.moves.isEmpty)
+        #expect(second.layer == first.layer)
     }
 }

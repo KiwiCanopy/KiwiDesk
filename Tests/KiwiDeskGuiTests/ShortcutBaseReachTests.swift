@@ -22,20 +22,20 @@ struct ShortcutBaseReachTests {
     /// Work is loaded and edited; Home and Away follow the base,
     /// `overrides` giving a profile rows of its own.
     private func model(
-        overrides: [String: KeyLayerOverride] = [:]
+        overrides: [String: KeyLayerOverride] = [:],
+        on base: ShortcutBase = .standard
     ) throws -> SettingsModel {
         let core = makeTestCore()
+        let mod = base == .hyper ? "hyper+" : "control+option+"
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
+        config.shortcutBase = base
         config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
-                bindings: [
-                    row("control+option+f", floating),
-                    row("control+option+s", sticky),
-                ]
+                bindings: [row(mod + "f", floating), row(mod + "s", sticky)]
             ),
-            KeyLayer(name: "work", bindings: [row("control+option+w", "w()")]),
+            KeyLayer(name: "work", bindings: [row(mod + "w", "w()")]),
         ]
         try core.guiConfigStore.save(config)
         try core.profiles.save(profile("Work", overrides["Work"]))
@@ -141,6 +141,69 @@ struct ShortcutBaseReachTests {
         #expect(
             try model.core.profiles.read(name: "Work").layers?.removed
                 == [KeyLayer.defaultName: ["hyper+s"]]
+        )
+    }
+
+    /// A row the page keeps on its old chord — its target held by
+    /// the page's own row — stays there in the shared keymap too, so
+    /// the page and the files never disagree about where it is.
+    @Test("a row the page keeps stays put for every profile")
+    func pageKeptRowStays() throws {
+        let holds = KeyLayerOverride(
+            layers: [
+                KeyLayer(
+                    name: KeyLayer.defaultName,
+                    bindings: [row("hyper+f", "hs.x()")]
+                )
+            ]
+        )
+        let model = try model(overrides: ["Work": holds])
+        model.setShortcutBase(.hyper)
+        #expect(model.saveRuleReach() == .landed)
+        #expect(
+            try savedDefault(model, "Home").first { $0.lua == floating }?
+                .combo == "control+option+f"
+        )
+    }
+
+    /// A switch that moves no row the page draws still moves the
+    /// shared keymap, and the memo must not serve the old one.
+    @Test("a switch moving only hidden rows refreshes the reach memo")
+    func hiddenOnlySwitchRefreshesTheMemo() throws {
+        let leaves = KeyLayerOverride(
+            removed: [
+                KeyLayer.defaultName: [
+                    "control+option+f", "control+option+s",
+                ]
+            ],
+            leftOut: ["work"]
+        )
+        let model = try model(overrides: ["Work": leaves])
+        let before = model.encodedReach?.keyBase.first?.bindings
+        model.setShortcutBase(.hyper)
+        #expect(before?.map(\.combo).first == "control+option+f")
+        #expect(
+            model.encodedReach?.keyBase.first?.bindings.map(\.combo)
+                == ["hyper+f", "hyper+s"]
+        )
+    }
+
+    /// The way back moves the tombstone back with the row.
+    @Test("the way back to ⌃⌥ keeps a left-out row out")
+    func reverseSwitchKeepsItOut() throws {
+        let leaves = KeyLayerOverride(
+            removed: [KeyLayer.defaultName: ["hyper+s"]]
+        )
+        let model = try model(overrides: ["Work": leaves], on: .hyper)
+        model.setShortcutBase(.standard)
+        #expect(model.saveRuleReach() == .landed)
+        #expect(
+            try savedDefault(model, "Work").map(\.combo)
+                == ["control+option+f"]
+        )
+        #expect(
+            try savedDefault(model, "Home").map(\.combo)
+                == ["control+option+f", "control+option+s"]
         )
     }
 

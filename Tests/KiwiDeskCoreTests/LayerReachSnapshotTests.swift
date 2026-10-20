@@ -132,6 +132,13 @@ struct LayerReachSnapshotTests {
         #expect(throws: LayerPassError.afterRowEncode) {
             try snapshot.rewriteLayers(["Desk": dropping("Gaming")])
         }
+        #expect(throws: LayerPassError.afterRowEncode) {
+            try snapshot.moveShortcutBase(
+                onto: .hyper,
+                liveSpaces: [],
+                staying: { _, _ in false }
+            )
+        }
         // A row edit reaching one profile alone, base untouched.
         var listed = try #require(core.ruleReachSnapshot())
         listed.keyLayers.applyKey(

@@ -24,15 +24,11 @@ public enum ShortcutBaseSwitch {
         _ base: ShortcutBase,
         to config: inout GuiConfig
     ) {
-        for index in config.layers.indices {
-            config.layers[index].bindings =
-                moved(
-                    config.layers[index],
-                    onto: base
-                ).rows
+        let live = Set(config.spaces)
+        config.layers = config.layers.map {
+            move($0, onto: base, liveSpaces: live) { _ in false }.layer
         }
         config.shortcutBase = base
-        NavigationChords.deduplicate(&config)
     }
 
     /// The rows of `layer` the switch would leave where they are,
@@ -57,17 +53,30 @@ public enum ShortcutBaseSwitch {
         return KeyCombo.parse(new) == target
     }
 
-    /// `layer` with its rows moved onto `base`, `staying` rows left
-    /// where they are and holding their chords — the shared keymap's
-    /// move, which leaves the rows a page kept (#2460).
-    public static func moved(
+    /// `layer` with its rows moved onto `base` — `staying` rows left
+    /// where they are, holding their chords — and then deduplicated
+    /// against `liveSpaces`, with each moved row by its old chord.
+    /// The draft's switch and the shared keymap's move (#2460) both
+    /// take it, so the two cannot write different rows.
+    public static func move(
         _ layer: KeyLayer,
         onto base: ShortcutBase,
+        liveSpaces: Set<SpaceID>,
         staying: (KeyBinding) -> Bool
-    ) -> KeyLayer {
+    ) -> (layer: KeyLayer, moves: [String: KeyBinding]) {
+        let rows = moved(layer, onto: base, staying: staying).rows
+        var moves: [String: KeyBinding] = [:]
+        for (old, new) in zip(layer.bindings, rows)
+        where old.combo != new.combo {
+            moves[old.combo] = new
+        }
         var layer = layer
-        layer.bindings = moved(layer, onto: base, staying: staying).rows
-        return layer
+        layer.bindings =
+            NavigationChords.deduplicated(
+                rows,
+                liveSpaces: liveSpaces
+            ).rows
+        return (layer, moves)
     }
 
     private static func moved(

@@ -12,7 +12,8 @@ extension SettingsModel {
             edits: reachEdits,
             page: config.layers,
             profile: reachProfile,
-            switchedBase: switchedShortcutBase
+            switchedBase: switchedShortcutBase,
+            spaces: config.spaces
         )
         if let cache = layeredCache, cache.key == key { return cache.value }
         let value = layeredReach(reachEdits)
@@ -81,7 +82,10 @@ extension SettingsModel {
         onto base: ShortcutBase
     ) throws {
         let page = config.layers
-        try snapshot.moveShortcutBase(onto: base) { layer, row in
+        try snapshot.moveShortcutBase(
+            onto: base,
+            liveSpaces: Set(config.spaces)
+        ) { layer, row in
             page.contains { held in
                 held.name == layer
                     && held.bindings.contains {
@@ -206,6 +210,7 @@ struct LayeredReachCache {
         let page: [KeyLayer]
         let profile: String?
         let switchedBase: ShortcutBase?
+        let spaces: [SpaceID]
     }
 
     let key: Key
@@ -230,6 +235,7 @@ struct EncodedReachCache {
         let profile: String?
         let isLoaded: Bool
         let switchedBase: ShortcutBase?
+        let spaces: [SpaceID]
     }
 
     let key: Key

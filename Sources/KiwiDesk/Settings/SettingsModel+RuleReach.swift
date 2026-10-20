@@ -44,7 +44,8 @@ extension SettingsModel {
             floatAutomatically: config.floatAutomatically,
             profile: reachProfile,
             isLoaded: reachIsLoaded,
-            switchedBase: switchedShortcutBase
+            switchedBase: switchedShortcutBase,
+            spaces: config.spaces
         )
         if let cache = encodedCache, cache.key == key { return cache.value }
         let value = encodeReach()
@@ -204,8 +205,15 @@ extension SettingsModel {
     /// shared rules are swapped back in. Every gui.json write of
     /// the draft goes through this.
     var sidecarConfig: GuiConfig {
-        guard target == .live, let reach = encodedReach else {
-            return config
+        guard target == .live else { return config }
+        guard let reach = encodedReach else {
+            // No page: a switch's moved base is the one the files'
+            // tombstones followed (`moveShortcutBase`).
+            var sidecar = config
+            if switchedShortcutBase != nil, let layered = layeredReach {
+                sidecar.layers = layered.keyBase
+            }
+            return sidecar
         }
         var sidecar = config
         sidecar.appRules = reach.appRules.appRuleBase(

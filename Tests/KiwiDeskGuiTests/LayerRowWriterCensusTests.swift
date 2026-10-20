@@ -98,6 +98,14 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDeskCore/Config/KeyLayer.swift":
             (1, "the initializer"),
+        "KiwiDeskCore/Profiles/RuleReachSnapshot+ShortcutBase.swift":
+            (
+                1,
+                "a profile following the Shortcuts use switch: keeps a"
+                    + " shared row its own row would replace at the new"
+                    + " chord on the old one, the one chord that row"
+                    + " has there (#2460, KeyLayerOverrideFollowTests)"
+            ),
         "KiwiDesk/Settings/Components/KiwiVision/"
             + "KiwiVisionLensHeader.swift":
             (
