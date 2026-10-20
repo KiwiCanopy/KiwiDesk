@@ -10610,10 +10610,11 @@ and names it; the name says the layer and each screen's Space,
 so VoiceOver reads what the eye does.
 
 :::unreleased
-"Off" became Auto and Hidden with #761, and both take the stand-in
-(owner, 2026-10-20): an Auto bar is hidden at rest, so the menu bar
-is again the one place that names the Space until the pointer
-reveals the bar. Only Always keeps the brand or layer icon.
+"Off" became Auto and Hidden with #761, and the stand-in follows
+the edge's own fold (owner, 2026-10-20): a screen is listed wherever
+its Space Bar is not drawn at rest — Hidden, or Auto unless an
+Always bar shares its edge — since the menu bar is then the one
+place that names the Space until the pointer reveals the bar.
 :::
 
 **The recorder snaps in on key-down.** (#212, replacing the

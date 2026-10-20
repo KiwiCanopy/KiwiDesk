@@ -137,6 +137,19 @@ extension TilingSettings {
         ).contains { $0.bars[bar] == .auto && $0.shown(bar) == .always }
     }
 
+    /// Whether `bar` is drawn at rest on `screen` in `mode`: the
+    /// edge's own fold, an `auto` bar beside an `always` one included.
+    public func drawsAtRest(
+        _ bar: ShelfBar,
+        in mode: LayoutMode,
+        on screen: String?
+    ) -> Bool {
+        onScreen(screen).barEdges(
+            space: spaceBarStyle.visibility,
+            app: appBarVisibility(in: mode)
+        ).contains { $0.drawnAtRest.contains(bar) }
+    }
+
     /// The edges the bars sit on — the ONE list the reservation
     /// and the live plan both take, over settings already resolved
     /// for a screen (`onScreen(_:)`), each bar handed in with its

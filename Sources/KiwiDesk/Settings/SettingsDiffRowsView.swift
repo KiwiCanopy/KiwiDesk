@@ -160,8 +160,8 @@ struct SettingsDiffRowsView: View {
             jump(row)
         } label: {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                // Wraps rather than truncates: the list is the one
-                // place a change is named (owner eyeball, 2026-10-20).
+                // The list is the one place a change is named, so the
+                // label wraps (owner eyeball, 2026-10-20).
                 Text(row.label)
                     .foregroundStyle(SettingsTheme.ink)
                     .fixedSize(horizontal: false, vertical: true)
@@ -190,7 +190,7 @@ struct SettingsDiffRowsView: View {
     static func fullText(_ row: SettingsDiffRow) -> String {
         let change =
             row.changeNote
-            ?? "\(row.oldValue ?? "—") → \(row.newValue ?? "—")"
+            ?? "\(row.oldValue ?? unsetMark) → \(row.newValue ?? unsetMark)"
         return [row.label, row.reach, change]
             .compactMap { $0 }
             .joined(separator: " · ")
@@ -206,11 +206,11 @@ struct SettingsDiffRowsView: View {
                 .foregroundStyle(SettingsTheme.ink3)
         } else {
             HStack(spacing: 5) {
-                Text(row.oldValue ?? unsetMark)
+                Text(row.oldValue ?? Self.unsetMark)
                     .foregroundStyle(SettingsTheme.ink3)
                 Text(verbatim: "→")
                     .foregroundStyle(SettingsTheme.ink3)
-                Text(row.newValue ?? unsetMark)
+                Text(row.newValue ?? Self.unsetMark)
                     .fontWeight(.semibold)
                     .foregroundStyle(SettingsTheme.groupHeading)
             }
@@ -218,7 +218,7 @@ struct SettingsDiffRowsView: View {
         }
     }
 
-    private var unsetMark: String {
+    static var unsetMark: String {
         L("diff.value.unset", "—")
     }
 }

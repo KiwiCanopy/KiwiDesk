@@ -12,19 +12,13 @@ struct PermissionPausedBanner: View {
     let onResolve: () -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: 10) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(SettingsTheme.warningInk)
-            Text(
-                L(
-                    "settings.permission_paused",
-                    "Window management is paused — KiwiDesk "
-                        + "needs Accessibility permission."
-                )
+        WarningBox(
+            text: L(
+                "settings.permission_paused",
+                "Window management is paused — KiwiDesk "
+                    + "needs Accessibility permission."
             )
-            .font(.callout)
-            .foregroundStyle(SettingsTheme.warningInk)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        ) {
             // ONE key with the onboarding button, not a twin
             // (l10n audit 2026-08-11): `onboarding.grant.body`
             // QUOTES this label in its steps. Renamed out of
@@ -39,13 +33,5 @@ struct PermissionPausedBanner: View {
             }
             .settingsActionButton()
         }
-        .padding(12)
-        // A solid warning surface, never an opacity wash: a wash
-        // takes its result from whatever is behind it, drifts with
-        // the page, and cannot promise 4.5:1 for `warningInk`.
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(SettingsTheme.warningSurface)
-        )
     }
 }

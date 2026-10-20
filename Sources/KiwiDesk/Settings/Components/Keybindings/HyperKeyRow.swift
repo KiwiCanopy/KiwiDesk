@@ -105,24 +105,11 @@ struct HyperKeyRow: View {
             status: model.hyperStatus,
             luaOwned: reason == .appWideLuaOwned
         ) {
-            HStack(alignment: .center, spacing: 10) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(SettingsTheme.warningInk)
-                    .accessibilityHidden(true)
-                Text(text)
-                    .font(.callout)
-                    .foregroundStyle(SettingsTheme.warningInk)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            WarningBox(text: text) {
                 HyperTakeOverButton(model: model, foreign: foreign) {
                     recorderFocused = true
                 }
             }
-            .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(SettingsTheme.warningSurface)
-            )
             .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
         } else {
             caption(text)

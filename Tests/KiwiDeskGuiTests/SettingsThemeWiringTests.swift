@@ -62,7 +62,7 @@ struct SettingsThemeWiringTests {
         "accentInkSecondary": "JumpRowView.swift",
         "accentPressed": "KiwiProminentButton.swift",
         "accentDisabled": "KiwiProminentButton.swift",
-        "warningSurface": "PermissionPausedBanner.swift",
+        "warningSurface": "WarningBox.swift",
         "warningInk": "SettingsHeaderBar+Status.swift",
         "danger": "KeyRecorderRejectionRow.swift",
         "highlight": "UpdateNotesGroups.swift",

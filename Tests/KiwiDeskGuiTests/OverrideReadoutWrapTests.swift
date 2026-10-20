@@ -21,7 +21,10 @@ struct OverrideReadoutWrapTests {
         let body = tail[..<end]
         #expect(body.contains("Text(inheritedText(inherited.value))"))
         #expect(!body.contains(".truncationMode("))
-        #expect(!body.contains(".lineLimit(1)\n                .help"))
+        let readout = try #require(
+            body.range(of: "Text(inheritedText(inherited.value))")
+        )
+        #expect(!body[readout.upperBound...].contains(".lineLimit("))
         #expect(body.contains(".help(inheritedText(inherited.value))"))
     }
 }

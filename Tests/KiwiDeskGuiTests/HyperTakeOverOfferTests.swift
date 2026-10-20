@@ -44,7 +44,7 @@ struct HyperTakeOverOfferTests {
         #expect(row.contains("HyperTakeOverButton(model: model"))
         // The offer is drawn as a warning beside its fix, and the
         // key row carries its drawn label (owner eyeball, 2026-10-20).
-        #expect(row.contains("SettingsTheme.warningSurface"))
+        #expect(row.contains("WarningBox(text: text)"))
         #expect(row.contains("Text(HyperKeyWords.useAs)"))
         let button = SourceScan.stripComments(
             try String(
