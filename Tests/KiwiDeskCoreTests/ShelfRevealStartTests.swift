@@ -4,23 +4,39 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The ORDER a hiding shelf's reveal starts in (#761), split from
-/// `ShelfRevealMotionTests` at the §2.1 target: the pass ordering
-/// the panel in holds both channels, the plate leads the items in
-/// and follows them out, a Boxed shelf only fades, and the reveal
-/// delay redraws once. Main-actor spend: unwindowed overlays.
-@Suite("Shelf reveal start order (#761)")
+/// The ORDER a hiding shelf's reveal starts in (#761, #2497), split
+/// from `ShelfRevealMotionTests` at the §2.1 target: the pass
+/// ordering the panel in holds the slide, a shown panel's starts at
+/// once, a retract slides back out, Reduce Motion cross-fades, and
+/// the reveal delay redraws once. Main-actor spend: a few overlays,
+/// one ordered panel each.
+@Suite("Shelf reveal start order (#761)", .serialized)
 @MainActor
 struct ShelfRevealStartTests {
-    private static let mark = CGRect(x: 100, y: 0, width: 60, height: 8)
-    private static let plate = CGRect(x: 20, y: 0, width: 360, height: 40)
+    /// Clear of the menu bar, which AppKit keeps a panel below.
+    private static let strip = CGRect(x: 100, y: 300, width: 1000, height: 40)
 
-    private func overlay(plate: Bool) -> ShelfOverlay {
+    /// A shown shelf, its reveal landings swallowed.
+    private func overlay() -> ShelfOverlay {
         let overlay = ShelfOverlay()
         overlay.afterReveal = { _, _ in }
-        overlay.content.frame = CGRect(x: 0, y: 0, width: 400, height: 40)
-        overlay.revealOrigin = Self.mark
-        overlay.revealPlate = plate ? (Self.plate, 10) : nil
+        let plate = CGRect(x: 200, y: 0, width: 300, height: 40)
+        var shelf = KiwiShelf()
+        shelf.liquidGlass = false
+        overlay.show(
+            strip: Self.strip,
+            edge: .top,
+            shelf: shelf,
+            sheen: 0,
+            sections: [
+                .init(
+                    view: NSView(),
+                    slot: Self.strip,
+                    plate: plate,
+                    content: plate
+                )
+            ]
+        )
         return overlay
     }
 
@@ -28,58 +44,60 @@ struct ShelfRevealStartTests {
         view.layer?.animation(forKey: BarMotion.revealKey)
     }
 
-    @Test("A reveal ordering the panel in holds both channels a pass")
+    @Test("A reveal ordering the panel in holds the slide a pass")
     func orderingRevealWaitsForTheCommit() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
-        let overlay = overlay(plate: true)
+        let overlay = overlay()
+        defer { overlay.hide() }
         var commits: [() -> Void] = []
         overlay.afterCommit = { commits.append($0) }
         overlay.revealIn(ordering: true)
-        // No mask is rendered off screen per frame: the content's
-        // own layer is the clip.
+        // No mask is rendered off screen per frame: the panel clips.
         #expect(overlay.content.layer?.mask == nil)
         #expect(motion(overlay.content)?.speed == 0)
-        #expect(motion(overlay.stripView)?.speed == 0)
+        #expect(motion(overlay.stripView) == nil)
         #expect(commits.count == 1)
         commits.first?()
-        let plate = try #require(motion(overlay.content))
-        let items = try #require(motion(overlay.stripView))
-        #expect(plate.speed == 1)
-        #expect(items.speed == 1)
-        #expect(plate.beginTime > 0)
-        #expect(items.beginTime > plate.beginTime)
+        let slide = try #require(motion(overlay.content))
+        #expect(slide.speed == 1)
+        #expect(slide.beginTime > 0)
     }
 
-    @Test("A retract starts the plate after the items")
-    func retractShrinksAfterTheItems() throws {
+    @Test("A retract slides back out past the screen side")
+    func retractSlidesOut() throws {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
-        let overlay = overlay(plate: true)
+        let overlay = overlay()
+        defer { overlay.hide() }
         #expect(overlay.retractOut())
-        let plate = try #require(motion(overlay.content))
-        let items = try #require(motion(overlay.stripView))
-        #expect(plate.beginTime > items.beginTime)
+        let slide = try #require(
+            motion(overlay.content) as? CABasicAnimation
+        )
+        #expect(slide.keyPath == "position")
+        let end = try #require(slide.toValue as? NSValue).pointValue
+        #expect(abs(end.y) == Self.strip.height)
     }
 
-    @Test("A Boxed shelf's reveal fades the content and clips nothing")
-    func boxedRevealFades() throws {
-        BarMotion.reducedOverride = false
+    @Test("Under Reduce Motion a reveal fades the content in place")
+    func reducedRevealFades() throws {
+        BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
-        let overlay = overlay(plate: false)
+        let overlay = overlay()
+        defer { overlay.hide() }
         overlay.revealIn()
         let fade = try #require(
             motion(overlay.content) as? CABasicAnimation
         )
         #expect(fade.keyPath == "opacity")
-        #expect(motion(overlay.stripView) == nil)
     }
 
     @Test("A reveal on a shown panel starts at once")
     func shownRevealStartsAtOnce() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
-        let overlay = overlay(plate: true)
+        let overlay = overlay()
+        defer { overlay.hide() }
         var commits = 0
         overlay.afterCommit = { _ in commits += 1 }
         overlay.revealIn()

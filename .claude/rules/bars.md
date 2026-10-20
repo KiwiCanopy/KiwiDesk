@@ -532,19 +532,33 @@ render content into it (#1517). Obligations:
   `ignoresMouseEvents` is whole-window — so the clear strip beside
   a hugging plate ate the clicks meant for the windows under it.
   At rest the panel covers the one `ShelfOverlay.restingRoom`: the
-  plate's span, under Boxed the span of the sections' plate asks,
-  which hold their boxes, counts and fades, at the strip's whole
-  depth; the content keeps strip coordinates inside it, so no
-  section's arithmetic sees the room. A motion whose frames leave
-  that room opens it to the strip for its length and settles it
-  on its own landing — a plate glide through `holdRoomForGlide`, a
-  reveal or retract through `openRoom` and the reveal's landing —
-  since a reveal's clip is placed in the panel's coordinates and
-  the room must not move under it; a new piece drawn outside the
-  runs' asks joins `restingRoom`. `ShelfPanelRoomTests` holds the
-  rest, Boxed, the glide and the reveal, and
-  `ShelfAutoHideCoreTests` ▸ `revealedPanelTakesThePlate` a
-  pinned reveal through the drivers.
+  plate, under Boxed the span of the sections' plate asks
+  (`plateAsks`, the plate's own input), which hold their boxes,
+  counts and fades, at the strip's whole depth; the content keeps
+  strip coordinates inside it, so no section's arithmetic sees the
+  room. A plate glide whose resting room moved holds both ends
+  until it lands (`holdRoomForGlide`) and one that moved none
+  holds nothing; a reveal or retract opens the slide's room
+  (`openSlideRoom`) until its own landing; and a leave that cuts a
+  reveal short clears it, or the room never settles.
+  `ShelfPanelRoomTests` holds the rest — a fitting run, an
+  overflowing one, Boxed, a side edge, an unchanged refresh —
+  `ShelfPanelRoomMotionTests` the glide, the slide and the cut
+  reveal, and `ShelfAutoHideCoreTests` ▸
+  `revealedPanelTakesThePlate` a pinned reveal through the
+  drivers. A piece drawn outside its run's plate ask is clipped
+  at rest, and noticing one is review's.
+- **A hiding shelf slides whole from its screen side, and the
+  panel never moves for it (#2497).** The reveal and the retract
+  travel the content through `BarMotion.playReveal`, an ADDITIVE
+  position slide from `BarMotion.revealOffset` — the strip's depth
+  plus the outer margin, so it starts wholly clipped at the usable
+  area's edge — while the panel stands in its slide room; moving
+  the window frame instead lagged on the device. The mark fades
+  out as the slide starts and back as the retract lands
+  (`BarMotion.markFade`), and Reduce Motion cross-fades in place.
+  `ShelfRevealMotionTests` holds the decisions,
+  `ShelfRevealStartTests` the start order.
 - **Centre the live shelf's section divider between what the two
   sections DRAW, never on the slot gutter (#1779)**: each bar insets its
   run and its items' content by its own amounts, so the gutter

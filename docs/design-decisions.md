@@ -14624,6 +14624,18 @@ current Space in its dot; a vertical mark is a dot wide, with no
 room across it for a name. The App line only grows, since the App
 Bar opens a moment later and icons in a 14-point mark would not read.
 
+A reveal slides the whole bar in from the shelf's screen side,
+already laid out — out from under the menu bar where it shows,
+from the screen's edge where it hides — while the mark fades, and
+the retract slides it back out the same way, the mark returning
+as it lands (owner, device, 2026-10-20, replacing a plate that
+grew out of the mark). The panel stays still and the content
+travels inside it: moving the window frame lagged on the device,
+the compositor moving it per frame and the glass re-sampling, so
+for the slide's length the panel's room runs out over the outer
+margin and its own edge clips the bar. Reduce Motion cross-fades
+in place.
+
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing
 for a title bar does not pop it, never restarting for movement
@@ -14634,9 +14646,9 @@ There is no click-pin: the band sits over the mark, so the shelf
 has revealed before a click lands, and a revealed shelf has no
 click to spare for one — each item already does something, and
 the shelf lets the mouse through outside what it draws, as the
-marks do, so a title bar beside the plate keeps its click. Only
-while the shelf glides or reveals does it cover its whole strip,
-for that beat, since a motion's frames sit wherever it travels.
+marks do, so a title bar beside the plate keeps its click. While
+the shelf glides or slides it covers what that motion crosses,
+for that beat.
 The show/hide action is the one pin. It stays until the next
 press by default, because a keyboard user who pressed to look has
 not said for how long; `reveal_duration` hides it again on its

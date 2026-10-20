@@ -8,29 +8,24 @@ import QuartzCore
 extension BarMotion {
     /// When the mark's plate and dots fade, and for how long, as
     /// their shelf reveals over them (`showing` false) or retracts
-    /// (`showing`): out under a growing plate; back over the end of
-    /// a morph's retract so it lands with it; a cross-fade with
-    /// the shelf otherwise.
+    /// (`showing`): out as the slide starts, back over the end of
+    /// the retract so it lands with it; a cross-fade with the shelf
+    /// under Reduce Motion.
     static func markFade(
         showing: Bool,
-        morphs: Bool,
         reduceMotion: Bool
     ) -> (delay: TimeInterval, length: TimeInterval) {
-        guard morphs, !reduceMotion else { return (0, revealFade) }
-        guard showing else { return (0, plateGrow / 2) }
-        return (itemsFadeOut + plateShrink - markReturn, markReturn)
+        guard !reduceMotion else { return (0, revealFade) }
+        guard showing else { return (0, revealFade) }
+        return (revealSlide - markReturn, markReturn)
     }
 
     /// Fades the mark's `body` in (`showing`) or out as its shelf
     /// retracts or reveals; a fade already playing continues from
     /// where it stands.
     @MainActor
-    static func fadeMark(_ body: NSView, showing: Bool, morphs: Bool) {
-        let timing = markFade(
-            showing: showing,
-            morphs: morphs,
-            reduceMotion: isReduced
-        )
+    static func fadeMark(_ body: NSView, showing: Bool) {
+        let timing = markFade(showing: showing, reduceMotion: isReduced)
         body.wantsLayer = true
         let from =
             body.layer?.animationKeys()?.contains(revealKey) == true

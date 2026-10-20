@@ -3175,9 +3175,11 @@ space_bar.set_reserve(false)
   item and, on a top or bottom edge, shows the current Space's
   icon, number or first two letters in its dot. Resting a moment in the dots' band — 64
   points along the edge, centred on the dots, from a few points
-  past the shelf to where the windows start — grows the bar out
-  of the dots, at once when the pointer pushes against the
-  screen's edge inside that band. It shrinks back 0.5 s after the
+  past the shelf to where the windows start — slides the bar in
+  from the screen's edge, out from under the menu bar where it
+  shows, as the dots fade; at once when the pointer pushes against
+  the screen's edge inside that band. It slides back out 0.5 s
+  after the
   pointer leaves the bar and its band, and stays while a bar menu
   or a hover peek it opened is up.
 - `"hidden"` draws nothing and reserves nothing; only

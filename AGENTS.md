@@ -1540,8 +1540,11 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   down at `ShelfManager.relayout` (`ShelfOverlayTests`,
   `ShelfPlateGlassGateTests`)
 - the shelf panel takes the drawn plate or runs, never the strip — the one
-  `ShelfOverlay.restingRoom` at rest, the strip only while a glide or a
-  reveal travels, settled on its landing (#2497, `ShelfPanelRoomTests`)
+  `ShelfOverlay.restingRoom` at rest, a glide's two ends or a slide's room
+  while it travels, settled on its landing (#2497, `ShelfPanelRoomTests`,
+  `ShelfPanelRoomMotionTests`) — and a hiding shelf slides whole from its
+  screen side inside a still panel through `BarMotion.playReveal`
+  (`ShelfRevealMotionTests`)
 - every rule a bar draws takes `BarDivider` (`ShelfDividerWeightTests`) and
   idle ink is `KiwiShelf.idleItemColor` (`IdleItemContrastTests`)
 - overflow goes through `ShelfOverflow`, `ShelfFadeMask` and `ShelfCountView`

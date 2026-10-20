@@ -120,10 +120,7 @@ extension KiwiCore {
                     carriesSpace: $0.arrangement.space != nil,
                     carriesApp: $0.arrangement.app != nil,
                     divider: $0.arrangement.divider,
-                    slides: $0.hides,
-                    mark: hiding.marks[
-                        ShelfManager.Key(display: display.id, edge: $0.edge)
-                    ]
+                    slides: $0.hides
                 )
             }
             if let app,
@@ -184,10 +181,9 @@ extension KiwiCore {
         let carriesSpace: Bool
         let carriesApp: Bool
         var divider: ShelfArrangement.Divider? = nil
-        /// A hiding shelf's reveal, which grows out of its mark at
-        /// `mark` and back into it (#761).
+        /// A hiding shelf, which slides in from its screen side
+        /// (#761, #2497).
         var slides = false
-        var mark: CGRect? = nil
     }
 
     /// Hands each shelf the sections its bars just rendered on its
@@ -209,8 +205,7 @@ extension KiwiCore {
                     app: shelf.carriesApp
                         ? appBars.shownOverlay(on: shelf.display) : nil,
                     divider: shelf.divider,
-                    slides: shelf.slides,
-                    mark: shelf.mark
+                    slides: shelf.slides
                 )
             }
         )

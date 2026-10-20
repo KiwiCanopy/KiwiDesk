@@ -24,9 +24,6 @@ extension KiwiCore {
     struct HidingShelves {
         var targets: [ShelfRevealer.Key: ShelfRevealer.Target] = [:]
         var indicators: [ShelfRevealer.Key: ShelfIndicatorSpec] = [:]
-        /// The mark each hiding shelf's reveal grows out of: its
-        /// shown bar's, else its first mark's. AX coordinates.
-        var marks: [ShelfManager.Key: CGRect] = [:]
         /// Each Space mark's first dot shown, carried from the last
         /// pass so the dots slide only when they must
         /// (`ShelfDotWindow`); a mark that stops drawing forgets it.
@@ -156,14 +153,6 @@ extension KiwiCore {
                     near: near,
                     section: section(bar)
                 )
-                // The reveal grows out of the leading shown bar's
-                // mark, else the leading mark.
-                if marks[key] == nil
-                    || (shown(bar)
-                        && !auto.prefix(index).contains(where: shown))
-                {
-                    marks[key] = markIn
-                }
                 indicators[barKey(bar)] = ShelfIndicatorSpec(
                     mark: mark,
                     frame: markIn,
@@ -175,7 +164,6 @@ extension KiwiCore {
                     highlight: shelf.highlightColor,
                     shown: shown(bar),
                     hovered: reveal.arming.contains(barKey(bar)),
-                    morphs: shelf.drawsPlate,
                     rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
                     sheen: settings.borderStyle.sheen,
                     yields: reveal.yields(barKey(bar)),
