@@ -258,7 +258,8 @@ extension EventLoop {
     /// `id` is the window's, where the caller already read it
     /// (#1933); nil asks the element. `titlebarButton` likewise:
     /// the off-main list read carries it for a raised-layer
-    /// window, and nil reads it here where the #2072 escape needs it.
+    /// window, and nil reads it here where the #2072 escape needs it;
+    /// `subrole` likewise, read live only where the escape asks it.
     /// `tracked` judges a window already in state below the
     /// screen-saver level (#2069).
     func shouldIgnore(
@@ -269,6 +270,7 @@ extension EventLoop {
         layer: Int? = nil,
         isAccessory: Bool,
         tracked: Bool,
+        subrole: String? = nil,
         titlebarButton: Bool? = nil
     ) -> Bool {
         if Self.isOwnProcess(pid) {
@@ -300,7 +302,8 @@ extension EventLoop {
             FloatDetection.needsTitlebarButton(
                 layer: resolved,
                 isAccessory: isAccessory,
-                bundleID: app.bundleID
+                bundleID: app.bundleID,
+                subrole: subrole ?? AXHelper.subrole(of: element)
             )
             ? titlebarButton ?? Self.readsTitlebarButton(element, id: id)
             : false

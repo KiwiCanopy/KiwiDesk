@@ -4720,9 +4720,12 @@ launcher or HUD qualifies without a rule; the app's normal windows
 additionally recognized by bundle id for setups where Raycast shows
 a dock icon and loses the accessory policy.
 
-Spotlight on macOS 27 is recognized by bundle id too: its panel
-lists title-bar buttons, which would otherwise mark it as one of
-its app's normal windows.
+:::unreleased
+A raised window of an accessory app, or of Ghostty, counts as one
+of its app's normal windows only when it lists title-bar buttons
+and macOS does not report it as a system dialog, so Spotlight's
+panel on macOS 27 stays ignored.
+:::
 
 Invisible helper windows are ignored automatically: a raised-layer
 window that is fully transparent or sits entirely off-screen (the

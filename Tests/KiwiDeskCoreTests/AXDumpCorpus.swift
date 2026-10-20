@@ -174,7 +174,8 @@ extension AXDump {
             titlebarButton: FloatDetection.needsTitlebarButton(
                 layer: layer,
                 isAccessory: isAccessory,
-                bundleID: bundleID
+                bundleID: bundleID,
+                subrole: subrole ?? ""
             ) && hasTitlebarButton == true
         )
         return ignored ? .ignored : .kept

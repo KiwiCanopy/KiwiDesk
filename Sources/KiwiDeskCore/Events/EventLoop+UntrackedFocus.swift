@@ -21,12 +21,14 @@ extension EventLoop {
         // element and reads as one, Ghostty's config window too.
         let layer = FloatDetection.windowLayer(of: id) ?? 0
         let button =
-            FloatDetection.needsTitlebarButton(
-                layer: layer,
-                isAccessory: isAccessory,
-                bundleID: bundleID
-            )
-            && element.map { Self.readsTitlebarButton($0, id: id) } == true
+            element.map {
+                FloatDetection.needsTitlebarButton(
+                    layer: layer,
+                    isAccessory: isAccessory,
+                    bundleID: bundleID,
+                    subrole: AXHelper.subrole(of: $0)
+                ) && Self.readsTitlebarButton($0, id: id)
+            } == true
         if FloatDetection.isBuiltInIgnoredPanel(
             bundleID: bundleID,
             layer: layer,

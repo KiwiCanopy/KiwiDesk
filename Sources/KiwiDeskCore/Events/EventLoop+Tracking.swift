@@ -106,6 +106,7 @@ extension EventLoop {
                 layer: layer ?? 0,
                 isAccessory: isAccessory,
                 tracked: false,
+                subrole: subrole,
                 titlebarButton: arrival.map {
                     $0.traits?.hasTitlebarButton == true
                 }

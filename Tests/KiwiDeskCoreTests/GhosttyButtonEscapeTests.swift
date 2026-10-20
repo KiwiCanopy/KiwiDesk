@@ -63,21 +63,24 @@ struct GhosttyButtonEscapeTests {
             FloatDetection.needsTitlebarButton(
                 layer: 101,
                 isAccessory: false,
-                bundleID: Self.ghostty
+                bundleID: Self.ghostty,
+                subrole: "AXStandardWindow"
             )
         )
         #expect(
             !FloatDetection.needsTitlebarButton(
                 layer: 0,
                 isAccessory: false,
-                bundleID: Self.ghostty
+                bundleID: Self.ghostty,
+                subrole: "AXStandardWindow"
             )
         )
         #expect(
             !FloatDetection.needsTitlebarButton(
                 layer: 8,
                 isAccessory: false,
-                bundleID: "com.raycast.macos"
+                bundleID: "com.raycast.macos",
+                subrole: "AXStandardWindow"
             )
         )
     }

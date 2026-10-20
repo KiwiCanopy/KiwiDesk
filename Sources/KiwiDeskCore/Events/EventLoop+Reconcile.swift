@@ -218,6 +218,7 @@ extension EventLoop {
                 layer: read == nil ? layers[id] : layers[id] ?? 0,
                 isAccessory: isAccessory,
                 tracked: elements[pid]?[id] != nil,
+                subrole: read?.subrole,
                 titlebarButton: read?.titlebarButton
             ) {
                 // App-wide user rules are stable config, not a
