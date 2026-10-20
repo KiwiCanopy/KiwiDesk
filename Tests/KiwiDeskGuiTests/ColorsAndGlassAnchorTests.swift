@@ -12,7 +12,7 @@ import Testing
 @MainActor
 struct ColorsAndGlassAnchorTests {
     /// Every colour row the section draws, the two role-group
-    /// wells aside: they draw no `AdvancedColorRow` and land on
+    /// wells aside: they draw no `ColorsAndGlassRow` and land on
     /// their group's title through the group's own section.
     private var rows: [SettingKey] {
         SettingKey.allCases.filter {

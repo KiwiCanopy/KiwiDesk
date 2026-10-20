@@ -6,8 +6,8 @@ import SwiftUI
 struct KiwiShelfColorCard: View {
     @ObservedObject var model: SettingsModel
 
-    private var gates: AdvancedColorsGates {
-        AdvancedColorsGates(settings: model.config.settings)
+    private var gates: ColorsAndGlassGates {
+        ColorsAndGlassGates(settings: model.config.settings)
     }
 
     var body: some View {
@@ -18,7 +18,7 @@ struct KiwiShelfColorCard: View {
             plated: false
         ) {
             ColorGrid {
-                AdvancedColorRows(
+                ColorsAndGlassRows(
                     model: model,
                     keys: ColorsRowOrder.kiwishelfColorRows
                 )
@@ -28,7 +28,7 @@ struct KiwiShelfColorCard: View {
             // subtree — a header `?` scopes the card (#1310).
             if gates.needsOwnSentence(.kiwishelf(.borderColor)) {
                 CrossReferenceRow(
-                    prose: AdvancedColorsHelp.shelfBorderReference,
+                    prose: ColorsAndGlassHelp.shelfBorderReference,
                     linkTitle: SettingsDestination.bars.title,
                     destination: .bars
                 )
@@ -38,18 +38,18 @@ struct KiwiShelfColorCard: View {
 }
 
 /// Renders colour rows, each greyed by its one verdict (#1857).
-struct AdvancedColorRows: View {
+struct ColorsAndGlassRows: View {
     @ObservedObject var model: SettingsModel
     let keys: [SettingKey]
 
-    private var gates: AdvancedColorsGates {
-        AdvancedColorsGates(settings: model.config.settings)
+    private var gates: ColorsAndGlassGates {
+        ColorsAndGlassGates(settings: model.config.settings)
     }
 
     var body: some View {
         ForEach(keys, id: \.id) { key in
             let verdict = gates.verdict(for: key)
-            AdvancedColorRow(model: model, key: key)
+            ColorsAndGlassRow(model: model, key: key)
                 .modifier(
                     GreyOut(
                         active: verdict != nil,
