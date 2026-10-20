@@ -190,13 +190,20 @@ editing here:
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
   argument lives in `docs/design-decisions.md`.
-  The fold's TARGET skips the App Rule for a RAISED-LAYER overlay
-  only — filed into an unshown Space, a popup menu is parked the
-  moment it opens (#1602) — and asks state for both flags, as the
-  grant does; a layer-0 overlay keeps its rule by owner ruling, so
-  a change widening the skip to the whole flag owes that ruling
-  again (`TransientOverlayRuleTests` holds the popup, the layer-0
-  control, the state read and the tracker's layer write).
+  The fold's TARGET skips the App Rule for a POPUP only —
+  `ManagedWindow.isPopup`, an overlay on a raised layer (#1602)
+  or with no title-bar button (#2475, a Chromium extension
+  popup) — since filed into an unshown Space a popup is parked
+  the moment it opens; it asks state, as the grant does. A
+  layer-0 overlay with a button, or whose button read did not
+  answer, keeps its rule by owner rulings (2026-09-23,
+  2026-10-20), so a change widening the skip to the whole flag
+  owes that ruling again (`TransientOverlayRuleTests` holds both
+  popups, the button and unread controls, the state read and the
+  tracker's writes on the no-arrival path). The verdict is an
+  ADOPTION fact: its layer and button are never refreshed, so a
+  reader past the create fold refreshes both on the recheck path
+  first or does not ask it.
 - **A window that lands on another screen takes THAT screen's
   space, through the one shared predicate** (#1010):
   `StateCoordinator.screenHome(of:leaving:landingOn:)`. Two

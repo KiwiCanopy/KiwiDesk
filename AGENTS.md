@@ -533,8 +533,8 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
 - only a pass whose windows are all spring-sized may promise
   `BatchSizing.allSpringSized` (#593)
 - the create fold's spawn grant consults `isTransientOverlay` first, read from
-  state (#671), and its App Rule files no raised-layer overlay (#1602,
-  `TransientOverlayRuleTests`)
+  state (#671), and its App Rule files no popup — an overlay raised or
+  without a title-bar button (#1602, #2475, `TransientOverlayRuleTests`)
 - a switch landing on a Space it un-stashes raises that Space's float layer
   once after its own retile, handing focus back to the ANCHOR (#412/#1727,
   `FollowSwitchFloatRaiseTests`)

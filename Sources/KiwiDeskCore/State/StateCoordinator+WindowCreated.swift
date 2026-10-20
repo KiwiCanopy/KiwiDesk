@@ -48,12 +48,8 @@ extension StateCoordinator {
         )
         effects.rehomedToScreenSpace = preferred
         let held = preferred ?? livingRememberedSpace(remembered)
-        // A raised-layer overlay (a popup menu) skips the rule
-        // (#1602).
-        let popup =
-            windows[window.id].map {
-                $0.isTransientOverlay && $0.isRaisedLayer
-            } ?? false
+        // A popup skips the rule (#1602, #2475).
+        let popup = windows[window.id]?.isPopup ?? false
         let ruled =
             held == nil && !popup
             ? window.appBundleID.flatMap { appRules[$0] }
