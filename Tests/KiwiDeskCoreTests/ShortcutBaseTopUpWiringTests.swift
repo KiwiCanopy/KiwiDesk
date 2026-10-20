@@ -60,4 +60,14 @@ struct ShortcutBaseTopUpWiringTests {
         let combo = rows(core).first { $0.lua == reset.lua }?.combo
         #expect(combo == "hyper+r")
     }
+
+    @Test("a new Desktop's row lands on the stored base")
+    func desktopTopUpReadsTheStore() throws {
+        let core = try core()
+        core.topUpDesktopShortcuts(desktops: [1])
+        let combo = rows(core).first {
+            $0.lua == "KiwiDesk.focus_desktop(1)"
+        }?.combo
+        #expect(combo == "hyper+option+1")
+    }
 }

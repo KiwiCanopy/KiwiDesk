@@ -4,12 +4,13 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Desktop base rides the draft beside the rows it moves (#1870):
-/// a dropped rule half drops it too, Restore Defaults writes Desktop
-/// rows on it, and a top-up row adopted into a staged draft takes it.
-@Suite("Hyper move: the base stays with its rows in the draft")
+/// The shortcut base rides the draft beside the rows it moves
+/// (#2460): a dropped rule half drops it too, Restore Defaults writes
+/// the seed on it, and a top-up row adopted into a staged draft
+/// takes it.
+@Suite("Shortcut base: the base stays with its rows in the draft")
 @MainActor
-struct HyperMoveDraftTests {
+struct ShortcutBaseDraftTests {
     private func movedModel() throws -> SettingsModel {
         let core = makeTestCore()
         core.setAppWide(persisting: false) { $0.hyperKey = .capsLock }
@@ -19,7 +20,7 @@ struct HyperMoveDraftTests {
         config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
-                bindings: HyperShortcutMove.letterSeed
+                bindings: DefaultKeybindings.appChromeRows()
                     + [1, 2].compactMap {
                         DefaultKeybindings.desktopRow($0, base: .standard)
                     }
@@ -27,8 +28,7 @@ struct HyperMoveDraftTests {
         ]
         model.config = config
         model.cleanConfig = config
-        let request = try #require(model.hyperMoveRequest())
-        model.applyHyperMove(request, items: [], desktop: true)
+        model.setShortcutBase(.hyper)
         #expect(model.config.shortcutBase == .hyper)
         return model
     }

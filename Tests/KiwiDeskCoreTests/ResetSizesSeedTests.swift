@@ -71,46 +71,27 @@ struct ResetSizesSeedTests {
         )
     }
 
-    /// The Hyper move reads its list off the seed, so the reset
-    /// moves to ✦R as one line of its own.
-    @Test("the Hyper move carries ⌃⌥R to ✦R")
-    func movesWithTheLadder() throws {
+    /// The switch moves the reset with every other letter.
+    @Test("the switch carries ⌃⌥R to ✦R")
+    func movesWithTheLadder() {
         let row = DefaultKeybindings.resetSizesRow()
-        #expect(HyperShortcutMove.letterSeed.contains(row))
-        let offer = HyperShortcutMove.offer(
-            .toHyper,
-            rows: seeded,
-            base: .standard
-        )
-        let item = try #require(offer.items.first { $0.id == row.lua })
-        #expect(item.seeds == [row])
-        #expect(item.moves.map(\.to) == ["hyper+r"])
+        #expect(ShortcutBase.hyper.rebased(row).combo == "hyper+r")
     }
 
-    /// A 3.0.0 layer — the seed without the reset — after the
-    /// Hyper move took every letter line.
+    /// A 3.0.0 layer — the seed without the reset — on the Hyper
+    /// base.
     private var movedLayer: [KeyBinding] {
         let reset = DefaultKeybindings.resetSizesRow().lua
         var config = GuiConfig()
         let index = config.layers.firstIndex { $0.isDefault } ?? 0
         config.layers[index].bindings = seeded.filter { $0.lua != reset }
-        let offer = HyperShortcutMove.offer(
-            .toHyper,
-            rows: config.layers[index].bindings,
-            base: config.shortcutBase
-        )
-        HyperShortcutMove.apply(
-            offer,
-            items: Set(offer.items.map(\.id)),
-            desktop: false,
-            to: &config
-        )
+        ShortcutBaseSwitch.apply(.hyper, to: &config)
         return config.layers[index].bindings
     }
 
     /// An install on the Hyper base gets the reset on ✦R beside
-    /// its letters, so the move is not offered again for one row.
-    @Test("the Hyper base gets ✦R, and no move line comes back")
+    /// its letters.
+    @Test("the Hyper base gets ✦R")
     func movedLayerGetsHyper() {
         let layer = movedLayer
         #expect(layer.contains { $0.combo == "hyper+f" })
@@ -120,12 +101,6 @@ struct ResetSizesSeedTests {
             base: .hyper
         )
         #expect(added.map(\.combo) == ["hyper+r"])
-        let offer = HyperShortcutMove.offer(
-            .toHyper,
-            rows: layer + added,
-            base: .standard
-        )
-        #expect(offer.items.isEmpty)
     }
 
     /// ✦R registers as a bare R while Hyper is held, so a row

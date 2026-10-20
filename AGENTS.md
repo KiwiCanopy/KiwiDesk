@@ -887,7 +887,7 @@ Touching `Config`, `Profiles`, `Commands`.
   reverses its unshifted stepping twin as `⇧Tab` and `⌃⌥⇧C` do (#453), or on
   `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past the
   setup's `shortcut_offer` through the one `topUpDesktopShortcuts`
-  (#1870, `DesktopShortcutTopUpTests`, `HyperShortcutMoveDesktopTests`)
+  (#1870, `DesktopShortcutTopUpTests`, `ShortcutBaseSwitchTests`)
   (#1094/#1655, `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`,
   `DefaultKeybindingLadderTests` ▸ `shiftReversesItsTwin`), and `⌘` on an arrow
   steps the Spaces (`DefaultKeybindingLadderTests` ▸ `arrowsRideTheirOwnTiers`)

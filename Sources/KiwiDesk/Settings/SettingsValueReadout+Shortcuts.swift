@@ -38,9 +38,9 @@ extension SettingsValueReadout {
             return [
                 .change(
                     census,
-                    label: HyperMoveWords.baseTitle,
-                    old: HyperMoveWords.modifiers(old.shortcutBase),
-                    new: HyperMoveWords.modifiers(new.shortcutBase)
+                    label: ShortcutBaseWords.title,
+                    old: ShortcutBaseWords.glyphs(old.shortcutBase),
+                    new: ShortcutBaseWords.glyphs(new.shortcutBase)
                 )
             ]
         case .spaceHistory:
@@ -69,6 +69,13 @@ extension SettingsValueReadout {
         old: GuiConfig,
         new: GuiConfig
     ) -> [SettingsDiffRow] {
+        // The rows the base switch moved are narrated by its own
+        // row (#2460): compare against the old draft switched the
+        // same way, so only the user's other edits list here.
+        var old = old
+        if old.shortcutBase != new.shortcutBase {
+            ShortcutBaseSwitch.apply(new.shortcutBase, to: &old)
+        }
         let labels = shortcutsActionLabels(old: old, new: new)
         let oldByName = shortcutsLayersByName(old.layers)
         let newByName = shortcutsLayersByName(new.layers)

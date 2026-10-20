@@ -1331,8 +1331,8 @@ the Trash, and nothing merges. A merge would make the result
 depend on what both Macs happened to hold, which is the thing a
 person syncing two Macs wants to stop thinking about.
 
-The choice is made in a SHEET that commits, the second ruled
-exception to "a sheet is read-only" after the Hyper move. An
+The choice is made in a SHEET that commits, a ruled exception to
+"a sheet is read-only". An
 alert cannot show two dated sides next to each other, and the
 choice is only safe when it is made looking at both — which side
 changed last, and on which Mac. The sheet still takes no model:
@@ -10856,11 +10856,7 @@ built from `release/3.0.0` had already taken generation 2.
 Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
 the way back from the size keys, but a key you press once, so it
 rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
-not `appChromeRows`, and the Hyper move carries it with the other
-letters. A default letter added after the move lands where the
-letters went: the top-up offers `✦R` on a layer whose seeded
-letters sit mostly on Hyper, or the move would reappear for one
-row. It resets the active space only, for the reason the
+not `appChromeRows`. It resets the active space only, for the reason the
 #764 entry gives the verb's default: a key undoes what you just
 did in front of you. `"all"` gets no Settings row and no default
 key; it stays a Lua and CLI form (owner ruling 2026-10-18). The
@@ -10924,8 +10920,7 @@ before seeding (2026-10-10, macOS 27.0.1): no entry in
 AX menu bars of fifteen running apps (858 shortcut items) one
 claimed a `⌃⌥⇧⌘` digit — Antigravity IDE's Split Terminal on 7,
 which KiwiDesk's hotkey takes from it as every seeded chord takes
-an app menu's. #1870's Hyper key does not move this tier unasked —
-only its move offer (#1870) does — and the seed stays here: it is a
+an app menu's. #1870's Hyper key does not move this tier unasked, and the seed stays here: it is a
 separate modifier and off by default, so the seed cannot depend on
 it, and the users the four-modifier chord serves are the ones whose
 own tool already presses all four.
@@ -10952,7 +10947,9 @@ reads keeps it true for rows that do not exist yet. The one-shot
 move offer that came before (#1870) and the letters guess (#2303)
 retire with it: an offer covers the rows of its day and leaves
 every later writer guessing, and a stored answer is what a guess
-stands in for.
+stands in for. So Reset sizes in this Space (#2303) and every
+default added later land on the base like the letters, and the
+Desktop tier moves only with the switch.
 
 **Go to Desktop is the one exception, and takes `✦⌥` + digit.** A
 Hyper row is registered bare while the key is held (#1870), so

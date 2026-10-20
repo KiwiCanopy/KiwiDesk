@@ -116,11 +116,9 @@ restated `20...80` satisfies on the day it is written.
   is a draft like any other; `DetailPanelTests` holds the offer
   set) — and keep the sheet
   read-only, a sheet that grows a commit being a dialog wearing
-  the wrong chrome — save a ruled offer whose one commit STAGES a
-  multi-row edit into the draft through a closure its host hands
-  it, taking no model (#1870's Hyper move, owner-ruled), and
-  Compare and Copy, whose two Keeps run through the closures its
-  row hands it (#2324 ruling 14), and the sync sheet at Save,
+  the wrong chrome — save Compare and Copy, whose two Keeps run
+  through the closures its row hands it (#2324 ruling 14), and
+  the sync sheet at Save,
   whose one Save runs through the closure the shell hands it
   (#2450; a further one is a ruling too). A read-only sheet also
   answers the keyboard both ways:

@@ -116,11 +116,11 @@ because two real clients now remove drift — see
   is what split a moved ladder at the next Space. A writer of the
   base moves the rows in the same draft write, and a path that
   drops the draft's rows drops the base with them
-  (`ShortcutBaseTests`, `HyperShortcutMoveDesktopTests`,
-  `HyperMoveDraftTests`). A writer that moves a row between the
+  (`ShortcutBaseTests`, `ShortcutBaseSwitchTests`,
+  `ShortcutBaseDraftTests`). A writer that moves a row between the
   bases takes `ShortcutBase.moved`, never a mapping beside it —
-  the old move sheet's `HyperShortcutMove.moved` retires with that
-  sheet. The Desktop tier takes `✦⌥` + digit because `✦⇧⌘3` is
+  the "Shortcuts use" switch's `ShortcutBaseSwitch` takes it for
+  the whole keymap. The Desktop tier takes `✦⌥` + digit because `✦⇧⌘3` is
   macOS's screenshot chord while Hyper is held (measured
   2026-10-20, macOS 27.0.1).
 - **A default row added after the first-run seed joins the next
