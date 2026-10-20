@@ -113,15 +113,15 @@ struct GridWeightCommandTests {
             try JSONSerialization.jsonObject(
                 with: JSONEncoder().encode(grid)
             ) as? [String: Any]
-        #expect(empty?["column_weights"] == nil)
+        #expect(empty?["column_weight"] == nil)
         grid.columnWeights = [2, 1]
         grid.rowWeights = [1, 3]
         let data = try JSONEncoder().encode(grid)
         let object =
             try JSONSerialization.jsonObject(with: data)
             as? [String: Any]
-        #expect(object?["column_weights"] as? [Double] == [2, 1])
-        #expect(object?["row_weights"] as? [Double] == [1, 3])
+        #expect(object?["column_weight"] as? [Double] == [2, 1])
+        #expect(object?["row_weight"] as? [Double] == [1, 3])
         let back = try JSONDecoder().decode(GridParams.self, from: data)
         #expect(back == grid)
     }

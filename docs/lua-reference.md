@@ -5677,7 +5677,9 @@ mouse drag on a cell's inner edge moves that edge the same way.
 The sizes are kept as [column and row weights](#gridset_column_weight)
 in a session layer that
 [`reset_layout_sizing`](#reset_layout_sizing) clears.
-::: `set_refusal_sound(true)` adds the system alert sound
+:::
+
+`set_refusal_sound(true)` adds the system alert sound
 to that pill; only a hotkey fire sounds, so CLI and IPC callers
 see the pill and read the error JSON without hearing anything.
 

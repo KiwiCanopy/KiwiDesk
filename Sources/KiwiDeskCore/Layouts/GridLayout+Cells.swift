@@ -4,74 +4,102 @@ import CoreGraphics
 /// size: the track lengths the weights draw (#763) and the cell
 /// frames over them.
 extension GridLayout {
+    /// One track's floor and the window that sets it — nil where
+    /// `min_window_size` alone binds.
+    public struct TrackFloor: Equatable, Sendable {
+        public let size: CGFloat
+        public let carrier: WindowID?
+    }
+
+    /// Each column's floor (`horizontal`) or each row's: the
+    /// configured minimum, raised by the learned minimum of every
+    /// window whose cell lies in that track alone (#763). The pile
+    /// holds several windows, so none of them lifts a track, and a
+    /// forced pass probes past learned bounds (#1055). The one
+    /// reading the render and the resize share.
+    public static func trackFloors(
+        windows: [WindowID],
+        shape: Shape,
+        horizontal: Bool,
+        context: LayoutContext
+    ) -> [TrackFloor] {
+        let count = horizontal ? shape.columns : shape.rows
+        let configured = context.minWindowSize.along(
+            horizontal: horizontal
+        )
+        var floors = Array(
+            repeating: TrackFloor(size: configured, carrier: nil),
+            count: count
+        )
+        let alone = shape.piles ? shape.cells - 1 : shape.cells
+        let learned =
+            context.probesBeyondBounds ? 0 : min(alone, windows.count)
+        for index in 0..<learned {
+            let cell = cell(index, of: shape)
+            let span = horizontal ? cell.columns : cell.rows
+            guard span.first == span.last else { continue }
+            let floor = context.learnedFloor(
+                of: windows[index],
+                horizontal: horizontal
+            )
+            if floor > floors[span.first].size {
+                floors[span.first] = TrackFloor(
+                    size: floor,
+                    carrier: windows[index]
+                )
+            }
+        }
+        return floors
+    }
+
+    /// The drawn lengths of one axis's tracks under `weights` —
+    /// what the render draws and what a press solves against.
+    public static func axisLengths(
+        weights: [Double],
+        floors: [TrackFloor],
+        horizontal: Bool,
+        context: LayoutContext
+    ) -> [CGFloat] {
+        let usable = context.usable
+        return GridTracks.lengths(
+            count: floors.count,
+            weights: weights,
+            span: GridTracks.span(
+                of: horizontal ? usable.width : usable.height,
+                count: floors.count,
+                gap: horizontal
+                    ? context.gaps.inner.horizontal
+                    : context.gaps.inner.vertical
+            ),
+            floors: floors.map(\.size),
+            minimum: context.minWindowSize.along(horizontal: horizontal)
+        )
+    }
+
     /// The drawn column widths and row heights of a grid holding
-    /// `windows` — the stored track weights (#763) over the
-    /// gapped span, each track lifted to the floor of the windows
-    /// it holds alone. The resize reads this too, so a press
-    /// measures from what was drawn.
+    /// `windows`: the stored track weights (#763) over the gapped
+    /// span, each track lifted to its `trackFloors` floor.
     public static func trackLengths(
         windows: [WindowID],
         shape: Shape,
         context: LayoutContext
     ) -> (widths: [CGFloat], heights: [CGFloat]) {
-        let columns = shape.columns
-        let rows = shape.rows
-        var colFloors = Array(
-            repeating: context.minWindowSize.width,
-            count: columns
-        )
-        var rowFloors = Array(
-            repeating: context.minWindowSize.height,
-            count: rows
-        )
-        // The pile's cell holds several windows, so none of them
-        // lifts its tracks alone.
-        let alone = shape.piles ? shape.cells - 1 : shape.cells
-        // A forced pass probes past corroborated bounds (#1055).
-        let learnedCount =
-            context.probesBeyondBounds ? 0 : min(alone, windows.count)
-        for index in 0..<learnedCount {
-            let cell = cell(index, of: shape)
-            let bound = context.sizeBounds[windows[index]]
-            if cell.columns.first == cell.columns.last,
-                let learned = bound?.minWidth
-            {
-                colFloors[cell.columns.first] = max(
-                    colFloors[cell.columns.first],
-                    learned
-                )
-            }
-            if cell.rows.first == cell.rows.last,
-                let learned = bound?.minHeight
-            {
-                rowFloors[cell.rows.first] = max(
-                    rowFloors[cell.rows.first],
-                    learned
-                )
-            }
+        func lengths(_ horizontal: Bool) -> [CGFloat] {
+            axisLengths(
+                weights: horizontal
+                    ? context.grid.columnWeights
+                    : context.grid.rowWeights,
+                floors: trackFloors(
+                    windows: windows,
+                    shape: shape,
+                    horizontal: horizontal,
+                    context: context
+                ),
+                horizontal: horizontal,
+                context: context
+            )
         }
-        let usable = context.usable
-        let widths = GridTracks.lengths(
-            count: columns,
-            weights: context.grid.columnWeights,
-            span: GridTracks.span(
-                of: usable.width,
-                count: columns,
-                gap: context.gaps.inner.horizontal
-            ),
-            floors: colFloors
-        )
-        let heights = GridTracks.lengths(
-            count: rows,
-            weights: context.grid.rowWeights,
-            span: GridTracks.span(
-                of: usable.height,
-                count: rows,
-                gap: context.gaps.inner.vertical
-            ),
-            floors: rowFloors
-        )
-        return (widths, heights)
+        return (lengths(true), lengths(false))
     }
 
     /// The first `count` cells of an equal `columns`×`rows` grid

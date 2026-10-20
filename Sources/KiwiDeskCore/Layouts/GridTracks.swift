@@ -31,30 +31,43 @@ public enum GridTracks {
     }
 
     /// `count` track lengths dividing `span` (gaps already
-    /// removed) by weight, each lifted to its floor while the
-    /// floors fit: a lifted track takes its room from the others
-    /// in proportion to their weights. Where the floors do not fit
-    /// the weights alone decide — the layout's own overflow rule
-    /// owns that case.
+    /// removed) by weight, each lifted to its floor: a lifted
+    /// track takes its room from the others in proportion to
+    /// their weights. Where the floors do not fit, every track
+    /// keeps `minimum` alone (the layout's cascade rule has proved
+    /// equal tracks clear it), and only past that do the weights
+    /// alone decide.
     public static func lengths(
         count: Int,
         weights: [Double],
         span: CGFloat,
-        floors: [CGFloat]
+        floors: [CGFloat],
+        minimum: CGFloat
     ) -> [CGFloat] {
         guard count > 0 else { return [] }
         let w = (0..<count).map { weight(weights, at: $0) }
         let floor = (0..<count).map {
-            $0 < floors.count ? floors[$0] : 0
+            max(minimum, $0 < floors.count ? floors[$0] : 0)
         }
-        guard floor.reduce(0, +) <= span else {
-            return proportional(w, span: span)
+        if floor.reduce(0, +) <= span {
+            return lifted(w, span: span, floors: floor)
         }
+        let base = Array(repeating: minimum, count: count)
+        if minimum * CGFloat(count) <= span {
+            return lifted(w, span: span, floors: base)
+        }
+        return proportional(w, span: span)
+    }
+
+    private static func lifted(
+        _ w: [Double],
+        span: CGFloat,
+        floors floor: [CGFloat]
+    ) -> [CGFloat] {
         var pinned = Set<Int>()
         while true {
-            let free = (0..<count).filter { !pinned.contains($0) }
-            let room =
-                span - pinned.reduce(0) { $0 + floor[$1] }
+            let free = w.indices.filter { !pinned.contains($0) }
+            let room = span - pinned.reduce(0) { $0 + floor[$1] }
             let total = free.reduce(0) { $0 + w[$1] }
             var out = floor
             for index in free {
@@ -125,39 +138,86 @@ public enum GridTracks {
 
     /// Moves the edge between adjacent tracks `grown` and
     /// `neighbor` so `grown` draws `delta` points longer (shorter
-    /// for a negative delta), keeping the pair's weight sum — so
-    /// every other track keeps its length. Clamped so each of the
-    /// pair keeps its floor; nil when the pair cannot hold both
-    /// floors at all. `lengths` are the pair's drawn lengths
-    /// under the current weights.
+    /// for a negative delta) and `neighbor` gives exactly that,
+    /// every other track keeping the length it drew. `draw` is the
+    /// render's own solver for a weight list and `floors` its
+    /// per-track floors, so a press lands what the next render
+    /// draws even where a floor lifts a track. With no floor
+    /// lifting anything the pair's weight sum is kept. Clamped so
+    /// each of the pair keeps its floor; nil when the pair cannot
+    /// hold both floors at all.
     public static func moveEdge(
         weights stored: [Double],
         grown: Int,
         neighbor: Int,
-        lengths: (grown: CGFloat, neighbor: CGFloat),
-        floors: (grown: CGFloat, neighbor: CGFloat),
-        delta: CGFloat
+        floors: [CGFloat],
+        delta: CGFloat,
+        draw: ([Double]) -> [CGFloat]
     ) -> EdgeStep? {
-        let pair = lengths.grown + lengths.neighbor
-        guard pair > 0,
-            floors.grown + floors.neighbor <= pair + 0.001
-        else { return nil }
-        let wanted = lengths.grown + delta
-        let landed = min(
-            max(wanted, floors.grown),
-            pair - floors.neighbor
-        )
         var weights = stored
         let needed = max(grown, neighbor) + 1
         while weights.count < needed { weights.append(1) }
-        let sum =
-            weight(weights, at: grown) + weight(weights, at: neighbor)
-        weights[grown] = sum * Double(landed / pair)
-        weights[neighbor] = sum - weights[grown]
+        let drawn = draw(weights)
+        let floor = { $0 < floors.count ? floors[$0] : 0 }
+        let pair = drawn[grown] + drawn[neighbor]
+        guard pair > 0, floor(grown) + floor(neighbor) <= pair + 0.001
+        else { return nil }
+        let wanted = drawn[grown] + delta
+        let landed = min(
+            max(wanted, floor(grown)),
+            pair - floor(neighbor)
+        )
+        let target = [grown: landed, neighbor: pair - landed]
+        // A free track's length is its weight times one shared
+        // rate; a pair weighted at that rate draws its target and
+        // leaves every free track where it was.
+        let free = drawn.indices.first {
+            target[$0] == nil && drawn[$0] > floor($0) + 0.01
+        }
+        if let free {
+            for _ in 0..<24 {
+                let now = draw(weights)
+                let rate = now[free] / CGFloat(weight(weights, at: free))
+                for (index, length) in target {
+                    weights[index] = Double(max(length, 0.001) / rate)
+                }
+            }
+        } else {
+            bisect(&weights, grown, neighbor, landed, draw)
+        }
         return EdgeStep(
             weights: weights,
             clamped: abs(landed - wanted) > 0.001
         )
+    }
+
+    /// The pair's share of its weight sum that draws `landed`:
+    /// with no free track the others keep their floors whatever
+    /// the pair's weights, so the sum is kept.
+    private static func bisect(
+        _ weights: inout [Double],
+        _ grown: Int,
+        _ neighbor: Int,
+        _ landed: CGFloat,
+        _ draw: ([Double]) -> [CGFloat]
+    ) {
+        let sum =
+            weight(weights, at: grown) + weight(weights, at: neighbor)
+        var low = 0.0
+        var high = 1.0
+        for _ in 0..<48 {
+            let mid = (low + high) / 2
+            weights[grown] = sum * mid
+            weights[neighbor] = sum - weights[grown]
+            if draw(weights)[grown] < landed {
+                low = mid
+            } else {
+                high = mid
+            }
+        }
+        let share = min(max((low + high) / 2, 0.000_001), 0.999_999)
+        weights[grown] = sum * share
+        weights[neighbor] = sum - weights[grown]
     }
 
     /// `weights` with its trailing `1.0` entries dropped — they

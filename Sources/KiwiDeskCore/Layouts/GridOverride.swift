@@ -54,8 +54,8 @@ extension GridOverride: Codable {
         case columns
         case rows
         case autoSize = "auto_size"
-        case columnWeights = "column_weights"
-        case rowWeights = "row_weights"
+        case columnWeights = "column_weight"
+        case rowWeights = "row_weight"
     }
 
     public init(from decoder: Decoder) throws {

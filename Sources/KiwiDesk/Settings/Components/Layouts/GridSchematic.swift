@@ -3,6 +3,9 @@ import SwiftUI
 
 /// Grid layout visual preview showing dynamic/rigid cell tiling and overflow
 /// piles (#125, #712).
+/// It draws equal tracks: the column and row weights (#763) are
+/// Lua-only and the resize's own, with no Settings row whose
+/// draft this picture could follow.
 struct GridSchematic: View {
     let columns: Int
     let rows: Int

@@ -104,12 +104,12 @@ extension KiwiCore {
             )
             return .fail("the cell spans the grid on this axis")
         }
-        let lengths = GridLayout.trackLengths(
+        let floors = GridLayout.trackFloors(
             windows: ordered,
             shape: shape,
+            horizontal: horizontal,
             context: context
         )
-        let drawn = horizontal ? lengths.widths : lengths.heights
         let grownMembers = members(
             ofTrack: grown,
             horizontal: horizontal,
@@ -122,28 +122,27 @@ extension KiwiCore {
             ordered: ordered,
             shape: shape
         )
-        let grownMin = effectiveMinSize(
-            of: grownMembers,
-            axis: axis,
-            in: space
-        )
-        let neighborMin = effectiveMinSize(
-            of: neighborMembers,
-            axis: axis,
-            in: space
-        )
-        let params = tiler.settings.resolvedGrid(for: space)
-        let stored = horizontal ? params.columnWeights : params.rowWeights
+        // The context carries the session layer over the
+        // authored weights (`resolvedGrid(for: Space)`).
+        let stored =
+            horizontal
+            ? context.grid.columnWeights : context.grid.rowWeights
         // A pair that cannot hold both floors is drawn by the
         // render's floor fallback; the write stands still.
         let step = GridTracks.moveEdge(
             weights: stored,
             grown: grown,
             neighbor: neighbor,
-            lengths: (drawn[grown], drawn[neighbor]),
-            floors: (CGFloat(grownMin.size), CGFloat(neighborMin.size)),
+            floors: floors.map(\.size),
             delta: CGFloat(delta)
-        )
+        ) {
+            GridLayout.axisLengths(
+                weights: $0,
+                floors: floors,
+                horizontal: horizontal,
+                context: context
+            )
+        }
         if let step {
             writeGridWeights(step.weights, axis: axis, for: space.id)
         }
@@ -153,15 +152,19 @@ extension KiwiCore {
         if delta < 0 {
             reportResizeRefusal(
                 focused: window,
-                bindingCarrier: grownMin.carrier,
-                fallbackAnchor: nil,
-                focusedIsBinding: true,
+                bindingCarrier: floors[grown].carrier,
+                fallbackAnchor: grownMembers.first {
+                    $0 != window
+                },
+                // A cell spanning several tracks is no member of
+                // the one whose floor bound (#1259).
+                focusedIsBinding: grownMembers.contains(window),
                 axis: axis
             )
         } else {
             reportResizeRefusal(
                 focused: window,
-                bindingCarrier: neighborMin.carrier,
+                bindingCarrier: floors[neighbor].carrier,
                 fallbackAnchor: neighborMembers.first,
                 focusedIsBinding: false,
                 axis: axis
@@ -200,19 +203,20 @@ extension KiwiCore {
         return out
     }
 
-    /// The windows whose cell lies in `track` alone on the axis —
-    /// the ones whose floor binds that track's length.
+    /// The windows whose cell lies in `track` alone on the axis,
+    /// the pile left out as `GridLayout.trackFloors` leaves it —
+    /// a refusal's fallback anchor.
     private func members(
         ofTrack track: Int,
         horizontal: Bool,
         ordered: [WindowID],
         shape: GridLayout.Shape
     ) -> [WindowID] {
-        ordered.enumerated().compactMap { offset, window in
-            let cell = GridLayout.cell(
-                min(offset, shape.cells - 1),
-                of: shape
-            )
+        let alone = shape.piles ? shape.cells - 1 : shape.cells
+        return ordered.prefix(alone).enumerated().compactMap {
+            offset,
+            window in
+            let cell = GridLayout.cell(offset, of: shape)
             let span = horizontal ? cell.columns : cell.rows
             return span.first == track && span.last == track
                 ? window : nil

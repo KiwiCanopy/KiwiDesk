@@ -15,7 +15,8 @@ struct GridTracksTests {
             count: 3,
             weights: [2],
             span: 400,
-            floors: []
+            floors: [],
+            minimum: 0
         )
         #expect(widths == [200, 100, 100])
     }
@@ -26,7 +27,8 @@ struct GridTracksTests {
             count: 2,
             weights: [3, 1, 5, 5],
             span: 400,
-            floors: []
+            floors: [],
+            minimum: 0
         )
         #expect(widths == [300, 100])
     }
@@ -37,7 +39,8 @@ struct GridTracksTests {
             count: 3,
             weights: [8, 1, 1],
             span: 1000,
-            floors: [0, 200, 0]
+            floors: [0, 200, 0],
+            minimum: 0
         )
         #expect(widths[1] == 200)
         // The rest share what is left by weight, 8 : 1.
@@ -45,15 +48,41 @@ struct GridTracksTests {
         #expect(abs(widths[2] - 88.89) < 0.01)
     }
 
-    @Test("Floors that cannot fit leave the weights to decide")
-    func unfitFloorsFallBack() {
+    @Test("Floors that cannot fit fall back to the configured one")
+    func unfitFloorsKeepTheMinimum() {
+        let widths = GridTracks.lengths(
+            count: 2,
+            weights: [0.01, 1],
+            span: 400,
+            floors: [300, 300],
+            minimum: 100
+        )
+        #expect(widths == [100, 300])
+    }
+
+    @Test("Past the configured floor the weights alone decide")
+    func unfitMinimumIsProportional() {
         let widths = GridTracks.lengths(
             count: 2,
             weights: [1, 1],
             span: 400,
-            floors: [300, 300]
+            floors: [],
+            minimum: 300
         )
         #expect(widths == [200, 200])
+    }
+
+    /// The render with no floors, for the edge-move cases.
+    private func plain(_ count: Int) -> ([Double]) -> [CGFloat] {
+        {
+            GridTracks.lengths(
+                count: count,
+                weights: $0,
+                span: 900,
+                floors: [],
+                minimum: 0
+            )
+        }
     }
 
     @Test("A moved edge keeps its pair's weight sum")
@@ -63,13 +92,14 @@ struct GridTracksTests {
                 weights: [1, 1, 1],
                 grown: 0,
                 neighbor: 1,
-                lengths: (300, 300),
-                floors: (100, 100),
-                delta: 60
+                floors: [100, 100, 100],
+                delta: 60,
+                draw: plain(3)
             )
         )
-        #expect(abs(step.weights[0] - 1.2) < 0.000_001)
-        #expect(abs(step.weights[1] - 0.8) < 0.000_001)
+        #expect(abs(step.weights[0] - 1.2) < 0.000_01)
+        #expect(abs(step.weights[1] - 0.8) < 0.000_01)
+        try #require(step.weights.count == 3)
         #expect(step.weights[2] == 1)
         #expect(!step.clamped)
     }
@@ -81,13 +111,13 @@ struct GridTracksTests {
                 weights: [],
                 grown: 1,
                 neighbor: 0,
-                lengths: (300, 300),
-                floors: (100, 250),
-                delta: 200
+                floors: [250, 100],
+                delta: 400,
+                draw: plain(2)
             )
         )
-        // The neighbour keeps 250 of the pair's 600.
-        #expect(abs(step.weights[0] - 2 * 250 / 600) < 0.000_001)
+        let drawn = plain(2)(step.weights)
+        #expect(abs(drawn[0] - 250) < 0.01)
         #expect(step.clamped)
     }
 
@@ -98,11 +128,42 @@ struct GridTracksTests {
                 weights: [],
                 grown: 0,
                 neighbor: 1,
-                lengths: (150, 150),
-                floors: (200, 200),
-                delta: 10
+                floors: [500, 500],
+                delta: 10,
+                draw: plain(2)
             ) == nil
         )
+    }
+
+    /// The architect's case: column 0 lifted to a 700-pt floor in
+    /// an 1800-pt span draws 700/550/550; growing it by 50 must
+    /// draw 750/500/550, never move column 2.
+    @Test("A press on a lifted column lands what the render draws")
+    func liftedColumnLandsTheDelta() throws {
+        let draw: ([Double]) -> [CGFloat] = {
+            GridTracks.lengths(
+                count: 3,
+                weights: $0,
+                span: 1800,
+                floors: [700, 0, 0],
+                minimum: 0
+            )
+        }
+        #expect(draw([]) == [700, 550, 550])
+        let step = try #require(
+            GridTracks.moveEdge(
+                weights: [],
+                grown: 0,
+                neighbor: 1,
+                floors: [700, 0, 0],
+                delta: 50,
+                draw: draw
+            )
+        )
+        let after = draw(step.weights)
+        #expect(abs(after[0] - 750) < 0.5)
+        #expect(abs(after[1] - 500) < 0.5)
+        #expect(abs(after[2] - 550) < 0.5)
     }
 
     @Test("A write never shortens the stored list")
@@ -112,9 +173,9 @@ struct GridTracksTests {
                 weights: [1, 1, 3, 2],
                 grown: 0,
                 neighbor: 1,
-                lengths: (200, 200),
-                floors: (0, 0),
-                delta: 20
+                floors: [0, 0],
+                delta: 20,
+                draw: plain(2)
             )
         )
         #expect(step.weights.count == 4)

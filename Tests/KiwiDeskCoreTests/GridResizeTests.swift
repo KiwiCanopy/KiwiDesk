@@ -111,6 +111,17 @@ struct GridResizeTests {
         #expect(core.tiler.settings.grid.columnWeights.isEmpty)
     }
 
+    @Test("A middle column grows at its trailing edge")
+    func middleColumnGrowsTrailing() {
+        let core = makeCore()
+        grid(core, count: 3, focus: 2)
+        let third = width(core, 2)
+        core.execute("resize", args: [.string("x"), .number(60)])
+        #expect(abs(width(core, 2) - (third + 60)) < 0.5)
+        #expect(abs(width(core, 3) - (third - 60)) < 0.5)
+        #expect(abs(width(core, 1) - third) < 0.5)
+    }
+
     @Test("The last column grows at its leading edge")
     func lastColumnGrowsLeading() {
         let core = makeCore()
@@ -142,6 +153,34 @@ struct GridResizeTests {
         )
     }
 
+    /// Five windows in a 3 × 2 grid under `fill_empty_cells`: the
+    /// last spans columns 2–3, so a shrink that stops at column 2's
+    /// floor names that column's own window, never the spanning
+    /// one as "at its minimum" (#1259).
+    @Test("A spanning cell's shrink names the column that binds")
+    func spanningShrinkNamesTheColumn() {
+        let core = makeCore()
+        grid(core, count: 5, focus: 5, type: "dynamic")
+        core.execute(
+            "grid.set_dimensions",
+            args: [.number(3), .number(2)]
+        )
+        core.retile()
+        let seen = refusals(core) {
+            core.execute("resize", args: [.string("x"), .number(-500)])
+        }
+        #expect(
+            seen == [
+                .neighborMinimum(
+                    anchor: WindowID(2),
+                    focused: WindowID(5),
+                    axis: "x",
+                    appBound: false
+                )
+            ]
+        )
+    }
+
     @Test("A single row has no edge to move on y")
     func singleRowDividesNothing() {
         let core = makeCore()
@@ -155,7 +194,7 @@ struct GridResizeTests {
     }
 
     @Test("A write while fewer columns show keeps the rest")
-    func sizesSurviveACountDrop() {
+    func sizesSurviveACountDrop() throws {
         let core = makeCore()
         let space = grid(core, count: 3, focus: 2, type: "dynamic")
         // The middle column grows into the third.
@@ -174,8 +213,9 @@ struct GridResizeTests {
         let after =
             core.state.workspaces[space]?.sessionRatios
             .gridColumnWeights
-        #expect(after?.count == 3)
-        #expect(after?[2] == third)
+        let kept = try #require(after)
+        try #require(kept.count == 3)
+        #expect(kept[2] == third)
     }
 
     @Test("reset_layout_sizing returns to the authored weights")

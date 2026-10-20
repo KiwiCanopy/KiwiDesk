@@ -46,8 +46,8 @@ public struct GridParams: Sendable, Equatable, Codable {
         case rows
         case autoSize = "auto_size"
         case newWindowPlacement = "new_window_placement"
-        case columnWeights = "column_weights"
-        case rowWeights = "row_weights"
+        case columnWeights = "column_weight"
+        case rowWeights = "row_weight"
         case override
     }
 

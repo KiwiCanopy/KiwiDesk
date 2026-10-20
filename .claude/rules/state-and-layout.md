@@ -1543,11 +1543,14 @@ editing here:
   `writeCapped*` family, named by that prefix rather than by a
   file, since it has already outgrown one
   (`KiwiCore+RatioWriters` and `KiwiCore+ResizeScrollSlot`) —
-  and, for the two WEIGHT stores, the one `resizeStackMember`
+  and, for the WEIGHT stores, the one `resizeStackMember`
   and the one `resizeTrackMember`, which clamp through
   `StackLayout.weightStep` and which the keyboard verb and the
   mouse drop both take (#941, `StackWeightDragTests` ▸
-  `dragMatchesTheKeyboardVerb`) — never a raw `writeSlotSize`,
+  `dragMatchesTheKeyboardVerb`), and the one `resizeGridMember`,
+  which moves a grid edge through `GridTracks.moveEdge` against
+  the render's own solver and is the one caller of the raw
+  `writeGridWeights` (#763, `GridWeightWriterSeamTests`) — never a raw `writeSlotSize`,
   `writeSplitRatio*`, `writeMasterRatio`, `stackWeights` or
   `trackWeights` write beside a resize call site, which is
   exactly how the mouse `.scrollSlot` drag crossed the floor
@@ -1573,7 +1576,16 @@ editing here:
   the math is `StackLayout.healedWeights`) — a NEW session
   weight store joins that heal in the same change, or a
   membership change after a legal write collapses the space
-  into a pile the clamps cannot see coming.
+  into a pile the clamps cannot see coming. The one other
+  answer is a store whose weights cannot pile its Space and
+  whose floor the RENDER keeps through a pure solver that never
+  writes the store: Grid's track weights (#763), whose cascade
+  is judged on EQUAL cells (`GridLayout.shape`) and whose floors
+  are `GridLayout.trackFloors` drawn by `GridTracks.lengths`,
+  standing down on a forced pass (`GridTracksTests`,
+  `SplitOverflowTests` ▸ `gridWidensTheColumn`). A store taking
+  that answer states both halves, and a press on it solves
+  against the same render.
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`
   the math; the ruling and the stack-zone residue are in
   `docs/design-decisions.md`. **The split stores joined that

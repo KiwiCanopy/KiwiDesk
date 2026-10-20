@@ -5280,9 +5280,14 @@ round trip, and an auto-size grid crossing a screen change the
 same; a writer therefore never shortens it. *Applying weights only
 to a rigid grid* is cheaper and defensible, but makes one drag
 work or not depending on a setting the user set once and forgot.
-A resize moves the edge between two adjacent tracks with their
-weight sum held, so no third track moves — the bsp arm's shared
-edge, per index — and, since weights are shares, the store is
+A resize moves the edge between two adjacent tracks: the
+neighbour gives exactly what the track takes and every other
+track keeps the length it drew — the bsp arm's shared edge, per
+index, and where no floor lifts a track simply the pair's weight
+sum held. The press solves against the render's own floors, since
+a lifted track's length is not proportional to its weight and a
+split by drawn lengths would move a third track. Since weights
+are shares, the store is
 bounded by construction and needs no ceiling (the scrolling slot,
 an absolute length, is the one store that does). The floor is the
 render's: a track is lifted to Grid's `min_window_size` and the
