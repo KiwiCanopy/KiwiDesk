@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The visible-panel scan's button reader (#2344): it reads the
+/// The visible-panel scan's window reader (#2344): it reads the
 /// app's window list once, names a tracked element from the map
 /// without asking the app, and resolves the rest only as far as
 /// the asked id. The trait read itself has no seam, so its call
@@ -56,14 +56,14 @@ struct PanelButtonReaderTests {
     @Test("a tracked element is named by the map, never asked")
     func trackedIsNeverAsked() {
         let (loop, box) = makeLoop()
-        _ = loop.untrackedTitlebarButton(of: pid)(WindowID(31))
+        _ = loop.untrackedWindow(of: pid)(WindowID(31))
         #expect(box.asked == [0])
     }
 
     @Test("resolution stops at the asked window")
     func stopsAtTheAskedId() {
         let (loop, box) = makeLoop()
-        let reader = loop.untrackedTitlebarButton(of: pid)
+        let reader = loop.untrackedWindow(of: pid)
         _ = reader(WindowID(31))
         #expect(box.asked == [0])
         _ = reader(WindowID(32))
@@ -73,7 +73,7 @@ struct PanelButtonReaderTests {
     @Test("one list read per scan, and a second ask is cached")
     func listIsReadOnce() {
         let (loop, box) = makeLoop()
-        let reader = loop.untrackedTitlebarButton(of: pid)
+        let reader = loop.untrackedWindow(of: pid)
         #expect(box.listReads == 0)
         _ = reader(WindowID(31))
         _ = reader(WindowID(31))
@@ -82,9 +82,9 @@ struct PanelButtonReaderTests {
         #expect(box.asked == [0, 1])
     }
 
-    @Test("a window the app does not list has no button")
-    func unlistedHasNoButton() {
+    @Test("a window the app does not list has no element")
+    func unlistedHasNoElement() {
         let (loop, _) = makeLoop()
-        #expect(!loop.untrackedTitlebarButton(of: pid)(WindowID(99)))
+        #expect(loop.untrackedWindow(of: pid)(WindowID(99)) == nil)
     }
 }

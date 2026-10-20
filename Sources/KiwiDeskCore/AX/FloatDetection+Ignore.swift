@@ -12,14 +12,10 @@ extension FloatDetection {
     /// beside its buttonless quick terminal (#2067) — and a window
     /// at the modal-panel level, its update alert, which the quick
     /// terminal never takes (3 shown, 101 hidden; #2200).
-    /// Spotlight's panel on macOS 27 is `com.apple.campo`'s, a
-    /// layer-23 window whose AX lists all three title-bar buttons,
-    /// so it takes no escape (#2236).
     private static let layerScopedIgnoredApps: [String: Bool] = [
         ghosttyBundleID: true,
         "com.raycast.macos": false,
         "com.raycast-x.macos": false,
-        "com.apple.campo": false,
     ]
 
     /// System UI overlay processes that should not enter window state (#177).
@@ -93,15 +89,19 @@ extension FloatDetection {
 
     /// Whether the ignore gate asks the window's title-bar button:
     /// the #2072 escape decides only for an accessory app's raised
-    /// window, and for Ghostty's (#2067). The one copy of the
-    /// condition — the off-main list read and the main-actor gate
-    /// both ask it.
+    /// window, and for Ghostty's (#2067), and never for a system
+    /// dialog, which a launcher draws with buttons — Spotlight's
+    /// panel on macOS 27 (#2239). The one copy of the condition,
+    /// which every reader asks (`TitlebarButtonWiringTests` is the
+    /// census); `subrole` is read only where the rest holds.
     public static func needsTitlebarButton(
         layer: Int,
         isAccessory: Bool,
-        bundleID: String?
+        bundleID: String?,
+        subrole: @autoclosure () -> String
     ) -> Bool {
         layer != 0 && (isAccessory || escapesWithButton(bundleID))
+            && subrole() != kAXSystemDialogSubrole
     }
 
     /// Whether ignore classification depends on CGWindow layer lookup.
@@ -177,12 +177,14 @@ extension FloatDetection {
     /// Whether process currently displays a visible ignored panel
     /// (#21, #448). A `tracked` window is none: the gate admitted
     /// it. An untracked one states the title-bar button the #2072
-    /// escape decides on, through `titlebarButton` (#2344).
+    /// escape decides on, through `subrole` and `titlebarButton`
+    /// (#2344, #2239).
     public static func hasVisibleIgnoredPanel(
         pid: pid_t,
         bundleID: String?,
         isAccessory: Bool,
         tracked: Set<WindowID>,
+        subrole: (WindowID) -> String,
         titlebarButton: (WindowID) -> Bool
     ) -> Bool {
         guard
@@ -208,6 +210,7 @@ extension FloatDetection {
                 bundleID: bundleID,
                 isAccessory: isAccessory,
                 tracked: tracked,
+                subrole: subrole,
                 titlebarButton: titlebarButton
             )
         }
@@ -224,18 +227,21 @@ extension FloatDetection {
         bundleID: String?,
         isAccessory: Bool,
         tracked: Set<WindowID>,
+        subrole: (WindowID) -> String,
         titlebarButton: (WindowID) -> Bool
     ) -> Bool {
         guard id.map({ !tracked.contains($0) }) ?? true,
             isPanelBandLayer(layer)
         else { return false }
         let button =
-            needsTitlebarButton(
-                layer: layer,
-                isAccessory: isAccessory,
-                bundleID: bundleID
-            )
-            && id.map(titlebarButton) == true
+            id.map {
+                needsTitlebarButton(
+                    layer: layer,
+                    isAccessory: isAccessory,
+                    bundleID: bundleID,
+                    subrole: subrole($0)
+                ) && titlebarButton($0)
+            } == true
         return shouldIgnore(
             bundleID: bundleID,
             layer: layer,
