@@ -595,6 +595,13 @@ replaces its layout's
 ([Lua reference](lua-reference.md#set_min_window_size_override)).
 :::
 
+:::unreleased
+Grid: `grid.set_column_weight` and `grid.set_row_weight` take a
+track number (from 1) and a positive weight, `1` being an equal
+share; each has a `_override` sibling taking a space id first
+([Lua reference](lua-reference.md#gridset_column_weight)).
+:::
+
 `animations.set_on_space_change` and `animations.set_space_change`
 are refused, naming `set_space_cue`;
 `animations.set_space_change_duration` and
@@ -731,6 +738,13 @@ whatever issued it, and adds the system alert sound when
 `set_refusal_sound` is on (default off) and a hotkey was what
 fired: a CLI or IPC caller reads the error reply and never hears
 one.
+
+:::unreleased
+Grid now resizes too (#763): `x` moves the edge the focused cell
+shares with the next column (the previous one for the last
+column) and `y` the same for rows, writing session-scoped
+column and row weights; only monocle replies "not supported".
+:::
 
 ### Deleting a Space
 

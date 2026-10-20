@@ -17,6 +17,10 @@ public struct SessionRatios: Sendable, Equatable {
     public var masterRatio: Double?
     /// Scrolling slot extent along the scroll axis.
     public var slotSize: ScrollSize?
+    /// Grid column weights (#763), the whole list.
+    public var gridColumnWeights: [Double]?
+    /// Grid row weights (#763), the whole list.
+    public var gridRowWeights: [Double]?
 
     public init() {}
 }
@@ -32,6 +36,8 @@ extension SessionRatios: Codable {
         case slotPoints = "slot_points"
         case slotFraction = "slot_fraction"
         case slotAuto = "slot_auto"
+        case gridColumnWeights = "grid_column_weights"
+        case gridRowWeights = "grid_row_weights"
     }
 
     public init(from decoder: Decoder) throws {
@@ -64,6 +70,14 @@ extension SessionRatios: Codable {
         {
             slotSize = .auto
         }
+        gridColumnWeights = try c.decodeIfPresent(
+            [Double].self,
+            forKey: .gridColumnWeights
+        )
+        gridRowWeights = try c.decodeIfPresent(
+            [Double].self,
+            forKey: .gridRowWeights
+        )
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -81,5 +95,13 @@ extension SessionRatios: Codable {
         case nil:
             break
         }
+        try c.encodeIfPresent(
+            gridColumnWeights,
+            forKey: .gridColumnWeights
+        )
+        try c.encodeIfPresent(
+            gridRowWeights,
+            forKey: .gridRowWeights
+        )
     }
 }

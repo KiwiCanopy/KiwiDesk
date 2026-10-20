@@ -134,12 +134,9 @@ extension TrackLayout {
         of id: WindowID,
         in context: LayoutContext
     ) -> CGFloat {
-        let bound = context.sizeBounds[id]
-        let vertical = context.track.axis == .vertical
-        let learned = vertical ? bound?.minWidth : bound?.minHeight
-        return max(
-            context.minWindowSize.along(horizontal: vertical),
-            learned ?? 0
+        context.learnedFloor(
+            of: id,
+            horizontal: context.track.axis == .vertical
         )
     }
 

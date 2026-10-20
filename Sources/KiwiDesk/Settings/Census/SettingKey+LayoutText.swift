@@ -97,7 +97,9 @@ extension LayoutKey {
             return .text("track.wrap_focus")
         case .scrollingOverrideOrientation, .monocleOverrideOrientation:
             return .text("scroll_grid.orientation")
-        case .gridOverrideAutoSize, .trackOverrideAutoTracks:
+        case .gridOverrideAutoSize, .trackOverrideAutoTracks,
+            .gridColumnWeights, .gridRowWeights,
+            .gridOverrideColumnWeights, .gridOverrideRowWeights:
             return .none
         }
     }

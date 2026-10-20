@@ -66,6 +66,8 @@ extension LayoutCard {
             .gridOverrideType, .gridOverrideSplitDirection,
             .gridOverrideFillEmptyCells, .gridOverrideColumns,
             .gridOverrideRows, .gridOverrideAutoSize,
+            .gridOverrideColumnWeights, .gridOverrideRowWeights,
+            .gridColumnWeights, .gridRowWeights,
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideLimit, .trackOverrideOverflowStyle,
             .trackOverrideAutoTracks:

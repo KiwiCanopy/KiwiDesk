@@ -31,6 +31,22 @@ extension KiwiCore {
         }
     }
 
+    /// One grid axis's whole weight list (#763): "x" the columns,
+    /// "y" the rows.
+    func writeGridWeights(
+        _ weights: [Double],
+        axis: String,
+        for space: SpaceID
+    ) {
+        state.workspaces.withSpace(space) {
+            if axis == "x" {
+                $0.sessionRatios.gridColumnWeights = weights
+            } else {
+                $0.sessionRatios.gridRowWeights = weights
+            }
+        }
+    }
+
     /// Clears one session field on every space — the explicit
     /// global setters (`bsp.set_ratio_h`, `stack.set_master_
     /// ratio`, `scroll.set_slot_size`) call this so an explicit

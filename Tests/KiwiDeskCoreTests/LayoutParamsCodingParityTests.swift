@@ -112,6 +112,8 @@ struct LayoutParamsCodingParityTests {
         params.rows = 4
         params.autoSize = true
         params.newWindowPlacement = .first
+        params.columnWeights = [2, 1]
+        params.rowWeights = [1, 3]
         var over = GridOverride()
         over.columns = 6
         params.override[space] = over

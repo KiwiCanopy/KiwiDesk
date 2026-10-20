@@ -151,8 +151,10 @@ struct SplitOverflowTests {
         #expect(try #require(frames[w2]).width < 600)
     }
 
-    @Test("Grid keeps the slot")
-    func gridKeepsTheSlot() throws {
+    /// Grid lifts the column itself (#763), so nothing is left
+    /// for the overflow post-pass to place.
+    @Test("Grid widens the column to a learned floor")
+    func gridWidensTheColumn() throws {
         let w1 = WindowID(1)
         let w2 = WindowID(2)
         let frames = placed(
@@ -160,7 +162,34 @@ struct SplitOverflowTests {
             [w1, w2],
             context(bounds: [w2: floor(700)])
         )
-        #expect(try #require(frames[w2]).width < 700)
+        #expect(try #require(frames[w2]).width >= 700)
+        let forced = placed(
+            .grid,
+            [w1, w2],
+            context(bounds: [w2: floor(700)], probing: true)
+        )
+        #expect(try #require(forced[w2]).width < 700)
+    }
+
+    /// Seven windows in the default 3 × 2 cap pile the last two in
+    /// cell 6 (column 3): a 500-pt floor on the pile's first window lifts
+    /// nothing,
+    /// while the same floor on window 3, alone in column 3, does.
+    @Test("A pile window never lifts its column")
+    func pileLiftsNothing() throws {
+        let ids = (1...7).map { WindowID(UInt32($0)) }
+        let piled = placed(
+            .grid,
+            ids,
+            context(bounds: [ids[5]: floor(500)])
+        )
+        #expect(try #require(piled[ids[2]]).width < 500)
+        let alone = placed(
+            .grid,
+            ids,
+            context(bounds: [ids[2]: floor(500)])
+        )
+        #expect(try #require(alone[ids[2]]).width >= 500)
     }
 
     @Test("The origin pulls back to the trailing edge, never past the lead")

@@ -174,6 +174,12 @@ extension KiwiCore {
                 span: span,
                 space: space
             )
+        case .grid:
+            response = resizeGrid(
+                axis: axis,
+                delta: delta,
+                space: space
+            )
         case .floating:
             // Every member resizes itself (#1184), so this arm
             // is reached only with no focus to move — the

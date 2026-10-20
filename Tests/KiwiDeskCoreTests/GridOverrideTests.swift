@@ -38,6 +38,8 @@ struct GridOverrideTests {
         over.columns = 5
         over.rows = 4
         over.autoSize = true
+        over.columnWeights = [2, 1]
+        over.rowWeights = [3]
         let resolved = over.resolved(onto: GridParams())
         #expect(resolved.type == .rigid)
         #expect(resolved.fillEmptyCells == false)
@@ -45,6 +47,8 @@ struct GridOverrideTests {
         #expect(resolved.columns == 5)
         #expect(resolved.rows == 4)
         #expect(resolved.autoSize == true)
+        #expect(resolved.columnWeights == [2, 1])
+        #expect(resolved.rowWeights == [3])
     }
 
     @Test("Unset fields inherit the global, per field")

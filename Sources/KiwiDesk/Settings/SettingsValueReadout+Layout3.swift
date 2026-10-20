@@ -123,6 +123,22 @@ extension SettingsValueReadout {
                 { $0.rows },
                 layoutCount
             )
+        case .gridOverrideColumnWeights:
+            return layoutOvr(
+                census,
+                old.grid.override,
+                new.grid.override,
+                { $0.columnWeights },
+                layoutWeights
+            )
+        case .gridOverrideRowWeights:
+            return layoutOvr(
+                census,
+                old.grid.override,
+                new.grid.override,
+                { $0.rowWeights },
+                layoutWeights
+            )
         case .gridOverrideAutoSize:
             // Lua-only, so its census text is `.none`; the base
             // label reuses the global twin's key.
@@ -186,7 +202,8 @@ extension SettingsValueReadout {
             .scrollingFillWhenAlone, .stackFillWhenAlone,
             .gridType, .gridSplitDirection, .gridFillEmptyCells,
             .gridAutoSize, .gridColumns, .gridRows,
-            .gridNewWindowPlacement, .monocleOrientation,
+            .gridNewWindowPlacement, .gridColumnWeights,
+            .gridRowWeights, .monocleOrientation,
             .monocleHideStyle, .monocleWrapFocus,
             .monocleNewWindowPlacement,
             .trackAxis, .trackOverflowStyle, .trackNewWindow,

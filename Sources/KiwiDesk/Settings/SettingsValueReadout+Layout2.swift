@@ -180,6 +180,13 @@ extension SettingsValueReadout {
         String(value)
     }
 
+    /// Grid track weights (#763) in track order; an empty list
+    /// draws every track equal and reads as unset.
+    static func layoutWeights(_ value: [Double]) -> String {
+        value.isEmpty
+            ? unset : value.map { trimmed($0) }.joined(separator: " · ")
+    }
+
     /// Localized scroll anchor text (`ScrollAnchorLabel`, #239, #753).
     static func layoutAnchorText(
         _ anchor: ScrollingParams.Anchor,

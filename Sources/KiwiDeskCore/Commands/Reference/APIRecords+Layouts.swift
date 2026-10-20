@@ -178,6 +178,18 @@ extension APIReference {
                 + "size.",
             .boolean("enabled")
         ),
+        "set_column_weight": APIRecord(
+            "Sets one grid column's share of the width, 1 being "
+                + "an equal share; columns count from 1.",
+            .integer("column"),
+            .number("weight")
+        ),
+        "set_row_weight": APIRecord(
+            "Sets one grid row's share of the height, 1 being an "
+                + "equal share; rows count from 1.",
+            .integer("row"),
+            .number("weight")
+        ),
         "set_new_window_placement": APIRecord(
             "Sets where a new window lands in the grid order.",
             .choice("placement", SpawnPlacement.self)
@@ -207,6 +219,18 @@ extension APIReference {
             "Overrides the auto-size flag for one Space.",
             .space("space"),
             .boolean("enabled")
+        ),
+        "set_column_weight_override": APIRecord(
+            "Overrides one grid column's share for one Space.",
+            .space("space"),
+            .integer("column"),
+            .number("weight")
+        ),
+        "set_row_weight_override": APIRecord(
+            "Overrides one grid row's share for one Space.",
+            .space("space"),
+            .integer("row"),
+            .number("weight")
         ),
     ]
 

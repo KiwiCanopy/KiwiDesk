@@ -268,6 +268,24 @@ extension KiwiCore {
                 span: span,
                 space: space
             )
+        case .gridColumn(let delta, let leading):
+            guard let window else { break }
+            resizeGridMember(
+                window,
+                axis: "x",
+                delta: Double(delta),
+                edge: leading ? .leading : .trailing,
+                space: space
+            )
+        case .gridRow(let delta, let leading):
+            guard let window else { break }
+            resizeGridMember(
+                window,
+                axis: "y",
+                delta: Double(delta),
+                edge: leading ? .leading : .trailing,
+                space: space
+            )
         case nil:
             break
         }
