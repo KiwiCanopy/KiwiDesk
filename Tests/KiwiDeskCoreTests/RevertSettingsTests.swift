@@ -28,6 +28,20 @@ struct RevertSettingsTests {
         return items.compactMap(\.stringValue)
     }
 
+    /// `not_revertable`'s entries, id to reason.
+    private func refusals(_ data: JSONValue?) -> [String: String] {
+        guard case .object(let fields)? = data,
+            case .array(let items)? = fields["not_revertable"]
+        else { return [:] }
+        var out: [String: String] = [:]
+        for case .object(let leaf) in items {
+            if let id = leaf["id"]?.stringValue {
+                out[id] = leaf["reason"]?.stringValue
+            }
+        }
+        return out
+    }
+
     /// A core whose live profile keeps its own look.
     private func ownLookCore() throws -> KiwiCore {
         let core = try KeepFixture.core()
@@ -44,7 +58,7 @@ struct RevertSettingsTests {
             let response = revert(core, [width])
             #expect(response.isSuccess)
             #expect(ids(response.data, "reverted") == [width])
-            #expect(ids(response.data, "not_revertable").isEmpty)
+            #expect(refusals(response.data).isEmpty)
             #expect(core.tiler.settings.borderStyle.width == stored)
             #expect(core.unsavedLiveSettings() == nil)
         }
@@ -98,8 +112,11 @@ struct RevertSettingsTests {
         #expect(response.isSuccess)
         #expect(ids(response.data, "reverted").isEmpty)
         #expect(
-            ids(response.data, "not_revertable").sorted()
-                == ["/space_modes/1", temporary, "not a pointer"].sorted()
+            refusals(response.data) == [
+                "/space_modes/1": "not_a_setting",
+                "not a pointer": "not_a_setting",
+                temporary: "not_keepable",
+            ]
         )
         #expect(core.tiler.settings.spaceIcons[SpaceID("8")] == "star")
     }

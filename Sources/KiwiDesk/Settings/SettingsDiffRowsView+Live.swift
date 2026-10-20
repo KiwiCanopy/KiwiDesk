@@ -114,16 +114,21 @@ extension SettingsDiffRowsView {
         focusedKeep = next.id
     }
 
-    /// Reverts one live row; under a keyboard press focus moves to
-    /// the neighbouring row's ↺, read before the row goes (#816).
+    /// Reverts one live row; where the row leaves under a keyboard
+    /// press, focus moves to the neighbouring row's ↺, read before
+    /// the row goes (#816), else to the first draft row's. A refused
+    /// revert keeps the row, and focus with it.
     private func revertLiveRow(
         _ row: SettingsDiffRow,
         among shown: [SettingsDiffRow],
         with revert: DiffRowRevert
     ) {
-        let next = DeletionFocus.neighbour(after: row, in: shown)
-        revert.perform(row)
-        guard SettingsInputSource.movesFocus, let next else { return }
+        let next =
+            DeletionFocus.neighbour(after: row, in: shown)
+            ?? rows.first { $0.section == .draft && revert.can($0) }
+        guard revert.performLive(row), SettingsInputSource.movesFocus,
+            let next
+        else { return }
         focusedRevert = next.id
     }
 }

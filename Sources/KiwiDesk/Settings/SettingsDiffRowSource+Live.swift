@@ -111,12 +111,31 @@ extension SettingsModel {
     }
 
     /// Puts a live row's leaves back to their stored values through
-    /// Core's revert (#2411), then asks Core again; the draft is
-    /// untouched, since a live row is never the draft's.
+    /// Core's revert (#2411), a user act (#804), then asks Core
+    /// again. The draft follows live as `adoptLiveWrite` rules: a
+    /// clean one re-reads, a dirty one moves the reverted leaves on
+    /// both sides of its diff and keeps its own edits.
     @discardableResult
     func revertLive(_ ids: [String]) -> LiveRevertOutcome? {
         guard target == .live, !ids.isEmpty else { return nil }
-        let outcome = core.revertUnsavedLive(ids)
+        let before = core.tiler.settings
+        let outcome = core.withUserMotion { core.revertUnsavedLive(ids) }
+        let after = core.tiler.settings
+        if !isDirty {
+            reload()
+        } else if after != before {
+            suppressDirty = true
+            config.settings = config.settings.rebased(
+                from: before,
+                onto: after
+            )
+            cleanConfig.settings = cleanConfig.settings.rebased(
+                from: before,
+                onto: after
+            )
+            suppressDirty = false
+            recomputeDirty()
+        }
         refreshUnsavedLive()
         return outcome
     }
@@ -127,7 +146,9 @@ extension SettingsModel {
     /// standing temporary layout (#1179).
     func revertAll() {
         if let leaves = unsavedLive?.leaves.keys, target == .live {
-            core.revertUnsavedLive(leaves.sorted())
+            core.withUserMotion {
+                core.revertUnsavedLive(leaves.sorted())
+            }
         }
         revert()
     }

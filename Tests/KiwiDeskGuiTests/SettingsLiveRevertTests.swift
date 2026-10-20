@@ -79,6 +79,33 @@ struct SettingsLiveRevertTests {
         #expect(!model.isDirty)
     }
 
+    /// A draft seeded after the live change holds the live value;
+    /// reverting the row moves it with live, clean or dirty, and a
+    /// dirty draft keeps its own edit.
+    @Test("the draft follows a live row's revert")
+    func draftFollows() throws {
+        LocalizationManager.shared.select("en")
+        for dirty in [false, true] {
+            let model = try makeModel()
+            let core = model.core
+            let width = core.tiler.settings.borderStyle.width
+            _ = core.execute("border.set_width", args: [.number(9)])
+            model.reload()
+            #expect(model.config.settings.borderStyle.width == 9)
+            if dirty {
+                model.config.settings.appBarStyle.titleCap += 3
+                model.recomputeDirty()
+            }
+            let cap = model.config.settings.appBarStyle.titleCap
+            let row = try #require(liveRows(model).first)
+            model.revert(row)
+            #expect(model.config.settings.borderStyle.width == width)
+            #expect(model.cleanConfig.settings.borderStyle.width == width)
+            #expect(model.config.settings.appBarStyle.titleCap == cap)
+            #expect(model.isDirty == dirty)
+        }
+    }
+
     /// The draft's own ↺ never reaches live, and a live row has no
     /// way back once the target is a stored profile.
     @Test("a live row reverts only on the live target")
@@ -140,5 +167,29 @@ struct SettingsLiveRevertTests {
         )
         #expect(rows.contains("RowRevertButton(row: row, group: false)"))
         #expect(rows.contains("revertLiveRow(row, among: shown, with: back)"))
+        #expect(rows.contains("guard revert.performLive(row)"))
+        let live = try SourceScan.blankedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/SettingsDiffRowSource+Live.swift"
+            )
+        )
+        #expect(
+            live.contains(
+                "core.withUserMotion { core.revertUnsavedLive(ids) }"
+            )
+        )
+        let verb = try SourceScan.blankedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDeskCore/Commands/KiwiCore+RevertSettings.swift"
+            )
+        )
+        // Each half of the apply a setter makes (#2411).
+        for needle in [
+            "clearSessionShadows(from: current, to: back)",
+            "retile(pass: .apply)",
+            "refreshStickyReach()",
+        ] {
+            #expect(verb.contains(needle))
+        }
     }
 }

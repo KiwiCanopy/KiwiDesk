@@ -1560,8 +1560,9 @@ fact about its command*. The obligations:
   answer takes that one read. `look.current` is the second such
   MCP-time reader, through `liveWearsSharedLook`; a new reader on
   the switch path answers from adoption state instead.
-  Settings' **Live, not saved** rows are the one ruled reader that
-  diffs the settings root itself (#2262): `unsavedLiveSettings`
+  Settings' **Live, not saved** rows are a ruled reader that
+  diffs the settings root itself (#2262), the revert below the
+  other: `unsavedLiveSettings`
   judges each leaf through the same `KeepJudge` and hands Settings
   its leaves by keep id (`UnsavedLiveSettings.leaves`); a row's
   Keep takes its ids from there alone, never derived in the GUI,
@@ -1572,6 +1573,20 @@ fact about its command*. The obligations:
   — never per render (`UnsavedLiveSettingsTests`,
   `SettingsLiveRowsTests` ▸ `wiringReadsTheVerdict`). A further
   reader of that shape is a ruling here.
+- **A revert puts back only what that reading names (#2411).**
+  `revert_settings` reads the same `unsavedLiveLeaves` judgement,
+  and Settings hands it the reading's own keep ids, never ids
+  derived in the GUI. It applies the named leaves alone, the way
+  their setters do — the settings, each reverted sizing leaf's
+  session shadow through `clearSessionShadows`, an explicit retile,
+  the sticky carry — and never through `applyProfileScopedState`
+  or a profile re-apply, which would end a standing temporary
+  layout (#1179); it answers what landed from a fresh judgement
+  after the apply (`RevertSettingsTests` ▸ `otherLeavesStay`,
+  `RevertSettingsApplyTests` ▸ `sizingShadowDrops`,
+  `SettingsLiveRevertTests` ▸ `revertIsWired`). A new
+  `SessionRatios` field joins `sizingShadows`
+  (`RevertSettingsApplyTests` ▸ `everyFieldHasAnEntry`).
 - **A look verb paints live only (#1685).** `look.apply` writes no
   file; a wear that must also WRITE takes `writeThroughLiveProfile`
   as the tour's paint does, never a grown `wearLook`, and a verb

@@ -85,6 +85,9 @@ struct MotionScopeCensusTests {
         "KiwiDesk/Settings/SettingsModel+Refresh.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ScreenSetups.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Persistence.swift": 1,
+        // A live row's ↺ and the pill's Revert, which apply stored
+        // values live (#2411).
+        "KiwiDesk/Settings/SettingsDiffRowSource+Live.swift": 2,
     ]
 
     @Test("Every user-scope opener is listed, and the list is exact")
@@ -147,7 +150,7 @@ struct MotionScopeCensusTests {
         "applyProfileScopedState", "applyStandard", "restoreSetup",
         "restoreShelf", "paintShelf", "reapplyIfInEffect",
         "resetAllSettings", "claimMonitorSet", "commitSharedLook",
-        "setAppWide", "rewriteSidecarBindings",
+        "setAppWide", "rewriteSidecarBindings", "revertUnsavedLive",
     ]
 
     /// GUI call sites of a motion door left outside the scope on

@@ -173,9 +173,8 @@ extension APIReference {
             .text("id")
         ),
         KiwiCore.revertSettingsCommand: APIRecord(
-            "Puts one or more unsaved live settings leaves back to "
-                + "the value the live profile or its shared look "
-                + "stores.",
+            "Puts one or more unsaved live settings leaves back "
+                + "to their stored value.",
             .text("id")
         ),
         "save_profile": APIRecord(

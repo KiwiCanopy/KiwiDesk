@@ -14,55 +14,67 @@ extension KiwiCore {
 
     /// `revert_settings(id…)`.
     func revertSettings(_ args: [JSONValue]) -> CommandResponse {
-        let ids = args.compactMap(\.stringValue)
+        let ids = args.compactMap { arg -> String? in
+            guard case .string(let id) = arg else { return nil }
+            return id
+        }
         guard !ids.isEmpty, ids.count == args.count else {
             return .fail("expected leaf ids from a change report")
         }
         let outcome = revertUnsavedLive(ids)
+        let refused: [JSONValue] = outcome.refused.sorted {
+            $0.key < $1.key
+        }.map {
+            .object([
+                "id": .string($0.key),
+                "reason": .string($0.value.rawValue),
+            ])
+        }
         return .ok(
             .object([
                 "reverted": .array(
                     outcome.reverted.sorted().map(JSONValue.string)
                 ),
-                "not_revertable": .array(
-                    outcome.refused.sorted().map(JSONValue.string)
-                ),
+                "not_revertable": .array(refused),
             ])
         )
     }
 
     /// Puts the named unsaved leaves back live (#2411); ids are
     /// keep ids, as `UnsavedLiveSettings.leaves` holds them. A leaf
-    /// already as stored counts as reverted; one no keep could
-    /// write, or outside `settings`, is refused.
+    /// already as stored counts as reverted. The apply is the one a
+    /// sizing setter makes: settings, the session shadow of each
+    /// reverted sizing leaf, an explicit retile, the sticky carry.
     @discardableResult
     public func revertUnsavedLive(_ ids: [String]) -> LiveRevertOutcome {
-        let leaves = unsavedLiveLeaves() ?? [:]
         let judge = keepJudge(judgingRules: false)
+        let leaves = unsavedLiveLeaves(in: judge) ?? [:]
         var chosen: [[String]: JSONValue?] = [:]
         var reverted: [String] = []
-        var refused: [String] = []
+        var refused: [String: RevertRefusal] = [:]
         var pending: [String] = []
         for id in ids {
             guard let path = KeepPointer.path(id),
                 path.first == KeepRoot.settings
             else {
-                refused.append(id)
+                refused[id] = .notASetting
                 continue
             }
-            if let stored = leaves[Array(path.dropFirst())] {
-                chosen.updateValue(stored, forKey: Array(path.dropFirst()))
+            let rest = Array(path.dropFirst())
+            if let stored = leaves[rest] {
+                chosen.updateValue(stored, forKey: rest)
                 pending.append(id)
             } else if judge.verdict(of: path)?.stored == true {
                 reverted.append(id)
             } else {
-                refused.append(id)
+                refused[id] = .notKeepable
             }
         }
         let current = tiler.settings
         let back = current.patchedLeafByLeaf(chosen)
         if back != current {
             tiler.settings = back
+            clearSessionShadows(from: current, to: back)
             // An explicit apply, as a Settings Save's (§5).
             retile(pass: .apply)
             refreshStickyReach()
@@ -70,11 +82,10 @@ extension KiwiCore {
         let after = keepJudge(judgingRules: false)
         for id in pending {
             let verdict = KeepPointer.path(id).flatMap(after.verdict(of:))
-            let landed = verdict?.stored == true
-            if landed {
+            if verdict?.stored == true {
                 reverted.append(id)
             } else {
-                refused.append(id)
+                refused[id] = .notApplied
             }
         }
         return LiveRevertOutcome(reverted: reverted, refused: refused)
@@ -82,8 +93,19 @@ extension KiwiCore {
 }
 
 /// What a live revert did (#2411): the keep ids it put back, and
-/// those it could not.
+/// those it could not, each with why.
 public struct LiveRevertOutcome: Equatable {
     public let reverted: [String]
-    public let refused: [String]
+    public let refused: [String: RevertRefusal]
+}
+
+/// Why `revert_settings` left a leaf live (#2411).
+public enum RevertRefusal: String, Equatable, Sendable {
+    /// Not a `/settings/…` leaf: a Space's layout or a rule.
+    case notASetting = "not_a_setting"
+    /// Unsaved but no keep could write it (a temporary Space's,
+    /// a Lua-owned config's), so nothing stores a value to revert to.
+    case notKeepable = "not_keepable"
+    /// Applied, and still not the stored value afterwards.
+    case notApplied = "not_applied"
 }

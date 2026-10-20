@@ -38,7 +38,10 @@ extension KiwiCore {
     /// per render (profiles.md ▸ A change report reads one
     /// judgement).
     public func unsavedLiveSettings() -> UnsavedLiveSettings? {
-        guard let leaves = unsavedLiveLeaves() else { return nil }
+        let judge = keepJudge(live: keepDocument, judgingRules: false)
+        guard let leaves = unsavedLiveLeaves(in: judge) else {
+            return nil
+        }
         let current = tiler.settings
         let saved = current.patchedLeafByLeaf(leaves)
         guard saved != current else { return nil }
@@ -54,10 +57,12 @@ extension KiwiCore {
 
     /// Each unsaved live leaf by its path under `settings`, mapped
     /// to the value its owner stores, nil absent — the one
-    /// judgement `unsavedLiveSettings` and `revert_settings` read.
-    func unsavedLiveLeaves() -> [[String]: JSONValue?]? {
-        let live = keepDocument
-        let judge = keepJudge(live: live, judgingRules: false)
+    /// judgement `unsavedLiveSettings` and `revert_settings` read,
+    /// over the one `judge` the caller took.
+    func unsavedLiveLeaves(
+        in judge: KeepJudge
+    ) -> [[String]: JSONValue?]? {
+        let live = judge.live
         guard let stored = judge.stored else { return nil }
         let root = [KeepRoot.settings]
         let paths = KeepPointer.diff(
