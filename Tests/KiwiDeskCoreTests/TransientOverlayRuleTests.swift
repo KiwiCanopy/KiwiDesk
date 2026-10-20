@@ -4,13 +4,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// An App Rule files an app's windows but never its raised-layer
-/// popups (#1602): a popup menu filed into a Space that is not
-/// shown is parked the moment it appears, which read on device as
-/// Telegram's right-click menu closing on its own. The skip is
-/// scoped to the measured shape by owner ruling (2026-09-23): a
-/// layer-0 dialog or an accessory app's window keeps its rule.
-@Suite("A raised-layer popup ignores its app's rule (#1602)")
+/// An App Rule files an app's windows but never its popups: a
+/// popup filed into a Space that is not shown is parked the moment
+/// it appears, which read on device as Telegram's right-click menu
+/// (#1602, raised layer) and a Chromium extension popup (#2475,
+/// layer 0, no title-bar button) closing on their own. The skip is
+/// scoped by owner rulings (2026-09-23, 2026-10-20): a layer-0
+/// overlay WITH a title-bar button — a dialog, a panel — keeps its
+/// rule, and so does one whose button read did not answer.
+@Suite("A popup ignores its app's rule (#1602, #2475)")
 struct TransientOverlayRuleTests {
     private let shown = SpaceID("1")
     private let ruled = SpaceID("2")
@@ -30,6 +32,7 @@ struct TransientOverlayRuleTests {
         _ id: UInt32,
         overlay: Bool,
         raised: Bool,
+        button: Bool? = true,
         title: String = ""
     ) -> ManagedWindow {
         ManagedWindow(
@@ -41,7 +44,8 @@ struct TransientOverlayRuleTests {
             frame: CGRect(x: 0, y: 0, width: 200, height: 200),
             isFloating: overlay,
             isTransientOverlay: overlay,
-            isRaisedLayer: raised
+            isRaisedLayer: raised,
+            hasTitlebarButton: button
         )
     }
 
@@ -73,9 +77,10 @@ struct TransientOverlayRuleTests {
         )
     }
 
-    /// A layer-0 overlay — a dialog, a panel, an accessory app's
-    /// window — is the reach the ruling leaves on the rule.
-    @Test("a layer-0 overlay still follows the rule")
+    /// A layer-0 overlay with a title-bar button — a dialog, a
+    /// panel, an accessory app's window — is the reach the rulings
+    /// leave on the rule.
+    @Test("a layer-0 overlay with a button still follows the rule")
     func layerZeroOverlayFollowsTheRule() {
         var state = makeState()
         state.apply(
@@ -84,11 +89,58 @@ struct TransientOverlayRuleTests {
         #expect(state.workspaces.space(of: WindowID(3)) == ruled)
     }
 
+    /// A Chromium extension popup: layer 0, no title-bar button
+    /// (#2475, measured on Brave with Bitwarden, 2026-10-20).
+    @Test("a buttonless layer-0 popup opens where you are")
+    func buttonlessPopupStaysOnTheShownSpace() {
+        var state = makeState()
+        state.apply(
+            .windowCreated(
+                window(4, overlay: true, raised: false, button: false)
+            )
+        )
+        #expect(
+            state.workspaces.space(of: WindowID(4)) == shown,
+            Comment(
+                rawValue:
+                    "the extension popup was filed into its app's "
+                    + "rule Space, which is not shown, so it is "
+                    + "parked as it opens"
+            )
+        )
+    }
+
+    /// A read that did not answer is no verdict: the window keeps
+    /// its rule rather than being guessed a popup.
+    @Test("an overlay whose button read failed follows the rule")
+    func unreadButtonFollowsTheRule() {
+        var state = makeState()
+        state.apply(
+            .windowCreated(
+                window(5, overlay: true, raised: false, button: nil)
+            )
+        )
+        #expect(state.workspaces.space(of: WindowID(5)) == ruled)
+    }
+
+    /// The skip is a popup's: a window detection does not call an
+    /// overlay keeps its rule however bare its title bar.
+    @Test("a buttonless window that is no overlay follows the rule")
+    func buttonlessWindowFollowsTheRule() {
+        var state = makeState()
+        state.apply(
+            .windowCreated(
+                window(6, overlay: false, raised: false, button: false)
+            )
+        )
+        #expect(state.workspaces.space(of: WindowID(6)) == ruled)
+    }
+
     /// The tracker is where the layer is read, from a live element
     /// no fixture can build, so the fold clauses above hand the
     /// field in and would stay green with the assignment gone. Read
     /// from code lines only, so a comment cannot satisfy it.
-    @Test("the tracker records the raised layer")
+    @Test("the tracker records the raised layer and the button")
     func trackerRecordsTheLayer() throws {
         let source = try String(
             contentsOf: scriptFixtureRepoRoot()
@@ -109,6 +161,19 @@ struct TransientOverlayRuleTests {
                 rawValue:
                     "the tracker no longer records the layer, so "
                     + "every popup follows its app's rule again"
+            )
+        )
+        #expect(
+            code.contains {
+                $0.contains(
+                    "window.hasTitlebarButton = traits??.hasTitlebarButton"
+                )
+            },
+            Comment(
+                rawValue:
+                    "the tracker no longer records the title-bar "
+                    + "button, so an extension popup follows its "
+                    + "app's rule again (#2475)"
             )
         )
     }

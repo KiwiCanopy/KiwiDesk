@@ -114,13 +114,18 @@ extension EventLoop {
             return
         }
         // Every subrole: Orion's twin reads AXUnknown as often
-        // as AXStandardWindow (#1785, device 2026-09-30).
+        // as AXStandardWindow (#1785, device 2026-09-30). One read
+        // serves the shadow rule and the App Rule's popup skip
+        // (#2475).
+        let traits =
+            arrival.map(\.traits)
+            ?? .some(shadows.traits(element, window.id))
         guard
             shadowVerdict(
                 element,
                 id: window.id,
                 pid: pid,
-                traits: arrival.map(\.traits)
+                traits: traits
             ) == .window
         else { return }
         let verdict = autoFloatVerdict(
@@ -140,6 +145,7 @@ extension EventLoop {
             )
         )
         window.isRaisedLayer = (layer ?? 0) != 0
+        window.hasTitlebarButton = traits??.hasTitlebarButton
         window.subrole = subrole
         // Native fullscreen suppresses the focus ring (a ring
         // around a display-filling window shows only at the

@@ -62,6 +62,9 @@ public struct ManagedWindow: Sendable, Equatable {
     /// WindowServer layer above the normal one at adoption — a
     /// popup menu, a reaction bar (#1602).
     public var isRaisedLayer: Bool
+    /// Close, minimize, zoom or full-screen button present at
+    /// adoption; nil where the read did not answer.
+    public var hasTitlebarButton: Bool?
     /// Native fullscreen state (`kAXFullScreenAttribute`).
     public var isFullscreen: Bool
     /// Carries KiwiDesk's own tiling mark (`OwnWindowTiling`), so
@@ -85,6 +88,7 @@ public struct ManagedWindow: Sendable, Equatable {
         stickyScope: StickyScope = .none,
         isTransientOverlay: Bool = false,
         isRaisedLayer: Bool = false,
+        hasTitlebarButton: Bool? = nil,
         isFullscreen: Bool = false,
         carriesOwnMark: Bool = false,
         subrole: String? = nil
@@ -99,6 +103,7 @@ public struct ManagedWindow: Sendable, Equatable {
         self.stickyScope = stickyScope
         self.isTransientOverlay = isTransientOverlay
         self.isRaisedLayer = isRaisedLayer
+        self.hasTitlebarButton = hasTitlebarButton
         self.isFullscreen = isFullscreen
         self.carriesOwnMark = carriesOwnMark
         self.subrole = subrole
@@ -120,6 +125,7 @@ public struct ManagedWindow: Sendable, Equatable {
             stickyScope: stickyScope,
             isTransientOverlay: isTransientOverlay,
             isRaisedLayer: isRaisedLayer,
+            hasTitlebarButton: hasTitlebarButton,
             isFullscreen: isFullscreen,
             carriesOwnMark: carriesOwnMark,
             subrole: subrole

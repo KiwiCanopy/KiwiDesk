@@ -67,6 +67,7 @@ struct WindowRekeyTests {
             stickyScope: .global,
             isTransientOverlay: true,
             isRaisedLayer: true,
+            hasTitlebarButton: true,
             isFullscreen: true,
             carriesOwnMark: true,
             subrole: "AXUnknown"

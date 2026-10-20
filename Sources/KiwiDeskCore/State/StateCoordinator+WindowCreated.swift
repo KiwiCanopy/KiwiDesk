@@ -48,11 +48,14 @@ extension StateCoordinator {
         )
         effects.rehomedToScreenSpace = preferred
         let held = preferred ?? livingRememberedSpace(remembered)
-        // A raised-layer overlay (a popup menu) skips the rule
-        // (#1602).
+        // A popup skips the rule: an overlay on a raised layer
+        // (#1602) or with no title-bar button, a Chromium
+        // extension popup (#2475). An unread button keeps it.
         let popup =
             windows[window.id].map {
-                $0.isTransientOverlay && $0.isRaisedLayer
+                $0.isTransientOverlay
+                    && ($0.isRaisedLayer
+                        || $0.hasTitlebarButton == false)
             } ?? false
         let ruled =
             held == nil && !popup

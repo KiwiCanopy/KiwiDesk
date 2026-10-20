@@ -38,6 +38,7 @@ struct SnapshotCarryCensusTests {
         "title": "the scan reads it",
         "isTransientOverlay": "the scan classifies it",
         "isRaisedLayer": "the scan reads the window layer",
+        "hasTitlebarButton": "the scan reads the window's buttons",
         "isFullscreen": "the scan reads the AX attribute",
         "carriesOwnMark": "the scan reads the window mark",
         "subrole": "the scan reads the AX subrole",
