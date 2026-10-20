@@ -34,7 +34,8 @@ struct ShortcutBaseReachTests {
                     row("control+option+f", floating),
                     row("control+option+s", sticky),
                 ]
-            )
+            ),
+            KeyLayer(name: "work", bindings: [row("control+option+w", "w()")]),
         ]
         try core.guiConfigStore.save(config)
         try core.profiles.save(profile("Work", overrides["Work"]))
@@ -70,6 +71,7 @@ struct ShortcutBaseReachTests {
             model.encodedReach?.keyBase.first?.bindings.map(\.combo)
                 == ["hyper+f", "hyper+s"]
         )
+        #expect(model.rowsLeftOnStandard.isEmpty)
         let rows = SettingsDiffRowSource.rows(for: model)
         #expect(
             rows.filter { $0.key == .shortcuts(.shortcutBase) }.count == 1
@@ -115,5 +117,26 @@ struct ShortcutBaseReachTests {
         let left = model.rowsLeftOnStandard
         #expect(left.map(\.reason) == [.leftOutHere])
         #expect(left.first?.row.lua == sticky)
+    }
+
+    @Test("a shared layer the page's profile leaves out is listed")
+    func leftOutLayerIsListed() throws {
+        let leaves = KeyLayerOverride(leftOut: ["work"])
+        let model = try model(overrides: ["Work": leaves])
+        model.setShortcutBase(.hyper)
+        let left = model.rowsLeftOnStandard
+        #expect(left.map(\.reason) == [.leftOutHere])
+        #expect(left.first?.row.lua == "w()")
+    }
+
+    /// The draft's own edits are in the base Save writes: a layer
+    /// renamed or a shared row deleted is never "left out".
+    @Test("a draft's rename or delete is not read as left out")
+    func draftEditsAreNotLeftOut() throws {
+        let model = try model()
+        model.renameLayer("work", to: "office")
+        model.config.layers[0].bindings.removeAll { $0.lua == sticky }
+        model.setShortcutBase(.hyper)
+        #expect(model.rowsLeftOnStandard.isEmpty)
     }
 }

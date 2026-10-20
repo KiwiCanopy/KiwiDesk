@@ -62,9 +62,11 @@ extension SettingsModel {
 
     /// Shared rows the page's profile leaves out: the switch moves
     /// only what the page draws, and a left-out row is named by its
-    /// old chord, which a move would bring back.
+    /// old chord, which a move would bring back. Read off the base
+    /// Save would write, so the draft's own layer edits and deletes
+    /// are already in it.
     private var hiddenSharedRows: [ShortcutBaseLeftRow] {
-        guard let stored = ruleReachStored else { return [] }
+        guard let base = encodedReach?.keyBase else { return [] }
         let shown = Set(
             config.layers.flatMap { layer in
                 layer.bindings.map {
@@ -75,7 +77,7 @@ extension SettingsModel {
                 }
             }
         )
-        return stored.storedKeyBase.flatMap { layer in
+        return base.flatMap { layer in
             layer.bindings.filter {
                 movesToHyper($0)
                     && !shown.contains(
@@ -116,6 +118,9 @@ extension SettingsModel {
         )
         let seed =
             shippedDefaults(on: .standard)
+            + (1...DefaultKeybindings.digitCapacity).compactMap {
+                DefaultKeybindings.desktopRow($0, base: .standard)
+            }
             + DefaultKeybindings.digitTopUp(
                 existing: [],
                 spaces: spaces,
