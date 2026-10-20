@@ -89,6 +89,10 @@ public final class BorderManager {
             ((BorderGeometry.Order) -> any BorderOverlayBackend)?
     #endif
     var onLog: @MainActor (String) -> Void = CoreLog.write
+    /// Speaks a refusal pill for VoiceOver (#2480); a live default
+    /// both `makeTestCore` twins pin inert.
+    var announceRefusal: @MainActor (String) -> Void =
+        KiwiCore.postAnnouncement
     /// True while local animation drives this window (#594).
     var isAnimating: @MainActor (WindowID) -> Bool = { _ in false }
     #if DEBUG

@@ -67,7 +67,9 @@ extension KiwiCore {
                     lens,
                     profile
                 ),
-                symbol: "eyeglasses"
+                symbol: "eyeglasses",
+                // The GUI announces the same cause (#2103).
+                announce: false
             )
         }
     }
