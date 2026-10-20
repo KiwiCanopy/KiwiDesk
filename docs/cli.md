@@ -432,6 +432,14 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 
+:::unreleased
+`take_over_hyper_remap` takes over a Hyper remap another tool
+left in place when it is exactly the one KiwiDesk would write for
+the chosen key ([`set_hyper_key`](lua-reference.md#set_hyper_key)).
+KiwiDesk then removes it when it quits, and an app still listening
+for F18 keeps hearing the key. CLI only — Lua cannot call it.
+:::
+
 `look.list`, `look.current`, `look.apply <name>`, `look.save
 <name>` and `look.delete <name>` reach the look library
 ([Looks](lua-reference.md#looks)). `look.apply` wears a look

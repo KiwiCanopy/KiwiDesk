@@ -10284,6 +10284,20 @@ Caps Lock → F18 is also a common Hammerspoon setup — and refuses
 otherwise. The trade: "tap Hyper alone for Escape" needs a posted
 key event, which is Input Monitoring, so it stays with #1874.
 
+:::unreleased
+The one way past that refusal is the user's own consent (#2471).
+An entry that is exactly KiwiDesk's own for the chosen key — what
+a quit remapper such as the Hyperkey app leaves until a restart —
+may be taken over on a click, which writes the same boot-stamped
+record KiwiDesk's own set writes, so quitting clears it. The shape
+decides only whether the offer appears, never ownership, and
+nothing takes over automatically: a live Hammerspoon config may
+own that entry, and two processes registering F18 both hear one
+press (measured 2026-10-20), so a take-over beside such a tool
+arms both. A mapping the other tool later removes is written again
+at the next apply; one it replaces is refused.
+:::
+
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
 opposite treatments, so the line is drawn here rather than

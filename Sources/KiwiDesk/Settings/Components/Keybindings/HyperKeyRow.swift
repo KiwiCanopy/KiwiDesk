@@ -10,6 +10,9 @@ import SwiftUI
 /// draft uses Hyper (config presence expands Simple).
 struct HyperKeyRow: View {
     @ObservedObject var model: SettingsModel
+    /// The take-over's focus destination (#816): the button leaves
+    /// once the remap is KiwiDesk's, and the recorder stays drawn.
+    @FocusState private var recorderFocused: Bool
 
     /// The one offer predicate, evaluated at `.simple` for the
     /// mode-gated frame (#760).
@@ -79,19 +82,42 @@ struct HyperKeyRow: View {
                         model.setAppWide { $0.hyperKey = key }
                     }
                 ),
-                disabled: reason == .appWideLuaOwned
+                disabled: reason == .appWideLuaOwned,
+                focus: $recorderFocused
             )
         }
     }
 
     private var captions: some View {
-        caption(
-            Self.captionText(
-                key: model.appWide.hyperKey,
+        VStack(alignment: .leading, spacing: 6) {
+            caption(
+                Self.captionText(
+                    key: model.appWide.hyperKey,
+                    status: model.hyperStatus,
+                    luaOwned: reason == .appWideLuaOwned
+                )
+            )
+            if let foreign = Self.takeOverOffer(
                 status: model.hyperStatus,
                 luaOwned: reason == .appWideLuaOwned
-            )
-        )
+            ) {
+                HyperTakeOverButton(model: model, foreign: foreign) {
+                    recorderFocused = true
+                }
+            }
+        }
+    }
+
+    /// The remap the row offers to take over: Core's `claimable`
+    /// verdict, never a key comparison here (#2471).
+    static func takeOverOffer(
+        status: HyperKeyStatus,
+        luaOwned: Bool
+    ) -> HyperForeignRemap? {
+        guard !luaOwned, case .refused(let foreign?) = status,
+            foreign.claimable
+        else { return nil }
+        return foreign
     }
 
     /// The one sentence under the field.

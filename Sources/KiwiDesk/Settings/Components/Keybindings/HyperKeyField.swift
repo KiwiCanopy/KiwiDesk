@@ -10,6 +10,8 @@ import SwiftUI
 struct HyperKeyField: View {
     @Binding var key: HyperSourceKey?
     let disabled: Bool
+    /// The row's focus destination for the recorder (#816).
+    var focus: FocusState<Bool>.Binding
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
     @State private var fieldID = UUID()
@@ -55,6 +57,7 @@ struct HyperKeyField: View {
         )
         .accessibilityLabel(HyperKeyWords.title)
         .accessibilityValue(spokenValue)
+        .focused(focus)
     }
 
     private var clearButton: some View {

@@ -116,6 +116,8 @@ extension KiwiCore {
             return setDesktopCue(args)
         case "set_hyper_key":
             return setHyperKey(args)
+        case Self.takeOverHyperRemapCommand:
+            return takeOverHyperRemap()
         case "set_mode_cue":
             return setModeCue(args)
         case "set_space_cue":

@@ -58,13 +58,24 @@ enum HyperKeyRemap {
 
     /// The one foreign entry as keys the GUI can name (#2470); nil
     /// for several entries or a key outside `HyperSourceKey`, so a
-    /// reader falls back to the unnamed sentence.
-    static func foreign(in current: Set<Pair>) -> HyperForeignRemap? {
+    /// reader falls back to the unnamed sentence. Claimable only
+    /// where it is exactly `want`'s own entry (#2471).
+    static func foreign(
+        in current: Set<Pair>,
+        want: HyperSourceKey?
+    ) -> HyperForeignRemap? {
         guard current.count == 1, let pair = current.first,
             let source = key(atUsage: pair.source),
             let destination = key(atUsage: pair.destination)
         else { return nil }
-        return HyperForeignRemap(source: source, destination: destination)
+        let claimable =
+            want.map { $0 != .f18 && current == [self.pair(for: $0)] }
+            ?? false
+        return HyperForeignRemap(
+            source: source,
+            destination: destination,
+            claimable: claimable
+        )
     }
 
     static func pair(for key: HyperSourceKey) -> Pair {
@@ -167,7 +178,7 @@ extension HyperKeyRemap {
             // A record of ours the mapping no longer holds is
             // stale: someone else replaced it.
             host.writeWritten(nil)
-            return .refused(foreign(in: current))
+            return .refused(foreign(in: current, want: want))
         }
         let before = host.readWritten()
         // Recorded ahead of the set: a timed-out set may still

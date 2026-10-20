@@ -79,7 +79,11 @@ struct HyperKeyCommandTests {
         #expect(
             core.keys.hyperStatus
                 == .refused(
-                    HyperForeignRemap(source: .capsLock, destination: .f18)
+                    HyperForeignRemap(
+                        source: .capsLock,
+                        destination: .f18,
+                        claimable: true
+                    )
                 )
         )
         #expect(reply.error?.contains("(caps_lock -> f18)") == true)
