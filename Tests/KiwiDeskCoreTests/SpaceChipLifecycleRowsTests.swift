@@ -75,7 +75,7 @@ struct SpaceChipLifecycleRowsTests {
                 == [
                     "Space Settings…", "—", "New Space", "Delete Space",
                     "—", "KiwiShelf Settings…", "Looks…",
-                    "Advanced Colors…",
+                    "Colors & Glass…",
                 ]
         )
     }

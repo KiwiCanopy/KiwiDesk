@@ -140,14 +140,15 @@ struct SettingsSearchPlacesTests {
         defer { reset() }
         let model = makeTestModel()
         #expect(model.searchModeNotice == nil)
-        model.noteSearchModeSwitch(.advancedColors)
+        model.noteSearchModeSwitch(.screens)
         let notice = model.searchModeNotice
         #expect(notice != nil)
-        #expect(
-            notice?.contains("Advanced Colors") == true
-        )
-        // A second flip supersedes the first.
+        #expect(notice?.contains("Screens") == true)
+        // A second flip supersedes the first: a fresh notice on
+        // its own timeline. Screens is the one Power User page.
+        let first = model.searchNoticeTask
         model.noteSearchModeSwitch(.screens)
+        #expect(model.searchNoticeTask != first)
         #expect(
             model.searchModeNotice?.contains("Screens") == true
         )
@@ -173,7 +174,7 @@ struct SettingsSearchPlacesTests {
         pinEnglish()
         defer { reset() }
         let model = makeTestModel()
-        model.noteSearchModeSwitch(.advancedColors)
+        model.noteSearchModeSwitch(.screens)
         #expect(model.searchModeNotice != nil)
         let timeline = model.searchNoticeTask
         #expect(timeline != nil, "no self-clear was scheduled")

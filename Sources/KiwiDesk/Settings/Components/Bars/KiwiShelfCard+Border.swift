@@ -16,7 +16,7 @@ extension KiwiShelfCard {
                     + "Its color is in %2$@, under "
                     + "\u{201C}%3$@\u{201D}.",
                 L("app_bar.background_style.boxed", "Boxed"),
-                SettingsDestination.advancedColors.title,
+                ColorsAndGlassSection.place,
                 L("kiwishelf.colors.title", "KiwiShelf colors")
             )
         )

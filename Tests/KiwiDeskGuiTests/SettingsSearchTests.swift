@@ -100,7 +100,7 @@ struct SettingsSearchTests {
         #expect(!results.isEmpty)
         #expect(
             results.allSatisfy {
-                $0.destination == .advancedColors
+                $0.destination == .looks
             }
         )
     }
@@ -200,18 +200,12 @@ struct SettingsSearchTests {
         defer { reset() }
         let simple = SettingsSearchContext(mode: .simple)
         let power = SettingsSearchContext(mode: .powerUser)
-        let advanced = SettingsSearchResult.destination(
-            .advancedColors
-        )
-        #expect(
-            SettingsSearch.switchesMode(advanced, context: simple)
-        )
-        #expect(
-            !SettingsSearch.switchesMode(advanced, context: power)
-        )
         let screens = SettingsSearchResult.destination(.screens)
         #expect(
             SettingsSearch.switchesMode(screens, context: simple)
+        )
+        #expect(
+            !SettingsSearch.switchesMode(screens, context: power)
         )
         #expect(
             !SettingsSearch.switchesMode(

@@ -14,7 +14,7 @@ import Testing
 /// `conversionsHold` would then find eight registered frames
 /// interpolating nothing — but a PARTIAL parse reds on nothing
 /// at all, which is exactly what shipped: the first cut matched
-/// per line, and `.advancedColors` is the one case whose `L(`
+/// per line, and `.advancedColors` (since retired) was a case whose `L(`
 /// and key literal sit on different lines. The frame naming it
 /// silently lost a label, and the register's own equality check
 /// passed at the wrong number.

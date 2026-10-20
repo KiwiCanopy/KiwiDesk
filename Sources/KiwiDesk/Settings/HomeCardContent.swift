@@ -85,12 +85,6 @@ enum HomeCardContent {
                 model.displays.count,
                 model.config.spacePins.count
             )
-        case .advancedColors:
-            return L(
-                "home.card.advanced_colors.subtitle",
-                "%1$d individual colors",
-                advancedColourCount
-            )
         case .shortcuts:
             return L(
                 "home.card.shortcuts.subtitle",
@@ -203,17 +197,6 @@ enum HomeCardContent {
     ) -> Int {
         model.config.appRules.count
             + model.config.floatRules.count
-    }
-
-    /// Census count of individual color settings.
-    private static var advancedColourCount: Int {
-        SettingKey.allCases.filter {
-            $0.placement.area == .advancedColours
-                && [.atRest, .showMore].contains(
-                    $0.placement.tier
-                )
-                && SettingsDraftDiff.namesModelPath($0.id)
-        }.count
     }
 
     private static func edgeName(_ edge: AppBarEdge) -> String {

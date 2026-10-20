@@ -128,7 +128,7 @@ extension InterpolatedLabelTests {
         // "turn one on" having left the referent to the reader.
         // Its Bars-page twin joins the register for the same
         // change.
-        "kiwishelf.icon_source.help": 2,
+        "kiwishelf.icon_source.help": 1,
         "scroll_grid.app_bar_xref_link": 2,
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it
@@ -148,12 +148,14 @@ extension InterpolatedLabelTests {
         "colors.unfocused_off.xref": 2,
         "colors.unfocused_off.help": 1,
         // #1679: the shelf border's switch by its key, the Bars
-        // and Advanced Colours titles by their destinations, the
-        // KiwiShelf colors group by its key; the xref's second slot
-        // is the link.
+        // title by its destination, the KiwiShelf colors group by
+        // its key; the xref's second slot is the link. The
+        // border help's place is `colors.colors_and_glass.place`,
+        // which names the page by its destination (#2389).
         "colors.kiwishelf_border_off.help": 2,
         "colors.kiwishelf_border_off.xref": 1,
-        "kiwishelf.border.help": 3,
+        "kiwishelf.border.help": 2,
+        "colors.colors_and_glass.place": 1,
         "kiwishelf.border_width.border_off": 1,
         "layout_defaults.spaces_using.none": 1,
         // The `i18n/residue-round` batch (#830), in three

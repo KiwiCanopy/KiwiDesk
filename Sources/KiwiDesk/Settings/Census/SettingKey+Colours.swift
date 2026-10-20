@@ -48,7 +48,7 @@ extension ColoursKey {
             return .row(
                 .coloursAndMotion,
                 .glass,
-                .atRest,
+                .showMore,
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
@@ -63,7 +63,7 @@ extension ColoursKey {
             return .row(
                 .coloursAndMotion,
                 .glass,
-                .atRest,
+                .showMore,
                 exemptFromContainerGate: true
             )
         case .animationsMaster:
@@ -121,9 +121,9 @@ extension ColoursKey {
             // Its grey reads the card's own ticks — editor state the
             // saved config cannot answer, so a wiring predicate and
             // no census gate (gui.md); the reason is drawn beside it.
-            return .row(.advancedColours, .accent, .atRest)
+            return .row(.coloursAndMotion, .accent, .showMore)
         case .secondAccentPaint:
-            return .row(.advancedColours, .secondAccent, .atRest)
+            return .row(.coloursAndMotion, .secondAccent, .showMore)
         case .paletteNeonGlowHint:
             return .row(
                 .coloursAndMotion,
@@ -211,9 +211,17 @@ extension ColoursKey {
             return .text("looks.export")
         case .lookDelete:
             return .text("looks.delete")
-        case .accentPaint, .secondAccentPaint:
+        // Labelled by their group (#2389): the two wells share
+        // the drawn "Ticked rows", so the search join lands each
+        // on its own group's title instead (gui.md ▸ #1250).
+        case .accentPaint:
             return .text(
-                "colors.ticked_rows",
+                "colors.accent.title",
+                help: "colors.ticked_rows.help"
+            )
+        case .secondAccentPaint:
+            return .text(
+                "colors.second_accent.title",
                 help: "colors.ticked_rows.help"
             )
         }

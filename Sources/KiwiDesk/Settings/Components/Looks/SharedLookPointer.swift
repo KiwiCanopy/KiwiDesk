@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The line at the top of a page whose settings belong to a look
-/// (#1752) — Advanced Colors, KiwiShelf & Bars, Gaps & Borders —
+/// (#1752) — KiwiShelf & Bars, Gaps & Borders —
 /// saying whether an edit here reaches other profiles, and linking
 /// to the switch. Shown only where another saved profile exists,
 /// since with one there is nothing to reach; the page's rows that

@@ -17,8 +17,6 @@ extension SettingsView {
             ScreensSection(model: model)
         case .looks:
             LooksSection(model: model)
-        case .advancedColors:
-            AdvancedColorsSection(model: model)
         case .gapsAndBorders:
             GapsAndBordersSection(model: model)
         case .bars:

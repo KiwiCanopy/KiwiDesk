@@ -23,7 +23,7 @@ enum HomeCardPreview {
         // (#1536); its
         // subtitle already says the language and start at login.
         case .spaces, .bars, .layoutDefaults, .screens,
-            .gapsAndBorders, .looks, .advancedColors, .general, .ai,
+            .gapsAndBorders, .looks, .general, .ai,
             .kiwiVision:
             return nil
         }

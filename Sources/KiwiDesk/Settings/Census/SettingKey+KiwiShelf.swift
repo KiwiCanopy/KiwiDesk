@@ -112,16 +112,16 @@ extension KiwiShelfKey {
             return .luaOnly
         case .activeItemColor, .highlightColor, .hoverFillColor:
             // The accent's bar half (#1857).
-            return .row(.advancedColours, .accent, .atRest)
+            return .row(.coloursAndMotion, .accent, .showMore)
         case .fillColor, .itemColor, .hoverItemColor,
             .groupBadgeColor, .groupBadgeTextColor:
-            return .row(.advancedColours, .kiwishelf, .atRest)
+            return .row(.coloursAndMotion, .kiwishelf, .showMore)
         case .borderColor:
             // Inert while the border is off (#1679).
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .kiwishelf,
-                .atRest,
+                .showMore,
                 gate: .setting(.kiwishelf(.border))
             )
         }

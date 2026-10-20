@@ -215,24 +215,4 @@ struct HomeCardContentTests {
         #expect(!none.contains("0"))
     }
 
-    /// The Advanced Colours count is the census's, so the card
-    /// can never disagree with the area it opens.
-    @Test("the colour count is the census's own")
-    func advancedColourCount() {
-        pinEnglish()
-        let expected = SettingKey.allCases.filter {
-            $0.placement.area == .advancedColours
-                && [.atRest, .showMore].contains(
-                    $0.placement.tier
-                )
-                && SettingsDraftDiff.namesModelPath($0.id)
-        }.count
-        #expect(expected > 0)
-        let line = HomeCardContent.subtitle(
-            for: .advancedColors,
-            model: model()
-        )
-        #expect(line.contains("\(expected)"))
-    }
-
 }

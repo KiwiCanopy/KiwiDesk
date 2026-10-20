@@ -7169,8 +7169,8 @@ channels, in the order a reader meets them:
    that already names it — needs nothing more, and the hover
    string stays for the pointer user;
 3. a row gated from **another destination** takes the live `?`
-   whose sentence names where to go (Advanced Colours is
-   entirely this class);
+   whose sentence names where to go (the Colors & glass
+   colour rows are entirely this class);
 
 and what falls through all three — same page, no adjacency,
 nothing else to look at — draws the reason INLINE, outside the
@@ -7657,9 +7657,21 @@ and the line is drawn where the harm is:
   wash on a control already in view is coverage for its own
   sake, and it costs the heading. (The two per-layout App Bar
   show toggles predate the ruling and stay as shipped.)
-- Advanced Colours' rows take none whatever their tier. Colour
-  selection is a browse, not a name search: nobody types
-  "group badge text colour", they open the page and look.
+- The colour rows are no exception. They once took none on
+  the ground that colour is a browse — nobody types "group
+  badge text colour", they open the page and look — but that
+  held only while they had a page of their own at rest. Since
+  #2389 they sit in Looks & Animations' shut Colors & glass
+  section, so a hit with no anchor lands on a page that does
+  not show them, the one failure this split exists to prevent.
+  The browse argument survives inside the section: open, it
+  hides nothing, and the anchor only opens it. The two role
+  groups' wells both draw "Ticked rows", which the label-key join
+  cannot tell apart, so their census label is their group's title
+  instead: the hit lands on the group, the drawn words reach them
+  as a search synonym — the one place the census label is not the
+  drawn one, ruled rather than left anchor-less, since anchor-less
+  inside a shut section is the failure itself.
 
 The split is keyed on the census TIER, so a row moves across it
 by correcting the census, never by an anchor added beside it —
@@ -13570,15 +13582,15 @@ deep-linkable destination in the *This Profile* group, peer of
 that page. It is **not** a tab strip alongside Gaps/Drag: those
 are co-active concerns tuned together in one session, not a
 mutually-exclusive set, so a strip would misapply the #205 "tabs
-fit a fixed exclusive set" principle. The bar colors live on
-Advanced Colors (#678 Phase 3, "Colour is its own destination"
-below). Since #1857 none of them sits behind a drawer: the
-accent ones open the page in its role groups and the rest are all
-at rest under KiwiShelf colors, because a browse should not hide
-half its subject.
+fit a fixed exclusive set" principle. The bar colors live in
+Looks & Animations ▸ Colors & glass (#678 Phase 3, #2389, "Colour
+collects in one area" below). Since #1857 none of them sits
+behind a second drawer: once the section is open, the accent ones
+lead in its role groups and the rest are all shown under KiwiShelf
+colors, because a browse should not hide half its subject.
 
-**[Principle] Colour is its own destination, and a colour renders
-in exactly one of them.** (#678 Phase 3, 2026-08-02.) Filing a
+**[Principle] Colour collects in one area, and a colour renders
+there and nowhere else.** (#678 Phase 3, 2026-08-02; #2389.) Filing a
 colour under the thing it paints — the ring's tint under Focus
 border, a bar's tints on the Bars page, the mark tints under
 Sticky windows — scatters one decision ("what does this look
@@ -13606,7 +13618,7 @@ highlight, the focus border and the drag ghost — and the palette
 rules already treat it as one role, held apart from a second
 accent by the two colour-vision pair floors (active item against
 the Space Bar's focused window, the ghost against the drop zone).
-So Advanced Colours opens with two role groups side by side,
+So the colours open with two role groups side by side,
 **Accent** and **Second accent**, which are exactly one half of
 each pair, and groups by surface everywhere else, where the
 premise holds. A role group is not a second home: every colour
@@ -13645,10 +13657,31 @@ own colours is choosing for their own eyes, and a reader who
 cannot tell the pair apart sees that on the bar without being
 told. The guards keep the bundled half.
 
-The cost is real and is paid deliberately: every gate on the
-Advanced Colours page now names a switch on another page, so
-"why is this greyed" has to say *where to go*, on a live `?`
-outside the dimmed rows.
+The cost is real and is paid deliberately: every gate on a
+colour row names a switch on another page, so "why is this
+greyed" has to say *where to go*, on a live `?` outside the
+dimmed rows.
+
+**Amended by #2389 (2026-10-20): one area, inside Looks &
+Animations.** The split by kind stands; the second page does
+not. Two pages for what a user reads as one decision ("what does
+this look like") cost a Simple user the individual colours
+outright — the page was Power User only, so a palette could be
+picked but never one of its colours fixed — and cost a Power
+User a crossing between pages for every retint. So the colours
+moved into a collapsible section, **Colors & glass**, directly
+under the palette shelf they refine, shown in both modes and
+shut by default; Liquid Glass and the sheen moved in beside
+them, first, since the finish changes how every colour below it
+reads. "A colour renders in exactly one area" holds unchanged —
+the area is now Looks & Animations (`SettingsColorSurfaceTests`).
+What keeps the Simple surface simple is the shut section, not
+the mode: opening it is the "on demand" step, so nothing inside
+is gated by mode or hidden behind a second "More", which would
+add a decision and a second search hop for no new protection.
+The section's rows are `.showMore` and take search anchors (the
+#277 entry above), and "Advanced Colors" stays a search synonym
+of the page that took its content, per the title rule below.
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**
@@ -13658,8 +13691,8 @@ that content — Appearance, the most colour-sounding word in the
 app, would have gone on answering "where do I change the ring
 colour" after the split left it owning no colour. It is **Gaps
 & Borders**, the name the census already gives that area — the
-name the Home card teaches. **And the colour pages
-sit after the things they paint**: search returns one hit per
+name the Home card teaches. **And the colour page
+sits after the things it paints**: search returns one hit per
 destination in the search catalog's own order
 (`SettingsDestination.thisProfile` + `.wholeApp` — a separate
 list from the Home grid's card order, pinned set-equal to it by
@@ -13831,7 +13864,7 @@ alignment to Lua alone (#754). The narrowing that lets a
 half-width row hold a colour field (`dragColumnLabelColumn`) and
 the in-group short form it is for ("Border color" → "Border",
 with the full name kept for VoiceOver through `a11yLabel`) travel
-with those rows: they live on in Advanced Colours' twin drag
+with those rows: they live on in Colors & glass' twin drag
 columns, which take the width as `AdvancedColorRow`'s
 `labelWidth:`, and this editor no longer pushes the narrow axis in through
 `settingsLabelColumn` at all — what remains here is toggles, which
@@ -15597,7 +15630,7 @@ between applied and not.
 The cheap alternative is to record the name on apply, and it is
 wrong for the reason the one-shot paint below exists: applying is
 a paint, not a link, so the moment a user edits one hex in
-Advanced Colors the stored name describes something that is no
+Colors & glass the stored name describes something that is no
 longer on screen. A picker whose entire job is to show state
 would then be the one surface in the window that lies about it —
 the same defect the live-preview rule names, one shelf over. The

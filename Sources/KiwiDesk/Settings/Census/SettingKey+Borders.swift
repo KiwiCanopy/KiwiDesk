@@ -57,9 +57,9 @@ extension BordersKey {
             )
         case .borderFocusedColor:
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .accent,
-                .atRest,
+                .showMore,
                 gate: .setting(.borders(.borderEnabled))
             )
         case .borderUnfocusedEnabled, .borderGlow:
@@ -75,9 +75,9 @@ extension BordersKey {
             )
         case .borderUnfocusedColor:
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .windowMarks,
-                .atRest,
+                .showMore,
                 gate: .anyOf([
                     .borders(.borderEnabled),
                     .borders(.borderUnfocusedEnabled),
@@ -86,7 +86,7 @@ extension BordersKey {
         case .stickyColor, .floatingColor:
             // Both paint on the window, so neither takes the Space
             // Bar's gate (StickyMarkUngatedTests, #1799).
-            return .row(.advancedColours, .windowMarks, .atRest)
+            return .row(.coloursAndMotion, .windowMarks, .showMore)
         case .borderGlowSize:
             return .row(
                 .gapsAndBorders,
@@ -133,9 +133,9 @@ extension BordersKey {
             )
         case .dragGhostBorderColor:
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .accent,
-                .atRest,
+                .showMore,
                 gate: .anyOf([
                     .borders(.dragGhostEnabled),
                     .borders(.dragGhostBorder),
@@ -143,9 +143,9 @@ extension BordersKey {
             )
         case .dragGhostFillColor:
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .accent,
-                .atRest,
+                .showMore,
                 gate: .anyOf([
                     .borders(.dragGhostEnabled),
                     .borders(.dragGhostFill),
@@ -156,9 +156,9 @@ extension BordersKey {
             return .luaOnly
         case .dragDropZoneBorderColor:
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .secondAccent,
-                .atRest,
+                .showMore,
                 gate: .anyOf([
                     .borders(.dragDropZoneEnabled),
                     .borders(.dragDropZoneBorder),
@@ -166,9 +166,9 @@ extension BordersKey {
             )
         case .dragDropZoneFillColor:
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .secondAccent,
-                .atRest,
+                .showMore,
                 gate: .anyOf([
                     .borders(.dragDropZoneEnabled),
                     .borders(.dragDropZoneFill),

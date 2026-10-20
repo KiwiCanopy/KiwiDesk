@@ -1,6 +1,6 @@
 import KiwiDeskCore
 
-/// Where each Advanced Colours row's hex is stored, for the
+/// Where each Colors & glass row's hex is stored, for the
 /// writers that act on rows by key rather than by builder — the
 /// role groups' colour (#1857). `AdvancedColorPathsTests` holds
 /// that every colour row resolves to its own palette colour.

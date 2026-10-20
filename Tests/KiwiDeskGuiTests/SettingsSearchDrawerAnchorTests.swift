@@ -22,12 +22,13 @@ struct SettingsSearchDrawerAnchorTests {
 
     /// The census containers whose `.showMore` rows a drawer
     /// hides, each with its destination — a container name
-    /// recurs across areas (`.appBar` holds Bars' Style rows AND
-    /// Advanced Colours') — its English title, and the drawers
-    /// that draw it: two where a container is split across
-    /// disclosures (`.gaps`). The membership of each container
-    /// is the census's, read live, so a new row landing in one
-    /// of them anchor-less reds here without a count. A drawer
+    /// recurs across areas (`.kiwishelf` holds the Bars card's
+    /// rows AND Colors & glass' shelf colours) — its English
+    /// title, and the drawers that draw it: two where a
+    /// container is split across disclosures (`.gaps`). The
+    /// membership of each container is the census's, read live,
+    /// so a new row landing in one of them anchor-less reds here
+    /// without a count. A drawer
     /// declared with children joins this register, one declared
     /// childless joins `SettingsCatalogDrawerTests`', and
     /// `filledRegisterIsComplete` refuses a third state.
@@ -69,6 +70,26 @@ struct SettingsSearchDrawerAnchorTests {
             (
                 .looks, "Looks & Animations", .motion,
                 [SettingsCatalog.colors.motionMore]
+            ),
+            (
+                .looks, "Looks & Animations", .glass,
+                [SettingsCatalog.colors.colorsAndGlass]
+            ),
+            (
+                .looks, "Looks & Animations", .accent,
+                [SettingsCatalog.colors.colorsAndGlass]
+            ),
+            (
+                .looks, "Looks & Animations", .secondAccent,
+                [SettingsCatalog.colors.colorsAndGlass]
+            ),
+            (
+                .looks, "Looks & Animations", .kiwishelf,
+                [SettingsCatalog.colors.colorsAndGlass]
+            ),
+            (
+                .looks, "Looks & Animations", .windowMarks,
+                [SettingsCatalog.colors.colorsAndGlass]
             ),
             (
                 .shortcuts, "Shortcuts & Gestures", .gestures,
@@ -270,7 +291,8 @@ struct SettingsSearchDrawerAnchorTests {
             $0.anchor.anchor == top
         }
         #expect(after.isEmpty, Comment(rawValue: "\(after.map(\.id))"))
-        let glass = SettingsCatalog.colors.glassCard.id
+        let glass = SettingsCatalog.colors.colorsAndGlass.children
+            .liquidGlassGroup.id
         let glassRow = SettingsSearchIndex.rows().first {
             $0.anchor.anchor == glass
         }

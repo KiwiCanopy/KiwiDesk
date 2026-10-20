@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// How Advanced Colours GREYS (#678 Phase 3) — split from
+/// How Colors & glass GREYS (#678 Phase 3) — split from
 /// `ColorsCensusRenderTests` at the 350-line ceiling (§5, split
 /// early). That suite pins which rows render where; this one
 /// pins which of them are live, and why the page says what it
@@ -12,7 +12,7 @@ import Testing
 /// The area is the first whose gates all live on ANOTHER page,
 /// so the sentence a dimmed row is explained by is part of the
 /// behaviour, not decoration.
-@Suite("Advanced Colours greying")
+@Suite("Colors & glass greying")
 struct ColorsGateTests {
     /// The exemption escapes the shelf's block gate and nothing
     /// else, asserted over the verdict because nothing in this
@@ -27,20 +27,18 @@ struct ColorsGateTests {
         #expect(!plain.placement.exemptFromContainerGate)
     }
 
-    /// Advanced Colours exempts no row from a container gate
+    /// Colors & glass exempts no row from a container gate
     /// today. Pinned so that adding one is a conscious edit —
     /// the renderer already honors the flag as data
     /// (`AdvancedColorRows`), so the census is the only half a
     /// future exemption has to touch, and this is what asks
     /// whether it has an argument.
-    @Test("no Advanced Colours row escapes its container gate")
+    @Test("no Colors & glass row escapes its container gate")
     func nothingIsExempt() {
+        let rows = SettingKey.allCases.filter(\.isColourRow)
+        #expect(!rows.isEmpty)
         #expect(
-            SettingKey.allCases.filter {
-                $0.placement.area == .advancedColours
-                    && $0.placement.exemptFromContainerGate
-            }
-            .isEmpty
+            rows.filter(\.placement.exemptFromContainerGate).isEmpty
         )
     }
 
@@ -59,7 +57,7 @@ struct ColorsGateTests {
         // A hidden bar's shortcut still shows it, so its colours
         // never grey for its value (#761).
         let gates = AdvancedColorsGates(settings: settings)
-        for key in ColorsRowOrder.kiwishelfAtRest
+        for key in ColorsRowOrder.kiwishelfColorRows
         where key != .kiwishelf(.borderColor) {
             #expect(gates.verdict(for: key) == nil, "\(key.id)")
         }
@@ -156,12 +154,12 @@ struct ColorsGateTests {
         var gates = AdvancedColorsGates(settings: settings)
         #expect(
             gates.dimmedDestinations(
-                of: ColorsRowOrder.accentAtRest
+                of: ColorsRowOrder.accentRows
             ).isEmpty
         )
         #expect(
             gates.dimmedDestinations(
-                of: ColorsRowOrder.secondAccentAtRest
+                of: ColorsRowOrder.secondAccentRows
             ).isEmpty
         )
 
@@ -176,7 +174,7 @@ struct ColorsGateTests {
         gates = AdvancedColorsGates(settings: settings)
         #expect(
             gates.dimmedDestinations(
-                of: ColorsRowOrder.accentAtRest
+                of: ColorsRowOrder.accentRows
             ) == [.gapsAndBorders]
         )
 
@@ -187,7 +185,7 @@ struct ColorsGateTests {
         gates = AdvancedColorsGates(settings: settings)
         #expect(
             gates.dimmedDestinations(
-                of: ColorsRowOrder.secondAccentAtRest
+                of: ColorsRowOrder.secondAccentRows
             ) == [.gapsAndBorders]
         )
 
@@ -209,7 +207,7 @@ struct ColorsGateTests {
         )
         #expect(
             !gates.dimmedDestinations(
-                of: ColorsRowOrder.secondAccentAtRest
+                of: ColorsRowOrder.secondAccentRows
             ).contains(.bars)
         )
     }

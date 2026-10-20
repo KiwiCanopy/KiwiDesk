@@ -47,10 +47,6 @@ enum HomeCardPlate {
             return tile(padding: 8, settings: settings) {
                 HomeCardScreensTile(model: model)
             }
-        case .advancedColors:
-            return tile(padding: 11, settings: settings) {
-                HomeCardSwatchGridTile(settings: settings)
-            }
         case .shortcuts, .profiles, .appRules, .kiwiVision, .ai,
             .general,
             .macChecklist:

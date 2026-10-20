@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Two-column swatch grid layout shared across Advanced Colours groups (#2).
+/// Two-column swatch grid layout shared across Colors & glass groups (#2).
 struct ColorGrid<Content: View>: View {
     @ViewBuilder let content: Content
 

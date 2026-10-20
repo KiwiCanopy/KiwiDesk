@@ -43,7 +43,7 @@ struct HomeCardOrderTests {
     /// is the conscious-edit tripwire on the size of the
     /// first-week surface, and growing it should cost a
     /// deliberate edit here.
-    @Test("Simple offers twelve cards, Power User fourteen")
+    @Test("Simple offers twelve cards, Power User thirteen")
     func modeCounts() {
         let simple = offered(mode: .simple, displays: 1)
         let powerUser = offered(mode: .powerUser, displays: 1)
@@ -51,9 +51,10 @@ struct HomeCardOrderTests {
         // Simple — the north-star's own card. 10 / 12 since
         // #1741: Behavior, Power User only, retired. 11 / 13
         // since #1685: AI, offered in Simple. 12 / 14 since
-        // #2103: KiwiVision, offered in Simple.
+        // #2103: KiwiVision, offered in Simple. 12 / 13 since
+        // #2389: Advanced Colors folded into Looks & Animations.
         #expect(simple.count == 12)
-        #expect(powerUser.count == 14)
+        #expect(powerUser.count == 13)
     }
 
     /// Power User INSERTS, never reorders: Simple's sequence is

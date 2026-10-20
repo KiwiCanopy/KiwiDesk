@@ -160,7 +160,7 @@ struct GreyOutParityTests {
             "active: gates.inertReason(",
             3
         ),
-        // Advanced Colours (#678 Phase 3), which replaced the
+        // Colors & glass (#678 Phase 3), which replaced the
         // interim colour cards.
         //
         // This pins the WIRING: each row must actually grey on

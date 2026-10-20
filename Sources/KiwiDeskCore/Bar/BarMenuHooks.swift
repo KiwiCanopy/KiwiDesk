@@ -8,8 +8,9 @@ public enum SettingsLanding: Equatable, Sendable {
     case shelf
     /// Looks & Animations.
     case looks
-    /// Advanced Colors.
-    case advancedColors
+    /// Looks & Animations, with its Colors & glass section open
+    /// (#2389).
+    case colorsAndGlass
     /// Spaces, on this Space's card.
     case space(SpaceID)
     /// App Rules, on this app's row, by its lower-cased bundle id.

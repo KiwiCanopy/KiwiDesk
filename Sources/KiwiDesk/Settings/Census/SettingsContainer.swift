@@ -16,7 +16,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case aiSetup
     /// AI ▸ Ready-made prompts (#1685).
     case readyMadePrompts
-    /// Advanced Colours' first role group (#1857): the hue the
+    /// Colors & glass' first role group (#1857): the hue the
     /// active Space, the focus border and the drag ghost share.
     case accent
     case appBar
@@ -47,7 +47,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case layout
     case luaBindings
     case screenFingerprints
-    /// Advanced Colours' second role group (#1857).
+    /// Colors & glass' second role group (#1857).
     case secondAccent
     case monocle
     case motion
@@ -74,7 +74,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case stack
     case stickyWindows
     case track
-    /// Advanced Colours' window-mark colours (#1857).
+    /// Colors & glass' window-mark colours (#1857).
     case windowMarks
 
     /// Container-level gate that greys member rows as a unit.
@@ -117,5 +117,27 @@ enum SettingsContainer: CaseIterable, Hashable {
             .stickyWindows, .track, .windowMarks:
             return nil
         }
+    }
+}
+
+extension SettingsContainer {
+    /// The Colors & glass groups that hold colour rows (#2389):
+    /// Liquid Glass and the sheen sit beside them in `.glass`.
+    static let colourGroups: Set<SettingsContainer> = [
+        .accent, .secondAccent, .kiwishelf, .windowMarks,
+    ]
+}
+
+extension SettingKey {
+    /// A colour row of Colors & glass — the one area a colour
+    /// renders in (`SettingsColorSurfaceTests`). Membership is by
+    /// container, so a colour placed in another container of the
+    /// area escapes the readers of this; the palette-count
+    /// equality in `SettingsColorSurfaceTests` is what catches it.
+    var isColourRow: Bool {
+        placement.area == .coloursAndMotion
+            && placement.container.map(
+                SettingsContainer.colourGroups.contains
+            ) == true
     }
 }

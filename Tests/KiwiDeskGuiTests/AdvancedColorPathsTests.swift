@@ -3,12 +3,12 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Every Advanced Colours colour row resolves to the stored hex of
+/// Every Colors & glass colour row resolves to the stored hex of
 /// its own palette colour (#1857): writing through the lookup
 /// moves exactly one palette path, and that path is the one the
 /// row's census id names — so a group colour writes the row the
 /// user ticked, never its neighbour.
-@Suite("Advanced Colours hex lookup")
+@Suite("Colors & glass hex lookup")
 struct AdvancedColorPathsTests {
     /// The census id's group, spelled as the palette spells it.
     private static let groups: [String: String] = [
@@ -53,7 +53,7 @@ struct AdvancedColorPathsTests {
 
     private var colourKeys: [SettingKey] {
         SettingKey.allCases.filter {
-            $0.placement.area == .advancedColours
+            $0.isColourRow
                 && SettingsDraftDiff.namesModelPath($0.id)
         }
     }

@@ -36,7 +36,7 @@ extension SourceScan {
         )
         // Scanned over the WHOLE source, not line by line: a
         // case's `L(` and its key literal need not share a line,
-        // and `.advancedColors` is exactly that shape. The
+        // and `.looks` is exactly that shape. The
         // line-scoped first cut missed it, silently — the frame
         // naming that destination simply went undiscovered and
         // lost its floor, which is how a fail-open parser hurts.

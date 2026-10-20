@@ -6,7 +6,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The shelf border's colour row on Advanced Colours (#1679):
+/// The shelf border's colour row on Colors & glass (#1679):
 /// greyed while the border is off, with its reason as a live link
 /// to Bars beneath the grid — the #1310 shape — only while a bar
 /// shows, since with none the card's header carries the reason.
@@ -317,7 +317,6 @@ struct ShelfBorderPreviewTests {
     @Test(
         "Every palette scene reads the draft's border switch",
         arguments: [
-            "Colors/AdvancedColorsPanel.swift",
             "Looks/PaletteScenePanel.swift",
             "Looks/PaletteShelf.swift",
         ]

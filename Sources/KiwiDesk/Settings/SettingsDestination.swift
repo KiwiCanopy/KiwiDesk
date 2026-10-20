@@ -8,7 +8,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case layoutDefaults
     case screens
     case looks
-    case advancedColors
     case gapsAndBorders
     case bars
     // Whole App
@@ -24,13 +23,12 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
 
     /// Destinations scoped to the active profile. The order is
     /// load-bearing: search groups results by destination in it,
-    /// so the colour pair sits AFTER the things it paints
-    /// (`SettingsSearchTests`), and Advanced Colors directly after
-    /// its Simple twin so the pair reads as a family
-    /// (`HomeCardOrderTests` pins the shared membership).
+    /// so the colour page sits AFTER the things it paints
+    /// (`SettingsSearchTests`; `HomeCardOrderTests` pins the
+    /// shared membership).
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .screens, .gapsAndBorders,
-        .bars, .looks, .advancedColors,
+        .bars, .looks,
     ]
     /// Destinations scoped globally across the application. The
     /// checklist is LAST here so a search for "Spaces" or "Dock"
@@ -50,11 +48,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             return L(
                 "destination.looks",
                 "Looks & Animations"
-            )
-        case .advancedColors:
-            return L(
-                "destination.advanced_colors",
-                "Advanced Colors"
             )
         case .gapsAndBorders:
             return L("destination.gaps_borders", "Gaps & Borders")
@@ -80,7 +73,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .layoutDefaults: return "rectangle.3.group"
         case .screens: return "display.2"
         case .looks: return "paintbrush.fill"
-        case .advancedColors: return "paintpalette.fill"
         case .gapsAndBorders: return "square.dashed.inset.filled"
         case .bars: return "menubar.rectangle"
         case .profiles: return "square.stack.3d.up"
@@ -125,8 +117,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .screens: return .blue
         case .looks: return .purple
-        case .advancedColors:
-            return Color(red: 0.38, green: 0.20, blue: 0.60)
         case .gapsAndBorders: return .brown
         case .bars: return .pink
         case .profiles:

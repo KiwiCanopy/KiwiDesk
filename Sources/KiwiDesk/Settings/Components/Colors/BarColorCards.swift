@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The shelf's own colours on Advanced Colours (#1517, #1857),
-/// all at rest; its accent rows open the page in the role groups.
+/// The shelf's own colours in Colors & glass (#1517, #1857,
+/// #2389); its accent rows sit in the role groups above.
 struct KiwiShelfColorCard: View {
     @ObservedObject var model: SettingsModel
 
@@ -12,12 +12,15 @@ struct KiwiShelfColorCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.advancedColors.kiwishelfGroup
+            SettingsCatalog.colors.colorsAndGlass.children
+                .kiwishelfGroup,
+            subsection: true,
+            plated: false
         ) {
             ColorGrid {
                 AdvancedColorRows(
                     model: model,
-                    keys: ColorsRowOrder.kiwishelfAtRest
+                    keys: ColorsRowOrder.kiwishelfColorRows
                 )
             }
             // One greyed ROW in a live card takes its reason
