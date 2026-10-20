@@ -64,7 +64,7 @@ extension AdvancedColorRow {
             )
         default:
             let _ = assertionFailure(
-                "non-colour KiwiShelf key in Advanced Colours: "
+                "non-colour KiwiShelf key in Colors & glass: "
                     + key.rawValue
             )
             EmptyView()
@@ -101,7 +101,7 @@ extension AdvancedColorRow {
             .help(focusedHighlightHelp)
         default:
             let _ = assertionFailure(
-                "non-colour Space Bar key in Advanced Colours: "
+                "non-colour Space Bar key in Colors & glass: "
                     + key.rawValue
             )
             EmptyView()

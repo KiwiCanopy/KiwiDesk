@@ -47,6 +47,9 @@ enum SettingsSearchSynonyms {
         // never "zen" (ruling 5).
         case .kiwiVision:
             return ["dim", "blur", "haze", "focus"]
+        // The retired page's title (#2389), which a user who
+        // learned it still types.
+        case .looks: return ["advanced colors", "advanced colours"]
         default: return []
         }
     }
@@ -104,6 +107,10 @@ enum SettingsSearchSynonyms {
             return ["gloss", "shine", "gradient", "highlight", "shade"]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
+        // Each well is labelled by its group (#2389), so the
+        // words drawn beside it still reach it.
+        case .colours(.accentPaint), .colours(.secondAccentPaint):
+            return ["ticked rows", "recolor", "retint"]
         case .colours(.animationsMaster):
             return ["motion", "movement"]
         // Speed is the word people reach for; duration is what

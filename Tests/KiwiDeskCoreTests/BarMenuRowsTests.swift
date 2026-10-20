@@ -61,7 +61,7 @@ struct BarMenuRowsTests {
     }
 
     private let shelf = [
-        "KiwiShelf Settings…", "Looks…", "Advanced Colors…",
+        "KiwiShelf Settings…", "Looks…", "Colors & Glass…",
     ]
 
     @Test("every menu ends with the shelf section")
@@ -83,7 +83,7 @@ struct BarMenuRowsTests {
         var landed: [SettingsLanding] = []
         core.barMenuHooks.openSettings = { landed.append($0) }
         core.barMenuRows(.empty).forEach(perform)
-        #expect(landed == [.shelf, .looks, .advancedColors])
+        #expect(landed == [.shelf, .looks, .colorsAndGlass])
         let chip = core.barMenuRows(.space(two))
         perform(chip[1])
         #expect(landed.last == .space(two))

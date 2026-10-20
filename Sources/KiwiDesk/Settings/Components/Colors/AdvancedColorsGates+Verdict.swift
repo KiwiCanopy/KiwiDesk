@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Why an Advanced Colours row draws nothing right now, and where
+/// Why a Colors & glass row draws nothing right now, and where
 /// the page says so (#1857, #1310): the ONE verdict the row's grey,
 /// its card's links and the group well all read.
 struct ColorRowVerdict: Equatable {

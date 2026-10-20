@@ -287,13 +287,12 @@ fingerprint anywhere.
 
 **The qualifier must also be unclaimed by the surface AROUND
 the drawer** (#678). A row tier and a mode depth are never
-spelled with one word: Advanced Colors is the deep-mode twin of
-Looks & Animations (`SettingsArea.minimumMode` is `.powerUser`
-there), so on that page "advanced" already means *which mode
-you are in* and no drawer may re-use it to mean *which rows are
-hidden*. Its last colour drawer was **"More colors"**, the
-collapsed summary doing the naming — "More" cannot be misread
-as a mode; since #1857 every colour there is at rest.
+spelled with one word: a page whose `SettingsArea.minimumMode` is
+`.powerUser` already means *which mode you are in* by
+"advanced", so no drawer may re-use the word to mean *which rows
+are hidden*. The colours' own section is **"Colors & glass"**
+(#2389), named for what it holds, after the Power User page it
+replaced was called Advanced Colors.
 
 A connector (`Advanced: Lua bindings`) is not the fix: it
 restores the tier reading but re-splits the format. Dropping
@@ -743,8 +742,8 @@ drives.
 panel; the rest keep full width.** Which ones is
 `SettingsDetailPanelOffer.offering` and nothing else — Gaps &
 Borders, Bars, Looks & Animations, Layout Defaults, Shortcuts
-(its keyboard board), Advanced Colours and Spaces (#793,
-#794). They open as two columns: the controls, then a fixed
+(its keyboard board), Spaces and KiwiVision (#793, #794,
+#2103). They open as two columns: the controls, then a fixed
 392 pt right panel headed "Live preview · <area>" that redraws
 the area's preview from the *staged* draft, with a "Changed in
 this draft" list of old → new rows underneath, each a jump to
@@ -1487,8 +1486,8 @@ Greying applied across a whole editor (#520, #527):
   answer "why", so it takes a **live pointer whose sentence
   names the destination to go to**, in one of two shapes. Where
   the block has a live label, the pointer is a `?` on the
-  nearest live label above the dimmed rows: on Advanced Colours
-  every gate is remote, so the KiwiShelf colors card carries a
+  nearest live label above the dimmed rows: in Colors & glass
+  every colour gate is remote, so the KiwiShelf colors card carries a
   header `?` for its block gate (`AdvancedColorsHelp`), while a
   row greyed in a live card takes a `CrossReferenceRow` beneath
   it (#1310) — in the role groups, one per page whose switch

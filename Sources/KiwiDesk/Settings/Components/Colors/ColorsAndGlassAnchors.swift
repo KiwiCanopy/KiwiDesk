@@ -1,0 +1,51 @@
+import KiwiDeskCore
+
+/// Which catalog child a colour row lands a search on (#2389,
+/// #1250): one arm per row the section draws, named outright so
+/// the catalog's site guards see each declaration referenced.
+enum ColorsAndGlassAnchors {
+    private static var rows: ColorsAndGlassControls {
+        SettingsCatalog.colors.colorsAndGlass.children
+    }
+
+    static func control(for key: SettingKey) -> SettingsControl? {
+        switch key {
+        case .kiwishelf(let k): return shelf(k)
+        case .spaceBar(.spaceBarFocusedItemColor):
+            return rows.tintFocusedWindow
+        case .spaceBar(.spaceBarFocusedHighlightColor):
+            return rows.tintFrontAppIndicator
+        case .borders(let k): return borders(k)
+        default: return nil
+        }
+    }
+
+    private static func shelf(_ key: KiwiShelfKey) -> SettingsControl? {
+        switch key {
+        case .activeItemColor: return rows.tintActiveItem
+        case .highlightColor: return rows.tintHighlight
+        case .hoverFillColor: return rows.tintHoverFill
+        case .fillColor: return rows.tintShelfFill
+        case .itemColor: return rows.tintShelfItem
+        case .hoverItemColor: return rows.tintShelfHoverItem
+        case .borderColor: return rows.tintShelfBorder
+        case .groupBadgeColor: return rows.tintGroupBadge
+        case .groupBadgeTextColor: return rows.tintBadgeText
+        default: return nil
+        }
+    }
+
+    private static func borders(_ key: BordersKey) -> SettingsControl? {
+        switch key {
+        case .borderFocusedColor: return rows.tintFocusBorder
+        case .dragGhostBorderColor: return rows.tintGhostBorder
+        case .dragGhostFillColor: return rows.tintGhostFill
+        case .dragDropZoneBorderColor: return rows.tintDropZoneBorder
+        case .dragDropZoneFillColor: return rows.tintDropZoneFill
+        case .borderUnfocusedColor: return rows.tintUnfocusedBorder
+        case .stickyColor: return rows.tintStickyMark
+        case .floatingColor: return rows.tintFloatingMark
+        default: return nil
+        }
+    }
+}

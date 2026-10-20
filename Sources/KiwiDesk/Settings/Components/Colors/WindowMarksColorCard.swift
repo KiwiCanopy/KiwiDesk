@@ -12,17 +12,20 @@ struct WindowMarksColorCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.advancedColors.windowMarksGroup,
+            SettingsCatalog.colors.colorsAndGlass.children
+                .windowMarksGroup,
             caption: L(
                 "colors.window_marks.caption",
                 "The border on unfocused windows, and the marks on "
                     + "sticky and floating ones."
-            )
+            ),
+            subsection: true,
+            plated: false
         ) {
             ColorGrid {
                 AdvancedColorRows(
                     model: model,
-                    keys: ColorsRowOrder.windowMarksAtRest
+                    keys: ColorsRowOrder.windowMarksRows
                 )
             }
             // One greyed ROW in a live card takes its reason
@@ -36,7 +39,7 @@ struct WindowMarksColorCard: View {
             }
             ForEach(
                 gates.dimmedDestinations(
-                    of: ColorsRowOrder.windowMarksAtRest
+                    of: ColorsRowOrder.windowMarksRows
                 ),
                 id: \.self
             ) { destination in

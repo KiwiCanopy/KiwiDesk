@@ -38,7 +38,7 @@ struct GreyOutAnchorTests {
             "help: blockReason.map(GapsBordersGateHelp.sentence)",
             1
         ),
-        // Advanced Colours (#678 Phase 3). Every gate on this
+        // Colors & glass (#678 Phase 3). Every gate on this
         // page names a switch on ANOTHER page, so the header
         // anchor is not a nicety here — the hover string on a
         // dimmed row is the only other channel, and it cannot

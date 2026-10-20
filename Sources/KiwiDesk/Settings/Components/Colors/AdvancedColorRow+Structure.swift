@@ -56,7 +56,7 @@ extension AdvancedColorRow {
             dragRow(ghost: false, fill: true)
         default:
             let _ = assertionFailure(
-                "non-colour Borders key in Advanced Colours: "
+                "non-colour Borders key in Colors & glass: "
                     + key.rawValue
             )
             EmptyView()

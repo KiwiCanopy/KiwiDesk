@@ -3,7 +3,8 @@ import SwiftUI
 
 /// The one Liquid Glass switch, over both bars and the ⌃⌥K
 /// shortcuts panel (#1307), and the sheen's own row beneath it
-/// (#1644), which alone shows below macOS 26.
+/// (#1644), which alone shows below macOS 26 — the first group
+/// of Colors & glass (#2389).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -18,8 +19,11 @@ struct GlassCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.colors.glassCard,
-            caption: AppBarStyle.glassAvailable ? caption : nil
+            SettingsCatalog.colors.colorsAndGlass.children
+                .liquidGlassGroup,
+            caption: AppBarStyle.glassAvailable ? caption : nil,
+            subsection: true,
+            plated: false
         ) {
             // The grey is per row, honoring the census's
             // exemption: the sheen is not glass and never greys
@@ -39,7 +43,7 @@ struct GlassCard: View {
     /// is an absence (#390), which the census records in the HIDES
     /// group — while the sheen, which is not glass, stays (#1644).
     static var rows: [SettingKey] {
-        ColorsRowOrder.glassAtRest.filter {
+        ColorsRowOrder.glassRows.filter {
             !$0.placement.hiddenWithoutGlass
         }
     }
@@ -73,6 +77,10 @@ struct GlassCard: View {
             )
         case .colours(.borderSheen):
             SheenRow(strength: $model.config.settings.borderStyle.sheen)
+                .searchAnchored(
+                    SettingsCatalog.colors.colorsAndGlass.children
+                        .sheenStrength
+                )
         default:
             let _ = assertionFailure(
                 "unrendered Glass census key: \(key.id)"

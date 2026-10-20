@@ -48,7 +48,7 @@ struct SheenCouplingTests {
     @Test("the row sits beneath the switch, never greys or hides")
     func rowPlacement() {
         #expect(
-            ColorsRowOrder.glassAtRest == [
+            ColorsRowOrder.glassRows == [
                 .colours(.liquidGlassMaster),
                 .colours(.borderSheen),
             ]

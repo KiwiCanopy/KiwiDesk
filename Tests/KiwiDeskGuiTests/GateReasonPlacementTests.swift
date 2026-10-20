@@ -19,7 +19,7 @@ import Testing
 /// whole Show-more block owed inline sentences — two rows inside
 /// one disclosure are adjacent when the reader sees them, which
 /// is what `visibilityRank` compares. The second had no `remote`
-/// channel and claimed every Advanced Colours row owed one,
+/// channel and claimed every Colors & glass row owed one,
 /// against `docs/ui-patterns.md`, which routes a gate on another
 /// destination to a live `?` naming where to go.
 @Suite("Gate reason placement (#815)")
@@ -125,7 +125,7 @@ struct GateReasonPlacementTests {
         #expect(
             channel(.kiwishelf(.backgroundFit)) == .adjacent
         )
-        // Advanced Colours: its bar-colour rows are gated by
+        // Colors & glass: its bar-colour rows are gated by
         // switches that live on the Bars destination, which is
         // the case `AdvancedColorsHelp`'s anchors answer.
         #expect(

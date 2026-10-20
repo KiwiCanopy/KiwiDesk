@@ -11,7 +11,6 @@ extension SettingsDestination {
         case .layoutDefaults: return .layoutDefaults
         case .screens: return .screens
         case .looks: return .coloursAndMotion
-        case .advancedColors: return .advancedColours
         case .gapsAndBorders: return .gapsAndBorders
         case .bars: return .bars
         case .profiles: return .profiles
@@ -32,7 +31,6 @@ extension SettingsDestination {
         case .layoutDefaults: self = .layoutDefaults
         case .screens: self = .screens
         case .coloursAndMotion: self = .looks
-        case .advancedColours: self = .advancedColors
         case .gapsAndBorders: self = .gapsAndBorders
         case .bars: self = .bars
         case .profiles: self = .profiles

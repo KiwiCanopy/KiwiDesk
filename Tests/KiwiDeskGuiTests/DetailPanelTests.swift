@@ -19,13 +19,13 @@ struct DetailPanelTests {
     /// (2026-08-09) and pass 5 added Shortcuts, which is the
     /// extension motion #793-#795 and #2103 repeat — a member
     /// arriving without a branch below is what this pair catches.
-    @Test("the offer set is the scoped eight")
+    @Test("the offer set is the scoped seven")
     func offerSetIsPinned() {
         #expect(
             SettingsDetailPanelOffer.offering == [
                 .gapsAndBorders, .bars, .looks,
-                .layoutDefaults, .shortcuts, .advancedColors,
-                .spaces, .kiwiVision,
+                .layoutDefaults, .shortcuts, .spaces,
+                .kiwiVision,
             ]
         )
         // General's absence is a RULING, not a gap (#795, owner
@@ -86,9 +86,6 @@ struct DetailPanelTests {
                 "case.layoutDefaults:LayoutPreviewPanel(",
             .shortcuts:
                 "case.shortcuts:KeyboardPreviewPanel(model:model)",
-            .advancedColors:
-                "case.advancedColors:"
-                + "AdvancedColorsPanel(model:model)",
             .spaces:
                 "case.spaces:SpacesPanelPreview(model:model)",
             .kiwiVision:  // #2103
@@ -233,7 +230,7 @@ struct DetailPanelTests {
 
     /// The in-card mounts the panel replaced stay replaced —
     /// the same fact drawn twice on one screen is the drift
-    /// this lane's migration removed. Advanced Colours' own
+    /// this lane's migration removed. Colors & glass' own
     /// mounts (the palette mirrors) are deliberately outside
     /// this scan.
     @Test("migrated previews do not return to their cards")
@@ -254,7 +251,7 @@ struct DetailPanelTests {
                 "DragVisualPreview("
             ),
             // The two bar strips are not listed: #793 took their
-            // last mount (Advanced Colours' cards) and the
+            // last mount (the old colour page's cards) and the
             // renderers were deleted outright, so a needle for
             // them would assert against a type that no longer
             // exists — permanently true, and read as coverage.

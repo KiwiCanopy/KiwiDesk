@@ -42,7 +42,7 @@ struct ColorPaletteTests {
         #expect(all.contains("drag.ghost.fill_color"))
         #expect(all.contains("drag.drop_zone.border_color"))
         // The two mark tints joined in the #678 Colours phase, so
-        // Advanced Colours' "save these as a palette" bridge
+        // Colors & glass' "save these as a palette" bridge
         // carries every row it shows.
         #expect(all.contains("sticky.color"))
         #expect(all.contains("floating.color"))

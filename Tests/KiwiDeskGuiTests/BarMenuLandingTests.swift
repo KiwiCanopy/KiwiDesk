@@ -25,8 +25,18 @@ struct BarMenuLandingTests {
                 == SettingsAnchor(destination: .looks)
         )
         #expect(
-            SettingsAnchor(landing: .advancedColors)
-                == SettingsAnchor(destination: .advancedColors)
+            SettingsAnchor(landing: .colorsAndGlass)
+                == SettingsAnchor(
+                    destination: .looks,
+                    anchor: ColorsAndGlassSection.head.id
+                )
+        )
+        // The head opens the section: a drawer expands only for
+        // its children, never its own label (#1250).
+        #expect(
+            SettingsCatalog.colors.colorsAndGlass.shouldExpand(
+                revealing: ColorsAndGlassSection.head.id
+            )
         )
         // The key panel's Layout Defaults… (#2229): the page, on
         // the layout's own tab.

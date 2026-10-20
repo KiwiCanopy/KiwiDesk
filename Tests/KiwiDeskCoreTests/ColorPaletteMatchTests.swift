@@ -33,7 +33,7 @@ struct ColorPaletteMatchTests {
         )
     }
 
-    /// One hand edit in Advanced Colours unmarks the card. This
+    /// One hand edit in Colors & glass unmarks the card. This
     /// is the whole reason the mark is computed and not stored.
     @Test("A hand-edited colour drops the mark")
     func handEditDropsTheMark() {

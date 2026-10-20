@@ -105,7 +105,6 @@ struct PaletteSceneSheenTests {
     @Test(
         "every palette scene reads the draft's sheen",
         arguments: [
-            "Colors/AdvancedColorsPanel.swift",
             "Looks/PaletteScenePanel.swift",
             "Looks/PaletteShelf.swift",
         ]

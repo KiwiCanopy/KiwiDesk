@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The two colour areas render FROM the census (#678 Phase 3):
-/// the census owns placement, `ColorsRowOrder` owns display
-/// order. These pin the two together — every `.coloursAndMotion`
-/// / `.advancedColours` census key appears in exactly the order
+/// Looks & Animations renders FROM the census (#678 Phase 3,
+/// #2389): the census owns placement, `ColorsRowOrder` owns
+/// display order. These pin the two together — every
+/// `.coloursAndMotion` census key appears in exactly the order
 /// list its placement names, so a census row added, retiered or
 /// moved without a renderer update is a red test, not a silently
 /// missing control.
@@ -162,59 +162,73 @@ struct ColorsCensusRenderTests {
         #expect(!SettingRuntimeGate.liquidGlassUnavailable.greys)
     }
 
-    /// The area's render knows exactly its five containers — the
-    /// Shared look card first since #1752; another would mount
-    /// nowhere, so it must fail loud here rather than ship an
-    /// unreachable row.
-    @Test("Looks & Animations holds its five containers")
+    /// The area's render knows exactly its containers — the
+    /// Shared look card first since #1752, Colors & glass' five
+    /// groups since #2389; another would mount nowhere, so it
+    /// must fail loud here rather than ship an unreachable row.
+    @Test("Looks & Animations holds its containers")
     func coloursAndMotionContainers() {
         #expect(
             containers(of: .coloursAndMotion)
-                == [.sharedLook, .looks, .palettes, .glass, .motion]
+                == [
+                    .sharedLook, .looks, .palettes, .glass, .accent,
+                    .secondAccent, .kiwishelf, .windowMarks, .motion,
+                ]
         )
     }
 
-    // MARK: - Advanced Colours
+    // MARK: - Colors & glass
 
-    /// Every Advanced Colours group draws its rows at rest:
-    /// the page is a browse, and since #1857 nothing on it hides
-    /// behind a drawer.
-    @Test("each Advanced Colours group's rows are the census's")
-    func advancedColoursGroups() {
+    /// Every Colors & glass group's rows sit behind the section's
+    /// one disclosure (#2389), and none behind a second: since
+    /// #1857 the colours are a browse that hides nothing once
+    /// open.
+    @Test("each Colors & glass group's rows are the census's")
+    func colorsAndGlassGroups() {
+        pin(
+            ColorsRowOrder.glassRows,
+            .coloursAndMotion,
+            .glass,
+            .showMore,
+            "glass"
+        )
         // Each role group draws its colour above its rows.
         pin(
-            [ColorRole.accent.paint] + ColorsRowOrder.accentAtRest,
-            .advancedColours,
+            [ColorRole.accent.paint] + ColorsRowOrder.accentRows,
+            .coloursAndMotion,
             .accent,
-            .atRest,
+            .showMore,
             "accent"
         )
         pin(
             [ColorRole.secondAccent.paint]
-                + ColorsRowOrder.secondAccentAtRest,
-            .advancedColours,
+                + ColorsRowOrder.secondAccentRows,
+            .coloursAndMotion,
             .secondAccent,
-            .atRest,
+            .showMore,
             "second accent"
         )
         pin(
-            ColorsRowOrder.kiwishelfAtRest,
-            .advancedColours,
+            ColorsRowOrder.kiwishelfColorRows,
+            .coloursAndMotion,
             .kiwishelf,
-            .atRest,
+            .showMore,
             "shelf inks"
         )
         pin(
-            ColorsRowOrder.windowMarksAtRest,
-            .advancedColours,
+            ColorsRowOrder.windowMarksRows,
+            .coloursAndMotion,
             .windowMarks,
-            .atRest,
+            .showMore,
             "window marks"
         )
+        let section = SettingsContainer.colourGroups.union([.glass])
         #expect(
             SettingKey.allCases.filter {
-                $0.placement.area == .advancedColours
-                    && $0.placement.tier != .atRest
+                $0.placement.area == .coloursAndMotion
+                    && $0.placement.container.map(section.contains)
+                        == true
+                    && $0.placement.tier != .showMore
             }
             .isEmpty
         )
@@ -226,8 +240,8 @@ struct ColorsCensusRenderTests {
     /// split onto one side, or moved off the page's top, reds.
     @Test("each role group holds one half of both pairs")
     func roleGroupsSplitThePairs() {
-        let accent = ColorsRowOrder.accentAtRest
-        let second = ColorsRowOrder.secondAccentAtRest
+        let accent = ColorsRowOrder.accentRows
+        let second = ColorsRowOrder.secondAccentRows
         #expect(accent.contains(.kiwishelf(.activeItemColor)))
         #expect(second.contains(.spaceBar(.spaceBarFocusedItemColor)))
         #expect(accent.contains(.borders(.dragGhostBorderColor)))
@@ -239,8 +253,7 @@ struct ColorsCensusRenderTests {
         // ghost's in Accent, the drop zone's in Second accent,
         // derived from the key rather than re-listed.
         let drag = SettingKey.allCases.filter {
-            $0.placement.area == .advancedColours
-                && $0.id.contains("drag")
+            $0.isColourRow && $0.id.contains("drag")
         }
         #expect(drag.count == 4)
         for key in drag {
@@ -250,16 +263,6 @@ struct ColorsCensusRenderTests {
                 "\(key.id) left its visual's group"
             )
         }
-    }
-
-    /// Four groups, matching the four cards on screen. A fifth
-    /// container placed in this area would render nowhere.
-    @Test("Advanced Colours holds exactly the four groups")
-    func advancedColoursContainers() {
-        #expect(
-            containers(of: .advancedColours)
-                == [.accent, .secondAccent, .kiwishelf, .windowMarks]
-        )
     }
 
     private func containers(

@@ -78,8 +78,11 @@ extension SettingsAnchor {
             )
         case .looks:
             self.init(destination: .looks)
-        case .advancedColors:
-            self.init(destination: .advancedColors)
+        case .colorsAndGlass:
+            self.init(
+                destination: .looks,
+                anchor: ColorsAndGlassSection.head.id
+            )
         case .space(let space):
             self.init(destination: .spaces, surface: .space(space))
         case .appRule(let app):

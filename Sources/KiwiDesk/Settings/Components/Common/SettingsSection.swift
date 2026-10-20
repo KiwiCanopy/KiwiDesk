@@ -28,6 +28,8 @@ struct SettingsSection<Content: View>: View {
     /// Checklist's "2 of 4 done" (#1365). Text, not a control:
     /// a header accessory that acts needs a name and a value.
     let trailing: String?
+    /// False for a titled group inside another card (#2389).
+    let plated: Bool
     @ViewBuilder let content: Content
 
     /// Computed-title initializer for unindexed sections
@@ -44,6 +46,7 @@ struct SettingsSection<Content: View>: View {
     ) {
         self.title = title
         self.control = nil
+        self.plated = true
         self.symbol = symbol
         self.caption = caption
         self.subsection = subsection
@@ -62,10 +65,15 @@ struct SettingsSection<Content: View>: View {
         help: String? = nil,
         modeGated: Bool = false,
         trailing: String? = nil,
+        plated: Bool = true,
         @ViewBuilder content: () -> Content
     ) {
+        // A group drawn inside another card has no frame to carry
+        // the mode-gated stroke (#760), so the two never combine.
+        assert(plated || !modeGated, "unplated group with modeGated")
         self.title = control.text
         self.control = control
+        self.plated = plated
         self.symbol = symbol
         self.caption = caption
         self.subsection = subsection
@@ -109,37 +117,11 @@ struct SettingsSection<Content: View>: View {
     private var core: some View {
         VStack(alignment: .leading, spacing: 8) {
             flashedHeader
-            VStack(alignment: .leading, spacing: 8) {
-                content
+            plate {
+                VStack(alignment: .leading, spacing: 8) {
+                    content
+                }
             }
-            .padding(12)
-            .frame(
-                maxWidth: .infinity,
-                alignment: .leading
-            )
-            .background(
-                RoundedRectangle(
-                    cornerRadius: SettingsTheme.sectionRadius
-                )
-                .fill(SettingsTheme.card)
-                .overlay(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.sectionRadius
-                    )
-                    .strokeBorder(
-                        modeGated
-                            ? SettingsTheme.accent.opacity(
-                                SettingsTheme
-                                    .modeGatedStrokeOpacity
-                            )
-                            : SettingsTheme.hairline,
-                        lineWidth: modeGated
-                            ? SettingsTheme
-                                .containerStrokeModeGated
-                            : SettingsTheme.containerStroke
-                    )
-                )
-            )
         }
         // Hoisted scroll markers for nested search anchors (#610).
         .overlayPreferenceValue(HoistedRevealAnchorsKey.self) {
@@ -149,6 +131,42 @@ struct SettingsSection<Content: View>: View {
         .transformPreference(HoistedRevealAnchorsKey.self) {
             $0 = []
         }
+    }
+
+    /// The card's plate, or none for a group inside a card that
+    /// already draws one (#2389).
+    @ViewBuilder private func plate(
+        @ViewBuilder _ inner: () -> some View
+    ) -> some View {
+        if plated {
+            inner()
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(plateShape)
+        } else {
+            inner()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var plateShape: some View {
+        RoundedRectangle(cornerRadius: SettingsTheme.sectionRadius)
+            .fill(SettingsTheme.card)
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.sectionRadius
+                )
+                .strokeBorder(
+                    modeGated
+                        ? SettingsTheme.accent.opacity(
+                            SettingsTheme.modeGatedStrokeOpacity
+                        )
+                        : SettingsTheme.hairline,
+                    lineWidth: modeGated
+                        ? SettingsTheme.containerStrokeModeGated
+                        : SettingsTheme.containerStroke
+                )
+            )
     }
 
     private func revealMarkers(

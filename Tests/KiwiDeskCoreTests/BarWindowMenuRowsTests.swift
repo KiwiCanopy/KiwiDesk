@@ -77,7 +77,7 @@ struct BarWindowMenuRowsTests {
     }
 
     private let shelf = [
-        "KiwiShelf Settings…", "Looks…", "Advanced Colors…",
+        "KiwiShelf Settings…", "Looks…", "Colors & Glass…",
     ]
 
     @Test("a one-window glyph offers every window row, in order")

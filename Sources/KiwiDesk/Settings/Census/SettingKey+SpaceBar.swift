@@ -69,9 +69,9 @@ extension SpaceBarKey {
         case .spaceBarFocusedItemColor:
             // Inert when front-app is off or icon source does not tint.
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .secondAccent,
-                .atRest,
+                .showMore,
                 gate: .anyOf([
                     .kiwishelf(.iconSource),
                     .spaceBar(.spaceBarShowFrontApp),
@@ -81,9 +81,9 @@ extension SpaceBarKey {
         case .spaceBarFocusedHighlightColor:
             // Inert while no front-app segment draws (#1856).
             return .row(
-                .advancedColours,
+                .coloursAndMotion,
                 .secondAccent,
-                .atRest,
+                .showMore,
                 gate: .setting(.spaceBar(.spaceBarShowFrontApp))
             )
         }
