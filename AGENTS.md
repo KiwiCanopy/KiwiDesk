@@ -418,8 +418,9 @@ Touching Anywhere in `Sources/KiwiDeskCore`.
 - the #292 preflight's one verb bypass is
   `FocusedCommandPolicy.raiseFlightExempt`, joined only by a verb that changes
   no window's content, size or membership and judged by the app the raise LEFT,
-  never by stamp presence, its `RaiseFlight` written by the `focus` verb and
-  hover focus alone, through the one recorder (#1812, #1869,
+  never by stamp presence, its `RaiseFlight` written by the `focus` verb,
+  hover focus and `focus_window` alone, through the one recorder (#1812,
+  #1869, #2492,
   `FocusRaiseFlightGuardTests`, `RaiseFlightWriterCensusTests`)
 - a class storing a panel orders it out in its own `isolated deinit` (#1868,
   `OverlayPanelDeinitCensusTests`)

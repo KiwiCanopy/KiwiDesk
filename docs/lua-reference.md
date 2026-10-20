@@ -7190,7 +7190,7 @@ the focused window otherwise.
 as `get_state` has it), `float`, `app_rule`, `sticky` (`none`,
 `global` or `display`), `fullscreen`, `presenting` and `focused`.
 `float` holds `floats` (whether it floats, a floating-layout Space
-included), `cause` (`detection`, `user`, `space_mode` or `nil`) and
+included — for a sticky window, the Space it is drawn on), `cause` (`detection`, `user`, `space_mode` or `nil`) and
 `detection` (`reason` — `rule`, `panel`, `accessory_app` or
 `fixed_size` — `is_guess`, and `escapes`, what would let it tile:
 `set_float_automatically`, `app_rule.remove_float`, or `tile_rule`,

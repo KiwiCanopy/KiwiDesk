@@ -23,7 +23,7 @@ extension KiwiCore {
         case "swap":
             return navigate(args, swapping: true)
         case "focus_window":
-            return focusWindowCommand(args)
+            return focusWindowRecordingFlight(args)
         case "focus_space":
             return focusSpace(args)
         case "focus_space_back":

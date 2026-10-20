@@ -28,7 +28,14 @@ extension KiwiCore {
                     "space_id": space.map { .string($0.raw) } ?? .null,
                     "mode": mode.map { .string($0.rawValue) } ?? .null,
                     "floating": .bool(window.isFloating),
-                    "float": float(window, mode: mode),
+                    // Judged where the window draws: a sticky
+                    // traveler on a floating-mode Space floats there.
+                    "float": float(
+                        window,
+                        mode: state.renderSpace(of: window).flatMap {
+                            state.workspaces[$0]?.mode
+                        }
+                    ),
                     "app_rule": appRuleFacts(window.appBundleID),
                     "sticky": .string(window.stickyScope.rawValue),
                     "fullscreen": .bool(window.isFullscreen),

@@ -10,9 +10,7 @@ extension KiwiCore {
     /// traveler RENDERS on, else the window's own (#1217) — the
     /// same space for the gate and the region.
     func floatPlacementSpace(of id: WindowID) -> SpaceID? {
-        guard let window = state.windows[id] else { return nil }
-        return state.stickyRenderSpace(of: window)
-            ?? state.workspaces.space(of: id)
+        state.windows[id].flatMap(state.renderSpace(of:))
     }
 
     /// Whether `id` is already an effective float where it would

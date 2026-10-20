@@ -58,7 +58,7 @@ extension KiwiCore {
         for id in shown {
             guard let space = state.workspaces[id] else { continue }
             let drawn = state.windows.all.filter {
-                renderSpace(of: $0) == id && !$0.isFullscreen
+                state.renderSpace(of: $0) == id && !$0.isFullscreen
             }
             let tiled = Set(state.effectiveTiledMembers(of: space))
             let floats = drawn.map(\.id).filter {
@@ -72,13 +72,6 @@ extension KiwiCore {
         return placements
     }
 
-    /// The Space a window draws on: a sticky one's render Space,
-    /// else its own.
-    func renderSpace(of window: ManagedWindow) -> SpaceID? {
-        state.stickyRenderSpace(of: window)
-            ?? state.workspaces.space(of: window.id)
-    }
-
     private func listedWindow(
         _ window: ManagedWindow,
         home: SpaceID?,
@@ -86,7 +79,7 @@ extension KiwiCore {
         placement: WindowPlacement?
     ) -> JSONValue {
         let id = window.id
-        let drawn = renderSpace(of: window)
+        let drawn = state.renderSpace(of: window)
         let isShown = drawn.map(shown.contains) ?? false
         // A parked frame — an unshown Space's, a monocle park
         // (#881) — is no place the window lives (#2492).

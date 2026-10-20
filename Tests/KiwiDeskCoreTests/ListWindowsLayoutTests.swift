@@ -163,4 +163,28 @@ struct ListWindowsLayoutTests {
             #expect(listed[id]?["floats"] == float["floats"])
         }
     }
+
+    /// A tiled sticky window homed on a Stack Space and drawn on a
+    /// floating-mode one floats where it draws, in both verbs.
+    @Test("A sticky traveler floats where it draws, in both verbs")
+    func travelerParity() throws {
+        let core = makeCore(mode: "stack", windows: [window(1)])
+        core.state.workspaces.ensureSpace("2")
+        core.execute("set_mode", args: [.string("2"), .string("floating")])
+        var traveler = window(3)
+        traveler.stickyScope = .global
+        core.state.apply(.windowCreated(traveler))
+        core.state.workspaces.add(WindowID(3), to: "1")
+        core.state.workspaces.activate("2")
+        let listed = try #require(try entries(core)[3])
+        #expect(listed["floats"] == .bool(true))
+        let explained = core.execute("explain_window", args: [.number(3)])
+        guard case .object(let explain)? = explained.data,
+            case .object(let float)? = explain["float"]
+        else {
+            Issue.record("explain_window answered \(explained)")
+            return
+        }
+        #expect(float["floats"] == listed["floats"])
+    }
 }

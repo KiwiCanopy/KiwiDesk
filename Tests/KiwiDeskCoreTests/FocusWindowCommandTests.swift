@@ -68,6 +68,24 @@ struct FocusWindowCommandTests {
         #expect(core.activeSpace?.focused == WindowID(3))
     }
 
+    /// The flight names the app in front BEFORE the focus ran, so
+    /// a chained `focus` passes the #292 preflight (#1812, #2492).
+    @Test("A focus that moved records the raise flight")
+    func recordsAFlight() throws {
+        let core = makeCore()
+        seed(core)
+        core.frontmostPIDProvider = { [weak core] in
+            core?.focusedWindowID == WindowID(2) ? 12 : 11
+        }
+        _ = core.execute("focus_window", args: [.number(2)])
+        let flight = try #require(core.raiseFlight)
+        #expect(flight.target == WindowID(2))
+        #expect(flight.leftPID == 11)
+        core.raiseFlight = nil
+        _ = core.execute("focus_window", args: [.number(2)])
+        #expect(core.raiseFlight == nil)
+    }
+
     @Test("A full-screen window is refused")
     func fullscreenRefused() {
         let core = makeCore()

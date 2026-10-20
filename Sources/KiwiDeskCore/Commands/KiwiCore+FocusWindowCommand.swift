@@ -27,7 +27,7 @@ extension KiwiCore {
                     "window \(id.raw) is on a Desktop no screen shows"
                 )
             }
-            if let space = renderSpace(of: window),
+            if let space = state.renderSpace(of: window),
                 space != state.workspaces.activeSpace
             {
                 focusFromSpaceBar(id, on: space)
