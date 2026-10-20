@@ -40,8 +40,12 @@ struct RevertSettingsApplyTests {
             $0.sessionRatios.splitRatioH = 0.3
             $0.sessionRatios.splitRatioV = 0.4
         }
-        let outcome = core.revertUnsavedLive(["/settings/bsp/ratio_h"])
+        let ids = try #require(core.unsavedLiveSettings()).leaves.keys
+        #expect(ids.count == 1)
+        #expect(ids.first?.hasSuffix("/ratio_h") == true)
+        let outcome = core.revertUnsavedLive(Array(ids))
         #expect(outcome.refused.isEmpty)
+        #expect(outcome.reverted.count == 1)
         let ratios = try #require(core.state.workspaces[space])
             .sessionRatios
         #expect(ratios.splitRatioH == nil)
