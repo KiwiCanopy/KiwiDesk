@@ -7193,7 +7193,7 @@ device. Such a row takes a `CrossReferenceRow` directly beneath
 the grid, outside the dimmed subtree: the sentence states the fact
 and the destination name is the link, so the fix is one click
 rather than a popover that then says to go elsewhere
-(`AdvancedColorsHelp.focusedItemReference`). The Borders card is
+(`ColorsAndGlassHelp.focusedItemReference`). The Borders card is
 the same shape — *Unfocused windows* greyed alone while the ring
 is on — and takes the same link (`unfocusedReference`); its header
 `?` answers only for the ring being off, when every row is grey.
@@ -13870,7 +13870,7 @@ half-width row hold a colour field (`dragColumnLabelColumn`) and
 the in-group short form it is for ("Border color" → "Border",
 with the full name kept for VoiceOver through `a11yLabel`) travel
 with those rows: they live on in Colors & glass' twin drag
-columns, which take the width as `AdvancedColorRow`'s
+columns, which take the width as `ColorsAndGlassRow`'s
 `labelWidth:`, and this editor no longer pushes the narrow axis in through
 `settingsLabelColumn` at all — what remains here is toggles, which
 draw their own labels. Wherever the ghost and drop zone are drawn

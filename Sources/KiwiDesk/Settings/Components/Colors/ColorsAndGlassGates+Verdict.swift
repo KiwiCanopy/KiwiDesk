@@ -24,7 +24,7 @@ struct ColorRowVerdict: Equatable {
     let link: Link
 }
 
-extension AdvancedColorsGates {
+extension ColorsAndGlassGates {
     /// The verdict for one row; nil while it draws. No bar's
     /// visibility greys a colour: a hidden bar's shortcut still
     /// shows it (#761).
@@ -33,19 +33,19 @@ extension AdvancedColorsGates {
         case .kiwishelf(.borderColor):
             return shelfBorderOff
                 ? ColorRowVerdict(
-                    help: AdvancedColorsHelp.shelfBorderOff,
+                    help: ColorsAndGlassHelp.shelfBorderOff,
                     link: .ownSentence(.bars)
                 ) : nil
         case .spaceBar(.spaceBarFocusedItemColor):
             guard focusedItemInert else { return nil }
             return ColorRowVerdict(
-                help: AdvancedColorsHelp.focusedItemHelp,
+                help: ColorsAndGlassHelp.focusedItemHelp,
                 link: .ownSentence(.bars)
             )
         case .spaceBar(.spaceBarFocusedHighlightColor):
             guard focusedHighlightInert else { return nil }
             return ColorRowVerdict(
-                help: AdvancedColorsHelp.frontAppOff,
+                help: ColorsAndGlassHelp.frontAppOff,
                 link: .page(.bars)
             )
         case .borders(.borderFocusedColor):
@@ -55,7 +55,7 @@ extension AdvancedColorsGates {
             return unfocusedOn
                 ? nil
                 : ColorRowVerdict(
-                    help: AdvancedColorsHelp.unfocusedOff,
+                    help: ColorsAndGlassHelp.unfocusedOff,
                     link: .ownSentence(.gapsAndBorders)
                 )
         case .borders(.dragGhostBorderColor):
@@ -98,7 +98,7 @@ extension AdvancedColorsGates {
 
     private var borderOffVerdict: ColorRowVerdict {
         ColorRowVerdict(
-            help: AdvancedColorsHelp.borderOff,
+            help: ColorsAndGlassHelp.borderOff,
             link: .page(.gapsAndBorders)
         )
     }

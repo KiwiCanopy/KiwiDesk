@@ -9,7 +9,7 @@ import Testing
 /// row's census id names — so a group colour writes the row the
 /// user ticked, never its neighbour.
 @Suite("Colors & glass hex lookup")
-struct AdvancedColorPathsTests {
+struct ColorsAndGlassPathsTests {
     /// The census id's group, spelled as the palette spells it.
     private static let groups: [String: String] = [
         "kiwishelf": "kiwishelf",
@@ -42,7 +42,7 @@ struct AdvancedColorPathsTests {
 
     /// The path a sentinel write through the lookup moves.
     private static func moved(by key: SettingKey) -> [String] {
-        guard let path = AdvancedColorPaths.hex(key) else { return [] }
+        guard let path = ColorsAndGlassPaths.hex(key) else { return [] }
         let base = ColorPaletteKeys.extract(from: TilingSettings())
         var settings = TilingSettings()
         settings[keyPath: path] = "#010203"
@@ -71,7 +71,7 @@ struct AdvancedColorPathsTests {
                 "\(key.id) writes \(Self.moved(by: key))"
             )
         }
-        #expect(AdvancedColorPaths.hex(.kiwishelf(.border)) == nil)
+        #expect(ColorsAndGlassPaths.hex(.kiwishelf(.border)) == nil)
     }
 
     /// The rows a group colour never ticks are exactly the ones

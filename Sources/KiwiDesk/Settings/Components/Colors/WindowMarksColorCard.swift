@@ -6,8 +6,8 @@ import SwiftUI
 struct WindowMarksColorCard: View {
     @ObservedObject var model: SettingsModel
 
-    private var gates: AdvancedColorsGates {
-        AdvancedColorsGates(settings: model.config.settings)
+    private var gates: ColorsAndGlassGates {
+        ColorsAndGlassGates(settings: model.config.settings)
     }
 
     var body: some View {
@@ -23,7 +23,7 @@ struct WindowMarksColorCard: View {
             plated: false
         ) {
             ColorGrid {
-                AdvancedColorRows(
+                ColorsAndGlassRows(
                     model: model,
                     keys: ColorsRowOrder.windowMarksRows
                 )
@@ -32,7 +32,7 @@ struct WindowMarksColorCard: View {
             // beneath it as a live link (#1310).
             if gates.needsOwnSentence(.borders(.borderUnfocusedColor)) {
                 CrossReferenceRow(
-                    prose: AdvancedColorsHelp.unfocusedReference,
+                    prose: ColorsAndGlassHelp.unfocusedReference,
                     linkTitle: SettingsDestination.gapsAndBorders.title,
                     destination: .gapsAndBorders
                 )
@@ -44,7 +44,7 @@ struct WindowMarksColorCard: View {
                 id: \.self
             ) { destination in
                 CrossReferenceRow(
-                    prose: AdvancedColorsHelp.dimmedReference,
+                    prose: ColorsAndGlassHelp.dimmedReference,
                     linkTitle: destination.title,
                     destination: destination
                 )

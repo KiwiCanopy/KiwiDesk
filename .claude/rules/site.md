@@ -357,13 +357,52 @@ cannot be reasoned about from the include line alone.
 
 `.github/workflows/site-daily.yml` rebuilds the site once a day
 by POSTing to a Pages deploy hook, so values read at build time —
-the star count — stay fresh on days nothing merges. Cloudflare
-mints hooks only in the dashboard, and the URL is a credential:
-**keep it in the `CF_PAGES_DEPLOY_HOOK` secret, never in a
-committed file.** A rotated hook moves the secret in the same
+the star count, the voices — stay fresh on days nothing merges.
+Cloudflare mints hooks only in the dashboard, and the URL is a
+credential: **keep it in the `CF_PAGES_DEPLOY_HOOK` secret, never
+in a committed file.** A rotated hook moves the secret in the same
 sitting, and the workflow must red without the secret rather than
 skip, so a missing one is seen instead of a count that quietly
 freezes.
+
+## Build-time reads (#1659, #2369)
+
+A value the site takes from outside the repo is read while it
+builds and never from a visitor's browser, which the CSP and the
+privacy policy promise — the star count (`src/lib/stars.ts`) and
+the voices (`src/lib/voices.ts`, Sanity) are the instances. **Every
+such read obeys four rules:**
+
+- **No secret.** Pages passes none to a build (above), so the read
+  is unauthenticated against a public source, its id committed.
+- **A timeout and a fallback that never fails the deploy.** A
+  deploy that breaks on someone else's outage also holds back the
+  next voice withdrawal. Stars fall back to a reached count; the
+  voices to no section, and a photo the CDN does not serve to the
+  monogram — never a committed snapshot, which would put the
+  personal data back in this repo.
+- **A fallback that is silent on Pages is watched on the site
+  gate.** `check-site-tokens.py` ▸ `check_voices_rendered` reds
+  when a landing page draws no voice, so a dataset turned private
+  or a field renamed in the Studio reds a PR instead of quietly
+  emptying production. Name the watcher at the read.
+- **Remote media reaches `dist/` through astro:assets.**
+  `check-site-tokens.py` ▸ `check_no_sanity_in_dist` reds on any
+  `<img>` source on another host and on any Sanity host in a built
+  file.
+
+None of these is a path, so the build watch paths above do not
+change for them.
+
+**A withdrawn voice leaves the live site at the next build**: the
+daily hook bounds it to a day. To make it immediate, add a Sanity
+webhook on `kiwideskVoice` that POSTs to a Pages deploy hook — its
+URL kept in Sanity, never here. On a withdrawal, also delete the
+older Pages deployments that carry the voice, since each stays
+reachable at its own `pages.dev` URL. Delete the photo asset in the Studio
+after the document. The voices committed before #2369 remain in
+git history; rewriting it is the owner's call for a voice that
+withdraws.
 
 ## The 404 is a user page, so withdraw Starlight's (#635)
 

@@ -1442,7 +1442,7 @@ Greying applied across a whole editor (#520, #527):
   and leave the label live. A block gate therefore must not
   wrap a section that *contains* a disclosure: push it down to
   the siblings, or pass the gate into the child view
-  (`AdvancedColorRows(allows:gateHelp:)`, which the Advanced
+  (`ColorsAndGlassRows(allows:gateHelp:)`, which the Advanced
   Colours cards hand the shelf's block gate row by row). Expansion state is preserved across the toggle —
   with the label live, closing is one click.
 - **A block gate's explanation lives on a live anchor, not
@@ -1459,7 +1459,7 @@ Greying applied across a whole editor (#520, #527):
   header `?` may scope a card whose census-exempt rows stay
   live exactly when its copy points at them. When the gate
   must reach inside a child view to do this, pass it in
-  (`AdvancedColorRows(allows:gateHelp:)`) rather than wrapping
+  (`ColorsAndGlassRows(allows:gateHelp:)`) rather than wrapping
   the child from outside, which would disable the anchor too. A
   *control-scoped* gate — one row, its gating control directly
   adjacent (Background style over Background size, a toggle
@@ -1488,7 +1488,7 @@ Greying applied across a whole editor (#520, #527):
   the block has a live label, the pointer is a `?` on the
   nearest live label above the dimmed rows: in Colors & glass
   every colour gate is remote, so the KiwiShelf colors card carries a
-  header `?` for its block gate (`AdvancedColorsHelp`), while a
+  header `?` for its block gate (`ColorsAndGlassHelp`), while a
   row greyed in a live card takes a `CrossReferenceRow` beneath
   it (#1310) — in the role groups, one per page whose switch
   dims a row (#1857). Where it does not, the pointer is a
@@ -1527,7 +1527,7 @@ while ONE greyed row inside a live card takes a
 `CrossReferenceRow` directly beneath its grid, outside the
 dimmed subtree — the Second accent group's *Focused window*
 row, whose gating picker lives on KiwiShelf, draws
-`AdvancedColorsHelp.focusedItemReference` there, and Window
+`ColorsAndGlassHelp.focusedItemReference` there, and Window
 marks' *Unfocused windows* row draws `unfocusedReference` the
 same way while the ring is on, each linking the destination in
 the sentence. A row with no sentence of its own takes its
