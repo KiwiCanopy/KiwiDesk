@@ -425,6 +425,7 @@
   "diff.live.keep": "Manter",
   "diff.live.keep.conflicting": "Não foi possível manter — não se encaixa no perfil salvo.",
   "diff.live.keep.hint": "Mantém esta alteração aplicada para que dure após reiniciar.",
+  "diff.live.keep.newer_format": "Não foi possível manter — um KiwiDesk mais recente salvou o arquivo.",
   "diff.live.keep.not_written": "Não foi possível manter este ajuste.",
   "diff.live.keep_all": "Manter tudo",
   "diff.live.keep_all.hint": "Mantém todas as alterações aplicadas para que durem após reiniciar.",

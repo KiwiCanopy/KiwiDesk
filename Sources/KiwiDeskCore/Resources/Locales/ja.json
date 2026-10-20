@@ -425,6 +425,7 @@
   "diff.live.keep": "保持",
   "diff.live.keep.conflicting": "保持できませんでした。保存済みのプロファイルに合いません。",
   "diff.live.keep.hint": "この適用中の変更を保持し、再起動後も残るようにします。",
+  "diff.live.keep.newer_format": "保持できませんでした。より新しいKiwiDeskがファイルを保存しています。",
   "diff.live.keep.not_written": "この設定を保持できませんでした。",
   "diff.live.keep_all": "すべて保持",
   "diff.live.keep_all.hint": "適用中のすべての変更を保持し、再起動後も残るようにします。",
