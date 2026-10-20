@@ -72,7 +72,10 @@ struct LuaOwnedKeybindingSnapshotTests {
         #expect(bodies(snapshot) == ["KiwiDesk.focus(\"left\")"])
         let unread = snapshot.unreadChords(in: snapshot.activeLayerName)
         #expect(unread.count == 1)
-        #expect(unread.first.flatMap(KeyCombo.parse) != nil)
+        #expect(
+            unread.first.flatMap(KeyCombo.parse)
+                == KeyCombo.parse("ctrl+alt+u")
+        )
     }
 
     @Test("Import stays drop-only: an unread chord never becomes a row")

@@ -57,13 +57,23 @@ extension KiwiCore {
         }
     }
 
+    /// The live settings and Spaces a Lua-owned snapshot's rows
+    /// are filed against: live state only, never `gui.json`, which
+    /// such a config does not run, and never a re-read of
+    /// `init.lua` (#2482).
+    public func liveShortcutContext() -> GuiConfig {
+        var config = GuiConfig()
+        overlayLiveProfileState(&config)
+        return config
+    }
+
     /// Reads back the bodies `init.lua` just bound, once per load:
     /// the file read now is the one that ran (#2482).
     func captureLuaKeybindings(from lua: LuaInterpreter) {
         let captured = KeybindingImporter.capture(
             from: keys,
             interpreter: lua,
-            readFile: { try? String(contentsOfFile: $0, encoding: .utf8) }
+            readFile: KeybindingImporter.readSource
         )
         installedKeybindings = .lua(
             layers: captured.layers,

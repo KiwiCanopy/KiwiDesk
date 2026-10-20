@@ -7,6 +7,11 @@ import Foundation
 /// save.
 @MainActor
 enum KeybindingImporter {
+    /// Reads a binding's source file as the importer expects.
+    static func readSource(_ path: String) -> String? {
+        try? String(contentsOfFile: path, encoding: .utf8)
+    }
+
     /// Builds layers from manager reading binding source bodies
     /// (`KiwiCore.recoverKeybindings`). Drop-only: a row whose
     /// body cannot be read back is absent.
