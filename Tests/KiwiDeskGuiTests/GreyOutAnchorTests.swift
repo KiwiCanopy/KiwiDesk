@@ -49,7 +49,7 @@ struct GreyOutAnchorTests {
         // the border row since #1679).
         (
             "BarColorCards.swift",
-            "prose: AdvancedColorsHelp.shelfBorderReference",
+            "prose: ColorsAndGlassHelp.shelfBorderReference",
             1
         ),
         // The role groups (#1857) carry no container gate, so
@@ -58,24 +58,24 @@ struct GreyOutAnchorTests {
         // link per page whose switch dims it.
         (
             "RoleColorCards.swift",
-            "prose: AdvancedColorsHelp.focusedItemReference",
+            "prose: ColorsAndGlassHelp.focusedItemReference",
             1
         ),
         (
             "RoleColorCards.swift",
-            "prose: AdvancedColorsHelp.dimmedReference",
+            "prose: ColorsAndGlassHelp.dimmedReference",
             1
         ),
         // Window marks: the unfocused row's own sentence while
         // the ring is on, the page link while it is off (#1310).
         (
             "WindowMarksColorCard.swift",
-            "prose: AdvancedColorsHelp.unfocusedReference",
+            "prose: ColorsAndGlassHelp.unfocusedReference",
             1
         ),
         (
             "WindowMarksColorCard.swift",
-            "prose: AdvancedColorsHelp.dimmedReference",
+            "prose: ColorsAndGlassHelp.dimmedReference",
             1
         ),
         // The column header `?` anchor reads the resolver's

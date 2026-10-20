@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Swatch dispatcher for the Colors & glass section (#678,
 /// #2389), each row landing a search on its own catalog child.
-struct AdvancedColorRow: View {
+struct ColorsAndGlassRow: View {
     @ObservedObject var model: SettingsModel
     let key: SettingKey
 

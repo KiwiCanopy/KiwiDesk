@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Colors & glass gating logic (#520, #527, #678).
 @MainActor
-struct AdvancedColorsGates {
+struct ColorsAndGlassGates {
     let settings: TilingSettings
 
     /// The bar halves, delegated whole.
@@ -29,10 +29,10 @@ struct AdvancedColorsGates {
 
     /// The hover reason for one drag tint.
     func dragHelp(ghost: Bool, fill: Bool) -> String {
-        if !dragVisual(ghost).enabled { return AdvancedColorsHelp.dragOff }
+        if !dragVisual(ghost).enabled { return ColorsAndGlassHelp.dragOff }
         return fill
-            ? AdvancedColorsHelp.dragFillOff
-            : AdvancedColorsHelp.dragBorderOff
+            ? ColorsAndGlassHelp.dragFillOff
+            : ColorsAndGlassHelp.dragBorderOff
     }
 
     // MARK: - KiwiShelf

@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Advanced color swatch rows for the shelf and the Space Bar.
-extension AdvancedColorRow {
+/// Colors & glass swatch rows for the shelf and the Space Bar.
+extension ColorsAndGlassRow {
     @ViewBuilder func kiwishelfRow(_ key: KiwiShelfKey) -> some View {
         let shelf = settings.kiwishelf
         switch key {

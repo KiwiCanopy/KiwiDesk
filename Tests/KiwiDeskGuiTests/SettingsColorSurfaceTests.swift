@@ -37,9 +37,9 @@ struct SettingsColorSurfaceTests {
     /// dispatcher itself renders no well, and `ColorField.swift`
     /// declares the type rather than using it.
     private let allowed: [String: String] = [
-        "AdvancedColorRow+Bars.swift":
+        "ColorsAndGlassRow+Bars.swift":
             "the shelf's and the Space Bar's swatches",
-        "AdvancedColorRow+Structure.swift":
+        "ColorsAndGlassRow+Structure.swift":
             "the border, mark and drag swatches",
         "ColorField.swift":
             "declares HexColorField; not a render site",

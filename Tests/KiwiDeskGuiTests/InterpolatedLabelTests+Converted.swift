@@ -36,7 +36,7 @@ extension InterpolatedLabelTests {
     /// those seven frames and `layout_defaults.spaces_using.none`
     /// are discovered and floored like any other. What remains
     /// invisible is a label reached through a LOCAL alias — which
-    /// is why `AdvancedColorsHelp` no longer has one.
+    /// is why `ColorsAndGlassHelp` no longer has one.
     /// The four below `track.…` were never #818 conversions —
     /// they already interpolated a label, and the scan found
     /// them. They are listed anyway, because the floor's job is

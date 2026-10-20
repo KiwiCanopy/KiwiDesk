@@ -851,7 +851,7 @@ Where the value is already arithmetic, the paragraph below on
 live previews owns which half a scan is for; a branch that was
 never written at all is what it cannot see.
 
-`AdvancedColorsGates` is deliberately NOT one of these resolvers
+`ColorsAndGlassGates` is deliberately NOT one of these resolvers
 and is not the regression the rule names: it answers no census
 `gate:` of its own. It DELEGATES the two bar block gates to
 `BarsGates` (`var bars`), and otherwise picks the SENTENCE for

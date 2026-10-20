@@ -151,7 +151,7 @@ struct BarEdgeWriteCensusTests {
             "order and minimum grey only where no screen fuses "
                 + "the bars, over `screenVariants` (#1948)"
         ),
-        "AdvancedColorsGates.swift": (
+        "ColorsAndGlassGates.swift": (
             1,
             "the front-app colour greys only where no screen "
                 + "draws the name, over `screenVariants` (#1948)"
