@@ -158,6 +158,8 @@ extension KiwiCore {
             stored: storedDoc,
             rules: rules,
             page: profiles.currentName,
+            profileIsNewer: managed && stored == nil
+                && liveProfileIsNewer(),
             liveSettings: tiler.settings,
             liveSpaces: Set(state.workspaces.allSpaces.map(\.id))
         )
@@ -179,6 +181,9 @@ struct KeepJudge {
     /// `gui.json` does not own them.
     let rules: RuleReachSnapshot?
     let page: String?
+    /// The live profile's file is a newer build's, which is why it
+    /// reads as none (#2490).
+    let profileIsNewer: Bool
     let liveSettings: TilingSettings
     let liveSpaces: Set<SpaceID>
 
@@ -222,7 +227,7 @@ struct KeepJudge {
         guard guiManaged else { return leaf(.initLua, .luaOwned) }
         if path.first == KeepRoot.appWide { return leaf(.none, .appWide) }
         guard let declared = profile?.declaredSpaces, stored != nil else {
-            return leaf(.none, .noProfile)
+            return leaf(.none, profileIsNewer ? .newerFormat : .noProfile)
         }
         // A path neither side holds names no setting.
         if liveValue == nil, storedValue == nil {

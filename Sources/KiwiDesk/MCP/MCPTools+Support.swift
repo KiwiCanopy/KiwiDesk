@@ -70,8 +70,14 @@ enum MCPWording {
             why = "that Space is not in the profile"
         case .notWritten:
             why =
-                "the write did not land; the profile or gui.json "
-                + "was not written"
+                "the write did not land, so its file was not written; "
+                + "run \(KiwiCore.configStatusCommand) for Config Issues"
+        case .newerFormat:
+            why =
+                "a newer KiwiDesk wrote its file, which this Mac "
+                + "leaves read-only; update KiwiDesk here or make the "
+                + "change on the Mac that wrote it ("
+                + "\(KiwiCore.configStatusCommand) names the file)"
         case .conflicting:
             why =
                 "it cannot be written into the profile together "

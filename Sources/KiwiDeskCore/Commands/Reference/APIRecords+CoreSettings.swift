@@ -122,6 +122,9 @@ extension APIReference {
             "Returns a snapshot of Spaces, windows, and "
                 + "screens."
         ),
+        "get_config_status": APIRecord(
+            "Returns the Config Issues and the sync folder's status."
+        ),
         "explain_window": APIRecord(
             "Explains why a window floats or tiles, its Space and "
                 + "app rules, and what would change them.",
