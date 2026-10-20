@@ -18,7 +18,7 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
     public var orientation: Orientation = .horizontal
     public var hideStyle: HideStyle = .stack
     /// Whether focus navigation wraps at cycle ends (#168).
-    public var wrapFocus = false
+    public var wrapFocus = true
     /// Placement for newly spawned windows (`SpawnPlacement`).
     public var newWindowPlacement: SpawnPlacement = .first
     public var appBar = LayoutAppBar()

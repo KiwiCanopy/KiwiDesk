@@ -40,7 +40,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
     public var overflowStyle: StackParams.OverflowStyle =
         .cascadeAll
     /// Wraps focus navigation past ends (#168).
-    public var wrapFocus = false
+    public var wrapFocus = true
     /// Per-space overrides.
     public var override: [SpaceID: TrackOverride] = [:]
 
@@ -107,7 +107,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Bool.self,
                 forKey: .wrapFocus
-            ) ?? false
+            ) ?? true
         override =
             try container.decodeIfPresent(
                 [SpaceID: TrackOverride].self,

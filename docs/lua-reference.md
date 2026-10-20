@@ -1601,12 +1601,12 @@ scroll.set_new_window_placement("after_focused")
 
 ### scroll.set_wrap_focus
 
-**Expects:** a boolean (default `false`).
+**Expects:** a boolean (default `true`).
 
 **Does:** `true`: stepping `focus` past either end of the row
 wraps to the far end. `false`: focus stops at the ends. Applies
 to `focus` only. Monocle has the same
-toggle (`monocle.set_wrap_focus`), default off.
+toggle (`monocle.set_wrap_focus`), default on.
 
 **Example:**
 
@@ -1991,7 +1991,7 @@ monocle.set_hide_style("park")
 
 ### monocle.set_wrap_focus
 
-**Expects:** `true` or `false` (default `false`).
+**Expects:** `true` or `false` (default `true`).
 
 **Does:** whether the focus cycle wraps past the ends. On,
 `focus` past the last window returns to the first, and vice
@@ -2173,7 +2173,7 @@ track.set_overflow_style("cascade_overflow")
 
 ### track.set_wrap_focus
 
-**Expects:** a boolean (default `false`).
+**Expects:** a boolean (default `true`).
 
 **Does:** the track twin of `scroll.set_wrap_focus` (#168): on,
 stepping `focus` past an end wraps — within the focused track
