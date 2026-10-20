@@ -37,10 +37,11 @@ extension KeybindingManager {
     /// Takes the active layer's Hyper rows at the end of every
     /// `activate`. A registrar with no release channel arms
     /// nothing: a held layer that never hears its release
-    /// swallows its keys.
+    /// swallows its keys. The trigger arms with no rows too, or
+    /// F18 reaches the frontmost app and beeps (#2480).
     func armHyper(_ rows: [(KeyCombo, Int32)]) {
         hyper.rows = rows
-        guard hyperEnabled, !rows.isEmpty else {
+        guard hyperEnabled else {
             disarmHyperTrigger()
             return
         }
@@ -68,6 +69,10 @@ extension KeybindingManager {
         if isSuspended || !hyperEnabled { disarmHyperTrigger() }
     }
 
+    /// Whether the active layer gives Hyper anything to do — what
+    /// the Settings caption reads (#2480).
+    public var hyperHasShortcuts: Bool { !hyper.rows.isEmpty }
+
     func disarmHyperTrigger() {
         hyperReleased()
         for id in hyper.triggerIDs { registrar.unregister(id: id) }
@@ -86,6 +91,8 @@ extension KeybindingManager {
 
     func hyperPressed() {
         guard !hyper.isHeld, !isSuspended else { return }
+        // Once per hold: key repeat never re-enters past the guard.
+        if hyper.rows.isEmpty { onBareHyper() }
         hyper.isHeld = true
         registerHeldRows()
         hyper.cancelWatchdog = hyperSchedule(HyperLayer.maxHoldSeconds) {

@@ -40,6 +40,7 @@ extension KiwiCore {
         keys.onLayerChange = { [weak self] from, to in
             self?.emitLayerChange(from: from, to: to)
         }
+        keys.onBareHyper = { [weak self] in self?.cueBareHyper() }
         exec.onLog = log
         profiles.onLog = log
         profiles.onActiveChange = { [weak self] in

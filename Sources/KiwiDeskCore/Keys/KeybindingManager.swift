@@ -68,6 +68,9 @@ public final class KeybindingManager {
     let holdGlide = HoldGlide()
     /// The Hyper layer's trigger and held registrations (#1870).
     var hyper = HyperLayer()
+    /// A Hyper press while the active layer has no Hyper row
+    /// (#2480); the core cues why.
+    var onBareHyper: @MainActor () -> Void = {}
     /// Schedules the Hyper hold's watchdog; returns its cancel.
     var hyperSchedule:
         @MainActor (
