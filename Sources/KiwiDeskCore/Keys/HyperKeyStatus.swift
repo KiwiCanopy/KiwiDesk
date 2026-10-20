@@ -12,15 +12,23 @@ public enum HyperKeyStatus: Sendable, Equatable {
 }
 
 /// The one foreign `UserKeyMapping` entry that refused the remap,
-/// as keys the GUI can name (#2470); `HyperKeyRemap.foreign(in:)`
-/// decides when there is one.
+/// as keys the GUI can name (#2470);
+/// `HyperKeyRemap.foreign(in:want:)` decides when there is one.
 public struct HyperForeignRemap: Sendable, Equatable {
     public let source: HyperSourceKey
     public let destination: HyperSourceKey
+    /// The entry is exactly the one KiwiDesk wants for the chosen
+    /// key, so the user may take it over (#2471).
+    public let claimable: Bool
 
-    public init(source: HyperSourceKey, destination: HyperSourceKey) {
+    public init(
+        source: HyperSourceKey,
+        destination: HyperSourceKey,
+        claimable: Bool = false
+    ) {
         self.source = source
         self.destination = destination
+        self.claimable = claimable
     }
 
 }

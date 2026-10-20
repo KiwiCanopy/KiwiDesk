@@ -10,6 +10,12 @@ extension SettingsModel {
     /// What the Hyper key's remap last did (#1870), read live.
     var hyperStatus: HyperKeyStatus { core.keys.hyperStatus }
 
+    /// Takes over the leftover remap Core offered (#2471).
+    func takeOverHyperRemap() {
+        objectWillChange.send()
+        core.takeOverHyperRemap()
+    }
+
     func setAppWide(_ change: (inout AppWideSettings) -> Void) {
         objectWillChange.send()
         core.withUserMotion { core.setAppWide(persisting: true, change) }

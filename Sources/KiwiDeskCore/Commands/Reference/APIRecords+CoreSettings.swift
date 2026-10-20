@@ -71,6 +71,10 @@ extension APIReference {
                 + "session, or `off`; it becomes F18 until quit.",
             .choice("key", HyperSourceKey.self)
         ),
+        KiwiCore.takeOverHyperRemapCommand: APIRecord(
+            "Takes over a leftover Hyper remap that matches "
+                + "KiwiDesk's own; it is cleared at quit."
+        ),
         "set_space_cue": APIRecord(
             "Shows the Space and its layout on the screen that "
                 + "switched, where no Space Bar is drawn.",

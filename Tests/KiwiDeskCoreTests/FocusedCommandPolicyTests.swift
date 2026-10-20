@@ -97,6 +97,8 @@ struct FocusedCommandPolicyTests {
         // Puts stored settings back live, never acting on the
         // focused window (#2411).
         "revert_settings",
+        // Writes the Hyper remap record; no window (#2471).
+        "take_over_hyper_remap",
         // Show or hide a hiding shelf, touching no window (#761).
         "space_bar.toggle_reveal",
         "app_bar.toggle_reveal",

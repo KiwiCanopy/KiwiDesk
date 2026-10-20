@@ -975,6 +975,12 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
+:::unreleased
+When that mapping is exactly the one KiwiDesk would write for the
+chosen key, the Hyper key card's **Take Over** and
+[`take_over_hyper_remap`](cli.md#commands) make it KiwiDesk's.
+:::
+
 The GUI twin is **Shortcuts & Gestures ▸ Hyper key**, a recorder
 that takes one key — left and right apart. Like
 [`set_desktop_cue`](#set_desktop_cue), the setting is app-wide,

@@ -134,5 +134,6 @@ extension APIReference {
         PrivatePathSelfTest.command,
         KiwiCore.keepSettingsCommand,
         KiwiCore.revertSettingsCommand,
+        KiwiCore.takeOverHyperRemapCommand,
     ]
 }

@@ -37,6 +37,9 @@ extension APIReference {
         // Drops unsaved live changes (#2411).
         KiwiCore.revertSettingsCommand,
         ServiceManager.prepareRestartCommand,
+        // The taken-over remap is cleared at quit, and the tool
+        // that set it must set it again (#2471).
+        KiwiCore.takeOverHyperRemapCommand,
     ]
 
     /// True for an entry in `destructive`.

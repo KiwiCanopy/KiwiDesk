@@ -3,6 +3,7 @@ paths:
   - "Sources/KiwiDeskCore/Keys/**"
   - "Sources/KiwiDeskCore/Events/**"
   - "Sources/KiwiDeskCore/Animation/**"
+  - "Sources/KiwiDeskCore/OS/HyperKeyRemap*.swift"
 ---
 
 # Input & animation
@@ -105,6 +106,16 @@ editing here:
   for each of those is `docs/design-decisions.md` ▸ "The keypad's
   ten digits ARE their number-row twins" — do not restate it here
   (`KeypadKeysTests`).
+- **The Hyper remap's ownership record is minted only by
+  `HyperKeyRemap`'s set or the user's explicit take-over (#2471),
+  never inferred from a mapping's shape** — Caps Lock → F18 is a
+  common Hammerspoon setup, so a writer judging by shape would
+  claim and later clear another tool's entry. A take-over re-reads
+  the mapping at the click and answers through the ordinary
+  `apply` when it changed, and whether a mapping is offered is
+  Core's `claimable` verdict, never a key comparison in the GUI
+  (`HyperRemapRecordWriterCensusTests`, `HyperKeyTakeOverTests`,
+  `HyperTakeOverOfferTests`).
 - **A chord's admissibility is `SystemShortcuts.map`'s to state,
   never prose's (#1075).** That map is the one derivation the
   conflict ring and the Settings keyboard board already share

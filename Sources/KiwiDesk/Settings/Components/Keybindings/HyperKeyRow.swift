@@ -85,13 +85,33 @@ struct HyperKeyRow: View {
     }
 
     private var captions: some View {
-        caption(
-            Self.captionText(
-                key: model.appWide.hyperKey,
+        VStack(alignment: .leading, spacing: 6) {
+            caption(
+                Self.captionText(
+                    key: model.appWide.hyperKey,
+                    status: model.hyperStatus,
+                    luaOwned: reason == .appWideLuaOwned
+                )
+            )
+            if let foreign = Self.takeOverOffer(
                 status: model.hyperStatus,
                 luaOwned: reason == .appWideLuaOwned
-            )
-        )
+            ) {
+                HyperTakeOverButton(model: model, foreign: foreign)
+            }
+        }
+    }
+
+    /// The remap the row offers to take over: Core's `claimable`
+    /// verdict, never a key comparison here (#2471).
+    static func takeOverOffer(
+        status: HyperKeyStatus,
+        luaOwned: Bool
+    ) -> HyperForeignRemap? {
+        guard !luaOwned, case .refused(let foreign?) = status,
+            foreign.claimable
+        else { return nil }
+        return foreign
     }
 
     /// The one sentence under the field.

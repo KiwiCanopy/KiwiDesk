@@ -30,6 +30,12 @@ extension KiwiCore {
             deferred.cancel(.hyperRemap)
             applyHyperKey()
         }
+        return hyperReply
+    }
+
+    /// The verbs' answer for the status the remap left: English,
+    /// a CLI contract (core-boundaries).
+    var hyperReply: CommandResponse {
         switch keys.hyperStatus {
         case .refused:
             return .fail(
@@ -90,7 +96,7 @@ extension KiwiCore {
 
     /// The layer and the status the row reads move together, and a
     /// status the ledger did not move still reaches Settings.
-    private func setHyperState(_ status: HyperKeyStatus) {
+    func setHyperState(_ status: HyperKeyStatus) {
         let changed = keys.hyperStatus != status
         keys.hyperStatus = status
         keys.hyperEnabled = status == .on

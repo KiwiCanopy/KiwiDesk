@@ -1361,6 +1361,10 @@ Touching `Keys`, `Events`, `Animation`.
   `.otherApp` at the CONSUMER, never a second channel named by the arm (#1281,
   `OwnPressMonitorSeamTests`, `OwnPressProvenanceSeamTests`,
   `OwnPressProvenanceTests`)
+- the Hyper remap's ownership record is minted only by `HyperKeyRemap`'s set
+  or the user's explicit take-over, never inferred from a mapping's shape,
+  the offer being Core's `claimable` verdict (#2471,
+  `HyperRemapRecordWriterCensusTests`, `HyperTakeOverOfferTests`)
 - a keypad digit IS its number-row twin — stated once in `KeypadKeys` and read
   by both registration and naming, the aliased set closed to the ten digits, a
   twin's refusal never reported as the binding's (#1074, `KeypadKeysTests`)
