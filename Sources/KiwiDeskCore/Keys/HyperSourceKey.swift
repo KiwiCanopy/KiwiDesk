@@ -67,17 +67,6 @@ public enum HyperSourceKey: String, CaseIterable, Sendable {
         self = match.key
     }
 
-    /// The key a full keyboard-page (0x07) HID usage names, nil
-    /// for another page or a key that cannot be Hyper.
-    init?(hidUsage usage: UInt64) {
-        guard usage >> 32 == 0x7 else { return nil }
-        let match = Self.codes.first {
-            UInt64($0.value.usage) == usage & 0xFFFF_FFFF
-        }
-        guard let match else { return nil }
-        self = match.key
-    }
-
     /// The key the remapped key arrives as: the remap's
     /// destination, the Carbon trigger's key, and what the GUI
     /// recorder reads as held Hyper (#2414).

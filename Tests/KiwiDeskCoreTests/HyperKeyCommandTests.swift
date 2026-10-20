@@ -115,12 +115,12 @@ struct HyperKeyCommandTests {
     @Test("a HID usage names a key on the keyboard page alone")
     func usageNamesKey() {
         let usage = HyperKeyRemap.usage(0x39)
-        #expect(HyperSourceKey(hidUsage: usage) == .capsLock)
-        #expect(HyperSourceKey(hidUsage: usage & 0xFF) == nil)
-        #expect(HyperSourceKey(hidUsage: 0xFF_0000_0039) == nil)
+        #expect(HyperKeyRemap.key(atUsage: usage) == .capsLock)
+        #expect(HyperKeyRemap.key(atUsage: usage & 0xFF) == nil)
+        #expect(HyperKeyRemap.key(atUsage: 0xFF_0000_0039) == nil)
         for key in HyperSourceKey.allCases {
             let full = HyperKeyRemap.usage(key.hidUsage)
-            #expect(HyperSourceKey(hidUsage: full) == key)
+            #expect(HyperKeyRemap.key(atUsage: full) == key)
         }
     }
 

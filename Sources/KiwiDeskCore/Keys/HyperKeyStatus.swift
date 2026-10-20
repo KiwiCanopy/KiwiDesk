@@ -12,9 +12,8 @@ public enum HyperKeyStatus: Sendable, Equatable {
 }
 
 /// The one foreign `UserKeyMapping` entry that refused the remap,
-/// as keys the GUI can name (#2470). Nil where the mapping holds
-/// several entries or a key outside `HyperSourceKey`, so a
-/// reader falls back to the unnamed sentence.
+/// as keys the GUI can name (#2470); `HyperKeyRemap.foreign(in:)`
+/// decides when there is one.
 public struct HyperForeignRemap: Sendable, Equatable {
     public let source: HyperSourceKey
     public let destination: HyperSourceKey
@@ -24,18 +23,14 @@ public struct HyperForeignRemap: Sendable, Equatable {
         self.destination = destination
     }
 
-    init?(_ mapping: Set<HyperKeyRemap.Pair>) {
-        guard mapping.count == 1, let pair = mapping.first,
-            let source = HyperSourceKey(hidUsage: pair.source),
-            let destination = HyperSourceKey(
-                hidUsage: pair.destination
-            )
-        else { return nil }
-        self.init(source: source, destination: destination)
-    }
+}
 
-    /// `caps_lock -> f18`, for the English CLI refusal.
-    var wireSpelling: String {
-        "\(source.rawValue) -> \(destination.rawValue)"
+extension HyperKeyStatus {
+    /// ` (caps_lock -> f18)` for a named refusal, else empty: the
+    /// English CLI reply and the log line share it.
+    var foreignNote: String {
+        guard case .refused(let foreign?) = self else { return "" }
+        return " (\(foreign.source.rawValue) -> "
+            + "\(foreign.destination.rawValue))"
     }
 }
