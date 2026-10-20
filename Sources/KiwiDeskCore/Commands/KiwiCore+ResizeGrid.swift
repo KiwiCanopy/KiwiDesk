@@ -2,9 +2,9 @@ import AppKit
 import Foundation
 
 /// Grid-mode `resize` (#763): a column or row is resized by
-/// moving the edge it shares with a neighbour, the pair's weight
-/// sum kept so no other track moves — the bsp arm's shared-edge
-/// shape over per-index track weights (`GridTracks`). The
+/// moving the edge it shares with a neighbour, every other track
+/// keeping the length it drew — the bsp arm's shared-edge shape
+/// over per-index track weights (`GridTracks`). The
 /// keyboard verb and the mouse drop both take
 /// `resizeGridMember`, so the two cannot clamp or cue apart.
 extension KiwiCore {
@@ -158,7 +158,7 @@ extension KiwiCore {
                 },
                 // A cell spanning several tracks is no member of
                 // the one whose floor bound (#1259).
-                focusedIsBinding: grownMembers.contains(window),
+                focusedIsBinding: span.first == span.last,
                 axis: axis
             )
         } else {
@@ -204,19 +204,18 @@ extension KiwiCore {
     }
 
     /// The windows whose cell lies in `track` alone on the axis,
-    /// the pile left out as `GridLayout.trackFloors` leaves it —
-    /// a refusal's fallback anchor.
+    /// the pile's included — a refusal's anchor.
     private func members(
         ofTrack track: Int,
         horizontal: Bool,
         ordered: [WindowID],
         shape: GridLayout.Shape
     ) -> [WindowID] {
-        let alone = shape.piles ? shape.cells - 1 : shape.cells
-        return ordered.prefix(alone).enumerated().compactMap {
-            offset,
-            window in
-            let cell = GridLayout.cell(offset, of: shape)
+        ordered.enumerated().compactMap { offset, window in
+            let cell = GridLayout.cell(
+                min(offset, shape.cells - 1),
+                of: shape
+            )
             let span = horizontal ? cell.columns : cell.rows
             return span.first == track && span.last == track
                 ? window : nil

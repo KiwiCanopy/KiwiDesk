@@ -53,7 +53,7 @@ public enum GridTracks {
             return lifted(w, span: span, floors: floor)
         }
         let base = Array(repeating: minimum, count: count)
-        if minimum * CGFloat(count) <= span {
+        if minimum * CGFloat(count) <= span + 0.001 {
             return lifted(w, span: span, floors: base)
         }
         return proportional(w, span: span)
@@ -163,10 +163,15 @@ public enum GridTracks {
         guard pair > 0, floor(grown) + floor(neighbor) <= pair + 0.001
         else { return nil }
         let wanted = drawn[grown] + delta
-        let landed = min(
+        // A floor the render could not honour never moves the
+        // edge against the press.
+        let floored = min(
             max(wanted, floor(grown)),
             pair - floor(neighbor)
         )
+        let landed =
+            delta < 0
+            ? min(floored, drawn[grown]) : max(floored, drawn[grown])
         let target = [grown: landed, neighbor: pair - landed]
         // A free track's length is its weight times one shared
         // rate; a pair weighted at that rate draws its target and

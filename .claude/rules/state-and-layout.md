@@ -1550,8 +1550,8 @@ editing here:
   `dragMatchesTheKeyboardVerb`), and the one `resizeGridMember`,
   which moves a grid edge through `GridTracks.moveEdge` against
   the render's own solver and is the one caller of the raw
-  `writeGridWeights` (#763, `GridWeightWriterSeamTests`) — never a raw `writeSlotSize`,
-  `writeSplitRatio*`, `writeMasterRatio`, `stackWeights` or
+  `writeGridWeights` (#763, `GridWeightWriterSeamTests`) —
+  never a raw `writeSlotSize`, `writeSplitRatio*`, `writeMasterRatio`, `stackWeights` or
   `trackWeights` write beside a resize call site, which is
   exactly how the mouse `.scrollSlot` drag crossed the floor
   the keyboard path refused. The writers clamp each side at its

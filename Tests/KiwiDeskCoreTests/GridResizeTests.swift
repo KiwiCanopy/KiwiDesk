@@ -181,6 +181,23 @@ struct GridResizeTests {
         )
     }
 
+    /// Four windows in a rigid 2 × 1 grid pile three into column
+    /// 2; a shrink there stops at the column's floor and says so
+    /// on the pile window pressed.
+    @Test("A pile window's shrink cues its own minimum")
+    func pileShrinkCues() {
+        let core = makeCore()
+        grid(core, count: 4, columns: 2, focus: 4)
+        let seen = refusals(core) {
+            core.execute("resize", args: [.string("x"), .number(-500)])
+        }
+        #expect(
+            seen == [
+                .ownMinimum(WindowID(4), axis: "x", appBound: false)
+            ]
+        )
+    }
+
     @Test("A single row has no edge to move on y")
     func singleRowDividesNothing() {
         let core = makeCore()
