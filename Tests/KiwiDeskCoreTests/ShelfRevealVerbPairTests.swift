@@ -72,6 +72,8 @@ struct ShelfRevealVerbPairTests {
                 makeCore(space: values.0, app: values.1)
             )
             defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+            var lines: [String] = []
+            core.onLog = { lines.append($0) }
             for bar in order {
                 #expect(
                     core.execute("\(bar).toggle_reveal", args: []).isSuccess
@@ -88,6 +90,9 @@ struct ShelfRevealVerbPairTests {
             }
             #expect(!core.spaceBars.shownStrips.isEmpty)
             #expect(!core.appBars.shownStrips.isEmpty)
+            // Each toggle leaves one line naming its bar.
+            let reveals = lines.filter { $0.hasPrefix("shelf reveal: ") }
+            #expect(reveals.count == 2)
         }
     }
 }

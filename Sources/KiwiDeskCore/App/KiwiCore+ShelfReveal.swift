@@ -243,9 +243,15 @@ extension KiwiCore {
 
     /// The show/hide action on one bar.
     func toggleBarReveal(_ key: ShelfRevealer.Key) {
+        let was = shelves.reveal.reveal(of: key)
         shelves.reveal.toggle(
             key,
             duration: tiler.settings.kiwishelf.revealDuration
+        )
+        // One line per toggle: a reveal leaves no other trace.
+        onLog(
+            "shelf reveal: \(key.bar) \(was) → "
+                + "\(shelves.reveal.reveal(of: key))"
         )
     }
 
