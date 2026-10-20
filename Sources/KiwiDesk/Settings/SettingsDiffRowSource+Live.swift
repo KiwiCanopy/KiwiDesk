@@ -112,30 +112,15 @@ extension SettingsModel {
 
     /// Puts a live row's leaves back to their stored values through
     /// Core's revert (#2411), a user act (#804), then asks Core
-    /// again. The draft follows live as `adoptLiveWrite` rules: a
-    /// clean one re-reads, a dirty one moves the reverted leaves on
-    /// both sides of its diff and keeps its own edits.
+    /// again. A revert writes no file, so the draft takes it as
+    /// `adoptLiveWrite` takes a session-only write: a clean draft
+    /// re-reads, a dirty one takes nothing, its Save laying only its
+    /// own edits over live.
     @discardableResult
     func revertLive(_ ids: [String]) -> LiveRevertOutcome? {
         guard target == .live, !ids.isEmpty else { return nil }
-        let before = core.tiler.settings
         let outcome = core.withUserMotion { core.revertUnsavedLive(ids) }
-        let after = core.tiler.settings
-        if !isDirty {
-            reload()
-        } else if after != before {
-            suppressDirty = true
-            config.settings = config.settings.rebased(
-                from: before,
-                onto: after
-            )
-            cleanConfig.settings = cleanConfig.settings.rebased(
-                from: before,
-                onto: after
-            )
-            suppressDirty = false
-            recomputeDirty()
-        }
+        if !isDirty { reload() }
         refreshUnsavedLive()
         return outcome
     }

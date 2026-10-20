@@ -32,7 +32,7 @@ extension KiwiCore {
     }
 
     /// One entry per `SessionRatios` field
-    /// (`RevertSettingsShadowTests` ▸ `everyFieldHasAnEntry`).
+    /// (`RevertSettingsApplyTests` ▸ `everyFieldHasAnEntry`).
     static var sizingShadows: [SizingShadow] {
         [
             SizingShadow(

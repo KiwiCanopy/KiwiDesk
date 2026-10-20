@@ -1059,6 +1059,7 @@ kiwidesk keep_settings /settings/border/width
 `revert_settings` is its twin: it puts those ids back to the value
 the live profile or its shared look stores, applied live, and
 answers which ones it `reverted` and which it could not
-(`not_revertable`). It takes settings leaves only; a Space's
+(`not_revertable`, each an `id` with its `reason`: `not_a_setting`,
+`not_keepable` or `not_applied`). It takes settings leaves only; a Space's
 layout and the rules are left as they are live.
 :::

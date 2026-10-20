@@ -48,28 +48,74 @@ struct RevertSettingsApplyTests {
         #expect(ratios.splitRatioV == 0.4)
     }
 
-    /// The shadow table mirrors `SessionRatios`: a field added there
-    /// with no entry here would leave its drag over every revert.
+    /// Every field, set, for a clear to find.
+    private func fullRatios() -> SessionRatios {
+        var ratios = SessionRatios()
+        ratios.splitRatioH = 0.1
+        ratios.splitRatioV = 0.1
+        ratios.masterRatio = 0.1
+        ratios.slotSize = .auto
+        ratios.gridColumnWeights = [1]
+        ratios.gridRowWeights = [1]
+        return ratios
+    }
+
+    /// The labels of `ratios`' fields that hold a value.
+    private func setLabels(_ ratios: SessionRatios) -> Set<String> {
+        Set(
+            Mirror(reflecting: ratios).children.compactMap { child in
+                "\(child.value)" == "nil" ? nil : child.label
+            }
+        )
+    }
+
+    /// The shadow table mirrors `SessionRatios`: each entry clears
+    /// one field, no two the same, and together every field — a
+    /// field added there with no entry leaves its drag over every
+    /// revert.
     @Test("every session field has a shadow entry")
     func everyFieldHasAnEntry() {
+        let all = setLabels(fullRatios())
         let fields = Mirror(reflecting: SessionRatios()).children.count
-        #expect(KiwiCore.sizingShadows.count == fields)
-        var cleared = 0
+        #expect(all.count == fields)
+        var cleared: [String] = []
         for shadow in KiwiCore.sizingShadows {
-            var ratios = SessionRatios()
-            ratios.splitRatioH = 0.1
-            ratios.splitRatioV = 0.1
-            ratios.masterRatio = 0.1
-            ratios.slotSize = .auto
-            ratios.gridColumnWeights = [1]
-            ratios.gridRowWeights = [1]
-            let before = Mirror(reflecting: ratios).children
-                .filter { "\($0.value)" != "nil" }.count
+            var ratios = fullRatios()
             shadow.clear(&ratios)
-            let after = Mirror(reflecting: ratios).children
-                .filter { "\($0.value)" != "nil" }.count
-            if before - after == 1 { cleared += 1 }
+            let gone = all.subtracting(setLabels(ratios))
+            #expect(gone.count == 1)
+            cleared += gone
         }
-        #expect(cleared == fields)
+        #expect(cleared.count == Set(cleared).count)
+        #expect(Set(cleared) == all)
+    }
+
+    /// Each entry reads the leaf its field shadows: a global write
+    /// of that leaf moves exactly the entry that clears the field.
+    @Test("each entry reads the leaf it clears")
+    func entriesReadTheirLeaf() {
+        let writes: [String: (inout TilingSettings) -> Void] = [
+            "splitRatioH": { $0.bsp.splitRatioH = 0.9 },
+            "splitRatioV": { $0.bsp.splitRatioV = 0.9 },
+            "masterRatio": { $0.stack.masterRatio = 0.9 },
+            "slotSize": { $0.scrolling.slotSize = .points(321) },
+            "gridColumnWeights": { $0.grid.columnWeights = [2, 1] },
+            "gridRowWeights": { $0.grid.rowWeights = [2, 1] },
+        ]
+        let all = setLabels(fullRatios())
+        #expect(Set(writes.keys) == all)
+        let old = TilingSettings()
+        for (label, write) in writes {
+            var new = old
+            write(&new)
+            let moved = KiwiCore.sizingShadows.filter {
+                $0.movedGlobally(old, new)
+            }
+            #expect(moved.count == 1, "\(label)")
+            guard let shadow = moved.first else { continue }
+            var ratios = fullRatios()
+            shadow.clear(&ratios)
+            #expect(all.subtracting(setLabels(ratios)) == [label])
+        }
     }
 }
