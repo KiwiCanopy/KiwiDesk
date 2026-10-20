@@ -8,17 +8,27 @@ extension SettingsModel {
     func canRevert(_ row: SettingsDiffRow) -> Bool {
         switch row.revert {
         case .census: SettingsRevertRegister.writers[row.key] != nil
-        case .lua, .look, .ruleReach: true
+        case .lua, .look, .ruleReach, .binding, .layerMembers,
+            .lensFields, .lensReach:
+            true
+        case .layer(let stored, let page):
+            !layerRevertBlocked(stored: stored, page: page)
+        case .lens(let stored, let page):
+            !lensRevertBlocked(stored: stored, page: page)
         case .live: target == .live && !row.keepIDs.isEmpty
-        case .none: false
+        case .none, .unstated: false
         }
     }
 
-    /// Whether `row`'s ↺ takes its whole group back — every shortcut
-    /// change — and so asks first.
+    /// Whether `row`'s ↺ takes more than its own row — a whole
+    /// layer or lens, or every shortcut change — and so asks first.
     func revertTakesGroup(_ row: SettingsDiffRow) -> Bool {
-        row.revert == .census
-            && SettingsRevertRegister.writers[row.key]?.takesGroup == true
+        switch row.revert {
+        case .census:
+            SettingsRevertRegister.writers[row.key]?.takesGroup == true
+        case .layer, .lens: true
+        default: false
+        }
     }
 
     /// Takes `row`'s change back to the baseline.
@@ -41,7 +51,19 @@ extension SettingsModel {
             revertRuleReach(of: row.key, app: app)
         case .live:
             revertLive(row.keepIDs)
-        case .none:
+        case .binding(let layer, let lua):
+            revertBinding(layer: layer, lua: lua)
+        case .layer(let stored, let page):
+            revertLayer(stored: stored, page: page)
+        case .layerMembers(let page, let profile):
+            revertLayerMembers(page: page, profile: profile)
+        case .lens(let stored, let page):
+            revertLens(stored: stored, page: page)
+        case .lensFields(let page):
+            revertLensFields(page: page)
+        case .lensReach(let page, let profile):
+            revertLensReach(page: page, profile: profile)
+        case .none, .unstated:
             break
         }
     }
@@ -55,6 +77,10 @@ extension SettingsModel {
             SettingsRevertRegister.revertSubject(self, .space, app)
         case .appRules(.floatRules):
             SettingsRevertRegister.revertSubject(self, .float, app)
+        case .shortcuts(.layers):
+            // A shortcut's reach row: the binding and its reach.
+            let parts = RuleReachTable<String>.keyParts(app)
+            revertBinding(layer: parts.layer, lua: parts.lua)
         default:
             break
         }

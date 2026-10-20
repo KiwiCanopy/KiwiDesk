@@ -23,9 +23,28 @@ enum SettingsRowRevert: Hashable {
     /// A live change put back to its stored value through Core
     /// (#2411), by the row's keep ids.
     case live
-    /// Nothing a revert can undo: profile drift, a leaf no key
-    /// claims, a reach this list only reports.
+    /// One binding, with the changed bindings now holding its
+    /// saved chords (#2412, `BindingRevertSet`), and their reach.
+    case binding(layer: String, lua: String)
+    /// A layer created, deleted or renamed, put back whole with its
+    /// bindings (#2412); it asks first.
+    case layer(stored: String?, page: String?)
+    /// One profile's membership of a layer, or the shared base's
+    /// where `profile` is nil (#2412).
+    case layerMembers(page: String, profile: String?)
+    /// A lens created, deleted or renamed, put back whole with its
+    /// chords (#2412); it asks first.
+    case lens(stored: String?, page: String?)
+    /// A lens's apps and settings, its name kept (#2412).
+    case lensFields(page: String)
+    /// Whether a lens reaches one saved profile (#2412).
+    case lensReach(page: String, profile: String)
+    /// Nothing a revert can undo: profile drift, a live change, a
+    /// leaf no key claims, a reach this list only reports.
     case none
+    /// The producer stated nothing: a key's own readout row takes
+    /// its census writer, any other draws no ↺.
+    case unstated
 }
 
 /// Display-ready row of the draft diff (`SettingsDiffRowsView`, #678 turn 9).
@@ -58,7 +77,7 @@ struct SettingsDiffRow: Identifiable, Hashable {
     /// says otherwise: `SettingsDiffRowSource` marks a key's own
     /// readout rows `.census`, so a new producer offers no ↺ by
     /// forgetting one.
-    var revert: SettingsRowRevert = .none
+    var revert: SettingsRowRevert = .unstated
     /// The rule this row changes, where another profile's reach row
     /// can name the same one: the fold joins on it, never on the
     /// label (#792).

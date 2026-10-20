@@ -23,7 +23,8 @@ extension SettingsModel {
                     L(
                         "shortcuts.layer_reach.diff.deleted",
                         "deleted from every profile"
-                    )
+                    ),
+                    .layer(stored: name, page: nil)
                 )
             )
         }
@@ -38,7 +39,8 @@ extension SettingsModel {
                             "shortcuts.layer_reach.diff.renamed",
                             "renamed to “%1$@”",
                             page
-                        )
+                        ),
+                        .layer(stored: old, page: page)
                     )
                 )
             }
@@ -79,7 +81,8 @@ extension SettingsModel {
                             "shortcuts.layer_reach.diff.left_out",
                             "left out of %1$@",
                             profile
-                        )
+                        ),
+                    .layerMembers(page: page, profile: profile)
                 )
             )
         }
@@ -98,7 +101,8 @@ extension SettingsModel {
                         : L(
                             "shortcuts.layer_reach.diff.new_profiles_lose",
                             "new profiles won't get it"
-                        )
+                        ),
+                    .layerMembers(page: page, profile: nil)
                 )
             )
         }
@@ -121,9 +125,10 @@ extension SettingsModel {
     private func row(
         _ layer: String,
         _ instance: String,
-        _ note: String
+        _ note: String,
+        _ revert: SettingsRowRevert
     ) -> SettingsDiffRow {
-        .note(
+        var row = SettingsDiffRow.note(
             .shortcuts(.layersReach),
             instance: "layer.\(layer).\(instance)",
             label: L(
@@ -133,5 +138,7 @@ extension SettingsModel {
             ),
             note: note
         )
+        row.revert = revert
+        return row
     }
 }

@@ -71,6 +71,19 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":
             (1, "layer editor: writes back the rows it was handed"),
+        "KiwiDesk/Settings/SettingsRevertRegister+Rules.swift":
+            (
+                1,
+                "base revert (#2412): each row the switch moved swapped"
+                    + " one for one for its saved row, adds none"
+            ),
+        "KiwiDesk/Settings/BindingRevertSet.swift":
+            (
+                1,
+                "revert (#2412): an action's rows become exactly the"
+                    + " saved ones, every action whose chord moved"
+                    + " taken with it (BindingRevertSetTests)"
+            ),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "KeybindingCatalog+Layers.swift":
             (
