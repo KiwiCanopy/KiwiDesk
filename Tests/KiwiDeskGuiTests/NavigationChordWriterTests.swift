@@ -115,7 +115,8 @@ struct NavigationChordWriterTests {
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: seed,
-            spaces: config.spaces
+            spaces: config.spaces,
+            base: .standard
         )
         #expect(!added.isEmpty)
         config.layers = [

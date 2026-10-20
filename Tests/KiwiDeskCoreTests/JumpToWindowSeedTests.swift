@@ -32,8 +32,12 @@ struct JumpToWindowSeedTests {
         let row = DefaultKeybindings.jumpToWindowRow()
         #expect(DefaultKeybindings.rows(ofGeneration: 3) == [row])
         #expect(
-            DefaultKeybindings.generationTopUp(existing: [], above: 2)
-                .first == row
+            DefaultKeybindings.generationTopUp(
+                existing: [],
+                above: 2,
+                base: .standard
+            )
+            .first == row
         )
     }
 

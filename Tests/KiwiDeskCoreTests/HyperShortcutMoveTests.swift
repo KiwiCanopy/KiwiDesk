@@ -39,7 +39,7 @@ struct HyperShortcutMoveTests {
         let offer = HyperShortcutMove.offer(
             direction,
             rows: rows,
-            base: config.desktopShortcutBase
+            base: config.shortcutBase
         )
         HyperShortcutMove.apply(
             offer,

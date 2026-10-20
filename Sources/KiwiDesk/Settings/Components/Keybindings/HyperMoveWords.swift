@@ -144,11 +144,10 @@ enum HyperMoveWords {
             .joined(separator: "  ")
     }
 
-    /// A Desktop base's modifiers as drawn.
-    static func modifiers(_ base: DesktopShortcutBase) -> String {
-        guard let combo = KeyCombo.parse(base.combo("1")) else {
-            return base.rawValue
-        }
-        return ComboSymbols.modifierSymbols(combo.modifiers)
+    /// A shortcut base's modifiers as drawn.
+    static func modifiers(_ base: ShortcutBase) -> String {
+        ComboSymbols.modifierSymbols(
+            base == .hyper ? .hyper : [.control, .option]
+        )
     }
 }

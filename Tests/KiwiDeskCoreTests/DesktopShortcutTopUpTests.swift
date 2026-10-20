@@ -20,7 +20,8 @@ struct DesktopShortcutTopUpTests {
         let rows = DefaultKeybindings.desktopTopUp(
             existing: [],
             desktops: [1, 2, 3, 10, 11],
-            above: 1
+            above: 1,
+            base: .standard
         )
         #expect(rows.map(\.lua) == [lua(2), lua(3), lua(10)])
         #expect(rows.map(\.combo) == ["2", "3", "0"].map { hyper + $0 })
@@ -40,7 +41,8 @@ struct DesktopShortcutTopUpTests {
         let rows = DefaultKeybindings.desktopTopUp(
             existing: existing,
             desktops: [1, 2, 3],
-            above: 0
+            above: 0,
+            base: .standard
         )
         #expect(rows.map(\.lua) == [lua(1)])
     }

@@ -32,14 +32,13 @@ extension DefaultKeybindings {
     }
 
     /// The rows of every generation above `mark` whose action no
-    /// row in `existing` binds and whose chord is free, a letter
-    /// row on the base `existing`'s letters took
-    /// (`HyperShortcutMove.onLettersBase`). Additive,
-    /// like `desktopTopUp`: a row the user deleted after its
-    /// generation was offered stays deleted.
+    /// row in `existing` binds and whose chord is free, each on
+    /// `base` (#2460). Additive, like `desktopTopUp`: a row the user
+    /// deleted after its generation was offered stays deleted.
     public static func generationTopUp(
         existing: [KeyBinding],
-        above mark: Int
+        above mark: Int,
+        base: ShortcutBase
     ) -> [KeyBinding] {
         guard mark < newestGeneration else { return [] }
         // As registered: a Hyper row holds its bare chord (#1870).
@@ -50,10 +49,7 @@ extension DefaultKeybindings {
         var added: [KeyBinding] = []
         for number in (max(mark, 0) + 1)...newestGeneration {
             for seeded in rows(ofGeneration: number) {
-                let row = HyperShortcutMove.onLettersBase(
-                    seeded,
-                    in: existing
-                )
+                let row = base.rebased(seeded)
                 guard !bound.contains(row.lua),
                     let combo = KeyCombo.parse(row.combo),
                     taken.insert(combo.registered).inserted

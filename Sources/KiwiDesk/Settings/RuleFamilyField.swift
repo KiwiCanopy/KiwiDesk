@@ -19,7 +19,7 @@ struct RuleFamilyField {
             family: .key,
             same: {
                 $0.layers == $1.layers
-                    && $0.desktopShortcutBase == $1.desktopShortcutBase
+                    && $0.shortcutBase == $1.shortcutBase
             }
         ),
         field(.scroll, \.scrollGesture),

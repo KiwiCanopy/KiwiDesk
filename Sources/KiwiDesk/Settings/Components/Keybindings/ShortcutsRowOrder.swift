@@ -131,7 +131,7 @@ enum ShortcutsRowOrder {
     /// the recorder, then the move offer under it.
     static let hyperKeyList: [SettingKey] = [
         .shortcuts(.hyperKey),
-        .shortcuts(.desktopShortcutBase),
+        .shortcuts(.shortcutBase),
     ]
 
     /// Layout group order (#453): `KeybindingCatalog

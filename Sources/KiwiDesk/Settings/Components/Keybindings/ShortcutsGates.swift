@@ -53,7 +53,7 @@ struct ShortcutsGates {
             return trackIsUsed ? nil : .trackUnused
         case .shortcuts(.modeCue), .shortcuts(.hyperKey):
             return guiManaged ? nil : .appWideLuaOwned
-        case .shortcuts(.desktopShortcutBase):
+        case .shortcuts(.shortcutBase):
             guard guiManaged else { return .appWideLuaOwned }
             return editingStoredProfile ? .storedProfilePage : nil
         default:
@@ -117,7 +117,7 @@ struct ShortcutsGates {
         .shortcuts(.swapWithTrack),
         .shortcuts(.modeCue),
         .shortcuts(.hyperKey),
-        .shortcuts(.desktopShortcutBase),
+        .shortcuts(.shortcutBase),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's

@@ -10821,11 +10821,8 @@ built from `release/3.0.0` had already taken generation 2.
 Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
 the way back from the size keys, but a key you press once, so it
 rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
-not `appChromeRows`, and the Hyper move carries it with the other
-letters. A default letter added after the move lands where the
-letters went: the top-up offers `✦R` on a layer whose seeded
-letters sit mostly on Hyper, or the move would reappear for one
-row. It resets the active space only, for the reason the
+not `appChromeRows`, and lands on the shortcut base like every
+other letter (#2460). It resets the active space only, for the reason the
 #764 entry gives the verb's default: a key undoes what you just
 did in front of you. `"all"` gets no Settings row and no default
 key; it stays a Lua and CLI form (owner ruling 2026-10-18). The
@@ -10890,50 +10887,95 @@ AX menu bars of fifteen running apps (858 shortcut items) one
 claimed a `⌃⌥⇧⌘` digit — Antigravity IDE's Split Terminal on 7,
 which KiwiDesk's hotkey takes from it as every seeded chord takes
 an app menu's. #1870's Hyper key does not move this tier unasked —
-only its move offer, below, does — and the seed stays here: it is a
+only the Shortcuts use switch, below, does, onto `✦⌥`
+(#2460) — and the seed stays here: it is a
 separate modifier and off by default, so the seed cannot depend on
 it, and the users the four-modifier chord serves are the ones whose
 own tool already presses all four.
 
-**The Hyper move is an offer, and it moves the Desktop base with
-the rows (#1870).** Turning Hyper on moves nothing, and seeding
-Hyper copies beside the `⌃⌥` rows is refused, since nothing
-KiwiDesk writes gives an action a second chord in a layer. Instead
-the Hyper card offers, once, to move the seeded `⌃⌥` letter rows
-onto `✦`, the list read off the seed rather than typed: a row
-still on its seeded chord is ticked; one the user rebound but left
-on `⌃⌥` is listed unticked, and ticking it moves their own chord
-(`⌃⌥⇧P` → `✦⇧P`); one rebound off `⌃⌥` is not listed, because
-the user already moved it; and a line whose `✦` chord another row
-holds is refused rather than doubled. KiwiHub's three sides move
-with Open Settings as one line, together or not at all: they are
-the app's chrome, learned as a set, and a panel on `✦J` beside one
-on `⌃⌥K` is a split nobody asked for. The arrow-and-digit ladder
-and the `⌥⌘` size base stay where they are.
+:::unreleased
+**One switch puts KiwiDesk's shortcuts on `⌃⌥` or on `✦` (#2460,
+owner ruling 2026-10-20).** The Hyper key card carries "Shortcuts
+use: `⌃⌥` | `✦`", and its value is one stored base, `gui.json`'s
+`shortcut_base`, which every writer of a default row reads: the
+seed, Restore Defaults, and the three top-ups — a new Space's
+digits, a new Desktop's row, a default added in a later
+generation. Choosing `✦` moves every row whose modifiers are `⌃⌥`
+plus at most `⇧` and `⌘`, swapping the base and keeping `⇧` and
+`⌘` (`⌃⌥F` → `✦F`, `⌃⌥⇧←` → `✦⇧←`, `⌃⌥⌘3` → `✦⌘3`). The `⌥⌘`
+size tier and the Space history stay where they are.
 
-The same sheet carries one Desktop line, and accepting it does two
-things together: it moves the Go to Desktop rows still on `⌃⌥⇧⌘`
-+ digit to `✦` + digit, and it sets `gui.json`'s
-`desktop_shortcut_base`, the base the top-up writes every new
-Desktop's row on. There is no separate switch for the base, which
-could leave existing and new Desktops on different modifiers and
-split the ladder. For the same reason the base is drafted with the
-layers rather than written at once like the other app-wide values:
-a Save or a Revert has to move the rows and the base together, and
-a base written at once beside a reverted move is the split again.
-The base is the Mac's while a profile may carry Desktop rows of its
-own, so the move runs only on the loaded profile's page, where a
-Save writes the shared rows. A Desktop row a profile overrides is
-that profile's: one another profile overrides stays on its chord
-until that row is recorded again, and one the loaded profile
-overrides moves in that profile's file while the base moves for
-every profile. The
-move applies exactly what its sheet showed, in every layer that
-holds a row on the chord shown.
-Turning Hyper off moves nothing back silently. The Hyper rows dim
-in place, dimmed and never disabled, since re-recording one is a
-way off Hyper, and the reverse offer appears; it is the only door
-that resets the base, and it moves the rows back with it.
+One base is the point. Three sources used to decide where a new
+row went: the Desktop base, a guess from where the seeded letters
+sat, and a fixed `⌃⌥` for a new Space's digits. So a user who
+moved the ladder to `✦` by hand had it split again at the next
+new Space, and "my shortcuts are on Hyper" held only for the rows
+that existed on the day they moved them. A base every writer
+reads keeps it true for rows that do not exist yet. The one-shot
+move offer that came before (#1870) and the letters guess (#2303)
+retire with it: an offer covers the rows of its day and leaves
+every later writer guessing, and a stored answer is what a guess
+stands in for.
+
+**Go to Desktop is the one exception, and takes `✦⌥` + digit.** A
+Hyper row is registered bare while the key is held (#1870), so
+`✦⇧⌘3` IS `⇧⌘3`, macOS's screenshot — and macOS answers it first:
+pressed on device (2026-10-20, macOS 27.0.1), the screenshot
+fired and the row never heard the press, as #1126 predicts for
+every live symbolic hotkey. The whole tier moves, not only the
+screenshot digits, since a tier with holes reads as a defect.
+`⌥` + digit holds no symbolic hotkey and no KiwiDesk row, and on
+`✦` the ladder then reads one modifier per tier: the digit alone
+goes to the Space, `⇧` sends the window, `⌘` follows it, `⌥` goes
+to the Desktop. Refused: `✦⌃` + digit, which is macOS's own
+Switch to Desktop and fires twice for anyone who turns that on;
+`✦⌥⌘` + digit, which is KiwiDesk's own size tier while Hyper is
+held; and leaving the tier on `⌃⌥⇧⌘` under `✦`, which splits the
+ladder across two bases — the split one base exists to prevent —
+and leaves a row in the list below that no re-recording clears.
+The mapping names this tier as its one case, so the way back
+reverses it.
+
+**The base is app-wide, with no profile checklist.** A
+per-profile base was weighed and refused: a swipe to a bound
+Desktop would swap the whole keymap between `⌃⌥` and `✦`, and
+every top-up would write synced profile files on every new Space.
+A profile that wants one row on `⌃⌥` keeps it through that row's
+"Applies to". The base is drafted with the layers rather than
+written at once like the other app-wide values, because Save and
+↺ have to move the rows and the base together: a base written at
+once beside a reverted move is the split again.
+
+**What the switch moves, and what it leaves.** It moves the
+shared keymap and the loaded profile's own rows. A row the user
+rebound off the base stays where they put it, and a target another
+row holds is refused and named with its holder, since nothing
+KiwiDesk writes gives an action a second chord in a layer. Every
+row still on `⌃⌥` is listed under the switch with its reason —
+the row predates the update, another row holds the key, the user
+set it, or another profile sets its own — and is re-recorded by
+hand; there is no "move these too", since each reason is one the
+user should read before the row moves. `⌃⌥` moves back only what
+the mapping produced, derived from the pure reverse mapping rather
+than a stored list: a row the user recorded on `✦` themselves
+stays, and nothing that came from `⌥⌘` lands on `⌃⌥`.
+
+**Without a Hyper key the switch is drawn greyed on `⌃⌥`,** since
+the setting that turns it on sits directly above it in the same
+card (gui.md ▸ Grey, don't hide). Clearing the key while rows are
+on `✦` moves nothing back silently: the rows dim in place, and the
+switch stays live as the way back.
+
+The stored Desktop base this replaces covered one tier and the
+new base covers every one, so the crossing is a change of meaning
+under a renamed key and reads the file's format to end (#1354). A
+Desktop base stored as Hyper moves its rows from `✦` + digit to
+`✦⌥` + digit, since the Space digits now hold `✦` + digit. An
+install whose seeded letters the old offer moved reads as `✦`:
+the letters guess, made once inside the crossing and never again.
+Nothing else moves on its own; the ladder rows still on `⌃⌥`
+appear in the list.
+:::
 
 The rows are topped up rather than seeded once, because Desktops
 come and go: at boot, and at a switch that shows a Desktop numbered

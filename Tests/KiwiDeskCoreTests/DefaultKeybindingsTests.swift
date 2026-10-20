@@ -206,7 +206,8 @@ struct DefaultKeybindingsTests {
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(10)
+            spaces: spaces(10),
+            base: .standard
         )
         let combos = Set(added.map(\.combo))
         // ⌃⌥6-9 and ⌃⌥0 (tenth), across all three tiers — nothing
@@ -248,7 +249,8 @@ struct DefaultKeybindingsTests {
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(10)
+            spaces: spaces(10),
+            base: .standard
         )
         // Tier 1 for space 6 is taken, so it is not re-added; the
         // shift/command tiers for space 6 are still free.
@@ -273,7 +275,8 @@ struct DefaultKeybindingsTests {
         ]
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(7)
+            spaces: spaces(7),
+            base: .standard
         )
         // The alias parses to the same physical shortcut, so the
         // focus tier for space 7 is treated as taken.
@@ -286,7 +289,8 @@ struct DefaultKeybindingsTests {
     func topUpCapsAtTen() {
         let added = DefaultKeybindings.digitTopUp(
             existing: [],
-            spaces: spaces(12)
+            spaces: spaces(12),
+            base: .standard
         )
         // Ten digits × three tiers; nothing for 11-12.
         #expect(
@@ -311,7 +315,8 @@ struct DefaultKeybindingsTests {
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: spaces(5)
+            spaces: spaces(5),
+            base: .standard
         )
         #expect(added.isEmpty)
     }

@@ -34,13 +34,13 @@ extension SettingsValueReadout {
         case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
             .scrollNaturalTrackpad, .scrollNaturalMouse, .scrollSpaceStep:
             return scrollGestureRows(key, old: old, new: new)
-        case .desktopShortcutBase:
+        case .shortcutBase:
             return [
                 .change(
                     census,
                     label: HyperMoveWords.baseTitle,
-                    old: HyperMoveWords.modifiers(old.desktopShortcutBase),
-                    new: HyperMoveWords.modifiers(new.desktopShortcutBase)
+                    old: HyperMoveWords.modifiers(old.shortcutBase),
+                    new: HyperMoveWords.modifiers(new.shortcutBase)
                 )
             ]
         case .spaceHistory:

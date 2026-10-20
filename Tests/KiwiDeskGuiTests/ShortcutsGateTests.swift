@@ -161,7 +161,7 @@ struct ShortcutsGateTests {
     /// the config and on a stored-profile page, Lua first.
     @Test("the Hyper move offer's reasons")
     func hyperMoveOfferReasons() {
-        let key = SettingKey.shortcuts(.desktopShortcutBase)
+        let key = SettingKey.shortcuts(.shortcutBase)
         let base = config(layers: [KeyLayer.defaultName])
         func reason(lua: Bool, stored: Bool) -> ShortcutsGates.InertReason? {
             ShortcutsGates(

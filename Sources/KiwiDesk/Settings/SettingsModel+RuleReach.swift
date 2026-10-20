@@ -297,7 +297,7 @@ extension SettingsModel {
         config.layers = cleanConfig.layers
         // Drafted beside the layers it moves (#1870): never kept
         // without them.
-        config.desktopShortcutBase = cleanConfig.desktopShortcutBase
+        config.shortcutBase = cleanConfig.shortcutBase
         config.scrollGesture = cleanConfig.scrollGesture
         config.spaceHistory = cleanConfig.spaceHistory
         config.modeCycle = cleanConfig.modeCycle

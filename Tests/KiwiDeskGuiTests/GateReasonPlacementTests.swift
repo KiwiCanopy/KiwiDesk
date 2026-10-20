@@ -76,7 +76,7 @@ struct GateReasonPlacementTests {
                 // on its own card above the layer header.
                 .shortcuts(.hyperKey),
                 // #1870: its move offer, on the same card.
-                .shortcuts(.desktopShortcutBase),
+                .shortcuts(.shortcutBase),
                 // #2228: the Space plate's switch, the same shape
                 // on KiwiShelf ▸ Show.
                 .spaceBar(.spaceCue),

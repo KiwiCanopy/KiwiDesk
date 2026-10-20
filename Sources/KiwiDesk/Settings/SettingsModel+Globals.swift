@@ -21,7 +21,7 @@ extension SettingsModel {
         target.floatRules = source.floatRules
         target.ignoreRules = source.ignoreRules
         target.tileRules = source.tileRules
-        target.desktopShortcutBase = source.desktopShortcutBase
+        target.shortcutBase = source.shortcutBase
         target.floatAutomatically = source.floatAutomatically
         target.profileBindings = source.profileBindings
         target.spaces = source.spaces

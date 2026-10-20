@@ -8,7 +8,8 @@ import Foundation
 /// door a synced change enters by (`adoptSyncedChange`, #2324):
 /// the Mac that made the change already offered what it needed.
 extension KiwiCore {
-    /// Adds ⌃⌥N digit shortcuts for spaces that appeared after the
+    /// Adds digit shortcuts, on the stored `shortcutBase` (#2460),
+    /// for spaces that appeared after the
     /// first-run seed authored them — the display-change twin of
     /// `seedDefaultShortcuts` (#485). Strictly additive and
     /// GUI-managed only: a Lua user owns their bindings, and a
@@ -36,7 +37,8 @@ extension KiwiCore {
         guard
             !DefaultKeybindings.digitTopUp(
                 existing: base,
-                spaces: spaces
+                spaces: spaces,
+                base: config.shortcutBase
             ).isEmpty
         else { return }
         // The base is shared by every profile, so a row in it or
@@ -50,7 +52,8 @@ extension KiwiCore {
         }.filter { SpaceLuaArg.target(of: $0.lua) != nil }
         let added = DefaultKeybindings.digitTopUp(
             existing: base + overrides,
-            spaces: spaces
+            spaces: spaces,
+            base: config.shortcutBase
         )
         guard !added.isEmpty else { return }
         appendBaseShortcuts(added, to: &config, layer: index)
@@ -58,7 +61,7 @@ extension KiwiCore {
 
     /// Tops up the Desktop rows for `desktops`, the snapshot's user
     /// Desktops: each Desktop past the setup's offer gets its row,
-    /// on the stored `desktopShortcutBase` (#1870), when no row
+    /// on the stored `shortcutBase` (#2460), when no row
     /// goes there and the chord is free. A Desktop at or below the
     /// offer was offered before — on this Mac or another sharing
     /// the setup (#2324) — so a row the user deleted stays deleted.
@@ -88,7 +91,7 @@ extension KiwiCore {
             existing: config.layers[index].bindings + overrides,
             desktops: reachable,
             above: offer.desktop,
-            base: config.desktopShortcutBase
+            base: config.shortcutBase
         )
         config.shortcutOffer = offer.merged(ShortcutOffer(desktop: top))
         saveOffer(added, to: &config, layer: index)
@@ -119,7 +122,8 @@ extension KiwiCore {
         }.filter { offered.contains($0.lua) }
         let added = DefaultKeybindings.generationTopUp(
             existing: config.layers[index].bindings + overrides,
-            above: offer.generation
+            above: offer.generation,
+            base: config.shortcutBase
         )
         config.shortcutOffer = offer.merged(
             ShortcutOffer(generation: newest)

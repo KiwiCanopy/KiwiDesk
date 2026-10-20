@@ -26,7 +26,8 @@ struct DigitTopUpActionTests {
     func numberedSpaceTakesItsOwnDigit() {
         let added = DefaultKeybindings.digitTopUp(
             existing: seed(["1", "2", "3", "4"]),
-            spaces: ids(["2", "3", "4", "6", "1", "5"])
+            spaces: ids(["2", "3", "4", "6", "1", "5"]),
+            base: .standard
         )
         let five = added.filter { $0.lua.contains("(\"5\")") }
         #expect(five.count == 3)
@@ -49,7 +50,8 @@ struct DigitTopUpActionTests {
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: ids(["1", "2", "3", "4", "5"])
+            spaces: ids(["1", "2", "3", "4", "5"]),
+            base: .standard
         )
         #expect(
             !added.contains {
@@ -68,7 +70,8 @@ struct DigitTopUpActionTests {
         // "Mail" sits fifth, where Space 5's own digit is.
         let added = DefaultKeybindings.digitTopUp(
             existing: seed(["1", "2", "3", "4"]),
-            spaces: ids(["1", "2", "3", "4", "Mail", "5"])
+            spaces: ids(["1", "2", "3", "4", "Mail", "5"]),
+            base: .standard
         )
         let combos = added.map(\.combo)
         #expect(combos.count == Set(combos).count)
@@ -82,7 +85,8 @@ struct DigitTopUpActionTests {
     func outOfRangeNumberTakesItsPlace() {
         let added = DefaultKeybindings.digitTopUp(
             existing: seed(["1", "2", "3", "4"]),
-            spaces: ids(["1", "2", "3", "4", "11"])
+            spaces: ids(["1", "2", "3", "4", "11"]),
+            base: .standard
         )
         #expect(
             added.contains {
@@ -103,7 +107,8 @@ struct DigitTopUpActionTests {
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: ids(["1", "2", "3", "4", "5"])
+            spaces: ids(["1", "2", "3", "4", "5"]),
+            base: .standard
         )
         #expect(
             !added.contains { $0.lua == "KiwiDesk.focus_space(\"5\")" }
@@ -121,7 +126,8 @@ struct DigitTopUpActionTests {
         ]
         let added = DefaultKeybindings.digitTopUp(
             existing: existing,
-            spaces: ids(["Mail", "1"])
+            spaces: ids(["Mail", "1"]),
+            base: .standard
         )
         #expect(
             !added.contains {

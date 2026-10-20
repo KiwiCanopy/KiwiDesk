@@ -37,12 +37,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// size is one width × height per layout (#2237; 24 is #761's,
     /// a parallel branch, so a file either stamped crosses here),
     /// 26 so a file a build without #761 stamped 25 crosses #761's
-    /// step too, which reads content and so runs twice harmlessly.
+    /// step too, which reads content and so runs twice harmlessly,
+    /// 27 since a Go to Desktop row on `✦` + digit takes `✦⌥` +
+    /// digit (#2460).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 26
+    public static let currentFormat = 27
 
     public var format: Int
     /// Stable across renames (#2324); `ProfileManager.write` keeps

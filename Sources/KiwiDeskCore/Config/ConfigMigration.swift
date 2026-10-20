@@ -47,6 +47,7 @@ public enum ConfigMigration {
         migratingProfileIDs,
         migratingBarVisibility,
         migratingMinWindowSizePerLayout,
+        migratingShortcutBase,
     ]
 
     /// Runs after `steps`, and is skipped by

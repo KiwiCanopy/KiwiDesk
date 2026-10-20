@@ -33,7 +33,7 @@ struct HyperKeyRow: View {
             config: model.config,
             guiManaged: model.guiManaged,
             editingStoredProfile: model.editingStoredProfile
-        ).inertReason(for: .shortcuts(.desktopShortcutBase))
+        ).inertReason(for: .shortcuts(.shortcutBase))
     }
 
     var body: some View {

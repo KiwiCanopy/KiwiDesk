@@ -116,7 +116,7 @@ struct ShortcutsFamilyRows {
             .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
             .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
-            .modeCycle, .modeCue, .hyperKey, .desktopShortcutBase:
+            .modeCycle, .modeCue, .hyperKey, .shortcutBase:
             return nil
         }
     }

@@ -79,7 +79,7 @@ struct DesktopSwitchShortcutTests {
             spaces: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
             resizeStep: 50
         )
-        for base in DesktopShortcutBase.allCases {
+        for base in ShortcutBase.allCases {
             seeded += (1...10).compactMap {
                 DefaultKeybindings.desktopRow($0, base: base)
             }

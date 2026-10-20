@@ -44,17 +44,17 @@ extension SettingsModel {
     }
 
     /// The seed for this config, the Desktop tier included for
-    /// the Desktops this Mac has now, on the draft's Desktop base
-    /// (#1870).
+    /// the Desktops this Mac has now, on the draft's shortcut base
+    /// (#2460).
     private var shippedDefaults: [KeyBinding] {
-        let base = config.desktopShortcutBase
-        return DefaultKeybindings.bindings(
+        let desktops = bindableDesktops.compactMap {
+            DefaultKeybindings.desktopRow($0)
+        }
+        let seed = DefaultKeybindings.bindings(
             spaces: config.spaces,
             resizeStep: Int(config.settings.resizeStep)
         )
-            + bindableDesktops.compactMap {
-                DefaultKeybindings.desktopRow($0, base: base)
-            }
+        return (seed + desktops).map(config.shortcutBase.rebased)
     }
 
     /// The live Spaces the page's per-Space shortcut rows add

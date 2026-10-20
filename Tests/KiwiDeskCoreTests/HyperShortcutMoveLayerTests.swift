@@ -32,7 +32,7 @@ struct HyperShortcutMoveLayerTests {
         let offer = HyperShortcutMove.offer(
             .toHyper,
             rows: config.layers[0].bindings,
-            base: config.desktopShortcutBase
+            base: config.shortcutBase
         )
         HyperShortcutMove.apply(
             offer,
@@ -91,17 +91,15 @@ struct HyperShortcutMoveLayerTests {
         #expect(base?.combo == "hyper+comma")
     }
 
-    @Test("a Desktop row rebases onto a staged base, others stay")
+    @Test("a top-up row rebases onto a staged base, and back")
     func rebasedTopUpRow() throws {
         let seeded = try #require(DefaultKeybindings.desktopRow(4))
-        #expect(
-            DefaultKeybindings.rebased(seeded, onto: .hyper).combo
-                == "hyper+4"
+        let onHyper = ShortcutBase.hyper.rebased(seeded)
+        #expect(onHyper.combo == "hyper+option+4")
+        #expect(ShortcutBase.standard.rebased(onHyper) == seeded)
+        let size = try #require(
+            DefaultKeybindings.resizeRows(step: 1).first
         )
-        var own = seeded
-        own.combo = "control+option+4"
-        #expect(DefaultKeybindings.rebased(own, onto: .hyper) == own)
-        let other = DefaultKeybindings.openSettingsRow()
-        #expect(DefaultKeybindings.rebased(other, onto: .hyper) == other)
+        #expect(ShortcutBase.hyper.rebased(size) == size)
     }
 }
