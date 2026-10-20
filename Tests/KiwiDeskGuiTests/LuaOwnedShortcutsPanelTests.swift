@@ -19,6 +19,9 @@ struct LuaOwnedShortcutsPanelTests {
           KiwiDesk.focus_space_next()
         end)
         KiwiDesk.bind("ctrl+alt+u", lonely)
+        KiwiDesk.bind("ctrl+alt+s", function()
+          KiwiDesk.focus_or_spawn("com.apple.Safari")
+        end)
         """
 
     private func loadedCore() throws -> KiwiCore {
@@ -55,6 +58,16 @@ struct LuaOwnedShortcutsPanelTests {
             !reference.custom.map(\.label)
                 .contains("KiwiDesk.focus_space_next()")
         )
+    }
+
+    @Test("an app body files under Apps, which reads the kind")
+    func appBodyFilesUnderApps() throws {
+        LocalizationManager.shared.select("en")
+        let core = try loadedCore()
+        let reference = try #require(
+            JumpPanelController(core: core).buildReference()
+        )
+        #expect(reference.apps.contains { $0.bundleID == "com.apple.Safari" })
     }
 
     @Test("an unread chord reaches Custom as a Lua function")
