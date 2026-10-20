@@ -171,6 +171,27 @@ struct SplitOverflowTests {
         #expect(try #require(forced[w2]).width < 700)
     }
 
+    /// Seven windows in the default 3 × 2 cap pile the last two in
+    /// cell 6 (column 3): a 500-pt floor on the pile's first window lifts
+    /// nothing,
+    /// while the same floor on window 3, alone in column 3, does.
+    @Test("A pile window never lifts its column")
+    func pileLiftsNothing() throws {
+        let ids = (1...7).map { WindowID(UInt32($0)) }
+        let piled = placed(
+            .grid,
+            ids,
+            context(bounds: [ids[5]: floor(500)])
+        )
+        #expect(try #require(piled[ids[2]]).width < 500)
+        let alone = placed(
+            .grid,
+            ids,
+            context(bounds: [ids[2]: floor(500)])
+        )
+        #expect(try #require(alone[ids[2]]).width >= 500)
+    }
+
     @Test("The origin pulls back to the trailing edge, never past the lead")
     func inwardOrigin() {
         #expect(

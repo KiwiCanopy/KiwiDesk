@@ -64,12 +64,12 @@ struct GridTracksTests {
     func unfitMinimumIsProportional() {
         let widths = GridTracks.lengths(
             count: 2,
-            weights: [1, 1],
+            weights: [1, 3],
             span: 400,
             floors: [],
             minimum: 300
         )
-        #expect(widths == [200, 200])
+        #expect(widths == [100, 300])
     }
 
     /// The render with no floors, for the edge-move cases.
@@ -164,6 +164,35 @@ struct GridTracksTests {
         #expect(abs(after[0] - 750) < 0.5)
         #expect(abs(after[1] - 500) < 0.5)
         #expect(abs(after[2] - 550) < 0.5)
+    }
+
+    /// Floors 600 and 800 overfill a 1300-pt span, so the render
+    /// keeps the configured floor alone and draws 433 each; a
+    /// shrink of column 1 must not jump it up to its 600 floor.
+    @Test("A shrink never moves the edge the other way")
+    func shrinkNeverGrows() throws {
+        let draw: ([Double]) -> [CGFloat] = {
+            GridTracks.lengths(
+                count: 3,
+                weights: $0,
+                span: 1300,
+                floors: [600, 0, 800],
+                minimum: 100
+            )
+        }
+        let before = draw([])[0]
+        let step = try #require(
+            GridTracks.moveEdge(
+                weights: [],
+                grown: 0,
+                neighbor: 1,
+                floors: [600, 0, 800],
+                delta: -50,
+                draw: draw
+            )
+        )
+        #expect(draw(step.weights)[0] <= before + 0.01)
+        #expect(step.clamped)
     }
 
     @Test("A write never shortens the stored list")

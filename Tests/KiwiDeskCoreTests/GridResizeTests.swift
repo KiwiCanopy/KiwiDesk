@@ -216,10 +216,13 @@ struct GridResizeTests {
         let space = grid(core, count: 3, focus: 2, type: "dynamic")
         // The middle column grows into the third.
         core.execute("resize", args: [.string("x"), .number(60)])
-        let third =
+        let first = try #require(
             core.state.workspaces[space]?.sessionRatios
-            .gridColumnWeights?[2]
-        #expect(third != nil && third! < 1)
+                .gridColumnWeights
+        )
+        try #require(first.count == 3)
+        let third = first[2]
+        #expect(third < 1)
         core.state.apply(
             .windowDestroyed(WindowID(3), wasMinimized: false)
         )
@@ -246,6 +249,34 @@ struct GridResizeTests {
                 .gridColumnWeights == nil
         )
         #expect(width(core, 1) == width(core, 2))
+    }
+
+    /// Two rows: the lower row's top edge is its only inner one,
+    /// so a drag naming the other edge moves nothing.
+    @Test("A row drag on a leading edge moves that edge")
+    func mouseLeadingRowEdge() {
+        let core = makeCore()
+        let space = grid(core, count: 2, focus: 2)
+        core.execute(
+            "grid.set_dimensions",
+            args: [.number(1), .number(2)]
+        )
+        core.retile()
+        func height(_ id: UInt32) -> CGFloat {
+            core.tiler.calculatedFrames(state: core.state)[
+                WindowID(id)
+            ]?.height ?? 0
+        }
+        let half = height(2)
+        core.applyResizeAdjustment(
+            .gridRow(40, leading: true),
+            for: WindowID(2),
+            in: core.state.workspaces[space]!,
+            bounds: CGRect(x: 0, y: 0, width: 1220, height: 820)
+        )
+        core.retile()
+        #expect(abs(height(2) - (half + 40)) < 0.5)
+        #expect(abs(height(1) - (half - 40)) < 0.5)
     }
 
     @Test("A mouse drag on a leading edge moves that edge")
