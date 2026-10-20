@@ -108,14 +108,14 @@ struct SettingsRowRevertGroupTests {
         #expect(model.config.appRules["com.apple.Notes"] == SpaceID("new"))
     }
 
-    /// Only the shortcut layers' ↺ takes a group the row does not
-    /// name, so only it asks first (owner, 2026-10-19).
-    @Test("only a shortcut row's ↺ asks before reverting")
+    /// A ↺ asks only where it takes more than its row: every
+    /// shortcut change, or a whole layer or lens (#2412).
+    @Test("only a ↺ that takes more than its row asks")
     func onlyShortcutsAsk() {
         let model = makeTestModel()
         #expect(model.revertTakesGroup(censusRow(.shortcuts(.layers), nil)))
         #expect(
-            model.revertTakesGroup(censusRow(.shortcuts(.layersIcon), nil))
+            !model.revertTakesGroup(censusRow(.shortcuts(.layersIcon), nil))
         )
         #expect(
             !model.revertTakesGroup(censusRow(.borders(.borderWidth), nil))
@@ -123,14 +123,23 @@ struct SettingsRowRevertGroupTests {
         #expect(
             !model.revertTakesGroup(censusRow(.spaces(.spaceList), "1"))
         )
+        // Only the "Layers edited" row's writer takes every shortcut
+        // change; a binding, an icon and the base go alone (#2412).
         let groups = SettingsRevertRegister.writers
             .filter { $0.value.takesGroup }.keys
-        #expect(
-            Set(groups) == [
-                .shortcuts(.layers), .shortcuts(.layersIcon),
-                .shortcuts(.shortcutBase),
-            ]
-        )
+        #expect(Set(groups) == [.shortcuts(.layers)])
+        var row = censusRow(.shortcuts(.layers), nil)
+        for (revert, asks) in [
+            (SettingsRowRevert.layer(stored: "A", page: nil), true),
+            (.lens(stored: nil, page: "B"), true),
+            (.binding(layer: "default", lua: "x"), false),
+            (.layerMembers(page: "A", profile: nil), false),
+            (.lensFields(page: "B"), false),
+            (.lensReach(page: "B", profile: "Work"), false),
+        ] {
+            row.revert = revert
+            #expect(model.revertTakesGroup(row) == asks)
+        }
     }
 
     /// The ↺ and the row menu both go through the door that asks;

@@ -2,9 +2,9 @@ import Foundation
 import Testing
 
 /// The visible-panel scan is wired in ONE door, which hands it
-/// the event loop's button reader (#2344). The scan reads the
-/// live WindowServer list and no fixture can drive it, so the
-/// wiring is a needle: a caller spelling the scan beside the
+/// the event loop's button and subrole readers (#2344, #2239).
+/// The scan reads the live WindowServer list and no fixture can
+/// drive it, so the wiring is a needle: a caller spelling the scan beside the
 /// door, or a door handing it `{ _ in false }`, is the #2344
 /// defect back with `VisiblePanelButtonTests` green.
 @Suite("Visible-panel scan wiring")
@@ -61,7 +61,7 @@ struct VisiblePanelWiringTests {
         )
     }
 
-    @Test("the door hands the scan the button reader")
+    @Test("the door hands the scan the button and subrole readers")
     func doorPassesTheReader() throws {
         let body = try SourceScan.functionBody(
             of: "showsIgnoredPanel",
@@ -69,24 +69,20 @@ struct VisiblePanelWiringTests {
             under: "Events"
         )
         try #require(!body.isEmpty)
+        #expect(body.contains("let window = untrackedWindow(of: pid)"))
+        #expect(body.contains("tracked: admittedWindows(of: pid)"))
+        // Both answers come from the gate's own reads, which have
+        // no seam (`PanelButtonReaderTests` holds the element
+        // reader); the subrole is #2239's system-dialog term.
         #expect(
             body.contains(
-                "titlebarButton: untrackedTitlebarButton(of: pid)"
+                "subrole: { window($0).map(AXHelper.subrole(of:))"
             )
         )
-        #expect(body.contains("tracked: admittedWindows(of: pid)"))
-        // The reader answers with the gate's own trait read, which
-        // has no seam (`PanelButtonReaderTests` holds the rest).
-        let reader = try SourceScan.functionBody(
-            of: "untrackedTitlebarButton",
-            in: "EventLoop+PanelButton.swift",
-            under: "Events"
-        )
-        try #require(!reader.isEmpty)
         #expect(
-            reader.components(
-                separatedBy: "return Self.readsTitlebarButton(element"
-            ).count - 1 == 2
+            body.contains(
+                "window(id).map { Self.readsTitlebarButton($0, id: id) }"
+            )
         )
         let scan = try SourceScan.functionBody(
             of: "hasVisibleIgnoredPanel",
@@ -94,6 +90,7 @@ struct VisiblePanelWiringTests {
             under: "AX"
         )
         try #require(!scan.isEmpty)
+        #expect(scan.contains("subrole: subrole"))
         #expect(scan.contains("titlebarButton: titlebarButton"))
     }
 

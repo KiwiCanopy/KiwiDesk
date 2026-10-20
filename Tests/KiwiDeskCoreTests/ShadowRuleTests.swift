@@ -1,3 +1,4 @@
+import ApplicationServices
 import CoreGraphics
 import Foundation
 import Testing
@@ -46,6 +47,26 @@ struct ShadowRuleTests {
         #expect(ShellReading.of(button: nil, children: 0) == .unread)
         #expect(ShellReading.of(button: false, children: nil) == .unread)
         #expect(ShellReading.of(button: nil, children: nil) == .unread)
+    }
+
+    // MARK: - The children read
+
+    /// NoMachine's buttonless twin lists its own empty title text
+    /// as its one child (#2346, device 2026-10-20). Elements of
+    /// pids no process holds: `CFEqual` reads them, nothing asks.
+    @Test("the window's own title element furnishes nothing")
+    func titleChildIsNoContent() {
+        let title = AXUIElementCreateApplication(900_101)
+        let content = AXUIElementCreateApplication(900_102)
+        #expect(AXHelper.contentChildren([title], title: title) == 0)
+        #expect(
+            AXHelper.contentChildren([title, content], title: title) == 1
+        )
+        #expect(AXHelper.contentChildren([content], title: title) == 1)
+        #expect(AXHelper.contentChildren([title], title: nil) == 1)
+        #expect(
+            AXHelper.contentChildren([title], title: kCFNull) == 1
+        )
     }
 
     // MARK: - The rule

@@ -200,14 +200,17 @@ enum SettingsDiffRowSource {
             apart: liveApart
         ) {
             // A key's own readout rows revert through its writer
-            // (#792); every other row states its own way back.
+            // (#792) unless the producer stated a way of their own
+            // (#2412); every other row states its own way back.
             rows += SettingsValueReadout.rows(
                 for: key,
                 old: model.cleanConfig,
                 new: model.config
             ).map {
                 var row = $0
-                row.revert = .census
+                row.revert =
+                    row.revert == .unstated
+                    ? .census : model.ownedRevert(row.revert)
                 return row
             }
         }

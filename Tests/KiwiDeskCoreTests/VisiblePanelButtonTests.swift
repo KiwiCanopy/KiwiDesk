@@ -21,7 +21,8 @@ struct VisiblePanelButtonTests {
         bundleID: String = "com.example.menubarapp",
         accessory: Bool = true,
         tracked: Set<WindowID> = [],
-        buttoned: Set<WindowID> = []
+        buttoned: Set<WindowID> = [],
+        dialogs: Set<WindowID> = []
     ) -> (panel: Bool, asked: [WindowID]) {
         var asked: [WindowID] = []
         let verdict = FloatDetection.isVisibleIgnoredPanel(
@@ -30,6 +31,9 @@ struct VisiblePanelButtonTests {
             bundleID: bundleID,
             isAccessory: accessory,
             tracked: tracked,
+            subrole: {
+                dialogs.contains($0) ? "AXSystemDialog" : "AXStandardWindow"
+            },
             titlebarButton: {
                 asked.append($0)
                 return buttoned.contains($0)
@@ -43,6 +47,15 @@ struct VisiblePanelButtonTests {
         #expect(panel(window).panel)
         #expect(panel(window).asked == [window])
         #expect(!panel(window, buttoned: [window]).panel)
+    }
+
+    /// Spotlight's panel on macOS 27 (#2239): its buttons are
+    /// never asked, so it counts as the panel the gate ignores.
+    @Test("a buttoned system dialog is a panel")
+    func buttonedSystemDialogIsAPanel() {
+        let dialog = panel(window, buttoned: [window], dialogs: [window])
+        #expect(dialog.panel)
+        #expect(dialog.asked.isEmpty)
     }
 
     @Test("a tracked, unbanded or unnumbered window asks nothing")

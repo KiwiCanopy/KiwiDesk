@@ -1211,12 +1211,13 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   LaunchServices on a notification path, a new filer joining
   `ProcessIdentitySeamTests`' census (#1936), which keeps a running process
   whose LaunchServices record went missing for a moment, while a window with no
-  title-bar button and no AX child beside a buttoned window of its own process
-  is a shadow refused at `track` on any subrole, in one batched read — a lone
-  shell waiting for a host only in a process that shows no tile yet — handed
-  back as a hide when tracked first, its record dying with its host, and never
-  a tab (#1785, `ProcessIdentityTests`, `ProcessPolicyReadingTests`,
-  `ShadowRuleTests`, `ShadowWindowTests`, `ShadowWindowReconcileTests`)
+  title-bar button and no AX child but its own title element beside a
+  buttoned window of its own process is a shadow refused at `track` on any
+  subrole, in one batched read — a lone shell waiting for a host only in a
+  process that shows no tile yet — handed back as a hide when tracked first,
+  its record dying with its host, and never a tab (#1785,
+  `ProcessIdentityTests`, `ProcessPolicyReadingTests`, `ShadowRuleTests`,
+  `ShadowWindowTests`, `ShadowWindowReconcileTests`)
 - boot replays the previous session before its first pass draws — nothing in
   `finishBoot` ahead of `arrangeBootDesk` issues a pass, and a new boot-time
   restore source joins `CrashRecovery.takeBootSnapshot` — the cross-session
@@ -1250,7 +1251,9 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
   `AXDumpCorpusTests`)
 - every reader of the ignore predicate states the title-bar button the #2072
   escape decides on, asked through the one `FloatDetection.needsTitlebarButton`
-  (`CommandBarIgnoreTests`), a screen-saver-level window refused at adoption
+  handed the window's subrole, a buttoned `AXSystemDialog` taking no escape
+  (#2239, `SystemDialogEscapeTests`, `TitlebarButtonWiringTests`), a
+  screen-saver-level window refused at adoption
   alone, a tracked one judged through the one `FloatDetection.judgedLayer`
   (#2069, `ScreenSaverLayerWiringTests`)
 - a float rule is read only through `FloatRules.parse` and spelled only
@@ -1810,7 +1813,10 @@ Touching `Sources/KiwiDesk` (the GUI).
 - a census key naming a model path owes a writer in
   `SettingsRevertRegister`, a diff-row producer states how its rows revert
   or they draw no ↺, and state written together reverts together (#792,
-  `SettingsRevertRegisterTests`, `SettingsRowRevertTests`)
+  `SettingsRevertRegisterTests`, `SettingsRowRevertTests`) — a binding with
+  the bindings its chord moved between, through the one `BindingRevertSet`
+  its words read too, and a ↺ taking more than its words name asking first
+  (#2412, `BindingRevertSetTests`, `SettingsRowRevertGroupTests`)
 - the settings one control writes together are one row while they agree,
   folded through the one `SettingKey.summarized` where rows are narrated —
   the pill, the live rows, the sync sheet — and never in `SettingsDraftDiff`

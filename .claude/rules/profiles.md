@@ -1843,7 +1843,12 @@ as ONE stored → page name map, or a chain merges two layers
 a profile whose override moved is written, an untouched one is
 not (`LayerReachSnapshotTests` ▸ `leaveOneOut`). A writer that
 drops a base layer clears every `leftOut` mark naming it
-(`LayerReachSnapshotTests` ▸ `dropClearsMarks`).
+(`LayerReachSnapshotTests` ▸ `dropClearsMarks`). A draft revert
+of a layer or a lens (#2412) stages through the delete's own
+helper, `dropDraftLayer` or `dropDraftLens`, never by writing
+`reachEdits` beside it, so the pass reads one staging whichever
+door wrote it (`SettingsShortcutRevertTests`,
+`SettingsShortcutRevertEdgeTests`).
 
 The layer pass is the ONE decider of which layers exist where. The
 loaded page's base takes its layer SET and order from the layered
