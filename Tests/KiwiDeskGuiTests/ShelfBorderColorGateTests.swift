@@ -27,10 +27,10 @@ struct ShelfBorderColorGateTests {
 
     @Test("The row greys, and links, only while the border is off")
     func gateFollowsTheSwitch() {
-        let off = AdvancedColorsGates(settings: Self.settings(border: false))
+        let off = ColorsAndGlassGates(settings: Self.settings(border: false))
         #expect(off.shelfBorderOff)
         #expect(off.needsOwnSentence(.kiwishelf(.borderColor)))
-        let on = AdvancedColorsGates(settings: Self.settings(border: true))
+        let on = ColorsAndGlassGates(settings: Self.settings(border: true))
         #expect(!on.shelfBorderOff)
         #expect(on.verdict(for: .kiwishelf(.borderColor)) == nil)
     }
@@ -40,7 +40,7 @@ struct ShelfBorderColorGateTests {
     /// sentence with every bar hidden (#761).
     @Test("With every bar hidden the row keeps its own sentence")
     func hiddenBarsKeepTheLink() {
-        let gates = AdvancedColorsGates(
+        let gates = ColorsAndGlassGates(
             settings: Self.settings(border: false, barShows: false)
         )
         #expect(gates.shelfBorderOff)
@@ -53,7 +53,7 @@ struct ShelfBorderColorGateTests {
         LocalizationManager.shared.select("en")
         defer { LocalizationManager.shared.select(nil) }
         #expect(
-            AdvancedColorsHelp.shelfBorderReference.contains(
+            ColorsAndGlassHelp.shelfBorderReference.contains(
                 CrossReferenceRow.linkSlot
             )
         )
@@ -67,15 +67,15 @@ struct ShelfBorderColorGateTests {
         "The row greys and the link renders on the gate's values",
         arguments: [
             (
-                "AdvancedColorsGates+Verdict.swift",
+                "ColorsAndGlassGates+Verdict.swift",
                 "returnshelfBorderOff?ColorRowVerdict("
-                    + "help:AdvancedColorsHelp.shelfBorderOff,"
+                    + "help:ColorsAndGlassHelp.shelfBorderOff,"
             ),
             (
                 "BarColorCards.swift",
                 "ifgates.needsOwnSentence(.kiwishelf(.borderColor)){"
                     + "CrossReferenceRow("
-                    + "prose:AdvancedColorsHelp.shelfBorderReference,"
+                    + "prose:ColorsAndGlassHelp.shelfBorderReference,"
             ),
         ]
     )

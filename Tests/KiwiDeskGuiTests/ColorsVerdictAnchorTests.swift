@@ -81,7 +81,7 @@ struct ColorsVerdictAnchorTests {
         #expect(all.count == 2048)
         var dimmed = 0
         for settings in all {
-            let gates = AdvancedColorsGates(settings: settings)
+            let gates = ColorsAndGlassGates(settings: settings)
             for card in cards {
                 let pages = gates.dimmedDestinations(of: card.keys)
                 for key in card.keys {
@@ -133,7 +133,7 @@ struct ColorsVerdictAnchorTests {
         let all = states()
         for key in keys {
             let ever = all.contains {
-                AdvancedColorsGates(settings: $0).verdict(for: key)
+                ColorsAndGlassGates(settings: $0).verdict(for: key)
                     != nil
             }
             #expect(

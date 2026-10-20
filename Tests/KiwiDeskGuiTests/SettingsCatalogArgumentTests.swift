@@ -37,7 +37,7 @@ struct SettingsCatalogArgumentTests {
         // `accentGroup` / `secondAccentGroup` declarations, which
         // the dotted-reference sweep still covers.
         "RoleColorCards.swift: role.control",
-        "AdvancedColorRow.swift: anchor",  // #2389's children
+        "ColorsAndGlassRow.swift: anchor",  // #2389's children
         // The collapsible card forwards its drawer's declaration
         // to the one `SettingsSection` it is (#1741); its mount
         // takes the drawer outright (`GesturesDrawer`), which the

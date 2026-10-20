@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Advanced color swatches for borders and drag visuals.
-extension AdvancedColorRow {
+/// Colors & glass swatches for borders and drag visuals.
+extension ColorsAndGlassRow {
     @ViewBuilder func structureRow(_ key: BordersKey) -> some View {
         switch key {
         case .borderFocusedColor:
