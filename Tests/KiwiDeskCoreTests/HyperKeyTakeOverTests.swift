@@ -10,6 +10,9 @@ private final class FakeHost {
     var mapping: Set<HyperKeyRemap.Pair> = []
     var written: HyperKeyRemap.Pair?
     var sets = 0
+    /// False stands in for a boot session the host cannot read,
+    /// where `Host.live` drops the record it was asked to keep.
+    var keepsRecord = true
 
     var host: HyperKeyRemap.Host {
         HyperKeyRemap.Host(
@@ -23,7 +26,7 @@ private final class FakeHost {
                 return ""
             },
             readWritten: { self.written },
-            writeWritten: { self.written = $0 }
+            writeWritten: { self.written = self.keepsRecord ? $0 : nil }
         )
     }
 
@@ -105,6 +108,34 @@ struct HyperKeyTakeOverTests {
             Issue.record("expected a refusal")
             return
         }
+    }
+
+    @Test("our entry beside another is never taken over")
+    func ourEntryBesideAnotherRefuses() {
+        let core = runningCore()
+        let fake = FakeHost()
+        let both = [Self.capsToF18, HyperKeyRemap.pair(for: .f13)]
+        fake.mapping = Set(both)
+        core.hyperRemapHost = fake.host
+        _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
+        let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
+        #expect(!reply.isSuccess)
+        #expect(fake.written == nil)
+        #expect(fake.sets == 0)
+    }
+
+    @Test("a record the host cannot keep fails the take-over")
+    func unkeptRecordFails() {
+        let core = runningCore()
+        let fake = FakeHost()
+        fake.mapping = [Self.capsToF18]
+        fake.keepsRecord = false
+        core.hyperRemapHost = fake.host
+        _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
+        let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
+        #expect(!reply.isSuccess)
+        #expect(core.keys.hyperStatus == .failed)
+        #expect(!core.keys.hyperEnabled)
     }
 
     @Test("a taken-over remap is cleared at stop")

@@ -96,6 +96,16 @@ enum HyperKeyWords {
     /// Why a chosen key is not working, or nil while it is.
     static func trouble(_ status: HyperKeyStatus) -> String? {
         switch status {
+        case .refused(let foreign?) where foreign.claimable:
+            return L(
+                "shortcuts.hyper_key.refused_claimable",
+                "%1$@ is already remapped to %2$@ on this Mac, so "
+                    + "Hyper stays off. That is the remap KiwiDesk "
+                    + "would set itself, which a remapping app can leave "
+                    + "behind when it quits.",
+                name(foreign.source),
+                name(foreign.destination)
+            )
         case .refused(let foreign?):
             return L(
                 "shortcuts.hyper_key.refused_named",

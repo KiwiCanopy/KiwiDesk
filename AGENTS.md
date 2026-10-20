@@ -1294,7 +1294,7 @@ Touching `Lua`.
 
 ### [input-and-animation](.claude/rules/input-and-animation.md)
 
-Touching `Keys`, `Events`, `Animation`.
+Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`.
 
 - Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per screen
 - hover focus is armed by user pointer motion alone, so KiwiDesk moves the

@@ -42,16 +42,19 @@ struct HyperTakeOverOfferTests {
         )
         #expect(row.contains("Self.takeOverOffer("))
         #expect(row.contains("HyperTakeOverButton(model: model"))
-        // Core decides what is claimable; the row never compares
-        // keys itself.
-        #expect(!row.contains(".destination =="))
+        // Core decides what is claimable: the row reads the
+        // foreign remap's keys nowhere, so it cannot compare them.
+        #expect(!row.contains(".source"))
+        #expect(!row.contains(".destination"))
     }
 
     @Test("the alert names the remap it takes over")
     func messageNamesTheRemap() {
         LocalizationManager.shared.select("en")
         let text = HyperTakeOverButton.message(Self.claimable)
-        #expect(text.contains("this remap of Caps Lock to F18"))
-        #expect(text.contains("still hears it"))
+        #expect(text.contains("the remap of Caps Lock to F18"))
+        #expect(text.contains("listens for F18"))
+        let caption = HyperKeyWords.trouble(.refused(Self.claimable))
+        #expect(caption?.contains("KiwiDesk would set itself") == true)
     }
 }

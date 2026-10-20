@@ -10,6 +10,9 @@ import SwiftUI
 /// draft uses Hyper (config presence expands Simple).
 struct HyperKeyRow: View {
     @ObservedObject var model: SettingsModel
+    /// The take-over's focus destination (#816): the button leaves
+    /// once the remap is KiwiDesk's, and the recorder stays drawn.
+    @FocusState private var recorderFocused: Bool
 
     /// The one offer predicate, evaluated at `.simple` for the
     /// mode-gated frame (#760).
@@ -79,7 +82,8 @@ struct HyperKeyRow: View {
                         model.setAppWide { $0.hyperKey = key }
                     }
                 ),
-                disabled: reason == .appWideLuaOwned
+                disabled: reason == .appWideLuaOwned,
+                focus: $recorderFocused
             )
         }
     }
@@ -97,7 +101,9 @@ struct HyperKeyRow: View {
                 status: model.hyperStatus,
                 luaOwned: reason == .appWideLuaOwned
             ) {
-                HyperTakeOverButton(model: model, foreign: foreign)
+                HyperTakeOverButton(model: model, foreign: foreign) {
+                    recorderFocused = true
+                }
             }
         }
     }

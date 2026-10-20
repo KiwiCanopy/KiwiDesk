@@ -7,7 +7,10 @@ extension HyperKeyRemap {
     /// clears the entry as one KiwiDesk wrote; the shape only ever
     /// decides the offer, never ownership. The mapping is re-read
     /// here, since it may have changed since the offer, and any
-    /// other mapping takes the ordinary `apply`.
+    /// other mapping takes the ordinary `apply`. The verdict is
+    /// `foreign(in:want:)`'s, the one the offer reads; a record the
+    /// host could not keep answers `.failed`, since quit would then
+    /// leave the mapping behind.
     @MainActor
     static func claim(
         _ want: HyperSourceKey,
@@ -18,10 +21,11 @@ extension HyperKeyRemap {
                 ["property", "--get", "UserKeyMapping"]
             )
         else { return .failed }
-        let ours = pair(for: want)
-        guard want != .f18, pairs(inHidutilOutput: listing) == [ours]
+        let current = pairs(inHidutilOutput: listing)
+        guard foreign(in: current, want: want)?.claimable == true
         else { return apply(want, on: host) }
+        let ours = pair(for: want)
         host.writeWritten(ours)
-        return .on
+        return host.readWritten() == ours ? .on : .failed
     }
 }
