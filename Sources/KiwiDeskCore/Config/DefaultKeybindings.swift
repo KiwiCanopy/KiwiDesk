@@ -11,10 +11,12 @@ public enum DefaultKeybindings {
         ("right", "to the right"),
     ]
 
-    /// Starter keybindings for base `default` mode (#91, #466, #1094, #602).
+    /// Starter keybindings for base `default` mode (#91, #466, #1094, #602),
+    /// on `base` (#2460).
     public static func bindings(
         spaces: [SpaceID],
-        resizeStep: Int
+        resizeStep: Int,
+        base: ShortcutBase
     ) -> [KeyBinding] {
         var rows: [KeyBinding] = []
         // Tier 1 — ⌃⌥: focus window / space
@@ -87,7 +89,7 @@ public enum DefaultKeybindings {
         rows.append(resetSizesRow())
         rows.append(contentsOf: barRevealRows())
         rows.append(contentsOf: appChromeRows())
-        return rows
+        return rows.map(base.rebased)
     }
 
     /// The app-chrome rows on the `⌃⌥` base — ⌃⌥K opens the

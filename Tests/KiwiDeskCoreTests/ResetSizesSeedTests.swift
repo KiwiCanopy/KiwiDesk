@@ -11,7 +11,11 @@ import Testing
 @Suite("Reset sizes seed (#2303)")
 struct ResetSizesSeedTests {
     private var seeded: [KeyBinding] {
-        DefaultKeybindings.bindings(spaces: [], resizeStep: 50)
+        DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 50,
+            base: .standard
+        )
     }
 
     @Test("⌃⌥R resets the active Space's sizes in the base seed")

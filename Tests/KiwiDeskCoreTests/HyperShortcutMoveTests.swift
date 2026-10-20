@@ -10,7 +10,11 @@ import Testing
 @Suite("Hyper move offer: the letter lines")
 struct HyperShortcutMoveTests {
     private func seedLayer() -> [KeyBinding] {
-        DefaultKeybindings.bindings(spaces: [SpaceID(1)], resizeStep: 50)
+        DefaultKeybindings.bindings(
+            spaces: [SpaceID(1)],
+            resizeStep: 50,
+            base: .standard
+        )
     }
 
     private func offer(_ rows: [KeyBinding]) -> HyperShortcutMove.Offer {

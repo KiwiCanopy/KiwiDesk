@@ -6,11 +6,6 @@ import Foundation
 /// tier rather than acting on the window; the ruling is
 /// `docs/design-decisions.md` ▸ *The Desktop tier is seeded*.
 extension DefaultKeybindings {
-    /// The seeded tier's row for Desktop `number`.
-    public static func desktopRow(_ number: Int) -> KeyBinding? {
-        desktopRow(number, base: .standard)
-    }
-
     /// The row that goes to Desktop `number` on `base` — the seed's
     /// chord moved through `ShortcutBase.rebased` — or nil past the
     /// ten digits.
@@ -33,7 +28,7 @@ extension DefaultKeybindings {
     /// Whether `row` goes to a Desktop — the seed's own spelling,
     /// derived from `desktopRow` rather than restated.
     public static func isDesktopRow(_ row: KeyBinding) -> Bool {
-        guard let sample = desktopRow(1)?.lua,
+        guard let sample = desktopRow(1, base: .standard)?.lua,
             let open = sample.firstIndex(of: "(")
         else { return false }
         return row.lua.hasPrefix(sample[...open])

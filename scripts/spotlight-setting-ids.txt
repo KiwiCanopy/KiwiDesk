@@ -78,7 +78,7 @@ appWide.visionFadeDuration
 appWide.visionLenses
 appWide.visionNeverDimmed
 config.appRules[app]
-config.desktopShortcutBase
+config.shortcutBase
 config.floatAutomatically
 config.floatRules
 config.layers[].icon

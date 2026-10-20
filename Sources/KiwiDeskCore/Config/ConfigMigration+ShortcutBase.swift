@@ -2,14 +2,15 @@ import Foundation
 
 /// The Desktop base becomes the shortcut base (#2460,
 /// `ShortcutBaseMigrationTests`). `desktop_shortcut_base` covered
-/// the Desktop tier alone and `shortcut_base` covers every tier, so
-/// the value is not carried: it reads `hyper` where more of the
+/// the Desktop tier alone and `shortcut_base` covers every tier: it
+/// reads `hyper` where the old Desktop base was Hyper or more of the
 /// seeded `⌃⌥` letters sit on Hyper than on `⌃⌥` — the old move
-/// offer's mark, judged once here — and `control+option` otherwise.
-/// A Go to Desktop row on `✦` + digit moves to `✦⌥` + digit, which
-/// the Space digits no longer hold under `✦`, in every `bindings`
-/// list a file carries. A meaning change, so the step reads the
-/// format and stands down at the floor it introduced (#1354).
+/// offer's marks, judged once here — and `control+option`
+/// otherwise. A Go to Desktop row on `✦` + digit moves to `✦⌥` +
+/// digit, which the Space digits no longer hold under `✦`, in every
+/// `bindings` list a file carries, where that chord is free. A
+/// meaning change, so the step reads the format and stands down at
+/// the floor it introduced (#1354).
 extension ConfigMigration {
     /// The formats this step introduced, per shape.
     static let shortcutBaseGuiFormat = 12
@@ -44,14 +45,14 @@ extension ConfigMigration {
 
     @Sendable
     static func migratingShortcutBase(_ data: Data) -> Data? {
-        guard belowShortcutBaseFloor(data) else { return nil }
         var bases: [String] = []
         return surgicallyApplying(
             data,
             gate: {
-                $0.range(of: Data("\"\(retiredDesktopBaseKey)\"".utf8))
+                ($0.range(of: Data("\"\(retiredDesktopBaseKey)\"".utf8))
                     != nil
-                    || $0.range(of: Data(desktopRowPrefix.utf8)) != nil
+                    || $0.range(of: Data(desktopRowPrefix.utf8)) != nil)
+                    && belowShortcutBaseFloor($0)
             },
             rewriting: { node in
                 bases = []
@@ -89,7 +90,10 @@ extension ConfigMigration {
                 if key == retiredDesktopBaseKey {
                     changed = true
                     if dict[shortcutBaseKey] == nil {
-                        let base = guessedBase(dict[shortcutBaseLayersKey])
+                        let base = crossedBase(
+                            old: value,
+                            layers: dict[shortcutBaseLayersKey]
+                        )
                         bases.append(base)
                         out[shortcutBaseKey] = base
                     }
@@ -117,6 +121,15 @@ extension ConfigMigration {
             return (out, changed)
         }
         return (node, false)
+    }
+
+    /// `hyper` where the old Desktop base was Hyper — the user took
+    /// the old offer's Desktop line, and the tier stays whole — or
+    /// where the default layer holds more of the moved letters on
+    /// Hyper than on `⌃⌥`; the seed's base otherwise.
+    static func crossedBase(old: Any, layers: Any?) -> String {
+        old as? String == ShortcutBase.hyper.rawValue
+            ? ShortcutBase.hyper.rawValue : guessedBase(layers)
     }
 
     /// `hyper` where the default layer holds more of the moved
@@ -148,7 +161,7 @@ extension ConfigMigration {
         var changed = false
         let out = rows.map { row -> Any in
             guard var binding = row as? [String: Any],
-                let target = rebasedDesktopCombo(binding)
+                let target = rebasedDesktopCombo(binding, among: rows)
             else { return row }
             binding["combo"] = target
             changed = true
@@ -157,8 +170,13 @@ extension ConfigMigration {
         return (out, changed)
     }
 
-    /// `✦⌥` + digit for a Go to Desktop row on exactly `✦` + digit.
-    static func rebasedDesktopCombo(_ row: [String: Any]) -> String? {
+    /// `✦⌥` + digit for a Go to Desktop row on exactly `✦` + digit,
+    /// or nil where another row of `rows` holds that chord as
+    /// registered — the row then stays, as the switch leaves one.
+    static func rebasedDesktopCombo(
+        _ row: [String: Any],
+        among rows: [Any]
+    ) -> String? {
         guard let lua = row["lua"] as? String,
             lua.hasPrefix(desktopRowPrefix),
             let text = row["combo"] as? String,
@@ -166,10 +184,16 @@ extension ConfigMigration {
             combo.modifiers == .hyper,
             KeyCombo.keyName(for: combo.keyCode).flatMap({ Int($0) }) != nil
         else { return nil }
-        return KeyCombo(
+        let target = KeyCombo(
             keyCode: combo.keyCode,
             modifiers: [.hyper, .option]
-        ).comboString()
+        )
+        let held = rows.contains {
+            ($0 as? [String: Any])?["combo"]
+                .flatMap { $0 as? String }
+                .flatMap(KeyCombo.parse)?.registered == target.registered
+        }
+        return held ? nil : target.comboString()
     }
 
     /// The textual edit: the retired key renamed with its new value
@@ -192,12 +216,20 @@ extension ConfigMigration {
             let regex = try? NSRegularExpression(pattern: "\\{[^{}]*\\}")
         else { return nil }
         let whole = NSRange(out.startIndex..., in: out)
-        for match in regex.matches(in: out, range: whole).reversed() {
+        let matches = regex.matches(in: out, range: whole)
+        // Every flat object: a holder in another list only makes the
+        // edit disagree with the walk, which the envelope discards.
+        let objects: [Any] = matches.compactMap {
+            Range($0.range, in: out).flatMap {
+                try? JSONSerialization.jsonObject(with: Data(out[$0].utf8))
+            }
+        }
+        for match in matches.reversed() {
             guard let range = Range(match.range, in: out),
                 let object = try? JSONSerialization.jsonObject(
                     with: Data(out[range].utf8)
                 ) as? [String: Any],
-                let target = rebasedDesktopCombo(object)
+                let target = rebasedDesktopCombo(object, among: objects)
             else { continue }
             let edited = out[range].replacingOccurrences(
                 of: "(\"combo\"\\s*:\\s*)\"[^\"]*\"",

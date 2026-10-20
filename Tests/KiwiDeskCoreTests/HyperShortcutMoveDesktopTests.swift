@@ -43,7 +43,7 @@ struct HyperShortcutMoveDesktopTests {
                 name: KeyLayer.defaultName,
                 bindings: HyperShortcutMove.letterSeed
                     + desktops.compactMap {
-                        DefaultKeybindings.desktopRow($0)
+                        DefaultKeybindings.desktopRow($0, base: .standard)
                     }
             )
         ]

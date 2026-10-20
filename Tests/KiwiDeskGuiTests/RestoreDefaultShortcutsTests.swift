@@ -66,7 +66,8 @@ struct RestoreDefaultShortcutsTests {
         let expected =
             DefaultKeybindings.bindings(
                 spaces: model.config.spaces,
-                resizeStep: 80
+                resizeStep: 80,
+                base: .standard
             ) + [1, 2].compactMap(DefaultKeybindings.desktopRow)
         let got = model.config.layers[0].bindings
         #expect(got.map(\.combo) == expected.map(\.combo))

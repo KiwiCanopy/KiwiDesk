@@ -895,10 +895,11 @@ Touching `Config`, `Profiles`, `Commands`.
   `gui.json` and only ever raised (#2324, `ShortcutOfferTests`) and cleared
   with a discarded `gui.json` (#2211, `DefaultShortcutGenerationTests` ▸
   `everySeedRowHasAGeneration`)
-- every writer of a default row — the three top-ups and Restore Defaults —
-  writes it on the stored `GuiConfig.shortcutBase` through the one
-  `ShortcutBase.rebased`, a writer of the base moving the rows in the same
-  draft write (#2460, `ShortcutBaseTests`, `ResetSizesSeedTests`)
+- every writer of a default row writes it on the stored
+  `GuiConfig.shortcutBase` through the one `ShortcutBase.rebased`, the
+  producers taking the base as a required argument, and a writer of the base
+  moves the rows in the same draft write (#2460, `ShortcutBaseTests`,
+  `ResetSizesSeedTests`)
 - a temporary Space's shortcuts go when it drops and a held Space's when its
   hold ends, through the one `retireLiveOnlyShortcuts`, a binding another
   arrangement declares staying #92's (#1827, `SpaceShortcutDropTests`)

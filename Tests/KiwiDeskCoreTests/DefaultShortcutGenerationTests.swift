@@ -101,7 +101,8 @@ struct DefaultShortcutGenerationTests {
     func seedCarriesEveryGeneration() {
         let seed = DefaultKeybindings.bindings(
             spaces: [SpaceID("1")],
-            resizeStep: 10
+            resizeStep: 10,
+            base: .standard
         )
         for number in 1...DefaultKeybindings.newestGeneration {
             for row in DefaultKeybindings.rows(ofGeneration: number) {
@@ -145,7 +146,8 @@ struct DefaultShortcutGenerationTests {
     func everySeedRowHasAGeneration() {
         let seed = DefaultKeybindings.bindings(
             spaces: [SpaceID("1")],
-            resizeStep: 10
+            resizeStep: 10,
+            base: .standard
         )
         let families = [
             "KiwiDesk.focus_space(", "KiwiDesk.move_to_space(",

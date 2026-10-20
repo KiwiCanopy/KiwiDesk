@@ -125,7 +125,11 @@ public enum HyperShortcutMove {
     /// The seed's `⌃⌥` rows off the arrow and digit ladder, in seed
     /// order — the letters, the `⇧` reversal and the comma.
     public static var letterSeed: [KeyBinding] {
-        DefaultKeybindings.bindings(spaces: [], resizeStep: 1).filter {
+        DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 1,
+            base: .standard
+        ).filter {
             guard let combo = KeyCombo.parse($0.combo) else { return false }
             return moved(combo, .toHyper) != nil && !isLadder(combo)
         }

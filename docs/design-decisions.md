@@ -10821,8 +10821,11 @@ built from `release/3.0.0` had already taken generation 2.
 Reset sizes in this Space takes `⌃⌥R` (#2303), R for reset. It is
 the way back from the size keys, but a key you press once, so it
 rides the `⌃⌥` letters rather than `⌥⌘`: it joins the base seed,
-not `appChromeRows`, and lands on the shortcut base like every
-other letter (#2460). It resets the active space only, for the reason the
+not `appChromeRows`, and the Hyper move carries it with the other
+letters. A default letter added after the move lands where the
+letters went: the top-up offers `✦R` on a layer whose seeded
+letters sit mostly on Hyper, or the move would reappear for one
+row. It resets the active space only, for the reason the
 #764 entry gives the verb's default: a key undoes what you just
 did in front of you. `"all"` gets no Settings row and no default
 key; it stays a Lua and CLI form (owner ruling 2026-10-18). The
@@ -10887,8 +10890,7 @@ AX menu bars of fifteen running apps (858 shortcut items) one
 claimed a `⌃⌥⇧⌘` digit — Antigravity IDE's Split Terminal on 7,
 which KiwiDesk's hotkey takes from it as every seeded chord takes
 an app menu's. #1870's Hyper key does not move this tier unasked —
-only the Shortcuts use switch, below, does, onto `✦⌥`
-(#2460) — and the seed stays here: it is a
+only its move offer (#1870) does — and the seed stays here: it is a
 separate modifier and off by default, so the seed cannot depend on
 it, and the users the four-modifier chord serves are the ones whose
 own tool already presses all four.
@@ -10955,10 +10957,14 @@ row still on `⌃⌥` is listed under the switch with its reason —
 the row predates the update, another row holds the key, the user
 set it, or another profile sets its own — and is re-recorded by
 hand; there is no "move these too", since each reason is one the
-user should read before the row moves. `⌃⌥` moves back only what
-the mapping produced, derived from the pure reverse mapping rather
-than a stored list: a row the user recorded on `✦` themselves
-stays, and nothing that came from `⌥⌘` lands on `⌃⌥`.
+user should read before the row moves. `⌃⌥` moves back what the
+mapping can produce, derived from the pure reverse mapping rather
+than a stored list: a row on any other `✦` chord stays (`✦⇧⌘3`,
+`✦⌃F`), and nothing that came from `⌥⌘` lands on `⌃⌥`. A row the
+user recorded on `✦F` themselves moves back with the rest —
+telling it from a moved one would take the stored list the ruling
+refused, and a list that outlives a re-recording is wrong the
+first time the user edits a row.
 
 **Without a Hyper key the switch is drawn greyed on `⌃⌥`,** since
 the setting that turns it on sits directly above it in the same
@@ -10968,11 +10974,14 @@ switch stays live as the way back.
 
 The stored Desktop base this replaces covered one tier and the
 new base covers every one, so the crossing is a change of meaning
-under a renamed key and reads the file's format to end (#1354). A
-Desktop base stored as Hyper moves its rows from `✦` + digit to
-`✦⌥` + digit, since the Space digits now hold `✦` + digit. An
-install whose seeded letters the old offer moved reads as `✦`:
-the letters guess, made once inside the crossing and never again.
+under a renamed key and reads the file's format to end (#1354).
+It reads `✦` where the user took either half of the old offer —
+the Desktop line, or most of the seeded letters — since either was
+a choice of Hyper, and splitting the Desktop tier from its own
+next row is the defect one base exists to prevent; the letters
+count is a guess made once, inside the crossing, and never again.
+A Go to Desktop row on `✦` + digit moves to `✦⌥` + digit where
+that chord is free, since the Space digits now hold `✦` + digit.
 Nothing else moves on its own; the ladder rows still on `⌃⌥`
 appear in the list.
 :::

@@ -22,8 +22,11 @@ struct HyperMoveOfferTests {
                 name: KeyLayer.defaultName,
                 bindings: DefaultKeybindings.bindings(
                     spaces: config.spaces,
-                    resizeStep: 50
-                ) + [DefaultKeybindings.desktopRow(1)].compactMap { $0 }
+                    resizeStep: 50,
+                    base: .standard
+                )
+                    + [DefaultKeybindings.desktopRow(1, base: .standard)]
+                    .compactMap { $0 }
             )
         ]
         model.config = config

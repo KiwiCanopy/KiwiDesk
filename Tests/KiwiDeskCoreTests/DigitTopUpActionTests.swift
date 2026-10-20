@@ -13,7 +13,11 @@ struct DigitTopUpActionTests {
     }
 
     private func seed(_ raws: [String]) -> [KeyBinding] {
-        DefaultKeybindings.bindings(spaces: ids(raws), resizeStep: 50)
+        DefaultKeybindings.bindings(
+            spaces: ids(raws),
+            resizeStep: 50,
+            base: .standard
+        )
     }
 
     private func targets(

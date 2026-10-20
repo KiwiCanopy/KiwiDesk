@@ -13,7 +13,8 @@ struct SizeLayerSeedTests {
     private func seeded(step: Int = 50) -> [KeyBinding] {
         DefaultKeybindings.bindings(
             spaces: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-            resizeStep: step
+            resizeStep: step,
+            base: .standard
         ) + (1...10).compactMap(DefaultKeybindings.desktopRow)
     }
 

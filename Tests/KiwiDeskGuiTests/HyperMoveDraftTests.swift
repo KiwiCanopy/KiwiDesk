@@ -21,7 +21,7 @@ struct HyperMoveDraftTests {
                 name: KeyLayer.defaultName,
                 bindings: HyperShortcutMove.letterSeed
                     + [1, 2].compactMap {
-                        DefaultKeybindings.desktopRow($0)
+                        DefaultKeybindings.desktopRow($0, base: .standard)
                     }
             )
         ]
@@ -58,7 +58,9 @@ struct HyperMoveDraftTests {
     @Test("a top-up row adopted into a staged draft takes its base")
     func topUpRowTakesTheStagedBase() throws {
         let model = try movedModel()
-        let row = try #require(DefaultKeybindings.desktopRow(3))
+        let row = try #require(
+            DefaultKeybindings.desktopRow(3, base: .standard)
+        )
         model.adoptShortcutAdd([row])
         #expect(desktopCombos(model).last == "hyper+option+3")
     }

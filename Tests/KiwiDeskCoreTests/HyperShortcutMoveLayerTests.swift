@@ -20,7 +20,8 @@ struct HyperShortcutMoveLayerTests {
                 name: KeyLayer.defaultName,
                 bindings: DefaultKeybindings.bindings(
                     spaces: config.spaces,
-                    resizeStep: 50
+                    resizeStep: 50,
+                    base: .standard
                 )
             ),
             KeyLayer(name: "work", bindings: work),
@@ -93,7 +94,9 @@ struct HyperShortcutMoveLayerTests {
 
     @Test("a top-up row rebases onto a staged base, and back")
     func rebasedTopUpRow() throws {
-        let seeded = try #require(DefaultKeybindings.desktopRow(4))
+        let seeded = try #require(
+            DefaultKeybindings.desktopRow(4, base: .standard)
+        )
         let onHyper = ShortcutBase.hyper.rebased(seeded)
         #expect(onHyper.combo == "hyper+option+4")
         #expect(ShortcutBase.standard.rebased(onHyper) == seeded)

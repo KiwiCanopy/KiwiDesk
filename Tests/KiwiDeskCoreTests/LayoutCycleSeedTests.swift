@@ -13,7 +13,11 @@ import Testing
 @Suite("Layout cycle seed (#453)")
 struct LayoutCycleSeedTests {
     private var seeded: [KeyBinding] {
-        DefaultKeybindings.bindings(spaces: [], resizeStep: 50)
+        DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 50,
+            base: .standard
+        )
     }
 
     @Test("⌃⌥C runs Next layout in the base seed")

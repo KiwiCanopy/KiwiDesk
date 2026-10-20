@@ -77,8 +77,12 @@ struct ShortcutBaseTests {
         let seed =
             DefaultKeybindings.bindings(
                 spaces: (1...10).map { SpaceID(String($0)) },
-                resizeStep: 1
-            ) + (1...10).compactMap { DefaultKeybindings.desktopRow($0) }
+                resizeStep: 1,
+                base: .standard
+            )
+            + (1...10).compactMap {
+                DefaultKeybindings.desktopRow($0, base: .standard)
+            }
         for row in seed {
             let there = ShortcutBase.hyper.rebased(row)
             #expect(ShortcutBase.standard.rebased(there) == row)

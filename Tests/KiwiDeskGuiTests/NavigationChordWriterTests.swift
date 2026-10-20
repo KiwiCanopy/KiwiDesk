@@ -111,7 +111,8 @@ struct NavigationChordWriterTests {
         config.spaces = ["2", "3", "4", "Mail", "1", "5"].map { SpaceID($0) }
         let seed = DefaultKeybindings.bindings(
             spaces: ["1", "2", "3", "4"].map { SpaceID($0) },
-            resizeStep: 50
+            resizeStep: 50,
+            base: .standard
         )
         let added = DefaultKeybindings.digitTopUp(
             existing: seed,

@@ -10,7 +10,11 @@ import Testing
 @Suite("Jump to window seed (#1875)")
 struct JumpToWindowSeedTests {
     private var seeded: [KeyBinding] {
-        DefaultKeybindings.bindings(spaces: [], resizeStep: 50)
+        DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 50,
+            base: .standard
+        )
     }
 
     @Test("⌃⌥J opens Jump to window in the base seed")

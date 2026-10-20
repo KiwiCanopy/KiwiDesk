@@ -106,16 +106,21 @@ because two real clients now remove drift — see
   its own.
 - **Every writer of a default row writes it on the stored
   `GuiConfig.shortcutBase` (#2460)**, through the one
-  `ShortcutBase.rebased`: the three top-ups (Space digits, Desktop
-  rows, generations), Restore Defaults, and a top-up row adopted
-  into a draft that staged a base change. Never a guess from the
+  `ShortcutBase.rebased`: the first-run seed, the top-ups (Space
+  digits, Desktop rows, generations), Restore Defaults, and a
+  top-up row adopted into a draft that staged a base change. The
+  producers take the base as a required argument
+  (`DefaultKeybindings.bindings`, `desktopRow`, the top-ups), so a
+  new writer cannot leave it out by default. Never a guess from the
   rows a layer holds — three sources deciding where a new row went
   is what split a moved ladder at the next Space. A writer of the
   base moves the rows in the same draft write, and a path that
   drops the draft's rows drops the base with them
   (`ShortcutBaseTests`, `HyperShortcutMoveDesktopTests`,
-  `HyperMoveDraftTests`). The mapping is `ShortcutBase.moved`'s
-  alone: the Desktop tier takes `✦⌥` + digit because `✦⇧⌘3` is
+  `HyperMoveDraftTests`). A writer that moves a row between the
+  bases takes `ShortcutBase.moved`, never a mapping beside it —
+  the old move sheet's `HyperShortcutMove.moved` retires with that
+  sheet. The Desktop tier takes `✦⌥` + digit because `✦⇧⌘3` is
   macOS's screenshot chord while Hyper is held (measured
   2026-10-20, macOS 27.0.1).
 - **A default row added after the first-run seed joins the next

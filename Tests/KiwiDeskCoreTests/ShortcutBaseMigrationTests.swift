@@ -78,23 +78,54 @@ struct ShortcutBaseMigrationTests {
         #expect(combos == ["hyper+option+1", "hyper+option+0"])
     }
 
-    @Test("letters on ⌃⌥ read as ⌃⌥, whatever the Desktop base was")
+    @Test("letters and the Desktop base on ⌃⌥ read as ⌃⌥")
     func unmovedInstallStays() throws {
-        for old in ["hyper", "control+option+shift+command"] {
-            let rows =
-                letters(onHyper: 1) + [
-                    desktop("control+option+shift+command+2", 2)
-                ]
-            let out = try #require(
-                ConfigMigration.migrated(try gui(rows, old: old))
+        let rows =
+            letters(onHyper: 1) + [
+                desktop("control+option+shift+command+2", 2)
+            ]
+        let out = try #require(
+            ConfigMigration.migrated(
+                try gui(rows, old: "control+option+shift+command")
             )
-            let config = try decoded(out)
-            #expect(config.shortcutBase == .standard)
-            #expect(
-                try #require(config.layers.first).bindings.last?.combo
-                    == "control+option+shift+command+2"
-            )
-        }
+        )
+        let config = try decoded(out)
+        #expect(config.shortcutBase == .standard)
+        #expect(
+            try #require(config.layers.first).bindings.last?.combo
+                == "control+option+shift+command+2"
+        )
+    }
+
+    /// The old offer's Desktop line could be taken without the
+    /// letters; its tier stays whole on the new base.
+    @Test("a Desktop base on Hyper reads as ✦ without the letters")
+    func desktopLineAloneReadsHyper() throws {
+        let rows = letters(onHyper: 0) + [desktop("hyper+2", 2)]
+        let out = try #require(
+            ConfigMigration.migrated(try gui(rows, old: "hyper"))
+        )
+        let config = try decoded(out)
+        #expect(config.shortcutBase == .hyper)
+        #expect(
+            try #require(config.layers.first).bindings.last?.combo
+                == "hyper+option+2"
+        )
+    }
+
+    @Test("a Desktop row whose ✦⌥ chord is held stays")
+    func heldTargetStays() throws {
+        let rows = [
+            desktop("hyper+4", 4),
+            row("option+4", "hs.x()"),
+        ]
+        let out = try #require(
+            ConfigMigration.migrated(try gui(rows, old: "hyper"))
+        )
+        #expect(
+            try #require(try decoded(out).layers.first).bindings
+                .first?.combo == "hyper+4"
+        )
     }
 
     /// Only a Go to Desktop row on exactly `✦` + digit moves: the
