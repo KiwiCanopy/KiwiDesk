@@ -7439,8 +7439,8 @@ nothing live and never asks the leave question: these are not the
 window's edits. A setting the draft also edits is the draft's row
 alone, since that edit is what its Save commits. Undoing a live row means
 applying the saved value live, a Core verb rather than a draft
-writeback, so it waits for per-row revert (#792), as does whether
-Revert all reaches live state.
+writeback (#2411, ▸ *A row's revert writes its one key back
+through a register*).
 
 :::unreleased
 ### A row's revert writes its one key back through a register (#792)
@@ -7493,9 +7493,17 @@ back is the rule's: the reach
 settles once the app's rules, or the shortcut layers, are the
 baseline's again. A row says
 how it reverts and offers no ↺ until it does: a lens or layer edit,
-profile drift, a live change and a leaf no key claims draw none.
-Whether the popover's Revert all reaches live state stays open with
-the live rows.
+profile drift and a leaf no key claims draw none.
+
+A live row's ↺ is not a draft writeback (#2411): it puts the row's
+leaves back to the value the live profile or its shared look
+stores and applies that live, through `revert_settings`, the twin
+of `keep_settings` — so a row can be kept or reverted, and nothing
+else of it changes. The pill's Revert takes every live row back
+with the draft, so the list it was asked to clear empties. Drift is
+the one row it leaves (owner ruling 2026-10-20): drift is about the
+arrangement, and re-applying the saved profile to clear it would
+end a standing temporary layout, which Revert never does (#1179).
 :::
 
 ### The header search is a field, not a button that opens one

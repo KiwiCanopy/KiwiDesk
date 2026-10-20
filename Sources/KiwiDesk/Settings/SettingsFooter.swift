@@ -134,14 +134,14 @@ struct SettingsFooter: View {
                     SettingsTheme.savePillInk.opacity(0.4)
                 )
             Button(L("footer.revert", "Revert")) {
-                model.revert()
+                model.revertAll()
             }
             .buttonStyle(.plain)
             .foregroundStyle(
                 SettingsTheme.savePillInk.opacity(0.8)
             )
             .pillHoverWash()
-            .disabled(!model.isDirty)
+            .disabled(!model.isDirty && !model.liveUnsaved)
             copySlot
             primarySlot
         }

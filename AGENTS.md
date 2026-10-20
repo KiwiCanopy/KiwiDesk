@@ -1010,9 +1010,11 @@ Touching `Config`, `Profiles`, `Commands`.
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
   stored profile and the rule snapshot, taken only where a caller holds leaves
-  — save Settings' live rows, the one ruled reader that diffs the root, its
-  Keep taking the reading's own keep ids (#2262, #2368,
-  `UnsavedLiveSettingsTests`, `SettingsLiveKeepTests`) — (`ChangeReportTests`,
+  — save Settings' live rows and `revert_settings`, the ruled readers that
+  diff the root, the rows' Keep taking the reading's own keep ids (#2262,
+  #2368, `UnsavedLiveSettingsTests`, `SettingsLiveKeepTests`) and the revert
+  applying the named leaves alone, session shadow included, never a profile
+  re-apply (#2411, `RevertSettingsApplyTests`) — (`ChangeReportTests`,
   `KeepSettingsEdgeTests`), a keep landing the shared look without repainting
   live, and a live store a verb writes joining the keep document or reporting
   nothing, which is review's (#1685)

@@ -181,6 +181,8 @@ extension KiwiCore {
             return profileCommand(command, args)
         case Self.keepSettingsCommand:
             return keepSettings(args)
+        case Self.revertSettingsCommand:
+            return revertSettings(args)
         case "bind_profile_to_desktop":
             return bindProfileToDesktop(args)
         case let quit where quit.hasPrefix("quit."):
