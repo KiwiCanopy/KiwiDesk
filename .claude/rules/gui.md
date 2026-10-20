@@ -116,11 +116,9 @@ restated `20...80` satisfies on the day it is written.
   is a draft like any other; `DetailPanelTests` holds the offer
   set) — and keep the sheet
   read-only, a sheet that grows a commit being a dialog wearing
-  the wrong chrome — save a ruled offer whose one commit STAGES a
-  multi-row edit into the draft through a closure its host hands
-  it, taking no model (#1870's Hyper move, owner-ruled), and
-  Compare and Copy, whose two Keeps run through the closures its
-  row hands it (#2324 ruling 14), and the sync sheet at Save,
+  the wrong chrome — save Compare and Copy, whose two Keeps run
+  through the closures its row hands it (#2324 ruling 14), and
+  the sync sheet at Save,
   whose one Save runs through the closure the shell hands it
   (#2450; a further one is a ruling too). A read-only sheet also
   answers the keyboard both ways:
@@ -790,6 +788,14 @@ comparison both its binding and its row read, and never joins
 the homes this section rules, or a home of its own is ruled here
 before it ships — otherwise the homes ruled here stop being the
 whole census of who acknowledges.
+
+The "Shortcuts use" switch (#2460) is a ruled home of its own: its
+followers are the rows on the other base, which no stored setting
+names, so it acknowledges them with the list under it — each row
+and its reason, read through the one
+`SettingsModel.rowsLeftOnStandard` — rather than the label's `?`,
+and joins neither register (`ShortcutBaseSwitchModelTests` ▸
+`leftRowsAreReasoned`, `ShortcutBaseReachTests`).
 
 A Space's own gap masters (#1775) are not a home of their own: they
 are the gap masters again, drawn by the one `GapsMasterRow` and

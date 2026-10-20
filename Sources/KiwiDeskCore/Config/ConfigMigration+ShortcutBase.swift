@@ -25,8 +25,8 @@ extension ConfigMigration {
     static let shortcutBaseBindingsKey = "bindings"
     static let shortcutBaseDefaultLayer = "default"
     static let desktopRowPrefix = "KiwiDesk.focus_desktop("
-    /// The seed's `⌃⌥` letter rows the 3.1.0 move offer carried, by
-    /// Lua.
+    /// The seed's `⌃⌥` letter rows the 3.0.0–3.1.0 move offer
+    /// carried, by Lua.
     static let movedLetterLua: Set<String> = [
         "KiwiDesk.toggle_floating()",
         "KiwiDesk.toggle_sticky()",

@@ -25,6 +25,9 @@ struct SegmentedPicker<Value: Hashable>: View {
     private let hints: [Value: String]
     /// The words VoiceOver reads a hint in.
     private let spokenHint: (String) -> String
+    /// A segment's name for VoiceOver where its title is a glyph
+    /// a screen reader cannot say (#2460); the title otherwise.
+    private let spokenTitles: [Value: String]
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
     /// Optional field help text (#94).
@@ -44,6 +47,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         reservesWeight: Bool = false,
         hints: [Value: String] = [:],
         spokenHint: @escaping (String) -> String = { $0 },
+        spokenTitles: [Value: String] = [:],
         selection: Binding<Value>,
         options: [(title: String, value: Value)],
         help: String? = nil
@@ -55,6 +59,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         self.reservesWeight = reservesWeight
         self.hints = hints
         self.spokenHint = spokenHint
+        self.spokenTitles = spokenTitles
         self._selection = selection
         self.options = options
         self.help = help
@@ -200,6 +205,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         // Only the focus stop goes, to the track; click,
         // VoiceOver and `isEnabled` stay (#997).
         .focusable(false)
+        .accessibilityLabel(spokenTitles[option.value] ?? option.title)
         .onHover { inside in
             updateHover(
                 inside: inside,

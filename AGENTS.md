@@ -887,7 +887,7 @@ Touching `Config`, `Profiles`, `Commands`.
   reverses its unshifted stepping twin as `⇧Tab` and `⌃⌥⇧C` do (#453), or on
   `⌃⌥⇧⌘` + digit lifts the ladder to Go to Desktop, topped up past the
   setup's `shortcut_offer` through the one `topUpDesktopShortcuts`
-  (#1870, `DesktopShortcutTopUpTests`, `HyperShortcutMoveDesktopTests`)
+  (#1870, `DesktopShortcutTopUpTests`, `ShortcutBaseSwitchTests`)
   (#1094/#1655, `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`,
   `DefaultKeybindingLadderTests` ▸ `shiftReversesItsTwin`), and `⌘` on an arrow
   steps the Spaces (`DefaultKeybindingLadderTests` ▸ `arrowsRideTheirOwnTiers`)
@@ -900,8 +900,9 @@ Touching `Config`, `Profiles`, `Commands`.
 - every writer of a default row writes it on the stored
   `GuiConfig.shortcutBase` through the one `ShortcutBase.rebased`, the
   producers taking the base as a required argument, and a writer of the base
-  moves the rows in the same draft write (#2460, `ShortcutBaseTests`,
-  `ResetSizesSeedTests`)
+  moves the rows in the same draft write, a narration of the switch reading
+  its rows through `ShortcutBaseSwitch` (#2460, `ShortcutBaseTests`,
+  `ShortcutBaseSwitchModelTests`, `ShortcutBaseReachTests`)
 - a temporary Space's shortcuts go when it drops and a held Space's when its
   hold ends, through the one `retireLiveOnlyShortcuts`, a binding another
   arrangement declares staying #92's (#1827, `SpaceShortcutDropTests`)

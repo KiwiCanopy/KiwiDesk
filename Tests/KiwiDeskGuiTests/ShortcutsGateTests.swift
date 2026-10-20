@@ -157,10 +157,10 @@ struct ShortcutsGateTests {
         )
     }
 
-    /// The Hyper move offer (#1870) greys where `init.lua` owns
+    /// The Shortcuts use switch (#2460) greys where `init.lua` owns
     /// the config and on a stored-profile page, Lua first.
-    @Test("the Hyper move offer's reasons")
-    func hyperMoveOfferReasons() {
+    @Test("the Shortcuts use switch's reasons")
+    func shortcutBaseReasons() {
         let key = SettingKey.shortcuts(.shortcutBase)
         let base = config(layers: [KeyLayer.defaultName])
         func reason(lua: Bool, stored: Bool) -> ShortcutsGates.InertReason? {

@@ -944,6 +944,12 @@ listed under Shortcuts & Gestures ▸ Size & float.
 Desktop gets its key the first time KiwiDesk sees it, so a key you
 delete stays deleted.
 
+:::unreleased
+With **Shortcuts use** set to `✦`, these defaults sit on Hyper:
+`✦` takes the place of `⌃⌥`, and Go to Desktop takes `✦⌥` + digit.
+New spaces, new Desktops and later defaults land there too.
+:::
+
 Each space digit is bound *by name* and follows a rename;
 spaces past the tenth ship without a digit. The set is seeded
 only while no shortcut is bound anywhere. An install that already

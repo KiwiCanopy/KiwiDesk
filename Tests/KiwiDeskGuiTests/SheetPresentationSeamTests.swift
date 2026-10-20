@@ -39,12 +39,6 @@ struct SheetPresentationSeamTests {
         // asks for it rebuilds at 900 pt. Its one commit runs
         // through the closures the shell hands it.
         "SettingsView.swift": ["$aboutRequest", "$model.sync.review"],
-        // The Hyper move sheet (#1870) is the section's: the card
-        // that opens it leaves the page once its last Hyper row
-        // moves back, and the section outlives it. Its one commit
-        // stages into the draft through a closure the section
-        // hands it, so the content still takes no model.
-        "ShortcutsSection.swift": ["$hyperMoveRequest"],
         // Compare and Copy (#2324) is the row's: it outlives the
         // button that opens it, and its commit runs through the
         // closures the row hands it, so the content takes no model.

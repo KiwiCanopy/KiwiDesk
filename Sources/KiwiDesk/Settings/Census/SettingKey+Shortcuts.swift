@@ -44,8 +44,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case modeCue = "appWide.modeCue"
     /// The key turned into Hyper (#1870): app-wide, per Mac.
     case hyperKey = "appWide.hyperKey"
-    /// The Hyper move offer and the Desktop base it writes (#1870),
-    /// drafted with the layers.
+    /// The "Shortcuts use" switch's base (#2460), drafted with the
+    /// layers it moves.
     case shortcutBase = "config.shortcutBase"
     case growWidth = "keybinding.grow_width"
     case shrinkWidth = "keybinding.shrink_width"
@@ -134,8 +134,9 @@ extension ShortcutsKey {
             )
         case .hyperKey, .shortcutBase:
             // Above the layer header: it belongs to no layer
-            // (#1870). The key is written at once, the offer into
-            // the draft; both grey where init.lua owns the config.
+            // (#1870). The key is written at once, the base into
+            // the draft (#2460); both grey where init.lua owns the
+            // config.
             return .row(
                 .shortcuts,
                 .hyperKey,
@@ -266,7 +267,7 @@ extension ShortcutsKey {
                 help: "shortcuts.hyper_key.help"
             )
         case .shortcutBase:
-            return .text("shortcuts.hyper_move.offer")
+            return .text("shortcuts.base", help: "shortcuts.base.help")
         }
     }
 }

@@ -114,8 +114,8 @@ struct KeyRecorderField: View {
         // Dim, never disable: re-recording is how a row leaves
         // Hyper (#1870, `keybindingRowStyle`'s rule).
         .opacity(hyperDormant ? 0.55 : 1)
-        .help(hyperDormant ? HyperMoveWords.dormantHint : Self.recordHelp)
-        .accessibilityHint(hyperDormant ? HyperMoveWords.dormantHint : "")
+        .help(hyperDormant ? ShortcutBaseWords.dormantHint : Self.recordHelp)
+        .accessibilityHint(hyperDormant ? ShortcutBaseWords.dormantHint : "")
         .accessibilityLabel(name)
         // The cost is announced ONCE, by the badge that precedes
         // this button in the row (#1126) — a second copy here
