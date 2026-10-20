@@ -25,6 +25,7 @@ extension SpacesSection {
             .help(
                 L("spaces.drag_handle.help", "Drag to reorder")
             )
+            .accessibilityHidden(true)
             .onHover { inside in
                 hoveredHandle =
                     inside
