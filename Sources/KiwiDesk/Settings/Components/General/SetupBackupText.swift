@@ -51,6 +51,13 @@ enum SetupBackupText {
                     + "backup would leave them out. They may come "
                     + "from a newer KiwiDesk."
             )
+        case .newerSettings:
+            return L(
+                "general.advanced.backup.error.newer_settings",
+                "This Mac's settings were saved by a newer version of "
+                    + "KiwiDesk, so a backup would leave them out. "
+                    + "Update KiwiDesk, then try again."
+            )
         case .unreadableInitLua:
             return L(
                 "general.advanced.backup.error.unreadable_init_lua",
@@ -182,7 +189,8 @@ enum SetupBackupText {
     static func title(for error: SetupBundleError) -> String {
         switch error {
         case .couldNotWrite, .unreadableSettings,
-            .unreadablePalettes, .unreadableLooks, .unreadableInitLua:
+            .unreadablePalettes, .unreadableLooks, .unreadableInitLua,
+            .newerSettings:
             return L(
                 "general.advanced.backup.error.export_title",
                 "Couldn't Save the Backup"

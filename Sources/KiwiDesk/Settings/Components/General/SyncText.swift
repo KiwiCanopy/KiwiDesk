@@ -133,7 +133,7 @@ enum SyncText {
                     + "folder's settings can't be applied here."
             )
         case .unreadableSettings, .unreadablePalettes, .unreadableLooks,
-            .unreadableInitLua:
+            .unreadableInitLua, .newerSettings:
             return L(
                 "general.sync.refusal.unreadable_here",
                 "KiwiDesk can't read some of this Mac's settings, so "

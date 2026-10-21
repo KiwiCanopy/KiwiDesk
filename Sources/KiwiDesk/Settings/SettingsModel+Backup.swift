@@ -23,10 +23,8 @@ extension SettingsModel {
     /// will fail on the first read should never open
     /// (`code-reviewer`, 2026-08-17).
     func exportBackup() -> SetupBundleError? {
-        if core.guiConfigStore.exists,
-            core.guiConfigStore.load() == nil
-        {
-            return .unreadableSettings
+        if let refusal = core.settingsExportRefusal() {
+            return refusal
         }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]

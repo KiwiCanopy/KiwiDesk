@@ -9,8 +9,11 @@ enum CLIOutput {
         pretty: Bool
     ) -> String? {
         let encoder = JSONEncoder()
+        // A path reads as typed: `/`, never `\/`.
         encoder.outputFormatting =
-            pretty ? [.sortedKeys, .prettyPrinted] : [.sortedKeys]
+            pretty
+            ? [.sortedKeys, .prettyPrinted, .withoutEscapingSlashes]
+            : [.sortedKeys, .withoutEscapingSlashes]
         guard let encoded = try? encoder.encode(data) else {
             return nil
         }

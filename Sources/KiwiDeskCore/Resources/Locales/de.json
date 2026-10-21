@@ -574,6 +574,7 @@
   "general.advanced.backup.error.export_title": "Sicherung konnte nicht gespeichert werden",
   "general.advanced.backup.error.lua_owned": "Die Einstellungen dieses Macs stammen aus deiner init.lua, daher lassen sich die Einstellungen einer Sicherung hier nicht anwenden. Wechsle zuerst zum visuellen Editor, oder stelle auf einem Mac wieder her, der ihn verwendet.",
   "general.advanced.backup.error.newer": "Diese Sicherung stammt aus einer neueren Version von KiwiDesk. Aktualisiere KiwiDesk und versuche es dann erneut.",
+  "general.advanced.backup.error.newer_settings": "Die Einstellungen dieses Macs wurden von einer neueren Version von KiwiDesk gespeichert, eine Sicherung würde sie also auslassen. Aktualisiere KiwiDesk und versuche es dann erneut.",
   "general.advanced.backup.error.not_a_backup": "Diese Datei ist keine KiwiDesk-Sicherung.",
   "general.advanced.backup.error.restore_title": "Wiederherstellen nicht möglich",
   "general.advanced.backup.error.unreadable": "Diese Datei konnte nicht geöffnet werden. Vielleicht wurde sie verschoben, umbenannt oder gelöscht.",

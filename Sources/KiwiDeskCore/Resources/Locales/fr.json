@@ -574,6 +574,7 @@
   "general.advanced.backup.error.export_title": "Impossible d'enregistrer la sauvegarde",
   "general.advanced.backup.error.lua_owned": "Les réglages de ce Mac proviennent de votre init.lua : ceux d'une sauvegarde ne peuvent donc pas être appliqués ici. Passez d'abord à l'éditeur visuel, ou restaurez sur un Mac qui l'utilise.",
   "general.advanced.backup.error.newer": "Cette sauvegarde a été créée par une version plus récente de KiwiDesk. Mettez KiwiDesk à jour, puis réessayez.",
+  "general.advanced.backup.error.newer_settings": "Les réglages de ce Mac ont été enregistrés par une version plus récente de KiwiDesk : une sauvegarde les laisserait donc de côté. Mettez KiwiDesk à jour, puis réessayez.",
   "general.advanced.backup.error.not_a_backup": "Ce fichier n'est pas une sauvegarde KiwiDesk.",
   "general.advanced.backup.error.restore_title": "Impossible de restaurer",
   "general.advanced.backup.error.unreadable": "Ce fichier n'a pas pu être ouvert. Il a peut-être été déplacé, renommé ou supprimé.",
