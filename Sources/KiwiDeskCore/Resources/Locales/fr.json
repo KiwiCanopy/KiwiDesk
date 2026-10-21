@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "Activer une app vous ferait sauter vers un autre Bureau ; avec KiwiDesk, vous y allez volontairement, avec « %1$@ » ou un raccourci de Bureau. %2$@",
   "mac_checklist.unreadable": "KiwiDesk n'a pas pu lire ce réglage — cochez-le une fois réglé. %1$@",
   "maximize.refused.floating": "Seule une fenêtre tuilée peut être maximisée.",
+  "maximize.refused.sticky": "Une fenêtre Sticky ne peut pas être maximisée.",
   "menu.accessibility_paused": "Gestion des fenêtres en pause…",
   "menu.accessibility_paused.tooltip": "Cliquez pour accorder l'autorisation d'Accessibilité et reprendre la mosaïque.",
   "menu.app.about": "À propos de %1$@",

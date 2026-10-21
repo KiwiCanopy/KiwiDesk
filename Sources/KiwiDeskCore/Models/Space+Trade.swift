@@ -30,5 +30,6 @@ extension Space {
         }
         if focused == resident { focused = incoming }
         releaseScrollSlot()
+        endMaximize()
     }
 }

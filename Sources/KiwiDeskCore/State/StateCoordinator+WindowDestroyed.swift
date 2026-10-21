@@ -13,6 +13,13 @@ extension StateCoordinator {
         // nothing and marks nothing.
         var handedTo: WindowID?
         if wasMinimized {
+            // A minimize is no Desktop departure: its maximize ends
+            // (#2448).
+            if let home = workspaces.space(of: id),
+                workspaces[home]?.maximized == id
+            {
+                workspaces.withSpace(home) { $0.maximized = nil }
+            }
             rememberedSpaces[id] = nil
             closedDepartures.remove(id)
             rememberMinimized(id)

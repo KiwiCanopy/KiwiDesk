@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "アプリを前面に出すだけで別のデスクトップへ飛ばされてしまいます。KiwiDeskでは「%1$@」やデスクトップのショートカットで、自分の意思で移動します。%2$@",
   "mac_checklist.unreadable": "KiwiDeskはこの項目を読み取れませんでした。設定したらチェックを入れてください。%1$@",
   "maximize.refused.floating": "最大化できるのはタイル表示されたウインドウだけです。",
+  "maximize.refused.sticky": "Sticky ウインドウは最大化できません。",
   "menu.accessibility_paused": "ウインドウ管理を一時停止中…",
   "menu.accessibility_paused.tooltip": "クリックしてアクセシビリティの許可を与え、タイル表示を再開します。",
   "menu.app.about": "%1$@について",

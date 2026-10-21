@@ -825,8 +825,9 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   declares or names it, never judged by `referenced` (#1526,
   `PlaceholderSpaceTests`)
 - whether a window is maximized is read through the one
-  `maximizedWindow(of:)`, the fill laid over the issued frames alone, and a
-  write that rearranges a Space ends its maximize at the write (#2448,
+  `maximizedWindow(of:)`, the fill laid over the issued frames alone, a
+  write that rearranges a Space ends its maximize at the write, and a Desktop
+  departure keeps the one stored copy (#2448,
   `MaximizedReaderCensusTests`, `MaximizeWindowEndTests`)
 - a new stored property of `Space`, `ManagedWindow` or their session value
   types, or a new id-keyed store on `StateCoordinator`, `TilingEngine` or

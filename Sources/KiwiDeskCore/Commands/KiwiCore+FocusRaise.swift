@@ -172,14 +172,12 @@ extension KiwiCore {
             // subset of `isFocusDriven` — but if that drifts,
             // never lose the raise.
             if defersRaise { raiseWindow(id) }
-            if endedMaximize, refocusRetile { retileEndingMaximize() }
+            if endedMaximize { retileEndingMaximize() }
             return
         }
-        if endedMaximize {
-            retileEndingMaximize()
-        } else {
-            retileWithScrollDuration()
-        }
+        retileWithScrollDuration(
+            sizing: endedMaximize ? .allSpringSized : .mayInstantSize
+        )
         // Monocle overlaps every window at one full-screen frame and
         // has no other z-order backstop (stack/scrolling/track arm
         // their own on their nav paths), so a focus change must

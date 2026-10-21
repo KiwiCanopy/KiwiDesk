@@ -5506,8 +5506,11 @@ than refusing: a swap or resize of a slot nobody can see would
 be a lie, and a refusal a dead key. The end is made at the write,
 so a verb that refuses ends nothing, and a drag puts the window
 back without a drop, since its gesture began at a frame that is
-no slot. A Desktop switch is no close (#1207): the departure
-carries the maximize and the return pays it. A sticky window is
+no slot. A Desktop switch is no close (#1207): the Space goes on
+naming the departed window and the return finds it maximized,
+while a close or a minimize ends it; a Desktop bound to another
+profile is such a switch, and only an explicit profile load ends
+every maximize. A sticky window is
 refused, since it draws on other Spaces' layouts too. It
 survives KiwiDesk's own in-place restart and not a Quit. Its motion is the engine's
 ordinary frame animation, governed by `animations.on_window_resize`

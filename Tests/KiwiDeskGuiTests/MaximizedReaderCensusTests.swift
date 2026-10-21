@@ -8,7 +8,9 @@ import Testing
 /// outlives a focus that ended it until the retire runs. So a
 /// reader beside a call site reds here until it routes through the
 /// verdict or names its reason below — a writer that ends the
-/// maximize at a rearranging write included.
+/// maximize at a rearranging write included. Blind spot: a bare
+/// `maximized` inside a `Space` extension (the model's own
+/// primitives) has no dot and is not counted.
 @Suite("Maximized reader census (#2448)")
 struct MaximizedReaderCensusTests {
     private var coreRoot: URL {
@@ -27,9 +29,10 @@ struct MaximizedReaderCensusTests {
         "Models/StateSnapshot+InPlace.swift": 3,
         // The verdict, the retire and the profile-switch end.
         "State/StateCoordinator+Maximized.swift": 5,
-        // A Desktop departure records it; the return pays it.
+        // A close while away and a minimize end it; a Desktop
+        // departure keeps the id for the return.
         "State/StateCoordinator+SpaceMemory.swift": 2,
-        "State/StateCoordinator+WindowCreated.swift": 3,
+        "State/StateCoordinator+WindowDestroyed.swift": 2,
         // The mode write ends it.
         "State/WorkspaceManager.swift": 1,
         // The toggle and the drag's end.

@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "激活 App 会把你甩到另一个桌面；用 KiwiDesk 时，你是主动前往——通过“%1$@”或桌面快捷键。%2$@",
   "mac_checklist.unreadable": "KiwiDesk 读不到这一项——设置好后请自行勾选。%1$@",
   "maximize.refused.floating": "只有平铺窗口才能最大化。",
+  "maximize.refused.sticky": "Sticky 窗口无法最大化。",
   "menu.accessibility_paused": "窗口管理已暂停…",
   "menu.accessibility_paused.tooltip": "点按以授予“辅助功能”权限并恢复平铺。",
   "menu.app.about": "关于%1$@",

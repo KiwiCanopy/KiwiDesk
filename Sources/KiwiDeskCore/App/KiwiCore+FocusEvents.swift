@@ -328,12 +328,12 @@ extension KiwiCore {
             // exempt above): one idempotent no-op pass, by
             // design. Our own raise's echo finishes that
             // command's pan, so it moves as user motion (#804).
-            if endedMaximize {
-                retileEndingMaximize()
-            } else if selfEcho {
-                withUserMotion { retileWithScrollDuration() }
+            let sizing: BatchSizing =
+                endedMaximize ? .allSpringSized : .mayInstantSize
+            if selfEcho {
+                withUserMotion { retileWithScrollDuration(sizing: sizing) }
             } else {
-                retileWithScrollDuration()
+                retileWithScrollDuration(sizing: sizing)
             }
         } else if filedHere {
             retile(animated: true)

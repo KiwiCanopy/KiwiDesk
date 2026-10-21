@@ -18,12 +18,15 @@ extension KiwiCore {
         } else {
             // A sticky window draws on other Spaces' layouts too,
             // so only a plain tiled member of its own Space fills.
+            guard state.windows[id]?.isSticky == false else {
+                cueMaximizeRefused(id, sticky: true)
+                return .fail("a sticky window")
+            }
             guard space.mode != .floating,
                 spaceID == state.workspaces.activeSpace,
-                state.windows[id]?.isSticky == false,
                 state.localTiledMembers(of: space).contains(id)
             else {
-                cueMaximizeRefused(id)
+                cueMaximizeRefused(id, sticky: false)
                 return .fail("not a tiled window")
             }
             state.workspaces.withSpace(spaceID) { $0.maximized = id }
@@ -63,13 +66,18 @@ extension KiwiCore {
 
     /// A refused press's cue: the pill is its only one, so
     /// VoiceOver hears it too (#2480).
-    private func cueMaximizeRefused(_ window: WindowID) {
+    private func cueMaximizeRefused(_ window: WindowID, sticky: Bool) {
         flashRefusalPill(
             window,
-            text: L(
-                "maximize.refused.floating",
-                "Only a tiled window can be maximized."
-            ),
+            text: sticky
+                ? L(
+                    "maximize.refused.sticky",
+                    "A sticky window can't be maximized."
+                )
+                : L(
+                    "maximize.refused.floating",
+                    "Only a tiled window can be maximized."
+                ),
             symbol: "arrow.up.left.and.arrow.down.right",
             announce: true
         )

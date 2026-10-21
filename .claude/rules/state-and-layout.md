@@ -1785,12 +1785,17 @@ editing here:
   alone (`TilingEngine.fillingMaximized` inside
   `visibleFrames(placed: true)`), never the slots, so every slot
   reader keeps the row. **A write that rearranges a Space ends its
-  maximize AT the write** — the reorder release, the mode write,
-  `resize`, `reset_layout_sizing`, a profile switch — so a refused
+  maximize AT the write** — every order write through the one
+  `Space.endMaximize`, the mode write, `resize`,
+  `reset_layout_sizing`, an explicit profile load — so a refused
   verb ends nothing (`MaximizeWindowEndTests` ▸ `refusedSwapKeeps`);
-  a new rearranging write ends it the same way, which is review's.
-  A Desktop departure carries it on the departure record and the
-  return pays it (`MaximizeWindowEndTests` ▸ `desktopReturnKeeps`).
+  a new rearranging write calls it the same way, which is review's.
+  A Desktop departure keeps ONE copy: `Space.maximized` goes on
+  naming the departed window, `retireEndedMaximize` spares it
+  through `departedWithDesktop`, and a close or a minimize ends it
+  in its own fold, so every ender reaches a departed maximize too
+  (`MaximizeWindowEndTests` ▸ `desktopReturnKeeps`,
+  `enderReachesDeparted`).
 - **A tracked window's "is it presenting" is asked through the
   one `KiwiCore.presents` door (#1788)**, which rules the float
   gate once — a tiled slot a gapless layout sizes to its screen

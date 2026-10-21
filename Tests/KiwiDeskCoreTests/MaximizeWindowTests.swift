@@ -99,7 +99,7 @@ struct MaximizeWindowTests {
         let core = makeCore()
         core.execute("toggle_maximized")
         core.state.apply(.windowDestroyed(w1, wasMinimized: false))
-        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(maximized(core) == nil)
     }
 
     @Test("Floating the window ends it")
@@ -162,7 +162,9 @@ struct MaximizeWindowTests {
         model.maximized = w1
         model.rekey(w1, to: w3)
         #expect(model.maximized == w3)
+        // A removal keeps the id for a Desktop return; the state
+        // fold and the retire end every other departure.
         model.remove(w3)
-        #expect(model.maximized == nil)
+        #expect(model.maximized == w3)
     }
 }

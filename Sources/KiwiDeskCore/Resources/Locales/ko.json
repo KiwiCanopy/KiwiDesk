@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "앱을 활성화하면 다른 데스크탑으로 튕겨 가게 됩니다. KiwiDesk에서는 ‘%1$@’(이)나 데스크탑 단축키로 원할 때만 이동합니다. %2$@",
   "mac_checklist.unreadable": "KiwiDesk가 이 항목을 읽지 못했습니다 — 설정한 뒤 직접 체크하십시오. %1$@",
   "maximize.refused.floating": "타일 배치된 윈도우만 최대화할 수 있습니다.",
+  "maximize.refused.sticky": "Sticky 윈도우는 최대화할 수 없습니다.",
   "menu.accessibility_paused": "윈도우 관리 일시 정지됨…",
   "menu.accessibility_paused.tooltip": "클릭하여 손쉬운 사용 권한을 부여하고 타일 배치를 재개하십시오.",
   "menu.app.about": "%1$@ 정보",

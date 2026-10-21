@@ -90,13 +90,37 @@ struct MaximizeWindowEndTests {
     func desktopReturnKeeps() {
         let core = makeCore()
         core.state.apply(.windowDestroyed(w1, wasMinimized: false))
-        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(maximized(core) == nil)
+        core.retile()
+        #expect(core.state.workspaces[space]?.maximized == w1)
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: w1, pid: 900_001, appName: "A")
             )
         )
         #expect(core.state.workspaces[space]?.maximized == w1)
+    }
+
+    @Test("A close while away ends it for good")
+    func closedDepartureEnds() {
+        let core = makeCore()
+        core.state.apply(.windowDestroyed(w1, wasMinimized: false))
+        core.state.rememberClosedDeparture(w1)
+        core.retile()
+        #expect(core.state.workspaces[space]?.maximized == nil)
+    }
+
+    @Test("A profile load's ender reaches a departed maximize")
+    func enderReachesDeparted() {
+        let core = makeCore()
+        core.state.apply(.windowDestroyed(w1, wasMinimized: false))
+        core.execute("set_mode", args: [.string("1"), .string("stack")])
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: w1, pid: 900_001, appName: "A")
+            )
+        )
+        #expect(core.state.workspaces[space]?.maximized == nil)
     }
 
     @Test("A minimize ends it for good")

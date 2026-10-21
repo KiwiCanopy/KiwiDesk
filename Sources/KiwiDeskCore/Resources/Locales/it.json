@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "Attivare un'app ti farebbe saltare a un'altra Scrivania; con KiwiDesk ci vai di proposito, con «%1$@» o con una scorciatoia per la Scrivania. %2$@",
   "mac_checklist.unreadable": "KiwiDesk non è riuscito a leggere questa impostazione — spuntala una volta impostata. %1$@",
   "maximize.refused.floating": "Solo una finestra affiancata può essere massimizzata.",
+  "maximize.refused.sticky": "Una finestra Sticky non può essere massimizzata.",
   "menu.accessibility_paused": "Gestione delle finestre in pausa…",
   "menu.accessibility_paused.tooltip": "Fai clic per concedere l'autorizzazione di Accessibilità e riprendere l'affiancamento.",
   "menu.app.about": "Informazioni su %1$@",

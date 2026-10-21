@@ -24,6 +24,15 @@ extension StateCoordinator {
         return id
     }
 
+    /// Whether `id` is away with its Desktop rather than gone: no
+    /// longer tracked, remembered as departed from `space` and not
+    /// marked closed. Its maximize waits for the return (#2448).
+    func departedWithDesktop(_ id: WindowID, from space: SpaceID) -> Bool {
+        windows[id] == nil
+            && rememberedSpaces[id] == .departed(space)
+            && !closedDepartures.contains(id)
+    }
+
     /// Ends every Space's maximize: an arrangement switch moves
     /// what the slots hold (#2448).
     mutating func endEveryMaximize() {
@@ -38,7 +47,9 @@ extension StateCoordinator {
     @discardableResult
     mutating func retireEndedMaximize() -> [SpaceID] {
         let ended = workspaces.allSpaces.filter {
-            $0.maximized != nil && maximizedWindow(of: $0) == nil
+            guard let id = $0.maximized else { return false }
+            return maximizedWindow(of: $0) == nil
+                && !departedWithDesktop(id, from: $0.id)
         }.map(\.id)
         for id in ended {
             workspaces.withSpace(id) { $0.maximized = nil }

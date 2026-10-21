@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "Ativar um app pularia para outra Mesa; com o KiwiDesk você vai até lá de propósito, com “%1$@” ou com um atalho de Mesa. %2$@",
   "mac_checklist.unreadable": "O KiwiDesk não conseguiu ler este item — marque-o quando tiver ajustado. %1$@",
   "maximize.refused.floating": "Só uma janela lado a lado pode ser maximizada.",
+  "maximize.refused.sticky": "Uma janela Sticky não pode ser maximizada.",
   "menu.accessibility_paused": "Gerenciamento de janelas pausado…",
   "menu.accessibility_paused.tooltip": "Clique para conceder a permissão de Acessibilidade e retomar o posicionamento lado a lado.",
   "menu.app.about": "Sobre o %1$@",

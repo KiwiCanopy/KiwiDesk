@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "Activating an app would jump you to another Desktop; with KiwiDesk you go there on purpose, with %1$@ or a Desktop shortcut. %2$@",
   "mac_checklist.unreadable": "KiwiDesk couldn’t read this one — tick it once you’ve set it. %1$@",
   "maximize.refused.floating": "Only a tiled window can be maximized.",
+  "maximize.refused.sticky": "A sticky window can't be maximized.",
   "menu.accessibility_paused": "Window Management Paused…",
   "menu.accessibility_paused.tooltip": "Click to grant Accessibility permission and resume tiling.",
   "menu.app.about": "About %1$@",

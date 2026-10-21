@@ -199,6 +199,16 @@ struct BatchSizingRoutingTests {
         // did.
         "KiwiDeskCore/App/KiwiCore+Maximize.swift":
             Site(names: 2, promises: 1),
+        // The focus paths: a focus that ended a maximize promises
+        // spring sizing on the pass that already pans (#2448) —
+        // the window shrinks in place; a newcomer was placed by its
+        // own creation pass. The retile wrapper threads it.
+        "KiwiDeskCore/App/KiwiCore+FocusEvents.swift":
+            Site(names: 7, promises: 1),
+        "KiwiDeskCore/Commands/KiwiCore+FocusRaise.swift":
+            Site(names: 2, promises: 1),
+        "KiwiDeskCore/Commands/KiwiCore+FocusRetile.swift":
+            Site(names: 6, promises: 0),
     ]
 
     /// Any spelling of the type — the argument label, the stored

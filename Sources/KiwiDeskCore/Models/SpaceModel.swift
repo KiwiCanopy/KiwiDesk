@@ -263,8 +263,10 @@ public struct Space: Sendable, Equatable {
         trackWeights[window] = nil
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
-        if maximized == window { maximized = nil }
-        if focused == window, let maximized {
+        // A departing maximized window keeps its id: a Desktop
+        // departure returns to it, and `retireEndedMaximize` ends
+        // every other departure (#2448).
+        if focused == window, let maximized, maximized != window {
             // A window closing over a maximized one (a dialog)
             // hands focus back to it, or the maximize ends (#2448).
             focused = maximized
@@ -305,6 +307,7 @@ public struct Space: Sendable, Equatable {
             trackWeights[b] = weight
         }
         releaseScrollSlot()
+        endMaximize()
     }
 }
 

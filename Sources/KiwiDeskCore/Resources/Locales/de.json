@@ -1409,6 +1409,7 @@
   "mac_checklist.switch_on_activate.caption": "Beim Aktivieren einer App würdest du auf einen anderen Schreibtisch springen; mit KiwiDesk gehst du gezielt dorthin — mit „%1$@“ oder einem Schreibtisch-Tastenkürzel. %2$@",
   "mac_checklist.unreadable": "KiwiDesk konnte diese Einstellung nicht lesen — hake sie ab, sobald du sie gesetzt hast. %1$@",
   "maximize.refused.floating": "Nur ein gekacheltes Fenster kann maximiert werden.",
+  "maximize.refused.sticky": "Ein Sticky-Fenster kann nicht maximiert werden.",
   "menu.accessibility_paused": "Fensterverwaltung pausiert…",
   "menu.accessibility_paused.tooltip": "Klicken, um Bedienungshilfen-Berechtigung zu erteilen und Kachelung fortzusetzen.",
   "menu.app.about": "Über %1$@",

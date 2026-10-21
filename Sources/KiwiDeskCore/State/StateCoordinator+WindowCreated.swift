@@ -88,11 +88,6 @@ extension StateCoordinator {
                     )
                 }
             }
-            if slot.maximized {
-                workspaces.withSpace(target) {
-                    if $0.maximized == nil { $0.maximized = window.id }
-                }
-            }
         } else if let track, !window.isFloating {
             workspaces.add(
                 window.id,

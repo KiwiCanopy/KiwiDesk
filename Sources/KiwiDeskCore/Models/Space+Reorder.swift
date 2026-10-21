@@ -13,10 +13,16 @@ extension Space {
     /// place on screen (#966). The census of callers is this
     /// file, `swap` and `replace` (#2509);
     /// `ScrollSlotReleaseSeamTests` holds that
-    /// no order write lives outside the model. A reorder also ends
-    /// the maximize, whose slot it moves out of sight (#2448).
+    /// no order write lives outside the model.
     public mutating func releaseScrollSlot() {
         scrollRest?.slot = nil
+    }
+
+    /// Ends the maximize: a write that rearranges the row moves a
+    /// slot the maximized window hides (#2448). Every order write
+    /// calls it — the ones that release the scroll slot and the
+    /// mode-bound stack and track writes alike.
+    public mutating func endMaximize() {
         maximized = nil
     }
 
@@ -31,6 +37,7 @@ extension Space {
         let clamped = min(max(index, 0), windows.count)
         windows.insert(window, at: clamped)
         releaseScrollSlot()
+        endMaximize()
     }
 
     /// Rewrites the order of the `tiled` members to `stream`,
@@ -51,5 +58,6 @@ extension Space {
             tiled.contains(id) ? (reordered.next() ?? id) : id
         }
         releaseScrollSlot()
+        endMaximize()
     }
 }
