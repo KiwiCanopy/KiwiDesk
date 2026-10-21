@@ -80,6 +80,12 @@ struct GateReasonPlacementTests {
                 // #2228: the Space plate's switch, the same shape
                 // on KiwiShelf ▸ Show.
                 .spaceBar(.spaceCue),
+                // The Reveal row beside it greys while no bar hides:
+                // the bars' values sit above it, not that a reveal
+                // needs a hiding bar (owner ruling, 2026-10-21).
+                .kiwishelf(.revealStyle),
+                .colours(.animationsRevealDurationMS),
+                .colours(.animationsExpandDurationMS),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no
@@ -113,6 +119,28 @@ struct GateReasonPlacementTests {
                 .kiwiVision(.lenses),
             ]
         )
+    }
+
+    /// A card an OS accessibility switch greys whole draws its
+    /// reason in a warning box too, beside the `?` (owner ruling,
+    /// 2026-10-21): the Animations card draws the box under its
+    /// own switch, with the one fix.
+    @Test("an OS switch that greys a whole card warns in a box")
+    func osSwitchWarnsInABox() throws {
+        let card = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Looks/MotionCard.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: card, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            source.contains(
+                "ifreduceMotion{WarningBox(text:Self.reduceMotionWarning)"
+            )
+        )
+        #expect(source.contains("Self.openAccessibilityDisplay()"))
     }
 
     /// The other two channels, pinned by one member each — a

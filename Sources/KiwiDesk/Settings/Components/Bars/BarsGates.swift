@@ -22,13 +22,23 @@ struct BarsGates {
         /// `init.lua` owns the config, so an app-wide row it does
         /// not store is not the GUI's to write (#1741).
         case appWideLuaOwned
+        /// Every bar reads Always, so nothing reveals (owner
+        /// ruling, 2026-10-21).
+        case noBarHides
+        /// The expand is off in the config (`animations.on_expand`),
+        /// a knob with no row (owner ruling, 2026-10-21).
+        case expandOff
     }
 
     /// Runtime-gated keys this resolver answers directly. Data, so
     /// the guard asserts the split against the census — a new
     /// runtime-gated bars row landing in neither set reds. A bars
     /// row's `.setting` gate is wiring's, as gui.md rules.
-    static let resolved: Set<SettingKey> = [.spaceBar(.spaceCue)]
+    static let resolved: Set<SettingKey> = [
+        .spaceBar(.spaceCue), .kiwishelf(.revealStyle),
+        .colours(.animationsRevealDurationMS),
+        .colours(.animationsExpandDurationMS),
+    ]
 
     /// Runtime-gated bars keys answered elsewhere.
     static let resolvedElsewhere: Set<SettingKey> = []
@@ -38,6 +48,11 @@ struct BarsGates {
         switch key {
         case .spaceBar(.spaceCue):
             return guiManaged ? nil : .appWideLuaOwned
+        case .kiwishelf(.revealStyle),
+            .colours(.animationsRevealDurationMS):
+            return settings.someBarHides ? nil : .noBarHides
+        case .colours(.animationsExpandDurationMS):
+            return settings.animations.onExpand ? nil : .expandOff
         default:
             assertionFailure("BarsGates does not own \(key.id)")
             return nil
@@ -136,6 +151,17 @@ enum BarsGateHelp {
             )
         case .appWideLuaOwned:
             return GeneralGateHelp.sentence(for: .luaOwned)
+        case .noBarHides:
+            return L(
+                "kiwishelf.reveal_style.no_bar_hides",
+                "No bar ever hides, so there is nothing to reveal."
+            )
+        case .expandOff:
+            return L(
+                "kiwishelf.expand_duration.off",
+                "Off in your config (%1$@).",
+                "animations.on_expand"
+            )
         }
     }
 }

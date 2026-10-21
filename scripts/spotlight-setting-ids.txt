@@ -109,13 +109,13 @@ keybinding.toggle_sticky
 profile.isDefault
 settings.animations (master)
 settings.animations.durationMS
+settings.animations.expandDurationMS
 settings.animations.onRelayout
 settings.animations.onScrolling
-settings.animations.onShelf
 settings.animations.onWindowResize
 settings.animations.onWindowSwap
+settings.animations.revealDurationMS
 settings.animations.scrollDurationMS
-settings.animations.shelfDurationMS
 settings.appBarStyle.activeIndicator
 settings.appBarStyle.edge
 settings.appBarStyle.edgeOverride[screen]

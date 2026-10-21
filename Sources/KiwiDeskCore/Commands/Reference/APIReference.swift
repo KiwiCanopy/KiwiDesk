@@ -154,7 +154,8 @@ public enum APIReference {
             "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",
-            "set_on_shelf", "set_shelf_duration",
+            "set_on_expand", "set_expand_duration",
+            "set_reveal_duration",
             "set_size_policy", "set_size_rate",
         ],
         "stack": [
@@ -218,7 +219,7 @@ public enum APIReference {
             "set_hover_fill_color", "set_hover_item_color",
             "set_fill_color", "set_border_color",
             "set_group_badge_color", "set_group_badge_text_color",
-            "set_reveal_duration", "set_reveal_style",
+            "set_reveal_timeout", "set_reveal_style",
         ],
         "grid": [
             "set_type", "set_fill_empty_cells",

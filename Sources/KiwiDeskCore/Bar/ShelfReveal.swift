@@ -11,7 +11,7 @@ enum ShelfReveal: Equatable {
     /// Shown while the pointer holds it.
     case hover
     /// Shown by the action until the next press, or until
-    /// `until` where `kiwishelf.reveal_duration` set one.
+    /// `until` where `kiwishelf.reveal_timeout` set one.
     case pinned(until: Date?)
 
     var isShown: Bool { self != .hidden }

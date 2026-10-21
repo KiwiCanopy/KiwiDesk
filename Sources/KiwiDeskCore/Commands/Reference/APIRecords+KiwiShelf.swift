@@ -147,11 +147,11 @@ extension APIReference {
             .color("hex")
         ),
         "set_reveal_style": APIRecord(
-            "Sets whether a revealed bar slides in or grows out "
-                + "of its mark.",
+            "Sets whether a revealed bar slides in, grows or "
+                + "unfolds out of its mark, or fades in.",
             .choice("style", KiwiShelf.RevealStyle.self)
         ),
-        "set_reveal_duration": APIRecord(
+        "set_reveal_timeout": APIRecord(
             "Sets how long the show/hide action keeps a shelf shown; "
                 + "0 waits for the next press.",
             .number("seconds")

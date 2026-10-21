@@ -13,11 +13,16 @@ public struct KiwiShelf: Sendable, Equatable {
     public typealias Alignment = AppBarStyle.BarAlignment
 
     /// How a revealed shelf comes onto its empty edge (owner
-    /// ruling, #2497): it slides in whole from the screen side, or
-    /// its plate grows out of the mark. Reduce Motion fades either.
+    /// rulings, #2497, 2026-10-21): it slides in whole from the
+    /// screen side, its plate grows out of the mark, it unfolds out
+    /// of the mark along the edge and then deepens, or it fades in
+    /// where it stands. A bar with no mark grows or unfolds from the
+    /// middle of its screen side. Each plays under Reduce Motion too.
     public enum RevealStyle: String, Sendable, Codable, CaseIterable {
         case slide
         case grow
+        case unfold
+        case fade
     }
 
     /// Which bar takes the start of the edge while both show.
@@ -111,20 +116,20 @@ public struct KiwiShelf: Sendable, Equatable {
     public var groupBadgeTextColor = "#FFFFFF"
     /// How long a shelf the show/hide action revealed stays shown,
     /// in seconds (#761); 0 keeps it until the next press.
-    public var revealDuration: Double = 0
+    public var revealTimeout: Double = 0
     /// How a revealed shelf comes onto its edge (#2497).
     public var revealStyle: RevealStyle = .slide
 
     public init() {}
 
-    /// Bounds of `revealDuration` in seconds (#761).
-    public static let revealDurationRange: ClosedRange<Double> = 0...60
+    /// Bounds of `revealTimeout` in seconds (#761).
+    public static let revealTimeoutRange: ClosedRange<Double> = 0...60
 
-    /// `value` within `revealDurationRange`.
-    public static func clampRevealDuration(_ value: Double) -> Double {
+    /// `value` within `revealTimeoutRange`.
+    public static func clampRevealTimeout(_ value: Double) -> Double {
         min(
-            max(value, revealDurationRange.lowerBound),
-            revealDurationRange.upperBound
+            max(value, revealTimeoutRange.lowerBound),
+            revealTimeoutRange.upperBound
         )
     }
 

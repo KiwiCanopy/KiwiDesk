@@ -56,5 +56,10 @@ extension GuiConfig {
     /// **12 (#2460)**: `desktop_shortcut_base` became
     /// `shortcut_base`, which covers every tier
     /// (`migratingShortcutBase`).
-    public static let currentFormat = 12
+    ///
+    /// **13 (owner ruling, 2026-10-21)**: the shared look's motion
+    /// paths `animations.on_shelf` / `shelf_duration` became
+    /// `on_expand` / `expand_duration`
+    /// (`migratingShelfGlideOntoExpand`).
+    public static let currentFormat = 13
 }

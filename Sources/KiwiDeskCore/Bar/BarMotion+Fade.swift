@@ -1,21 +1,22 @@
 import AppKit
 
 /// `BarMotion`'s fade half (#1831), split at the §2.1 ceiling: the
-/// App Bar group's members sliding into its item and out of it.
+/// App Bar group's members sliding into its item and out of it, and
+/// the shelf reveal's landings.
 /// The same one home — `BarMotionSeamTests` censuses both files.
 extension BarMotion {
     /// The shelf glide's length (#1838), the user's
-    /// `animations.shelf_duration` — nothing while `on_shelf` is
+    /// `animations.expand_duration` — nothing while `on_expand` is
     /// off — kept current by `KiwiCore.updateBars()`.
     @MainActor static var shelfGlide: TimeInterval =
-        AnimationSettings().shelfGlideSeconds
+        AnimationSettings().expandSeconds
 
-    /// The plate glide's live length: the user's `shelfGlide` under
-    /// the Reduce Motion setting — what a stand reads to know
-    /// whether anything will travel at all.
+    /// The plate glide's live length, the user's `shelfGlide` —
+    /// what a stand reads to know whether anything will travel at
+    /// all.
     @MainActor
     static var shelfGlideLength: TimeInterval {
-        plateGlideDuration(reduceMotion: isReduced, seconds: shelfGlide)
+        shelfGlide
     }
 
     /// Runs `body`'s writes with no implicit motion and COMMITS
@@ -39,7 +40,9 @@ extension BarMotion {
         to alpha: CGFloat,
         animated: Bool
     ) {
-        if fades(animated, reduceMotion: isReduced) {
+        // The expand fades under Reduce Motion; every other bar fade
+        // keeps the gate.
+        if fades(animated, reduceMotion: isReduced && !inExpand) {
             view.animator().alphaValue = alpha
         } else {
             view.alphaValue = alpha
@@ -106,46 +109,36 @@ extension BarMotion {
 
     /// Runs `body` in a dissolve's out-fade group, nested in the
     /// plate glide: `dissolveOutShare` of its length, the same
-    /// curve, zero under Reduce Motion.
+    /// curve.
     @MainActor
     static func runDissolveOut(_ body: () -> Void) {
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = dissolveOutDuration(
-                reduceMotion: isReduced,
-                seconds: shelfGlide
-            )
+            context.duration = dissolveOutDuration(seconds: shelfGlide)
             context.timingFunction = CAMediaTimingFunction(
                 controlPoints: 0.2,
                 0.9,
                 0.3,
                 1
             )
-            body()
+            expanding(body)
         }
     }
 
     /// The out-fade's length: `dissolveOutShare` of the plate
-    /// glide's, zero under Reduce Motion.
-    static func dissolveOutDuration(
-        reduceMotion: Bool,
-        seconds: TimeInterval
-    ) -> TimeInterval {
-        plateGlideDuration(reduceMotion: reduceMotion, seconds: seconds)
-            * dissolveOutShare
+    /// glide's.
+    static func dissolveOutDuration(seconds: TimeInterval) -> TimeInterval {
+        seconds * dissolveOutShare
     }
 
     /// Runs `body` once a group glide lands — a timer of the plate
-    /// glide's length, as `playWalk` does, and the next turn under
-    /// Reduce Motion, which plays no glide. Never inline: it is
+    /// glide's length, as `playWalk` does, and the next turn where
+    /// the expand is off. Never inline: it is
     /// scheduled from inside a render, which `body` may re-run.
     @MainActor
     static func afterGroupGlide(
         _ body: @escaping @MainActor () -> Void
     ) {
-        let span = plateGlideDuration(
-            reduceMotion: isReduced,
-            seconds: shelfGlide
-        )
+        let span = shelfGlide
         Task { @MainActor in
             if span > 0 { try? await Task.sleep(for: .seconds(span)) }
             body()
@@ -176,5 +169,52 @@ extension BarMotion {
         fade.fillMode = .forwards
         fade.isRemovedOnCompletion = false
         return fade
+    }
+
+    // MARK: - Reveal landings (#761, #2497)
+
+    /// Runs `body` in the main run loop's next pass once this one
+    /// has committed — after AppKit has sent the order-in made in
+    /// it (`MainRunLoopPass`, #1956) — the overlay's
+    /// `afterCommit` default; a test runs it inline.
+    @MainActor
+    static func afterCommit(_ body: @escaping @MainActor () -> Void) {
+        let main = CFRunLoopGetMain()
+        // Ordered last among the before-waiting observers, as
+        // `MainRunLoopPass` counts, so the commit has run.
+        let observer = CFRunLoopObserverCreateWithHandler(
+            nil,
+            CFRunLoopActivity.beforeWaiting.rawValue,
+            false,
+            CFIndex.max
+        ) { _, _ in
+            CFRunLoopPerformBlock(main, CFRunLoopMode.commonModes.rawValue) {
+                MainActor.assumeIsolated { body() }
+            }
+            CFRunLoopWakeUp(main)
+        }
+        CFRunLoopAddObserver(main, observer, .commonModes)
+    }
+
+    /// Runs `body` once a reveal of `span` seconds has landed — the
+    /// overlay's `afterReveal` default; a test hands a queue.
+    @MainActor
+    static func afterReveal(
+        _ span: TimeInterval,
+        _ body: @escaping @MainActor () -> Void
+    ) {
+        Task { @MainActor in
+            if span > 0 { try? await Task.sleep(for: .seconds(span)) }
+            body()
+        }
+    }
+
+    /// Ends a reveal's motion on `view` and its `items`: both
+    /// stand where they rest, unclipped and opaque.
+    @MainActor
+    static func endReveal(_ view: NSView, items: NSView) {
+        view.layer?.removeAnimation(forKey: revealKey)
+        items.layer?.removeAnimation(forKey: revealKey)
+        endSpread(in: items)
     }
 }

@@ -7,15 +7,19 @@ import QuartzCore
 /// censuses this file.
 extension BarMotion {
     /// How a shelf's reveal plays, as far as its mark keeps time
-    /// with it: the user's `reveal_style`, a grow on a shelf with no
-    /// plate cross-fading (#2497).
+    /// with it: the user's `reveal_style`, an unfold on a shelf with
+    /// no plate spreading its boxes (owner ruling, 2026-10-21) and a
+    /// grow there wiping over them; `fade` for a shelf not yet
+    /// shown.
     enum RevealKind: Equatable {
-        case slide, grow, fade
+        case slide, grow, unfold, spread, fade
 
         init(_ shelf: KiwiShelf) {
             switch shelf.revealStyle {
             case .slide: self = .slide
-            case .grow: self = shelf.drawsPlate ? .grow : .fade
+            case .grow: self = .grow
+            case .unfold: self = shelf.drawsPlate ? .unfold : .spread
+            case .fade: self = .fade
             }
         }
     }
@@ -25,13 +29,12 @@ extension BarMotion {
     /// (`showing`): out as the motion starts — under a growing
     /// plate, half its growth — and back over the end of the
     /// retract so it lands with it; a cross-fade with the shelf
-    /// where it only fades.
+    /// where it only fades. Reduce Motion keeps it, as it keeps the
+    /// reveal (owner ruling, 2026-10-21).
     static func markFade(
         showing: Bool,
-        reveal: RevealKind,
-        reduceMotion: Bool
+        reveal: RevealKind
     ) -> (delay: TimeInterval, length: TimeInterval) {
-        guard !reduceMotion else { return (0, revealFade) }
         switch reveal {
         case .fade: return (0, revealFade)
         case .slide:
@@ -40,6 +43,40 @@ extension BarMotion {
         case .grow:
             guard showing else { return (0, ShelfGrow.plateGrow / 2) }
             return (ShelfGrow.retractLength - markReturn, markReturn)
+        case .unfold:
+            guard showing else { return (0, ShelfUnfold.markFadeOut) }
+            return (ShelfUnfold.retractLength - markReturn, markReturn)
+        case .spread:
+            guard showing else { return (0, ShelfUnfold.markSpreadOut) }
+            return (ShelfUnfold.gatherLength - markReturn, markReturn)
+        }
+    }
+
+    /// How much a motion `natural` seconds long is stretched to
+    /// play inside `length` — a retract inside
+    /// `AnimationSettings.retractShare` of it.
+    static func revealScale(
+        _ natural: TimeInterval,
+        entering: Bool,
+        _ length: TimeInterval
+    ) -> Double {
+        let target =
+            entering ? length : length * AnimationSettings.retractShare
+        return natural > 0 && target > 0 ? target / natural : 1
+    }
+
+    /// How long `kind`'s motion plays before it is fitted to the
+    /// user's length — what `revealMotion` resolves it to.
+    static func naturalLength(
+        _ kind: RevealKind,
+        entering: Bool
+    ) -> TimeInterval {
+        switch kind {
+        case .slide: revealSlide
+        case .fade: revealFade
+        case .grow: ShelfGrow.length(entering: entering)
+        case .unfold: ShelfUnfold.length(entering: entering)
+        case .spread: ShelfUnfold.spreadLength(entering: entering)
         }
     }
 
@@ -52,12 +89,24 @@ extension BarMotion {
         showing: Bool,
         reveal: RevealKind
     ) {
-        let timing = markFade(
-            showing: showing,
-            reveal: reveal,
-            reduceMotion: isReduced
-        )
         body.wantsLayer = true
+        // A length of 0 swaps the mark at once.
+        guard revealLength > 0 else {
+            body.layer?.removeAnimation(forKey: revealKey)
+            body.alphaValue = showing ? 1 : 0
+            return
+        }
+        let natural = markFade(showing: showing, reveal: reveal)
+        // The motion's own scale, so the mark keeps its time.
+        let scale = revealScale(
+            naturalLength(reveal, entering: !showing),
+            entering: !showing,
+            revealLength
+        )
+        let timing = (
+            delay: natural.delay * scale,
+            length: natural.length * scale
+        )
         let from =
             body.layer?.animationKeys()?.contains(revealKey) == true
             ? body.layer?.presentation()?.opacity : nil
@@ -72,20 +121,14 @@ extension BarMotion {
     }
 
     /// The hidden mark's hover growth (#761): short, so the plate
-    /// reads as answering the pointer.
+    /// reads as answering the pointer. It travels under Reduce
+    /// Motion too (owner ruling, 2026-10-21).
     static let hoverGrow: TimeInterval = 0.15
-
-    /// How long the hover growth travels: none under Reduce Motion,
-    /// where the plate lands at its hovered size at once.
-    static func hoverGrowDuration(reduceMotion: Bool) -> TimeInterval {
-        reduceMotion ? 0 : hoverGrow
-    }
 
     /// Where the mark's plate stands in its view: `mark`, grown by
     /// `ShelfIndicatorSpec.hoverGrowth` on every side while
     /// hovered and along the edge by `widen`, a label's room. The
-    /// size is content rather than motion, so Reduce Motion keeps
-    /// it and drops only the growth's animation, for every mark.
+    /// size is content rather than motion, for every mark.
     static func hoverPlate(
         mark: CGRect,
         widen: CGFloat = 0,
@@ -103,8 +146,8 @@ extension BarMotion {
     /// Places the mark's `plate` for `hovered` and shows its
     /// `rim` — a view stroking its own bounds, at the hovered
     /// plate's frame so its stroke never stretches — growing and
-    /// fading in over `hoverGrow` where `animated`; under Reduce
-    /// Motion both land at once.
+    /// fading in over `hoverGrow` where `animated`, Reduce Motion
+    /// or not (owner ruling, 2026-10-21).
     @MainActor
     static func placeHoverPlate(
         _ plate: NSView,
@@ -133,13 +176,12 @@ extension BarMotion {
             plate.layer?.cornerRadius = min(frame.width, frame.height) / 2
             rim.alphaValue = hovered ? 1 : 0
         }
-        let duration = hoverGrowDuration(reduceMotion: isReduced)
-        guard animated, duration > 0, plate.frame != frame else {
+        guard animated, plate.frame != frame else {
             write()
             return
         }
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = duration
+            context.duration = hoverGrow
             context.timingFunction = CAMediaTimingFunction(
                 name: .easeOut
             )

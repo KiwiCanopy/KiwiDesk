@@ -165,11 +165,11 @@ extension SettingsValueReadout {
                 trimmed(o.dimFactor),
                 trimmed(n.dimFactor)
             )
-        case .revealDuration:
+        case .revealTimeout:
             return spaceBarRow(
                 census,
-                spaceBarSeconds(Int(o.revealDuration * 1000)),
-                spaceBarSeconds(Int(n.revealDuration * 1000))
+                spaceBarSeconds(Int(o.revealTimeout * 1000)),
+                spaceBarSeconds(Int(n.revealTimeout * 1000))
             )
         case .fillColor, .borderColor, .itemColor, .activeItemColor,
             .highlightColor, .hoverFillColor, .hoverItemColor,

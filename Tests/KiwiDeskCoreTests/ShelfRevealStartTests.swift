@@ -7,7 +7,7 @@ import Testing
 /// The ORDER a hiding shelf's reveal starts in (#761, #2497), split
 /// from `ShelfRevealMotionTests` at the §2.1 target: the pass
 /// ordering the panel in holds the slide, a shown panel's starts at
-/// once, a retract slides back out, Reduce Motion cross-fades, and
+/// once, a retract slides back out, Reduce Motion slides too, and
 /// the reveal delay redraws once. Main-actor spend: a few overlays,
 /// one ordered panel each.
 @Suite("Shelf reveal start order (#761)", .serialized)
@@ -17,12 +17,15 @@ struct ShelfRevealStartTests {
     private static let strip = CGRect(x: 100, y: 300, width: 1000, height: 40)
 
     /// A shown shelf, its reveal landings swallowed.
-    private func overlay() -> ShelfOverlay {
+    private func overlay(
+        _ style: KiwiShelf.RevealStyle = .slide
+    ) -> ShelfOverlay {
         let overlay = ShelfOverlay()
         overlay.afterReveal = { _, _ in }
         let plate = CGRect(x: 200, y: 0, width: 300, height: 40)
         var shelf = KiwiShelf()
         shelf.liquidGlass = false
+        shelf.revealStyle = style
         overlay.show(
             strip: Self.strip,
             edge: .top,
@@ -60,7 +63,7 @@ struct ShelfRevealStartTests {
         #expect(commits.count == 1)
         commits.first?()
         let slide = try #require(motion(overlay.content))
-        #expect(slide.speed == 1)
+        #expect(slide.speed > 0)
         #expect(slide.beginTime > 0)
     }
 
@@ -78,17 +81,37 @@ struct ShelfRevealStartTests {
         #expect(slide.isAdditive)
     }
 
-    @Test("Under Reduce Motion a reveal fades the content in place")
-    func reducedRevealFades() throws {
+    /// The owner's ruling (2026-10-21): the reveal is a motion
+    /// Reduce Motion keeps, as the Dock's auto-hide slides.
+    @Test("Under Reduce Motion a reveal still slides")
+    func reducedRevealSlides() throws {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
         let overlay = overlay()
+        defer { overlay.hide() }
+        overlay.revealIn()
+        let slide = try #require(
+            motion(overlay.content) as? CABasicAnimation
+        )
+        #expect(slide.keyPath == "position")
+        #expect(slide.isAdditive)
+    }
+
+    /// Fade is a style of its own (owner ruling, 2026-10-21): the
+    /// content cross-fades where it stands, with nothing clipped.
+    @Test("The Fade style fades the content in place")
+    func fadeStyleFades() throws {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        let overlay = overlay(.fade)
         defer { overlay.hide() }
         overlay.revealIn()
         let fade = try #require(
             motion(overlay.content) as? CABasicAnimation
         )
         #expect(fade.keyPath == "opacity")
+        #expect(fade.duration == BarMotion.revealFade)
+        #expect(!overlay.growing)
     }
 
     @Test("A reveal on a shown panel starts at once")
@@ -100,7 +123,7 @@ struct ShelfRevealStartTests {
         var commits = 0
         overlay.afterCommit = { _ in commits += 1 }
         overlay.revealIn()
-        #expect(motion(overlay.content)?.speed == 1)
+        #expect((motion(overlay.content)?.speed ?? 0) > 0)
         #expect(commits == 0)
     }
 

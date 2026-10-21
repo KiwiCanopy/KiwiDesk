@@ -7,7 +7,7 @@ import Testing
 /// (#2497, owner rulings 2026-10-21): a bar shown onto an EMPTY edge
 /// slides or grows — Hidden as well as Auto — while one shown beside
 /// an always sibling joins it; and `kiwishelf.set_reveal_style`
-/// picks slide or grow for every reveal, slide by default.
+/// picks slide, grow or unfold for every reveal, slide by default.
 @Suite("Shelf reveal style (#2497)", .serialized)
 @MainActor
 struct ShelfRevealStyleTests {
@@ -108,6 +108,18 @@ struct ShelfRevealStyleTests {
                 .isSuccess
         )
         #expect(core.tiler.settings.kiwishelf.revealStyle == .grow)
+        for style in KiwiShelf.RevealStyle.allCases {
+            #expect(
+                core.execute(
+                    "kiwishelf.set_reveal_style",
+                    args: [.string(style.rawValue)]
+                ).isSuccess
+            )
+        }
+        #expect(
+            core.execute("kiwishelf.set_reveal_style", args: [.string("grow")])
+                .isSuccess
+        )
         #expect(
             !core.execute("kiwishelf.set_reveal_style", args: [.string("fly")])
                 .isSuccess
@@ -154,6 +166,32 @@ struct ShelfRevealStyleTests {
                 == ShelfOverlay.screenSide(of: overlay.restRoom, edge: .bottom)
         )
         #expect(origin.minY == overlay.restRoom.maxY)
+    }
+
+    /// What Settings' Reveal row greys on (owner ruling,
+    /// 2026-10-21): a bar that reads Always everywhere never
+    /// reveals, while Hidden, or Auto with no Always beside it, does.
+    @Test("Some bar hides unless every bar reads Always")
+    func someBarHides() {
+        var settings = TilingSettings()
+        settings.setEveryBarVisibility(.always)
+        #expect(!settings.someBarHides)
+        settings.monocle.appBar.visibility = .hidden
+        #expect(settings.someBarHides)
+        settings.setEveryBarVisibility(.always)
+        // An App Bar on Auto beside the Always Space Bar on one edge
+        // reads Always; on an edge of its own it hides.
+        settings.spaceBarStyle.setEdge(.top)
+        settings.appBarStyle.setEdge(.top)
+        settings.monocle.appBar.visibility = .auto
+        #expect(!settings.someBarHides)
+        settings.appBarStyle.setEdge(.bottom)
+        #expect(settings.someBarHides)
+        // The Space Bar on Auto hides in a layout with no App Bar.
+        settings.setEveryBarVisibility(.always)
+        settings.appBarStyle.setEdge(.top)
+        settings.spaceBarStyle.visibility = .auto
+        #expect(settings.someBarHides)
     }
 
     @Test("A bundled look never changes the reveal style")

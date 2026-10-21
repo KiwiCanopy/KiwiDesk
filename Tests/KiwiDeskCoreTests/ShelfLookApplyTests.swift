@@ -170,8 +170,9 @@ struct ShelfLookApplyTests {
         source.animations.onRelayout = false
         source.animations.durationMS = 250
         source.animations.scrollDurationMS = 260
-        source.animations.onShelf = false
-        source.animations.shelfDurationMS = 900
+        source.animations.onExpand = false
+        source.animations.expandDurationMS = 900
+        source.animations.revealDurationMS = 500
         let saved = ShelfLook(
             name: "T",
             style: LookKeys.extract(from: source),

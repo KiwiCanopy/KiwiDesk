@@ -142,32 +142,35 @@ enum BarMotion {
         return step
     }
 
-    /// Runs `body` in the plate glide's group: a decelerating
-    /// ease with no overshoot, zero-length under Reduce Motion so
-    /// the plate arrives without travelling.
+    /// Runs `body` in the plate glide's group — the shelf's expand:
+    /// a decelerating ease with no overshoot, played under Reduce
+    /// Motion too (owner ruling, 2026-10-21).
     @MainActor
     static func runPlateGlide(_ body: () -> Void) {
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = plateGlideDuration(
-                reduceMotion: isReduced,
-                seconds: shelfGlide
-            )
+            context.duration = shelfGlide
             context.timingFunction = CAMediaTimingFunction(
                 controlPoints: 0.2,
                 0.9,
                 0.3,
                 1
             )
-            body()
+            expanding(body)
         }
     }
 
-    /// The plate glide's duration: zero under Reduce Motion.
-    static func plateGlideDuration(
-        reduceMotion: Bool,
-        seconds: TimeInterval
-    ) -> TimeInterval {
-        reduceMotion ? 0 : seconds
+    /// Whether a write is inside the expand's group, whose frames
+    /// and fades travel under Reduce Motion (owner ruling,
+    /// 2026-10-21); set by `expanding` alone.
+    @MainActor private(set) static var inExpand = false
+
+    /// Runs `body` as part of the expand, nested groups included.
+    @MainActor
+    static func expanding(_ body: () -> Void) {
+        let outer = inExpand
+        inExpand = true
+        defer { inExpand = outer }
+        body()
     }
 
     /// The group's duration. Zero under Reduce Motion, so
@@ -185,11 +188,13 @@ enum BarMotion {
         to frame: CGRect,
         animated: Bool
     ) {
+        // The expand travels under Reduce Motion; every other bar
+        // frame write keeps the gate.
         if travels(
             animated,
             from: view.frame,
             to: frame,
-            reduceMotion: isReduced
+            reduceMotion: isReduced && !inExpand
         ) {
             view.animator().frame = frame
         } else {

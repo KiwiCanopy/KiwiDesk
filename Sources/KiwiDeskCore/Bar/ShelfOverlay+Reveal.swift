@@ -1,8 +1,9 @@
 import AppKit
 
 /// A revealed shelf's reveal and retract (#761, #2497): the whole
-/// shelf slides in from its screen side, laid out, or grows out of
-/// its mark — the shelf's `reveal_style` — and back, through
+/// shelf slides in from its screen side, laid out, grows out of its
+/// mark or stretches out of it as an unfold — the shelf's
+/// `reveal_style` — and back, through
 /// `BarMotion.playReveal`, each taking over from where the other
 /// stands, the panel ordered out only once the retract lands. The
 /// panel stays still and the content moves inside its room.
@@ -27,11 +28,12 @@ extension ShelfOverlay {
     }
 
     /// What the reveal plays along: the shelf's reveal kind — its
-    /// `reveal_style`, a grow with no plate cross-fading, the one
+    /// `reveal_style`, an unfold with no plate spreading, the one
     /// verdict its mark reads too — the slide's start past the
-    /// strip's screen side and the margin, the grow's mark (the
-    /// middle of the screen side where the edge draws none, a
-    /// Hidden bar's) and plate. A shelf not yet shown fades.
+    /// strip's screen side and the margin, the grow's and the
+    /// unfold's mark (the middle of the screen side where the edge
+    /// draws none, a Hidden bar's) and plate. A shelf not yet shown
+    /// fades.
     var revealPath: BarMotion.RevealPath {
         guard let drawn else { return .init(kind: .fade) }
         let strip = drawn.strip
@@ -45,7 +47,9 @@ extension ShelfOverlay {
             origin: revealOrigin
                 ?? Self.screenSide(of: restRoom, edge: drawn.edge),
             plate: revealPlate?.frame,
-            plateRadius: revealPlate?.radius ?? 0
+            plateRadius: revealPlate?.radius ?? 0,
+            horizontal: drawn.edge.isHorizontal,
+            length: BarMotion.revealLength
         )
     }
 

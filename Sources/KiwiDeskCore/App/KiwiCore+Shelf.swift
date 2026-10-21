@@ -34,7 +34,8 @@ extension KiwiCore {
         }
         syncFontIssue()
         let settings = tiler.settings
-        BarMotion.shelfGlide = settings.animations.shelfGlideSeconds
+        BarMotion.shelfGlide = settings.animations.expandSeconds
+        BarMotion.revealLength = settings.animations.revealSeconds
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else {
             let fallback = appBarFallback(settings: settings)

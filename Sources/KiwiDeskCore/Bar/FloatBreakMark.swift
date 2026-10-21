@@ -41,5 +41,25 @@ final class FloatBreakMark: NSImageView {
         )
     }
 
+    /// The halo's alpha and blur under Boxed (owner ruling,
+    /// 2026-10-21).
+    static let haloAlpha: Float = 0.7
+    static let haloBlur: CGFloat = 2
+
+    /// A halo in the opaque Fill `hex`, or none for nil.
+    func setHalo(_ hex: String?) {
+        wantsLayer = true
+        guard let layer else { return }
+        guard let hex else {
+            layer.shadowOpacity = 0
+            return
+        }
+        layer.shadowColor =
+            NSColor(kiwiHex: hex).withAlphaComponent(1).cgColor
+        layer.shadowOpacity = Self.haloAlpha
+        layer.shadowRadius = Self.haloBlur
+        layer.shadowOffset = .zero
+    }
+
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }

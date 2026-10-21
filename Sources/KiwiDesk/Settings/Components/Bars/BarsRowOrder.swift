@@ -1,10 +1,19 @@
 /// Display order for the Bars settings area (#678, `BarsCensusRenderTests`).
 enum BarsRowOrder {
     /// KiwiShelf card, Show group: the master, its Each bar
-    /// drawer, then the Space cue (#761).
+    /// drawer, the reveal, then the Space cue (#761, owner ruling
+    /// 2026-10-21).
     static let kiwishelfShow: [SettingKey] = [
         .kiwishelf(.visibility),
+        .kiwishelf(.revealStyle),
         .spaceBar(.spaceCue),
+    ]
+
+    /// KiwiShelf card, behind the Durations disclosure under Reveal
+    /// (owner ruling, 2026-10-21).
+    static let kiwishelfDurations: [SettingKey] = [
+        .colours(.animationsRevealDurationMS),
+        .colours(.animationsExpandDurationMS),
     ]
 
     /// KiwiShelf card, behind Show's Each bar disclosure (#761).
@@ -58,7 +67,6 @@ enum BarsRowOrder {
         .kiwishelf(.fontFamily),
         .kiwishelf(.fontWeight),
         .kiwishelf(.iconSource),
-        .kiwishelf(.revealStyle),
     ]
 
     /// KiwiShelf card, behind the Margins disclosure.

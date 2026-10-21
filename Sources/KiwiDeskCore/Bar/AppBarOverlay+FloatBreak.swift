@@ -150,7 +150,9 @@ extension AppBarOverlay {
         }
         let item = frames[index]
         let ruleAt = (m.horizontal ? item.maxX : item.maxY) + m.gap
-        floatRule.isHidden = false
+        // Under Boxed the gap is the rule: each box already ends
+        // the row (owner ruling, 2026-10-21); its room stays.
+        floatRule.isHidden = !style.shelf.drawsPlate
         floatRule.layer?.backgroundColor =
             BarDivider.color(textColor: style.itemColor).cgColor
         BarMotion.setFrame(
@@ -181,9 +183,14 @@ extension AppBarOverlay {
         animated: Bool
     ) {
         floatMark.isHidden = false
+        // Free over whatever is behind a Boxed bar, the mark takes
+        // full ink and a Fill-coloured halo (owner ruling,
+        // 2026-10-21); on a plate it keeps the idle ink.
+        let boxed = !style.shelf.drawsPlate
         floatMark.contentTintColor = NSColor(
-            kiwiHex: style.shelf.idleItemColor
+            kiwiHex: boxed ? style.itemColor : style.shelf.idleItemColor
         )
+        floatMark.setHalo(boxed ? style.fillColor : nil)
         floatMark.draw(side: side, weight: style.shelf.symbolWeight)
         BarMotion.setFrame(
             floatMark,

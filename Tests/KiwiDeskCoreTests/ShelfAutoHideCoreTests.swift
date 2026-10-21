@@ -155,16 +155,16 @@ struct ShelfAutoHideCoreTests {
         "The reveal duration is the shelf's, clamped",
         .enabled(if: NSScreen.main != nil)
     )
-    func revealDurationVerb() throws {
+    func revealTimeoutVerb() throws {
         let (core, _) = try #require(makeCore(.auto))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         #expect(
             core.execute(
-                "kiwishelf.set_reveal_duration",
+                "kiwishelf.set_reveal_timeout",
                 args: [.number(90)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.kiwishelf.revealDuration == 60)
+        #expect(core.tiler.settings.kiwishelf.revealTimeout == 60)
         #expect(
             !core.execute(
                 "monocle.set_app_bar_visibility",

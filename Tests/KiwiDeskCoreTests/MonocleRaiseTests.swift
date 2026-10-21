@@ -45,14 +45,14 @@ struct MonocleRaiseTests {
     func storedFlipKeysAreIgnored() throws {
         let stored = """
             {"on_monocle_focus": false, "monocle_flip_duration": 300,
-             "duration": 220, "on_shelf": false}
+             "duration": 220, "on_expand": false}
             """
         let decoded = try JSONDecoder().decode(
             AnimationSettings.self,
             from: Data(stored.utf8)
         )
         #expect(decoded.durationMS == 220)
-        #expect(!decoded.onShelf)
+        #expect(!decoded.onExpand)
         let written = try String(
             decoding: JSONEncoder().encode(decoded),
             as: UTF8.self

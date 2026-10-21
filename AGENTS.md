@@ -1424,7 +1424,8 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   tint exists for — while a read of `currentSpace(on:)` answers only what a
   screen is SHOWING and says which of the two it means (#1214,
   `SpaceBarStickyScreenTests`)
-- a bar animation is gated on Reduce Motion in ONE home — an AppKit frame write
+- a bar animation is gated on Reduce Motion in ONE home, save a member ruled in
+  `BarMotionSeamTests`' `ungated` map — an AppKit frame write
   carries no animation argument to name a gate in, so the bars take the routed
   shape rather than the GUI tree's per-call one: every motion-starting spelling
   in CORE lives in `BarMotion` or a ruled `Borders/` file — the scan is
@@ -1548,9 +1549,14 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   `ShelfOverlay.restingRoom` at rest, a glide's two ends or the room of the
   reveal it resolves to while it travels, settled on its landing (#2497, `ShelfPanelRoomTests`,
   `ShelfPanelRoomMotionTests`) — and a shelf revealed onto an edge that
-  draws nothing at rest, by the one `ShelfEdge.drawsNothingAtRest`, slides
-  or grows as the one `reveal_style` says inside a still panel through
-  `BarMotion.playReveal` (`ShelfRevealStyleTests`, `ShelfRevealMotionTests`)
+  draws nothing at rest, by the one `ShelfEdge.drawsNothingAtRest`, slides,
+  grows, unfolds or fades as the one `reveal_style` says inside a still panel
+  through `BarMotion.playReveal`, Boxed included, a spread moving each box
+  by its glass host (`ShelfRevealStyleTests`, `ShelfRevealMotionTests`,
+  `ShelfRevealSpreadTests`), fitted to `animations.reveal_duration` through
+  the one `BarMotion.revealScale`, and it, the mark's hover growth and the
+  shelf's expand play under Reduce Motion, ruled in `BarMotionSeamTests`'
+  `ungated` map
 - a bar joining or leaving a fused shelf never budges its neighbour — on a
   new slot the run, items, box glass and float break snap, the shelf's glide
   the one motion (`AppBarLandingTests`)

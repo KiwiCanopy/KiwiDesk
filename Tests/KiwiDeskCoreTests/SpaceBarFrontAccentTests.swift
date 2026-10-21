@@ -80,13 +80,15 @@ struct SpaceBarFrontAccentTests {
     }
 
     /// From a chip that drew to none: a fresh view is unhidden by
-    /// default, so the drawn state comes first. Under Reduce Motion,
+    /// default, so the drawn state comes first. With the expand off,
     /// where the leaving segment snaps rather than shrinks (#1903,
-    /// `FrontAppGrowTests`).
+    /// `FrontAppGrowTests`) — Reduce Motion keeps the expand (owner
+    /// ruling, 2026-10-21).
     @Test("No front app draws no indicator")
     func hidesWithTheSegment() throws {
-        BarMotion.reducedOverride = true
-        defer { BarMotion.reducedOverride = nil }
+        let glide = BarMotion.shelfGlide
+        BarMotion.shelfGlide = 0
+        defer { BarMotion.shelfGlide = glide }
         let manager = SpaceBarManager()
         for front in [WindowID(1), nil] as [WindowID?] {
             let base = paintedSpaceBar(front: front, spaces: 2)

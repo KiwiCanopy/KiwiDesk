@@ -16,9 +16,11 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsOnScrolling = "settings.animations.onScrolling"
     case animationsScrollDurationMS =
         "settings.animations.scrollDurationMS"
-    case animationsOnShelf = "settings.animations.onShelf"
-    case animationsShelfDurationMS =
-        "settings.animations.shelfDurationMS"
+    case animationsOnExpand = "settings.animations.onExpand"
+    case animationsExpandDurationMS =
+        "settings.animations.expandDurationMS"
+    case animationsRevealDurationMS =
+        "settings.animations.revealDurationMS"
     case paletteApply = "(action) palette.apply"
     case paletteSave = "(action) palette.save"
     case paletteRename = "(action) palette.rename"
@@ -77,16 +79,27 @@ extension ColoursKey {
                 .showMore,
                 gate: .setting(.colours(.animationsMaster))
             )
-        case .animationsOnShelf:
-            // Not under the master: the shelf glides whatever the
-            // window animations do (#1838, ui-designer).
-            return .row(.coloursAndMotion, .motion, .showMore)
-        case .animationsShelfDurationMS:
+        case .animationsOnExpand:
+            // A hidden knob: its duration row says when it is off
+            // (owner ruling, 2026-10-21).
+            return .luaOnly
+        case .animationsRevealDurationMS:
+            // KiwiShelf ▸ Show ▸ Durations, greyed with the Reveal
+            // row while no bar hides (owner ruling, 2026-10-21).
             return .row(
-                .coloursAndMotion,
-                .motion,
+                .bars,
+                .kiwishelf,
                 .showMore,
-                gate: .setting(.colours(.animationsOnShelf))
+                gate: .runtime(.noBarHides)
+            )
+        case .animationsExpandDurationMS:
+            // The expand plays with every bar on Always, so it greys
+            // only while its hidden switch is off (2026-10-21).
+            return .row(
+                .bars,
+                .kiwishelf,
+                .showMore,
+                gate: .runtime(.expandOffInConfig)
             )
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
@@ -164,15 +177,17 @@ extension ColoursKey {
                 "behavior.animations.window_duration",
                 help: "behavior.animations.window_duration.help"
             )
-        case .animationsOnShelf:
+        case .animationsOnExpand:
+            return .none
+        case .animationsRevealDurationMS:
             return .text(
-                "behavior.animations.shelf",
-                help: "behavior.animations.shelf.help"
+                "kiwishelf.reveal_duration",
+                help: "kiwishelf.reveal_duration.help"
             )
-        case .animationsShelfDurationMS:
+        case .animationsExpandDurationMS:
             return .text(
-                "behavior.animations.shelf_duration",
-                help: "behavior.animations.shelf_duration.help"
+                "kiwishelf.expand_duration",
+                help: "kiwishelf.expand_duration.help"
             )
         case .animationsOnScrolling:
             return .text(

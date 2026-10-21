@@ -79,13 +79,19 @@ extension SettingsValueReadout {
                 milliseconds(Double(o.durationMS)),
                 milliseconds(Double(n.durationMS))
             )
-        case .animationsOnShelf:
-            return coloursOnOffRow(census, o.onShelf, n.onShelf)
-        case .animationsShelfDurationMS:
+        case .animationsOnExpand:
+            return coloursOnOffRow(census, o.onExpand, n.onExpand)
+        case .animationsExpandDurationMS:
             return coloursRow(
                 census,
-                milliseconds(Double(o.shelfDurationMS)),
-                milliseconds(Double(n.shelfDurationMS))
+                milliseconds(Double(o.expandDurationMS)),
+                milliseconds(Double(n.expandDurationMS))
+            )
+        case .animationsRevealDurationMS:
+            return coloursRow(
+                census,
+                milliseconds(Double(o.revealDurationMS)),
+                milliseconds(Double(n.revealDurationMS))
             )
         case .animationsOnScrolling:
             return coloursOnOffRow(

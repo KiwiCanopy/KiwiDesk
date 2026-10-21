@@ -50,62 +50,48 @@ struct ShelfRevealMotionTests {
             )
             #expect(found == offset)
             #expect(
-                BarMotion.revealMotion(
-                    reduceMotion: false,
-                    entering: true,
-                    path: slide(found)
-                ) == .slide(offset: offset, length: BarMotion.revealSlide)
+                BarMotion.revealMotion(entering: true, path: slide(found))
+                    == .slide(offset: offset, length: BarMotion.revealSlide)
             )
         }
     }
 
-    @Test("Reduce Motion, or nothing to travel, cross-fades in place")
-    func reducedFades() {
-        let offset = CGVector(dx: 0, dy: -46)
-        for path in [slide(offset), .init(kind: .grow, plate: Self.mark)] {
-            #expect(
-                BarMotion.revealMotion(
-                    reduceMotion: true,
-                    entering: true,
-                    path: path
-                ) == .fade(BarMotion.revealFade)
-            )
-        }
+    @Test("Nothing to travel cross-fades in place")
+    func nothingToTravelFades() {
         #expect(
-            BarMotion.revealMotion(
-                reduceMotion: false,
-                entering: true,
-                path: slide(.zero)
-            ) == .fade(BarMotion.revealFade)
+            BarMotion.revealMotion(entering: true, path: slide(.zero))
+                == .fade(BarMotion.revealFade)
         )
     }
 
     @Test("The mark fades as the slide starts and lands with the retract")
     func markFadeFollowsTheSlide() {
-        let back = BarMotion.markFade(
-            showing: true,
-            reveal: .slide,
-            reduceMotion: false
-        )
+        let back = BarMotion.markFade(showing: true, reveal: .slide)
         #expect(back.delay > 0)
         #expect(abs(back.delay + back.length - BarMotion.revealSlide) < 1e-9)
-        let out = BarMotion.markFade(
-            showing: false,
-            reveal: .slide,
-            reduceMotion: false
-        )
+        let out = BarMotion.markFade(showing: false, reveal: .slide)
         #expect(out.delay == 0)
-        for kind in [BarMotion.RevealKind.slide, .grow, .fade] {
-            for showing in [true, false] {
-                let fade = BarMotion.markFade(
-                    showing: showing,
-                    reveal: kind,
-                    reduceMotion: true
-                )
-                #expect(fade.delay == 0)
-                #expect(fade.length == BarMotion.revealFade)
-            }
-        }
+    }
+
+    /// The owner's ruling (2026-10-21): the mark keeps time with
+    /// the motion under Reduce Motion too, rather than cross-fading.
+    @Test("Under Reduce Motion the mark still keeps the motion's time")
+    func reducedMarkKeepsTime() throws {
+        BarMotion.reducedOverride = true
+        defer { BarMotion.reducedOverride = nil }
+        let body = NSView()
+        BarMotion.fadeMark(body, showing: true, reveal: .slide)
+        let fade = try #require(
+            body.layer?.animation(forKey: BarMotion.revealKey)
+        )
+        let back = BarMotion.markFade(showing: true, reveal: .slide)
+        let scale = BarMotion.revealScale(
+            BarMotion.naturalLength(.slide, entering: false),
+            entering: false,
+            BarMotion.revealLength
+        )
+        #expect(abs(fade.duration - back.length * scale) < 1e-9)
+        #expect(back.delay > 0)
     }
 
     private func spec(
@@ -158,32 +144,27 @@ struct ShelfRevealMotionTests {
         #expect(view.rim.alphaValue == 1)
     }
 
-    @Test("The hover growth travels only without Reduce Motion")
-    func hoverGrowDurationGates() {
-        #expect(BarMotion.hoverGrowDuration(reduceMotion: true) == 0)
-        #expect(BarMotion.hoverGrowDuration(reduceMotion: false) > 0)
-    }
-
-    /// The size is content, not motion: an unlabelled mark (a lone
-    /// App Bar's line) grows like a labelled one (owner, device,
-    /// 2026-10-21).
-    @Test("Under Reduce Motion a hover grows the plate at once")
+    /// The size is content, and the growth is motion the owner
+    /// keeps under Reduce Motion (2026-10-21): an unlabelled mark (a
+    /// lone App Bar's line) grows like a labelled one.
+    @Test("Under Reduce Motion a hover still grows the plate")
     func reducedHoverGrowsThePlate() {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
         let view = view()
+        view.render(spec(hovered: false), animated: false)
         view.render(spec(hovered: true), animated: true)
         #expect(view.plate.frame == view.bounds)
         #expect(view.rim.frame == view.plate.frame)
         #expect(view.rim.alphaValue == 1)
-        #expect(view.plate.layer?.animationKeys() == nil)
+        #expect(view.plate.layer?.animationKeys()?.isEmpty == false)
     }
 
     /// A label narrower than the current dot widens nothing, yet
     /// still needs the grown plate's depth: under Reduce Motion the
-    /// plate takes its hovered frame at once rather than staying
-    /// thin under the pill (owner, device, 2026-10-21).
-    @Test("Under Reduce Motion a labelled mark's plate grows at once")
+    /// plate takes its hovered frame rather than staying thin under
+    /// the pill (owner, device, 2026-10-21).
+    @Test("Under Reduce Motion a labelled mark's plate grows")
     func reducedLabelGrowsThePlate() {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }

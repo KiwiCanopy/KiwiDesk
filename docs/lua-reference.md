@@ -2801,7 +2801,7 @@ kiwishelf.set_dim_factor(0.4)
 ```
 
 :::unreleased
-### kiwishelf.set_reveal_duration
+### kiwishelf.set_reveal_timeout
 
 **Expects:** seconds, 0–60 (default `0`); out-of-range values
 clamp.
@@ -2817,22 +2817,30 @@ leaves.
 **Example:**
 
 ```lua
-kiwishelf.set_reveal_duration(5)
+kiwishelf.set_reveal_timeout(5)
 ```
 :::
 
 :::unreleased
 ### kiwishelf.set_reveal_style
 
-**Expects:** `"slide"` or `"grow"` (default `"slide"`).
+**Expects:** `"slide"`, `"grow"`, `"unfold"` or `"fade"`
+(default `"slide"`).
 
 **Does:** how an `"auto"` or `"hidden"` bar comes onto an edge
 that shows nothing else. `"slide"` brings the whole bar in from
 the screen's edge — out from under the menu bar where it shows —
 and back out; `"grow"` grows the bar out of its mark — from the
-screen edge where it has none — and back into it, and fades on a
-`"boxed"` shelf. A bar shown beside an `"always"` bar joins it
-instead, either way. With Reduce Motion on, both fade in place.
+screen edge where it has none — and back into it; `"unfold"`
+stretches the mark along the edge to the bar's length, then
+deepens it to the bar, and back; `"fade"` fades the bar in
+where it stands, and out. A `"hidden"` bar has no mark, so
+`"grow"` and `"unfold"` start from the middle of its screen edge.
+On a `"boxed"` shelf `"grow"`
+wipes across the boxes and `"unfold"` springs each box out of
+the mark to its place. A bar shown beside an `"always"` bar joins
+it instead, whichever style. Each plays with Reduce Motion on
+too.
 
 **Example:**
 
@@ -3278,7 +3286,7 @@ space_bar.set_visibility("auto")
 **Does:** shows or hides the Space Bar over the windows on the
 screen the active Space lays out on, and no other bar. A shown bar
 stays until the next call, or for
-[`kiwishelf.set_reveal_duration`](#kiwishelfset_reveal_duration)
+[`kiwishelf.set_reveal_timeout`](#kiwishelfset_reveal_timeout)
 seconds where that is above 0. Fails, with a pill beside the bar,
 where the Space Bar is `"always"`. VoiceOver's press on the Space
 dots runs it too.
@@ -6958,26 +6966,52 @@ CLI each fails with `…: a Monocle focus change is a raise and
 plays no flip`. A saved profile's stored values are dropped on its
 next write.
 
-### animations.set_on_shelf, animations.set_shelf_duration
+:::unreleased
+### animations.set_on_expand, animations.set_expand_duration
 
 **Expects:**
 
-- `set_on_shelf(bool)` — `true` or `false` (default `true`).
-- `set_shelf_duration(ms)` — a number (milliseconds, clamped
-  500–2000; default `750`).
+- `set_on_expand(bool)` — `true` or `false` (default `true`).
+- `set_expand_duration(ms)` — a number (milliseconds: `0`, or
+  500–2000; default `750`). `0` snaps the bars into place; a value
+  from 1 to 499 becomes 500.
 
-**Does:** the KiwiShelf motion when you switch Spaces: a bar
+**Does:** the KiwiShelf expand when you switch Spaces: a bar
 sharing a shelf grows out of the other bar and shrinks back into
 it, a bar on an edge of its own fades in and out, the App Bar's row
 dissolves to the new Space's, and the bars glide to their new
 places. Off, they move at once. It is not under the
-window-animation switches, and Reduce Motion keeps it off.
+window-animation switches, and it plays with Reduce Motion on too.
+Lua-only: no Settings row turns it off; while it is off, KiwiShelf ▸
+KiwiShelf ▸ Show ▸ Durations ▸ Expand duration greys and names
+`animations.on_expand`.
+`animations.set_on_shelf` and `animations.set_shelf_duration` are
+retired → these two; a saved profile, look or backup carrying the
+old names is renamed on its next read.
 
 **Example:**
 
 ```lua
-animations.set_shelf_duration(1000)
+animations.set_expand_duration(1000)
 ```
+
+### animations.set_reveal_duration
+
+**Expects:** milliseconds: `0`, or 150–800 (default `300`). `0`
+shows and hides the bar at once; a value from 1 to 149 becomes
+150.
+
+**Does:** how long a hidden bar takes to come in, whichever
+[`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) it plays;
+it goes back out in a little less. It plays with Reduce Motion on
+too.
+
+**Example:**
+
+```lua
+animations.set_reveal_duration(400)
+```
+:::
 
 ### enable_wake_restore, set_wake_restore_delay
 

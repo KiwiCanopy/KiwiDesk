@@ -430,7 +430,7 @@ twice, was a question the user answered twice. The argument is
   `standWrites` list decides both whether to stand and what to
   write (`ShelfStandSkipTests` ▸ `unchangedSlotSkips`). The
   glide's length is the user's
-  `animations.shelf_duration`, `BarMotion.shelfGlide` set in
+  `animations.expand_duration`, `BarMotion.shelfGlide` set in
   `updateBars()` (`ShelfGlideSettingsTests`).
 - **A section joining a fused shelf grows out of the section it
   joins and a leaving one shrinks back into it; a shelf shown at
@@ -507,7 +507,11 @@ twice, was a question the user answered twice. The argument is
 - **A row of floats alone keeps the floating mark ahead of its
   first float and draws no rule** (owner ruling, #1838):
   `AppBarFloatOverlayTests` ▸ `floatsAloneKeepTheMark` holds the
-  mark, the rule, the run's lengths and the drawn span.
+  mark, the rule, the run's lengths and the drawn span. **Under
+  Boxed the break draws no rule, keeping its room, and the mark
+  takes full item ink and a Fill-coloured halo** (owner ruling,
+  2026-10-21; `AppBarFloatOverlayTests` ▸
+  `boxedBreakHaloesTheMark`).
 
 ## One shelf panel per display and edge draws the plate; the bars draw sections
 
@@ -551,8 +555,9 @@ render content into it (#1517). Obligations:
   holds nothing; a reveal or retract opens the room of the motion
   it resolves to (`openRevealRoom` over
   `BarMotion.resolvedReveal`) until its own landing — a slide's
-  run out over the margin, a grow's plate and hovered mark, a
-  fade's none — and a leave that cuts a reveal short clears it, or
+  run out over the margin, a grow's plate and hovered mark, an
+  unfold's those grown by its springs' swing along the edge
+  (`ShelfUnfold.room`), a fade's none — and a leave that cuts a reveal short clears it, or
   the room never settles.
   `ShelfPanelRoomTests` holds the rest — a fitting run, an
   overflowing one, Boxed, a side edge, an unchanged refresh —
@@ -567,25 +572,48 @@ render content into it (#1517). Obligations:
   Hidden as well as Auto, while a bar shown beside an Always
   sibling joins it (`ShelfRevealStyleTests` ▸ `emptyEdgeDecides`,
   `ShelfRevealStyleTests` ▸ `hiddenSlidesThroughTheDrivers`).
-- **The motion is the shelf's one `reveal_style` — slide or grow —
-  and the panel takes no per-frame write for either (#2497)**: its
-  room opens once as the motion starts and settles at the landing;
-  moving the window frame instead lagged on the device. Both play
-  in the one `BarMotion.playReveal`, its decision the pure
+- **The motion is the shelf's one `reveal_style` — slide, grow,
+  unfold or fade — and the panel takes no per-frame write for any (#2497)**:
+  its room opens once as the motion starts and settles at the
+  landing; moving the window frame instead lagged on the device.
+  All play in the one `BarMotion.playReveal`, its decision the pure
   `BarMotion.revealMotion` over a `RevealPath`. A slide travels
   the content by an ADDITIVE position animation from
   `BarMotion.revealOffset` — the strip's depth plus the outer
   margin, so it starts wholly clipped at the usable area's edge —
   and one taken back continues from `BarMotion.revealShift`, read
   before that pass moves the room. A grow clips the content's own
-  layer from the mark to the plate (`ShelfGrow`), placed in the
-  panel's coordinates, so its room — the plate and the hovered
-  mark, or the middle of the screen side where the edge draws no
-  mark — holds still until it lands (`growing`). A leave that is no reveal ends the reveal's motion with
+  layer from the mark to the plate (`ShelfGrow`), and an unfold
+  clips it along the edge and then across, on two springs whose
+  key paths never overlap so the stages compose (`ShelfUnfold`),
+  both placed in the panel's coordinates, so the room — the plate
+  and the hovered mark, or the middle of the screen side where the
+  edge draws no mark — holds still until it lands (`growing`).
+  **Boxed takes every style (owner ruling, 2026-10-21)**: the plate
+  a grow reaches is the boxes' span (`revealPlate`), and an unfold
+  is a spread — each box moved through its GLASS HOST, never the
+  glass (#2095), found by the one `BarMotion.spreadUnits`, what
+  holds no box fading in place — positioned in VIEW coordinates,
+  since the pass that orders the panel in has not connected the
+  layer tree, and cleared from every view under the strip,
+  hidden ones included, by `endSpread` at each landing
+  (`ShelfRevealSpreadTests`). A new view that draws a box declares
+  `ShelfSpreadBox` where it is declared, or it fades in place
+  instead of spreading — review's, since nothing reds on the
+  omission. A
+  leave that is no reveal ends the reveal's motion with
   its token (`cutReveal`). The mark keeps time with the motion
-  through `BarMotion.markFade` and its `RevealKind`, and Reduce
-  Motion cross-fades in place either way. `ShelfRevealMotionTests`
-  and `ShelfRevealGrowTests` hold the decisions,
+  through `BarMotion.markFade` and its `RevealKind`, every timing
+  fitted to the user's `animations.reveal_duration` through the one
+  `BarMotion.revealScale` — a retract to its
+  `AnimationSettings.retractShare` — and never a second length
+  beside it (`ShelfRevealDurationTests`). **The reveal, the mark's hover growth and the
+  shelf's expand play under Reduce Motion** (owner ruling,
+  2026-10-21;
+  `docs/design-decisions.md` ▸ The bars honour Reduce Motion) —
+  so their members are in `BarMotionSeamTests`' `ungated` map and
+  read no flag. `ShelfRevealMotionTests`, `ShelfRevealGrowTests`
+  and `ShelfRevealUnfoldTests` hold the decisions,
   `ShelfRevealSlideEdgeTests` the slide's direction on every edge
   as drawn, `ShelfRevealStartTests` the start order, and
   `ShelfRevealSwapTests` the accepted swap's end state (#2500).
@@ -1107,7 +1135,8 @@ reading a bar still makes for itself:
 
 ## The bars start motion in one home, and that home gates it
 
-A bar animation is gated on Reduce Motion, and `BarMotion` — its
+A bar animation is gated on Reduce Motion — save a member ruled in
+`BarMotionSeamTests`' `ungated` map (below) — and `BarMotion` — its
 file and the extensions split from it at the §2.1 ceiling, which
 `BarMotionSeamTests.homes` lists and censuses alike — is where
 every one of them lives (#1078). `Sources/KiwiDesk`'s gate
@@ -1149,6 +1178,17 @@ Obligations:
   — because a second shape beside it owes the seam suite a
   second clause, and the clause a caller-fed gate needs cannot
   be the one a wrapper-read gate needs.
+- **A member whose motion Reduce Motion deliberately keeps is
+  ruled in `BarMotionSeamTests`' `ungated` map**, naming its
+  ruling, and reads neither `isReduced` nor `reduceMotion` — the
+  shelf's reveal, its hover growth and its expand (the plate
+  glide). The expand's frames and fades travel because
+  `setFrame` / `setAlpha` read the gate narrowed by the one
+  `BarMotion.expanding` scope its groups open, never a second
+  write path beside them (`ShelfExpandReducedMotionTests`). A
+  new entry is a product ruling argued in
+  `docs/design-decisions.md` first, never a way to skip writing
+  a gate.
 - **The gate drops the MOTION, never the affordance**, and **a
   DELAY is not motion** — a quiet window before something
   appears survives the gate at its full length, because

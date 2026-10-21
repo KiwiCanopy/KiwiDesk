@@ -1071,17 +1071,31 @@ windows* move; the system setting wins over both. (#989, #1069,
 `.claude/rules/gui.md` ▸ the Reduce Motion gate and
 `.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
-The shelf's own glide is the one chrome motion with rows on that
-card — **Animate KiwiShelf** and its duration — and Reduce Motion
-still wins over them (#1838).
+:::unreleased
+The bars' own animations are not on that card: their lengths —
+**Reveal duration** and **Expand duration** — sit in KiwiShelf ▸
+KiwiShelf ▸ Show ▸ Durations beside the Reveal picker, and the
+card points there. Animate KiwiShelf has no row; while the
+Lua-only `animations.on_expand` is off, Expand duration greys and
+names it. While Reduce Motion is on, the card also says so in a
+warning box at its top, with a button to System Settings ▸
+Accessibility.
+:::
 
 The plate naming the Space after a switch is not on that card:
 it is a cue rather than motion, so its row, **Show the Space after
-a switch**, sits on KiwiShelf under the Space Bar switch, and
+a switch**, closes KiwiShelf's Show group, and
 neither Reduce Motion nor the animations master greys it. Reduce
 Motion drops only its fade (#2228).
 
-Nothing is exempt, including the marks whose movement carries
+:::unreleased
+Three bar motions keep playing under Reduce Motion, by the owner's
+ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its
+mark growing under the pointer, and the shelf's expand
+(`docs/design-decisions.md` ▸ The bars honour Reduce Motion).
+:::
+
+Nothing else is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
 put, so the sentence it belongs to is still marked, and the
 tour's progress row fills the same pips without the crossfade.

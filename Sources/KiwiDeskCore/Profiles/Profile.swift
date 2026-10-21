@@ -39,12 +39,13 @@ public struct Profile: Codable, Sendable, Equatable {
     /// 26 so a file a build without #761 stamped 25 crosses #761's
     /// step too, which reads content and so runs twice harmlessly,
     /// 27 since a Go to Desktop row on `✦` + digit takes `✦⌥` +
-    /// digit (#2460).
+    /// digit (#2460), 28 since the shelf glide is its expand
+    /// (`animations.*_expand*`, owner ruling 2026-10-21).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 27
+    public static let currentFormat = 28
 
     public var format: Int
     /// Stable across renames (#2324); `ProfileManager.write` keeps
