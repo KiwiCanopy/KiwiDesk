@@ -32,15 +32,27 @@ prove.
 ## 0. Prove the commit you were handed
 
 The caller names the commit under proof — the current head of the
-change, after its last fix round. Before anything else, in your
-worktree:
+change, after its last fix round. **Never prove in the worktree
+the harness gave you, and never move its HEAD.** The harness
+starts that worktree at `main`'s tip, not at the caller's branch
+— observed on every isolated spawn from #1082 to #2485
+(2026-10-21) — and a
+checkout or detach in it is refused, and has reached the shared
+tree before. Build a proof tree of your own instead:
 
-- `git rev-parse HEAD` equals that commit, and
-- `git status --porcelain` is empty.
+1. `git cat-file -e <sha>^{commit}` — the commit is in the shared
+   object store. If not, stop and report it on the first line.
+2. `git worktree add --detach <scratchpad>/prove-<topic>/tree
+   <sha>` — a new tree at exactly that commit. Adding a tree
+   changes no existing tree or branch. Its first build is cold.
+3. In that tree, `git rev-parse HEAD` equals the sha and
+   `git status --porcelain` is empty. Every later step — the
+   driver's `<worktree>` argument included — runs there.
+4. When you finish or stop, `git worktree remove --force` the
+   proof tree, and say so in your report.
 
-If either fails, stop and report it on the first line. Do not
-check out another commit to fix it: a detach in an isolated
-worktree has reached the shared tree before. A proof of an older
+If any step is refused, stop and report the refusal on the first
+line. Do not find another way to move a HEAD: a proof of an older
 commit is worse than none, because it reads as coverage of code
 that later rounds changed.
 
@@ -254,7 +266,10 @@ mutation, with the reason.
 **Spawn this agent with `isolation: "worktree"`, and name the
 commit to prove** — the change's current head, committed. It
 breaks working source on purpose, so without a worktree the proof
-runs in the tree everything else is reading. `.claude/rules/tests.md`
+runs in the tree everything else is reading. The harness worktree
+starts at `main`, so a HEAD that differs from the named commit is
+the normal case, and step 0 answers it with a proof tree; do not
+brief the agent to check out or detach anything. `.claude/rules/tests.md`
 ▸ "Owed" states the same obligation for a caller who arrives from
 outside a review round, owns removing the worktree afterwards, and
 the `review-change` skill argues it.
