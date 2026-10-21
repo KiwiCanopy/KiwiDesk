@@ -41,10 +41,8 @@ A directory you own works without `sudo` as long as your shell
 already searches it; `~/.local/bin` is **not** on the macOS
 default `PATH`, so it needs adding first.
 
-:::unreleased
 Commands are sent over a UNIX domain socket at
 `~/Library/Application Support/KiwiDesk/KiwiDesk.sock`.
-:::
 
 Exit code is 0 on success, 1 on error; data goes to stdout, the
 error message — and, on some successes, a note — to stderr.
@@ -236,12 +234,10 @@ before the command runs. A shortcut verb saves at once, so `run`
 tells the AI app to show you the mapping and ask first. `subscribe` and the Lua-only verbs are
 not offered.
 
-:::unreleased
 An AI app reads Config Issues and the sync folder's status by
 sending `get_config_status` through `run`. When `keep` cannot write
 a change because a newer KiwiDesk wrote the file it goes to, it
 says so (`newer_format`) instead of reporting a plain failed write.
-:::
 
 `looks` takes an `action` — each `look.*` verb that can be undone —
 and that verb's arguments by name; `look.delete` goes through
@@ -439,19 +435,15 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 
-:::unreleased
 `take_over_hyper_remap` takes over a Hyper remap another tool
 left in place when it is exactly the one KiwiDesk would write for
 the chosen key ([`set_hyper_key`](lua-reference.md#set_hyper_key)).
 KiwiDesk then removes it when it quits, and an app still listening
 for F18 keeps hearing the key. CLI only — Lua cannot call it.
-:::
 
-:::unreleased
 `get_config_status` returns the Config Issues and the sync
 folder's status
 ([`get_config_status`](lua-reference.md#get_config_status)).
-:::
 
 `look.list`, `look.current`, `look.apply <name>`, `look.save
 <name>` and `look.delete <name>` reach the look library
@@ -472,7 +464,6 @@ what would change it; `explain_app <bundle_id>` says what KiwiDesk
 knows of an app whose window it does not list
 ([`explain_window`](lua-reference.md#explain_window)).
 
-:::unreleased
 `list_windows [space]` returns every window's frame, screen and
 visibility ([`list_windows`](lua-reference.md#list_windows)), and
 `focus_window <window>` focuses one by its id
@@ -488,7 +479,6 @@ id names, or two named windows, across Spaces and screens too, and
 `swap <direction> <window>` swaps a named window with its neighbour
 ([`swap`](lua-reference.md#swap)); `swap_here <window>` brings
 one into your slot instead ([`swap_here`](lua-reference.md#swap_here)).
-:::
 
 `kiwivision.toggle [lens]`, `kiwivision.current`, the
 `kiwivision.set_*` verbs, `kiwivision.define_lens <table>` and
@@ -626,12 +616,9 @@ every lens with why it cannot turn on.
 | | `track.set_wrap_focus` | true\|false (default true) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-:::unreleased
 `wrap_focus` is on by default for `scroll`, `monocle` and
 `track`; a profile that already stores `false` keeps it.
-:::
 
-:::unreleased
 `set_min_window_size`'s layout is `stack`, `grid`, `track`,
 `bsp`, `scrolling` or `floating`, and without one it sets every
 layout ([Lua reference](lua-reference.md#set_min_window_size)).
@@ -640,14 +627,11 @@ width instead of the 300 × 300 default.
 `set_min_window_size_override` gives one Space a value that
 replaces its layout's
 ([Lua reference](lua-reference.md#set_min_window_size_override)).
-:::
 
-:::unreleased
 Grid: `grid.set_column_weight` and `grid.set_row_weight` take a
 track number (from 1) and a positive weight, `1` being an equal
 share; each has a `_override` sibling taking a space id first
 ([Lua reference](lua-reference.md#gridset_column_weight)).
-:::
 
 `animations.set_on_space_change` and `animations.set_space_change`
 are refused, naming `set_space_cue`;
@@ -705,14 +689,12 @@ see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
 
-:::unreleased
 `animations.set_on_expand` and `animations.set_expand_duration` set
 the KiwiShelf expand on a Space switch, and
 `animations.set_reveal_duration` a hidden bar's reveal; see
 [animations.set_on_expand](lua-reference.md#animationsset_on_expand).
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired and fail naming their replacements.
-:::
 
 `make_auto` is retired: it fails with `make_auto was retired —
 use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
@@ -760,10 +742,8 @@ already against the screen edge or a bar (#1091). "Floating" is
 the effective float (#1184): the window's own flag, or any window
 in a floating-layout space, which places nothing.
 
-:::unreleased
 That floor is Floating's `min_window_size` on the axis
 resized, whatever layout the window's space uses.
-:::
 
 A focused window in native full screen is refused ahead of every layout,
 whatever its float state, with `the focused window is
@@ -791,12 +771,10 @@ whatever issued it, and adds the system alert sound when
 fired: a CLI or IPC caller reads the error reply and never hears
 one.
 
-:::unreleased
 In grid (#763), `x` moves the edge the focused cell shares with
 the next column (the previous one for the last column) and `y`
 the same for rows, writing session-scoped column and row
 weights.
-:::
 
 ### Deleting a Space
 
@@ -1010,7 +988,6 @@ numbering a screen argument takes), and the active profile:
           "profile": "Creator Studio"}}
 ```
 
-:::unreleased
 `desktop_change` fires once KiwiDesk has read the arriving
 Desktop's windows, after that switch's `vanished` and `returned`
 bursts, so a state query sent on it sees them — save an app slow
@@ -1018,7 +995,6 @@ to answer, whose windows follow within a few seconds
 ([#2347](https://github.com/KiwiCanopy/KiwiDesk/issues/2347)).
 Switches in quick succession deliver their events in order, after
 the last one's windows are read.
-:::
 
 With "Displays have separate Spaces" on, each screen switches
 Desktops on its own, so watch `monitor` to tell them apart:
@@ -1070,12 +1046,10 @@ relaunch, as `subscribe --reconnect` does, and runs until stopped.
 Anything that can write to a UNIX socket can drive KiwiDesk —
 newline-delimited JSON, one request per line:
 
-:::unreleased
 ```sh
 printf '{"command":"set_mode","args":["1","grid"]}\n' \
     | nc -U ~/Library/Application\ Support/KiwiDesk/KiwiDesk.sock
 ```
-:::
 
 Response:
 
@@ -1107,11 +1081,9 @@ changed (`rule_profiles`):
 kiwidesk keep_settings /settings/border/width
 ```
 
-:::unreleased
 `revert_settings` is its twin: it puts those ids back to the value
 the live profile or its shared look stores, applied live, and
 answers which ones it `reverted` and which it could not
 (`not_revertable`, each an `id` with its `reason`: `not_a_setting`,
 `not_keepable` or `not_applied`). It takes settings leaves only; a Space's
 layout and the rules are left as they are live.
-:::

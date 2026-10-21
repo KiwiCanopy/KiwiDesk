@@ -144,10 +144,8 @@ and can give a Desktop an identity of its own, that memory
 survives quitting KiwiDesk; a hand-written `init.lua` setup keeps
 it for the session only.
 
-:::unreleased
 That memory is kept on this Mac alone, in
 `~/Library/Application Support/KiwiDesk/machine.json`.
-:::
 
 **Your windows stay with their Desktop.** A Space holds whatever
 of its windows are on the Desktop you are looking at. Switch
@@ -236,7 +234,6 @@ On a Mac where KiwiDesk cannot write the identifier, bindings
 key by the Mission Control number — the behaviour above minus
 the protection.
 
-:::unreleased
 A binding follows its **profile** the same way: it names the
 profile by an identifier the profile file keeps, so renaming the
 profile — on this Mac or on another one syncing your config
@@ -244,7 +241,6 @@ folder — keeps the binding. Delete the profile and the binding
 moves under *Missing profiles* in the card; a new profile under
 the old name does not take it over. A binding written in
 `init.lua` names its profile on every load and follows the name.
-:::
 
 ## "Displays have separate Spaces" decides the nesting
 

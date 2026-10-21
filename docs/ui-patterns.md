@@ -199,7 +199,6 @@ by which pane the setting lives in:
   proportion tuned by eye: split ratios, master ratio, gaps.
 - **Segmented / toggle** for a non-numeric choice.
 
-:::unreleased
 Minimum window size takes the same idiom on each axis (#204,
 #2237): a precise pt threshold, not a feel knob, drawn as Width
 × Height on one line, each a typeable field with its own
@@ -208,7 +207,6 @@ over a "Per layout" drawer, one row per layout. The master takes
 the gap masters' acknowledging shape over an axis that reads
 "Mixed" ([Interaction states](#interaction-states)), and the
 drawer stays open while any axis is mixed.
-:::
 
 KiwiVision's **Dim** is a ruled exception: a proportion,
 yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on
@@ -1071,7 +1069,6 @@ windows* move; the system setting wins over both. (#989, #1069,
 `.claude/rules/gui.md` ▸ the Reduce Motion gate and
 `.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
-:::unreleased
 The bars' own animations are not on that card: their lengths —
 **Reveal duration** and **Expand duration** — sit in KiwiShelf ▸
 KiwiShelf ▸ Show ▸ Durations beside the Reveal picker, and the
@@ -1080,7 +1077,6 @@ Lua-only `animations.on_expand` is off, Expand duration greys and
 names it. While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
-:::
 
 The plate naming the Space after a switch is not on that card:
 it is a cue rather than motion, so its row, **Show the Space after
@@ -1088,12 +1084,10 @@ a switch**, closes KiwiShelf's Show group, and
 neither Reduce Motion nor the animations master greys it. Reduce
 Motion drops only its fade (#2228).
 
-:::unreleased
 Three bar motions keep playing under Reduce Motion, by the owner's
 ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its
 mark growing under the pointer, and the shelf's expand
 (`docs/design-decisions.md` ▸ The bars honour Reduce Motion).
-:::
 
 Nothing else is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays

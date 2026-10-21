@@ -2,6 +2,103 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "3.2.0",
+      "tag": "v3.2.0",
+      "date": "2026-10-21",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v3.2.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v3.2.0/KiwiDesk-3.2.0.dmg",
+      "summary": "KiwiDesk 3.2.0 lets each bar hide until you need it, keeps your setup the same on every Mac, and lets one layout or Space tile smaller windows than the rest.",
+      "spotlight": [
+        {
+          "title": "Bars that hide until you need them",
+          "line": "Set each bar to Always, Auto or Hidden; ⌃⌥G and ⌃⌥H show a hiding one.",
+          "setting": "settings.spaceBarStyle.visibility (master)",
+          "symbol": "menubar.arrow.up.rectangle"
+        },
+        {
+          "title": "KiwiVision fades in",
+          "line": "The window you leave now eases into the dim; choose how fast.",
+          "setting": "appWide.visionFadeDuration",
+          "symbol": "binoculars"
+        },
+        {
+          "title": "The App Bar shows what's on your screen",
+          "line": "Windows you can see are lit; ones cut off or covered are dimmed.",
+          "symbol": "eye"
+        },
+        {
+          "title": "Your setup on every Mac",
+          "line": "Keep KiwiDesk in step through iCloud Drive or a folder you pick.",
+          "setting": "UserDefaults.general.syncFolder",
+          "symbol": "icloud"
+        },
+        {
+          "title": "Smaller tiles where you want them",
+          "line": "Give a layout, or a single Space, its own minimum width × height.",
+          "setting": "settings.minWindowSizes (master)",
+          "symbol": "ruler"
+        },
+        {
+          "title": "Take back one change at a time",
+          "line": "Every unsaved change in Settings now has its own ↺ to undo it.",
+          "symbol": "list.bullet.rectangle"
+        }
+      ],
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**New: each bar can now hide until you reach for it.** KiwiShelf ▸ Show sets the Space Bar and the App Bar to Always, Auto (a thin mark that opens when the pointer rests on it) or Hidden, which ⌃⌥G and ⌃⌥H show over your windows. A hiding bar slides in from the screen edge, or grows, unfolds or fades in as KiwiShelf ▸ Reveal picks, with its timing under KiwiShelf ▸ Durations. Your bars stay as they were, and updating adds the two keys where they're free; change them in Shortcuts & Gestures ▸ Show & hide.",
+            "**New: keep your setup the same on every Mac.** General ▸ Sync across Macs picks iCloud Drive or a folder: Compare and Copy… shows both sides before you keep one, and Keep in sync automatically copies each change across, asking you only when both Macs changed the same setting.",
+            "**New: windows can now tile smaller in one layout or Space than in the rest.** Layout Defaults ▸ Minimum window size takes a width and a height, for every layout at once or each apart, and Spaces ▸ Customize… gives one Space its own; your current size carries over to every layout.",
+            "**New: the App Bar now shows which windows you can see.** A window fully on screen is lit, one cut off by the screen's edge or covered by another is dimmed, and in Scrolling a cut-off column is marked on the side that still shows.",
+            "**New: resting the pointer on a Space the Space Bar shows as a count now lists its windows**; click one to go straight to it.",
+            "**New: with KiwiVision on, the window you leave now fades into the dim** instead of dimming at once. Fade duration and Fade curve are under KiwiVision ▸ Dim and blur, and a duration of 0 makes it instant again.",
+            "**New: Settings can now take back one change at a time.** Every unsaved change has its own ↺, a shortcut you moved goes back together with the one it displaced, and Revert now also undoes changes made by a shortcut, the command line or an AI app."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**Grid columns and rows can now be resized** with the size keys and by dragging the edge between two windows, like every other tiled layout.",
+            "**Moving focus past the last window now wraps to the first in Scrolling, Monocle and Track** for a new setup or an `init.lua` that doesn't set it; a profile you've saved keeps what it had, and Layout Defaults ▸ Wrap focus changes it.",
+            "**Switching between busy macOS Desktops is now quicker**: the focus border, the bars and your shortcuts no longer wait while KiwiDesk looks over the windows that arrived.",
+            "**The Hyper key card now has one Shortcuts use: ⌃⌥ | ✦ switch** that moves every KiwiDesk shortcut onto Hyper, or back, in place of the one-time offer. When a key remap another app left behind keeps Hyper off, the card now names it, and offers Take Over… when it's the same remap KiwiDesk would set.",
+            "**KiwiHub's shortcuts side (⌃⌥K) now lists the shortcuts your `init.lua` binds**, instead of only saying that `init.lua` manages them.",
+            "**The bars now animate with Reduce Motion on, as the Dock does**: a hiding bar still slides in and the bars still expand and move into place, while windows keep moving without animation; the Animations card now says when Reduce Motion is the reason it's greyed.",
+            "**Every colour now lives in Looks & Animations ▸ Colors & glass**, which replaces the Advanced Colors page, and the KiwiHub, KiwiShelf and KiwiVision keys now share one Show & hide card at the top of Shortcuts & Gestures."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**With Reduce Motion on, windows now land at once and at their full size**: a Stack reflows right after you open or close a window, and a window moved to another screen no longer keeps a wrong size.",
+            "**With the Dock set to hide, clicking it again no longer moves KiwiDesk's focus to the Dock's screen** while the app you picked stays in front on another.",
+            "**A browser extension's popup, like Bitwarden's, no longer closes as it opens** when the browser's App Rule points at a Space that isn't showing.",
+            "**With a Hyper key set but no shortcut using it, pressing the key no longer beeps**; KiwiDesk now says that no shortcut uses Hyper.",
+            "**Switching from a Space with an App Bar to one without no longer leaves a dark strip past the Space Bar.**",
+            "**Clicking beside a bar that doesn't fill its edge now reaches the window under it** instead of landing on the bar's empty strip.",
+            "**The App Bar's floating mark now stays visible on a Boxed bar over light windows**: it draws in full ink with a soft edge, and the gap before it marks the break.",
+            "**NoMachine's empty second window no longer takes a tile of its own** beside the real one."
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**If you write your own Lua config:** `space_bar.set_enabled` is now `space_bar.set_visibility`, and `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled` are now `set_app_bar_visibility`, each taking `always`, `auto` or `hidden`; `animations.set_shelf_duration` and `animations.set_on_shelf` are now `animations.set_expand_duration` and `animations.set_on_expand`, and saved configs move over on their own; each old name is refused with its replacement. `set_min_window_size` now takes a width, an optional height and an optional layout, and a single number still works.",
+            "**New: `list_windows` gives every window's frame, screen and whether it's in view, and `focus_window <id>` focuses one by id**, switching Space if it has to; `list_monitors` now gives each screen's position and the area its Space lays windows out in.",
+            "**New: `swap` now takes window ids**: `swap <id>` trades the focused window with any window, on another Space or screen too, `swap <id> <id>` trades two windows, `swap <dir> <id>` swaps a named window with its neighbour, and `swap_here <id>` brings a window into your slot.",
+            "**New verbs for this release's settings:** `space_bar.toggle_reveal`, `app_bar.toggle_reveal`, `kiwishelf.set_reveal_style` (`slide`, `grow`, `unfold` or `fade`), `kiwishelf.set_reveal_timeout`, `animations.set_reveal_duration`, `set_min_window_size_override`, `grid.set_column_weight`, `grid.set_row_weight`, `kiwivision.set_fade_duration` and `kiwivision.set_fade_curve`. From the command line, `revert_settings` takes back unsaved live changes, `take_over_hyper_remap` adopts a matching leftover remap, and `get_config_status` reports Config Issues and the sync status, which `kiwidesk mcp` now reads to say why a change can't be kept."
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "3.1.0",
       "tag": "v3.1.0",
       "date": "2026-10-18",
