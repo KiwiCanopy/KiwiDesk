@@ -65,7 +65,7 @@ enum AppBarFixtures {
         shelf.hoverItemColor = "#070707"
         shelf.groupBadgeColor = "#090909"
         shelf.groupBadgeTextColor = "#0A0A0A"
-        shelf.revealDuration = 5
+        shelf.revealTimeout = 5
         shelf.revealStyle = .grow
         return shelf
     }

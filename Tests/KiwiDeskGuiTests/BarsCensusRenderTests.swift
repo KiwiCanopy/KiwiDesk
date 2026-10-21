@@ -36,6 +36,7 @@ struct BarsCensusRenderTests {
     func kiwishelfDrawers() {
         let rendered =
             BarsRowOrder.kiwishelfShowEach
+            + BarsRowOrder.kiwishelfDurations
             + BarsRowOrder.kiwishelfEdges
             + BarsRowOrder.kiwishelfStyle
             + BarsRowOrder.kiwishelfMargins

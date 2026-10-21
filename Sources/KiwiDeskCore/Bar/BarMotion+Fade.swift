@@ -5,17 +5,17 @@ import AppKit
 /// The same one home — `BarMotionSeamTests` censuses both files.
 extension BarMotion {
     /// The shelf glide's length (#1838), the user's
-    /// `animations.shelf_duration` — nothing while `on_shelf` is
+    /// `animations.expand_duration` — nothing while `on_expand` is
     /// off — kept current by `KiwiCore.updateBars()`.
     @MainActor static var shelfGlide: TimeInterval =
-        AnimationSettings().shelfGlideSeconds
+        AnimationSettings().expandSeconds
 
-    /// The plate glide's live length: the user's `shelfGlide` under
-    /// the Reduce Motion setting — what a stand reads to know
-    /// whether anything will travel at all.
+    /// The plate glide's live length, the user's `shelfGlide` —
+    /// what a stand reads to know whether anything will travel at
+    /// all.
     @MainActor
     static var shelfGlideLength: TimeInterval {
-        plateGlideDuration(reduceMotion: isReduced, seconds: shelfGlide)
+        plateGlideDuration(seconds: shelfGlide)
     }
 
     /// Runs `body`'s writes with no implicit motion and COMMITS
@@ -106,14 +106,11 @@ extension BarMotion {
 
     /// Runs `body` in a dissolve's out-fade group, nested in the
     /// plate glide: `dissolveOutShare` of its length, the same
-    /// curve, zero under Reduce Motion.
+    /// curve.
     @MainActor
     static func runDissolveOut(_ body: () -> Void) {
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = dissolveOutDuration(
-                reduceMotion: isReduced,
-                seconds: shelfGlide
-            )
+            context.duration = dissolveOutDuration(seconds: shelfGlide)
             context.timingFunction = CAMediaTimingFunction(
                 controlPoints: 0.2,
                 0.9,
@@ -125,27 +122,20 @@ extension BarMotion {
     }
 
     /// The out-fade's length: `dissolveOutShare` of the plate
-    /// glide's, zero under Reduce Motion.
-    static func dissolveOutDuration(
-        reduceMotion: Bool,
-        seconds: TimeInterval
-    ) -> TimeInterval {
-        plateGlideDuration(reduceMotion: reduceMotion, seconds: seconds)
-            * dissolveOutShare
+    /// glide's.
+    static func dissolveOutDuration(seconds: TimeInterval) -> TimeInterval {
+        plateGlideDuration(seconds: seconds) * dissolveOutShare
     }
 
     /// Runs `body` once a group glide lands — a timer of the plate
-    /// glide's length, as `playWalk` does, and the next turn under
-    /// Reduce Motion, which plays no glide. Never inline: it is
+    /// glide's length, as `playWalk` does, and the next turn where
+    /// the expand is off. Never inline: it is
     /// scheduled from inside a render, which `body` may re-run.
     @MainActor
     static func afterGroupGlide(
         _ body: @escaping @MainActor () -> Void
     ) {
-        let span = plateGlideDuration(
-            reduceMotion: isReduced,
-            seconds: shelfGlide
-        )
+        let span = plateGlideDuration(seconds: shelfGlide)
         Task { @MainActor in
             if span > 0 { try? await Task.sleep(for: .seconds(span)) }
             body()

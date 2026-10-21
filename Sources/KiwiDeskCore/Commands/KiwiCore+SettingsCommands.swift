@@ -117,20 +117,29 @@ extension KiwiCore {
             }
             tiler.settings.animations.scrollDurationMS = ms
             return .ok()
-        case "animations.set_on_shelf":
-            // The shelf's glide on and off (#1838).
+        case "animations.set_on_expand":
+            // The shelf's expand on and off (#1838).
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")
             }
-            tiler.settings.animations.onShelf = on
+            tiler.settings.animations.onExpand = on
             updateBars()
             return .ok()
-        case "animations.set_shelf_duration":
-            // The shelf glide's pace (#1838).
+        case "animations.set_expand_duration":
+            // The shelf expand's pace (#1838).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            tiler.settings.animations.shelfDurationMS = ms
+            tiler.settings.animations.expandDurationMS = ms
+            updateBars()
+            return .ok()
+        case "animations.set_reveal_duration":
+            // A hidden shelf's reveal length (owner ruling,
+            // 2026-10-21).
+            guard let ms = args.first?.intValue else {
+                return .fail("expected milliseconds")
+            }
+            tiler.settings.animations.revealDurationMS = ms
             updateBars()
             return .ok()
         case "animations.set_size_policy":

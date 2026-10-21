@@ -258,7 +258,7 @@ extension KiwiCore {
         let was = shelves.reveal.reveal(of: key)
         shelves.reveal.toggle(
             key,
-            duration: tiler.settings.kiwishelf.revealDuration
+            duration: tiler.settings.kiwishelf.revealTimeout
         )
         // One line per toggle: a reveal leaves no other trace.
         onLog(

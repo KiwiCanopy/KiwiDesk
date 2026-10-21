@@ -52,7 +52,7 @@ struct ShelfJoinLeaveGlideTests {
         settings.kiwishelf.order = order
         settings.kiwishelf.backgroundStyle = .boxed
         settings.kiwishelf.liquidGlass = true
-        settings.animations.onShelf = true
+        settings.animations.onExpand = true
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()

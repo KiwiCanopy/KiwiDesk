@@ -119,7 +119,7 @@ extension KiwiShelfCard {
             iconSourceRow
         case .revealStyle:
             revealStyleRow
-        case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealDuration,
+        case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealTimeout,
             .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,

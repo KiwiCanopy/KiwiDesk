@@ -153,7 +153,9 @@ struct SettingsCatalogTests {
         // 198 since #2389: Colors & glass and its twenty-five
         // children, for the Liquid Glass card and the old page's
         // four group titles and its scene. 199 #2497: Reveal.
-        #expect(allEntries.count == 199)
+        // 200 (owner ruling, 2026-10-21): the Durations drawer and
+        // its two rows, the Animations card's two shelf rows gone.
+        #expect(allEntries.count == 200)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

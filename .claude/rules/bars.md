@@ -430,7 +430,7 @@ twice, was a question the user answered twice. The argument is
   `standWrites` list decides both whether to stand and what to
   write (`ShelfStandSkipTests` ▸ `unchangedSlotSkips`). The
   glide's length is the user's
-  `animations.shelf_duration`, `BarMotion.shelfGlide` set in
+  `animations.expand_duration`, `BarMotion.shelfGlide` set in
   `updateBars()` (`ShelfGlideSettingsTests`).
 - **A section joining a fused shelf grows out of the section it
   joins and a leaving one shrinks back into it; a shelf shown at
@@ -597,9 +597,13 @@ render content into it (#1517). Obligations:
   `spreadUnits`, or it fades in place instead of spreading. A
   leave that is no reveal ends the reveal's motion with
   its token (`cutReveal`). The mark keeps time with the motion
-  through `BarMotion.markFade` and its `RevealKind`. **The reveal
-  and the mark's hover growth play under Reduce Motion** — the
-  one bar motion ruled to (owner ruling, 2026-10-21;
+  through `BarMotion.markFade` and its `RevealKind`, every timing
+  fitted to the user's `animations.reveal_duration` through the one
+  `BarMotion.revealScale` — a retract to its
+  `AnimationSettings.retractShare` — and never a second length
+  beside it. **The reveal, the mark's hover growth and the
+  shelf's expand play under Reduce Motion** (owner ruling,
+  2026-10-21;
   `docs/design-decisions.md` ▸ The bars honour Reduce Motion) —
   so their members are in `BarMotionSeamTests`' `ungated` map and
   read no flag. `ShelfRevealMotionTests`, `ShelfRevealGrowTests`
@@ -1170,7 +1174,8 @@ Obligations:
 - **A member whose motion Reduce Motion deliberately keeps is
   ruled in `BarMotionSeamTests`' `ungated` map**, naming its
   ruling, and reads neither `isReduced` nor `reduceMotion` — the
-  shelf reveal and the hover growth are the whole of it today. A
+  shelf's reveal, its hover growth and its expand (the plate
+  glide). A
   new entry is a product ruling argued in
   `docs/design-decisions.md` first, never a way to skip writing
   a gate.

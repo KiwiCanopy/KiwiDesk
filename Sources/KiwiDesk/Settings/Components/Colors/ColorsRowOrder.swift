@@ -42,13 +42,6 @@ enum ColorsRowOrder {
         .colours(.animationsDurationMS),
     ]
 
-    /// The shelf glide's rows in the Motion disclosure, outside the
-    /// master's grey (#1838).
-    static let motionShelf: [SettingKey] = [
-        .colours(.animationsOnShelf),
-        .colours(.animationsShelfDurationMS),
-    ]
-
     // MARK: - Colors & glass (#2389)
 
     /// The Accent group (#1857): the hue the active Space, the

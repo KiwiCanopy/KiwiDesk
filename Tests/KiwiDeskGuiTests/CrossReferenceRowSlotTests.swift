@@ -110,6 +110,7 @@ struct CrossReferenceRowSlotTests {
     /// over: the others carry their producer; only this row can't.
     private static let asserted: Set<String> = [
         "MotionCard.swift:Self.scrollingXrefProse",
+        "MotionCard.swift:Self.barsXrefProse",
         "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
         "LayoutCard.swift:appBarProse",
         "SpaceOverrideRows+ModeRows.swift:prose",
@@ -148,6 +149,7 @@ struct CrossReferenceRowSlotTests {
 
     @Test func theMotionCardProsePlacesItsLink() {
         #expect(MotionCard.scrollingXrefProse.contains(Self.slot))
+        #expect(MotionCard.barsXrefProse.contains(Self.slot))
     }
 
     /// The focused-item row's link under the Second accent

@@ -128,7 +128,7 @@ struct ColorsCensusRenderTests {
         // the master's grey and the shelf glide's outside it
         // (#1838); one tier, two orders.
         pin(
-            ColorsRowOrder.motionMore + ColorsRowOrder.motionShelf,
+            ColorsRowOrder.motionMore,
             .coloursAndMotion,
             .motion,
             .showMore,

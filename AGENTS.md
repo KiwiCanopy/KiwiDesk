@@ -1552,8 +1552,10 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   grows or stretches as the one `reveal_style` says inside a still panel
   through `BarMotion.playReveal`, Boxed included, a spread moving each box
   by its glass host (`ShelfRevealStyleTests`, `ShelfRevealMotionTests`,
-  `ShelfRevealSpreadTests`), and it and the mark's hover growth play under
-  Reduce Motion, ruled in `BarMotionSeamTests`' `ungated` map
+  `ShelfRevealSpreadTests`), fitted to `animations.reveal_duration` through
+  the one `BarMotion.revealScale`, and it, the mark's hover growth and the
+  shelf's expand play under Reduce Motion, ruled in `BarMotionSeamTests`'
+  `ungated` map
 - a bar joining or leaving a fused shelf never budges its neighbour — on a
   new slot the run, items, box glass and float break snap, the shelf's glide
   the one motion (`AppBarLandingTests`)

@@ -568,8 +568,9 @@ every lens with why it cannot turn on.
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
-| | `animations.set_on_shelf` | true\|false (default true); the KiwiShelf motion on a Space switch |
-| | `animations.set_shelf_duration` | ms (500–2000, default 750); the shelf glide's length |
+| | `animations.set_on_expand` | true\|false (default true); the KiwiShelf expand on a Space switch |
+| | `animations.set_expand_duration` | ms (500–2000, default 750); the KiwiShelf expand's length |
+| | `animations.set_reveal_duration` | ms (150–800, default 300); a hidden bar's reveal |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
@@ -704,9 +705,14 @@ see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
 
-`animations.set_on_shelf` and `animations.set_shelf_duration` set
-the KiwiShelf motion on a Space switch; see
-[animations.set_on_shelf](lua-reference.md#animationsset_on_shelf).
+:::unreleased
+`animations.set_on_expand` and `animations.set_expand_duration` set
+the KiwiShelf expand on a Space switch, and
+`animations.set_reveal_duration` a hidden bar's reveal; see
+[animations.set_on_expand](lua-reference.md#animationsset_on_expand).
+`animations.set_on_shelf` and `animations.set_shelf_duration` are
+retired and fail naming their replacements.
+:::
 
 `make_auto` is retired: it fails with `make_auto was retired —
 use make_tiled`, and `make_tiled` does its job. `make_tiled`, and

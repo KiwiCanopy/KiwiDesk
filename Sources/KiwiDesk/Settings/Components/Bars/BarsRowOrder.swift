@@ -9,6 +9,13 @@ enum BarsRowOrder {
         .spaceBar(.spaceCue),
     ]
 
+    /// KiwiShelf card, behind the Durations disclosure under Reveal
+    /// (owner ruling, 2026-10-21).
+    static let kiwishelfDurations: [SettingKey] = [
+        .colours(.animationsRevealDurationMS),
+        .colours(.animationsExpandDurationMS),
+    ]
+
     /// KiwiShelf card, behind Show's Each bar disclosure (#761).
     static let kiwishelfShowEach: [SettingKey] = [
         .spaceBar(.spaceBarVisibility),

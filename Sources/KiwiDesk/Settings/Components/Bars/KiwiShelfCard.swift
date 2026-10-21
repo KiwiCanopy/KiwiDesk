@@ -10,6 +10,7 @@ struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
     @State var edgesExpanded = false
     @State var showExpanded = false
+    @State var durationsExpanded = false
     @State private var styleExpanded = false
     @State private var marginsExpanded = false
 
@@ -55,6 +56,9 @@ struct KiwiShelfCard: View {
         case .spaceBar(.spaceBarVisibility), .spaceBar(.spaceCue),
             .layoutAppBar:
             showRow(key)
+        case .colours(.animationsRevealDurationMS),
+            .colours(.animationsExpandDurationMS):
+            durationRow(key)
         default:
             let _ = assertionFailure(
                 "unrendered KiwiShelf census key: \(key.id)"

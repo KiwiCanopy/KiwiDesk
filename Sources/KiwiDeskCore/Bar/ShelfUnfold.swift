@@ -110,12 +110,7 @@ enum ShelfUnfold {
         plateRadius: CGFloat,
         horizontal: Bool
     ) -> Stretch {
-        let enter = max(
-            alongDuration,
-            deepenDelay + deepenDuration,
-            itemsDelay + itemsFadeIn
-        )
-        return Stretch(
+        Stretch(
             entering: entering,
             mark: mark,
             along: along(mark: mark, plate: plate, horizontal: horizontal),
@@ -123,8 +118,23 @@ enum ShelfUnfold {
             markRadius: min(mark.width, mark.height) / 2,
             plateRadius: plateRadius,
             horizontal: horizontal,
-            length: entering ? enter : retractLength
+            length: length(entering: entering)
         )
+    }
+
+    /// A plate unfold's own length, in or out.
+    static func length(entering: Bool) -> TimeInterval {
+        entering
+            ? max(
+                alongDuration,
+                deepenDelay + deepenDuration,
+                itemsDelay + itemsFadeIn
+            ) : retractLength
+    }
+
+    /// A spread's own length, in or out.
+    static func spreadLength(entering: Bool) -> TimeInterval {
+        entering ? spreadStagger + spreadDuration : gatherLength
     }
 
     /// The spread out of or into `mark`'s centre over a run `span`
@@ -140,7 +150,7 @@ enum ShelfUnfold {
             mark: CGPoint(x: mark.midX, y: mark.midY),
             span: span,
             horizontal: horizontal,
-            length: entering ? spreadStagger + spreadDuration : gatherLength
+            length: spreadLength(entering: entering)
         )
     }
 

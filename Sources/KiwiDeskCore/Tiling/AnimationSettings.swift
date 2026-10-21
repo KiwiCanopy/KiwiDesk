@@ -27,31 +27,53 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         }
     }
 
-    /// The shelf's glide (#1838): a section growing in or out, the
+    /// The shelf's expand (#1838): a section growing in or out, the
     /// plate and sections re-placing, a group folding — one motion
     /// on one pace. Off, the shelf lands; not under `anyEnabled`.
-    public var onShelf = true
+    /// Was `on_shelf` (`ConfigMigration`, owner ruling 2026-10-21).
+    public var onExpand = true
 
-    /// The shelf glide in milliseconds (500–2000 ms, #1838).
-    public var shelfDurationMS = 750 {
-        didSet { shelfDurationMS = Self.clampShelfMS(shelfDurationMS) }
+    /// The expand in milliseconds (500–2000 ms, #1838); was
+    /// `shelf_duration`.
+    public var expandDurationMS = 750 {
+        didSet { expandDurationMS = Self.clampExpandMS(expandDurationMS) }
+    }
+
+    /// A hidden shelf's reveal in milliseconds (150–800 ms, owner
+    /// ruling 2026-10-21): every `reveal_style` plays inside it, a
+    /// retract inside `retractShare` of it.
+    public var revealDurationMS = 300 {
+        didSet { revealDurationMS = Self.clampRevealMS(revealDurationMS) }
     }
 
     /// The band every spring duration clamps to, and the one a
     /// control's edges derive from (gui.md, #1359).
     public static let durationBand = 50...1000
-    /// The shelf glide's band (owner, 2026-09-30): below half a
-    /// second it barely reads on a decelerating curve.
-    public static let shelfDurationBand = 500...2000
+    /// The expand's band (owner, 2026-09-30): below half a second
+    /// it barely reads on a decelerating curve.
+    public static let expandDurationBand = 500...2000
+    /// The reveal's band and step (owner ruling, 2026-10-21).
+    public static let revealDurationBand = 150...800
+    public static let revealDurationStep = 50
+    /// A retract's share of the reveal's length (owner ruling,
+    /// 2026-10-21): leaving reads quicker than arriving.
+    public static let retractShare = 0.8
 
     static func clampMS(_ ms: Int) -> Int {
         min(max(ms, durationBand.lowerBound), durationBand.upperBound)
     }
 
-    static func clampShelfMS(_ ms: Int) -> Int {
+    static func clampExpandMS(_ ms: Int) -> Int {
         min(
-            max(ms, shelfDurationBand.lowerBound),
-            shelfDurationBand.upperBound
+            max(ms, expandDurationBand.lowerBound),
+            expandDurationBand.upperBound
+        )
+    }
+
+    static func clampRevealMS(_ ms: Int) -> Int {
+        min(
+            max(ms, revealDurationBand.lowerBound),
+            revealDurationBand.upperBound
         )
     }
 
@@ -62,8 +84,9 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case onRelayout = "on_relayout"
         case durationMS = "duration"
         case scrollDurationMS = "scroll_duration"
-        case onShelf = "on_shelf"
-        case shelfDurationMS = "shelf_duration"
+        case onExpand = "on_expand"
+        case expandDurationMS = "expand_duration"
+        case revealDurationMS = "reveal_duration"
     }
 
     public init() {}
@@ -106,20 +129,31 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 forKey: .scrollDurationMS
             ) ?? 150
         )
-        onShelf =
-            try container.decodeIfPresent(Bool.self, forKey: .onShelf)
+        onExpand =
+            try container.decodeIfPresent(Bool.self, forKey: .onExpand)
             ?? true
-        shelfDurationMS = Self.clampShelfMS(
+        expandDurationMS = Self.clampExpandMS(
             try container.decodeIfPresent(
                 Int.self,
-                forKey: .shelfDurationMS
+                forKey: .expandDurationMS
             ) ?? 750
+        )
+        revealDurationMS = Self.clampRevealMS(
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .revealDurationMS
+            ) ?? 300
         )
     }
 
-    /// The shelf glide's length in seconds, nothing while it is off.
-    public var shelfGlideSeconds: TimeInterval {
-        onShelf ? TimeInterval(shelfDurationMS) / 1000 : 0
+    /// The expand's length in seconds, nothing while it is off.
+    public var expandSeconds: TimeInterval {
+        onExpand ? TimeInterval(expandDurationMS) / 1000 : 0
+    }
+
+    /// The reveal's length in seconds.
+    public var revealSeconds: TimeInterval {
+        TimeInterval(revealDurationMS) / 1000
     }
 }
 

@@ -167,14 +167,6 @@ struct MotionMoreControls: Sendable {
         "behavior.animations.window_duration",
         "Window duration"
     )
-    let animateShelf = SettingsControl(
-        "behavior.animations.shelf",
-        "Animate KiwiShelf"
-    )
-    let shelfDuration = SettingsControl(
-        "behavior.animations.shelf_duration",
-        "KiwiShelf duration"
-    )
 }
 
 /// Looks & Animations ▸ Colors & glass (#2389): each group's

@@ -339,6 +339,13 @@ synonym:
   (`core.set_wake_restore_delay`), a third quantity again.
   *Speed* survives only as a search synonym, because it is the
   word a user reaches for (`SettingsSearchSynonyms`).
+- **timeout** — a time after which KiwiDesk ENDS a state on its
+  own, `0` meaning never (`kiwishelf.set_reveal_timeout`, how long
+  a shelf the show/hide action revealed stays shown). Name such a
+  knob a *timeout*, never a *duration*, which is the time a motion
+  takes, nor a *delay*, which waits before something starts.
+  Rejected for it: *hold*, spoken for by a **held Space**, and
+  *pin*, spoken for by a **Screen pin**.
 - **animation** vs **motion** — KiwiDesk's own word for its
   window movement is **animation**, in every catalog and in the
   destination that holds it (#1017). *Motion* is reserved for

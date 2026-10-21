@@ -52,6 +52,39 @@ extension BarMotion {
         }
     }
 
+    /// How much a motion `natural` seconds long is stretched to
+    /// play inside `length` — a retract inside
+    /// `AnimationSettings.retractShare` of it.
+    static func revealScale(
+        _ natural: TimeInterval,
+        entering: Bool,
+        _ length: TimeInterval
+    ) -> Double {
+        let target =
+            entering ? length : length * AnimationSettings.retractShare
+        return natural > 0 && target > 0 ? target / natural : 1
+    }
+
+    /// How long `kind`'s motion plays before it is fitted to the
+    /// user's length — what `revealMotion` resolves it to.
+    static func naturalLength(
+        _ kind: RevealKind,
+        entering: Bool
+    ) -> TimeInterval {
+        switch kind {
+        case .slide: revealSlide
+        case .fade: revealFade
+        case .grow:
+            entering
+                ? max(
+                    ShelfGrow.plateGrow,
+                    ShelfGrow.itemsDelay + ShelfGrow.itemsFadeIn
+                ) : ShelfGrow.retractLength
+        case .unfold: ShelfUnfold.length(entering: entering)
+        case .spread: ShelfUnfold.spreadLength(entering: entering)
+        }
+    }
+
     /// Fades the mark's `body` in (`showing`) or out as its shelf
     /// retracts or reveals; a fade already playing continues from
     /// where it stands.
@@ -61,7 +94,17 @@ extension BarMotion {
         showing: Bool,
         reveal: RevealKind
     ) {
-        let timing = markFade(showing: showing, reveal: reveal)
+        let natural = markFade(showing: showing, reveal: reveal)
+        // The motion's own scale, so the mark keeps its time.
+        let scale = revealScale(
+            naturalLength(reveal, entering: !showing),
+            entering: !showing,
+            revealLength
+        )
+        let timing = (
+            delay: natural.delay * scale,
+            length: natural.length * scale
+        )
         body.wantsLayer = true
         let from =
             body.layer?.animationKeys()?.contains(revealKey) == true

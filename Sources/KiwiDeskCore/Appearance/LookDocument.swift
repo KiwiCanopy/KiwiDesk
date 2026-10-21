@@ -5,8 +5,10 @@ import Foundation
 /// which also travels inside `SetupBundle` under the bundle's own
 /// format — the palette library's shape (#939, #945).
 struct LookDocument: Codable {
-    /// Format version of the looks.json schema.
-    static let currentFormat = 1
+    /// Format version of the looks.json schema: 2 since a look's
+    /// `animations.on_shelf` / `shelf_duration` paths became
+    /// `on_expand` / `expand_duration` (owner ruling, 2026-10-21).
+    static let currentFormat = 2
 
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()

@@ -28,17 +28,17 @@ extension BarMotionSeamTests {
         "isReduced": [],
         "runLayout": ["duration(", "isReduced"],
         "duration": [],
-        "runPlateGlide": ["plateGlideDuration(", "isReduced"],
+        "runPlateGlide": ["plateGlideDuration("],
         "plateGlideDuration": [],
         "setFrame": ["travels(", "isReduced"],
         "setAlpha": ["fades(", "isReduced"],
         "fades": [],
         "fadePeek": ["peekFadeDuration(", "isReduced"],
         "peekFadeDuration": ["fades("],
-        "afterGroupGlide": ["plateGlideDuration(", "isReduced"],
-        "shelfGlideLength": ["plateGlideDuration(", "isReduced"],
+        "afterGroupGlide": ["plateGlideDuration("],
+        "shelfGlideLength": ["plateGlideDuration("],
         "standCommitted": [],
-        "runDissolveOut": ["dissolveOutDuration(", "isReduced"],
+        "runDissolveOut": ["dissolveOutDuration("],
         "dissolveOutDuration": ["plateGlideDuration("],
         "playWalk": ["walkDuration(", "isReduced"],
         "walkDuration": [],
@@ -60,6 +60,9 @@ extension BarMotionSeamTests {
         "hoverPlate": [],
         "placeHoverPlate": ["hoverGrow"],
         "clipPlace": [],
+        "revealScale": [],
+        "length": [],
+        "naturalLength": [],
         "playUnfold": ["unfoldStretch(", "itemsRise("],
         "unfoldStretch": [],
         "unfoldCollapse": [],
@@ -73,9 +76,9 @@ extension BarMotionSeamTests {
 
     /// Members whose motion Reduce Motion deliberately KEEPS, each
     /// naming its ruling — the one copy of who is ungated. The owner
-    /// ruled the shelf's reveal (slide, grow, unfold,
-    /// fade) and the hidden
-    /// mark's hover growth motions that play regardless, as the
+    /// ruled the shelf's reveal (every style), the hidden mark's
+    /// hover growth and the shelf's expand motions that play
+    /// regardless, as the
     /// Dock's auto-hide slides under Reduce Motion (2026-10-21,
     /// `docs/design-decisions.md` ▸ The bars honour Reduce Motion).
     /// A member here may start motion with no gate, and may not read
@@ -91,5 +94,7 @@ extension BarMotionSeamTests {
         "spreadFade": "the Boxed unfold's fade, the same ruling",
         "fadeMark": "the mark keeps the reveal's time (owner)",
         "placeHoverPlate": "the hover growth plays under Reduce Motion",
+        "runPlateGlide": "the shelf's expand plays under Reduce Motion",
+        "runDissolveOut": "the expand's dissolve, the same ruling",
     ]
 }

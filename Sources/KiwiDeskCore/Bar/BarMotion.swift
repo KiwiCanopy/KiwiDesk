@@ -142,16 +142,13 @@ enum BarMotion {
         return step
     }
 
-    /// Runs `body` in the plate glide's group: a decelerating
-    /// ease with no overshoot, zero-length under Reduce Motion so
-    /// the plate arrives without travelling.
+    /// Runs `body` in the plate glide's group — the shelf's expand:
+    /// a decelerating ease with no overshoot, played under Reduce
+    /// Motion too (owner ruling, 2026-10-21).
     @MainActor
     static func runPlateGlide(_ body: () -> Void) {
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = plateGlideDuration(
-                reduceMotion: isReduced,
-                seconds: shelfGlide
-            )
+            context.duration = plateGlideDuration(seconds: shelfGlide)
             context.timingFunction = CAMediaTimingFunction(
                 controlPoints: 0.2,
                 0.9,
@@ -162,12 +159,10 @@ enum BarMotion {
         }
     }
 
-    /// The plate glide's duration: zero under Reduce Motion.
-    static func plateGlideDuration(
-        reduceMotion: Bool,
-        seconds: TimeInterval
-    ) -> TimeInterval {
-        reduceMotion ? 0 : seconds
+    /// The plate glide's duration, the user's expand: Reduce Motion
+    /// keeps it (owner ruling, 2026-10-21).
+    static func plateGlideDuration(seconds: TimeInterval) -> TimeInterval {
+        seconds
     }
 
     /// The group's duration. Zero under Reduce Motion, so

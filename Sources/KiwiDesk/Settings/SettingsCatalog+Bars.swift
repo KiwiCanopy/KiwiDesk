@@ -27,6 +27,12 @@ struct BarsControls: Sendable {
         instance: "kiwishelf",
         children: KiwiShelfStyleControls()
     )
+    let kiwishelfDurations = SettingsDrawer(
+        "kiwishelf.durations",
+        "Durations",
+        instance: "kiwishelf",
+        children: KiwiShelfDurationControls()
+    )
     let kiwishelfMargins = SettingsDrawer(
         "kiwishelf.margins",
         "Margins",
@@ -48,6 +54,19 @@ struct BarsControls: Sendable {
     let appBarCard = SettingsControl(
         "bars.switch.app_bar",
         "App Bar"
+    )
+}
+
+/// KiwiShelf ▸ Show ▸ Durations rows (owner ruling, 2026-10-21),
+/// in `BarsRowOrder.kiwishelfDurations`' order.
+struct KiwiShelfDurationControls: Sendable {
+    let revealDuration = SettingsControl(
+        "kiwishelf.reveal_duration",
+        "Reveal duration"
+    )
+    let expandDuration = SettingsControl(
+        "kiwishelf.expand_duration",
+        "Expand duration"
     )
 }
 

@@ -135,10 +135,11 @@ struct FrontAppGrowTests {
         #expect(overlay.frontWindows == [WindowID(1)])
     }
 
-    @Test("Under Reduce Motion the segment snaps away")
+    @Test("With the expand off the segment snaps away")
     func reducedSnaps() throws {
-        BarMotion.reducedOverride = true
-        defer { BarMotion.reducedOverride = nil }
+        let glide = BarMotion.shelfGlide
+        BarMotion.shelfGlide = 0
+        defer { BarMotion.shelfGlide = glide }
         let manager = SpaceBarManager()
         let overlay = try sync(manager, front: WindowID(1))
         _ = try sync(manager, front: nil)
@@ -147,12 +148,13 @@ struct FrontAppGrowTests {
     }
 
     /// A joining segment lands where its render laid it, alpha
-    /// full, whatever it stood at for the glide; under Reduce
-    /// Motion the stand and the glide land in one turn.
+    /// full, whatever it stood at for the glide; with the expand
+    /// off the stand and the glide land in one turn.
     @Test("A joining segment lands where its render laid it")
     func joiningLands() throws {
-        BarMotion.reducedOverride = true
-        defer { BarMotion.reducedOverride = nil }
+        let glide = BarMotion.shelfGlide
+        BarMotion.shelfGlide = 0
+        defer { BarMotion.shelfGlide = glide }
         let manager = SpaceBarManager()
         let overlay = try sync(manager, front: nil)
         _ = try sync(manager, front: WindowID(1))

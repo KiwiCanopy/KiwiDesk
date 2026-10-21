@@ -85,8 +85,13 @@ struct ShelfRevealMotionTests {
             body.layer?.animation(forKey: BarMotion.revealKey)
         )
         let back = BarMotion.markFade(showing: true, reveal: .slide)
-        #expect(fade.duration == back.length)
-        #expect(back.length != BarMotion.revealFade || back.delay > 0)
+        let scale = BarMotion.revealScale(
+            BarMotion.naturalLength(.slide, entering: false),
+            entering: false,
+            BarMotion.revealLength
+        )
+        #expect(abs(fade.duration - back.length * scale) < 1e-9)
+        #expect(back.delay > 0)
     }
 
     private func spec(

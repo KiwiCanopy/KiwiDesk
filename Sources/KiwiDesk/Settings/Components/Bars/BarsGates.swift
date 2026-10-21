@@ -25,6 +25,9 @@ struct BarsGates {
         /// Every bar reads Always, so nothing reveals (owner
         /// ruling, 2026-10-21).
         case noBarHides
+        /// The expand is off in the config (`animations.on_expand`),
+        /// a knob with no row (owner ruling, 2026-10-21).
+        case expandOff
     }
 
     /// Runtime-gated keys this resolver answers directly. Data, so
@@ -33,6 +36,8 @@ struct BarsGates {
     /// row's `.setting` gate is wiring's, as gui.md rules.
     static let resolved: Set<SettingKey> = [
         .spaceBar(.spaceCue), .kiwishelf(.revealStyle),
+        .colours(.animationsRevealDurationMS),
+        .colours(.animationsExpandDurationMS),
     ]
 
     /// Runtime-gated bars keys answered elsewhere.
@@ -43,8 +48,12 @@ struct BarsGates {
         switch key {
         case .spaceBar(.spaceCue):
             return guiManaged ? nil : .appWideLuaOwned
-        case .kiwishelf(.revealStyle):
+        case .kiwishelf(.revealStyle),
+            .colours(.animationsRevealDurationMS):
             return settings.someBarHides ? nil : .noBarHides
+        case .colours(.animationsExpandDurationMS):
+            guard settings.someBarHides else { return .noBarHides }
+            return settings.animations.onExpand ? nil : .expandOff
         default:
             assertionFailure("BarsGates does not own \(key.id)")
             return nil
@@ -147,6 +156,12 @@ enum BarsGateHelp {
             return L(
                 "kiwishelf.reveal_style.no_bar_hides",
                 "No bar ever hides, so there is nothing to reveal."
+            )
+        case .expandOff:
+            return L(
+                "kiwishelf.expand_duration.off",
+                "Off in your config (%1$@).",
+                "animations.on_expand"
             )
         }
     }

@@ -22,6 +22,16 @@ extension BarMotion {
         /// It cross-fades in place: the Fade style, nothing to
         /// travel, or no plate to grow to.
         case fade(TimeInterval)
+
+        /// Its own length, before it is fitted to the user's.
+        var length: TimeInterval {
+            switch self {
+            case .slide(_, let length), .fade(let length): length
+            case .morph(let morph): morph.length
+            case .unfold(let stretch): stretch.length
+            case .spread(let spread): spread.length
+            }
+        }
     }
 
     /// A reveal's inputs, whichever kind plays it: the slide's
@@ -35,7 +45,14 @@ extension BarMotion {
         var plate: CGRect?
         var plateRadius: CGFloat = 0
         var horizontal = true
+        /// The user's `animations.reveal_duration`, in seconds, every
+        /// style plays inside.
+        var length = AnimationSettings().revealSeconds
     }
+
+    /// The user's `animations.reveal_duration` in seconds, kept
+    /// current by `KiwiCore.updateBars()`.
+    @MainActor static var revealLength = AnimationSettings().revealSeconds
 
     /// The slide's length and curve (owner ruling, #2497): the
     /// prototype's numbers, fixed like the mark's own timings.
@@ -180,13 +197,17 @@ extension BarMotion {
             layer.animationKeys()?.contains(revealKey) == true
             ? layer.presentation() : nil
         let start = held ? 0 : CACurrentMediaTime() + (lead ? revealLead : 0)
+        // Every style plays inside the user's length: its own
+        // timings stretched or squeezed as one.
+        let scale = revealScale(motion.length, entering: entering, path.length)
         let timed = { (animation: CAAnimation, at: TimeInterval) in
             animation.fillMode = .both
             animation.isRemovedOnCompletion = false
             if held {
                 animation.speed = 0
             } else {
-                animation.beginTime = start + at
+                animation.speed = Float(1 / scale)
+                animation.beginTime = start + at * scale
             }
         }
         let tail = lead ? revealLead : 0
@@ -194,10 +215,10 @@ extension BarMotion {
         switch motion {
         case .unfold(let stretch):
             playUnfold(stretch, on: layer, items: strip, timed: timed)
-            return held ? 0 : stretch.length + tail
+            return held ? 0 : stretch.length * scale + tail
         case .spread(let spread):
             playSpread(spread, on: view, items: items, timed: timed)
-            return held ? 0 : spread.length + tail
+            return held ? 0 : spread.length * scale + tail
         case .fade(let span):
             strip.removeAnimation(forKey: revealKey)
             let fade = CABasicAnimation(keyPath: "opacity")
@@ -206,7 +227,7 @@ extension BarMotion {
             fade.duration = span
             timed(fade, 0)
             layer.add(fade, forKey: revealKey)
-            return held ? 0 : span + tail
+            return held ? 0 : span * scale + tail
         case .morph(let morph):
             let shown =
                 strip.animationKeys()?.contains(revealKey) == true
@@ -244,7 +265,7 @@ extension BarMotion {
             timed(fade, morph.itemsStart)
             layer.add(clip, forKey: revealKey)
             strip.add(fade, forKey: revealKey)
-            return held ? 0 : morph.length + tail
+            return held ? 0 : morph.length * scale + tail
         case .slide(let offset, let span):
             strip.removeAnimation(forKey: revealKey)
             // The offset in the superlayer's coordinates, whichever
@@ -278,7 +299,7 @@ extension BarMotion {
                 )
             timed(slide, 0)
             layer.add(slide, forKey: revealKey)
-            return held ? 0 : span + tail
+            return held ? 0 : span * scale + tail
         }
     }
 

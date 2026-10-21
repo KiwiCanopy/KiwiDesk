@@ -84,6 +84,8 @@ struct GateReasonPlacementTests {
                 // the bars' values sit above it, not that a reveal
                 // needs a hiding bar (owner ruling, 2026-10-21).
                 .kiwishelf(.revealStyle),
+                .colours(.animationsRevealDurationMS),
+                .colours(.animationsExpandDurationMS),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no
@@ -117,6 +119,29 @@ struct GateReasonPlacementTests {
                 .kiwiVision(.lenses),
             ]
         )
+    }
+
+    /// A card an OS accessibility switch greys whole draws its
+    /// reason in a warning box too, beside the `?` (owner ruling,
+    /// 2026-10-21): every ruled switch is a container gate, and
+    /// the Animations card draws the box under its own switch.
+    @Test("an OS switch that greys a whole card warns in a box")
+    func osSwitchWarnsInABox() throws {
+        #expect(GateReasonPlacement.warnsInBox == [.reduceMotion])
+        let card = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Looks/MotionCard.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: card, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            source.contains(
+                "ifreduceMotion{WarningBox(text:Self.reduceMotionWarning)"
+            )
+        )
+        #expect(source.contains("Self.openAccessibilityDisplay()"))
     }
 
     /// The other two channels, pinned by one member each — a

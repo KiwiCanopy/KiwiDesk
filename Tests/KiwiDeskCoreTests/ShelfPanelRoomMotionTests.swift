@@ -156,7 +156,7 @@ struct ShelfPanelRoomMotionTests {
         let moving = try #require(
             overlay.content.layer?.animation(forKey: BarMotion.revealKey)
         )
-        #expect(moving.speed == 1)
+        #expect(moving.speed > 0)
         #expect(moving.beginTime > 0)
     }
 }

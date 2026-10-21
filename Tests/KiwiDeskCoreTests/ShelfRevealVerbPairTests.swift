@@ -47,7 +47,7 @@ struct ShelfRevealVerbPairTests {
         settings.appBarStyle.setEdge(.top)
         settings.spaceBarStyle.visibility = space
         settings.monocle.appBar.visibility = app
-        settings.kiwishelf.revealDuration = 0
+        settings.kiwishelf.revealTimeout = 0
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()

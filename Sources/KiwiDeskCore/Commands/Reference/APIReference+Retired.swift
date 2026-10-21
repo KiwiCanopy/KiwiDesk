@@ -56,6 +56,11 @@ extension APIReference {
         map["animations.set_on_space_change"] = "set_space_cue"
         map["animations.set_space_change"] = "set_space_cue"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
+        // The shelf's glide is its expand, beside the reveal's own
+        // duration (owner ruling, 2026-10-21).
+        map["animations.set_on_shelf"] = "animations.set_on_expand"
+        map["animations.set_shelf_duration"] =
+            "animations.set_expand_duration"
         // The centred strip draws one more glyph at a row's end,
         // so the count is a span, not a cap (#1528).
         map["space_bar.set_glyph_cap"] = "space_bar.set_glyph_span"

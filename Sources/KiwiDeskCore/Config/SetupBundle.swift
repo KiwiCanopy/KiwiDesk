@@ -82,7 +82,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 33 = 32's bundles cross #761's step too (Profile 26).
     /// 34 = the shortcut base (#2460), in a bundle's `config` and
     /// its `[Profile]` alike.
-    public static let currentFormat = 34
+    /// 35 = the shelf's glide became its expand (owner ruling,
+    /// 2026-10-21), in a bundle's `[Profile]`, its `config`'s
+    /// shared look and its looks alike.
+    public static let currentFormat = 35
 
     public let format: Int
 

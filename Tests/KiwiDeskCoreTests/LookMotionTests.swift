@@ -13,7 +13,7 @@ struct LookMotionTests {
     private var tuned: TilingSettings {
         var settings = TilingSettings()
         settings.animations.durationMS = 400
-        settings.animations.onShelf = false
+        settings.animations.onExpand = false
         return settings
     }
 
@@ -83,7 +83,7 @@ struct LookMotionTests {
             name: "Mine",
             style: [
                 "animations.duration": .number(5000),
-                "animations.on_shelf": .bool(false),
+                "animations.on_expand": .bool(false),
                 "animations.on_window_swap": .bool(false),
                 "animations.scroll_duration": .string("fast"),
             ],
@@ -95,7 +95,7 @@ struct LookMotionTests {
         look.apply(to: &settings)
         // Clamped as a stored file would be; a wrong type skipped.
         #expect(settings.animations.durationMS == 1000)
-        #expect(!settings.animations.onShelf)
+        #expect(!settings.animations.onExpand)
         #expect(!settings.animations.onWindowSwap)
         #expect(settings.animations.scrollDurationMS == 400)
     }

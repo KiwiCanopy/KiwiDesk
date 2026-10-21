@@ -7255,6 +7255,23 @@ is on — and takes the same link (`unfocusedReference`); its header
 `?` answers only for the ring being off, when every row is grey.
 The header `?` stays the shape for a greyed block.
 
+:::unreleased
+*A whole card an OS accessibility switch greys also says so in a
+warning box* (owner ruling, 2026-10-21). The Animations card under
+Reduce Motion keeps its header `?`, and adds the yellow box the
+Hyper key's card uses, at the top of the card and only while the
+switch is on, with the one fix — a button to System Settings ▸
+Accessibility ▸ Display. A `?` is found by a reader looking for
+why; a card whose every row is grey by a setting KiwiDesk cannot
+change was read as broken before the `?` was found, so the box
+states the cause where the eye lands first. It is for that class
+alone — a cause outside the app greying a whole card, of which the
+Liquid Glass card under Reduce transparency is the other member,
+not yet drawn — and a row greyed by something on the page keeps
+the channels above (`GateReasonPlacement.warnsInBox`,
+`GateReasonPlacementTests`).
+:::
+
 The temptation to answer all of this with `.accessibilityHint` is
 why the ladder is written down. A hint on a **leaf** control is
 ordinary and two rows ship one. A hint on `GreyOut` is not: that
@@ -14665,7 +14682,12 @@ default. Unfold stretches the mark along the edge to the plate's
 length on a spring and then deepens it to the plate while the
 items rise, and collapses back the same way — the motion the owner
 approved in a device demo, its numbers ported into `ShelfUnfold`
-rather than retuned. Fade cross-fades the bar where it stands, for
+rather than retuned. Every style plays inside one length, the
+user's `animations.reveal_duration` (150–800 ms, 300 by default),
+its own timings stretched or squeezed as a whole and a retract in
+four fifths of it — one value rather than one per style, since the
+user tunes how quick a bar feels, not a style's choreography. Fade
+cross-fades the bar where it stands, for
 a user who wants no travel at all; it is a choice, no longer what
 Reduce Motion falls back to. One picker serves Auto and Hidden
 alike: a Hidden bar has no mark, so Grow and Unfold start from a
@@ -14705,7 +14727,7 @@ the shelf glides or slides it covers what that motion crosses,
 for that beat.
 The show/hide action is the one pin. It stays until the next
 press by default, because a keyboard user who pressed to look has
-not said for how long; `reveal_duration` hides it again on its
+not said for how long; `reveal_timeout` hides it again on its
 own, one value for every bar. No reveal on a Space switch: the
 dots already show the new Space. A look never carries the mode,
 which is functionality, not styling.
@@ -14788,10 +14810,12 @@ closing within a Space still
 leaves at once, and a group still folds its members. The
 curve stays decelerating — the motion answers the user's switch,
 and a curve that eases in reads as lag — while its length is
-theirs: `animations.shelf_duration`, 500–2000 ms, 750 by default,
+theirs: `animations.expand_duration` (`shelf_duration` until the
+owner's 2026-10-21 rename), 500–2000 ms, 750 by default,
 since the fixed plate glide, just over a quarter second until
-#1838, read as a snap for a bar coming and going; `on_shelf` turns it off, outside the window
-animations' master, and Reduce Motion keeps it off.
+#1838, read as a snap for a bar coming and going; `on_expand` turns it off, outside the window
+animations' master, and it plays under Reduce Motion (▸ The bars
+honour Reduce Motion).
 
 *A minimum, not a share.* Each section is as long as its items
 while both fit. Once the shelf is full the Space section
@@ -15616,26 +15640,30 @@ that keep the bars routed through it — is
 `.claude/rules/bars.md` ▸ the bars start motion in one file.
 
 :::unreleased
-**Two bar motions play under Reduce Motion: a hidden shelf's
-reveal and its mark's hover growth** (owner ruling, 2026-10-21).
-The two rulings above stand for every other bar motion; these two
-were cross-fades and an instant plate until the owner judged them
-on the device. The argument is the one the held-key resize took
-(▸ A held resize chord glides, its Reduce Motion paragraph): Reduce
-Motion asks the app to stop moving things the user did not move,
-and both of these answer the user's own pointer or shortcut. A
-hidden bar sliding or growing in is the bar answering a push
-against the edge, which is why macOS's own Dock auto-hide still
-slides under the setting; a cross-fade in its place read as a
-glitch rather than a calmer motion — "otherwise it looks too
-cheap". The hover growth is the same answer at a smaller size:
-without its travel the plate popped under the pointer. Both stay
-short and settle once — no loop, no parallax, nothing in the
-corner of the eye. The rest of the bars' motion — an item run
-that changes width, the spring ring, the plate glide, the Space
-switch's dissolve — keeps standing down, since none of it answers
-a gesture the user is making. In code, the members that play these
-two are ruled in `BarMotionSeamTests`' `ungated` map, which may
+**Three bar motions play under Reduce Motion: a hidden shelf's
+reveal, its mark's hover growth, and the shelf's expand** (owner
+rulings, 2026-10-21). The two rulings above stand for every other
+bar motion; these were cross-fades, an instant plate and a landing
+until the owner judged them on the device. The argument is the one
+the held-key resize took (▸ A held resize chord glides, its Reduce
+Motion paragraph): Reduce Motion asks the app to stop moving
+things the user did not move, and each of these answers the user's
+own act. A hidden bar sliding, growing or unfolding in is the bar
+answering a push against the edge, which is why macOS's own Dock
+auto-hide still slides under the setting; a cross-fade in its
+place read as a glitch rather than a calmer motion — "otherwise it
+looks too cheap" — and Fade stays a style for whoever wants no
+travel at all. The hover growth is the same answer at a smaller
+size: without its travel the plate popped under the pointer. The
+expand — a bar growing out of its neighbour as the user switches
+to a layout that shows it, the plate gliding to its new place, the
+App Bar's row dissolving to the new Space's — answers the switch
+the user just made, and landing it read as the bars jumping. All
+three stay short and settle once — no loop, no parallax. What
+keeps standing down is the motion no act of the user's starts: an
+item run changing width as a window opens elsewhere, the spring
+ring's sweep, the strip walk. In code, the members that play these
+three are ruled in `BarMotionSeamTests`' `ungated` map, which may
 neither read the flag nor be added to without a ruling.
 :::
 
@@ -15748,7 +15776,10 @@ fade where it says arrow.
 **The bar cards share one canonical row order.** (#374, re-cut
 by the #678 Phase 2 census render and by #1517.) The KiwiShelf
 card owns existence and placement: the Show master and its Each
-bar drawer, then Position and its Each bar drawer, Alignment,
+bar drawer — then, since the owner's 2026-10-21 ruling, Reveal and
+its Durations drawer, how a hiding bar comes and goes, kept beside
+what makes a bar hide and greyed together while none does, then
+the Space cue — then Position and its Each bar drawer, Alignment,
 Order and Space Bar minimum — where the bars sit, coarse to fine —
 then Thickness and its Style and Margins drawers. A master's drawer
 hangs under it with no rule, since a rule marks a new topic. Each bar's card shows every row,

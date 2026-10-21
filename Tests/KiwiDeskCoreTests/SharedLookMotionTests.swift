@@ -223,18 +223,18 @@ struct SharedLookMotionTests {
         let core = try makeCore()
         var config = try #require(core.guiConfigStore.load())
         var look = LookBody(of: TilingSettings())
-        look.style["animations.shelf_duration"] = nil
+        look.style["animations.expand_duration"] = nil
         config.look = look
         try core.guiConfigStore.save(config)
         var work = profile("Work", duration: 300)
-        work.settings.animations.shelfDurationMS = 900
+        work.settings.animations.expandDurationMS = 900
         try core.profiles.save(work)
         core.profiles.resetAdoption()
         core.prepareSharedLook()
         #expect(core.sharedLookLedger.motionOwed)
         load("Work", core)
         let shared = try #require(core.guiConfigStore.load()?.look)
-        #expect(shared.style["animations.shelf_duration"] == .number(900))
+        #expect(shared.style["animations.expand_duration"] == .number(900))
         #expect(
             shared.style["animations.duration"]
                 == .number(Double(TilingSettings().animations.durationMS))

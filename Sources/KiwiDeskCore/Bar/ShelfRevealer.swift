@@ -115,7 +115,7 @@ final class ShelfRevealer {
     }
 
     /// The show/hide action on `key`'s bar; false where that bar
-    /// does not hide. `duration` is `kiwishelf.reveal_duration`.
+    /// does not hide. `duration` is `kiwishelf.reveal_timeout`.
     @discardableResult
     func toggle(_ key: Key, duration: TimeInterval) -> Bool {
         guard let target = targets[key] else { return false }

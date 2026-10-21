@@ -110,7 +110,7 @@ struct BarAutoHideFoldTests {
     @Test("The mode and the reveal duration round-trip through JSON")
     func storedShape() throws {
         var settings = settings(space: .auto, app: .auto)
-        settings.kiwishelf.revealDuration = 5
+        settings.kiwishelf.revealTimeout = 5
         let data = try JSONEncoder().encode(settings)
         let root = try #require(
             try JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -122,11 +122,11 @@ struct BarAutoHideFoldTests {
         let shelf = try #require(root["kiwishelf"] as? [String: Any])
         #expect(space["visibility"] as? String == "auto")
         #expect(app["visibility"] as? String == "auto")
-        #expect(shelf["reveal_duration"] as? Double == 5)
+        #expect(shelf["reveal_timeout"] as? Double == 5)
         let back = try JSONDecoder().decode(TilingSettings.self, from: data)
         #expect(back.spaceBarStyle.visibility == .auto)
         #expect(back.monocle.appBar.visibility == .auto)
-        #expect(back.kiwishelf.revealDuration == 5)
+        #expect(back.kiwishelf.revealTimeout == 5)
     }
 
     @Test("An absent key keeps today's behaviour")
@@ -138,15 +138,15 @@ struct BarAutoHideFoldTests {
         #expect(style.visibility == .always)
         let shelf = try JSONDecoder().decode(
             KiwiShelf.self,
-            from: Data(#"{"reveal_duration": 500}"#.utf8)
+            from: Data(#"{"reveal_timeout": 500}"#.utf8)
         )
-        #expect(shelf.revealDuration == 60)
+        #expect(shelf.revealTimeout == 60)
     }
 
     @Test("The visibility mode is functionality, never a look's")
     func lookLeavesItOut() {
         for key in [
-            "space_bar.visibility", "kiwishelf.reveal_duration",
+            "space_bar.visibility", "kiwishelf.reveal_timeout",
         ] {
             #expect(!LookKeys.all.contains(key))
             #expect(LookKeys.leftOut[key] != nil)

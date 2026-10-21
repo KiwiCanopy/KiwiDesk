@@ -39,7 +39,7 @@ extension KiwiShelf {
         case borderColor = "border_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
-        case revealDuration = "reveal_duration"
+        case revealTimeout = "reveal_timeout"
         case revealStyle = "reveal_style"
     }
 
@@ -131,9 +131,9 @@ extension KiwiShelf {
             try c.decodeIfPresent(CGFloat.self, forKey: .dimFactor)
                 ?? d.dimFactor
         )
-        revealDuration = Self.clampRevealDuration(
-            try c.decodeIfPresent(Double.self, forKey: .revealDuration)
-                ?? d.revealDuration
+        revealTimeout = Self.clampRevealTimeout(
+            try c.decodeIfPresent(Double.self, forKey: .revealTimeout)
+                ?? d.revealTimeout
         )
         revealStyle =
             try c.decodeIfPresent(RevealStyle.self, forKey: .revealStyle)

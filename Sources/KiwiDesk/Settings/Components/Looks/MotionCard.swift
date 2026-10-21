@@ -23,6 +23,17 @@ struct MotionCard: View {
             help: reduceMotion ? reduceMotionHelp : nil
         ) {
             VStack(alignment: .leading, spacing: 8) {
+                // A whole card an OS switch greys says so in a box
+                // with its one fix, beside the header's `?` (owner
+                // ruling, 2026-10-21).
+                if reduceMotion {
+                    WarningBox(text: Self.reduceMotionWarning) {
+                        Button(Self.openAccessibilityTitle) {
+                            Self.openAccessibilityDisplay()
+                        }
+                        .settingsActionButton()
+                    }
+                }
                 // Reduce Motion greys the CONTENT, never the
                 // header, so the `?` stays a live #527 anchor —
                 // the `.motion` container's `.runtime` census
@@ -42,6 +53,12 @@ struct MotionCard: View {
                         "Layout Defaults ▸ Scrolling"
                     ),
                     destination: .layoutDefaults
+                )
+                CrossReferenceRow(
+                    prose: Self.barsXrefProse,
+                    // The destination's own title, which is the card's.
+                    linkTitle: SettingsDestination.bars.title,
+                    destination: .bars
                 )
             }
         }
@@ -68,8 +85,6 @@ struct MotionCard: View {
                                 .wrappedValue
                         )
                     )
-                Divider()
-                rows(ColorsRowOrder.motionShelf)
             }
             .padding(.top, 8)
         }
@@ -123,6 +138,50 @@ struct MotionCard: View {
                 + "toggle and duration in %1$@.",
             CrossReferenceRow.linkSlot
         )
+    }
+
+    /// The bars' reveal and expand moved to their own card (owner
+    /// ruling, 2026-10-21).
+    static var barsXrefProse: String {
+        L(
+            "behavior.animations.bars_xref",
+            "The bars' animations are in %1$@.",
+            CrossReferenceRow.linkSlot
+        )
+    }
+
+    static var reduceMotionWarning: String {
+        L(
+            "behavior.animations.reduce_motion.warning",
+            "Reduce Motion is on in System Settings, so these "
+                + "animations don't play."
+        )
+    }
+
+    static var openAccessibilityTitle: String {
+        L(
+            "behavior.animations.reduce_motion.open",
+            "Open Accessibility Settings"
+        )
+    }
+
+    /// System Settings ▸ Accessibility ▸ Display, where Reduce
+    /// Motion lives; the pane alone, then the app, if refused.
+    static let accessibilityDisplayPane = URL(
+        string: "x-apple.systempreferences:"
+            + "com.apple.Accessibility-Settings.extension?Display"
+    )!
+
+    @MainActor static func openAccessibilityDisplay() {
+        if NSWorkspace.shared.open(accessibilityDisplayPane) { return }
+        if let app = NSWorkspace.shared.urlForApplication(
+            withBundleIdentifier: "com.apple.systempreferences"
+        ) {
+            NSWorkspace.shared.openApplication(
+                at: app,
+                configuration: .init()
+            )
+        }
     }
 
     private var caption: String {

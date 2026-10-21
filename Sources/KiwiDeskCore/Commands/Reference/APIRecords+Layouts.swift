@@ -35,13 +35,19 @@ extension APIReference {
             "Enables or disables animation on layout reflows.",
             .boolean("enabled")
         ),
-        "set_on_shelf": APIRecord(
-            "Enables or disables the shelf's glide — a bar growing "
+        "set_on_expand": APIRecord(
+            "Enables or disables the shelf's expand — a bar growing "
                 + "in or out and the shelf re-placing.",
             .boolean("enabled")
         ),
-        "set_shelf_duration": APIRecord(
-            "Sets the shelf's glide in milliseconds, clamped to its band.",
+        "set_expand_duration": APIRecord(
+            "Sets the shelf's expand in milliseconds, clamped to its "
+                + "band.",
+            .integer("milliseconds")
+        ),
+        "set_reveal_duration": APIRecord(
+            "Sets how long a hidden bar's reveal takes in "
+                + "milliseconds, clamped to its band.",
             .integer("milliseconds")
         ),
         "set_size_policy": APIRecord(
