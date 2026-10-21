@@ -18,6 +18,7 @@ extension SettingsValueReadout {
             .moveToSpaceFollow, .focusDesktop, .moveToDesktop,
             .moveToDesktopFollow, .layoutCycle, .viewPicker, .jumpToWindow,
             .growWidth, .shrinkWidth, .growHeight, .shrinkHeight, .resetSizes,
+            .maximize,
             .toggleFloating, .toggleKiwiVision, .toggleLens,
             .toggleSpaceBar, .toggleAppBar,
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,

@@ -945,6 +945,13 @@ sides.
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),
 listed under Shortcuts & Gestures ▸ Size & float.
 
+:::unreleased
+`⌃⌥M` makes the focused window fill its screen and hides the bars
+there, until you press it again or move focus to another window
+([`toggle_maximized`](lua-reference.md#toggle_maximized)), listed
+under Shortcuts & Gestures ▸ Size & float.
+:::
+
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you
 delete stays deleted.

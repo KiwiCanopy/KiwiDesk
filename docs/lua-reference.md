@@ -5251,6 +5251,32 @@ KiwiDesk.bind("cmd+alt+d", function()
 end)
 ```
 
+:::unreleased
+### toggle_maximized
+
+**Expects:** nothing.
+
+**Does:** makes the focused tiled window fill its screen —
+the whole area between the menu bar and the Dock, with no gaps —
+and hides both bars on that screen, without a macOS full-screen
+Desktop. The rest of the Space keeps its layout behind it. A
+second call puts the window back in its slot; so does moving
+focus to another tiled window of the Space, and the window
+leaving the layout (closed, minimized, floated or moved). A
+swap, resize, layout change or other rearranging command puts
+it back first, then acts. Focus on a floating window, or a
+switch to another Space and back, leaves it filling the screen.
+Fails on a floating window. Bound to `⌃⌥M` by default.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+m", function()
+    KiwiDesk.toggle_maximized()
+end)
+```
+:::
+
 ### override_sticky_reach
 
 **Expects:** one of `on`, `off`, `auto`.

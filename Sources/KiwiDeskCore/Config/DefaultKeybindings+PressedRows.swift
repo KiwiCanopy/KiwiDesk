@@ -1,8 +1,8 @@
 import Foundation
 
-/// The seed's pressed `⌃⌥` panel, layout, KiwiVision and sizing
-/// rows (#453, #762, #1875, #2103, #2303), each its own builder so the
-/// generations name it.
+/// The seed's pressed `⌃⌥` panel, layout, KiwiVision, sizing and
+/// maximize rows (#453, #762, #1875, #2103, #2303, #2448), each its
+/// own builder so the generations name it.
 extension DefaultKeybindings {
     /// Next layout on `⌃⌥C` (#453).
     public static func nextLayoutRow() -> KeyBinding {
@@ -56,6 +56,19 @@ extension DefaultKeybindings {
             lua: "KiwiDesk.reset_layout_sizing()",
             kind: .navigation,
             label: "Reset sizes in this Space"
+        )
+    }
+
+    /// Maximize on `⌃⌥M` (#2448), M for maximize: the focused
+    /// tiled window fills its screen. Free in the seed,
+    /// `SystemShortcuts.map` and macOS's symbolic hotkeys
+    /// (read 2026-10-21).
+    public static func maximizeRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+m",
+            lua: "KiwiDesk.toggle_maximized()",
+            kind: .navigation,
+            label: "Maximize"
         )
     }
 

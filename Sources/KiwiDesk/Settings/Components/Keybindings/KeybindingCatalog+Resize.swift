@@ -7,6 +7,7 @@ extension KeybindingCatalog {
         ResizeRow.allCases.map { resizeRow($0, step: step) }
             + [
                 resetSizes,
+                maximize,
                 toggleFloating,
                 toggleSticky,
                 toggleDisplaySticky,
@@ -20,6 +21,7 @@ extension KeybindingCatalog {
     /// label the banner interpolated untranslated.
     static let stepFreeCommands: [NavCommand] = [
         resetSizes,
+        maximize,
         toggleFloating,
         makeFloating,
         toggleSticky,
@@ -91,6 +93,23 @@ extension KeybindingCatalog {
         lua: "KiwiDesk.reset_layout_sizing()",
         displayLabel: {
             L("keybinding.reset_sizes", "Reset sizes in this Space")
+        }
+    )
+
+    /// `toggle_maximized` (#2448): the focused tiled window fills
+    /// its screen until pressed again.
+    static let maximize = NavCommand(
+        label: "Maximize",
+        lua: "KiwiDesk.toggle_maximized()",
+        displayLabel: { L("keybinding.maximize", "Maximize") },
+        help: {
+            L(
+                "keybinding.maximize.help",
+                "Fills the screen with this window and hides the "
+                    + "bars, leaving the rest of the Space as it "
+                    + "is. Press again, or move focus to another "
+                    + "window, to put it back."
+            )
         }
     )
 

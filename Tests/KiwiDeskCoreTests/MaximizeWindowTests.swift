@@ -120,6 +120,15 @@ struct MaximizeWindowTests {
         #expect(maximized(core) == nil)
     }
 
+    @Test("Dragging the window ends it")
+    func dragEnds() {
+        let core = makeCore()
+        core.execute("toggle_maximized")
+        let frame = issued(core)[w1] ?? .zero
+        core.handleDragMove(w1, start: frame, frame: frame)
+        #expect(maximized(core) == nil)
+    }
+
     @Test("A float press is refused")
     func floatRefused() {
         let core = makeCore()
@@ -136,6 +145,14 @@ struct MaximizeWindowTests {
         #expect(!core.showsMaximized(on: display))
         core.execute("toggle_maximized")
         #expect(core.showsMaximized(on: display))
+    }
+
+    @Test("⌃⌥M is the seeded Maximize, generation 7")
+    func seedsMaximize() {
+        let row = DefaultKeybindings.maximizeRow()
+        #expect(row.combo == "control+option+m")
+        #expect(row.lua == "KiwiDesk.toggle_maximized()")
+        #expect(DefaultKeybindings.rows(ofGeneration: 7) == [row])
     }
 
     @Test("A rekey carries the maximized window")

@@ -53,6 +53,9 @@ extension ShortcutsReferenceBuilder {
             return StickyStyle.displaySymbolName
         case "KiwiDesk.reset_layout_sizing()":
             return "arrow.counterclockwise"
+        // Owner ruling on #2448.
+        case "KiwiDesk.toggle_maximized()":
+            return "arrow.up.left.and.arrow.down.right"
         default:
             break
         }
