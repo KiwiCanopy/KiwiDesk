@@ -448,18 +448,9 @@ for F18 keeps hearing the key. CLI only — Lua cannot call it.
 :::
 
 :::unreleased
-`get_config_status` returns `{issues, sync}`. Each issue carries
-its `source` file, a `kind` (`profile_broken` with its `cause`,
-`lua_vm_unavailable`, `lua_error` with its `message`,
-`gui_config_unreadable`, `newer_format` (its `source` is the
-file a newer KiwiDesk wrote),
-`unknown_call` and `retired_call` with their `name`,
-`missing_font_family` with its `name`) and, where one applies, the
-`profile`. `sync` carries the followed `folder` (`null` when none)
-and a `status`: `off`, `up_to_date`, `folder_unavailable`,
-`changed_on_both`, `conflict_copy` with its `path`, or
-`newer_on_another_mac` / `newer_here` with the `file` a newer
-KiwiDesk wrote.
+`get_config_status` returns the Config Issues and the sync
+folder's status
+([`get_config_status`](lua-reference.md#get_config_status)).
 :::
 
 `look.list`, `look.current`, `look.apply <name>`, `look.save
@@ -503,6 +494,7 @@ every lens with why it cannot turn on.
 | Category | Command | Arguments |
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |
+| | `focus_window` | window id |
 | | `swap` | `left\|right\|up\|down` |
 | | `focus_space` | space id |
 | | `focus_space_previous` / `focus_space_next` | — (the focused screen's order; stops at the ends) |
@@ -562,6 +554,7 @@ every lens with why it cannot turn on.
 | | `bind_profile_to_desktop` | Desktop number, profile, screen fingerprints… (optional; scopes the binding to that setup) (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
+| | `list_windows` | [space] |
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000) |
 | | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration |
@@ -763,7 +756,7 @@ resized, whatever layout the window's space uses.
 A focused window in native full screen is refused ahead of every layout,
 whatever its float state, with `the focused window is
 fullscreen` (#1298): nothing is written and no neighbour moves;
-the pill and sound rule below apply to it as to the monocle/grid
+the pill and sound rule below apply to it as to the monocle
 reply.
 For tiled windows: in BSP, `x` moves the side-by-side split
 ratio and `y` the stacked one, independently, each in the
@@ -779,18 +772,18 @@ reachable per-window shares (accepted — see
 slot along its own scroll axis for either `x` or `y`. In a track
 space the axis across the tracks resizes the focused window's
 track, the axis along them its share within the track (#128;
-session-scoped weights too). Monocle and grid reply "not
-supported" — that failure flashes a pill on the focused window
+session-scoped weights too). Monocle replies "not supported" —
+that failure flashes a pill on the focused window
 whatever issued it, and adds the system alert sound when
 `set_refusal_sound` is on (default off) and a hotkey was what
 fired: a CLI or IPC caller reads the error reply and never hears
 one.
 
 :::unreleased
-Grid now resizes too (#763): `x` moves the edge the focused cell
-shares with the next column (the previous one for the last
-column) and `y` the same for rows, writing session-scoped
-column and row weights; only monocle replies "not supported".
+In grid (#763), `x` moves the edge the focused cell shares with
+the next column (the previous one for the last column) and `y`
+the same for rows, writing session-scoped column and row
+weights.
 :::
 
 ### Deleting a Space

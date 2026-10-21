@@ -110,17 +110,6 @@ class — see
 | Two connected screens of the **same model at the same resolution** are one identity to KiwiDesk: a space pinned to one may open on the other, both draw the same chips in Settings ▸ Screens, and only one of them can carry the "main" badge. | A screen is recognised by `name:WxH` because the identity has to be stable across sessions and macOS's `CGDirectDisplayID` is reassigned across reconnects and reboots, EDID serial numbers are unreliable in exactly the population that needs them (zeros for virtual, AirPlay and projector screens, missing on real panels), and every stored pin is keyed by that string, so changing the identity is a config-shape change. | `Display.fingerprint` (`Sources/KiwiDeskCore/Models/DisplayModel.swift`) is `name:WxH`; the Screens picture, the pin map and the main badge all key off it, and `ScreensFamilyRows.hasAmbiguousDisplays` is what detects the collision. | The picture **says so** rather than letting it read as a bug — a note appears under the arrangement whenever two connected screens share a fingerprint. Real fix planned in [#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734): a screen identity that survives reconnects without colliding. Changing it re-keys every stored pin, so the change owes a one-shot `ConfigMigration` step (AGENTS.md §5), and the changelog says so. The open question is which field is both stable and distinct, which needs a device test with two identical panels. |
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
-
-:::unreleased
-**Grid** ([#763](https://github.com/KiwiCanopy/KiwiDesk/issues/763)):
-a grid column or row is drawn at least as long as Grid's
-`min_window_size` and the learned minimum of every window that
-sits in it alone, taking the room from the other tracks by their
-weights. So the split-layout row's "a Grid cell" now means only a
-cell that spans several tracks — the last cell of a short row
-under `fill_empty_cells`, or the overflow pile — and KiwiDesk's
-own Settings window widens its grid column like any other app.
-:::
 A snapshot written in **another login session** is discarded at launch too, so after a logout and login without a restart KiwiDesk starts as it does after a restart of the Mac, rather than replaying window ids the new session may reuse ([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)). That covers the Spaces as well as the windows: the active Space, a Space's layout changed from a shortcut or the CLI without saving, and held and temporary Spaces all come back as after a restart, while your saved profiles and settings are untouched.
 
 The first launch after updating onto this version **other than through KiwiDesk's own updater** — replacing the app by hand, for one — starts fresh once in the same way: the older version's quit wrote an arrangement without the login-session mark, which is discarded by design. An update installed by KiwiDesk's own updater keeps the arrangement.
@@ -161,6 +150,17 @@ On macOS 27 the focus that a menu-bar reveal moves to the previous app comes bac
 The rejection in the row above has a second form. Issued while the Space KiwiDesk shows is **empty** — after `move_to_desktop` and a `focus_desktop` to that Desktop ([Lua reference ▸ move_to_desktop](lua-reference.md#move_to_desktop)) — a focused-window shortcut is rejected, and the refusal names it: `the active Space 2 is empty; the focused window (Finder) is in Space 1 — focus_space 1 first`, which the log carries too ([#1336](https://github.com/KiwiCanopy/KiwiDesk/issues/1336); the ruling is in [design decisions](design-decisions.md#an-empty-active-space-refuses-by-name-1336)). What remains: the verb acts only on the Space you are on, so the window that `get_state` marks focused in another Space is parked, not focused, until `focus_space` brings its Space back.
 
 Dragging a **stack** window's edge along its zone's own axis — a height drag beside a left or right stack, a width drag beside a top or bottom one — moves the dragged window's share of its zone, as the keyboard `resize` does ([#941](https://github.com/KiwiCanopy/KiwiDesk/issues/941); the ruling is in [design decisions](design-decisions.md#layout-and-resize-behavior)). What remains: a master zone lined up *along* the split has no cross-axis share to move, by the row above on masters' shares, so that drag snaps back.
+
+:::unreleased
+**Grid** ([#763](https://github.com/KiwiCanopy/KiwiDesk/issues/763)):
+a grid column or row is drawn at least as long as Grid's
+`min_window_size` and the learned minimum of every window that
+sits in it alone, taking the room from the other tracks by their
+weights. So the split-layout row's "a Grid cell" means only a
+cell that spans several tracks — the last cell of a short row
+under `fill_empty_cells`, or the overflow pile — and KiwiDesk's
+own Settings window widens its grid column like any other app.
+:::
 
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `focus_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `focus_or_spawn` (`open -a`, say) leaves you where you are, and so does a first window that appears more than about ten seconds after the app comes forward. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
 
