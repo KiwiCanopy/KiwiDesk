@@ -139,11 +139,9 @@ file with your settings, every profile and your saved palettes;
 and the remembered window arrangement. For continuous sync see
 [The gui.json File](#the-guijson-file).
 
-:::unreleased
 A backup does not carry which Space each Desktop remembers
 either: that stays on the Mac it was made on ([Spaces and
 Desktops](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-windows)).
-:::
 
 Restoring **replaces**, it does not merge, and what it replaces
 goes to the **Trash**. On the way, the remembered window
@@ -174,7 +172,6 @@ configuration. On a fresh install it is created at first launch
 with the [default shortcuts](#default-shortcuts); on a
 hand-written setup, the first time you Save in Settings.
 
-:::unreleased
 **Keeping several Macs in sync.** Pick a folder under Settings ›
 General › Sync across Macs: iCloud Drive, or any folder Dropbox,
 Syncthing, Nextcloud or a similar app keeps in step. With **Keep
@@ -200,9 +197,7 @@ switch names it. Reset All Settings turns the switch off, so the
 folder keeps the setup the other Macs use; turning it back on, or
 restoring a backup while it is on, asks which setup to keep with
 Compare and Copy.
-:::
 
-:::unreleased
 When an update moves `gui.json`, a profile, your palettes or your
 looks to a newer file format, KiwiDesk first keeps the file as it
 was in `~/Library/Application Support/KiwiDesk/migration-backups/`,
@@ -221,16 +216,13 @@ The socket, the instance lock, the saved window arrangement,
 `machine.json` and `bindings.json` (your Desktop bindings) live in
 `~/Library/Application Support/KiwiDesk/` itself, so a synced
 config folder carries neither file; Reset All Settings clears both.
-:::
 
-:::unreleased
 An older KiwiDesk never writes over `gui.json`, a profile, your
 palettes or your looks once a newer one has saved them. It lists
 the file under menu bar › Config Issues…, and a save that would
 write it is refused until that Mac is updated. Versions before
 3.0.0 do not have this check, so update every Mac sharing a synced
 folder together.
-:::
 
 ```json
 {
@@ -634,13 +626,11 @@ While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,
 ahead of the Spaces ([Shortcut Layers](#shortcut-layers)).
 
-:::unreleased
 Wherever a screen shows no Space Bar at rest, the menu bar icon
 takes its place: the Space each screen is showing — its icon, or its name
 where it has none — with the active layer's icon ahead of them,
 and the KiwiDesk logo, or the layer's icon, back wherever the bar
 shows at rest.
-:::
 
 The bar shows the Desktop you are looking at: a window on a macOS
 Desktop you are not looking at is not listed, and *Hide empty
@@ -946,11 +936,9 @@ listed under Shortcuts & Gestures ▸ Size & float.
 Desktop gets its key the first time KiwiDesk sees it, so a key you
 delete stays deleted.
 
-:::unreleased
 With **Shortcuts use** set to `✦`, these defaults sit on Hyper:
 `✦` takes the place of `⌃⌥`, and Go to Desktop takes `✦⌥` + digit.
 New spaces, new Desktops and later defaults land there too.
-:::
 
 Each space digit is bound *by name* and follows a rename;
 spaces past the tenth ship without a digit. The set is seeded
