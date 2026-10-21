@@ -28,6 +28,7 @@ enum SettingsDetailPanelOffer {
 struct SettingsDetailPanel: View {
     @ObservedObject var model: SettingsModel
     let destination: SettingsDestination
+    @State private var viewportBottom: CGFloat?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -38,8 +39,14 @@ struct SettingsDetailPanel: View {
                     diffList
                 }
                 .padding(.bottom, 18)
+                .environment(\.panelViewportBottom, viewportBottom)
             }
             .scrollIndicators(.hidden)
+            .onGeometryChange(for: CGFloat.self) {
+                $0.frame(in: .global).maxY
+            } action: {
+                viewportBottom = $0
+            }
             // VoiceOver lands on the scroll view as a bare
             // "scroll area" before interacting into it (owner,
             // #812 session 2); the header sentence names what the
@@ -258,5 +265,19 @@ enum SettingsDiffRowSource {
             }
             return SettingsDestination(area: area) == destination
         }
+    }
+}
+
+private struct PanelViewportBottomKey: EnvironmentKey {
+    static let defaultValue: CGFloat? = nil
+}
+
+extension EnvironmentValues {
+    /// The global bottom edge of the panel's visible scroll area,
+    /// so a preview's overlay knows how far it may draw (#2532);
+    /// nil outside the panel.
+    var panelViewportBottom: CGFloat? {
+        get { self[PanelViewportBottomKey.self] }
+        set { self[PanelViewportBottomKey.self] = newValue }
     }
 }

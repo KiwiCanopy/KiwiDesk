@@ -18630,8 +18630,14 @@ version appears.
   question at two grains. A popover was refused: anchored to a
   19pt cap it covers the neighbouring caps, which are exactly
   what a reader asking "if I hold ⌃⌥, what is left?" is looking
-  at. Reserved height comes from the sets the legend already
-  gates on, so a user with no conflicts pays for no dead air.
+  at. The reading draws OVER the tally and the lines under it
+  rather than in reserved height (#2532): a reservation sized
+  for the deepest key left a gap under the tally at rest — a
+  seeded digit alone carries three claims under All — and a slot
+  that grew on hover moved the panel. The legend is covered only
+  while a key is hovered, when the reading is what answers. The
+  caption leads with a hover hint, drawn and not spoken, since
+  the board's own description already reads every key.
 
   **The keyboard obligation is discharged by the ROW LIST, not
   by a twin affordance**, and that is the ruling worth keeping.

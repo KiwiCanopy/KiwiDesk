@@ -8,40 +8,95 @@ import SwiftUI
 /// and a separate view would take all four as parameters that
 /// could drift from the caps.
 extension KeyboardPreviewPanel {
-    /// One slot, two readings: the tally at rest, the hovered
-    /// key's actions under the pointer (#798). Bimodal rather
-    /// than a fifth line — the panel already stacks four under
-    /// the board, and a strip that appears on hover shoves them
-    /// all down under the user's own pointer.
-    ///
-    /// It ANNOUNCES the tally either way: the hover reading is
-    /// pointer state, and a board that already describes itself
-    /// must not be read a second time beside it.
+    /// The tally line under the board (#798). It ANNOUNCES the
+    /// tally even while a hover reading covers it: the reading
+    /// is pointer state, and a board that already describes
+    /// itself must not be read a second time beside it.
     var statusSlot: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            ForEach(Array(slotLines.enumerated()), id: \.offset) {
-                _,
-                line in
-                Text(line)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 0)
-        }
-        .frame(
-            maxWidth: .infinity,
-            minHeight: slotHeight,
-            alignment: .topLeading
-        )
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(tallyText)
+        Text(tallyText)
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(tallyText)
     }
 
-    var slotLines: [String] {
-        guard let hovered else { return [tallyText] }
-        return liveReading(hovered).lines
+    /// The hovered key's actions, drawn OVER the tally and the
+    /// lines below it rather than in reserved height (#2532): a
+    /// reservation for the deepest key left a gap under the tally
+    /// at rest, and growing the slot would move the panel under
+    /// the pointer. It may draw down to the panel's visible bottom,
+    /// ending on a "more" line where a key holds more than fit, and
+    /// a capped reading fills that height so nothing peeks under
+    /// it. Pointer-only and silent, as the tally speaks.
+    @ViewBuilder var hoverReading: some View {
+        if let hovered {
+            let lines = liveReading(hovered).lines
+            GeometryReader { geometry in
+                let top = geometry.frame(in: .global).minY
+                let height =
+                    viewportBottom.map { $0 - top }
+                    ?? geometry.size.height
+                let shown = shownLines(
+                    lines,
+                    width: geometry.size.width,
+                    height: height
+                )
+                VStack(alignment: .leading, spacing: Self.lineGap) {
+                    ForEach(
+                        Array(lines.prefix(shown).enumerated()),
+                        id: \.offset
+                    ) { _, line in
+                        readingLine(line)
+                    }
+                    if shown < lines.count {
+                        readingLine(moreText(lines.count - shown))
+                    }
+                }
+                .padding(.bottom, Self.readingPad)
+                .frame(
+                    maxWidth: .infinity,
+                    minHeight: shown < lines.count ? height : nil,
+                    alignment: .topLeading
+                )
+                .background(SettingsTheme.panel)
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
     }
+
+    private func readingLine(_ line: String) -> some View {
+        Text(line)
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink2)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func moreText(_ count: Int) -> String {
+        L("keyboard.hover.more", "More in the shortcut list: %1$d", count)
+    }
+
+    private func shownLines(
+        _ lines: [String],
+        width: CGFloat,
+        height: CGFloat
+    ) -> Int {
+        KeyboardHoverFit.shown(
+            heights: lines.map {
+                KeyboardHoverFit.height(of: $0, width: width)
+            },
+            more: KeyboardHoverFit.height(
+                of: moreText(lines.count),
+                width: width
+            ),
+            spacing: Self.lineGap,
+            available: height - Self.readingPad
+        )
+    }
+
+    private static let lineGap: CGFloat = 2
+    private static let readingPad: CGFloat = 8
 
     /// Every ringed key read aloud, through the SAME builder the
     /// pointer uses and over the ONE ringed set the caps are
@@ -76,31 +131,6 @@ extension KeyboardPreviewPanel {
             .joined()
             .compactMap(\.code)
         )
-    }
-
-    /// Reserved from what the slot can ACTUALLY be asked to
-    /// draw, never a constant: under `.all` a seeded install
-    /// already puts three claims on a digit (`⌃⌥1` go-to-Space,
-    /// `⌃⌥⇧1` move-to-Space, `⌃⌥⌘1` follow), so a fixed
-    /// two-line reservation nudges the panel on the COMMON case.
-    ///
-    /// Measured from the READINGS rather than from a claim
-    /// count: a ringed key draws a cost sentence under each
-    /// claim, so two bindings on one chord is four lines, not
-    /// two — counting claims understated exactly the case the
-    /// feature exists for (code review, #798).
-    ///
-    /// A floor, not a cap: a longer reading grows the slot
-    /// rather than truncating, because a half-said conflict is
-    /// worse than a nudge.
-    var slotHeight: CGFloat {
-        CGFloat(max(deepestReading, 1)) * Self.slotLine
-    }
-
-    /// Lines the deepest key on the board would draw.
-    var deepestReading: Int {
-        let read = reader
-        return claims.keys.map { read($0).lines.count }.max() ?? 1
     }
 
     /// ONE live preference read and one config capture per panel
@@ -141,7 +171,4 @@ extension KeyboardPreviewPanel {
         let taken = KeyboardCensus.takenKeyCount(claims: claims)
         return L("keyboard.tally", "Keys taken: %1$d", taken)
     }
-
-    /// One caption line at the panel's own metrics.
-    static let slotLine: CGFloat = 15
 }

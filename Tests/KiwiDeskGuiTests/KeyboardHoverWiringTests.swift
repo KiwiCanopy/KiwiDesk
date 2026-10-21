@@ -133,6 +133,52 @@ struct KeyboardHoverWiringTests {
         )
     }
 
+    /// The reading draws OVER the lines under the board, so the
+    /// tally sits on the legend at rest and nothing moves on a
+    /// hover (#2532). A reservation sized for the deepest key is
+    /// the gap this replaced; growing in place moves the panel.
+    @Test("the hover reading overlays, it reserves no height")
+    func readingOverlays() throws {
+        let panel = try Self.panelSource()
+        #expect(!panel.isEmpty)
+        #expect(
+            panel.contains(".overlay(alignment:.topLeading){hoverReading}")
+        )
+        #expect(panel.occurrences(of: "hoverReading") == 2)
+        // The tally line holds no reservation of its own.
+        #expect(
+            panel.contains(
+                "Text(tallyText).font(.caption)"
+                    + ".foregroundStyle(SettingsTheme.ink2)"
+                    + ".frame(maxWidth:.infinity,alignment:.leading)"
+            )
+        )
+        // The reading is cut to what fits, measured to the
+        // panel's visible bottom where the panel says it.
+        #expect(panel.contains("KeyboardHoverFit.shown("))
+        #expect(panel.contains("viewportBottom.map{$0-top}"))
+        let detail = try Self.settingsSource("SettingsDetailPanel.swift")
+        #expect(
+            detail.contains(
+                ".environment(\\.panelViewportBottom,viewportBottom)"
+            )
+        )
+    }
+
+    private static func settingsSource(_ file: String) throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/\(file)"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+    }
+
     /// A cap rebuilt under the pointer never delivers
     /// `onHover(false)` — the `NSCursor` push/pop class — and
     /// both of these rebuild the board.

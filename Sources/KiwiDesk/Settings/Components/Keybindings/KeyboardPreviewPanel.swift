@@ -16,6 +16,8 @@ struct KeyboardPreviewPanel: View {
     /// pointer never delivers `onHover(false)`, the class of the
     /// `NSCursor` push/pop trap.
     @State var hovered: UInt32?
+    /// How far down the hover reading may draw (#2532).
+    @Environment(\.panelViewportBottom) var viewportBottom
 
     /// The drawn layer — the one array every derivation below
     /// folds over (#1127).
@@ -86,19 +88,23 @@ struct KeyboardPreviewPanel: View {
                 conflictDetail: conflictDetail,
                 hyperKey: model.appWide.hyperKey
             )
-            statusSlot
-            fillLegend.accessibilityHidden(true)
-            layoutRow
-            // Announced without the layer: the board's one
-            // description already named it (#1127). Adjacent to
-            // the `Text` on purpose — the guard's needle runs
-            // through both, and a modifier that wanders onto a
-            // sibling view restores the double announcement
-            // while a whole-file scan stays green.
-            Text(caption)
-                .accessibilityLabel(draftCaption)
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink3)
+            VStack(alignment: .leading, spacing: 12) {
+                statusSlot
+                fillLegend.accessibilityHidden(true)
+                layoutRow
+                // Announced without the layer: the board's one
+                // description already named it (#1127). Adjacent
+                // to the `Text` on purpose — the guard's needle
+                // runs through both, and a modifier that wanders
+                // onto a sibling view restores the double
+                // announcement while a whole-file scan stays
+                // green.
+                Text(drawnCaption)
+                    .accessibilityLabel(draftCaption)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+            }
+            .overlay(alignment: .topLeading) { hoverReading }
         }
     }
 
@@ -112,6 +118,21 @@ struct KeyboardPreviewPanel: View {
             "Shows the \u{201C}%1$@\u{201D} layer in your "
                 + "draft, not the saved profile.",
             layerLabel
+        )
+    }
+
+    /// The caption as drawn: the hover hint leads it (#2532).
+    /// Drawn and never spoken — VoiceOver cannot hover, and the
+    /// board's own description already reads every key.
+    var drawnCaption: String {
+        L(
+            "panel.caption.with_hover_hint",
+            "%1$@ %2$@",
+            L(
+                "panel.caption.hover_hint",
+                "Hover over a key to see its shortcuts."
+            ),
+            caption
         )
     }
 
