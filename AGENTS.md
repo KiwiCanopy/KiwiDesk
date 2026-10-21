@@ -1305,7 +1305,9 @@ Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`.
 - Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per screen
 - hover focus is armed by user pointer motion alone, so KiwiDesk moves the
   pointer with a bare warp and never synthesizes a mouse event (#1869,
-  `HoverFocusWiringTests`)
+  `HoverFocusWiringTests`), and the Settings window's mouse-moved flag is
+  written by `SettingsWindow`'s derivation alone, off while a popover hangs
+  from it (#2501, `SettingsWindowMouseMovesTests`)
 - the running hotkey table is written only from saved files — no Settings
   control registers a chord ahead of Save, and a new writer joins
   `ShortcutsApplyOnSaveTests`' census
