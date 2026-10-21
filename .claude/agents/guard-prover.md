@@ -88,8 +88,9 @@ holding **one** slot for the whole batch.
 
 Write the driver in a private subdirectory of the scratchpad
 (`<scratchpad>/prove-<topic>/driver.py`): other agents share the
-scratchpad, and a common name has been overwritten mid-run. The
-driver:
+scratchpad, and a common name has been overwritten mid-run. Write
+it with the Write tool: the isolation hook refuses a Bash heredoc
+whose body names `git` (observed 2026-10-21). The driver:
 
 1. **Checks every anchor first.** Each row's old text occurs
    exactly once in its file, or the driver exits before it touches
