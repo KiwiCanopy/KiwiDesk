@@ -269,7 +269,9 @@ bite large test PRs:
   called on, so a test asserting the key absent beforehand
   passed locally and red on CI (2026-08-03). Neither a `--filter` run nor a `guard-prover`
   mutation can reach this class: both observe the test on its
-  own, which is the state it passes in.
+  own, which is the state it passes in. CI's full run on the PR
+  is the full run this needs — a PR-gated change leaves it there
+  (the `verify-gate` skill owns when a local one is owed).
 - **A test asserting localized output pins the locale first.**
   `L()` routes through `LocalizationManager.shared`, whose
   "System default" resolves the *host's* preferred languages, so
@@ -846,7 +848,8 @@ that wants the coverage captures instead. Do not read a
 `keybinding conflict` or `unclean shutdown detected` line seen
 during a run as the app misbehaving.
 
-Run the full suite as one command (~2 min):
+When the `verify-gate` skill calls for the full suite, run it as
+one command:
 
 ```bash
 swift test
