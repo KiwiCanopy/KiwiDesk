@@ -80,7 +80,10 @@ struct AppBarFloatOverlayTests {
         let side = mark.frame.height
         #expect(
             mark.image?.symbolConfiguration
-                == FloatBreakMark.configuration(side: side, weight: .bold)
+                == NSImage.SymbolConfiguration(
+                    pointSize: side,
+                    weight: .bold
+                ).applying(.preferringMonochrome())
         )
         shelf.fontWeight = 400
         overlay.show(
@@ -91,7 +94,10 @@ struct AppBarFloatOverlayTests {
         )
         #expect(
             mark.image?.symbolConfiguration
-                == FloatBreakMark.configuration(side: side, weight: .regular)
+                == NSImage.SymbolConfiguration(
+                    pointSize: side,
+                    weight: .regular
+                ).applying(.preferringMonochrome())
         )
     }
 
