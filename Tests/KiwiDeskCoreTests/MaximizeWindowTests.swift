@@ -90,7 +90,7 @@ struct MaximizeWindowTests {
         core.execute("toggle_maximized")
         core.state.windows.setFloating(w3, true)
         core.state.workspaces.focus(w3, in: space)
-        core.settleMaximizeAfterFocus()
+        core.state.retireEndedMaximize()
         #expect(maximized(core) == w1)
     }
 
@@ -118,6 +118,7 @@ struct MaximizeWindowTests {
         core.execute("toggle_maximized")
         core.execute("swap", args: [.string("right")])
         #expect(maximized(core) == nil)
+        #expect(issued(core)[w1] == slots(core)[w1])
     }
 
     @Test("Dragging the window ends it")

@@ -824,6 +824,10 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   arms `placeholderSpace`, and the next load retires it unless a SOURCE
   declares or names it, never judged by `referenced` (#1526,
   `PlaceholderSpaceTests`)
+- whether a window is maximized is read through the one
+  `maximizedWindow(of:)`, the fill laid over the issued frames alone, and a
+  write that rearranges a Space ends its maximize at the write (#2448,
+  `MaximizedReaderCensusTests`, `MaximizeWindowEndTests`)
 - a new stored property of `Space`, `ManagedWindow` or their session value
   types, or a new id-keyed store on `StateCoordinator`, `TilingEngine` or
   `KiwiCore`, answers which capture carries it — every snapshot, every stop, or

@@ -143,8 +143,10 @@ struct BatchSizingRoutingTests {
 
         // The `resize` verb: every layout path under it writes a
         // ratio or a per-window weight, nothing else.
+        // Two since #2448: a refused resize that ended a maximize
+        // still draws its return, one window shrinking in place.
         "KiwiDeskCore/Commands/KiwiCore+Resize.swift":
-            Site(names: 2, promises: 1),
+            Site(names: 4, promises: 2),
         // A float resizes ITSELF — no tiled window moves at all.
         "KiwiDeskCore/Commands/KiwiCore+ResizeFloating.swift":
             Site(names: 2, promises: 1),
@@ -191,10 +193,12 @@ struct BatchSizingRoutingTests {
         "KiwiDeskCore/Commands/KiwiCore+ResetLayoutSizing.swift":
             Site(names: 1, promises: 1),
         // Maximize (#2448): one already-placed window grows to its
-        // screen or shrinks back to its slot, on the toggle and on
-        // a focus that ends it; no slot or membership moves.
+        // screen or shrinks back to its slot — the toggle, a focus
+        // or a drag that ends it — and no slot or membership moves.
+        // A focus pass places no newcomer: its creation's own pass
+        // did.
         "KiwiDeskCore/App/KiwiCore+Maximize.swift":
-            Site(names: 4, promises: 2),
+            Site(names: 2, promises: 1),
     ]
 
     /// Any spelling of the type — the argument label, the stored

@@ -6,20 +6,30 @@ import Foundation
 /// leaves the tiled set or focus lands on another tiled member.
 extension StateCoordinator {
     /// The window `space` shows filling its screen, or nil: the
-    /// stored `Space.maximized` while that window is a tiled
-    /// member of a tiled layout and the Space's focus is on it,
-    /// or on a window outside the tiled set (a float).
+    /// stored `Space.maximized` while that window is a tiled,
+    /// non-sticky member of a tiled layout and the Space's focus
+    /// anchor — a tiled traveler included — is on it, or on a
+    /// window the layout draws no slot for (a float).
     public func maximizedWindow(of space: Space) -> WindowID? {
-        guard let id = space.maximized, space.mode != .floating
+        guard let id = space.maximized, space.mode != .floating,
+            windows[id]?.isSticky == false,
+            localTiledMembers(of: space).contains(id)
         else { return nil }
-        let tiled = localTiledMembers(of: space)
-        guard tiled.contains(id) else { return nil }
-        if let focus = space.focused, focus != id,
-            tiled.contains(focus)
+        let tiled = effectiveTiledMembers(of: space)
+        if let anchor = focusAnchor(of: space, tiled: tiled),
+            anchor != id, tiled.contains(anchor)
         {
             return nil
         }
         return id
+    }
+
+    /// Ends every Space's maximize: an arrangement switch moves
+    /// what the slots hold (#2448).
+    mutating func endEveryMaximize() {
+        for space in workspaces.allSpaces where space.maximized != nil {
+            workspaces.withSpace(space.id) { $0.maximized = nil }
+        }
     }
 
     /// Clears every stored maximize the verdict no longer honours,

@@ -114,6 +114,8 @@ extension KiwiCore {
         frame: CGRect
     ) {
         tiler.dragExemptWindow = nil
+        let endedMaximize = tiler.maximizeEndedByDrag == id
+        tiler.maximizeEndedByDrag = nil
         // Whether this gesture live-crossed displays (#504);
         // ends the crossing bookkeeping either way. A crossed
         // gesture is a MOVE for the resize gate below.
@@ -145,6 +147,13 @@ extension KiwiCore {
             return
         case .placeInSprung, .none:
             break
+        }
+        // A gesture that started maximized measured from the
+        // screen-filling frame, never a slot: the drop puts the
+        // window back in its slot rather than reading it (#2448).
+        if endedMaximize {
+            retileEndingMaximize()
+            return
         }
         // A floating window is excluded from the layout swap/resize
         // logic below, but a drop that leaves it under a top app bar

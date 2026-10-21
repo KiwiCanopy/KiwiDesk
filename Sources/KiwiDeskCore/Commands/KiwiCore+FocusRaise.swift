@@ -113,8 +113,10 @@ extension KiwiCore {
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
-            settleMaximizeAfterFocus()  // #2448
         }
+        // A focus onto another tiled window ends a maximize; this
+        // command's own pass draws the return (#2448).
+        let endedMaximize = !state.retireEndedMaximize().isEmpty
         if let previous = previousFocused, previous != id,
             let frame = state.windows[previous]?.frame
         {
@@ -170,9 +172,14 @@ extension KiwiCore {
             // subset of `isFocusDriven` — but if that drifts,
             // never lose the raise.
             if defersRaise { raiseWindow(id) }
+            if endedMaximize, refocusRetile { retileEndingMaximize() }
             return
         }
-        retileWithScrollDuration()
+        if endedMaximize {
+            retileEndingMaximize()
+        } else {
+            retileWithScrollDuration()
+        }
         // Monocle overlaps every window at one full-screen frame and
         // has no other z-order backstop (stack/scrolling/track arm
         // their own on their nav paths), so a focus change must

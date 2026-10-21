@@ -77,6 +77,13 @@ extension KiwiCore {
         guard pendingZOrderRestore else { return }
         pendingZOrderRestore = false
         guard let space = activeSpace else { return }
+        // Nothing under a maximized window shows: it alone is kept
+        // above the tiled plane, never a neighbour lifted over it
+        // (#2448).
+        if let maximized = state.maximizedWindow(of: space) {
+            restoreMaximizedZOrder(maximized, in: space)
+            return
+        }
         switch space.mode {
         case .stack:
             restoreStackZOrder(space)
@@ -89,6 +96,23 @@ extension KiwiCore {
         default:
             break
         }
+    }
+
+    /// The maximized window raised above the Space's tiled plane,
+    /// focus handed back to the anchor — a float holding it keeps
+    /// it (#2448). The floor is what the raise must clear, as in
+    /// Monocle's restore below.
+    private func restoreMaximizedZOrder(
+        _ maximized: WindowID,
+        in space: Space
+    ) {
+        let tiled = state.effectiveTiledMembers(of: space)
+        raiseSequentially(
+            [maximized],
+            thenFocus: state.focusAnchor(of: space, tiled: tiled)
+                ?? maximized,
+            above: Self.raiseFloor(tiled: tiled, excluding: maximized)
+        )
     }
 
     /// Monocle stacks every window at the same full-screen frame,

@@ -142,6 +142,18 @@ extension KiwiCore {
                 delta: delta
             )
         }
+        // A tiled resize moves slots a maximized window hides, so
+        // it ends the maximize first — the writers measure the
+        // drawn slot — and a refusal still draws the return
+        // (#2448).
+        let endedMaximize = space.maximized != nil
+        state.workspaces.withSpace(space.id) { $0.maximized = nil }
+        var resized = false
+        defer {
+            if endedMaximize, !resized {
+                retile(sizing: .allSpringSized)
+            }
+        }
         // Span resolves on the space's OWN display (#449) —
         // main-screen math resized against the wrong bounds on
         // a secondary monitor — and on the LAYOUT REGION of it,
@@ -201,6 +213,7 @@ extension KiwiCore {
             )
         }
         guard response.isSuccess else { return response }
+        resized = true
         // Deliberately un-forced (unlike the `set_*` config
         // applies, AGENTS.md §5): the nudged value persists in
         // settings/state and re-applies on the next layout, so

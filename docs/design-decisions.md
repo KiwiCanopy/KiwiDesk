@@ -5503,8 +5503,13 @@ the state is the window's, as macOS full screen, AeroSpace's
 `fullscreen` and Rectangle's restore all keep theirs. A verb
 that rearranges the Space ends it first and then acts, rather
 than refusing: a swap or resize of a slot nobody can see would
-be a lie, and a refusal a dead key. It survives KiwiDesk's own
-in-place restart and not a Quit. Its motion is the engine's
+be a lie, and a refusal a dead key. The end is made at the write,
+so a verb that refuses ends nothing, and a drag puts the window
+back without a drop, since its gesture began at a frame that is
+no slot. A Desktop switch is no close (#1207): the departure
+carries the maximize and the return pays it. A sticky window is
+refused, since it draws on other Spaces' layouts too. It
+survives KiwiDesk's own in-place restart and not a Quit. Its motion is the engine's
 ordinary frame animation, governed by `animations.on_window_resize`
 with no setting of its own. Named "Maximize": "Zoom" and "Fill"
 already mean other things in KiwiDesk's catalogs, and "Full

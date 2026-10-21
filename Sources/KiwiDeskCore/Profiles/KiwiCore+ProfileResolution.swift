@@ -38,6 +38,7 @@ extension KiwiCore {
         // Read before anything moves what is live or declared (#1790).
         let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
+        if switching { state.endEveryMaximize() }  // #2448
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
         let outgoingIcons = tiler.settings.spaceIcons
@@ -189,6 +190,7 @@ extension KiwiCore {
         // profile — file the outgoing one, restore its own.
         let standard = HeldOrigin.Arrangement.standard(composed.sourceName)
         let switching = recordOutgoingPartitioning(before: standard)
+        if switching { state.endEveryMaximize() }  // #2448
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)

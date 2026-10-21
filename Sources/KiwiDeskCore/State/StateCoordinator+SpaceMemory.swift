@@ -32,6 +32,10 @@ extension StateCoordinator {
         /// take-back and by the promotion, both of which refuse a
         /// holder that dropped the break meanwhile.
         var handedTo: WindowID?
+        /// Whether the window left its Space maximized (#2448): a
+        /// Desktop departure is no close, so the return fills its
+        /// screen again. A close's return drops the record.
+        var maximized = false
 
         init(
             rank: Int,
@@ -92,6 +96,8 @@ extension StateCoordinator {
         // the record names the holder ahead of it.
         departedSlots[id]?.handedTo =
             workspaces[space]?.handOffTarget(of: id)
+        departedSlots[id]?.maximized =
+            workspaces[space]?.maximized == id
     }
 
     /// Re-files a departure the destroy fold just recorded under

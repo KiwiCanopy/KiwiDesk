@@ -65,6 +65,11 @@ public final class TilingEngine {
     /// un-exempt: pinned for the duration of the gesture.
     public var dragExemptWindow: WindowID?
 
+    /// The window whose maximize a drag ended (#2448): its gesture
+    /// started at the screen-filling frame, which is no slot, so the
+    /// drop puts it back rather than reading that frame.
+    public var maximizeEndedByDrag: WindowID?
+
     /// App-enforced size bounds, learned from the engine's own
     /// asks (#677) — see `SizeBoundLearner` for the confirm
     /// ladder and `TilingEngine+SizeBounds` for how `retile`

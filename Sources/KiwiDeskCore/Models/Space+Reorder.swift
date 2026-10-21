@@ -13,9 +13,11 @@ extension Space {
     /// place on screen (#966). The census of callers is this
     /// file, `swap` and `replace` (#2509);
     /// `ScrollSlotReleaseSeamTests` holds that
-    /// no order write lives outside the model.
+    /// no order write lives outside the model. A reorder also ends
+    /// the maximize, whose slot it moves out of sight (#2448).
     public mutating func releaseScrollSlot() {
         scrollRest?.slot = nil
+        maximized = nil
     }
 
     /// Moves window to clamped target index. A reorder, so it

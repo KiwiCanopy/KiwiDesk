@@ -4,17 +4,10 @@ import Foundation
 /// screen until pressed again, until focus lands on another tiled
 /// window of its Space, or until it leaves the tiled set. The
 /// verdict is `StateCoordinator.maximizedWindow(of:)`; the frame
-/// is `TilingEngine.fillingMaximized`.
+/// is `TilingEngine.fillingMaximized`. A write that rearranges a
+/// Space ends its maximize at the write (`Space.releaseScrollSlot`,
+/// `resetSizing`, the mode write, `resize`, a profile switch).
 extension KiwiCore {
-    /// The verbs that change a Space's arrangement: each ends the
-    /// active Space's maximize before it acts, so it never moves a
-    /// slot nobody can see.
-    static let maximizeEndingVerbs: Set<String> = [
-        "swap", "swap_here", "resize", "move_to_track", "track.swap",
-        "stack.promote", "stack.demote", "set_mode", "cycle_mode",
-        "reset_layout_sizing",
-    ]
-
     func toggleMaximized() -> CommandResponse {
         guard let id = focusedWindowID,
             let spaceID = state.workspaces.space(of: id),
@@ -23,7 +16,11 @@ extension KiwiCore {
         if state.maximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) { $0.maximized = nil }
         } else {
+            // A sticky window draws on other Spaces' layouts too,
+            // so only a plain tiled member of its own Space fills.
             guard space.mode != .floating,
+                spaceID == state.workspaces.activeSpace,
+                state.windows[id]?.isSticky == false,
                 state.localTiledMembers(of: space).contains(id)
             else {
                 cueMaximizeRefused(id)
@@ -31,15 +28,40 @@ extension KiwiCore {
             }
             state.workspaces.withSpace(spaceID) { $0.maximized = id }
         }
-        // One window grows or shrinks in place; no slot moves.
-        retile(sizing: .allSpringSized)
+        retileEndingMaximize()
         if state.workspaces[spaceID]?.maximized == id {
             raiseWindow(id)
+            raiseFloatsAbove(afterFocusing: id)
         }
         return .ok()
     }
 
-    /// A float press's refusal: the pill is its only cue, so
+    /// The pass that grows a window to its screen or puts it back:
+    /// one already-placed window changes size in place, no slot or
+    /// membership moving, so it promises spring sizing (#593), on
+    /// the resize animation's own switch.
+    func retileEndingMaximize() {
+        retile(
+            animated: tiler.settings.animations.onWindowResize,
+            sizing: .allSpringSized
+        )
+    }
+
+    /// Ends the maximize `window` holds, if any, ahead of a drag
+    /// of it; the drop's pass places it. Bars and rings return now.
+    @discardableResult
+    func endMaximize(of window: WindowID) -> Bool {
+        guard let spaceID = state.workspaces.space(of: window),
+            state.workspaces[spaceID]?.maximized == window
+        else { return false }
+        state.workspaces.withSpace(spaceID) { $0.maximized = nil }
+        updateBars()
+        updateBorders()
+        updateStickyMarks()
+        return true
+    }
+
+    /// A refused press's cue: the pill is its only one, so
     /// VoiceOver hears it too (#2480).
     private func cueMaximizeRefused(_ window: WindowID) {
         flashRefusalPill(
@@ -51,33 +73,5 @@ extension KiwiCore {
             symbol: "arrow.up.left.and.arrow.down.right",
             announce: true
         )
-    }
-
-    /// Ends the active Space's maximize ahead of a verb that
-    /// rearranges it (`maximizeEndingVerbs`); the verb's own
-    /// retile places the window back in its slot.
-    func endMaximizeAhead(of command: String) {
-        guard Self.maximizeEndingVerbs.contains(command),
-            let spaceID = state.workspaces.activeSpace,
-            state.workspaces[spaceID]?.maximized != nil
-        else { return }
-        state.workspaces.withSpace(spaceID) { $0.maximized = nil }
-    }
-
-    /// Ends the maximize `window` holds, if any, with no retile of
-    /// its own.
-    func endMaximize(of window: WindowID) {
-        guard let spaceID = state.workspaces.space(of: window),
-            state.workspaces[spaceID]?.maximized == window
-        else { return }
-        state.workspaces.withSpace(spaceID) { $0.maximized = nil }
-    }
-
-    /// Retires every maximize its verdict no longer honours — a
-    /// focus moved onto another tiled member — and retiles the
-    /// window back into its slot. Called after a focus write.
-    func settleMaximizeAfterFocus() {
-        guard !state.retireEndedMaximize().isEmpty else { return }
-        retile(sizing: .allSpringSized)
     }
 }

@@ -17,7 +17,6 @@ extension KiwiCore {
         if let denial = focusedCommandDenial(for: command, args) {
             return denial
         }
-        endMaximizeAhead(of: command)  // #2448
         switch command {
         case "focus":
             return focusRecordingFlight(args)

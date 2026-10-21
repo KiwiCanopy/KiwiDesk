@@ -1776,6 +1776,21 @@ editing here:
   `ResizeRefusalAppBoundTests` builds the fixtures where the two
   terms disagree; the config-floor suites stamp the flag their
   fixtures earn.
+- **Whether a window is maximized is read through the one
+  `StateCoordinator.maximizedWindow(of:)` (#2448)**, never the
+  stored `Space.maximized`, which outlives the focus that ended it
+  until `retireEndedMaximize` runs; a raw spelling outside the
+  register reds `MaximizedReaderCensusTests`, whose `allowed` map
+  is the one copy of who may. Lay the fill over the ISSUED frames
+  alone (`TilingEngine.fillingMaximized` inside
+  `visibleFrames(placed: true)`), never the slots, so every slot
+  reader keeps the row. **A write that rearranges a Space ends its
+  maximize AT the write** — the reorder release, the mode write,
+  `resize`, `reset_layout_sizing`, a profile switch — so a refused
+  verb ends nothing (`MaximizeWindowEndTests` ▸ `refusedSwapKeeps`);
+  a new rearranging write ends it the same way, which is review's.
+  A Desktop departure carries it on the departure record and the
+  return pays it (`MaximizeWindowEndTests` ▸ `desktopReturnKeeps`).
 - **A tracked window's "is it presenting" is asked through the
   one `KiwiCore.presents` door (#1788)**, which rules the float
   gate once — a tiled slot a gapless layout sizes to its screen

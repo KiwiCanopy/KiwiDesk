@@ -264,7 +264,11 @@ public struct Space: Sendable, Equatable {
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
         if maximized == window { maximized = nil }
-        if focused == window {
+        if focused == window, let maximized {
+            // A window closing over a maximized one (a dialog)
+            // hands focus back to it, or the maximize ends (#2448).
+            focused = maximized
+        } else if focused == window {
             // The neighbor that slid into the removed slot — not
             // `windows.last` unconditionally, which yanked focus
             // across the whole scrolling row when a middle window
