@@ -1351,6 +1351,17 @@ two halves of one feature sit apart, which is accepted: a user
 who has just exported is not in danger, and a user reaching for
 the bottom of that drawer should meet the most severe thing last.
 
+`init.lua` is the one file a restore takes only when asked, on
+both ends and off by default (#2517). It is code, and a restore
+runs it at once; a backup is a file that can come from someone
+else, so carrying or running it is a choice the user makes at the
+moment of the act, never a default a stranger's file inherits.
+Asked, it is replaced like everything else and the old one goes to
+the Trash. A restore that replaces it is judged on the incoming
+file: the destination ends up holding the source's setup whole, so
+the "settings over a Lua-owned config" refusal, which exists to
+stop a half-landed restore, has nothing to refuse there.
+
 Trade-off: someone who wants one profile from an old machine has
 to restore everything and delete the rest. Accepted for now —
 per-profile export is a smaller, separate feature, and

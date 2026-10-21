@@ -441,6 +441,18 @@ the chosen key ([`set_hyper_key`](lua-reference.md#set_hyper_key)).
 KiwiDesk then removes it when it quits, and an app still listening
 for F18 keeps hearing the key. CLI only — Lua cannot call it.
 
+:::unreleased
+`export_setup <path>` writes the same backup file as **Export…** in
+Settings, and `restore_setup <path>` does what **Restore…** does:
+the same refusals, the replaced files in the Trash, and the reload
+([Backups](user-guide.md#moving-to-another-mac-backups)).
+`init.lua` is opt-in on both ends: `--include-init-lua` carries it,
+and `--init-lua` replaces this Mac's with the backup's. A relative
+path is resolved against your current directory. CLI only — Lua
+cannot call them — and from `kiwidesk mcp` they go through
+`run_destructive`.
+:::
+
 `get_config_status` returns the Config Issues and the sync
 folder's status
 ([`get_config_status`](lua-reference.md#get_config_status)).
