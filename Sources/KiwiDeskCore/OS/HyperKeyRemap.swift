@@ -33,6 +33,14 @@ enum HyperKeyRemap {
         0x7_0000_0000 | code
     }
 
+    /// The entries that remap a key. An identity entry (a key onto
+    /// itself, which Hyperkey leaves on the built-in keyboard) is
+    /// no one's mapping, so ownership never weighs it; it still
+    /// means that keyboard lacks the wanted entry.
+    static func remapping(_ current: Set<Pair>) -> Set<Pair> {
+        current.filter { $0.source != $0.destination }
+    }
+
     /// `written` is the entry KiwiDesk last wrote and has not
     /// cleared, persisted across a crash (`HyperRemapRecord`).
     static func plan(
@@ -40,11 +48,12 @@ enum HyperKeyRemap {
         written: Pair?,
         want: HyperSourceKey?
     ) -> Plan {
+        let held = remapping(current)
         let ours =
-            current.isEmpty || written.map { current == [$0] } == true
+            held.isEmpty || written.map { held == [$0] } == true
         guard ours else { return .refuse }
         guard let want, want != .f18 else {
-            return current.isEmpty ? .none : .clear
+            return held.isEmpty ? .none : .clear
         }
         let pair = pair(for: want)
         return current == [pair] ? .none : .set(pair)
@@ -64,6 +73,7 @@ enum HyperKeyRemap {
         in current: Set<Pair>,
         want: HyperSourceKey?
     ) -> HyperForeignRemap? {
+        let current = remapping(current)
         guard current.count == 1, let pair = current.first,
             let source = key(atUsage: pair.source),
             let destination = key(atUsage: pair.destination)
@@ -168,7 +178,7 @@ extension HyperKeyRemap {
         let current = pairs(inHidutilOutput: listing)
         // An empty mapping holds nothing of ours: a record beside
         // it would later claim another tool's identical entry.
-        if current.isEmpty { host.writeWritten(nil) }
+        if remapping(current).isEmpty { host.writeWritten(nil) }
         let plan = plan(
             current: current,
             written: host.readWritten(),

@@ -90,6 +90,27 @@ struct HyperKeyTakeOverTests {
         #expect(fake.mapping == [Self.capsToF18])
     }
 
+    @Test("Hyperkey's identity entry is taken over and set")
+    func identityBesideOursIsSet() {
+        let core = runningCore()
+        let fake = FakeHost()
+        let same = HyperKeyRemap.Pair(
+            source: Self.capsToF18.source,
+            destination: Self.capsToF18.source
+        )
+        fake.mapping = [Self.capsToF18, same]
+        core.hyperRemapHost = fake.host
+        _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
+        #expect(core.keys.hyperStatus == .refused(Self.offer))
+        let reply = core.execute(KiwiCore.takeOverHyperRemapCommand)
+        #expect(reply.isSuccess)
+        #expect(core.keys.hyperStatus == .on)
+        #expect(fake.written == Self.capsToF18)
+        // The keyboard holding the identity gets the entry too.
+        #expect(fake.sets == 1)
+        #expect(fake.mapping == [Self.capsToF18])
+    }
+
     @Test("a mapping changed before the click is still refused")
     func changedMappingRefuses() {
         let core = runningCore()

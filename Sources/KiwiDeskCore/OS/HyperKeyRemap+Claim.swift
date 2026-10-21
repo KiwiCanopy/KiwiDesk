@@ -7,7 +7,8 @@ extension HyperKeyRemap {
     /// clears the entry as one KiwiDesk wrote; the shape only ever
     /// decides the offer, never ownership. The mapping is re-read
     /// here, since it may have changed since the offer, and any
-    /// other mapping takes the ordinary `apply`. The verdict is
+    /// other mapping takes the ordinary `apply`, as does a claimed
+    /// one some keyboard does not hold yet. The verdict is
     /// `foreign(in:want:)`'s, the one the offer reads; a record the
     /// host could not keep answers `.failed`, since quit would then
     /// leave the mapping behind.
@@ -26,6 +27,9 @@ extension HyperKeyRemap {
         else { return apply(want, on: host) }
         let ours = pair(for: want)
         host.writeWritten(ours)
-        return host.readWritten() == ours ? .on : .failed
+        guard host.readWritten() == ours else { return .failed }
+        // A keyboard still lacking the entry is set now that the
+        // mapping is ours.
+        return current == [ours] ? .on : apply(want, on: host)
     }
 }
