@@ -35,9 +35,13 @@ extension KiwiCore {
     /// earlier cut swallowed all three writes with `try?` while
     /// the caller discarded the Bool — the user would have been
     /// told nothing at all.
+    ///
+    /// `replacingInitLua` takes the backup's `init.lua` too, where
+    /// it carries one (#2517); off, this Mac's stays.
     @discardableResult
     public func restoreSetup(
         from bundle: SetupBundle,
+        replacingInitLua: Bool = false,
         trash: (URL) throws -> Void
     ) throws(SetupBundleError) -> RestoreOutcome {
         // A restore is this Mac's choice, never the folder's: with
@@ -45,17 +49,27 @@ extension KiwiCore {
         // Copy rather than copying the backup out (#2324).
         try pausingSync { () throws(SetupBundleError) in
             defer { forgetSyncAgreement() }
-            return try replaceSetup(with: bundle, trash: trash, take: nil)
+            let incoming = replacingInitLua ? bundle.initLua : nil
+            return try replaceSetup(
+                with: bundle,
+                trash: trash,
+                fromFolder: false,
+                initLua: incoming.map { .replace(Data($0.utf8)) }
+                    ?? .keep
+            )
         }
     }
 
-    /// `restoreSetup`, or with `take` a sync folder's setup
-    /// (#2324): every travelling artifact and `init.lua` replaced,
-    /// absent ones by nothing, and this Mac's bindings kept.
+    /// `restoreSetup`, or `fromFolder` a sync folder's setup
+    /// (#2324): every travelling artifact replaced, absent ones by
+    /// nothing, and this Mac's bindings kept. `initLua` says what
+    /// becomes of `init.lua`, which a take always replaces and a
+    /// restore only when asked (#2517).
     func replaceSetup(
         with bundle: SetupBundle,
         trash: (URL) throws -> Void,
-        take: SyncTake?
+        fromFolder: Bool,
+        initLua: IncomingInitLua
     ) throws(SetupBundleError) -> RestoreOutcome {
         // **Refuse before touching anything** when this Mac's
         // config is Lua-owned and the backup carries settings.
@@ -68,10 +82,15 @@ extension KiwiCore {
         // DESTINATION, not of the file: the same backup restores
         // cleanly onto a GUI-managed Mac, so it must not be
         // refused at read time.
-        // A take replaces init.lua too, so its ownership is the
-        // folder's, judged by `SyncTake.guiManaged` below.
-        if take == nil, bundle.config != nil, !isGuiManaged {
-            throw .luaOwnsThisMac
+        // A replace of init.lua is judged on the incoming file,
+        // below, since the replace lands that setup whole.
+        if !fromFolder,
+            let refusal = restoreRefusal(
+                of: bundle,
+                replacingInitLua: initLua.replaces
+            )
+        {
+            throw refusal
         }
 
         // **Only discard what this bundle can replace.** A bundle
@@ -102,7 +121,7 @@ extension KiwiCore {
         let replacing = ConfigArtifact.allCases.filter {
             $0.travelsInABackup
                 && (bundle.replaces($0)
-                    || (take != nil && $0 == .guiConfig))
+                    || (fromFolder && $0 == .guiConfig))
         }
         guard
             discardArtifacts(
@@ -115,7 +134,7 @@ extension KiwiCore {
                 name: profiles.directory.lastPathComponent
             )
         }
-        if take != nil {
+        if initLua.replaces {
             do {
                 try discard(configURL, trash)
             } catch {
@@ -137,21 +156,22 @@ extension KiwiCore {
         } else {
             forgetAppWideCaptures()
         }
-        // A take has already discarded init.lua, so a failed write
-        // still copies it and reloads before the failure is thrown:
-        // the core never runs the old setup over new files.
+        // A replace of init.lua has already discarded it, so a
+        // failed write still writes it and reloads before the
+        // failure is thrown: the core never runs the old setup
+        // over new files.
         var failed: SetupBundleError?
         var outcome = RestoreOutcome(skippedProfiles: [], refusedPalettes: 0)
         do {
             outcome = try writeIncoming(
                 bundle,
-                keepingBindings: take != nil
+                keepingBindings: fromFolder
             )
         } catch {
-            guard take != nil else { throw error }
+            guard initLua.replaces else { throw error }
             failed = error
         }
-        if take.map(copyInitLua) == false, failed == nil {
+        if !writeIncomingInitLua(initLua), failed == nil {
             failed = .couldNotWrite(name: SyncFolder.initLua)
         }
 
@@ -161,16 +181,9 @@ extension KiwiCore {
         // have just replaced.
         profiles.resetAdoption()
 
-        // The destination's remembered arrangement names spaces
-        // that no longer exist — the restore just replaced the
-        // space list. `resetAllSettings` discards it for exactly
-        // this reason, and `CrashRecovery` names the harm: a stale
-        // snapshot files new windows into old spaces and seeds
-        // dead ids into the remembered-space map. The snapshot
-        // rightly does not TRAVEL in a bundle; that is a different
-        // question from whether the destination's own survives a
-        // confirmed replace, and it must not. Discarded above,
-        // before the write that would otherwise carry it.
+        // The destination's remembered arrangement names Spaces
+        // the restore just replaced, so it was discarded above,
+        // before the write that would carry it (`CrashRecovery`).
 
         // Reload first, THEN apply — the order the adopt path
         // already uses, and for its stated reason: the reload
@@ -195,7 +208,7 @@ extension KiwiCore {
         // crossing inside `loadConfig` cannot see them.
         settleSharedSets()
         loadConfig()
-        if let config = bundle.config, take?.guiManaged ?? true {
+        if let config = bundle.config, initLua.leavesSettingsToGui {
             applyProfileScopedState(from: config)
         }
 
@@ -224,6 +237,10 @@ extension KiwiCore {
         // this picks the one matching the monitors actually in
         // front of the user (#7's binding wins first, then #36's
         // resolution order).
+        outcome.initLua = Self.initLuaRestore(
+            of: bundle,
+            replaced: initLua.writesSource
+        )
         handleMonitorChange()
         // Explicit apply, so it forces (§5): the un-forced retile
         // inside the adoption path would be swallowed by the

@@ -1,16 +1,5 @@
 import Foundation
 
-/// What a sync take replaces beside its bundle (#2324 slice 2).
-struct SyncTake {
-    /// The staged copy of the folder's `init.lua`, nil where the
-    /// folder has none, which leaves this Mac without one.
-    let initLua: URL?
-    /// Whether the folder's own setup is the GUI's: `gui.json`
-    /// beside an `init.lua` with no foreign code. Judged on the
-    /// incoming files, since the take replaces this Mac's.
-    let guiManaged: Bool
-}
-
 /// Keep the Folder's (#2324 slice 2): the folder's setup replaces
 /// this Mac's through the backup restore, whose ordering prunes
 /// live state before the reload (#606).
@@ -39,17 +28,15 @@ extension KiwiCore {
         let bundle = try stagedBundle(in: stage)
         let lua = stage.appendingPathComponent(SyncFolder.initLua)
         let hasLua = FileManager.default.fileExists(atPath: lua.path)
-        let take = SyncTake(
-            initLua: hasLua ? lua : nil,
-            guiManaged: bundle.config != nil
-                && !Self.foreignCode(at: lua)
-        )
+        let source = try? Data(contentsOf: lua)
+        guard !hasLua || source != nil else { throw .folderUnreadable }
         do {
             return try pausingSync { () throws(SetupBundleError) in
                 let outcome = try replaceSetup(
                     with: bundle,
                     trash: trash,
-                    take: take
+                    fromFolder: true,
+                    initLua: .replace(source)
                 )
                 agreeOnFolder(folder)
                 return outcome
@@ -89,19 +76,6 @@ extension KiwiCore {
             FileManager.default.fileExists(atPath: gui.path)
             || Self.foreignCode(at: lua)
         return decodes && settled
-    }
-
-    /// Copies the staged `init.lua` in place of this Mac's, which
-    /// the replace has already discarded. False where it failed.
-    func copyInitLua(_ take: SyncTake) -> Bool {
-        guard let staged = take.initLua else { return true }
-        do {
-            try FileManager.default.copyItem(at: staged, to: configURL)
-            return true
-        } catch {
-            onLog("sync: could not copy init.lua: \(error)")
-            return false
-        }
     }
 
     // MARK: - Staging

@@ -913,6 +913,15 @@ case there and an answer to "does this travel?" in the same change
 set** — a prose line alone leaves the code unchanged, and a case
 alone leaves the reason unrecorded.
 
+**`init.lua` travels and is replaced only on an explicit opt-in at
+each end, never by default** — `SetupBundle.initLua` on export, a
+restore's choice on the way back — and so takes no `ConfigArtifact`
+case, which would pull it into `syncs` and into reset's discard. A
+restore taking it is judged on the incoming file, and writes it
+through the one `IncomingInitLua` writer and failure policy a sync
+take shares (#2517, `BackupInitLuaTests`). A further file that
+travels on request takes a case instead.
+
 `travelsInABackup` is load-bearing rather than documentation:
 `exportSetup` and the restore's discard both read it, so flipping
 a case to `false` changes behaviour rather than only a test.

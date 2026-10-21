@@ -36,13 +36,23 @@ extension KiwiCore {
     /// library where the user has one would "restore" data
     /// loss later — refusal must outrank convenience on the
     /// one path whose output outlives this build.
-    public func exportSetup() throws -> SetupBundle {
+    public func exportSetup(
+        includingInitLua: Bool = false
+    ) throws -> SetupBundle {
+        try exportSetup(
+            initLua: includingInitLua ? try initLuaForBackup() : nil
+        )
+    }
+
+    /// The export, carrying `initLua` as already read.
+    func exportSetup(initLua: String?) throws -> SetupBundle {
         try Self.setupBundle(
             gui: guiConfigStore,
             profiles: profiles,
             palettes: paletteLibrary,
             looks: lookLibrary,
-            bindings: true
+            bindings: true,
+            initLua: initLua
         )
     }
 
@@ -54,7 +64,8 @@ extension KiwiCore {
         profiles: ProfileManager,
         palettes: PaletteStore,
         looks: LookStore,
-        bindings: Bool
+        bindings: Bool,
+        initLua: String? = nil
     ) throws -> SetupBundle {
         // Each field asks the register whether it travels, so
         // `travelsInABackup` is the switch rather than a comment
@@ -74,7 +85,8 @@ extension KiwiCore {
                 ? try looks.libraryLooks() : nil,
             profileBindings: bindings
                 && ConfigArtifact.desktopBindings.travelsInABackup
-                ? gui.load()?.profileBindings : nil
+                ? gui.load()?.profileBindings : nil,
+            initLua: initLua
         )
     }
 
@@ -161,9 +173,11 @@ extension KiwiCore {
     /// re-encoding the struct does not help either, because
     /// `JSONEncoder` omits a nil Optional. Both weaker versions
     /// were written and both were proven blind before this one.
+    @discardableResult
     public func writeBackup(
-        to url: URL
-    ) throws(SetupBundleError) {
+        to url: URL,
+        includingInitLua: Bool = false
+    ) throws(SetupBundleError) -> InitLuaExport {
         // A sidecar that exists but will not decode is the one
         // case where a silent omission is worst: the user is
         // making a backup because they are about to need it.
@@ -180,7 +194,8 @@ extension KiwiCore {
         if (try? lookLibrary.libraryLooks()) == nil {
             throw .unreadableLooks
         }
-        guard let data = encodedBackup() else {
+        let carried = includingInitLua ? try initLuaForBackup() : nil
+        guard let data = encodedBackup(initLua: carried) else {
             throw .couldNotWrite(name: url.lastPathComponent)
         }
         do {
@@ -189,10 +204,12 @@ extension KiwiCore {
             onLog("backup export failed: \(error)")
             throw .couldNotWrite(name: url.lastPathComponent)
         }
+        guard includingInitLua else { return .notAsked }
+        return carried == nil ? .none : .included
     }
 
     /// The bundle as it is written: header, then payload.
-    func encodedBackup() -> Data? {
+    func encodedBackup(initLua: String? = nil) -> Data? {
         /// Just the two scalars, so their JSON literals — and the
         /// string's escaping — come from the encoder rather than
         /// from hand-written quoting.
@@ -200,7 +217,7 @@ extension KiwiCore {
             let format: Int
             let writtenBy: String
         }
-        guard let bundle = try? exportSetup() else {
+        guard let bundle = try? exportSetup(initLua: initLua) else {
             return nil
         }
         let encoder = JSONEncoder()
@@ -220,7 +237,8 @@ extension KiwiCore {
             let profiles = try? encoder.encode(bundle.profiles),
             let palettes = try? encoder.encode(bundle.palettes),
             let looks = try? encoder.encode(bundle.looks),
-            let bindings = try? encoder.encode(bundle.profileBindings)
+            let bindings = try? encoder.encode(bundle.profileBindings),
+            let initLua = try? encoder.encode(bundle.initLua)
         else { return nil }
 
         // The header's own braces come off; its two lines lead.
@@ -235,6 +253,7 @@ extension KiwiCore {
             ("palettes", palettes),
             ("looks", looks),
             ("profileBindings", bindings),
+            ("initLua", initLua),
         ]
         .map { name, data in
             "  \"\(name)\" : \(reindented(data))"

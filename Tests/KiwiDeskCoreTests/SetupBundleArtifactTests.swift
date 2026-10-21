@@ -179,7 +179,8 @@ struct SetupBundleArtifactTests {
                     }
                     .map(\.lastPathComponent)
             )
-            // The user's own script, which no backup rewrites, and
+            // The user's own script, which travels only on request
+            // and so takes no case (#2517), and
             // a test core's machine folder, nested here only so it
             // is cleaned with the config dir (#2324).
             .union(["init.lua", core.machineDirectory.lastPathComponent])

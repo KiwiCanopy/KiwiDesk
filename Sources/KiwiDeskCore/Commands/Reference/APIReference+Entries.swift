@@ -127,6 +127,9 @@ extension APIReference {
     /// `keep_settings` writes the live profile's file from a
     /// change report's ids (#1685); a config owns its own values,
     /// and `revert_settings` (#2411) is its twin.
+    /// `export_setup` and `restore_setup` (#2517) are Settings'
+    /// backup from the command line; a config restoring a backup
+    /// on every load is a loop.
     public static let cliOnly: [String] = [
         socketOnlyCommand,
         ServiceManager.prepareRestartCommand,
@@ -135,5 +138,7 @@ extension APIReference {
         KiwiCore.keepSettingsCommand,
         KiwiCore.revertSettingsCommand,
         KiwiCore.takeOverHyperRemapCommand,
+        KiwiCore.exportSetupCommand,
+        KiwiCore.restoreSetupCommand,
     ]
 }

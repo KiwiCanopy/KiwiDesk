@@ -13,8 +13,8 @@ extension GeneralSection {
             caption: L(
                 "general.advanced.backup.export.caption",
                 "Your settings, profiles, color palettes and "
-                    + "looks, in one file. Doesn't include "
-                    + "init.lua."
+                    + "looks, in one file. init.lua is left out "
+                    + "unless you include it."
             ),
             // A concept, not a live fact, which is what
             // `ui-patterns.md` gives the `?`. It also defuses a
@@ -58,7 +58,7 @@ extension GeneralSection {
                 "general.advanced.backup.restore.caption",
                 "Replaces your settings, profiles, color "
                     + "palettes and looks with a backup's. "
-                    + "Doesn't touch init.lua."
+                    + "init.lua only if you ask."
             ),
             help: L(
                 "general.advanced.backup.restore.help",
@@ -67,8 +67,10 @@ extension GeneralSection {
                     + "your color palettes and looks — "
                     + "with what's "
                     + "in the chosen file. The versions "
-                    + "being replaced go to the Trash. "
-                    + "init.lua is never touched."
+                    + "being replaced go to the Trash. If the "
+                    + "backup includes an init.lua, you choose "
+                    + "whether to restore it too; otherwise "
+                    + "yours stays as it is."
             ),
             helpSubject: SettingsCatalog.general.generalAdvanced
                 .children.restoreBackup.text
@@ -110,32 +112,36 @@ extension GeneralSection {
             titleVisibility: .visible,
             presenting: pendingRestore
         ) { bundle in
-            Button(
-                L(
-                    "general.advanced.backup.restore.confirm",
-                    "Restore"
-                ),
-                role: .destructive
-            ) {
-                backupError = model.restoreBackup(bundle)
-                pendingRestore = nil
+            let choices = model.core.restoreChoices(for: bundle)
+            if choices.plain {
+                Button(SetupBackupText.restoreLabel, role: .destructive) {
+                    backupError = model.restoreBackup(
+                        bundle,
+                        replacingInitLua: false
+                    )
+                    pendingRestore = nil
+                }
+            }
+            if choices.withInitLua {
+                Button(
+                    SetupBackupText.restoreWithInitLuaLabel,
+                    role: .destructive
+                ) {
+                    backupError = model.restoreBackup(
+                        bundle,
+                        replacingInitLua: true
+                    )
+                    pendingRestore = nil
+                }
             }
             Button(
                 L("spaces.delete_confirm.cancel", "Cancel"),
                 role: .cancel
             ) { pendingRestore = nil }
-        } message: { _ in
+        } message: { bundle in
             Text(
-                L(
-                    "general.advanced.backup.restore.confirm"
-                        + ".message",
-                    "This replaces your settings, every profile, "
-                        + "and your color palettes and looks with "
-                        + "what's in "
-                        + "the backup file — and discards any "
-                        + "changes you haven't saved yet. The "
-                        + "files being replaced go to the Trash. "
-                        + "init.lua is never touched."
+                SetupBackupText.restoreMessage(
+                    model.core.restoreChoices(for: bundle)
                 )
             )
         }

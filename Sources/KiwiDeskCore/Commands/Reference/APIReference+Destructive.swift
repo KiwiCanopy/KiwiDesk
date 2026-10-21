@@ -40,6 +40,11 @@ extension APIReference {
         // The taken-over remap is cleared at quit, and the tool
         // that set it must set it again (#2471).
         KiwiCore.takeOverHyperRemapCommand,
+        // Replaces every saved setting, profile, palette and look,
+        // and init.lua when asked; the Trash keeps the old (#2517).
+        KiwiCore.restoreSetupCommand,
+        // Overwrites whatever file is at the path it is given.
+        KiwiCore.exportSetupCommand,
     ]
 
     /// True for an entry in `destructive`.
