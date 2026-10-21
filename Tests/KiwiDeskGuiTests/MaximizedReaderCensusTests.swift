@@ -39,6 +39,24 @@ struct MaximizedReaderCensusTests {
         "Commands/KiwiCore+ResetLayoutSizing.swift": 1,
     ]
 
+    /// The shelf's one stand-down door asks the maximize arm —
+    /// once, since the door's native-fullscreen read is live and no
+    /// fixture can drive the door itself.
+    @Test("The shelf stand-down asks the maximize")
+    func shelfAsksTheMaximize() throws {
+        let file = coreRoot.appendingPathComponent(
+            "App/KiwiCore+ScreenCovering.swift"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        #expect(
+            source.components(
+                separatedBy: "|| showsMaximized(on: display)"
+            ).count == 2
+        )
+    }
+
     @Test("Only the allowlisted files spell the stored maximize")
     func readersAreCensused() throws {
         let pattern = try NSRegularExpression(

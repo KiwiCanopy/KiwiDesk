@@ -77,6 +77,15 @@ struct MaximizeWindowEndTests {
         #expect(maximized(core) == w1)
     }
 
+    @Test("A closing window hands focus to the maximized one")
+    func removeHandsFocusBack() {
+        var model = Space(id: space, windows: [w1, w3, w2])
+        model.maximized = w1
+        model.focused = w3
+        model.remove(w3)
+        #expect(model.focused == w1)
+    }
+
     @Test("A Desktop departure carries it back on return")
     func desktopReturnKeeps() {
         let core = makeCore()
@@ -123,10 +132,46 @@ struct MaximizeWindowEndTests {
     @Test("A sticky window is refused")
     func stickyRefused() {
         let core = makeCore()
-        core.execute("toggle_maximized")
         core.state.setSticky(w1, .global)
+        #expect(maximized(core) == nil)
+        core.retile()
         #expect(!core.execute("toggle_maximized").isSuccess)
         #expect(maximized(core) == nil)
+    }
+
+    @Test("Each screen's Space keeps its own maximize")
+    func everyScreenMaximizes() {
+        let core = makeCore()
+        let other = SpaceID("2")
+        let w4 = WindowID(4)
+        core.state.workspaces.assign(space, to: DisplayID(1))
+        core.state.workspaces.assign(other, to: DisplayID(2))
+        core.state.workspaces.activate(other)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: w4, pid: 900_001, appName: "B")
+            )
+        )
+        core.state.workspaces.focus(w4, in: other)
+        #expect(core.execute("toggle_maximized").isSuccess)
+        let second = core.state.workspaces[other].flatMap {
+            core.state.maximizedWindow(of: $0)
+        }
+        #expect(second == w4)
+        #expect(maximized(core) == w1)
+        #expect(core.showsMaximized(on: DisplayID(1)))
+        #expect(core.showsMaximized(on: DisplayID(2)))
+    }
+
+    /// Held twice over: `Space.remove`'s clear and the retile
+    /// head's retire each end it, so this reds only when both go.
+    @Test("Moving it to another Space ends it there and here")
+    func moveToSpaceEnds() {
+        let core = makeCore()
+        core.execute("move_to_space", args: [.string("2")])
+        #expect(core.state.workspaces[space]?.maximized == nil)
+        #expect(core.state.workspaces[SpaceID("2")]?.maximized == nil)
+        #expect(core.state.workspaces.space(of: w1) == SpaceID("2"))
     }
 
     @Test("The focused ring stands down over it")
