@@ -5508,9 +5508,10 @@ so a verb that refuses ends nothing, and a drag puts the window
 back without a drop, since its gesture began at a frame that is
 no slot. A Desktop switch is no close (#1207): the Space goes on
 naming the departed window and the return finds it maximized,
-while a close or a minimize ends it; a Desktop bound to another
-profile is such a switch, and only an explicit profile load ends
-every maximize. A sticky window is
+while a close or a minimize ends it. A profile change keeps no
+rule of its own: a maximize ends where the new arrangement
+changes its Space's layout or files the window elsewhere, and
+stands where both stay. A sticky window is
 refused, since it draws on other Spaces' layouts too. It
 survives KiwiDesk's own in-place restart and not a Quit. Its motion is the engine's
 ordinary frame animation, governed by `animations.on_window_resize`

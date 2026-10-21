@@ -266,7 +266,9 @@ public struct Space: Sendable, Equatable {
         // A departing maximized window keeps its id: a Desktop
         // departure returns to it, and `retireEndedMaximize` ends
         // every other departure (#2448).
-        if focused == window, let maximized, maximized != window {
+        if focused == window, let maximized, maximized != window,
+            windows.contains(maximized)
+        {
             // A window closing over a maximized one (a dialog)
             // hands focus back to it, or the maximize ends (#2448).
             focused = maximized

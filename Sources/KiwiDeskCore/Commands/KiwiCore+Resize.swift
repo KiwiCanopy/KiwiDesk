@@ -150,9 +150,7 @@ extension KiwiCore {
         state.workspaces.withSpace(space.id) { $0.maximized = nil }
         var resized = false
         defer {
-            if endedMaximize, !resized {
-                retile(sizing: .allSpringSized)
-            }
+            if endedMaximize, !resized { retileEndingMaximize() }
         }
         // Span resolves on the space's OWN display (#449) —
         // main-screen math resized against the wrong bounds on

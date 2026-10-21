@@ -38,9 +38,6 @@ extension KiwiCore {
         // Read before anything moves what is live or declared (#1790).
         let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
-        // A load ends every maximize; a Desktop binding or a monitor
-        // change is a switch, which keeps it (#2448).
-        if switching, cause == .explicit { state.endEveryMaximize() }
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
         let outgoingIcons = tiler.settings.spaceIcons

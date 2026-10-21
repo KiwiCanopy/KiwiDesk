@@ -148,13 +148,6 @@ extension KiwiCore {
         case .placeInSprung, .none:
             break
         }
-        // A gesture that started maximized measured from the
-        // screen-filling frame, never a slot: the drop puts the
-        // window back in its slot rather than reading it (#2448).
-        if endedMaximize {
-            retileEndingMaximize()
-            return
-        }
         // A floating window is excluded from the layout swap/resize
         // logic below, but a drop that leaves it under a top app bar
         // hides its title bar and makes it ungrabbable — clamp it
@@ -216,6 +209,14 @@ extension KiwiCore {
         // a resize. Same-display drops fall through (relocate
         // returns false when the destination is the origin space).
         if relocateAcrossDisplay(id, onto: target, from: space) {
+            return
+        }
+        // A same-display gesture that started maximized measured
+        // from the screen-filling frame, never a slot: the drop puts
+        // the window back rather than reading a swap or a resize off
+        // it (#2448). A crossed one is a move like any other.
+        if endedMaximize, !crossedDisplays {
+            retileEndingMaximize()
             return
         }
         // A gesture that live-crossed displays (#504) skips the

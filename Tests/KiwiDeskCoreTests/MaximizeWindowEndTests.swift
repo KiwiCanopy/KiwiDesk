@@ -86,6 +86,17 @@ struct MaximizeWindowEndTests {
         #expect(model.focused == w1)
     }
 
+    @Test("A whole Desktop leaving walks focus off, never back")
+    func desktopLeavingWalksFocusOff() {
+        var model = Space(id: space, windows: [w1, w2, w3])
+        model.maximized = w1
+        model.focused = w1
+        model.remove(w1)
+        model.remove(w2)
+        model.remove(w3)
+        #expect(model.focused == nil)
+    }
+
     @Test("A Desktop departure carries it back on return")
     func desktopReturnKeeps() {
         let core = makeCore()

@@ -5263,7 +5263,7 @@ Desktop. The rest of the Space keeps its layout behind it. A
 second call puts the window back in its slot; so does moving
 focus to another tiled window of the Space, and the window
 leaving the layout (closed, minimized, floated or moved). A
-swap, resize, layout change, reset of sizes or profile load
+swap, resize, layout change or reset of sizes
 puts it back first, then acts, and a mouse drag of it puts it
 back; a command that refuses leaves it as it is. Focus on a
 floating window, a switch to another Space or Desktop and back,

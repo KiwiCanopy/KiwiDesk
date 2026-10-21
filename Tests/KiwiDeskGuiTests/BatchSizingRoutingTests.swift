@@ -143,10 +143,8 @@ struct BatchSizingRoutingTests {
 
         // The `resize` verb: every layout path under it writes a
         // ratio or a per-window weight, nothing else.
-        // Two since #2448: a refused resize that ended a maximize
-        // still draws its return, one window shrinking in place.
         "KiwiDeskCore/Commands/KiwiCore+Resize.swift":
-            Site(names: 4, promises: 2),
+            Site(names: 2, promises: 1),
         // A float resizes ITSELF — no tiled window moves at all.
         "KiwiDeskCore/Commands/KiwiCore+ResizeFloating.swift":
             Site(names: 2, promises: 1),

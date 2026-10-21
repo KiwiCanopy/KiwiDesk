@@ -1787,12 +1787,12 @@ editing here:
   reader keeps the row. **A write that rearranges a Space ends its
   maximize AT the write** — every order write through the one
   `Space.endMaximize`, the mode write, `resize`,
-  `reset_layout_sizing`, an explicit profile load — so a refused
+  `reset_layout_sizing` — so a refused
   verb ends nothing (`MaximizeWindowEndTests` ▸ `refusedSwapKeeps`);
   a new rearranging write calls it the same way, which is review's.
   A Desktop departure keeps ONE copy: `Space.maximized` goes on
   naming the departed window, `retireEndedMaximize` spares it
-  through `departedWithDesktop`, and a close or a minimize ends it
+  through `awaitsMaximizedReturn`, and a close or a minimize ends it
   in its own fold, so every ender reaches a departed maximize too
   (`MaximizeWindowEndTests` ▸ `desktopReturnKeeps`,
   `enderReachesDeparted`).
