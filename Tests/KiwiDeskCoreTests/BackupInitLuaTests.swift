@@ -261,12 +261,13 @@ struct BackupInitLuaTests {
         try core.profiles.save(
             Profile(
                 name: "Here",
-                monitorSets: [],
+                monitorSets: [MonitorSet(monitors: ["A:100x100"])],
                 spaces: [SpaceID("1")],
                 spaceModes: [:],
                 settings: TilingSettings()
             )
         )
+        #expect(!core.profiles.allProfiles().isEmpty)
         try core.restoreSetup(
             from: only,
             replacingInitLua: true,
