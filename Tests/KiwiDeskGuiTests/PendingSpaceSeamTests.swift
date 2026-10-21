@@ -49,7 +49,7 @@ struct PendingSpaceSeamTests {
         (
             "fileMembership(window, into:",
             [
-                "KiwiCore+SpaceCommands.swift",
+                "KiwiCore+MoveWindow.swift",
                 "KiwiCore+DesktopMove.swift",
                 "KiwiCore+DesktopMoveSpace.swift",
                 "KiwiCore+SpaceBarDrop.swift",
@@ -59,6 +59,26 @@ struct PendingSpaceSeamTests {
                 "KiwiCore+JumpHiddenApp.swift",
             ]
         ),
+        // The two filing doors share one settle (#2509): its
+        // definition and `fileMembership`'s call, and the trade's.
+        // A third caller is a hand route past both doors.
+        (
+            "settleFiling(",
+            [
+                "KiwiCore+SpaceCommands.swift",
+                "KiwiCore+SpaceCommands.swift",
+                "KiwiCore+MoveWindow.swift",
+            ]
+        ),
+        // The one trade door: its definition and `moveWindow`'s
+        // call.
+        (
+            "fileTrade(",
+            ["KiwiCore+MoveWindow.swift", "KiwiCore+MoveWindow.swift"]
+        ),
+        // `moveWindow` asks no sticky gate for a trade's partner:
+        // its one `trading:` caller does, ahead of the move (#445).
+        ("trading:", ["KiwiCore+SwapCommand.swift"]),
     ]
 
     /// The helper's callers are counted above; nothing else pins
@@ -78,11 +98,29 @@ struct PendingSpaceSeamTests {
             after: "func fileMembership(",
             in: source
         )
-        #expect(filing != nil)
-        #expect(filing?.contains("reanchorFloat(") == true)
+        let settle = SourceScan.declarationBody(
+            after: "func settleFiling(",
+            in: source
+        )
+        // The filing settles through the one helper the trade
+        // shares (#2509), and the helper carries the steps.
+        #expect(filing?.contains("settleFiling(") == true)
+        #expect(settle?.contains("reanchorFloat(") == true)
         // The move entry's placement (#1708) rides the same one
         // filing, or the Desktop routes lose it.
-        #expect(filing?.contains("placeEnteringFloat(") == true)
+        #expect(settle?.contains("placeEnteringFloat(") == true)
+        let trade = SourceScan.declarationBody(
+            after: "func fileTrade(",
+            in: SourceScan.stripComments(
+                try String(
+                    contentsOf: Self.core.appendingPathComponent(
+                        "Commands/KiwiCore+MoveWindow.swift"
+                    ),
+                    encoding: .utf8
+                )
+            )
+        )
+        #expect(trade?.contains("settleFiling(") == true)
     }
 
     @Test("each wiring exists exactly once per named file")

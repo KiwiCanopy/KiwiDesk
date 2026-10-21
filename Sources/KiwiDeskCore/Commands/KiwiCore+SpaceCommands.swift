@@ -102,6 +102,7 @@ extension KiwiCore {
     /// the window may sit on another display than its membership
     /// by USER choice, and placement always wins. `restoring` is
     /// the cross-session pass's (#1385): no focus, no event.
+    /// `fileTrade` files a pair through the same `settleFiling`.
     func fileMembership(
         _ window: WindowID,
         into target: SpaceID,
@@ -118,6 +119,26 @@ extension KiwiCore {
             state.workspaces.lastFocused == window
             || target == state.workspaces.activeSpace
         addFocusedToSpace(window, to: target, restoring: restoring)
+        settleFiling(
+            window,
+            into: target,
+            from: from,
+            wasFloat: wasFloat,
+            takesFocus: restoring ? nil : takesFocus
+        )
+    }
+
+    /// What a filing owes once the window is in its Space: the
+    /// #1708 float placement or else the #444 re-anchor, the #22
+    /// focus stamp and `window_moved_to_space`. `takesFocus` nil
+    /// is a restore's, which touches no focus and tells no one.
+    func settleFiling(
+        _ window: WindowID,
+        into target: SpaceID,
+        from: SpaceID?,
+        wasFloat: Bool,
+        takesFocus: Bool?
+    ) {
         // A target named by an undeclared id takes its screen now:
         // the re-anchor and a follow's Space cue read it (#1994).
         placeUnplacedSpaces()
@@ -128,7 +149,7 @@ extension KiwiCore {
         }
         // A restore's filing touches no focus and tells no one,
         // like the boot replay it completes (#1385).
-        guard !restoring else { return }
+        guard let takesFocus else { return }
         if takesFocus {
             state.workspaces.focus(window, in: target)
         } else {
@@ -155,8 +176,9 @@ extension KiwiCore {
     /// slot). Without this a `move_to_space` into a track space
     /// silently dropped the window into the last track. `after`
     /// places it behind a member outside a track target (a drop).
-    /// The ONE user filing seam: every filing not `restoring`
-    /// stamps the cross-session match here (#1385).
+    /// A user filing seam: every filing not `restoring` stamps
+    /// the cross-session match here (#1385), a trade in
+    /// `fileTrade`.
     func addFocusedToSpace(
         _ window: WindowID,
         to target: SpaceID,
@@ -194,122 +216,5 @@ extension KiwiCore {
                     && !window.isFullscreen
             }
         )
-    }
-
-    func moveToSpace(
-        _ command: String,
-        _ args: [JSONValue],
-        follow: Bool
-    ) -> CommandResponse {
-        guard let raw = args.first?.stringValue else {
-            return .fail("expected space id")
-        }
-        switch commandTarget(command, args) {
-        case .refused(let response): return response
-        case .window(let window):
-            moveWindow(window, to: SpaceID(raw), follow: follow)
-            return .ok()
-        }
-    }
-
-    /// Relocates an explicit `window` into `target`. `follow`
-    /// switches the visible space to the target; otherwise the
-    /// caller's space stays put and the moved window becomes the
-    /// target's focus for its next visit. The window-explicit
-    /// core behind `move_to_space(_and_follow)` and the Space Bar
-    /// drag-drop (#372) — the drag knows the window id, the
-    /// command resolves the focused one. When the target is
-    /// already the active space (a Space Bar spring drop), this
-    /// files the window into the visible layout and focuses it.
-    ///
-    /// Sticky moves are guarded up front via `stickyMoveRefused`
-    /// (#445) — the same gate the Space-Bar spring calls, since
-    /// `addFocusedToSpace` (not `moveWindow`) is the real re-home
-    /// choke point and has two callers.
-    func moveWindow(
-        _ window: WindowID,
-        to target: SpaceID,
-        follow: Bool
-    ) {
-        let from = state.workspaces.space(of: window)
-        // Told where an undeclared target WILL lay out (#1994).
-        if stickyMoveRefused(
-            window,
-            to: target,
-            landingOn: landingDisplay(of: target)
-        ) {
-            return
-        }
-        // Captured before the focus reassign below overwrites it:
-        // whether the moved window currently holds OS key focus.
-        // Only then must an emptied origin yield focus (#446).
-        let movedHeldFocus = state.workspaces.lastFocused == window
-        fileMembership(window, into: target, from: from)
-        if !follow {
-            // A no-follow move must not be turned into a follow
-            // by the OS dropping the origin refocus raise below
-            // (#463's cooperative activate): the moved window
-            // then keeps key focus, its app re-reports it
-            // AX-focused, and the focus-follow would teleport
-            // the user to the target (#482/#483). Latch the
-            // intent — every no-follow branch shares the hazard
-            // (in the yield branch, the Finder activate can even
-            // BE the moved window's app: a floating Finder
-            // window, #483).
-            moveLatch.stamp(window)
-        }
-        if follow {
-            // The one copy of the follow-shaped switch — the
-            // capture/raise/settle ordering lives on it.
-            followSwitch(to: target, focusing: window)
-        } else if movedHeldFocus
-            || from == state.workspaces.activeSpace
-            || target == state.workspaces.activeSpace,
-            let next = activeSpace?.focused
-        {
-            // A window moved between Spaces nobody is on, holding
-            // no focus, leaves the active Space's focus alone
-            // (#1518); one moved INTO it is that focus.
-            // Captured before the refocus raise below — the
-            // settle's dropped-activate detection (#463 pattern).
-            let priorFrontmost = frontmostPIDProvider?()
-            // The moved window would keep macOS focus while
-            // stashed offscreen; refocus the current space.
-            focusWindow(next, refocusRetile: false, warp: true)
-            // Arm the settle that re-raises `next` once when the
-            // moved window's app provably kept frontmost. Only a
-            // move that held key focus can leave that hazard;
-            // otherwise `priorFrontmost` is whatever app the
-            // user is really in — never fight it. The gate reads
-            // the RING (`lastFocused`), which the hazard itself
-            // can leave stale: then the settle is skipped and a
-            // #292 denial may persist until the next click — the
-            // latch still blocks the teleport, so this residue
-            // degrades, never breaks. Don't widen the gate.
-            if movedHeldFocus {
-                scheduleMoveSettle(
-                    origin: state.workspaces.activeSpace,
-                    priorFrontmost: priorFrontmost
-                )
-            }
-        } else if movedHeldFocus {
-            // Reached only when the active space has no member to
-            // take over (else the neighbor branch fired) AND the
-            // moved window held system key focus. It is now stashed
-            // offscreen yet still key — orphaned — so hand focus to
-            // the desktop, the state a bare empty-desktop click
-            // leaves (#446). Keying on `lastFocused` (not the
-            // emptied `from`) is the exact hazard: a move that did
-            // NOT hold system focus never yields, and a #414
-            // traveler / secondary-display window that DID hold it
-            // is cleaned up wherever its origin was.
-            desktopFocusYield?()
-        }
-        if !follow {
-            // The follow branch retiled inside `followSwitch`
-            // (a follow IS a space switch — same policy and force
-            // contract).
-            retile(animated: true)
-        }
     }
 }

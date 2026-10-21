@@ -11,6 +11,7 @@ public enum APIReference {
         [
             ("focus", "focus"),
             ("swap", "swap"),
+            ("swap_here", "swap_here"),
             ("focus_window", "focus_window"),
             // Bare `space` is canonical (#42): aligned with the
             // event namespace, which uses bare `space` for a

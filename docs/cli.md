@@ -482,6 +482,12 @@ with `jq`:
 ```bash
 kiwidesk list_windows | jq '.[] | select(.focused)'
 ```
+
+`swap <window> [window]` swaps the focused window with the one an
+id names, or two named windows, across Spaces and screens too, and
+`swap <direction> <window>` swaps a named window with its neighbour
+([`swap`](lua-reference.md#swap)); `swap_here <window>` brings
+one into your slot instead ([`swap_here`](lua-reference.md#swap_here)).
 :::
 
 `kiwivision.toggle [lens]`, `kiwivision.current`, the

@@ -7,6 +7,7 @@ public enum FocusedCommandPolicy {
     public static let focusedCommands: Set<String> = [
         "focus",
         "swap",
+        "swap_here",
         "resize",
         "move_to_space",
         "move_to_space_and_follow",

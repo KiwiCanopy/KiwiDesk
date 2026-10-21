@@ -7,11 +7,13 @@ extension KiwiCore {
     /// `warp: false` is a scroll gesture's (#1656): the pointer
     /// stays where the hand holds it. Every step, a gesture's too,
     /// skips what a lens leaves out (`lensKeySkip`, #2103 rulings
-    /// 35, 44, 45).
+    /// 35, 44, 45). `origin` steps from a named member of the
+    /// active Space instead of the focus anchor (#2509).
     func navigate(
         _ args: [JSONValue],
         swapping: Bool,
-        warp: Bool = true
+        warp: Bool = true,
+        origin: WindowID? = nil
     ) -> CommandResponse {
         guard let raw = args.first?.stringValue,
             let direction = Direction(rawValue: raw)
@@ -31,10 +33,8 @@ extension KiwiCore {
         // and flashing the dead-end cue on the wrong ring.
         let tiled = state.effectiveTiledMembers(of: space)
         guard
-            let focused = state.focusAnchor(
-                of: space,
-                tiled: tiled
-            )
+            let focused = origin
+                ?? state.focusAnchor(of: space, tiled: tiled)
         else {
             return .fail("no focused window")
         }
@@ -199,33 +199,35 @@ extension KiwiCore {
             ) {
                 return .ok()
             }
-            let crossedZones = crossesStackBoundary(
-                focused,
-                target,
-                in: space
-            )
-            state.workspaces.withSpace(space.id) {
-                $0.swap(focused, target)
-            }
-            retile(
-                animated: tiler.settings.animations.onWindowSwap
-            )
-            // A scrolling swap can push a window into an edge pile
-            // whose stacking then goes stale (#150); a track swap
-            // that fell through to the geometric search can
-            // scramble a track's overflow pile (#193); a stack swap
-            // that crosses the master boundary scrambles the
-            // cascade. All three gates are mode-exclusive.
-            if space.mode == .scrolling {
-                scheduleScrollingZOrderRestoreIfOverflowing()
-            } else if space.mode == .track {
-                scheduleTrackZOrderRestoreIfOverflowing()
-            } else if crossedZones {
-                scheduleZOrderRestore()
-            }
+            commitSwap(focused, target, in: space)
         } else {
             focusWindow(target, warp: warp)
         }
         return .ok()
+    }
+
+    /// Swaps two members of `space` in its row, retiles and arms
+    /// the z-order restore the swap owes — the one tail of the
+    /// directional swap and the window-id one (#2509).
+    func commitSwap(_ a: WindowID, _ b: WindowID, in space: Space) {
+        let crossedZones = crossesStackBoundary(a, b, in: space)
+        state.workspaces.withSpace(space.id) { $0.swap(a, b) }
+        retile(animated: tiler.settings.animations.onWindowSwap)
+        // Every arm reads the active Space: a two-id swap in a
+        // Space nobody is on scrambles nothing on screen (#2509).
+        guard space.id == state.workspaces.activeSpace else { return }
+        // A scrolling swap can push a window into an edge pile
+        // whose stacking then goes stale (#150); a track swap
+        // that fell through to the geometric search can
+        // scramble a track's overflow pile (#193); a stack swap
+        // that crosses the master boundary scrambles the
+        // cascade. All three gates are mode-exclusive.
+        if space.mode == .scrolling {
+            scheduleScrollingZOrderRestoreIfOverflowing()
+        } else if space.mode == .track {
+            scheduleTrackZOrderRestoreIfOverflowing()
+        } else if crossedZones {
+            scheduleZOrderRestore()
+        }
     }
 }
