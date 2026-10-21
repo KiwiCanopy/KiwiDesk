@@ -89,6 +89,13 @@ extension BarMotion {
         showing: Bool,
         reveal: RevealKind
     ) {
+        body.wantsLayer = true
+        // A length of 0 swaps the mark at once.
+        guard revealLength > 0 else {
+            body.layer?.removeAnimation(forKey: revealKey)
+            body.alphaValue = showing ? 1 : 0
+            return
+        }
         let natural = markFade(showing: showing, reveal: reveal)
         // The motion's own scale, so the mark keeps its time.
         let scale = revealScale(
@@ -100,7 +107,6 @@ extension BarMotion {
             delay: natural.delay * scale,
             length: natural.length * scale
         )
-        body.wantsLayer = true
         let from =
             body.layer?.animationKeys()?.contains(revealKey) == true
             ? body.layer?.presentation()?.opacity : nil

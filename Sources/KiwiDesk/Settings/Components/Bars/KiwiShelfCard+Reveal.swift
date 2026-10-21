@@ -55,6 +55,27 @@ extension KiwiShelfCard {
         }
     }
 
+    /// `value` stepped over 0 and `band`, so a step from the floor
+    /// lands on 0 and never on a blink in between — Core's
+    /// `AnimationSettings.stepped`.
+    static func instantOr(
+        _ value: Binding<Int>,
+        band: ClosedRange<Int>,
+        step: Int
+    ) -> Binding<Int> {
+        Binding(
+            get: { value.wrappedValue },
+            set: { new in
+                value.wrappedValue = AnimationSettings.stepped(
+                    new,
+                    from: value.wrappedValue,
+                    band: band,
+                    step: step
+                )
+            }
+        )
+    }
+
     /// Whether no bar hides, so the reveal's rows take no input.
     private var revealInert: Bool {
         BarsGates(
@@ -81,14 +102,19 @@ extension KiwiShelfCard {
         case .colours(.animationsRevealDurationMS):
             StepperRow(
                 label: children.revealDuration.text,
-                value: animations.revealDurationMS,
-                in: AnimationSettings.revealDurationBand,
+                value: Self.instantOr(
+                    animations.revealDurationMS,
+                    band: AnimationSettings.revealDurationBand,
+                    step: AnimationSettings.revealDurationStep
+                ),
+                in: 0...AnimationSettings.revealDurationBand.upperBound,
                 step: AnimationSettings.revealDurationStep,
                 suffix: "ms",
                 help: L(
                     "kiwishelf.reveal_duration.help",
                     "How long a hidden bar takes to appear, whichever "
-                        + "way it reveals; it leaves a little quicker."
+                        + "way it reveals; it leaves a little quicker. "
+                        + "0 makes it instant."
                 )
             )
             .modifier(GreyOut(active: revealInert))
@@ -103,15 +129,19 @@ extension KiwiShelfCard {
             ).inertReason(for: .colours(.animationsExpandDurationMS))
             StepperRow(
                 label: children.expandDuration.text,
-                value: animations.expandDurationMS,
-                in: AnimationSettings.expandDurationBand,
+                value: Self.instantOr(
+                    animations.expandDurationMS,
+                    band: AnimationSettings.expandDurationBand,
+                    step: 50
+                ),
+                in: 0...AnimationSettings.expandDurationBand.upperBound,
                 step: 50,
                 suffix: "ms",
                 help: L(
                     "kiwishelf.expand_duration.help",
                     "How long the bars take to grow out of each "
                         + "other, shrink back, fade and glide into "
-                        + "place."
+                        + "place. 0 makes it instant."
                 )
             )
             .modifier(GreyOut(active: reason == .expandOff))

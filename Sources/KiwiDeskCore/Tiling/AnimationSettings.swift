@@ -33,15 +33,16 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// Was `on_shelf` (`ConfigMigration`, owner ruling 2026-10-21).
     public var onExpand = true
 
-    /// The expand in milliseconds (500–2000 ms, #1838); was
-    /// `shelf_duration`.
+    /// The expand in milliseconds (0, or 500–2000 ms, #1838; 0 snaps,
+    /// owner ruling 2026-10-21); was `shelf_duration`.
     public var expandDurationMS = 750 {
         didSet { expandDurationMS = Self.clampExpandMS(expandDurationMS) }
     }
 
-    /// A hidden shelf's reveal in milliseconds (150–800 ms, owner
-    /// ruling 2026-10-21): every `reveal_style` plays inside it, a
-    /// retract inside `retractShare` of it.
+    /// A hidden shelf's reveal in milliseconds (0, or 150–800 ms,
+    /// owner rulings 2026-10-21): every `reveal_style` plays inside
+    /// it, a retract inside `retractShare` of it; 0 shows and hides
+    /// at once.
     public var revealDurationMS = 300 {
         didSet { revealDurationMS = Self.clampRevealMS(revealDurationMS) }
     }
@@ -50,9 +51,12 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// control's edges derive from (gui.md, #1359).
     public static let durationBand = 50...1000
     /// The expand's band (owner, 2026-09-30): below half a second
-    /// it barely reads on a decelerating curve.
+    /// it barely reads on a decelerating curve. 0 lies outside it,
+    /// for no motion at all (owner ruling, 2026-10-21); a value
+    /// between rises to the band.
     public static let expandDurationBand = 500...2000
-    /// The reveal's band and step (owner ruling, 2026-10-21).
+    /// The reveal's band and step (owner ruling, 2026-10-21); 0
+    /// lies outside it as the expand's does, so no value blinks.
     public static let revealDurationBand = 150...800
     public static let revealDurationStep = 50
     /// A retract's share of the reveal's length (owner ruling,
@@ -64,17 +68,34 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     }
 
     static func clampExpandMS(_ ms: Int) -> Int {
-        min(
-            max(ms, expandDurationBand.lowerBound),
-            expandDurationBand.upperBound
-        )
+        instantOr(ms, band: expandDurationBand)
     }
 
     static func clampRevealMS(_ ms: Int) -> Int {
-        min(
-            max(ms, revealDurationBand.lowerBound),
-            revealDurationBand.upperBound
-        )
+        instantOr(ms, band: revealDurationBand)
+    }
+
+    /// `ms` as 0 (instant) or inside `band`: a value between 0 and
+    /// the band rises to its floor.
+    static func instantOr(_ ms: Int, band: ClosedRange<Int>) -> Int {
+        guard ms > 0 else { return 0 }
+        return min(max(ms, band.lowerBound), band.upperBound)
+    }
+
+    /// A stepper's next value over 0 and `band`: one step down
+    /// from the floor lands on 0, and any other value in the gap
+    /// rises to the floor — so stepping never blinks.
+    public static func stepped(
+        _ new: Int,
+        from current: Int,
+        band: ClosedRange<Int>,
+        step: Int
+    ) -> Int {
+        guard new > 0, new < band.lowerBound else {
+            return instantOr(new, band: band)
+        }
+        return current >= band.lowerBound && new == current - step
+            ? 0 : band.lowerBound
     }
 
     enum CodingKeys: String, CodingKey, CaseIterable {

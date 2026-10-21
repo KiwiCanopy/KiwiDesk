@@ -14696,7 +14696,11 @@ not retune them without the owner. Every style plays inside one length, the
 user's `animations.reveal_duration` (150–800 ms, 300 by default),
 its own timings stretched or squeezed as a whole and a retract in
 four fifths of it — one value rather than one per style, since the
-user tunes how quick a bar feels, not a style's choreography. Fade
+user tunes how quick a bar feels, not a style's choreography. 0
+means no animation, as KiwiVision's fade does, and the expand's
+duration takes the same 0; a value between 0 and the band rises
+to its floor, since a 50 ms reveal reads as a blink rather than a
+motion (owner ruling, 2026-10-21). Fade
 cross-fades the bar where it stands, for
 a user who wants no travel at all. One picker serves Auto and Hidden
 alike: a Hidden bar has no mark, so Grow and Unfold start from a

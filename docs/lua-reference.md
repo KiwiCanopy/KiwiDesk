@@ -6972,8 +6972,9 @@ next write.
 **Expects:**
 
 - `set_on_expand(bool)` — `true` or `false` (default `true`).
-- `set_expand_duration(ms)` — a number (milliseconds, clamped
-  500–2000; default `750`).
+- `set_expand_duration(ms)` — a number (milliseconds: `0`, or
+  500–2000; default `750`). `0` snaps the bars into place; a value
+  from 1 to 499 becomes 500.
 
 **Does:** the KiwiShelf expand when you switch Spaces: a bar
 sharing a shelf grows out of the other bar and shrinks back into
@@ -6996,7 +6997,9 @@ animations.set_expand_duration(1000)
 
 ### animations.set_reveal_duration
 
-**Expects:** milliseconds, clamped 150–800 (default `300`).
+**Expects:** milliseconds: `0`, or 150–800 (default `300`). `0`
+shows and hides the bar at once; a value from 1 to 149 becomes
+150.
 
 **Does:** how long a hidden bar takes to come in, whichever
 [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) it plays;

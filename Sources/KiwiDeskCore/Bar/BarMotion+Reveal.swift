@@ -193,6 +193,11 @@ extension BarMotion {
             return 0
         }
         let motion = revealMotion(entering: entering, path: path)
+        // A length of 0 is no motion: the shelf stands where it lands.
+        guard path.length > 0 else {
+            endReveal(view, items: items)
+            return 0
+        }
         let current =
             layer.animationKeys()?.contains(revealKey) == true
             ? layer.presentation() : nil
@@ -301,50 +306,5 @@ extension BarMotion {
             layer.add(slide, forKey: revealKey)
             return held ? 0 : span * scale + tail
         }
-    }
-
-    /// Runs `body` in the main run loop's next pass once this one
-    /// has committed — after AppKit has sent the order-in made in
-    /// it (`MainRunLoopPass`, #1956) — the overlay's
-    /// `afterCommit` default; a test runs it inline.
-    @MainActor
-    static func afterCommit(_ body: @escaping @MainActor () -> Void) {
-        let main = CFRunLoopGetMain()
-        // Ordered last among the before-waiting observers, as
-        // `MainRunLoopPass` counts, so the commit has run.
-        let observer = CFRunLoopObserverCreateWithHandler(
-            nil,
-            CFRunLoopActivity.beforeWaiting.rawValue,
-            false,
-            CFIndex.max
-        ) { _, _ in
-            CFRunLoopPerformBlock(main, CFRunLoopMode.commonModes.rawValue) {
-                MainActor.assumeIsolated { body() }
-            }
-            CFRunLoopWakeUp(main)
-        }
-        CFRunLoopAddObserver(main, observer, .commonModes)
-    }
-
-    /// Runs `body` once a reveal of `span` seconds has landed — the
-    /// overlay's `afterReveal` default; a test hands a queue.
-    @MainActor
-    static func afterReveal(
-        _ span: TimeInterval,
-        _ body: @escaping @MainActor () -> Void
-    ) {
-        Task { @MainActor in
-            if span > 0 { try? await Task.sleep(for: .seconds(span)) }
-            body()
-        }
-    }
-
-    /// Ends a reveal's motion on `view` and its `items`: both
-    /// stand where they rest, unclipped and opaque.
-    @MainActor
-    static func endReveal(_ view: NSView, items: NSView) {
-        view.layer?.removeAnimation(forKey: revealKey)
-        items.layer?.removeAnimation(forKey: revealKey)
-        endSpread(in: items)
     }
 }

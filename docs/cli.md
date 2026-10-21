@@ -569,8 +569,8 @@ every lens with why it cannot turn on.
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
 | | `animations.set_on_expand` | true\|false (default true); the KiwiShelf expand on a Space switch |
-| | `animations.set_expand_duration` | ms (500–2000, default 750); the KiwiShelf expand's length |
-| | `animations.set_reveal_duration` | ms (150–800, default 300); a hidden bar's reveal |
+| | `animations.set_expand_duration` | ms (0 or 500–2000, default 750; 0 snaps); the KiwiShelf expand's length |
+| | `animations.set_reveal_duration` | ms (0 or 150–800, default 300; 0 is instant); a hidden bar's reveal |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
