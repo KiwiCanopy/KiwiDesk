@@ -15,7 +15,8 @@ struct ShortcutBaseTopUpWiringTests {
         base: ShortcutBase = .hyper
     ) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-base-topup-\(UUID().uuidString)"
                 )

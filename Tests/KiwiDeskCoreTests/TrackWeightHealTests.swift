@@ -17,7 +17,8 @@ import Testing
 struct TrackWeightHealTests {
 
     private func makeCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-weight-heal-\(UUID().uuidString)"
             )

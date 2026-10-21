@@ -12,8 +12,8 @@ import Testing
 struct StateMarkColorTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-mark-\(UUID().uuidString)"
                 )

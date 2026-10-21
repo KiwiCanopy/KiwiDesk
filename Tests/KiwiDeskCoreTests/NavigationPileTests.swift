@@ -116,7 +116,8 @@ struct NavigationPileTests {
 @MainActor
 struct SwapSkipsCascadeCommandTests {
     private func makeCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-swap-skip-\(UUID().uuidString)"
             )

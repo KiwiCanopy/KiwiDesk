@@ -29,7 +29,8 @@ struct ChangelogParserTests {
         _ body: String,
         tag: String? = nil
     ) throws -> ScriptRun {
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "changelog-body-\(UUID().uuidString).md"
             )

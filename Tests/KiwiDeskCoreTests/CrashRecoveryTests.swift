@@ -13,7 +13,8 @@ import Testing
 @MainActor
 struct CrashRecoveryTests {
     private func makeRecovery() throws -> (CrashRecovery, URL) {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-crash-\(UUID().uuidString)"
             )

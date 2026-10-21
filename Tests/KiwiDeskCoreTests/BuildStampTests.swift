@@ -149,7 +149,8 @@ struct BuildStampTests {
         let to = text.index(text.startIndex, offsetBy: end)
         let block = String(text[from..<to])
 
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("build-stamp-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

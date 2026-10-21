@@ -12,8 +12,8 @@ import Testing
 struct ProfileRestoreOrderTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-restoreorder-\(UUID().uuidString)"
                 )

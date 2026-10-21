@@ -71,7 +71,8 @@ enum AppcastFixture {
         _ object: Any,
         label: String
     ) throws -> URL {
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "appcast-\(label)-\(UUID().uuidString).json"
             )

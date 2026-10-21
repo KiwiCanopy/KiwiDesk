@@ -23,7 +23,8 @@ struct ListWindowsTests {
         windows: [ManagedWindow]
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-list-windows-\(UUID().uuidString)"
                 )

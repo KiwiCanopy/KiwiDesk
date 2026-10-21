@@ -12,7 +12,7 @@ struct MachineConfigTests {
     private let stamp = DesktopIdentity(raw: "STAMP-M")
 
     private func scratch() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-machine-\(UUID().uuidString)")
     }
 

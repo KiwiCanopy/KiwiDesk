@@ -53,8 +53,8 @@ struct BootWindowRuleReconcileTests {
     /// a counter on the reconcile's own AX call.
     private func makeScannedCore() -> (KiwiCore, CountBox) {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-836-\(UUID().uuidString)"
                 )

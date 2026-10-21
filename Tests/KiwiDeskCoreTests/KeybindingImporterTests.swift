@@ -212,7 +212,8 @@ private final class CapturingRegistrar: HotkeyRegistrar {
 struct KeybindingImporterIntegrationTests {
     @Test("Recovers combos and bodies from a real file")
     func recoversFromFile() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-import-\(UUID())")
         try FileManager.default.createDirectory(
             at: dir,

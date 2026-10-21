@@ -65,7 +65,8 @@ struct ChangelogDownloadTests {
     private func entry(
         assets: [[String: Any]]
     ) throws -> [String: Any] {
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "changelog-releases-\(UUID().uuidString).json"
             )

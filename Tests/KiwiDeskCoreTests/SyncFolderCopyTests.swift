@@ -12,7 +12,7 @@ struct SyncFolderCopyTests {
     private let files = FileManager.default
 
     private func folder() throws -> URL {
-        let url = files.temporaryDirectory.appendingPathComponent(
+        let url = testTemporaryDirectory.appendingPathComponent(
             "kiwi-sync-\(UUID().uuidString)"
         )
         try files.createDirectory(at: url, withIntermediateDirectories: true)

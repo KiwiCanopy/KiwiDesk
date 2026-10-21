@@ -15,7 +15,8 @@ import Testing
 @MainActor
 struct VisibleBoundsResizeSeamTests {
     private func makeCore(bounds: CGRect) -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-bounds-\(UUID().uuidString)"
             )

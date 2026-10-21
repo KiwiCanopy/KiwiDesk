@@ -28,8 +28,8 @@ struct FloatRegionFitTests {
         frame: CGRect
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-floatregion-\(UUID().uuidString)"
                 )

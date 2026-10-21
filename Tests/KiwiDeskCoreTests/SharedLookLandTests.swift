@@ -17,7 +17,8 @@ struct SharedLookLandTests {
 
     private func guiCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-land-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

@@ -13,7 +13,8 @@ import Testing
 @MainActor
 struct NewerFormatLatchTests {
     private func scratch() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-latch-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

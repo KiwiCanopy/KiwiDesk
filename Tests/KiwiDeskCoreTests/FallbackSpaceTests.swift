@@ -10,8 +10,8 @@ import Testing
 @MainActor
 private func makeCore() -> KiwiCore {
     makeTestCore(
-        configDirectory: FileManager.default
-            .temporaryDirectory
+        configDirectory:
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-fallback-\(UUID().uuidString)"
             )

@@ -11,7 +11,7 @@ import Testing
 @MainActor
 struct AppWideBackupTests {
     private func directory() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-appwide-end-\(UUID().uuidString)")
     }
 

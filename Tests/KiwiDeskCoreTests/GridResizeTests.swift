@@ -15,8 +15,8 @@ import Testing
 struct GridResizeTests {
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-grid-resize-\(UUID().uuidString)"
                 )

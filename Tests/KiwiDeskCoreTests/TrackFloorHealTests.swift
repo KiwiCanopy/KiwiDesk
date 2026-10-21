@@ -145,7 +145,8 @@ struct TrackFloorHealTests {
 
     /// Two own-track windows on a pinned 1200×800 display.
     private func makeCore() -> (KiwiCore, SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-floor-heal-\(UUID().uuidString)"
             )

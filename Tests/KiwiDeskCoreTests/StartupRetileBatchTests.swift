@@ -16,8 +16,8 @@ struct StartupRetileBatchTests {
     @Test("a deferred burst places windows in one trailing pass")
     func deferredBurstRetilesOnce() {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-batch-\(UUID().uuidString)"
                 )

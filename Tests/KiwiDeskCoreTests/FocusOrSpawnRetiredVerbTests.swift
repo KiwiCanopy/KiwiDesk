@@ -12,7 +12,8 @@ struct FocusOrSpawnRetiredVerbTests {
     @Test("the CLI refuses the old verb and names the new one")
     func cliNamesTheReplacement() {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwidesk-\(UUID())")
         )
         let response = core.execute(
@@ -27,7 +28,8 @@ struct FocusOrSpawnRetiredVerbTests {
 
     @Test("init.lua's old call is an issue naming the new verb")
     func initLuaNamesTheReplacement() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-\(UUID())")
         try FileManager.default.createDirectory(
             at: dir,

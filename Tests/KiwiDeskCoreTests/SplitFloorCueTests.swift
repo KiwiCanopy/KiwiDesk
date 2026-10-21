@@ -17,7 +17,8 @@ import Testing
 @MainActor
 struct SplitFloorCueTests {
     private func makeCore(mode: String) -> (KiwiCore, SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-split-cue-\(UUID().uuidString)"
             )

@@ -10,7 +10,8 @@ import Testing
 struct SyncFolderDisplayTests {
     @Test("a symlinked folder keeps the name it was chosen by")
     func symlinkIsNotFollowed() throws {
-        let root = FileManager.default.temporaryDirectory
+        let root =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-sync-display-\(UUID().uuidString)")
         let target = root.appendingPathComponent("real-target")
         let link = root.appendingPathComponent("chosen-link")

@@ -18,8 +18,8 @@ import Testing
 struct DesktopBindingFitTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-fit-\(UUID().uuidString)"
                 )

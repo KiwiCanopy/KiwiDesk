@@ -75,7 +75,8 @@ struct ScrollGestureReachTests {
 
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-scroll-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())
@@ -251,7 +252,8 @@ struct ScrollGestureReloadTests {
     @Test("a reload drops a verb the file no longer declares")
     func reloadDropsARemovedVerb() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-reload-\(UUID().uuidString)")
         )
         core.onLog = { _ in }

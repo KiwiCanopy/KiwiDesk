@@ -41,7 +41,8 @@ struct HyperKeyLuaReloadTests {
     }
 
     private func core(_ lua: String) throws -> (KiwiCore, Host) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("hyper-lua-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         try FileManager.default.createDirectory(

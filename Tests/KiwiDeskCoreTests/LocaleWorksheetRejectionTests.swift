@@ -158,7 +158,8 @@ struct LocaleWorksheetRejectionTests {
     func siteRefusesUnderTheOverride(
         variable: String
     ) throws {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-worksheet-site-\(UUID().uuidString)"
             )
@@ -215,7 +216,8 @@ struct LocaleWorksheetRejectionTests {
         let before = try snapshot(of: fx.siteLocales)
         #expect(!before.isEmpty, "no site catalogs to protect")
 
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-worksheet-prune-\(UUID().uuidString)"
             )
@@ -267,7 +269,8 @@ struct LocaleWorksheetRejectionTests {
         locales files: [String: String],
         inspecting: ((URL) throws -> Void)? = nil
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-worksheet-check-\(UUID().uuidString)"
             )

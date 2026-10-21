@@ -22,8 +22,8 @@ import Foundation
 @MainActor
 func makeAuthorityCore() -> KiwiCore {
     makeTestCore(
-        configDirectory: FileManager.default
-            .temporaryDirectory
+        configDirectory:
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-core-\(UUID().uuidString)"
             )

@@ -118,7 +118,8 @@ struct CoreInitPathTests {
 
     @Test("the machine directory is created and holds the backups")
     func machineDirectoryHoldsBackups() throws {
-        let root = FileManager.default.temporaryDirectory
+        let root =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-init-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         let config = root.appendingPathComponent("config")

@@ -180,7 +180,8 @@ struct AppBarContentMigrationTests {
     @Test("the retired verbs fail and say why, naming no replacement")
     func verbsAreRetired() {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwidesk-\(UUID())")
         )
         for verb in [

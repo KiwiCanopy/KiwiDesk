@@ -14,8 +14,8 @@ struct ProfileListRulesApplyTests {
         staleSidecar: Bool = false
     ) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-list-rules-\(UUID().uuidString)"
                 )

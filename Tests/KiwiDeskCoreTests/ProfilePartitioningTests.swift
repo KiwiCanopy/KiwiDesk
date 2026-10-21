@@ -24,8 +24,8 @@ import Testing
 struct ProfilePartitioningTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-partition-\(UUID().uuidString)"
                 )

@@ -94,7 +94,8 @@ struct BorderSheenTests {
         defer { LiquidGlassGate.override = before }
         LiquidGlassGate.override = { true }
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-sheen-\(UUID().uuidString)")
         )
         core.tiler.visibleBounds = { _ in

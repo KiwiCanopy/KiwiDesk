@@ -176,7 +176,8 @@ private enum OverlapFixture {
         english: [String: String],
         catalogs: [String: [String: String]]
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-overlap-guard-\(UUID().uuidString)"
             )

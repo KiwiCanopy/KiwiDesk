@@ -14,8 +14,8 @@ import Testing
 struct SessionRatioOverrideTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-session-override-\(UUID().uuidString)"
                 )

@@ -29,8 +29,8 @@ struct FloatDropRefileTests {
         sticky: StickyScope = .none
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-float-drop-\(UUID().uuidString)"
                 )

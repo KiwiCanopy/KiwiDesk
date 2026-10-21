@@ -36,7 +36,8 @@ struct DesktopBindingRuleSweepTests {
         pinTwoDisplays()
         WMBridge.classResolverOverride = { desktopVerbBridgeClasses[$0] }
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-sweep-\(UUID().uuidString)")
         )
         core.state.workspaces.upsertDisplay(

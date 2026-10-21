@@ -26,7 +26,8 @@ struct LayoutBoundsResizeSeamTests {
         bounds: CGRect,
         edge: String
     ) -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-layoutbounds-\(UUID().uuidString)"
             )

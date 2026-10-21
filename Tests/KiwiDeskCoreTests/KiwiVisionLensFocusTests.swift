@@ -20,7 +20,8 @@ private enum LensNavFixture {
         windows: [(UInt32, String, String)]
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-lens-nav-\(UUID().uuidString)"
                 )

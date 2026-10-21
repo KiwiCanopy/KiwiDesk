@@ -27,7 +27,8 @@ struct ScrollingEdgeDropTests {
         mode: String,
         vertical: Bool = false
     ) -> (KiwiCore, SpaceID) {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-edge-drop-\(UUID().uuidString)"
             )

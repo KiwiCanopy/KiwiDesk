@@ -17,7 +17,8 @@ struct ToggleFloatingFlagTests {
 
     /// One window alone on Space 1, which is in floating mode.
     private func setup() -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in

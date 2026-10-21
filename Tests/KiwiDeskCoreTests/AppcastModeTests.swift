@@ -177,7 +177,8 @@ struct AppcastModeTests {
                 ]
             ],
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "appcast-notes-\(UUID().uuidString).json"
             )

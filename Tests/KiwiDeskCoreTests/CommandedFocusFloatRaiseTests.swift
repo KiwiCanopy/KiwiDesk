@@ -17,7 +17,8 @@ import Testing
 @MainActor
 struct CommandedFocusFloatRaiseTests {
     private func makeCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
         return makeTestCore(configDirectory: directory)
     }

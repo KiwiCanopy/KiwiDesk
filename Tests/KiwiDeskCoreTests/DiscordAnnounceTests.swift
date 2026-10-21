@@ -42,7 +42,8 @@ struct DiscordAnnounceTests {
             "body": body,
             "assets": assets,
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "discord-releases-\(UUID().uuidString).json"
             )

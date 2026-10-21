@@ -40,7 +40,8 @@ struct ReleaseNotesFeedParityTests {
     }
 
     private static func write(_ object: Any) throws -> URL {
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent("notes-parity-\(UUID()).json")
         try JSONSerialization.data(withJSONObject: object).write(to: file)
         return file

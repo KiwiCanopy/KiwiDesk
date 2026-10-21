@@ -15,7 +15,8 @@ extension Result {
 /// line ceiling (split-early convention).
 @MainActor
 private func makeCore() -> KiwiCore {
-    let directory = FileManager.default.temporaryDirectory
+    let directory =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-exec-dedup-\(UUID().uuidString)"
         )

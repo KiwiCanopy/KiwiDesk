@@ -61,7 +61,8 @@ struct GuiConfigParityTests {
     /// in (#2324), so a field dropped from either file reds here.
     @Test("Every sidecar global round-trips non-default")
     func globalsRoundTrip() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-parity-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: dir) }
         let store = GuiConfigStore(

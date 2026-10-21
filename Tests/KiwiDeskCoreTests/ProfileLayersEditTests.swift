@@ -16,8 +16,8 @@ struct ProfileModesEditTests {
 
     private func makeGuiCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-modesedit-\(UUID().uuidString)"
                 )

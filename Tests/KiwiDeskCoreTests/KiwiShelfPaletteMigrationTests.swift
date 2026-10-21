@@ -126,7 +126,8 @@ struct KiwiShelfPaletteMigrationTests {
     /// where the crossing reaches it.
     @Test("an exported sidecar is shelved on import")
     func sidecarImportShelves() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwishelf-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

@@ -14,7 +14,8 @@ import Testing
 struct SettingsLiveFollowerTests {
     private func makeModel() throws -> SettingsModel {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-follow-\(UUID().uuidString)")
         )
         for display in core.state.workspaces.allDisplays {

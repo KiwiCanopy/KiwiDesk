@@ -15,8 +15,8 @@ import Testing
 struct SessionRatioTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-session-\(UUID().uuidString)"
                 )

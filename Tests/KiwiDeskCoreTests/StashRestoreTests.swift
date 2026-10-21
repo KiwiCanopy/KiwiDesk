@@ -300,8 +300,8 @@ struct StashRestoreTests {
     @MainActor
     func rekeyCarriesCapture() {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-stash-rekey-\(UUID().uuidString)"
                 )

@@ -16,7 +16,8 @@ struct SpaceBarCollapsedPeekTests {
     /// Space 1 shown; Space 2 holds Mail twice and Web once.
     private func seededCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-peek-\(UUID().uuidString)")
         )
         for n in 1...2 {

@@ -80,7 +80,8 @@ struct SyncPlanTests {
 @Suite("A sync pass reads only the setup's names")
 struct SyncScanTests {
     private func folder(_ files: [String]) throws -> URL {
-        let root = FileManager.default.temporaryDirectory
+        let root =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-sync-scan-\(UUID().uuidString)")
         for file in files {
             let url = root.appendingPathComponent(file)

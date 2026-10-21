@@ -17,7 +17,8 @@ struct SharedLookLiveSaveTests {
 
     private func model() throws -> SettingsModel {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-livesave-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

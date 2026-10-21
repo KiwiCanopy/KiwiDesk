@@ -29,8 +29,8 @@ struct ZOrderCloseReturnArmTests {
 
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-close-arm-\(UUID().uuidString)"
                 )

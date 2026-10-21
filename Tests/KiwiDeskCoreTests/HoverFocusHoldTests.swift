@@ -57,7 +57,8 @@ struct HoverFocusHoldTests {
     /// the same rest focuses it once the hold is gone.
     @Test("A rest on a held window stands down")
     func heldWindowStandsDown() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-hold-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.tiler.visibleBounds = { _ in

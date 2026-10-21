@@ -34,7 +34,8 @@ struct ConfigMigrationWiringTests {
 
     /// A scratch config directory, cleaned up by the test.
     private func scratch() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-migration-\(UUID().uuidString)"
             )

@@ -19,8 +19,8 @@ struct DesktopDepartureStandDownTests {
             secondaryCurrent: 20
         )
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-departure-\(UUID().uuidString)"
                 )

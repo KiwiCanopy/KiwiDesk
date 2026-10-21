@@ -26,7 +26,8 @@ struct LaunchFollowTests {
     /// and a press 0.2 s before the activation unless the case
     /// says otherwise.
     static func makeCore(pressAge: TimeInterval? = 0.2) -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-launch-follow-\(UUID().uuidString)"
             )

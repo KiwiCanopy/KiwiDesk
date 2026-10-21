@@ -89,6 +89,9 @@ func runPythonScript(
 /// whatever is on the other end. A `bash` copy beside a `python3`
 /// copy would be exactly the "undrained pipe, missed `stderr`"
 /// drift `.claude/rules/tests.md` names.
+///
+/// The child's `TMPDIR` is always the run's root, whatever
+/// `environment` says (#2518).
 @discardableResult
 func spawn(
     _ launchPath: String,
@@ -99,9 +102,11 @@ func spawn(
     let process = Process()
     process.executableURL = URL(fileURLWithPath: launchPath)
     process.arguments = arguments
-    if let environment {
-        process.environment = environment
-    }
+    // A child's own temp files land in the run's root (#2518).
+    var childEnvironment =
+        environment ?? ProcessInfo.processInfo.environment
+    childEnvironment["TMPDIR"] = testTemporaryDirectory.path + "/"
+    process.environment = childEnvironment
     if let currentDirectory {
         process.currentDirectoryURL = currentDirectory
     }
@@ -236,7 +241,8 @@ func makeRepoShapedFixture(
     locales localeFiles: [String: String],
     siteLocales siteFiles: [String: String] = [:]
 ) throws -> RepoShapedFixture {
-    let root = FileManager.default.temporaryDirectory
+    let root =
+        testTemporaryDirectory
         .appendingPathComponent("\(prefix)-\(UUID().uuidString)")
     let fixture = RepoShapedFixture(
         root: root,

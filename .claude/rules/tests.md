@@ -67,7 +67,10 @@ bite large test PRs:
     than a second concern, and each states its own subject in its
     docstring: `+Worksheets` the third tree `extract-keys`
     writes outside every shipped directory, `+Unreleased` the
-    docs corpus `scripts/unreleased-strip` sweeps (#1232). The
+    docs corpus `scripts/unreleased-strip` sweeps (#1232),
+    `+Source` an inline Python source run from a directory
+    holding only it, since Python lists the script's directory
+    on every import (#2518, `PythonSourceIsolationTests`). The
     harm is the family's: `+Unreleased` hands back the pages it
     RE-READ from disk, and a copy that returned the fixture it
     was given instead would leave every corpus assertion in two
@@ -187,6 +190,24 @@ bite large test PRs:
     the divergence-weakens-a-guard basis the closing paragraph
     below names. The admission gate therefore has two grounds, not
     one — state both when weighing a further one.
+  - *test scratch* in `TestScratch.swift` —
+    `testTemporaryDirectory`, the run's private temp root, and
+    `makeScratchDefaults`, both named by the run's pid, removed
+    at its exit and swept by the next run when the process died
+    first. Twinned like `TestCore.swift` and admitted on its
+    OMISSION ground: one test reading the user temp dir or
+    minting its own defaults suite leaves litter every run, which
+    once slowed the Core target 7–15× (#2518).
+    Its state is per process and every name carries the pid
+    (each root a random suffix too, since both test modules load
+    into one process), so nothing couples one suite or one run
+    to another.
+    A test takes its scratch folder and defaults domain from it,
+    and the two script-spawn primitives hand their children its
+    root as `TMPDIR` — `TestScratchCensusTests` holds
+    the spellings, and its `literalTmp` map names the `/tmp`
+    paths a socket root keeps short for `sun_path` —
+    `MachineTouchTests` the twins.
   - *the fake WindowServer* in `ZOrderDrainFake.swift` — the late-
     landing, fake-clock window server the drain suites run
     against, shared by `ZOrderDrainTests` (#684) and
@@ -784,7 +805,9 @@ test` run needs that AGENTS.md §4 calls optional, which is why
 `SparkleKeyDerivationTests` carries an `.enabled(if:)` rather
 than redding a host without it — one inert `true` child when
 `FirstRunSeedTests`' executed hooks fixture fires, scratch
-`UserDefaults` suites cleaned on both sides, and one read-only
+`UserDefaults` suites from `makeScratchDefaults` (a plist cfprefsd
+writes after the exit sweep is the next run's to remove), and
+one read-only
 `NSScreen.screens` read per lifecycle suite that drives
 `EventLoop.beginScan()` with faked seams (`publishDisplays`; the
 suites set

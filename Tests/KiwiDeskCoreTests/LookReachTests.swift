@@ -15,7 +15,8 @@ struct LookReachTests {
 
     private func crossedCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-reach-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())
@@ -107,7 +108,8 @@ struct LookReachTests {
     @Test("with no shared look yet, opting in seeds it")
     func optInSeeds() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-reach-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

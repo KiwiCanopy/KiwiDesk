@@ -95,7 +95,8 @@ struct ScrollingFloatingFocusTests {
     @MainActor
     func floatingFocusEndToEnd() {
         guard NSScreen.main != nil else { return }
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )

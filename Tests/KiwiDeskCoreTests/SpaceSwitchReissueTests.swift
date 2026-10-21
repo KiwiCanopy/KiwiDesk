@@ -25,7 +25,8 @@ struct SpaceSwitchReissueTests {
     /// placement ledger, which every frame-set stamps (#1161) —
     /// the state frames stay put with no AX echo to move them.
     private func makeCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-switch-reissue-\(UUID().uuidString)"
             )

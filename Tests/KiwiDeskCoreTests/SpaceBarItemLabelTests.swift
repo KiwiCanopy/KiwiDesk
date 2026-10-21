@@ -17,7 +17,8 @@ struct SpaceBarItemLabelTests {
     /// one window each.
     private func seededCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-item-label-\(UUID().uuidString)"
                 )

@@ -11,7 +11,8 @@ import Testing
 struct ResetEscapeHatchTests {
     @Test("Discard removes both snapshot files and the memory")
     func discardArrangement() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-reset-\(UUID().uuidString)"
             )
@@ -69,7 +70,8 @@ struct ResetEscapeHatchTests {
     /// mentioned palettes at all (`code-reviewer`, 2026-08-17).
     @Test("Reset keeps the palette library, which names the action")
     func resetKeepsPalettes() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-reset-pal-\(UUID().uuidString)"
             )
@@ -101,7 +103,8 @@ struct ResetEscapeHatchTests {
 
     @Test("Reset reseeds first-launch state and keeps init.lua")
     func resetReseedsFirstLaunch() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-reset-\(UUID().uuidString)"
             )
@@ -187,7 +190,8 @@ struct ResetEscapeHatchTests {
     func resetMatchesFirstLaunch() throws {
         let files = FileManager.default
         func tempDir() throws -> URL {
-            let dir = files.temporaryDirectory
+            let dir =
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-reset-\(UUID().uuidString)"
                 )
@@ -249,7 +253,8 @@ struct ResetEscapeHatchTests {
     func luaOwnedResetSkipsLadder() throws {
         let files = FileManager.default
         func luaCore() throws -> KiwiCore {
-            let dir = files.temporaryDirectory
+            let dir =
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-reset-\(UUID().uuidString)"
                 )

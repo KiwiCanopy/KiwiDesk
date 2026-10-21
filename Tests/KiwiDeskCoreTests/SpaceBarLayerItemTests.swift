@@ -15,7 +15,8 @@ import Testing
 struct SpaceBarLayerItemTests {
     private static func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-layer-item-\(UUID().uuidString)"
                 )

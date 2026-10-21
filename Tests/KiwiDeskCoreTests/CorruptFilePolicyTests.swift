@@ -13,7 +13,8 @@ struct CorruptFilePolicyTests {
     private let corrupt = Data("{ not json".utf8)
 
     private func scratch() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-corrupt-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

@@ -17,7 +17,8 @@ private let testDisplay = CGRect(
 
 @MainActor
 private func makeCore() -> KiwiCore {
-    let dir = FileManager.default.temporaryDirectory
+    let dir =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-reach-\(UUID().uuidString)"
         )

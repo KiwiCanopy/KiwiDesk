@@ -59,7 +59,8 @@ struct GlobalsFieldParityTests {
 
         // What the store actually round-trips — `gui.json` and this
         // Mac's files composed (#2324).
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-globals-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: dir) }
         let store = GuiConfigStore(

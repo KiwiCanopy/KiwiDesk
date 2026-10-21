@@ -53,8 +53,8 @@ struct StartupSweepTests {
     @Test("the scheduled sweep task runs a reconcileAll")
     func sweepTaskReconciles() async {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-sweep-\(UUID().uuidString)"
                 )

@@ -6,7 +6,8 @@ import Testing
 
 @MainActor
 private func makeCore() -> KiwiCore {
-    let dir = FileManager.default.temporaryDirectory
+    let dir =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-floattier-\(UUID().uuidString)"
         )

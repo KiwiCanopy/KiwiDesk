@@ -12,7 +12,7 @@ import Testing
 @Suite("What's new (#1542)", .serialized)
 struct WhatsNewTests {
     private static func defaults() -> UserDefaults {
-        UserDefaults(suiteName: "WhatsNewTests.\(UUID())")!
+        makeScratchDefaults().defaults
     }
 
     private static func compare(_ a: String, _ b: String)

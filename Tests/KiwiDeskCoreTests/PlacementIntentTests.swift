@@ -40,7 +40,8 @@ struct PlacementIntentTests {
     private func makeFixture() -> (
         core: KiwiCore, target: WindowID, other: WindowID
     ) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-placement-intent-\(UUID().uuidString)"
             )

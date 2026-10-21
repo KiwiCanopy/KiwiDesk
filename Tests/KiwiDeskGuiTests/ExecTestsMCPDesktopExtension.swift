@@ -44,7 +44,7 @@ struct ExecTestsMCPDesktopExtension {
     }
 
     static func scratch() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-mcpb-\(UUID().uuidString)")
     }
 

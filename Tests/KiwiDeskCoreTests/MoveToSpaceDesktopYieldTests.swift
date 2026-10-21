@@ -17,8 +17,8 @@ import Testing
 struct MoveToSpaceDesktopYieldTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-move-\(UUID().uuidString)"
                 )

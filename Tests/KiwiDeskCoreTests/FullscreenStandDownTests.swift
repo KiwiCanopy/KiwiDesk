@@ -52,8 +52,8 @@ struct FullscreenStandDownTests {
     // process-global, and only one suite may serialize them.
     func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-fullscreen-\(UUID().uuidString)"
                 )

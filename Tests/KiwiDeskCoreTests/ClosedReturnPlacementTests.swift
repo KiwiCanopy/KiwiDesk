@@ -18,7 +18,8 @@ struct ClosedReturnPlacementTests {
     private func makeFixture() -> (
         core: KiwiCore, target: WindowID, other: WindowID
     ) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-closed-placement-\(UUID().uuidString)"
             )

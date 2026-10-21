@@ -15,7 +15,8 @@ struct RuleKeepDraftTests {
     @Test("only the rules the keep changed move, the draft's own stay")
     @MainActor func keptRulesMoveOnly() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-rulekeep-\(UUID().uuidString)")
         )
         var base = GuiConfig()

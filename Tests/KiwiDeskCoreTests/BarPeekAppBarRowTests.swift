@@ -13,7 +13,8 @@ import Testing
 @Suite("Bar peek App Bar rows", .serialized)
 struct BarPeekAppBarRowTests {
     private func makeCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         // Space 1 (active) holds 1 and 2; sticky 50 homes on Space 2
@@ -57,7 +58,8 @@ struct BarPeekAppBarRowTests {
     /// row's Space from state finds Space 2, where 60 IS a member,
     /// and switches to it; its item focuses it in place.
     private func makeTwoScreenCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.state.workspaces.assign("1", to: DisplayID(1))

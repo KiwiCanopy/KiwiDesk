@@ -30,8 +30,8 @@ struct FloatRegionBoundsTests {
 
     private func makeFloatCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-floatbounds-\(UUID().uuidString)"
                 )

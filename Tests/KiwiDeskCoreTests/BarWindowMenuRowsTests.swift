@@ -23,7 +23,8 @@ struct BarWindowMenuRowsTests {
     private func seededCore() -> KiwiCore {
         LocalizationManager.shared.select("en")
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-win-menu-\(UUID())")
         )
         core.state.workspaces.upsertDisplay(

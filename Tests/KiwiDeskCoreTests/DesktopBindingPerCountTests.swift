@@ -17,8 +17,8 @@ struct DesktopBindingPerCountTests {
 
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-count-\(UUID().uuidString)"
                 )

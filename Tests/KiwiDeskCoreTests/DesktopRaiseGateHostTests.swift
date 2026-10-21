@@ -23,8 +23,8 @@ struct DesktopRaiseGateHostTests {
     /// Two windows, 2 focused; 1 is the raise target.
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-raise-gate-host-\(UUID().uuidString)"
                 )

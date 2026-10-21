@@ -24,8 +24,8 @@ struct ResizeRefusalTargetingTests {
     /// against and the split strategy that shapes the tree.
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-bsp-refusal-\(UUID().uuidString)"
                 )

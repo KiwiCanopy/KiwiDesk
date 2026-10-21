@@ -127,7 +127,8 @@ struct MinWindowSizeOverrideTests {
     @Test("a reload drops a value init.lua no longer sets")
     func reloadDropsIt() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-2422-\(UUID().uuidString)")
         )
         let declare = "KiwiDesk.set_mode(\"monitoring\", \"grid\")\n"

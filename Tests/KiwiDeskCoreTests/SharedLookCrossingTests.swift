@@ -13,7 +13,8 @@ import Testing
 struct SharedLookCrossingTests {
     private func makeGuiCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-shared-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())
@@ -122,7 +123,8 @@ struct SharedLookCrossingTests {
     @Test("a Lua-owned config has no shared look")
     func luaOwnedCrossesNothing() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-shared-\(UUID().uuidString)")
         )
         try core.profiles.save(profile("Work"))

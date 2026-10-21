@@ -23,10 +23,9 @@ struct AppScanDepthTests {
     /// A root laid out like the real ones: a top-level app, one
     /// in a plain subfolder, and one nested INSIDE a bundle.
     private func fixture() throws -> URL {
-        let root = URL(
-            fileURLWithPath: NSTemporaryDirectory()
-        )
-        .appendingPathComponent("kiwi-scan-\(UUID().uuidString)")
+        let root =
+            testTemporaryDirectory
+            .appendingPathComponent("kiwi-scan-\(UUID().uuidString)")
         let manager = FileManager.default
         for path in [
             "Top.app",

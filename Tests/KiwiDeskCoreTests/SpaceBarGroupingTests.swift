@@ -15,7 +15,8 @@ struct SpaceBarGroupingTests {
 
     private func core(apps: [String]) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-tests-\(UUID().uuidString)"
                 )

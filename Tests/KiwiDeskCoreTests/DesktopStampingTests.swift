@@ -21,8 +21,8 @@ import Testing
 struct DesktopStampingTests {
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-stamp-\(UUID().uuidString)"
                 )

@@ -14,8 +14,8 @@ import Testing
 struct MenuBarRemeasureTests {
     private func makeCore(reads: ReadCount) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-1386-\(UUID().uuidString)"
                 )

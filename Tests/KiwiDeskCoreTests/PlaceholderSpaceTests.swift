@@ -12,7 +12,7 @@ import Testing
 @MainActor
 struct PlaceholderSpaceTests {
     private func directory() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-placeholder-\(UUID())")
     }
 

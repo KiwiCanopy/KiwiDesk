@@ -60,8 +60,8 @@ struct KiwiVisionAppearanceTests {
         clock: @escaping () -> Date = { start }
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-vision-appearance-\(UUID().uuidString)"
                 )

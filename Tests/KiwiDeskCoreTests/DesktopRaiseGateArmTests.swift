@@ -21,8 +21,8 @@ struct DesktopRaiseGateArmTests {
 
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-raise-gate-arms-\(UUID().uuidString)"
                 )

@@ -22,10 +22,8 @@ struct OtherWindowManagerAlertTests {
 
     @Test("silencing holds for that manager alone")
     func silenceIsPerManager() {
-        let name = "kiwi-test-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        defer { defaults.removePersistentDomain(forName: name) }
+        let (defaults, name) = makeScratchDefaults()
+        defer { TestScratch.remove(name) }
         #expect(!OtherWindowManagerSilence.isSilenced(aerospace, in: defaults))
         OtherWindowManagerSilence.silence(aerospace, in: defaults)
         OtherWindowManagerSilence.silence(aerospace, in: defaults)
@@ -109,10 +107,8 @@ struct OtherWindowManagerAlertTests {
 
     @Test("a silenced manager is never presented")
     func silencedIsNotPresented() {
-        let name = "kiwi-test-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        defer { defaults.removePersistentDomain(forName: name) }
+        let (defaults, name) = makeScratchDefaults()
+        defer { TestScratch.remove(name) }
         #expect(
             OtherWindowManagerAlert.shouldPresent(
                 aerospace,

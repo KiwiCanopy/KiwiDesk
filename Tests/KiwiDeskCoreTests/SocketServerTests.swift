@@ -257,7 +257,7 @@ struct SocketTests {
     }
 
     private static func throwawaySocketPath() -> String {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-\(UUID().uuidString.prefix(8)).sock"
             ).path

@@ -10,8 +10,8 @@ import Testing
 struct DragDropTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-drag-\(UUID().uuidString)"
                 )

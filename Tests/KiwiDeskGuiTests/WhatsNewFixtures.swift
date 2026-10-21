@@ -35,7 +35,7 @@ enum WhatsNewFixture {
         feed: [WhatsNewFeed.Item]?
     ) throws -> (WhatsNewCoordinator, WhatsNewRecord, Log) {
         let record = WhatsNewRecord(
-            UserDefaults(suiteName: "WhatsNewTests.\(UUID())")!
+            makeScratchDefaults().defaults
         )
         if let lastRun { record.markAnswered(lastRun) }
         let host = try FeedFixture.host(version: current)
@@ -115,7 +115,7 @@ enum FeedFixture {
                 ]
             },
         ]
-        let dir = FileManager.default.temporaryDirectory
+        let dir = testTemporaryDirectory
         let releasesFile = dir.appendingPathComponent("wn-r-\(UUID()).json")
         let notesFile = dir.appendingPathComponent("wn-n-\(UUID()).json")
         try JSONSerialization.data(withJSONObject: releases)
@@ -139,7 +139,8 @@ enum FeedFixture {
     /// A throwaway bundle whose Info.plist carries the version and
     /// a feed URL — the coordinator reads both off its host.
     static func host(version: String) throws -> Bundle {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("wn-host-\(UUID()).bundle")
         let contents = dir.appendingPathComponent("Contents")
         try FileManager.default.createDirectory(

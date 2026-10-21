@@ -33,7 +33,8 @@ struct ScrollingAppCeilingTests {
     /// A scrolling space on a pinned 1200pt-wide display
     /// (#531), focused on the first of two windows.
     private func makeCore() -> (core: KiwiCore, space: SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-app-ceiling-\(UUID().uuidString)"
             )

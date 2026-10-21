@@ -23,15 +23,7 @@ func makeTestModel(
     core: KiwiCore? = nil,
     defaults: UserDefaults? = nil
 ) -> SettingsModel {
-    let domain =
-        defaults
-        ?? {
-            let name =
-                "kiwi-test-defaults-\(UUID().uuidString)"
-            let scratch = UserDefaults(suiteName: name)!
-            scratch.removePersistentDomain(forName: name)
-            return scratch
-        }()
+    let domain = defaults ?? makeScratchDefaults().defaults
     let model = SettingsModel(
         core: core ?? makeTestCore(),
         preferences: domain

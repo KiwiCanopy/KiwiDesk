@@ -11,7 +11,8 @@ import Testing
 @Suite("A composed Standard's own Space record (#1829)", .serialized)
 @MainActor
 struct StandardPartitioningTests {
-    private let directory = FileManager.default.temporaryDirectory
+    private let directory =
+        testTemporaryDirectory
         .appendingPathComponent("kiwi-standard-\(UUID().uuidString)")
 
     private func desk() throws -> (KiwiCore, Profile) {

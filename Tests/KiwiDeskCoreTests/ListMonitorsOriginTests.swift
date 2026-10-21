@@ -16,7 +16,8 @@ struct ListMonitorsOriginTests {
         _ displays: [Display]
     ) throws -> [UInt32: (x: Double, y: Double)] {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-list-monitors-\(UUID().uuidString)"
                 )

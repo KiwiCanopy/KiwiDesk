@@ -18,7 +18,8 @@ struct ControlKeyExtractionTests {
     private func makeFixture(
         _ swiftFiles: [String: String]
     ) throws -> (sources: URL, locales: URL, cleanup: () -> Void) {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-control-keys-\(UUID().uuidString)"
             )

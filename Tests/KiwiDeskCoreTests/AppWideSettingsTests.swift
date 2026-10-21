@@ -135,7 +135,7 @@ struct AppWideSettingsTests {
     }
 
     private func tempDirectory() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-appwide-\(UUID().uuidString)")
     }
 }

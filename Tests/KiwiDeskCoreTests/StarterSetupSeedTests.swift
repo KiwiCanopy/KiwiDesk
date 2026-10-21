@@ -20,7 +20,8 @@ struct StarterSetupSeedTests {
 
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-starter-\(UUID().uuidString)"
                 )

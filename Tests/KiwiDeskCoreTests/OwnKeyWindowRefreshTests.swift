@@ -17,8 +17,8 @@ import Testing
 struct OwnKeyWindowRefreshTests {
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-own-key-refresh-\(UUID().uuidString)"
                 )

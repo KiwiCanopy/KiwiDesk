@@ -176,7 +176,8 @@ struct DefaultShortcutGenerationTests {
         base: [KeyBinding]
     ) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-generation-topup-\(UUID().uuidString)"
                 )

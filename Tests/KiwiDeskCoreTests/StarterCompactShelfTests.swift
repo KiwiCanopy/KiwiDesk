@@ -74,7 +74,8 @@ struct StarterCompactShelfTests {
     @Test("first run seeds gui.json's shared look from Glass")
     func firstRunSeedsTheCompactLook() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-compact-\(UUID().uuidString)"
                 )

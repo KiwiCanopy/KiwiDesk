@@ -15,7 +15,8 @@ struct ExecTestsCLIZshCompletion {
     static func complete(_ words: [String], answer: [String]) throws
         -> (asked: [String], printed: [String])
     {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-zsh-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: directory,

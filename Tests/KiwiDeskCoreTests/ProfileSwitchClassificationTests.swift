@@ -22,8 +22,8 @@ import Testing
 struct ProfileSwitchClassificationTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-switchclass-\(UUID().uuidString)"
                 )

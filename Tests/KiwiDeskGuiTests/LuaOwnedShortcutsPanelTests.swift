@@ -26,8 +26,8 @@ struct LuaOwnedShortcutsPanelTests {
 
     private func loadedCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-lua-panel-\(UUID().uuidString)"
                 )

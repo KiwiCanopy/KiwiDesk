@@ -13,8 +13,8 @@ import Testing
 struct StickyFocusFollowTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-follow-\(UUID().uuidString)"
                 )

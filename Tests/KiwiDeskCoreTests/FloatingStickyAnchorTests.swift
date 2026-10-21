@@ -17,8 +17,8 @@ import Testing
 struct FloatingStickyAnchorTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-float-sticky-\(UUID().uuidString)"
                 )

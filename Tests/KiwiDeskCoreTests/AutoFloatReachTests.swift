@@ -14,7 +14,8 @@ struct AutoFloatReachTests {
 
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-autoreach-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

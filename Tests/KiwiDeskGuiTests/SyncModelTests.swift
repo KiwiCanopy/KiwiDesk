@@ -11,7 +11,8 @@ import Testing
 @MainActor
 struct SyncModelTests {
     private func emptyFolder() throws -> URL {
-        let url = FileManager.default.temporaryDirectory
+        let url =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-sync-model-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: url,
@@ -49,9 +50,7 @@ struct SyncModelTests {
 
     @Test("the sync folder lives in the model's preferences")
     func folderLivesInPreferences() throws {
-        let defaults = UserDefaults(
-            suiteName: "kiwi-sync-\(UUID().uuidString)"
-        )!
+        let defaults = makeScratchDefaults().defaults
         let model = makeTestModel(defaults: defaults)
         let folder = try emptyFolder()
         model.syncFolder = folder

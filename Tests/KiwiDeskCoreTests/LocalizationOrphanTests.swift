@@ -16,7 +16,8 @@ struct LocalizationOrphanTests {
         swift swiftFiles: [String: String],
         locales localeFiles: [String: String] = [:]
     ) throws -> (sources: URL, locales: URL, cleanup: () -> Void) {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-extract-keys-orphan-\(UUID().uuidString)"
             )

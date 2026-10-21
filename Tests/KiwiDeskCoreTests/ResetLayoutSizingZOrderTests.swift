@@ -23,7 +23,8 @@ import Testing
 struct ResetLayoutSizingZOrderTests {
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-reset-zorder-\(UUID().uuidString)"
                 )

@@ -178,7 +178,8 @@ struct DiscordAnnounceWorkflowTests {
             lines.firstIndex { $0.hasSuffix("run: |") }
         )
         let script = try dedented(lines[(start + 1)...])
-        let output = FileManager.default.temporaryDirectory
+        let output =
+            testTemporaryDirectory
             .appendingPathComponent("announce-\(UUID().uuidString)")
         try Data().write(to: output)
         defer { try? FileManager.default.removeItem(at: output) }

@@ -18,7 +18,8 @@ struct ResetLayoutSizingScopeTests {
     /// Space 1 is the active one.
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-reset-scope-\(UUID().uuidString)"
                 )

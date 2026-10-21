@@ -24,7 +24,8 @@ struct TrackResizeFoldTests {
     /// and w3 into one column — and stored weights 2 : 1 : 2
     /// from an earlier three-track arrangement.
     private func makeCore() -> (KiwiCore, SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-resize-fold-\(UUID().uuidString)"
             )

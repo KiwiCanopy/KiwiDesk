@@ -59,8 +59,8 @@ struct AdoptionHealScheduleTests {
 
     private func makeCore() -> (core: KiwiCore, box: Box) {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-heal-\(UUID().uuidString)"
                 )

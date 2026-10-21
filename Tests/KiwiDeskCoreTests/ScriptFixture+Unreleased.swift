@@ -39,7 +39,8 @@ func sweepFixtureCorpus(
     _ pages: [String: String],
     check: Bool = false
 ) throws -> SweptCorpus {
-    let root = FileManager.default.temporaryDirectory
+    let root =
+        testTemporaryDirectory
         .appendingPathComponent("unreleased-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: root) }
     for (name, body) in pages {

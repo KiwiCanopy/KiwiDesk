@@ -23,7 +23,8 @@ struct AppBarVisibilityTests {
         windows: [ManagedWindow]
     ) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-bar-visibility-\(UUID().uuidString)"
                 )

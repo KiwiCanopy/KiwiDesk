@@ -114,8 +114,8 @@ struct DesktopRowScreenTests {
         NativeSpaces.displayUUIDOverride = { _ in "UUID-A" }
         let model = makeTestModel(
             core: makeTestCore(
-                configDirectory: FileManager.default
-                    .temporaryDirectory
+                configDirectory:
+                    testTemporaryDirectory
                     .appendingPathComponent(
                         "kiwi-row-screen-\(UUID().uuidString)"
                     )

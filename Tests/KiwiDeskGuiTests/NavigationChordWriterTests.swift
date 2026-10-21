@@ -47,7 +47,8 @@ struct NavigationChordWriterTests {
     /// twice each.
     private func luaCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-chords-\(UUID().uuidString)")
         )
         try FileManager.default.createDirectory(

@@ -16,8 +16,8 @@ import Testing
 struct SpaceSwitchFocusHandoffTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-handoff-\(UUID().uuidString)"
                 )

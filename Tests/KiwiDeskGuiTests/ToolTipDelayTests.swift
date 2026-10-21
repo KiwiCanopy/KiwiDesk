@@ -11,19 +11,9 @@ import Testing
 /// launch actually installs it.
 @Suite("Tooltip delay")
 struct ToolTipDelayTests {
-    private static let suitePrefix = "kiwidesk.tests.tooltip."
-
-    /// A scratch suite cleaned on both sides: here, so a crashed
-    /// run cannot seed it, and in each test's `defer`.
-    private func scratchDefaults(_ name: String) -> UserDefaults {
-        clean(name)
-        return UserDefaults(suiteName: Self.suitePrefix + name)!
-    }
-
-    private func clean(_ name: String) {
-        UserDefaults().removePersistentDomain(
-            forName: Self.suitePrefix + name
-        )
+    /// Removed at the run's exit (`makeScratchDefaults`).
+    private func scratchDefaults() -> UserDefaults {
+        makeScratchDefaults().defaults
     }
 
     private func value(_ defaults: UserDefaults) -> Int? {
@@ -58,8 +48,7 @@ struct ToolTipDelayTests {
 
     @Test("no stored value: install stores ours and the marker")
     func storesWhenAbsent() {
-        let defaults = scratchDefaults("absent")
-        defer { clean("absent") }
+        let defaults = scratchDefaults()
         ToolTipDelay.install(into: defaults)
         #expect(value(defaults) == ToolTipDelay.milliseconds)
         #expect(marker(defaults) == ToolTipDelay.milliseconds)
@@ -69,8 +58,7 @@ struct ToolTipDelayTests {
     /// release, so a retune reaches it.
     @Test("our earlier value moves to the current one")
     func updatesOwnEarlierValue() {
-        let defaults = scratchDefaults("earlier")
-        defer { clean("earlier") }
+        let defaults = scratchDefaults()
         let earlier = ToolTipDelay.milliseconds + 450
         defaults.set(earlier, forKey: ToolTipDelay.key)
         defaults.set(earlier, forKey: ToolTipDelay.markerKey)
@@ -83,9 +71,7 @@ struct ToolTipDelayTests {
     /// or a marker naming another value — is the user's.
     @Test("a user's own delay wins", arguments: [nil, 700] as [Int?])
     func userValueWins(written: Int?) {
-        let name = "user.\(written.map(String.init) ?? "none")"
-        let defaults = scratchDefaults(name)
-        defer { clean(name) }
+        let defaults = scratchDefaults()
         defaults.set(1234, forKey: ToolTipDelay.key)
         if let written {
             defaults.set(written, forKey: ToolTipDelay.markerKey)

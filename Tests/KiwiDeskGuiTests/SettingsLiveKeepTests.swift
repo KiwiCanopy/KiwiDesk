@@ -69,7 +69,8 @@ struct SettingsLiveKeepTests {
     /// with Settings seeded from it.
     private func makeModel() throws -> SettingsModel {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-keep-\(UUID().uuidString)")
         )
         for display in core.state.workspaces.allDisplays {

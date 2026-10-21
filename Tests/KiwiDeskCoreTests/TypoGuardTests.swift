@@ -10,7 +10,8 @@ import Testing
 
 @MainActor
 private func makeCore(config: String? = nil) -> KiwiCore {
-    let directory = FileManager.default.temporaryDirectory
+    let directory =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwi-typo-\(UUID().uuidString)"
         )

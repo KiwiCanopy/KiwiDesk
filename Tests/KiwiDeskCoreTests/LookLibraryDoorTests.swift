@@ -81,7 +81,7 @@ struct LookLibraryDoorTests {
     }
 
     private func scratchFile() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("look-\(UUID().uuidString).json")
     }
 }

@@ -21,7 +21,8 @@ struct FloatRaiseRingRestackTests {
     }
 
     private func makeCore(_ orders: Orders) -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.borders.movePanel = { _, _ in false }

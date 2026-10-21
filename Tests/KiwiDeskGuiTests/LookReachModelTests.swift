@@ -13,7 +13,8 @@ import Testing
 struct LookReachModelTests {
     private func model() throws -> SettingsModel {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-lookreach-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

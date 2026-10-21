@@ -168,7 +168,8 @@ struct DiscardGuardHookTests {
     /// A repo with `a.txt` committed then modified, and an
     /// untracked `u.txt`.
     private func makeRepo() throws -> URL {
-        let repo = FileManager.default.temporaryDirectory
+        let repo =
+            testTemporaryDirectory
             .appendingPathComponent("discard-guard-\(UUID())")
         try FileManager.default.createDirectory(
             at: repo,
@@ -219,7 +220,8 @@ struct DiscardGuardHookTests {
             "tool_name": "Bash", "cwd": repo.path,
             "tool_input": ["command": command],
         ]
-        let input = FileManager.default.temporaryDirectory
+        let input =
+            testTemporaryDirectory
             .appendingPathComponent("discard-hook-\(UUID()).json")
         try JSONSerialization.data(withJSONObject: event)
             .write(to: input)

@@ -29,7 +29,8 @@ struct AppcastNotesTests {
     /// notes file it cannot parse must therefore fail.
     @Test("--release --check reads the notes it was given")
     func strictPathHonoursNotes() throws {
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "appcast-bad-notes-\(UUID().uuidString).json"
             )
@@ -67,7 +68,8 @@ struct AppcastNotesTests {
                 ]
             ],
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "appcast-strict-notes-\(UUID().uuidString).json"
             )
@@ -107,7 +109,8 @@ struct AppcastNotesTests {
                 ]
             ],
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "appcast-flank-\(UUID().uuidString).json"
             )

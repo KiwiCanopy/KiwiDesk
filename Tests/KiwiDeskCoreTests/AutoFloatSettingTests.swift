@@ -15,7 +15,8 @@ struct AutoFloatSettingTests {
 
     private func makeCore(lua: String? = nil) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-autofloat-\(UUID().uuidString)")
         )
         if let lua {

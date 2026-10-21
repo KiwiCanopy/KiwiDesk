@@ -23,7 +23,8 @@ struct BspFocusResizeTests {
     )
 
     private func makeCore() -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )

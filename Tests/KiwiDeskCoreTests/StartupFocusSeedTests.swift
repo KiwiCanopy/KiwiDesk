@@ -13,8 +13,8 @@ import Testing
 struct StartupFocusSeedTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-seed-\(UUID().uuidString)"
                 )

@@ -12,7 +12,7 @@ import Testing
 @MainActor
 struct AppWideCrossingEndTests {
     private func directory() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-appwide-end-\(UUID().uuidString)")
     }
 

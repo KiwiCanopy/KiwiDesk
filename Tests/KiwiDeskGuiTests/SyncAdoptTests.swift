@@ -17,7 +17,8 @@ struct SyncAdoptTests {
 
     private func setup() throws -> (KiwiCore, SettingsModel) {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-sync-adopt-\(UUID())")
         )
         core.onLog = { _ in }

@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDeskCore
 
 private func tempLockPath() -> String {
-    FileManager.default.temporaryDirectory
+    testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-lock-tests-\(UUID().uuidString)"
         )

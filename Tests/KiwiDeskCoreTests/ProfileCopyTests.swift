@@ -16,8 +16,8 @@ struct ProfileCopyTests {
 
     private func makeGuiCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-copy-\(UUID().uuidString)"
                 )

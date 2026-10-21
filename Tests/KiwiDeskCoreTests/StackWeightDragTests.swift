@@ -25,7 +25,8 @@ struct StackWeightDragTests {
     private let bounds = CGRect(x: 0, y: 0, width: 1920, height: 1080)
 
     private func makeCore() -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )

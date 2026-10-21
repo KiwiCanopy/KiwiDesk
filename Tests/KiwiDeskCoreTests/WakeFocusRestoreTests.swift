@@ -14,8 +14,8 @@ import Testing
 struct WakeFocusRestoreTests {
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-wake-focus-\(UUID().uuidString)"
                 )
