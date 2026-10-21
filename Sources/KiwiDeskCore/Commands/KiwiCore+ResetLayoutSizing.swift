@@ -31,7 +31,12 @@ extension KiwiCore {
             targets = [active]
         }
         for space in targets {
-            state.workspaces.withSpace(space) { $0.resetSizing() }
+            state.workspaces.withSpace(space) {
+                $0.resetSizing()
+                // The slots it re-divides are hidden under a
+                // maximized window (#2448).
+                $0.maximized = nil
+            }
         }
         // Only room is re-divided among windows already placed
         // (#593). A cleared track weight can change which windows

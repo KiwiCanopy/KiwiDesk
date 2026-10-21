@@ -21,6 +21,9 @@ extension KiwiCore {
         // gesture's life, so a Space Bar spring can't stash it
         // mid-drag (#372). Cleared at drop.
         tiler.dragExemptWindow = id
+        // A drag rearranges: it ends the window's maximize, and
+        // the drop's retile places it (#2448).
+        if endMaximize(of: id) { tiler.maximizeEndedByDrag = id }
         // Feed the Space Bar drop machine the live cursor. While a
         // bar target is armed (hover + pending spring), suppress
         // the in-space ghost/drop-zone — the drag is heading off

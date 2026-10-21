@@ -121,6 +121,7 @@ extension Space {
             let anchor = tiled[ranges[target].upperBound - 1]
             windows.removeAll { $0 == window }
             insert(window, after: anchor)
+            endMaximize()
             return true
         }
         guard counts[track] > 1 else { return false }
@@ -139,6 +140,7 @@ extension Space {
             windows.insert(window, at: 0)
             trackBreaks.insert(window)
         }
+        endMaximize()
         return true
     }
 
@@ -186,6 +188,7 @@ extension Space {
             windows[slot] = reordered[next]
             next += 1
         }
+        endMaximize()
         return true
     }
 }

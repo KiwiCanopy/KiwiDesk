@@ -300,6 +300,9 @@ struct RefusalCueSeamTests {
                 // A Hyper press with nothing to do (#2480): silent
                 // by ruling, on a window or else the shelf.
                 "KiwiCore+HyperBarePress.swift": 2,
+                // Maximize on a floating window (#2448): its only
+                // cue, so it announces.
+                "KiwiCore+Maximize.swift": 1,
             ],
             "found: \(callers)"
         )

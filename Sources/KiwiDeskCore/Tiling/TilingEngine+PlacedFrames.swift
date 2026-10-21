@@ -9,7 +9,8 @@ import CoreGraphics
 extension TilingEngine {
     /// The frames the retile issues: `calculatedFrames` with the
     /// split layouts' floor residue placed by the one
-    /// `SplitOverflow.placed` post-pass. A reader that acts on
+    /// `SplitOverflow.placed` post-pass and a maximized window
+    /// filling its screen (#2448). A reader that acts on
     /// where a window IS takes this; one that CLASSIFIES slots
     /// keeps `calculatedFrames` — `FrameSetReaderCensusTests` is
     /// the register, state-and-layout.md the argument (#934).
@@ -36,14 +37,20 @@ extension TilingEngine {
     ) -> [WindowID: CGRect] {
         var frames: [WindowID: CGRect] = [:]
         for placement in visiblePlacements(state: state) {
-            let computed = laidOut(
-                layoutInput(
-                    state: state,
-                    space: placement.space,
-                    screen: placement.screen
-                ),
-                placed: placed
+            let input = layoutInput(
+                state: state,
+                space: placement.space,
+                screen: placement.screen
             )
+            var computed = laidOut(input, placed: placed)
+            if placed {
+                computed = fillingMaximized(
+                    computed,
+                    input: input,
+                    on: placement.screen,
+                    state: state
+                )
+            }
             // Each visible space is a distinct space on a distinct
             // display, so their window sets are disjoint and the
             // union is lossless — the `new` tie-break never fires
@@ -88,7 +95,12 @@ extension TilingEngine {
         defer { monocleShownMembers = held }
         let input = layoutInput(state: state, space: space, screen: screen)
         return (
-            laidOut(input, placed: true),
+            fillingMaximized(
+                laidOut(input, placed: true),
+                input: input,
+                on: screen,
+                state: state
+            ),
             input.context.focused,
             input.context.usable
         )

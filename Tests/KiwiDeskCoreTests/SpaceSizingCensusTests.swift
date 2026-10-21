@@ -29,6 +29,7 @@ struct SpaceSizingCensusTests {
         "scrollRest": "the viewport's place, re-anchored by #966",
         "trackBreaks": "where the user broke the row (#128)",
         "handedBreaks": "a break's provenance (#1387)",
+        "maximized": "a window filling its screen, not a size (#2448)",
     ]
 
     /// Every property set away from its default — the census is
@@ -45,6 +46,7 @@ struct SpaceSizingCensusTests {
         space.handedBreaks = [w2]
         space.trackWeights = [w1: 1.5]
         space.sessionRatios.masterRatio = 0.6
+        space.maximized = w2
         return space
     }
 

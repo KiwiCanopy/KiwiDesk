@@ -96,6 +96,8 @@ struct ShortcutsFamilyRows {
             return [resizeRow(.shrinkHeight)]
         case .resetSizes:
             return [KeybindingCatalog.resetSizes]
+        case .maximize:
+            return [KeybindingCatalog.maximize]
         case .toggleFloating:
             return [KeybindingCatalog.toggleFloating]
         case .toggleSticky:

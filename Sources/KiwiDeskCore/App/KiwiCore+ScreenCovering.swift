@@ -82,11 +82,21 @@ extension KiwiCore {
     }
 
     /// Whether the shelf stands down on `display`: a native
-    /// fullscreen Space (#670) or a presentation in front. Both
+    /// fullscreen Space (#670), a presentation in front, or the
+    /// Space it shows holding a maximized window (#2448). Both
     /// bars ask this one answer.
     func shelfStandsDown(on display: DisplayID) -> Bool {
         !NativeSpaces.currentSpaceIsUser(display: display)
             || showsPresentation(on: display)
+            || showsMaximized(on: display)
+    }
+
+    /// Whether the Space `display` shows holds a maximized window.
+    func showsMaximized(on display: DisplayID) -> Bool {
+        guard let id = state.workspaces.activeSpace(on: display),
+            let space = state.workspaces[id]
+        else { return false }
+        return state.maximizedWindow(of: space) != nil
     }
 
     /// The same answer for a GUI surface on `screen` — the

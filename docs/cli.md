@@ -531,6 +531,7 @@ every lens with why it cannot turn on.
 | | `make_unsticky` | — |
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
+| | `toggle_maximized` | — the focused tiled window fills its screen, bars hidden, until called again |
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |

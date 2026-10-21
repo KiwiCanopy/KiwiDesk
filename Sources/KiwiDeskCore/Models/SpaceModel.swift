@@ -135,6 +135,10 @@ public struct Space: Sendable, Equatable {
     /// Session-only interactive resize ratio overrides
     /// (#458, `SessionRatios`).
     public var sessionRatios: SessionRatios
+    /// The member filling its screen until focus moves to another
+    /// tiled member or it leaves the tiled set (#2448); read
+    /// through `StateCoordinator.maximizedWindow(of:)`. Session-only.
+    public var maximized: WindowID?
 
     public init(
         id: SpaceID,
@@ -146,7 +150,8 @@ public struct Space: Sendable, Equatable {
         trackBreaks: Set<WindowID> = [],
         handedBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
-        sessionRatios: SessionRatios = SessionRatios()
+        sessionRatios: SessionRatios = SessionRatios(),
+        maximized: WindowID? = nil
     ) {
         self.id = id
         self.mode = mode
@@ -158,6 +163,7 @@ public struct Space: Sendable, Equatable {
         self.handedBreaks = handedBreaks
         self.trackWeights = trackWeights
         self.sessionRatios = sessionRatios
+        self.maximized = maximized
     }
 
     /// Clears this Space's SIZING — what `resize` accumulates:
@@ -257,7 +263,16 @@ public struct Space: Sendable, Equatable {
         trackWeights[window] = nil
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
-        if focused == window {
+        // A departing maximized window keeps its id: a Desktop
+        // departure returns to it, and `retireEndedMaximize` ends
+        // every other departure (#2448).
+        if focused == window, let maximized, maximized != window,
+            windows.contains(maximized)
+        {
+            // A window closing over a maximized one (a dialog)
+            // hands focus back to it, or the maximize ends (#2448).
+            focused = maximized
+        } else if focused == window {
             // The neighbor that slid into the removed slot — not
             // `windows.last` unconditionally, which yanked focus
             // across the whole scrolling row when a middle window
@@ -294,6 +309,7 @@ public struct Space: Sendable, Equatable {
             trackWeights[b] = weight
         }
         releaseScrollSlot()
+        endMaximize()
     }
 }
 

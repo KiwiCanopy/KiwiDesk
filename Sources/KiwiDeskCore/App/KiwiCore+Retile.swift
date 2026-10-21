@@ -52,6 +52,7 @@ extension KiwiCore {
         if sortTemporarySpaces() { spacesChanged = true }
         if spacesChanged { emitSpaceChange() }
         payOwedShortcutDrops()  // #1827
+        state.retireEndedMaximize()  // #2448
         // Ambient motion waits for the hand to rest (#804): the pass
         // is owed and re-run then; state, bars and rings move now.
         let asked = MotionGate.Owed(

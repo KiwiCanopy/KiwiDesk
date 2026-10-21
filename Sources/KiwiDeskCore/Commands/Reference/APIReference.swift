@@ -42,6 +42,7 @@ public enum APIReference {
             ("make_unsticky", "make_unsticky"),
             ("toggle_sticky", "toggle_sticky"),
             ("toggle_display_sticky", "toggle_display_sticky"),
+            ("toggle_maximized", "toggle_maximized"),
             ("override_sticky_reach", "override_sticky_reach"),
             ("resize", "resize"),
             ("move_to_track", "move_to_track"),

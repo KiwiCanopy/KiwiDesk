@@ -5470,6 +5470,56 @@ the grid's columns and its last cell spans the rest, so the
 columns line up in every row; re-dividing the short row would give
 its cells widths no column carries.
 
+:::unreleased
+### Maximize is one window for a while, not a layout (#2448)
+
+**Maximize fills the screen with one tiled window, without a
+macOS full-screen Desktop, and ends on two predicates rather
+than a list of events.** The green button enters a full-screen
+Desktop (#670) and its Option-click is the app's own zoom, which
+#1358 undoes on a tiled window, so Maximize is KiwiDesk's verb
+and frame: the screen's visible frame, gaps 0, the bars, the
+ring and the marks stood down on that screen. KiwiDesk cannot
+hide the menu bar or the Dock for another app's window, which
+is why the frame stops between them — Apple's Window ▸ Fill
+frame.
+
+Switching the Space to Monocle with the bars hidden was the
+other candidate and is refused: it retiles and parks every
+window on the Space, needs a remembered previous layout, shows
+in the Space Bar and Settings as a layout change, and re-anchors
+Scrolling and Stack. Maximize is a per-Space flag
+(`Space.maximized`) laid over the frames the retile ISSUES: the
+other windows stay where they are, the slots every reader
+classifies against are unchanged, and the layout keeps
+reserving the bar strip, so nothing reflows on return.
+
+It ends when focus lands on another TILED window of its Space —
+a focus key included, so focus-right puts it back rather than
+moving the maximize to the neighbour, which would be Monocle — or
+when the window leaves the tiled set. A float taking focus (a
+dialog, a palette) and a switch away and back keep it, since
+the state is the window's, as macOS full screen, AeroSpace's
+`fullscreen` and Rectangle's restore all keep theirs. A verb
+that rearranges the Space ends it first and then acts, rather
+than refusing: a swap or resize of a slot nobody can see would
+be a lie, and a refusal a dead key. The end is made at the write,
+so a verb that refuses ends nothing, and a drag puts the window
+back without a drop, since its gesture began at a frame that is
+no slot. A Desktop switch is no close (#1207): the Space goes on
+naming the departed window and the return finds it maximized,
+while a close or a minimize ends it. A profile change keeps no
+rule of its own: a maximize ends where the new arrangement
+changes its Space's layout or files the window elsewhere, and
+stands where both stay. A sticky window is
+refused, since it draws on other Spaces' layouts too. It
+survives KiwiDesk's own in-place restart and not a Quit. Its motion is the engine's
+ordinary frame animation, governed by `animations.on_window_resize`
+with no setting of its own. Named "Maximize": "Zoom" and "Fill"
+already mean other things in KiwiDesk's catalogs, and "Full
+Screen" promises a new Desktop.
+:::
+
 ### Spaces, profiles & config ownership
 
 **[Principle]**

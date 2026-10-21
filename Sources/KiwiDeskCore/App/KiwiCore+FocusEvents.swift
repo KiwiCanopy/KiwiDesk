@@ -272,6 +272,8 @@ extension KiwiCore {
         )
         let filedHere = payHiddenAppMove(focused: id)
         rememberHonoredFocus(id)
+        // Ends a maximize, drawn by the one pass below (#2448).
+        let endedMaximize = !state.retireEndedMaximize().isEmpty
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.
@@ -326,13 +328,17 @@ extension KiwiCore {
             // exempt above): one idempotent no-op pass, by
             // design. Our own raise's echo finishes that
             // command's pan, so it moves as user motion (#804).
+            let sizing: BatchSizing =
+                endedMaximize ? .allSpringSized : .mayInstantSize
             if selfEcho {
-                withUserMotion { retileWithScrollDuration() }
+                withUserMotion { retileWithScrollDuration(sizing: sizing) }
             } else {
-                retileWithScrollDuration()
+                retileWithScrollDuration(sizing: sizing)
             }
         } else if filedHere {
             retile(animated: true)
+        } else if endedMaximize {
+            retileEndingMaximize()
         }
         // Keep floats above the just-focused tiled window
         // (#418). Skipped on a self-echo so the raise's own

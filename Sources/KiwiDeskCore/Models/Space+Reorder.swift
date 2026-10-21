@@ -18,6 +18,14 @@ extension Space {
         scrollRest?.slot = nil
     }
 
+    /// Ends the maximize: a write that rearranges the row moves a
+    /// slot the maximized window hides (#2448). Every order write
+    /// calls it — the ones that release the scroll slot and the
+    /// mode-bound stack and track writes alike.
+    public mutating func endMaximize() {
+        maximized = nil
+    }
+
     /// Moves window to clamped target index. A reorder, so it
     /// releases; an ARRIVAL seats through `insert` and keeps the
     /// slot (#1353).
@@ -29,6 +37,7 @@ extension Space {
         let clamped = min(max(index, 0), windows.count)
         windows.insert(window, at: clamped)
         releaseScrollSlot()
+        endMaximize()
     }
 
     /// Rewrites the order of the `tiled` members to `stream`,
@@ -49,5 +58,6 @@ extension Space {
             tiled.contains(id) ? (reordered.next() ?? id) : id
         }
         releaseScrollSlot()
+        endMaximize()
     }
 }

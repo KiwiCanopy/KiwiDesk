@@ -145,6 +145,9 @@ struct CoreLocalizationBoundaryTests {
         // A Hyper press with nothing to do (#2480), on the pill
         // Core draws.
         "App/KiwiCore+HyperBarePress.swift": 1,
+        // Maximize refused on a floating window (#2448), on the
+        // pill Core draws.
+        "App/KiwiCore+Maximize.swift": 2,
         // A lens's default reminder, on the hold pill Core draws
         // (#2103 ruling 42a).
         "App/KiwiCore+VisionHold.swift": 1,

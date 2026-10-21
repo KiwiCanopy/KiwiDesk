@@ -212,8 +212,14 @@ extension StateCoordinator {
     /// classification; only a departed window can carry it, so a
     /// minimize or an unfiled removal marks nothing.
     mutating func rememberClosedDeparture(_ id: WindowID) {
-        guard case .departed? = rememberedSpaces[id] else { return }
+        guard case .departed(let space)? = rememberedSpaces[id] else {
+            return
+        }
         closedDepartures.insert(id)
+        // A close is no Desktop departure: its maximize ends (#2448).
+        if workspaces[space]?.maximized == id {
+            workspaces.withSpace(space) { $0.maximized = nil }
+        }
     }
 
     /// Retires a window closed while away (#1146): the ledger

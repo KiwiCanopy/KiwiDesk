@@ -29,6 +29,11 @@ extension KiwiCore {
         let glass = LiquidGlassGate.rendered(
             glass: tiler.settings.stickyStyle.liquidGlass
         )
+        let maximized = Set(
+            state.workspaces.allSpaces.compactMap {
+                state.maximizedWindow(of: $0)
+            }
+        )
         return state.windows.all.compactMap { window in
             var glyphs: [StickyMarkManager.Glyph] = []
             if stickyMark, window.isSticky {
@@ -44,8 +49,9 @@ extension KiwiCore {
                 glyphs.append(.floating(color: floating.color))
             }
             // A presenting window wears no mark over its show
-            // (#1788) — asked last, of a marked window alone.
-            guard !glyphs.isEmpty,
+            // (#1788), nor a maximized one (#2448) — asked last,
+            // of a marked window alone.
+            guard !glyphs.isEmpty, !maximized.contains(window.id),
                 !presents(window.id, at: window.frame)
             else { return nil }
             return StickyMarkManager.Spec(

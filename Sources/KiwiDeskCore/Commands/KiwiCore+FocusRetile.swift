@@ -33,18 +33,22 @@ extension KiwiCore {
     ///
     /// Safe to call on MainActor: `retile()` is synchronous and
     /// reads `durationMS` at call time, so the transient swap
-    /// cannot race anything.
-    func retileWithScrollDuration() {
+    /// cannot race anything. `sizing` is the caller's promise
+    /// (#593): a focus that ended a maximize promises spring
+    /// sizing (#2448).
+    func retileWithScrollDuration(
+        sizing: BatchSizing = .mayInstantSize
+    ) {
         if activeSpace?.mode == .scrolling,
             tiler.settings.animations.onScrolling
         {
             let saved = tiler.animation.durationMS
             tiler.animation.durationMS =
                 tiler.animation.scrollDurationMS
-            retile(animated: true)
+            retile(animated: true, sizing: sizing)
             tiler.animation.durationMS = saved
         } else {
-            retile(animated: focusRetileAnimated)
+            retile(animated: focusRetileAnimated, sizing: sizing)
         }
     }
 }

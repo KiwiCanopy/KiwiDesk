@@ -114,6 +114,8 @@ extension KiwiCore {
         frame: CGRect
     ) {
         tiler.dragExemptWindow = nil
+        let endedMaximize = tiler.maximizeEndedByDrag == id
+        tiler.maximizeEndedByDrag = nil
         // Whether this gesture live-crossed displays (#504);
         // ends the crossing bookkeeping either way. A crossed
         // gesture is a MOVE for the resize gate below.
@@ -207,6 +209,14 @@ extension KiwiCore {
         // a resize. Same-display drops fall through (relocate
         // returns false when the destination is the origin space).
         if relocateAcrossDisplay(id, onto: target, from: space) {
+            return
+        }
+        // A same-display gesture that started maximized measured
+        // from the screen-filling frame, never a slot: the drop puts
+        // the window back rather than reading a swap or a resize off
+        // it (#2448). A crossed one is a move like any other.
+        if endedMaximize, !crossedDisplays {
+            retileEndingMaximize()
             return
         }
         // A gesture that live-crossed displays (#504) skips the

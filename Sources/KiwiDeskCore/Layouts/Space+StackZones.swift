@@ -13,6 +13,7 @@ extension Space {
             boundary - 1 < windows.count
         else { return }
         windows.swapAt(index, boundary - 1)
+        endMaximize()
     }
 
     /// Moves a master-zone window into the stack zone by
@@ -27,5 +28,6 @@ extension Space {
             boundary < windows.count
         else { return }
         windows.swapAt(index, boundary)
+        endMaximize()
     }
 }

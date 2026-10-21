@@ -190,6 +190,23 @@ struct BatchSizingRoutingTests {
         // in one dispatch. Slots and membership never move.
         "KiwiDeskCore/Commands/KiwiCore+ResetLayoutSizing.swift":
             Site(names: 1, promises: 1),
+        // Maximize (#2448): one already-placed window grows to its
+        // screen or shrinks back to its slot — the toggle, a focus
+        // or a drag that ends it — and no slot or membership moves.
+        // A focus pass places no newcomer: its creation's own pass
+        // did.
+        "KiwiDeskCore/App/KiwiCore+Maximize.swift":
+            Site(names: 2, promises: 1),
+        // The focus paths: a focus that ended a maximize promises
+        // spring sizing on the pass that already pans (#2448) —
+        // the window shrinks in place; a newcomer was placed by its
+        // own creation pass. The retile wrapper threads it.
+        "KiwiDeskCore/App/KiwiCore+FocusEvents.swift":
+            Site(names: 7, promises: 1),
+        "KiwiDeskCore/Commands/KiwiCore+FocusRaise.swift":
+            Site(names: 2, promises: 1),
+        "KiwiDeskCore/Commands/KiwiCore+FocusRetile.swift":
+            Site(names: 6, promises: 0),
     ]
 
     /// Any spelling of the type — the argument label, the stored

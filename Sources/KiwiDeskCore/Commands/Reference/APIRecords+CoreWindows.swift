@@ -146,6 +146,10 @@ extension APIReference {
             "Flips the focused window between screen-sticky and "
                 + "off."
         ),
+        "toggle_maximized": APIRecord(
+            "Fills the screen with the focused tiled window until "
+                + "pressed again or focus moves on."
+        ),
         "override_sticky_reach": APIRecord(
             "Overrides Desktop reach for the focused sticky "
                 + "window; auto follows sticky.set_desktop_reach.",

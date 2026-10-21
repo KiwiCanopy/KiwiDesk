@@ -112,13 +112,15 @@ extension KiwiCore {
         // ring would show only at the corners: native fullscreen
         // (it keeps its home-space slot, no destroy fires) or a
         // presenting float (#1788). Travelers ARE included (a
-        // sticky window can go fullscreen).
+        // sticky window can go fullscreen). A maximized window
+        // fills its screen too (#2448).
+        let maximized = state.maximizedWindow(of: space)
         let fillsDisplay = Set(
             (space.windows + travelers).filter { id in
                 guard let window = state.windows[id] else {
                     return false
                 }
-                return window.isFullscreen
+                return window.isFullscreen || id == maximized
                     || presents(id, at: window.frame)
             }
         )
