@@ -48,6 +48,8 @@ struct CrossSessionSeamTests {
         #expect(
             stamps == [
                 "KiwiCore+SpaceCommands.swift": 1,
+                // The trade's two filings (#2509).
+                "KiwiCore+MoveWindow.swift": 1,
                 "StateCoordinator+SpaceMemory.swift": 1,
             ]
         )

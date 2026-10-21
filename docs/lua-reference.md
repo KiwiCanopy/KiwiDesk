@@ -179,6 +179,43 @@ never wraps at the ends, even with a wrap-focus toggle on.
 KiwiDesk.swap("right")
 ```
 
+:::unreleased
+A window id in place of the direction, as
+[`list_windows`](#list_windows) reports it, swaps the focused
+window with that window, and focus goes with your window wherever
+it lands — onto another screen, or into a Space no screen shows,
+which `swap` then switches to. A second id swaps the two named
+windows, neither of which needs the focus; focus stays where it
+is unless one of them lands in the Space you are on, which then
+focuses it. Two windows in different Spaces, on one screen or
+two, trade places: each takes the other's slot. A floating
+window, a window in native full screen and a sticky window that
+cannot change Space are refused.
+
+```lua
+KiwiDesk.swap(1234)
+KiwiDesk.swap(1234, 5678)
+```
+:::
+
+:::unreleased
+### swap_here
+
+**Expects:** a window id, as [`list_windows`](#list_windows)
+reports it.
+
+**Does:** brings that window into the focused window's slot and
+focuses it; you stay where you are, and the focused window takes
+the other window's place, in its Space or on its screen. Refused
+as for [`swap`](#swap).
+
+**Example:**
+
+```lua
+KiwiDesk.swap_here(1234)
+```
+:::
+
 ### focus_space
 
 **Expects:** a space identifier (number or string).

@@ -199,33 +199,32 @@ extension KiwiCore {
             ) {
                 return .ok()
             }
-            let crossedZones = crossesStackBoundary(
-                focused,
-                target,
-                in: space
-            )
-            state.workspaces.withSpace(space.id) {
-                $0.swap(focused, target)
-            }
-            retile(
-                animated: tiler.settings.animations.onWindowSwap
-            )
-            // A scrolling swap can push a window into an edge pile
-            // whose stacking then goes stale (#150); a track swap
-            // that fell through to the geometric search can
-            // scramble a track's overflow pile (#193); a stack swap
-            // that crosses the master boundary scrambles the
-            // cascade. All three gates are mode-exclusive.
-            if space.mode == .scrolling {
-                scheduleScrollingZOrderRestoreIfOverflowing()
-            } else if space.mode == .track {
-                scheduleTrackZOrderRestoreIfOverflowing()
-            } else if crossedZones {
-                scheduleZOrderRestore()
-            }
+            commitSwap(focused, target, in: space)
         } else {
             focusWindow(target, warp: warp)
         }
         return .ok()
+    }
+
+    /// Swaps two members of `space` in its row, retiles and arms
+    /// the z-order restore the swap owes — the one tail of the
+    /// directional swap and the window-id one (#2509).
+    func commitSwap(_ a: WindowID, _ b: WindowID, in space: Space) {
+        let crossedZones = crossesStackBoundary(a, b, in: space)
+        state.workspaces.withSpace(space.id) { $0.swap(a, b) }
+        retile(animated: tiler.settings.animations.onWindowSwap)
+        // A scrolling swap can push a window into an edge pile
+        // whose stacking then goes stale (#150); a track swap
+        // that fell through to the geometric search can
+        // scramble a track's overflow pile (#193); a stack swap
+        // that crosses the master boundary scrambles the
+        // cascade. All three gates are mode-exclusive.
+        if space.mode == .scrolling {
+            scheduleScrollingZOrderRestoreIfOverflowing()
+        } else if space.mode == .track {
+            scheduleTrackZOrderRestoreIfOverflowing()
+        } else if crossedZones {
+            scheduleZOrderRestore()
+        }
     }
 }

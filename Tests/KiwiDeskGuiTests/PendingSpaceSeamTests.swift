@@ -49,7 +49,7 @@ struct PendingSpaceSeamTests {
         (
             "fileMembership(window, into:",
             [
-                "KiwiCore+SpaceCommands.swift",
+                "KiwiCore+MoveWindow.swift",
                 "KiwiCore+DesktopMove.swift",
                 "KiwiCore+DesktopMoveSpace.swift",
                 "KiwiCore+SpaceBarDrop.swift",
@@ -78,11 +78,17 @@ struct PendingSpaceSeamTests {
             after: "func fileMembership(",
             in: source
         )
-        #expect(filing != nil)
-        #expect(filing?.contains("reanchorFloat(") == true)
+        let settle = SourceScan.declarationBody(
+            after: "func settleFiling(",
+            in: source
+        )
+        // The filing settles through the one helper the trade
+        // shares (#2509), and the helper carries the steps.
+        #expect(filing?.contains("settleFiling(") == true)
+        #expect(settle?.contains("reanchorFloat(") == true)
         // The move entry's placement (#1708) rides the same one
         // filing, or the Desktop routes lose it.
-        #expect(filing?.contains("placeEnteringFloat(") == true)
+        #expect(settle?.contains("placeEnteringFloat(") == true)
     }
 
     @Test("each wiring exists exactly once per named file")

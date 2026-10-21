@@ -11,7 +11,8 @@ extension Space {
     /// act on a static row — the pair must visibly trade places
     /// — where `follow` otherwise holds the focused window's
     /// place on screen (#966). The census of callers is this
-    /// file plus `swap`; `ScrollSlotReleaseSeamTests` holds that
+    /// file, `swap` and `replace` (#2509);
+    /// `ScrollSlotReleaseSeamTests` holds that
     /// no order write lives outside the model.
     public mutating func releaseScrollSlot() {
         scrollRest?.slot = nil

@@ -57,7 +57,14 @@ extension KiwiCore {
             }
             return .window(focused)
         }
-        let value = args[index]
+        return windowTarget(args[index])
+    }
+
+    /// The tracked window `value` names — the one parse of a
+    /// window id. Outside `commandTarget` only for an id that
+    /// sits where the record's `.window` argument cannot, the
+    /// first of `swap`'s two (#2509).
+    func windowTarget(_ value: JSONValue) -> CommandTarget {
         guard let spelled = value.stringValue else {
             return .refused(.fail("expected window id"))
         }
