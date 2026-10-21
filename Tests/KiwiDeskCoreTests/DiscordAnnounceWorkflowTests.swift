@@ -112,6 +112,11 @@ struct DiscordAnnounceWorkflowTests {
         // A rebuild, of one tag or of every release.
         #expect(try decide(merged("false", "v9.1.0")) == "")
         #expect(try decide(merged("true", "")) == "")
+        // A line merely quoting the ask, in a note or a reply.
+        let quoted =
+            try merged("false", "v9.1.0")
+            + "\n> Announce-Release: v9.1.0"
+        #expect(try decide(quoted) == "")
     }
 
     /// The body the sync step builds for a new PR, run from the
