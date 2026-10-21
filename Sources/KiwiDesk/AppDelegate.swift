@@ -122,6 +122,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.uiBridge.onOpenSettings = { [weak self] in
             self?.dashboard.show()
         }
+        // `restore_setup` replaced the files under an open
+        // Settings: it re-reads, as its own Restore… does (#2517).
+        core.uiBridge.onSetupRestored = { [weak self] in
+            self?.dashboardIfCreated?.reloadAfterRestore()
+        }
         // Hover focus fronts the own window its command focused
         // (#1869, #1281): AppKit's half, no Settings reload.
         core.mouse.rest.frontOwnWindow = { number in

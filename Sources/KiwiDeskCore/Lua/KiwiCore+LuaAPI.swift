@@ -216,5 +216,9 @@ public struct UIBridgeHooks {
         _ in
     }
 
+    /// `restore_setup` (#2517) replaced the setup under an open
+    /// Settings window, which re-reads it as its own Restore… does.
+    public var onSetupRestored: @MainActor () -> Void = {}
+
     public init() {}
 }

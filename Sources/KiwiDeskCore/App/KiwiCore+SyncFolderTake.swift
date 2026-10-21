@@ -49,7 +49,8 @@ extension KiwiCore {
                 let outcome = try replaceSetup(
                     with: bundle,
                     trash: trash,
-                    take: take
+                    take: take,
+                    initLua: nil
                 )
                 agreeOnFolder(folder)
                 return outcome

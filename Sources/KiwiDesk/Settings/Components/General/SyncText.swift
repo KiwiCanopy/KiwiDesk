@@ -132,7 +132,8 @@ enum SyncText {
                 "This Mac's settings come from your init.lua, so the "
                     + "folder's settings can't be applied here."
             )
-        case .unreadableSettings, .unreadablePalettes, .unreadableLooks:
+        case .unreadableSettings, .unreadablePalettes, .unreadableLooks,
+            .unreadableInitLua:
             return L(
                 "general.sync.refusal.unreadable_here",
                 "KiwiDesk can't read some of this Mac's settings, so "

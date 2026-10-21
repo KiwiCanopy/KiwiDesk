@@ -122,6 +122,10 @@ extension KiwiCore {
             return setHyperKey(args)
         case Self.takeOverHyperRemapCommand:
             return takeOverHyperRemap()
+        case Self.exportSetupCommand:
+            return runExportSetup(args)
+        case Self.restoreSetupCommand:
+            return runRestoreSetup(args)
         case "set_mode_cue":
             return setModeCue(args)
         case "set_space_cue":
