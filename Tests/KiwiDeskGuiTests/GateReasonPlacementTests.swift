@@ -80,6 +80,10 @@ struct GateReasonPlacementTests {
                 // #2228: the Space plate's switch, the same shape
                 // on KiwiShelf ▸ Show.
                 .spaceBar(.spaceCue),
+                // The Reveal row beside it greys while no bar hides:
+                // the bars' values sit above it, not that a reveal
+                // needs a hiding bar (owner ruling, 2026-10-21).
+                .kiwishelf(.revealStyle),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no

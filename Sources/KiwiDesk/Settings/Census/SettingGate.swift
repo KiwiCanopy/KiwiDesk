@@ -20,6 +20,9 @@ enum SettingRuntimeGate: Hashable {
     /// `init.lua` owns the config, so a General row that stores in
     /// `gui.json` has no store to write (#1741).
     case luaOwnsConfig
+    /// Every bar reads Always on every layout and screen, so no
+    /// bar ever reveals (owner ruling, 2026-10-21).
+    case noBarHides
     /// Space reset is inert when no overrides exist.
     case spaceHasNoOverrides
     /// macOS Reduce Motion greys animations card.

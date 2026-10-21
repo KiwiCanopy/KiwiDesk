@@ -111,9 +111,11 @@ extension ShelfOverlay {
 
     /// The room the reveal or retract about to play moves through,
     /// read off the motion it resolves to: a slide's run out over
-    /// the margin, a grow's the plate and the hovered mark, a fade's
-    /// none. A grow's clip is placed in the panel's coordinates, so
-    /// its room then holds still until it lands (`growing`).
+    /// the margin, a grow's the plate and the hovered mark, an
+    /// unfold's those grown by its springs' swing along the edge, a
+    /// fade's none. A grow's and a plate unfold's clip is placed in
+    /// the panel's coordinates, so its room then holds still until
+    /// it lands (`growing`).
     func openRevealRoom(entering: Bool) {
         guard let drawn else { return }
         growing = false
@@ -125,6 +127,35 @@ extension ShelfOverlay {
         case .morph(let morph):
             widenRoom(to: restRoom.union(morph.mark))
             growing = true
+        case .unfold(let stretch):
+            let length =
+                stretch.horizontal
+                ? stretch.plate.width : stretch.plate.height
+            widenRoom(
+                to: ShelfUnfold.room(
+                    restRoom.union(stretch.mark),
+                    travel: length / 2,
+                    bounce: ShelfUnfold.alongBounce,
+                    horizontal: stretch.horizontal
+                )
+            )
+            growing = true
+        case .spread(let spread):
+            let held = restRoom.union(
+                CGRect(origin: spread.mark, size: .zero)
+            )
+            let travel =
+                spread.horizontal
+                ? max(spread.mark.x - held.minX, held.maxX - spread.mark.x)
+                : max(spread.mark.y - held.minY, held.maxY - spread.mark.y)
+            widenRoom(
+                to: ShelfUnfold.room(
+                    held,
+                    travel: travel,
+                    bounce: ShelfUnfold.spreadBounce,
+                    horizontal: spread.horizontal
+                )
+            )
         case .fade:
             break
         }

@@ -1081,7 +1081,15 @@ a switch**, sits on KiwiShelf under the Space Bar switch, and
 neither Reduce Motion nor the animations master greys it. Reduce
 Motion drops only its fade (#2228).
 
-Nothing is exempt, including the marks whose movement carries
+:::unreleased
+Two bar motions keep playing under Reduce Motion, by the owner's
+ruling: a hidden shelf's reveal — slide, grow, unfold or fade — and its
+mark growing under the pointer. Both answer the user's own
+gesture, as the Dock's auto-hide does
+(`docs/design-decisions.md` ▸ The bars honour Reduce Motion).
+:::
+
+Nothing else is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
 put, so the sentence it belongs to is still marked, and the
 tour's progress row fills the same pips without the crossfade.

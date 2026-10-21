@@ -2824,15 +2824,23 @@ kiwishelf.set_reveal_duration(5)
 :::unreleased
 ### kiwishelf.set_reveal_style
 
-**Expects:** `"slide"` or `"grow"` (default `"slide"`).
+**Expects:** `"slide"`, `"grow"`, `"unfold"` or `"fade"`
+(default `"slide"`).
 
 **Does:** how an `"auto"` or `"hidden"` bar comes onto an edge
 that shows nothing else. `"slide"` brings the whole bar in from
 the screen's edge — out from under the menu bar where it shows —
 and back out; `"grow"` grows the bar out of its mark — from the
-screen edge where it has none — and back into it, and fades on a
-`"boxed"` shelf. A bar shown beside an `"always"` bar joins it
-instead, either way. With Reduce Motion on, both fade in place.
+screen edge where it has none — and back into it; `"unfold"`
+stretches the mark along the edge to the bar's length, then
+deepens it to the bar, and back; `"fade"` fades the bar in
+where it stands, and out. A `"hidden"` bar has no mark, so
+`"grow"` and `"unfold"` start from the middle of its screen edge.
+On a `"boxed"` shelf `"grow"`
+wipes across the boxes and `"unfold"` springs each box out of
+the mark to its place. A bar shown beside an `"always"` bar joins
+it instead, whichever style. Each plays with Reduce Motion on
+too.
 
 **Example:**
 

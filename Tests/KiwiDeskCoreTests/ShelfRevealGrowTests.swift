@@ -19,7 +19,6 @@ struct ShelfRevealGrowTests {
 
     private func morph(entering: Bool) -> ShelfGrow.Morph? {
         let motion = BarMotion.revealMotion(
-            reduceMotion: false,
             entering: entering,
             path: .init(
                 kind: .grow,
@@ -51,11 +50,13 @@ struct ShelfRevealGrowTests {
         #expect(morph.plateStart >= morph.itemsStart + morph.itemsLength)
     }
 
-    @Test("A grow with no plate cross-fades, and its mark with it")
-    func platelessGrowFades() {
+    /// Boxed draws no plate, so a grow wipes over the boxes and an
+    /// unfold spreads them (owner ruling, 2026-10-21); a grow with no
+    /// plate at all — a shelf not yet shown — cross-fades.
+    @Test("Boxed grows as a wipe and spreads its unfold")
+    func boxedKinds() {
         #expect(
             BarMotion.revealMotion(
-                reduceMotion: false,
                 entering: true,
                 path: .init(kind: .grow, origin: Self.mark)
             ) == .fade(BarMotion.revealFade)
@@ -63,20 +64,22 @@ struct ShelfRevealGrowTests {
         var shelf = KiwiShelf()
         shelf.revealStyle = .grow
         #expect(BarMotion.RevealKind(shelf) == .grow)
+        shelf.revealStyle = .unfold
+        #expect(BarMotion.RevealKind(shelf) == .unfold)
         shelf.backgroundStyle = .boxed
-        #expect(BarMotion.RevealKind(shelf) == .fade)
+        #expect(BarMotion.RevealKind(shelf) == .spread)
+        shelf.revealStyle = .grow
+        #expect(BarMotion.RevealKind(shelf) == .grow)
         shelf.revealStyle = .slide
         #expect(BarMotion.RevealKind(shelf) == .slide)
+        shelf.revealStyle = .fade
+        #expect(BarMotion.RevealKind(shelf) == .fade)
     }
 
     @Test("The mark lands with a grow's retract")
     func markLandsWithTheGrow() throws {
         let retract = try #require(morph(entering: false))
-        let back = BarMotion.markFade(
-            showing: true,
-            reveal: .grow,
-            reduceMotion: false
-        )
+        let back = BarMotion.markFade(showing: true, reveal: .grow)
         #expect(back.delay > 0)
         #expect(abs(back.delay + back.length - retract.length) < 1e-9)
     }

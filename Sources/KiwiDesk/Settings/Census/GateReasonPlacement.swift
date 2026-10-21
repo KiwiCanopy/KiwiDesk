@@ -80,7 +80,8 @@ extension SettingRuntimeGate {
             .loginItemServiceStatus, .autoStartServiceLoaded,
             .runningCopyTranslocated,
             .automaticInstallUnavailable, .luaOwnsConfig,
-            .spaceHasNoOverrides, .reduceMotion, .reduceTransparency,
+            .noBarHides, .spaceHasNoOverrides, .reduceMotion,
+            .reduceTransparency,
             .noBindingStore:
             return true
         case .orphanPinsExist, .screensDisconnected,
@@ -105,6 +106,10 @@ extension SettingRuntimeGate {
             .runningCopyTranslocated,
             .automaticInstallUnavailable, .noBindingStore,
             .luaOwnsConfig:
+            return false
+        case .noBarHides:
+            // The bars' values sit above it, but not that a reveal
+            // needs a hiding bar (owner ruling, 2026-10-21).
             return false
         case .editingStoredProfile, .screenCountMismatch:
             return true

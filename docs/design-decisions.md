@@ -14658,9 +14658,19 @@ edge draws at rest, never by the stored value: a Hidden bar shown
 by its shortcut onto an empty edge slides as an Auto one does,
 while one shown beside an Always sibling joins it (#1838), there
 being no edge to come from. One setting, `reveal_style`, picks
-slide or the earlier grow out of the mark for every reveal (owner
-ruling, 2026-10-21): the two read differently and neither is wrong,
-so the user keeps the one they like, and Slide is the default. The
+slide, the earlier grow out of the mark, unfold or fade for every
+reveal (owner rulings, 2026-10-21): they read differently and none
+is wrong, so the user keeps the one they like, and Slide is the
+default. Unfold stretches the mark along the edge to the plate's
+length on a spring and then deepens it to the plate while the
+items rise, and collapses back the same way — the motion the owner
+approved in a device demo, its numbers ported into `ShelfUnfold`
+rather than retuned. Fade cross-fades the bar where it stands, for
+a user who wants no travel at all; it is a choice, no longer what
+Reduce Motion falls back to. One picker serves Auto and Hidden
+alike: a Hidden bar has no mark, so Grow and Unfold start from a
+point at the middle of its screen side rather than offering a
+second set of styles per visibility. The
 panel stays still and the content travels inside it: moving the
 window frame lagged on the device, the compositor moving it per
 frame and the glass re-sampling, so for the slide's length the
@@ -14668,9 +14678,17 @@ panel's room runs out over the outer margin and its own edge clips
 the bar; a grow's clip is placed in the panel's coordinates, so
 its room — the plate and the mark it grows from — holds still
 until it lands. A grow on an edge with no mark, a Hidden bar's,
-starts at the middle of its screen side, and a Boxed shelf, having
-no plate to grow, fades. Reduce Motion cross-fades in place either
-way.
+starts at the middle of its screen side. A Boxed shelf has no
+plate, and both plate styles still apply to it (owner ruling,
+2026-10-21): a grow wipes its clip across the span of the boxes,
+and an unfold springs each box out of the mark to its slot, the
+farther ones a beat later, gathering the outer ones first. The
+spread moves each box's glass host, never the glass, which would
+drift from its tint (#2095). A fade alone read as cheap beside the
+other two, which is why the earlier cross-fade there is gone. The
+reveal plays under Reduce Motion too, and so does the mark's hover
+growth (owner ruling, 2026-10-21; ▸ The bars honour Reduce Motion
+argues why).
 
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing
@@ -15596,6 +15614,30 @@ not decoration in either case.
 The engineering half — one home, `BarMotion`, and the guards
 that keep the bars routed through it — is
 `.claude/rules/bars.md` ▸ the bars start motion in one file.
+
+:::unreleased
+**Two bar motions play under Reduce Motion: a hidden shelf's
+reveal and its mark's hover growth** (owner ruling, 2026-10-21).
+The two rulings above stand for every other bar motion; these two
+were cross-fades and an instant plate until the owner judged them
+on the device. The argument is the one the held-key resize took
+(▸ A held resize chord glides, its Reduce Motion paragraph): Reduce
+Motion asks the app to stop moving things the user did not move,
+and both of these answer the user's own pointer or shortcut. A
+hidden bar sliding or growing in is the bar answering a push
+against the edge, which is why macOS's own Dock auto-hide still
+slides under the setting; a cross-fade in its place read as a
+glitch rather than a calmer motion — "otherwise it looks too
+cheap". The hover growth is the same answer at a smaller size:
+without its travel the plate popped under the pointer. Both stay
+short and settle once — no loop, no parallax, nothing in the
+corner of the eye. The rest of the bars' motion — an item run
+that changes width, the spring ring, the plate glide, the Space
+switch's dissolve — keeps standing down, since none of it answers
+a gesture the user is making. In code, the members that play these
+two are ruled in `BarMotionSeamTests`' `ungated` map, which may
+neither read the flag nor be added to without a ruling.
+:::
 
 **Space Bar drag-drop is a two-speed spring, not a blind
 relocate.** (#372.) Dragging a window onto a Space item either

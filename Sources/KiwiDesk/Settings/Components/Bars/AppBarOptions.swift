@@ -144,6 +144,8 @@ enum AppBarOptions {
         [
             (.slide, L("kiwishelf.reveal_style.slide", "Slide")),
             (.grow, L("kiwishelf.reveal_style.grow", "Grow")),
+            (.unfold, L("kiwishelf.reveal_style.unfold", "Unfold")),
+            (.fade, L("kiwishelf.reveal_style.fade", "Fade")),
         ]
     }
 

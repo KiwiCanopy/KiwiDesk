@@ -54,4 +54,19 @@ struct SpaceCuePlateTests {
         #expect(placement.container == .kiwishelf)
         #expect(placement.gate == .runtime(.luaOwnsConfig))
     }
+
+    /// The Reveal row sits under Each bar, ahead of the Space cue,
+    /// at rest rather than in the Style drawer (owner ruling,
+    /// 2026-10-21).
+    @Test("the Reveal row follows Each bar in the Show group")
+    func revealFollowsEachBar() {
+        let show = BarsRowOrder.kiwishelfShow
+        #expect(show.dropFirst().first == .kiwishelf(.revealStyle))
+        #expect(
+            !BarsRowOrder.kiwishelfStyle.contains(.kiwishelf(.revealStyle))
+        )
+        let placement = SettingKey.kiwishelf(.revealStyle).placement
+        #expect(placement.container == .kiwishelf)
+        #expect(placement.gate == .runtime(.noBarHides))
+    }
 }

@@ -54,14 +54,15 @@ final class ShelfOverlay {
     var leavingSlides = false
     /// The reveal in flight, whose landing alone ends its motion.
     var revealing: UUID?
-    /// A grow reveal or retract plays, so the room holds still.
+    /// A grow or plate unfold plays, so the room holds still.
     var growing = false
     /// The mark in the content's coordinates a grow grows out of,
     /// nil where the edge draws none (#761); set by `ShelfManager`.
     var revealOrigin: CGRect?
-    /// The plate a grow reaches, in the content's coordinates, with
-    /// its corner radius; nil where the shelf draws none, which
-    /// cross-fades instead (#761). Set by each show.
+    /// The plate a grow or an unfold reaches, in the content's
+    /// coordinates, with its corner radius — under Boxed the boxes'
+    /// span (#761, owner ruling 2026-10-21); nil before a show.
+    /// Set by each show.
     var revealPlate: (frame: CGRect, radius: CGFloat)?
     /// Lands a reveal or a retract after its length — the reveal's
     /// own timer; a test hands a queue it drains by hand.
@@ -189,13 +190,15 @@ final class ShelfOverlay {
             shelf: shelf
         )
         let radius = shelf.resolvedCornerRadius(forThickness: depth)
-        revealPlate = shelf.drawsPlate ? plate.map { ($0, radius) } : nil
         restRoom = Self.restingRoom(
             plate: plate,
             sections: sections,
             strip: strip,
             horizontal: horizontal
         )
+        // Boxed draws no plate: its grow wipes and its unfold spreads
+        // over the boxes' span.
+        revealPlate = (plate ?? restRoom, radius)
         let travels = BarMotion.shelfGlideLength > 0
         if glides, travels {
             standGlideStarts(sections, in: strip, horizontal: horizontal)

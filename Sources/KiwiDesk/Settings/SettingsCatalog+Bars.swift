@@ -33,6 +33,10 @@ struct BarsControls: Sendable {
         instance: "kiwishelf",
         children: KiwiShelfMarginControls()
     )
+    let kiwishelfRevealStyle = SettingsControl(
+        "kiwishelf.reveal_style.label",
+        "Reveal"
+    )
     let spaceCue = SettingsControl(
         "space_bar.cue",
         "Show the Space after a switch"
@@ -124,10 +128,6 @@ struct KiwiShelfStyleControls: Sendable {
     let kiwishelfStyleIconSource = SettingsControl(
         "kiwishelf.icon_source.label",
         "App glyph style"
-    )
-    let kiwishelfStyleRevealStyle = SettingsControl(
-        "kiwishelf.reveal_style.label",
-        "Reveal"
     )
 }
 

@@ -65,8 +65,17 @@ extension KiwiShelfKey {
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
-            .outerMargin, .innerMargin, .iconSource, .revealStyle:
+            .outerMargin, .innerMargin, .iconSource:
             return .row(.bars, .kiwishelf, .showMore)
+        case .revealStyle:
+            // In the Show group under Each bar, greyed while no bar
+            // hides (owner ruling, 2026-10-21).
+            return .row(
+                .bars,
+                .kiwishelf,
+                .atRest,
+                gate: .runtime(.noBarHides)
+            )
         case .backgroundFit:
             return .row(
                 .bars,

@@ -79,6 +79,33 @@ extension TilingSettings {
         LayoutMode.allCases.contains { revealActionLive(bar, in: $0) }
     }
 
+    /// Whether some bar ever hides, so a reveal can play — what
+    /// Settings' Reveal row asks to grey (owner ruling,
+    /// 2026-10-21): Hidden in some layout, or Auto where no Always
+    /// sibling keeps it shown on some screen (`autoReadsAlways`).
+    public var someBarHides: Bool {
+        let screens: [String?] =
+            [nil]
+            + Set(spaceBarStyle.edgeOverride.keys)
+            .union(appBarStyle.edgeOverride.keys).sorted()
+        let hides = {
+            (bar: ShelfBar, value: ShelfVisibility?, mode: LayoutMode)
+                -> Bool in
+            switch value {
+            case .hidden: return true
+            case .auto:
+                return screens.contains {
+                    !autoReadsAlways(bar, in: mode, on: $0)
+                }
+            case .always, nil: return false
+            }
+        }
+        return LayoutMode.allCases.contains { mode in
+            hides(.space, spaceBarStyle.visibility, mode)
+                || hides(.app, appBarVisibility(in: mode), mode)
+        }
+    }
+
     /// These settings as each screen they can draw on shows them
     /// (#1948): the bars' own edges, then every screen with an edge
     /// of its own. A reader asking whether a setting acts on SOME

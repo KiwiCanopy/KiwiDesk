@@ -72,6 +72,14 @@ struct BarsGateWiringTests {
                 "disabled:reason!=nil",
                 "BarsGateHelp.sentence(for:reason)",
             ],
+            // The Reveal row's grey while no bar hides (owner
+            // ruling, 2026-10-21), the grey it drives, and its
+            // sentence.
+            "Components/Bars/KiwiShelfCard+Reveal.swift": [
+                ".inertReason(for:.kiwishelf(.revealStyle))",
+                "GreyOut(active:reason!=nil)",
+                "BarsGateHelp.sentence(for:reason)",
+            ],
         ]
         for (path, needles) in consults {
             let source = try squashed(path)
@@ -176,6 +184,21 @@ struct BarsGateWiringTests {
             BarsGates.resolved
                 .isDisjoint(with: BarsGates.resolvedElsewhere)
         )
+    }
+
+    /// The Reveal row greys while every bar reads Always, and
+    /// stays live while one hides (owner ruling, 2026-10-21).
+    @Test("the Reveal row greys while no bar hides")
+    func revealGreysWhileNoBarHides() {
+        var settings = TilingSettings()
+        let key = SettingKey.kiwishelf(.revealStyle)
+        settings.setEveryBarVisibility(.always)
+        #expect(
+            BarsGates(settings: settings).inertReason(for: key)
+                == .noBarHides
+        )
+        settings.spaceBarStyle.visibility = .hidden
+        #expect(BarsGates(settings: settings).inertReason(for: key) == nil)
     }
 
     /// The Space cue's switch greys under a Lua-owned config and

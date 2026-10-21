@@ -28,6 +28,7 @@ struct BarMotionSeamTests {
     private static let homes = [
         "BarMotion.swift", "BarMotion+Fade.swift",
         "BarMotion+Reveal.swift", "BarMotion+Mark.swift",
+        "BarMotion+Unfold.swift", "BarMotion+Spread.swift",
     ]
 
     /// Ways to start AppKit or Core Animation motion. Type
@@ -76,64 +77,6 @@ struct BarMotionSeamTests {
             "animates only under StickyMarkOverlay's gate",
         "SizeLimitOverlay.swift":
             "gates at its own site; borders.md owns it",
-    ]
-
-    /// Every member of the home file, paired with what its body
-    /// must name. **The census is the fail-shut half**: a member
-    /// added to `BarMotion` reds until it is written down here,
-    /// which is what a hand-listed case list could not do — the
-    /// routing clause exempts the home file by design, so a
-    /// fourth ungated wrapper was invisible to every test in
-    /// both suites (guard-prover).
-    ///
-    /// An empty list claims the member starts no motion, and the
-    /// clause refuses that claim for one that does — so a new
-    /// starter cannot be admitted quietly, only with the gate it
-    /// names written beside it.
-    ///
-    /// It lists the members that OPEN A BODY, which is what
-    /// `memberBodies` returns: `slide` is a stored `let` and is
-    /// deliberately absent. That is the walker's stated residue
-    /// arriving here — a stored property whose initializer is a
-    /// closure could start motion out of this clause's reach —
-    /// and it is why `motionHasOneHome` scans the file's whole
-    /// text rather than only its members.
-    private static let members: [String: [String]] = [
-        "isReduced": [],
-        "runLayout": ["duration(", "isReduced"],
-        "duration": [],
-        "runPlateGlide": ["plateGlideDuration(", "isReduced"],
-        "plateGlideDuration": [],
-        "setFrame": ["travels(", "isReduced"],
-        "setAlpha": ["fades(", "isReduced"],
-        "fades": [],
-        "fadePeek": ["peekFadeDuration(", "isReduced"],
-        "peekFadeDuration": ["fades("],
-        "afterGroupGlide": ["plateGlideDuration(", "isReduced"],
-        "shelfGlideLength": ["plateGlideDuration(", "isReduced"],
-        "standCommitted": [],
-        "runDissolveOut": ["dissolveOutDuration(", "isReduced"],
-        "dissolveOutDuration": ["plateGlideDuration("],
-        "playWalk": ["walkDuration(", "isReduced"],
-        "walkDuration": [],
-        "walkAnimation": ["duration"],
-        "travels": [],
-        "springSweep": ["springAnimation(", "isReduced"],
-        "springAnimation": ["reduceMotion"],
-        "opacityFade": ["reduceMotion"],
-        "revealOffset": [],
-        "revealShift": [],
-        "revealMotion": ["reduceMotion"],
-        "resolvedReveal": ["revealMotion(", "isReduced"],
-        "playReveal": ["revealMotion(", "isReduced"],
-        "afterCommit": [],
-        "endReveal": [],
-        "afterReveal": [],
-        "markFade": ["reduceMotion"],
-        "fadeMark": ["markFade(", "isReduced"],
-        "hoverPlate": [],
-        "hoverGrowDuration": [],
-        "placeHoverPlate": ["hoverGrowDuration(", "isReduced"],
     ]
 
     private static func stripped(_ home: String) throws -> String {
@@ -251,6 +194,10 @@ struct BarMotionSeamTests {
             names.count == Set(names).count,
             "an overload shares a census entry: \(names)"
         )
+        #expect(
+            Set(Self.ungated.keys).isSubset(of: Self.members.keys),
+            "an ungated ruling names no member: \(Self.ungated.keys)"
+        )
         for (name, body) in members {
             guard let needles = Self.members[name] else {
                 continue
@@ -266,6 +213,19 @@ struct BarMotionSeamTests {
                     Self.handsOnTheRead(body, to: decision),
                     "\(name) hands \(decision) something other than isReduced"
                 )
+            }
+            if Self.ungated[name] != nil {
+                #expect(
+                    !body.contains("isReduced")
+                        && !body.contains("reduceMotion"),
+                    "\(name) is ruled ungated but reads the flag"
+                )
+                #expect(
+                    Self.startsMotion(body)
+                        || needles.contains { body.contains($0) },
+                    "\(name) is ruled ungated but starts no motion"
+                )
+                continue
             }
             guard needles.isEmpty, Self.startsMotion(body) else {
                 continue
