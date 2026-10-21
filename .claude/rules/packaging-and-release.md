@@ -237,21 +237,35 @@ release the three clauses below keep out of the feed is missing
 from it too, and the notes link is what covers it.
 
 **A published release is announced on Discord from the same
-curated block (#1627).** `scripts/discord-announce` runs in a job
-of its own after the sync job is green — a re-run of a sync that
-failed after posting would otherwise post again, and a finished
-job is not re-run — on `release: published`, or on a dispatch
-that sets `announce`, which is how a release whose body was
-refused at publication gets its post once the body is fixed; a
-plain rebuild never posts. It reads the body through
-`changelog-sync`'s parser, never the generated list, and it may
-not fail the release: the page and the feed outrank a chat post,
-and an unset `DISCORD_RELEASE_WEBHOOK` skips with a notice
-(`DiscordAnnounceTests`). The webhook URL is the secret, so
-nothing prints it. A block with Spotlight rows posts the rows and
-not its sections; an uncut post closes on its changes counted in a
-sentence, a cut one on the line naming what was cut, both on how
-to get the update; no post carries a download link
+curated block (#1627), and only once a reader can get it
+(#2521).** The post waits for the release sync PR to MERGE and
+for the site that merge deploys to SERVE the release:
+`.github/workflows/release-announce.yml` runs on that merge's
+push to `main`, reads the tag off the merge's subject, and waits
+for the bundle's `SUFeedURL` to list the version before
+`scripts/discord-announce` posts. Posting from the sync workflow
+put v3.2.0's post out while its PR was still open, so "Check for
+Updates" from the post answered "up to date" and the notes page
+lacked the release. Which merges post is decided by the sync
+job, which writes an `Announce-Release:` line into the PR body —
+the squash commit's body under the repository's squash-message
+setting (`PR_BODY`, observed 2026-10-21) — on `release:
+published`, or on a dispatch that sets `announce`, which is how a
+release whose body was refused at publication gets its post once
+the body is fixed;
+a plain rebuild never posts. A dispatch of the announce workflow
+posts a named tag behind the same feed wait — the way out when a
+merge fired no push workflow (a `github.token` merge). It reads
+the body through `changelog-sync`'s parser, never the generated
+list, and it may not fail a run a re-run would post again: the
+post step continues on error, and an unset
+`DISCORD_RELEASE_WEBHOOK` skips with a notice
+(`DiscordAnnounceTests`, `DiscordAnnounceWorkflowTests`). The
+webhook URL is the secret, so nothing prints it. A block with
+Spotlight rows posts the rows and not its sections; an uncut post
+closes on its changes counted in a sentence, a cut one on the line
+naming what was cut, both on how to get the update; no post
+carries a download link
 (`DiscordAnnounceSpotlightTests`, `DiscordAnnounceTests`).
 
 **Three clauses decide whether a release enters the feed, and

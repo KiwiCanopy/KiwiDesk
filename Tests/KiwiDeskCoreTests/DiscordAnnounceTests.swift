@@ -7,7 +7,8 @@ import Testing
 /// count where there are not — never the generated list — closed
 /// by a counted sentence linking the notes and how to update, cut
 /// at a section boundary to fit an embed, and never failing the
-/// release sync when the webhook is absent.
+/// release when the webhook is absent. Where the post runs is
+/// `DiscordAnnounceWorkflowTests`'.
 ///
 /// Driven through `--dry-run` over a releases fixture, so no test
 /// touches the network or the webhook.
@@ -246,44 +247,5 @@ struct DiscordAnnounceTests {
         let result = try run(body: "No curated block at all.")
         #expect(result.status != 0)
         #expect(result.stderr.contains("no `## Highlights` block"))
-    }
-
-    /// Publication only, and never able to fail the sync: a
-    /// dispatch rebuild would announce an old release again.
-    @Test("the workflow posts on publication and never blocks")
-    func workflowGuardsThePost() throws {
-        let yaml = try String(
-            contentsOf: scriptFixtureRepoRoot()
-                .appendingPathComponent(".github/workflows/changelog.yml"),
-            encoding: .utf8
-        )
-        let step = try #require(
-            ReleaseSyncTokenTests.steps(in: yaml).first {
-                $0.contains("scripts/discord-announce")
-            }
-        )
-        #expect(step.contains("continue-on-error: true"))
-        #expect(
-            step.contains(
-                "DISCORD_RELEASE_WEBHOOK: "
-                    + "${{ secrets.DISCORD_RELEASE_WEBHOOK }}"
-            )
-        )
-        // Its own job, after the sync: a re-run of a failed sync
-        // must not post again, and nothing posts before the sync
-        // proved the notes.
-        let job = try #require(
-            yaml.components(separatedBy: "\n  announce:\n").last
-        )
-        #expect(yaml.contains("\n  announce:\n"))
-        #expect(job.contains("needs: sync"))
-        #expect(job.contains("github.event_name == 'release'"))
-        #expect(job.contains("inputs.announce && inputs.tag != ''"))
-        // A status function in the gate overrides `needs`, and
-        // the job would post after a failed sync.
-        let gate = job.components(separatedBy: "runs-on:").first ?? ""
-        for status in ["always()", "failure()", "cancelled()"] {
-            #expect(!gate.contains(status), "the gate spells \(status)")
-        }
     }
 }

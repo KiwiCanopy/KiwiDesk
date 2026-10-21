@@ -61,9 +61,10 @@ on:
         type: string
       announce:
         description: >-
-          Also post the tag to Discord (#1627). Only for a release
-          whose announcement never went out — a refused body
-          re-run after fixing it; a rebuild posts nothing.
+          Also post the tag to Discord (#1627) once this sync's
+          PR merges and the site serves it (#2521). Only for a
+          release whose announcement never went out — a refused
+          body re-run after fixing it; a rebuild posts nothing.
         required: false
         type: boolean
         default: false
@@ -273,6 +274,8 @@ jobs:
         env:
           GH_TOKEN: ${{ env.SYNC_TOKEN }}
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          ANNOUNCE: >-
+            ${{ github.event_name == 'release' || inputs.announce }}
         run: |
           set -euo pipefail
           SYNCED=(site/src/data/changelog.json
@@ -322,19 +325,36 @@ jobs:
           # a MERGED or CLOSED PR for the same branch name, and
           # treating that as "already open" would strand the new
           # commit with no PR and no failure.
+          # The post waits for this PR's merge to deploy
+          # (release-announce.yml, #2521). The squash merge takes
+          # this body as its commit body, and this line in it is
+          # what asks that workflow to post; a rebuild leaves it
+          # out and posts nothing.
+          ANNOUNCED=""
+          if [ "$ANNOUNCE" = "true" ] && [ -n "$TAG" ]; then
+            ANNOUNCED="
+
+          Announce-Release: $TAG"
+          fi
+          BODY="$MESSAGE
+
+          Merging this rebuilds the release-notes page AND puts
+          the new version in front of every installed copy — the
+          appcast is live the moment Cloudflare redeploys.$RETIRED$ANNOUNCED"
           STATE="$(gh pr view "$BRANCH" --json state \
             --jq .state 2>/dev/null || true)"
           if [ "$STATE" = "OPEN" ]; then
             echo "PR already open for $BRANCH — updated by push."
+            # A dispatch asking for the post onto an open PR
+            # opened without it: the body is what merges.
+            if [ -n "$ANNOUNCED" ]; then
+              gh pr edit "$BRANCH" --body "$BODY"
+            fi
           else
             gh pr create --base main --head "$BRANCH" \
               --title \
               "chore(site): sync release notes and feed for ${LABEL}" \
-              --body "$MESSAGE
-
-          Merging this rebuilds the release-notes page AND puts
-          the new version in front of every installed copy — the
-          appcast is live the moment Cloudflare redeploys.$RETIRED"
+              --body "$BODY"
           fi
 
           # Start CI by hand when — and only when — nothing
@@ -367,39 +387,3 @@ jobs:
             fi
             echo "auto-merge was already armed for $BRANCH."
           fi
-
-  # Announce the release on Discord (#1627). A job of its own,
-  # after the whole sync is green: "re-run failed jobs" on a sync
-  # that failed after the post would otherwise post again, and a
-  # finished job is not re-run. Publication, or a dispatch that
-  # asks — a refused body's fix is a dispatch, and without the
-  # input its release would never be announced. It never fails
-  # the release: the notes page and the feed outrank a chat post,
-  # and an unset webhook skips with a notice.
-  announce:
-    name: Announce the release on Discord
-    needs: sync
-    if: >-
-      github.event_name == 'release'
-      || (inputs.announce && inputs.tag != '')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Check out main
-        uses: actions/checkout@v7
-        env:
-          SYNC_TOKEN: ""
-        with:
-          ref: main
-          persist-credentials: false
-
-      - name: Post the curated notes
-        continue-on-error: true
-        env:
-          # `gh` reads the one home every step takes (#1154); this
-          # step only reads the release it announces.
-          GH_TOKEN: ${{ env.SYNC_TOKEN }}
-          TAG: ${{ github.event.release.tag_name || inputs.tag }}
-          DISCORD_RELEASE_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
-        run: python3 scripts/discord-announce --release "$TAG"

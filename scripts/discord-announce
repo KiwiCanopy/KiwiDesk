@@ -28,9 +28,9 @@ fork's run or a rotated webhook never fails the release sync. To
 see a real post, point that variable at a private channel's
 webhook and run the script locally against a published tag.
 
-`.github/workflows/changelog.yml` runs it in its own job after the
-sync is green, on `release: published` or a dispatch that sets
-`announce` — never on a plain rebuild.
+`.github/workflows/release-announce.yml` runs it once the release
+sync PR has merged and the deployed feed lists the release
+(#2521) — never for a plain rebuild's merge.
 """
 
 from __future__ import annotations
