@@ -114,6 +114,54 @@ struct AppBarLandingTests {
         #expect(itemMoves.contains(true))
     }
 
+    /// A box glass hosts its item, so on a new slot it snaps with
+    /// the run too: one gliding inside a section the shelf re-places
+    /// starts the box displaced and counter-glides — the App Bar's
+    /// budge when the Space Bar joins it on a Boxed glass shelf.
+    @Test(
+        "On a new slot the box glass snaps with its item",
+        .enabled(if: AppBarStyle.glassAvailable)
+    )
+    func newSlotSnapsTheBoxes() {
+        let overlay = AppBarOverlay()
+        var look = AppBarLook()
+        look.shelf.backgroundStyle = .boxed
+        look.shelf.liquidGlass = true
+        var hostMoves: [Bool] = []
+        overlay.moveFrame = { view, frame, animated in
+            if view is GlassBoxHost { hostMoves.append(animated) }
+            view.frame = frame
+        }
+        let items = [item(1), item(2)]
+        let strip = { (width: CGFloat) in
+            CGRect(x: 0, y: 0, width: width, height: 30)
+        }
+        overlay.show(
+            items: items,
+            activeIndex: nil,
+            strip: strip(900),
+            style: look
+        )
+        hostMoves = []
+        overlay.show(
+            items: items,
+            activeIndex: nil,
+            strip: strip(300),
+            style: look
+        )
+        #expect(!hostMoves.isEmpty)
+        #expect(!hostMoves.contains(true))
+        // The same slot again travels.
+        hostMoves = []
+        overlay.show(
+            items: items,
+            activeIndex: 1,
+            strip: strip(300),
+            style: look
+        )
+        #expect(hostMoves.contains(true))
+    }
+
     /// `contentFrame` is the drawn span in the section's own
     /// coordinates: the run's span moved by the run's origin AND the
     /// viewport's inset, which an overflowing run sets (#1837).

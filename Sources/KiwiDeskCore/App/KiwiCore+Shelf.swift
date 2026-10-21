@@ -120,7 +120,7 @@ extension KiwiCore {
                     carriesSpace: $0.arrangement.space != nil,
                     carriesApp: $0.arrangement.app != nil,
                     divider: $0.arrangement.divider,
-                    slides: $0.hides,
+                    slides: $0.slides,
                     mark: hiding.marks[
                         ShelfManager.Key(display: display.id, edge: $0.edge)
                     ]
@@ -184,8 +184,8 @@ extension KiwiCore {
         let carriesSpace: Bool
         let carriesApp: Bool
         var divider: ShelfArrangement.Divider? = nil
-        /// A hiding shelf's reveal, which grows out of its mark at
-        /// `mark` and back into it (#761).
+        /// A shelf revealed onto an empty edge (#761, #2497), and
+        /// the mark at `mark` a grow reveal grows out of.
         var slides = false
         var mark: CGRect? = nil
     }

@@ -67,6 +67,13 @@ extension SettingsValueReadout {
                 n.order,
                 AppBarOptions.order
             )
+        case .revealStyle:
+            return spaceBarChoiceRow(
+                census,
+                o.revealStyle,
+                n.revealStyle,
+                AppBarOptions.revealStyle
+            )
         case .minimum:
             return spaceBarRow(
                 census,

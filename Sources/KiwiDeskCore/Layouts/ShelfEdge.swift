@@ -64,6 +64,12 @@ public struct ShelfEdge: Sendable, Equatable {
     public var drawnAtRest: Set<ShelfBar> {
         Set(bars.keys.filter { shown($0) == .always })
     }
+
+    /// Whether the edge draws nothing at rest, so a bar a reveal
+    /// shows comes onto an empty edge and takes the reveal's own
+    /// motion — Hidden as well as Auto — where one shown beside an
+    /// always sibling joins it (#2497).
+    public var drawsNothingAtRest: Bool { drawnAtRest.isEmpty }
 }
 
 /// What the shelves take off a screen in one layout: the edges

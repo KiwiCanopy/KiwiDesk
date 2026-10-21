@@ -396,6 +396,15 @@ twice, was a question the user answered twice. The argument is
   glass hosting on the one plate glide the shelf re-places the
   section on, both passes taking the one groups-or-not choice
   (`AppBarGroupGlideDispatchTests`).
+- **A bar joining or leaving a fused shelf never budges its
+  neighbour: on a new slot the neighbour's run, items, box glass
+  and float break SNAP, and the shelf's glide of the section is
+  the one motion** — a piece gliding inside a section the shelf
+  re-places starts displaced and counter-glides. Save a fold or a
+  release, which rides the shelf's glide (#1831).
+  `AppBarLandingTests` ▸ `newSlotSnapsTheItems` and
+  `AppBarLandingTests` ▸ `newSlotSnapsTheBoxes` hold the App Bar;
+  a new piece in the run owes the same snap, which is review's.
 - **Stand what a glide or fade will read from and COMMIT it
   through the one `BarMotion.standCommitted`, before the group
   that reads it** (#1838) — a section's glide start in
@@ -424,9 +433,10 @@ twice, was a question the user answered twice. The argument is
   `animations.shelf_duration`, `BarMotion.shelfGlide` set in
   `updateBars()` (`ShelfGlideSettingsTests`).
 - **A section joining a fused shelf grows out of the section it
-  joins and a leaving one shrinks back into it; a shelf on an
-  edge of its own fades in and out, plate included** (owner
-  ruling, #1838). The fade-out keeps the panel until it lands,
+  joins and a leaving one shrinks back into it; a shelf shown at
+  rest on an edge of its own fades in and out, plate included**
+  (owner ruling, #1838) — a revealed one takes the reveal's motion
+  (below). The fade-out keeps the panel until it lands,
   a show meanwhile fades it back, the shelf reports leaving
   exactly once, and `ShelfManager` retires it only then
   (`ShelfFadeTests`). The Space Bar's front-app segment, joining
@@ -526,6 +536,59 @@ render content into it (#1517). Obligations:
   and Boxed, and ▸ `dividerInTheDrawnGap` the divider; no suite
   scans a bar overlay for a plate of its own, so a section growing
   one is review's.
+- **The shelf panel takes the drawn plate or runs, never the
+  strip (#2497).** A panel takes every press inside its frame —
+  a `hitTest` answering nil passes nothing on, and
+  `ignoresMouseEvents` is whole-window — so the clear strip beside
+  a hugging plate ate the clicks meant for the windows under it.
+  At rest the panel covers the one `ShelfOverlay.restingRoom`: the
+  plate, under Boxed the span of the sections' plate asks
+  (`plateAsks`, the plate's own input), which hold their boxes,
+  counts and fades, at the strip's whole depth; the content keeps
+  strip coordinates inside it, so no section's arithmetic sees the
+  room. A plate glide whose resting room moved holds both ends
+  until it lands (`holdRoomForGlide`) and one that moved none
+  holds nothing; a reveal or retract opens the room of the motion
+  it resolves to (`openRevealRoom` over
+  `BarMotion.resolvedReveal`) until its own landing — a slide's
+  run out over the margin, a grow's plate and hovered mark, a
+  fade's none — and a leave that cuts a reveal short clears it, or
+  the room never settles.
+  `ShelfPanelRoomTests` holds the rest — a fitting run, an
+  overflowing one, Boxed, a side edge, an unchanged refresh —
+  `ShelfPanelRoomMotionTests` the glide, the slide and the cut
+  reveal, and `ShelfAutoHideCoreTests` ▸
+  `revealedPanelTakesThePlate` a pinned reveal through the
+  drivers. A piece drawn outside its run's plate ask is clipped
+  at rest, and noticing one is review's.
+- **A revealed shelf takes the reveal's motion only onto an edge
+  that draws nothing at rest, decided by the one
+  `ShelfEdge.drawsNothingAtRest`, never by the stored value** —
+  Hidden as well as Auto, while a bar shown beside an Always
+  sibling joins it (`ShelfRevealStyleTests` ▸ `emptyEdgeDecides`,
+  `ShelfRevealStyleTests` ▸ `hiddenSlidesThroughTheDrivers`).
+- **The motion is the shelf's one `reveal_style` — slide or grow —
+  and the panel takes no per-frame write for either (#2497)**: its
+  room opens once as the motion starts and settles at the landing;
+  moving the window frame instead lagged on the device. Both play
+  in the one `BarMotion.playReveal`, its decision the pure
+  `BarMotion.revealMotion` over a `RevealPath`. A slide travels
+  the content by an ADDITIVE position animation from
+  `BarMotion.revealOffset` — the strip's depth plus the outer
+  margin, so it starts wholly clipped at the usable area's edge —
+  and one taken back continues from `BarMotion.revealShift`, read
+  before that pass moves the room. A grow clips the content's own
+  layer from the mark to the plate (`ShelfGrow`), placed in the
+  panel's coordinates, so its room — the plate and the hovered
+  mark, or the middle of the screen side where the edge draws no
+  mark — holds still until it lands (`growing`). A leave that is no reveal ends the reveal's motion with
+  its token (`cutReveal`). The mark keeps time with the motion
+  through `BarMotion.markFade` and its `RevealKind`, and Reduce
+  Motion cross-fades in place either way. `ShelfRevealMotionTests`
+  and `ShelfRevealGrowTests` hold the decisions,
+  `ShelfRevealSlideEdgeTests` the slide's direction on every edge
+  as drawn, `ShelfRevealStartTests` the start order, and
+  `ShelfRevealSwapTests` the accepted swap's end state (#2500).
 - **Centre the live shelf's section divider between what the two
   sections DRAW, never on the slot gutter (#1779)**: each bar insets its
   run and its items' content by its own amounts, so the gutter
