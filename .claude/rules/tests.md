@@ -486,8 +486,8 @@ bite large test PRs:
 
   **Remove an isolated prover's worktree and its branch once it
   reports or is stopped** (owner, 2026-10-16). The agent removes
-  its own proof tree, and the harness removes an unchanged
-  worktree; one a prover changed anyway is left behind, and such
+  its own proof tree; the harness worktree it leaves unchanged is
+  sometimes left behind locked anyway (2026-10-21), and such
   leftovers pile up in `.claude/worktrees/`. First check that the
   worktree's HEAD and its `worktree-agent-*` branch hold no commit
   that is on no other branch (`git branch -a --contains <sha>`);
