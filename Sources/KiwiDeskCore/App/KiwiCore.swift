@@ -294,10 +294,8 @@ public final class KiwiCore {
     /// sink every Core seam is wired to forward *into*.
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    /// Problems from the last config load (#68): a broken
-    /// init.lua, an unreadable gui.json, invalid profile JSONs.
-    /// Empty when the config loaded cleanly. Drives the
-    /// menu-bar error badge and the Config Issues panel.
+    /// Problems from the last config load (#68), empty when it
+    /// loaded cleanly; the error badge and Config Issues read it.
     public internal(set) var configIssues: [ConfigIssue] = []
     /// The load-scoped half of `configIssues` (init.lua /
     /// gui.json) — kept so profile mutations can refresh the
@@ -321,6 +319,8 @@ public final class KiwiCore {
     public var onLookLibraryChanged: @MainActor () -> Void = {}
     /// An outside rule write landed (#1685): a draft adopts it.
     public var onRulesKept: @MainActor () -> Void = {}
+    /// `restore_setup` replaced the files (#2517): Settings re-reads.
+    public var onSetupRestored: @MainActor () -> Void = {}
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
     /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.

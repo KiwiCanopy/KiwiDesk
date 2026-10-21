@@ -124,7 +124,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         // `restore_setup` replaced the files under an open
         // Settings: it re-reads, as its own Restore… does (#2517).
-        core.uiBridge.onSetupRestored = { [weak self] in
+        core.onSetupRestored = { [weak self] in
             self?.dashboardIfCreated?.reloadAfterRestore()
         }
         // Hover focus fronts the own window its command focused

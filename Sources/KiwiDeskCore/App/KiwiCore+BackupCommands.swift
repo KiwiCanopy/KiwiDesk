@@ -52,7 +52,7 @@ extension KiwiCore {
                 replacingInitLua: replacing,
                 trash: sync.trash
             )
-            uiBridge.onSetupRestored()
+            onSetupRestored()
             return .ok(
                 .object([
                     "init_lua": .string(outcome.initLua.rawValue),
@@ -70,7 +70,7 @@ extension KiwiCore {
         } catch {
             // Only a write failure has touched the files; a refusal
             // leaves an open Settings draft as it is.
-            if case .couldNotWrite = error { uiBridge.onSetupRestored() }
+            if case .couldNotWrite = error { onSetupRestored() }
             return .fail(error.cliMessage)
         }
     }

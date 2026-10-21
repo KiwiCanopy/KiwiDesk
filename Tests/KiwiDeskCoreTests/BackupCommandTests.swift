@@ -98,7 +98,7 @@ struct BackupCommandTests {
 
         let target = try core()
         var reloads = 0
-        target.uiBridge.onSetupRestored = { reloads += 1 }
+        target.onSetupRestored = { reloads += 1 }
         let plain = target.execute(
             KiwiCore.restoreSetupCommand,
             args: [.string(url.path)]
@@ -126,7 +126,7 @@ struct BackupCommandTests {
     func refusalReloadsNothing() throws {
         let core = try core()
         var reloads = 0
-        core.uiBridge.onSetupRestored = { reloads += 1 }
+        core.onSetupRestored = { reloads += 1 }
         let reply = core.execute(
             KiwiCore.restoreSetupCommand,
             args: [.string(file(core).path)]
