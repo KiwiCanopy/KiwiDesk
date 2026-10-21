@@ -190,11 +190,14 @@ is unless one of them lands in the Space you are on, which then
 focuses it. Two windows in different Spaces, on one screen or
 two, trade places: each takes the other's slot. A floating
 window, a window in native full screen and a sticky window that
-cannot change Space are refused.
+cannot change Space are refused. A direction followed by a window
+id swaps that window with its neighbour in that direction, in the
+Space you are on, and moves no focus.
 
 ```lua
 KiwiDesk.swap(1234)
 KiwiDesk.swap(1234, 5678)
+KiwiDesk.swap("left", 1234)
 ```
 :::
 

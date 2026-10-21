@@ -7,11 +7,13 @@ extension KiwiCore {
     /// `warp: false` is a scroll gesture's (#1656): the pointer
     /// stays where the hand holds it. Every step, a gesture's too,
     /// skips what a lens leaves out (`lensKeySkip`, #2103 rulings
-    /// 35, 44, 45).
+    /// 35, 44, 45). `origin` steps from a named member of the
+    /// active Space instead of the focus anchor (#2509).
     func navigate(
         _ args: [JSONValue],
         swapping: Bool,
-        warp: Bool = true
+        warp: Bool = true,
+        origin: WindowID? = nil
     ) -> CommandResponse {
         guard let raw = args.first?.stringValue,
             let direction = Direction(rawValue: raw)
@@ -31,10 +33,8 @@ extension KiwiCore {
         // and flashing the dead-end cue on the wrong ring.
         let tiled = state.effectiveTiledMembers(of: space)
         guard
-            let focused = state.focusAnchor(
-                of: space,
-                tiled: tiled
-            )
+            let focused = origin
+                ?? state.focusAnchor(of: space, tiled: tiled)
         else {
             return .fail("no focused window")
         }

@@ -136,10 +136,31 @@ struct SwapWindowIDTests {
         #expect(second.error == "unknown window: 98")
         let direction = core.execute(
             "swap",
-            args: [.string("left"), .number(900_001)]
+            args: [.string("left"), .number(97)]
         )
-        #expect(direction.error == "a direction swap takes no window id")
+        #expect(direction.error == "unknown window: 97")
         #expect(row(core, Self.one) == [900_001, 900_002])
+        #expect(row(core, Self.two) == [900_003, 900_004])
+    }
+
+    @Test("a direction and an id swap that window with its neighbour")
+    func directionMovesTheNamedWindow() {
+        let core = makeCore()
+        let response = core.execute(
+            "swap",
+            args: [.string("right"), .number(900_001)]
+        )
+        #expect(response.isSuccess)
+        #expect(row(core, Self.one) == [900_002, 900_001])
+        // The named window moved; the focus did not.
+        #expect(core.focusedWindowID == WindowID(900_002))
+        let away = core.execute(
+            "swap",
+            args: [.string("left"), .number(900_003)]
+        )
+        #expect(
+            away.error == "window 900003 is not in the Space you are on"
+        )
         #expect(row(core, Self.two) == [900_003, 900_004])
     }
 

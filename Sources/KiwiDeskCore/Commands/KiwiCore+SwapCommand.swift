@@ -27,10 +27,24 @@ extension KiwiCore {
             Direction(rawValue: raw) != nil
         {
             guard named else { return navigate(args, swapping: true) }
-            if case .refused(let response) = commandTarget("swap", args) {
+            // A named window steps from its own slot, in the Space
+            // you are on, and moves no focus.
+            switch commandTarget("swap", args) {
+            case .refused(let response):
                 return response
+            case .window(let window):
+                if let refusal = swapRefusal(window) { return refusal }
+                guard
+                    state.workspaces.space(of: window)
+                        == state.workspaces.activeSpace
+                else {
+                    return .fail(
+                        "window \(window.raw) is not in the Space you "
+                            + "are on"
+                    )
+                }
+                return navigate(args, swapping: true, origin: window)
             }
-            return .fail("a direction swap takes no window id")
         }
         guard let first = args.first, first.numberValue != nil else {
             return .fail(
@@ -85,12 +99,7 @@ extension KiwiCore {
             return .fail("cannot swap a window with itself")
         }
         for id in [lead, partner] {
-            if state.windows[id]?.isFullscreen == true {
-                return .fail("window \(id.raw) is full screen")
-            }
-            if isEffectiveFloatForPlacement(id) {
-                return .fail("window \(id.raw) is floating")
-            }
+            if let refusal = swapRefusal(id) { return refusal }
         }
         guard let home = state.workspaces.space(of: lead),
             let away = state.workspaces.space(of: partner)
@@ -141,6 +150,19 @@ extension KiwiCore {
             focusWindow(lead, warp: true)
         }
         return .ok()
+    }
+
+    /// Why `id` holds no slot to swap, nil where it does: an
+    /// effective float has none and a native full-screen window
+    /// keeps its own Space (#670).
+    private func swapRefusal(_ id: WindowID) -> CommandResponse? {
+        if state.windows[id]?.isFullscreen == true {
+            return .fail("window \(id.raw) is full screen")
+        }
+        if isEffectiveFloatForPlacement(id) {
+            return .fail("window \(id.raw) is floating")
+        }
+        return nil
     }
 
     /// The directional swap's #438 refusal, asked both ways: a

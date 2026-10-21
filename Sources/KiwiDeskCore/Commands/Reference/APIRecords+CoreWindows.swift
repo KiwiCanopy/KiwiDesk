@@ -17,8 +17,8 @@ extension APIReference {
             .window("window")
         ),
         "swap": APIRecord(
-            "Swaps the focused window with a neighbor or the id "
-                + "given for direction; two ids swap any pair.",
+            "Swaps the focused or named window with a neighbor; "
+                + "ids in place of direction swap two windows.",
             .choice("direction", Direction.self),
             .window("window", optional: true)
         ),
