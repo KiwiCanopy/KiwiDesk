@@ -13,7 +13,8 @@ import Testing
 @Suite("Gone reason through the handler (#1146)", .serialized)
 struct GoneReasonEventTests {
     private func makeCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-gone-reason-tests-\(UUID().uuidString)"
             )

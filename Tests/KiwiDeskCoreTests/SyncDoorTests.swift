@@ -16,7 +16,8 @@ struct SyncDoorTests {
     /// recorded, Spaces without digit rows, a new Desktop.
     private func eagerCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-sync-door-\(UUID().uuidString)")
         )
         core.onLog = { _ in }

@@ -230,6 +230,7 @@ struct MachineTouchTests {
         "the makeTestCore twins are identical",
         arguments: [
             MachineTouchTests.coreFactory, "TestCoreTripwires.swift",
+            "TestScratch.swift",
         ]
     )
     func testCoreTwins(file: String) throws {

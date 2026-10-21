@@ -20,7 +20,8 @@ struct DesktopShortcutMarkTests {
 
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-desktop-mark-\(UUID().uuidString)"
                 )

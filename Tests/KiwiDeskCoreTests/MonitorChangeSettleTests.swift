@@ -27,8 +27,8 @@ struct MonitorChangeSettleTests {
     /// profile `solo`, `solo` live on the built-in alone.
     private func makeCore(log: SettleLog) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-1612-\(UUID().uuidString)"
                 )
@@ -235,8 +235,8 @@ struct MonitorChangeSettleTests {
     @Test("the first report after boot decides at once")
     func bootReportIsImmediate() {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-1612-boot-\(UUID().uuidString)"
                 )

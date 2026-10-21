@@ -183,7 +183,8 @@ struct MonocleParkLayoutTests {
 
 @MainActor
 private func makeCore() -> KiwiCore {
-    let directory = FileManager.default.temporaryDirectory
+    let directory =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-tests-\(UUID().uuidString)"
         )

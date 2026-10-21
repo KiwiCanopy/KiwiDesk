@@ -14,7 +14,7 @@ struct SocketServerOwnershipTests {
     private let hangGuard: TimeInterval = 30
 
     private func throwawayPath() -> String {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-own-\(UUID().uuidString.prefix(8)).sock"
             ).path

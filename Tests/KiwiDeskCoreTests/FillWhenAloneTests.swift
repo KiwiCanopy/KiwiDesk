@@ -153,7 +153,8 @@ struct FillWhenAloneTests {
     @Test("The Lua setters write both flags")
     @MainActor func setters() {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-fill-alone-\(UUID().uuidString)"
                 )

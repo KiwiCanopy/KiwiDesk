@@ -25,7 +25,8 @@ struct LogoutRollbackTests {
     private func makeRecovery(
         _ clock: Clock
     ) throws -> (CrashRecovery, URL) {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-rollback-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

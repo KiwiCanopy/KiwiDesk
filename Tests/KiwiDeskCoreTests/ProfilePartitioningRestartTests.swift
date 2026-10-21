@@ -10,7 +10,8 @@ import Testing
 @Suite("Per-profile Space records across a restart (#1802)", .serialized)
 @MainActor
 struct ProfilePartitioningRestartTests {
-    private let directory = FileManager.default.temporaryDirectory
+    private let directory =
+        testTemporaryDirectory
         .appendingPathComponent("kiwi-partition-\(UUID().uuidString)")
 
     private func makeCore() -> KiwiCore {

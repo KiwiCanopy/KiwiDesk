@@ -64,7 +64,8 @@ struct CiStampOnlyTests {
         branch: String,
         files: [String: String]
     ) throws -> Int32 {
-        let repo = FileManager.default.temporaryDirectory
+        let repo =
+            testTemporaryDirectory
             .appendingPathComponent("ci-stamp-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: repo) }
         try FileManager.default.createDirectory(

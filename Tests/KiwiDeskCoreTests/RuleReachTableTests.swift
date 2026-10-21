@@ -271,7 +271,8 @@ struct RuleReachTableTests {
 struct RuleReachSaveTests {
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-reach-\(UUID().uuidString)")
         )
         var config = GuiConfig()

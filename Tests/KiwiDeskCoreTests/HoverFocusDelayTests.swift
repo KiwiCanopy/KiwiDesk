@@ -12,7 +12,8 @@ import Testing
 struct HoverFocusDelayTests {
     @Test("mouse.set_hover_focus_delay takes milliseconds, 0 or more")
     func verb() {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-delay-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         let mouse = { core.tiler.settings.mouse.hoverFocusDelayMS }

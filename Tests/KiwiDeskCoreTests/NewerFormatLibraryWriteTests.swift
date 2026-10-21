@@ -13,7 +13,8 @@ import Testing
 @MainActor
 struct NewerFormatLibraryWriteTests {
     private func scratch() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-libs-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

@@ -11,8 +11,8 @@ import Testing
 struct ProfileListRulesEditTests {
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-list-edit-\(UUID().uuidString)"
                 )

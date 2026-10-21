@@ -14,7 +14,7 @@ struct HeldSpaceRestartRecordTests {
     private var desk: HeldSpaceDesk { t.desk }
 
     private func freshDirectory() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-1646-\(UUID().uuidString)")
     }
 

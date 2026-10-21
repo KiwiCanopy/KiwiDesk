@@ -28,8 +28,8 @@ import Testing
 struct FloatResizeAccumulationTests {
     private func makeFloatCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-floataccum-\(UUID().uuidString)"
                 )

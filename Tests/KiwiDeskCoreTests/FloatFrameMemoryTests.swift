@@ -18,7 +18,8 @@ struct FloatFrameMemoryTests {
     private func setup(
         applied: @escaping @MainActor (WindowID, CGRect) -> Void
     ) -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in

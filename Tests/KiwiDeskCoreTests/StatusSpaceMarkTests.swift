@@ -28,7 +28,8 @@ struct StatusSpaceMarkTests {
     /// `main` active. The bar is OFF.
     private func makeCore(screens: Int = 1) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-status-mark-\(UUID().uuidString)"
                 )

@@ -269,7 +269,8 @@ private func runningCore(directory: Bool = false) -> KiwiCore {
     let core =
         directory
         ? makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("hyper-\(UUID().uuidString)")
         )
         : makeTestCore()

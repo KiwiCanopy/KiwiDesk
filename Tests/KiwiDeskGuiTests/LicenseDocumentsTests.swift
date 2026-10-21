@@ -19,7 +19,8 @@ struct LicenseDocumentsTests {
     }
 
     private func temporaryBundle() throws -> (Bundle, URL) {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "LicenseDocuments-\(UUID().uuidString)"
             )

@@ -292,7 +292,8 @@ private enum ProductNameFixture {
         english: String,
         value: String
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-product-name-\(UUID().uuidString)"
             )

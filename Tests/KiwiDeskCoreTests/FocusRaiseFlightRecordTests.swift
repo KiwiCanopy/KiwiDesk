@@ -21,8 +21,8 @@ struct FocusRaiseFlightRecordTests {
     /// observer is real so `observes(pid:)` answers.
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-flight-\(UUID().uuidString)"
                 )

@@ -19,7 +19,8 @@ struct SplitFloorHealWiringTests {
         windows count: Int,
         mode: String
     ) -> (KiwiCore, SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-split-heal-\(UUID().uuidString)"
             )

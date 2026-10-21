@@ -126,7 +126,8 @@ private enum CollapseFixture {
         english: [String: String],
         catalog: [String: String]
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-collapse-guard-\(UUID().uuidString)"
             )

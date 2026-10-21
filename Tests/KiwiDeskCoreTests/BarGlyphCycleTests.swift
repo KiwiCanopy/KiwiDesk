@@ -20,7 +20,8 @@ struct BarGlyphCycleTests {
     /// 2, 3 and 4 and Web 5, its remembered focus on Mail 3.
     private func seededCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-cycle-\(UUID().uuidString)")
         )
         core.state.workspaces.assign(one, to: display)

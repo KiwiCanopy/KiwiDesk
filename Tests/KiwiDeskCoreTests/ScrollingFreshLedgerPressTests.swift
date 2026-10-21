@@ -31,7 +31,8 @@ struct ScrollingFreshLedgerPressTests {
     /// (#531), focused on the first of two windows — the
     /// sibling suites' fixture.
     private func makeCore() -> (core: KiwiCore, space: SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-fresh-ledger-\(UUID().uuidString)"
             )

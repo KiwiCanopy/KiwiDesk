@@ -53,7 +53,8 @@ struct DesktopShortcutTopUpTests {
 
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-desktop-topup-\(UUID().uuidString)"
                 )
@@ -90,7 +91,8 @@ struct DesktopShortcutTopUpTests {
     func luaOwnedKeepsTheMark() throws {
         var cleared = 0
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-desktop-topup-lua-\(UUID().uuidString)"
                 )
@@ -127,7 +129,8 @@ struct DesktopShortcutTopUpTests {
     @Test("A declining setup is asked once a session")
     func declineIsLatched() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-desktop-topup-latch-\(UUID().uuidString)"
                 )

@@ -18,8 +18,8 @@ struct DesktopBindingDraftTests {
     private func makeModel() -> SettingsModel {
         makeTestModel(
             core: makeTestCore(
-                configDirectory: FileManager.default
-                    .temporaryDirectory
+                configDirectory:
+                    testTemporaryDirectory
                     .appendingPathComponent(
                         "kiwi-draft-\(UUID().uuidString)"
                     )

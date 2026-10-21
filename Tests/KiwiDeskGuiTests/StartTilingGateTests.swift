@@ -14,18 +14,14 @@ import Testing
 @Suite("Start Tiling gate (#2050)", .serialized)
 @MainActor
 struct StartTilingGateTests {
-    /// A distinct suite name per test, removed after it, so no
-    /// run reads or leaves the real domain.
+    /// A distinct scratch domain per test, removed after it, so
+    /// no run reads or leaves the real domain. `name` labels the
+    /// call only.
     private func scratch(
         _ name: String
     ) -> (defaults: UserDefaults, cleanup: () -> Void) {
-        let suite = "org.kiwidesk.tilingconsent.tests.\(name)"
-        let defaults = UserDefaults(suiteName: suite)!
-        defaults.removePersistentDomain(forName: suite)
-        return (
-            defaults,
-            { defaults.removePersistentDomain(forName: suite) }
-        )
+        let (defaults, suite) = makeScratchDefaults()
+        return (defaults, { TestScratch.remove(suite) })
     }
 
     // MARK: - The stored press

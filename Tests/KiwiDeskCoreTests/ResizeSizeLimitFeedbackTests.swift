@@ -40,7 +40,8 @@ struct ResizeSizeLimitFeedbackTests {
 
     @Test("Stack resize clamps against learned size bound")
     func stackResizeClampsAtLearnedMin() {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-stack-resize-limit-\(UUID().uuidString)"
             )
@@ -98,7 +99,8 @@ struct ResizeSizeLimitFeedbackTests {
 
     @Test("Track resize clamps against learned size bound")
     func trackResizeClampsAtLearnedMin() {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-track-resize-limit-\(UUID().uuidString)"
             )
@@ -157,7 +159,8 @@ struct ResizeSizeLimitFeedbackTests {
 
     @Test("BSP resize clamps against learned size bound")
     func bspResizeClampsAtLearnedMin() {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-bsp-resize-limit-\(UUID().uuidString)"
             )
@@ -212,7 +215,8 @@ struct ResizeSizeLimitFeedbackTests {
 
     @Test("Floating resize clamps against learned size bound")
     func floatingResizeClampsAtLearnedMin() {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-float-resize-limit-\(UUID().uuidString)"
             )

@@ -17,7 +17,8 @@ private final class Clock {
 private func makeDesk() -> (
     core: KiwiCore, clock: Clock, settings: WindowID, chrome: WindowID
 ) {
-    let directory = FileManager.default.temporaryDirectory
+    let directory =
+        testTemporaryDirectory
         .appendingPathComponent("kiwidesk-own-front-\(UUID())")
     let core = makeTestCore(configDirectory: directory)
     core.tiler.visibleBounds = { _ in

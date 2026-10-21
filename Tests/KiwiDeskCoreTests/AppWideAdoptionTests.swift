@@ -13,7 +13,8 @@ import Testing
 struct AppWideAdoptionTests {
     private func makeGuiCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-appwide-adopt-\(UUID().uuidString)"
                 )
@@ -164,7 +165,8 @@ struct AppWideAdoptionTests {
     @Test("a Lua-owned config adopts nothing")
     func luaOwnedAdoptsNothing() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-appwide-lua-\(UUID().uuidString)"
                 )

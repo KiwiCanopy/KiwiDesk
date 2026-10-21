@@ -15,8 +15,8 @@ import Testing
 struct FocusedCommandGuardTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-guard-\(UUID().uuidString)"
                 )

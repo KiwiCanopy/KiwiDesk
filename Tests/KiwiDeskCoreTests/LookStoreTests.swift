@@ -10,7 +10,8 @@ import Testing
 struct LookStoreTests {
     private func store() -> LookStore {
         LookStore(
-            directory: FileManager.default.temporaryDirectory
+            directory:
+                testTemporaryDirectory
                 .appendingPathComponent("looks-\(UUID().uuidString)")
         )
     }
@@ -58,7 +59,8 @@ struct LookStoreTests {
     @Test("export and import round-trip, foreign keys dropped")
     func roundTrip() throws {
         let store = store()
-        let url = FileManager.default.temporaryDirectory
+        let url =
+            testTemporaryDirectory
             .appendingPathComponent("look-\(UUID().uuidString).json")
         var exported = look("A")
         exported.colors["bogus"] = "#FFF"
@@ -100,7 +102,8 @@ struct LookStoreTests {
     @Test("an imported look's colours are completed")
     func importCompletesColours() throws {
         let store = store()
-        let url = FileManager.default.temporaryDirectory
+        let url =
+            testTemporaryDirectory
             .appendingPathComponent("look-\(UUID().uuidString).json")
         try store.export(LookExport(look: look("A")), to: url)
         let back = try store.importLook(from: url)

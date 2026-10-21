@@ -54,7 +54,7 @@ func makeTestCore(
 ) -> KiwiCore {
     let directory =
         configDirectory
-        ?? FileManager.default.temporaryDirectory
+        ?? testTemporaryDirectory
         .appendingPathComponent(
             "kiwi-test-\(UUID().uuidString)"
         )

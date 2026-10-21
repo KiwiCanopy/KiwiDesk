@@ -7,7 +7,8 @@ import Testing
 @MainActor
 private func makeCore() -> KiwiCore {
     makeTestCore(
-        configDirectory: FileManager.default.temporaryDirectory
+        configDirectory:
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
     )
 }

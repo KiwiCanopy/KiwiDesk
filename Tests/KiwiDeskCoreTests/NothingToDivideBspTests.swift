@@ -24,8 +24,8 @@ struct NothingToDivideBspTests {
         height: CGFloat = 800
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-nothing-divide-\(UUID().uuidString)"
                 )

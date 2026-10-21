@@ -91,7 +91,8 @@ struct GateLockHookTests {
                 "run_in_background": true,
             ],
         ]
-        let input = FileManager.default.temporaryDirectory
+        let input =
+            testTemporaryDirectory
             .appendingPathComponent("gate-hook-\(UUID()).json")
         try JSONSerialization.data(withJSONObject: event)
             .write(to: input)

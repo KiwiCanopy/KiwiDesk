@@ -60,7 +60,8 @@ struct RestoreKeyLogTests {
     }
 
     static func autosaveCore(optedIn: Bool = true) -> (KiwiCore, URL) {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-rkey-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: dir)
         core.crash.captureState = { [weak core] in

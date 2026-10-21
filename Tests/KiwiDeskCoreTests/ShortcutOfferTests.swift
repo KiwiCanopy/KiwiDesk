@@ -11,7 +11,7 @@ import Testing
 @MainActor
 struct ShortcutOfferTests {
     private func folder() -> URL {
-        FileManager.default.temporaryDirectory.appendingPathComponent(
+        testTemporaryDirectory.appendingPathComponent(
             "kiwi-offer-\(UUID().uuidString)"
         )
     }

@@ -16,8 +16,8 @@ struct ResizeNeighborLimitTests {
     /// arithmetic under test divides both.
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-resize-neighbor-\(UUID().uuidString)"
                 )

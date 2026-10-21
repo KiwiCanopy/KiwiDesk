@@ -11,7 +11,8 @@ import Testing
 @MainActor
 struct SyncModelTests {
     private func emptyFolder() throws -> URL {
-        let url = FileManager.default.temporaryDirectory
+        let url =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-sync-model-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: url,

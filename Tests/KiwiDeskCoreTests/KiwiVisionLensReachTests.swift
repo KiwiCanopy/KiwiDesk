@@ -13,8 +13,8 @@ import Testing
 struct KiwiVisionLensReachTests {
     private func makeCore(guiManaged: Bool = true) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-lens-reach-\(UUID().uuidString)"
                 )

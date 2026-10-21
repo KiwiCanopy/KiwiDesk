@@ -15,7 +15,8 @@ struct LogoutAutosaveFreezeTests {
     private let frozeAt = Date(timeIntervalSince1970: 9000)
 
     private func makeRecovery() throws -> (CrashRecovery, URL) {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-freeze-\(UUID().uuidString)"
             )
@@ -172,7 +173,7 @@ struct LogoutAutosaveFreezeTests {
     @Test("The default center is the workspace's own")
     func defaultCenterIsTheWorkspaces() {
         let workspace = NSWorkspace.shared.notificationCenter
-        let dir = FileManager.default.temporaryDirectory
+        let dir = testTemporaryDirectory
         let fresh = CrashRecovery(directory: dir).workspaceCenter
         #expect(fresh === workspace)
         let wired = makeTestCore().crash.workspaceCenter

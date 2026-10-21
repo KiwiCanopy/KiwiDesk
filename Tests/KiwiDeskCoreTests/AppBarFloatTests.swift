@@ -14,7 +14,8 @@ struct AppBarFloatTests {
     /// transient-overlay float P (a dialog) that is never listed.
     private func makeCore() throws -> (KiwiCore, Space) {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-app-bar-floats-\(UUID().uuidString)"
                 )

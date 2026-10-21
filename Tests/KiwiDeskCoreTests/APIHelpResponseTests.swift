@@ -148,8 +148,8 @@ struct APIHelpDispatchTests {
     @Test("the dispatcher reads the argument it used to drop")
     func dispatcherRoutesTheName() {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-help-\(UUID().uuidString)"
                 )

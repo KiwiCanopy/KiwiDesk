@@ -14,7 +14,8 @@ struct LoginSessionGateTests {
     private let at = Date(timeIntervalSince1970: 9000)
 
     private func makeDir() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-login-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

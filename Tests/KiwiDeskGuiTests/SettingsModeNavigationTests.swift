@@ -13,9 +13,7 @@ import Testing
 @Suite("Settings mode navigation")
 struct SettingsModeNavigationTests {
     private func model() -> (SettingsModel, UserDefaults) {
-        let name = "settings-mode-nav-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
+        let defaults = makeScratchDefaults().defaults
         return (makeTestModel(defaults: defaults), defaults)
     }
 

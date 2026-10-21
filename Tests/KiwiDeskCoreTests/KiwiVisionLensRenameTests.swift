@@ -43,7 +43,8 @@ struct KiwiVisionLensRenameTests {
 
     private func core() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-lens-rename-\(UUID())")
         )
         core.tiler.visibleBounds = { _ in

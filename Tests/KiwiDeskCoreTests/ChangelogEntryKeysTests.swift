@@ -50,7 +50,8 @@ struct ChangelogEntryKeysTests {
             "body": body,
             "assets": [],
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "changelog-keys-\(UUID().uuidString).json"
             )

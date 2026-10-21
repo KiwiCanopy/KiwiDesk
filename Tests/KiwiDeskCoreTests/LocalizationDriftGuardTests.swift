@@ -15,7 +15,8 @@ struct LocalizationDriftGuardTests {
     private func makeFixture(
         _ swiftFiles: [String: String]
     ) throws -> (sources: URL, locales: URL, cleanup: () -> Void) {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-extract-keys-\(UUID().uuidString)"
             )

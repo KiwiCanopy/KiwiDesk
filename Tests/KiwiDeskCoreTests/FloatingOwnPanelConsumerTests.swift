@@ -14,7 +14,8 @@ struct FloatingOwnPanelConsumerTests {
 
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-float-own-\(UUID().uuidString)")
         )
         core.tiler.visibleBounds = { _ in

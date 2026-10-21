@@ -20,7 +20,8 @@ import Testing
 @MainActor
 struct ResizeRefusalAppBoundTests {
     private func makeCore(mode: String) -> (KiwiCore, SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-app-bound-\(UUID().uuidString)"
             )

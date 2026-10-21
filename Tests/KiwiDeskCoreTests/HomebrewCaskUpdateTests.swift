@@ -155,7 +155,8 @@ private struct CaskFixture {
     }
 
     init() throws {
-        root = FileManager.default.temporaryDirectory
+        root =
+            testTemporaryDirectory
             .appendingPathComponent("cask-\(UUID().uuidString)")
         cask = root.appendingPathComponent("kiwidesk.rb")
         try FileManager.default.createDirectory(

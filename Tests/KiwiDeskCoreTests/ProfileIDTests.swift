@@ -12,7 +12,8 @@ import Testing
 struct ProfileIDTests {
     private func manager() -> ProfileManager {
         ProfileManager(
-            directory: FileManager.default.temporaryDirectory
+            directory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-ids-\(UUID().uuidString)")
         )
     }

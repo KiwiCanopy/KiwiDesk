@@ -18,7 +18,8 @@ struct SharedLookWriteTests {
     /// from "Work", which follows it.
     private func crossedCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-shared-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())
@@ -106,7 +107,8 @@ struct SharedLookWriteTests {
     @Test("before the crossing a follower's write seeds nothing")
     func noSharedLookNoWrite() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-shared-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

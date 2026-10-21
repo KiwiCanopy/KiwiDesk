@@ -5,7 +5,8 @@ import Testing
 
 @MainActor
 private func makeCore() -> KiwiCore {
-    let directory = FileManager.default.temporaryDirectory
+    let directory =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-deferred-tests-\(UUID().uuidString)"
         )

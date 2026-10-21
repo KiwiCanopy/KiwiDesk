@@ -185,8 +185,8 @@ struct DesktopBindingTests {
     private func makeCore() -> KiwiCore {
         pinDesktops()
         return makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-core-\(UUID().uuidString)"
                 )

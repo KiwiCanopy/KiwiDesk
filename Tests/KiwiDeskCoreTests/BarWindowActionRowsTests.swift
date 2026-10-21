@@ -20,7 +20,8 @@ struct BarWindowActionRowsTests {
     private func seededCore(log: Log = Log()) -> KiwiCore {
         LocalizationManager.shared.select("en")
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-win-action-\(UUID())")
         )
         let display = DisplayID(7)

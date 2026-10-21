@@ -152,7 +152,8 @@ private enum ModeNameFixture {
         english: String = "Floating",
         locale: String = "it"
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-mode-name-\(UUID().uuidString)"
             )

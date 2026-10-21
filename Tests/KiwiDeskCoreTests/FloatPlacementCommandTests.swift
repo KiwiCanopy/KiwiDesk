@@ -20,7 +20,8 @@ struct FloatPlacementCommandTests {
         mode: String,
         applied: @escaping @MainActor (WindowID, CGRect) -> Void
     ) -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )

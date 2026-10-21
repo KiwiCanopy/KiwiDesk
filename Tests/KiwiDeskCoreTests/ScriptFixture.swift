@@ -236,7 +236,8 @@ func makeRepoShapedFixture(
     locales localeFiles: [String: String],
     siteLocales siteFiles: [String: String] = [:]
 ) throws -> RepoShapedFixture {
-    let root = FileManager.default.temporaryDirectory
+    let root =
+        testTemporaryDirectory
         .appendingPathComponent("\(prefix)-\(UUID().uuidString)")
     let fixture = RepoShapedFixture(
         root: root,

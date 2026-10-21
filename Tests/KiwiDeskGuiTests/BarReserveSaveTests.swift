@@ -14,7 +14,8 @@ import Testing
 struct BarReserveSaveTests {
     private func model() throws -> SettingsModel {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-reserve-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

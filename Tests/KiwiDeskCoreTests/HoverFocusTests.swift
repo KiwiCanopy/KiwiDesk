@@ -17,7 +17,8 @@ struct HoverFocusTests {
 
     /// Two tiled windows side by side, w1 focused, hover on.
     private func makeCore() -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-hover-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.tiler.visibleBounds = { _ in

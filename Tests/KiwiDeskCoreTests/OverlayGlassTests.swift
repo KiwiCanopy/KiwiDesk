@@ -271,7 +271,8 @@ struct OverlayGlassTests {
     @Test("The Lua setters write their leaves")
     func luaSettersWrite() {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-glass-\(UUID().uuidString)")
         )
         for on in [false, true] {

@@ -32,7 +32,7 @@ struct LogExportModelTests {
     }
 
     private func scratch() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-log-model-\(UUID().uuidString)")
             .appendingPathExtension("txt")
     }

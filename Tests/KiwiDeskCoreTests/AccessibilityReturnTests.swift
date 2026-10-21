@@ -33,8 +33,8 @@ struct AccessibilityReturnTests {
     /// spirit; the arm needs only the seam call.
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-a11y-return-\(UUID().uuidString)"
                 )

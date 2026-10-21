@@ -45,8 +45,8 @@ struct HeldSpaceDesk {
     /// DELL's 3, 12 in the DELL's 4.
     func docked() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-1507-\(UUID().uuidString)"
                 )

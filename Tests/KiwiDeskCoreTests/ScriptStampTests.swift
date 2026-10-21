@@ -190,7 +190,8 @@ private struct StampFixture {
         // Local URLs, not the computed properties: Swift forbids
         // touching an instance member before every stored property
         // is initialized, and `headSHA` is filled at the bottom.
-        let root = fm.temporaryDirectory
+        let root =
+            testTemporaryDirectory
             .appendingPathComponent("stamp-\(UUID().uuidString)")
         self.root = root
         let appDir =

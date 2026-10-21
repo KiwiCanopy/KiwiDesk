@@ -18,8 +18,8 @@ struct ProfileKeybindingApplyTests {
 
     private func makeGuiCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-profkeys-\(UUID().uuidString)"
                 )
@@ -182,8 +182,8 @@ struct ProfileKeybindingApplyTests {
     func nonGuiManagedKeepsLuaBindings() throws {
         // No gui.json: Lua owns keybindings entirely.
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-profkeys-\(UUID().uuidString)"
                 )

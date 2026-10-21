@@ -16,7 +16,8 @@ struct SharedLookMotionTests {
     /// styling and colours, no motion.
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-motion-\(UUID().uuidString)")
         )
         let settings = TilingSettings()

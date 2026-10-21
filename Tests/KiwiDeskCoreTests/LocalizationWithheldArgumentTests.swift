@@ -107,7 +107,8 @@ private enum WithheldFixture {
         english: String,
         value: String
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-withheld-\(UUID().uuidString)"
             )

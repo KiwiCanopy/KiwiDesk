@@ -12,7 +12,8 @@ import Testing
 struct ModeCycleSettingTests {
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-cycle-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())
@@ -180,7 +181,8 @@ struct ModeCycleSettingTests {
     @Test("Lua-owned: a profile apply keeps init.lua's base")
     func luaOwnedKeepsTheBase() {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-cycle-\(UUID().uuidString)")
         )
         #expect(!core.isGuiManaged)
@@ -199,7 +201,8 @@ struct ModeCycleSettingTests {
         // Lua-owned, so no gui.json pass re-seeds what the reset
         // cleared and the reset alone answers.
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-cycle-\(UUID().uuidString)")
         )
         reapply(core, cycle: [.stack, .monocle])

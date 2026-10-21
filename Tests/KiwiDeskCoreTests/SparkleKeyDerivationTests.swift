@@ -51,7 +51,8 @@ struct SparkleKeyDerivationTests {
 
     /// Runs the deriver with `stdin` set to `key`.
     private func derive(_ key: String) throws -> ScriptRun {
-        let input = FileManager.default.temporaryDirectory
+        let input =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "sparkle-key-\(UUID().uuidString)"
             )

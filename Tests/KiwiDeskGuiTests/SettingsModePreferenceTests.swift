@@ -11,10 +11,7 @@ import Testing
 @Suite("Settings mode preference")
 struct SettingsModePreferenceTests {
     private func scratch() -> UserDefaults {
-        let name = "settings-mode-tests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
+        makeScratchDefaults().defaults
     }
 
     @Test("absent reads as Simple")

@@ -127,7 +127,8 @@ struct IconLayerParityTests {
 /// `run.status == 0` expectation catches.
 private func makeIconFixture(repoRoot: URL) throws -> URL {
     let fm = FileManager.default
-    let fixture = fm.temporaryDirectory
+    let fixture =
+        testTemporaryDirectory
         .appendingPathComponent("icon-layers-\(UUID().uuidString)")
     try fm.createDirectory(
         at: fixture.appendingPathComponent("scripts"),

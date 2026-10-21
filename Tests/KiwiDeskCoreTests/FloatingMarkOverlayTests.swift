@@ -109,8 +109,8 @@ struct FloatingMarkOverlayTests {
     @Test("A floating-only mark joins the watch set with no ring")
     func floatingMarkIsTracked() {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-float-track-\(UUID().uuidString)"
                 )

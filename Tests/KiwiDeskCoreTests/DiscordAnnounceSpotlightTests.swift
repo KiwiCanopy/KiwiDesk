@@ -35,7 +35,8 @@ struct DiscordAnnounceSpotlightTests {
             "body": body,
             "assets": [],
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "discord-spotlight-\(UUID().uuidString).json"
             )

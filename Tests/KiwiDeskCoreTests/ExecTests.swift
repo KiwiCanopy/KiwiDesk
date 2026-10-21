@@ -12,7 +12,8 @@ extension Result {
 
 @MainActor
 private func makeCore() -> KiwiCore {
-    let directory = FileManager.default.temporaryDirectory
+    let directory =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-exec-tests-\(UUID().uuidString)"
         )

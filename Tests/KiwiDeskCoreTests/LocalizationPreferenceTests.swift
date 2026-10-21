@@ -13,12 +13,8 @@ struct LocalizationPreferenceTests {
     private func makeDefaults() -> (
         defaults: UserDefaults, cleanup: () -> Void
     ) {
-        let domain = "kiwi-locale-test-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: domain)!
-        return (
-            defaults,
-            { defaults.removePersistentDomain(forName: domain) }
-        )
+        let (defaults, domain) = makeScratchDefaults()
+        return (defaults, { TestScratch.remove(domain) })
     }
 
     @Test("an absent key reads back as nil (System default)")

@@ -20,7 +20,8 @@ struct HoverFocusStandDownTests {
         _ mode: String = "bsp",
         _ setup: (KiwiCore) -> Void = { _ in }
     ) throws -> KiwiCore {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-hover-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.tiler.visibleBounds = { _ in

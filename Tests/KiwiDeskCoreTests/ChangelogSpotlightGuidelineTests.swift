@@ -40,7 +40,8 @@ struct ChangelogSpotlightGuidelineTests {
 
             - A thing.
             """
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "changelog-guideline-\(UUID().uuidString).md"
             )

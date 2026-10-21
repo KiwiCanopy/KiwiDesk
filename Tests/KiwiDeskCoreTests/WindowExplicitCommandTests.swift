@@ -14,8 +14,8 @@ import Testing
 struct WindowExplicitCommandTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-explicit-\(UUID().uuidString)"
                 )

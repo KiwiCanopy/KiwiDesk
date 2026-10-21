@@ -34,7 +34,8 @@ struct DesktopSwitchCueProfileTests {
         pinTwoDisplays()
         WMBridge.classResolverOverride = { desktopVerbBridgeClasses[$0] }
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-cue-\(UUID().uuidString)")
         )
         core.state.workspaces.upsertDisplay(

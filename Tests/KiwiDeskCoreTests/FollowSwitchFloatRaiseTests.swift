@@ -25,7 +25,8 @@ struct FollowSwitchFloatRaiseTests {
 
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwidesk-\(UUID().uuidString)")
         )
     }

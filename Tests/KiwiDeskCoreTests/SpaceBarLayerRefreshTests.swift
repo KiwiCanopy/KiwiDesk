@@ -21,7 +21,8 @@ struct SpaceBarLayerRefreshTests {
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-layer-refresh-\(UUID().uuidString)"
                 )

@@ -18,7 +18,8 @@ struct SwapWindowIDTests {
     /// focused; Space 2, unshown, holds 900003 and 900004.
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-swap-\(UUID().uuidString)")
         )
         core.tiler.visibleBounds = { _ in

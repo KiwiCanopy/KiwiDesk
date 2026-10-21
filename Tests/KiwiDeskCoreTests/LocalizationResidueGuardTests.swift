@@ -160,7 +160,8 @@ private enum ResidueFixture {
         english: String,
         value: String
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-residue-guard-\(UUID().uuidString)"
             )

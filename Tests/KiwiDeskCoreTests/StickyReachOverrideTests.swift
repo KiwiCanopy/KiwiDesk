@@ -23,8 +23,8 @@ struct StickyReachOverrideTests {
         Self.priorResolver = WMBridge.classResolverOverride
         WMBridge.classResolverOverride = { _ in nil }
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-reach-\(UUID().uuidString)"
                 )

@@ -34,7 +34,8 @@ struct ScrollingFixedSpanCueTests {
         // records the real ask, not the bound. Without this
         // wiring the pure-layout probe test stays green while
         // the flag never connects.
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-probe-wiring-\(UUID().uuidString)"
             )
@@ -89,7 +90,8 @@ struct ScrollingFixedSpanCueTests {
         // span, and only then pilled. Measured from the drawn
         // span, the first press refuses with the max pill and
         // no neighbor moves.
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-grow-refuse-\(UUID().uuidString)"
             )
@@ -167,7 +169,8 @@ struct ScrollingFixedSpanCueTests {
         // anchored on. The floor is now capped at the current
         // size: refuse where the store stands, cue, move
         // nothing.
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-never-raise-\(UUID().uuidString)"
             )
@@ -232,7 +235,8 @@ struct ScrollingFixedSpanCueTests {
 
     @Test("The shrink below a fixed span clamps and cues")
     func shrinkBelowTheFixedSpanCues() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-fixed-span-\(UUID().uuidString)"
             )

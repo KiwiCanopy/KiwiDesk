@@ -20,7 +20,8 @@ enum VisionHoldFixture {
         windows: [ManagedWindow] = []
     ) -> (KiwiCore, InertVisionPlate) {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-vision-hold-\(UUID())")
         )
         core.tiler.visibleBounds = { _ in

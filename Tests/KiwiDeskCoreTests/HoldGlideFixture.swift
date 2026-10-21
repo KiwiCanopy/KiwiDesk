@@ -33,8 +33,8 @@ final class HoldGlideFixture {
     init(body: String) throws {
         registrar = ReleaseRegistrar()
         core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-holdwire-\(UUID().uuidString)"
                 ),

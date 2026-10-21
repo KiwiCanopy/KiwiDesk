@@ -10,7 +10,8 @@ import Testing
 struct PaletteStoreTests {
     /// A fresh store over a unique temp dir.
     private func makeStore() -> (PaletteStore, URL) {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("palettes-\(UUID().uuidString)")
         return (PaletteStore(directory: dir), dir)
     }

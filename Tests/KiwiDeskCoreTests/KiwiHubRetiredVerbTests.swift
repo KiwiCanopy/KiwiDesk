@@ -23,7 +23,8 @@ struct KiwiHubRetiredVerbTests {
 
     @Test("init.lua's old call is an issue naming the new verb")
     func initLuaNamesTheReplacement() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-\(UUID())")
         try FileManager.default.createDirectory(
             at: dir,

@@ -89,7 +89,8 @@ struct PointerRestTests {
 
     @Test("A mouse settings write tells the engine's listener")
     func settingsWriteIsHeard() {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-rest-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         var heard: [Bool] = []

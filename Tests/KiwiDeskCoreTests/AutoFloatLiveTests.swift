@@ -222,7 +222,8 @@ struct AutoFloatLiveTests {
     @Test("the verb inside init.lua leaks no profile rule")
     func verbInsideLoadLeaksNothing() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-autofloat-\(UUID().uuidString)")
         )
         try FileManager.default.createDirectory(
@@ -260,7 +261,8 @@ struct AutoFloatLiveTests {
     @Test("a profile's override outranks the verb's base")
     func profileOverrideOutranksVerb() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-autofloat-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

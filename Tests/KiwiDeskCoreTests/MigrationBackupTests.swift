@@ -12,7 +12,7 @@ import Testing
 @MainActor
 struct MigrationBackupTests {
     private func directory() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-migbak-\(UUID().uuidString)")
     }
 

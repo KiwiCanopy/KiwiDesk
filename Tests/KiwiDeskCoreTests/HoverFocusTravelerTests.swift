@@ -14,7 +14,8 @@ import Testing
 struct HoverFocusTravelerTests {
     @Test("A traveler whose focus re-seats the row stands down")
     func travelerReseatStandsDown() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-hover-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.tiler.visibleBounds = { _ in

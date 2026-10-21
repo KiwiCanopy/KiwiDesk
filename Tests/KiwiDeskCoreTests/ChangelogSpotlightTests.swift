@@ -17,7 +17,8 @@ struct ChangelogSpotlightTests {
         tag: String? = nil,
         census: URL? = nil
     ) throws -> ScriptRun {
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent("spotlight-\(UUID().uuidString).md")
         try body.write(to: file, atomically: true, encoding: .utf8)
         defer { try? FileManager.default.removeItem(at: file) }
@@ -59,7 +60,8 @@ struct ChangelogSpotlightTests {
         let id = Self.bracedID
         // Its own list, so the braced id is there whatever the
         // tree's list holds.
-        let census = FileManager.default.temporaryDirectory
+        let census =
+            testTemporaryDirectory
             .appendingPathComponent("census-\(UUID().uuidString).txt")
         try "config.layers\n\(id)\n".write(
             to: census,
@@ -137,7 +139,8 @@ struct ChangelogSpotlightTests {
     @Test("the landable list is read only for a `{setting:…}`")
     func censusReadLazily() throws {
         func run(_ body: String) throws -> ScriptRun {
-            let file = FileManager.default.temporaryDirectory
+            let file =
+                testTemporaryDirectory
                 .appendingPathComponent("lazy-\(UUID().uuidString).md")
             try body.write(to: file, atomically: true, encoding: .utf8)
             defer { try? FileManager.default.removeItem(at: file) }
@@ -170,7 +173,8 @@ struct ChangelogSpotlightTests {
             "body": rows("config.layers"),
             "assets": [],
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent("tag-\(UUID().uuidString).json")
         try JSONSerialization.data(withJSONObject: [release]).write(to: file)
         defer { try? FileManager.default.removeItem(at: file) }
@@ -194,7 +198,8 @@ struct ChangelogSpotlightTests {
             "body": body,
             "assets": [],
         ]
-        let file = FileManager.default.temporaryDirectory
+        let file =
+            testTemporaryDirectory
             .appendingPathComponent("spotlight-\(UUID().uuidString).json")
         try JSONSerialization.data(withJSONObject: [release]).write(to: file)
         defer { try? FileManager.default.removeItem(at: file) }

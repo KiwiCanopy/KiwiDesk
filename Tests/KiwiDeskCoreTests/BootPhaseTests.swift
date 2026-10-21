@@ -46,8 +46,8 @@ struct BootPhaseTests {
         apps: Int
     ) -> (core: KiwiCore, box: Box) {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-boot-\(UUID().uuidString)"
                 )

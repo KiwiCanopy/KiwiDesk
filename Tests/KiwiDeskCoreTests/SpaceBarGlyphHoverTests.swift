@@ -13,7 +13,8 @@ import Testing
 @MainActor
 private func makeCore() -> KiwiCore {
     let core = makeTestCore(
-        configDirectory: FileManager.default.temporaryDirectory
+        configDirectory:
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-glyph-hover-\(UUID().uuidString)"
             )

@@ -13,7 +13,8 @@ import Testing
 struct FocusWindowCommandTests {
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-focus-window-\(UUID().uuidString)"
                 )

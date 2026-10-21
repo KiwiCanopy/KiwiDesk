@@ -15,7 +15,8 @@ struct QuitCrossingTests {
     private static let quitAt = Date(timeIntervalSince1970: 5000)
 
     private func directory() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-quit-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,

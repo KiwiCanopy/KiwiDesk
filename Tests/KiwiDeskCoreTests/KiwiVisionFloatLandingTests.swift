@@ -17,8 +17,8 @@ struct KiwiVisionFloatLandingTests {
 
     private func makeCore() -> (KiwiCore, InertVisionPlate) {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-vision-landing-\(UUID().uuidString)"
                 )

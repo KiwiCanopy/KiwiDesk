@@ -12,7 +12,8 @@ import Testing
 @MainActor
 struct FloatingResizeCommandTests {
     private func makeCore() -> KiwiCore {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )

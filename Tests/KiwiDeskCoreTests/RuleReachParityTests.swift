@@ -135,7 +135,8 @@ struct OverwriteProfileRulesTests {
     @Test("writingRules false keeps the stored rule overrides")
     func keepsStoredRules() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-owr-\(UUID().uuidString)")
         )
         try core.guiConfigStore.save(GuiConfig())

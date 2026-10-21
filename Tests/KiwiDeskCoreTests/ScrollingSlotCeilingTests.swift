@@ -35,7 +35,8 @@ struct ScrollingSlotCeilingTests {
     private func makeCore(
         width: CGFloat = 1200
     ) -> (core: KiwiCore, space: SpaceID) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-slot-ceiling-\(UUID().uuidString)"
             )

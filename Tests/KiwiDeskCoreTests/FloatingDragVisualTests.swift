@@ -14,8 +14,8 @@ import Testing
 struct FloatingDragVisualTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-floatdrag-\(UUID().uuidString)"
                 )

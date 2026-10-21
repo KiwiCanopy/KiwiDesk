@@ -15,7 +15,8 @@ import Testing
 struct DeleteSpaceDeclaredInTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-declared-\(UUID().uuidString)"
                 )

@@ -14,8 +14,8 @@ import Testing
 struct MoveFocusLatchTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-move-latch-\(UUID().uuidString)"
                 )

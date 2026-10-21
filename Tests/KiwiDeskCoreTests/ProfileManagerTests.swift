@@ -7,7 +7,8 @@ import Testing
 @MainActor
 private func makeManager() -> ProfileManager {
     ProfileManager(
-        directory: FileManager.default.temporaryDirectory
+        directory:
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-profiles-\(UUID().uuidString)"
             )
@@ -222,7 +223,8 @@ struct ProfileManagerTests {
 
     @Test("Invalid profile files are skipped, not fatal")
     func invalidSkipped() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-profiles-\(UUID().uuidString)"
             )
@@ -249,7 +251,8 @@ struct ProfileManagerTests {
 
     @Test("A broken profile's cause splits syntax from shape")
     func brokenCauseSplitsSyntaxFromShape() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-profiles-\(UUID().uuidString)"
             )
@@ -284,7 +287,8 @@ struct ProfileManagerTests {
 
     @Test("Delete repairs a count left without a default")
     func deleteRepairsDefaults() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-profiles-\(UUID().uuidString)"
             )

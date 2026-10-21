@@ -16,7 +16,8 @@ enum KeepFixture {
     /// and the shared look is crossed from "Work", which follows it.
     static func core(gui: Bool = true) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-keep-\(UUID().uuidString)")
         )
         for display in core.state.workspaces.allDisplays {

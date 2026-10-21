@@ -12,7 +12,8 @@ import Testing
 struct AppWideCaptureFollowsTests {
     private func makeGuiCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-appwide-follow-\(UUID().uuidString)"
                 )

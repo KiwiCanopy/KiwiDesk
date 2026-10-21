@@ -213,7 +213,8 @@ private enum ContentGuardFixture {
         english: [String: String],
         catalogs: [String: [String: String]]
     ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
+        let base =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-content-guard-\(UUID().uuidString)"
             )

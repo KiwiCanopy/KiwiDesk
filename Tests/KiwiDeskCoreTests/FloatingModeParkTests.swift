@@ -13,8 +13,8 @@ struct FloatingModeParkTests {
     @Test("Parking a floating-mode space captures every member")
     func parkCapturesMembers() {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-floatpark-\(UUID().uuidString)"
                 )

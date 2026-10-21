@@ -13,7 +13,8 @@ import Testing
 struct DigitTopUpOverrideTests {
     private func onStarterBaseline() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-topup-override-\(UUID().uuidString)"
                 )

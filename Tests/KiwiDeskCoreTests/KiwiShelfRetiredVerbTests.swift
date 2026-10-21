@@ -12,7 +12,8 @@ import Testing
 struct KiwiShelfRetiredVerbTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwidesk-\(UUID())")
         )
     }
@@ -100,7 +101,8 @@ struct KiwiShelfRetiredVerbTests {
     /// did-you-mean would point at whatever is spelled closest.
     @Test("init.lua's retired call is an issue naming the replacement")
     func retiredCallIsAnIssue() throws {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-\(UUID())")
         try FileManager.default.createDirectory(
             at: dir,

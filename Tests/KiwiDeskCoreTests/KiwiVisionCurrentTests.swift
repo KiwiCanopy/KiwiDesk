@@ -14,8 +14,8 @@ struct KiwiVisionCurrentTests {
 
     private func makeCore(guiManaged: Bool = true) throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-vision-current-\(UUID().uuidString)"
                 )

@@ -27,7 +27,8 @@ struct WarningGateTests {
         over log: String,
         flags: [String] = downgrade
     ) throws -> ScriptRun {
-        let url = FileManager.default.temporaryDirectory
+        let url =
+            testTemporaryDirectory
             .appendingPathComponent("warning-gate-\(UUID()).log")
         try log.write(to: url, atomically: true, encoding: .utf8)
         defer { try? FileManager.default.removeItem(at: url) }

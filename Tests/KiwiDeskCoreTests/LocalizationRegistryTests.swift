@@ -67,16 +67,8 @@ struct LocalizationRegistryTests {
             sys.path.insert(0, sys.argv[1])
             \(body)
             """
-        let file = FileManager.default.temporaryDirectory
-            .appendingPathComponent("reg-\(UUID().uuidString).py")
-        defer { try? FileManager.default.removeItem(at: file) }
-        try script.write(
-            to: file,
-            atomically: true,
-            encoding: .utf8
-        )
-        let run = try runPythonScript(
-            at: file,
+        let run = try runPythonSource(
+            script,
             arguments: [
                 repoRoot.appendingPathComponent("scripts").path
             ]
@@ -99,16 +91,12 @@ struct LocalizationRegistryTests {
                 unregistered_locales(json.loads(sys.argv[2]))
             ))
             """
-        let file = FileManager.default.temporaryDirectory
-            .appendingPathComponent("reg-\(UUID().uuidString).py")
-        defer { try? FileManager.default.removeItem(at: file) }
-        try script.write(to: file, atomically: true, encoding: .utf8)
         let payload = String(
             data: try JSONEncoder().encode(locales),
             encoding: .utf8
         )!
-        let run = try runPythonScript(
-            at: file,
+        let run = try runPythonSource(
+            script,
             arguments: [
                 repoRoot.appendingPathComponent("scripts").path,
                 payload,
@@ -223,12 +211,8 @@ struct LocalizationRegistryTests {
             from localization_guards import foreign_scripts
             print(foreign_scripts(sys.argv[2], sys.argv[3]))
             """
-        let file = FileManager.default.temporaryDirectory
-            .appendingPathComponent("scr-\(UUID().uuidString).py")
-        defer { try? FileManager.default.removeItem(at: file) }
-        try script.write(to: file, atomically: true, encoding: .utf8)
-        let run = try runPythonScript(
-            at: file,
+        let run = try runPythonSource(
+            script,
             arguments: [
                 repoRoot.appendingPathComponent("scripts").path,
                 locale,

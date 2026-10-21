@@ -13,10 +13,7 @@ import Testing
 @Suite("Settings mode reveal")
 struct SettingsModeRevealTests {
     private func model() -> SettingsModel {
-        let name = "settings-mode-reveal-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return makeTestModel(defaults: defaults)
+        makeTestModel(defaults: makeScratchDefaults().defaults)
     }
 
     /// Awaits the reveal's own completion signal rather than

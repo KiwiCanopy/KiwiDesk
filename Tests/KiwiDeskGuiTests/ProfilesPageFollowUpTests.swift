@@ -50,8 +50,8 @@ struct ProfilesPageFollowUpTests {
         let section = ProfilesSection(
             model: makeTestModel(
                 core: makeTestCore(
-                    configDirectory: FileManager.default
-                        .temporaryDirectory
+                    configDirectory:
+                        testTemporaryDirectory
                         .appendingPathComponent(
                             "kiwi-default-\(UUID().uuidString)"
                         )

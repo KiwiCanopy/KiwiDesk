@@ -19,7 +19,8 @@ struct ExecTestsCLICompletion {
     static func complete(_ words: [String], answer: [String]) throws
         -> Run
     {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-shim-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: directory,
@@ -123,7 +124,8 @@ struct ExecTestsCLICompletion {
     /// offers nothing; the stubbed runs above cannot see it.
     @Test("the shim registers with no file fallback")
     func registration() throws {
-        let shim = FileManager.default.temporaryDirectory
+        let shim =
+            testTemporaryDirectory
             .appendingPathComponent("kiwi-shim-\(UUID().uuidString)")
         try CLICompletion.Shell.bash.script
             .write(to: shim, atomically: true, encoding: .utf8)

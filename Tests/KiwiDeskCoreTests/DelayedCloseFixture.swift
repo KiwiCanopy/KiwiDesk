@@ -29,7 +29,8 @@ struct DelayedCloseFixture {
         fallback hasFallback: Bool = true
     ) -> (KiwiCore, Log) {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-2002-\(UUID().uuidString)")
         )
         let now = Date()

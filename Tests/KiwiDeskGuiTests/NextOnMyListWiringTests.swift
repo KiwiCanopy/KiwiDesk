@@ -146,7 +146,7 @@ struct NextOnMyListWiringTests {
         )
         driver.presents = { _ in }
         driver.seenRecord = WhatsNewRecord(
-            UserDefaults(suiteName: "NextOnMyListWiringTests.\(UUID())")!
+            makeScratchDefaults().defaults
         )
         driver.sparkleError = { _, _ in }
         driver.sparkleReadyToInstall = { .dismiss }

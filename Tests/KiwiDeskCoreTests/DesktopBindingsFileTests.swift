@@ -12,7 +12,7 @@ import Testing
 @Suite("Desktop bindings file (#2324)")
 struct DesktopBindingsFileTests {
     private func scratch() -> URL {
-        FileManager.default.temporaryDirectory
+        testTemporaryDirectory
             .appendingPathComponent("kiwi-bindings-\(UUID().uuidString)")
     }
 

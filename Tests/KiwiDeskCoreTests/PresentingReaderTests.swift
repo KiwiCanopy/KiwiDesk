@@ -36,8 +36,8 @@ struct PresentingReaderTests {
         subrole: String? = nil
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-presenting-\(UUID().uuidString)"
                 )

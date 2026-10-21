@@ -56,7 +56,8 @@ struct FitGapsGlowTests {
     @Test("a float keeps one glow off bars and edges too")
     @MainActor func floatInsetRidesTheReach() {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-fit-glow-\(UUID().uuidString)"
                 )

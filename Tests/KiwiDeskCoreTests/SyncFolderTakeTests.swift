@@ -13,7 +13,7 @@ struct SyncFolderTakeTests {
     private let foreign = "KiwiDesk.bind(\"alt\", \"x\", function() end)"
 
     private func folder() throws -> URL {
-        let url = files.temporaryDirectory.appendingPathComponent(
+        let url = testTemporaryDirectory.appendingPathComponent(
             "kiwi-sync-take-\(UUID().uuidString)"
         )
         try files.createDirectory(

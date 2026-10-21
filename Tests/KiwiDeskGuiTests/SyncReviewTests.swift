@@ -16,7 +16,8 @@ struct SyncReviewTests {
 
     private func setup() throws -> (KiwiCore, SettingsModel) {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-sync-review-\(UUID())")
         )
         core.onLog = { _ in }

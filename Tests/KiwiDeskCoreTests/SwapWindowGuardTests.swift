@@ -24,7 +24,8 @@ struct SwapWindowGuardTests {
         bounds: CGRect = CGRect(x: 0, y: 25, width: 1440, height: 875)
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-swapg-\(UUID().uuidString)")
         )
         core.tiler.visibleBounds = { _ in bounds }

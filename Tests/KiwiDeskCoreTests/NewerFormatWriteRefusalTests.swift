@@ -12,7 +12,8 @@ import Testing
 @MainActor
 struct NewerFormatWriteRefusalTests {
     private func scratch() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
+        let dir =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-newer-format-\(UUID().uuidString)"
             )

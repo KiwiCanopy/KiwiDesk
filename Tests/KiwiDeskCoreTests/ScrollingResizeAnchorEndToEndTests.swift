@@ -12,7 +12,8 @@ import Testing
 private func makeScrollingCore() throws -> (
     core: KiwiCore, space: SpaceID
 ) {
-    let directory = FileManager.default.temporaryDirectory
+    let directory =
+        testTemporaryDirectory
         .appendingPathComponent(
             "kiwidesk-tests-\(UUID().uuidString)"
         )

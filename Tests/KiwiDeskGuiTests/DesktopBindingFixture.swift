@@ -61,8 +61,8 @@ enum DesktopBindingFixture {
     static func makeCard() -> (DesktopsGroup, SettingsModel) {
         let model = makeTestModel(
             core: makeTestCore(
-                configDirectory: FileManager.default
-                    .temporaryDirectory
+                configDirectory:
+                    testTemporaryDirectory
                     .appendingPathComponent(
                         "kiwi-group-\(UUID().uuidString)"
                     )

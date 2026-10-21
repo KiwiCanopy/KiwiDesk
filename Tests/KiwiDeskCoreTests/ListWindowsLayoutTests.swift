@@ -24,7 +24,8 @@ struct ListWindowsLayoutTests {
         windows: [ManagedWindow]
     ) -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-list-layouts-\(UUID().uuidString)"
                 )

@@ -30,7 +30,7 @@ struct UpdateWindowRoutingTests {
         )
         driver.presents = { _ in log.presented += 1 }
         driver.seenRecord = WhatsNewRecord(
-            UserDefaults(suiteName: "UpdateWindowRoutingTests.\(UUID())")!
+            makeScratchDefaults().defaults
         )
         // Sparkle's alert is modal: a routing regression must red
         // on the record, never block on the real thing.

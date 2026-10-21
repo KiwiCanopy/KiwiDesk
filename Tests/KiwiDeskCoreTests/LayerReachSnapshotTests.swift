@@ -30,7 +30,8 @@ struct LayerReachSnapshotTests {
 
     private func makeCore() throws -> KiwiCore {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-layer-\(UUID().uuidString)")
         )
         var gui = GuiConfig()

@@ -20,7 +20,8 @@ struct HoverFocusOwnWindowTests {
     /// w1 another app's, w3 KiwiDesk's own, side by side; w1
     /// focused; `marked` decides whether w3 carries the mark.
     private func makeCore(marked: Bool) -> (KiwiCore, Fronts) {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent("kiwidesk-own-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: directory)
         core.tiler.visibleBounds = { _ in

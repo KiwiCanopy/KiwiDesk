@@ -9,8 +9,8 @@ import Testing
 struct DragVisualCommandTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-dragviz-\(UUID().uuidString)"
                 )

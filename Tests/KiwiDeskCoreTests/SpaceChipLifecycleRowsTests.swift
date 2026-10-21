@@ -32,7 +32,8 @@ struct SpaceChipLifecycleRowsTests {
     private func seededCore() -> KiwiCore {
         LocalizationManager.shared.select("en")
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent("kiwi-chip-life-\(UUID())")
         )
         core.state.workspaces.upsertDisplay(display)

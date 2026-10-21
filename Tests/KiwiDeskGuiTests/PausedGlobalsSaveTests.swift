@@ -146,7 +146,8 @@ struct PausedGlobalsSaveTests {
     /// and hide the very state under test.
     @Test("a paused save never overwrites the authored spaces")
     func pausedSaveKeepsAuthoredSpaces() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-paused-spaces-\(UUID().uuidString)"
             )
@@ -211,7 +212,8 @@ struct PausedGlobalsSaveTests {
     /// permission arrives.
     @Test("a cold paused save does not start the engine")
     func coldPausedSaveDoesNotStartTheEngine() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-cold-paused-\(UUID().uuidString)"
             )
@@ -254,7 +256,8 @@ struct PausedGlobalsSaveTests {
     /// outside the sanctioned adopt path.
     @Test("a Lua-owned config is not offered the globals save")
     func luaOwnedConfigKeepsItsOwnAction() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory =
+            testTemporaryDirectory
             .appendingPathComponent(
                 "kiwi-paused-lua-\(UUID().uuidString)"
             )

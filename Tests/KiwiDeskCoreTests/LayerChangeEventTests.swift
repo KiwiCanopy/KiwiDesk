@@ -13,7 +13,8 @@ import Testing
 struct LayerChangeEventTests {
     private func makeCore() -> KiwiCore {
         makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-layer-event-\(UUID().uuidString)"
                 )

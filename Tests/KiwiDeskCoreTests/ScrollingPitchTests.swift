@@ -30,7 +30,8 @@ struct ScrollingPitchTests {
     )
     @MainActor func writerGrowLandsTheDrawnSlot() throws {
         let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwidesk-pitch-writer-\(UUID().uuidString)"
                 )

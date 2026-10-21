@@ -11,7 +11,7 @@ import Testing
 @MainActor
 struct SyncFollowTests {
     private func temporary(_ name: String) -> URL {
-        FileManager.default.temporaryDirectory.appendingPathComponent(
+        testTemporaryDirectory.appendingPathComponent(
             "kiwi-sync-\(name)-\(UUID().uuidString)"
         )
     }
