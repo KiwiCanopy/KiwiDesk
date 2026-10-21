@@ -184,7 +184,7 @@ extension AppBarOverlay {
         floatMark.contentTintColor = NSColor(
             kiwiHex: style.shelf.idleItemColor
         )
-        floatMark.draw(side: side, in: style.shelf.textFont(ofSize: side))
+        floatMark.draw(side: side, weight: style.shelf.symbolWeight)
         BarMotion.setFrame(
             floatMark,
             to: m.horizontal
@@ -193,47 +193,6 @@ extension AppBarOverlay {
             animated: animated
         )
     }
-}
-
-/// The floating mark's view: the shared symbol, inert to the pointer
-/// and silent to VoiceOver, which hears "floating" on each item.
-final class FloatBreakMark: NSImageView {
-    /// The weight the symbol draws at: the bar text's, so its
-    /// strokes never fall below the titles' on a light plate.
-    private(set) var weight: NSFont.Weight = .regular
-    private var drawn: (side: CGFloat, weight: NSFont.Weight)?
-
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        imageScaling = .scaleProportionallyDown
-        isHidden = true
-        setAccessibilityElement(false)
-    }
-
-    /// Draws the symbol at `side` points in `font`'s weight.
-    func draw(side: CGFloat, in font: NSFont) {
-        let traits =
-            font.fontDescriptor.object(forKey: .traits)
-            as? [NSFontDescriptor.TraitKey: Any]
-        let raw = traits?[.weight] as? CGFloat ?? 0
-        weight = NSFont.Weight(rawValue: raw)
-        guard drawn?.side != side || drawn?.weight != weight else { return }
-        drawn = (side, weight)
-        image = NSImage(
-            systemSymbolName: FloatingStyle.symbolName,
-            accessibilityDescription: nil
-        )?.withSymbolConfiguration(
-            NSImage.SymbolConfiguration(pointSize: side, weight: weight)
-                .applying(.preferringMonochrome())
-        )
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("FloatBreakMark is code-only")
-    }
-
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 /// The break's rule: a boundary, not a state, so it is inert and

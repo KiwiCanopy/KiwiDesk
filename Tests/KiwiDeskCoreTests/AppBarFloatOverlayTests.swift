@@ -77,8 +77,11 @@ struct AppBarFloatOverlayTests {
             style: AppBarLook(shelf: shelf, bar: AppBarStyle(), sheen: 0)
         )
         let mark = overlay.floatMark
-        #expect(mark.image != nil)
-        #expect(mark.weight.rawValue > NSFont.Weight.medium.rawValue)
+        let side = mark.frame.height
+        #expect(
+            mark.image?.symbolConfiguration
+                == FloatBreakMark.configuration(side: side, weight: .bold)
+        )
         shelf.fontWeight = 400
         overlay.show(
             items: [item(1), item(2, floating: true)],
@@ -86,7 +89,10 @@ struct AppBarFloatOverlayTests {
             strip: CGRect(x: 0, y: 0, width: 800, height: 30),
             style: AppBarLook(shelf: shelf, bar: AppBarStyle(), sheen: 0)
         )
-        #expect(mark.weight.rawValue < NSFont.Weight.medium.rawValue)
+        #expect(
+            mark.image?.symbolConfiguration
+                == FloatBreakMark.configuration(side: side, weight: .regular)
+        )
     }
 
     @Test("A rule ends the row and the mark opens the floats")

@@ -158,6 +158,12 @@ struct ShelfRevealMotionTests {
         #expect(view.rim.alphaValue == 1)
     }
 
+    @Test("The hover growth travels only without Reduce Motion")
+    func hoverGrowDurationGates() {
+        #expect(BarMotion.hoverGrowDuration(reduceMotion: true) == 0)
+        #expect(BarMotion.hoverGrowDuration(reduceMotion: false) > 0)
+    }
+
     /// The size is content, not motion: an unlabelled mark (a lone
     /// App Bar's line) grows like a labelled one (owner, device,
     /// 2026-10-21).

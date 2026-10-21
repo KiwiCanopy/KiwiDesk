@@ -58,7 +58,7 @@ struct SymbolClassifierSeamTests {
             "builds a bar menu row's image from a fixed name",
         "Sources/KiwiDeskCore/Bar/ShelfCountView.swift":
             "builds the overflow count's chevron from a fixed name",
-        "Sources/KiwiDeskCore/Bar/AppBarOverlay+FloatBreak.swift":
+        "Sources/KiwiDeskCore/Bar/FloatBreakMark.swift":
             "builds the App Bar's float mark from a fixed name",
         "Sources/KiwiDeskCore/Bar/ShelfIndicatorSpec+Label.swift":
             "draws a Space icon spaceIdentifier already classified",

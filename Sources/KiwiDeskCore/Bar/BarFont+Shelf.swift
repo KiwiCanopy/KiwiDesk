@@ -40,6 +40,27 @@ extension KiwiShelf {
         )
     }
 
+    /// The weight bar text draws at, as a symbol weight, so a
+    /// symbol set beside the text never draws lighter than it.
+    @MainActor
+    public var symbolWeight: NSFont.Weight {
+        let drawn = BarFont.drawnWeight(
+            family: fontFamily,
+            weight: resolvedFontWeight
+        )
+        switch BarFontWeight.nearest(to: drawn) {
+        case .ultralight: return .ultraLight
+        case .thin: return .thin
+        case .light: return .light
+        case .regular: return .regular
+        case .medium: return .medium
+        case .semibold: return .semibold
+        case .bold: return .bold
+        case .heavy: return .heavy
+        case .black: return .black
+        }
+    }
+
     /// What the shelf's family draws for its weight.
     @MainActor
     public var fontRendering: BarFont.Rendering {
