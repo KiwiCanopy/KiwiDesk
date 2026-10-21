@@ -46,6 +46,10 @@
 /// The minimum window size a window is floored to is ruled onto
 /// it (#2237, `KiwiCore.minWindowSize(of:)`): every effective
 /// float takes Floating's, so one window always has one floor.
+/// `swap` by window id (#2509) refuses an effective float on
+/// either side, judged where it plays out
+/// (`isEffectiveFloatForPlacement`): a float has no slot to
+/// trade (`SwapWindowIDTests`).
 /// Ruled to STAY on the flag: the Space Bar float badge and
 /// the group-breaking beside it (`KiwiCore+SpaceBarItems`), which
 /// mark the exception to a space's layout and in a floating-mode

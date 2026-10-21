@@ -1,7 +1,7 @@
 import Foundation
 
-/// The Space order's in-place sort, split from `WorkspaceManager`
-/// at the §2.1 ceiling.
+/// The Space order's in-place sort and the cross-Space window
+/// trade, split from `WorkspaceManager` at the §2.1 ceiling.
 extension WorkspaceManager {
     /// Sorts `ids` by number within the slots they already hold
     /// on their OWN screen, every other Space staying where it is:
@@ -23,5 +23,18 @@ extension WorkspaceManager {
         guard reordered != order else { return false }
         order = reordered
         return true
+    }
+}
+
+extension WorkspaceManager {
+    /// Trades two windows filed in different Spaces, each taking
+    /// the other's slot (#2509). Nothing where either is unfiled
+    /// or both share a Space — that is `Space.swap`'s.
+    public mutating func trade(_ a: WindowID, _ b: WindowID) {
+        guard let from = space(of: a), let to = space(of: b),
+            from != to
+        else { return }
+        withSpace(from) { $0.replace(a, with: b) }
+        withSpace(to) { $0.replace(b, with: a) }
     }
 }

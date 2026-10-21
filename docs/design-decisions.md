@@ -278,6 +278,24 @@ handing focus to a sibling of the space being LEFT is the exact
 opposite of what the verb was asked for
 ([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
 
+:::unreleased
+**A swap moves your window, and focus goes with it — across
+Spaces too; `swap_here` is the verb that keeps you where you are
+([#2509](https://github.com/KiwiCanopy/KiwiDesk/issues/2509)).**
+`swap` is the one verb without `_and_follow` that may switch a
+Space, because what it moves is the focused window itself: a
+direction swap already keeps focus on that window as it changes
+slots, and an id swap to another Space or screen keeps the same
+promise rather than handing the focus to whatever arrived. The
+opposite intent — bring that window here, I stay — is its own
+verb, named for `move_here`, so neither verb answers a question
+the user did not ask. Two ids name no window as yours, so they
+move no focus beyond #1518's rule that a window filed into the
+Space you are on takes it. A trade keeps both slots — index,
+track break and weights — and refuses a float, which has no
+slot, and a native full-screen window.
+:::
+
 The **pointer** is not a second decision. It follows focus only
 where *mouse follows focus* is on, through the same predicate
 every other focus change uses — the setting is the answer, and a

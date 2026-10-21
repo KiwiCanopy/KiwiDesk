@@ -46,7 +46,8 @@ extension StateCoordinator {
 
     /// A filing by a user verb or drop while the cross-session
     /// match is open: no restore pass may undo it (#1385). Called
-    /// by the one user filing seam, `KiwiCore.addFocusedToSpace`.
+    /// by the user filing seams, `KiwiCore.addFocusedToSpace` and
+    /// the trade's `fileTrade` (#2509).
     mutating func stampUserFiling(_ id: WindowID) {
         guard crossSession.isOpen else { return }
         crossSession.placed.insert(id)

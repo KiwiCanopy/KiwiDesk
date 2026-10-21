@@ -17,9 +17,15 @@ extension APIReference {
             .window("window")
         ),
         "swap": APIRecord(
-            "Swaps the focused window with the neighboring "
-                + "window.",
-            .choice("direction", Direction.self)
+            "Swaps the focused or named window with a neighbor; "
+                + "ids in place of direction swap two windows.",
+            .choice("direction", Direction.self),
+            .window("window", optional: true)
+        ),
+        "swap_here": APIRecord(
+            "Brings the window an id names into your slot and "
+                + "focuses it; yours takes its place.",
+            .integer("window")
         ),
         "focus_space": APIRecord(
             "Switches to a Space, hiding the current Space's "

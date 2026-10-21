@@ -40,7 +40,7 @@ struct CrossSessionSeamTests {
         return found
     }
 
-    @Test("every membership add is classified, and users stamp once")
+    @Test("every membership add is classified, and users stamp")
     func membershipAddsAreClassified() throws {
         let found = try counts(of: "workspaces.add(")
         #expect(found == Self.adds.mapValues(\.0))
@@ -48,6 +48,8 @@ struct CrossSessionSeamTests {
         #expect(
             stamps == [
                 "KiwiCore+SpaceCommands.swift": 1,
+                // The trade's two filings (#2509).
+                "KiwiCore+MoveWindow.swift": 1,
                 "StateCoordinator+SpaceMemory.swift": 1,
             ]
         )
@@ -57,6 +59,20 @@ struct CrossSessionSeamTests {
             under: "Commands"
         )
         #expect(body.contains("if !restoring { state.stampUserFiling("))
+        // A swap's trade is the other user filing (#2509): one
+        // caller of the primitive, stamping both windows ahead.
+        #expect(
+            try counts(of: "workspaces.trade(")
+                == ["KiwiCore+MoveWindow.swift": 1]
+        )
+        let trade = try SourceScan.functionBody(
+            of: "fileTrade",
+            in: "KiwiCore+MoveWindow.swift",
+            under: "Commands"
+        )
+        let stamp = try #require(trade.range(of: "stampUserFiling("))
+        let move = try #require(trade.range(of: "workspaces.trade("))
+        #expect(stamp.lowerBound < move.lowerBound)
     }
 
     @Test("the restore policy has one caller, the title pass")

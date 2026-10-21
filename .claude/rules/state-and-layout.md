@@ -296,7 +296,10 @@ editing here:
   membership filing — this route, `moveWindow`, the #1010
   re-home, the Space Bar spring drop — goes through the one
   `fileMembership` (add, float placement or else re-anchor,
-  focus stamp, emit),
+  focus stamp, emit), save a swap's trade (#2509), which moves
+  two windows in one step through the one `fileTrade` — both
+  doors settling through the one `settleFiling`, which
+  `PendingSpaceSeamTests` counts —
   never a hand copy of that list, which is how the re-anchor went
   missing once; no fixture can see a float cross fake screens, so
   `PendingSpaceSeamTests` counts the callers and pins the
