@@ -120,13 +120,9 @@ The focused-window shortcut row above has one exception: `focus` itself runs thr
 
 The Layout menu subtitle row above has a remedy on every macOS: KiwiHub's view picker (`⌃⌥L`) names the layout of the Space under the pointer and adds "not saved to profile" while it drifts.
 
-:::unreleased
 Keeping a sync folder in step ([#2324](https://github.com/KiwiCanopy/KiwiDesk/issues/2324); the ruling is in [design decisions](design-decisions.md#following-a-sync-folder-mirrors-it-one-sides-change-at-a-time)) copies one file at a time. A Save that writes several files can reach the other Mac a file at a time, so for about a second that Mac may show part of the change. A profile whose name contains "conflict" is taken for a sync app's conflict copy and does not sync. Deleting `gui.json` or `init.lua` does not delete it on the other Macs: KiwiDesk writes a starter file back on its next load, and that file syncs. A list both Macs edited — the app rules, say — is one Yours / Theirs row for the whole list in the sheet at Save, so the pick keeps one Mac's entries and drops the other's. Loading a profile or deleting a Space writes that Mac's Space list into `gui.json`, which the other Macs read only at their next launch, before a profile applies.
-:::
 
-:::unreleased
 An App Bar item reads KiwiDesk's own layout, not what the screen draws ([#2234](https://github.com/KiwiCanopy/KiwiDesk/issues/2234)). A window KiwiDesk does not manage — a picture-in-picture video, another app's panel — covering a tile leaves the tile's item lit, a float covering a tile does too by ruling, and two unfocused floats that overlap both read lit, since only the focused window is known to be on top. Asking the WindowServer what is drawn would see all of it, at the price of a round trip on every bar refresh, which stalls under GPU load ([#1925](https://github.com/KiwiCanopy/KiwiDesk/issues/1925)).
-:::
 
 
 The sticky-window row above covers the *gesture* switch too: a
@@ -151,7 +147,6 @@ The rejection in the row above has a second form. Issued while the Space KiwiDes
 
 Dragging a **stack** window's edge along its zone's own axis — a height drag beside a left or right stack, a width drag beside a top or bottom one — moves the dragged window's share of its zone, as the keyboard `resize` does ([#941](https://github.com/KiwiCanopy/KiwiDesk/issues/941); the ruling is in [design decisions](design-decisions.md#layout-and-resize-behavior)). What remains: a master zone lined up *along* the split has no cross-axis share to move, by the row above on masters' shares, so that drag snaps back.
 
-:::unreleased
 **Grid** ([#763](https://github.com/KiwiCanopy/KiwiDesk/issues/763)):
 a grid column or row is drawn at least as long as Grid's
 `min_window_size` and the learned minimum of every window that
@@ -160,15 +155,12 @@ weights. So the split-layout row's "a Grid cell" means only a
 cell that spans several tracks — the last cell of a short row
 under `fill_empty_cells`, or the overflow pile — and KiwiDesk's
 own Settings window widens its grid column like any other app.
-:::
 
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `focus_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `focus_or_spawn` (`open -a`, say) leaves you where you are, and so does a first window that appears more than about ten seconds after the app comes forward. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
 
 A slow cold start takes you there too: the press counts when the app's process started within about a second of it, even when the app then takes up to about fifteen seconds to come forward ([#2201](https://github.com/KiwiCanopy/KiwiDesk/issues/2201)). What remains: a click or key press you make between the launch and the app coming forward takes that place, so the app leaves you where you are unless it comes forward within a second of that later press.
 
-:::unreleased
 New Window, or an un-minimize from the window switcher, pressed in the moment after a macOS Desktop switch — before KiwiDesk has read the arriving Desktop's windows, under half a second — does not take you to the window's Space when that window arrives with the switch's own windows; it opens where its app rule files it ([#2347](https://github.com/KiwiCanopy/KiwiDesk/issues/2347)). A window of the same app that the switch reveals cannot take you there instead either.
-:::
 
 Reopening an app whose last window you closed while the app kept running can take you to **another macOS Desktop**. Some apps — Microsoft Word for one — hide a closed window and show that same window again when you click the app in the Dock, and macOS switches to the Desktop that window was on before KiwiDesk hears of it (measured 2026-10-13). KiwiDesk does not switch you back: undoing a switch macOS has already made would move you between two Desktops on every reopen ([#1515](https://github.com/KiwiCanopy/KiwiDesk/issues/1515)). An app you quit opens its next window on the Desktop you are on. macOS's own *When switching to an application, switch to a Space with open windows for the application* (System Settings ▸ Desktop & Dock ▸ Mission Control) governs that switch; whether turning it off keeps you on your Desktop for a re-shown window is not measured.
 
@@ -220,6 +212,4 @@ until the swipe ends
 
 With KiwiVision on, the window you move the focus away from stays clear for a split second — about 40–60 ms — after you click or switch, until KiwiDesk hears that the focus moved ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)). A floating window shows it most, since it sits on top. macOS reports a focus change through Accessibility only after the window has come forward.
 
-:::unreleased
 When `init.lua` owns the shortcuts, the shortcuts panel (`⌃⌥K`) lists every chord it registered, but names each one only as well as its source spells it ([#2482](https://github.com/KiwiCanopy/KiwiDesk/issues/2482)). An inline action KiwiDesk knows is listed by name, any other inline body as its raw Lua, and a binding to a named handler or a C function as **Lua function**. A body that reads a loop variable shows the variable, not its value (`focus_space(i)`). The panel reads the bindings back once per load, right after `init.lua` runs, so a `bind` or `define_layer` that runs later, from an event hook, is not listed, and while a layer defined that way is active the panel shows the first layer it knows. The chords KiwiHub and the menus print beside an action read the same list, so they now show an `init.lua` chord too. Spelling the action inline — `function() KiwiDesk.focus("left") end` — names the row; Settings ▸ Shortcuts ▸ **Import from init.lua…** moves the shortcuts into the visual editor.
-:::
