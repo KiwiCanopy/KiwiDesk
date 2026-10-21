@@ -17,6 +17,10 @@ enum GuiScriptFixture {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
         process.arguments = ["python3"] + arguments
+        // A child's own temp files land in the run's root (#2518).
+        var environment = ProcessInfo.processInfo.environment
+        environment["TMPDIR"] = testTemporaryDirectory.path + "/"
+        process.environment = environment
         let out = Pipe()
         let err = Pipe()
         process.standardOutput = out

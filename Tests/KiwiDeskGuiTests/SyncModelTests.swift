@@ -50,9 +50,7 @@ struct SyncModelTests {
 
     @Test("the sync folder lives in the model's preferences")
     func folderLivesInPreferences() throws {
-        let defaults = UserDefaults(
-            suiteName: "kiwi-sync-\(UUID().uuidString)"
-        )!
+        let defaults = makeScratchDefaults().defaults
         let model = makeTestModel(defaults: defaults)
         let folder = try emptyFolder()
         model.syncFolder = folder

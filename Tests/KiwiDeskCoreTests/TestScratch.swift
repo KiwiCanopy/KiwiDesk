@@ -1,22 +1,16 @@
 import Foundation
 
-/// This test process's private temp root (#2518). Every scratch
-/// folder a test makes lands under it, and the process removes it
-/// at exit, so a run leaves nothing in the user temp dir — which
-/// had grown to 1.3 M entries, and a Python spawn from there
-/// listed them all on every import. A root whose process died
-/// before its exit hook ran is swept by the next run.
-///
-/// Twinned per test target like `TestCore.swift`:
-/// `MachineTouchTests` pins the twins identical, and
-/// `TestScratchCensusTests` pins every temp-dir read and every
-/// scratch defaults domain under `Tests/` to this file.
+/// This test process's private temp root (#2518), removed at its
+/// exit; a root whose process died first is swept by the next
+/// run. Twinned like `TestCore.swift`, and both test modules load
+/// into one process, so each claim mints its own root.
+/// `TestScratchCensusTests` holds every temp-dir and scratch
+/// defaults spelling in `Tests/` to this file.
 let testTemporaryDirectory: URL = TestScratch.claimRoot()
 
 /// A scratch `UserDefaults` domain this process removes at exit,
-/// its plist included (#2518: `removePersistentDomain` alone
-/// leaves an empty plist in `~/Library/Preferences`). A suite
-/// that wants it gone sooner calls `TestScratch.remove(_:)`.
+/// its plist included (#2518). A suite that wants it gone sooner
+/// calls `TestScratch.remove(_:)`.
 func makeScratchDefaults() -> (defaults: UserDefaults, name: String) {
     TestScratch.start()
     let name =
@@ -45,11 +39,10 @@ enum TestScratch {
     static func claimRoot() -> URL {
         start()
         let root = systemTemp.appendingPathComponent(
-            "\(rootPrefix)\(getpid())",
+            // Short: a socket under it must fit `sun_path`.
+            "\(rootPrefix)\(getpid())-\(UUID().uuidString.prefix(8))",
             isDirectory: true
         )
-        // A dead process's root under a reused pid.
-        try? FileManager.default.removeItem(at: root)
         try! FileManager.default.createDirectory(
             at: root,
             withIntermediateDirectories: true

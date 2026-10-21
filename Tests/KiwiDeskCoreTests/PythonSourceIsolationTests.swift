@@ -1,12 +1,9 @@
 import Foundation
 import Testing
 
-/// A Python source a test runs sits alone in its directory
-/// (#2518). Python puts the script's own directory first on
-/// `sys.path` and lists it on every import, so a script written
-/// into a shared temp dir pays for every entry beside it — 15 s
-/// for two lines once that dir held 1.3 M entries, and the
-/// localization suites blocked the cooperative pool behind it.
+/// A Python source a test runs sits alone in its directory, which
+/// is gone after: Python lists that directory on every import, so
+/// a shared temp dir made each spawn pay for its size (#2518).
 @Suite("Python sources run from their own directory")
 struct PythonSourceIsolationTests {
     @Test("the script's directory holds only the script")

@@ -196,12 +196,16 @@ bite large test PRs:
     at its exit and swept by the next run when the process died
     first. Twinned like `TestCore.swift` and admitted on its
     OMISSION ground: one test reading the user temp dir or
-    minting its own defaults suite leaves litter every run, and
-    1.3 M temp entries and 113 k plists made a Python spawn take
-    15 s and the Core target 7–15× slower (#2518).
-    `TestScratchCensusTests` pins every temp-dir read, every
-    scratch defaults domain and every minted `.py` name under
-    `Tests/` to its home; `MachineTouchTests` the twins.
+    minting its own defaults suite leaves litter every run, which
+    once slowed the Core target 7–15× (#2518).
+    Its state is per process and every name carries the pid
+    (each root a UUID too, since both test modules load into one
+    process), so nothing couples one suite or one run to another.
+    A test takes its scratch folder, defaults domain and spawned
+    children's `TMPDIR` from it — `TestScratchCensusTests` holds
+    the spellings, and its `literalTmp` map names the `/tmp`
+    paths a socket root keeps short for `sun_path` —
+    `MachineTouchTests` the twins.
   - *the fake WindowServer* in `ZOrderDrainFake.swift` — the late-
     landing, fake-clock window server the drain suites run
     against, shared by `ZOrderDrainTests` (#684) and

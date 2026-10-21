@@ -2132,8 +2132,9 @@ Touching `Tests/**`.
   fail-open rather than a tax — locate the subject by what it cannot lose
   (#1021)
 - a test's temp folders and scratch defaults come from `TestScratch` alone,
-  removed at the run's exit, and an inline Python source runs from a
-  directory holding only it (#2518, `TestScratchCensusTests`,
+  removed at the run's exit — save a `sun_path`-short `/tmp` socket root
+  the census names — and an inline Python source runs from a directory
+  holding only it (#2518, `TestScratchCensusTests`,
   `PythonSourceIsolationTests`)
 - a WindowServer read on a per-retile path answers from a `makeTestCore` seam,
   never live in every fixture (#1868,

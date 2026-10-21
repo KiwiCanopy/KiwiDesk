@@ -99,9 +99,11 @@ func spawn(
     let process = Process()
     process.executableURL = URL(fileURLWithPath: launchPath)
     process.arguments = arguments
-    if let environment {
-        process.environment = environment
-    }
+    // A child's own temp files land in the run's root (#2518).
+    var childEnvironment =
+        environment ?? ProcessInfo.processInfo.environment
+    childEnvironment["TMPDIR"] = testTemporaryDirectory.path + "/"
+    process.environment = childEnvironment
     if let currentDirectory {
         process.currentDirectoryURL = currentDirectory
     }
