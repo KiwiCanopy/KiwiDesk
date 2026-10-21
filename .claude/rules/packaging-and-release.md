@@ -241,24 +241,25 @@ curated block (#1627), and only once a reader can get it
 (#2521).** The post waits for the release sync PR to MERGE and
 for the site that merge deploys to SERVE the release:
 `.github/workflows/release-announce.yml` runs on that merge's
-push to `main`, reads the tag off the merge's subject, and waits
-for the bundle's `SUFeedURL` to list the version before
-`scripts/discord-announce` posts. Posting from the sync workflow
-put v3.2.0's post out while its PR was still open, so "Check for
-Updates" from the post answered "up to date" and the notes page
-lacked the release. Which merges post is decided by the sync
-job, which writes an `Announce-Release:` line into the PR body —
-the squash commit's body under the repository's squash-message
-setting (`PR_BODY`, observed 2026-10-21) — on `release:
-published`, or on a dispatch that sets `announce`, which is how a
-release whose body was refused at publication gets its post once
-the body is fixed;
-a plain rebuild never posts. A dispatch of the announce workflow
-posts a named tag behind the same feed wait — the way out when a
-merge fired no push workflow (a `github.token` merge). It reads
-the body through `changelog-sync`'s parser, never the generated
-list, and it may not fail a run a re-run would post again: the
-post step continues on error, and an unset
+push to `main` and waits for the bundle's `SUFeedURL` to list
+the version before `scripts/discord-announce` posts. Posting
+from the sync workflow put v3.2.0's post out while its PR was
+still open, so "Check for Updates" from the post answered "up to
+date" and the notes page lacked the release. The sync job decides
+which merges post: on `release: published`, or on a dispatch that
+sets `announce` — how a release whose body was refused at
+publication gets its post once the body is fixed — it writes an
+`Announce-Release: <tag>` line into the PR body and passes that
+body to the auto-merge arming as the squash commit's body, never
+leaving it to a repository default; the line alone names the tag.
+A plain rebuild writes none and never posts. Where no merge can
+carry the ask — the `github.token` fallback, whose merge fires no
+push workflow, or a tag with nothing left to sync — the sync job
+says so in a notice, and a dispatch of the announce workflow
+posts the tag behind the same feed wait. The script reads the
+body through `changelog-sync`'s parser, never the generated list,
+and it may not fail a run a re-run would post again: the post
+step continues on error, and an unset
 `DISCORD_RELEASE_WEBHOOK` skips with a notice
 (`DiscordAnnounceTests`, `DiscordAnnounceWorkflowTests`). The
 webhook URL is the secret, so nothing prints it. A block with

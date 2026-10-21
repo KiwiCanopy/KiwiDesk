@@ -7,15 +7,15 @@ import Testing
 /// from there went out on v3.2.0 while the PR was still open, so
 /// the feed and the release-notes page did not know the release.
 ///
-/// Reads through `workflowSource` / `workflowStep`, and RUNS the
-/// step that decides which merge posts, over commit messages
-/// shaped like the squash merge the sync PR becomes.
+/// Reads through `workflowSource` / `workflowStep`, and RUNS both
+/// halves of the handshake: the sync step that builds the PR body,
+/// and the step that reads the merge's commit message for the ask.
 ///
 /// **What this cannot see:** whether GitHub runs a push workflow
 /// for a merge at all — a sync PR merged by `github.token` fires
-/// none, which the workflow's dispatch covers — and whether the
-/// squash merge keeps the PR body as its commit body, a repository
-/// setting (`PR_BODY`) no file holds.
+/// none, which the sync job's notice and the dispatch cover — and
+/// whether GitHub's auto-merge commits the body the arming passed.
+/// Only a real release answers those.
 @Suite("Discord release announcement workflow (#2521)")
 struct DiscordAnnounceWorkflowTests {
     static let workflow = "release-announce.yml"
@@ -23,11 +23,6 @@ struct DiscordAnnounceWorkflowTests {
     static let waitStep = "Wait for the deployed feed to list it"
     static let postStep = "Post the curated notes"
     static let prStep = "Open a PR if anything moved, and let it land"
-    /// The line both sides spell: the sync writes it, the post
-    /// asks for it.
-    static let askLine = "Announce-Release: $TAG"
-    static let title =
-        "chore(site): sync release notes and feed for ${LABEL}"
 
     @Test("the sync workflow posts nothing")
     func syncNeverPosts() throws {
@@ -81,18 +76,20 @@ struct DiscordAnnounceWorkflowTests {
 
     @Test("the sync asks for the post on publication alone")
     func syncWritesTheAsk() throws {
-        let sync = try workflowSource("changelog.yml")
-        let step = try workflowStep(Self.prStep, in: sync)
-        #expect(step.contains(Self.title))
-        #expect(step.contains(Self.askLine))
+        let step = try workflowStep(
+            Self.prStep,
+            in: workflowSource("changelog.yml")
+        )
         #expect(
             step.contains(
                 "${{ github.event_name == 'release' || inputs.announce }}"
             )
         )
+        // The commit body is passed at the arming, never left to a
+        // repository default that could drop the ask.
         #expect(
             step.contains(
-                #"if [ "$ANNOUNCE" = "true" ] && [ -n "$TAG" ]; then"#
+                #"gh pr merge "$BRANCH" --auto --squash --body "$BODY""#
             )
         )
     }
@@ -100,33 +97,65 @@ struct DiscordAnnounceWorkflowTests {
     @Test("only a sync merge that asks for it posts")
     func onlyAnAskedSyncMergePosts() throws {
         let subject =
-            Self.title.replacingOccurrences(
-                of: "${LABEL}",
-                with: "v9.1.0"
-            ) + " (#2520)"
-        let ask = Self.askLine.replacingOccurrences(
-            of: "$TAG",
-            with: "v9.1.0"
-        )
+            "chore(site): sync release notes and feed for v9.1.0 (#2520)"
         let trailer = "\n\nCo-authored-by: bot <bot@example.invalid>"
-        #expect(
-            try decide("\(subject)\n\nnotes\n\n\(ask)\(trailer)")
-                == "v9.1.0"
-        )
+        func merged(_ announce: String, _ tag: String) throws -> String {
+            let body = try syncBody(announce: announce, tag: tag)
+            return "\(subject)\n\n\(body)\(trailer)"
+        }
+        // Publication, or a dispatch that sets `announce`.
+        #expect(try decide(merged("true", "v9.1.0")) == "v9.1.0")
         // GitHub may hand the body back with CRLF line ends.
-        #expect(
-            try decide("\(subject)\r\n\r\nnotes\r\n\r\n\(ask)\r\n")
-                == "v9.1.0"
+        let crlf = try merged("true", "v9.1.0")
+            .replacingOccurrences(of: "\n", with: "\r\n")
+        #expect(try decide(crlf) == "v9.1.0")
+        // A rebuild, of one tag or of every release.
+        #expect(try decide(merged("false", "v9.1.0")) == "")
+        #expect(try decide(merged("true", "")) == "")
+    }
+
+    /// The body the sync step builds for a new PR, run from the
+    /// step itself: from its first `ASK=` to the PR lookup.
+    private func syncBody(announce: String, tag: String) throws -> String {
+        let step = try workflowStep(
+            Self.prStep,
+            in: workflowSource("changelog.yml")
         )
-        // A rebuild: the same merge with no ask.
-        #expect(try decide("\(subject)\n\nnotes\(trailer)") == "")
-        // Another release's ask, and a non-sync commit.
-        #expect(
-            try decide(
-                "\(subject)\n\nAnnounce-Release: v9.0.0\(trailer)"
-            ) == ""
+        let lines = step.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
         )
-        #expect(try decide("feat: something\n\n\(ask)") == "")
+        let start = try #require(
+            lines.firstIndex { $0.contains(#"ASK="""#) }
+        )
+        let end = try #require(
+            lines.firstIndex { $0.contains(#"STATE="$(gh pr view"#) }
+        )
+        let script =
+            try dedented(lines[start..<end])
+            + "\nprintf '%s' \"$BODY\""
+        let run = try spawn(
+            "/bin/bash",
+            ["-e", "-u", "-c", script],
+            environment: [
+                "MESSAGE": "chore(site): sync\n\nGenerated.",
+                "RETIRED": "",
+                "TAG": tag,
+                "ANNOUNCE": announce,
+                "PATH": "/usr/bin:/bin",
+            ]
+        )
+        try #require(run.status == 0, "\(run.stderr)")
+        return run.stdout
+    }
+
+    /// Lines of a `run: |` block as the shell receives them.
+    private func dedented(_ lines: ArraySlice<Substring>) throws -> String {
+        let indent =
+            try #require(lines.first { !$0.isEmpty })
+            .prefix { $0 == " " }.count
+        return lines.map { String($0.dropFirst(indent)) }
+            .joined(separator: "\n")
     }
 
     /// The tag the find step writes for a push of `message`, or
@@ -143,12 +172,7 @@ struct DiscordAnnounceWorkflowTests {
         let start = try #require(
             lines.firstIndex { $0.hasSuffix("run: |") }
         )
-        let body = lines[(start + 1)...]
-        let indent =
-            body.first { !$0.isEmpty }?
-            .prefix { $0 == " " }.count ?? 0
-        let script = body.map { String($0.dropFirst(indent)) }
-            .joined(separator: "\n")
+        let script = try dedented(lines[(start + 1)...])
         let output = FileManager.default.temporaryDirectory
             .appendingPathComponent("announce-\(UUID().uuidString)")
         try Data().write(to: output)

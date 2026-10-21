@@ -65,6 +65,8 @@ on:
           PR merges and the site serves it (#2521). Only for a
           release whose announcement never went out — a refused
           body re-run after fixing it; a rebuild posts nothing.
+          A tag already synced is posted by dispatching
+          release-announce.yml instead.
         required: false
         type: boolean
         default: false
@@ -285,6 +287,11 @@ jobs:
             echo "the notes, the feed and the docs markers" \
                  "already match the published releases —" \
                  "nothing to do."
+            if [ "$ANNOUNCE" = "true" ] && [ -n "$TAG" ]; then
+              echo "::notice::nothing to sync, so no merge asks" \
+                   "for the post — dispatch release-announce.yml" \
+                   "with tag=$TAG to announce it."
+            fi
             exit 0
           fi
           # The unmarked-blocks paragraph is written ONLY when
@@ -319,42 +326,59 @@ jobs:
           git add "${SYNCED[@]}"
           git commit -m "$MESSAGE"
           git push -f -u origin "$BRANCH"
+          # The post waits for this PR's merge to deploy
+          # (release-announce.yml, #2521). This line in the
+          # squash commit's body is what asks that workflow to
+          # post; a rebuild leaves it out and posts nothing.
+          ASK=""
+          if [ "$ANNOUNCE" = "true" ] && [ -n "$TAG" ]; then
+            ASK="Announce-Release: $TAG"
+          fi
+          BODY="$MESSAGE
+
+          Merging this rebuilds the release-notes page AND puts
+          the new version in front of every installed copy — the
+          appcast is live the moment Cloudflare redeploys.$RETIRED"
+          if [ -n "$ASK" ]; then
+            BODY="$BODY
+
+          $ASK"
+          fi
           # A re-run after a refused body reuses the branch, so an
           # OPEN PR is updated by the push above, never duplicated.
           # The state test is load-bearing: `gh pr view` also finds
           # a MERGED or CLOSED PR for the same branch name, and
           # treating that as "already open" would strand the new
           # commit with no PR and no failure.
-          # The post waits for this PR's merge to deploy
-          # (release-announce.yml, #2521). The squash merge takes
-          # this body as its commit body, and this line in it is
-          # what asks that workflow to post; a rebuild leaves it
-          # out and posts nothing.
-          ANNOUNCED=""
-          if [ "$ANNOUNCE" = "true" ] && [ -n "$TAG" ]; then
-            ANNOUNCED="
-
-          Announce-Release: $TAG"
-          fi
-          BODY="$MESSAGE
-
-          Merging this rebuilds the release-notes page AND puts
-          the new version in front of every installed copy — the
-          appcast is live the moment Cloudflare redeploys.$RETIRED$ANNOUNCED"
           STATE="$(gh pr view "$BRANCH" --json state \
             --jq .state 2>/dev/null || true)"
+          REARM=""
           if [ "$STATE" = "OPEN" ]; then
             echo "PR already open for $BRANCH — updated by push."
-            # A dispatch asking for the post onto an open PR
-            # opened without it: the body is what merges.
-            if [ -n "$ANNOUNCED" ]; then
+            # The open PR's body is kept, a reviewer's note
+            # included; an announce dispatch appends its ask, and
+            # re-arms below so the merge carries it.
+            BODY="$(gh pr view "$BRANCH" --json body --jq .body)"
+            if [ -n "$ASK" ] \
+                && ! grep -qxF "$ASK" <<< "$BODY"; then
+              BODY="$BODY
+
+          $ASK"
               gh pr edit "$BRANCH" --body "$BODY"
+              REARM=1
             fi
           else
             gh pr create --base main --head "$BRANCH" \
               --title \
               "chore(site): sync release notes and feed for ${LABEL}" \
               --body "$BODY"
+          fi
+          # On the fallback the merge is the bot's, and its push
+          # fires no workflow, so the post cannot follow it.
+          if [ -n "$ASK" ] && [ "$SYNC_TOKEN_IS_PAT" != "true" ]; then
+            echo "::notice::this PR's merge starts no workflow —" \
+                 "once it lands, dispatch release-announce.yml" \
+                 "with tag=$TAG to announce it."
           fi
 
           # Start CI by hand when — and only when — nothing
@@ -378,7 +402,13 @@ jobs:
           # sentence with nothing armed and leave the job green,
           # which is the invisible "somebody has to notice"
           # state this whole change exists to end.
-          if ! gh pr merge "$BRANCH" --auto --squash; then
+          # The squash commit's body is passed, never left to a
+          # repository default: it carries the ask (#2521).
+          if [ -n "$REARM" ]; then
+            gh pr merge "$BRANCH" --disable-auto || true
+          fi
+          if ! gh pr merge "$BRANCH" --auto --squash --body "$BODY"
+          then
             ARMED="$(gh pr view "$BRANCH" \
               --json autoMergeRequest --jq .autoMergeRequest)"
             if [ -z "$ARMED" ] || [ "$ARMED" = "null" ]; then
