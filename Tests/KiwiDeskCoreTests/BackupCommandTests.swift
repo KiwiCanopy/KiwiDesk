@@ -134,4 +134,26 @@ struct BackupCommandTests {
         #expect(!reply.isSuccess)
         #expect(reloads == 0)
     }
+
+    @Test("an init.lua-only backup points the plain restore at the flag")
+    func initLuaOnlyNamesTheFlag() throws {
+        let core = try core()
+        let url = file(core)
+        let only = SetupBundle(
+            writtenBy: "test",
+            config: nil,
+            profiles: [],
+            palettes: [],
+            initLua: "print('theirs')\n"
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        try encoder.encode(only).write(to: url)
+        let reply = core.execute(
+            KiwiCore.restoreSetupCommand,
+            args: [.string(url.path)]
+        )
+        #expect(!reply.isSuccess)
+        #expect(reply.error?.contains(KiwiCore.initLuaFlag) == true)
+    }
 }
