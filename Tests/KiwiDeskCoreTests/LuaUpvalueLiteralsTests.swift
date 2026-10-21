@@ -115,6 +115,7 @@ struct LuaUpvalueLiteralsTests {
             "local mode = 1 f(x) mode = 2",
             "local mode <const> = 1\nt[k] = 2 mode = 3",
             "-- note\r\nlocal mode = 1\r\nmode = 2\r\n",
+            "-- note\rlocal mode = 1\rmode = 2",
         ] {
             #expect(resolve(body, upvalues, file: file) == body)
         }
@@ -232,7 +233,10 @@ struct LuaUpvalueReadingTests {
             """
             local nul, bad, big, whole = "a\\0b", "\\255", math.maxinteger, 3.0
             local n, x, s, b = 3, 0.5, "ok", true
-            probe = function() return nul, bad, big, whole, n, x, s, b end
+            local edge, under, bom = 1 << 53, (1 << 53) - 1, "\\239\\187\\191a"
+            probe = function()
+              return nul, bad, big, whole, n, x, s, b, edge, under, bom
+            end
             """
         ).get()
         guard case .functionRef(let ref) = lua.global("probe") else {
@@ -240,13 +244,15 @@ struct LuaUpvalueReadingTests {
             return
         }
         let values = lua.functionUpvalues(ref: ref)
-        for name in ["nul", "bad", "big", "whole"] {
+        for name in ["nul", "bad", "big", "whole", "edge"] {
             #expect(values[name] == .some(nil), "\(name)")
         }
         #expect(values["n"] == .some(.number(3)))
         #expect(values["x"] == .some(.number(0.5)))
         #expect(values["s"] == .some(.string("ok")))
         #expect(values["b"] == .some(.bool(true)))
+        #expect(values["under"] == .some(.number(9_007_199_254_740_991)))
+        #expect(values["bom"] == .some(.string("\u{FEFF}a")))
     }
 }
 

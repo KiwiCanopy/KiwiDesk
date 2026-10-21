@@ -19,10 +19,11 @@ enum LuaTokens {
         "==", "~=", "<=", ">=", "..", "::", "//", "<<", ">>",
     ]
 
-    /// `\r\n` is one `Character` that is not `\n`, so it is read
-    /// as `\n` here, or a line comment would run to the file's end.
+    /// `\r\n` is one `Character` that is not `\n`, and Lua also
+    /// ends a line at a lone `\r`, so both read as `\n` here, or a
+    /// line comment would run to the file's end.
     static func lex(_ text: [Character]) -> [Token] {
-        let chars = text.map { $0 == "\r\n" ? "\n" : $0 }
+        let chars = text.map { $0 == "\r\n" || $0 == "\r" ? "\n" : $0 }
         var tokens: [Token] = []
         var i = 0
         while i < chars.count {
