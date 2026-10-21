@@ -41,8 +41,21 @@ extension KiwiCore {
         guard case .success(let (url, replacing)) = parsed else {
             return parsed.refusal
         }
+        let bundle: SetupBundle
         do {
-            let bundle = try readBackup(at: url)
+            bundle = try readBackup(at: url)
+        } catch {
+            return .fail(error.cliMessage)
+        }
+        // A read backup carries something, so one with no setup
+        // carries init.lua alone, which only the flag restores.
+        if !replacing, !bundle.carriesSetup {
+            return .fail(
+                "the backup carries only init.lua; restore it with "
+                    + Self.initLuaFlag
+            )
+        }
+        do {
             // The Trash Core writes to when no GUI hands one,
             // pinned to a delete in every test core.
             let outcome = try restoreSetup(
@@ -64,11 +77,6 @@ extension KiwiCore {
                         Double(outcome.refusedLooks)
                     ),
                 ])
-            )
-        } catch .empty where !replacing {
-            return .fail(
-                "the backup carries only init.lua; restore it with "
-                    + Self.initLuaFlag
             )
         } catch {
             // Only a write failure has touched the files; a refusal

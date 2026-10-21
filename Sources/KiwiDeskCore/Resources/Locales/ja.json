@@ -591,6 +591,7 @@
   "general.advanced.backup.restore.caption": "設定、プロファイル、カラーパレット、デザインをバックアップの内容で置き換えます。init.luaは指定した場合のみ置き換えます。",
   "general.advanced.backup.restore.confirm": "復元",
   "general.advanced.backup.restore.confirm.choose_init_lua": "このバックアップにはinit.luaも含まれています。「%1$@」では現在のinit.luaがそのまま残り、「%2$@」ではバックアップのinit.luaに置き換えられ、KiwiDeskがそれを実行します。",
+  "general.advanced.backup.restore.confirm.init_lua_only": "このバックアップにはinit.luaだけが含まれています。復元すると、現在のinit.luaはゴミ箱に移動してバックアップのinit.luaに置き換えられ、KiwiDeskがそれを実行します。",
   "general.advanced.backup.restore.confirm.lead": "設定、すべてのプロファイル、カラーパレット、デザインを、バックアップファイルの内容で置き換えます。保存していない変更は破棄されます。置き換えられたファイルはゴミ箱に移動します。",
   "general.advanced.backup.restore.confirm.lua_owned": "このコンピュータの設定はinit.luaから読み込まれているため、このバックアップはそれ自身のinit.luaと一緒にしか復元できません。復元後、KiwiDeskがそのinit.luaを実行します。",
   "general.advanced.backup.restore.confirm.no_init_lua": "init.luaは変更されません。",

@@ -256,5 +256,23 @@ struct BackupInitLuaTests {
                 )
             }
         )
+        // Taken with init.lua, it lands the source's setup whole:
+        // profiles and palettes replaced with none (#606's ruling).
+        try core.profiles.save(
+            Profile(
+                name: "Here",
+                monitorSets: [],
+                spaces: [SpaceID("1")],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        try core.restoreSetup(
+            from: only,
+            replacingInitLua: true,
+            trash: { try FileManager.default.removeItem(at: $0) }
+        )
+        #expect(core.profiles.allProfiles().isEmpty)
+        #expect(lua(of: core) == Self.guiLua)
     }
 }

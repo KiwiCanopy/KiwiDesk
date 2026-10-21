@@ -591,6 +591,7 @@
   "general.advanced.backup.restore.caption": "Sustituye tus ajustes, perfiles, paletas de colores y looks por los de una copia de seguridad. init.lua, solo si lo pides.",
   "general.advanced.backup.restore.confirm": "Restaurar",
   "general.advanced.backup.restore.confirm.choose_init_lua": "La copia de seguridad también incluye un init.lua. «%1$@» deja el tuyo como está; «%2$@» pone el de la copia en su lugar y KiwiDesk lo ejecuta.",
+  "general.advanced.backup.restore.confirm.init_lua_only": "Esta copia de seguridad solo contiene un init.lua. Al restaurarla, el de la copia ocupa el lugar del tuyo, que va a la papelera, y KiwiDesk lo ejecuta.",
   "general.advanced.backup.restore.confirm.lead": "Esto sustituye tus ajustes, todos los perfiles y tus paletas de colores y looks por lo que haya en el archivo de copia de seguridad, y descarta los cambios que aún no hayas guardado. Los archivos sustituidos van a la papelera.",
   "general.advanced.backup.restore.confirm.lua_owned": "Aquí tus ajustes provienen de init.lua, así que esta copia de seguridad solo puede restaurarse junto con su propio init.lua, que KiwiDesk ejecuta después.",
   "general.advanced.backup.restore.confirm.no_init_lua": "init.lua no se toca.",

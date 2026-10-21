@@ -33,8 +33,10 @@ struct RestoreMessageTests {
             message(.luaOwnsThisMac, withInitLua: true)
                 .contains("Your settings here come from init.lua")
         )
+        // The lead names everything replaced, here with none.
         let only = message(.empty, withInitLua: true)
-        #expect(only.hasPrefix("This backup holds only an init.lua."))
-        #expect(!only.contains("every profile"))
+        #expect(only.contains("every profile"))
+        #expect(only.hasSuffix("and KiwiDesk runs it."))
+        #expect(only.contains("This backup holds only an init.lua."))
     }
 }

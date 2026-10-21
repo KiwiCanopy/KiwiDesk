@@ -90,6 +90,12 @@ enum IncomingInitLua {
         return false
     }
 
+    /// Whether a file takes this Mac's place, rather than none.
+    var writesSource: Bool {
+        if case .replace(_?) = self { return true }
+        return false
+    }
+
     /// Whether the setup the replace leaves is the GUI's, judged on
     /// the incoming file: one with foreign code owns the settings
     /// itself, so the incoming `gui.json` is not applied.

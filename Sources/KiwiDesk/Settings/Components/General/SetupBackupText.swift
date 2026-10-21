@@ -136,16 +136,16 @@ enum SetupBackupText {
                 + "haven't saved yet. The files being replaced go "
                 + "to the Trash."
         )
+        let tail: String
         if choices.plainRefusal == .empty {
-            return L(
+            // Everything the lead names is replaced with none.
+            tail = L(
                 "general.advanced.backup.restore.confirm.init_lua_only",
                 "This backup holds only an init.lua. Restoring it puts "
                     + "the backup's in place of yours, which goes to "
                     + "the Trash, and KiwiDesk runs it."
             )
-        }
-        let tail: String
-        if !choices.withInitLua {
+        } else if !choices.withInitLua {
             tail = L(
                 "general.advanced.backup.restore.confirm.no_init_lua",
                 "init.lua isn't touched."

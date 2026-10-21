@@ -239,7 +239,7 @@ extension KiwiCore {
         // resolution order).
         outcome.initLua = Self.initLuaRestore(
             of: bundle,
-            replaced: initLua.replaces
+            replaced: initLua.writesSource
         )
         handleMonitorChange()
         // Explicit apply, so it forces (§5): the un-forced retile
