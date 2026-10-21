@@ -14359,6 +14359,17 @@ model*). The Space
 Bar takes no mark, since each of its float glyphs wears its
 badge already.
 
+:::unreleased
+Under Boxed the gap is the rule (owner ruling, 2026-10-21): each
+item's box already ends the row, and a hairline over the wallpaper
+cannot carry a halo, so the rule draws nothing while its room
+stays and the mark keeps its place. The mark, free over whatever
+is behind the bar — a white window — vanished at idle ink, so on
+Boxed alone it takes the full item ink and a halo in the shelf's
+Fill, overriding the idle-ink clause above; a light Fill flips both
+with it. On a plate both stay as they are.
+:::
+
 The App Bar's set is the one the directional focus keys reach,
 `floatingFocusCandidates`, not a narrower "floated by hand or by
 rule": the #683 transient-overlay filter already drops dialogs,

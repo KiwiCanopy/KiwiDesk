@@ -62,6 +62,57 @@ struct AppBarFloatOverlayTests {
         #expect(!overlay.floatRule.isHidden)
     }
 
+    /// The break on `background`, its mark frame and the views.
+    private func breakOn(
+        _ background: KiwiShelf.BackgroundStyle
+    ) -> AppBarOverlay {
+        var shelf = KiwiShelf()
+        shelf.liquidGlass = false
+        shelf.backgroundStyle = background
+        let overlay = AppBarOverlay()
+        overlay.show(
+            items: [item(1), item(2, floating: true)],
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 800, height: 30),
+            style: AppBarLook(shelf: shelf, bar: AppBarStyle(), sheen: 0)
+        )
+        return overlay
+    }
+
+    /// Under Boxed the gap is the rule, and the mark, free over
+    /// whatever is behind the bar, takes full ink and a halo in the
+    /// Fill (owner ruling, 2026-10-21); a plate keeps the rule and
+    /// the idle ink. The mark keeps its place either way.
+    @Test("Boxed drops the rule and haloes the mark at full ink")
+    func boxedBreakHaloesTheMark() throws {
+        let boxed = breakOn(.boxed)
+        let plain = breakOn(.plain)
+        let shelf = KiwiShelf()
+        #expect(boxed.floatRule.isHidden)
+        #expect(!plain.floatRule.isHidden)
+        // The rule's room stays: the mark sits as far past the row.
+        let lead = { (o: AppBarOverlay) in
+            o.floatMark.frame.minX - o.itemViews[0].frame.maxX
+        }
+        #expect(abs(lead(boxed) - lead(plain)) < 0.01)
+        #expect(
+            boxed.floatMark.contentTintColor
+                == NSColor(kiwiHex: shelf.itemColor)
+        )
+        #expect(
+            plain.floatMark.contentTintColor
+                == NSColor(kiwiHex: shelf.idleItemColor)
+        )
+        let halo = try #require(boxed.floatMark.layer)
+        #expect(halo.shadowOpacity == FloatBreakMark.haloAlpha)
+        #expect(
+            halo.shadowColor
+                == NSColor(kiwiHex: shelf.fillColor)
+                .withAlphaComponent(1).cgColor
+        )
+        #expect((plain.floatMark.layer?.shadowOpacity ?? 0) == 0)
+    }
+
     /// A hairline symbol at idle ink vanished on a light plate
     /// (owner, device, 2026-10-21): the mark draws the bar text's
     /// weight.

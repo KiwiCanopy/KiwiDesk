@@ -507,7 +507,11 @@ twice, was a question the user answered twice. The argument is
 - **A row of floats alone keeps the floating mark ahead of its
   first float and draws no rule** (owner ruling, #1838):
   `AppBarFloatOverlayTests` ▸ `floatsAloneKeepTheMark` holds the
-  mark, the rule, the run's lengths and the drawn span.
+  mark, the rule, the run's lengths and the drawn span. **Under
+  Boxed the break draws no rule, keeping its room, and the mark
+  takes full item ink and a Fill-coloured halo** (owner ruling,
+  2026-10-21; `AppBarFloatOverlayTests` ▸
+  `boxedBreakHaloesTheMark`).
 
 ## One shelf panel per display and edge draws the plate; the bars draw sections
 
