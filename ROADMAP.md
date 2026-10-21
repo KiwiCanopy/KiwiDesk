@@ -29,9 +29,9 @@ that section is free.
 
 ## Next on my list
 
-_As of 2026-10-12_
+_As of 2026-10-21_
 
-- Set up your whole desk from your own AI assistant, just by asking
-- Jump to any window by typing its name, or bring it into the Space you're on
-- KiwiVision, a new way to focus
+- A Stack or Track that runs out of room scrolls instead of piling windows up
+- Keep a window one key away, floating over whatever you're on
+- One key gives the focused window the whole screen, and again puts it back
 
