@@ -127,7 +127,10 @@ struct BackupInitLuaTests {
         let carried = bundle(initLua: Self.guiLua)
         #expect(
             core.restoreChoices(for: carried)
-                == RestoreChoices(plain: false, withInitLua: true)
+                == RestoreChoices(
+                    plainRefusal: .luaOwnsThisMac,
+                    withInitLua: true
+                )
         )
         #expect(
             throws: SetupBundleError.luaOwnsThisMac,
@@ -153,11 +156,11 @@ struct BackupInitLuaTests {
         let core = try core(initLua: nil)
         #expect(
             core.restoreChoices(for: bundle(initLua: nil))
-                == RestoreChoices(plain: true, withInitLua: false)
+                == RestoreChoices(plainRefusal: nil, withInitLua: false)
         )
         #expect(
             core.restoreChoices(for: bundle(initLua: Self.guiLua))
-                == RestoreChoices(plain: true, withInitLua: true)
+                == RestoreChoices(plainRefusal: nil, withInitLua: true)
         )
     }
 
@@ -242,7 +245,7 @@ struct BackupInitLuaTests {
         )
         #expect(
             core.restoreChoices(for: only)
-                == RestoreChoices(plain: false, withInitLua: true)
+                == RestoreChoices(plainRefusal: .empty, withInitLua: true)
         )
         #expect(
             throws: SetupBundleError.empty,

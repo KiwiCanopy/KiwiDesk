@@ -43,8 +43,10 @@ extension KiwiCore {
     /// reading for Settings' buttons and the CLI's refusal alike.
     public func restoreChoices(for bundle: SetupBundle) -> RestoreChoices {
         RestoreChoices(
-            plain: restoreRefusal(of: bundle, replacingInitLua: false)
-                == nil,
+            plainRefusal: restoreRefusal(
+                of: bundle,
+                replacingInitLua: false
+            ),
             withInitLua: bundle.initLua != nil
                 && restoreRefusal(of: bundle, replacingInitLua: true)
                     == nil
@@ -101,8 +103,12 @@ enum IncomingInitLua {
 
 /// The ways a restore of one backup may go on this Mac (#2517).
 public struct RestoreChoices: Equatable, Sendable {
+    /// Why a restore leaving this Mac's `init.lua` is refused, nil
+    /// where it is offered — `.empty` for a backup carrying only
+    /// `init.lua`, `.luaOwnsThisMac` for settings over one.
+    public let plainRefusal: SetupBundleError?
     /// Restore, leaving this Mac's `init.lua` as it is.
-    public let plain: Bool
+    public var plain: Bool { plainRefusal == nil }
     /// Restore, taking the backup's `init.lua` too.
     public let withInitLua: Bool
 

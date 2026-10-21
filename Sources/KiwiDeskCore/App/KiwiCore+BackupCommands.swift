@@ -65,6 +65,11 @@ extension KiwiCore {
                     ),
                 ])
             )
+        } catch .empty where !replacing {
+            return .fail(
+                "the backup carries only init.lua; restore it with "
+                    + Self.initLuaFlag
+            )
         } catch {
             // Only a write failure has touched the files; a refusal
             // leaves an open Settings draft as it is.

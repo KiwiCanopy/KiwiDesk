@@ -39,13 +39,20 @@ extension KiwiCore {
     public func exportSetup(
         includingInitLua: Bool = false
     ) throws -> SetupBundle {
+        try exportSetup(
+            initLua: includingInitLua ? try initLuaForBackup() : nil
+        )
+    }
+
+    /// The export, carrying `initLua` as already read.
+    func exportSetup(initLua: String?) throws -> SetupBundle {
         try Self.setupBundle(
             gui: guiConfigStore,
             profiles: profiles,
             palettes: paletteLibrary,
             looks: lookLibrary,
             bindings: true,
-            initLua: includingInitLua ? try initLuaForBackup() : nil
+            initLua: initLua
         )
     }
 
@@ -210,16 +217,7 @@ extension KiwiCore {
             let format: Int
             let writtenBy: String
         }
-        guard
-            let bundle = try? Self.setupBundle(
-                gui: guiConfigStore,
-                profiles: profiles,
-                palettes: paletteLibrary,
-                looks: lookLibrary,
-                bindings: true,
-                initLua: initLua
-            )
-        else {
+        guard let bundle = try? exportSetup(initLua: initLua) else {
             return nil
         }
         let encoder = JSONEncoder()
