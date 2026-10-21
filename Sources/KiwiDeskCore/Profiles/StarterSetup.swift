@@ -186,11 +186,12 @@ public enum StarterSetup {
     /// default `.top`, so no stored profile moves (#1528).
     public static let appBarEdge = AppBarEdge.bottom
 
-    /// The starter's bars hide until the pointer reaches their edge
-    /// (#761): a first run gets the whole screen. Starter-only, like
-    /// `appBarEdge` — the type default stays `always`, so no stored
-    /// profile and no preset moves.
-    public static let barVisibility = ShelfVisibility.auto
+    /// The starter's bars (#761). Always for 3.2.0 (owner ruling,
+    /// 2026-10-21): under Auto the tour's Looks step paints bars
+    /// hidden at rest, and the tour page explaining Auto lands with
+    /// #2515, which returns this to Auto. Starter-only, like
+    /// `appBarEdge` — the type default stays `always`.
+    public static let barVisibility = ShelfVisibility.always
 
     /// A MAIN screen whose full frame (not visible) height is under
     /// this (pt) gets `compactThickness` on every screen's shelf
