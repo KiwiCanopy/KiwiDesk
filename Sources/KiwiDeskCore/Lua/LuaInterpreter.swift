@@ -197,13 +197,31 @@ public final class LuaInterpreter {
         return values
     }
 
+    /// A value only where its literal is exact: nil for a string
+    /// with a NUL or invalid UTF-8, an integer past 2^53 and an
+    /// integral float, whose spelling would read as an integer.
     private static func scalar(
         _ state: OpaquePointer,
         at index: Int32
     ) -> LuaValue? {
         switch lua_type(state, index) {
-        case SHIM_LUA_TBOOLEAN, SHIM_LUA_TNUMBER, SHIM_LUA_TSTRING:
-            return LuaBridge.read(state, at: index)
+        case SHIM_LUA_TBOOLEAN:
+            return .bool(lua_toboolean(state, index) != 0)
+        case SHIM_LUA_TNUMBER where lua_isinteger(state, index) != 0:
+            let n = shim_lua_tointeger(state, index)
+            return n.magnitude <= 1 << 53 ? .number(Double(n)) : nil
+        case SHIM_LUA_TNUMBER:
+            let n = shim_lua_tonumber(state, index)
+            return n == n.rounded() ? nil : .number(n)
+        case SHIM_LUA_TSTRING:
+            var length = 0
+            guard let bytes = lua_tolstring(state, index, &length)
+            else { return nil }
+            let data = Data(bytes: bytes, count: length)
+            guard !data.contains(0),
+                let text = String(data: data, encoding: .utf8)
+            else { return nil }
+            return .string(text)
         default:
             return nil
         }

@@ -71,6 +71,14 @@ struct LuaUpvalueLiteralsTests {
         )
     }
 
+    @Test("A table constructor's key is not a read")
+    func tableKeysStay() {
+        #expect(
+            resolve("f({ dir = dir, x = dir })", ["dir": .string("l")])
+                == "f({ dir = \"l\", x = \"l\" })"
+        )
+    }
+
     @Test("A literal that would fuse with its neighbour is wrapped")
     func adjoiningLiteralsWrap() {
         #expect(resolve("f(i..x)", ["i": .number(3)]) == "f((3)..x)")
@@ -80,6 +88,7 @@ struct LuaUpvalueLiteralsTests {
         )
         #expect(resolve("f(x-i)", ["i": .number(-1)]) == "f(x-(-1))")
         #expect(resolve("f(i)", ["i": .number(-1)]) == "f(-1)")
+        #expect(resolve("f(i^2)", ["i": .number(-2)]) == "f((-2)^2)")
     }
 
     @Test("A name the body declares keeps the raw body")
@@ -88,6 +97,8 @@ struct LuaUpvalueLiteralsTests {
             "local i = 5 KiwiDesk.focus_space(i)",
             "for i = 1, 2 do f(i) end",
             "g(function(a, i) return i end)",
+            "global i\nf(i)",
+            "local <const> i = 2 f(i)",
         ] {
             #expect(resolve(body, ["i": .number(3)]) == body)
         }
@@ -103,6 +114,7 @@ struct LuaUpvalueLiteralsTests {
             "local mode\nfunction mode() end",
             "local mode = 1 f(x) mode = 2",
             "local mode <const> = 1\nt[k] = 2 mode = 3",
+            "-- note\r\nlocal mode = 1\r\nmode = 2\r\n",
         ] {
             #expect(resolve(body, upvalues, file: file) == body)
         }
@@ -119,6 +131,7 @@ struct LuaUpvalueLiteralsTests {
             "local t = { a = 1, mode = 2, [k] = 3, f(), mode = 4 }",
             "t.mode = 1 t[mode] = 2 x = mode == 3",
             "local function mode() end",
+            "local t = { mode = 2 }",
         ] {
             #expect(
                 resolve(body, upvalues, file: file)
@@ -206,6 +219,34 @@ struct LuaUpvalueCaptureTests {
                 "KiwiDesk.focus_space(\"3\")",
             ]
         )
+    }
+}
+
+@Suite("LuaInterpreter upvalue reading")
+@MainActor
+struct LuaUpvalueReadingTests {
+    @Test("Only values whose literal is exact are read")
+    func exactValuesOnly() throws {
+        let lua = try #require(LuaInterpreter())
+        try lua.run(
+            """
+            local nul, bad, big, whole = "a\\0b", "\\255", math.maxinteger, 3.0
+            local n, x, s, b = 3, 0.5, "ok", true
+            probe = function() return nul, bad, big, whole, n, x, s, b end
+            """
+        ).get()
+        guard case .functionRef(let ref) = lua.global("probe") else {
+            Issue.record("probe is not a function")
+            return
+        }
+        let values = lua.functionUpvalues(ref: ref)
+        for name in ["nul", "bad", "big", "whole"] {
+            #expect(values[name] == .some(nil), "\(name)")
+        }
+        #expect(values["n"] == .some(.number(3)))
+        #expect(values["x"] == .some(.number(0.5)))
+        #expect(values["s"] == .some(.string("ok")))
+        #expect(values["b"] == .some(.bool(true)))
     }
 }
 

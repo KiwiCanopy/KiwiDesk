@@ -78,7 +78,8 @@ enum LuaUpvalueLiterals {
         }
         let negative =
             text.hasPrefix("-")
-            && !["(", ",", "=", "{", nil].contains(prev)
+            && (!["(", ",", "=", "{", nil].contains(prev)
+                || next?.text == "^")
         return adjoins == true || negative ? "(\(text))" : text
     }
 

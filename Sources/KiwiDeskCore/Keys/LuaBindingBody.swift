@@ -103,6 +103,9 @@ enum LuaBindingBody {
         return nil
     }
 
+    /// The end of a comment, string or long bracket at `i`, or nil.
+    /// `LuaTokens.lex` reads a skip opening with `-` as a comment and
+    /// any other as a literal, so a new trivia kind updates it too.
     static func skipTrivia(
         _ chars: [Character],
         _ i: Int

@@ -19,7 +19,10 @@ enum LuaTokens {
         "==", "~=", "<=", ">=", "..", "::", "//", "<<", ">>",
     ]
 
-    static func lex(_ chars: [Character]) -> [Token] {
+    /// `\r\n` is one `Character` that is not `\n`, so it is read
+    /// as `\n` here, or a line comment would run to the file's end.
+    static func lex(_ text: [Character]) -> [Token] {
+        let chars = text.map { $0 == "\r\n" ? "\n" : $0 }
         var tokens: [Token] = []
         var i = 0
         while i < chars.count {
@@ -78,20 +81,24 @@ enum LuaTokens {
         )
     }
 
-    /// Whether the name at `k` is a field or method (`t.i`, `t:i`)
-    /// or a label, never a variable read.
+    /// Whether the name at `k` is a field or method (`t.i`, `t:i`),
+    /// a label or a table constructor's key (`{ i = 1 }`), never a
+    /// variable read.
     static func isField(_ tokens: [Token], _ k: Int) -> Bool {
         guard k > 0 else { return false }
-        return [".", ":", "::", "goto"].contains(tokens[k - 1].text)
+        let prev = tokens[k - 1].text
+        if [".", ":", "::", "goto"].contains(prev) { return true }
+        let next = k + 1 < tokens.count ? tokens[k + 1].text : nil
+        return ["{", ",", ";"].contains(prev) && next == "="
     }
 
-    /// Names a `local`, a `for` header or a function's parameter
-    /// list introduces.
+    /// Names a `local`, a Lua 5.5 `global`, a `for` header or a
+    /// function's parameter list introduces.
     static func declared(_ tokens: [Token]) -> Set<String> {
         var names: Set<String> = []
         for (k, token) in tokens.enumerated() {
             switch token.text {
-            case "local", "for":
+            case "local", "global", "for":
                 names.formUnion(nameList(tokens, from: k + 1))
             case "function":
                 var j = k + 1
@@ -106,7 +113,8 @@ enum LuaTokens {
         return names
     }
 
-    /// `a, b <const>, c` from `from`, skipping `local function`.
+    /// `a, b <const>, c` from `from`, skipping `local function`
+    /// and a leading attribute (`local <const> a`).
     private static func nameList(
         _ tokens: [Token],
         from: Int
@@ -114,6 +122,7 @@ enum LuaTokens {
         var names: Set<String> = []
         var j = from
         if j < tokens.count, tokens[j].text == "function" { j += 1 }
+        if j + 2 < tokens.count, tokens[j].text == "<" { j += 3 }
         while j < tokens.count, tokens[j].kind == .word {
             names.insert(tokens[j].text)
             j += 1
