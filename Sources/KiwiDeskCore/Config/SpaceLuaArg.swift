@@ -36,6 +36,15 @@ public enum SpaceLuaArg {
         parsed(lua, acceptingNumber: true)
     }
 
+    /// A Space call spelled as the catalog spells it, its Space
+    /// quoted — `focus_space(3)` reads `focus_space("3")` — and
+    /// any other Lua unchanged, so a bare-number body matches its
+    /// catalog row (#2485).
+    public static func catalogSpelling(of lua: String) -> String {
+        guard let target = target(of: lua) else { return lua }
+        return "KiwiDesk.\(target.verb)(\(quote(target.space.raw)))"
+    }
+
     private static func parsed(
         _ lua: String,
         acceptingNumber: Bool

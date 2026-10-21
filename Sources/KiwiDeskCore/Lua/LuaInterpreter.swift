@@ -179,6 +179,54 @@ public final class LuaInterpreter {
         return (String(cString: cString), Int(first), Int(last))
     }
 
+    /// The upvalues of a function ref by name (#2485): a string,
+    /// number or boolean as its value, anything else as nil. Runs
+    /// no Lua code and mints no ref.
+    public func functionUpvalues(ref: Int32) -> [String: LuaValue?] {
+        guard let state else { return [:] }
+        lua_rawgeti(state, SHIM_LUA_REGISTRYINDEX, lua_Integer(ref))
+        defer { shim_lua_pop(state, 1) }
+        guard shim_lua_isfunction(state, -1) != 0 else { return [:] }
+        var values: [String: LuaValue?] = [:]
+        var n: Int32 = 1
+        while let name = lua_getupvalue(state, -1, n) {
+            values[String(cString: name)] = Self.scalar(state, at: -1)
+            shim_lua_pop(state, 1)
+            n += 1
+        }
+        return values
+    }
+
+    /// A value only where its literal is exact: nil for a string
+    /// with a NUL or invalid UTF-8, an integer from 2^53 on and an
+    /// integral float, whose spelling would read as an integer.
+    private static func scalar(
+        _ state: OpaquePointer,
+        at index: Int32
+    ) -> LuaValue? {
+        switch lua_type(state, index) {
+        case SHIM_LUA_TBOOLEAN:
+            return .bool(lua_toboolean(state, index) != 0)
+        case SHIM_LUA_TNUMBER where lua_isinteger(state, index) != 0:
+            let n = shim_lua_tointeger(state, index)
+            return n.magnitude < 1 << 53 ? .number(Double(n)) : nil
+        case SHIM_LUA_TNUMBER:
+            let n = shim_lua_tonumber(state, index)
+            return n == n.rounded() ? nil : .number(n)
+        case SHIM_LUA_TSTRING:
+            var length = 0
+            guard let bytes = lua_tolstring(state, index, &length)
+            else { return nil }
+            let data = Data(bytes: bytes, count: length)
+            let text = String(decoding: data, as: UTF8.self)
+            guard !data.contains(0), Data(text.utf8) == data
+            else { return nil }
+            return .string(text)
+        default:
+            return nil
+        }
+    }
+
     // MARK: - Registration
 
     /// Exposes a Swift closure as `tableName.name(...)`. The
