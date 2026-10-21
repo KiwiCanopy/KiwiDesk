@@ -62,6 +62,45 @@ struct AppBarFloatOverlayTests {
         #expect(!overlay.floatRule.isHidden)
     }
 
+    /// A hairline symbol at idle ink vanished on a light plate
+    /// (owner, device, 2026-10-21): the mark draws the bar text's
+    /// weight.
+    @Test("The mark draws at the bar text's weight")
+    func markTakesTheTextWeight() throws {
+        var shelf = KiwiShelf()
+        shelf.fontWeight = 700
+        let overlay = AppBarOverlay()
+        overlay.show(
+            items: [item(1), item(2, floating: true)],
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 800, height: 30),
+            style: AppBarLook(shelf: shelf, bar: AppBarStyle(), sheen: 0)
+        )
+        let mark = overlay.floatMark
+        let side = mark.frame.height
+        #expect(
+            mark.image?.symbolConfiguration
+                == NSImage.SymbolConfiguration(
+                    pointSize: side,
+                    weight: .bold
+                ).applying(.preferringMonochrome())
+        )
+        shelf.fontWeight = 400
+        overlay.show(
+            items: [item(1), item(2, floating: true)],
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 800, height: 30),
+            style: AppBarLook(shelf: shelf, bar: AppBarStyle(), sheen: 0)
+        )
+        #expect(
+            mark.image?.symbolConfiguration
+                == NSImage.SymbolConfiguration(
+                    pointSize: side,
+                    weight: .regular
+                ).applying(.preferringMonochrome())
+        )
+    }
+
     @Test("A rule ends the row and the mark opens the floats")
     func markBetweenSections() throws {
         let overlay = AppBarOverlay()

@@ -2,9 +2,9 @@ import SwiftUI
 
 /// An icon picker grid cell: the chip's resting fill with no edge —
 /// a picker tile, not a chip — sized to the grid column it is placed
-/// in rather than padded past it, the press step on a press and the
-/// chosen icon's accent mark on a layer of its own above it (#1173).
-/// No hover lift, by ruling (#2440). No animation.
+/// in rather than padded past it, the chip ladder's hover and press
+/// steps and the chosen icon's accent mark on a layer of its own
+/// above them (#1173). No animation.
 struct IconCellStyle: ButtonStyle {
     let marked: Bool
 
@@ -12,9 +12,10 @@ struct IconCellStyle: ButtonStyle {
         Face(configuration: configuration, marked: marked)
     }
 
-    /// The pointer's fill — the chip ladder's rest and press steps.
-    static func fill(pressed: Bool) -> Color {
-        ButtonChipStyle.fill(pressed: pressed, hovered: false)
+    /// The pointer's fill — the chip ladder's rest, hover and press
+    /// steps.
+    static func fill(pressed: Bool, hovered: Bool) -> Color {
+        ButtonChipStyle.fill(pressed: pressed, hovered: hovered)
     }
 
     /// The marking's layer, over the press — the chip ladder's.
@@ -27,6 +28,7 @@ struct IconCellStyle: ButtonStyle {
     private struct Face: View {
         let configuration: Configuration
         let marked: Bool
+        @State private var hovered = false
 
         var body: some View {
             configuration.label
@@ -36,13 +38,15 @@ struct IconCellStyle: ButtonStyle {
                     ZStack {
                         shape.fill(
                             IconCellStyle.fill(
-                                pressed: configuration.isPressed
+                                pressed: configuration.isPressed,
+                                hovered: hovered
                             )
                         )
                         shape.fill(IconCellStyle.markFill(marked))
                     }
                 }
                 .contentShape([.interaction, .focusEffect], shape)
+                .onHover { hovered = $0 }
         }
 
         private var shape: RoundedRectangle {

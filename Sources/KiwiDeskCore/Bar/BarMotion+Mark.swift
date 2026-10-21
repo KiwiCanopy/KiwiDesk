@@ -75,24 +75,24 @@ extension BarMotion {
     /// reads as answering the pointer.
     static let hoverGrow: TimeInterval = 0.15
 
+    /// How long the hover growth travels: none under Reduce Motion,
+    /// where the plate lands at its hovered size at once.
+    static func hoverGrowDuration(reduceMotion: Bool) -> TimeInterval {
+        reduceMotion ? 0 : hoverGrow
+    }
+
     /// Where the mark's plate stands in its view: `mark`, grown by
     /// `ShelfIndicatorSpec.hoverGrowth` on every side while
-    /// hovered and along the edge by `widen`, a label's room —
-    /// never under Reduce Motion, which keeps the rim alone, save
-    /// for a mark carrying a label (`labelled`): the pill is content
-    /// rather than motion and needs the grown plate's depth as well
-    /// as its length, so the plate takes its whole hovered frame at
-    /// once — a label narrower than the dot included, which widens
-    /// nothing.
+    /// hovered and along the edge by `widen`, a label's room. The
+    /// size is content rather than motion, so Reduce Motion keeps
+    /// it and drops only the growth's animation, for every mark.
     static func hoverPlate(
         mark: CGRect,
         widen: CGFloat = 0,
-        labelled: Bool = false,
         horizontal: Bool = true,
-        hovered: Bool,
-        reduceMotion: Bool
+        hovered: Bool
     ) -> CGRect {
-        guard hovered, !reduceMotion || labelled else { return mark }
+        guard hovered else { return mark }
         let growth = ShelfIndicatorSpec.hoverGrowth
         let along = growth + widen / 2
         return horizontal
@@ -104,14 +104,13 @@ extension BarMotion {
     /// `rim` — a view stroking its own bounds, at the hovered
     /// plate's frame so its stroke never stretches — growing and
     /// fading in over `hoverGrow` where `animated`; under Reduce
-    /// Motion the plate keeps its frame and the rim appears alone.
+    /// Motion both land at once.
     @MainActor
     static func placeHoverPlate(
         _ plate: NSView,
         rim: NSView,
         mark: CGRect,
         widen: CGFloat = 0,
-        labelled: Bool = false,
         horizontal: Bool = true,
         hovered: Bool,
         animated: Bool
@@ -119,18 +118,14 @@ extension BarMotion {
         let frame = hoverPlate(
             mark: mark,
             widen: widen,
-            labelled: labelled,
             horizontal: horizontal,
-            hovered: hovered,
-            reduceMotion: isReduced
+            hovered: hovered
         )
         rim.frame = hoverPlate(
             mark: mark,
             widen: widen,
-            labelled: labelled,
             horizontal: horizontal,
-            hovered: true,
-            reduceMotion: isReduced
+            hovered: true
         )
         plate.wantsLayer = true
         let write = {
@@ -138,12 +133,13 @@ extension BarMotion {
             plate.layer?.cornerRadius = min(frame.width, frame.height) / 2
             rim.alphaValue = hovered ? 1 : 0
         }
-        guard animated, !isReduced, plate.frame != frame else {
+        let duration = hoverGrowDuration(reduceMotion: isReduced)
+        guard animated, duration > 0, plate.frame != frame else {
             write()
             return
         }
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = hoverGrow
+            context.duration = duration
             context.timingFunction = CAMediaTimingFunction(
                 name: .easeOut
             )

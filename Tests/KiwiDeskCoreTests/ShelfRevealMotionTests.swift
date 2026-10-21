@@ -16,28 +16,14 @@ import Testing
 struct ShelfRevealMotionTests {
     private static let mark = CGRect(x: 100, y: 0, width: 60, height: 8)
 
-    @Test("The hovered plate grows on every side, never under Reduce Motion")
+    @Test("The hovered plate grows on every side")
     func hoverPlateGrows() {
-        let grown = BarMotion.hoverPlate(
-            mark: Self.mark,
-            hovered: true,
-            reduceMotion: false
-        )
+        let grown = BarMotion.hoverPlate(mark: Self.mark, hovered: true)
         let growth = ShelfIndicatorSpec.hoverGrowth
         #expect(grown == Self.mark.insetBy(dx: -growth, dy: -growth))
         #expect(
-            BarMotion.hoverPlate(
-                mark: Self.mark,
-                hovered: true,
-                reduceMotion: true
-            ) == Self.mark
-        )
-        #expect(
-            BarMotion.hoverPlate(
-                mark: Self.mark,
-                hovered: false,
-                reduceMotion: false
-            ) == Self.mark
+            BarMotion.hoverPlate(mark: Self.mark, hovered: false)
+                == Self.mark
         )
     }
 
@@ -172,16 +158,25 @@ struct ShelfRevealMotionTests {
         #expect(view.rim.alphaValue == 1)
     }
 
-    @Test("Under Reduce Motion a hover takes the rim alone")
-    func reducedHoverIsTheRim() {
+    @Test("The hover growth travels only without Reduce Motion")
+    func hoverGrowDurationGates() {
+        #expect(BarMotion.hoverGrowDuration(reduceMotion: true) == 0)
+        #expect(BarMotion.hoverGrowDuration(reduceMotion: false) > 0)
+    }
+
+    /// The size is content, not motion: an unlabelled mark (a lone
+    /// App Bar's line) grows like a labelled one (owner, device,
+    /// 2026-10-21).
+    @Test("Under Reduce Motion a hover grows the plate at once")
+    func reducedHoverGrowsThePlate() {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
         let view = view()
         view.render(spec(hovered: true), animated: true)
-        let room = ShelfIndicatorSpec.hoverGrowth
-        #expect(view.plate.frame == view.bounds.insetBy(dx: room, dy: room))
+        #expect(view.plate.frame == view.bounds)
         #expect(view.rim.frame == view.plate.frame)
         #expect(view.rim.alphaValue == 1)
+        #expect(view.plate.layer?.animationKeys() == nil)
     }
 
     /// A label narrower than the current dot widens nothing, yet
@@ -200,18 +195,5 @@ struct ShelfRevealMotionTests {
         view.render(spec(hovered: true, label: label), animated: true)
         #expect(spec(hovered: true, label: label).labelExtra == 0)
         #expect(view.plate.frame == view.bounds)
-        #expect(
-            BarMotion.hoverPlate(
-                mark: Self.mark,
-                labelled: true,
-                hovered: true,
-                reduceMotion: true
-            )
-                == BarMotion.hoverPlate(
-                    mark: Self.mark,
-                    hovered: true,
-                    reduceMotion: false
-                )
-        )
     }
 }

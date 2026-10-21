@@ -19,11 +19,19 @@ struct IconCellStyleTests {
         ).split(whereSeparator: \.isWhitespace).joined()
     }
 
-    @Test("the cell rests and presses on the chip ladder")
+    @Test("the cell rests, hovers and presses on the chip ladder")
     func ladder() {
-        #expect(IconCellStyle.fill(pressed: false) == SettingsTheme.chipRest)
         #expect(
-            IconCellStyle.fill(pressed: true) == SettingsTheme.chipPressed
+            IconCellStyle.fill(pressed: false, hovered: false)
+                == SettingsTheme.chipRest
+        )
+        #expect(
+            IconCellStyle.fill(pressed: false, hovered: true)
+                == SettingsTheme.chipHover
+        )
+        #expect(
+            IconCellStyle.fill(pressed: true, hovered: true)
+                == SettingsTheme.chipPressed
         )
     }
 
@@ -43,8 +51,14 @@ struct IconCellStyleTests {
         #expect(pointer.lowerBound < mark.lowerBound)
         // A tile, not a chip: an edge on a 40 pt grid reads hard.
         #expect(!face.contains("strokeBorder"))
-        // No hover lift, by ruling (#2440).
-        #expect(!face.contains(".onHover"))
+        // The hover step reaches the fill (owner ruling on #2440).
+        #expect(face.contains(".onHover{hovered=$0}"))
+        #expect(
+            face.contains(
+                "IconCellStyle.fill(pressed:configuration.isPressed,"
+                    + "hovered:hovered)"
+            )
+        )
     }
 
     /// The grid's cells take the cell style, never the action chip,

@@ -184,6 +184,7 @@ extension AppBarOverlay {
         floatMark.contentTintColor = NSColor(
             kiwiHex: style.shelf.idleItemColor
         )
+        floatMark.draw(side: side, weight: style.shelf.symbolWeight)
         BarMotion.setFrame(
             floatMark,
             to: m.horizontal
@@ -192,28 +193,6 @@ extension AppBarOverlay {
             animated: animated
         )
     }
-}
-
-/// The floating mark's view: the shared symbol, inert to the pointer
-/// and silent to VoiceOver, which hears "floating" on each item.
-final class FloatBreakMark: NSImageView {
-    override init(frame: NSRect) {
-        super.init(frame: frame)
-        image = NSImage(
-            systemSymbolName: FloatingStyle.symbolName,
-            accessibilityDescription: nil
-        )
-        imageScaling = .scaleProportionallyUpOrDown
-        isHidden = true
-        setAccessibilityElement(false)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("FloatBreakMark is code-only")
-    }
-
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 /// The break's rule: a boundary, not a state, so it is inert and
