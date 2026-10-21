@@ -75,6 +75,12 @@ struct ConfigWriterCensusTests {
             1,
             "a backup bundle written where the user picked"
         ),
+        "KiwiCore+BackupInitLua.swift": (
+            1,
+            "init.lua carries no format; a restore writes the "
+                + "backup's after trashing this Mac's "
+                + "(BackupInitLuaTests)"
+        ),
         "KiwiCore+SyncFollow.swift": (
             1,
             "the sync folder's stamp, which names the Mac and carries "
