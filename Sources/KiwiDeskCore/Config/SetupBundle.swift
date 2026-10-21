@@ -87,7 +87,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// shared look and its looks alike.
     /// 36 = `init.lua` carried on request (#2517): an older build
     /// would drop a carried one silently.
-    public static let currentFormat = 36
+    /// 37 = `space.cue` became `space.transition` (#2524), in a
+    /// bundle's `config`.
+    public static let currentFormat = 37
 
     public let format: Int
 

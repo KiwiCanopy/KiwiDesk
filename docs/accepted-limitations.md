@@ -202,6 +202,17 @@ A window with **no title-bar buttons and no accessibility content** that is the 
 
 A window that fills its whole screen — a slide show, a borderless-fullscreen game — is left where its app put it and hides both bars while it is in front ([#1787](https://github.com/KiwiCanopy/KiwiDesk/issues/1787)). KiwiDesk tells it from a window you maximise by its missing title bar, so a titled window whose app reports itself as untitled still reads as one when it fills its screen ([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)). The bars come back at the next focus change, so a window of an app KiwiDesk ignores stepping in front of a show leaves them hidden until then, and a screen-filling window KiwiDesk does not manage keeps them drawn over it.
 
+:::unreleased
+With Space switches on Slide, a window of an app that is slow
+to move — System Settings is the usual one — can land a moment
+after the plates have faded, and under a heavily loaded GPU a
+window can stay visible for an instant after the slide
+([#1956](https://github.com/KiwiCanopy/KiwiDesk/issues/1956)).
+KiwiDesk sends each window its move at the press and holds the
+arriving ones until the plates land, but when the app performs
+the move is the app's.
+:::
+
 The focus ring disappears with the desktop when Mission Control
 opens and comes back when it closes, in either draw order and
 with or without glow

@@ -155,7 +155,9 @@ struct SettingsCatalogTests {
         // four group titles and its scene. 199 #2497: Reveal.
         // 200 (owner ruling, 2026-10-21): the Durations drawer and
         // its two rows, the Animations card's two shelf rows gone.
-        #expect(allEntries.count == 200)
+        // 201 with #2524: the Space switch picker and its pace in
+        // the Animations card, KiwiShelf's Show the Space gone.
+        #expect(allEntries.count == 201)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

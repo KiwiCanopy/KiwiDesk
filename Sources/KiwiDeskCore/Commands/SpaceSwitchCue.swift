@@ -25,25 +25,14 @@ extension KiwiCore {
         set { cueHooks.onSpaceCue = newValue }
     }
 
-    /// The screen an explicit switch to `target` changes, read
-    /// BEFORE the switch activates it; nil where that screen
-    /// already shows it, so the switch names nothing.
-    func spaceSwitchDisplay(to target: SpaceID) -> DisplayID? {
-        guard let display = state.workspaces.display(of: target),
-            state.workspaces.activeSpace(on: display) != target
-        else { return nil }
-        return display
-    }
-
     /// Called by `spaceSwitchRetile` alone, after an explicit
-    /// switch, while `space.cue` is on (#2228). Stands down where
-    /// `display` draws a Space Bar, which already names the Space,
-    /// and where the shelf stands down (#1787).
+    /// switch the slide did not play on, while the drawn transition
+    /// is Show the Space (#2524) — on every screen, a Space Bar or
+    /// not, save where the shelf stands down (#1787).
     func paySpaceCue(on display: DisplayID) {
-        guard appWide.spaceCue,
+        guard drawnSpaceTransition == .show,
             let space = state.workspaces.activeSpace(on: display),
             let mode = state.workspaces[space]?.mode,
-            !spaceBars.shownDisplays.contains(display),
             !shelfStandsDown(on: display)
         else { return }
         cueHooks.onSpaceCue(
@@ -51,14 +40,26 @@ extension KiwiCore {
         )
     }
 
-    /// `KiwiDesk.set_space_cue(bool)` (#2228): turns the plate on
-    /// or off. App-wide (#1741) and session-only, as every app-wide
-    /// verb; no retile.
-    func setSpaceCue(_ args: [JSONValue]) -> CommandResponse {
-        guard let on = args.first?.boolValue else {
-            return .fail("expected a boolean")
+    /// `KiwiDesk.set_space_transition(name)` (#2524): `slide`,
+    /// `show` or `none`. App-wide (#1741) and session-only, as
+    /// every app-wide verb; read at each switch, so no retile.
+    func setSpaceTransition(_ args: [JSONValue]) -> CommandResponse {
+        guard let raw = args.first?.stringValue,
+            let style = SpaceTransition(rawValue: raw)
+        else { return .expected(SpaceTransition.self) }
+        setAppWide(persisting: false) { $0.spaceTransition = style }
+        return .ok()
+    }
+
+    /// `KiwiDesk.set_space_slide_duration(ms)` (#2524): the slide's
+    /// pace, clamped into its band; read at each press.
+    func setSpaceSlideDuration(_ args: [JSONValue]) -> CommandResponse {
+        guard let ms = args.first?.intValue else {
+            return .fail("expected milliseconds")
         }
-        setAppWide(persisting: false) { $0.spaceCue = on }
+        setAppWide(persisting: false) {
+            $0.spaceSlideDuration = AppWideSettings.clampedSlideDuration(ms)
+        }
         return .ok()
     }
 }

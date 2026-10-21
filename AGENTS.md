@@ -1307,7 +1307,10 @@ Touching `Lua`.
 
 ### [input-and-animation](.claude/rules/input-and-animation.md)
 
-Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`.
+Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`,
+`Tiling/FrameApplier.swift`, `Tiling/FrameApplier+Hold.swift`,
+`Commands/KiwiCore+SpaceSlide.swift`,
+`Commands/KiwiCore+SpaceTransition.swift`.
 
 - Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per screen
 - hover focus is armed by user pointer motion alone, so KiwiDesk moves the
@@ -1383,10 +1386,16 @@ Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`.
 - a keypad digit IS its number-row twin — stated once in `KeypadKeys` and read
   by both registration and naming, the aliased set closed to the ten digits, a
   twin's refusal never reported as the binding's (#1074, `KeypadKeysTests`)
-- a Space switch is instant — keep its pass the instant one, move KiwiDesk's
-  own window through AppKit in the caller's turn, and pay the Space cue from
-  `spaceSwitchRetile` alone, `paySpaceCue` the one Core reader of `space.cue`
-  (#2228, `FrameApplierOwnWindowTests`, `SpaceCueSeamTests`)
+- a Space switch's motion is DRAWN, never an animation of its windows — keep
+  its pass the instant one, stage an incoming window's writes in
+  `FrameApplier`'s hold through every write path and release them from the
+  app's own queue, move KiwiDesk's own window through AppKit in the caller's
+  turn, and pay the Space cue from `spaceSwitchRetile` alone,
+  `drawnSpaceTransition` the one Core reader of `space.transition` and
+  `SpaceTransition.drawn(reduceMotion:)` the one copy of the Reduce Motion
+  fallback, which the GUI asks too (#1956, #2524,
+  `SpaceSlideSwitchTests`, `FrameApplierHeldTests`,
+  `FrameApplierOwnWindowTests`, `SpaceSlideSeamTests`, `SpaceCueSeamTests`)
 - every `.windowFocused` the loop emits comes from the app macOS activated last
   — a non-activating panel flips its app's focused window without the app ever
   being frontmost — so a new emitter in `Events/` asks `reportsFromActiveApp`
@@ -1413,7 +1422,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 `Layouts` files, the Settings shelf preview,
 `Commands/Reference/APIReference+Retired.swift`, the glass hosts outside `Bar`
 (`Tiling/DragOverlay.swift`, `Tiling/DragMarkerView.swift`,
-`Borders/StickyMarkPlate+Glass.swift`).
+`Borders/StickyMarkPlate+Glass.swift`,
+`Animation/SpaceSlideOverlay+Plates.swift`), the app-icon reader outside `Bar`
+(`Animation/SpaceSlideOverlay.swift`).
 
 - A bar item's title is shown on two channels — drawn AND announced (#937) — so
   a title consumer's stand-down asks whether the title reaches either, never
@@ -1738,8 +1749,8 @@ Touching `Borders`, `Vision`.
   `announce:`, spoken through the one `announceRefusal` seam both
   `makeTestCore` twins pin inert (#2480, `HyperBarePressCueTests`)
 - after a Space switch the focused ring is ordered in dormant and revealed on
-  its window's own report near the sent frame, or at a cap (#1959,
-  `BorderArrivalTests`)
+  its window's own report near the sent frame, at a cap, and never before the
+  slide's plates lift (#1959, `BorderArrivalTests`)
 - a panel that keeps the ring's size moves through `SkyLight.moveWindow`, never
   AppKit's fenced `setFrame`, outside a pass AppKit placed it in, the backend's
   `placedFrame` its frame of record (#1956, `BorderPanelMoveTests`,

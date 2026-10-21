@@ -82,9 +82,9 @@ extension KiwiCore {
     }
 
     /// Commits a focused-display / space switch to `space`: makes
-    /// it the active space, force-retiles (§5: an explicit switch
-    /// forces past the "already there" tolerance check), and tells
-    /// the bars. It names no Space: the screen already shows it.
+    /// it the active space, force-retiles honouring the
+    /// space-change animation (§5: an explicit switch forces past
+    /// the "already there" tolerance check), and tells the bars.
     /// The shared tail of the empty-desktop display follow (#446)
     /// and the AX focus-follow (`scheduleFocusFollow`, #22) — each
     /// caller adds its own raise / warp / settle afterwards.
@@ -119,9 +119,9 @@ extension KiwiCore {
     ) {
         let priorFrontmost = frontmostPIDProvider?()
         // A launch follow arrives with its rule's undeclared Space
-        // filed but unplaced: place it before the cue reads it.
+        // filed but unplaced: place it before the slide reads it.
         placeUnplacedSpaces()
-        let cueOn = spaceSwitchDisplay(to: target)
+        let slide = spaceSlideIntent(to: target)
         state.workspaces.activate(target)
         focusWindow(id, refocusRetile: false, warp: true)
         emitSpaceChange()
@@ -132,7 +132,7 @@ extension KiwiCore {
         spaceSwitchRetile(
             asSwitch: true,
             newcomer: arriving ? id : nil,
-            cueOn: cueOn
+            slide: slide
         )
         raiseLandingFloats(thenFocus: id)
     }

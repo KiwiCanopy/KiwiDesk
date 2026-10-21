@@ -6,7 +6,7 @@ import Testing
 
 /// #1959: after a Space switch the focused ring appears with its
 /// window — on the window's first own report near the frame we
-/// sent, or at the cap.
+/// sent, or at the cap — and never before the slide's plates lift.
 /// Driven on a real ring panel; the hold's clock and scheduler are
 /// stepped by hand.
 @Suite("Border ring arrival (#1959)")
@@ -19,6 +19,8 @@ struct BorderArrivalTests {
     /// in `due` instead of running.
     private final class Clock {
         var now: CFTimeInterval = 100
+        /// The slide's lift, for the gate case.
+        var lift: CFTimeInterval = 0
         /// The engine's commanded frame, for the stale-echo case.
         var commanded: CGRect?
         var due: [(at: CFTimeInterval, run: @MainActor () -> Void)] = []
@@ -56,11 +58,12 @@ struct BorderArrivalTests {
     /// The ring shown, then retired with its Space, then held for
     /// the switch back and synced: ordered in, still dormant.
     private func heldRing(
-        _ border: BorderManager
+        _ border: BorderManager,
+        notBefore: @escaping @MainActor () -> CFTimeInterval? = { nil }
     ) throws -> AppKitBorderOverlay {
         border.sync([spec()])
         border.sync([])
-        border.holdArrival(of: WindowID(1))
+        border.holdArrival(of: WindowID(1), notBefore: notBefore)
         border.sync([spec()])
         let ring = try #require(border.overlays[WindowID(1)])
         return try #require(ring.backend as? AppKitBorderOverlay)
@@ -130,6 +133,23 @@ struct BorderArrivalTests {
         clock.advance(to: 100 + BorderManager.arrivalCap / 2)
         #expect(panel.panelAlpha == 0)
         clock.advance(to: 100 + BorderManager.arrivalCap)
+        #expect(panel.panelAlpha == 1)
+    }
+
+    @Test("an arrived window waits for the plates to lift")
+    func liftGatesTheReveal() throws {
+        let clock = Clock()
+        let border = manager(clock)
+        defer { border.clear() }
+        clock.lift = 100.4
+        let panel = try heldRing(border) { clock.lift }
+        report(border, rest)
+        #expect(panel.panelAlpha == 0)
+        // A burst press moves the lift later before it comes.
+        clock.lift = 100.6
+        clock.advance(to: 100.4)
+        #expect(panel.panelAlpha == 0)
+        clock.advance(to: 100.6)
         #expect(panel.panelAlpha == 1)
     }
 

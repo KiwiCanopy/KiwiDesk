@@ -5,6 +5,10 @@ import SwiftUI
 extension MotionCard {
     @ViewBuilder func motionRow(_ key: ColoursKey) -> some View {
         switch key {
+        case .spaceTransition:
+            spaceTransitionRow
+        case .spaceSlideDuration:
+            spaceSlideDurationRow
         case .animationsMaster:
             ToggleRow(
                 label: L(

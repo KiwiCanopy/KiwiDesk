@@ -158,6 +158,22 @@ struct ScreenEdgeCoreTests {
         #expect(core.tiler.screenFingerprint(screen) == nil)
     }
 
+    /// A Space switch's plates slide across the Space Bar's edge
+    /// as the switching screen has it.
+    @Test(
+        "The slide's axis follows this screen's Space Bar edge",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func slideAxisPerScreen() throws {
+        let (core, display, _) = try #require(makeCore(mode: .bsp))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        #expect(core.spaceSlideAxis(on: display.id) == .horizontal)
+        core.tiler.settings.spaceBarStyle.edgeOverride = [
+            display.fingerprint: .left
+        ]
+        #expect(core.spaceSlideAxis(on: display.id) == .vertical)
+    }
+
     private func passes(_ meter: WorkMeter) -> Int {
         let counts = meter.snapshot(reset: false).counts
         return counts.retiles + counts.passesHeld

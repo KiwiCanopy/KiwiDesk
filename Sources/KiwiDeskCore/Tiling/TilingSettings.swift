@@ -51,6 +51,7 @@ public struct TilingSettings: Sendable, Equatable {
     /// leaves (#1307); the panel reads the active profile.
     /// Defaults ON with them (owner ruling 2026-09-10), so the
     /// row's "all three" reading is never false on a fresh setup.
+    /// A shared leaf: the Space slide's plates read it too (#2524).
     public var shortcutPanelLiquidGlass = true
     /// Space spawn placement overrides (`placement.override[space_id]`).
     public var placementOverride: [SpaceID: SpawnPlacement] =

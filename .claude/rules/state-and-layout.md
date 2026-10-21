@@ -1338,7 +1338,10 @@ editing here:
   must stop it joins `FrameApplier.resendStandsDown`, wired once in
   `TilingEngine`'s init (`ReduceMotionInstantWriteTests` ▸
   `newerWriteCancelsTheResend`, `unparkOwesNoResend`,
-  `parkOwesNoResend`, `dragStandsTheResendDown`).
+  `parkOwesNoResend`, `dragStandsTheResendDown`). A write the
+  Space slide's hold stages owes none either: it lands once, at the
+  slide's landing (#2524, `FrameApplierHeldTests` ▸
+  `heldSetOwesNoResend`).
 - **A scrolling viewport offset travels with the slot it was
   measured against (#966).** One slot size serves the whole
   row, so anything that changes it — a resize, a window opening

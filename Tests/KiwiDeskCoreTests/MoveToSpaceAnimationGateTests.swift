@@ -55,6 +55,7 @@ struct MoveToSpaceAnimationGateTests {
     func scrollingSwitchNoRefocusRetile() {
         guard NSScreen.main != nil else { return }
         let core = makeCore()
+        core.setAppWide(persisting: false) { $0.spaceTransition = .none }
         core.tiler.animation.isEnabled = false
         var animatedApplies: [WindowID: Int] = [:]
         core.tiler.animation.apply = { id, _, _ in

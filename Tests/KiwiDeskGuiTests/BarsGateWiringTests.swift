@@ -61,17 +61,6 @@ struct BarsGateWiringTests {
                 "SettingsCatalog.bars.kiwishelfEdges,"
                     + "chrome:.attached,"
             ],
-            // The one row gate the area answers (#2228): the Space
-            // cue's Lua-owned grey — the whole constructor, since
-            // `guiManaged` has a default a dropped argument would
-            // fall back to — the grey it drives, and its sentence.
-            "Components/Bars/KiwiShelfCard+SpaceCue.swift": [
-                "BarsGates(settings:model.config.settings,"
-                    + "guiManaged:model.guiManaged)"
-                    + ".inertReason(for:.spaceBar(.spaceCue))",
-                "disabled:reason!=nil",
-                "BarsGateHelp.sentence(for:reason)",
-            ],
             // The Reveal row's grey while no bar hides (owner
             // ruling, 2026-10-21), the grey it drives, and its
             // sentence.
@@ -162,7 +151,7 @@ struct BarsGateWiringTests {
     @Test("each reason has its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
-            .boxedShelf, .barsSplit, .appWideLuaOwned,
+            .boxedShelf, .barsSplit, .noBarHides, .expandOff,
         ]
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }
@@ -216,22 +205,6 @@ struct BarsGateWiringTests {
         settings.animations.onExpand = false
         #expect(
             BarsGates(settings: settings).inertReason(for: key) == .expandOff
-        )
-    }
-
-    /// The Space cue's switch greys under a Lua-owned config and
-    /// stays live where the GUI owns it (#2228).
-    @Test("the Space cue switch greys under Lua")
-    func spaceCueGreysUnderLua() {
-        let settings = TilingSettings()
-        let key = SettingKey.spaceBar(.spaceCue)
-        #expect(
-            BarsGates(settings: settings, guiManaged: true)
-                .inertReason(for: key) == nil
-        )
-        #expect(
-            BarsGates(settings: settings, guiManaged: false)
-                .inertReason(for: key) == .appWideLuaOwned
         )
     }
 }

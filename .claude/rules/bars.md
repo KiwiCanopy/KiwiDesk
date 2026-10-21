@@ -23,6 +23,8 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
   # The looks (#1684): which bar fields a look may set.
   - "Sources/KiwiDeskCore/Appearance/*Look*.swift"
+  # The app-icon reader outside Bar: one icon source (#1901).
+  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay.swift"
   # The Settings preview asks ShelfArrangement and the hard floor
   # like the live plan does; a hand placement there is this
   # file's defect, not gui.md's.
@@ -42,9 +44,13 @@ paths:
   - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
   - "Sources/KiwiDeskCore/Tiling/DragMarkerView.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
+  # The Space slide's plates (#1956, #2524): untinted `.regular`
+  # glass, KiwiHub's, on KiwiHub's leaf.
+  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay+Plates.swift"
   # ...and the sites that decide their glass through the gate.
   - "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
+  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceSlide.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)

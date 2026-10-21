@@ -51,10 +51,13 @@ extension APIReference {
         // A window is tiled or floating, and Tile hands it back
         // to detection (#1810).
         map["make_auto"] = "make_tiled"
-        // A Space switch is instant, and names the Space where no
-        // Space Bar does (#2228).
-        map["animations.set_on_space_change"] = "set_space_cue"
-        map["animations.set_space_change"] = "set_space_cue"
+        // A Space switch slides, shows the Space or neither, one
+        // app-wide choice (#2524).
+        map["animations.set_on_space_change"] = "set_space_transition"
+        map["animations.set_space_change"] = "set_space_transition"
+        map["set_space_cue"] = "set_space_transition"
+        map["animations.set_space_change_duration"] =
+            "set_space_slide_duration"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
         // The shelf's glide is its expand, beside the reveal's own
         // duration (owner ruling, 2026-10-21).
@@ -91,13 +94,9 @@ extension APIReference {
     /// the one list `retired` takes its nil entries from.
     static let retiredReasons: [String: String] = {
         var map = ["space_bar.set_item_size": itemFollowsContent]
-        // The Space switch no longer slides (#2228).
-        for verb in [
-            "animations.set_space_change_duration",
-            "set_space_switch_liquid_glass",
-        ] {
-            map[verb] = switchNoLongerSlides
-        }
+        // The slide's plates wear KiwiHub's glass
+        // (#2524).
+        map["set_space_switch_liquid_glass"] = platesWearPanelGlass
         // A Monocle focus change is a raise and nothing else
         // (#2099).
         for verb in [
@@ -118,8 +117,8 @@ extension APIReference {
 
     private static let itemFollowsContent =
         "a Space item's length follows its content"
-    private static let switchNoLongerSlides =
-        "a Space switch is instant and no longer slides"
+    private static let platesWearPanelGlass =
+        "the Space slide's plates follow KiwiHub's glass"
     private static let monocleFocusIsARaise =
         "a Monocle focus change is a raise and plays no flip"
     private static let appBarDrawsBoth =

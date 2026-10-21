@@ -77,7 +77,8 @@ public enum APIReference {
             ("set_desktop_cue", "set_desktop_cue"),
             ("set_hyper_key", "set_hyper_key"),
             ("set_mode_cue", "set_mode_cue"),
-            ("set_space_cue", "set_space_cue"),
+            ("set_space_transition", "set_space_transition"),
+            ("set_space_slide_duration", "set_space_slide_duration"),
             ("set_space_history", "set_space_history"),
             ("set_float_automatically", "set_float_automatically"),
             (

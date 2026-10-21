@@ -21,9 +21,6 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarFocusedItemColor = "settings.spaceBarStyle.focusedItemColor"
     case spaceBarFocusedHighlightColor =
         "settings.spaceBarStyle.focusedHighlightColor"
-    /// App-wide, not a `SpaceBarStyle` field: the Space switch
-    /// plate the bar's absence calls for (#2228).
-    case spaceCue = "appWide.spaceCue"
 }
 
 extension SpaceBarKey {
@@ -34,18 +31,6 @@ extension SpaceBarKey {
             // hidden bar's shortcut still shows it, so it gates
             // nothing.
             return .row(.bars, .kiwishelf, .showMore)
-        case .spaceCue:
-            // Under the Space Bar row in the Show group, which has
-            // no block gate: it matters most while the bar is
-            // hidden (#2228, #761). App-wide
-            // (#1741), so it greys where init.lua owns the config,
-            // as the Desktop cue does (#2142).
-            return .row(
-                .bars,
-                .kiwishelf,
-                .atRest,
-                gate: .runtime(.luaOwnsConfig)
-            )
         case .spaceBarHideEmpty, .spaceBarShowFrontApp,
             .spaceBarGroupAdjacent,
             .spaceBarActiveIndicator, .spaceBarSpringDelay,
@@ -145,8 +130,6 @@ extension SpaceBarKey {
         case .spaceBarActiveDimFactor, .spaceBarStickyBadge,
             .spaceBarReserve:
             return .none
-        case .spaceCue:
-            return .text("space_bar.cue", help: "space_bar.cue.help")
         case .spaceBarFocusedItemColor:
             return .text(
                 "space_bar.color.focused_item",

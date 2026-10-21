@@ -43,10 +43,6 @@ struct BarsControls: Sendable {
         "kiwishelf.reveal_style.label",
         "Reveal"
     )
-    let spaceCue = SettingsControl(
-        "space_bar.cue",
-        "Show the Space after a switch"
-    )
     let spaceBarCard = SettingsControl(
         "bars.switch.space_bar",
         "Space Bar"

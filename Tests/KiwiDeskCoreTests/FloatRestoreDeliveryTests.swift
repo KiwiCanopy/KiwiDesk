@@ -61,6 +61,7 @@ struct FloatRestoreDeliveryTests {
         core.tiler.applier.clock = { 0 }
         core.tiler.visibleBounds = { [screen] _ in screen }
         core.tiler.allScreenBounds = { [screen] }
+        core.setAppWide(persisting: false) { $0.spaceTransition = .slide }
         core.state.apply(.windowCreated(float))
         core.tiler.stashedFrames[id] = original
         core.spaceSwitchRetile(asSwitch: false)

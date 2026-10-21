@@ -127,7 +127,7 @@ extension SpaceBarCard {
         case .spaceBarReserve, .spaceBarVisibility,
             .spaceBarActiveDimFactor,
             .spaceBarStickyBadge, .spaceBarFocusedItemColor,
-            .spaceBarFocusedHighlightColor, .spaceCue:
+            .spaceBarFocusedHighlightColor:
             let _ = assertionFailure(
                 "unrendered Space Bar census key: \(key.rawValue)"
             )

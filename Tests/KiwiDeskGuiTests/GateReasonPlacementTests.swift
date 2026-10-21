@@ -77,9 +77,10 @@ struct GateReasonPlacementTests {
                 .shortcuts(.hyperKey),
                 // #1870: its move offer, on the same card.
                 .shortcuts(.shortcutBase),
-                // #2228: the Space plate's switch, the same shape
-                // on KiwiShelf ▸ Show.
-                .spaceBar(.spaceCue),
+                // #2524: the Space switch picker and the slide's
+                // pace, the same shape on Colors ▸ Animations.
+                .colours(.spaceTransition),
+                .colours(.spaceSlideDuration),
                 // The Reveal row beside it greys while no bar hides:
                 // the bars' values sit above it, not that a reveal
                 // needs a hiding bar (owner ruling, 2026-10-21).

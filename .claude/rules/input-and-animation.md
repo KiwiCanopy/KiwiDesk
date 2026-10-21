@@ -4,6 +4,10 @@ paths:
   - "Sources/KiwiDeskCore/Events/**"
   - "Sources/KiwiDeskCore/Animation/**"
   - "Sources/KiwiDeskCore/OS/HyperKeyRemap*.swift"
+  - "Sources/KiwiDeskCore/Tiling/FrameApplier.swift"
+  - "Sources/KiwiDeskCore/Tiling/FrameApplier+Hold.swift"
+  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceSlide.swift"
+  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceTransition.swift"
 ---
 
 # Input & animation
@@ -720,24 +724,52 @@ editing here:
   [accessibility.md](accessibility.md)'s, because it constrains
   a file under `AX/` that this rule's `paths:` do not reach.
 
-- **A Space switch is instant, and each window moves once
-  (#2228).** Keep the switch's pass the instant one: re-animating
-  window frames on a switch, or adding a write per window,
-  re-opens the corner slide's per-frame AX cost. Move KiwiDesk's
-  own window through AppKit inside the caller's turn, never on a
-  later main-queue turn (`FrameApplierOwnWindowTests`). The Space
-  cue (#2143) is the switch's one picture: `spaceSwitchRetile` is
-  its one payer, handed the screen an explicit switch changes
-  (`spaceSwitchDisplay`, read before the switch activates), and
-  `paySpaceCue` reads `space.cue` itself — a second payer, or a
-  reader of the toggle beside it, is a switch that shows the
-  plate past the user's off (`SpaceCueSeamTests`). A display
-  follow passes no screen, since its screen already shows the
-  Space (`FullscreenStandDownTests` ▸ `displayFollowNamesNothing`);
-  boot, wake and a restore pass none through `spaceSwitchRetile`'s
-  nil default, which review holds. The product ruling is
-  `docs/design-decisions.md` ▸ *A Space switch is instant, and
-  names the Space only where no Space Bar does*.
+- **A Space switch's motion is DRAWN, and each window still
+  moves once (#1956, #2524).** The plate slide is a picture over
+  the windows, never an animation of them: keep the switch's pass
+  the instant one, since re-animating window frames on a switch,
+  or adding a write per window, re-opens the corner slide's
+  per-frame AX cost (`SpaceSlideSwitchTests` ▸
+  `slideCostsNoExtraWork`). Stage an incoming
+  window's writes in `FrameApplier`'s hold through EVERY applier
+  write path (`SpaceSlideSeamTests` ▸ `writePathsReachTheHold`)
+  and release them from the app's own queue at the landing —
+  KiwiDesk's own window, whose queue is main, excepted — once,
+  inside one Enhanced UI hold (`FrameApplierHeldTests`); a play
+  that ends early releases what it held, whichever activation
+  overtook it — asked once at the head of every retile, never per
+  activation door (`SpaceSlideSwitchTests` ▸
+  `instantSwitchReleasesHolds`, `overtakenPlayEnds`), the one
+  ruled exception being `spaceSwitchRetile`'s own
+  `endSpaceSlide()`: a navigation that stands the slide down cuts
+  a running one. A frame write outside the applier drops every
+  hold first, or a landing undoes it — the quit gather is the
+  instance (`SpaceSlideSeamTests` ▸ `gatherDropsTheHolds`).
+  Move KiwiDesk's own window through AppKit inside the caller's
+  turn, never on a later main-queue turn
+  (`FrameApplierOwnWindowTests`). Order the overlay's panel in
+  once per screen and never move it during a play — what moves
+  is a layer timed from the press, through `BarMotion`'s
+  censused members (`BarMotionSeamTests`); the panel half is
+  review's, since no fixture orders a panel in. And play only
+  for navigation that passes a `SpaceSlideIntent`, read before
+  the switch activates (`SpaceSlideSwitchTests` ▸
+  `onlyNavigationPlays` holds the display follow; boot, wake and
+  a restore pass none through `spaceSwitchRetile`'s nil default,
+  which review holds). The Space cue (#2143) rides the same
+  intent: `spaceSwitchRetile` is its one payer, where no slide
+  ran, and the slide and the cue ask the one
+  `drawnSpaceTransition` — the one Core reader of the stored
+  `space.transition` — so a stand-down or a second reader added
+  beside it leaves a switch with neither, or with both
+  (`SpaceCueSeamTests`). Slide under Reduce Motion reading as Show
+  the Space is stated once, in `SpaceTransition.drawn(reduceMotion:)`,
+  which that reader and the Settings rows ask, never a copy of
+  its branch beside either. A live read the slide adds is pinned
+  inert in both `makeTestCore` twins (`SpaceSlideSeamTests` ▸
+  `bothTwinsPinTheReads`). The product ruling is
+  `docs/design-decisions.md` ▸ *A Space switch slides, shows the
+  Space, or neither*.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

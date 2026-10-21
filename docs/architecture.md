@@ -194,12 +194,21 @@ bar, and a reveal or a retract from
 the pointer monitor or the show/hide action calls `updateBars()`
 alone — never a retile.
 
-A Space switch is always that one instant reissue. After an
-explicit switch, Core hands the GUI the Space and its layout for
-the screen that switched (`paySpaceCue`, in
-`Commands/SpaceSwitchCue`), standing down where that screen draws
-a Space Bar or the shelf stands down; the plate itself is drawn in
-`Sources/KiwiDesk/CuePlate` (#2143, #2228).
+:::unreleased
+A Space switch is always that one instant reissue, and how it
+shows itself is read once, through `drawnSpaceTransition`
+(`Commands/KiwiCore+SpaceSlide`). On Slide, an explicit switch
+wraps the reissue in the plate slide: before the pass, the
+overlay in `Animation/` covers the windows shown and the incoming
+windows' writes are held in the `FrameApplier`'s hold; after it,
+the strip runs, and each held write leaves from its app's queue
+when the strip lands (#1956). On Show the Space, Core hands the
+GUI the Space and its layout for the screen that switched
+(`paySpaceCue`, in `Commands/SpaceSwitchCue`); the plate itself
+is drawn in `Sources/KiwiDesk/CuePlate` (#2143, #2524). Both
+stand down where the shelf stands down (`shelfStandsDown(on:)`),
+leaving the instant switch alone.
+:::
 
 The Lua watchdog is an instruction-count hook and **cannot**
 interrupt a blocking C call, so anything that blocks in C

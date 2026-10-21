@@ -6,7 +6,6 @@ enum BarsRowOrder {
     static let kiwishelfShow: [SettingKey] = [
         .kiwishelf(.visibility),
         .kiwishelf(.revealStyle),
-        .spaceBar(.spaceCue),
     ]
 
     /// KiwiShelf card, behind the Durations disclosure under Reveal

@@ -87,10 +87,15 @@ extension APIReference {
             .text("path"),
             .text("flag", optional: true)
         ),
-        "set_space_cue": APIRecord(
-            "Shows the Space and its layout on the screen that "
-                + "switched, where no Space Bar is drawn.",
-            .boolean("enabled")
+        "set_space_transition": APIRecord(
+            "Sets how a Space switch shows itself: the plate "
+                + "slide, the Space and its layout, or nothing.",
+            .choice("transition", SpaceTransition.self)
+        ),
+        "set_space_slide_duration": APIRecord(
+            "Sets the Space slide's pace in milliseconds, clamped "
+                + "to its band.",
+            .integer("milliseconds")
         ),
         "set_mode_cue": APIRecord(
             "Shows the cycle list and the new layout on the "
@@ -108,8 +113,8 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_shortcut_panel_liquid_glass": APIRecord(
-            "Lays a macOS 26 Liquid Glass material over the "
-                + "shortcuts panel and the slow-boot notice.",
+            "Lays Liquid Glass over KiwiHub, the slow-boot notice "
+                + "and the Space slide's plates.",
             .boolean("enabled")
         ),
         "set_new_window_placement_override": APIRecord(

@@ -39,6 +39,11 @@ struct OverlayGlassGateTests {
             function: "func kiwiVisionDrawsBlur(for look: VisionLook)",
             stored: "blur: look.blur"
         ),
+        (
+            file: "Commands/KiwiCore+SpaceSlide.swift",
+            function: "func prepareSpaceSlide(",
+            stored: "glass: tiler.settings.shortcutPanelLiquidGlass"
+        ),
     ]
 
     /// Exactly one gate read, handed the stored leaf, which the
@@ -94,6 +99,7 @@ struct OverlayGlassGateTests {
         "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
+        "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
         "Vision/VisionPlate.swift": "OverlayGlassGateTests",
     ]

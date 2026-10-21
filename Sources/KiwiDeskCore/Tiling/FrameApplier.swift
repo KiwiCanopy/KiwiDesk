@@ -16,6 +16,8 @@ final class FrameApplier {
     private let recent = RecentApplies()
     private let instantTargets = InstantTargets()
     let enhancedUI = EnhancedUIHolds()
+    /// Writes the plate slide holds until it lands (#1956).
+    let held = HeldWrites()
     /// Whose motion the writes in this turn are (#804): the open
     /// scope, and the one full reading (`KiwiCore.motionCause`,
     /// wired at bootstrap) the input-quiescence gate will take.
@@ -120,6 +122,7 @@ final class FrameApplier {
         recent.record(id, now: clock())
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
+        if stageHeld(id, frame, setSize: setSize) { return }
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -181,12 +184,18 @@ final class FrameApplier {
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
+        // A held write owes no resend: it lands once, at the
+        // slide's landing, on the screen it was sent to (#2524).
+        if stageHeld(id, frame, setSize: setSize) {
+            pendingResends[id] = nil
+            return
+        }
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
         else { return }
         // Our own window moves now, inside the caller's turn: the
-        // main queue would run it only after that turn.
+        // main queue would run it only after that turn (#1956).
         if pid == getpid(), ownWindowMove(id, frame, setSize) {
             recentStamp(id)
             return

@@ -46,6 +46,9 @@ extension SettingsValueReadout {
                 LiquidGlassAgreement(settings: old.settings).allOn,
                 LiquidGlassAgreement(settings: new.settings).allOn
             )
+        case .spaceTransition, .spaceSlideDuration:
+            // No model path: the rows write at once (#1741).
+            return []
         case .animationsMaster:
             // The master is derived, not stored (`anyEnabled`) —
             // the same derivation the Motion card's toggle and

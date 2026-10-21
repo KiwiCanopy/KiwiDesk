@@ -2,13 +2,17 @@ import AppKit
 
 /// The focused ring after a Space switch appears with its window
 /// (#1959): kept dormant until the window's own report lands near
-/// the frame we sent it, or a cap passes. Focus moves inside a
-/// Space keep the leading ring.
+/// the frame we sent it, or a cap passes, and never ahead of the
+/// slide's plates lifting. Focus moves inside a Space keep the
+/// leading ring.
 extension BorderManager {
     struct ArrivalHold {
         let window: WindowID
         /// When the hold began.
         let start: CFTimeInterval
+        /// The earliest the ring may show — the slide's lift — read
+        /// live, since a burst press moves it later.
+        let notBefore: @MainActor () -> CFTimeInterval?
         /// The frame the switch sent the window, kept from the
         /// first read: a stale echo retires the commanded frame
         /// before the window gets there.
@@ -17,8 +21,8 @@ extension BorderManager {
         var arrived = false
     }
 
-    /// The longest a ring waits for a window that never reports
-    /// (owner ruling, #1959).
+    /// The longest a ring waits for a window that never reports,
+    /// counted from the lift (owner ruling, #1959).
     static let arrivalCap: CFTimeInterval = 0.3
     /// How near a report must land to the frame we sent, per
     /// origin axis.
@@ -26,7 +30,10 @@ extension BorderManager {
 
     /// Holds `window`'s ring for this switch, replacing any hold
     /// a previous switch left.
-    func holdArrival(of window: WindowID) {
+    func holdArrival(
+        of window: WindowID,
+        notBefore: @escaping @MainActor () -> CFTimeInterval? = { nil }
+    ) {
         // A hold this switch replaces must not strand its ring; the
         // next order shows it only if its window is still wanted.
         if let old = arrival, old.window != window {
@@ -34,7 +41,8 @@ extension BorderManager {
         }
         arrival = ArrivalHold(
             window: window,
-            start: arrivalClock()
+            start: arrivalClock(),
+            notBefore: notBefore
         )
         checkArrival()
     }
@@ -85,7 +93,11 @@ extension BorderManager {
     func checkArrival() {
         guard let hold = arrival else { return }
         let now = arrivalClock()
-        let due = hold.arrived ? now : hold.start + Self.arrivalCap
+        let gate = max(hold.start, hold.notBefore() ?? hold.start)
+        let due =
+            now < gate
+            ? gate
+            : hold.arrived ? now : gate + Self.arrivalCap
         guard now >= due else {
             scheduleArrivalCheck(due - now) { [weak self] in
                 guard self?.arrival?.start == hold.start else { return }
