@@ -1178,7 +1178,10 @@ Obligations:
   ruled in `BarMotionSeamTests`' `ungated` map**, naming its
   ruling, and reads neither `isReduced` nor `reduceMotion` — the
   shelf's reveal, its hover growth and its expand (the plate
-  glide). A
+  glide). The expand's frames and fades travel because
+  `setFrame` / `setAlpha` read the gate narrowed by the one
+  `BarMotion.expanding` scope its groups open, never a second
+  write path beside them (`ShelfExpandReducedMotionTests`). A
   new entry is a product ruling argued in
   `docs/design-decisions.md` first, never a way to skip writing
   a gate.

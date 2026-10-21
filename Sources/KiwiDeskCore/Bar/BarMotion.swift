@@ -155,8 +155,22 @@ enum BarMotion {
                 0.3,
                 1
             )
-            body()
+            expanding(body)
         }
+    }
+
+    /// Whether a write is inside the expand's group, whose frames
+    /// and fades travel under Reduce Motion (owner ruling,
+    /// 2026-10-21); set by `expanding` alone.
+    @MainActor private(set) static var inExpand = false
+
+    /// Runs `body` as part of the expand, nested groups included.
+    @MainActor
+    static func expanding(_ body: () -> Void) {
+        let outer = inExpand
+        inExpand = true
+        defer { inExpand = outer }
+        body()
     }
 
     /// The group's duration. Zero under Reduce Motion, so
@@ -174,11 +188,13 @@ enum BarMotion {
         to frame: CGRect,
         animated: Bool
     ) {
+        // The expand travels under Reduce Motion; every other bar
+        // frame write keeps the gate.
         if travels(
             animated,
             from: view.frame,
             to: frame,
-            reduceMotion: isReduced
+            reduceMotion: isReduced && !inExpand
         ) {
             view.animator().frame = frame
         } else {

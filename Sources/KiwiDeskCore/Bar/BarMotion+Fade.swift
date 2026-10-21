@@ -39,7 +39,9 @@ extension BarMotion {
         to alpha: CGFloat,
         animated: Bool
     ) {
-        if fades(animated, reduceMotion: isReduced) {
+        // The expand fades under Reduce Motion; every other bar fade
+        // keeps the gate.
+        if fades(animated, reduceMotion: isReduced && !inExpand) {
             view.animator().alphaValue = alpha
         } else {
             view.alphaValue = alpha
@@ -117,7 +119,7 @@ extension BarMotion {
                 0.3,
                 1
             )
-            body()
+            expanding(body)
         }
     }
 

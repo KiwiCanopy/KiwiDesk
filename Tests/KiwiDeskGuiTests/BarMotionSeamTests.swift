@@ -266,6 +266,11 @@ struct BarMotionSeamTests {
         if ends(handed, "reduceMotion:isReduced", [",", ")"]) {
             return true
         }
+        // The one ruled narrowing: the expand's own scope, which
+        // Reduce Motion keeps (owner ruling, 2026-10-21).
+        if ends(handed, "reduceMotion:isReduced&&!inExpand", [",", ")"]) {
+            return true
+        }
         let letters = Set(
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
         )
