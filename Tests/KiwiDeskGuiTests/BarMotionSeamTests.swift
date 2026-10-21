@@ -220,9 +220,13 @@ struct BarMotionSeamTests {
                         && !body.contains("reduceMotion"),
                     "\(name) is ruled ungated but reads the flag"
                 )
+                // Its own body, or a member it names that does: a
+                // needle alone is already required above.
+                let moving = members.filter { Self.startsMotion($0.body) }
+                    .map { $0.declaration + "(" }
                 #expect(
                     Self.startsMotion(body)
-                        || needles.contains { body.contains($0) },
+                        || needles.contains { moving.contains($0) },
                     "\(name) is ruled ungated but starts no motion"
                 )
                 continue

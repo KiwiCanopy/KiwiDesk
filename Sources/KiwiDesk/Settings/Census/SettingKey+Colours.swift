@@ -93,11 +93,13 @@ extension ColoursKey {
                 gate: .runtime(.noBarHides)
             )
         case .animationsExpandDurationMS:
+            // The expand plays with every bar on Always, so it greys
+            // only while its hidden switch is off (2026-10-21).
             return .row(
                 .bars,
                 .kiwishelf,
                 .showMore,
-                gate: .runtimeAnyOf([.noBarHides, .expandOffInConfig])
+                gate: .runtime(.expandOffInConfig)
             )
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)

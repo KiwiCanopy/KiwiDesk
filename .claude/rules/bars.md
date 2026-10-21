@@ -593,15 +593,17 @@ render content into it (#1517). Obligations:
   since the pass that orders the panel in has not connected the
   layer tree, and cleared from every view under the strip,
   hidden ones included, by `endSpread` at each landing
-  (`ShelfRevealSpreadTests`). A new box type a bar draws joins
-  `spreadUnits`, or it fades in place instead of spreading. A
+  (`ShelfRevealSpreadTests`). A new view that draws a box declares
+  `ShelfSpreadBox` where it is declared, or it fades in place
+  instead of spreading — review's, since nothing reds on the
+  omission. A
   leave that is no reveal ends the reveal's motion with
   its token (`cutReveal`). The mark keeps time with the motion
   through `BarMotion.markFade` and its `RevealKind`, every timing
   fitted to the user's `animations.reveal_duration` through the one
   `BarMotion.revealScale` — a retract to its
   `AnimationSettings.retractShare` — and never a second length
-  beside it. **The reveal, the mark's hover growth and the
+  beside it (`ShelfRevealDurationTests`). **The reveal, the mark's hover growth and the
   shelf's expand play under Reduce Motion** (owner ruling,
   2026-10-21;
   `docs/design-decisions.md` ▸ The bars honour Reduce Motion) —
@@ -1129,7 +1131,8 @@ reading a bar still makes for itself:
 
 ## The bars start motion in one home, and that home gates it
 
-A bar animation is gated on Reduce Motion, and `BarMotion` — its
+A bar animation is gated on Reduce Motion — save a member ruled in
+`BarMotionSeamTests`' `ungated` map (below) — and `BarMotion` — its
 file and the extensions split from it at the §2.1 ceiling, which
 `BarMotionSeamTests.homes` lists and censuses alike — is where
 every one of them lives (#1078). `Sources/KiwiDesk`'s gate

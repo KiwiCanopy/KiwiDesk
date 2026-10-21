@@ -24,9 +24,6 @@ struct BarMotionTests {
     func groupCollapses() {
         #expect(BarMotion.duration(reduceMotion: true) == 0)
         #expect(BarMotion.duration(reduceMotion: false) > 0)
-        // The shelf plate's glide is the expand, which the owner
-        // keeps under Reduce Motion (2026-10-21).
-        #expect(BarMotion.plateGlideDuration(seconds: 1) == 1)
     }
 
     @Test("An item lands in its new frame, never travels to it")

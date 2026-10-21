@@ -122,19 +122,25 @@ enum ShelfUnfold {
         )
     }
 
-    /// A plate unfold's own length, in or out.
+    /// A plate unfold's own length, in or out: until both springs
+    /// have settled and the items have risen.
     static func length(entering: Bool) -> TimeInterval {
         entering
             ? max(
-                alongDuration,
-                deepenDelay + deepenDuration,
+                BarMotion.settling(alongDuration, bounce: alongBounce),
+                deepenDelay
+                    + BarMotion.settling(deepenDuration, bounce: deepenBounce),
                 itemsDelay + itemsFadeIn
             ) : retractLength
     }
 
-    /// A spread's own length, in or out.
+    /// A spread's own length, in or out: the farthest box's spring
+    /// settled.
     static func spreadLength(entering: Bool) -> TimeInterval {
-        entering ? spreadStagger + spreadDuration : gatherLength
+        entering
+            ? spreadStagger
+                + BarMotion.settling(spreadDuration, bounce: spreadBounce)
+            : gatherLength
     }
 
     /// The spread out of or into `mark`'s centre over a run `span`

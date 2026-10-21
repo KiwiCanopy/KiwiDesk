@@ -52,7 +52,6 @@ struct BarsGates {
             .colours(.animationsRevealDurationMS):
             return settings.someBarHides ? nil : .noBarHides
         case .colours(.animationsExpandDurationMS):
-            guard settings.someBarHides else { return .noBarHides }
             return settings.animations.onExpand ? nil : .expandOff
         default:
             assertionFailure("BarsGates does not own \(key.id)")

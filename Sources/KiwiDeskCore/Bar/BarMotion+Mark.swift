@@ -74,12 +74,7 @@ extension BarMotion {
         switch kind {
         case .slide: revealSlide
         case .fade: revealFade
-        case .grow:
-            entering
-                ? max(
-                    ShelfGrow.plateGrow,
-                    ShelfGrow.itemsDelay + ShelfGrow.itemsFadeIn
-                ) : ShelfGrow.retractLength
+        case .grow: ShelfGrow.length(entering: entering)
         case .unfold: ShelfUnfold.length(entering: entering)
         case .spread: ShelfUnfold.spreadLength(entering: entering)
         }

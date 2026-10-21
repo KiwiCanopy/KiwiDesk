@@ -146,7 +146,13 @@ enum MacSettingRead {
     /// Opens System Settings at Desktop & Dock, plainly if the
     /// pane URL is refused — the app writes nothing there.
     @MainActor static func openDesktopAndDock() {
-        if NSWorkspace.shared.open(desktopAndDockPane) { return }
+        openPane(desktopAndDockPane)
+    }
+
+    /// Opens System Settings at `pane`, plainly if the pane URL is
+    /// refused.
+    @MainActor static func openPane(_ pane: URL) {
+        if NSWorkspace.shared.open(pane) { return }
         if let app = NSWorkspace.shared.urlForApplication(
             withBundleIdentifier: "com.apple.systempreferences"
         ) {

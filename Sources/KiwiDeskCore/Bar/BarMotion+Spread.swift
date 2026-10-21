@@ -15,10 +15,7 @@ extension BarMotion {
     ) -> (boxes: [NSView], still: [NSView]) {
         var boxes: [NSView] = []
         var still: [NSView] = []
-        func isBox(_ view: NSView) -> Bool {
-            view is GlassBoxHost || view is SpaceBarItemView
-                || view is AppBarItemView
-        }
+        func isBox(_ view: NSView) -> Bool { view is ShelfSpreadBox }
         func holdsBox(_ view: NSView) -> Bool {
             view.subviews.contains { isBox($0) || holdsBox($0) }
         }
@@ -154,3 +151,12 @@ extension BarMotion {
         }
     }
 }
+
+/// A view a Boxed unfold springs out of the mark as one box: a box
+/// glass's host, or an item no host holds. A view that draws a box
+/// declares it here, where it is declared, or it fades in place.
+@MainActor protocol ShelfSpreadBox: NSView {}
+
+extension GlassBoxHost: ShelfSpreadBox {}
+extension SpaceBarItemView: ShelfSpreadBox {}
+extension AppBarItemView: ShelfSpreadBox {}

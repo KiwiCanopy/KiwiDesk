@@ -148,7 +148,7 @@ enum BarMotion {
     @MainActor
     static func runPlateGlide(_ body: () -> Void) {
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = plateGlideDuration(seconds: shelfGlide)
+            context.duration = shelfGlide
             context.timingFunction = CAMediaTimingFunction(
                 controlPoints: 0.2,
                 0.9,
@@ -157,12 +157,6 @@ enum BarMotion {
             )
             body()
         }
-    }
-
-    /// The plate glide's duration, the user's expand: Reduce Motion
-    /// keeps it (owner ruling, 2026-10-21).
-    static func plateGlideDuration(seconds: TimeInterval) -> TimeInterval {
-        seconds
     }
 
     /// The group's duration. Zero under Reduce Motion, so

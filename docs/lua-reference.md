@@ -6981,6 +6981,9 @@ it, a bar on an edge of its own fades in and out, the App Bar's row
 dissolves to the new Space's, and the bars glide to their new
 places. Off, they move at once. It is not under the
 window-animation switches, and it plays with Reduce Motion on too.
+Lua-only: no Settings row turns it off; while it is off, KiwiShelf ▸
+KiwiShelf ▸ Show ▸ Durations ▸ Expand duration greys and names
+`animations.on_expand`.
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired → these two; a saved profile, look or backup carrying the
 old names is renamed on its next read.

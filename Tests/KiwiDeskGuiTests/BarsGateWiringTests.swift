@@ -79,6 +79,10 @@ struct BarsGateWiringTests {
                 ".inertReason(for:.kiwishelf(.revealStyle))",
                 "GreyOut(active:reason!=nil)",
                 "BarsGateHelp.sentence(for:reason)",
+                ".inertReason(for:.colours(.animationsRevealDurationMS))",
+                "GreyOut(active:revealInert)",
+                ".inertReason(for:.colours(.animationsExpandDurationMS))",
+                "GreyOut(active:reason==.expandOff)",
             ],
         ]
         for (path, needles) in consults {
@@ -199,6 +203,20 @@ struct BarsGateWiringTests {
         )
         settings.spaceBarStyle.visibility = .hidden
         #expect(BarsGates(settings: settings).inertReason(for: key) == nil)
+    }
+
+    /// The expand plays with every bar on Always, so its length
+    /// greys only while its hidden switch is off (2026-10-21).
+    @Test("the Expand duration greys only while the expand is off")
+    func expandGreysOnlyWhenOff() {
+        var settings = TilingSettings()
+        let key = SettingKey.colours(.animationsExpandDurationMS)
+        settings.setEveryBarVisibility(.always)
+        #expect(BarsGates(settings: settings).inertReason(for: key) == nil)
+        settings.animations.onExpand = false
+        #expect(
+            BarsGates(settings: settings).inertReason(for: key) == .expandOff
+        )
     }
 
     /// The Space cue's switch greys under a Lua-owned config and

@@ -84,25 +84,23 @@ extension TilingSettings {
     /// 2026-10-21): Hidden in some layout, or Auto where no Always
     /// sibling keeps it shown on some screen (`autoReadsAlways`).
     public var someBarHides: Bool {
-        let screens: [String?] =
-            [nil]
-            + Set(spaceBarStyle.edgeOverride.keys)
-            .union(appBarStyle.edgeOverride.keys).sorted()
         let hides = {
-            (bar: ShelfBar, value: ShelfVisibility?, mode: LayoutMode)
+            (screen: TilingSettings, bar: ShelfBar, mode: LayoutMode)
                 -> Bool in
+            let value =
+                bar == .space
+                ? screen.spaceBarStyle.visibility
+                : screen.appBarVisibility(in: mode)
             switch value {
             case .hidden: return true
-            case .auto:
-                return screens.contains {
-                    !autoReadsAlways(bar, in: mode, on: $0)
-                }
+            case .auto: return !screen.autoReadsAlways(bar, in: mode, on: nil)
             case .always, nil: return false
             }
         }
-        return LayoutMode.allCases.contains { mode in
-            hides(.space, spaceBarStyle.visibility, mode)
-                || hides(.app, appBarVisibility(in: mode), mode)
+        return screenVariants.contains { screen in
+            LayoutMode.allCases.contains { mode in
+                hides(screen, .space, mode) || hides(screen, .app, mode)
+            }
         }
     }
 

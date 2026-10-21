@@ -123,11 +123,10 @@ struct GateReasonPlacementTests {
 
     /// A card an OS accessibility switch greys whole draws its
     /// reason in a warning box too, beside the `?` (owner ruling,
-    /// 2026-10-21): every ruled switch is a container gate, and
-    /// the Animations card draws the box under its own switch.
+    /// 2026-10-21): the Animations card draws the box under its
+    /// own switch, with the one fix.
     @Test("an OS switch that greys a whole card warns in a box")
     func osSwitchWarnsInABox() throws {
-        #expect(GateReasonPlacement.warnsInBox == [.reduceMotion])
         let card = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Looks/MotionCard.swift"

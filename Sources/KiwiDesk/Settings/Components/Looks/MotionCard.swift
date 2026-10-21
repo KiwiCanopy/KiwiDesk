@@ -165,23 +165,15 @@ struct MotionCard: View {
         )
     }
 
-    /// System Settings ▸ Accessibility ▸ Display, where Reduce
-    /// Motion lives; the pane alone, then the app, if refused.
-    static let accessibilityDisplayPane = URL(
+    /// System Settings ▸ Accessibility, where Reduce Motion lives;
+    /// no sub-pane anchor, which moves between releases.
+    static let accessibilityPane = URL(
         string: "x-apple.systempreferences:"
-            + "com.apple.Accessibility-Settings.extension?Display"
+            + "com.apple.Accessibility-Settings.extension"
     )!
 
     @MainActor static func openAccessibilityDisplay() {
-        if NSWorkspace.shared.open(accessibilityDisplayPane) { return }
-        if let app = NSWorkspace.shared.urlForApplication(
-            withBundleIdentifier: "com.apple.systempreferences"
-        ) {
-            NSWorkspace.shared.openApplication(
-                at: app,
-                configuration: .init()
-            )
-        }
+        MacSettingRead.openPane(accessibilityPane)
     }
 
     private var caption: String {

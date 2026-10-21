@@ -15,7 +15,7 @@ extension BarMotion {
     /// all.
     @MainActor
     static var shelfGlideLength: TimeInterval {
-        plateGlideDuration(seconds: shelfGlide)
+        shelfGlide
     }
 
     /// Runs `body`'s writes with no implicit motion and COMMITS
@@ -124,7 +124,7 @@ extension BarMotion {
     /// The out-fade's length: `dissolveOutShare` of the plate
     /// glide's.
     static func dissolveOutDuration(seconds: TimeInterval) -> TimeInterval {
-        plateGlideDuration(seconds: seconds) * dissolveOutShare
+        seconds * dissolveOutShare
     }
 
     /// Runs `body` once a group glide lands — a timer of the plate
@@ -135,7 +135,7 @@ extension BarMotion {
     static func afterGroupGlide(
         _ body: @escaping @MainActor () -> Void
     ) {
-        let span = plateGlideDuration(seconds: shelfGlide)
+        let span = shelfGlide
         Task { @MainActor in
             if span > 0 { try? await Task.sleep(for: .seconds(span)) }
             body()

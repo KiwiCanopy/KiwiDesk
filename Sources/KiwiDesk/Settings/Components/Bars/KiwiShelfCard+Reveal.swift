@@ -48,11 +48,19 @@ extension KiwiShelfCard {
             }
             .padding(.top, 8)
         }
-        .modifier(GreyOut(active: reason != nil))
-        // One sentence for the group: the three grey together.
+        // One sentence for the picker and the reveal's own length,
+        // which grey together; the expand plays regardless.
         if let reason {
             caption(reason)
         }
+    }
+
+    /// Whether no bar hides, so the reveal's rows take no input.
+    private var revealInert: Bool {
+        BarsGates(
+            settings: model.config.settings,
+            guiManaged: model.guiManaged
+        ).inertReason(for: .colours(.animationsRevealDurationMS)) != nil
     }
 
     /// A reason sentence under what it greys, outside the grey.
@@ -64,7 +72,8 @@ extension KiwiShelfCard {
     }
 
     /// The reveal's and the expand's lengths (owner ruling,
-    /// 2026-10-21), in the Durations drawer.
+    /// 2026-10-21), in the Durations drawer: the reveal's greys with
+    /// the picker, the expand's only while its switch is off.
     @ViewBuilder func durationRow(_ key: SettingKey) -> some View {
         let animations = $model.config.settings.animations
         let children = SettingsCatalog.bars.kiwishelfDurations.children
@@ -82,6 +91,7 @@ extension KiwiShelfCard {
                         + "way it reveals; it leaves a little quicker."
                 )
             )
+            .modifier(GreyOut(active: revealInert))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .revealDuration

@@ -35,6 +35,13 @@ enum ShelfGrow {
     /// A retract's whole length: the items out, then the plate.
     static let retractLength = itemsFadeOut + plateShrink
 
+    /// A grow's own length, in or out — the one copy `morph` and the
+    /// mark's timing read.
+    static func length(entering: Bool) -> TimeInterval {
+        entering
+            ? max(plateGrow, itemsDelay + itemsFadeIn) : retractLength
+    }
+
     /// The grow out of or into `mark` — the mark at its hovered
     /// size, which `BarMotion.revealMotion` hands it — onto `plate`.
     static func morph(
@@ -57,7 +64,7 @@ enum ShelfGrow {
             plateLength: plateLength,
             itemsStart: itemsStart,
             itemsLength: itemsLength,
-            length: max(plateStart + plateLength, itemsStart + itemsLength)
+            length: length(entering: entering)
         )
     }
 }

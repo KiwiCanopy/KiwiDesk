@@ -11,13 +11,6 @@ enum GateReasonPlacement {
         case inline
     }
 
-    /// The container gates on an OS accessibility switch whose card
-    /// also draws its reason in a `WarningBox` at the top, beside
-    /// the header `?` (owner ruling, 2026-10-21): a cause outside
-    /// the app greying a whole card. Reduce transparency's Liquid
-    /// Glass card is the class's other member and does not yet.
-    static let warnsInBox: Set<SettingRuntimeGate> = [.reduceMotion]
-
     /// Whether this row's gate needs its reason drawn inline.
     static func owesInlineReason(
         _ key: SettingKey,

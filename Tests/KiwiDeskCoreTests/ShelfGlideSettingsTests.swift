@@ -88,8 +88,8 @@ struct ShelfGlideSettingsTests {
     /// whole of it.
     @Test("The dissolve's out-fade takes its share of the glide")
     func dissolveOutIsAShare() {
-        let whole = BarMotion.plateGlideDuration(seconds: 0.75)
-        let out = BarMotion.dissolveOutDuration(seconds: 0.75)
+        let whole = 0.75
+        let out = BarMotion.dissolveOutDuration(seconds: whole)
         #expect(out == whole * BarMotion.dissolveOutShare)
         #expect(out > 0 && out < whole)
     }

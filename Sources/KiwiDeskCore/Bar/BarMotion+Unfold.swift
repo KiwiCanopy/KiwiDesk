@@ -11,6 +11,17 @@ extension BarMotion {
     /// its start, held or at an offset.
     typealias RevealTiming = (CAAnimation, TimeInterval) -> Void
 
+    /// How long a spring of `duration` and `bounce` runs until it
+    /// settles — what its animation runs for, so a landing never
+    /// cuts it short. It builds a spring to ask, and starts none.
+    static func settling(
+        _ duration: TimeInterval,
+        bounce: CGFloat
+    ) -> TimeInterval {
+        CASpringAnimation(perceptualDuration: duration, bounce: bounce)
+            .settlingDuration
+    }
+
     /// Where a clip of `rect` (the layer's own coordinates) puts
     /// `layer`'s position, so the content stays where it rests.
     @MainActor
