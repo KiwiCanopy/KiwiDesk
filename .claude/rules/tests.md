@@ -479,11 +479,15 @@ bite large test PRs:
   later fix rounds changed. The agent runs the whole batch as one
   driver script under one `scripts/gate-lock` slot rather than a
   gate wait per mutation (owner, 2026-10-18) — its own file owns
-  the driver.
+  the driver. The harness starts an isolated worktree at `main`,
+  never at your branch, so the agent proves in a tree of its own
+  at that sha, built and removed by its step 0; never brief it to
+  check out or detach a commit.
 
   **Remove an isolated prover's worktree and its branch once it
-  reports or is stopped** (owner, 2026-10-16). A prover always
-  changes its tree, so the harness never cleans it up, and the
+  reports or is stopped** (owner, 2026-10-16). The agent removes
+  its own proof tree; the harness worktree it leaves unchanged is
+  sometimes left behind locked anyway (2026-10-21), and such
   leftovers pile up in `.claude/worktrees/`. First check that the
   worktree's HEAD and its `worktree-agent-*` branch hold no commit
   that is on no other branch (`git branch -a --contains <sha>`);
