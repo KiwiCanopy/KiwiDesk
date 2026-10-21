@@ -177,11 +177,12 @@ traced at directory altitude — see **`docs/architecture.md`**.
 3. **Act:** implement step by step; keep commits focused.
 4. **Verify:** run the **`verify-gate` skill**
    ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md))
-   — `swift build`, the test run, `scripts/lint.sh`,
-   and the release build when the change touches concurrency or
-   `Sendable`. That skill owns the procedure — which gate a change
-   earns, what to run, in what order, and when CI's `Release
-   Build` job substitutes for a local one.
+   — `swift build`, the tests the change earns, `scripts/lint.sh`,
+   the warning ratchet, and the release build when the change
+   touches concurrency or `Sendable`. That skill owns the
+   procedure — which gate a change earns, what to run, in what
+   order, and when CI's full suite or its `Release Build` job
+   substitutes for a local run.
 5. **Document:** any user-visible behavior change updates the
    matching doc in the same change set — code and docs must
    never describe different behavior — and a user-facing page

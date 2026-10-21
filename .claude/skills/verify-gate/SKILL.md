@@ -1,5 +1,5 @@
 ---
-description: Run KiwiDesk's full verification gate — debug build, tests, and lint (AGENTS.md §3, the Verify step), plus the release build when the change touches concurrency. Use before any commit or PR.
+description: Run KiwiDesk's verification gate — debug build, the touched test suites (the full suite where no PR gates the push), lint, the warning ratchet (AGENTS.md §3, the Verify step), plus the release build when the change touches concurrency. Use before any commit or PR.
 argument-hint: "[optional: file/dir to scope the lint]"
 ---
 
@@ -10,7 +10,8 @@ continue to later steps.
 
 ## Which gate the change earns
 
-Default to the full gate below. Two narrow exceptions:
+Default to the gate below. Its exceptions, and how much of the
+suite a change runs locally:
 
 - Read `.github/ci-ignore.txt`. Never restate that list here — it
   is the one authority, shared with the `changes` job in `ci.yml`,
@@ -28,11 +29,26 @@ Default to the full gate below. Two narrow exceptions:
   few minutes sooner while holding the machine-wide gate slot
   other sessions wait on. Fix a red and push again. Still run
   `scripts/unreleased-strip --check` locally: it takes a second.
-- **Anything else runs the full gate.** `AGENTS.md`,
+- **Anything else runs the gate.** `AGENTS.md`,
   `.claude/rules/**`, `.claude/agents/**` and this skill tree are
   instructions every session reasons from, and a prose-only edit
   to them has already shipped a dangling citation; code, tests and
   `site/` need it besides.
+- **A change that lands through a PR leaves the full suite to CI**
+  (owner, 2026-10-21). Run step 1, step 3 (its catalog checks
+  included) and the ratchet check below, and in place of step 2
+  run `swift test --filter` over the suites the diff touches —
+  the suites it edits, and the suites that read or scan the code
+  it edits. CI's `Build, Lint & Test` runs the whole suite on
+  every PR and a red PR cannot merge: fix the red and push again.
+  A local full run only duplicated that run (~7 min each) while
+  holding the machine-wide gate slot (`scripts/gate-lock`) that
+  other sessions wait on.
+- **Run step 2 whole, locally,** when no PR gates the push
+  (`scripts/release.sh`, a direct push), when CI is unavailable,
+  or when a late red would be expensive — for example right
+  before handing the owner a device build. Say in the report
+  which of these applied.
 - **Additionally**, when a gated change touches `site/` — or
   `docs/` beside code — run the site build: `npm ci && npm run
   build` in `site/`. It is a separate gate, not a substitute: a
@@ -52,12 +68,14 @@ Bash tool's 10-minute cap — run the test step with
 not hung; don't kill it or run around it.
 
 1. `swift build`
-2. `swift test -q` (one command — the old two-command split
-   died with the #494 tail-hang fix; history and the rest of
-   the test conventions live in `.claude/rules/tests.md`. `-q`
-   drops the ~20k per-test progress lines a green full run
-   prints (#1140); failure issues and the run summary still
-   print, and a red run is re-run `--filter`ed for detail)
+2. `swift test -q` (the full suite — a PR-gated change runs
+   only the `--filter`ed suites, per the gate section above.
+   One command — the old two-command split died with the #494
+   tail-hang fix; history and the rest of the test conventions
+   live in `.claude/rules/tests.md`. `-q` drops the ~20k
+   per-test progress lines a green full run prints (#1140);
+   failure issues and the run summary still print, and a red
+   run is re-run `--filter`ed for detail)
 3. `scripts/lint.sh $ARGUMENTS` (omit the argument to lint the
    repo)
 
@@ -109,7 +127,8 @@ the push.
 
 ## Report
 
-End with a one-line PASS/FAIL summary per step, marking step 4
-PASS, FAIL, or SKIPPED (with the reason). On any failure, show
+End with a one-line PASS/FAIL summary per step, marking step 2
+FULL or FILTERED (naming the filter) and step 4 PASS, FAIL, or
+SKIPPED (with the reason). On any failure, show
 the relevant compiler/test/lint output and stop — the gate has
 not passed.
