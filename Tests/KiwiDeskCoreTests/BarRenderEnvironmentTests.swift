@@ -96,13 +96,8 @@ struct BarRenderEnvironmentTests {
         }
         show()
         overlay.hide(animated: true)
-        // Under Reduce Motion (CI's runner) a hide never fades, so
-        // there is no fade-out to show into — `ShelfFadeTests`'
-        // branch; the gate has no test override by bars.md's rule.
-        guard !BarMotion.isReduced else {
-            #expect(!overlay.isLeaving)
-            return
-        }
+        // The fade is the expand, which plays under Reduce Motion
+        // too (CI's runner has it on; owner ruling, 2026-10-21).
         #expect(overlay.isLeaving)
         show()
         #expect(!overlay.isLeaving)

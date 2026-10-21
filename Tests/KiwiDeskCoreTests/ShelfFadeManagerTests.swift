@@ -111,7 +111,6 @@ struct ShelfFadeManagerTests {
     /// shown until the fade lands.
     @Test("A refresh inside the fade keeps the leaving section shown")
     func refreshKeepsTheLeavingSection() async throws {
-        guard !BarMotion.isReduced else { return }
         pinShelfGlide()
         let apps = AppBarManager()
         let bar = AppBarManager.Bar(
@@ -172,12 +171,10 @@ struct ShelfFadeManagerTests {
             shelves.overlayForTesting(barTitleDisplay)
         )
         shelves.sync([])
-        if !BarMotion.isReduced {
-            #expect(shelves.overlayForTesting(barTitleDisplay) === overlay)
-            // Its display is spared by the bar managers' retire
-            // while the fade runs.
-            #expect(shelves.leavingDisplays == [barTitleDisplay])
-        }
+        #expect(shelves.overlayForTesting(barTitleDisplay) === overlay)
+        // Its display is spared by the bar managers' retire
+        // while the fade runs.
+        #expect(shelves.leavingDisplays == [barTitleDisplay])
         try await settle { shelves.overlayForTesting(barTitleDisplay) == nil }
         #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
         #expect(shelves.leavingDisplays.isEmpty)

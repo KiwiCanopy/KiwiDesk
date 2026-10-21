@@ -66,10 +66,8 @@ struct ShelfFadeTests {
         overlay.onLeft = { left += 1 }
         show(overlay, Self.section())
         overlay.hide(animated: true)
-        if !BarMotion.isReduced {
-            #expect(overlay.isVisible)
-            #expect(left == 0)
-        }
+        #expect(overlay.isVisible)
+        #expect(left == 0)
         try await settle { left == 1 }
         #expect(!overlay.isVisible)
         #expect(left == 1)
@@ -77,7 +75,6 @@ struct ShelfFadeTests {
 
     @Test("A show during the fade-out keeps the shelf")
     func showCancelsTheFade() async throws {
-        guard !BarMotion.isReduced else { return }
         pinShelfGlide()
         let overlay = ShelfOverlay()
         var left = 0
@@ -96,7 +93,6 @@ struct ShelfFadeTests {
     /// Space (device, #1838).
     @Test("A hide already fading keeps its landing")
     func repeatedHideKeepsTheLanding() async throws {
-        guard !BarMotion.isReduced else { return }
         pinShelfGlide()
         let overlay = ShelfOverlay()
         var left = 0
@@ -115,7 +111,6 @@ struct ShelfFadeTests {
     /// (device, #1838).
     @Test("A section wanted again before its leave lands stays")
     func reWantedSectionStays() async throws {
-        guard !BarMotion.isReduced else { return }
         pinShelfGlide()
         let overlay = ShelfOverlay()
         let space = ShelfOverlay.Section(
@@ -158,7 +153,6 @@ struct ShelfFadeTests {
     /// leaves it to the second, which removes it (#1838).
     @Test("A leave inside a leave keeps the later landing")
     func leaveInsideALeave() throws {
-        guard !BarMotion.isReduced else { return }
         pinShelfGlide()
         let overlay = ShelfOverlay()
         var landings: [@MainActor () -> Void] = []
