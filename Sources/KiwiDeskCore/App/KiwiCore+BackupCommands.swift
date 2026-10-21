@@ -140,6 +140,9 @@ extension SetupBundleError {
         case .empty: return "the backup has nothing to restore"
         case .couldNotWrite(let name): return "could not write \(name)"
         case .unreadableSettings: return "gui.json could not be read"
+        case .newerSettings(let found, let supported):
+            return "gui.json is format \(found), written by a newer "
+                + "KiwiDesk; this one reads up to \(supported)"
         case .unreadablePalettes:
             return "palettes.json could not be read"
         case .unreadableLooks: return "looks.json could not be read"

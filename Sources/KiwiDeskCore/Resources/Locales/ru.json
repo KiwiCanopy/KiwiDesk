@@ -574,6 +574,7 @@
   "general.advanced.backup.error.export_title": "Не удалось сохранить резервную копию",
   "general.advanced.backup.error.lua_owned": "Настройки этого компьютера берутся из твоего init.lua, поэтому настройки из резервной копии здесь применить нельзя. Сначала переключись на визуальный редактор или восстанови на компьютере, который его использует.",
   "general.advanced.backup.error.newer": "Эта резервная копия создана более новой версией KiwiDesk. Обнови KiwiDesk и попробуй ещё раз.",
+  "general.advanced.backup.error.newer_settings": "Настройки этого компьютера сохранены более новой версией KiwiDesk, поэтому они не попадут в резервную копию. Обнови KiwiDesk и попробуй ещё раз.",
   "general.advanced.backup.error.not_a_backup": "Этот файл не является резервной копией KiwiDesk.",
   "general.advanced.backup.error.restore_title": "Не удалось восстановить",
   "general.advanced.backup.error.unreadable": "Не удалось открыть этот файл. Возможно, он был перемещён, переименован или удалён.",

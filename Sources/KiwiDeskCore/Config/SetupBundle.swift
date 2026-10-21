@@ -226,6 +226,9 @@ public enum SetupBundleError: Error, Equatable, Sendable {
     case couldNotWrite(name: String)
     /// Existing `gui.json` failed to decode during export.
     case unreadableSettings
+    /// Existing `gui.json` was written by a newer KiwiDesk, so an
+    /// export would leave it out.
+    case newerSettings(found: Int, supported: Int)
     /// Existing `palettes.json` failed to decode during export (#945).
     case unreadablePalettes
     /// Existing `looks.json` failed to decode during export (#1684).

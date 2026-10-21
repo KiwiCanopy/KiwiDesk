@@ -574,6 +574,7 @@
   "general.advanced.backup.error.export_title": "無法儲存備份",
   "general.advanced.backup.error.lua_owned": "這部電腦的設定來自你的 init.lua，因此無法在此套用備份中的設定。請先切換到視覺化編輯器，或在使用它的電腦上回復。",
   "general.advanced.backup.error.newer": "這個備份是由較新版本的 KiwiDesk 製作的。請先更新 KiwiDesk，然後再試一次。",
+  "general.advanced.backup.error.newer_settings": "這部電腦的設定是由較新版本的 KiwiDesk 儲存的，因此備份中將不包含它們。請先更新 KiwiDesk，然後再試一次。",
   "general.advanced.backup.error.not_a_backup": "這個檔案不是 KiwiDesk 備份。",
   "general.advanced.backup.error.restore_title": "無法回復",
   "general.advanced.backup.error.unreadable": "無法打開這個檔案。它可能已被移動、重新命名或刪除。",
