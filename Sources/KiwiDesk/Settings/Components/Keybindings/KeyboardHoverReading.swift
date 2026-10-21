@@ -41,9 +41,13 @@ struct KeyboardHoverReading: Equatable {
     /// Lines the slot draws, in order — each claim followed by
     /// its own cost, so a two-claim collision does not orphan
     /// its sentences at the bottom.
-    @MainActor var lines: [String] {
-        guard !claims.isEmpty else { return [freeSentence] }
-        return claims.flatMap { claim -> [String] in
+    @MainActor var lines: [String] { groups.flatMap { $0 } }
+
+    /// The same lines kept per claim — a claim with its cost — so
+    /// a cut never separates a binding from its conflict (#2532).
+    @MainActor var groups: [[String]] {
+        guard !claims.isEmpty else { return [[freeSentence]] }
+        return claims.map { claim -> [String] in
             [
                 L(
                     "keyboard.hover.bound",

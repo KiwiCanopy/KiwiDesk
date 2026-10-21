@@ -21,42 +21,40 @@ extension KeyboardPreviewPanel {
             .accessibilityLabel(tallyText)
     }
 
-    /// The hovered key's actions, drawn OVER the tally and the
-    /// lines below it rather than in reserved height (#2532): a
-    /// reservation for the deepest key left a gap under the tally
-    /// at rest, and growing the slot would move the panel under
-    /// the pointer. It may draw down to the panel's visible bottom,
-    /// ending on a "more" line where a key holds more than fit, and
-    /// a capped reading fills that height so nothing peeks under
-    /// it. Pointer-only and silent, as the tally speaks.
+    /// The hovered key's actions, drawn over the tally and the lines
+    /// under it, down to the panel's visible bottom and never past
+    /// it; a capped reading fills that height and ends on a "more"
+    /// line. Pointer-only and silent, as the tally speaks (#2532).
     @ViewBuilder var hoverReading: some View {
         if let hovered {
-            let lines = liveReading(hovered).lines
+            let groups = liveReading(hovered).groups
             GeometryReader { geometry in
                 let top = geometry.frame(in: .global).minY
-                let height =
+                let height = max(
                     viewportBottom.map { $0 - top }
-                    ?? geometry.size.height
-                let shown = shownLines(
-                    lines,
+                        ?? geometry.size.height,
+                    0
+                )
+                let shown = shownGroups(
+                    groups,
                     width: geometry.size.width,
                     height: height
                 )
                 VStack(alignment: .leading, spacing: Self.lineGap) {
                     ForEach(
-                        Array(lines.prefix(shown).enumerated()),
+                        Array(groups.prefix(shown).joined().enumerated()),
                         id: \.offset
                     ) { _, line in
                         readingLine(line)
                     }
-                    if shown < lines.count {
-                        readingLine(moreText(lines.count - shown))
+                    if shown < groups.count {
+                        readingLine(moreText(groups.count - shown))
                     }
                 }
                 .padding(.bottom, Self.readingPad)
                 .frame(
                     maxWidth: .infinity,
-                    minHeight: shown < lines.count ? height : nil,
+                    minHeight: shown < groups.count ? height : nil,
                     alignment: .topLeading
                 )
                 .background(SettingsTheme.panel)
@@ -68,26 +66,32 @@ extension KeyboardPreviewPanel {
 
     private func readingLine(_ line: String) -> some View {
         Text(line)
-            .font(.caption)
+            .font(Font(KeyboardHoverFit.font as CTFont))
             .foregroundStyle(SettingsTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
     }
 
     private func moreText(_ count: Int) -> String {
-        L("keyboard.hover.more", "More in the shortcut list: %1$d", count)
+        L("keyboard.hover.more", "More shortcuts on this key: %1$d", count)
     }
 
-    private func shownLines(
-        _ lines: [String],
+    /// Each claim measured whole — its lines and the gaps between
+    /// them — so the cut falls between claims, never inside one.
+    private func shownGroups(
+        _ groups: [[String]],
         width: CGFloat,
         height: CGFloat
     ) -> Int {
         KeyboardHoverFit.shown(
-            heights: lines.map {
-                KeyboardHoverFit.height(of: $0, width: width)
+            heights: groups.map { group in
+                group.map {
+                    KeyboardHoverFit.height(of: $0, width: width)
+                }
+                .reduce(0, +)
+                    + Self.lineGap * CGFloat(max(group.count - 1, 0))
             },
             more: KeyboardHoverFit.height(
-                of: moreText(lines.count),
+                of: moreText(groups.count),
                 width: width
             ),
             spacing: Self.lineGap,
@@ -165,6 +169,21 @@ extension KeyboardPreviewPanel {
 
     func liveReading(_ code: UInt32) -> KeyboardHoverReading {
         reader(code)
+    }
+
+    /// The caption as drawn: the hover hint leads it (#2532).
+    /// Drawn and never spoken — VoiceOver cannot hover, and the
+    /// board's own description already reads every key.
+    var drawnCaption: String {
+        L(
+            "panel.caption.with_hover_hint",
+            "%1$@ %2$@",
+            L(
+                "panel.caption.hover_hint",
+                "Hover over a key to see its shortcuts."
+            ),
+            caption
+        )
     }
 
     var tallyText: String {

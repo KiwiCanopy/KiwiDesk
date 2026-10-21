@@ -1,12 +1,12 @@
 import AppKit
 
-/// How many lines of a hover reading fit over the lines under the
-/// board (#2532): the reading draws over them and never leaves the
-/// panel, so a key with more lines than fit ends on a "more" line
-/// that points at the row list.
+/// How many claims of a hover reading fit between the board and the
+/// panel's visible bottom (#2532): the reading never leaves the
+/// panel, so a key with more than fit ends on a "more" line that
+/// points at the row list, and a claim is never cut from its cost.
 enum KeyboardHoverFit {
-    /// The count of leading lines to draw: every line when all fit,
-    /// otherwise as many as fit with the "more" line after them.
+    /// The count of leading groups to draw: every group when all
+    /// fit, otherwise as many as fit with the "more" line after them.
     static func shown(
         heights: [CGFloat],
         more: CGFloat,
@@ -25,10 +25,11 @@ enum KeyboardHoverFit {
         return heights.count
     }
 
-    /// One line's drawn height at `width` in the caption face the
-    /// reading uses (SwiftUI `.caption`).
+    /// The face the reading both draws and is measured in.
+    static var font: NSFont { NSFont.preferredFont(forTextStyle: .caption1) }
+
+    /// One line's drawn height at `width` in `font`.
     static func height(of line: String, width: CGFloat) -> CGFloat {
-        let font = NSFont.preferredFont(forTextStyle: .caption1)
         let rect = (line as NSString).boundingRect(
             with: CGSize(
                 width: max(width, 1),

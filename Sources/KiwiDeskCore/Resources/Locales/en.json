@@ -927,7 +927,7 @@
   "keyboard.ax.reserved": "macOS owns: %1$@.",
   "keyboard.hover.bound": "%1$@ — %2$@",
   "keyboard.hover.free": "%1$@ — not bound",
-  "keyboard.hover.more": "More in the shortcut list: %1$d",
+  "keyboard.hover.more": "More shortcuts on this key: %1$d",
   "keyboard.hover.reserved": "%1$@ — macOS owns this: %2$@",
   "keyboard.key.delete": "delete",
   "keyboard.key.down": "down",

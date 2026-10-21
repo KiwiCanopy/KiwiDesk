@@ -35,7 +35,9 @@ struct SettingsDetailPanel: View {
             header
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    preview
+                    // Above the list: a preview's overlay may draw
+                    // past its own frame down to the viewport (#2532).
+                    preview.zIndex(1)
                     diffList
                 }
                 .padding(.bottom, 18)
@@ -265,19 +267,5 @@ enum SettingsDiffRowSource {
             }
             return SettingsDestination(area: area) == destination
         }
-    }
-}
-
-private struct PanelViewportBottomKey: EnvironmentKey {
-    static let defaultValue: CGFloat? = nil
-}
-
-extension EnvironmentValues {
-    /// The global bottom edge of the panel's visible scroll area,
-    /// so a preview's overlay knows how far it may draw (#2532);
-    /// nil outside the panel.
-    var panelViewportBottom: CGFloat? {
-        get { self[PanelViewportBottomKey.self] }
-        set { self[PanelViewportBottomKey.self] = newValue }
     }
 }

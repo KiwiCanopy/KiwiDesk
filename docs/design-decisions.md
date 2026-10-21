@@ -18636,6 +18636,12 @@ version appears.
   seeded digit alone carries three claims under All — and a slot
   that grew on hover moved the panel. The legend is covered only
   while a key is hovered, when the reading is what answers. The
+  reading may draw down to the panel's visible bottom, over
+  anything under the preview, and never past it: a key holding
+  more than fits ends on a line counting the rest and pointing at
+  the row list, and the cut falls between claims, since a binding
+  cut from its conflict is the half-said conflict this entry
+  refuses. The
   caption leads with a hover hint, drawn and not spoken, since
   the board's own description already reads every key.
 

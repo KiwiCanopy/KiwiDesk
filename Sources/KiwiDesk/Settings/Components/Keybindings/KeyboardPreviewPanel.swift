@@ -121,22 +121,7 @@ struct KeyboardPreviewPanel: View {
         )
     }
 
-    /// The caption as drawn: the hover hint leads it (#2532).
-    /// Drawn and never spoken — VoiceOver cannot hover, and the
-    /// board's own description already reads every key.
-    var drawnCaption: String {
-        L(
-            "panel.caption.with_hover_hint",
-            "%1$@ %2$@",
-            L(
-                "panel.caption.hover_hint",
-                "Hover over a key to see its shortcuts."
-            ),
-            caption
-        )
-    }
-
-    private var draftCaption: String {
+    var draftCaption: String {
         L(
             "panel.caption.draft",
             "Shows your draft, not the saved profile."
