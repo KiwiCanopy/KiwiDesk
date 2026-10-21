@@ -31,6 +31,7 @@ extension ProfilesSection {
             ) { draft in
                 commitRename(draft, of: name)
             }
+            .settingsPopoverChrome()
         }
     }
 

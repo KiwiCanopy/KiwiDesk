@@ -1801,6 +1801,12 @@ Obligations:
   first cut got wrong: `glassEffect(_:in:)` draws in a shape
   without clipping to it, so the modifier built to stop the two
   halves disagreeing shipped them disagreeing.
+- **A popover wears `settingsPopoverChrome()`**, the one Settings
+  popover surface (#2503), or is ruled out with its reason in
+  `SettingsPopoverChromeCensusTests`' `exempt` map — the one copy
+  of who may — by #2399's test: a popover whose meaning rides in
+  fills or hues stays on the material
+  (`docs/design-decisions.md` ▸ the search results entry).
 - **The fallback keeps today's design**, not a glass-adjacent
   approximation (owner, 2026-09-07). *Keep the old design* and
   *keep the design language* are different answers and the first

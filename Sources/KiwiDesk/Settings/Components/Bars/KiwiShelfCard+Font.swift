@@ -112,6 +112,7 @@ struct FontFamilyRow: View {
                 },
                 onClose: { showing = false }
             )
+            .settingsPopoverChrome()
         }
     }
 

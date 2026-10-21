@@ -45,6 +45,7 @@ struct RuleReachControl: View {
                 subject: subject,
                 value: value
             )
+            .settingsPopoverChrome()
         }
     }
 }

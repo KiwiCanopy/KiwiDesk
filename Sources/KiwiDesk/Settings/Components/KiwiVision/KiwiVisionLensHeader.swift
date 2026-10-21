@@ -88,6 +88,7 @@ struct KiwiVisionLensHeader: View {
                 renameRequest = nil
                 model.nav.kiwiVisionLens = AppWideSettings.lensName(typed)
             }
+            .settingsPopoverChrome()
         }
     }
 
@@ -143,6 +144,7 @@ struct KiwiVisionLensReachControl: View {
         .accessibilityValue(label)
         .popover(item: $request, arrowEdge: .bottom) { _ in
             checklist(reached)
+                .settingsPopoverChrome()
         }
     }
 

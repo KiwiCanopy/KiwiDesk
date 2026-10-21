@@ -1815,6 +1815,8 @@ Touching `Sources/KiwiDesk` (the GUI).
   the scan cannot follow ungates every caller at once
 - a window that must not be covered by a bar takes `BarPanel.aboveLevel` rather
   than spelling `.floating` again
+- a popover wears `settingsPopoverChrome()` or is ruled out with its reason
+  in `SettingsPopoverChromeCensusTests`' `exempt` map (#2503)
 - this tree draws Liquid Glass through the one `glassChrome(in:)` modifier and
   never a second `.glassEffect` beside it, untinted by RULING rather than by
   the AppKit near-colourless finding, which is another toolkit's and false of

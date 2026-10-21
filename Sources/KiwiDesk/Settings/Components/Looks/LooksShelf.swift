@@ -145,6 +145,7 @@ struct LooksShelf: View {
         .help(other ? restoreColorsHelp : "")
         .popover(item: renameBinding(look.name)) { request in
             renamePopover(request)
+                .settingsPopoverChrome()
         }
     }
 
@@ -243,6 +244,7 @@ struct LooksShelf: View {
         .accessibilityLabel(saveCurrentLabel)
         .popover(item: $saveRequest) { request in
             savePopover(request)
+                .settingsPopoverChrome()
         }
     }
 

@@ -7620,6 +7620,12 @@ fill rather than against the glass. Its fallback stays a popover
 material, since that was its design before the glass. The owner kept
 it on the device, 2026-10-19. A further popover takes glass only by
 passing the same test, ruled here.
+
+A Settings popover is words over the page, up only while it is
+read or chosen from, so it takes the same surface (#2503); a name
+editor's field draws its own bezel on the glass. One whose meaning
+rides in fills stays on the material, as the pill does —
+`SettingsPopoverChromeCensusTests` names each and why.
 :::
 
 ### Search: one result per setting, and a fast path kept pure

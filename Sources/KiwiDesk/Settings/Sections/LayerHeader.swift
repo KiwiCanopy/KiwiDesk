@@ -111,6 +111,7 @@ struct LayerHeader: View {
                 model.renameLayer(old, to: new)
                 selected = new
             }
+            .settingsPopoverChrome()
         }
     }
 

@@ -58,11 +58,14 @@ struct AppPickerButton: View {
             }
         }
         .popover(isPresented: $showing) {
-            if let guessed {
-                guessedPopover(guessed())
-            } else {
-                popover
+            Group {
+                if let guessed {
+                    guessedPopover(guessed())
+                } else {
+                    popover
+                }
             }
+            .settingsPopoverChrome()
         }
         // Every open starts with an empty search (#1357): the
         // reset rides the popover's own dismissal edge, and the

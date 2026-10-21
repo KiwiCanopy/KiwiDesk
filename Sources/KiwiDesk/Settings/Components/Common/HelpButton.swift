@@ -42,6 +42,7 @@ struct HelpButton: View {
                 )
                 .padding(12)
                 .onDisappear { dismissed = .now }
+                .settingsPopoverChrome()
         }
         .help(plain)
         .accessibilityLabel(
