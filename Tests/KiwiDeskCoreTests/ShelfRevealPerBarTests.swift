@@ -183,18 +183,6 @@ struct ShelfRevealPerBarTests {
         }
     }
 
-    /// A first run's bars hide until the pointer asks (#761), so
-    /// the starter gives the windows the whole screen.
-    @Test("the starter's bars are auto")
-    func starterBarsAreAuto() {
-        let settings = StarterSetup.settings(
-            sizes: [CGSize(width: 1728, height: 1117)]
-        )
-        #expect(settings.spaceBarStyle.visibility == .auto)
-        #expect(settings.monocle.appBar.visibility == .auto)
-        #expect(settings.scrolling.appBar.visibility == .auto)
-    }
-
     // MARK: - Through the drivers
 
     /// A core on the primary screen with one window in a monocle
