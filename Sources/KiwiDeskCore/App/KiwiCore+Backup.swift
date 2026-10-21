@@ -181,9 +181,7 @@ extension KiwiCore {
         // A sidecar that exists but will not decode is the one
         // case where a silent omission is worst: the user is
         // making a backup because they are about to need it.
-        if guiConfigStore.exists, guiConfigStore.load() == nil {
-            throw .unreadableSettings
-        }
+        if let refusal = settingsExportRefusal() { throw refusal }
         // The palettes twin (#945 review): `libraryPalettes`
         // returns [] for a missing file and throws only for one
         // that exists and refuses to decode — the case where a
@@ -206,6 +204,23 @@ extension KiwiCore {
         }
         guard includingInitLua else { return .notAsked }
         return carried == nil ? .none : .included
+    }
+
+    /// Why this Mac's `gui.json` cannot go into a backup: written
+    /// by a newer KiwiDesk, or not decodable; nil where it can.
+    public func settingsExportRefusal() -> SetupBundleError? {
+        guard guiConfigStore.exists, guiConfigStore.load() == nil
+        else { return nil }
+        let supported = GuiConfig.currentFormat
+        if let data = try? Data(contentsOf: guiConfigStore.url),
+            let found = NewerFormatOnDisk.newerFormat(
+                of: data,
+                knows: supported
+            )
+        {
+            return .newerSettings(found: found, supported: supported)
+        }
+        return .unreadableSettings
     }
 
     /// The bundle as it is written: header, then payload.
