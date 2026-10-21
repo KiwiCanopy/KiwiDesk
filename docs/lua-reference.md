@@ -1032,9 +1032,9 @@ steps, the [scroll Space step](#scroll_gestureset_space_step), a
 another Space or a launch follow — shows a plate in the middle of
 the screen that switched: the Space's name or number and its
 layout's symbol. The plate shows only where that screen draws no
-Space Bar — the Space Bar is off or that screen has none — and
-never over a full-screen app or a presentation. It takes no focus
-or click and fades after
+Space Bar ([`space_bar.set_visibility`](#space_barset_visibility))
+and never over a full-screen app or a presentation. It takes no
+focus or click and fades after
 about a second; with Reduce Motion on it appears and leaves
 without the fade. The switch itself is always instant.
 
@@ -2297,12 +2297,13 @@ along their edge, how the two share one, and the styling, colours and app glyph 
 each bar keeps its own content and the shape of its active
 indicator. Stored as `settings.kiwishelf` in a profile.
 
-The shelf reserves its edge in a layout where a bar draws: in
-every layout while the Space Bar is on, and otherwise only in
-the layouts whose App Bar is on (monocle and scrolling show one
-by default). With the Space Bar off, switching a Space between a
-layout that shows an App Bar and one that does not moves its
-windows by the strip.
+The shelf reserves its edge in a layout where a bar draws at
+rest ([`space_bar.set_visibility`](#space_barset_visibility)):
+in every layout while the Space Bar does, and otherwise only in
+the layouts whose App Bar does (monocle and scrolling show one
+by default). Where the Space Bar draws nothing at rest,
+switching a Space between a layout that shows an App Bar and one
+that does not moves its windows by the strip.
 
 A bar can also show without reserving:
 [`space_bar.set_reserve`](#space_barset_reserve) and
@@ -2327,8 +2328,8 @@ is its own, with its own plate, and `set_order`, `set_minimum` and
 the divider do nothing until they share an edge again. Everything
 else on this page applies to both bars wherever they sit, and
 `set_alignment` places each bar along its own edge. Each edge is
-reserved where its bar draws: the Space Bar's in every layout,
-the App Bar's only in the layouts whose App Bar is on — so with
+reserved where its bar draws at rest: the Space Bar's in every
+layout, the App Bar's only in the layouts where it does — so with
 the bars split, switching a Space into or out of such a layout
 moves its windows by the App Bar's strip. Where the two edges
 meet at a corner, the Space Bar runs the whole edge and the App
@@ -4820,6 +4821,12 @@ layer — is not filed by the rule: it opens in the space you are
 in. The app's dialogs and panels follow the rule like its other
 windows.
 
+:::unreleased
+A popup with no title-bar button, such as a browser extension's
+popup, is not filed by the rule either
+([#2475](https://github.com/KiwiCanopy/KiwiDesk/issues/2475)).
+:::
+
 **Example:**
 
 ```lua
@@ -5213,7 +5220,7 @@ KiwiDesk.override_sticky_reach("on")
 glyph at a sticky window's top-right corner, and the carrier
 for sticky's refusal pills (home-space, can't-pile,
 move-blocked), which go silent with it. Off while the Space Bar
-is also off leaves sticky state with no mark at all; neither
+is not shown leaves sticky state with no mark at all; neither
 this setting nor the Settings app's toggle refuses that.
 
 **Example:**
@@ -5940,9 +5947,10 @@ icon shows the first two characters of its name there,
 uppercased. The default layer (`KiwiDesk.bind`) never takes an
 icon — the status item shows the standard KiwiDesk glyph.
 
-With the Space Bar off, the status item shows the Space each
-screen is showing instead ([User Guide ▸ Space
-Bar](user-guide.md#space-bar)), led by the layer's icon — or
+Where a screen's Space Bar draws nothing at rest
+([`space_bar.set_visibility`](#space_barset_visibility)), the
+status item shows the Space that screen is showing instead
+([User Guide ▸ Space Bar](user-guide.md#space-bar)), led by the layer's icon — or
 the two-character cut of its name — the way the bar is.
 
 **Example:**
@@ -6683,8 +6691,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
                 "split_direction": "horizontal",
                 "new_window_placement": "last" },
       "monocle": { "orientation": "horizontal",
-                   "app_bar": { "enabled": true,
-                                "content": "icon",
+                   "app_bar": { "visibility": "always",
                                 "active_indicator": "edge_mark" } },
       "scroll": { "anchor": "follow", "slot_size": 0,
                   "new_window_placement": "after_focused" },
@@ -7239,6 +7246,34 @@ its `policy` and whether it is `hidden`), `windows` (tracked
 ids), `minimized` (ids), `away` (each `id` with its `space_id`)
 and `app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
+
+:::unreleased
+### get_config_status
+
+**Expects:** nothing.
+
+**Does:** returns `{issues, sync}`: the Config Issues and the
+sync folder's status. Each issue carries its `source` file, a
+`kind` with its fields, and the `profile` where one applies:
+
+- `profile_broken`, with a `cause`: `malformed_json`,
+  `unexpected_shape`, `unreadable` or `newer_format`.
+- `lua_vm_unavailable`.
+- `lua_error`, with its `message`.
+- `gui_config_unreadable`.
+- `newer_format`: `source` is the file a newer KiwiDesk wrote.
+- `unknown_call`, with its `name` and a `suggestion`, the verb
+  it may have meant, or `nil`.
+- `retired_call`, with its `name` and a `replacement`, the verb
+  that replaces it, or `nil` where nothing does.
+- `missing_font_family`, with its `name`.
+
+`sync` carries the followed `folder` (`nil` when none) and a
+`status`: `off`, `up_to_date`, `folder_unavailable`,
+`changed_on_both`, `conflict_copy` with its `path`, or
+`newer_on_another_mac` / `newer_here` with the `file` a newer
+KiwiDesk wrote.
+:::
 
 :::unreleased
 ### list_windows
