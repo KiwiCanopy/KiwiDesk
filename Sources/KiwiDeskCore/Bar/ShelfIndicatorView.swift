@@ -53,6 +53,7 @@ final class ShelfIndicatorView: NSView {
             rim: rim,
             mark: mark,
             widen: spec.labelExtra,
+            labelled: spec.label != nil,
             horizontal: spec.horizontal,
             hovered: spec.hovered,
             animated: animated && was?.hovered != spec.hovered

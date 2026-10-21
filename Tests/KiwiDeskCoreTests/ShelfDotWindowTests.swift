@@ -110,6 +110,7 @@ struct ShelfDotWindowTests {
         let plate = BarMotion.hoverPlate(
             mark: mark,
             widen: extra,
+            labelled: true,
             hovered: true,
             reduceMotion: true
         )

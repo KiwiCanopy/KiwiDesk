@@ -79,17 +79,20 @@ extension BarMotion {
     /// `ShelfIndicatorSpec.hoverGrowth` on every side while
     /// hovered and along the edge by `widen`, a label's room —
     /// never under Reduce Motion, which keeps the rim alone, save
-    /// for a mark carrying a label: the pill is content rather than
-    /// motion and needs the grown plate's depth as well as its
-    /// length, so the plate takes its whole hovered frame at once.
+    /// for a mark carrying a label (`labelled`): the pill is content
+    /// rather than motion and needs the grown plate's depth as well
+    /// as its length, so the plate takes its whole hovered frame at
+    /// once — a label narrower than the dot included, which widens
+    /// nothing.
     static func hoverPlate(
         mark: CGRect,
         widen: CGFloat = 0,
+        labelled: Bool = false,
         horizontal: Bool = true,
         hovered: Bool,
         reduceMotion: Bool
     ) -> CGRect {
-        guard hovered, !reduceMotion || widen > 0 else { return mark }
+        guard hovered, !reduceMotion || labelled else { return mark }
         let growth = ShelfIndicatorSpec.hoverGrowth
         let along = growth + widen / 2
         return horizontal
@@ -108,6 +111,7 @@ extension BarMotion {
         rim: NSView,
         mark: CGRect,
         widen: CGFloat = 0,
+        labelled: Bool = false,
         horizontal: Bool = true,
         hovered: Bool,
         animated: Bool
@@ -115,6 +119,7 @@ extension BarMotion {
         let frame = hoverPlate(
             mark: mark,
             widen: widen,
+            labelled: labelled,
             horizontal: horizontal,
             hovered: hovered,
             reduceMotion: isReduced
@@ -122,6 +127,7 @@ extension BarMotion {
         rim.frame = hoverPlate(
             mark: mark,
             widen: widen,
+            labelled: labelled,
             horizontal: horizontal,
             hovered: true,
             reduceMotion: isReduced

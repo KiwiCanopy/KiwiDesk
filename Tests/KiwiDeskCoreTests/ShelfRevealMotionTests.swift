@@ -122,9 +122,11 @@ struct ShelfRevealMotionTests {
         }
     }
 
-    private func spec(hovered: Bool, shown: Bool = false)
-        -> ShelfIndicatorSpec
-    {
+    private func spec(
+        hovered: Bool,
+        shown: Bool = false,
+        label: ShelfIndicatorSpec.Label? = nil
+    ) -> ShelfIndicatorSpec {
         ShelfIndicatorSpec(
             mark: .dots([.init(current: true, occupied: true)]),
             frame: Self.mark,
@@ -136,7 +138,8 @@ struct ShelfRevealMotionTests {
             highlight: "#FF0000",
             shown: shown,
             hovered: hovered,
-            reveal: .slide
+            reveal: .slide,
+            label: label
         )
     }
 
@@ -179,5 +182,36 @@ struct ShelfRevealMotionTests {
         #expect(view.plate.frame == view.bounds.insetBy(dx: room, dy: room))
         #expect(view.rim.frame == view.plate.frame)
         #expect(view.rim.alphaValue == 1)
+    }
+
+    /// A label narrower than the current dot widens nothing, yet
+    /// still needs the grown plate's depth: under Reduce Motion the
+    /// plate takes its hovered frame at once rather than staying
+    /// thin under the pill (owner, device, 2026-10-21).
+    @Test("Under Reduce Motion a labelled mark's plate grows at once")
+    func reducedLabelGrowsThePlate() {
+        BarMotion.reducedOverride = true
+        defer { BarMotion.reducedOverride = nil }
+        let label = ShelfIndicatorSpec.label(
+            .text("1", tinted: true),
+            font: NSFont.systemFont(ofSize: 8)
+        )
+        let view = view()
+        view.render(spec(hovered: true, label: label), animated: true)
+        #expect(spec(hovered: true, label: label).labelExtra == 0)
+        #expect(view.plate.frame == view.bounds)
+        #expect(
+            BarMotion.hoverPlate(
+                mark: Self.mark,
+                labelled: true,
+                hovered: true,
+                reduceMotion: true
+            )
+                == BarMotion.hoverPlate(
+                    mark: Self.mark,
+                    hovered: true,
+                    reduceMotion: false
+                )
+        )
     }
 }
