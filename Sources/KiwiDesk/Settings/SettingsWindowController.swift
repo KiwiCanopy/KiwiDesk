@@ -218,6 +218,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.sync.status = status
     }
 
+    /// Re-reads a setup `restore_setup` replaced (#2517).
+    func reloadAfterRestore() {
+        model.reload()
+    }
+
     /// Re-reads the look library a verb changed (#1685).
     func refreshLooks() {
         model.refreshLooks()

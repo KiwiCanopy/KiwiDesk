@@ -59,8 +59,9 @@ public final class SyncFollower {
     var makeWatch:
         @MainActor ([URL], @escaping @MainActor () -> Void) -> SyncWatching? =
             SyncWatch.live
-    /// Where a removed file goes; pinned to a delete by both twins,
-    /// so no suite fills the developer's Trash.
+    /// Where a removed file goes — a sync's, and `restore_setup`'s
+    /// (#2517), Core's one Trash with no GUI to hand one; pinned to
+    /// a delete by both twins, so no suite fills the Trash.
     var trash: (URL) throws -> Void = KiwiCore.moveToTrash
     /// Whether a watch that does not start is reported; off in both
     /// `makeTestCore` twins, whose watch is pinned inert.

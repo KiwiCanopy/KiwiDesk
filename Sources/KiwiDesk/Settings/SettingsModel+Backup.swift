@@ -32,11 +32,23 @@ extension SettingsModel {
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = suggestedBackupName
         panel.canCreateDirectories = true
+        // Off every time the panel opens (#2517): a backup can
+        // reach someone else, and init.lua is code.
+        let option = BackupInitLuaOption(
+            hasInitLua: FileManager.default.fileExists(
+                atPath: core.configURL.path
+            ),
+            luaOwned: !core.isGuiManaged
+        )
+        panel.accessoryView = option.view
         guard panel.runModal() == .OK, let url = panel.url else {
             return nil
         }
         do {
-            try core.writeBackup(to: url)
+            try core.writeBackup(
+                to: url,
+                includingInitLua: option.isOn
+            )
             return nil
         } catch {
             return error
@@ -58,10 +70,10 @@ extension SettingsModel {
         do {
             let bundle = try core.readBackup(at: url)
             // Refuse HERE, not after the confirm: both the
-            // decoded bundle and the destination are in hand, and
-            // `isGuiManaged` needs no dialog to answer
-            // (`architect-reviewer`, 2026-08-17).
-            if bundle.config != nil, !core.isGuiManaged {
+            // decoded bundle and the destination are in hand
+            // (`architect-reviewer`, 2026-08-17). A backup carrying
+            // init.lua can still restore with it (#2517).
+            if !core.restoreChoices(for: bundle).any {
                 return .failure(.luaOwnsThisMac)
             }
             return .success(bundle)
@@ -76,13 +88,17 @@ extension SettingsModel {
     /// `reload()` runs either way: the files changed even on the
     /// failing path, and an editor describing the old ones would
     /// be lying.
-    func restoreBackup(_ bundle: SetupBundle) -> SetupBundleError? {
+    func restoreBackup(
+        _ bundle: SetupBundle,
+        replacingInitLua: Bool
+    ) -> SetupBundleError? {
         defer { reload() }
         do {
             let outcome = try core.withUserMotion {
                 () throws(SetupBundleError) in
                 try core.restoreSetup(
                     from: bundle,
+                    replacingInitLua: replacingInitLua,
                     trash: KiwiCore.moveToTrash
                 )
             }

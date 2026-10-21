@@ -3,10 +3,10 @@ import Foundation
 /// Everything a KiwiDesk backup carries as one JSON document
 /// (#606): `gui.json`, profiles, and the saved palette library.
 /// The contents are an ALLOW-LIST, never a directory sweep —
-/// `init.lua` stays behind (user-authored code a backup must not
-/// claim), as do the arrangement snapshots (this Mac's session)
-/// and the socket/lock (runtime). Add an entry only for a path
-/// something actually creates.
+/// `init.lua` travels only when the export asks (#2517: code a
+/// restore must not run unasked), the arrangement snapshots (this
+/// Mac's session) and the socket/lock (runtime) never. Add an
+/// entry only for a path something actually creates.
 public struct SetupBundle: Codable, Sendable, Equatable {
     /// Supported bundle format version. Not a compatibility shim —
     /// a refusal signal: this is the one artifact that legitimately
@@ -85,9 +85,11 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 35 = the shelf's glide became its expand (owner ruling,
     /// 2026-10-21), in a bundle's `[Profile]`, its `config`'s
     /// shared look and its looks alike.
-    /// 36 = `space.cue` became `space.transition` (#2524), in a
+    /// 36 = `init.lua` carried on request (#2517): an older build
+    /// would drop a carried one silently.
+    /// 37 = `space.cue` became `space.transition` (#2524), in a
     /// bundle's `config`.
-    public static let currentFormat = 36
+    public static let currentFormat = 37
 
     public let format: Int
 
@@ -116,6 +118,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// so on another Mac they stay dormant until that Desktop
     /// exists — never resolved through the Mission Control number.
     public let profileBindings: [DesktopKey: DesktopBinding]?
+    /// The source's `init.lua`, carried only when the export asked
+    /// (#2517); a restore replaces this Mac's only when asked too.
+    public let initLua: String?
 
     public init(
         format: Int = SetupBundle.currentFormat,
@@ -124,7 +129,8 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         profiles: [Profile],
         palettes: [ColorPalette],
         looks: [ShelfLook]? = nil,
-        profileBindings: [DesktopKey: DesktopBinding]? = nil
+        profileBindings: [DesktopKey: DesktopBinding]? = nil,
+        initLua: String? = nil
     ) {
         self.format = format
         self.writtenBy = writtenBy
@@ -133,6 +139,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         self.palettes = palettes
         self.looks = looks
         self.profileBindings = profileBindings
+        self.initLua = initLua
     }
 
     /// Whether this build can read the bundle format.
@@ -157,11 +164,15 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         }
     }
 
-    /// True when bundle carries no settings, profiles, or palettes.
-    public var isEmpty: Bool {
-        config == nil && profiles.isEmpty && palettes.isEmpty
-            && (looks ?? []).isEmpty
+    /// Whether it carries settings, profiles, palettes or looks —
+    /// what a restore leaving `init.lua` alone writes.
+    public var carriesSetup: Bool {
+        config != nil || !profiles.isEmpty || !palettes.isEmpty
+            || !(looks ?? []).isEmpty
     }
+
+    /// True when bundle carries nothing a restore could write.
+    public var isEmpty: Bool { !carriesSetup && initLua == nil }
 }
 
 /// Structural outcome of a backup restore
@@ -173,11 +184,34 @@ public struct RestoreOutcome: Equatable, Sendable {
     public let refusedPalettes: Int
     /// Looks dropped the same way (#1684).
     public var refusedLooks = 0
+    /// What the restore did with `init.lua` (#2517).
+    public var initLua: InitLuaRestore = .notCarried
 
     public var isClean: Bool {
         skippedProfiles.isEmpty && refusedPalettes == 0
             && refusedLooks == 0
     }
+}
+
+/// What an export did with `init.lua` (#2517).
+public enum InitLuaExport: String, Equatable, Sendable {
+    /// The export was not asked to carry it.
+    case notAsked = "not_asked"
+    /// Carried.
+    case included
+    /// Asked, and this Mac has none.
+    case none
+}
+
+/// What a restore did with `init.lua` (#2517).
+public enum InitLuaRestore: String, Equatable, Sendable {
+    /// The backup carries none, so this Mac's stayed.
+    case notCarried = "not_carried"
+    /// The backup's replaced this Mac's, which went to the Trash.
+    case replaced
+    /// The backup carries one and the restore was not asked to
+    /// take it, so this Mac's stayed.
+    case leftAlone = "left_alone"
 }
 
 /// Structured error cases for backup read/write operations (#96).
@@ -198,6 +232,9 @@ public enum SetupBundleError: Error, Equatable, Sendable {
     case unreadablePalettes
     /// Existing `looks.json` failed to decode during export (#1684).
     case unreadableLooks
+    /// An export asked for `init.lua` and it could not be read
+    /// (#2517).
+    case unreadableInitLua
     /// Target Mac is Lua-owned, so the settings half could not
     /// apply: `loadConfig` never reads the restored rules and
     /// keybindings there while the profile-scoped half applies

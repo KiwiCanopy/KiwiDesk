@@ -75,6 +75,18 @@ extension APIReference {
             "Takes over a leftover Hyper remap that matches "
                 + "KiwiDesk's own; it is cleared at quit."
         ),
+        KiwiCore.exportSetupCommand: APIRecord(
+            "Writes a backup file, as Settings' Export… does; "
+                + KiwiCore.includeInitLuaFlag + " carries init.lua too.",
+            .text("path"),
+            .text("flag", optional: true)
+        ),
+        KiwiCore.restoreSetupCommand: APIRecord(
+            "Restores a backup file, as Settings' Restore… does; "
+                + KiwiCore.initLuaFlag + " also takes the backup's init.lua.",
+            .text("path"),
+            .text("flag", optional: true)
+        ),
         "set_space_transition": APIRecord(
             "Sets how a Space switch shows itself: the plate "
                 + "slide, the Space and its layout, or nothing.",

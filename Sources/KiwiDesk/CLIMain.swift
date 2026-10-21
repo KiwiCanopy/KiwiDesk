@@ -109,6 +109,7 @@ private func runSocketCommand(
     if command == APIReference.socketOnlyCommand {
         return CLIEventStream.subscribe(rest)
     }
+    rest = CLIPathArguments.resolved(rest, command: command)
     let args = rest.map { JSONValue.string($0) }
     let request = CommandRequest(
         command: command,

@@ -51,6 +51,12 @@ enum SetupBackupText {
                     + "backup would leave them out. They may come "
                     + "from a newer KiwiDesk."
             )
+        case .unreadableInitLua:
+            return L(
+                "general.advanced.backup.error.unreadable_init_lua",
+                "KiwiDesk can't read this Mac's init.lua, so a "
+                    + "backup including it can't be made."
+            )
         case .luaOwnsThisMac:
             return L(
                 "general.advanced.backup.error.lua_owned",
@@ -105,6 +111,65 @@ enum SetupBackupText {
         return parts.joined(separator: "\n")
     }
 
+    /// The confirm's plain Restore, leaving this Mac's init.lua.
+    static var restoreLabel: String {
+        L("general.advanced.backup.restore.confirm", "Restore")
+    }
+
+    /// The confirm's Restore that takes the backup's init.lua too
+    /// (#2517).
+    static var restoreWithInitLuaLabel: String {
+        L(
+            "general.advanced.backup.restore.confirm.with_init_lua",
+            "Restore with init.lua"
+        )
+    }
+
+    /// The confirm's message: what every restore replaces, then
+    /// what each offered button does with init.lua (#2517).
+    static func restoreMessage(_ choices: RestoreChoices) -> String {
+        let lead = L(
+            "general.advanced.backup.restore.confirm.lead",
+            "This replaces your settings, every profile, and your "
+                + "color palettes and looks with what's in the "
+                + "backup file — and discards any changes you "
+                + "haven't saved yet. The files being replaced go "
+                + "to the Trash."
+        )
+        let tail: String
+        if choices.plainRefusal == .empty {
+            // Everything the lead names is replaced with none.
+            tail = L(
+                "general.advanced.backup.restore.confirm.init_lua_only",
+                "This backup holds only an init.lua. Restoring it puts "
+                    + "the backup's in place of yours, which goes to "
+                    + "the Trash, and KiwiDesk runs it."
+            )
+        } else if !choices.withInitLua {
+            tail = L(
+                "general.advanced.backup.restore.confirm.no_init_lua",
+                "init.lua isn't touched."
+            )
+        } else if choices.plain {
+            tail = L(
+                "general.advanced.backup.restore.confirm.choose_init_lua",
+                "The backup also includes an init.lua. “%1$@” leaves "
+                    + "yours as it is; “%2$@” puts the backup's in "
+                    + "its place and KiwiDesk runs it.",
+                restoreLabel,
+                restoreWithInitLuaLabel
+            )
+        } else {
+            tail = L(
+                "general.advanced.backup.restore.confirm.lua_owned",
+                "Your settings here come from init.lua, so this "
+                    + "backup can only be restored together with its "
+                    + "own init.lua, which KiwiDesk then runs."
+            )
+        }
+        return lead + " " + tail
+    }
+
     /// Title for partial restore alert.
     static var partialTitle: String {
         L(
@@ -117,7 +182,7 @@ enum SetupBackupText {
     static func title(for error: SetupBundleError) -> String {
         switch error {
         case .couldNotWrite, .unreadableSettings,
-            .unreadablePalettes, .unreadableLooks:
+            .unreadablePalettes, .unreadableLooks, .unreadableInitLua:
             return L(
                 "general.advanced.backup.error.export_title",
                 "Couldn't Save the Backup"

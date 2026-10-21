@@ -104,6 +104,9 @@ struct FocusedCommandPolicyTests {
         "revert_settings",
         // Writes the Hyper remap record; no window (#2471).
         "take_over_hyper_remap",
+        // Write or read a backup file, touching no window (#2517).
+        "export_setup",
+        "restore_setup",
         // Show or hide a hiding shelf, touching no window (#761).
         "space_bar.toggle_reveal",
         "app_bar.toggle_reveal",

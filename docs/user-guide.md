@@ -134,10 +134,10 @@ Advanced ▸ Saved window arrangement ▸ Discard** clears it.
 ## Moving to Another Mac: Backups
 
 **General ▸ Advanced ▸ KiwiDesk backup ▸ Export…** writes one
-file with your settings, every profile and your saved palettes;
-**Restore from backup ▸ Restore…** puts it back. Not included: `init.lua`
-and the remembered window arrangement. For continuous sync see
-[The gui.json File](#the-guijson-file).
+file with your settings, every profile, your saved palettes and
+your Desktop bindings; **Restore from backup ▸ Restore…** puts it
+back. Not included: the remembered window arrangement. For
+continuous sync see [The gui.json File](#the-guijson-file).
 
 A backup does not carry which Space each Desktop remembers
 either: that stays on the Mac it was made on ([Spaces and
@@ -152,6 +152,15 @@ from a **newer** KiwiDesk, one that would restore nothing, and
 one carrying settings when this Mac's settings come from
 `init.lua` (profiles and palettes alone restore there). A
 restore that skips a profile or a palette says so.
+
+:::unreleased
+`init.lua` travels only when asked, off by default: tick
+**Include init.lua** when you export, and pick **Restore with
+init.lua** when you restore, which runs it at once and is the one
+restore of settings a Mac whose settings come from `init.lua`
+accepts. The same backup is one command away with `kiwidesk
+export_setup` and `kiwidesk restore_setup` ([CLI](cli.md#commands)).
+:::
 
 Saved looks travel in a backup beside the palettes, and restore
 wherever they do; **All settings ▸ Reset…** keeps them too. The

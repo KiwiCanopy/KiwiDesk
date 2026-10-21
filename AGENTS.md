@@ -1069,6 +1069,10 @@ Touching `Config`, `Profiles`, `Commands`.
   `promotePendingBindings` at every profile write, and `bindings.json`
   written through `saveBindings` alone (#2324, `DesktopBindingByIDTests`,
   `ProfileIDTests`, `DesktopBindingsFileTests`)
+- `init.lua` travels in a backup and is replaced by a restore only on an
+  explicit opt-in at each end, never by default, and a restore taking it is
+  judged on the incoming file, through the one writer a sync take shares
+  (#2517, `BackupInitLuaTests`)
 - a change breaking the decoded shape of anything a bundle carries bumps
   `SetupBundle.currentFormat`, breaking Profile or GuiConfig schema bumps
   `Profile.currentFormat` / `GuiConfig.currentFormat`, and a breaking palette
