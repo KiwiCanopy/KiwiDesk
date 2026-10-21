@@ -48,4 +48,23 @@ struct CLIPathArgumentsTests {
             ) == ["2"]
         )
     }
+
+    /// The resolver and the restore hook are inert unless wired:
+    /// the CLI resolves before it sends, and the app re-reads an
+    /// open Settings after `restore_setup`.
+    @Test("the resolver and the restore hook are wired")
+    func wiring() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let cli = try SourceScan.strippedSource(
+            at: root.appendingPathComponent("Sources/KiwiDesk/CLIMain.swift")
+        )
+        #expect(cli.contains("CLIPathArguments.resolved(rest"))
+        let app = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/AppDelegate.swift"
+            )
+        )
+        #expect(app.contains("core.onSetupRestored = {"))
+        #expect(app.contains("reloadAfterRestore()"))
+    }
 }
