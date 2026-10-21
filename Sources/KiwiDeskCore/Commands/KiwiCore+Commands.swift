@@ -17,6 +17,7 @@ extension KiwiCore {
         if let denial = focusedCommandDenial(for: command, args) {
             return denial
         }
+        endMaximizeAhead(of: command)  // #2448
         switch command {
         case "focus":
             return focusRecordingFlight(args)
@@ -74,6 +75,8 @@ extension KiwiCore {
             return toggleFocusedSticky(.global)
         case "toggle_display_sticky":
             return toggleFocusedSticky(.display)
+        case "toggle_maximized":
+            return toggleMaximized()
         case "override_sticky_reach":
             return setFocusedStickyReach(args)
         case "resize":

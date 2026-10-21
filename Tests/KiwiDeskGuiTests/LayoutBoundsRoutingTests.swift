@@ -115,6 +115,11 @@ struct LayoutBoundsRoutingTests {
         // `TilingSettings.layoutBounds(from:mode:on:)`, the same seam one
         // level down (`ScrollingColumnCapDoorTests`).
         "App/KiwiCore+ScrollingColumnCap.swift": 1,
+        // A maximized window (#2448) fills the whole visible frame
+        // because the shelf stands down while it shows, so the
+        // strip `layoutBounds(on:)` reserves draws nothing there.
+        // It lays out one window and divides no span.
+        "Tiling/TilingEngine+Maximized.swift": 1,
     ]
 
     @Test("Only the allowlisted files read raw display bounds")

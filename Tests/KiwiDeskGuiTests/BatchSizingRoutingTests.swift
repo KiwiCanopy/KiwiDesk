@@ -190,6 +190,11 @@ struct BatchSizingRoutingTests {
         // in one dispatch. Slots and membership never move.
         "KiwiDeskCore/Commands/KiwiCore+ResetLayoutSizing.swift":
             Site(names: 1, promises: 1),
+        // Maximize (#2448): one already-placed window grows to its
+        // screen or shrinks back to its slot, on the toggle and on
+        // a focus that ends it; no slot or membership moves.
+        "KiwiDeskCore/App/KiwiCore+Maximize.swift":
+            Site(names: 4, promises: 2),
     ]
 
     /// Any spelling of the type — the argument label, the stored

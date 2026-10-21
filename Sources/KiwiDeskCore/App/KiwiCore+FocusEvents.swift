@@ -272,6 +272,7 @@ extension KiwiCore {
         )
         let filedHere = payHiddenAppMove(focused: id)
         rememberHonoredFocus(id)
+        settleMaximizeAfterFocus()  // #2448
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.

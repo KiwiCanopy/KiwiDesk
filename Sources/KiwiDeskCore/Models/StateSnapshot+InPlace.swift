@@ -17,6 +17,9 @@ extension StateSnapshot {
         /// `TilingEngine.monocleShownMembers` (#881): the member
         /// shown while a float holds the focus.
         public var monocleShown: UInt32?
+        /// `Space.maximized` (#2448): an in-place restart moves
+        /// nothing, so the maximized window stays filling its screen.
+        public var maximized: UInt32?
 
         public init(space: Space, monocleShown: WindowID?) {
             ratios = space.sessionRatios
@@ -27,6 +30,7 @@ extension StateSnapshot {
             )
             scrollRest = space.scrollRest
             self.monocleShown = monocleShown?.raw
+            maximized = space.maximized?.raw
         }
 
         private enum CodingKeys: String, CodingKey {
@@ -34,6 +38,7 @@ extension StateSnapshot {
             case stackWeights = "stack_weights"
             case scrollRest = "scroll_rest"
             case monocleShown = "monocle_shown"
+            case maximized
         }
     }
 
@@ -123,6 +128,11 @@ extension StateCoordinator {
                 }
             )
             $0.scrollRest = session.scrollRest
+            if let raw = session.maximized,
+                $0.windows.contains(WindowID(raw))
+            {
+                $0.maximized = WindowID(raw)
+            }
         }
     }
 

@@ -113,6 +113,7 @@ extension KiwiCore {
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
+            settleMaximizeAfterFocus()  // #2448
         }
         if let previous = previousFocused, previous != id,
             let frame = state.windows[previous]?.frame
