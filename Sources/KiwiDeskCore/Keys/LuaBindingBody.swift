@@ -103,7 +103,7 @@ enum LuaBindingBody {
         return nil
     }
 
-    private static func skipTrivia(
+    static func skipTrivia(
         _ chars: [Character],
         _ i: Int
     ) -> Int? {
@@ -191,7 +191,7 @@ enum LuaBindingBody {
         return chars.count
     }
 
-    private static func readWord(
+    static func readWord(
         _ chars: [Character],
         _ i: Int
     ) -> (String, Int) {
@@ -200,15 +200,15 @@ enum LuaBindingBody {
         return (String(chars[i..<j]), j)
     }
 
-    private static func isWordStart(_ c: Character) -> Bool {
+    static func isWordStart(_ c: Character) -> Bool {
         c == "_" || c.isLetter
     }
 
-    private static func isWordChar(_ c: Character) -> Bool {
+    static func isWordChar(_ c: Character) -> Bool {
         c == "_" || c.isLetter || c.isNumber
     }
 
-    private static func isSpace(_ c: Character) -> Bool {
+    static func isSpace(_ c: Character) -> Bool {
         c == " " || c == "\t" || c == "\n" || c == "\r"
     }
 

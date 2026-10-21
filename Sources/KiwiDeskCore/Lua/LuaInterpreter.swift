@@ -179,6 +179,36 @@ public final class LuaInterpreter {
         return (String(cString: cString), Int(first), Int(last))
     }
 
+    /// The upvalues of a function ref by name (#2485): a string,
+    /// number or boolean as its value, anything else as nil. Runs
+    /// no Lua code and mints no ref.
+    public func functionUpvalues(ref: Int32) -> [String: LuaValue?] {
+        guard let state else { return [:] }
+        lua_rawgeti(state, SHIM_LUA_REGISTRYINDEX, lua_Integer(ref))
+        defer { shim_lua_pop(state, 1) }
+        guard shim_lua_isfunction(state, -1) != 0 else { return [:] }
+        var values: [String: LuaValue?] = [:]
+        var n: Int32 = 1
+        while let name = lua_getupvalue(state, -1, n) {
+            values[String(cString: name)] = Self.scalar(state, at: -1)
+            shim_lua_pop(state, 1)
+            n += 1
+        }
+        return values
+    }
+
+    private static func scalar(
+        _ state: OpaquePointer,
+        at index: Int32
+    ) -> LuaValue? {
+        switch lua_type(state, index) {
+        case SHIM_LUA_TBOOLEAN, SHIM_LUA_TNUMBER, SHIM_LUA_TSTRING:
+            return LuaBridge.read(state, at: index)
+        default:
+            return nil
+        }
+    }
+
     // MARK: - Registration
 
     /// Exposes a Swift closure as `tableName.name(...)`. The

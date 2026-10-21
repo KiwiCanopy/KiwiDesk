@@ -68,10 +68,12 @@ enum KeybindingImporter {
         return (layers, unread)
     }
 
-    /// The recovered, non-empty action body for one binding, or
-    /// nil when its source is a C function, a named (non-inline)
-    /// Lua handler, an unreadable file, or an unbalanced range —
-    /// see `LuaBindingBody` for the inline-literal assumption.
+    /// The recovered, non-empty action body for one binding, its
+    /// scalar upvalues spelled as literals and a Space call as the
+    /// catalog spells it (#2485), or nil when its source is a C
+    /// function, a named (non-inline) Lua handler, an unreadable
+    /// file, or an unbalanced range — see `LuaBindingBody` for the
+    /// inline-literal assumption.
     private static func action(
         ref: Int32,
         interpreter: LuaInterpreter,
@@ -97,6 +99,12 @@ enum KeybindingImporter {
             lastLine: info.lastLine
         )
         guard let body, !body.isEmpty else { return nil }
-        return body
+        return SpaceLuaArg.catalogSpelling(
+            of: LuaUpvalueLiterals.resolve(
+                body: body,
+                upvalues: interpreter.functionUpvalues(ref: ref),
+                file: contents
+            )
+        )
     }
 }
