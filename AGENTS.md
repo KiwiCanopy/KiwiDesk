@@ -1305,7 +1305,9 @@ Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`.
 - Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per screen
 - hover focus is armed by user pointer motion alone, so KiwiDesk moves the
   pointer with a bare warp and never synthesizes a mouse event (#1869,
-  `HoverFocusWiringTests`)
+  `HoverFocusWiringTests`), and the Settings window's mouse-moved flag is
+  written by `SettingsWindow`'s derivation alone, off while a popover hangs
+  from it (#2501, `SettingsWindowMouseMovesTests`)
 - the running hotkey table is written only from saved files — no Settings
   control registers a chord ahead of Save, and a new writer joins
   `ShortcutsApplyOnSaveTests`' census
@@ -1539,6 +1541,16 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   section at its own `shownStrip`, and Reduce transparency standing the plate
   down at `ShelfManager.relayout` (`ShelfOverlayTests`,
   `ShelfPlateGlassGateTests`)
+- the shelf panel takes the drawn plate or runs, never the strip — the one
+  `ShelfOverlay.restingRoom` at rest, a glide's two ends or the room of the
+  reveal it resolves to while it travels, settled on its landing (#2497, `ShelfPanelRoomTests`,
+  `ShelfPanelRoomMotionTests`) — and a shelf revealed onto an edge that
+  draws nothing at rest, by the one `ShelfEdge.drawsNothingAtRest`, slides
+  or grows as the one `reveal_style` says inside a still panel through
+  `BarMotion.playReveal` (`ShelfRevealStyleTests`, `ShelfRevealMotionTests`)
+- a bar joining or leaving a fused shelf never budges its neighbour — on a
+  new slot the run, items, box glass and float break snap, the shelf's glide
+  the one motion (`AppBarLandingTests`)
 - every rule a bar draws takes `BarDivider` (`ShelfDividerWeightTests`) and
   idle ink is `KiwiShelf.idleItemColor` (`IdleItemContrastTests`)
 - overflow goes through `ShelfOverflow`, `ShelfFadeMask` and `ShelfCountView`

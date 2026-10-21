@@ -216,6 +216,9 @@ struct HoverFocusWiringTests {
                 encoding: .utf8
             )
         )
-        #expect(window.contains("window.acceptsMouseMovedEvents = true"))
+        // `SettingsWindow` takes the moves while nothing hangs from
+        // it (#2501, `SettingsWindowMouseMovesTests`).
+        #expect(window.contains("let window = SettingsWindow("))
+        #expect(window.contains("window.syncMouseMoves()"))
     }
 }

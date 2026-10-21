@@ -34,9 +34,12 @@ extension ShelfOverlay {
             )
         )
         panel.onPress = { [weak self] in self?.onPress($0, $1) }
+        root.wantsLayer = true
+        root.layer?.masksToBounds = true
+        panel.contentView = root
         content.wantsLayer = true
         content.layer?.masksToBounds = true
-        panel.contentView = content
+        root.addSubview(content)
         stripView.wantsLayer = true
         content.addSubview(stripView)
         content.addSubview(

@@ -76,15 +76,28 @@ struct SpaceBarStuckHoverTests {
     }
 
     /// The chip's centre in its window's points.
-    private func centre(of view: NSView) -> CGPoint {
+    private func windowCentre(of view: NSView) -> CGPoint {
         view.convert(
             CGPoint(x: view.bounds.midX, y: view.bounds.midY),
             to: nil
         )
     }
 
+    /// The chip's centre on screen, where a resting pointer stays
+    /// while the shelf's panel moves under it (#2497).
+    private func centre(of view: NSView) -> CGPoint {
+        let point = windowCentre(of: view)
+        return view.window?.convertPoint(toScreen: point) ?? point
+    }
+
+    /// Rests the pointer at a screen `point`, read as the live
+    /// pointer is: in the window's points at read time.
     private func rest(at point: CGPoint) {
-        BarHoverHit.pointerOverride = { _ in point }
+        guard point != BarHoverHit.offWindow else {
+            BarHoverHit.pointerOverride = { _ in point }
+            return
+        }
+        BarHoverHit.pointerOverride = { $0.convertPoint(fromScreen: point) }
     }
 
     @Test("a placement re-reads the hover from where the pointer rests")
@@ -107,7 +120,7 @@ struct SpaceBarStuckHoverTests {
         let moved = try #require(
             NSEvent.mouseEvent(
                 with: .mouseMoved,
-                location: centre(of: two),
+                location: windowCentre(of: two),
                 modifierFlags: [],
                 timestamp: 0,
                 windowNumber: window.windowNumber,

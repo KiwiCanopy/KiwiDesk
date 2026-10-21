@@ -110,6 +110,7 @@ struct ShelfDotWindowTests {
         let plate = BarMotion.hoverPlate(
             mark: mark,
             widen: extra,
+            labelled: true,
             hovered: true,
             reduceMotion: true
         )
@@ -147,6 +148,7 @@ struct ShelfDotSpokenTests {
                 highlight: "#FF9900",
                 shown: false,
                 hovered: false,
+                reveal: .slide,
                 position: .init(index: 7, count: 10)
             ),
             animated: false

@@ -65,6 +65,9 @@ public enum LookKeys {
         "app_bar.reserve": functionality,
         "space_bar.visibility": functionality,
         "kiwishelf.reveal_duration": functionality,
+        "kiwishelf.reveal_style": "how a revealed bar moves — motion, "
+            + "which a bundled look and the tour's paint never change "
+            + "(#2176)",
         "space_bar.glyph_span": functionality,
         "space_bar.inactive_content": functionality,
         "space_bar.front_app_title_cap": functionality,

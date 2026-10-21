@@ -42,6 +42,14 @@ editing here:
   read from state frames on the move (`PointerRest.held`,
   `HoverFocusHoldTests`). A new trigger for hover focus is a user
   event too, never a reading of where the pointer IS.
+  While KiwiDesk is active, the local monitor hears the pointer
+  leave Settings only because that window accepts mouse-moved
+  events (#2381), and the flag breaks SwiftUI hover in a popover
+  over it (#2501). So the flag is written by `SettingsWindow`'s
+  derivation alone — off while a window hangs from it, which
+  stands hover focus down out of Settings for that while, as
+  KiwiHub does (#2378) — and never beside it
+  (`SettingsWindowMouseMovesTests`).
 - **Scroll gestures take the ONE active scroll-wheel tap,
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the

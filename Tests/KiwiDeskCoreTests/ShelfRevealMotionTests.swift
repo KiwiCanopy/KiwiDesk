@@ -4,11 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// How a hiding shelf's reveal and its mark's hover MOVE (#761):
-/// the plate morphs out of the mark as a clip of the content's own
-/// layer while the items fade on it, starting only after the pass
-/// that orders the panel in, and the hovered plate grows its frame
-/// rather than cross-fading a redraw. Whether it reads well is the
+/// How a hiding shelf's reveal and its mark's hover MOVE (#761,
+/// #2497): the whole shelf slides in from past its screen side and
+/// the mark fades as it starts, and the hovered plate grows its
+/// frame rather than cross-fading a redraw. Whether it reads well is the
 /// device's; this holds the decisions and the start order, never
 /// the tuned values. Main-actor spend: a handful of unwindowed
 /// views.
@@ -16,7 +15,6 @@ import Testing
 @MainActor
 struct ShelfRevealMotionTests {
     private static let mark = CGRect(x: 100, y: 0, width: 60, height: 8)
-    private static let plate = CGRect(x: 20, y: 0, width: 360, height: 40)
 
     @Test("The hovered plate grows on every side, never under Reduce Motion")
     func hoverPlateGrows() {
@@ -43,84 +41,80 @@ struct ShelfRevealMotionTests {
         )
     }
 
-    private func morph(entering: Bool) -> BarMotion.Morph? {
-        let motion = BarMotion.revealMotion(
-            reduceMotion: false,
-            entering: entering,
-            origin: Self.mark,
-            plate: Self.plate,
-            plateRadius: 10
-        )
-        guard case .morph(let morph) = motion else { return nil }
-        return morph
+    /// A slide along `offset`.
+    private func slide(_ offset: CGVector) -> BarMotion.RevealPath {
+        BarMotion.RevealPath(kind: .slide, offset: offset)
     }
 
-    @Test("A reveal grows the plate out of the hovered mark, items after")
-    func revealMorphsOutOfTheMark() throws {
-        let morph = try #require(morph(entering: true))
-        let mark = BarMotion.hoverPlate(
-            mark: Self.mark,
-            hovered: true,
-            reduceMotion: false
-        )
-        #expect(morph.mark == mark)
-        #expect(morph.plate == Self.plate)
-        // The items fade up once the plate moves, while it still
-        // grows: one overlapping sequence.
-        #expect(morph.itemsStart > morph.plateStart)
-        #expect(morph.itemsStart < morph.plateStart + morph.plateLength)
-    }
-
-    @Test("A retract fades the items before the plate shrinks")
-    func retractFadesItemsFirst() throws {
-        let morph = try #require(morph(entering: false))
-        #expect(morph.plateStart >= morph.itemsStart + morph.itemsLength)
-    }
-
-    @Test("A Boxed shelf and Reduce Motion cross-fade in place")
-    func boxedAndReducedFade() {
-        for entering in [true, false] {
-            let boxed = BarMotion.revealMotion(
-                reduceMotion: false,
-                entering: entering,
-                origin: Self.mark,
-                plate: nil,
-                plateRadius: 0
+    @Test("A reveal slides from past the screen side, by edge")
+    func revealSlidesFromTheEdge() {
+        let depth: CGFloat = 40
+        let gap: CGFloat = 6
+        let offsets: [(AppBarEdge, CGVector)] = [
+            (.top, CGVector(dx: 0, dy: -46)),
+            (.bottom, CGVector(dx: 0, dy: 46)),
+            (.left, CGVector(dx: -46, dy: 0)),
+            (.right, CGVector(dx: 46, dy: 0)),
+        ]
+        for (edge, offset) in offsets {
+            let found = BarMotion.revealOffset(
+                edge: edge,
+                depth: depth,
+                gap: gap
             )
-            let reduced = BarMotion.revealMotion(
-                reduceMotion: true,
-                entering: entering,
-                origin: Self.mark,
-                plate: Self.plate,
-                plateRadius: 10
+            #expect(found == offset)
+            #expect(
+                BarMotion.revealMotion(
+                    reduceMotion: false,
+                    entering: true,
+                    path: slide(found)
+                ) == .slide(offset: offset, length: BarMotion.revealSlide)
             )
-            #expect(boxed == .fade(BarMotion.revealFade))
-            #expect(reduced == .fade(BarMotion.revealFade))
         }
     }
 
-    @Test("The mark lands with a morph's retract, and cross-fades else")
-    func markFadeFollowsTheShelf() throws {
-        let retract = try #require(morph(entering: false))
+    @Test("Reduce Motion, or nothing to travel, cross-fades in place")
+    func reducedFades() {
+        let offset = CGVector(dx: 0, dy: -46)
+        for path in [slide(offset), .init(kind: .grow, plate: Self.mark)] {
+            #expect(
+                BarMotion.revealMotion(
+                    reduceMotion: true,
+                    entering: true,
+                    path: path
+                ) == .fade(BarMotion.revealFade)
+            )
+        }
+        #expect(
+            BarMotion.revealMotion(
+                reduceMotion: false,
+                entering: true,
+                path: slide(.zero)
+            ) == .fade(BarMotion.revealFade)
+        )
+    }
+
+    @Test("The mark fades as the slide starts and lands with the retract")
+    func markFadeFollowsTheSlide() {
         let back = BarMotion.markFade(
             showing: true,
-            morphs: true,
+            reveal: .slide,
             reduceMotion: false
         )
         #expect(back.delay > 0)
-        #expect(abs(back.delay + back.length - retract.length) < 1e-9)
+        #expect(abs(back.delay + back.length - BarMotion.revealSlide) < 1e-9)
         let out = BarMotion.markFade(
             showing: false,
-            morphs: true,
+            reveal: .slide,
             reduceMotion: false
         )
         #expect(out.delay == 0)
-        for (morphs, reduced) in [(false, false), (true, true)] {
+        for kind in [BarMotion.RevealKind.slide, .grow, .fade] {
             for showing in [true, false] {
                 let fade = BarMotion.markFade(
                     showing: showing,
-                    morphs: morphs,
-                    reduceMotion: reduced
+                    reveal: kind,
+                    reduceMotion: true
                 )
                 #expect(fade.delay == 0)
                 #expect(fade.length == BarMotion.revealFade)
@@ -128,9 +122,11 @@ struct ShelfRevealMotionTests {
         }
     }
 
-    private func spec(hovered: Bool, shown: Bool = false)
-        -> ShelfIndicatorSpec
-    {
+    private func spec(
+        hovered: Bool,
+        shown: Bool = false,
+        label: ShelfIndicatorSpec.Label? = nil
+    ) -> ShelfIndicatorSpec {
         ShelfIndicatorSpec(
             mark: .dots([.init(current: true, occupied: true)]),
             frame: Self.mark,
@@ -141,7 +137,9 @@ struct ShelfRevealMotionTests {
             emptyInk: "#555555",
             highlight: "#FF0000",
             shown: shown,
-            hovered: hovered
+            hovered: hovered,
+            reveal: .slide,
+            label: label
         )
     }
 
@@ -184,5 +182,36 @@ struct ShelfRevealMotionTests {
         #expect(view.plate.frame == view.bounds.insetBy(dx: room, dy: room))
         #expect(view.rim.frame == view.plate.frame)
         #expect(view.rim.alphaValue == 1)
+    }
+
+    /// A label narrower than the current dot widens nothing, yet
+    /// still needs the grown plate's depth: under Reduce Motion the
+    /// plate takes its hovered frame at once rather than staying
+    /// thin under the pill (owner, device, 2026-10-21).
+    @Test("Under Reduce Motion a labelled mark's plate grows at once")
+    func reducedLabelGrowsThePlate() {
+        BarMotion.reducedOverride = true
+        defer { BarMotion.reducedOverride = nil }
+        let label = ShelfIndicatorSpec.label(
+            .text("1", tinted: true),
+            font: NSFont.systemFont(ofSize: 8)
+        )
+        let view = view()
+        view.render(spec(hovered: true, label: label), animated: true)
+        #expect(spec(hovered: true, label: label).labelExtra == 0)
+        #expect(view.plate.frame == view.bounds)
+        #expect(
+            BarMotion.hoverPlate(
+                mark: Self.mark,
+                labelled: true,
+                hovered: true,
+                reduceMotion: true
+            )
+                == BarMotion.hoverPlate(
+                    mark: Self.mark,
+                    hovered: true,
+                    reduceMotion: false
+                )
+        )
     }
 }

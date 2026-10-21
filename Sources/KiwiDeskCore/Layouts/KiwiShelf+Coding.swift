@@ -40,6 +40,7 @@ extension KiwiShelf {
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
         case revealDuration = "reveal_duration"
+        case revealStyle = "reveal_style"
     }
 
     /// Decodes a shelf, a missing key taking its default.
@@ -134,6 +135,9 @@ extension KiwiShelf {
             try c.decodeIfPresent(Double.self, forKey: .revealDuration)
                 ?? d.revealDuration
         )
+        revealStyle =
+            try c.decodeIfPresent(RevealStyle.self, forKey: .revealStyle)
+            ?? d.revealStyle
         try decodeColors(from: c)
     }
 

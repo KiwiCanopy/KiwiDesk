@@ -6,29 +6,55 @@ import QuartzCore
 /// to its shelf. The same one home — `BarMotionSeamTests`
 /// censuses this file.
 extension BarMotion {
+    /// How a shelf's reveal plays, as far as its mark keeps time
+    /// with it: the user's `reveal_style`, a grow on a shelf with no
+    /// plate cross-fading (#2497).
+    enum RevealKind: Equatable {
+        case slide, grow, fade
+
+        init(_ shelf: KiwiShelf) {
+            switch shelf.revealStyle {
+            case .slide: self = .slide
+            case .grow: self = shelf.drawsPlate ? .grow : .fade
+            }
+        }
+    }
+
     /// When the mark's plate and dots fade, and for how long, as
     /// their shelf reveals over them (`showing` false) or retracts
-    /// (`showing`): out under a growing plate; back over the end of
-    /// a morph's retract so it lands with it; a cross-fade with
-    /// the shelf otherwise.
+    /// (`showing`): out as the motion starts — under a growing
+    /// plate, half its growth — and back over the end of the
+    /// retract so it lands with it; a cross-fade with the shelf
+    /// where it only fades.
     static func markFade(
         showing: Bool,
-        morphs: Bool,
+        reveal: RevealKind,
         reduceMotion: Bool
     ) -> (delay: TimeInterval, length: TimeInterval) {
-        guard morphs, !reduceMotion else { return (0, revealFade) }
-        guard showing else { return (0, plateGrow / 2) }
-        return (itemsFadeOut + plateShrink - markReturn, markReturn)
+        guard !reduceMotion else { return (0, revealFade) }
+        switch reveal {
+        case .fade: return (0, revealFade)
+        case .slide:
+            guard showing else { return (0, revealFade) }
+            return (revealSlide - markReturn, markReturn)
+        case .grow:
+            guard showing else { return (0, ShelfGrow.plateGrow / 2) }
+            return (ShelfGrow.retractLength - markReturn, markReturn)
+        }
     }
 
     /// Fades the mark's `body` in (`showing`) or out as its shelf
     /// retracts or reveals; a fade already playing continues from
     /// where it stands.
     @MainActor
-    static func fadeMark(_ body: NSView, showing: Bool, morphs: Bool) {
+    static func fadeMark(
+        _ body: NSView,
+        showing: Bool,
+        reveal: RevealKind
+    ) {
         let timing = markFade(
             showing: showing,
-            morphs: morphs,
+            reveal: reveal,
             reduceMotion: isReduced
         )
         body.wantsLayer = true
@@ -53,17 +79,20 @@ extension BarMotion {
     /// `ShelfIndicatorSpec.hoverGrowth` on every side while
     /// hovered and along the edge by `widen`, a label's room —
     /// never under Reduce Motion, which keeps the rim alone, save
-    /// for a mark carrying a label: the pill is content rather than
-    /// motion and needs the grown plate's depth as well as its
-    /// length, so the plate takes its whole hovered frame at once.
+    /// for a mark carrying a label (`labelled`): the pill is content
+    /// rather than motion and needs the grown plate's depth as well
+    /// as its length, so the plate takes its whole hovered frame at
+    /// once — a label narrower than the dot included, which widens
+    /// nothing.
     static func hoverPlate(
         mark: CGRect,
         widen: CGFloat = 0,
+        labelled: Bool = false,
         horizontal: Bool = true,
         hovered: Bool,
         reduceMotion: Bool
     ) -> CGRect {
-        guard hovered, !reduceMotion || widen > 0 else { return mark }
+        guard hovered, !reduceMotion || labelled else { return mark }
         let growth = ShelfIndicatorSpec.hoverGrowth
         let along = growth + widen / 2
         return horizontal
@@ -82,6 +111,7 @@ extension BarMotion {
         rim: NSView,
         mark: CGRect,
         widen: CGFloat = 0,
+        labelled: Bool = false,
         horizontal: Bool = true,
         hovered: Bool,
         animated: Bool
@@ -89,6 +119,7 @@ extension BarMotion {
         let frame = hoverPlate(
             mark: mark,
             widen: widen,
+            labelled: labelled,
             horizontal: horizontal,
             hovered: hovered,
             reduceMotion: isReduced
@@ -96,6 +127,7 @@ extension BarMotion {
         rim.frame = hoverPlate(
             mark: mark,
             widen: widen,
+            labelled: labelled,
             horizontal: horizontal,
             hovered: true,
             reduceMotion: isReduced
