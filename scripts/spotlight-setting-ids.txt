@@ -96,6 +96,7 @@ config.spaceHistory
 config.tileRules
 keybinding.grow_height
 keybinding.grow_width
+keybinding.maximize
 keybinding.open_settings
 keybinding.reset_sizes
 keybinding.show_shortcuts
