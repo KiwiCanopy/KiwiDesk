@@ -64,14 +64,19 @@ struct SwapWindowGuardTests {
         #expect(core.focusedWindowID == mine)
         core.execute("swap_here", args: [.number(900_101)])
         #expect(core.state.workspaces.space(of: mine) == Self.two)
-        #expect(core.moveLatch.isLatched(mine))
-        #expect(core.moveLatch.isLatched(WindowID(900_101)))
+        // The latch ages on the wall clock, so ask at a fixed past
+        // instant: only a stamp's presence answers, never how long
+        // the runner took to get here (tests.md, #1456).
+        let past = Date.distantPast
+        #expect(core.moveLatch.isLatched(mine, at: past))
+        #expect(core.moveLatch.isLatched(WindowID(900_101), at: past))
         #expect(core.deferred.isScheduled(.moveSettle))
     }
 
     /// A trade bringing a window into an overflowing scrolling
     /// row arms the restore after its retile; one between two
-    /// Spaces nobody shows arms nothing.
+    /// Spaces nobody shows arms nothing. A host with no main
+    /// screen returns early, `ZOrderScheduleTests`' convention.
     @Test("a trade into an overflowing row arms a restore")
     func tradeArmsTheRestore() throws {
         let core = makeCore(active: 5)

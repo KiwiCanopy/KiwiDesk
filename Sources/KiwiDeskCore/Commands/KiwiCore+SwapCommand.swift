@@ -121,9 +121,10 @@ extension KiwiCore {
             )
             // The window a trade brings into the active Space sits
             // in an overflow pile at the slot it took, unstacked
-            // (#150, #193). Both arms read the active Space alone,
-            // so a trade into a Space another screen shows owes
-            // its pile nothing until that Space is active.
+            // (#150, #193); the gate keeps a trade between Spaces
+            // nobody is on from restacking the active row. The
+            // accepted cost: a trade into a stack cascade, or into
+            // a Space another screen shows, arms no restore.
             let active = state.workspaces.activeSpace
             if active == home || active == away {
                 scheduleScrollingZOrderRestoreIfOverflowing()

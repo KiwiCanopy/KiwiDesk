@@ -76,6 +76,9 @@ struct PendingSpaceSeamTests {
             "fileTrade(",
             ["KiwiCore+MoveWindow.swift", "KiwiCore+MoveWindow.swift"]
         ),
+        // `moveWindow` asks no sticky gate for a trade's partner:
+        // its one `trading:` caller does, ahead of the move (#445).
+        ("trading:", ["KiwiCore+SwapCommand.swift"]),
     ]
 
     /// The helper's callers are counted above; nothing else pins
