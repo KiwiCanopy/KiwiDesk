@@ -12,7 +12,13 @@ enum CLIPathArguments {
         KiwiCore.restoreSetupCommand,
     ]
 
-    /// `arguments` with the first non-flag one made absolute
+    /// The flags those verbs know; any other argument is the path.
+    static let flags: Set<String> = [
+        KiwiCore.includeInitLuaFlag,
+        KiwiCore.initLuaFlag,
+    ]
+
+    /// `arguments` with the first one that is no flag made absolute
     /// against `directory`, for a verb that takes a path.
     static func resolved(
         _ arguments: [String],
@@ -21,7 +27,7 @@ enum CLIPathArguments {
     ) -> [String] {
         guard verbs.contains(command),
             let index = arguments.firstIndex(where: {
-                !$0.hasPrefix("--")
+                !flags.contains($0)
             })
         else { return arguments }
         var resolved = arguments

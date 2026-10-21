@@ -85,7 +85,8 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 35 = the shelf's glide became its expand (owner ruling,
     /// 2026-10-21), in a bundle's `[Profile]`, its `config`'s
     /// shared look and its looks alike.
-    /// 36 = `init.lua` carried on request (#2517).
+    /// 36 = `init.lua` carried on request (#2517): an older build
+    /// would drop a carried one silently.
     public static let currentFormat = 36
 
     public let format: Int
@@ -161,11 +162,15 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         }
     }
 
-    /// True when bundle carries nothing a restore could write.
-    public var isEmpty: Bool {
-        config == nil && profiles.isEmpty && palettes.isEmpty
-            && (looks ?? []).isEmpty && initLua == nil
+    /// Whether it carries settings, profiles, palettes or looks —
+    /// what a restore leaving `init.lua` alone writes.
+    public var carriesSetup: Bool {
+        config != nil || !profiles.isEmpty || !palettes.isEmpty
+            || !(looks ?? []).isEmpty
     }
+
+    /// True when bundle carries nothing a restore could write.
+    public var isEmpty: Bool { !carriesSetup && initLua == nil }
 }
 
 /// Structural outcome of a backup restore
@@ -184,6 +189,16 @@ public struct RestoreOutcome: Equatable, Sendable {
         skippedProfiles.isEmpty && refusedPalettes == 0
             && refusedLooks == 0
     }
+}
+
+/// What an export did with `init.lua` (#2517).
+public enum InitLuaExport: String, Equatable, Sendable {
+    /// The export was not asked to carry it.
+    case notAsked = "not_asked"
+    /// Carried.
+    case included
+    /// Asked, and this Mac has none.
+    case none
 }
 
 /// What a restore did with `init.lua` (#2517).

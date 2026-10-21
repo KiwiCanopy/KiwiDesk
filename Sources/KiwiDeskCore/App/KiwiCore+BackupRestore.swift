@@ -49,25 +49,27 @@ extension KiwiCore {
         // Copy rather than copying the backup out (#2324).
         try pausingSync { () throws(SetupBundleError) in
             defer { forgetSyncAgreement() }
+            let incoming = replacingInitLua ? bundle.initLua : nil
             return try replaceSetup(
                 with: bundle,
                 trash: trash,
-                take: nil,
-                initLua: replacingInitLua ? bundle.initLua : nil
+                fromFolder: false,
+                initLua: incoming.map { .replace(Data($0.utf8)) }
+                    ?? .keep
             )
         }
     }
 
-    /// `restoreSetup`, or with `take` a sync folder's setup
-    /// (#2324): every travelling artifact and `init.lua` replaced,
-    /// absent ones by nothing, and this Mac's bindings kept.
-    /// `initLua` is the backup's `init.lua` a restore was asked to
-    /// write (#2517), nil to leave this Mac's.
+    /// `restoreSetup`, or `fromFolder` a sync folder's setup
+    /// (#2324): every travelling artifact replaced, absent ones by
+    /// nothing, and this Mac's bindings kept. `initLua` says what
+    /// becomes of `init.lua`, which a take always replaces and a
+    /// restore only when asked (#2517).
     func replaceSetup(
         with bundle: SetupBundle,
         trash: (URL) throws -> Void,
-        take: SyncTake?,
-        initLua: String?
+        fromFolder: Bool,
+        initLua: IncomingInitLua
     ) throws(SetupBundleError) -> RestoreOutcome {
         // **Refuse before touching anything** when this Mac's
         // config is Lua-owned and the backup carries settings.
@@ -80,12 +82,12 @@ extension KiwiCore {
         // DESTINATION, not of the file: the same backup restores
         // cleanly onto a GUI-managed Mac, so it must not be
         // refused at read time.
-        // A take replaces init.lua too, so its ownership is the
-        // folder's, judged by `SyncTake.guiManaged` below.
-        if take == nil,
+        // A replace of init.lua is judged on the incoming file,
+        // below, since the replace lands that setup whole.
+        if !fromFolder,
             let refusal = restoreRefusal(
                 of: bundle,
-                replacingInitLua: initLua != nil
+                replacingInitLua: initLua.replaces
             )
         {
             throw refusal
@@ -119,7 +121,7 @@ extension KiwiCore {
         let replacing = ConfigArtifact.allCases.filter {
             $0.travelsInABackup
                 && (bundle.replaces($0)
-                    || (take != nil && $0 == .guiConfig))
+                    || (fromFolder && $0 == .guiConfig))
         }
         guard
             discardArtifacts(
@@ -132,14 +134,13 @@ extension KiwiCore {
                 name: profiles.directory.lastPathComponent
             )
         }
-        if take != nil || initLua != nil {
+        if initLua.replaces {
             do {
                 try discard(configURL, trash)
             } catch {
                 throw .couldNotWrite(name: SyncFolder.initLua)
             }
         }
-        if let initLua { try writeRestoredInitLua(initLua) }
 
         // BEFORE the write (#1230): every sidecar write stamps
         // the live Desktop→Space memory in, so discarding after
@@ -155,21 +156,22 @@ extension KiwiCore {
         } else {
             forgetAppWideCaptures()
         }
-        // A take has already discarded init.lua, so a failed write
-        // still copies it and reloads before the failure is thrown:
-        // the core never runs the old setup over new files.
+        // A replace of init.lua has already discarded it, so a
+        // failed write still writes it and reloads before the
+        // failure is thrown: the core never runs the old setup
+        // over new files.
         var failed: SetupBundleError?
         var outcome = RestoreOutcome(skippedProfiles: [], refusedPalettes: 0)
         do {
             outcome = try writeIncoming(
                 bundle,
-                keepingBindings: take != nil
+                keepingBindings: fromFolder
             )
         } catch {
-            guard take != nil else { throw error }
+            guard initLua.replaces else { throw error }
             failed = error
         }
-        if take.map(copyInitLua) == false, failed == nil {
+        if !writeIncomingInitLua(initLua), failed == nil {
             failed = .couldNotWrite(name: SyncFolder.initLua)
         }
 
@@ -206,9 +208,7 @@ extension KiwiCore {
         // crossing inside `loadConfig` cannot see them.
         settleSharedSets()
         loadConfig()
-        if let config = bundle.config,
-            take?.guiManaged ?? restoredGuiManaged(initLua) ?? true
-        {
+        if let config = bundle.config, initLua.leavesSettingsToGui {
             applyProfileScopedState(from: config)
         }
 
@@ -239,7 +239,7 @@ extension KiwiCore {
         // resolution order).
         outcome.initLua = Self.initLuaRestore(
             of: bundle,
-            replaced: initLua != nil
+            replaced: initLua.replaces
         )
         handleMonitorChange()
         // Explicit apply, so it forces (§5): the un-forced retile

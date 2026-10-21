@@ -166,4 +166,92 @@ struct BackupInitLuaTests {
         let core = try core(initLua: Self.foreignLua)
         #expect(!core.restoreChoices(for: bundle(initLua: nil)).any)
     }
+
+    /// A restore taking an `init.lua` that owns the settings itself
+    /// writes the backup's `gui.json` but does not apply it.
+    @Test(
+        "an incoming init.lua decides whether the settings apply",
+        arguments: [true, false]
+    )
+    func incomingOwnershipGatesTheApply(guiOwned: Bool) throws {
+        let core = try core(initLua: nil)
+        var config = GuiConfig()
+        config.settings.resizeStep = 77
+        let carried = SetupBundle(
+            writtenBy: "test",
+            config: config,
+            profiles: [],
+            palettes: [],
+            initLua: guiOwned ? Self.guiLua : Self.foreignLua
+        )
+        try core.restoreSetup(
+            from: carried,
+            replacingInitLua: true,
+            trash: { try FileManager.default.removeItem(at: $0) }
+        )
+        #expect((core.tiler.settings.resizeStep == 77) == guiOwned)
+    }
+
+    /// Once init.lua is replaced, a failed write still reloads, so
+    /// the core never runs the old setup over the new files.
+    @Test("a failed write after the replace still reloads")
+    func failedWriteStillReloads() throws {
+        let core = try core(initLua: Self.guiLua)
+        let broken = "this is not lua (\n"
+        let carried = SetupBundle(
+            writtenBy: "test",
+            config: nil,
+            profiles: [
+                Profile(
+                    name: "../outside",
+                    monitorSets: [],
+                    spaces: [SpaceID("1")],
+                    spaceModes: [:],
+                    settings: TilingSettings()
+                )
+            ],
+            palettes: [],
+            initLua: broken
+        )
+        #expect(core.configIssues.isEmpty)
+        #expect(
+            throws: SetupBundleError.self,
+            performing: {
+                try core.restoreSetup(
+                    from: carried,
+                    replacingInitLua: true,
+                    trash: { try FileManager.default.removeItem(at: $0) }
+                )
+            }
+        )
+        #expect(lua(of: core) == broken)
+        #expect(!core.configIssues.isEmpty)
+    }
+
+    /// A backup with nothing but init.lua restores only with it: a
+    /// plain restore would empty this Mac and write nothing.
+    @Test("an init.lua-only backup offers no plain restore")
+    func initLuaOnlyBackup() throws {
+        let core = try core(initLua: nil)
+        let only = SetupBundle(
+            writtenBy: "test",
+            config: nil,
+            profiles: [],
+            palettes: [],
+            initLua: Self.guiLua
+        )
+        #expect(
+            core.restoreChoices(for: only)
+                == RestoreChoices(plain: false, withInitLua: true)
+        )
+        #expect(
+            throws: SetupBundleError.empty,
+            performing: {
+                try core.restoreSetup(
+                    from: only,
+                    trash: { try FileManager.default.removeItem(at: $0) }
+                )
+            }
+        )
+    }
 }

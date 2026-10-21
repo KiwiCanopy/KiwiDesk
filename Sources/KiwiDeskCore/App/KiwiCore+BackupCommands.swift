@@ -22,18 +22,16 @@ extension KiwiCore {
         guard case .success(let (url, include)) = parsed else {
             return parsed.refusal
         }
+        let carried: InitLuaExport
         do {
-            try writeBackup(to: url, includingInitLua: include)
+            carried = try writeBackup(to: url, includingInitLua: include)
         } catch {
             return .fail(error.cliMessage)
         }
-        let carried =
-            include
-            ? (configURLExists ? "included" : "none") : "not_asked"
         return .ok(
             .object([
                 "path": .string(url.path),
-                "init_lua": .string(carried),
+                "init_lua": .string(carried.rawValue),
             ])
         )
     }
@@ -73,10 +71,6 @@ extension KiwiCore {
             if case .couldNotWrite = error { onSetupRestored() }
             return .fail(error.cliMessage)
         }
-    }
-
-    private var configURLExists: Bool {
-        FileManager.default.fileExists(atPath: configURL.path)
     }
 
     /// The path and the opt-in flag, in either order. A relative

@@ -166,10 +166,11 @@ extension KiwiCore {
     /// re-encoding the struct does not help either, because
     /// `JSONEncoder` omits a nil Optional. Both weaker versions
     /// were written and both were proven blind before this one.
+    @discardableResult
     public func writeBackup(
         to url: URL,
         includingInitLua: Bool = false
-    ) throws(SetupBundleError) {
+    ) throws(SetupBundleError) -> InitLuaExport {
         // A sidecar that exists but will not decode is the one
         // case where a silent omission is worst: the user is
         // making a backup because they are about to need it.
@@ -186,9 +187,8 @@ extension KiwiCore {
         if (try? lookLibrary.libraryLooks()) == nil {
             throw .unreadableLooks
         }
-        if includingInitLua { _ = try initLuaForBackup() }
-        guard let data = encodedBackup(includingInitLua: includingInitLua)
-        else {
+        let carried = includingInitLua ? try initLuaForBackup() : nil
+        guard let data = encodedBackup(initLua: carried) else {
             throw .couldNotWrite(name: url.lastPathComponent)
         }
         do {
@@ -197,10 +197,12 @@ extension KiwiCore {
             onLog("backup export failed: \(error)")
             throw .couldNotWrite(name: url.lastPathComponent)
         }
+        guard includingInitLua else { return .notAsked }
+        return carried == nil ? .none : .included
     }
 
     /// The bundle as it is written: header, then payload.
-    func encodedBackup(includingInitLua: Bool = false) -> Data? {
+    func encodedBackup(initLua: String? = nil) -> Data? {
         /// Just the two scalars, so their JSON literals — and the
         /// string's escaping — come from the encoder rather than
         /// from hand-written quoting.
@@ -209,8 +211,13 @@ extension KiwiCore {
             let writtenBy: String
         }
         guard
-            let bundle = try? exportSetup(
-                includingInitLua: includingInitLua
+            let bundle = try? Self.setupBundle(
+                gui: guiConfigStore,
+                profiles: profiles,
+                palettes: paletteLibrary,
+                looks: lookLibrary,
+                bindings: true,
+                initLua: initLua
             )
         else {
             return nil

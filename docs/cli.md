@@ -443,14 +443,17 @@ for F18 keeps hearing the key. CLI only — Lua cannot call it.
 
 :::unreleased
 `export_setup <path>` writes the same backup file as **Export…** in
-Settings, and `restore_setup <path>` does what **Restore…** does:
-the same refusals, the replaced files in the Trash, and the reload
+Settings, replacing a file already at that path, and `restore_setup
+<path>` does what **Restore…** does: the same refusals, the replaced
+files in the Trash, the reload, and unsaved edits in an open
+Settings window dropped
 ([Backups](user-guide.md#moving-to-another-mac-backups)).
 `init.lua` is opt-in on both ends: `--include-init-lua` carries it,
-and `--init-lua` replaces this Mac's with the backup's. A relative
-path is resolved against your current directory. CLI only — Lua
-cannot call them — and from `kiwidesk mcp` they go through
-`run_destructive`.
+and `--init-lua` replaces this Mac's with the backup's where the
+backup carries one; the reply's `init_lua` says what happened. The
+`kiwidesk` CLI resolves a relative path against your current
+directory; any other caller passes an absolute one. CLI only — Lua
+cannot call them.
 :::
 
 `get_config_status` returns the Config Issues and the sync

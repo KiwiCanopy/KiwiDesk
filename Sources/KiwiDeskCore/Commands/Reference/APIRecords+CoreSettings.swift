@@ -77,13 +77,13 @@ extension APIReference {
         ),
         KiwiCore.exportSetupCommand: APIRecord(
             "Writes a backup file, as Settings' Export… does; "
-                + "--include-init-lua carries init.lua too.",
+                + KiwiCore.includeInitLuaFlag + " carries init.lua too.",
             .text("path"),
             .text("flag", optional: true)
         ),
         KiwiCore.restoreSetupCommand: APIRecord(
             "Restores a backup file, as Settings' Restore… does; "
-                + "--init-lua also takes the backup's init.lua.",
+                + KiwiCore.initLuaFlag + " also takes the backup's init.lua.",
             .text("path"),
             .text("flag", optional: true)
         ),
