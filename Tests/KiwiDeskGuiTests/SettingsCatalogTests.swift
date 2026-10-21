@@ -152,8 +152,8 @@ struct SettingsCatalogTests {
         // 178: the Show & hide card over Shortcuts' three groups.
         // 198 since #2389: Colors & glass and its twenty-five
         // children, for the Liquid Glass card and the old page's
-        // four group titles and its scene.
-        #expect(allEntries.count == 198)
+        // four group titles and its scene. 199 #2497: Reveal.
+        #expect(allEntries.count == 199)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

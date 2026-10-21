@@ -193,8 +193,7 @@ final class ShelfRevealer {
                 return
             }
             // The reveal ends the hover in its own pass: a redraw
-            // of the plate ahead of it would shrink the plate the
-            // shelf grows out of, a full bar render earlier.
+            // ahead of it would cost a full bar render more.
             self.set(.hover, for: key)
         }
     }

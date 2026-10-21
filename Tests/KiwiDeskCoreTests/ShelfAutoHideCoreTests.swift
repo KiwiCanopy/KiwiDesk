@@ -229,4 +229,40 @@ struct ShelfAutoHideCoreTests {
         )
         #expect(panel.ignoresMouseEvents)
     }
+
+    /// A pinned reveal draws a hugging plate; the panel covers it
+    /// alone, so a click beside it reaches the window (#2497).
+    @Test(
+        "A revealed shelf's panel takes its plate, not its strip",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func revealedPanelTakesThePlate() throws {
+        let (core, display) = try #require(makeCore(.auto))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.settings.kiwishelf.backgroundStyle = .plain
+        core.tiler.settings.kiwishelf.backgroundFit = .hug
+        #expect(core.execute("space_bar.toggle_reveal", args: []).isSuccess)
+        let overlay = try #require(
+            core.shelves.overlayForTesting(display, edge: .top)
+        )
+        let panel = try #require(overlay.panel)
+        let drawn = try #require(overlay.drawn)
+        let plate = try #require(
+            ShelfOverlay.plateFrame(
+                sections: drawn.sections,
+                strip: drawn.strip,
+                horizontal: true,
+                shelf: drawn.shelf
+            )
+        )
+        try #require(plate.width < drawn.strip.width, "the plate hugs")
+        #expect(
+            panel.frame
+                == GeometryUtils.flip(
+                    plate.offsetBy(dx: drawn.strip.minX, dy: drawn.strip.minY)
+                        .integral,
+                    primaryHeight: GeometryUtils.primaryHeight
+                )
+        )
+    }
 }

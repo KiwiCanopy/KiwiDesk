@@ -24,8 +24,8 @@ extension KiwiCore {
     struct HidingShelves {
         var targets: [ShelfRevealer.Key: ShelfRevealer.Target] = [:]
         var indicators: [ShelfRevealer.Key: ShelfIndicatorSpec] = [:]
-        /// The mark each hiding shelf's reveal grows out of: its
-        /// shown bar's, else its first mark's. AX coordinates.
+        /// The mark each hiding shelf's grow reveal grows out of:
+        /// its shown bar's, else its first mark's. AX coordinates.
         var marks: [ShelfManager.Key: CGRect] = [:]
         /// Each Space mark's first dot shown, carried from the last
         /// pass so the dots slide only when they must
@@ -156,7 +156,7 @@ extension KiwiCore {
                     near: near,
                     section: section(bar)
                 )
-                // The reveal grows out of the leading shown bar's
+                // A grow reveal grows out of the leading shown bar's
                 // mark, else the leading mark.
                 if marks[key] == nil
                     || (shown(bar)
@@ -175,7 +175,7 @@ extension KiwiCore {
                     highlight: shelf.highlightColor,
                     shown: shown(bar),
                     hovered: reveal.arming.contains(barKey(bar)),
-                    morphs: shelf.drawsPlate,
+                    reveal: BarMotion.RevealKind(shelf),
                     rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
                     sheen: settings.borderStyle.sheen,
                     yields: reveal.yields(barKey(bar)),
@@ -255,9 +255,15 @@ extension KiwiCore {
 
     /// The show/hide action on one bar.
     func toggleBarReveal(_ key: ShelfRevealer.Key) {
+        let was = shelves.reveal.reveal(of: key)
         shelves.reveal.toggle(
             key,
             duration: tiler.settings.kiwishelf.revealDuration
+        )
+        // One line per toggle: a reveal leaves no other trace.
+        onLog(
+            "shelf reveal: \(key.bar) \(was) → "
+                + "\(shelves.reveal.reveal(of: key))"
         )
     }
 

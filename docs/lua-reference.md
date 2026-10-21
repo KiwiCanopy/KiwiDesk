@@ -2780,6 +2780,26 @@ kiwishelf.set_reveal_duration(5)
 ```
 :::
 
+:::unreleased
+### kiwishelf.set_reveal_style
+
+**Expects:** `"slide"` or `"grow"` (default `"slide"`).
+
+**Does:** how an `"auto"` or `"hidden"` bar comes onto an edge
+that shows nothing else. `"slide"` brings the whole bar in from
+the screen's edge — out from under the menu bar where it shows —
+and back out; `"grow"` grows the bar out of its mark — from the
+screen edge where it has none — and back into it, and fades on a
+`"boxed"` shelf. A bar shown beside an `"always"` bar joins it
+instead, either way. With Reduce Motion on, both fade in place.
+
+**Example:**
+
+```lua
+kiwishelf.set_reveal_style("grow")
+```
+:::
+
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
@@ -3175,14 +3195,17 @@ space_bar.set_reserve(false)
   item and, on a top or bottom edge, shows the current Space's
   icon, number or first two letters in its dot. Resting a moment in the dots' band — 64
   points along the edge, centred on the dots, from a few points
-  past the shelf to where the windows start — grows the bar out
-  of the dots, at once when the pointer pushes against the
-  screen's edge inside that band. It shrinks back 0.5 s after the
+  past the shelf to where the windows start — brings the bar in
+  as [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style)
+  says, as the dots fade; at once when the pointer pushes against
+  the screen's edge inside that band. It goes back the same way
+  0.5 s after the
   pointer leaves the bar and its band, and stays while a bar menu
   or a hover peek it opened is up.
 - `"hidden"` draws nothing and reserves nothing; only
-  [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it.
-  The menu bar then shows the Space each screen is on.
+  [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it,
+  in the same reveal style. The menu bar then shows the Space each
+  screen is on.
 
 A shown `auto` or `hidden` bar draws over the windows, so a
 reveal moves no window; setting the value moves the windows at

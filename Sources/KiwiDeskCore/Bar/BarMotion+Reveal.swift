@@ -1,53 +1,44 @@
 import AppKit
 import QuartzCore
 
-/// `BarMotion`'s reveal half (#761): a hiding shelf's plate grows
-/// out of its hidden mark and back into it, its items fading on
-/// it, and it cross-fades in place under Reduce Motion or where it
-/// draws no plate. The same one home — `BarMotionSeamTests`
-/// censuses this file.
+/// `BarMotion`'s reveal half (#761, #2497): a revealed shelf slides
+/// in from its screen side whole, its content already laid out, or
+/// — the user's `reveal_style` — grows its plate out of the mark
+/// (`ShelfGrow`); either cross-fades in place under Reduce
+/// Motion. The same one home — `BarMotionSeamTests` censuses this
+/// file.
 extension BarMotion {
     /// How a reveal or a retract plays.
     enum RevealMotion: Equatable {
-        /// The plate grows out of the hidden mark — the mark its
-        /// upper end — and the items fade up on it, or fade out
-        /// before it shrinks back into the mark.
-        case morph(Morph)
-        /// It cross-fades in place: Reduce Motion drops the
-        /// travel, and a Boxed shelf has no plate to grow.
+        /// The content travels from `offset` (its own coordinates)
+        /// to its rest, or back, over `length`.
+        case slide(offset: CGVector, length: TimeInterval)
+        /// The plate grows out of the mark (`ShelfGrow`).
+        case morph(ShelfGrow.Morph)
+        /// It cross-fades in place: Reduce Motion drops the travel,
+        /// and a grow has no plate where the shelf draws none.
         case fade(TimeInterval)
     }
 
-    /// A morph's two channels, timed from the motion's start: a
-    /// clip from `mark` to `plate` (the content layer's own
-    /// coordinates) and the items' fade.
-    struct Morph: Equatable {
-        let entering: Bool
-        let mark: CGRect
-        let plate: CGRect
-        let markRadius: CGFloat
-        let plateRadius: CGFloat
-        let plateStart: TimeInterval
-        let plateLength: TimeInterval
-        let itemsStart: TimeInterval
-        let itemsLength: TimeInterval
-        /// Until both channels have landed.
-        let length: TimeInterval
+    /// A reveal's inputs, whichever kind plays it: the slide's
+    /// `offset`, the grow's mark `origin` and `plate`, all in the
+    /// content's coordinates.
+    struct RevealPath: Equatable {
+        var kind: RevealKind
+        var offset: CGVector = .zero
+        var origin: CGRect = .zero
+        var plate: CGRect?
+        var plateRadius: CGFloat = 0
     }
 
-    /// The morph's timings (ruling on #761): the plate grows over
-    /// `plateGrow` while the items fade up over `itemsFadeIn` from
-    /// `itemsDelay`; a retract fades the items over `itemsFadeOut`
-    /// and then shrinks the plate over `plateShrink`.
-    static let plateGrow: TimeInterval = 0.24
-    static let itemsDelay: TimeInterval = 0.08
-    static let itemsFadeIn: TimeInterval = 0.16
-    static let itemsFadeOut: TimeInterval = 0.08
-    static let plateShrink: TimeInterval = 0.18
+    /// The slide's length and curve (owner ruling, #2497): the
+    /// prototype's numbers, fixed like the mark's own timings.
+    static let revealSlide: TimeInterval = 0.28
+    static let revealCurve: (Float, Float, Float, Float) = (0.3, 0.7, 0.2, 1)
     /// The cross-fade's length, as the peek's.
     static let revealFade: TimeInterval = 0.1
-    /// How long the mark fades back at the end of a morph's
-    /// retract, landing with it.
+    /// How long the mark fades back at the end of a retract,
+    /// landing with it.
     static let markReturn: TimeInterval = 0.06
     /// How long a reveal stands at its start after the commit that
     /// orders the panel in: a freshly ordered window reaches the
@@ -55,65 +46,103 @@ extension BarMotion {
     /// started there loses the travel those frames carry.
     static let revealLead: TimeInterval = 1.0 / 30
 
-    /// The motion for a reveal (`entering`) or a retract out of or
-    /// into the mark at `origin` — taken at its hovered size, the
-    /// plate a reveal out of the hover leaves — onto `plate`, the
-    /// plate's frame, nil where the shelf draws none.
+    /// Where a shelf on `edge` starts its slide, in its flipped
+    /// content coordinates: past its screen side by its `depth`
+    /// and the `gap` to the usable area's edge, so it starts
+    /// wholly clipped and comes out from under the menu bar.
+    static func revealOffset(
+        edge: AppBarEdge,
+        depth: CGFloat,
+        gap: CGFloat
+    ) -> CGVector {
+        let travel = depth + max(gap, 0)
+        switch edge {
+        case .top: return CGVector(dx: 0, dy: -travel)
+        case .bottom: return CGVector(dx: 0, dy: travel)
+        case .left: return CGVector(dx: -travel, dy: 0)
+        case .right: return CGVector(dx: travel, dy: 0)
+        }
+    }
+
+    /// The motion for a reveal (`entering`) or a retract along
+    /// `path`.
     static func revealMotion(
         reduceMotion: Bool,
         entering: Bool,
-        origin: CGRect,
-        plate: CGRect?,
-        plateRadius: CGFloat
+        path: RevealPath
     ) -> RevealMotion {
-        guard !reduceMotion, let plate else { return .fade(revealFade) }
-        let mark = origin.insetBy(
-            dx: -ShelfIndicatorSpec.hoverGrowth,
-            dy: -ShelfIndicatorSpec.hoverGrowth
-        )
-        let plateStart = entering ? 0 : itemsFadeOut
-        let plateLength = entering ? plateGrow : plateShrink
-        let itemsStart = entering ? itemsDelay : 0
-        let itemsLength = entering ? itemsFadeIn : itemsFadeOut
-        return .morph(
-            Morph(
-                entering: entering,
-                mark: mark,
-                plate: plate,
-                markRadius: min(mark.width, mark.height) / 2,
-                plateRadius: plateRadius,
-                plateStart: plateStart,
-                plateLength: plateLength,
-                itemsStart: itemsStart,
-                itemsLength: itemsLength,
-                length: max(
-                    plateStart + plateLength,
-                    itemsStart + itemsLength
+        guard !reduceMotion else { return .fade(revealFade) }
+        switch path.kind {
+        case .slide:
+            guard path.offset != .zero else { return .fade(revealFade) }
+            return .slide(offset: path.offset, length: revealSlide)
+        case .grow:
+            guard let plate = path.plate else { return .fade(revealFade) }
+            return .morph(
+                ShelfGrow.morph(
+                    entering: entering,
+                    // Out of the mark as its hover leaves it.
+                    mark: hoverPlate(
+                        mark: path.origin,
+                        hovered: true,
+                        reduceMotion: false
+                    ),
+                    plate: plate,
+                    plateRadius: path.plateRadius
                 )
             )
-        )
+        case .fade:
+            return .fade(revealFade)
+        }
+    }
+
+    /// The motion a reveal along `path` plays now — what the
+    /// panel's room is opened for before it starts.
+    @MainActor
+    static func resolvedReveal(
+        _ path: RevealPath,
+        entering: Bool
+    ) -> RevealMotion {
+        revealMotion(reduceMotion: isReduced, entering: entering, path: path)
     }
 
     /// The reveal's animation key, on the content and the items.
     static let revealKey = "kiwi.reveal"
 
+    /// The slide `view` is in, as a position shift in its
+    /// superlayer, nil where none plays. Read it before the view's
+    /// frame moves in the same pass: the presentation shows the
+    /// last commit, the model the new frame.
+    @MainActor
+    static func revealShift(of view: NSView) -> CGPoint? {
+        guard let layer = view.layer,
+            layer.animationKeys()?.contains(revealKey) == true,
+            let shown = layer.presentation()
+        else { return nil }
+        return CGPoint(
+            x: shown.position.x - layer.position.x,
+            y: shown.position.y - layer.position.y
+        )
+    }
+
     /// Plays a reveal (`entering`) or a retract on `view`, the
-    /// panel's content, with `items` the section strip, and
-    /// returns its length; the caller lands it through its own
-    /// `afterReveal` seam. A `held` start stands still until a
-    /// later call replaces it — the pass that orders the panel in
-    /// holds it — and a `lead` start waits `revealLead` first. The
-    /// plate grows as a clip of the content's own layer, so no
-    /// glass moves or fades; the items fade as one ancestor. A
-    /// motion already playing continues from where it stands.
+    /// panel's content, with `items` the section strip a grow fades,
+    /// and returns its length; the caller lands it through its own
+    /// `afterReveal` seam. A `held` start
+    /// stands still until a later call replaces it — the pass that
+    /// orders the panel in holds it — and a `lead` start waits
+    /// `revealLead` first. The slide is ADDITIVE on the layer's
+    /// position, so a resize of the panel's room under it moves
+    /// nothing; a slide already playing continues from `from`
+    /// (`revealShift`), a fade from where it stands.
     @MainActor
     @discardableResult
     static func playReveal(
         _ view: NSView,
         items: NSView,
-        origin: CGRect,
-        plate: (frame: CGRect, radius: CGFloat)?,
+        path: RevealPath,
         entering: Bool,
+        from: CGPoint? = nil,
         held: Bool = false,
         lead: Bool = false
     ) -> TimeInterval {
@@ -125,16 +154,11 @@ extension BarMotion {
         let motion = revealMotion(
             reduceMotion: isReduced,
             entering: entering,
-            origin: origin,
-            plate: plate?.frame,
-            plateRadius: plate?.radius ?? 0
+            path: path
         )
-        let playing = { (layer: CALayer) -> CALayer? in
+        let current =
             layer.animationKeys()?.contains(revealKey) == true
-                ? layer.presentation() : nil
-        }
-        let current = playing(layer)
-        let shown = playing(strip)?.opacity
+            ? layer.presentation() : nil
         let start = held ? 0 : CACurrentMediaTime() + (lead ? revealLead : 0)
         let timed = { (animation: CAAnimation, at: TimeInterval) in
             animation.fillMode = .both
@@ -145,6 +169,7 @@ extension BarMotion {
                 animation.beginTime = start + at
             }
         }
+        let tail = lead ? revealLead : 0
         switch motion {
         case .fade(let span):
             strip.removeAnimation(forKey: revealKey)
@@ -154,8 +179,11 @@ extension BarMotion {
             fade.duration = span
             timed(fade, 0)
             layer.add(fade, forKey: revealKey)
-            return held ? 0 : span + (lead ? revealLead : 0)
+            return held ? 0 : span + tail
         case .morph(let morph):
+            let shown =
+                strip.animationKeys()?.contains(revealKey) == true
+                ? strip.presentation()?.opacity : nil
             // The clip is the layer's own bounds: its origin keeps
             // the content where it rests while its frame — the
             // position — moves to the clip's place.
@@ -196,7 +224,41 @@ extension BarMotion {
             timed(fade, morph.itemsStart)
             layer.add(clip, forKey: revealKey)
             strip.add(fade, forKey: revealKey)
-            return held ? 0 : morph.length + (lead ? revealLead : 0)
+            return held ? 0 : morph.length + tail
+        case .slide(let offset, let span):
+            strip.removeAnimation(forKey: revealKey)
+            // The offset in the superlayer's coordinates, whichever
+            // way each layer is flipped.
+            let rest = layer.convert(layer.bounds, to: layer.superlayer)
+            let away = layer.convert(
+                layer.bounds.offsetBy(dx: offset.dx, dy: offset.dy),
+                to: layer.superlayer
+            )
+            let shift = CGPoint(
+                x: away.minX - rest.minX,
+                y: away.minY - rest.minY
+            )
+            let slide = CABasicAnimation(keyPath: "position")
+            slide.isAdditive = true
+            slide.fromValue = NSValue(
+                point: from ?? (entering ? shift : .zero)
+            )
+            slide.toValue = NSValue(point: entering ? .zero : shift)
+            slide.duration = span
+            let (a, b, c, d) = revealCurve
+            // A retract plays the reveal's curve backwards.
+            slide.timingFunction =
+                entering
+                ? CAMediaTimingFunction(controlPoints: a, b, c, d)
+                : CAMediaTimingFunction(
+                    controlPoints: 1 - c,
+                    1 - d,
+                    1 - a,
+                    1 - b
+                )
+            timed(slide, 0)
+            layer.add(slide, forKey: revealKey)
+            return held ? 0 : span + tail
         }
     }
 

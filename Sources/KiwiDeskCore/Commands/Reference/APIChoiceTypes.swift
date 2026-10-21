@@ -39,6 +39,7 @@ extension TrackParams.NewWindowTrack: APIChoiceType {}
 // covers all three.
 extension AppBarEdge: APIChoiceType {}
 extension KiwiShelf.Order: APIChoiceType {}
+extension KiwiShelf.RevealStyle: APIChoiceType {}
 extension AppBarStyle.BarAlignment: APIChoiceType {}
 extension AppBarStyle.BackgroundStyle: APIChoiceType {}
 extension AppBarStyle.BackgroundFit: APIChoiceType {}

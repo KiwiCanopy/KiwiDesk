@@ -58,6 +58,7 @@ enum BarsRowOrder {
         .kiwishelf(.fontFamily),
         .kiwishelf(.fontWeight),
         .kiwishelf(.iconSource),
+        .kiwishelf(.revealStyle),
     ]
 
     /// KiwiShelf card, behind the Margins disclosure.

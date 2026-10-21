@@ -26,6 +26,24 @@ extension ShelfOverlay {
             )
     }
 
+    /// Each section's plate ask along the edge, in strip
+    /// coordinates — the plate's and the panel's room's one input
+    /// (#2497); an empty ask asks nothing.
+    nonisolated static func plateAsks(
+        sections: [Section],
+        strip: CGRect,
+        horizontal: Bool
+    ) -> [ClosedRange<CGFloat>] {
+        sections.compactMap { section in
+            guard !section.plate.isEmpty else { return nil }
+            let ask = section.plate.offsetBy(
+                dx: section.slot.minX - strip.minX,
+                dy: section.slot.minY - strip.minY
+            )
+            return horizontal ? ask.minX...ask.maxX : ask.minY...ask.maxY
+        }
+    }
+
     /// The one plate under both sections, in strip coordinates,
     /// the shelf's whole depth over `ShelfArrangement.plateSpan`
     /// of what each section's run asks for.
@@ -35,17 +53,13 @@ extension ShelfOverlay {
         horizontal: Bool,
         shelf: KiwiShelf
     ) -> CGRect? {
-        let asks = sections.compactMap { section -> ClosedRange<CGFloat>? in
-            guard !section.plate.isEmpty else { return nil }
-            let ask = section.plate.offsetBy(
-                dx: section.slot.minX - strip.minX,
-                dy: section.slot.minY - strip.minY
-            )
-            return horizontal ? ask.minX...ask.maxX : ask.minY...ask.maxY
-        }
         guard
             let span = ShelfArrangement.plateSpan(
-                asks: asks,
+                asks: plateAsks(
+                    sections: sections,
+                    strip: strip,
+                    horizontal: horizontal
+                ),
                 length: horizontal ? strip.width : strip.height,
                 shelf: shelf
             )

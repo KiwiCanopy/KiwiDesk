@@ -22,7 +22,14 @@ final class ShelfOverlay {
     }
 
     /// The last input laid out.
-    private var drawn: Drawn?
+    private(set) var drawn: Drawn?
+    /// What the panel covers at rest, and what it was last asked
+    /// to cover, in strip coordinates (#2497).
+    private(set) var restRoom: CGRect = .zero
+    var placedRoom: CGRect?
+    /// The plate glide holding the room open, whose landing alone
+    /// settles it.
+    var roomGlide: UUID?
 
     private(set) var panel: NSPanel?
     #if DEBUG
@@ -39,18 +46,21 @@ final class ShelfOverlay {
     /// The fade-out in flight, if any (#1838): its landing orders
     /// the panel out unless a show cleared it meanwhile.
     var leaving: UUID?
-    /// A hiding shelf (#761): it slides in on appearing and out
-    /// on leaving, set by `ShelfManager` before each show.
+    /// A shelf revealed onto an empty edge (#761, #2497): it plays
+    /// its reveal on appearing and its retract on leaving; set by
+    /// `ShelfManager` before each show.
     var slides = false
-    /// Whether the leave in flight is a slide.
+    /// Whether the leave in flight is a retract.
     var leavingSlides = false
     /// The reveal in flight, whose landing alone ends its motion.
     var revealing: UUID?
-    /// A hiding shelf's mark in the content's coordinates, which a
-    /// reveal grows out of (#761); set by `ShelfManager`.
+    /// A grow reveal or retract plays, so the room holds still.
+    var growing = false
+    /// The mark in the content's coordinates a grow grows out of,
+    /// nil where the edge draws none (#761); set by `ShelfManager`.
     var revealOrigin: CGRect?
-    /// The plate a morph grows to, in the content's coordinates,
-    /// with its corner radius; nil where the shelf draws none, which
+    /// The plate a grow reaches, in the content's coordinates, with
+    /// its corner radius; nil where the shelf draws none, which
     /// cross-fades instead (#761). Set by each show.
     var revealPlate: (frame: CGRect, radius: CGFloat)?
     /// Lands a reveal or a retract after its length — the reveal's
@@ -86,6 +96,9 @@ final class ShelfOverlay {
     /// Each section's drawn content at its last placement, in its
     /// own coordinates — where a glide starts it from (#1838).
     var placedContent: [ObjectIdentifier: CGRect] = [:]
+    /// The panel's own view, sized to the room; `content` keeps
+    /// the strip's size inside it (#2497).
+    let root = AppBarOverlay.FlippedView()
     let content = BarMenuView()
     /// Holds both sections and the divider, above the plate.
     let stripView = BarMenuView()
@@ -162,6 +175,8 @@ final class ShelfOverlay {
         // out fades back (#1838).
         let glides = panel.isVisible
         let fadesBack = glides && leaving != nil
+        // Read before the room moves the content's model (#2497).
+        let inFlight = BarMotion.revealShift(of: content)
         let slidesBack = fadesBack && leavingSlides
         leaving = nil
         stripView.frame = CGRect(origin: .zero, size: strip.size)
@@ -175,6 +190,12 @@ final class ShelfOverlay {
         )
         let radius = shelf.resolvedCornerRadius(forThickness: depth)
         revealPlate = shelf.drawsPlate ? plate.map { ($0, radius) } : nil
+        restRoom = Self.restingRoom(
+            plate: plate,
+            sections: sections,
+            strip: strip,
+            horizontal: horizontal
+        )
         let travels = BarMotion.shelfGlideLength > 0
         if glides, travels {
             standGlideStarts(sections, in: strip, horizontal: horizontal)
@@ -205,7 +226,9 @@ final class ShelfOverlay {
                 BarMotion.setAlpha(content, to: 1, animated: true)
             }
         }
-        if slidesBack { revealIn() }
+        // Its landing scheduled after the sections' own (#2497).
+        if glides, travels { holdRoomForGlide() } else { settleRoom() }
+        if slidesBack { revealIn(from: inFlight) }
         layoutHandle(
             range: range,
             divider: Self.dividerFrame(
@@ -215,13 +238,6 @@ final class ShelfOverlay {
                 horizontal: horizontal
             ),
             horizontal: horizontal
-        )
-        panel.setFrame(
-            GeometryUtils.flip(
-                strip,
-                primaryHeight: GeometryUtils.primaryHeight
-            ),
-            display: true
         )
         if !panel.isVisible {
             #if DEBUG
@@ -257,11 +273,13 @@ final class ShelfOverlay {
     @discardableResult
     func hide(animated: Bool = false) -> Bool {
         guard let panel, panel.isVisible else {
+            cutReveal()
             leaving = nil
             onLeft()
             return true
         }
         if animated, slides { return retractOut() }
+        cutReveal()
         guard animated, BarMotion.shelfGlideLength > 0 else {
             leaving = nil
             panel.orderOut(nil)

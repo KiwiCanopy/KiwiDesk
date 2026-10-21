@@ -191,6 +191,7 @@ settings.kiwishelf.liquidGlass (master)
 settings.kiwishelf.minimum
 settings.kiwishelf.order
 settings.kiwishelf.outerMargin
+settings.kiwishelf.revealStyle
 settings.kiwishelf.thickness
 settings.minWindowSizes (master)
 settings.minWindowSizes.bsp.height

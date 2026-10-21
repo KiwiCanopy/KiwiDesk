@@ -12,6 +12,14 @@ public struct KiwiShelf: Sendable, Equatable {
     public typealias BackgroundFit = AppBarStyle.BackgroundFit
     public typealias Alignment = AppBarStyle.BarAlignment
 
+    /// How a revealed shelf comes onto its empty edge (owner
+    /// ruling, #2497): it slides in whole from the screen side, or
+    /// its plate grows out of the mark. Reduce Motion fades either.
+    public enum RevealStyle: String, Sendable, Codable, CaseIterable {
+        case slide
+        case grow
+    }
+
     /// Which bar takes the start of the edge while both show.
     public enum Order: String, Sendable, Codable, CaseIterable {
         case spacesFirst = "spaces_first"
@@ -104,6 +112,8 @@ public struct KiwiShelf: Sendable, Equatable {
     /// How long a shelf the show/hide action revealed stays shown,
     /// in seconds (#761); 0 keeps it until the next press.
     public var revealDuration: Double = 0
+    /// How a revealed shelf comes onto its edge (#2497).
+    public var revealStyle: RevealStyle = .slide
 
     public init() {}
 

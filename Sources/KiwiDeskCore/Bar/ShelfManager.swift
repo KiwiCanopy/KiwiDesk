@@ -23,8 +23,8 @@ final class ShelfManager {
         let app: AppBarOverlay?
         /// Set while the shelf is full, so the divider drags.
         var divider: ShelfArrangement.Divider? = nil
-        /// A hiding shelf's reveal, which grows out of its mark at
-        /// `mark`, AX coordinates (#761).
+        /// A shelf revealed onto an empty edge (#761, #2497), and
+        /// the mark a grow reveal grows out of, AX coordinates.
         var slides = false
         var mark: CGRect? = nil
     }

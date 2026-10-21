@@ -20,6 +20,9 @@ extension KiwiCore {
 
         /// Whether the edge hides to a mark (#761).
         var hides: Bool { shelfEdge.hides }
+        /// Whether a reveal here comes onto an empty edge, so the
+        /// shelf slides or grows rather than joins (#2497).
+        var slides: Bool { shelfEdge.drawsNothingAtRest }
         /// Whether the plan places any bar this pass.
         var drawsAny: Bool {
             arrangement.space != nil || arrangement.app != nil

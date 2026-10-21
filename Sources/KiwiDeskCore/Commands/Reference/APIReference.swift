@@ -217,7 +217,7 @@ public enum APIReference {
             "set_hover_fill_color", "set_hover_item_color",
             "set_fill_color", "set_border_color",
             "set_group_badge_color", "set_group_badge_text_color",
-            "set_reveal_duration",
+            "set_reveal_duration", "set_reveal_style",
         ],
         "grid": [
             "set_type", "set_fill_empty_cells",

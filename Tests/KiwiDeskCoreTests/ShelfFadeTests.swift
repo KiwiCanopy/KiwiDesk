@@ -146,8 +146,9 @@ struct ShelfFadeTests {
         #expect(overlay.leavingViews[app.view] != nil)
         both([space, app])
         #expect(overlay.leavingViews[app.view] == nil)
-        // The leave's landing, run by hand.
-        try #require(landings.count == 1)
+        // The leave's landing, run by hand; the panel room's hold
+        // for the shrunk plate lands after it (#2497).
+        try #require(landings.count == 2)
         landings[0]()
         #expect(app.view.superview === overlay.stripView)
     }
@@ -190,12 +191,14 @@ struct ShelfFadeTests {
         both([space])
         let second = try #require(overlay.leavingViews[app.view])
         #expect(second != first)
-        try #require(landings.count == 2)
+        // Each leave's landing comes ahead of its show's room hold
+        // (#2497): leave, hold, leave, hold.
+        try #require(landings.count == 4)
         // The first leave's landing leaves the view to the second.
         landings[0]()
         #expect(app.view.superview === overlay.stripView)
         #expect(overlay.leavingViews[app.view] == second)
-        landings[1]()
+        landings[2]()
         #expect(app.view.superview == nil)
         #expect(overlay.leavingViews.isEmpty)
     }
