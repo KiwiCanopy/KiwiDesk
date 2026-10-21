@@ -727,9 +727,10 @@ holds the secondary-switch decision including its nil case.
     it: the ledger's crossing is per group of settings, and on
     an install that has adopted it has already ended, so a
     member added later inherits nothing from it. A member with
-    no such predecessor states so in its design entry — the
-    Space cue's is the worked case (#2228: the per-profile slide
-    toggle before it meant something else). The member also
+    no such predecessor, or whose predecessor is owed none,
+    states so in its design entry — the Space transition's is
+    the worked case (#2524, `docs/design-decisions.md` ▸ *No
+    crossing from 2.x's per-profile slide*). The member also
     joins the census
     (`SettingKeyModelParityTests` ▸ `appWideFieldsAreCensused`).
 

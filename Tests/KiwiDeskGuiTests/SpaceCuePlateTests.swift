@@ -82,7 +82,12 @@ struct SpaceCuePlateTests {
             ).filter { !$0.isWhitespace }
         }
         let rows = try flat("MotionCard+SpaceTransition.swift")
-        #expect(rows.contains(".disabled(spaceTransitionLuaOwned)"))
+        // On the picker's DropdownRow, never a caption beside it.
+        #expect(
+            rows.contains(
+                ".neutralMenuLabel()}.disabled(spaceTransitionLuaOwned)"
+            )
+        )
         #expect(
             rows.contains(
                 "varspaceTransitionLuaOwned:Bool{!model.guiManaged}"
@@ -90,11 +95,19 @@ struct SpaceCuePlateTests {
         )
         #expect(
             rows.contains(
-                "spaceTransitionLuaOwned||model.appWide"
-                    + ".spaceTransition!=.slide"
+                "spaceTransitionLuaOwned||model.appWide.spaceTransition"
+                    + ".drawn(reduceMotion:reduceMotion)!=.slide"
             )
         )
         let card = try flat("MotionCard.swift")
+        // The predicate is applied to the group's rows, not only
+        // declared.
+        #expect(
+            card.contains(
+                "ForEach(ColorsRowOrder.motionSpaceSwitch,id:\\.id){keyin"
+                    + "row(for:key).modifier(GreyOut(active:greyed(key)))"
+            )
+        )
         #expect(
             card.contains(
                 "key==.colours(.spaceSlideDuration)"

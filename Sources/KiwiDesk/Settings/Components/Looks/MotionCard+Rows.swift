@@ -9,9 +9,6 @@ extension MotionCard {
             spaceTransitionRow
         case .spaceSlideDuration:
             spaceSlideDurationRow
-            // The Space switch rows stand apart from the window
-            // master, which does not reach them (#1932, #2524).
-            Divider()
         case .animationsMaster:
             ToggleRow(
                 label: L(

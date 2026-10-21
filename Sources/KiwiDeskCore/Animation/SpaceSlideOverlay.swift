@@ -174,7 +174,7 @@ final class SpaceSlideOverlay {
                     from: from,
                     to: 1,
                     begin: now,
-                    duration: SpaceSlidePlan.fadeIn(at: current.pace)
+                    duration: SpaceSlidePlan.fadeIn
                         * Double(1 - from),
                     reduceMotion: reduceMotion()
                 ),
@@ -246,7 +246,7 @@ final class SpaceSlideOverlay {
                 from: 1,
                 to: 0,
                 begin: current.liftAt,
-                duration: SpaceSlidePlan.fadeOut(at: current.pace),
+                duration: SpaceSlidePlan.fadeOut,
                 reduceMotion: reduceMotion()
             ),
             forKey: "out"
@@ -254,7 +254,7 @@ final class SpaceSlideOverlay {
         teardown?.cancel()
         let item = DispatchWorkItem { [weak self] in self?.end() }
         teardown = item
-        let fadeOut = SpaceSlidePlan.fadeOut(at: current.pace)
+        let fadeOut = SpaceSlidePlan.fadeOut
         let idle = current.liftAt + fadeOut - now + 0.05
         DispatchQueue.main.asyncAfter(
             deadline: .now() + max(idle, 0),

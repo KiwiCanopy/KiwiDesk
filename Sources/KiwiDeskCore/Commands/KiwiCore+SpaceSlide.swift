@@ -28,8 +28,9 @@ extension KiwiCore {
     /// Space instead. The one reading the slide and the Space cue
     /// both take.
     var drawnSpaceTransition: SpaceTransition {
-        let style = appWide.spaceTransition
-        return style == .slide && spaceSlide.reduceMotion() ? .show : style
+        appWide.spaceTransition.drawn(
+            reduceMotion: spaceSlide.reduceMotion()
+        )
     }
 
     /// Anything but a drawn Slide: no slide.
@@ -40,7 +41,10 @@ extension KiwiCore {
     /// the incoming windows' writes until it lands. Nil where it
     /// stands down, and the switch is instant.
     func prepareSpaceSlide(_ intent: SpaceSlideIntent) -> SpaceSlideRun? {
+        // Never over a full-screen app or a presentation, as the
+        // Space cue (#2524): the switch is instant there.
         guard !spaceSlideStandsDown,
+            !shelfStandsDown(on: intent.display),
             let target = state.workspaces.activeSpace,
             let screen = screen(for: intent.display)
         else { return nil }

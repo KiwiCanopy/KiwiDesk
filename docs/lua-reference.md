@@ -1060,7 +1060,8 @@ switched:
   glass
   ([`set_shortcut_panel_liquid_glass`](#set_shortcut_panel_liquid_glass)).
   With Reduce Motion on, a switch shows the Space as `"show"`
-  does, the stored value staying `"slide"`.
+  does, the stored value staying `"slide"`. Over a full-screen app
+  or a presentation the screen changes at once, with no plate.
 - `"show"`: the screen changes at once, and a plate in its middle
   shows the Space's name or number and its layout's symbol, whether
   or not that screen draws a Space Bar, and never over a
@@ -1097,14 +1098,16 @@ KiwiDesk.set_space_transition("show")
 
 **Does:** sets the pace of the plate slide
 ([`set_space_transition`](#set_space_transition)): how long the
-plates take to slide to the new Space, their fades scaling with
-it. It has no effect unless the transition is `"slide"`, nor while
-Reduce Motion is on. Window motion keeps its own pace
+plates take to slide to the new Space. Their fades keep fixed
+lengths whatever the pace: 80 ms in, 300 ms out. It has
+no effect unless the transition is `"slide"`, nor while Reduce
+Motion is on. Window motion keeps its own pace
 ([animations.set_duration](#animationsset_duration)). Read at the
 next switch.
 
 The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Slide
-duration**, grey while **Space switches** is not on Slide. The
+duration**, grey while **Space switches** is not on Slide or
+Reduce Motion is on. The
 setting is app-wide, stored in `gui.json` as
 `space.slide_duration`; the verb changes the running value only.
 It replaces `animations.set_space_change_duration`, which is

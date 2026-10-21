@@ -156,6 +156,23 @@ extension FullscreenStandDownTests {
         #expect(box.cues.isEmpty)
     }
 
+    /// The slide stands down there too (#2524): instant, with no
+    /// plate of either kind.
+    @Test(
+        "a full-screen Space plays no slide",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func fullScreenKeepsTheSlideAway() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, box, _) = try #require(
+            makeSpaceCueCore(transition: .slide, isUser: false)
+        )
+        core.spaceSlide.reduceMotion = { false }
+        _ = core.execute("focus_space", args: [.string("2")])
+        #expect(!core.spaceSlide.isPlaying)
+        #expect(box.cues.isEmpty)
+    }
+
     /// A display follow lands on a Space its screen already shows,
     /// so nothing needs naming: it passes no screen to the switch.
     @Test(

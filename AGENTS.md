@@ -1303,7 +1303,10 @@ Touching `Lua`.
 
 ### [input-and-animation](.claude/rules/input-and-animation.md)
 
-Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`.
+Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`,
+`Tiling/FrameApplier.swift`, `Tiling/FrameApplier+Hold.swift`,
+`Commands/KiwiCore+SpaceSlide.swift`,
+`Commands/KiwiCore+SpaceTransition.swift`.
 
 - Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per screen
 - hover focus is armed by user pointer motion alone, so KiwiDesk moves the
@@ -1384,7 +1387,9 @@ Touching `Keys`, `Events`, `Animation`, `OS/HyperKeyRemap*.swift`.
   `FrameApplier`'s hold through every write path and release them from the
   app's own queue, move KiwiDesk's own window through AppKit in the caller's
   turn, and pay the Space cue from `spaceSwitchRetile` alone,
-  `drawnSpaceTransition` the one reader of `space.transition` (#1956, #2524,
+  `drawnSpaceTransition` the one Core reader of `space.transition` and
+  `SpaceTransition.drawn(reduceMotion:)` the one copy of the Reduce Motion
+  fallback, which the GUI asks too (#1956, #2524,
   `SpaceSlideSwitchTests`, `FrameApplierHeldTests`,
   `FrameApplierOwnWindowTests`, `SpaceSlideSeamTests`, `SpaceCueSeamTests`)
 - every `.windowFocused` the loop emits comes from the app macOS activated last

@@ -22,7 +22,7 @@ public struct AppWideSettings: Equatable, Sendable {
     /// (`space.transition`, #2524). The slide by default.
     public var spaceTransition = SpaceTransition.slide
     /// The plate slide's pace in ms (`space.slide_duration`,
-    /// #1931), inside `spaceSlideDurationRange`.
+    /// #1956), inside `spaceSlideDurationRange`.
     public var spaceSlideDuration = AppWideSettings.spaceSlideDefaultMS
     /// Whether `cycle_mode` shows the plate with the cycle list
     /// and the layout it landed on (`mode.cue`, #2144). ON by

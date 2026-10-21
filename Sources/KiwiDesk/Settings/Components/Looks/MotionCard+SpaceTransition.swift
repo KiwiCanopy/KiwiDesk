@@ -73,11 +73,25 @@ extension MotionCard {
         .searchAnchored(SettingsCatalog.colors.spaceSlideDuration)
     }
 
-    /// Greys the duration while the picker is off Slide — a wiring
-    /// predicate on the stored pick, beside the census's Lua gate.
+    /// Closes the Space switch group: both rows are app-wide on a
+    /// profile's page, so it says so, as KiwiVision's immediate
+    /// cards do (#1741); the divider parts it from the window
+    /// master, which does not reach it (#1932, #2524).
+    @ViewBuilder var spaceSwitchGroupEnd: some View {
+        Text(KiwiVisionCopy.appliesAtOnce)
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink3)
+            .fixedSize(horizontal: false, vertical: true)
+        Divider()
+    }
+
+    /// Greys the duration while no slide plays — off Slide, or
+    /// under Reduce Motion — a wiring predicate on Core's one
+    /// fallback, beside the census's Lua gate.
     var spaceSlideDurationInert: Bool {
         spaceTransitionLuaOwned
-            || model.appWide.spaceTransition != .slide
+            || model.appWide.spaceTransition
+                .drawn(reduceMotion: reduceMotion) != .slide
     }
 
     static var spaceTransitionLabel: String {
@@ -102,19 +116,20 @@ extension MotionCard {
     /// What the selection does; under Reduce Motion, Slide shows
     /// the Space instead, which its caption says.
     func spaceTransitionCaption(_ style: SpaceTransition) -> String {
+        let drawn = style.drawn(reduceMotion: reduceMotion)
         switch style {
-        case .slide where reduceMotion:
+        case .slide where drawn != .slide:
             return L(
                 "animations.space_transition.slide.reduced",
-                "Plates cover your windows and slide to the Space "
-                    + "you're switching to. Reduce Motion is on, so "
-                    + "the Space is shown instead."
+                "Your windows slide away as the Space you're "
+                    + "switching to slides in. Reduce Motion is on, "
+                    + "so the Space is shown instead."
             )
         case .slide:
             return L(
                 "animations.space_transition.slide.caption",
-                "Plates cover your windows and slide to the Space "
-                    + "you're switching to."
+                "Your windows slide away as the Space you're "
+                    + "switching to slides in."
             )
         case .show:
             return L(

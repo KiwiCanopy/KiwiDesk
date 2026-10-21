@@ -101,8 +101,8 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_shortcut_panel_liquid_glass": APIRecord(
-            "Lays a macOS 26 Liquid Glass material over the "
-                + "shortcuts panel and the slow-boot notice.",
+            "Lays Liquid Glass over KiwiHub, the slow-boot notice "
+                + "and the Space slide's plates.",
             .boolean("enabled")
         ),
         "set_new_window_placement_override": APIRecord(

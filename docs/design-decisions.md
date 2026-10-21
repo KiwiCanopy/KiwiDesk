@@ -3577,39 +3577,55 @@ different questions. The plate says where you are now, at the
 instant switch's cost; the slide also says which way the switch
 went, and shows a follow's window travelling with you — the two
 things the plate cannot, and the direction cue is what users
-asked back for once the slide was gone. The owner's ruling makes
-the slide the default, and its cost is known and accepted with
-it:
-it holds the GPU at 55–65 % switching back-to-back where the
-instant switch holds 33 % (#2143's measurement), and it carries
-the most fragile machinery in the switch path, the write hold and
-the plate builder. None stays for a user who wants no cue at all.
+asked back for once the slide was gone. Slide is the default
+because it alone answers both questions — where you are and which
+way you went. Its cost comes with it: it holds the GPU at 55–65 %
+switching back-to-back where the instant switch holds 33 %
+(measured with glass plates when #1931 made the slide the
+default), and it carries the most fragile machinery in the switch
+path, the write hold and the plate builder. Show the Space is one
+pick away for a user who wants the plate's answer at the instant
+switch's cost, and None for one who wants no cue at all.
 
 *Reduce Motion shows the Space.* Under Reduce Motion a Slide
 draws Show the Space, the stored pick untouched, and the plate
 drops only its fade: the plate is how a switch reads with less
 motion, so the fallback keeps the answer and drops the motion.
-`KiwiCore.drawnSpaceTransition` is the one reading both the slide
-and the plate ask, so neither can disagree with the other about
+`SpaceTransition.drawn(reduceMotion:)` is the one copy of that
+fallback: Core's `KiwiCore.drawnSpaceTransition`, which the slide
+and the plate both ask, reads through it, and so do the Settings
+rows, so neither the two cues nor the card can disagree about
 which one a switch draws.
 
 *Show the Space shows everywhere.* A user who picks the plate has
 asked for it, so it shows on a screen that draws a Space Bar too.
 Standing it down there made the setting look dead to anyone whose
 Space Bar is on every screen, and the plate says the Space once,
-for a moment, where the bar says it all the time. It still stands
-down where the shelf does, over a full-screen app or a
-presentation: a plate over a slide show is the intrusion #1787
-keeps the bars from.
+for a moment, where the bar says it all the time.
 
-*On the Animations card, outside its greys.* The picker and
-**Slide duration** sit at the top of Looks & Animations ▸
-Animations, above **Animate windows**, which does not reach them:
+*Neither cue plays over a full-screen app or a presentation.* The
+plate and the slide both stand down where the shelf does
+(`shelfStandsDown`), and the switch there is instant with no
+plate of either kind: a plate over a slide show is the intrusion
+#1787 keeps the bars from, and a strip of plates sweeping across
+it is the same intrusion, larger. The slide does not fall back to
+the Show plate there, since that plate stands down for the same
+reason (`FullscreenStandDownTests` ▸
+`fullScreenKeepsTheSlideAway`).
+
+*On the Animations card, apart from the window rows.* The
+picker and **Slide duration** sit at the top of Looks &
+Animations ▸ Animations, above **Animate windows**, which does
+not reach them:
 that master paces windows, and the slide moves none. Reduce
-Motion does not grey them either, since the fallback above is
-the answer that setting asks for. The duration greys while the
-pick is not Slide, and both grey where `init.lua` owns the config,
-as the Desktop cue's row does (#1741, #2142).
+Motion does not grey the picker, since the fallback above is the
+answer that setting asks for. The duration greys whenever no
+slide would play — the pick is not Slide, or Reduce Motion is on —
+read through the same `drawn(reduceMotion:)`, and both grey where
+`init.lua` owns the config, as the Desktop cue's row does (#1741,
+#2142). The group ends with the note that it applies at once in
+every profile and a divider, so the window rows below it read as
+a second subject.
 
 *App-wide, and crossed from the toggle.* It is stored in
 `gui.json` as `space.transition` and `space.slide_duration`,
@@ -3622,6 +3638,15 @@ in a setup bundle's inline config (`SpaceTransitionMigrationTests`).
 The cost is a user who turned the plate on deliberately meeting
 the slide once, one picker step from Show the Space. The retired
 verbs are refused, naming the new ones, rather than aliased.
+
+*No crossing from 2.x's per-profile slide.* 2.x stored the slide
+per profile as `animations.on_space_change` and
+`animations.space_change_duration`. 3.0–3.2 already dropped both
+on load and wrote neither back, so a crossing could reach only a
+profile no 3.x build has saved, and would revive a per-profile
+choice into an app-wide one three releases after it stopped
+meaning anything. The cost is a 2.x user who had the slide off
+meeting Slide, one pick from None.
 
 *The plates wear KiwiHub's glass.* Each plate is `.regular`
 Liquid Glass, each pile one container so overlapping plates read
@@ -3677,8 +3702,9 @@ already on screen in the Space it goes to, travels with the user
 uncovered.
 
 *Its own pace (#1931).* `space.slide_duration` is the strip's
-spring response, and both fades scale with it from the times they
-were tuned at; its default is that 300 ms. A slower pace does not
+spring response, and only the strip's travel follows it; its
+default is 300 ms (`SpaceSlideDurationTests` ▸
+`paceScalesTheSlide`). A slower pace does not
 buy readable icons: the strip crosses the screen too fast to read
 at any pace in the band, and what reads is the arriving plates at
 rest, which 550 ms lengthens by about 45 ms while lengthening the
@@ -3686,8 +3712,12 @@ whole slide by about 380 ms. Under a saturated GPU the switch work
 that overlaps the plates grows with the pace too, and 300 ms is
 the one pace measured steady there. The two waits on apps — the
 strip's delay for the parks and the landed windows' margin — do
-not scale, since no pace changes how long an app takes.
-`animations.duration` keeps pacing windows only.
+not scale, since no pace changes how long an app takes. Nor do the
+fades, and neither has a setting: the fade-out, 300 ms, is how
+softly the windows appear rather than how fast the slide goes,
+and the fade-in, 80 ms, must leave the plates opaque before the
+outgoing windows park. `animations.duration` keeps pacing windows
+only.
 
 *One panel per screen, ordered in once.* Moving or re-ordering a
 panel per switch queues behind the compositor exactly when the
@@ -3701,9 +3731,13 @@ after it.
 *The focused ring waits for its window.* A slow app's window can
 land after the switch, so the ring appears on the window's own
 report near the frame it was sent, or at a cap, never ahead of it
-(#1959) — and never before the slide's plates lift. Inside a Space
-the ring still leads a focus move, since there the moving ring is
-the cue; after a switch a leading ring would sit on an empty spot.
+(#1959). Inside a Space the ring still leads a focus move, since
+there the moving ring is the cue; after a switch a leading ring
+would sit on an empty spot.
+
+:::unreleased
+Nor does it appear before the slide's plates lift.
+:::
 
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
@@ -15841,8 +15875,8 @@ order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
 
 Reveal and its Durations drawer follow the Show master's Each bar
-drawer, ahead of the Space cue: how a hiding bar comes and goes
-sits beside what makes a bar hide, and the picker and the Reveal
+drawer: how a hiding bar comes and goes sits beside what makes a
+bar hide, and the picker and the Reveal
 duration grey with it while no bar hides (owner ruling,
 2026-10-21). The Expand duration does not: the expand plays with
 every bar on Always — a bar joining a fused shelf, the plate

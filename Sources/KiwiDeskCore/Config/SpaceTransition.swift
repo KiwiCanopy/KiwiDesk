@@ -9,4 +9,11 @@ public enum SpaceTransition: String, Codable, CaseIterable, Sendable {
     case show
     /// At once, with no cue.
     case none
+
+    /// What a switch draws for this pick: Slide under Reduce
+    /// Motion shows the Space instead. The one copy of that
+    /// fallback — Core's switch and the Settings rows ask it.
+    public func drawn(reduceMotion: Bool) -> SpaceTransition {
+        self == .slide && reduceMotion ? .show : self
+    }
 }

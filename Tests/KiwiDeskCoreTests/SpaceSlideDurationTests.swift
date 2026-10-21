@@ -5,10 +5,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The plate slide's pace (#1931, #2524): `space.slide_duration`
-/// is the strip's spring response, and scales the strip's spring and both
-/// fades while the app-latency waits stay fixed. The overlay
-/// clauses pin its clock and never order a panel in.
-@Suite("Space switch duration (#1931)", .serialized)
+/// is the strip's spring response; the fades and the app-latency
+/// waits stay fixed. The overlay clauses pin its clock and never
+/// order a panel in.
+@Suite("Space slide duration (#1931, #2524)", .serialized)
 @MainActor
 struct SpaceSlideDurationTests {
     private final class Clock {
@@ -81,10 +81,10 @@ struct SpaceSlideDurationTests {
         return (spring.stiffness / spring.mass).squareRoot()
     }
 
-    /// A doubled pace doubles the spring and the fades; the strip
-    /// still waits the parks' fixed delay, and the plates the
-    /// landed windows' fixed margin.
-    @Test("the pace scales the strip and the fades, not the waits")
+    /// A doubled pace doubles the spring alone; the fades keep
+    /// their fixed lengths, the strip the parks' fixed delay, and
+    /// the plates the landed windows' fixed margin.
+    @Test("the pace scales the strip alone, never the fades or waits")
     func paceScalesTheSlide() throws {
         var lands: [Double: CFTimeInterval] = [:]
         var begins: [Double: CFTimeInterval] = [:]
@@ -99,10 +99,14 @@ struct SpaceSlideDurationTests {
             #expect(response == SpaceSlidePlan.response(at: 1) * pace)
             #expect(play.motion.response == response)
             #expect(abs(try playedOmega(play) - 2 * .pi / response) < 1e-6)
-            let fadeIn = SpaceSlidePlan.fadeIn(at: 1) * pace
-            let fadeOut = SpaceSlidePlan.fadeOut(at: 1) * pace
-            #expect(abs(try fade(play, "in") - fadeIn) < 1e-9)
-            #expect(abs(try fade(play, "out") - fadeOut) < 1e-9)
+            // The fades are fixed (#2524): how softly windows
+            // appear is not the slide's speed.
+            #expect(
+                abs(try fade(play, "in") - SpaceSlidePlan.fadeIn) < 1e-9
+            )
+            #expect(
+                abs(try fade(play, "out") - SpaceSlidePlan.fadeOut) < 1e-9
+            )
             #expect(play.motion.begin == 100 + SpaceSlidePlan.stripDelay)
             #expect(
                 abs(play.liftAt - pressed.landAt - SpaceSlidePlan.landMargin)
@@ -135,10 +139,7 @@ struct SpaceSlideDurationTests {
             abs(try playedOmega(play) - 2 * .pi / play.motion.response)
                 < 1e-6
         )
-        #expect(
-            abs(try fade(play, "out") - 2 * SpaceSlidePlan.fadeOut(at: 1))
-                < 1e-9
-        )
+        #expect(abs(try fade(play, "out") - SpaceSlidePlan.fadeOut) < 1e-9)
     }
 
     /// A press after the landing waits the parks' fixed delay

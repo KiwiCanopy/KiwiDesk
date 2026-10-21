@@ -1081,11 +1081,14 @@ Accessibility.
 :::unreleased
 The Space switch is on that card: **Space switches** at its top
 picks Slide, Show the Space or None, and **Slide duration**
-beneath it paces the slide, greyed while the pick is not Slide
-(#1956, #2524). Neither Reduce Motion nor the **Animate windows**
-master greys the two: under Reduce Motion a Slide shows the Space
-instead, which is how a switch reads with less motion, and the
-plate drops only its fade.
+beneath it paces the slide (#1956, #2524). The **Animate windows**
+master greys neither, and Reduce Motion greys only the duration:
+under Reduce Motion a Slide shows the Space instead, which is how
+a switch reads with less motion, and the plate drops only its
+fade. The duration also greys while the pick is not Slide. The
+pair closes with "Applies at once, in every profile." and a
+divider above **Animate windows**, and the card's Reduce Motion
+warning names window animations alone.
 :::
 
 Three bar motions keep playing under Reduce Motion, by the owner's

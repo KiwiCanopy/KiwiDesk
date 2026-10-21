@@ -40,7 +40,11 @@ struct MotionCard: View {
                 // gate (#171) — per row, less the census's
                 // exemption; parallel `GreyOut`s, never nested
                 // (gui.md).
-                ForEach(ColorsRowOrder.motionAtRest, id: \.id) { key in
+                ForEach(ColorsRowOrder.motionSpaceSwitch, id: \.id) { key in
+                    row(for: key).modifier(GreyOut(active: greyed(key)))
+                }
+                spaceSwitchGroupEnd
+                ForEach(windowRows, id: \.id) { key in
                     row(for: key).modifier(GreyOut(active: greyed(key)))
                 }
                 disclosure.modifier(GreyOut(active: reduceMotion))
@@ -62,6 +66,15 @@ struct MotionCard: View {
                 )
             }
         }
+    }
+
+    /// The at-rest rows after the Space switch group.
+    private var windowRows: [SettingKey] {
+        Array(
+            ColorsRowOrder.motionAtRest.dropFirst(
+                ColorsRowOrder.motionSpaceSwitch.count
+            )
+        )
     }
 
     /// Whether `key` greys: the card's Reduce Motion gate, less the
@@ -158,7 +171,7 @@ struct MotionCard: View {
     static var reduceMotionWarning: String {
         L(
             "behavior.animations.reduce_motion.warning",
-            "Reduce Motion is on in System Settings, so these "
+            "Reduce Motion is on in System Settings, so window "
                 + "animations don't play."
         )
     }
@@ -184,7 +197,7 @@ struct MotionCard: View {
     private var caption: String {
         L(
             "motion.caption",
-            "How windows move when the layout changes."
+            "How a Space switch shows itself, and how windows move."
         )
     }
 
@@ -192,8 +205,8 @@ struct MotionCard: View {
         L(
             "behavior.animations.reduce_motion.help",
             "System Settings ▸ Accessibility ▸ Reduce "
-                + "Motion is on, so animations stay off "
-                + "regardless of this setting."
+                + "Motion is on, so window animations stay off "
+                + "regardless of these settings."
         )
     }
 }

@@ -47,6 +47,22 @@ struct FrameApplierHeldTests {
         }
     }
 
+    /// A held set owes no #2187 resend: it lands once, at the
+    /// landing, and nothing schedules a second write (#2524).
+    @Test("a held cross-screen set owes no resend")
+    func heldSetOwesNoResend() async throws {
+        let counts = OSAllocatedUnfairLock(initialState: Counts())
+        let applier = makeApplier(counts)
+        var owed: [@MainActor () -> Void] = []
+        applier.scheduleResend = { _, work in owed.append(work) }
+        applier.holdWrites([w], until: .now() + 0.05)
+        applier.applyInstant(w, frame, setSize: true, resend: true)
+        try await waitForWrite(counts)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(owed.isEmpty)
+        #expect(counts.withLock { $0.frames } == 1)
+    }
+
     @Test("an instant write leaves once, at the landing, under one EUI drop")
     func instantWriteLandsOnce() async throws {
         let counts = OSAllocatedUnfairLock(initialState: Counts())

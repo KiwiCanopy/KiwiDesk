@@ -4,6 +4,10 @@ paths:
   - "Sources/KiwiDeskCore/Events/**"
   - "Sources/KiwiDeskCore/Animation/**"
   - "Sources/KiwiDeskCore/OS/HyperKeyRemap*.swift"
+  - "Sources/KiwiDeskCore/Tiling/FrameApplier.swift"
+  - "Sources/KiwiDeskCore/Tiling/FrameApplier+Hold.swift"
+  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceSlide.swift"
+  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceTransition.swift"
 ---
 
 # Input & animation
@@ -726,7 +730,7 @@ editing here:
   the instant one, since re-animating window frames on a switch,
   or adding a write per window, re-opens the corner slide's
   per-frame AX cost (`SpaceSlideSwitchTests` ▸
-  `slideCostsNoExtraWork`). Four obligations. Stage an incoming
+  `slideCostsNoExtraWork`). Stage an incoming
   window's writes in `FrameApplier`'s hold through EVERY applier
   write path (`SpaceSlideSeamTests` ▸ `writePathsReachTheHold`)
   and release them from the app's own queue at the landing —
@@ -735,9 +739,12 @@ editing here:
   that ends early releases what it held, whichever activation
   overtook it — asked once at the head of every retile, never per
   activation door (`SpaceSlideSwitchTests` ▸
-  `instantSwitchReleasesHolds`, `overtakenPlayEnds`), and the
-  quit gather drops every hold, being the one frame write outside
-  the applier (`SpaceSlideSeamTests` ▸ `gatherDropsTheHolds`).
+  `instantSwitchReleasesHolds`, `overtakenPlayEnds`), the one
+  ruled exception being `spaceSwitchRetile`'s own
+  `endSpaceSlide()`: a navigation that stands the slide down cuts
+  a running one. A frame write outside the applier drops every
+  hold first, or a landing undoes it — the quit gather is the
+  instance (`SpaceSlideSeamTests` ▸ `gatherDropsTheHolds`).
   Move KiwiDesk's own window through AppKit inside the caller's
   turn, never on a later main-queue turn
   (`FrameApplierOwnWindowTests`). Order the overlay's panel in
@@ -752,11 +759,13 @@ editing here:
   which review holds). The Space cue (#2143) rides the same
   intent: `spaceSwitchRetile` is its one payer, where no slide
   ran, and the slide and the cue ask the one
-  `drawnSpaceTransition` — the one reader of the stored
-  `space.transition`, Slide under Reduce Motion reading as Show
-  the Space — so a stand-down or a second reader added beside it
-  leaves a switch with neither, or with both
-  (`SpaceCueSeamTests`). A live read the slide adds is pinned
+  `drawnSpaceTransition` — the one Core reader of the stored
+  `space.transition` — so a stand-down or a second reader added
+  beside it leaves a switch with neither, or with both
+  (`SpaceCueSeamTests`). Slide under Reduce Motion reading as Show
+  the Space is stated once, in `SpaceTransition.drawn(reduceMotion:)`,
+  which that reader and the Settings rows ask, never a copy of
+  its branch beside either. A live read the slide adds is pinned
   inert in both `makeTestCore` twins (`SpaceSlideSeamTests` ▸
   `bothTwinsPinTheReads`). The product ruling is
   `docs/design-decisions.md` ▸ *A Space switch slides, shows the

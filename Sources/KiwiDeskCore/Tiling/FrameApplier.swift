@@ -184,7 +184,12 @@ final class FrameApplier {
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
-        if stageHeld(id, frame, setSize: setSize) { return }
+        // A held write owes no resend: it lands once, at the
+        // slide's landing, on the screen it was sent to (#2524).
+        if stageHeld(id, frame, setSize: setSize) {
+            pendingResends[id] = nil
+            return
+        }
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)

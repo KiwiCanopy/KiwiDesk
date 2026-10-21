@@ -204,9 +204,10 @@ windows' writes are held in the `FrameApplier`'s hold; after it,
 the strip runs, and each held write leaves from its app's queue
 when the strip lands (#1956). On Show the Space, Core hands the
 GUI the Space and its layout for the screen that switched
-(`paySpaceCue`, in `Commands/SpaceSwitchCue`), standing down
-where the shelf stands down; the plate itself is drawn in
-`Sources/KiwiDesk/CuePlate` (#2143, #2524).
+(`paySpaceCue`, in `Commands/SpaceSwitchCue`); the plate itself
+is drawn in `Sources/KiwiDesk/CuePlate` (#2143, #2524). Both
+stand down where the shelf stands down (`shelfStandsDown(on:)`),
+leaving the instant switch alone.
 :::
 
 The Lua watchdog is an instruction-count hook and **cannot**

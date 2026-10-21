@@ -12,9 +12,10 @@ enum SpaceSlidePlan {
     /// (profiles.md, #1931).
     static let baseResponseMS = 300
 
-    /// The plates fade in over the windows shown now, at `pace`
-    /// (`KiwiCore.spaceSlidePace`, #1931).
-    static func fadeIn(at pace: Double) -> TimeInterval { 0.08 * pace }
+    /// The plates fade in over the windows shown now. Fixed, never
+    /// paced: they must be opaque before the outgoing parks land,
+    /// 60–100 ms after the press (#2524).
+    static let fadeIn: TimeInterval = 0.08
     /// The strip waits this long after a press: the outgoing parks
     /// leave AT the press, and apps take 60–100 ms to perform one.
     static let stripDelay: TimeInterval = 0.12
@@ -26,10 +27,12 @@ enum SpaceSlidePlan {
     }
     /// The landed writes' own time to show before the plates lift.
     static let landMargin: TimeInterval = 0.06
-    /// The plates fade out over the landed windows, at `pace`.
-    static func fadeOut(at pace: Double) -> TimeInterval { 0.18 * pace }
-    // `stripDelay` and `landMargin` wait on apps, so no pace moves
-    // them (#1931).
+    /// The plates fade out over the landed windows. Fixed, never
+    /// paced: it is how softly the windows appear, not the slide's
+    /// speed (owner, 2026-10-21, #2524).
+    static let fadeOut: TimeInterval = 0.3
+    // Only the strip's travel is paced; the fades and the app
+    // waits (`stripDelay`, `landMargin`) are not (#1931, #2524).
 
     /// A window clipped smaller than this on the page draws no
     /// plate: a stash corner's sliver, a scrolled-out column's edge.

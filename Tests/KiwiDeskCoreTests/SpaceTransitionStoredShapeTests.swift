@@ -42,6 +42,20 @@ struct SpaceTransitionStoredShapeTests {
         )
     }
 
+    /// The one fallback Core's switch and the Settings rows ask.
+    @Test("Slide under Reduce Motion draws Show; nothing else moves")
+    func drawnFallback() {
+        for style in SpaceTransition.allCases {
+            #expect(style.drawn(reduceMotion: false) == style)
+        }
+        #expect(SpaceTransition.slide.drawn(reduceMotion: true) == .show)
+        #expect(SpaceTransition.show.drawn(reduceMotion: true) == .show)
+        #expect(
+            SpaceTransition.none.drawn(reduceMotion: true)
+                == SpaceTransition.none
+        )
+    }
+
     @Test("a stored pace outside the band decodes clamped")
     func decodeClamps() throws {
         let band = AppWideSettings.spaceSlideDurationRange

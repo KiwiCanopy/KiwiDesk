@@ -58,23 +58,29 @@ struct SpaceTransitionMigrationTests {
         #expect(back.appWide?.spaceTransition == expected)
     }
 
-    @Test("the crossing is surgical: only the space group's line moves")
+    /// Compact input: the tree fallback re-encodes pretty-printed,
+    /// so a file that stays on one line was edited in place.
+    @Test("the crossing is surgical: the file keeps its own shape")
     func surgical() throws {
-        let before = try data(legacyGui(cue: false))
+        let before = try JSONSerialization.data(
+            withJSONObject: legacyGui(cue: false)
+        )
+        let old = try #require(String(data: before, encoding: .utf8))
+        #expect(!old.contains("\n"))
         let out = try #require(ConfigMigration.migrated(before))
         let text = try #require(String(data: out, encoding: .utf8))
-        let old = try #require(String(data: before, encoding: .utf8))
-        #expect(text.contains("\"transition\" : \"none\""))
-        // Every other line is the input's, save the format stamp.
-        let kept = Set(old.split(separator: "\n"))
-        let changed = text.split(separator: "\n").filter {
-            !kept.contains($0)
-        }
+        #expect(!text.contains("\n"))
+        #expect(text.contains(#""transition":"none""#))
+        let edited = try #require(
+            ConfigMigration.surgicallyCrossedSpaceCue(old)
+        )
+        let crossed = try #require(String(data: edited, encoding: .utf8))
         #expect(
-            changed.allSatisfy {
-                $0.contains("transition") || $0.contains("format")
-            },
-            Comment(rawValue: "changed lines: \(changed)")
+            crossed
+                == old.replacingOccurrences(
+                    of: #""cue":false"#,
+                    with: #""transition":"none""#
+                )
         )
     }
 
