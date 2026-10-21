@@ -199,8 +199,9 @@ bite large test PRs:
     minting its own defaults suite leaves litter every run, which
     once slowed the Core target 7–15× (#2518).
     Its state is per process and every name carries the pid
-    (each root a UUID too, since both test modules load into one
-    process), so nothing couples one suite or one run to another.
+    (each root a random suffix too, since both test modules load
+    into one process), so nothing couples one suite or one run
+    to another.
     A test takes its scratch folder and defaults domain from it,
     and the two script-spawn primitives hand their children its
     root as `TMPDIR` — `TestScratchCensusTests` holds

@@ -89,6 +89,9 @@ func runPythonScript(
 /// whatever is on the other end. A `bash` copy beside a `python3`
 /// copy would be exactly the "undrained pipe, missed `stderr`"
 /// drift `.claude/rules/tests.md` names.
+///
+/// The child's `TMPDIR` is always the run's root, whatever
+/// `environment` says (#2518).
 @discardableResult
 func spawn(
     _ launchPath: String,
