@@ -72,14 +72,4 @@ struct IconCellStyleTests {
         #expect(!cell.contains(".settingsActionButton()"))
         #expect(!cell.contains(".frame(width:"))
     }
-
-    /// The popover wears the search card's glass through the one
-    /// modifier, not the popover's own material (#1295).
-    @Test("the popover sits on the search card's glass")
-    func popoverGlass() throws {
-        // The surface is every Settings popover's (#2503,
-        // `SettingsPopoverChromeCensusTests`).
-        let source = try squashed("IconPicker.swift")
-        #expect(source.contains("{popover.settingsPopoverChrome()}"))
-    }
 }

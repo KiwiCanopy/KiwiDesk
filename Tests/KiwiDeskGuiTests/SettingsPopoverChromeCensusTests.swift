@@ -9,14 +9,15 @@ import Testing
 /// or hues stays off glass. Off the main actor: a source walk.
 @Suite("Settings popover chrome census")
 struct SettingsPopoverChromeCensusTests {
-    /// File name → how many of its popovers stay on the material,
-    /// and why. The one copy of who may.
-    private static let exempt: [String: (count: Int, reason: String)] = [
-        "SettingsFooter+Unsaved.swift": (
-            1, "the change list's Keep and ↺ fills and value swatches"
-        ),
-        "ScreenCard.swift": (1, "its overflow Space chips carry fills"),
-        "FollowsMainTray.swift": (1, "its overflow Space chips carry fills"),
+    /// File name and the content a popover opens with → why it
+    /// stays on the material. The one copy of who may.
+    private static let exempt: [String: String] = [
+        "SettingsFooter+Unsaved.swift unsavedPopover":
+            "the change list's Keep and ↺ fills and value swatches",
+        "ScreenCard.swift WrapChips":
+            "its overflow Space chips carry fills",
+        "FollowsMainTray.swift WrapChips":
+            "its overflow Space chips carry fills",
     ]
 
     /// Each `.popover(` call's content closure, by file name.
@@ -50,7 +51,9 @@ struct SettingsPopoverChromeCensusTests {
                         close: "}"
                     ) ?? ""
                 bodies.append((file.lastPathComponent, body))
-                i = cursor
+                // On past the call, not the closure: a popover
+                // nested in another's content is its own site.
+                i += needle.count
             }
         }
         return bodies
@@ -61,22 +64,45 @@ struct SettingsPopoverChromeCensusTests {
         let bodies = try Self.popoverBodies()
         // A walk that found nothing would pass for having no strays.
         #expect(bodies.count > 20)
-        var bare: [String: Int] = [:]
+        var bare: Set<String> = []
         for (file, body) in bodies {
-            #expect(!body.isEmpty, "\(file): a popover with no content")
-            if !body.contains(".settingsPopoverChrome()") {
-                bare[file, default: 0] += 1
+            let content = body.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            #expect(!content.isEmpty, "\(file): a popover with no content")
+            // The trailing modifier, so the whole content wears it,
+            // never one branch or one row of it.
+            if !content.hasSuffix(".settingsPopoverChrome()") {
+                let root = content.prefix {
+                    $0.isLetter || $0.isNumber || $0 == "_"
+                }
+                bare.insert("\(file) \(root)")
             }
         }
-        let ruled = Self.exempt.mapValues(\.count)
         #expect(
-            bare == ruled,
+            bare == Set(Self.exempt.keys),
             """
-            a popover off the Settings surface: wear \
+            a popover off the Settings surface: end its content with \
             `settingsPopoverChrome()`, or rule it in `exempt` with \
-            its reason (#2399's test). Off it: \(bare)
+            its reason (#2399's test). Off it: \(bare.sorted())
             """
         )
+    }
+
+    /// A background set beside the surface would hide it, or put an
+    /// exempt popover somewhere other than on the material.
+    @Test("the popover background is set in one home")
+    func backgroundHasOneHome() throws {
+        let tree = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var homes: [String] = []
+        for file in try SourceScan.swiftSources(under: tree) {
+            let source = try SourceScan.blankedSource(at: file)
+            if source.contains("presentationBackground") {
+                homes.append(file.lastPathComponent)
+            }
+        }
+        #expect(homes == ["SettingsPopoverChrome.swift"])
     }
 
     /// The surface is the icon picker's, which the owner kept on
