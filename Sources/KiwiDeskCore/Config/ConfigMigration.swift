@@ -49,6 +49,7 @@ public enum ConfigMigration {
         migratingMinWindowSizePerLayout,
         migratingShortcutBase,
         migratingShelfGlideOntoExpand,
+        migratingSpaceCueOntoTransition,
     ]
 
     /// Runs after `steps`, and is skipped by

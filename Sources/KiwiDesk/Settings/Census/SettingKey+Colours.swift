@@ -9,6 +9,10 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
+    /// App-wide (#1741), not an `AnimationSettings` field: how a
+    /// Space switch shows itself and the slide's pace (#2524).
+    case spaceTransition = "appWide.spaceTransition"
+    case spaceSlideDuration = "appWide.spaceSlideDuration"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
     case animationsOnRelayout = "settings.animations.onRelayout"
@@ -70,6 +74,20 @@ extension ColoursKey {
             )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
+        case .spaceTransition, .spaceSlideDuration:
+            // Above the master, which does not reach them, and
+            // outside Reduce Motion's grey: the slide falls back to
+            // Show the Space there (#2524). App-wide (#1741), so
+            // they grey where init.lua owns the config, as the
+            // Desktop cue does (#2142). The duration's grey while
+            // the picker is off Slide is wiring's (gui.md).
+            return .row(
+                .coloursAndMotion,
+                .motion,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig),
+                exemptFromContainerGate: true
+            )
         case .animationsOnWindowResize,
             .animationsOnWindowSwap, .animationsOnRelayout,
             .animationsDurationMS:
@@ -165,6 +183,13 @@ extension ColoursKey {
             return .text(
                 "behavior.animations.master",
                 help: "behavior.animations.master.help"
+            )
+        case .spaceTransition:
+            return .text("animations.space_transition")
+        case .spaceSlideDuration:
+            return .text(
+                "animations.space_slide_duration",
+                help: "animations.space_slide_duration.help"
             )
         case .animationsOnWindowResize:
             return .text("behavior.animations.window_resize")

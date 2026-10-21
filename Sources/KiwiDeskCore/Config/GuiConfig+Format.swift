@@ -61,5 +61,8 @@ extension GuiConfig {
     /// paths `animations.on_shelf` / `shelf_duration` became
     /// `on_expand` / `expand_duration`
     /// (`migratingShelfGlideOntoExpand`).
-    public static let currentFormat = 13
+    ///
+    /// **14 (#2524)**: `space.cue` became `space.transition`
+    /// (`migratingSpaceCueOntoTransition`).
+    public static let currentFormat = 14
 }

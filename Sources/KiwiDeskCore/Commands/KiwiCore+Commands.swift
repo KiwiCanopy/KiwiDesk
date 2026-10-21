@@ -124,8 +124,10 @@ extension KiwiCore {
             return takeOverHyperRemap()
         case "set_mode_cue":
             return setModeCue(args)
-        case "set_space_cue":
-            return setSpaceCue(args)
+        case "set_space_transition":
+            return setSpaceTransition(args)
+        case "set_space_slide_duration":
+            return setSpaceSlideDuration(args)
         case "set_space_history":
             return setSpaceHistory(args)
         case "set_float_automatically":

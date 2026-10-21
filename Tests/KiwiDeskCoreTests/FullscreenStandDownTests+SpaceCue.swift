@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The Space cue (#2143, #2228): an explicit switch pays a cue
+/// The Space cue (#2143, #2524): an explicit switch pays a cue
 /// naming the Space and its layout on the screen that switched,
-/// while `space.cue` is on, and stands down where that screen draws
-/// a Space Bar or the shelf stands down (#1787).
+/// while the drawn transition is Show the Space — a Space Bar or
+/// not — and stands down where the shelf stands down (#1787).
 /// An extension of this suite, not a second one: every case holds
 /// the process-global `currentSpaceIsUserOverride`.
 extension FullscreenStandDownTests {
@@ -16,7 +16,7 @@ extension FullscreenStandDownTests {
     /// Two Spaces on the primary screen, "1" shown, the Space Bar
     /// on or off. Nil where the host has no screen.
     private func makeSpaceCueCore(
-        cue: Bool = true,
+        transition: SpaceTransition = .show,
         spaceBar: Bool = false,
         isUser: Bool = true
     ) -> (KiwiCore, SpaceCueBox, DisplayID)? {
@@ -34,7 +34,9 @@ extension FullscreenStandDownTests {
         core.state.workspaces.setMode("2", .grid)
         core.state.workspaces.activate("1")
         core.frontStack = { [] }
-        core.setAppWide(persisting: false) { $0.spaceCue = cue }
+        core.setAppWide(persisting: false) {
+            $0.spaceTransition = transition
+        }
         var settings = core.tiler.settings
         settings.spaceBarStyle.visibility = spaceBar ? .always : .hidden
         core.tiler.settings = settings
@@ -61,14 +63,44 @@ extension FullscreenStandDownTests {
     }
 
     @Test(
-        "with space.cue off, a switch shows no plate",
+        "with the transition on None, a switch shows no plate",
         .enabled(if: NSScreen.main != nil)
     )
     func toggleDecidesTheCue() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let (core, box, _) = try #require(makeSpaceCueCore(cue: false))
+        let (core, box, _) = try #require(makeSpaceCueCore(transition: .none))
         _ = core.execute("focus_space", args: [.string("2")])
         #expect(box.cues.isEmpty)
+    }
+
+    /// Slide under Reduce Motion shows the Space instead (#2524),
+    /// and a slide that plays is the cue itself, so no plate.
+    @Test(
+        "Slide shows the plate only under Reduce Motion",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func slideFallsBackUnderReduceMotion() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        for reduced in [true, false] {
+            let (core, box, display) = try #require(
+                makeSpaceCueCore(transition: .slide)
+            )
+            core.spaceSlide.reduceMotion = { reduced }
+            core.spaceSlide.stackOrder = { [:] }
+            _ = core.execute("focus_space", args: [.string("2")])
+            #expect(
+                box.cues
+                    == (reduced
+                        ? [
+                            SpaceSwitchCue(
+                                display: display,
+                                space: "2",
+                                mode: .grid
+                            )
+                        ] : [])
+            )
+            core.endSpaceSlide()
+        }
     }
 
     /// A follow pays it too: `followSwitch` hands the switch the
@@ -95,17 +127,20 @@ extension FullscreenStandDownTests {
     }
 
     @Test(
-        "a screen drawing a Space Bar shows no plate",
+        "a screen drawing a Space Bar shows the plate too",
         .enabled(if: NSScreen.main != nil)
     )
-    func spaceBarKeepsTheCueAway() throws {
+    func spaceBarKeepsTheCue() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, display) = try #require(
             makeSpaceCueCore(spaceBar: true)
         )
         #expect(core.spaceBars.shownDisplays.contains(display))
         _ = core.execute("focus_space", args: [.string("2")])
-        #expect(box.cues.isEmpty)
+        #expect(
+            box.cues
+                == [SpaceSwitchCue(display: display, space: "2", mode: .grid)]
+        )
     }
 
     @Test(

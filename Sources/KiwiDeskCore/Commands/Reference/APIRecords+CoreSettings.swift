@@ -75,10 +75,15 @@ extension APIReference {
             "Takes over a leftover Hyper remap that matches "
                 + "KiwiDesk's own; it is cleared at quit."
         ),
-        "set_space_cue": APIRecord(
-            "Shows the Space and its layout on the screen that "
-                + "switched, where no Space Bar is drawn.",
-            .boolean("enabled")
+        "set_space_transition": APIRecord(
+            "Sets how a Space switch shows itself: the plate "
+                + "slide, the Space and its layout, or nothing.",
+            .choice("transition", SpaceTransition.self)
+        ),
+        "set_space_slide_duration": APIRecord(
+            "Sets the Space slide's pace in milliseconds, clamped "
+                + "to its band.",
+            .integer("milliseconds")
         ),
         "set_mode_cue": APIRecord(
             "Shows the cycle list and the new layout on the "

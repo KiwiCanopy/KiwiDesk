@@ -430,8 +430,12 @@ Spaces by their order and by the ones you visited
 `set_desktop_cue` turns off the plate a Desktop switch shows
 ([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
 
-`set_space_cue` turns off the plate naming the Space a switch
-lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
+:::unreleased
+`set_space_transition` picks how a Space switch shows itself, and
+`set_space_slide_duration` paces the slide
+([`set_space_transition`](lua-reference.md#set_space_transition)).
+:::
+
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 
@@ -528,7 +532,8 @@ every lens with why it cannot turn on.
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
-| | `set_space_cue` | true\|false (default `true`) — the plate naming the Space an explicit switch lands on, where no Space Bar is drawn |
+| | `set_space_transition` | `slide` (default) \| `show` \| `none` — how an explicit Space switch shows itself: the plate slide, a plate naming the Space, or nothing |
+| | `set_space_slide_duration` | ms (150–1000, default 300) — the plate slide's pace |
 | | `set_mode_cue` | true\|false (default `true`) — the plate showing the layout a `cycle_mode` lands on |
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
@@ -633,11 +638,15 @@ track number (from 1) and a positive weight, `1` being an equal
 share; each has a `_override` sibling taking a space id first
 ([Lua reference](lua-reference.md#gridset_column_weight)).
 
-`animations.set_on_space_change` and `animations.set_space_change`
-are refused, naming `set_space_cue`;
-`animations.set_space_change_duration` and
-`set_space_switch_liquid_glass` are refused, since a Space switch
-is instant and no longer slides.
+:::unreleased
+`set_space_cue`, `animations.set_on_space_change` and
+`animations.set_space_change` are refused, naming
+`set_space_transition`; `animations.set_space_change_duration` is
+refused, naming `set_space_slide_duration`; and
+`set_space_switch_liquid_glass` is refused, since the Space
+slide's plates follow KiwiHub's glass.
+:::
+
 `animations.set_on_monocle_focus` and
 `animations.set_monocle_flip_duration` are refused, since a
 Monocle focus change is a raise and plays no flip.

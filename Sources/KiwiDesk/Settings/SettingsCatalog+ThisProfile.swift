@@ -138,6 +138,14 @@ struct ColorsControls: Sendable {
         "behavior.animations.title",
         "Animations"
     )
+    let spaceTransition = SettingsControl(
+        "animations.space_transition",
+        "Space switches"
+    )
+    let spaceSlideDuration = SettingsControl(
+        "animations.space_slide_duration",
+        "Slide duration"
+    )
     /// Declared with its children so a hit on a per-event
     /// toggle opens the drawer (#1250, #277).
     let motionMore = SettingsDrawer(

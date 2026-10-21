@@ -1151,10 +1151,10 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
   temporary retire, since every membership change retiles
   (`UndeclaredSpaceDisplayTests` ▸ `setModeTargetHasAChip`). A
   path that reads a new Space's screen BEFORE its own retile
-  places it first: the switch ahead of `spaceSwitchDisplay`
-  (`FullscreenStandDownTests` ▸ `firstVisitIsNamed`), the one
+  places it first: the switch ahead of `spaceSlideIntent`
+  (`UndeclaredSpaceDisplayTests` ▸ `firstVisitSlides`), the one
   `followSwitch` likewise, a launch follow's rule Space included
-  (`FullscreenStandDownTests` ▸ `launchFollowIsNamed`), the one
+  (`UndeclaredSpaceDisplayTests` ▸ `launchFollowSlides`), the one
   `fileMembership` ahead of the float re-anchor, and boot ahead
   of its activation — those two read `NSScreen` and the
   frontmost app, which no fixture pins, so they have no test;

@@ -1,11 +1,14 @@
 import Foundation
 
-/// The retile behind a Space switch (#207, #2228).
+/// The retile behind a Space switch (#207, #1956).
 ///
 /// State (active space, focus, bars, events) commits up front; the
-/// frames then land in one instant pass, and an explicit switch
-/// names the Space it landed on with the plate (`paySpaceCue`,
-/// #2143) where nothing else names it.
+/// frames then land in one instant pass. An explicit switch with
+/// `space.transition` on Slide plays the plate slide around that
+/// pass (`prepareSpaceSlide`, `runSpaceSlide`, #1956, #2524): the
+/// motion is drawn, and the windows still move once each. On Show
+/// the Space — or Slide under Reduce Motion — it pays the plate
+/// naming the Space instead (`paySpaceCue`, #2143).
 ///
 /// Native macOS Space switches are untouched: AX cannot address
 /// an inactive desktop's windows, so that path stays instant in
@@ -16,10 +19,10 @@ extension KiwiCore {
     /// behind AX echoes during rapid switching, and probes
     /// nothing — it is not an apply.
     ///
-    /// `cueOn` is the screen an EXPLICIT switch changes, read
-    /// before it activated (`spaceSwitchDisplay`); only navigation
+    /// `slide` is the screen an EXPLICIT switch changes, read
+    /// before it activated (`spaceSlideIntent`); only navigation
     /// passes one — boot, wake, a restore, a display follow and a
-    /// Space moved between screens name nothing. The 300 ms
+    /// Space moved between screens retile instantly. The 300 ms
     /// settle re-assert and the Space Bar spring switch do not
     /// route here at all.
     /// `newcomer` is a window arriving with this switch (#1599's
@@ -31,17 +34,23 @@ extension KiwiCore {
     func spaceSwitchRetile(
         asSwitch: Bool,
         newcomer: WindowID? = nil,
-        cueOn: DisplayID? = nil
+        slide: SpaceSlideIntent? = nil
     ) {
-        // The focused ring appears with its window (#1959) — a
-        // window this switch brings out of its park; one already
-        // shown keeps its ring.
+        let run = slide.flatMap(prepareSpaceSlide)
+        // A navigation that stands the slide down cuts a running
+        // one; anything else is the head-of-retile check's.
+        if slide != nil, run == nil { endSpaceSlide() }
+        // The focused ring appears with its window, never ahead of
+        // the plates lifting (#1959) — a window this switch brings
+        // out of its park; one already shown keeps its ring.
         if let space = activeSpace,
             let anchor = state.focusAnchor(of: space),
             let frame = state.windows[anchor]?.frame,
             tiler.looksStashed(frame)
         {
-            borders.holdArrival(of: anchor)
+            borders.holdArrival(of: anchor) { [weak self] in
+                self?.spaceSlide.play?.liftAt
+            }
         }
         let pass = { [self] in
             retile(
@@ -55,6 +64,10 @@ extension KiwiCore {
         } else {
             pass()
         }
-        if let cueOn { paySpaceCue(on: cueOn) }
+        if let run {
+            runSpaceSlide(run)
+        } else if let slide {
+            paySpaceCue(on: slide.display)
+        }
     }
 }

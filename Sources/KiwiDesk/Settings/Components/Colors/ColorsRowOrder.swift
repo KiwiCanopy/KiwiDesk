@@ -28,10 +28,13 @@ enum ColorsRowOrder {
         .colours(.borderSheen),
     ]
 
-    /// The Motion card's at-rest row: the window animations'
-    /// master.
+    /// The Motion card's at-rest rows: how a Space switch shows
+    /// itself and the slide's pace beneath it (#2524), then the
+    /// window animations' master.
     static let motionAtRest: [SettingKey] = [
-        .colours(.animationsMaster)
+        .colours(.spaceTransition),
+        .colours(.spaceSlideDuration),
+        .colours(.animationsMaster),
     ]
 
     /// Motion card disclosure rows.

@@ -301,6 +301,10 @@ these:
   2026-10-05). Our own animation ticks are not the window
   arriving. A window that never reports gets its ring at
   `arrivalCap` (`BorderArrivalTests`).
+- **Never ahead of the slide's plates lifting**: the hold reads
+  `spaceSlide.play?.liftAt` live, since a burst press moves it
+  (`BorderArrivalTests` ▸ `liftGatesTheReveal`,
+  `BorderArrivalWiringTests` ▸ `holdReadsTheSlidesLift`).
 - **The reveal fades through `BarMotion.opacityFade`, handed the
   manager's `reduceMotion` read**, so Reduce Motion cuts it in —
   stated, not guarded, as the section on a cue's Reduce Motion
@@ -582,7 +586,7 @@ Obligations:
   commits through the one `fadeLeaving` ahead of the plate's order
   in `sync`** (#2417). Whether a fade is owed is the one
   `KiwiCore.visionLeaving` — a tracked window on a shown Space, so
-  a Space switch stays instant (#2228), never a window a lens held
+  a Space switch fades nothing (#2228), never a window a lens held
   — and the plate never orders above the new focus for it. The
   fade's masks reach WindowServer before the order, or the window
   left is covered whole for a frame (`VisionLeaveFadeSeamTests`,

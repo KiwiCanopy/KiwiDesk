@@ -1,10 +1,11 @@
 import Foundation
 import Testing
 
-/// The Space cue's seams (#2143, #2228): paid from one place, and
-/// decided by the one `space.cue` reading inside the payer — so a
-/// second switch path cannot show the plate past the toggle.
-@Suite("Space cue seams (#2143, #2228)")
+/// The Space cue's seams (#2143, #2524): paid from one place, and
+/// decided by the one `drawnSpaceTransition` reading inside the
+/// payer — so a second switch path cannot show the plate past the
+/// user's pick.
+@Suite("Space cue seams (#2143, #2524)")
 struct SpaceCueSeamTests {
     private static let core = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent().deletingLastPathComponent()
@@ -39,15 +40,16 @@ struct SpaceCueSeamTests {
         #expect(calls == ["KiwiCore+SpaceTransition.swift"])
     }
 
-    @Test("the payer alone reads the toggle")
+    @Test("the stored pick is read once, through the drawn reading")
     func oneReading() throws {
         let files = Dictionary(uniqueKeysWithValues: try Self.sources())
         let cue = try #require(files["SpaceSwitchCue.swift"])
-        #expect(cue.contains("guard appWide.spaceCue,"))
-        // Nothing else reads the toggle to decide a switch.
+        #expect(cue.contains("guard drawnSpaceTransition == .show,"))
+        // Nothing else reads the stored pick to decide a switch:
+        // the slide and the cue both take the drawn reading.
         let readers = try Self.sources().filter { _, text in
-            text.contains("appWide.spaceCue")
+            text.contains("appWide.spaceTransition")
         }.map(\.0)
-        #expect(readers == ["SpaceSwitchCue.swift"])
+        #expect(readers == ["KiwiCore+SpaceSlide.swift"])
     }
 }

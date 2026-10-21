@@ -18,10 +18,12 @@ public struct AppWideSettings: Equatable, Sendable {
     /// ON by default: the instant switch removed the slide that
     /// was the cue.
     public var desktopCue = true
-    /// Whether an explicit Space switch shows the plate naming the
-    /// Space it landed on, where no Space Bar is drawn
-    /// (`space.cue`, #2228). ON by default: the switch is instant.
-    public var spaceCue = true
+    /// How an explicit Space switch shows itself
+    /// (`space.transition`, #2524). The slide by default.
+    public var spaceTransition = SpaceTransition.slide
+    /// The plate slide's pace in ms (`space.slide_duration`,
+    /// #1931), inside `spaceSlideDurationRange`.
+    public var spaceSlideDuration = AppWideSettings.spaceSlideDefaultMS
     /// Whether `cycle_mode` shows the plate with the cycle list
     /// and the layout it landed on (`mode.cue`, #2144). ON by
     /// default: the press asked for it.
@@ -73,6 +75,19 @@ public struct AppWideSettings: Equatable, Sendable {
     /// The dim's band in percent: the verb, the decode and the
     /// Settings stepper all read it.
     public static let visionDimRange: ClosedRange<Double> = 0...100
+
+    /// The slide's default pace in ms. Moving it moves a stored
+    /// default and owes profiles.md's crossing question (#1369).
+    public static let spaceSlideDefaultMS = 300
+    /// The slide's band in ms: below it the strip is a jump; above
+    /// it a switch outlasts the hand that pressed it.
+    public static let spaceSlideDurationRange: ClosedRange<Int> = 150...1000
+
+    /// `raw` clamped into `spaceSlideDurationRange`.
+    static func clampedSlideDuration(_ raw: Int) -> Int {
+        let band = spaceSlideDurationRange
+        return min(max(raw, band.lowerBound), band.upperBound)
+    }
 
     /// The fade's band in ms: the verb, the decode and the Settings
     /// stepper all read it.
@@ -142,9 +157,17 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
-    /// `gui.json`'s `space` group (#2228) — additive, as `desktop`.
+    /// `gui.json`'s `space` group (#2228, #2524) — additive, as
+    /// `desktop`. Its #2228 `cue` crosses to `transition` once
+    /// (`migratingSpaceCueOntoTransition`).
     struct Space: Codable {
-        var cue: Bool?
+        var transition: SpaceTransition?
+        var slideDuration: Int?
+
+        enum CodingKeys: String, CodingKey {
+            case transition
+            case slideDuration = "slide_duration"
+        }
     }
 
     /// `gui.json`'s `mode` group (#2144) — additive, as `desktop`.
@@ -231,7 +254,12 @@ extension AppWideSettings {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
         if let cue = desktop?.cue { desktopCue = cue }
-        if let cue = space?.cue { spaceCue = cue }
+        if let transition = space?.transition {
+            spaceTransition = transition
+        }
+        if let ms = space?.slideDuration {
+            spaceSlideDuration = Self.clampedSlideDuration(ms)
+        }
         if let cue = mode?.cue { modeCue = cue }
         hyperKey = hyper?.key
         if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
@@ -265,7 +293,9 @@ extension AppWideSettings {
         Quit(gridTargetDepth: quitGridTargetDepth, layout: quitLayout)
     }
     var desktop: Desktop { Desktop(cue: desktopCue) }
-    var space: Space { Space(cue: spaceCue) }
+    var space: Space {
+        Space(transition: spaceTransition, slideDuration: spaceSlideDuration)
+    }
     var mode: Mode { Mode(cue: modeCue) }
     var hyper: Hyper { Hyper(key: hyperKey) }
     var vision: Vision {

@@ -53,8 +53,7 @@ struct KiwiShelfCard: View {
         switch key {
         case .kiwishelf(let k):
             kiwishelfRow(k)
-        case .spaceBar(.spaceBarVisibility), .spaceBar(.spaceCue),
-            .layoutAppBar:
+        case .spaceBar(.spaceBarVisibility), .layoutAppBar:
             showRow(key)
         case .colours(.animationsRevealDurationMS),
             .colours(.animationsExpandDurationMS):

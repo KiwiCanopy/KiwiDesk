@@ -36,6 +36,8 @@ extension KiwiCore {
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.
         // A temporary one the same way, once armed (#1790).
+        // A plate slide another activation took past (#1956).
+        endSpaceSlideIfOvertaken()
         noteSpaceVisits()  // #1655: a Space shown without an event
         let heldRetired = retireEmptiedHeldSpaces()
         var spacesChanged = false

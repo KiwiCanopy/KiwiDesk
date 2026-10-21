@@ -19,9 +19,6 @@ struct BarsGates {
         /// The shelf's font family is not installed, so System
         /// draws and the family has no weights to offer (#1681).
         case fontMissing(family: String)
-        /// `init.lua` owns the config, so an app-wide row it does
-        /// not store is not the GUI's to write (#1741).
-        case appWideLuaOwned
         /// Every bar reads Always, so nothing reveals (owner
         /// ruling, 2026-10-21).
         case noBarHides
@@ -35,7 +32,7 @@ struct BarsGates {
     /// runtime-gated bars row landing in neither set reds. A bars
     /// row's `.setting` gate is wiring's, as gui.md rules.
     static let resolved: Set<SettingKey> = [
-        .spaceBar(.spaceCue), .kiwishelf(.revealStyle),
+        .kiwishelf(.revealStyle),
         .colours(.animationsRevealDurationMS),
         .colours(.animationsExpandDurationMS),
     ]
@@ -46,8 +43,6 @@ struct BarsGates {
     /// Resolves a row's declared runtime gate (#2228).
     func inertReason(for key: SettingKey) -> InertReason? {
         switch key {
-        case .spaceBar(.spaceCue):
-            return guiManaged ? nil : .appWideLuaOwned
         case .kiwishelf(.revealStyle),
             .colours(.animationsRevealDurationMS):
             return settings.someBarHides ? nil : .noBarHides
@@ -149,8 +144,6 @@ enum BarsGateHelp {
                     + "of its own to choose.",
                 family
             )
-        case .appWideLuaOwned:
-            return GeneralGateHelp.sentence(for: .luaOwned)
         case .noBarHides:
             return L(
                 "kiwishelf.reveal_style.no_bar_hides",

@@ -1078,11 +1078,15 @@ names it. While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 
-The plate naming the Space after a switch is not on that card:
-it is a cue rather than motion, so its row, **Show the Space after
-a switch**, closes KiwiShelf's Show group, and
-neither Reduce Motion nor the animations master greys it. Reduce
-Motion drops only its fade (#2228).
+:::unreleased
+The Space switch is on that card: **Space switches** at its top
+picks Slide, Show the Space or None, and **Slide duration**
+beneath it paces the slide, greyed while the pick is not Slide
+(#1956, #2524). Neither Reduce Motion nor the **Animate windows**
+master greys the two: under Reduce Motion a Slide shows the Space
+instead, which is how a switch reads with less motion, and the
+plate drops only its fade.
+:::
 
 Three bar motions keep playing under Reduce Motion, by the owner's
 ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its

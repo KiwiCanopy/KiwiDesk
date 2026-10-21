@@ -67,7 +67,8 @@ appWide.hyperKey
 appWide.modeCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
-appWide.spaceCue
+appWide.spaceSlideDuration
+appWide.spaceTransition
 appWide.visionAppearance
 appWide.visionBlur
 appWide.visionClearApp

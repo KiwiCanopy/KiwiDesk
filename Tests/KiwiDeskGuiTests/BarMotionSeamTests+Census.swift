@@ -46,6 +46,7 @@ extension BarMotionSeamTests {
         "springSweep": ["springAnimation(", "isReduced"],
         "springAnimation": ["reduceMotion"],
         "opacityFade": ["reduceMotion"],
+        "slideSpring": ["reduceMotion"],
         "revealOffset": [],
         "revealShift": [],
         "revealMotion": [],

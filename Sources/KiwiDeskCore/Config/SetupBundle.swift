@@ -85,7 +85,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 35 = the shelf's glide became its expand (owner ruling,
     /// 2026-10-21), in a bundle's `[Profile]`, its `config`'s
     /// shared look and its looks alike.
-    public static let currentFormat = 35
+    /// 36 = `space.cue` became `space.transition` (#2524), in a
+    /// bundle's `config`.
+    public static let currentFormat = 36
 
     public let format: Int
 

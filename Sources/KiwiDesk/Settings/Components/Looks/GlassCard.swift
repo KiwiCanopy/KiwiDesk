@@ -111,7 +111,8 @@ struct GlassCard: View {
         L(
             "colors.glass.caption",
             "A translucent material over both bars, %1$@, the "
-                + "drag ghost and drop zone, and the sticky mark.",
+                + "drag ghost and drop zone, the sticky mark and the "
+                + "plates a Space switch slides.",
             JumpScope.panelName
         )
     }
@@ -124,11 +125,12 @@ struct GlassCard: View {
             "colors.liquid_glass.help",
             "Lays macOS's translucent material over the Space "
                 + "Bar, the App Bar, %2$@, the drag ghost and drop "
-                + "zone, and the sticky mark. KiwiShelf's %1$@ "
-                + "color tints the bars, fading from its screen "
-                + "edge; the drag ghost, drop zone and sticky mark "
-                + "take their own colors, fading downward; the "
-                + "panel stays untinted.",
+                + "zone, the sticky mark and the plates a Space "
+                + "switch slides. KiwiShelf's %1$@ color tints the "
+                + "bars, fading from its screen edge; the drag "
+                + "ghost, drop zone and sticky mark take their own "
+                + "colors, fading downward; the panel and the "
+                + "plates stay untinted.",
             L("kiwishelf.color.fill", "Fill"),
             JumpScope.panelName
         )

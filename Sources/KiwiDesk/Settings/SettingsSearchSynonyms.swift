@@ -105,6 +105,10 @@ enum SettingsSearchSynonyms {
             return ["icon", "glyph", "system default", "app font"]
         case .colours(.borderSheen):
             return ["gloss", "shine", "gradient", "highlight", "shade"]
+        case .colours(.spaceTransition):
+            return ["slide", "transition", "space change", "cue"]
+        case .colours(.spaceSlideDuration):
+            return ["speed", "space speed", "slide speed", "transition"]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         // Each well is labelled by its group (#2389), so the

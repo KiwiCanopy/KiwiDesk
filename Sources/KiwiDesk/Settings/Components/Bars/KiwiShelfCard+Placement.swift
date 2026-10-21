@@ -78,8 +78,6 @@ extension KiwiShelfCard {
                     .spaceBarShow
             )
             besideAlwaysNote(.space, in: [.monocle, .scrolling])
-        case .spaceBar(.spaceCue):
-            spaceCueRow
         case .layoutAppBar(.monocleAppBarVisibility):
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children

@@ -29,6 +29,7 @@ public final class KiwiCore {
     public let stickyMarks = StickyMarkManager()
     /// KiwiVision's plates (#2103), driven with the rings.
     public let vision = VisionManager()
+    let spaceSlide = SpaceSlideOverlay()  // #1956, #2524
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
@@ -42,9 +43,8 @@ public final class KiwiCore {
 
     /// The global window-rule bases (`GlobalRuleBase`).
     var globalRuleBase = GlobalRuleBase()
-    /// `loadConfig` installs several candidate rule states before
-    /// the active native-Space binding is known. Suppress their AX
-    /// reconciles and run one pass after the final profile wins.
+    /// Holds AX reconciles while `loadConfig` tries candidate rule
+    /// states; one pass runs once the final profile wins.
     var defersWindowRuleReconcile = false
 
     /// Boot's half of the same suppression (#836). **Raised in

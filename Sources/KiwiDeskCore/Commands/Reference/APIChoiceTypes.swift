@@ -18,6 +18,7 @@ extension FloatPlacement: APIChoiceType {}
 extension SizePolicy: APIChoiceType {}
 extension QuitLayoutStyle: APIChoiceType {}
 extension SpaceHistoryKind: APIChoiceType {}
+extension SpaceTransition: APIChoiceType {}
 extension ModeCycleDirection: APIChoiceType {}
 extension HyperSourceKey: APIChoiceType {}
 

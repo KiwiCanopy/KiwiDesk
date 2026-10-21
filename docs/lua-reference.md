@@ -1039,37 +1039,83 @@ KiwiDesk.set_hyper_key("caps_lock")
 KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
 ```
 
-### set_space_cue
+:::unreleased
+### set_space_transition
 
-**Expects:** `true` or `false` (default `true`).
+**Expects:** `"slide"`, `"show"` or `"none"` (default `"slide"`).
 
-**Does:** whether an explicit Space switch —
+**Does:** sets how an explicit Space switch —
 [`focus_space`](#focus_space) and the Space history and order
 steps, the [scroll Space step](#scroll_gestureset_space_step), a
 [move-and-follow](#move_to_space_and_follow), Open or Focus onto
-another Space or a launch follow — shows a plate in the middle of
-the screen that switched: the Space's name or number and its
-layout's symbol. The plate shows only where that screen draws no
-Space Bar ([`space_bar.set_visibility`](#space_barset_visibility))
-and never over a full-screen app or a presentation. It takes no
-focus or click and fades after
-about a second; with Reduce Motion on it appears and leaves
-without the fade. The switch itself is always instant.
+another Space or a launch follow — shows itself on the screen that
+switched:
 
-The GUI twin is **KiwiShelf ▸ KiwiShelf ▸ Show ▸ Show the Space
-after a switch**. Like [`set_desktop_cue`](#set_desktop_cue), the
-setting is app-wide, stored in `gui.json` as `space.cue`; the verb
-changes the running value only. It replaces
-`animations.set_space_change` and `animations.set_on_space_change`,
-which are refused, naming it; `animations.set_space_change_duration`
-and `set_space_switch_liquid_glass` are refused, since a Space
-switch no longer slides.
+- `"slide"`: the plate slide. A plate with its app's icon fades in
+  over each window on that screen, the plates slide as one strip
+  one screen toward the new Space — across when the Space Bar's
+  edge is the top or bottom, up or down when it is a side — and
+  fade out over the windows that arrive. The windows themselves
+  move once each, under the plates. The plates wear KiwiHub's
+  glass
+  ([`set_shortcut_panel_liquid_glass`](#set_shortcut_panel_liquid_glass)).
+  With Reduce Motion on, a switch shows the Space as `"show"`
+  does, the stored value staying `"slide"`.
+- `"show"`: the screen changes at once, and a plate in its middle
+  shows the Space's name or number and its layout's symbol, whether
+  or not that screen draws a Space Bar, and never over a
+  full-screen app or a presentation. It takes no focus or click
+  and fades after about a second; with Reduce Motion on it appears
+  and leaves without the fade.
+- `"none"`: the screen changes at once.
+
+The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Space
+switches**, which neither Reduce Motion nor the **Animate
+windows** switch greys. Like [`set_desktop_cue`](#set_desktop_cue),
+the setting is app-wide, stored in `gui.json` as
+`space.transition`; the verb changes the running value only. It
+replaces `set_space_cue`, `animations.set_space_change` and
+`animations.set_on_space_change`, which are refused, naming it; a
+stored `space.cue` that was on becomes `"slide"`, and one that was
+off `"none"`.
+
+macOS Desktop switches are never animated in either direction (see
+[Accepted limitations](accepted-limitations.md)).
 
 **Example:**
 
 ```lua
-KiwiDesk.set_space_cue(false)
+KiwiDesk.set_space_transition("show")
 ```
+:::
+
+:::unreleased
+### set_space_slide_duration
+
+**Expects:** a number (milliseconds, clamped 150–1000; default
+`300`).
+
+**Does:** sets the pace of the plate slide
+([`set_space_transition`](#set_space_transition)): how long the
+plates take to slide to the new Space, their fades scaling with
+it. It has no effect unless the transition is `"slide"`, nor while
+Reduce Motion is on. Window motion keeps its own pace
+([animations.set_duration](#animationsset_duration)). Read at the
+next switch.
+
+The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Slide
+duration**, grey while **Space switches** is not on Slide. The
+setting is app-wide, stored in `gui.json` as
+`space.slide_duration`; the verb changes the running value only.
+It replaces `animations.set_space_change_duration`, which is
+refused, naming it.
+
+**Example:**
+
+```lua
+KiwiDesk.set_space_slide_duration(450)
+```
+:::
 
 ### set_mode_cue
 
@@ -1118,6 +1164,13 @@ profile switch can change the panel's material.
 The slow-boot notice reads this leaf too: it draws its capsule
 in the same material (#1715).
 
+:::unreleased
+The plates a Space switch slides
+([`set_space_transition`](#set_space_transition)) read this leaf
+too, and keep it untinted; `set_space_switch_liquid_glass` is
+refused, since they have no leaf of their own.
+:::
+
 Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
 ([Liquid Glass](#kiwishelfset_liquid_glass)).
@@ -1150,8 +1203,11 @@ corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
-The switch is instant; whether a plate names the Space it lands
-on is [`set_space_cue`](#set_space_cue).
+:::unreleased
+How the switch shows itself — the plate slide, at once with a
+plate naming the Space, or at once — is
+[`set_space_transition`](#set_space_transition).
+:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -2537,6 +2593,10 @@ and the sticky mark their flat look. The stored values are
 untouched, so the glass and the alpha return the moment the
 setting goes off (#1374).
 
+:::unreleased
+The Space switch's plates draw their material then too.
+:::
+
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
 shortcuts panel's
@@ -2547,6 +2607,10 @@ and the sticky mark's
 and shows on only when all of them are on.
 
 The slow-boot notice follows the shortcuts panel's.
+
+:::unreleased
+So do the plates a Space switch slides.
+:::
 
 This verb sets the
 bars alone; setting them apart is a Lua-only state, and the

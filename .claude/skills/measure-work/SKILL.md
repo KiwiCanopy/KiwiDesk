@@ -131,10 +131,13 @@ The fixture pins only the animation settings every measured
 release shares; a setting one release changes or lacks is stated
 per bundle in `extra.lua`, which `up` appends to the config — a
 2.x *slide off* bundle appends
-`animations.set_on_space_change(false)`. 3.0.0 has no slide
-(#2228), and its Space plate stays away while the Space Bar is
-on — the default the fixture leaves — so a 3.0.0 bundle needs no
-line for it. Compare
+`animations.set_on_space_change(false)`. 3.0.0 through 3.2.x
+have no slide (#2228), and their Space plate stays away while the
+Space Bar is on — the default the fixture leaves — so such a
+bundle needs no line for it. A release with
+`set_space_transition` slides by default (#2524): its *slide
+off* bundle appends `KiwiDesk.set_space_transition("none")`, and
+its pace is `KiwiDesk.set_space_slide_duration(ms)`. Compare
 like with like: every release with all animations off, and every
 release that has the slide with it on at one shared pace, each
 set through `extra.lua`. Pass `--gap` past the
