@@ -30,8 +30,9 @@ struct TestScratchSweepTests {
             }
         }
 
+        /// The shape `claimRoot` mints: pid, then 8 hex.
         func root(_ pid: pid_t) -> String {
-            "\(TestScratch.rootPrefix)\(pid)"
+            "\(TestScratch.rootPrefix)\(pid)-\(UUID().uuidString.prefix(8))"
         }
 
         func plist(_ pid: pid_t) -> String {
@@ -65,9 +66,10 @@ struct TestScratchSweepTests {
         let own = getpid()
         let deadPlist = fixture.plist(Self.deadPID)
         let livePlist = fixture.plist(own)
+        let liveRoot = fixture.root(own)
         let unrelated = ["kiwi-runner", "kiwi-run-x", "other.plist"]
         try fixture.make(
-            [fixture.root(Self.deadPID), fixture.root(own)]
+            [fixture.root(Self.deadPID), liveRoot]
                 + unrelated.prefix(2),
             [deadPlist, livePlist, unrelated[2]]
         )
@@ -77,7 +79,7 @@ struct TestScratchSweepTests {
         ) { !TestScratch.isAlive($0) }
         #expect(
             try fixture.left()
-                == Set([fixture.root(own), livePlist] + unrelated)
+                == Set([liveRoot, livePlist] + unrelated)
         )
     }
 
@@ -88,8 +90,9 @@ struct TestScratchSweepTests {
         let otherLive = getppid()
         let ownPlist = fixture.plist(own)
         let otherPlist = fixture.plist(otherLive)
+        let otherRoot = fixture.root(otherLive)
         try fixture.make(
-            [fixture.root(own), fixture.root(otherLive)],
+            [fixture.root(own), otherRoot],
             [ownPlist, otherPlist]
         )
         TestScratch.sweep(
@@ -98,7 +101,7 @@ struct TestScratchSweepTests {
         ) { $0 == own }
         #expect(
             try fixture.left()
-                == Set([fixture.root(otherLive), otherPlist])
+                == Set([otherRoot, otherPlist])
         )
     }
 

@@ -201,8 +201,9 @@ bite large test PRs:
     Its state is per process and every name carries the pid
     (each root a UUID too, since both test modules load into one
     process), so nothing couples one suite or one run to another.
-    A test takes its scratch folder, defaults domain and spawned
-    children's `TMPDIR` from it — `TestScratchCensusTests` holds
+    A test takes its scratch folder and defaults domain from it,
+    and the two script-spawn primitives hand their children its
+    root as `TMPDIR` — `TestScratchCensusTests` holds
     the spellings, and its `literalTmp` map names the `/tmp`
     paths a socket root keeps short for `sun_path` —
     `MachineTouchTests` the twins.
