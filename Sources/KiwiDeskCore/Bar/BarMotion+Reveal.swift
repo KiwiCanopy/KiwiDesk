@@ -84,8 +84,7 @@ extension BarMotion {
                     // Out of the mark as its hover leaves it.
                     mark: hoverPlate(
                         mark: path.origin,
-                        hovered: true,
-                        reduceMotion: false
+                        hovered: true
                     ),
                     plate: plate,
                     plateRadius: path.plateRadius

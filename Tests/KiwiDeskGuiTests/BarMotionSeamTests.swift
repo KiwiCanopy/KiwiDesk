@@ -131,8 +131,9 @@ struct BarMotionSeamTests {
         "afterReveal": [],
         "markFade": ["reduceMotion"],
         "fadeMark": ["markFade(", "isReduced"],
-        "hoverPlate": ["reduceMotion"],
-        "placeHoverPlate": ["hoverPlate(", "isReduced"],
+        "hoverPlate": [],
+        "hoverGrowDuration": [],
+        "placeHoverPlate": ["hoverGrowDuration(", "isReduced"],
     ]
 
     private static func stripped(_ home: String) throws -> String {

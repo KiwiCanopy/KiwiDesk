@@ -110,19 +110,11 @@ struct ShelfDotWindowTests {
         let plate = BarMotion.hoverPlate(
             mark: mark,
             widen: extra,
-            labelled: true,
-            hovered: true,
-            reduceMotion: true
+            hovered: true
         )
-        // Content, not motion: the room is taken under Reduce
-        // Motion too.
         #expect(
             plate.width == mark.width + extra + 2
                 * ShelfIndicatorSpec.hoverGrowth
-        )
-        #expect(
-            BarMotion.hoverPlate(mark: mark, hovered: true, reduceMotion: true)
-                == mark
         )
     }
 }
