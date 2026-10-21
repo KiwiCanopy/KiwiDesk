@@ -35,7 +35,8 @@ extension KiwiCore {
     /// (#445) — the same gate the Space-Bar spring calls, since
     /// `addFocusedToSpace` (not `moveWindow`) is the real re-home
     /// choke point and has two callers. `trading` sends that
-    /// window the other way, into `window`'s slot (#2509).
+    /// window the other way, into `window`'s slot (#2509); its
+    /// caller asks the sticky gate for it, `swapWindows` the one.
     func moveWindow(
         _ window: WindowID,
         to target: SpaceID,
@@ -49,15 +50,6 @@ extension KiwiCore {
             to: target,
             landingOn: landingDisplay(of: target)
         ) {
-            return
-        }
-        if let partner, let from,
-            stickyMoveRefused(
-                partner,
-                to: from,
-                landingOn: landingDisplay(of: from)
-            )
-        {
             return
         }
         // Captured before the focus reassign below overwrites it:
@@ -144,14 +136,17 @@ extension KiwiCore {
 
     /// The one trade filing (#2509): `a` and `b`, in different
     /// Spaces, take each other's slot in one step, then each
-    /// takes the side effects `fileMembership` owes a filing.
+    /// takes the side effects `fileMembership` owes a filing
+    /// through the shared `settleFiling`. Only a window landing
+    /// in the active Space moves the focus trackers; the other is
+    /// its Space's focus for the next visit, whoever held focus,
+    /// so the pair's order decides nothing.
     func fileTrade(_ a: WindowID, _ b: WindowID) {
         guard let from = state.workspaces.space(of: a),
             let to = state.workspaces.space(of: b),
             from != to
         else { return }
         let active = state.workspaces.activeSpace
-        let lastFocused = state.workspaces.lastFocused
         let filings = [(a, to, from), (b, from, to)].map {
             window,
             target,
@@ -161,7 +156,7 @@ extension KiwiCore {
                 target: target,
                 origin: origin,
                 wasFloat: isEffectiveFloatForPlacement(window),
-                takesFocus: lastFocused == window || target == active
+                takesFocus: target == active
             )
         }
         for filing in filings { state.stampUserFiling(filing.window) }

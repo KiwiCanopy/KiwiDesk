@@ -75,6 +75,10 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+TrackNavigate.swift": (
             .slots, "navigation is geometric over regions"
         ),
+        "KiwiCore+SwapCommand.swift": (
+            .slots,
+            "an id swap's #438 refusal classifies the pile (#2509)"
+        ),
         "KiwiCore+NavigateCommand.swift": (
             .slots, "navigation is geometric over regions"
         ),

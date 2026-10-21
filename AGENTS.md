@@ -752,9 +752,11 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   files now, a Space on another screen is refused, an unowned one is accepted
   on one screen only and never hand-assigned, its landing screen carried on the
   resolution, the write takes the one sticky gate told where the Space will lay
-  out, and every membership filing goes through the one `fileMembership`
-  (#1150, `DesktopMoveSpaceTargetTests`, `DesktopMoveSpaceGateTests`,
-  `PendingSpaceAssignmentTests`, `PendingSpaceSeamTests`)
+  out, and every membership filing goes through the one `fileMembership`,
+  a swap's two-window trade through the one `fileTrade`, both settling through
+  the one `settleFiling` (#1150, #2509, `DesktopMoveSpaceTargetTests`,
+  `DesktopMoveSpaceGateTests`, `PendingSpaceAssignmentTests`,
+  `PendingSpaceSeamTests`)
 - a follow owes the window it sent to an unshown Desktop a focus, recorded only
   for a switch that happened, paid at that window's own ARRIVAL as a space
   switch rather than a bare focus, with the departure's raise stood down

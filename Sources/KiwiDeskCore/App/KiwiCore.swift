@@ -253,8 +253,8 @@ public final class KiwiCore {
     /// Ruled OUT: a move VERB (`fileMembership`), where the user
     /// chose the destination and a window entering a floating
     /// space by a verb takes the float placement (#1708); and a
-    /// window re-filed while AWAY (`refileAway`), whose return
-    /// carries the frame macOS kept for it on that Desktop.
+    /// window re-filed while AWAY (`refileAway`), which keeps its
+    /// Desktop frame; and a swap's trade (#2509), never a float.
     var refiledWindows: Set<WindowID> = []
 
     /// The live arrangement's space→monitor fingerprint pins, adopted

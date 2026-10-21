@@ -213,6 +213,9 @@ extension KiwiCore {
         let crossedZones = crossesStackBoundary(a, b, in: space)
         state.workspaces.withSpace(space.id) { $0.swap(a, b) }
         retile(animated: tiler.settings.animations.onWindowSwap)
+        // Every arm reads the active Space: a two-id swap in a
+        // Space nobody is on scrambles nothing on screen (#2509).
+        guard space.id == state.workspaces.activeSpace else { return }
         // A scrolling swap can push a window into an edge pile
         // whose stacking then goes stale (#150); a track swap
         // that fell through to the geometric search can

@@ -8,6 +8,7 @@ import Foundation
 /// where you are: the named window takes your slot and the focus.
 /// Windows in different Spaces trade places, each taking the
 /// other's slot.
+
 /// Where focus goes after a swap of `lead` with `partner`.
 enum SwapFocus {
     /// It stays on `lead`, switching to the Space it lands in.
@@ -97,17 +98,34 @@ extension KiwiCore {
             return .fail("window is in no Space")
         }
         guard home == away else {
+            // Both sides asked before anything moves (#445), so a
+            // refusal is the command's answer, not a silent no-op.
+            if stickyMoveRefused(
+                lead,
+                to: away,
+                landingOn: landingDisplay(of: away)
+            )
+                || stickyMoveRefused(
+                    partner,
+                    to: home,
+                    landingOn: landingDisplay(of: home)
+                )
+            {
+                return .fail("a sticky window cannot change Space")
+            }
             moveWindow(
                 lead,
                 to: away,
                 follow: focus == .follows,
                 trading: partner
             )
-            // The incoming window sits in an overflow pile at the
-            // slot it took, unstacked (#150, #193).
-            if state.workspaces.activeSpace == home
-                || state.workspaces.activeSpace == away
-            {
+            // The window a trade brings into the active Space sits
+            // in an overflow pile at the slot it took, unstacked
+            // (#150, #193). Both arms read the active Space alone,
+            // so a trade into a Space another screen shows owes
+            // its pile nothing until that Space is active.
+            let active = state.workspaces.activeSpace
+            if active == home || active == away {
                 scheduleScrollingZOrderRestoreIfOverflowing()
                 scheduleTrackZOrderRestoreIfOverflowing()
             }
