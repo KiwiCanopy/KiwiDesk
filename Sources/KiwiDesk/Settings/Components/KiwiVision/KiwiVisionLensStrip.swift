@@ -88,6 +88,7 @@ struct KiwiVisionLensStrip: View {
                 adding = nil
                 model.nav.kiwiVisionLens = AppWideSettings.lensName(typed)
             }
+            .settingsPopoverChrome()
         }
     }
 }

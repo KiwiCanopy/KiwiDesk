@@ -7620,6 +7620,18 @@ fill rather than against the glass. Its fallback stays a popover
 material, since that was its design before the glass. The owner kept
 it on the device, 2026-10-19. A further popover takes glass only by
 passing the same test, ruled here.
+
+Every Settings popover now passes it and wears the same surface
+(#2503, owner 2026-10-21): the help popovers, the row menus' chord
+popover, the reach checklists, the name editors, the font and app
+pickers and the screen setups list are all words over the page,
+up only while the user reads or chooses. A name editor's field
+draws its own bezel on the glass. Three stay on the material,
+since their meaning rides in fills: the save pill's change list
+(its Keep and ↺ fills and value swatches, the pill's own reason)
+and the two screen overflows, whose Space chips are fills. Hover
+inside a popover keeps the row and icon tiers; the accent cursor
+stays with lists filtered by typing.
 :::
 
 ### Search: one result per setting, and a fast path kept pure

@@ -92,6 +92,7 @@ struct LayerStripEditor: View {
                 }
             }
             .padding(10)
+            .settingsPopoverChrome()
         }
     }
 

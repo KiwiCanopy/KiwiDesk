@@ -62,6 +62,7 @@ extension KeyRecorderField {
                             alignment: .leading
                         )
                         .padding(14)
+                        .settingsPopoverChrome()
                 }
             }
         }

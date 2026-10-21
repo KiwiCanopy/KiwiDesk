@@ -32,6 +32,7 @@ struct LayerReachControl: View {
         .accessibilityValue(RuleReachWords.spoken(reading))
         .popover(item: $request, arrowEdge: .bottom) { _ in
             LayerReachChecklist(model: model, layer: layer)
+                .settingsPopoverChrome()
         }
     }
 }

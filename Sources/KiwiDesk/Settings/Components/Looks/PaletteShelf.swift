@@ -161,6 +161,7 @@ struct PaletteShelf: View {
         .accessibilityAddTraits(applied ? [.isSelected] : [])
         .popover(item: renameBinding(palette.name)) { request in
             renamePopover(request)
+                .settingsPopoverChrome()
         }
     }
 
@@ -241,6 +242,7 @@ struct PaletteShelf: View {
         .accessibilityLabel(saveCurrentLabel)
         .popover(item: $saveRequest) { request in
             savePopover(request)
+                .settingsPopoverChrome()
         }
     }
 

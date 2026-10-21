@@ -121,6 +121,7 @@ extension ProfilesSection {
         )
         .popover(item: setupListBinding(summary.name)) { _ in
             setupList(summary)
+                .settingsPopoverChrome()
         }
     }
 

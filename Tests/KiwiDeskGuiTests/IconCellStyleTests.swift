@@ -77,12 +77,9 @@ struct IconCellStyleTests {
     /// modifier, not the popover's own material (#1295).
     @Test("the popover sits on the search card's glass")
     func popoverGlass() throws {
+        // The surface is every Settings popover's (#2503,
+        // `SettingsPopoverChromeCensusTests`).
         let source = try squashed("IconPicker.swift")
-        #expect(
-            source.contains(
-                ".presentationBackground{Color.clear.glassChrome("
-                    + "in:Rectangle(),enabled:true,variant:.regular,"
-            )
-        )
+        #expect(source.contains("{popover.settingsPopoverChrome()}"))
     }
 }

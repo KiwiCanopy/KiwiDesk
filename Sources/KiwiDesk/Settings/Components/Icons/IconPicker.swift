@@ -43,7 +43,9 @@ struct IconPicker: View {
         .help(chooseHelp)
         // A glyph-only label names nothing (#812).
         .accessibilityLabel(chooseHelp)
-        .popover(isPresented: $showing) { popover }
+        .popover(isPresented: $showing) {
+            popover.settingsPopoverChrome()
+        }
         // Every open starts in one resting shape (#1357, #1379):
         // the search cleared and the tab back on Symbols, on a
         // choice, the clear button and a dismissal alike.
@@ -124,16 +126,6 @@ struct IconPicker: View {
         }
         .padding(12)
         .frame(width: 340, height: 400)
-        // The search card's glass, `.regular` and untinted
-        // (#1295, #2399); the fallback keeps a popover's material.
-        .presentationBackground {
-            Color.clear.glassChrome(
-                in: Rectangle(),
-                enabled: true,
-                variant: .regular,
-                fallback: AnyShapeStyle(.regularMaterial)
-            )
-        }
     }
 
     // MARK: - Result sections

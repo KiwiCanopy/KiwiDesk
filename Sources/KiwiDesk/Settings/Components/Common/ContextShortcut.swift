@@ -59,6 +59,7 @@ private struct RowActions<MenuContent: View>: ViewModifier {
                 }
                 .buttonStyle(PopoverRowStyle())
                 .padding(8)
+                .settingsPopoverChrome()
             }
             .onAppear {
                 let shown = $chordMenuShown

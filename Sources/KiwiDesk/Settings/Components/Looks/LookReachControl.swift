@@ -32,6 +32,7 @@ struct LookReachControl: View {
         .accessibilityValue(label)
         .popover(item: $request, arrowEdge: .bottom) { _ in
             LookReachChecklist(model: model, edited: edited)
+                .settingsPopoverChrome()
         }
     }
 }
