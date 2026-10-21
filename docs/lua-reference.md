@@ -38,11 +38,9 @@ The Settings app stores its settings in
 event hooks and custom Lua. For the GUI workflow, see the
 [user guide](user-guide.md).
 
-:::unreleased
 A migrated file's previous version is kept in
 `~/Library/Application Support/KiwiDesk/migration-backups/` — see
 the [user guide](user-guide.md#the-guijson-file).
-:::
 
 ### What coexists with the Settings app, and what doesn't
 
@@ -112,11 +110,9 @@ layout steps in window order on both axes: along the axis
 within the focused track, across it to the neighboring track
 (same relative position).
 
-:::unreleased
 All three wrap at the ends by default, and stop there with
 `wrap_focus` off (`scroll.set_wrap_focus`,
 `monocle.set_wrap_focus`, `track.set_wrap_focus`).
-:::
 
 The search is two-tier: **tiled windows always win**, and only
 when no tiled window lies in the pressed direction are the
@@ -142,7 +138,6 @@ the windows the lens leaves out.
 KiwiDesk.focus("left")
 ```
 
-:::unreleased
 ### focus_window
 
 **Expects:** a window id, as `list_windows` and `get_state` report
@@ -158,7 +153,6 @@ unknown to KiwiDesk is refused.
 ```lua
 KiwiDesk.focus_window(1234)
 ```
-:::
 
 ### swap
 
@@ -179,7 +173,6 @@ never wraps at the ends, even with a wrap-focus toggle on.
 KiwiDesk.swap("right")
 ```
 
-:::unreleased
 A window id in place of the direction, as
 [`list_windows`](#list_windows) reports it, swaps the focused
 window with that window, and focus goes with your window wherever
@@ -199,9 +192,7 @@ KiwiDesk.swap(1234)
 KiwiDesk.swap(1234, 5678)
 KiwiDesk.swap("left", 1234)
 ```
-:::
 
-:::unreleased
 ### swap_here
 
 **Expects:** a window id, as [`list_windows`](#list_windows)
@@ -217,7 +208,6 @@ as for [`swap`](#swap).
 ```lua
 KiwiDesk.swap_here(1234)
 ```
-:::
 
 ### focus_space
 
@@ -695,11 +685,9 @@ The one exception is a bar set not to reserve its strip
 ([`space_bar.set_reserve`](#space_barset_reserve) and
 [`app_bar.set_reserve`](#app_barset_reserve)), which draws over the windows.
 
-:::unreleased
 A revealed `auto` or `hidden` bar draws over the windows too
 ([`space_bar.set_visibility`](#space_barset_visibility),
 [Per-Layout App Bar Overrides](#per-layout-app-bar-overrides)).
-:::
 
 **Example:**
 
@@ -735,7 +723,6 @@ KiwiDesk.set_gap_override("editor", {
 
 ### set_min_window_size
 
-:::unreleased
 **Expects:** a width in points, then optionally a height in
 points and a layout: `stack`, `grid`, `track`, `bsp`,
 `scrolling` or `floating`. Without a height the width serves
@@ -755,11 +742,9 @@ KiwiDesk.set_min_window_size(300)            -- every layout
 KiwiDesk.set_min_window_size(220, 160, "grid")
 KiwiDesk.set_min_window_size(480, "scrolling")
 ```
-:::
 
 ### set_min_window_size_override
 
-:::unreleased
 **Expects:** a space identifier, a width in points, then
 optionally a height in points. Without a height the width serves
 both.
@@ -776,7 +761,6 @@ lays windows out per screen and keeps Floating's value.
 ```lua
 KiwiDesk.set_min_window_size_override("monitoring", 220, 160)
 ```
-:::
 
 ### set_resize_step
 
@@ -819,11 +803,9 @@ own minimum binds, the next retile's floor heal moves the ratio
 back off that value by as much. Retiles at once. Bind it from
 `init.lua` or the Shortcuts & Gestures ▸ Lua bindings drawer.
 
-:::unreleased
 A grid's column and row sizes from `resize` are sizing too, and
 return to the weights `grid.set_column_weight` and
 `grid.set_row_weight` set.
-:::
 
 `⌃⌥R` runs it on the active space by default, listed as **Reset
 sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
@@ -1037,16 +1019,12 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
-:::unreleased
 When that mapping is exactly the one KiwiDesk would write for the
 chosen key, the Hyper key card's **Take Over** and
 [`take_over_hyper_remap`](cli.md#commands) make it KiwiDesk's.
-:::
 
-:::unreleased
 While no shortcut in the active layer uses `hyper`, pressing the
 key does nothing and draws a short note saying so.
-:::
 
 The GUI twin is **Shortcuts & Gestures ▸ Hyper key**, a recorder
 that takes one key — left and right apart. Like
@@ -1528,13 +1506,11 @@ or `0` (auto, default).
 (vertical) in scrolling layouts. Auto is 95%, horizontal and
 vertical alike.
 
-:::unreleased
 Any resolved size is floored at Scrolling's minimum window size
 ([`set_min_window_size`](#set_min_window_size)) on the axis it
 scrolls along — its width when it scrolls horizontally, its
 height when it scrolls vertically — and capped at the axis
 length.
-:::
 
 A percentage is a share of the **pitch**, one window plus one
 inner gap: `"50%"` is two windows, gaps included, `"33.33%"`
@@ -1668,9 +1644,7 @@ scroll.set_new_window_placement("after_focused")
 
 ### scroll.set_wrap_focus
 
-:::unreleased
 **Expects:** a boolean (default `true`).
-:::
 
 **Does:** `true`: stepping `focus` past either end of the row
 wraps to the far end. `false`: focus stops at the ends. Applies
@@ -1810,14 +1784,12 @@ screen over the typed `columns`/`rows`. It caps a dynamic grid
 and fixes a rigid one alike. Windows past the resulting
 capacity cascade in the last cell.
 
-:::unreleased
 The grid takes as many columns as fit at Grid's minimum window
 width and as many rows as fit at its minimum height
 ([`set_min_window_size`](#set_min_window_size)):
 `floor(usable width / (min width + horizontal inner gap))`
 columns and `floor(usable height / (min height + vertical inner
 gap))` rows, at least 1 each.
-:::
 
 **Example:**
 
@@ -1825,7 +1797,6 @@ gap))` rows, at least 1 each.
 grid.set_auto_size(true)
 ```
 
-:::unreleased
 ### grid.set_column_weight
 
 **Expects:**
@@ -1879,7 +1850,6 @@ grid.set_column_weight(1, 2)
 ```lua
 grid.set_row_weight(1, 1.5)
 ```
-:::
 
 ### grid.set_new_window_placement
 
@@ -1970,7 +1940,6 @@ grid.set_dimensions_override("3", 4, 3)
 grid.set_auto_size_override("3", true)
 ```
 
-:::unreleased
 ### grid.set_column_weight_override
 
 **Expects:**
@@ -2005,7 +1974,6 @@ grid.set_column_weight_override("3", 2, 1.5)
 ```lua
 grid.set_row_weight_override("3", 1, 2)
 ```
-:::
 
 ### monocle.set_orientation
 
@@ -2060,9 +2028,7 @@ monocle.set_hide_style("park")
 
 ### monocle.set_wrap_focus
 
-:::unreleased
 **Expects:** `true` or `false` (default `true`).
-:::
 
 **Does:** whether the focus cycle wraps past the ends. On,
 `focus` past the last window returns to the first, and vice
@@ -2244,9 +2210,7 @@ track.set_overflow_style("cascade_overflow")
 
 ### track.set_wrap_focus
 
-:::unreleased
 **Expects:** a boolean (default `true`).
-:::
 
 **Does:** the track twin of `scroll.set_wrap_focus` (#168): on,
 stepping `focus` past an end wraps — within the focused track
@@ -2785,14 +2749,12 @@ colour instead. The Space Bar's middle tier is
 [`space_bar.set_active_dim_factor`](#space_barset_active_dim_factor).
 Lua-only (no GUI).
 
-:::unreleased
 On the App Bar the dim marks a window that is not fully on screen
 — in monocle every window but the one shown, in scrolling a column
 cut by the screen's edge or stacked behind another, and a float the
 screen's edge cuts or the focused window covers. A fully visible
 item stays undimmed whether or not it holds the focus. A float or a
 window KiwiDesk does not manage covering a tile does not count.
-:::
 
 **Example:**
 
@@ -2800,7 +2762,6 @@ window KiwiDesk does not manage covering a tile does not count.
 kiwishelf.set_dim_factor(0.4)
 ```
 
-:::unreleased
 ### kiwishelf.set_reveal_timeout
 
 **Expects:** seconds, 0–60 (default `0`); out-of-range values
@@ -2819,9 +2780,7 @@ leaves.
 ```lua
 kiwishelf.set_reveal_timeout(5)
 ```
-:::
 
-:::unreleased
 ### kiwishelf.set_reveal_style
 
 **Expects:** `"slide"`, `"grow"`, `"unfold"` or `"fade"`
@@ -2847,7 +2806,6 @@ too.
 ```lua
 kiwishelf.set_reveal_style("grow")
 ```
-:::
 
 ### KiwiShelf colours
 
@@ -2891,13 +2849,11 @@ which follows the focused window's colour until you set it.
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
-:::unreleased
 An App Bar window not fully on screen draws its title and glyph in
 the same idle ink as an identifier on a Space you are not on:
 `kiwishelf.set_item_color` at 60% of its own alpha. A fully visible
 one draws them in the item colour, and the focused one in
 `active_item_color`.
-:::
 
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
@@ -3064,7 +3020,6 @@ Global only: no layout sets its own.
 app_bar.set_reserve(false)
 ```
 
-:::unreleased
 ### app_bar.toggle_reveal
 
 **Expects:** nothing.
@@ -3078,7 +3033,6 @@ layout carries no App Bar, or where its App Bar is `"always"`.
 ```lua
 app_bar.toggle_reveal()
 ```
-:::
 
 ### app_bar.set_active_indicator
 
@@ -3135,7 +3089,6 @@ collapses it again.
 app_bar.set_group_adjacent_windows(true)
 ```
 
-:::unreleased
 ### Per-Layout App Bar Overrides
 
 Each bar-hosting layout (monocle, scrolling) sets its own App
@@ -3170,7 +3123,6 @@ scroll.set_app_bar_title_cap(20)  -- override for scrolling
 are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
 short line, which grows when the pointer comes near and opens as
 the Space dots do.
-:::
 
 ## Space Bar
 
@@ -3223,7 +3175,6 @@ its own [`app_bar.set_reserve`](#app_barset_reserve) off.
 space_bar.set_reserve(false)
 ```
 
-:::unreleased
 ### space_bar.set_visibility
 
 **Expects:** `"always"`, `"auto"` or `"hidden"` (default
@@ -3298,7 +3249,6 @@ KiwiDesk.bind("ctrl+alt+b", function()
     space_bar.toggle_reveal()
 end)
 ```
-:::
 
 ### space_bar.set_edge
 
@@ -4228,7 +4178,6 @@ Liquid Glass (a plain blur on macOS 14 and 15).
 With Reduce transparency on in macOS, the blur stands down and the
 dim stays.
 
-:::unreleased
 ### kiwivision.set_fade_duration
 
 **Expects:** milliseconds, 0–1000. Default 300.
@@ -4248,7 +4197,6 @@ lens table takes it too.
 the start, `"ease_in"` slowest, `"linear"` evenly. Stored as
 `fade_curve` in the `kiwivision` group, and a lens table takes it
 too.
-:::
 
 ### kiwivision.set_appearance
 
@@ -4825,12 +4773,10 @@ launcher or HUD qualifies without a rule; the app's normal windows
 additionally recognized by bundle id for setups where Raycast shows
 a dock icon and loses the accessory policy.
 
-:::unreleased
 A raised window of an accessory app, or of Ghostty, counts as one
 of its app's normal windows only when it lists title-bar buttons
 and macOS does not report it as a system dialog, so Spotlight's
 panel on macOS 27 stays ignored.
-:::
 
 Invisible helper windows are ignored automatically: a raised-layer
 window that is fully transparent or sits entirely off-screen (the
@@ -4869,11 +4815,9 @@ layer — is not filed by the rule: it opens in the space you are
 in. The app's dialogs and panels follow the rule like its other
 windows.
 
-:::unreleased
 A popup with no title-bar button, such as a browser extension's
 popup, is not filed by the rule either
 ([#2475](https://github.com/KiwiCanopy/KiwiDesk/issues/2475)).
-:::
 
 **Example:**
 
@@ -5771,11 +5715,9 @@ own float flag — set by a toggle, `make_floating`, a
 `float_rules` entry or KiwiDesk's own detection — **or**
 membership of a space set to the floating layout.
 
-:::unreleased
 A floating window's `min_window_size` is Floating's
 ([`set_min_window_size`](#set_min_window_size)), whatever layout
 its space uses: its width for `"x"`, its height for `"y"`.
-:::
 
 The delta is split between **both** edges (#1091), so a float
 grows and shrinks around its own centre. An edge already against
@@ -5785,7 +5727,6 @@ strips on that space, so a float cannot be grown underneath a
 bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
 
-:::unreleased
 Tiled windows resize in bsp, stack, scrolling, track and grid
 layouts; monocle reports "not supported" and flashes a pill on
 the focused window saying the layout has no resizing (#1255). In
@@ -5797,7 +5738,6 @@ mouse drag on a cell's inner edge moves that edge the same way.
 The sizes are kept as [column and row weights](#gridset_column_weight)
 in a session layer that
 [`reset_layout_sizing`](#reset_layout_sizing) clears.
-:::
 
 `set_refusal_sound(true)` adds the system alert sound
 to that pill; only a hotkey fire sounds, so CLI and IPC callers
@@ -6455,7 +6395,6 @@ screen's Desktop is *the* Desktop. In a hand-written config
 the call lives in `init.lua`; when the config is GUI-managed,
 bindings are edited in the Profiles section instead.
 
-:::unreleased
 A GUI-managed config keeps its bindings on this Mac, in
 `~/Library/Application Support/KiwiDesk/bindings.json`, and a
 backup carries them. Such a binding follows its profile through a
@@ -6465,7 +6404,6 @@ there the binding follows the name. Restored on another Mac, a
 binding stays dormant until that Mac shows the Desktop it was
 made on; one kept by Mission Control number attaches to that
 number there.
-:::
 
 A call binds the profile for all screen setups of its screen
 count, and a Desktop holds one such profile per count: a second
@@ -6687,7 +6625,6 @@ Keys mirror the Lua API: the command name with the `set_` verb
 stripped, grouped by namespace — `set_gap_override` becomes
 `gap.override`, `bsp.set_ratio_h` becomes `layout.bsp.ratio_h`.
 
-:::unreleased
 **Example:**
 
 ```jsonc
@@ -6773,7 +6710,6 @@ stripped, grouped by namespace — `set_gap_override` becomes
   ]
 }
 ```
-:::
 
 `lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
 the profile. It maps a lens name, in lower case, to `false`:
@@ -6966,7 +6902,6 @@ CLI each fails with `…: a Monocle focus change is a raise and
 plays no flip`. A saved profile's stored values are dropped on its
 next write.
 
-:::unreleased
 ### animations.set_on_expand, animations.set_expand_duration
 
 **Expects:**
@@ -7011,7 +6946,6 @@ too.
 ```lua
 animations.set_reveal_duration(400)
 ```
-:::
 
 ### enable_wake_restore, set_wake_restore_delay
 
@@ -7321,7 +7255,6 @@ ids), `minimized` (ids), `away` (each `id` with its `space_id`)
 and `app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
 
-:::unreleased
 ### get_config_status
 
 **Expects:** nothing.
@@ -7347,9 +7280,7 @@ sync folder's status. Each issue carries its `source` file, a
 `changed_on_both`, `conflict_copy` with its `path`, or
 `newer_on_another_mac` / `newer_here` with the `file` a newer
 KiwiDesk wrote.
-:::
 
-:::unreleased
 ### list_windows
 
 **Expects:** optionally a Space id; every tracked window otherwise.
@@ -7383,7 +7314,6 @@ for _, w in ipairs(KiwiDesk.list_windows()) do
     end
 end
 ```
-:::
 
 ### help
 

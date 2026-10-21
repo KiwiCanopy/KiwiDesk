@@ -278,7 +278,6 @@ handing focus to a sibling of the space being LEFT is the exact
 opposite of what the verb was asked for
 ([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
 
-:::unreleased
 **A swap moves your window, and focus goes with it — across
 Spaces too; `swap_here` is the verb that keeps you where you are
 ([#2509](https://github.com/KiwiCanopy/KiwiDesk/issues/2509)).**
@@ -294,7 +293,6 @@ move no focus beyond #1518's rule that a window filed into the
 Space you are on takes it. A trade keeps both slots — index,
 track break and weights — and refuses a float, which has no
 slot, and a native full-screen window.
-:::
 
 The **pointer** is not a second decision. It follows focus only
 where *mouse follows focus* is on, through the same predicate
@@ -1156,7 +1154,6 @@ would put every save behind `run_destructive`, so the verb stays
 one `run` can send, and replacing a look is the destructive
 `look.delete` followed by a save.
 
-:::unreleased
 ### A window's frame is reported from KiwiDesk's own placement
 
 **[Rationale]**
@@ -1180,7 +1177,6 @@ one means the focused window here (#1518), so a bare call would
 answer one window; a script picks one with `jq`. The trade: an
 app that refuses its size shows the frame the layout asked for,
 and a float an app moved itself shows its last report.
-:::
 
 ### Whether a setting lasts is not a fact about its command
 
@@ -1365,7 +1361,6 @@ wanted.
 
 **[Principle]** (#2324 ruling 14)
 
-:::unreleased
 Sync across Macs copies a whole setup between this Mac and a
 folder the user's sync app shares — one direction at a time, the
 direction the user picks after seeing both sides. It is the
@@ -1404,13 +1399,11 @@ never writes over a setup it cannot read (ruling 2).
 Trade-off: a copy is whole. Someone who wants one profile from
 the other Mac takes the whole setup or exports that profile by
 hand. Accepted for the same reason the restore accepts it.
-:::
 
 ### Following a sync folder mirrors it, one side's change at a time
 
 **[Principle]** (#2324 rulings 4, 15; slice 3)
 
-:::unreleased
 Following a folder never moves the config folder: it stays in
 `~/.config/KiwiDesk`, and the folder is kept in step with it, file
 by file. A relocated config would make a missing folder — iCloud
@@ -1465,7 +1458,6 @@ manual" are different states and get different controls.
 Trade-off: a Save writes several files, and the other Mac may
 apply the first before the second has landed; it catches up at the
 next pass, a second later.
-:::
 
 ### Feature names: which stay English, which translate
 
@@ -5985,7 +5977,6 @@ a diff can see, which is exactly the path the hint exists for.
 
 **[Principle]**
 
-:::unreleased
 **Each layout that tiles to a floor keeps its own minimum window
 size, as a width and a height, and a window always has exactly
 one.** A floor protects an app's own contents, and what a
@@ -6062,7 +6053,6 @@ so the two never become separate rules. Every layout takes the
 main screen's answer rather than its own screen's: seeded from
 different screens, the master would open on "Mixed" for a first
 run, showing a new user a difference they never made.
-:::
 
 ### Sticky reach spans macOS Desktops (#1145)
 
@@ -7255,7 +7245,6 @@ is on — and takes the same link (`unfocusedReference`); its header
 `?` answers only for the ring being off, when every row is grey.
 The header `?` stays the shape for a greyed block.
 
-:::unreleased
 *A whole card an OS accessibility switch greys also says so in a
 warning box* (owner ruling, 2026-10-21). The Animations card under
 Reduce Motion keeps its header `?`, and adds the yellow box the
@@ -7269,7 +7258,6 @@ alone — a cause outside the app greying a whole card, which the
 Liquid Glass card under Reduce transparency owes too — and a row greyed by something on the page keeps
 the channels above (`GateReasonPlacementTests` ▸
 `osSwitchWarnsInABox`).
-:::
 
 The temptation to answer all of this with `.accessibilityHint` is
 why the ladder is written down. A hint on a **leaf** control is
@@ -7514,7 +7502,6 @@ applying the saved value live, a Core verb rather than a draft
 writeback (#2411, ▸ *A row's revert writes its one key back
 through a register*).
 
-:::unreleased
 ### A row's revert writes its one key back through a register (#792)
 
 **[Rationale]**
@@ -7591,7 +7578,6 @@ with the draft, so the list it was asked to clear empties. Drift is
 the one row it leaves (owner ruling 2026-10-20): drift is about the
 arrangement, and re-applying the saved profile to clear it would
 end a standing temporary layout, which Revert never does (#1179).
-:::
 
 ### The header search is a field, not a button that opens one
 
@@ -7622,7 +7608,6 @@ become invisible while every test still passes, since nothing
 about paint order is observable from the view tree. (Owner report
 2026-08-04, in chat.)
 
-:::unreleased
 ### The search results are as wide as the field, and on glass (#2399)
 
 **[Trade-off]**
@@ -7660,7 +7645,6 @@ read or chosen from, so it takes the same surface (#2503); a name
 editor's field draws its own bezel on the glass. One whose meaning
 rides in fills stays on the material, as the pill does —
 `SettingsPopoverChromeCensusTests` names each and why.
-:::
 
 ### Search: one result per setting, and a fast path kept pure
 
@@ -10377,7 +10361,6 @@ Caps Lock → F18 is also a common Hammerspoon setup — and refuses
 otherwise. The trade: "tap Hyper alone for Escape" needs a posted
 key event, which is Input Monitoring, so it stays with #1874.
 
-:::unreleased
 The one way past that refusal is the user's own consent (#2471).
 An entry that is exactly KiwiDesk's own for the chosen key — what
 a quit remapper such as the Hyperkey app leaves until a restart —
@@ -10389,7 +10372,6 @@ own that entry, and two processes registering F18 both hear one
 press (measured 2026-10-20), so a take-over beside such a tool
 arms both. A mapping the other tool later removes is written again
 at the next apply; one it replaces is refused.
-:::
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
@@ -10649,13 +10631,11 @@ every trigger the bar has reaches the item) and the GUI draws
 and names it; the name says the layer and each screen's Space,
 so VoiceOver reads what the eye does.
 
-:::unreleased
 "Off" became Auto and Hidden with #761, and the stand-in follows
 the edge's own fold (owner, 2026-10-20): a screen is listed wherever
 its Space Bar is not drawn at rest — Hidden, or Auto unless an
 Always bar shares its edge — since the menu bar is then the one
 place that names the Space until the pointer reveals the bar.
-:::
 
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed and
@@ -11060,7 +11040,6 @@ default, so the seed cannot depend on it, and the users the
 four-modifier chord serves are the ones whose own tool already
 presses all four.
 
-:::unreleased
 **One switch puts KiwiDesk's shortcuts on `⌃⌥` or on `✦` (#2460,
 owner ruling 2026-10-20).** The Hyper key card carries "Shortcuts
 use: `⌃⌥` | `✦`", and its value is one stored base, `gui.json`'s
@@ -11160,7 +11139,6 @@ A Go to Desktop row on `✦` + digit moves to `✦⌥` + digit where
 that chord is free, since the Space digits now hold `✦` + digit.
 Nothing else moves on its own; the ladder rows still on `⌃⌥`
 appear in the list.
-:::
 
 The rows are topped up rather than seeded once, because Desktops
 come and go: at boot, and at a switch that shows a Desktop numbered
@@ -12798,7 +12776,6 @@ the header is what tells "where focus goes" from "where a window
 goes" on the same arrows. The section keeps its name: *Controls*
 stays refused, every row in Settings being a control.
 
-:::unreleased
 **One card for what shows and hides.** KiwiHub, KiwiShelf and
 KiwiVision each arrived with a card of their own (#2265, #761,
 #2312), so the page grew a card and a chip per product, and
@@ -12817,7 +12794,6 @@ This amends #2265's KiwiHub card, which becomes the card's
 first sub-group, J K L kept. The ⌃⌥K shortcuts panel keeps its
 own bands, KiwiVision among them: it reads a layer as a reference rather than an editor, and
 regrouping it is a ruling of its own.
-:::
 
 **The marked chip is the group under the bar.** A group is
 current once its header has reached the bar and while its card
@@ -13197,7 +13173,6 @@ second admitted class, not the start of a generic per-Space
 settings override — each further class owes the same three
 tests and its own entry. (#1775, owner ruling 2026-10-09)
 
-:::unreleased
 **A Space's own minimum window size is the third class, on the
 gaps' tests** (#2422). It floors every window in the Space,
 whichever layout places it; it resolves before any layout runs,
@@ -13209,7 +13184,6 @@ apart from the layout rows, and survives a layout switch. Unlike
 the gaps it is live on a Floating Space, since it floors every
 float there, so it greys only on Monocle, which applies no
 minimum.
-:::
 
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the
@@ -13228,12 +13202,10 @@ space-list cell that summarises them — the count is the scannable
 signal, and dropping it is the one way the data goes invisible.
 (`OverrideCellState`, owner ruling 2026-08-04; #678 8a)
 
-:::unreleased
 A Floating space's cell never disables: its own minimum window
 size still applies there, so the cell offers **Customize…** with
 nothing saved, and counts as **N custom** once that value is set
 (#2422).
-:::
 
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge
@@ -14255,7 +14227,6 @@ the user who never opens the editor.
 Bar's front segment shows the focused window's title in place of
 its app's name.
 
-:::unreleased
 **The App Bar's dim means "not fully on screen".** (#2234, owner
 rulings 2026-10-15 and 2026-10-18.) It used to mean "not focused",
 which says nothing the indicator does not already say. The question
@@ -14313,7 +14284,6 @@ fifth of it is uncovered (`BarVisibility.partlyFloor`); less reads
 hidden. A share would not do for the cut: the sliver is a fixed
 length, so on a narrow slot it is a large share. A float takes no
 floor: any overlap by the focused window shows the ring.
-:::
 
 **An App Bar item draws its icon AND its title.**
 ([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
@@ -14359,7 +14329,6 @@ model*). The Space
 Bar takes no mark, since each of its float glyphs wears its
 badge already.
 
-:::unreleased
 Under Boxed the gap is the rule (owner ruling, 2026-10-21): each
 item's box already ends the row, and a hairline over the wallpaper
 cannot carry a halo, so the rule draws nothing while its room
@@ -14368,7 +14337,6 @@ is behind the bar — a white window — vanished at idle ink, so on
 Boxed alone it takes the full item ink and a halo in the shelf's
 Fill, overriding the idle-ink clause above; a light Fill flips both
 with it. On a plate both stay as they are.
-:::
 
 The App Bar's set is the one the directional focus keys reach,
 `floatingFocusCandidates`, not a narrower "floated by hand or by
@@ -14600,7 +14568,6 @@ layout would move windows on a layout switch.
 A split App Bar pays the same price with the Space Bar on — the
 reflow paragraph of *Amended* below.
 
-:::unreleased
 *A shelf can hide; a reveal is an overlay*
 ([#761](https://github.com/KiwiCanopy/KiwiDesk/issues/761)).
 Each bar carries one of three values, `always`, `auto` or
@@ -14743,7 +14710,6 @@ not said for how long; `reveal_timeout` hides it again on its
 own, one value for every bar. No reveal on a Space switch: the
 dots already show the new Space. A look never carries the mode,
 which is functionality, not styling.
-:::
 
 *One placement rule, asked by every picture of it.* Where each
 section sits along the edge is decided in ONE pure function,
@@ -15394,7 +15360,6 @@ passes all day, while Settings' help answers a reader who stopped
 to ask. A dwell is not motion, so Reduce Motion keeps it and
 drops only the fade.
 
-:::unreleased
 A Space collapsed to its window count (#1683) peeks too, always
 (#1945; owner 2026-10-04, and 2026-10-18 for no setting): resting
 on the chip lists every window its Space holds, as `+n` lists its
@@ -15416,7 +15381,6 @@ and its window list waits on a ruling of its own. It takes no
 setting: the peek's dwell already keeps it from firing on a pass,
 and a switch for it would be one more row a minimal bar does not
 need.
-:::
 
 **A Space's strip centres on its focus, holds under the pointer,
 and does not scroll.** (#1528 items 17–22, owner rulings
@@ -15649,7 +15613,6 @@ The engineering half — one home, `BarMotion`, and the guards
 that keep the bars routed through it — is
 `.claude/rules/bars.md` ▸ the bars start motion in one file.
 
-:::unreleased
 **Three bar motions play under Reduce Motion: a hidden shelf's
 reveal, its mark's hover growth, and the shelf's expand** (owner
 rulings, 2026-10-21). The two rulings above stand for every other
@@ -15675,7 +15638,6 @@ what the bars do rather than how. All three stay short and settle
 once. In code, the members that play them are ruled in
 `BarMotionSeamTests`' `ungated` map, which may neither read the
 flag nor be added to without a ruling.
-:::
 
 **Space Bar drag-drop is a two-speed spring, not a blind
 relocate.** (#372.) Dragging a window onto a Space item either
@@ -15798,7 +15760,6 @@ order — in the census
 order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
 
-:::unreleased
 Reveal and its Durations drawer follow the Show master's Each bar
 drawer, ahead of the Space cue: how a hiding bar comes and goes
 sits beside what makes a bar hide, and the picker and the Reveal
@@ -15810,7 +15771,6 @@ no row any more: the expand is the shelf's own way of changing
 shape, which a user tunes by its length and has no reason to stop
 once Reduce Motion no longer does it for them, so `on_expand`
 stays a Lua knob and the Expand duration says so where it greys.
-:::
 
 **The bars ship one thickness, 40 pt, on every screen, and the
 slider's floor is the Core floor by derivation.** (#1359, owner
