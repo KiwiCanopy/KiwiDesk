@@ -1,0 +1,114 @@
+name: Release announce
+
+# Announces a release on Discord (#1627) once a reader who clicks
+# through can actually get it (#2521): after the release sync PR
+# that `changelog.yml` opens has MERGED, and after the site that
+# merge deploys serves the release in its update feed. Posting
+# from the sync job itself put the post out while that PR was
+# still open, so "Check for Updates" answered "up to date" and the
+# release-notes page did not list the release.
+#
+# The trigger is the sync merge's own push to main. The sync job
+# writes an `Announce-Release: <tag>` line into the squash
+# commit's body — only on publication or on a dispatch that sets
+# `announce` — and that line alone names the tag to post. A plain
+# rebuild's merge has no such line, so it never posts. The push
+# alone is not proof the site is live, so the job then waits for
+# the feed every installed copy reads to list the version.
+#
+# A dispatch posts a named tag by hand, behind the same feed wait:
+# the way out when the automatic post was missed, e.g. a sync PR
+# merged by `github.token`, whose push fires no workflow.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/public/appcast.xml"
+      - "site/src/data/changelog.json"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: >-
+          Release tag to announce. Posts once the deployed update
+          feed lists it.
+        required: true
+        type: string
+
+jobs:
+  announce:
+    name: Announce the release on Discord
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Find the release this merge announces
+        id: release
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "tag=$INPUT_TAG" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # The ask alone names the tag: the subject is the PR's
+          # title, which a hand merge may edit.
+          PATTERN='^Announce-Release: (v[^[:space:]]+)$'
+          TAG=""
+          while IFS= read -r LINE; do
+            LINE="${LINE%$'\r'}"
+            if [[ "$LINE" =~ $PATTERN ]]; then
+              TAG="${BASH_REMATCH[1]}"
+            fi
+          done <<< "$MESSAGE"
+          if [ -z "$TAG" ]; then
+            echo "this merge asks for no post (a rebuild, or not" \
+                 "a release sync) — nothing to announce."
+            exit 0
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for the deployed feed to list it
+        if: steps.release.outputs.tag != ''
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          # The bundle's SUFeedURL (scripts/build-app.sh).
+          FEED: https://kiwidesk.kiwicanopy.com/appcast.xml
+        run: |
+          set -euo pipefail
+          NEEDLE="<sparkle:shortVersionString>${TAG#v}<"
+          # Read whole before matching: a `curl | grep -q` pipe
+          # dies of SIGPIPE under pipefail exactly when it matches.
+          for ATTEMPT in $(seq 60); do
+            BUST="$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$ATTEMPT"
+            SERVED="$(curl -fsSL --max-time 20 "$FEED?run=$BUST" \
+              || true)"
+            if grep -qF "$NEEDLE" <<< "$SERVED"; then
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "::error::$FEED does not list $TAG after 30" \
+               "minutes; $TAG was not announced. Dispatch this" \
+               "workflow with the tag once the site serves it."
+          exit 1
+
+      - name: Post the curated notes
+        if: steps.release.outputs.tag != ''
+        # Never fails the run: a red job here invites "re-run
+        # failed jobs", which would post again.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          DISCORD_RELEASE_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
+        run: python3 scripts/discord-announce --release "$TAG"
