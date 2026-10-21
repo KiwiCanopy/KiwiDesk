@@ -73,6 +73,32 @@ struct HyperKeyRemapTests {
         )
     }
 
+    @Test("a key mapped onto itself is no one's mapping")
+    func identityIsNoOnesMapping() {
+        // Hyperkey leaves Caps Lock → Caps Lock on the built-in
+        // keyboard beside its Caps Lock → F18 (#2471 on device).
+        let same = Pair(source: caps.source, destination: caps.source)
+        #expect(
+            HyperKeyRemap.plan(
+                current: [caps, same],
+                written: caps,
+                want: .capsLock
+            ) == .set(caps)
+        )
+        #expect(
+            HyperKeyRemap.plan(current: [same], written: nil, want: nil)
+                == HyperKeyRemap.Plan.none
+        )
+        #expect(
+            HyperKeyRemap.foreign(in: [caps, same], want: .capsLock)
+                == HyperForeignRemap(
+                    source: .capsLock,
+                    destination: .f18,
+                    claimable: true
+                )
+        )
+    }
+
     @Test("F18 itself needs no remap")
     func f18NeedsNone() {
         #expect(
