@@ -152,6 +152,7 @@ extension KiwiCore {
             if performed {
                 stickyReachInFlightAt[id] = Date()
                 stickyMarks.oweOrder(id)
+                overflowMarks.oweOrder(id)
             }
             onLog(
                 "reach: carry w\(id.raw) -> space \(current.id) "

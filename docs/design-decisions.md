@@ -4095,6 +4095,58 @@ global and per Space, and the format bump makes an older build
 read the rewritten file as newer than itself rather than write
 it back. The four verbs join `APIReference.retired`, refused with
 their reason, never aliased (`AGENTS.md` §5).
+
+*The overflow mark: a "+n" on each hiding end.* Each end of a
+run that hides windows carries a mark on its edge window,
+counting that end alone (`OverflowMark`, derived from
+`runCovers` and never stored, so any layout that records a cover
+gets its marks). It shows whenever the end hides windows and has
+no setting: a mark the user could turn off would leave windows
+reachable only by stepping blind into them. It is a mark, not a
+bar, so it reserves nothing and no window moves when it
+appears — the #761 rule the App Bar alternative broke.
+
+It wears KiwiShelf's look — the Fill, glass where the shelf's
+glass is on, the item ink and the rim — because hovering it opens
+the hover peek, which wears that surface: the mark and the list it
+unfolds read as one object, and the ink-on-Fill pairing is the
+peek's, already measured on every palette. The Space Bar's badge
+colours were the alternative; that badge marks a bar item, and the
+peek is the closer relative. An accent fill was refused outright:
+the edge window is often the focused one, and an accent on its
+ring reads as part of the focus cue. The sticky mark's plate was
+too small to read a count on.
+
+*As shallow across the edge as the text allows.* The mark is
+centred on its edge window, its outer edge flush with the layout
+bounds, so it fills the outer gap and reaches onto the window by
+its depth less that gap — 8 pt at the default gap, clear of a
+centred title and never onto the shelf, the menu bar or the
+notch. Off centre was refused because the trailing corner holds
+toolbar buttons and the sticky mark, and the leading one the
+traffic lights; a mark takes the clicks of what it covers, and
+the centred title is the least interactive thing a title bar
+has. On a top or bottom end the count runs along the edge, so
+the mark is an 18 pt pill whose width grows with the count; on a
+left or right end it runs across, so the mark is a circle sized
+to the text. Those are one rule, not two shapes to merge: a
+circle on a top end grows taller with a two-digit count and
+covers the title again, and a pill on a side reaches twice as
+far onto the window, over a scroll bar or a sidebar.
+
+*It lists that end, and a click opens rather than steps.* The
+peek lists the end's windows nearest the edge first — the order
+one focus step at a time brings them in — and opens into the
+run. A click on the mark opens the peek and holds it, as a click
+on the Space Bar's `+n` does: one meaning for `+n` in both places
+beats a cleverer "step to the next" here. Every group wears its
+app's icon, even when every row is one app: a Space Bar glyph
+shows its app beside the peek, and the mark shows nothing but the
+count (owner, device). VoiceOver reads it as a button naming its
+direction and count, and its press opens the window menu. It has
+no motion of its own: it appears and goes with the park snap and
+rides its window's glide, so Reduce Motion changes nothing about
+it.
 :::
 
 **The stack cascade is a last resort; extreme ratios clamp at

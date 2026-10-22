@@ -71,6 +71,13 @@ synonym:
 
 - **mark** — the on-window state glyph (sticky, floating). Retired as a
   name for it: *indicator*, *chip*.
+- **overflow mark** — the "+n" on the edge window at each end of a
+  Stack or Track run that hides windows (#2235). It is a *mark* —
+  drawn on a window — that counts rather than marks state, so copy
+  and code name it in full and never a bare *mark*, which stays the
+  state glyph's. Retired as its name: *bubble*, the issue's working
+  name; never a *badge*, which sits on a bar item, nor an
+  *indicator*.
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One family;

@@ -11,6 +11,12 @@ extension KiwiCore {
         let peek = shelves.peek
         spaceBars.glyphActions.peek = peek
         appBars.itemActions.peek = peek
+        // An overflow mark's panel wears the shelf it draws in.
+        let shelfOf = peek.shelf
+        peek.shelf = { [weak self] window in
+            shelfOf(window)
+                ?? self?.overflowMarks.shelf(drawnIn: window)
+        }
         peek.content = { [weak self] source, space in
             self?.barPeekContent(source, on: space)
         }
@@ -40,7 +46,8 @@ extension KiwiCore {
         return BarPeekContent(
             rows: rows,
             checks: source.isList,
-            focus: barFocus(on: space)
+            focus: barFocus(on: space),
+            icons: source.iconsEveryGroup
         )
     }
 
@@ -79,7 +86,7 @@ extension BarPeekSource {
     /// or the mixed rows of `+n` and a collapsed Space.
     var menuKind: SpaceBarGlyphPick.Kind {
         switch self {
-        case .overflow, .space: .overflow
+        case .overflow, .space, .run: .overflow
         case .glyph, .appItem: .glyph
         }
     }

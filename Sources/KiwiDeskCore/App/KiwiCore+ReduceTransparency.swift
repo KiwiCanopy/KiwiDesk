@@ -28,6 +28,7 @@ extension KiwiCore {
     func reduceTransparencyDidChange() {
         updateBars()
         updateStickyMarks()
+        updateOverflowMarks()
         updateVision()
     }
 }

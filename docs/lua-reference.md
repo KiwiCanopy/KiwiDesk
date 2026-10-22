@@ -4625,6 +4625,12 @@ it fits, so a step reveals one window. A zone at rest keeps the
 windows it shows; closing one lets the others grow into the
 room.
 
+Each end of a zone that hides windows shows a "+n" overflow mark
+on its edge window, counting that end's hidden windows. Hovering
+or clicking the mark lists them, nearest first; clicking one
+focuses it, which scrolls it in. The mark takes no room, so no
+window resizes when it appears.
+
 In Stack, `focus` and `swap` along a zone that hides windows
 step through them in order, as Track does along a track; a
 direction from another zone lands only on a shown window. A

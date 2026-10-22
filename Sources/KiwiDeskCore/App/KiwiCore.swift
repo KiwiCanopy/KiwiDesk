@@ -24,9 +24,10 @@ public final class KiwiCore {
     let dragCrossing = DragCrossingCoordinator()
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
-    /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
+    /// Rings, sticky and overflow marks (#278, #414, #2235): `retile`.
     public let borders = BorderManager(watch: WindowServerWatch())
     public let stickyMarks = StickyMarkManager()
+    public let overflowMarks = OverflowMarkManager()
     /// KiwiVision's plates (#2103), driven with the rings.
     public let vision = VisionManager()
     let spaceSlide = SpaceSlideOverlay()  // #1956, #2524
@@ -43,8 +44,7 @@ public final class KiwiCore {
 
     /// The global window-rule bases (`GlobalRuleBase`).
     var globalRuleBase = GlobalRuleBase()
-    /// Holds AX reconciles while `loadConfig` tries candidate rule
-    /// states; one pass runs once the final profile wins.
+    /// Holds AX reconciles while `loadConfig` tries rule states.
     var defersWindowRuleReconcile = false
 
     /// Boot's half of the same suppression (#836). **Raised in

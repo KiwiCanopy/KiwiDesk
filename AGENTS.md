@@ -1644,7 +1644,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   `BarPeekSource.isList`, the focus read from that one reading and never a
   stored position (#2063, `BarGlyphCycleTests`) — where VoiceOver's press opens
   the menu, only a list's peek holding inside `BarPeekHull`, and a press
-  anywhere in a bar closing it at the one `ShelfPanel` press point (#1946,
+  anywhere in a bar closing it at the one `ShelfPanel` press point — an
+  overflow mark's panel its twin, the mark's `.run` list naming every app
+  through `iconsEveryGroup` (#2235, `OverflowMarkWiringTests`) — (#1946,
   `AppBarHoverTitleTests`, `BarPeekTests`, `BarPeekSeamTests`,
   `BarPeekActionTests`, `BarPeekHoldTests`, `BarPeekClickTests`), a clickable
   piece of an item joins its `hitTest` target list, and a window menu is built
@@ -1720,6 +1722,11 @@ Touching `Borders`, `Vision`.
   through `BorderOverlay` only where it stopped spanning or `sync` orders it on
   another Desktop (#2149, #1145, `StickyOverlaySpanTests`,
   `BorderDesktopSpanTests`)
+- an overflow mark follows its window on every channel the sticky mark takes,
+  through `FollowSource` and its own `WindowServerWatch` consumer, its marks
+  derived from `runCovers` in the one `overflowMarkSpecs` at the bars' tail,
+  on its window's Desktop unless carried (#2235, `OverflowMarkWiringTests`,
+  `StickyOverlaySpanTests`)
 - every window `focusAnchor` may yield has a ring slot — the slots and the
   anchor read the one `anchorVisitors(of:tiled:)` (#2259,
   `BorderTravelerFocusTests`)

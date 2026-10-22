@@ -33,10 +33,13 @@ struct WindowServerWatchTests {
         return (watch, { log.calls })
     }
 
-    @Test("the consumers fan out mark, then ring, then vision")
+    /// The overflow mark (#2235) rides beside the sticky mark,
+    /// both above the ring they stack over.
+    @Test("the consumers fan out mark, overflow, ring, then vision")
     func consumerOrder() {
         #expect(
-            WindowServerWatch.Consumer.allCases == [.mark, .ring, .vision]
+            WindowServerWatch.Consumer.allCases
+                == [.mark, .overflow, .ring, .vision]
         )
     }
 
@@ -49,8 +52,9 @@ struct WindowServerWatchTests {
         watch.handle(.unhide, window: w1)
         #expect(
             calls() == [
-                "mark.frame", "ring.frame",
-                "mark.restack", "ring.restack", "vision.restack",
+                "mark.frame", "overflow.frame", "ring.frame",
+                "mark.restack", "overflow.restack", "ring.restack",
+                "vision.restack",
             ]
         )
         let (reorder, reordered) = recordingWatch()
@@ -59,7 +63,10 @@ struct WindowServerWatchTests {
         }
         reorder.handle(.reorder, window: w1)
         #expect(
-            reordered() == ["mark.restack", "ring.restack", "vision.restack"]
+            reordered() == [
+                "mark.restack", "overflow.restack", "ring.restack",
+                "vision.restack",
+            ]
         )
         let (hide, hidden) = recordingWatch()
         hide.request([w1], for: .ring)

@@ -24,6 +24,18 @@ extension KiwiCore {
                 }
             )
         )
+        // The overflow marks ride the same bounds stream (#2235).
+        windowServer.connect(
+            .overflow,
+            WindowServerWatch.Hooks(
+                frame: { [weak self] id, frame, _ in
+                    self?.overflowMarks.reposition(id, windowFrame: frame)
+                },
+                restack: { [weak self] id in
+                    self?.overflowMarks.reassert(id)
+                }
+            )
+        )
         // After the ring's own re-order: the plate stacks under it.
         windowServer.connect(
             .vision,

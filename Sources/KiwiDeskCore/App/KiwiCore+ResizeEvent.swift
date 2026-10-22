@@ -23,6 +23,12 @@ extension KiwiCore {
             source: .axEcho,
             pin: nil
         )
+        overflowMarks.follow(
+            id,
+            windowFrame: frame,
+            source: .axEcho,
+            pin: nil
+        )
         // Same policy as `handle`'s `.windowMoved` arm: a genuine
         // user resize takes the window over.
         if !tiler.didRecentlySetFrame(id),

@@ -31,10 +31,14 @@ public struct RunCover: Sendable, Equatable {
 
     public let space: SpaceID
     public let runs: [Run]
+    /// The layout bounds the runs were laid in — the outer gap
+    /// included — which an overflow mark sits flush with (#2235).
+    public let bounds: CGRect
 
-    public init(space: SpaceID, runs: [Run]) {
+    public init(space: SpaceID, runs: [Run], bounds: CGRect = .zero) {
         self.space = space
         self.runs = runs
+        self.bounds = bounds
     }
 
     /// Hidden window → the shown window at the end it waits beyond;
@@ -89,6 +93,6 @@ public struct RunCover: Sendable, Equatable {
                 extra: zone.runExtra(in: context) ?? 0
             )
         }
-        return RunCover(space: space, runs: runs)
+        return RunCover(space: space, runs: runs, bounds: context.bounds)
     }
 }

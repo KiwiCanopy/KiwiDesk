@@ -67,10 +67,13 @@ extension BarPeek {
     /// A press in a bar panel (`ShelfPanel`), on `hit`: a click
     /// outside the peek, which closes it — except a left press on
     /// a Space Bar glyph, whose release decides: a list's click
-    /// opens the peek, a one-window glyph's picks (#2063). Any
-    /// other button's press on a glyph closes it.
+    /// opens the peek, a one-window glyph's picks (#2063) — or on
+    /// an overflow mark, whose click opens its list (#2235). Any
+    /// other button's press on either closes it.
     func pressed(on hit: NSView?, type: NSEvent.EventType) {
-        guard type != .leftMouseDown || !(hit is SpaceBarGlyphTarget)
+        guard
+            type != .leftMouseDown
+                || !(hit is SpaceBarGlyphTarget || hit is OverflowMarkView)
         else { return }
         dismiss()
     }

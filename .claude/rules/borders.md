@@ -340,6 +340,25 @@ obligations:
   carry moves its window — and `StickyOverlaySpanTests` gains its
   clause.
 
+## An overflow mark follows its window like the sticky mark (#2235)
+
+The "+n" on a run's edge window is a third overlay family. **Its
+frame comes from `FollowSource` on every channel the sticky mark
+takes** — the sync's `syncFrame`, the animation tick, the AX echo
+and the WindowServer bounds and restack through its own
+`WindowServerWatch` consumer — so a scroll's glide carries it with
+its window; a new channel the sticky mark gains, the overflow mark
+gains in the same change (`OverflowMarkManager` mirrors
+`StickyMarkManager`'s `follow` / `reposition` / `reassert`; nothing
+scans for a missed one, so that is review's). **What it draws is
+derived from `TilingEngine.runCovers` in the one
+`overflowMarkSpecs`, synced at the bars' tail**
+(`repaintBarsAndFloatNet`), since it wears KiwiShelf's look and a
+shelf write repaints the bars without a pass
+(`OverflowMarkWiringTests`). It stays on its window's Desktop,
+spanning only while that window is carried, and its panels order in
+nowhere in a `makeTestCore` twin (`ordersPanels`).
+
 ## The ring draws on the `.transient` panel, never a raw window
 
 **A ring renders through `AppKitBorderOverlay` in both draw

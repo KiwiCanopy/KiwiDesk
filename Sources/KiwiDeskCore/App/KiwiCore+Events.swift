@@ -164,6 +164,12 @@ extension KiwiCore {
                 source: .axEcho,
                 pin: nil
             )
+            overflowMarks.follow(
+                id,
+                windowFrame: frame,
+                source: .axEcho,
+                pin: nil
+            )
             // A genuine user move (not the echo of our own
             // frame-set) supersedes a pending stash restore:
             // the user took the window over, so the captured

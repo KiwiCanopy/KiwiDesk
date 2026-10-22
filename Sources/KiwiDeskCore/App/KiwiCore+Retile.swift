@@ -166,6 +166,9 @@ extension KiwiCore {
         between: () -> Void = {}
     ) {
         updateBars()
+        // The overflow marks wear the shelf's look and read the
+        // pass's runs, so a shelf write repaints them too (#2235).
+        updateOverflowMarks()
         between()
         // Floats sit outside the layout loop, so a bar just
         // switched on (or a window just turned floating) can leave

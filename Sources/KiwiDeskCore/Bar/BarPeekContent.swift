@@ -12,11 +12,14 @@ enum BarPeekSource: Equatable {
     case appItem([WindowID])
     /// A collapsed Space chip (#1945): every window its Space holds.
     case space([WindowID])
+    /// An overflow mark (#2235): the windows one end of a run
+    /// hides, nearest the edge first.
+    case run([WindowID])
 
     var windows: [WindowID] {
         switch self {
         case .glyph(let ids), .overflow(let ids), .appItem(let ids),
-            .space(let ids):
+            .space(let ids), .run(let ids):
             ids
         }
     }
@@ -31,9 +34,17 @@ enum BarPeekSource: Equatable {
     /// (#1945).
     var isList: Bool {
         switch self {
-        case .overflow, .space: true
+        case .overflow, .space, .run: true
         case .glyph, .appItem: windows.count > 1
         }
+    }
+
+    /// Whether every group wears its app's icon: an overflow mark
+    /// draws no glyph beside its peek, so its rows name their apps
+    /// even when they are one app (#2235, owner on device).
+    var iconsEveryGroup: Bool {
+        if case .run = self { return true }
+        return false
     }
 }
 
@@ -111,13 +122,15 @@ struct BarPeekContent: Equatable {
     /// kept — a lone window titled as its app included (owner,
     /// #1946) — on the key the bars group by, so a glyph standing
     /// for sibling processes of one app (#1785) is one group. Icons
-    /// mark the groups only where the rows mix apps. A list
+    /// mark the groups only where the rows mix apps, or always
+    /// with `icons` (`BarPeekSource.iconsEveryGroup`). A list
     /// (`checks`) checks the row of `focus` (#2063).
     @MainActor
     init(
         rows: [BarWindowRow],
         checks: Bool = false,
-        focus: WindowID? = nil
+        focus: WindowID? = nil,
+        icons: Bool = false
     ) {
         self.checks = checks
         var order: [BarWindowRow] = []
@@ -132,12 +145,12 @@ struct BarPeekContent: Equatable {
                 )
             )
         }
-        let mixed = order.count > 1
+        let iconed = icons || order.count > 1
         groups = order.map { first in
             let all = grouped[first.app] ?? []
             return Group(
                 app: first.app,
-                icon: mixed ? first.icon : nil,
+                icon: iconed ? first.icon : nil,
                 rows: all,
                 windowCount: all.count
             )
