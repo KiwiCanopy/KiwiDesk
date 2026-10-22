@@ -178,6 +178,11 @@ struct RunRestWiringTests {
         #expect(Array(run.shown) == [WindowID(3)])
         let stored = try #require(core.state.workspaces[space])
         #expect(stored.runTails == [WindowID(3)])
+        // A step to window 4 moves the tail, and the pass writes
+        // the new one back.
+        core.state.workspaces.focus(WindowID(4), in: space)
+        core.retile(animated: false)
+        #expect(core.state.workspaces[space]?.runTails == [WindowID(4)])
     }
 
     @Test("The shown slots leave a run's hidden windows out")
