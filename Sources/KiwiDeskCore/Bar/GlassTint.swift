@@ -122,6 +122,17 @@ enum GlassTint {
         glass.appearance = NSAppearance(named: .darkAqua)
     }
 
+    /// Pins `glass` dark where `host` — the window's effective
+    /// appearance, which carries the Settings Appearance pick —
+    /// resolves dark, and lifts the pin otherwise: the Space-switch
+    /// plates, which have no Fill and follow KiwiHub's glass. Only
+    /// dark is pinned, for `pinnedAppearance`'s reason (#2539).
+    @MainActor
+    static func followPick(_ glass: NSView, host: NSAppearance) {
+        let dark = host.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+        glass.appearance = dark ? NSAppearance(named: .darkAqua) : nil
+    }
+
     /// Whether `backdrop` is the subview immediately below `glass`
     /// in `parent`.
     @MainActor
