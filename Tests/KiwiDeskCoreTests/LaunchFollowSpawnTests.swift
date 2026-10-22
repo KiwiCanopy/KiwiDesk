@@ -70,126 +70,6 @@ struct LaunchFollowSpawnTests {
         Base.expectStayed(core)
     }
 
-    /// WindowServer's create for `id`, and the hop its payment
-    /// takes out of the event-port drain: read before the await,
-    /// since the payment's own run clears it (tests.md).
-    static func lateCreate(_ id: UInt32, on core: KiwiCore) async {
-        core.windowServerChanged(.created, id: WindowID(id))
-        await core.deferred.task(for: .lateSpawnFollow)?.value
-    }
-
-    @Test("A create landing after the arrival pays the follow then")
-    func lateCreateFollows() async {
-        // TextEdit's ⌘N: the create trails the AX arrival by ~10 ms.
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        Base.expectStayed(core)
-        core.windowServerChanged(.created, id: WindowID(9))
-        // Not inside the drain: the payment waits for its hop.
-        Base.expectStayed(core)
-        let hop = core.deferred.task(for: .lateSpawnFollow)
-        #expect(hop != nil)
-        await hop?.value
-        Self.expectFollowed(core)
-    }
-
-    @Test("A create past the late bound pays nothing")
-    func lateCreatePastTheBoundStays() async {
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        let arrived = core.wallClock()
-        core.wallClock = {
-            arrived.addingTimeInterval(
-                LaunchFollowIntent.lateCreateBound + 0.1
-            )
-        }
-        await Self.lateCreate(9, on: core)
-        Base.expectStayed(core)
-    }
-
-    @Test("A late create for another window pays nothing")
-    func lateCreateOfAnotherWindowStays() async {
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        await Self.lateCreate(10, on: core)
-        Base.expectStayed(core)
-        // The slot is still 9's, so its own create pays.
-        await Self.lateCreate(9, on: core)
-        Self.expectFollowed(core)
-    }
-
-    @Test("A window moved out of its rule's Space is not followed")
-    func movedWindowStays() async {
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        core.state.workspaces.remove(WindowID(9))
-        core.state.workspaces.add(
-            WindowID(9),
-            to: Base.home,
-            placement: .afterFocused
-        )
-        await Self.lateCreate(9, on: core)
-        #expect(core.state.workspaces.activeSpace == Base.home)
-    }
-
-    @Test("A refused arrival leaves no late create to pay")
-    func refusedArrivalOwesNoLateCreate() async {
-        let core = Self.makeCore(processAge: 5)
-        Base.arrive(9, on: core)
-        #expect(core.launchFollow.spawn == nil)
-        await Self.lateCreate(9, on: core)
-        Base.expectStayed(core)
-    }
-
-    @Test("The spawning app's own activation keeps the late create")
-    func ownActivationKeepsTheSpawn() async {
-        // A notification click: the app activates between its
-        // window's arrival and that window's create.
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        Base.activate(core, launchedAgo: 3_600)
-        await Self.lateCreate(9, on: core)
-        Self.expectFollowed(core)
-    }
-
-    @Test("Another app's activation retires the late create")
-    func otherActivationRetiresTheSpawn() async {
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        Base.activate(core, bundleID: "app.other", launchedAgo: 3_600)
-        await Self.lateCreate(9, on: core)
-        Base.expectStayed(core)
-    }
-
-    @Test("A launch debt owed before the create holds the payment")
-    func debtAtPaymentStands() async {
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        core.oweLaunchFollow("app.other")
-        await Self.lateCreate(9, on: core)
-        Base.expectStayed(core)
-    }
-
-    @Test("A Space the user left before the create is not pulled back")
-    func userMovedOnStands() async {
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        let elsewhere = SpaceID("3")
-        core.state.workspaces.ensureSpace(elsewhere)
-        core.state.workspaces.activate(elsewhere)
-        await Self.lateCreate(9, on: core)
-        #expect(core.state.workspaces.activeSpace == elsewhere)
-    }
-
-    @Test("A stop drops the late create")
-    func stopDropsTheSpawn() {
-        let core = Self.makeCore()
-        Base.arrive(9, on: core)
-        #expect(core.launchFollow.spawn != nil)
-        core.stop()
-        #expect(core.launchFollow.spawn == nil)
-    }
-
     @Test("Without the WindowServer route nothing follows unowed")
     func deadRouteStays() async {
         let core = Self.makeCore()
@@ -197,8 +77,8 @@ struct LaunchFollowSpawnTests {
         core.windowCreates.isLive = false
         Base.arrive(9, on: core)
         Base.expectStayed(core)
-        // Nor through a late create, at the claim or the payment.
-        await Self.lateCreate(9, on: core)
+        // Nor through a late create: the claim noted no slot.
+        await LaunchFollowLateCreateTests.lateCreate(9, on: core)
         Base.expectStayed(core)
     }
 
