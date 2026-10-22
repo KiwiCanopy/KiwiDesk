@@ -52,8 +52,9 @@ struct BorderOrderCensusTests {
     /// A sticky mark's stack is the same round trip (#2026): its
     /// callers are the sync behind `ordersOverlay` and the
     /// WindowServer reorder events' `reassert`, beside the one
-    /// definition in the overlay.
-    @Test("only the ruled sites stack a sticky mark")
+    /// definition in the overlay. The overflow mark (#2235) takes
+    /// the same three: its sync, its `reassert`, its definition.
+    @Test("only the ruled sites stack a sticky or overflow mark")
     func markOrderSitesAreCensused() throws {
         let sites = try SourceScan.identifierSites(
             of: "order()",
@@ -61,6 +62,8 @@ struct BorderOrderCensusTests {
         )
         #expect(
             sites.map(\.file.lastPathComponent).sorted() == [
+                "OverflowMarkManager.swift", "OverflowMarkManager.swift",
+                "OverflowMarkOverlay.swift",
                 "StickyMarkManager.swift", "StickyMarkManager.swift",
                 "StickyMarkOverlay.swift",
             ],

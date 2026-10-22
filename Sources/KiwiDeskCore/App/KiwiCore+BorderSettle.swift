@@ -54,7 +54,7 @@ extension KiwiCore {
             after: .milliseconds(animationMS + 50)
         ) { [weak self] in
             self?.updateBorders(reassertOrder: true)
-            self?.updateStickyMarks(reassertOrder: true)
+            self?.updateMarks(reassertOrder: true)
         }
     }
 
@@ -107,6 +107,6 @@ extension KiwiCore {
     /// ungated rather than growing a second guard.
     func runBorderResync() {
         updateBorders(reassertOrder: true)
-        updateStickyMarks(reassertOrder: true)
+        updateMarks(reassertOrder: true)
     }
 }

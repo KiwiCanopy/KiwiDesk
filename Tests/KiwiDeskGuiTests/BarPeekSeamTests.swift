@@ -165,15 +165,20 @@ struct BarPeekSeamTests {
     /// and no view's press handler re-spells the dismissal.
     @Test("a press in a bar closes the peek at one point")
     func onePressDismissal() throws {
+        let panel = try Self.source("ShelfPanel.swift")
         let send = try #require(
             SourceScan.declarationBody(
                 after: "override func sendEvent(",
-                in: try Self.source("ShelfPanel.swift")
+                in: panel
             )
         )
+        let reading = try #require(
+            SourceScan.declarationBody(after: "func pressType(", in: panel)
+        )
         for type in [".leftMouseDown", ".rightMouseDown", ".otherMouseDown"] {
-            #expect(send.contains(type), "\(type)")
+            #expect(reading.contains(type), "\(type)")
         }
+        #expect(send.contains("Self.pressType(of: event)"))
         let press = try #require(send.range(of: "onPress("))
         let forward = try #require(send.range(of: "super.sendEvent("))
         #expect(press.upperBound <= forward.lowerBound)

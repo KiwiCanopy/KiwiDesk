@@ -33,6 +33,12 @@ struct OverlayGlassGateTests {
             stored: "glass: tiler.settings.stickyStyle.liquidGlass"
         ),
         (
+            // The overflow mark wears the shelf's look (#2235).
+            file: "App/KiwiCore+OverflowMarks.swift",
+            function: "func overflowMarkSpecs(",
+            stored: "tiler.settings.kiwishelf"
+        ),
+        (
             file: "App/KiwiCore+Vision.swift",
             // The door over a look (#2103 PR 7); the live
             // `kiwiVisionDrawsBlur` hands it `visionLook`.
@@ -99,6 +105,7 @@ struct OverlayGlassGateTests {
         "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
+        "Borders/OverflowMarkView.swift": "OverlayGlassGateTests",
         "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
         "Vision/VisionPlate.swift": "OverlayGlassGateTests",

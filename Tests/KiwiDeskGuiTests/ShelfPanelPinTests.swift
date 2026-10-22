@@ -15,12 +15,16 @@ struct ShelfPanelPinTests {
                     "Tests/\(target)/TestCore.swift"
                 )
             )
-            // One write, and it is the pin: a later `= true` in the
-            // same twin would undo it.
+            // One write per manager, and it is the pin: a later
+            // `= true` in the same twin would undo it. The overflow
+            // marks' panels are the second (#2235).
             #expect(
                 source.components(separatedBy: "ordersPanels =").count
-                    == 2
+                    == 3
                     && source.contains("core.shelves.ordersPanels = false")
+                    && source.contains(
+                        "core.overflowMarks.ordersPanels = false"
+                    )
                     // A hidden shelf's indicator is a panel too
                     // (#761).
                     && source.contains(

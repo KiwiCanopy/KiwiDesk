@@ -279,10 +279,10 @@ func makeTestCore(
         readWritten: { nil },
         writeWritten: { _ in }
     )
-    // A shelf panel is a real window on the developer's screen,
-    // and a core outlives its test while a task still holds it
-    // (#1894): placed, never ordered in, unless the suite asks.
+    // A shelf or overflow-mark panel is a real window, and a core
+    // outlives its test (#1894): placed, never ordered in.
     core.shelves.ordersPanels = false
+    core.overflowMarks.ordersPanels = false
     core.shelves.indicators.ordersIndicatorPanels = false
     // The drawn-menu-bar read (#1386) lists the host's real
     // WindowServer windows; a test's displays are fake.

@@ -13,6 +13,16 @@ final class ShelfPanel: NSPanel {
     }
 
     override func sendEvent(_ event: NSEvent) {
+        if let type = Self.pressType(of: event) {
+            onPress(contentView?.hitTest(event.locationInWindow), type)
+        }
+        super.sendEvent(event)
+    }
+
+    /// The press `event` is, as the peek reads it, nil for any
+    /// other event — the one reading every panel that closes the
+    /// peek takes (an overflow mark's too, #2235).
+    static func pressType(of event: NSEvent) -> NSEvent.EventType? {
         switch event.type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             // A Control-click is AppKit's right-click (#761: its
@@ -20,13 +30,9 @@ final class ShelfPanel: NSPanel {
             let controlClick =
                 event.type == .leftMouseDown
                 && event.modifierFlags.contains(.control)
-            onPress(
-                contentView?.hitTest(event.locationInWindow),
-                controlClick ? .rightMouseDown : event.type
-            )
+            return controlClick ? .rightMouseDown : event.type
         default:
-            break
+            return nil
         }
-        super.sendEvent(event)
     }
 }

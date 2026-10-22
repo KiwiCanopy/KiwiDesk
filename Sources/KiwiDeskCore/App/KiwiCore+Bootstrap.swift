@@ -91,6 +91,7 @@ extension KiwiCore {
         wireSpaceBarGlyphs()
         wireBarMenus()
         wireBarPeek()
+        wireOverflowMarks()
         appFont.onLoad = { [weak self] in
             self?.updateBars()
         }
@@ -147,7 +148,7 @@ extension KiwiCore {
                 source: .animationTick,
                 pin: pin
             )
-            self?.stickyMarks.follow(
+            self?.followMarks(
                 id,
                 windowFrame: frame,
                 source: .animationTick,
@@ -173,6 +174,7 @@ extension KiwiCore {
         }
         borders.isAnimating = animationDriven
         stickyMarks.isAnimating = animationDriven
+        overflowMarks.isAnimating = animationDriven
         windowServer.isAnimating = animationDriven
         // The instant twin of the tick's leading truth (#881):
         // a just-commanded `applyInstant` target leads the
@@ -186,6 +188,7 @@ extension KiwiCore {
             }
         borders.commandedFrame = commandedInstant
         stickyMarks.commandedFrame = commandedInstant
+        overflowMarks.commandedFrame = commandedInstant
 
         socket.handler = { [weak self] request in
             self?.answer(request) ?? .fail("core unavailable")

@@ -58,6 +58,8 @@ extension KiwiCore {
                 settings: settings
             )
             retireDepartedBars(live: Set(fallback.map(\.display)))
+            overflowMarks.standingDown = []
+            updateOverflowMarks()
             return
         }
         var appBarsShown: [AppBarManager.Bar] = []
@@ -163,6 +165,10 @@ extension KiwiCore {
         retireDepartedBars(live: Set(displays.map(\.id)))
         // KiwiVision stands down on the same verdict (#2103).
         noteVisionStandDown(standingDown)
+        // The overflow marks wear the shelf's look, so they repaint
+        // with every shelf repaint, on this pass's verdict (#2235).
+        overflowMarks.standingDown = standingDown
+        updateOverflowMarks()
     }
 
     /// Drops the bar overlays of displays outside `live` — after the

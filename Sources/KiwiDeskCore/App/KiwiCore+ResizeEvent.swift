@@ -17,7 +17,7 @@ extension KiwiCore {
             source: .axEcho,
             pin: nil
         )
-        stickyMarks.follow(
+        followMarks(
             id,
             windowFrame: frame,
             source: .axEcho,
