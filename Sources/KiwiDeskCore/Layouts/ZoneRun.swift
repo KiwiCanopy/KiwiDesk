@@ -44,8 +44,10 @@ public struct ZoneRun: Sendable, Equatable {
         }
         var start = min(max(head ?? 0, 0), count - 1)
         var last = start
-        if let tail, tail >= start, tail < count {
-            last = tail
+        // A tail a removal handed back past the head reads as the
+        // head alone: a stale end never refills the run.
+        if let tail, tail < count {
+            last = max(tail, start)
         } else {
             while last + 1 < count, fits(start, last + 1) { last += 1 }
         }

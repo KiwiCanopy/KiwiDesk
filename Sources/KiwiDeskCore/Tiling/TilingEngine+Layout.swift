@@ -81,6 +81,7 @@ extension TilingEngine {
         // computation, so every other `calculatedFrames`
         // caller keeps the generalized consume.
         context.probesBeyondBounds = probeBeyondBoundsPass
+        context.parkBounds = visibleBounds(screen)
         return (space, tiled, context)
     }
 

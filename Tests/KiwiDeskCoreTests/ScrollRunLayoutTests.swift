@@ -107,6 +107,28 @@ struct ScrollRunLayoutTests {
         )
     }
 
+    /// A shelf on the right reserves its strip off `bounds`; the
+    /// park still lands at the screen's corner, or it reads as no
+    /// park and flies (#2235 review).
+    @Test("A run parks at the screen's corner past a reserved shelf")
+    func parkIgnoresTheShelf() throws {
+        var ctx = context(focused: ids[5])
+        ctx.bounds = CGRect(x: 0, y: 0, width: 1860, height: 800)
+        ctx.parkBounds = screen
+        let frames = StackLayout().calculateGeometry(for: tiled, in: ctx)
+        #expect(isParked(frames[ids[1]]))
+    }
+
+    @Test("Monocle parks at the screen's corner past a reserved shelf")
+    func monocleParkIgnoresTheShelf() throws {
+        var ctx = context(focused: ids[0])
+        ctx.bounds = CGRect(x: 0, y: 0, width: 1860, height: 800)
+        ctx.parkBounds = screen
+        ctx.monocle.hideStyle = .park
+        let frames = MonocleLayout().calculateGeometry(for: tiled, in: ctx)
+        #expect(isParked(frames[ids[1]]))
+    }
+
     @Test("Every overflowing track scrolls on its own")
     func tracksScrollApart() throws {
         var ctx = context(focused: ids[5])

@@ -223,8 +223,7 @@ struct StackSchematic: View {
         return L(
             "layout.schematic.stack.caption_scroll",
             "Master zone and stack zone; windows a zone can't fit "
-                + "wait behind the ones it shows, and moving focus "
-                + "scrolls them in."
+                + "wait off screen, and moving focus scrolls them in."
         )
     }
 

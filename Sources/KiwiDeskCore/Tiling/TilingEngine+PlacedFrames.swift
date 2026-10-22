@@ -111,9 +111,9 @@ extension TilingEngine {
             frames: slots,
             context: input.context
         )
-        // A run's hidden window keeps the edge slot it waits
-        // behind: pulled inward it would cross the shown run
-        // (#2235 ruling).
+        // A run's parked window keeps its park: the inward pass
+        // would pull it, an overhang outside the zone, back onto
+        // the screen (#2235).
         if input.space.mode == .stack, let cover {
             for id in cover.behind.keys { issued[id] = slots[id] }
         }

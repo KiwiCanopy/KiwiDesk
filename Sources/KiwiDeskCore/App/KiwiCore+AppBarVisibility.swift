@@ -109,8 +109,8 @@ extension KiwiCore {
             }
             return verdicts
         default:
-            // A run's hidden window waits under the shown run, and
-            // a shown one is covered by no hidden window (#2235,
+            // A run's hidden window waits parked off screen, and a
+            // shown one is covered by no hidden window (#2235,
             // #2547).
             let hidden = tiler.runCovers[space.id]?.behind ?? [:]
             let first = front.map { tiled[$0] }

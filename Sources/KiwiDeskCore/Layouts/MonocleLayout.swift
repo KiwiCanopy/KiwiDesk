@@ -47,7 +47,7 @@ public struct MonocleLayout: LayoutSystem {
                 ? own
                 : TilingEngine.stashFrame(
                     own,
-                    in: context.bounds,
+                    in: context.parkBounds ?? context.bounds,
                     corner: corner
                 )
         }

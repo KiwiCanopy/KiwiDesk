@@ -103,6 +103,11 @@ public struct LayoutContext: Sendable {
     public var sticky: Set<WindowID>
     /// Screen neighbor topology for clamping and park corners (#878, #881).
     public var screenNeighbors: ScreenNeighbors
+    /// The screen's visible bounds with no shelf carved off: where
+    /// a layout parks, the frame the stash parks against and
+    /// `looksStashed` judges (#881, #2235). Nil off the engine's
+    /// own build, which parks against `bounds`.
+    public var parkBounds: CGRect?
     /// App-enforced size bounds confirmed by engine (#677).
     public var sizeBounds: [WindowID: EffectiveSizeBound]
 

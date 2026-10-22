@@ -104,28 +104,31 @@ struct RunRestWiringTests {
         #expect(!core.pendingZOrderRestore)
     }
 
-    /// The parked windows share one corner frame: the restore that
-    /// stacks the stack zone, and its track twin's gate, leave them
-    /// out or every scroll would restack a phantom pile.
-    @Test("A zone restore leaves the parked windows out")
-    func restoreSkipsParked() throws {
+    /// The parked windows share one corner frame: the track
+    /// restore, which judges a pile by overlap, leaves them out or
+    /// every scroll would restack a phantom pile at the corner.
+    @Test("The track restore leaves the parked windows out")
+    func trackRestoreSkipsParked() throws {
         let core = makeCore()
         let space = makeSpace(core, focused: 6)
+        _ = core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("track")]
+        )
+        // One normal track and the overflow track, which shows two
+        // of its five.
+        _ = core.execute(
+            "track.set_limit",
+            args: [.number(Double(TrackParams.minLimit))]
+        )
         core.retile(animated: false)
-        let hidden = core.runHidden
-        #expect(!hidden.isEmpty)
         let input = try #require(
             core.tiler.layoutInput(state: core.state)
         )
-        let frames = core.dropRunHidden(
-            core.tiler.calculatedFrames(state: core.state),
-            space: space,
-            mode: .stack,
-            tiled: input.tiled,
-            in: input.context
-        )
-        #expect(hidden.allSatisfy { frames[$0] == nil })
-        #expect(frames[WindowID(6)] != nil)
+        let parked = core.parkedByRun(input)
+        #expect(!parked.isEmpty)
+        #expect(core.trackRestoreOrder(input).isEmpty)
+        #expect(!core.activeTrackOverflows)
     }
 
     @Test("The stack restack leaves the parked windows out")

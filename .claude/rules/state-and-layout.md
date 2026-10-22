@@ -1169,7 +1169,18 @@ editing here:
   frames — or monocle's or a scrolled run's parked frames (#881,
   #2235) — threads `screenNeighbors`** (#878), and a park or an
   unpark the layout loop issues snaps on every pass through the
-  one `TilingEngine.parkSnaps` (`RunParkSnapTests`):
+  one `TilingEngine.parkSnaps` (`RunParkSnapTests`). A layout
+  parks against `LayoutContext.parkBounds`, the screen's
+  unreserved visible frame the stash parks against and
+  `looksStashed` judges, never the shelf-reserved `bounds`, or a
+  park reads as no park (`RunParkSnapTests` ▸
+  `parkBoundsAreTheScreens`); a window already at its park is
+  skipped on a re-issuing pass too (▸ `liftedParkIsKept`). A
+  z-order restore or gate that judges frames computed now leaves
+  out what `parkedByRun` names, and a classifier of the last
+  pass's slots takes `shownSlots()` (`RunRestWiringTests`); a
+  run's two ends are written together by `persistRunHeads`
+  (▸ `retileKeepsTheTail`):
   `TilingSettings.context` defaults the flags to all-open (the
   single-screen verdict), and nothing scans for the omitted
   parameter, so a new site that computes real scrolling frames

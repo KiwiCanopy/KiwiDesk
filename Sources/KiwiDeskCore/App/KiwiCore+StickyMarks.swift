@@ -34,8 +34,8 @@ extension KiwiCore {
                 state.maximizedWindow(of: $0)
             }
         )
-        // A window a run hides wears no mark over the window it
-        // waits behind (#2235, owner 2026-10-22: no exemption).
+        // A window a run parks wears no mark at the corner
+        // (#2235, owner 2026-10-22: no exemption).
         let hidden = runHidden
         return state.windows.all.compactMap { window in
             var glyphs: [StickyMarkManager.Glyph] = []

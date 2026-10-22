@@ -62,41 +62,31 @@ extension KiwiCore {
         activeSpace?.mode.isFocusDriven == true || focusScrollsRun(to: id)
     }
 
+    /// The windows the active Space's runs would park as the
+    /// layout draws NOW — what a z-order restore and its gate,
+    /// which judge frames computed now, leave out: parked at one
+    /// corner, they read as a pile (#2235). A classifier of the
+    /// last pass's slots takes `shownSlots()` instead.
+    func parkedByRun(
+        _ input: (space: Space, tiled: [WindowID], context: LayoutContext)
+    ) -> Set<WindowID> {
+        RunCover.of(
+            space: input.space.id,
+            mode: input.space.mode,
+            tiled: input.tiled,
+            in: input.context
+        ).map { Set($0.behind.keys) } ?? []
+    }
+
     /// The Track frames `input` draws, less what its runs park —
     /// what a track restore and its gate judge for a pile.
     func shownTrackFrames(
         _ input: (space: Space, tiled: [WindowID], context: LayoutContext)
     ) -> [WindowID: CGRect] {
-        dropRunHidden(
-            TrackLayout().calculateGeometry(
-                for: input.tiled,
-                in: input.context
-            ),
-            space: input.space.id,
-            mode: .track,
-            tiled: input.tiled,
+        let parked = parkedByRun(input)
+        return TrackLayout().calculateGeometry(
+            for: input.tiled,
             in: input.context
-        )
-    }
-
-    /// `frames` without the windows the run `mode` draws over
-    /// `tiled` hides: parked at one corner, they would read as a
-    /// pile to a z-order restore and its gate (#2235).
-    func dropRunHidden(
-        _ frames: [WindowID: CGRect],
-        space: SpaceID,
-        mode: LayoutMode,
-        tiled: [WindowID],
-        in context: LayoutContext
-    ) -> [WindowID: CGRect] {
-        guard
-            let hidden = RunCover.of(
-                space: space,
-                mode: mode,
-                tiled: tiled,
-                in: context
-            )?.behind
-        else { return frames }
-        return frames.filter { hidden[$0.key] == nil }
+        ).filter { !parked.contains($0.key) }
     }
 }

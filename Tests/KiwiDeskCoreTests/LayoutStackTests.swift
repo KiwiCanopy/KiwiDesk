@@ -94,10 +94,10 @@ struct StackLayoutTests {
     }
 
     @MainActor
-    @Test("Column overflow shows what fits, hides the rest behind")
+    @Test("Column overflow shows what fits, parks the rest")
     func partialOverflow() throws {
         // Usable 780pt tall; two stack windows fit at 300pt, so
-        // the other two wait behind the last shown slot (#2235).
+        // the other two wait parked (#2235).
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3, w4, w5],
             in: makeContext(

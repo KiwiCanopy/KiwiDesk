@@ -92,6 +92,13 @@ struct ZoneRunTests {
         #expect(mixed(head: 1, tail: 2, focus: 1) == 1..<3)
     }
 
+    /// The one shown window closed: its head hands on, its tail
+    /// back, so the tail sits before the head.
+    @Test("A tail before the head shows the head alone")
+    func staleTailRevealsNothing() {
+        #expect(mixed(head: 2, tail: 1) == 2..<3)
+    }
+
     @Test("Focus before the run becomes its first window")
     func stepBackRevealsOne() {
         #expect(mixed(head: 2, tail: 3, focus: 1) == 1..<4)

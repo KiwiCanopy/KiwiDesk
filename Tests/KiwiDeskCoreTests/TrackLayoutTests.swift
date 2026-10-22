@@ -224,11 +224,11 @@ struct TrackLayoutTests {
         #expect(!shown.contains(w[7]))
     }
 
-    @Test("A row's overflow waits behind its last slot")
+    @Test("A row's overflow waits parked")
     func overflowCascadeAlwaysVertical() {
         // Horizontal mode, one row holding too many windows: the
-        // windows tile along X and the rest wait behind the
-        // row's last shown slot, full height (#2235).
+        // windows tile along X and the rest wait parked at the
+        // corner (#2235).
         let w = ids(10)
         let frames = layout.calculateGeometry(
             for: w,

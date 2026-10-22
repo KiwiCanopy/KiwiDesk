@@ -79,12 +79,8 @@ public struct RunZone: Sendable, Equatable {
         return frames
     }
 
-    /// A hidden window's frame: its own size at the slot it waits
-    /// for, parked at the hide corner (#2235 ruling, 2026-10-22).
-    /// macOS cannot clip another app's window, so one whose
-    /// minimum exceeds a slot overhangs wherever it waits; the
-    /// corner is where that overhang lands off screen, as for
-    /// monocle's `park` (#881).
+    /// A hidden window's frame: its own learned size at the slot
+    /// it waits for, parked at the hide corner (#881, #2235).
     private static func parked(
         _ id: WindowID,
         slot: CGRect,
@@ -97,7 +93,7 @@ public struct RunZone: Sendable, Equatable {
             ?? slot
         return TilingEngine.stashFrame(
             own,
-            in: context.bounds,
+            in: context.parkBounds ?? context.bounds,
             corner: corner
         )
     }

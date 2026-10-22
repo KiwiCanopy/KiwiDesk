@@ -97,6 +97,34 @@ struct RunParkSnapTests {
         #expect(glides(core, 5))
     }
 
+    /// The layout parks against the screen's whole visible frame,
+    /// the one the stash parks against and `looksStashed` judges,
+    /// never the shelf-reserved layout bounds (#881, #2235).
+    @Test("The layout parks against the screen's visible bounds")
+    func parkBoundsAreTheScreens() throws {
+        let (core, _) = makeCore()
+        let input = try #require(core.tiler.layoutInput(state: core.state))
+        #expect(input.context.parkBounds == Self.screen)
+    }
+
+    /// macOS lifts a parked window off the line it was asked for
+    /// (the `looksStashed` measurement): a pass, a re-issuing one
+    /// included, leaves it there rather than re-sending the park
+    /// (#1508).
+    @Test("A lifted park is not re-sent, even on a re-issue")
+    func liftedParkIsKept() throws {
+        let (core, space) = makeCore()
+        let hidden = try #require(
+            core.tiler.runCovers[space]?.behind.keys.first
+        )
+        let park = try sent(core, hidden.raw)
+        let lifted = park.offsetBy(dx: 0, dy: -10)
+        core.state.apply(.windowMoved(hidden, lifted))
+        core.tiler.clearInstantTarget(hidden)
+        core.retile(animated: false, pass: .reissue)
+        #expect(core.tiler.commandedFrame(of: hidden) == nil)
+    }
+
     @Test("A park or an unpark snaps; any other frame may glide")
     func parkSnapsVerdict() {
         let slot = CGRect(x: 100, y: 100, width: 400, height: 300)

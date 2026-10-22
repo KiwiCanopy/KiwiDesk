@@ -173,12 +173,30 @@ extension KiwiCore {
         guard let input = tiler.layoutInput(state: state) else {
             return
         }
+        let order = trackRestoreOrder(input)
+        guard order.count > 1 else { return }
+        // The anchor, not `space.focused` (#431): with a focused
+        // traveler the closing re-assert must skip (not steal
+        // focus back to the stale local slot) — the monocle
+        // restore's rule, applied to every restore.
+        raiseSequentially(
+            order,
+            thenFocus: state.focusAnchor(
+                of: space,
+                tiled: input.tiled
+            ),
+            above: []
+        )
+    }
+
+    /// The piled tracks' windows in cascade order. Any overlap =
+    /// piled, matching the `framesCascade` gate (raw
+    /// intersection), never `Navigation.pileMates`' 25%-area
+    /// threshold, which answers a swap's question.
+    func trackRestoreOrder(
+        _ input: (space: Space, tiled: [WindowID], context: LayoutContext)
+    ) -> [WindowID] {
         let frames = shownTrackFrames(input)
-        // Any overlap = piled, matching the `framesCascade` gate
-        // (raw intersection). Deliberately NOT `Navigation.
-        // pileMates`' 25%-area threshold — that answers "worth
-        // skipping in a swap", a different question. Tiled tracks
-        // never overlap (inner gaps), so both agree in practice.
         let piled = input.tiled.filter { id in
             guard let rect = frames[id] else { return false }
             return input.tiled.contains { other in
@@ -187,19 +205,7 @@ extension KiwiCore {
                         .intersection(rect).isEmpty ?? true)
             }
         }
-        guard piled.count > 1 else { return }
-        // The anchor, not `space.focused` (#431): with a focused
-        // traveler the closing re-assert must skip (not steal
-        // focus back to the stale local slot) — the monocle
-        // restore's rule, applied to every restore.
-        raiseSequentially(
-            Self.cascadeRaiseOrder(piled, frames: frames),
-            thenFocus: state.focusAnchor(
-                of: space,
-                tiled: input.tiled
-            ),
-            above: []
-        )
+        return Self.cascadeRaiseOrder(piled, frames: frames)
     }
 
     /// Schedules a track z-order restore, but only when the
@@ -253,9 +259,9 @@ extension KiwiCore {
     /// array-ordered (a promoted sticky, #414 v2), leaving out what
     /// a run parks outside the zone (#2235).
     func stackRestoreOrder(_ zone: ArraySlice<WindowID>) -> [WindowID] {
-        let hidden = runHidden
+        let parked = tiler.layoutInput(state: state).map(parkedByRun)
         return Self.cascadeRaiseOrder(
-            zone.filter { !hidden.contains($0) },
+            zone.filter { parked?.contains($0) != true },
             frames: tiler.calculatedFrames(state: state)
         )
     }

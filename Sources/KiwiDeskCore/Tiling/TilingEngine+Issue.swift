@@ -48,6 +48,17 @@ extension TilingEngine {
         // An unanswered instant set outranks the stale state
         // frame: no re-ask, no slide from the corner (#1912).
         let sent = commandedFrame(of: id)
+        // A window already at its park — lifted as macOS lifts a
+        // parked window — is there, on a re-issuing pass too: only
+        // a departure the stash owes forces a park (#1508, #2235).
+        if probe == nil, looksStashed(target),
+            Self.parked(sent ?? current, at: target)
+                || Self.parked(current, at: target)
+        {
+            animation.cancel(window: id)
+            meter.add(\.framesSkipped)
+            return
+        }
         if probe == nil, !pass.reissues, let sent,
             animation.targetFrame(window: id) == nil,
             Self.close(sent, to: target)

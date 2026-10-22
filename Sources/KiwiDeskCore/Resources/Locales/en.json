@@ -1228,7 +1228,7 @@
   "layout.schematic.stack.ax_alone_zone": "Stack preview: one window in the master zone at %1$d percent, the stack zone empty.",
   "layout.schematic.stack.caption_alone_fill": "One window fills the whole screen.",
   "layout.schematic.stack.caption_alone_zone": "One window keeps the master zone and leaves the stack zone empty.",
-  "layout.schematic.stack.caption_scroll": "Master zone and stack zone; windows a zone can't fit wait behind the ones it shows, and moving focus scrolls them in.",
+  "layout.schematic.stack.caption_scroll": "Master zone and stack zone; windows a zone can't fit wait off screen, and moving focus scrolls them in.",
   "layout.schematic.track.ax": "Track preview: tracks along one axis, the far one scrolling its overflow; the plus is the next window.",
   "layout.schematic.track.ax_plain": "Track preview: tracks along one axis; the plus is the next window.",
   "layout.schematic.track.caption_focused": "New windows join the focused track until it is full, then open one beside it; the far track scrolls the overflow.",

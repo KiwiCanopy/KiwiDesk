@@ -25,7 +25,7 @@ private func makeContext(
 /// The overflow track (#192): too many tracks to tile side by
 /// side fold their surplus into ONE far-edge overflow track,
 /// which scrolls its windows like every other track (#2235): as
-/// many as fit are shown, the rest wait behind the edge slot.
+/// many as fit are shown, the rest wait parked.
 @Suite("Track overflow track (#192)")
 @MainActor
 struct TrackOverflowStyleTests {
