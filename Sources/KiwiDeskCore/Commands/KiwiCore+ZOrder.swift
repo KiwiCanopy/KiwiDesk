@@ -241,20 +241,22 @@ extension KiwiCore {
         // floating member and miss travelers entirely.
         let tiled = state.effectiveTiledMembers(of: space)
         guard tiled.count > boundary else { return }
-        // Frame-ordered, not array-ordered: the zone cascade's
-        // rendered order can differ from the array once
-        // `stickyExempt` promotes a piled sticky (#414 v2).
         // Anchor, not `space.focused` — see restoreTrackZOrder.
-        // A run's hidden windows rest parked, outside the zone
-        // (#2235): the zone restacks only what it shows.
-        let hidden = runHidden
         raiseSequentially(
-            Self.cascadeRaiseOrder(
-                tiled[boundary...].filter { !hidden.contains($0) },
-                frames: tiler.calculatedFrames(state: state)
-            ),
+            stackRestoreOrder(tiled[boundary...]),
             thenFocus: state.focusAnchor(of: space, tiled: tiled),
             above: []
+        )
+    }
+
+    /// The stack zone's restack, frame-ordered rather than
+    /// array-ordered (a promoted sticky, #414 v2), leaving out what
+    /// a run parks outside the zone (#2235).
+    func stackRestoreOrder(_ zone: ArraySlice<WindowID>) -> [WindowID] {
+        let hidden = runHidden
+        return Self.cascadeRaiseOrder(
+            zone.filter { !hidden.contains($0) },
+            frames: tiler.calculatedFrames(state: state)
         )
     }
 

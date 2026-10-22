@@ -128,6 +128,18 @@ struct RunRestWiringTests {
         #expect(frames[WindowID(6)] != nil)
     }
 
+    @Test("The stack restack leaves the parked windows out")
+    func stackRestackSkipsParked() throws {
+        let core = makeCore()
+        _ = makeSpace(core, focused: 6)
+        core.retile(animated: false)
+        let hidden = core.runHidden
+        #expect(!hidden.isEmpty)
+        let zone = (2...6).map { WindowID(UInt32($0)) }
+        let order = core.stackRestoreOrder(zone[...])
+        #expect(Set(order) == Set(zone).subtracting(hidden))
+    }
+
     /// Focus drives the scroll (#2235 ruling): the focus verb's
     /// step past the run's edge lands on a hidden window, and the
     /// focus itself retiles so the run moves to show it.
