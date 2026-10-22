@@ -202,8 +202,7 @@ public final class KiwiCore {
     /// The warp's machine tail (#186); nil until `start()` wires it.
     var pointerWarp: (@MainActor (CGRect) -> Void)?
 
-    /// The deferred one-shot settle tasks, keyed so `stop()` cancels
-    /// them all without a hand-kept list (#49).
+    /// One-shot settle tasks, keyed so `stop()` cancels all (#49).
     let deferred = DeferredTasks()
     /// The in-flight boot's phase, spans and timestamps (#801).
     let boot = BootRun()
@@ -213,11 +212,12 @@ public final class KiwiCore {
     var hyperRemapHost = HyperKeyRemap.Host.live
 
     /// The intent ledgers; each type's doc carries its argument
-    /// (#482/#483, #1007, #1150, #1599, #1875).
+    /// (#482/#483, #1007, #1150, #1599, #1875, #2478).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
     let launchFollow = LaunchFollowIntent()
+    let windowCreates = WindowCreateLedger()
     let jump = JumpState()
 
     /// The MAIN display's current native Desktop (#888): the binding

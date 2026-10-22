@@ -20,6 +20,7 @@ extension KiwiCore {
         let active = SkyLightWindowLifecycle.start { [weak self] in
             self?.windowServerChanged($0, id: $1)
         }
+        windowCreates.isLive = active
         onLog(
             "WindowServer window wake-up "
                 + (active ? "active" : "unavailable")
@@ -37,8 +38,11 @@ extension KiwiCore {
             // app's arrival, and a Space switch creates them.
             guard EventLoop.ownWindow(number: Int(id.raw)) == nil
             else { return }
+            windowCreates.noteCreated(id, at: wallClock())
+            payLateSpawnFollow(id)
             pullWakeSweep()
         case .destroyed:
+            windowCreates.noteDestroyed(id)
             eventLoop.windowServerDestroyed(id)
         }
     }
