@@ -25,7 +25,8 @@ struct ShelfIndicatorSpec: Equatable {
     let mark: Mark
     /// The indicator's frame, AX coordinates.
     let frame: CGRect
-    let horizontal: Bool
+    /// The edge its shelf hides on.
+    let edge: AppBarEdge
     let fill: String
     /// The bar's own state inks (`SpaceBarItemView.stateColor`):
     /// the current Space's, an idle one's, an empty one's.
@@ -58,6 +59,8 @@ struct ShelfIndicatorSpec: Equatable {
     /// Where the current Space sits, for VoiceOver: its place
     /// from 1 and the Space count, which the dots may not all show.
     var position: Position?
+
+    var horizontal: Bool { edge.isHorizontal }
 
     /// Whether the mark draws nothing: its bar or a sibling shows.
     var standsAside: Bool { shown || yields }
@@ -180,8 +183,7 @@ final class ShelfIndicator {
         // Room around the mark for its hover growth and its
         // label, taken once: the plate grows inside it and a hover
         // never resizes the panel.
-        let room = Self.room(of: spec)
-        let frame = spec.frame.insetBy(dx: -room.width, dy: -room.height)
+        let frame = Self.room(of: spec)
         panel.setFrame(
             GeometryUtils.flip(
                 frame,
@@ -201,14 +203,16 @@ final class ShelfIndicator {
         panel?.orderOut(nil)
     }
 
-    /// The room the panel keeps around `spec`'s mark on each side:
-    /// the hover's growth, and along the edge half its label's.
-    static func room(of spec: ShelfIndicatorSpec) -> CGSize {
-        let growth = ShelfIndicatorSpec.hoverGrowth
-        let along = growth + spec.labelExtra / 2
-        return spec.horizontal
-            ? CGSize(width: along, height: growth)
-            : CGSize(width: growth, height: along)
+    /// The panel's frame for `spec`, AX coordinates: its hovered
+    /// plate with the label's room, which never crosses the
+    /// screen side.
+    static func room(of spec: ShelfIndicatorSpec) -> CGRect {
+        BarMotion.hoverPlate(
+            mark: spec.frame,
+            widen: spec.labelExtra,
+            edge: spec.edge,
+            hovered: true
+        )
     }
 
     /// The mark's resting frame inside a view `bounds` sized by
@@ -218,7 +222,10 @@ final class ShelfIndicator {
         in bounds: CGRect
     ) -> CGRect {
         let room = room(of: spec)
-        return bounds.insetBy(dx: room.width, dy: room.height)
+        return spec.frame.offsetBy(
+            dx: bounds.minX - room.minX,
+            dy: bounds.minY - room.minY
+        )
     }
 
     var isVisible: Bool { panel?.isVisible == true }

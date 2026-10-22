@@ -16,15 +16,80 @@ import Testing
 struct ShelfRevealMotionTests {
     private static let mark = CGRect(x: 100, y: 0, width: 60, height: 8)
 
-    @Test("The hovered plate grows on every side")
-    func hoverPlateGrows() {
-        let grown = BarMotion.hoverPlate(mark: Self.mark, hovered: true)
+    /// The screen side of `rect` on `edge`, y down.
+    private func screenSide(_ rect: CGRect, _ edge: AppBarEdge) -> CGFloat {
+        switch edge {
+        case .top: rect.minY
+        case .bottom: rect.maxY
+        case .left: rect.minX
+        case .right: rect.maxX
+        }
+    }
+
+    /// A plain `NSPanel` is clamped below the menu bar (#436), so a
+    /// plate reaching past the screen side moved the mark off the
+    /// edge and the grow reveal jumped as it landed.
+    @Test("The hovered plate grows away from the screen side alone")
+    func hoverPlateKeepsTheScreenSide() {
+        let mark = CGRect(x: 100, y: 100, width: 60, height: 8)
         let growth = ShelfIndicatorSpec.hoverGrowth
-        #expect(grown == Self.mark.insetBy(dx: -growth, dy: -growth))
-        #expect(
-            BarMotion.hoverPlate(mark: Self.mark, hovered: false)
-                == Self.mark
+        for edge in AppBarEdge.allCases {
+            let rest =
+                edge.isHorizontal
+                ? mark : CGRect(x: 100, y: 100, width: 8, height: 60)
+            let grown = BarMotion.hoverPlate(
+                mark: rest,
+                edge: edge,
+                hovered: true
+            )
+            #expect(
+                screenSide(grown, edge) == screenSide(rest, edge),
+                "\(edge)"
+            )
+            #expect(grown.contains(rest), "\(edge)")
+            let along = edge.isHorizontal ? \CGRect.width : \.height
+            let across = edge.isHorizontal ? \CGRect.height : \.width
+            #expect(grown[keyPath: along] == rest[keyPath: along] + 2 * growth)
+            #expect(
+                grown[keyPath: across] == rest[keyPath: across] + 2 * growth
+            )
+            #expect(
+                BarMotion.hoverPlate(mark: rest, edge: edge, hovered: false)
+                    == rest
+            )
+        }
+    }
+
+    @Test("The mark's panel and a grow's mark keep the screen side")
+    func roomKeepsTheScreenSide() throws {
+        let label = ShelfIndicatorSpec.label(
+            .text("MA", tinted: true),
+            font: NSFont.systemFont(ofSize: 8)
         )
+        for edge in AppBarEdge.allCases {
+            let frame =
+                edge.isHorizontal
+                ? CGRect(x: 100, y: 100, width: 60, height: 8)
+                : CGRect(x: 100, y: 100, width: 8, height: 60)
+            let spec = spec(hovered: true, label: label, edge: edge, at: frame)
+            let room = ShelfIndicator.room(of: spec)
+            #expect(screenSide(room, edge) == screenSide(frame, edge))
+            #expect(room.contains(frame), "\(edge)")
+            let motion = BarMotion.revealMotion(
+                entering: true,
+                path: .init(
+                    kind: .grow,
+                    origin: frame,
+                    plate: frame.insetBy(dx: -200, dy: -200),
+                    edge: edge
+                )
+            )
+            guard case .morph(let morph) = motion else {
+                Issue.record("\(edge): no grow")
+                continue
+            }
+            #expect(screenSide(morph.mark, edge) == screenSide(frame, edge))
+        }
     }
 
     /// A slide along `offset`.
@@ -97,12 +162,14 @@ struct ShelfRevealMotionTests {
     private func spec(
         hovered: Bool,
         shown: Bool = false,
-        label: ShelfIndicatorSpec.Label? = nil
+        label: ShelfIndicatorSpec.Label? = nil,
+        edge: AppBarEdge = .top,
+        at frame: CGRect = ShelfRevealMotionTests.mark
     ) -> ShelfIndicatorSpec {
         ShelfIndicatorSpec(
             mark: .dots([.init(current: true, occupied: true)]),
-            frame: Self.mark,
-            horizontal: true,
+            frame: frame,
+            edge: edge,
             fill: "#000000",
             currentInk: "#FFFFFF",
             ink: "#AAAAAA",
@@ -117,30 +184,39 @@ struct ShelfRevealMotionTests {
 
     /// The indicator view sized as `ShelfIndicator.show` sizes it.
     private func view() -> ShelfIndicatorView {
-        let room = ShelfIndicatorSpec.hoverGrowth
         let view = ShelfIndicatorView()
         view.frame = CGRect(
             origin: .zero,
-            size: Self.mark.insetBy(dx: -room, dy: -room).size
+            size: ShelfIndicator.room(of: spec(hovered: false)).size
         )
         return view
     }
 
-    @Test("A hover grows the plate's frame and leaves the dots alone")
+    /// The dots' mark in the indicator view's own coordinates.
+    private func drawnMark(_ view: ShelfIndicatorView) -> CGRect {
+        view.dots.mark.offsetBy(
+            dx: view.dots.frame.minX,
+            dy: view.dots.frame.minY
+        )
+    }
+
+    @Test("A hover grows the plate's frame and the dots follow its middle")
     func hoverGrowsThePlate() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
         let view = view()
         view.render(spec(hovered: false), animated: false)
-        let room = ShelfIndicatorSpec.hoverGrowth
-        let resting = view.bounds.insetBy(dx: room, dy: room)
+        let resting = ShelfIndicator.mark(
+            of: spec(hovered: false),
+            in: view.bounds
+        )
         #expect(view.plate.frame == resting)
-        #expect(view.dots.mark == resting)
+        #expect(drawnMark(view) == resting)
         #expect(view.rim.alphaValue == 0)
         view.render(spec(hovered: true), animated: false)
         #expect(view.plate.frame == view.bounds)
         #expect(view.rim.frame == view.bounds)
-        #expect(view.dots.mark == resting)
+        #expect(drawnMark(view).midY == view.plate.frame.midY)
         #expect(view.rim.alphaValue == 1)
     }
 
