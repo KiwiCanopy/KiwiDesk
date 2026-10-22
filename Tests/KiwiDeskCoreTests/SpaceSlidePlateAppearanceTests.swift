@@ -4,9 +4,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// **The slide's glass plates follow the Appearance pick**
-/// (#2539). Unpinned, a plate's glass takes its variant from the
-/// windows it covers, which are mostly bright, so the plates read
-/// white under a dark pick while KiwiHub goes dark. Each plate and
+/// (#2539). Unpinned, a glass view takes its variant from the
+/// backdrop it samples (#1308) — here the windows being switched —
+/// rather than from the pick KiwiHub follows. Each plate and
 /// pile container is pinned through `GlassTint.followPick` from
 /// the panel's effective appearance, the pick it carries.
 ///
@@ -46,6 +46,9 @@ struct SpaceSlidePlateAppearanceTests {
             )
         )
         let play = try #require(overlay.play)
+        // The panel must inherit `NSApp.appearance`, the pick; one
+        // of its own would hide it from the plates.
+        #expect(play.panel.appearance == nil)
         play.panel.appearance = NSAppearance(named: appearance)
         overlay.run(
             incoming: [
@@ -111,5 +114,18 @@ struct SpaceSlidePlateAppearanceTests {
         for view in glass {
             #expect(view.appearance == nil)
         }
+    }
+
+    /// The door LIFTS a pin a dark pick left, not only declines to
+    /// set one: a fresh plate cannot tell the two apart.
+    @Test("a light pick lifts a dark pin")
+    func lightPickLiftsThePin() throws {
+        let view = NSView()
+        let dark = try #require(NSAppearance(named: .darkAqua))
+        let light = try #require(NSAppearance(named: .aqua))
+        GlassTint.followPick(view, host: dark)
+        #expect(view.appearance?.name == .darkAqua)
+        GlassTint.followPick(view, host: light)
+        #expect(view.appearance == nil)
     }
 }

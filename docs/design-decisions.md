@@ -3668,10 +3668,13 @@ fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
 They follow the Appearance pick as KiwiHub does: each plate's
-glass is pinned dark where the pick resolves dark, through
-`GlassTint.followPick` (#2539). Left to itself the glass takes its
-variant from the windows it covers, which are mostly bright, so
-the plates read white under a dark pick. No switch of their own: only dark
+glass and pile container is pinned dark where the panel's
+effective appearance resolves dark, through `GlassTint.followPick`
+(#2539), rather than left to inherit it. An unpinned glass view
+decides its variant from the backdrop it samples and holds it
+(#1308, measured under a light pick), and a plate's backdrop is the
+windows being switched; the pin makes the variant the pick's
+whatever the plates cover. No switch of their own: only dark
 can be pinned (#1308, Liquid Glass above), so a light choice could
 not hold over dark windows, and plates unlike the rest of the app
 are not worth a setting.

@@ -1392,7 +1392,9 @@ Obligations:
   **A surface with no Fill that follows the Appearance pick pins
   through `GlassTint.followPick`**, handed its window's effective
   appearance — the Space-switch plates (#2539,
-  `SpaceSlidePlateAppearanceTests`).
+  `SpaceSlidePlateAppearanceTests`) — and a new caller joins
+  `GlassTintPinDarkCallerTests`' `followPick` register, for the
+  reason `pinDark`'s has one.
 - **A `Sources/KiwiDesk` surface that tints glass owes this suite
   a root.** `GlassTintSeamTests` scans Core alone, so the GUI
   tree is not covered by it — a Fill→colour derivation that lands
