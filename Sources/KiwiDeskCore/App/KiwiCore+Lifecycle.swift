@@ -237,6 +237,8 @@ extension KiwiCore {
         // child after teardown (a start() may reuse the launcher).
         exec.cancelWatchdogs()
         SkyLightWindowLifecycle.stop()
+        windowCreates.isLive = false
+        launchFollow.dropSpawn()
         deferred.cancelAll()
         // Its close task just went; an open match would claim the
         // next start's arrivals (#1385).

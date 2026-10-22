@@ -34,12 +34,10 @@ struct ProcessIdentity {
     /// `sysctl`, since `proc_pidinfo` answers ESRCH for one while
     /// `kill(pid, 0)` still answers 0 (macOS 27.0, 2026-09-30).
     var runs: @MainActor (pid_t) -> Bool = { pid in
-        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
-        var info = kinfo_proc()
-        var size = MemoryLayout<kinfo_proc>.size
-        guard sysctl(&mib, UInt32(mib.count), &info, &size, nil, 0) == 0
+        guard let record = Self.processRecord(pid)
         else { return kill(pid, 0) == 0 || errno == EPERM }
-        return size > 0 && Int32(info.kp_proc.p_stat) != SZOMB
+        return record.size > 0
+            && Int32(record.info.kp_proc.p_stat) != SZOMB
     }
 
     /// Whether LaunchServices calls the process at this pid

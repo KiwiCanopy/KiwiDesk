@@ -25,6 +25,8 @@ struct GlassTintCensusTests {
         "sits": ["subviews"],
         // KiwiVision's plate: no Fill, a black dim (#2103).
         "pinDark": ["darkAqua"],
+        // The Space-switch plates: no Fill, the Appearance pick.
+        "followPick": ["darkAqua", "bestMatch"],
         // Both doors take the one painter (#1946's uniform tint).
         "apply": ["paint("],
         "applyUniform": ["paint("],

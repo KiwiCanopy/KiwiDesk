@@ -95,6 +95,7 @@ extension InterpolatedLabelTests {
         "track.auto_tracks.gates": 1,
         "home.card.ax_value": 1,
         "keyboard.layout.value": 1,
+        "panel.caption.with_hover_hint": 1,
         "layout.schematic.grid.ax": 2,
         "search.result_mode_ax": 1,
         "track.new_window_position.help": 4,

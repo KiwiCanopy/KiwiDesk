@@ -409,6 +409,26 @@ editing here:
   is derived from `FollowFocusIntent.drainWindow` plus one
   adoption-heal period and must stay above the measured heal
   latency (`LaunchFollowIntentTests` ▸ `boundCoversTheHeal`).
+  **A NEW window follows owed nothing (#2478)**, decided at the
+  claim by the one `spawnVerdict` and never by teaching the
+  #1161/#465 distrusts to stand down. What makes it new is
+  WindowServer's create, not `.windowCreated`, which a boot
+  sweep, an unlock's heal, a re-track and a Desktop reveal also
+  emit. Feed `WindowCreateLedger` from `windowServerChanged` alone
+  (`LaunchFollowSeamTests` ▸ `ledgerHasOneFeeder`); it reads
+  closed until that route reports itself active
+  (`LaunchFollowSpawnTests` ▸ `deadRouteStays`), so a new
+  adoption pass owes no guard of its own here, and a host
+  without the route follows only an open. The process-age and
+  press clause is the one `LaunchFollowIntent.spawnFollows`, the
+  age read through its `processAge` seam over
+  `ProcessIdentity.startAge`, never LaunchServices on the arrival
+  path; a create trailing its arrival pays through the one
+  `spawn` slot within `lateCreateBound`, as a whole
+  `followSwitch`. Which filings may follow stays the fold's
+  `placedByAppRule` alone, so a door that must not follow keeps it
+  unset rather than adding a check at the claim
+  (`LaunchFollowSpawnTests`, `LaunchFollowSeamTests`).
 - **A Desktop switch is not a close (#1207).** Leaving a Desktop
   folds its windows as destroys, and the close-return walk moves
   `Space.focused` down the departing windows to nil — or onto a

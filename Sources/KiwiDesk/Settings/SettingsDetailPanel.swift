@@ -28,18 +28,27 @@ enum SettingsDetailPanelOffer {
 struct SettingsDetailPanel: View {
     @ObservedObject var model: SettingsModel
     let destination: SettingsDestination
+    @State private var viewportBottom: CGFloat?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    preview
+                    // Above the list: a preview's overlay may draw
+                    // past its own frame down to the viewport (#2532).
+                    preview.zIndex(1)
                     diffList
                 }
                 .padding(.bottom, 18)
+                .environment(\.panelViewportBottom, viewportBottom)
             }
             .scrollIndicators(.hidden)
+            .onGeometryChange(for: CGFloat.self) {
+                $0.frame(in: .global).maxY
+            } action: {
+                viewportBottom = $0
+            }
             // VoiceOver lands on the scroll view as a bare
             // "scroll area" before interacting into it (owner,
             // #812 session 2); the header sentence names what the

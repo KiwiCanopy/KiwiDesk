@@ -4,7 +4,9 @@ import Foundation
 /// Opening an app follows its window into the Space its app rule
 /// files it in (#1599): a full Space switch with the focus, the
 /// `followSwitch` shape. Owed by a launch, paid after the window's
-/// arrival retile — `LaunchFollowIntent` carries the bounds.
+/// arrival retile — `LaunchFollowIntent` carries the bounds. A new
+/// window created while KiwiDesk watched follows owed nothing
+/// (#2478), on `spawnVerdict`.
 extension KiwiCore {
     /// The one door that owes the follow — Open or Focus, and a
     /// launch-shaped activation below.
@@ -107,7 +109,8 @@ extension KiwiCore {
     /// its app rule into another Space; the Space to switch to, or
     /// nil. A transient overlay never claims, so a launch's splash
     /// panel cannot spend the debt, and neither does a window a
-    /// Desktop switch's batch reveals (#2347). Paid by
+    /// Desktop switch's batch reveals (#2347). Owed nothing, the
+    /// window still follows on `spawnVerdict` (#2478). Paid by
     /// `payLaunchFollow` after the arrival retile.
     func claimLaunchFollow(
         arrived window: ManagedWindow,
@@ -121,6 +124,26 @@ extension KiwiCore {
             state.windows[window.id]?.isTransientOverlay == false
         else { return nil }
         guard launchFollow.claim(bundleID, at: now) else {
+            switch spawnVerdict(window) {
+            case .follows:
+                onLog(
+                    "launch follow: w\(window.id.raw), a new window "
+                        + "of pid \(window.pid), follows its rule"
+                )
+                return space
+            case .awaitsCreate:
+                launchFollow.noteSpawn(
+                    .init(
+                        window: window.id,
+                        bundleID: bundleID,
+                        space: space,
+                        from: state.workspaces.activeSpace,
+                        at: wallClock()
+                    )
+                )
+            case .stays:
+                break
+            }
             // Owed nothing yet: its app's activation may still come.
             launchFollow.notePlacement(
                 .init(
@@ -133,6 +156,51 @@ extension KiwiCore {
             return nil
         }
         return space
+    }
+
+    /// What the unowed arm (#2478) makes of a rule-filed arrival:
+    /// `spawnStandsClear`, then `spawnFollows`; then created while
+    /// KiwiDesk watched, or a create still due. One clock,
+    /// `wallClock`, for every reading.
+    enum SpawnVerdict { case follows, awaitsCreate, stays }
+
+    func spawnVerdict(_ window: ManagedWindow) -> SpawnVerdict {
+        let now = wallClock()
+        guard spawnStandsClear(at: now),
+            launchFollow.spawnFollows(pid: window.pid)
+        else { return .stays }
+        let created = windowCreates.createdAt(window.id, now: now)
+        return created == nil ? .awaitsCreate : .follows
+    }
+
+    /// The unowed arm's stand-downs, asked at the claim and again
+    /// at a late payment: the route live, boot done, no sweep
+    /// chunk deferring, no app's launch debt standing, clear of a
+    /// Desktop switch.
+    private func spawnStandsClear(at now: Date) -> Bool {
+        windowCreates.isLive && boot.reachedReady
+            && !defersEventRetiles
+            && launchFollow.owed(at: now) == nil
+            && now.timeIntervalSince(lastDesktopSwitch)
+                > LaunchFollowIntent.desktopSwitchGrace
+    }
+
+    /// Pays the unowed follow when `id`'s create lands after its
+    /// arrival (#2478): the arrival retile has parked the window in
+    /// its unshown Space, so this is a whole `followSwitch`.
+    func payLateSpawnFollow(_ id: WindowID) {
+        let now = wallClock()
+        guard let spawn = launchFollow.takeSpawn(id, at: now),
+            spawnStandsClear(at: now),
+            state.workspaces.activeSpace == spawn.from,
+            state.workspaces.space(of: id) == spawn.space,
+            spawn.space != state.workspaces.activeSpace
+        else { return }
+        onLog(
+            "launch follow: w\(id.raw) created after its arrival "
+                + "— following now"
+        )
+        followSwitch(to: spawn.space, focusing: id)
     }
 
     /// The switch itself, IN PLACE of the arrival's event retile,

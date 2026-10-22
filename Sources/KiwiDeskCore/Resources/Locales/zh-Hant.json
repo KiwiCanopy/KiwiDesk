@@ -162,7 +162,6 @@
   "app_rules.space.remove.help": "不再在空間中開啟這個 App",
   "app_rules.space.temporary_header": "暫時 — 不在這個描述檔中",
   "app_rules.space_list.caption": "App 的每個新視窗都會在它的空間中開啟。",
-  "app_rules.space_list.help": "此規則適用於這個 App 的每個新視窗：無論是你啟動它、開啟另一個視窗、重新開啟已關閉的視窗，還是還原已縮到最小的視窗。啟動這個 App 時，你也會被帶到它的空間。",
   "app_rules.space_list.title": "在空間中開啟 App",
   "app_rules.tile": "改為並排",
   "app_rules.tile.help": "並排規則會並排 App 中原本會自動浮動的視窗。對話框、表單和面板仍會浮動，同一個 App 的浮動規則也仍會讓它符合的視窗浮動。",

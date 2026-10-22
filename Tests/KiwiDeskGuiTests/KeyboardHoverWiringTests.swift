@@ -104,7 +104,7 @@ struct KeyboardHoverWiringTests {
         // …the drawn half, and the spoken half, both through
         // the ONE reader closure — which is also what holds the
         // live preference read to once per panel render.
-        #expect(panel.contains("liveReading(hovered).lines"))
+        #expect(panel.contains("liveReading(hovered).groups"))
         #expect(panel.contains("read($0).lines"))
         #expect(panel.contains("conflictDetail:conflictDetail"))
         #expect(
@@ -131,6 +131,78 @@ struct KeyboardHoverWiringTests {
                     + ".accessibilityLabel(tallyText)"
             )
         )
+    }
+
+    /// The reading draws over the lines under the board, is cut
+    /// to the panel's visible bottom, and stays silent (#2532).
+    @Test("the hover reading overlays, it reserves no height")
+    func readingOverlays() throws {
+        let panel = try Self.panelSource()
+        #expect(!panel.isEmpty)
+        #expect(
+            panel.contains(".overlay(alignment:.topLeading){hoverReading}")
+        )
+        #expect(panel.occurrences(of: "hoverReading") == 2)
+        // The tally line holds no reservation of its own.
+        #expect(
+            panel.contains(
+                "Text(tallyText).font(.caption)"
+                    + ".foregroundStyle(SettingsTheme.ink2)"
+                    + ".frame(maxWidth:.infinity,alignment:.leading)"
+            )
+        )
+        // The reading is cut to what fits, measured to the
+        // panel's visible bottom where the panel says it.
+        #expect(panel.contains("KeyboardHoverFit.shown("))
+        // …and the cut is the one the view draws from, not a
+        // helper nothing calls.
+        #expect(panel.contains("letshown=shownGroups(groups,"))
+        #expect(panel.contains("groups.prefix(shown)"))
+        #expect(panel.contains("viewportBottom.map{$0-top}"))
+        let detail = try Self.settingsSource("SettingsDetailPanel.swift")
+        #expect(
+            detail.contains(
+                ".environment(\\.panelViewportBottom,viewportBottom)"
+            )
+        )
+        // The producer, in the same coordinate space the consumer
+        // reads: a dropped measure leaves the value nil and the
+        // reading falls back to the block's height, green.
+        #expect(
+            detail.contains(
+                ".onGeometryChange(for:CGFloat.self){"
+                    + "$0.frame(in:.global).maxY}action:{"
+                    + "viewportBottom=$0}"
+            )
+        )
+        #expect(panel.contains("geometry.frame(in:.global).minY"))
+        // The overlay draws above the diff list it may reach.
+        #expect(detail.contains("preview.zIndex(1)"))
+        // Silent: the tally speaks, and the overlay is no
+        // longer inside the slot's `children: .ignore`.
+        #expect(
+            panel.contains(
+                ".background(SettingsTheme.panel)}"
+                    + ".allowsHitTesting(false)"
+                    + ".accessibilityHidden(true)"
+            )
+        )
+        // One face drawn and measured.
+        #expect(panel.contains("Font(KeyboardHoverFit.fontasCTFont)"))
+    }
+
+    private static func settingsSource(_ file: String) throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/\(file)"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
     }
 
     /// A cap rebuilt under the pointer never delivers

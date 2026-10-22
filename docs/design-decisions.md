@@ -3672,6 +3672,17 @@ a second needs no switch of its own, and one leaf fewer is one
 fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
+They follow the Appearance pick as KiwiHub does: each plate's
+glass and pile container is pinned dark where the panel's
+effective appearance resolves dark, through `GlassTint.followPick`
+(#2539), rather than left to inherit it. An unpinned glass view
+carries the pick (#2543) but adapts to the backdrop it samples and
+holds that verdict (#1308), and a plate's backdrop is the windows
+being switched; the pin keeps the variant the pick's whatever the
+plates cover. No switch of their own: only dark
+can be pinned (#1308, Liquid Glass above), so a light choice could
+not hold over dark windows, and plates unlike the rest of the app
+are not worth a setting.
 
 *Why plates, and not a blur or a picture of the windows.* A blur
 dissolve was built on the device and dropped: a blur reads as
@@ -6420,11 +6431,11 @@ its arrival must not take them along, which is what
 `MoveIntentLatch` enforces.
 
 **The discrimination is the feature**, and following the wrong
-arrivals is worse than following none. A background app's
-spawned window, the windows macOS reopens at login, the ones
-KiwiDesk adopts at boot, the ones a Desktop switch reveals and
-a new tab are all window creations with an app rule behind them,
-and none of them is the user opening the app. What separates
+arrivals is worse than following none. The windows macOS
+reopens at login, the ones KiwiDesk adopts at boot, the ones a
+Desktop switch reveals and a new tab are all window creations
+with an app rule behind them, and none of them is the user
+opening the app. What separates
 them, measured on device, is an OPEN the user caused:
 
 - **A press within a second.** A Dock click activated the
@@ -6464,8 +6475,8 @@ them, measured on device, is an OPEN the user caused:
   those windows to its Space, and moving a window without the
   user is the worst of the three outcomes — it vanishes from
   where they are. A running app still showing a window — a
-  switch into it, its own call window, ⌘T — owes nothing. The
-  boot scan involves no activation at all. **New Window owes it
+  switch into it, ⌘T — owes no debt. The boot scan involves no
+  activation at all. **New Window owes it
   outright** (#1518, owner ruling 2026-09-30): the verb names the
   app and asks for a window, which is the open this rule follows,
   whatever the app already shows — and a press the app answers
@@ -6488,7 +6499,7 @@ them, measured on device, is an OPEN the user caused:
   own activation that follows keeps the debt rather than
   retiring it, since it is that launch completing. A pull of an
   app already showing a window opens nothing, so it owes
-  nothing, and a ⌘N moments later stays where the rule files it.
+  nothing.
 
 The debt is keyed by the app's bundle id and paid by its
 window's ARRIVAL, never at the activation, because the window
@@ -6504,6 +6515,45 @@ landed on, or one the rule files in the Space the user is
 already in is no launch to follow, and a transient overlay (a
 splash, a panel) never spends the debt, so the window behind it
 still can.
+
+:::unreleased
+**A new window follows too, owed nothing (#2478).** A running
+app's new window — ⌘N, File ▸ New, or one the app opens itself —
+that its rule files into a Space nobody is showing takes the user
+along the same way (owner ruling 2026-10-20). Left behind, it
+waits out of sight, and the focus distrusts that met its first
+report (#1161's placement bounce, #465's sibling re-report) fired
+for reasons false here.
+
+**What makes it new is WindowServer's word, not KiwiDesk's.**
+`.windowCreated` is also a boot sweep, an unlock's heal, a
+re-track after a dropped removal and a Desktop reveal, and no
+guard on those paths would stay complete as passes are added. So
+the arm follows only a window WindowServer reported CREATED while
+KiwiDesk watched (`WindowCreateLedger`, fed by the #1877
+notification), and where that route is absent the arm is off and
+only an open follows. The create can trail the arrival — 8–10 ms
+behind TextEdit's ⌘N, measured — so a create landing within half
+a second of its arrival pays the follow then, as a whole switch.
+
+A login restore is created while KiwiDesk watches too, so the
+window must also come from a process older than the cold-start
+grace, or follow a press within a second since KiwiDesk started
+(owner ruling 2026-10-22): a login restore has neither, a ⌘N right
+after a launch has the press. The arm stands down where the open
+arm does — during boot and a fresh Desktop switch — and while
+another app's launch debt stands, whose window would otherwise
+open in the Space this switch left. A popup still opens where the
+user is (#1602, #2475). The trade, accepted: a window an app opens
+with no press behind it, a call window, takes the user to its
+rule's Space.
+
+That does not reverse the discrimination above. The open arm
+judges an activation, which says nothing about any window; this
+arm judges a window WindowServer just created, one the user will
+look for. So a press — or none, from an app past its cold start —
+is enough here and still not there.
+:::
 
 There is no setting and no same-screen narrowing. A user who
 pins an app to a Space has already said where they want it, a
@@ -16810,7 +16860,11 @@ Settings Appearance pick writes it (#678 item 8, above): dark
 under a Dark pick, and under Light or System the OS's own light
 scheme, which the bright tint holds — so two bars sharing a dark
 Fill cannot diverge, and two sharing a light one match wherever
-the pick is Dark. **Precedence, since two sanctioned writers reach
+the pick is Dark. That the unpinned glass carries a Dark pick was
+measured on macOS 27.0.1 (#2543): a clear Fill's plate read 33
+luminance under Dark and 89 under Light over the same backdrop,
+Dark → Light → Dark, while a light Fill read 208 under both, its
+tint holding the scheme. **Precedence, since two sanctioned writers reach
 one view:** the Fill decides where it is dark, since the plate IS
 the Fill's colour and the dark variant is the one the ink reads
 on; the Appearance pick decides only the light branch. A user who
@@ -18718,8 +18772,20 @@ version appears.
   question at two grains. A popover was refused: anchored to a
   19pt cap it covers the neighbouring caps, which are exactly
   what a reader asking "if I hold ⌃⌥, what is left?" is looking
-  at. Reserved height comes from the sets the legend already
-  gates on, so a user with no conflicts pays for no dead air.
+  at. The reading draws OVER the tally and the lines under it
+  rather than in reserved height (#2532): a reservation sized
+  for the deepest key left a gap under the tally at rest — a
+  seeded digit alone carries three claims under All — and a slot
+  that grew on hover moved the panel. The legend is covered only
+  while a key is hovered, when the reading is what answers. The
+  reading may draw down to the panel's visible bottom, over
+  anything under the preview, and never past it: a key holding
+  more than fits ends on a line counting the rest and pointing at
+  the row list, and the cut falls between claims, since a binding
+  cut from its conflict is the half-said conflict this entry
+  refuses. The
+  caption leads with a hover hint, drawn and not spoken, since
+  the board's own description already reads every key.
 
   **The keyboard obligation is discharged by the ROW LIST, not
   by a twin affordance**, and that is the ruling worth keeping.

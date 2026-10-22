@@ -27,6 +27,12 @@ extension KiwiCore {
         eventLoop.frontmostPID = frontmost
         // The launch follow's press read (#1599).
         launchFollow.pressAge = { KiwiCore.secondsSinceUserPress() }
+        // The unowed arm's process age (#2478).
+        launchFollow.processAge = { [weak self] pid in
+            self.flatMap {
+                ProcessIdentity.startAge(of: pid, now: $0.wallClock())
+            }
+        }
         launchFollow.watchedFor = { [weak self] in
             self?.boot.began.map {
                 TimeInterval($0.duration(to: .now) / .milliseconds(1))

@@ -1057,7 +1057,8 @@ switched:
   fade out over the windows that arrive. The windows themselves
   move once each, under the plates. The plates wear KiwiHub's
   glass
-  ([`set_shortcut_panel_liquid_glass`](#set_shortcut_panel_liquid_glass)).
+  ([`set_shortcut_panel_liquid_glass`](#set_shortcut_panel_liquid_glass)),
+  dark where Settings' Appearance is.
   With Reduce Motion on, a switch shows the Space as `"show"`
   does, the stored value staying `"slide"`. Over a full-screen app
   or a presentation the screen changes at once, with no plate.
@@ -4822,12 +4823,17 @@ Opening a listed app takes you with it: when you launch it,
 reopen it with no window showing, or restore its minimized
 window yourself — a Dock click, Spotlight, `focus_or_spawn` —
 and the window goes to a space other than the one you are on,
-KiwiDesk switches to that space and focuses the window. A
-window an app opens on its own while another of its windows is
-showing, the windows macOS reopens at login or KiwiDesk finds
-when it starts, and the windows a Desktop switch shows you stay
-in their space
+KiwiDesk switches to that space and focuses the window. The
+windows macOS reopens at login or KiwiDesk finds when it starts,
+and the windows a Desktop switch shows you, stay in their space
 ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599)).
+
+:::unreleased
+A new window of a running app takes you there too — ⌘N, File ▸
+New, or one the app opens on its own — with the exceptions in
+[accepted limitations](accepted-limitations.md)
+([#2478](https://github.com/KiwiCanopy/KiwiDesk/issues/2478)).
+:::
 
 A popup menu the app opens — a window above the normal window
 layer — is not filed by the rule: it opens in the space you are

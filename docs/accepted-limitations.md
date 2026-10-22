@@ -165,6 +165,24 @@ Reopening an app whose last window you closed while the app kept running can tak
 
 [`new_window`](lua-reference.md#new_window) takes you there too, whatever the app already shows. It finds the app's **File ▸ New Window** by its ⌘N or ⇧⌘N shortcut and a word for "window" in any language macOS ships, because apps expose no other name for that menu item ([#1518](https://github.com/KiwiCanopy/KiwiDesk/issues/1518)). What remains: an app whose New Window has no such shortcut (Claude's "New Session in New Window") is refused with a pill even though it has the item.
 
+:::unreleased
+A new window of a running app takes you there too when its app
+rule sends it to a Space no screen is showing — ⌘N, File ▸ New,
+or one the app opens on its own
+([#2478](https://github.com/KiwiCanopy/KiwiDesk/issues/2478)).
+What remains: in the first 15 seconds after the app's process
+starts, its new window takes you along only when a click or key
+press came within a second before it, so a window macOS reopens
+at login in the same second as an unrelated press takes you
+along, and a window a just-launched app opens on its own stays
+where the rule files it. A new window that appears before the
+window of another app you just opened has arrived stays too.
+KiwiDesk tells a new window from one it is only now adopting by
+WindowServer's create notification; where that route is
+unavailable, only opening the app takes you along. Use
+`focus_space` to reach the window when you are left behind.
+:::
+
 Open or Focus asks a running app with **no window at all** for a new one, the way a Dock click does, and it judges "no window" from what it can see ([#1840](https://github.com/KiwiCanopy/KiwiDesk/issues/1840)). A window on another Desktop counts only once KiwiDesk has seen it: on a Mac where the per-Desktop window list cannot be read none does, and anywhere else a window the app opened on a Desktop nobody has shown since does not, so the shortcut sends that reopen anyway. Whether the app then opens a second window beside the one on the other Desktop is the app's own reopen handling. Not observed; reasoned from the mechanism. Switch to the Desktop that holds the window to reach it instead.
 
 With the **Space Bar off**, switching a Space between a layout that shows an App Bar (Monocle, Scrolling) and one that does not moves its windows by the bar strip's depth: [KiwiShelf](lua-reference.md#kiwishelf) reserves its edge only in a layout where a bar draws ([#1517](https://github.com/KiwiCanopy/KiwiDesk/issues/1517); the ruling is in [design decisions](design-decisions.md)). Reserving it in every layout instead would leave an empty strip on screen in every layout that draws nothing there. With the Space Bar on, the strip is reserved in every layout and no switch moves a window.

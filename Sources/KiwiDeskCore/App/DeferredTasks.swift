@@ -43,6 +43,10 @@ final class DeferredTasks {
         /// A WindowServer create's wake sweep and its census read
         /// (#1877).
         case adoptionHealWake
+        /// A rule-filed new window's follow, paid once its
+        /// trailing create lands, outside the event-port drain
+        /// (#2478).
+        case lateSpawnFollow
         /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack
         /// Re-reads an app whose sweep removal was distrusted
@@ -111,7 +115,7 @@ final class DeferredTasks {
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,
-                .adoptionHealWake,
+                .adoptionHealWake, .lateSpawnFollow,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .barVisibilityRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,

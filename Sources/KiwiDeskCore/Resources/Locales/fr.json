@@ -162,7 +162,6 @@
   "app_rules.space.remove.help": "Ne plus ouvrir cette app dans un espace",
   "app_rules.space.temporary_header": "Temporaires — absents de ce profil",
   "app_rules.space_list.caption": "Chaque nouvelle fenêtre de l'app s'ouvre dans son espace.",
-  "app_rules.space_list.help": "La règle s'applique à chaque nouvelle fenêtre de l'app : quand vous la lancez, ouvrez une autre fenêtre, rouvrez une fenêtre que vous aviez fermée ou restaurez une fenêtre que vous aviez réduite. Lancer l'app vous emmène aussi dans son espace.",
   "app_rules.space_list.title": "Ouvrir dans un espace",
   "app_rules.tile": "Tuiler à la place",
   "app_rules.tile.help": "Une règle de tuilage tuile les fenêtres d’une app qui flotteraient sinon automatiquement. Les zones de dialogue, les feuilles et les panneaux flottent toujours, et une règle de flottement pour la même app fait toujours flotter les fenêtres qu’elle vise.",
