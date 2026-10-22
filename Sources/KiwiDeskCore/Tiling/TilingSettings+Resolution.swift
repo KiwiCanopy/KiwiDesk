@@ -219,6 +219,7 @@ extension TilingSettings {
             scrollRest: space.scrollRest,
             trackBreaks: space.trackBreaks,
             runHeads: space.runHeads,
+            runTails: space.runTails,
             trackWeights: space.trackWeights,
             sticky: sticky,
             screenNeighbors: screenNeighbors,

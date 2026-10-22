@@ -161,6 +161,25 @@ struct RunRestWiringTests {
         #expect(core.state.workspaces[space]?.runHeads == [WindowID(3)])
     }
 
+    /// A run keeps both its ends at rest (owner, 2026-10-22): a
+    /// stored tail reaches the layout and is written back, so a
+    /// pass adds no window a focus step did not ask for.
+    @Test("A retile reads and writes back the run's tail")
+    func retileKeepsTheTail() throws {
+        let core = makeCore()
+        let space = makeSpace(core, focused: 1)
+        core.state.workspaces.withSpace(space) {
+            $0.runHeads = [WindowID(3)]
+            $0.runTails = [WindowID(3)]
+        }
+        core.retile(animated: false)
+        let run = try #require(core.tiler.runCovers[space]?.runs.first)
+        // Room for two, yet the stored ends hold the one.
+        #expect(Array(run.shown) == [WindowID(3)])
+        let stored = try #require(core.state.workspaces[space])
+        #expect(stored.runTails == [WindowID(3)])
+    }
+
     @Test("The shown slots leave a run's hidden windows out")
     func shownSlotsDropHidden() throws {
         let core = makeCore()

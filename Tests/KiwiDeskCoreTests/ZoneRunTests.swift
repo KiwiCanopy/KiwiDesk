@@ -53,11 +53,56 @@ struct ZoneRunTests {
         #expect(run(head: 1, focus: 2).visible == 1..<3)
     }
 
-    @Test("A fully shown tail pulls back to fill the zone")
-    func tailPullsBack() {
-        // Head on the last window: the run would show it alone
-        // with room for one more, so it starts one earlier.
-        #expect(run(head: 3).visible == 2..<4)
+    @Test("A pass at rest adds no window, even with room")
+    func restAddsNothing() {
+        // A head on the last window shows it alone: pulling the
+        // run back would reveal a window no focus asked for.
+        #expect(run(head: 3).visible == 3..<4)
+    }
+
+    /// The device case (owner, 2026-10-22): a big window, then
+    /// small ones, in 1000 pt with 10 pt gaps.
+    private func mixed(
+        head: Int? = nil,
+        tail: Int? = nil,
+        focus: Int? = nil
+    ) -> Range<Int> {
+        ZoneRun.resolve(
+            floors: [500, 300, 300, 300, 300],
+            span: 1000,
+            gap: 10,
+            head: head,
+            tail: tail,
+            focus: focus
+        ).visible
+    }
+
+    @Test("A step reveals the focused window and nothing past it")
+    func stepRevealsOne() {
+        // Shown 0 and 1; focus 2 drops the big one. Windows 1…3
+        // would fit, but 3 waits until a step reaches it.
+        #expect(mixed(head: 0, tail: 1, focus: 2) == 1..<3)
+        // The next step adds it while the shown ones still fit.
+        #expect(mixed(head: 1, tail: 2, focus: 3) == 1..<4)
+    }
+
+    @Test("A run at rest keeps both its ends")
+    func restKeepsBothEnds() {
+        #expect(mixed(head: 1, tail: 2) == 1..<3)
+        #expect(mixed(head: 1, tail: 2, focus: 1) == 1..<3)
+    }
+
+    @Test("Focus before the run becomes its first window")
+    func stepBackRevealsOne() {
+        #expect(mixed(head: 2, tail: 3, focus: 1) == 1..<4)
+        // The big one joins only by dropping from the far end.
+        #expect(mixed(head: 1, tail: 3, focus: 0) == 0..<2)
+    }
+
+    @Test("A run that stops fitting gives up the end away from focus")
+    func shrinkAwayFromFocus() {
+        #expect(mixed(head: 0, tail: 2, focus: 2) == 1..<3)
+        #expect(mixed(head: 0, tail: 2, focus: 0) == 0..<2)
     }
 
     @Test("A floor bigger than the zone is shown alone")

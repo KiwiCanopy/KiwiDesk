@@ -15,50 +15,54 @@ public struct ZoneRun: Sendable, Equatable {
     /// Whether the zone hides any window.
     public var hides: Bool { visible.count < count }
 
-    /// The run taking windows from `head` while their `floors`
-    /// fit `span`, moved by the smallest step that shows `focus`
-    /// (#2235 ruling). `head` and `focus` are member indices; a
-    /// run whose tail is shown in full is pulled back while the
-    /// window before it still fits, so a close never leaves room
-    /// unused. A first window whose floor exceeds the span is
-    /// shown alone.
+    /// The run between `head` and `tail` where both still fit,
+    /// moved by the smallest step that shows `focus` (#2235
+    /// rulings, owner 2026-10-22): a focus past the run becomes
+    /// its last window, with windows dropped from the other end
+    /// only until the floors fit `span`, so a step reveals the
+    /// focused window and nothing beyond it. With no stored tail
+    /// the run takes windows from `head` while they fit. All
+    /// three are member indices. A window whose floor exceeds the
+    /// span is shown alone.
     public static func resolve(
         floors: [CGFloat],
         span: CGFloat,
         gap: CGFloat,
         head: Int?,
+        tail: Int? = nil,
         focus: Int?
     ) -> ZoneRun {
         let count = floors.count
         guard count > 0 else { return ZoneRun(visible: 0..<0, count: 0) }
-        func end(from start: Int) -> Int {
-            var used: CGFloat = 0
-            var end = start
-            while end < count {
-                let need = floors[end] + (end > start ? gap : 0)
-                if end > start, used + need > span { break }
-                used += need
-                end += 1
-            }
-            return end
+        func fits(_ start: Int, _ last: Int) -> Bool {
+            let used = floors[start...last].reduce(0, +)
+            return start == last
+                || used + gap * CGFloat(last - start) <= span
         }
-        if end(from: 0) == count {
+        guard !fits(0, count - 1) else {
             return ZoneRun(visible: 0..<count, count: count)
         }
         var start = min(max(head ?? 0, 0), count - 1)
-        if let focus, focus >= 0, focus < count {
-            if focus < start {
-                start = focus
-            } else {
-                while focus >= end(from: start) { start += 1 }
-            }
+        var last = start
+        if let tail, tail >= start, tail < count {
+            last = tail
+        } else {
+            while last + 1 < count, fits(start, last + 1) { last += 1 }
         }
-        while start > 0, end(from: start) == count,
-            end(from: start - 1) == count
-        {
-            start -= 1
+        let focus = focus.flatMap { (0..<count).contains($0) ? $0 : nil }
+        if let focus, focus > last {
+            last = focus
+            while !fits(start, last) { start += 1 }
+        } else if let focus, focus < start {
+            start = focus
+            while !fits(start, last) { last -= 1 }
         }
-        return ZoneRun(visible: start..<end(from: start), count: count)
+        // A run that no longer fits — a window joined it, a floor
+        // was learned — gives up the end away from the focus.
+        while !fits(start, last) {
+            if let focus, focus == last { start += 1 } else { last -= 1 }
+        }
+        return ZoneRun(visible: start..<(last + 1), count: count)
     }
 
     /// Frames for a zone's members: the shown run shares `region`
@@ -121,6 +125,16 @@ public struct ZoneRun: Sendable, Equatable {
         in heads: Set<WindowID>
     ) -> Int? {
         members.lastIndex { heads.contains($0) }
+    }
+
+    /// The member `tails` names as this zone's resting tail: the
+    /// first one in the zone, since a tail handed back by a
+    /// removal can land past the zone's own (`Space.remove`).
+    public static func tail(
+        of members: [WindowID],
+        in tails: Set<WindowID>
+    ) -> Int? {
+        members.firstIndex { tails.contains($0) }
     }
 }
 

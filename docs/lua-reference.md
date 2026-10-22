@@ -4615,8 +4615,11 @@ appears in its slot at once, and the one scrolling out returns
 to the corner. A window whose
 minimum is larger than the zone is shown alone. Focusing a
 hidden window scrolls the zone by the smallest step that shows
-it, and closing a window pulls the run back so no room stays
-unused.
+it: the window joins as the last in line (the first, going
+back), and the zone hides windows at its other end only until
+it fits, so a step reveals one window. A zone at rest keeps the
+windows it shows; closing one lets the others grow into the
+room.
 
 In Stack, `focus` and `swap` along a zone that hides windows
 step through them in order, as Track does along a track; a

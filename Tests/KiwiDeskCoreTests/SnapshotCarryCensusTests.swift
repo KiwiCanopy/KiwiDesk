@@ -115,6 +115,7 @@ struct SnapshotCarryCensusTests {
             $0.handedBreaks = [self.w2]
             $0.trackWeights = [self.w2: 1.5]
             $0.runHeads = [self.w2]
+            $0.runTails = [self.w2]
             $0.sessionRatios.splitRatioH = 0.31
             $0.sessionRatios.splitRatioV = 0.62
             $0.sessionRatios.masterRatio = 0.44

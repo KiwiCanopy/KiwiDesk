@@ -4001,8 +4001,17 @@ or a Track track that cannot fit its windows at their floors
 shows as many as fit from where it rests, each at its floor plus
 a weighted share of what is left, and the rest wait off
 screen, parked at the hide corner. Focus drives the run by the
-smallest step that shows the focused window. Every zone that overflows scrolls on its own, as each
-Track track does. The master zone still holds `master_count`
+smallest step that shows the focused window: the focused window
+joins as the last in line (the first, going back), the run gives
+up windows at its other end only until it fits, and nothing past
+the focused window is revealed. A run at rest keeps both its ends
+(`Space.runHeads`, `runTails`), so no pass adds a window a step
+did not ask for, and a close leaves the shown windows to grow
+into the room rather than revealing more. A run whose windows'
+floors differ would otherwise reveal two or three at once when a
+step dropped a large one, which reads as a jump (owner, device,
+2026-10-22). Every zone that overflows scrolls on its own, as
+each Track track does. The master zone still holds `master_count`
 windows and sends every further one to the stack zone; it
 overflows only when `master_count` itself is more than fits.
 The master zone is no exception: more masters than fit is the

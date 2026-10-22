@@ -59,6 +59,16 @@ public struct RunCover: Sendable, Equatable {
         )
     }
 
+    /// The last shown window of each run that hides any after it
+    /// — what `Space.runTails` stores, so a pass at rest neither
+    /// adds nor drops a window (owner, 2026-10-22).
+    public var tails: Set<WindowID> {
+        Set(
+            runs.filter { $0.run.visible.upperBound < $0.run.count }
+                .compactMap { $0.shown.last }
+        )
+    }
+
     /// The cover `mode` draws over `tiled`, or nil for a layout
     /// that scrolls no zone.
     public static func of(

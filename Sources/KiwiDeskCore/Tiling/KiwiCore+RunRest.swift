@@ -11,13 +11,19 @@ extension KiwiCore {
         state.workspaces.activeSpace.flatMap { tiler.runCovers[$0] }
     }
 
-    /// Writes the drawn heads back. Hidden windows rest parked at
-    /// the hide corner, overlapping nothing, so a scroll owes no
-    /// z-order restore (#2235 ruling, 2026-10-22).
+    /// Writes the drawn heads and tails back. Hidden windows rest
+    /// parked at the hide corner, overlapping nothing, so a scroll
+    /// owes no z-order restore (#2235 ruling, 2026-10-22).
     func persistRunHeads() {
-        for (id, cover) in tiler.runCovers
-        where state.workspaces[id]?.runHeads != cover.heads {
-            state.workspaces.withSpace(id) { $0.runHeads = cover.heads }
+        for (id, cover) in tiler.runCovers {
+            guard let space = state.workspaces[id],
+                space.runHeads != cover.heads
+                    || space.runTails != cover.tails
+            else { continue }
+            state.workspaces.withSpace(id) {
+                $0.runHeads = cover.heads
+                $0.runTails = cover.tails
+            }
         }
     }
 

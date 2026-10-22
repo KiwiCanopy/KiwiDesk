@@ -136,6 +136,9 @@ public struct Space: Sendable, Equatable {
     /// that scrolls its overflow (#2235, `ZoneRun`), written back
     /// after every retile of the active Space.
     public var runHeads: Set<WindowID>
+    /// The last shown window of each such run that hides windows
+    /// after it (#2235), the run's other end.
+    public var runTails: Set<WindowID>
     /// Session-only interactive resize ratio overrides
     /// (#458, `SessionRatios`).
     public var sessionRatios: SessionRatios
@@ -155,6 +158,7 @@ public struct Space: Sendable, Equatable {
         handedBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
         runHeads: Set<WindowID> = [],
+        runTails: Set<WindowID> = [],
         sessionRatios: SessionRatios = SessionRatios(),
         maximized: WindowID? = nil
     ) {
@@ -168,6 +172,7 @@ public struct Space: Sendable, Equatable {
         self.handedBreaks = handedBreaks
         self.trackWeights = trackWeights
         self.runHeads = runHeads
+        self.runTails = runTails
         self.sessionRatios = sessionRatios
         self.maximized = maximized
     }
@@ -276,6 +281,12 @@ public struct Space: Sendable, Equatable {
             windows.indices.contains(removedIndex)
         {
             runHeads.insert(windows[removedIndex])
+        }
+        // A tail hands back to its predecessor, the head's mirror.
+        if runTails.remove(window) != nil, let removedIndex,
+            removedIndex > 0
+        {
+            runTails.insert(windows[removedIndex - 1])
         }
         // A departing maximized window keeps its id: a Desktop
         // departure returns to it, and `retireEndedMaximize` ends

@@ -20,8 +20,10 @@ extension StateSnapshot {
         /// `Space.maximized` (#2448): an in-place restart moves
         /// nothing, so the maximized window stays filling its screen.
         public var maximized: UInt32?
-        /// `Space.runHeads` (#2235): where each scrolled zone rests.
+        /// `Space.runHeads` and `runTails` (#2235): where each
+        /// scrolled zone rests.
         public var runHeads: [UInt32]?
+        public var runTails: [UInt32]?
 
         public init(space: Space, monocleShown: WindowID?) {
             ratios = space.sessionRatios
@@ -36,6 +38,9 @@ extension StateSnapshot {
             runHeads =
                 space.runHeads.isEmpty
                 ? nil : space.runHeads.map(\.raw).sorted()
+            runTails =
+                space.runTails.isEmpty
+                ? nil : space.runTails.map(\.raw).sorted()
         }
 
         private enum CodingKeys: String, CodingKey {
@@ -45,6 +50,7 @@ extension StateSnapshot {
             case monocleShown = "monocle_shown"
             case maximized
             case runHeads = "run_heads"
+            case runTails = "run_tails"
         }
     }
 
@@ -136,6 +142,9 @@ extension StateCoordinator {
             $0.scrollRest = session.scrollRest
             $0.runHeads = Set(
                 (session.runHeads ?? []).map { WindowID($0) }
+            )
+            $0.runTails = Set(
+                (session.runTails ?? []).map { WindowID($0) }
             )
             if let raw = session.maximized,
                 $0.windows.contains(WindowID(raw))

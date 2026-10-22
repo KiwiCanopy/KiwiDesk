@@ -155,6 +155,7 @@ public struct RunZone: Sendable, Equatable {
             span: span,
             gap: gap,
             head: ZoneRun.head(of: members, in: context.runHeads),
+            tail: ZoneRun.tail(of: members, in: context.runTails),
             focus: context.focused.flatMap { members.firstIndex(of: $0) }
         )
         return Plan(
