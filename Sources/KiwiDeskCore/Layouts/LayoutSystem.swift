@@ -90,6 +90,9 @@ public struct LayoutContext: Sendable {
     public var scrollRest: ScrollRest?
     /// Track layout break markers (#128).
     public var trackBreaks: Set<WindowID>
+    /// Where each Stack zone's or Track track's run rests
+    /// (`Space.runHeads`, #2235).
+    public var runHeads: Set<WindowID>
     /// Track column weights (#128).
     public var trackWeights: [WindowID: Double]
     /// Sticky windows exempt from overlap piling (#414). May
@@ -125,6 +128,7 @@ public struct LayoutContext: Sendable {
         stackWeights: [WindowID: Double] = [:],
         scrollRest: ScrollRest? = nil,
         trackBreaks: Set<WindowID> = [],
+        runHeads: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
         sticky: Set<WindowID> = [],
         screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
@@ -143,6 +147,7 @@ public struct LayoutContext: Sendable {
         self.stackWeights = stackWeights
         self.scrollRest = scrollRest
         self.trackBreaks = trackBreaks
+        self.runHeads = runHeads
         self.trackWeights = trackWeights
         self.sticky = sticky
         self.screenNeighbors = screenNeighbors

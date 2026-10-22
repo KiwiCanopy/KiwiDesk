@@ -148,6 +148,7 @@ extension KiwiCore {
         // modes never write `scrollRest`, so this is a no-op
         // for them.
         persistScrollRest()
+        persistRunHeads()
         repaintBarsAndFloatNet(
             animated: animated ?? tiler.settings.animations.onRelayout
         ) {

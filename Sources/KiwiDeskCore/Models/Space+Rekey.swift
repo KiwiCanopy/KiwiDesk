@@ -24,6 +24,9 @@ extension Space {
         if trackBreaks.remove(old) != nil {
             trackBreaks.insert(new)
         }
+        if runHeads.remove(old) != nil {
+            runHeads.insert(new)
+        }
         if handedBreaks.remove(old) != nil {
             handedBreaks.insert(new)
         }

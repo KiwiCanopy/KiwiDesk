@@ -132,6 +132,10 @@ public struct Space: Sendable, Equatable {
     public var handedBreaks: Set<WindowID>
     /// Per-track weight keyed by head window (#128).
     public var trackWeights: [WindowID: Double]
+    /// The first shown window of each Stack zone or Track track
+    /// that scrolls its overflow (#2235, `ZoneRun`), written back
+    /// after every retile of the active Space.
+    public var runHeads: Set<WindowID>
     /// Session-only interactive resize ratio overrides
     /// (#458, `SessionRatios`).
     public var sessionRatios: SessionRatios
@@ -150,6 +154,7 @@ public struct Space: Sendable, Equatable {
         trackBreaks: Set<WindowID> = [],
         handedBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
+        runHeads: Set<WindowID> = [],
         sessionRatios: SessionRatios = SessionRatios(),
         maximized: WindowID? = nil
     ) {
@@ -162,6 +167,7 @@ public struct Space: Sendable, Equatable {
         self.trackBreaks = trackBreaks
         self.handedBreaks = handedBreaks
         self.trackWeights = trackWeights
+        self.runHeads = runHeads
         self.sessionRatios = sessionRatios
         self.maximized = maximized
     }
@@ -263,6 +269,14 @@ public struct Space: Sendable, Equatable {
         trackWeights[window] = nil
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
+        // The successor keeps the run resting where it was
+        // (#2235); one in the next zone loses to that zone's own
+        // head (`ZoneRun.head`).
+        if runHeads.remove(window) != nil, let removedIndex,
+            windows.indices.contains(removedIndex)
+        {
+            runHeads.insert(windows[removedIndex])
+        }
         // A departing maximized window keeps its id: a Desktop
         // departure returns to it, and `retireEndedMaximize` ends
         // every other departure (#2448).

@@ -170,6 +170,7 @@ extension KiwiCore {
     /// its title bar. The focused window is re-raised last, the
     /// same override as the stack cascade.
     private func restoreTrackZOrder(_ space: Space) {
+        if restoreRunZOrder(space) { return }
         guard let input = tiler.layoutInput(state: state) else {
             return
         }
@@ -237,6 +238,7 @@ extension KiwiCore {
     /// brings the focused window to the front, which is the
     /// expected override.
     private func restoreStackZOrder(_ space: Space) {
+        if restoreRunZOrder(space) { return }
         // Per-space master boundary (#17), matching layout math.
         let boundary = max(
             1,
@@ -299,7 +301,7 @@ extension KiwiCore {
     /// leaves the apps to land them in whatever order they get to
     /// them, and the pile settles scrambled. `ZOrderDrain` owns
     /// the verification, the budget and the measurements.
-    private func raiseSequentially(
+    func raiseSequentially(
         _ ids: [WindowID],
         thenFocus focused: WindowID?,
         above floor: [WindowID]

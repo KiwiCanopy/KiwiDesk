@@ -194,7 +194,11 @@ extension KiwiCore {
         focused: WindowID
     ) -> Set<WindowID> {
         let slots = tiler.calculatedFrames(state: state)
+        // A run's hidden windows are no cascade (#2235): a swap
+        // steps into them like any track member.
+        let hidden = activeRunCover?.behind ?? [:]
         let tiled = state.effectiveTiledMembers(of: space)
+            .filter { hidden[$0] == nil }
             .compactMap { id -> (id: WindowID, frame: CGRect)? in
                 guard let frame = slots[id] else { return nil }
                 return (id, frame)

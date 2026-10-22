@@ -8,20 +8,39 @@ public struct TrackLayout: LayoutSystem {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
-        let usable = context.usable
         guard !windows.isEmpty else { return [:] }
-        let params = context.track
-        let vertical = params.axis == .vertical
+        guard let zones = Self.zones(for: windows, in: context) else {
+            return OverlapStack.frames(
+                for: windows,
+                in: context.usable,
+                minSize: context.minWindowSize
+            )
+        }
+        var result: [WindowID: CGRect] = [:]
+        for zone in zones {
+            result.merge(zone.frames(in: context)) { _, new in new }
+        }
+        return result
+    }
+
+    /// One zone per drawn track, each scrolling its own overflow
+    /// (#2235); nil where the tracks cannot keep the minimum size
+    /// across the axis and every window piles (#44, #67, #933,
+    /// #944).
+    public static func zones(
+        for windows: [WindowID],
+        in context: LayoutContext
+    ) -> [RunZone]? {
+        let usable = context.usable
+        guard !windows.isEmpty else { return [] }
+        let vertical = context.track.axis == .vertical
         let gap =
             vertical
             ? context.gaps.inner.horizontal
             : context.gaps.inner.vertical
-        let (counts, _, _, overflowTrack) = Self.renderPartition(
-            of: windows,
-            in: context
-        )
-        let weights = Self.ranges(of: counts).map {
-            Self.weight(
+        let counts = renderPartition(of: windows, in: context).counts
+        let weights = ranges(of: counts).map {
+            weight(
                 ofTrack: $0,
                 tiled: windows,
                 weights: context.trackWeights
@@ -31,8 +50,6 @@ public struct TrackLayout: LayoutSystem {
             (vertical ? usable.width : usable.height)
             - gap * CGFloat(counts.count - 1)
         let total = weights.reduce(0, +)
-        // Degenerate span cascades if tracks cannot satisfy min_window_size
-        // (#44, #67, #933, #944).
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(span),
@@ -40,13 +57,7 @@ public struct TrackLayout: LayoutSystem {
                 context.minWindowSize.along(horizontal: vertical)
             )
         )
-        guard span > 0, total <= limit else {
-            return OverlapStack.frames(
-                for: windows,
-                in: usable,
-                minSize: context.minWindowSize
-            )
-        }
+        guard span > 0, total <= limit else { return nil }
         let regions = proportionalRegions(
             counts: counts,
             weights: weights,
@@ -56,27 +67,17 @@ public struct TrackLayout: LayoutSystem {
             vertical: vertical,
             usable: usable
         )
-        var result: [WindowID: CGRect] = [:]
-        for (track, range) in Self.ranges(of: counts).enumerated() {
-            // Far-edge overflow track honors overflow_style (#192).
-            let style: StackParams.OverflowStyle =
-                track == overflowTrack
-                ? params.overflowStyle : .cascadeOverflow
-            result.merge(
-                trackFrames(
-                    windows[range],
-                    in: regions[track],
-                    vertical: vertical,
-                    overflowStyle: style,
-                    context: context
-                )
-            ) { _, new in new }
+        return ranges(of: counts).enumerated().map { track, range in
+            RunZone(
+                members: Array(windows[range]),
+                region: regions[track],
+                vertical: vertical
+            )
         }
-        return result
     }
 
     /// Computes proportional track regions along axis.
-    private func proportionalRegions(
+    private static func proportionalRegions(
         counts: [Int],
         weights: [Double],
         total: Double,
@@ -108,96 +109,5 @@ public struct TrackLayout: LayoutSystem {
             origin += size + gap
         }
         return regions
-    }
-
-    /// Distributes track windows proportionally by `stackWeights` (#67, #192).
-    private func trackFrames(
-        _ windows: ArraySlice<WindowID>,
-        in region: CGRect,
-        vertical: Bool,
-        overflowStyle: StackParams.OverflowStyle,
-        context: LayoutContext
-    ) -> [WindowID: CGRect] {
-        let count = CGFloat(windows.count)
-        guard count > 0 else { return [:] }
-        let gap =
-            vertical
-            ? context.gaps.inner.vertical
-            : context.gaps.inner.horizontal
-        let available =
-            (vertical ? region.height : region.width)
-            - gap * (count - 1)
-        let weights = windows.map {
-            max(context.stackWeights[$0] ?? 1, Self.weightFloor)
-        }
-        let total = weights.reduce(0, +)
-        let limit = StackLayout.maxColumnTotal(
-            smallestWeight: weights.min() ?? 1,
-            span: Double(available),
-            minSize: Double(
-                context.minWindowSize.along(horizontal: !vertical)
-            )
-        )
-        guard available > 0, total <= limit else {
-            // cascade_all piles every window from the top; the
-            // whole-region cascade is also the physics fallback
-            // when not even the fitting prefix holds (#192).
-            if overflowStyle == .cascadeAll {
-                return OverlapStack.frames(
-                    for: windows,
-                    in: region,
-                    minSize: context.minWindowSize
-                )
-            }
-            let ids = Array(windows)
-            if let overflow = OverlapStack.overflowFrames(
-                count: ids.count,
-                in: region,
-                vertical: vertical,
-                minSize: context.minWindowSize,
-                gap: gap
-            ) {
-                // Sticky windows keep a fully-tiled slot
-                // (#414 v2); non-sticky ones overflow instead.
-                let ordered = OverlapStack.stickyExempt(
-                    ids,
-                    tiled: overflow.tiled,
-                    sticky: context.sticky
-                )
-                return Dictionary(
-                    uniqueKeysWithValues: zip(
-                        ordered,
-                        overflow.rects
-                    )
-                )
-            }
-            return OverlapStack.frames(
-                for: windows,
-                in: region,
-                minSize: context.minWindowSize
-            )
-        }
-        var result: [WindowID: CGRect] = [:]
-        var position = vertical ? region.minY : region.minX
-        for (offset, window) in windows.enumerated() {
-            let share =
-                available * CGFloat(weights[offset] / total)
-            result[window] =
-                vertical
-                ? CGRect(
-                    x: region.minX,
-                    y: position,
-                    width: region.width,
-                    height: share
-                )
-                : CGRect(
-                    x: position,
-                    y: region.minY,
-                    width: share,
-                    height: region.height
-                )
-            position += share + gap
-        }
-        return result
     }
 }

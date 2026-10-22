@@ -96,6 +96,18 @@ extension KiwiCore {
         {
             return response
         }
+        if space.mode == .stack,
+            let response = stackStep(
+                direction,
+                space: space,
+                focused: focused,
+                swapping: swapping,
+                warp: warp,
+                skip: skip
+            )
+        {
+            return response
+        }
         // Navigate the layout's slots, not live AX frames:
         // live frames are stale mid-animation or when an app
         // misses a move notification, and cascaded windows
@@ -108,14 +120,19 @@ extension KiwiCore {
         else {
             return .fail("no focused window")
         }
-        let candidates = tiled.filter { $0 != focused && !skip($0) }
-            .compactMap { id -> (WindowID, CGRect)? in
-                guard
-                    let slot = slots[id]
-                        ?? state.windows[id]?.frame
-                else { return nil }
-                return (id, slot)
-            }
+        // A window a run hides shares its edge slot's frame: the
+        // search sees only the shown slots (#2235).
+        let hidden = activeRunCover?.behind ?? [:]
+        let candidates = tiled.filter {
+            $0 != focused && !skip($0) && hidden[$0] == nil
+        }
+        .compactMap { id -> (WindowID, CGRect)? in
+            guard
+                let slot = slots[id]
+                    ?? state.windows[id]?.frame
+            else { return nil }
+            return (id, slot)
+        }
         // A swap from inside an overflow cascade must reach the
         // tiled neighbor outside the pile, not reorder the pile
         // (#172): drop the focused window's pile-mates from the
