@@ -116,7 +116,7 @@ struct GlyphSizeGlyphTests {
             + SpaceBarOverlay.chipEndPad(look, depth: Self.depth).total
             + cell + SpaceBarItemView.pad
         // The fixed name slot in the face it draws (#2086).
-        let title = SpaceBarOverlay.titleSlot(
+        let title = BarTitleSlot.length(
             cap: look.bar.resolvedFrontAppTitleCap,
             font: drawn
         )

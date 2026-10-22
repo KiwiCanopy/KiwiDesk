@@ -25,8 +25,9 @@ struct AppBarScrollLayoutTests {
             horizontal: true,
             thickness: 32
         )
-        // A longer name yields a wider slot; measured, not fixed.
-        #expect(longW > shortW)
+        // A title never sizes the slot: every one draws in the
+        // fixed `titleSlot` (#2545).
+        #expect(longW == shortW)
         // Vertical bars render icon-only: the slot is the
         // icon square (QA 2026-07-19) and the half-moon's slot
         // above it (#2234).

@@ -165,11 +165,9 @@ extension AppBarOverlay {
         (index == 0, index == count - 1)
     }
 
-    /// Measures automatic slot width across items. Measure
-    /// EXACTLY as the item view draws: `.center` alignment alone
-    /// widens an NSTextField cell by ~4 pt, so a raw string
-    /// measurement truncates exactly the item that defined the
-    /// width (QA 2026-07-19, owner 2026-07-20).
+    /// The automatic slot width across items: every item's title
+    /// takes the one `titleSlot`, never its own drawn width, so a
+    /// title change moves no frame (#2545, owner ruling).
     @MainActor
     static func autoSlotWidth(
         items: [Item],
@@ -183,15 +181,8 @@ extension AppBarOverlay {
         // Vertical circle slots take no end inset (#1763).
         guard horizontal else { return depth + moon }
         let pad = AppBarItemView.contentPadding
-        let font = style.shelf.textFont(
-            ofSize: style.resolvedFontSize(forDepth: thickness)
-        )
         let iconSide = max(depth - pad * 2, 0)
-        let measure = NSTextField(labelWithString: "")
-        measure.alignment = .center
-        measure.font = font
-        measure.maximumNumberOfLines = 1
-        measure.lineBreakMode = .byTruncatingTail
+        let title = titleSlot(style, thickness: thickness)
         return items.enumerated().reduce(0) { widest, entry in
             let (index, item) = entry
             let place = runPlace(index: index, count: items.count)
@@ -201,8 +192,7 @@ extension AppBarOverlay {
                 first: place.first,
                 last: place.last
             )
-            measure.stringValue = item.text
-            let text = ceil(measure.cell?.cellSize.width ?? 0)
+            let text = item.text.isEmpty ? 0 : title
             let spacing =
                 iconSide > 0 && text > 0 ? pad / 2 : 0
             let badge =
@@ -216,9 +206,25 @@ extension AppBarOverlay {
         }
     }
 
+    /// The slot every item's title draws in on a strip
+    /// `thickness` deep: `title_cap` in the bar font's average
+    /// glyph (`BarTitleSlot`).
+    @MainActor
+    static func titleSlot(
+        _ style: AppBarLook,
+        thickness: CGFloat
+    ) -> CGFloat {
+        BarTitleSlot.length(
+            cap: style.resolvedTitleCap,
+            font: style.shelf.textFont(
+                ofSize: style.resolvedFontSize(forDepth: thickness)
+            )
+        )
+    }
+
     /// Shared slot length, floored at the content depth (#1682)
-    /// so measurement's icon side equals layout's — the
-    /// slot-fits-widest-title invariant leans on it.
+    /// so measurement's icon side equals layout's — the title
+    /// slot's fit leans on it.
     nonisolated static func slotLength(
         contentDepth: CGFloat,
         axis: CGFloat,

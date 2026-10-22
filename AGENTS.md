@@ -1548,7 +1548,10 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   segment as long as its one `titleSlot` and never its name, a Space Bar show
   that keeps every frame redrawing content alone through `keepsGeometry`, a new
   stored field of a show classified in `ContentRedrawCensusTests` (#2086,
-  `FrontAppFixedLengthTests`), and both bars refresh through the one
+  `FrontAppFixedLengthTests`), an App Bar title in the same `BarTitleSlot`
+  and a show whose titles alone changed redrawing content alone, its fields
+  classified in `AppBarTitleSlotTests`, the preview drawing the same slot
+  (#2545, `TitleSlotPreviewTests`), and both bars refresh through the one
   `KiwiCore.updateBars()`, never a single-bar sync (`ShelfArrangementTests`,
   `ShelfDriverTests`, `ShelfGeometryTests`, `ShelfNeedParityTests`), standing
   down through the one `shelfStandsDown(on:)` — native fullscreen or a

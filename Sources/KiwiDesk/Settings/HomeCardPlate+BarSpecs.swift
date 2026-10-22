@@ -66,7 +66,8 @@ extension HomeCardBarsTile {
             ),
             contentShare: share,
             shelf: style.shelf,
-            sheen: style.sheen
+            sheen: style.sheen,
+            titleCap: style.resolvedTitleCap
         )
     }
 

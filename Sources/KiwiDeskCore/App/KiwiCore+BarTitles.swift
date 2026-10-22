@@ -15,10 +15,9 @@ import Foundation
 /// Debounced, because the event is as fast as a keystroke: an
 /// editor retitles as its dirty flag flips and a browser several
 /// times through a page load. One refresh per quiet moment is
-/// both cheaper and steadier to look at — an App Bar re-measures
-/// its uniform slot against the widest title on every render
-/// (`AppBarOverlay.autoSlotWidth`), so an undebounced burst would
-/// visibly pump the slot widths while the user types.
+/// both cheaper and steadier to look at — the slots hold still
+/// (#2545), but an undebounced burst would flicker the words in
+/// them while the user types.
 ///
 /// It rides `DeferredTasks` rather than a flag plus a dispatch
 /// hop: the reschedule-cancels-the-previous protocol IS the

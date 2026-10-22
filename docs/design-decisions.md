@@ -14670,20 +14670,32 @@ a string the user edits, and both are load-bearing rather than
 polish.
 
 `app_bar.set_title_cap` (8–80, default 10) exists because App
-Bar slots are **uniform and measured from the widest item**
-(`AppBarOverlay.autoSlotWidth`). On that same sample the app
-names ran 6–20 characters and the titles to 57. One long title
-therefore widens *every* slot until `slotLength`'s
-quarter-of-the-bar clamp bites and the rest of the bar scrolls.
+Bar slots are **uniform**. On that same sample the app names ran
+6–20 characters and the titles to 57, so a slot sized by its
+titles would grow with the longest until `slotLength`'s
+quarter-of-the-bar clamp bit and the rest of the bar scrolled.
 
-So the cap is what keeps automatic slot sizing usable at all,
-and with no pinned item size it is the App Bar's one size
-control. The Space Bar's own cap, `front_app_title_cap`, exists
-for a different reason and is kept as a separate knob for that
-reason: its front segment already ellipsizes at the panel edge
-and cannot clip, but its estimated length feeds the bar's
-alignment total, so under `center` or `end` an uncapped title
-slides the whole run of Space items sideways.
+So the cap is what keeps the slot usable at all, and with no
+pinned item size it is the App Bar's one size control. Every
+title draws in a slot as long as the cap in the bar font's
+average glyph, whatever the titles read (#2545, owner ruling
+2026-10-22) — the front-app segment's rule below. A slot
+measured from the widest drawn title moved on every title
+change even with the cap: ten capitals draw wider than ten
+lower-case letters, and a title under the cap is narrower
+still, so switching between two capped windows re-sized every
+slot and re-centred the run. Cutting by width while the slots
+still followed the widest title was rejected: two capped titles
+would then match, but a short title meeting a capped one would
+still jump. With every frame fixed, a show whose titles alone
+changed redraws content and never runs the frame pass.
+
+The Space Bar's own cap, `front_app_title_cap`, exists for a
+different reason and is kept as a separate knob for that reason:
+its front segment already ellipsizes at the panel edge and
+cannot clip, but its estimated length feeds the bar's alignment
+total, so under `center` or `end` an uncapped title slides the
+whole run of Space items sideways.
 
 The refresh path is the subtler half. The bars are driven from
 `retile()`, and `TilingEngine.shouldRetile` returns false for
@@ -15119,7 +15131,7 @@ becomes `outline` once, and Lua refuses `gap` naming the values
 that remain.
 
 *No item size.* A Space item sizes to its content and an App
-Bar slot to the widest title, between the icon square and a
+Bar slot to its title cap (#2545), between the icon square and a
 quarter of the whole shelf edge — measured on the edge rather
 than the App section, so a slot does not shrink when the Space
 Bar joins. A pinned item size answered only what the title cap
