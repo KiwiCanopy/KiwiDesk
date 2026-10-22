@@ -17,13 +17,7 @@ extension KiwiCore {
             source: .axEcho,
             pin: nil
         )
-        stickyMarks.follow(
-            id,
-            windowFrame: frame,
-            source: .axEcho,
-            pin: nil
-        )
-        overflowMarks.follow(
+        followMarks(
             id,
             windowFrame: frame,
             source: .axEcho,

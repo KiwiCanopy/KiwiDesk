@@ -27,13 +27,28 @@ public struct OverflowMark: Sendable, Equatable {
 
     public var count: Int { windows.count }
 
-    /// Overlay key: an anchor can carry a mark at each end.
+    /// Overlay key: one run end, named by its Space, its zone's
+    /// place and its end — never the anchor, which a scroll step
+    /// changes, so a step re-anchors the mark rather than minting
+    /// a panel (#2026's steady-path rule).
     public struct Key: Hashable, Sendable {
-        public let anchor: WindowID
+        public let space: SpaceID
         public let end: End
+        public let zoneX: Int
+        public let zoneY: Int
     }
 
-    public var key: Key { Key(anchor: anchor, end: end) }
+    /// The zone's origin, which a scroll leaves in place.
+    public let zoneOrigin: CGPoint
+
+    public var key: Key {
+        Key(
+            space: space,
+            end: end,
+            zoneX: Int(zoneOrigin.x.rounded()),
+            zoneY: Int(zoneOrigin.y.rounded())
+        )
+    }
 
     /// One mark per run end that hides windows.
     public static func marks(of cover: RunCover) -> [OverflowMark] {
@@ -49,7 +64,8 @@ public struct OverflowMark: Sendable, Equatable {
                         anchor: first,
                         end: vertical ? .top : .left,
                         windows: Array(run.hiddenBefore.reversed()),
-                        bounds: cover.bounds
+                        bounds: run.bounds,
+                        zoneOrigin: run.zone.region.origin
                     )
                 )
             }
@@ -60,7 +76,8 @@ public struct OverflowMark: Sendable, Equatable {
                         anchor: last,
                         end: vertical ? .bottom : .right,
                         windows: Array(run.hiddenAfter),
-                        bounds: cover.bounds
+                        bounds: run.bounds,
+                        zoneOrigin: run.zone.region.origin
                     )
                 )
             }

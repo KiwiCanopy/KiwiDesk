@@ -1722,11 +1722,12 @@ Touching `Borders`, `Vision`.
   through `BorderOverlay` only where it stopped spanning or `sync` orders it on
   another Desktop (#2149, #1145, `StickyOverlaySpanTests`,
   `BorderDesktopSpanTests`)
-- an overflow mark follows its window on every channel the sticky mark takes,
-  through `FollowSource` and its own `WindowServerWatch` consumer, its marks
-  derived from `runCovers` in the one `overflowMarkSpecs` at the bars' tail,
-  on its window's Desktop unless carried (#2235, `OverflowMarkWiringTests`,
-  `StickyOverlaySpanTests`)
+- an overflow mark rides every channel the sticky mark takes through the one
+  door per channel in `KiwiCore+Marks.swift` and its own `WindowServerWatch`
+  consumer, its marks derived from `runCovers` in the one `overflowMarkSpecs`
+  at the bars' tail and standing down with the shelf, keyed by run end, on its
+  window's Desktop unless carried (#2235, `MarkFamilyParityTests`,
+  `OverflowMarkWiringTests`, `StickyOverlaySpanTests`)
 - every window `focusAnchor` may yield has a ring slot — the slots and the
   anchor read the one `anchorVisitors(of:tiled:)` (#2259,
   `BorderTravelerFocusTests`)

@@ -24,9 +24,10 @@ public final class KiwiCore {
     let dragCrossing = DragCrossingCoordinator()
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
-    /// Rings, sticky and overflow marks (#278, #414, #2235): `retile`.
+    /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
     public let borders = BorderManager(watch: WindowServerWatch())
     public let stickyMarks = StickyMarkManager()
+    /// The "+n" marks on a run's edge windows (#2235).
     public let overflowMarks = OverflowMarkManager()
     /// KiwiVision's plates (#2103), driven with the rings.
     public let vision = VisionManager()
@@ -44,7 +45,8 @@ public final class KiwiCore {
 
     /// The global window-rule bases (`GlobalRuleBase`).
     var globalRuleBase = GlobalRuleBase()
-    /// Holds AX reconciles while `loadConfig` tries rule states.
+    /// Holds AX reconciles while `loadConfig` tries candidate rule
+    /// states; one pass runs once the final profile wins.
     var defersWindowRuleReconcile = false
 
     /// Boot's half of the same suppression (#836). **Raised in
@@ -120,15 +122,13 @@ public final class KiwiCore {
     /// provenance.
     var stackingOrderProvider: (@MainActor () -> [WindowID])?
 
-    /// Windows raised purely for z-order (#418 floats, #425 pile
-    /// restores), stamped per raise sequence. Their focus echoes
-    /// carry no self-raise provenance (#152), so a fresh stamped
-    /// report that is not the intended focus is reverted unless
-    /// it carries click provenance (#687 — the design-decisions
-    /// entry owns the ruling). Age-pruned, cleaned on
-    /// destroy/rekey, and NEVER consumed by an echo: lazy apps
-    /// re-report, and the unstamped duplicate was honored as
-    /// deliberate focus (#689).
+    /// Windows raised purely for z-order (#418 floats, #425 pile restores),
+    /// stamped per raise sequence. Their focus echoes carry no self-raise
+    /// provenance (#152), so a fresh stamped report that is not the intended
+    /// focus is reverted unless it carries click provenance (#687 — the
+    /// design-decisions entry owns the ruling). Age-pruned, cleaned on
+    /// destroy/rekey, and NEVER consumed by an echo: lazy apps re-report, and
+    /// the unstamped duplicate was honored as deliberate focus (#689).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
     /// The wall clock the core's `Date`-stamped ledgers stamp and age

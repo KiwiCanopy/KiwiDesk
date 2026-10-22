@@ -43,6 +43,11 @@ paths:
   # whose obligations live here.
   - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
   - "Sources/KiwiDeskCore/Tiling/DragMarkerView.swift"
+  # The overflow mark (#2235) wears the shelf's look — its glass,
+  # rim and bar font — and feeds the hover peek; its driver reads
+  # the gate.
+  - "Sources/KiwiDeskCore/Borders/OverflowMark*.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
   # The Space slide's plates (#1956, #2524): untinted `.regular`
   # glass, KiwiHub's, on KiwiHub's leaf.
@@ -860,7 +865,8 @@ Obligations:
   `otherPressOnAGlyphCloses`) — and an overflow mark's panel is
   that point's twin (#2235): `OverflowMarkPanel.sendEvent` hands
   its presses to the same `pressed`, sparing the mark's own LEFT
-  press, whose click opens its list (`OverflowMarkWiringTests` ▸
+  press, whose click opens its list (`OverflowMarkPanelSeamTests`,
+  `OverflowMarkWiringTests` ▸
   `leftPressOnAMarkSpares`); a view's
   own press handler never re-spells the dismissal, so one that
   takes its own press cannot leave a peek standing

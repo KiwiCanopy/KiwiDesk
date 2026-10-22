@@ -68,6 +68,31 @@ struct StickyOverlaySpanTests {
             )
         )
         #expect(core.contains("spans: carried.contains(mark.anchor)"))
+        let manager = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/Borders/OverflowMarkManager.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(manager.contains("overlay.setSpans(spec.spans)"))
+        // Leaving the span re-homes the panel: ordered out, a stack
+        // owed, so the next order lands it on the shown Desktop.
+        let overlay = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/Borders/OverflowMarkOverlay.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        let setSpans = try #require(
+            SourceScan.declarationBody(after: "func setSpans(", in: overlay)
+        )
+        #expect(setSpans.contains("remove(.canJoinAllSpaces)"))
+        #expect(setSpans.contains("panel.orderOut(nil)"))
+        #expect(setSpans.contains("hasOrdered = false"))
     }
 
     @Test("the ring is built on one Desktop and spans when carried")

@@ -74,6 +74,34 @@ struct OverflowMarkWiringTests {
         #expect(core.overflowMarks.anchors == [WindowID(3)])
     }
 
+    /// A shelf write skips the layout pass (#1524) and runs only
+    /// the bars' tail, which is where the mark is synced.
+    @Test("A shelf write repaints the mark without a pass")
+    func shelfWriteRepaintsTheMark() throws {
+        let core = makeCore()
+        _ = makeSpace(core)
+        let hex = "#3355AAB3"
+        _ = core.execute("kiwishelf.set_fill_color", args: [.string(hex)])
+        let overlay = try #require(core.overflowMarks.overlays.values.first)
+        #expect(overlay.view.shelfLook.fillColor == hex)
+    }
+
+    /// A step moves the end to another window: the same panel is
+    /// re-anchored, never retired and minted again (#2026).
+    @Test("A scroll step re-anchors the end's one overlay")
+    func stepReanchorsTheOverlay() throws {
+        let core = makeCore()
+        let space = makeSpace(core)
+        let before = try #require(core.overflowMarks.overlays.values.first)
+        core.state.workspaces.focus(WindowID(4), in: space)
+        core.retile(animated: false)
+        let after = try #require(
+            core.overflowMarks.overlays.values.first { $0.mark.end == .bottom }
+        )
+        #expect(after === before)
+        #expect(after.mark.anchor == WindowID(4))
+    }
+
     @Test("A run that hides nothing draws no mark")
     func noOverflowNoMark() {
         let core = makeCore()
@@ -136,16 +164,16 @@ struct OverflowMarkWiringTests {
 
     @Test("A left press on a mark leaves its peek to the click")
     func leftPressOnAMarkSpares() {
-        let peek = BarPeek(menus: NotificationCenter())
-        peek.schedule = { _, _ in }
         let view = OverflowMarkView()
-        let source = BarPeekSource.run([WindowID(4)])
-        peek.pointer(in: view, on: view, source: source, edge: .bottom)
-        #expect(peek.pending != nil)
-        peek.pressed(on: view, type: .leftMouseDown)
-        #expect(peek.pending != nil)
+        #expect(
+            !OverflowMarkPanel.closesPeek(hit: view, type: .leftMouseDown)
+        )
         // Any other button closes it, as on a bar glyph.
-        peek.pressed(on: view, type: .rightMouseDown)
-        #expect(peek.pending == nil)
+        #expect(
+            OverflowMarkPanel.closesPeek(hit: view, type: .rightMouseDown)
+        )
+        #expect(
+            OverflowMarkPanel.closesPeek(hit: nil, type: .leftMouseDown)
+        )
     }
 }

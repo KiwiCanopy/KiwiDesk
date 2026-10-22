@@ -1,8 +1,9 @@
 import AppKit
 
-/// The overflow mark's panel (#2235): a press anywhere on it
-/// reaches `onPress` before the view takes it — the hover peek's
-/// one dismissal point, as on `ShelfPanel`.
+/// The overflow mark's panel (#2235): a press on it reaches
+/// `onPress` before the view takes it, read through
+/// `ShelfPanel.pressType` as on the shelf's panel — save the
+/// mark's own left press, whose click opens its list.
 final class OverflowMarkPanel: NSPanel {
     var onPress: @MainActor (NSView?, NSEvent.EventType) -> Void = {
         _,
@@ -10,13 +11,19 @@ final class OverflowMarkPanel: NSPanel {
     }
 
     override func sendEvent(_ event: NSEvent) {
-        switch event.type {
-        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            onPress(contentView?.hitTest(event.locationInWindow), event.type)
-        default:
-            break
+        let hit = contentView?.hitTest(event.locationInWindow)
+        if let type = ShelfPanel.pressType(of: event),
+            Self.closesPeek(hit: hit, type: type)
+        {
+            onPress(hit, type)
         }
         super.sendEvent(event)
+    }
+
+    /// Whether a press closes the peek: every press but a left
+    /// one on the mark, which opens it.
+    static func closesPeek(hit: NSView?, type: NSEvent.EventType) -> Bool {
+        type != .leftMouseDown || !(hit is OverflowMarkView)
     }
 
     override var canBecomeKey: Bool { false }
@@ -71,6 +78,13 @@ final class OverflowMarkOverlay {
 
     /// Takes `mark`'s count and bounds, drawn in `shelf`.
     func set(_ mark: OverflowMark, name: String, shelf: KiwiShelf) {
+        // A scroll step moves the end to another window: the held
+        // frame was the old anchor's, and the mark owes a stack
+        // above the new one.
+        if mark.anchor != self.mark.anchor {
+            lastFrame = nil
+            hasOrdered = false
+        }
         self.mark = mark
         let text = "+\(mark.count)"
         size = OverflowMark.size(

@@ -158,13 +158,7 @@ extension KiwiCore {
                 source: .axEcho,
                 pin: nil
             )
-            stickyMarks.follow(
-                id,
-                windowFrame: frame,
-                source: .axEcho,
-                pin: nil
-            )
-            overflowMarks.follow(
+            followMarks(
                 id,
                 windowFrame: frame,
                 source: .axEcho,
@@ -302,7 +296,7 @@ extension KiwiCore {
             }
             updateBars()
             updateBorders()
-            updateStickyMarks()
+            updateMarks()
         }
         settleDetectedFlip(detectedFlip)
         runCloseReturnTail(

@@ -24,8 +24,19 @@ extension KiwiCore {
         let shelf = LiquidGlassGate.rendered(tiler.settings.kiwishelf)
         let shown = Set(state.workspaces.visibleSpaces)
         let carried = stickyReachCarried()
+        // A mark wears the shelf's look, so it stands down with the
+        // shelf: native fullscreen, a show or a maximized window in
+        // front (#1787, #2448).
         return tiler.runCovers.values
-            .filter { shown.contains($0.space) }
+            .filter { cover in
+                guard shown.contains(cover.space),
+                    let screen = TilingEngine.screen(
+                        for: cover.space,
+                        in: state
+                    )
+                else { return false }
+                return !shelfStandsDown(on: screen)
+            }
             .sorted { $0.space.description < $1.space.description }
             .flatMap(OverflowMark.marks(of:))
             .compactMap { mark in
@@ -66,7 +77,9 @@ extension KiwiCore {
         }
     }
 
-    /// The marks' peek, menu and follow seams, wired once at boot.
+    /// The marks' peek and menu seams, wired once at boot; their
+    /// WindowServer stream is wired with the others'
+    /// (`connectWindowServerConsumers`).
     func wireOverflowMarks() {
         overflowMarks.peek = shelves.peek
         overflowMarks.openMenu = { [weak self] mark, anchor in
@@ -76,9 +89,6 @@ extension KiwiCore {
                 space: mark.space,
                 at: anchor
             )
-        }
-        overflowMarks.isWindowServerTracked = { [weak self] id in
-            self?.windowServer.hears(id, as: .overflow) ?? false
         }
     }
 }

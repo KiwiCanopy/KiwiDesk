@@ -148,13 +148,7 @@ extension KiwiCore {
                 source: .animationTick,
                 pin: pin
             )
-            self?.stickyMarks.follow(
-                id,
-                windowFrame: frame,
-                source: .animationTick,
-                pin: pin
-            )
-            self?.overflowMarks.follow(
+            self?.followMarks(
                 id,
                 windowFrame: frame,
                 source: .animationTick,

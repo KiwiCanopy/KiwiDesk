@@ -46,7 +46,7 @@ public final class OverflowMarkManager {
     public init() {}
 
     /// Windows carrying a mark.
-    var anchors: Set<WindowID> { Set(overlays.keys.map(\.anchor)) }
+    var anchors: Set<WindowID> { Set(overlays.values.map(\.mark.anchor)) }
 
     /// Synchronizes the drawn marks to `desired`.
     func sync(_ desired: [Spec], reassertOrder: Bool = false) {
@@ -121,7 +121,10 @@ public final class OverflowMarkManager {
 
     /// Removes and hides every mark.
     func clear() {
-        for overlay in overlays.values { overlay.hide() }
+        for overlay in overlays.values {
+            if peek?.shown?.view === overlay.view { peek?.dismiss() }
+            overlay.hide()
+        }
         overlays = [:]
     }
 
@@ -129,7 +132,7 @@ public final class OverflowMarkManager {
         _ id: WindowID,
         _ body: (OverflowMarkOverlay) -> Void
     ) {
-        for (key, overlay) in overlays where key.anchor == id {
+        for overlay in overlays.values where overlay.mark.anchor == id {
             body(overlay)
         }
     }

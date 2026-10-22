@@ -60,7 +60,7 @@ extension KiwiCore {
         state.workspaces.withSpace(spaceID) { $0.maximized = nil }
         updateBars()
         updateBorders()
-        updateStickyMarks()
+        updateMarks()
         return true
     }
 

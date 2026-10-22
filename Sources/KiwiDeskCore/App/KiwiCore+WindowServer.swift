@@ -54,5 +54,8 @@ extension KiwiCore {
         stickyMarks.isWindowServerTracked = { [weak self] id in
             self?.windowServer.hears(id, as: .mark) ?? false
         }
+        overflowMarks.isWindowServerTracked = { [weak self] id in
+            self?.windowServer.hears(id, as: .overflow) ?? false
+        }
     }
 }

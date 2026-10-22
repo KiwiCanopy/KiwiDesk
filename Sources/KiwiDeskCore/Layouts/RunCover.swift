@@ -12,6 +12,10 @@ public struct RunCover: Sendable, Equatable {
         /// What the weights divide once the shown members' floors
         /// are set aside (`RunZone.runExtra`).
         public let extra: CGFloat
+        /// The bounds this run's ends sit flush with — the layout
+        /// bounds, outer gap included, for a Stack zone or a Track
+        /// track; a later pile's own cell (#2235).
+        public let bounds: CGRect
 
         /// Members shown, in drawn order.
         public var shown: ArraySlice<WindowID> {
@@ -31,14 +35,10 @@ public struct RunCover: Sendable, Equatable {
 
     public let space: SpaceID
     public let runs: [Run]
-    /// The layout bounds the runs were laid in — the outer gap
-    /// included — which an overflow mark sits flush with (#2235).
-    public let bounds: CGRect
 
-    public init(space: SpaceID, runs: [Run], bounds: CGRect = .zero) {
+    public init(space: SpaceID, runs: [Run]) {
         self.space = space
         self.runs = runs
-        self.bounds = bounds
     }
 
     /// Hidden window → the shown window at the end it waits beyond;
@@ -90,9 +90,10 @@ public struct RunCover: Sendable, Equatable {
             return Run(
                 zone: zone,
                 run: run,
-                extra: zone.runExtra(in: context) ?? 0
+                extra: zone.runExtra(in: context) ?? 0,
+                bounds: context.bounds
             )
         }
-        return RunCover(space: space, runs: runs, bounds: context.bounds)
+        return RunCover(space: space, runs: runs)
     }
 }

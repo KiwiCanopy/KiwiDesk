@@ -8,6 +8,8 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Marks.swift"
   # The one WindowServer stream every overlay hears through
   # (#2275), and its consumer order, live outside Borders/.
   - "Sources/KiwiDeskCore/OS/WindowServerWatch.swift"
@@ -342,22 +344,29 @@ obligations:
 
 ## An overflow mark follows its window like the sticky mark (#2235)
 
-The "+n" on a run's edge window is a third overlay family. **Its
-frame comes from `FollowSource` on every channel the sticky mark
-takes** — the sync's `syncFrame`, the animation tick, the AX echo
-and the WindowServer bounds and restack through its own
-`WindowServerWatch` consumer — so a scroll's glide carries it with
-its window; a new channel the sticky mark gains, the overflow mark
-gains in the same change (`OverflowMarkManager` mirrors
-`StickyMarkManager`'s `follow` / `reposition` / `reassert`; nothing
-scans for a missed one, so that is review's). **What it draws is
+The "+n" on a run's edge window is a third overlay family, and
+**it rides every channel the sticky mark takes, through the one
+door per channel in `KiwiCore+Marks.swift`** — `updateMarks` for a
+sync (the settle passes' `reassertOrder` included), `followMarks`
+for the tick and the AX echo, `oweMarkOrder` for a carry — plus the
+WindowServer bounds and restack through its own `WindowServerWatch`
+consumer, its frame decided by `FollowSource` like the sticky
+mark's. A channel the sticky mark gains is added through that door,
+or as a twin spelling in the same file; `MarkFamilyParityTests`
+holds the doors, the two ruled single-family syncs in the retile,
+and every other spelling twinned file by file. **What it draws is
 derived from `TilingEngine.runCovers` in the one
 `overflowMarkSpecs`, synced at the bars' tail**
 (`repaintBarsAndFloatNet`), since it wears KiwiShelf's look and a
-shelf write repaints the bars without a pass
-(`OverflowMarkWiringTests`). It stays on its window's Desktop,
-spanning only while that window is carried, and its panels order in
-nowhere in a `makeTestCore` twin (`ordersPanels`).
+shelf write repaints the bars without a pass, and it stands down
+through the shelf's one `shelfStandsDown(on:)`
+(`OverflowMarkWiringTests`). Its overlay is keyed by the run END,
+never the anchor, so a scroll step re-anchors one panel rather than
+minting another. It stays on its window's Desktop, spanning only
+while that window is carried — the off-transition's re-home is
+`StickyOverlaySpanTests`' needle, its on-screen effect review's —
+and its panels order in nowhere in a `makeTestCore` twin
+(`ordersPanels`).
 
 ## The ring draws on the `.transient` panel, never a raw window
 
