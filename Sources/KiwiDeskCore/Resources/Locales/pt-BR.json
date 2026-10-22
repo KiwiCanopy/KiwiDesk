@@ -162,7 +162,6 @@
   "app_rules.space.remove.help": "Parar de abrir este app em um espaço",
   "app_rules.space.temporary_header": "Temporários — fora deste perfil",
   "app_rules.space_list.caption": "Toda nova janela do app abre no espaço dele.",
-  "app_rules.space_list.help": "A regra vale para toda nova janela do app: quando você o inicia, abre outra janela, reabre uma janela que fechou ou restaura uma que minimizou. Iniciar o app também leva você ao espaço dele.",
   "app_rules.space_list.title": "Abrir em um espaço",
   "app_rules.tile": "Lado a lado em vez disso",
   "app_rules.tile.help": "Uma regra de lado a lado coloca lado a lado as janelas de um app que, de outra forma, flutuariam automaticamente. Caixas de diálogo, painéis e folhas continuam flutuando, e uma regra de flutuar do mesmo app continua fazendo flutuar as janelas que abrange.",

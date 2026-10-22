@@ -39,7 +39,13 @@ extension KiwiCore {
             guard EventLoop.ownWindow(number: Int(id.raw)) == nil
             else { return }
             windowCreates.noteCreated(id, at: wallClock())
-            payLateSpawnFollow(id)
+            // Paid off the port's drain, which the border pump
+            // waits on: a follow raises and retiles.
+            if launchFollow.spawn?.window == id {
+                deferred.schedule(.lateSpawnFollow, after: .zero) {
+                    [weak self] in self?.payLateSpawnFollow(id)
+                }
+            }
             pullWakeSweep()
         case .destroyed:
             windowCreates.noteDestroyed(id)

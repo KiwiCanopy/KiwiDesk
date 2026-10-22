@@ -162,7 +162,7 @@
   "app_rules.space.remove.help": "Stop opening this app in a Space",
   "app_rules.space.temporary_header": "Temporary — not in this profile",
   "app_rules.space_list.caption": "Every new window of the app opens in its Space.",
-  "app_rules.space_list.help": "The rule applies to every new window of the app: when you launch it, open another window, reopen a window you closed, or restore one you minimized. Launching the app also takes you to its Space.",
+  "app_rules.space_list.help": "The rule applies to every new window of the app: when you launch it, open another window, reopen a window you closed, or restore one you minimized. Launching the app, or opening another window of it, also takes you to its Space.",
   "app_rules.space_list.title": "Open in a Space",
   "app_rules.tile": "Tile instead",
   "app_rules.tile.help": "A Tile rule tiles an app’s windows that would otherwise float automatically. Dialogs, sheets and panels still float, and a Float rule for the same app still floats the windows it matches.",

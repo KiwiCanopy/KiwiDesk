@@ -414,9 +414,11 @@ editing here:
   #1161/#465 distrusts to stand down. What makes it new is
   WindowServer's create, not `.windowCreated`, which a boot
   sweep, an unlock's heal, a re-track and a Desktop reveal also
-  emit: `WindowCreateLedger` is fed by `windowServerChanged` alone
-  and reads closed until that route reports itself active, so a
-  new adoption pass needs no guard of its own here, while a host
+  emit. Feed `WindowCreateLedger` from `windowServerChanged` alone
+  (`LaunchFollowSeamTests` ▸ `ledgerHasOneFeeder`); it reads
+  closed until that route reports itself active
+  (`LaunchFollowSpawnTests` ▸ `deadRouteStays`), so a new
+  adoption pass owes no guard of its own here, and a host
   without the route follows only an open. The process-age and
   press clause is the one `LaunchFollowIntent.spawnFollows`, the
   age read through its `processAge` seam over

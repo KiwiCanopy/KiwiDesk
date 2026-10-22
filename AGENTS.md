@@ -776,8 +776,10 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   `LaunchFollowRetireTests`, `LaunchFollowReopenTests`,
   `LaunchFollowColdStartTests`, `LaunchFollowSeamTests`) — and a NEW window
   WindowServer reported created while KiwiDesk watched follows owed nothing,
-  through the one `spawnVerdict`, a late create paid through the one `spawn`
-  slot (#2478, `LaunchFollowSpawnTests`)
+  through the one `spawnVerdict` — its process past `coldStartGrace` or a
+  watched press within `pressGrace`, judged by the one
+  `LaunchFollowIntent.spawnFollows` — a late create paid outside the event-port
+  drain through the one `spawn` slot (#2478, `LaunchFollowSpawnTests`)
 - a Move here on a hidden app is paid at that app's first honored focus REPORT,
   ahead of the #1207 memory and the follow, the handler deciding the retile
   (#1513, `JumpHiddenAppTests`)
@@ -1152,7 +1154,8 @@ adoption's `Events` files (`+BootScan`, `+AppObservation`, `+Reconcile`,
 `+ReconcileAll`, `+ReconcileOffMain`, `+ListedWindows`, `+Heal`,
 `+WindowPolicy`, `+FloatVerdict`, `+Tabs`, `+RemovalDistrust`, `+Tracking`,
 `+ProcessIdentity`, `+ShadowWindows`, `+WindowServerWakeUp`,
-`+PanelButton`, `+SwitchReconcile`, and `SwitchReconcile`).
+`+PanelButton`, `+SwitchReconcile`, `SwitchReconcile` and
+`ProcessIdentity+Table`).
 
 - AX calls are slow and can block — snapshot before layout math, and the
   activation, focus, hide and undeferred-close arms and the distrust and

@@ -162,7 +162,6 @@
   "app_rules.space.remove.help": "Diese App nicht mehr in einem Space öffnen",
   "app_rules.space.temporary_header": "Temporär — nicht in diesem Profil",
   "app_rules.space_list.caption": "Jedes neue Fenster der App öffnet sich in ihrem Space.",
-  "app_rules.space_list.help": "Die Regel gilt für jedes neue Fenster der App: wenn du sie startest, ein weiteres Fenster öffnest, ein geschlossenes Fenster erneut öffnest oder ein im Dock abgelegtes wiederherstellst. Beim Starten der App wechselst du außerdem in ihren Space.",
   "app_rules.space_list.title": "In einem Space öffnen",
   "app_rules.tile": "Stattdessen kacheln",
   "app_rules.tile.help": "Eine Kachel-Regel kachelt die Fenster einer App, die sonst automatisch schweben würden. Dialoge, Sheets und Panels schweben weiterhin, und eine Schwebe-Regel für dieselbe App lässt die Fenster, auf die sie zutrifft, weiterhin schweben.",

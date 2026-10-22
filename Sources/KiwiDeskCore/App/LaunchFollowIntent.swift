@@ -132,7 +132,11 @@ final class LaunchFollowIntent {
     /// which had not landed yet. One slot.
     struct Spawn {
         let window: WindowID
+        let bundleID: String
         let space: SpaceID
+        /// The Space the user was in, which a payment requires
+        /// they still are.
+        let from: SpaceID?
         let at: Date
     }
     private(set) var spawn: Spawn?
@@ -140,6 +144,11 @@ final class LaunchFollowIntent {
     /// Remembers `spawn` for a create still to come.
     func noteSpawn(_ spawn: Spawn) {
         self.spawn = spawn
+    }
+
+    /// Drops the slot: the core stopped.
+    func dropSpawn() {
+        spawn = nil
     }
 
     /// Takes the slot for `window` while within `lateCreateBound`.
@@ -214,12 +223,14 @@ final class LaunchFollowIntent {
         if pending?.bundleID == bundleID { pending = nil }
     }
 
-    /// Retires the debt unpaid, any spawn awaiting its create, and
-    /// any placement waiting for one except `keeping`'s — the app
+    /// Retires the debt unpaid, and any spawn or placement waiting
+    /// on a create or an activation except `keeping`'s — the app
     /// whose activation is judging it.
     func forget(keeping bundleID: String? = nil) {
         pending = nil
-        spawn = nil
+        if spawn?.bundleID != bundleID || bundleID == nil {
+            spawn = nil
+        }
         if placement?.bundleID != bundleID || bundleID == nil {
             placement = nil
         }

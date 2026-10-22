@@ -6375,9 +6375,8 @@ them, measured on device, is an OPEN the user caused:
   those windows to its Space, and moving a window without the
   user is the worst of the three outcomes — it vanishes from
   where they are. A running app still showing a window — a
-  switch into it, ⌘T — owes no debt; a NEW window it opens is
-  the second arm's, below. The boot scan involves no activation
-  at all. **New Window owes it
+  switch into it, ⌘T — owes no debt. The boot scan involves no
+  activation at all. **New Window owes it
   outright** (#1518, owner ruling 2026-09-30): the verb names the
   app and asks for a window, which is the open this rule follows,
   whatever the app already shows — and a press the app answers
@@ -6448,6 +6447,12 @@ open in the Space this switch left. A popup still opens where the
 user is (#1602, #2475). The trade, accepted: a window an app opens
 with no press behind it, a call window, takes the user to its
 rule's Space.
+
+That does not reverse the discrimination above. The open arm
+judges an activation, which says nothing about any window; this
+arm judges a window WindowServer just created, one the user will
+look for. So a press — or none, from an app past its cold start —
+is enough here and still not there.
 :::
 
 There is no setting and no same-screen narrowing. A user who

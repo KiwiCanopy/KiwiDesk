@@ -124,7 +124,7 @@ extension KiwiCore {
             state.windows[window.id]?.isTransientOverlay == false
         else { return nil }
         guard launchFollow.claim(bundleID, at: now) else {
-            switch spawnVerdict(window, now: now) {
+            switch spawnVerdict(window) {
             case .follows:
                 onLog(
                     "launch follow: w\(window.id.raw), a new window "
@@ -133,7 +133,13 @@ extension KiwiCore {
                 return space
             case .awaitsCreate:
                 launchFollow.noteSpawn(
-                    .init(window: window.id, space: space, at: wallClock())
+                    .init(
+                        window: window.id,
+                        bundleID: bundleID,
+                        space: space,
+                        from: state.workspaces.activeSpace,
+                        at: wallClock()
+                    )
                 )
             case .stays:
                 break
@@ -153,31 +159,40 @@ extension KiwiCore {
     }
 
     /// What the unowed arm (#2478) makes of a rule-filed arrival:
-    /// boot done, no sweep chunk deferring, no other app's debt
-    /// standing, clear of a Desktop switch, and `spawnFollows`;
-    /// then created while KiwiDesk watched, or a create still due.
+    /// `spawnStandsClear`, then `spawnFollows`; then created while
+    /// KiwiDesk watched, or a create still due. One clock,
+    /// `wallClock`, for every reading.
     enum SpawnVerdict { case follows, awaitsCreate, stays }
 
-    func spawnVerdict(
-        _ window: ManagedWindow,
-        now: Date
-    ) -> SpawnVerdict {
-        guard windowCreates.isLive, boot.reachedReady,
-            !defersEventRetiles, launchFollow.owed(at: now) == nil,
-            now.timeIntervalSince(lastDesktopSwitch)
-                > LaunchFollowIntent.desktopSwitchGrace,
+    func spawnVerdict(_ window: ManagedWindow) -> SpawnVerdict {
+        let now = wallClock()
+        guard spawnStandsClear(at: now),
             launchFollow.spawnFollows(pid: window.pid)
         else { return .stays }
-        let created = windowCreates.createdAt(window.id, now: wallClock())
+        let created = windowCreates.createdAt(window.id, now: now)
         return created == nil ? .awaitsCreate : .follows
+    }
+
+    /// The unowed arm's stand-downs, asked at the claim and again
+    /// at a late payment: the route live, boot done, no sweep
+    /// chunk deferring, no app's launch debt standing, clear of a
+    /// Desktop switch.
+    private func spawnStandsClear(at now: Date) -> Bool {
+        windowCreates.isLive && boot.reachedReady
+            && !defersEventRetiles
+            && launchFollow.owed(at: now) == nil
+            && now.timeIntervalSince(lastDesktopSwitch)
+                > LaunchFollowIntent.desktopSwitchGrace
     }
 
     /// Pays the unowed follow when `id`'s create lands after its
     /// arrival (#2478): the arrival retile has parked the window in
     /// its unshown Space, so this is a whole `followSwitch`.
     func payLateSpawnFollow(_ id: WindowID) {
-        guard let spawn = launchFollow.takeSpawn(id, at: wallClock()),
-            !defersEventRetiles,
+        let now = wallClock()
+        guard let spawn = launchFollow.takeSpawn(id, at: now),
+            spawnStandsClear(at: now),
+            state.workspaces.activeSpace == spawn.from,
             state.workspaces.space(of: id) == spawn.space,
             spawn.space != state.workspaces.activeSpace
         else { return }

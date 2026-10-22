@@ -44,16 +44,15 @@ extension AppRulesSection {
 
     /// The Space card's `?`: which arrivals the rule places — a
     /// return that only comes back into view keeps its Space — and
-    /// the launch follow (#1599), which ⌘N in a running app does
-    /// not take.
+    /// the launch follow (#1599) and a new window's (#2478).
     static var spaceHelp: String {
         L(
             "app_rules.space_list.help",
             "The rule applies to every new window of the app: "
                 + "when you launch it, open another window, reopen "
                 + "a window you closed, or restore one you "
-                + "minimized. Launching the app also takes you to "
-                + "its Space."
+                + "minimized. Launching the app, or opening another "
+                + "window of it, also takes you to its Space."
         )
     }
 
