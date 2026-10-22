@@ -10,7 +10,8 @@ extension KiwiCore {
         event: KiwiEvent,
         effects foldEffects: AppliedEffects,
         goneReason: WindowGoneReason?,
-        willRetile: Bool
+        willRetile: Bool,
+        runArmOwed: Bool
     ) {
         // A close the distrust delayed past a same-app focus on
         // another Space is re-filed as the focus loss it was, owed
@@ -83,22 +84,15 @@ extension KiwiCore {
         // arms no restore either (#936): the drain ends in a
         // focus re-raise of the very anchor the stand-down
         // refused — the next mutation's arm heals the pile.
+        // The scrolled runs' arm (#2235) takes the same verdict:
+        // the debt a removal's own retile held is paid here, and
+        // a fold's held pass pays once any folded event votes.
         if willRetile, !closeReturnRaiseStandsDown {
             afterSwitchResync { [self] in
                 scheduleTrackZOrderRestoreIfOverflowing()
+                if runArmOwed { scheduleZOrderRestore() }
             }
-        }
-        // The scrolled runs' arm the removal's retile held (#2235)
-        // takes the same verdict, read after the pass — inline or
-        // the re-sync's fold — has drawn: paid where any folded
-        // removal's raise runs. A stood-down debt dies here, or
-        // with the fold's batch, never paid by a later removal.
-        if event.goneWindowID != nil {
-            let pays = !closeReturnRaiseStandsDown
-            afterSwitchResync { [self] in
-                if pays, runArm.takeOwed() { scheduleZOrderRestore() }
-            }
-            if !pays, switchResync == nil { runArm.owed = false }
+            voteRunArmPays()
         }
         // #951/#952 diagnosis: narrate the decision above. AFTER
         // the arms on purpose — the needle windows in

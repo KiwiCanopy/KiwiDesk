@@ -273,6 +273,9 @@ extension KiwiCore {
         let followed = launchFollow.map {
             payLaunchFollow($0.0, into: $0.1)
         }
+        // The run arm a removal's own retile held, which the tail
+        // pays or stands down (#936, #2235).
+        var runArmOwed = false
         if willRetile, followed != true {
             // A Desktop switch's re-sync takes one pass at its end.
             if !foldIntoSwitchResync(
@@ -284,9 +287,7 @@ extension KiwiCore {
                     effects: effects,
                     reason: goneReason
                 ) {
-                    // A removal's run arm waits for the tail's
-                    // stand-down verdict (#936, #2235).
-                    holdingRunArm(event.goneWindowID != nil) {
+                    runArmOwed = holdingRunArm(event.goneWindowID != nil) {
                         retile(newlyCreatedWindow: newlyCreatedWindow)
                     }
                 }
@@ -309,7 +310,8 @@ extension KiwiCore {
             event: event,
             effects: effects,
             goneReason: goneReason,
-            willRetile: willRetile
+            willRetile: willRetile,
+            runArmOwed: runArmOwed
         )
     }
 }

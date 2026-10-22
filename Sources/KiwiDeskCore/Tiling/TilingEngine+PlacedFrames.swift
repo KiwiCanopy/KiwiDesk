@@ -102,6 +102,10 @@ extension TilingEngine {
             context: input.context
         )
         guard placed else { return slots }
+        assert(
+            input.space.mode != .stack || cover != nil,
+            "a placed stack pass owes laidOut its cover"
+        )
         var issued = SplitOverflow.placed(
             mode: input.space.mode,
             frames: slots,

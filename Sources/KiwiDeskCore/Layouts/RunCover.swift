@@ -81,12 +81,24 @@ public struct RunCover: Sendable, Equatable {
         return RunCover(space: space, runs: runs)
     }
 
-    /// What decides the stacking: each hiding run's shown members
-    /// and the windows behind them, never its region, gaps or
-    /// weight span, which move no window between layers.
-    public var stacking: [[[WindowID]]] {
+    /// One run's layers: the windows behind its first slot, the
+    /// shown run, and the windows behind its last slot.
+    public struct Layers: Sendable, Equatable {
+        public let before: [WindowID]
+        public let shown: [WindowID]
+        public let after: [WindowID]
+    }
+
+    /// What decides the stacking: each hiding run's layers, never
+    /// its region, gaps or weight span, which move no window
+    /// between layers.
+    public var stacking: [Layers] {
         runs.map {
-            [Array($0.hiddenBefore), Array($0.shown), Array($0.hiddenAfter)]
+            Layers(
+                before: Array($0.hiddenBefore),
+                shown: Array($0.shown),
+                after: Array($0.hiddenAfter)
+            )
         }
     }
 

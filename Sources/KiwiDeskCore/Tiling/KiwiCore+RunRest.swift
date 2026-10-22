@@ -11,18 +11,11 @@ final class RunArm {
     /// between layers. Pruned to live Spaces at each pass, so a
     /// dropped or renumbered Space's entry goes with it and a
     /// renumbered one arms once; a rekeyed window re-arms once.
-    var answered: [SpaceID: [[[WindowID]]]] = [:]
-    /// Raised around a removal's event retile: its arm is owed to
-    /// the close-return tail rather than issued.
-    var holding = false
-    /// A held arm the tail still has to pay or stand down.
-    var owed = false
-
-    /// The arm a removal owed, taken once.
-    func takeOwed() -> Bool {
-        defer { owed = false }
-        return owed
-    }
+    var answered: [SpaceID: [RunCover.Layers]] = [:]
+    /// Raised around a held retile: its arm is recorded in `owed`
+    /// rather than issued, and the hold hands it back.
+    fileprivate(set) var holding = false
+    fileprivate(set) var owed = false
 }
 
 /// Persists where the shown Spaces' scrolled Stack zones and Track
@@ -98,14 +91,20 @@ extension KiwiCore {
         activeSpace?.mode.isFocusDriven == true || focusScrollsRun(to: id)
     }
 
-    /// Runs `retile` for a removal with the run arm held, so the
-    /// close-return tail decides it (#936). A hold starts with no
-    /// debt, so an earlier one no tail took never pays here.
-    func holdingRunArm(_ removal: Bool, _ body: () -> Void) {
-        if removal { runArm.owed = false }
+    /// Runs `retile` for a removal with the run arm held, and
+    /// returns whether the pass owed it: the close-return tail
+    /// pays or stands it down (#936). The debt lives no longer
+    /// than this call's answer.
+    @discardableResult
+    func holdingRunArm(_ removal: Bool, _ body: () -> Void) -> Bool {
         runArm.holding = removal
-        defer { runArm.holding = false }
+        runArm.owed = false
+        defer {
+            runArm.holding = false
+            runArm.owed = false
+        }
         body()
+        return runArm.owed
     }
 
     /// The restore for a Space whose runs hide windows: every

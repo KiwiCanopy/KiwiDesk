@@ -104,8 +104,6 @@ struct RunArmWiringTests {
             OwnKeyWindowReading(number: 42, isDialog: true)
         }
         #expect(try !closeFocused(core, space, folded: false))
-        // The stood-down debt dies; no later removal pays it.
-        #expect(!core.runArm.owed)
     }
 
     @Test("A folded close's arm is paid after the re-sync's pass")
@@ -121,7 +119,33 @@ struct RunArmWiringTests {
             OwnKeyWindowReading(number: 42, isDialog: true)
         }
         #expect(try !closeFocused(core, space, folded: true))
-        #expect(!core.runArm.owed)
+    }
+
+    /// The fold's one pass holds every folded event's stacking
+    /// change, so an arrival whose own arm runs pays it beside a
+    /// close that stood down — as the arrival inline would.
+    @Test("A folded arrival pays beside a stood-down close")
+    func foldedArrivalPays() throws {
+        let (core, space) = makeCore()
+        core.eventLoop.ownKeyWindow = {
+            OwnKeyWindowReading(number: 42, isDialog: true)
+        }
+        try #require(startDummyPan(core))
+        core.pendingZOrderRestore = false
+        core.foldingSwitchResync {
+            core.handle(.windowDestroyed(WindowID(6), wasMinimized: false))
+            core.handle(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(7),
+                        pid: pid_t(900_007),
+                        appName: "App7"
+                    )
+                )
+            )
+        }
+        #expect(core.state.workspaces.space(of: WindowID(7)) == space)
+        #expect(core.pendingZOrderRestore)
     }
 
     @Test("A focus report onto a hidden window scrolls the run")

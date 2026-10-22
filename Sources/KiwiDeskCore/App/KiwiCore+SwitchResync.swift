@@ -8,6 +8,9 @@ struct SwitchResyncBatch {
     /// A folded removal's retile: the pass holds the run arm for
     /// the close-return tail (#936, #2235).
     var holdsRunArm = false
+    /// A folded event whose close-return verdict lets the arm
+    /// through: the held pass's run debt is paid.
+    var runArmPays = false
     var afterPass: [@MainActor () -> Void] = []
 }
 
@@ -28,16 +31,22 @@ extension KiwiCore {
         body()
         let batch = switchResync ?? SwitchResyncBatch()
         switchResync = nil
+        var runArmOwed = false
         if batch.owesRetile {
             tiler.motionGate.exemptingSwitch {
-                holdingRunArm(batch.holdsRunArm) {
+                runArmOwed = holdingRunArm(batch.holdsRunArm) {
                     retile(animated: false, pass: .event)
                 }
             }
         }
         for work in batch.afterPass { work() }
-        // A held arm no folded removal paid ends with the batch.
-        if batch.holdsRunArm { runArm.owed = false }
+        if runArmOwed, batch.runArmPays { scheduleZOrderRestore() }
+    }
+
+    /// The close-return tail's verdict for the run arm, inside a
+    /// re-sync: the held pass's debt is paid (#936, #2235).
+    func voteRunArmPays() {
+        switchResync?.runArmPays = true
     }
 
     /// Folds an event retile into the running re-sync, if one

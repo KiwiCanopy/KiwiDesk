@@ -36,11 +36,11 @@ struct SwitchResyncSeamTests {
             "holdingRunArm(batch.holdsRunArm) {",
             "Sources/KiwiDeskCore", "KiwiCore+SwitchResync.swift", 1
         ),
-        // The close-return raise, its track arm and the scrolled
-        // runs' held arm (#2235) wait for the fold's one pass.
+        // The close-return raise and its track and run arms wait
+        // for the fold's one pass.
         (
             "afterSwitchResync { [self] in",
-            "Sources/KiwiDeskCore", "KiwiCore+CloseReturn.swift", 3
+            "Sources/KiwiDeskCore", "KiwiCore+CloseReturn.swift", 2
         ),
     ]
 
@@ -92,15 +92,22 @@ struct SwitchResyncSeamTests {
         #expect(
             source.contains(
                 "afterSwitchResync{[self]in"
-                    + "scheduleTrackZOrderRestoreIfOverflowing()}"
+                    + "scheduleTrackZOrderRestoreIfOverflowing()"
+                    + "ifrunArmOwed{scheduleZOrderRestore()}}"
+                    // A folded event's vote, under the same guard.
+                    + "voteRunArmPays()}"
             )
         )
-        // The held run arm is taken after the pass, not before
-        // (#2235): a folded pass owes it only once it has run.
+        // The fold pays its held run arm after the close-return
+        // work, and only on a folded event's vote (#2235, #153).
+        let fold = try Self.squeezed(
+            "Sources/KiwiDeskCore/App/KiwiCore+SwitchResync.swift"
+        )
         #expect(
-            source.contains(
-                "afterSwitchResync{[self]in"
-                    + "ifpays,runArm.takeOwed(){scheduleZOrderRestore()}}"
+            fold.contains(
+                "forworkinbatch.afterPass{work()}"
+                    + "ifrunArmOwed,batch.runArmPays"
+                    + "{scheduleZOrderRestore()}"
             )
         )
     }

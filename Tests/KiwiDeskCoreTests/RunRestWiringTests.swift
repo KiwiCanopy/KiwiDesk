@@ -115,10 +115,13 @@ struct RunRestWiringTests {
         try #require(startDummyPan(core))
         core.state.workspaces.focus(WindowID(2), in: space)
         core.pendingZOrderRestore = false
-        core.holdingRunArm(true) { core.retile(animated: false) }
+        let owed = core.holdingRunArm(true) {
+            core.retile(animated: false)
+        }
         #expect(!core.pendingZOrderRestore)
-        #expect(core.runArm.takeOwed())
-        #expect(!core.runArm.takeOwed())
+        #expect(owed)
+        // The debt lives no longer than the hold's answer.
+        #expect(!core.runArm.owed)
     }
 
     /// Focus drives the scroll (#2235 ruling): the focus verb's
