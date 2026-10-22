@@ -49,10 +49,15 @@ struct OnboardingChordReachTests {
             }
             .map { $0.lastPathComponent }
             .sorted()
+        // The bars step's wiring and the enum's toggle and KiwiHub
+        // halves are its own tree too (#2515).
         #expect(
             callers == [
                 "AppDelegate+Onboarding.swift",
+                "AppDelegate+OnboardingBars.swift",
                 "OnboardingKeys+Chords.swift",
+                "OnboardingKeys+KiwiHub.swift",
+                "OnboardingKeys+Toggles.swift",
                 "OnboardingView+Keys.swift",
             ],
             Comment(
