@@ -91,13 +91,18 @@ struct PopUpTriggerTests {
             let label = try Self.body("} label: {", in: path)
             #expect(!label.contains("Spacer("), "\(path)'s trigger is greedy")
             #expect(label.contains(".lineLimit(1)"))
-            // The floor bounds the whole trigger, name and chevron,
-            // never the name alone.
-            let squashed = label.split(whereSeparator: \.isWhitespace)
-                .joined()
-            #expect(squashed.occurrences(of: ".frame(minWidth:") == 1)
-            #expect(squashed.contains(")}.frame(minWidth:"))
         }
+        // The Font trigger trails (#2439), so it takes no floor: a
+        // floor parks a short name's chevron short of the row's
+        // edge (#2507).
+        let fontTrigger = try Self.body("} label: {", in: font)
+        #expect(!fontTrigger.contains("minWidth"))
+        // The app picker's floor bounds the whole trigger, name and
+        // chevron, never the name alone.
+        let pickerLabel = try Self.body("} label: {", in: picker)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(pickerLabel.occurrences(of: ".frame(minWidth:") == 1)
+        #expect(pickerLabel.contains(")}.frame(minWidth:"))
         // A tall face keeps the system line box.
         let fontLabel = try Self.body("} label: {", in: font)
         #expect(fontLabel.contains(".frame(height: Self.systemLineHeight)"))
