@@ -1491,7 +1491,7 @@
   "notification.permission_lost.body": "A permissão de Acessibilidade foi revogada. Reative-a em Ajustes do Sistema > Privacidade e Segurança > Acessibilidade.",
   "notification.permission_lost.title": "O KiwiDesk parou de gerenciar as janelas",
   "onboarding.bars.always": "Sempre na tela. Suas janelas se ajustam ao lado.",
-  "onboarding.bars.auto": "Oculta numa faixa fina. Repouse o cursor sobre ela para mostrar a barra.",
+  "onboarding.bars.auto": "Reduzida a uma faixa fina. Repouse o cursor sobre ela para mostrar a barra.",
   "onboarding.bars.body": "Mantenha a Space Bar e a App Bar na tela, ou oculte-as e dê às suas janelas a tela inteira.",
   "onboarding.bars.draft_pending": "Há alterações não salvas em Ajustes. Clique lá em “%1$@” ou “%2$@” para escolher aqui quando as barras aparecem.",
   "onboarding.bars.hidden": "Nada na tela. Mostre uma barra com o atalho dela abaixo.",

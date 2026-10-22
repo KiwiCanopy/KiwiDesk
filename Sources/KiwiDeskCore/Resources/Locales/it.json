@@ -1491,7 +1491,7 @@
   "notification.permission_lost.body": "L'autorizzazione di Accessibilità è stata revocata. Riattivala in Impostazioni di Sistema > Privacy e sicurezza > Accessibilità.",
   "notification.permission_lost.title": "KiwiDesk ha smesso di gestire le finestre",
   "onboarding.bars.always": "Sempre sullo schermo. Le finestre si sistemano accanto.",
-  "onboarding.bars.auto": "Nascosta in una sottile striscia: fermaci il puntatore per mostrarla.",
+  "onboarding.bars.auto": "Ridotta a una sottile striscia: fermaci il puntatore per mostrarla.",
   "onboarding.bars.body": "Tieni la Space Bar e la App Bar sullo schermo, oppure nascondile e lascia alle tue finestre tutto lo schermo.",
   "onboarding.bars.draft_pending": "In Impostazioni ci sono modifiche che non hai salvato. Fai clic lì su «%1$@» o «%2$@» per scegliere qui quando mostrare le barre.",
   "onboarding.bars.hidden": "Niente sullo schermo. Mostra una barra con la sua scorciatoia qui sotto.",

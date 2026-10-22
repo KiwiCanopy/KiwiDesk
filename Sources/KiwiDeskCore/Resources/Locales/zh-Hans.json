@@ -1495,7 +1495,7 @@
   "onboarding.bars.body": "让 Space Bar 和 App Bar 留在屏幕上，或者隐藏它们，把整个屏幕留给窗口。",
   "onboarding.bars.draft_pending": "“设置”中有尚未存储的更改。请在那里选择“%1$@”或“%2$@”，才能在这里选择栏何时显示。",
   "onboarding.bars.hidden": "屏幕上不显示任何内容。用下方的快捷键显示栏。",
-  "onboarding.bars.hint": "以后可在 %1$@ ▸ %2$@ 中分别设置每个栏。",
+  "onboarding.bars.hint": "以后可在“%1$@ ▸ %2$@”中分别设置每个栏。",
   "onboarding.bars.title": "选择栏何时显示",
   "onboarding.continue": "继续",
   "onboarding.grant.arranging.body": "KiwiDesk 正在逐个检查你打开的 App，并把它们的窗口排列到位。打开的 App 较多时，这会花一点时间。",

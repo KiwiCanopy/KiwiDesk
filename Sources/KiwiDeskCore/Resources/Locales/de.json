@@ -1494,7 +1494,7 @@
   "onboarding.bars.auto": "Ein schmaler Streifen. Ruht der Mauszeiger darauf, erscheint die Leiste.",
   "onboarding.bars.body": "Behalte die Space Bar und die App Bar auf dem Bildschirm, oder blende sie aus und gib deinen Fenstern den ganzen Bildschirm.",
   "onboarding.bars.draft_pending": "In den Einstellungen gibt es ungesicherte Änderungen. Klicke dort auf „%1$@“ oder „%2$@“, um hier zu wählen, wann die Leisten erscheinen.",
-  "onboarding.bars.hidden": "Nichts auf dem Bildschirm. Eine Leiste erscheint mit ihrem Tastenkürzel unten.",
+  "onboarding.bars.hidden": "Nichts auf dem Bildschirm. Die Tastenkürzel unten blenden die Leisten ein.",
   "onboarding.bars.hint": "Stelle jede Leiste später einzeln unter %1$@ ▸ %2$@ ein.",
   "onboarding.bars.title": "Wähle, wann die Leisten erscheinen",
   "onboarding.continue": "Weiter",
