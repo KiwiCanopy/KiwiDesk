@@ -172,15 +172,15 @@ struct StackArrangementTests {
         #expect(heavy.height == light.height)
     }
 
-    @Test("A wide zone's overflow pile still cascades downward")
+    @Test("A wide zone's overflow waits behind its last slot")
     func widePileIsVertical() throws {
         var context = makeContext {
             $0.stackPosition = .top
         }
         context.minWindowSize = 400
-        // 1 master + 10 stack windows: a 1900 pt row fits 3
-        // tiled 400 pt windows plus the pile strip; the other
-        // 7 pile downward at the row's trailing end.
+        // 1 master + 10 stack windows: a 1900 pt row shows the
+        // 400 pt windows that fit, and the rest wait behind the
+        // row's last shown slot, never past its edge (#2235).
         let windows = (1...11).map { WindowID(UInt32($0)) }
         let frames = layout.calculateGeometry(
             for: windows,
@@ -188,9 +188,9 @@ struct StackArrangementTests {
         )
         let buried = try #require(frames[WindowID(10)])
         let front = try #require(frames[WindowID(11)])
-        #expect(buried.minX == front.minX)
-        #expect(buried.width == front.width)
-        #expect(abs(front.minY - buried.minY - 40) < 0.01)
+        #expect(buried == front)
+        #expect(front.width >= 400)
+        #expect(front.maxX <= context.usable.maxX + 0.01)
     }
 }
 

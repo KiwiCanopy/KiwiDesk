@@ -149,10 +149,11 @@ struct TrackLayoutTests {
                 xs.filter { $0 == frames[lead]!.minX }.count == 1
             )
         }
-        // cascade_all piles the overflow windows: they step down
-        // in y at the shared far-edge x.
-        let oy = inOverflow.map { frames[$0]!.minY }.sorted()
-        #expect(abs((oy[1] - oy[0]) - 40) < 0.001)
+        // The overflow track scrolls (#2235): fewer slots drawn
+        // than windows, the hidden sharing the last one.
+        let oy = Set(inOverflow.map { frames[$0]!.minY })
+        #expect(oy.count < inOverflow.count)
+        #expect(frames[w[w.count - 1]] == frames[w[w.count - 2]])
     }
 
     @Test("Degenerate span falls back to a whole-space cascade")
@@ -182,10 +183,10 @@ struct TrackLayoutTests {
         #expect(widths.first! >= 300)
     }
 
-    @Test("Along-axis overflow tiles the fitting prefix too")
+    @Test("Along-axis overflow shows what fits, hides the rest")
     func alongAxisPartialOverflow() {
-        // One track holding many windows taller than fits: the
-        // prefix tiles, the rest cascade within the column.
+        // One track holding more windows than fit: the run shows
+        // what fits and the rest wait behind its last slot.
         let w = ids(8)
         let frames = layout.calculateGeometry(
             for: w,
@@ -201,22 +202,20 @@ struct TrackLayoutTests {
                 $0.minWindowSize = 300
             }
         )
-        // A single (normal) track always cascade_overflows its
-        // own windows: a tiled prefix, then a pile.
         // Single track: all windows share one column (same x).
         #expect(Set(w.map { frames[$0]!.minX }).count == 1)
-        let tiled = w.filter { frames[$0]!.height > 300.5 }
-        let cascaded = w.filter { frames[$0]!.height <= 300.5 }
-        #expect(!tiled.isEmpty)
-        #expect(!cascaded.isEmpty)
+        let slots = Set(w.map { frames[$0]!.minY })
+        #expect(slots.count > 1)
+        #expect(slots.count < w.count)
+        #expect(w.allSatisfy { frames[$0]!.height >= 300 })
+        #expect(frames[w[7]] == frames[w[6]])
     }
 
-    @Test("Overflow always cascades vertically, even in rows")
+    @Test("A row's overflow waits behind its last slot")
     func overflowCascadeAlwaysVertical() {
-        // Horizontal mode, one row holding too many windows:
-        // the windows tile along X, and the overflow piles as a
-        // DOWNWARD title-bar cascade (shared y-offset
-        // convention) — not a horizontal side-sliver pile.
+        // Horizontal mode, one row holding too many windows: the
+        // windows tile along X and the rest wait behind the
+        // row's last shown slot, full height (#2235).
         let w = ids(10)
         let frames = layout.calculateGeometry(
             for: w,
@@ -233,15 +232,11 @@ struct TrackLayoutTests {
                 $0.minWindowSize = 300
             }
         )
-        let cascaded = w.filter { frames[$0]!.height <= 300.5 }
-        #expect(!cascaded.isEmpty)
-        // The buried windows step DOWN in y at a shared x — a
-        // vertical cascade, not horizontal.
-        let ys = cascaded.map { frames[$0]!.minY }.sorted()
-        #expect(Set(cascaded.map { frames[$0]!.minX }).count == 1)
-        if ys.count >= 2 {
-            #expect(abs((ys[1] - ys[0]) - 40) < 0.001)
-        }
+        let xs = Set(w.map { frames[$0]!.minX })
+        #expect(xs.count > 1)
+        #expect(xs.count < w.count)
+        #expect(Set(w.map { frames[$0]!.height }).count == 1)
+        #expect(frames[w[9]] == frames[w[8]])
     }
 
     @Test("Empty window list yields no frames")

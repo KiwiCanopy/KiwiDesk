@@ -64,5 +64,8 @@ extension GuiConfig {
     ///
     /// **14 (#2524)**: `space.cue` became `space.transition`
     /// (`migratingSpaceCueOntoTransition`).
-    public static let currentFormat = 14
+    ///
+    /// **15 (#2235)**: `overflow_style` retired from `stack` and
+    /// `track` (`migratingRetiredOverflowStyle`).
+    public static let currentFormat = 15
 }

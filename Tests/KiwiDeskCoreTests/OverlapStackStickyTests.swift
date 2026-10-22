@@ -146,11 +146,11 @@ struct OverlapStackStickyTests {
         )
     }
 
-    @Test("Track keeps a sticky out of the column cascade")
+    @Test("Track keeps a sticky shown in a scrolled track")
     func trackColumnExemption() {
-        // One track (no breaks), four windows in a column too
-        // short for two full slots: the tail cascades. Sticky 4
-        // must take the single full slot at the column top.
+        // One track (no breaks), four windows in a column that
+        // shows three: the run scrolls so sticky 4 keeps a slot
+        // rather than waiting hidden (#414 v2, #2235).
         let context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 600, height: 900),
             gaps: Gaps.uniform(0),
@@ -165,8 +165,10 @@ struct OverlapStackStickyTests {
             Issue.record("Expected a frame for the sticky")
             return
         }
-        #expect(stickyFrame.minY == 0)
         #expect(stickyFrame.height >= 300)
+        #expect(frames[WindowID(3)] != stickyFrame)
+        // Window 1 is the one the run hides, behind window 2.
+        #expect(frames[WindowID(1)] == frames[WindowID(2)])
     }
 
     @Test("cascadeRaiseOrder raises top frames first")
@@ -206,11 +208,11 @@ struct OverlapStackStickyTests {
         )
     }
 
-    @Test("Stack keeps a sticky out of the zone cascade")
+    @Test("Stack keeps a sticky shown in a scrolled zone")
     func stackZoneExemption() {
-        // One master + a stack zone too short for 3 full
-        // windows: the zone overflows and its tail cascades.
-        // Sticky 4 (last in the zone) must keep a full slot.
+        // One master + a stack zone showing two of three: the
+        // run scrolls so sticky 4 (last in the zone) keeps a
+        // full slot rather than waiting hidden (#414 v2, #2235).
         let context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 1200, height: 700),
             gaps: Gaps.uniform(0),
@@ -225,11 +227,9 @@ struct OverlapStackStickyTests {
             Issue.record("Expected a frame for the sticky")
             return
         }
-        // A fully-tiled zone slot keeps >= minWindowSize height;
-        // a buried cascade entry is clamped to the min-size
-        // title strip below a full slot. The sticky's slot must
-        // be a full one at the zone top.
-        #expect(stickyFrame.minY == 0)
         #expect(stickyFrame.height >= 300)
+        #expect(frames[WindowID(3)] != stickyFrame)
+        // Window 2 is the one the run hides, behind window 3.
+        #expect(frames[WindowID(2)] == frames[WindowID(3)])
     }
 }

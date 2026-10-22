@@ -602,7 +602,6 @@ every lens with why it cannot turn on.
 | Stack | `stack.promote` / `stack.demote` | — |
 | | `stack.set_master_count` | n |
 | | `stack.set_master_ratio` | 0.1–0.9 |
-| | `stack.set_overflow_style` | `cascade_overflow\|cascade_all` |
 | | `stack.set_stack_position` | `top\|right\|bottom\|left` (default `right`; derives the stack's lineup) |
 | | `stack.set_master_orientation` | `vertical\|horizontal` (default `horizontal`) |
 | | `stack.set_new_window_placement` | placement¹ (default `first`) |
@@ -633,7 +632,6 @@ every lens with why it cannot turn on.
 | | `track.set_auto_tracks` | true\|false (default `true`) |
 | | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
-| | `track.set_overflow_style` | `cascade_all\|cascade_overflow` (default `cascade_all` for track) |
 | | `track.set_wrap_focus` | true\|false (default true) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
@@ -661,6 +659,13 @@ share; each has a `_override` sibling taking a space id first
 refused, naming `set_space_slide_duration`; and
 `set_space_switch_liquid_glass` is refused, since the Space
 slide's plates follow KiwiHub's glass.
+:::
+
+:::unreleased
+`stack.set_overflow_style`, `track.set_overflow_style` and their
+`_override` siblings are refused, since a Stack zone or Track
+track scrolls the windows that do not fit
+([When windows no longer fit](lua-reference.md#when-windows-no-longer-fit)).
 :::
 
 `animations.set_on_monocle_focus` and

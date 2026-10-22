@@ -216,7 +216,6 @@ struct LayoutSchematicAloneTests {
         StackSchematic(
             masterCount: 1,
             masterRatio: 0.6,
-            overflowStyle: .cascadeOverflow,
             masterOrientation: .horizontal,
             stackPosition: position,
             placement: .first,

@@ -171,7 +171,6 @@ struct LayoutSchematicTrackEngineTests {
     ) -> TrackSchematic {
         TrackSchematic(
             axis: .vertical,
-            overflowStyle: .cascadeAll,
             newWindow: newWindow,
             placement: placement,
             limit: 3,

@@ -39,9 +39,6 @@ extension LayoutKey {
                 "layout_params.stack_position",
                 help: "layout_params.stack_position.help"
             )
-        case .stackOverflowStyle, .trackOverflowStyle,
-            .stackOverrideOverflowStyle, .trackOverrideOverflowStyle:
-            return .text("layout_params.overflow")
         case .scrollingOrientation:
             return .text("scroll_grid.scroll_orientation")
         case .scrollingAnchor, .scrollingOverrideAnchor:

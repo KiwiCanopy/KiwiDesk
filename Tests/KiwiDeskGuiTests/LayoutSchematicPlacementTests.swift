@@ -78,7 +78,6 @@ struct LayoutSchematicPlacementTests {
                     let schematic = StackSchematic(
                         masterCount: masterCount,
                         masterRatio: 0.5,
-                        overflowStyle: .cascadeOverflow,
                         masterOrientation: .vertical,
                         stackPosition: .right,
                         placement: placement,
@@ -313,7 +312,6 @@ struct LayoutSchematicPlacementTests {
     ) -> TrackSchematic {
         TrackSchematic(
             axis: .vertical,
-            overflowStyle: .cascadeAll,
             newWindow: newWindow,
             placement: placement,
             limit: 3,

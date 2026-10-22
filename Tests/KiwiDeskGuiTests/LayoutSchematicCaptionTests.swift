@@ -125,7 +125,6 @@ struct LayoutSchematicCaptionTests {
     ) -> TrackSchematic {
         TrackSchematic(
             axis: .vertical,
-            overflowStyle: .cascadeAll,
             newWindow: rule,
             placement: .last,
             limit: 3,

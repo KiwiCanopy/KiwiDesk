@@ -44,7 +44,6 @@ struct LayoutSchematicTrackFoldTests {
     ) -> TrackSchematic {
         TrackSchematic(
             axis: .vertical,
-            overflowStyle: .cascadeAll,
             newWindow: rule,
             placement: .last,
             limit: limit,

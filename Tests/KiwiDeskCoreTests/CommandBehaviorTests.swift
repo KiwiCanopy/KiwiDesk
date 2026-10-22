@@ -126,28 +126,6 @@ struct CommandBehaviorTests {
         #expect(core.activeSpace?.focused == WindowID(2))
     }
 
-    @Test("stack.set_overflow_style updates and validates")
-    func overflowStyle() {
-        let core = makeCore()
-        core.execute(
-            "stack.set_overflow_style",
-            args: [.string("cascade_all")]
-        )
-        #expect(
-            core.tiler.settings.stack.overflowStyle
-                == .cascadeAll
-        )
-        let bad = core.execute(
-            "stack.set_overflow_style",
-            args: [.string("sideways")]
-        )
-        #expect(!bad.isSuccess)
-        #expect(
-            core.tiler.settings.stack.overflowStyle
-                == .cascadeAll
-        )
-    }
-
     @Test("set_new_window_placement updates and validates")
     func newWindowPlacement() {
         let core = makeCore()

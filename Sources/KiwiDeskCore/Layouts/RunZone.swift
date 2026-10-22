@@ -28,8 +28,15 @@ public struct RunZone: Sendable, Equatable {
             span: span,
             gap: gap(in: context),
             head: ZoneRun.head(of: members, in: context.runHeads),
-            focus: context.focused.flatMap { members.firstIndex(of: $0) }
+            focus: shown(in: context)
         )
+    }
+
+    /// The member the run must show: the focus, else a sticky
+    /// member, which keeps a shown slot (#414 v2).
+    private func shown(in context: LayoutContext) -> Int? {
+        context.focused.flatMap { members.firstIndex(of: $0) }
+            ?? members.firstIndex { context.sticky.contains($0) }
     }
 
     /// Frames for every member.
@@ -80,12 +87,14 @@ public struct RunZone: Sendable, Equatable {
             || span < context.minWindowSize.along(horizontal: !vertical)
     }
 
-    /// Every member fits: the weighted shares keep the minimum
-    /// size (#67) and the floors fit side by side.
+    /// Every member's weighted share keeps the minimum size (#67)
+    /// and its own floor; otherwise the run places them, each at
+    /// its floor or more.
     private func fitsWhole(in context: LayoutContext) -> Bool {
         let gaps = gap(in: context) * CGFloat(members.count - 1)
         let available = span - gaps
         let weights = weights(in: context)
+        let total = weights.reduce(0, +)
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(available),
@@ -93,9 +102,10 @@ public struct RunZone: Sendable, Equatable {
                 context.minWindowSize.along(horizontal: !vertical)
             )
         )
-        let floorTotal = floors(in: context).reduce(0, +)
-        return available > 0 && weights.reduce(0, +) <= limit
-            && floorTotal <= available
+        guard available > 0, total <= limit else { return false }
+        return zip(weights, floors(in: context)).allSatisfy {
+            available * CGFloat($0.0 / total) >= $0.1
+        }
     }
 
     private func weightedRects(in context: LayoutContext) -> [CGRect] {

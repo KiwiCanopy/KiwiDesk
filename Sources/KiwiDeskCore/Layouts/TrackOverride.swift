@@ -8,7 +8,6 @@ public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
     public var autoTracks: Bool?
     public var limit: Int?
-    public var overflowStyle: StackParams.OverflowStyle?
 
     public init() {}
 
@@ -18,7 +17,6 @@ public struct TrackOverride: Sendable, Equatable {
         if let axis { out.axis = axis }
         if let autoTracks { out.autoTracks = autoTracks }
         if let limit { out.limit = limit }
-        if let overflowStyle { out.overflowStyle = overflowStyle }
         // Merged params hold no override map (see
         // ScrollingOverride).
         out.override = [:]
@@ -28,7 +26,6 @@ public struct TrackOverride: Sendable, Equatable {
     /// True when no field is set (drives sparse encoding).
     public var isEmpty: Bool {
         axis == nil && autoTracks == nil && limit == nil
-            && overflowStyle == nil
     }
 }
 
@@ -37,7 +34,6 @@ extension TrackOverride: Codable {
         case axis
         case autoTracks = "auto_tracks"
         case limit
-        case overflowStyle = "overflow_style"
     }
 
     public init(from decoder: Decoder) throws {
@@ -56,10 +52,6 @@ extension TrackOverride: Codable {
             Int.self,
             forKey: .limit
         )
-        overflowStyle = try container.decodeIfPresent(
-            StackParams.OverflowStyle.self,
-            forKey: .overflowStyle
-        )
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -70,9 +62,5 @@ extension TrackOverride: Codable {
             forKey: .autoTracks
         )
         try container.encodeIfPresent(limit, forKey: .limit)
-        try container.encodeIfPresent(
-            overflowStyle,
-            forKey: .overflowStyle
-        )
     }
 }

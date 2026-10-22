@@ -14,7 +14,6 @@ extension SettingsRevertRegister {
         .layout(.monocleNewWindowPlacement):
             .leaf(\.settings.monocle.newWindowPlacement),
         .layout(.trackAxis): .leaf(\.settings.track.axis),
-        .layout(.trackOverflowStyle): .leaf(\.settings.track.overflowStyle),
         .layout(.trackNewWindow): .leaf(\.settings.track.newWindow),
         .layout(.trackNewWindowPosition):
             .leaf(\.settings.track.newWindowPosition),
@@ -49,12 +48,6 @@ extension SettingsRevertRegister {
             .entryField(
                 \.settings.stack.override,
                 \.masterRatio,
-                key: { SpaceID($0) }
-            ),
-        .layout(.stackOverrideOverflowStyle):
-            .entryField(
-                \.settings.stack.override,
-                \.overflowStyle,
                 key: { SpaceID($0) }
             ),
         .layout(.stackOverrideStackPosition):
@@ -151,12 +144,6 @@ extension SettingsRevertRegister {
             .entryField(
                 \.settings.track.override,
                 \.limit,
-                key: { SpaceID($0) }
-            ),
-        .layout(.trackOverrideOverflowStyle):
-            .entryField(
-                \.settings.track.override,
-                \.overflowStyle,
                 key: { SpaceID($0) }
             ),
         .layout(.trackOverrideAutoTracks):

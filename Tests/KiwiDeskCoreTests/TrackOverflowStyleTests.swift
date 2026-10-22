@@ -24,9 +24,8 @@ private func makeContext(
 
 /// The overflow track (#192): too many tracks to tile side by
 /// side fold their surplus into ONE far-edge overflow track,
-/// which alone honors `overflow_style` (default `cascade_all`).
-/// Every *normal* track's internal overflow is always
-/// `cascade_overflow`.
+/// which scrolls its windows like every other track (#2235): as
+/// many as fit are shown, the rest wait behind the edge slot.
 @Suite("Track overflow track (#192)")
 struct TrackOverflowStyleTests {
     let layout = TrackLayout()
@@ -59,44 +58,33 @@ struct TrackOverflowStyleTests {
         )
     }
 
-    @Test("The overflow track honors overflow_style")
-    func overflowTrackHonorsStyle() {
+    @Test("The overflow track scrolls what does not fit")
+    func overflowTrackScrolls() {
         // 8 single-window tracks, 700 pt / 300 min (gap 10) → 2
         // columns fit, so w1..w7 merge into the far-edge overflow
-        // track. Its internal pile follows overflow_style.
+        // track, whose 880 pt shows two windows at 300 pt.
         let w = ids(8)
-        func overflowHeights(
-            _ style: StackParams.OverflowStyle
-        ) -> Set<CGFloat> {
-            let frames = layout.calculateGeometry(
-                for: w,
-                in: makeContext(
-                    bounds: CGRect(x: 0, y: 0, width: 700, height: 900),
-                    breaks: Set(w)
-                ) {
-                    $0.minWindowSize = 300
-                    $0.track.overflowStyle = style
-                }
-            )
-            let overflowX = w.map { frames[$0]!.minX }.max()!
-            return Set(
-                w.filter { frames[$0]!.minX == overflowX }
-                    .map { frames[$0]!.height }
-            )
-        }
-        // cascade_all: every overflow window keeps the full region
-        // height (all equal, piled from the top).
-        #expect(overflowHeights(.cascadeAll).count == 1)
-        // cascade_overflow: a tiled prefix makes the heights vary.
-        #expect(overflowHeights(.cascadeOverflow).count > 1)
+        let frames = layout.calculateGeometry(
+            for: w,
+            in: makeContext(
+                bounds: CGRect(x: 0, y: 0, width: 700, height: 900),
+                breaks: Set(w)
+            ) {
+                $0.minWindowSize = 300
+            }
+        )
+        let overflowX = w.map { frames[$0]!.minX }.max()!
+        let overflow = w.filter { frames[$0]!.minX == overflowX }
+        #expect(overflow.count == 7)
+        // Two slots drawn; the five hidden share the last one.
+        #expect(Set(overflow.map { frames[$0]!.minY }).count == 2)
+        #expect(frames[w[7]] == frames[w[2]])
     }
 
-    @Test("A normal track is always cascade_overflow")
-    func normalTrackAlwaysCascadeOverflow() {
+    @Test("A normal track scrolls the same way")
+    func normalTrackScrolls() {
         // Two tracks that both fit (no merge, so no overflow
-        // track). Track 0 holds six windows and overflows
-        // internally — it must tile-then-pile even with the
-        // global style set to cascade_all.
+        // track). Track 0 holds six windows and shows two.
         let w = ids(7)
         let frames = layout.calculateGeometry(
             for: w,
@@ -105,13 +93,11 @@ struct TrackOverflowStyleTests {
                 breaks: [w[0], w[6]]
             ) {
                 $0.minWindowSize = 300
-                $0.track.overflowStyle = .cascadeAll
             }
         )
-        // Track 0 = w0..w5 (a normal track); its heights vary =
-        // a tiled prefix, i.e. cascade_overflow, not an all-pile.
         let track0 = Array(w[0..<6])
-        #expect(Set(track0.map { frames[$0]!.height }).count > 1)
+        #expect(Set(track0.map { frames[$0]!.minY }).count == 2)
+        #expect(frames[w[5]] == frames[w[1]])
     }
 
     @Test("A fixed limit shows N tracks, the last the overflow")
@@ -131,7 +117,6 @@ struct TrackOverflowStyleTests {
                 $0.minWindowSize = 300
                 $0.track.autoTracks = false
                 $0.track.limit = 3
-                $0.track.overflowStyle = .cascadeAll
             }
         )
         let xs = w.map { frames[$0]!.minX }
@@ -139,8 +124,8 @@ struct TrackOverflowStyleTests {
         let overflowX = xs.max()!
         let inOverflow = w.filter { frames[$0]!.minX == overflowX }
         #expect(Set(inOverflow) == Set(w[2...]))
-        // cascade_all piles them: stepped y at a shared x.
-        let oy = inOverflow.map { frames[$0]!.minY }.sorted()
-        #expect(abs((oy[1] - oy[0]) - 40) < 0.001)
+        // Two fit in 880 pt; the third waits behind the second.
+        #expect(frames[w[4]] == frames[w[3]])
+        #expect(frames[w[2]] != frames[w[3]])
     }
 }

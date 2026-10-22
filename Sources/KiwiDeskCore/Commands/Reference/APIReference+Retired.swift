@@ -112,6 +112,12 @@ extension APIReference {
         ] {
             map[verb] = appBarDrawsBoth
         }
+        // Stack and Track scroll their overflow (#2235).
+        for layout in ["stack", "track"] {
+            map["\(layout).set_overflow_style"] = overflowScrolls
+            map["\(layout).set_overflow_style_override"] =
+                overflowScrolls
+        }
         return map
     }()
 
@@ -121,6 +127,9 @@ extension APIReference {
         "the Space slide's plates follow KiwiHub's glass"
     private static let monocleFocusIsARaise =
         "a Monocle focus change is a raise and plays no flip"
+    private static let overflowScrolls =
+        "a Stack zone or Track track scrolls the windows that "
+        + "do not fit"
     private static let appBarDrawsBoth =
         "the App Bar always draws each item's icon and title"
 

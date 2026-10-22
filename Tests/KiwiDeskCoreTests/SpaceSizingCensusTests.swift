@@ -30,6 +30,7 @@ struct SpaceSizingCensusTests {
         "trackBreaks": "where the user broke the row (#128)",
         "handedBreaks": "a break's provenance (#1387)",
         "maximized": "a window filling its screen, not a size (#2448)",
+        "runHeads": "where a scrolled zone rests, not a size (#2235)",
     ]
 
     /// Every property set away from its default — the census is
@@ -45,6 +46,7 @@ struct SpaceSizingCensusTests {
         space.trackBreaks = [w2]
         space.handedBreaks = [w2]
         space.trackWeights = [w1: 1.5]
+        space.runHeads = [w2]
         space.sessionRatios.masterRatio = 0.6
         space.maximized = w2
         return space

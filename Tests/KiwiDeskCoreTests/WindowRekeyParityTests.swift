@@ -47,6 +47,7 @@ private func trackedFixture() -> StateCoordinator {
         space.trackBreaks.insert(old)
         space.handedBreaks.insert(old)
         space.trackWeights[old] = 1.5
+        space.runHeads.insert(old)
         // Not a container — a bare id inside a struct (#966), so
         // the count pin below cannot see it and the
         // `String(describing:)` scan is its only net.
@@ -99,13 +100,14 @@ private func trackedFixture() -> StateCoordinator {
 /// `unjudgedFilings` (#1646), `focusRecency` (#1840),
 /// `crossSession.placed` (#1385), plus
 /// each space's `windows`, `stackWeights`, `trackBreaks`,
-/// `handedBreaks` (#1387), `trackWeights`. Bumping the fixture
+/// `handedBreaks` (#1387), `trackWeights`, `runHeads` (#2235).
+/// Bumping the fixture
 /// with a new id-keyed map
 /// must bump this — and then the scan test forces the re-key to
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 17
+private let expectedContainerCount = 18
 
 /// The renderings of every WindowID-keyed container the shared
 /// walker (`idContainers`) finds.

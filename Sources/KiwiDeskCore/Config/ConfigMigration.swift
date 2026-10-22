@@ -50,6 +50,7 @@ public enum ConfigMigration {
         migratingShortcutBase,
         migratingShelfGlideOntoExpand,
         migratingSpaceCueOntoTransition,
+        migratingRetiredOverflowStyle,
     ]
 
     /// Runs after `steps`, and is skipped by

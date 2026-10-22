@@ -23,13 +23,6 @@ extension KiwiCore {
             promiseAllWindowsSpringSized()
             // Explicit global write shows everywhere (#458).
             clearSessionRatios { $0.masterRatio = nil }
-        case "stack.set_overflow_style":
-            guard
-                let style = Self.parseOverflowStyle(
-                    args.first?.stringValue
-                )
-            else { return Self.overflowStyleError }
-            tiler.settings.stack.overflowStyle = style
         case "stack.set_master_orientation":
             guard
                 let orientation = Self.parseStackOrientation(
@@ -103,13 +96,6 @@ extension KiwiCore {
             clearSessionRatios(for: SpaceID(space)) {
                 $0.masterRatio = nil
             }
-        case "overflow_style":
-            guard
-                let style = Self.parseOverflowStyle(
-                    rest.first?.stringValue
-                )
-            else { return Self.overflowStyleError }
-            over.overflowStyle = style
         case "master_orientation":
             guard
                 let orientation = Self.parseStackOrientation(
@@ -144,12 +130,6 @@ extension KiwiCore {
         value?.numberValue.map { min(max($0, 0.1), 0.9) }
     }
 
-    static func parseOverflowStyle(
-        _ raw: String?
-    ) -> StackParams.OverflowStyle? {
-        raw.flatMap(StackParams.OverflowStyle.init(rawValue:))
-    }
-
     static func parseStackOrientation(
         _ raw: String?
     ) -> StackParams.Orientation? {
@@ -167,9 +147,6 @@ extension KiwiCore {
     )
     private static let masterRatioError = CommandResponse.fail(
         "expected ratio"
-    )
-    static let overflowStyleError = CommandResponse.expected(
-        StackParams.OverflowStyle.self
     )
     static let stackOrientationError = CommandResponse.expected(
         StackParams.Orientation.self

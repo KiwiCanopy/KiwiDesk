@@ -212,9 +212,7 @@ extension InterpolatedLabelTests {
         //    unchanged. Every `**%n$@**` frame in `en.json` is in
         //    this register — converting some would leave a picker
         //    naming its entries as text beside one that does not.
-        "layout_params.overflow.stack.help": 2,
         "layout_params.split_strategy.help": 2,
-        "layout_params.overflow.track.help": 2,
         "behavior.mouse.resize_action.help": 2,
         // 3. Found by re-running #830's own detector against
         //    this tree rather than trusting its table. Two are

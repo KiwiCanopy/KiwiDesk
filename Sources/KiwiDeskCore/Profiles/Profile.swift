@@ -45,7 +45,7 @@ public struct Profile: Codable, Sendable, Equatable {
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 28
+    public static let currentFormat = 29  // overflow_style, #2235
 
     public var format: Int
     /// Stable across renames (#2324); `ProfileManager.write` keeps

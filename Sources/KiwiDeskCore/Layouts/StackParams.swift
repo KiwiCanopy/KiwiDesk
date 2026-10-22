@@ -2,12 +2,6 @@ import Foundation
 
 /// Parameters for the stack/master-stack layout engine (#222).
 public struct StackParams: Sendable, Equatable, Codable {
-    /// Overflow behavior when windows exceed `minWindowSize`.
-    public enum OverflowStyle: String, Sendable, Codable, CaseIterable {
-        case cascadeOverflow = "cascade_overflow"
-        case cascadeAll = "cascade_all"
-    }
-
     /// Linear orientation within a zone (`OverlapStack`, #222).
     public enum Orientation: String, Sendable, Codable, CaseIterable {
         case vertical
@@ -38,8 +32,6 @@ public struct StackParams: Sendable, Equatable, Codable {
     public var masterCount: Int = 1
     /// Master zone share of split axis.
     public var masterRatio: Double = 0.6
-    /// Overflow behavior applying to both zones.
-    public var overflowStyle: OverflowStyle = .cascadeOverflow
     /// Master zone layout orientation (#222).
     public var masterOrientation: Orientation = .horizontal
     /// Position of stack zone (#222).
@@ -57,7 +49,6 @@ public struct StackParams: Sendable, Equatable, Codable {
     private enum CodingKeys: String, CodingKey {
         case masterCount = "master_count"
         case masterRatio = "master_ratio"
-        case overflowStyle = "overflow_style"
         case masterOrientation = "master_orientation"
         case stackPosition = "stack_position"
         case newWindowPlacement = "new_window_placement"
@@ -81,11 +72,6 @@ public struct StackParams: Sendable, Equatable, Codable {
                 Double.self,
                 forKey: .masterRatio
             ) ?? 0.6
-        overflowStyle =
-            try container.decodeIfPresent(
-                OverflowStyle.self,
-                forKey: .overflowStyle
-            ) ?? .cascadeOverflow
         masterOrientation =
             try container.decodeIfPresent(
                 Orientation.self,
@@ -118,10 +104,6 @@ public struct StackParams: Sendable, Equatable, Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(masterCount, forKey: .masterCount)
         try container.encode(masterRatio, forKey: .masterRatio)
-        try container.encode(
-            overflowStyle,
-            forKey: .overflowStyle
-        )
         try container.encode(
             masterOrientation,
             forKey: .masterOrientation

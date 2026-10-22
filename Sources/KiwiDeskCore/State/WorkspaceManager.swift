@@ -76,6 +76,7 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.mode = mode
         spaces[id]?.maximized = nil  // #2448
         spaces[id]?.scrollRest = nil
+        spaces[id]?.runHeads = []
         spaces[id]?.sessionRatios = SessionRatios()
         spaces[id]?.trackWeights = [:]
         spaces[id]?.handedBreaks = []

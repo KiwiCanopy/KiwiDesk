@@ -53,7 +53,6 @@ struct LayoutSchematicView: View {
             StackSchematic(
                 masterCount: settings.stack.masterCount,
                 masterRatio: settings.stack.masterRatio,
-                overflowStyle: settings.stack.overflowStyle,
                 masterOrientation: settings.stack.masterOrientation,
                 stackPosition: settings.stack.stackPosition,
                 placement: settings.stack.newWindowPlacement,
@@ -95,7 +94,6 @@ struct LayoutSchematicView: View {
         case .track:
             TrackSchematic(
                 axis: settings.track.axis,
-                overflowStyle: settings.track.overflowStyle,
                 newWindow: settings.track.newWindow,
                 placement: settings.track.newWindowPosition,
                 limit: settings.track.limit,

@@ -61,7 +61,6 @@ extension SettingsRevertRegister {
         .layout(.stackMasterOrientation):
             .leaf(\.settings.stack.masterOrientation),
         .layout(.stackStackPosition): .leaf(\.settings.stack.stackPosition),
-        .layout(.stackOverflowStyle): .leaf(\.settings.stack.overflowStyle),
         .layout(.stackNewWindowPlacement):
             .leaf(\.settings.stack.newWindowPlacement),
         .layout(.stackFillWhenAlone): .leaf(\.settings.stack.fillWhenAlone),

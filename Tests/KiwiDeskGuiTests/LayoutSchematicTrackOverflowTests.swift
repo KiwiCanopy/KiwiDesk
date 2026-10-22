@@ -6,12 +6,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The preview's overflow track keeps the layout's contract
-/// (`set_overflow_style`, #1354): a cascade begins only WHEN the
-/// track overflows — more windows than the stand-in fit — and
-/// the two styles differ only past that point. Drawn from the
-/// first window, `cascade_all` read as "piles from window one",
-/// which the layout never does; the owner saw the two disagree
-/// on the device (2026-09-13).
+/// (#1354, #2235): below the stand-in fit every window tiles, and
+/// past it as many as fit are shown while the rest wait hidden
+/// behind the edge slot — never a pile from window one, which the
+/// owner saw the preview draw on the device (2026-09-13).
 ///
 /// Main-actor spend: three geometry cases over a view fixture —
 /// the view's stored properties are main-actor, so the suite is;
@@ -22,18 +20,16 @@ struct LayoutSchematicTrackOverflowTests {
     private static let fits = LayoutSchematic.trackSpillCapacity
     private let size = CGSize(width: 40, height: 120)
 
-    /// `windows` in a limit-2 space under `own_track`, the
-    /// incoming placed first: one normal track (the `+`) and the
-    /// overflow holding the other `windows - 1`.
+    /// `windows` in a limit-2 space under `own_track`: one normal
+    /// track and the overflow holding the other `windows - 1`.
     private func track(
         windows: Int,
-        style: StackParams.OverflowStyle
+        placement: SpawnPlacement = .first
     ) -> TrackSchematic {
         TrackSchematic(
             axis: .vertical,
-            overflowStyle: style,
             newWindow: .ownTrack,
-            placement: .first,
+            placement: placement,
             limit: TrackParams.minLimit,
             autoTracks: false,
             windows: windows
@@ -48,45 +44,43 @@ struct LayoutSchematicTrackOverflowTests {
         }
     }
 
-    @Test("below the fit both styles tile the overflow track")
+    @Test("below the fit the overflow track tiles every window")
     func belowTheFitTiles() {
-        for style in [StackParams.OverflowStyle.cascadeAll, .cascadeOverflow] {
-            for overflow in 1...Self.fits {
-                // The `+` alone in the normal track, the rest in
-                // the overflow.
-                let s = track(windows: overflow + 1, style: style)
-                #expect(s.overflowWindows == overflow)
-                let rects = s.overflowSlots(size)
-                #expect(rects.count == overflow)
-                #expect(tiled(rects), "\(style) at \(overflow) piled")
-            }
+        for overflow in 1...Self.fits {
+            let s = track(windows: overflow + 1)
+            #expect(s.overflowWindows == overflow)
+            let slots = s.overflowSlots(size)
+            #expect(slots.count == overflow)
+            #expect(slots.allSatisfy { !$0.hidden })
+            #expect(tiled(slots.map(\.rect)), "\(overflow) overlapped")
         }
     }
 
-    @Test("past the fit, cascade_all piles every window")
-    func pastTheFitCascadeAllPiles() {
-        let s = track(windows: Self.fits + 3, style: .cascadeAll)
-        let rects = s.overflowSlots(size)
-        #expect(rects.count == Self.fits + 2)
-        #expect(!tiled(rects))
-        // Every pair overlaps: the pile, not a tiled prefix.
-        #expect(
-            zip(rects, rects.dropFirst()).allSatisfy { a, b in
-                b.minY < a.maxY
-            }
-        )
+    @Test("past the fit the rest wait behind the last shown slot")
+    func pastTheFitHides() {
+        let s = track(windows: Self.fits + 3)
+        let slots = s.overflowSlots(size)
+        #expect(slots.count == Self.fits + 2)
+        let shown = Array(slots.prefix(Self.fits))
+        let hidden = Array(slots.dropFirst(Self.fits))
+        let edge = shown.last?.rect
+        let shownVisible = shown.allSatisfy { !$0.hidden }
+        let hiddenBehind = hidden.allSatisfy {
+            $0.hidden && $0.rect == edge
+        }
+        #expect(shownVisible)
+        #expect(tiled(shown.map(\.rect)))
+        #expect(hiddenBehind)
     }
 
-    @Test("past the fit, cascade_overflow keeps the fitting prefix tiled")
-    func pastTheFitCascadeOverflowTilesThePrefix() {
-        let s = track(windows: Self.fits + 3, style: .cascadeOverflow)
-        let rects = s.overflowSlots(size)
-        #expect(rects.count == Self.fits + 2)
-        #expect(tiled(Array(rects.prefix(Self.fits))))
-        // The rest pile under the prefix.
-        let pile = Array(rects.dropFirst(Self.fits))
-        #expect(pile.count == 2)
-        #expect(pile[1].minY < pile[0].maxY)
-        #expect(pile[0].minY >= rects[Self.fits - 1].maxY)
+    @Test("an incoming window folding in ends the run at itself")
+    func incomingEndsTheRun() throws {
+        let s = track(windows: Self.fits + 3, placement: .last)
+        try #require(s.incomingFolds)
+        let slots = s.overflowSlots(size)
+        let last = try #require(slots.last)
+        #expect(!last.hidden)
+        #expect(slots.first?.hidden == true)
+        #expect(slots.first?.rect == slots[slots.count - Self.fits].rect)
     }
 }

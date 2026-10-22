@@ -10,7 +10,6 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case stackMasterRatio = "settings.stack.masterRatio"
     case stackMasterOrientation = "settings.stack.masterOrientation"
     case stackStackPosition = "settings.stack.stackPosition"
-    case stackOverflowStyle = "settings.stack.overflowStyle"
     case stackNewWindowPlacement = "settings.stack.newWindowPlacement"
     case stackFillWhenAlone = "settings.stack.fillWhenAlone"
     case scrollingOrientation = "settings.scrolling.orientation"
@@ -35,7 +34,6 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case monocleWrapFocus = "settings.monocle.wrapFocus"
     case monocleNewWindowPlacement = "settings.monocle.newWindowPlacement"
     case trackAxis = "settings.track.axis"
-    case trackOverflowStyle = "settings.track.overflowStyle"
     case trackNewWindow = "settings.track.newWindow"
     case trackNewWindowPosition = "settings.track.newWindowPosition"
     case trackAutoTracks = "settings.track.autoTracks"
@@ -48,8 +46,6 @@ enum LayoutKey: String, CaseIterable, Hashable {
         "settings.stack.override[space].masterCount"
     case stackOverrideMasterRatio =
         "settings.stack.override[space].masterRatio"
-    case stackOverrideOverflowStyle =
-        "settings.stack.override[space].overflowStyle"
     case stackOverrideStackPosition =
         "settings.stack.override[space].stackPosition"
     case stackOverrideMasterOrientation =
@@ -75,8 +71,6 @@ enum LayoutKey: String, CaseIterable, Hashable {
         "settings.monocle.override[space].orientation"
     case trackOverrideAxis = "settings.track.override[space].axis"
     case trackOverrideLimit = "settings.track.override[space].limit"
-    case trackOverrideOverflowStyle =
-        "settings.track.override[space].overflowStyle"
     case trackOverrideAutoTracks = "settings.track.override[space].autoTracks"
 }
 
@@ -87,8 +81,7 @@ extension LayoutKey {
             .bspNewWindowPlacement:
             return .row(.layoutDefaults, .bsp, .atRest)
         case .stackMasterCount, .stackMasterRatio, .stackStackPosition,
-            .stackOverflowStyle, .stackNewWindowPlacement,
-            .stackFillWhenAlone:
+            .stackNewWindowPlacement, .stackFillWhenAlone:
             return .row(.layoutDefaults, .stack, .atRest)
         case .stackMasterOrientation:
             // Orientation applies only with multiple masters (#406).
@@ -134,7 +127,7 @@ extension LayoutKey {
         case .monocleOrientation, .monocleHideStyle,
             .monocleWrapFocus, .monocleNewWindowPlacement:
             return .row(.layoutDefaults, .monocle, .atRest)
-        case .trackAxis, .trackOverflowStyle, .trackNewWindow,
+        case .trackAxis, .trackNewWindow,
             .trackNewWindowPosition, .trackAutoTracks, .trackWrapFocus:
             return .row(.layoutDefaults, .track, .atRest)
         case .trackLimit:
@@ -146,12 +139,11 @@ extension LayoutKey {
             )
         case .bspOverrideStrategy, .bspOverrideSplitRatioH,
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,
-            .stackOverrideMasterRatio, .stackOverrideOverflowStyle,
+            .stackOverrideMasterRatio,
             .stackOverrideStackPosition, .scrollingOverrideOrientation,
             .scrollingOverrideAnchor, .scrollingOverrideSlotSize,
             .gridOverrideType, .gridOverrideSplitDirection,
-            .monocleOverrideOrientation, .trackOverrideAxis,
-            .trackOverrideOverflowStyle:
+            .monocleOverrideOrientation, .trackOverrideAxis:
             return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
         case .stackOverrideMasterOrientation:
             return .row(
