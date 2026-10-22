@@ -50,10 +50,15 @@ extension TilingEngine {
         let sent = commandedFrame(of: id)
         // A window already at its park — lifted as macOS lifts a
         // parked window — is there, on a re-issuing pass too: only
-        // a departure the stash owes forces a park (#1508, #2235).
-        if probe == nil, looksStashed(target),
-            Self.parked(sent ?? current, at: target)
-                || Self.parked(current, at: target)
+        // a departure the stash owes forces a park. The stash's
+        // rule: an unanswered ask that left the corner outranks
+        // the state frame, here and in the tolerance skip below
+        // (#1508, #1912, #2235).
+        let parks = looksStashed(target)
+        let leftThePark =
+            parks && sent.map { !Self.parked($0, at: target) } == true
+        if probe == nil, parks, !leftThePark,
+            Self.parked(current, at: target)
         {
             animation.cancel(window: id)
             meter.add(\.framesSkipped)
@@ -66,7 +71,7 @@ extension TilingEngine {
             meter.add(\.framesSkipped)
             return
         }
-        if probe == nil, !pass.reissues,
+        if probe == nil, !pass.reissues, !leftThePark,
             Self.close(current, to: target)
                 || sizeBoundExplains(
                     id,

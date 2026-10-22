@@ -125,6 +125,24 @@ struct RunParkSnapTests {
         #expect(core.tiler.commandedFrame(of: hidden) == nil)
     }
 
+    /// The skip's other half: an unpark still unanswered when a
+    /// quick step hides the window again leaves the state frame
+    /// at the corner, yet the window is on its way to the slot,
+    /// so the park is owed (#1912's order, #2235 review).
+    @Test("A re-hide before the unpark's echo sends the park")
+    func reHideBeforeEchoParks() throws {
+        let (core, space) = makeCore()
+        let park = try sent(core, 4)
+        core.state.apply(.windowMoved(WindowID(4), park))
+        core.tiler.clearInstantTarget(WindowID(4))
+        core.state.workspaces.focus(WindowID(4), in: space)
+        core.retile(animated: false)
+        #expect(!core.tiler.looksStashed(try sent(core, 4)))
+        core.state.workspaces.focus(WindowID(6), in: space)
+        core.retile(animated: false)
+        #expect(core.tiler.looksStashed(try sent(core, 4)))
+    }
+
     @Test("A park or an unpark snaps; any other frame may glide")
     func parkSnapsVerdict() {
         let slot = CGRect(x: 100, y: 100, width: 400, height: 300)

@@ -199,18 +199,19 @@ extension TilingSettings {
     /// frame-producing build that silently omitted it would
     /// diverge only when a sticky is piled — the hardest drift to
     /// spot; strip-geometry builds pass `[]` explicitly.
-    /// `focusedOverride` (#431), `screenNeighbors` (#878, #881)
-    /// and `sizeBounds` (#677) follow the same choose-or-omit
-    /// shape.
+    /// `focusedOverride` (#431), `screenNeighbors` (#878, #881),
+    /// `sizeBounds` (#677) and `parkBounds` (#2235) follow the
+    /// same choose-or-omit shape.
     public func context(
         bounds: CGRect,
         space: Space,
         sticky: Set<WindowID>,
         focusedOverride: WindowID? = nil,
         screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
-        sizeBounds: [WindowID: EffectiveSizeBound] = [:]
+        sizeBounds: [WindowID: EffectiveSizeBound] = [:],
+        parkBounds: CGRect? = nil
     ) -> LayoutContext {
-        LayoutContext(
+        var context = LayoutContext(
             bounds: bounds,
             gaps: gaps(for: space.id),
             focused: focusedOverride ?? space.focused,
@@ -231,6 +232,8 @@ extension TilingSettings {
             monocle: resolvedMonocle(for: space.id),
             track: resolvedTrack(for: space.id)
         )
+        context.parkBounds = parkBounds
+        return context
     }
 
     /// Returns copy of settings with active layout mode resolved for space.
