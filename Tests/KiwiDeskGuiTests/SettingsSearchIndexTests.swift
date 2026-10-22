@@ -189,7 +189,7 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                .layoutDefaults: 37,
+                .layoutDefaults: 35,
                 .screens: 3,
                 // 18 since #1473: the focus border's four rows,
                 // the fit-gaps spacing and the sticky mark are

@@ -86,7 +86,13 @@ struct InPlaceRestartNoMotionTests {
             F.processB(scanned, left: left, session: session)
         )
         let moved = Set(issued.map(\.0))
-        for id in Self.shownIDs {
+        // A window a scrolled run parks — a stack overflowing on a
+        // small host screen — is already at its park, which a
+        // re-issuing pass does not send again (#1508, #2235).
+        let parked = b.runHidden
+        let owed = Self.shownIDs.filter { !parked.contains($0) }
+        #expect(!owed.isEmpty)
+        for id in owed {
             #expect(moved.contains(id), "w\(id.raw) was never issued")
         }
         for (id, frame) in issued {
@@ -209,7 +215,13 @@ struct InPlaceRestartNoMotionTests {
             F.processB(windows, left: left, session: session)
         )
         let moved = Set(issued.map(\.0))
-        for id in Self.shownIDs {
+        // A window a scrolled run parks — a stack overflowing on a
+        // small host screen — is already at its park, which a
+        // re-issuing pass does not send again (#1508, #2235).
+        let parked = b.runHidden
+        let owed = Self.shownIDs.filter { !parked.contains($0) }
+        #expect(!owed.isEmpty)
+        for id in owed {
             #expect(moved.contains(id), "w\(id.raw) was never issued")
         }
         for (id, frame) in issued {

@@ -172,7 +172,8 @@ extension KiwiCore {
         _ b: WindowID,
         in space: Space
     ) -> Bool {
-        let frames = tiler.calculatedFrames(state: state)
+        // A run's hidden windows are no pile (#2235).
+        let frames = shownSlots()
         let slots = state.effectiveTiledMembers(of: space)
             .compactMap { id -> (id: WindowID, frame: CGRect)? in
                 frames[id].map { (id, $0) }

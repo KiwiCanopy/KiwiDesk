@@ -103,15 +103,17 @@ Keys ending in `.help` hold the contextual-help popover copy
 line breaks — one line per option, with the option's name bold:
 
 ```json
-"layout_params.overflow.stack.help":
-  "**Cascade overflow** — Keeps as many windows fully tiled
-   as fit…\n**Cascade all** — Cascades the whole stack…"
+"layout_params.split_strategy.help":
+  "**%1$@** — Cuts whichever side of the region is
+   longer…\n**%2$@** — Alternates left/right and top/bottom
+   cuts…"
 ```
 
 Preserve both in a translation: keep each `**…**` pair balanced
-around the translated option name (an unbalanced pair renders
-literal asterisks), keep the option names matching the field's
-option labels (the sibling keys without `.help`), and keep the
+around the option name or its specifier (an unbalanced pair renders
+literal asterisks), keep a spelled-out option name matching the
+field's option label (a specifier is filled with it for you), and
+keep the
 `\n` between option lines. The sentence around them is yours to
 reshape.
 

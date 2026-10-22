@@ -89,20 +89,6 @@ extension SettingsValueReadout {
         }
     }
 
-    static func layoutOverflow(
-        _ value: StackParams.OverflowStyle
-    ) -> String {
-        switch value {
-        case .cascadeOverflow:
-            return L(
-                "layout_params.cascade_overflow",
-                "Cascade overflow"
-            )
-        case .cascadeAll:
-            return L("layout_params.cascade_all", "Cascade all")
-        }
-    }
-
     /// Localized monocle hide style option text (#881).
     static func layoutHideStyle(
         _ value: MonocleParams.HideStyle

@@ -23,7 +23,6 @@ enum LayoutDefaultsRowOrder {
         .layout(.stackFillWhenAlone),
         .layout(.stackMasterOrientation),
         .layout(.stackStackPosition),
-        .layout(.stackOverflowStyle),
         .layout(.stackNewWindowPlacement),
     ]
 
@@ -60,7 +59,6 @@ enum LayoutDefaultsRowOrder {
 
     static let track: [SettingKey] = [
         .layout(.trackAxis),
-        .layout(.trackOverflowStyle),
         .layout(.trackNewWindow),
         .layout(.trackNewWindowPosition),
         .layout(.trackAutoTracks),

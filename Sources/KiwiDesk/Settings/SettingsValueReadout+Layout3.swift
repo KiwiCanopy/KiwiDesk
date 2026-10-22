@@ -56,14 +56,6 @@ extension SettingsValueReadout {
                 new.stack.override,
                 { $0.masterOrientation }
             ) { layoutAxisWord(vertical: $0 == .vertical) }
-        case .stackOverrideOverflowStyle:
-            return layoutOvr(
-                census,
-                old.stack.override,
-                new.stack.override,
-                { $0.overflowStyle },
-                layoutOverflow
-            )
         case .stackOverrideStackPosition:
             return layoutOvr(
                 census,
@@ -173,14 +165,6 @@ extension SettingsValueReadout {
                 { $0.limit },
                 layoutCount
             )
-        case .trackOverrideOverflowStyle:
-            return layoutOvr(
-                census,
-                old.track.override,
-                new.track.override,
-                { $0.overflowStyle },
-                layoutOverflow
-            )
         case .trackOverrideAutoTracks:
             // Lua-only twin of the grid case above.
             return layoutOvr(
@@ -194,7 +178,7 @@ extension SettingsValueReadout {
         case .bspStrategy, .bspSplitRatioH, .bspSplitRatioV,
             .bspNewWindowPlacement, .stackMasterCount,
             .stackMasterRatio, .stackMasterOrientation,
-            .stackStackPosition, .stackOverflowStyle,
+            .stackStackPosition,
             .stackNewWindowPlacement, .scrollingOrientation,
             .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue, .scrollingSlotSizeCount,
@@ -206,7 +190,7 @@ extension SettingsValueReadout {
             .gridRowWeights, .monocleOrientation,
             .monocleHideStyle, .monocleWrapFocus,
             .monocleNewWindowPlacement,
-            .trackAxis, .trackOverflowStyle, .trackNewWindow,
+            .trackAxis, .trackNewWindow,
             .trackNewWindowPosition, .trackAutoTracks,
             .trackLimit, .trackWrapFocus:
             // Globals — `layoutRows`' own switch narrates them;

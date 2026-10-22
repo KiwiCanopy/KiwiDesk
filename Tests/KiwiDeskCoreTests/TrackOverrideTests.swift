@@ -92,22 +92,6 @@ struct TrackOverrideTests {
         #expect(settings.resolvedTrack(for: "1").limit == 0)
     }
 
-    @Test("overflow_style resolves per space (#188)")
-    func overflowResolves() {
-        var global = TrackParams()  // default cascade_all
-        var over = TrackOverride()
-        over.overflowStyle = .cascadeOverflow
-        #expect(
-            over.resolved(onto: global).overflowStyle
-                == .cascadeOverflow
-        )
-        global.overflowStyle = .cascadeAll
-        #expect(
-            TrackOverride().resolved(onto: global).overflowStyle
-                == .cascadeAll
-        )
-    }
-
     @Test("override map nests under layout.track and round-trips")
     func settingsJSONNesting() throws {
         var settings = TilingSettings()

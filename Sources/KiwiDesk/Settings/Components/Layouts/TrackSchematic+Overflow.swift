@@ -3,97 +3,76 @@ import SwiftUI
 
 /// Overflow track layout and slot geometry for TrackSchematic.
 extension TrackSchematic {
-    /// Renders cascade or overflow pile in far-edge track.
+    /// Renders the far-edge track's shown run, its hidden windows
+    /// behind the edge slot they wait at (#2235).
     var overflowTrack: some View {
         GeometryReader { geo in
             let slots = overflowSlots(geo.size)
             ZStack(alignment: .topLeading) {
                 ForEach(slots.indices, id: \.self) { i in
                     // A `last` own-track past the cap IS the
-                    // overflow's newest member (#1354): the `+`
-                    // rides the top of the pile, where the engine
-                    // puts it, rather than a column the limit
-                    // does not allow.
+                    // overflow's newest member (#1354), and as
+                    // the focus it is the run's last shown slot.
                     SchematicPileTile(
                         isNew: incomingFolds && i == slots.count - 1
                     )
                     .frame(
-                        width: slots[i].width,
-                        height: slots[i].height
+                        width: slots[i].rect.width,
+                        height: slots[i].rect.height
                     )
-                    .position(x: slots[i].midX, y: slots[i].midY)
+                    .position(
+                        x: slots[i].rect.midX,
+                        y: slots[i].rect.midY
+                    )
+                    .zIndex(slots[i].hidden ? -1 : 0)
                 }
             }
         }
     }
 
-    /// The overflow track's windows (always vertical), the same
-    /// shape as the Stack cascade and on the same contract
-    /// (`set_overflow_style`): a cascade begins only WHEN the
-    /// track overflows — more windows than fit, the stand-in
-    /// `trackSpillCapacity` standing for "fit at the minimum
-    /// size" as it does for the fill rule — and then
-    /// `cascade_all` piles all of them while `cascade_overflow`
-    /// keeps the fitting ones tiled and piles the rest. Below the
-    /// fit both styles tile, as the layout does (#1354). Only
-    /// reached with at least one window to draw.
-    func overflowSlots(_ size: CGSize) -> [CGRect] {
-        let n = overflowWindows
-        let w = size.width
-        let h = size.height
-        let fits = LayoutSchematic.trackSpillCapacity
-        // Track keeps its own, narrower reveal rather than the
-        // family's: its overflow track is one slice of the strip,
-        // so the wider reveal trips the tile-height floor sooner
-        // and the pile leaves its zone. The shared value is the
-        // Stack/Grid one; this is a deliberate divergence, not a
-        // missed rename.
-        let off: CGFloat = 6
-        if n > fits, overflowStyle == .cascadeAll {
-            let tileH = max(6, h - off * CGFloat(n - 1))
-            return (0..<n).map {
-                CGRect(
-                    x: 0,
-                    y: CGFloat($0) * off,
-                    width: w,
-                    height: tileH
-                )
-            }
-        }
-        let tiled = min(fits, n)
-        let piled = n - tiled
-        let g: CGFloat = 3
-        // Tiled rows share the height with the pile's top row;
-        // with nothing piled, the rows alone divide it.
-        let rows = CGFloat(tiled + (piled > 0 ? 1 : 0))
-        let rowH = max(
-            8,
-            (h - g * CGFloat(max(0, Int(rows) - 1))
-                - off * CGFloat(max(0, piled - 1))) / rows
-        )
-        var rects: [CGRect] = []
-        for i in 0..<tiled {
-            rects.append(
-                CGRect(
-                    x: 0,
-                    y: CGFloat(i) * (rowH + g),
-                    width: w,
-                    height: rowH
-                )
-            )
-        }
-        let top = CGFloat(tiled) * (rowH + g)
-        for k in 0..<piled {
-            rects.append(
-                CGRect(
-                    x: 0,
-                    y: top + CGFloat(k) * off,
-                    width: w,
-                    height: rowH
-                )
-            )
-        }
-        return rects
+    /// One overflow-track window's slot; a hidden one shares the
+    /// edge slot it waits behind.
+    struct OverflowSlot {
+        var rect: CGRect
+        var hidden: Bool
     }
 
+    /// The overflow track's windows (always vertical): up to
+    /// `trackSpillCapacity` — the stand-in for "fit at the
+    /// minimum size", as for the fill rule — share the track, and
+    /// the rest wait behind an edge slot, as `ZoneRun` places
+    /// them. An incoming window folding in takes the focus, so
+    /// the run ends at it and the earlier windows wait behind the
+    /// first slot. Only reached with at least one window to draw.
+    func overflowSlots(_ size: CGSize) -> [OverflowSlot] {
+        let n = overflowWindows
+        guard n > 0 else { return [] }
+        let shown = min(LayoutSchematic.trackSpillCapacity, n)
+        let g: CGFloat = 3
+        let rowH = max(
+            8,
+            (size.height - g * CGFloat(max(0, shown - 1)))
+                / CGFloat(max(1, shown))
+        )
+        // The engine's own run (`ZoneRun`, gui.md #702), over
+        // floors a hair under the row so exactly `shown` fit.
+        let floors = Array(repeating: rowH - 0.01, count: n)
+        let run = ZoneRun.resolve(
+            floors: floors,
+            span: size.height,
+            gap: g,
+            head: nil,
+            focus: incomingFolds ? n - 1 : nil
+        )
+        let rects = run.frames(
+            floors: floors,
+            weights: Array(repeating: 1, count: n),
+            in: CGRect(origin: .zero, size: size),
+            vertical: true,
+            gap: g
+        )
+        return rects.enumerated().map { index, rect in
+            OverflowSlot(rect: rect, hidden: !run.visible.contains(index))
+        }
+    }
 }

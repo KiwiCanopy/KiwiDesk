@@ -66,13 +66,6 @@ extension SettingsValueReadout {
                 n.stack.stackPosition,
                 layoutPosition
             )
-        case .stackOverflowStyle:
-            return layoutRow(
-                census,
-                o.stack.overflowStyle,
-                n.stack.overflowStyle,
-                layoutOverflow
-            )
         case .stackNewWindowPlacement:
             return layoutRow(
                 census,
@@ -254,13 +247,6 @@ extension SettingsValueReadout {
                 n.track.axis,
                 layoutTrackAxis
             )
-        case .trackOverflowStyle:
-            return layoutRow(
-                census,
-                o.track.overflowStyle,
-                n.track.overflowStyle,
-                layoutOverflow
-            )
         case .trackNewWindow:
             return layoutRow(
                 census,
@@ -300,7 +286,6 @@ extension SettingsValueReadout {
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,
             .stackOverrideMasterRatio,
             .stackOverrideMasterOrientation,
-            .stackOverrideOverflowStyle,
             .stackOverrideStackPosition,
             .scrollingOverrideOrientation,
             .scrollingOverrideAnchor, .scrollingOverrideSlotSize,
@@ -309,8 +294,7 @@ extension SettingsValueReadout {
             .gridOverrideRows, .gridOverrideAutoSize,
             .gridOverrideColumnWeights, .gridOverrideRowWeights,
             .monocleOverrideOrientation, .trackOverrideAxis,
-            .trackOverrideLimit, .trackOverrideOverflowStyle,
-            .trackOverrideAutoTracks:
+            .trackOverrideLimit, .trackOverrideAutoTracks:
             return layoutOverrideRows(key, old: o, new: n)
         }
     }

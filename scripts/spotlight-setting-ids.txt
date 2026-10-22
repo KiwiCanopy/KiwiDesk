@@ -246,7 +246,6 @@ settings.stack.masterCount
 settings.stack.masterOrientation
 settings.stack.masterRatio
 settings.stack.newWindowPlacement
-settings.stack.overflowStyle
 settings.stack.stackPosition
 settings.stickyStyle.color
 settings.stickyStyle.desktopReach
@@ -256,5 +255,4 @@ settings.track.axis
 settings.track.limit
 settings.track.newWindow
 settings.track.newWindowPosition
-settings.track.overflowStyle
 settings.track.wrapFocus

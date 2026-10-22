@@ -52,6 +52,12 @@ struct SnapshotStoreCensusTests {
             (.always, "the track partition (#128)"),
         "state.workspaces.spaces[].handedBreaks":
             (.behind, "a break's provenance; draws nothing (#1387)"),
+        "state.workspaces.spaces[].runHeads":
+            (.inPlace, "where a scrolled zone rests (#2235)"),
+        "state.workspaces.spaces[].runTails":
+            (.inPlace, "where a scrolled zone ends (#2235)"),
+        "tiler.runCovers":
+            (.behind, "what the last pass's runs drew, redrawn (#2235)"),
         "state.userFloated":
             (.stop, "a float set by hand, which the scan cannot see"),
         "state.stickyReachOverrides":

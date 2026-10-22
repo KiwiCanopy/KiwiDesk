@@ -92,7 +92,6 @@ struct LayoutParamsCodingParityTests {
         var params = StackParams()
         params.masterCount = 3
         params.masterRatio = 0.35
-        params.overflowStyle = .cascadeAll
         params.masterOrientation = .vertical
         params.stackPosition = .top
         params.newWindowPlacement = .last
@@ -155,7 +154,6 @@ struct LayoutParamsCodingParityTests {
         params.limit = 4
         params.newWindow = .ownTrack
         params.newWindowPosition = .last
-        params.overflowStyle = .cascadeOverflow
         params.wrapFocus = false
         var over = TrackOverride()
         over.limit = 2

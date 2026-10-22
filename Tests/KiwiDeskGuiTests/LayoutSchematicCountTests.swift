@@ -283,7 +283,6 @@ struct LayoutSchematicCountTests {
         StackSchematic(
             masterCount: masterCount,
             masterRatio: 0.5,
-            overflowStyle: .cascadeOverflow,
             masterOrientation: .vertical,
             stackPosition: .right,
             placement: .last,
@@ -298,7 +297,6 @@ struct LayoutSchematicCountTests {
     ) -> TrackSchematic {
         TrackSchematic(
             axis: .vertical,
-            overflowStyle: .cascadeAll,
             newWindow: .ownTrack,
             placement: .last,
             limit: limit,

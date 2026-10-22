@@ -217,8 +217,8 @@ of prose that names layouts owes its own guard.
 ### A mode's own structural unit is not a common noun
 
 Some modes name the thing a window sits in after the mode
-itself: a Track holds windows, a Stack has a zone the overflow
-piles into, a Grid lays windows into its cells. Read as ordinary
+itself: a Track holds windows, a Stack sorts windows into
+zones, a Grid lays windows into its cells. Read as ordinary
 vocabulary those look like Family C — the English lower-cases
 them, they never appear alone as a label, and every language has
 a good word of its own for each.

@@ -57,9 +57,8 @@ state. Deleting a live cue does not move its fact into the
 
 Copy is a normal `L()` string under the `<key>.help` suffix
 convention. When a *label* key is shared by fields with
-divergent semantics (Stack's and Track's Overflow both use
-`layout_params.overflow`), the help key scopes itself
-(`layout_params.overflow.stack.help`). Help copy rendered on
+divergent semantics, the help key scopes itself by the field
+(`<key>.<layout>.help`). Help copy rendered on
 two surfaces — a Layout Defaults layout card and the per-space
 override editor — is authored once in a per-domain namespace
 (`LayoutHelp`); membership means 2+ call sites or an override
@@ -136,7 +135,7 @@ semantic field uses the same control on comparable full-width
 surfaces*: the two bar cards both render Active indicator as
 segments. Segmented under the
 rule: the App Bar fields, Stack's Master orientation / Stack
-position / Overflow, Track's Overflow, and Corners. Menus where
+position, and Corners. Menus where
 the rule keeps them: new-window placement (comparative labels), the
 seven-option Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
@@ -237,7 +236,7 @@ so the drawing is the label — each tile also carrying the
 count of spaces using it. The strip lands on the profile's
 most-used layout. The minimum window size is pinned *above* the
 strip because its master and drawer set every layout's at once
-(and it gates the `OverlapStack` overflow cascade). The rows come from the
+(and it decides when windows stop fitting). The rows come from the
 settings census and one `LayoutCard` renders whichever layout
 is selected.
 
@@ -634,10 +633,9 @@ bottom:
    outranks adjacency, because the greyed state already
    signals the gating. Strict adjacency stays mandatory only
    for a boolean-toggle-controls-one-row pair.
-3. **Standing placement / overflow policy** — New-window
-   placement and Overflow style, steady-state behaviour
-   rather than static geometry, cluster together and sit last
-   among the schematic-tied fields.
+3. **Standing placement policy** — New-window placement,
+   steady-state behaviour rather than static geometry, sits
+   last among the schematic-tied fields.
 4. **Secondary, occasional-use toggles** with their own
    captions (auto-derivation, wrap-focus), each still
    gate-above-gated internally.
@@ -690,7 +688,7 @@ grid's second column. Dropdowns go through `DropdownRow` and
 take `.controlSize(.large)` so a menu button's height sits with
 the capsule tracks around it. Within a section, a `Divider`
 separates geometry controls from the behavior dropdowns
-(overflow, new-window placement).
+(new-window placement).
 
 An **action row** (`SettingsActionRow`) is a title, a caption
 and a `?`, with short trailing buttons ("Export…", "Reset…").
@@ -897,11 +895,9 @@ lands here": BSP's incoming window, Track's own-vs-focused
 track), an **off-screen ghost** (solid gray, straddling a
 drawn screen edge, "a real window scrolled off-screen":
 Scrolling's side panel), and the **empty-cell gap** (dashed
-gray, "unused grid space": rigid Grid). Stack's overflow is a
-small iconic fanned-pile badge, not a permanently cascading
-column. A fact the reader can reach by dragging the
-window-count slider — a grid rebalancing as a fifth window
-opens — is expressible in that one frame; a fact about *motion*
+gray, "unused grid space": rigid Grid). A fact the reader can
+reach by dragging the window-count slider — a grid rebalancing
+as a fifth window opens — is expressible in that one frame; a fact about *motion*
 is the caption's to state, in words, and a caption that carries
 one **switches with the control that changes it** rather than
 stating it under every setting. Where a ghost needs more room
@@ -912,6 +908,12 @@ in Scrolling/Monocle is **not** drawn into their schematics
 (one preview, one job); its presence surfaces as live On/Off
 state in the `CrossReferenceRow` that points at the App Bar
 destination (#229).
+
+:::unreleased
+Stack's and Track's overflow are drawn the way the engine places
+them (`ZoneRun`): the windows that do not fit sit behind the
+edge tile.
+:::
 
 ## Labels & wire names
 

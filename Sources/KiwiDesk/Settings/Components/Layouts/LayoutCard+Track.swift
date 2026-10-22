@@ -21,17 +21,6 @@ extension LayoutCard {
         )
     }
 
-    /// Overflow track rendering style picker
-    /// (`TrackParams.OverflowStyle`, #192).
-    var trackOverflowRow: some View {
-        SegmentedPicker(
-            L("layout_params.overflow", "Overflow"),
-            selection: track.overflowStyle,
-            options: overflowOptions,
-            help: LayoutHelp.trackOverflow
-        )
-    }
-
     var trackNewWindowRow: some View {
         SegmentedPicker(
             L("track.new_window", "New window"),

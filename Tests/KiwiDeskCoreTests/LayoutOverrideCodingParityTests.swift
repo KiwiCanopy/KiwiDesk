@@ -94,9 +94,6 @@ struct LayoutOverrideCodingParityTests {
         over.axis = .horizontal
         over.autoTracks = false
         over.limit = TrackParams().limit + 1
-        // ≠ the TrackParams default (cascade_all) so resolve is
-        // exercised.
-        over.overflowStyle = .cascadeOverflow
         return over
     }
 
@@ -113,7 +110,6 @@ struct LayoutOverrideCodingParityTests {
         var over = StackOverride()
         over.masterCount = 4
         over.masterRatio = 0.3
-        over.overflowStyle = .cascadeAll
         over.masterOrientation = .vertical
         over.stackPosition = .top
         return over

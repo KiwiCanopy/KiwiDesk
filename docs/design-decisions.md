@@ -1836,11 +1836,11 @@ detail:
 | Layout | Model | How it walks | Overflow → pile? |
 |---|---|---|---|
 | **BSP** | geometric | `Navigation.neighbor` over slots | yes — an extreme stored ratio cascades the whole space (`BspLayout` → `OverlapStack`) |
-| **Stack** | geometric | `Navigation.neighbor` over slots | yes — a zone overflow cascade / `cascade_all` (`StackLayout`); piles always cascade downward, whatever the arrangement (#222) |
+| **Stack** | geometric | `Navigation.neighbor` over slots, which sees only a zone's shown windows; along a zone that hides windows, focus and swap step in drawn order (`stackStep`, #2235) | a zone that overflows scrolls (`ZoneRun`, #2235); the emergency pile — a zone that cannot hold one window at min-size, or two zones that cannot coexist — cascades downward, whatever the arrangement (#222) |
 | **Grid** | geometric | `Navigation.neighbor` over slots | yes — a last-cell pile (rigid/dynamic past the cap) or a whole-grid cascade at min-size (`GridLayout`) |
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142; walled at a screen seam, #878) is a viewport pin, not an `OverlapStack` fallback |
 | **Monocle** | array-order | steps along the orientation, wraps iff `wrap_focus` (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
-| **Track** | array-order | steps both axes (`trackStep`) | yes — surplus tracks merge into one far-edge **overflow track** (`OverlapStack`) shaped by `overflow_style` (#192, default `cascade_all`); normal tracks always `cascade_overflow` |
+| **Track** | array-order | steps both axes (`trackStep`) | surplus tracks merge into one far-edge **overflow track** (#192), and every track that overflows scrolls (`ZoneRun`, #2235); only a track that cannot hold one window at min-size, or tracks that cannot keep it side by side, pile (`OverlapStack`) |
 | **Floating** | geometric (live frames) | `Navigation.neighbor` with no slots: every member navigates by its live frame (the slot→frame fallback), flagged floats via the #488 float tier | n/a |
 
 The two models need different handling for anything pile-aware:
@@ -1930,15 +1930,12 @@ lights up, while every inactive-display space keeps its own
 remembered `focused`; the Space Bar reads raw `lastFocused`
 because its items are spaces (#414). What *does* differ per
 layout is the overflow pile: a sticky window keeps a
-fully-tiled slot, so the
-partial tile-then-pile overflows — Stack zones, track columns
-(`cascade_overflow`), and the grid's last-cell pile — clamp it
-below the boundary via the shared `OverlapStack.stickyExempt`
-(a trailing non-sticky window piles in its place). Whole-region
-cascades (`cascade_all` and the emergency min-size fallback)
-exempt nothing (no fully-tiled slot exists — see Accepted
-limitations); Scrolling has no `OverlapStack` pile at all — its
-overflow is the scroll, and the clamped edge columns (#142/#150)
+fully-tiled slot, so the grid's last-cell pile clamps it below
+the boundary via `OverlapStack.stickyExempt` (a trailing
+non-sticky window piles in its place). Whole-region cascades
+(the emergency min-size fallback) exempt nothing (no fully-tiled
+slot exists — see Accepted limitations); Scrolling has no
+`OverlapStack` pile at all — its overflow is the scroll, and the clamped edge columns (#142/#150)
 are scroll-reachable viewport pins a sticky may sit in like any
 other slot, not cascades — and Monocle overlaps everything at
 one frame, stacked full-frame or parked at the stash corner
@@ -1947,6 +1944,16 @@ under `hide_style = park` (#881), so both need nothing. Reorder of a traveler is
 design (v2 non-goal; see [Accepted limitations](accepted-limitations.md)). A **new layout**
 adding a row above must also state which pile class it produces,
 so the sticky exemption is reconciled with it.
+
+:::unreleased
+A Stack zone's or Track track's scrolled run (#2235) exempts
+nothing: a sticky window scrolls and hides like any other member,
+and its sticky mark stands down while it is hidden. The exemption
+exists because a pile reduces its members to title-bar slivers; a
+run reduces nothing, since every hidden window is one focus step
+away. Holding a sticky shown would take a slot the focus walks
+through, so a run could no longer show what the focus asked for.
+:::
 
 The **focus border** (#278) is a cross-layout overlay that
 deliberately opts OUT of the pile-dedup model above: with
@@ -2270,9 +2277,7 @@ break markers. Spawn placement stays
 geometry-free (the flat-array / pure-layout invariant, AGENTS.md
 §1/§5): a window lands by `new_window` / `new_window_position`
 and simply falls into the overflow track's slice at render time.
-`overflow_style` shapes only that overflow track (default
-`cascade_all`); every normal track's own overflow is always
-`cascade_overflow`. An "overflow-aware spawn" — shifting windows
+An "overflow-aware spawn" — shifting windows
 into a new track at spawn based on available space — is rejected
 for putting geometry into state (it would make spawn outcomes
 monitor-dependent and non-deterministic). **The `focused_track`
@@ -3871,7 +3876,7 @@ never writes the override at all (the #458 amendment above), so
 the reset restores the authored value by dropping the layer in
 front of it. And it stops at size: `masterCount`
 looks like a size and is a count of which windows are masters;
-the strategy, orientations, positions, overflow style,
+the strategy, orientations, positions,
 placement, anchor, axis, limit, grid dimensions and the track
 breaks are choices the user made, not drift, and a verb that
 cleared them would be a second `load_profile`. What the verb
@@ -3918,8 +3923,9 @@ window relaunches, so there is nothing durable to persist a
 weight against — persisting them would at best restore sizes to
 the wrong windows. They are pruned when a window leaves the
 space. When a weighted share drops below `min_window_size`, the
-zone falls back to the existing overflow cascade (weights
-apply to the fully-tiled case only), and the resize command
+zone no longer draws the weighted shares ([When windows no
+longer fit](lua-reference.md#when-windows-no-longer-fit)), and
+the resize command
 caps weight *growth* at that cliff so presses past it cannot
 ratchet the stored weight invisibly; clamping the *master
 ratio* against min window size stays a separate issue (#44).
@@ -3957,11 +3963,8 @@ keep cascading downward in every arrangement (ui-designer
 consult): the title bar is the affordance unit
 (identify + drag + raise) and one pile vocabulary spans the app
 — a sideways pile would expose blank side slivers and read as a
-glitch. A wide zone's `cascade_all` pile may spill over the
-master zone; that is the same accepted spill tall zones already
-do at the screen's bottom edge, kept coherent by the managed
-z-order. If pile depth ever hurts, the lever is a depth cap —
-not a direction switch. (#222)
+glitch. If pile depth ever hurts, the lever is not a direction
+switch. (#222)
 
 The `master_orientation` default is `horizontal`: side-by-side
 masters beside a right stack turn a raised master count into
@@ -3974,7 +3977,7 @@ switched to vertical), and the leading-edge promotion path is
 the default-adjacent bug #313. (#222)
 
 **The master zone fills from the stack seam when the stack
-leads.** (#313) `StackLayout.zone` lays array order from a
+leads.** (#313) A zone lays array order from a
 region's min edge, which put the boundary master (the
 promote/demote swap slot) at the point *farthest* from a
 leading stack — every boundary crossing teleported across the
@@ -3988,9 +3991,111 @@ natural reading order — every master already touches the seam.
 Boundary crossings read identically to the trailing-stack
 (default) arrangement: the crossing window moves locally,
 survivors shift one slot. Accepted side effect: when a mirrored
-master zone uses `cascade_overflow`, its trailing pile contains
-the array-earliest masters instead of the latest; the pile keeps
-the same screen position and downward cascade either way.
+master zone overflows, the windows it sets aside are the
+array-earliest masters instead of the latest, at the slot
+farthest from the seam.
+
+:::unreleased
+**Stack and Track scroll their overflow (#2235).** A Stack zone
+or a Track track that cannot fit its windows at their floors
+shows as many as fit from where it rests, each at its floor plus
+a weighted share of what is left, and the rest wait off
+screen, parked at the hide corner. Focus drives the run by the
+smallest step that shows the focused window: the focused window
+joins as the last in line (the first, going back), the run gives
+up windows at its other end only until it fits, and nothing past
+the focused window is revealed. A run at rest keeps both its ends
+(`Space.runHeads`, `runTails`), so no pass adds a window a step
+did not ask for, and a close leaves the shown windows to grow
+into the room rather than revealing more. A run whose windows'
+floors differ would otherwise reveal two or three at once when a
+step dropped a large one, which reads as a jump (owner, device,
+2026-10-22). Every zone that overflows scrolls on its own, as
+each Track track does. The master zone still holds `master_count`
+windows and sends every further one to the stack zone; it
+overflows only when `master_count` itself is more than fits.
+The master zone is no exception: more masters than fit is the
+same overflow, and one behaviour for both zones keeps a
+window's treatment from changing when promote or demote carries
+it across the boundary.
+
+*Why a scroll, not a cascade.* A cascade spends the zone's
+length on title-bar slivers: past a few windows every member is
+a strip too short to read, and the way to the one you want is a
+click on a sliver. A run keeps every shown window usable and
+puts each hidden one a focus step away, the answer Scrolling
+already gives. With that, the overflow style that chose between
+two cascades has nothing left to choose, so it is retired rather
+than given a third value.
+
+*Rejected.* A fixed visible count or share: it is wrong for some
+screen or some app's minimum, where the floors already say how
+many fit. A zone-only scroll gesture: the ⌃⌥ scroll steps focus
+in every layout, and focus already drives the run. Overhang past
+the zone's edge and parking behind the master: each puts a
+hidden window where it is drawn over something else.
+An App Bar that appears only on overflow: its reserve would
+resize every window the moment the count crosses the edge,
+against #761's rule that only a setting moves the windows.
+
+*Parked at the hide corner, and a park snaps.* A hidden window
+rests at the hide corner, at its own learned size, as monocle's
+`park` does (#881): the corner and its sliver are #410's, chosen
+over `screenNeighbors` (#878) so the body falls into dead space.
+Waiting behind the edge slot was the first ruling and failed on
+the device: macOS cannot clip another app's window, and one
+whose minimum exceeds the slot keeps its origin and grows down
+into the shown run (Zen, 495 pt in a 432 pt slot, peeking
+through the gap below it). Only the corner puts that overhang
+off screen for any app. A park or an unpark snaps on every pass,
+the animated ones included (`TilingEngine.parkSnaps`), while the
+shown windows glide one slot: the step still reads as a scroll.
+The window entering is always the focused one, and focusing
+raises it, so it can never slide out from under its neighbour —
+it appears in its slot on top. The window leaving drops to the
+corner. With nothing stacked under the run, a scroll owes no
+z-order restore, and the zone restores leave the parked windows
+out, which would otherwise read as a pile at the corner. Flying
+from the corner was declined for the default: monocle's park
+already rules that a focus change is a raise and never a corner
+flight (a separate setting may offer it later).
+
+*One record of what a run shows.* The engine records each shown
+Space's runs inside the retile pass that draws them
+(`TilingEngine.runCovers`), and the z-order restores, navigation,
+the weight resize, `list_windows` and the App Bar's visibility
+all read that record. A reader judging a run from the frames
+alone sees the parked windows piled at the corner, or, as it
+was under the first ruling, a hidden window at its shown
+neighbour's frame and one of the two covered by the other
+(#2547); the record says which wait. The weight resize is the same rule
+applied: inside a run it divides only the span left after the
+shown windows' floors, which is the span the layout divides
+(#933), so a press never writes a share the run does not draw.
+
+*Learned floors, judged once per pass.* A floor is the configured
+minimum, or an app's corroborated learned minimum where larger
+(#677/#1055) — the bound Track's automatic count already reads
+(#1355). Reading it keeps a shown window from being asked for a
+size it will refuse. Judging it from the bounds the pass starts
+with, never by comparing two passes, means a floor learned
+during a pass moves the next pass's run and cannot make the run
+oscillate. A forced pass reads the configured minimum alone, as
+`TrackLayout.geometricCap` does, so it still probes past a
+learned bound. The cost is the first placement: a floor is
+learned only after an app refuses an ask, so a window may
+overhang for one pass ([Accepted limitations](accepted-limitations.md)).
+
+*The retired setting crosses by migration.* `overflow_style` is
+stored in profiles, `gui.json` and backups. A decoder that
+skipped the key would keep the dead value in every file with
+nothing ever signalling that the last one is gone; the one-shot
+`migratingRetiredOverflowStyle` step removes it everywhere,
+global and per Space, and the format bump makes an older build
+read the rewritten file as newer than itself rather than write
+it back. The four verbs join `APIReference.retired`, refused with
+their reason, never aliased (`AGENTS.md` §5).
+:::
 
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**
@@ -4095,8 +4200,8 @@ Four rulings sharpen that:
 - **A weight clamp divides the layout's exact span.** The ratio
   caps deliberately use the raw region span (a superset can never
   block reaching the visible bound; the render clamp is the net),
-  but for the track/stack *weight* paths crossing the floor means
-  an `OverlapStack` cascade, so the clamp subtracts the outer
+  but for the track/stack *weight* paths crossing the floor
+  changes what the layout draws, so the clamp subtracts the outer
   gaps and inner gaps exactly as the layout does — plus a small
   margin (`StackLayout.minSizeMargin` owns the number), because
   the clamp's fixed point sits at exact equality with the
@@ -4821,8 +4926,8 @@ when the span cannot hold the members at ANY weights, the
 overflow folds stay the honest answer. Deliberate residue: the
 stack layout's zone shares keep write-time clamps only — a
 zone's membership shifts with `master_count` and spawns too,
-but its overflow degrades to a cascade inside the zone, not a
-whole-space collapse, and the heal joins it only if live QA
+but its overflow stays inside the zone, not a whole-space
+collapse, and the heal joins it only if live QA
 ever measures that class. An explicit `balance` verb stays a
 possible future escape hatch, not shipped — the heal removes
 the defect, and 1.0 adds no new configuration axes (#663).
@@ -9083,10 +9188,9 @@ disagreeing picture of the same configuration.
 
 **A preview that takes a window count simulates; one that does not
 illustrates.** Several Layout Defaults settings are invisible at
-any fixed number of windows. Cascade overflow and Cascade all draw
-the identical frame until the stack is deep enough to overflow; a
-track limit means nothing until there are more windows than
-tracks; a dynamic grid's balance only shows as it rebalances. A
+any fixed number of windows. A track limit means nothing until
+there are more windows than tracks; a dynamic grid's balance
+only shows as it rebalances. A
 still frame at a baked-in count therefore cannot teach the setting
 it is under, and the reader has to save, watch real windows, and
 come back. So the count is an input on a slider, and each

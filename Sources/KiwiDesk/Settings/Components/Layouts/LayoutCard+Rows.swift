@@ -14,7 +14,6 @@ extension LayoutCard {
         case .stackFillWhenAlone: stackFillWhenAloneRow
         case .stackMasterOrientation: masterOrientationRow
         case .stackStackPosition: stackPositionRow
-        case .stackOverflowStyle: stackOverflowRow
         case .scrollingOrientation: scrollOrientationRow
         case .scrollingAnchor: scrollAnchorRow
         case .scrollingSlotSizeUnit: slotSizeUnitRow
@@ -29,7 +28,6 @@ extension LayoutCard {
         case .monocleHideStyle: monocleHideStyleRow
         case .monocleWrapFocus: monocleWrapFocusRow
         case .trackAxis: trackArrangeRow
-        case .trackOverflowStyle: trackOverflowRow
         case .trackNewWindow: trackNewWindowRow
         case .trackNewWindowPosition: trackPositionRow
         case .trackAutoTracks: trackLimitGroup
@@ -59,7 +57,6 @@ extension LayoutCard {
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,
             .stackOverrideMasterRatio,
             .stackOverrideMasterOrientation,
-            .stackOverrideOverflowStyle,
             .stackOverrideStackPosition,
             .scrollingOverrideOrientation,
             .scrollingOverrideAnchor, .scrollingOverrideSlotSize,
@@ -69,8 +66,7 @@ extension LayoutCard {
             .gridOverrideColumnWeights, .gridOverrideRowWeights,
             .gridColumnWeights, .gridRowWeights,
             .monocleOverrideOrientation, .trackOverrideAxis,
-            .trackOverrideLimit, .trackOverrideOverflowStyle,
-            .trackOverrideAutoTracks:
+            .trackOverrideLimit, .trackOverrideAutoTracks:
             let _ = assertionFailure(
                 "unrendered Layout Defaults row: \(key.rawValue)"
             )
@@ -203,31 +199,6 @@ extension LayoutCard {
             ],
             help: LayoutHelp.stackPosition
         )
-    }
-
-    var stackOverflowRow: some View {
-        SegmentedPicker(
-            L("layout_params.overflow", "Overflow"),
-            selection: stack.overflowStyle,
-            options: overflowOptions,
-            help: LayoutHelp.stackOverflow
-        )
-    }
-
-    /// Shared overflow options for Stack and Track layouts.
-    var overflowOptions: [(String, StackParams.OverflowStyle)] {
-        [
-            (
-                L(
-                    "layout_params.cascade_overflow",
-                    "Cascade overflow"
-                ), .cascadeOverflow
-            ),
-            (
-                L("layout_params.cascade_all", "Cascade all"),
-                .cascadeAll
-            ),
-        ]
     }
 
     var monocleOrientationRow: some View {

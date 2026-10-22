@@ -22,7 +22,6 @@ enum SpacesRowOrder {
         .layout(.bspOverrideSplitRatioV),
         .layout(.stackOverrideMasterCount),
         .layout(.stackOverrideMasterRatio),
-        .layout(.stackOverrideOverflowStyle),
         .layout(.stackOverrideStackPosition),
         .layout(.stackOverrideMasterOrientation),
         .layout(.scrollingOverrideOrientation),
@@ -36,7 +35,6 @@ enum SpacesRowOrder {
         .layout(.monocleOverrideOrientation),
         .layout(.trackOverrideAxis),
         .layout(.trackOverrideLimit),
-        .layout(.trackOverrideOverflowStyle),
         .spaces(.spaceOverrideResetActive),
         .spaces(.spaceOverrideResetAll),
     ]

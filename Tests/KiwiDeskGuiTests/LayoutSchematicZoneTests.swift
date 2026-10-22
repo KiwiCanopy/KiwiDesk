@@ -62,7 +62,6 @@ struct LayoutSchematicZoneTests {
         StackSchematic(
             masterCount: masterCount,
             masterRatio: 0.5,
-            overflowStyle: .cascadeOverflow,
             masterOrientation: masterOrientation,
             stackPosition: stackPosition,
             placement: placement,

@@ -92,7 +92,7 @@ enum LayoutCardText {
             return L(
                 "layout.stack.blurb",
                 "One or more master windows beside a stack of "
-                    + "the rest, which piles up once it fills."
+                    + "the rest, which scrolls once it fills."
             )
         case .scrolling:
             return L(

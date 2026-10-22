@@ -12,7 +12,7 @@ extension TrackSchematic {
             return L(
                 "layout.schematic.track.caption_own",
                 "New windows open their own track; the far track "
-                    + "piles the overflow."
+                    + "scrolls the overflow."
             )
         case (.ownTrack, false):
             return L(
@@ -24,7 +24,7 @@ extension TrackSchematic {
                 "layout.schematic.track.caption_focused",
                 "New windows join the focused track until it is "
                     + "full, then open one beside it; the far "
-                    + "track piles the overflow."
+                    + "track scrolls the overflow."
             )
         case (.focusedTrack, false):
             return L(
@@ -41,7 +41,7 @@ extension TrackSchematic {
             ? L(
                 "layout.schematic.track.ax",
                 "Track preview: tracks along one axis, the far "
-                    + "one piling overflow; the plus is the next "
+                    + "one scrolling its overflow; the plus is the next "
                     + "window."
             )
             : L(

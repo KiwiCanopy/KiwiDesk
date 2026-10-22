@@ -35,6 +35,7 @@ extension TilingEngine {
         // The shelf's reservation (#293, #1517) comes off the
         // visible frame before any layout sees its bounds.
         let bounds = layoutBounds(on: screen, for: space)
+        let visible = visibleBounds(screen)
         let tiled = state.effectiveTiledMembers(of: space)
         var context = settings.context(
             bounds: bounds,
@@ -64,7 +65,7 @@ extension TilingEngine {
             // plugged in or out is correct from the retile the
             // display change already triggers.
             screenNeighbors: ScreenNeighbors.detect(
-                around: visibleBounds(screen),
+                around: visible,
                 among: allScreenBounds()
             ),
             // Confirmed app-enforced bounds (#677), read fresh
@@ -72,7 +73,10 @@ extension TilingEngine {
             // frames reach real windows, so the residue of a
             // refusal is placed rather than left at the slot
             // origin.
-            sizeBounds: sizeBounds(for: tiled)
+            sizeBounds: sizeBounds(for: tiled),
+            // Where a layout parks: the frame the stash parks
+            // against, never the shelf-reserved `bounds` (#2235).
+            parkBounds: visible
         )
         // A FORCED (explicit-apply) pass probes past the
         // corroborated bounds once (#1055, owner ruling

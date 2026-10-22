@@ -36,9 +36,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
     public var newWindow: NewWindowTrack = .focusedTrack
     /// Position of new window within target track.
     public var newWindowPosition: SpawnPlacement = .first
-    /// Rendering style for overflow track (#192).
-    public var overflowStyle: StackParams.OverflowStyle =
-        .cascadeAll
     /// Wraps focus navigation past ends (#168).
     public var wrapFocus = true
     /// Per-space overrides.
@@ -64,7 +61,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
         case limit
         case newWindow = "new_window"
         case newWindowPosition = "new_window_position"
-        case overflowStyle = "overflow_style"
         case wrapFocus = "wrap_focus"
         case override
     }
@@ -98,11 +94,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
                 SpawnPlacement.self,
                 forKey: .newWindowPosition
             ) ?? .first
-        overflowStyle =
-            try container.decodeIfPresent(
-                StackParams.OverflowStyle.self,
-                forKey: .overflowStyle
-            ) ?? .cascadeAll
         wrapFocus =
             try container.decodeIfPresent(
                 Bool.self,
@@ -125,7 +116,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
             newWindowPosition,
             forKey: .newWindowPosition
         )
-        try container.encode(overflowStyle, forKey: .overflowStyle)
         try container.encode(wrapFocus, forKey: .wrapFocus)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)

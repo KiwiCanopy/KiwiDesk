@@ -89,7 +89,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// would drop a carried one silently.
     /// 37 = `space.cue` became `space.transition` (#2524), in a
     /// bundle's `config`.
-    public static let currentFormat = 37
+    /// 38 = `overflow_style` retired (#2235), in a bundle's
+    /// `config` and its `[Profile]` alike.
+    public static let currentFormat = 38
 
     public let format: Int
 

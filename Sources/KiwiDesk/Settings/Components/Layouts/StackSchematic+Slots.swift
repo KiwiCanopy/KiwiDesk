@@ -1,115 +1,43 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Stack zone schematic slot geometry calculations (#222).
+/// Stack zone schematic slot geometry (#222, #2235).
 extension StackSchematic {
-    /// Computes stack slot frames for cascade and overflow styles
-    /// (`OverlapStack`).
+    /// The stack zone's slots, placed by the engine's own run
+    /// (`ZoneRun`, gui.md #702): `shownRows` windows fit, the run
+    /// shows the incoming window — the focus it takes — or else
+    /// rests at the zone's head, and every other window waits
+    /// exactly behind the edge slot.
     func stackSlots(in size: CGSize) -> [Slot] {
         let n = stackWins.count
-        // Unreachable today (`order` carries the incoming window),
-        // but at n == 0 the overflow branch would build a reversed
-        // `Range` and trap — keep the guard.
         guard n > 0 else { return [] }
-        let w = size.width
-        let h = size.height
-        let off = LayoutSchematic.cascadeOffset
-        if overflowStyle == .cascadeAll {
-            // The whole zone piles downward regardless of the
-            // zone's orientation, exactly like the engine.
-            let tileH = max(10, h - off * CGFloat(n - 1))
-            return (0..<n).map { i in
-                Slot(
-                    rect: CGRect(
-                        x: 0,
-                        y: CGFloat(i) * off,
-                        width: w,
-                        height: tileH
-                    ),
-                    piled: true,
-                    front: i == n - 1
-                )
-            }
-        }
-        let tiled = min(Self.overflowTiled, n - 1)
-        let piled = n - tiled
         let g: CGFloat = 3
-        if stackOrientation == .horizontal {
-            // Tiles side by side; the surplus piles downward in
-            // the last column (`OverlapStack.overflowFrames`
-            // with a horizontal tiling axis).
-            let colW = max(
-                6,
-                (w - g * CGFloat(tiled)) / CGFloat(tiled + 1)
-            )
-            var slots: [Slot] = []
-            for i in 0..<tiled {
-                slots.append(
-                    Slot(
-                        rect: CGRect(
-                            x: CGFloat(i) * (colW + g),
-                            y: 0,
-                            width: colW,
-                            height: h
-                        ),
-                        piled: false,
-                        front: false
-                    )
-                )
-            }
-            let left = CGFloat(tiled) * (colW + g)
-            let pileH = max(10, h - off * CGFloat(piled - 1))
-            for k in 0..<piled {
-                slots.append(
-                    Slot(
-                        rect: CGRect(
-                            x: left,
-                            y: CGFloat(k) * off,
-                            width: colW,
-                            height: pileH
-                        ),
-                        piled: true,
-                        front: k == piled - 1
-                    )
-                )
-            }
-            return slots
-        }
-        let rowH = max(
-            10,
-            (h - g * CGFloat(tiled) - off * CGFloat(piled - 1))
-                / CGFloat(tiled + 1)
+        let vertical = stackOrientation == .vertical
+        let along = vertical ? size.height : size.width
+        let shown = min(Self.shownRows, n)
+        let extent = max(
+            vertical ? 10 : 6,
+            (along - g * CGFloat(shown - 1)) / CGFloat(shown)
         )
-        var slots: [Slot] = []
-        for i in 0..<tiled {
-            slots.append(
-                Slot(
-                    rect: CGRect(
-                        x: 0,
-                        y: CGFloat(i) * (rowH + g),
-                        width: w,
-                        height: rowH
-                    ),
-                    piled: false,
-                    front: false
-                )
-            )
+        // Floors that let exactly `shownRows` windows fit, a hair
+        // under the slot so rounding never drops the last one.
+        let floors = Array(repeating: extent - 0.01, count: n)
+        let run = ZoneRun.resolve(
+            floors: floors,
+            span: along,
+            gap: g,
+            head: nil,
+            focus: stackWins.firstIndex(of: newWindow)
+        )
+        let rects = run.frames(
+            floors: floors,
+            weights: Array(repeating: 1, count: n),
+            in: CGRect(origin: .zero, size: size),
+            vertical: vertical,
+            gap: g
+        )
+        return rects.enumerated().map { index, rect in
+            Slot(rect: rect, hidden: !run.visible.contains(index))
         }
-        let top = CGFloat(tiled) * (rowH + g)
-        for k in 0..<piled {
-            slots.append(
-                Slot(
-                    rect: CGRect(
-                        x: 0,
-                        y: top + CGFloat(k) * off,
-                        width: w,
-                        height: rowH
-                    ),
-                    piled: true,
-                    front: k == piled - 1
-                )
-            )
-        }
-        return slots
     }
 }

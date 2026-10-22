@@ -295,6 +295,15 @@ extension KiwiCore {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let vertical = params.axis == .vertical
         let alongAxis = vertical ? "y" : "x"
+        if let response = resizeInRun(
+            focused,
+            axis: alongAxis,
+            delta: delta,
+            space: space,
+            otherAxisDivides: tracks > 1
+        ) {
+            return response
+        }
         // Gap-adjusted span and per-window minimums, exactly as
         // the across-tracks knob above (#933): the layout
         // divides the span minus the gaps between the track's

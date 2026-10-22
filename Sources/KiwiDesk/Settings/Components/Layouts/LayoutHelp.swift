@@ -33,23 +33,6 @@ enum LayoutHelp {
         )
     }
 
-    /// Stack overflow styles help text (#94). Deliberately NOT
-    /// reused by Track's same-named picker: there the enum governs
-    /// only the far-edge overflow track and the default flips, so
-    /// this text would describe the wrong thing.
-    @MainActor static var stackOverflow: String {
-        L(
-            "layout_params.overflow.stack.help",
-            "**%1$@** — Keeps as many windows "
-                + "fully tiled as fit, then cascades only the "
-                + "extra ones at the bottom.\n**%2$@** — "
-                + "Cascades the whole stack, showing a sliver "
-                + "of every window.",
-            L("layout_params.cascade_overflow", "Cascade overflow"),
-            L("layout_params.cascade_all", "Cascade all")
-        )
-    }
-
     /// Stack zone position help text (#222).
     @MainActor static var stackPosition: String {
         L(
@@ -120,24 +103,6 @@ enum LayoutHelp {
                 + "size.",
             L("monocle.hide_style.stack", "Stack behind"),
             L("monocle.hide_style.park", "Park in corner")
-        )
-    }
-
-    /// Track far-edge overflow track help text.
-    @MainActor static var trackOverflow: String {
-        L(
-            "layout_params.overflow.track.help",
-            "How the far-edge **overflow track** — which "
-                + "collects the tracks that don't fit side by "
-                + "side — packs its windows.\n**%1$@** "
-                + "(the default) — piles every window from the "
-                + "top.\n**%2$@** — tiles what fits, "
-                + "piles the rest.\nAn ordinary track that holds "
-                + "more windows than fit always overflows this "
-                + "second way; only the far-edge track is "
-                + "configurable.",
-            L("layout_params.cascade_all", "Cascade all"),
-            L("layout_params.cascade_overflow", "Cascade overflow")
         )
     }
 

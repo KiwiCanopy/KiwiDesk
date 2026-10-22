@@ -26,7 +26,6 @@ struct SpaceOverrideFieldCountTests {
         var stack = StackOverride()
         stack.masterCount = 2
         stack.masterRatio = 0.55
-        stack.overflowStyle = .cascadeAll
         stack.masterOrientation = .horizontal
         stack.stackPosition = .left
 
@@ -52,7 +51,6 @@ struct SpaceOverrideFieldCountTests {
         track.axis = .horizontal
         track.autoTracks = true
         track.limit = 4
-        track.overflowStyle = .cascadeAll
 
         return [
             ("Bsp", bsp), ("Stack", stack), ("Scrolling", scrolling),

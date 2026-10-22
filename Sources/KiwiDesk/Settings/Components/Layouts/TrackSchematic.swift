@@ -6,7 +6,6 @@ import SwiftUI
 /// cascade, always vertical (#192).
 struct TrackSchematic: View {
     let axis: TrackParams.Axis
-    let overflowStyle: StackParams.OverflowStyle
     let newWindow: TrackParams.NewWindowTrack
     let placement: SpawnPlacement
     let limit: Int
@@ -49,7 +48,6 @@ struct TrackSchematic: View {
         ) {
             strip
                 .animation(damping, value: axis)
-                .animation(damping, value: overflowStyle)
                 .animation(damping, value: newWindow)
                 .animation(damping, value: placement)
                 .animation(damping, value: limit)

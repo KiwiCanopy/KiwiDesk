@@ -76,10 +76,6 @@ extension APIReference {
             "Sets the master zone's share of the split axis.",
             .number("ratio")
         ),
-        "set_overflow_style": APIRecord(
-            "Sets how the stack zone cascades when overflowing.",
-            .choice("style", StackParams.OverflowStyle.self)
-        ),
         "set_fill_when_alone": APIRecord(
             "A lone window takes the whole screen instead of "
                 + "the master zone; off keeps the zone's share.",
@@ -107,11 +103,6 @@ extension APIReference {
             "Overrides the master ratio for one Space.",
             .space("space"),
             .number("ratio")
-        ),
-        "set_overflow_style_override": APIRecord(
-            "Overrides the overflow style for one Space.",
-            .space("space"),
-            .choice("style", StackParams.OverflowStyle.self)
         ),
         "set_master_orientation_override": APIRecord(
             "Overrides the master orientation for one Space.",
@@ -270,11 +261,6 @@ extension APIReference {
                 + "choice.",
             .choice("placement", SpawnPlacement.self)
         ),
-        "set_overflow_style": APIRecord(
-            "Sets how the overflow track cascades when "
-                + "overflowing.",
-            .choice("style", StackParams.OverflowStyle.self)
-        ),
         "set_wrap_focus": APIRecord(
             "Wraps focus from either end of the track to the "
                 + "other.",
@@ -295,11 +281,6 @@ extension APIReference {
             "Overrides automatic track limits for one Space.",
             .space("space"),
             .boolean("enabled")
-        ),
-        "set_overflow_style_override": APIRecord(
-            "Overrides the track overflow style for one Space.",
-            .space("space"),
-            .choice("style", StackParams.OverflowStyle.self)
         ),
     ]
 }

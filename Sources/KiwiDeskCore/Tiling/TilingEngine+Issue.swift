@@ -48,6 +48,22 @@ extension TilingEngine {
         // An unanswered instant set outranks the stale state
         // frame: no re-ask, no slide from the corner (#1912).
         let sent = commandedFrame(of: id)
+        // A window already at its park — lifted as macOS lifts a
+        // parked window — is there, on a re-issuing pass too: only
+        // a departure the stash owes forces a park. The stash's
+        // rule: an unanswered ask that left the corner outranks
+        // the state frame, here and in the tolerance skip below
+        // (#1508, #1912, #2235).
+        let parks = looksStashed(target)
+        let leftThePark =
+            parks && sent.map { !Self.parked($0, at: target) } == true
+        if probe == nil, parks, !leftThePark,
+            Self.parked(current, at: target)
+        {
+            animation.cancel(window: id)
+            meter.add(\.framesSkipped)
+            return
+        }
         if probe == nil, !pass.reissues, let sent,
             animation.targetFrame(window: id) == nil,
             Self.close(sent, to: target)
@@ -55,7 +71,7 @@ extension TilingEngine {
             meter.add(\.framesSkipped)
             return
         }
-        if probe == nil, !pass.reissues,
+        if probe == nil, !pass.reissues, !leftThePark,
             Self.close(current, to: target)
                 || sizeBoundExplains(
                     id,
@@ -69,11 +85,15 @@ extension TilingEngine {
         }
         meter.add(\.framesIssued)
         let issued = probe?.frame ?? target
+        let from = sent ?? current
         let instant = applyFrame(
             id,
-            from: sent ?? current,
+            from: from,
             to: issued,
-            animated: animated,
+            animated: animated
+                && !Self.parkSnaps(from: from, to: issued) {
+                    looksStashed($0)
+                },
             isNewWindow: isNew,
             sizing: promised
         )
@@ -90,6 +110,18 @@ extension TilingEngine {
         ) {
             onInstantLayoutAsk(id)
         }
+    }
+
+    /// Whether a layout frame parks or unparks a window — a corner
+    /// at either end — which snaps on an animated pass too: a park
+    /// is a hide, never a corner flight (#881; #2235 ruling,
+    /// 2026-10-22).
+    static func parkSnaps(
+        from: CGRect,
+        to: CGRect,
+        _ looksStashed: (CGRect) -> Bool
+    ) -> Bool {
+        looksStashed(from) || looksStashed(to)
     }
 
     /// Whether a layout ask owes the #677 settle probe itself: an

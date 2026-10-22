@@ -34,11 +34,18 @@ extension KiwiCore {
         guard let index = tiled.firstIndex(of: focused) else {
             return nil
         }
-        let counts = TrackLayout.counts(
-            of: tiled,
-            breaks: space.trackBreaks,
-            cap: params.trackCap
-        )
+        // The tracks the render draws — the automatic cap and the
+        // overflow fold included — or a step "along" a track walks
+        // across the ones the fold merged (#1488, #2235).
+        let counts =
+            (tiler.layoutInput(state: state)?.context)
+            .map { TrackLayout.renderPartition(of: tiled, in: $0) }?
+            .counts
+            ?? TrackLayout.counts(
+                of: tiled,
+                breaks: space.trackBreaks,
+                cap: params.trackCap
+            )
         let ranges = TrackLayout.ranges(of: counts)
         guard
             let track = TrackLayout.trackIndex(
@@ -193,7 +200,9 @@ extension KiwiCore {
         space: Space,
         focused: WindowID
     ) -> Set<WindowID> {
-        let slots = tiler.calculatedFrames(state: state)
+        // A run's hidden windows are no cascade (#2235): a swap
+        // steps into them like any track member.
+        let slots = shownSlots()
         let tiled = state.effectiveTiledMembers(of: space)
             .compactMap { id -> (id: WindowID, frame: CGRect)? in
                 guard let frame = slots[id] else { return nil }

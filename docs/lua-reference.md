@@ -728,9 +728,8 @@ points and a layout: `stack`, `grid`, `track`, `bsp`,
 `scrolling` or `floating`. Without a height the width serves
 both; a layout may stand in the height's place.
 
-**Does:** windows below this width or height
-[cascade](#when-windows-no-longer-fit) instead of shrinking
-further. Without a layout it sets every layout; with one, only
+**Does:** no window is shrunk below this width or height
+([When windows no longer fit](#when-windows-no-longer-fit)). Without a layout it sets every layout; with one, only
 that layout. Scrolling applies only the axis it scrolls along,
 and Floating's value bounds every floating window. Monocle
 keeps no minimum.
@@ -796,7 +795,7 @@ or slot size (`bsp.set_ratio_h_override`, the Settings override
 editor) is what the space returns to, and a space with no
 override lands on the global — and everything that is
 structure: the layout mode, the BSP strategy, the master count,
-orientation and stack position, the overflow style, the
+orientation and stack position, the
 scrolling anchor and orientation, the track axis and limit, a
 grid's columns and rows, new-window placement. Where a window's
 own minimum binds, the next retile's floor heal moves the ratio
@@ -1394,20 +1393,6 @@ stack.
 stack.demote()
 ```
 
-### stack.set_overflow_style
-
-**Expects:** `"cascade_overflow"` (default) or `"cascade_all"`.
-
-**Does:** when the stack overflows, `cascade_overflow` keeps as
-many full windows as fit and cascades the rest at the bottom;
-`cascade_all` cascades the whole zone.
-
-**Example:**
-
-```lua
-stack.set_overflow_style("cascade_overflow")
-```
-
 ### stack.set_stack_position
 
 **Expects:** `"top"`, `"right"` (default), `"bottom"`, or
@@ -1418,7 +1403,7 @@ the master zone gets the rest. `left`/`right` split the width,
 `top`/`bottom` the height. The stack zone's lineup derives from
 the position — a left/right zone stacks its windows vertically,
 a top/bottom zone lines them up side by side; there is no
-separate stack orientation knob. Overflow piles always cascade
+separate stack orientation knob. A pile always cascades
 downward. When the stack leads (`left`/`top`) and the masters
 line up along the split axis, the master zone fills from the
 stack seam, so a promoted window appears beside the stack it
@@ -1510,21 +1495,6 @@ stack.set_master_count_override("3", 2)
 
 ```lua
 stack.set_master_ratio_override("3", 0.7)
-```
-
-### stack.set_overflow_style_override
-
-**Expects:**
-
-- A space identifier.
-- An overflow style string.
-
-**Does:** overrides the global overflow style for one space.
-
-**Example:**
-
-```lua
-stack.set_overflow_style_override("3", "cascade_all")
 ```
 
 ### stack.set_stack_position_override
@@ -2166,7 +2136,7 @@ track** counted. `0` restores the **automatic** track limit
 turns automatic off. The last track is the overflow track at
 the far edge, which collects the surplus (#192): a new
 `own_track` window past the normal tracks opens it, and further
-windows fold into it, rendered per `track.set_overflow_style`.
+windows fold into it.
 `move_to_track` can open the overflow track but not go past it.
 A screen that cannot fit the tracks at `min_window_size` shows
 fewer at render time. The last positive value is remembered and
@@ -2213,8 +2183,9 @@ track.set_auto_tracks(false)
   the focused one. Focus follows the new window. With no room
   for another track under a fixed
   [`track.set_limit`](#trackset_limit) cap, or for a window
-  `move_to_space` drops onto a full track, it piles in the
-  focused track.
+  `move_to_space` drops onto a full track, it joins the
+  focused track
+  ([When windows no longer fit](#when-windows-no-longer-fit)).
 - `own_track`: each new window opens its **own** new track,
   positioned among the others by
   [`track.set_new_window_position`](#trackset_new_window_position).
@@ -2248,24 +2219,6 @@ windows** (`first`/`last` = the track's ends,
 
 ```lua
 track.set_new_window_position("after_focused")
-```
-
-### track.set_overflow_style
-
-**Expects:** `"cascade_all"` (default) or `"cascade_overflow"`.
-
-**Does:** shapes the **overflow track** only — the far-edge
-track that collects the surplus when more tracks exist than fit
-side by side at `min_window_size`. `cascade_all` piles all its
-windows from the top as a title-bar cascade; `cascade_overflow`
-keeps as many full windows as fit and cascades the rest. Every
-**normal** track uses `cascade_overflow` for its own internal
-overflow and stays tiled.
-
-**Example:**
-
-```lua
-track.set_overflow_style("cascade_overflow")
 ```
 
 ### track.set_wrap_focus
@@ -2332,23 +2285,6 @@ track.set_limit_override("code", 2)
 
 ```lua
 track.set_auto_tracks_override("code", false)
-```
-
-### track.set_overflow_style_override
-
-**Expects:**
-
-- A space identifier.
-- An overflow style string (`cascade_all` or
-  `cascade_overflow`).
-
-**Does:** overrides the global track overflow style for one
-space.
-
-**Example:**
-
-```lua
-track.set_overflow_style_override("code", "cascade_overflow")
 ```
 
 ## KiwiShelf
@@ -4664,20 +4600,42 @@ scroll_gesture.set_step_distance(120)
 
 ## When Windows No Longer Fit
 
-No layout ever shrinks a window below `min_window_size`. When a
-zone gets too crowded, downsizing stops and the overflow
-**cascades vertically**: offset 40 pt downward per window, so every
-title bar stays visible and clickable. There is no horizontal
-(side-reveal) stacking — overflow is always resolved top-to-bottom
-via title bars.
+No layout ever shrinks a window below `min_window_size`. Where
+windows stop fitting, the overflow **cascades vertically**:
+offset 40 pt downward per window, so every title bar stays
+visible and clickable. There is no horizontal (side-reveal)
+stacking.
 
-The stack layout degrades gradually, per zone: as many windows as
-still fit keep their full size, and only the remainder collapses
-into a cascade at the bottom of the column. Only when not even one
-full window fits does the whole zone cascade. Track behaves the
-same way on both axes — the fitting prefix of tracks (or of a
-track's windows) stays tiled and only the remainder cascades.
-This is built into the layout, not a setting.
+:::unreleased
+A Stack zone — master or stack — and each Track track scroll
+instead of cascading. A zone shows as many windows as fit at
+their minimum size, which is `min_window_size`, or an app's own
+minimum once KiwiDesk has learned it where that is larger. Each
+shown window gets its minimum plus a share of what is left, and
+the rest wait off screen, parked at the screen's bottom corner
+like the windows of a Space you are not on. Scrolling moves the
+shown windows one slot along the zone; the window scrolling in
+appears in its slot at once, and the one scrolling out returns
+to the corner. A window whose
+minimum is larger than the zone is shown alone. Focusing a
+hidden window scrolls the zone by the smallest step that shows
+it: the window joins as the last in line (the first, going
+back), and the zone hides windows at its other end only until
+it fits, so a step reveals one window. A zone at rest keeps the
+windows it shows; closing one lets the others grow into the
+room.
+
+In Stack, `focus` and `swap` along a zone that hides windows
+step through them in order, as Track does along a track; a
+direction from another zone lands only on a shown window. A
+Track [`set_swap_skips_cascade`](#set_swap_skips_cascade) swap
+treats hidden windows as ordinary track members.
+
+A zone cascades whole only when not even one window fits in it
+at `min_window_size`, and the whole Space cascades when the
+master and stack zones, or Track's tracks side by side, cannot
+all keep that size.
+:::
 
 For a cascade to read correctly, upper windows must sit *behind*
 lower ones. KiwiDesk restores this z-order whenever a window
@@ -6786,7 +6744,6 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "scroll": { "anchor": "follow", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,
-                 "overflow_style": "cascade_overflow",
                  "new_window_placement": "first" }
     },
     "min_window_size": {          // per layout, in pt

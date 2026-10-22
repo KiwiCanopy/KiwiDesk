@@ -37,13 +37,11 @@ struct StackOverrideTests {
         var over = StackOverride()
         over.masterCount = 3
         over.masterRatio = 0.75
-        over.overflowStyle = .cascadeAll
         over.masterOrientation = .vertical
         over.stackPosition = .bottom
         let resolved = over.resolved(onto: StackParams())
         #expect(resolved.masterCount == 3)
         #expect(resolved.masterRatio == 0.75)
-        #expect(resolved.overflowStyle == .cascadeAll)
         #expect(resolved.masterOrientation == .vertical)
         #expect(resolved.stackPosition == .bottom)
     }
@@ -53,11 +51,10 @@ struct StackOverrideTests {
         var global = StackParams()
         global.masterCount = 2
         global.masterRatio = 0.4
-        global.overflowStyle = .cascadeOverflow
         var over = StackOverride()
-        over.overflowStyle = .cascadeAll  // override only this
+        over.stackPosition = .top  // override only this
         let resolved = over.resolved(onto: global)
-        #expect(resolved.overflowStyle == .cascadeAll)  // set
+        #expect(resolved.stackPosition == .top)  // set
         #expect(resolved.masterCount == 2)  // inherited
         #expect(resolved.masterRatio == 0.4)  // inherited
     }
@@ -71,7 +68,7 @@ struct StackOverrideTests {
             try #require(String(data: data, encoding: .utf8))
         #expect(json.contains("master_ratio"))
         #expect(!json.contains("master_count"))
-        #expect(!json.contains("overflow_style"))
+        #expect(!json.contains("stack_position"))
         let back = try JSONDecoder().decode(
             StackOverride.self,
             from: data
@@ -159,8 +156,8 @@ struct StackOverrideCommandTests {
         )
     }
 
-    @Test("ratio + style overrides share the global parsers")
-    func ratioAndStyleOverride() {
+    @Test("ratio + position overrides share the global parsers")
+    func ratioAndPositionOverride() {
         let core = makeCore()
         #expect(
             core.execute(
@@ -170,13 +167,13 @@ struct StackOverrideCommandTests {
         )
         #expect(
             core.execute(
-                "stack.set_overflow_style_override",
-                args: [.string("7"), .string("cascade_all")]
+                "stack.set_stack_position_override",
+                args: [.string("7"), .string("left")]
             ).isSuccess
         )
         let over = core.tiler.settings.stack.override[SpaceID("7")]
         #expect(over?.masterRatio == 0.9)  // clamped ceiling
-        #expect(over?.overflowStyle == .cascadeAll)
+        #expect(over?.stackPosition == .left)
     }
 
     @Test("Invalid value is rejected and writes nothing")
@@ -184,8 +181,8 @@ struct StackOverrideCommandTests {
         let core = makeCore()
         #expect(
             !core.execute(
-                "stack.set_overflow_style_override",
-                args: [.string("2"), .string("cascade_none")]
+                "stack.set_stack_position_override",
+                args: [.string("2"), .string("sideways")]
             ).isSuccess
         )
         #expect(core.tiler.settings.stack.override.isEmpty)

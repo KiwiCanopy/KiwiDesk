@@ -31,32 +31,6 @@ extension SpaceOverrideRows {
             global: g.stack.masterRatio
         )
         OverridePickerRow(
-            label: L("layout_params.overflow", "Overflow"),
-            value: binding(
-                \.stack.override,
-                space,
-                \.overflowStyle
-            ),
-            global: g.stack.overflowStyle,
-            options: [
-                (
-                    .cascadeOverflow,
-                    L(
-                        "layout_params.cascade_overflow",
-                        "Cascade overflow"
-                    )
-                ),
-                (
-                    .cascadeAll,
-                    L(
-                        "layout_params.cascade_all",
-                        "Cascade all"
-                    )
-                ),
-            ],
-            help: LayoutHelp.stackOverflow
-        )
-        OverridePickerRow(
             label: L(
                 "layout_params.stack_position",
                 "Stack position"

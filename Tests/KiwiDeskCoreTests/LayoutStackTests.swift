@@ -93,10 +93,11 @@ struct StackLayoutTests {
         #expect(frames[w3]?.minX ?? 0 > m1.maxX)
     }
 
-    @Test("Column overflow keeps full windows, cascades rest")
+    @MainActor
+    @Test("Column overflow shows what fits, parks the rest")
     func partialOverflow() throws {
-        // Usable 780pt tall; four stack windows can't all get
-        // 300pt, but one can — the other three cascade below.
+        // Usable 780pt tall; two stack windows fit at 300pt, so
+        // the other two wait parked (#2235).
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3, w4, w5],
             in: makeContext(
@@ -109,43 +110,23 @@ struct StackLayoutTests {
             )
         )
         let top = try #require(frames[w2])
-        let c1 = try #require(frames[w3])
-        let c2 = try #require(frames[w4])
-        let c3 = try #require(frames[w5])
-        // First stack window stays fully tiled...
-        #expect(top.height >= 300)
-        // ...the rest cascade with title-bar offsets.
-        #expect(c2.minY - c1.minY == OverlapStack.offset)
-        #expect(c3.minY - c2.minY == OverlapStack.offset)
-        #expect(c1.height == 300)
-        // The cascade ends exactly at the region bottom.
-        #expect(abs(c3.maxY - 790) < 0.01)
-    }
-
-    @Test("cascade_all overflow style cascades the whole zone")
-    func cascadeAllStyle() throws {
-        // Same crowded column as partialOverflow, old-style.
-        var context = makeContext(
-            bounds: CGRect(x: 0, y: 0, width: 1920, height: 800)
-        )
-        context.stack.overflowStyle = .cascadeAll
-        let frames = layout.calculateGeometry(
-            for: [w1, w2, w3, w4, w5],
-            in: context
-        )
-        let s1 = try #require(frames[w2])
-        let s2 = try #require(frames[w3])
-        let s3 = try #require(frames[w4])
-        let s4 = try #require(frames[w5])
-        #expect(s2.minY - s1.minY == OverlapStack.offset)
-        #expect(s3.minY - s2.minY == OverlapStack.offset)
-        #expect(s4.minY - s3.minY == OverlapStack.offset)
-        #expect(s1.size == s4.size)
+        let edge = try #require(frames[w3])
+        // The two shown share the zone: (780 - 10) / 2 each.
+        #expect(abs(top.minY - 10) < 0.01)
+        #expect(abs(top.height - 385) < 0.01)
+        #expect(abs(edge.minY - top.maxY - 10) < 0.01)
+        #expect(abs(edge.maxY - 790) < 0.01)
+        // Hidden windows rest parked at the hide corner (#2235).
+        let screen = CGRect(x: 0, y: 0, width: 1920, height: 800)
+        for hidden in [w4, w5] {
+            let frame = try #require(frames[hidden])
+            #expect(TilingEngine.looksStashed(frame, in: screen))
+        }
     }
 
     @Test("StackParams decodes profiles missing new fields")
     func decodeOldProfile() throws {
-        // A profile saved before overflowStyle existed.
+        // A profile saved before the orientation fields existed.
         let old = #"{"master_count":2,"master_ratio":0.7}"#
         let params = try JSONDecoder().decode(
             StackParams.self,
@@ -153,7 +134,7 @@ struct StackLayoutTests {
         )
         #expect(params.masterCount == 2)
         #expect(params.masterRatio == 0.7)
-        #expect(params.overflowStyle == .cascadeOverflow)
+        #expect(params.stackPosition == .right)
     }
 
     @Test("Promote swaps with the last master window")

@@ -25,7 +25,6 @@ extension HyperSourceKey: APIChoiceType {}
 extension BspParams.Strategy: APIChoiceType {}
 extension ScrollingParams.Anchor: APIChoiceType {}
 extension ScrollingParams.Orientation: APIChoiceType {}
-extension StackParams.OverflowStyle: APIChoiceType {}
 extension StackParams.Orientation: APIChoiceType {}
 extension StackParams.StackPosition: APIChoiceType {}
 extension GridParams.GridType: APIChoiceType {}

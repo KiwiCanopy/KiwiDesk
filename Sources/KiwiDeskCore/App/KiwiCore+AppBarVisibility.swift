@@ -109,16 +109,23 @@ extension KiwiCore {
             }
             return verdicts
         default:
+            // A run's hidden window waits parked off screen, and a
+            // shown one is covered by no hidden window (#2235,
+            // #2547).
+            let hidden = tiler.runCovers[space.id]?.behind ?? [:]
             let first = front.map { tiled[$0] }
             for id in tiled {
+                guard hidden[id] == nil else {
+                    verdicts[id] = .hidden
+                    continue
+                }
                 verdicts[id] = BarVisibility.judge(
                     laid.frames[id],
                     on: laid.usable,
                     above: id == first
                         ? []
-                        : tiled.filter { $0 != id }.compactMap {
-                            laid.frames[$0]
-                        }
+                        : tiled.filter { $0 != id && hidden[$0] == nil }
+                            .compactMap { laid.frames[$0] }
                 )
             }
             return verdicts

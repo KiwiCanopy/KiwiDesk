@@ -17,12 +17,19 @@ extension TilingEngine {
     /// `recording: false` is a what-if reading over a state that
     /// is not live (#1869): the monocle hold the layout input
     /// records is put back, so the live engine is left as found.
+    /// `recordingCovers` is the retile's own call (#2235): it files
+    /// what each scrolled run draws in `runCovers`.
     func placedFrames(
         state: StateCoordinator,
-        recording: Bool = true
+        recording: Bool = true,
+        recordingCovers: Bool = false
     ) -> [WindowID: CGRect] {
         guard !recording else {
-            return visibleFrames(state: state, placed: true)
+            return visibleFrames(
+                state: state,
+                placed: true,
+                recordingCovers: recordingCovers
+            )
         }
         let held = monocleShownMembers
         defer { monocleShownMembers = held }
@@ -33,7 +40,8 @@ extension TilingEngine {
     /// its own screen, unioned.
     func visibleFrames(
         state: StateCoordinator,
-        placed: Bool
+        placed: Bool,
+        recordingCovers: Bool = false
     ) -> [WindowID: CGRect] {
         var frames: [WindowID: CGRect] = [:]
         for placement in visiblePlacements(state: state) {
@@ -42,7 +50,13 @@ extension TilingEngine {
                 space: placement.space,
                 screen: placement.screen
             )
-            var computed = laidOut(input, placed: placed)
+            // One cover per space: the record and the hidden
+            // windows' slots read the same value.
+            let cover =
+                recordingCovers || placed && input.space.mode == .stack
+                ? Self.cover(of: input) : nil
+            if recordingCovers { runCovers[input.space.id] = cover }
+            var computed = laidOut(input, placed: placed, cover: cover)
             if placed {
                 computed = fillingMaximized(
                     computed,
@@ -62,11 +76,25 @@ extension TilingEngine {
         return frames
     }
 
+    private static func cover(
+        of input: (space: Space, tiled: [WindowID], context: LayoutContext)
+    ) -> RunCover? {
+        RunCover.of(
+            space: input.space.id,
+            mode: input.space.mode,
+            tiled: input.tiled,
+            in: input.context
+        )
+    }
+
     /// One space's frames from its layout input: the slots, or the
     /// issued frames with the split layouts' residue placed.
+    /// `cover` is that input's `RunCover.of`, read on a placed
+    /// stack pass.
     private func laidOut(
         _ input: (space: Space, tiled: [WindowID], context: LayoutContext),
-        placed: Bool
+        placed: Bool,
+        cover: RunCover?
     ) -> [WindowID: CGRect] {
         let slots = LayoutEngine.calculate(
             mode: input.space.mode,
@@ -74,11 +102,22 @@ extension TilingEngine {
             context: input.context
         )
         guard placed else { return slots }
-        return SplitOverflow.placed(
+        assert(
+            input.space.mode != .stack || cover != nil,
+            "a placed stack pass owes laidOut its cover"
+        )
+        var issued = SplitOverflow.placed(
             mode: input.space.mode,
             frames: slots,
             context: input.context
         )
+        // A run's parked window keeps its park: the inward pass
+        // would pull it, an overhang outside the zone, back onto
+        // the screen (#2235).
+        if input.space.mode == .stack, let cover {
+            for id in cover.behind.keys { issued[id] = slots[id] }
+        }
+        return issued
     }
 
     /// One space's issued frames on `screen`, the window its layout
@@ -96,7 +135,7 @@ extension TilingEngine {
         let input = layoutInput(state: state, space: space, screen: screen)
         return (
             fillingMaximized(
-                laidOut(input, placed: true),
+                laidOut(input, placed: true, cover: Self.cover(of: input)),
                 input: input,
                 on: screen,
                 state: state

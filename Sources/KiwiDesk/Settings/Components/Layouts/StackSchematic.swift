@@ -5,7 +5,6 @@ import SwiftUI
 struct StackSchematic: View {
     let masterCount: Int
     let masterRatio: Double
-    let overflowStyle: StackParams.OverflowStyle
     let masterOrientation: StackParams.Orientation
     let stackPosition: StackParams.StackPosition
     let placement: SpawnPlacement
@@ -31,8 +30,8 @@ struct StackSchematic: View {
         stackPosition.stackOrientation
     }
 
-    /// Tiled windows count before cascade overflow kicks in.
-    static let overflowTiled = 3
+    /// Stack windows the zone shows before the rest wait hidden.
+    static let shownRows = 4
 
     /// Effective master count clamped to window count.
     var masters: Int {
@@ -99,7 +98,6 @@ struct StackSchematic: View {
             .animation(damping, value: windows)
             .animation(damping, value: masterCount)
             .animation(damping, value: masterRatio)
-            .animation(damping, value: overflowStyle)
             .animation(damping, value: masterOrientation)
             .animation(damping, value: stackPosition)
             .animation(damping, value: placement)
@@ -183,11 +181,11 @@ struct StackSchematic: View {
         }
     }
 
-    /// Slot geometry and pile state per stack window.
+    /// Slot geometry per stack window; a hidden one sits behind
+    /// the last shown slot.
     struct Slot {
         var rect: CGRect
-        var piled: Bool
-        var front: Bool
+        var hidden: Bool
     }
 
     private var stackZone: some View {
@@ -195,36 +193,19 @@ struct StackSchematic: View {
             let slots = stackSlots(in: geo.size)
             ZStack(alignment: .topLeading) {
                 ForEach(slots.indices, id: \.self) { i in
-                    stackTile(
-                        for: stackWins[i],
-                        slot: slots[i]
-                    )
-                    .frame(
-                        width: slots[i].rect.width,
-                        height: slots[i].rect.height
-                    )
-                    .position(
-                        x: slots[i].rect.midX,
-                        y: slots[i].rect.midY
-                    )
+                    tile(for: stackWins[i])
+                        .zIndex(slots[i].hidden ? -1 : 0)
+                        .frame(
+                            width: slots[i].rect.width,
+                            height: slots[i].rect.height
+                        )
+                        .position(
+                            x: slots[i].rect.midX,
+                            y: slots[i].rect.midY
+                        )
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
-        }
-    }
-
-    @ViewBuilder
-    private func stackTile(
-        for id: WindowID,
-        slot: Slot
-    ) -> some View {
-        if slot.piled {
-            SchematicPileTile(
-                active: id == focused,
-                isNew: id == newWindow
-            )
-        } else {
-            tile(for: id)
         }
     }
 
@@ -239,21 +220,11 @@ struct StackSchematic: View {
 
     private var caption: String {
         if lone { return loneCaption }
-        switch overflowStyle {
-        case .cascadeOverflow:
-            return L(
-                "layout.schematic.stack.caption_overflow",
-                "Master zone and stack zone; when the stack "
-                    + "fills, the surplus piles up."
-            )
-        case .cascadeAll:
-            return L(
-                "layout.schematic.stack.caption_all",
-                "Master zone and stack zone; when the stack "
-                    + "fills, the whole zone piles so only the "
-                    + "top edges show."
-            )
-        }
+        return L(
+            "layout.schematic.stack.caption_scroll",
+            "Master zone and stack zone; windows a zone can't fit "
+                + "wait off screen, and moving focus scrolls them in."
+        )
     }
 
     /// Speaks `masters`, not the staged `masterCount`: the count

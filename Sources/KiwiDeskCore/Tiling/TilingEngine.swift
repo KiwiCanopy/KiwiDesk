@@ -113,6 +113,10 @@ public final class TilingEngine {
     /// float holds the focus (#881) — engine-owned transient
     /// state, argued in `TilingEngine+MonocleShown`.
     var monocleShownMembers: [SpaceID: WindowID] = [:]
+    /// What each Space's scrolled runs drew in the last retile
+    /// (#2235): recorded inside the pass, so a reader sees the run
+    /// the screen shows, the pass's forced floors included.
+    var runCovers: [SpaceID: RunCover] = [:]
 
     /// Original frames of floating windows parked off-screen by
     /// `stashInactive`, keyed by window. Engine-owned, transient,
@@ -288,8 +292,10 @@ public final class TilingEngine {
         else { return }
         // An apply probes past bounds once; the one door (#1055).
         withForcedPass(pass.probes) {
-            // The issued set, not the slots (#934).
-            let frames = placedFrames(state: state)
+            // The issued set, not the slots (#934), recording what
+            // each scrolled run draws (#2235).
+            runCovers = [:]
+            let frames = placedFrames(state: state, recordingCovers: true)
             // The #45 invariant, enforced here because the routing
             // guard counts occurrences, not combinations: a newcomer
             // IS an instant size, so no promise survives one.

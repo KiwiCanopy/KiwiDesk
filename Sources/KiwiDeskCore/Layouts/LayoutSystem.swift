@@ -90,6 +90,10 @@ public struct LayoutContext: Sendable {
     public var scrollRest: ScrollRest?
     /// Track layout break markers (#128).
     public var trackBreaks: Set<WindowID>
+    /// Where each Stack zone's or Track track's run rests
+    /// (`Space.runHeads`, `Space.runTails`, #2235).
+    public var runHeads: Set<WindowID>
+    public var runTails: Set<WindowID>
     /// Track column weights (#128).
     public var trackWeights: [WindowID: Double]
     /// Sticky windows exempt from overlap piling (#414). May
@@ -99,6 +103,11 @@ public struct LayoutContext: Sendable {
     public var sticky: Set<WindowID>
     /// Screen neighbor topology for clamping and park corners (#878, #881).
     public var screenNeighbors: ScreenNeighbors
+    /// The screen's visible bounds with no shelf carved off: where
+    /// a layout parks, the frame the stash parks against and
+    /// `looksStashed` judges (#881, #2235). Nil off the engine's
+    /// own build, which parks against `bounds`.
+    public var parkBounds: CGRect?
     /// App-enforced size bounds confirmed by engine (#677).
     public var sizeBounds: [WindowID: EffectiveSizeBound]
 
@@ -125,6 +134,8 @@ public struct LayoutContext: Sendable {
         stackWeights: [WindowID: Double] = [:],
         scrollRest: ScrollRest? = nil,
         trackBreaks: Set<WindowID> = [],
+        runHeads: Set<WindowID> = [],
+        runTails: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
         sticky: Set<WindowID> = [],
         screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
@@ -143,6 +154,8 @@ public struct LayoutContext: Sendable {
         self.stackWeights = stackWeights
         self.scrollRest = scrollRest
         self.trackBreaks = trackBreaks
+        self.runHeads = runHeads
+        self.runTails = runTails
         self.trackWeights = trackWeights
         self.sticky = sticky
         self.screenNeighbors = screenNeighbors

@@ -8,20 +8,42 @@ public struct StackLayout: LayoutSystem {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
-        let usable = context.usable
         guard !windows.isEmpty else { return [:] }
+        guard let zones = Self.zones(for: windows, in: context) else {
+            return OverlapStack.frames(
+                for: windows,
+                in: context.usable,
+                minSize: context.minWindowSize
+            )
+        }
+        var result: [WindowID: CGRect] = [:]
+        for zone in zones {
+            result.merge(zone.frames(in: context)) { _, new in new }
+        }
+        return result
+    }
+
+    /// The master zone, then the stack zone where one is drawn —
+    /// the regions every member is laid along (#222, #2235); nil
+    /// where the two zones cannot both keep the minimum size and
+    /// every window piles over the whole area (#44).
+    public static func zones(
+        for windows: [WindowID],
+        in context: LayoutContext
+    ) -> [RunZone]? {
+        let usable = context.usable
+        guard !windows.isEmpty else { return [] }
         let params = context.stack
-        let (master, stack) = Self.partition(
+        let (master, stack) = partition(
             windows,
             masterCount: params.masterCount
         )
-
         // Mirrored master order keeps boundary master at stack seam (#313).
         let masterOrdered =
-            Self.mirrorsMasterZone(params)
-            ? ArraySlice(master.reversed())
-            : master
-
+            mirrorsMasterZone(params)
+            ? Array(master.reversed())
+            : Array(master)
+        let masterVertical = params.masterOrientation == .vertical
         let horizontal = params.stackPosition.splitsHorizontally
         let gap =
             horizontal
@@ -29,86 +51,62 @@ public struct StackLayout: LayoutSystem {
             : context.gaps.inner.vertical
         let available =
             (horizontal ? usable.width : usable.height) - gap
-        // Cascades if min-size zones cannot coexist (#44).
         let range = SplitDomain.effectiveRatioRange(
             available: Double(available),
             minSize: Double(
                 context.minWindowSize.along(horizontal: horizontal)
             )
         )
-
+        func split(_ range: ClosedRange<Double>)
+            -> (master: CGRect, stack: CGRect)
+        {
+            let span = Self.masterSpan(
+                available: available,
+                ratio: params.masterRatio,
+                in: range
+            )
+            return Self.regions(
+                usable: usable,
+                position: params.stackPosition,
+                masterSpan: span,
+                stackSpan: available - span,
+                gap: gap
+            )
+        }
         guard let stack else {
             // Master only: the full usable region — unless the one
             // window keeps its zone (#1389).
-            if let range,
-                Self.loneMasterKeepsZone(
-                    windows,
-                    params: params,
-                    range: range
+            let region =
+                range.map { range in
+                    loneMasterKeepsZone(
+                        windows,
+                        params: params,
+                        range: range
+                    ) ? split(range).master : usable
+                } ?? usable
+            return [
+                RunZone(
+                    members: masterOrdered,
+                    region: region,
+                    vertical: masterVertical
                 )
-            {
-                let masterSpan = Self.masterSpan(
-                    available: available,
-                    ratio: params.masterRatio,
-                    in: range
-                )
-                return zone(
-                    masterOrdered,
-                    in: Self.regions(
-                        usable: usable,
-                        position: params.stackPosition,
-                        masterSpan: masterSpan,
-                        stackSpan: available - masterSpan,
-                        gap: gap
-                    ).master,
-                    vertical: params.masterOrientation == .vertical,
-                    context: context
-                )
-            }
-            return zone(
-                masterOrdered,
-                in: usable,
-                vertical: params.masterOrientation == .vertical,
-                context: context
-            )
+            ]
         }
-
-        guard let range else {
-            return OverlapStack.frames(
-                for: windows,
-                in: usable,
-                minSize: context.minWindowSize
-            )
-        }
-        let masterSpan = Self.masterSpan(
-            available: available,
-            ratio: params.masterRatio,
-            in: range
-        )
-        let (masterRegion, stackRegion) = Self.regions(
-            usable: usable,
-            position: params.stackPosition,
-            masterSpan: masterSpan,
-            stackSpan: available - masterSpan,
-            gap: gap
-        )
-
-        var result = zone(
-            masterOrdered,
-            in: masterRegion,
-            vertical: params.masterOrientation == .vertical,
-            context: context
-        )
-        result.merge(
-            zone(
-                stack,
-                in: stackRegion,
+        guard let range else { return nil }
+        let halves = split(range)
+        return [
+            RunZone(
+                members: masterOrdered,
+                region: halves.master,
+                vertical: masterVertical
+            ),
+            RunZone(
+                members: Array(stack),
+                region: halves.stack,
                 vertical: params.stackPosition.stackOrientation
-                    == .vertical,
-                context: context
-            )
-        ) { _, new in new }
-        return result
+                    == .vertical
+            ),
+        ]
     }
 
     /// Whether master zone renders from stack seam (`StackSchematic`, #313).
@@ -221,107 +219,5 @@ public struct StackLayout: LayoutSystem {
             )
             return (master, stack)
         }
-    }
-
-    /// Distributes windows along region axis weighted by `stackWeights`
-    /// (#222, #67, `OverlapStack`).
-    private func zone(
-        _ windows: ArraySlice<WindowID>,
-        in region: CGRect,
-        vertical: Bool,
-        context: LayoutContext
-    ) -> [WindowID: CGRect] {
-        let count = CGFloat(windows.count)
-        guard count > 0 else { return [:] }
-        let gap =
-            vertical
-            ? context.gaps.inner.vertical
-            : context.gaps.inner.horizontal
-        let span = vertical ? region.height : region.width
-        let available = span - gap * (count - 1)
-        let weights = windows.map {
-            max(context.stackWeights[$0] ?? 1, Self.weightFloor)
-        }
-        let total = weights.reduce(0, +)
-        let limit = Self.maxColumnTotal(
-            smallestWeight: weights.min() ?? 1,
-            span: Double(available),
-            minSize: Double(
-                context.minWindowSize.along(horizontal: !vertical)
-            )
-        )
-        if total > limit {
-            if context.stack.overflowStyle == .cascadeAll {
-                return OverlapStack.frames(
-                    for: windows,
-                    in: region,
-                    minSize: context.minWindowSize
-                )
-            }
-            return overflowZone(
-                windows,
-                in: region,
-                vertical: vertical,
-                context: context
-            )
-        }
-        var result: [WindowID: CGRect] = [:]
-        var position = vertical ? region.minY : region.minX
-        for (offset, window) in windows.enumerated() {
-            let extent =
-                available * weights[offset] / total
-            result[window] =
-                vertical
-                ? CGRect(
-                    x: region.minX,
-                    y: position,
-                    width: region.width,
-                    height: extent
-                )
-                : CGRect(
-                    x: position,
-                    y: region.minY,
-                    width: extent,
-                    height: region.height
-                )
-            position += extent + gap
-        }
-        return result
-    }
-
-    /// Cascades trailing windows when zone exceeds capacity.
-    private func overflowZone(
-        _ windows: ArraySlice<WindowID>,
-        in region: CGRect,
-        vertical: Bool,
-        context: LayoutContext
-    ) -> [WindowID: CGRect] {
-        let ids = Array(windows)
-        guard
-            let overflow = OverlapStack.overflowFrames(
-                count: ids.count,
-                in: region,
-                vertical: vertical,
-                minSize: context.minWindowSize,
-                gap: vertical
-                    ? context.gaps.inner.vertical
-                    : context.gaps.inner.horizontal
-            )
-        else {
-            return OverlapStack.frames(
-                for: windows,
-                in: region,
-                minSize: context.minWindowSize
-            )
-        }
-        // Sticky windows keep fully-tiled slot (#414 v2).
-        let ordered = OverlapStack.stickyExempt(
-            ids,
-            tiled: overflow.tiled,
-            sticky: context.sticky
-        )
-        return Dictionary(
-            uniqueKeysWithValues: zip(ordered, overflow.rects)
-        )
     }
 }
