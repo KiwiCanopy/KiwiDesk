@@ -208,6 +208,7 @@ extension KiwiCore {
         windowServer.stop()  // first: the ring's clear sends nothing
         borders.stop()
         stickyMarks.clear()
+        overflowMarks.clear()
         endVisionHold(restack: false)  // its pill has no timer
         vision.clear()
         retargetVisionAppearance(nil)  // a quit puts it back

@@ -27,7 +27,7 @@ extension KiwiCore {
     /// sticky marks and KiwiVision's blur (#2103).
     func reduceTransparencyDidChange() {
         updateBars()
-        updateStickyMarks()
+        updateMarks()
         updateVision()
     }
 }

@@ -8,6 +8,8 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Marks.swift"
   # The one WindowServer stream every overlay hears through
   # (#2275), and its consumer order, live outside Borders/.
   - "Sources/KiwiDeskCore/OS/WindowServerWatch.swift"
@@ -339,6 +341,33 @@ obligations:
   is** — on the window's Desktop, or on every Desktop because a
   carry moves its window — and `StickyOverlaySpanTests` gains its
   clause.
+
+## An overflow mark follows its window like the sticky mark (#2235)
+
+The "+n" on a run's edge window is a third overlay family, and
+**it rides every channel the sticky mark takes, through the one
+door per channel in `KiwiCore+Marks.swift`** — `updateMarks` for a
+sync (the settle passes' `reassertOrder` included), `followMarks`
+for the tick and the AX echo, `oweMarkOrder` for a carry — plus the
+WindowServer bounds and restack through its own `WindowServerWatch`
+consumer, its frame decided by `FollowSource` like the sticky
+mark's. A channel the sticky mark gains is added through that door,
+or as a twin spelling in the same file, or is ruled sticky-only
+with its reason; `MarkFamilyParityTests` reads the members off the
+source and holds the doors, the ruled single-family syncs and every
+other member twinned file by file. **What it draws is derived from
+`TilingEngine.runCovers` in the one `overflowMarkSpecs`, synced at
+the tail of every `updateBars()`**, since it wears KiwiShelf's look
+and the shelf repaints from many sites with no pass, and it stands
+down on the stand-down set that same bar pass took, never a second
+reading (`OverflowMarkPanelSeamTests`, `OverflowMarkWiringTests`).
+Its overlay is keyed by the run END,
+never the anchor, so a scroll step re-anchors one panel rather than
+minting another. It stays on its window's Desktop, spanning only
+while that window is carried — the off-transition's re-home is
+`StickyOverlaySpanTests`' needle, its on-screen effect review's —
+and its panels order in nowhere in a `makeTestCore` twin
+(`ordersPanels`).
 
 ## The ring draws on the `.transient` panel, never a raw window
 

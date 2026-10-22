@@ -71,9 +71,15 @@ final class ShelfManager {
     /// hands it to both bar managers.
     let peek = BarPeek()
 
+    /// The shelf a non-bar panel the peek anchors on wears — an
+    /// overflow mark's (#2235); the peek's one shelf reading asks
+    /// it after the bars.
+    var shelfBeyondBars: @MainActor (NSWindow) -> KiwiShelf? = { _ in nil }
+
     init() {
         peek.shelf = { [weak self] window in
             self?.shelf(drawnIn: window)
+                ?? self?.shelfBeyondBars(window)
         }
     }
 

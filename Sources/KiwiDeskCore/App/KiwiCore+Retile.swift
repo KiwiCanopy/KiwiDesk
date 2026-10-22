@@ -186,7 +186,8 @@ extension KiwiCore {
         // frames (steady state); per-tick moves come from the
         // animation tee (`tiler.onFrameApplied`).
         updateBorders()
-        // The sticky marks ride the same freshness (#414).
+        // The sticky marks ride the same freshness (#414); the
+        // overflow marks synced with the bars above.
         updateStickyMarks()
         // An animated relayout (spawn, close, mode/gap change)
         // restacks windows, so WindowServer fires the same

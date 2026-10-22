@@ -137,7 +137,7 @@ extension KiwiCore {
             state.workspaces.focus(window, in: space)
         }
         updateBorders()
-        updateStickyMarks()
+        updateMarks()
         updateBars()
     }
 
@@ -275,7 +275,7 @@ extension KiwiCore {
         }
         raiseWindow(debt.window)
         updateBorders()
-        updateStickyMarks()
+        updateMarks()
     }
 
     private func dropMenuBarRevealDebt(_ reason: String) {

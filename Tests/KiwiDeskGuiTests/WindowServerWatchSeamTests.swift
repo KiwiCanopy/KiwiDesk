@@ -44,7 +44,24 @@ struct WindowServerWatchSeamTests {
         )
         #expect(
             try sites(of: "windowServer.connect(")
-                == ["KiwiCore+WindowServer.swift": 2]
+                == ["KiwiCore+WindowServer.swift": 3]
+        )
+    }
+
+    /// The overflow mark rides the same stream as the sticky mark
+    /// (#2235): its re-assert on a restack is a panel order no Core
+    /// test can read, so the wiring is needled too.
+    @Test("the core connects the overflow mark's re-assert")
+    func overflowRestackIsWired() throws {
+        let wiring = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "App/KiwiCore+WindowServer.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            wiring.occurrences(
+                of: "restack:{[weakself]idinself?.overflowMarks.reassert(id)}"
+            ) == 1
         )
     }
 

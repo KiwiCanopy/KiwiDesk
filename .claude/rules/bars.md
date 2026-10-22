@@ -43,6 +43,11 @@ paths:
   # whose obligations live here.
   - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
   - "Sources/KiwiDeskCore/Tiling/DragMarkerView.swift"
+  # The overflow mark (#2235) wears the shelf's look — its glass,
+  # rim and bar font — and feeds the hover peek; its driver reads
+  # the gate.
+  - "Sources/KiwiDeskCore/Borders/OverflowMark*.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
   # The Space slide's plates (#1956, #2524): untinted `.regular`
   # glass, KiwiHub's, on KiwiHub's leaf.
@@ -832,7 +837,12 @@ Obligations:
   always asks, as a multi-window glyph does; a single App Bar item
   asks only where it hides text — Core's cut verdict
   (`barItemTitle`, the one branch the item text also takes) or a
-  label it did not draw in full (#1514). No bar view registers
+  label it did not draw in full (#1514). An overflow mark (#2235)
+  feeds the same peek through `BarPeekSource.run`, a list whose
+  every group wears its app's icon through the one
+  `BarPeekSource.iconsEveryGroup`, since the mark draws no glyph
+  beside it, while a bar's own sources keep the mixed-apps rule
+  (`OverflowMarkWiringTests` ▸ `coreAsksForIcons`). No bar view registers
   the system tooltip the peek replaced
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one
@@ -852,7 +862,12 @@ Obligations:
   count — to `BarPeek.pressed(on:type:)` before the view takes
   it, sparing only a LEFT press on a Space Bar glyph, whose
   release decides (`BarPeekHoldTests` ▸
-  `otherPressOnAGlyphCloses`); a view's
+  `otherPressOnAGlyphCloses`) — and an overflow mark's panel is
+  that point's twin (#2235): `OverflowMarkPanel.sendEvent` hands
+  its presses to the same `pressed`, sparing the mark's own LEFT
+  press, whose click opens its list (`OverflowMarkPanelSeamTests`,
+  `OverflowMarkWiringTests` ▸
+  `leftPressOnAMarkSpares`); a view's
   own press handler never re-spells the dismissal, so one that
   takes its own press cannot leave a peek standing
   (`BarPeekSeamTests` ▸ `onePressDismissal`,

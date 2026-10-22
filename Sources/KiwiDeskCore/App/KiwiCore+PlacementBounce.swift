@@ -112,7 +112,7 @@ extension KiwiCore {
             AXHelper.raise(element, pid: window.pid)
         }
         updateBorders()
-        updateStickyMarks()
+        updateMarks()
         return true
     }
 }

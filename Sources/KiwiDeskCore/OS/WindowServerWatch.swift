@@ -14,7 +14,7 @@ public final class WindowServerWatch {
     /// float tier, whose landing re-enters the fan-out for the
     /// target (`KiwiCore.visionWindowRestacked`).
     enum Consumer: CaseIterable {
-        case mark, ring, vision
+        case mark, overflow, ring, vision
     }
 
     /// What a consumer does with an event; a nil hook is a phase

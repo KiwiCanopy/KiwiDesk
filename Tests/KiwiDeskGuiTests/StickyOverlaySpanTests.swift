@@ -48,6 +48,53 @@ struct StickyOverlaySpanTests {
         #expect(literal?.contains(".transient") == true)
     }
 
+    /// An overflow mark rides a run's edge window (#2235), so it
+    /// takes the ring's rule: on its window's Desktop, every
+    /// Desktop only while that window is carried.
+    @Test("an overflow mark is built on one Desktop, spans when carried")
+    func overflowMarkSpansOnlyWhenCarried() throws {
+        let literal = try behaviorLiteral(
+            "Sources/KiwiDeskCore/Borders/OverflowMarkOverlay.swift"
+        )
+        #expect(literal != nil)
+        #expect(literal?.contains(".canJoinAllSpaces") == false)
+        #expect(literal?.contains(".transient") == true)
+        let core = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(core.contains("spans: carried.contains(mark.anchor)"))
+        let manager = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/Borders/OverflowMarkManager.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(manager.contains("overlay.setSpans(spec.spans)"))
+        // Leaving the span re-homes the panel: ordered out, a stack
+        // owed, so the next order lands it on the shown Desktop.
+        let overlay = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/Borders/OverflowMarkOverlay.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        let setSpans = try #require(
+            SourceScan.declarationBody(after: "func setSpans(", in: overlay)
+        )
+        #expect(setSpans.contains("remove(.canJoinAllSpaces)"))
+        #expect(setSpans.contains("panel.orderOut(nil)"))
+        #expect(setSpans.contains("hasOrdered = false"))
+    }
+
     @Test("the ring is built on one Desktop and spans when carried")
     func ringSpansOnlyWhenCarried() throws {
         let literal = try behaviorLiteral(

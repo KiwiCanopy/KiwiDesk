@@ -94,7 +94,7 @@ extension KiwiCore {
                 state.workspaces.focus(intended, in: space)
             }
             updateBorders()
-            updateStickyMarks()
+            updateMarks()
             return
         }
         // An activation re-report (#465 QA): raising window B
@@ -166,7 +166,7 @@ extension KiwiCore {
                 }
             }
             updateBorders()
-            updateStickyMarks()
+            updateMarks()
             return
         }
         // Echo provenance (#152/#158): an echo of KiwiDesk's
@@ -286,7 +286,7 @@ extension KiwiCore {
         // on sync (never per tick) — without this the mark
         // vanished behind the window on a plain click until
         // the next retile (owner QA 2026-07-21).
-        updateStickyMarks()
+        updateMarks()
         // The Space Bar's focused-glyph accent follows the
         // same rule (#293): layout-independent, so it can't
         // ride the focus-driven retile alone.
