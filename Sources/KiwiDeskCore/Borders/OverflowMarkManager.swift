@@ -59,6 +59,13 @@ public final class OverflowMarkManager {
         for spec in desired {
             let overlay = overlays[spec.mark.key] ?? made(spec.mark)
             overlays[spec.mark.key] = overlay
+            // A re-anchored mark lists other windows from another
+            // place, so a peek open on it would read stale.
+            if overlay.mark != spec.mark,
+                peek?.shown?.view === overlay.view
+            {
+                peek?.dismiss()
+            }
             overlay.set(spec.mark, name: spec.name, shelf: spec.shelf)
             overlay.setSpans(spec.spans)
             overlay.update(

@@ -102,6 +102,36 @@ struct OverflowMarkWiringTests {
         #expect(after.mark.anchor == WindowID(4))
     }
 
+    /// The peek reads its anchor's frame only off a window on
+    /// screen, so this core orders its mark panels in, and takes
+    /// them and the peek out again at the end.
+    @Test("A step closes a peek open on the re-anchored mark")
+    func stepClosesTheOpenPeek() throws {
+        let core = makeCore()
+        core.overflowMarks.ordersPanels = true
+        let peek = core.shelves.peek
+        defer {
+            peek.dismiss()
+            peek.panel.panel?.orderOut(nil)
+            core.overflowMarks.clear()
+        }
+        let space = makeSpace(core)
+        let overlay = try #require(core.overflowMarks.overlays.values.first)
+        peek.visibleArea = { _ in
+            CGRect(x: 0, y: 0, width: 1440, height: 900)
+        }
+        peek.show(
+            overlay.view,
+            source: .run(overlay.mark.windows),
+            space: space,
+            edge: .bottom
+        )
+        try #require(peek.shown != nil)
+        core.state.workspaces.focus(WindowID(4), in: space)
+        core.retile(animated: false)
+        #expect(peek.shown == nil)
+    }
+
     @Test("A run that hides nothing draws no mark")
     func noOverflowNoMark() {
         let core = makeCore()
