@@ -101,8 +101,8 @@ struct KiwiShelfCard: View {
     private var cardCaption: String {
         L(
             "bars.kiwishelf.caption",
-            "One place for both bars: where each sits, how they "
-                + "share an edge, and the style they have in common."
+            "What both bars share — when they show, where they sit, "
+                + "and how they look."
         )
     }
 

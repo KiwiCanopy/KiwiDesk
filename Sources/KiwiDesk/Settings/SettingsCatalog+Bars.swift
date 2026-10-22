@@ -2,8 +2,8 @@ import KiwiDeskCore
 
 /// Bars catalog controls (#293, #277, #1517). Each drawer is
 /// declared with its children so a search hit on a row behind the
-/// disclosure opens it (#1250). The bar cards have no drawer: all
-/// their rows are shown.
+/// disclosure opens it (#1250). The App Bar card has no drawer;
+/// the Space Bar card keeps its numbers in Fine-tuning (#2507).
 struct BarsControls: Sendable {
     let kiwishelfCard = SettingsControl(
         "bars.switch.kiwishelf",
@@ -46,6 +46,12 @@ struct BarsControls: Sendable {
     let spaceBarCard = SettingsControl(
         "bars.switch.space_bar",
         "Space Bar"
+    )
+    let spaceBarTuning = SettingsDrawer(
+        "space_bar.fine_tuning",
+        "Fine-tuning",
+        instance: "space_bar",
+        children: SpaceBarTuningControls()
     )
     let appBarCard = SettingsControl(
         "bars.switch.app_bar",
@@ -143,6 +149,35 @@ struct KiwiShelfStyleControls: Sendable {
     let kiwishelfStyleIconSource = SettingsControl(
         "kiwishelf.icon_source.label",
         "App glyph style"
+    )
+    let kiwishelfStyleOrder = SettingsControl(
+        "kiwishelf.order.label",
+        "Order"
+    )
+    let kiwishelfStyleMinimum = SettingsControl(
+        "kiwishelf.minimum",
+        "Space Bar minimum"
+    )
+}
+
+/// Space Bar ▸ Fine-tuning rows (#2507), keyed on their census
+/// label keys, in `BarsRowOrder.spaceBarTuning`'s order.
+struct SpaceBarTuningControls: Sendable {
+    let frontAppTitleCap = SettingsControl(
+        "space_bar.front_app_title_cap",
+        "Front app title length"
+    )
+    let glyphSpan = SettingsControl(
+        "space_bar.glyph_span",
+        "Glyphs per Space"
+    )
+    let glyphGap = SettingsControl(
+        "space_bar.glyph_gap",
+        "Glyph gap"
+    )
+    let springDelay = SettingsControl(
+        "space_bar.spring_delay",
+        "Spring delay"
     )
 }
 

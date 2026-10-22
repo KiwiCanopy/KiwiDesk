@@ -203,7 +203,6 @@
   "bar.visibility.auto": "Auto",
   "bar.visibility.hidden": "Oculta",
   "bars.app_bar.shelf_caption": "As janelas do espaço atual — apenas em %1$@ e %2$@. KiwiShelf a posiciona.",
-  "bars.kiwishelf.caption": "Um só lugar para as duas barras: onde cada uma fica, como compartilham uma borda e o estilo que têm em comum.",
   "bars.kiwishelf.looks_xref": "Um look define onde as barras ficam e como elas aparecem, os dois indicadores, o formato e o reflexo do contorno de foco, e os espaçamentos das janelas com um clique — em %1$@.",
   "bars.preview.other_layouts": "Outros layouts",
   "bars.space_bar.shelf_caption": "Um item por espaço — uma barra por tela, em todos os layouts. KiwiShelf a posiciona.",

@@ -62,12 +62,17 @@ struct BarVisibilityMasterTests {
     }
 
     /// Where the bars sit runs coarse to fine and the strip's depth
-    /// follows after a rule, in the card body (#761).
+    /// follows after a rule, in the card body (#761); order and
+    /// minimum close the Style drawer (#2507).
     @Test("placement rows run coarse to fine, depth after them")
     func placementOrder() {
         #expect(
             BarsRowOrder.kiwishelfPlacement == [
                 .kiwishelf(.edge), .kiwishelf(.alignment),
+            ]
+        )
+        #expect(
+            BarsRowOrder.kiwishelfStyle.suffix(2) == [
                 .kiwishelf(.order), .kiwishelf(.minimum),
             ]
         )

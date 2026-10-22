@@ -15970,20 +15970,45 @@ hit frame stops at them, so the autoscroll and the drop-spring
 still govern disjoint zones and the argument above holds with a
 fade where it says arrow.
 
+:::unreleased
 **The bar cards share one canonical row order.** (#374, re-cut
-by the #678 Phase 2 census render and by #1517.) The KiwiShelf
-card owns existence and placement: the Show master and its Each
-bar drawer, then Position and its Each bar drawer, Alignment,
-Order and Space Bar minimum — where the bars sit, coarse to fine —
-then Thickness and its Style and Margins drawers. A master's drawer
-hangs under it with no rule, since a rule marks a new topic. Each bar's card shows every row,
-with no drawer, each gate directly above what it gates. Colours
+by the #678 Phase 2 census render, by #1517 and by #2507.) The
+KiwiShelf card owns existence and placement: the Show master and
+its Each bar drawer, then Position and its Each bar drawer and
+Alignment — where the bars sit, coarse to fine — then Thickness
+and its Style and Margins drawers. Order and Space Bar minimum
+close the Style drawer: they change how the joined run draws —
+which bar leads, how much of a crowded edge the Space Bar keeps —
+and matter only where the bars share an edge. A master's drawer
+hangs under it with no rule, since a rule marks a new topic. Each
+gate sits directly above what it gates. Colours
 live in the one KiwiShelf colour card — signature colours
 inline, the rest behind a shut disclosure, the Space Bar's
 focused-window colour among them. A new bar row slots into this
 order — in the census
 order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
+:::
+
+:::unreleased
+**Choices stay open; numbers go in one drawer per bar card (#2507,
+owner ruling 2026-10-21).** Settings modes hide whole pages, never
+rows, so every open row on Bars is in front of someone who just
+installed KiwiDesk, and the accordion is the page's one density
+tool. So a bar card draws its choices open and its numbers in one
+drawer at its foot, under its last open choice — the Space Bar's
+Fine-tuning — and a gated number may lead that drawer when its
+gate is that last open choice, as the front-app title length leads
+Fine-tuning under Show front app (and Durations follows Reveal on
+the shelf card). A number stays open only where the numbers in its
+drawer derive from it: Thickness, whose value drives Auto glyph
+size and Auto font size. No drawer holds one row, which is why the
+App Bar card's title length stays open. This is a depth tier —
+tuning a user rarely touches — and not a grouping by widget type,
+which gui.md ▸ group by topic forbids: a choice that is set once
+and a number that is nudged once are different depths of the same
+topic.
+:::
 
 Reveal and its Durations drawer follow the Show master's Each bar
 drawer: how a hiding bar comes and goes sits beside what makes a

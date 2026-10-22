@@ -58,14 +58,14 @@ extension KiwiShelfKey {
             // A master acknowledges divergence through its `?`
             // and carries no gate (`GapsBordersGates.acknowledged`).
             return .row(.bars, .kiwishelf, .atRest)
-        case .thickness, .alignment, .order, .minimum:
+        case .thickness, .alignment:
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
             .appBarScreenEdge:
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
-            .outerMargin, .innerMargin, .iconSource:
+            .outerMargin, .innerMargin, .iconSource, .order, .minimum:
             return .row(.bars, .kiwishelf, .showMore)
         case .revealStyle:
             // In the Show group under Each bar, greyed while no bar

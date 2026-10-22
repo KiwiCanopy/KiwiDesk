@@ -44,19 +44,32 @@ struct BarsCensusRenderTests {
         #expect(rendered.count == Set(rendered).count)
     }
 
-    /// The bar cards have no drawer (#1517): every row is at
-    /// rest, and the card draws exactly the census's set.
+    /// A bar card draws its choices open and its numbers in one
+    /// drawer at its foot (#2507); the App Bar card, whose one
+    /// number would make a one-row drawer, keeps every row open.
     @Test(
-        "A bar card draws every census row at rest",
+        "A bar card draws the census's open rows and its drawer",
         arguments: [
-            (SettingsContainer.spaceBar, BarsRowOrder.spaceBar),
-            (.appBar, BarsRowOrder.appBar),
+            (
+                SettingsContainer.spaceBar,
+                BarsRowOrder.spaceBar,
+                BarsRowOrder.spaceBarTuning
+            ),
+            // No drawer list: whatever the census tiers behind
+            // one is a row the card never mounts.
+            (.appBar, BarsRowOrder.appBar, [SettingKey]()),
         ]
     )
-    func barCardRows(container: SettingsContainer, rows: [SettingKey]) {
-        #expect(Set(rows) == censusRows(container, .atRest))
-        #expect(censusRows(container, .showMore).isEmpty)
-        #expect(rows.count == Set(rows).count)
+    func barCardRows(
+        container: SettingsContainer,
+        open: [SettingKey],
+        drawer: [SettingKey]
+    ) {
+        #expect(Set(open) == censusRows(container, .atRest))
+        #expect(Set(drawer) == censusRows(container, .showMore))
+        let all = open + drawer
+        #expect(all.count == Set(all).count)
+        #expect(drawer.isEmpty || drawer.count > 1)
     }
 
     /// The area's render knows exactly three containers; a

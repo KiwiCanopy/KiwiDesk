@@ -61,6 +61,10 @@ struct SettingsSearchDrawerAnchorTests {
                 ]
             ),
             (
+                .bars, "KiwiShelf", .spaceBar,
+                [SettingsCatalog.bars.spaceBarTuning]
+            ),
+            (
                 .profiles, "Profiles", .profilesPerMacOSSpace,
                 [SettingsCatalog.profiles.desktops]
             ),
