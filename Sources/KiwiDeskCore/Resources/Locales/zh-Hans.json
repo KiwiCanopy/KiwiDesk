@@ -1514,7 +1514,6 @@
   "onboarding.grant.title": "KiwiDesk 需要辅助功能权限",
   "onboarding.grant.trust": "KiwiDesk 绝不读取你的按键，也绝不会要求你停用系统完整性保护（SIP）。",
   "onboarding.grant.waiting": "正在等待 — 本页会自动继续",
-  "onboarding.keys.all": "查看所有快捷键",
   "onboarding.keys.bars": "显示或隐藏 Space Bar 或 App Bar",
   "onboarding.keys.body": "这些已可直接使用，适用于你正在使用的键盘。",
   "onboarding.keys.focus": "移动焦点",

@@ -153,11 +153,13 @@ extension AppDelegate {
                 where: { $0.isDefault }
             )
         else { return [] }
+        let settings = core.tiler.settings
         return OnboardingKeys.families(
             layer: layer,
             spaces: SpaceID.deduplicated(
                 core.state.workspaces.allSpaces.map(\.id)
-            )
+            ),
+            showsBar: { settings.revealActionLiveAnywhere($0) }
         )
     }
 

@@ -216,22 +216,17 @@ struct OnboardingKeysTests {
             #expect(!family.label.isEmpty)
             #expect(!family.glyphs.isEmpty)
         }
-        // The panel's own opener is taught here, unlike in the
+        // KiwiHub's own opener is taught here, unlike in the
         // shortcuts panel where it is suppressed as a row — the
-        // tour is where a user learns it exists.
-        #expect(families.contains { $0.id == "shortcuts" })
+        // tour is where a user learns it exists (#2515).
+        #expect(families.contains { $0.id == "kiwihub" })
     }
 
-    /// Open Settings is taught where a new user meets it — before
-    /// Settings has ever been opened (#1381, owner 2026-09-15) —
-    /// and, like every family, draws no row when unbound.
-    @Test("a bound Open Settings chord is taught, an unbound one is not")
-    func openSettingsIsTaughtWhenBound() {
-        let unbound = OnboardingKeys.families(
-            layer: layer(arrows),
-            spaces: spaces(1)
-        )
-        #expect(!unbound.contains { $0.id == "settings" })
+    /// Open Settings gave its row to KiwiVision (owner,
+    /// 2026-10-23, reversing 2026-09-15): a bound chord is no
+    /// longer taught.
+    @Test("Open Settings is not taught")
+    func openSettingsIsNotTaught() {
         let families = OnboardingKeys.families(
             layer: layer(
                 arrows + [
@@ -243,15 +238,11 @@ struct OnboardingKeysTests {
             ),
             spaces: spaces(1)
         )
-        let settings = families.first { $0.id == "settings" }
         #expect(
-            settings?.chord == .shared([.control, .option], keys: ",")
+            !families.contains {
+                $0.label == KeybindingCatalog.openSettings.resolvedLabel
+            }
         )
-        #expect(
-            settings?.label
-                == KeybindingCatalog.openSettings.resolvedLabel
-        )
-        #expect(settings?.isGateway == false)
     }
 
     /// The move/follow PAIR ships together (owner, 2026-08-16).

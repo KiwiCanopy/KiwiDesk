@@ -1514,7 +1514,6 @@
   "onboarding.grant.title": "KiwiDesk нужен Универсальный доступ",
   "onboarding.grant.trust": "KiwiDesk никогда не считывает нажатия клавиш и не просит отключить SIP (защиту целостности системы).",
   "onboarding.grant.waiting": "Ожидание — эта страница продолжится сама",
-  "onboarding.keys.all": "Посмотреть все сочетания",
   "onboarding.keys.bars": "Показать или скрыть Space Bar или App Bar",
   "onboarding.keys.body": "Они готовы к использованию — на той клавиатуре, на которой ты сейчас печатаешь.",
   "onboarding.keys.focus": "Переместить фокус",

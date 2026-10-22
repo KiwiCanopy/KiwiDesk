@@ -66,9 +66,24 @@ extension OnboardingView {
             OnboardingKeycap(family: family)
         }
         .accessibilityElement(children: .combine)
+        .modifier(SpokenRow(spoken: family.spoken))
     }
 
     private var keysTitle: String {
         L("onboarding.keys.title", "Your shortcuts")
+    }
+}
+
+/// A row's own spoken text where it has one, replacing what the
+/// combined label and glyphs would read.
+private struct SpokenRow: ViewModifier {
+    let spoken: String?
+
+    func body(content: Content) -> some View {
+        if let spoken {
+            content.accessibilityLabel(spoken)
+        } else {
+            content
+        }
     }
 }

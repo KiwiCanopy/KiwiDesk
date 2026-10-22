@@ -1514,7 +1514,6 @@
   "onboarding.grant.title": "KiwiDeskにはアクセシビリティが必要です",
   "onboarding.grant.trust": "KiwiDeskがキー入力を読み取ることはなく、SIP（システム構成保護）の無効化を求めることもありません。",
   "onboarding.grant.waiting": "待機中 — このページは自動的に次へ進みます",
-  "onboarding.keys.all": "すべてのショートカットを表示",
   "onboarding.keys.bars": "Space BarまたはApp Barを表示/非表示",
   "onboarding.keys.body": "これらはすぐに使えます。今あなたが入力しているキーボードで動作します。",
   "onboarding.keys.focus": "フォーカスを移動",

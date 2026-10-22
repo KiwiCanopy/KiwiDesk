@@ -1514,7 +1514,6 @@
   "onboarding.grant.title": "KiwiDesk에 손쉬운 사용 권한이 필요합니다",
   "onboarding.grant.trust": "KiwiDesk는 키 입력을 절대 읽지 않으며, SIP(시스템 무결성 보호) 해제를 요구하지도 않습니다.",
   "onboarding.grant.waiting": "대기 중 — 이 단계는 저절로 넘어갑니다",
-  "onboarding.keys.all": "모든 단축키 보기",
   "onboarding.keys.bars": "Space Bar 또는 App Bar 보기/가리기",
   "onboarding.keys.body": "지금 입력하고 있는 키보드에서 바로 사용할 수 있습니다.",
   "onboarding.keys.focus": "포커스 이동",

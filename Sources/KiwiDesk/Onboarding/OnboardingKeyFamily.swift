@@ -10,10 +10,14 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
     /// The chord(s), kept STRUCTURED rather than as one glyph
     /// string (#1016).
     let chord: OnboardingChord
-    /// Whether this row opens the shortcuts reference panel (#828).
+    /// Whether this row opens KiwiHub, the way to every
+    /// shortcut the step leaves out (#828, #2515).
     var isGateway = false
     /// Which seeded modifier tier this family belongs to, if any.
     var tier: OnboardingKeyTier?
+    /// What VoiceOver reads for the row, where the label and
+    /// glyphs alone would leave a key's meaning to position.
+    var spoken: String?
 
     /// The chord as a native glyph string for VoiceOver and mixed families.
     var glyphs: String { chord.glyphs }

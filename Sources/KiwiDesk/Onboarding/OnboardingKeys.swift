@@ -5,9 +5,11 @@ import KiwiDeskCore
 /// key layer (#678).
 @MainActor
 enum OnboardingKeys {
+    /// `showsBar` leaves a bar set to Always out of the bars row.
     static func families(
         layer: KeyLayer,
-        spaces: [SpaceID]
+        spaces: [SpaceID],
+        showsBar: (ShelfBar) -> Bool = { _ in true }
     ) -> [OnboardingKeyFamily] {
         var families: [OnboardingKeyFamily] = []
         if let focus = directional(
@@ -89,45 +91,14 @@ enum OnboardingKeys {
                 )
             )
         }
-        if let maximize = maximizeFamily(layer: layer) {
-            families.append(maximize)
-        }
-        if let bars = revealFamily(layer: layer) {
-            families.append(bars)
-        }
-        // Taught before Settings has ever been opened, which is
-        // the road #1381 seeded the chord for; the label is the
-        // row's own, so the two cannot drift apart.
-        if let settings = single(
-            combo: layer.bindings.first {
-                $0.lua == KeybindingCatalog.openSettings.lua
-            }?.combo
-        ) {
-            families.append(
-                OnboardingKeyFamily(
-                    id: "settings",
-                    label: KeybindingCatalog.openSettings.resolvedLabel,
-                    chord: settings
-                )
-            )
-        }
-        if let panel = single(
-            combo: layer.bindings.first {
-                $0.lua == ShortcutsOpenBinding.lua
-            }?.combo
-        ) {
-            families.append(
-                OnboardingKeyFamily(
-                    id: "shortcuts",
-                    label: L(
-                        "onboarding.keys.all",
-                        "See every shortcut"
-                    ),
-                    chord: panel,
-                    isGateway: true
-                )
-            )
-        }
+        // Single-key toggles, then the screen's chrome, then the
+        // way into everything else (#2515).
+        families += [
+            maximizeFamily(layer: layer),
+            kiwiVisionFamily(layer: layer),
+            revealFamily(layer: layer, showsBar: showsBar),
+            kiwiHubFamily(layer: layer),
+        ].compactMap { $0 }
         return families
     }
 
