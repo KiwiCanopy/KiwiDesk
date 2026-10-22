@@ -104,6 +104,8 @@ struct RunArmWiringTests {
             OwnKeyWindowReading(number: 42, isDialog: true)
         }
         #expect(try !closeFocused(core, space, folded: false))
+        // The stood-down debt dies; no later removal pays it.
+        #expect(!core.runArm.owed)
     }
 
     @Test("A folded close's arm is paid after the re-sync's pass")
@@ -119,6 +121,7 @@ struct RunArmWiringTests {
             OwnKeyWindowReading(number: 42, isDialog: true)
         }
         #expect(try !closeFocused(core, space, folded: true))
+        #expect(!core.runArm.owed)
     }
 
     @Test("A focus report onto a hidden window scrolls the run")

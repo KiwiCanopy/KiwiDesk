@@ -36,6 +36,8 @@ extension KiwiCore {
             }
         }
         for work in batch.afterPass { work() }
+        // A held arm no folded removal paid ends with the batch.
+        if batch.holdsRunArm { runArm.owed = false }
     }
 
     /// Folds an event retile into the running re-sync, if one

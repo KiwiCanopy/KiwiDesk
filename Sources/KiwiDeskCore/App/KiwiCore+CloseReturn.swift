@@ -91,11 +91,14 @@ extension KiwiCore {
         // The scrolled runs' arm the removal's retile held (#2235)
         // takes the same verdict, read after the pass — inline or
         // the re-sync's fold — has drawn: paid where any folded
-        // removal's raise runs.
-        if event.goneWindowID != nil, !closeReturnRaiseStandsDown {
+        // removal's raise runs. A stood-down debt dies here, or
+        // with the fold's batch, never paid by a later removal.
+        if event.goneWindowID != nil {
+            let pays = !closeReturnRaiseStandsDown
             afterSwitchResync { [self] in
-                if runArm.takeOwed() { scheduleZOrderRestore() }
+                if pays, runArm.takeOwed() { scheduleZOrderRestore() }
             }
+            if !pays, switchResync == nil { runArm.owed = false }
         }
         // #951/#952 diagnosis: narrate the decision above. AFTER
         // the arms on purpose — the needle windows in

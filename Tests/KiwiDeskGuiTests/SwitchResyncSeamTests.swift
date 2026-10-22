@@ -100,7 +100,7 @@ struct SwitchResyncSeamTests {
         #expect(
             source.contains(
                 "afterSwitchResync{[self]in"
-                    + "ifrunArm.takeOwed(){scheduleZOrderRestore()}}"
+                    + "ifpays,runArm.takeOwed(){scheduleZOrderRestore()}}"
             )
         )
     }
