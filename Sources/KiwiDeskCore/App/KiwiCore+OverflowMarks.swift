@@ -25,17 +25,14 @@ extension KiwiCore {
         let shown = Set(state.workspaces.visibleSpaces)
         let carried = stickyReachCarried()
         // A mark wears the shelf's look, so it stands down with the
-        // shelf: native fullscreen, a show or a maximized window in
-        // front (#1787, #2448).
+        // shelf — native fullscreen, a show or a maximized window in
+        // front (#1787, #2448) — on the verdict the bar pass took.
+        let down = overflowMarks.standingDown
         return tiler.runCovers.values
             .filter { cover in
-                guard shown.contains(cover.space),
-                    let screen = TilingEngine.screen(
-                        for: cover.space,
-                        in: state
-                    )
-                else { return false }
-                return !shelfStandsDown(on: screen)
+                guard shown.contains(cover.space) else { return false }
+                return state.workspaces.display(of: cover.space)
+                    .map { !down.contains($0) } ?? true
             }
             .sorted { $0.space.description < $1.space.description }
             .flatMap(OverflowMark.marks(of:))

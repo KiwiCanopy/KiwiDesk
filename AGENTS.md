@@ -1725,8 +1725,9 @@ Touching `Borders`, `Vision`.
 - an overflow mark rides every channel the sticky mark takes through the one
   door per channel in `KiwiCore+Marks.swift` and its own `WindowServerWatch`
   consumer, its marks derived from `runCovers` in the one `overflowMarkSpecs`
-  at the bars' tail and standing down with the shelf, keyed by run end, on its
-  window's Desktop unless carried (#2235, `MarkFamilyParityTests`,
+  at the tail of every `updateBars()` and standing down on that pass's own
+  verdict, keyed by run end, on its window's Desktop unless carried (#2235,
+  `MarkFamilyParityTests`, `OverflowMarkPanelSeamTests`,
   `OverflowMarkWiringTests`, `StickyOverlaySpanTests`)
 - every window `focusAnchor` may yield has a ring slot — the slots and the
   anchor read the one `anchorVisitors(of:tiled:)` (#2259,

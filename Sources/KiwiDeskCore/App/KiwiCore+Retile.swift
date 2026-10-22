@@ -66,7 +66,7 @@ extension KiwiCore {
             tiler.meter.add(\.passesHeld)
             updateBars()
             updateBorders()
-            updateMarks()
+            updateStickyMarks()
             return
         }
         if paying { tiler.meter.add(\.passesMerged) }
@@ -159,17 +159,13 @@ extension KiwiCore {
     /// The bars, then every step that reads the strips they paint
     /// (`shownStrips`, through `reservedStrips`) — the one tail a
     /// retile and a pass-less bar write (#1524) share, so a new
-    /// strip reader joins here, as does a surface wearing the
-    /// shelf's look (the overflow marks, #2235). `between` runs
-    /// after the bars and before the readers.
+    /// strip reader joins here. `between` runs after the bars and
+    /// before the readers.
     func repaintBarsAndFloatNet(
         animated: Bool,
         between: () -> Void = {}
     ) {
         updateBars()
-        // The overflow marks wear the shelf's look and read the
-        // pass's runs, so a shelf write repaints them too (#2235).
-        updateOverflowMarks()
         between()
         // Floats sit outside the layout loop, so a bar just
         // switched on (or a window just turned floating) can leave
@@ -191,7 +187,7 @@ extension KiwiCore {
         // animation tee (`tiler.onFrameApplied`).
         updateBorders()
         // The sticky marks ride the same freshness (#414); the
-        // overflow marks synced at the bars' tail just above.
+        // overflow marks synced with the bars above.
         updateStickyMarks()
         // An animated relayout (spawn, close, mode/gap change)
         // restacks windows, so WindowServer fires the same

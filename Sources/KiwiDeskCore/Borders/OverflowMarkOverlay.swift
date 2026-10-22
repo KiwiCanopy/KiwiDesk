@@ -57,6 +57,8 @@ final class OverflowMarkOverlay {
     private(set) var lastFrame: CGRect?
     private var hasOrdered = false
     private var spans = false
+    private var hasRendered = false
+    private var drawnName = ""
     #if DEBUG
         /// Whether the panel orders in; off in both `makeTestCore`
         /// twins, so no Stack fixture puts a window on screen.
@@ -85,6 +87,14 @@ final class OverflowMarkOverlay {
             lastFrame = nil
             hasOrdered = false
         }
+        // Every bar pass syncs the marks; an unchanged one measures
+        // and draws nothing.
+        guard
+            mark != self.mark || name != drawnName
+                || shelf != view.shelfLook || !hasRendered
+        else { return }
+        hasRendered = true
+        drawnName = name
         self.mark = mark
         let text = "+\(mark.count)"
         size = OverflowMark.size(

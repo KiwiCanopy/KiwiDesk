@@ -47,11 +47,12 @@ struct OverflowMarkPanelSeamTests {
     }
 
     /// The mark wears the shelf's look, so it stands down with the
-    /// shelf through its one verdict (#1787, #2448) — never a part
-    /// of it. Which Space a fixture's screen shows is the host's,
-    /// so the routing is needled rather than driven.
-    @Test("the marks stand down through the shelf's one verdict")
-    func specsAskTheStandDown() throws {
+    /// shelf on the verdict the bar pass took (#1787, #2448) —
+    /// never a second reading of it, nor a part of it — and syncs
+    /// at that pass's tail. Which Space a fixture's screen shows is
+    /// the host's, so the routing is needled rather than driven.
+    @Test("the marks stand down on the bar pass's own verdict")
+    func specsReadTheBarVerdict() throws {
         let app = Self.borders.deletingLastPathComponent()
             .appendingPathComponent("App")
         let source = try SourceScan.strippedSource(
@@ -63,9 +64,28 @@ struct OverflowMarkPanelSeamTests {
                 in: source
             )
         )
-        #expect(specs.occurrences(of: "shelfStandsDown(on: screen)") == 1)
-        for part in ["showsMaximized(", "showsPresentation(", "isUser"] {
+        #expect(specs.contains("overflowMarks.standingDown"))
+        for part in [
+            "shelfStandsDown(", "showsMaximized(", "showsPresentation(",
+            "isUser",
+        ] {
             #expect(!specs.contains(part), "reads \(part) beside it")
         }
+        let shelf = try SourceScan.strippedSource(
+            at: app.appendingPathComponent("KiwiCore+Shelf.swift")
+        )
+        let bars = try #require(
+            SourceScan.declarationBody(after: "func updateBars(", in: shelf)
+        )
+        let filed = try #require(
+            bars.range(of: "overflowMarks.standingDown = standingDown")
+        )
+        let synced = try #require(
+            bars.range(
+                of: "updateOverflowMarks()",
+                range: filed.upperBound..<bars.endIndex
+            )
+        )
+        #expect(filed.upperBound <= synced.lowerBound)
     }
 }

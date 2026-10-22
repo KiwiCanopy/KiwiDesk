@@ -352,15 +352,16 @@ for the tick and the AX echo, `oweMarkOrder` for a carry — plus the
 WindowServer bounds and restack through its own `WindowServerWatch`
 consumer, its frame decided by `FollowSource` like the sticky
 mark's. A channel the sticky mark gains is added through that door,
-or as a twin spelling in the same file; `MarkFamilyParityTests`
-holds the doors, the two ruled single-family syncs in the retile,
-and every other spelling twinned file by file. **What it draws is
-derived from `TilingEngine.runCovers` in the one
-`overflowMarkSpecs`, synced at the bars' tail**
-(`repaintBarsAndFloatNet`), since it wears KiwiShelf's look and a
-shelf write repaints the bars without a pass, and it stands down
-through the shelf's one `shelfStandsDown(on:)`
-(`OverflowMarkWiringTests`). Its overlay is keyed by the run END,
+or as a twin spelling in the same file, or is ruled sticky-only
+with its reason; `MarkFamilyParityTests` reads the members off the
+source and holds the doors, the ruled single-family syncs and every
+other member twinned file by file. **What it draws is derived from
+`TilingEngine.runCovers` in the one `overflowMarkSpecs`, synced at
+the tail of every `updateBars()`**, since it wears KiwiShelf's look
+and the shelf repaints from many sites with no pass, and it stands
+down on the stand-down set that same bar pass took, never a second
+reading (`OverflowMarkPanelSeamTests`, `OverflowMarkWiringTests`).
+Its overlay is keyed by the run END,
 never the anchor, so a scroll step re-anchors one panel rather than
 minting another. It stays on its window's Desktop, spanning only
 while that window is carried — the off-transition's re-home is
