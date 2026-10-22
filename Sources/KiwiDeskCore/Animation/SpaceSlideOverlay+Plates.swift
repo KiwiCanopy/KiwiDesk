@@ -23,7 +23,7 @@ extension SpaceSlideOverlay {
         for pile in piles.keys.sorted() {
             let members = piles[pile] ?? []
             let views = members.map { plateView($0, in: current) }
-            page.addSubview(pileView(views, bounds: bounds, current.glass))
+            page.addSubview(pileView(views, bounds: bounds, current))
         }
         return page
     }
@@ -33,13 +33,18 @@ extension SpaceSlideOverlay {
     private func pileView(
         _ views: [NSView],
         bounds: CGRect,
-        _ glass: Bool
+        _ current: Play
     ) -> NSView {
         let content = NSView(frame: bounds)
         for view in views { content.addSubview(view) }
-        guard glass, let container = GlassPlate.makeContainer() else {
+        guard current.glass, let container = GlassPlate.makeContainer()
+        else {
             return content
         }
+        GlassTint.followPick(
+            container,
+            host: current.panel.effectiveAppearance
+        )
         container.frame = bounds
         GlassPlate.setContainerContent(container, content)
         return container
@@ -48,7 +53,8 @@ extension SpaceSlideOverlay {
     /// One plate: Liquid Glass (`.regular`, the shortcuts panel's)
     /// or, where the gate stands glass down, the behind-window blur
     /// nearest the shortcuts panel's `.regularMaterial` (owner,
-    /// device, #1956) — with the app icon centred
+    /// device, #1956), dark where the Appearance pick is — with the
+    /// app icon centred
     /// on the part of the window the page shows, on a pile's front
     /// face only.
     private func plateView(
@@ -76,6 +82,10 @@ extension SpaceSlideOverlay {
         let radius = SpaceSlidePlan.cornerRadius
         if current.glass, let glass = GlassPlate.make(regular: true) {
             GlassPlate.update(glass, frame: rect, cornerRadius: radius)
+            GlassTint.followPick(
+                glass,
+                host: current.panel.effectiveAppearance
+            )
             GlassPlate.setContent(glass, content)
             return glass
         }

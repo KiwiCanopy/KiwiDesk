@@ -3667,6 +3667,14 @@ a second needs no switch of its own, and one leaf fewer is one
 fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
+They follow the Appearance pick as KiwiHub does: each plate's
+glass is pinned dark where the pick resolves dark, through
+`GlassTint.followPick` (#2539). Left to itself the glass takes its
+variant from the windows it covers, which are mostly bright, so
+the plates read white under a dark pick. No switch of their own: only dark
+can be pinned (#1308, Liquid Glass above), so a light choice could
+not hold over dark windows, and plates unlike the rest of the app
+are not worth a setting.
 
 *Why plates, and not a blur or a picture of the windows.* A blur
 dissolve was built on the device and dropped: a blur reads as

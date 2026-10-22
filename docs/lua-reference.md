@@ -1058,7 +1058,8 @@ switched:
   fade out over the windows that arrive. The windows themselves
   move once each, under the plates. The plates wear KiwiHub's
   glass
-  ([`set_shortcut_panel_liquid_glass`](#set_shortcut_panel_liquid_glass)).
+  ([`set_shortcut_panel_liquid_glass`](#set_shortcut_panel_liquid_glass)),
+  dark where Settings' Appearance is.
   With Reduce Motion on, a switch shows the Space as `"show"`
   does, the stored value staying `"slide"`. Over a full-screen app
   or a presentation the screen changes at once, with no plate.
