@@ -136,8 +136,7 @@ extension AppDelegate {
             closing === onboardingWindow
         else { return }
         onboardingWindow = nil
-        // A tour closed on the looks step leaves no bar held.
-        core.holdBarsRevealed(false)
+        onboardingModel.endPresentation()
         // Keyed on model completion rather than hardcoded step cases (#678).
         if onboardingModel.reachedEnd {
             OnboardingDiscovery.markShown()

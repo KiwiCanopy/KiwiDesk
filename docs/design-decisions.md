@@ -8738,6 +8738,21 @@ colours no palette reads selected until a click, while a look
 whose shape is still live keeps its mark and says "Other colors"
 (`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`).
 
+:::unreleased
+The bars step (#2515) is the same act on the bars' visibility:
+a pick writes through, its Revert returns the visibility leaves
+alone, and the two steps' Reverts leave each other's writes
+standing (`TourBarVisibilityTests` ▸ `barsRevertKeepsTheLook`,
+`TourBarVisibilityTests` ▸ `looksRevertKeepsTheVisibility`).
+While the Looks step is on screen it holds every hiding bar
+shown, over the windows and retiling nothing, since a look
+painted onto bars hidden at rest is a click with nothing to see
+(`OnboardingBarsTests` ▸ `onlyLooksHolds`,
+`ShelfRevealHoldTests`). A bar's shortcut is refused under
+that hold, which would otherwise move only what the release
+gives back.
+:::
+
 ### The Mac Checklist counts what macOS can confirm
 
 **[Principle]**
@@ -14930,7 +14945,15 @@ is the one change that can move the windows. Hiding while still
 reserving the full strip was rejected (the user would give up the
 information and keep paying the area). An update changes nothing
 a user sees: a bar stored on becomes `always`, one stored off
-`hidden`; a fresh install's starter takes `auto`, which the welcome tour's bars step explains and lets the user change (#2515); 3.2.0 shipped it on `always` because no tour page explained Auto yet.
+`hidden`.
+
+:::unreleased
+A fresh install's starter takes `auto` (#2515), and only beside
+the welcome tour's bars step, which shows what Auto does and
+offers Always and Hidden in one click: a starter that hides the
+bars with no page explaining it leaves a new user with a mark
+they cannot read. A tour without that step seeds `always`.
+:::
 
 Each bar stores its own value, and an edge two bars share reserves
 for its MORE present bar: `always` over `auto` over `hidden`.

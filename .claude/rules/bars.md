@@ -212,7 +212,12 @@ twice, was a question the user answered twice. The argument is
   timed pin ends hidden, since no hover can retract it.
   Whether a hiding bar is shown is asked of `ShelfManager.reveal`
   per bar in `updateBars()`, and a second shown-answer
-  beside it is review's; its pointer monitor and location are
+  beside it is review's; a FORCED reveal is the revealer's one
+  `heldOpen`, read only inside `reveal(of:)`, session-only,
+  refusing a shortcut while set and released by its owner on
+  leaving and by `stop()` — the tour's looks step its one
+  holder, through `KiwiCore.holdBarsRevealed` (#2515,
+  `ShelfRevealHoldTests`, `OnboardingBarsTests`); its pointer monitor and location are
   seams both `makeTestCore` twins pin (`MouseButtonSeamGuardTests`,
   `ShelfPanelPinTests` the indicator panels), the indicator lets
   the mouse through (`ShelfAutoHideCoreTests` ▸

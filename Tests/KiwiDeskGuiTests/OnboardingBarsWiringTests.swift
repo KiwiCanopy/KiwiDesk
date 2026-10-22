@@ -42,7 +42,12 @@ struct OnboardingBarsWiringTests {
     func tourWiresAndReleases() throws {
         let tour = try source("AppDelegate+Onboarding.swift")
         #expect(tour.contains("wireOnboardingBars()"))
-        #expect(tour.contains("core.holdBarsRevealed(false)"))
+        #expect(
+            tour.contains(
+                "onboardingWindow = nil\n"
+                    + "        onboardingModel.endPresentation()"
+            )
+        )
     }
 
     @Test("the step is drawn")

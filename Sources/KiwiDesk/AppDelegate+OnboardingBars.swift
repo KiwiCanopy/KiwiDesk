@@ -18,7 +18,7 @@ extension AppDelegate {
             self?.dashboardIfCreated?.hasUnsavedDraft ?? false
         }
         bars.captureBaseline = { [weak self] in
-            self?.core.shelfPaintBaseline()
+            self?.core.tourBaseline()
         }
         bars.baselineIsLive = { [weak self] baseline in
             self?.core.describesLiveProfile(baseline) ?? false
@@ -26,7 +26,7 @@ extension AppDelegate {
         bars.onSetVisibility = { [weak self] visibility in
             self?.core.withUserMotion {
                 self?.core.setBarVisibility(visibility)
-            }
+            } ?? false
         }
         bars.onRestore = { [weak self] baseline in
             self?.core.withUserMotion {

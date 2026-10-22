@@ -89,6 +89,11 @@ final class OnboardingModel {
         reachedEnd = false
     }
 
+    /// The tour window closed: nothing it held stays held.
+    func endPresentation() {
+        holdBarsRevealed(false)
+    }
+
     /// Registers/unregisters the login item to match `openAtLogin`.
     /// Wired to `LoginItemManager`; a no-op stub keeps the model
     /// testable without touching `SMAppService`.
@@ -125,7 +130,7 @@ final class OnboardingModel {
     private(set) var looksRevision = 0
     /// The settings before this presentation's first paint; nil
     /// until one lands, so a step left untouched writes nothing.
-    private(set) var looksBaseline: KiwiCore.ShelfPaintBaseline?
+    private(set) var looksBaseline: KiwiCore.TourBaseline?
     /// The bundled looks, then every palette a look may name.
     var shelfLooks: () -> [ShelfLook] = { [] }
     var shelfPalettes: () -> [ColorPalette] = { [] }
@@ -134,12 +139,12 @@ final class OnboardingModel {
     /// Whether Settings holds an unsaved draft, whose Save would
     /// overwrite a paint here.
     var settingsDraftPending: () -> Bool = { false }
-    var captureShelfBaseline: () -> KiwiCore.ShelfPaintBaseline? = {
+    var captureShelfBaseline: () -> KiwiCore.TourBaseline? = {
         nil
     }
     /// Whether a baseline still describes the live profile; one
     /// that does not is re-captured by the next paint.
-    var baselineIsLive: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in
+    var baselineIsLive: (KiwiCore.TourBaseline) -> Bool = { _ in
         true
     }
     /// Paints a look with its palette, or a palette alone, live
@@ -147,7 +152,7 @@ final class OnboardingModel {
     var onPaintShelf: (ShelfLook?, ColorPalette?) -> Void = { _, _ in }
     /// Returns whether the restore landed; it is refused once
     /// another profile went live (`KiwiCore.restoreShelf`).
-    var onRestoreShelf: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in
+    var onRestoreShelf: (KiwiCore.TourBaseline) -> Bool = { _ in
         false
     }
 

@@ -9,16 +9,16 @@ extension KiwiCore {
     /// What a tour Revert returns to — the looks step's and the
     /// bars step's (#2515): the settings live and in the file
     /// before the step's first write, and whose profile they were.
-    public struct ShelfPaintBaseline: Equatable, Sendable {
+    public struct TourBaseline: Equatable, Sendable {
         let profile: String?
         let live: TilingSettings
         let stored: TilingSettings?
     }
 
     /// Records what a later `restoreShelf` returns to.
-    public func shelfPaintBaseline() -> ShelfPaintBaseline {
+    public func tourBaseline() -> TourBaseline {
         let name = profiles.currentName
-        return ShelfPaintBaseline(
+        return TourBaseline(
             profile: name,
             live: tiler.settings,
             stored:
@@ -29,7 +29,7 @@ extension KiwiCore {
     }
 
     /// Whether `baseline` still describes the live profile.
-    public func describesLiveProfile(_ baseline: ShelfPaintBaseline) -> Bool {
+    public func describesLiveProfile(_ baseline: TourBaseline) -> Bool {
         baseline.profile == profiles.currentName
     }
 
@@ -53,15 +53,15 @@ extension KiwiCore {
         let paint: (inout TilingSettings) -> Void = {
             $0 = Self.painted($0, look: look, palette: palette)
         }
-        paintShelfThrough(live: paint, stored: paint)
+        writeTourEditThrough(live: paint, stored: paint)
     }
 
     /// Returns what a paint can reach to `baseline`, live and in
     /// the file; refused once another profile is live.
     @discardableResult
-    public func restoreShelf(_ baseline: ShelfPaintBaseline) -> Bool {
+    public func restoreShelf(_ baseline: TourBaseline) -> Bool {
         guard describesLiveProfile(baseline) else { return false }
-        paintShelfThrough(
+        writeTourEditThrough(
             live: { $0 = Self.unpainted($0, to: baseline.live) },
             stored: { settings in
                 guard let stored = baseline.stored else { return }
@@ -104,7 +104,7 @@ extension KiwiCore {
 
     /// Writes a tour step's edit live, retiles, and writes it
     /// into the live profile's file.
-    func paintShelfThrough(
+    func writeTourEditThrough(
         live: (inout TilingSettings) -> Void,
         stored: @escaping SettingsEdit
     ) {

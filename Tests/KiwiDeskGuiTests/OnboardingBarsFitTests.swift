@@ -18,9 +18,12 @@ import Testing
 struct OnboardingBarsFitTests {
     /// The window's height less its vertical padding, the progress
     /// row and the stack spacing under it (`OnboardingView`).
-    private static let budget: CGFloat = 620 - 2 * 26 - 5 - 16
+    private static let budget =
+        OnboardingView.size.height - 2 * OnboardingView.inset.height
+        - OnboardingProgressRow.pipHeight - OnboardingView.spacing
     /// The window's width less its horizontal padding.
-    private static let width: CGFloat = 560 - 2 * 30
+    private static let width =
+        OnboardingView.size.width - 2 * OnboardingView.inset.width
 
     private static var seeded: KeyLayer {
         var layer = KeyLayer.defaultLayer

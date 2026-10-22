@@ -13,24 +13,24 @@ final class OnboardingBarsModel {
     private(set) var revision = 0
     /// The settings before this presentation's first pick; nil
     /// until one lands, so a step left untouched writes nothing.
-    private(set) var baseline: KiwiCore.ShelfPaintBaseline?
+    private(set) var baseline: KiwiCore.TourBaseline?
 
     var tilingSettings: () -> TilingSettings = { TilingSettings() }
     /// Whether Settings holds an unsaved draft, whose Save would
     /// overwrite a pick here.
     var settingsDraftPending: () -> Bool = { false }
-    var captureBaseline: () -> KiwiCore.ShelfPaintBaseline? = { nil }
+    var captureBaseline: () -> KiwiCore.TourBaseline? = { nil }
     /// Whether a baseline still describes the live profile; one
     /// that does not is re-captured by the next pick.
-    var baselineIsLive: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in
+    var baselineIsLive: (KiwiCore.TourBaseline) -> Bool = { _ in
         true
     }
-    /// Sets every bar's visibility live and into the live profile
-    /// (`KiwiCore.setBarVisibility`).
-    var onSetVisibility: (ShelfVisibility) -> Void = { _ in }
+    /// Sets every bar's visibility live and into the live profile,
+    /// false where nothing changed (`KiwiCore.setBarVisibility`).
+    var onSetVisibility: (ShelfVisibility) -> Bool = { _ in false }
     /// Returns whether the restore landed; it is refused once
     /// another profile went live (`KiwiCore.restoreBarVisibility`).
-    var onRestore: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in false }
+    var onRestore: (KiwiCore.TourBaseline) -> Bool = { _ in false }
     /// The show/hide shortcut rows, read from the live layer; a
     /// bar with no chord has no row.
     var revealKeys: () -> [OnboardingKeyFamily] = { [] }
@@ -51,18 +51,14 @@ final class OnboardingBarsModel {
         return baseline.map(baselineIsLive) ?? false
     }
 
-    /// A pick that would change nothing writes nothing, so Revert
-    /// stays greyed until something changed.
+    /// Core answers whether a pick changed anything; one that
+    /// did not keeps no baseline, so Revert stays greyed.
     func pick(_ visibility: ShelfVisibility) {
         guard !settingsDraftPending() else { return }
-        let live = tilingSettings()
-        var next = live
-        next.setEveryBarVisibility(visibility)
-        guard next != live else { return }
-        if baseline.map(baselineIsLive) != true {
-            baseline = captureBaseline()
-        }
-        onSetVisibility(visibility)
+        let kept = baseline.flatMap { baselineIsLive($0) ? $0 : nil }
+        let before = kept ?? captureBaseline()
+        guard onSetVisibility(visibility) else { return }
+        baseline = before
         revision += 1
     }
 

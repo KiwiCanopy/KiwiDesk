@@ -22,7 +22,7 @@ extension AppDelegate {
             self?.dashboardIfCreated?.hasUnsavedDraft ?? false
         }
         onboardingModel.captureShelfBaseline = { [weak self] in
-            self?.core.shelfPaintBaseline()
+            self?.core.tourBaseline()
         }
         onboardingModel.onPaintShelf = { [weak self] look, palette in
             self?.core.withUserMotion {

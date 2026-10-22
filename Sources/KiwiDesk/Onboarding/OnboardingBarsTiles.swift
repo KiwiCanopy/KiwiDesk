@@ -45,11 +45,8 @@ struct OnboardingBarsTiles: View {
     /// Settings' own option names, so the tour and the Show row
     /// say one word.
     static func name(_ visibility: ShelfVisibility) -> String {
-        switch visibility {
-        case .always: L("bar.visibility.always", "Always")
-        case .auto: L("bar.visibility.auto", "Auto")
-        case .hidden: L("bar.visibility.hidden", "Hidden")
-        }
+        AppBarOptions.visibility.first { $0.0 == visibility }?.1
+            ?? ""
     }
 
     static func caption(_ visibility: ShelfVisibility) -> String {

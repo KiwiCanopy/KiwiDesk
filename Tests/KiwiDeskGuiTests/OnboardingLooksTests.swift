@@ -43,7 +43,7 @@ struct OnboardingLooksTests {
         model.settingsDraftPending = { recorder.draftPending }
         model.captureShelfBaseline = {
             recorder.captures += 1
-            return core.shelfPaintBaseline()
+            return core.tourBaseline()
         }
         model.onPaintShelf = { look, palette in
             recorder.paints.append((look?.name, palette?.name))

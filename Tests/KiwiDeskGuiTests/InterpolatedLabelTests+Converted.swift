@@ -305,6 +305,8 @@ extension InterpolatedLabelTests {
         // the scan does not count as a label).
         "looks.shared.xref_link": 1,
         "onboarding.looks.draft_pending": 2,
+        "onboarding.bars.draft_pending": 2,
+        "onboarding.bars.hint": 2,
         "onboarding.looks.hint_ai": 2,
         // The Float card's `?` names the float VALUE it explains
         // (#1022, #1608).

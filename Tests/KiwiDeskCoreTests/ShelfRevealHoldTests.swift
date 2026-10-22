@@ -85,4 +85,17 @@ struct ShelfRevealHoldTests {
         #expect(!revealer.heldOpen)
         #expect(counter.changes == before)
     }
+
+    /// Under a hold the bar reads shown whatever its phase, so a
+    /// shortcut is refused rather than moving the phase the release
+    /// gives back.
+    @Test("a toggle under the hold is refused and keeps the phase")
+    func toggleUnderHoldIsRefused() {
+        let (revealer, _) = make()
+        revealer.toggle(Self.key, duration: 0)
+        revealer.heldOpen = true
+        #expect(!revealer.toggle(Self.key, duration: 0))
+        revealer.heldOpen = false
+        #expect(revealer.reveal(of: Self.key) == .pinned(until: nil))
+    }
 }

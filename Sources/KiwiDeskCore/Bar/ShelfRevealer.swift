@@ -124,10 +124,15 @@ final class ShelfRevealer {
     }
 
     /// The show/hide action on `key`'s bar; false where that bar
-    /// does not hide. `duration` is `kiwishelf.reveal_timeout`.
+    /// does not hide or while `heldOpen`. `duration` is
+    /// `kiwishelf.reveal_timeout`.
     @discardableResult
     func toggle(_ key: Key, duration: TimeInterval) -> Bool {
-        guard let target = targets[key] else { return false }
+        // Under a hold the bar reads shown whatever its phase,
+        // so a toggle could only move what the release gives back.
+        guard !heldOpen, let target = targets[key] else {
+            return false
+        }
         cancelTimer(key)
         arming.remove(key)
         let next = reveal(of: key).toggled(now: now(), duration: duration)

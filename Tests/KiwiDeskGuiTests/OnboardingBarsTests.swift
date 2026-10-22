@@ -35,11 +35,15 @@ struct OnboardingBarsTests {
         bars.settingsDraftPending = { recorder.draftPending }
         bars.captureBaseline = {
             recorder.captures += 1
-            return core.shelfPaintBaseline()
+            return core.tourBaseline()
         }
         bars.onSetVisibility = { visibility in
+            var next = recorder.live
+            next.setEveryBarVisibility(visibility)
+            guard next != recorder.live else { return false }
             recorder.picks.append(visibility)
-            recorder.live.setEveryBarVisibility(visibility)
+            recorder.live = next
+            return true
         }
         bars.onRestore = { _ in
             recorder.restores += 1
@@ -71,12 +75,13 @@ struct OnboardingBarsTests {
         #expect(model.bars.selected == nil)
     }
 
-    @Test("a pick that changes nothing writes nothing")
-    func noOpPickWritesNothing() {
+    /// Core answers whether a pick changed anything, and the
+    /// model keeps no baseline for one that did not.
+    @Test("a pick that changes nothing keeps no baseline")
+    func noOpPickKeepsNoBaseline() {
         let (model, recorder) = makeModel()
         model.bars.pick(.auto)
         #expect(recorder.picks.isEmpty)
-        #expect(recorder.captures == 0)
         #expect(!model.bars.hasChanges)
     }
 
@@ -167,6 +172,17 @@ struct OnboardingBarsTests {
         #expect(model.step == .bars)
         #expect(recorder.holds.last == false)
         model.continueAfterBars()
+        #expect(recorder.holds.last == false)
+    }
+
+    /// The tour's close releases the hold through the model, the
+    /// one owner of it.
+    @Test("ending the presentation releases the hold")
+    func endReleases() {
+        let (model, recorder) = makeModel()
+        model.beginPresentation(at: .looks)
+        #expect(recorder.holds.last == true)
+        model.endPresentation()
         #expect(recorder.holds.last == false)
     }
 }

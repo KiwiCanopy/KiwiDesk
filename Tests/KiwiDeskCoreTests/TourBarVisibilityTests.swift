@@ -39,20 +39,20 @@ struct TourBarVisibilityTests {
     }
 
     @Test("a pick every bar already reads writes nothing")
-    func noOpWritesNothing() throws {
+    func noOpWritesNothing() {
         let core = makeCore()
-        core.tiler.settings.resizeStep += 7
+        var writes = 0
+        core.onLiveProfileWritten = { _, _ in writes += 1 }
         #expect(!core.setBarVisibility(.always))
-        // A write would have been a read-modify-write of the file,
-        // so the file's own step is the tell that none ran.
-        let live = core.tiler.settings.resizeStep
-        #expect(try stored(core).resizeStep != live)
+        #expect(writes == 0)
+        #expect(core.setBarVisibility(.auto))
+        #expect(writes == 1)
     }
 
     @Test("restore returns the visibility live and in the file")
     func restoreReturnsBoth() throws {
         let core = makeCore()
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.setBarVisibility(.auto)
         #expect(core.restoreBarVisibility(baseline))
         #expect(core.tiler.settings.uniformBarVisibility == .always)
@@ -62,7 +62,7 @@ struct TourBarVisibilityTests {
     @Test("the bars' revert leaves a look painted since alone")
     func barsRevertKeepsTheLook() throws {
         let core = makeCore()
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.setBarVisibility(.hidden)
         let taskbar = try look("Taskbar")
         core.paintShelf(look: taskbar, palette: nil)
@@ -75,7 +75,7 @@ struct TourBarVisibilityTests {
     @Test("the looks' revert leaves a visibility picked since alone")
     func looksRevertKeepsTheVisibility() throws {
         let core = makeCore()
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.paintShelf(look: try look("Taskbar"), palette: nil)
         core.setBarVisibility(.hidden)
         core.restoreShelf(baseline)
@@ -86,7 +86,7 @@ struct TourBarVisibilityTests {
     @Test("a restore is refused once another profile went live")
     func restoreSkipsAnotherProfile() throws {
         let core = makeCore(saving: "First")
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.setBarVisibility(.hidden)
         _ = core.execute("save_profile", args: [.string("Second")])
         #expect(!core.restoreBarVisibility(baseline))

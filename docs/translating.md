@@ -446,8 +446,8 @@ checked — so it is yours to hold.
 
 ### The tour's modifier abbreviations are not translated
 
-The tour's shortcuts screen draws `ctrl`, `opt`, `shift` and
-`cmd` under `⌃ ⌥ ⇧ ⌘`. Those four are **not catalog keys** and
+The tour's shortcuts and bars screens draw `ctrl`, `opt`,
+`shift` and `cmd` under `⌃ ⌥ ⇧ ⌘`. Those four are **not catalog keys** and
 never appear in a worksheet — they are language-neutral tokens
 like the glyphs above them — so their appearing in English is
 not a missed translation. The full names *are* translated, in

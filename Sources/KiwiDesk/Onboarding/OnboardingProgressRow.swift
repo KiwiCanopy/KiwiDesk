@@ -10,7 +10,7 @@ struct OnboardingProgressRow: View {
     private var reduceMotion
 
     private let pipWidth: CGFloat = 18
-    private let pipHeight: CGFloat = 5
+    static let pipHeight: CGFloat = 5
 
     var body: some View {
         HStack(spacing: 7) {
@@ -23,7 +23,7 @@ struct OnboardingProgressRow: View {
                             ? SettingsTheme.accent
                             : SettingsTheme.hairline
                     )
-                    .frame(width: pipWidth, height: pipHeight)
+                    .frame(width: pipWidth, height: Self.pipHeight)
             }
         }
         // #1069
