@@ -162,7 +162,6 @@
   "app_rules.space.remove.help": "Non aprire più questa app in uno spazio",
   "app_rules.space.temporary_header": "Temporanei — non in questo profilo",
   "app_rules.space_list.caption": "Ogni nuova finestra dell'app si apre nel suo spazio.",
-  "app_rules.space_list.help": "La regola vale per ogni nuova finestra dell'app: quando la avvii, apri un'altra finestra, riapri una finestra che avevi chiuso o ripristini una che avevi ridotto. Avviare l'app ti porta anche nel suo spazio.",
   "app_rules.space_list.title": "Apri in uno spazio",
   "app_rules.tile": "Affianca invece",
   "app_rules.tile.help": "Una regola di affiancamento affianca le finestre di un'app che altrimenti fluttuerebbero automaticamente. Finestre di dialogo, fogli e pannelli fluttuano comunque, e una regola di fluttuazione per la stessa app continua a far fluttuare le finestre che riguarda.",

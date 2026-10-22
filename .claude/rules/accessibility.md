@@ -4,6 +4,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+BootScan.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+AppObservation.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ProcessIdentity.swift"
+  - "Sources/KiwiDeskCore/Events/ProcessIdentity+Table.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ShadowWindows.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Tracking.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"

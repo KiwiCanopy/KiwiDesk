@@ -440,6 +440,10 @@ does not move focus.
 Opening an app whose [app rule](#app-rules) names a space on
 another screen moves the focus there with its window.
 
+:::unreleased
+A new window of a running app follows its app rule the same way.
+:::
+
 ## Gaps & Borders
 
 ### Shared by all borders

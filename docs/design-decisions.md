@@ -6342,11 +6342,11 @@ its arrival must not take them along, which is what
 `MoveIntentLatch` enforces.
 
 **The discrimination is the feature**, and following the wrong
-arrivals is worse than following none. A background app's
-spawned window, the windows macOS reopens at login, the ones
-KiwiDesk adopts at boot, the ones a Desktop switch reveals and
-a new tab are all window creations with an app rule behind them,
-and none of them is the user opening the app. What separates
+arrivals is worse than following none. The windows macOS
+reopens at login, the ones KiwiDesk adopts at boot, the ones a
+Desktop switch reveals and a new tab are all window creations
+with an app rule behind them, and none of them is the user
+opening the app. What separates
 them, measured on device, is an OPEN the user caused:
 
 - **A press within a second.** A Dock click activated the
@@ -6386,8 +6386,8 @@ them, measured on device, is an OPEN the user caused:
   those windows to its Space, and moving a window without the
   user is the worst of the three outcomes — it vanishes from
   where they are. A running app still showing a window — a
-  switch into it, its own call window, ⌘T — owes nothing. The
-  boot scan involves no activation at all. **New Window owes it
+  switch into it, ⌘T — owes no debt. The boot scan involves no
+  activation at all. **New Window owes it
   outright** (#1518, owner ruling 2026-09-30): the verb names the
   app and asks for a window, which is the open this rule follows,
   whatever the app already shows — and a press the app answers
@@ -6410,7 +6410,7 @@ them, measured on device, is an OPEN the user caused:
   own activation that follows keeps the debt rather than
   retiring it, since it is that launch completing. A pull of an
   app already showing a window opens nothing, so it owes
-  nothing, and a ⌘N moments later stays where the rule files it.
+  nothing.
 
 The debt is keyed by the app's bundle id and paid by its
 window's ARRIVAL, never at the activation, because the window
@@ -6426,6 +6426,45 @@ landed on, or one the rule files in the Space the user is
 already in is no launch to follow, and a transient overlay (a
 splash, a panel) never spends the debt, so the window behind it
 still can.
+
+:::unreleased
+**A new window follows too, owed nothing (#2478).** A running
+app's new window — ⌘N, File ▸ New, or one the app opens itself —
+that its rule files into a Space nobody is showing takes the user
+along the same way (owner ruling 2026-10-20). Left behind, it
+waits out of sight, and the focus distrusts that met its first
+report (#1161's placement bounce, #465's sibling re-report) fired
+for reasons false here.
+
+**What makes it new is WindowServer's word, not KiwiDesk's.**
+`.windowCreated` is also a boot sweep, an unlock's heal, a
+re-track after a dropped removal and a Desktop reveal, and no
+guard on those paths would stay complete as passes are added. So
+the arm follows only a window WindowServer reported CREATED while
+KiwiDesk watched (`WindowCreateLedger`, fed by the #1877
+notification), and where that route is absent the arm is off and
+only an open follows. The create can trail the arrival — 8–10 ms
+behind TextEdit's ⌘N, measured — so a create landing within half
+a second of its arrival pays the follow then, as a whole switch.
+
+A login restore is created while KiwiDesk watches too, so the
+window must also come from a process older than the cold-start
+grace, or follow a press within a second since KiwiDesk started
+(owner ruling 2026-10-22): a login restore has neither, a ⌘N right
+after a launch has the press. The arm stands down where the open
+arm does — during boot and a fresh Desktop switch — and while
+another app's launch debt stands, whose window would otherwise
+open in the Space this switch left. A popup still opens where the
+user is (#1602, #2475). The trade, accepted: a window an app opens
+with no press behind it, a call window, takes the user to its
+rule's Space.
+
+That does not reverse the discrimination above. The open arm
+judges an activation, which says nothing about any window; this
+arm judges a window WindowServer just created, one the user will
+look for. So a press — or none, from an app past its cold start —
+is enough here and still not there.
+:::
 
 There is no setting and no same-screen narrowing. A user who
 pins an app to a Space has already said where they want it, a

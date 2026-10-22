@@ -1,8 +1,9 @@
 import Foundation
 import Testing
 
-/// The production wirings of the launch follow (#1599) that no
-/// unit test reaches — the `FollowFocusSeamTests` shape.
+/// The production wirings of the launch follow (#1599) and its
+/// unowed arm (#2478) that no unit test reaches — the
+/// `FollowFocusSeamTests` shape.
 ///
 /// `LaunchFollowTests` drives the core entry, the fold and the
 /// arrival arm, but it calls `noteAppActivation` and injects the
@@ -79,6 +80,46 @@ struct LaunchFollowSeamTests {
             "effects.placedByAppRule =",
             "StateCoordinator+WindowCreated.swift", 1
         ),
+        // The unowed arm (#2478): the process age armed with the
+        // other machine seams, the create ledger fed and opened
+        // by the WindowServer route and closed by `stop()`, the
+        // verdict at the claim, and a late create paid as a
+        // whole switch. Each defaults closed, so a deleted line
+        // turns the arm off with every behaviour suite green.
+        (
+            "launchFollow.processAge = {",
+            "KiwiCore+BootSeams.swift", 1
+        ),
+        (
+            "ProcessIdentity.startAge(of: pid, now: $0.wallClock())",
+            "KiwiCore+BootSeams.swift", 1
+        ),
+        (
+            "windowCreates.isLive = active",
+            "KiwiCore+WindowServerWakeUp.swift", 1
+        ),
+        (
+            "windowCreates.isLive = false",
+            "KiwiCore+Lifecycle.swift", 1
+        ),
+        (
+            "windowCreates.noteCreated(id, at: wallClock())",
+            "KiwiCore+WindowServerWakeUp.swift", 1
+        ),
+        (
+            "windowCreates.noteDestroyed(id)",
+            "KiwiCore+WindowServerWakeUp.swift", 1
+        ),
+        ("payLateSpawnFollow(id)", "KiwiCore+WindowServerWakeUp.swift", 1),
+        (
+            "deferred.schedule(.lateSpawnFollow",
+            "KiwiCore+WindowServerWakeUp.swift", 1
+        ),
+        ("launchFollow.dropSpawn()", "KiwiCore+Lifecycle.swift", 1),
+        ("spawnVerdict(window)", followFile, 1),
+        ("launchFollow.noteSpawn(", followFile, 1),
+        ("launchFollow.takeSpawn(", followFile, 1),
+        ("followSwitch(to: spawn.space, focusing: id)", followFile, 1),
     ]
 
     @Test("each wiring exists exactly as often as pinned, in its file")
@@ -99,6 +140,40 @@ struct LaunchFollowSeamTests {
                 """
             )
         }
+    }
+
+    /// The ledger has one feeder, the WindowServer route (#2478):
+    /// a second would make an adoption read as a creation.
+    @Test("the create ledger is fed from the WindowServer route alone")
+    func ledgerHasOneFeeder() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "windowCreates.noteCreated(",
+            under: Self.core
+        )
+        #expect(
+            sites.count == 1
+                && sites.first?.file.lastPathComponent
+                    == "KiwiCore+WindowServerWakeUp.swift",
+            "found: \(sites.map(\.site))"
+        )
+    }
+
+    /// The late payment runs a whole switch, so it leaves the
+    /// event-port drain the notify proc runs inside — which the
+    /// border pump waits on — through the deferred hop (#2478).
+    @Test("a late create pays outside the event-port drain")
+    func latePaymentLeavesTheDrain() throws {
+        let body = try SourceScan.functionBody(
+            of: "windowServerChanged",
+            in: "KiwiCore+WindowServerWakeUp.swift",
+            under: "App"
+        )
+        let hop = try #require(
+            body.range(of: "deferred.schedule(.lateSpawnFollow")
+        )
+        let pay = try #require(body.range(of: "payLateSpawnFollow("))
+        #expect(hop.lowerBound < pay.lowerBound)
+        #expect(body.components(separatedBy: "payLateSpawnFollow(").count == 2)
     }
 
     /// Three retires, each load-bearing: another app's activation
