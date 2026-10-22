@@ -4,6 +4,15 @@ import Testing
 @testable import KiwiDeskCore
 
 private let ids = (1...6).map { WindowID(UInt32($0)) }
+private let screen = CGRect(x: 0, y: 0, width: 1920, height: 800)
+
+/// A hidden window is parked at the hide corner (#2235 ruling,
+/// 2026-10-22), never inside the screen's usable area.
+@MainActor
+private func isParked(_ frame: CGRect?) -> Bool {
+    guard let frame else { return false }
+    return TilingEngine.looksStashed(frame, in: screen)
+}
 
 /// Usable 1900 × 780: a stack zone of five fits two at 300 pt.
 private func context(
@@ -23,6 +32,7 @@ private func context(
 /// focus scrolls it, a resting head holds it, each zone and each
 /// track scrolls on its own, and `RunCover` reads what it hides.
 @Suite("Scroll run layouts")
+@MainActor
 struct ScrollRunLayoutTests {
     /// Master w1, stack w2…w6.
     private let tiled = Array(ids)
@@ -35,11 +45,12 @@ struct ScrollRunLayoutTests {
         )
         let last = try #require(frames[ids[5]])
         #expect(abs(last.maxY - 790) < 0.01)
-        // w5 shares the zone with w6; w2…w4 wait behind w5.
+        // w5 shares the zone with w6; w2…w4 wait parked.
         let edge = try #require(frames[ids[4]])
         #expect(edge.maxY + 10 == last.minY)
-        #expect(frames[ids[1]] == edge)
-        #expect(frames[ids[3]] == edge)
+        #expect(isParked(frames[ids[1]]))
+        #expect(isParked(frames[ids[3]]))
+        #expect(!isParked(edge))
     }
 
     @Test("A resting head holds the run while focus is elsewhere")
@@ -70,8 +81,30 @@ struct ScrollRunLayoutTests {
         let frames = StackLayout().calculateGeometry(for: tiled, in: ctx)
         let alone = try #require(frames[ids[2]])
         #expect(abs(alone.height - 780) < 0.01)
-        #expect(frames[ids[1]] == alone)
-        #expect(frames[ids[3]] == alone)
+        #expect(isParked(frames[ids[1]]))
+        #expect(isParked(frames[ids[3]]))
+    }
+
+    /// The device case: an app whose minimum exceeds the slot
+    /// grew down from the slot into the shown run (Zen, 495 pt in
+    /// a 432 pt slot). Parked at its own size, it shows nowhere.
+    @Test("A hidden window larger than its slot parks at its size")
+    func oversizedHiddenParks() throws {
+        var ctx = context(focused: ids[5])
+        ctx.sizeBounds = [
+            ids[1]: EffectiveSizeBound(height: [
+                .init(asked: 385, answered: 500),
+                .init(asked: 300, answered: 500),
+            ])
+        ]
+        let frames = StackLayout().calculateGeometry(for: tiled, in: ctx)
+        let hidden = try #require(frames[ids[1]])
+        #expect(isParked(hidden))
+        #expect(abs(hidden.height - 500) < 0.01)
+        let usable = screen.insetBy(dx: 10, dy: 10)
+        #expect(
+            hidden.intersection(usable).height <= TilingEngine.stashPeekY
+        )
     }
 
     @Test("Every overflowing track scrolls on its own")
@@ -85,9 +118,11 @@ struct ScrollRunLayoutTests {
         // The first track rests at its head; the second ends at
         // its focus.
         #expect(frames[ids[0]]?.minY == 10)
-        #expect(frames[ids[2]] == frames[ids[1]])
+        #expect(isParked(frames[ids[2]]))
+        #expect(!isParked(frames[ids[1]]))
         #expect(abs((frames[ids[5]]?.maxY ?? 0) - 790) < 0.01)
-        #expect(frames[ids[3]] == frames[ids[4]])
+        #expect(isParked(frames[ids[3]]))
+        #expect(!isParked(frames[ids[4]]))
     }
 
     @Test("The cover names each hidden window's edge and the heads")
@@ -104,12 +139,6 @@ struct ScrollRunLayoutTests {
         #expect(cover.behind[ids[1]] == ids[4])
         #expect(cover.behind[ids[3]] == ids[4])
         #expect(cover.behind[ids[5]] == nil)
-        // Hidden first, then the zone's whole shown run: a hidden
-        // window an app sizes past its slot stays under the run.
-        #expect(
-            cover.raiseOrder(in: tiled)
-                == [ids[1], ids[2], ids[3], ids[4], ids[5]]
-        )
     }
 
     @Test("A zone that fits draws no run and no cover")
@@ -147,22 +176,5 @@ struct ScrollRunLayoutTests {
         #expect(shown >= 2)
         let expected = span - shown * floor - (shown - 1) * gap
         #expect(abs(run.extra - expected) < 0.01)
-    }
-
-    /// Three shown at a 200 pt floor, so the run has a middle
-    /// member no edge rule would raise.
-    @Test("The restore raises every shown member, not only the edges")
-    func coverRaisesTheWholeRun() throws {
-        var probe = context(focused: ids[5])
-        probe.minWindowSize = .square(200)
-        let cover = try #require(
-            RunCover.of(space: "s", mode: .stack, tiled: tiled, in: probe)
-        )
-        let run = try #require(cover.runs.first)
-        #expect(Array(run.shown) == [ids[3], ids[4], ids[5]])
-        #expect(
-            cover.raiseOrder(in: tiled)
-                == [ids[1], ids[2], ids[3], ids[4], ids[5]]
-        )
     }
 }

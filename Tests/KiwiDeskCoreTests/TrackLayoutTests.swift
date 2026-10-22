@@ -114,6 +114,7 @@ struct TrackLayoutTests {
         }
     }
 
+    @MainActor
     @Test("Surplus tracks merge into one far-edge overflow track")
     func overflowTrackMerge() {
         // 10 single-window tracks, 2000 pt / 300 min (gap 10) →
@@ -136,24 +137,31 @@ struct TrackLayoutTests {
                 $0.minWindowSize = 300
             }
         )
-        let xs = w.map { frames[$0]!.minX }
+        // The overflow track's run parks what it hides (#2235).
+        let screen = CGRect(x: 0, y: 0, width: 2000, height: 900)
+        let parked = w.filter {
+            TilingEngine.looksStashed(frames[$0]!, in: screen)
+        }
+        let shown = w.filter { !parked.contains($0) }
+        let xs = shown.map { frames[$0]!.minX }
         // Five normal columns + one overflow column = six x's.
         #expect(Set(xs).count == 6)
         // The overflow track is the far edge and holds the tail.
         let overflowX = xs.max()!
-        let inOverflow = w.filter { frames[$0]!.minX == overflowX }
-        #expect(Set(inOverflow) == Set(w[5...]))
+        let inOverflow = shown.filter { frames[$0]!.minX == overflowX }
+        #expect(!parked.isEmpty)
+        #expect(Set(inOverflow + parked) == Set(w[5...]))
         // Each leading track holds exactly one window.
         for lead in w[..<5] {
             #expect(
                 xs.filter { $0 == frames[lead]!.minX }.count == 1
             )
         }
-        // The overflow track scrolls (#2235): fewer slots drawn
-        // than windows, the hidden sharing the last one.
+        // The overflow track scrolls (#2235): each shown window
+        // draws its own slot, the last window waits parked.
         let oy = Set(inOverflow.map { frames[$0]!.minY })
-        #expect(oy.count < inOverflow.count)
-        #expect(frames[w[w.count - 1]] == frames[w[w.count - 2]])
+        #expect(oy.count == inOverflow.count)
+        #expect(parked.contains(w[w.count - 1]))
     }
 
     @Test("Degenerate span falls back to a whole-space cascade")
@@ -183,10 +191,11 @@ struct TrackLayoutTests {
         #expect(widths.first! >= 300)
     }
 
+    @MainActor
     @Test("Along-axis overflow shows what fits, hides the rest")
     func alongAxisPartialOverflow() {
         // One track holding more windows than fit: the run shows
-        // what fits and the rest wait behind its last slot.
+        // what fits and the rest wait parked.
         let w = ids(8)
         let frames = layout.calculateGeometry(
             for: w,
@@ -202,13 +211,17 @@ struct TrackLayoutTests {
                 $0.minWindowSize = 300
             }
         )
-        // Single track: all windows share one column (same x).
-        #expect(Set(w.map { frames[$0]!.minX }).count == 1)
-        let slots = Set(w.map { frames[$0]!.minY })
-        #expect(slots.count > 1)
-        #expect(slots.count < w.count)
+        // Single track: every shown window shares one column; the
+        // rest rest parked at the hide corner (#2235).
+        let screen = CGRect(x: 0, y: 0, width: 1200, height: 1600)
+        let shown = w.filter {
+            !TilingEngine.looksStashed(frames[$0]!, in: screen)
+        }
+        #expect(Set(shown.map { frames[$0]!.minX }).count == 1)
+        #expect(shown.count > 1)
+        #expect(shown.count < w.count)
         #expect(w.allSatisfy { frames[$0]!.height >= 300 })
-        #expect(frames[w[7]] == frames[w[6]])
+        #expect(!shown.contains(w[7]))
     }
 
     @Test("A row's overflow waits behind its last slot")

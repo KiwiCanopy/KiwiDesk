@@ -93,6 +93,7 @@ struct StackLayoutTests {
         #expect(frames[w3]?.minX ?? 0 > m1.maxX)
     }
 
+    @MainActor
     @Test("Column overflow shows what fits, hides the rest behind")
     func partialOverflow() throws {
         // Usable 780pt tall; two stack windows fit at 300pt, so
@@ -115,9 +116,12 @@ struct StackLayoutTests {
         #expect(abs(top.height - 385) < 0.01)
         #expect(abs(edge.minY - top.maxY - 10) < 0.01)
         #expect(abs(edge.maxY - 790) < 0.01)
-        // Hidden windows take the edge slot exactly.
-        #expect(frames[w4] == edge)
-        #expect(frames[w5] == edge)
+        // Hidden windows rest parked at the hide corner (#2235).
+        let screen = CGRect(x: 0, y: 0, width: 1920, height: 800)
+        for hidden in [w4, w5] {
+            let frame = try #require(frames[hidden])
+            #expect(TilingEngine.looksStashed(frame, in: screen))
+        }
     }
 
     @Test("StackParams decodes profiles missing new fields")

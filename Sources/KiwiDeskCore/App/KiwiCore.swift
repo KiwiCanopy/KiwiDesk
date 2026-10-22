@@ -64,16 +64,16 @@ public final class KiwiCore {
     var defersEventRetiles = false
     /// A Desktop switch's re-sync, folded alike (`+SwitchResync`).
     var switchResync: SwitchResyncBatch?
-    /// A z-order restore waits for animations to settle.
+    /// A z-order restore is waiting for the current animations
+    /// to settle (`runPendingZOrderRestore`).
     var pendingZOrderRestore = false
-    /// The scrolled runs' z-order arm (`+RunRest`, #2235).
-    let runArm = RunArm()
     /// The float raise owed behind the tiled plane (#2284).
     let floatRaiseDebt = FloatRaiseDebt()
 
     /// A command reordered windows but its paired retile is the
     /// dispatcher's trailing `retile(pass: .apply)` (#153), so
-    /// `layoutCommand` arms the restore after it; reset each dispatch.
+    /// `layoutCommand` arms the z-order restore after it. Set via
+    /// `requestZOrderRestoreAfterDispatch`; reset each dispatch.
     var deferredCommandZOrderRestore = false
 
     /// What the layout sub-API's one trailing `retile` may

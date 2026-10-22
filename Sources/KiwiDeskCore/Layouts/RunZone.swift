@@ -49,15 +49,57 @@ public struct RunZone: Sendable, Equatable {
                 minSize: context.minWindowSize
             )
         }
-        let rects =
-            plan.run?.frames(
-                floors: plan.floors,
-                weights: plan.weights,
-                in: region,
-                vertical: vertical,
-                gap: plan.gap
-            ) ?? weightedRects(plan)
-        return Dictionary(uniqueKeysWithValues: zip(members, rects))
+        guard let run = plan.run else {
+            return Dictionary(
+                uniqueKeysWithValues: zip(members, weightedRects(plan))
+            )
+        }
+        let rects = run.frames(
+            floors: plan.floors,
+            weights: plan.weights,
+            in: region,
+            vertical: vertical,
+            gap: plan.gap
+        )
+        let corner = TilingEngine.optimalHideCorner(
+            neighbors: context.screenNeighbors
+        )
+        var frames: [WindowID: CGRect] = [:]
+        for (index, member) in members.enumerated() {
+            frames[member] =
+                run.visible.contains(index)
+                ? rects[index]
+                : Self.parked(
+                    member,
+                    slot: rects[index],
+                    corner: corner,
+                    in: context
+                )
+        }
+        return frames
+    }
+
+    /// A hidden window's frame: its own size at the slot it waits
+    /// for, parked at the hide corner (#2235 ruling, 2026-10-22).
+    /// macOS cannot clip another app's window, so one whose
+    /// minimum exceeds a slot overhangs wherever it waits; the
+    /// corner is where that overhang lands off screen, as for
+    /// monocle's `park` (#881).
+    private static func parked(
+        _ id: WindowID,
+        slot: CGRect,
+        corner: TilingEngine.HideCorner,
+        in context: LayoutContext
+    ) -> CGRect {
+        let own =
+            context.sizeBounds[id]?
+            .centered(in: slot, generalizing: !context.probesBeyondBounds)
+            ?? slot
+        return TilingEngine.stashFrame(
+            own,
+            in: context.bounds,
+            corner: corner
+        )
     }
 
     /// The span left to the weights once the shown members' floors

@@ -170,14 +170,10 @@ extension KiwiCore {
     /// its title bar. The focused window is re-raised last, the
     /// same override as the stack cascade.
     private func restoreTrackZOrder(_ space: Space) {
-        if restoreRunZOrder(space) { return }
         guard let input = tiler.layoutInput(state: state) else {
             return
         }
-        let frames = TrackLayout().calculateGeometry(
-            for: input.tiled,
-            in: input.context
-        )
+        let frames = shownTrackFrames(input)
         // Any overlap = piled, matching the `framesCascade` gate
         // (raw intersection). Deliberately NOT `Navigation.
         // pileMates`' 25%-area threshold — that answers "worth
@@ -224,12 +220,7 @@ extension KiwiCore {
         guard let input = tiler.layoutInput(state: state),
             input.space.mode == .track
         else { return false }
-        return Self.framesCascade(
-            TrackLayout().calculateGeometry(
-                for: input.tiled,
-                in: input.context
-            )
-        )
+        return Self.framesCascade(shownTrackFrames(input))
     }
 
     /// Re-raises the stack zone top to bottom, so upper
@@ -238,7 +229,6 @@ extension KiwiCore {
     /// brings the focused window to the front, which is the
     /// expected override.
     private func restoreStackZOrder(_ space: Space) {
-        if restoreRunZOrder(space) { return }
         // Per-space master boundary (#17), matching layout math.
         let boundary = max(
             1,
@@ -255,9 +245,12 @@ extension KiwiCore {
         // rendered order can differ from the array once
         // `stickyExempt` promotes a piled sticky (#414 v2).
         // Anchor, not `space.focused` — see restoreTrackZOrder.
+        // A run's hidden windows rest parked, outside the zone
+        // (#2235): the zone restacks only what it shows.
+        let hidden = runHidden
         raiseSequentially(
             Self.cascadeRaiseOrder(
-                Array(tiled[boundary...]),
+                tiled[boundary...].filter { !hidden.contains($0) },
                 frames: tiler.calculatedFrames(state: state)
             ),
             thenFocus: state.focusAnchor(of: space, tiled: tiled),
@@ -301,7 +294,7 @@ extension KiwiCore {
     /// leaves the apps to land them in whatever order they get to
     /// them, and the pile settles scrambled. `ZOrderDrain` owns
     /// the verification, the budget and the measurements.
-    func raiseSequentially(
+    private func raiseSequentially(
         _ ids: [WindowID],
         thenFocus focused: WindowID?,
         above floor: [WindowID]

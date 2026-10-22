@@ -84,7 +84,7 @@ struct ZoneRunTests {
         #expect(fewer.visible == 0..<1)
     }
 
-    @Test("Hidden windows take the slot they wait behind")
+    @Test("Hidden windows are handed the edge slot RunZone parks")
     func hiddenFrames() {
         let region = CGRect(x: 0, y: 0, width: 100, height: 780)
         let rects = run(head: 1).frames(

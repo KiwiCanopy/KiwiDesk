@@ -1166,8 +1166,10 @@ editing here:
   `ZOrderSequenceWiringTests` pins that the teardown call site
   still drops it.
 - A context site that **materializes scrolled-out scrolling
-  frames — or monocle's parked frames (#881) — threads
-  `screenNeighbors`** (#878):
+  frames — or monocle's or a scrolled run's parked frames (#881,
+  #2235) — threads `screenNeighbors`** (#878), and a park or an
+  unpark the layout loop issues snaps on every pass through the
+  one `TilingEngine.parkSnaps` (`RunParkSnapTests`):
   `TilingSettings.context` defaults the flags to all-open (the
   single-screen verdict), and nothing scans for the omitted
   parameter, so a new site that computes real scrolling frames

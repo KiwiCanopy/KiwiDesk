@@ -85,43 +85,47 @@ struct RunRestWiringTests {
         #expect(!heads.contains(WindowID(1)))
     }
 
-    @Test("A changed cover arms the restore; a repeat arms nothing")
-    func coverChangeArmsOnce() throws {
+    /// Hidden windows rest parked at the hide corner and overlap
+    /// nothing (#2235 ruling, 2026-10-22), so a scroll owes no
+    /// z-order restore — the pan holds any restore pending, which
+    /// is what the assertion reads.
+    @Test("A scroll arms no z-order restore")
+    func scrollArmsNothing() throws {
         let core = makeCore()
         let space = makeSpace(core, focused: 6)
-        // The fixture's own retiles drew the cover for the last
-        // window; scrolling back to the top changes it.
         core.retile(animated: false)
-        let drawn = core.runArm.answered[space]
+        let before = try #require(core.tiler.runCovers[space])
         try #require(startDummyPan(core))
         core.state.workspaces.focus(WindowID(2), in: space)
         core.pendingZOrderRestore = false
         core.retile(animated: false)
-        #expect(core.runArm.answered[space] != drawn)
-        #expect(core.pendingZOrderRestore)
-        core.pendingZOrderRestore = false
-        core.retile(animated: false)
+        let after = try #require(core.tiler.runCovers[space])
+        #expect(after.heads != before.heads)
         #expect(!core.pendingZOrderRestore)
     }
 
-    /// The close-return stand-down governs this arm too (#936): a
-    /// removal's retile owes the arm to the tail instead of
-    /// issuing it.
-    @Test("A removal's retile holds the arm for the tail")
-    func removalHoldsTheArm() throws {
+    /// The parked windows share one corner frame: the restore that
+    /// stacks the stack zone, and its track twin's gate, leave them
+    /// out or every scroll would restack a phantom pile.
+    @Test("A zone restore leaves the parked windows out")
+    func restoreSkipsParked() throws {
         let core = makeCore()
         let space = makeSpace(core, focused: 6)
         core.retile(animated: false)
-        try #require(startDummyPan(core))
-        core.state.workspaces.focus(WindowID(2), in: space)
-        core.pendingZOrderRestore = false
-        let owed = core.holdingRunArm(true) {
-            core.retile(animated: false)
-        }
-        #expect(!core.pendingZOrderRestore)
-        #expect(owed)
-        // The debt lives no longer than the hold's answer.
-        #expect(!core.runArm.owed)
+        let hidden = core.runHidden
+        #expect(!hidden.isEmpty)
+        let input = try #require(
+            core.tiler.layoutInput(state: core.state)
+        )
+        let frames = core.dropRunHidden(
+            core.tiler.calculatedFrames(state: core.state),
+            space: space,
+            mode: .stack,
+            tiled: input.tiled,
+            in: input.context
+        )
+        #expect(hidden.allSatisfy { frames[$0] == nil })
+        #expect(frames[WindowID(6)] != nil)
     }
 
     /// Focus drives the scroll (#2235 ruling): the focus verb's

@@ -69,11 +69,15 @@ extension TilingEngine {
         }
         meter.add(\.framesIssued)
         let issued = probe?.frame ?? target
+        let from = sent ?? current
         let instant = applyFrame(
             id,
-            from: sent ?? current,
+            from: from,
             to: issued,
-            animated: animated,
+            animated: animated
+                && !Self.parkSnaps(from: from, to: issued) {
+                    looksStashed($0)
+                },
             isNewWindow: isNew,
             sizing: promised
         )
@@ -90,6 +94,18 @@ extension TilingEngine {
         ) {
             onInstantLayoutAsk(id)
         }
+    }
+
+    /// Whether a layout frame parks or unparks a window — a corner
+    /// at either end — which snaps on an animated pass too: a park
+    /// is a hide, never a corner flight (#881; #2235 ruling,
+    /// 2026-10-22).
+    static func parkSnaps(
+        from: CGRect,
+        to: CGRect,
+        _ looksStashed: (CGRect) -> Bool
+    ) -> Bool {
+        looksStashed(from) || looksStashed(to)
     }
 
     /// Whether a layout ask owes the #677 settle probe itself: an

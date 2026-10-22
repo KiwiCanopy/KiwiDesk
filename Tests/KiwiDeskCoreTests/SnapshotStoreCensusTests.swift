@@ -56,8 +56,6 @@ struct SnapshotStoreCensusTests {
             (.inPlace, "where a scrolled zone rests (#2235)"),
         "tiler.runCovers":
             (.behind, "what the last pass's runs drew, redrawn (#2235)"),
-        "runArm.answered":
-            (.behind, "the run arm's memo; a restart arms once (#2235)"),
         "state.userFloated":
             (.stop, "a float set by hand, which the scan cannot see"),
         "state.stickyReachOverrides":

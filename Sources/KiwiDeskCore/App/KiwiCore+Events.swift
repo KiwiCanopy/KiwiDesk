@@ -273,23 +273,16 @@ extension KiwiCore {
         let followed = launchFollow.map {
             payLaunchFollow($0.0, into: $0.1)
         }
-        // The run arm a removal's own retile held, which the tail
-        // pays or stands down (#936, #2235).
-        var runArmOwed = false
         if willRetile, followed != true {
             // A Desktop switch's re-sync takes one pass at its end.
-            if !foldIntoSwitchResync(
-                removal: event.goneWindowID != nil
-            ) {
+            if !foldIntoSwitchResync() {
                 // The user's own close or open runs now (#2187).
                 withAppActMotion(
                     event,
                     effects: effects,
                     reason: goneReason
                 ) {
-                    runArmOwed = holdingRunArm(event.goneWindowID != nil) {
-                        retile(newlyCreatedWindow: newlyCreatedWindow)
-                    }
+                    retile(newlyCreatedWindow: newlyCreatedWindow)
                 }
             }
         } else if crossedScreenCover(event, before: preEventFrame) {
@@ -310,8 +303,7 @@ extension KiwiCore {
             event: event,
             effects: effects,
             goneReason: goneReason,
-            willRetile: willRetile,
-            runArmOwed: runArmOwed
+            willRetile: willRetile
         )
     }
 }

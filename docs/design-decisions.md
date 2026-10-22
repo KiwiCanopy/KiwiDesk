@@ -3999,10 +3999,9 @@ farthest from the seam.
 **Stack and Track scroll their overflow (#2235).** A Stack zone
 or a Track track that cannot fit its windows at their floors
 shows as many as fit from where it rests, each at its floor plus
-a weighted share of what is left, and the rest wait exactly
-behind the first or last shown slot, inside the zone. Focus
-drives the run by the smallest step that shows the focused
-window. Every zone that overflows scrolls on its own, as each
+a weighted share of what is left, and the rest wait off
+screen, parked at the hide corner. Focus drives the run by the
+smallest step that shows the focused window. Every zone that overflows scrolls on its own, as each
 Track track does. The master zone still holds `master_count`
 windows and sends every further one to the stack zone; it
 overflows only when `master_count` itself is more than fits.
@@ -4024,35 +4023,43 @@ than given a third value.
 screen or some app's minimum, where the floors already say how
 many fit. A zone-only scroll gesture: the ⌃⌥ scroll steps focus
 in every layout, and focus already drives the run. Overhang past
-the zone's edge, corner parking and parking behind the master:
-each puts a hidden window where it is drawn over something else.
+the zone's edge and parking behind the master: each puts a
+hidden window where it is drawn over something else.
 An App Bar that appears only on overflow: its reserve would
 resize every window the moment the count crosses the edge,
 against #761's rule that only a setting moves the windows.
 
-*Behind an edge slot, inside the zone.* A hidden window takes the
-frame of the slot it waits behind and is stacked under it.
-Nothing peeks out, nothing reaches the master zone and nothing
-crosses to a neighbouring screen — #878's wall, on every edge —
-so the run needs no `screenNeighbors` rule, and macOS's
-inability to clip a foreign window never comes into play. The
-hidden window keeps that edge slot even where Stack's
-learned-floor pass (`SplitOverflow.placed`) moves a window
-inward, since pulled inward it would cross the shown run; and
-the z-order restore raises every hidden window first, then every
-shown window of a zone that hides (`RunCover.raiseOrder`). A
-hidden app that refuses the slot's size therefore overhangs from
-that slot, stacked under the zone's shown windows, never above
-them.
+*Parked at the hide corner, and a park snaps.* A hidden window
+rests at the hide corner, at its own learned size, as monocle's
+`park` does (#881): the corner and its sliver are #410's, chosen
+over `screenNeighbors` (#878) so the body falls into dead space.
+Waiting behind the edge slot was the first ruling and failed on
+the device: macOS cannot clip another app's window, and one
+whose minimum exceeds the slot keeps its origin and grows down
+into the shown run (Zen, 495 pt in a 432 pt slot, peeking
+through the gap below it). Only the corner puts that overhang
+off screen for any app. A park or an unpark snaps on every pass,
+the animated ones included (`TilingEngine.parkSnaps`), while the
+shown windows glide one slot: the step still reads as a scroll.
+The window entering is always the focused one, and focusing
+raises it, so it can never slide out from under its neighbour —
+it appears in its slot on top. The window leaving drops to the
+corner. With nothing stacked under the run, a scroll owes no
+z-order restore, and the zone restores leave the parked windows
+out, which would otherwise read as a pile at the corner. Flying
+from the corner was declined for the default: monocle's park
+already rules that a focus change is a raise and never a corner
+flight (a separate setting may offer it later).
 
 *One record of what a run shows.* The engine records each shown
 Space's runs inside the retile pass that draws them
-(`TilingEngine.runCovers`), and the z-order restore, navigation,
+(`TilingEngine.runCovers`), and the z-order restores, navigation,
 the weight resize, `list_windows` and the App Bar's visibility
 all read that record. A reader judging a run from the frames
-alone sees a hidden window at its shown neighbour's frame and
-calls one of the two covered by the other (#2547); the record
-says which waits behind. The weight resize is the same rule
+alone sees the parked windows piled at the corner, or, as it
+was under the first ruling, a hidden window at its shown
+neighbour's frame and one of the two covered by the other
+(#2547); the record says which wait. The weight resize is the same rule
 applied: inside a run it divides only the span left after the
 shown windows' floors, which is the span the layout divides
 (#933), so a press never writes a share the run does not draw.

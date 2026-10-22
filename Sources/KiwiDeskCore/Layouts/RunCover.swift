@@ -2,7 +2,7 @@ import CoreGraphics
 
 /// What a Space's scrolled runs draw (#2235): each zone that hides
 /// windows with the run it shows. Persistence, the z-order
-/// restore, navigation and the visibility verdict all read this
+/// restores, navigation and the visibility verdict all read this
 /// one value — the engine records it from the pass it issued.
 public struct RunCover: Sendable, Equatable {
     /// One zone that hides windows, and the run it draws.
@@ -18,12 +18,12 @@ public struct RunCover: Sendable, Equatable {
             zone.members[run.visible]
         }
 
-        /// Members waiting before the run, behind its first slot.
+        /// Members waiting before the run's first slot.
         public var hiddenBefore: ArraySlice<WindowID> {
             zone.members[..<run.visible.lowerBound]
         }
 
-        /// Members waiting after the run, behind its last slot.
+        /// Members waiting after the run's last slot.
         public var hiddenAfter: ArraySlice<WindowID> {
             zone.members[run.visible.upperBound...]
         }
@@ -37,7 +37,8 @@ public struct RunCover: Sendable, Equatable {
         self.runs = runs
     }
 
-    /// Hidden window → the shown window whose slot it shares.
+    /// Hidden window → the shown window at the end it waits beyond;
+    /// the window itself is parked at the hide corner.
     public var behind: [WindowID: WindowID] {
         var map: [WindowID: WindowID] = [:]
         for run in runs {
@@ -79,37 +80,5 @@ public struct RunCover: Sendable, Equatable {
             )
         }
         return RunCover(space: space, runs: runs)
-    }
-
-    /// One run's layers: the windows behind its first slot, the
-    /// shown run, and the windows behind its last slot.
-    public struct Layers: Sendable, Equatable {
-        public let before: [WindowID]
-        public let shown: [WindowID]
-        public let after: [WindowID]
-    }
-
-    /// What decides the stacking: each hiding run's layers, never
-    /// its region, gaps or weight span, which move no window
-    /// between layers.
-    public var stacking: [Layers] {
-        runs.map {
-            Layers(
-                before: Array($0.hiddenBefore),
-                shown: Array($0.shown),
-                after: Array($0.hiddenAfter)
-            )
-        }
-    }
-
-    /// The raise order that stacks every hidden window under its
-    /// zone's shown run: the hidden first, then each shown member
-    /// of a zone that hides, in array order — so a hidden window
-    /// an app sizes past its slot stays under the whole run.
-    public func raiseOrder(in tiled: [WindowID]) -> [WindowID] {
-        let hidden = Set(behind.keys)
-        let shown = Set(runs.flatMap(\.shown))
-        return tiled.filter { hidden.contains($0) }
-            + tiled.filter { shown.contains($0) }
     }
 }

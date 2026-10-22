@@ -4608,8 +4608,11 @@ instead of cascading. A zone shows as many windows as fit at
 their minimum size, which is `min_window_size`, or an app's own
 minimum once KiwiDesk has learned it where that is larger. Each
 shown window gets its minimum plus a share of what is left, and
-the rest wait hidden exactly behind the first or last shown
-window, inside the zone, stacked under it. A window whose
+the rest wait off screen, parked at the screen's bottom corner
+like the windows of a Space you are not on. Scrolling moves the
+shown windows one slot along the zone; the window scrolling in
+appears in its slot at once, and the one scrolling out returns
+to the corner. A window whose
 minimum is larger than the zone is shown alone. Focusing a
 hidden window scrolls the zone by the smallest step that shows
 it, and closing a window pulls the run back so no room stays

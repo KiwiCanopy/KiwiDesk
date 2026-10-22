@@ -1,23 +1,5 @@
 import Foundation
 
-/// The scrolled runs' z-order arm (#2235): the cover each Space's
-/// arm last answered for, and the hold a removal's retile places
-/// on it until the close-return tail decides (#936).
-@MainActor
-final class RunArm {
-    /// Per Space, the `RunCover.stacking` its last arm answered
-    /// for — so a switch away and back arms nothing (#674), nor
-    /// does a gap or learned-floor change that moves no window
-    /// between layers. Pruned to live Spaces at each pass, so a
-    /// dropped or renumbered Space's entry goes with it and a
-    /// renumbered one arms once; a rekeyed window re-arms once.
-    var answered: [SpaceID: [RunCover.Layers]] = [:]
-    /// Raised around a held retile: its arm is recorded in `owed`
-    /// rather than issued, and the hold hands it back.
-    fileprivate(set) var holding = false
-    fileprivate(set) var owed = false
-}
-
 /// Persists where the shown Spaces' scrolled Stack zones and Track
 /// tracks rest (#2235), the `ScrollRest` loop's twin: the layout
 /// reads `Space.runHeads` and this writes back the heads the pass
@@ -29,30 +11,13 @@ extension KiwiCore {
         state.workspaces.activeSpace.flatMap { tiler.runCovers[$0] }
     }
 
-    /// Writes the drawn heads back, and arms the z-order restore
-    /// when what the active Space's runs hide changed: a hidden
-    /// window must sit under the run it waits behind, and a scroll
-    /// or a new member leaves the stacking stale. Narrow by
-    /// construction (#674): a cover the Space's last arm answered
-    /// for arms nothing, so neither the restore's own re-assert nor
-    /// a switch away and back re-arms it.
+    /// Writes the drawn heads back. Hidden windows rest parked at
+    /// the hide corner, overlapping nothing, so a scroll owes no
+    /// z-order restore (#2235 ruling, 2026-10-22).
     func persistRunHeads() {
         for (id, cover) in tiler.runCovers
         where state.workspaces[id]?.runHeads != cover.heads {
             state.workspaces.withSpace(id) { $0.runHeads = cover.heads }
-        }
-        runArm.answered = runArm.answered.filter {
-            state.workspaces[$0.key] != nil
-        }
-        guard let cover = activeRunCover,
-            runArm.answered[cover.space] != cover.stacking
-        else { return }
-        runArm.answered[cover.space] = cover.stacking
-        guard !cover.runs.isEmpty else { return }
-        if runArm.holding {
-            runArm.owed = true
-        } else {
-            scheduleZOrderRestore()
         }
     }
 
@@ -63,8 +28,8 @@ extension KiwiCore {
 
     /// The slots a classifier reads — a geometric step, a drop
     /// target, a pile test: `calculatedFrames` without the windows
-    /// a run hides, which share their edge slot's frame and so
-    /// would read as that slot's pile. The one door, so a new
+    /// a run hides, which all park at one corner and so would read
+    /// as a pile there. The one door, so a new
     /// classifier cannot forget the filter. The slots are fresh,
     /// the hidden set the last pass's: between a membership change
     /// and its retile, a window can read on the wrong side of the
@@ -91,35 +56,41 @@ extension KiwiCore {
         activeSpace?.mode.isFocusDriven == true || focusScrollsRun(to: id)
     }
 
-    /// Runs `retile` for a removal with the run arm held, and
-    /// returns whether the pass owed it: the close-return tail
-    /// pays or stands it down (#936). The debt lives no longer
-    /// than this call's answer.
-    @discardableResult
-    func holdingRunArm(_ removal: Bool, _ body: () -> Void) -> Bool {
-        runArm.holding = removal
-        runArm.owed = false
-        defer {
-            runArm.holding = false
-            runArm.owed = false
-        }
-        body()
-        return runArm.owed
+    /// The Track frames `input` draws, less what its runs park —
+    /// what a track restore and its gate judge for a pile.
+    func shownTrackFrames(
+        _ input: (space: Space, tiled: [WindowID], context: LayoutContext)
+    ) -> [WindowID: CGRect] {
+        dropRunHidden(
+            TrackLayout().calculateGeometry(
+                for: input.tiled,
+                in: input.context
+            ),
+            space: input.space.id,
+            mode: .track,
+            tiled: input.tiled,
+            in: input.context
+        )
     }
 
-    /// The restore for a Space whose runs hide windows: every
-    /// hidden window raised under its zone's shown run, and only
-    /// the windows of zones that hide (#192). False where no run
-    /// hides, leaving a whole-zone pile to the cascade order.
-    func restoreRunZOrder(_ space: Space) -> Bool {
-        guard let cover = tiler.runCovers[space.id], !cover.runs.isEmpty
-        else { return false }
-        let tiled = state.effectiveTiledMembers(of: space)
-        raiseSequentially(
-            cover.raiseOrder(in: tiled),
-            thenFocus: state.focusAnchor(of: space, tiled: tiled),
-            above: []
-        )
-        return true
+    /// `frames` without the windows the run `mode` draws over
+    /// `tiled` hides: parked at one corner, they would read as a
+    /// pile to a z-order restore and its gate (#2235).
+    func dropRunHidden(
+        _ frames: [WindowID: CGRect],
+        space: SpaceID,
+        mode: LayoutMode,
+        tiled: [WindowID],
+        in context: LayoutContext
+    ) -> [WindowID: CGRect] {
+        guard
+            let hidden = RunCover.of(
+                space: space,
+                mode: mode,
+                tiled: tiled,
+                in: context
+            )?.behind
+        else { return frames }
+        return frames.filter { hidden[$0.key] == nil }
     }
 }

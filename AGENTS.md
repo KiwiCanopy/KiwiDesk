@@ -607,8 +607,10 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   sticky from `effectiveTiledMembers`, so the writers' `tiled.contains` is a
   construction net and a new droppable focus owes its one ruling in `resize()`
   ahead of every path (#1301, `ActiveHomeStickyMembershipTests`)
-- a context site that materializes scrolled-out scrolling frames — or monocle's
-  parked frames (#881) — threads `screenNeighbors`, detected fresh each retile
+- a context site that materializes scrolled-out scrolling frames — or
+  monocle's or a scrolled run's parked frames (#881, #2235), a park snapping
+  through the one `parkSnaps` — threads `screenNeighbors`, detected fresh each
+  retile
   over the `allScreenBounds` seam — never cached, never re-enumerated beside
   it, and a corner consumer takes its preference from the one
   `optimalHideCorner(neighbors:)` copy (#878)

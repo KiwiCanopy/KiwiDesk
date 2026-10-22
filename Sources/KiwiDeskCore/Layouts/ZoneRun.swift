@@ -1,9 +1,10 @@
 import CoreGraphics
 
 /// A Stack zone's or a Track track's scrolled run (#2235): the
-/// windows shown at once, the rest waiting behind the first or
-/// last shown slot. Pure; `StackLayout` and `TrackLayout` place
-/// through it, and `Space.runHeads` carries where a run rests.
+/// windows shown at once, the rest waiting beyond the first or
+/// last shown slot, parked by `RunZone`. Pure; `StackLayout`
+/// and `TrackLayout` place through it, and `Space.runHeads`
+/// carries where a run rests.
 public struct ZoneRun: Sendable, Equatable {
     /// Indices into the zone's members, in drawn order, that are
     /// shown. Never empty for a non-empty zone.
@@ -62,8 +63,9 @@ public struct ZoneRun: Sendable, Equatable {
 
     /// Frames for a zone's members: the shown run shares `region`
     /// along the axis, each window getting its floor plus a
-    /// weighted share of what is left; a hidden window takes the
-    /// slot it waits behind. Keyed in member order.
+    /// weighted share of what is left; a hidden window is handed
+    /// the edge slot it waits beyond, which `RunZone` parks. Keyed
+    /// in member order.
     public func frames(
         floors: [CGFloat],
         weights: [Double],

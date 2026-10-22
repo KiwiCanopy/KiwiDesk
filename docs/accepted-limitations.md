@@ -235,13 +235,15 @@ A Stack zone or Track track — the overflow track included —
 whose windows do not all fit at their minimums, an app's own
 learned minimum among them, shows only the windows that do
 ([When windows no longer fit](lua-reference.md#when-windows-no-longer-fit)).
-Each hidden window keeps the frame of the edge slot it waits
-behind and is stacked under the zone's shown windows, so an app
-that refuses that size overhangs from that slot, under the shown
-windows, never above them. An app's own minimum is learned only
-after it refuses a size, so the first time such a window is
-placed it may overhang for one pass, until the next pass shows
-fewer windows. A tiled sticky window scrolls and hides like any
+Each hidden window waits off screen, parked at the screen's
+bottom corner like the windows of a Space you are not on, so it
+never shows in the zone whatever size its app insists on. A
+window scrolling in appears in its slot at once rather than
+sliding there, since focusing it raises it over its neighbour.
+An app's own minimum is learned only after it refuses a size,
+so the first time such a shown window is placed it may overhang
+its slot for one pass, until the next pass shows fewer
+windows. A tiled sticky window scrolls and hides like any
 other, and its sticky mark is not drawn while it is hidden; only
 the grid's last-cell pile keeps a sticky window shown
 ([#2235](https://github.com/KiwiCanopy/KiwiDesk/issues/2235)).

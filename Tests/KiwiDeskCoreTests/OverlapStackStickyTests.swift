@@ -146,10 +146,11 @@ struct OverlapStackStickyTests {
         )
     }
 
+    @MainActor
     @Test("A sticky scrolls in a track like any window")
     func trackColumnExemption() {
         // One track (no breaks), four windows in a column that
-        // shows three: sticky 4 waits hidden behind window 3 like
+        // shows three: sticky 4 waits parked like
         // any other (#2235, owner 2026-10-22: no exemption).
         let context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 600, height: 900),
@@ -165,7 +166,9 @@ struct OverlapStackStickyTests {
             Issue.record("Expected a frame for the sticky")
             return
         }
-        #expect(stickyFrame == frames[WindowID(3)])
+        #expect(
+            TilingEngine.looksStashed(stickyFrame, in: context.bounds)
+        )
         #expect(frames[WindowID(1)] != frames[WindowID(2)])
     }
 
@@ -206,10 +209,11 @@ struct OverlapStackStickyTests {
         )
     }
 
+    @MainActor
     @Test("A sticky scrolls in a stack zone like any window")
     func stackZoneExemption() {
         // One master + a stack zone showing two of three: sticky
-        // 4 (last in the zone) waits hidden behind window 3 like
+        // 4 (last in the zone) waits parked like
         // any other (#2235, owner 2026-10-22: no exemption).
         let context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 1200, height: 700),
@@ -225,7 +229,9 @@ struct OverlapStackStickyTests {
             Issue.record("Expected a frame for the sticky")
             return
         }
-        #expect(stickyFrame == frames[WindowID(3)])
+        #expect(
+            TilingEngine.looksStashed(stickyFrame, in: context.bounds)
+        )
         #expect(frames[WindowID(2)] != frames[WindowID(3)])
     }
 }

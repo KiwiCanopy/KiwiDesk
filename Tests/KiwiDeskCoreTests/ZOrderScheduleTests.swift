@@ -221,11 +221,16 @@ struct ZOrderScheduleTests {
         )
         setMode(core, space, "track")
         // Cap the space at the floor — one normal track plus the
-        // overflow (#1354): seven of the eight windows pile into
-        // the overflow and cascade (cascade_all default), so a
-        // swap inside it scrambles the stacking. Turn off
+        // overflow (#1354) — on a screen where not one window keeps
+        // the 900 pt minimum: the emergency whole-zone pile, the
+        // one track pile a scrolled run leaves (#2235), so a swap
+        // inside it scrambles the stacking. Turn off
         // swap-skips-cascade (#172) so the swap targets the
         // in-pile neighbor instead of stepping past the pile.
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1200, height: 800)
+        }
+        _ = core.execute("set_min_window_size", args: [.number(900)])
         _ = core.execute(
             "track.set_limit",
             args: [.number(Double(TrackParams.minLimit))]
