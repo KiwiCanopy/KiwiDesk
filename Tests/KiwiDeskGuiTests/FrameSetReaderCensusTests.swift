@@ -98,6 +98,41 @@ struct FrameSetReaderCensusTests {
         ),
     ]
 
+    /// The classifiers that read a scrolled run's hidden windows
+    /// as a pile unless they drop them (#2235): each reads the
+    /// slots through `shownSlots()` alone, so a site going back
+    /// to the raw `calculatedFrames(state:)` reds here — the
+    /// register above counts both as `.slots`.
+    static let viaShownSlots: Set<String> = [
+        "KiwiCore+Drag.swift",
+        "KiwiCore+DragMove.swift",
+        "KiwiCore+NavigateCommand.swift",
+        "KiwiCore+TrackNavigate.swift",
+        "KiwiCore+SwapCommand.swift",
+    ]
+
+    @Test("The run-aware classifiers read only the shown slots")
+    func classifiersDropHidden() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        var found = 0
+        for url in try SourceScan.swiftSources(under: root)
+        where Self.viaShownSlots.contains(url.lastPathComponent) {
+            found += 1
+            let text = try SourceScan.strippedSource(at: url)
+            let name = url.lastPathComponent
+            #expect(text.contains("shownSlots()"), "\(name)")
+            #expect(
+                SourceScan.allMatches(
+                    in: text,
+                    pattern: "(calculatedFrames\\(\\s*state)"
+                ).isEmpty,
+                "\(name) reads the raw slots"
+            )
+        }
+        #expect(found == Self.viaShownSlots.count)
+    }
+
     @Test("Every reader of either frame set is registered on its side")
     func readersAreRegistered() throws {
         let root = SourceScan.repoRoot(from: #filePath)

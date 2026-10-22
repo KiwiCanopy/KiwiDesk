@@ -161,14 +161,9 @@ extension KiwiCore {
             // it divides only with both zones populated, and a
             // literal `true` here silently became false the
             // moment the empty-zone verdict moved (review).
-            let (_, zone) = StackLayout.partition(
-                tiled,
-                masterCount: stack.masterCount
-            )
             refuseNothingToDivide(
                 focused,
-                otherAxisDivides: !(zone?.isEmpty ?? true)
-                    || loneMasterKeepsZone(tiled, stack, in: space)
+                otherAxisDivides: masterSplitDivides(tiled, stack, in: space)
             )
             return .fail("focused window is alone in its column")
         }
@@ -181,7 +176,8 @@ extension KiwiCore {
             focused,
             axis: axis,
             delta: delta,
-            space: space
+            space: space,
+            otherAxisDivides: masterSplitDivides(tiled, stack, in: space)
         ) {
             return response
         }
@@ -241,5 +237,20 @@ extension KiwiCore {
             $0.stackWeights[focused] = outcome.value
         }
         return .ok()
+    }
+
+    /// Whether the master split divides the Space: both zones
+    /// populated, or a lone master that keeps its zone.
+    private func masterSplitDivides(
+        _ tiled: [WindowID],
+        _ stack: StackParams,
+        in space: Space
+    ) -> Bool {
+        let (_, zone) = StackLayout.partition(
+            tiled,
+            masterCount: stack.masterCount
+        )
+        return !(zone?.isEmpty ?? true)
+            || loneMasterKeepsZone(tiled, stack, in: space)
     }
 }

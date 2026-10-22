@@ -81,6 +81,15 @@ public struct RunCover: Sendable, Equatable {
         return RunCover(space: space, runs: runs)
     }
 
+    /// What decides the stacking: each hiding run's shown members
+    /// and the windows behind them, never its region, gaps or
+    /// weight span, which move no window between layers.
+    public var stacking: [[[WindowID]]] {
+        runs.map {
+            [Array($0.hiddenBefore), Array($0.shown), Array($0.hiddenAfter)]
+        }
+    }
+
     /// The raise order that stacks every hidden window under its
     /// zone's shown run: the hidden first, then each shown member
     /// of a zone that hides, in array order — so a hidden window

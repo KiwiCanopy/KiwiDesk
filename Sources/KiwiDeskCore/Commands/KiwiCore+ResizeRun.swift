@@ -8,12 +8,14 @@ import Foundation
 extension KiwiCore {
     /// The write for `focused` when its zone's run hides windows,
     /// nil otherwise — the caller then takes the whole-zone clamp.
-    /// The stack and the track member writers share it.
+    /// The stack and the track member writers share it, each
+    /// stating whether its other axis divides (#1258).
     func resizeInRun(
         _ focused: WindowID,
         axis: String,
         delta: Double,
-        space: Space
+        space: Space,
+        otherAxisDivides: Bool
     ) -> CommandResponse? {
         guard
             let run = tiler.runCovers[space.id]?.runs.first(where: {
@@ -23,9 +25,11 @@ extension KiwiCore {
         let shown = Array(run.shown)
         guard shown.count > 1, let index = shown.firstIndex(of: focused)
         else {
-            // A run showing one window has no share to move; the
-            // other axis still divides the Space.
-            refuseNothingToDivide(focused, otherAxisDivides: true)
+            // A run showing one window has no share to move.
+            refuseNothingToDivide(
+                focused,
+                otherAxisDivides: otherAxisDivides
+            )
             return .fail("the focused window is alone in its run")
         }
         guard run.extra > 0 else {

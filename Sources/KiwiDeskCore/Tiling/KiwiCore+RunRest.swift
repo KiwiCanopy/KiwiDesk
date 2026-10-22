@@ -5,11 +5,13 @@ import Foundation
 /// on it until the close-return tail decides (#936).
 @MainActor
 final class RunArm {
-    /// Per Space, the cover its last arm answered for — so a
-    /// switch away and back arms nothing (#674). Pruned to live
-    /// Spaces at each pass, so a dropped or renumbered Space's
-    /// entry goes with it and a renumbered one arms once.
-    var answered: [SpaceID: RunCover] = [:]
+    /// Per Space, the `RunCover.stacking` its last arm answered
+    /// for — so a switch away and back arms nothing (#674), nor
+    /// does a gap or learned-floor change that moves no window
+    /// between layers. Pruned to live Spaces at each pass, so a
+    /// dropped or renumbered Space's entry goes with it and a
+    /// renumbered one arms once; a rekeyed window re-arms once.
+    var answered: [SpaceID: [[[WindowID]]]] = [:]
     /// Raised around a removal's event retile: its arm is owed to
     /// the close-return tail rather than issued.
     var holding = false
@@ -50,9 +52,9 @@ extension KiwiCore {
             state.workspaces[$0.key] != nil
         }
         guard let cover = activeRunCover,
-            runArm.answered[cover.space] != cover
+            runArm.answered[cover.space] != cover.stacking
         else { return }
-        runArm.answered[cover.space] = cover
+        runArm.answered[cover.space] = cover.stacking
         guard !cover.runs.isEmpty else { return }
         if runArm.holding {
             runArm.owed = true
@@ -70,7 +72,10 @@ extension KiwiCore {
     /// target, a pile test: `calculatedFrames` without the windows
     /// a run hides, which share their edge slot's frame and so
     /// would read as that slot's pile. The one door, so a new
-    /// classifier cannot forget the filter.
+    /// classifier cannot forget the filter. The slots are fresh,
+    /// the hidden set the last pass's: between a membership change
+    /// and its retile, a window can read on the wrong side of the
+    /// run for one press.
     func shownSlots() -> [WindowID: CGRect] {
         let hidden = runHidden
         return tiler.calculatedFrames(state: state).filter {
@@ -94,8 +99,10 @@ extension KiwiCore {
     }
 
     /// Runs `retile` for a removal with the run arm held, so the
-    /// close-return tail decides it (#936).
+    /// close-return tail decides it (#936). A hold starts with no
+    /// debt, so an earlier one no tail took never pays here.
     func holdingRunArm(_ removal: Bool, _ body: () -> Void) {
+        if removal { runArm.owed = false }
         runArm.holding = removal
         defer { runArm.holding = false }
         body()

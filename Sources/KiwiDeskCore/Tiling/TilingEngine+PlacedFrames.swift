@@ -50,15 +50,13 @@ extension TilingEngine {
                 space: placement.space,
                 screen: placement.screen
             )
-            if recordingCovers {
-                runCovers[input.space.id] = RunCover.of(
-                    space: input.space.id,
-                    mode: input.space.mode,
-                    tiled: input.tiled,
-                    in: input.context
-                )
-            }
-            var computed = laidOut(input, placed: placed)
+            // One cover per space: the record and the hidden
+            // windows' slots read the same value.
+            let cover =
+                recordingCovers || placed && input.space.mode == .stack
+                ? Self.cover(of: input) : nil
+            if recordingCovers { runCovers[input.space.id] = cover }
+            var computed = laidOut(input, placed: placed, cover: cover)
             if placed {
                 computed = fillingMaximized(
                     computed,
@@ -78,11 +76,25 @@ extension TilingEngine {
         return frames
     }
 
+    private static func cover(
+        of input: (space: Space, tiled: [WindowID], context: LayoutContext)
+    ) -> RunCover? {
+        RunCover.of(
+            space: input.space.id,
+            mode: input.space.mode,
+            tiled: input.tiled,
+            in: input.context
+        )
+    }
+
     /// One space's frames from its layout input: the slots, or the
     /// issued frames with the split layouts' residue placed.
+    /// `cover` is that input's `RunCover.of`, read on a placed
+    /// stack pass.
     private func laidOut(
         _ input: (space: Space, tiled: [WindowID], context: LayoutContext),
-        placed: Bool
+        placed: Bool,
+        cover: RunCover?
     ) -> [WindowID: CGRect] {
         let slots = LayoutEngine.calculate(
             mode: input.space.mode,
@@ -98,14 +110,7 @@ extension TilingEngine {
         // A run's hidden window keeps the edge slot it waits
         // behind: pulled inward it would cross the shown run
         // (#2235 ruling).
-        if input.space.mode == .stack,
-            let cover = RunCover.of(
-                space: input.space.id,
-                mode: .stack,
-                tiled: input.tiled,
-                in: input.context
-            )
-        {
+        if input.space.mode == .stack, let cover {
             for id in cover.behind.keys { issued[id] = slots[id] }
         }
         return issued
@@ -126,7 +131,7 @@ extension TilingEngine {
         let input = layoutInput(state: state, space: space, screen: screen)
         return (
             fillingMaximized(
-                laidOut(input, placed: true),
+                laidOut(input, placed: true, cover: Self.cover(of: input)),
                 input: input,
                 on: screen,
                 state: state

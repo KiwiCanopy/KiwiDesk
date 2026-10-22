@@ -137,7 +137,32 @@ struct ScrollRunLayoutTests {
             )
         )
         let run = try #require(cover.runs.first)
-        // 780 pt, two shown at 300 with one 10 pt gap: 170 left.
-        #expect(abs(run.extra - 170) < 0.01)
+        // The fixture's own numbers: the zone's span inside the
+        // outer gaps, less each shown floor and the gaps between.
+        let probe = context()
+        let gap = CGFloat(10)
+        let span = probe.bounds.height - 2 * gap
+        let shown = CGFloat(run.shown.count)
+        let floor = probe.minWindowSize.height
+        #expect(shown >= 2)
+        let expected = span - shown * floor - (shown - 1) * gap
+        #expect(abs(run.extra - expected) < 0.01)
+    }
+
+    /// Three shown at a 200 pt floor, so the run has a middle
+    /// member no edge rule would raise.
+    @Test("The restore raises every shown member, not only the edges")
+    func coverRaisesTheWholeRun() throws {
+        var probe = context(focused: ids[5])
+        probe.minWindowSize = .square(200)
+        let cover = try #require(
+            RunCover.of(space: "s", mode: .stack, tiled: tiled, in: probe)
+        )
+        let run = try #require(cover.runs.first)
+        #expect(Array(run.shown) == [ids[3], ids[4], ids[5]])
+        #expect(
+            cover.raiseOrder(in: tiled)
+                == [ids[1], ids[2], ids[3], ids[4], ids[5]]
+        )
     }
 }

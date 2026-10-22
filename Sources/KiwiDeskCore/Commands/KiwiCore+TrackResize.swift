@@ -299,7 +299,8 @@ extension KiwiCore {
             focused,
             axis: alongAxis,
             delta: delta,
-            space: space
+            space: space,
+            otherAxisDivides: tracks > 1
         ) {
             return response
         }

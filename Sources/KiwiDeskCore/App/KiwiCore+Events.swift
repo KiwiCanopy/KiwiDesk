@@ -275,7 +275,9 @@ extension KiwiCore {
         }
         if willRetile, followed != true {
             // A Desktop switch's re-sync takes one pass at its end.
-            if !foldIntoSwitchResync() {
+            if !foldIntoSwitchResync(
+                removal: event.goneWindowID != nil
+            ) {
                 // The user's own close or open runs now (#2187).
                 withAppActMotion(
                     event,

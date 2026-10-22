@@ -75,7 +75,8 @@ struct ResizeRefusalCensusTests {
             + "learned ceiling and the track draws it (#1488)",
         "the focused window is alone in its run":
             "nothingToDivide — a scrolled run shows one window, so "
-            + "no share moves; the other axis divides (#2235)",
+            + "no share moves; the caller says whether the other "
+            + "axis divides (#2235)",
         "every shown window is at its minimum":
             "ownMinimum on a shrink, neighborMinimum on a grow — "
             + "every shown window of the run sits at its floor "

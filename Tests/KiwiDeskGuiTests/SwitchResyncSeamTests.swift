@@ -26,10 +26,15 @@ struct SwitchResyncSeamTests {
             "self.foldingSwitchResync(body)",
             "Sources/KiwiDeskCore", "KiwiCore+Bootstrap.swift", 1
         ),
-        // The event retile asks the fold before it retiles.
+        // The event retile asks the fold before it retiles, and a
+        // removal's fold holds the run arm (#2235).
         (
-            "!foldIntoSwitchResync()",
+            "!foldIntoSwitchResync(",
             "Sources/KiwiDeskCore", "KiwiCore+Events.swift", 1
+        ),
+        (
+            "holdingRunArm(batch.holdsRunArm) {",
+            "Sources/KiwiDeskCore", "KiwiCore+SwitchResync.swift", 1
         ),
         // The close-return raise, its track arm and the scrolled
         // runs' held arm (#2235) wait for the fold's one pass.
@@ -88,6 +93,14 @@ struct SwitchResyncSeamTests {
             source.contains(
                 "afterSwitchResync{[self]in"
                     + "scheduleTrackZOrderRestoreIfOverflowing()}"
+            )
+        )
+        // The held run arm is taken after the pass, not before
+        // (#2235): a folded pass owes it only once it has run.
+        #expect(
+            source.contains(
+                "afterSwitchResync{[self]in"
+                    + "ifrunArm.takeOwed(){scheduleZOrderRestore()}}"
             )
         )
     }

@@ -80,6 +80,32 @@ struct RunReadersTests {
         let core = makeCore()
         let id = makeSpace(core)
         let space = try #require(core.state.workspaces[id])
+        let run = try #require(
+            core.tiler.runCovers[id]?.runs.first {
+                $0.shown.contains(WindowID(2))
+            }
+        )
+        #expect(Array(run.shown) == [WindowID(2), WindowID(3)])
+        #expect(run.extra > 0)
+        // The run's step: the shown pair over the span their
+        // floors leave, with no minimum of its own.
+        let expected = StackLayout.weightStep(
+            weights: [1, 1],
+            at: 0,
+            delta: 50,
+            span: Double(run.extra),
+            minSizes: [0, 0]
+        ).value
+        // The whole-zone step the run replaced divides the full
+        // span over every member, which lands elsewhere.
+        let wholeZone = StackLayout.weightStep(
+            weights: [1, 1, 1, 1, 1],
+            at: 0,
+            delta: 50,
+            span: 780,
+            minSizes: Array(repeating: 300, count: 5)
+        ).value
+        #expect(abs(expected - wholeZone) > 0.01)
         let response = core.resizeStackMember(
             WindowID(2),
             axis: "y",
@@ -91,6 +117,6 @@ struct RunReadersTests {
         let weight = try #require(
             core.state.workspaces[id]?.stackWeights[WindowID(2)]
         )
-        #expect(weight > 1)
+        #expect(abs(weight - expected) < 0.0001)
     }
 }

@@ -89,9 +89,13 @@ extension KiwiCore {
             }
         }
         // The scrolled runs' arm the removal's retile held (#2235)
-        // takes the same verdict: paid only where the raise runs.
-        if runArm.takeOwed(), !closeReturnRaiseStandsDown {
-            afterSwitchResync { [self] in scheduleZOrderRestore() }
+        // takes the same verdict, read after the pass — inline or
+        // the re-sync's fold — has drawn: paid where any folded
+        // removal's raise runs.
+        if event.goneWindowID != nil, !closeReturnRaiseStandsDown {
+            afterSwitchResync { [self] in
+                if runArm.takeOwed() { scheduleZOrderRestore() }
+            }
         }
         // #951/#952 diagnosis: narrate the decision above. AFTER
         // the arms on purpose — the needle windows in
