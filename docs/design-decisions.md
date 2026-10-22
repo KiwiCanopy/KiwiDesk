@@ -14774,20 +14774,32 @@ a string the user edits, and both are load-bearing rather than
 polish.
 
 `app_bar.set_title_cap` (8–80, default 10) exists because App
-Bar slots are **uniform and measured from the widest item**
-(`AppBarOverlay.autoSlotWidth`). On that same sample the app
-names ran 6–20 characters and the titles to 57. One long title
-therefore widens *every* slot until `slotLength`'s
-quarter-of-the-bar clamp bites and the rest of the bar scrolls.
+Bar slots are **uniform**. On that same sample the app names ran
+6–20 characters and the titles to 57, so a slot sized by its
+titles would grow with the longest until `slotLength`'s
+quarter-of-the-bar clamp bit and the rest of the bar scrolled.
 
-So the cap is what keeps automatic slot sizing usable at all,
-and with no pinned item size it is the App Bar's one size
-control. The Space Bar's own cap, `front_app_title_cap`, exists
-for a different reason and is kept as a separate knob for that
-reason: its front segment already ellipsizes at the panel edge
-and cannot clip, but its estimated length feeds the bar's
-alignment total, so under `center` or `end` an uncapped title
-slides the whole run of Space items sideways.
+So the cap is what keeps the slot usable at all, and with no
+pinned item size it is the App Bar's one size control. Every
+title draws in a slot as long as the cap in the bar font's
+average glyph, whatever the titles read (#2545, owner ruling
+2026-10-22) — the front-app segment's rule below. A slot
+measured from the widest drawn title moved on every title
+change even with the cap: ten capitals draw wider than ten
+lower-case letters, and a title under the cap is narrower
+still, so switching between two capped windows re-sized every
+slot and re-centred the run. Cutting by width while the slots
+still followed the widest title was rejected: two capped titles
+would then match, but a short title meeting a capped one would
+still jump. With every frame fixed, a show whose titles alone
+changed redraws content and never runs the frame pass.
+
+The Space Bar's own cap, `front_app_title_cap`, exists for a
+different reason and is kept as a separate knob for that reason:
+its front segment already ellipsizes at the panel edge and
+cannot clip, but its estimated length feeds the bar's alignment
+total, so under `center` or `end` an uncapped title slides the
+whole run of Space items sideways.
 
 The refresh path is the subtler half. The bars are driven from
 `retile()`, and `TilingEngine.shouldRetile` returns false for
@@ -15223,7 +15235,7 @@ becomes `outline` once, and Lua refuses `gap` naming the values
 that remain.
 
 *No item size.* A Space item sizes to its content and an App
-Bar slot to the widest title, between the icon square and a
+Bar slot to its title cap (#2545), between the icon square and a
 quarter of the whole shelf edge — measured on the edge rather
 than the App section, so a slot does not shrink when the Space
 Bar joins. A pinned item size answered only what the title cap
@@ -16074,20 +16086,45 @@ hit frame stops at them, so the autoscroll and the drop-spring
 still govern disjoint zones and the argument above holds with a
 fade where it says arrow.
 
+:::unreleased
 **The bar cards share one canonical row order.** (#374, re-cut
-by the #678 Phase 2 census render and by #1517.) The KiwiShelf
-card owns existence and placement: the Show master and its Each
-bar drawer, then Position and its Each bar drawer, Alignment,
-Order and Space Bar minimum — where the bars sit, coarse to fine —
-then Thickness and its Style and Margins drawers. A master's drawer
-hangs under it with no rule, since a rule marks a new topic. Each bar's card shows every row,
-with no drawer, each gate directly above what it gates. Colours
+by the #678 Phase 2 census render, by #1517 and by #2507.) The
+KiwiShelf card owns existence and placement: the Show master and
+its Each bar drawer, then Position and its Each bar drawer and
+Alignment — where the bars sit, coarse to fine — then Thickness
+and its Style and Margins drawers. Order and Space Bar minimum
+close the Style drawer: they change how the joined run draws —
+which bar leads, how much of a crowded edge the Space Bar keeps —
+and matter only where the bars share an edge. A master's drawer
+hangs under it with no rule, since a rule marks a new topic. Each
+gate sits directly above what it gates. Colours
 live in the one KiwiShelf colour card — signature colours
 inline, the rest behind a shut disclosure, the Space Bar's
 focused-window colour among them. A new bar row slots into this
 order — in the census
 order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
+:::
+
+:::unreleased
+**Choices stay open; numbers go in one drawer per bar card (#2507,
+owner ruling 2026-10-21).** Settings modes hide whole pages, never
+rows, so every open row on Bars is in front of someone who just
+installed KiwiDesk, and the accordion is the page's one density
+tool. So a bar card draws its choices open and its numbers in one
+drawer at its foot, under its last open choice — the Space Bar's
+Fine-tuning — and a gated number may lead that drawer when its
+gate is that last open choice, as the front-app title length leads
+Fine-tuning under Show front app (and Durations follows Reveal on
+the shelf card). A number stays open only where the numbers in its
+drawer derive from it: Thickness, whose value drives Auto glyph
+size and Auto font size. No drawer holds one row, which is why the
+App Bar card's title length stays open. This is a depth tier —
+tuning a user rarely touches — and not a grouping by widget type,
+which gui.md ▸ group by topic forbids: a choice that is set once
+and a number that is nudged once are different depths of the same
+topic.
+:::
 
 Reveal and its Durations drawer follow the Show master's Each bar
 drawer: how a hiding bar comes and goes sits beside what makes a

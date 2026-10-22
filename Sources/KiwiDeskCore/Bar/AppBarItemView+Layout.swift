@@ -119,15 +119,21 @@ extension AppBarItemView {
             )
             x += placed.side + placed.spacing
         }
+        let name = BarTitleSlot.span(
+            label,
+            natural: placed.natural,
+            slotStart: x,
+            slot: placed.text.width
+        )
         label.frame = CGRect(
-            x: x,
+            x: name.lowerBound,
             y: BarTextGlyph.originY(
                 centredOn: bounds.midY,
                 for: label,
                 band: .caps,
                 height: placed.text.height
             ),
-            width: placed.text.width,
+            width: min(placed.natural, placed.text.width),
             height: placed.text.height
         )
     }

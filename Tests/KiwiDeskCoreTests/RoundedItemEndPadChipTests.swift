@@ -168,9 +168,16 @@ struct RoundedItemEndPadChipTests {
                 let title = ceil(view.label.cell?.cellSize.width ?? 0)
                 #expect(view.label.frame.width >= title)
                 #expect(abs(view.halfMoon.frame.minX - ends.leading) <= 0.5)
+                // The title's fixed slot ends at the trailing inset,
+                // its short title inside it (#2545).
+                let placed = view.horizontalPlacement(
+                    in: view.bounds.size
+                )
+                let titleEnd =
+                    placed.x + placed.moon + placed.side + placed.spacing
+                    + placed.text.width
                 #expect(
-                    abs(slot - view.label.frame.maxX - ends.trailing)
-                        <= 0.5,
+                    abs(slot - titleEnd - ends.trailing) <= 0.5,
                     "depth \(depth), roundness \(roundness)"
                 )
             }

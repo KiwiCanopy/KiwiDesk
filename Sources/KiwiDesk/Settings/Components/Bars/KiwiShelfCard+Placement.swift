@@ -213,6 +213,10 @@ extension KiwiShelfCard {
                     ?? ""
             )
         )
+        .searchAnchored(
+            SettingsCatalog.bars.kiwishelfStyle.children
+                .kiwishelfStyleOrder
+        )
     }
 
     /// The share row is a split row: the same slider, readout and
@@ -239,6 +243,10 @@ extension KiwiShelfCard {
                 help: gates.bothBarsReason.map(BarsGateHelp.sentence)
                     ?? ""
             )
+        )
+        .searchAnchored(
+            SettingsCatalog.bars.kiwishelfStyle.children
+                .kiwishelfStyleMinimum
         )
     }
 }

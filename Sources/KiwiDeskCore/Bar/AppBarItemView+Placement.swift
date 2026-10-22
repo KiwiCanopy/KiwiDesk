@@ -17,7 +17,12 @@ extension AppBarItemView {
         /// The icon square's side; 0 without one.
         var side: CGFloat
         var spacing: CGFloat
+        /// The title's slot (`AppBarOverlay.titleSlot`), cut to
+        /// what the item has room for; zero where none draws.
         var text: CGSize
+        /// The title's own fitted width, which the slot centres by
+        /// its ink or cuts (`BarTitleSlot.span`).
+        var natural: CGFloat
         /// The group-count badge's reach past the title.
         var badgeExtent: CGFloat
         var showsLabel: Bool
@@ -43,8 +48,9 @@ extension AppBarItemView {
 
     /// The icon-and-title group in a horizontal slot of `size`,
     /// centred between the two ends' insets, which differ where
-    /// only one end is drawn rounded (#1763). Sets the label's
-    /// font and text, which the measurement reads.
+    /// only one end is drawn rounded (#1763), the title taking its
+    /// fixed slot whatever it reads (#2545). Sets the label's font
+    /// and text, which the measurement reads.
     func horizontalPlacement(in size: CGSize) -> HorizontalPlacement {
         let pad = Self.contentPadding
         let depth = size.height
@@ -67,9 +73,12 @@ extension AppBarItemView {
         let moon = AppBarHalfMoon.reserve(
             contentDepth: style.contentDepth(forDepth: depth)
         )
-        var textSize = label.cell?.cellSize ?? .zero
-        textSize.width = ceil(textSize.width)
-        textSize.height = ceil(textSize.height)
+        let cell = label.cell?.cellSize ?? .zero
+        var textSize = CGSize(
+            width: text.isEmpty
+                ? 0 : AppBarOverlay.titleSlot(style, thickness: depth),
+            height: ceil(cell.height)
+        )
         var spacing: CGFloat = side > 0 ? pad / 2 : 0
         let badgeReserve: CGFloat =
             count >= 2
@@ -100,6 +109,7 @@ extension AppBarItemView {
             side: side,
             spacing: spacing,
             text: textSize,
+            natural: ceil(cell.width),
             badgeExtent: badgeExtent,
             showsLabel: textSize.width > 0
         )

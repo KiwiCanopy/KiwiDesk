@@ -97,7 +97,6 @@ struct FontFamilyRow: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-            .frame(minWidth: 150, alignment: .leading)
         }
         .settingsPopUpTrigger()
         .controlSize(.large)

@@ -157,7 +157,10 @@ struct SettingsCatalogTests {
         // its two rows, the Animations card's two shelf rows gone.
         // 201 with #2524: the Space switch picker and its pace in
         // the Animations card, KiwiShelf's Show the Space gone.
-        #expect(allEntries.count == 201)
+        // 208 with #2507: the Space Bar's Fine-tuning drawer and
+        // its four rows, KiwiShelf's Order and Space Bar minimum
+        // as Style children.
+        #expect(allEntries.count == 208)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

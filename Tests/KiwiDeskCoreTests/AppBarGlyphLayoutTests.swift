@@ -84,69 +84,83 @@ struct AppBarGlyphLayoutTests {
         #expect(view.label.stringValue == "Downloads")
     }
 
-    /// The widest name defines the uniform slot — and must then
-    /// FIT that slot untruncated (the center-alignment cell
-    /// metric that tail-truncated exactly the longest tab).
-    /// Parameterized over the formula's font branch: auto
-    /// (`0`) and fixed.
+    /// Every title draws in one slot as long as the title cap in
+    /// the bar font's average glyph (#2545, owner ruling): the
+    /// slot never reads the titles, a capped title of capitals —
+    /// wider than lower-case — is cut by width, a short one sits
+    /// inside by its ink, and the icon beside them never moves.
+    /// Parameterized over the formula's font branch: auto (`0`)
+    /// and fixed.
     @Test(
-        "The widest title fits the slot it defined",
+        "Every title draws in the cap's fixed slot",
         arguments: [CGFloat(0), CGFloat(18)]
     )
-    func widestTitleFitsItsOwnSlot(fontSize: CGFloat) {
+    func titlesDrawInTheFixedSlot(fontSize: CGFloat) throws {
         let thickness: CGFloat = 32
         var style = AppBarLook()
         style.fontSize = fontSize
-        let items = [
-            // The widest TITLE deliberately belongs to the
-            // app with the SHORTEST name. A measurement that
-            // read `name` would size the slot to
-            // "Systemeinstellungen" — narrower than the title
-            // actually drawn below — and truncate it.
-            AppBarOverlay.Item(
-                id: WindowID(1),
-                text: "Bedienungshilfen",
-                icon: nil
-            ),
-            AppBarOverlay.Item(
-                id: WindowID(2),
-                text: "TanStack Start: Full-Stack React",
-                icon: nil
-            ),
-        ]
-        let slot = AppBarOverlay.autoSlotWidth(
-            items: items,
-            style: style,
-            horizontal: true,
-            thickness: thickness
-        )
-        let view = AppBarItemView(
-            frame: NSRect(
-                x: 0,
-                y: 0,
-                width: slot,
-                height: thickness
+        let width = { (texts: [String]) in
+            AppBarOverlay.autoSlotWidth(
+                items: texts.enumerated().map {
+                    AppBarOverlay.Item(
+                        id: WindowID(UInt32($0.offset + 1)),
+                        text: $0.element,
+                        icon: nil
+                    )
+                },
+                style: style,
+                horizontal: true,
+                thickness: thickness
             )
+        }
+        let cap = style.resolvedTitleCap
+        let lower = AppBarStyle.cappedTitle("space switch stalls", to: cap)
+        let upper = AppBarStyle.cappedTitle("CLAUDE AGENT LANE", to: cap)
+        // Two items each, so the run's end insets match.
+        let slot = width([lower, "zsh"])
+        #expect(width([upper, "zsh"]) == slot)
+        #expect(width(["Mail", "TanStack Start: Full-Stack React"]) == slot)
+        let titleSlot = AppBarOverlay.titleSlot(style, thickness: thickness)
+        let drawn = { (text: String) -> AppBarItemView in
+            let view = AppBarItemView(
+                frame: NSRect(x: 0, y: 0, width: slot, height: thickness)
+            )
+            view.configure(
+                id: WindowID(1),
+                text: text,
+                icon: nil,
+                glyph: ":settings:",
+                count: 1,
+                active: false,
+                horizontal: true,
+                style: style
+            )
+            view.layout()
+            return view
+        }
+        let views = [lower, upper, "Mail"].map(drawn)
+        let icons = views.map(\.glyphLabel.frame)
+        #expect(icons.allSatisfy { $0 == icons[0] })
+        for view in views {
+            let placed = view.horizontalPlacement(in: view.bounds.size)
+            #expect(placed.text.width == titleSlot)
+            let start = placed.x + placed.moon + placed.side + placed.spacing
+            #expect(view.label.frame.minX >= start - 0.5)
+            #expect(view.label.frame.maxX <= start + titleSlot + 0.5)
+        }
+        // Ten capitals pass the slot, so the label fills it and cuts.
+        #expect(abs(views[1].label.frame.width - titleSlot) <= 0.5)
+        #expect(!views[1].drawsTextInFull)
+        // A short title's ink is centred on the slot.
+        let short = views[2]
+        let placed = short.horizontalPlacement(in: short.bounds.size)
+        let mid =
+            placed.x + placed.moon + placed.side + placed.spacing
+            + titleSlot / 2
+        let ink = BarTextGlyph.metrics(of: short.label).inkSpan(
+            in: short.label.frame
         )
-        // The item that DEFINED the width is the one that must
-        // fit — item 2, whose title is the widest string in the
-        // set above.
-        view.configure(
-            id: WindowID(2),
-            text: "TanStack Start: Full-Stack React",
-            icon: nil,
-            glyph: ":settings:",
-            count: 1,
-            active: false,
-            horizontal: true,
-            style: style
-        )
-        view.layout()
-        // The label must have been given its full cell width —
-        // a clamped width is what renders the "…" tail.
-        #expect(!view.label.isHidden)
-        let needed = ceil(view.label.cell?.cellSize.width ?? 0)
-        #expect(view.label.frame.width >= needed)
+        #expect(abs((ink.lowerBound + ink.upperBound) / 2 - mid) <= 1)
     }
 
     /// A REUSED view that flips to a vertical bar hides its

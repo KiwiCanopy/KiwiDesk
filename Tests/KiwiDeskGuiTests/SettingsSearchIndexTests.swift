@@ -200,15 +200,12 @@ struct SettingsSearchIndexTests {
                 // stay anchor-less by ruling — two census rows
                 // per label key, unsplit; 19 with #1799's mark.
                 .gapsAndBorders: 19,
-                // 16 since the #1517 redesign: the bar cards
-                // lost their Style drawers, so every bar row is
-                // at rest and anchor-less by the same ruling
-                // (#277 anchors, first #1517 split — both moot).
-                // 18: Glyph gap (#1689), Windows in other Spaces
-                // (#1683) at rest; #1713 took glyph size to Style.
-                // 19 since #1535: Space label, at rest.
-                // -1 #1528 (App Bar Content), +1 #1725 (grouping).
-                .bars: 19,
+                // The bar cards' open rows are anchor-less by the
+                // #277 ruling (#1517); 19 by #1535, #1689, #1683
+                // and #1725, 13 since #2507: Fine-tuning's four
+                // rows, and Order and Minimum in Style, anchor in
+                // drawers.
+                .bars: 13,
                 // 7 since #277: the Animations drawer's five
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to

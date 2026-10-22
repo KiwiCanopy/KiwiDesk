@@ -32,17 +32,20 @@ extension SpaceBarKey {
             // nothing.
             return .row(.bars, .kiwishelf, .showMore)
         case .spaceBarHideEmpty, .spaceBarShowFrontApp,
-            .spaceBarGroupAdjacent,
-            .spaceBarActiveIndicator, .spaceBarSpringDelay,
-            .spaceBarGlyphSpan, .spaceBarGlyphGap,
+            .spaceBarGroupAdjacent, .spaceBarActiveIndicator,
             .spaceBarInactiveContent, .spaceBarItemLabel:
             return .row(.bars, .spaceBar, .atRest)
+        case .spaceBarSpringDelay, .spaceBarGlyphSpan,
+            .spaceBarGlyphGap:
+            // The Fine-tuning drawer: numbers (#2507).
+            return .row(.bars, .spaceBar, .showMore)
         case .spaceBarFrontAppTitleCap:
-            // Inert while front segment is off.
+            // Leads Fine-tuning, under its gate; inert while the
+            // front segment is off.
             return .row(
                 .bars,
                 .spaceBar,
-                .atRest,
+                .showMore,
                 gate: .setting(.spaceBar(.spaceBarShowFrontApp))
             )
         case .spaceBarActiveDimFactor, .spaceBarStickyBadge:

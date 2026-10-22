@@ -8,4 +8,16 @@ extension HomeCardBarsTile.BarSpec {
     @MainActor func textFont(size: CGFloat) -> Font {
         Font(shelf.textFont(ofSize: size) as CTFont)
     }
+
+    /// The slot an App Bar title draws in at the frame's font
+    /// size, the live bar's one `BarTitleSlot` (#2545); nil where
+    /// the bar has no title cap.
+    @MainActor var titleSlot: CGFloat? {
+        titleCap.map {
+            BarTitleSlot.length(
+                cap: $0,
+                font: shelf.textFont(ofSize: fontSize)
+            )
+        }
+    }
 }
