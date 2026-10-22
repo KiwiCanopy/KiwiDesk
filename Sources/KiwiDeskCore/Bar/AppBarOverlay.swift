@@ -139,6 +139,16 @@ public final class AppBarOverlay {
             WorkMeter.shared.add(\.barShowsSkipped)
             return
         }
+        // One whose titles alone changed moves no frame, so it
+        // redraws content alone (#2545).
+        if isVisible, drawnEnvironment == environment,
+            let last = lastShown, Self.keepsGeometry(last, next)
+        {
+            lastShown = next
+            WorkMeter.shared.add(\.barContentRedraws)
+            redrawContent(since: last)
+            return
+        }
         drawnEnvironment = environment
         let appearing = lastShown == nil
         pendingLanding = appearing
@@ -289,37 +299,15 @@ public final class AppBarOverlay {
             )
         }
         for (index, item) in items.enumerated() {
-            let view = itemViews[index]
-            let active = index == activeIndex
-            view.isHidden = false
-            view.configure(
-                id: item.id,
-                name: item.name,
-                text: item.text,
-                icon: item.icon,
-                glyph: item.glyph,
-                count: item.count,
-                titleCut: item.titleCut,
-                floating: item.floating,
-                visibility: item.visibility,
-                active: active,
+            configure(
+                itemViews[index],
+                item,
+                at: index,
+                of: items.count,
+                active: index == activeIndex,
                 horizontal: m.horizontal,
                 style: style
             )
-            view.itemActions = itemActions
-            view.members = item.members
-            let place = Self.runPlace(index: index, count: items.count)
-            view.isFirstInRun = place.first
-            view.isLastInRun = place.last
-            view.onSelect = { [weak self] id in
-                self?.onSelect(id)
-            }
-            view.onDragMoved = { [weak self] view, point in
-                self?.dragMoved(view, to: point)
-            }
-            view.onDragEnded = { [weak self] view in
-                self?.dragEnded(view)
-            }
         }
         runContent = drawnContent(
             frames: frames,

@@ -96,17 +96,6 @@ extension SpaceBarOverlay {
         return extent
     }
 
-    /// The width `layoutFrontName`'s `sizeToFit` gives `text` in
-    /// `font` — the label's own cell, padding included.
-    static func titleWidth(_ text: String, font: NSFont) -> CGFloat {
-        measure.font = font
-        measure.stringValue = text
-        measure.sizeToFit()
-        return measure.frame.width
-    }
-
-    private static let measure = NSTextField(labelWithString: "")
-
     private func attachFrontViewsIfNeeded() {
         // Only a host CHANGE reparents (a plain `addSubview`
         // detaches from the previous parent); a view already in
@@ -299,7 +288,7 @@ extension SpaceBarOverlay {
         let available = max(viewport - offset - trailing, 0)
         let slot = min(Self.titleSlot(style, depth: depth), available)
         frontNameEnd = offset + slot
-        let span = Self.nameSpan(
+        let span = BarTitleSlot.span(
             frontName,
             natural: frontName.frame.width,
             slotStart: offset,

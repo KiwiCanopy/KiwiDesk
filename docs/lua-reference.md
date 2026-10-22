@@ -2955,8 +2955,7 @@ content`.
 - `app_bar.set_item_size`, `monocle.set_app_bar_item_size` and
   `scroll.set_app_bar_item_size` → that bar's `title_cap`
   ([`app_bar.set_title_cap`](#app_barset_title_cap)): an App Bar
-  slot is as wide as the widest title, so the title length is
-  its one width control.
+  slot's width follows the title cap, its one width control.
 - `space_bar.set_item_size` → nothing: a Space item's length
   follows its content.
 - `space_bar.set_title_cap` →
@@ -3130,10 +3129,15 @@ longer titles are cut at the end and marked with an ellipsis. A
 title is also cut where it does not fit its slot; only the
 title shrinks, never the icon.
 
-Every slot is as wide as the widest item, at least the icon
-square and at most a quarter of the whole KiwiShelf edge, so
-the cap is the App Bar's one size control; items that then do
-not fit scroll instead of shrinking.
+:::unreleased
+Every slot is as long as this many characters of the bar's font
+beside the icon, whatever the titles read — at least the icon
+square and at most a quarter of the whole KiwiShelf edge — so a
+longer title ends in "…", a shorter one is centred in its slot,
+and a change of title never moves the App Bar or the shelf
+beside it. The cap is the App Bar's one size control; items that
+do not fit scroll instead of shrinking.
+:::
 
 **Example:**
 

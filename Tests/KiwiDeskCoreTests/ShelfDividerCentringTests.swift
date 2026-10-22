@@ -189,8 +189,22 @@ struct ShelfDividerCentringTests {
         in overlay: ShelfOverlay,
         horizontal: Bool
     ) -> ClosedRange<CGFloat> {
-        let rects = views.map {
-            overlay.stripView.convert($0.bounds, from: $0)
+        span(
+            views.map { ($0, $0.bounds) },
+            in: overlay,
+            horizontal: horizontal
+        )
+    }
+
+    /// The span `parts` — each a rect in its view's coordinates —
+    /// cover together, in the shelf strip's coordinates.
+    private func span(
+        _ parts: [(NSView, CGRect)],
+        in overlay: ShelfOverlay,
+        horizontal: Bool
+    ) -> ClosedRange<CGFloat> {
+        let rects = parts.map {
+            overlay.stripView.convert($0.1, from: $0.0)
         }
         return horizontal
             ? rects.map(\.minX).min()!...rects.map(\.maxX).max()!
@@ -198,9 +212,20 @@ struct ShelfDividerCentringTests {
     }
 
     /// What an App item shows: its icon, and on a horizontal
-    /// titled item the title — the count badge hangs off either.
-    private func appInk(_ item: AppBarItemView) -> [NSView] {
-        [item.iconView] + (item.label.isHidden ? [] : [item.label])
+    /// titled item the title's fixed slot, which a short title
+    /// sits inside (#2545) — the count badge hangs off either.
+    private func appInk(_ item: AppBarItemView) -> [(NSView, CGRect)] {
+        let icon = (item.iconView as NSView, item.iconView.bounds)
+        guard !item.label.isHidden else { return [icon] }
+        let placed = item.horizontalPlacement(in: item.bounds.size)
+        let start = placed.x + placed.moon + placed.side + placed.spacing
+        let title = CGRect(
+            x: start,
+            y: 0,
+            width: placed.text.width,
+            height: item.bounds.height
+        )
+        return [icon, (item, title)]
     }
 
     @Test(
@@ -234,7 +259,7 @@ struct ShelfDividerCentringTests {
             ]
         let spaceSpan = span(spaceInk, in: overlay, horizontal: horizontal)
         let appSpan = span(
-            boxed ? [appItem] : appInk(appItem),
+            boxed ? [(appItem, appItem.bounds)] : appInk(appItem),
             in: overlay,
             horizontal: horizontal
         )

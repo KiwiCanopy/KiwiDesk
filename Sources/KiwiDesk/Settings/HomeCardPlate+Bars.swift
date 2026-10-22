@@ -71,6 +71,10 @@ struct HomeCardBarsTile: View {
         /// Whether the sheen paints the indicator and the border
         /// (#1644) — its own value, no other gate.
         var sheen: CGFloat
+        /// The App Bar's title cap, whose slot every title draws
+        /// in as the live bar's (`BarTitleSlot`, #2545); nil for
+        /// the Space Bar, whose labels size to themselves.
+        var titleCap: Int? = nil
     }
 
     /// The share of the thickness an item's content fills, read

@@ -38,16 +38,17 @@ struct BarTextFieldCensusTests {
             reason: "title (originY), App Font glyph (an icon, "
                 + "anchored by Metrics), badge (IndicatorBarBadgeCell)"
         ),
-        "AppBarOverlay+Sizing.swift": Entry(
-            count: 1,
-            door: nil,
-            reason: "measures a width, draws nothing"
-        ),
         "BarPeekBody+Parts.swift": Entry(
             count: 1,
             door: nil,
             reason: "the hover peek's wrapped lines (#1946), laid by "
                 + "their line box off the strip"
+        ),
+        "BarTitleSlot.swift": Entry(
+            count: 1,
+            door: nil,
+            reason: "measures the bars' one title slot (#2086, "
+                + "#2545), draws nothing"
         ),
         "ShelfCountView.swift": Entry(
             count: 1,
@@ -63,12 +64,6 @@ struct BarTextFieldCensusTests {
             count: 1,
             door: ("BarTextGlyph.frame(", "SpaceBarItemView+Layout.swift"),
             reason: "App Font app glyphs (frame), minted per slot (#1942)"
-        ),
-        "SpaceBarOverlay+FrontApp.swift": Entry(
-            count: 1,
-            door: nil,
-            reason: "measures the front-app title's width (#1856), "
-                + "draws nothing"
         ),
         "SpaceBarOverlay.swift": Entry(
             count: 1,

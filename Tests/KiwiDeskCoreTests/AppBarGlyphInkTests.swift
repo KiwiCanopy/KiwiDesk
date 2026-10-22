@@ -109,10 +109,11 @@ struct AppBarGlyphInkTests {
         let view = Self.item(thickness: thickness, horizontal: true)
         try #require(!view.label.isHidden)
         let ink = try Self.inkRange(of: view.glyphLabel)
-        // The slot's trailing edge sits one icon-name gap before
-        // the label, and the ink's trailing edge sits on it.
-        let slotEnd =
-            view.label.frame.minX - AppBarItemView.contentPadding / 2
+        // The icon square ends one icon-name gap before the
+        // title's slot (#2545), and the ink's trailing edge sits
+        // on it.
+        let placed = view.horizontalPlacement(in: view.bounds.size)
+        let slotEnd = placed.x + placed.moon + placed.side
         #expect(
             abs(ink.upperBound - slotEnd) <= 1,
             "ink ends \(ink.upperBound) vs slot \(slotEnd)"
