@@ -1402,7 +1402,7 @@ the master zone gets the rest. `left`/`right` split the width,
 `top`/`bottom` the height. The stack zone's lineup derives from
 the position — a left/right zone stacks its windows vertically,
 a top/bottom zone lines them up side by side; there is no
-separate stack orientation knob. Overflow piles always cascade
+separate stack orientation knob. A pile always cascades
 downward. When the stack leads (`left`/`top`) and the masters
 line up along the split axis, the master zone fills from the
 stack seam, so a promoted window appears beside the stack it
@@ -2182,8 +2182,9 @@ track.set_auto_tracks(false)
   the focused one. Focus follows the new window. With no room
   for another track under a fixed
   [`track.set_limit`](#trackset_limit) cap, or for a window
-  `move_to_space` drops onto a full track, it piles in the
-  focused track.
+  `move_to_space` drops onto a full track, it joins the
+  focused track
+  ([When windows no longer fit](#when-windows-no-longer-fit)).
 - `own_track`: each new window opens its **own** new track,
   positioned among the others by
   [`track.set_new_window_position`](#trackset_new_window_position).

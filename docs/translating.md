@@ -111,8 +111,9 @@ line breaks — one line per option, with the option's name bold:
 
 Preserve both in a translation: keep each `**…**` pair balanced
 around the option name or its specifier (an unbalanced pair renders
-literal asterisks), keep the option names matching the field's
-option labels (the sibling keys without `.help`), and keep the
+literal asterisks), keep a spelled-out option name matching the
+field's option label (a specifier is filled with it for you), and
+keep the
 `\n` between option lines. The sentence around them is yours to
 reshape.
 

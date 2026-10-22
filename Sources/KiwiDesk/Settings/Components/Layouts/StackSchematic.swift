@@ -222,9 +222,9 @@ struct StackSchematic: View {
         if lone { return loneCaption }
         return L(
             "layout.schematic.stack.caption_scroll",
-            "Master zone and stack zone; windows that don't fit "
-                + "wait behind the stack, and moving focus scrolls "
-                + "them in."
+            "Master zone and stack zone; windows a zone can't fit "
+                + "wait behind the ones it shows, and moving focus "
+                + "scrolls them in."
         )
     }
 

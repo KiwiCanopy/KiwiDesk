@@ -282,7 +282,11 @@ extension KiwiCore {
                     effects: effects,
                     reason: goneReason
                 ) {
-                    retile(newlyCreatedWindow: newlyCreatedWindow)
+                    // A removal's run arm waits for the tail's
+                    // stand-down verdict (#936, #2235).
+                    holdingRunArm(event.goneWindowID != nil) {
+                        retile(newlyCreatedWindow: newlyCreatedWindow)
+                    }
                 }
             }
         } else if crossedScreenCover(event, before: preEventFrame) {

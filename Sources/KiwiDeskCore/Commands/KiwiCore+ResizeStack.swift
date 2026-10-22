@@ -177,6 +177,14 @@ extension KiwiCore {
         // span stands in for the column height A — close enough
         // for a keyboard nudge, and the layout renormalizes
         // whatever we store.
+        if let response = resizeInRun(
+            focused,
+            axis: axis,
+            delta: delta,
+            space: space
+        ) {
+            return response
+        }
         let weightFloor = StackLayout.weightFloor
         let weights = column.map {
             max(space.stackWeights[$0] ?? 1, weightFloor)

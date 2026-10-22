@@ -17,12 +17,19 @@ extension TilingEngine {
     /// `recording: false` is a what-if reading over a state that
     /// is not live (#1869): the monocle hold the layout input
     /// records is put back, so the live engine is left as found.
+    /// `recordingCovers` is the retile's own call (#2235): it files
+    /// what each scrolled run draws in `runCovers`.
     func placedFrames(
         state: StateCoordinator,
-        recording: Bool = true
+        recording: Bool = true,
+        recordingCovers: Bool = false
     ) -> [WindowID: CGRect] {
         guard !recording else {
-            return visibleFrames(state: state, placed: true)
+            return visibleFrames(
+                state: state,
+                placed: true,
+                recordingCovers: recordingCovers
+            )
         }
         let held = monocleShownMembers
         defer { monocleShownMembers = held }
@@ -33,7 +40,8 @@ extension TilingEngine {
     /// its own screen, unioned.
     func visibleFrames(
         state: StateCoordinator,
-        placed: Bool
+        placed: Bool,
+        recordingCovers: Bool = false
     ) -> [WindowID: CGRect] {
         var frames: [WindowID: CGRect] = [:]
         for placement in visiblePlacements(state: state) {
@@ -42,6 +50,14 @@ extension TilingEngine {
                 space: placement.space,
                 screen: placement.screen
             )
+            if recordingCovers {
+                runCovers[input.space.id] = RunCover.of(
+                    space: input.space.id,
+                    mode: input.space.mode,
+                    tiled: input.tiled,
+                    in: input.context
+                )
+            }
             var computed = laidOut(input, placed: placed)
             if placed {
                 computed = fillingMaximized(
@@ -74,11 +90,25 @@ extension TilingEngine {
             context: input.context
         )
         guard placed else { return slots }
-        return SplitOverflow.placed(
+        var issued = SplitOverflow.placed(
             mode: input.space.mode,
             frames: slots,
             context: input.context
         )
+        // A run's hidden window keeps the edge slot it waits
+        // behind: pulled inward it would cross the shown run
+        // (#2235 ruling).
+        if input.space.mode == .stack,
+            let cover = RunCover.of(
+                space: input.space.id,
+                mode: .stack,
+                tiled: input.tiled,
+                in: input.context
+            )
+        {
+            for id in cover.behind.keys { issued[id] = slots[id] }
+        }
+        return issued
     }
 
     /// One space's issued frames on `screen`, the window its layout

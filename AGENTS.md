@@ -277,7 +277,7 @@ period. Optional body explains the why, wrapped at 72 columns.
 - Scope is the touched area (`animation`, `tiling`, `layout`,
   `commands`, `lua`, `ax`, `profiles`, `docs`); omit when the
   change is repo-wide.
-- Examples: `feat(layout): add stack.set_overflow_style`,
+- Examples: `feat(layout): add track.set_wrap_focus`,
   `fix(tiling): defer z-order restore until animations settle`.
 
 ## 4. Tooling

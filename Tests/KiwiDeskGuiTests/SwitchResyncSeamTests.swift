@@ -31,11 +31,11 @@ struct SwitchResyncSeamTests {
             "!foldIntoSwitchResync()",
             "Sources/KiwiDeskCore", "KiwiCore+Events.swift", 1
         ),
-        // The close-return raise and its track arm wait for the
-        // fold's one pass.
+        // The close-return raise, its track arm and the scrolled
+        // runs' held arm (#2235) wait for the fold's one pass.
         (
             "afterSwitchResync { [self] in",
-            "Sources/KiwiDeskCore", "KiwiCore+CloseReturn.swift", 2
+            "Sources/KiwiDeskCore", "KiwiCore+CloseReturn.swift", 3
         ),
     ]
 

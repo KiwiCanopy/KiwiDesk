@@ -113,18 +113,18 @@ extension KiwiCore {
         // misses a move notification, and cascaded windows
         // overlap anyway. Floating windows (no slot) fall
         // back to their last known frame.
-        let slots = tiler.calculatedFrames(state: state)
+        // A window a run hides shares its edge slot's frame: the
+        // search sees only the shown slots (#2235).
+        let slots = shownSlots()
         guard
             let frame = slots[focused]
                 ?? state.windows[focused]?.frame
         else {
             return .fail("no focused window")
         }
-        // A window a run hides shares its edge slot's frame: the
-        // search sees only the shown slots (#2235).
-        let hidden = activeRunCover?.behind ?? [:]
+        let hidden = runHidden
         let candidates = tiled.filter {
-            $0 != focused && !skip($0) && hidden[$0] == nil
+            $0 != focused && !skip($0) && !hidden.contains($0)
         }
         .compactMap { id -> (WindowID, CGRect)? in
             guard

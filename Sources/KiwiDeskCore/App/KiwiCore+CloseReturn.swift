@@ -88,6 +88,11 @@ extension KiwiCore {
                 scheduleTrackZOrderRestoreIfOverflowing()
             }
         }
+        // The scrolled runs' arm the removal's retile held (#2235)
+        // takes the same verdict: paid only where the raise runs.
+        if runArm.takeOwed(), !closeReturnRaiseStandsDown {
+            afterSwitchResync { [self] in scheduleZOrderRestore() }
+        }
         // #951/#952 diagnosis: narrate the decision above. AFTER
         // the arms on purpose — the needle windows in
         // `CloseReturnStandDownWiringTests` span the definition

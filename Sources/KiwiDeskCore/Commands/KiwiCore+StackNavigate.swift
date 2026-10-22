@@ -17,15 +17,10 @@ extension KiwiCore {
         warp: Bool,
         skip: (WindowID) -> Bool
     ) -> CommandResponse? {
-        guard let input = tiler.layoutInput(state: state),
-            input.space.id == space.id,
-            let zone = RunCover.zone(
-                of: focused,
-                mode: .stack,
-                tiled: input.tiled,
-                in: input.context
-            ),
-            zone.run(in: input.context)?.hides == true,
+        guard
+            let zone = tiler.runCovers[space.id]?.runs.first(where: {
+                $0.zone.members.contains(focused)
+            })?.zone,
             let index = zone.members.firstIndex(of: focused)
         else { return nil }
         let step: Int

@@ -146,11 +146,11 @@ struct OverlapStackStickyTests {
         )
     }
 
-    @Test("Track keeps a sticky shown in a scrolled track")
+    @Test("A sticky scrolls in a track like any window")
     func trackColumnExemption() {
         // One track (no breaks), four windows in a column that
-        // shows three: the run scrolls so sticky 4 keeps a slot
-        // rather than waiting hidden (#414 v2, #2235).
+        // shows three: sticky 4 waits hidden behind window 3 like
+        // any other (#2235, owner 2026-10-22: no exemption).
         let context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 600, height: 900),
             gaps: Gaps.uniform(0),
@@ -165,10 +165,8 @@ struct OverlapStackStickyTests {
             Issue.record("Expected a frame for the sticky")
             return
         }
-        #expect(stickyFrame.height >= 300)
-        #expect(frames[WindowID(3)] != stickyFrame)
-        // Window 1 is the one the run hides, behind window 2.
-        #expect(frames[WindowID(1)] == frames[WindowID(2)])
+        #expect(stickyFrame == frames[WindowID(3)])
+        #expect(frames[WindowID(1)] != frames[WindowID(2)])
     }
 
     @Test("cascadeRaiseOrder raises top frames first")
@@ -208,11 +206,11 @@ struct OverlapStackStickyTests {
         )
     }
 
-    @Test("Stack keeps a sticky shown in a scrolled zone")
+    @Test("A sticky scrolls in a stack zone like any window")
     func stackZoneExemption() {
-        // One master + a stack zone showing two of three: the
-        // run scrolls so sticky 4 (last in the zone) keeps a
-        // full slot rather than waiting hidden (#414 v2, #2235).
+        // One master + a stack zone showing two of three: sticky
+        // 4 (last in the zone) waits hidden behind window 3 like
+        // any other (#2235, owner 2026-10-22: no exemption).
         let context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 1200, height: 700),
             gaps: Gaps.uniform(0),
@@ -227,9 +225,7 @@ struct OverlapStackStickyTests {
             Issue.record("Expected a frame for the sticky")
             return
         }
-        #expect(stickyFrame.height >= 300)
-        #expect(frames[WindowID(3)] != stickyFrame)
-        // Window 2 is the one the run hides, behind window 3.
-        #expect(frames[WindowID(2)] == frames[WindowID(3)])
+        #expect(stickyFrame == frames[WindowID(3)])
+        #expect(frames[WindowID(2)] != frames[WindowID(3)])
     }
 }

@@ -1934,12 +1934,8 @@ fully-tiled slot, so the grid's last-cell pile clamps it below
 the boundary via `OverlapStack.stickyExempt` (a trailing
 non-sticky window piles in its place). Whole-region cascades
 (the emergency min-size fallback) exempt nothing (no fully-tiled
-slot exists — see Accepted limitations). A Stack zone's or Track
-track's scrolled run (#2235) keeps the exemption in its own
-shape: with no focus in the zone, the run scrolls to show the
-sticky member (`RunZone`), while a focus in the zone outranks it;
-Scrolling has no `OverlapStack` pile at all — its
-overflow is the scroll, and the clamped edge columns (#142/#150)
+slot exists — see Accepted limitations); Scrolling has no
+`OverlapStack` pile at all — its overflow is the scroll, and the clamped edge columns (#142/#150)
 are scroll-reachable viewport pins a sticky may sit in like any
 other slot, not cascades — and Monocle overlaps everything at
 one frame, stacked full-frame or parked at the stash corner
@@ -1948,6 +1944,16 @@ under `hide_style = park` (#881), so both need nothing. Reorder of a traveler is
 design (v2 non-goal; see [Accepted limitations](accepted-limitations.md)). A **new layout**
 adding a row above must also state which pile class it produces,
 so the sticky exemption is reconciled with it.
+
+:::unreleased
+A Stack zone's or Track track's scrolled run (#2235) exempts
+nothing: a sticky window scrolls and hides like any other member,
+and its sticky mark stands down while it is hidden. The exemption
+exists because a pile reduces its members to title-bar slivers; a
+run reduces nothing, since every hidden window is one focus step
+away. Holding a sticky shown would take a slot the focus walks
+through, so a run could no longer show what the focus asked for.
+:::
 
 The **focus border** (#278) is a cross-layout overlay that
 deliberately opts OUT of the pile-dedup model above: with
@@ -2270,9 +2276,8 @@ display changes; nothing is written into the window array or the
 break markers. Spawn placement stays
 geometry-free (the flat-array / pure-layout invariant, AGENTS.md
 §1/§5): a window lands by `new_window` / `new_window_position`
-and simply falls into the overflow track's slice at render time,
-where it scrolls like any track that overflows (#2235). An
-"overflow-aware spawn" — shifting windows
+and simply falls into the overflow track's slice at render time.
+An "overflow-aware spawn" — shifting windows
 into a new track at spawn based on available space — is rejected
 for putting geometry into state (it would make spawn outcomes
 monitor-dependent and non-deterministic). **The `focused_track`
@@ -3906,9 +3911,10 @@ The weights are **session-scoped and never serialized**: a
 window relaunches, so there is nothing durable to persist a
 weight against — persisting them would at best restore sizes to
 the wrong windows. They are pruned when a window leaves the
-space. When a weighted share drops below `min_window_size`, every
-window of the zone keeps its floor and the weights share only
-what is left (`ZoneRun`, #2235), and the resize command
+space. When a weighted share drops below `min_window_size`, the
+zone no longer draws the weighted shares ([When windows no
+longer fit](lua-reference.md#when-windows-no-longer-fit)), and
+the resize command
 caps weight *growth* at that cliff so presses past it cannot
 ratchet the stored weight invisibly; clamping the *master
 ratio* against min window size stays a separate issue (#44).
@@ -3946,8 +3952,8 @@ keep cascading downward in every arrangement (ui-designer
 consult): the title bar is the affordance unit
 (identify + drag + raise) and one pile vocabulary spans the app
 — a sideways pile would expose blank side slivers and read as a
-glitch. If pile depth ever hurts, the lever is a depth cap —
-not a direction switch. (#222)
+glitch. If pile depth ever hurts, the lever is not a direction
+switch. (#222)
 
 The `master_orientation` default is `horizontal`: side-by-side
 masters beside a right stack turn a raised master count into
@@ -3974,9 +3980,9 @@ natural reading order — every master already touches the seam.
 Boundary crossings read identically to the trailing-stack
 (default) arrangement: the crossing window moves locally,
 survivors shift one slot. Accepted side effect: when a mirrored
-master zone scrolls, the windows it hides at rest are the
-array-earliest masters instead of the latest, waiting behind the
-slot farthest from the seam.
+master zone overflows, the windows it sets aside are the
+array-earliest masters instead of the latest, at the slot
+farthest from the seam.
 
 :::unreleased
 **Stack and Track scroll their overflow (#2235).** A Stack zone
@@ -3986,10 +3992,13 @@ a weighted share of what is left, and the rest wait exactly
 behind the first or last shown slot, inside the zone. Focus
 drives the run by the smallest step that shows the focused
 window. Every zone that overflows scrolls on its own, as each
-Track track does — the master zone included. The ruling is
-silent on an overflowing master zone; applying the same run
-there is this entry's reading and awaits the owner's
-confirmation.
+Track track does. The master zone still holds `master_count`
+windows and sends every further one to the stack zone; it
+overflows only when `master_count` itself is more than fits.
+The master zone is no exception: more masters than fit is the
+same overflow, and one behaviour for both zones keeps a
+window's treatment from changing when promote or demote carries
+it across the boundary.
 
 *Why a scroll, not a cascade.* A cascade spends the zone's
 length on title-bar slivers: past a few windows every member is
@@ -4015,9 +4024,27 @@ frame of the slot it waits behind and is stacked under it.
 Nothing peeks out, nothing reaches the master zone and nothing
 crosses to a neighbouring screen — #878's wall, on every edge —
 so the run needs no `screenNeighbors` rule, and macOS's
-inability to clip a foreign window never comes into play. A
-hidden app that refuses the slot's size overhangs only at that
-zone's edge, never across the shown run.
+inability to clip a foreign window never comes into play. The
+hidden window keeps that edge slot even where Stack's
+learned-floor pass (`SplitOverflow.placed`) moves a window
+inward, since pulled inward it would cross the shown run; and
+the z-order restore raises every hidden window first, then every
+shown window of a zone that hides (`RunCover.raiseOrder`). A
+hidden app that refuses the slot's size therefore overhangs from
+that slot, stacked under the zone's shown windows, never above
+them.
+
+*One record of what a run shows.* The engine records each shown
+Space's runs inside the retile pass that draws them
+(`TilingEngine.runCovers`), and the z-order restore, navigation,
+the weight resize, `list_windows` and the App Bar's visibility
+all read that record. A reader judging a run from the frames
+alone sees a hidden window at its shown neighbour's frame and
+calls one of the two covered by the other (#2547); the record
+says which waits behind. The weight resize is the same rule
+applied: inside a run it divides only the span left after the
+shown windows' floors, which is the span the layout divides
+(#933), so a press never writes a share the run does not draw.
 
 *Learned floors, judged once per pass.* A floor is the configured
 minimum, or an app's corroborated learned minimum where larger
@@ -4146,8 +4173,8 @@ Four rulings sharpen that:
 - **A weight clamp divides the layout's exact span.** The ratio
   caps deliberately use the raw region span (a superset can never
   block reaching the visible bound; the render clamp is the net),
-  but for the track/stack *weight* paths crossing the floor means
-  an `OverlapStack` cascade, so the clamp subtracts the outer
+  but for the track/stack *weight* paths crossing the floor
+  changes what the layout draws, so the clamp subtracts the outer
   gaps and inner gaps exactly as the layout does — plus a small
   margin (`StackLayout.minSizeMargin` owns the number), because
   the clamp's fixed point sits at exact equality with the
@@ -4872,8 +4899,8 @@ when the span cannot hold the members at ANY weights, the
 overflow folds stay the honest answer. Deliberate residue: the
 stack layout's zone shares keep write-time clamps only — a
 zone's membership shifts with `master_count` and spawns too,
-but its overflow scrolls inside the zone (#2235), not a
-whole-space collapse, and the heal joins it only if live QA
+but its overflow stays inside the zone, not a whole-space
+collapse, and the heal joins it only if live QA
 ever measures that class. An explicit `balance` verb stays a
 possible future escape hatch, not shipped — the heal removes
 the defect, and 1.0 adds no new configuration axes (#663).
@@ -9095,10 +9122,9 @@ disagreeing picture of the same configuration.
 
 **A preview that takes a window count simulates; one that does not
 illustrates.** Several Layout Defaults settings are invisible at
-any fixed number of windows. A Stack zone draws the same frame
-until it is deep enough to scroll; a
-track limit means nothing until there are more windows than
-tracks; a dynamic grid's balance only shows as it rebalances. A
+any fixed number of windows. A track limit means nothing until
+there are more windows than tracks; a dynamic grid's balance
+only shows as it rebalances. A
 still frame at a baked-in count therefore cannot teach the setting
 it is under, and the reader has to save, watch real windows, and
 come back. So the count is an input on a slider, and each

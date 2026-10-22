@@ -34,6 +34,9 @@ extension KiwiCore {
                 state.maximizedWindow(of: $0)
             }
         )
+        // A window a run hides wears no mark over the window it
+        // waits behind (#2235, owner 2026-10-22: no exemption).
+        let hidden = runHidden
         return state.windows.all.compactMap { window in
             var glyphs: [StickyMarkManager.Glyph] = []
             if stickyMark, window.isSticky {
@@ -52,6 +55,7 @@ extension KiwiCore {
             // (#1788), nor a maximized one (#2448) — asked last,
             // of a marked window alone.
             guard !glyphs.isEmpty, !maximized.contains(window.id),
+                !hidden.contains(window.id),
                 !presents(window.id, at: window.frame)
             else { return nil }
             return StickyMarkManager.Spec(

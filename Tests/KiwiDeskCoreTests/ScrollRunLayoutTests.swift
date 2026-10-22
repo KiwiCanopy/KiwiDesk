@@ -104,10 +104,11 @@ struct ScrollRunLayoutTests {
         #expect(cover.behind[ids[1]] == ids[4])
         #expect(cover.behind[ids[3]] == ids[4])
         #expect(cover.behind[ids[5]] == nil)
-        // Hidden first, edges last: each lands under its edge.
+        // Hidden first, then the zone's whole shown run: a hidden
+        // window an app sizes past its slot stays under the run.
         #expect(
             cover.raiseOrder(in: tiled)
-                == [ids[1], ids[2], ids[3], ids[4]]
+                == [ids[1], ids[2], ids[3], ids[4], ids[5]]
         )
     }
 
@@ -123,5 +124,20 @@ struct ScrollRunLayoutTests {
         )
         #expect(cover.behind.isEmpty)
         #expect(cover.heads.isEmpty)
+    }
+
+    @Test("A run's extra is what the shown floors leave the weights")
+    func extraIsTheWeightSpan() throws {
+        let cover = try #require(
+            RunCover.of(
+                space: "s",
+                mode: .stack,
+                tiled: tiled,
+                in: context(focused: ids[5])
+            )
+        )
+        let run = try #require(cover.runs.first)
+        // 780 pt, two shown at 300 with one 10 pt gap: 170 left.
+        #expect(abs(run.extra - 170) < 0.01)
     }
 }

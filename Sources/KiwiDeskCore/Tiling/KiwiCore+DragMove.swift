@@ -52,7 +52,8 @@ extension KiwiCore {
             dragOverlay.hideAll()
             return
         }
-        let slots = tiler.calculatedFrames(state: state)
+        // A run's hidden window is no drop target (#2235).
+        let slots = shownSlots()
         guard let slot = slots[id] else {
             dragCrossing.cancelPending(for: id)
             dragOverlay.hideAll()

@@ -323,7 +323,7 @@ extension KiwiCore {
             state.windows[id]?.isSticky != true
         {
             scheduleFocusFollow(id)
-        } else if activeSpace?.mode.isFocusDriven == true {
+        } else if focusRetiles(to: id) {
             // A foreign STICKY focus lands here too (follow
             // exempt above): one idempotent no-op pass, by
             // design. Our own raise's echo finishes that

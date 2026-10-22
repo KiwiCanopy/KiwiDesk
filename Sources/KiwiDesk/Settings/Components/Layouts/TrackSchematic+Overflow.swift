@@ -46,25 +46,33 @@ extension TrackSchematic {
     /// first slot. Only reached with at least one window to draw.
     func overflowSlots(_ size: CGSize) -> [OverflowSlot] {
         let n = overflowWindows
+        guard n > 0 else { return [] }
         let shown = min(LayoutSchematic.trackSpillCapacity, n)
-        let head = incomingFolds ? n - shown : 0
         let g: CGFloat = 3
         let rowH = max(
             8,
             (size.height - g * CGFloat(max(0, shown - 1)))
                 / CGFloat(max(1, shown))
         )
-        return (0..<n).map { index in
-            let row = min(max(index - head, 0), shown - 1)
-            return OverflowSlot(
-                rect: CGRect(
-                    x: 0,
-                    y: CGFloat(row) * (rowH + g),
-                    width: size.width,
-                    height: rowH
-                ),
-                hidden: index < head || index >= head + shown
-            )
+        // The engine's own run (`ZoneRun`, gui.md #702), over
+        // floors a hair under the row so exactly `shown` fit.
+        let floors = Array(repeating: rowH - 0.01, count: n)
+        let run = ZoneRun.resolve(
+            floors: floors,
+            span: size.height,
+            gap: g,
+            head: nil,
+            focus: incomingFolds ? n - 1 : nil
+        )
+        let rects = run.frames(
+            floors: floors,
+            weights: Array(repeating: 1, count: n),
+            in: CGRect(origin: .zero, size: size),
+            vertical: true,
+            gap: g
+        )
+        return rects.enumerated().map { index, rect in
+            OverflowSlot(rect: rect, hidden: !run.visible.contains(index))
         }
     }
 }

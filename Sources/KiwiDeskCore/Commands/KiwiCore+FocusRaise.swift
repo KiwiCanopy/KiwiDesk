@@ -165,9 +165,7 @@ extension KiwiCore {
         if warp {
             warpMouseToFocused(id)
         }
-        guard refocusRetile,
-            activeSpace?.mode.isFocusDriven == true
-        else {
+        guard refocusRetile, focusRetiles(to: id) else {
             // Unreachable while `defersFocusRaise` stays a
             // subset of `isFocusDriven` — but if that drifts,
             // never lose the raise.

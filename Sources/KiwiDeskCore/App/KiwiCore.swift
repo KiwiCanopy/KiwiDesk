@@ -66,8 +66,8 @@ public final class KiwiCore {
     var switchResync: SwitchResyncBatch?
     /// A z-order restore waits for animations to settle.
     var pendingZOrderRestore = false
-    /// What the last restore-armed pass hid (`+RunRest`, #2235).
-    var drawnRunCover: RunCover?
+    /// The scrolled runs' z-order arm (`+RunRest`, #2235).
+    let runArm = RunArm()
     /// The float raise owed behind the tiled plane (#2284).
     let floatRaiseDebt = FloatRaiseDebt()
 

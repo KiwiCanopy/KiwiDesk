@@ -16,84 +16,126 @@ public struct RunZone: Sendable, Equatable {
         self.vertical = vertical
     }
 
+    /// The zones `mode` lays `tiled` along, nil for a layout that
+    /// scrolls none or where every window piles over the whole
+    /// area. The one switch every run reader takes.
+    public static func zones(
+        mode: LayoutMode,
+        tiled: [WindowID],
+        in context: LayoutContext
+    ) -> [RunZone]? {
+        switch mode {
+        case .stack: StackLayout.zones(for: tiled, in: context)
+        case .track: TrackLayout.zones(for: tiled, in: context)
+        default: nil
+        }
+    }
+
     /// The run this zone draws, or nil where it draws none: every
     /// member fits at its weighted share, or the zone cannot hold
     /// even one window at the minimum size and piles whole.
     public func run(in context: LayoutContext) -> ZoneRun? {
-        guard !members.isEmpty, !fitsWhole(in: context),
-            !piles(in: context)
-        else { return nil }
-        return ZoneRun.resolve(
-            floors: floors(in: context),
-            span: span,
-            gap: gap(in: context),
-            head: ZoneRun.head(of: members, in: context.runHeads),
-            focus: shown(in: context)
-        )
-    }
-
-    /// The member the run must show: the focus, else a sticky
-    /// member, which keeps a shown slot (#414 v2).
-    private func shown(in context: LayoutContext) -> Int? {
-        context.focused.flatMap { members.firstIndex(of: $0) }
-            ?? members.firstIndex { context.sticky.contains($0) }
+        placement(in: context).run
     }
 
     /// Frames for every member.
     public func frames(in context: LayoutContext) -> [WindowID: CGRect] {
         guard !members.isEmpty else { return [:] }
-        if piles(in: context) {
+        let plan = placement(in: context)
+        if plan.piles {
             return OverlapStack.frames(
                 for: members,
                 in: region,
                 minSize: context.minWindowSize
             )
         }
-        let rects: [CGRect]
-        if let run = run(in: context) {
-            rects = run.frames(
-                floors: floors(in: context),
-                weights: weights(in: context),
+        let rects =
+            plan.run?.frames(
+                floors: plan.floors,
+                weights: plan.weights,
                 in: region,
                 vertical: vertical,
-                gap: gap(in: context)
-            )
-        } else {
-            rects = weightedRects(in: context)
-        }
+                gap: plan.gap
+            ) ?? weightedRects(plan)
         return Dictionary(uniqueKeysWithValues: zip(members, rects))
+    }
+
+    /// The span left to the weights once the shown members' floors
+    /// are set aside — what a weight resize divides inside a run
+    /// (`resizeStackMember`). Nil outside a run.
+    public func runExtra(in context: LayoutContext) -> CGFloat? {
+        let plan = placement(in: context)
+        guard let run = plan.run else { return nil }
+        let shown = Array(run.visible)
+        let used =
+            shown.reduce(CGFloat(0)) { $0 + plan.floors[$1] }
+            + plan.gap * CGFloat(max(shown.count - 1, 0))
+        return max(span - used, 0)
+    }
+
+    private struct Plan {
+        let floors: [CGFloat]
+        let weights: [Double]
+        let gap: CGFloat
+        let piles: Bool
+        let run: ZoneRun?
+    }
+
+    /// Every reading a placement takes, each computed once.
+    private func placement(in context: LayoutContext) -> Plan {
+        let floors = members.map {
+            context.runFloor(of: $0, horizontal: !vertical)
+        }
+        let weights = members.map {
+            max(context.stackWeights[$0] ?? 1, StackLayout.weightFloor)
+        }
+        let gap =
+            vertical
+            ? context.gaps.inner.vertical : context.gaps.inner.horizontal
+        // The emergency whole-zone pile (#44): not even one window
+        // fits at the minimum size.
+        let piles =
+            span <= 0
+            || span < context.minWindowSize.along(horizontal: !vertical)
+        guard !members.isEmpty, !piles,
+            !fitsWhole(floors, weights, gap, context)
+        else {
+            return Plan(
+                floors: floors,
+                weights: weights,
+                gap: gap,
+                piles: piles,
+                run: nil
+            )
+        }
+        let run = ZoneRun.resolve(
+            floors: floors,
+            span: span,
+            gap: gap,
+            head: ZoneRun.head(of: members, in: context.runHeads),
+            focus: context.focused.flatMap { members.firstIndex(of: $0) }
+        )
+        return Plan(
+            floors: floors,
+            weights: weights,
+            gap: gap,
+            piles: false,
+            run: run
+        )
     }
 
     private var span: CGFloat { vertical ? region.height : region.width }
 
-    private func gap(in context: LayoutContext) -> CGFloat {
-        vertical ? context.gaps.inner.vertical : context.gaps.inner.horizontal
-    }
-
-    private func weights(in context: LayoutContext) -> [Double] {
-        members.map {
-            max(context.stackWeights[$0] ?? 1, StackLayout.weightFloor)
-        }
-    }
-
-    private func floors(in context: LayoutContext) -> [CGFloat] {
-        members.map { context.runFloor(of: $0, horizontal: !vertical) }
-    }
-
-    /// The emergency whole-zone pile (#44): not even one window
-    /// fits at the minimum size.
-    private func piles(in context: LayoutContext) -> Bool {
-        span <= 0
-            || span < context.minWindowSize.along(horizontal: !vertical)
-    }
-
     /// Every member's weighted share keeps the minimum size (#67)
     /// and its own floor; otherwise the run places them, each at
     /// its floor or more.
-    private func fitsWhole(in context: LayoutContext) -> Bool {
-        let gaps = gap(in: context) * CGFloat(members.count - 1)
-        let available = span - gaps
-        let weights = weights(in: context)
+    private func fitsWhole(
+        _ floors: [CGFloat],
+        _ weights: [Double],
+        _ gap: CGFloat,
+        _ context: LayoutContext
+    ) -> Bool {
+        let available = span - gap * CGFloat(members.count - 1)
         let total = weights.reduce(0, +)
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
@@ -103,20 +145,18 @@ public struct RunZone: Sendable, Equatable {
             )
         )
         guard available > 0, total <= limit else { return false }
-        return zip(weights, floors(in: context)).allSatisfy {
+        return zip(weights, floors).allSatisfy {
             available * CGFloat($0.0 / total) >= $0.1
         }
     }
 
-    private func weightedRects(in context: LayoutContext) -> [CGRect] {
-        let gap = gap(in: context)
-        let available = span - gap * CGFloat(members.count - 1)
-        let weights = weights(in: context)
-        let total = weights.reduce(0, +)
+    private func weightedRects(_ plan: Plan) -> [CGRect] {
+        let available = span - plan.gap * CGFloat(members.count - 1)
+        let total = plan.weights.reduce(0, +)
         var position = vertical ? region.minY : region.minX
-        return weights.map { weight in
+        return plan.weights.map { weight in
             let extent = available * CGFloat(weight / total)
-            defer { position += extent + gap }
+            defer { position += extent + plan.gap }
             return vertical
                 ? CGRect(
                     x: region.minX,

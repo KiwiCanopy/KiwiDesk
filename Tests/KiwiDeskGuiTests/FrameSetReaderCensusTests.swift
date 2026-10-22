@@ -91,6 +91,11 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+ResizeBsp.swift": (
             .slots, "the focus sign reads the slot's side"
         ),
+        "KiwiCore+RunRest.swift": (
+            .slots,
+            "`shownSlots()`, the slots without a run's hidden windows "
+                + "(#2235)"
+        ),
     ]
 
     @Test("Every reader of either frame set is registered on its side")
@@ -103,10 +108,13 @@ struct FrameSetReaderCensusTests {
             let text = try SourceScan.strippedSource(at: url)
             // A call, never the declaration; the argument label
             // may sit on the next line. The issued set has a
-            // one-space overload (`of:`, #2234).
+            // one-space overload (`of:`, #2234). `shownSlots()` is
+            // the slots with a run's hidden windows left out
+            // (#2235), so its callers classify slots too.
             let slots = SourceScan.allMatches(
                 in: text,
-                pattern: "((?<!func )calculatedFrames\\(\\s*state)"
+                pattern: "((?<!func )(calculatedFrames\\(\\s*state"
+                    + "|shownSlots\\(\\)))"
             ).count
             let issued = SourceScan.allMatches(
                 in: text,

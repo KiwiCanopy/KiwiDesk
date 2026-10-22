@@ -41,7 +41,7 @@ extension TrackSchematic {
             ? L(
                 "layout.schematic.track.ax",
                 "Track preview: tracks along one axis, the far "
-                    + "one scrolling overflow; the plus is the next "
+                    + "one scrolling its overflow; the plus is the next "
                     + "window."
             )
             : L(

@@ -1,0 +1,62 @@
+import Foundation
+
+/// A weight resize inside a scrolled run (#2235): the layout gives
+/// every shown window its floor and divides only what is left by
+/// weight (`ZoneRun.frames`), so the press divides that span over
+/// the shown windows alone — the span the layout divides (#933),
+/// and never a hidden window named in a refusal (#1259).
+extension KiwiCore {
+    /// The write for `focused` when its zone's run hides windows,
+    /// nil otherwise — the caller then takes the whole-zone clamp.
+    /// The stack and the track member writers share it.
+    func resizeInRun(
+        _ focused: WindowID,
+        axis: String,
+        delta: Double,
+        space: Space
+    ) -> CommandResponse? {
+        guard
+            let run = tiler.runCovers[space.id]?.runs.first(where: {
+                $0.shown.contains(focused)
+            })
+        else { return nil }
+        let shown = Array(run.shown)
+        guard shown.count > 1, let index = shown.firstIndex(of: focused)
+        else {
+            // A run showing one window has no share to move; the
+            // other axis still divides the Space.
+            refuseNothingToDivide(focused, otherAxisDivides: true)
+            return .fail("the focused window is alone in its run")
+        }
+        guard run.extra > 0 else {
+            // Every shown window sits at its floor: nothing to
+            // give or take without hiding a window.
+            if delta < 0 {
+                refuseShrinkAtMinimum(focused, axis: axis)
+            } else {
+                refuseGrowAtNeighborMinimum(
+                    focused,
+                    anchor: shown[index == 0 ? 1 : index - 1],
+                    axis: axis
+                )
+            }
+            return .fail("every shown window is at its minimum")
+        }
+        let weights = shown.map {
+            max(space.stackWeights[$0] ?? 1, StackLayout.weightFloor)
+        }
+        // Floors are kept by the layout itself, so the step
+        // divides the extra with no minimum of its own.
+        let outcome = StackLayout.weightStep(
+            weights: weights,
+            at: index,
+            delta: delta,
+            span: Double(run.extra),
+            minSizes: Array(repeating: 0, count: shown.count)
+        )
+        state.workspaces.withSpace(space.id) {
+            $0.stackWeights[focused] = outcome.value
+        }
+        return .ok()
+    }
+}

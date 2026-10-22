@@ -190,7 +190,8 @@ extension KiwiCore {
         }
 
         let frame = liveDropFrame(id, fallback: frame)
-        let slots = tiler.calculatedFrames(state: state)
+        // A run's hidden window is no drop target (#2235).
+        let slots = shownSlots()
         // Resolve the swap target from the cursor, exactly as the
         // live preview did (#492), so the drop can never disagree
         // with the drop-zone the user saw. AX coords: flip the

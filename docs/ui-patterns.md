@@ -236,7 +236,7 @@ so the drawing is the label — each tile also carrying the
 count of spaces using it. The strip lands on the profile's
 most-used layout. The minimum window size is pinned *above* the
 strip because its master and drawer set every layout's at once
-(and it decides when a zone scrolls or piles). The rows come from the
+(and it decides when windows stop fitting). The rows come from the
 settings census and one `LayoutCard` renders whichever layout
 is selected.
 
@@ -895,11 +895,9 @@ lands here": BSP's incoming window, Track's own-vs-focused
 track), an **off-screen ghost** (solid gray, straddling a
 drawn screen edge, "a real window scrolled off-screen":
 Scrolling's side panel), and the **empty-cell gap** (dashed
-gray, "unused grid space": rigid Grid). Stack's and Track's
-overflow are drawn as the engine places them: the windows that
-do not fit sit behind the edge tile. A fact the reader can reach by dragging the
-window-count slider — a grid rebalancing as a fifth window
-opens — is expressible in that one frame; a fact about *motion*
+gray, "unused grid space": rigid Grid). A fact the reader can
+reach by dragging the window-count slider — a grid rebalancing
+as a fifth window opens — is expressible in that one frame; a fact about *motion*
 is the caption's to state, in words, and a caption that carries
 one **switches with the control that changes it** rather than
 stating it under every setting. Where a ghost needs more room
@@ -910,6 +908,12 @@ in Scrolling/Monocle is **not** drawn into their schematics
 (one preview, one job); its presence surfaces as live On/Off
 state in the `CrossReferenceRow` that points at the App Bar
 destination (#229).
+
+:::unreleased
+Stack's and Track's overflow are drawn the way the engine places
+them (`ZoneRun`): the windows that do not fit sit behind the
+edge tile.
+:::
 
 ## Labels & wire names
 
