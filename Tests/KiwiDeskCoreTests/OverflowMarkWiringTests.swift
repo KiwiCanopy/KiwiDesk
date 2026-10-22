@@ -132,6 +132,23 @@ struct OverflowMarkWiringTests {
         #expect(peek.shown == nil)
     }
 
+    /// A repeat sync draws nothing, but a font-set change is no
+    /// repeat: the face and the pill's width are read at draw time
+    /// (#1901). `BarFont.invalidate` is process-wide and only forgets
+    /// a memo, so it costs no other suite anything.
+    @Test("A font-set change re-renders an unchanged mark")
+    func fontChangeRerenders() throws {
+        let core = makeCore()
+        _ = makeSpace(core)
+        let overlay = try #require(core.overflowMarks.overlays.values.first)
+        let before = try #require(overlay.drawnEnvironment)
+        BarFont.invalidate()
+        core.updateOverflowMarks()
+        let after = try #require(overlay.drawnEnvironment)
+        #expect(after.fonts != before.fonts)
+        #expect(after == BarDrawEnvironment.current)
+    }
+
     @Test("A run that hides nothing draws no mark")
     func noOverflowNoMark() {
         let core = makeCore()
