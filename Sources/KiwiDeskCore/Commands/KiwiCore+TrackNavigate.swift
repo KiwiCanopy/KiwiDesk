@@ -34,11 +34,18 @@ extension KiwiCore {
         guard let index = tiled.firstIndex(of: focused) else {
             return nil
         }
-        let counts = TrackLayout.counts(
-            of: tiled,
-            breaks: space.trackBreaks,
-            cap: params.trackCap
-        )
+        // The tracks the render draws — the automatic cap and the
+        // overflow fold included — or a step "along" a track walks
+        // across the ones the fold merged (#1488, #2235).
+        let counts =
+            (tiler.layoutInput(state: state)?.context)
+            .map { TrackLayout.renderPartition(of: tiled, in: $0) }?
+            .counts
+            ?? TrackLayout.counts(
+                of: tiled,
+                breaks: space.trackBreaks,
+                cap: params.trackCap
+            )
         let ranges = TrackLayout.ranges(of: counts)
         guard
             let track = TrackLayout.trackIndex(

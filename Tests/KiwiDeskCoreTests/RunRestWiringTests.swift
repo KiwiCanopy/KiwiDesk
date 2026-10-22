@@ -188,6 +188,32 @@ struct RunRestWiringTests {
         #expect(core.state.workspaces[space]?.runTails == [WindowID(4)])
     }
 
+    /// The device case (owner, 2026-10-22): every window on its
+    /// own track, the automatic cap folds them into one overflow
+    /// track that scrolls, and a step along that track is ↓ —
+    /// never → across tracks the fold merged (#1488).
+    @Test("A step along a folded overflow track takes its axis")
+    func foldedTrackStepsAlong() throws {
+        let core = makeCore()
+        let space = makeSpace(core, focused: 2)
+        _ = core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("track")]
+        )
+        // After the mode write, which seeds its own partition.
+        core.state.workspaces.withSpace(space) {
+            $0.trackBreaks = Set((1...6).map { WindowID(UInt32($0)) })
+        }
+        _ = core.execute("set_min_window_size", args: [.number(600)])
+        core.state.workspaces.focus(WindowID(2), in: space)
+        core.retile(animated: false)
+        #expect(core.runHidden.contains(WindowID(3)))
+        #expect(
+            core.execute("focus", args: [.string("down")]).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(3))
+    }
+
     @Test("The shown slots leave a run's hidden windows out")
     func shownSlotsDropHidden() throws {
         let core = makeCore()
