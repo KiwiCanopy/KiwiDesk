@@ -171,7 +171,7 @@ struct KeyboardLayerWiringTests {
         // into the run — the styling follows it.
         #expect(
             panel.contains(
-                "Text(caption).accessibilityLabel(draftCaption)"
+                "Text(drawnCaption).accessibilityLabel(draftCaption)"
             )
         )
         // The naming condition is the gate's one reading,
@@ -295,6 +295,11 @@ struct KeyboardLayerNamingTests {
         #expect(
             panel.caption
                 == "Shows your draft, not the saved profile."
+        )
+        #expect(
+            panel.drawnCaption
+                == "Hover over a key to see its shortcuts. "
+                + "Shows your draft, not the saved profile."
         )
 
         let two = model([KeyLayer.defaultName, "media"])
