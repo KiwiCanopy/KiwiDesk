@@ -5,6 +5,7 @@ import SwiftUI
 /// sits and whether it shows are the KiwiShelf card's (#1517).
 struct SpaceBarCard: View {
     @ObservedObject var model: SettingsModel
+    @State private var tuningExpanded = false
 
     var style: Binding<SpaceBarStyle> {
         $model.config.settings.spaceBarStyle
@@ -20,6 +21,25 @@ struct SpaceBarCard: View {
         ) {
             // Preview strip renders in BarsPanelPreview (#678).
             rows(BarsRowOrder.spaceBar)
+            tuningDisclosure
+        }
+    }
+
+    /// The numbers, in one drawer at the card's foot (#2507).
+    private var tuningDisclosure: some View {
+        SettingsDisclosure(
+            SettingsCatalog.bars.spaceBarTuning,
+            isExpanded: $tuningExpanded,
+            scrollHoisted: true,
+            summary: L(
+                "space_bar.fine_tuning.summary",
+                "Title length, glyphs, spring delay"
+            )
+        ) {
+            VStack(alignment: .leading, spacing: 10) {
+                rows(BarsRowOrder.spaceBarTuning)
+            }
+            .padding(.top, 8)
         }
     }
 

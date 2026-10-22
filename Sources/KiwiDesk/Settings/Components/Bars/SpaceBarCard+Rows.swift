@@ -97,6 +97,10 @@ extension SpaceBarCard {
             )
         case .spaceBarGlyphSpan:
             glyphSpanRow
+                .searchAnchored(
+                    SettingsCatalog.bars.spaceBarTuning.children
+                        .glyphSpan
+                )
         case .spaceBarGlyphGap:
             PtSlider(
                 label: L("space_bar.glyph_gap", "Glyph gap"),
@@ -108,8 +112,16 @@ extension SpaceBarCard {
                         + "sets them side by side."
                 )
             )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarTuning.children
+                    .glyphGap
+            )
         case .spaceBarFrontAppTitleCap:
             titleCapRow
+                .searchAnchored(
+                    SettingsCatalog.bars.spaceBarTuning.children
+                        .frontAppTitleCap
+                )
         case .spaceBarSpringDelay:
             SecondsRow(
                 label: L("space_bar.spring_delay", "Spring delay"),
@@ -123,6 +135,10 @@ extension SpaceBarCard {
                         + "its layout. A quicker drop moves the "
                         + "window there without switching."
                 )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarTuning.children
+                    .springDelay
             )
         case .spaceBarReserve, .spaceBarVisibility,
             .spaceBarActiveDimFactor,

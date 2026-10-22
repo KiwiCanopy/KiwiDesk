@@ -27,8 +27,6 @@ enum BarsRowOrder {
     static let kiwishelfPlacement: [SettingKey] = [
         .kiwishelf(.edge),
         .kiwishelf(.alignment),
-        .kiwishelf(.order),
-        .kiwishelf(.minimum),
     ]
 
     /// KiwiShelf card, after a rule: how deep the strip is.
@@ -50,7 +48,8 @@ enum BarsRowOrder {
         .kiwishelf(.appBarScreenEdge),
     ]
 
-    /// KiwiShelf card, behind the Style disclosure.
+    /// KiwiShelf card, behind the Style disclosure; how two bars
+    /// on one edge meet closes it (#2507).
     static let kiwishelfStyle: [SettingKey] = [
         .kiwishelf(.background),
         .kiwishelf(.backgroundFit),
@@ -66,6 +65,8 @@ enum BarsRowOrder {
         .kiwishelf(.fontFamily),
         .kiwishelf(.fontWeight),
         .kiwishelf(.iconSource),
+        .kiwishelf(.order),
+        .kiwishelf(.minimum),
     ]
 
     /// KiwiShelf card, behind the Margins disclosure.
@@ -74,20 +75,25 @@ enum BarsRowOrder {
         .kiwishelf(.innerMargin),
     ]
 
-    /// Space Bar card — every row shown, each gate directly
-    /// above what it gates (#1517); rows on the label axis
+    /// Space Bar card, open: the choices, rows on the label axis
     /// first, the checkbox tier last (ui-patterns ▸ Row layout).
     static let spaceBar: [SettingKey] = [
         .spaceBar(.spaceBarItemLabel),
         .spaceBar(.spaceBarInactiveContent),
-        .spaceBar(.spaceBarGlyphSpan),
-        .spaceBar(.spaceBarGlyphGap),
         .spaceBar(.spaceBarActiveIndicator),
-        .spaceBar(.spaceBarSpringDelay),
         .spaceBar(.spaceBarGroupAdjacent),
         .spaceBar(.spaceBarHideEmpty),
         .spaceBar(.spaceBarShowFrontApp),
+    ]
+
+    /// Space Bar card, behind the Fine-tuning disclosure at its
+    /// foot (#2507): the numbers, the title length first, directly
+    /// under its gate Show front app.
+    static let spaceBarTuning: [SettingKey] = [
         .spaceBar(.spaceBarFrontAppTitleCap),
+        .spaceBar(.spaceBarGlyphSpan),
+        .spaceBar(.spaceBarGlyphGap),
+        .spaceBar(.spaceBarSpringDelay),
     ]
 
     /// App Bar card — every row shown, each gate directly above
