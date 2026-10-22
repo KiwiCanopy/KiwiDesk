@@ -14,11 +14,12 @@ struct OnboardingSpaceCard: Identifiable, Equatable {
 @MainActor
 @Observable
 final class OnboardingModel {
-    /// Onboarding tour steps (#678, #828, #888, #1720).
+    /// Onboarding tour steps (#678, #828, #888, #1720, #2515).
     enum Step: Equatable, CaseIterable {
         case grant
         case spaces
         case looks
+        case bars
         case keys
         case done
 
@@ -26,7 +27,7 @@ final class OnboardingModel {
         /// asks `reachedEnd`, never a list of cases of its own.
         var isClosingBeat: Bool {
             switch self {
-            case .grant, .spaces, .looks: false
+            case .grant, .spaces, .looks, .bars: false
             case .keys, .done: true
             }
         }
@@ -37,6 +38,9 @@ final class OnboardingModel {
     private(set) var step: Step = .grant {
         didSet {
             if step.isClosingBeat { reachedEnd = true }
+            // The looks step paints bars the user must see; the
+            // bars step shows them as the pick leaves them (#2515).
+            holdBarsRevealed(step == .looks)
         }
     }
     var isTrusted = false
@@ -68,6 +72,7 @@ final class OnboardingModel {
     func beginPresentation(at step: Step) {
         self.step = step
         looksBaseline = nil
+        bars.reset()
         plannedSteps = OnboardingEntry.plannedSteps(from: step)
     }
 
@@ -107,6 +112,11 @@ final class OnboardingModel {
     /// The chord families the keys step teaches, read from the
     /// live layer.
     var keyFamilies: () -> [OnboardingKeyFamily] = { [] }
+
+    /// Holds every hiding bar shown (`KiwiCore.holdBarsRevealed`).
+    var holdBarsRevealed: (Bool) -> Void = { _ in }
+    /// The bars step's own state (#2515).
+    let bars = OnboardingBarsModel()
 
     // MARK: - Looks step (#1720)
 
@@ -208,6 +218,10 @@ final class OnboardingModel {
     }
 
     func continueAfterLooks() {
+        advance()
+    }
+
+    func continueAfterBars() {
         advance()
     }
 

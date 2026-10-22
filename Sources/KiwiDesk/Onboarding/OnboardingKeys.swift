@@ -89,6 +89,12 @@ enum OnboardingKeys {
                 )
             )
         }
+        if let maximize = maximizeFamily(layer: layer) {
+            families.append(maximize)
+        }
+        if let bars = revealFamily(layer: layer) {
+            families.append(bars)
+        }
         // Taught before Settings has ever been opened, which is
         // the road #1381 seeded the chord for; the label is the
         // row's own, so the two cannot drift apart.

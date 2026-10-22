@@ -69,6 +69,7 @@ extension AppDelegate {
             self?.onboardingKeyFamilies() ?? []
         }
         wireOnboardingLooks()
+        wireOnboardingBars()
         // Resolved after wiring so step handlers are in place (#828, #888).
         onboardingModel.beginPresentation(at: entry)
 
@@ -135,6 +136,8 @@ extension AppDelegate {
             closing === onboardingWindow
         else { return }
         onboardingWindow = nil
+        // A tour closed on the looks step leaves no bar held.
+        core.holdBarsRevealed(false)
         // Keyed on model completion rather than hardcoded step cases (#678).
         if onboardingModel.reachedEnd {
             OnboardingDiscovery.markShown()

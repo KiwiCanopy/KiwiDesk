@@ -67,6 +67,8 @@ struct MotionScopeCensusTests {
         "KiwiDesk/AppDelegate.swift": 2,
         // The tour's shelf paint and its revert.
         "KiwiDesk/AppDelegate+OnboardingLooks.swift": 2,
+        // The tour's bar visibility pick and its revert (#2515).
+        "KiwiDesk/AppDelegate+OnboardingBars.swift": 2,
         // Settings: Save and its config reload, load, delete, set
         // default, a preset, a restore, a reset, an app-wide change, a claim,
         // a stored-profile edit, the Lua editor's apply.
@@ -148,7 +150,8 @@ struct MotionScopeCensusTests {
     private static let motionDoors = [
         "execute", "loadConfig", "saveGuiConfig",
         "applyProfileScopedState", "applyStandard", "restoreSetup",
-        "restoreShelf", "paintShelf", "reapplyIfInEffect",
+        "restoreShelf", "paintShelf", "setBarVisibility",
+        "restoreBarVisibility", "reapplyIfInEffect",
         "resetAllSettings", "claimMonitorSet", "commitSharedLook",
         "setAppWide", "rewriteSidecarBindings", "revertUnsavedLive",
     ]

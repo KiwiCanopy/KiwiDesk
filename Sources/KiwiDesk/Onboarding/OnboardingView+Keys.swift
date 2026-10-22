@@ -49,7 +49,7 @@ extension OnboardingView {
             .foregroundStyle(SettingsTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
         } else {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
                 ForEach(rows) { row(for: $0) }
             }
         }
@@ -63,87 +63,9 @@ extension OnboardingView {
                 .font(.system(size: 13.5))
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 12)
-            keycap(family)
+            OnboardingKeycap(family: family)
         }
         .accessibilityElement(children: .combine)
-    }
-
-    /// Renders chord chips with modifier labels and separators (#23, #1016).
-    @ViewBuilder private func keycap(
-        _ family: OnboardingKeyFamily
-    ) -> some View {
-        HStack(alignment: .top, spacing: 5) {
-            switch family.chord {
-            case .shared(let modifiers, let keys):
-                ForEach(
-                    OnboardingModifierNames.named(modifiers)
-                ) { modifier in
-                    namedChip(modifier, family: family)
-                    plus
-                }
-                chip(keys, family: family)
-            case .mixed(let text):
-                chip(text, family: family)
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(family.glyphs)
-    }
-
-    /// Single modifier chip with hidden accessibility label (#1016).
-    private func namedChip(
-        _ modifier: OnboardingModifierName,
-        family: OnboardingKeyFamily
-    ) -> some View {
-        VStack(spacing: 3) {
-            chip(modifier.glyph, family: family)
-            Text(modifier.name)
-                .font(.system(size: 9.5))
-                .foregroundStyle(SettingsTheme.ink3)
-                .accessibilityHidden(true)
-        }
-        .fixedSize()
-    }
-
-    /// Separator between shortcut key chips.
-    private var plus: some View {
-        Text(verbatim: "+")
-            .font(.system(size: 12, weight: .medium))
-            .foregroundStyle(SettingsTheme.ink3)
-            .padding(.vertical, 4)
-    }
-
-    /// Visual keycap chip; gateway chords draw accent ink on accent fill.
-    private func chip(
-        _ text: String,
-        family: OnboardingKeyFamily
-    ) -> some View {
-        Text(text)
-            .font(.system(size: 12, weight: .semibold).monospaced())
-            .foregroundStyle(
-                family.isGateway
-                    ? SettingsTheme.accentInk
-                    : SettingsTheme.ink
-            )
-            .padding(.horizontal, 9)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(
-                        family.isGateway
-                            ? SettingsTheme.accent
-                            : SettingsTheme.sunken
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(
-                        family.isGateway
-                            ? SettingsTheme.accentInk.opacity(0.22)
-                            : SettingsTheme.ink2.opacity(0.3),
-                        lineWidth: 1.2
-                    )
-            )
     }
 
     private var keysTitle: String {

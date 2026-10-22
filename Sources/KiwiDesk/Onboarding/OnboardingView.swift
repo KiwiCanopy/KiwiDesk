@@ -17,6 +17,8 @@ struct OnboardingView: View {
                 spaces
             case .looks:
                 OnboardingLooksStep(model: model)
+            case .bars:
+                OnboardingBarsStep(model: model)
             case .keys:
                 keys
             case .done:

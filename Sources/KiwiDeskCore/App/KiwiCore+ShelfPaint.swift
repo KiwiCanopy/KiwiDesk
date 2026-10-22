@@ -6,8 +6,9 @@ import Foundation
 /// click is the whole act. The file half reads the stored settings
 /// and paints them, never `persistProfile`'s live capture (#1179).
 extension KiwiCore {
-    /// What a tour Revert returns to: the settings live and in the
-    /// file before the first paint, and whose profile they were.
+    /// What a tour Revert returns to — the looks step's and the
+    /// bars step's (#2515): the settings live and in the file
+    /// before the step's first write, and whose profile they were.
     public struct ShelfPaintBaseline: Equatable, Sendable {
         let profile: String?
         let live: TilingSettings
@@ -101,7 +102,9 @@ extension KiwiCore {
         return settings
     }
 
-    private func paintShelfThrough(
+    /// Writes a tour step's edit live, retiles, and writes it
+    /// into the live profile's file.
+    func paintShelfThrough(
         live: (inout TilingSettings) -> Void,
         stored: @escaping SettingsEdit
     ) {

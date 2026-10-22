@@ -14930,7 +14930,7 @@ is the one change that can move the windows. Hiding while still
 reserving the full strip was rejected (the user would give up the
 information and keep paying the area). An update changes nothing
 a user sees: a bar stored on becomes `always`, one stored off
-`hidden`; a fresh install's starter takes `auto` — `always` for 3.2.0, until the tour page that explains Auto ships (#2515), since under Auto the tour's Looks step paints bars hidden at rest.
+`hidden`; a fresh install's starter takes `auto`, which the welcome tour's bars step explains and lets the user change (#2515); 3.2.0 shipped it on `always` because no tour page explained Auto yet.
 
 Each bar stores its own value, and an edge two bars share reserves
 for its MORE present bar: `always` over `auto` over `hidden`.

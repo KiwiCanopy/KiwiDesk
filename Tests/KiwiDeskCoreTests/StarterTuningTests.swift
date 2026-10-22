@@ -119,16 +119,16 @@ struct StarterTuningTests {
         )
     }
 
-    /// A fresh install's bars show for 3.2.0 (owner ruling,
-    /// 2026-10-21) until the tour explains Auto (#2515): every bar
-    /// the starter sets reads Always.
-    @Test("the starter's bars read Always")
-    func starterBarsAlways() {
+    /// A fresh install's bars hide to their marks, which the
+    /// tour's bars step explains (#2515): every bar the starter
+    /// sets reads Auto.
+    @Test("the starter's bars read Auto")
+    func starterBarsAuto() {
         let settings = StarterSetup.settings(
             sizes: [CGSize(width: 1728, height: 1117)]
         )
-        #expect(settings.spaceBarStyle.visibility == .always)
-        #expect(settings.monocle.appBar.visibility == .always)
-        #expect(settings.scrolling.appBar.visibility == .always)
+        #expect(settings.spaceBarStyle.visibility == .auto)
+        #expect(settings.monocle.appBar.visibility == .auto)
+        #expect(settings.scrolling.appBar.visibility == .auto)
     }
 }

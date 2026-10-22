@@ -41,6 +41,13 @@ final class ShelfRevealer {
         @MainActor (TimeInterval, @escaping @MainActor () -> Void)
             -> ShelfRevealTimer = ShelfRevealTimer.after
 
+    /// Every hiding bar reads shown while set — the tour's looks
+    /// step (#2515) — over whatever its pointer or shortcut did,
+    /// which stands again on release.
+    var heldOpen = false {
+        didSet { if running, heldOpen != oldValue { onChange() } }
+    }
+
     private(set) var targets: [Key: Target] = [:]
     private(set) var phases: [Key: ShelfReveal] = [:]
     /// Hidden shelves whose mark shows its hover cue — the pointer
@@ -64,6 +71,7 @@ final class ShelfRevealer {
     /// tearing its bars down, and its next start redraws them.
     func stop() {
         running = false
+        heldOpen = false
         for timer in timers.values { timer.cancel() }
         timers = [:]
         suppressed = []
@@ -83,7 +91,8 @@ final class ShelfRevealer {
 
     /// The state of `key`, hidden where nothing revealed it.
     func reveal(of key: Key) -> ShelfReveal {
-        phases[key] ?? .hidden
+        if heldOpen, targets[key] != nil { return .pinned(until: nil) }
+        return phases[key] ?? .hidden
     }
 
     /// Whether any hiding bar sits on `shelf`, which a retracted
