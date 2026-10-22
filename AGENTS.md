@@ -1516,7 +1516,9 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
   on a bar reading `always` through the one `autoReadsAlways`, and redrawing
   the bars without a retile (#761,
   `BarAutoHideFoldTests`, `ShelfRevealPerBarTests`, `ShelfAutoHideCoreTests`,
-  `ShelfRevealerTests`)
+  `ShelfRevealerTests`), a forced reveal the revealer's one
+  `heldOpen`, read only in `reveal(of:)` and released by its owner
+  (#2515, `ShelfRevealHoldTests`)
 - a hiding bar's mark and its fixed band are placed through the one
   `ShelfMarkPlacement`, its Space dots capped by the one `ShelfDotWindow`, and
   whether it yields to a shown sibling is the revealer's one `yields` (#761,

@@ -40,6 +40,7 @@ struct OnboardingProgressTests {
             case .grant: model.continueAfterAccessibility()
             case .spaces: model.continueAfterSpaces()
             case .looks: model.continueAfterLooks()
+            case .bars: model.continueAfterBars()
             case .keys: model.continueAfterKeys()
             case .done: break
             }
@@ -58,7 +59,10 @@ struct OnboardingProgressTests {
     /// thing that still varies the plan.
     @Test("the plan is the route the tour actually walks")
     func planMatchesTheWalkedRoute() {
-        for door: OnboardingModel.Step in [.grant, .spaces, .looks, .keys] {
+        let doors: [OnboardingModel.Step] = [
+            .grant, .spaces, .looks, .bars, .keys,
+        ]
+        for door in doors {
             let model = OnboardingModel()
             model.beginPresentation(at: door)
             let planned = model.plannedSteps
@@ -143,6 +147,7 @@ struct OnboardingProgressTests {
             case .grant: model.continueAfterAccessibility()
             case .spaces: model.continueAfterSpaces()
             case .looks: model.continueAfterLooks()
+            case .bars: model.continueAfterBars()
             case .keys: model.continueAfterKeys()
             case .done: break
             }

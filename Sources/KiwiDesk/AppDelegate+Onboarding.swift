@@ -69,6 +69,7 @@ extension AppDelegate {
             self?.onboardingKeyFamilies() ?? []
         }
         wireOnboardingLooks()
+        wireOnboardingBars()
         // Resolved after wiring so step handlers are in place (#828, #888).
         onboardingModel.beginPresentation(at: entry)
 
@@ -135,6 +136,7 @@ extension AppDelegate {
             closing === onboardingWindow
         else { return }
         onboardingWindow = nil
+        onboardingModel.endPresentation()
         // Keyed on model completion rather than hardcoded step cases (#678).
         if onboardingModel.reachedEnd {
             OnboardingDiscovery.markShown()
@@ -151,11 +153,13 @@ extension AppDelegate {
                 where: { $0.isDefault }
             )
         else { return [] }
+        let settings = core.tiler.settings
         return OnboardingKeys.families(
             layer: layer,
             spaces: SpaceID.deduplicated(
                 core.state.workspaces.allSpaces.map(\.id)
-            )
+            ),
+            showsBar: { settings.revealActionLiveAnywhere($0) }
         )
     }
 

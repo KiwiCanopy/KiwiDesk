@@ -253,18 +253,23 @@ extension KiwiCore {
         shelves.indicators.sync(hiding.indicators)
     }
 
-    /// The show/hide action on one bar.
-    func toggleBarReveal(_ key: ShelfRevealer.Key) {
+    /// The show/hide action on one bar; false where the revealer
+    /// refused it — a bar the tour holds shown (#2515).
+    @discardableResult
+    func toggleBarReveal(_ key: ShelfRevealer.Key) -> Bool {
         let was = shelves.reveal.reveal(of: key)
-        shelves.reveal.toggle(
-            key,
-            duration: tiler.settings.kiwishelf.revealTimeout
-        )
+        guard
+            shelves.reveal.toggle(
+                key,
+                duration: tiler.settings.kiwishelf.revealTimeout
+            )
+        else { return false }
         // One line per toggle: a reveal leaves no other trace.
         onLog(
             "shelf reveal: \(key.bar) \(was) → "
                 + "\(shelves.reveal.reveal(of: key))"
         )
+        return true
     }
 
     /// `space_bar.toggle_reveal` / `app_bar.toggle_reveal` (#761):
@@ -305,7 +310,9 @@ extension KiwiCore {
                 $0.shelf.display == display && $0.bar == bar
             })
         else { return .fail("the \(name) has nothing to show here") }
-        toggleBarReveal(key)
+        guard toggleBarReveal(key) else {
+            return .fail("the \(name) is held shown by the tour")
+        }
         return .ok()
     }
 }

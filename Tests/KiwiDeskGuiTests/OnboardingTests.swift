@@ -13,7 +13,7 @@ struct OnboardingTests {
     /// again — including from Home's "Show me around", where they
     /// had just asked for it. #331's ruling is untouched, being
     /// about whether an unfinished tour RESUMES there at launch.
-    @Test("the spaces step leads through the looks to the keys")
+    @Test("the spaces step leads through looks and bars to the keys")
     func spacesAlwaysLeadToKeys() {
         let model = OnboardingModel()
         model.beginPresentation(at: .spaces)
@@ -21,6 +21,9 @@ struct OnboardingTests {
         #expect(model.step == .looks)
         #expect(!model.reachedEnd)
         model.continueAfterLooks()
+        #expect(model.step == .bars)
+        #expect(!model.reachedEnd)
+        model.continueAfterBars()
         #expect(model.step == .keys)
     }
 
@@ -89,8 +92,8 @@ struct OnboardingTests {
     /// from `isClosingBeat` reds here even though the sweep above
     /// cannot see it.
     ///
-    /// The flow: grant → spaces → looks → keys → done, with no
-    /// machine-gated step. The route still varies by its DOOR,
+    /// The flow: grant → spaces → looks → bars → keys → done,
+    /// with no machine-gated step. The route still varies by its DOOR,
     /// which is why the progress row derives its length instead
     /// of drawing a fixed counter (`OnboardingProgressTests`).
     @Test("every terminal route arrives having reached the end")
@@ -102,6 +105,7 @@ struct OnboardingTests {
         direct.continueAfterAccessibility()
         direct.continueAfterSpaces()
         direct.continueAfterLooks()
+        direct.continueAfterBars()
         #expect(direct.step == .keys)
         direct.continueAfterKeys()
         #expect(direct.step == .done)
@@ -115,6 +119,7 @@ struct OnboardingTests {
         closedOnKeys.continueAfterAccessibility()
         closedOnKeys.continueAfterSpaces()
         closedOnKeys.continueAfterLooks()
+        closedOnKeys.continueAfterBars()
         #expect(closedOnKeys.step == .keys)
         #expect(closedOnKeys.reachedEnd)
 

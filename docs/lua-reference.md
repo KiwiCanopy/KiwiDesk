@@ -3189,6 +3189,11 @@ space_bar.set_reserve(false)
 `"always"`). Replaces the retired `space_bar.set_enabled`:
 `false` is `"hidden"`.
 
+:::unreleased
+The starter setup seeds `"auto"` for the Space Bar and for the
+App Bar in monocle and scrolling.
+:::
+
 **Does:**
 
 - `"always"` keeps the bar shown and reserves its strip.

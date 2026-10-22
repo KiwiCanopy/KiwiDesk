@@ -14,11 +14,12 @@ struct OnboardingSpaceCard: Identifiable, Equatable {
 @MainActor
 @Observable
 final class OnboardingModel {
-    /// Onboarding tour steps (#678, #828, #888, #1720).
+    /// Onboarding tour steps (#678, #828, #888, #1720, #2515).
     enum Step: Equatable, CaseIterable {
         case grant
         case spaces
         case looks
+        case bars
         case keys
         case done
 
@@ -26,7 +27,7 @@ final class OnboardingModel {
         /// asks `reachedEnd`, never a list of cases of its own.
         var isClosingBeat: Bool {
             switch self {
-            case .grant, .spaces, .looks: false
+            case .grant, .spaces, .looks, .bars: false
             case .keys, .done: true
             }
         }
@@ -37,6 +38,9 @@ final class OnboardingModel {
     private(set) var step: Step = .grant {
         didSet {
             if step.isClosingBeat { reachedEnd = true }
+            // The looks step paints bars the user must see; the
+            // bars step shows them as the pick leaves them (#2515).
+            holdBarsRevealed(step == .looks)
         }
     }
     var isTrusted = false
@@ -68,6 +72,7 @@ final class OnboardingModel {
     func beginPresentation(at step: Step) {
         self.step = step
         looksBaseline = nil
+        bars.reset()
         plannedSteps = OnboardingEntry.plannedSteps(from: step)
     }
 
@@ -82,6 +87,11 @@ final class OnboardingModel {
     /// Clears the `reachedEnd` flag between presentations.
     func clearReachedEnd() {
         reachedEnd = false
+    }
+
+    /// The tour window closed: nothing it held stays held.
+    func endPresentation() {
+        holdBarsRevealed(false)
     }
 
     /// Registers/unregisters the login item to match `openAtLogin`.
@@ -108,6 +118,11 @@ final class OnboardingModel {
     /// live layer.
     var keyFamilies: () -> [OnboardingKeyFamily] = { [] }
 
+    /// Holds every hiding bar shown (`KiwiCore.holdBarsRevealed`).
+    var holdBarsRevealed: (Bool) -> Void = { _ in }
+    /// The bars step's own state (#2515).
+    let bars = OnboardingBarsModel()
+
     // MARK: - Looks step (#1720)
 
     /// Bumped by every paint and revert, and when a window becomes
@@ -115,7 +130,7 @@ final class OnboardingModel {
     private(set) var looksRevision = 0
     /// The settings before this presentation's first paint; nil
     /// until one lands, so a step left untouched writes nothing.
-    private(set) var looksBaseline: KiwiCore.ShelfPaintBaseline?
+    private(set) var looksBaseline: KiwiCore.TourBaseline?
     /// The bundled looks, then every palette a look may name.
     var shelfLooks: () -> [ShelfLook] = { [] }
     var shelfPalettes: () -> [ColorPalette] = { [] }
@@ -124,12 +139,12 @@ final class OnboardingModel {
     /// Whether Settings holds an unsaved draft, whose Save would
     /// overwrite a paint here.
     var settingsDraftPending: () -> Bool = { false }
-    var captureShelfBaseline: () -> KiwiCore.ShelfPaintBaseline? = {
+    var captureShelfBaseline: () -> KiwiCore.TourBaseline? = {
         nil
     }
     /// Whether a baseline still describes the live profile; one
     /// that does not is re-captured by the next paint.
-    var baselineIsLive: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in
+    var baselineIsLive: (KiwiCore.TourBaseline) -> Bool = { _ in
         true
     }
     /// Paints a look with its palette, or a palette alone, live
@@ -137,7 +152,7 @@ final class OnboardingModel {
     var onPaintShelf: (ShelfLook?, ColorPalette?) -> Void = { _, _ in }
     /// Returns whether the restore landed; it is refused once
     /// another profile went live (`KiwiCore.restoreShelf`).
-    var onRestoreShelf: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in
+    var onRestoreShelf: (KiwiCore.TourBaseline) -> Bool = { _ in
         false
     }
 
@@ -208,6 +223,10 @@ final class OnboardingModel {
     }
 
     func continueAfterLooks() {
+        advance()
+    }
+
+    func continueAfterBars() {
         advance()
     }
 

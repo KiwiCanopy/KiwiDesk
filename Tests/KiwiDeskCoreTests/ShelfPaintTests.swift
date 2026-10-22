@@ -66,7 +66,7 @@ struct ShelfPaintTests {
     func restoreReturnsBoth() throws {
         let core = makeCore()
         let before = core.tiler.settings
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.paintShelf(
             look: try look("Pill"),
             palette: try palette(core, "True Dark")
@@ -106,7 +106,7 @@ struct ShelfPaintTests {
     @Test("a restore is refused once another profile went live")
     func restoreSkipsAnotherProfile() throws {
         let core = makeCore(saving: "First")
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         let taskbar = try look("Taskbar")
         core.paintShelf(look: taskbar, palette: nil)
         _ = core.execute("save_profile", args: [.string("Second")])
@@ -126,7 +126,7 @@ struct ShelfPaintTests {
     @Test("a restore leaves every other setting where it is")
     func restoreTouchesOnlyTheLook() throws {
         let core = makeCore()
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.paintShelf(look: try look("Taskbar"), palette: nil)
         core.tiler.settings.resizeStep += 7
         _ = core.execute("save_profile", args: [.string("Mine")])
@@ -149,7 +149,7 @@ struct ShelfPaintTests {
         core.tiler.settings.stickyStyle.liquidGlass = !glass
         core.tiler.settings.monocle.appBar.activeIndicator = .outline
         _ = core.execute("save_profile", args: [.string("Mine")])
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.paintShelf(look: nil, palette: try palette(core, "Sunset"))
 
         core.restoreShelf(baseline)
@@ -172,7 +172,7 @@ struct ShelfPaintTests {
                     && file.map(taskbar.isApplied(to:)) == true
             )
         }
-        let baseline = core.shelfPaintBaseline()
+        let baseline = core.tourBaseline()
         core.paintShelf(look: taskbar, palette: nil)
         core.restoreShelf(baseline)
         // Told after the write landed, live and in the file.

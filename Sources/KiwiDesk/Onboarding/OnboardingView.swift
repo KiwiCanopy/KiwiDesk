@@ -7,8 +7,14 @@ struct OnboardingView: View {
     @EnvironmentObject private var localization: LocalizationManager
     @Environment(\.colorScheme) var colorScheme
 
+    static let size = CGSize(width: 560, height: 620)
+    /// Padding on each side, horizontal then vertical.
+    static let inset = CGSize(width: 30, height: 26)
+    /// Room between the progress row and the page.
+    static let spacing: CGFloat = 16
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Self.spacing) {
             progressRow
             switch model.step {
             case .grant:
@@ -17,16 +23,19 @@ struct OnboardingView: View {
                 spaces
             case .looks:
                 OnboardingLooksStep(model: model)
+            case .bars:
+                OnboardingBarsStep(model: model)
             case .keys:
                 keys
             case .done:
                 done
             }
         }
-        .padding(.horizontal, 30)
-        .padding(.vertical, 26)
-        // Fixed 560×620 window frame sized for all locales (#828).
-        .frame(width: 560, height: 620)
+        .padding(.horizontal, Self.inset.width)
+        .padding(.vertical, Self.inset.height)
+        // Fixed window frame sized for all locales (#828,
+        // `OnboardingBarsFitTests`).
+        .frame(width: Self.size.width, height: Self.size.height)
         .background(SettingsTheme.page)
         .foregroundStyle(SettingsTheme.ink)
         .tint(SettingsTheme.accent)

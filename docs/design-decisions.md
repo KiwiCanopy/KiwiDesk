@@ -8728,6 +8728,24 @@ correct failure here — the screen without the sentence is exactly
 the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
+:::unreleased
+**One page's rows are a budget, and the last row is KiwiHub**
+(#2515, owner rulings 2026-10-23). The fixed window holds nine
+one-line rows in every catalog (`OnboardingBarsFitTests`), so a
+row joins only by another leaving. The navigation tiers stay;
+then the single-key toggles a new user would never find —
+Maximize, KiwiVision, the bars' show/hide as one row; then
+KiwiHub, naming its sides over their chords, which is the way to
+everything the page leaves out. Open Settings gave its row to
+KiwiVision: the menu-bar icon and KiwiHub both reach Settings,
+while nothing on screen hints that KiwiVision exists. A two-column
+grid of toggles was rejected: at half the width a German label
+wraps to three lines, so it costs height rather than saving it.
+A bar set to Always leaves the bars row, since its shortcut can
+only refuse — the one place this page reads a setting rather
+than a chord, through the shortcut's own gate.
+:::
+
 ### The tour's look is written through, and the tour owns its undo
 
 **[Principle]**
@@ -8789,6 +8807,21 @@ read from the live settings on every render: after hand-tuned
 colours no palette reads selected until a click, while a look
 whose shape is still live keeps its mark and says "Other colors"
 (`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`).
+
+:::unreleased
+The bars step (#2515) is the same act on the bars' visibility:
+a pick writes through, its Revert returns the visibility leaves
+alone, and the two steps' Reverts leave each other's writes
+standing (`TourBarVisibilityTests` ▸ `barsRevertKeepsTheLook`,
+`TourBarVisibilityTests` ▸ `looksRevertKeepsTheVisibility`).
+While the Looks step is on screen it holds every hiding bar
+shown, over the windows and retiling nothing, since a look
+painted onto bars hidden at rest is a click with nothing to see
+(`OnboardingBarsTests` ▸ `onlyLooksHolds`,
+`ShelfRevealHoldTests`). A bar's shortcut is refused under
+that hold, which would otherwise move only what the release
+gives back.
+:::
 
 ### The Mac Checklist counts what macOS can confirm
 
@@ -14982,7 +15015,15 @@ is the one change that can move the windows. Hiding while still
 reserving the full strip was rejected (the user would give up the
 information and keep paying the area). An update changes nothing
 a user sees: a bar stored on becomes `always`, one stored off
-`hidden`; a fresh install's starter takes `auto` — `always` for 3.2.0, until the tour page that explains Auto ships (#2515), since under Auto the tour's Looks step paints bars hidden at rest.
+`hidden`.
+
+:::unreleased
+A fresh install's starter takes `auto` (#2515), and only beside
+the welcome tour's bars step, which shows what Auto does and
+offers Always and Hidden in one click: a starter that hides the
+bars with no page explaining it leaves a new user with a mark
+they cannot read. A tour without that step seeds `always`.
+:::
 
 Each bar stores its own value, and an edge two bars share reserves
 for its MORE present bar: `always` over `auto` over `hidden`.
