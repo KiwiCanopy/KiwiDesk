@@ -36,6 +36,7 @@ struct ShelfRevealGrowTests {
         let morph = try #require(morph(entering: true))
         let mark = BarMotion.hoverPlate(
             mark: Self.mark,
+            edge: .top,
             hovered: true
         )
         #expect(morph.mark == mark)
@@ -128,6 +129,7 @@ struct ShelfRevealGrowTests {
         )
         let hovered = BarMotion.hoverPlate(
             mark: Self.mark,
+            edge: .top,
             hovered: true
         )
         // Out of the hovered mark onto the plate, never the reverse.

@@ -39,8 +39,13 @@ final class ShelfIndicatorView: NSView {
         self.spec = spec
         body.frame = bounds
         let mark = ShelfIndicator.mark(of: spec, in: bounds)
-        dots.frame = bounds
-        dots.mark = mark
+        // The dots reach out past the screen side by the hover's
+        // shift, so they can follow the plate's middle inward.
+        let shift = BarMotion.hoverShift(spec.edge)
+        let dotsRest = bounds.union(
+            bounds.offsetBy(dx: -shift.dx, dy: -shift.dy)
+        )
+        dots.mark = mark.offsetBy(dx: -dotsRest.minX, dy: -dotsRest.minY)
         dots.spec = spec
         plate.layer?.backgroundColor = NSColor(kiwiHex: spec.fill).cgColor
         rim.ink = .init(
@@ -51,9 +56,11 @@ final class ShelfIndicatorView: NSView {
         BarMotion.placeHoverPlate(
             plate,
             rim: rim,
+            content: dots,
+            contentRest: dotsRest,
             mark: mark,
             widen: spec.labelExtra,
-            horizontal: spec.horizontal,
+            edge: spec.edge,
             hovered: spec.hovered,
             animated: animated && was?.hovered != spec.hovered
         )

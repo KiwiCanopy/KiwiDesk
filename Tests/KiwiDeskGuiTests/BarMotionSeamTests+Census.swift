@@ -58,6 +58,8 @@ extension BarMotionSeamTests {
         "markFade": [],
         "fadeMark": ["markFade("],
         "hoverPlate": [],
+        "hoverShift": [],
+        "horizontal": [],
         "placeHoverPlate": ["hoverGrow"],
         "clipPlace": [],
         "expanding": [],

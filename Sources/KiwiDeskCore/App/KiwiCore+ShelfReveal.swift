@@ -167,7 +167,7 @@ extension KiwiCore {
                 indicators[barKey(bar)] = ShelfIndicatorSpec(
                     mark: mark,
                     frame: markIn,
-                    horizontal: plan.horizontal,
+                    edge: plan.edge,
                     fill: shelf.fillColor,
                     currentInk: shelf.activeItemColor,
                     ink: shelf.idleItemColor,

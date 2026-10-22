@@ -125,55 +125,79 @@ extension BarMotion {
     /// Motion too (owner ruling, 2026-10-21).
     static let hoverGrow: TimeInterval = 0.15
 
-    /// Where the mark's plate stands in its view: `mark`, grown by
-    /// `ShelfIndicatorSpec.hoverGrowth` on every side while
-    /// hovered and along the edge by `widen`, a label's room. The
-    /// size is content rather than motion, for every mark.
+    /// Where the mark's plate stands in its view, y down: `mark`,
+    /// grown while hovered by `ShelfIndicatorSpec.hoverGrowth` each
+    /// way along `edge` plus half of `widen`, a label's room, and
+    /// by twice the growth away from the screen side alone — a
+    /// plain `NSPanel` is clamped below the menu bar (#436), so a
+    /// plate past the screen side moved the mark and the reveal off
+    /// the edge. The size is content rather than motion.
     static func hoverPlate(
         mark: CGRect,
         widen: CGFloat = 0,
-        horizontal: Bool = true,
+        edge: AppBarEdge,
         hovered: Bool
     ) -> CGRect {
         guard hovered else { return mark }
         let growth = ShelfIndicatorSpec.hoverGrowth
         let along = growth + widen / 2
-        return horizontal
+        let inward = hoverShift(edge)
+        let grown =
+            edge.isHorizontal
             ? mark.insetBy(dx: -along, dy: -growth)
             : mark.insetBy(dx: -growth, dy: -along)
+        return grown.offsetBy(dx: inward.dx, dy: inward.dy)
+    }
+
+    /// How far the hovered plate's middle moves off `edge`'s
+    /// screen side, y down: one growth inward.
+    static func hoverShift(_ edge: AppBarEdge) -> CGVector {
+        let growth = ShelfIndicatorSpec.hoverGrowth
+        switch edge {
+        case .top: return CGVector(dx: 0, dy: growth)
+        case .bottom: return CGVector(dx: 0, dy: -growth)
+        case .left: return CGVector(dx: growth, dy: 0)
+        case .right: return CGVector(dx: -growth, dy: 0)
+        }
     }
 
     /// Places the mark's `plate` for `hovered` and shows its
     /// `rim` — a view stroking its own bounds, at the hovered
     /// plate's frame so its stroke never stretches — growing and
     /// fading in over `hoverGrow` where `animated`, Reduce Motion
-    /// or not (owner ruling, 2026-10-21).
+    /// or not (owner ruling, 2026-10-21). `content`, resting at
+    /// `contentRest`, moves with the plate's middle.
     @MainActor
     static func placeHoverPlate(
         _ plate: NSView,
         rim: NSView,
+        content: NSView,
+        contentRest: CGRect,
         mark: CGRect,
         widen: CGFloat = 0,
-        horizontal: Bool = true,
+        edge: AppBarEdge,
         hovered: Bool,
         animated: Bool
     ) {
         let frame = hoverPlate(
             mark: mark,
             widen: widen,
-            horizontal: horizontal,
+            edge: edge,
             hovered: hovered
         )
         rim.frame = hoverPlate(
             mark: mark,
             widen: widen,
-            horizontal: horizontal,
+            edge: edge,
             hovered: true
         )
+        let shift = hovered ? hoverShift(edge) : .zero
+        let contentFrame = contentRest.offsetBy(dx: shift.dx, dy: shift.dy)
         plate.wantsLayer = true
         let write = {
             plate.frame = frame
             plate.layer?.cornerRadius = min(frame.width, frame.height) / 2
+            content.frame = contentFrame
             rim.alphaValue = hovered ? 1 : 0
         }
         guard animated, plate.frame != frame else {

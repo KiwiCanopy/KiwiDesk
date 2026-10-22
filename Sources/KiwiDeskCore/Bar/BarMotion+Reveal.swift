@@ -37,14 +37,15 @@ extension BarMotion {
     /// A reveal's inputs, whichever kind plays it: the slide's
     /// `offset`, the grow's and the unfold's mark `origin` and
     /// `plate` — under Boxed the span of the boxes — all in the
-    /// content's coordinates, and the edge's axis.
+    /// content's coordinates, and the shelf's edge.
     struct RevealPath: Equatable {
         var kind: RevealKind
         var offset: CGVector = .zero
         var origin: CGRect = .zero
         var plate: CGRect?
         var plateRadius: CGFloat = 0
-        var horizontal = true
+        var edge: AppBarEdge = .top
+        var horizontal: Bool { edge.isHorizontal }
         /// The user's `animations.reveal_duration`, in seconds, every
         /// style plays inside.
         var length = AnimationSettings().revealSeconds
@@ -97,7 +98,11 @@ extension BarMotion {
         path: RevealPath
     ) -> RevealMotion {
         // Out of the mark as its hover leaves it.
-        let mark = hoverPlate(mark: path.origin, hovered: true)
+        let mark = hoverPlate(
+            mark: path.origin,
+            edge: path.edge,
+            hovered: true
+        )
         switch path.kind {
         case .slide:
             guard path.offset != .zero else { return .fade(revealFade) }

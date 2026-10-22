@@ -110,6 +110,7 @@ struct ShelfDotWindowTests {
         let plate = BarMotion.hoverPlate(
             mark: mark,
             widen: extra,
+            edge: .top,
             hovered: true
         )
         #expect(
@@ -132,7 +133,7 @@ struct ShelfDotSpokenTests {
             ShelfIndicatorSpec(
                 mark: .dots([.init(current: true, occupied: true)]),
                 frame: CGRect(x: 0, y: 0, width: 20, height: 8),
-                horizontal: true,
+                edge: .top,
                 fill: "#000000",
                 currentInk: "#FFFFFF",
                 ink: "#AAAAAA",

@@ -20,7 +20,7 @@ struct ShelfRevealUnfoldTests {
     private static let strip = CGRect(x: 100, y: 300, width: 1000, height: 40)
 
     private var hovered: CGRect {
-        BarMotion.hoverPlate(mark: Self.mark, hovered: true)
+        BarMotion.hoverPlate(mark: Self.mark, edge: .top, hovered: true)
     }
 
     private func stretch(entering: Bool) -> ShelfUnfold.Stretch? {

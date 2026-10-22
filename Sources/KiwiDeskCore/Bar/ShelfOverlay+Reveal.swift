@@ -48,7 +48,7 @@ extension ShelfOverlay {
                 ?? Self.screenSide(of: restRoom, edge: drawn.edge),
             plate: revealPlate?.frame,
             plateRadius: revealPlate?.radius ?? 0,
-            horizontal: drawn.edge.isHorizontal,
+            edge: drawn.edge,
             length: BarMotion.revealLength
         )
     }
