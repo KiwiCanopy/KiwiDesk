@@ -43,7 +43,9 @@ struct TitleSlotPreviewTests {
         #expect(tile.spaceSpec(tile.settings.spaceBarLook).titleSlot == nil)
     }
 
-    /// The strip frames its title text in the spec's slot.
+    /// The strip frames its title text in the spec's slot, at that
+    /// width exactly: a bound on one side alone lets a short title
+    /// size to itself.
     @Test("The strip frames a title in the slot")
     func stripFramesTheTitle() throws {
         let file = SourceScan.repoRoot(from: #filePath)
@@ -51,6 +53,6 @@ struct TitleSlotPreviewTests {
                 "Sources/KiwiDesk/Settings/HomeCardPlate+BarStrip.swift"
             )
         let source = try SourceScan.strippedSource(at: file)
-        #expect(source.occurrences(of: "maxWidth: spec.titleSlot") == 1)
+        #expect(source.occurrences(of: ".frame(width: spec.titleSlot)") == 1)
     }
 }

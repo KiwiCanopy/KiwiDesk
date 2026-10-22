@@ -14688,12 +14688,14 @@ slot and re-centred the run. Cutting by width while the slots
 still followed the widest title was rejected: two capped titles
 would then match, but a short title meeting a capped one would
 still jump. With every frame fixed, a show whose titles alone
-changed redraws content and never runs the frame pass. The Space Bar's own cap, `front_app_title_cap`, exists
-for a different reason and is kept as a separate knob for that
-reason: its front segment already ellipsizes at the panel edge
-and cannot clip, but its estimated length feeds the bar's
-alignment total, so under `center` or `end` an uncapped title
-slides the whole run of Space items sideways.
+changed redraws content and never runs the frame pass.
+
+The Space Bar's own cap, `front_app_title_cap`, exists for a
+different reason and is kept as a separate knob for that reason:
+its front segment already ellipsizes at the panel edge and
+cannot clip, but its estimated length feeds the bar's alignment
+total, so under `center` or `end` an uncapped title slides the
+whole run of Space items sideways.
 
 The refresh path is the subtler half. The bars are driven from
 `retile()`, and `TilingEngine.shouldRetile` returns false for

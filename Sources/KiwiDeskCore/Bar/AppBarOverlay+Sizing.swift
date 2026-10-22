@@ -223,8 +223,8 @@ extension AppBarOverlay {
     }
 
     /// Shared slot length, floored at the content depth (#1682)
-    /// so measurement's icon side equals layout's — the
-    /// slot-fits-widest-title invariant leans on it.
+    /// so measurement's icon side equals layout's — the title
+    /// slot's fit leans on it.
     nonisolated static func slotLength(
         contentDepth: CGFloat,
         axis: CGFloat,
