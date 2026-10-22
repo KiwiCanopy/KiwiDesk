@@ -774,7 +774,10 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   paid by it — never by the app being active or a press alone, keyed by bundle
   id and paid on the fold's own rule verdict (#1599, `LaunchFollowTests`,
   `LaunchFollowRetireTests`, `LaunchFollowReopenTests`,
-  `LaunchFollowColdStartTests`, `LaunchFollowSeamTests`)
+  `LaunchFollowColdStartTests`, `LaunchFollowSeamTests`) — and a NEW window
+  WindowServer reported created while KiwiDesk watched follows owed nothing,
+  through the one `spawnVerdict`, a late create paid through the one `spawn`
+  slot (#2478, `LaunchFollowSpawnTests`)
 - a Move here on a hidden app is paid at that app's first honored focus REPORT,
   ahead of the #1207 memory and the follow, the handler deciding the retile
   (#1513, `JumpHiddenAppTests`)

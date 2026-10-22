@@ -213,6 +213,19 @@ arriving ones until the plates land, but when the app performs
 the move is the app's.
 :::
 
+:::unreleased
+A new window that an app rule sends to a Space no screen is
+showing takes you there unless its app started under 15 seconds
+ago ([#2478](https://github.com/KiwiCanopy/KiwiDesk/issues/2478)).
+In that window it follows only if a click or key press came
+within a second before it, so a window macOS reopens at login in
+the same second as an unrelated press takes you along once, and a
+window a just-launched app opens on its own stays where the rule
+files it. KiwiDesk tells a new window from one it is only now
+adopting by WindowServer's create notification; where that route
+is unavailable, only opening the app takes you along.
+:::
+
 The focus ring disappears with the desktop when Mission Control
 opens and comes back when it closes, in either draw order and
 with or without glow

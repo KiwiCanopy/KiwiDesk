@@ -14,6 +14,12 @@ import Foundation
 /// `noteAppActivation` judges a launch. One pending, paid once;
 /// another app's activation, a Desktop switch and a refused New
 /// Window retire it.
+///
+/// Its second arm is owed nothing (#2478): a window WindowServer
+/// created while KiwiDesk watched (`WindowCreateLedger`) follows
+/// when `spawnFollows` says the user or an old process opened it.
+/// That arm never writes the debt; its one slot, `spawn`, waits
+/// for a create that lands after the window's arrival.
 @MainActor
 final class LaunchFollowIntent {
     /// How long after the launch its window may still claim the
@@ -95,6 +101,56 @@ final class LaunchFollowIntent {
         return press
     }
 
+    /// Seconds since the kernel started a process
+    /// (`ProcessIdentity.startAge`). nil until `start()` wires it,
+    /// so a unit test follows no unowed window unless it injects
+    /// one (`LaunchFollowSeamTests` pins the arming).
+    var processAge: (@MainActor (pid_t) -> TimeInterval?)?
+
+    /// Whether a new window of `pid`, created while KiwiDesk
+    /// watched and owed nothing, follows its rule (#2478 ▸ Ruling
+    /// — login restore): a process older than `coldStartGrace`,
+    /// or a press within `pressGrace` since KiwiDesk started. An
+    /// unreadable age counts as young, so a login restore — no
+    /// press near it, the password older than KiwiDesk — stays.
+    func spawnFollows(pid: pid_t) -> Bool {
+        if let press = recentPress(), let watched = watchedFor?(),
+            press <= watched
+        {
+            return true
+        }
+        guard let age = processAge?(pid) else { return false }
+        return age >= Self.coldStartGrace
+    }
+
+    /// Longest gap between a window's arrival and its create for
+    /// that create to pay the follow: the create trails the AX
+    /// arrival by 8–10 ms on TextEdit's ⌘N (device, 2026-10-22).
+    static let lateCreateBound: TimeInterval = 0.5
+
+    /// A window the unowed arm passed in every way but its create,
+    /// which had not landed yet. One slot.
+    struct Spawn {
+        let window: WindowID
+        let space: SpaceID
+        let at: Date
+    }
+    private(set) var spawn: Spawn?
+
+    /// Remembers `spawn` for a create still to come.
+    func noteSpawn(_ spawn: Spawn) {
+        self.spawn = spawn
+    }
+
+    /// Takes the slot for `window` while within `lateCreateBound`.
+    func takeSpawn(_ window: WindowID, at now: Date) -> Spawn? {
+        guard let spawn, spawn.window == window else { return nil }
+        self.spawn = nil
+        guard now.timeIntervalSince(spawn.at) < Self.lateCreateBound
+        else { return nil }
+        return spawn
+    }
+
     private var pending: (bundleID: String, at: Date)?
 
     /// A rule-placed window that arrived with NO debt standing — a
@@ -158,10 +214,12 @@ final class LaunchFollowIntent {
         if pending?.bundleID == bundleID { pending = nil }
     }
 
-    /// Retires the debt unpaid, and any placement waiting for one
-    /// except `keeping`'s — the app whose activation is judging it.
+    /// Retires the debt unpaid, any spawn awaiting its create, and
+    /// any placement waiting for one except `keeping`'s — the app
+    /// whose activation is judging it.
     func forget(keeping bundleID: String? = nil) {
         pending = nil
+        spawn = nil
         if placement?.bundleID != bundleID || bundleID == nil {
             placement = nil
         }
