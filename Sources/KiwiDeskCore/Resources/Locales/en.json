@@ -1528,6 +1528,7 @@
   "onboarding.keys.go_to_space": "Go to a Space",
   "onboarding.keys.hint": "Try one now — nothing will break.",
   "onboarding.keys.kiwihub": "%1$@: %2$@",
+  "onboarding.keys.kiwihub.side": "%1$@ %2$@",
   "onboarding.keys.kiwivision": "KiwiVision: dim everything else",
   "onboarding.keys.maximize": "Maximize the window",
   "onboarding.keys.move_and_follow": "Move the window to a Space and follow it",

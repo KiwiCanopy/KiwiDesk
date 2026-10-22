@@ -19,8 +19,13 @@ extension OnboardingKeys {
         _ command: NavCommand,
         in layer: KeyLayer
     ) -> String? {
+        combo(lua: command.lua, in: layer)
+    }
+
+    /// The chord bound to `lua`, nil where it is unbound.
+    static func combo(lua: String, in layer: KeyLayer) -> String? {
         layer.bindings.first {
-            $0.lua == command.lua && !$0.combo.isEmpty
+            $0.lua == lua && !$0.combo.isEmpty
         }?.combo
     }
 

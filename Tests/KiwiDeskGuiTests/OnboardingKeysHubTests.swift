@@ -55,8 +55,8 @@ struct OnboardingKeysHubTests {
         // Each side beside its own chord, never left to position.
         let spoken = row?.spoken ?? ""
         #expect(spoken.hasPrefix("KiwiHub"))
-        #expect(spoken.contains("Windows, ⌃⌥J"))
-        #expect(spoken.contains("View, ⌃⌥L"))
+        #expect(spoken.contains("Windows ⌃⌥J"))
+        #expect(spoken.contains("View ⌃⌥L"))
     }
 
     @Test("an unbound side is left out, and no side means no row")
@@ -93,6 +93,7 @@ struct OnboardingKeysHubTests {
 
     @Test("a bar set to Always is left out of the bars row")
     func alwaysBarIsLeftOut() {
+        LocalizationManager.shared.select("en")
         let both = OnboardingKeys.families(
             layer: layer(bars),
             spaces: [],
