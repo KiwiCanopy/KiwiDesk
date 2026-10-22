@@ -3667,6 +3667,17 @@ a second needs no switch of its own, and one leaf fewer is one
 fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
+They follow the Appearance pick as KiwiHub does: each plate's
+glass and pile container is pinned dark where the panel's
+effective appearance resolves dark, through `GlassTint.followPick`
+(#2539), rather than left to inherit it. An unpinned glass view
+carries the pick (#2543) but adapts to the backdrop it samples and
+holds that verdict (#1308), and a plate's backdrop is the windows
+being switched; the pin keeps the variant the pick's whatever the
+plates cover. No switch of their own: only dark
+can be pinned (#1308, Liquid Glass above), so a light choice could
+not hold over dark windows, and plates unlike the rest of the app
+are not worth a setting.
 
 *Why plates, and not a blur or a picture of the windows.* A blur
 dissolve was built on the device and dropped: a blur reads as
@@ -16722,7 +16733,11 @@ Settings Appearance pick writes it (#678 item 8, above): dark
 under a Dark pick, and under Light or System the OS's own light
 scheme, which the bright tint holds — so two bars sharing a dark
 Fill cannot diverge, and two sharing a light one match wherever
-the pick is Dark. **Precedence, since two sanctioned writers reach
+the pick is Dark. That the unpinned glass carries a Dark pick was
+measured on macOS 27.0.1 (#2543): a clear Fill's plate read 33
+luminance under Dark and 89 under Light over the same backdrop,
+Dark → Light → Dark, while a light Fill read 208 under both, its
+tint holding the scheme. **Precedence, since two sanctioned writers reach
 one view:** the Fill decides where it is dark, since the plate IS
 the Fill's colour and the dark variant is the one the ink reads
 on; the Appearance pick decides only the light branch. A user who
