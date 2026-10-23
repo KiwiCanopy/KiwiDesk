@@ -45,67 +45,56 @@ extension ShortcutsReferenceBuilder {
             layerNames
             .filter { $0 != activeLayer }
             .map { KeybindingCatalog.switchLayerCommand($0) }
+        // A band names its group once: its rows are filed against it.
+        func band(
+            _ title: String,
+            _ group: ShortcutGroup?,
+            _ commands: [NavCommand]
+        ) -> ShortcutSubgroup {
+            ShortcutSubgroup(
+                title: title,
+                rows: rows(commands, group),
+                group: group
+            )
+        }
         return [
-            ShortcutSubgroup(
-                title: L("shortcuts.section.focus", "Focus"),
-                rows: rows(focus, .focus),
-                group: .focus
+            band(L("shortcuts.section.focus", "Focus"), .focus, focus),
+            band(
+                L("shortcuts.section.move_windows", "Move windows"),
+                .moveWindows,
+                move
             ),
-            ShortcutSubgroup(
-                title: L(
-                    "shortcuts.section.move_windows",
-                    "Move windows"
-                ),
-                rows: rows(move, .moveWindows),
-                group: .moveWindows
+            band(
+                L("shortcuts.section.layout", "Layout"),
+                .layout,
+                KeybindingCatalog.layoutRows
             ),
-            ShortcutSubgroup(
-                title: L("shortcuts.section.layout", "Layout"),
-                rows: rows(KeybindingCatalog.layoutRows, .layout),
-                group: .layout
-            ),
-            ShortcutSubgroup(
-                title: L(
-                    "shortcuts.section.size_float",
-                    "Size & float"
-                ),
-                rows: rows(
-                    KeybindingCatalog.resizeAndFloat(
-                        step: resizeStep
-                    ),
-                    .sizeFloat
-                ),
-                group: .sizeFloat
+            band(
+                L("shortcuts.section.size_float", "Size & float"),
+                .sizeFloat,
+                KeybindingCatalog.resizeAndFloat(step: resizeStep)
             ),
             // A section of its own, empty and so dropped while no
             // KiwiVision key is bound (#2312).
-            ShortcutSubgroup(
-                title: L("destination.kiwivision", "KiwiVision"),
-                rows: rows(
-                    [KeybindingCatalog.toggleKiwiVision]
-                        + lenses.map(KeybindingCatalog.toggleLens),
-                    .kiwivision
-                ),
-                group: .kiwivision
+            band(
+                L("destination.kiwivision", "KiwiVision"),
+                .kiwivision,
+                [KeybindingCatalog.toggleKiwiVision]
+                    + lenses.map(KeybindingCatalog.toggleLens)
             ),
             // The bars' show/hide shortcuts (#761).
-            ShortcutSubgroup(
-                title: L("bars.switch.kiwishelf", "KiwiShelf"),
-                rows: rows(
-                    [
-                        KeybindingCatalog.toggleSpaceBar,
-                        KeybindingCatalog.toggleAppBar,
-                    ],
-                    .kiwishelf
-                ),
-                group: .kiwishelf
+            band(
+                L("bars.switch.kiwishelf", "KiwiShelf"),
+                .kiwishelf,
+                [
+                    KeybindingCatalog.toggleSpaceBar,
+                    KeybindingCatalog.toggleAppBar,
+                ]
             ),
-            ShortcutSubgroup(
-                title: L(
-                    "shortcuts.section.switch_layers",
-                    "Switch layers"
-                ),
-                rows: rows(switchLayers, nil)
+            band(
+                L("shortcuts.section.switch_layers", "Switch layers"),
+                nil,
+                switchLayers
             ),
         ]
         // Empty bands stay: a binding may still file into one, and

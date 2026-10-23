@@ -48,10 +48,11 @@ struct ShortcutMetaCarryTests {
         #expect(row.desc == "D" && row.group == "G" && row.symbol == "star")
     }
 
-    /// Reflection-driven round trip: every meta field decodes onto
-    /// `KeyBinding`, reads back through the getter, survives the
-    /// setter and reaches `shortcut.list`, so a field the mirror
-    /// forgets reds here rather than slipping past `==`.
+    /// Reflection-driven round trip: every meta field is read from a
+    /// Lua option table and decodes onto `KeyBinding` under its own
+    /// name, reads back through the getter, survives the setter, the
+    /// encoder and `shortcut.list` — so a field one mirror forgets
+    /// reds here rather than slipping past `==`.
     @Test("Every meta field round-trips through KeyBinding.meta")
     func metaRoundTrips() throws {
         let fields = fieldNames(KeyBindingMeta())
@@ -63,6 +64,17 @@ struct ShortcutMetaCarryTests {
             from: try JSONSerialization.data(withJSONObject: object)
         )
         let read = fieldValues(row.meta)
+        let lua = fieldValues(
+            KeyBindingMeta(
+                options: Dictionary(
+                    uniqueKeysWithValues: fields.map { ($0, .string($0)) }
+                )
+            )
+        )
+        let reencoded = try JSONDecoder().decode(
+            KeyBinding.self,
+            from: try JSONEncoder().encode(row)
+        )
         var copied = KeyBinding()
         copied.meta = row.meta
         guard case .object(let body) = KiwiCore.shortcutEntry(copied) else {
@@ -71,6 +83,11 @@ struct ShortcutMetaCarryTests {
         }
         for field in fields {
             #expect(read[field] == field, "getter drops \(field)")
+            #expect(lua[field] == field, "Lua option drops \(field)")
+            #expect(
+                fieldValues(reencoded.meta)[field] == field,
+                "encoder drops \(field)"
+            )
             #expect(
                 fieldValues(copied.meta)[field] == field,
                 "setter drops \(field)"
@@ -82,12 +99,11 @@ struct ShortcutMetaCarryTests {
     @Test("A change to one field alone is a different binding")
     func eachFieldCounts() {
         let base = KeyBinding(combo: "alt+h", lua: "x()")
-        let changes: [WritableKeyPath<KeyBinding, String>] = [
-            \.desc, \.group, \.symbol,
-        ]
-        for path in changes {
+        let fields = fieldNames(KeyBindingMeta())
+        #expect(!fields.isEmpty)
+        for field in fields {
             var changed = base
-            changed[keyPath: path] = "new"
+            changed.meta = KeyBindingMeta(options: [field: .string("new")])
             #expect(changed != base)
             let layers = { (row: KeyBinding) in
                 [KeyLayer(name: KeyLayer.defaultName, bindings: [row])]
@@ -223,75 +239,5 @@ struct ShortcutMetaCarryTests {
         core.syncDerivedIssues()
         core.setConfigIssues([])
         #expect(symbolIssues(core).count == 1)
-    }
-
-    private func profile(
-        _ name: String,
-        layers: KeyLayerOverride? = nil
-    ) -> Profile {
-        Profile(
-            name: name,
-            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
-            spaceModes: [:],
-            settings: TilingSettings(),
-            layers: layers
-        )
-    }
-
-    private static let badRow = KeyLayer(
-        name: KeyLayer.defaultName,
-        bindings: [
-            KeyBinding(
-                combo: "alt+h",
-                lua: "KiwiDesk.focus(\"left\")",
-                symbol: "kiwidesk.no.such.symbol"
-            )
-        ]
-    )
-
-    /// Loading a profile whose override holds the row names that
-    /// profile's file; a sidecar row names the sidecar.
-    @Test("A profile's row files its issue against the profile")
-    func loadedProfileSourcesTheIssue() throws {
-        let core = makeTestCore(
-            configDirectory:
-                testTemporaryDirectory
-                .appendingPathComponent("kiwi-src-\(UUID().uuidString)")
-        )
-        var base = GuiConfig()
-        base.layers = [Self.badRow]
-        try core.guiConfigStore.save(GuiConfig())
-        try core.saveGuiConfig(base)
-        #expect(symbolIssues(core).map(\.source) == ["gui.json"])
-        try core.saveGuiConfig(GuiConfig())
-        try core.profiles.save(
-            profile("Work", layers: KeyLayerOverride(layers: [Self.badRow]))
-        )
-        #expect(
-            core.execute("load_profile", args: [.string("Work")]).isSuccess
-        )
-        #expect(symbolIssues(core).map(\.source) == ["Work.json"])
-    }
-
-    /// The install names the profile it resolved over, never the
-    /// adopted name, which an apply moves only after installing.
-    @Test("The install names its own profile, not the adopted one")
-    func installNamesItsOwnProfile() throws {
-        let core = try loaded("")
-        try core.profiles.save(profile("Home"))
-        #expect(
-            core.execute("load_profile", args: [.string("Home")]).isSuccess
-        )
-        let lua = try #require(core.keys.lua)
-        core.applyStructuredKeybindings(
-            layers: [],
-            profile: profile(
-                "Work",
-                layers: KeyLayerOverride(layers: [Self.badRow])
-            ),
-            lua: lua
-        )
-        #expect(core.profiles.currentName == "Home")
-        #expect(symbolIssues(core).map(\.source) == ["Work.json"])
     }
 }

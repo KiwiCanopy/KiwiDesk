@@ -3,10 +3,16 @@ import Foundation
 /// Which owner's bindings `keys` holds, recorded by the apply that
 /// installed them — never re-read from `init.lua`, which can change
 /// on disk without a reload (#2482).
-/// A structured install keeps the profile it resolved over, so an
-/// issue about one of its rows names the file that holds it (#2544).
+/// A structured install keeps the profile tier it resolved over —
+/// its name and its override, nothing else — so an issue about one
+/// of its rows names the file that holds it (#2544).
 enum InstalledKeybindings {
-    case structured([KeyLayer], profile: Profile?)
+    struct ProfileTier: Sendable {
+        var name: String
+        let layers: KeyLayerOverride?
+    }
+
+    case structured([KeyLayer], profile: ProfileTier?)
     case lua(layers: [KeyLayer], unread: [String: [UnreadChord]])
 }
 
@@ -94,6 +100,17 @@ extension KiwiCore {
             layers: captured.layers,
             unread: captured.unread
         )
+        syncDerivedIssues()
+    }
+
+    /// Follows a rename of the profile the structured install
+    /// resolved over, so an issue names the file by its new name.
+    func renameInstalledProfile(_ old: String, to new: String) {
+        guard case .structured(let layers, var tier?) = installedKeybindings,
+            tier.name == old
+        else { return }
+        tier.name = new
+        installedKeybindings = .structured(layers, profile: tier)
         syncDerivedIssues()
     }
 

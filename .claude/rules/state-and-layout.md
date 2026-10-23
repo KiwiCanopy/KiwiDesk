@@ -2376,7 +2376,8 @@ editing here:
   source calls `syncDerivedIssues()` wherever it changes — the
   shelf's at `updateBars()`, the shortcut symbols' at every
   keybinding install (`ShortcutMetaCarryTests` ▸
-  `issueSurvivesRepublish`, `installNamesItsOwnProfile`).
+  `issueSurvivesRepublish`, `ShortcutIssueSourceTests` ▸
+  `installNamesItsOwnProfile`).
 
 ## Cross-layout logic must account for each layout's navigation model
 

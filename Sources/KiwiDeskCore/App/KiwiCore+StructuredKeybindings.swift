@@ -38,7 +38,9 @@ extension KiwiCore {
         )
         installedKeybindings = .structured(
             prepared.registeredLayers,
-            profile: profile
+            profile: profile.map {
+                .init(name: $0.name, layers: $0.layers)
+            }
         )
         syncDerivedIssues()
     }
