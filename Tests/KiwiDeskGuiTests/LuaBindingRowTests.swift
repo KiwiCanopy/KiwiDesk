@@ -90,10 +90,13 @@ struct LuaBindingRowTests {
     @Test("the editor writes as typed, Cancel restores")
     func editorWritesLive() throws {
         let editor = try Self.source("Lua/LuaBindingEditor.swift")
-        #expect(editor.contains("LuaSourceEditor(text:$text,"))
+        #expect(editor.contains("LuaSourceEditor(text:typed,"))
+        #expect(editor.contains("set:{written=$0text=$0}"))
         #expect(!editor.contains("onDisappear"))
         #expect(
-            editor.contains("privatefunccancel(){text=seeddismiss()}")
+            editor.contains(
+                "privatefunccancel(){iftext==written{text=seed}dismiss()}"
+            )
         )
         let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
         #expect(row.contains("text:luaBinding(id),"))

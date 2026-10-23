@@ -11,7 +11,8 @@ struct LuaEditRequest: Identifiable, Equatable {
 /// Ruling). The body writes the draft as it is typed, so Done
 /// (⌘Return) and a click away leave the edit and no late write can
 /// land after a Save or a Revert; Cancel (Escape) puts back the body
-/// the row had when the editor opened.
+/// the row had when the editor opened, unless a Save or a Revert has
+/// moved the draft since the editor last wrote it.
 struct LuaBindingEditor: View {
     let title: String
     /// What VoiceOver calls the body.
@@ -20,6 +21,8 @@ struct LuaBindingEditor: View {
     let dismiss: () -> Void
 
     @State private var seed: String
+    /// The body this editor last wrote into the draft.
+    @State private var written: String
 
     init(
         title: String,
@@ -32,6 +35,7 @@ struct LuaBindingEditor: View {
         _text = text
         self.dismiss = dismiss
         _seed = State(initialValue: text.wrappedValue)
+        _written = State(initialValue: text.wrappedValue)
     }
 
     var body: some View {
@@ -41,7 +45,7 @@ struct LuaBindingEditor: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            LuaSourceEditor(text: $text, spokenName: spokenName)
+            LuaSourceEditor(text: typed, spokenName: spokenName)
                 .frame(minHeight: 150)
             HStack {
                 Spacer()
@@ -57,8 +61,18 @@ struct LuaBindingEditor: View {
         .frame(width: 460)
     }
 
+    private var typed: Binding<String> {
+        Binding(
+            get: { text },
+            set: {
+                written = $0
+                text = $0
+            }
+        )
+    }
+
     private func cancel() {
-        text = seed
+        if text == written { text = seed }
         dismiss()
     }
 }
