@@ -179,8 +179,9 @@ struct MouseButtonSeamGuardTests {
 
     /// The live host reads `wireDrag` and the seam defaults
     /// leave on every core a suite builds — the button mask, the
-    /// cursor, since #1532 the reveal-strip read, and since #2224 the
-    /// revealed app's open-menu read. Deleting a pin from
+    /// cursor, since #1532 the reveal-strip read, since #2224 the
+    /// revealed app's open-menu read, and since #2548 the pointer's
+    /// screen. Deleting a pin from
     /// BOTH twins is otherwise silent: the twins-identical scan
     /// sees only a one-sided deletion, and a behavioural read
     /// answers 0 on a quiet host either way — which is exactly
