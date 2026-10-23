@@ -289,6 +289,48 @@ an existing one gets them through **Restore Defaults…**.
 KiwiDesk.focus_space_back()
 ```
 
+:::unreleased
+### focus_display_last / focus_display
+
+**Expects:** nothing for `focus_display_last`; a direction
+(`"left"`, `"right"`, `"up"` or `"down"`) for `focus_display`.
+
+**Does:** moves focus to another screen, switching to the Space
+that screen shows — its last focused window comes forward and
+the pointer follows. Neither changes which Space a screen shows;
+an empty one still becomes the focused screen, so the next press
+acts from it.
+
+- `focus_display_last` goes to the screen you were on before, like
+  ⌘Tab for screens: with two screens one key toggles between them,
+  with three or more it returns to the one you were on just before.
+  Every arrival on a screen counts — a key, a click, a move-and-
+  follow, a Space Bar click. The record starts fresh each time
+  KiwiDesk starts; with two screens and nothing recorded it goes to
+  the other one.
+- `focus_display` goes to the nearest screen in that direction, by
+  the arrangement in System Settings ▸ Displays. A screen counts
+  only where it overlaps the focused screen across that direction,
+  so a diagonal one is no neighbour, and focus stops at the edge.
+
+With one screen, or with nothing recorded among three, the focused
+window's ring bumps and the command fails with `no other screen`;
+`focus_display` at an edge bumps toward it and fails with
+`no screen <direction> of focus`. Each visit also counts in the
+[Space history](#focus_space_back--focus_space_forward).
+
+`focus_display_last` is **Go to last screen** under Settings ▸
+Shortcuts ▸ Focus, with no default chord; `focus_display` is
+Lua and CLI only.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_display_last()
+KiwiDesk.focus_display("right")
+```
+:::
+
 ### move_to_space
 
 **Expects:** a space identifier.
