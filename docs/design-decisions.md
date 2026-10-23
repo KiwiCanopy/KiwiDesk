@@ -4107,7 +4107,7 @@ bar, so it reserves nothing and no window moves when it
 appears — the #761 rule the App Bar alternative broke.
 
 It wears KiwiShelf's look — the Fill, glass where the shelf's
-glass is on, the item ink and the rim — because hovering it opens
+glass is on, the item ink and the rim — because clicking it opens
 the hover peek, which wears that surface: the mark and the list it
 unfolds read as one object, and the ink-on-Fill pairing is the
 peek's, already measured on every palette. The Space Bar's badge
@@ -4134,19 +4134,51 @@ circle on a top end grows taller with a two-digit count and
 covers the title again, and a pill on a side reaches twice as
 far onto the window, over a scroll bar or a sidebar.
 
-*It lists that end, and a click opens rather than steps.* The
+*It lists that end, and only a click opens it (#2563).* The
 peek lists the end's windows nearest the edge first — the order
 one focus step at a time brings them in — and opens into the
-run. A click on the mark opens the peek and holds it, as a click
-on the Space Bar's `+n` does: one meaning for `+n` in both places
-beats a cleverer "step to the next" here. Every group wears its
-app's icon, even when every row is one app: a Space Bar glyph
-shows its app beside the peek, and the mark shows nothing but the
-count (owner, device). VoiceOver reads it as a button naming its
-direction and count, and its press opens the window menu. It has
-no motion of its own: it appears and goes with the park snap and
-rides its window's glide, so Reduce Motion changes nothing about
-it.
+run. Hovering the mark lights it and opens nothing; a click opens
+the list and holds it, a click on its header closes it. Every
+other bar peek opens on hover, and this one does not, because of
+where it sits: on the title bar of the window the pointer is on
+its way to drag or click, so a hover peek covered the very window
+the user was reaching for. The Space Bar's `+n` keeps its hover,
+since a bar is crossed only on the way to the bar. A click still
+opens rather than steps, as a click on `+n` does: one meaning for
+`+n` in both places beats a cleverer "step to the next" here. The
+second click of a double-click is not a close, so a double-click
+leaves the list open (#2063: a double-click stays harmless). The
+list stays open when the pointer leaves it, because a held list
+that closes on leave is hover again; it closes on a click outside
+it, a pick, Escape, and anything that makes it stale — the end's
+count changing, a scroll step, the anchor window moving, a Space
+or Desktop switch, the shelf standing down. It takes the keyboard
+while open, for Escape and the arrow keys over its rows, without
+activating KiwiDesk. Every group wears its app's icon, even when
+every row is one app: a Space Bar glyph shows its app beside the
+peek, and the mark shows nothing but the count (owner, device).
+VoiceOver reads it as a button naming its direction and count,
+and its press opens the window menu.
+
+*The pill becomes the list.* On a click the mark's own plate grows
+by its frame into the list, the "+n" staying where the pill sat as
+the list's header and taking the list's ink, the rows fading in
+over the second half; closing shrinks the list back into the
+current mark. The mark and the list it opens are one object — that
+is why the mark wears the peek's surface — and the motion says so
+where a fade could not. It is the peek's opening motion for this
+one source, never a second peek, so the bars keep one peek. No
+scale: an 18 pt pill scaled up squashes its count and rim, and a
+list scaled from it warps rows until they cannot be read, which is
+also why a genie was refused, besides meaning "minimized to the
+Dock" and needing a private API. One critically damped spring with
+no overshoot, about 200 ms open and 160 ms closed, fixed rather
+than following `reveal_duration`: a list is a label, not a bar
+reveal. Under Reduce Motion nothing grows — the pill fades out and
+the list fades in where it rests, the "+n" holding its place — so
+the mark's entry and its list are the only motion it has. Its
+appearing and going still ride the park snap and its window's
+glide, with no motion of their own.
 :::
 
 **The stack cascade is a last resort; extreme ratios clamp at
