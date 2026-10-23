@@ -118,16 +118,20 @@ What happens past the last window that way is
 The search is two-tier: **tiled windows always win**, and only
 when no tiled window lies in the pressed direction are the
 space's *floating* windows (including floating sticky windows
-shown on the space) considered, by their live frames. On an
-axis that wraps, the wrap wins over the float tier: a
-float past that edge is reachable on the cross axis only,
-except with a single tiled window, when it is reachable on both
-axes. Transient panels (Spotlight-style launchers) and
+shown on the space) considered, by their live frames. Transient panels (Spotlight-style launchers) and
 fullscreen windows are never focus targets. A float parked
 *exactly* on a tiled slot is reached by no direction — click it
 or cycle to it instead
 ([Accepted limitations](accepted-limitations.md)). `swap` is
 tiled-only.
+
+:::unreleased
+A float past the last window that way is reached before focus
+wraps or leaves the screen, except under `"this_screen"` in
+Scrolling, Monocle and Track, where the wrap wins: there a float
+past that edge is reachable on the cross axis only, except with a
+single tiled window, when it is reachable on both axes.
+:::
 
 While a KiwiVision lens is on with
 [`keep_focus`](#kiwivisiondefine_lens), `focus` and `swap` skip
@@ -166,7 +170,8 @@ found the way `focus` finds it, including the window-order
 stepping on a monocle or scrolling orientation axis and in
 track spaces, where a cross-axis swap trades the two windows
 between their tracks and the track boundaries stay put. `swap`
-never wraps at the ends, even with a wrap-focus toggle on.
+never wraps at the ends, whatever
+[`set_focus_wrap`](#set_focus_wrap) says.
 
 **Example:**
 
@@ -226,8 +231,8 @@ unchanged frontmost app and re-raises once.
 When the target Space is on another screen, the pointer moves
 there too, whether or not
 [*mouse follows focus*](#mouseset_follows_focus) is on: onto the
-focused window, or to the centre of that screen when the Space is
-empty. It stays put when it is already on that screen or a mouse
+focused window, or to the centre of that screen's usable area
+when the Space is empty. It stays put when it is already on that screen or a mouse
 button is held. A move-and-follow onto another screen's Space
 does the same.
 :::
@@ -304,8 +309,9 @@ acts from it.
 - `focus_display_last` goes to the screen you were on before, like
   ⌘Tab for screens: with two screens one key toggles between them,
   with three or more it returns to the one you were on just before.
-  Every arrival on a screen counts — a key, a click, a move-and-
-  follow, a Space Bar click. The record starts fresh each time
+  Every arrival on a screen counts — a key, a click, hover focus,
+  a focus key past the last window, a move-and-follow, a Space Bar
+  click. The record starts fresh each time
   KiwiDesk starts; with two screens and nothing recorded it goes to
   the other one.
 - `focus_display` goes to the nearest screen in that direction, by
@@ -313,14 +319,15 @@ acts from it.
   only where it overlaps the focused screen across that direction,
   so a diagonal one is no neighbour, and focus stops at the edge.
 
-With one screen, or with nothing recorded among three, the focused
+With one screen, or with nothing recorded among three or more, the
+focused
 window's ring bumps and the command fails with `no other screen`;
 `focus_display` at an edge bumps toward it and fails with
 `no screen <direction> of focus`. Each visit also counts in the
 [Space history](#focus_space_back--focus_space_forward).
 
 `focus_display_last` is **Go to last screen** under Settings ▸
-Shortcuts ▸ Focus, with no default chord; `focus_display` is
+Shortcuts & Gestures ▸ Focus, with no default chord; `focus_display` is
 Lua and CLI only.
 
 **Example:**
@@ -488,6 +495,12 @@ switches you there with it.
 
 Keyboard focus ends on the window you sent. The pointer moves
 only with *mouse follows focus* on.
+
+:::unreleased
+A follow onto a Desktop on another screen moves the pointer there
+too, whether or not *mouse follows focus* is on
+([`focus_space`](#focus_space)).
+:::
 
 If the target Desktop is **hidden**, focus lands a beat after
 the switch, when the window reappears there
@@ -1039,7 +1052,8 @@ pressed direction, in every layout. `swap` never wraps.
 - `this_screen`: focus wraps to the window at the opposite edge
   of the same screen — in BSP, Stack and Grid the nearest one in
   the same row or column; in Scrolling, Monocle and Track the
-  far end of the order.
+  far end of the order. A Floating Space stops at its last
+  window.
 - `all_screens`: focus continues to the window nearest the
   entering edge on the next screen that way, switching to the
   Space that screen shows. Past the last screen it wraps to the
@@ -1056,7 +1070,8 @@ crossing like any
 
 It is stored like the Space history: `focus_wrap` in `gui.json`
 is the value every profile uses, and a profile may keep its own,
-which the Settings row's **Applies to** writes. The verb sets the
+which the **Wrap focus** row's **Applies to** under Shortcuts &
+Gestures ▸ Focus writes. The verb sets the
 shared value for the running session and never reaches a file; a
 profile's own value still wins.
 
