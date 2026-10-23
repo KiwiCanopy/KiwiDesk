@@ -65,14 +65,16 @@ struct ShortcutMetaCarryTests {
         let read = fieldValues(row.meta)
         var copied = KeyBinding()
         copied.meta = row.meta
-        let entry = KiwiCore.shortcutEntry(copied)
+        guard case .object(let body) = KiwiCore.shortcutEntry(copied) else {
+            Issue.record("shortcut.list entry is no object")
+            return
+        }
         for field in fields {
             #expect(read[field] == field, "getter drops \(field)")
             #expect(
                 fieldValues(copied.meta)[field] == field,
                 "setter drops \(field)"
             )
-            guard case .object(let body) = entry else { continue }
             #expect(body[field] == .string(field), "list drops \(field)")
         }
     }

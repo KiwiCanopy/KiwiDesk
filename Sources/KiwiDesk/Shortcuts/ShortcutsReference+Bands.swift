@@ -19,7 +19,7 @@ extension ShortcutsReferenceBuilder {
         resizeStep: Int,
         layerNames: [String],
         lenses: [String] = [],
-        rows: ([NavCommand]) -> [ShortcutRow]
+        rows: ([NavCommand], ShortcutGroup?) -> [ShortcutRow]
     ) -> [ShortcutSubgroup] {
         let focus =
             KeybindingCatalog.focusDirections
@@ -48,7 +48,7 @@ extension ShortcutsReferenceBuilder {
         return [
             ShortcutSubgroup(
                 title: L("shortcuts.section.focus", "Focus"),
-                rows: rows(focus),
+                rows: rows(focus, .focus),
                 group: .focus
             ),
             ShortcutSubgroup(
@@ -56,12 +56,12 @@ extension ShortcutsReferenceBuilder {
                     "shortcuts.section.move_windows",
                     "Move windows"
                 ),
-                rows: rows(move),
+                rows: rows(move, .moveWindows),
                 group: .moveWindows
             ),
             ShortcutSubgroup(
                 title: L("shortcuts.section.layout", "Layout"),
-                rows: rows(KeybindingCatalog.layoutRows),
+                rows: rows(KeybindingCatalog.layoutRows, .layout),
                 group: .layout
             ),
             ShortcutSubgroup(
@@ -72,7 +72,8 @@ extension ShortcutsReferenceBuilder {
                 rows: rows(
                     KeybindingCatalog.resizeAndFloat(
                         step: resizeStep
-                    )
+                    ),
+                    .sizeFloat
                 ),
                 group: .sizeFloat
             ),
@@ -82,7 +83,8 @@ extension ShortcutsReferenceBuilder {
                 title: L("destination.kiwivision", "KiwiVision"),
                 rows: rows(
                     [KeybindingCatalog.toggleKiwiVision]
-                        + lenses.map(KeybindingCatalog.toggleLens)
+                        + lenses.map(KeybindingCatalog.toggleLens),
+                    .kiwivision
                 ),
                 group: .kiwivision
             ),
@@ -93,7 +95,8 @@ extension ShortcutsReferenceBuilder {
                     [
                         KeybindingCatalog.toggleSpaceBar,
                         KeybindingCatalog.toggleAppBar,
-                    ]
+                    ],
+                    .kiwishelf
                 ),
                 group: .kiwishelf
             ),
@@ -102,7 +105,7 @@ extension ShortcutsReferenceBuilder {
                     "shortcuts.section.switch_layers",
                     "Switch layers"
                 ),
-                rows: rows(switchLayers)
+                rows: rows(switchLayers, nil)
             ),
         ]
         // Empty bands stay: a binding may still file into one, and

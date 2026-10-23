@@ -67,38 +67,76 @@ struct ShortcutRegroupScopeTests {
         #expect(mine.rows.first?.ownApp == true)
     }
 
+    private func focusIDs(_ built: ShortcutsReference) -> [String] {
+        (built.controls.first { $0.group == .focus }?.rows ?? [])
+            .flatMap { $0.members.isEmpty ? [$0.id] : $0.members.map(\.id) }
+    }
+
+    private static func focus(_ dir: String) -> String {
+        "KiwiDesk.focus(\"\(dir)\")"
+    }
+
+    /// Two Focus rows, so a row taken out and put back at the band's
+    /// end changes the order.
     @Test("Its own band's token moves nothing; another band's moves it")
     func builtInTokens() throws {
         LocalizationManager.shared.select("en")
-        let lua = "KiwiDesk.focus(\"left\")"
-        let plain = reference([KeyBinding(combo: "alt+h", lua: lua)])
-        let same = reference([row("alt+h", lua, group: "focus")])
-        func focusIDs(_ built: ShortcutsReference) -> [String] {
-            built.controls.first { $0.group == .focus }?.rows.map(\.id)
-                ?? []
-        }
+        let right = KeyBinding(combo: "alt+l", lua: Self.focus("right"))
+        let plain = reference([
+            KeyBinding(combo: "alt+h", lua: Self.focus("left")), right,
+        ])
+        let same = reference([
+            row("alt+h", Self.focus("left"), group: "focus"), right,
+        ])
+        #expect(focusIDs(plain).count == 2)
         #expect(focusIDs(same) == focusIDs(plain))
-        let moved = reference([row("alt+h", lua, group: "layout")])
-        #expect(!focusIDs(moved).contains(lua))
+        let moved = reference([
+            row("alt+h", Self.focus("left"), group: "layout"), right,
+        ])
+        #expect(focusIDs(moved) == [Self.focus("right")])
         let layout = try #require(
             moved.controls.first { $0.group == .layout }
         )
-        #expect(layout.rows.contains { $0.id == lua })
+        #expect(layout.rows.contains { $0.id == Self.focus("left") })
     }
 
-    /// Four directions folded into one row move together when each
-    /// names the same group.
-    @Test("A folded row moves when every member names the group")
+    /// One member of a fold naming a group leaves alone, a built-in
+    /// token as a group of its own does; the rest keep their band.
+    @Test("One member of a fold moves alone, by any group")
+    func foldMemberMovesAlone() throws {
+        LocalizationManager.shared.select("en")
+        for group in ["layout", "Mine"] {
+            let bindings = [
+                ("alt+h", "left"), ("alt+j", "down"),
+                ("alt+k", "up"), ("alt+l", "right"),
+            ].map { combo, dir in
+                dir == "left"
+                    ? row(combo, Self.focus(dir), group: group)
+                    : KeyBinding(combo: combo, lua: Self.focus(dir))
+            }
+            let built = reference(bindings)
+            let stayed = focusIDs(built)
+            #expect(stayed.count == 3, "\(group)")
+            #expect(!stayed.contains(Self.focus("left")), "\(group)")
+            let target =
+                built.controls.first { $0.group?.rawValue == group }?.rows
+                ?? built.groups.first { $0.title == group }?.rows ?? []
+            #expect(target.map(\.id) == [Self.focus("left")], "\(group)")
+        }
+    }
+
+    /// Four directions each naming the same group all move.
+    @Test("Every member of a fold naming the group moves")
     func foldedRowMoves() throws {
         LocalizationManager.shared.select("en")
         let bindings = [
             ("alt+h", "left"), ("alt+j", "down"),
             ("alt+k", "up"), ("alt+l", "right"),
         ].map { combo, dir in
-            row(combo, "KiwiDesk.focus(\"\(dir)\")", group: "layout")
+            row(combo, Self.focus(dir), group: "layout")
         }
         let built = reference(bindings)
-        #expect(built.controls.first { $0.group == .focus } == nil)
+        #expect(focusIDs(built).isEmpty)
         let layout = try #require(
             built.controls.first { $0.group == .layout }
         )

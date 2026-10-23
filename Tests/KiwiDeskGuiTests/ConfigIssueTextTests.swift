@@ -109,6 +109,12 @@ struct ConfigIssueTextTests {
                 seen.insert(text).inserted,
                 "\(kind) duplicates another kind's text"
             )
+            // A layer other than the default is named in its text.
+            if case .unknownShortcutSymbol(let layer, _, _) = kind,
+                layer != KeyLayer.defaultName
+            {
+                #expect(text.contains(layer))
+            }
         }
     }
 
