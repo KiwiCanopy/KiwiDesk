@@ -12,8 +12,12 @@ struct GestureStripHoverCue: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
-            .strokeBorder(SettingsTheme.accent, lineWidth: 2)
-            .opacity(hovering ? 1 : 0)
+            // The ink fades, never the view: a view at opacity 0
+            // stops taking the hover and the click.
+            .strokeBorder(
+                SettingsTheme.accent.opacity(hovering ? 1 : 0),
+                lineWidth: 2
+            )
             .contentShape(Rectangle())
             .onTapGesture(perform: onTap)
             .onHover { hovering = $0 }

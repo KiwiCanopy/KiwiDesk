@@ -270,7 +270,11 @@ restated `20...80` satisfies on the day it is written.
   key frame, and always under Reduce Motion, never a bundled clip,
   with the gate named per call (`ReduceMotionGateTests`).
   `GestureAutoplayWiringTests` holds the click as the only
-  trigger. An entry's sentence, picture, surface and pace live
+  trigger. A strip picture's hover and click live in a sibling
+  overlay, `GestureStripHoverCue`, never in the view that draws
+  the picture, so a hover never re-renders it (#2537,
+  `GestureAutoplayWiringTests` ▸ `stripRests`, `GestureStripTests`
+  ▸ `plateHoverCue`). An entry's sentence, picture, surface and pace live
   once, on `GestureItem`, which the entry and the strip both read
   (`GesturesDrawerTests` ▸ `entriesAreTheItems`, `GestureStripTests`).
   Whether it actually moves is a device check, since no headless
@@ -1248,7 +1252,10 @@ must keep:
   neutral fill lift says where the pointer is (the idiom
   `hoverHighlight` and `ShortcutLayerChip` already keep — the
   accent is reserved for identity and selection). The two then
-  compose instead of one erasing the other.
+  compose instead of one erasing the other. An accent hover edge
+  is legal only on a surface that carries no durable marking at
+  all, as the gesture strip's pictures (#2537, `GestureStripTests`
+  ▸ `plateHoverCue`).
   `HomeCardChromeTests` holds the split, its negative half
   located by `cardStroke`'s brace-balanced body rather than by
   a spelling a retune may move. A searchable dropdown's

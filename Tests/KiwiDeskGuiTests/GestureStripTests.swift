@@ -138,10 +138,11 @@ struct GestureStripTests {
         #expect(view.contains(".pointingHandCursor()"))
         #expect(
             view.contains(
-                ".strokeBorder(SettingsTheme.accent,lineWidth:2)"
-                    + ".opacity(hovering?1:0)"
+                ".strokeBorder(SettingsTheme.accent.opacity(hovering?1:0),"
             )
         )
+        // The view itself never fades out of hit-testing.
+        #expect(!view.contains(").opacity("))
         #expect(!view.contains("picture("))
     }
 }
