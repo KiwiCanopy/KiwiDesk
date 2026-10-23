@@ -71,12 +71,22 @@ struct AdvancedLuaGroup: View {
     /// A row's Lua body, found by id at each read and write — the
     /// editor popover outlives no row, but the array may move.
     func luaBinding(_ id: UUID) -> Binding<String> {
+        Self.luaBinding(id, in: $bindings)
+    }
+
+    static func luaBinding(
+        _ id: UUID,
+        in bindings: Binding<[KeyBinding]>
+    ) -> Binding<String> {
         Binding(
-            get: { bindings.first { $0.id == id }?.lua ?? "" },
+            get: { bindings.wrappedValue.first { $0.id == id }?.lua ?? "" },
             set: { lua in
-                guard let index = bindings.firstIndex(where: { $0.id == id })
+                guard
+                    let index = bindings.wrappedValue.firstIndex(where: {
+                        $0.id == id
+                    })
                 else { return }
-                bindings[index].lua = lua
+                bindings.wrappedValue[index].lua = lua
             }
         )
     }

@@ -1,5 +1,6 @@
 import Foundation
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -37,6 +38,27 @@ struct LuaBindingRowTests {
         #expect(LuaBodyShape.lineCount("a\n\nb") == 3)
     }
 
+    /// The editor's body reaches its own row by id, wherever the row
+    /// has moved since the editor opened.
+    @Test("the editor's binding writes its own row by id")
+    @MainActor
+    func luaBindingWritesItsRow() {
+        var rows = [
+            KeyBinding(lua: "one"), KeyBinding(lua: "two"),
+            KeyBinding(lua: "three"),
+        ]
+        let array = Binding(get: { rows }, set: { rows = $0 })
+        let second = rows[1].id
+        let body = AdvancedLuaGroup.luaBinding(second, in: array)
+        #expect(body.wrappedValue == "two")
+        rows.swapAt(1, 2)
+        body.wrappedValue = "edited"
+        #expect(rows.map(\.lua) == ["one", "three", "edited"])
+        rows.removeAll { $0.id == second }
+        body.wrappedValue = "gone"
+        #expect(rows.map(\.lua) == ["one", "three"])
+    }
+
     @Test("the fields write the binding's own description, symbol, group")
     func fieldsWriteTheBinding() throws {
         let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
@@ -48,6 +70,14 @@ struct LuaBindingRowTests {
             )
         )
         #expect(row.contains("ShortcutGroupField(group:binding.group,"))
+        // The picker speaks the symbol it shows (gui.md, #812).
+        #expect(
+            row.contains(
+                ".accessibilityValue(binding.wrappedValue.symbol.isEmpty"
+                    + "?L(\"shortcuts.lua.default_symbol\",\"</>\")"
+                    + ":binding.wrappedValue.symbol)"
+            )
+        )
         let group = try Self.source("Lua/AdvancedLuaGroup.swift")
         #expect(group.contains("row($binding)"))
     }
