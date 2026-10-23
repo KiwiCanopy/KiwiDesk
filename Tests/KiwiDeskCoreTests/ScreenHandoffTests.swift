@@ -197,4 +197,29 @@ struct ScreenHandoffTests {
         #expect(core.state.workspaces.activeSpace == SpaceID("3"))
         #expect(warps == 1)
     }
+
+    /// The display follow (#446) and the AX focus follow's landing
+    /// hand off like a switch: once with the pointer left behind,
+    /// never with it already on the target screen.
+    @Test("the display follow and the focus follow hand off")
+    func followDoorsHandOff() {
+        typealias Door = (KiwiCore) -> Void
+        let doors: [Door] = [
+            { $0.handFollowFocus(to: WindowID(2), in: SpaceID("2")) },
+            { $0.landFocusFollow(WindowID(2), on: SpaceID("2")) },
+        ]
+        for door in doors {
+            for onTarget in [false, true] {
+                guard let (core, main) = twoScreenCore() else { return }
+                core.mouse.pointerDisplay = {
+                    onTarget ? main : self.away
+                }
+                var warps = 0
+                core.pointerWarp = { _ in warps += 1 }
+                door(core)
+                #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+                #expect(warps == (onTarget ? 0 : 1))
+            }
+        }
+    }
 }

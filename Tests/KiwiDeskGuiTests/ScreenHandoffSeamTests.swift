@@ -4,11 +4,10 @@ import Testing
 /// Every Space switch or follow that can move focus onto another
 /// screen hands the pointer over through `warpForSwitch` (#2548):
 /// `switchSpace`, `followSwitch`, `handFollowFocus` and the AX focus
-/// follow's landing. A door added beside them that warps through
-/// `focusWindow` instead leaves the pointer behind with every
-/// behaviour suite green, so this is the register of who calls it.
-/// Counted per file, the definition included, so a call migrating
-/// between files or a second one inside a file reds.
+/// follow's landing. This registers the known callers: a call lost,
+/// moved between files or doubled inside one reds. A NEW door that
+/// warps through `focusWindow` and never names the seam is outside
+/// the scan — review's. Counted per file, the definition included.
 @Suite("Screen handoff callers (#2548)")
 struct ScreenHandoffSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
