@@ -64,6 +64,27 @@ struct RaisedLayerLatchTests {
         #expect(reason(facts(kAXDialogSubrole, layer: 0)) == .panel)
     }
 
+    /// A raised layer would hide a Float rule from a tiled window
+    /// the recheck refuses it for, so the rule is asked first.
+    @Test("a Float rule under a raised layer still floats")
+    func ruleBeneathTheLayer() {
+        let rules = FloatRules(["com.brave.Browser"])
+        let standard = kAXStandardWindowSubrole
+        let reason = { (layer: Int) in
+            FloatDetection.autoFloatReason(
+                facts(standard, layer: layer),
+                bundleID: "com.brave.Browser",
+                rules: rules
+            )
+        }
+        #expect(reason(999) == .rule)
+        #expect(reason(0) == .rule)
+        let core = makeTestCore()
+        core.eventLoop.detectedFloating[id] = .tiles
+        _ = recheck(core, .rule)
+        #expect(core.eventLoop.detectedFloating[id] == .floats(.rule))
+    }
+
     @Test("a raised layer is structure: an overlay, not a guess")
     func raisedLayerIsStructure() {
         #expect(!AutoFloatReason.raisedLayer.isGuess)
@@ -88,6 +109,18 @@ struct RaisedLayerLatchTests {
             events += recheck(core, read)
             #expect(core.eventLoop.detectedFloating[id] == .tiles)
         }
+        #expect(events.isEmpty)
+    }
+
+    /// A changed guess forgets every verdict of its app
+    /// (`rejudgeGuesses`); the layer is no guess, so a forgotten
+    /// verdict refuses it as a tiled one does.
+    @Test("a forgotten verdict never floats on the layer")
+    func forgottenStaysTiled() {
+        let core = makeTestCore()
+        core.eventLoop.detectedFloating[id] = nil
+        let events = recheck(core, .raisedLayer)
+        #expect(core.eventLoop.detectedFloating[id] == nil)
         #expect(events.isEmpty)
     }
 

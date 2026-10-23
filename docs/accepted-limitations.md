@@ -273,11 +273,14 @@ A `desc` names such a row too ([Describing a Shortcut](lua-reference.md#describi
 :::unreleased
 A window that an app lifts above the normal window level *after*
 KiwiDesk tiled it stays tiled — a player's "float on top" toggle,
-say — until it is closed and reopened
+or an app that sets a window's level a moment after opening it —
+until the window reopens or KiwiDesk restarts
 ([#2572](https://github.com/KiwiCanopy/KiwiDesk/issues/2572)).
 KiwiDesk judges the level once, when it adopts the window, because
-Chromium browsers lift their tiled main window to that level while
-a site permission prompt is open; re-judging it floated and shrank
-the window on every lift. Float the window yourself (`make_floating`,
-or Float Window on its bar menu) to float it at once.
+Brave lifted its tiled main window to that level each time it came
+forward with a site permission prompt open (2026-10-23), and
+re-judging it floated and shrank the window on every lift. Float
+the window yourself (`make_floating`, or **Float Window** in its
+App Bar item's right-click menu), or add a Float rule for the app,
+to float it at once.
 :::

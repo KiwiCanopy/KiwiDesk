@@ -230,9 +230,10 @@ extension EventLoop {
         if verdict == .floats(.fixedSize), let before, before != verdict {
             return
         }
-        // A raised layer likewise (#2572): Chromium lifts its main
-        // window to 999 while a permission prompt is up.
-        if verdict == .floats(.raisedLayer), before == .tiles {
+        // A raised layer likewise, whatever forgot the verdict
+        // (#2572): Brave lifted its main window to 999 with a
+        // permission prompt up (2026-10-23).
+        if verdict == .floats(.raisedLayer), before?.floats != true {
             return
         }
         detectedFloating[id] = verdict

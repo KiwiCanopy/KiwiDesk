@@ -13,9 +13,10 @@ public enum FloatDetection {
     }
 
     /// Evaluates role/subrole and WindowServer layer: layer != 0
-    /// never tiles, even when the subrole momentarily reads
-    /// AXStandardWindow — apps mid-launch report unreliable
-    /// subroles.
+    /// never tiles at adoption, even when the subrole momentarily
+    /// reads AXStandardWindow — apps mid-launch report unreliable
+    /// subroles. A recheck never floats a tiled window on the
+    /// layer (#2572).
     public static func shouldFloat(
         role: String,
         subrole: String,
@@ -241,9 +242,20 @@ public enum FloatDetection {
         bundleID: String?,
         rules: FloatRules
     ) -> AutoFloatReason? {
-        let shaped = shouldFloat(role: facts.role, subrole: facts.subrole)
-        let reason = autoFloatReason(
-            structural: shaped || (facts.layer ?? 0) != 0,
+        let structural: AutoFloatReason? =
+            if shouldFloat(role: facts.role, subrole: facts.subrole) {
+                .panel
+            } else if shouldFloat(
+                role: facts.role,
+                subrole: facts.subrole,
+                layer: facts.layer ?? 0
+            ) {
+                .raisedLayer
+            } else {
+                nil
+            }
+        return autoFloatReason(
+            structural: structural,
             // Asked only where structure tiles: a standard window
             // on the normal layer, the one shape a disabled zoom
             // button marks as fixed-size — and only where a guess
@@ -256,7 +268,6 @@ public enum FloatDetection {
                 rules.matches(bundleID: bundleID, title: facts.title())
             }
         )
-        return reason == .panel && !shaped ? .raisedLayer : reason
     }
 
     /// The reason's order, pure: structure, then a fixed size
@@ -265,13 +276,17 @@ public enum FloatDetection {
     /// obstacle met, so a fixed-size window a rule also matches
     /// reads `.fixedSize` and, once tiled by a Tile rule, `.rule`.
     /// Each is asked only where the one before tiles: the later
-    /// ones cost a read.
+    /// ones cost a read. A raised layer asks the rule first, since
+    /// a recheck refuses the layer for a tiled window (#2572).
     public static func autoFloatReason(
-        structural: Bool,
+        structural: AutoFloatReason?,
         fixedSize: () -> Bool,
         ruleMatches: () -> Bool
     ) -> AutoFloatReason? {
-        if structural { return .panel }
+        if structural == .raisedLayer {
+            return ruleMatches() ? .rule : .raisedLayer
+        }
+        if let structural { return structural }
         if fixedSize() { return .fixedSize }
         return ruleMatches() ? .rule : nil
     }
