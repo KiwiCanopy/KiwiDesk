@@ -5,7 +5,11 @@ import Foundation
 /// on disk without a reload (#2482).
 enum InstalledKeybindings {
     case structured([KeyLayer])
-    case lua(layers: [KeyLayer], unread: [String: [String]])
+    case lua(
+        layers: [KeyLayer],
+        unread: [String: [String]],
+        unreadMeta: [String: [String: KeyBindingMeta]]
+    )
 }
 
 /// The structured bindings currently installed, for the
@@ -14,6 +18,7 @@ public struct LiveKeybindingSnapshot: Sendable {
     let layers: [KeyLayer]
     let activeLayer: String
     let unread: [String: [String]]
+    var unreadMeta: [String: [String: KeyBindingMeta]] = [:]
     let luaOwned: Bool
 
     /// The resolved key modes currently installed. Under Lua
@@ -28,6 +33,12 @@ public struct LiveKeybindingSnapshot: Sendable {
     /// only; never a `KeyBinding`, so nothing can save one.
     public func unreadChords(in layer: String) -> [String] {
         unread[layer] ?? []
+    }
+    /// What an unread chord in `layer` says of itself (#2544).
+    public func meta(ofUnread chord: String, in layer: String)
+        -> KeyBindingMeta
+    {
+        unreadMeta[layer]?[chord] ?? .none
     }
 }
 
@@ -47,11 +58,12 @@ extension KiwiCore {
                 unread: [:],
                 luaOwned: false
             )
-        case .lua(let layers, let unread):
+        case .lua(let layers, let unread, let unreadMeta):
             return LiveKeybindingSnapshot(
                 layers: layers,
                 activeLayer: keys.currentLayer,
                 unread: unread,
+                unreadMeta: unreadMeta,
                 luaOwned: true
             )
         }
@@ -77,7 +89,8 @@ extension KiwiCore {
         )
         installedKeybindings = .lua(
             layers: captured.layers,
-            unread: captured.unread
+            unread: captured.unread,
+            unreadMeta: captured.unreadMeta
         )
     }
 

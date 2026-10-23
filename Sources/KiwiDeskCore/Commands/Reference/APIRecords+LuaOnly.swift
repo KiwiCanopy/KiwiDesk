@@ -18,9 +18,10 @@ extension APIReference {
         ),
         "bind": APIRecord(
             "Binds a key combination in the base layer to a "
-                + "function.",
+                + "function; options take desc, group and symbol.",
             .text("combo"),
-            .callback("action")
+            .callback("action"),
+            .table("options", optional: true)
         ),
         "on": APIRecord(
             "Calls a function whenever a KiwiDesk event fires.",

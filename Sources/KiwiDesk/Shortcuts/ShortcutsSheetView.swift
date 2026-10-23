@@ -51,6 +51,10 @@ struct ShortcutsSheetView: View {
                 rows: reference.apps
             )
         )
+        // A binding's own groups, untranslated (#2544).
+        out += reference.groups.map {
+            Section(title: $0.title, rows: $0.rows)
+        }
         out.append(
             Section(
                 title: L("shortcuts.panel.custom", "Custom"),

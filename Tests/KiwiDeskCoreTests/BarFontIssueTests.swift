@@ -13,7 +13,10 @@ struct BarFontIssueTests {
     private static let missing = "KiwiDesk No Such Family"
 
     private func hasFontIssue(_ core: KiwiCore) -> Bool {
-        core.configIssues.contains { $0.kind.isFontIssue }
+        core.configIssues.contains {
+            if case .missingFontFamily = $0.kind { return true }
+            return false
+        }
     }
 
     @Test("Setting a missing family files an issue; a fix clears it")

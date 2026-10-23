@@ -91,7 +91,13 @@ extension KiwiCore {
                 )
                 return .none
             }
-            self.keys.bind(combo, ref: ref)
+            // An optional third table says what the binding does
+            // (#2544).
+            var meta = KeyBindingMeta.none
+            if case .table(let options)? = args.dropFirst(2).first {
+                meta = KeyBindingMeta(options: options)
+            }
+            self.keys.bind(combo, ref: ref, meta: meta)
             return .none
         }
         lua.register("define_layer") { [weak self] args in
@@ -106,9 +112,19 @@ extension KiwiCore {
                 return .none
             }
             var bindings: [KeyCombo: Int32] = [:]
+            var meta: [KeyCombo: KeyBindingMeta] = [:]
             for (key, value) in table {
+                // A value is the function, or `{ fn = …, desc = … }`
+                // saying what it does (#2544).
+                var entry = value
+                if case .table(let options) = value {
+                    entry = options["fn"] ?? .none
+                    if let combo = KeyCombo.parse(key) {
+                        meta[combo] = KeyBindingMeta(options: options)
+                    }
+                }
                 guard let combo = KeyCombo.parse(key),
-                    case .functionRef(let ref) = value
+                    case .functionRef(let ref) = entry
                 else {
                     self.onLog(
                         "define_layer('\(name)'): bad key "
@@ -124,7 +140,8 @@ extension KiwiCore {
             self.keys.defineLayer(
                 name,
                 bindings: bindings,
-                icon: icon
+                icon: icon,
+                meta: meta.filter { bindings[$0.key] != nil }
             )
             return .none
         }

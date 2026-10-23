@@ -23,7 +23,7 @@ struct ShortcutsReferenceParityTests {
         #expect(
             names == [
                 "layerName", "controls", "inactive", "desktopAway",
-                "apps", "custom",
+                "apps", "groups", "custom",
             ],
             Comment(
                 rawValue: "a new section must join isEmpty, the filter, "

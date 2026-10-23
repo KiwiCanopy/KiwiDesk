@@ -28,20 +28,25 @@ enum KeybindingImporter {
     }
 
     /// The recovered layers, and per layer the chords whose body
-    /// could not be read back (#2482). The unread chords are
-    /// plain strings and never a `KeyBinding`, so no save path
-    /// can turn one into a no-op row.
+    /// could not be read back (#2482) with what each says of itself
+    /// (#2544). The unread chords are plain strings and never a
+    /// `KeyBinding`, so no save path can turn one into a no-op row.
     static func capture(
         from manager: KeybindingManager,
         interpreter: LuaInterpreter,
         readFile: (String) -> String?
-    ) -> (layers: [KeyLayer], unread: [String: [String]]) {
+    ) -> (
+        layers: [KeyLayer], unread: [String: [String]],
+        unreadMeta: [String: [String: KeyBindingMeta]]
+    ) {
         var cache: [String: String] = [:]
         var unread: [String: [String]] = [:]
+        var unreadMeta: [String: [String: KeyBindingMeta]] = [:]
         let layers = manager.definedLayers.map { name in
             var rows: [KeyBinding] = []
             for (combo, ref) in manager.bindings(for: name) {
                 guard let text = combo.comboString() else { continue }
+                let meta = manager.meta(for: name, combo: combo)
                 guard
                     let lua = action(
                         ref: ref,
@@ -51,10 +56,15 @@ enum KeybindingImporter {
                     )
                 else {
                     unread[name, default: []].append(text)
+                    if meta != .none {
+                        unreadMeta[name, default: [:]][text] = meta
+                    }
                     continue
                 }
                 rows.append(
-                    KeyBinding(combo: text, lua: lua, kind: .custom)
+                    meta.applied(
+                        to: KeyBinding(combo: text, lua: lua, kind: .custom)
+                    )
                 )
             }
             rows.sort { $0.combo < $1.combo }
@@ -65,7 +75,7 @@ enum KeybindingImporter {
                 bindings: rows
             )
         }
-        return (layers, unread)
+        return (layers, unread, unreadMeta)
     }
 
     /// The recovered, non-empty action body for one binding, its

@@ -200,7 +200,12 @@ extension RuleReachTable where Value == String {
         func shape(_ layers: [KeyLayer]) -> [[String]] {
             layers.map { layer in
                 [layer.name, layer.icon ?? ""]
-                    + layer.bindings.map { $0.combo + "\u{1F}" + $0.lua }
+                    // What a row says of itself is stored too
+                    // (#2544): a changed description is a write.
+                    + layer.bindings.map {
+                        [$0.combo, $0.lua, $0.desc, $0.group, $0.symbol]
+                            .joined(separator: "\u{1F}")
+                    }
             }
         }
         return shape(a) == shape(b)

@@ -38,10 +38,10 @@ enum IconCatalog {
         .init("wifi", "network wireless internet"),
         // Work / code
         .init("terminal", "shell console code command cli"),
-        .init("curlybraces", "code programming develop lua"),
+        .init("curlybraces", "code programming develop braces"),
         .init(
             "chevron.left.forwardslash.chevron.right",
-            "code html develop web"
+            "code html develop web lua programming"
         ),
         .init("hammer", "build tools develop xcode"),
         .init("wrench.adjustable", "tools fix settings utility"),

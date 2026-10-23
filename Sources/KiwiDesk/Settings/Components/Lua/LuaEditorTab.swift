@@ -64,7 +64,9 @@ struct LuaEditorTab: View {
                 Label {
                     Text(foreignCodeCaption)
                 } icon: {
-                    Image(systemName: "curlybraces")
+                    // The Lua mark, as KiwiHub's own rows wear it
+                    // (#2544).
+                    Image(systemName: ShortcutsReferenceBuilder.luaMark)
                 }
                 .font(.callout)
                 .foregroundStyle(.secondary)

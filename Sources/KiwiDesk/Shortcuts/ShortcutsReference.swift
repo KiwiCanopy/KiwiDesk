@@ -15,7 +15,8 @@ enum ShortcutsReferenceBuilder {
         resizeStep: Int,
         layerNames: [String],
         lenses: [String] = [],
-        unread: [String] = []
+        unread: [String] = [],
+        unreadMeta: (String) -> KeyBindingMeta = { _ in .none }
     ) -> ShortcutsReference {
         // Drop the key panel's three openers from the working set
         // BEFORE any band builds, so the suppression holds by
@@ -111,17 +112,21 @@ enum ShortcutsReferenceBuilder {
                 return row
             }
             + buildApps(layer, consumed: &consumed)
-        let custom =
+        let filed = file(
             buildCustom(layer, consumed: consumed)
-            + buildUnread(unread)
+                + buildUnread(unread, meta: unreadMeta),
+            controls: controls,
+            apps: apps
+        )
 
         // A key that does nothing until its Desktop returns leaves
         // its group, so the groups list only keys that work.
-        let desktopAway = controls.flatMap(\.rows).filter(\.unavailable)
-        let working = controls.compactMap { group -> ShortcutSubgroup? in
-            let rows = group.rows.filter { !$0.unavailable }
-            return rows.isEmpty
-                ? nil : ShortcutSubgroup(title: group.title, rows: rows)
+        let desktopAway = filed.controls.flatMap(\.rows)
+            .filter(\.unavailable)
+        let working = filed.controls.compactMap { group -> ShortcutSubgroup? in
+            var group = group
+            group.rows = group.rows.filter { !$0.unavailable }
+            return group.rows.isEmpty ? nil : group
         }
 
         return ShortcutsReference(
@@ -129,8 +134,9 @@ enum ShortcutsReferenceBuilder {
             controls: working,
             inactive: inactive,
             desktopAway: desktopAway,
-            apps: apps,
-            custom: custom
+            apps: filed.apps,
+            groups: filed.groups,
+            custom: filed.custom
         )
     }
 }

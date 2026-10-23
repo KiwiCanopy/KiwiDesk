@@ -111,7 +111,7 @@ extension ShortcutsReferenceBuilder {
     /// guard; a command row's symbol is resolved from the rows
     /// themselves (`ShortcutRowSymbolTests`).
     static let verbSymbols = [
-        "curlybraces",
+        luaMark,
         "rectangle.stack",
     ]
 

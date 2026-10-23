@@ -473,6 +473,12 @@ without writing it.
 `shortcut.remove <chord>` read and write the saved shortcuts; a
 write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 
+:::unreleased
+`shortcut.list_groups` lists the shortcut groups a binding's `group`
+can name: the built-in tokens and the groups your shortcuts make
+([`shortcut.list_groups`](lua-reference.md#shortcutlist_groups)).
+:::
+
 `app_rule.list`, `app_rule.set_space <app> <space>`,
 `app_rule.remove_space <app>`, `app_rule.set_float <app> [title]`
 and `app_rule.remove_float <app> [title]` change the app rules live

@@ -30,6 +30,10 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
         /// The shelf's font family is not installed, so the bars
         /// draw System (#1681, `BarFont.isInstalled`).
         case missingFontFamily(name: String)
+        /// A shortcut names a symbol that is no SF Symbol, so its
+        /// row wears the Lua mark (#2544): a warning, the binding
+        /// works.
+        case unknownShortcutSymbol(chord: String, symbol: String)
     }
 
     /// Source filename (`init.lua`, `gui.json`, or `<profile>.json`).
@@ -58,7 +62,8 @@ extension KiwiCore {
     /// here from the live shelf on every publish (#1681).
     func setConfigIssues(_ issues: [ConfigIssue]) {
         let issues =
-            issues.filter { !$0.kind.isFontIssue } + fontIssues()
+            issues.filter { !$0.kind.isDerived } + fontIssues()
+            + shortcutSymbolIssues()
         guard issues != configIssues else { return }
         configIssues = issues
         onConfigIssuesChange(issues)
@@ -116,10 +121,44 @@ extension KiwiCore {
 }
 
 extension ConfigIssue.Kind {
-    /// The live-derived font issue, which `setConfigIssues` owns.
-    var isFontIssue: Bool {
-        if case .missingFontFamily = self { return true }
-        return false
+    /// The live-derived issues — the font's and the shortcut
+    /// symbols' — which `setConfigIssues` owns.
+    var isDerived: Bool {
+        switch self {
+        case .missingFontFamily, .unknownShortcutSymbol: true
+        default: false
+        }
+    }
+}
+
+extension KiwiCore {
+    /// One issue per installed shortcut whose `symbol` is no SF
+    /// Symbol (#2544), read off the bindings the last load installed.
+    func shortcutSymbolIssues() -> [ConfigIssue] {
+        guard let snapshot = liveKeybindingSnapshot() else { return [] }
+        let source = isGuiManaged ? "gui.json" : "init.lua"
+        var named: [(chord: String, symbol: String)] = []
+        for layer in snapshot.keyLayers {
+            for binding in layer.bindings {
+                named.append((binding.combo, binding.symbol))
+            }
+            for chord in snapshot.unreadChords(in: layer.name) {
+                let meta = snapshot.meta(ofUnread: chord, in: layer.name)
+                named.append((chord, meta.symbol))
+            }
+        }
+        return named.filter {
+            !$0.symbol.isEmpty && !Self.iconIsSymbol($0.symbol)
+        }
+        .map {
+            ConfigIssue(
+                source: source,
+                kind: .unknownShortcutSymbol(
+                    chord: $0.chord,
+                    symbol: $0.symbol
+                )
+            )
+        }
     }
 }
 

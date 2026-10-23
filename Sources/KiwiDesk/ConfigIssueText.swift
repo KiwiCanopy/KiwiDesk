@@ -69,6 +69,14 @@ enum ConfigIssueText {
                 name,
                 BarFontText.familyName(KiwiShelf.systemFontFamily)
             )
+        case .unknownShortcutSymbol(let chord, let symbol):
+            return L(
+                "config_issues.unknown_shortcut_symbol",
+                "The shortcut %1$@ names “%2$@”, which isn't an SF "
+                    + "Symbol, so it shows the Lua mark.",
+                ShortcutsReferenceBuilder.glyphs(chord),
+                symbol
+            )
         }
     }
 }

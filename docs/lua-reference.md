@@ -6028,6 +6028,45 @@ KiwiDesk.define_layer("service", { --[[ bindings ]] },
     { icon = "⚙️" })
 ```
 
+:::unreleased
+#### Describing a Shortcut
+
+**Expects:** an optional third table on `KiwiDesk.bind`, or a
+`{ fn = …, … }` table in place of a function in a `define_layer`
+table, with any of:
+
+- `desc` — what the shortcut does, in your words.
+- `group` — the group it is listed in: a built-in group's token
+  (`focus`, `move_windows`, `layout`, `size_float`, `kiwivision`,
+  `kiwishelf`, `apps`) puts it there; any other name makes a group
+  of its own.
+- `symbol` — an SF Symbol name for its row.
+
+**Does:** KiwiHub's Shortcuts side lists the shortcut under its
+description instead of its Lua, in its group, wearing its symbol.
+A group of your own is listed after the built-in ones and before
+Custom, in the order your config first names it, under the name as
+written. Without a symbol a row wears `</>`, the mark for your own
+Lua; a name that is not an SF Symbol shows `</>` too and is listed
+in Config Issues, and the shortcut still works. A group name
+KiwiDesk does not know is never an error.
+[`shortcut.list_groups`](#shortcutlist_groups) lists the names in
+use.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+f", move_and_follow, {
+  desc = "Move to the next Space and follow",
+  group = "Move and follow",
+  symbol = "arrow.right.square",
+})
+KiwiDesk.define_layer("resize", {
+  ["h"] = { fn = shrink, desc = "Narrower", group = "size_float" },
+})
+```
+:::
+
 ### Config Cascade (Per-Profile Keybindings)
 
 Keybindings resolve through a two-level cascade, like tiling
@@ -6086,6 +6125,11 @@ refuse.
 its `name`, whether it is the `default`, and its `shortcuts` —
 each `chord` and the `lua` it runs.
 
+:::unreleased
+A shortcut that describes itself carries its `desc`, `group` and
+`symbol` too ([Describing a Shortcut](#describing-a-shortcut)).
+:::
+
 #### shortcut.set
 
 **Expects:** a chord (`"ctrl+alt+h"`), a command's name, and that
@@ -6104,6 +6148,18 @@ chord, is refused; remove the old binding first.
 
 **Does:** unbinds it, from every profile holding it when it is a
 shared shortcut. A chord with no shortcut is refused.
+
+:::unreleased
+#### shortcut.list_groups
+
+**Expects:** nothing.
+
+**Does:** returns `built_in`, the tokens of KiwiHub's built-in
+groups, and `custom`, every group the installed shortcuts make of
+their own, in the order a shortcut first names it. It reads the
+shortcuts in effect, so it answers with `init.lua` owning the
+config too.
+:::
 
 **Example:**
 

@@ -46,6 +46,9 @@ public final class KeybindingManager {
         []
     private var layers: [String: [KeyCombo: Int32]] = [:]
     private var layerIcons: [String: String] = [:]
+    /// What a Lua binding says of itself — description, group and
+    /// symbol (#2544) — by layer and chord.
+    private var layerMeta: [String: [KeyCombo: KeyBindingMeta]] = [:]
     /// Live registrations by id — the ONE home for "what is
     /// registered right now" (#1056/#1082): the unregister loop
     /// and the glide's arm check both read it, and the arm check
@@ -122,8 +125,11 @@ public final class KeybindingManager {
         return [Self.defaultLayer] + others
     }
 
-    /// Binds combo to Lua ref in default layer.
-    func bind(_ combo: KeyCombo, ref: Int32) {
+    /// Binds combo to Lua ref in default layer, with what the binding
+    /// says of itself.
+    func bind(_ combo: KeyCombo, ref: Int32, meta: KeyBindingMeta = .none) {
+        layerMeta[Self.defaultLayer, default: [:]][combo] =
+            meta == .none ? nil : meta
         let old = layers[Self.defaultLayer, default: [:]]
             .updateValue(ref, forKey: combo)
         if let old, old != ref {
@@ -138,7 +144,8 @@ public final class KeybindingManager {
     func defineLayer(
         _ name: String,
         bindings: [KeyCombo: Int32],
-        icon: String? = nil
+        icon: String? = nil,
+        meta: [KeyCombo: KeyBindingMeta] = [:]
     ) {
         if let lua, let old = layers[name] {
             for ref in old.values
@@ -147,6 +154,7 @@ public final class KeybindingManager {
             }
         }
         layers[name] = bindings
+        layerMeta[name] = meta.isEmpty ? nil : meta
         if let icon, !icon.isEmpty {
             layerIcons[name] = icon
         } else {
@@ -159,6 +167,12 @@ public final class KeybindingManager {
 
     public func icon(for layer: String) -> String? {
         layerIcons[layer]
+    }
+
+    /// What the binding on `combo` in `layer` says of itself; `.none`
+    /// where it says nothing (#2544).
+    public func meta(for layer: String, combo: KeyCombo) -> KeyBindingMeta {
+        layerMeta[layer]?[combo] ?? .none
     }
 
     public func switchLayer(_ name: String) {
@@ -194,6 +208,7 @@ public final class KeybindingManager {
         }
         layers = [:]
         layerIcons = [:]
+        layerMeta = [:]
         let previous = currentLayer
         currentLayer = Self.defaultLayer
         announce(from: previous, to: Self.defaultLayer)

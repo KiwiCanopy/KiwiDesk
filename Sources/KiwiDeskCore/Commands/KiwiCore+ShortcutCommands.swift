@@ -19,6 +19,8 @@ extension KiwiCore {
             return setShortcut(args)
         case "shortcut.remove":
             return removeShortcut(args)
+        case "shortcut.list_groups":
+            return .ok(shortcutGroupList())
         default:
             return .fail("unknown command: \(command)")
         }
@@ -44,12 +46,9 @@ extension KiwiCore {
                         "name": .string(layer.name),
                         "default": .bool(layer.isDefault),
                         "shortcuts": .array(
-                            layer.bindings.filter { !$0.combo.isEmpty }.map {
-                                .object([
-                                    "chord": .string($0.combo),
-                                    "lua": .string($0.lua),
-                                ])
-                            }
+                            layer.bindings.filter { !$0.combo.isEmpty }.map(
+                                Self.shortcutEntry
+                            )
                         ),
                     ])
                 }

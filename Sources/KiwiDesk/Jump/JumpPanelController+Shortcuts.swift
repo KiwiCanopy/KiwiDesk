@@ -86,7 +86,10 @@ extension JumpPanelController {
             resizeStep: Int(config.settings.resizeStep),
             layerNames: layers.map(\.name),
             lenses: core.kiwiVisionLensChoices.map(\.name),
-            unread: unread
+            unread: unread,
+            unreadMeta: { [snapshot = core.liveKeybindingSnapshot()] chord in
+                snapshot?.meta(ofUnread: chord, in: activeLayer) ?? .none
+            }
         )
         return withAppGlyphs(
             reference,
