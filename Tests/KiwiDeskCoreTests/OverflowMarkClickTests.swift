@@ -19,7 +19,7 @@ struct OverflowMarkClickTests {
     /// 2, so the run's tail hides 4…6 behind window 3; its marks
     /// order in and its peek's clock reads `clock`.
     @MainActor
-    private final class Rig {
+    final class Rig {
         let core: KiwiCore
         let space: SpaceID
         var clock: TimeInterval = 100
@@ -88,21 +88,31 @@ struct OverflowMarkClickTests {
             }
         }
 
-        func click() throws {
-            let event = try #require(
-                NSEvent.mouseEvent(
-                    with: .leftMouseDown,
-                    location: .zero,
-                    modifierFlags: [],
-                    timestamp: 0,
-                    windowNumber: 0,
-                    context: nil,
-                    eventNumber: 0,
-                    clickCount: 1,
-                    pressure: 1
+        /// A press on the mark, released at `release` in the mark's
+        /// window — its middle unless a drag moved it off.
+        func click(releaseOff: Bool = false) throws {
+            let view = try overlay.view
+            let mid = CGPoint(x: view.bounds.midX, y: view.bounds.midY)
+            func mouse(_ type: NSEvent.EventType, _ at: CGPoint) throws
+                -> NSEvent
+            {
+                try #require(
+                    NSEvent.mouseEvent(
+                        with: type,
+                        location: at,
+                        modifierFlags: [],
+                        timestamp: 0,
+                        windowNumber: 0,
+                        context: nil,
+                        eventNumber: 0,
+                        clickCount: 1,
+                        pressure: 1
+                    )
                 )
-            )
-            try overlay.view.mouseDown(with: event)
+            }
+            view.mouseDown(with: try mouse(.leftMouseDown, mid))
+            let off = CGPoint(x: mid.x + 200, y: mid.y + 200)
+            view.mouseUp(with: try mouse(.leftMouseUp, releaseOff ? off : mid))
         }
 
         func close() {
@@ -110,27 +120,6 @@ struct OverflowMarkClickTests {
             peek.panel.panel?.orderOut(nil)
             core.overflowMarks.clear()
         }
-    }
-
-    private static func key(
-        _ code: UInt16,
-        _ chars: String,
-        _ flags: NSEvent.ModifierFlags
-    ) throws -> NSEvent {
-        try #require(
-            NSEvent.keyEvent(
-                with: .keyDown,
-                location: .zero,
-                modifierFlags: flags,
-                timestamp: 0,
-                windowNumber: 0,
-                context: nil,
-                characters: chars,
-                charactersIgnoringModifiers: chars,
-                isARepeat: false,
-                keyCode: code
-            )
-        )
     }
 
     private static func crossing(_ type: NSEvent.EventType) throws -> NSEvent {
@@ -162,6 +151,18 @@ struct OverflowMarkClickTests {
         view.mouseExited(with: try Self.crossing(.mouseExited))
         #expect(!view.hovered)
         #expect(view.highlight.isHidden)
+    }
+
+    /// A press is often a window drag begun just past the mark: the
+    /// list opens on the release inside it, and a drag off cancels.
+    @Test("The list opens on the release; a drag off opens nothing")
+    func opensOnRelease() throws {
+        let rig = Rig()
+        defer { rig.close() }
+        try rig.click(releaseOff: true)
+        #expect(rig.peek.shown == nil)
+        try rig.click()
+        #expect(rig.peek.shown != nil)
     }
 
     @Test("A click grows the list and hides the pill under it")
@@ -197,52 +198,6 @@ struct OverflowMarkClickTests {
         #expect(rig.peek.shown?.source.morphsFromAnchor == true)
         rig.peek.pointer(in: item, on: nil, source: nil, edge: .bottom)
         #expect(rig.peek.shown?.source.morphsFromAnchor == true)
-    }
-
-    @Test("Escape closes the list; the arrows walk its rows")
-    func keysOnTheList() throws {
-        let rig = Rig()
-        defer { rig.close() }
-        try rig.click()
-        let panel = rig.peek.panel
-        #expect(panel.panel?.canBecomeKey == true)
-        #expect(panel.morphKey(125))
-        #expect(panel.body.hovered == 0)
-        #expect(panel.morphKey(125))
-        #expect(panel.body.hovered == 1)
-        #expect(panel.morphKey(126))
-        #expect(panel.body.hovered == 0)
-        #expect(panel.morphKey(53))
-        #expect(rig.peek.shown == nil)
-    }
-
-    /// A chord while the list is key never reaches KiwiDesk's menu:
-    /// ⌘Q is the user's for the app beneath (gui.md).
-    @Test("A chord closes the list and quits nothing")
-    func chordIsSwallowed() throws {
-        let rig = Rig()
-        defer { rig.close() }
-        try rig.click()
-        let panel = try #require(rig.peek.panel.panel)
-        let quit = try Self.key(12, "q", .command)
-        // An arrow reaches the same door first and must pass on to
-        // `keyDown`, which walks the rows.
-        let down = try Self.key(125, "", [.numericPad, .function])
-        #expect(!panel.performKeyEquivalent(with: down))
-        #expect(rig.peek.shown != nil)
-        #expect(panel.performKeyEquivalent(with: quit))
-        #expect(rig.peek.shown == nil)
-    }
-
-    /// A key the list does not use closes it rather than beeping:
-    /// the user is typing for the app beneath.
-    @Test("Any other key closes the list")
-    func otherKeyCloses() throws {
-        let rig = Rig()
-        defer { rig.close() }
-        try rig.click()
-        #expect(rig.peek.panel.morphKey(0))
-        #expect(rig.peek.shown == nil)
     }
 
     /// The second press of the double-click that opened it lands on

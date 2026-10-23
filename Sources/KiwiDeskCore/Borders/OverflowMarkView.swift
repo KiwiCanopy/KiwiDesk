@@ -28,6 +28,8 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
     /// The gated shelf the mark draws in — the peek wears it.
     private(set) var shelfLook = KiwiShelf()
     private(set) var hovered = false
+    /// A left press landed on the mark; its release decides.
+    private var armed = false
     /// The run's layout bounds on screen (AppKit), the room its list
     /// grows into — the overlay's, written as it places the mark.
     var morphRoom = CGRect.zero
@@ -218,7 +220,17 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
         return bounds.contains(local) ? self : nil
     }
 
+    /// Opens on the release inside the mark, as a button acts: a
+    /// press on the title bar is often a window drag begun just
+    /// past it, and a drag off cancels (#2563, #2044).
     override func mouseDown(with event: NSEvent) {
+        armed = true
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        defer { armed = false }
+        let point = convert(event.locationInWindow, from: nil)
+        guard armed, bounds.contains(point) else { return }
         onClick()
     }
 
