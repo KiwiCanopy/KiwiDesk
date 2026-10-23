@@ -281,6 +281,6 @@ Brave lifted its tiled main window to that level each time it came
 forward with a site permission prompt open (2026-10-23), and
 re-judging it floated and shrank the window on every lift. Float
 the window yourself (`make_floating`, or **Float Window** in its
-App Bar item's right-click menu), or add a Float rule for the app,
-to float it at once.
+App Bar item's right-click menu) to float it at once; a Float rule
+for the app applies once the level drops.
 :::

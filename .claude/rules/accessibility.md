@@ -189,9 +189,9 @@ editing AX code:
   sheet can grey it for a moment. Judge a raised layer at
   adoption too (#2572): a recheck may keep a raised-layer float
   floating, but must never float a tiled window — or one whose
-  verdict a changed guess forgot — on `.raisedLayer`, and a
-  Float rule is asked beneath the layer so it still floats one.
-  Brave lifted its tiled main window to layer 999 each time it
+  verdict a changed guess forgot — on `.raisedLayer`, and
+  structure keeps outranking a Float rule, whose label would
+  take a raised window's overlay status (#300). Brave lifted its tiled main window to layer 999 each time it
   came forward with a site permission prompt open (issue trace,
   2026-10-23) (`RaisedLayerLatchTests`).
 - **A float rule is read only through `FloatRules.parse` and

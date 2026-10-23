@@ -1,4 +1,4 @@
-import ApplicationServices
+import AppKit
 import Testing
 
 @testable import KiwiDeskCore
@@ -64,25 +64,23 @@ struct RaisedLayerLatchTests {
         #expect(reason(facts(kAXDialogSubrole, layer: 0)) == .panel)
     }
 
-    /// A raised layer would hide a Float rule from a tiled window
-    /// the recheck refuses it for, so the rule is asked first.
-    @Test("a Float rule under a raised layer still floats")
-    func ruleBeneathTheLayer() {
-        let rules = FloatRules(["com.brave.Browser"])
-        let standard = kAXStandardWindowSubrole
-        let reason = { (layer: Int) in
-            FloatDetection.autoFloatReason(
-                facts(standard, layer: layer),
-                bundleID: "com.brave.Browser",
-                rules: rules
-            )
-        }
-        #expect(reason(999) == .rule)
-        #expect(reason(0) == .rule)
-        let core = makeTestCore()
-        core.eventLoop.detectedFloating[id] = .tiles
-        _ = recheck(core, .rule)
-        #expect(core.eventLoop.detectedFloating[id] == .floats(.rule))
+    /// Structure outranks a Float rule, so a raised window a rule
+    /// matches keeps the overlay status a rule would take from it
+    /// (#300): no ring, no App Rule Space for a popup.
+    @Test("a Float rule never relabels a raised window's structure")
+    func ruleLeavesTheOverlay() {
+        let verdict = EventLoop.composeVerdict(
+            .facts(facts(kAXStandardWindowSubrole, layer: 999)),
+            pid: pid,
+            activationPolicy: .regular,
+            tilesAsOwnWindow: false,
+            bundleID: "com.brave.Browser",
+            rules: FloatRules(["com.brave.Browser"])
+        )
+        #expect(verdict == .floats(.raisedLayer))
+        #expect(
+            EventLoop.isOverlay(verdict, ownProcess: false, structural: false)
+        )
     }
 
     @Test("a raised layer is structure: an overlay, not a guess")

@@ -276,16 +276,12 @@ public enum FloatDetection {
     /// obstacle met, so a fixed-size window a rule also matches
     /// reads `.fixedSize` and, once tiled by a Tile rule, `.rule`.
     /// Each is asked only where the one before tiles: the later
-    /// ones cost a read. A raised layer asks the rule first, since
-    /// a recheck refuses the layer for a tiled window (#2572).
+    /// ones cost a read.
     public static func autoFloatReason(
         structural: AutoFloatReason?,
         fixedSize: () -> Bool,
         ruleMatches: () -> Bool
     ) -> AutoFloatReason? {
-        if structural == .raisedLayer {
-            return ruleMatches() ? .rule : .raisedLayer
-        }
         if let structural { return structural }
         if fixedSize() { return .fixedSize }
         return ruleMatches() ? .rule : nil

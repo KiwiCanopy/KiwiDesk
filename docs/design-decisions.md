@@ -5650,8 +5650,9 @@ to change. A later re-check never floats a tiled window on that
 reason — Brave lifted its main window to the prompt's level each
 time it came forward with a site permission prompt open
 (2026-10-23), and the window floated and shrank on every lift. A
-Float rule is still asked beneath the layer, so the rule floats
-the window as it would at any level. One way only: a window
+Float rule that comes to match a tiled window while it is lifted
+floats it at the next re-check after the level drops. One way
+only: a window
 adopted floating keeps floating on that reason, or an app that
 misreports its subrole mid-launch would tile its panel once the
 subrole heals. The price is a window an app raises after KiwiDesk
