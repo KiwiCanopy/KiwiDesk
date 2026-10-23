@@ -12952,7 +12952,11 @@ rest, in card order with the groups set apart, scrolling sideways
 and fading at an end where it cuts a picture, the KiwiShelf's
 overflow arithmetic (`ShelfOverflow.fades`) rather than a copy.
 A picture stays still, shows its entry's own sentence as
-a tooltip after the window's 250 ms delay, and a click opens the
+a tooltip after the window's 250 ms delay, marks itself as a link
+under the pointer with an accent edge and the pointing hand
+(#2537) — the accent, not the neutral hover lift, because the
+picture is otherwise read as decoration and its plate carries no
+marking the edge could overwrite — and a click opens the
 card at its entry and plays that one — the same "a click asked to
 read it" argument as the first picture's, aimed. The strip is a
 pointer shortcut: hidden from VoiceOver, never a focus stop, since
