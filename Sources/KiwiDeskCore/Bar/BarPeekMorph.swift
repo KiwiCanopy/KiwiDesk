@@ -29,17 +29,18 @@ enum BarPeekMorph {
     /// its place.
     static let headerDepth = OverflowMark.depth
 
-    /// The tallest list that fits between the pill's outer edge and
-    /// the room's far edge, header included.
+    /// The tallest list that fits between the pill and the room's
+    /// far edge, header included: a side end's list hangs from its
+    /// pill as a top end's does, so a taller one would be clamped up
+    /// and lift its header off the pill.
     static func maxHeight(
         pill: CGRect,
         edge: AppBarEdge,
         room: CGRect
     ) -> CGFloat {
         switch edge {
-        case .top: max(pill.maxY - room.minY, 0)
+        case .top, .left, .right: max(pill.maxY - room.minY, 0)
         case .bottom: max(room.maxY - pill.minY, 0)
-        case .left, .right: max(room.height, 0)
         }
     }
 

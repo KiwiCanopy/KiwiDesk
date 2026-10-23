@@ -124,9 +124,32 @@ struct BarPeekMorphTests {
                 == room.maxY - pill.minY
         )
         #expect(
-            BarPeekMorph.maxHeight(pill: pill, edge: .left, room: room)
-                == room.height
+            BarPeekMorph.maxHeight(pill: high, edge: .left, room: room)
+                == high.maxY - room.minY
         )
+    }
+
+    /// A list taller than the room below a side pill is cut to it,
+    /// so the clamp never lifts the header off the pill.
+    @Test("A tall side-end list keeps its header on the pill")
+    func tallSideListKeepsTheHeader() {
+        let pill = CGRect(x: 882, y: 200, width: 18, height: 18)
+        let tall = CGSize(width: 200, height: 500)
+        let cut = CGSize(
+            width: tall.width,
+            height: min(
+                tall.height,
+                BarPeekMorph.maxHeight(pill: pill, edge: .right, room: room)
+            )
+        )
+        let list = BarPeekMorph.listFrame(
+            size: cut,
+            pill: pill,
+            edge: .right,
+            room: room
+        )
+        #expect(list.maxY == pill.maxY)
+        #expect(list.minY >= room.minY)
     }
 
     /// The double-click that opens stays open (#2063): its second

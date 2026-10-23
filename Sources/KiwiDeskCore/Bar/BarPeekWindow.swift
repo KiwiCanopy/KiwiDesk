@@ -15,4 +15,16 @@ final class BarPeekWindow: NSPanel {
     override func keyDown(with event: NSEvent) {
         if !onKey(event.keyCode) { super.keyDown(with: event) }
     }
+
+    /// A chord while the list is key is the user's for the app
+    /// beneath, never KiwiDesk's menu: a ⌘Q must not quit KiwiDesk
+    /// (gui.md ▸ a non-activating key panel). It closes the list and
+    /// is swallowed, as any key the list does not use.
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        guard takesKey else {
+            return super.performKeyEquivalent(with: event)
+        }
+        _ = onKey(UInt16.max)
+        return true
+    }
 }

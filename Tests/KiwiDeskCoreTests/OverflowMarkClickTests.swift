@@ -199,6 +199,32 @@ struct OverflowMarkClickTests {
         #expect(rig.peek.shown == nil)
     }
 
+    /// A chord while the list is key never reaches KiwiDesk's menu:
+    /// ⌘Q is the user's for the app beneath (gui.md).
+    @Test("A chord closes the list and quits nothing")
+    func chordIsSwallowed() throws {
+        let rig = Rig()
+        defer { rig.close() }
+        try rig.click()
+        let panel = try #require(rig.peek.panel.panel)
+        let quit = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: .command,
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                characters: "q",
+                charactersIgnoringModifiers: "q",
+                isARepeat: false,
+                keyCode: 12
+            )
+        )
+        #expect(panel.performKeyEquivalent(with: quit))
+        #expect(rig.peek.shown == nil)
+    }
+
     /// A key the list does not use closes it rather than beeping:
     /// the user is typing for the app beneath.
     @Test("Any other key closes the list")
