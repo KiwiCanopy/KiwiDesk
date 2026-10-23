@@ -108,6 +108,41 @@ struct MouseButtonSeamGuardTests {
         )
     }
 
+    /// The CoreGraphics pointer read, a third API for the same fact:
+    /// the warp's own cursor check (#186) and the screen handoff's
+    /// pointer screen (#2548), both inert in every test core.
+    private static let eventPointerHomes = [
+        "KiwiCore+BootSeams.swift",
+        "MouseTracker.swift",
+    ]
+
+    @Test("the CoreGraphics pointer read stays in its seam homes")
+    func eventPointerReadHomes() throws {
+        let sites = try Self.productionTrees.flatMap {
+            try SourceScan.identifierSites(
+                of: "CGEvent(source: nil)",
+                under: $0
+            )
+        }
+        for home in Self.eventPointerHomes {
+            let reads = sites.filter {
+                $0.file.lastPathComponent == home
+            }
+            #expect(
+                reads.count == 1,
+                "\(home) reads the pointer \(reads.count) times"
+            )
+        }
+        let strays = sites.filter {
+            !Self.eventPointerHomes.contains($0.file.lastPathComponent)
+        }
+        let listed = strays.map(\.site).joined(separator: ", ")
+        #expect(
+            strays.isEmpty,
+            "live pointer read outside a seam: \(listed)"
+        )
+    }
+
     /// The window-relative pointer read (#1665), a second API for
     /// the fact `NSEvent.mouseLocation` names, so the census above
     /// cannot see it: the bar hover seam, and the Settings caption
