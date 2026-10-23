@@ -141,6 +141,39 @@ struct ScreenHandoffTests {
         #expect(warps == 1)
     }
 
+    /// The pointer and frame reads run only where the focus crossed
+    /// (guard-prover, #2548): a same-screen switch reads nothing.
+    @Test("a same-screen switch reads no pointer")
+    func sameScreenReadsNothing() {
+        guard let (core, _) = twoScreenCore() else { return }
+        var reads = 0
+        core.mouse.pointerDisplay = {
+            reads += 1
+            return self.away
+        }
+        core.pointerWarp = { _ in }
+        core.execute("focus_space", args: [.string("2")])
+        #expect(reads == 1)
+        reads = 0
+        core.execute("focus_space", args: [.string("3")])
+        #expect(reads == 0)
+    }
+
+    /// A follow whose focus the #1345 gate refuses moves no pointer.
+    @Test("a refused follow moves no pointer")
+    func refusedFollowStays() {
+        guard let (core, _) = twoScreenCore() else { return }
+        core.mouse.pointerDisplay = { self.away }
+        core.windowIsOnScreen = { $0 == WindowID(1) ? false : nil }
+        var warps = 0
+        core.pointerWarp = { _ in warps += 1 }
+        core.execute(
+            "move_to_space_and_follow",
+            args: [.string("3")]
+        )
+        #expect(warps == 0)
+    }
+
     @Test("the scroll step never hands off")
     func scrollStepStays() {
         guard let (core, _) = twoScreenCore() else { return }

@@ -124,10 +124,9 @@ extension KiwiCore {
         placeUnplacedSpaces()
         let slide = spaceSlideIntent(to: target)
         state.workspaces.activate(target)
-        focusWindow(id, refocusRetile: false, warp: false)
         // After the raise, as `focusWindow`'s own warp; a focus the
         // #1345 gate refused moves no pointer.
-        if state.workspaces.lastFocused == id {
+        if focusWindow(id, refocusRetile: false, warp: false) {
             warpForSwitch(to: target, focusing: id, leaving: priorScreen)
         }
         emitSpaceChange()

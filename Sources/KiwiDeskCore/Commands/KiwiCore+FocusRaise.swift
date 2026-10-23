@@ -77,11 +77,13 @@ extension KiwiCore {
     /// would spring them from their stale stash-corner frames
     /// (the AX echo of the instant switch has not landed yet),
     /// which is the "fly out of the corner" bug (issue #11).
+    /// False where the #1345 gate refused it, which changed nothing.
+    @discardableResult
     public func focusWindow(
         _ id: WindowID,
         refocusRetile: Bool = true,
         warp: Bool
-    ) {
+    ) -> Bool {
         // Refused WHOLE, ahead of the state write, the warp and
         // the pan (#1345): moving state focus onto a window the
         // compositor is not drawing splits state from key focus
@@ -91,7 +93,7 @@ extension KiwiCore {
                 "focus: w\(id.raw) refused — not on screen (closed, "
                     + "or a Desktop nobody shows) (#1345)"
             )
-            return
+            return false
         }
         // A report of the OS state this command supersedes may
         // still be in its read's flight (#1088). A same-target
@@ -171,7 +173,7 @@ extension KiwiCore {
             // never lose the raise.
             if defersRaise { raiseWindow(id) }
             if endedMaximize { retileEndingMaximize() }
-            return
+            return true
         }
         retileWithScrollDuration(
             sizing: endedMaximize ? .allSpringSized : .mayInstantSize
@@ -265,6 +267,7 @@ extension KiwiCore {
         if scrollFocusJumpsSlots(to: id, from: previousFocused) {
             scheduleScrollingZOrderRestoreIfOverflowing()
         }
+        return true
     }
 
     /// Whether a scrolling focus move crosses MORE than one
