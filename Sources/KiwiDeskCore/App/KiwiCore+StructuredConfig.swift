@@ -36,7 +36,7 @@ extension KiwiCore {
         guard let lua = keys.lua else { return }
         applyStructuredKeybindings(
             layers: config.layers,
-            profile: profile?.layers,
+            profile: profile,
             lua: lua
         )
     }
@@ -65,7 +65,7 @@ extension KiwiCore {
         guard let config = structured else { return }
         applyStructuredKeybindings(
             layers: config.layers,
-            profile: profile?.layers,
+            profile: profile,
             lua: lua
         )
     }

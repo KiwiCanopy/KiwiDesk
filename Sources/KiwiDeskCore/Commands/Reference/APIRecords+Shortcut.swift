@@ -14,6 +14,10 @@ extension APIReference {
             .text("command"),
             .text("arguments", optional: true)
         ),
+        "list_groups": APIRecord(
+            "Lists the shortcut groups: the built-in ones by token "
+                + "and every group a shortcut makes."
+        ),
         "remove": APIRecord(
             "Unbinds a chord in the default layer and saves at once.",
             .text("chord")

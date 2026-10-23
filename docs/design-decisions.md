@@ -13249,6 +13249,24 @@ first sub-group, J K L kept. The ⌃⌥K shortcuts panel keeps its
 own bands, KiwiVision among them: it reads a layer as a reference rather than an editor, and
 regrouping it is a ruling of its own.
 
+:::unreleased
+**A binding names its group by token; a name of its own is its
+own group (#2544).** A binding's `group` matches a built-in group
+by its Lua token (`focus`, `move_windows`, …), never its English
+title, so the group still reads in the user's language; any other
+name makes a group of its own, shown as written and never
+translated, after the built-in groups and before Custom. An
+unknown name is never an error: a typo makes a visible group,
+which says more than a refusal would. The fields live on the
+stored binding, so a binding imported into `gui.json` or written
+there by hand carries them as one `init.lua` declares does. `</>`
+marks your own Lua everywhere — Custom rows, a name-less handler,
+the Lua editor's tab — and a symbol that is no SF Symbol falls
+back to it with a Config Issue; braces read as a code block,
+`</>` as code you wrote. `curlybraces` stays in the
+icon picker as an icon of its own.
+:::
+
 **The marked chip is the group under the bar.** A group is
 current once its header has reached the bar and while its card
 is still under it, so scrolling past Mouse & trackpad into the

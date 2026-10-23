@@ -29,7 +29,7 @@ extension JumpPanelController {
         var layers: [KeyLayer]
         let activeLayer: String
         let config: GuiConfig
-        var unread: [String] = []
+        var unread: [UnreadChord] = []
         if let snapshot = core.liveKeybindingSnapshot() {
             layers = snapshot.keyLayers
             activeLayer = snapshot.activeLayerName

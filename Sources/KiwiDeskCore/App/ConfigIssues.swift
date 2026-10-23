@@ -30,6 +30,14 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
         /// The shelf's font family is not installed, so the bars
         /// draw System (#1681, `BarFont.isInstalled`).
         case missingFontFamily(name: String)
+        /// A shortcut in layer `layer` names a symbol that is no
+        /// SF Symbol, so its row wears the Lua mark (#2544): a
+        /// warning, the binding works.
+        case unknownShortcutSymbol(
+            layer: String,
+            chord: String,
+            symbol: String
+        )
     }
 
     /// Source filename (`init.lua`, `gui.json`, or `<profile>.json`).
@@ -58,7 +66,8 @@ extension KiwiCore {
     /// here from the live shelf on every publish (#1681).
     func setConfigIssues(_ issues: [ConfigIssue]) {
         let issues =
-            issues.filter { !$0.kind.isFontIssue } + fontIssues()
+            issues.filter { !$0.kind.isDerived } + fontIssues()
+            + shortcutSymbolIssues()
         guard issues != configIssues else { return }
         configIssues = issues
         onConfigIssuesChange(issues)
@@ -72,11 +81,10 @@ extension KiwiCore {
         )
     }
 
-    /// Re-derives the font issue against the settings live now —
-    /// `updateBars()`'s call, the one point every settings landing
-    /// passes (load, profile apply, Desktop binding, monitor change,
-    /// Settings Save, a verb), so no writer owes it (#1681).
-    func syncFontIssue() { setConfigIssues(configIssues) }
+    /// Re-derives the live-derived issues — `updateBars()`'s call,
+    /// the one point every settings landing passes (#1681), and
+    /// every keybinding install's (#2544), so no writer owes it.
+    func syncDerivedIssues() { setConfigIssues(configIssues) }
 
     /// The live shelf's family, when it is not installed (#1681).
     /// The source is approximate — the active profile's file, else
@@ -116,10 +124,49 @@ extension KiwiCore {
 }
 
 extension ConfigIssue.Kind {
-    /// The live-derived font issue, which `setConfigIssues` owns.
-    var isFontIssue: Bool {
-        if case .missingFontFamily = self { return true }
-        return false
+    /// The live-derived issues — the font's and the shortcut
+    /// symbols' — which `setConfigIssues` owns.
+    var isDerived: Bool {
+        switch self {
+        case .missingFontFamily, .unknownShortcutSymbol: true
+        default: false
+        }
+    }
+}
+
+extension KiwiCore {
+    /// One issue per installed shortcut whose `symbol` is no SF
+    /// Symbol (#2544), read off the bindings the last install left,
+    /// sourced to the file holding the row.
+    func shortcutSymbolIssues() -> [ConfigIssue] {
+        guard let snapshot = liveKeybindingSnapshot() else { return [] }
+        return snapshot.metaByChord().filter(\.meta.namesUnknownSymbol)
+            .map {
+                ConfigIssue(
+                    source: shortcutSource(layer: $0.layer, chord: $0.chord),
+                    kind: .unknownShortcutSymbol(
+                        layer: $0.layer,
+                        chord: $0.chord,
+                        symbol: $0.meta.symbol
+                    )
+                )
+            }
+    }
+
+    /// The file an installed row came from: the profile the install
+    /// resolved over, where its override holds the chord — named by
+    /// the install, never `currentName`, which an apply moves after
+    /// it — else the sidecar or `init.lua`.
+    private func shortcutSource(layer: String, chord: String) -> String {
+        guard case .structured(_, let profile)? = installedKeybindings
+        else { return "init.lua" }
+        guard let profile,
+            profile.layers?.layers.contains(where: { held in
+                held.name == layer
+                    && held.bindings.contains { $0.combo == chord }
+            }) == true
+        else { return "gui.json" }
+        return "\(profile.name).json"
     }
 }
 

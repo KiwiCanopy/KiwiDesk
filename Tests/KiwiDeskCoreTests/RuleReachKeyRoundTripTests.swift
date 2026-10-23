@@ -182,7 +182,12 @@ struct RuleReachKeyRoundTripTests {
         let binding = Set(
             Mirror(reflecting: KeyBinding()).children.compactMap(\.label)
         )
-        #expect(binding == ["id", "combo", "lua", "kind", "label"])
+        #expect(
+            binding == [
+                "id", "combo", "lua", "kind", "label", "desc", "group",
+                "symbol",
+            ]
+        )
         let layer = Set(
             Mirror(reflecting: KeyLayer(name: "x")).children.compactMap(
                 \.label

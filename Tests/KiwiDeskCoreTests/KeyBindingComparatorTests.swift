@@ -61,6 +61,12 @@ struct KeyBindingComparatorTests {
         var label = row
         label.label = "Other"
         #expect(label.sameAction(as: row))
+
+        // What a binding says of itself is display too (#2544).
+        var meta = row
+        meta.meta = KeyBindingMeta(desc: "D", group: "G", symbol: "star")
+        #expect(meta.sameAction(as: row))
+        #expect(meta != row)
     }
 
     /// Forget-proof net: a NEW stored property fails this
@@ -70,7 +76,7 @@ struct KeyBindingComparatorTests {
     @Test("Stored-property count pins the mirrored field list")
     func storedPropertyCount() {
         let children = Mirror(reflecting: row).children
-        // id + combo + lua + kind + label
-        #expect(children.count == 5)
+        // id + combo + lua + kind + label + desc + group + symbol
+        #expect(children.count == 8)
     }
 }

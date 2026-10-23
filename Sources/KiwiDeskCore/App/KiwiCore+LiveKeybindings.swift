@@ -3,9 +3,17 @@ import Foundation
 /// Which owner's bindings `keys` holds, recorded by the apply that
 /// installed them — never re-read from `init.lua`, which can change
 /// on disk without a reload (#2482).
+/// A structured install keeps the profile tier it resolved over —
+/// its name and its override, nothing else — so an issue about one
+/// of its rows names the file that holds it (#2544).
 enum InstalledKeybindings {
-    case structured([KeyLayer])
-    case lua(layers: [KeyLayer], unread: [String: [String]])
+    struct ProfileTier: Sendable {
+        var name: String
+        let layers: KeyLayerOverride?
+    }
+
+    case structured([KeyLayer], profile: ProfileTier?)
+    case lua(layers: [KeyLayer], unread: [String: [UnreadChord]])
 }
 
 /// The structured bindings currently installed, for the
@@ -13,7 +21,7 @@ enum InstalledKeybindings {
 public struct LiveKeybindingSnapshot: Sendable {
     let layers: [KeyLayer]
     let activeLayer: String
-    let unread: [String: [String]]
+    let unread: [String: [UnreadChord]]
     let luaOwned: Bool
 
     /// The resolved key modes currently installed. Under Lua
@@ -26,8 +34,21 @@ public struct LiveKeybindingSnapshot: Sendable {
     /// The chords in `layer` whose action could not be read back
     /// from `init.lua` — a named handler, a C function. Lua-owned
     /// only; never a `KeyBinding`, so nothing can save one.
-    public func unreadChords(in layer: String) -> [String] {
+    public func unreadChords(in layer: String) -> [UnreadChord] {
         unread[layer] ?? []
+    }
+
+    /// What every installed binding says of itself, by layer and
+    /// chord — read rows and unread chords alike (#2544).
+    func metaByChord()
+        -> [(layer: String, chord: String, meta: KeyBindingMeta)]
+    {
+        layers.flatMap { layer in
+            layer.bindings.map { (layer.name, $0.combo, $0.meta) }
+                + unreadChords(in: layer.name).map {
+                    (layer.name, $0.chord, $0.meta)
+                }
+        }
     }
 }
 
@@ -40,7 +61,7 @@ extension KiwiCore {
         guard keys.lua != nil, let installed = installedKeybindings
         else { return nil }
         switch installed {
-        case .structured(let layers):
+        case .structured(let layers, _):
             return LiveKeybindingSnapshot(
                 layers: layers,
                 activeLayer: keys.currentLayer,
@@ -79,6 +100,18 @@ extension KiwiCore {
             layers: captured.layers,
             unread: captured.unread
         )
+        syncDerivedIssues()
+    }
+
+    /// Follows a rename of the profile the structured install
+    /// resolved over, so an issue names the file by its new name.
+    func renameInstalledProfile(_ old: String, to new: String) {
+        guard case .structured(let layers, var tier?) = installedKeybindings,
+            tier.name == old
+        else { return }
+        tier.name = new
+        installedKeybindings = .structured(layers, profile: tier)
+        syncDerivedIssues()
     }
 
     /// Suspends every KiwiDesk Carbon hotkey while a Settings

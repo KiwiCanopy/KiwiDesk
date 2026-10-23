@@ -19,7 +19,7 @@ extension ShortcutsReferenceBuilder {
         resizeStep: Int,
         layerNames: [String],
         lenses: [String] = [],
-        rows: ([NavCommand]) -> [ShortcutRow]
+        rows: ([NavCommand], ShortcutGroup?) -> [ShortcutRow]
     ) -> [ShortcutSubgroup] {
         let focus =
             KeybindingCatalog.focusDirections
@@ -45,67 +45,65 @@ extension ShortcutsReferenceBuilder {
             layerNames
             .filter { $0 != activeLayer }
             .map { KeybindingCatalog.switchLayerCommand($0) }
+        // A band names its group once: its rows are filed against it.
+        func band(
+            _ title: String,
+            _ group: ShortcutGroup?,
+            _ commands: [NavCommand]
+        ) -> ShortcutSubgroup {
+            ShortcutSubgroup(
+                title: title,
+                rows: rows(commands, group),
+                group: group
+            )
+        }
         return [
-            ShortcutSubgroup(
-                title: L("shortcuts.section.focus", "Focus"),
-                rows: rows(focus)
+            band(L("shortcuts.section.focus", "Focus"), .focus, focus),
+            band(
+                L("shortcuts.section.move_windows", "Move windows"),
+                .moveWindows,
+                move
             ),
-            ShortcutSubgroup(
-                title: L(
-                    "shortcuts.section.move_windows",
-                    "Move windows"
-                ),
-                rows: rows(move)
+            band(
+                L("shortcuts.section.layout", "Layout"),
+                .layout,
+                KeybindingCatalog.layoutRows
             ),
-            ShortcutSubgroup(
-                title: L("shortcuts.section.layout", "Layout"),
-                rows: rows(KeybindingCatalog.layoutRows)
-            ),
-            ShortcutSubgroup(
-                title: L(
-                    "shortcuts.section.size_float",
-                    "Size & float"
-                ),
-                rows: rows(
-                    KeybindingCatalog.resizeAndFloat(
-                        step: resizeStep
-                    )
-                )
+            band(
+                L("shortcuts.section.size_float", "Size & float"),
+                .sizeFloat,
+                KeybindingCatalog.resizeAndFloat(step: resizeStep)
             ),
             // A section of its own, empty and so dropped while no
             // KiwiVision key is bound (#2312).
-            ShortcutSubgroup(
-                title: L("destination.kiwivision", "KiwiVision"),
-                rows: rows(
-                    [KeybindingCatalog.toggleKiwiVision]
-                        + lenses.map(KeybindingCatalog.toggleLens)
-                )
+            band(
+                L("destination.kiwivision", "KiwiVision"),
+                .kiwivision,
+                [KeybindingCatalog.toggleKiwiVision]
+                    + lenses.map(KeybindingCatalog.toggleLens)
             ),
             // The bars' show/hide shortcuts (#761).
-            ShortcutSubgroup(
-                title: L("bars.switch.kiwishelf", "KiwiShelf"),
-                rows: rows(
-                    [
-                        KeybindingCatalog.toggleSpaceBar,
-                        KeybindingCatalog.toggleAppBar,
-                    ]
-                )
+            band(
+                L("bars.switch.kiwishelf", "KiwiShelf"),
+                .kiwishelf,
+                [
+                    KeybindingCatalog.toggleSpaceBar,
+                    KeybindingCatalog.toggleAppBar,
+                ]
             ),
-            ShortcutSubgroup(
-                title: L(
-                    "shortcuts.section.switch_layers",
-                    "Switch layers"
-                ),
-                rows: rows(switchLayers)
+            band(
+                L("shortcuts.section.switch_layers", "Switch layers"),
+                nil,
+                switchLayers
             ),
         ]
+        // Empty bands stay: a binding may still file into one, and
+        // the reference drops what is left empty (#2544).
         .map {
-            ShortcutSubgroup(
-                title: $0.title,
-                rows: ShortcutFold.folded($0.rows)
-            )
+            var group = $0
+            group.rows = ShortcutFold.folded($0.rows)
+            return group
         }
-        .filter { !$0.rows.isEmpty }
     }
 
     /// Builds inactive shortcut rows (`OrphanedShortcuts`, #92, #820).
@@ -196,40 +194,61 @@ extension ShortcutsReferenceBuilder {
         }
     }
 
+    /// A binding of the user's own and the group it files into
+    /// (#2544): its description in place of its Lua, its symbol
+    /// where that is an SF Symbol, else the Lua mark.
+    struct OwnRow {
+        let row: ShortcutRow
+        let group: String
+    }
+
     /// Builds custom shortcut rows for remaining unconsumed bindings.
     static func buildCustom(
         _ layer: KeyLayer,
         consumed: Set<UUID>
-    ) -> [ShortcutRow] {
+    ) -> [OwnRow] {
         layer.bindings
             .filter {
                 !$0.combo.isEmpty && !consumed.contains($0.id)
             }
             .map { binding in
-                ShortcutRow(
-                    id: binding.id.uuidString,
-                    label: binding.lua,
-                    combo: glyphs(binding.combo),
-                    icon: "curlybraces",
-                    monospaced: true
+                OwnRow(
+                    row: ShortcutRow(
+                        id: binding.id.uuidString,
+                        label: binding.desc.isEmpty
+                            ? binding.lua : binding.desc,
+                        combo: glyphs(binding.combo),
+                        icon: ownIcon(binding.meta),
+                        monospaced: binding.desc.isEmpty
+                    ),
+                    group: binding.group
                 )
             }
     }
 
     /// Rows for Lua-owned chords whose action `init.lua` does not
     /// spell inline (a named handler, a C function): the chord is
-    /// registered, so it is listed, under a generic name (#2482).
-    static func buildUnread(_ chords: [String]) -> [ShortcutRow] {
-        chords.map { chord in
-            ShortcutRow(
-                id: "unread:" + chord,
-                label: L(
-                    "shortcuts.panel.lua_function",
-                    "Lua function"
+    /// registered, so it is listed, under its description or a
+    /// generic name (#2482, #2544).
+    static func buildUnread(_ chords: [UnreadChord]) -> [OwnRow] {
+        chords.map { unread in
+            OwnRow(
+                row: ShortcutRow(
+                    id: "unread:" + unread.chord,
+                    label: unread.meta.desc.isEmpty
+                        ? L("shortcuts.panel.lua_function", "Lua function")
+                        : unread.meta.desc,
+                    combo: glyphs(unread.chord),
+                    icon: ownIcon(unread.meta)
                 ),
-                combo: glyphs(chord),
-                icon: "curlybraces"
+                group: unread.meta.group
             )
         }
+    }
+
+    /// A binding's own symbol where it names an SF Symbol, else the
+    /// Lua mark; a name that is none is a Config Issue (#2544).
+    static func ownIcon(_ meta: KeyBindingMeta) -> String {
+        meta.usableSymbol ?? LuaMark.symbol
     }
 }

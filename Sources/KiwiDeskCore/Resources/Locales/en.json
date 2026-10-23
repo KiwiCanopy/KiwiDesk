@@ -362,6 +362,8 @@
   "config_issues.title": "Config Issues",
   "config_issues.unknown_call": "Unknown call '%1$@'.",
   "config_issues.unknown_call_suggestion": "Unknown call '%1$@' — did you mean '%2$@'?",
+  "config_issues.unknown_shortcut_symbol": "The shortcut %1$@ asks for the symbol “%2$@”, which isn't an SF Symbol, so its row shows </> instead.",
+  "config_issues.unknown_shortcut_symbol_layer": "The shortcut %1$@ in the “%3$@” layer asks for the symbol “%2$@”, which isn't an SF Symbol, so its row shows </> instead.",
   "custom_lua_banner.adopts": "Your init.lua sets some settings itself. Saving here moves your shortcuts and rules into the visual editor; init.lua keeps running, and the app never modifies it.",
   "custom_lua_banner.text": "Your init.lua also has custom Lua. It doesn’t conflict with the visual editor, and the app never modifies init.lua.",
   "desktop_cue.ax": "Desktop %1$d, %2$d of %3$d",

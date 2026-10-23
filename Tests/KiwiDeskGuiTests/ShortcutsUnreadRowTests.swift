@@ -25,7 +25,7 @@ struct ShortcutsUnreadRowTests {
             desktops: [1],
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName],
-            unread: unread
+            unread: unread.map { UnreadChord(chord: $0) }
         )
     }
 

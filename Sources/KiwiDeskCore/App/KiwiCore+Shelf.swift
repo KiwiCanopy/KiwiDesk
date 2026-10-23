@@ -32,7 +32,7 @@ extension KiwiCore {
             publishStatusSpaceMark()
             spaceBars.publishLiveOnly(liveOnlySpaces)
         }
-        syncFontIssue()
+        syncDerivedIssues()
         let settings = tiler.settings
         BarMotion.shelfGlide = settings.animations.expandSeconds
         BarMotion.revealLength = settings.animations.revealSeconds

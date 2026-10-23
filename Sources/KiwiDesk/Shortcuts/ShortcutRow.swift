@@ -40,7 +40,10 @@ struct ShortcutRow: Identifiable {
 /// Named subgroup of shortcut rows in the Controls band.
 struct ShortcutSubgroup: Identifiable {
     let title: String
-    let rows: [ShortcutRow]
+    var rows: [ShortcutRow]
+    /// The built-in group a binding's `group` token names (#2544);
+    /// nil for a group a binding made of its own.
+    var group: ShortcutGroup? = nil
     var id: String { title }
 }
 
@@ -56,11 +59,14 @@ struct ShortcutsReference {
     /// dims the same rows in place, where they stay rebindable.
     var desktopAway: [ShortcutRow] = []
     var apps: [ShortcutRow]
+    /// The groups bindings make of their own (#2544), after the
+    /// built-in ones and before Custom, in first-named order.
+    var groups: [ShortcutSubgroup] = []
     var custom: [ShortcutRow]
 
     /// Whether the reference contains no listable shortcuts.
     var isEmpty: Bool {
         controls.isEmpty && inactive.isEmpty && desktopAway.isEmpty
-            && apps.isEmpty && custom.isEmpty
+            && apps.isEmpty && groups.isEmpty && custom.isEmpty
     }
 }

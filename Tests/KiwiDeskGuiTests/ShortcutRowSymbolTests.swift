@@ -38,7 +38,7 @@ struct ShortcutRowSymbolTests {
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName, "Mouse"],
             lenses: ["Reading"],
-            rows: record
+            rows: { commands, _ in record(commands) }
         )
         let orphans = KeyLayer(
             name: KeyLayer.defaultName,

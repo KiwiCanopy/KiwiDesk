@@ -74,6 +74,16 @@ struct ConfigIssueTextTests {
                 replacement: nil
             ),
             .missingFontFamily(name: "JetBrains Mono"),
+            .unknownShortcutSymbol(
+                layer: KeyLayer.defaultName,
+                chord: "cmd+alt+k",
+                symbol: "not.a.symbol"
+            ),
+            .unknownShortcutSymbol(
+                layer: "resize",
+                chord: "cmd+alt+k",
+                symbol: "not.a.symbol"
+            ),
         ]
     }
 
@@ -82,12 +92,12 @@ struct ConfigIssueTextTests {
         pinEnglish()
         defer { reset() }
         // Eight cases; the fixture count is the causes plus the
-        // nine hand-listed entries (`unknownCall` and
+        // eleven hand-listed entries (`unknownCall` and
         // `retiredCall` twice each). The cause half derives, so
-        // only the hand-listed half is pinned — bump the 9
+        // only the hand-listed half is pinned — bump the 11
         // deliberately when a `Kind` is added, which is the
         // reminder the compiler cannot give.
-        #expect(kinds.count == ProfileBrokenCause.allCases.count + 9)
+        #expect(kinds.count == ProfileBrokenCause.allCases.count + 11)
         var seen: Set<String> = []
         for kind in kinds {
             let text = ConfigIssueText.message(for: kind)
@@ -99,6 +109,12 @@ struct ConfigIssueTextTests {
                 seen.insert(text).inserted,
                 "\(kind) duplicates another kind's text"
             )
+            // A layer other than the default is named in its text.
+            if case .unknownShortcutSymbol(let layer, _, _) = kind,
+                layer != KeyLayer.defaultName
+            {
+                #expect(text.contains(layer))
+            }
         }
     }
 

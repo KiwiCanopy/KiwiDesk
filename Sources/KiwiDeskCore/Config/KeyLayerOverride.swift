@@ -133,8 +133,10 @@ extension KeyLayerOverride {
             if !gone.isEmpty { removed[layer.name] = gone }
             var rows: [KeyBinding] = []
             for row in layer.bindings {
+                // A row that only re-describes the base row is still
+                // the profile's own (#2544).
                 let inherited = baseLayer.bindings.contains {
-                    $0.sameAction(as: row)
+                    $0.sameAction(as: row) && $0.meta == row.meta
                 }
                 if !inherited {
                     rows.append(row)

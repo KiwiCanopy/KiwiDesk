@@ -35,6 +35,7 @@ extension KiwiCore {
         // follows the rename or the profile loses its own Spaces.
         state.profilePartitioning.rename(old, to: new)
         renameAppWideCapture(old, to: new)
+        renameInstalledProfile(old, to: new)
         // A binding naming the id needs nothing here: the write
         // door's promotion refreshes its label (#2324). A PENDING
         // entry follows by name, as before ids.

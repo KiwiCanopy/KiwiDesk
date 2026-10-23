@@ -185,6 +185,13 @@ reading). Lua itself is uncapped — the
 argument is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes
 may give an action a second chord in a layer*.
 
+**A writer that compares or copies what a binding says of itself
+goes through `KeyBinding.meta` (#2544)**, never `desc`, `group`
+and `symbol` one by one, so a field added to `KeyBindingMeta`
+reaches it (`ShortcutMetaCarryTests` ▸ `metaIsTheOneHome`,
+`metaRoundTrips`, `eachFieldCounts`, `profileKeepsMetaOnlyRow`,
+`reimportCarriesMeta`).
+
 ## The starter setup is derived, and its tuning is profile-wide
 
 A fresh install's starter profile — identity

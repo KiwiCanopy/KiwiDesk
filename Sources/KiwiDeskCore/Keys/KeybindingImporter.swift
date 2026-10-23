@@ -28,20 +28,20 @@ enum KeybindingImporter {
     }
 
     /// The recovered layers, and per layer the chords whose body
-    /// could not be read back (#2482). The unread chords are
-    /// plain strings and never a `KeyBinding`, so no save path
-    /// can turn one into a no-op row.
+    /// could not be read back (#2482), each with what it says of
+    /// itself (#2544).
     static func capture(
         from manager: KeybindingManager,
         interpreter: LuaInterpreter,
         readFile: (String) -> String?
-    ) -> (layers: [KeyLayer], unread: [String: [String]]) {
+    ) -> (layers: [KeyLayer], unread: [String: [UnreadChord]]) {
         var cache: [String: String] = [:]
-        var unread: [String: [String]] = [:]
+        var unread: [String: [UnreadChord]] = [:]
         let layers = manager.definedLayers.map { name in
             var rows: [KeyBinding] = []
             for (combo, ref) in manager.bindings(for: name) {
                 guard let text = combo.comboString() else { continue }
+                let meta = manager.meta(for: name, combo: combo)
                 guard
                     let lua = action(
                         ref: ref,
@@ -50,15 +50,17 @@ enum KeybindingImporter {
                         cache: &cache
                     )
                 else {
-                    unread[name, default: []].append(text)
+                    unread[name, default: []].append(
+                        UnreadChord(chord: text, meta: meta)
+                    )
                     continue
                 }
-                rows.append(
-                    KeyBinding(combo: text, lua: lua, kind: .custom)
-                )
+                var row = KeyBinding(combo: text, lua: lua, kind: .custom)
+                row.meta = meta
+                rows.append(row)
             }
             rows.sort { $0.combo < $1.combo }
-            unread[name]?.sort()
+            unread[name]?.sort { $0.chord < $1.chord }
             return KeyLayer(
                 name: name,
                 icon: manager.icon(for: name),

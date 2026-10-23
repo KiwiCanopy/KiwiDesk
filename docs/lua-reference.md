@@ -6028,6 +6028,49 @@ KiwiDesk.define_layer("service", { --[[ bindings ]] },
     { icon = "⚙️" })
 ```
 
+:::unreleased
+#### Describing a Shortcut
+
+**Expects:** an optional third table on `KiwiDesk.bind`, or a
+`{ fn = …, … }` table in place of a function in a `define_layer`
+table, with any of:
+
+- `desc` — what the shortcut does, in your words.
+- `group` — the shortcut group it is listed in: a built-in
+  group's token (`focus`, `move_windows`, `layout`, `size_float`,
+  `kiwivision`, `kiwishelf`, `apps`) puts it there, whatever its
+  case and the spaces around it; any other name makes a shortcut
+  group of its own.
+- `symbol` — an SF Symbol name for its row.
+
+**Does:** KiwiHub's Shortcuts side lists the shortcut under its
+description instead of its Lua, in its group, wearing its symbol.
+A group of your own is listed after the built-in ones and before
+Custom, under the name as written. Without a symbol a row wears
+`</>`; a name that is not an SF Symbol shows `</>` too and is
+listed in Config Issues, and the shortcut still works.
+
+A shortcut whose action KiwiHub knows — `KiwiDesk.focus("left")` —
+keeps its built-in name, group and symbol for each field it leaves
+empty, and shows the ones it sets. An inactive or unavailable
+shortcut stays in its own section whatever its group.
+[`shortcut.list_groups`](#shortcutlist_groups) lists the names in
+use.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+f", move_and_follow, {
+  desc = "Move to the next Space and follow",
+  group = "Move and follow",
+  symbol = "arrow.right.square",
+})
+KiwiDesk.define_layer("resize", {
+  ["h"] = { fn = shrink, desc = "Narrower", group = "size_float" },
+})
+```
+:::
+
 ### Config Cascade (Per-Profile Keybindings)
 
 Keybindings resolve through a two-level cascade, like tiling
@@ -6069,14 +6112,15 @@ layer.
 
 ### Shortcut verbs
 
-The `shortcut` table writes the saved shortcuts of the live profile
-from Lua, the CLI and an AI app, in the default layer. Shortcuts
+The `shortcut` table reads and writes the saved shortcuts of the
+live profile from Lua, the CLI and an AI app, in the default layer. Shortcuts
 load only from the saved files, so a write saves at once and the
 key works straight away — the shortcut rows alone, never the rest
 of the profile. A new shortcut goes into the shared base on the
 loaded profile, as Settings ▸ Shortcuts starts one. With
 `init.lua` owning the config, or no saved profile live, the verbs
-refuse.
+refuse, save `shortcut.list_groups`, which reads the shortcuts in
+effect.
 
 #### shortcut.list
 
@@ -6085,6 +6129,14 @@ refuse.
 **Does:** returns the live `profile` and its `layers`, each with
 its `name`, whether it is the `default`, and its `shortcuts` —
 each `chord` and the `lua` it runs.
+
+:::unreleased
+A shortcut that describes itself carries its `desc`, `group` and
+`symbol` too ([Describing a Shortcut](#describing-a-shortcut)). It
+reads the saved files, where
+[`shortcut.list_groups`](#shortcutlist_groups) reads the shortcuts
+in effect.
+:::
 
 #### shortcut.set
 
@@ -6111,6 +6163,18 @@ shared shortcut. A chord with no shortcut is refused.
 shortcut.set("ctrl+alt+h", "focus", "left")
 shortcut.remove("ctrl+alt+h")
 ```
+
+:::unreleased
+#### shortcut.list_groups
+
+**Expects:** nothing.
+
+**Does:** returns `built_in`, the tokens of KiwiHub's built-in
+groups, and `custom`, every shortcut group the installed shortcuts
+make of their own, each once. It reads the
+shortcuts in effect, so it answers with `init.lua` owning the
+config too.
+:::
 
 ## Events
 
@@ -7369,6 +7433,11 @@ sync folder's status. Each issue carries its `source` file, a
 - `retired_call`, with its `name` and a `replacement`, the verb
   that replaces it, or `nil` where nothing does.
 - `missing_font_family`, with its `name`.
+
+:::unreleased
+A shortcut whose `symbol` is no SF Symbol is
+`unknown_shortcut_symbol`, with its `layer`, `chord` and `symbol`.
+:::
 
 `sync` carries the followed `folder` (`nil` when none) and a
 `status`: `off`, `up_to_date`, `folder_unavailable`,

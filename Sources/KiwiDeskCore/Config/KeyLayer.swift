@@ -49,17 +49,32 @@ public struct KeyBinding: Codable, Equatable, Sendable,
     public var kind: Kind
     /// Row label shown in the editor (nav name / app name).
     public var label: String
+    /// What the binding does, in the user's words, shown in place of
+    /// its Lua (#2544); empty for none.
+    public var desc: String
+    /// The group it is listed in: a built-in group's token
+    /// (`ShortcutGroup`) or a name that makes a group of its own
+    /// (#2544); empty for the default.
+    public var group: String
+    /// The SF Symbol its row wears (#2544); empty for the Lua mark.
+    public var symbol: String
 
     public init(
         combo: String = "",
         lua: String = "",
         kind: Kind = .custom,
-        label: String = ""
+        label: String = "",
+        desc: String = "",
+        group: String = "",
+        symbol: String = ""
     ) {
         self.combo = combo
         self.lua = lua
         self.kind = kind
         self.label = label
+        self.desc = desc
+        self.group = group
+        self.symbol = symbol
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -67,6 +82,9 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         case lua
         case kind
         case label
+        case desc
+        case group
+        case symbol
     }
 
     public init(from decoder: Decoder) throws {
@@ -85,6 +103,15 @@ public struct KeyBinding: Codable, Equatable, Sendable,
                 String.self,
                 forKey: .label
             ) ?? ""
+        desc =
+            try container.decodeIfPresent(String.self, forKey: .desc)
+            ?? ""
+        group =
+            try container.decodeIfPresent(String.self, forKey: .group)
+            ?? ""
+        symbol =
+            try container.decodeIfPresent(String.self, forKey: .symbol)
+            ?? ""
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -95,6 +122,24 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         try container.encode(lua, forKey: .lua)
         try container.encode(kind, forKey: .kind)
         try container.encode(label, forKey: .label)
+        // Sparse: a binding carrying none of the three writes none
+        // (#2544).
+        if !desc.isEmpty { try container.encode(desc, forKey: .desc) }
+        if !group.isEmpty { try container.encode(group, forKey: .group) }
+        if !symbol.isEmpty {
+            try container.encode(symbol, forKey: .symbol)
+        }
+    }
+
+    /// What the binding says of itself, the three fields whole
+    /// (`KeyBindingMeta`, #2544).
+    public var meta: KeyBindingMeta {
+        get { KeyBindingMeta(desc: desc, group: group, symbol: symbol) }
+        set {
+            desc = newValue.desc
+            group = newValue.group
+            symbol = newValue.symbol
+        }
     }
 
     /// Compares equality of binding content ignoring transient UUID.
@@ -104,6 +149,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
     ) -> Bool {
         lhs.combo == rhs.combo && lhs.lua == rhs.lua
             && lhs.kind == rhs.kind && lhs.label == rhs.label
+            && lhs.meta == rhs.meta
     }
 
     /// Semantic identity for the override cascade (#55): combo +

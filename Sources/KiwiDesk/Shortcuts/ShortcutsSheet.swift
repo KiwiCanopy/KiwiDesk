@@ -38,6 +38,7 @@ struct ShortcutsSheet {
         return shown.controls.reduce(0) { $0 + $1.rows.count }
             + shown.inactive.count + shown.desktopAway.count
             + shown.apps.count + shown.custom.count
+            + shown.groups.reduce(0) { $0 + $1.rows.count }
     }
 
     static func filtered(
@@ -56,11 +57,15 @@ struct ShortcutsSheet {
             return hits.count == row.members.count ? [row] : hits
         }
         var out = reference
-        out.controls = reference.controls.compactMap { group in
-            let rows = group.rows.flatMap(shown)
-            return rows.isEmpty
-                ? nil : ShortcutSubgroup(title: group.title, rows: rows)
+        func narrowed(_ groups: [ShortcutSubgroup]) -> [ShortcutSubgroup] {
+            groups.compactMap { group in
+                var group = group
+                group.rows = group.rows.flatMap(shown)
+                return group.rows.isEmpty ? nil : group
+            }
         }
+        out.controls = narrowed(reference.controls)
+        out.groups = narrowed(reference.groups)
         out.inactive = reference.inactive.filter(keeps)
         out.desktopAway = reference.desktopAway.filter(keeps)
         out.apps = reference.apps.filter(keeps)

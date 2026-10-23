@@ -60,6 +60,13 @@ extension KiwiCore {
                 "kind": .string("missing_font_family"),
                 "name": .string(name),
             ]
+        case .unknownShortcutSymbol(let layer, let chord, let symbol):
+            return [
+                "kind": .string("unknown_shortcut_symbol"),
+                "layer": .string(layer),
+                "chord": .string(chord),
+                "symbol": .string(symbol),
+            ]
         }
     }
 

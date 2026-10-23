@@ -15,7 +15,7 @@ enum ShortcutsReferenceBuilder {
         resizeStep: Int,
         layerNames: [String],
         lenses: [String] = [],
-        unread: [String] = []
+        unread: [UnreadChord] = []
     ) -> ShortcutsReference {
         // Drop the key panel's three openers from the working set
         // BEFORE any band builds, so the suppression holds by
@@ -58,19 +58,30 @@ enum ShortcutsReferenceBuilder {
             resizeStep: resizeStep
         )
 
-        func rows(_ commands: [NavCommand]) -> [ShortcutRow] {
+        // A recognised binding that names a group other than its
+        // `band` leaves the band for it, before the band folds
+        // (#2544 ▸ Ruling); an inactive or unavailable row keeps its
+        // own section.
+        var regrouped: [OwnRow] = []
+        func rows(
+            _ commands: [NavCommand],
+            band: ShortcutGroup?,
+            regroups: Bool
+        ) -> [ShortcutRow] {
             commands.compactMap { cmd in
                 guard let binding = bound(cmd.lua) else {
                     return nil
                 }
                 consumed.insert(binding.id)
-                let icon = icon(for: cmd)
                 let combo = glyphs(binding.combo)
-                return ShortcutRow(
+                // A field the binding sets wins; one it leaves empty
+                // keeps the built-in name or symbol (#2544).
+                var row = ShortcutRow(
                     id: cmd.lua,
-                    label: cmd.resolvedLabel,
+                    label: binding.desc.isEmpty
+                        ? cmd.resolvedLabel : binding.desc,
                     combo: combo,
-                    icon: icon,
+                    icon: binding.meta.usableSymbol ?? icon(for: cmd),
                     unavailable: cmd.unavailable != nil,
                     fold: ShortcutFold.tag(
                         for: cmd,
@@ -79,6 +90,20 @@ enum ShortcutsReferenceBuilder {
                         rendered: combo
                     )
                 )
+                row.ownApp = cmd.lua == KeybindingCatalog.openSettings.lua
+                guard regroups, cmd.unavailable == nil else { return row }
+                switch ShortcutGroup.filing(binding.group) {
+                case .none:
+                    return row
+                case .builtIn(let group) where group == band:
+                    return row
+                case .builtIn(let group):
+                    regrouped.append(OwnRow(row: row, group: group.rawValue))
+                    return nil
+                case .own(let name):
+                    regrouped.append(OwnRow(row: row, group: name))
+                    return nil
+                }
             }
         }
 
@@ -90,7 +115,7 @@ enum ShortcutsReferenceBuilder {
             resizeStep: resizeStep,
             layerNames: layerNames,
             lenses: lenses,
-            rows: rows
+            rows: { rows($0, band: $1, regroups: true) }
         )
         // Inactive orphans built before Apps/Custom (#820).
         let inactive = buildInactive(
@@ -98,30 +123,30 @@ enum ShortcutsReferenceBuilder {
             spaces: spaces,
             layers: layerNames,
             spaceIcons: spaceIcons,
-            rows: rows
+            rows: { rows($0, band: nil, regroups: false) }
         )
         // KiwiDesk's own app row leads Apps, as the editor's Open
         // applications ▸ KiwiDesk does (#1520, #2246); without it a
         // bound Open Settings fell through to Custom as raw Lua
         // (#678 item 18).
         let apps =
-            rows([KeybindingCatalog.openSettings]).map { row in
-                var row = row
-                row.ownApp = true
-                return row
-            }
+            rows([KeybindingCatalog.openSettings], band: .apps, regroups: true)
             + buildApps(layer, consumed: &consumed)
-        let custom =
-            buildCustom(layer, consumed: consumed)
-            + buildUnread(unread)
+        let filed = file(
+            regrouped + buildCustom(layer, consumed: consumed)
+                + buildUnread(unread),
+            controls: controls,
+            apps: apps
+        )
 
         // A key that does nothing until its Desktop returns leaves
         // its group, so the groups list only keys that work.
-        let desktopAway = controls.flatMap(\.rows).filter(\.unavailable)
-        let working = controls.compactMap { group -> ShortcutSubgroup? in
-            let rows = group.rows.filter { !$0.unavailable }
-            return rows.isEmpty
-                ? nil : ShortcutSubgroup(title: group.title, rows: rows)
+        let desktopAway = filed.controls.flatMap(\.rows)
+            .filter(\.unavailable)
+        let working = filed.controls.compactMap { group -> ShortcutSubgroup? in
+            var group = group
+            group.rows = group.rows.filter { !$0.unavailable }
+            return group.rows.isEmpty ? nil : group
         }
 
         return ShortcutsReference(
@@ -129,8 +154,9 @@ enum ShortcutsReferenceBuilder {
             controls: working,
             inactive: inactive,
             desktopAway: desktopAway,
-            apps: apps,
-            custom: custom
+            apps: filed.apps,
+            groups: filed.groups,
+            custom: filed.custom
         )
     }
 }
