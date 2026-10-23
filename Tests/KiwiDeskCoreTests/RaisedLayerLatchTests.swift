@@ -112,14 +112,19 @@ struct RaisedLayerLatchTests {
 
     /// A changed guess forgets every verdict of its app
     /// (`rejudgeGuesses`); the layer is no guess, so a forgotten
-    /// verdict refuses it as a tiled one does.
-    @Test("a forgotten verdict never floats on the layer")
-    func forgottenStaysTiled() {
+    /// verdict tiles, and none is left nil for `explain_window`.
+    @Test("a forgotten verdict tiles on the layer")
+    func forgottenTiles() {
         let core = makeTestCore()
         core.eventLoop.detectedFloating[id] = nil
         let events = recheck(core, .raisedLayer)
-        #expect(core.eventLoop.detectedFloating[id] == nil)
-        #expect(events.isEmpty)
+        #expect(core.eventLoop.detectedFloating[id] == .tiles)
+        #expect(
+            !events.contains {
+                if case .windowFloatChanged(_, true) = $0 { return true }
+                return false
+            }
+        )
     }
 
     @Test("a window adopted on a raised layer keeps floating")

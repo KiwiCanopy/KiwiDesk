@@ -191,9 +191,8 @@ editing AX code:
   floating, but must never float a tiled window — or one whose
   verdict a changed guess forgot — on `.raisedLayer`, and
   structure keeps outranking a Float rule, whose label would
-  take a raised window's overlay status (#300). Brave lifted its tiled main window to layer 999 each time it
-  came forward with a site permission prompt open (issue trace,
-  2026-10-23) (`RaisedLayerLatchTests`).
+  take a raised window's overlay status (#300,
+  `RaisedLayerLatchTests`).
 - **A float rule is read only through `FloatRules.parse` and
   spelled only through `FloatRules.rule(app:title:)` (#2345).**
   The engine, the profile reach and the Settings Float list all
