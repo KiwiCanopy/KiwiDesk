@@ -61,6 +61,9 @@ struct AnnouncedValueTests {
         "GeneralSection+LogExport.swift": 1,
         // #2308: What's new's release menu, named "Release".
         "WhatsNewReleasePicker.swift": 1,
+        // #2544: a Lua binding's shortcut group menu, named for its
+        // row.
+        "ShortcutGroupField.swift": 1,
     ]
 
     @Test("a named picker or menu gives its value back")

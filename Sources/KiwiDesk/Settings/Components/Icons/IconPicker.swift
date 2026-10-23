@@ -8,6 +8,11 @@ struct IconPicker: View {
     @Binding var icon: String
     /// How the popover header previews the selection.
     var preview: IconPreview = .menuBar
+    /// SF Symbols alone — a shortcut's symbol is a symbol name
+    /// (#2544): no Emoji tab, no text, Recents filtered.
+    var symbolsOnly = false
+    /// What an empty icon draws as, where it means a default.
+    var placeholder: String?
 
     @State private var showing = false
     @State private var search = ""
@@ -26,7 +31,12 @@ struct IconPicker: View {
                 // Fixed glyph slot: every picker button is
                 // the same size whether it holds an emoji, a
                 // symbol, or nothing yet.
-                IconGlyphLabel(icon: icon)
+                IconGlyphLabel(icon: icon, placeholder: placeholder)
+                    .foregroundStyle(
+                        icon.isEmpty && placeholder != nil
+                            ? AnyShapeStyle(SettingsTheme.ink3)
+                            : AnyShapeStyle(.foreground)
+                    )
                     .frame(width: 20)
                 Image(systemName: "chevron.down")
                     .font(.caption2)
@@ -74,7 +84,12 @@ struct IconPicker: View {
                 text: $search
             )
             .textFieldStyle(.roundedBorder)
-            if search.trimmed.isEmpty {
+            if search.trimmed.isEmpty && symbolsOnly {
+                HStack {
+                    Spacer()
+                    clearButton
+                }
+            } else if search.trimmed.isEmpty {
                 HStack(spacing: 8) {
                     SegmentedPicker(
                         selection: $tab,
@@ -99,7 +114,8 @@ struct IconPicker: View {
                         )
                         gridSection(
                             nil,
-                            choices: tab.choices
+                            choices: symbolsOnly
+                                ? IconCatalog.symbols : tab.choices
                         )
                     } else {
                         // Search is global: both
@@ -113,12 +129,14 @@ struct IconPicker: View {
                                 IconCatalog.symbols
                             )
                         )
-                        gridSection(
-                            L("icon_picker.emoji", "Emoji"),
-                            choices: filtered(
-                                IconCatalog.emoji
+                        if !symbolsOnly {
+                            gridSection(
+                                L("icon_picker.emoji", "Emoji"),
+                                choices: filtered(
+                                    IconCatalog.emoji
+                                )
                             )
-                        )
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -136,7 +154,7 @@ struct IconPicker: View {
         let query = search.trimmed
         if !query.isEmpty {
             HStack(spacing: 8) {
-                if query.count == 1 {
+                if query.count == 1, !symbolsOnly {
                     Button {
                         choose(query)
                     } label: {
@@ -231,7 +249,9 @@ struct IconPicker: View {
     // MARK: - Data
 
     private var recentChoices: [IconChoice] {
-        IconCatalog.recents().map { IconChoice($0, "") }
+        IconCatalog.recents()
+            .filter { !symbolsOnly || isSymbolName($0) }
+            .map { IconChoice($0, "") }
     }
 
     private func filtered(

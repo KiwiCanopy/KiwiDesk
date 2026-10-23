@@ -28,6 +28,37 @@ extension View {
     }
 }
 
+extension View {
+    /// Reports this card's frame under `control`'s anchor id, where
+    /// the page measures (#1520).
+    func reportsSectionFrame(_ control: SettingsControl) -> some View {
+        background { SectionFrameReport(control: control) }
+    }
+}
+
+/// The card's frame keyed by the same id its anchor takes, so a
+/// page mapping its sections names each by one key (#1520).
+private struct SectionFrameReport: View {
+    let control: SettingsControl
+    @Environment(\.measuresSectionFrames)
+    private var measuresFrames
+
+    var body: some View {
+        if measuresFrames {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: SettingsSectionFrames.self,
+                    value: [
+                        control.id: proxy.frame(
+                            in: .named(SettingsSectionFrames.space)
+                        )
+                    ]
+                )
+            }
+        }
+    }
+}
+
 extension EnvironmentValues {
     /// Whether section cards report `SettingsSectionFrames`.
     var measuresSectionFrames: Bool {

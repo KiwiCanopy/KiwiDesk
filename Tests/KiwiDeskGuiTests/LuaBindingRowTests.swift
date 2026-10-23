@@ -1,0 +1,116 @@
+import Foundation
+import KiwiDeskCore
+import Testing
+
+@testable import KiwiDesk
+
+/// A Lua binding's Settings row (#2544 ▸ Ruling): its Description,
+/// symbol and shortcut group write the binding, a body of more than
+/// one line reads as a readout rather than a field, the editor keeps
+/// an edit on a click away, and the symbol picker offers symbols
+/// alone. Source scans, off the main actor.
+@Suite("Lua binding row")
+struct LuaBindingRowTests {
+    private static func source(_ path: String) throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/\(path)"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+    }
+
+    @Test("one line edits in place; more lines read as their first")
+    func bodyShape() {
+        #expect(!LuaBodyShape.isMultiline("KiwiDesk.reload_config()\n"))
+        let body = "local s = KiwiDesk.get_state()\nKiwiDesk.focus(s)\n"
+        #expect(LuaBodyShape.isMultiline(body))
+        #expect(
+            LuaBodyShape.firstLine(body) == "local s = KiwiDesk.get_state()"
+        )
+        #expect(LuaBodyShape.lineCount(body) == 2)
+        #expect(LuaBodyShape.lineCount("a\n\nb") == 3)
+    }
+
+    @Test("the fields write the binding's own description, symbol, group")
+    func fieldsWriteTheBinding() throws {
+        let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
+        #expect(row.contains("text:binding.desc)"))
+        #expect(
+            row.contains(
+                "IconPicker(icon:binding.symbol,preview:.chip,"
+                    + "symbolsOnly:true,placeholder:LuaMark.symbol)"
+            )
+        )
+        #expect(row.contains("ShortcutGroupField(group:binding.group,"))
+        let group = try Self.source("Lua/AdvancedLuaGroup.swift")
+        #expect(group.contains("row($binding)"))
+    }
+
+    /// A field that ignores typing is never drawn: a multi-line body
+    /// is a button opening the editor, a one-line body a field.
+    @Test("a multi-line body is a readout, never a field")
+    func multilineIsAReadout() throws {
+        let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
+        #expect(
+            row.contains(
+                "ifLuaBodyShape.isMultiline(lua){Button{"
+                    + "editing=LuaEditRequest(id:id)}"
+            )
+        )
+        #expect(
+            row.contains("}else{TextField(luaPlaceholder,text:binding.lua)")
+        )
+        #expect(row.contains(".popover(item:editBinding(id))"))
+    }
+
+    /// One binding to VoiceOver, named as KiwiHub names it.
+    @Test("the row speaks as one binding, by its name")
+    func rowSpeaksByName() throws {
+        let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
+        #expect(row.contains(".accessibilityElement(children:.contain)"))
+        #expect(row.contains("KeyRecorderField(name:name,"))
+        #expect(row.contains("rowName:name)"))
+    }
+
+    /// Only Cancel drops an edit: Done and a click away keep it.
+    @Test("a click away keeps the edit, Cancel drops it")
+    func clickAwayKeeps() throws {
+        let editor = try Self.source("Lua/LuaBindingEditor.swift")
+        #expect(editor.contains(".onDisappear(perform:keep)"))
+        #expect(
+            editor.contains(
+                "privatefunckeep(){guard!settledelse{return}"
+                    + "settled=trueiftext!=seed{write(text)}}"
+            )
+        )
+        #expect(
+            editor.contains(
+                "privatefunccancel(){settled=truedismiss()}"
+            )
+        )
+    }
+
+    /// A shortcut's symbol is an SF Symbol name, so nothing else is
+    /// offered (`docs/design-decisions.md` ▸ the icon picker).
+    @Test("the symbol picker offers symbols alone")
+    func symbolsOnly() throws {
+        let picker = try Self.source("Icons/IconPicker.swift")
+        #expect(picker.contains("ifsearch.trimmed.isEmpty&&symbolsOnly{"))
+        #expect(picker.contains("if!symbolsOnly{gridSection("))
+        #expect(picker.contains("ifquery.count==1,!symbolsOnly{"))
+        #expect(
+            picker.contains(".filter{!symbolsOnly||isSymbolName($0)}")
+        )
+        #expect(
+            picker.contains(
+                "choices:symbolsOnly?IconCatalog.symbols:tab.choices"
+            )
+        )
+    }
+}

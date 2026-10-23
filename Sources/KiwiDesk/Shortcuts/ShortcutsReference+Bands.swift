@@ -58,33 +58,33 @@ extension ShortcutsReferenceBuilder {
             )
         }
         return [
-            band(L("shortcuts.section.focus", "Focus"), .focus, focus),
+            band(ShortcutGroup.focus.title, .focus, focus),
             band(
-                L("shortcuts.section.move_windows", "Move windows"),
+                ShortcutGroup.moveWindows.title,
                 .moveWindows,
                 move
             ),
             band(
-                L("shortcuts.section.layout", "Layout"),
+                ShortcutGroup.layout.title,
                 .layout,
                 KeybindingCatalog.layoutRows
             ),
             band(
-                L("shortcuts.section.size_float", "Size & float"),
+                ShortcutGroup.sizeFloat.title,
                 .sizeFloat,
                 KeybindingCatalog.resizeAndFloat(step: resizeStep)
             ),
             // A section of its own, empty and so dropped while no
             // KiwiVision key is bound (#2312).
             band(
-                L("destination.kiwivision", "KiwiVision"),
+                ShortcutGroup.kiwivision.title,
                 .kiwivision,
                 [KeybindingCatalog.toggleKiwiVision]
                     + lenses.map(KeybindingCatalog.toggleLens)
             ),
             // The bars' show/hide shortcuts (#761).
             band(
-                L("bars.switch.kiwishelf", "KiwiShelf"),
+                ShortcutGroup.kiwishelf.title,
                 .kiwishelf,
                 [
                     KeybindingCatalog.toggleSpaceBar,

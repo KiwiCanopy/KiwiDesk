@@ -10793,6 +10793,15 @@ popover closes — a choice, the clear button or a click-away alike
 ask for (`IconPickerRestingShapeTests`), and every popover holding
 a per-open search takes that same dismissal-edge hook.
 
+**A shortcut's symbol picks from symbols alone.** That rule is
+about the resting TAB; a caller whose value must be an SF Symbol
+narrows the VOCABULARY instead (#2544, `symbolsOnly`): a Lua
+binding's `symbol` that names no symbol draws `</>` and raises a
+Config Issue, so an Emoji tab, a "Use as text" result or an emoji
+in Recents there would offer a choice that only produces that
+warning. They are removed, not greyed — no mode turns them on —
+and Recents stays one list, read through the filter.
+
 **The picker button and its clear control.** The button shows
 a glyph-sized placeholder when no icon is set, never a
 "Choose…" label: the text made unset pickers wider than set

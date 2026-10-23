@@ -98,7 +98,7 @@ struct ConflictRowTreatmentTests {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Lua/"
-                    + "AdvancedLuaGroup.swift"
+                    + "AdvancedLuaGroup+Row.swift"
             )
         let source = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)

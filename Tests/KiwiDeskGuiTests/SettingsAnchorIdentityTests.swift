@@ -62,7 +62,7 @@ struct SettingsAnchorIdentityTests {
         // reveal target.
         "KeybindingNavRow.swift": 1,
         "KeybindingAppGroup+Row.swift": 1,
-        "AdvancedLuaGroup.swift": 1,
+        "AdvancedLuaGroup+Row.swift": 1,
         // Locale identity: `L()` is not observable state, so a
         // language change rebuilds the whole hosting root by
         // keying it on the locale. Deliberately the coarsest

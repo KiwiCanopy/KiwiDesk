@@ -3,7 +3,8 @@ import SwiftUI
 
 /// A group the Shortcuts & Gestures jump chips lead to (#1520), in
 /// page order. Layers takes no chip: it scopes the groups below
-/// rather than being a destination, and is absent in Simple.
+/// rather than being a destination, and is absent in Simple. Lua
+/// bindings takes one only while its drawer is offered (#2544).
 enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case gestures
     case showHide
@@ -12,6 +13,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case layout
     case sizeFloat
     case openApplications
+    case luaBindings
 
     /// The group's own title control: its text is the chip's
     /// label, and its id both the card's scroll anchor and the key
@@ -27,6 +29,8 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
         case .openApplications:
             return SettingsCatalog.shortcuts.openApplications
+        case .luaBindings:
+            return SettingsCatalog.shortcuts.luaBindings.control
         }
     }
 
@@ -40,12 +44,19 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
         case .openApplications: return .openApplications
+        case .luaBindings: return .luaBindings
         }
     }
 
     /// The chip a rule follows: everything after it is scoped to
     /// one layer, this card to none.
     var ruledAfter: Bool { self == .gestures }
+
+    /// The chips drawn: a drawer not offered has nowhere to jump,
+    /// so its chip is left out rather than greyed (#2544).
+    static func shown(luaDrawerOffered: Bool) -> [ShortcutsJumpGroup] {
+        allCases.filter { $0 != .luaBindings || luaDrawerOffered }
+    }
 }
 
 /// The page's measured geometry, in the scroll viewport's space:

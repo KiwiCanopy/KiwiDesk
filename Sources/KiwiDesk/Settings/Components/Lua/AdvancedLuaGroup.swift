@@ -3,14 +3,17 @@ import SwiftUI
 
 /// Custom arbitrary Lua keybinding management group (#68 §3.6.1).
 /// Raw Lua stays monospaced on purpose: arbitrary Lua IS the
-/// capability, not a serialization leak.
+/// capability, not a serialization leak. A row names itself and its
+/// keys on its first line and carries its symbol, Lua and shortcut
+/// group on its second (#2544 ▸ Ruling).
 struct AdvancedLuaGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     @Environment(\.disabledSystemShortcuts)
-    private var disabledSystemShortcuts
+    var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
-    private var layerName
+    var layerName
+    @State var editing: LuaEditRequest?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -31,76 +34,7 @@ struct AdvancedLuaGroup: View {
         }
     }
 
-    private func row(
-        _ binding: Binding<KeyBinding>
-    ) -> some View {
-        HStack {
-            TextField(
-                L(
-                    "shortcuts.lua_placeholder",
-                    "Lua, e.g. KiwiDesk.reload_config()"
-                ),
-                text: binding.lua
-            )
-            .textFieldStyle(.roundedBorder)
-            .font(.system(.body, design: .monospaced))
-            KeyReachColumn(
-                model: model,
-                layer: layerName,
-                binding: binding.wrappedValue
-            )
-            KeyRecorderField(
-                name: binding.wrappedValue.lua.isEmpty
-                    ? L(
-                        "shortcuts.lua_placeholder",
-                        "Lua, e.g. KiwiDesk.reload_config()"
-                    )
-                    : binding.wrappedValue.lua,
-                combo: binding.wrappedValue.combo,
-                reading: ConflictText.reading(
-                    for: binding.wrappedValue,
-                    in: bindings,
-                    config: model.config,
-                    disabled: disabledSystemShortcuts
-                ),
-                preflight: { combo in
-                    RecorderPreflight.rejection(
-                        combo: combo,
-                        excluding: {
-                            [id = binding.wrappedValue.id] in
-                            $0.id == id
-                        },
-                        bindings: $bindings,
-                        config: model.config,
-                        // Id-based: Steal mutates the array
-                        // (removing a navigation holder
-                        // shifts indices) before committing —
-                        // an element binding captured by the
-                        // ForEach would write the wrong row
-                        // (#68 review M2).
-                        commit: {
-                            record(
-                                $0,
-                                id: binding.wrappedValue.id
-                            )
-                        }
-                    )
-                },
-                onRecord: { record($0, into: binding) },
-                onClear: {
-                    binding.wrappedValue.combo = ""
-                }
-            )
-            KeyReachTrash(
-                model: model,
-                layer: layerName,
-                binding: binding.wrappedValue
-            ) { remove(binding.wrappedValue.id) }
-        }
-        .id(binding.wrappedValue.id.uuidString)
-    }
-
-    private func record(
+    func record(
         _ combo: String,
         into binding: Binding<KeyBinding>
     ) {
@@ -118,7 +52,7 @@ struct AdvancedLuaGroup: View {
 
     /// Looks the row up by id at write time — safe after any
     /// structural mutation of the bindings array.
-    private func record(
+    func record(
         _ combo: String,
         id: UUID
     ) {
@@ -134,8 +68,24 @@ struct AdvancedLuaGroup: View {
         )
     }
 
+    /// Writes an edited Lua body into the row, found by id.
+    func writeLua(_ lua: String, id: UUID) {
+        guard let index = bindings.firstIndex(where: { $0.id == id })
+        else { return }
+        bindings[index].lua = lua
+    }
+
     /// Removes the row from the draft.
-    private func remove(_ id: UUID) {
+    func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
+    }
+
+    /// The groups bindings make of their own: the installed ones in
+    /// KiwiHub's order, then any only this draft names.
+    func groupsInUse() -> [String] {
+        ShortcutGroup.custom(
+            in: model.core.customShortcutGroups()
+                + model.config.layers.flatMap(\.bindings).map(\.group)
+        )
     }
 }

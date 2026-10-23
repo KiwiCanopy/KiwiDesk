@@ -63,6 +63,10 @@ struct ShortcutsJumpPairingTests {
                 "SettingsCatalog.shortcuts.gestures.children",
                 gestureRows
             ),
+            (
+                "AdvancedLuaGroup(",
+                ShortcutsRowOrder.luaBindingsMore
+            ),
         ]
     }
 

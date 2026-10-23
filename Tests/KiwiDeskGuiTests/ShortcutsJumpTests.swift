@@ -25,6 +25,7 @@ struct ShortcutsJumpTests {
                 SettingsCatalog.shortcuts.layoutKeys.id,
                 SettingsCatalog.shortcuts.sizeFloat.id,
                 SettingsCatalog.shortcuts.openApplications.id,
+                SettingsCatalog.shortcuts.luaBindings.control.id,
             ]
         )
         #expect(
@@ -40,8 +41,8 @@ struct ShortcutsJumpTests {
         let exempt: Set<SettingsContainer> = [
             // Scope, not a destination.
             .layers,
-            // The tail's Lua drawer and the header's restore row.
-            .luaBindings, .defaultShortcuts,
+            // The header's restore row.
+            .defaultShortcuts,
             // One row above the first chip's card (#1870).
             .hyperKey,
         ]
@@ -226,10 +227,9 @@ struct ShortcutsJumpTests {
         #expect(
             card.contains(
                 "core.searchAnchorCard(control)"
-                    + ".background{frameReport(control)}"
+                    + ".reportsSectionFrame(control)"
             )
         )
-        #expect(card.contains("control.id:proxy.frame("))
         let section = try Self.source("Sections/ShortcutsSection.swift")
         // One opt-in names both the flag and the space the
         // viewport and the cards measure in.
@@ -241,6 +241,7 @@ struct ShortcutsJumpTests {
         let optIn = try Self.source(
             "Components/Common/SettingsSectionFrames.swift"
         )
+        #expect(optIn.contains("control.id:proxy.frame("))
         #expect(
             optIn.contains(
                 "environment(\\.measuresSectionFrames,true)"
