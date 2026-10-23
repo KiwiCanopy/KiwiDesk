@@ -66,10 +66,11 @@ extension ShortcutsReferenceBuilder {
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"
-        // The bars' show/hide (#2530): the Space Bar wears Settings'
-        // Bars symbol, the App Bar the strip along the screen's foot.
+        // The bars' show/hide (#2530): the Space Bar wears the arrowed
+        // symbol the 3.2.0 notes' hiding-bars spotlight wears, the App
+        // Bar the strip along the screen's foot (owner, 2026-10-23).
         case KeybindingCatalog.toggleSpaceBar.lua:
-            return SettingsDestination.bars.symbol
+            return "menubar.arrow.up.rectangle"
         case KeybindingCatalog.toggleAppBar.lua:
             return "dock.rectangle"
         // Track's own verbs: to the line before or after, a swap
