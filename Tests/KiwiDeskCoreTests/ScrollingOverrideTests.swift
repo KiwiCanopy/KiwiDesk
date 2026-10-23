@@ -14,11 +14,8 @@ struct ScrollingOverrideTests {
         "newWindowPlacement",
         // Per-space bar *look* lands with the app-bar tier.
         "appBar",
-        // A per-layout behavior toggle (#168), not per-space —
-        // like newWindowPlacement, it shapes the whole layout.
-        "wrapFocus",
-        // Same class (#1389): what a lone window does is the
-        // layout's shape, not a space's.
+        // What a lone window does is the layout's shape, not a
+        // space's (#1389).
         "fillWhenAlone",
         // The override map itself.
         "override",

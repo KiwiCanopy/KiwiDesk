@@ -13,8 +13,6 @@ struct MonocleOverrideTests {
         // Per-space bar *look* lands with the app-bar tier; only
         // the orientation (which drives the bar edge) is per-space.
         "appBar",
-        // Per-layout, like the scrolling/track wrap toggles (#168).
-        "wrapFocus",
         // Per-layout too (#881): the owner ruling ships ONE
         // global axis (`monocle.set_hide_style`), and a
         // per-space split of how monocle hides would put a

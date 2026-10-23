@@ -1,9 +1,9 @@
 import Foundation
 
 /// Per-space overrides of TrackParams: optional mirror, nil
-/// inherits (`TrackOverrideTests`, #128). `newWindow`,
-/// `newWindowPosition` and `wrapFocus` are excluded by design —
-/// per-layout behavior, not per-space geometry.
+/// inherits (`TrackOverrideTests`, #128). `newWindow` and
+/// `newWindowPosition` are excluded by design — per-layout
+/// behavior, not per-space geometry.
 public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
     public var autoTracks: Bool?
