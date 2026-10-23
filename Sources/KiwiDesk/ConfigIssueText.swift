@@ -72,8 +72,8 @@ enum ConfigIssueText {
         case .unknownShortcutSymbol(let chord, let symbol):
             return L(
                 "config_issues.unknown_shortcut_symbol",
-                "The shortcut %1$@ names “%2$@”, which isn't an SF "
-                    + "Symbol, so it shows the Lua mark.",
+                "The shortcut %1$@ asks for the symbol “%2$@”, which "
+                    + "isn't an SF Symbol, so its row shows </> instead.",
                 ShortcutsReferenceBuilder.glyphs(chord),
                 symbol
             )

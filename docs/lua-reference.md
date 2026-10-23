@@ -6048,8 +6048,7 @@ A group of your own is listed after the built-in ones and before
 Custom, in the order your config first names it, under the name as
 written. Without a symbol a row wears `</>`, the mark for your own
 Lua; a name that is not an SF Symbol shows `</>` too and is listed
-in Config Issues, and the shortcut still works. A group name
-KiwiDesk does not know is never an error.
+in Config Issues, and the shortcut still works. A token matches whatever its case and the spaces around it.
 [`shortcut.list_groups`](#shortcutlist_groups) lists the names in
 use.
 
@@ -6149,6 +6148,13 @@ chord, is refused; remove the old binding first.
 **Does:** unbinds it, from every profile holding it when it is a
 shared shortcut. A chord with no shortcut is refused.
 
+**Example:**
+
+```lua
+shortcut.set("ctrl+alt+h", "focus", "left")
+shortcut.remove("ctrl+alt+h")
+```
+
 :::unreleased
 #### shortcut.list_groups
 
@@ -6160,13 +6166,6 @@ their own, in the order a shortcut first names it. It reads the
 shortcuts in effect, so it answers with `init.lua` owning the
 config too.
 :::
-
-**Example:**
-
-```lua
-shortcut.set("ctrl+alt+h", "focus", "left")
-shortcut.remove("ctrl+alt+h")
-```
 
 ## Events
 
@@ -7425,6 +7424,11 @@ sync folder's status. Each issue carries its `source` file, a
 - `retired_call`, with its `name` and a `replacement`, the verb
   that replaces it, or `nil` where nothing does.
 - `missing_font_family`, with its `name`.
+
+:::unreleased
+A shortcut whose `symbol` is no SF Symbol is
+`unknown_shortcut_symbol`, with its `chord` and `symbol`.
+:::
 
 `sync` carries the followed `folder` (`nil` when none) and a
 `status`: `off`, `up_to_date`, `folder_unavailable`,

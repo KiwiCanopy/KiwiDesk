@@ -271,6 +271,12 @@ folder together.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
+:::unreleased
+A row may also carry **`desc`**, **`group`** and **`symbol`**,
+written only when set ([Describing a
+Shortcut](lua-reference.md#describing-a-shortcut)).
+:::
+
 **`refusal`** holds `sound`, the alert sound when an action is
 blocked, and **`quit`** holds `grid_target_depth`, the
 windows per pile on quit, beside `layout`, how windows are

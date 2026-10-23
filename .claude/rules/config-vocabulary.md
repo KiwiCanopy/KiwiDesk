@@ -85,6 +85,16 @@ synonym:
   a parked window "peeks" past an edge uses the verb, never a
   setting or label. Never a *tooltip*, which the peek replaced, nor
   a *popover* or *preview*.
+- **shortcut group** — the band a KiwiHub row is listed in: a
+  built-in group named by its Lua token, or one a binding's
+  `group` makes (#2544, `ShortcutGroup`). Say *shortcut group* in
+  copy; a bare *group* stays the App Bar's same-app group, and a
+  command's namespace is a *namespace*. A binding's **symbol** is
+  an SF Symbol name, the same kind the `symbol` row below names.
+  The `</>` its row falls back to is shown, never named: copy
+  writes `</>`, and *Lua mark* is the code's name alone
+  (`ShortcutsReferenceBuilder.luaMark`), since *mark* is the
+  window glyph's word.
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One family;
@@ -227,7 +237,8 @@ synonym:
   same kind of monochrome mark — and a layout's symbol, the
   `LayoutMode.symbol` the Layout menu and the Space Bar's
   `item_label` draw (#1535), is that same SF Symbol kind; a
-  further use of the word owes this row an entry. In a catalog, the two words are the
+  further use of the word owes this row an entry. A shortcut's `symbol` (#2544) is
+  that same SF Symbol kind. In a catalog, the two words are the
   translator's own under `docs/localization-naming.md` ▸
   Family C, and must differ from each other and from the
   catalog's word for an app icon. `AppSymbolNounTests` holds

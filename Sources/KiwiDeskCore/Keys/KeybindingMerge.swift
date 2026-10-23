@@ -51,6 +51,11 @@ public enum KeybindingMerge {
             bindings[index].lua = row.lua
             bindings[index].kind = row.kind
             bindings[index].label = row.label
+            // What the binding says of itself follows its source
+            // (#2544), cleared where the source dropped it.
+            bindings[index].desc = row.desc
+            bindings[index].group = row.group
+            bindings[index].symbol = row.symbol
         } else {
             bindings.append(row)
         }

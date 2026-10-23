@@ -59,19 +59,24 @@ enum ShortcutsReferenceBuilder {
             resizeStep: resizeStep
         )
 
+        // A recognised binding that names a group of its own leaves
+        // its built-in band for it (#2544 ▸ Ruling).
+        var regrouped: [OwnRow] = []
         func rows(_ commands: [NavCommand]) -> [ShortcutRow] {
             commands.compactMap { cmd in
                 guard let binding = bound(cmd.lua) else {
                     return nil
                 }
                 consumed.insert(binding.id)
-                let icon = icon(for: cmd)
                 let combo = glyphs(binding.combo)
-                return ShortcutRow(
+                // A field the binding sets wins; one it leaves empty
+                // keeps the built-in name or symbol (#2544).
+                let row = ShortcutRow(
                     id: cmd.lua,
-                    label: cmd.resolvedLabel,
+                    label: binding.desc.isEmpty
+                        ? cmd.resolvedLabel : binding.desc,
                     combo: combo,
-                    icon: icon,
+                    icon: ownSymbol(binding.symbol) ?? icon(for: cmd),
                     unavailable: cmd.unavailable != nil,
                     fold: ShortcutFold.tag(
                         for: cmd,
@@ -80,6 +85,11 @@ enum ShortcutsReferenceBuilder {
                         rendered: combo
                     )
                 )
+                guard binding.group.isEmpty else {
+                    regrouped.append(OwnRow(row: row, group: binding.group))
+                    return nil
+                }
+                return row
             }
         }
 
@@ -113,7 +123,7 @@ enum ShortcutsReferenceBuilder {
             }
             + buildApps(layer, consumed: &consumed)
         let filed = file(
-            buildCustom(layer, consumed: consumed)
+            regrouped + buildCustom(layer, consumed: consumed)
                 + buildUnread(unread, meta: unreadMeta),
             controls: controls,
             apps: apps

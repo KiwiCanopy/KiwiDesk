@@ -265,6 +265,12 @@ extension ShortcutsReferenceBuilder {
     /// A binding's own symbol where it names an SF Symbol, else the
     /// Lua mark; a name that is none is a Config Issue (#2544).
     static func ownIcon(_ symbol: String) -> String {
-        symbol.isEmpty || !KiwiCore.iconIsSymbol(symbol) ? luaMark : symbol
+        ownSymbol(symbol) ?? luaMark
+    }
+
+    /// A binding's own symbol where it names an SF Symbol; nil where
+    /// it names none, or one that is not (#2544).
+    static func ownSymbol(_ symbol: String) -> String? {
+        symbol.isEmpty || !KiwiCore.iconIsSymbol(symbol) ? nil : symbol
     }
 }
