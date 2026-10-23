@@ -13,7 +13,8 @@ extension ShortcutsReferenceBuilder {
     }
 
     /// Files `own` into the built-in `controls` and `apps`, the
-    /// user's groups and Custom; built-in groups left empty drop.
+    /// user's groups and Custom, folding the rows each one gains;
+    /// built-in groups left empty drop.
     static func file(
         _ own: [OwnRow],
         controls: [ShortcutSubgroup],
@@ -25,6 +26,8 @@ extension ShortcutsReferenceBuilder {
             groups: [],
             custom: []
         )
+        let built = controls.map(\.rows.count)
+        let builtApps = apps.count
         for entry in own {
             switch ShortcutGroup.filing(entry.group) {
             case .none:
@@ -50,6 +53,26 @@ extension ShortcutsReferenceBuilder {
                     )
                 }
             }
+        }
+        // A recognised fold that moved whole folds again where it
+        // lands; the rows a band was built with are folded already.
+        func foldingGained(_ rows: [ShortcutRow], after kept: Int)
+            -> [ShortcutRow]
+        {
+            Array(rows.prefix(kept))
+                + ShortcutFold.folded(Array(rows.dropFirst(kept)))
+        }
+        for index in filed.controls.indices {
+            filed.controls[index].rows = foldingGained(
+                filed.controls[index].rows,
+                after: built[index]
+            )
+        }
+        filed.apps = foldingGained(filed.apps, after: builtApps)
+        for index in filed.groups.indices {
+            filed.groups[index].rows = ShortcutFold.folded(
+                filed.groups[index].rows
+            )
         }
         filed.controls.removeAll { $0.rows.isEmpty }
         return filed

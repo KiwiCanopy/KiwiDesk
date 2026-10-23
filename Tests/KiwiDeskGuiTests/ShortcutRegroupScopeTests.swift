@@ -140,9 +140,12 @@ struct ShortcutRegroupScopeTests {
         let layout = try #require(
             built.controls.first { $0.group == .layout }
         )
-        let moved = layout.rows.flatMap {
-            $0.members.isEmpty ? [$0.id] : $0.members.map(\.id)
-        }
-        #expect(moved.filter { $0.hasPrefix("KiwiDesk.focus(") }.count == 4)
+        let folded = layout.rows.filter { $0.members.count == 4 }
+        #expect(folded.count == 1)
+        #expect(
+            folded.first?.members.allSatisfy {
+                $0.id.hasPrefix("KiwiDesk.focus(")
+            } == true
+        )
     }
 }
