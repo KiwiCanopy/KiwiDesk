@@ -4,6 +4,16 @@ import KiwiDeskCore
 /// Shortcut reference row glyphs and combo string formatting
 /// (`ShortcutsReferenceBuilder`, #820).
 extension ShortcutsReferenceBuilder {
+    /// A row's glyph: the command's own, else its direction, its
+    /// Space, or its verb. Every row the panel draws resolves to
+    /// one (#2530, `ShortcutRowSymbolTests`).
+    static func icon(for cmd: NavCommand) -> String? {
+        cmd.icon.flatMap { $0.isEmpty ? nil : $0 }
+            ?? directionalIcon(for: cmd.lua)
+            ?? spaceFallbackIcon(for: cmd.lua)
+            ?? verbIcon(for: cmd.lua)
+    }
+
     /// SF Symbol icon name for compass-direction navigation commands.
     static func directionalIcon(for lua: String) -> String? {
         guard !lua.contains("_space"),
@@ -56,6 +66,22 @@ extension ShortcutsReferenceBuilder {
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"
+        // The bars' show/hide (#2530): the Space Bar wears the arrowed
+        // symbol the 3.2.0 notes' hiding-bars spotlight wears, the App
+        // Bar the strip along the screen's foot (owner, 2026-10-23).
+        case KeybindingCatalog.toggleSpaceBar.lua:
+            return "menubar.arrow.up.rectangle"
+        case KeybindingCatalog.toggleAppBar.lua:
+            return "dock.rectangle"
+        // Track's own verbs: to the line before or after, a swap
+        // of two tracks (#2530).
+        case KeybindingCatalog.moveToTrackRows[0].lua:
+            return "arrow.backward.to.line"
+        case KeybindingCatalog.moveToTrackRows[1].lua:
+            return "arrow.forward.to.line"
+        case KeybindingCatalog.trackSwapRows[0].lua,
+            KeybindingCatalog.trackSwapRows[1].lua:
+            return "rectangle.2.swap"
         default:
             break
         }
@@ -80,18 +106,11 @@ extension ShortcutsReferenceBuilder {
         return nil
     }
 
-    /// The symbols the Shortcuts side draws beyond `verbIcon`'s
-    /// Core marks — its own literals, Custom's Lua mark and the
-    /// gather badge — for the resolve guard.
+    /// The symbols the Shortcuts side draws on no command row —
+    /// Custom's Lua mark and the gather badge — for the resolve
+    /// guard; a command row's symbol is resolved from the rows
+    /// themselves (`ShortcutRowSymbolTests`).
     static let verbSymbols = [
-        "rectangle.righthalf.inset.filled.arrow.right",
-        "rectangle.lefthalf.inset.filled.arrow.left",
-        "square.3.layers.3d",
-        "arrow.right.and.line.vertical.and.arrow.left",
-        "arrow.left.and.line.vertical.and.arrow.right",
-        "arrow.down.and.line.horizontal.and.arrow.up",
-        "arrow.up.and.line.horizontal.and.arrow.down",
-        "arrow.counterclockwise",
         "curlybraces",
         "rectangle.stack",
     ]
