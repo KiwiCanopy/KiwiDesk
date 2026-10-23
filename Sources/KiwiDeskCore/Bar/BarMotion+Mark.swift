@@ -7,15 +7,14 @@ import QuartzCore
 /// censuses this file.
 extension BarMotion {
     /// How a shelf's reveal plays, as far as its mark keeps time
-    /// with it: the user's `reveal_style`, an unfold on a shelf with
-    /// no plate spreading its boxes (owner ruling, 2026-10-21) and a
-    /// grow there wiping over them; `fade` for a shelf not yet
-    /// shown.
+    /// with it: the style the shelf plays (`playedRevealStyle`), an
+    /// unfold on a shelf with no plate spreading its boxes (owner
+    /// ruling, 2026-10-21); `fade` for a shelf not yet shown.
     enum RevealKind: Equatable {
         case slide, grow, unfold, spread, fade
 
         init(_ shelf: KiwiShelf) {
-            switch shelf.revealStyle {
+            switch shelf.playedRevealStyle {
             case .slide: self = .slide
             case .grow: self = .grow
             case .unfold: self = shelf.drawsPlate ? .unfold : .spread

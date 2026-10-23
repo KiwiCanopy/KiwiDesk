@@ -196,6 +196,13 @@ public struct KiwiShelf: Sendable, Equatable {
     /// plate beneath them.
     public var drawsPlate: Bool { backgroundStyle != .boxed }
 
+    /// The reveal style the shelf actually plays — the ONE answer
+    /// the motion and Settings' note both read: a grow with no
+    /// plate plays as an unfold (#2556), every other pick as picked.
+    public var playedRevealStyle: RevealStyle {
+        revealStyle == .grow && !drawsPlate ? .unfold : revealStyle
+    }
+
     /// True if the plate spans edge-to-edge.
     public var plateSpans: Bool {
         drawsPlate && backgroundFit == .full

@@ -7,10 +7,11 @@ import SwiftUI
 /// 2026-10-21).
 extension KiwiShelfCard {
     @ViewBuilder var revealStyleRow: some View {
-        let reason = BarsGates(
+        let gates = BarsGates(
             settings: model.config.settings,
             guiManaged: model.guiManaged
-        ).inertReason(for: .kiwishelf(.revealStyle))
+        )
+        let reason = gates.inertReason(for: .kiwishelf(.revealStyle))
         SegmentedPicker(
             L("kiwishelf.reveal_style.label", "Reveal"),
             selection: shelf.revealStyle,
@@ -20,8 +21,8 @@ extension KiwiShelfCard {
                 "How a hidden bar appears: \u{201C}%1$@\u{201D} brings "
                     + "the whole bar in from the screen edge; "
                     + "\u{201C}%2$@\u{201D} grows it out of its mark, "
-                    + "or wipes across the boxes of a \u{201C}%5$@"
-                    + "\u{201D} background; \u{201C}%3$@\u{201D} "
+                    + "and unfolds on a \u{201C}%5$@\u{201D} "
+                    + "background; \u{201C}%3$@\u{201D} "
                     + "stretches it out of the mark along the edge, "
                     + "then deepens it, or springs each box out of the "
                     + "mark; \u{201C}%4$@\u{201D} fades it in where it "
@@ -36,6 +37,9 @@ extension KiwiShelfCard {
         )
         .modifier(GreyOut(active: reason != nil))
         .searchAnchored(SettingsCatalog.bars.kiwishelfRevealStyle)
+        if reason == nil, gates.growPlaysAsUnfold {
+            note(BarsGateHelp.growPlaysAsUnfold)
+        }
         SettingsDisclosure(
             SettingsCatalog.bars.kiwishelfDurations,
             isExpanded: $durationsExpanded,
@@ -86,7 +90,12 @@ extension KiwiShelfCard {
 
     /// A reason sentence under what it greys, outside the grey.
     func caption(_ reason: BarsGates.InertReason) -> some View {
-        Text(BarsGateHelp.sentence(for: reason))
+        note(BarsGateHelp.sentence(for: reason))
+    }
+
+    /// A caption-weight line under a row.
+    func note(_ text: String) -> some View {
+        Text(text)
             .font(.caption)
             .foregroundStyle(SettingsTheme.ink3)
             .fixedSize(horizontal: false, vertical: true)
