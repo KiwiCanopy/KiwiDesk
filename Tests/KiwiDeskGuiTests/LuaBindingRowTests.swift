@@ -6,8 +6,8 @@ import Testing
 
 /// A Lua binding's Settings row (#2544 ▸ Ruling): its Description,
 /// symbol and shortcut group write the binding, a body of more than
-/// one line reads as a readout rather than a field, the editor keeps
-/// an edit on a click away, and the symbol picker offers symbols
+/// one line reads as a readout rather than a field, the editor writes
+/// the draft as it is typed, and the symbol picker offers symbols
 /// alone. Source scans, off the main actor.
 @Suite("Lua binding row")
 struct LuaBindingRowTests {
@@ -73,27 +73,30 @@ struct LuaBindingRowTests {
     @Test("the row speaks as one binding, by its name")
     func rowSpeaksByName() throws {
         let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
-        #expect(row.contains(".accessibilityElement(children:.contain)"))
+        #expect(
+            row.contains(
+                ".accessibilityElement(children:.contain)"
+                    + ".accessibilityLabel(name)"
+            )
+        )
+        #expect(row.contains("set:{if$0!=nil||editing?.id==id{"))
         #expect(row.contains("KeyRecorderField(name:name,"))
         #expect(row.contains("rowName:name)"))
     }
 
-    /// Only Cancel drops an edit: Done and a click away keep it.
-    @Test("a click away keeps the edit, Cancel drops it")
-    func clickAwayKeeps() throws {
+    /// The body is the draft's from the first keystroke, so a click
+    /// away keeps it and no write can land after a Save or a Revert;
+    /// only Cancel puts the opening body back.
+    @Test("the editor writes as typed, Cancel restores")
+    func editorWritesLive() throws {
         let editor = try Self.source("Lua/LuaBindingEditor.swift")
-        #expect(editor.contains(".onDisappear(perform:keep)"))
+        #expect(editor.contains("LuaSourceEditor(text:$text,"))
+        #expect(!editor.contains("onDisappear"))
         #expect(
-            editor.contains(
-                "privatefunckeep(){guard!settledelse{return}"
-                    + "settled=trueiftext!=seed{write(text)}}"
-            )
+            editor.contains("privatefunccancel(){text=seeddismiss()}")
         )
-        #expect(
-            editor.contains(
-                "privatefunccancel(){settled=truedismiss()}"
-            )
-        )
+        let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
+        #expect(row.contains("text:luaBinding(id),"))
     }
 
     /// A shortcut's symbol is an SF Symbol name, so nothing else is

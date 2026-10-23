@@ -13,6 +13,8 @@ struct ShortcutGroupField: View {
     let rowName: String
 
     @State private var text = ""
+    /// New group… emptied the field; an empty commit keeps the group.
+    @State private var startedNew = false
     @FocusState private var editing: Bool
 
     private var naming: ShortcutGroupNaming { .current }
@@ -44,12 +46,18 @@ struct ShortcutGroupField: View {
     }
 
     private func commit() {
-        let stored = naming.stored(text)
+        let stored = naming.committed(
+            text,
+            over: group,
+            startedNew: startedNew
+        )
+        startedNew = false
         if stored != group { group = stored }
         text = naming.shown(stored)
     }
 
     private func revert() {
+        startedNew = false
         text = naming.shown(group)
     }
 
@@ -80,6 +88,7 @@ struct ShortcutGroupField: View {
                 }
             case .newGroup:
                 return PullDownItem(title: newGroupTitle) {
+                    startedNew = true
                     text = ""
                     editing = true
                 }
@@ -92,7 +101,7 @@ struct ShortcutGroupField: View {
     }
 
     private var builtInHeader: String {
-        L("shortcuts.group.built_in", "Built-in")
+        L("shortcuts.group.built_in", "Built-in shortcut groups")
     }
 
     private var ownHeader: String {
@@ -100,7 +109,7 @@ struct ShortcutGroupField: View {
     }
 
     private var newGroupTitle: String {
-        L("shortcuts.group.new", "New group…")
+        L("shortcuts.group.new", "New shortcut group…")
     }
 
     /// The label replaced the menu's own announcement, so the

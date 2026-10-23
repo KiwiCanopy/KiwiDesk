@@ -51,6 +51,31 @@ struct ShortcutGroupFieldTests {
         #expect(naming.stored("   ") == "")
     }
 
+    /// An own group named like a built-in title — Lua files it by
+    /// token alone — is never re-filed by a focus and a blur.
+    @Test("unchanged text keeps the stored group")
+    func unchangedTextKeeps() {
+        let own = "Title of focus"
+        #expect(naming.committed(naming.shown(own), over: own) == own)
+        #expect(naming.committed("Title of focus", over: "") == "focus")
+        #expect(naming.committed("Mine", over: "focus") == "Mine")
+    }
+
+    /// New group… empties the field for a name; leaving it empty
+    /// keeps the group it replaced, where clearing it by hand does
+    /// not.
+    @Test("an empty New group keeps the group it replaced")
+    func emptyNewGroupKeeps() {
+        #expect(
+            naming.committed("", over: "Mine", startedNew: true) == "Mine"
+        )
+        #expect(naming.committed("", over: "Mine") == "")
+        #expect(
+            naming.committed("Theirs", over: "Mine", startedNew: true)
+                == "Theirs"
+        )
+    }
+
     @Test("the menu: built-ins, the user's own, Custom, New group")
     func menuOrder() {
         let entries = ShortcutGroupMenu.entries(

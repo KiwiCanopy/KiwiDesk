@@ -8,32 +8,30 @@ struct LuaEditRequest: Identifiable, Equatable {
 }
 
 /// A Lua binding's body in Settings ▸ Lua's own editor (#2544 ▸
-/// Ruling). Done (⌘Return) and a click away write the draft; Cancel
-/// (Escape) drops the edit.
+/// Ruling). The body writes the draft as it is typed, so Done
+/// (⌘Return) and a click away leave the edit and no late write can
+/// land after a Save or a Revert; Cancel (Escape) puts back the body
+/// the row had when the editor opened.
 struct LuaBindingEditor: View {
     let title: String
     /// What VoiceOver calls the body.
     let spokenName: String
-    let seed: String
-    let write: (String) -> Void
+    @Binding var text: String
     let dismiss: () -> Void
 
-    @State private var text: String
-    @State private var settled = false
+    @State private var seed: String
 
     init(
         title: String,
         spokenName: String,
-        seed: String,
-        write: @escaping (String) -> Void,
+        text: Binding<String>,
         dismiss: @escaping () -> Void
     ) {
         self.title = title
         self.spokenName = spokenName
-        self.seed = seed
-        self.write = write
+        _text = text
         self.dismiss = dismiss
-        _text = State(initialValue: seed)
+        _seed = State(initialValue: text.wrappedValue)
     }
 
     var body: some View {
@@ -50,30 +48,17 @@ struct LuaBindingEditor: View {
                 Button(L("footer.cancel", "Cancel"), action: cancel)
                     .settingsActionButton()
                     .keyboardShortcut(.cancelAction)
-                Button(L("common.done", "Done"), action: done)
+                Button(L("common.done", "Done"), action: dismiss)
                     .kiwiProminentButton()
                     .keyboardShortcut(.return, modifiers: .command)
             }
         }
         .padding(12)
         .frame(width: 460)
-        // A click away keeps the edit: only Cancel drops it.
-        .onDisappear(perform: keep)
-    }
-
-    private func keep() {
-        guard !settled else { return }
-        settled = true
-        if text != seed { write(text) }
-    }
-
-    private func done() {
-        keep()
-        dismiss()
     }
 
     private func cancel() {
-        settled = true
+        text = seed
         dismiss()
     }
 }

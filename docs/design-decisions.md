@@ -10764,9 +10764,11 @@ can't enumerate them at runtime, so every symbol picker ships
 its own list. Ours is curated *with search tags* ("mail" finds
 `envelope`), which searches better than a raw dump of ~6,000
 names ever could. The full catalog stays reachable: any valid
-SF Symbol name typed into the search appears as a result, and
-any single character (incl. emoji) works via "Use as text".
-One `IconPicker` serves layer icons and space icons. (#68 §6.4)
+SF Symbol name typed into the search appears as a result, and,
+where the caller takes text, any single character (incl. emoji)
+works via "Use as text". One `IconPicker` serves layer icons,
+space icons and a Lua binding's symbol, the last narrowed to
+symbols (below). (#68 §6.4)
 
 **Browsing is tabbed (Symbols first, every caller); search is
 global; every open starts in one resting shape.** The picker's

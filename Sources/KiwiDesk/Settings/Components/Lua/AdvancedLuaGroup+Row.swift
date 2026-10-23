@@ -39,6 +39,11 @@ extension AdvancedLuaGroup {
                 .accessibilityLabel(
                     L("shortcuts.lua.symbol_ax", "Symbol for %1$@", name)
                 )
+                // `</>` is shown, never named (config-vocabulary.md).
+                .accessibilityValue(
+                    binding.wrappedValue.symbol.isEmpty
+                        ? "</>" : binding.wrappedValue.symbol
+                )
                 luaLine(binding, name: name)
                 ShortcutGroupField(
                     group: binding.group,
@@ -48,15 +53,16 @@ extension AdvancedLuaGroup {
             }
         }
         .accessibilityElement(children: .contain)
+        .accessibilityLabel(name)
         .id(binding.wrappedValue.id.uuidString)
     }
 
     /// The name KiwiHub lists the row under: its description, else
-    /// its Lua.
+    /// its Lua; a row with neither is a new binding.
     func rowName(_ binding: KeyBinding) -> String {
         if !binding.desc.trimmed.isEmpty { return binding.desc }
         if !binding.lua.isEmpty { return LuaBodyShape.firstLine(binding.lua) }
-        return luaPlaceholder
+        return L("shortcuts.lua.new_binding", "New binding")
     }
 
     private func descPlaceholder(_ binding: KeyBinding) -> String {
@@ -118,8 +124,7 @@ extension AdvancedLuaGroup {
                 LuaBindingEditor(
                     title: binding.wrappedValue.desc,
                     spokenName: spoken,
-                    seed: lua,
-                    write: { writeLua($0, id: id) },
+                    text: luaBinding(id),
                     dismiss: { editing = nil }
                 )
                 .settingsPopoverChrome()
@@ -146,7 +151,8 @@ extension AdvancedLuaGroup {
     private func editBinding(_ id: UUID) -> Binding<LuaEditRequest?> {
         Binding(
             get: { editing?.id == id ? editing : nil },
-            set: { editing = $0 }
+            // A row's own dismissal never closes another row's.
+            set: { if $0 != nil || editing?.id == id { editing = $0 } }
         )
     }
 

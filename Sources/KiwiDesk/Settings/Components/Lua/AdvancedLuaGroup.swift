@@ -68,11 +68,17 @@ struct AdvancedLuaGroup: View {
         )
     }
 
-    /// Writes an edited Lua body into the row, found by id.
-    func writeLua(_ lua: String, id: UUID) {
-        guard let index = bindings.firstIndex(where: { $0.id == id })
-        else { return }
-        bindings[index].lua = lua
+    /// A row's Lua body, found by id at each read and write — the
+    /// editor popover outlives no row, but the array may move.
+    func luaBinding(_ id: UUID) -> Binding<String> {
+        Binding(
+            get: { bindings.first { $0.id == id }?.lua ?? "" },
+            set: { lua in
+                guard let index = bindings.firstIndex(where: { $0.id == id })
+                else { return }
+                bindings[index].lua = lua
+            }
+        )
     }
 
     /// Removes the row from the draft.
