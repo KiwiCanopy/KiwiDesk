@@ -1050,6 +1050,7 @@
   "kiwishelf.reveal_style.fade": "淡入",
   "kiwishelf.reveal_style.grow": "放大",
   "kiwishelf.reveal_style.label": "出现效果",
+  "kiwishelf.reveal_style.label.help": "隐藏的栏如何出现：“%1$@”让整个栏从屏幕边缘移入；“%2$@”让栏从细条中放大，背景为“%5$@”时则展开；“%3$@”让栏从细条沿边缘拉长，再加厚，或让每个方框从细条中弹出；“%4$@”让栏在原处淡入。没有细条的栏会从屏幕边缘的中间放大或展开。",
   "kiwishelf.reveal_style.no_bar_hides": "没有会隐藏的栏，因此没有需要显示的内容。",
   "kiwishelf.reveal_style.slide": "滑入",
   "kiwishelf.reveal_style.unfold": "展开",

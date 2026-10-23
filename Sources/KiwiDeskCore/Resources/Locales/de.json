@@ -1050,6 +1050,7 @@
   "kiwishelf.reveal_style.fade": "Einblenden",
   "kiwishelf.reveal_style.grow": "Wachsen",
   "kiwishelf.reveal_style.label": "Erscheinen",
+  "kiwishelf.reveal_style.label.help": "Wie eine ausgeblendete Leiste erscheint: „%1$@“ schiebt die ganze Leiste vom Bildschirmrand herein; „%2$@“ lässt sie aus ihrem Streifen wachsen und entfaltet sie auf einem „%5$@“-Hintergrund; „%3$@“ zieht sie aus dem Streifen entlang der Kante in die Länge und dann in die Tiefe, oder lässt jedes Kästchen aus dem Streifen herausspringen; „%4$@“ blendet sie an ihrem Platz ein. Eine Leiste ohne Streifen wächst oder entfaltet sich aus der Mitte der Bildschirmkante.",
   "kiwishelf.reveal_style.no_bar_hides": "Keine Leiste wird je ausgeblendet, daher kann nichts erscheinen.",
   "kiwishelf.reveal_style.slide": "Schieben",
   "kiwishelf.reveal_style.unfold": "Entfalten",

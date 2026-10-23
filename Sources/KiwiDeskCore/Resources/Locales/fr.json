@@ -1050,6 +1050,7 @@
   "kiwishelf.reveal_style.fade": "Fondu",
   "kiwishelf.reveal_style.grow": "Agrandir",
   "kiwishelf.reveal_style.label": "Apparition",
+  "kiwishelf.reveal_style.label.help": "Comment une barre masquée apparaît : « %1$@ » fait entrer toute la barre depuis le bord de l'écran ; « %2$@ » l'agrandit à partir de sa bande, et la déplie sur un fond « %5$@ » ; « %3$@ » l'étire depuis la bande le long du bord, puis l'épaissit, ou fait jaillir chaque cadre de la bande ; « %4$@ » la fait apparaître en fondu sur place. Une barre sans bande s'agrandit ou se déplie depuis le milieu du bord de l'écran.",
   "kiwishelf.reveal_style.no_bar_hides": "Aucune barre n’est jamais masquée : il n’y a donc rien à faire apparaître.",
   "kiwishelf.reveal_style.slide": "Glisser",
   "kiwishelf.reveal_style.unfold": "Déplier",

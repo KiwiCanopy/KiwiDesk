@@ -1050,6 +1050,7 @@
   "kiwishelf.reveal_style.fade": "Dissolvi",
   "kiwishelf.reveal_style.grow": "Ingrandisci",
   "kiwishelf.reveal_style.label": "Comparsa",
+  "kiwishelf.reveal_style.label.help": "Come compare una barra nascosta: «%1$@» porta l'intera barra dentro dal bordo dello schermo; «%2$@» la ingrandisce dalla sua striscia, e la dispiega su uno sfondo «%5$@»; «%3$@» la allunga dalla striscia lungo il bordo e poi la ispessisce, o fa scattare ogni riquadro fuori dalla striscia; «%4$@» la fa comparire in dissolvenza dove si trova. Una barra senza striscia si ingrandisce o si dispiega dal centro del bordo dello schermo.",
   "kiwishelf.reveal_style.no_bar_hides": "Nessuna barra viene mai nascosta, quindi non c'è nulla da far comparire.",
   "kiwishelf.reveal_style.slide": "Scorri",
   "kiwishelf.reveal_style.unfold": "Dispiega",
