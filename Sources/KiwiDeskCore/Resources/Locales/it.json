@@ -1850,7 +1850,7 @@
   "shortcuts.dropped_chord": "%1$@ saltata: «%2$@» ha già %3$@.",
   "shortcuts.editing_layer": "Modifica del livello «%1$@»",
   "shortcuts.field.label": "Cerca scorciatoie",
-  "shortcuts.focus_wrap": "Scorrimento circolare del focus",
+  "shortcuts.focus_wrap": "Focus circolare",
   "shortcuts.focus_wrap.all_screens": "Tutti gli schermi",
   "shortcuts.focus_wrap.help": "%1$@: dopo l'ultima finestra, il focus torna alla prima sullo stesso schermo. %2$@: prosegue sullo schermo successivo e, dopo l'ultimo schermo, torna al primo. Con un solo schermo, le due opzioni funzionano allo stesso modo.",
   "shortcuts.focus_wrap.off": "Disattivato",

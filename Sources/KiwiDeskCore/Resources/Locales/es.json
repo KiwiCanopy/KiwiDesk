@@ -1850,7 +1850,7 @@
   "shortcuts.dropped_chord": "%1$@ omitido: «%2$@» ya tiene %3$@.",
   "shortcuts.editing_layer": "Editando la capa «%1$@»",
   "shortcuts.field.label": "Buscar atajos",
-  "shortcuts.focus_wrap": "Envolver foco",
+  "shortcuts.focus_wrap": "Foco circular",
   "shortcuts.focus_wrap.all_screens": "Todas las pantallas",
   "shortcuts.focus_wrap.help": "%1$@: después de la última ventana, el foco vuelve a la primera de la misma pantalla. %2$@: continúa en la siguiente pantalla y, después de la última pantalla, vuelve a la primera. Con una sola pantalla, ambas opciones funcionan igual.",
   "shortcuts.focus_wrap.off": "Desactivado",

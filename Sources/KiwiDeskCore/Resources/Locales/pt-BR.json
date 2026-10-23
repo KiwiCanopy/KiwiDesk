@@ -1850,7 +1850,7 @@
   "shortcuts.dropped_chord": "%1$@ ignorado: “%2$@” já tem %3$@.",
   "shortcuts.editing_layer": "Editando a camada “%1$@”",
   "shortcuts.field.label": "Buscar atalhos",
-  "shortcuts.focus_wrap": "Rolagem circular de foco",
+  "shortcuts.focus_wrap": "Foco circular",
   "shortcuts.focus_wrap.all_screens": "Todas as telas",
   "shortcuts.focus_wrap.help": "%1$@: depois da última janela, o foco volta à primeira na mesma tela. %2$@: ele continua na próxima tela e, depois da última tela, volta à primeira. Com uma só tela, as duas opções funcionam igual.",
   "shortcuts.focus_wrap.off": "Desativado",
