@@ -155,14 +155,33 @@ struct BarTextBaselineSiteTests {
     }
 
     /// The pill's number sits on its figures band, centred on the
-    /// pill, in Apple Chancery at a size where centring its line box
-    /// instead misses by more than a point.
+    /// pill, in a face where centring its line box instead misses by
+    /// more than two points — measured here, so the premise holds
+    /// (Apple Chancery's badge face missed by 0.31 pt, guard-prover).
     @Test("the App Bar handle's count centres its figures")
     func handleCountLine() throws {
-        try #require(BarFont.isInstalled(Self.family))
-        var shelf = KiwiShelf()
-        shelf.fontFamily = Self.family
-        let font = shelf.badgeFont(ofSize: 40, emphasis: .semibold)
+        let middle: CGFloat = 60
+        func font(_ family: String) -> NSFont {
+            var shelf = KiwiShelf()
+            shelf.fontFamily = family
+            return shelf.badgeFont(ofSize: 40, emphasis: .semibold)
+        }
+        func separation(_ font: NSFont) -> CGFloat {
+            let figures = BarTextGlyph.lineTop(
+                centredOn: middle,
+                band: .figures,
+                font: font
+            )
+            let box = middle - (font.ascender - font.descender) / 2
+            return abs(figures - box)
+        }
+        let family = try #require(
+            ["Hoefler Text", "Zapfino", Self.family].first {
+                BarFont.isInstalled($0) && separation(font($0)) > 2
+            },
+            "no installed face separates the line box from the figures"
+        )
+        let font = font(family)
         var spec = ShelfIndicatorSpec(
             mark: .line,
             frame: CGRect(x: 0, y: 0, width: 36, height: 8),
@@ -193,10 +212,13 @@ struct BarTextBaselineSiteTests {
         let lead = 150 - count.content.along / 2
         let columns = Int(lead)...Int(lead + count.number.width)
         let rows = try #require(Self.whiteRows(of: dots, columns: columns))
-        let middle =
+        let drawn =
             rows.upperBound
             - BarTextBaselineTests.bandMiddle(.figures, font: font)
-        #expect(abs(middle - 60) <= 1, "figures at \(middle), pill \(pill)")
+        #expect(
+            abs(drawn - middle) <= 1,
+            "figures at \(drawn), pill \(pill), \(family)"
+        )
     }
 
     /// The rows, in points down from the top, where `view` draws

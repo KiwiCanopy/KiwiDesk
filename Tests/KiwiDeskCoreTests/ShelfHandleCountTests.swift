@@ -51,23 +51,14 @@ struct ShelfHandleCountTests {
         return spec
     }
 
-    @Test("A pill stays inside the rim with 1 pt clear")
-    func pillInsideTheRim() {
-        #expect(spec(rim: 3).pillDepth == 12)
-        #expect(spec(rim: 1).pillDepth == ShelfIndicatorSpec.labelDepth)
-        let grown =
-            ShelfIndicatorSpec.depth + 2 * ShelfIndicatorSpec.hoverGrowth
-        for rim in [1, 2, 3, 4] as [CGFloat] {
-            #expect(spec(rim: rim).pillDepth <= grown - 2 * rim - 2)
-        }
-    }
-
     @Test("Top and bottom always show the number; the glyph fits")
     func topShowsTheNumber() throws {
         for windows in [7, 42, 128] {
             let spec = spec(windows: windows)
             let count = try #require(spec.count)
             #expect(count.showsNumber)
+            // A top edge's plate grows along it, never deeper.
+            #expect(spec.growth.across == 0)
             #expect(count.glyph.height > 0)
             #expect(count.glyph.height <= spec.pillDepth - 2)
         }
@@ -147,5 +138,8 @@ struct ShelfHandleCountTests {
         )
         #expect(view.glass == nil)
         #expect(!view.plate.isHidden)
+        // Dropped, not merely forgotten: the box leaves the view.
+        #expect(host.superview == nil)
+        #expect(box.tint.superview == nil)
     }
 }

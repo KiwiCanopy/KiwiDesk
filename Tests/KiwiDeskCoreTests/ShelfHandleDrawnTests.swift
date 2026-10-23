@@ -37,7 +37,7 @@ struct ShelfHandleDrawnTests {
     }
 
     /// `spec` rendered as `ShelfIndicator.show` sizes it, and the
-    /// plate's frame in the view.
+    /// plate's frame in the view — which the panel's room holds.
     private func render(
         _ spec: ShelfIndicatorSpec
     ) -> (rep: NSBitmapImageRep, plate: CGRect)? {
@@ -47,6 +47,10 @@ struct ShelfHandleDrawnTests {
             size: ShelfIndicator.room(of: spec).size
         )
         view.render(spec, animated: false)
+        #expect(
+            view.bounds.contains(view.plate.frame),
+            "plate \(view.plate.frame) past the panel \(view.bounds)"
+        )
         guard
             let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds)
         else { return nil }
@@ -76,6 +80,31 @@ struct ShelfHandleDrawnTests {
         }
         guard let first = hits.first, let last = hits.last else { return nil }
         return CGFloat(first) / scale...CGFloat(last + 1) / scale
+    }
+
+    /// The span across the edge of near-white ink — the count's —
+    /// over `along`, a row range on a side edge.
+    private func inkAcross(
+        _ rep: NSBitmapImageRep,
+        along: ClosedRange<CGFloat>
+    ) -> ClosedRange<CGFloat>? {
+        let scale = CGFloat(rep.pixelsWide) / rep.size.width
+        var low = Int.max
+        var high = Int.min
+        for y in Int(along.lowerBound * scale)..<Int(along.upperBound * scale)
+        {
+            for x in 0..<rep.pixelsWide {
+                guard let colour = rep.colorAt(x: x, y: y),
+                    colour.alphaComponent > 0.9,
+                    colour.redComponent > 0.85, colour.greenComponent > 0.85,
+                    colour.blueComponent > 0.85
+                else { continue }
+                low = min(low, x)
+                high = max(high, x)
+            }
+        }
+        guard low <= high else { return nil }
+        return CGFloat(low) / scale...CGFloat(high + 1) / scale
     }
 
     @Test("The App Bar count pill shows Fill at both ends, inside the rim")
@@ -138,6 +167,10 @@ struct ShelfHandleDrawnTests {
         )
         #expect(across.lowerBound - plate.minX >= side.rimWidth + 0.5)
         #expect(plate.maxX - across.upperBound >= side.rimWidth + 0.5)
+        // The number and symbol stand inside the pill across it.
+        let ink = try #require(inkAcross(rep, along: along))
+        #expect(ink.lowerBound >= across.lowerBound)
+        #expect(ink.upperBound <= across.upperBound)
     }
 
     @Test("A narrow Space name's pill is round, never an upright oval")
