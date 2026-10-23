@@ -75,6 +75,29 @@ struct FocusWrapTests {
         #expect(focused(core) == WindowID(2))
     }
 
+    /// Three BSP windows: 1 full height on the left, 2 above 3 on
+    /// the right. ↑/↓ wrap inside the right column; window 1 has
+    /// nothing above or below in its own column.
+    @Test("This screen wraps BSP up and down within a column")
+    func thisScreenWrapsVertically() {
+        let core = pair()
+        core.state.apply(.windowCreated(window(3, x: 740)))
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
+        let slots = core.tiler.calculatedFrames(state: core.state)
+        let top = [WindowID(2), WindowID(3)].min {
+            (slots[$0]?.minY ?? 0) < (slots[$1]?.minY ?? 0)
+        }!
+        let bottom = top == WindowID(2) ? WindowID(3) : WindowID(2)
+        core.state.workspaces.focus(bottom, in: "1")
+        #expect(core.navigate([.string("down")], swapping: false).isSuccess)
+        #expect(focused(core) == top)
+        #expect(core.navigate([.string("up")], swapping: false).isSuccess)
+        #expect(focused(core) == bottom)
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        #expect(!core.navigate([.string("up")], swapping: false).isSuccess)
+        #expect(focused(core) == WindowID(1))
+    }
+
     @Test("All screens with one screen wraps like This screen")
     func oneScreenAllScreensWraps() {
         let core = pair()
