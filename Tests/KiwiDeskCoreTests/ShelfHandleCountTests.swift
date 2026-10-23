@@ -108,7 +108,7 @@ struct ShelfHandleCountTests {
 
     @Test("A glass mark draws its plate as a glass box that grows")
     func glassPlate() throws {
-        let rest = spec(hovered: false, glass: true)
+        let rest = spec(windows: 42, hovered: false, glass: true)
         let view = ShelfIndicatorView()
         view.frame = CGRect(
             origin: .zero,
@@ -126,14 +126,25 @@ struct ShelfHandleCountTests {
         // The tint only `GlassBox.place` lays under the glass.
         #expect(box.tint.superview != nil)
         let host = try #require(GlassBox.host(of: box.glass))
-        let grownSpec = spec(hovered: true, glass: true)
-        view.render(grownSpec, animated: false)
+        let grownSpec = spec(windows: 42, hovered: true, glass: true)
         let mark = ShelfIndicator.mark(of: grownSpec, in: view.bounds)
-        #expect(
-            host.frame
-                == BarMotion.hoverPlate(mark: mark, edge: .top, hovered: true)
+        let grown = BarMotion.hoverPlate(
+            mark: mark,
+            growth: grownSpec.growth,
+            edge: .top,
+            hovered: true
         )
-        view.render(spec(hovered: true, glass: false), animated: false)
+        // One capsule radius at both sizes: the grown plate's.
+        let capsule = min(grown.width, grown.height) / 2
+        let glass = try #require(box.glass as? NSGlassEffectView)
+        #expect(glass.cornerRadius == capsule)
+        view.render(grownSpec, animated: false)
+        #expect(host.frame == grown)
+        #expect(glass.cornerRadius == capsule)
+        view.render(
+            spec(windows: 42, hovered: true, glass: false),
+            animated: false
+        )
         #expect(view.glass == nil)
         #expect(!view.plate.isHidden)
     }

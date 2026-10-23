@@ -322,6 +322,12 @@ extension KiwiCore {
             cueRevealRefusal(.shownBesideAlways(bar), display: display)
             return .fail("the \(name) is shown beside an always bar")
         }
+        // A shelf stood down for what is in front (full screen, a
+        // presentation, a maximized window) has no target either,
+        // and is no empty bar: it refuses without a pill.
+        if shelfStandsDown(on: display) {
+            return .fail("the \(name) stands down for what is in front")
+        }
         guard
             let key = shelves.reveal.targets.keys.first(where: {
                 $0.shelf.display == display && $0.bar == bar

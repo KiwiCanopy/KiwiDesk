@@ -285,5 +285,10 @@ struct BarFontSiteTests {
         #expect(name.familyName == Self.family)
         #expect(count.familyName == Self.family)
         #expect(name.pointSize == count.pointSize)
+        // The count takes the badge face, heavier than the name's.
+        #expect(
+            NSFontManager.shared.weight(of: count)
+                > NSFontManager.shared.weight(of: name)
+        )
     }
 }

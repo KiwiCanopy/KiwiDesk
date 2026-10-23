@@ -32,6 +32,15 @@ struct ShelfRevealRefusalWiringTests {
         let body = try Self.body
         #expect(body.contains("cueRevealRefusal(.nothingToShow(bar)"))
         #expect(body.contains("has nothing to show here"))
+        // A stood-down shelf is asked first, so its missing target
+        // never reads as an empty bar.
+        let standDown = try #require(
+            body.range(of: "shelfStandsDown(on: display)")
+        )
+        let empty = try #require(
+            body.range(of: "cueRevealRefusal(.nothingToShow")
+        )
+        #expect(standDown.lowerBound < empty.lowerBound)
     }
 
     @Test("Each refusal reads its own sentence")
