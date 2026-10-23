@@ -115,6 +115,13 @@ synonym:
   lone App Bar's hidden shelf draws a short **line**. Neither is a
   *pill*, an *indicator* or a *badge*, each spoken for here, and
   neither is a *half-moon*.
+- **handle** — what an `auto` bar leaves at its edge, the Space
+  dots or the App Bar's line, as one thing: what the pointer
+  reaches for to bring the bar in (owner, #2567). Name it a
+  *handle* — the bar's handle where another handle could be read —
+  never a *mark*, the on-window glyph's word, nor an *indicator*,
+  the active item's. Rejected for it: *stub*, *trace*, *sliver*
+  (the reserved strip's), *cue*.
 - **held Space** — a Space with windows kept live for the
   arrangement it left, when a switch does not name it (#1507,
   #1790). *Held* is the word in copy and
@@ -237,7 +244,8 @@ synonym:
   `LayoutMode.symbol` the Layout menu and the Space Bar's
   `item_label` draw (#1535), is that same SF Symbol kind; a
   further use of the word owes this row an entry. A shortcut's
-  `symbol` (#2544) is that same SF Symbol kind. In a catalog, the two words are the
+  `symbol` (#2544) is that same SF Symbol kind, and so is the
+  window symbol an App Bar handle's count stands beside (#2567). In a catalog, the two words are the
   translator's own under `docs/localization-naming.md` ▸
   Family C, and must differ from each other and from the
   catalog's word for an app icon. `AppSymbolNounTests` holds

@@ -126,32 +126,38 @@ extension BarMotion {
 
     /// Where the mark's plate stands in its view, y down: `mark`,
     /// grown while hovered by `ShelfIndicatorSpec.hoverGrowth` each
-    /// way along `edge` plus half of `widen`, a label's room, and
-    /// by twice the growth away from the screen side alone — a
+    /// way along `edge` plus half of `growth.widen`, a pill's room,
+    /// and by twice the growth plus `growth.across`, a side-edge
+    /// count's room (#2567), away from the screen side alone — a
     /// plain `NSPanel` is clamped below the menu bar (#436), so a
     /// plate past the screen side moved the mark and the reveal off
     /// the edge. The size is content rather than motion.
     static func hoverPlate(
         mark: CGRect,
-        widen: CGFloat = 0,
+        growth extra: ShelfIndicatorSpec.Growth = .none,
         edge: AppBarEdge,
         hovered: Bool
     ) -> CGRect {
         guard hovered else { return mark }
         let growth = ShelfIndicatorSpec.hoverGrowth
-        let along = growth + widen / 2
-        let inward = hoverShift(edge)
+        let along = growth + extra.widen / 2
+        let deep = growth + extra.across / 2
+        let inward = hoverShift(edge, across: extra.across)
         let grown =
             edge.isHorizontal
-            ? mark.insetBy(dx: -along, dy: -growth)
-            : mark.insetBy(dx: -growth, dy: -along)
+            ? mark.insetBy(dx: -along, dy: -deep)
+            : mark.insetBy(dx: -deep, dy: -along)
         return grown.offsetBy(dx: inward.dx, dy: inward.dy)
     }
 
     /// How far the hovered plate's middle moves off `edge`'s
-    /// screen side, y down: one growth inward.
-    static func hoverShift(_ edge: AppBarEdge) -> CGVector {
-        let growth = ShelfIndicatorSpec.hoverGrowth
+    /// screen side, y down: one growth inward, and half of
+    /// `across`.
+    static func hoverShift(
+        _ edge: AppBarEdge,
+        across: CGFloat = 0
+    ) -> CGVector {
+        let growth = ShelfIndicatorSpec.hoverGrowth + across / 2
         switch edge {
         case .top: return CGVector(dx: 0, dy: growth)
         case .bottom: return CGVector(dx: 0, dy: -growth)
@@ -165,7 +171,10 @@ extension BarMotion {
     /// plate's frame so its stroke never stretches — growing and
     /// fading in over `hoverGrow` where `animated`, Reduce Motion
     /// or not (owner ruling, 2026-10-21). `content`, resting at
-    /// `contentRest`, moves with the plate's middle.
+    /// `contentRest`, moves with the plate's middle. `placePlate`
+    /// writes a plate that is no plain view — a glass box's host,
+    /// which travels with its pair (#2567) — inside the same motion,
+    /// told whether the write glides.
     @MainActor
     static func placeHoverPlate(
         _ plate: NSView,
@@ -173,33 +182,40 @@ extension BarMotion {
         content: NSView,
         contentRest: CGRect,
         mark: CGRect,
-        widen: CGFloat = 0,
+        growth: ShelfIndicatorSpec.Growth = .none,
         edge: AppBarEdge,
         hovered: Bool,
-        animated: Bool
+        animated: Bool,
+        placePlate: ((CGRect, Bool) -> Void)? = nil
     ) {
         let frame = hoverPlate(
             mark: mark,
-            widen: widen,
+            growth: growth,
             edge: edge,
             hovered: hovered
         )
         rim.frame = hoverPlate(
             mark: mark,
-            widen: widen,
+            growth: growth,
             edge: edge,
             hovered: true
         )
-        let shift = hovered ? hoverShift(edge) : .zero
+        let shift =
+            hovered ? hoverShift(edge, across: growth.across) : .zero
         let contentFrame = contentRest.offsetBy(dx: shift.dx, dy: shift.dy)
         plate.wantsLayer = true
+        let glides = animated && plate.frame != frame
         let write = {
-            plate.frame = frame
-            plate.layer?.cornerRadius = min(frame.width, frame.height) / 2
+            if let placePlate {
+                placePlate(frame, glides)
+            } else {
+                plate.frame = frame
+                plate.layer?.cornerRadius = min(frame.width, frame.height) / 2
+            }
             content.frame = contentFrame
             rim.alphaValue = hovered ? 1 : 0
         }
-        guard animated, plate.frame != frame else {
+        guard glides else {
             write()
             return
         }

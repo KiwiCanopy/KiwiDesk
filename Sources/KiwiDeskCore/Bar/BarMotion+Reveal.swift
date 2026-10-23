@@ -34,6 +34,14 @@ extension BarMotion {
         }
     }
 
+    /// A hidden bar's handle a reveal grows out of: its resting
+    /// frame and how its hover grows it (#2567) — one value, so the
+    /// two never part on the way to the reveal.
+    struct RevealMark: Equatable {
+        var frame: CGRect
+        var growth: ShelfIndicatorSpec.Growth = .none
+    }
+
     /// A reveal's inputs, whichever kind plays it: the slide's
     /// `offset`, the grow's and the unfold's mark `origin` and
     /// `plate` — under Boxed the span of the boxes — all in the
@@ -42,6 +50,8 @@ extension BarMotion {
         var kind: RevealKind
         var offset: CGVector = .zero
         var origin: CGRect = .zero
+        /// How the origin mark grows past the plain hover (#2567).
+        var growth: ShelfIndicatorSpec.Growth = .none
         var plate: CGRect?
         var plateRadius: CGFloat = 0
         var edge: AppBarEdge = .top
@@ -100,6 +110,7 @@ extension BarMotion {
         // Out of the mark as its hover leaves it.
         let mark = hoverPlate(
             mark: path.origin,
+            growth: path.growth,
             edge: path.edge,
             hovered: true
         )

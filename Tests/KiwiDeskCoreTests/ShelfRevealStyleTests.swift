@@ -159,7 +159,7 @@ struct ShelfRevealStyleTests {
         let overlay = try #require(
             core.shelves.overlayForTesting(display, edge: .bottom)
         )
-        #expect(overlay.revealOrigin == nil)
+        #expect(overlay.revealMark == nil)
         let origin = overlay.revealPath.origin
         #expect(
             origin

@@ -64,6 +64,8 @@ struct SymbolClassifierSeamTests {
             "builds the App Bar's float mark from a fixed name",
         "Sources/KiwiDeskCore/Bar/ShelfIndicatorSpec+Label.swift":
             "draws a Space icon spaceIdentifier already classified",
+        "Sources/KiwiDeskCore/Bar/ShelfIndicatorSpec+Count.swift":
+            "builds the hidden App Bar mark's count glyphs from fixed names",
         "Tests/KiwiDeskCoreTests/ShelfCountTests.swift":
             "asserts every count chevron RESOLVES; classifies nothing",
     ]

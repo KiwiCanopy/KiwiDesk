@@ -272,4 +272,23 @@ struct BarFontSiteTests {
             }
         )
     }
+
+    /// The handles' text: the Space name in the shelf's text
+    /// face, the App Bar count in its badge face (#2567).
+    @Test("The handles' name and count draw the family")
+    func handles() throws {
+        try #require(BarFont.isInstalled(Self.family))
+        var settings = TilingSettings()
+        settings.kiwishelf.fontFamily = Self.family
+        let name = KiwiCore.HidingShelves.markNameFont(settings)
+        let count = KiwiCore.HidingShelves.markCountFont(settings)
+        #expect(name.familyName == Self.family)
+        #expect(count.familyName == Self.family)
+        #expect(name.pointSize == count.pointSize)
+        // The count takes the badge face, heavier than the name's.
+        #expect(
+            NSFontManager.shared.weight(of: count)
+                > NSFontManager.shared.weight(of: name)
+        )
+    }
 }

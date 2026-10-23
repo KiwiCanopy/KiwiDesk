@@ -10,21 +10,23 @@ import AppKit
 extension ShelfOverlay {
     /// Where the hidden mark sits in the content, from its frame
     /// and the shelf's strip, both AX coordinates.
-    func setRevealOrigin(mark: CGRect?, strip: CGRect) {
+    func setRevealOrigin(mark: BarMotion.RevealMark?, strip: CGRect) {
         guard let mark else {
-            revealOrigin = nil
+            revealMark = nil
             return
         }
-        let local = mark.offsetBy(dx: -strip.minX, dy: -strip.minY)
-        revealOrigin =
-            content.isFlipped
-            ? local
-            : CGRect(
-                x: local.minX,
-                y: strip.height - local.maxY,
-                width: local.width,
-                height: local.height
-            )
+        let local = mark.frame.offsetBy(dx: -strip.minX, dy: -strip.minY)
+        revealMark = .init(
+            frame: content.isFlipped
+                ? local
+                : CGRect(
+                    x: local.minX,
+                    y: strip.height - local.maxY,
+                    width: local.width,
+                    height: local.height
+                ),
+            growth: mark.growth
+        )
     }
 
     /// What the reveal plays along: the shelf's reveal kind — its
@@ -44,8 +46,9 @@ extension ShelfOverlay {
                 depth: drawn.edge.isHorizontal ? strip.height : strip.width,
                 gap: revealGap
             ),
-            origin: revealOrigin
+            origin: revealMark?.frame
                 ?? Self.screenSide(of: restRoom, edge: drawn.edge),
+            growth: revealMark?.growth ?? .none,
             plate: revealPlate?.frame,
             plateRadius: revealPlate?.radius ?? 0,
             edge: drawn.edge,

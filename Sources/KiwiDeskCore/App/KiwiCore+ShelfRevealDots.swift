@@ -43,26 +43,44 @@ extension KiwiCore.HidingShelves {
                 small: ends && !spaces[index].active
             )
         }
-        let look = settings.spaceBarLook
         let label = current.map {
             ShelfIndicatorSpec.label(
                 spaces[$0].spaceGlyph,
-                // The Space Bar's own identifier size, held inside
-                // the pill.
-                font: look.shelf.textFont(
-                    ofSize: min(
-                        look.identifierFontSize(
-                            forDepth: look.shelf.thickness
-                        ),
-                        ShelfIndicatorSpec.labelDepth - 4
-                    )
-                )
+                font: Self.markNameFont(settings)
             )
         }
         return (
             .dots(dots),
             label,
             current.map { .init(index: $0 + 1, count: spaces.count) }
+        )
+    }
+
+    /// The hovered marks' text size: the Space Bar's own identifier
+    /// size, held inside the pill — the Space name's and the App Bar
+    /// count's alike, so the two marks read alike (#2567).
+    @MainActor static func markTextSize(_ settings: TilingSettings) -> CGFloat
+    {
+        let look = settings.spaceBarLook
+        return min(
+            look.identifierFontSize(forDepth: look.shelf.thickness),
+            ShelfIndicatorSpec.labelDepth - 4
+        )
+    }
+
+    /// The Space mark's name: the shelf's text face.
+    @MainActor static func markNameFont(_ settings: TilingSettings) -> NSFont {
+        settings.spaceBarLook.shelf.textFont(ofSize: markTextSize(settings))
+    }
+
+    /// The App Bar mark's count: the shelf's badge face, as every
+    /// bar count takes (bars.md ▸ Bar text takes its face).
+    @MainActor static func markCountFont(
+        _ settings: TilingSettings
+    ) -> NSFont {
+        settings.spaceBarLook.shelf.badgeFont(
+            ofSize: markTextSize(settings),
+            emphasis: .semibold
         )
     }
 }

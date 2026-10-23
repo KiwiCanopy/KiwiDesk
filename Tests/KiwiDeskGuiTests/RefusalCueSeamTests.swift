@@ -295,8 +295,8 @@ struct RefusalCueSeamTests {
                 "KiwiCore+WindowActions.swift": 1,
                 "KiwiCore+VisionReach.swift": 1,
                 // A bar's shortcut refused (#761), sounded
-                // through `soundIfDrawn`.
-                "KiwiCore+ShelfRevealCue.swift": 2,
+                // through `soundIfDrawn`, at the bar alone (#2567).
+                "KiwiCore+ShelfRevealCue.swift": 1,
                 // A Hyper press with nothing to do (#2480): silent
                 // by ruling, on a window or else the shelf.
                 "KiwiCore+HyperBarePress.swift": 2,

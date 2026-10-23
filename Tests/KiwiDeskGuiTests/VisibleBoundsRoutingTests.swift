@@ -96,6 +96,9 @@ struct VisibleBoundsRoutingTests {
         // cold-start fallback once for the main screen.
         "App/KiwiCore+Shelf.swift": 1,
         "App/KiwiCore+AppBar.swift": 1,
+        // A bar's refusal pill sits at that bar's edge of the screen
+        // where no shelf carries it (#2567).
+        "App/KiwiCore+ShelfRevealCue.swift": 1,
         // DO NOT ROUTE. Re-anchor resolves the source AND the
         // destination screen and early-returns when they are
         // equal — under a one-rect hook they always are, so

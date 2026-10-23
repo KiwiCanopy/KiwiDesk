@@ -110,6 +110,7 @@ extension KiwiCore {
                 display: display.id,
                 screen: screen,
                 items: items,
+                appWindows: app?.windowCount,
                 reveal: reveal,
                 gaps: state.workspaces.currentSpace(on: display.id)
                     .map(shown.gaps(for:)) ?? shown.gapsGlobal,
@@ -195,7 +196,7 @@ extension KiwiCore {
         /// A shelf revealed onto an empty edge (#761, #2497), and
         /// the mark at `mark` a grow reveal grows out of.
         var slides = false
-        var mark: CGRect? = nil
+        var mark: BarMotion.RevealMark? = nil
     }
 
     /// Hands each shelf the sections its bars just rendered on its
@@ -232,6 +233,12 @@ extension KiwiCore {
         let groups: [[WindowID]]
         /// The groups' items, then each float's (#1826).
         let items: [AppBarOverlay.Item]
+
+        /// Every window the bar draws: each group's windows, then
+        /// one per float item — the hidden mark's count (#2567).
+        var windowCount: Int {
+            groups.reduce(0) { $0 + $1.count } + items.count - groups.count
+        }
     }
 
     /// The App Bar content for the space shown on `display`, or

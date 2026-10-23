@@ -2537,6 +2537,12 @@ setting goes off (#1374).
 The Space switch's plates draw their material then too.
 :::
 
+:::unreleased
+A hidden bar's Space dots and line wear the glass too, tinted by
+the same fill, and draw that fill flat when the glass is off or
+stood down.
+:::
+
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
 shortcuts panel's
@@ -3033,6 +3039,11 @@ app_bar.set_reserve(false)
 for the App Bar of the active Space's layout. Fails where that
 layout carries no App Bar, or where its App Bar is `"always"`.
 
+:::unreleased
+It fails with a pill too where the Space holds no window, so the
+App Bar has nothing to show.
+:::
+
 **Example:**
 
 ```lua
@@ -3134,6 +3145,13 @@ are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
 short line, which grows when the pointer comes near and opens as
 the Space dots do.
 
+:::unreleased
+Grown, the line shows how many windows the App Bar lists for the
+Space on that screen, beside a window symbol. On a side edge the
+number stands above the symbol; past 99 a stacked-windows symbol
+shows there alone. VoiceOver reads the count at rest too.
+:::
+
 ## Space Bar
 
 The Space Bar (#293) lists, per screen, that screen's Spaces
@@ -3231,13 +3249,18 @@ nothing in any mode.
 Each bar keeps its own value. On an edge the two bars share, the
 edge reserves for its more present bar: beside an `"always"` bar
 an `"auto"` one stays shown, while a `"hidden"` one still shows
-only on its shortcut. Two `"auto"` bars on one edge draw two marks
+only on its shortcut. Two `"auto"` bars on one edge draw two handles
 side by side — the Space dots and the App Bar's line, in the
 shelf's [order](#kiwishelfset_order), where a lone bar would sit
 — each with its own 64-point band, the two meeting between the
-marks. The pointer opens one bar at a time: while a bar is shown,
-the other's mark and band go away. A second bar's shortcut shows
+handles. The pointer opens one bar at a time: while a bar is shown,
+the other's handle and band go away. A second bar's shortcut shows
 it beside the first. A look never carries the value.
+
+:::unreleased
+The Space dots and the App Bar's line wear the bars'
+[Liquid Glass](#kiwishelfset_liquid_glass).
+:::
 
 **Example:**
 

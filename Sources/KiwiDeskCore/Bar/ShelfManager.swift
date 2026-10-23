@@ -26,7 +26,7 @@ final class ShelfManager {
         /// A shelf revealed onto an empty edge (#761, #2497), and
         /// the mark a grow reveal grows out of, AX coordinates.
         var slides = false
-        var mark: CGRect? = nil
+        var mark: BarMotion.RevealMark? = nil
     }
 
     /// A Space Bar minimum the divider reached (`committed` on
@@ -100,6 +100,19 @@ final class ShelfManager {
         body()
     }
     private var last: [Key: Shelf] = [:]
+
+    /// The shown shelf on `display` that carries `bar`, if any, in
+    /// AX coordinates (#2567).
+    func drawnStrip(
+        on display: DisplayID,
+        carrying bar: ShelfBar
+    ) -> (strip: CGRect, edge: AppBarEdge)? {
+        last.values.first {
+            $0.display == display
+                && (bar == .space ? $0.space != nil : $0.app != nil)
+        }
+        .map { ($0.strip, $0.edge) }
+    }
 
     /// The strip last laid on `display` carrying `bar`, else any on
     /// that display, in AX coordinates (#761).

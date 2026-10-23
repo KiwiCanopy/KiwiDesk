@@ -251,6 +251,23 @@ twice, was a question the user answered twice. The argument is
   yields is the revealer's one `ShelfRevealer.yields`, which the
   pointer and the mark both read; a second placement or yield
   beside them is review's.
+  **An App Bar handle counts what `AppBarContent.windowCount`
+  counts, never a second derivation**, carried in the indicator's
+  spec so a count-only change redraws (#2567,
+  `ShelfHandleCountWiringTests`); an App Bar with no window
+  draws no handle, so the count is never 0 (▸
+  `emptyAppBarDrawsNoHandle`); grown on a top or bottom edge it
+  may reach past its band with the count, by ruling. **A hovered
+  pill — the Space name's or the count's — is never deeper than
+  `ShelfIndicatorSpec.pillDepth`**, the room inside the rim, and
+  never shorter than it is deep (`ShelfHandleDrawnTests`). **Every
+  reader of the grown plate takes the spec's one `growth`** — the
+  panel's room, the view and a reveal's origin — never a widening
+  of its own. **A handle's glass is one `GlassBox` whose host
+  the hover moves** inside the handle's own hover group, under one
+  capsule radius at both sizes (`ShelfHandleCountTests` ▸
+  `glassPlate`); the count reads the badge face, as every bar count
+  does.
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one
