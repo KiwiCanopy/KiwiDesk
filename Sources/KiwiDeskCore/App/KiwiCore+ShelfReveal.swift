@@ -24,12 +24,11 @@ extension KiwiCore {
     struct HidingShelves {
         var targets: [ShelfRevealer.Key: ShelfRevealer.Target] = [:]
         var indicators: [ShelfRevealer.Key: ShelfIndicatorSpec] = [:]
-        /// The mark each hiding shelf's grow reveal grows out of:
-        /// its shown bar's, else its first mark's. AX coordinates.
-        var marks: [ShelfManager.Key: CGRect] = [:]
-        /// How each of those marks grows past the plain hover, so the
-        /// reveal starts from the plate on screen (#2567).
-        var markGrowths: [ShelfManager.Key: ShelfIndicatorSpec.Growth] = [:]
+        /// The handle each hiding shelf's grow reveal grows out of —
+        /// its shown bar's, else its first — with its growth, so the
+        /// reveal starts from the plate on screen (#2567). AX
+        /// coordinates.
+        var marks: [ShelfManager.Key: BarMotion.RevealMark] = [:]
         /// Each Space mark's first dot shown, carried from the last
         /// pass so the dots slide only when they must
         /// (`ShelfDotWindow`); a mark that stops drawing forgets it.
@@ -163,13 +162,11 @@ extension KiwiCore {
                     section: section(bar)
                 )
                 // A grow reveal grows out of the leading shown bar's
-                // mark, else the leading mark.
-                if marks[key] == nil
+                // handle, else the leading handle.
+                let leads =
+                    marks[key] == nil
                     || (shown(bar)
                         && !auto.prefix(index).contains(where: shown))
-                {
-                    marks[key] = markIn
-                }
                 var spec = ShelfIndicatorSpec(
                     mark: mark,
                     frame: markIn,
@@ -197,7 +194,9 @@ extension KiwiCore {
                         pillDepth: spec.pillDepth
                     )
                 }
-                if marks[key] == markIn { markGrowths[key] = spec.growth }
+                if leads {
+                    marks[key] = .init(frame: markIn, growth: spec.growth)
+                }
                 indicators[barKey(bar)] = spec
             }
         }
@@ -287,58 +286,5 @@ extension KiwiCore {
                 + "\(shelves.reveal.reveal(of: key))"
         )
         return true
-    }
-
-    /// `space_bar.toggle_reveal` / `app_bar.toggle_reveal` (#761):
-    /// shows or hides the bar on the screen the active Space lays
-    /// out on, over the windows, and only that bar. A bar set to
-    /// `always` is refused with a pill on the bar, since it is
-    /// already shown; the App Bar is refused where the active
-    /// Space's layout carries none.
-    func shelfRevealCommand(_ bar: ShelfBar) -> CommandResponse {
-        let name = bar == .space ? "Space Bar" : "App Bar"
-        let workspaces = state.workspaces
-        guard let space = workspaces.activeSpace,
-            let display = workspaces.display(of: space)
-        else { return .fail("the \(name) draws on no screen here") }
-        let mode = workspaces[space]?.mode ?? .bsp
-        let settings = tiler.settings
-        guard bar == .space || settings.appBarVisibility(in: mode) != nil
-        else {
-            cueRevealRefusal(.noAppBarHere, display: display)
-            return .fail("no App Bar in this layout")
-        }
-        guard settings.revealActionLive(bar, in: mode) else {
-            cueRevealRefusal(.alwaysShown(bar), display: display)
-            return .fail("the \(name) is set to always")
-        }
-        // The edge's own fold answers whether the bar hides here: an
-        // `auto` bar beside an `always` one reads `always` (#761).
-        if settings.autoReadsAlways(
-            bar,
-            in: mode,
-            on: screenFingerprint(of: display)
-        ) {
-            cueRevealRefusal(.shownBesideAlways(bar), display: display)
-            return .fail("the \(name) is shown beside an always bar")
-        }
-        // A shelf stood down for what is in front (full screen, a
-        // presentation, a maximized window) has no target either,
-        // and is no empty bar: it refuses without a pill.
-        if shelfStandsDown(on: display) {
-            return .fail("the \(name) stands down for what is in front")
-        }
-        guard
-            let key = shelves.reveal.targets.keys.first(where: {
-                $0.shelf.display == display && $0.bar == bar
-            })
-        else {
-            cueRevealRefusal(.nothingToShow(bar), display: display)
-            return .fail("the \(name) has nothing to show here")
-        }
-        guard toggleBarReveal(key) else {
-            return .fail("the \(name) is held shown by the tour")
-        }
-        return .ok()
     }
 }

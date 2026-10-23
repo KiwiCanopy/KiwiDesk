@@ -34,6 +34,14 @@ extension BarMotion {
         }
     }
 
+    /// A hidden bar's handle a reveal grows out of: its resting
+    /// frame and how its hover grows it (#2567) — one value, so the
+    /// two never part on the way to the reveal.
+    struct RevealMark: Equatable {
+        var frame: CGRect
+        var growth: ShelfIndicatorSpec.Growth = .none
+    }
+
     /// A reveal's inputs, whichever kind plays it: the slide's
     /// `offset`, the grow's and the unfold's mark `origin` and
     /// `plate` — under Boxed the span of the boxes — all in the

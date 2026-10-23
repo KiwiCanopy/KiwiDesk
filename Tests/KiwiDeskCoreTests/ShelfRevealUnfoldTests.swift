@@ -107,7 +107,7 @@ struct ShelfRevealUnfoldTests {
                 )
             ]
         )
-        overlay.revealOrigin = Self.mark
+        overlay.revealMark = .init(frame: Self.mark)
         return overlay
     }
 

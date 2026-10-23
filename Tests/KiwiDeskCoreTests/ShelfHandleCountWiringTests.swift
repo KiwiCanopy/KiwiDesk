@@ -105,6 +105,42 @@ struct ShelfHandleCountWiringTests {
         )
         #expect(app.windowCount == 3)
         #expect(view.spec?.count?.windows == app.windowCount)
+        // The count is handed the badge face, not the name's.
+        #expect(
+            view.spec?.count?.font
+                == KiwiCore.HidingShelves.markCountFont(core.tiler.settings)
+        )
+    }
+
+    @Test(
+        "An App Bar with no window draws no handle",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func emptyAppBarDrawsNoHandle() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let display = try #require(screen.kiwiDisplay)
+        let core = makeTestCore()
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.visibleBounds = { _ in screen.frame }
+        core.state.apply(.displaysChanged([display]))
+        core.resolveSpaceDisplays(mainID: display.id)
+        let space = try #require(
+            core.state.workspaces.currentSpace(on: display.id)
+        )
+        core.state.workspaces.setMode(space, .monocle)
+        var settings = core.tiler.settings
+        settings.spaceBarStyle.setEdge(.bottom)
+        settings.appBarStyle.setEdge(.top)
+        settings.monocle.appBar.visibility = .auto
+        core.tiler.settings = settings
+        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
+        core.updateBars()
+        let key = ShelfManager.Key(display: display.id, edge: .top)
+        #expect(
+            core.shelves.indicators.indicatorForTesting(
+                .init(shelf: key, bar: .app)
+            ) == nil
+        )
     }
 
     /// A grow reveal starts from the plate on screen: the mark grown
@@ -185,6 +221,6 @@ struct ShelfHandleCountWiringTests {
         let overlay = try #require(
             core.shelves.overlayForTesting(display.id, edge: .top)
         )
-        #expect(overlay.revealGrowth == spec.growth)
+        #expect(overlay.revealMark?.growth == spec.growth)
     }
 }

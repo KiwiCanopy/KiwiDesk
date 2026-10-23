@@ -56,11 +56,10 @@ final class ShelfOverlay {
     var revealing: UUID?
     /// A grow or plate unfold plays, so the room holds still.
     var growing = false
-    /// The mark in the content's coordinates a grow grows out of,
-    /// nil where the edge draws none (#761); set by `ShelfManager`.
-    var revealOrigin: CGRect?
-    /// How that mark grows past the plain hover (#2567).
-    var revealGrowth: ShelfIndicatorSpec.Growth = .none
+    /// The handle in the content's coordinates a grow grows out of,
+    /// with its growth (#2567), nil where the edge draws none (#761);
+    /// set by `ShelfManager`.
+    var revealMark: BarMotion.RevealMark?
     /// The plate a grow or an unfold reaches, in the content's
     /// coordinates, with its corner radius — under Boxed the boxes'
     /// span the spread reads (#761, #2556); nil before a show.

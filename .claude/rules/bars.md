@@ -254,7 +254,9 @@ twice, was a question the user answered twice. The argument is
   **An App Bar handle counts what `AppBarContent.windowCount`
   counts, never a second derivation**, carried in the indicator's
   spec so a count-only change redraws (#2567,
-  `ShelfHandleCountWiringTests`); grown on a top or bottom edge it
+  `ShelfHandleCountWiringTests`); an App Bar with no window
+  draws no handle, so the count is never 0 (▸
+  `emptyAppBarDrawsNoHandle`); grown on a top or bottom edge it
   may reach past its band with the count, by ruling. **A hovered
   pill — the Space name's or the count's — is never deeper than
   `ShelfIndicatorSpec.pillDepth`**, the room inside the rim, and

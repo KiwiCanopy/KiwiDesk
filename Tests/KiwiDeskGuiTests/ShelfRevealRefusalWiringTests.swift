@@ -14,9 +14,8 @@ struct ShelfRevealRefusalWiringTests {
     private static var body: String {
         get throws {
             let file = SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent(
-                    "Sources/KiwiDeskCore/App/KiwiCore+ShelfReveal.swift"
-                )
+                .appendingPathComponent("Sources/KiwiDeskCore/App")
+                .appendingPathComponent("KiwiCore+ShelfRevealCommand.swift")
             let source = try SourceScan.strippedSource(at: file)
             return try #require(
                 SourceScan.declarationBody(
@@ -32,6 +31,9 @@ struct ShelfRevealRefusalWiringTests {
         let body = try Self.body
         #expect(body.contains("cueRevealRefusal(.nothingToShow(bar)"))
         #expect(body.contains("has nothing to show here"))
+        // Decided by the bar's own content, never by elimination.
+        #expect(body.contains("appBarContent(on: display"))
+        #expect(body.contains("spaceBarContent(on: display"))
         // A stood-down shelf is asked first, so its missing target
         // never reads as an empty bar.
         let standDown = try #require(

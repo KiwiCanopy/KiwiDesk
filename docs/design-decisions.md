@@ -15166,6 +15166,9 @@ across for it, since the count is short where a Space's name is not;
 past 99 it shows a plural symbol alone rather than a wrong "99" or a
 "99+", keeping the handle beside the Space Bar's, while a top or
 bottom edge grows along with any count and may reach past its band.
+An App Bar with no window draws no handle at all, so the count is
+never 0; its show/hide there refuses with a pill, as every refusal
+of a bar's show/hide does, rather than doing nothing silently.
 :::
 
 A reveal onto an edge that shows nothing else slides the whole bar

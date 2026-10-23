@@ -106,7 +106,7 @@ struct ShelfRevealGrowTests {
                 )
             ]
         )
-        overlay.revealOrigin = Self.mark
+        overlay.revealMark = .init(frame: Self.mark)
         return overlay
     }
 
@@ -189,7 +189,7 @@ struct ShelfRevealGrowTests {
             )
         }
         show(Self.plate)
-        overlay.revealOrigin = Self.mark
+        overlay.revealMark = .init(frame: Self.mark)
         overlay.revealIn()
         let panel = try #require(overlay.panel)
         let held = panel.frame
