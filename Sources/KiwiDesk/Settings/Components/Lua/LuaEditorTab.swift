@@ -66,7 +66,7 @@ struct LuaEditorTab: View {
                 } icon: {
                     // The Lua mark, as KiwiHub's own rows wear it
                     // (#2544).
-                    Image(systemName: ShortcutsReferenceBuilder.luaMark)
+                    Image(systemName: LuaMark.symbol)
                 }
                 .font(.callout)
                 .foregroundStyle(.secondary)

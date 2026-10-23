@@ -136,8 +136,7 @@ extension KeyLayerOverride {
                 // A row that only re-describes the base row is still
                 // the profile's own (#2544).
                 let inherited = baseLayer.bindings.contains {
-                    $0.sameAction(as: row) && $0.desc == row.desc
-                        && $0.group == row.group && $0.symbol == row.symbol
+                    $0.sameAction(as: row) && $0.meta == row.meta
                 }
                 if !inherited {
                     rows.append(row)

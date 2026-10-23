@@ -30,17 +30,12 @@ extension KiwiCore {
     }
 
     /// The groups the installed shortcuts make, every layer and the
-    /// chords whose body was not read back included.
+    /// chords whose body was not read back included — read live, as
+    /// installed, where `shortcut.list` reads the files.
     func customShortcutGroups() -> [String] {
         guard let snapshot = liveKeybindingSnapshot() else { return [] }
-        var bindings: [KeyBinding] = []
-        for layer in snapshot.keyLayers {
-            bindings += layer.bindings
-            for chord in snapshot.unreadChords(in: layer.name) {
-                let meta = snapshot.meta(ofUnread: chord, in: layer.name)
-                bindings.append(meta.applied(to: KeyBinding(combo: chord)))
-            }
-        }
-        return ShortcutGroup.custom(in: bindings)
+        return ShortcutGroup.custom(
+            in: snapshot.metaByChord().map(\.meta.group)
+        )
     }
 }

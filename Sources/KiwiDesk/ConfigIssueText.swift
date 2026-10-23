@@ -69,7 +69,7 @@ enum ConfigIssueText {
                 name,
                 BarFontText.familyName(KiwiShelf.systemFontFamily)
             )
-        case .unknownShortcutSymbol(let chord, let symbol):
+        case .unknownShortcutSymbol(_, let chord, let symbol):
             return L(
                 "config_issues.unknown_shortcut_symbol",
                 "The shortcut %1$@ asks for the symbol “%2$@”, which "

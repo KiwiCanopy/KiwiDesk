@@ -14,8 +14,7 @@ import Testing
 struct ShortcutGroupFilingTests {
     private func reference(
         _ bindings: [KeyBinding],
-        unread: [String] = [],
-        meta: @escaping (String) -> KeyBindingMeta = { _ in .none }
+        unread: [UnreadChord] = []
     ) -> ShortcutsReference {
         ShortcutsReferenceBuilder.build(
             layer: KeyLayer(name: KeyLayer.defaultName, bindings: bindings),
@@ -24,8 +23,7 @@ struct ShortcutGroupFilingTests {
             desktops: [],
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName],
-            unread: unread,
-            unreadMeta: meta
+            unread: unread
         )
     }
 
@@ -89,10 +87,10 @@ struct ShortcutGroupFilingTests {
             built.custom.first { $0.label == label }?.icon
         }
         #expect(icon("Star") == "star")
-        #expect(icon("None") == ShortcutsReferenceBuilder.luaMark)
-        #expect(icon("Unknown") == ShortcutsReferenceBuilder.luaMark)
+        #expect(icon("None") == LuaMark.symbol)
+        #expect(icon("Unknown") == LuaMark.symbol)
         #expect(
-            ShortcutsReferenceBuilder.luaMark
+            LuaMark.symbol
                 == "chevron.left.forwardslash.chevron.right"
         )
     }
@@ -101,22 +99,23 @@ struct ShortcutGroupFilingTests {
     func unreadRowsTakeTheirMeta() throws {
         let built = reference(
             [],
-            unread: ["option+f", "option+g"],
-            meta: { chord in
-                chord == "option+f"
-                    ? KeyBindingMeta(
+            unread: [
+                UnreadChord(
+                    chord: "option+f",
+                    meta: KeyBindingMeta(
                         desc: "Follow",
                         group: "Mine",
                         symbol: "star"
                     )
-                    : .none
-            }
+                ),
+                UnreadChord(chord: "option+g"),
+            ]
         )
         let mine = try #require(built.groups.first { $0.title == "Mine" })
         #expect(mine.rows.map(\.label) == ["Follow"])
         #expect(mine.rows.first?.icon == "star")
         let generic = try #require(built.custom.first)
-        #expect(generic.icon == ShortcutsReferenceBuilder.luaMark)
+        #expect(generic.icon == LuaMark.symbol)
     }
 
     @Test("The panel lists a binding's own groups after Apps, before Custom")

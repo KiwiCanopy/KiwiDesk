@@ -15,8 +15,7 @@ enum ShortcutsReferenceBuilder {
         resizeStep: Int,
         layerNames: [String],
         lenses: [String] = [],
-        unread: [String] = [],
-        unreadMeta: (String) -> KeyBindingMeta = { _ in .none }
+        unread: [UnreadChord] = []
     ) -> ShortcutsReference {
         // Drop the key panel's three openers from the working set
         // BEFORE any band builds, so the suppression holds by
@@ -76,7 +75,7 @@ enum ShortcutsReferenceBuilder {
                     label: binding.desc.isEmpty
                         ? cmd.resolvedLabel : binding.desc,
                     combo: combo,
-                    icon: ownSymbol(binding.symbol) ?? icon(for: cmd),
+                    icon: binding.meta.usableSymbol ?? icon(for: cmd),
                     unavailable: cmd.unavailable != nil,
                     fold: ShortcutFold.tag(
                         for: cmd,
@@ -124,7 +123,7 @@ enum ShortcutsReferenceBuilder {
             + buildApps(layer, consumed: &consumed)
         let filed = file(
             regrouped + buildCustom(layer, consumed: consumed)
-                + buildUnread(unread, meta: unreadMeta),
+                + buildUnread(unread),
             controls: controls,
             apps: apps
         )

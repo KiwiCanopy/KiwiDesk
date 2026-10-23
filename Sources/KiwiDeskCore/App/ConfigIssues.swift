@@ -30,10 +30,14 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
         /// The shelf's font family is not installed, so the bars
         /// draw System (#1681, `BarFont.isInstalled`).
         case missingFontFamily(name: String)
-        /// A shortcut names a symbol that is no SF Symbol, so its
-        /// row wears the Lua mark (#2544): a warning, the binding
-        /// works.
-        case unknownShortcutSymbol(chord: String, symbol: String)
+        /// A shortcut in key mode `layer` names a symbol that is no
+        /// SF Symbol, so its row wears the Lua mark (#2544): a
+        /// warning, the binding works.
+        case unknownShortcutSymbol(
+            layer: String,
+            chord: String,
+            symbol: String
+        )
     }
 
     /// Source filename (`init.lua`, `gui.json`, or `<profile>.json`).
@@ -77,11 +81,10 @@ extension KiwiCore {
         )
     }
 
-    /// Re-derives the font issue against the settings live now —
-    /// `updateBars()`'s call, the one point every settings landing
-    /// passes (load, profile apply, Desktop binding, monitor change,
-    /// Settings Save, a verb), so no writer owes it (#1681).
-    func syncFontIssue() { setConfigIssues(configIssues) }
+    /// Re-derives the live-derived issues — `updateBars()`'s call,
+    /// the one point every settings landing passes (#1681), and
+    /// every keybinding install's (#2544), so no writer owes it.
+    func syncDerivedIssues() { setConfigIssues(configIssues) }
 
     /// The live shelf's family, when it is not installed (#1681).
     /// The source is approximate — the active profile's file, else
@@ -133,32 +136,38 @@ extension ConfigIssue.Kind {
 
 extension KiwiCore {
     /// One issue per installed shortcut whose `symbol` is no SF
-    /// Symbol (#2544), read off the bindings the last load installed.
+    /// Symbol (#2544), read off the bindings the last install left,
+    /// sourced to the file holding the row.
     func shortcutSymbolIssues() -> [ConfigIssue] {
         guard let snapshot = liveKeybindingSnapshot() else { return [] }
-        let source = isGuiManaged ? "gui.json" : "init.lua"
-        var named: [(chord: String, symbol: String)] = []
-        for layer in snapshot.keyLayers {
-            for binding in layer.bindings {
-                named.append((binding.combo, binding.symbol))
-            }
-            for chord in snapshot.unreadChords(in: layer.name) {
-                let meta = snapshot.meta(ofUnread: chord, in: layer.name)
-                named.append((chord, meta.symbol))
-            }
-        }
-        return named.filter {
-            !$0.symbol.isEmpty && !Self.iconIsSymbol($0.symbol)
-        }
-        .map {
-            ConfigIssue(
-                source: source,
-                kind: .unknownShortcutSymbol(
-                    chord: $0.chord,
-                    symbol: $0.symbol
+        return snapshot.metaByChord().filter(\.meta.namesUnknownSymbol)
+            .map {
+                ConfigIssue(
+                    source: shortcutSource(layer: $0.layer, chord: $0.chord),
+                    kind: .unknownShortcutSymbol(
+                        layer: $0.layer,
+                        chord: $0.chord,
+                        symbol: $0.meta.symbol
+                    )
                 )
-            )
+            }
+    }
+
+    /// The file an installed row came from: the active profile's
+    /// where its override holds the chord, else the sidecar or
+    /// `init.lua`.
+    private func shortcutSource(layer: String, chord: String) -> String {
+        guard case .structured(_, let profile)? = installedKeybindings
+        else { return "init.lua" }
+        let overridden =
+            profile?.layers.contains { held in
+                held.name == layer
+                    && held.bindings.contains { $0.combo == chord }
+            } ?? false
+        if overridden, let name = profiles.currentName {
+            return "\(name).json"
         }
+        return "gui.json"
     }
 }
 

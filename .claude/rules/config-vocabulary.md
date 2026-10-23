@@ -93,7 +93,7 @@ synonym:
   an SF Symbol name, the same kind the `symbol` row below names.
   The `</>` its row falls back to is shown, never named: copy
   writes `</>`, and *Lua mark* is the code's name alone
-  (`ShortcutsReferenceBuilder.luaMark`), since *mark* is the
+  (`LuaMark.symbol`), since *mark* is the
   window glyph's word.
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state

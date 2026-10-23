@@ -14,28 +14,34 @@ public enum ShortcutGroup: String, CaseIterable, Sendable {
     case kiwishelf
     case apps
 
-    /// The built-in group `name` spells, matched on the token alone,
-    /// case and surrounding spaces aside; nil names a group of its
-    /// own.
-    public static func builtIn(_ name: String) -> ShortcutGroup? {
-        ShortcutGroup(
-            rawValue: name.trimmingCharacters(in: .whitespaces).lowercased()
-        )
+    /// Where a binding's `group` files it: no group, a built-in one,
+    /// or one of its own under its name as written, trimmed — the
+    /// one classifier the panel and `shortcut.list_groups` read.
+    public enum Filing: Equatable, Sendable {
+        case none
+        case builtIn(ShortcutGroup)
+        case own(String)
     }
 
-    /// The groups `bindings` make of their own, in the order a
-    /// binding first names each — built-in tokens and empty names
-    /// left out.
-    public static func custom(in bindings: [KeyBinding]) -> [String] {
-        var seen: Set<String> = []
-        var names: [String] = []
-        for binding in bindings {
-            let name = binding.group.trimmingCharacters(in: .whitespaces)
-            guard !name.isEmpty, builtIn(name) == nil,
-                seen.insert(name).inserted
-            else { continue }
-            names.append(name)
+    /// Files `name`: a built-in token matches case and surrounding
+    /// spaces aside.
+    public static func filing(_ name: String) -> Filing {
+        let name = name.trimmingCharacters(in: .whitespaces)
+        if name.isEmpty { return .none }
+        if let group = ShortcutGroup(rawValue: name.lowercased()) {
+            return .builtIn(group)
         }
-        return names
+        return .own(name)
+    }
+
+    /// The groups `names` make of their own, in first-named order.
+    public static func custom(in names: [String]) -> [String] {
+        var seen: Set<String> = []
+        return names.compactMap { name in
+            guard case .own(let own) = filing(name),
+                seen.insert(own).inserted
+            else { return nil }
+            return own
+        }
     }
 }

@@ -53,9 +53,7 @@ public enum KeybindingMerge {
             bindings[index].label = row.label
             // What the binding says of itself follows its source
             // (#2544), cleared where the source dropped it.
-            bindings[index].desc = row.desc
-            bindings[index].group = row.group
-            bindings[index].symbol = row.symbol
+            bindings[index].meta = row.meta
         } else {
             bindings.append(row)
         }

@@ -87,14 +87,13 @@ struct ShortcutMetaTests {
         )
         let snapshot = try #require(core.liveKeybindingSnapshot())
         #expect(
-            snapshot.unreadChords(in: KeyLayer.defaultName) == ["option+f"]
+            snapshot.unreadChords(in: KeyLayer.defaultName) == [
+                UnreadChord(
+                    chord: "option+f",
+                    meta: KeyBindingMeta(desc: "Follow", group: "Mine")
+                )
+            ]
         )
-        let meta = snapshot.meta(
-            ofUnread: "option+f",
-            in: KeyLayer.defaultName
-        )
-        #expect(meta.desc == "Follow")
-        #expect(meta.group == "Mine")
     }
 
     @Test("The fields are stored sparsely and decode from old files")
@@ -125,15 +124,14 @@ struct ShortcutMetaTests {
 
     @Test("A built-in token is matched; any other name is a group of its own")
     func groupsResolve() {
-        #expect(ShortcutGroup.builtIn("focus") == .focus)
-        #expect(ShortcutGroup.builtIn(" Move_Windows ") == .moveWindows)
-        #expect(ShortcutGroup.builtIn("Move and follow") == nil)
+        #expect(ShortcutGroup.filing("focus") == .builtIn(.focus))
+        #expect(
+            ShortcutGroup.filing(" Move_Windows ") == .builtIn(.moveWindows)
+        )
+        #expect(ShortcutGroup.filing(" Mine ") == .own("Mine"))
+        #expect(ShortcutGroup.filing("  ") == .none)
         let names = ShortcutGroup.custom(
-            in: [
-                KeyBinding(group: "B"), KeyBinding(group: "focus"),
-                KeyBinding(group: "A"), KeyBinding(group: "B"),
-                KeyBinding(),
-            ]
+            in: ["B", "focus", "A", " B", ""]
         )
         #expect(names == ["B", "A"])
     }
@@ -174,7 +172,7 @@ struct ShortcutMetaTests {
             """
         )
         let symbols = core.configIssues.compactMap { issue -> String? in
-            guard case .unknownShortcutSymbol(_, let symbol) = issue.kind
+            guard case .unknownShortcutSymbol(_, _, let symbol) = issue.kind
             else { return nil }
             return symbol
         }

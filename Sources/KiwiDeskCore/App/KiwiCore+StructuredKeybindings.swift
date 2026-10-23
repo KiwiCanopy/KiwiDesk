@@ -36,7 +36,11 @@ extension KiwiCore {
             icons: prepared.icons,
             preferredLayer: preferredLayer
         )
-        installedKeybindings = .structured(prepared.registeredLayers)
+        installedKeybindings = .structured(
+            prepared.registeredLayers,
+            profile: profile
+        )
+        syncDerivedIssues()
     }
 
     /// Compiles every representable, assigned binding without

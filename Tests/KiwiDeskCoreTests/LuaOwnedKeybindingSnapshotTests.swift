@@ -73,7 +73,7 @@ struct LuaOwnedKeybindingSnapshotTests {
         let unread = snapshot.unreadChords(in: snapshot.activeLayerName)
         #expect(unread.count == 1)
         #expect(
-            unread.first.flatMap(KeyCombo.parse)
+            unread.first.flatMap { KeyCombo.parse($0.chord) }
                 == KeyCombo.parse("ctrl+alt+u")
         )
     }

@@ -131,6 +131,17 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         }
     }
 
+    /// What the binding says of itself, the three fields whole
+    /// (`KeyBindingMeta`, #2544).
+    public var meta: KeyBindingMeta {
+        get { KeyBindingMeta(desc: desc, group: group, symbol: symbol) }
+        set {
+            desc = newValue.desc
+            group = newValue.group
+            symbol = newValue.symbol
+        }
+    }
+
     /// Compares equality of binding content ignoring transient UUID.
     public static func == (
         lhs: KeyBinding,
@@ -138,8 +149,7 @@ public struct KeyBinding: Codable, Equatable, Sendable,
     ) -> Bool {
         lhs.combo == rhs.combo && lhs.lua == rhs.lua
             && lhs.kind == rhs.kind && lhs.label == rhs.label
-            && lhs.desc == rhs.desc && lhs.group == rhs.group
-            && lhs.symbol == rhs.symbol
+            && lhs.meta == rhs.meta
     }
 
     /// Semantic identity for the override cascade (#55): combo +

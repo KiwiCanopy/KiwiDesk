@@ -26,27 +26,29 @@ extension ShortcutsReferenceBuilder {
             custom: []
         )
         for entry in own {
-            let name = entry.group.trimmingCharacters(in: .whitespaces)
-            if name.isEmpty {
+            switch ShortcutGroup.filing(entry.group) {
+            case .none:
                 filed.custom.append(entry.row)
-            } else if let builtIn = ShortcutGroup.builtIn(name) {
-                if builtIn == .apps {
-                    filed.apps.append(entry.row)
-                } else if let index = filed.controls.firstIndex(
+            case .builtIn(.apps):
+                filed.apps.append(entry.row)
+            case .builtIn(let builtIn):
+                if let index = filed.controls.firstIndex(
                     where: { $0.group == builtIn }
                 ) {
                     filed.controls[index].rows.append(entry.row)
                 } else {
                     filed.custom.append(entry.row)
                 }
-            } else if let index = filed.groups.firstIndex(
-                where: { $0.title == name }
-            ) {
-                filed.groups[index].rows.append(entry.row)
-            } else {
-                filed.groups.append(
-                    ShortcutSubgroup(title: name, rows: [entry.row])
-                )
+            case .own(let name):
+                if let index = filed.groups.firstIndex(
+                    where: { $0.title == name }
+                ) {
+                    filed.groups[index].rows.append(entry.row)
+                } else {
+                    filed.groups.append(
+                        ShortcutSubgroup(title: name, rows: [entry.row])
+                    )
+                }
             }
         }
         filed.controls.removeAll { $0.rows.isEmpty }

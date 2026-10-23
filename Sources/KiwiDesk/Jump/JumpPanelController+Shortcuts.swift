@@ -29,7 +29,7 @@ extension JumpPanelController {
         var layers: [KeyLayer]
         let activeLayer: String
         let config: GuiConfig
-        var unread: [String] = []
+        var unread: [UnreadChord] = []
         if let snapshot = core.liveKeybindingSnapshot() {
             layers = snapshot.keyLayers
             activeLayer = snapshot.activeLayerName
@@ -86,10 +86,7 @@ extension JumpPanelController {
             resizeStep: Int(config.settings.resizeStep),
             layerNames: layers.map(\.name),
             lenses: core.kiwiVisionLensChoices.map(\.name),
-            unread: unread,
-            unreadMeta: { [snapshot = core.liveKeybindingSnapshot()] chord in
-                snapshot?.meta(ofUnread: chord, in: activeLayer) ?? .none
-            }
+            unread: unread
         )
         return withAppGlyphs(
             reference,

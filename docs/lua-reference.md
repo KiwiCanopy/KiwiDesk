@@ -6126,7 +6126,10 @@ each `chord` and the `lua` it runs.
 
 :::unreleased
 A shortcut that describes itself carries its `desc`, `group` and
-`symbol` too ([Describing a Shortcut](#describing-a-shortcut)).
+`symbol` too ([Describing a Shortcut](#describing-a-shortcut)). It
+reads the saved files, where
+[`shortcut.list_groups`](#shortcutlist_groups) reads the shortcuts
+in effect.
 :::
 
 #### shortcut.set

@@ -202,10 +202,6 @@ extension ShortcutsReferenceBuilder {
         }
     }
 
-    /// The Lua mark: what a binding of your own wears without a
-    /// symbol of its own, everywhere KiwiDesk marks Lua (#2544).
-    static let luaMark = "chevron.left.forwardslash.chevron.right"
-
     /// A binding of the user's own and the group it files into
     /// (#2544): its description in place of its Lua, its symbol
     /// where that is an SF Symbol, else the Lua mark.
@@ -230,7 +226,7 @@ extension ShortcutsReferenceBuilder {
                         label: binding.desc.isEmpty
                             ? binding.lua : binding.desc,
                         combo: glyphs(binding.combo),
-                        icon: ownIcon(binding.symbol),
+                        icon: ownIcon(binding.meta),
                         monospaced: binding.desc.isEmpty
                     ),
                     group: binding.group
@@ -242,35 +238,25 @@ extension ShortcutsReferenceBuilder {
     /// spell inline (a named handler, a C function): the chord is
     /// registered, so it is listed, under its description or a
     /// generic name (#2482, #2544).
-    static func buildUnread(
-        _ chords: [String],
-        meta: (String) -> KeyBindingMeta = { _ in .none }
-    ) -> [OwnRow] {
-        chords.map { chord in
-            let meta = meta(chord)
-            return OwnRow(
+    static func buildUnread(_ chords: [UnreadChord]) -> [OwnRow] {
+        chords.map { unread in
+            OwnRow(
                 row: ShortcutRow(
-                    id: "unread:" + chord,
-                    label: meta.desc.isEmpty
+                    id: "unread:" + unread.chord,
+                    label: unread.meta.desc.isEmpty
                         ? L("shortcuts.panel.lua_function", "Lua function")
-                        : meta.desc,
-                    combo: glyphs(chord),
-                    icon: ownIcon(meta.symbol)
+                        : unread.meta.desc,
+                    combo: glyphs(unread.chord),
+                    icon: ownIcon(unread.meta)
                 ),
-                group: meta.group
+                group: unread.meta.group
             )
         }
     }
 
     /// A binding's own symbol where it names an SF Symbol, else the
     /// Lua mark; a name that is none is a Config Issue (#2544).
-    static func ownIcon(_ symbol: String) -> String {
-        ownSymbol(symbol) ?? luaMark
-    }
-
-    /// A binding's own symbol where it names an SF Symbol; nil where
-    /// it names none, or one that is not (#2544).
-    static func ownSymbol(_ symbol: String) -> String? {
-        symbol.isEmpty || !KiwiCore.iconIsSymbol(symbol) ? nil : symbol
+    static func ownIcon(_ meta: KeyBindingMeta) -> String {
+        meta.usableSymbol ?? LuaMark.symbol
     }
 }
