@@ -54,6 +54,8 @@ struct SymbolClassifierSeamTests {
             "asserts every pill symbol RESOLVES; classifies nothing",
         "Tests/KiwiDeskGuiTests/ShortcutsSheetTests.swift":
             "asserts every verb glyph RESOLVES; classifies nothing",
+        "Tests/KiwiDeskGuiTests/ShortcutRowSymbolTests.swift":
+            "asserts every row symbol RESOLVES; classifies nothing",
         "Sources/KiwiDeskCore/Bar/BarMenu.swift":
             "builds a bar menu row's image from a fixed name",
         "Sources/KiwiDeskCore/Bar/ShelfCountView.swift":
