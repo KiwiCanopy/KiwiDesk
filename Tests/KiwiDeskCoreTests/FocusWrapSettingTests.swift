@@ -118,6 +118,24 @@ struct FocusWrapSettingTests {
         #expect(try core.profiles.read(name: "Work").focusWrap == nil)
     }
 
+    /// A checklist Save writes the rule families through the reach
+    /// door alone (#1393), so the profile write keeps the stored one.
+    @Test("a profile write that leaves the rules keeps the stored one")
+    func ruleFreeWriteKeepsTheStored() throws {
+        let core = try makeCore()
+        var work = try core.profiles.read(name: "Work")
+        work.focusWrap = .off
+        try core.profiles.write(work)
+        var page = try core.loadGuiConfig(editing: "Work")
+        page.focusWrap = .allScreens
+        try core.overwriteProfile(
+            named: "Work",
+            with: page,
+            writingRules: false
+        )
+        #expect(try core.profiles.read(name: "Work").focusWrap == .off)
+    }
+
     @Test("a profile apply resolves its override over the base")
     func profileApplyResolves() throws {
         let core = try makeCore()

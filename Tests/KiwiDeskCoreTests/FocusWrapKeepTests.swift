@@ -43,4 +43,23 @@ struct FocusWrapKeepTests {
         #expect(kept(response) == ["/focus_wrap"])
         #expect(core.guiConfigStore.load()?.focusWrap == .off)
     }
+
+    /// The owner is `focus_wrap`'s own reach, never its twin's: with
+    /// the profile holding `float_automatically` the two disagree, and
+    /// `focus_wrap`, which it does not hold, stays shared.
+    @Test("the owner reads focus_wrap's reach, not its twin's")
+    func ownerIsItsOwnReach() throws {
+        let core = try KeepFixture.core()
+        var odd = KeepFixture.profile("Odd")
+        odd.floatAutomatically = false
+        try core.profiles.save(odd)
+        KeepFixture.load("Odd", core)
+        let set = KeepFixture.report(
+            core,
+            "set_focus_wrap",
+            [.string("off")]
+        )
+        let leaf = try #require(KeepFixture.leaf(set, "/focus_wrap"))
+        #expect(leaf.owner == .sharedRules)
+    }
 }

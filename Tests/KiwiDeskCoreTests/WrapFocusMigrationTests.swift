@@ -103,9 +103,14 @@ struct WrapFocusMigrationTests {
         )
         let out = try #require(ConfigMigration.migrated(bundle))
         #expect(!mentionsKey(out))
-        #expect(
-            try root(out)["format"] as? Int == SetupBundle.currentFormat
+        let migrated = try root(out)
+        #expect(migrated["format"] as? Int == SetupBundle.currentFormat)
+        // Each inline profile follows the base too, All screens.
+        let profiles = try #require(
+            migrated["profiles"] as? [[String: Any]]
         )
+        #expect(profiles.count == 1)
+        #expect(profiles.allSatisfy { $0["focus_wrap"] == nil })
     }
 
     /// The textual edit itself: only a direct call tells it from the

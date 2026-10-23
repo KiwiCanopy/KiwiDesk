@@ -112,6 +112,35 @@ struct FocusWrapScreensTests {
         #expect(core.state.workspaces.lastFocused == WindowID(11))
     }
 
+    /// A third screen past the empty one: two screens cannot tell
+    /// "skip it" from "stop at it", since both end in the wrap.
+    @Test("an empty screen between is passed over")
+    func emptyMiddleIsPassedOver() {
+        guard let core = twoScreens(emptyMain: true) else { return }
+        let far = DisplayID(9_998)
+        let farFrame = CGRect(x: 1440, y: 25, width: 1440, height: 875)
+        let frames = core.tiler.displayFrames()
+        core.tiler.displayFrames = { frames + [(id: far, frame: farFrame)] }
+        core.state.workspaces.assign(SpaceID("5"), to: far)
+        core.state.workspaces.activate(SpaceID("5"))
+        core.state.apply(.windowCreated(window(51, x: 1440)))
+        core.state.workspaces.activate(SpaceID("1"))
+        core.state.apply(.windowFocused(WindowID(12)))
+        #expect(right(core))
+        #expect(core.state.workspaces.activeSpace == SpaceID("5"))
+        #expect(core.state.workspaces.lastFocused == WindowID(51))
+    }
+
+    @Test("This screen keeps a key on an empty Space")
+    func thisScreenEmptySpaceStays() {
+        guard let core = twoScreens() else { return }
+        core.state.workspaces.assign(SpaceID("4"), to: left)
+        core.state.workspaces.activate(SpaceID("4"))
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
+        #expect(!right(core))
+        #expect(core.state.workspaces.activeSpace == SpaceID("4"))
+    }
+
     @Test("This screen never leaves the screen")
     func thisScreenStays() {
         guard let core = twoScreens() else { return }
