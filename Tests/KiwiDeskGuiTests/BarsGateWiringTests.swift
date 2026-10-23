@@ -68,6 +68,9 @@ struct BarsGateWiringTests {
                 ".inertReason(for:.kiwishelf(.revealStyle))",
                 "GreyOut(active:reason!=nil)",
                 "BarsGateHelp.sentence(for:reason)",
+                // Grow's Unfold note on a Boxed shelf (#2556).
+                "ifreason==nil,gates.growPlaysAsUnfold{"
+                    + "note(BarsGateHelp.growPlaysAsUnfold)",
                 ".inertReason(for:.colours(.animationsRevealDurationMS))",
                 "GreyOut(active:revealInert)",
                 ".inertReason(for:.colours(.animationsExpandDurationMS))",

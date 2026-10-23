@@ -1050,7 +1050,7 @@
   "kiwishelf.reveal_style.fade": "Fundido",
   "kiwishelf.reveal_style.grow": "Crecer",
   "kiwishelf.reveal_style.label": "Aparición",
-  "kiwishelf.reveal_style.label.help": "Cómo aparece una barra oculta: «%1$@» trae la barra entera desde el borde de la pantalla; «%2$@» la hace crecer desde su franja, o recorre las cajas de un fondo «%5$@»; «%3$@» la estira desde la franja a lo largo del borde y luego la ensancha, o hace saltar cada caja desde la franja; «%4$@» la hace aparecer con un fundido donde está. Una barra sin franja crece o se despliega desde el centro del borde de la pantalla.",
+  "kiwishelf.reveal_style.label.help": "Cómo aparece una barra oculta: «%1$@» trae la barra entera desde el borde de la pantalla; «%2$@» la hace crecer desde su franja, y la despliega sobre un fondo «%5$@»; «%3$@» la estira desde la franja a lo largo del borde y luego la ensancha, o hace saltar cada caja desde la franja; «%4$@» la hace aparecer con un fundido donde está. Una barra sin franja crece o se despliega desde el centro del borde de la pantalla.",
   "kiwishelf.reveal_style.no_bar_hides": "Ninguna barra se oculta nunca, así que no hay nada que mostrar.",
   "kiwishelf.reveal_style.slide": "Deslizar",
   "kiwishelf.reveal_style.unfold": "Desplegar",
