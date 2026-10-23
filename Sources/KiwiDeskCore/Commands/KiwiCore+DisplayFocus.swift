@@ -118,12 +118,18 @@ extension KiwiCore {
         arriving: Bool = false
     ) {
         let priorFrontmost = frontmostPIDProvider?()
+        let priorScreen = focusedScreen
         // A launch follow arrives with its rule's undeclared Space
         // filed but unplaced: place it before the slide reads it.
         placeUnplacedSpaces()
         let slide = spaceSlideIntent(to: target)
         state.workspaces.activate(target)
-        focusWindow(id, refocusRetile: false, warp: true)
+        focusWindow(id, refocusRetile: false, warp: false)
+        // After the raise, as `focusWindow`'s own warp; a focus the
+        // #1345 gate refused moves no pointer.
+        if state.workspaces.lastFocused == id {
+            warpForSwitch(to: target, focusing: id, leaving: priorScreen)
+        }
         emitSpaceChange()
         scheduleSpaceSettle(
             target,

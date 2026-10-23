@@ -101,17 +101,19 @@ extension KiwiCore {
             return
         }
         pendingMouseWarp = nil
-        let frame: CGRect
-        if let slot = tiler.calculatedFrames(
-            state: state
-        )[id] {
-            frame = slot
-        } else if let element = eventLoop.element(for: id) {
-            frame = AXHelper.frame(of: element)
-        } else {
-            return
-        }
+        guard let frame = warpFrame(of: id) else { return }
         pointerWarp?(frame)
+    }
+
+    /// Where a warp onto `id` aims: its layout slot, else its live
+    /// AX frame (a float), nil for a window with neither.
+    func warpFrame(of id: WindowID) -> CGRect? {
+        if let slot = tiler.calculatedFrames(state: state)[id] {
+            return slot
+        }
+        return eventLoop.element(for: id).map {
+            AXHelper.frame(of: $0)
+        }
     }
 
     /// Fires the warp a draining restore held, once the LAST

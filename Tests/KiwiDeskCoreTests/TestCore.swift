@@ -253,12 +253,12 @@ func makeTestCore(
     // unless a test states otherwise.
     core.tiler.motionGate.quiescence.sinceMouseMoved = { .infinity }
     // Same class, tenth time (#1532): the reveal-strip read
-    // defaults LIVE, so a developer parking the pointer at the
-    // top edge with the bar auto-hidden would have every focus
-    // suite return foreign reports to an own window. Pin "not in
-    // the strip"; the return suite states the reading itself.
+    // defaults LIVE, so a pointer parked at an auto-hidden bar
+    // returned every focus suite's foreign reports to an own
+    // window; the pointer's screen likewise (#2548). Pin both.
     core.mouse.pointerInMenuBarStrip = { false }
     core.mouse.menuOpen = { _ in false }
+    core.mouse.pointerDisplay = { nil }
     // Same class, process-wide (#1971's flake): every core hears
     // EVERY key-window change in the test process, so another
     // suite's window or post re-synced this one's rings mid-test.

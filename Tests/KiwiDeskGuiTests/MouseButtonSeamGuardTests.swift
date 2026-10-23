@@ -219,6 +219,9 @@ struct MouseButtonSeamGuardTests {
                         "mouse.menuOpen = { _ in false }"
                     )
                     && source.contains(
+                        "mouse.pointerDisplay = { nil }"
+                    )
+                    && source.contains(
                         "BarHoverHit.pointerOverride = { _ in"
                             + " BarHoverHit.offWindow }"
                     )
