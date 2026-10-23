@@ -50,6 +50,15 @@ public final class MouseTracker {
     /// gesture, whichever button started it.
     var anyButtonHeld: Bool { pressedButtons() != 0 }
 
+    /// The screen the pointer is on, nil where no screen holds it
+    /// — the screen handoff's gate (#2548). Live in production,
+    /// pinned nil by `makeTestCore` the way `pressedButtons` is.
+    var pointerDisplay: @MainActor () -> DisplayID? = {
+        CGEvent(source: nil).flatMap {
+            GeometryUtils.display(at: $0.location)
+        }
+    }
+
     /// Whether `pid` has one of its menus open — a pop-up-level
     /// window of its own on a screen. An open menu keeps the bar a
     /// reveal shows up while the pointer sits in it, below the

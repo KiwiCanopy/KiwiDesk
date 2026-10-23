@@ -221,6 +221,16 @@ an **empty** space hands focus to Finder. If macOS drops the
 activation, the post-switch settle (~300 ms) detects the
 unchanged frontmost app and re-raises once.
 
+:::unreleased
+When the target Space is on another screen, the pointer moves
+there too, whether or not
+[*mouse follows focus*](#mouseset_follows_focus) is on: onto the
+focused window, or to the centre of that screen when the Space is
+empty. It stays put when it is already on that screen or a mouse
+button is held. A move-and-follow onto another screen's Space
+does the same.
+:::
+
 **Example:**
 
 ```lua
@@ -4411,6 +4421,12 @@ settle, for the window focus finally landed on. When focus lands
 on a window in an inactive space (cmd+tab into a stashed window),
 the warp waits until KiwiDesk follows focus and pulls that space
 forward. Clicking an app-bar item warps too.
+
+:::unreleased
+A Space switch onto another screen moves the pointer even with
+the setting off ([`focus_space`](#focus_space)); the setting
+governs focus changes within a screen.
+:::
 
 Also togglable in the Settings app under **Shortcuts & Gestures ▸
 Mouse & trackpad**.

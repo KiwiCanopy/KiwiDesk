@@ -65,13 +65,15 @@ extension KiwiCore {
     /// pay too (#1727) — on every landing, a Space another
     /// display already shows included, where it is harmless.
     func landFocusFollow(_ id: WindowID, on space: SpaceID) {
+        let priorScreen = focusedScreen
         applyFocusedSpaceSwitch(to: space)
         noteDelayedCloseFollowed(id)  // #2002
         // The focus echo that triggered this follow found
         // the window on an inactive space, where the warp
         // guard skips; now that the space is forward the
-        // slot frames are real — warp here (#186).
-        warpMouseToFocused(id)
+        // slot frames are real — warp here (#186), handing the
+        // pointer over where ⌘Tab crossed screens (#2548).
+        warpForSwitch(to: space, focusing: id, leaving: priorScreen)
         raiseLandingFloats(thenFocus: id)
     }
 

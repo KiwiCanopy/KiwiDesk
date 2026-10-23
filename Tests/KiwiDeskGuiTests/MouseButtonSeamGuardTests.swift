@@ -108,6 +108,41 @@ struct MouseButtonSeamGuardTests {
         )
     }
 
+    /// The CoreGraphics pointer read, a third API for the same fact:
+    /// the warp's own cursor check (#186) and the screen handoff's
+    /// pointer screen (#2548), both inert in every test core.
+    private static let eventPointerHomes = [
+        "KiwiCore+BootSeams.swift",
+        "MouseTracker.swift",
+    ]
+
+    @Test("the CoreGraphics pointer read stays in its seam homes")
+    func eventPointerReadHomes() throws {
+        let sites = try Self.productionTrees.flatMap {
+            try SourceScan.identifierSites(
+                of: "CGEvent(source: nil)",
+                under: $0
+            )
+        }
+        for home in Self.eventPointerHomes {
+            let reads = sites.filter {
+                $0.file.lastPathComponent == home
+            }
+            #expect(
+                reads.count == 1,
+                "\(home) reads the pointer \(reads.count) times"
+            )
+        }
+        let strays = sites.filter {
+            !Self.eventPointerHomes.contains($0.file.lastPathComponent)
+        }
+        let listed = strays.map(\.site).joined(separator: ", ")
+        #expect(
+            strays.isEmpty,
+            "live pointer read outside a seam: \(listed)"
+        )
+    }
+
     /// The window-relative pointer read (#1665), a second API for
     /// the fact `NSEvent.mouseLocation` names, so the census above
     /// cannot see it: the bar hover seam, and the Settings caption
@@ -179,8 +214,9 @@ struct MouseButtonSeamGuardTests {
 
     /// The live host reads `wireDrag` and the seam defaults
     /// leave on every core a suite builds — the button mask, the
-    /// cursor, since #1532 the reveal-strip read, and since #2224 the
-    /// revealed app's open-menu read. Deleting a pin from
+    /// cursor, since #1532 the reveal-strip read, since #2224 the
+    /// revealed app's open-menu read, and since #2548 the pointer's
+    /// screen. Deleting a pin from
     /// BOTH twins is otherwise silent: the twins-identical scan
     /// sees only a one-sided deletion, and a behavioural read
     /// answers 0 on a quiet host either way — which is exactly
@@ -217,6 +253,9 @@ struct MouseButtonSeamGuardTests {
                     )
                     && source.contains(
                         "mouse.menuOpen = { _ in false }"
+                    )
+                    && source.contains(
+                        "mouse.pointerDisplay = { nil }"
                     )
                     && source.contains(
                         "BarHoverHit.pointerOverride = { _ in"

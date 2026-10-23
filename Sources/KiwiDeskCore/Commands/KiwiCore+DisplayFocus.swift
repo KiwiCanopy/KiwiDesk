@@ -118,12 +118,17 @@ extension KiwiCore {
         arriving: Bool = false
     ) {
         let priorFrontmost = frontmostPIDProvider?()
+        let priorScreen = focusedScreen
         // A launch follow arrives with its rule's undeclared Space
         // filed but unplaced: place it before the slide reads it.
         placeUnplacedSpaces()
         let slide = spaceSlideIntent(to: target)
         state.workspaces.activate(target)
-        focusWindow(id, refocusRetile: false, warp: true)
+        // After the raise, as `focusWindow`'s own warp; a focus the
+        // #1345 gate refused moves no pointer.
+        if focusWindow(id, refocusRetile: false, warp: false) {
+            warpForSwitch(to: target, focusing: id, leaving: priorScreen)
+        }
         emitSpaceChange()
         scheduleSpaceSettle(
             target,
@@ -204,8 +209,17 @@ extension KiwiCore {
         in destination: SpaceID,
         warp: Bool = true
     ) {
+        let priorScreen = focusedScreen
         state.workspaces.activate(destination)
-        focusWindow(window, refocusRetile: false, warp: warp)
+        // The screen handoff as `followSwitch`'s (#2548); hover
+        // passes false, its pointer being the cause.
+        if focusWindow(window, refocusRetile: false, warp: false), warp {
+            warpForSwitch(
+                to: destination,
+                focusing: window,
+                leaving: priorScreen
+            )
+        }
         emitSpaceChange()
         onLog(
             "follow: focus handed to w\(window.raw) in space "

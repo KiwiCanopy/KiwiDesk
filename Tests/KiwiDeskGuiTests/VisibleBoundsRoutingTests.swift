@@ -95,6 +95,10 @@ struct VisibleBoundsRoutingTests {
         // once per display for both bars (#1517); the App Bar's
         // cold-start fallback once for the main screen.
         "App/KiwiCore+Shelf.swift": 1,
+        // The screen handoff's empty-Space landing is the centre of
+        // that screen's visible frame (#2548): a screen, not a
+        // layout span.
+        "App/KiwiCore+ScreenHandoff.swift": 1,
         "App/KiwiCore+AppBar.swift": 1,
         // A bar's refusal pill sits at that bar's edge of the screen
         // where no shelf carries it (#2567).
