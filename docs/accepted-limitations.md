@@ -269,3 +269,15 @@ When `init.lua` owns the shortcuts, the shortcuts panel (`⌃⌥K`) lists every 
 :::unreleased
 A `desc` names such a row too ([Describing a Shortcut](lua-reference.md#describing-a-shortcut)).
 :::
+
+:::unreleased
+A window that an app lifts above the normal window level *after*
+KiwiDesk tiled it stays tiled — a player's "float on top" toggle,
+say — until it is closed and reopened
+([#2572](https://github.com/KiwiCanopy/KiwiDesk/issues/2572)).
+KiwiDesk judges the level once, when it adopts the window, because
+Chromium browsers lift their tiled main window to that level while
+a site permission prompt is open; re-judging it floated and shrank
+the window on every lift. Float the window yourself (`make_floating`,
+or Float Window on its bar menu) to float it at once.
+:::

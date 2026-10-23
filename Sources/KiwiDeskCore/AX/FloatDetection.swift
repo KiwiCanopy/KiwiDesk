@@ -234,19 +234,16 @@ public enum FloatDetection {
     /// (#1810) — the one body every producer hands its facts to
     /// (#1933, #1883). Structure is asked before the rules, so a
     /// dialog a rule also matches reports `.panel` — deleting the
-    /// rule would not tile it.
+    /// rule would not tile it. A standard window the layer alone
+    /// floats reports `.raisedLayer` (#2572).
     public static func autoFloatReason(
         _ facts: WindowFacts,
         bundleID: String?,
         rules: FloatRules
     ) -> AutoFloatReason? {
-        let structural = shouldFloat(
-            role: facts.role,
-            subrole: facts.subrole,
-            layer: facts.layer ?? 0
-        )
-        return autoFloatReason(
-            structural: structural,
+        let shaped = shouldFloat(role: facts.role, subrole: facts.subrole)
+        let reason = autoFloatReason(
+            structural: shaped || (facts.layer ?? 0) != 0,
             // Asked only where structure tiles: a standard window
             // on the normal layer, the one shape a disabled zoom
             // button marks as fixed-size — and only where a guess
@@ -259,6 +256,7 @@ public enum FloatDetection {
                 rules.matches(bundleID: bundleID, title: facts.title())
             }
         )
+        return reason == .panel && !shaped ? .raisedLayer : reason
     }
 
     /// The reason's order, pure: structure, then a fixed size

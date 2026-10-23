@@ -6,11 +6,18 @@ extension AXDumpExpected {
         .row("1password", .tiles, .kept, .furnished),
         .row(
             "1password_large_type_window",
-            .floats(.panel),
+            .floats(.raisedLayer),
             .kept,
-            .furnished
+            .furnished,
+            .ruled(issue: 2572)
         ),
-        .row("1password_mini_window", .floats(.panel), .kept, .furnished),
+        .row(
+            "1password_mini_window",
+            .floats(.raisedLayer),
+            .kept,
+            .furnished,
+            .ruled(issue: 2572)
+        ),
         .row("about_this_mac", .floats(.accessoryApp), .kept, .furnished),
         .row("alacritty_decorations_buttonless", .tiles, .kept, .furnished),
         .row("apple_calendar", .tiles, .kept, .furnished),
@@ -38,7 +45,13 @@ extension AXDumpExpected {
         ),
         .row("archiveutility", .tiles, .kept, .furnished),
         .row("brave", .tiles, .kept, .furnished),
-        .row("brave_pip", .floats(.panel), .kept, .furnished),
+        .row(
+            "brave_pip",
+            .floats(.raisedLayer),
+            .kept,
+            .furnished,
+            .ruled(issue: 2572)
+        ),
         .row(
             "calculator",
             .floats(.fixedSize),
@@ -51,7 +64,13 @@ extension AXDumpExpected {
         .row("chrome_choose_what_to_share_popup", .floats(.panel), .kept, nil),
         .row("chrome_extensions_popup", .floats(.panel), .kept, nil),
         .row("chrome_find_in_page", .floats(.panel), .kept, nil),
-        .row("chrome_pip", .floats(.panel), .kept, nil),
+        .row(
+            "chrome_pip",
+            .floats(.raisedLayer),
+            .kept,
+            nil,
+            .ruled(issue: 2572)
+        ),
         .row(
             "chrome_sharing_is_in_progress_popup",
             .floats(.panel),
@@ -61,7 +80,13 @@ extension AXDumpExpected {
         .row("cleanshotx_monitor_1", .floats(.accessoryApp), .ignored, nil),
         .row("cleanshotx_monitor_2", .floats(.accessoryApp), .ignored, nil),
         .row("codex", .tiles, .kept, .furnished),
-        .row("codex_pet_window", .floats(.panel), .kept, nil),
+        .row(
+            "codex_pet_window",
+            .floats(.raisedLayer),
+            .kept,
+            nil,
+            .ruled(issue: 2572)
+        ),
         .row("drracket", .tiles, .kept, .furnished),
         .row("emacs", .tiles, .kept, .furnished),
         .row("emacs_child_frame_corfu", .floats(.panel), .kept, nil),
@@ -90,6 +115,12 @@ extension AXDumpExpected {
             .kept,
             .furnished
         ),
-        .row("firefox_pip", .floats(.panel), .kept, .furnished),
+        .row(
+            "firefox_pip",
+            .floats(.raisedLayer),
+            .kept,
+            .furnished,
+            .ruled(issue: 2572)
+        ),
     ]
 }

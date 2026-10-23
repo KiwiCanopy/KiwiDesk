@@ -186,7 +186,12 @@ editing AX code:
   removal would read as a close (`ScreenSaverLayerWiringTests`).
   A fixed size (#2070) is judged at adoption: a recheck never
   floats a tiled window on a disabled zoom button alone, since a
-  sheet can grey it for a moment.
+  sheet can grey it for a moment. A raised layer alone is too
+  (#2572): the verdict body names it `.raisedLayer` apart from
+  `.panel`, and `applyFloatVerdict` refuses it for a tiled
+  window — Chromium lifts its main window to 999 while a
+  permission prompt is up. One-way: a floating window keeps
+  floating on it (`RaisedLayerLatchTests`).
 - **A float rule is read only through `FloatRules.parse` and
   spelled only through `FloatRules.rule(app:title:)` (#2345).**
   The engine, the profile reach and the Settings Float list all

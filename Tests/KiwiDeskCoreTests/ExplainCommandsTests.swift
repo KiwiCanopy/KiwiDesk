@@ -75,7 +75,8 @@ struct ExplainCommandsTests {
     @Test(
         "detection's verdict is the cause, with its escapes",
         arguments: [
-            AutoFloatReason.rule, .panel, .accessoryApp, .fixedSize,
+            AutoFloatReason.rule, .panel, .raisedLayer, .accessoryApp,
+            .fixedSize,
         ]
     )
     func detectionIsTheCause(_ reason: AutoFloatReason) {
@@ -103,6 +104,7 @@ struct ExplainCommandsTests {
                 == ["set_float_automatically", "tile_rule"]
         )
         #expect(AutoFloatReason.panel.escapes.isEmpty)
+        #expect(AutoFloatReason.raisedLayer.escapes.isEmpty)
         #expect(
             AutoFloatReason.rule.escapes == ["app_rule.remove_float"]
         )
@@ -119,6 +121,7 @@ struct ExplainCommandsTests {
     func wireNamesAreFrozen() {
         #expect(AutoFloatReason.rule.wireName == "rule")
         #expect(AutoFloatReason.panel.wireName == "panel")
+        #expect(AutoFloatReason.raisedLayer.wireName == "raised_layer")
         #expect(AutoFloatReason.accessoryApp.wireName == "accessory_app")
         #expect(AutoFloatReason.fixedSize.wireName == "fixed_size")
     }

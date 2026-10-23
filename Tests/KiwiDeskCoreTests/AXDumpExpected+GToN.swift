@@ -21,10 +21,10 @@ extension AXDumpExpected {
         ),
         .row(
             "ghostty_config_error",
-            .floats(.panel),
+            .floats(.raisedLayer),
             .kept,
             .furnished,
-            .ruled(issue: 2067)
+            .ruled(issue: 2067)  // detection label: #2572
         ),
         .row("ghostty_quick_terminal", .floats(.panel), .ignored, nil),
         .row("ghostty_window_decorations_false", .tiles, .kept, nil),
@@ -66,7 +66,13 @@ extension AXDumpExpected {
         ),
         .row("marta", .tiles, .kept, .furnished),
         .row("microsoft_edge", .tiles, .kept, .furnished),
-        .row("microsoft_edge_pip", .floats(.panel), .kept, .furnished),
+        .row(
+            "microsoft_edge_pip",
+            .floats(.raisedLayer),
+            .kept,
+            .furnished,
+            .ruled(issue: 2572)
+        ),
         .row("mpv_fullscreen", .floats(.panel), .kept, nil),
         .row("mpv_windowed", .tiles, .kept, .furnished),
         .row("nomachine_session_1", .floats(.accessoryApp), .kept, nil),

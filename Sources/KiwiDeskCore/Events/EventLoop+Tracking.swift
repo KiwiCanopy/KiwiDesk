@@ -211,7 +211,10 @@ extension EventLoop {
         structural: Bool
     ) -> Bool {
         guard !ownProcess else { return structural }
-        return verdict.reason == .panel || verdict.reason == .accessoryApp
+        switch verdict.reason {
+        case .panel, .raisedLayer, .accessoryApp: return true
+        case .rule, .fixedSize, nil: return false
+        }
     }
 
     private func applyFloatVerdict(
@@ -225,6 +228,11 @@ extension EventLoop {
         // floats a tiled window on that reading alone — save one
         // whose verdict a changed guess forgot (#2173).
         if verdict == .floats(.fixedSize), let before, before != verdict {
+            return
+        }
+        // A raised layer likewise (#2572): Chromium lifts its main
+        // window to 999 while a permission prompt is up.
+        if verdict == .floats(.raisedLayer), before == .tiles {
             return
         }
         detectedFloating[id] = verdict

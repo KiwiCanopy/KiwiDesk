@@ -12,7 +12,7 @@ extension AutoFloatReason {
         switch self {
         case .rule:
             L("float.refusal.rule", "An App Rule floats this window")
-        case .panel:
+        case .panel, .raisedLayer:
             L("float.refusal.panel", "Dialogs and panels always float")
         case .accessoryApp:
             L(
@@ -46,6 +46,7 @@ extension AutoFloatReason {
         switch self {
         case .rule: "rule"
         case .panel: "panel"
+        case .raisedLayer: "raised_layer"
         case .accessoryApp: "accessory_app"
         case .fixedSize: "fixed_size"
         }
@@ -60,7 +61,7 @@ extension AutoFloatReason {
         case .accessoryApp, .fixedSize:
             ["set_float_automatically", "tile_rule"]
         case .rule: ["app_rule.remove_float"]
-        case .panel: []
+        case .panel, .raisedLayer: []
         }
     }
 
@@ -68,7 +69,7 @@ extension AutoFloatReason {
     var failure: String {
         switch self {
         case .rule: "a float rule floats this window"
-        case .panel: "dialogs and panels always float"
+        case .panel, .raisedLayer: "dialogs and panels always float"
         case .accessoryApp:
             "apps without a Dock icon float automatically"
         case .fixedSize:

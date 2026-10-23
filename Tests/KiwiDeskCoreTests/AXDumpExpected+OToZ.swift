@@ -3,7 +3,13 @@
 extension AXDumpExpected {
     /// Dumps o–z.
     static let rowsOToZ: [Row] = [
-        .row("outlook_reminder", .floats(.panel), .kept, .furnished),
+        .row(
+            "outlook_reminder",
+            .floats(.raisedLayer),
+            .kept,
+            .furnished,
+            .ruled(issue: 2572)
+        ),
         .row("qutebrowser", .tiles, .kept, .furnished),
         .row("qutebrowser_context_menu", .floats(.panel), .kept, nil),
         .row("qutebrowser_hide_decoration", .floats(.panel), .kept, nil),
@@ -69,17 +75,17 @@ extension AXDumpExpected {
         .row("slack_chat_in_a_separate_window", .tiles, .kept, .furnished),
         .row(
             "slack_huddle_share_screen_draw_on_screen_fake_window",
-            .floats(.panel),
+            .floats(.raisedLayer),
             .ignored,
             .furnished,
-            .ruled(issue: 2069)
+            .ruled(issue: 2069)  // detection label: #2572
         ),
         .row(
             "slack_huddle_share_screen_floating_popup",
-            .floats(.panel),
+            .floats(.raisedLayer),
             .ignored,
             .furnished,
-            .ruled(issue: 2069)
+            .ruled(issue: 2069)  // detection label: #2572
         ),
         .row(
             "slack_huddle_share_screen_target_picker",
@@ -89,7 +95,13 @@ extension AXDumpExpected {
             .ruled(issue: 2069)
         ),
         .row("spotify", .tiles, .kept, .furnished),
-        .row("spotify_miniplayer", .floats(.panel), .kept, .furnished),
+        .row(
+            "spotify_miniplayer",
+            .floats(.raisedLayer),
+            .kept,
+            .furnished,
+            .ruled(issue: 2572)
+        ),
         .row("steam_1", .floats(.accessoryApp), .kept, nil),
         .row("steam_2", .floats(.panel), .kept, nil),
         .row("sublime_text_4", .tiles, .kept, .furnished),
@@ -129,6 +141,12 @@ extension AXDumpExpected {
         .row("zebar", .floats(.accessoryApp), .kept, nil),
         .row("zed", .tiles, .kept, .furnished),
         .row("zen_browser", .tiles, .kept, .furnished),
-        .row("zen_browser_pip", .floats(.panel), .kept, .furnished),
+        .row(
+            "zen_browser_pip",
+            .floats(.raisedLayer),
+            .kept,
+            .furnished,
+            .ruled(issue: 2572)
+        ),
     ]
 }
