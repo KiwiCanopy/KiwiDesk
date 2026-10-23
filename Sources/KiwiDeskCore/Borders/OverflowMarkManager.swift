@@ -55,23 +55,23 @@ public final class OverflowMarkManager {
     func sync(_ desired: [Spec], reassertOrder: Bool = false) {
         let wanted = Set(desired.map(\.mark.key))
         for (key, overlay) in overlays where !wanted.contains(key) {
-            if peek?.shown?.view === overlay.view { peek?.dismiss() }
+            // Hidden first, so its list fades rather than shrinking
+            // into a mark that is gone (#2563).
             overlay.hide()
+            if peek?.shown?.view === overlay.view { peek?.dismiss() }
             overlays[key] = nil
         }
         for spec in desired {
             let overlay = overlays[spec.mark.key] ?? made(spec.mark)
             overlays[spec.mark.key] = overlay
             // A re-anchored mark lists other windows from another
-            // place, so a peek open on it would read stale.
-            if overlay.mark != spec.mark,
-                peek?.shown?.view === overlay.view
-            {
-                peek?.dismiss()
-            }
+            // place, so a peek open on it would read stale; it
+            // shrinks into the mark as now drawn.
+            let stale = overlay.mark != spec.mark
             overlay.set(spec.mark, name: spec.name, shelf: spec.shelf)
             overlay.setSpans(spec.spans)
-            overlay.update(
+            place(
+                overlay,
                 frame: FollowSource.syncFrame(
                     spec: spec.frame,
                     held: overlay.lastFrame,
@@ -79,6 +79,9 @@ public final class OverflowMarkManager {
                     commanded: commandedFrame(spec.mark.anchor)
                 )
             )
+            if stale, peek?.shown?.view === overlay.view {
+                peek?.dismiss()
+            }
             if BorderManager.ordersOverlay(
                 reassert: reassertOrder,
                 needsOrder: overlay.needsOrder,
@@ -105,13 +108,28 @@ public final class OverflowMarkManager {
                 animating: isAnimating(id)
             )
         else { return }
-        each(id) { $0.update(frame: frame) }
+        each(id) { place($0, frame: frame) }
     }
 
     /// Repositions from WindowServer bounds (the watch's frame
     /// phase).
     func reposition(_ id: WindowID, windowFrame: CGRect) {
-        each(id) { $0.update(frame: windowFrame) }
+        each(id) { place($0, frame: windowFrame) }
+    }
+
+    /// Places `overlay` on its anchor framed `frame`; a mark that
+    /// moved on screen closes the list open on it (#2563), which
+    /// would otherwise stand over a window no longer there. It reads
+    /// the mark's placed frame, since its channels hand frames that
+    /// differ while the mark stays put.
+    private func place(_ overlay: OverflowMarkOverlay, frame: CGRect) {
+        let was = overlay.panel?.frame
+        overlay.update(frame: frame)
+        if let was, was != overlay.panel?.frame,
+            peek?.shown?.view === overlay.view
+        {
+            peek?.dismiss()
+        }
     }
 
     /// Re-stacks above the anchor (the watch's restack phase).
@@ -132,8 +150,9 @@ public final class OverflowMarkManager {
     /// Removes and hides every mark.
     func clear() {
         for overlay in overlays.values {
-            if peek?.shown?.view === overlay.view { peek?.dismiss() }
+            // Hidden first, as in `sync`, so the list fades.
             overlay.hide()
+            if peek?.shown?.view === overlay.view { peek?.dismiss() }
         }
         overlays = [:]
     }
@@ -153,10 +172,6 @@ public final class OverflowMarkManager {
             overlay.ordersPanel = ordersPanels
         #endif
         let view = overlay.view
-        view.onHover = { [weak self, weak overlay] inside in
-            guard let self, let overlay else { return }
-            self.report(overlay, inside: inside)
-        }
         view.onClick = { [weak self, weak overlay] in
             guard let overlay else { return }
             self?.peek?.show(
@@ -174,19 +189,6 @@ public final class OverflowMarkManager {
             self?.peek?.pressed(on: hit, type: type)
         }
         return overlay
-    }
-
-    /// What the pointer rests on, handed to the peek from the
-    /// mark's one hover gate.
-    private func report(_ overlay: OverflowMarkOverlay, inside: Bool) {
-        let view = overlay.view
-        peek?.pointer(
-            in: view,
-            on: inside ? view : nil,
-            source: inside ? .run(overlay.mark.windows) : nil,
-            space: overlay.mark.space,
-            edge: overlay.mark.end.peekEdge
-        )
     }
 }
 

@@ -726,6 +726,12 @@ the KiwiShelf expand on a Space switch, and
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired and fail naming their replacements.
 
+:::unreleased
+`animations.set_on_peek` (true|false, default true) turns the bars'
+peeks instant; see
+[animations.set_on_peek](lua-reference.md#animationsset_on_peek).
+:::
+
 `make_auto` is retired: it fails with `make_auto was retired —
 use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
 `toggle_floating` towards tiled, fail on a window that a float

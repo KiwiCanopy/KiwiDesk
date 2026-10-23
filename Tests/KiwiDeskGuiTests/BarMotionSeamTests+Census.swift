@@ -32,8 +32,8 @@ extension BarMotionSeamTests {
         "setFrame": ["travels(", "isReduced"],
         "setAlpha": ["fades(", "isReduced"],
         "fades": [],
-        "fadePeek": ["peekFadeDuration(", "isReduced"],
-        "peekFadeDuration": ["fades("],
+        "fadePeek": ["peekFadeDuration(", "isReduced", "peekMotion"],
+        "peekFadeDuration": ["fades(", "onPeek"],
         "afterGroupGlide": ["shelfGlide"],
         "shelfGlideLength": ["shelfGlide"],
         "standCommitted": [],
@@ -76,6 +76,11 @@ extension BarMotionSeamTests {
         "playSpread": [],
         "spreadFade": [],
         "endSpread": [],
+        "morphPlay": [],
+        "playMorph": ["morphPlay(", "isReduced", "peekMotion"],
+        "endMorph": [],
+        "morphClip": ["span"],
+        "morphFade": ["span"],
     ]
 
     /// Members whose motion Reduce Motion deliberately KEEPS, each

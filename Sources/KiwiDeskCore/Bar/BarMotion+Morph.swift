@@ -1,0 +1,193 @@
+import AppKit
+import QuartzCore
+
+/// `BarMotion`'s peek morph (#2563 ▸ Ruling): the overflow mark's
+/// pill grows by its frame into the list and shrinks back into it,
+/// on one critically damped spring; under Reduce Motion nothing
+/// grows and the pill and the list cross-fade at rest.
+/// The same one home — `BarMotionSeamTests` censuses this file.
+extension BarMotion {
+    /// The open's perceptual length: fixed, never `reveal_duration`,
+    /// since a list is a label and not a bar reveal.
+    static let morphOpen: TimeInterval = 0.2
+    /// The close's: about four fifths of the open.
+    static let morphClose: TimeInterval = 0.16
+    static let morphKey = "kiwidesk.peekMorph"
+
+    /// How the pill becomes the list and back.
+    enum MorphPlay: Equatable {
+        /// The pill grows by its frame into the list.
+        case grow
+        /// Reduce Motion: the two cross-fade at rest.
+        case crossFade
+        /// The peeks' motion off (`on_peek`): at once.
+        case snap
+    }
+
+    /// The morph `on_peek` and Reduce Motion leave: the motion off
+    /// snaps, outranking Reduce Motion's cross-fade.
+    static func morphPlay(onPeek: Bool, reduceMotion: Bool) -> MorphPlay {
+        guard onPeek else { return .snap }
+        return reduceMotion ? .crossFade : .grow
+    }
+
+    /// Plays the open (`opening`) or the close of the list `parts`
+    /// draw in `panel`, the `anchor`'s panel hiding as it opens, the
+    /// stage between `pill` and its own bounds, both in the stage
+    /// layer's own coordinates; returns how long until it lands.
+    /// Continues from where a morph in flight stands.
+    @MainActor
+    @discardableResult
+    static func playMorph(
+        _ parts: BarPeekMorphParts,
+        panel: NSWindow,
+        anchor: NSWindow?,
+        pill: CGRect,
+        pillRadius: CGFloat,
+        listRadius: CGFloat,
+        opening: Bool
+    ) -> TimeInterval {
+        let alpha: CGFloat = opening ? 1 : 0
+        switch morphPlay(onPeek: peekMotion, reduceMotion: isReduced) {
+        case .snap:
+            panel.alphaValue = alpha
+            anchor?.alphaValue = 1 - alpha
+            return 0
+        case .crossFade:
+            if opening { panel.alphaValue = 0 }
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = peekFade
+                panel.animator().alphaValue = alpha
+                anchor?.animator().alphaValue = 1 - alpha
+            }
+            return peekFade
+        case .grow:
+            break
+        }
+        let span = opening ? morphOpen : morphClose
+        // Replaces a peek fade still running, which a bare write
+        // would leave to finish over it.
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0
+            panel.animator().alphaValue = 1
+        }
+        panel.alphaValue = 1
+        if opening { anchor?.alphaValue = 0 }
+        let clipLayer = parts.stage
+        let current =
+            clipLayer.animationKeys()?.contains(morphKey) == true
+            ? clipLayer.presentation() : nil
+        let full = clipLayer.bounds
+        let from = current?.bounds ?? (opening ? pill : full)
+        let to = opening ? full : pill
+        let clip = morphClip(
+            from: (
+                from,
+                current?.position ?? clipPlace(from, on: clipLayer),
+                current?.cornerRadius ?? (opening ? pillRadius : listRadius)
+            ),
+            to: (
+                to,
+                clipPlace(to, on: clipLayer),
+                opening ? listRadius : pillRadius
+            ),
+            span: span
+        )
+        clipLayer.masksToBounds = true
+        clipLayer.add(clip, forKey: morphKey)
+        let half = span / 2
+        // A fade in flight continues from where it stands.
+        let shown = { (layer: CALayer, rest: Float) -> Float in
+            layer.animationKeys()?.contains(morphKey) == true
+                ? layer.presentation()?.opacity ?? rest : rest
+        }
+        parts.rows.add(
+            morphFade(
+                from: shown(parts.rows, opening ? 0 : 1),
+                to: opening ? 1 : 0,
+                begin: opening ? half : 0,
+                span: half
+            ),
+            forKey: morphKey
+        )
+        parts.markInk.add(
+            morphFade(
+                from: shown(parts.markInk, opening ? 1 : 0),
+                to: opening ? 0 : 1,
+                begin: 0,
+                span: span
+            ),
+            forKey: morphKey
+        )
+        parts.listInk.add(
+            morphFade(
+                from: shown(parts.listInk, opening ? 0 : 1),
+                to: opening ? 1 : 0,
+                begin: 0,
+                span: span
+            ),
+            forKey: morphKey
+        )
+        // The spring runs past its perceptual length; the landing
+        // waits it out.
+        return settling(span, bounce: 0)
+    }
+
+    /// Ends a morph: every part stands at rest, the clip open.
+    @MainActor
+    static func endMorph(_ parts: BarPeekMorphParts) {
+        [parts.stage, parts.rows, parts.markInk, parts.listInk].forEach {
+            $0.removeAnimation(forKey: morphKey)
+        }
+    }
+
+    /// The stage's clip on one critically damped spring: bounds,
+    /// position and corner radius, held where it lands — played only
+    /// where `morphPlay` grows the pill.
+    private static func morphClip(
+        from: ClipStart,
+        to: ClipStart,
+        span: TimeInterval
+    ) -> CAAnimation {
+        let group = CAAnimationGroup()
+        let parts: [(String, Any, Any)] = [
+            ("bounds", from.bounds, to.bounds),
+            ("position", from.place, to.place),
+            ("cornerRadius", from.radius, to.radius),
+        ]
+        group.animations = parts.map { path, start, end in
+            let spring = CASpringAnimation(
+                perceptualDuration: span,
+                bounce: 0
+            )
+            spring.keyPath = path
+            spring.fromValue = start
+            spring.toValue = end
+            spring.duration = spring.settlingDuration
+            return spring
+        }
+        group.duration = settling(span, bounce: 0)
+        group.fillMode = .forwards
+        group.isRemovedOnCompletion = false
+        return group
+    }
+
+    /// An opacity fade from `from` to `to` over `span`, `begin`
+    /// seconds in, holding its ends either side — the grown morph's
+    /// alone.
+    private static func morphFade(
+        from: Float,
+        to: Float,
+        begin: TimeInterval,
+        span: TimeInterval
+    ) -> CAAnimation {
+        let fade = CABasicAnimation(keyPath: "opacity")
+        fade.fromValue = from
+        fade.toValue = to
+        fade.beginTime = CACurrentMediaTime() + begin
+        fade.duration = max(span, 0.001)
+        fade.fillMode = .both
+        fade.isRemovedOnCompletion = false
+        return fade
+    }
+}

@@ -4633,10 +4633,12 @@ windows it shows; closing one lets the others grow into the
 room.
 
 Each end of a zone that hides windows shows a "+n" overflow mark
-on its edge window, counting that end's hidden windows. Hovering
-or clicking the mark lists them, nearest first; clicking one
-focuses it, which scrolls it in. The mark takes no room, so no
-window resizes when it appears.
+on its edge window, counting that end's hidden windows. Clicking
+the mark opens the list of them, nearest first; clicking one
+focuses it, which scrolls it in. The arrow keys and Return walk
+and pick its rows; Escape or any other key, a click on the list's
+header or a click outside closes it. The mark takes no
+room, so no window resizes when it appears.
 
 In Stack, `focus` and `swap` along a zone that hides windows
 step through them in order, as Track does along a track; a
@@ -7021,6 +7023,24 @@ too.
 ```lua
 animations.set_reveal_duration(400)
 ```
+
+:::unreleased
+### animations.set_on_peek
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** the bars' peeks: the short fade of the label a bar item
+shows on hover, and the overflow mark's "+n" growing into its list
+of windows and back. Off, both show and hide at once. With Reduce
+Motion on, the list cross-fades with the mark instead of growing,
+unless this is off. Lua-only: no Settings row turns it off.
+
+**Example:**
+
+```lua
+animations.set_on_peek(false)
+```
+:::
 
 ### enable_wake_restore, set_wake_restore_delay
 

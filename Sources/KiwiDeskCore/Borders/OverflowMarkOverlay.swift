@@ -138,6 +138,10 @@ final class OverflowMarkOverlay {
             rect,
             primaryHeight: GeometryUtils.primaryHeight
         )
+        view.morphRoom = GeometryUtils.flip(
+            mark.bounds,
+            primaryHeight: GeometryUtils.primaryHeight
+        )
         if panel.frame != flipped {
             panel.setFrame(flipped, display: false)
         }

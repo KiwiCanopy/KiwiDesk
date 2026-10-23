@@ -58,13 +58,19 @@ extension BarMotion {
     /// appearing rather than arriving; never a slide.
     static let peekFade: TimeInterval = 0.1
 
-    /// The peek fade's length: none where it is not animated or
-    /// under Reduce Motion, which snaps.
+    /// Whether the bars' peeks move at all, the user's
+    /// `animations.on_peek` (#2563) — kept current by
+    /// `KiwiCore.updateBars()`.
+    @MainActor static var peekMotion = AnimationSettings().onPeek
+
+    /// The peek fade's length: none where it is not animated, under
+    /// Reduce Motion, which snaps, or with the peeks' motion off.
     static func peekFadeDuration(
         _ animated: Bool,
-        reduceMotion: Bool
+        reduceMotion: Bool,
+        onPeek: Bool
     ) -> TimeInterval {
-        fades(animated, reduceMotion: reduceMotion) ? peekFade : 0
+        onPeek && fades(animated, reduceMotion: reduceMotion) ? peekFade : 0
     }
 
     /// Fades the peek's `panel` to `alpha`; `landed` runs once it
@@ -77,7 +83,11 @@ extension BarMotion {
         animated: Bool,
         landed: @escaping @MainActor () -> Void = {}
     ) {
-        let span = peekFadeDuration(animated, reduceMotion: isReduced)
+        let span = peekFadeDuration(
+            animated,
+            reduceMotion: isReduced,
+            onPeek: peekMotion
+        )
         guard span > 0 else {
             // Replaces a fade still running, which a bare write
             // would leave to finish over it.

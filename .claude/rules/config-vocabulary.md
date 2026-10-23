@@ -78,6 +78,13 @@ synonym:
   state glyph's. Retired as its name: *bubble*, the issue's working
   name; never a *badge*, which sits on a bar item, nor an
   *indicator*.
+- **peek** — the bars' hover peek, the label or list a bar item
+  shows over itself, and the overflow mark's list, which is the
+  same peek grown out of its mark (#1946, #2563;
+  `animations.on_peek`). It names that surface alone: prose saying
+  a parked window "peeks" past an edge uses the verb, never a
+  setting or label. Never a *tooltip*, which the peek replaced, nor
+  a *popover* or *preview*.
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One family;

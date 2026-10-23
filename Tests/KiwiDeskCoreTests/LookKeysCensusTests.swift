@@ -98,6 +98,7 @@ struct LookKeysCensusTests {
                 "animations.duration",
                 "animations.scroll_duration",
                 "animations.on_expand",
+                "animations.on_peek",
                 "animations.expand_duration",
                 "animations.reveal_duration",
             ]
