@@ -1050,7 +1050,7 @@
   "kiwishelf.reveal_style.fade": "Esmaecer",
   "kiwishelf.reveal_style.grow": "Crescer",
   "kiwishelf.reveal_style.label": "Exibição",
-  "kiwishelf.reveal_style.label.help": "Como uma barra oculta aparece: “%1$@” traz a barra inteira da borda da tela; “%2$@” a faz crescer a partir da faixa, ou percorre as caixas de um fundo “%5$@”; “%3$@” a estica a partir da faixa ao longo da borda e depois a engrossa, ou faz cada caixa saltar da faixa; “%4$@” a faz aparecer gradualmente onde está. Uma barra sem faixa cresce ou se desdobra a partir do meio da borda da tela.",
+  "kiwishelf.reveal_style.label.help": "Como uma barra oculta aparece: “%1$@” traz a barra inteira da borda da tela; “%2$@” a faz crescer a partir da faixa, e a desdobra sobre um fundo “%5$@”; “%3$@” a estica a partir da faixa ao longo da borda e depois a engrossa, ou faz cada caixa saltar da faixa; “%4$@” a faz aparecer gradualmente onde está. Uma barra sem faixa cresce ou se desdobra a partir do meio da borda da tela.",
   "kiwishelf.reveal_style.no_bar_hides": "Nenhuma barra fica oculta, então não há nada para exibir.",
   "kiwishelf.reveal_style.slide": "Deslizar",
   "kiwishelf.reveal_style.unfold": "Desdobrar",

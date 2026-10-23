@@ -106,12 +106,43 @@ struct GestureStripTests {
         let plate = try Self.squashed(
             Self.gestures + "GestureStripPlate.swift"
         )
-        #expect(plate.contains(".onTapGesture{onLand(item)}"))
+        #expect(
+            plate.contains(".overlay(GestureStripHoverCue{onLand(item)})")
+        )
         #expect(
             plate.contains(
                 ".overlay(PlateToolTip(text:item.sentence(settings)))"
             )
         )
         #expect(!plate.contains("GreyOut("))
+    }
+
+    /// The hover cue (#2537): its own view, so the picture never
+    /// re-renders on hover; an accent border bound to the pointer
+    /// over the off-gesture fade, the pointing hand, the click.
+    @Test("a picture under the pointer wears the accent border")
+    func plateHoverCue() throws {
+        let plate = try Self.squashed(
+            Self.gestures + "GestureStripPlate.swift"
+        )
+        let fade = try #require(plate.range(of: ".opacity(item.isOff"))
+        let cue = try #require(
+            plate.range(of: ".overlay(GestureStripHoverCue{")
+        )
+        #expect(fade.upperBound < cue.lowerBound)
+        let view = try Self.squashed(
+            Self.gestures + "GestureStripHoverCue.swift"
+        )
+        #expect(view.contains(".onTapGesture(perform:onTap)"))
+        #expect(view.contains(".onHover{hovering=$0}"))
+        #expect(view.contains(".pointingHandCursor()"))
+        #expect(
+            view.contains(
+                ".strokeBorder(SettingsTheme.accent.opacity(hovering?1:0),"
+            )
+        )
+        // The view itself never fades out of hit-testing.
+        #expect(!view.contains(").opacity("))
+        #expect(!view.contains("picture("))
     }
 }

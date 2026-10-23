@@ -61,7 +61,7 @@ final class ShelfOverlay {
     var revealOrigin: CGRect?
     /// The plate a grow or an unfold reaches, in the content's
     /// coordinates, with its corner radius — under Boxed the boxes'
-    /// span (#761, owner ruling 2026-10-21); nil before a show.
+    /// span the spread reads (#761, #2556); nil before a show.
     /// Set by each show.
     var revealPlate: (frame: CGRect, radius: CGFloat)?
     /// Lands a reveal or a retract after its length — the reveal's
@@ -196,8 +196,8 @@ final class ShelfOverlay {
             strip: strip,
             horizontal: horizontal
         )
-        // Boxed draws no plate: its grow wipes and its unfold spreads
-        // over the boxes' span.
+        // Boxed draws no plate: its grow and unfold both spread over
+        // the boxes' span (#2556).
         revealPlate = (plate ?? restRoom, radius)
         let travels = BarMotion.shelfGlideLength > 0
         if glides, travels {

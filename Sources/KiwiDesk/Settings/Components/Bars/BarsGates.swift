@@ -74,6 +74,13 @@ struct BarsGates {
         settings.kiwishelf.backgroundStyle == .boxed
     }
 
+    /// True when Core plays the Grow pick as Unfold (#2556), read
+    /// from `playedRevealStyle` rather than re-derived here.
+    var growPlaysAsUnfold: Bool {
+        settings.kiwishelf.revealStyle == .grow
+            && settings.kiwishelf.playedRevealStyle == .unfold
+    }
+
     /// Why the font weight is inert: the family is not installed.
     @MainActor var fontWeightReason: InertReason? {
         let family = settings.kiwishelf.fontFamily
@@ -105,6 +112,19 @@ enum BarsGateHelp {
             "kiwishelf.show.differ.help",
             "Your bars show differently right now; choosing here "
                 + "sets every bar."
+        )
+    }
+
+    /// The Reveal row's note while Grow plays as Unfold on a
+    /// Boxed shelf (#2556) — not an `InertReason`: nothing greys.
+    static var growPlaysAsUnfold: String {
+        L(
+            "kiwishelf.reveal_style.grow_boxed",
+            "On a \u{201C}%1$@\u{201D} background, \u{201C}%2$@"
+                + "\u{201D} plays as \u{201C}%3$@\u{201D}.",
+            L("app_bar.background_style.boxed", "Boxed"),
+            L("kiwishelf.reveal_style.grow", "Grow"),
+            L("kiwishelf.reveal_style.unfold", "Unfold")
         )
     }
 

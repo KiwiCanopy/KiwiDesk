@@ -271,7 +271,8 @@ struct SettingsThemeContrastTests {
             inkAlpha: 0.75
         ),
         // The bound key's glyph — `KeyCap.ink` draws
-        // previewPlate on the accent fill.
+        // previewPlate on the accent fill; the same pair holds the
+        // gesture strip's accent hover border on its plate (#2537).
         Pairing(
             "previewPlate glyph on accent",
             SettingsTheme.previewPlate,
