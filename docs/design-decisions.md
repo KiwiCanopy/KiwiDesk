@@ -294,10 +294,32 @@ Space you are on takes it. A trade keeps both slots — index,
 track break and weights — and refuses a float, which has no
 slot, and a native full-screen window.
 
-The **pointer** is not a second decision. It follows focus only
-where *mouse follows focus* is on, through the same predicate
-every other focus change uses — the setting is the answer, and a
-follow does not earn an exception to it.
+The **pointer** is not a second decision. On one screen it
+follows focus only where *mouse follows focus* is on, through the
+same predicate every other focus change uses — the setting is the
+answer, and a follow does not earn an exception to it.
+
+:::unreleased
+**A screen handoff is not a window follow, so the pointer crosses
+with the focus whatever the setting says
+([#2548](https://github.com/KiwiCanopy/KiwiDesk/issues/2548)).**
+macOS keeps one active screen, and the pointer partly decides it:
+Spotlight opens on the pointer's screen, and so does an app's
+first window. A Space switch that moves focus to another screen
+while the pointer stays behind splits the Mac in two — you type
+on one screen and see the result on the other. So a switch that
+crosses screens moves the pointer onto the focused window there,
+or to the centre of that screen's usable area when the Space is
+empty, and nothing moves when the pointer is already on that
+screen. The setting still governs every follow within a screen,
+which is the choice a user who turned it off made. The handoff is
+gated on the screen changing, never on which verb ran, so the
+rule-driven follow of a new window (#2478) crosses too. The
+pointer gestures stay out of it: the scroll step acts on the
+screen under the pointer, hover focus is made by the pointer, an
+unlock restores focus without moving it, and a held button is a
+gesture in progress.
+:::
 
 What that admission costs, accepted deliberately: **there is no
 fallback to write.** The public API for these operations does not
