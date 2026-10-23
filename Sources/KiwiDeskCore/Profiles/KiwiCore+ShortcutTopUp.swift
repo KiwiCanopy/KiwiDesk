@@ -201,7 +201,7 @@ extension KiwiCore {
         if let lua = keys.lua {
             applyStructuredKeybindings(
                 layers: config.layers,
-                profile: activeProfileOverrides()?.layers,
+                profile: activeProfileOverrides(),
                 lua: lua
             )
         }

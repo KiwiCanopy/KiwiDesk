@@ -2369,6 +2369,15 @@ editing here:
   the same frame set and is not pinned, since every fake display
   resolves to the one host screen.
 
+- **A Config Issue derived from live state is re-derived, never
+  handed in (#1681, #2544).** `setConfigIssues` owns every kind
+  `ConfigIssue.Kind.isDerived` names and recomputes it on each
+  publish, so a new live-derived kind joins `isDerived` and its
+  source calls `syncDerivedIssues()` wherever it changes — the
+  shelf's at `updateBars()`, the shortcut symbols' at every
+  keybinding install (`ShortcutMetaCarryTests` ▸
+  `issueSurvivesRepublish`, `installNamesItsOwnProfile`).
+
 ## Cross-layout logic must account for each layout's navigation model
 
 Anything spanning all layouts — focus/swap navigation, overflow

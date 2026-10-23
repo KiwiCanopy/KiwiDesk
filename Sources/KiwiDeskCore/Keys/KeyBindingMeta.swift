@@ -6,7 +6,7 @@ import Foundation
 /// `KiwiDesk.bind`'s and `define_layer`'s option tables. The one
 /// home of the three fields: `KeyBinding.meta` reads and writes them
 /// whole, and every comparison or copy goes through it
-/// (`ShortcutMetaParityTests`).
+/// (`ShortcutMetaCarryTests` ▸ `metaIsTheOneHome`).
 public struct KeyBindingMeta: Equatable, Sendable {
     public var desc = ""
     public var group = ""

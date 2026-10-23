@@ -19,13 +19,13 @@ extension KiwiCore {
     /// refresh keeps the running layer.
     func applyStructuredKeybindings(
         layers base: [KeyLayer],
-        profile: KeyLayerOverride?,
+        profile: Profile?,
         lua: LuaInterpreter,
         preferredLayer: String = KeybindingManager.defaultLayer
     ) {
         let resolved = ConfigResolver.resolvedLayers(
             base: base,
-            profile: profile
+            profile: profile?.layers
         )
         let prepared = prepareKeybindings(
             resolved,

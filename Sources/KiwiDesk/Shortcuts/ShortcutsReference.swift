@@ -58,10 +58,16 @@ enum ShortcutsReferenceBuilder {
             resizeStep: resizeStep
         )
 
-        // A recognised binding that names a group of its own leaves
-        // its built-in band for it (#2544 ▸ Ruling).
+        // A recognised binding that names another group leaves its
+        // built-in band for it (#2544 ▸ Ruling): one of its own
+        // here, a built-in one once the bands are built. An
+        // inactive or unavailable row keeps its own section.
         var regrouped: [OwnRow] = []
-        func rows(_ commands: [NavCommand]) -> [ShortcutRow] {
+        var moves: [String: ShortcutGroup] = [:]
+        func rows(
+            _ commands: [NavCommand],
+            regroups: Bool
+        ) -> [ShortcutRow] {
             commands.compactMap { cmd in
                 guard let binding = bound(cmd.lua) else {
                     return nil
@@ -70,7 +76,7 @@ enum ShortcutsReferenceBuilder {
                 let combo = glyphs(binding.combo)
                 // A field the binding sets wins; one it leaves empty
                 // keeps the built-in name or symbol (#2544).
-                let row = ShortcutRow(
+                var row = ShortcutRow(
                     id: cmd.lua,
                     label: binding.desc.isEmpty
                         ? cmd.resolvedLabel : binding.desc,
@@ -84,11 +90,18 @@ enum ShortcutsReferenceBuilder {
                         rendered: combo
                     )
                 )
-                guard binding.group.isEmpty else {
-                    regrouped.append(OwnRow(row: row, group: binding.group))
+                row.ownApp = cmd.lua == KeybindingCatalog.openSettings.lua
+                guard regroups, cmd.unavailable == nil else { return row }
+                switch ShortcutGroup.filing(binding.group) {
+                case .none:
+                    return row
+                case .builtIn(let group):
+                    moves[row.id] = group
+                    return row
+                case .own(let name):
+                    regrouped.append(OwnRow(row: row, group: name))
                     return nil
                 }
-                return row
             }
         }
 
@@ -100,7 +113,7 @@ enum ShortcutsReferenceBuilder {
             resizeStep: resizeStep,
             layerNames: layerNames,
             lenses: lenses,
-            rows: rows
+            rows: { rows($0, regroups: true) }
         )
         // Inactive orphans built before Apps/Custom (#820).
         let inactive = buildInactive(
@@ -108,24 +121,21 @@ enum ShortcutsReferenceBuilder {
             spaces: spaces,
             layers: layerNames,
             spaceIcons: spaceIcons,
-            rows: rows
+            rows: { rows($0, regroups: false) }
         )
         // KiwiDesk's own app row leads Apps, as the editor's Open
         // applications ▸ KiwiDesk does (#1520, #2246); without it a
         // bound Open Settings fell through to Custom as raw Lua
         // (#678 item 18).
         let apps =
-            rows([KeybindingCatalog.openSettings]).map { row in
-                var row = row
-                row.ownApp = true
-                return row
-            }
+            rows([KeybindingCatalog.openSettings], regroups: true)
             + buildApps(layer, consumed: &consumed)
         let filed = file(
             regrouped + buildCustom(layer, consumed: consumed)
                 + buildUnread(unread),
             controls: controls,
-            apps: apps
+            apps: apps,
+            moves: moves
         )
 
         // A key that does nothing until its Desktop returns leaves

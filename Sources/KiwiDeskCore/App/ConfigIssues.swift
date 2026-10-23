@@ -30,7 +30,7 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
         /// The shelf's font family is not installed, so the bars
         /// draw System (#1681, `BarFont.isInstalled`).
         case missingFontFamily(name: String)
-        /// A shortcut in key mode `layer` names a symbol that is no
+        /// A shortcut in layer `layer` names a symbol that is no
         /// SF Symbol, so its row wears the Lua mark (#2544): a
         /// warning, the binding works.
         case unknownShortcutSymbol(
@@ -153,21 +153,20 @@ extension KiwiCore {
             }
     }
 
-    /// The file an installed row came from: the active profile's
-    /// where its override holds the chord, else the sidecar or
-    /// `init.lua`.
+    /// The file an installed row came from: the profile the install
+    /// resolved over, where its override holds the chord — named by
+    /// the install, never `currentName`, which an apply moves after
+    /// it — else the sidecar or `init.lua`.
     private func shortcutSource(layer: String, chord: String) -> String {
         guard case .structured(_, let profile)? = installedKeybindings
         else { return "init.lua" }
-        let overridden =
-            profile?.layers.contains { held in
+        guard let profile,
+            profile.layers?.layers.contains(where: { held in
                 held.name == layer
                     && held.bindings.contains { $0.combo == chord }
-            } ?? false
-        if overridden, let name = profiles.currentName {
-            return "\(name).json"
-        }
-        return "gui.json"
+            }) == true
+        else { return "gui.json" }
+        return "\(profile.name).json"
     }
 }
 

@@ -69,14 +69,37 @@ enum ConfigIssueText {
                 name,
                 BarFontText.familyName(KiwiShelf.systemFontFamily)
             )
-        case .unknownShortcutSymbol(_, let chord, let symbol):
+        case .unknownShortcutSymbol(let layer, let chord, let symbol):
+            return unknownSymbol(layer: layer, chord: chord, symbol: symbol)
+        }
+    }
+
+    /// The default layer's shortcut is named by its chord alone; any
+    /// other layer's names its layer too, so one chord in two layers
+    /// reads as two issues.
+    @MainActor private static func unknownSymbol(
+        layer: String,
+        chord: String,
+        symbol: String
+    ) -> String {
+        let chord = ShortcutsReferenceBuilder.glyphs(chord)
+        guard layer != KeyLayer.defaultName else {
             return L(
                 "config_issues.unknown_shortcut_symbol",
                 "The shortcut %1$@ asks for the symbol “%2$@”, which "
                     + "isn't an SF Symbol, so its row shows </> instead.",
-                ShortcutsReferenceBuilder.glyphs(chord),
+                chord,
                 symbol
             )
         }
+        return L(
+            "config_issues.unknown_shortcut_symbol_layer",
+            "The shortcut %1$@ in the “%3$@” layer asks for the symbol "
+                + "“%2$@”, which isn't an SF Symbol, so its row shows "
+                + "</> instead.",
+            chord,
+            symbol,
+            layer
+        )
     }
 }

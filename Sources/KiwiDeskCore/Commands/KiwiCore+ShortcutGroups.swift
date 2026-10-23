@@ -21,10 +21,11 @@ extension KiwiCore {
             "chord": .string(binding.combo),
             "lua": .string(binding.lua),
         ]
-        if !binding.desc.isEmpty { entry["desc"] = .string(binding.desc) }
-        if !binding.group.isEmpty { entry["group"] = .string(binding.group) }
-        if !binding.symbol.isEmpty {
-            entry["symbol"] = .string(binding.symbol)
+        // Every field of `KeyBindingMeta`, by its stored name.
+        for case (let key?, let value as String) in Mirror(
+            reflecting: binding.meta
+        ).children where !value.isEmpty {
+            entry[key] = .string(value)
         }
         return .object(entry)
     }

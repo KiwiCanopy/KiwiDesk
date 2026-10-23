@@ -70,7 +70,7 @@ extension KiwiCore {
         else { return }
         applyStructuredKeybindings(
             layers: config.layers,
-            profile: (profile ?? activeProfileOverrides())?.layers,
+            profile: profile ?? activeProfileOverrides(),
             lua: lua,
             preferredLayer: keys.currentLayer
         )

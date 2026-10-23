@@ -3,10 +3,10 @@ import Foundation
 /// Which owner's bindings `keys` holds, recorded by the apply that
 /// installed them — never re-read from `init.lua`, which can change
 /// on disk without a reload (#2482).
-/// A structured install keeps the profile tier it resolved, so an
+/// A structured install keeps the profile it resolved over, so an
 /// issue about one of its rows names the file that holds it (#2544).
 enum InstalledKeybindings {
-    case structured([KeyLayer], profile: KeyLayerOverride?)
+    case structured([KeyLayer], profile: Profile?)
     case lua(layers: [KeyLayer], unread: [String: [UnreadChord]])
 }
 

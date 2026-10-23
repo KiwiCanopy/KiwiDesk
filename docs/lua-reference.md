@@ -6036,19 +6036,24 @@ KiwiDesk.define_layer("service", { --[[ bindings ]] },
 table, with any of:
 
 - `desc` — what the shortcut does, in your words.
-- `group` — the group it is listed in: a built-in group's token
-  (`focus`, `move_windows`, `layout`, `size_float`, `kiwivision`,
-  `kiwishelf`, `apps`) puts it there; any other name makes a group
-  of its own.
+- `group` — the shortcut group it is listed in: a built-in
+  group's token (`focus`, `move_windows`, `layout`, `size_float`,
+  `kiwivision`, `kiwishelf`, `apps`) puts it there, whatever its
+  case and the spaces around it; any other name makes a shortcut
+  group of its own.
 - `symbol` — an SF Symbol name for its row.
 
 **Does:** KiwiHub's Shortcuts side lists the shortcut under its
 description instead of its Lua, in its group, wearing its symbol.
 A group of your own is listed after the built-in ones and before
-Custom, in the order your config first names it, under the name as
-written. Without a symbol a row wears `</>`, the mark for your own
-Lua; a name that is not an SF Symbol shows `</>` too and is listed
-in Config Issues, and the shortcut still works. A token matches whatever its case and the spaces around it.
+Custom, under the name as written. Without a symbol a row wears
+`</>`; a name that is not an SF Symbol shows `</>` too and is
+listed in Config Issues, and the shortcut still works.
+
+A shortcut whose action KiwiHub knows — `KiwiDesk.focus("left")` —
+keeps its built-in name, group and symbol for each field it leaves
+empty, and shows the ones it sets. An inactive or unavailable
+shortcut stays in its own section whatever its group.
 [`shortcut.list_groups`](#shortcutlist_groups) lists the names in
 use.
 
@@ -6107,14 +6112,15 @@ layer.
 
 ### Shortcut verbs
 
-The `shortcut` table writes the saved shortcuts of the live profile
-from Lua, the CLI and an AI app, in the default layer. Shortcuts
+The `shortcut` table reads and writes the saved shortcuts of the
+live profile from Lua, the CLI and an AI app, in the default layer. Shortcuts
 load only from the saved files, so a write saves at once and the
 key works straight away — the shortcut rows alone, never the rest
 of the profile. A new shortcut goes into the shared base on the
 loaded profile, as Settings ▸ Shortcuts starts one. With
 `init.lua` owning the config, or no saved profile live, the verbs
-refuse.
+refuse, save `shortcut.list_groups`, which reads the shortcuts in
+effect.
 
 #### shortcut.list
 
@@ -6164,8 +6170,8 @@ shortcut.remove("ctrl+alt+h")
 **Expects:** nothing.
 
 **Does:** returns `built_in`, the tokens of KiwiHub's built-in
-groups, and `custom`, every group the installed shortcuts make of
-their own, in the order a shortcut first names it. It reads the
+groups, and `custom`, every shortcut group the installed shortcuts
+make of their own, each once. It reads the
 shortcuts in effect, so it answers with `init.lua` owning the
 config too.
 :::
@@ -7430,7 +7436,7 @@ sync folder's status. Each issue carries its `source` file, a
 
 :::unreleased
 A shortcut whose `symbol` is no SF Symbol is
-`unknown_shortcut_symbol`, with its `chord` and `symbol`.
+`unknown_shortcut_symbol`, with its `layer`, `chord` and `symbol`.
 :::
 
 `sync` carries the followed `folder` (`nil` when none) and a

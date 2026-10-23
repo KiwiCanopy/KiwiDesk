@@ -48,6 +48,35 @@ struct ShortcutMetaCarryTests {
         #expect(row.desc == "D" && row.group == "G" && row.symbol == "star")
     }
 
+    /// Reflection-driven round trip: every meta field decodes onto
+    /// `KeyBinding`, reads back through the getter, survives the
+    /// setter and reaches `shortcut.list`, so a field the mirror
+    /// forgets reds here rather than slipping past `==`.
+    @Test("Every meta field round-trips through KeyBinding.meta")
+    func metaRoundTrips() throws {
+        let fields = fieldNames(KeyBindingMeta())
+        #expect(!fields.isEmpty)
+        var object: [String: String] = ["combo": "c", "lua": "l"]
+        for field in fields { object[field] = field }
+        let row = try JSONDecoder().decode(
+            KeyBinding.self,
+            from: try JSONSerialization.data(withJSONObject: object)
+        )
+        let read = fieldValues(row.meta)
+        var copied = KeyBinding()
+        copied.meta = row.meta
+        let entry = KiwiCore.shortcutEntry(copied)
+        for field in fields {
+            #expect(read[field] == field, "getter drops \(field)")
+            #expect(
+                fieldValues(copied.meta)[field] == field,
+                "setter drops \(field)"
+            )
+            guard case .object(let body) = entry else { continue }
+            #expect(body[field] == .string(field), "list drops \(field)")
+        }
+    }
+
     @Test("A change to one field alone is a different binding")
     func eachFieldCounts() {
         let base = KeyBinding(combo: "alt+h", lua: "x()")
@@ -194,44 +223,73 @@ struct ShortcutMetaCarryTests {
         #expect(symbolIssues(core).count == 1)
     }
 
-    /// A structured install re-derives the issue itself, and names
-    /// the active profile's file where its override holds the row.
-    @Test("A structured install files the issue against its source")
-    func structuredInstallSourcesTheIssue() throws {
-        let core = try loaded("")
-        try core.profiles.save(
-            Profile(
-                name: "Work",
-                monitorSets: [MonitorSet(monitors: ["A:100x100"])],
-                spaceModes: [:],
-                settings: TilingSettings()
+    private func profile(
+        _ name: String,
+        layers: KeyLayerOverride? = nil
+    ) -> Profile {
+        Profile(
+            name: name,
+            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+            spaceModes: [:],
+            settings: TilingSettings(),
+            layers: layers
+        )
+    }
+
+    private static let badRow = KeyLayer(
+        name: KeyLayer.defaultName,
+        bindings: [
+            KeyBinding(
+                combo: "alt+h",
+                lua: "KiwiDesk.focus(\"left\")",
+                symbol: "kiwidesk.no.such.symbol"
             )
+        ]
+    )
+
+    /// Loading a profile whose override holds the row names that
+    /// profile's file; a sidecar row names the sidecar.
+    @Test("A profile's row files its issue against the profile")
+    func loadedProfileSourcesTheIssue() throws {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("kiwi-src-\(UUID().uuidString)")
+        )
+        var base = GuiConfig()
+        base.layers = [Self.badRow]
+        try core.guiConfigStore.save(GuiConfig())
+        try core.saveGuiConfig(base)
+        #expect(symbolIssues(core).map(\.source) == ["gui.json"])
+        try core.saveGuiConfig(GuiConfig())
+        try core.profiles.save(
+            profile("Work", layers: KeyLayerOverride(layers: [Self.badRow]))
         )
         #expect(
             core.execute("load_profile", args: [.string("Work")]).isSuccess
         )
+        #expect(symbolIssues(core).map(\.source) == ["Work.json"])
+    }
+
+    /// The install names the profile it resolved over, never the
+    /// adopted name, which an apply moves only after installing.
+    @Test("The install names its own profile, not the adopted one")
+    func installNamesItsOwnProfile() throws {
+        let core = try loaded("")
+        try core.profiles.save(profile("Home"))
+        #expect(
+            core.execute("load_profile", args: [.string("Home")]).isSuccess
+        )
         let lua = try #require(core.keys.lua)
-        let layer = KeyLayer(
-            name: KeyLayer.defaultName,
-            bindings: [
-                KeyBinding(
-                    combo: "alt+h",
-                    lua: "KiwiDesk.focus(\"left\")",
-                    symbol: "kiwidesk.no.such.symbol"
-                )
-            ]
-        )
-        core.applyStructuredKeybindings(
-            layers: [layer],
-            profile: nil,
-            lua: lua
-        )
-        #expect(symbolIssues(core).map(\.source) == ["gui.json"])
         core.applyStructuredKeybindings(
             layers: [],
-            profile: KeyLayerOverride(layers: [layer]),
+            profile: profile(
+                "Work",
+                layers: KeyLayerOverride(layers: [Self.badRow])
+            ),
             lua: lua
         )
+        #expect(core.profiles.currentName == "Home")
         #expect(symbolIssues(core).map(\.source) == ["Work.json"])
     }
 }
