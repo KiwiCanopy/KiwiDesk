@@ -2,8 +2,8 @@ import AppKit
 
 /// The refusal a bar's shortcut draws where it cannot show the bar
 /// (#761): a pill beside the shelf it names, so a press that does
-/// nothing says why — the bar is already shown, or the layout
-/// carries no App Bar.
+/// nothing says why — the bar is already shown, the layout carries
+/// no App Bar, or the bar has nothing to show (#2567).
 extension KiwiCore {
     enum RevealRefusal: Equatable {
         case alwaysShown(ShelfBar)
@@ -11,6 +11,9 @@ extension KiwiCore {
         /// its edge.
         case shownBesideAlways(ShelfBar)
         case noAppBarHere
+        /// Nothing to show here: an App Bar on a Space with no
+        /// window, a Space Bar with no Space (#2567).
+        case nothingToShow(ShelfBar)
     }
 
     /// Draws `refusal`'s pill beside the shelf on `display`, else on
@@ -75,6 +78,16 @@ extension KiwiCore {
                 "shelf.reveal_refused.no_app_bar",
                 "No App Bar in this layout"
             )
+        case .nothingToShow(.app):
+            L(
+                "shelf.reveal_refused.app_empty",
+                "No windows for the App Bar here"
+            )
+        case .nothingToShow(.space):
+            L(
+                "shelf.reveal_refused.space_empty",
+                "No Spaces for the Space Bar here"
+            )
         }
     }
 }
@@ -83,7 +96,9 @@ extension KiwiCore.RevealRefusal {
     /// The bar whose shelf the pill stands beside.
     var bar: ShelfBar {
         switch self {
-        case .alwaysShown(let bar), .shownBesideAlways(let bar): bar
+        case .alwaysShown(let bar), .shownBesideAlways(let bar),
+            .nothingToShow(let bar):
+            bar
         case .noAppBarHere: .space
         }
     }

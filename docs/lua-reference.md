@@ -3039,6 +3039,11 @@ app_bar.set_reserve(false)
 for the App Bar of the active Space's layout. Fails where that
 layout carries no App Bar, or where its App Bar is `"always"`.
 
+:::unreleased
+It fails with a pill too where the Space holds no window, so the
+App Bar has nothing to show.
+:::
+
 **Example:**
 
 ```lua

@@ -326,7 +326,10 @@ extension KiwiCore {
             let key = shelves.reveal.targets.keys.first(where: {
                 $0.shelf.display == display && $0.bar == bar
             })
-        else { return .fail("the \(name) has nothing to show here") }
+        else {
+            cueRevealRefusal(.nothingToShow(bar), display: display)
+            return .fail("the \(name) has nothing to show here")
+        }
         guard toggleBarReveal(key) else {
             return .fail("the \(name) is held shown by the tour")
         }
