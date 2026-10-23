@@ -465,7 +465,15 @@ bite large test PRs:
   **Spawn it with `isolation: "worktree"`, or run it alone.** It
   breaks working source on purpose, so unisolated it is mutating
   the tree every other agent is reading, and a run that is
-  cancelled or dies on a timeout leaves the sabotage behind. The
+  cancelled or dies on a timeout leaves the sabotage behind.
+  **Run alone means through `scripts/mutate`, on a committed
+  tree** (owner, 2026-10-23): a hand-written driver that restores
+  with `git checkout --` resets a file to HEAD and wiped
+  uncommitted fixes several times. The harness refuses a tree
+  that differs from HEAD and restores from the bytes it read
+  (`MutateScriptTests`), and `scripts/gate-hook` refuses a command
+  that runs any other discarding script on a dirty tree
+  (`DiscardGuardScriptTests`). The
   obligation is stated here because this row is where a caller
   outside a review round meets it; inside one,
   [the `review-change` skill](../skills/review-change/SKILL.md)

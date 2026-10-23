@@ -120,13 +120,93 @@ def discards(sub: str, args: List[str], where: str) -> bool:
     return False
 
 
-def targets(command: str, cwd: str) -> List[Tuple[str, bool]]:
-    """(directory, is a clean) for each discarding git command."""
-    here, found = cwd, []
+SHELLS = {"bash", "sh", "zsh", "python3", "python", "source", "."}
+SCRIPT_MAX = 256 * 1024
+VAR = re.compile(r"\$(?:\{([A-Za-z_][A-Za-z0-9_]*)\}|([A-Za-z_][A-Za-z0-9_]*))")
+QUOTED = re.compile(r"[\"']([^\"']*)[\"']")
+
+
+def expand(word: str, names: dict) -> str:
+    """`$NAME` from the command's own assignments, else the env."""
+    def value(match: "re.Match[str]") -> str:
+        name = match.group(1) or match.group(2)
+        return names.get(name, os.environ.get(name, match.group(0)))
+    return os.path.expanduser(VAR.sub(value, word))
+
+
+def script_file(words: List[str], here: str) -> Optional[str]:
+    """The script a segment runs, if it names a readable file."""
+    first = os.path.basename(words[0])
+    if first in SHELLS:
+        rest = [w for w in words[1:] if not w.startswith("-")]
+        if not rest:
+            return None
+        path = rest[0]
+    else:
+        path = words[0]
+    path = os.path.join(here, path)
+    if os.path.isfile(path) and os.path.getsize(path) <= SCRIPT_MAX:
+        return path
+    return None
+
+
+def python_discards(text: str, here: str) -> List[Tuple[str, bool]]:
+    """A `["git", "checkout", ...]` call in a Python script."""
+    found = []
+    for line in text.splitlines():
+        words = QUOTED.findall(line)
+        if "git" not in words:
+            continue
+        rest = words[words.index("git") + 1:]
+        where = here
+        while rest and rest[0].startswith("-"):
+            option = rest.pop(0)
+            if option in OPTIONS_WITH_ARG and rest:
+                rest.pop(0)
+        if rest and discards(rest[0], rest[1:], where):
+            found.append((where, rest[0] == "clean"))
+    return found
+
+
+def targets(command: str, cwd: str,
+            depth: int = 0) -> List[Tuple[str, bool]]:
+    """(directory, is a clean) for each discarding git command,
+    reading one level into a script file the command runs."""
+    return [(where, cleans) for where, cleans, _ in
+            located(command, cwd, depth)]
+
+
+def located(command: str, cwd: str,
+            depth: int = 0) -> List[Tuple[str, bool, bool]]:
+    """(directory, is a clean, inside a script file) per discard."""
+    here, found, names = cwd, [], {}
     for words in segments(command):
         while words and (words[0] in PREFIXES or ASSIGN.match(words[0])):
+            if ASSIGN.match(words[0]):
+                name, _, value = words[0].partition("=")
+                names[name] = expand(value, names)
             words = words[1:]
+        if words and words[0] == "export":
+            for word in words[1:]:
+                if ASSIGN.match(word):
+                    name, _, value = word.partition("=")
+                    names[name] = expand(value, names)
+            continue
         if not words:
+            continue
+        words = [expand(w, names) for w in words]
+        script = script_file(words, here) if depth < 2 else None
+        if script:
+            try:
+                with open(script, encoding="utf-8") as handle:
+                    text = handle.read()
+            except (OSError, UnicodeDecodeError):
+                text = ""
+            inner = python_discards(text, here) if script.endswith(
+                ".py") or text.startswith("#!/usr/bin/env python") \
+                else [(w, c) for w, c, _ in
+                      located(text, here, depth + 1)]
+            found.extend((w, c, True) for w, c in inner)
             continue
         if words[0] in ("cd", "pushd"):
             dest = words[1] if len(words) > 1 else "~"
@@ -148,8 +228,30 @@ def targets(command: str, cwd: str) -> List[Tuple[str, bool]]:
                         os.path.expanduser(os.path.expandvars(value)),
                     ))
         if rest and discards(rest[0], rest[1:], where):
-            found.append((where, rest[0] == "clean"))
+            found.append((where, rest[0] == "clean", depth > 0))
     return found
+
+
+def refusal(command: str, cwd: str) -> Optional[str]:
+    """Why a command must not run: it executes a script that
+    discards uncommitted tracked work. A script's restore is a side
+    effect nobody chose for the work it wipes, which is how mutation
+    drivers lost fixes; an inline discard stays the snapshot's."""
+    clock = Deadline()
+    for where, _, scripted in located(command, cwd):
+        if not scripted or not os.path.isdir(where):
+            continue
+        dirty = git(where, clock, "status", "--porcelain",
+                    "--untracked-files=no")
+        if dirty:
+            return (
+                "discard-guard: refused — this command runs a script "
+                f"that discards git work, and {where} has "
+                "uncommitted tracked changes. Commit first; prove "
+                "guards with scripts/mutate, which refuses a dirty "
+                "tree and restores from saved bytes."
+            )
+    return None
 
 
 def keep_untracked(where: str, stamp: str, clock: Deadline) -> str:
