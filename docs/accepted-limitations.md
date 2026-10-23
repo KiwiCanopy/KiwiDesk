@@ -282,5 +282,9 @@ forward with a site permission prompt open (2026-10-23), and
 re-judging it floated and shrank the window on every lift. Float
 the window yourself (`make_floating`, or **Float Window** in its
 App Bar item's right-click menu) to float it at once; a Float rule
-for the app applies once the level drops.
+for the app applies once the level drops. While Brave holds its
+window at that level, the window also covers any part of the Space
+Bar or App Bar that overlaps it — a revealed shelf, a peek — since
+the bars sit at the floating window level, below it; they show
+again as soon as the prompt closes or Brave loses focus.
 :::
