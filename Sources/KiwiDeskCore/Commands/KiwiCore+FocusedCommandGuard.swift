@@ -36,6 +36,16 @@ extension KiwiCore {
         guard let frontmostPID = frontmostPIDProvider,
             impliesFocus(command, args)
         else { return nil }
+        // A focus key on an empty Space acts on no window but hops
+        // to the next screen under All screens (#2493), so there
+        // is no foreground to own; #1336's sentence answers the rest.
+        if command == "focus", focusWrap.mode == .allScreens,
+            focusedWindow == nil,
+            activeSpace.map({ state.effectiveMembers(of: $0).isEmpty })
+                == true
+        {
+            return nil
+        }
         // Sampled ONCE, before the guard: the log below must
         // print the pid that actually denied, not a re-sample
         // that may have changed in exactly the racy activation

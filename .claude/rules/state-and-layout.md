@@ -2410,11 +2410,12 @@ neither wraps nor crosses screens itself, leaving both to
 `Navigation.neighbor` from `ScreenHop.entrySeed`, never a search of
 their own, and the screens are tried in `ScreenHop.hopOrder`
 (`FocusWrapTests`, `FocusWrapScreensTests`, `ScreenHopOrderTests`).
-**A Space switch or a follow that can move focus onto another
-screen hands the pointer over through `warpForSwitch` (#2548)**,
-never `focusWindow`'s own warp, hover focus excepted
-(`ScreenHandoffTests`, `ScreenHandoffSeamTests` counts the
-callers).
+**A keyboard-made Space switch or follow that can move focus onto
+another screen — `switchSpace`, `followSwitch`, `handFollowFocus`,
+the AX focus follow's landing — hands the pointer over through
+`warpForSwitch` (#2548)**, never `focusWindow`'s own warp, hover
+focus excepted; a new such door joins them (`ScreenHandoffTests`,
+`ScreenHandoffSeamTests` registers the known callers).
 
 ## macOS native tabs are one `NSWindow` per tab, coalesced temporally
 

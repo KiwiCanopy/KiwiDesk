@@ -214,8 +214,6 @@ extension KiwiCore {
 
     /// The AX visible frame of the screen `space` lays out on.
     func screenFrame(of space: SpaceID) -> CGRect? {
-        guard let display = state.workspaces.display(of: space)
-        else { return nil }
-        return tiler.displayFrames().first { $0.id == display }?.frame
+        state.workspaces.display(of: space).flatMap(handoffScreenFrame)
     }
 }
