@@ -165,6 +165,26 @@ struct FocusWrapScreensTests {
         #expect(core.state.workspaces.lastFocused == WindowID(21))
     }
 
+    /// The #292 preflight lets that press through only where the hop
+    /// lands (#2493): live, the key reaches Space 2's window; with an
+    /// ignored panel latched in front, #1336's sentence answers.
+    @Test("the preflight passes an empty Space's hop, not a panel's")
+    func preflightPassesTheHop() {
+        guard let core = twoScreens() else { return }
+        core.state.workspaces.assign(SpaceID("4"), to: left)
+        core.state.workspaces.activate(SpaceID("4"))
+        core.frontmostPIDProvider = { 1 }
+        core.ignoredPanel.active.insert(1)
+        let latched = core.execute("focus", args: [.string("right")])
+        #expect(latched.error?.contains("is empty") == true)
+        #expect(core.state.workspaces.activeSpace == SpaceID("4"))
+        core.ignoredPanel.active.remove(1)
+        let hop = core.execute("focus", args: [.string("right")])
+        #expect(hop.isSuccess)
+        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        #expect(core.state.workspaces.lastFocused == WindowID(21))
+    }
+
     /// A Stack run on the main screen hides windows behind its edge
     /// slot (#2235): a hop entering past them lands on a shown one.
     @Test("a hop never lands on a window a run hides")

@@ -81,28 +81,53 @@ extension KiwiCore {
     }
 
     /// A focus key on an empty Space, which has no window to step
-    /// from: under All screens it hops with its whole screen as the
-    /// band; otherwise, or with nowhere to land, nil.
+    /// from: the hop `emptySpaceHop` names, else nil.
     func hopFromEmptySpace(
         _ space: Space,
         in direction: Direction,
         wrap: FocusWrap?
     ) -> CommandResponse? {
+        guard let hop = emptySpaceHop(space, in: direction, wrap: wrap)
+        else { return nil }
+        followSwitch(to: hop.space, focusing: hop.window)
+        return .ok()
+    }
+
+    /// Where a focus key on an empty Space lands: under All screens,
+    /// a hop with its whole screen as the band; nil otherwise or
+    /// with nowhere to land. The one answer the #292 preflight and
+    /// `navigate` both read.
+    func emptySpaceHop(
+        _ space: Space,
+        in direction: Direction,
+        wrap: FocusWrap?
+    ) -> (space: SpaceID, window: WindowID)? {
         guard (wrap ?? focusWrap.mode) == .allScreens,
             let band = screenFrame(of: space.id)
         else { return nil }
-        return hopScreens(from: space.id, in: direction, band: band)
+        return hopTarget(from: space.id, in: direction, band: band)
     }
 
-    /// The hop: the first screen in `hopOrder` whose shown Space
-    /// has a window to land on, switched to through the one
-    /// `followSwitch`, which raises, focuses and hands the pointer
-    /// over (#2548).
+    /// The hop, switched to through the one `followSwitch`, which
+    /// raises, focuses and hands the pointer over (#2548).
     private func hopScreens(
         from origin: SpaceID,
         in direction: Direction,
         band: CGRect
     ) -> CommandResponse? {
+        guard let hop = hopTarget(from: origin, in: direction, band: band)
+        else { return nil }
+        followSwitch(to: hop.space, focusing: hop.window)
+        return .ok()
+    }
+
+    /// The first screen in `hopOrder` whose shown Space has a window
+    /// to land on, and that window.
+    private func hopTarget(
+        from origin: SpaceID,
+        in direction: Direction,
+        band: CGRect
+    ) -> (space: SpaceID, window: WindowID)? {
         guard let here = state.workspaces.display(of: origin)
         else { return nil }
         let screens = tiler.displayFrames()
@@ -126,8 +151,7 @@ extension KiwiCore {
                     bounds: bounds
                 )
             else { continue }
-            followSwitch(to: shown, focusing: landing)
-            return .ok()
+            return (shown, landing)
         }
         return nil
     }
