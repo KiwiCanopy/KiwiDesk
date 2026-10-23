@@ -7,8 +7,8 @@ import Testing
 /// The Boxed unfold and grow (owner ruling 2026-10-21): with no
 /// plate, an unfold springs each box — its glass host, never the
 /// glass — out of the mark to its slot, the farther later, and
-/// gathers the outer first; a grow wipes its clip over the boxes'
-/// span rather than cross-fading. Main-actor spend: a few overlays,
+/// gathers the outer first; a grow plays that spread (#2556).
+/// Main-actor spend: a few overlays,
 /// one ordered panel each.
 @Suite("Shelf reveal spread", .serialized)
 @MainActor

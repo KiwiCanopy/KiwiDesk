@@ -620,8 +620,11 @@ render content into it (#1517). Obligations:
   and the hovered mark, or the middle of the screen side where the
   edge draws no mark — holds still until it lands (`growing`).
   **Boxed takes every style (owner ruling, 2026-10-21)**, a grow
-  playing as the unfold there (#2556, `ShelfRevealGrowTests`), and
-  an unfold is a spread — each box moved through its GLASS HOST, never the
+  playing as the unfold there (owner ruling, 2026-10-23, #2556,
+  `ShelfRevealSpreadTests` ▸ `boxedGrowSpreads`) — which style
+  plays is the one `KiwiShelf.playedRevealStyle` the motion and
+  Settings' note both read, never re-derived beside it
+  (`BarsGrowFallbackTests`) — and an unfold is a spread — each box moved through its GLASS HOST, never the
   glass (#2095), found by the one `BarMotion.spreadUnits`, what
   holds no box fading in place — positioned in VIEW coordinates,
   since the pass that orders the panel in has not connected the

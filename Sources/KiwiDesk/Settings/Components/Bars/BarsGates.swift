@@ -74,10 +74,11 @@ struct BarsGates {
         settings.kiwishelf.backgroundStyle == .boxed
     }
 
-    /// True when Grow is picked on a Boxed shelf, which Core plays
-    /// as Unfold (#2556): the pick stays live and stored.
+    /// True when Core plays the Grow pick as Unfold (#2556), read
+    /// from `playedRevealStyle` rather than re-derived here.
     var growPlaysAsUnfold: Bool {
-        boxedShelf && settings.kiwishelf.revealStyle == .grow
+        settings.kiwishelf.revealStyle == .grow
+            && settings.kiwishelf.playedRevealStyle == .unfold
     }
 
     /// Why the font weight is inert: the family is not installed.

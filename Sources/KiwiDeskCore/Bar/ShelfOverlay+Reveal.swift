@@ -28,7 +28,7 @@ extension ShelfOverlay {
     }
 
     /// What the reveal plays along: the shelf's reveal kind — its
-    /// `reveal_style`, an unfold with no plate spreading, the one
+    /// played `reveal_style`, an unfold with no plate spreading, the one
     /// verdict its mark reads too — the slide's start past the
     /// strip's screen side and the margin, the grow's and the
     /// unfold's mark (the middle of the screen side where the edge
