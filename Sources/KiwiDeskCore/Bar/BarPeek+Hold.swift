@@ -101,6 +101,11 @@ extension BarPeek {
             self?.bodyReported(inside: $0)
         }
         made.onClose = { [weak self] in self?.dismiss() }
+        // The morph lands on the peek's own timer, which both
+        // `makeTestCore` twins pin.
+        made.land = { [weak self] span, body in
+            self?.schedule(span, body)
+        }
         made.now = { [weak self] in self?.now() ?? 0 }
         made.pointer = { [weak self] in
             self?.pointerOnScreen() ?? BarPeekPanel.offScreen

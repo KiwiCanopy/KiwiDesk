@@ -927,10 +927,11 @@ Obligations:
   it (`OverflowMarkClickTests` ▸ `hoverOpensNothing`,
   `otherHoverLeavesIt`). It closes on the peek's own closes plus its
   header — never the second press of the double-click that opened it
-  (`BarPeekMorphTests` ▸ `headerClosesPastTheDoubleClick`) — Escape,
-  the anchor window moving, a Desktop switch and KiwiVision turning
-  on or off, the last two
-  through the one `BarPeek.dismissHeld` (`OverflowMarkClickTests`).
+  (`BarPeekMorphTests` ▸ `headerClosesPastTheDoubleClick`) — any
+  key, its mark moving on screen (read off the mark's placed frame,
+  never the frame a channel hands it), a Desktop switch and
+  KiwiVision turning on or off, the last two through the one
+  `BarPeek.dismissHeld` (`OverflowMarkClickTests`).
   The morph is the panel's opening motion (`BarPeekPanel+Morph`):
   the panel takes the list's resting frame, which holds the pill,
   and `BarMotion.playMorph` clips the panel's `stage` inside it, so
@@ -942,7 +943,15 @@ Obligations:
   panel is key-capable for this source alone, keyed a turn later
   through the peek's `schedule`, so Escape and the arrows reach its
   rows without activating KiwiDesk (`OverflowMarkClickTests` ▸
-  `keysOnTheList`).
+  `keysOnTheList`). **A key-capable panel in Core takes no chord
+  and hands none on**: Core cannot reach `MainMenu.performPanelChord`
+  (gui.md ▸ a non-activating key panel), so `performKeyEquivalent`
+  swallows every chord while it is key, a ⌘Q aimed at the app
+  beneath never quitting KiwiDesk (`OverflowMarkClickTests` ▸
+  `chordIsSwallowed`); `PanelChordTests` ▸ `coreKeyPanelsSwallow`
+  holds every key-capable Core window to that override. Its
+  landings run on the peek's `schedule`, which both `makeTestCore`
+  twins pin.
 - **Every peek row is its window's button, picked through the
   one `pickBarRow` a window menu row takes, which does what
   clicking that window's bar item does** (#1946 amendment 2) —

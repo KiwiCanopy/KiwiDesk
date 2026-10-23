@@ -185,7 +185,10 @@ extension BarPeekPanel {
     /// A key on the grown list: Escape closes it, the arrows walk
     /// its rows, Return picks the lifted one; any other closes it.
     func morphKey(_ code: UInt16) -> Bool {
-        guard morph != nil, drawn != nil else { return false }
+        guard morph != nil else { return false }
+        // Closing, the panel still holds the keyboard until it lands:
+        // a key then is swallowed, never a beep.
+        guard drawn != nil else { return true }
         switch code {
         case 53: onClose()
         case 125: body.stepHover(by: 1)
