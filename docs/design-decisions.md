@@ -15101,7 +15101,7 @@ a user sees: a bar stored on becomes `always`, one stored off
 A fresh install's starter takes `auto` (#2515), and only beside
 the welcome tour's bars step, which shows what Auto does and
 offers Always and Hidden in one click: a starter that hides the
-bars with no page explaining it leaves a new user with a mark
+bars with no page explaining it leaves a new user with a handle
 they cannot read. A tour without that step seeds `always`.
 :::
 
@@ -15127,49 +15127,61 @@ A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
 a bar already shown and must not hide one by writing a setting.
 
-The hover target is a band over the bar's own mark, never the
-mark's drawing and never the edge: one length for every bar, alone
-or paired, centred on its mark (owner, 2026-10-19). A band along
+The hover target is a band over the bar's own handle, never the
+handle's drawing and never the edge: one length for every bar, alone
+or paired, centred on its handle (owner, 2026-10-19). A band along
 the whole edge, or half of it split between two bars, opened a
 bar far from the pointer, so the user could not tell what the
-pointer was about to open; a band under the mark shows the answer
+pointer was about to open; a band under the handle shows the answer
 before the reveal. It is not the bar's drawn length either: a busy
 Space's App Bar would bring the whole-edge band back. A shown bar
 is held over its own drawn run and band, so a bar wider than its
 band stays open while the pointer moves along it.
 
-Two marks on one edge sit as one row where a lone bar would, their
+Two handles on one edge sit as one row where a lone bar would, their
 bands meeting edge to edge, so a point opens one bar. The mouse
-opens one bar at a time — while a bar shows, its sibling's mark
+opens one bar at a time — while a bar shows, its sibling's handle
 stands aside — and each opens at its lone place under the pair;
-the keyboard merges both into one strip. That replaced two marks
+the keyboard merges both into one strip. That replaced two handles
 over the merged run opening in place with a hover swap: a short
-Space Bar and a long App Bar put the marks at unequal distances
+Space Bar and a long App Bar put the handles at unequal distances
 from the middle, where they read as unrelated.
 
-The dots cap at six, so a mark at rest never outgrows its band — a
-growing band gives up the one target size, a growing App line
-would signal a count it does not show — following the current
+The dots cap at six, so a handle at rest never outgrows its band — a
+growing band gives up the one target size — following the current
 Space with small end dots, as iOS page dots do; the open bar shows
 every Space anyway. On a top or bottom edge a hover names the
-current Space in its dot; a vertical mark is a dot wide, with no
-room across it for a name. The App line only grows, since the App
-Bar opens a moment later and icons in a 14-point mark would not read.
+current Space in its dot; a vertical handle is a dot wide, with no
+room across it for a name.
+
+:::unreleased
+Grown, the App Bar's line counts the windows its bar lists, beside a
+window symbol (#2567): the Space Bar's handle tells you where you are, and
+this gives the App line the same reason to be hovered, a beat before
+the bar itself shows the windows. It counts and never names — icons
+in a 14-point handle would not read — and carries no word, so no
+catalog key and no plural agreement; VoiceOver reads the count at
+rest. A side edge stacks the number above the symbol and widens
+across for it, since the count is short where a Space's name is not;
+past 99 it shows a plural symbol alone rather than a wrong "99" or a
+"99+", keeping the handle beside the Space Bar's, while a top or
+bottom edge grows along with any count and may reach past its band.
+:::
 
 A reveal onto an edge that shows nothing else slides the whole bar
 in from the shelf's screen side, already laid out — out from under
 the menu bar where it shows, from the screen's edge where it
-hides — while the mark fades, and the retract slides it back out
-the same way, the mark returning as it lands (owner ruling,
+hides — while the handle fades, and the retract slides it back out
+the same way, the handle returning as it lands (owner ruling,
 2026-10-20). Which reveals take that motion is decided by what the
 edge draws at rest, never by the stored value: a Hidden bar shown
 by its shortcut onto an empty edge slides as an Auto one does,
 while one shown beside an Always sibling joins it (#1838), there
 being no edge to come from. One setting, `reveal_style`, picks
-slide, the earlier grow out of the mark, unfold or fade for every
+slide, the earlier grow out of the handle, unfold or fade for every
 reveal (owner rulings, 2026-10-21): they read differently and none
 is wrong, so the user keeps the one they like, and Slide is the
-default. Unfold stretches the mark along the edge to the plate's
+default. Unfold stretches the handle along the edge to the plate's
 length on a spring and then deepens it to the plate while the
 items rise, and collapses back the same way — the motion the owner
 approved in a device demo, whose numbers `ShelfUnfold` keeps — do
@@ -15184,7 +15196,7 @@ to its floor, since a 50 ms reveal reads as a blink rather than a
 motion (owner ruling, 2026-10-21). Fade
 cross-fades the bar where it stands, for
 a user who wants no travel at all. One picker serves Auto and Hidden
-alike: a Hidden bar has no mark, so Grow and Unfold start from a
+alike: a Hidden bar has no handle, so Grow and Unfold start from a
 point at the middle of its screen side rather than offering a
 second set of styles per visibility. The
 panel stays still and the content travels inside it: moving the
@@ -15192,12 +15204,12 @@ window frame lagged on the device, the compositor moving it per
 frame and the glass re-sampling, so for the slide's length the
 panel's room runs out over the outer margin and its own edge clips
 the bar; a grow's clip is placed in the panel's coordinates, so
-its room — the plate and the mark it grows from — holds still
-until it lands. A grow on an edge with no mark, a Hidden bar's,
+its room — the plate and the handle it grows from — holds still
+until it lands. A grow on an edge with no handle, a Hidden bar's,
 starts at the middle of its screen side. A Boxed shelf has no
 plate, and every style still applies to it (owner rulings,
 2026-10-21 and 2026-10-23): an unfold springs each box out of the
-mark to its slot, the farther ones a beat later, gathering the
+handle to its slot, the farther ones a beat later, gathering the
 outer ones first, and a grow plays as that unfold (#2556) — a wipe
 across the boxes' span could not retract, and the spread is nearer
 a grow than a fade is. The stored pick stays Grow, so a shelf

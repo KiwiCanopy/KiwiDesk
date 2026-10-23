@@ -85,10 +85,9 @@ extension ShelfIndicatorSpec {
     }
 
     /// How much farther across the edge the grown mark reaches for a
-    /// side edge's count pill to sit inside the rim — for the grown
-    /// plate where `grown`, else as the hover stands.
-    func countAcross(grown: Bool = false) -> CGFloat {
-        guard grown || hovered, let count else { return 0 }
+    /// side edge's count pill to sit inside the rim.
+    var countAcross: CGFloat {
+        guard let count else { return 0 }
         let grown = Self.depth + 2 * Self.hoverGrowth
         return max(0, pill(of: count).across + 2 * rimWidth + 2 - grown)
     }
@@ -134,9 +133,36 @@ extension ShelfIndicatorSpec {
         )
     }
 
-    /// The count's SF Symbol at `size`.
-    static func countSymbol(_ name: String, size: CGFloat) -> NSImage? {
-        NSImage(systemSymbolName: name, accessibilityDescription: nil)?
-            .withSymbolConfiguration(.init(pointSize: size, weight: .regular))
+    /// How the grown mark exceeds the plain hover growth: along the
+    /// edge for a Space name's or the count's pill, across it for a
+    /// side edge's count — the one value every reader of the grown
+    /// plate takes (`BarMotion.hoverPlate`), the reveal's included.
+    struct Growth: Equatable, Sendable {
+        var widen: CGFloat = 0
+        var across: CGFloat = 0
+
+        static let none = Growth()
     }
+
+    var growth: Growth { Growth(widen: labelExtra, across: countAcross) }
+
+    /// The count's SF Symbol at `size`, made once per name and size:
+    /// every bar refresh measures it.
+    @MainActor static func countSymbol(
+        _ name: String,
+        size: CGFloat
+    ) -> NSImage? {
+        let key = "\(name)@\(size)"
+        if let known = symbols[key] { return known }
+        let image = NSImage(
+            systemSymbolName: name,
+            accessibilityDescription: nil
+        )?
+        .withSymbolConfiguration(.init(pointSize: size, weight: .regular))
+        if symbols.count > 64 { symbols.removeAll() }
+        symbols[key] = image
+        return image
+    }
+
+    @MainActor private static var symbols: [String: NSImage] = [:]
 }

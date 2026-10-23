@@ -27,6 +27,8 @@ final class ShelfManager {
         /// the mark a grow reveal grows out of, AX coordinates.
         var slides = false
         var mark: CGRect? = nil
+        /// How that mark grows past the plain hover (#2567).
+        var markGrowth: ShelfIndicatorSpec.Growth = .none
     }
 
     /// A Space Bar minimum the divider reached (`committed` on
@@ -188,7 +190,11 @@ final class ShelfManager {
         #endif
         overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.slides = shelf.slides
-        overlay.setRevealOrigin(mark: shelf.mark, strip: shelf.strip)
+        overlay.setRevealOrigin(
+            mark: shelf.mark,
+            growth: shelf.markGrowth,
+            strip: shelf.strip
+        )
         overlay.onPress = { [weak self, weak overlay] in
             // A right-click opens the shelf's menu on its panel.
             if $1 == .rightMouseDown {

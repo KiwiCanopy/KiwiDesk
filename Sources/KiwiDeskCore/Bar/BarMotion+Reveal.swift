@@ -42,6 +42,8 @@ extension BarMotion {
         var kind: RevealKind
         var offset: CGVector = .zero
         var origin: CGRect = .zero
+        /// How the origin mark grows past the plain hover (#2567).
+        var growth: ShelfIndicatorSpec.Growth = .none
         var plate: CGRect?
         var plateRadius: CGFloat = 0
         var edge: AppBarEdge = .top
@@ -100,6 +102,7 @@ extension BarMotion {
         // Out of the mark as its hover leaves it.
         let mark = hoverPlate(
             mark: path.origin,
+            growth: path.growth,
             edge: path.edge,
             hovered: true
         )

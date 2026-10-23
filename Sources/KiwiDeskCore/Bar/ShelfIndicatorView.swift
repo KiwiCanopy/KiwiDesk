@@ -44,8 +44,10 @@ final class ShelfIndicatorView: NSView {
         let mark = ShelfIndicator.mark(of: spec, in: bounds)
         // The dots reach out past the screen side by the hover's
         // shift, so they can follow the plate's middle inward.
-        let across = spec.countAcross(grown: true)
-        let shift = BarMotion.hoverShift(spec.edge, across: across)
+        let shift = BarMotion.hoverShift(
+            spec.edge,
+            across: spec.growth.across
+        )
         let dotsRest = bounds.union(
             bounds.offsetBy(dx: -shift.dx, dy: -shift.dy)
         )
@@ -59,28 +61,39 @@ final class ShelfIndicatorView: NSView {
         )
         let box = glassBox(for: spec)
         plate.isHidden = box != nil
+        // One radius at both sizes: the box writes it before its
+        // host moves, so the grown plate's capsule rounds the
+        // resting mark too.
+        let grown = BarMotion.hoverPlate(
+            mark: mark,
+            growth: spec.growth,
+            edge: spec.edge,
+            hovered: true
+        )
+        let capsule = min(grown.width, grown.height) / 2
         BarMotion.placeHoverPlate(
             box.flatMap { GlassBox.host(of: $0.glass) } ?? plate,
             rim: rim,
             content: dots,
             contentRest: dotsRest,
             mark: mark,
-            widen: spec.labelExtra,
-            across: across,
+            growth: spec.growth,
             edge: spec.edge,
             hovered: spec.hovered,
             animated: animated && was?.hovered != spec.hovered,
             placePlate: box.map { box in
-                { frame in
+                { frame, glides in
                     GlassBox.place(
                         box.glass,
                         tint: box.tint,
                         at: frame,
-                        cornerRadius: min(frame.width, frame.height) / 2,
+                        cornerRadius: capsule,
                         hex: spec.fill,
                         edge: spec.edge,
                         visible: true,
-                        animated: true,
+                        animated: glides,
+                        // The mark's own hover group carries the
+                        // motion (`BarMotion.placeHoverPlate`).
                         move: { host, frame, _ in host.frame = frame }
                     )
                 }

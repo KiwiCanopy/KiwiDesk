@@ -126,24 +126,23 @@ extension BarMotion {
 
     /// Where the mark's plate stands in its view, y down: `mark`,
     /// grown while hovered by `ShelfIndicatorSpec.hoverGrowth` each
-    /// way along `edge` plus half of `widen`, a label's room, and
-    /// by twice the growth plus `across`, a side-edge count's room
-    /// (#2567), away from the screen side alone — a
+    /// way along `edge` plus half of `growth.widen`, a pill's room,
+    /// and by twice the growth plus `growth.across`, a side-edge
+    /// count's room (#2567), away from the screen side alone — a
     /// plain `NSPanel` is clamped below the menu bar (#436), so a
     /// plate past the screen side moved the mark and the reveal off
     /// the edge. The size is content rather than motion.
     static func hoverPlate(
         mark: CGRect,
-        widen: CGFloat = 0,
-        across: CGFloat = 0,
+        growth extra: ShelfIndicatorSpec.Growth = .none,
         edge: AppBarEdge,
         hovered: Bool
     ) -> CGRect {
         guard hovered else { return mark }
         let growth = ShelfIndicatorSpec.hoverGrowth
-        let along = growth + widen / 2
-        let deep = growth + across / 2
-        let inward = hoverShift(edge, across: across)
+        let along = growth + extra.widen / 2
+        let deep = growth + extra.across / 2
+        let inward = hoverShift(edge, across: extra.across)
         let grown =
             edge.isHorizontal
             ? mark.insetBy(dx: -along, dy: -deep)
@@ -174,7 +173,8 @@ extension BarMotion {
     /// or not (owner ruling, 2026-10-21). `content`, resting at
     /// `contentRest`, moves with the plate's middle. `placePlate`
     /// writes a plate that is no plain view — a glass box's host,
-    /// which travels with its pair (#2567) — inside the same motion.
+    /// which travels with its pair (#2567) — inside the same motion,
+    /// told whether the write glides.
     @MainActor
     static func placeHoverPlate(
         _ plate: NSView,
@@ -182,33 +182,32 @@ extension BarMotion {
         content: NSView,
         contentRest: CGRect,
         mark: CGRect,
-        widen: CGFloat = 0,
-        across: CGFloat = 0,
+        growth: ShelfIndicatorSpec.Growth = .none,
         edge: AppBarEdge,
         hovered: Bool,
         animated: Bool,
-        placePlate: ((CGRect) -> Void)? = nil
+        placePlate: ((CGRect, Bool) -> Void)? = nil
     ) {
         let frame = hoverPlate(
             mark: mark,
-            widen: widen,
-            across: across,
+            growth: growth,
             edge: edge,
             hovered: hovered
         )
         rim.frame = hoverPlate(
             mark: mark,
-            widen: widen,
-            across: across,
+            growth: growth,
             edge: edge,
             hovered: true
         )
-        let shift = hovered ? hoverShift(edge, across: across) : .zero
+        let shift =
+            hovered ? hoverShift(edge, across: growth.across) : .zero
         let contentFrame = contentRest.offsetBy(dx: shift.dx, dy: shift.dy)
         plate.wantsLayer = true
+        let glides = animated && plate.frame != frame
         let write = {
             if let placePlate {
-                placePlate(frame)
+                placePlate(frame, glides)
             } else {
                 plate.frame = frame
                 plate.layer?.cornerRadius = min(frame.width, frame.height) / 2
@@ -216,7 +215,7 @@ extension BarMotion {
             content.frame = contentFrame
             rim.alphaValue = hovered ? 1 : 0
         }
-        guard animated, plate.frame != frame else {
+        guard glides else {
             write()
             return
         }

@@ -153,4 +153,88 @@ struct BarTextBaselineSiteTests {
             "cap band \(band.mid) vs count middle \(view.bounds.midY)"
         )
     }
+
+    /// The pill's number sits on its figures band, centred on the
+    /// pill, in Apple Chancery at a size where centring its line box
+    /// instead misses by more than a point.
+    @Test("the App Bar handle's count centres its figures")
+    func handleCountLine() throws {
+        try #require(BarFont.isInstalled(Self.family))
+        var shelf = KiwiShelf()
+        shelf.fontFamily = Self.family
+        let font = shelf.badgeFont(ofSize: 40, emphasis: .semibold)
+        var spec = ShelfIndicatorSpec(
+            mark: .line,
+            frame: CGRect(x: 0, y: 0, width: 36, height: 8),
+            edge: .top,
+            fill: "#336699",
+            currentInk: "#000000",
+            ink: "#AAAAAA",
+            emptyInk: "#555555",
+            highlight: "#FF0000",
+            shown: false,
+            hovered: true,
+            reveal: .slide,
+            rimWidth: 1
+        )
+        let count = ShelfIndicatorSpec.count(
+            11,
+            font: font,
+            edge: .top,
+            pillDepth: spec.pillDepth
+        )
+        spec.count = count
+        let dots = ShelfIndicatorDots(
+            frame: CGRect(x: 0, y: 0, width: 300, height: 120)
+        )
+        dots.mark = CGRect(x: 0, y: 0, width: 300, height: 120)
+        dots.spec = spec
+        let pill = spec.pill(of: count)
+        let lead = 150 - count.content.along / 2
+        let columns = Int(lead)...Int(lead + count.number.width)
+        let rows = try #require(Self.whiteRows(of: dots, columns: columns))
+        let middle =
+            rows.upperBound
+            - BarTextBaselineTests.bandMiddle(.figures, font: font)
+        #expect(abs(middle - 60) <= 1, "figures at \(middle), pill \(pill)")
+    }
+
+    /// The rows, in points down from the top, where `view` draws
+    /// near-white ink within `columns` — rendered at 2×.
+    private static func whiteRows(
+        of view: NSView,
+        columns: ClosedRange<Int>
+    ) -> ClosedRange<CGFloat>? {
+        let scale: CGFloat = 2
+        guard
+            let rep = NSBitmapImageRep(
+                bitmapDataPlanes: nil,
+                pixelsWide: Int(view.bounds.width * scale),
+                pixelsHigh: Int(view.bounds.height * scale),
+                bitsPerSample: 8,
+                samplesPerPixel: 4,
+                hasAlpha: true,
+                isPlanar: false,
+                colorSpaceName: .deviceRGB,
+                bytesPerRow: 0,
+                bitsPerPixel: 0
+            )
+        else { return nil }
+        rep.size = view.bounds.size
+        view.cacheDisplay(in: view.bounds, to: rep)
+        var hits: [Int] = []
+        for y in 0..<rep.pixelsHigh {
+            for x in (columns.lowerBound * 2)...(columns.upperBound * 2)
+            where x < rep.pixelsWide {
+                guard let colour = rep.colorAt(x: x, y: y),
+                    colour.alphaComponent > 0.9,
+                    colour.redComponent > 0.9, colour.greenComponent > 0.9
+                else { continue }
+                hits.append(y)
+                break
+            }
+        }
+        guard let first = hits.first, let last = hits.last else { return nil }
+        return CGFloat(first) / scale...CGFloat(last + 1) / scale
+    }
 }

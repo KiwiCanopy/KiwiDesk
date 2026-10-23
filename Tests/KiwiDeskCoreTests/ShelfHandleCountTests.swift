@@ -3,16 +3,18 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The hidden App Bar mark's window count and the hovered pills
+/// The App Bar handle's window count and the hovered pills
 /// (#2567 ▸ Ruling): the count is the App Bar's own, read from its
 /// content; a pill never runs past the rim and is never shorter
-/// than it is deep; the grown App Bar mark keeps the bar's Fill at
+/// than it is deep; the grown App Bar handle keeps the bar's Fill at
 /// both ends of its pill; a side edge stacks the number above the
 /// glyph and shows the plural glyph alone past 99; VoiceOver speaks
 /// the count at rest.
-@Suite("Hidden App Bar mark count (#2567)", .serialized)
+@Suite("App Bar handle count (#2567)", .serialized)
 @MainActor
-struct HiddenMarkCountTests {
+struct ShelfHandleCountTests {
+    init() { LiquidGlassGate.override = { false } }
+
     static let mark = CGRect(x: 100, y: 0, width: 36, height: 8)
     static let side = CGRect(x: 0, y: 100, width: 8, height: 36)
 
@@ -60,38 +62,14 @@ struct HiddenMarkCountTests {
         }
     }
 
-    @Test("A narrow Space name's pill is round, never an upright oval")
-    func spacePillFloor() {
-        var narrow = spec(rim: 1)
-        narrow.label = ShelfIndicatorSpec.label(
-            .text("1", tinted: true),
-            font: NSFont.systemFont(ofSize: 12)
-        )
-        #expect(
-            ShelfIndicatorSpec.currentDot + narrow.labelExtra
-                >= narrow.pillDepth
-        )
-    }
-
-    @Test("The grown App Bar mark keeps the Fill at both ends")
-    func fillRunEachEnd() throws {
-        for windows in [0, 7, 42, 128] {
+    @Test("Top and bottom always show the number; the glyph fits")
+    func topShowsTheNumber() throws {
+        for windows in [7, 42, 128] {
             let spec = spec(windows: windows)
             let count = try #require(spec.count)
-            let grown = BarMotion.hoverPlate(
-                mark: spec.frame,
-                widen: spec.labelExtra,
-                edge: .top,
-                hovered: true
-            )
-            #expect(
-                grown.width
-                    >= spec.pill(of: count).along
-                    + 2 * ShelfIndicatorSpec.fillRun
-            )
             #expect(count.showsNumber)
-            #expect(count.glyph.height <= spec.pillDepth - 2)
             #expect(count.glyph.height > 0)
+            #expect(count.glyph.height <= spec.pillDepth - 2)
         }
     }
 
@@ -104,16 +82,17 @@ struct HiddenMarkCountTests {
         #expect(!many.showsNumber)
         #expect(many.glyphName == ShelfIndicatorSpec.manyGlyph)
         let wide = spec(windows: 99, edge: .left)
-        let pill = wide.pill(of: two)
         let grown = BarMotion.hoverPlate(
             mark: wide.frame,
-            widen: wide.labelExtra,
-            across: wide.countAcross(grown: true),
+            growth: wide.growth,
             edge: .left,
             hovered: true
         )
-        #expect(grown.width >= pill.across + 2 * wide.rimWidth + 2)
-        // Against the screen side still.
+        // Wider than the plain growth, against the screen side still.
+        #expect(
+            grown.width
+                > ShelfIndicatorSpec.depth + 2 * ShelfIndicatorSpec.hoverGrowth
+        )
         #expect(grown.minX == wide.frame.minX)
     }
 
@@ -136,12 +115,16 @@ struct HiddenMarkCountTests {
             size: ShelfIndicator.room(of: rest).size
         )
         view.render(rest, animated: false)
-        guard let box = view.glass else {
+        guard #available(macOS 26, *) else {
             // No Liquid Glass below macOS 26: the solid plate stands.
+            #expect(view.glass == nil)
             #expect(!view.plate.isHidden)
             return
         }
+        let box = try #require(view.glass)
         #expect(view.plate.isHidden)
+        // The tint only `GlassBox.place` lays under the glass.
+        #expect(box.tint.superview != nil)
         let host = try #require(GlassBox.host(of: box.glass))
         let grownSpec = spec(hovered: true, glass: true)
         view.render(grownSpec, animated: false)

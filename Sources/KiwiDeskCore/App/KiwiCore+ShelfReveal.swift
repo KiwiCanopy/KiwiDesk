@@ -27,6 +27,9 @@ extension KiwiCore {
         /// The mark each hiding shelf's grow reveal grows out of:
         /// its shown bar's, else its first mark's. AX coordinates.
         var marks: [ShelfManager.Key: CGRect] = [:]
+        /// How each of those marks grows past the plain hover, so the
+        /// reveal starts from the plate on screen (#2567).
+        var markGrowths: [ShelfManager.Key: ShelfIndicatorSpec.Growth] = [:]
         /// Each Space mark's first dot shown, carried from the last
         /// pass so the dots slide only when they must
         /// (`ShelfDotWindow`); a mark that stops drawing forgets it.
@@ -49,7 +52,7 @@ extension KiwiCore {
                     plan.shelfEdge.shown($0)?.revealable == true
                 }
                 guard !hiding.isEmpty else { continue }
-                file(
+                fileEdge(
                     plan,
                     bars: Set(hiding),
                     key: ShelfManager.Key(display: display, edge: plan.edge),
@@ -69,7 +72,7 @@ extension KiwiCore {
         /// target. A hidden bar whose sibling on the edge shows
         /// yields — no band, its mark standing aside — so the
         /// mouse opens one bar at a time (owner, 2026-10-19).
-        @MainActor private mutating func file(
+        @MainActor private mutating func fileEdge(
             _ plan: ShelfPlan,
             bars: Set<ShelfBar>,
             key: ShelfManager.Key,
@@ -189,11 +192,12 @@ extension KiwiCore {
                 if bar == .app, let appWindows {
                     spec.count = ShelfIndicatorSpec.count(
                         appWindows,
-                        font: Self.countFont(settings),
+                        font: Self.markCountFont(settings),
                         edge: plan.edge,
                         pillDepth: spec.pillDepth
                     )
                 }
+                if marks[key] == markIn { markGrowths[key] = spec.growth }
                 indicators[barKey(bar)] = spec
             }
         }

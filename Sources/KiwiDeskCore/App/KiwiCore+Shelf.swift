@@ -128,7 +128,10 @@ extension KiwiCore {
                     slides: $0.slides,
                     mark: hiding.marks[
                         ShelfManager.Key(display: display.id, edge: $0.edge)
-                    ]
+                    ],
+                    markGrowth: hiding.markGrowths[
+                        ShelfManager.Key(display: display.id, edge: $0.edge)
+                    ] ?? .none
                 )
             }
             if let app,
@@ -197,6 +200,7 @@ extension KiwiCore {
         /// the mark at `mark` a grow reveal grows out of.
         var slides = false
         var mark: CGRect? = nil
+        var markGrowth: ShelfIndicatorSpec.Growth = .none
     }
 
     /// Hands each shelf the sections its bars just rendered on its
@@ -219,7 +223,8 @@ extension KiwiCore {
                         ? appBars.shownOverlay(on: shelf.display) : nil,
                     divider: shelf.divider,
                     slides: shelf.slides,
-                    mark: shelf.mark
+                    mark: shelf.mark,
+                    markGrowth: shelf.markGrowth
                 )
             }
         )

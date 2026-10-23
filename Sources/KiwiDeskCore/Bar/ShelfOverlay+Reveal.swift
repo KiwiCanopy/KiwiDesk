@@ -10,7 +10,12 @@ import AppKit
 extension ShelfOverlay {
     /// Where the hidden mark sits in the content, from its frame
     /// and the shelf's strip, both AX coordinates.
-    func setRevealOrigin(mark: CGRect?, strip: CGRect) {
+    func setRevealOrigin(
+        mark: CGRect?,
+        growth: ShelfIndicatorSpec.Growth = .none,
+        strip: CGRect
+    ) {
+        revealGrowth = growth
         guard let mark else {
             revealOrigin = nil
             return
@@ -46,6 +51,7 @@ extension ShelfOverlay {
             ),
             origin: revealOrigin
                 ?? Self.screenSide(of: restRoom, edge: drawn.edge),
+            growth: revealOrigin == nil ? .none : revealGrowth,
             plate: revealPlate?.frame,
             plateRadius: revealPlate?.radius ?? 0,
             edge: drawn.edge,

@@ -2,9 +2,10 @@ import AppKit
 
 /// The hidden App Bar mark's count pill (#2567 ▸ Ruling), drawn
 /// only while the mark is grown: centred on the plate, in the Space
-/// mark's own pill ink — the active item colour, the empty one at
-/// 0 — with the number on its figures band and the glyph tinted
-/// against the pill, laid out as one unit.
+/// mark's own pill ink, the active item colour — an App Bar with no
+/// window draws no mark, so the count is never 0 — with the number
+/// on its figures band and the glyph tinted against the pill, laid
+/// out as one unit.
 extension ShelfIndicatorDots {
     func drawCount(_ spec: ShelfIndicatorSpec) {
         guard spec.hovered, let count = spec.count else { return }
@@ -23,9 +24,7 @@ extension ShelfIndicatorDots {
                 width: size.across,
                 height: size.along
             )
-        let fill = NSColor(
-            kiwiHex: count.windows == 0 ? spec.emptyInk : spec.currentInk
-        )
+        let fill = NSColor(kiwiHex: spec.currentInk)
         fill.setFill()
         let radius = min(pill.width, pill.height) / 2
         NSBezierPath(roundedRect: pill, xRadius: radius, yRadius: radius)

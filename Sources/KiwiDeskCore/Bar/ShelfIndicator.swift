@@ -215,8 +215,7 @@ final class ShelfIndicator {
     static func room(of spec: ShelfIndicatorSpec) -> CGRect {
         BarMotion.hoverPlate(
             mark: spec.frame,
-            widen: spec.labelExtra,
-            across: spec.countAcross(grown: true),
+            growth: spec.growth,
             edge: spec.edge,
             hovered: true
         )

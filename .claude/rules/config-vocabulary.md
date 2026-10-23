@@ -115,6 +115,13 @@ synonym:
   lone App Bar's hidden shelf draws a short **line**. Neither is a
   *pill*, an *indicator* or a *badge*, each spoken for here, and
   neither is a *half-moon*.
+- **handle** — what an `auto` bar leaves at its edge, the Space
+  dots or the App Bar's line, as one thing: what the pointer
+  reaches for to bring the bar in (owner, #2567). Name it a
+  *handle* — the bar's handle where another handle could be read —
+  never a *mark*, the on-window glyph's word, nor an *indicator*,
+  the active item's. Rejected for it: *stub*, *trace*, *sliver*
+  (the reserved strip's), *cue*.
 - **held Space** — a Space with windows kept live for the
   arrangement it left, when a switch does not name it (#1507,
   #1790). *Held* is the word in copy and

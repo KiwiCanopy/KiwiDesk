@@ -109,7 +109,7 @@ struct ShelfDotWindowTests {
             - ShelfIndicatorSpec.currentDot
         let plate = BarMotion.hoverPlate(
             mark: mark,
-            widen: extra,
+            growth: .init(widen: extra),
             edge: .top,
             hovered: true
         )

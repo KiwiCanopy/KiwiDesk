@@ -39,6 +39,12 @@ struct OverlayGlassGateTests {
             stored: "tiler.settings.kiwishelf"
         ),
         (
+            // A hidden bar's mark wears its bar's glass (#2567).
+            file: "App/KiwiCore+ShelfReveal.swift",
+            function: "func fileEdge(",
+            stored: "settings.kiwishelf"
+        ),
+        (
             file: "App/KiwiCore+Vision.swift",
             // The door over a look (#2103 PR 7); the live
             // `kiwiVisionDrawsBlur` hands it `visionLook`.
@@ -109,6 +115,7 @@ struct OverlayGlassGateTests {
         "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
         "Vision/VisionPlate.swift": "OverlayGlassGateTests",
+        "Bar/ShelfIndicatorView.swift": "OverlayGlassGateTests",
     ]
 
     @Test("every glass host in Core names the gate that covers it")
