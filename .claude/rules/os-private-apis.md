@@ -281,14 +281,6 @@ Every one of the following binds whoever touches them:
   is still not usable: it is `SpaceCopyName` — the Desktop's
   name — so naming a Desktop would move it, and it is EMPTY on
   the primordial Desktop. Never write it.
-- **A private AppKit method KiwiDesk answers is spelled once, as a
-  `privateSelector`, added at runtime to the panels its home lists,
-  never to `NSPanel` itself** — the glass's key-window look on the
-  shelf, the overflow marks and the peek (`GlassActiveAppearance`,
-  measured on macOS 27, 2026-10-23). Its fallback is that a macOS
-  no longer asking leaves the added method uncalled, so the glass
-  draws as it would anyway; it owes a `self_test` row like a
-  symbol (`PrivatePathCensusTests` reads the spelling).
 - **Every private path is a `self_test` row (#1889).** A new
   `dlsym` symbol is a `PrivateSymbol`, its name spelled once at
   the lookup, and owes a row in the `selfTestProbes` of the home

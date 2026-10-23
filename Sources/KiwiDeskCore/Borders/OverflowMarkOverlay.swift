@@ -168,7 +168,6 @@ final class OverflowMarkOverlay {
     }
 
     private func makePanel() -> OverflowMarkPanel {
-        GlassActiveAppearance.install()
         let panel = OverflowMarkPanel(
             contentRect: CGRect(origin: .zero, size: size),
             styleMask: [.borderless, .nonactivatingPanel],

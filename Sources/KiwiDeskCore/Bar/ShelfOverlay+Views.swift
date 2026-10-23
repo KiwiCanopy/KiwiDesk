@@ -25,7 +25,6 @@ extension ShelfOverlay {
     }
 
     func makePanel() -> NSPanel {
-        GlassActiveAppearance.install()
         let panel = BarPanel.configure(
             ShelfPanel(
                 contentRect: .zero,
