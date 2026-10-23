@@ -125,6 +125,14 @@ extension KiwiCore {
             tiler.settings.animations.onExpand = on
             updateBars()
             return .ok()
+        case "animations.set_on_peek":
+            // The bars' peeks on and off (#2563).
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.animations.onPeek = on
+            updateBars()
+            return .ok()
         case "animations.set_expand_duration":
             // The shelf expand's pace (#1838).
             guard let ms = args.first?.intValue else {

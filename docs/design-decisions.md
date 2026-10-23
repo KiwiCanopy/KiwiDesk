@@ -4176,7 +4176,14 @@ no overshoot, about 200 ms open and 160 ms closed, fixed rather
 than following `reveal_duration`: a list is a label, not a bar
 reveal. Under Reduce Motion nothing grows — the pill fades out and
 the list fades in where it rests, the "+n" holding its place — so
-the mark's entry and its list are the only motion it has. Its
+the mark's entry and its list are the only motion it has. Reduce
+Motion is a cross-fade, not an instant open, so the peeks have one
+off switch of their own, `animations.on_peek`: off, the list and
+the hover peek's fade show and hide at once. It covers both
+because the bars keep one peek, and one rule for its motion beats
+two. Borrowing `reveal_duration` was refused: that is a hidden
+bar's pace, and a "Reveal duration" row quietly governing a list
+is a link nobody would find. Its
 appearing and going still ride the park snap and its window's
 glide, with no motion of their own.
 :::

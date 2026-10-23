@@ -14,10 +14,21 @@ extension BarMotion {
     static let morphClose: TimeInterval = 0.16
     static let morphKey = "kiwidesk.peekMorph"
 
-    /// Whether the pill grows into the list: never under Reduce
-    /// Motion, which cross-fades the two at rest instead.
-    static func morphGrows(reduceMotion: Bool) -> Bool {
-        !reduceMotion
+    /// How the pill becomes the list and back.
+    enum MorphPlay: Equatable {
+        /// The pill grows by its frame into the list.
+        case grow
+        /// Reduce Motion: the two cross-fade at rest.
+        case crossFade
+        /// The peeks' motion off (`on_peek`): at once.
+        case snap
+    }
+
+    /// The morph `on_peek` and Reduce Motion leave: the motion off
+    /// snaps, outranking Reduce Motion's cross-fade.
+    static func morphPlay(onPeek: Bool, reduceMotion: Bool) -> MorphPlay {
+        guard onPeek else { return .snap }
+        return reduceMotion ? .crossFade : .grow
     }
 
     /// Plays the open (`opening`) or the close of the list `parts`
@@ -36,15 +47,22 @@ extension BarMotion {
         listRadius: CGFloat,
         opening: Bool
     ) -> TimeInterval {
-        guard morphGrows(reduceMotion: isReduced) else {
-            let to: CGFloat = opening ? 1 : 0
+        let alpha: CGFloat = opening ? 1 : 0
+        switch morphPlay(onPeek: peekMotion, reduceMotion: isReduced) {
+        case .snap:
+            panel.alphaValue = alpha
+            anchor?.alphaValue = 1 - alpha
+            return 0
+        case .crossFade:
             if opening { panel.alphaValue = 0 }
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = peekFade
-                panel.animator().alphaValue = to
-                anchor?.animator().alphaValue = 1 - to
+                panel.animator().alphaValue = alpha
+                anchor?.animator().alphaValue = 1 - alpha
             }
             return peekFade
+        case .grow:
+            break
         }
         let span = opening ? morphOpen : morphClose
         panel.alphaValue = 1
@@ -112,7 +130,7 @@ extension BarMotion {
 
     /// The stage's clip on one critically damped spring: bounds,
     /// position and corner radius, held where it lands — played only
-    /// where `morphGrows` let the pill grow.
+    /// where `morphPlay` grows the pill.
     private static func morphClip(
         from: ClipStart,
         to: ClipStart,

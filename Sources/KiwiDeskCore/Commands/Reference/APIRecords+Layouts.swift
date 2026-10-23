@@ -40,6 +40,11 @@ extension APIReference {
                 + "in or out and the shelf re-placing.",
             .boolean("enabled")
         ),
+        "set_on_peek": APIRecord(
+            "Enables or disables the bars' peeks: the hover fade and "
+                + "the overflow list's growth.",
+            .boolean("enabled")
+        ),
         "set_expand_duration": APIRecord(
             "Sets the shelf's expand in milliseconds, clamped to its "
                 + "band.",

@@ -156,7 +156,7 @@ public enum APIReference {
             "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",
-            "set_on_expand", "set_expand_duration",
+            "set_on_expand", "set_expand_duration", "set_on_peek",
             "set_reveal_duration",
             "set_size_policy", "set_size_rate",
         ],
