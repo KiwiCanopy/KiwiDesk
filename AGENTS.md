@@ -190,6 +190,9 @@ Shared automation lives in `/scripts/`, never in dot-folders.
   `./scripts/release.sh <version>` cuts a release in two runs.
   Both, and CI's `changes` gating, are
   [packaging-and-release.md](.claude/rules/packaging-and-release.md)'s.
+- `scripts/mutate <spec.json>` proves guards red: commit first,
+  it refuses a tree that differs from HEAD and restores every
+  mutated file from its own bytes ([tests.md](.claude/rules/tests.md)).
 - `./scripts/sync-agents.sh` regenerates the Codex mirror of
   `.claude/agents/` ([subagents.md](.claude/rules/subagents.md)).
 - Optional per developer: Node `>= 18`, which only

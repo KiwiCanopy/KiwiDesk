@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Prove guards red by mutating source, without ever losing work.
+
+Usage:
+    scripts/mutate <spec.json> [--test-cmd '<cmd with {filter}>']
+                               [--no-baseline]
+
+The spec is a JSON list of mutations:
+
+    [{"name": "core mapping off",
+      "file": "Sources/KiwiDeskCore/Bar/BarMotion+Mark.swift",
+      "old": "case .grow: self = .grow",
+      "new": "case .grow: self = .slide",
+      "filter": "ShelfRevealGrowTests"}]
+
+Each mutation replaces `old` (which must occur exactly once) with
+`new`, runs the test command for its `filter`, and puts the file
+back from the bytes read before the edit. A mutation PROVES its
+guard when the command fails with a test failure; a build error
+proves nothing and is reported as such.
+
+Why a harness: a hand-written driver that restores with
+`git checkout -- <file>` resets the file to HEAD, so any edit not
+yet committed is lost with the mutation. This script therefore:
+
+- refuses to start while any tracked file differs from HEAD —
+  commit first, then prove the commit;
+- refuses to mutate a file git does not track;
+- restores from saved bytes, never through git, on every exit
+  path (failure, Ctrl-C, SIGTERM);
+- checks at the end that the tree matches HEAD again.
+
+By default each filter first runs unmutated (the baseline), since
+a guard that is red before the mutation proves nothing.
+
+The default test command is
+`scripts/gate-lock swift test --filter '{filter}'`, run from the
+repository root.
+"""
+
+import argparse
+import json
+import signal
+import subprocess
+import sys
+from pathlib import Path
+
+DEFAULT_CMD = "scripts/gate-lock swift test --filter '{filter}'"
+
+
+def git(root, *args):
+    return subprocess.run(
+        ["git", "-C", str(root), *args],
+        capture_output=True,
+        text=True,
+    )
+
+
+def dirty(root):
+    out = git(root, "status", "--porcelain", "--untracked-files=no")
+    return [line for line in out.stdout.splitlines() if line.strip()]
+
+
+def fail(message, code):
+    print(f"mutate: {message}", file=sys.stderr)
+    sys.exit(code)
+
+
+def load(spec_path, root):
+    try:
+        spec = json.loads(Path(spec_path).read_text())
+    except (OSError, ValueError) as error:
+        fail(f"cannot read spec {spec_path}: {error}", 64)
+    if not isinstance(spec, list) or not spec:
+        fail("spec must be a non-empty JSON list", 64)
+    for index, item in enumerate(spec):
+        for key in ("file", "old", "new", "filter"):
+            if not isinstance(item.get(key), str) or not item[key]:
+                fail(f"mutation {index}: missing '{key}'", 64)
+        item.setdefault("name", f"mutation {index}")
+        path = root / item["file"]
+        tracked = git(root, "ls-files", "--error-unmatch", item["file"])
+        if tracked.returncode != 0:
+            fail(f"{item['name']}: {item['file']} is not tracked", 65)
+        count = path.read_text().count(item["old"])
+        if count != 1:
+            fail(
+                f"{item['name']}: `old` occurs {count} times in "
+                f"{item['file']} (needs exactly 1)",
+                65,
+            )
+    return spec
+
+
+def run_tests(root, template, test_filter):
+    command = template.replace("{filter}", test_filter)
+    result = subprocess.run(
+        command,
+        shell=True,
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    output = result.stdout + result.stderr
+    ran = "Test run with" in output or "Executed" in output
+    built = not ("error:" in output and not ran)
+    return result.returncode, built, output
+
+
+def verdict(code, built):
+    if not built:
+        return "BUILD-BROKE"
+    return "red" if code != 0 else "GREEN"
+
+
+def main():
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument("spec")
+    parser.add_argument("--test-cmd", default=DEFAULT_CMD)
+    parser.add_argument("--no-baseline", action="store_true")
+    args = parser.parse_args()
+
+    top = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        text=True,
+    )
+    if top.returncode != 0:
+        fail("not inside a git repository", 64)
+    root = Path(top.stdout.strip())
+
+    changed = dirty(root)
+    if changed:
+        listing = "\n  ".join(changed)
+        fail(
+            "refusing to mutate: tracked files differ from HEAD.\n"
+            f"  {listing}\n"
+            "Commit them first, then prove the commit.",
+            2,
+        )
+
+    spec = load(args.spec, root)
+    saved = {}
+
+    def restore():
+        for path, data in saved.items():
+            path.write_bytes(data)
+        saved.clear()
+
+    def on_signal(signum, _frame):
+        restore()
+        fail(f"interrupted by signal {signum}; files restored", 130)
+
+    signal.signal(signal.SIGINT, on_signal)
+    signal.signal(signal.SIGTERM, on_signal)
+
+    rows = []
+    try:
+        if not args.no_baseline:
+            for test_filter in dict.fromkeys(m["filter"] for m in spec):
+                code, built, output = run_tests(
+                    root, args.test_cmd, test_filter
+                )
+                if code != 0 or not built:
+                    print(output[-2000:], file=sys.stderr)
+                    fail(
+                        f"baseline for '{test_filter}' is not green; "
+                        "a mutation cannot prove anything against it",
+                        3,
+                    )
+        for item in spec:
+            path = root / item["file"]
+            original = path.read_bytes()
+            saved[path] = original
+            text = original.decode()
+            path.write_text(text.replace(item["old"], item["new"], 1))
+            try:
+                code, built, _ = run_tests(
+                    root, args.test_cmd, item["filter"]
+                )
+            finally:
+                restore()
+            rows.append((item["name"], verdict(code, built)))
+    finally:
+        restore()
+
+    left = dirty(root)
+    if left:
+        fail(
+            "tree differs from HEAD after restoring: "
+            + ", ".join(left),
+            4,
+        )
+
+    width = max(len(name) for name, _ in rows)
+    for name, result in rows:
+        print(f"{name.ljust(width)}  {result}")
+    unproven = [name for name, result in rows if result != "red"]
+    if unproven:
+        print(
+            f"mutate: {len(unproven)} mutation(s) did not red: "
+            + ", ".join(unproven),
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
