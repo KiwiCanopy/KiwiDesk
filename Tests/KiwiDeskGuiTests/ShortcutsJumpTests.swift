@@ -241,6 +241,7 @@ struct ShortcutsJumpTests {
         let optIn = try Self.source(
             "Components/Common/SettingsSectionFrames.swift"
         )
+        #expect(optIn.contains("ifmeasuresFrames{GeometryReader{"))
         #expect(optIn.contains("control.id:proxy.frame("))
         #expect(
             optIn.contains(

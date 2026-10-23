@@ -148,6 +148,10 @@ struct ShortcutGroupFieldTests {
     func bandsShareTitles() throws {
         LocalizationManager.shared.select("en")
         #expect(ShortcutGroup.moveWindows.title == "Move windows")
+        // The field's live naming reads the same titles.
+        let live = ShortcutGroupNaming.current
+        #expect(live.shown("move_windows") == "Move windows")
+        #expect(live.stored("move windows") == "move_windows")
         let bands = SourceScan.stripComments(
             try String(
                 contentsOf: SourceScan.repoRoot(from: #filePath)
