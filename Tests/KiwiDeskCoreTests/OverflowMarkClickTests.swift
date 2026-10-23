@@ -1,17 +1,13 @@
 import AppKit
-import CoreGraphics
-import Foundation
 import Testing
 
 @testable import KiwiDeskCore
 
 /// The overflow mark's list through a real core (#2563 ▸ Ruling):
-/// hover lights the mark and opens nothing, a click grows the list
-/// and holds it, and it closes on its own triggers, never on the
-/// pointer leaving. The peek reads its anchor's frame only off a
-/// window on screen, so this core orders its mark panels in and
-/// takes them and the peek out again. `.enabled(if:)` because the
-/// run resolves the Space's screen.
+/// hover opens nothing, a click grows and holds the list, and it
+/// closes on its own triggers. The peek reads its anchor off a
+/// window on screen, so the core orders its marks in; the run
+/// resolves the Space's screen, hence `.enabled(if:)`.
 @Suite(
     "Overflow mark click (#2563)",
     .serialized,
@@ -116,6 +112,27 @@ struct OverflowMarkClickTests {
         }
     }
 
+    private static func key(
+        _ code: UInt16,
+        _ chars: String,
+        _ flags: NSEvent.ModifierFlags
+    ) throws -> NSEvent {
+        try #require(
+            NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: flags,
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                characters: chars,
+                charactersIgnoringModifiers: chars,
+                isARepeat: false,
+                keyCode: code
+            )
+        )
+    }
+
     private static func crossing(_ type: NSEvent.EventType) throws -> NSEvent {
         try #require(
             NSEvent.enterExitEvent(
@@ -207,20 +224,12 @@ struct OverflowMarkClickTests {
         defer { rig.close() }
         try rig.click()
         let panel = try #require(rig.peek.panel.panel)
-        let quit = try #require(
-            NSEvent.keyEvent(
-                with: .keyDown,
-                location: .zero,
-                modifierFlags: .command,
-                timestamp: 0,
-                windowNumber: 0,
-                context: nil,
-                characters: "q",
-                charactersIgnoringModifiers: "q",
-                isARepeat: false,
-                keyCode: 12
-            )
-        )
+        let quit = try Self.key(12, "q", .command)
+        // An arrow reaches the same door first and must pass on to
+        // `keyDown`, which walks the rows.
+        let down = try Self.key(125, "", [.numericPad, .function])
+        #expect(!panel.performKeyEquivalent(with: down))
+        #expect(rig.peek.shown != nil)
         #expect(panel.performKeyEquivalent(with: quit))
         #expect(rig.peek.shown == nil)
     }

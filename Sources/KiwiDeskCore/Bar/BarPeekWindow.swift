@@ -21,7 +21,9 @@ final class BarPeekWindow: NSPanel {
     /// (gui.md ▸ a non-activating key panel). It closes the list and
     /// is swallowed, as any key the list does not use.
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        guard takesKey else {
+        // AppKit offers every key press here before `keyDown`, the
+        // arrows included: only a ⌘ chord is the menu's to take.
+        guard takesKey, event.modifierFlags.contains(.command) else {
             return super.performKeyEquivalent(with: event)
         }
         _ = onKey(UInt16.max)
