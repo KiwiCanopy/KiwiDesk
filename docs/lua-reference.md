@@ -118,8 +118,9 @@ What happens past the last window that way is
 The search is two-tier: **tiled windows always win**, and only
 when no tiled window lies in the pressed direction are the
 space's *floating* windows (including floating sticky windows
-shown on the space) considered, by their live frames. Transient panels (Spotlight-style launchers) and
-fullscreen windows are never focus targets. A float parked
+shown on the space) considered, by their live frames. Transient
+panels (Spotlight-style launchers) and fullscreen windows are
+never focus targets. A float parked
 *exactly* on a tiled slot is reached by no direction — click it
 or cycle to it instead
 ([Accepted limitations](accepted-limitations.md)). `swap` is
@@ -232,8 +233,8 @@ When the target Space is on another screen, the pointer moves
 there too, whether or not
 [*mouse follows focus*](#mouseset_follows_focus) is on: onto the
 focused window, or to the centre of that screen's usable area
-when the Space is empty. It stays put when it is already on that screen or a mouse
-button is held. A move-and-follow onto another screen's Space
+when the Space is empty. It stays put when it is already on that
+screen or a mouse button is held. A move-and-follow onto another screen's Space
 does the same.
 :::
 
@@ -320,8 +321,7 @@ acts from it.
   so a diagonal one is no neighbour, and focus stops at the edge.
 
 With one screen, or with nothing recorded among three or more, the
-focused
-window's ring bumps and the command fails with `no other screen`;
+focused window's ring bumps and the command fails with `no other screen`;
 `focus_display` at an edge bumps toward it and fails with
 `no screen <direction> of focus`. Each visit also counts in the
 [Space history](#focus_space_back--focus_space_forward).
