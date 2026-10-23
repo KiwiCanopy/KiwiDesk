@@ -2399,6 +2399,16 @@ KiwiVision lens's skip; the obligation is
 [borders.md](borders.md)'s ▸ "A step KiwiDesk's own navigation
 takes".
 
+**What a focus key does past its last window is the one
+`focusPastEdge` (#2493)** — Off, a wrap within the screen, or the
+hop onto the next screen — reached only where a layout's own step
+has nothing left that way, a run's hidden windows included, so a
+new layout returns nil at the end of its order and never wraps or
+crosses screens itself. Its wrap and its landing seed
+`Navigation.neighbor` from `ScreenHop.entrySeed`, never a search of
+their own, and the screen order is the one `ScreenHop.hopOrder`
+(`FocusWrapTests`, `FocusWrapScreensTests`, `ScreenHopOrderTests`).
+
 ## macOS native tabs are one `NSWindow` per tab, coalesced temporally
 
 Finder/Terminal/Ghostty native tabs are separate `NSWindow`s

@@ -110,15 +110,16 @@ layout steps in window order on both axes: along the axis
 within the focused track, across it to the neighboring track
 (same relative position).
 
-All three wrap at the ends by default, and stop there with
-`wrap_focus` off (`scroll.set_wrap_focus`,
-`monocle.set_wrap_focus`, `track.set_wrap_focus`).
+:::unreleased
+What happens past the last window that way is
+[`set_focus_wrap`](#set_focus_wrap)'s.
+:::
 
 The search is two-tier: **tiled windows always win**, and only
 when no tiled window lies in the pressed direction are the
 space's *floating* windows (including floating sticky windows
 shown on the space) considered, by their live frames. On an
-axis with `wrap_focus` on, the wrap wins over the float tier: a
+axis that wraps, the wrap wins over the float tier: a
 float past that edge is reachable on the cross axis only,
 except with a single tiled window, when it is reachable on both
 axes. Transient panels (Spotlight-style launchers) and
@@ -982,6 +983,52 @@ profile's own value still wins.
 KiwiDesk.set_space_history("all_screens")
 ```
 
+:::unreleased
+### set_focus_wrap
+
+**Expects:** `"off"`, `"this_screen"` or `"all_screens"`
+(default `"all_screens"`).
+
+**Does:** what [`focus`](#focus) does at the last window in the
+pressed direction, in every layout. `swap` never wraps.
+
+- `off`: focus stops there; the ring bumps toward the edge and
+  the command fails with `no window <direction> of focus`.
+- `this_screen`: focus wraps to the window at the opposite edge
+  of the same screen — in BSP, Stack and Grid the nearest one in
+  the same row or column; in Scrolling, Monocle and Track the
+  far end of the order.
+- `all_screens`: focus continues to the window nearest the
+  entering edge on the next screen that way, switching to the
+  Space that screen shows. Past the last screen it wraps to the
+  farthest screen on the other side. A screen counts only where
+  it overlaps the focused window's row (←/→) or column (↑/↓); a
+  screen showing no window is skipped. With one screen it works
+  like `this_screen`.
+
+In Scrolling and Monocle the edge is the end of the window
+order, not the screen edge, and a Stack or Track run that hides
+windows is walked to its end first. The pointer follows the
+crossing like any
+[Space switch onto another screen](#focus_space).
+
+It is stored like the Space history: `focus_wrap` in `gui.json`
+is the value every profile uses, and a profile may keep its own,
+which the Settings row's **Applies to** writes. The verb sets the
+shared value for the running session and never reaches a file; a
+profile's own value still wins.
+
+It replaces the retired `scroll.set_wrap_focus`,
+`monocle.set_wrap_focus` and `track.set_wrap_focus`; a call to
+one is reported in Config Issues naming this verb.
+
+**Example:**
+
+```lua
+KiwiDesk.set_focus_wrap("this_screen")
+```
+:::
+
 ### set_desktop_cue
 
 **Expects:** `true` or `false` (default `true`).
@@ -1682,21 +1729,6 @@ scroll.set_orientation("horizontal")
 scroll.set_new_window_placement("after_focused")
 ```
 
-### scroll.set_wrap_focus
-
-**Expects:** a boolean (default `true`).
-
-**Does:** `true`: stepping `focus` past either end of the row
-wraps to the far end. `false`: focus stops at the ends. Applies
-to `focus` only. Monocle has the same
-toggle (`monocle.set_wrap_focus`).
-
-**Example:**
-
-```lua
-scroll.set_wrap_focus(true)
-```
-
 ### scroll.set_fill_when_alone
 
 **Expects:** a boolean (default `true`).
@@ -2066,21 +2098,6 @@ at the corner.
 monocle.set_hide_style("park")
 ```
 
-### monocle.set_wrap_focus
-
-**Expects:** `true` or `false` (default `true`).
-
-**Does:** whether the focus cycle wraps past the ends. On,
-`focus` past the last window returns to the first, and vice
-versa; off, focus stops at the first/last window. `swap` never
-wraps.
-
-**Example:**
-
-```lua
-monocle.set_wrap_focus(false)
-```
-
 ### monocle.set_new_window_placement
 
 **Expects:** `"first"`, `"last"`, `"before_focused"`, or
@@ -2229,22 +2246,6 @@ windows** (`first`/`last` = the track's ends,
 
 ```lua
 track.set_new_window_position("after_focused")
-```
-
-### track.set_wrap_focus
-
-**Expects:** a boolean (default `true`).
-
-**Does:** the track twin of `scroll.set_wrap_focus` (#168): on,
-stepping `focus` past an end wraps — within the focused track
-along the axis, last ↔ first track across it; off, focus stops
-at the ends. `swap` and `move_to_track` never wrap. Affects
-track spaces only.
-
-**Example:**
-
-```lua
-track.set_wrap_focus(true)
 ```
 
 ### track.set_axis_override
@@ -4495,13 +4496,19 @@ does not move, even with `mouse.follows_focus` on.
 
 - **Scrolling:** focus moves along the row through the same step
   as [`focus`](#focus) in the row's direction, with the ordinary
-  focus animation and border, wrapping only while
-  [`scroll.set_wrap_focus`](#scrollset_wrap_focus) is on.
-- **Monocle:** it steps through the windows, wrapping per
-  [`monocle.set_wrap_focus`](#monocleset_wrap_focus).
+  focus animation and border, wrapping at the ends as the focus
+  keys do.
+- **Monocle:** it steps through the windows, wrapping the same
+  way.
 - **Any other layout:** it steps to the next or previous window
   in the Space's window order, floating windows included,
   wrapping at the ends.
+
+:::unreleased
+The gesture never leaves its screen: under
+[`set_focus_wrap("all_screens")`](#set_focus_wrap) it wraps there
+as `"this_screen"` does.
+:::
 
 A swipe on a trackpad or Magic Mouse moves one window, and a
 notch of a mouse wheel moves one — a fast roll or a

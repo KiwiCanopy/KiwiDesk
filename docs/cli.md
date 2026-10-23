@@ -620,7 +620,6 @@ every lens with why it cannot turn on.
 | | `scroll.set_anchor` | `center\|start\|end\|follow` (default `follow`) |
 | | `scroll.set_orientation` | `horizontal\|vertical` |
 | | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |
-| | `scroll.set_wrap_focus` | true\|false (default true) |
 | | `scroll.set_fill_when_alone` | true\|false (default true; off keeps the slot size even alone) |
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_cells` | true\|false |
@@ -630,7 +629,6 @@ every lens with why it cannot turn on.
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Monocle | `monocle.set_orientation` | `horizontal\|vertical` |
 | | `monocle.set_hide_style` | `stack\|park` (default `stack`; park hides unfocused windows at the stash corner) |
-| | `monocle.set_wrap_focus` | true\|false (default `true`, matching scrolling/track) |
 | | `monocle.set_new_window_placement` | placement¹ (default `first`) |
 | Track | `track.swap` | `prev\|next` — swap the focused window's whole track with the adjacent one |
 | | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
@@ -638,11 +636,17 @@ every lens with why it cannot turn on.
 | | `track.set_auto_tracks` | true\|false (default `true`) |
 | | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
-| | `track.set_wrap_focus` | true\|false (default true) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-`wrap_focus` is on by default for `scroll`, `monocle` and
-`track`; a profile that already stores `false` keeps it.
+:::unreleased
+`set_focus_wrap` takes `off`, `this_screen` or `all_screens`
+(default `all_screens`): what `focus <direction>` does at the
+last window that way in every layout — stop, wrap within the
+screen, or continue onto the next screen
+([Lua reference](lua-reference.md#set_focus_wrap)). It replaces
+`scroll.set_wrap_focus`, `monocle.set_wrap_focus` and
+`track.set_wrap_focus`, which now fail naming it.
+:::
 
 `set_min_window_size`'s layout is `stack`, `grid`, `track`,
 `bsp`, `scrolling` or `floating`, and without one it sets every

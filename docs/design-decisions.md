@@ -1861,7 +1861,7 @@ detail:
 | **Stack** | geometric | `Navigation.neighbor` over slots, which sees only a zone's shown windows; along a zone that hides windows, focus and swap step in drawn order (`stackStep`, #2235) | a zone that overflows scrolls (`ZoneRun`, #2235); the emergency pile — a zone that cannot hold one window at min-size, or two zones that cannot coexist — cascades downward, whatever the arrangement (#222) |
 | **Grid** | geometric | `Navigation.neighbor` over slots | yes — a last-cell pile (rigid/dynamic past the cap) or a whole-grid cascade at min-size (`GridLayout`) |
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142; walled at a screen seam, #878) is a viewport pin, not an `OverlapStack` fallback |
-| **Monocle** | array-order | steps along the orientation, wraps iff `wrap_focus` (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
+| **Monocle** | array-order | steps along the orientation (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
 | **Track** | array-order | steps both axes (`trackStep`) | surplus tracks merge into one far-edge **overflow track** (#192), and every track that overflows scrolls (`ZoneRun`, #2235); only a track that cannot hold one window at min-size, or tracks that cannot keep it side by side, pile (`OverlapStack`) |
 | **Floating** | geometric (live frames) | `Navigation.neighbor` with no slots: every member navigates by its live frame (the slot→frame fallback), flagged floats via the #488 float tier | n/a |
 
@@ -1902,6 +1902,48 @@ gesture's steps skip too, through `navigate` on a row and its
 own-order step everywhere else. A new layout's navigation takes
 that predicate too, or the lens stops steering the keys on it
 ([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
+
+:::unreleased
+**One setting decides what a focus key does at its last window,
+in every layout: Off, This screen or All screens
+([#2493](https://github.com/KiwiCanopy/KiwiDesk/issues/2493)).**
+Three per-layout switches answered the question for the
+array-order layouts only, and the geometric ones stopped at the
+edge with no way to wrap; a user who moved between layouts met
+three answers to one key. *Off* stays because it is the one
+place a deliberate `false` can go, it keeps the #436 wall a held
+key parks on, and a script detects an edge by the failure.
+*This screen* wraps within the screen: the array-order layouts to
+the far end of their order, the geometric ones to the window
+nearest the opposite edge in the focused window's row or column,
+found by `Navigation.neighbor` seeded from a point just outside
+that edge — never a second search. *All screens*, the default,
+continues to the nearest screen that way showing a window, and
+past the last screen to the farthest on the other side, which
+may be this screen, so with one screen it is *This screen*. A
+screen counts only where it overlaps the focused window's band,
+so a diagonal screen is never a neighbour; the landing is the
+window nearest the entering edge, an array-order layout's end
+of order on that side. The edge is reached only past each
+layout's own steps, so a Scrolling row, a Monocle cycle and a
+Stack or Track run that hides windows are walked to their end
+before focus leaves the screen. The scroll gesture acts on the
+Space under the pointer and never leaves its screen. The setting
+is the Space history's shape — a `gui.json` base with a sparse
+per-profile override — because a profile may want the screen
+wall its arrangement was made around, and no layout wants a
+different answer than another on the same keys.
+
+The three switches cross by adoption at the first apply, as
+app-wide values do (#1741), since only the apply knows which
+profile is live. A file written before 3.2.0, whose default was
+off, carries no choice in `false`: all three `true` reads All
+screens and anything else the default. From 3.2.0 on the default
+was on, so a `false` is a choice: all three `true` reads All
+screens and any `false` reads Off. The cost is the mixed file —
+one layout wrapping and another not — which lands on one answer
+for all of them: Off from 3.2.0 on, the default before.
+:::
 
 ```mermaid
 flowchart TD
@@ -3282,8 +3324,8 @@ master — still fill, since no second-window region exists for
 them to keep; so under `master_count` 2 or more the lone
 window's kept zone widens to the shared full area when the
 second arrives, a consequence stated rather than a case the
-setting carves out. It is per LAYOUT and not per Space, the
-`wrap_focus` shape rather than `slot_size`'s: what a lone
+setting carves out. It is per LAYOUT and not per Space, a
+layout-wide shape rather than `slot_size`'s: what a lone
 window does is a taste about the layout, the same on every
 screen, and an override map is additive if a per-Space wish
 ever arrives. Default ON is a behaviour change to nothing —
@@ -13098,7 +13140,7 @@ surface redraw so the background seemed to move with it, and
 gave a mouse notch about 10 pt of travel, too little to read as
 anything. Stepping goes through the arrow keys' own focus step
 instead, so the animation, the border, the deferred raise and
-`wrap_focus` are the keyboard's and cannot drift from them; a
+the focus wrap are the keyboard's and cannot drift from them; a
 scroll gesture that grows a movement path of its own re-opens
 all three measurements. It takes `navigate` but not `execute`,
 whose foreground preflight (#292) refuses a focused command while
@@ -13127,7 +13169,7 @@ across the store*) — while here there is nothing to refuse,
 since the flat window array gives every Space a well-defined
 next and previous window whatever its geometry. Where a step
 still lands on nothing — a Scrolling or Monocle row's end with
-`wrap_focus` off, or a Space holding one window — the ring takes
+the focus wrap off, or a Space holding one window — the ring takes
 the arrow keys' own dead-end bump toward the step (#436; owner
 ruling 2026-09-29), once per event and never a pill: the
 gesture should answer a wall the way the keys do, and a worded
@@ -13671,8 +13713,8 @@ configurable; a generic `SpaceSettingsOverride` was rejected
 for exactly that reason. Two boundary notes: **Monocle** has a
 single eligible override, focus **orientation** (which
 directional keys cycle the window order and which axis the App
-Bar follows); **Wrap focus** is a layout-wide Monocle/Scrolling
-behavior, deliberately *not* per-space. The editor's
+Bar follows); **Wrap focus** is deliberately *not* per-space.
+The editor's
 *saved for other layouts* breakdown reads one reflective
 `fieldCount` over these six models, so a new override field is
 counted without a hand-kept tally; the cell's total adds the
