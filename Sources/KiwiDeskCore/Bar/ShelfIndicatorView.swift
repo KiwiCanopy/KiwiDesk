@@ -17,6 +17,9 @@ final class ShelfIndicatorView: NSView {
     let plate = NSView()
     let rim = ShelfIndicatorRim()
     let dots = ShelfIndicatorDots()
+    /// The plate as tinted glass where its bar draws glass (#2567):
+    /// a glass box whose host travels with the hover, under the rim.
+    private(set) var glass: (glass: NSView, tint: GlassBackdrop)?
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -41,7 +44,8 @@ final class ShelfIndicatorView: NSView {
         let mark = ShelfIndicator.mark(of: spec, in: bounds)
         // The dots reach out past the screen side by the hover's
         // shift, so they can follow the plate's middle inward.
-        let shift = BarMotion.hoverShift(spec.edge)
+        let across = spec.countAcross(grown: true)
+        let shift = BarMotion.hoverShift(spec.edge, across: across)
         let dotsRest = bounds.union(
             bounds.offsetBy(dx: -shift.dx, dy: -shift.dy)
         )
@@ -53,16 +57,34 @@ final class ShelfIndicatorView: NSView {
             width: spec.rimWidth,
             sheen: spec.sheen
         )
+        let box = glassBox(for: spec)
+        plate.isHidden = box != nil
         BarMotion.placeHoverPlate(
-            plate,
+            box.flatMap { GlassBox.host(of: $0.glass) } ?? plate,
             rim: rim,
             content: dots,
             contentRest: dotsRest,
             mark: mark,
             widen: spec.labelExtra,
+            across: across,
             edge: spec.edge,
             hovered: spec.hovered,
-            animated: animated && was?.hovered != spec.hovered
+            animated: animated && was?.hovered != spec.hovered,
+            placePlate: box.map { box in
+                { frame in
+                    GlassBox.place(
+                        box.glass,
+                        tint: box.tint,
+                        at: frame,
+                        cornerRadius: min(frame.width, frame.height) / 2,
+                        hex: spec.fill,
+                        edge: spec.edge,
+                        visible: true,
+                        animated: true,
+                        move: { host, frame, _ in host.frame = frame }
+                    )
+                }
+            }
         )
         // The mark gives way to the shelf it reveals and comes
         // back as the shelf's retract lands.
@@ -77,6 +99,21 @@ final class ShelfIndicatorView: NSView {
         }
     }
 
+    /// The glass box `spec` draws its plate in, made once beneath
+    /// the rim; nil, and any box dropped, where its bar draws no
+    /// glass or the OS has none.
+    private func glassBox(
+        for spec: ShelfIndicatorSpec
+    ) -> (glass: NSView, tint: GlassBackdrop)? {
+        guard spec.glass else {
+            if let glass { GlassBox.drop(glass.glass, glass.tint) }
+            glass = nil
+            return nil
+        }
+        if glass == nil { glass = GlassBox.make(in: body, below: rim) }
+        return glass
+    }
+
     override func isAccessibilityElement() -> Bool { true }
     override func accessibilityRole() -> NSAccessibility.Role? { .button }
 
@@ -88,6 +125,20 @@ final class ShelfIndicatorView: NSView {
 
     override func accessibilityValue() -> Any? {
         let shown = spec?.shown == true
+        // The App Bar's count is spoken at rest too, number last.
+        if let windows = spec?.count?.windows {
+            return shown
+                ? L(
+                    "kiwishelf.indicator.shown_windows.ax",
+                    "Shown, windows: %1$d",
+                    windows
+                )
+                : L(
+                    "kiwishelf.indicator.hidden_windows.ax",
+                    "Hidden, windows: %1$d",
+                    windows
+                )
+        }
         // The dots may not all show, so the place is spoken whole.
         guard let place = spec?.position else {
             return shown
@@ -167,7 +218,11 @@ final class ShelfIndicatorDots: NSView {
     override var isFlipped: Bool { true }
 
     override func draw(_ dirtyRect: NSRect) {
-        guard let spec, case .dots(let dots) = spec.mark else { return }
+        guard let spec else { return }
+        guard case .dots(let dots) = spec.mark else {
+            drawCount(spec)
+            return
+        }
         let labelled = spec.hovered && spec.label != nil
         let extra = labelled ? spec.labelExtra : 0
         var lead =
@@ -178,7 +233,7 @@ final class ShelfIndicatorDots: NSView {
             let pill = dot.current && labelled
             let size =
                 pill
-                ? ShelfIndicatorSpec.labelDepth
+                ? spec.pillDepth
                 : dot.small
                     ? ShelfIndicatorSpec.smallDot : ShelfIndicatorSpec.dot
             let long =

@@ -39,6 +39,7 @@ extension KiwiCore {
             display: DisplayID,
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
+            appWindows: Int? = nil,
             reveal: ShelfRevealer,
             gaps: Gaps,
             settings: TilingSettings
@@ -54,6 +55,7 @@ extension KiwiCore {
                     key: ShelfManager.Key(display: display, edge: plan.edge),
                     screen: screen,
                     items: items,
+                    appWindows: appWindows,
                     reveal: reveal,
                     gaps: gaps,
                     settings: settings
@@ -73,6 +75,7 @@ extension KiwiCore {
             key: ShelfManager.Key,
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
+            appWindows: Int?,
             reveal: ShelfRevealer,
             gaps: Gaps,
             settings: TilingSettings
@@ -164,7 +167,7 @@ extension KiwiCore {
                 {
                     marks[key] = markIn
                 }
-                indicators[barKey(bar)] = ShelfIndicatorSpec(
+                var spec = ShelfIndicatorSpec(
                     mark: mark,
                     frame: markIn,
                     edge: plan.edge,
@@ -180,8 +183,18 @@ extension KiwiCore {
                     sheen: settings.borderStyle.sheen,
                     yields: reveal.yields(barKey(bar)),
                     label: plan.horizontal ? dots?.label : nil,
-                    position: dots?.position
+                    position: dots?.position,
+                    glass: shelf.glassEnabled
                 )
+                if bar == .app, let appWindows {
+                    spec.count = ShelfIndicatorSpec.count(
+                        appWindows,
+                        font: Self.countFont(settings),
+                        edge: plan.edge,
+                        pillDepth: spec.pillDepth
+                    )
+                }
+                indicators[barKey(bar)] = spec
             }
         }
 

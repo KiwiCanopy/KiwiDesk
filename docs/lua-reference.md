@@ -3134,6 +3134,13 @@ are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
 short line, which grows when the pointer comes near and opens as
 the Space dots do.
 
+:::unreleased
+Grown, the line shows how many windows the App Bar holds on that
+screen, beside a window symbol, with the bar's Fill at both ends;
+on a side edge the number stands above the symbol, and past 99
+the symbol shows alone. VoiceOver reads the count at rest too.
+:::
+
 ## Space Bar
 
 The Space Bar (#293) lists, per screen, that screen's Spaces
@@ -3238,6 +3245,12 @@ shelf's [order](#kiwishelfset_order), where a lone bar would sit
 marks. The pointer opens one bar at a time: while a bar is shown,
 the other's mark and band go away. A second bar's shortcut shows
 it beside the first. A look never carries the value.
+
+:::unreleased
+With Liquid Glass on, a mark draws as tinted glass, as its bar
+does; under Reduce transparency, or with glass off, it draws its
+Fill solid.
+:::
 
 **Example:**
 

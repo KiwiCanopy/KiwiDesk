@@ -43,26 +43,29 @@ extension KiwiCore.HidingShelves {
                 small: ends && !spaces[index].active
             )
         }
-        let look = settings.spaceBarLook
         let label = current.map {
             ShelfIndicatorSpec.label(
                 spaces[$0].spaceGlyph,
-                // The Space Bar's own identifier size, held inside
-                // the pill.
-                font: look.shelf.textFont(
-                    ofSize: min(
-                        look.identifierFontSize(
-                            forDepth: look.shelf.thickness
-                        ),
-                        ShelfIndicatorSpec.labelDepth - 4
-                    )
-                )
+                font: Self.countFont(settings)
             )
         }
         return (
             .dots(dots),
             label,
             current.map { .init(index: $0 + 1, count: spaces.count) }
+        )
+    }
+
+    /// The hovered marks' text font: the Space Bar's own
+    /// identifier size, held inside the pill — the Space name's and
+    /// the App Bar count's alike (#2567).
+    @MainActor static func countFont(_ settings: TilingSettings) -> NSFont {
+        let look = settings.spaceBarLook
+        return look.shelf.textFont(
+            ofSize: min(
+                look.identifierFontSize(forDepth: look.shelf.thickness),
+                ShelfIndicatorSpec.labelDepth - 4
+            )
         )
     }
 }

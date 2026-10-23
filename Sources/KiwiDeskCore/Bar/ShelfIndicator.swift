@@ -59,6 +59,12 @@ struct ShelfIndicatorSpec: Equatable {
     /// Where the current Space sits, for VoiceOver: its place
     /// from 1 and the Space count, which the dots may not all show.
     var position: Position?
+    /// The App Bar mark's window count, drawn while hovered and
+    /// spoken always (`ShelfIndicatorSpec+Count`, #2567).
+    var count: Count?
+    /// The plate draws as tinted glass, as its bar does
+    /// (`LiquidGlassGate.rendered`, #2567).
+    var glass = false
 
     var horizontal: Bool { edge.isHorizontal }
 
@@ -210,6 +216,7 @@ final class ShelfIndicator {
         BarMotion.hoverPlate(
             mark: spec.frame,
             widen: spec.labelExtra,
+            across: spec.countAcross(grown: true),
             edge: spec.edge,
             hovered: true
         )

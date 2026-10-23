@@ -29,11 +29,19 @@ extension ShelfIndicatorSpec {
     /// Room either side of the label inside its pill.
     static let labelPad: CGFloat = 3
 
-    /// How much longer the hovered pill is than the current dot,
-    /// which the panel keeps room for so a hover never resizes it.
+    /// How much longer the hovered mark is along its edge than its
+    /// plain growth — a Space name's pill past the current dot, or
+    /// the count's pill with the Fill at each end past the App Bar
+    /// line — which the panel keeps room for so a hover never
+    /// resizes it. A pill is never shorter than it is deep.
     var labelExtra: CGFloat {
+        if let count {
+            let grown = Self.lineLength + 2 * Self.hoverGrowth
+            return max(0, pill(of: count).along + 2 * Self.fillRun - grown)
+        }
         guard let label else { return 0 }
-        return max(0, label.width + 2 * Self.labelPad - Self.currentDot)
+        let pill = max(label.width + 2 * Self.labelPad, pillDepth)
+        return max(0, pill - Self.currentDot)
     }
 
     /// `glyph` measured in `font`: a symbol at the font's size,
