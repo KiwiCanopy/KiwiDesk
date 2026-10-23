@@ -277,6 +277,13 @@ struct SettingsThemeContrastTests {
             SettingsTheme.previewPlate,
             on: SettingsTheme.accent
         ),
+        // The gesture strip's hover border, a non-text cue (#2537).
+        Pairing(
+            "accent hover border on previewPlate",
+            SettingsTheme.accent,
+            on: SettingsTheme.previewPlate,
+            floor: 3.0
+        ),
         // The narrow-window "Show preview" chip (17a): ordinary
         // ink on a card plane the render washes with the accent
         // at the search notice's strength.
