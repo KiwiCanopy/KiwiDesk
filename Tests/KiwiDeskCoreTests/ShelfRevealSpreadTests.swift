@@ -142,23 +142,18 @@ struct ShelfRevealSpreadTests {
         #expect(motion(run.far) == nil)
     }
 
-    @Test("A Boxed grow wipes over the boxes' span")
-    func boxedGrowWipes() throws {
+    /// Grow's wipe never retracted on a Boxed shelf, so it plays
+    /// the spread there (#2556).
+    @Test("A Boxed grow plays the spread")
+    func boxedGrowSpreads() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
         let run = Run()
         let overlay = overlay(.grow, run: run)
         defer { overlay.hide() }
         overlay.revealIn()
-        let clip = try #require(motion(overlay.content) as? CAAnimationGroup)
-        let bounds = try #require(
-            clip.animations?.first {
-                ($0 as? CABasicAnimation)?.keyPath == "bounds"
-            } as? CABasicAnimation
-        )
-        #expect(
-            (bounds.toValue as? NSValue)?.rectValue == overlay.restRoom
-        )
-        #expect(motion(run.near) == nil)
+        #expect(motion(run.near) != nil)
+        #expect(motion(run.far) != nil)
+        #expect(!(motion(overlay.content) is CAAnimationGroup))
     }
 }

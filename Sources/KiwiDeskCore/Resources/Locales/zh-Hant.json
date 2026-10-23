@@ -1050,7 +1050,6 @@
   "kiwishelf.reveal_style.fade": "淡入",
   "kiwishelf.reveal_style.grow": "放大",
   "kiwishelf.reveal_style.label": "出現效果",
-  "kiwishelf.reveal_style.label.help": "隱藏的列如何出現：「%1$@」讓整個列從螢幕邊緣移入；「%2$@」讓列從細條中放大，背景為「%5$@」時則依序掃過各個方塊；「%3$@」讓列從細條沿邊緣拉長，再加厚，或讓每個方塊從細條中彈出；「%4$@」讓列在原處淡入。沒有細條的列會從螢幕邊緣的中間放大或展開。",
   "kiwishelf.reveal_style.no_bar_hides": "沒有會隱藏的列，因此沒有需要顯示的內容。",
   "kiwishelf.reveal_style.slide": "滑入",
   "kiwishelf.reveal_style.unfold": "展開",

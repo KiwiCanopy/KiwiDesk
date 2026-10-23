@@ -51,10 +51,10 @@ struct ShelfRevealGrowTests {
         #expect(morph.plateStart >= morph.itemsStart + morph.itemsLength)
     }
 
-    /// Boxed draws no plate, so a grow wipes over the boxes and an
-    /// unfold spreads them (owner ruling, 2026-10-21); a grow with no
-    /// plate at all — a shelf not yet shown — cross-fades.
-    @Test("Boxed grows as a wipe and spreads its unfold")
+    /// Boxed draws no plate, so an unfold spreads the boxes (owner
+    /// ruling, 2026-10-21) and a grow plays that spread (#2556); a
+    /// grow path with no plate — a shelf not yet shown — cross-fades.
+    @Test("Boxed spreads its unfold, and its grow plays as one")
     func boxedKinds() {
         #expect(
             BarMotion.revealMotion(
@@ -70,7 +70,7 @@ struct ShelfRevealGrowTests {
         shelf.backgroundStyle = .boxed
         #expect(BarMotion.RevealKind(shelf) == .spread)
         shelf.revealStyle = .grow
-        #expect(BarMotion.RevealKind(shelf) == .grow)
+        #expect(BarMotion.RevealKind(shelf) == .spread)
         shelf.revealStyle = .slide
         #expect(BarMotion.RevealKind(shelf) == .slide)
         shelf.revealStyle = .fade

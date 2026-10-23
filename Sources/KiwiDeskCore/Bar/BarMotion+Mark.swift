@@ -9,15 +9,15 @@ extension BarMotion {
     /// How a shelf's reveal plays, as far as its mark keeps time
     /// with it: the user's `reveal_style`, an unfold on a shelf with
     /// no plate spreading its boxes (owner ruling, 2026-10-21) and a
-    /// grow there wiping over them; `fade` for a shelf not yet
-    /// shown.
+    /// grow there playing that spread too, since its wipe could not
+    /// retract (#2556); `fade` for a shelf not yet shown.
     enum RevealKind: Equatable {
         case slide, grow, unfold, spread, fade
 
         init(_ shelf: KiwiShelf) {
             switch shelf.revealStyle {
             case .slide: self = .slide
-            case .grow: self = .grow
+            case .grow: self = shelf.drawsPlate ? .grow : .spread
             case .unfold: self = shelf.drawsPlate ? .unfold : .spread
             case .fade: self = .fade
             }

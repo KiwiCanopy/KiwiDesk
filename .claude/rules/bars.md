@@ -619,9 +619,9 @@ render content into it (#1517). Obligations:
   both placed in the panel's coordinates, so the room — the plate
   and the hovered mark, or the middle of the screen side where the
   edge draws no mark — holds still until it lands (`growing`).
-  **Boxed takes every style (owner ruling, 2026-10-21)**: the plate
-  a grow reaches is the boxes' span (`revealPlate`), and an unfold
-  is a spread — each box moved through its GLASS HOST, never the
+  **Boxed takes every style (owner ruling, 2026-10-21)**, a grow
+  playing as the unfold there (#2556, `ShelfRevealGrowTests`), and
+  an unfold is a spread — each box moved through its GLASS HOST, never the
   glass (#2095), found by the one `BarMotion.spreadUnits`, what
   holds no box fading in place — positioned in VIEW coordinates,
   since the pass that orders the panel in has not connected the

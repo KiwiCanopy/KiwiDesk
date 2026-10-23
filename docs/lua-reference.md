@@ -2799,11 +2799,13 @@ stretches the mark along the edge to the bar's length, then
 deepens it to the bar, and back; `"fade"` fades the bar in
 where it stands, and out. A `"hidden"` bar has no mark, so
 `"grow"` and `"unfold"` start from the middle of its screen edge.
-On a `"boxed"` shelf `"grow"`
-wipes across the boxes and `"unfold"` springs each box out of
-the mark to its place. A bar shown beside an `"always"` bar joins
-it instead, whichever style. Each plays with Reduce Motion on
-too.
+A bar shown beside an `"always"` bar joins it instead, whichever
+style. Each plays with Reduce Motion on too.
+
+:::unreleased
+On a `"boxed"` shelf `"unfold"` springs each box out of the mark
+to its place, and `"grow"` plays as `"unfold"`.
+:::
 
 **Example:**
 
