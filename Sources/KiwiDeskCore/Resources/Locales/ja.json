@@ -872,6 +872,7 @@
   "keybinding.dir.right": "右",
   "keybinding.focus_desktop": "デスクトップ%1$@へ移動",
   "keybinding.focus_dir": "%1$@のウインドウにフォーカス",
+  "keybinding.focus_display_last": "最後に使った画面へ移動",
   "keybinding.go_to_space": "スペース%1$@へ移動",
   "keybinding.grow_height": "高さを広げる",
   "keybinding.grow_width": "幅を広げる",

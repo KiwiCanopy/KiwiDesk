@@ -48,6 +48,15 @@ extension APIReference {
             "Switches to the next Space in the focused screen's "
                 + "order, stopping at the last."
         ),
+        "focus_display_last": APIRecord(
+            "Goes to the screen you were on before, like Cmd-Tab for "
+                + "screens."
+        ),
+        "focus_display": APIRecord(
+            "Goes to the nearest screen in a direction, stopping at "
+                + "the last.",
+            .choice("direction", Direction.self)
+        ),
         "move_to_space": APIRecord(
             "Moves the focused window, or the one a window id "
                 + "names, to a Space without following it.",

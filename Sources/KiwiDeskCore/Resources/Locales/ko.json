@@ -872,6 +872,7 @@
   "keybinding.dir.right": "오른쪽",
   "keybinding.focus_desktop": "데스크탑 %1$@(으)로 이동",
   "keybinding.focus_dir": "%1$@ 윈도우에 포커스",
+  "keybinding.focus_display_last": "마지막으로 사용한 화면으로 이동",
   "keybinding.go_to_space": "공간 %1$@(으)로 이동",
   "keybinding.grow_height": "높이 늘리기",
   "keybinding.grow_width": "너비 늘리기",

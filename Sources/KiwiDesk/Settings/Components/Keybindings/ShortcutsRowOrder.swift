@@ -45,6 +45,7 @@ enum ShortcutsRowOrder {
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusWrap),
         .shortcuts(.focusDir),
+        .shortcuts(.screenLast),
         .shortcuts(.spaceStep),
         .shortcuts(.spaceHistory),
         .shortcuts(.spaceHistoryStep),

@@ -872,6 +872,7 @@
   "keybinding.dir.right": "右側",
   "keybinding.focus_desktop": "前往桌面 %1$@",
   "keybinding.focus_dir": "聚焦%1$@的視窗",
+  "keybinding.focus_display_last": "前往上次使用的螢幕",
   "keybinding.go_to_space": "前往空間 %1$@",
   "keybinding.grow_height": "增加高度",
   "keybinding.grow_width": "增加寬度",

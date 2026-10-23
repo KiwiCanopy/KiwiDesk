@@ -872,6 +872,7 @@
   "keybinding.dir.right": "a destra",
   "keybinding.focus_desktop": "Vai alla Scrivania %1$@",
   "keybinding.focus_dir": "Sposta il focus sulla finestra %1$@",
+  "keybinding.focus_display_last": "Vai all'ultimo schermo usato",
   "keybinding.go_to_space": "Vai allo spazio %1$@",
   "keybinding.grow_height": "Aumenta l'altezza",
   "keybinding.grow_width": "Aumenta la larghezza",

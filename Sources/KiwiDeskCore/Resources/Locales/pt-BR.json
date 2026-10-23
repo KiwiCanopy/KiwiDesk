@@ -872,6 +872,7 @@
   "keybinding.dir.right": "à direita",
   "keybinding.focus_desktop": "Ir para a Mesa %1$@",
   "keybinding.focus_dir": "Focar a janela %1$@",
+  "keybinding.focus_display_last": "Ir para a última tela usada",
   "keybinding.go_to_space": "Ir para o espaço %1$@",
   "keybinding.grow_height": "Aumentar a altura",
   "keybinding.grow_width": "Aumentar a largura",
