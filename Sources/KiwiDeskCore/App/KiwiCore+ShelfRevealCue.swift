@@ -16,35 +16,76 @@ extension KiwiCore {
         case nothingToShow(ShelfBar)
     }
 
-    /// Draws `refusal`'s pill beside the shelf on `display`, else on
-    /// the focused window.
+    /// Draws `refusal`'s pill where its bar sits, where the user
+    /// looks on pressing its key (owner, #2567): beside the shelf
+    /// carrying that bar, else at that bar's own edge of the screen —
+    /// never on a window, never beside the other bar's shelf.
     func cueRevealRefusal(_ refusal: RevealRefusal, display: DisplayID) {
-        let text = Self.revealRefusalText(refusal)
-        let symbol = "eye.slash"
-        if let drawn = shelves.drawnStrip(
-            on: display,
-            preferring: refusal.bar
-        ) {
-            soundIfDrawn(
-                flashRefusalPill(
-                    near: drawn.strip,
-                    on: display,
-                    edge: drawn.edge,
-                    text: text,
-                    symbol: symbol,
-                    announce: false
-                )
+        guard let place = refusalPlace(of: refusal.bar, on: display)
+        else { return }
+        soundIfDrawn(
+            flashRefusalPill(
+                near: place.strip,
+                on: display,
+                edge: place.edge,
+                text: Self.revealRefusalText(refusal),
+                symbol: "eye.slash",
+                announce: false
             )
-        } else if let window = focusedWindowID {
-            soundIfDrawn(
-                flashRefusalPill(
-                    window,
-                    text: text,
-                    symbol: symbol,
-                    announce: false
-                )
+        )
+    }
+
+    /// The strip a refusal's pill stands beside, AX coordinates: the
+    /// shelf carrying `bar`, else a zero-depth strip along `bar`'s
+    /// edge of the screen's visible frame.
+    func refusalPlace(
+        of bar: ShelfBar,
+        on display: DisplayID
+    ) -> (strip: CGRect, edge: AppBarEdge)? {
+        if let shelf = shelves.drawnStrip(on: display, carrying: bar) {
+            return shelf
+        }
+        guard let screen = screen(for: display) else { return nil }
+        let settings = tiler.settings
+        let fingerprint = screenFingerprint(of: display)
+        let edge =
+            bar == .app
+            ? settings.appBarStyle.edge(on: fingerprint)
+            : settings.spaceBarStyle.edge(on: fingerprint)
+        // Chrome is drawn on a REAL screen (`VisibleBoundsRoutingTests`).
+        let visible = GeometryUtils.axVisibleFrame(of: screen)
+        let strip: CGRect
+        switch edge {
+        case .top:
+            strip = CGRect(
+                x: visible.minX,
+                y: visible.minY,
+                width: visible.width,
+                height: 0
+            )
+        case .bottom:
+            strip = CGRect(
+                x: visible.minX,
+                y: visible.maxY,
+                width: visible.width,
+                height: 0
+            )
+        case .left:
+            strip = CGRect(
+                x: visible.minX,
+                y: visible.minY,
+                width: 0,
+                height: visible.height
+            )
+        case .right:
+            strip = CGRect(
+                x: visible.maxX,
+                y: visible.minY,
+                width: 0,
+                height: visible.height
             )
         }
+        return (strip, edge)
     }
 
     /// The pill's sentence: a fact, the fix living on the shortcut

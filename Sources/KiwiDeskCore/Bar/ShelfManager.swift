@@ -101,6 +101,19 @@ final class ShelfManager {
     }
     private var last: [Key: Shelf] = [:]
 
+    /// The shown shelf on `display` that carries `bar`, if any, in
+    /// AX coordinates (#2567).
+    func drawnStrip(
+        on display: DisplayID,
+        carrying bar: ShelfBar
+    ) -> (strip: CGRect, edge: AppBarEdge)? {
+        last.values.first {
+            $0.display == display
+                && (bar == .space ? $0.space != nil : $0.app != nil)
+        }
+        .map { ($0.strip, $0.edge) }
+    }
+
     /// The strip last laid on `display` carrying `bar`, else any on
     /// that display, in AX coordinates (#761).
     func drawnStrip(

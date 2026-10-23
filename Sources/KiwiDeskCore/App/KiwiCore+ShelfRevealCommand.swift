@@ -48,14 +48,8 @@ extension KiwiCore {
                 $0.shelf.display == display && $0.bar == bar
             })
         else {
-            // Only a bar whose own content is empty says so.
-            let empty =
-                bar == .app
-                ? appBarContent(on: display, settings: settings) == nil
-                : spaceBarContent(on: display, style: settings.spaceBarLook)
-                    == nil
-            if empty {
-                cueRevealRefusal(.nothingToShow(bar), display: display)
+            if let refusal = emptyRefusal(bar, on: display) {
+                cueRevealRefusal(refusal, display: display)
             }
             return .fail("the \(name) has nothing to show here")
         }
@@ -63,5 +57,23 @@ extension KiwiCore {
             return .fail("the \(name) is held shown by the tour")
         }
         return .ok()
+    }
+
+    /// The pill a show/hide with no reveal target owes: nothing to
+    /// show where the bar's own content is empty, and none where the
+    /// shelf stands down for what is in front, which is no empty bar
+    /// (#2567).
+    func emptyRefusal(
+        _ bar: ShelfBar,
+        on display: DisplayID
+    ) -> RevealRefusal? {
+        guard !shelfStandsDown(on: display) else { return nil }
+        let settings = tiler.settings
+        let empty =
+            bar == .app
+            ? appBarContent(on: display, settings: settings) == nil
+            : spaceBarContent(on: display, style: settings.spaceBarLook)
+                == nil
+        return empty ? .nothingToShow(bar) : nil
     }
 }

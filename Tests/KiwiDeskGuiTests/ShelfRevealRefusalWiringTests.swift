@@ -29,18 +29,17 @@ struct ShelfRevealRefusalWiringTests {
     @Test("Nothing to show refuses with a pill, for either bar")
     func nothingToShowIsCued() throws {
         let body = try Self.body
-        #expect(body.contains("cueRevealRefusal(.nothingToShow(bar)"))
+        // The empty pill is `emptyRefusal`'s verdict (its behaviour is
+        // `ShelfRefusalPlaceTests` ▸ `emptyRefusalAsksTheContent`).
+        #expect(body.contains("emptyRefusal(bar, on: display)"))
         #expect(body.contains("has nothing to show here"))
-        // Decided by the bar's own content, never by elimination.
-        #expect(body.contains("appBarContent(on: display"))
-        #expect(body.contains("spaceBarContent(on: display"))
         // A stood-down shelf is asked first, so its missing target
         // never reads as an empty bar.
         let standDown = try #require(
             body.range(of: "shelfStandsDown(on: display)")
         )
         let empty = try #require(
-            body.range(of: "cueRevealRefusal(.nothingToShow")
+            body.range(of: "emptyRefusal(bar, on: display)")
         )
         #expect(standDown.lowerBound < empty.lowerBound)
     }
