@@ -98,6 +98,24 @@ struct MutateScriptTests {
         #expect(try contents(repo) == "alpha\n")
     }
 
+    @Test("an empty replacement deletes the text")
+    func deletionIsAMutation() throws {
+        let repo = try makeRepo()
+        let spec = """
+            [{"name": "alpha off", "file": "a.txt", "old": "alpha",
+              "new": "", "filter": "alpha"}]
+            """
+        try spec.write(
+            to: repo.appendingPathComponent("spec.json"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let result = try run(repo, testCmd: "grep -q {filter} a.txt")
+        #expect(result.status == 0, "\(result.stderr)")
+        #expect(result.stdout.contains("alpha off  red"))
+        #expect(try contents(repo) == "alpha\n")
+    }
+
     @Test("a baseline that is already red refuses to prove")
     func redBaselineRefuses() throws {
         let repo = try makeRepo()
