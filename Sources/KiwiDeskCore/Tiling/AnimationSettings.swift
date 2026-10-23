@@ -33,6 +33,11 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// Was `on_shelf` (`ConfigMigration`, owner ruling 2026-10-21).
     public var onExpand = true
 
+    /// The bars' peeks (#2563): the hover peek's fade and the
+    /// overflow mark's pill growing into its list. Off, both show
+    /// and hide at once; not under `anyEnabled`.
+    public var onPeek = true
+
     /// The expand in milliseconds (0, or 500–2000 ms, #1838; 0 snaps,
     /// owner ruling 2026-10-21); was `shelf_duration`.
     public var expandDurationMS = 750 {
@@ -106,6 +111,7 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case durationMS = "duration"
         case scrollDurationMS = "scroll_duration"
         case onExpand = "on_expand"
+        case onPeek = "on_peek"
         case expandDurationMS = "expand_duration"
         case revealDurationMS = "reveal_duration"
     }
@@ -152,6 +158,9 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         )
         onExpand =
             try container.decodeIfPresent(Bool.self, forKey: .onExpand)
+            ?? true
+        onPeek =
+            try container.decodeIfPresent(Bool.self, forKey: .onPeek)
             ?? true
         expandDurationMS = Self.clampExpandMS(
             try container.decodeIfPresent(

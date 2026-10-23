@@ -131,4 +131,37 @@ struct PanelChordTests {
         #expect(forwards.isEmpty)
         #expect(!panels.isEmpty)
     }
+
+    /// A key-capable window in Core cannot reach
+    /// `MainMenu.performPanelChord`, so it takes no chord and hands
+    /// none on: it swallows them all (#2563, bars.md). Matches a
+    /// `canBecomeKey` override answering anything but `false`.
+    /// Trade: a key window spelled another way is outside it.
+    @Test("a key-capable Core panel swallows every chord")
+    func coreKeyPanelsSwallow() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        var keyable: Set<String> = []
+        var scanned = 0
+        for file in try SourceScan.swiftSources(under: root) {
+            scanned += 1
+            let source = try SourceScan.strippedSource(at: file)
+                .replacingOccurrences(of: " ", with: "")
+                .replacingOccurrences(of: "\n", with: "")
+            let needle = "overridevarcanBecomeKey:Bool{"
+            guard let hit = source.range(of: needle),
+                !source[hit.upperBound...].hasPrefix("false}")
+            else { continue }
+            keyable.insert(file.lastPathComponent)
+            #expect(
+                source.contains(
+                    "overridefuncperformKeyEquivalent(withevent:NSEvent)"
+                        + "->Bool{"
+                ),
+                "\(file.lastPathComponent)"
+            )
+        }
+        #expect(scanned > 300)
+        #expect(keyable.contains("BarPeekWindow.swift"))
+    }
 }

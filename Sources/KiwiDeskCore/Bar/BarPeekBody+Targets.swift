@@ -102,6 +102,25 @@ extension BarPeekBody {
         }
     }
 
+    /// The arrow keys on a grown list (#2563): lifts the button
+    /// `delta` rows on, from the first or the last where none is.
+    func stepHover(by delta: Int) {
+        guard !targets.isEmpty else { return }
+        let next =
+            hovered.map { min(max($0 + delta, 0), targets.count - 1) }
+            ?? (delta > 0 ? 0 : targets.count - 1)
+        setHovered(next)
+    }
+
+    /// Return on a grown list: acts as a click on the lifted button.
+    func activateHovered() {
+        guard let index = hovered, index < targets.count else { return }
+        switch targets[index].action {
+        case .window(let id): onPick(id)
+        case .more: onMore()
+        }
+    }
+
     private static func ink(of view: NSView) -> NSColor? {
         (view as? NSTextField)?.textColor
             ?? (view as? NSImageView)?.contentTintColor

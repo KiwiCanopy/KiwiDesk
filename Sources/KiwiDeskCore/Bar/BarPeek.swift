@@ -150,6 +150,9 @@ final class BarPeek {
         {
             spent = nil
         }
+        // A list a click holds open is no hover's to swap or close
+        // (#2563); the mark it grew from reports no hover at all.
+        if shown?.source.morphsFromAnchor == true { return }
         guard let anchor, let source else {
             let current = shown?.view ?? pending?.view
             if let current, Self.belongs(current, to: reporter) {
@@ -222,13 +225,11 @@ final class BarPeek {
             !content.groups.isEmpty, content != panel.drawn,
             let shelf = shelf(window)
         else { return }
-        panel.show(
+        showPanel(
             content,
+            at: anchor,
+            frame: frame,
             shelf: shelf,
-            edge: anchor.edge,
-            anchor: frame,
-            strip: window.frame,
-            visible: visibleArea(window),
             fades: false
         )
     }
@@ -327,13 +328,11 @@ final class BarPeek {
         var placed = anchor
         placed.frame = frame
         phase = .showing(placed, holding: false)
-        panel.show(
+        showPanel(
             content,
+            at: anchor,
+            frame: frame,
             shelf: shelf,
-            edge: anchor.edge,
-            anchor: frame,
-            strip: window.frame,
-            visible: visibleArea(window),
             fades: fades
         )
     }

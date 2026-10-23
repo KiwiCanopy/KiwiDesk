@@ -21,6 +21,7 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsScrollDurationMS =
         "settings.animations.scrollDurationMS"
     case animationsOnExpand = "settings.animations.onExpand"
+    case animationsOnPeek = "settings.animations.onPeek"
     case animationsExpandDurationMS =
         "settings.animations.expandDurationMS"
     case animationsRevealDurationMS =
@@ -100,6 +101,9 @@ extension ColoursKey {
         case .animationsOnExpand:
             // A hidden knob: its duration row says when it is off
             // (owner ruling, 2026-10-21).
+            return .luaOnly
+        case .animationsOnPeek:
+            // The peeks' motion off, Lua-only (#2563).
             return .luaOnly
         case .animationsRevealDurationMS:
             // KiwiShelf ▸ Show ▸ Durations, greyed with the Reveal
@@ -202,7 +206,7 @@ extension ColoursKey {
                 "behavior.animations.window_duration",
                 help: "behavior.animations.window_duration.help"
             )
-        case .animationsOnExpand:
+        case .animationsOnExpand, .animationsOnPeek:
             return .none
         case .animationsRevealDurationMS:
             return .text(

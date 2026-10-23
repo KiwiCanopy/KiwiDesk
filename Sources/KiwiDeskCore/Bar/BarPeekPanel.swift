@@ -1,10 +1,11 @@
 import AppKit
 
 /// The peek's one panel (#1946): above the bars, taking the mouse
-/// for its rows yet non-activating and never key, so a click on a
-/// row never activates KiwiDesk; hidden from accessibility, where
-/// the glyph's menu is its twin. Its ground is the shelf's plate:
-/// glass through `GlassTint.apply`, or the solid Fill.
+/// for its rows yet non-activating, so a click on a row never
+/// activates KiwiDesk, and key only for a list that grows out of its
+/// anchor (#2563, `BarPeekPanel+Morph`); hidden from accessibility,
+/// where the glyph's menu is its twin. Its ground is the shelf's
+/// plate: glass through `GlassTint.apply`, or the solid Fill.
 @MainActor
 final class BarPeekPanel {
     /// AppKit keeps a visible panel alive after its owner is gone
@@ -13,17 +14,42 @@ final class BarPeekPanel {
         panel?.orderOut(nil)
     }
 
-    private(set) var panel: NSPanel?
+    var panel: BarPeekWindow?
     let body = BarPeekBody()
+    /// The count a grown list keeps as its header (#2563).
+    let header = BarPeekHeader()
     private let root = NSView()
+    /// Everything the panel draws; a grown list's clip (#2563).
+    let stage = NSView()
     private let solid = NSView()
     private let tint = GlassBackdrop()
     private var glass: NSView?
     /// The fade-out in flight; its landing orders the panel out
     /// unless a show cleared it meanwhile.
-    private var leaving: UUID?
+    var leaving: UUID?
     /// What the panel shows; nil while it is closed.
-    private(set) var drawn: BarPeekContent?
+    var drawn: BarPeekContent?
+    /// The list grown out of an anchor that shows, or is closing
+    /// back into it (#2563); nil for every other peek.
+    var morph: Morph?
+    /// The grown list's open in flight; its landing restores the
+    /// shadow unless a close cleared it meanwhile.
+    var opening: UUID?
+    /// Seconds on a monotonic clock: the peek's `now`, wired by it.
+    var now: @MainActor () -> TimeInterval = { 0 }
+    /// The pointer on screen: the peek's `pointerOnScreen`, wired by
+    /// it, so a returning anchor re-reads its hover through the
+    /// peek's seam.
+    var pointer: @MainActor () -> CGPoint = { BarPeekPanel.offScreen }
+    /// A point on no screen: the pointer before the peek wires it.
+    static let offScreen = CGPoint(x: -1e6, y: -1e6)
+    /// Runs a morph's landing after its span — a timer; a test
+    /// drains it by hand.
+    var land: BarPeekSchedule = { span, body in
+        BarMotion.afterReveal(span, body)
+    }
+    /// The grown list's header pressed to close it (#2563).
+    var onClose: @MainActor () -> Void = {}
 
     var isShown: Bool { panel?.isVisible == true && drawn != nil }
 
@@ -44,6 +70,9 @@ final class BarPeekPanel {
         // The one place the stored shelf becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let shelf = LiquidGlassGate.rendered(stored)
+        dropMorph()
+        body.reserve = .none
+        header.isHidden = true
         let size = Self.fittedSize(
             of: body,
             content,
@@ -54,6 +83,7 @@ final class BarPeekPanel {
         )
         let panel = self.panel ?? makePanel()
         self.panel = panel
+        panel.takesKey = false
         let origin = Self.origin(
             size: size,
             edge: edge,
@@ -74,8 +104,13 @@ final class BarPeekPanel {
         BarMotion.fadePeek(panel, to: 1, animated: fades)
     }
 
-    /// Closes the peek, fading where `animated`.
+    /// Closes the peek, fading where `animated`; a grown list
+    /// shrinks back into its anchor instead (#2563).
     func hide(animated: Bool) {
+        guard morph == nil else {
+            closeMorph()
+            return
+        }
         drawn = nil
         guard let panel, panel.isVisible else { return }
         // A fading peek takes no click.
@@ -200,10 +235,11 @@ final class BarPeekPanel {
         return CGPoint(x: point.x.rounded(), y: point.y.rounded())
     }
 
-    private func paint(_ shelf: KiwiShelf, edge: AppBarEdge, size: CGSize) {
+    func paint(_ shelf: KiwiShelf, edge: AppBarEdge, size: CGSize) {
         let bounds = CGRect(origin: .zero, size: size)
         let radius = BarPeekBody.Metrics.cornerRadius
         root.frame = bounds
+        stage.frame = bounds
         if shelf.glassEnabled, let glass = glassView() {
             solid.isHidden = true
             glass.isHidden = false
@@ -229,7 +265,9 @@ final class BarPeekPanel {
         solid.layer?.cornerRadius = radius
         solid.layer?.backgroundColor =
             NSColor(kiwiHex: shelf.fillColor).cgColor
-        if body.superview !== root { root.addSubview(body) }
+        if body.superview !== stage {
+            stage.addSubview(body, positioned: .below, relativeTo: header)
+        }
         body.frame = bounds
     }
 
@@ -237,22 +275,37 @@ final class BarPeekPanel {
     private func glassView() -> NSView? {
         if let glass { return glass }
         guard let made = GlassPlate.make() else { return nil }
-        root.addSubview(made, positioned: .above, relativeTo: solid)
+        stage.addSubview(made, positioned: .above, relativeTo: solid)
         glass = made
         return made
     }
 
-    private func makePanel() -> NSPanel {
-        let panel = BarPanel.makeNonActivating()
+    func makePanel() -> BarPeekWindow {
+        let panel = BarPanel.configure(
+            BarPeekWindow(
+                contentRect: .zero,
+                styleMask: BarPanel.styleMask,
+                backing: .buffered,
+                defer: true
+            )
+        )
         panel.level = BarPanel.aboveLevel
         panel.hasShadow = true
         panel.setAccessibilityElement(false)
+        panel.onKey = { [weak self] in self?.morphKey($0) ?? false }
         root.wantsLayer = true
         root.setAccessibilityElement(false)
+        stage.wantsLayer = true
+        // The morph fades the rows on the body's own layer.
+        body.wantsLayer = true
         solid.wantsLayer = true
         solid.layer?.masksToBounds = true
-        root.addSubview(solid)
-        root.addSubview(body)
+        root.addSubview(stage)
+        stage.addSubview(solid)
+        stage.addSubview(body)
+        stage.addSubview(header)
+        header.isHidden = true
+        header.onPress = { [weak self] in self?.headerPressed($0) }
         panel.contentView = root
         return panel
     }
