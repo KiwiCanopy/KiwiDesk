@@ -132,7 +132,7 @@ locale-worksheets/            # at the repo root, gitignored
 
 **`Resources/Locales/*.json` is translation-owned and generated:
 edit it via the scripts below, never by hand, and AI agents must
-not hand-edit it either** (see `AGENTS.md` §5). `en.json` is
+not hand-edit it either** (see `.claude/rules/localization.md`). `en.json` is
 regenerated wholesale by `scripts/extract-keys` on every run and
 is not a place to type a translation (see [Why `en.json` is
 generated](#why-enjson-is-generated-not-hand-edited)).

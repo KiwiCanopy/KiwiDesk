@@ -192,6 +192,9 @@ Shared automation lives in `/scripts/`, never in dot-folders.
   [packaging-and-release.md](.claude/rules/packaging-and-release.md)'s.
 - `./scripts/sync-agents.sh` regenerates the Codex mirror of
   `.claude/agents/` ([subagents.md](.claude/rules/subagents.md)).
+- Optional per developer: Node `>= 18`, which only
+  `scripts/sparkle-public-key.js` needs, and skill installs, which
+  land in the ignored `.agents/skills/`.
 
 ### Subagent delegation (AI agents)
 
@@ -228,7 +231,7 @@ These apply everywhere, whatever you touch:
 
 **Read the owning rule file before editing its subsystem.**
 
-| Rule file | Loads when touching | Covers |
+| Rule file | Scope (its `paths:` frontmatter decides) | Covers |
 |---|---|---|
 | [core-boundaries](.claude/rules/core-boundaries.md) | `Sources/KiwiDeskCore` | Core/GUI seam, logging, command records |
 | [state-and-layout](.claude/rules/state-and-layout.md) | `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`, crash recovery | Flat state, retiles, floats, focus, z-order, snapshots |

@@ -94,9 +94,8 @@ without anyone noticing; inside a review round it is the
 - **Where "route" and "calibrate" collide, split on kind.** An
   agent's most useful section is what *not* to flag, and some of
   that reads like the rule it is calibrating against. The line is
-  the one `rule-authoring.md` already draws: an **obligation** may
-  be repeated verbatim, because a copy of an obligation cannot go
-  out of sync with itself. A **fact** may not — a count, a list, a
+  the one `rule-authoring.md` ▸ State a fact once draws: an
+  **obligation** may be repeated. A **fact** may not — a count, a list, a
   threshold, a tool inventory, a named exemption. Those get a
   pointer, and if the pointer has nowhere to land, the fact is
   missing from its rule file and that is the bug to fix.

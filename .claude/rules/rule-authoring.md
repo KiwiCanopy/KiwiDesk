@@ -141,8 +141,9 @@ authority and link to it.
 This does **not** contradict the tripwire exception in AGENTS.md
 ("How this file is organized"), which repeats a handful of §5
 guardrails in short form from their rule file. That exception
-covers *obligations*, and an obligation restated can drift only by
-an edit that review sees. A **fact** — a count, a file list, a
+covers *obligations*, and only where the rule file carries the
+whole obligation the short form names: a tripwire with no
+rule-file home is a claim nothing backs. A **fact** — a count, a file list, a
 measured number — is what must not be duplicated.
 
 One narrow extension, on the tripwire's own reasoning: a

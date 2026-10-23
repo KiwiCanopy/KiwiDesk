@@ -12,7 +12,7 @@ body:
         Keep checkboxes in sync when issues close — a stale
         tracker is worse than none (see the #71 retrospective).
 
-        Conventions (see AGENTS.md §3–4): cluster = worktree =
+        Conventions: cluster = worktree =
         branch = PR; parallelize across file-disjoint lanes,
         serialize within a lane (same files → they conflict).
 

@@ -53,7 +53,8 @@ drifts out of sync with the original.
   `.claude/rules/parity-tests.md` owns the threshold.
 - **Did an invariant get discovered?** If the change establishes a
   new rule someone could unknowingly break, it belongs in the
-  owning rule file with a §5 entry — written as an
+  owning rule file (its §5 row changes only if the file's scope
+  does) — written as an
   obligation, not a state claim (`.claude/rules/rule-authoring.md`).
 - **Testability.** Did the change make a subsystem reachable only
   through the machine (real hotkeys, real menu bar, real screens)

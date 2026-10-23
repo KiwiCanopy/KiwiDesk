@@ -1412,7 +1412,7 @@ editing here:
   once.
   Three obligations follow. **Never split the pair into two
   fields** beside each other, and never re-derive the verdict
-  at a call site — nothing scans for either, so each new author
+  at a call site — `ScrollingLayout+Offset.heldBase` is its home — nothing scans for either, so each new author
   owes it deliberately. **A layout PASS never DESTROYS provenance
   it was handed**: a nil slot is the "no provenance to re-anchor
   from" verdict, so a pass that carries an offset through

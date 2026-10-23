@@ -9,11 +9,11 @@ Companion to **AGENTS.md §1**, the subsystem map: that table is
 the *where*, the pipelines below are the *how*. They name
 subsystems (`State`, `Tiling`, …), never files, so a file split
 under the 350-line ceiling leaves them true; a step's rule is
-cited (**AGENTS.md §5**, `design-decisions.md`), not restated.
+cited (the owning `.claude/rules/` file, `design-decisions.md`), not restated.
 
 Every pipeline runs over one state model: **windows live in a
 flat `[WindowID]` array per space**, never a tree, and layout
-algorithms are **pure functions over that array** (§5).
+algorithms are **pure functions over that array** (`state-and-layout.md`).
 
 ```mermaid
 graph LR
@@ -49,7 +49,7 @@ flowchart TD
 1. **`Events` / `AX`** — an `AXObserver` callback (window created,
    destroyed, moved, focused) or an event listener fires. AX
    callbacks arrive on the run loop of the thread that registered
-   them, and observer registration stays on the main thread (§5).
+   them, and observer registration stays on the main thread (`accessibility.md`).
    A notification names its window from the tracked element map
    before asking the app (#1084), and every read of that element
    — the frame behind a move/resize, the liveness frame behind a
@@ -61,7 +61,7 @@ flowchart TD
    state. macOS **native tabs** surface as one window vanishing
    while another appears at the same frame; `TabReconciler`
    coalesces that pair into a single `.windowRekeyed` — id swapped
-   in place, one slot per group — never a destroy + create (§5,
+   in place, one slot per group — never a destroy + create (`state-and-layout.md`,
    and the tab-reconcile notes in `design-decisions.md`). A
    window's `CGWindowID` is **not** stable.
 3. **`State`** — the reconciled result mutates the flat
@@ -75,7 +75,7 @@ flowchart TD
    one screen never hides another's. A single screen has exactly
    one active space.
 5. **`Layouts`** — a **pure function** computes frames from the
-   array and the resolved settings: no AX, no I/O (§5). Each
+   array and the resolved settings: no AX, no I/O (`state-and-layout.md`). Each
    layout's model (geometric neighbor-search vs array-order) is a
    row of the "Layout navigation & overflow models" table in
    `design-decisions.md`; a new layout adds its row there.
@@ -83,7 +83,7 @@ flowchart TD
    path resolves private SkyLight/CGS symbols at runtime via
    `dlsym`, and every private call **falls back** to the public
    Accessibility API when the lookup returns nil — never link
-   private symbols, never disable SIP (§5). SkyLight's ObjC
+   private symbols, never disable SIP (`os-private-apis.md`). SkyLight's ObjC
    window-management operation classes resolve by name at runtime
    under the same discipline, through one wrapper, `WMBridge`: a
    class that does not resolve reads as the capability absent.
@@ -160,18 +160,18 @@ flowchart TD
 ```
 
 1. **`Keys`** (Carbon `RegisterEventHotKey` — no Input Monitoring
-   permission; §5), **`IPC`** (CLI / external) or **`Lua`** (VM
+   permission; `input-and-animation.md`), **`IPC`** (CLI / external) or **`Lua`** (VM
    bridge) originates the intent.
 2. **`Commands`** — dispatches the `set_*` verb. The verb
    vocabulary is one-to-one with the profile JSON keys
    (`set_gap_override` → `gap.override`): pick the Lua name first
-   and derive the JSON key (§5).
+   and derive the JSON key (`config-vocabulary.md`).
 3. **`State`** mutates, then **Tiling → Layouts → OS** run as in
    pipeline 1.
 
 Every retile an explicit `set_*` triggers is an **apply**
 (`retile(pass: .apply)`): it bypasses the ±2 pt tolerance, so a
-1 pt gap edit moves windows (§5), and probes past the learned app
+1 pt gap edit moves windows (`state-and-layout.md`), and probes past the learned app
 size bounds once. A Space or Desktop switch is a **reissue** —
 past the tolerance, no probe — and everything event-driven is the
 default `.event` pass (`RetilePass`). A reissue forces the park
@@ -213,7 +213,7 @@ leaving the instant switch alone.
 The Lua watchdog is an instruction-count hook and **cannot**
 interrupt a blocking C call, so anything that blocks in C
 (external commands) goes through `ExecLauncher`, never inline on
-the main thread (§5).
+the main thread (`lua.md`).
 
 ## 3. Config resolve (global → layout → space, + profiles)
 
@@ -231,16 +231,16 @@ flowchart TD
 
 1. **`Config`** decodes the active owner — `init.lua` (Lua) or
    `gui.json` (GUI) — into settings. The single
-   `KiwiCore.isGuiManaged` predicate decides ownership (§5); never
+   `KiwiCore.isGuiManaged` predicate decides ownership (`profiles.md`); never
    add a second.
 2. **`Profiles`** layer on top: a profile serializes tiling state
    and may carry **sparse overrides** of *behavior* settings
    (keybindings, app/float/ignore rules), never a setting that
-   *routes or selects the profile itself* (§5).
+   *routes or selects the profile itself* (`profiles.md`).
 3. **resolve** — settings that layer (global → layout → space)
    merge **field-by-field**, and cross-field clamps apply **last**,
    on the merged values. Resolution runs **before** layout math
-   (§5); the worked example is `.claude/rules/profiles.md` ▸
+   (`profiles.md`); the worked example is `.claude/rules/profiles.md` ▸
    Resolve before layout.
 
 Between steps 2 and 3, a GUI-managed profile that follows the
@@ -255,7 +255,7 @@ Hand-mirrored field lists here are guarded by parity tests — see
 ## 4. Animation (per-screen)
 
 Animated placement is driven by **one `DisplayLink` per screen**,
-never a single global timer (§5). `Animation` interpolates and
+never a single global timer (`input-and-animation.md`). `Animation` interpolates and
 hands each frame to the `OS` placement path of pipeline 1's final
 step; position-only frames are applied per app.
 
@@ -296,7 +296,7 @@ flowchart TD
    apps never enter it. Among the admitted, one
    `CGWindowListCopyWindowInfo` snapshot decides which apps get the
    AX window query and warmup at attach; the rest keep their
-   observer and are warmed by a later reconcile (§5, the #662
+   observer and are warmed by a later reconcile (`accessibility.md`, the #662
    promise).
 3. **chunks** — each chunk attaches apps until its budget is
    spent, then hands the run loop back, so the menu answers at any
@@ -329,7 +329,7 @@ pass about 30 s after launch pairs the rest by title.
 ## Where to go next
 
 - **AGENTS.md §1** — the subsystem/target map.
-- **AGENTS.md §5** — the guardrails each step above links to.
+- **`.claude/rules/`** — the guardrails each step above links to, indexed by AGENTS.md §5.
 - **`design-decisions.md`** — the layout navigation/overflow table
   and the tab-reconcile model; the
   [Accepted limitations](accepted-limitations.md) page collects
