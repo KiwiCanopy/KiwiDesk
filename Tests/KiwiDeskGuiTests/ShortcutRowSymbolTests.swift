@@ -9,7 +9,12 @@ import Testing
 /// rows have shipped bare more than once, since a verb no case of
 /// the icon chain matched silently drew none. The commands are the
 /// ones the builder's own band code hands its row maker, and each
-/// is resolved through the builder's own `icon(for:)`, never a copy.
+/// is resolved through the builder's own `icon(for:)`, never a copy;
+/// the seeded case reads `row.icon` off `build` itself, the check
+/// that the builder calls that chain. A row `build` makes directly
+/// (Apps' own Open Settings, drawn with the app icon) is outside the
+/// recorded net. Main-actor spend: three builder passes, two seeded
+/// keymaps and one symbol lookup per distinct symbol.
 @Suite("Shortcut rows wear a symbol")
 @MainActor
 struct ShortcutRowSymbolTests {
@@ -68,6 +73,14 @@ struct ShortcutRowSymbolTests {
                 ShortcutsReferenceBuilder.icon(for: command) != nil,
                 "\(command.lua) draws no symbol"
             )
+        }
+    }
+
+    @Test("every exemption names a command the panel draws")
+    func exemptionsAreLive() {
+        let drawn = Set(drawable().map(\.lua))
+        for lua in Self.exempt.keys {
+            #expect(drawn.contains(lua), "stale exemption \(lua)")
         }
     }
 

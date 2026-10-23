@@ -74,11 +74,12 @@ extension ShortcutsReferenceBuilder {
             return "dock.rectangle"
         // Track's own verbs: to the line before or after, a swap
         // of two tracks (#2530).
-        case "KiwiDesk.move_to_track(\"prev\")":
+        case KeybindingCatalog.moveToTrackRows[0].lua:
             return "arrow.backward.to.line"
-        case "KiwiDesk.move_to_track(\"next\")":
+        case KeybindingCatalog.moveToTrackRows[1].lua:
             return "arrow.forward.to.line"
-        case "track.swap(\"prev\")", "track.swap(\"next\")":
+        case KeybindingCatalog.trackSwapRows[0].lua,
+            KeybindingCatalog.trackSwapRows[1].lua:
             return "rectangle.2.swap"
         default:
             break
@@ -104,23 +105,11 @@ extension ShortcutsReferenceBuilder {
         return nil
     }
 
-    /// The symbols the Shortcuts side draws beyond `verbIcon`'s
-    /// Core marks — its own literals, Custom's Lua mark and the
-    /// gather badge — for the resolve guard.
+    /// The symbols the Shortcuts side draws on no command row —
+    /// Custom's Lua mark and the gather badge — for the resolve
+    /// guard; a command row's symbol is resolved from the rows
+    /// themselves (`ShortcutRowSymbolTests`).
     static let verbSymbols = [
-        "rectangle.righthalf.inset.filled.arrow.right",
-        "rectangle.lefthalf.inset.filled.arrow.left",
-        "square.3.layers.3d",
-        "arrow.right.and.line.vertical.and.arrow.left",
-        "arrow.left.and.line.vertical.and.arrow.right",
-        "arrow.down.and.line.horizontal.and.arrow.up",
-        "arrow.up.and.line.horizontal.and.arrow.down",
-        "arrow.counterclockwise",
-        "arrow.up.left.and.arrow.down.right",
-        "dock.rectangle",
-        "arrow.backward.to.line",
-        "arrow.forward.to.line",
-        "rectangle.2.swap",
         "curlybraces",
         "rectangle.stack",
     ]
