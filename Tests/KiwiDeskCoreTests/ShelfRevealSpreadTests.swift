@@ -7,8 +7,8 @@ import Testing
 /// The Boxed unfold and grow (owner ruling 2026-10-21): with no
 /// plate, an unfold springs each box — its glass host, never the
 /// glass — out of the mark to its slot, the farther later, and
-/// gathers the outer first; a grow wipes its clip over the boxes'
-/// span rather than cross-fading. Main-actor spend: a few overlays,
+/// gathers the outer first; a grow plays that spread (#2556).
+/// Main-actor spend: a few overlays,
 /// one ordered panel each.
 @Suite("Shelf reveal spread", .serialized)
 @MainActor
@@ -142,23 +142,18 @@ struct ShelfRevealSpreadTests {
         #expect(motion(run.far) == nil)
     }
 
-    @Test("A Boxed grow wipes over the boxes' span")
-    func boxedGrowWipes() throws {
+    /// Grow's wipe never retracted on a Boxed shelf, so it plays
+    /// the spread there (#2556).
+    @Test("A Boxed grow plays the spread")
+    func boxedGrowSpreads() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
         let run = Run()
         let overlay = overlay(.grow, run: run)
         defer { overlay.hide() }
         overlay.revealIn()
-        let clip = try #require(motion(overlay.content) as? CAAnimationGroup)
-        let bounds = try #require(
-            clip.animations?.first {
-                ($0 as? CABasicAnimation)?.keyPath == "bounds"
-            } as? CABasicAnimation
-        )
-        #expect(
-            (bounds.toValue as? NSValue)?.rectValue == overlay.restRoom
-        )
-        #expect(motion(run.near) == nil)
+        #expect(motion(run.near) != nil)
+        #expect(motion(run.far) != nil)
+        #expect(!(motion(overlay.content) is CAAnimationGroup))
     }
 }

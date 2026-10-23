@@ -15115,10 +15115,15 @@ the bar; a grow's clip is placed in the panel's coordinates, so
 its room — the plate and the mark it grows from — holds still
 until it lands. A grow on an edge with no mark, a Hidden bar's,
 starts at the middle of its screen side. A Boxed shelf has no
-plate, and both plate styles still apply to it (owner ruling,
-2026-10-21): a grow wipes its clip across the span of the boxes,
-and an unfold springs each box out of the mark to its slot, the
-farther ones a beat later, gathering the outer ones first. The
+plate, and every style still applies to it (owner rulings,
+2026-10-21 and 2026-10-23): an unfold springs each box out of the
+mark to its slot, the farther ones a beat later, gathering the
+outer ones first, and a grow plays as that unfold (#2556) — a wipe
+across the boxes' span could not retract, and the spread is nearer
+a grow than a fade is. The stored pick stays Grow, so a shelf
+switched back to Plain grows again, and the Reveal row says so
+under the picker while both are chosen rather than hiding the
+segment. The
 spread moves each box's glass host, never the glass, which would
 drift from its tint (#2095); a fade alone read as cheap beside the
 other two. The reveal plays under Reduce Motion too, and so does the mark's hover
