@@ -16,7 +16,7 @@ struct GestureStripHoverCue: View {
             // stops taking the hover and the click.
             .strokeBorder(
                 SettingsTheme.accent.opacity(hovering ? 1 : 0),
-                lineWidth: 2
+                lineWidth: 3
             )
             .contentShape(Rectangle())
             .onTapGesture(perform: onTap)
