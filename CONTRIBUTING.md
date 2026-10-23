@@ -157,7 +157,7 @@ refactors from features (review them independently).
    (see [AGENTS.md](AGENTS.md) §3).
 3. CI (build, lint, test) must pass before merging.
 4. Address feedback from code-reviewer and
-   architect-reviewer agents (see [AGENTS.md](AGENTS.md) §4)
+   architect-reviewer agents (see [AGENTS.md](AGENTS.md) §3)
    before opening a PR.
 
 ## Reporting Issues

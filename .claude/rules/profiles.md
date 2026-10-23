@@ -589,6 +589,13 @@ holds the secondary-switch decision including its nil case.
 - The GUI-vs-Lua ownership predicate is centralized in
   `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine
   that one predicate, never add a second.
+- **Code renames freely; only a stored value needs a crossing
+  (#42).** Command names, Lua/CLI verbs and event names take no
+  compatibility aliases or deprecation layers — a retired verb
+  joins `APIReference.retired` (`KiwiShelfRetiredVerbTests`) —
+  save `kiwidesk mcp`'s verb and server name, which installed
+  extensions store ([packaging-and-release.md](packaging-and-release.md),
+  `MCPInvocationContractTests`).
 - **A stored value that is renamed owes a one-shot migration**
   in `ConfigMigration`, applied at EVERY reader of that file
   shape. Add the step to `ConfigMigration.steps`, never to a
@@ -601,7 +608,7 @@ holds the secondary-switch decision including its nil case.
   rewritten, so a refusal there ("that file isn't a KiwiDesk
   backup", about a file this app wrote) is permanent.
   The older rule here — "pre-release, single user, re-saving is
-  the migration" — was retired with AGENTS.md §5's premise: it
+  the migration" — was retired with its premise: it
   was true while the author was the only user, and v0.9.7 shipped
   to others. A lenient decoder is still banned; it never ends,
   where a rewrite does.

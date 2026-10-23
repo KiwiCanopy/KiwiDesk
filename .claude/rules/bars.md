@@ -1382,6 +1382,7 @@ Obligations:
 - **A member added to `GlassTint` owes a census entry** naming
   what its body reaches, and one that paints without routing
   through the clamp may not be censused as routing.
+  `GlassTintCapTests` holds the clamp itself, and
   `GlassTintSeamTests` is the fail-shut half — every other clause
   in it exempts the home file by design, so without the census a
   second unclamped painter inside `GlassTint` is invisible to

@@ -144,7 +144,8 @@ Every one of the following binds whoever touches them:
   intersecting the per-Desktop lists with the layer-0 owner map
   `AXHelper.allNormalWindowOwners()` reads; a production
   consumer reads it ONLY through `DesktopMemory.readCensus`, the
-  one door a test pins too (`DesktopCensusSeamTests`, whose
+  one door a test pins too (`DesktopCensusTests` the builder,
+  `DesktopCensusSeamTests`, whose
   `testCorePinsBothDoors` holds that `makeTestCore` pins it and
   the per-window `readWindowSpace` to "no compositor"), because
   the builder reads the host's WindowServer under a suite. **Nil is absent, never

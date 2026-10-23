@@ -252,7 +252,7 @@ jobs:
     # grows the pipeline by the release build's full wall clock.
     # As a parallel job it costs nothing on the critical path.
     #
-    # This is the gate AGENTS.md §3 no longer asks every commit to
+    # This is the gate the verify-gate skill no longer asks every commit to
     # pay locally: the optimizer turns on concurrency diagnostics
     # (non-Sendable captures in `@Sendable` closures) the debug
     # build silently accepts. #532.

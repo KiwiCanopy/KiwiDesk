@@ -3,15 +3,28 @@ description: File a KiwiDesk GitHub issue the way an agent must — render the t
 argument-hint: "[template: bug_report|feature_request|report_docs|collector]"
 ---
 
-File a GitHub issue for this repository. AGENTS.md §3 (Branching
-& Pull Requests) owns the *why* — which template an issue takes,
-and why its questions must be answered rather than skipped. This
-skill owns the mechanics.
+File a GitHub issue for this repository.
 
-`gh issue create` does not apply the
-`.github/ISSUE_TEMPLATE/*.yml` forms: the body observation is
-AGENTS.md §3's (2026-08-02, `gh` 2.x — a `--body-file` filing
-starts blank), and since the form never runs, its `type:` key
+**Why the template is reproduced, not skipped.** GitHub applies a
+`.yml` form only when a human opens the *New issue* page, so
+`gh issue create --body-file` starts from a blank body (observed
+2026-08-02, `gh` 2.x). The template's fields are the questions a
+maintainer needs answered before triaging — the macOS version and
+the other AX tools running are what half of KiwiDesk's bug reports
+turn on — so skipping them skips the questions, not just the
+formatting.
+
+**Which template.** Pick by what the issue *is*: `bug_report` when
+something shipped behaves wrongly (including a guard that cannot
+fail — the repro is the mutation that ought to red it),
+`feature_request` for new or retuned behavior, `report_docs` for
+prose. `config.yml` turns blank issues off, so those three are the
+only way in. Each is written for a **user**, so an internal
+engineering issue answers the fields that fit awkwardly honestly
+from the dev machine rather than dropping them or inventing a new
+shape.
+
+Since the form never runs, its `type:` key
 cannot apply either (inferred from that observation, not
 separately tested — a filing that does land with a Type set is
 news worth updating this line with). So reproduce by hand what
@@ -19,8 +32,8 @@ the web form gives a human for free.
 
 ## 1. Render the template
 
-The template to use is `$ARGUMENTS` (pick per AGENTS.md §3 if
-not given). Read it and reproduce it — the three reporter shapes
+The template to use is `$ARGUMENTS` (pick per "Which template"
+above if not given). Read it and reproduce it — the three reporter shapes
 live in `.github/ISSUE_TEMPLATE/$ARGUMENTS.yml`, while `collector`
 is ours rather than a reporter's and lives in
 `templates/collector.yml` beside this skill, out of the chooser

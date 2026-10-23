@@ -160,7 +160,8 @@ restated `20...80` satisfies on the day it is written.
   slider made them arithmetic across 2…12, and two arms of one of
   them then marked the wrong window as focused (#702).
   `LayoutSchematicPlacementTests` holds each schematic to what
-  its frame promises and
+  its frame promises (Scrolling's in
+  `LayoutSchematicScrollingTests`) and
   `LayoutSchematicPlacementScanTests` reds on the next copy.
   **Where a frame sorts the array into ZONES, guard the
   membership and not only the sizes**: Stack's two zone reads
@@ -1289,6 +1290,10 @@ producer taking it as a required argument (`ReachRowFoldTests`,
 and `ReachRowFoldFamilyTests` per family, which reds on a reach
 row left unfolded).
 
+**A diff row narrates its value through `SettingsValueReadout`**,
+whose totality net covers every model-path census key
+(`SettingsValueReadoutTests`).
+
 **The settings one control writes together are one row while they
 agree, folded where rows are narrated and never in the diff**
 (#2450). A group is a master over its members, by axis, in the
@@ -2040,7 +2045,7 @@ command has, save the ruled `help` (`CLIRouteTests`,
 - **A shortcut row's title is a verb phrase saying what pressing
   it does: "Show ‹panel name›" for a panel, using the panel's
   VoiceOver name; "Open" for a window** (#2245,
-  `JumpSideNameTests`). The pairing of a row with its panel's name
+  `JumpSideNameTests`, `ShortcutsPanelNounTests`). The pairing of a row with its panel's name
   is [config-vocabulary.md](config-vocabulary.md)'s ▸ shortcuts
   panel. Renaming a row leaves the verb INSIDE its panel ("Jump")
   alone.

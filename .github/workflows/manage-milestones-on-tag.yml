@@ -1,7 +1,7 @@
 name: Milestones on tag
 
 # A milestone says which release must not ship without those issues
-# (AGENTS.md §3). So a tag whose milestone still has open issues is a
+# (.claude/skills/file-issue/SKILL.md). So a tag whose milestone still has open issues is a
 # mistake, not an event to tidy up after: this refuses the tag rather
 # than rescheduling the work.
 #
