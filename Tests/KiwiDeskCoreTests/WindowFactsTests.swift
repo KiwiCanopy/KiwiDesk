@@ -59,7 +59,7 @@ struct WindowFactsTests {
             bundleID: nil,
             rules: FloatRules()
         )
-        #expect(reason == .panel)
+        #expect(reason == .raisedLayer)
     }
 
     @Test("a forced float asks detection nothing")

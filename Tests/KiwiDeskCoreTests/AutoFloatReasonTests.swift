@@ -16,7 +16,7 @@ struct AutoFloatReasonTests {
         var asked = false
         #expect(
             FloatDetection.autoFloatReason(
-                structural: true,
+                structural: .panel,
                 fixedSize: { false }
             ) {
                 asked = true
@@ -26,13 +26,13 @@ struct AutoFloatReasonTests {
         #expect(!asked)
         #expect(
             FloatDetection.autoFloatReason(
-                structural: false,
+                structural: nil,
                 fixedSize: { false }
             ) { true } == .rule
         )
         #expect(
             FloatDetection.autoFloatReason(
-                structural: false,
+                structural: nil,
                 fixedSize: { false }
             ) { false } == nil
         )
@@ -48,7 +48,7 @@ struct AutoFloatReasonTests {
         var asked = false
         #expect(
             FloatDetection.autoFloatReason(
-                structural: false,
+                structural: nil,
                 fixedSize: { true }
             ) {
                 asked = true

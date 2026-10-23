@@ -211,21 +211,32 @@ extension EventLoop {
         structural: Bool
     ) -> Bool {
         guard !ownProcess else { return structural }
-        return verdict.reason == .panel || verdict.reason == .accessoryApp
+        switch verdict.reason {
+        case .panel, .raisedLayer, .accessoryApp: return true
+        case .rule, .fixedSize, nil: return false
+        }
     }
 
     private func applyFloatVerdict(
-        _ verdict: FloatVerdict,
+        _ read: FloatVerdict,
         id: WindowID,
         pid: pid_t
     ) {
         let before = detectedFloating[id]
+        var verdict = read
         // A fixed size is judged at adoption (#2070): a sheet can
         // grey the zoom button for a moment, and a recheck never
         // floats a tiled window on that reading alone — save one
         // whose verdict a changed guess forgot (#2173).
         if verdict == .floats(.fixedSize), let before, before != verdict {
             return
+        }
+        // A raised layer likewise (#2572), and it tiles a verdict a
+        // changed guess forgot, so none stays nil while it is up:
+        // Brave lifted its main window to 999 with a permission
+        // prompt up (2026-10-23).
+        if verdict == .floats(.raisedLayer), before?.floats != true {
+            verdict = .tiles
         }
         detectedFloating[id] = verdict
         // A changed REASON alone is stored silently: the flag

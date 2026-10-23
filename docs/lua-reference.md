@@ -7399,6 +7399,13 @@ where the window has none. No window title is returned. Any other
 id is refused, an away window's included; ask `explain_app`
 instead.
 
+:::unreleased
+`detection.reason` can also read `raised_layer`: a standard
+window that floats because it opened above the normal window
+level, such as a picture-in-picture video. Like `panel`, it has
+no escapes.
+:::
+
 ### explain_app
 
 **Expects:** an app's bundle identifier.

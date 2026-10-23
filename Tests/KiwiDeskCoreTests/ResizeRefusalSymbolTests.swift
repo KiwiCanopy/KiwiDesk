@@ -157,7 +157,7 @@ struct ResizeRefusalSymbolTests {
     @Test("a Tile refusal draws a resolvable non-arrow")
     func tileRefusalSymbol() {
         for reason: AutoFloatReason in [
-            .rule, .panel, .accessoryApp, .fixedSize,
+            .rule, .panel, .raisedLayer, .accessoryApp, .fixedSize,
         ] {
             #expect(!reason.pillSymbol.contains("arrow"))
             #expect(

@@ -13,9 +13,10 @@ public enum FloatDetection {
     }
 
     /// Evaluates role/subrole and WindowServer layer: layer != 0
-    /// never tiles, even when the subrole momentarily reads
-    /// AXStandardWindow — apps mid-launch report unreliable
-    /// subroles.
+    /// never tiles at adoption, even when the subrole momentarily
+    /// reads AXStandardWindow — apps mid-launch report unreliable
+    /// subroles. A recheck never floats a tiled window on the
+    /// layer (#2572).
     public static func shouldFloat(
         role: String,
         subrole: String,
@@ -234,17 +235,25 @@ public enum FloatDetection {
     /// (#1810) — the one body every producer hands its facts to
     /// (#1933, #1883). Structure is asked before the rules, so a
     /// dialog a rule also matches reports `.panel` — deleting the
-    /// rule would not tile it.
+    /// rule would not tile it. A standard window the layer alone
+    /// floats reports `.raisedLayer` (#2572).
     public static func autoFloatReason(
         _ facts: WindowFacts,
         bundleID: String?,
         rules: FloatRules
     ) -> AutoFloatReason? {
-        let structural = shouldFloat(
-            role: facts.role,
-            subrole: facts.subrole,
-            layer: facts.layer ?? 0
-        )
+        let structural: AutoFloatReason? =
+            if shouldFloat(role: facts.role, subrole: facts.subrole) {
+                .panel
+            } else if shouldFloat(
+                role: facts.role,
+                subrole: facts.subrole,
+                layer: facts.layer ?? 0
+            ) {
+                .raisedLayer
+            } else {
+                nil
+            }
         return autoFloatReason(
             structural: structural,
             // Asked only where structure tiles: a standard window
@@ -269,11 +278,11 @@ public enum FloatDetection {
     /// Each is asked only where the one before tiles: the later
     /// ones cost a read.
     public static func autoFloatReason(
-        structural: Bool,
+        structural: AutoFloatReason?,
         fixedSize: () -> Bool,
         ruleMatches: () -> Bool
     ) -> AutoFloatReason? {
-        if structural { return .panel }
+        if let structural { return structural }
         if fixedSize() { return .fixedSize }
         return ruleMatches() ? .rule : nil
     }

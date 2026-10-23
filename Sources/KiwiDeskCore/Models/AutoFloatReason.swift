@@ -6,9 +6,13 @@ import Foundation
 public enum AutoFloatReason: Sendable, Equatable {
     /// A float rule matches the window.
     case rule
-    /// A dialog, sheet, panel or raised-layer window — or one of
+    /// A dialog, sheet or panel by its subrole — or one of
     /// KiwiDesk's own chrome windows.
     case panel
+    /// A standard window on a raised CGWindow layer: judged at
+    /// adoption, so a recheck never floats a tiled window on it
+    /// alone (#2572).
+    case raisedLayer
     /// The app runs with no Dock icon (accessory policy).
     case accessoryApp
     /// A standard window that cannot be resized — its zoom button
@@ -20,7 +24,7 @@ public enum AutoFloatReason: Sendable, Equatable {
     public var isGuess: Bool {
         switch self {
         case .accessoryApp, .fixedSize: true
-        case .rule, .panel: false
+        case .rule, .panel, .raisedLayer: false
         }
     }
 }

@@ -186,7 +186,13 @@ editing AX code:
   removal would read as a close (`ScreenSaverLayerWiringTests`).
   A fixed size (#2070) is judged at adoption: a recheck never
   floats a tiled window on a disabled zoom button alone, since a
-  sheet can grey it for a moment.
+  sheet can grey it for a moment. Judge a raised layer at
+  adoption too (#2572): a recheck may keep a raised-layer float
+  floating, but must never float a tiled window — or one whose
+  verdict a changed guess forgot — on `.raisedLayer`, and
+  structure keeps outranking a Float rule, whose label would
+  take a raised window's overlay status (#300,
+  `RaisedLayerLatchTests`).
 - **A float rule is read only through `FloatRules.parse` and
   spelled only through `FloatRules.rule(app:title:)` (#2345).**
   The engine, the profile reach and the Settings Float list all

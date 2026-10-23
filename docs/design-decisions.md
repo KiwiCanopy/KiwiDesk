@@ -5639,6 +5639,28 @@ floating-mode Space still floats every member through
 `EffectiveFloat`; that is the Space's layout, not a verdict about
 the window, and Tile does not reach it.
 
+:::unreleased
+*A raised layer is judged when the window is adopted*
+([#2572](https://github.com/KiwiCanopy/KiwiDesk/issues/2572)). A
+standard window that floats only because it sits above the normal
+window level — a picture-in-picture video, a mini player — has its
+own reason, `raised_layer`, apart from a dialog or panel's, and
+shares the panel's refusal sentence, since neither has a setting
+to change. A later re-check never floats a tiled window on that
+reason — Brave lifted its main window to the prompt's level each
+time it came forward with a site permission prompt open
+(2026-10-23), and the window floated and shrank on every lift. A
+Float rule that comes to match a tiled window while it is lifted
+floats it at the next re-check after the level drops. One way
+only: a window
+adopted floating keeps floating on that reason, or an app that
+misreports its subrole mid-launch would tile its panel once the
+subrole heals. The price is a window an app raises after KiwiDesk
+tiled it — a "float on top" toggle, or a level set a moment after
+the window opens: it stays tiled until it reopens or KiwiDesk
+restarts.
+:::
+
 **A grid's track sizes belong to positions, and outlive the
 column count (#763).** [Trade-off] A grid stores one unnormalised
 weight per column index and per row index, `1` an equal share and
