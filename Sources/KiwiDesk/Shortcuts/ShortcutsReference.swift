@@ -64,11 +64,7 @@ enum ShortcutsReferenceBuilder {
                     return nil
                 }
                 consumed.insert(binding.id)
-                let icon =
-                    cmd.icon.flatMap { $0.isEmpty ? nil : $0 }
-                    ?? directionalIcon(for: cmd.lua)
-                    ?? spaceFallbackIcon(for: cmd.lua)
-                    ?? verbIcon(for: cmd.lua)
+                let icon = icon(for: cmd)
                 let combo = glyphs(binding.combo)
                 return ShortcutRow(
                     id: cmd.lua,

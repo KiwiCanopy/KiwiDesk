@@ -4,6 +4,16 @@ import KiwiDeskCore
 /// Shortcut reference row glyphs and combo string formatting
 /// (`ShortcutsReferenceBuilder`, #820).
 extension ShortcutsReferenceBuilder {
+    /// A row's glyph: the command's own, else its direction, its
+    /// Space, or its verb. Every row the panel draws resolves to
+    /// one (#2530, `ShortcutRowSymbolTests`).
+    static func icon(for cmd: NavCommand) -> String? {
+        cmd.icon.flatMap { $0.isEmpty ? nil : $0 }
+            ?? directionalIcon(for: cmd.lua)
+            ?? spaceFallbackIcon(for: cmd.lua)
+            ?? verbIcon(for: cmd.lua)
+    }
+
     /// SF Symbol icon name for compass-direction navigation commands.
     static func directionalIcon(for lua: String) -> String? {
         guard !lua.contains("_space"),
@@ -56,6 +66,20 @@ extension ShortcutsReferenceBuilder {
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"
+        // The bars' show/hide (#2530): the Space Bar wears Settings'
+        // Bars symbol, the App Bar the strip along the screen's foot.
+        case KeybindingCatalog.toggleSpaceBar.lua:
+            return SettingsDestination.bars.symbol
+        case KeybindingCatalog.toggleAppBar.lua:
+            return "dock.rectangle"
+        // Track's own verbs: to the line before or after, a swap
+        // of two tracks (#2530).
+        case "KiwiDesk.move_to_track(\"prev\")":
+            return "arrow.backward.to.line"
+        case "KiwiDesk.move_to_track(\"next\")":
+            return "arrow.forward.to.line"
+        case "track.swap(\"prev\")", "track.swap(\"next\")":
+            return "rectangle.2.swap"
         default:
             break
         }
@@ -92,6 +116,11 @@ extension ShortcutsReferenceBuilder {
         "arrow.down.and.line.horizontal.and.arrow.up",
         "arrow.up.and.line.horizontal.and.arrow.down",
         "arrow.counterclockwise",
+        "arrow.up.left.and.arrow.down.right",
+        "dock.rectangle",
+        "arrow.backward.to.line",
+        "arrow.forward.to.line",
+        "rectangle.2.swap",
         "curlybraces",
         "rectangle.stack",
     ]
