@@ -75,7 +75,10 @@ def load(spec_path, root):
         fail("spec must be a non-empty JSON list", 64)
     for index, item in enumerate(spec):
         for key in ("file", "old", "new", "filter"):
-            if not isinstance(item.get(key), str) or not item[key]:
+            # An empty `new` is a deletion; every other key needs text.
+            if not isinstance(item.get(key), str) or (
+                not item[key] and key != "new"
+            ):
                 fail(f"mutation {index}: missing '{key}'", 64)
         item.setdefault("name", f"mutation {index}")
         path = root / item["file"]
