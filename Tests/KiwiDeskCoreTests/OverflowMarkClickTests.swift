@@ -27,6 +27,8 @@ struct OverflowMarkClickTests {
         let core: KiwiCore
         let space: SpaceID
         var clock: TimeInterval = 100
+        /// The morph's landings, run by `land()` rather than a timer.
+        var landings: [@MainActor () -> Void] = []
 
         init() {
             core = makeTestCore(
@@ -64,6 +66,22 @@ struct OverflowMarkClickTests {
                 CGRect(x: 0, y: 0, width: 1440, height: 900)
             }
             peek.now = { [unowned self] in self.clock }
+            peek.panel.land = { [unowned self] _, body in
+                self.landings.append(body)
+            }
+        }
+
+        /// Lands every morph in flight.
+        func land() {
+            let due = landings
+            landings = []
+            due.forEach { $0() }
+        }
+
+        /// Whether a morph's motion is on the panel's stage.
+        var stageMorphs: Bool {
+            peek.panel.stage.layer?.animationKeys()?
+                .contains(BarMotion.morphKey) == true
         }
 
         var peek: BarPeek { core.shelves.peek }
@@ -177,8 +195,18 @@ struct OverflowMarkClickTests {
         #expect(panel.body.hovered == 1)
         #expect(panel.morphKey(126))
         #expect(panel.body.hovered == 0)
-        #expect(!panel.morphKey(0))
         #expect(panel.morphKey(53))
+        #expect(rig.peek.shown == nil)
+    }
+
+    /// A key the list does not use closes it rather than beeping:
+    /// the user is typing for the app beneath.
+    @Test("Any other key closes the list")
+    func otherKeyCloses() throws {
+        let rig = Rig()
+        defer { rig.close() }
+        try rig.click()
+        #expect(rig.peek.panel.morphKey(0))
         #expect(rig.peek.shown == nil)
     }
 
@@ -196,6 +224,10 @@ struct OverflowMarkClickTests {
         panel.headerPressed(1)
         #expect(rig.peek.shown != nil)
         rig.clock += 5
+        // Past the interval a second press still keeps it: the click
+        // count is a gate of its own.
+        panel.headerPressed(2)
+        #expect(rig.peek.shown != nil)
         panel.headerPressed(1)
         #expect(rig.peek.shown == nil)
     }
@@ -236,16 +268,46 @@ struct OverflowMarkClickTests {
     }
 
     /// A mark that is gone leaves nothing to shrink into: it is
-    /// ordered out before its list closes, so the list fades.
-    @Test("A list whose mark is gone closes with the mark hidden")
+    /// ordered out before its list closes, so the list fades and no
+    /// shrink plays on the stage. Reads the clip, so it asks for
+    /// the growth Reduce Motion would replace.
+    @Test(
+        "A list whose mark is gone fades rather than shrinking",
+        .enabled(
+            if: !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        )
+    )
     func goneMarkFades() throws {
         let rig = Rig()
         defer { rig.close() }
         try rig.click()
+        rig.land()
+        try #require(!rig.stageMorphs)
         let view = try rig.overlay.view
         rig.core.overflowMarks.sync([])
         #expect(rig.peek.shown == nil)
         #expect(view.window?.isVisible != true)
+        #expect(!rig.stageMorphs)
         #expect(rig.peek.panel.panel?.ignoresMouseEvents == true)
+    }
+
+    /// The pill comes back only as the shrink lands, taking the
+    /// pointer again; the list is then gone.
+    @Test("The pill returns when the close lands")
+    func pillReturnsAtTheLanding() throws {
+        let rig = Rig()
+        defer { rig.close() }
+        try rig.click()
+        rig.land()
+        let markPanel = try #require(try rig.overlay.panel)
+        #expect(markPanel.ignoresMouseEvents)
+        #expect(rig.peek.panel.morphKey(53))
+        #expect(markPanel.ignoresMouseEvents)
+        #expect(rig.peek.panel.morph != nil)
+        rig.land()
+        #expect(!markPanel.ignoresMouseEvents)
+        #expect(markPanel.alphaValue == 1)
+        #expect(rig.peek.panel.morph == nil)
+        #expect(rig.peek.panel.panel?.isVisible != true)
     }
 }

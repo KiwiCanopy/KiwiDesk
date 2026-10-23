@@ -117,13 +117,17 @@ public final class OverflowMarkManager {
         each(id) { place($0, frame: windowFrame) }
     }
 
-    /// Places `overlay` on its anchor framed `frame`; an anchor that
-    /// moved closes the list open on its mark (#2563), which would
-    /// otherwise stand over a window no longer there.
+    /// Places `overlay` on its anchor framed `frame`; a mark that
+    /// moved on screen closes the list open on it (#2563), which
+    /// would otherwise stand over a window no longer there. It reads
+    /// the mark's placed frame, since its channels hand frames that
+    /// differ while the mark stays put.
     private func place(_ overlay: OverflowMarkOverlay, frame: CGRect) {
-        let was = overlay.lastFrame
+        let was = overlay.panel?.frame
         overlay.update(frame: frame)
-        if let was, was != frame, peek?.shown?.view === overlay.view {
+        if let was, was != overlay.panel?.frame,
+            peek?.shown?.view === overlay.view
+        {
             peek?.dismiss()
         }
     }
@@ -146,8 +150,9 @@ public final class OverflowMarkManager {
     /// Removes and hides every mark.
     func clear() {
         for overlay in overlays.values {
-            if peek?.shown?.view === overlay.view { peek?.dismiss() }
+            // Hidden first, as in `sync`, so the list fades.
             overlay.hide()
+            if peek?.shown?.view === overlay.view { peek?.dismiss() }
         }
         overlays = [:]
     }

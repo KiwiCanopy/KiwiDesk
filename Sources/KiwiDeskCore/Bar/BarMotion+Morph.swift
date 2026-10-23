@@ -65,6 +65,12 @@ extension BarMotion {
             break
         }
         let span = opening ? morphOpen : morphClose
+        // Replaces a peek fade still running, which a bare write
+        // would leave to finish over it.
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0
+            panel.animator().alphaValue = 1
+        }
         panel.alphaValue = 1
         if opening { anchor?.alphaValue = 0 }
         let clipLayer = parts.stage
@@ -90,9 +96,14 @@ extension BarMotion {
         clipLayer.masksToBounds = true
         clipLayer.add(clip, forKey: morphKey)
         let half = span / 2
+        // A fade in flight continues from where it stands.
+        let shown = { (layer: CALayer, rest: Float) -> Float in
+            layer.animationKeys()?.contains(morphKey) == true
+                ? layer.presentation()?.opacity ?? rest : rest
+        }
         parts.rows.add(
             morphFade(
-                from: opening ? 0 : 1,
+                from: shown(parts.rows, opening ? 0 : 1),
                 to: opening ? 1 : 0,
                 begin: opening ? half : 0,
                 span: half
@@ -101,7 +112,7 @@ extension BarMotion {
         )
         parts.markInk.add(
             morphFade(
-                from: opening ? 1 : 0,
+                from: shown(parts.markInk, opening ? 1 : 0),
                 to: opening ? 0 : 1,
                 begin: 0,
                 span: span
@@ -110,14 +121,16 @@ extension BarMotion {
         )
         parts.listInk.add(
             morphFade(
-                from: opening ? 0 : 1,
+                from: shown(parts.listInk, opening ? 0 : 1),
                 to: opening ? 1 : 0,
                 begin: 0,
                 span: span
             ),
             forKey: morphKey
         )
-        return opening ? span : settling(span, bounce: 0)
+        // The spring runs past its perceptual length; the landing
+        // waits it out.
+        return settling(span, bounce: 0)
     }
 
     /// Ends a morph: every part stands at rest, the clip open.

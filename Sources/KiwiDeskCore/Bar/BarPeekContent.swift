@@ -42,7 +42,8 @@ enum BarPeekSource: Equatable {
     /// Whether the peek grows out of its anchor and is held open by
     /// a click alone (#2563): an overflow mark's list. Its hover
     /// opens nothing, and it holds until a close, never on the
-    /// pointer leaving.
+    /// pointer leaving. Three behaviours on one flag: a source that
+    /// wants only one of them splits it first.
     var morphsFromAnchor: Bool {
         if case .run = self { return true }
         return false

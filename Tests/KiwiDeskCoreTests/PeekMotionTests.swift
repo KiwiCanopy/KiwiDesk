@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -41,6 +42,39 @@ struct PeekMotionTests {
         )
     }
 
+    /// The morph reads the switch live: off, it snaps the list in
+    /// and the pill out at once, and lands with no wait. Writes the
+    /// process-wide pace synchronously and puts it back.
+    @Test("Off, the morph snaps and lands at once")
+    @MainActor
+    func morphReadsTheSwitch() {
+        let was = BarMotion.peekMotion
+        defer { BarMotion.peekMotion = was }
+        BarMotion.peekMotion = false
+        let panel = NSPanel()
+        let anchor = NSPanel()
+        panel.alphaValue = 0
+        let parts = BarPeekMorphParts(
+            stage: CALayer(),
+            rows: CALayer(),
+            markInk: CALayer(),
+            listInk: CALayer()
+        )
+        let span = BarMotion.playMorph(
+            parts,
+            panel: panel,
+            anchor: anchor,
+            pill: CGRect(x: 0, y: 0, width: 18, height: 18),
+            pillRadius: 9,
+            listRadius: 11,
+            opening: true
+        )
+        #expect(span == 0)
+        #expect(panel.alphaValue == 1)
+        #expect(anchor.alphaValue == 0)
+        #expect(parts.stage.animationKeys() == nil)
+    }
+
     @Test("The setting defaults on and round-trips as on_peek")
     func settingRoundTrips() throws {
         let absent = try JSONDecoder().decode(
@@ -63,6 +97,9 @@ struct PeekMotionTests {
     @Test("The verb writes the setting")
     @MainActor
     func verbWrites() {
+        // The bar pass writes the process-wide pace; put it back.
+        let was = BarMotion.peekMotion
+        defer { BarMotion.peekMotion = was }
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
@@ -74,5 +111,6 @@ struct PeekMotionTests {
         )
         #expect(response.isSuccess)
         #expect(!core.tiler.settings.animations.onPeek)
+        #expect(!BarMotion.peekMotion)
     }
 }

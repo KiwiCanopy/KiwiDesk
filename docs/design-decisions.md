@@ -4150,11 +4150,9 @@ second click of a double-click is not a close, so a double-click
 leaves the list open (#2063: a double-click stays harmless). The
 list stays open when the pointer leaves it, because a held list
 that closes on leave is hover again; it closes on a click outside
-it, a pick, Escape, and anything that makes it stale — the end's
-count changing, a scroll step, the anchor window moving, a Space
-or Desktop switch, the shelf standing down. It takes the keyboard
-while open, for Escape and the arrow keys over its rows, without
-activating KiwiDesk. Every group wears its app's icon, even when
+it, a pick, Escape, and anything that makes it stale. It takes the
+keyboard while open, for Escape and the arrow keys over its rows,
+without activating KiwiDesk. Every group wears its app's icon, even when
 every row is one app: a Space Bar glyph shows its app beside the
 peek, and the mark shows nothing but the count (owner, device).
 VoiceOver reads it as a button naming its direction and count,
@@ -4172,10 +4170,9 @@ scale: an 18 pt pill scaled up squashes its count and rim, and a
 list scaled from it warps rows until they cannot be read, which is
 also why a genie was refused, besides meaning "minimized to the
 Dock" and needing a private API. One critically damped spring with
-no overshoot, about 200 ms open and 160 ms closed, fixed rather
-than following `reveal_duration`: a list is a label, not a bar
-reveal. Under Reduce Motion nothing grows — the pill fades out and
-the list fades in where it rests, the "+n" holding its place — so
+no overshoot, about 200 ms open and 160 ms closed. Under Reduce
+Motion nothing grows — the pill fades out and the list fades in
+where it rests, the "+n" holding its place — so
 the mark's entry and its list are the only motion it has. Reduce
 Motion is a cross-fade, not an instant open, so the peeks have one
 off switch of their own, `animations.on_peek`: off, the list and
@@ -15749,6 +15746,13 @@ hover ink, so a bar's hover means one thing wherever it shows.
 The panel takes the mouse yet never activates, so a click on a
 row leaves the app the user is in frontmost until the pick moves
 the focus; it is never key, so Escape is not one of its exits.
+
+:::unreleased
+The overflow mark's list is the one exception (#2563): held open by
+a click and standing over a window rather than a bar, it takes the
+keyboard without activating KiwiDesk, so Escape closes it and the
+arrow keys walk its rows.
+:::
 
 The native menu stays as the peek's twin where the peek cannot
 reach. VoiceOver's press on a glyph opens it: the peek is hidden

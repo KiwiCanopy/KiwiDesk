@@ -927,8 +927,9 @@ Obligations:
   it (`OverflowMarkClickTests` ▸ `hoverOpensNothing`,
   `otherHoverLeavesIt`). It closes on the peek's own closes plus its
   header — never the second press of the double-click that opened it
-  (`BarPeekMorph.headerCloses`) — Escape, the anchor window moving,
-  a Desktop switch and KiwiVision turning on or off, the last two
+  (`BarPeekMorphTests` ▸ `headerClosesPastTheDoubleClick`) — Escape,
+  the anchor window moving, a Desktop switch and KiwiVision turning
+  on or off, the last two
   through the one `BarPeek.dismissHeld` (`OverflowMarkClickTests`).
   The morph is the panel's opening motion (`BarPeekPanel+Morph`):
   the panel takes the list's resting frame, which holds the pill,
@@ -936,10 +937,12 @@ Obligations:
   the panel is never resized per frame and the glass moves by its
   host; the mark only hides its own panel and never draws a list. A
   mark the sync drops is hidden BEFORE its list closes, so the list
-  fades rather than shrinking into nothing (`goneMarkFades`). The
+  fades rather than shrinking into nothing (`OverflowMarkClickTests`
+  ▸ `goneMarkFades`). The
   panel is key-capable for this source alone, keyed a turn later
   through the peek's `schedule`, so Escape and the arrows reach its
-  rows without activating KiwiDesk (`keysOnTheList`).
+  rows without activating KiwiDesk (`OverflowMarkClickTests` ▸
+  `keysOnTheList`).
 - **Every peek row is its window's button, picked through the
   one `pickBarRow` a window menu row takes, which does what
   clicking that window's bar item does** (#1946 amendment 2) —

@@ -116,12 +116,12 @@ extension KiwiCore {
         guard next != before else { return }
         let old = old ?? visionLook
         vision.active = next
-        // The plates re-stack around the focus, over a list a click
-        // held open (#2563).
-        shelves.peek.dismissHeld()
         if before.isOn == next.isOn {
             visionLookChanged(from: old, to: visionLook)
         } else {
+            // The plates stand up or down around the focus, over a
+            // list a click held open (#2563).
+            shelves.peek.dismissHeld()
             if old.listedApps != visionLook.listedApps {
                 vision.forgetListedWindows()
             }

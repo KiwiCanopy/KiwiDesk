@@ -40,7 +40,14 @@ final class BarPeekPanel {
     /// The pointer on screen: the peek's `pointerOnScreen`, wired by
     /// it, so a returning anchor re-reads its hover through the
     /// peek's seam.
-    var pointer: @MainActor () -> CGPoint = { CGPoint(x: -1e6, y: -1e6) }
+    var pointer: @MainActor () -> CGPoint = { BarPeekPanel.offScreen }
+    /// A point on no screen: the pointer before the peek wires it.
+    static let offScreen = CGPoint(x: -1e6, y: -1e6)
+    /// Runs a morph's landing after its span — a timer; a test
+    /// drains it by hand.
+    var land: BarPeekSchedule = { span, body in
+        BarMotion.afterReveal(span, body)
+    }
     /// The grown list's header pressed to close it (#2563).
     var onClose: @MainActor () -> Void = {}
 
@@ -289,6 +296,8 @@ final class BarPeekPanel {
         root.wantsLayer = true
         root.setAccessibilityElement(false)
         stage.wantsLayer = true
+        // The morph fades the rows on the body's own layer.
+        body.wantsLayer = true
         solid.wantsLayer = true
         solid.layer?.masksToBounds = true
         root.addSubview(stage)

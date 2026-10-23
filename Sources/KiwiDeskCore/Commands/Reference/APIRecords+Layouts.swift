@@ -41,8 +41,8 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_on_peek": APIRecord(
-            "Enables or disables the bars' peeks: the hover fade and "
-                + "the overflow list's growth.",
+            "Enables or disables the bars' peek motion: the hover "
+                + "fade and the overflow list's growth.",
             .boolean("enabled")
         ),
         "set_expand_duration": APIRecord(

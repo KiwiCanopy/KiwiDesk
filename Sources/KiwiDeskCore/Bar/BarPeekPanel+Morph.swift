@@ -111,7 +111,7 @@ extension BarPeekPanel {
         )
         let token = UUID()
         opening = token
-        BarMotion.afterReveal(span) { [weak self] in
+        land(span) { [weak self] in
             guard let self, self.opening == token else { return }
             self.opening = nil
             BarMotion.endMorph(parts)
@@ -155,13 +155,16 @@ extension BarPeekPanel {
             listRadius: BarPeekBody.Metrics.cornerRadius,
             opening: false
         )
-        BarMotion.afterReveal(span, land)
+        self.land(span, land)
     }
 
     /// Ends a grown list at once — another peek shows in its place.
     func dropMorph() {
         guard let morph else { return }
         leaving = nil
+        // Clearing `takesKey` resigns nothing: the peek showing next
+        // must not keep the keyboard the list took.
+        if panel?.isKeyWindow == true { panel?.orderOut(nil) }
         endMorph()
         morph.anchor?.setMorphed(false, pointer: pointer())
     }
@@ -180,7 +183,7 @@ extension BarPeekPanel {
     }
 
     /// A key on the grown list: Escape closes it, the arrows walk
-    /// its rows, Return picks the lifted one.
+    /// its rows, Return picks the lifted one; any other closes it.
     func morphKey(_ code: UInt16) -> Bool {
         guard morph != nil, drawn != nil else { return false }
         switch code {
@@ -188,7 +191,9 @@ extension BarPeekPanel {
         case 125: body.stepHover(by: 1)
         case 126: body.stepHover(by: -1)
         case 36, 76: body.activateHovered()
-        default: return false
+        // Any other key closes the list rather than vanishing into a
+        // beep: the user is typing for the app beneath.
+        default: onClose()
         }
         return true
     }

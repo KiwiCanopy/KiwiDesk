@@ -4635,8 +4635,9 @@ room.
 Each end of a zone that hides windows shows a "+n" overflow mark
 on its edge window, counting that end's hidden windows. Clicking
 the mark opens the list of them, nearest first; clicking one
-focuses it, which scrolls it in. Escape, a click on the list's
-header or a click outside closes the list. The mark takes no
+focuses it, which scrolls it in. The arrow keys and Return walk
+and pick its rows; Escape or any other key, a click on the list's
+header or a click outside closes it. The mark takes no
 room, so no window resizes when it appears.
 
 In Stack, `focus` and `swap` along a zone that hides windows

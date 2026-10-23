@@ -77,8 +77,11 @@ struct BarPeekMorphTests {
         #expect(count.maxY == list.height)
     }
 
-    @Test("A side end grows inward, centred vertically on the mark")
-    func sideEndIsCentredVertically() {
+    /// The header sits on the pill on a side end too, so the count
+    /// holds its place and a double-click's second press lands on
+    /// the header, never a row (#2063).
+    @Test("A side end grows inward, its header on the pill")
+    func sideEndHangsFromThePill() {
         let pill = CGRect(x: 882, y: 391, width: 18, height: 18)
         let list = BarPeekMorph.listFrame(
             size: size,
@@ -87,7 +90,14 @@ struct BarPeekMorphTests {
             room: room
         )
         #expect(list.maxX == pill.maxX)
-        #expect(list.midY == pill.midY)
+        #expect(list.maxY == pill.maxY)
+        let count = BarPeekMorph.count(
+            width: pill.width,
+            pill: pill,
+            list: list,
+            edge: .right
+        )
+        #expect(count.offsetBy(dx: list.minX, dy: list.minY) == pill)
         let left = CGRect(x: 100, y: 391, width: 18, height: 18)
         #expect(
             BarPeekMorph.listFrame(
@@ -101,11 +111,14 @@ struct BarPeekMorphTests {
 
     @Test("The list's height stops at the room's far edge")
     func heightStopsAtTheRoom() {
+        // Pills set in from the room's edges, so a formula reading
+        // the room's height alone answers differently.
+        let high = CGRect(x: 480, y: 500, width: 40, height: 18)
         #expect(
-            BarPeekMorph.maxHeight(pill: topPill, edge: .top, room: room)
-                == topPill.maxY - room.minY
+            BarPeekMorph.maxHeight(pill: high, edge: .top, room: room)
+                == high.maxY - room.minY
         )
-        let pill = CGRect(x: 480, y: 100, width: 40, height: 18)
+        let pill = CGRect(x: 480, y: 300, width: 40, height: 18)
         #expect(
             BarPeekMorph.maxHeight(pill: pill, edge: .bottom, room: room)
                 == room.maxY - pill.minY

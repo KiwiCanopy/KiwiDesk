@@ -103,7 +103,7 @@ extension BarPeek {
         made.onClose = { [weak self] in self?.dismiss() }
         made.now = { [weak self] in self?.now() ?? 0 }
         made.pointer = { [weak self] in
-            self?.pointerOnScreen() ?? CGPoint(x: -1e6, y: -1e6)
+            self?.pointerOnScreen() ?? BarPeekPanel.offScreen
         }
         return made
     }

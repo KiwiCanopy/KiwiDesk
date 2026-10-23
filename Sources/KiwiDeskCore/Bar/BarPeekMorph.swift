@@ -19,9 +19,11 @@ protocol BarPeekMorphAnchor: NSView {
 
 /// Where the list the pill grows into stands (#2563 ▸ Ruling), in
 /// AppKit screen coordinates: its outer edge flush with the pill's,
-/// growing inward into the run; along the edge centred on the
-/// pill and clamped to the room. Pure, so its arithmetic is
-/// assertable.
+/// growing inward into the run; on a top or bottom end centred on
+/// the pill along it, on a side end hanging from the pill's top so
+/// the header and its count sit on the pill — a list centred there
+/// would put a row under a double-click's second press (#2063).
+/// Clamped to the room. Pure, so its arithmetic is assertable.
 enum BarPeekMorph {
     /// The header strip's depth: the pill's, so the count holds
     /// its place.
@@ -70,7 +72,7 @@ enum BarPeekMorph {
             )
         case .left, .right:
             frame.origin.y = clamped(
-                pill.midY - size.height / 2,
+                pill.maxY - size.height,
                 size.height,
                 room.minY,
                 room.maxY

@@ -21,9 +21,7 @@ extension BarPeek {
         fades: Bool
     ) {
         guard let window = anchor.view?.window else { return }
-        guard anchor.source.morphsFromAnchor,
-            let grown = anchor.view as? any BarPeekMorphAnchor
-        else {
+        guard anchor.source.morphsFromAnchor else {
             panel.show(
                 content,
                 shelf: shelf,
@@ -33,6 +31,14 @@ extension BarPeek {
                 visible: visibleArea(window),
                 fades: fades
             )
+            return
+        }
+        // The flag is the one gate; an anchor that cannot grow its
+        // list is a wiring defect, never a quiet fall back to a
+        // hover peek the flag's other readers would hold open.
+        guard let grown = anchor.view as? any BarPeekMorphAnchor else {
+            assertionFailure("a morphing source on a non-morph anchor")
+            dismiss()
             return
         }
         panel.showMorph(
