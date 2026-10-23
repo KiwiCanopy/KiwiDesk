@@ -34,7 +34,8 @@ struct ShortcutsJumpReadoutTests {
     ) throws -> CGFloat {
         let bar = ShortcutsJumpBar(
             tracker: ShortcutsJumpTracker(),
-            readout: readout
+            readout: readout,
+            groups: ShortcutsJumpGroup.allCases
         ) { _ in }
         .environment(\.settingsWidth, band)
         .frame(width: width)

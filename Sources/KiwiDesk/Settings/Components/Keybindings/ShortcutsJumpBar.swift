@@ -14,6 +14,8 @@ struct ShortcutsJumpBar: View {
     /// The same sentence with the layer's full name, for
     /// VoiceOver; nil speaks what is drawn.
     var spokenReadout: String? = nil
+    /// The chips drawn, in page order.
+    let groups: [ShortcutsJumpGroup]
     let jump: (ShortcutsJumpGroup) -> Void
     @Environment(\.settingsWidth) private var width
 
@@ -84,7 +86,7 @@ struct ShortcutsJumpBar: View {
 
     private var chips: some View {
         FlowLayout(spacing: Self.spacing) {
-            ForEach(ShortcutsJumpGroup.allCases, id: \.self) { group in
+            ForEach(groups, id: \.self) { group in
                 ruledChip(group)
             }
         }

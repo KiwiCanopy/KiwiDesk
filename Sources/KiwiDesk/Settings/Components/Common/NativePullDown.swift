@@ -4,10 +4,27 @@ import SwiftUI
 
 /// One row of a `NativePullDown` menu.
 struct PullDownItem {
+    /// A pickable row, a section header, or a divider.
+    enum Kind {
+        case item
+        case header
+        case divider
+    }
+
     let title: String
     var subtitle: String = ""
     var enabled = true
+    var checked = false
+    var kind: Kind = .item
     var action: () -> Void = {}
+
+    static func header(_ title: String) -> PullDownItem {
+        PullDownItem(title: title, kind: .header)
+    }
+
+    static var divider: PullDownItem {
+        PullDownItem(title: "", kind: .divider)
+    }
 }
 
 /// A bordered action button that opens a native menu under itself
@@ -44,6 +61,16 @@ struct NativePullDown<Label: View>: View {
         menu.autoenablesItems = false
         menu.addItem(.sectionHeader(title: header))
         for (index, item) in target.items.enumerated() {
+            switch item.kind {
+            case .header:
+                menu.addItem(.sectionHeader(title: item.title))
+                continue
+            case .divider:
+                menu.addItem(.separator())
+                continue
+            case .item:
+                break
+            }
             let entry = NSMenuItem(
                 title: item.title,
                 action: #selector(PullDownTarget.fire(_:)),
@@ -52,6 +79,7 @@ struct NativePullDown<Label: View>: View {
             entry.target = target
             entry.tag = index
             entry.isEnabled = item.enabled
+            entry.state = item.checked ? .on : .off
             // Before 14.4 a row shows its title alone.
             if !item.subtitle.isEmpty, #available(macOS 14.4, *) {
                 entry.subtitle = item.subtitle

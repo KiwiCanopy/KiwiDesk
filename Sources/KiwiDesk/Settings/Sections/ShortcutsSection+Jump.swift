@@ -9,7 +9,10 @@ extension ShortcutsSection {
         ShortcutsJumpBar(
             tracker: jumpTracker,
             readout: editingReadout(ShortcutsJumpBar.shownName(selected)),
-            spokenReadout: editingReadout(selected)
+            spokenReadout: editingReadout(selected),
+            groups: ShortcutsJumpGroup.shown(
+                luaDrawerOffered: offersAdvancedDrawer
+            )
         ) { group in
             jump(to: group, proxy: proxy)
         }
@@ -35,6 +38,7 @@ extension ShortcutsSection {
     ) {
         jumpTracker.jump(to: group)
         if group == .gestures { gesturesExpanded = true }
+        if group == .luaBindings { advancedExpanded = true }
         withAnimation(
             reduceMotion
                 ? nil

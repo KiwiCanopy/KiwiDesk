@@ -140,7 +140,11 @@ struct LayerRowWriterCensusTests {
             + "RecorderCoordinator.swift":
             (1, "the recorder's steal: removes a combo from its holder"),
         "KiwiDesk/Settings/Components/Lua/AdvancedLuaGroup.swift":
-            (1, "custom rows, which are no navigation action"),
+            (
+                2,
+                "custom rows, which are no navigation action; the "
+                    + "editor's body reaches one row's Lua by id (#2544)"
+            ),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingAppGroup.swift":
             (1, "application rows, which are no navigation action"),
         "KiwiDeskCore/Keys/KeybindingMerge.swift":

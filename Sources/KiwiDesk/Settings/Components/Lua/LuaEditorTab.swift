@@ -158,6 +158,8 @@ struct LuaEditorTab: View {
 /// Monospaced text editor wrapped around NSTextView (`gui.md`, #812).
 struct LuaSourceEditor: NSViewRepresentable {
     @Binding var text: String
+    /// What VoiceOver calls the text.
+    var spokenName = "init.lua"
 
     func makeCoordinator() -> Coordinator {
         Coordinator(text: $text)
@@ -180,7 +182,7 @@ struct LuaSourceEditor: NSViewRepresentable {
         // (gui.md, #812). The FILENAME verbatim, not a new noun:
         // a translatable third name for the config file is
         // Family C drift (localization audit 2026-08-24).
-        textView.setAccessibilityLabel("init.lua")
+        textView.setAccessibilityLabel(spokenName)
         return scroll
     }
 
@@ -191,7 +193,7 @@ struct LuaSourceEditor: NSViewRepresentable {
         guard
             let textView = scroll.documentView as? NSTextView
         else { return }
-        textView.setAccessibilityLabel("init.lua")
+        textView.setAccessibilityLabel(spokenName)
         guard textView.string != text else { return }
         textView.string = text
     }

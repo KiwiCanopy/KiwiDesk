@@ -10764,9 +10764,11 @@ can't enumerate them at runtime, so every symbol picker ships
 its own list. Ours is curated *with search tags* ("mail" finds
 `envelope`), which searches better than a raw dump of ~6,000
 names ever could. The full catalog stays reachable: any valid
-SF Symbol name typed into the search appears as a result, and
-any single character (incl. emoji) works via "Use as text".
-One `IconPicker` serves layer icons and space icons. (#68 §6.4)
+SF Symbol name typed into the search appears as a result, and,
+where the caller takes text, any single character (incl. emoji)
+works via "Use as text". One `IconPicker` serves layer icons,
+space icons and a Lua binding's symbol, the last narrowed to
+symbols (below). (#68 §6.4)
 
 **Browsing is tabbed (Symbols first, every caller); search is
 global; every open starts in one resting shape.** The picker's
@@ -10792,6 +10794,15 @@ popover closes — a choice, the clear button or a click-away alike
 (#1357) — so no picker reopens on a filtered view the user did not
 ask for (`IconPickerRestingShapeTests`), and every popover holding
 a per-open search takes that same dismissal-edge hook.
+
+**A shortcut's symbol picks from symbols alone.** That rule is
+about the resting TAB; a caller whose value must be an SF Symbol
+narrows the VOCABULARY instead (#2544, `symbolsOnly`): a Lua
+binding's `symbol` that names no symbol draws `</>` and raises a
+Config Issue, so an Emoji tab, a "Use as text" result or an emoji
+in Recents there would offer a choice that only produces that
+warning. They are removed, not greyed — no mode turns them on —
+and Recents stays one list, read through the filter.
 
 **The picker button and its clear control.** The button shows
 a glyph-sized placeholder when no icon is set, never a

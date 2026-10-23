@@ -6080,6 +6080,10 @@ shortcut stays in its own section whatever its group.
 [`shortcut.list_groups`](#shortcutlist_groups) lists the names in
 use.
 
+A row in Settings ▸ Shortcuts & Gestures ▸ Lua bindings sets the
+same three fields for a shortcut Settings made. A shortcut
+`init.lua` binds is not listed there.
+
 **Example:**
 
 ```lua

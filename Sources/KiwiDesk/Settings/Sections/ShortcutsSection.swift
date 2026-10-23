@@ -14,7 +14,7 @@ struct ShortcutsSection: View {
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
     @ObservedObject var model: SettingsModel
-    @State private var advancedExpanded = false
+    @State var advancedExpanded = false
     /// Lifted so the Mouse & trackpad chip opens the card (#1520);
     /// still shut on every visit.
     @State var gesturesExpanded = false
@@ -191,7 +191,7 @@ struct ShortcutsSection: View {
         model.hasCustomLua || mode == .powerUser
     }
 
-    private var offersAdvancedDrawer: Bool {
+    var offersAdvancedDrawer: Bool {
         offersAdvancedDrawer(in: model.settingsMode)
     }
 
@@ -221,6 +221,8 @@ struct ShortcutsSection: View {
             }
             .padding(.top, 8)
         }
+        // Its jump chip's anchor (#2544).
+        .reportsSectionFrame(SettingsCatalog.shortcuts.luaBindings.control)
     }
 
     private var advancedDrawerCaption: String {
