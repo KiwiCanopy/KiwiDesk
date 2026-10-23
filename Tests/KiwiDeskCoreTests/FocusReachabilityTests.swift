@@ -191,7 +191,7 @@ struct TrackFocusReachabilityTests {
         )
         // wrap_focus defaults on; a wrap edge would reach a
         // window a broken adjacent step stranded.
-        core.execute("track.set_wrap_focus", args: [.bool(false)])
+        core.execute("set_focus_wrap", args: [.string("off")])
         return SpaceID("1")
     }
 
@@ -209,7 +209,7 @@ struct TrackFocusReachabilityTests {
         )
         // wrap_focus defaults on; a wrap edge would reach a
         // window a broken adjacent step stranded.
-        core.execute("track.set_wrap_focus", args: [.bool(false)])
+        core.execute("set_focus_wrap", args: [.string("off")])
         let space = SpaceID("1")
         core.state.workspaces.withSpace(space) {
             $0.trackBreaks = [WindowID(1)]

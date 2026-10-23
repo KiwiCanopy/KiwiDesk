@@ -82,6 +82,9 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+NavigateCommand.swift": (
             .slots, "navigation is geometric over shown regions"
         ),
+        "KiwiCore+FocusEdge.swift": (
+            .slots, "the focus wrap's landing is a navigation (#2493)"
+        ),
         "KiwiCore+ResizeScrollSlot.swift": (
             .slots, "the press measures the drawn slot"
         ),
@@ -107,6 +110,7 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+Drag.swift",
         "KiwiCore+DragMove.swift",
         "KiwiCore+NavigateCommand.swift",
+        "KiwiCore+FocusEdge.swift",
         "KiwiCore+TrackNavigate.swift",
         "KiwiCore+SwapCommand.swift",
     ]

@@ -89,7 +89,7 @@ struct TrackNavigateTests {
         // Two tracks: [1] [2, 3].
         setHeads(core, space: space, heads: [WindowID(2)])
         // wrap_focus defaults on; this pins the dead end.
-        core.execute("track.set_wrap_focus", args: [.bool(false)])
+        core.execute("set_focus_wrap", args: [.string("off")])
         #expect(
             core.execute("focus", args: [.string("down")])
                 .isSuccess
@@ -112,7 +112,7 @@ struct TrackNavigateTests {
             focus: WindowID(3)
         )
         setHeads(core, space: space, heads: [WindowID(2)])
-        core.execute("track.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(
             core.execute("focus", args: [.string("down")])
                 .isSuccess
@@ -126,7 +126,7 @@ struct TrackNavigateTests {
     func wrapAcrossTracks() {
         let core = makeCore()
         _ = makeTrackSpace(core, windows: 3, focus: WindowID(3))
-        core.execute("track.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(
             core.execute("focus", args: [.string("right")])
                 .isSuccess
@@ -138,7 +138,7 @@ struct TrackNavigateTests {
     func swapNeverWraps() {
         let core = makeCore()
         _ = makeTrackSpace(core, windows: 3, focus: WindowID(3))
-        core.execute("track.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(
             !core.execute("swap", args: [.string("right")])
                 .isSuccess

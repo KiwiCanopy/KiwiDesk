@@ -94,6 +94,8 @@ public struct Profile: Codable, Sendable, Equatable {
     public var spaceHistory: SpaceHistoryKind?
     /// Sparse layout-cycle override (#453); nil follows the base.
     public var modeCycle: [LayoutMode]?
+    /// Sparse focus-wrap override (#2493); nil follows the base.
+    public var focusWrap: FocusWrap?
     /// Sparse override of `float_automatically` (#2173); nil
     /// follows the base.
     public var floatAutomatically: Bool?
@@ -128,6 +130,7 @@ public struct Profile: Codable, Sendable, Equatable {
         scrollGesture: ScrollGestureOverride? = nil,
         spaceHistory: SpaceHistoryKind? = nil,
         modeCycle: [LayoutMode]? = nil,
+        focusWrap: FocusWrap? = nil,
         floatAutomatically: Bool? = nil,
         tileRules: RuleListOverride? = nil,
         look: LookReference? = nil,
@@ -154,6 +157,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.scrollGesture = scrollGesture
         self.spaceHistory = spaceHistory
         self.modeCycle = modeCycle
+        self.focusWrap = focusWrap
         self.floatAutomatically = floatAutomatically
         self.tileRules = tileRules
         self.look = look
@@ -277,6 +281,10 @@ public struct Profile: Codable, Sendable, Equatable {
             container,
             forKey: .modeCycle
         )
+        focusWrap = try container.decodeIfPresent(
+            FocusWrap.self,
+            forKey: .focusWrap
+        )
         floatAutomatically = try container.decodeIfPresent(
             Bool.self,
             forKey: .floatAutomatically
@@ -293,19 +301,6 @@ public struct Profile: Codable, Sendable, Equatable {
             [String: Bool].self,
             forKey: .lensReach
         )
-    }
-
-    /// All entries must share one `monitors` length — the first
-    /// entry's length is canonical, mismatched entries dropped.
-    private static func sanitized(
-        _ sets: [MonitorSet]
-    ) -> [MonitorSet] {
-        guard let canonical = sets.first?.monitors.count else {
-            return []
-        }
-        return sets.filter {
-            $0.monitors.count == canonical
-        }
     }
 
     /// Adds or replaces the set covering the same monitors.

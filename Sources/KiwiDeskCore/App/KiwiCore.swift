@@ -262,8 +262,7 @@ public final class KiwiCore {
     /// GUI Canvas (#36). Internal: the GUI reads placement via
     /// `loadGuiConfig` and writes it via `applyProfileScopedState`.
     var spacePins: [SpaceID: String] = [:]
-    /// Spaces assigned the *Main* role — they follow whatever
-    /// display is currently main (#36).
+    /// Spaces in the *Main* role, following the main screen (#36).
     var mainSpaces: Set<SpaceID> = []
     /// The empty-display heal's seed per monitor fingerprint (#1175),
     /// re-pinned rather than re-minted; session state, retired by a
@@ -283,10 +282,11 @@ public final class KiwiCore {
     var fallbackSpace: SpaceID?
     /// The layouts `cycle_mode` walks (#453, `KiwiCore+ModeCycle`).
     var modeCycle = ModeCycleState()
+    /// What a focus key does at an edge (#2493, `KiwiCore+FocusWrap`).
+    var focusWrap = FocusWrapState()
     /// The announced in-place restart (#930, `KiwiCore+InPlaceRestart`).
     var inPlaceRestart = InPlaceRestartState()
-    /// Profile bound per macOS Desktop, keyed by the Desktop
-    /// itself (#1147). Populated by `bind_profile_to_desktop`.
+    /// Profile bound per macOS Desktop, keyed by its stamp (#1147).
     public internal(set) var desktopBindings: [DesktopKey: DesktopBinding] =
         [:]
 

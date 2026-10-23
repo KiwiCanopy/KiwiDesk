@@ -18,7 +18,6 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case scrollingSlotSizeValue = "settings.scrolling.slotSize (value)"
     case scrollingSlotSizeCount = "settings.scrolling.slotSize (count)"
     case scrollingNewWindowPlacement = "settings.scrolling.newWindowPlacement"
-    case scrollingWrapFocus = "settings.scrolling.wrapFocus"
     case scrollingFillWhenAlone = "settings.scrolling.fillWhenAlone"
     case gridType = "settings.grid.type"
     case gridSplitDirection = "settings.grid.splitDirection"
@@ -31,14 +30,12 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case gridRowWeights = "settings.grid.rowWeights"
     case monocleOrientation = "settings.monocle.orientation"
     case monocleHideStyle = "settings.monocle.hideStyle"
-    case monocleWrapFocus = "settings.monocle.wrapFocus"
     case monocleNewWindowPlacement = "settings.monocle.newWindowPlacement"
     case trackAxis = "settings.track.axis"
     case trackNewWindow = "settings.track.newWindow"
     case trackNewWindowPosition = "settings.track.newWindowPosition"
     case trackAutoTracks = "settings.track.autoTracks"
     case trackLimit = "settings.track.limit"
-    case trackWrapFocus = "settings.track.wrapFocus"
     case bspOverrideStrategy = "settings.bsp.override[space].strategy"
     case bspOverrideSplitRatioH = "settings.bsp.override[space].splitRatioH"
     case bspOverrideSplitRatioV = "settings.bsp.override[space].splitRatioV"
@@ -96,8 +93,7 @@ extension LayoutKey {
             )
         case .scrollingOrientation, .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue, .scrollingSlotSizeCount,
-            .scrollingNewWindowPlacement, .scrollingWrapFocus,
-            .scrollingFillWhenAlone:
+            .scrollingNewWindowPlacement, .scrollingFillWhenAlone:
             return .row(.layoutDefaults, .scrolling, .atRest)
         case .gridType, .gridSplitDirection, .gridAutoSize,
             .gridNewWindowPlacement:
@@ -125,10 +121,10 @@ extension LayoutKey {
                 gate: .setting(.layout(.gridAutoSize))
             )
         case .monocleOrientation, .monocleHideStyle,
-            .monocleWrapFocus, .monocleNewWindowPlacement:
+            .monocleNewWindowPlacement:
             return .row(.layoutDefaults, .monocle, .atRest)
         case .trackAxis, .trackNewWindow,
-            .trackNewWindowPosition, .trackAutoTracks, .trackWrapFocus:
+            .trackNewWindowPosition, .trackAutoTracks:
             return .row(.layoutDefaults, .track, .atRest)
         case .trackLimit:
             return .row(

@@ -23,6 +23,9 @@ extension SettingsRevertRegister {
         .shortcuts(.spaceHistory): RevertWriter.leaf(
             \.spaceHistory
         ).then { model, _ in settle(model, .history, nil) },
+        .shortcuts(.focusWrap): RevertWriter.leaf(
+            \.focusWrap
+        ).then { model, _ in settle(model, .wrap, nil) },
         .shortcuts(.modeCycle): RevertWriter.leaf(\.modeCycle)
             .then { model, _ in settle(model, .cycle, nil) },
         .shortcuts(.scrollPan): scroll(\.scrollGesture.pan),

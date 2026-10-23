@@ -24,6 +24,7 @@ struct RuleFamilyField {
         ),
         field(.scroll, \.scrollGesture),
         field(.history, \.spaceHistory),
+        field(.wrap, \.focusWrap),
         field(.cycle, \.modeCycle),
         field(.tile, \.tileRules),
         field(.autoFloat, \.floatAutomatically),

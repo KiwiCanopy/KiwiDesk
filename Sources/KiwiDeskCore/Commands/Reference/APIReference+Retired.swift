@@ -80,6 +80,10 @@ extension APIReference {
                 "\(layout).set_app_bar_visibility"
         }
         map["app_bar.set_visibility"] = "monocle.set_app_bar_visibility"
+        // One setting wraps focus in every layout (#2493).
+        for layout in ["scroll", "monocle", "track"] {
+            map["\(layout).set_wrap_focus"] = "set_focus_wrap"
+        }
         // KiwiHub's sides open through one verb (#2265).
         for verb in [
             "show_jump_to_window", "show_shortcuts", "show_layout_picker",

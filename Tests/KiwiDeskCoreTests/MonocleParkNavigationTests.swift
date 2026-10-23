@@ -57,7 +57,7 @@ struct MonocleParkNavigationTests {
             args: [.string("park")]
         )
         // wrap_focus defaults on; this pins the dead end.
-        core.execute("monocle.set_wrap_focus", args: [.bool(false)])
+        core.execute("set_focus_wrap", args: [.string("off")])
         core.state.workspaces.focus(w3, in: space)
         return core
     }
@@ -76,8 +76,8 @@ struct MonocleParkNavigationTests {
     func wrapOnWraps() {
         let core = makeParkCore()
         _ = core.execute(
-            "monocle.set_wrap_focus",
-            args: [.bool(true)]
+            "set_focus_wrap",
+            args: [.string("this_screen")]
         )
         #expect(
             core.execute("focus", args: [.string("right")])

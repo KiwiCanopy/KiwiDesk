@@ -182,17 +182,17 @@ extension SettingsValueReadout {
             .stackNewWindowPlacement, .scrollingOrientation,
             .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue, .scrollingSlotSizeCount,
-            .scrollingNewWindowPlacement, .scrollingWrapFocus,
+            .scrollingNewWindowPlacement,
             .scrollingFillWhenAlone, .stackFillWhenAlone,
             .gridType, .gridSplitDirection, .gridFillEmptyCells,
             .gridAutoSize, .gridColumns, .gridRows,
             .gridNewWindowPlacement, .gridColumnWeights,
             .gridRowWeights, .monocleOrientation,
-            .monocleHideStyle, .monocleWrapFocus,
+            .monocleHideStyle,
             .monocleNewWindowPlacement,
             .trackAxis, .trackNewWindow,
             .trackNewWindowPosition, .trackAutoTracks,
-            .trackLimit, .trackWrapFocus:
+            .trackLimit:
             // Globals — `layoutRows`' own switch narrates them;
             // this expander only ever receives override keys.
             // Spelled out (no `default:`) so a new census case

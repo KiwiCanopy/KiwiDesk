@@ -93,7 +93,7 @@ struct FocusFloatTierEdgeTests {
             )
         )
         // wrap_focus defaults on; this pins the dead end.
-        core.execute("scroll.set_wrap_focus", args: [.bool(false)])
+        core.execute("set_focus_wrap", args: [.string("off")])
         // w2 is the last tiled window; a step past the end
         // falls through the array step AND the tiled geometric
         // search into the float tier.

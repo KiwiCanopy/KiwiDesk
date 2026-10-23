@@ -53,6 +53,15 @@ extension SettingsValueReadout {
                     new: SpaceHistoryWords.value(new.spaceHistory)
                 )
             ]
+        case .focusWrap:
+            return [
+                .change(
+                    census,
+                    label: FocusWrapWords.title,
+                    old: FocusWrapWords.value(old.focusWrap),
+                    new: FocusWrapWords.value(new.focusWrap)
+                )
+            ]
         case .modeCycle:
             return [
                 .change(

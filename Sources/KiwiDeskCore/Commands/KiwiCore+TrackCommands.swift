@@ -54,11 +54,6 @@ extension KiwiCore {
                 return placementError
             }
             tiler.settings.track.newWindowPosition = placement
-        case "track.set_wrap_focus":
-            guard let on = args.first?.boolValue else {
-                return .fail("expected a boolean")
-            }
-            tiler.settings.track.wrapFocus = on
         default:
             return trackOverrideFallback(command, args)
         }

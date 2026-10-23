@@ -37,17 +37,10 @@ struct TrackCommandsTests {
                 args: [.string("focused_track")]
             ).isSuccess
         )
-        #expect(
-            core.execute(
-                "track.set_wrap_focus",
-                args: [.bool(true)]
-            ).isSuccess
-        )
         let track = core.tiler.settings.track
         #expect(track.axis == .horizontal)
         #expect(track.limit == 3)
         #expect(track.newWindow == .focusedTrack)
-        #expect(track.wrapFocus)
     }
 
     @Test("new_window_position set (#188)")

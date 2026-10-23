@@ -94,6 +94,7 @@ extension KiwiCore {
             profile: profile?.spaceHistory
         )
         applyModeCycle(base: base?.modeCycle, profile: profile?.modeCycle)
+        applyFocusWrap(base: base?.focusWrap, profile: profile?.focusWrap)
     }
 
     /// The one resolve of the window-rule families — a config load,

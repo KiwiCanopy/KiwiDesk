@@ -58,6 +58,7 @@ extension KiwiCore {
             ?? config.scrollGesture
         config.spaceHistory = profile.spaceHistory ?? config.spaceHistory
         config.modeCycle = profile.modeCycle ?? config.modeCycle
+        config.focusWrap = profile.focusWrap ?? config.focusWrap
         config.tileRules =
             profile.tileRules?.resolved(
                 onto: config.tileRules,
@@ -203,6 +204,7 @@ extension KiwiCore {
         config.scrollGesture = mouse.scroll.base
         config.spaceHistory = spaceHistory.base
         config.modeCycle = modeCycle.base
+        config.focusWrap = focusWrap.base
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
         for space in capturedSpaces {

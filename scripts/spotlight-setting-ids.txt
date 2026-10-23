@@ -82,6 +82,7 @@ config.appRules[app]
 config.shortcutBase
 config.floatAutomatically
 config.floatRules
+config.focusWrap
 config.layers[].icon
 config.layers[].reach
 config.mainSpaces
@@ -212,7 +213,6 @@ settings.monocle.appBar.visibility
 settings.monocle.hideStyle
 settings.monocle.newWindowPlacement
 settings.monocle.orientation
-settings.monocle.wrapFocus
 settings.mouse.followsFocus
 settings.mouse.hoverFocus
 settings.mouse.hoverFocusDelayMS
@@ -223,7 +223,6 @@ settings.scrolling.fillWhenAlone
 settings.scrolling.newWindowPlacement
 settings.scrolling.orientation
 settings.scrolling.slotSize (unit)
-settings.scrolling.wrapFocus
 settings.spaceBarStyle.activeIndicator
 settings.spaceBarStyle.edge
 settings.spaceBarStyle.edge (master)
@@ -255,4 +254,3 @@ settings.track.axis
 settings.track.limit
 settings.track.newWindow
 settings.track.newWindowPosition
-settings.track.wrapFocus

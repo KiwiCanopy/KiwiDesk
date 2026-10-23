@@ -152,10 +152,10 @@ func makeTestCore(
     // multi-screen dev Mac an engine fixture would inherit the
     // host's arrangement and wall a scrolling edge that a
     // single-screen CI runner leaves open — the #523 leak, one
-    // hook over. Pin the single-screen verdict (no neighbors:
-    // every edge open); an adjacency suite injects a fabricated
-    // list itself.
+    // hook over, and the focus keys' screen hop (#2493). Pin the
+    // single-screen verdict; an adjacency suite injects its own.
     core.tiler.allScreenBounds = { [] }
+    core.tiler.displayFrames = { [] }
     // The WindowServer z-order and screen frames the
     // presentation verdict reads (#1787): live, they hand every
     // fixture the host desk.

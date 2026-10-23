@@ -81,6 +81,7 @@ public enum APIReference {
             ("set_space_transition", "set_space_transition"),
             ("set_space_slide_duration", "set_space_slide_duration"),
             ("set_space_history", "set_space_history"),
+            ("set_focus_wrap", "set_focus_wrap"),
             ("set_float_automatically", "set_float_automatically"),
             (
                 "set_shortcut_panel_liquid_glass",
@@ -180,7 +181,7 @@ public enum APIReference {
         ],
         "scroll": [
             "set_slot_size", "set_anchor", "set_orientation",
-            "set_new_window_placement", "set_wrap_focus",
+            "set_new_window_placement",
             "set_fill_when_alone", "set_slot_size_override",
             "set_anchor_override", "set_orientation_override",
             "set_app_bar_visibility", "set_app_bar_active_indicator",
@@ -237,7 +238,7 @@ public enum APIReference {
         ],
         "monocle": [
             "set_orientation", "set_orientation_override",
-            "set_hide_style", "set_wrap_focus",
+            "set_hide_style",
             "set_new_window_placement", "set_app_bar_visibility",
             "set_app_bar_active_indicator", "set_app_bar_title_cap",
             "set_app_bar_group_adjacent_windows",
@@ -246,7 +247,6 @@ public enum APIReference {
             "swap",
             "set_axis", "set_limit", "set_auto_tracks",
             "set_new_window", "set_new_window_position",
-            "set_wrap_focus",
             "set_axis_override", "set_limit_override",
             "set_auto_tracks_override",
         ],

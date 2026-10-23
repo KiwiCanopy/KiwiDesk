@@ -18,7 +18,6 @@ extension LayoutCard {
         case .scrollingAnchor: scrollAnchorRow
         case .scrollingSlotSizeUnit: slotSizeUnitRow
         case .scrollingSlotSizeValue: slotSizeValueRow
-        case .scrollingWrapFocus: scrollWrapFocusRow
         case .scrollingFillWhenAlone: scrollFillWhenAloneRow
         case .gridType: gridTypeRow
         case .gridSplitDirection: gridArrangeRow
@@ -26,12 +25,10 @@ extension LayoutCard {
         case .gridAutoSize: gridDimensionsGroup
         case .monocleOrientation: monocleOrientationRow
         case .monocleHideStyle: monocleHideStyleRow
-        case .monocleWrapFocus: monocleWrapFocusRow
         case .trackAxis: trackArrangeRow
         case .trackNewWindow: trackNewWindowRow
         case .trackNewWindowPosition: trackPositionRow
         case .trackAutoTracks: trackLimitGroup
-        case .trackWrapFocus: trackWrapFocusRow
         case .bspNewWindowPlacement:
             PlacementPicker(placement: bsp.newWindowPlacement)
         case .stackNewWindowPlacement:
@@ -233,14 +230,6 @@ extension LayoutCard {
                 ),
             ],
             help: LayoutHelp.monocleHideStyle
-        )
-    }
-
-    var monocleWrapFocusRow: some View {
-        ToggleRow(
-            label: L("scroll_grid.wrap_focus", "Wrap focus"),
-            isOn: monocle.wrapFocus,
-            help: LayoutHelp.wrapFocus
         )
     }
 }

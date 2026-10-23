@@ -192,6 +192,7 @@ extension SettingsModel {
         case .key: keyReach(app)
         case .scroll: scrollReach(app)
         case .history: historyReach()
+        case .wrap: wrapReach()
         case .cycle: cycleReach()
         case .tile: tileReach(app)
         case .autoFloat: autoFloatReach()
@@ -302,6 +303,13 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.spaceHistory,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .wrap:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.focusWrap,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )

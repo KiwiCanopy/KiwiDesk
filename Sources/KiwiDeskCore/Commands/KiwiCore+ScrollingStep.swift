@@ -11,7 +11,7 @@ extension KiwiCore {
     /// flat array, so array order IS spatial order, and slots
     /// pinned at a shared edge sliver (#142) cannot mislead a
     /// geometric search. Past an end: `focus` wraps to the far
-    /// end when `wrap_focus` is on (#168), else falls through;
+    /// end when `wraps` (#168, This screen, #2493), else falls through;
     /// `swap` never wraps (a wrapping swap would teleport the
     /// window across the whole row). Nil (→ geometric
     /// navigation) for cross-axis directions, for a floating
@@ -27,6 +27,7 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool,
         warp: Bool,
+        wraps: Bool,
         skip: (WindowID) -> Bool
     ) -> CommandResponse? {
         let horizontal =
@@ -43,7 +44,7 @@ extension KiwiCore {
         let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
-        // Wrap past an end (#168, on by default). It keeps
+        // Wrap past an end (#168). It keeps
         // array-index order, so the deferred-raise classifier
         // (#143/#158) reads it right without a special case:
         // wrapping forward to index 0 is a lower-index move —
@@ -52,10 +53,7 @@ extension KiwiCore {
         // pan, raise immediate. Each matches a plain step in
         // that direction. `count > 1` skips a pointless
         // wrap-to-self on a single-window row.
-        let wrap =
-            !swapping && tiled.count > 1
-            && tiler.settings.resolvedScrolling(for: space.id)
-                .wrapFocus
+        let wrap = wraps && tiled.count > 1
         guard
             let targetIndex = Navigation.arrayStep(
                 from: index,

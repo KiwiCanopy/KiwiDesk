@@ -209,10 +209,7 @@ struct KiwiVisionLensWrapTests {
                 (3, LensNavFixture.member, ""),
             ]
         )
-        let verb =
-            mode == "scrolling"
-            ? "scroll" : mode.hasPrefix("track") ? "track" : mode
-        core.execute("\(verb).set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         LensNavFixture.defineLens(core)
         return core
     }

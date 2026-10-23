@@ -60,7 +60,7 @@ private func startDummyPan(_ core: KiwiCore) -> Bool {
     return core.tiler.animation.activeCount > 0
 }
 
-/// `scroll.set_wrap_focus` (#168, on by default): with the toggle on,
+/// Focus wrap under This screen (#168, #2493): with it set,
 /// stepping `focus` past a row end lands on the far end; `swap`
 /// still never wraps.
 @Suite("Scrolling wrap focus (#168)", .serialized)
@@ -70,7 +70,7 @@ struct ScrollingWrapFocusTests {
     func wrapsForward() {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 3, focus: WindowID(3))
-        core.execute("scroll.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(
             core.execute("focus", args: [.string("right")])
                 .isSuccess
@@ -83,7 +83,7 @@ struct ScrollingWrapFocusTests {
     func wrapsBackward() {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 3, focus: WindowID(1))
-        core.execute("scroll.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         #expect(
             core.execute("focus", args: [.string("left")])
                 .isSuccess
@@ -100,7 +100,7 @@ struct ScrollingWrapFocusTests {
             windows: 3,
             focus: WindowID(3)
         )
-        core.execute("scroll.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         // At the last window, swapping right finds nothing to
         // trade with (a wrapping swap would teleport the window
         // across the whole row) — the order stays put.
@@ -119,7 +119,7 @@ struct ScrollingWrapFocusTests {
     func singleWindowNoSelfWrap() {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 1, focus: WindowID(1))
-        core.execute("scroll.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         // Only one window: wrapping would land on itself, so the
         // step falls through and reports no neighbor instead.
         let right = core.execute(
@@ -134,7 +134,7 @@ struct ScrollingWrapFocusTests {
     func wrapForwardDefersRaise() {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 3, focus: WindowID(3))
-        core.execute("scroll.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         // Wall the leading edge: since #878 the wall, not the
         // direction, is what defers — toward an OPEN leading
         // edge the wrapped-to window slides in from the void
@@ -184,7 +184,7 @@ struct ScrollingWrapFocusTests {
     func wrapBackwardRaisesImmediately() {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 3, focus: WindowID(1))
-        core.execute("scroll.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         guard startDummyPan(core) else { return }
         // Wrap-backward to the last index is a higher-index move —
         // a forward pan (#158), so the raise fires at once and
@@ -202,7 +202,7 @@ struct ScrollingWrapFocusTests {
     func offKeepsStopAtEnds() {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 3, focus: WindowID(3))
-        core.execute("scroll.set_wrap_focus", args: [.bool(false)])
+        core.execute("set_focus_wrap", args: [.string("off")])
         let right = core.execute(
             "focus",
             args: [.string("right")]

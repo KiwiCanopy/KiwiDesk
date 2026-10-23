@@ -189,7 +189,8 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                .layoutDefaults: 35,
+                // 32 since #2493 took the three wrap rows.
+                .layoutDefaults: 32,
                 .screens: 3,
                 // 18 since #1473: the focus border's four rows,
                 // the fit-gaps spacing and the sticky mark are
@@ -239,8 +240,8 @@ struct SettingsSearchIndexTests {
                 // kept under Open applications (#1520); 11, #2022; 12, #1655.
                 // 13 since #2103: Toggle KiwiVision, at rest.
                 // 14 #2460: Shortcuts use; 15 #2303; 17 #761's bar rows.
-                // 18 #2448: Maximize.
-                .shortcuts: 18,
+                // 18 #2448: Maximize. 19 #2493: Wrap focus.
+                .shortcuts: 19,
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
                 // a row can no longer be a no-op — a new census

@@ -81,7 +81,7 @@ struct VisibleBoundsRoutingTests {
         // `NSScreen.screens` for the neighbor scan, the same
         // several-screens shape as parking below, and is itself
         // an injectable seam the test factories pin.
-        "Tiling/TilingEngine.swift": 2,
+        "Tiling/TilingEngine.swift": 3,
         // `screen(containing:)` is static — no instance in hand.
         "Tiling/TilingEngine+Layout.swift": 1,
         // Parking picks each window's OWN screen from

@@ -23,9 +23,21 @@ extension Profile {
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
+        case focusWrap = "focus_wrap"
         case floatAutomatically = "float_automatically"
         case tileRules = "tile_rules"
         case look
         case lensReach = "lens_reach"
+    }
+}
+
+extension Profile {
+    /// All entries must share one `monitors` length — the first
+    /// entry's length is canonical, mismatched entries dropped.
+    static func sanitized(_ sets: [MonitorSet]) -> [MonitorSet] {
+        guard let canonical = sets.first?.monitors.count else {
+            return []
+        }
+        return sets.filter { $0.monitors.count == canonical }
     }
 }

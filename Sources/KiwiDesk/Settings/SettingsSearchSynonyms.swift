@@ -82,6 +82,13 @@ enum SettingsSearchSynonyms {
                 "natural", "natural scrolling", "reverse", "invert",
                 "direction",
             ]
+        // The row replaced each layout's own "Wrap focus" (#2493),
+        // so a search from those pages still reaches it.
+        case .shortcuts(.focusWrap):
+            return [
+                "loop", "around", "edge", "next screen", "monitor",
+                "scrolling", "monocle", "track",
+            ]
         // "Monitor fingerprints" until #865 retired the noun.
         case .screens(.fingerprints):
             return ["monitor fingerprints", "display fingerprints"]

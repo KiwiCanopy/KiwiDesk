@@ -53,6 +53,7 @@ extension KiwiCore {
             // rest of its state on this branch.
             applyScrollGestures(profile: nil)
             applySpaceHistory(profile: nil)
+            applyFocusWrap(profile: nil)
             return
         }
         lua = fresh
@@ -233,6 +234,7 @@ extension KiwiCore {
         spaceHistory.base = .defaultKind
         spaceHistory.profileOverride = nil
         modeCycle = ModeCycleState()
+        focusWrap = FocusWrapState()
         tiler.settings.gapsOverride = [:]
         tiler.settings.minWindowSizeOverride = [:]
         tiler.settings.placementOverride = [:]

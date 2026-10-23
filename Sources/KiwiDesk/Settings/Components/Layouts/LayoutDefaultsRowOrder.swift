@@ -35,7 +35,6 @@ enum LayoutDefaultsRowOrder {
         .layout(.scrollingSlotSizeCount),
         .layout(.scrollingFillWhenAlone),
         .layout(.scrollingNewWindowPlacement),
-        .layout(.scrollingWrapFocus),
         .colours(.animationsOnScrolling),
         .colours(.animationsScrollDurationMS),
     ]
@@ -53,7 +52,6 @@ enum LayoutDefaultsRowOrder {
     static let monocle: [SettingKey] = [
         .layout(.monocleOrientation),
         .layout(.monocleHideStyle),
-        .layout(.monocleWrapFocus),
         .layout(.monocleNewWindowPlacement),
     ]
 
@@ -63,7 +61,6 @@ enum LayoutDefaultsRowOrder {
         .layout(.trackNewWindowPosition),
         .layout(.trackAutoTracks),
         .layout(.trackLimit),
-        .layout(.trackWrapFocus),
     ]
 
     /// Setting rows for specified layout mode (`placementTabs`).
