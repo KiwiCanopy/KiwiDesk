@@ -257,6 +257,9 @@ extension KiwiCore {
             // corners — drop it now, restore on exit).
             break
         case .desktopChanged:
+            // A list a click held open names the Desktop left
+            // (#2563).
+            shelves.peek.dismissHeld()
             handleDesktopChange()
         case .windowRekeyed(let old, let new):
             // The whole id-retarget lives in

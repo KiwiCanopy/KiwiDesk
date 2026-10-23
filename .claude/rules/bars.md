@@ -917,6 +917,29 @@ Obligations:
   its room keeps what fits and closes on the one "more" line
   (`BarPeekBody+More`, `BarPeekFitTests` ▸
   `tallPeekKeepsWhatFits`, `moreCountsHiddenRows`).
+- **The overflow mark's list grows out of its pill, and ONE source
+  flag says so** (#2563 ▸ Ruling): `BarPeekSource.morphsFromAnchor`,
+  `.run` alone, read by the peek, its panel and the mark — never a
+  second peek, and never a check of the source's case beside it
+  (`BarPeekMorphTests` ▸ `onlyTheRunMorphs`). Its mark reports no
+  hover to the peek and only lights itself; a click opens and holds
+  the list, and while it shows no other item's hover swaps or closes
+  it (`OverflowMarkClickTests` ▸ `hoverOpensNothing`,
+  `otherHoverLeavesIt`). It closes on the peek's own closes plus its
+  header — never the second press of the double-click that opened it
+  (`BarPeekMorph.headerCloses`) — Escape, the anchor window moving,
+  a Desktop switch and KiwiVision turning on or off, the last two
+  through the one `BarPeek.dismissHeld` (`OverflowMarkClickTests`).
+  The morph is the panel's opening motion (`BarPeekPanel+Morph`):
+  the panel takes the list's resting frame, which holds the pill,
+  and `BarMotion.playMorph` clips the panel's `stage` inside it, so
+  the panel is never resized per frame and the glass moves by its
+  host; the mark only hides its own panel and never draws a list. A
+  mark the sync drops is hidden BEFORE its list closes, so the list
+  fades rather than shrinking into nothing (`goneMarkFades`). The
+  panel is key-capable for this source alone, keyed a turn later
+  through the peek's `schedule`, so Escape and the arrows reach its
+  rows without activating KiwiDesk (`keysOnTheList`).
 - **Every peek row is its window's button, picked through the
   one `pickBarRow` a window menu row takes, which does what
   clicking that window's bar item does** (#1946 amendment 2) —
@@ -954,7 +977,8 @@ Obligations:
   press stay the chip's switch, so its list reads at the hold
   and the check alone (`SpaceBarCollapsedPeekTests` ▸
   `pressOnTheChipCloses`). The panel takes
-  the mouse but is non-activating and never key, and hidden from
+  the mouse but is non-activating and key only for a grown list
+  (below), and hidden from
   accessibility (`BarPeekTests` ▸
   `panelTakesClicksWithoutActivating`). The argument is
   `docs/design-decisions.md` ▸ A bar item's hover peek.

@@ -44,6 +44,16 @@ final class BarPeekBody: NSView {
 
     override var isFlipped: Bool { true }
 
+    /// Room a grown list keeps for its header strip (#2563): above
+    /// or below the rows, and the pill's width at least.
+    struct Reserve: Equatable {
+        var top: CGFloat = 0
+        var bottom: CGFloat = 0
+        var minWidth: CGFloat = 0
+        static let none = Reserve()
+    }
+    var reserve = Reserve.none
+
     /// What the last build drew, top to bottom: headers and
     /// titles, the icons and the hairlines.
     private(set) var labels: [NSTextField] = []
@@ -116,7 +126,7 @@ final class BarPeekBody: NSView {
         let more =
             hidden > 0
             ? moreLine(hidden, shelf: shelf, up: cutAtTop) : nil
-        let width = min(
+        let fitted = min(
             Metrics.maxWidth - 2 * Metrics.padH,
             max(
                 groups.map { $0.need(indent: indent) }.max() ?? 0,
@@ -126,7 +136,11 @@ final class BarPeekBody: NSView {
         // A list's check column sits past the wrap width, so titles
         // wrap where they would without it (#2063).
         let column = content.checks ? Metrics.checkColumn : 0
-        var y = Metrics.padV
+        let width = max(
+            fitted,
+            reserve.minWidth - column - 2 * Metrics.padH
+        )
+        var y = Metrics.padV + reserve.top
         if let more, cutAtTop {
             y = place(more, at: y, width: width) + Metrics.rowGap
         }
@@ -152,7 +166,7 @@ final class BarPeekBody: NSView {
         }
         let size = CGSize(
             width: ceil(width + column + 2 * Metrics.padH),
-            height: ceil(y + Metrics.padV)
+            height: ceil(y + Metrics.padV + reserve.bottom)
         )
         frame.size = size
         return size

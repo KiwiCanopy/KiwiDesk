@@ -39,6 +39,15 @@ enum BarPeekSource: Equatable {
         }
     }
 
+    /// Whether the peek grows out of its anchor and is held open by
+    /// a click alone (#2563): an overflow mark's list. Its hover
+    /// opens nothing, and it holds until a close, never on the
+    /// pointer leaving.
+    var morphsFromAnchor: Bool {
+        if case .run = self { return true }
+        return false
+    }
+
     /// Whether every group wears its app's icon: an overflow mark
     /// draws no glyph beside its peek, so its rows name their apps
     /// even when they are one app (#2235, owner on device).

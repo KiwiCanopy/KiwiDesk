@@ -3,14 +3,13 @@ import AppKit
 /// The overflow mark's drawing (#2235): KiwiShelf's look — its
 /// Fill as tinted glass or solid, its rim, its item ink and bar
 /// face — around the "+n" count, a pill or a circle. A button to
-/// VoiceOver; the pointer reports to the shared hover peek.
+/// VoiceOver. The pointer lights it, as the shelf's hover lights an
+/// item, and opens nothing: a click grows it into its list (#2563).
 @MainActor
-final class OverflowMarkView: NSView {
+final class OverflowMarkView: NSView, BarPeekMorphAnchor {
     /// The count's fixed reading size, the peek's header size.
     static let textSize: CGFloat = 11
 
-    /// The pointer entered (true) or left (false) the mark.
-    var onHover: @MainActor (Bool) -> Void = { _ in }
     /// A left click on the mark.
     var onClick: @MainActor () -> Void = {}
     /// VoiceOver's press.
@@ -21,11 +20,18 @@ final class OverflowMarkView: NSView {
     private let solid = NSView()
     private let tint = GlassBackdrop()
     private let rim = ShelfBorder.make()
+    /// The shelf's hover fill under the count while the pointer is
+    /// on the mark.
+    let highlight = NSView()
     private var glass: NSView?
     private var tracking: NSTrackingArea?
     /// The gated shelf the mark draws in — the peek wears it.
     private(set) var shelfLook = KiwiShelf()
     private(set) var hovered = false
+    /// The run's layout bounds on screen (AppKit), the room its list
+    /// grows into — the overlay's, written as it places the mark.
+    var morphRoom = CGRect.zero
+    var morphText: String { label.stringValue }
 
     override var isFlipped: Bool { true }
 
@@ -35,6 +41,10 @@ final class OverflowMarkView: NSView {
         solid.wantsLayer = true
         solid.layer?.masksToBounds = true
         content.wantsLayer = true
+        highlight.wantsLayer = true
+        highlight.isHidden = true
+        highlight.setAccessibilityElement(false)
+        content.addSubview(highlight)
         label.alignment = .center
         label.isBezeled = false
         label.drawsBackground = false
@@ -67,7 +77,7 @@ final class OverflowMarkView: NSView {
             ofSize: Self.textSize,
             emphasis: .semibold
         )
-        label.textColor = NSColor(kiwiHex: gated.itemColor)
+        paintHover()
         setAccessibilityLabel(name)
         needsLayout = true
     }
@@ -76,6 +86,8 @@ final class OverflowMarkView: NSView {
         super.layout()
         let radius = min(bounds.width, bounds.height) / 2
         content.frame = bounds
+        highlight.frame = bounds
+        highlight.layer?.cornerRadius = radius
         label.sizeToFit()
         let width = max(label.frame.width, bounds.width)
         label.frame = CGRect(
@@ -157,13 +169,46 @@ final class OverflowMarkView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        hovered = true
-        onHover(true)
+        setHovered(true)
     }
 
     override func mouseExited(with event: NSEvent) {
-        hovered = false
-        onHover(false)
+        setHovered(false)
+    }
+
+    /// Lights the mark while the pointer is on it, snapped as a bar
+    /// item's hover is.
+    func setHovered(_ on: Bool) {
+        guard on != hovered else { return }
+        hovered = on
+        paintHover()
+    }
+
+    private func paintHover() {
+        highlight.isHidden = !hovered
+        highlight.layer?.backgroundColor =
+            NSColor(kiwiHex: shelfLook.hoverFillColor).cgColor
+        label.textColor = NSColor(
+            kiwiHex: hovered ? shelfLook.hoverItemColor : shelfLook.itemColor
+        )
+    }
+
+    /// Hidden while its list stands in its place, taking no press;
+    /// back, it re-reads its hover from the resting pointer, since
+    /// the pointer left it under the list and no exit came.
+    func setMorphed(_ morphed: Bool, pointer: CGPoint) {
+        guard let window else { return }
+        window.ignoresMouseEvents = morphed
+        guard !morphed else {
+            setHovered(false)
+            return
+        }
+        window.alphaValue = 1
+        let point = convert(
+            window.convertPoint(fromScreen: pointer),
+            from: nil
+        )
+        setHovered(bounds.contains(point))
     }
 
     /// The whole mark is one target: the count and the plate

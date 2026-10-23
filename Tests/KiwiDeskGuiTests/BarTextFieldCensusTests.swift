@@ -38,6 +38,12 @@ struct BarTextFieldCensusTests {
             reason: "title (originY), App Font glyph (an icon, "
                 + "anchored by Metrics), badge (IndicatorBarBadgeCell)"
         ),
+        "BarPeekHeader.swift": Entry(
+            count: 2,
+            door: ("BarTextGlyph.originY(", "BarPeekHeader.swift"),
+            reason: "the grown list's count in the mark's ink and the "
+                + "list's (#2563), crossing over its growth"
+        ),
         "BarPeekBody+Parts.swift": Entry(
             count: 1,
             door: nil,

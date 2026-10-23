@@ -76,6 +76,11 @@ extension BarMotionSeamTests {
         "playSpread": [],
         "spreadFade": [],
         "endSpread": [],
+        "morphGrows": [],
+        "playMorph": ["morphGrows(", "isReduced"],
+        "endMorph": [],
+        "morphClip": ["span"],
+        "morphFade": ["span"],
     ]
 
     /// Members whose motion Reduce Motion deliberately KEEPS, each

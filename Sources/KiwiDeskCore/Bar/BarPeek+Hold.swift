@@ -100,6 +100,11 @@ extension BarPeek {
         made.body.onPointerInside = { [weak self] in
             self?.bodyReported(inside: $0)
         }
+        made.onClose = { [weak self] in self?.dismiss() }
+        made.now = { [weak self] in self?.now() ?? 0 }
+        made.pointer = { [weak self] in
+            self?.pointerOnScreen() ?? CGPoint(x: -1e6, y: -1e6)
+        }
         return made
     }
 

@@ -243,9 +243,9 @@ struct GlassTintFadeTests {
             visible: CGRect(x: 0, y: 0, width: 1440, height: 900),
             fades: false
         )
-        let root = try #require(peek.panel?.contentView)
+        // The panel draws on its stage, a grown list's clip (#2563).
         let tint = try #require(
-            root.subviews.compactMap { $0 as? GlassBackdrop }.first,
+            peek.stage.subviews.compactMap { $0 as? GlassBackdrop }.first,
             "the peek has no tint"
         )
         try #require(!tint.isHidden, "the peek's tint was not painted")
