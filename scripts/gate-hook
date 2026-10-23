@@ -11,7 +11,8 @@ than the `cd`. Anything else, or a command already naming
 gate-lock, prints nothing and passes through unchanged.
 
 A git command that discards uncommitted work is snapshotted
-first by `discard_guard`, beside this file.
+first by `discard_guard`, beside this file; a command that RUNS a
+script which discards is refused while tracked files are dirty.
 
 Registered from the user-level settings so it reaches every
 worktree; `GateLockHookTests` pins that every heavy skill step
@@ -51,11 +52,25 @@ def main() -> int:
     command = tool_input.get("command")
     if not isinstance(command, str):
         return 0
+    cwd = event.get("cwd") or os.getcwd()
     try:
         sys.dont_write_bytecode = True
+        from discard_guard import refusal
+
+        reason = refusal(command, cwd)
+    except Exception:  # never let the net break the gate queue
+        reason = None
+    if reason:
+        json.dump({"hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": reason,
+        }}, sys.stdout)
+        return 0
+    try:
         from discard_guard import snapshot
 
-        note = snapshot(command, event.get("cwd") or os.getcwd())
+        note = snapshot(command, cwd)
     except Exception:  # never let the net break the gate queue
         note = None
     if "gate-lock" in command or not HEAVY.search(command):
