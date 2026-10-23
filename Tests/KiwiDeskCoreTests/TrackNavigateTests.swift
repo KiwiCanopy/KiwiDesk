@@ -88,7 +88,7 @@ struct TrackNavigateTests {
         )
         // Two tracks: [1] [2, 3].
         setHeads(core, space: space, heads: [WindowID(2)])
-        // wrap_focus defaults on; this pins the dead end.
+        // The focus wrap defaults on; this pins the dead end.
         core.execute("set_focus_wrap", args: [.string("off")])
         #expect(
             core.execute("focus", args: [.string("down")])

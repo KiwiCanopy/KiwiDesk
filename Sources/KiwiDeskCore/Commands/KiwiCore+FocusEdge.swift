@@ -13,6 +13,9 @@ struct FocusEdge {
     let frame: CGRect
     /// The tiled windows the search looked at, in their slots.
     let candidates: [(WindowID, CGRect)]
+    /// The pointer's say on a wrap within the screen; a hop always
+    /// hands it over (#2548), and no caller passing false reaches
+    /// one, the scroll gesture reading All screens as This screen.
     let warp: Bool
     let origin: WindowID?
 }
@@ -32,7 +35,13 @@ extension KiwiCore {
         case .thisScreen:
             return wrapThisScreen(edge)
         case .allScreens:
-            if let hop = hopScreens(edge) { return hop }
+            if let hop = hopScreens(
+                from: edge.space.id,
+                in: edge.direction,
+                band: edge.frame
+            ) {
+                return hop
+            }
             return navigate(
                 edge.args,
                 swapping: false,
@@ -71,31 +80,49 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// A focus key on an empty Space, which has no window to step
+    /// from: under All screens it hops with its whole screen as the
+    /// band; otherwise, or with nowhere to land, nil.
+    func hopFromEmptySpace(
+        _ space: Space,
+        in direction: Direction,
+        wrap: FocusWrap?
+    ) -> CommandResponse? {
+        guard (wrap ?? focusWrap.mode) == .allScreens,
+            let band = screenFrame(of: space.id)
+        else { return nil }
+        return hopScreens(from: space.id, in: direction, band: band)
+    }
+
     /// The hop: the first screen in `hopOrder` whose shown Space
     /// has a window to land on, switched to through the one
     /// `followSwitch`, which raises, focuses and hands the pointer
     /// over (#2548).
-    private func hopScreens(_ edge: FocusEdge) -> CommandResponse? {
-        guard let here = state.workspaces.display(of: edge.space.id)
+    private func hopScreens(
+        from origin: SpaceID,
+        in direction: Direction,
+        band: CGRect
+    ) -> CommandResponse? {
+        guard let here = state.workspaces.display(of: origin)
         else { return nil }
         let screens = tiler.displayFrames()
         let order = ScreenHop.hopOrder(
             from: here,
-            in: edge.direction,
-            band: edge.frame,
+            in: direction,
+            band: band,
             among: screens
         )
         for display in order {
             guard
                 let shown = state.workspaces.activeSpace(on: display),
-                shown != edge.space.id,
+                shown != origin,
                 let space = state.workspaces[shown],
                 let bounds = screens.first(where: { $0.id == display })?
                     .frame,
                 let landing = landing(
                     in: space,
-                    entering: edge.direction,
-                    band: edge.frame,
+                    entering: direction,
+                    band: band,
                     bounds: bounds
                 )
             else { continue }
@@ -118,8 +145,9 @@ extension KiwiCore {
         bounds: CGRect
     ) -> WindowID? {
         let skip = lensKeySkip() ?? { _ in false }
+        let hidden = runHidden
         let tiled = state.effectiveTiledMembers(of: space)
-            .filter { !skip($0) }
+            .filter { !skip($0) && !hidden.contains($0) }
         if let end = orderEnd(of: space, tiled, entering: direction) {
             return end
         }

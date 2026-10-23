@@ -62,10 +62,9 @@ extension KiwiCore {
     }
 
     /// The target screen's visible frame (AX space), the empty
-    /// Space's landing; nil for a screen not connected.
+    /// Space's landing; nil for a screen not connected. Read off
+    /// the one `displayFrames` topology the screen hop reads.
     func handoffScreenFrame(of display: DisplayID) -> CGRect? {
-        TilingEngine.screen(for: display).map {
-            GeometryUtils.axVisibleFrame(of: $0)
-        }
+        tiler.displayFrames().first { $0.id == display }?.frame
     }
 }

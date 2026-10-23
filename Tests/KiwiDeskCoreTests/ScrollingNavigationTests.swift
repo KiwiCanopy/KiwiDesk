@@ -182,7 +182,7 @@ struct ScrollingNavigationTests {
             windows: 3,
             focus: WindowID(1)
         )
-        // wrap_focus defaults on; this pins the dead end.
+        // The focus wrap defaults on; this pins the dead end.
         core.execute("set_focus_wrap", args: [.string("off")])
         let left = core.execute("focus", args: [.string("left")])
         #expect(!left.isSuccess)
@@ -254,7 +254,7 @@ struct ScrollingNavigationTests {
         #expect(core.activeSpace?.focused == WindowID(3))
     }
 
-    @Test("Monocle wraps when wrap_focus is on")
+    @Test("Monocle wraps under This screen")
     func monocleCycleUntouched() {
         let core = makeCore()
         for id in 1...3 {

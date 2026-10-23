@@ -25,3 +25,14 @@ extension Profile {
         return monitorSets.first { $0.monitors == wanted }
     }
 }
+
+extension Profile {
+    /// All entries must share one `monitors` length — the first
+    /// entry's length is canonical, mismatched entries dropped.
+    static func sanitized(_ sets: [MonitorSet]) -> [MonitorSet] {
+        guard let canonical = sets.first?.monitors.count else {
+            return []
+        }
+        return sets.filter { $0.monitors.count == canonical }
+    }
+}

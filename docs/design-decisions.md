@@ -1910,10 +1910,11 @@ in every layout: Off, This screen or All screens
 Three per-layout switches answered the question for the
 array-order layouts only, and the geometric ones stopped at the
 edge with no way to wrap; a user who moved between layouts met
-three answers to one key. *Off* stays because it is the one
-place a deliberate `false` can go, it keeps the #436 wall a held
-key parks on, and a script detects an edge by the failure.
-*This screen* wraps within the screen: the array-order layouts to
+three answers to one key. *Off* stays because it keeps the #436
+wall a held key parks on, and a script detects an edge by the
+failure.
+*This screen* wraps within the screen — a Floating Space stops
+at its last window: the array-order layouts to
 the far end of their order, the geometric ones to the window
 nearest the opposite edge in the focused window's row or column,
 found by `Navigation.neighbor` seeded from a point just outside
@@ -1923,8 +1924,8 @@ past the last screen to the farthest on the other side, which
 may be this screen, so with one screen it is *This screen*. A
 screen counts only where it overlaps the focused window's band,
 so a diagonal screen is never a neighbour; the landing is the
-window nearest the entering edge, an array-order layout's end
-of order on that side. The edge is reached only past each
+window nearest the entering edge, and along a Scrolling or
+Monocle row's axis the end of its order on that side. The edge is reached only past each
 layout's own steps, so a Scrolling row, a Monocle cycle and a
 Stack or Track run that hides windows are walked to their end
 before focus leaves the screen. The scroll gesture acts on the
@@ -1934,15 +1935,14 @@ per-profile override — because a profile may want the screen
 wall its arrangement was made around, and no layout wants a
 different answer than another on the same keys.
 
-The three switches cross by adoption at the first apply, as
-app-wide values do (#1741), since only the apply knows which
-profile is live. A file written before 3.2.0, whose default was
-off, carries no choice in `false`: all three `true` reads All
-screens and anything else the default. From 3.2.0 on the default
-was on, so a `false` is a choice: all three `true` reads All
-screens and any `false` reads Off. The cost is the mixed file —
-one layout wrapping and another not — which lands on one answer
-for all of them: Off from 3.2.0 on, the default before.
+The three switches cross to the default, All screens, whatever
+they stored, and a one-shot step drops them from every file (owner
+ruling 2026-10-23). A stored `false` cannot say whether anyone
+chose it: before 3.2.0 it was the default, 3.2.0 kept a stored
+value, and every later build re-stamped the file's format, so the
+format cannot date the choice either. The cost is the user who
+turned focus wrapping off on purpose: it comes back on, and
+Off is one row away under Shortcuts & Gestures ▸ Focus.
 :::
 
 ```mermaid

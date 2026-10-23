@@ -154,4 +154,41 @@ struct FocusWrapScreensTests {
         #expect(right(core))
         #expect(core.state.workspaces.lastFocused == WindowID(21))
     }
+
+    @Test("an empty Space still crosses to the next screen")
+    func emptySpaceHops() {
+        guard let core = twoScreens() else { return }
+        core.state.workspaces.assign(SpaceID("4"), to: left)
+        core.state.workspaces.activate(SpaceID("4"))
+        #expect(right(core))
+        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        #expect(core.state.workspaces.lastFocused == WindowID(21))
+    }
+
+    /// A Stack run on the main screen hides windows behind its edge
+    /// slot (#2235): a hop entering past them lands on a shown one.
+    @Test("a hop never lands on a window a run hides")
+    func hopSkipsHiddenRunMembers() throws {
+        guard let core = twoScreens() else { return }
+        for id in UInt32(23)...26 {
+            core.state.workspaces.activate(SpaceID("2"))
+            core.state.apply(.windowCreated(window(id, x: 740)))
+        }
+        core.execute("set_mode", args: [.string("2"), .string("stack")])
+        core.execute("set_min_window_size", args: [.number(300)])
+        core.state.workspaces.activate(SpaceID("2"))
+        core.retile(animated: false)
+        let hidden = core.runHidden
+        try #require(!hidden.isEmpty)
+        // Back on the left screen, at its left edge: ← wraps round
+        // to the main screen, entering through its right edge.
+        core.state.workspaces.activate(SpaceID("1"))
+        core.state.apply(.windowFocused(WindowID(11)))
+        #expect(
+            core.navigate([.string("left")], swapping: false).isSuccess
+        )
+        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        let landed = try #require(core.state.workspaces.lastFocused)
+        #expect(!hidden.contains(landed))
+    }
 }

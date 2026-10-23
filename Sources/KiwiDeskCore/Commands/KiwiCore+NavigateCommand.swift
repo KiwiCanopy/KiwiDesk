@@ -40,6 +40,16 @@ extension KiwiCore {
             let focused = origin
                 ?? state.focusAnchor(of: space, tiled: tiled)
         else {
+            // An empty Space still crosses screens (#2493).
+            if !swapping,
+                let hop = hopFromEmptySpace(
+                    space,
+                    in: direction,
+                    wrap: wrap
+                )
+            {
+                return hop
+            }
             return .fail("no focused window")
         }
         // Swapping FROM a traveler is refused up front, for every
@@ -165,7 +175,7 @@ extension KiwiCore {
         // so the cross-axis search — and the dead-end
         // fall-through of an unwrapped cycle — would
         // geometric-hit the pile: an accidental tile jump that
-        // also made `wrap_focus` look inert, since focusing a
+        // also made the focus wrap look inert, since focusing a
         // parked member SHOWS it (owner QA 2026-08-18). The
         // SHOWN member stays a candidate, so the #488
         // float→tile hop still lands; under `stack` nothing

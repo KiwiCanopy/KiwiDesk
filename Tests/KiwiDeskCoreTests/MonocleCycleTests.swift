@@ -68,7 +68,7 @@ struct MonocleCycleTests {
         #expect(core.activeSpace?.focused == w3)
     }
 
-    @Test("wrap_focus off makes focus stop at the ends")
+    @Test("Wrap focus off makes focus stop at the ends")
     func wrapOffStopsAtEnds() {
         let core = makeMonocleCore()
         core.execute(

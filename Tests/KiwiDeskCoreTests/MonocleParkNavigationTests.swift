@@ -28,7 +28,7 @@ private func makeCore() -> KiwiCore {
 /// tier (#881, owner QA): the slivers are real frames, so an
 /// unwrapped cycle's dead-end fall-through geometric-hit a
 /// parked window — and focusing a parked member SHOWS it, which
-/// made `wrap_focus` look inert (wrap on and off both "moved
+/// made the focus wrap look inert (wrap on and off both "moved
 /// on"). The parked members leave the tiled tier; the wrap
 /// toggle's two arms are observable again.
 @Suite("Monocle park navigation (#881)", .serialized)
@@ -56,7 +56,7 @@ struct MonocleParkNavigationTests {
             "monocle.set_hide_style",
             args: [.string("park")]
         )
-        // wrap_focus defaults on; this pins the dead end.
+        // The focus wrap defaults on; this pins the dead end.
         core.execute("set_focus_wrap", args: [.string("off")])
         core.state.workspaces.focus(w3, in: space)
         return core
