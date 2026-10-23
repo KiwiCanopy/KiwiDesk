@@ -49,6 +49,9 @@ public struct PrivatePathProbe {
         case symbol
         /// An `SLSBridged*Operation` class `WMBridge` resolves.
         case bridgeClass = "bridge_class"
+        /// A private AppKit method KiwiDesk answers on its own
+        /// panels (`GlassActiveAppearance`).
+        case objcMethod = "objc_method"
     }
 
     /// Whether the read-only run calls it (`read`) or only looks

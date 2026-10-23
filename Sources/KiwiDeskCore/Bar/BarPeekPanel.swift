@@ -281,6 +281,7 @@ final class BarPeekPanel {
     }
 
     func makePanel() -> BarPeekWindow {
+        GlassActiveAppearance.install()
         let panel = BarPanel.configure(
             BarPeekWindow(
                 contentRect: .zero,

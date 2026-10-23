@@ -22,6 +22,7 @@ public enum PrivatePathSelfTest {
             + SkyLightWindowEvents.selfTestProbes()
             + WMBridge.selfTestProbes(context)
             + SystemAppearance.selfTestProbes()
+            + GlassActiveAppearance.selfTestProbes()
     }
 
     /// Runs each probe once, in order, into the verb's reply.
