@@ -2010,6 +2010,7 @@
   "shortcuts.layer_rename.shared": "“%1$@” is a shared layer. Add it by name to join it.",
   "shortcuts.layers.caption": "Layers are alternate shortcut sets — only the active layer's shortcuts fire. Bind a key below to switch between them. “default” is the standard layer and is always the active one after the app starts.",
   "shortcuts.lua.body_ax": "Lua for %1$@",
+  "shortcuts.lua.default_symbol": "</>",
   "shortcuts.lua.desc_ax": "Description for %1$@",
   "shortcuts.lua.desc_placeholder": "Description",
   "shortcuts.lua.edit_ax": "Edit Lua for %1$@",

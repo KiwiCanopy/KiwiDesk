@@ -76,6 +76,36 @@ struct ShortcutGroupFieldTests {
         )
     }
 
+    /// The field commits through `committed`, and New group… arms
+    /// the empty-keeps arm — `committed`'s cases prove nothing if the
+    /// field stores `stored(text)` or never sets the flag.
+    @Test("the field commits through committed, armed by New group")
+    func fieldWiring() throws {
+        let field = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/Lua/"
+                            + "ShortcutGroupField.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        #expect(
+            field.contains(
+                "naming.committed(text,over:group,startedNew:startedNew)"
+            )
+        )
+        #expect(!field.contains("naming.stored("))
+        #expect(
+            field.contains(
+                "PullDownItem(title:newGroupTitle){startedNew=truetext=\"\""
+            )
+        )
+    }
+
     @Test("the menu: built-ins, the user's own, Custom, New group")
     func menuOrder() {
         let entries = ShortcutGroupMenu.entries(

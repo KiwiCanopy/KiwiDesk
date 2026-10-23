@@ -42,7 +42,8 @@ extension AdvancedLuaGroup {
                 // `</>` is shown, never named (config-vocabulary.md).
                 .accessibilityValue(
                     binding.wrappedValue.symbol.isEmpty
-                        ? "</>" : binding.wrappedValue.symbol
+                        ? L("shortcuts.lua.default_symbol", "</>")
+                        : binding.wrappedValue.symbol
                 )
                 luaLine(binding, name: name)
                 ShortcutGroupField(
