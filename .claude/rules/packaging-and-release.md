@@ -571,7 +571,8 @@ branches on each section's generated `type` and never on its
 displayed title, and a new type joins `changelog-sync`'s
 `SECTION_TYPES` alone; a reader that keeps its own list of the
 types (the window's Swift enum) is held to that table by a parity
-test that runs the generator, never by a hand-typed copy.
+test that runs the generator, never by a hand-typed copy
+(`ChangelogEntryKeysTests`).
 **Curate the draft,
 then publish** — `release.yml` drafts, and
 `.github/workflows/changelog.yml` fires on *publish* and syncs the

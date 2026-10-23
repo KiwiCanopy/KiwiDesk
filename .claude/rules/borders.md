@@ -181,7 +181,7 @@ these:
 - **A steady `sync` orders only a ring `needsOrder` flags** —
   new, revived or hidden — unless no WindowServer stream reports
   its target moving; the two settle passes re-stack every ring
-  (`BorderOrderReassertTests`).
+  (`BorderOrderReassertTests`, `BorderRestackTests`).
 - **A ring re-stacks through AppKit's `order(_:relativeTo:)`, and
   only from a ruled trigger** — `sync`'s `ordersOverlay` gate
   (`needsOrder`, a settle pass, no WindowServer stream), the

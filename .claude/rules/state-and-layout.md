@@ -151,7 +151,9 @@ editing here:
   `minWindowSizes` beside a call site: the value is per layout, so
   a raw read answers for no layout and disagrees with the one the
   layout draws. `MinWindowSizeReadCensusTests` reds an unrouted
-  read, and its `allowed` map is the exemption list. Hand the
+  read, and its `allowed` map is the exemption list; a Space's
+  own value outranking the layout's is `MinWindowSizeOverrideTests`'
+  (#2422). Hand the
   resolver the Space the floor is asked for, and nil only where
   none exists (the quit grid, a preview of a layout's own value):
   the Space argument is where #2422's per-Space level
@@ -399,7 +401,8 @@ editing here:
   `paidInPlaceOfTheArrivalRetile`). A window that lands BEFORE
   its app's activation is noted as the ledger's one placement and
   paid by that activation, only where it arrived after the press
-  (`LaunchFollowReopenTests`). Open or Focus owes only where
+  (`LaunchFollowReopenTests`); a press that opened nothing
+  retires its debt (`LaunchFollowRetireTests`). Open or Focus owes only where
   nothing of the app is up; one already showing is merely
   focused. A new route that should follow an open owes through
   that door, and a new moment that is "not an open" retires
