@@ -19,7 +19,7 @@ extension ShortcutsReferenceBuilder {
     /// a line arrow, swap a filled triangle, so a one-sided line
     /// arrow always means a focus move.
     static let directionIcons: [String: String] = {
-        let names = KeybindingCatalog.directions.map(\.0)
+        let names = KeybindingCatalog.directionNames
         let focus = zip(KeybindingCatalog.focusDirections, names).map {
             ($0.lua, "arrow.\($1)")
         }
@@ -31,17 +31,50 @@ extension ShortcutsReferenceBuilder {
 
     /// The glyph a folded set wears in place of its first member's:
     /// every direction the set covers, never one (#2529 ▸ Ruling).
-    /// Nil keeps the first member's, for sets whose members already
-    /// share a non-directional glyph or show both ways.
+    /// Nil keeps the first member's, for sets whose members share
+    /// one glyph or show both ways already.
     static func foldIcon(for family: ShortcutFold.Family) -> String? {
         switch family {
+        case .goToSpace, .moveToSpace, .moveToSpaceFollow:
+            return spaceGroupIcon
         case .focusDirections:
             return "arrow.up.and.down.and.arrow.left.and.right"
         case .swapDirections: return "dpad.fill"
-        case .layoutCycle: return "arrow.trianglehead.2.clockwise"
-        default: return nil
+        case .layoutCycle: return layoutCycle.drawn
+        case .goToDesktop, .moveToDesktop, .moveToDesktopFollow,
+            .spaceStep, .spaceHistory, .width, .height:
+            return nil
         }
     }
+
+    /// A symbol newer than the deployment floor, and the older one
+    /// the floor's macOS draws instead (`ShortcutSymbolFloorTests`).
+    struct FloorSymbol: Sendable {
+        let name: String
+        let floor: String
+        /// The macOS `name` needs, the `#available` below.
+        static let since = 15
+
+        var drawn: String {
+            if #available(macOS 15, *) { return name }
+            return floor
+        }
+    }
+
+    /// The layout cycle's arrows (#2529 ▸ Ruling).
+    static let nextLayout = FloorSymbol(
+        name: "arrow.trianglehead.clockwise",
+        floor: "arrow.clockwise"
+    )
+    static let previousLayout = FloorSymbol(
+        name: "arrow.trianglehead.counterclockwise",
+        floor: "arrow.counterclockwise"
+    )
+    static let layoutCycle = FloorSymbol(
+        name: "arrow.trianglehead.2.clockwise",
+        floor: "arrow.triangle.2.circlepath"
+    )
+    static let floorSymbols = [nextLayout, previousLayout, layoutCycle]
 
     /// Numbered square icon fallback for Space switching commands.
     static func spaceFallbackIcon(
@@ -69,9 +102,9 @@ extension ShortcutsReferenceBuilder {
     static func verbIcon(for lua: String) -> String? {
         switch lua {
         case "KiwiDesk.cycle_mode()":
-            return "arrow.trianglehead.clockwise"
+            return nextLayout.drawn
         case "KiwiDesk.cycle_mode(\"prev\")":
-            return "arrow.trianglehead.counterclockwise"
+            return previousLayout.drawn
         case "KiwiDesk.toggle_floating()":
             return FloatingStyle.symbolName
         case "KiwiDesk.toggle_sticky()":

@@ -4,12 +4,14 @@ import KiwiDeskCore
 /// Catalog backing shortcuts settings tab: navigation presets and application
 /// launchers.
 enum KeybindingCatalog {
-    /// The compass directions, in the order the focus and swap
-    /// sets list them; the argument comes first.
-    static let directions = [
+    private static let directions = [
         ("left", "to the left"), ("down", "below"),
         ("up", "above"), ("right", "to the right"),
     ]
+
+    /// The compass arguments, in the order the focus and swap sets
+    /// list them.
+    static let directionNames = directions.map(\.0)
 
     /// Translates direction argument for display (`docs/translating.md`).
     @MainActor private static func directionPhrase(

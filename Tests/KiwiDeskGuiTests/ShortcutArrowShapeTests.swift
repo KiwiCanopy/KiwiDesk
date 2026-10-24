@@ -5,24 +5,27 @@ import Testing
 @testable import KiwiDesk
 
 /// The Shortcuts side's direction glyphs (#2529 ▸ Ruling): a row
-/// for one direction wears that direction, focus a line arrow and
-/// swap a filled triangle; a folded set wears every direction it
-/// covers, never its first member's one-sided glyph.
+/// for one direction wears that direction, focus and swap in
+/// different shapes; a folded set wears every direction it covers,
+/// never a member's glyph. The picks themselves are the docstrings'
+/// in `ShortcutsReference+Glyphs.swift`; this suite holds shapes.
+/// Main-actor spend: three builder passes and one symbol lookup per
+/// family.
 @Suite("Shortcut arrows show the directions a row covers")
 @MainActor
 struct ShortcutArrowShapeTests {
-    private static let directions = ["left", "down", "up", "right"]
-
-    /// The owner's picks for the folded sets (#2529 ▸ Ruling).
-    private static let foldGlyphs: [ShortcutFold.Family: String] = [
-        .focusDirections: "arrow.up.and.down.and.arrow.left.and.right",
-        .swapDirections: "dpad.fill",
-        .layoutCycle: "arrow.trianglehead.2.clockwise",
+    /// The sets whose members each name a direction.
+    private static let directional: [ShortcutFold.Family] = [
+        .focusDirections, .swapDirections, .layoutCycle,
     ]
 
-    private func folded(_ family: ShortcutFold.Family) -> ShortcutRow? {
-        let members = ShortcutFold.sets(resizeStep: 50)
-            .first { $0.0 == family }!.1
+    private func folded(
+        _ family: ShortcutFold.Family
+    ) throws -> ShortcutRow {
+        let members = try #require(
+            ShortcutFold.sets(resizeStep: 50).first { $0.0 == family }?.1,
+            "\(family) is not a set"
+        )
         let keys = ["a", "b", "c", "d"]
         let layer = KeyLayer(
             name: KeyLayer.defaultName,
@@ -42,49 +45,64 @@ struct ShortcutArrowShapeTests {
             resizeStep: 50,
             layerNames: [KeyLayer.defaultName]
         )
-        return reference.controls.flatMap(\.rows).first
-    }
-
-    @Test("a focus row wears its direction's line arrow")
-    func focusRowsWearLineArrows() {
-        let glyphs = KeybindingCatalog.focusDirections.map(
-            ShortcutsReferenceBuilder.icon(for:)
-        )
-        #expect(glyphs == Self.directions.map { "arrow.\($0)" })
-    }
-
-    @Test("a swap row wears its direction's filled triangle")
-    func swapRowsWearTriangles() {
-        let glyphs = KeybindingCatalog.swapDirections.map(
-            ShortcutsReferenceBuilder.icon(for:)
-        )
-        #expect(
-            glyphs == Self.directions.map { "arrowtriangle.\($0).fill" }
+        return try #require(
+            reference.controls.flatMap(\.rows).first,
+            "\(family) built nothing"
         )
     }
 
-    @Test("layout next and previous wear the cycle arrows")
-    func layoutCycleRows() {
-        let glyphs = KeybindingCatalog.layoutCycleRows.map(
-            ShortcutsReferenceBuilder.icon(for:)
-        )
-        #expect(
-            glyphs == [
-                "arrow.trianglehead.clockwise",
-                "arrow.trianglehead.counterclockwise",
-            ]
-        )
+    /// A glyph's name parts, so "left" matches `arrow.left` and not
+    /// a name that merely contains the letters.
+    private func parts(_ glyph: String?) -> Set<Substring> {
+        Set((glyph ?? "").split(separator: "."))
     }
 
-    @Test("a folded set wears every direction, never a member's glyph")
+    @Test("a focus or swap row names its own direction alone")
+    func singleRowsNameTheirDirection() {
+        let names = KeybindingCatalog.directionNames
+        for commands in [
+            KeybindingCatalog.focusDirections,
+            KeybindingCatalog.swapDirections,
+        ] {
+            for (command, name) in zip(commands, names) {
+                let glyph = ShortcutsReferenceBuilder.icon(for: command)
+                let named = parts(glyph).intersection(
+                    names.map { Substring($0) }
+                )
+                #expect(named == [Substring(name)], "\(command.lua)")
+            }
+        }
+    }
+
+    @Test("focus and swap wear different shapes")
+    func focusAndSwapDiffer() {
+        let focus = Set(
+            KeybindingCatalog.focusDirections.compactMap(
+                ShortcutsReferenceBuilder.icon(for:)
+            )
+        )
+        let swap = Set(
+            KeybindingCatalog.swapDirections.compactMap(
+                ShortcutsReferenceBuilder.icon(for:)
+            )
+        )
+        #expect(focus.count == 4 && swap.count == 4)
+        #expect(focus.isDisjoint(with: swap))
+    }
+
+    @Test("a folded set wears its own glyph, never a member's")
     func foldedSetsWearTheirGroupGlyph() throws {
         LocalizationManager.shared.select("en")
-        for (family, glyph) in Self.foldGlyphs {
-            let row = try #require(folded(family), "\(family) built nothing")
+        for family in Self.directional {
+            let row = try folded(family)
             #expect(row.members.count >= 2, "\(family) did not fold")
-            #expect(row.icon == glyph, "\(family) wears \(row.icon ?? "-")")
+            let glyph = try #require(row.icon, "\(family) is bare")
+            #expect(
+                glyph == ShortcutsReferenceBuilder.foldIcon(for: family),
+                "\(family) wears \(glyph)"
+            )
             let own = Set(row.members.compactMap(\.icon))
-            #expect(!own.contains(row.icon ?? ""), "\(family)")
+            #expect(!own.contains(glyph), "\(family)")
         }
     }
 
@@ -92,28 +110,32 @@ struct ShortcutArrowShapeTests {
     /// any Lua: a verb outside the focus and swap sets gains no arrow.
     @Test("a direction argument alone draws no arrow")
     func directionArgumentAloneDrawsNoArrow() {
-        let other = NavCommand(
-            label: "Focus screen to the left",
-            lua: "KiwiDesk.focus_display(\"left\")"
-        )
-        #expect(ShortcutsReferenceBuilder.icon(for: other) == nil)
+        for name in KeybindingCatalog.directionNames {
+            let other = NavCommand(
+                label: "Focus screen \(name)",
+                lua: "KiwiDesk.focus_display(\"\(name)\")"
+            )
+            #expect(
+                ShortcutsReferenceBuilder.icon(for: other) == nil,
+                "\(name)"
+            )
+        }
     }
 
     @Test("every fold glyph resolves on this macOS")
     func foldGlyphsResolve() {
-        for family in ShortcutFold.Family.allCases {
-            guard let glyph = ShortcutsReferenceBuilder.foldIcon(for: family)
-            else { continue }
+        let glyphs = ShortcutFold.Family.allCases.compactMap(
+            ShortcutsReferenceBuilder.foldIcon(for:)
+        )
+        #expect(!glyphs.isEmpty)
+        for glyph in glyphs {
             #expect(
-                NSImage(systemSymbolName: glyph, accessibilityDescription: nil)
-                    != nil,
+                NSImage(
+                    systemSymbolName: glyph,
+                    accessibilityDescription: nil
+                ) != nil,
                 "\(glyph) does not resolve"
             )
         }
-        #expect(
-            ShortcutFold.Family.allCases.contains {
-                ShortcutsReferenceBuilder.foldIcon(for: $0) != nil
-            }
-        )
     }
 }
