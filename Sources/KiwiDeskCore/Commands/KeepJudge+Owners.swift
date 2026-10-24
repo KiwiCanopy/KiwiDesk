@@ -29,6 +29,11 @@ extension KeepJudge {
                 RuleReachTable<[String]>.app(of: path[1]),
                 editing: page
             )
+        case KeepRoot.focusWrap?:
+            shared = rules.focusWrap.keepIsShared(
+                RuleReachTable<FocusWrap>.focusWrapKey,
+                editing: page
+            )
         default:
             shared = rules.floatAutomatically.keepIsShared(
                 RuleReachTable<Bool>.floatAutomaticallyKey,

@@ -81,7 +81,7 @@ struct VisibleBoundsRoutingTests {
         // `NSScreen.screens` for the neighbor scan, the same
         // several-screens shape as parking below, and is itself
         // an injectable seam the test factories pin.
-        "Tiling/TilingEngine.swift": 2,
+        "Tiling/TilingEngine.swift": 3,
         // `screen(containing:)` is static — no instance in hand.
         "Tiling/TilingEngine+Layout.swift": 1,
         // Parking picks each window's OWN screen from
@@ -95,10 +95,6 @@ struct VisibleBoundsRoutingTests {
         // once per display for both bars (#1517); the App Bar's
         // cold-start fallback once for the main screen.
         "App/KiwiCore+Shelf.swift": 1,
-        // The screen handoff's empty-Space landing is the centre of
-        // that screen's visible frame (#2548): a screen, not a
-        // layout span.
-        "App/KiwiCore+ScreenHandoff.swift": 1,
         "App/KiwiCore+AppBar.swift": 1,
         // A bar's refusal pill sits at that bar's edge of the screen
         // where no shelf carries it (#2567).

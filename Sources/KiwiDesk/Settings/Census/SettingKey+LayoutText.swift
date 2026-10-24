@@ -52,8 +52,6 @@ extension LayoutKey {
         // unit row's synonyms instead (#1382).
         case .scrollingSlotSizeCount:
             return .dynamic
-        case .scrollingWrapFocus, .monocleWrapFocus:
-            return .text("scroll_grid.wrap_focus")
         case .scrollingFillWhenAlone, .stackFillWhenAlone:
             return .text(
                 "layout_params.fill_when_alone",
@@ -90,8 +88,6 @@ extension LayoutKey {
             return .text("track.auto_tracks")
         case .trackLimit, .trackOverrideLimit:
             return .text("track.limit")
-        case .trackWrapFocus:
-            return .text("track.wrap_focus")
         case .scrollingOverrideOrientation, .monocleOverrideOrientation:
             return .text("scroll_grid.orientation")
         case .gridOverrideAutoSize, .trackOverrideAutoTracks,

@@ -121,6 +121,8 @@ struct FocusGroup: View {
                 key in
                 if key == .shortcuts(.spaceHistory) {
                     SpaceHistoryRow(model: model)
+                } else if key == .shortcuts(.focusWrap) {
+                    FocusWrapRow(model: model)
                 } else {
                     KeybindingFamilyRows(
                         model: model,

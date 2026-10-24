@@ -77,14 +77,6 @@ extension LayoutCard {
         )
     }
 
-    var scrollWrapFocusRow: some View {
-        ToggleRow(
-            label: L("scroll_grid.wrap_focus", "Wrap focus"),
-            isOn: scrolling.wrapFocus,
-            help: LayoutHelp.wrapFocus
-        )
-    }
-
     /// Focus shift animation toggle for scrolling layout (#68 §3.5).
     var animateFocusShiftsRow: some View {
         ToggleRow(

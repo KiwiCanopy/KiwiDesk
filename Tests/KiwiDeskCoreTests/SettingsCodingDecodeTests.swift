@@ -22,13 +22,11 @@ struct SettingsCodingDecodeTests {
         settings.stack.stackPosition = .top
         settings.grid.rows = 4
         settings.grid.autoSize = true
-        settings.monocle.wrapFocus = false
         settings.monocle.hideStyle = .park
         settings.track.axis = .horizontal
         settings.track.autoTracks = false
         settings.track.limit = 3
         settings.track.newWindow = .focusedTrack
-        settings.track.wrapFocus = false
         settings.minWindowSizes = MinWindowSizes(all: 200)
         settings.swapSkipsCascade = false
         settings.floatPlacement = .keep

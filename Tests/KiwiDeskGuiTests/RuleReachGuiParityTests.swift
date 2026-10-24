@@ -25,6 +25,7 @@ struct RuleReachGuiParityTests {
         "scrollGestures": "scrollGesture",
         "spaceHistory": "spaceHistory",
         "modeCycle": "modeCycle",
+        "focusWrap": "focusWrap",
         "tileRules": "tileRules",
         "floatAutomatically": "floatAutomatically",
     ]

@@ -23,6 +23,7 @@ struct RuleReachFamilyParityTests {
         "scrollGestures": "scrollGesture",
         "spaceHistory": "spaceHistory",
         "modeCycle": "modeCycle",
+        "focusWrap": "focusWrap",
         "tileRules": "tileRules",
         "floatAutomatically": "floatAutomatically",
         // The shortcut override is always the Save's own diff

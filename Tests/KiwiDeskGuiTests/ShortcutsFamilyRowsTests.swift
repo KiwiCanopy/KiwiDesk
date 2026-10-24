@@ -71,6 +71,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse),
             .shortcuts(.spaceHistory),
+            .shortcuts(.focusWrap),
             .shortcuts(.modeCycle),
             .shortcuts(.modeCue),
             .shortcuts(.hyperKey),

@@ -50,8 +50,8 @@ struct MonocleCycleTests {
         // Wrap is on by default; pin it so the test does not
         // ride the default (#257).
         core.execute(
-            "monocle.set_wrap_focus",
-            args: [.bool(true)]
+            "set_focus_wrap",
+            args: [.string("this_screen")]
         )
         #expect(
             core.execute("focus", args: [.string("right")])
@@ -68,12 +68,12 @@ struct MonocleCycleTests {
         #expect(core.activeSpace?.focused == w3)
     }
 
-    @Test("wrap_focus off makes focus stop at the ends")
+    @Test("Wrap focus off makes focus stop at the ends")
     func wrapOffStopsAtEnds() {
         let core = makeMonocleCore()
         core.execute(
-            "monocle.set_wrap_focus",
-            args: [.bool(false)]
+            "set_focus_wrap",
+            args: [.string("off")]
         )
         // At the first window, left no longer wraps.
         #expect(
@@ -135,7 +135,7 @@ struct MonocleCycleTests {
         // swap never wraps (#168), even with focus wrap on: from
         // the first slot, left is a no-op — a wrapping swap would
         // teleport the window end to end.
-        core.execute("monocle.set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         core.state.workspaces.focus(w2, in: SpaceID(1))
         #expect(
             !core.execute("swap", args: [.string("left")])

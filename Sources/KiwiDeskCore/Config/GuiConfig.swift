@@ -55,6 +55,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The layouts the cycle walks (#453); a profile diverges
     /// through `Profile.modeCycle`.
     public var modeCycle = ModeCycle.defaultList
+    /// What a focus key does at the last window (#2493); a profile
+    /// diverges through `Profile.focusWrap`.
+    public var focusWrap = FocusWrap.defaultMode
     /// Whether detection floats windows on a guess — a fixed size,
     /// no Dock icon — (#2173); a profile diverges through
     /// `Profile.floatAutomatically`.
@@ -119,6 +122,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
+        case focusWrap = "focus_wrap"
         case floatAutomatically = "float_automatically"
         case tileRules = "tile_rules"
         case shortcutBase = "shortcut_base"
@@ -195,6 +199,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? .defaultKind
         // Additive since #453: absence is the default list.
         modeCycle = try ModeCycle.decoded(container, forKey: .modeCycle)
+        // Additive since #2493: absence is the default.
+        focusWrap =
+            try container.decodeIfPresent(
+                FocusWrap.self,
+                forKey: .focusWrap
+            ) ?? .defaultMode
         // Additive since #2173: absence is the defaults.
         floatAutomatically =
             try container.decodeIfPresent(
@@ -279,6 +289,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(scrollGesture, forKey: .scrollGesture)
         try container.encode(spaceHistory, forKey: .spaceHistory)
         try container.encode(modeCycle, forKey: .modeCycle)
+        try container.encode(focusWrap, forKey: .focusWrap)
         try container.encode(
             floatAutomatically,
             forKey: .floatAutomatically

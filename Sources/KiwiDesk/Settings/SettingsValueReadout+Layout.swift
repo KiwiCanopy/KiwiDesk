@@ -129,13 +129,6 @@ extension SettingsValueReadout {
                 n.scrolling.newWindowPlacement,
                 layoutPlacement
             )
-        case .scrollingWrapFocus:
-            return layoutRow(
-                census,
-                o.scrolling.wrapFocus,
-                n.scrolling.wrapFocus,
-                onOff
-            )
         case .scrollingFillWhenAlone:
             return layoutRow(
                 census,
@@ -226,13 +219,6 @@ extension SettingsValueReadout {
                 n.monocle.hideStyle,
                 layoutHideStyle
             )
-        case .monocleWrapFocus:
-            return layoutRow(
-                census,
-                o.monocle.wrapFocus,
-                n.monocle.wrapFocus,
-                onOff
-            )
         case .monocleNewWindowPlacement:
             return layoutRow(
                 census,
@@ -274,13 +260,6 @@ extension SettingsValueReadout {
                 o.track.limit,
                 n.track.limit,
                 layoutCount
-            )
-        case .trackWrapFocus:
-            return layoutRow(
-                census,
-                o.track.wrapFocus,
-                n.track.wrapFocus,
-                onOff
             )
         case .bspOverrideStrategy, .bspOverrideSplitRatioH,
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,

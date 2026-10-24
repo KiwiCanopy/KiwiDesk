@@ -41,11 +41,25 @@ private func window(_ id: UInt32) -> ManagedWindow {
 @MainActor
 struct ScreenHandoffTests {
     private let away = DisplayID(9_999)
+    /// The main screen's frame as the topology seam reports it.
+    private static let mainFrame = CGRect(
+        x: 0,
+        y: 25,
+        width: 1440,
+        height: 875
+    )
 
     private func twoScreenCore() -> (KiwiCore, DisplayID)? {
         guard let main = ScreenList.all.first?.kiwiDisplayID
         else { return nil }
         let core = makeCore()
+        let away = self.away
+        core.tiler.displayFrames = {
+            [
+                (away, CGRect(x: -1440, y: 25, width: 1440, height: 875)),
+                (main, Self.mainFrame),
+            ]
+        }
         core.state.workspaces.assign(SpaceID("1"), to: away)
         core.state.workspaces.assign(SpaceID("2"), to: main)
         core.state.workspaces.assign(SpaceID("3"), to: main)
@@ -109,8 +123,8 @@ struct ScreenHandoffTests {
         var warped: [CGRect] = []
         core.pointerWarp = { warped.append($0) }
         core.execute("focus_space", args: [.string("3")])
-        let screen = try #require(core.handoffScreenFrame(of: main))
-        #expect(warped == [screen])
+        #expect(core.handoffScreenFrame(of: main) == Self.mainFrame)
+        #expect(warped == [Self.mainFrame])
     }
 
     @Test("a pointer already on the target screen stays")

@@ -60,6 +60,7 @@ extension KiwiCore {
             KeepRoot.floatAutomatically: .bool(
                 eventLoop.floatRules.guess.enabled
             ),
+            KeepRoot.focusWrap: .string(focusWrap.mode.rawValue),
         ])
     }
 
@@ -76,6 +77,12 @@ extension KiwiCore {
         return [
             KeepRoot.appRules: appRuleJSON(rules.appRules.resolved(for: page)),
             KeepRoot.floatRules: floatRuleJSON(floats),
+            KeepRoot.focusWrap: .string(
+                (rules.focusWrap.resolved(
+                    RuleReachTable<FocusWrap>.focusWrapKey,
+                    for: page
+                ) ?? rules.focusWrap.focusWrapBase).rawValue
+            ),
             KeepRoot.floatAutomatically: .bool(
                 auto ?? rules.floatAutomatically.floatAutomaticallyBase
             ),
@@ -225,7 +232,8 @@ struct KeepJudge {
         case KeepRoot.spaceModes?: known = rest.count == 1
         case KeepRoot.appRules?, KeepRoot.floatRules?:
             known = rest.count == 1
-        case KeepRoot.floatAutomatically?: known = rest.isEmpty
+        case KeepRoot.floatAutomatically?, KeepRoot.focusWrap?:
+            known = rest.isEmpty
         default: known = false
         }
         guard known else { return leaf(.none, .unknown) }
@@ -252,6 +260,7 @@ struct KeepJudge {
         }
         if path.first == KeepRoot.floatAutomatically
             || path.first == KeepRoot.floatRules
+            || path.first == KeepRoot.focusWrap
         {
             return ruleLeaf(path, leaf)
         }
@@ -295,4 +304,6 @@ enum KeepRoot {
     static let appRules = "app_rules"
     static let floatRules = "float_rules"
     static let floatAutomatically = "float_automatically"
+    /// The focus-wrap setting (#2493), a rule-reach family.
+    static let focusWrap = "focus_wrap"
 }

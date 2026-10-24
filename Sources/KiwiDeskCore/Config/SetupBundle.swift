@@ -91,7 +91,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// bundle's `config`.
     /// 38 = `overflow_style` retired (#2235), in a bundle's
     /// `config` and its `[Profile]` alike.
-    public static let currentFormat = 38
+    /// 39 = the per-layout `wrap_focus` retired for `focus_wrap`
+    /// (#2493), in a bundle's `config` and its `[Profile]` alike.
+    public static let currentFormat = 39
 
     public let format: Int
 

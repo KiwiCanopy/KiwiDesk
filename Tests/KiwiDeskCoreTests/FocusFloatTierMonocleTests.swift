@@ -119,8 +119,8 @@ struct FocusFloatTierMonocleTests {
         let core = makeCore()
         let floatID = makeMonocleWithFloat(core, tiled: 2)
         core.execute(
-            "monocle.set_wrap_focus",
-            args: [.bool(false)]
+            "set_focus_wrap",
+            args: [.string("off")]
         )
         // w2 is the carousel's last window; with wrap off the
         // end step falls through both the cycle and the tied

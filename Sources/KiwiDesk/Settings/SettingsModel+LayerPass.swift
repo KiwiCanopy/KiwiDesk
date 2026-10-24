@@ -229,6 +229,7 @@ struct EncodedReachCache {
         let layers: [KeyLayer]
         let scrollGesture: ScrollGestureBase
         let spaceHistory: SpaceHistoryKind
+        let focusWrap: FocusWrap
         let modeCycle: [LayoutMode]
         let tileRules: [String]
         let floatAutomatically: Bool

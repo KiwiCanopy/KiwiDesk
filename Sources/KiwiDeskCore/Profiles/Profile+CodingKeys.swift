@@ -23,6 +23,7 @@ extension Profile {
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
+        case focusWrap = "focus_wrap"
         case floatAutomatically = "float_automatically"
         case tileRules = "tile_rules"
         case look

@@ -39,9 +39,11 @@ enum ShortcutsRowOrder {
         .shortcuts(.viewPicker),
     ]
 
-    /// Focus group order: directions, the Space steps, the
-    /// history setting above its two rows (#1655), live spaces.
+    /// Focus group order: the wrap setting above the direction keys
+    /// it governs (#2493), directions, the Space steps, the history
+    /// setting above its two rows (#1655), live spaces.
     static let focusAtRest: [SettingKey] = [
+        .shortcuts(.focusWrap),
         .shortcuts(.focusDir),
         .shortcuts(.spaceStep),
         .shortcuts(.spaceHistory),

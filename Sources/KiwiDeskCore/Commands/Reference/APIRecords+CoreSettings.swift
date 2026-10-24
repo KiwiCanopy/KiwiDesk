@@ -107,6 +107,11 @@ extension APIReference {
                 + "across every screen.",
             .choice("kind", SpaceHistoryKind.self)
         ),
+        "set_focus_wrap": APIRecord(
+            "Sets what focus does past the last window: stop, wrap, "
+                + "or go on to the next screen.",
+            .choice("mode", FocusWrap.self)
+        ),
         "set_float_automatically": APIRecord(
             "Sets whether windows that can't be resized and apps "
                 + "with no Dock icon float without a rule.",

@@ -291,4 +291,21 @@ struct EmptyActiveSpaceRefusalTests {
         #expect(verb == "focus_space")
         #expect(verb.map(APIReference.dispatchable.contains) == true)
     }
+
+    /// Under All screens a focus key on an empty Space passes the
+    /// preflight only where it hops (#2493): with one screen there
+    /// is nowhere to go, so the sentence still answers, as under Off.
+    /// The hop's own pass is `FocusWrapScreensTests`'.
+    @Test("a focus key with nowhere to hop keeps the sentence")
+    func oneScreenFocusKeepsTheSentence() {
+        let core = makeCore()
+        arriveOnEmptySpace(core, pid: 1)
+        core.frontmostPIDProvider = { 1 }
+        #expect(core.focusWrap.mode == .allScreens)
+        let all = core.execute("focus", args: [.string("right")])
+        #expect(all.error?.contains("is empty") == true)
+        core.execute("set_focus_wrap", args: [.string("off")])
+        let off = core.execute("focus", args: [.string("right")])
+        #expect(off.error?.contains("is empty") == true)
+    }
 }

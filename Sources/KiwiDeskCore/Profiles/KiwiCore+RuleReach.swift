@@ -14,6 +14,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var spaceHistory: RuleReachTable<SpaceHistoryKind>
     /// The layout cycle, one key (#453).
     public var modeCycle: RuleReachTable<[LayoutMode]>
+    /// The focus-wrap setting, one key (#2493).
+    public var focusWrap: RuleReachTable<FocusWrap>
     /// The Tile list and the Automatic floating switch
     /// (#2173).
     public var tileRules: RuleReachTable<[String]>
@@ -55,6 +57,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         storedScrollBase: ScrollGestureBase,
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,
+        focusWrap: RuleReachTable<FocusWrap>,
         tileRules: RuleReachTable<[String]>,
         floatAutomatically: RuleReachTable<Bool>,
         storedTileBase: [String],
@@ -75,6 +78,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.storedScrollBase = storedScrollBase
         self.spaceHistory = spaceHistory
         self.modeCycle = modeCycle
+        self.focusWrap = focusWrap
         self.tileRules = tileRules
         self.floatAutomatically = floatAutomatically
         self.storedTileBase = storedTileBase
@@ -99,6 +103,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || !scrollGestures.baseTouched.isEmpty
             || !spaceHistory.baseTouched.isEmpty
             || !modeCycle.baseTouched.isEmpty
+            || !focusWrap.baseTouched.isEmpty
             || !tileRules.baseTouched.isEmpty
             || !floatAutomatically.baseTouched.isEmpty
             || !RuleReachTable<String>.sameShortcuts(keyBase, fileKeyBase)
@@ -109,6 +114,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || scrollGestures.touched.values.contains { !$0.isEmpty }
             || spaceHistory.touched.values.contains { !$0.isEmpty }
             || modeCycle.touched.values.contains { !$0.isEmpty }
+            || focusWrap.touched.values.contains { !$0.isEmpty }
             || tileRules.touched.values.contains { !$0.isEmpty }
             || floatAutomatically.touched.values.contains { !$0.isEmpty }
             || lensReach != fileLensReach
@@ -194,6 +200,10 @@ extension KiwiCore {
             modeCycle: .modeCycle(
                 base: sidecar.modeCycle,
                 overrides: stored.map { ($0.name, $0.modeCycle) }
+            ),
+            focusWrap: .focusWrap(
+                base: sidecar.focusWrap,
+                overrides: stored.map { ($0.name, $0.focusWrap) }
             ),
             tileRules: .tileRules(
                 base: sidecar.tileRules,

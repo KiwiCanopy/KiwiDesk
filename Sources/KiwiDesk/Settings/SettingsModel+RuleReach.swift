@@ -39,6 +39,7 @@ extension SettingsModel {
             layers: config.layers,
             scrollGesture: config.scrollGesture,
             spaceHistory: config.spaceHistory,
+            focusWrap: config.focusWrap,
             modeCycle: config.modeCycle,
             tileRules: config.tileRules,
             floatAutomatically: config.floatAutomatically,
@@ -118,6 +119,16 @@ extension SettingsModel {
             reach: reachEdits.reach[.history] ?? [:],
             removal: [:]
         )
+        snapshot.focusWrap = RuleReachDraft.encode(
+            snapshot.focusWrap,
+            current: [
+                RuleReachTable<FocusWrap>.focusWrapKey: config.focusWrap
+            ],
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.wrap] ?? [:],
+            removal: [:]
+        )
         snapshot.modeCycle = RuleReachDraft.encode(
             snapshot.modeCycle,
             current: [
@@ -185,6 +196,11 @@ extension SettingsModel {
                 RuleReachTable<SpaceHistoryKind>.spaceHistoryKey,
                 for: loaded
             ) ?? stored.spaceHistory.spaceHistoryBase
+        config.focusWrap =
+            stored.focusWrap.resolved(
+                RuleReachTable<FocusWrap>.focusWrapKey,
+                for: loaded
+            ) ?? stored.focusWrap.focusWrapBase
         config.modeCycle =
             stored.modeCycle.resolved(
                 RuleReachTable<[LayoutMode]>.modeCycleKey,
@@ -221,6 +237,7 @@ extension SettingsModel {
         )
         sidecar.spaceHistory = reach.spaceHistory.spaceHistoryBase
         sidecar.modeCycle = reach.modeCycle.modeCycleBase
+        sidecar.focusWrap = reach.focusWrap.focusWrapBase
         sidecar.tileRules = reach.tileRules.floatRuleBase(
             original: reach.storedTileBase
         )
@@ -281,6 +298,7 @@ extension SettingsModel {
         cleanConfig.scrollGesture = config.scrollGesture
         cleanConfig.spaceHistory = config.spaceHistory
         cleanConfig.modeCycle = config.modeCycle
+        cleanConfig.focusWrap = config.focusWrap
         cleanConfig.tileRules = config.tileRules
         cleanConfig.floatAutomatically = config.floatAutomatically
         // Not the layers: a stored page's own shortcut diff is the
@@ -303,6 +321,7 @@ extension SettingsModel {
         config.scrollGesture = cleanConfig.scrollGesture
         config.spaceHistory = cleanConfig.spaceHistory
         config.modeCycle = cleanConfig.modeCycle
+        config.focusWrap = cleanConfig.focusWrap
         config.tileRules = cleanConfig.tileRules
         config.floatAutomatically = cleanConfig.floatAutomatically
         reachEdits = RuleReachEdits()

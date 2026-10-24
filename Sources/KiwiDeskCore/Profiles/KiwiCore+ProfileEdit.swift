@@ -38,6 +38,7 @@ extension KiwiCore {
             existing.scrollGesture = stored.scrollGesture
             existing.spaceHistory = stored.spaceHistory
             existing.modeCycle = stored.modeCycle
+            existing.focusWrap = stored.focusWrap
             existing.tileRules = stored.tileRules
             existing.floatAutomatically = stored.floatAutomatically
         }
@@ -183,6 +184,10 @@ extension KiwiCore {
             profile.modeCycle = ModeCycle.sparse(
                 config.modeCycle,
                 over: base.modeCycle
+            )
+            profile.focusWrap = .sparse(
+                config.focusWrap,
+                over: base.focusWrap
             )
             profile.tileRules = RuleListOverride.diff(
                 base: sidecar?.tileRules ?? globalRuleBase.tileRules,

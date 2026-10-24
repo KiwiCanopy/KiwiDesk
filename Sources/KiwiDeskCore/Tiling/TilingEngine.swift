@@ -215,6 +215,17 @@ public final class TilingEngine {
         }
     }
 
+    /// Every screen's AX visible frame by its display, for the focus
+    /// keys' screen hop (#2493); `allScreenBounds`' sibling, pinned
+    /// the same way.
+    var displayFrames: @MainActor () -> [(id: DisplayID, frame: CGRect)] = {
+        ScreenList.all.compactMap { screen in
+            screen.kiwiDisplayID.map {
+                ($0, GeometryUtils.axVisibleFrame(of: screen))
+            }
+        }
+    }
+
     /// Every screen's WHOLE AX frame, menu bar and Dock included
     /// (#1787); `allScreenBounds`' sibling, pinned the same way.
     var allScreenFrames: @MainActor () -> [CGRect] = {

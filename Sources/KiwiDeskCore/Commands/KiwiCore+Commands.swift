@@ -136,6 +136,8 @@ extension KiwiCore {
             return setSpaceSlideDuration(args)
         case "set_space_history":
             return setSpaceHistory(args)
+        case "set_focus_wrap":
+            return setFocusWrap(args)
         case "set_float_automatically":
             return setFloatAutomatically(args)
         case "set_shortcut_panel_liquid_glass":

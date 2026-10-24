@@ -17,8 +17,6 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
 
     public var orientation: Orientation = .horizontal
     public var hideStyle: HideStyle = .stack
-    /// Whether focus navigation wraps at cycle ends (#168).
-    public var wrapFocus = true
     /// Placement for newly spawned windows (`SpawnPlacement`).
     public var newWindowPlacement: SpawnPlacement = .first
     public var appBar = LayoutAppBar()
@@ -34,7 +32,6 @@ extension MonocleParams: Codable {
     private enum CodingKeys: String, CodingKey {
         case orientation
         case hideStyle = "hide_style"
-        case wrapFocus = "wrap_focus"
         case newWindowPlacement = "new_window_placement"
         case appBar = "app_bar"
         case override
@@ -57,11 +54,6 @@ extension MonocleParams: Codable {
                 HideStyle.self,
                 forKey: .hideStyle
             ) ?? defaults.hideStyle
-        wrapFocus =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .wrapFocus
-            ) ?? defaults.wrapFocus
         newWindowPlacement =
             try container.decodeIfPresent(
                 SpawnPlacement.self,
@@ -84,7 +76,6 @@ extension MonocleParams: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(orientation, forKey: .orientation)
         try container.encode(hideStyle, forKey: .hideStyle)
-        try container.encode(wrapFocus, forKey: .wrapFocus)
         try container.encode(
             newWindowPlacement,
             forKey: .newWindowPlacement

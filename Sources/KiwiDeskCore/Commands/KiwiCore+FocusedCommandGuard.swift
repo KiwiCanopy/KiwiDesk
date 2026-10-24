@@ -42,6 +42,9 @@ extension KiwiCore {
         // window this seam diagnoses.
         let front = frontmostPID()
         if foregroundOwned(front: front) { return nil }
+        if command == "focus", focusHopsOffEmptySpace(args, front: front) {
+            return nil
+        }
         // The wake heal (#1130), one-shot and time-bounded: the
         // wake payment's activation can be refused, so re-seed
         // from the real frontmost (a blocking AX read, paid at
@@ -86,6 +89,24 @@ extension KiwiCore {
         }
         return owns(front: front, pid: focused.pid)
             && anchorManaged(focused)
+    }
+
+    /// A focus key on an empty Space acts on no window, so it owns
+    /// no foreground: it passes where `emptySpaceHop` lands it on
+    /// another screen (#2493) and no ignored panel is latched in
+    /// front. Every other empty-Space press keeps #1336's sentence.
+    private func focusHopsOffEmptySpace(
+        _ args: [JSONValue],
+        front: pid_t?
+    ) -> Bool {
+        guard focusedWindow == nil,
+            let raw = args.first?.stringValue,
+            let direction = Direction(rawValue: raw),
+            let space = activeSpace,
+            state.effectiveMembers(of: space).isEmpty,
+            front.map({ ignoredPanel.active.contains($0) }) != true
+        else { return false }
+        return emptySpaceHop(space, in: direction, wrap: nil) != nil
     }
 
     /// The clauses that do not read the frontmost app: the loop

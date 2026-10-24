@@ -27,11 +27,6 @@ extension APIReference {
             "Sets where a new window lands in the row.",
             .choice("placement", SpawnPlacement.self)
         ),
-        "set_wrap_focus": APIRecord(
-            "Wraps focus from either end of the row to the far "
-                + "end.",
-            .boolean("enabled")
-        ),
         "set_fill_when_alone": APIRecord(
             "A lone window takes the whole screen instead of "
                 + "one slot; off keeps the slot size.",

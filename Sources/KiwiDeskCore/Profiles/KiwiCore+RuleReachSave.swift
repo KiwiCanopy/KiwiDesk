@@ -27,6 +27,7 @@ extension KiwiCore {
         let scroll = snapshot.scrollGestures
         let history = snapshot.spaceHistory
         let cycle = snapshot.modeCycle
+        let wrap = snapshot.focusWrap
         let tile = snapshot.tileRules
         let automatic = snapshot.floatAutomatically
         var pending: [Profile] = []
@@ -45,6 +46,7 @@ extension KiwiCore {
             let scrollTouched = !(scroll.touched[name] ?? []).isEmpty
             let historyTouched = !(history.touched[name] ?? []).isEmpty
             let cycleTouched = !(cycle.touched[name] ?? []).isEmpty
+            let wrapTouched = !(wrap.touched[name] ?? []).isEmpty
             let tileOriginal = snapshot.storedTileOverrides[name]
             let tileOverride = tile.floatRuleOverride(
                 for: name,
@@ -57,7 +59,7 @@ extension KiwiCore {
                 lensMarks != (snapshot.fileLensReach[name] ?? [:])
             guard
                 appTouched || keyTouched || scrollTouched
-                    || historyTouched || cycleTouched
+                    || historyTouched || cycleTouched || wrapTouched
                     || floatOverride != original
                     || tileOverride != tileOriginal || automaticTouched
                     || lensTouched
@@ -88,6 +90,9 @@ extension KiwiCore {
             if cycleTouched {
                 profile.modeCycle = cycle.modeCycleOverride(for: name)
             }
+            if wrapTouched {
+                profile.focusWrap = wrap.focusWrapOverride(for: name)
+            }
             if automaticTouched {
                 profile.floatAutomatically =
                     automatic.floatAutomaticallyOverride(for: name)
@@ -110,6 +115,7 @@ extension KiwiCore {
             || !scroll.baseTouched.isEmpty
             || !history.baseTouched.isEmpty
             || !cycle.baseTouched.isEmpty || keysMoved
+            || !wrap.baseTouched.isEmpty
             || !tile.baseTouched.isEmpty || !automatic.baseTouched.isEmpty
         {
             guard var stored = guiConfigStore.load() else {
@@ -127,6 +133,7 @@ extension KiwiCore {
             )
             stored.spaceHistory = history.spaceHistoryBase
             stored.modeCycle = cycle.modeCycleBase
+            stored.focusWrap = wrap.focusWrapBase
             stored.tileRules = tile.floatRuleBase(
                 original: snapshot.storedTileBase
             )

@@ -17,6 +17,7 @@ extension SettingsModel {
         target.scrollGesture = source.scrollGesture
         target.spaceHistory = source.spaceHistory
         target.modeCycle = source.modeCycle
+        target.focusWrap = source.focusWrap
         target.appRules = source.appRules
         target.floatRules = source.floatRules
         target.ignoreRules = source.ignoreRules

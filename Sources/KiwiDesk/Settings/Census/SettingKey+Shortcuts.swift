@@ -5,6 +5,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case layersIcon = "config.layers[].icon"
     /// Which profiles a layer belongs to (#2022).
     case layersReach = "config.layers[].reach"
+    /// What the focus keys do at the last window (#2493).
+    case focusWrap = "config.focusWrap"
     case focusDir = "keybinding.focus_dir (x4)"
     /// The previous / next Space in the screen's order (#1655).
     case spaceStep = "keybinding.space_{previous,next}"
@@ -85,8 +87,8 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.layersExist)
             )
-        case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
-            .goToSpace:
+        case .focusWrap, .focusDir, .spaceStep, .spaceHistoryStep,
+            .spaceHistory, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         // One card for what shows and hides: KiwiHub's sides
         // (#2265), the bars (#761), KiwiVision and its lenses.
@@ -253,6 +255,11 @@ extension ShortcutsKey {
             return .text("shortcuts.gestures.scroll.mouse")
         case .scrollSpaceStep:
             return .text("shortcuts.gestures.scroll.space_step")
+        case .focusWrap:
+            return .text(
+                "shortcuts.focus_wrap",
+                help: "shortcuts.focus_wrap.help"
+            )
         case .spaceHistory:
             return .text(
                 "shortcuts.space_history.kept",

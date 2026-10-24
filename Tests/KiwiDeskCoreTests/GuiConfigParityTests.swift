@@ -50,7 +50,7 @@ struct GuiConfigParityTests {
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
                 "scrollGesture", "appWide", "look", "spaceHistory",
-                "modeCycle",
+                "modeCycle", "focusWrap",
                 "floatAutomatically", "tileRules",
                 "shortcutBase", "shortcutOffer",
             ]
@@ -103,6 +103,7 @@ struct GuiConfigParityTests {
         )
         config.spaceHistory = .allScreens
         config.modeCycle = [.grid, .monocle]
+        config.focusWrap = .off
         config.floatAutomatically = false
         config.tileRules = ["com.valvesoftware.steam"]
         config.shortcutBase = .hyper
@@ -135,6 +136,7 @@ struct GuiConfigParityTests {
         #expect(back.scrollGesture == config.scrollGesture)
         #expect(back.spaceHistory == config.spaceHistory)
         #expect(back.modeCycle == config.modeCycle)
+        #expect(back.focusWrap == config.focusWrap)
         #expect(back.floatAutomatically == config.floatAutomatically)
         #expect(back.tileRules == config.tileRules)
         #expect(back.shortcutBase == config.shortcutBase)

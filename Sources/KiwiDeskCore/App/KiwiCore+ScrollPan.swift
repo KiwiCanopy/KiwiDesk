@@ -104,7 +104,8 @@ extension KiwiCore {
             return navigate(
                 [.string(direction.rawValue)],
                 swapping: false,
-                warp: false
+                warp: false,
+                wrap: focusWrap.mode.withinScreen
             ).isSuccess
         default:
             return stepInOrder(space, toward: direction, by: step)

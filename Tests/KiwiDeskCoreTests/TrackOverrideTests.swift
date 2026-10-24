@@ -10,11 +10,9 @@ struct TrackOverrideTests {
     /// `TrackOverride` — the reflection parity test below turns
     /// a forgotten mirror into a red build (AGENTS.md §5).
     private static let notOverridable: Set<String> = [
-        // Per-layout behavior, not per-space geometry (the
-        // ScrollingOverride precedent for wrapFocus).
+        // Per-layout behavior, not per-space geometry.
         "newWindow",
         "newWindowPosition",
-        "wrapFocus",
         // The override map itself.
         "override",
     ]

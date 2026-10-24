@@ -163,7 +163,19 @@ below, so it corrects itself when a seventh is added.
   question "does this call act on the focus" asks
   `impliesFocus(_:_:)`, never `FocusedCommandPolicy` alone.
 
-  **The preflight's one other bypass is a verb list, and a verb
+  **A call that acts on no window passes the preflight only where
+  its own target predicate says it lands elsewhere (#2493).** A
+  focus key on an empty Space owns no foreground; it passes where
+  `emptySpaceHop` — the answer `navigate` hops by — lands it on
+  another screen and no ignored panel is latched in front, and
+  every other such press keeps #1336's sentence
+  (`FocusWrapScreensTests` ▸ `preflightPassesTheHop`,
+  `EmptyActiveSpaceRefusalTests` ▸
+  `oneScreenFocusKeepsTheSentence`). A further verb of that shape
+  asks its own predicate the same way, never a copy of its
+  condition in the preflight, and is a ruling here.
+
+  **The preflight's remaining bypass is a verb list, and a verb
   joins it only if it changes no window's content, size or
   membership (#1812).** A verb in
   `FocusedCommandPolicy.raiseFlightExempt` passes while

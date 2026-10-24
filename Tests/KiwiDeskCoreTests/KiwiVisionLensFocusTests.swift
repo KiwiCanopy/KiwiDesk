@@ -194,7 +194,7 @@ struct KiwiVisionLensFocusTests {
 }
 
 /// A wrap past a row's end asks the lens too (#2103 ruling 35,
-/// `wrap_focus` on): it lands on the first member beyond the end,
+/// the focus wrap on): it lands on the first member beyond the end,
 /// never on a stranger at index 0 and never back on the origin.
 @Suite("KiwiVision lens focus keys, wrapping", .serialized)
 @MainActor
@@ -209,10 +209,7 @@ struct KiwiVisionLensWrapTests {
                 (3, LensNavFixture.member, ""),
             ]
         )
-        let verb =
-            mode == "scrolling"
-            ? "scroll" : mode.hasPrefix("track") ? "track" : mode
-        core.execute("\(verb).set_wrap_focus", args: [.bool(true)])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
         LensNavFixture.defineLens(core)
         return core
     }

@@ -67,5 +67,8 @@ extension GuiConfig {
     ///
     /// **15 (#2235)**: `overflow_style` retired from `stack` and
     /// `track` (`migratingRetiredOverflowStyle`).
-    public static let currentFormat = 15
+    ///
+    /// **16 (#2493)**: the per-layout `wrap_focus` switches retired
+    /// for `focus_wrap` (`migratingRetiredWrapFocus`).
+    public static let currentFormat = 16
 }

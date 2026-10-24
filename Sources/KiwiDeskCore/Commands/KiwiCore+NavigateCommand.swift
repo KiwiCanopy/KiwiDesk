@@ -8,12 +8,16 @@ extension KiwiCore {
     /// stays where the hand holds it. Every step, a gesture's too,
     /// skips what a lens leaves out (`lensKeySkip`, #2103 rulings
     /// 35, 44, 45). `origin` steps from a named member of the
-    /// active Space instead of the focus anchor (#2509).
+    /// active Space instead of the focus anchor (#2509). `wrap`
+    /// stands in for the focus-wrap setting (#2493): the scroll
+    /// gesture's never crosses screens, and the screen hop's
+    /// last resort wraps this screen.
     func navigate(
         _ args: [JSONValue],
         swapping: Bool,
         warp: Bool = true,
-        origin: WindowID? = nil
+        origin: WindowID? = nil,
+        wrap: FocusWrap? = nil
     ) -> CommandResponse {
         guard let raw = args.first?.stringValue,
             let direction = Direction(rawValue: raw)
@@ -36,6 +40,16 @@ extension KiwiCore {
             let focused = origin
                 ?? state.focusAnchor(of: space, tiled: tiled)
         else {
+            // An empty Space still crosses screens (#2493).
+            if !swapping,
+                let hop = hopFromEmptySpace(
+                    space,
+                    in: direction,
+                    wrap: wrap
+                )
+            {
+                return hop
+            }
             return .fail("no focused window")
         }
         // Swapping FROM a traveler is refused up front, for every
@@ -47,6 +61,9 @@ extension KiwiCore {
             return .ok()
         }
         let skip = lensKeySkip() ?? { _ in false }
+        let wrapMode: FocusWrap =
+            swapping ? .off : wrap ?? focusWrap.mode
+        let wraps = wrapMode == .thisScreen
         // Monocle windows all share one frame, so geometric
         // neighbor search finds nothing. Directions on the
         // configured orientation axis cycle the window order
@@ -58,6 +75,7 @@ extension KiwiCore {
                 focused: focused,
                 swapping: swapping,
                 warp: warp,
+                wraps: wraps,
                 skip: skip
             )
         {
@@ -75,6 +93,7 @@ extension KiwiCore {
                 focused: focused,
                 swapping: swapping,
                 warp: warp,
+                wraps: wraps,
                 skip: skip
             )
         {
@@ -91,6 +110,7 @@ extension KiwiCore {
                 focused: focused,
                 swapping: swapping,
                 warp: warp,
+                wraps: wraps,
                 skip: skip
             )
         {
@@ -155,7 +175,7 @@ extension KiwiCore {
         // so the cross-axis search — and the dead-end
         // fall-through of an unwrapped cycle — would
         // geometric-hit the pile: an accidental tile jump that
-        // also made `wrap_focus` look inert, since focusing a
+        // also made the focus wrap look inert, since focusing a
         // parked member SHOWS it (owner QA 2026-08-18). The
         // SHOWN member stays a candidate, so the #488
         // float→tile hop still lands; under `stack` nothing
@@ -193,6 +213,23 @@ extension KiwiCore {
                     skip: skip
                 )
         else {
+            // The last window that way: the focus-wrap setting
+            // decides (#2493), a swap never wraps.
+            if let response = focusPastEdge(
+                FocusEdge(
+                    args: args,
+                    direction: direction,
+                    mode: wrapMode,
+                    space: space,
+                    focused: focused,
+                    frame: frame,
+                    candidates: searchCandidates,
+                    warp: warp,
+                    origin: origin
+                )
+            ) {
+                return response
+            }
             // Dead end — no window that way. Rubber-band the ring
             // toward the wall (#436); wordless, unlike the traveler
             // pill (#435). Fires for focus and swap alike.

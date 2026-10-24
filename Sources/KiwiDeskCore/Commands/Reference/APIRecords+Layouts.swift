@@ -266,11 +266,6 @@ extension APIReference {
                 + "choice.",
             .choice("placement", SpawnPlacement.self)
         ),
-        "set_wrap_focus": APIRecord(
-            "Wraps focus from either end of the track to the "
-                + "other.",
-            .boolean("enabled")
-        ),
         "set_axis_override": APIRecord(
             "Overrides the track axis for one Space.",
             .space("space"),

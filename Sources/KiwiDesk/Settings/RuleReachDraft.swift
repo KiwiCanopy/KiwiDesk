@@ -13,6 +13,9 @@ enum RuleFamily: Hashable {
     /// The Space history setting, keyed by
     /// `RuleReachTable.spaceHistoryKey` (#1655).
     case history
+    /// The focus-wrap setting, keyed by
+    /// `RuleReachTable.focusWrapKey` (#2493).
+    case wrap
     /// The layout cycle, keyed by `RuleReachTable.modeCycleKey`
     /// (#453).
     case cycle
@@ -28,7 +31,8 @@ enum RuleFamily: Hashable {
     /// scroll setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
-        case .key, .scroll, .history, .cycle, .autoFloat: subject
+        case .key, .scroll, .history, .wrap, .cycle, .autoFloat:
+            subject
         case .float: FloatRules.appKey(subject)
         case .space, .tile: subject.lowercased()
         }

@@ -222,14 +222,14 @@ extension SettingsModel {
                 "app_rules.reach.diff.new_profiles_lose.shortcut",
                 "New profiles won't get this shortcut"
             )
-        case (.scroll, true), (.history, true), (.cycle, true),
-            (.autoFloat, true):
+        case (.scroll, true), (.history, true), (.wrap, true),
+            (.cycle, true), (.autoFloat, true):
             L(
                 "app_rules.reach.diff.new_profiles_get.setting",
                 "New profiles get this setting"
             )
-        case (.scroll, false), (.history, false), (.cycle, false),
-            (.autoFloat, false):
+        case (.scroll, false), (.history, false), (.wrap, false),
+            (.cycle, false), (.autoFloat, false):
             L(
                 "app_rules.reach.diff.new_profiles_lose.setting",
                 "New profiles won't get this setting"

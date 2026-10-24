@@ -36,8 +36,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
     public var newWindow: NewWindowTrack = .focusedTrack
     /// Position of new window within target track.
     public var newWindowPosition: SpawnPlacement = .first
-    /// Wraps focus navigation past ends (#168).
-    public var wrapFocus = true
     /// Per-space overrides.
     public var override: [SpaceID: TrackOverride] = [:]
 
@@ -61,7 +59,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
         case limit
         case newWindow = "new_window"
         case newWindowPosition = "new_window_position"
-        case wrapFocus = "wrap_focus"
         case override
     }
 
@@ -94,11 +91,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
                 SpawnPlacement.self,
                 forKey: .newWindowPosition
             ) ?? .first
-        wrapFocus =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .wrapFocus
-            ) ?? true
         override =
             try container.decodeIfPresent(
                 [SpaceID: TrackOverride].self,
@@ -116,7 +108,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
             newWindowPosition,
             forKey: .newWindowPosition
         )
-        try container.encode(wrapFocus, forKey: .wrapFocus)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)
         }

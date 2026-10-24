@@ -78,12 +78,4 @@ extension LayoutCard {
             )
         }
     }
-
-    var trackWrapFocusRow: some View {
-        ToggleRow(
-            label: L("track.wrap_focus", "Wrap focus"),
-            isOn: track.wrapFocus,
-            help: LayoutHelp.wrapFocus
-        )
-    }
 }

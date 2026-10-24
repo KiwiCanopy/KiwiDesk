@@ -12,7 +12,7 @@ extension KiwiCore {
     /// the axis move within the focused track, directions
     /// across it jump to the same relative position in the
     /// adjacent track. Past an end, `focus` wraps when
-    /// `wrap_focus` is on (#168 twin: within the track along
+    /// `wraps` (#168 twin, This screen, #2493: within the track along
     /// the axis, last <-> first track across it); `swap` never
     /// wraps. Nil falls through to the geometric search — which
     /// keeps cross-monitor focus alive and, with unequal track
@@ -27,6 +27,7 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool,
         warp: Bool,
+        wraps: Bool,
         skip lensSkip: (WindowID) -> Bool
     ) -> CommandResponse? {
         let params = tiler.settings.resolvedTrack(for: space.id)
@@ -76,7 +77,7 @@ extension KiwiCore {
                 index: index,
                 range: ranges[track],
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping,
+                wrap: wraps,
                 skip: skip
             )
         case .down where vertical, .right where !vertical:
@@ -85,7 +86,7 @@ extension KiwiCore {
                 index: index,
                 range: ranges[track],
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping,
+                wrap: wraps,
                 skip: skip
             )
         case .left where vertical, .up where !vertical:
@@ -95,7 +96,7 @@ extension KiwiCore {
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping,
+                wrap: wraps,
                 skip: skip
             )
         case .right where vertical, .down where !vertical:
@@ -105,7 +106,7 @@ extension KiwiCore {
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping,
+                wrap: wraps,
                 skip: skip
             )
         default:

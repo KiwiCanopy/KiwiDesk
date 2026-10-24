@@ -38,9 +38,7 @@ struct ScrollGestureDeadEndTests {
         }
         let space = core.state.workspaces.space(of: WindowID(1))!
         core.execute("set_mode", args: [.string(space.raw), .string(mode)])
-        for verb in ["scroll.set_wrap_focus", "monocle.set_wrap_focus"] {
-            core.execute(verb, args: [.bool(false)])
-        }
+        core.execute("set_focus_wrap", args: [.string("off")])
         core.state.workspaces.focus(focus, in: space)
         var bumps: [Bump] = []
         core.borders.deadEndProbe = { bumps.append(($0, $1)) }

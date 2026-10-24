@@ -16,6 +16,7 @@ extension KiwiCore {
         let root = path.first
         return root == KeepRoot.appRules || root == KeepRoot.floatRules
             || root == KeepRoot.floatAutomatically
+            || root == KeepRoot.focusWrap
     }
 
     /// Writes `leaves` as `live` holds them; answers every profile
@@ -30,6 +31,8 @@ extension KiwiCore {
         var floatEdits: [String: [String: Bool]] = [:]
         let autoKey = RuleReachTable<Bool>.floatAutomaticallyKey
         var autoKept = false
+        let wrapKey = RuleReachTable<FocusWrap>.focusWrapKey
+        var wrapKept = false
         for leaf in leaves {
             guard let path = KeepPointer.path(leaf.id) else { continue }
             let value = KeepPointer.value(at: path, in: live)
@@ -41,6 +44,13 @@ extension KiwiCore {
                     editing: page
                 )
                 autoKept = true
+            case (KeepRoot.focusWrap?, 1):
+                snapshot.focusWrap.keep(
+                    wrapKey,
+                    value: value?.stringValue.flatMap(FocusWrap.init),
+                    editing: page
+                )
+                wrapKept = true
             case (KeepRoot.appRules?, 2):
                 appKeys.insert(path[1])
                 snapshot.appRules.keep(
@@ -89,6 +99,14 @@ extension KiwiCore {
                 snapshot.floatAutomatically.profilesChanged(
                     from: before.floatAutomatically,
                     keys: [autoKey]
+                )
+            )
+        }
+        if wrapKept {
+            reached.formUnion(
+                snapshot.focusWrap.profilesChanged(
+                    from: before.focusWrap,
+                    keys: [wrapKey]
                 )
             )
         }

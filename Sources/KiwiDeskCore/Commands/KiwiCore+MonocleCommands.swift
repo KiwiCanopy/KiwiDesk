@@ -30,13 +30,6 @@ extension KiwiCore {
             tiler.settings.monocle.hideStyle = style
             return .ok()
         }
-        if command == "monocle.set_wrap_focus" {
-            guard let on = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.settings.monocle.wrapFocus = on
-            return .ok()
-        }
         if command == "monocle.set_new_window_placement" {
             guard let placement = parsePlacement(args) else {
                 return placementError
@@ -106,6 +99,7 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool,
         warp: Bool,
+        wraps: Bool,
         skip: (WindowID) -> Bool
     ) -> CommandResponse? {
         // Resolve per-space (#149): a space with a vertical
@@ -133,10 +127,7 @@ extension KiwiCore {
         // float that way the shared dead-end cue fires, like
         // every other layout's single-window edge.
         guard tiled.count > 1 else { return nil }
-        let wrap =
-            tiler.settings.resolvedMonocle(for: space.id)
-            .wrapFocus
-        // Focus wraps the carousel (opt out with wrap_focus);
+        // Focus wraps the carousel under This screen (#2493);
         // `swap` never wraps, matching scrolling/track (a wrapping
         // swap would teleport a window end to end). At an end
         // without a wrap: fall through. Every monocle window shares
@@ -149,7 +140,7 @@ extension KiwiCore {
                 from: index,
                 step: step,
                 count: tiled.count,
-                wrap: !swapping && wrap,
+                wrap: wraps,
                 skip: { skip(tiled[$0]) }
             )
         else { return nil }

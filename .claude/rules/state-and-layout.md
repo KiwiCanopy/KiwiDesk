@@ -2399,6 +2399,24 @@ KiwiVision lens's skip; the obligation is
 [borders.md](borders.md)'s ▸ "A step KiwiDesk's own navigation
 takes".
 
+**A focus key past its last window answers the focus-wrap setting
+through `navigate` (#2493), never a layout's own reading of it.**
+`navigate` resolves the mode once and hands an array-order step
+only `wraps`, true under This screen alone, so a new array-order
+layout wraps its own order on that flag and otherwise returns nil
+at its end, a run's hidden windows included; a geometric layout
+neither wraps nor crosses screens itself, leaving both to
+`focusPastEdge`. A geometric wrap and a hop's landing seed
+`Navigation.neighbor` from `ScreenHop.entrySeed`, never a search of
+their own, and the screens are tried in `ScreenHop.hopOrder`
+(`FocusWrapTests`, `FocusWrapScreensTests`, `ScreenHopOrderTests`).
+**A keyboard-made Space switch or follow that can move focus onto
+another screen — `switchSpace`, `followSwitch`, `handFollowFocus`,
+the AX focus follow's landing — hands the pointer over through
+`warpForSwitch` (#2548)**, never `focusWindow`'s own warp, hover
+focus excepted; a new such door joins them (`ScreenHandoffTests`,
+`ScreenHandoffSeamTests` registers the known callers).
+
 ## macOS native tabs are one `NSWindow` per tab, coalesced temporally
 
 Finder/Terminal/Ghostty native tabs are separate `NSWindow`s

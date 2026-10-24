@@ -55,20 +55,6 @@ enum LayoutHelp {
         )
     }
 
-    /// Wrap-focus help for the three array-order layouts (#257).
-    /// Key deviates from `<label-key>.help`: the wrap-focus label
-    /// is itself split across pre-existing keys (#168), so no
-    /// single label key yields one help key — hence the neutral
-    /// `layout_params.wrap_focus.help` home.
-    @MainActor static var wrapFocus: String {
-        L(
-            "layout_params.wrap_focus.help",
-            "When on, moving focus past the last window wraps "
-                + "around to the first, and past the first back "
-                + "to the last, instead of stopping at the end."
-        )
-    }
-
     /// "If one window, fill the screen" (#1389), one label and one
     /// help for the scrolling and stack rows: the sentence names
     /// no slot or zone, so it holds for both.

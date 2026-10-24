@@ -72,7 +72,6 @@ extension SettingsRevertRegister {
         .layout(.scrollingSlotSizeCount): .leaf(\.settings.scrolling.slotSize),
         .layout(.scrollingNewWindowPlacement):
             .leaf(\.settings.scrolling.newWindowPlacement),
-        .layout(.scrollingWrapFocus): .leaf(\.settings.scrolling.wrapFocus),
         .layout(.scrollingFillWhenAlone):
             .leaf(\.settings.scrolling.fillWhenAlone),
         .layout(.gridType): .leaf(\.settings.grid.type),

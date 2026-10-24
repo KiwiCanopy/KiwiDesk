@@ -23,11 +23,6 @@ extension APIReference {
             "Sets how unfocused monocle windows are hidden.",
             .choice("style", MonocleParams.HideStyle.self)
         ),
-        "set_wrap_focus": APIRecord(
-            "Wraps focus from either end of the cycle to the "
-                + "other.",
-            .boolean("enabled")
-        ),
         "set_new_window_placement": APIRecord(
             "Sets where a new window lands in the monocle cycle.",
             .choice("placement", SpawnPlacement.self)
