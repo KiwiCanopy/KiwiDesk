@@ -1378,7 +1378,13 @@ Obligations:
   site. An EMPTY Fill is no colour there —
   clear glass, nothing pinned — which the drag marker's fill-off
   and the sticky mark's Automatic both hand it
-  (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).
+  (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
+  whether a Fill has a colour through the one
+  `KiwiShelf.hasColour` — empty, unparseable and zero alpha are
+  one state (#2569) — and paint a solid Fill through
+  `NSColor(kiwiFill:)`, which draws no plate there, never through
+  `kiwiHex`, whose fallback is the system accent
+  (`NoColourFillTests`).
 - **A glass and its backdrop never animate their own frames; a
   pair that travels fills one host that carries the motion**
   (#2095). The glass renders a frame behind its gradient, so a

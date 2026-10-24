@@ -12479,6 +12479,17 @@ light limit is AppKit's*).
 **The cue plates follow KiwiHub's Liquid Glass leaf**
 (`shortcutPanelLiquidGlass`), the leaf the slide plates already
 read (`PanelGlassTests`).
+
+**A Fill with no colour leaves the panel untinted** (owner
+ruling 2026-10-24). While the Fill has no colour, KiwiHub, the cue
+plates and the slide plates fall back to their untinted,
+Appearance-following look, exactly as with the toggle off.
+Settings greys the toggle with that reason. The look's inks were
+chosen to read on the Fill. Without one, the panel would put them
+on plain `.clear` glass under KiwiHub's dense text, which is
+`.clear` without a Fill, the case this entry found unreadable. The
+fallback replaces the re-measure of that case that the earlier
+ruling asked for (`PanelGlassTests`, `SpaceSlideSwitchTests`).
 :::
 
 **The chip stays at 0.2 on glass, and that is a decision rather
@@ -13752,7 +13763,7 @@ the outermost glyph never drops.
 The glyph is the badge's own `macwindow.on.rectangle`, so the
 bar and the window read as one mark. On Liquid Glass the plate
 carries ONE tint — the outermost glyph's colour, so sticky's
-when both show — because a glass has one backdrop beneath it;
+when both show — because a glass has one backdrop inside it;
 the flat finish keeps each glyph's own disc.
 
 **Overrides are visible-but-inherited, never hidden.** A
@@ -17081,6 +17092,40 @@ profile travels: writing the leaf off would flip the user's
 choice on every Mac the profile reaches and leave it flipped when
 the setting goes back off. It is read at render time instead.
 
+:::unreleased
+**A Fill with no colour is one state, and it paints nothing on
+any path** (#2569, owner ruling 2026-10-24, after an HTML preview;
+`ui-designer` concurred). An empty Fill, an unparseable one and
+one at 0 % opacity read alike, decided by one predicate,
+`KiwiShelf.hasColour`: a parseable Fill above zero alpha has a
+colour. `GlassTint`, the solid paths and Settings' greys all read
+that predicate, and the solid paths reach it through
+`NSColor(kiwiFill:)` (`NoColourFillTests`). With glass the result is
+plain `.clear` glass with nothing pinned. Without glass — the
+switch off, Reduce transparency on, or below macOS 26 — there is
+no plate, and the items sit on the wallpaper. Before, an empty
+Fill on the solid path painted the system accent through
+`NSColor(kiwiHex:)`'s fallback, a colour nobody picked. The
+Settings way in is *No Color* on the Fill well's menu. It sets
+the Fill's alpha to 0 and keeps the hue, so raising the opacity
+brings the same colour back. A second "none" value beside the
+hex would have been a second state for one meaning.
+
+**Under Reduce transparency, no colour stays on the wallpaper**
+(owner: "on the wallpaper"). This extends the sentence above that
+a fully transparent Fill stays absent, and it is a risk, recorded
+here rather than hidden. The setting asks for opaque backgrounds,
+and a user who picked No Color gets none: the bars' fixed-hex ink
+sits on whatever the wallpaper is, with no plate and no measured
+floor beneath it. The reading floor cannot help, because it
+scales a Fill and there is none. The owner chose the user's
+explicit "no plate" over the setting's general request. A report
+of an unreadable bar under Reduce transparency with No Color is
+this trade showing, not a regression. The answer would be a
+ruling to draw an opaque ground there, not a quiet fallback
+colour.
+:::
+
 The Settings row reads the same OS value and greys with its
 reason while the setting holds glass down (#1418), so the row
 and the surfaces cannot disagree — *grey, don't hide*: the
@@ -17361,7 +17406,9 @@ black, never from the model alone (`PeekInkContrastTests`,
 `GlassFillFadeTests`). The bars, the marks and the hidden shelf's
 handle follow the slider freely. They carry glanceable glyphs,
 not lines read top to bottom, and their ink at the anchor edge is
-the cap's job above.
+the cap's job above. A Fill with no colour leaves nothing to
+floor: the peek and the list then draw on plain `.clear` glass
+(▸ Reduce transparency, *A Fill with no colour is one state*).
 :::
 
 The finish is ON by default on every surface (owner ruling

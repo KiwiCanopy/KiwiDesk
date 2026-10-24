@@ -2614,6 +2614,11 @@ focused window (#2569). How far the fill fades is
 [`set_fill_fade`](#kiwishelfset_fill_fade). The hover peek and
 the overflow mark's list fade from the shelf's edge too, but
 never so far that their text stops reading.
+
+A fill with no color draws plain clear glass with nothing
+pinned, and no plate where the glass is off or stood down, so the
+items sit on the wallpaper even under Reduce transparency
+([KiwiShelf colours](#kiwishelf-colours)).
 :::
 
 Stood down, live, while macOS's Reduce transparency is on: the
@@ -2675,8 +2680,13 @@ tints. The drag visuals and the sticky mark keep their own fade.
 The hover peek, the overflow mark's list, KiwiHub and the Space,
 Desktop and layout plates stop fading where their text would stop
 reading, at a higher floor while macOS's Increase contrast is on.
-No effect while the glass is off or the fill is fully
-transparent. Stored as `kiwishelf.fill_fade`.
+No effect while the glass is off or the fill has no color.
+Stored as `kiwishelf.fill_fade`.
+
+The GUI twin is **Fill fade** under the **Liquid Glass** switch
+on Looks &amp; Animations, reading **Off** at `0`; it is hidden
+below macOS 26 and greys while glass is off or stood down, or
+while the fill has no color.
 
 **Example:**
 
@@ -2702,11 +2712,17 @@ black or white text, whichever reads on it, and a hovered row
 takes `hover_fill_color` and `hover_item_color`. A light fill
 keeps the glass of KiwiHub and those plates light, and a dark
 fill keeps it dark, whatever Settings' Appearance says.
+While the fill has no color, they draw as with `false`.
 `false` draws them in frosted, untinted glass that follows
 Settings' Appearance, with KiwiHub's kiwi-green selection. The
 glass itself turns on and off with
 [`set_shortcut_panel_liquid_glass`](#set_shortcut_panel_liquid_glass).
 Stored as `kiwishelf.tint_hub_and_plates`.
+
+The GUI twin is **Tint KiwiHub and plates** under the **Liquid
+Glass** switch on Looks &amp; Animations; it is hidden below
+macOS 26 and greys while glass is off or stood down, or while the
+fill has no color.
 
 **Example:**
 
@@ -3007,6 +3023,16 @@ which follows the focused window's colour until you set it.
   `kiwishelf.set_group_badge_text_color` — the count and `+n`
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
+
+:::unreleased
+A `fill_color` with no color — 0% opacity, an empty string or a
+value that does not parse — draws no plate on the solid path and
+plain clear glass under [Liquid Glass](#kiwishelfset_liquid_glass),
+never a fallback color, and leaves KiwiHub and the plates
+[`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
+tints untinted. Settings' **No Color**, on the Fill well's menu,
+sets the fill's opacity to 0 and keeps its hue.
+:::
 
 An App Bar window not fully on screen draws its title and glyph in
 the same idle ink as an identifier on a Space you are not on:
