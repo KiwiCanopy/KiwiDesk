@@ -19,6 +19,12 @@ struct ShortcutSymbolFloorTests {
 
     private static let root = SourceScan.repoRoot(from: #filePath)
 
+    private var glyphsFile: URL {
+        Self.root.appendingPathComponent(
+            "Sources/KiwiDesk/Shortcuts/ShortcutsReference+Glyphs.swift"
+        )
+    }
+
     /// The manifest's floor, read as `BuildStampTests` reads it in
     /// the Core target, which this one cannot see.
     private func floorMajor() throws -> Int {
@@ -59,18 +65,48 @@ struct ShortcutSymbolFloorTests {
     @Test("the stand-in gate is the macOS the check trusts")
     func gateMatchesSince() throws {
         let source = SourceScan.stripComments(
-            try String(
-                contentsOf: Self.root.appendingPathComponent(
-                    "Sources/KiwiDesk/Shortcuts/"
-                        + "ShortcutsReference+Glyphs.swift"
-                ),
-                encoding: .utf8
-            )
+            try String(contentsOf: glyphsFile, encoding: .utf8)
         )
         let gates = source.matches(of: /#available\(macOS (\d+)/)
             .map { Int($0.1) }
         let since = ShortcutsReferenceBuilder.FloorSymbol.since
         #expect(gates == [since])
+    }
+
+    /// The check below finds a stand-in by its newer name, so a site
+    /// reading `.name` draws it on the floor macOS and still passes:
+    /// every read of a `FloorSymbol` outside its type is `.drawn`.
+    @Test("a stand-in is read only through drawn")
+    func standInsAreReadThroughDrawn() throws {
+        let glyphs = SourceScan.stripComments(
+            try String(contentsOf: glyphsFile, encoding: .utf8)
+        )
+        let names = glyphs.matches(of: /static let (\w+) = FloorSymbol\(/)
+            .map { String($0.1) }
+        #expect(
+            names.count == ShortcutsReferenceBuilder.floorSymbols.count,
+            "the declarations no longer read as `static let x = …`"
+        )
+        let tree = Self.root.appendingPathComponent("Sources/KiwiDesk")
+        var reads = 0
+        for file in try SourceScan.swiftSources(under: tree) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            for name in names {
+                let member = try Regex<(Substring, Substring)>(
+                    "\\b\(name)\\.(\\w+)"
+                )
+                for read in source.matches(of: member) {
+                    reads += 1
+                    #expect(
+                        read.1 == "drawn",
+                        "\(file.lastPathComponent) reads \(name).\(read.1)"
+                    )
+                }
+            }
+        }
+        #expect(reads >= names.count, "no stand-in read found")
     }
 
     @Test("every drawn symbol exists on the floor or has a stand-in")
