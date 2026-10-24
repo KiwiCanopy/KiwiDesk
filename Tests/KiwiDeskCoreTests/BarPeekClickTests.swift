@@ -130,8 +130,8 @@ struct BarPeekClickTests {
         defer { close(core) }
         var menus = 0
         core.spaceBars.glyphActions.present = { _, _ in menus += 1 }
-        var clock: TimeInterval = 100
-        core.shelves.peek.now = { clock }
+        let clock = Clock()
+        core.shelves.peek.now = { clock.now }
         let checked = {
             core.shelves.peek.panel.drawn?.groups.flatMap(\.rows)
                 .filter(\.focused).map(\.window)
@@ -161,7 +161,7 @@ struct BarPeekClickTests {
         let after = try webTarget(core)
         #expect(core.shelves.peek.shown?.view === after, "it stays")
         #expect(checked() == [WindowID(5)], "the check follows")
-        clock += 1
+        clock.now += 1
         try click(after)
         #expect(core.shelves.peek.shown == nil, "a second click closes")
         #expect(core.state.workspaces.lastFocused == WindowID(5))
@@ -185,12 +185,12 @@ struct BarPeekClickTests {
         web.superview?.addSubview(disc)
         // Past the double-click interval, so only the press's own
         // count keeps the list open.
-        var clock: TimeInterval = 100
-        core.shelves.peek.now = { clock }
+        let clock = Clock()
+        core.shelves.peek.now = { clock.now }
         try click(disc)
         #expect(core.shelves.peek.shown?.view === disc)
         #expect(core.activeSpace?.id == one, "nothing switches")
-        clock += 1
+        clock.now += 1
         try click(disc, count: 2)
         #expect(core.shelves.peek.shown?.view === disc, "still open")
         #expect(core.state.workspaces.lastFocused == WindowID(1))
@@ -291,4 +291,11 @@ struct BarPeekClickTests {
         #expect(core.shelves.peek.panel.drawn == nil)
         #expect(core.activeSpace?.id == one, "nothing switches")
     }
+}
+
+/// The peek's clock, stepped by hand: a reference, so the closure the
+/// peek holds reads the step.
+@MainActor
+private final class Clock {
+    var now: TimeInterval = 100
 }
