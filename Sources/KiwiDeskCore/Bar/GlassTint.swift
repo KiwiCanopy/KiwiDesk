@@ -78,11 +78,10 @@ public enum GlassTint {
         // The one drawing authority, not a second `#available`
         // beside it: nothing here touches a macOS 26 API, so the
         // check is policy rather than the compiler's (#1374).
-        guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
+        guard LiquidGlassGate.drawsGlass, KiwiShelf.hasColour(hex) else {
             return nil
         }
         let color = NSColor(kiwiHex: hex)
-        guard color.alphaComponent > 0 else { return nil }
         let anchor = min(color.alphaComponent, maxAlpha)
         return (
             color.withAlphaComponent(anchor),
@@ -127,12 +126,10 @@ public enum GlassTint {
     /// (#2569 ▸ Ruling). `wantsLightInk` is the one threshold.
     @MainActor
     public static func pin(_ hex: String) -> GlassPaint.Pin? {
-        guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
+        guard LiquidGlassGate.drawsGlass, KiwiShelf.hasColour(hex) else {
             return nil
         }
-        let fill = NSColor(kiwiHex: hex)
-        guard fill.alphaComponent > 0 else { return nil }
-        return fill.wantsLightInk ? .dark : .light
+        return NSColor(kiwiHex: hex).wantsLightInk ? .dark : .light
     }
 
     /// The Fill as SwiftUI glass paints it (#2569): the AppKit

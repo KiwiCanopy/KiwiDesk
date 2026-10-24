@@ -84,7 +84,8 @@ extension KiwiCore {
                 holes: holes,
                 space: target,
                 glass: glass,
-                tint: shelf.tintHubAndPlates ? shelf.glassFill : nil,
+                tint: shelf.tintHubAndPlates && shelf.hasFill
+                    ? shelf.glassFill : nil,
                 pace: spaceSlidePace
             )
         )

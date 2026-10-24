@@ -55,7 +55,7 @@ extension ShelfOverlay {
         BarMotion.setFrame(plate, to: frame, animated: animated)
         plate.layer?.cornerRadius = radius
         plate.layer?.backgroundColor =
-            NSColor(kiwiHex: shelf.fillColor).cgColor
+            NSColor(kiwiFill: shelf.fillColor).cgColor
     }
 
     /// A thin line between the two sections, in the item colour

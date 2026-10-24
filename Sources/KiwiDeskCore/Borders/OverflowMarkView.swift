@@ -140,7 +140,7 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
         solid.frame = bounds
         solid.layer?.cornerRadius = radius
         solid.layer?.backgroundColor =
-            NSColor(kiwiHex: shelfLook.fillColor).cgColor
+            NSColor(kiwiFill: shelfLook.fillColor).cgColor
         if content.superview !== self {
             addSubview(content, positioned: .above, relativeTo: solid)
         }

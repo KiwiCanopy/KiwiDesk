@@ -266,7 +266,7 @@ final class BarPeekPanel {
         solid.frame = bounds
         solid.layer?.cornerRadius = radius
         solid.layer?.backgroundColor =
-            NSColor(kiwiHex: shelf.fillColor).cgColor
+            NSColor(kiwiFill: shelf.fillColor).cgColor
         if body.superview !== stage {
             stage.addSubview(body, positioned: .below, relativeTo: header)
         }

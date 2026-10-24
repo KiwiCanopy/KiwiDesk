@@ -31,8 +31,8 @@ struct KiwiHubPaint {
 
     /// The paint `settings` gives KiwiHub.
     static func of(_ settings: TilingSettings) -> KiwiHubPaint {
-        settings.kiwishelf.tintHubAndPlates
-            ? KiwiHubPaint(settings.kiwishelf.panelHighlight) : KiwiHubPaint()
+        PanelGlass(settings: settings).shelf
+            .map { KiwiHubPaint($0.panelHighlight) } ?? KiwiHubPaint()
     }
 }
 

@@ -23,4 +23,19 @@ extension SpaceSlideSwitchTests {
                 == (tinted ? core.tiler.settings.kiwishelf.glassFill : nil)
         )
     }
+
+    /// A Fill without colour leaves the plates untinted, as the
+    /// toggle off does (#2569 ▸ "No Colour").
+    @Test(
+        "plates take no tint from a Fill without colour",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func noColourLeavesThePlatesUntinted() throws {
+        let (core, _) = try makeCore(slide: true)
+        core.tiler.settings.kiwishelf.tintHubAndPlates = true
+        core.tiler.settings.kiwishelf.fillColor = "#14201C00"
+        core.execute("focus_space", args: [.string("2")])
+        defer { core.spaceSlide.end() }
+        #expect(try #require(core.spaceSlide.play).tint == nil)
+    }
 }

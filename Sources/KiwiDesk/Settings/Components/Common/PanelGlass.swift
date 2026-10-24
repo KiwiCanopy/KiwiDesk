@@ -15,8 +15,9 @@ struct PanelGlass: Equatable {
     /// share KiwiHub's leaf (#2524).
     init(settings: TilingSettings) {
         enabled = settings.shortcutPanelLiquidGlass
-        shelf =
-            settings.kiwishelf.tintHubAndPlates ? settings.kiwishelf : nil
+        // No colour leaves nothing to wear: the untinted panel.
+        let shelf = settings.kiwishelf
+        self.shelf = shelf.tintHubAndPlates && shelf.hasFill ? shelf : nil
     }
 
     init(enabled: Bool, shelf: KiwiShelf?) {

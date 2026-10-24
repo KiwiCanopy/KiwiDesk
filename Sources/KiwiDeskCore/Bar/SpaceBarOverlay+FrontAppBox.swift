@@ -52,7 +52,7 @@ extension SpaceBarOverlay {
             frontBox.frame = rect
             frontBox.layer?.cornerRadius = radius
             frontBox.layer?.backgroundColor =
-                NSColor(kiwiHex: style.fillColor).cgColor
+                NSColor(kiwiFill: style.fillColor).cgColor
             updateFrontGlass(nil, radius: 0, style: style)
         } else {
             frontBox.isHidden = true

@@ -43,6 +43,17 @@ struct PanelGlassTests {
         #expect(PanelGlass(settings: settings).enabled == on)
     }
 
+    /// A Fill without colour leaves KiwiHub and the cues untinted,
+    /// as the toggle off does (#2569 ▸ "No Colour").
+    @Test("No colour falls back to the untinted panel")
+    func noColourFallsBack() {
+        var settings = TilingSettings()
+        settings.kiwishelf.tintHubAndPlates = true
+        settings.kiwishelf.fillColor = "#14201C00"
+        #expect(PanelGlass(settings: settings).shelf == nil)
+        #expect(!KiwiHubPaint.of(settings).tinted)
+    }
+
     @Test("Every cue view and KiwiHub draw through the panel glass")
     func surfacesDrawThroughIt() throws {
         for path in [
