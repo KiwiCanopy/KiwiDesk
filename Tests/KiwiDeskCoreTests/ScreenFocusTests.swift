@@ -71,6 +71,43 @@ struct ScreenFocusTests {
         #expect(screen(core) == Self.c)
     }
 
+    /// A recorded screen since unplugged is passed over for the one
+    /// before it, never targeted.
+    @Test("an unplugged screen leaves the trail")
+    func unpluggedScreenIsSkipped() {
+        let core = makeCore(screens: 3)
+        core.execute("focus_space", args: [.string("2")])
+        core.execute("focus_space", args: [.string("3")])
+        core.state.workspaces.removeDisplay(Self.b)
+        let left = Self.frames.filter { $0.id != Self.b }
+        core.tiler.displayFrames = { left }
+        #expect(core.execute("focus_display_last").isSuccess)
+        #expect(screen(core) == Self.a)
+    }
+
+    /// Each refusal bumps the focused window toward the edge it met
+    /// (#436); the last-screen verb's toward the right, by ruling.
+    @Test("a refusal bumps the focused window")
+    func refusalBumps() {
+        let core = makeCore(screens: 1)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(1),
+                    pid: 900_001,
+                    appName: "App1",
+                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+                )
+            )
+        )
+        core.state.apply(.windowFocused(WindowID(1)))
+        var bumps: [Direction] = []
+        core.borders.deadEndProbe = { bumps.append($1) }
+        core.execute("focus_display_last")
+        core.execute("focus_display", args: [.string("up")])
+        #expect(bumps == [.right, .up])
+    }
+
     @Test("one screen has no other")
     func oneScreenRefuses() {
         let core = makeCore(screens: 1)
