@@ -159,7 +159,8 @@ extension BarPeekPanel {
             pill: local(target, in: panel.frame),
             pillRadius: min(target.width, target.height) / 2,
             listRadius: BarPeekBody.Metrics.cornerRadius,
-            opening: false
+            opening: false,
+            fadesOut: morph.item != nil
         )
         self.land(span, land)
     }

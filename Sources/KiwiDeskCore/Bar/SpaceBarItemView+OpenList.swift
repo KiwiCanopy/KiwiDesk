@@ -16,32 +16,53 @@ extension SpaceBarItemView {
         return overflowTarget === openListTarget
     }
 
-    /// The `+n` disc's text while its list is open: the window
-    /// symbol in the badge's own ink and size.
-    static func windowSymbol(
-        size: CGFloat,
-        color: NSColor
-    ) -> NSAttributedString? {
+    static let windowSymbolID = NSUserInterfaceItemIdentifier(
+        "kiwidesk.openListSymbol"
+    )
+
+    /// Draws the window symbol on `badge` in place of its count while
+    /// `open`, or takes it back. An image laid on the disc, never a
+    /// text attachment, which a bar font draws as nothing (device,
+    /// 2026-10-24).
+    static func showWindowSymbol(on badge: NSTextField, open: Bool) {
+        let shown = badge.subviews.first { $0.identifier == windowSymbolID }
+        guard open else {
+            shown?.removeFromSuperview()
+            return
+        }
+        let side = (min(badge.bounds.width, badge.bounds.height) * 0.62)
+            .rounded()
+        guard
+            let image = windowSymbol(
+                size: side,
+                color: badge.textColor ?? .white
+            )
+        else { return }
+        let view = shown as? NSImageView ?? NSImageView()
+        view.identifier = windowSymbolID
+        view.image = image
+        view.imageScaling = .scaleProportionallyDown
+        view.setAccessibilityElement(false)
+        view.frame = CGRect(
+            x: ((badge.bounds.width - side) / 2).rounded(),
+            y: ((badge.bounds.height - side) / 2).rounded(),
+            width: side,
+            height: side
+        )
+        if view.superview !== badge { badge.addSubview(view) }
+        badge.stringValue = ""
+    }
+
+    /// The window symbol in `color`, `size` points.
+    static func windowSymbol(size: CGFloat, color: NSColor) -> NSImage? {
         let config = NSImage.SymbolConfiguration(
             pointSize: size,
             weight: .semibold
         ).applying(.init(paletteColors: [color]))
-        let image = NSImage(
+        return NSImage(
             systemSymbolName: "macwindow",
             accessibilityDescription: nil
         )?.withSymbolConfiguration(config)
-        guard let image else { return nil }
-        let attachment = NSTextAttachment()
-        attachment.image = image
-        let text = NSMutableAttributedString(attachment: attachment)
-        let centred = NSMutableParagraphStyle()
-        centred.alignment = .center
-        text.addAttribute(
-            .paragraphStyle,
-            value: centred,
-            range: NSRange(location: 0, length: text.length)
-        )
-        return text
     }
 }
 

@@ -69,8 +69,14 @@ struct SpaceBarOpenListTests {
         )
     }
 
+    /// The symbol is an image on the disc, its count blanked: a text
+    /// attachment drew nothing in a bar font (device, 2026-10-24).
     private func carriesSymbol(_ badge: NSTextField) -> Bool {
-        badge.attributedStringValue.containsAttachments
+        let symbol = badge.subviews.first {
+            $0.identifier == SpaceBarItemView.windowSymbolID
+        }
+        return (symbol as? NSImageView)?.image != nil
+            && badge.stringValue.isEmpty
     }
 
     @Test("An open +n stays lit and reads as a window until it closes")
@@ -113,7 +119,6 @@ struct SpaceBarOpenListTests {
         let symbol = try #require(
             SpaceBarItemView.windowSymbol(size: 11, color: .white)
         )
-        #expect(symbol.containsAttachments)
-        #expect(symbol.length == 1)
+        #expect(symbol.size.width > 0)
     }
 }

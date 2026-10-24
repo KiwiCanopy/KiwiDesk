@@ -79,13 +79,11 @@ extension SpaceBarItemView {
         let open = openListTarget
         for (badge, target) in [
             (overflowBadge, overflowTarget), (leadingBadge, leadingTarget),
-        ] where target != nil && target === open && collapse == nil {
-            if let symbol = Self.windowSymbol(
-                size: badge.font?.pointSize ?? 9,
-                color: badge.textColor ?? .white
-            ) {
-                badge.attributedStringValue = symbol
-            }
+        ] {
+            Self.showWindowSymbol(
+                on: badge,
+                open: target != nil && target === open && collapse == nil
+            )
         }
         styleStateBadges()
     }
