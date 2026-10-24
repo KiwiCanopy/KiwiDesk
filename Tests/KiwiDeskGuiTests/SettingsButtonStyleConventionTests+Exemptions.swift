@@ -88,6 +88,12 @@ extension SettingsButtonStyleConventionTests {
             "HeaderSearch.swift": (
                 1, "focusShortcut", "Invisible zero-size shortcut sink"
             ),
+            // ⌘S on the Settings root, mounted whatever the draft
+            // (#2584).
+            "CommitsOnSave.swift": (
+                1, "KeyboardSaveButton",
+                "Invisible zero-size shortcut sink — ⌘S"
+            ),
             // The same shape one surface over: a sheet's Escape
             // needs a carrier that does not depend on focus, and an
             // invisible one draws nothing to style (#859).

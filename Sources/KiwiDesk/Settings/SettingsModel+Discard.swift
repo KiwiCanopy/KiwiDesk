@@ -86,6 +86,7 @@ extension SettingsModel {
         confirmLabel: String,
         perform action: @escaping @MainActor () -> Void
     ) {
+        commitFocusedField()
         guard isDirty else { return action() }
         pendingDiscard = PendingDiscard(
             message: message,

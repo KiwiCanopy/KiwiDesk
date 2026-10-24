@@ -40,12 +40,8 @@ struct SpaceNameField: View {
                 L("diff.label.space_name", "Space name")
             )
             .fontWeight(.medium)
-            .focused($focused)
             .frame(width: 180, alignment: .leading)
-            .onSubmit(commit)
-            .onChange(of: focused) { _, isFocused in
-                if !isFocused { commit() }
-            }
+            .commitsOnSave($focused, commit)
             .onChange(of: notice) { _, notice in onNotice(notice) }
             // A row removed mid-edit runs no `onChange`: retire
             // its caption here, or a later Space of the same id

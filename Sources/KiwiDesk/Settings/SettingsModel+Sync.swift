@@ -84,6 +84,7 @@ extension SettingsModel {
     /// Mac's setup into `folder`. A Save that does not land copies
     /// nothing and answers nil, its own surface saying why.
     func keepThisMacsSetup(in folder: URL) -> SyncRefusal? {
+        commitFocusedField()
         if isDirty {
             guard syncSaveBlockedReason == nil else { return nil }
             performPrimarySave()

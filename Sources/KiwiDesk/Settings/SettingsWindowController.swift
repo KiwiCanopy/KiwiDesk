@@ -137,6 +137,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         return true
     }
 
+    /// Lands a value still being typed before a quit reads the
+    /// draft (#2584).
+    func commitFocusedField() {
+        model.commitFocusedField()
+    }
+
     /// A SIGTERM's quit: the draft goes unasked (#2049).
     func dropDraftForQuit() {
         model.dropDraftForQuit()
@@ -145,6 +151,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// Every close path — the close button, ⌘W, File ▸ Close —
     /// asks first while the draft holds unsaved edits (#2049).
     func windowShouldClose(_ sender: NSWindow) -> Bool {
+        model.commitFocusedField()
         guard model.isDirty else { return true }
         model.leavingDraft(
             .close,

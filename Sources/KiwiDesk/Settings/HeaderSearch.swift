@@ -117,6 +117,8 @@ struct HeaderSearch: View {
     private var focusShortcut: some View {
         Button("", action: open)
             .keyboardShortcut("k", modifiers: .command)
+            // Reached by its chord, never Tab (#2584).
+            .focusable(false)
             .opacity(0)
             .frame(width: 0, height: 0)
             .accessibilityHidden(true)

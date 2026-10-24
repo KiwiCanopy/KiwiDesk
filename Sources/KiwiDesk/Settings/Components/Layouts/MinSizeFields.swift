@@ -71,11 +71,7 @@ struct MinSizeAxisField: View {
                 .multilineTextAlignment(.trailing)
                 .monospacedDigit()
                 .textFieldStyle(.roundedBorder)
-                .focused($focused)
-                .onSubmit(commit)
-                .onChange(of: focused) { _, now in
-                    if !now { commit() }
-                }
+                .commitsOnSave($focused, commit)
             Stepper(label) {
                 set(clamped((value ?? base) + MinSizeFields.step))
             } onDecrement: {
