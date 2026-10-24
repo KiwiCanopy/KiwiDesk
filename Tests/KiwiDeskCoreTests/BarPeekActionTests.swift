@@ -98,46 +98,66 @@ struct BarPeekActionTests {
 
     // MARK: - The click
 
-    @Test("A click shows the peek at once, with no dwell")
+    private func click(_ rig: BarPeekRig, count: Int = 1) {
+        rig.peek.clicked(
+            rig.first,
+            source: .glyph([WindowID(1), WindowID(2)]),
+            space: SpaceID("1"),
+            edge: .top,
+            clickCount: count
+        )
+    }
+
+    /// A list opens on its click alone (#2571): at once, keyed a
+    /// turn later, held whatever the pointer does, and closed by a
+    /// second click past the double-click guard.
+    @Test("A click opens a list at once and holds it until a close")
     func clickShowsAtOnce() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
-        rig.peek.show(
-            rig.first,
-            source: .glyph([WindowID(1), WindowID(2)]),
-            space: SpaceID("1"),
-            edge: .top
-        )
-        #expect(rig.dwells.isEmpty, "no dwell")
+        click(rig)
+        #expect(!rig.dwells.contains(BarPeek.Timing.dwell), "no dwell")
         #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        // A list's peek: it holds in the hull, as a hover's does.
-        rig.pointer = try rig.gap()
-        rig.hover(nil)
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        #expect(rig.peek.holding)
-        // Leaving the hull closes it.
         rig.pointer = CGPoint(x: -1e6, y: -1e6)
+        rig.hover(nil)
         rig.step()
-        #expect(rig.peek.panel.drawn == nil)
+        #expect(rig.shownTitles == ["Window 1", "Window 2"], "held")
+        #expect(!rig.peek.holding, "no hull hold: a click holds it")
+        rig.clock += 1
+        click(rig)
+        #expect(rig.peek.panel.drawn == nil, "a second click closes")
     }
 
-    /// Hover-then-click is the common path (#2063): the click must
-    /// not close the list the hand was reaching for.
-    @Test("A click on an item whose hover peek shows keeps it")
+    /// The second press of the double-click that opened a list
+    /// keeps it, as any press inside the double-click interval does
+    /// (#2063).
+    @Test("A double-click keeps the list it opened")
     func clickKeepsAHoverPeek() {
         let rig = BarPeekRig()
         defer { rig.close() }
-        rig.hover(rig.first, 1, 2)
-        rig.step()
+        click(rig)
+        click(rig, count: 2)
         #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        rig.peek.show(
-            rig.first,
+        rig.clock += 0.1
+        click(rig)
+        #expect(rig.shownTitles == ["Window 1", "Window 2"], "too soon")
+        #expect(rig.peek.shown?.view === rig.first)
+    }
+
+    /// A list's hover opens nothing (#2571), however long it rests.
+    @Test("A list's hover opens nothing")
+    func listHoverOpensNothing() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        rig.peek.pointer(
+            in: rig.item,
+            on: rig.first,
             source: .glyph([WindowID(1), WindowID(2)]),
-            space: SpaceID("1"),
             edge: .top
         )
-        #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        #expect(rig.peek.shown?.view === rig.first)
+        rig.step()
+        #expect(rig.dwells.isEmpty, "no dwell started")
+        #expect(rig.shownTitles == nil)
     }
 
     @Test("A second click leaves the peek open")
@@ -320,6 +340,6 @@ struct BarPeekActionTests {
         #expect(opened == 1)
         // The shown peek's own button reaches its menu.
         rig.peek.panel.body.onMore()
-        #expect(rig.menusOpened == [.glyph([WindowID(1), WindowID(2)])])
+        #expect(rig.menusOpened == [.space([WindowID(1), WindowID(2)])])
     }
 }

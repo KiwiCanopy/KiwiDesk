@@ -39,15 +39,31 @@ enum BarPeekSource: Equatable {
         }
     }
 
-    /// Whether the peek grows out of its anchor and is held open by
-    /// a click alone (#2563): an overflow mark's list. Its hover
-    /// opens nothing, and it holds until a close, never on the
-    /// pointer leaving. Three behaviours on one flag: a source that
-    /// wants only one of them splits it first.
-    var morphsFromAnchor: Bool {
-        if case .run = self { return true }
-        return false
+    /// How a list held open by a click grows (#2563, #2571).
+    enum Growth: Equatable {
+        /// Out of the overflow mark's pill, which becomes its header.
+        case fromPill
+        /// Out of a bar item, across the gap to where the list rests.
+        case outOfItem
     }
+
+    /// How a click-held list grows, nil for a peek the hover opens
+    /// (#2571 ▸ Ruling): every list but a collapsed Space's chip,
+    /// whose click is its switch (#1945). A click-held list opens on
+    /// no hover, holds until a close — never on the pointer leaving —
+    /// and takes the keyboard. Its readers ask this or
+    /// `opensOnClick`, never the source's case.
+    var clickGrowth: Growth? {
+        switch self {
+        case .run: .fromPill
+        case .overflow: .outOfItem
+        case .glyph, .appItem: isList ? .outOfItem : nil
+        case .space: nil
+        }
+    }
+
+    /// Whether a click alone opens and holds this source's list.
+    var opensOnClick: Bool { clickGrowth != nil }
 
 }
 

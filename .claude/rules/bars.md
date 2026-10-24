@@ -907,7 +907,8 @@ Obligations:
   than one window — read by the click, VoiceOver's press and the
   hold alike, never a count beside it
   (`BarPeekHoldTests` ▸ `overflowOfOneHolds`, `BarPeekSeamTests`
-  ▸ `glyphClickRouting`). **Only a list's peek holds, while the
+  ▸ `glyphClickRouting`). **A hover's list — a collapsed chip's,
+  the one list a hover opens (#2571) — holds only while the
   pointer is inside `BarPeekHull`** — the item, the peek and the
   bridge between their facing edges, which spans no neighbour's
   rect — where no neighbour swaps in; leaving it closes and
@@ -935,15 +936,29 @@ Obligations:
   its room keeps what fits and closes on the one "more" line
   (`BarPeekBody+More`, `BarPeekFitTests` ▸
   `tallPeekKeepsWhatFits`, `moreCountsHiddenRows`).
-- **The overflow mark's list grows out of its pill, and ONE source
-  flag says so** (#2563 ▸ Ruling): `BarPeekSource.morphsFromAnchor`,
-  `.run` alone, read by the peek, its panel and the mark — never a
-  second peek, and never a check of the source's case beside it
-  (`BarPeekMorphTests` ▸ `onlyTheRunMorphs`). Its mark reports no
-  hover to the peek and only lights itself; a click opens and holds
-  the list, and while it shows no other item's hover swaps or closes
-  it (`OverflowMarkClickTests` ▸ `hoverOpensNothing`,
-  `otherHoverLeavesIt`). It closes on the peek's own closes plus its
+- **A list a click holds open is the one `BarPeekSource.clickGrowth`
+  that says so** (#2563, #2571 ▸ Ruling): `.fromPill` for the
+  overflow mark, `.outOfItem` for every other list but a collapsed
+  chip's, nil for a peek the hover opens — read by the peek, its
+  panel and the items, through it or `opensOnClick`, never a second
+  peek and never a check of the source's case beside it
+  (`BarPeekMorphTests` ▸ `onlyTheRunMorphs`). Its hover opens
+  nothing; a click opens and holds the list, and while it shows no
+  other item's hover swaps or closes it (`OverflowMarkClickTests` ▸
+  `hoverOpensNothing`, `otherHoverLeavesIt`; `BarPeekActionTests` ▸
+  `listHoverOpensNothing`). Its item's click closes it, save the
+  second press of the double-click that opened it, through the one
+  `BarPeek.clicked` (`BarPeekActionTests` ▸ `clickShowsAtOnce`,
+  `clickKeepsAHoverPeek`); a left press on that item is spared at
+  the panel's one point through `BarPeek.releaseDecides`
+  (`AppBarGroupClickTests` ▸ `pressOnAGroupIsSpared`). Its item
+  draws the open state through `BarPeek.holdsOpen`, re-read as the
+  list opens and closes (`BarPeekListAnchor`): it stays lit, and
+  only a `+n` disc swaps its count for the window symbol, a group
+  count badge keeping its number (`SpaceBarOpenListTests`,
+  `AppBarGroupClickTests` ▸ `groupClickOpensTheList`). The overflow
+  mark reports no hover to the peek and only lights itself. Its list
+  closes on the peek's own closes plus its
   header — never the second press of the double-click that opened it
   (`BarPeekMorphTests` ▸ `headerClosesPastTheDoubleClick`) — any
   key, its mark moving on screen (read off the mark's placed frame,
@@ -957,8 +972,11 @@ Obligations:
   host; the mark only hides its own panel and never draws a list. A
   mark the sync drops is hidden BEFORE its list closes, so the list
   fades rather than shrinking into nothing (`OverflowMarkClickTests`
-  ▸ `goneMarkFades`). The
-  panel is key-capable for this source alone, keyed a turn later
+  ▸ `goneMarkFades`). A bar item's list grows on the same motion
+  from `BarPeekMorph.seed` — the item's size at the gap's near
+  edge, never on the item the panel would cover — and hides nothing
+  (`BarPeekPanel+Grown`, `BarPeekSeedTests`). The
+  panel is key-capable for a click-held source alone, keyed a turn later
   through the peek's `schedule`, so Escape and the arrows reach its
   rows without activating KiwiDesk (`OverflowMarkClickTests` ▸
   `keysOnTheList`). **A key-capable panel in Core takes no chord
@@ -983,25 +1001,16 @@ Obligations:
   draws it rather than on its home Space (`BarPeekSeamTests` ▸
   `oneBarRowPick`, `BarPeekClickTests` ▸
   `refusedRowTakesThePlainSwitch`, `BarPeekAppBarRowTests` ▸
-  `travelerRowActsAsItsItem`). A left click on a list OPENS its
-  peek and never closes it, through the one `BarPeek.show`: at
-  once where none shows — a fading one included, no dwell and no
-  cool-down — and re-read in place where one does, the hover's
-  or a click's; it pops no menu (#2063, amending #1946's
-  toggle). A multi-window glyph's click FOCUSES its next window
-  first — the one after `barFocus`, wrapping, or the first, in
-  the peek's own `order`, through the glyph's
-  `focusFromSpaceBar` and never a stored position — so the
-  check reads the window landed; `+n` focuses nothing.
-  VoiceOver's press and "N more" open the native menu at the
-  anchor (`BarPeekActionTests` ▸ `clickKeepsAHoverPeek`,
-  `secondClickKeeps`, `clickReopensADismissedPeek`,
-  `BarPeekClickTests`, `BarGlyphCycleTests`,
-  `BarPeekSeamTests` ▸ `oneBarRowPick`).
-  The cycle steps over a window the focus door refuses (#1345),
-  or the walk stalls on it (`BarGlyphCycleTests` ▸
-  `refusedWindowIsSteppedOver`); a click that switches Spaces
-  shows no peek, its chip having moved. A collapsed chip is the
+  `travelerRowActsAsItsItem`). A left click on a click-held list
+  opens it at once — a fading one included, no dwell and no
+  cool-down — pops no menu and moves no focus, a row being the
+  pick (#2571, retiring #2063's click cycle); `BarPeek.show`
+  re-reads a list already showing in place. VoiceOver's press and
+  "N more" open the native menu at the anchor
+  (`BarPeekActionTests` ▸ `secondClickKeeps`,
+  `clickReopensADismissedPeek`, `BarPeekClickTests`,
+  `BarGlyphCycleTests` ▸ `glyphClickFocusesNothing`,
+  `BarPeekSeamTests` ▸ `oneBarRowPick`). A collapsed chip is the
   one list anchor that is no glyph (#1945): its press closes the
   peek at the panel's one point and its click and VoiceOver's
   press stay the chip's switch, so its list reads at the hold

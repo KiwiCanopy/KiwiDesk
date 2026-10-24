@@ -151,8 +151,10 @@ final class BarPeek {
             spent = nil
         }
         // A list a click holds open is no hover's to swap or close
-        // (#2563); the mark it grew from reports no hover at all.
-        if shown?.source.morphsFromAnchor == true { return }
+        // (#2563), and a list a click opens no hover opens (#2571):
+        // its item reads as nothing under the pointer.
+        if shown?.source.opensOnClick == true { return }
+        let source = source?.opensOnClick == true ? nil : source
         guard let anchor, let source else {
             let current = shown?.view ?? pending?.view
             if let current, Self.belongs(current, to: reporter) {
@@ -256,9 +258,11 @@ final class BarPeek {
     }
 
     private func close() {
+        let was = shown
         generation += 1
         phase = .idle
         pointerInPeek = false
+        noteOpenChanged(was)
     }
 
     /// The item reported the pointer gone: inside the hull a list's
@@ -335,5 +339,6 @@ final class BarPeek {
             shelf: shelf,
             fades: fades
         )
+        noteOpenChanged(placed)
     }
 }

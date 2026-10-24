@@ -122,6 +122,42 @@ enum BarPeekMorph {
         )
     }
 
+    /// Where a list grown out of a bar item starts and ends (#2571 ▸
+    /// Ruling): a plate the item's size at the list's near edge — the
+    /// bar's side of the gap — across from the item and kept inside
+    /// the list, never on the item, which the panel above the bar
+    /// would cover. AppKit screen coordinates.
+    static func seed(
+        item: CGRect,
+        list: CGRect,
+        edge: AppBarEdge
+    ) -> CGRect {
+        let width = min(item.width, list.width)
+        let height = min(item.height, list.height)
+        var seed = CGRect(x: 0, y: 0, width: width, height: height)
+        switch edge {
+        case .top, .bottom:
+            seed.origin.x = clamped(
+                item.midX - width / 2,
+                width,
+                list.minX,
+                list.maxX
+            )
+            seed.origin.y =
+                edge == .top ? list.maxY - height : list.minY
+        case .left, .right:
+            seed.origin.y = clamped(
+                item.midY - height / 2,
+                height,
+                list.minY,
+                list.maxY
+            )
+            seed.origin.x =
+                edge == .left ? list.minX : list.maxX - width
+        }
+        return seed
+    }
+
     /// Whether a press on the header closes the list: never the
     /// second press of a double-click, nor one within the double-click
     /// interval of the open, so a double-click opens and stays open

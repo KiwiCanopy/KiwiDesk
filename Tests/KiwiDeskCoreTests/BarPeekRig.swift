@@ -65,12 +65,16 @@ final class BarPeekRig {
         }
     }
 
+    /// One window is a glyph's label; several are a collapsed chip's
+    /// list, the one list a hover opens (#2571).
     func hover(_ anchor: NSView?, _ ids: UInt32...) {
         let windows = (ids.isEmpty ? [1] : ids).map(WindowID.init)
         peek.pointer(
             in: item,
             on: anchor,
-            source: anchor.map { _ in .glyph(windows) },
+            source: anchor.map { _ in
+                windows.count > 1 ? .space(windows) : .glyph(windows)
+            },
             space: SpaceID("1"),
             edge: .top
         )

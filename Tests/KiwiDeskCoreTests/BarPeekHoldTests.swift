@@ -17,32 +17,35 @@ struct BarPeekHoldTests {
     }
 
     /// `+1` stands for one window the chip did not draw: a list by
-    /// the one predicate, so its click shows a peek that holds —
-    /// one the pointer could never reach otherwise (#1946).
-    @Test("A +n peek of one hidden window holds in the hull")
+    /// the one predicate, so its click opens a list held until a
+    /// close (#1946, #2571) — one the pointer could never reach
+    /// otherwise.
+    @Test("A +n list of one hidden window holds past the pointer")
     func overflowOfOneHolds() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
         let source = BarPeekSource.overflow([WindowID(7)])
         #expect(source.isList)
+        #expect(source.opensOnClick)
         #expect(!BarPeekSource.glyph([WindowID(7)]).isList)
         #expect(!BarPeekSource.appItem([WindowID(7)]).isList)
         #expect(BarPeekSource.space([WindowID(7)]).isList)
-        rig.peek.show(
+        rig.peek.clicked(
             rig.first,
             source: source,
             space: SpaceID("1"),
-            edge: .top
+            edge: .top,
+            clickCount: 1
         )
-        rig.pointer = try rig.gap()
+        rig.pointer = CGPoint(x: -1e6, y: -1e6)
         rig.peek.pointer(
             in: rig.item,
             on: nil,
             source: nil,
             edge: .top
         )
-        #expect(rig.shownTitles == ["Window 7"], "held in the gap")
-        #expect(rig.peek.holding)
+        rig.step()
+        #expect(rig.shownTitles == ["Window 7"], "held off the item")
     }
 
     /// Inside the peek its body's own tracking reports the pointer,

@@ -7311,10 +7311,12 @@ animations.set_reveal_duration(400)
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** the bars' peeks: the short fade of the label a bar item
-shows on hover, and the overflow mark's "+n" growing into its list
-of windows and back. Off, both show and hide at once. With Reduce
-Motion on, the list cross-fades with the mark instead of growing,
-unless this is off. Lua-only: no Settings row turns it off.
+shows on hover, and a list a click opens growing out of its item —
+a bar's "+n", a glyph or App Bar item standing for several
+windows, the overflow mark's "+n" — and back. Off, both show and
+hide at once. With Reduce Motion on, a list cross-fades in place
+instead of growing, unless this is off. Lua-only: no Settings row
+turns it off.
 
 **Example:**
 

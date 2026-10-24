@@ -1,13 +1,12 @@
 import AppKit
 
 /// What a click on a Space Bar glyph or `+n` does (#1528, the
-/// owner rulings in its body, #1946's and #2063's): a glyph
-/// switches to its Space and focuses a window — its one window,
-/// or for several the next in its peek's order (`glyphCycleTarget`)
-/// with the peek shown on it; `+n` shows its peek and switches
-/// nothing until a row is picked — VoiceOver's press opening the
-/// native menu instead. A list's click opens its peek and never
-/// closes it. A click elsewhere on the chip stays `focusSpace`.
+/// owner rulings in its body, #1946's and #2571's): a one-window
+/// glyph switches to its Space and focuses its window; a list — a
+/// multi-window glyph or `+n` — opens its list, or closes the one it
+/// holds open, and moves no focus until a row is picked —
+/// VoiceOver's press opening the native menu instead. A click
+/// elsewhere on the chip stays `focusSpace`.
 extension KiwiCore {
     func wireSpaceBarGlyphs() {
         spaceBars.glyphActions.pick = { [weak self] pick in
@@ -35,16 +34,7 @@ extension KiwiCore {
             focusFromSpaceBar(pick.windows[0], on: pick.space)
             return
         }
-        // No menu: the list is the peek, its rows the picks. A
-        // glyph focuses its next window first, so the check reads
-        // the window landed; `+n` mixes apps and has no next.
-        if pick.kind == .glyph, let next = glyphCycleTarget(pick) {
-            // A switch moves the chip, which closes the peek as any
-            // relayout moving its item does.
-            let switches = pick.space != activeSpace?.id
-            focusFromSpaceBar(next, on: pick.space)
-            guard !switches else { return }
-        }
+        // No menu: the list is the peek, its rows the picks.
         spaceBars.glyphActions.showPeek(pick)
     }
 

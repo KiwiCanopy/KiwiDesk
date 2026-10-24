@@ -17,6 +17,9 @@ struct SpaceBarGlyphPick {
     let kind: Kind
     /// Where the peek or a menu opens; the target view itself.
     let anchor: NSView
+    /// The click's count, for the double-click guard on a list held
+    /// open (#2063); VoiceOver's press is one.
+    var clickCount = 1
 
     /// What the peek shows for this pick (#1946).
     var peekSource: BarPeekSource {
@@ -70,18 +73,19 @@ final class SpaceBarGlyphActions {
         )
     }
 
-    /// A click on a list shows its peek at once, or re-reads the
-    /// one showing, and never closes it (#2063): a glyph's after
-    /// its focus moved, so the check stands on the window landed.
+    /// A click on a list opens it at once, or closes the one it
+    /// holds open, save the second press of the double-click that
+    /// opened it (#2571, #2063).
     func showPeek(_ pick: SpaceBarGlyphPick) {
         guard let target = pick.anchor as? SpaceBarGlyphTarget,
             let item = target.superview as? SpaceBarItemView
         else { return }
-        peek?.show(
+        peek?.clicked(
             target,
             source: target.peekSource,
             space: pick.space,
-            edge: item.style.edge
+            edge: item.style.edge,
+            clickCount: pick.clickCount
         )
     }
 }
@@ -132,8 +136,8 @@ final class SpaceBarGlyphTarget: NSView {
     var peekSource: BarPeekSource { pick.peekSource }
 
     /// A press arms the pick; the peek stays, since the release
-    /// decides — a list's click opens it and never closes it
-    /// (#2063). A Control-click's menu closes it as any menu does.
+    /// decides — a list's click opens or closes its list (#2571). A
+    /// Control-click's menu closes it as any menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
         pressed = true
@@ -145,7 +149,9 @@ final class SpaceBarGlyphTarget: NSView {
     override func mouseUp(with event: NSEvent) {
         defer { pressed = false }
         guard pressed, releasesInside(event) else { return }
-        actions?.pick(pick)
+        var clicked = pick
+        clicked.clickCount = event.clickCount
+        actions?.pick(clicked)
     }
 
     private func releasesInside(_ event: NSEvent) -> Bool {

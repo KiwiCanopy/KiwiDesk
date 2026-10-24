@@ -66,13 +66,28 @@ extension BarPeek {
 
     /// A press in a bar panel (`ShelfPanel`), on `hit`: a click
     /// outside the peek, which closes it — except a left press on
-    /// a Space Bar glyph, whose release decides: a list's click
-    /// opens the peek, a one-window glyph's picks (#2063). Any
-    /// other button's press on a glyph closes it.
+    /// a Space Bar glyph or an App Bar group, whose release decides:
+    /// a list's click opens or closes its list (#2571), a one-window
+    /// glyph's picks. Any other button's press on them closes it.
     func pressed(on hit: NSView?, type: NSEvent.EventType) {
-        guard type != .leftMouseDown || !(hit is SpaceBarGlyphTarget)
+        guard type != .leftMouseDown || !Self.releaseDecides(hit)
         else { return }
         dismiss()
+    }
+
+    /// Whether a left press on `hit` leaves the peek to its release:
+    /// a Space Bar glyph's, or an App Bar group's, whose views it
+    /// may land on.
+    static func releaseDecides(_ hit: NSView?) -> Bool {
+        if hit is SpaceBarGlyphTarget { return true }
+        var view = hit
+        while let current = view {
+            if let item = current as? AppBarItemView {
+                return item.peekSource?.opensOnClick == true
+            }
+            view = current.superview
+        }
+        return false
     }
 
     /// A row's window picked: the peek closes and Core focuses it.

@@ -45,3 +45,8 @@ extension AppBarItemView {
         )
     }
 }
+
+/// A group's list opening or closing re-reads its lit state (#2571).
+extension AppBarItemView: BarPeekListAnchor {
+    func listOpenChanged() { syncHoverToPointer() }
+}

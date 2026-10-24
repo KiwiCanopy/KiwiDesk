@@ -17,14 +17,27 @@ struct BarPeekMorphTests {
         CGRect(x: 480, y: 682, width: 40, height: 18)
     }
 
-    @Test("Only the overflow mark's source grows out of its anchor")
+    /// Every list but a collapsed chip's opens on a click alone
+    /// (#2571); only the overflow mark's grows out of its pill, and a
+    /// one-window label stays the hover's.
+    @Test("Which sources a click opens, and how each grows")
     func onlyTheRunMorphs() {
         let ids = [WindowID(1), WindowID(2)]
-        #expect(BarPeekSource.run(ids).morphsFromAnchor)
-        for source: BarPeekSource in [
-            .glyph(ids), .overflow(ids), .appItem(ids), .space(ids),
-        ] {
-            #expect(!source.morphsFromAnchor, "\(source)")
+        let one = [WindowID(1)]
+        let table: [(BarPeekSource, BarPeekSource.Growth?)] = [
+            (.run(ids), .fromPill),
+            (.run(one), .fromPill),
+            (.overflow(ids), .outOfItem),
+            (.overflow(one), .outOfItem),
+            (.glyph(ids), .outOfItem),
+            (.appItem(ids), .outOfItem),
+            (.glyph(one), nil),
+            (.appItem(one), nil),
+            (.space(ids), nil),
+        ]
+        for (source, growth) in table {
+            #expect(source.clickGrowth == growth, "\(source)")
+            #expect(source.opensOnClick == (growth != nil), "\(source)")
         }
     }
 

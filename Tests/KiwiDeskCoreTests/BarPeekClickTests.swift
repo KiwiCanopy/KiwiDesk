@@ -117,67 +117,56 @@ struct BarPeekClickTests {
         core.shelves.peek.panel.panel?.orderOut(nil)
     }
 
-    /// The peek stays up across clicks on the glyph's own Space,
-    /// re-read in place, so its check follows the window each click
-    /// landed (#2063); a click switching Spaces moves the chip, which
-    /// closes it as any relayout that moves its item does.
-    @Test("A list glyph's click focuses and shows its peek checked there")
+    /// A list glyph's click opens its list and moves no focus
+    /// (#2571): the check reads the focus a row or a key moved,
+    /// following it while the list stays open; a second click past
+    /// the double-click guard closes it.
+    @Test("A list glyph's click opens its list and focuses nothing")
     func clickFocusesAndShowsThePeek() throws {
         let core = seededCore()
         defer { close(core) }
         var menus = 0
         core.spaceBars.glyphActions.present = { _, _ in menus += 1 }
-        var dwells = 0
-        core.shelves.peek.schedule = { _, _ in dwells += 1 }
+        var clock: TimeInterval = 100
+        core.shelves.peek.now = { clock }
         let checked = {
             core.shelves.peek.panel.drawn?.groups.flatMap(\.rows)
                 .filter(\.focused).map(\.window)
         }
-        // The shelf lookup answers across the switch, so a peek the
-        // click showed would stand: the guard is what keeps it shut.
         core.shelves.peek.shelf = { _ in KiwiShelf() }
         try click(try webTarget(core))
-        #expect(core.activeSpace?.id == two)
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
-        #expect(core.shelves.peek.shown == nil, "a switch shows none")
+        #expect(core.activeSpace?.id == one, "nothing switches")
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        close(core)
+        // A row's pick lands Space 2 on Doc; the list opens there.
+        core.pickBarRow(WindowID(4), on: two)
         let web = try webTarget(core)
         try click(web)
         #expect(menus == 0)
-        #expect(dwells == 0, "no dwell")
-        #expect(core.state.workspaces.lastFocused == WindowID(5))
+        #expect(core.state.workspaces.lastFocused == WindowID(4))
         #expect(core.shelves.peek.shown?.view === web)
         #expect(
             core.shelves.peek.panel.drawn?.groups.flatMap(\.titles)
                 == ["Doc", "Mail"]
         )
-        #expect(checked() == [WindowID(5)])
-        #expect(core.shelves.peek.panel.body.check != nil)
-        // The bar re-rendered for the focus change keeps the glyph
-        // where it was, so the peek survives its relayout.
-        // The pointer rests on the glyph, as a click leaves it: the
-        // re-render below re-reads the hover, which finds it inside
-        // the hull (without it the peek closes there).
-        let rest = try #require(BarPeek.screenFrame(of: web))
-        core.shelves.peek.pointerOnScreen = {
-            CGPoint(x: rest.midX, y: rest.midY)
-        }
-        let after = try webTarget(core)
-        core.shelves.peek.syncToAnchor()
-        #expect(core.shelves.peek.shown?.view === after, "it stays")
-        try click(after)
-        #expect(core.state.workspaces.lastFocused == WindowID(4), "wraps")
         #expect(checked() == [WindowID(4)])
+        #expect(core.shelves.peek.panel.body.check != nil)
         // A focus moved while it stays open — a key, a click on the
-        // window — reaches it through the relayout's re-read.
+        // window — reaches it through the relayout's re-read; the
+        // pointer leaving does not close it.
         core.focusWindow(WindowID(5), warp: false)
-        _ = try webTarget(core)
-        #expect(core.shelves.peek.shown != nil)
+        let after = try webTarget(core)
+        #expect(core.shelves.peek.shown?.view === after, "it stays")
         #expect(checked() == [WindowID(5)], "the check follows")
+        clock += 1
+        try click(after)
+        #expect(core.shelves.peek.shown == nil, "a second click closes")
+        #expect(core.state.workspaces.lastFocused == WindowID(5))
     }
 
-    /// `+n` mixes apps, so it focuses nothing (#2063): a click shows
-    /// its peek, and a second leaves it open.
-    @Test("A +n click shows its peek and never closes it")
+    /// `+n` focuses nothing (#2571): a click opens its list, and the
+    /// second press of a double-click leaves it open (#2063).
+    @Test("A +n click opens its list; a double-click keeps it")
     func overflowClickShows() throws {
         let core = seededCore()
         defer { close(core) }

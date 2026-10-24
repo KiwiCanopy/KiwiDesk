@@ -9,9 +9,14 @@ import AppKit
 extension BarPeekPanel {
     /// A list grown out of its anchor, shown or closing back.
     struct Morph {
+        /// The overflow mark's pill; nil for a list grown out of a
+        /// bar item (#2571), which hides nothing.
         weak var anchor: (any BarPeekMorphAnchor)?
+        /// The bar item a list grew out of; nil for the overflow
+        /// mark's.
+        weak var item: NSView?
         let edge: AppBarEdge
-        /// When it opened, for the header's double-click guard.
+        /// When it opened, for the double-click guard (#2063).
         let openedAt: TimeInterval
     }
 
@@ -33,6 +38,8 @@ extension BarPeekPanel {
         visible: CGRect
     ) {
         let shelf = LiquidGlassGate.rendered(stored)
+        // A bar item's list in its place ends at once (#2571).
+        if morph?.item != nil { dropMorph() }
         let room = request.anchor.morphRoom.intersection(visible)
         let area = room.isNull ? visible : room
         let atTop = BarPeekMorph.headerAtTop(request.edge)
@@ -138,8 +145,7 @@ extension BarPeekPanel {
             self.endMorph()
             morph.anchor?.setMorphed(false, pointer: pointer())
         }
-        guard let anchor = morph.anchor,
-            let target = BarPeek.screenFrame(of: anchor),
+        guard let target = closingTarget(morph, list: panel.frame),
             panel.frame.insetBy(dx: -1, dy: -1).contains(target),
             let parts = morphParts()
         else {
@@ -149,7 +155,7 @@ extension BarPeekPanel {
         let span = BarMotion.playMorph(
             parts,
             panel: panel,
-            anchor: anchor.window,
+            anchor: morph.anchor?.window,
             pill: local(target, in: panel.frame),
             pillRadius: min(target.width, target.height) / 2,
             listRadius: BarPeekBody.Metrics.cornerRadius,
@@ -169,15 +175,35 @@ extension BarPeekPanel {
         morph.anchor?.setMorphed(false, pointer: pointer())
     }
 
+    /// Where a closing list shrinks to on screen: the pill's current
+    /// frame, or the seed off the item's (#2571); nil where neither
+    /// is on screen.
+    private func closingTarget(_ morph: Morph, list: CGRect) -> CGRect? {
+        if let anchor = morph.anchor {
+            return BarPeek.screenFrame(of: anchor)
+        }
+        guard let item = morph.item,
+            let frame = BarPeek.screenFrame(of: item)
+        else { return nil }
+        return BarPeekMorph.seed(item: frame, list: list, edge: morph.edge)
+    }
+
+    /// Whether a press on a held list's header or item closes it:
+    /// never the second press of the double-click that opened it
+    /// (#2063).
+    func pressCloses(_ clickCount: Int) -> Bool {
+        guard let morph else { return true }
+        return BarPeekMorph.headerCloses(
+            clickCount: clickCount,
+            sinceOpen: now() - morph.openedAt,
+            doubleClick: NSEvent.doubleClickInterval
+        )
+    }
+
     /// A press on the header strip closes the list, save the second
     /// press of the double-click that opened it (#2063).
     func headerPressed(_ clickCount: Int) {
-        guard let morph, drawn != nil,
-            BarPeekMorph.headerCloses(
-                clickCount: clickCount,
-                sinceOpen: now() - morph.openedAt,
-                doubleClick: NSEvent.doubleClickInterval
-            )
+        guard morph != nil, drawn != nil, pressCloses(clickCount)
         else { return }
         onClose()
     }
@@ -211,7 +237,7 @@ extension BarPeekPanel {
         panel?.alphaValue = 1
     }
 
-    private func morphParts() -> BarPeekMorphParts? {
+    func morphParts() -> BarPeekMorphParts? {
         guard let stage = stage.layer, let rows = body.layer,
             let markInk = header.markInk.layer,
             let listInk = header.listInk.layer
@@ -226,7 +252,7 @@ extension BarPeekPanel {
 
     /// `rect` on screen in the coordinates of a panel framed
     /// `panel`.
-    private func local(_ rect: CGRect, in panel: CGRect) -> CGRect {
+    func local(_ rect: CGRect, in panel: CGRect) -> CGRect {
         rect.offsetBy(dx: -panel.minX, dy: -panel.minY)
     }
 }

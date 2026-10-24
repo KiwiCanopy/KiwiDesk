@@ -171,7 +171,7 @@ struct OverflowMarkClickTests {
         defer { rig.close() }
         try rig.click()
         let shown = try #require(rig.peek.shown)
-        #expect(shown.source.morphsFromAnchor)
+        #expect(shown.source.opensOnClick)
         #expect(rig.peek.panel.morph != nil)
         #expect(!rig.peek.panel.header.isHidden)
         #expect(try rig.overlay.panel?.ignoresMouseEvents == true)
@@ -195,9 +195,9 @@ struct OverflowMarkClickTests {
             source: .glyph([WindowID(1), WindowID(2)]),
             edge: .bottom
         )
-        #expect(rig.peek.shown?.source.morphsFromAnchor == true)
+        #expect(rig.peek.shown?.source.opensOnClick == true)
         rig.peek.pointer(in: item, on: nil, source: nil, edge: .bottom)
-        #expect(rig.peek.shown?.source.morphsFromAnchor == true)
+        #expect(rig.peek.shown?.source.opensOnClick == true)
     }
 
     /// The second press of the double-click that opened it lands on

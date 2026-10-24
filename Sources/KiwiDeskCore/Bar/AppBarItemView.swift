@@ -139,6 +139,16 @@ final class AppBarItemView: NSView {
         if isDragging {
             isDragging = false
             onDragEnded(self)
+        } else if let source = peekSource, source.opensOnClick {
+            // A group's click opens its list and selects nothing
+            // until a row is picked (#2571).
+            itemActions?.peek?.clicked(
+                self,
+                source: source,
+                space: nil,
+                edge: edge,
+                clickCount: event.clickCount
+            )
         } else if !isInert {
             onSelect(windowID)
         }
@@ -184,7 +194,9 @@ final class AppBarItemView: NSView {
     private func applyHover(_ ownsPointer: Bool) {
         // The peek reads an inert item too: it may hide its title.
         reportPeek(ownsPointer: ownsPointer)
-        let hovered = !isInert && ownsPointer
+        // An item whose list is open stays lit until it closes (#2571).
+        let open = itemActions?.peek?.holdsOpen(self) == true
+        let hovered = !isInert && (ownsPointer || open)
         guard hovered != isHovered else { return }
         isHovered = hovered
         applyColors()
