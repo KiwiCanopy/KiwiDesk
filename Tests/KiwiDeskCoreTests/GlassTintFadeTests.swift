@@ -188,7 +188,7 @@ struct GlassTintFadeTests {
         }
     }
 
-    // MARK: - The uniform exception (#1946)
+    // MARK: - The hover peek (#1946, #2569)
 
     /// The first tint under `view`, at any depth: a glass carries
     /// its tint as its content (#2569).
@@ -205,36 +205,16 @@ struct GlassTintFadeTests {
         (tint.gradient?.colors as? [CGColor] ?? []).map(\.alpha)
     }
 
-    /// A reading panel takes ONE tint over its whole height: both
-    /// ends carry the anchor, where a fade would drop to the floor.
-    @Test("The uniform tint carries the anchor end to end")
-    func uniformTintHasNoFade() throws {
+    /// The consumer: the hover peek fades like the bar, from the
+    /// shelf's edge (#2569, overturning #1946's uniform tint).
+    @Test(
+        "The hover peek's glass fades from the shelf's edge",
+        arguments: [false, true]
+    )
+    func peekFadesFromTheEdge(increaseContrast: Bool) throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
-        let parent = NSView(frame: Self.frame)
-        let glass = NSView(frame: Self.frame)
-        parent.addSubview(glass)
-        let backdrop = GlassBackdrop()
-        GlassTint.applyUniform(
-            backdrop,
-            in: glass,
-            cornerRadius: 4,
-            fill: GlassFill(hex: "#14201CB3")
-        )
-        try #require(
-            backdrop.gradient?.colors != nil,
-            "the tint was not painted"
-        )
-        let alphas = Self.alphas(backdrop)
-        try #require(alphas.count == 2, "\(alphas)")
-        #expect(alphas[0] == alphas[1], "\(alphas)")
-        #expect(alphas[0] > 0)
-    }
-
-    /// The consumer: the hover peek's panel paints the uniform tint
-    /// on a bottom bar too, where a fade would run from its edge.
-    @Test("The hover peek's glass takes the uniform tint")
-    func peekTakesTheUniformTint() throws {
-        try #require(Self.drawsGlass, "no glass below macOS 26")
+        LiquidGlassGate.contrastOverride = { increaseContrast }
+        defer { LiquidGlassGate.contrastOverride = nil }
         var shelf = KiwiShelf()
         shelf.fillColor = "#14201CB3"
         shelf.liquidGlass = true
@@ -270,8 +250,16 @@ struct GlassTintFadeTests {
             !tint.isHiddenOrHasHiddenAncestor,
             "the peek's tint was not painted"
         )
+        #expect(tint.gradient?.startPoint == Self.anchor(.bottom))
         let alphas = Self.alphas(tint)
         try #require(alphas.count == 2, "\(alphas)")
-        #expect(alphas[0] == alphas[1], "\(alphas)")
+        #expect(alphas[0] > alphas[1], "\(alphas)")
+        // The reading floor stops the fade (#2569 ▸ Ruling), the
+        // bars' floor under Increase Contrast.
+        let floor = shelf.readingGlassFill(
+            increaseContrast: increaseContrast
+        ).minShare
+        try #require(floor > GlassTint.farShare(fade: 100))
+        #expect(abs(alphas[1] / alphas[0] - floor) < 0.001, "\(alphas)")
     }
 }

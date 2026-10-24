@@ -5,9 +5,8 @@ import AppKit
 /// beneath what it hosts (#2569), and the one place a stored Fill
 /// becomes a rendered colour on glass (#1297) — a fade from the
 /// shelf's screen edge toward the windows (#1622), or downward on a
-/// surface on no edge (#1620, #1621). A reading surface — the bar
-/// hover peek — takes no fade at all (`applyUniform`, owner ruling
-/// on #1946).
+/// surface on no edge (#1620, #1621). The bar hover peek fades like
+/// the bar (#2569, overturning #1946's uniform tint).
 enum GlassTint {
     /// Ceiling on the backdrop's alpha at the fade's ANCHOR edge
     /// — a floor on how much refraction survives, not a legibility
@@ -87,7 +86,9 @@ enum GlassTint {
         let anchor = min(color.alphaComponent, maxAlpha)
         return (
             color.withAlphaComponent(anchor),
-            color.withAlphaComponent(anchor * farShare(fade: fill.fade))
+            color.withAlphaComponent(
+                anchor * max(farShare(fade: fill.fade), fill.minShare)
+            )
         )
     }
 
@@ -163,48 +164,8 @@ enum GlassTint {
         fill: GlassFill,
         edge: AppBarEdge
     ) {
-        paint(
-            backdrop,
-            in: glass,
-            cornerRadius: cornerRadius,
-            fill: fill,
-            fadeFrom: edge
-        )
-    }
-
-    /// A READING surface's tint: the Fill at the anchor's capped
-    /// alpha over the whole surface, no fade — the ruled exception
-    /// to #1620's detached-surface fade, since a panel of text must
-    /// stay legible over its whole height (owner, #1946: the bar
-    /// hover peek). Everything else `apply` holds holds here.
-    @MainActor
-    static func applyUniform(
-        _ backdrop: GlassBackdrop,
-        in glass: NSView,
-        cornerRadius: CGFloat,
-        fill: GlassFill
-    ) {
-        paint(
-            backdrop,
-            in: glass,
-            cornerRadius: cornerRadius,
-            fill: fill,
-            fadeFrom: nil
-        )
-    }
-
-    /// The one painter both doors take: a fade from `edge`, or the
-    /// anchor alone where it is nil. A clear Fill clears the
-    /// gradient and never hides the backdrop, which carries the
-    /// glass's content.
-    @MainActor
-    private static func paint(
-        _ backdrop: GlassBackdrop,
-        in glass: NSView,
-        cornerRadius: CGFloat,
-        fill: GlassFill,
-        fadeFrom edge: AppBarEdge?
-    ) {
+        // A clear Fill clears the gradient and never hides the
+        // backdrop, which carries the glass's content.
         glass.appearance = pinnedAppearance(fill.hex)
         GlassPlate.setBackdrop(glass, backdrop)
         guard let gradient = backdrop.gradient else { return }
@@ -213,10 +174,9 @@ enum GlassTint {
             gradient.colors = nil
             return
         }
-        let direction = fade(from: edge ?? .top)
+        let direction = fade(from: edge)
         gradient.startPoint = direction.start
         gradient.endPoint = direction.end
-        let far = edge == nil ? ends.anchor : ends.floor
-        gradient.colors = [ends.anchor.cgColor, far.cgColor]
+        gradient.colors = [ends.anchor.cgColor, ends.floor.cgColor]
     }
 }

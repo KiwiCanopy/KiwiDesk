@@ -924,10 +924,12 @@ Obligations:
   Its timing lives in `BarPeek.Timing` and
   nowhere beside it; its fade is `BarMotion`'s; its glass is
   decided once in `BarPeekPanel.show` through the gate
-  (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted UNIFORMLY
-  through `GlassTint.applyUniform`, the ruled exception to the
-  detached-surface fade (`PeekInkContrastTests` measures the ink
-  on that ground, a hovered row's included); its shelf is the one
+  (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted like the
+  bar, fading from the shelf's edge but never past the reading
+  floor, `KiwiShelf.readingGlassFill` — the bars' own ink floor
+  under Increase Contrast (#2569, overturning #1946's uniform
+  tint; `PeekInkContrastTests` measures both ends, a hovered
+  row's included); its shelf is the one
   `ShelfManager` drew the anchor's panel with; its text asks
   `BarFont` at the peek's own fixed size, never the strip-depth
   ladders (`BarFontSiteTests` ▸ `hoverPeek`); a list taller than
@@ -1362,10 +1364,12 @@ Obligations:
   fixture on another edge can see (`GlassTintFadeTests`,
   `GlassTintCensusTests` ▸ `applyTakesAFillNotAColour`), and the
   backdrop paints nothing of its own (`GlassTintCensusTests` ▸
-  `backdropPaintsNothing`). A READING surface takes no fade at
-  all, through `GlassTint.applyUniform` — the hover peek alone,
-  by the owner's ruling on #1946; a second one argues its own
-  design-decisions entry first. An EMPTY Fill is no colour there —
+  `backdropPaintsNothing`). Every surface fades, the hover peek
+  included (#2569); how far is the Fill value's `fade`, the
+  shelf's `fill_fade` for every KiwiShelf glass, and a READING
+  surface's Fill carries the floor its ink needs as `minShare`,
+  minted by `readingGlassFill` and never a share typed at a call
+  site. An EMPTY Fill is no colour there —
   clear glass, nothing pinned — which the drag marker's fill-off
   and the sticky mark's Automatic both hand it
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).

@@ -28,10 +28,8 @@ struct GlassTintCensusTests {
         "pinDark": ["darkAqua"],
         // The Space-switch plates: no Fill, the Appearance pick.
         "followPick": ["darkAqua", "bestMatch"],
-        // Both doors take the one painter (#1946's uniform tint).
-        "apply": ["paint("],
-        "applyUniform": ["paint("],
-        "paint": [
+        // The one painter (#1946's uniform tint retired, #2569).
+        "apply": [
             "rendered(", "fade(", "pinnedAppearance(", "setBackdrop(",
         ],
     ]

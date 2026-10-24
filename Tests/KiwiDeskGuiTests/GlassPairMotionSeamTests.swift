@@ -33,16 +33,6 @@ struct GlassPairMotionSeamTests {
             file: "GlassTint.swift", declaration: "static func apply(",
             input: "in glass: NSView"
         ),
-        (
-            file: "GlassTint.swift",
-            declaration: "static func applyUniform(",
-            input: "in glass: NSView"
-        ),
-        (
-            file: "GlassTint.swift",
-            declaration: "private static func paint(",
-            input: "in glass: NSView"
-        ),
     ]
 
     /// Motion inputs a signature may not take.

@@ -53,6 +53,22 @@ struct GlassFillFadeTests {
         #expect(abs(painted - share) < 0.001, "\(fade): \(painted)")
     }
 
+    @Test("A reading floor stops the fade at its share")
+    func readingFloorStopsTheFade() throws {
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        let glass = NSView(frame: Self.frame)
+        let backdrop = GlassBackdrop(frame: Self.frame)
+        GlassTint.apply(
+            backdrop,
+            in: glass,
+            cornerRadius: 4,
+            fill: GlassFill(hex: "#14201CB3", fade: 100, minShare: 0.6),
+            edge: .top
+        )
+        let share = try #require(Self.farShare(backdrop))
+        #expect(abs(share - 0.6) < 0.001, "\(share)")
+    }
+
     @Test("A surface's own colour keeps today's fade")
     func ownColourKeepsTheFade() {
         #expect(GlassFill(hex: "#FF0000").fade == 100)

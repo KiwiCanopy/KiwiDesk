@@ -8,8 +8,9 @@ import Testing
 /// titles in the shelf's item ink, the app header at its derived
 /// `peekHeaderColor`, and a hovered row's `hoverItemColor` over
 /// its `hoverFillColor` — on the plate's Fill, capped at
-/// `GlassTint.maxAlpha` as glass and uniform over the whole panel
-/// (`GlassTint.applyUniform`), or as stored where the glass is off.
+/// `GlassTint.maxAlpha` as glass at the fade's anchor, or as stored
+/// where the glass is off. The fade's far end holds the reading
+/// floor instead (#2569 ▸ Ruling), its own clause below.
 /// Measured as `IdleItemContrastTests` measures the idle identifier:
 /// the ground composited over each wallpaper extreme, the ink over
 /// the ground, against the same floor, on every bundled palette.
@@ -100,6 +101,43 @@ struct PeekInkContrastTests {
         }
         #expect(measured == PaletteCatalog.bundled().count * 12)
         #expect(measured > 0)
+    }
+
+    /// The far end of the strongest fade holds the reading floor,
+    /// and the bars' own floor under Increase Contrast (#2569 ▸
+    /// Ruling): the peek fades like the bar, never past either.
+    @Test(
+        "The peek's faint end holds the reading floor",
+        arguments: [false, true]
+    )
+    func faintEndHoldsTheFloor(increaseContrast: Bool) throws {
+        let floor =
+            increaseContrast
+            ? KiwiShelf.idleInkFloor : KiwiShelf.readingInkFloor
+        try #require(KiwiShelf.readingInkFloor < KiwiShelf.idleInkFloor)
+        for palette in PaletteCatalog.bundled() {
+            var shelf = painted(palette)
+            shelf.fillFade = 100
+            let fill = shelf.readingGlassFill(
+                increaseContrast: increaseContrast
+            )
+            let rgba = try #require(DragVisual.parseHex(shelf.fillColor))
+            let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
+            let share = max(GlassTint.farShare(fade: 100), fill.minShare)
+            let ground = shelf.fill(cappedAt: anchor * share)
+            for (ink, layer) in shelf.readingInks {
+                let value = try #require(
+                    shelf.worstContrast(ink, nil, on: ground, beneath: layer)
+                )
+                #expect(
+                    value >= floor - 0.01,
+                    "\(palette.name) \(ink) at \(share): \(value)"
+                )
+            }
+            // A floor is a net, not a lift: a share that already
+            // holds it is left to the fade.
+            #expect(fill.minShare < 1, "\(palette.name)")
+        }
     }
 
     /// The glass ground alone failing drops the step: an opaque mid

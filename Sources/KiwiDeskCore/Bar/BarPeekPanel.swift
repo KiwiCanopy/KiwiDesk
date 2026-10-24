@@ -245,12 +245,16 @@ final class BarPeekPanel {
             glass.isHidden = false
             GlassPlate.setContent(glass, body)
             GlassPlate.update(glass, frame: bounds, cornerRadius: radius)
-            // A reading panel: one tint over its whole height.
-            GlassTint.applyUniform(
+            // Fades like the bar, from the shelf's edge, never past
+            // the reading floor (#2569 ▸ Ruling).
+            GlassTint.apply(
                 tint,
                 in: glass,
                 cornerRadius: radius,
-                fill: shelf.glassFill
+                fill: shelf.readingGlassFill(
+                    increaseContrast: LiquidGlassGate.increasesContrast
+                ),
+                edge: edge
             )
             return
         }
