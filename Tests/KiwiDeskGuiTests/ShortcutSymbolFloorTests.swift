@@ -17,13 +17,13 @@ struct ShortcutSymbolFloorTests {
             + "/Contents/Resources/name_availability.plist"
     )
 
+    private static let root = SourceScan.repoRoot(from: #filePath)
+
+    /// The manifest's floor, read as `BuildStampTests` reads it in
+    /// the Core target, which this one cannot see.
     private func floorMajor() throws -> Int {
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
         let manifest = try String(
-            contentsOf: root.appendingPathComponent("Package.swift"),
+            contentsOf: Self.root.appendingPathComponent("Package.swift"),
             encoding: .utf8
         )
         let declared = try #require(
@@ -51,6 +51,26 @@ struct ShortcutSymbolFloorTests {
                 .flatMap { $0.split(separator: ".").first }
                 .flatMap { Int($0) }
         }
+    }
+
+    /// `FloorSymbol.since` is what the check below trusts, and
+    /// `#available` takes no variable, so the gate's literal is held
+    /// to it by reading the source.
+    @Test("the stand-in gate is the macOS the check trusts")
+    func gateMatchesSince() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.root.appendingPathComponent(
+                    "Sources/KiwiDesk/Shortcuts/"
+                        + "ShortcutsReference+Glyphs.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        let gates = source.matches(of: /#available\(macOS (\d+)/)
+            .map { Int($0.1) }
+        let since = ShortcutsReferenceBuilder.FloorSymbol.since
+        #expect(gates == [since])
     }
 
     @Test("every drawn symbol exists on the floor or has a stand-in")
