@@ -40,6 +40,8 @@ struct SymbolClassifierSeamTests {
             "builds the peek's focus check from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift":
             "builds the Space marker's image from a fixed name",
+        "Sources/KiwiDeskCore/Bar/SpaceBarItemView+OpenList.swift":
+            "builds an open `+n` disc's window symbol from a fixed name",
         "Sources/KiwiDeskCore/Borders/StickyMarkOverlay.swift":
             "builds the state mark images from fixed names",
         "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Pill.swift":

@@ -26,12 +26,11 @@ extension SpaceBarItemView {
             pointSize: size,
             weight: .semibold
         ).applying(.init(paletteColors: [color]))
-        guard
-            let image = NSImage(
-                systemSymbolName: "macwindow",
-                accessibilityDescription: nil
-            )?.withSymbolConfiguration(config)
-        else { return nil }
+        let image = NSImage(
+            systemSymbolName: "macwindow",
+            accessibilityDescription: nil
+        )?.withSymbolConfiguration(config)
+        guard let image else { return nil }
         let attachment = NSTextAttachment()
         attachment.image = image
         let text = NSMutableAttributedString(attachment: attachment)
