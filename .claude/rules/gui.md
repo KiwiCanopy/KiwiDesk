@@ -1828,11 +1828,11 @@ Obligations:
   `tint` parameter's `GlassPaint`** — minted by `GlassTint.paint`
   alone, nil for an untinted surface (bars.md ▸ A stored Fill
   becomes a colour on glass in ONE place). The ruled surfaces are
-  KiwiHub and the cue plates while
-  `TilingSettings.panelsWearFill` holds (#2569), drawn through the
-  one `panelGlassChrome`, which picks
-  the Fill, the variant and the inks from `PanelGlass`
-  (`PanelGlassTests`); otherwise they hand `tint` nil,
+  KiwiHub and the cue plates while Core's pure
+  `TilingSettings.panelsWearFill(glassDrawn:)` holds (#2569), drawn
+  through the one `panelGlassChrome`, which picks the Fill, the
+  variant, the inks and KiwiHub's paint from `PanelGlass` as drawn
+  under the live Reduce transparency (`PanelGlassTests`); otherwise they hand `tint` nil,
   as does every surface no ruling names. Never reach for
   `Glass.tint(_:)`: it is a **dimmer** — measured 2026-09-07, a
   neutral tint took a plate from luminance 144 to 134 with chroma
@@ -1856,7 +1856,7 @@ Obligations:
   parameters reach the branch.
 - **A tinted panel's text takes the hierarchical styles `panelGlassChrome`
   sets, never an ink by name.** While the panel wears the Fill
-  (`TilingSettings.panelsWearFill`) it sets
+  (`PanelGlass` as drawn) it sets
   `KiwiShelf.panelInk(increaseContrast:)` as the `.primary` / `.secondary` /
   `.tertiary` styles beneath the glass, and the reading floor is measured on
   exactly those (`GlassPaintTests`). So content inside KiwiHub or a cue plate

@@ -183,18 +183,23 @@ public enum GlassTint {
     /// Fill rather than a colour so the cap cannot be walked around
     /// at a call site (#1297); `fill.fade` sets how far it fades.
     /// A Fill with no colour (`KiwiShelf.hasColour`) is clear
-    /// glass, nothing pinned.
+    /// glass, nothing pinned. AppKit pins only dark: with a `host`,
+    /// glass the Fill leaves unpinned follows its pick instead.
     @MainActor
     static func apply(
         _ backdrop: GlassBackdrop,
         in glass: NSView,
         cornerRadius: CGFloat,
         fill: GlassFill,
-        edge: AppBarEdge
+        edge: AppBarEdge,
+        host: NSAppearance? = nil
     ) {
         // A clear Fill clears the gradient and never hides the
         // backdrop, which carries the glass's content.
         glass.appearance = pinnedAppearance(fill.hex)
+        if let host, glass.appearance == nil {
+            followPick(glass, host: host)
+        }
         GlassPlate.setBackdrop(glass, backdrop)
         guard let gradient = backdrop.gradient else { return }
         gradient.cornerRadius = cornerRadius

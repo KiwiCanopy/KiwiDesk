@@ -84,7 +84,8 @@ extension KiwiCore {
                 holes: holes,
                 space: target,
                 glass: glass,
-                tint: tiler.settings.panelsWearFill ? shelf.glassFill : nil,
+                tint: tiler.settings.panelsWearFill(glassDrawn: glass)
+                    ? shelf.glassFill : nil,
                 pace: spaceSlidePace
             )
         )

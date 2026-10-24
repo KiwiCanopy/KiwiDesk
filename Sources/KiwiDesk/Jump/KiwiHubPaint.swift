@@ -29,10 +29,9 @@ struct KiwiHubPaint {
         hoverInk = Color(kiwiHex: shelf.hoverInk)
     }
 
-    /// The paint `settings` gives KiwiHub.
-    @MainActor
-    static func of(_ settings: TilingSettings) -> KiwiHubPaint {
-        PanelGlass(settings: settings).shelf
+    /// The paint KiwiHub wears on `glass` as drawn.
+    static func of(_ glass: PanelGlass) -> KiwiHubPaint {
+        glass.shelf
             .map { KiwiHubPaint($0.panelHighlight) } ?? KiwiHubPaint()
     }
 }

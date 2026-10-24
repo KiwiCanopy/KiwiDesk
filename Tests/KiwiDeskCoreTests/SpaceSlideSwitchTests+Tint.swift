@@ -42,6 +42,23 @@ extension SpaceSlideSwitchTests {
         #expect(try #require(core.spaceSlide.play).tint == nil)
     }
 
+    /// Reduce transparency stands the plates' Fill down with their
+    /// glass: the switch hands them the leaf as drawn.
+    @Test(
+        "plates take no tint under Reduce transparency",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func reducedTransparencyLeavesThePlatesUntinted() throws {
+        let (core, _) = try makeCore(slide: true)
+        let before = LiquidGlassGate.override
+        LiquidGlassGate.override = { true }
+        defer { LiquidGlassGate.override = before }
+        core.tiler.settings.kiwishelf.tintHubAndPlates = true
+        core.execute("focus_space", args: [.string("2")])
+        defer { core.spaceSlide.end() }
+        #expect(try #require(core.spaceSlide.play).tint == nil)
+    }
+
     /// The plates follow KiwiHub's Liquid Glass leaf: off, they take
     /// no tint though the toggle is on (#2569 ▸ Ruling).
     @Test(

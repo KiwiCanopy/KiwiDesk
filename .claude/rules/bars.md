@@ -1502,8 +1502,9 @@ Obligations:
   **A surface with no Fill that follows the Appearance pick pins
   through `GlassTint.followPick`**, handed its window's effective
   appearance — the Space-switch plates while they wear no Fill or
-  a light one (#2539, `SpaceSlidePlateAppearanceTests`; a dark
-  Fill pins them through `GlassTint.apply`) — and a new caller
+  a light one (#2539, `SpaceSlidePlateAppearanceTests`; with a
+  Fill, `GlassTint.apply` takes the `host` and decides both) — and
+  a new caller
   joins
   `GlassTintPinDarkCallerTests`' `followPick` register, for the
   reason `pinDark`'s has one.

@@ -48,7 +48,6 @@ struct JumpPanelView: View {
             .panelContentFade(presence)
             .frame(width: width)
             .tint(SettingsTheme.accent)
-            .environment(\.kiwiHubPaint, KiwiHubPaint.of(settings))
             .panelGlassChrome(
                 in: KeyPanelStyle.shape,
                 glass: panelGlass,

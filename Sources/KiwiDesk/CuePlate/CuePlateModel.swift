@@ -16,7 +16,7 @@ final class CuePlateModel: ObservableObject {
     @Published private(set) var content: Content?
     @Published var visible = false
     /// The plate's glass, read at each show (#2569).
-    @Published var glass = PanelGlass(enabled: true, shelf: nil)
+    @Published var glass = PanelGlass.untinted
 
     static let hold: TimeInterval = 0.6
     static let fade: TimeInterval = 0.25

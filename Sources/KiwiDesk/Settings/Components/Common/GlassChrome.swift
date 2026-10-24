@@ -62,7 +62,7 @@ extension View {
     }
 }
 
-/// The one reader of Reduce transparency in this tree (#1374): a
+/// The glass branch's one Reduce transparency gate (#1374): a
 /// modifier, because an environment value is read from a view
 /// body rather than from a `View` extension's function.
 private struct GlassChrome<S: Shape>: ViewModifier {

@@ -12429,10 +12429,12 @@ wears the Fill on `.clear` glass** (#2569, owner rulings
 While KiwiHub, the cue plates (Space, Desktop, layout) and the
 Space-switch slide plates wear the Fill, they wear KiwiShelf's
 Fill on `.clear` glass, fading top to bottom. One Core answer,
-`TilingSettings.panelsWearFill`, decides that for all of them —
-the glass, the inks, the highlight and the rim: the toggle on, a
-Fill with a colour, KiwiHub's Liquid Glass leaf on and glass
-drawn. With KiwiHub's glass off, under Reduce transparency or
+`TilingSettings.panelsWearFill(glassDrawn:)`, decides that for all
+of them — the glass, the inks, the highlight and the rim: the
+toggle on, a Fill with a colour, and KiwiHub's Liquid Glass leaf
+as drawn. The answer is pure; Core hands it the gate's read, the
+GUI its live Reduce transparency, so a flip while KiwiHub is open
+stands the Fill down at once. With KiwiHub's glass off, under Reduce transparency or
 below macOS 26 they draw the untinted look, since a Fill-matched
 ink on the fallback material is a pairing nobody measured. The
 plates also wear the key-window rim (▸ Liquid Glass). Off is
@@ -12488,7 +12490,7 @@ light limit is AppKit's*).
 2026-10-24). While the Fill has no colour, KiwiHub, the cue plates
 and the slide plates fall back to their untinted,
 Appearance-following look, exactly as with the toggle off
-(`panelsWearFill`). Settings greys the toggle with that reason.
+(`panelsWearFill(glassDrawn:)`). Settings greys the toggle with that reason.
 The look's inks were chosen to read on the Fill. Without one, the
 panel would put them on plain `.clear` glass under KiwiHub's dense
 text, which is `.clear` without a Fill, the case this entry found

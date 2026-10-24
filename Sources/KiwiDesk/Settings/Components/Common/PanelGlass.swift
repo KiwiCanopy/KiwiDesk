@@ -12,18 +12,28 @@ struct PanelGlass: Equatable {
     var shelf: KiwiShelf?
 
     /// The glass `settings` gives KiwiHub and the plates, which
-    /// share KiwiHub's leaf (#2524).
-    @MainActor
+    /// share KiwiHub's leaf (#2524), on a platform that draws glass;
+    /// Reduce transparency lands live, in `drawn(reduceTransparency:)`.
     init(settings: TilingSettings) {
         enabled = settings.shortcutPanelLiquidGlass
-        // Core's one answer: the toggle, a colour, the leaf, the
-        // glass gate.
-        shelf = settings.panelsWearFill ? settings.kiwishelf : nil
+        let drawable = enabled && GlassChromeVariant.drawable
+        shelf =
+            settings.panelsWearFill(glassDrawn: drawable)
+            ? settings.kiwishelf : nil
     }
 
-    init(enabled: Bool, shelf: KiwiShelf?) {
+    private init(enabled: Bool, shelf: KiwiShelf?) {
         self.enabled = enabled
         self.shelf = shelf
+    }
+
+    /// Plain frosted glass on, before any settings are read.
+    static let untinted = PanelGlass(enabled: true, shelf: nil)
+
+    /// The glass as drawn: Reduce transparency draws the fallback,
+    /// which wears no Fill and so none of its inks.
+    func drawn(reduceTransparency: Bool) -> PanelGlass {
+        reduceTransparency ? PanelGlass(enabled: enabled, shelf: nil) : self
     }
 
     var variant: GlassChromeVariant { shelf == nil ? .regular : .clear }
@@ -50,6 +60,10 @@ extension View {
 
 private struct PanelGlassChrome<S: Shape>: ViewModifier {
     @Environment(\.colorSchemeContrast) private var contrast
+    /// `glassChrome` gates its branch on the same value; this reader
+    /// takes the Fill's inks and KiwiHub's paint down with it.
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
 
     let shape: S
     let glass: PanelGlass
@@ -57,10 +71,14 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
 
     private var increased: Bool { contrast == .increased }
 
+    private var drawn: PanelGlass {
+        glass.drawn(reduceTransparency: reduceTransparency)
+    }
+
     /// The look's three inks while the panel wears the Fill; the
     /// untinted panel keeps SwiftUI's own hierarchy, untouched.
     @ViewBuilder private func inked(_ content: Content) -> some View {
-        if let shelf = glass.shelf {
+        if let shelf = drawn.shelf {
             let ink = shelf.panelInk(increaseContrast: increased)
             content.foregroundStyle(
                 Color(kiwiHex: ink.primary),
@@ -74,11 +92,12 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
 
     func body(content: Content) -> some View {
         inked(content)
+            .environment(\.kiwiHubPaint, KiwiHubPaint.of(drawn))
             .glassChrome(
                 in: shape,
-                enabled: glass.enabled,
-                variant: glass.variant,
-                tint: glass.shelf.flatMap {
+                enabled: drawn.enabled,
+                variant: drawn.variant,
+                tint: drawn.shelf.flatMap {
                     GlassTint.paint(
                         $0.panelGlassFill(
                             increaseContrast: contrast == .increased

@@ -23,17 +23,3 @@ extension KiwiShelf {
         return "#" + bytes.joined() + "00"
     }
 }
-
-extension TilingSettings {
-    /// Whether KiwiHub, the cue plates and the Space-switch slide
-    /// plates wear the Fill (#2569): the toggle on, a Fill with a
-    /// colour, their Liquid Glass leaf on and glass drawn — Reduce
-    /// transparency and the platform included. Every reader takes
-    /// this one answer: the slide press, the panels' glass, inks,
-    /// highlight and rim.
-    @MainActor
-    public var panelsWearFill: Bool {
-        kiwishelf.tintHubAndPlates && kiwishelf.hasFill
-            && shortcutPanelLiquidGlass && LiquidGlassGate.drawsGlass
-    }
-}
