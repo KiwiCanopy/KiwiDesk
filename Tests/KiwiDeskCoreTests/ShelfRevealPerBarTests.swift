@@ -237,7 +237,7 @@ struct ShelfRevealPerBarTests {
         #expect(core.spaceBars.shownStrips.isEmpty)
         for bar in [ShelfBar.space, .app] {
             #expect(
-                core.shelves.indicators.indicatorForTesting(
+                core.shelves.handles.handleForTesting(
                     .init(shelf: shelf, bar: bar)
                 ) == nil
             )

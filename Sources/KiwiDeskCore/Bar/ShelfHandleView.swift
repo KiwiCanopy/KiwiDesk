@@ -1,11 +1,11 @@
 import AppKit
 
-/// The view an indicator draws (#761), and VoiceOver's way to the
+/// The view a handle draws (#761), and VoiceOver's way to the
 /// show/hide action: its press runs the action and its value says
 /// whether the shelf is shown. The plate is a view of its own, so
 /// the hover grows its frame while the dots stay where they are.
-final class ShelfIndicatorView: NSView {
-    private(set) var spec: ShelfIndicatorSpec?
+final class ShelfHandleView: NSView {
+    private(set) var spec: ShelfHandleSpec?
     /// The bar the action names, for the label.
     var carriesSpaceBar = true
     var onPress: @MainActor () -> Void = {}
@@ -15,8 +15,8 @@ final class ShelfIndicatorView: NSView {
     /// staying for VoiceOver.
     let body = AppBarOverlay.FlippedView()
     let plate = NSView()
-    let rim = ShelfIndicatorRim()
-    let dots = ShelfIndicatorDots()
+    let rim = ShelfHandleRim()
+    let dots = ShelfHandleDots()
     /// The plate as tinted glass where its bar draws glass (#2567):
     /// a glass box whose host travels with the hover, under the rim.
     private(set) var glass: (glass: NSView, tint: GlassBackdrop)?
@@ -37,11 +37,11 @@ final class ShelfIndicatorView: NSView {
 
     /// Draws `spec` in the current bounds — the mark inset by the
     /// hover's room — growing the plate where `animated`.
-    func render(_ spec: ShelfIndicatorSpec, animated: Bool) {
+    func render(_ spec: ShelfHandleSpec, animated: Bool) {
         let was = self.spec
         self.spec = spec
         body.frame = bounds
-        let mark = ShelfIndicator.mark(of: spec, in: bounds)
+        let mark = ShelfHandle.mark(of: spec, in: bounds)
         // The dots reach out past the screen side by the hover's
         // shift, so they can follow the plate's middle inward.
         let shift = BarMotion.hoverShift(
@@ -116,7 +116,7 @@ final class ShelfIndicatorView: NSView {
     /// the rim; nil, and any box dropped, where its bar draws no
     /// glass or the OS has none.
     private func glassBox(
-        for spec: ShelfIndicatorSpec
+        for spec: ShelfHandleSpec
     ) -> (glass: NSView, tint: GlassBackdrop)? {
         guard spec.glass else {
             if let glass { GlassBox.drop(glass.glass, glass.tint) }
@@ -182,7 +182,7 @@ final class ShelfIndicatorView: NSView {
 /// The hovered plate's rim in the highlight colour and the bars'
 /// sheen, stroked inside its own bounds — drawn, never a layer
 /// border, which is the shelf border's one painter's (bars.md).
-final class ShelfIndicatorRim: NSView {
+final class ShelfHandleRim: NSView {
     struct Ink: Equatable {
         let hex: String
         let width: CGFloat
@@ -219,12 +219,12 @@ final class ShelfIndicatorRim: NSView {
     }
 }
 
-/// The Space dots on an indicator's plate, drawn over the mark's
+/// The Space dots on a handle's plate, drawn over the mark's
 /// resting frame: a hover widens the current one into the label's
 /// pill about the row's middle, the others moving out by half the
 /// widening each side.
-final class ShelfIndicatorDots: NSView {
-    var spec: ShelfIndicatorSpec? { didSet { needsDisplay = true } }
+final class ShelfHandleDots: NSView {
+    var spec: ShelfHandleSpec? { didSet { needsDisplay = true } }
     /// The mark's resting frame in this view.
     var mark: CGRect = .zero { didSet { needsDisplay = true } }
 
@@ -240,7 +240,7 @@ final class ShelfIndicatorDots: NSView {
         let extra = labelled ? spec.labelExtra : 0
         var lead =
             (spec.horizontal ? mark.minX : mark.minY)
-            + ShelfIndicatorSpec.pad - extra / 2
+            + ShelfHandleSpec.pad - extra / 2
         let middle = spec.horizontal ? mark.midY : mark.midX
         for dot in dots {
             let pill = dot.current && labelled
@@ -248,10 +248,10 @@ final class ShelfIndicatorDots: NSView {
                 pill
                 ? spec.pillDepth
                 : dot.small
-                    ? ShelfIndicatorSpec.smallDot : ShelfIndicatorSpec.dot
+                    ? ShelfHandleSpec.smallDot : ShelfHandleSpec.dot
             let long =
                 dot.current
-                ? ShelfIndicatorSpec.currentDot + extra : size
+                ? ShelfHandleSpec.currentDot + extra : size
             let cross = middle - size / 2
             let rect =
                 spec.horizontal
@@ -273,7 +273,7 @@ final class ShelfIndicatorDots: NSView {
                         .contrastingGlyph
                 )
             }
-            lead += long + ShelfIndicatorSpec.dotGap
+            lead += long + ShelfHandleSpec.dotGap
         }
     }
 
@@ -281,14 +281,14 @@ final class ShelfIndicatorDots: NSView {
     /// (`BarTextGlyph.Metrics`) on its band's baseline
     /// (`BarTextGlyph.lineTop`), a symbol by its image.
     private func draw(
-        _ label: ShelfIndicatorSpec.Label,
+        _ label: ShelfHandleSpec.Label,
         in pill: CGRect,
         ink color: NSColor
     ) {
         switch label.glyph {
         case .symbol(let name):
             guard
-                let image = ShelfIndicatorSpec.symbol(name, font: label.font)
+                let image = ShelfHandleSpec.symbol(name, font: label.font)
             else { return }
             let tinted = NSImage(size: image.size, flipped: false) { rect in
                 image.draw(in: rect)

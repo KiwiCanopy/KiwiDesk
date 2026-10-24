@@ -420,7 +420,7 @@ editing here:
   app EMITTED a newer one is stale. Emitted, never asked: a newer
   report the arm then dropped (a dead element, a shadow, a panel)
   supersedes nothing, or it would discard the activation report
-  it raced (`ReconcileOffMainDebtTests` ▸
+  it raced (`FocusReportOrderTests` ▸
   `droppedNewerReportSupersedesNothing`, `newerReportDropsTheWaitingOne`).
   The gates judged at delivery live beside `reportsFromActiveApp`
   in `EventLoop+FocusReport`, and a new one joins them there.

@@ -32,7 +32,7 @@ struct ShelfRevealMotionTests {
     @Test("The hovered plate grows away from the screen side alone")
     func hoverPlateKeepsTheScreenSide() {
         let mark = CGRect(x: 100, y: 100, width: 60, height: 8)
-        let growth = ShelfIndicatorSpec.hoverGrowth
+        let growth = ShelfHandleSpec.hoverGrowth
         for edge in AppBarEdge.allCases {
             let rest =
                 edge.isHorizontal
@@ -62,7 +62,7 @@ struct ShelfRevealMotionTests {
 
     @Test("The mark's panel and a grow's mark keep the screen side")
     func roomKeepsTheScreenSide() throws {
-        let label = ShelfIndicatorSpec.label(
+        let label = ShelfHandleSpec.label(
             .text("MA", tinted: true),
             font: NSFont.systemFont(ofSize: 8)
         )
@@ -72,7 +72,7 @@ struct ShelfRevealMotionTests {
                 ? CGRect(x: 100, y: 100, width: 60, height: 8)
                 : CGRect(x: 100, y: 100, width: 8, height: 60)
             let spec = spec(hovered: true, label: label, edge: edge, at: frame)
-            let room = ShelfIndicator.room(of: spec)
+            let room = ShelfHandle.room(of: spec)
             #expect(screenSide(room, edge) == screenSide(frame, edge))
             #expect(room.contains(frame), "\(edge)")
             let motion = BarMotion.revealMotion(
@@ -162,11 +162,11 @@ struct ShelfRevealMotionTests {
     private func spec(
         hovered: Bool,
         shown: Bool = false,
-        label: ShelfIndicatorSpec.Label? = nil,
+        label: ShelfHandleSpec.Label? = nil,
         edge: AppBarEdge = .top,
         at frame: CGRect = ShelfRevealMotionTests.mark
-    ) -> ShelfIndicatorSpec {
-        ShelfIndicatorSpec(
+    ) -> ShelfHandleSpec {
+        ShelfHandleSpec(
             mark: .dots([.init(current: true, occupied: true)]),
             frame: frame,
             edge: edge,
@@ -182,18 +182,18 @@ struct ShelfRevealMotionTests {
         )
     }
 
-    /// The indicator view sized as `ShelfIndicator.show` sizes it.
-    private func view() -> ShelfIndicatorView {
-        let view = ShelfIndicatorView()
+    /// The handle view sized as `ShelfHandle.show` sizes it.
+    private func view() -> ShelfHandleView {
+        let view = ShelfHandleView()
         view.frame = CGRect(
             origin: .zero,
-            size: ShelfIndicator.room(of: spec(hovered: false)).size
+            size: ShelfHandle.room(of: spec(hovered: false)).size
         )
         return view
     }
 
-    /// The dots' mark in the indicator view's own coordinates.
-    private func drawnMark(_ view: ShelfIndicatorView) -> CGRect {
+    /// The dots' mark in the handle view's own coordinates.
+    private func drawnMark(_ view: ShelfHandleView) -> CGRect {
         view.dots.mark.offsetBy(
             dx: view.dots.frame.minX,
             dy: view.dots.frame.minY
@@ -206,7 +206,7 @@ struct ShelfRevealMotionTests {
         defer { BarMotion.reducedOverride = nil }
         let view = view()
         view.render(spec(hovered: false), animated: false)
-        let resting = ShelfIndicator.mark(
+        let resting = ShelfHandle.mark(
             of: spec(hovered: false),
             in: view.bounds
         )
@@ -244,7 +244,7 @@ struct ShelfRevealMotionTests {
     func reducedLabelGrowsThePlate() {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
-        let label = ShelfIndicatorSpec.label(
+        let label = ShelfHandleSpec.label(
             .text("1", tinted: true),
             font: NSFont.systemFont(ofSize: 8)
         )

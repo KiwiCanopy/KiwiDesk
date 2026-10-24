@@ -14,11 +14,11 @@ struct HighlightWidthMarkTests {
     func rimWidthFollowsTheShelf() {
         var shelf = KiwiShelf()
         shelf.highlightWidth = 1
-        #expect(ShelfIndicatorSpec.rimWidth(for: shelf) == 1)
+        #expect(ShelfHandleSpec.rimWidth(for: shelf) == 1)
         shelf.highlightWidth = 6
         #expect(
-            ShelfIndicatorSpec.rimWidth(for: shelf)
-                == ShelfIndicatorSpec.hoverGrowth
+            ShelfHandleSpec.rimWidth(for: shelf)
+                == ShelfHandleSpec.hoverGrowth
         )
     }
 
@@ -57,7 +57,7 @@ struct HighlightWidthMarkTests {
         core.updateBars()
         let key = ShelfManager.Key(display: display.id, edge: .top)
         let view = try #require(
-            core.shelves.indicators.indicatorForTesting(
+            core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .space)
             )?.view
         )

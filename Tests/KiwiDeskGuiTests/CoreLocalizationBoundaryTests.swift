@@ -120,9 +120,9 @@ struct CoreLocalizationBoundaryTests {
         // The shelf's overflow counts, a button each for VoiceOver
         // (#1517): before and after.
         "Bar/ShelfCountView.swift": 2,
-        // A hidden shelf's indicator: its bar and its state, and
+        // A hidden shelf's handle: its bar and its state, and
         // the App Bar's window count, for VoiceOver (#761, #2567).
-        "Bar/ShelfIndicatorView.swift": 8,
+        "Bar/ShelfHandleView.swift": 8,
         // The bars' right-click menus (#1518), which Core draws:
         // their rows, VoiceOver's name for a nested row, and the
         // Layout menu's words under the keys Settings' own names

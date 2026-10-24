@@ -2,11 +2,11 @@ import CoreGraphics
 import Foundation
 
 /// Whether a hiding shelf is shown (#761), and why: the one state
-/// a hidden shelf's indicator, its hover band and the show/hide
+/// a hidden shelf's handle, its hover band and the show/hide
 /// action share. Pure, so the timings and the transitions are
 /// assertable; `ShelfRevealer` drives it from the pointer.
 enum ShelfReveal: Equatable {
-    /// Down to its indicator.
+    /// Down to its handle.
     case hidden
     /// Shown while the pointer holds it.
     case hover
@@ -25,7 +25,7 @@ enum ShelfReveal: Equatable {
     /// forgiving an overshoot.
     static let retractDelay: TimeInterval = 0.5
     /// The hover band's depth from the shelf's screen side (pt),
-    /// whatever the indicator draws: the target, not the drawing.
+    /// whatever the handle draws: the target, not the drawing.
     static let bandDepth: CGFloat = 8
     /// A pointer within this many points of a physical screen
     /// edge the band touches is a push, which reveals at once.
