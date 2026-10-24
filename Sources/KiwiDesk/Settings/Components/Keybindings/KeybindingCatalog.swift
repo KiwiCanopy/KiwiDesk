@@ -149,7 +149,8 @@ enum KeybindingCatalog {
             NavGroup(title: "KiwiHub", commands: kiwiHubRows),
             NavGroup(
                 title: "Focus",
-                commands: focusDirections + spaceStepRows
+                commands: focusDirections + [screenLastRow]
+                    + spaceStepRows
                     + spaceHistoryRows + goToSpace(spaces)
             ),
             NavGroup(title: "KiwiVision", commands: [toggleKiwiVision]),

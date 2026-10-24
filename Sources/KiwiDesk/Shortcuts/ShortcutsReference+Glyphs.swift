@@ -63,6 +63,9 @@ extension ShortcutsReferenceBuilder {
             return StickyStyle.displaySymbolName
         case "KiwiDesk.reset_layout_sizing()":
             return "arrow.counterclockwise"
+        // Two screens: back to the one before (#2512).
+        case KeybindingCatalog.screenLastRow.lua:
+            return "display.2"
         // Owner ruling on #2448.
         case "KiwiDesk.toggle_maximized()":
             return "arrow.up.left.and.arrow.down.right"

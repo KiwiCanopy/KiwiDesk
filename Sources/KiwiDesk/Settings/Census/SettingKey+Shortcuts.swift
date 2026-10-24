@@ -8,6 +8,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// What the focus keys do at the last window (#2493).
     case focusWrap = "config.focusWrap"
     case focusDir = "keybinding.focus_dir (x4)"
+    /// Go to the screen the focus was on before (#2512).
+    case screenLast = "keybinding.focus_display_last"
     /// The previous / next Space in the screen's order (#1655).
     case spaceStep = "keybinding.space_{previous,next}"
     /// Back / forward through the Space history (#1655).
@@ -87,8 +89,8 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.layersExist)
             )
-        case .focusWrap, .focusDir, .spaceStep, .spaceHistoryStep,
-            .spaceHistory, .goToSpace:
+        case .focusWrap, .focusDir, .screenLast, .spaceStep,
+            .spaceHistoryStep, .spaceHistory, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         // One card for what shows and hides: KiwiHub's sides
         // (#2265), the bars (#761), KiwiVision and its lenses.
@@ -189,7 +191,8 @@ extension ShortcutsKey {
     var text: SettingRowText {
         switch self {
         case .layers, .openApplications, .advanced, .focusDir,
-            .spaceStep, .spaceHistoryStep, .goToSpace, .swapDir,
+            .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,
+            .swapDir,
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,

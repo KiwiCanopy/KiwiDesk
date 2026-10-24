@@ -872,6 +872,7 @@
   "keybinding.dir.right": "de droite",
   "keybinding.focus_desktop": "Aller au Bureau %1$@",
   "keybinding.focus_dir": "Cibler la fenêtre %1$@",
+  "keybinding.focus_display_last": "Aller au dernier écran utilisé",
   "keybinding.go_to_space": "Aller à l'espace %1$@",
   "keybinding.grow_height": "Agrandir la hauteur",
   "keybinding.grow_width": "Agrandir la largeur",

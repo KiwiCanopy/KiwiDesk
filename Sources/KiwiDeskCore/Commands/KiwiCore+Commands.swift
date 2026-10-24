@@ -36,6 +36,10 @@ extension KiwiCore {
             return focusSpaceInOrder(by: -1)
         case "focus_space_next":
             return focusSpaceInOrder(by: 1)
+        case "focus_display_last":
+            return focusDisplayLast()
+        case "focus_display":
+            return focusDisplay(args)
         case "move_to_space":
             return moveToSpace(command, args, follow: false)
         case "move_to_space_and_follow":

@@ -24,6 +24,16 @@ extension KeybindingCatalog {
         ),
     ]
 
+    /// Go to the screen the focus was on before (#2512). No default
+    /// chord; the screen verbs beside it are Lua and CLI only.
+    static let screenLastRow = NavCommand(
+        label: "Go to last screen",
+        lua: "KiwiDesk.focus_display_last()",
+        displayLabel: {
+            L("keybinding.focus_display_last", "Go to last screen")
+        }
+    )
+
     /// Go back / forward in the Space history.
     static let spaceHistoryRows: [NavCommand] = [
         NavCommand(

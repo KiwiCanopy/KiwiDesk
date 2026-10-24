@@ -21,6 +21,8 @@ public enum APIReference {
             ("focus_space_forward", "focus_space_forward"),
             ("focus_space_previous", "focus_space_previous"),
             ("focus_space_next", "focus_space_next"),
+            ("focus_display_last", "focus_display_last"),
+            ("focus_display", "focus_display"),
             ("move_to_space", "move_to_space"),
             ("move_to_space_and_follow", "move_to_space_and_follow"),
             // The Desktop twins (#884): `desktop` is macOS's,

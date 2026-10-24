@@ -24,6 +24,9 @@ struct FocusedCommandPolicyTests {
         "focus_space_next",
         "focus_space_back",
         "focus_space_forward",
+        // Switch the focused screen (#2512), moving no window.
+        "focus_display_last",
+        "focus_display",
         // Act on a named space + display, not the focused window,
         // so they skip the foreground preflight (like focus_space).
         "move_space_to_display",

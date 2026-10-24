@@ -431,6 +431,13 @@ Spaces by their order and by the ones you visited
 ([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
 
 :::unreleased
+`focus_display_last` goes to the screen you were on before, and
+`focus_display` takes `left|right|up|down` to the nearest screen
+that way, stopping at the edge; neither takes other arguments
+([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
+:::
+
+:::unreleased
 `set_space_transition` picks how a Space switch shows itself, and
 `set_space_slide_duration` paces the slide
 ([`set_space_transition`](lua-reference.md#set_space_transition)).
