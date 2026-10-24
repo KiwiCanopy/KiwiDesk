@@ -109,10 +109,6 @@ struct CommitsOnSaveCensusTests {
                 "funcperformPrimarySave(){commitFocusedField()saveCommitted()}"
             ),
             (
-                "Settings/SettingsModel+Leave.swift",
-                "commitFocusedField()guardisDirtyelse{returnproceed()}"
-            ),
-            (
                 "Settings/SettingsModel+Sync.swift",
                 "->SyncRefusal?{commitFocusedField()ifisDirty{"
             ),
@@ -135,6 +131,18 @@ struct CommitsOnSaveCensusTests {
                 "\(file) reads the draft before the commit"
             )
         }
+        // The gates above already committed: a second request in
+        // the same turn re-commits a renamed Space against its old
+        // name.
+        let leave = try flat(dir + "Settings/SettingsModel+Leave.swift")
+        #expect(leave.occurrences(of: "commitFocusedField()") == 0)
+        let keyboard = try flat(dir + "Settings/" + Self.home)
+        #expect(
+            keyboard.occurrences(
+                of: "funcsaveFromKeyboard(){commitFocusedField()"
+                    + "guardprimarySaveEnabledelse{return}saveCommitted()}"
+            ) == 1
+        )
     }
 
     /// ⌘S rides the root, which is mounted whatever the draft, and

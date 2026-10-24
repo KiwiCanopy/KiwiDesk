@@ -1,9 +1,9 @@
 import AppKit
-import KiwiDeskCore
 import SwiftUI
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A value still being typed in a field that commits on blur is part
 /// of what a Save or a leave reads (#2584): the request to commit
@@ -23,8 +23,9 @@ struct SaveCommitsFocusedFieldTests {
         let editor: NSTextView
     }
 
-    private func typed() throws -> Typed {
-        let model = makeTestModel()
+    private func typed(
+        _ model: SettingsModel = makeTestModel()
+    ) throws -> Typed {
         // The field and ⌘S as the Settings root mounts them.
         let row = VStack {
             StepperRow(
@@ -98,13 +99,48 @@ struct SaveCommitsFocusedFieldTests {
     func keyboardSaveCommitsAndSaves() throws {
         let typed = try typed()
         defer { typed.window.orderOut(nil) }
+        #expect(try pressSave(in: typed.window))
+        #expect(typed.model.config.settings.mouse.hoverFocusDelayMS == 1234)
+        #expect(typed.model.newProfileNamingRequested)
+    }
+
+    /// A stored profile's Save is greyed on a clean draft, so ⌘S
+    /// commits before it asks whether there is anything to save.
+    @Test("⌘S saves a typed value that is the one edit")
+    func keyboardSaveOnAGreyedSave() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        let model = makeTestModel(core: core)
+        _ = try core.profiles.write(
+            Profile(
+                name: "p",
+                monitorSets: [MonitorSet(monitors: ["Away:100x100"])],
+                spaces: [SpaceID("1")],
+                spaceModes: [SpaceID("1"): .bsp],
+                settings: TilingSettings()
+            )
+        )
+        model.reload()
+        model.selectEditTarget("p")
+        #expect(model.primarySaveAction == .updateStoredProfile)
+        let typed = try typed(model)
+        defer { typed.window.orderOut(nil) }
+        #expect(!model.primarySaveEnabled)
+        #expect(try pressSave(in: typed.window))
+        // Committed although Save was greyed; that the Save then
+        // runs is the census's pin on `saveFromKeyboard`'s body.
+        #expect(model.config.settings.mouse.hoverFocusDelayMS == 1234)
+        #expect(model.primarySaveEnabled || !model.isDirty)
+    }
+
+    private func pressSave(in window: NSWindow) throws -> Bool {
         let event = try #require(
             NSEvent.keyEvent(
                 with: .keyDown,
                 location: .zero,
                 modifierFlags: .command,
                 timestamp: 0,
-                windowNumber: typed.window.windowNumber,
+                windowNumber: window.windowNumber,
                 context: nil,
                 characters: "s",
                 charactersIgnoringModifiers: "s",
@@ -112,9 +148,7 @@ struct SaveCommitsFocusedFieldTests {
                 keyCode: 1
             )
         )
-        #expect(typed.window.performKeyEquivalent(with: event))
-        #expect(typed.model.config.settings.mouse.hoverFocusDelayMS == 1234)
-        #expect(typed.model.newProfileNamingRequested)
+        return window.performKeyEquivalent(with: event)
     }
 
     /// Another model's request commits nothing here: a field

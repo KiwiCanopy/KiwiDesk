@@ -25,7 +25,8 @@ extension SettingsModel {
         proceed: @escaping @MainActor () -> Void,
         cancel: @escaping @MainActor () -> Void
     ) {
-        commitFocusedField()
+        // Its gates commit the field being typed in first, once
+        // per turn (#2584): the close and the quit gate.
         guard isDirty else { return proceed() }
         finishLeave(proceeding: false)
         draftLeave = DraftLeave(
