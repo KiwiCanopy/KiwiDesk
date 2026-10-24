@@ -9,6 +9,10 @@ enum KeybindingCatalog {
         ("up", "above"), ("right", "to the right"),
     ]
 
+    /// The compass arguments, in the order the focus and swap sets
+    /// list them.
+    static let directionNames = directions.map(\.0)
+
     /// Translates direction argument for display (`docs/translating.md`).
     @MainActor private static func directionPhrase(
         _ dir: String

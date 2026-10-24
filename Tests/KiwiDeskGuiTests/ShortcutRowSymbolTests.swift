@@ -24,7 +24,7 @@ struct ShortcutRowSymbolTests {
 
     /// Every command `buildControls` and `buildInactive` can draw,
     /// with Spaces, Desktops, layers and lenses present and absent.
-    private func drawable() -> [NavCommand] {
+    static func drawable() -> [NavCommand] {
         var seen: [NavCommand] = []
         let record: ([NavCommand]) -> [ShortcutRow] = { commands in
             seen += commands
@@ -66,7 +66,7 @@ struct ShortcutRowSymbolTests {
 
     @Test("every drawable command resolves to a symbol")
     func everyCommandHasASymbol() {
-        let commands = drawable()
+        let commands = Self.drawable()
         #expect(commands.count > 30, "recorded too few commands")
         for command in commands where Self.exempt[command.lua] == nil {
             #expect(
@@ -78,7 +78,7 @@ struct ShortcutRowSymbolTests {
 
     @Test("every exemption names a command the panel draws")
     func exemptionsAreLive() {
-        let drawn = Set(drawable().map(\.lua))
+        let drawn = Set(Self.drawable().map(\.lua))
         for lua in Self.exempt.keys {
             #expect(drawn.contains(lua), "stale exemption \(lua)")
         }
@@ -87,7 +87,7 @@ struct ShortcutRowSymbolTests {
     @Test("every symbol a row draws resolves on this macOS")
     func everySymbolResolves() {
         let symbols = Set(
-            drawable().compactMap(ShortcutsReferenceBuilder.icon(for:))
+            Self.drawable().compactMap(ShortcutsReferenceBuilder.icon(for:))
         )
         for symbol in symbols {
             let image = NSImage(
@@ -99,6 +99,26 @@ struct ShortcutRowSymbolTests {
                 "\(symbol) does not resolve"
             )
         }
+    }
+
+    /// A one-sided line arrow means a focus move and nothing else
+    /// (#2529 ▸ Ruling), whichever chain arm would draw it.
+    @Test("only a focus row wears a one-sided line arrow")
+    func lineArrowsAreFocusOnly() {
+        let lines = Set(
+            KeybindingCatalog.directionNames.map { "arrow.\($0)" }
+        )
+        let focus = Set(KeybindingCatalog.focusDirections.map(\.lua))
+        let wearing = Self.drawable().filter {
+            ShortcutsReferenceBuilder.icon(for: $0).map(lines.contains)
+                ?? false
+        }
+        #expect(Set(wearing.map(\.lua)) == focus)
+        let folds = ShortcutFold.Family.allCases.compactMap(
+            ShortcutsReferenceBuilder.foldIcon(for:)
+        )
+        #expect(!folds.isEmpty)
+        #expect(Set(folds).isDisjoint(with: lines), "a fold wears one way")
     }
 
     /// The seeded keymap, on both bases: every row is recognised
