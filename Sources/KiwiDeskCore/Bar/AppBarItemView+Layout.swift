@@ -120,7 +120,6 @@ extension AppBarItemView {
             x += placed.side + placed.spacing
         }
         let name = BarTitleSlot.span(
-            label,
             natural: placed.natural,
             slotStart: x,
             slot: placed.text.width

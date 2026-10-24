@@ -3,7 +3,7 @@ import AppKit
 /// A bar title's fixed slot (#2086, #2545, owner rulings): a title
 /// draws in a slot as long as the title cap in the bar font's
 /// average glyph, so a title change moves no frame — a longer
-/// title cuts with "…", a shorter one sits inside, its ink centred.
+/// title cuts with "…", a shorter one starts at the slot's start.
 /// The Space Bar's front-app name and every App Bar item take it.
 @MainActor
 public enum BarTitleSlot {
@@ -29,26 +29,16 @@ public enum BarTitleSlot {
         return slot
     }
 
-    /// Where `field` draws inside its slot: a title that fits has
-    /// its INK centred on the slot — the icon beside it never
-    /// moves — and one that does not fills it from its start, cut
-    /// with "…". `natural` is the field's fitted width; the field
-    /// centres its advance in its own frame.
+    /// Where a title draws inside its slot: from the slot's start,
+    /// right after the icon, whether it fits or is cut with "…", so
+    /// every title starts at one offset and a short one leaves the
+    /// trailing end empty (#2587). `natural` is the fitted width.
     static func span(
-        _ field: NSTextField,
         natural: CGFloat,
         slotStart: CGFloat,
         slot: CGFloat
     ) -> ClosedRange<CGFloat> {
-        guard natural < slot else {
-            return slotStart...(slotStart + slot)
-        }
-        let origin = BarTextGlyph.metrics(of: field).originX(
-            centringInkOn: slotStart + slot / 2,
-            frameWidth: natural
-        )
-        let x = min(max(origin, slotStart), slotStart + slot - natural)
-        return x...(x + natural)
+        slotStart...(slotStart + min(natural, slot))
     }
 
     /// The width `sizeToFit` gives `text` in `font` — the label's

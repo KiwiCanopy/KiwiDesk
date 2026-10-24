@@ -163,7 +163,7 @@ struct BarStripView: View {
                     Text(text)
                         .font(spec.textFont(size: spec.fontSize))
                         .lineLimit(1)
-                        .frame(width: spec.titleSlot)
+                        .frame(width: spec.titleSlot, alignment: .leading)
                 }
             }
             .foregroundStyle(Color(kiwiHex: item.color))
