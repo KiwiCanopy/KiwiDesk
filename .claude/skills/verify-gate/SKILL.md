@@ -34,16 +34,18 @@ suite a change runs locally:
   instructions every session reasons from, and a prose-only edit
   to them has already shipped a dangling citation; code, tests and
   `site/` need it besides.
-- **A change that lands through a PR leaves the full suite to CI**
-  (owner, 2026-10-21). Run step 1, step 3 (its catalog checks
-  included) and the ratchet check below, and in place of step 2
-  run `swift test --filter` over the suites the diff touches —
-  the suites it edits, and the suites that read or scan the code
-  it edits. CI's `Build, Lint & Test` runs the whole suite on
-  every PR and a red PR cannot merge: fix the red and push again.
-  A local full run only duplicated that run (~7 min each) while
-  holding the machine-wide gate slot (`scripts/gate-lock`) that
-  other sessions wait on.
+- **A change that lands through a PR runs the full suite locally
+  once, before its first push** (owner, 2026-10-24, replacing the
+  2026-10-21 rule that left it to CI). While a lane is still
+  moving, run step 1, step 3 (its catalog checks included) and the
+  ratchet check below, and in place of step 2 `swift test
+  --filter` over the suites the diff touches. When the lane is
+  done and reviewed, run step 2 whole, then push and arm the
+  merge. The whole-tree census suites (a symbol lookup, a button
+  style, a seam's `allowed` map) read files no filter names, and
+  four PR rounds went red on them in one day while every filtered
+  suite was green. A fix pushed after that runs the filtered
+  suites plus whichever suite CI named.
 - **Run step 2 whole, locally,** when no PR gates the push
   (`scripts/release.sh`, a direct push), when CI is unavailable,
   or when a late red would be expensive — for example right
