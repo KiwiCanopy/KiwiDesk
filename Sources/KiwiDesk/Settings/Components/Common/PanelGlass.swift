@@ -30,10 +30,11 @@ struct PanelGlass: Equatable {
     /// Plain frosted glass on, before any settings are read.
     static let untinted = PanelGlass(enabled: true, shelf: nil)
 
-    /// The glass as drawn: Reduce transparency draws the fallback,
-    /// which wears no Fill and so none of its inks.
+    /// The glass as drawn: glass off or Reduce transparency draws
+    /// the fallback, which wears no Fill and so none of its inks.
     func drawn(reduceTransparency: Bool) -> PanelGlass {
-        reduceTransparency ? PanelGlass(enabled: enabled, shelf: nil) : self
+        enabled && !reduceTransparency
+            ? self : PanelGlass(enabled: enabled, shelf: nil)
     }
 
     var variant: GlassChromeVariant { shelf == nil ? .regular : .clear }

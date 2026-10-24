@@ -49,6 +49,10 @@ struct PanelGlassTests {
         #expect(reduced.shelf == nil)
         #expect(reduced.enabled == glass.enabled)
         #expect(!KiwiHubPaint.of(reduced).tinted)
+        // A leaf turned off after the read draws the fallback too.
+        var off = glass
+        off.enabled = false
+        #expect(off.drawn(reduceTransparency: false).shelf == nil)
     }
 
     @Test(
