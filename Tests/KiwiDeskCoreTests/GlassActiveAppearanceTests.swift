@@ -57,4 +57,19 @@ struct GlassActiveAppearanceTests {
                 != make(ShelfPanel.self).method(for: selector)
         )
     }
+
+    /// `self_test` reads the installed answers, not the class list.
+    /// Its failure arm needs a panel class `install` skipped, which
+    /// no test can build without a seam.
+    @Test("self_test finds every panel answering")
+    func selfTestFindsTheAnswers() {
+        let probes = GlassActiveAppearance.selfTestProbes()
+        #expect(probes.count == 1)
+        for probe in probes {
+            guard case .answered = probe.check() else {
+                Issue.record("\(probe.check())")
+                continue
+            }
+        }
+    }
 }

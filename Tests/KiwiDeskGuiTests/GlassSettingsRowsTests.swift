@@ -62,6 +62,15 @@ struct GlassSettingsRowsTests {
         #expect(card.contains("Text(noColourHelp)"))
     }
 
+    /// 0 reads "Off" on the row and in the diff row alike.
+    @Test("Fill fade reads Off at zero")
+    @MainActor
+    func fadeReadsOffAtZero() {
+        let off = L("kiwishelf.fill_fade.off", "Off")
+        #expect(FillFadeRow.readout(0) == off)
+        #expect(FillFadeRow.readout(40) != off)
+    }
+
     @Test("The Fill well offers No Color, and only it")
     func onlyTheFillIsClearable() throws {
         let bars = try Self.squashed(
