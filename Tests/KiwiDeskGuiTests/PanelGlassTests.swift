@@ -215,6 +215,24 @@ struct PanelGlassTests {
         #expect(paint.rowHover == SettingsTheme.chipRest)
     }
 
+    /// KiwiHub's footer buttons rest on the neutral chip, lift in
+    /// the shelf's hover, and read the panel's inks; the layer pill
+    /// takes the highlight (#2569 ▸ owner).
+    @Test("KiwiHub's footer chips and layer pill read the paint")
+    func footerReadsThePaint() throws {
+        let face = try Self.source("Settings/ChipFace.swift")
+            .filter { !$0.isWhitespace }
+        #expect(face.contains("@Environment(\\.kiwiHubPaint)"))
+        #expect(face.contains("ifpaint.tinted,lifted{returnpaint.rowHover}"))
+        #expect(face.contains("guardpaint.tintedelse{"))
+        #expect(face.contains(".foregroundStyle(ink)"))
+        let footer = try Self.source("Jump/JumpPanelView+Footer.swift")
+        #expect(
+            footer.contains("Capsule().fill(paint.selection.opacity(0.2))")
+        )
+        #expect(!footer.contains("SettingsTheme.accent"))
+    }
+
     @Test("Rows, chips and tiles paint through KiwiHub's paint")
     func rowsReadThePaint() throws {
         for path in [
