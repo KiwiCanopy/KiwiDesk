@@ -50,7 +50,8 @@ extension SpaceSlideOverlay {
         return container
     }
 
-    /// One plate: Liquid Glass (`.regular`, the shortcuts panel's)
+    /// One plate: Liquid Glass — `.clear` wearing the Fill under
+    /// "Tint KiwiHub and plates", `.regular` otherwise (#2569) —
     /// or, where the gate stands glass down, the behind-window blur
     /// nearest the shortcuts panel's `.regularMaterial` (owner,
     /// device, #1956), dark where the Appearance pick is — with the
@@ -80,13 +81,26 @@ extension SpaceSlideOverlay {
             content.addSubview(view)
         }
         let radius = SpaceSlidePlan.cornerRadius
-        if current.glass, let glass = GlassPlate.make(regular: true) {
+        if current.glass,
+            let glass = GlassPlate.make(regular: current.tint == nil)
+        {
             GlassPlate.update(glass, frame: rect, cornerRadius: radius)
-            GlassTint.followPick(
-                glass,
-                host: current.panel.effectiveAppearance
-            )
             GlassPlate.setContent(glass, content)
+            // Tinted, the Fill pins the variant as on the bars.
+            guard let tint = current.tint else {
+                GlassTint.followPick(
+                    glass,
+                    host: current.panel.effectiveAppearance
+                )
+                return glass
+            }
+            GlassTint.apply(
+                GlassBackdrop(),
+                in: glass,
+                cornerRadius: radius,
+                fill: tint,
+                edge: .top
+            )
             return glass
         }
         let material = NSVisualEffectView(frame: rect)

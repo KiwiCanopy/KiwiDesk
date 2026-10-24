@@ -25,7 +25,7 @@ extension SpaceSlideOverlay {
         holeHost.addSubview(strip)
         panel.contentView = root
         if !panel.isVisible { present(panel) }
-        return Play(
+        let play = Play(
             display: press.display,
             panel: panel,
             screen: press.screen,
@@ -34,9 +34,18 @@ extension SpaceSlideOverlay {
             holeHost: holeHost,
             strip: strip,
             glass: press.glass,
+            tint: press.tint,
             pace: press.pace,
             space: press.space
         )
+        Self.wearActiveLook(play)
+        return play
+    }
+
+    /// A tinted play's panel wears the key-window rim (#2569).
+    static func wearActiveLook(_ play: Play) {
+        (play.panel as? ActiveGlassPanel)?.wearsActiveLook =
+            play.tint != nil
     }
 
     /// The sticky windows stay on screen above the plates: a hole
@@ -91,7 +100,14 @@ extension SpaceSlideOverlay {
     }
 
     private static func makePanel() -> NSPanel {
-        let panel = BarPanel.makeNonActivating()
+        let panel = BarPanel.configure(
+            ActiveGlassPanel(
+                contentRect: .zero,
+                styleMask: BarPanel.styleMask,
+                backing: .buffered,
+                defer: true
+            )
+        )
         panel.level = NSWindow.Level(rawValue: BarPanel.level.rawValue - 1)
         panel.ignoresMouseEvents = true
         // On every Desktop, since it is ordered in once and stays.

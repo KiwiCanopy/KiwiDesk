@@ -67,6 +67,7 @@ extension KiwiCore {
         let glass = LiquidGlassGate.rendered(
             glass: tiler.settings.shortcutPanelLiquidGlass
         )
+        let shelf = tiler.settings.kiwishelf
         let pressed = spaceSlide.press(
             SpaceSlideOverlay.Press(
                 display: intent.display,
@@ -83,6 +84,7 @@ extension KiwiCore {
                 holes: holes,
                 space: target,
                 glass: glass,
+                tint: shelf.tintHubAndPlates ? shelf.glassFill : nil,
                 pace: spaceSlidePace
             )
         )
