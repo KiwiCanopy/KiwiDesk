@@ -1982,6 +1982,18 @@ doc comment rules what that mark keeps and what it drops, and
 `OnboardingProgressRow` never had a claim, the pips it fills
 being a static state it draws either way.
 
+## The Shortcuts side's row glyphs (#2529)
+
+**A one-sided line arrow means a focus move, and a folded set
+never wears one direction.** A new verb picks another shape
+(`ShortcutRowSymbolTests` ▸ `lineArrowsAreFocusOnly`); a new fold
+family states its glyph in `foldIcon(for:)`'s switch, which has no
+`default` so the compiler asks (`ShortcutArrowShapeTests`). **A
+symbol newer than the deployment floor ships as a `FloorSymbol`
+with a stand-in the floor has** (`ShortcutSymbolFloorTests`, read
+from the OS's availability table, since a newer name resolves on
+every machine that runs the suite).
+
 ## SwiftUI traps
 
 - **A field that keeps its typing local commits through the one
