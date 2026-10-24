@@ -101,6 +101,13 @@ extension SpaceSlideOverlay {
                 fill: tint,
                 edge: .top
             )
+            // AppKit pins only dark: a light Fill keeps the pick.
+            if GlassTint.pin(tint.hex) != .dark {
+                GlassTint.followPick(
+                    glass,
+                    host: current.panel.effectiveAppearance
+                )
+            }
             return glass
         }
         let material = NSVisualEffectView(frame: rect)

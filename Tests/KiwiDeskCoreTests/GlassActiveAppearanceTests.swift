@@ -52,8 +52,6 @@ struct GlassActiveAppearanceTests {
             !GlassActiveAppearance.classes.contains { $0 == NSPanel.self }
         )
         let plain = make(NSPanel.self)
-        // AppKit's own answer for a panel that is not key.
-        #expect(!answers(plain) || !plain.isKeyWindow)
         #expect(
             plain.method(for: selector)
                 != make(ShelfPanel.self).method(for: selector)

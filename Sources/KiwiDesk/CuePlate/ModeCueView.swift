@@ -10,7 +10,7 @@ import SwiftUI
 /// list entry, so the centre is always one of the ring's own.
 struct ModeCueView: View {
     let cue: ModeCycleCue
-    /// KiwiHub\'s glass, the Fill with it under the toggle (#2569).
+    /// KiwiHub's glass, the Fill with it under the toggle (#2569).
     let glass: PanelGlass
 
     /// The panel's room height, so the plate fills it.

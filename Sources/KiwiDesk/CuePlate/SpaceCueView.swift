@@ -8,7 +8,7 @@ import SwiftUI
 /// dots: dots mean a Desktop, a symbol means a Space.
 struct SpaceCueView: View {
     let cue: SpaceSwitchCue
-    /// KiwiHub\'s glass, the Fill with it under the toggle (#2569).
+    /// KiwiHub's glass, the Fill with it under the toggle (#2569).
     let glass: PanelGlass
 
     /// Up to this many characters draw in the digit face.

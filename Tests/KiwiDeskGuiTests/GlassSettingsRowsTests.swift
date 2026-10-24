@@ -29,8 +29,8 @@ struct GlassSettingsRowsTests {
         ]
     )
     func noColorKeepsTheHue(hex: String, cleared: String) {
-        #expect(ColorSwatch.cleared(hex) == cleared)
-        #expect(!KiwiShelf.hasColour(ColorSwatch.cleared(hex)))
+        #expect(KiwiShelf.cleared(hex) == cleared)
+        #expect(!KiwiShelf.hasColour(KiwiShelf.cleared(hex)))
     }
 
     @Test("The Fill's rows are the Tint switch and Fill fade")
@@ -76,6 +76,6 @@ struct GlassSettingsRowsTests {
         #expect(
             menu.contains("ifclearable{noColourItem(hex:hex,draft:draft)}")
         )
-        #expect(menu.contains("ColorSwatch.cleared(hex.wrappedValue)"))
+        #expect(menu.contains("KiwiShelf.cleared(hex.wrappedValue)"))
     }
 }

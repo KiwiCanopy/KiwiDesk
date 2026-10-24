@@ -134,12 +134,14 @@ extension InterpolatedLabelTests {
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it
         // says tints the glass, rather than quoting the word.
-        "colors.liquid_glass.help": 1,
-        // The Liquid Glass group's rows and the Fill's help (#2569).
+        "colors.liquid_glass.help": 2,
+        // The Liquid Glass group's rows and the Fill's help (#2569);
+        // the toggle's label comes from the catalog, not an `L()`,
+        // so it goes uncounted.
         "kiwishelf.tint_hub_and_plates.help": 1,
         "kiwishelf.no_color.reason": 2,
-        "kiwishelf.fill_fade.help": 1,
-        "kiwishelf.color.fill.help": 3,
+        "kiwishelf.fill_fade.help": 2,
+        "kiwishelf.color.fill.help": 2,
         // #1745: the switch by its own key, then the pane.
         "colors.drag_border_off.help": 2,
         "colors.drag_fill_off.help": 2,

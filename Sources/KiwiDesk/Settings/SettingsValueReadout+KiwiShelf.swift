@@ -180,8 +180,8 @@ extension SettingsValueReadout {
         case .fillFade:
             return spaceBarRow(
                 census,
-                percent(Double(o.fillFade) / 100),
-                percent(Double(n.fillFade) / 100)
+                FillFadeRow.readout(o.fillFade),
+                FillFadeRow.readout(n.fillFade)
             )
         case .fillColor, .borderColor, .itemColor, .activeItemColor,
             .highlightColor, .hoverFillColor, .hoverItemColor,

@@ -182,8 +182,8 @@ public enum GlassTint {
     /// the glass's variant from the same Fill (#1308). It takes the
     /// Fill rather than a colour so the cap cannot be walked around
     /// at a call site (#1297); `fill.fade` sets how far it fades.
-    /// An EMPTY Fill is no colour — clear glass, nothing pinned —
-    /// while any other string resolves through `NSColor(kiwiHex:)`.
+    /// A Fill with no colour (`KiwiShelf.hasColour`) is clear
+    /// glass, nothing pinned.
     @MainActor
     static func apply(
         _ backdrop: GlassBackdrop,

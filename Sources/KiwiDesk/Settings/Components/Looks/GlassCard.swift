@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The one Liquid Glass switch, over both bars and the ⌃⌥K
-/// shortcuts panel (#1307), and the sheen's own row beneath it
-/// (#1644), which alone shows below macOS 26 — the first group
-/// of Colors & glass (#2389).
+/// shortcuts panel (#1307), the Fill's two rows beneath it —
+/// "Tint KiwiHub and plates" and "Fill fade" (#2569) — and the
+/// sheen's own row last (#1644), which alone shows below macOS 26
+/// — the first group of Colors & glass (#2389).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -99,17 +100,14 @@ struct GlassCard: View {
             )
         case .kiwishelf(.tintHubAndPlates):
             ToggleRow(
-                label: L(
-                    "kiwishelf.tint_hub_and_plates",
-                    "Tint %1$@ and plates",
-                    JumpScope.panelName
-                ),
+                label: SettingsCatalog.colors.colorsAndGlass.children
+                    .tintHubAndPlates.text,
                 isOn: $model.config.settings.kiwishelf.tintHubAndPlates,
                 help: L(
                     "kiwishelf.tint_hub_and_plates.help",
-                    "%1$@ and the plates a Space switch shows wear "
-                        + "the bars' %2$@ on clear glass, in the bars' "
-                        + "own colors. Off, they draw plain frosted "
+                    "%1$@ and the plates a Space, Desktop or layout "
+                        + "switch shows wear the bars' %2$@ and colors "
+                        + "on clear glass. Off, they draw plain frosted "
                         + "glass.",
                     JumpScope.panelName,
                     L("kiwishelf.color.fill", "Fill")
@@ -187,12 +185,16 @@ struct GlassCard: View {
                 + "Bar, the App Bar, %2$@, the drag ghost and drop "
                 + "zone, the sticky mark and the plates a Space "
                 + "switch slides. KiwiShelf's %1$@ color tints the "
-                + "bars, fading from its screen edge; the drag "
-                + "ghost, drop zone and sticky mark take their own "
-                + "colors, fading downward; the panel and the "
-                + "plates stay untinted.",
+                + "bars, fading from their screen edge as far as "
+                + "\u{201C}%3$@\u{201D} sets; with "
+                + "\u{201C}%4$@\u{201D} on, it tints %2$@ and the "
+                + "plates too. The drag ghost, drop zone and sticky "
+                + "mark take their own colors.",
             L("kiwishelf.color.fill", "Fill"),
-            JumpScope.panelName
+            JumpScope.panelName,
+            L("kiwishelf.fill_fade", "Fill fade"),
+            SettingsCatalog.colors.colorsAndGlass.children
+                .tintHubAndPlates.text
         )
     }
 

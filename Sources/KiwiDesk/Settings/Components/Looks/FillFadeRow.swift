@@ -16,11 +16,15 @@ struct FillFadeRow: View {
             KiwiShelf.fillFadeRange.upperBound
         )
 
-    private var readout: String {
+    /// The value as the row and its diff row read it: 0 is "Off".
+    @MainActor
+    static func readout(_ fade: CGFloat) -> String {
         fade == 0
             ? L("kiwishelf.fill_fade.off", "Off")
             : SettingsValueReadout.percent(Double(fade) / 100)
     }
+
+    private var readout: String { Self.readout(fade) }
 
     var body: some View {
         SettingsRowShape {
@@ -28,9 +32,10 @@ struct FillFadeRow: View {
                 label: Self.label,
                 help: L(
                     "kiwishelf.fill_fade.help",
-                    "How far the %1$@ fades across the glass. Off is "
-                        + "one even color.",
-                    L("kiwishelf.color.fill", "Fill")
+                    "How far the %1$@ fades across the glass. "
+                        + "\u{201C}%2$@\u{201D} is one even color.",
+                    L("kiwishelf.color.fill", "Fill"),
+                    L("kiwishelf.fill_fade.off", "Off")
                 )
             )
         } control: {

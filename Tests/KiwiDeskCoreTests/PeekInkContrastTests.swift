@@ -140,6 +140,26 @@ struct PeekInkContrastTests {
         }
     }
 
+    /// A hovered row reads on its own layer, so where that layer
+    /// washes the ground out the row, not the titles, sets the
+    /// floor.
+    @Test("A hovered row can set the peek's floor")
+    func hoveredRowSetsTheFloor() {
+        var shelf = KiwiShelf()
+        shelf.fillColor = "#000000FF"
+        shelf.itemColor = "#FFFFFF"
+        shelf.hoverFillColor = "#FFFFFF59"
+        shelf.hoverItemColor = "#FFFFFF"
+        shelf.fillFade = 100
+        let floor = KiwiShelf.readingInkFloor
+        let titles = shelf.readingShare(
+            holding: floor,
+            inks: [(shelf.itemColor, nil), (shelf.peekHeaderColor, nil)]
+        )
+        let fill = shelf.readingGlassFill(increaseContrast: false)
+        #expect(titles < fill.minShare)
+    }
+
     /// The glass ground alone failing drops the step: an opaque mid
     /// grey Fill holds the dimmed white ink as stored, but not once
     /// glass caps it and the wallpaper shows through.

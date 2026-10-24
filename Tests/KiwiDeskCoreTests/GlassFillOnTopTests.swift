@@ -131,13 +131,16 @@ struct GlassFillOnTopTests {
     func settledTintStays() throws {
         let glass = try #require(Self.glass(), "no glass below 26")
         let backdrop = GlassBackdrop()
-        let content = NSView()
+        let content = MoveCounter()
         GlassPlate.setContent(glass, content)
         Self.apply(backdrop, in: glass)
+        let settled = content.moves
         Self.apply(backdrop, in: glass)
         Self.apply(backdrop, in: glass)
         #expect(Self.held(glass) === backdrop)
         #expect(backdrop.subviews.map { $0 } == [content])
+        // A re-wrap lands the same tree, so only the moves show it.
+        #expect(content.moves == settled)
     }
 
     /// The shelf's plate hosts no view: its glass carries the tint
@@ -184,4 +187,10 @@ struct GlassFillOnTopTests {
             app: nil
         )
     }
+}
+
+/// Counts the superview changes a re-wrap would cost.
+private final class MoveCounter: NSView {
+    var moves = 0
+    override func viewDidMoveToSuperview() { moves += 1 }
 }

@@ -61,7 +61,18 @@ enum GlassActiveAppearance {
                 home: "GlassActiveAppearance",
                 resolved: { isAsked },
                 verify: {
-                    .answered(
+                    install()
+                    let selector = NSSelectorFromString(privateSelector)
+                    let base = NSWindow.instanceMethod(for: selector)
+                    let missing = classes.filter {
+                        $0.instanceMethod(for: selector) == base
+                    }
+                    guard missing.isEmpty else {
+                        return .failed(
+                            "no answer added on \(missing.map { "\($0)" })"
+                        )
+                    }
+                    return .answered(
                         "NSWindow declares it; \(classes.count) panels "
                             + "answer YES"
                     )

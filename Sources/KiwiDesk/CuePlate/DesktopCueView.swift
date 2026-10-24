@@ -7,7 +7,7 @@ import SwiftUI
 /// mouse.
 struct DesktopCueView: View {
     let cue: DesktopSwitchCue
-    /// KiwiHub\'s glass, the Fill with it under the toggle (#2569).
+    /// KiwiHub's glass, the Fill with it under the toggle (#2569).
     let glass: PanelGlass
 
     var body: some View {

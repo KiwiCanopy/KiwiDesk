@@ -13,11 +13,12 @@ struct PanelGlass: Equatable {
 
     /// The glass `settings` gives KiwiHub and the plates, which
     /// share KiwiHub's leaf (#2524).
+    @MainActor
     init(settings: TilingSettings) {
         enabled = settings.shortcutPanelLiquidGlass
-        // No colour leaves nothing to wear: the untinted panel.
-        let shelf = settings.kiwishelf
-        self.shelf = shelf.tintHubAndPlates && shelf.hasFill ? shelf : nil
+        // Core's one answer: the toggle, a colour, the leaf, the
+        // glass gate.
+        shelf = settings.panelsWearFill ? settings.kiwishelf : nil
     }
 
     init(enabled: Bool, shelf: KiwiShelf?) {
@@ -56,31 +57,23 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
 
     private var increased: Bool { contrast == .increased }
 
-    func body(content: Content) -> some View {
-        content
-            .foregroundStyle(
-                glass.shelf.map {
-                    Color(
-                        kiwiHex: $0.panelInk(increaseContrast: increased)
-                            .primary
-                    )
-                }
-                    ?? Color.primary,
-                glass.shelf.map {
-                    Color(
-                        kiwiHex: $0.panelInk(increaseContrast: increased)
-                            .secondary
-                    )
-                }
-                    ?? Color.secondary,
-                glass.shelf.map {
-                    Color(
-                        kiwiHex: $0.panelInk(increaseContrast: increased)
-                            .tertiary
-                    )
-                }
-                    ?? Color(nsColor: .tertiaryLabelColor)
+    /// The look's three inks while the panel wears the Fill; the
+    /// untinted panel keeps SwiftUI's own hierarchy, untouched.
+    @ViewBuilder private func inked(_ content: Content) -> some View {
+        if let shelf = glass.shelf {
+            let ink = shelf.panelInk(increaseContrast: increased)
+            content.foregroundStyle(
+                Color(kiwiHex: ink.primary),
+                Color(kiwiHex: ink.secondary),
+                Color(kiwiHex: ink.tertiary)
             )
+        } else {
+            content
+        }
+    }
+
+    func body(content: Content) -> some View {
+        inked(content)
             .glassChrome(
                 in: shape,
                 enabled: glass.enabled,

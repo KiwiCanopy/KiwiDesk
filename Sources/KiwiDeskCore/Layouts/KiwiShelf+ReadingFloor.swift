@@ -39,9 +39,10 @@ extension KiwiShelf {
         increaseContrast: Bool
     ) -> [(ink: String, layer: String?)] {
         let ink = panelInk(increaseContrast: increaseContrast)
+        let hover = panelHighlight
         return [
             (ink.primary, nil), (ink.secondary, nil), (ink.tertiary, nil),
-            (hoverItemColor, hoverFillColor),
+            (hover.hoverInk, hover.hover),
         ]
     }
 

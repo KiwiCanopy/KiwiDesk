@@ -101,15 +101,6 @@ struct ColorSwatch: View {
         clearable && !KiwiShelf.hasColour(hex)
     }
 
-    /// `hex` at zero opacity, its hue kept: "No Colour" (#2569).
-    nonisolated static func cleared(_ hex: String) -> String {
-        guard let rgba = DragVisual.parseHex(hex) else { return "#00000000" }
-        let bytes = [rgba.red, rgba.green, rgba.blue].map {
-            String(format: "%02X", Int(($0 * 255).rounded()))
-        }
-        return "#" + bytes.joined() + "00"
-    }
-
     var body: some View {
         HStack(spacing: 6) {
             swatchButton

@@ -30,6 +30,7 @@ struct KiwiHubPaint {
     }
 
     /// The paint `settings` gives KiwiHub.
+    @MainActor
     static func of(_ settings: TilingSettings) -> KiwiHubPaint {
         PanelGlass(settings: settings).shelf
             .map { KiwiHubPaint($0.panelHighlight) } ?? KiwiHubPaint()

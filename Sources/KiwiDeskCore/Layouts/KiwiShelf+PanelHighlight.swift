@@ -22,16 +22,6 @@ public struct PanelInk: Sendable, Equatable {
 }
 
 extension KiwiShelf {
-    /// Whether `hex` is a colour at all: parseable and above zero
-    /// alpha (#2569 ▸ "No Colour"). An empty, unparseable or fully
-    /// transparent Fill is one state — no colour.
-    public static func hasColour(_ hex: String) -> Bool {
-        (DragVisual.parseHex(hex)?.alpha ?? 0) > 0
-    }
-
-    /// Whether the Fill has a colour.
-    public var hasFill: Bool { Self.hasColour(fillColor) }
-
     /// The look's inks for KiwiHub and the cue plates; under
     /// Increase Contrast the dim level takes the secondary ink,
     /// since the idle ink has no legibility step of its own.

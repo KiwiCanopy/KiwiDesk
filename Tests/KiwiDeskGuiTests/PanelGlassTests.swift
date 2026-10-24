@@ -10,6 +10,7 @@ import Testing
 /// no behavioural test can reach — which view draws through it,
 /// which panel wears the rim — is needled on its use sites.
 @Suite("KiwiHub and cue plate glass (#2569)")
+@MainActor
 struct PanelGlassTests {
     private static let gui = SourceScan.repoRoot(from: #filePath)
         .appendingPathComponent("Sources/KiwiDesk")
@@ -28,9 +29,12 @@ struct PanelGlassTests {
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = tinted
         let glass = PanelGlass(settings: settings)
-        #expect((glass.shelf != nil) == tinted)
-        #expect(glass.variant == (tinted ? .clear : .regular))
-        #expect(glass.wearsActiveLook == tinted)
+        // Core's answer also asks the machine's glass gate.
+        let wears = settings.panelsWearFill
+        #expect(!wears || tinted)
+        #expect((glass.shelf != nil) == wears)
+        #expect(glass.variant == (wears ? .clear : .regular))
+        #expect(glass.wearsActiveLook == wears)
     }
 
     @Test(
@@ -74,6 +78,39 @@ struct PanelGlassTests {
         }
     }
 
+    /// The tinted panel reads in the look's three inks; the
+    /// untinted one keeps SwiftUI's hierarchy (#2569 ▸ Ruling).
+    @Test("The panel chrome inks and tints the tinted panel")
+    func chromeInksTheTintedPanel() throws {
+        let chrome = try Self.source(
+            "Settings/Components/Common/PanelGlass.swift"
+        ).filter { !$0.isWhitespace }
+        #expect(chrome.contains("inked(content).glassChrome("))
+        #expect(
+            chrome.contains(
+                "content.foregroundStyle(Color(kiwiHex:ink.primary),"
+                    + "Color(kiwiHex:ink.secondary),"
+                    + "Color(kiwiHex:ink.tertiary))"
+            )
+        )
+        #expect(chrome.contains("ifletshelf=glass.shelf{"))
+        #expect(
+            chrome.contains(
+                "glassChrome(in:shape,enabled:glass.enabled,"
+                    + "variant:glass.variant,tint:"
+            )
+        )
+        // The paint lands as the chrome's tint, untouched.
+        #expect(
+            chrome.contains(
+                "tint:glass.shelf.flatMap{GlassTint.paint("
+                    + "$0.panelGlassFill(increaseContrast:"
+                    + "contrast==.increased),edge:.top)},"
+                    + "fallback:fallback)"
+            )
+        )
+    }
+
     @Test("The cue panel wears the rim the glass asks for")
     func cuePanelWearsTheRim() throws {
         let controller = try Self.source("CuePlate/CuePlateController.swift")
@@ -100,10 +137,11 @@ struct PanelGlassTests {
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = tinted
         let paint = KiwiHubPaint.of(settings)
-        #expect(paint.tinted == tinted)
+        let wears = settings.panelsWearFill
+        #expect(paint.tinted == wears)
         // A selected item's every level takes its own ink only
         // under the toggle (#2569).
-        #expect((paint.rowInk(selected: true, lifted: false) != nil) == tinted)
+        #expect((paint.rowInk(selected: true, lifted: false) != nil) == wears)
         #expect(paint.rowInk(selected: false, lifted: false) == nil)
     }
 

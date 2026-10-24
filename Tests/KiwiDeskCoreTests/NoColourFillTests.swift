@@ -38,7 +38,12 @@ struct NoColourFillTests {
     }
 
     @Test("Glass paints no colour for an unparseable Fill")
-    func glassPaintsNothing() {
+    func glassPaintsNothing() throws {
+        // Below macOS 26 `rendered` answers nil for every Fill.
+        guard #available(macOS 26, *) else { return }
+        try #require(
+            GlassTint.paint(GlassFill(hex: "#FF0000"), edge: .top) != nil
+        )
         #expect(GlassTint.paint(GlassFill(hex: "nope"), edge: .top) == nil)
         #expect(GlassTint.pin("nope") == nil)
     }

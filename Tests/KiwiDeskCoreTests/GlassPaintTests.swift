@@ -100,7 +100,13 @@ struct GlassPaintTests {
             let share = max(GlassTint.farShare(fade: 100), fill.minShare)
             let ground = shelf.fill(cappedAt: anchor * share)
             let inks = shelf.panelInks(increaseContrast: false)
-            try #require(inks.count == 4)
+            // The hover row is floored too (#2569 ▸ Ruling).
+            let hover = shelf.panelHighlight
+            try #require(
+                inks.contains {
+                    $0.ink == hover.hoverInk && $0.layer == hover.hover
+                }
+            )
             for (ink, layer) in inks {
                 let value = try #require(
                     shelf.worstContrast(ink, nil, on: ground, beneath: layer)

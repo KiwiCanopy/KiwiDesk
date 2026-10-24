@@ -10,13 +10,18 @@ public struct GlassFill: Sendable, Equatable {
     public var hex: String
     public var fade: CGFloat
     /// The least share of the anchor the far end keeps, 0–1.
-    public var minShare: CGFloat
+    public private(set) var minShare: CGFloat
 
     public init(
         hex: String,
-        fade: CGFloat = KiwiShelf.fillFadeRange.upperBound,
-        minShare: CGFloat = 0
+        fade: CGFloat = KiwiShelf.fillFadeRange.upperBound
     ) {
+        self.init(hex: hex, fade: fade, minShare: 0)
+    }
+
+    /// With a reading floor: only `KiwiShelf.readingGlassFill`'s
+    /// family mints one, never a share typed at a call site.
+    init(hex: String, fade: CGFloat, minShare: CGFloat) {
         self.hex = hex
         self.fade = KiwiShelf.clampFillFade(fade)
         self.minShare = min(max(minShare, 0), 1)
