@@ -36,6 +36,19 @@ struct DeadShortcutIssueTests {
         KeyLayer(name: KeyLayer.defaultName, bindings: rows)
     }
 
+    /// A profile whose override holds one dead row.
+    private func profile() -> Profile {
+        Profile(
+            name: "Work",
+            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+            spaceModes: [:],
+            settings: TilingSettings(),
+            layers: KeyLayerOverride(layers: [
+                layer(KeyBinding(combo: "alt+j", lua: "test "))
+            ])
+        )
+    }
+
     private static let good = KeyBinding(
         combo: "alt+h",
         lua: "KiwiDesk.focus(\"left\")"
@@ -89,10 +102,49 @@ struct DeadShortcutIssueTests {
         var config = GuiConfig()
         config.layers = [layer(KeyBinding(combo: "alt+j", lua: "test "))]
         try core.saveGuiConfig(config)
+        core.syncDerivedIssues()
         #expect(dead(core).count == 1)
         config.layers = [layer(Self.good)]
         try core.saveGuiConfig(config)
+        core.syncDerivedIssues()
         #expect(dead(core).isEmpty)
+    }
+
+    @Test("A row in another layer names that layer")
+    func namedLayer() throws {
+        let core = try core()
+        var config = GuiConfig()
+        config.layers = [
+            layer(Self.good),
+            KeyLayer(
+                name: "resize",
+                bindings: [KeyBinding(combo: "alt+j", lua: "test ")]
+            ),
+        ]
+        try core.saveGuiConfig(config)
+        guard
+            case .deadShortcut(let name, _, _)? = dead(core).first?.kind
+        else {
+            Issue.record("expected one dead shortcut")
+            return
+        }
+        #expect(name == "resize")
+    }
+
+    /// The install's skips follow a rename of the profile it
+    /// resolved over, so the issue names the file by its new name.
+    @Test("A rename keeps the issue and moves its file")
+    func renameKeepsTheIssue() throws {
+        let core = try core()
+        let lua = try #require(core.keys.lua)
+        core.applyStructuredKeybindings(
+            layers: [],
+            profile: profile(),
+            lua: lua
+        )
+        #expect(dead(core).map(\.source) == ["Work.json"])
+        core.renameInstalledProfile("Work", to: "Home")
+        #expect(dead(core).map(\.source) == ["Home.json"])
     }
 
     /// A chord another row of the layer installs still fires, and a
@@ -173,15 +225,7 @@ struct DeadShortcutIssueTests {
         let lua = try #require(core.keys.lua)
         core.applyStructuredKeybindings(
             layers: [],
-            profile: Profile(
-                name: "Work",
-                monitorSets: [MonitorSet(monitors: ["A:100x100"])],
-                spaceModes: [:],
-                settings: TilingSettings(),
-                layers: KeyLayerOverride(layers: [
-                    layer(KeyBinding(combo: "alt+j", lua: "test "))
-                ])
-            ),
+            profile: profile(),
             lua: lua
         )
         #expect(dead(core).map(\.source) == ["Work.json"])

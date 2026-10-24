@@ -111,7 +111,7 @@ struct ConfigIssueTextTests {
     func everyKindRenders() {
         pinEnglish()
         defer { reset() }
-        // Eight cases; the fixture count is the causes plus the
+        // The fixture count is the causes plus the
         // fifteen hand-listed entries (`unknownCall` and
         // `retiredCall` twice each). The cause half derives, so
         // only the hand-listed half is pinned — bump the 15

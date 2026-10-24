@@ -71,6 +71,22 @@ struct LuaBindingVerdictWiringTests {
         }
     }
 
+    /// Core is asked in one place, and the verdict is written only
+    /// there: a keystroke check that skips `judge` still reds.
+    @Test("One door to Core, one write of the verdict")
+    func oneDoorOneWrite() throws {
+        let files = [
+            "AdvancedLuaGroup.swift", "AdvancedLuaGroup+Row.swift",
+            "AdvancedLuaGroup+Verdict.swift",
+        ]
+        let all = try files.map(flat).joined()
+        #expect(all.occurrences(of: "shortcutLuaProblem(") == 1)
+        #expect(all.occurrences(of: "verdicts[") == 2)
+        #expect(all.occurrences(of: "verdicts[id]=LuaVerdict(") == 1)
+        let verdict = try flat("AdvancedLuaGroup+Verdict.swift")
+        #expect(verdict.occurrences(of: "verdicts[id]=LuaVerdict(") == 1)
+    }
+
     /// The call sites above plus the declaration.
     private let expectedJudges = [
         "AdvancedLuaGroup.swift": 3,
