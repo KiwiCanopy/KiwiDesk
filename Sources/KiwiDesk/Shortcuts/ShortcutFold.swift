@@ -174,7 +174,9 @@ enum ShortcutFold {
             label: label,
             combo: combo,
             icon: tag.family.isSpace
-                ? ShortcutsReferenceBuilder.spaceGroupIcon : first.icon
+                ? ShortcutsReferenceBuilder.spaceGroupIcon
+                : ShortcutsReferenceBuilder.foldIcon(for: tag.family)
+                    ?? first.icon
         )
         row.spokenLabel = spoken
         row.members = group
