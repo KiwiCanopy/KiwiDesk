@@ -49,13 +49,6 @@ enum BarPeekSource: Equatable {
         return false
     }
 
-    /// Whether every group wears its app's icon: an overflow mark
-    /// draws no glyph beside its peek, so its rows name their apps
-    /// even when they are one app (#2235, owner on device).
-    var iconsEveryGroup: Bool {
-        if case .run = self { return true }
-        return false
-    }
 }
 
 /// What a peek shows (#1946, the owner's ruling): one group per
@@ -73,7 +66,7 @@ struct BarPeekContent: Equatable {
 
     struct Group: Equatable {
         let app: String
-        /// The app's icon, only where the rows mix apps (`+n`).
+        /// The app's icon, on every group, a one-app list's too.
         let icon: NSImage?
         /// One per window shown, in row order.
         let rows: [Row]
@@ -131,16 +124,14 @@ struct BarPeekContent: Equatable {
     /// Groups `rows` per app NAME in first-seen order, every row
     /// kept — a lone window titled as its app included (owner,
     /// #1946) — on the key the bars group by, so a glyph standing
-    /// for sibling processes of one app (#1785) is one group. Icons
-    /// mark the groups only where the rows mix apps, or always
-    /// with `icons` (`BarPeekSource.iconsEveryGroup`). A list
-    /// (`checks`) checks the row of `focus` (#2063).
+    /// for sibling processes of one app (#1785) is one group. Every
+    /// group wears its app's icon, a one-app list's too (#2571). A
+    /// list (`checks`) checks the row of `focus` (#2063).
     @MainActor
     init(
         rows: [BarWindowRow],
         checks: Bool = false,
-        focus: WindowID? = nil,
-        icons: Bool = false
+        focus: WindowID? = nil
     ) {
         self.checks = checks
         var order: [BarWindowRow] = []
@@ -155,12 +146,11 @@ struct BarPeekContent: Equatable {
                 )
             )
         }
-        let iconed = icons || order.count > 1
         groups = order.map { first in
             let all = grouped[first.app] ?? []
             return Group(
                 app: first.app,
-                icon: iconed ? first.icon : nil,
+                icon: first.icon,
                 rows: all,
                 windowCount: all.count
             )

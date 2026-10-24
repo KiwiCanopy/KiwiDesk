@@ -4237,8 +4237,7 @@ that closes on leave is hover again; it closes on a click outside
 it, a pick, Escape, and anything that makes it stale. It takes the
 keyboard while open, for Escape and the arrow keys over its rows,
 without activating KiwiDesk. Every group wears its app's icon, even when
-every row is one app: a Space Bar glyph shows its app beside the
-peek, and the mark shows nothing but the count (owner, device).
+every row is one app, as every peek's does (#2571).
 VoiceOver reads it as a button naming its direction and count,
 and its press opens the window menu.
 
@@ -16072,8 +16071,10 @@ windows, so it needs no word and
 no plural — the glyph taking the header's derived step of the
 badge ink over the badge fill, so it reads as faint as the app
 line, while the number keeps the full badge ink; titles wrapped
-whole, since the peek exists to show what the bar cuts. `+n`
-mixes apps, so its groups carry their icons.
+whole, since the peek exists to show what the bar cuts. Every
+group carries its app's icon, a one-app list's too (owner,
+2026-10-24, #2571): a collapsed chip draws no glyph beside its
+list, and one look for every peek beats a rule per source.
 The face is the bar's, at one fixed reading size: the strip-depth
 ladders would shrink it with a thin bar, which is where the peek
 is most needed. An App Bar GROUP always peeks every window it

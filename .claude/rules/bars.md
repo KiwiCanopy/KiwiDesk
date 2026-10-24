@@ -863,11 +863,10 @@ Obligations:
   asks only where it hides text — Core's cut verdict
   (`barItemTitle`, the one branch the item text also takes) or a
   label it did not draw in full (#1514). An overflow mark (#2235)
-  feeds the same peek through `BarPeekSource.run`, a list whose
-  every group wears its app's icon through the one
-  `BarPeekSource.iconsEveryGroup`, since the mark draws no glyph
-  beside it, while a bar's own sources keep the mixed-apps rule
-  (`OverflowMarkWiringTests` ▸ `coreAsksForIcons`). No bar view registers
+  feeds the same peek through `BarPeekSource.run`. Every peek
+  group wears its app's icon, a one-app list's too, never gated
+  on the source (#2571, `BarPeekContentTests` ▸ `oneAppKeepsItsIcon`,
+  `OverflowMarkWiringTests` ▸ `coreAsksForIcons`). No bar view registers
   the system tooltip the peek replaced
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one

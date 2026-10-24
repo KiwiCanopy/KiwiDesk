@@ -99,11 +99,11 @@ struct BarPeekContentTests {
         #expect(content.groups.allSatisfy { $0.icon === icon })
     }
 
-    /// Icons answer "which app?", so a list of one app — a glyph,
-    /// an App Bar item, or a `+n` hiding one app — carries none,
-    /// whatever asked for it (#1945 feeds the same rows).
-    @Test("One app's rows carry no icon")
-    func oneAppNoIcon() {
+    /// A list of one app wears its icon too: a collapsed chip
+    /// draws no glyph beside its list, and every peek keeps one
+    /// look (#2571).
+    @Test("One app's rows keep their icon")
+    func oneAppKeepsItsIcon() {
         let icon = NSImage(size: NSSize(width: 16, height: 16))
         let content = BarPeekContent(
             rows: [
@@ -112,12 +112,12 @@ struct BarPeekContentTests {
             ]
         )
         #expect(content.groups.count == 1)
-        #expect(content.groups[0].icon == nil)
+        #expect(content.groups[0].icon === icon)
     }
 
     /// A glyph's run may span sibling processes of one app (#1785,
     /// Orion): the bars group by app name, so the peek does too —
-    /// one group, every window, and no icon, since it names one app.
+    /// one group, every window, under the one icon.
     @Test("Sibling processes of one app are one group")
     func siblingProcessesShareAGroup() {
         let icon = NSImage(size: NSSize(width: 16, height: 16))
@@ -133,7 +133,7 @@ struct BarPeekContentTests {
             content.groups.map(\.titles) == [["Work", "Home", "Mail"]]
         )
         #expect(content.groups.map(\.windowCount) == [3])
-        #expect(content.groups[0].icon == nil)
+        #expect(content.groups[0].icon === icon)
     }
 
     // MARK: - The drawing
