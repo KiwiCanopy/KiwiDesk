@@ -40,6 +40,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case dimFactor = "settings.kiwishelf.dimFactor"
     case revealTimeout = "settings.kiwishelf.revealTimeout"
     case fillFade = "settings.kiwishelf.fillFade"
+    case tintHubAndPlates = "settings.kiwishelf.tintHubAndPlates"
     case revealStyle = "settings.kiwishelf.revealStyle"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
@@ -121,8 +122,8 @@ extension KiwiShelfKey {
         case .revealTimeout:
             // Lua/CLI until its Settings row lands (#761).
             return .luaOnly
-        case .fillFade:
-            // Lua/CLI until its Settings row lands (#2569).
+        case .fillFade, .tintHubAndPlates:
+            // Lua/CLI until their Settings rows land (#2569).
             return .luaOnly
         case .activeItemColor, .highlightColor, .hoverFillColor:
             // The accent's bar half (#1857).
@@ -247,7 +248,8 @@ extension KiwiShelfKey {
                 "kiwishelf.inner_margin",
                 help: "kiwishelf.inner_margin.help"
             )
-        case .liquidGlass, .dimFactor, .revealTimeout, .fillFade:
+        case .liquidGlass, .dimFactor, .revealTimeout, .fillFade,
+            .tintHubAndPlates:
             return .none
         case .iconSource:
             return .text(

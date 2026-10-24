@@ -51,7 +51,7 @@ public enum LookKeys {
         "background_fit", "corner_roundness", "border",
         "border_width", "highlight_width", "item_gap", "glyph_size",
         "font_size", "font_family", "font_weight", "icon_source",
-        "dim_factor", "fill_fade",
+        "dim_factor", "fill_fade", "tint_hub_and_plates",
     ]
 
     /// Paths of the stores a look reaches that it leaves alone,

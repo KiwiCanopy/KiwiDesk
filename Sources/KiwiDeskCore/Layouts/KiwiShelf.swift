@@ -109,6 +109,10 @@ public struct KiwiShelf: Sendable, Equatable {
     /// How far the Fill fades across glass, in percent (#2569):
     /// 100 to `GlassTint.floorShare` of it, 0 one even colour.
     public var fillFade: CGFloat = 100
+    /// KiwiHub, the cue plates and the Space-switch slide plates
+    /// wear the Fill on `.clear` glass with the active rim; off,
+    /// they draw today's frosted, untinted glass (#2569).
+    public var tintHubAndPlates = true
     /// The border's colour (#1679): `itemColor`'s hex at alpha
     /// 0x59, spelled out (`ShelfBorderTests` pins the relation) and
     /// held against the wallpaper the plate blends into

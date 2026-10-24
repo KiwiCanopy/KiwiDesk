@@ -69,6 +69,24 @@ struct GlassFillFadeTests {
         #expect(abs(share - 0.6) < 0.001, "\(share)")
     }
 
+    /// "Tint KiwiHub and plates" (#2569 ▸ Ruling): on by default,
+    /// a boolean everywhere it is written.
+    @Test("The plates' tint toggle stores and sets")
+    func tintToggleStoresAndSets() throws {
+        #expect(KiwiShelf().tintHubAndPlates)
+        let shelf = try JSONDecoder().decode(
+            KiwiShelf.self,
+            from: Data(#"{"tint_hub_and_plates": false}"#.utf8)
+        )
+        #expect(!shelf.tintHubAndPlates)
+        var set = KiwiShelf()
+        try KiwiShelfCommandSetting.parse(
+            field: "tint_hub_and_plates",
+            args: [.bool(false)]
+        ).get().apply(to: &set)
+        #expect(!set.tintHubAndPlates)
+    }
+
     @Test("A surface's own colour keeps today's fade")
     func ownColourKeepsTheFade() {
         #expect(GlassFill(hex: "#FF0000").fade == 100)

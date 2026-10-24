@@ -68,6 +68,7 @@ enum AppBarFixtures {
         shelf.revealTimeout = 5
         shelf.revealStyle = .grow
         shelf.fillFade = 40
+        shelf.tintHubAndPlates = false
         return shelf
     }
 }
