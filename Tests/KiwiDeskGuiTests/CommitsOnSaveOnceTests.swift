@@ -25,6 +25,51 @@ struct CommitsOnSaveOnceTests {
         }
     }
 
+    /// Two fields, the first focused: only it answers a request.
+    private struct Pair: View {
+        let focused: Count
+        let other: Count
+        @FocusState private var first: Bool
+        @FocusState private var second: Bool
+        @State private var a = ""
+        @State private var b = ""
+
+        var body: some View {
+            VStack {
+                TextField("", text: $a)
+                    .commitsOnSave($first) { focused.commits += 1 }
+                TextField("", text: $b)
+                    .commitsOnSave($second) { other.commits += 1 }
+            }
+        }
+    }
+
+    @Test("A request commits the focused field alone")
+    func onlyTheFocusedField() throws {
+        let focused = Count()
+        let other = Count()
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 200, height: 80),
+            styleMask: [.titled],
+            backing: .buffered,
+            defer: false
+        )
+        defer { window.orderOut(nil) }
+        window.contentView = NSHostingView(
+            rootView: Pair(focused: focused, other: other)
+        )
+        window.contentView?.layoutSubtreeIfNeeded()
+        spin()
+        let field = try #require(
+            window.contentView.flatMap(Self.textField(in:))
+        )
+        #expect(window.makeFirstResponder(field))
+        spin()
+        makeTestModel().commitFocusedField()
+        #expect(focused.commits == 1)
+        #expect(other.commits == 0)
+    }
+
     private func spin() {
         RunLoop.main.run(until: Date().addingTimeInterval(0.15))
     }

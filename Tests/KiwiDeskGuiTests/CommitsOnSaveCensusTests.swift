@@ -45,7 +45,8 @@ struct CommitsOnSaveCensusTests {
 
     /// The subject is the field, not a spelling: a file with a
     /// focus state and a text field joins the modifier or names
-    /// why not.
+    /// why not. Trade: it asks per file, so a second field added to
+    /// a file that already joins (or is exempt) passes unseen.
     @Test("Every focusable text field joins or is exempt")
     func everyFieldJoins() throws {
         let files = try guiFiles()
@@ -98,6 +99,8 @@ struct CommitsOnSaveCensusTests {
     func needleSeesTheShape() throws {
         let home = try flat("Sources/KiwiDesk/Settings/" + Self.home)
         #expect(Self.blurCommits(in: home) == 1)
+        // Return commits too, and only through the modifier.
+        #expect(home.occurrences(of: ".onSubmit(commit)") == 1)
     }
 
     @Test("Each draft reader asks for the commit first")
@@ -150,6 +153,13 @@ struct CommitsOnSaveCensusTests {
     @Test("⌘S is the root's, once")
     func keyboardSaveOnTheRoot() throws {
         let view = try flat("Sources/KiwiDesk/Settings/SettingsView.swift")
+        // The scope a field answers by is the root's, set once.
+        #expect(
+            view.occurrences(
+                of: ".environment(\\.settingsCommitScope,"
+                    + "ObjectIdentifier(model))"
+            ) == 1
+        )
         #expect(
             view.occurrences(
                 of: ".background(KeyboardSaveButton(model:model))"
