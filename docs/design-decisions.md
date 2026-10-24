@@ -3689,7 +3689,12 @@ user chose, so a plate naming it again is noise. `paySpaceCue`
 stands down inside the one `fromSpaceBar` scope, which the bar's
 own pick doors open. The slide still plays there: it answers
 which way the switch went, and the click does not answer that.
-A Space reached by any other door keeps the plate.
+Under Reduce Motion, where Slide draws Show the Space, such a pick
+draws nothing. A Space reached by any other door keeps the plate,
+the window switcher's included: its pick names a window, not a
+Space. Accepted: a Lua callback the pick fires inline, such as a
+`space_change` handler that switches again, runs inside the scope
+and shows no plate either.
 
 *Neither cue plays over a full-screen app or a presentation.* The
 plate and the slide both stand down where the shelf does

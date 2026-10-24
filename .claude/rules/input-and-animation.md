@@ -765,7 +765,12 @@ editing here:
   (`SpaceCueSeamTests`). Slide under Reduce Motion reading as Show
   the Space is stated once, in `SpaceTransition.drawn(reduceMotion:)`,
   which that reader and the Settings rows ask, never a copy of
-  its branch beside either. A live read the slide adds is pinned
+  its branch beside either. The one ruled stand-down inside the
+  payer is a switch the Space Bar picked (#2591): every bar door
+  that can switch opens the one `fromSpaceBar` scope beside its
+  `withUserMotion`, and only `paySpaceCue` reads the bit, so such
+  a pick slides on Slide and draws nothing on Show or under Reduce
+  Motion (`SpaceCueSeamTests` ▸ `barDoorsOpenTheScope`). A live read the slide adds is pinned
   inert in both `makeTestCore` twins (`SpaceSlideSeamTests` ▸
   `bothTwinsPinTheReads`). The product ruling is
   `docs/design-decisions.md` ▸ *A Space switch slides, shows the

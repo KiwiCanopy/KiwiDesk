@@ -29,7 +29,8 @@ extension KiwiCore {
     /// switch the slide did not play on, while the drawn transition
     /// is Show the Space (#2524) — on every screen, a Space Bar or
     /// not, save where the shelf stands down (#1787) and a switch
-    /// the Space Bar picked, whose chip already named the Space.
+    /// the Space Bar picked, whose chip already named the Space
+    /// (#2591).
     func paySpaceCue(on display: DisplayID) {
         guard drawnSpaceTransition == .show,
             !cueHooks.spaceBarPicking,
@@ -42,8 +43,10 @@ extension KiwiCore {
         )
     }
 
-    /// Runs a Space Bar pick — a chip, a glyph, a list row — whose
-    /// switch pays no Space cue; the slide still plays.
+    /// Runs a bar pick — a chip, a glyph, any bar list row — whose
+    /// switch pays no Space cue; the slide still plays (#2591). It
+    /// changes only a pick that switches, and a Lua callback the
+    /// pick fires inline runs inside it.
     func fromSpaceBar(_ body: () -> Void) {
         let outer = cueHooks.spaceBarPicking
         cueHooks.spaceBarPicking = true
