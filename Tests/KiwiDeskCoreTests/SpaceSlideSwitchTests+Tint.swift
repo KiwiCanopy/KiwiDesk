@@ -13,6 +13,9 @@ extension SpaceSlideSwitchTests {
     )
     func platesTakeTheFill(tinted: Bool) throws {
         let (core, _) = try makeCore(slide: true)
+        let before = LiquidGlassGate.override
+        LiquidGlassGate.override = { false }
+        defer { LiquidGlassGate.override = before }
         core.tiler.settings.kiwishelf.tintHubAndPlates = tinted
         core.tiler.settings.kiwishelf.fillFade = 40
         core.execute("focus_space", args: [.string("2")])
@@ -34,6 +37,24 @@ extension SpaceSlideSwitchTests {
         let (core, _) = try makeCore(slide: true)
         core.tiler.settings.kiwishelf.tintHubAndPlates = true
         core.tiler.settings.kiwishelf.fillColor = "#14201C00"
+        core.execute("focus_space", args: [.string("2")])
+        defer { core.spaceSlide.end() }
+        #expect(try #require(core.spaceSlide.play).tint == nil)
+    }
+
+    /// The plates follow KiwiHub's Liquid Glass leaf: off, they take
+    /// no tint though the toggle is on (#2569 ▸ Ruling).
+    @Test(
+        "plates take no tint with KiwiHub's glass off",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func leafOffLeavesThePlatesUntinted() throws {
+        let (core, _) = try makeCore(slide: true)
+        let before = LiquidGlassGate.override
+        LiquidGlassGate.override = { false }
+        defer { LiquidGlassGate.override = before }
+        core.tiler.settings.kiwishelf.tintHubAndPlates = true
+        core.tiler.settings.shortcutPanelLiquidGlass = false
         core.execute("focus_space", args: [.string("2")])
         defer { core.spaceSlide.end() }
         #expect(try #require(core.spaceSlide.play).tint == nil)

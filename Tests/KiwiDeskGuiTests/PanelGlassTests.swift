@@ -25,12 +25,14 @@ struct PanelGlassTests {
         "The toggle picks clear glass with the Fill",
         arguments: [true, false]
     )
-    func togglePicksTheGlass(tinted: Bool) {
+    func togglePicksTheGlass(tinted: Bool) throws {
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = tinted
         let glass = PanelGlass(settings: settings)
         // Core's answer also asks the machine's glass gate.
         let wears = settings.panelsWearFill
+        // The tinted arm measures nothing where glass is not drawn.
+        if tinted { try #require(wears, "this machine draws no glass") }
         #expect(!wears || tinted)
         #expect((glass.shelf != nil) == wears)
         #expect(glass.variant == (wears ? .clear : .regular))
@@ -45,6 +47,17 @@ struct PanelGlassTests {
         var settings = TilingSettings()
         settings.shortcutPanelLiquidGlass = on
         #expect(PanelGlass(settings: settings).enabled == on)
+    }
+
+    /// KiwiHub's leaf off leaves KiwiHub and the cues untinted though
+    /// the toggle is on: the answer is Core's, not the toggle's.
+    @Test("KiwiHub's glass off leaves the panels untinted")
+    func leafOffLeavesThemUntinted() {
+        var settings = TilingSettings()
+        settings.kiwishelf.tintHubAndPlates = true
+        settings.shortcutPanelLiquidGlass = false
+        #expect(PanelGlass(settings: settings).shelf == nil)
+        #expect(!KiwiHubPaint.of(settings).tinted)
     }
 
     /// A Fill without colour leaves KiwiHub and the cues untinted,
@@ -133,11 +146,12 @@ struct PanelGlassTests {
     /// KiwiHub's selection and hover take the shelf's colours under
     /// the toggle and keep kiwi green off it (#2569 ▸ Ruling).
     @Test("KiwiHub's selection follows the toggle", arguments: [true, false])
-    func selectionFollowsTheToggle(tinted: Bool) {
+    func selectionFollowsTheToggle(tinted: Bool) throws {
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = tinted
         let paint = KiwiHubPaint.of(settings)
         let wears = settings.panelsWearFill
+        if tinted { try #require(wears, "this machine draws no glass") }
         #expect(paint.tinted == wears)
         // A selected item's every level takes its own ink only
         // under the toggle (#2569).

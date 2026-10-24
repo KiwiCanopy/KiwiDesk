@@ -30,8 +30,9 @@ struct PanelsWearFillTests {
     @Test("Every term must hold")
     func everyTermHolds() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
+        let before = LiquidGlassGate.override
         LiquidGlassGate.override = { false }
-        defer { LiquidGlassGate.override = nil }
+        defer { LiquidGlassGate.override = before }
         #expect(settings().panelsWearFill)
         #expect(!settings(toggle: false).panelsWearFill)
         #expect(!settings(leaf: false).panelsWearFill)
@@ -40,8 +41,9 @@ struct PanelsWearFillTests {
 
     @Test("Reduce transparency stands it down")
     func reduceTransparencyStandsDown() {
+        let before = LiquidGlassGate.override
         LiquidGlassGate.override = { true }
-        defer { LiquidGlassGate.override = nil }
+        defer { LiquidGlassGate.override = before }
         #expect(!settings().panelsWearFill)
     }
 }

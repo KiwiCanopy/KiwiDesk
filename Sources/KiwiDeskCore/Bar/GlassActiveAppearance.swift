@@ -50,9 +50,9 @@ enum GlassActiveAppearance {
         NSWindow.instancesRespond(to: NSSelectorFromString(privateSelector))
     }
 
-    /// `self_test`'s row (#1889): liveness only — whether AppKit
-    /// still declares the question; no public reader says how glass
-    /// draws.
+    /// `self_test`'s row (#1889): AppKit still declares the
+    /// question and every listed panel class carries its own answer;
+    /// no public reader says how glass draws.
     static func selfTestProbes() -> [PrivatePathProbe] {
         [
             .read(
