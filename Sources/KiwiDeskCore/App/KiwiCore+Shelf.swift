@@ -68,7 +68,7 @@ extension KiwiCore {
         var strips: [ShelfStrip] = []
         var standingDown: Set<DisplayID> = []
         var hiding = HidingShelves(
-            dotStarts: shelves.indicators.dotStarts
+            dotStarts: shelves.handles.dotStarts
         )
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so

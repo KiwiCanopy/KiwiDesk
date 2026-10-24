@@ -125,7 +125,7 @@ extension BarMotion {
     static let hoverGrow: TimeInterval = 0.15
 
     /// Where the mark's plate stands in its view, y down: `mark`,
-    /// grown while hovered by `ShelfIndicatorSpec.hoverGrowth` each
+    /// grown while hovered by `ShelfHandleSpec.hoverGrowth` each
     /// way along `edge` plus half of `growth.widen`, a pill's room,
     /// and by twice the growth plus `growth.across`, a side-edge
     /// count's room (#2567), away from the screen side alone — a
@@ -134,12 +134,12 @@ extension BarMotion {
     /// the edge. The size is content rather than motion.
     static func hoverPlate(
         mark: CGRect,
-        growth extra: ShelfIndicatorSpec.Growth = .none,
+        growth extra: ShelfHandleSpec.Growth = .none,
         edge: AppBarEdge,
         hovered: Bool
     ) -> CGRect {
         guard hovered else { return mark }
-        let growth = ShelfIndicatorSpec.hoverGrowth
+        let growth = ShelfHandleSpec.hoverGrowth
         let along = growth + extra.widen / 2
         let deep = growth + extra.across / 2
         let inward = hoverShift(edge, across: extra.across)
@@ -157,7 +157,7 @@ extension BarMotion {
         _ edge: AppBarEdge,
         across: CGFloat = 0
     ) -> CGVector {
-        let growth = ShelfIndicatorSpec.hoverGrowth + across / 2
+        let growth = ShelfHandleSpec.hoverGrowth + across / 2
         switch edge {
         case .top: return CGVector(dx: 0, dy: growth)
         case .bottom: return CGVector(dx: 0, dy: -growth)
@@ -182,7 +182,7 @@ extension BarMotion {
         content: NSView,
         contentRest: CGRect,
         mark: CGRect,
-        growth: ShelfIndicatorSpec.Growth = .none,
+        growth: ShelfHandleSpec.Growth = .none,
         edge: AppBarEdge,
         hovered: Bool,
         animated: Bool,

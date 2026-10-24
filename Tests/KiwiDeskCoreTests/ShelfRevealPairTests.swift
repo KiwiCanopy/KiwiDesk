@@ -57,8 +57,8 @@ struct ShelfRevealPairTests {
         _ core: KiwiCore,
         _ shelf: ShelfManager.Key,
         _ bar: ShelfBar
-    ) -> ShelfIndicatorSpec? {
-        core.shelves.indicators.indicatorForTesting(
+    ) -> ShelfHandleSpec? {
+        core.shelves.handles.handleForTesting(
             .init(shelf: shelf, bar: bar)
         )?.view.spec
     }
@@ -138,7 +138,7 @@ struct ShelfRevealPairTests {
     func pressShowsItsBar() throws {
         let (core, shelf) = try #require(makeCore())
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        core.shelves.indicators.onPress(.init(shelf: shelf, bar: .app))
+        core.shelves.handles.onPress(.init(shelf: shelf, bar: .app))
         #expect(
             core.shelves.reveal.reveal(of: .init(shelf: shelf, bar: .app))
                 .isShown

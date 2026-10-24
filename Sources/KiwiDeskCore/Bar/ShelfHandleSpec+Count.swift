@@ -6,7 +6,7 @@ import AppKit
 /// catalog key — with the bar's Fill showing at both ends. Top and
 /// bottom edges read number then glyph, side edges the number above
 /// it; past `sideCap` a side edge shows the plural glyph alone.
-extension ShelfIndicatorSpec {
+extension ShelfHandleSpec {
     struct Count: Equatable {
         let windows: Int
         let font: NSFont
@@ -20,13 +20,13 @@ extension ShelfIndicatorSpec {
         /// Whether the number shows: always along a top or bottom
         /// edge, up to `sideCap` on a side one.
         var showsNumber: Bool {
-            horizontal || windows <= ShelfIndicatorSpec.sideCap
+            horizontal || windows <= ShelfHandleSpec.sideCap
         }
 
         var glyphName: String {
             showsNumber
-                ? ShelfIndicatorSpec.countGlyph
-                : ShelfIndicatorSpec.manyGlyph
+                ? ShelfHandleSpec.countGlyph
+                : ShelfHandleSpec.manyGlyph
         }
 
         /// The number and glyph laid out as one unit (pt), along
@@ -37,7 +37,7 @@ extension ShelfIndicatorSpec {
                     ? (glyph.width, glyph.height)
                     : (glyph.height, glyph.width)
             }
-            let gap = ShelfIndicatorSpec.countGap
+            let gap = ShelfHandleSpec.countGap
             return horizontal
                 ? (
                     number.width + gap + glyph.width,

@@ -24,8 +24,8 @@ struct ShelfHandleCountTests {
         rim: CGFloat = 3,
         hovered: Bool = true,
         glass: Bool = false
-    ) -> ShelfIndicatorSpec {
-        var spec = ShelfIndicatorSpec(
+    ) -> ShelfHandleSpec {
+        var spec = ShelfHandleSpec(
             mark: .line,
             frame: edge.isHorizontal ? Self.mark : Self.side,
             edge: edge,
@@ -41,7 +41,7 @@ struct ShelfHandleCountTests {
             glass: glass
         )
         if let windows {
-            spec.count = ShelfIndicatorSpec.count(
+            spec.count = ShelfHandleSpec.count(
                 windows,
                 font: NSFont.systemFont(ofSize: 12),
                 edge: edge,
@@ -68,10 +68,10 @@ struct ShelfHandleCountTests {
     func sideEdges() throws {
         let two = try #require(spec(windows: 99, edge: .left).count)
         #expect(two.showsNumber)
-        #expect(two.glyphName == ShelfIndicatorSpec.countGlyph)
+        #expect(two.glyphName == ShelfHandleSpec.countGlyph)
         let many = try #require(spec(windows: 128, edge: .left).count)
         #expect(!many.showsNumber)
-        #expect(many.glyphName == ShelfIndicatorSpec.manyGlyph)
+        #expect(many.glyphName == ShelfHandleSpec.manyGlyph)
         let wide = spec(windows: 99, edge: .left)
         let grown = BarMotion.hoverPlate(
             mark: wide.frame,
@@ -82,7 +82,7 @@ struct ShelfHandleCountTests {
         // Wider than the plain growth, against the screen side still.
         #expect(
             grown.width
-                > ShelfIndicatorSpec.depth + 2 * ShelfIndicatorSpec.hoverGrowth
+                > ShelfHandleSpec.depth + 2 * ShelfHandleSpec.hoverGrowth
         )
         #expect(grown.minX == wide.frame.minX)
     }
@@ -90,7 +90,7 @@ struct ShelfHandleCountTests {
     @Test("VoiceOver reads the count at rest, number last")
     func spokenCount() {
         LocalizationManager.shared.select("en")
-        let view = ShelfIndicatorView()
+        let view = ShelfHandleView()
         view.carriesSpaceBar = false
         view.render(spec(windows: 3, hovered: false), animated: false)
         #expect(view.accessibilityLabel() == "App Bar")
@@ -100,10 +100,10 @@ struct ShelfHandleCountTests {
     @Test("A glass mark draws its plate as a glass box that grows")
     func glassPlate() throws {
         let rest = spec(windows: 42, hovered: false, glass: true)
-        let view = ShelfIndicatorView()
+        let view = ShelfHandleView()
         view.frame = CGRect(
             origin: .zero,
-            size: ShelfIndicator.room(of: rest).size
+            size: ShelfHandle.room(of: rest).size
         )
         view.render(rest, animated: false)
         guard #available(macOS 26, *) else {
@@ -118,7 +118,7 @@ struct ShelfHandleCountTests {
         #expect(box.tint.superview != nil)
         let host = try #require(GlassBox.host(of: box.glass))
         let grownSpec = spec(windows: 42, hovered: true, glass: true)
-        let mark = ShelfIndicator.mark(of: grownSpec, in: view.bounds)
+        let mark = ShelfHandle.mark(of: grownSpec, in: view.bounds)
         let grown = BarMotion.hoverPlate(
             mark: mark,
             growth: grownSpec.growth,

@@ -189,7 +189,7 @@ draws only
 when `ShelfManager.reveal` shows it (#761): `updateBars()` files
 each hiding bar as a target — its band centred on its mark, the
 marks of an edge placed as one row (`ShelfMarkPlacement`) — and
-draws its Space dots or line (`ShelfIndicators`), one panel per
+draws its Space dots or line (`ShelfHandles`), one panel per
 bar, and a reveal or a retract from
 the pointer monitor or the show/hide action calls `updateBars()`
 alone — never a retile.

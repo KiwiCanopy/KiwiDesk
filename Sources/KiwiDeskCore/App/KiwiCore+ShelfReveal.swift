@@ -23,7 +23,7 @@ extension KiwiCore {
     /// and synced once at its end.
     struct HidingShelves {
         var targets: [ShelfRevealer.Key: ShelfRevealer.Target] = [:]
-        var indicators: [ShelfRevealer.Key: ShelfIndicatorSpec] = [:]
+        var handles: [ShelfRevealer.Key: ShelfHandleSpec] = [:]
         /// The handle each hiding shelf's grow reveal grows out of —
         /// its shown bar's, else its first — with its growth, so the
         /// reveal starts from the plate on screen (#2567). AX
@@ -126,7 +126,7 @@ extension KiwiCore {
                     ? spaceDots(items, key: barKey(bar), settings: settings)
                     : nil
                 let mark = dots?.mark ?? .line
-                let markIn = ShelfIndicatorSpec.frame(
+                let markIn = ShelfHandleSpec.frame(
                     of: mark,
                     in: plan.strip,
                     edge: plan.edge,
@@ -167,7 +167,7 @@ extension KiwiCore {
                     marks[key] == nil
                     || (shown(bar)
                         && !auto.prefix(index).contains(where: shown))
-                var spec = ShelfIndicatorSpec(
+                var spec = ShelfHandleSpec(
                     mark: mark,
                     frame: markIn,
                     edge: plan.edge,
@@ -179,7 +179,7 @@ extension KiwiCore {
                     shown: shown(bar),
                     hovered: reveal.arming.contains(barKey(bar)),
                     reveal: BarMotion.RevealKind(shelf),
-                    rimWidth: ShelfIndicatorSpec.rimWidth(for: shelf),
+                    rimWidth: ShelfHandleSpec.rimWidth(for: shelf),
                     sheen: settings.borderStyle.sheen,
                     yields: reveal.yields(barKey(bar)),
                     label: plan.horizontal ? dots?.label : nil,
@@ -187,7 +187,7 @@ extension KiwiCore {
                     glass: shelf.glassEnabled
                 )
                 if bar == .app, let appWindows {
-                    spec.count = ShelfIndicatorSpec.count(
+                    spec.count = ShelfHandleSpec.count(
                         appWindows,
                         font: Self.markCountFont(settings),
                         edge: plan.edge,
@@ -197,7 +197,7 @@ extension KiwiCore {
                 if leads {
                     marks[key] = .init(frame: markIn, growth: spec.growth)
                 }
-                indicators[barKey(bar)] = spec
+                handles[barKey(bar)] = spec
             }
         }
 
@@ -265,8 +265,8 @@ extension KiwiCore {
     /// to the panels.
     func syncHidingShelves(_ hiding: HidingShelves) {
         shelves.reveal.sync(hiding.targets)
-        shelves.indicators.dotStarts = hiding.dotStarts
-        shelves.indicators.sync(hiding.indicators)
+        shelves.handles.dotStarts = hiding.dotStarts
+        shelves.handles.sync(hiding.handles)
     }
 
     /// The show/hide action on one bar; false where the revealer
