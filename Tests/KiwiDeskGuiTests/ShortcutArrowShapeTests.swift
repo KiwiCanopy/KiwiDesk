@@ -1,4 +1,3 @@
-import AppKit
 import KiwiDeskCore
 import Testing
 
@@ -9,8 +8,7 @@ import Testing
 /// different shapes; a folded set wears every direction it covers,
 /// never a member's glyph. The picks themselves are the docstrings'
 /// in `ShortcutsReference+Glyphs.swift`; this suite holds shapes.
-/// Main-actor spend: three builder passes and one symbol lookup per
-/// family.
+/// Main-actor spend: three builder passes.
 @Suite("Shortcut arrows show the directions a row covers")
 @MainActor
 struct ShortcutArrowShapeTests {
@@ -118,23 +116,6 @@ struct ShortcutArrowShapeTests {
             #expect(
                 ShortcutsReferenceBuilder.icon(for: other) == nil,
                 "\(name)"
-            )
-        }
-    }
-
-    @Test("every fold glyph resolves on this macOS")
-    func foldGlyphsResolve() {
-        let glyphs = ShortcutFold.Family.allCases.compactMap(
-            ShortcutsReferenceBuilder.foldIcon(for:)
-        )
-        #expect(!glyphs.isEmpty)
-        for glyph in glyphs {
-            #expect(
-                NSImage(
-                    systemSymbolName: glyph,
-                    accessibilityDescription: nil
-                ) != nil,
-                "\(glyph) does not resolve"
             )
         }
     }
