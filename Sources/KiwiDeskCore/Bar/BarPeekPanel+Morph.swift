@@ -19,6 +19,17 @@ extension BarPeekPanel {
         let edge: AppBarEdge
         /// When it opened, for the double-click guard (#2063).
         var openedAt: TimeInterval = 0
+
+        /// Whether `next` is this same list shown again: the one
+        /// answer to "redraw or replace", its growth first and only
+        /// then the anchor it grew from.
+        func continues(_ next: Morph) -> Bool {
+            guard growth == next.growth else { return false }
+            switch growth {
+            case .fromPill: return anchor != nil && anchor === next.anchor
+            case .outOfItem: return item != nil && item === next.item
+            }
+        }
     }
 
     /// What a grown list is shown from: its anchor, the pill's
@@ -39,10 +50,12 @@ extension BarPeekPanel {
         visible: CGRect
     ) {
         let shelf = LiquidGlassGate.rendered(stored)
-        // Any other list in its place ends at once: a bar item's
-        // (#2571), or another mark's, whose pill comes back as this
-        // one's grows — a run has a mark at each end.
-        if let morph, morph.anchor !== request.anchor { dropMorph() }
+        let next = Morph(
+            growth: .fromPill,
+            anchor: request.anchor,
+            edge: request.edge
+        )
+        endUnlessContinued(by: next)
         let room = request.anchor.morphRoom.intersection(visible)
         let area = room.isNull ? visible : room
         let atTop = BarPeekMorph.headerAtTop(request.edge)
@@ -92,17 +105,7 @@ extension BarPeekPanel {
                 height: strip.height
             )
         )
-        let opens = adopt(
-            content,
-            Morph(
-                growth: .fromPill,
-                anchor: request.anchor,
-                edge: request.edge
-            ),
-            panel: panel,
-            redraws: morph?.growth == .fromPill
-        )
-        guard opens else { return }
+        guard adopt(content, next, panel: panel) else { return }
         // The pill hides in the same pass the list orders in.
         request.anchor.setMorphed(true, pointer: pointer())
         playOpen(
@@ -113,15 +116,24 @@ extension BarPeekPanel {
         )
     }
 
+    /// Ends a list `next` does not continue at once — another kind's,
+    /// another item's, or another mark's, whose pill comes back as
+    /// the next grows (a run has a mark at each end). Called first,
+    /// before the next list lays out its panel.
+    func endUnlessContinued(by next: Morph) {
+        guard let morph, !morph.continues(next) else { return }
+        dropMorph()
+    }
+
     /// Takes `content` as the list shown, under `next`; answers
-    /// whether it opens — false where it `redraws` a list already
+    /// whether it opens — false where `next` continues the list
     /// shown, whose open time it keeps for the double-click guard.
     func adopt(
         _ content: BarPeekContent,
         _ next: Morph,
-        panel: BarPeekWindow,
-        redraws: Bool
+        panel: BarPeekWindow
     ) -> Bool {
+        let redraws = morph?.continues(next) == true
         let opens = !redraws || leaving != nil || !panel.isVisible
         leaving = nil
         drawn = content

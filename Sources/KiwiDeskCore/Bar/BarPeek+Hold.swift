@@ -65,10 +65,10 @@ extension BarPeek {
     }
 
     /// A press in a bar panel (`ShelfPanel`), on `hit`: a click
-    /// outside the peek, which closes it — except a left press on
-    /// a Space Bar glyph or an App Bar group, whose release decides:
-    /// a list's click opens or closes its list (#2571), a one-window
-    /// glyph's picks. Any other button's press on them closes it.
+    /// outside the peek, which closes it — except a left press
+    /// `releaseDecides` leaves to the release, which its item says
+    /// through `BarPeekListAnchor.sparesLeftPress` (#2571). Any other
+    /// button's press closes it.
     func pressed(on hit: NSView?, type: NSEvent.EventType) {
         guard type != .leftMouseDown || !Self.releaseDecides(hit)
         else { return }

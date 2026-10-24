@@ -26,8 +26,12 @@ extension BarPeekPanel {
         visible: CGRect
     ) {
         let shelf = LiquidGlassGate.rendered(stored)
-        // An overflow mark's list in its place ends at once.
-        if morph?.growth == .fromPill { dropMorph() }
+        let next = Morph(
+            growth: .outOfItem,
+            item: request.item,
+            edge: request.edge
+        )
+        endUnlessContinued(by: next)
         body.reserve = .none
         header.isHidden = true
         let size = Self.fittedSize(
@@ -53,13 +57,7 @@ extension BarPeekPanel {
         panel.takesKey = true
         panel.setFrame(list, display: false)
         paint(shelf, edge: request.edge, size: size)
-        let opens = adopt(
-            content,
-            Morph(growth: .outOfItem, item: request.item, edge: request.edge),
-            panel: panel,
-            redraws: morph?.item === request.item
-        )
-        guard opens else { return }
+        guard adopt(content, next, panel: panel) else { return }
         playOpen(
             panel,
             from: BarPeekMorph.seed(

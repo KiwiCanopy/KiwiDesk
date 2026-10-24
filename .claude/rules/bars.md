@@ -944,10 +944,15 @@ Obligations:
   for the overflow mark, `.outOfItem` for every other list but a
   collapsed chip's, nil for a peek the hover opens — read by the
   peek, the items and the click routing through it or
-  `opensOnClick`, and carried by the panel's `Morph.growth`, never a
-  second peek, a check of the source's case or a reading of which
-  morph reference is set (`BarPeekMorphTests` ▸ `clickGrowthTable`,
-  `BarPeekGrownPanelTests` ▸ `kindsReplaceEachOther`). Its hover opens
+  `opensOnClick`, and carried by the panel's `Morph.growth`, whose
+  one `Morph.continues` answers whether a show redraws the list or
+  replaces it — never a second peek, a check of the source's case or
+  a reading of which morph reference is set (`BarPeekMorphTests` ▸
+  `clickGrowthTable`, `BarPeekGrownPanelTests` ▸
+  `kindsReplaceEachOther`, `secondPillTakesOver`,
+  `secondItemOpensAfresh`). A shelf item whose source opens on click
+  conforms to `BarPeekListAnchor`, or the peek refuses to grow its
+  list. Its hover opens
   nothing; a click opens and holds the list, and while it shows no
   other item's hover swaps or closes it (`OverflowMarkClickTests` ▸
   `hoverOpensNothing`, `otherHoverLeavesIt`; `BarPeekActionTests` ▸

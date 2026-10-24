@@ -1,10 +1,12 @@
 import AppKit
 
-/// A bar item that may anchor a list a click holds open (#2571): it
-/// says whether a left press on it is its release's to decide, and
-/// draws its open state while the list shows, re-reading it as the
-/// list opens and closes. A new list item type conforms, so the
-/// press point and the open state name one protocol.
+/// A shelf item a click acts on through its release (#2571): it says
+/// whether a left press on it is its release's to decide — a list's
+/// open or close, or a one-window glyph's pick — and draws its open
+/// state while its list shows, re-reading it as the list opens and
+/// closes. A shelf item whose source opens on click conforms, or the
+/// peek refuses to grow its list; the overflow mark's panel is its
+/// own press point (`OverflowMarkPanel`).
 @MainActor
 protocol BarPeekListAnchor: NSView {
     /// Whether a left press leaves the peek to this item's release.
@@ -114,6 +116,14 @@ extension BarPeek {
                 visible: visibleArea(window)
             )
         case .outOfItem:
+            // Its item owes the list-anchor conformance — the press
+            // point and the open state read it — so a missing one is a
+            // wiring defect, as a pill source's on a non-morph anchor.
+            guard view is any BarPeekListAnchor else {
+                assertionFailure("a click-held list on a non-list anchor")
+                dismiss()
+                return
+            }
             panel.showGrown(
                 content,
                 shelf: shelf,
