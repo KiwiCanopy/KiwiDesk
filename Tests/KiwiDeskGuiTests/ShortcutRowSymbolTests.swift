@@ -114,6 +114,11 @@ struct ShortcutRowSymbolTests {
                 ?? false
         }
         #expect(Set(wearing.map(\.lua)) == focus)
+        let folds = ShortcutFold.Family.allCases.compactMap(
+            ShortcutsReferenceBuilder.foldIcon(for:)
+        )
+        #expect(!folds.isEmpty)
+        #expect(Set(folds).isDisjoint(with: lines), "a fold wears one way")
     }
 
     /// The seeded keymap, on both bases: every row is recognised
