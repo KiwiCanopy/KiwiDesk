@@ -67,9 +67,10 @@ extension SettingsButtonStyleConventionTests {
             // from drifting. A button in a shared menu-item
             // builder is as unstyleable as one written inline
             // in the menu.
+            // "No Color" joins Automatic there (#2569).
             "ColorField+AutomaticMenu.swift": (
-                1, "automaticItem",
-                "Menu item from the one builder the rowActions "
+                2, "rowActions",
+                "Menu items from the builders the rowActions "
                     + "seam feeds (#845)"
             ),
             // A temporary Space's one row action (#1790).

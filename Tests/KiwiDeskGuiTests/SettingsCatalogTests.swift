@@ -160,7 +160,7 @@ struct SettingsCatalogTests {
         // 208 with #2507: the Space Bar's Fine-tuning drawer and
         // its four rows, KiwiShelf's Order and Space Bar minimum
         // as Style children.
-        #expect(allEntries.count == 208)
+        #expect(allEntries.count == 210)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

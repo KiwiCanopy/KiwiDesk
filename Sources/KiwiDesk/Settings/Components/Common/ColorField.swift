@@ -15,6 +15,8 @@ struct HexColorField: View {
     /// (`ColorPaletteKeys.followers`, #1856); nil for the marks'
     /// adaptive Automatic.
     var follows: ColorFollow?
+    /// Offers "No Colour", zero opacity with the hue kept (#2569).
+    var clearable = false
     @Binding var hex: String
 
     var body: some View {
@@ -26,6 +28,7 @@ struct HexColorField: View {
                 label: a11yLabel ?? label,
                 automatic: automatic,
                 follows: follows,
+                clearable: clearable,
                 hex: $hex
             )
         }
@@ -65,6 +68,8 @@ struct ColorSwatch: View {
     var automatic: Bool = false
     /// Set where Automatic is another colour rather than adaptive.
     var follows: ColorFollow?
+    /// Offers "No Colour" (#2569).
+    var clearable = false
     @Binding var hex: String
     @State private var draft: String
     @FocusState private var focused: Bool
@@ -74,11 +79,13 @@ struct ColorSwatch: View {
         label: String,
         automatic: Bool = false,
         follows: ColorFollow? = nil,
+        clearable: Bool = false,
         hex: Binding<String>
     ) {
         self.label = label
         self.automatic = automatic
         self.follows = follows
+        self.clearable = clearable
         self._hex = hex
         self._draft = State(initialValue: hex.wrappedValue)
     }
@@ -87,6 +94,20 @@ struct ColorSwatch: View {
     /// state — an empty hex on a well that allows it.
     private var isAutomatic: Bool {
         automatic && hex.isEmpty
+    }
+
+    /// True while a clearable well holds no colour (#2569).
+    private var isClear: Bool {
+        clearable && !KiwiShelf.hasColour(hex)
+    }
+
+    /// `hex` at zero opacity, its hue kept: "No Colour" (#2569).
+    nonisolated static func cleared(_ hex: String) -> String {
+        guard let rgba = DragVisual.parseHex(hex) else { return "#00000000" }
+        let bytes = [rgba.red, rgba.green, rgba.blue].map {
+            String(format: "%02X", Int(($0 * 255).rounded()))
+        }
+        return "#" + bytes.joined() + "00"
     }
 
     var body: some View {
@@ -144,7 +165,12 @@ struct ColorSwatch: View {
         }
         .buttonStyle(.plain)
         .hoverHighlight(cornerRadius: 6, padding: 0)
-        .automaticMenu(automatic: automatic, hex: $hex, draft: $draft)
+        .automaticMenu(
+            automatic: automatic,
+            clearable: clearable,
+            hex: $hex,
+            draft: $draft
+        )
         .help(swatchHelp)
         .accessibilityLabel(
             isAutomatic
@@ -153,11 +179,17 @@ struct ColorSwatch: View {
                     "%1$@ color, Automatic",
                     label
                 )
-                : L(
-                    "color_field.swatch.a11y",
-                    "%1$@ color",
-                    label
-                )
+                : isClear
+                    ? L(
+                        "color_field.swatch.a11y_clear",
+                        "%1$@ color, No Color",
+                        label
+                    )
+                    : L(
+                        "color_field.swatch.a11y",
+                        "%1$@ color",
+                        label
+                    )
         )
         .accessibilityHint(
             L(
@@ -183,6 +215,31 @@ struct ColorSwatch: View {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
+            )
+        } else if isClear {
+            // The clear colour's checkerboard, as macOS draws one.
+            Circle().fill(.clear).overlay(
+                Canvas { context, size in
+                    let half = CGSize(
+                        width: size.width / 2,
+                        height: size.height / 2
+                    )
+                    for (x, y) in [(0.0, 0.0), (1.0, 1.0)] {
+                        context.fill(
+                            Path(
+                                CGRect(
+                                    origin: CGPoint(
+                                        x: x * half.width,
+                                        y: y * half.height
+                                    ),
+                                    size: half
+                                )
+                            ),
+                            with: .style(Color.primary.opacity(0.18))
+                        )
+                    }
+                }
+                .clipShape(Circle())
             )
         } else {
             Circle().fill(color)

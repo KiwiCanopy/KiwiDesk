@@ -98,7 +98,8 @@ struct SettingKeyLocaleTests {
             checked += 1
             let template = en[label]?.contains("%1$") == true
             #expect(
-                !template || key.labelMode != nil,
+                !template || key.labelMode != nil
+                    || key.labelNamesKiwiHub,
                 "\(key.id): label \(label) is a template"
             )
             #expect(

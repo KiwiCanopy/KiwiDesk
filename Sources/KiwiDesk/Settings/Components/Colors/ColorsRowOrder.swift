@@ -25,6 +25,8 @@ enum ColorsRowOrder {
     /// sheen's own row directly beneath it (#1644).
     static let glassRows: [SettingKey] = [
         .colours(.liquidGlassMaster),
+        .kiwishelf(.tintHubAndPlates),
+        .kiwishelf(.fillFade),
         .colours(.borderSheen),
     ]
 

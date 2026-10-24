@@ -188,6 +188,13 @@ struct ColorsAndGlassControls: Sendable {
         "colors.liquid_glass",
         "Liquid Glass"
     )
+    /// The Liquid Glass group's Fill rows (#2569).
+    let tintHubAndPlates = SettingsControl(
+        "kiwishelf.tint_hub_and_plates",
+        "Tint %1$@ and plates",
+        namesKiwiHub: true
+    )
+    let fillFade = SettingsControl("kiwishelf.fill_fade", "Fill fade")
     let sheenStrength = SettingsControl("colors.sheen", "Sheen")
     /// The two role groups (#1857).
     let accentGroup = SettingsControl("colors.accent.title", "Accent")

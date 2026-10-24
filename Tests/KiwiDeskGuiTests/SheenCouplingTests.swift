@@ -50,6 +50,8 @@ struct SheenCouplingTests {
         #expect(
             ColorsRowOrder.glassRows == [
                 .colours(.liquidGlassMaster),
+                .kiwishelf(.tintHubAndPlates),
+                .kiwishelf(.fillFade),
                 .colours(.borderSheen),
             ]
         )
