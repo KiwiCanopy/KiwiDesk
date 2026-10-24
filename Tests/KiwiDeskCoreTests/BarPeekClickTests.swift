@@ -5,8 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A click on a rendered list glyph (#1946, owner ruling amendment
-/// 2; #2063): it focuses the glyph's next window and shows the peek
-/// at once, checked on that window, presenting no menu; VoiceOver's
+/// 2; #2571): it opens the list at once and moves no focus, its
+/// check on the focused window, presenting no menu; VoiceOver's
 /// press presents the native menu once, a press elsewhere on the
 /// shelf closes it, and a peek row picks through Core's one bar-row
 /// pick — the window menu's — doing what the row's glyph does: a
@@ -83,7 +83,10 @@ struct BarPeekClickTests {
         return web
     }
 
-    private func click(_ target: SpaceBarGlyphTarget) throws {
+    private func click(
+        _ target: SpaceBarGlyphTarget,
+        count: Int = 1
+    ) throws {
         let event = { (type: NSEvent.EventType) in
             NSEvent.mouseEvent(
                 with: type,
@@ -93,7 +96,7 @@ struct BarPeekClickTests {
                 windowNumber: 0,
                 context: nil,
                 eventNumber: 0,
-                clickCount: 1,
+                clickCount: count,
                 pressure: 1
             )
         }
@@ -122,7 +125,7 @@ struct BarPeekClickTests {
     /// following it while the list stays open; a second click past
     /// the double-click guard closes it.
     @Test("A list glyph's click opens its list and focuses nothing")
-    func clickFocusesAndShowsThePeek() throws {
+    func clickOpensTheList() throws {
         let core = seededCore()
         defer { close(core) }
         var menus = 0
@@ -180,10 +183,15 @@ struct BarPeekClickTests {
         disc.actions = web.actions
         disc.frame = web.frame
         web.superview?.addSubview(disc)
+        // Past the double-click interval, so only the press's own
+        // count keeps the list open.
+        var clock: TimeInterval = 100
+        core.shelves.peek.now = { clock }
         try click(disc)
         #expect(core.shelves.peek.shown?.view === disc)
         #expect(core.activeSpace?.id == one, "nothing switches")
-        try click(disc)
+        clock += 1
+        try click(disc, count: 2)
         #expect(core.shelves.peek.shown?.view === disc, "still open")
         #expect(core.state.workspaces.lastFocused == WindowID(1))
     }

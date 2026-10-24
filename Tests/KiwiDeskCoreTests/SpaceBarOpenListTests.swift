@@ -12,8 +12,11 @@ import Testing
 struct SpaceBarOpenListTests {
     private static let depth: CGFloat = 32
 
+    /// The pointer pinned off every window, so the lit state reads
+    /// the open list alone, never the host's resting pointer.
     init() {
         LiquidGlassGate.override = { false }
+        BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
     }
 
     /// Mail (2, 3) and Web (4) drawn, 5 and 6 behind a trailing `+2`,
@@ -69,7 +72,7 @@ struct SpaceBarOpenListTests {
     }
 
     @Test("An open +n stays lit, its number kept, until it closes")
-    func openDiscReadsAsAWindow() throws {
+    func openDiscStaysLit() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
         let actions = SpaceBarGlyphActions()
@@ -88,7 +91,7 @@ struct SpaceBarOpenListTests {
     }
 
     @Test("An open glyph stays lit over a neighbour the pointer rests on")
-    func openGlyphKeepsItsBadge() throws {
+    func openGlyphOutranksTheHover() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
         let actions = SpaceBarGlyphActions()

@@ -27,7 +27,7 @@ extension BarPeekPanel {
     ) {
         let shelf = LiquidGlassGate.rendered(stored)
         // An overflow mark's list in its place ends at once.
-        if morph?.anchor != nil { dropMorph() }
+        if morph?.growth == .fromPill { dropMorph() }
         body.reserve = .none
         header.isHidden = true
         let size = Self.fittedSize(
@@ -53,46 +53,22 @@ extension BarPeekPanel {
         panel.takesKey = true
         panel.setFrame(list, display: false)
         paint(shelf, edge: request.edge, size: size)
-        let opens =
-            morph?.item !== request.item || leaving != nil
-            || !panel.isVisible
-        leaving = nil
-        drawn = content
-        panel.ignoresMouseEvents = false
-        morph = Morph(
-            item: request.item,
-            edge: request.edge,
-            openedAt: opens ? now() : morph?.openedAt ?? now()
-        )
-        guard opens else {
-            panel.invalidateShadow()
-            return
-        }
-        panel.hasShadow = false
-        panel.orderFrontRegardless()
-        guard let parts = morphParts() else { return }
-        let seed = BarPeekMorph.seed(
-            item: request.frame,
-            list: list,
-            edge: request.edge
-        )
-        let span = BarMotion.playMorph(
-            parts,
+        let opens = adopt(
+            content,
+            Morph(growth: .outOfItem, item: request.item, edge: request.edge),
             panel: panel,
-            anchor: nil,
-            pill: local(seed, in: list),
-            pillRadius: min(seed.width, seed.height) / 2,
-            listRadius: BarPeekBody.Metrics.cornerRadius,
-            opening: true
+            redraws: morph?.item === request.item
         )
-        let token = UUID()
-        opening = token
-        land(span) { [weak self] in
-            guard let self, self.opening == token else { return }
-            self.opening = nil
-            BarMotion.endMorph(parts)
-            self.panel?.hasShadow = true
-            self.panel?.invalidateShadow()
-        }
+        guard opens else { return }
+        playOpen(
+            panel,
+            from: BarPeekMorph.seed(
+                item: request.frame,
+                list: list,
+                edge: request.edge
+            ),
+            in: list,
+            anchor: nil
+        )
     }
 }

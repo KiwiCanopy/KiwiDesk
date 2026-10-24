@@ -10,9 +10,12 @@ extension SpaceBarItemView {
     }
 }
 
-/// A glyph or `+n` whose list opens or closes re-reads its item's
-/// lit state (#2571).
+/// A glyph or `+n`: its release decides every left press — a list's
+/// click opens or closes it, a one-window glyph's picks — and its
+/// list opening or closing re-reads its item's lit state (#2571).
 extension SpaceBarGlyphTarget: BarPeekListAnchor {
+    var sparesLeftPress: Bool { true }
+
     func listOpenChanged() {
         (superview as? SpaceBarItemView)?.syncHoverToPointer()
     }

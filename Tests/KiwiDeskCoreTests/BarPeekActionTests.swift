@@ -132,7 +132,7 @@ struct BarPeekActionTests {
     /// keeps it, as any press inside the double-click interval does
     /// (#2063).
     @Test("A double-click keeps the list it opened")
-    func clickKeepsAHoverPeek() {
+    func doubleClickKeepsTheList() {
         let rig = BarPeekRig()
         defer { rig.close() }
         click(rig)
@@ -160,8 +160,8 @@ struct BarPeekActionTests {
         #expect(rig.shownTitles == nil)
     }
 
-    @Test("A second click leaves the peek open")
-    func secondClickKeeps() {
+    @Test("A second show re-reads the peek in place")
+    func secondShowReReads() {
         let rig = BarPeekRig()
         defer { rig.close() }
         let source = BarPeekSource.glyph([WindowID(1), WindowID(2)])

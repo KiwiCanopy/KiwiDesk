@@ -98,8 +98,7 @@ struct BarPeekContent: Equatable {
     /// row, checked or not, so no title moves with focus (#2063).
     let checks: Bool
 
-    /// The windows shown, top to bottom — the order a glyph's
-    /// click cycles in (#2063).
+    /// The windows shown, top to bottom: the rows' order.
     var order: [WindowID] { groups.flatMap { $0.rows.map(\.window) } }
 
     /// Every window the peek stands for.

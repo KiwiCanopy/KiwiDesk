@@ -46,7 +46,11 @@ extension AppBarItemView {
     }
 }
 
-/// A group's list opening or closing re-reads its lit state (#2571).
+/// A group's release decides its left press — it opens or closes the
+/// list — and its list opening or closing re-reads its lit state
+/// (#2571); a single item's press closes a peek as any press does.
 extension AppBarItemView: BarPeekListAnchor {
+    var sparesLeftPress: Bool { peekSource?.opensOnClick == true }
+
     func listOpenChanged() { syncHoverToPointer() }
 }

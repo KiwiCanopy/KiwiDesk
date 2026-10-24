@@ -10,7 +10,7 @@ import Testing
 /// window.
 @Suite("Bar glyph clicks and the focus check", .serialized)
 @MainActor
-struct BarGlyphCycleTests {
+struct BarGlyphClickTests {
     private let display = DisplayID(7)
     private let one = SpaceID("1")
     private let two = SpaceID("2")

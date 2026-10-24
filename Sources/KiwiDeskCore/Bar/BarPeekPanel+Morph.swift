@@ -9,15 +9,16 @@ import AppKit
 extension BarPeekPanel {
     /// A list grown out of its anchor, shown or closing back.
     struct Morph {
-        /// The overflow mark's pill; nil for a list grown out of a
-        /// bar item (#2571), which hides nothing.
+        /// How it grew: the one answer every reader switches on, the
+        /// weak references below being payload only (#2571).
+        let growth: BarPeekSource.Growth
+        /// The overflow mark's pill, for `.fromPill`.
         weak var anchor: (any BarPeekMorphAnchor)?
-        /// The bar item a list grew out of; nil for the overflow
-        /// mark's.
+        /// The bar item it grew out of, for `.outOfItem`.
         weak var item: NSView?
         let edge: AppBarEdge
         /// When it opened, for the double-click guard (#2063).
-        let openedAt: TimeInterval
+        var openedAt: TimeInterval = 0
     }
 
     /// What a grown list is shown from: its anchor, the pill's
@@ -39,7 +40,7 @@ extension BarPeekPanel {
     ) {
         let shelf = LiquidGlassGate.rendered(stored)
         // A bar item's list in its place ends at once (#2571).
-        if morph?.item != nil { dropMorph() }
+        if morph?.growth == .outOfItem { dropMorph() }
         let room = request.anchor.morphRoom.intersection(visible)
         let area = room.isNull ? visible : room
         let atTop = BarPeekMorph.headerAtTop(request.edge)
@@ -89,30 +90,65 @@ extension BarPeekPanel {
                 height: strip.height
             )
         )
-        let opens = morph == nil || leaving != nil || !panel.isVisible
+        let opens = adopt(
+            content,
+            Morph(
+                growth: .fromPill,
+                anchor: request.anchor,
+                edge: request.edge
+            ),
+            panel: panel,
+            redraws: morph?.growth == .fromPill
+        )
+        guard opens else { return }
+        // The pill hides in the same pass the list orders in.
+        request.anchor.setMorphed(true, pointer: pointer())
+        playOpen(
+            panel,
+            from: request.pill,
+            in: list,
+            anchor: request.anchor.window
+        )
+    }
+
+    /// Takes `content` as the list shown, under `next`; answers
+    /// whether it opens — false where it `redraws` a list already
+    /// shown, whose open time it keeps for the double-click guard.
+    func adopt(
+        _ content: BarPeekContent,
+        _ next: Morph,
+        panel: BarPeekWindow,
+        redraws: Bool
+    ) -> Bool {
+        let opens = !redraws || leaving != nil || !panel.isVisible
         leaving = nil
         drawn = content
         panel.ignoresMouseEvents = false
-        morph = Morph(
-            anchor: request.anchor,
-            edge: request.edge,
-            openedAt: opens ? now() : morph?.openedAt ?? now()
-        )
-        guard opens else {
-            panel.invalidateShadow()
-            return
-        }
-        // The pill hides in the same pass the list orders in.
-        request.anchor.setMorphed(true, pointer: pointer())
+        var shown = next
+        shown.openedAt = opens ? now() : morph?.openedAt ?? now()
+        morph = shown
+        if !opens { panel.invalidateShadow() }
+        return opens
+    }
+
+    /// Orders `panel` in and grows its list out of `seed` inside
+    /// `list`, both on screen, `anchor`'s panel hiding as it opens;
+    /// the shadow comes back as it lands.
+    func playOpen(
+        _ panel: BarPeekWindow,
+        from seed: CGRect,
+        in list: CGRect,
+        anchor: NSWindow?
+    ) {
         panel.hasShadow = false
         panel.orderFrontRegardless()
         guard let parts = morphParts() else { return }
         let span = BarMotion.playMorph(
             parts,
             panel: panel,
-            anchor: request.anchor.window,
-            pill: local(request.pill, in: list),
-            pillRadius: min(request.pill.width, request.pill.height) / 2,
+            anchor: anchor,
+            pill: local(seed, in: list),
+            pillRadius: min(seed.width, seed.height) / 2,
             listRadius: BarPeekBody.Metrics.cornerRadius,
             opening: true
         )
@@ -160,7 +196,7 @@ extension BarPeekPanel {
             pillRadius: min(target.width, target.height) / 2,
             listRadius: BarPeekBody.Metrics.cornerRadius,
             opening: false,
-            fadesOut: morph.item != nil
+            fadesOut: morph.growth == .outOfItem
         )
         self.land(span, land)
     }
@@ -180,13 +216,15 @@ extension BarPeekPanel {
     /// frame, or the seed off the item's (#2571); nil where neither
     /// is on screen.
     private func closingTarget(_ morph: Morph, list: CGRect) -> CGRect? {
-        if let anchor = morph.anchor {
-            return BarPeek.screenFrame(of: anchor)
+        switch morph.growth {
+        case .fromPill:
+            return morph.anchor.flatMap { BarPeek.screenFrame(of: $0) }
+        case .outOfItem:
+            guard let item = morph.item,
+                let frame = BarPeek.screenFrame(of: item)
+            else { return nil }
+            return BarPeekMorph.seed(item: frame, list: list, edge: morph.edge)
         }
-        guard let item = morph.item,
-            let frame = BarPeek.screenFrame(of: item)
-        else { return nil }
-        return BarPeekMorph.seed(item: frame, list: list, edge: morph.edge)
     }
 
     /// Whether a press on a held list's header or item closes it:

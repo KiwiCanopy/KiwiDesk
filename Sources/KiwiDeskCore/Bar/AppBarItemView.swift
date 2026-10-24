@@ -141,7 +141,9 @@ final class AppBarItemView: NSView {
             onDragEnded(self)
         } else if let source = peekSource, source.opensOnClick {
             // A group's click opens its list and selects nothing
-            // until a row is picked (#2571).
+            // until a row is picked (#2571); a release off it — a
+            // float group never drags — cancels, as a button (#2044).
+            guard releasesInside(event) else { return }
             itemActions?.peek?.clicked(
                 self,
                 source: source,
@@ -152,6 +154,11 @@ final class AppBarItemView: NSView {
         } else if !isInert {
             onSelect(windowID)
         }
+    }
+
+    private func releasesInside(_ event: NSEvent) -> Bool {
+        guard event.window != nil else { return true }
+        return bounds.contains(convert(event.locationInWindow, from: nil))
     }
 
     override func updateTrackingAreas() {

@@ -3278,9 +3278,13 @@ app_bar.set_title_cap(25)
 
 **Does:** if true, collapses adjacent same-app windows into one
 item with a count badge; same-app windows that are not adjacent
-stay separate. Clicking a grouped item focuses its first window
+stay separate.
+
+:::unreleased
+Clicking a grouped item lists its windows. Picking one focuses it
 and expands the group into its members; focus leaving the group
 collapses it again.
+:::
 
 **Example:**
 
@@ -3412,7 +3416,7 @@ App Bar in monocle and scrolling.
   the screen's edge inside that band. It goes back the same way
   0.5 s after the
   pointer leaves the bar and its band, and stays while a bar menu
-  or a hover peek it opened is up.
+  or a peek it opened is up.
 - `"hidden"` draws nothing and reserves nothing; only
   [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it,
   in the same reveal style. The menu bar then shows the Space each
@@ -7310,11 +7314,11 @@ animations.set_reveal_duration(400)
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** the bars' peeks: the short fade of the label a bar item
-shows on hover, and a list a click opens growing out of its item —
-a bar's "+n", a glyph or App Bar item standing for several
-windows, the overflow mark's "+n" — and back. Off, both show and
-hide at once. With Reduce Motion on, a list cross-fades in place
+**Does:** the bars' peeks: the short fade of what a bar item shows
+on hover — a label, or a collapsed Space's list — and a list a
+click opens growing out of its item — a bar's "+n", a glyph or App
+Bar item standing for several windows, the overflow mark's "+n" —
+and back, fading as it retracts. Off, both show and hide at once. With Reduce Motion on, a list cross-fades in place
 instead of growing, unless this is off. Lua-only: no Settings row
 turns it off.
 

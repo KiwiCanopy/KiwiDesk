@@ -21,7 +21,7 @@ struct BarPeekMorphTests {
     /// (#2571); only the overflow mark's grows out of its pill, and a
     /// one-window label stays the hover's.
     @Test("Which sources a click opens, and how each grows")
-    func onlyTheRunMorphs() {
+    func clickGrowthTable() {
         let ids = [WindowID(1), WindowID(2)]
         let one = [WindowID(1)]
         let table: [(BarPeekSource, BarPeekSource.Growth?)] = [

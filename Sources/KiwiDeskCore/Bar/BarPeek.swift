@@ -200,11 +200,10 @@ final class BarPeek {
         }
     }
 
-    /// A click on a list (`BarPeekSource.isList`): shows the peek
-    /// at `anchor` at once, with no dwell or cool-down — a fading one
-    /// included — or re-reads the one showing in place, and never
-    /// closes it (#2063). It holds as any list's does, until a click
-    /// outside, a pick, or the pointer leaving the hull.
+    /// Shows the peek at `anchor` at once, with no dwell or
+    /// cool-down — a fading one included — or re-reads the one
+    /// showing in place: the open path of `clicked` (#2571) and the
+    /// overflow mark's own click (#2563).
     func show(
         _ anchor: NSView,
         source: BarPeekSource,
@@ -218,24 +217,6 @@ final class BarPeek {
         )
     }
 
-    /// Re-reads the shown peek's content, redrawn in place where it
-    /// changed, its phase kept: a focus moved while it stays open.
-    func reread() {
-        guard let anchor = shown, let frame = anchor.frame,
-            let window = anchor.view?.window,
-            let content = content(anchor.source, anchor.space),
-            !content.groups.isEmpty, content != panel.drawn,
-            let shelf = shelf(window)
-        else { return }
-        showPanel(
-            content,
-            at: anchor,
-            frame: frame,
-            shelf: shelf,
-            fades: false
-        )
-    }
-
     /// The pointer left the peeked item for good: it fades and cools.
     func leave() {
         let was = shown
@@ -243,6 +224,7 @@ final class BarPeek {
         guard was != nil else { return }
         closedAt = now()
         panel.hide(animated: true)
+        noteOpenChanged(was)
     }
 
     /// A press, a pick or a scroll took the item: it closes at once
@@ -255,14 +237,16 @@ final class BarPeek {
         closedAt = nil
         guard was != nil else { return }
         panel.hide(animated: false)
+        noteOpenChanged(was)
     }
 
+    /// Ends the phase. An open list's anchor is told only once its
+    /// caller's transition has settled, since telling it re-reads the
+    /// pointer, which may present again (#2571).
     private func close() {
-        let was = shown
         generation += 1
         phase = .idle
         pointerInPeek = false
-        noteOpenChanged(was)
     }
 
     /// The item reported the pointer gone: inside the hull a list's
@@ -327,6 +311,7 @@ final class BarPeek {
             let shelf = shelf(window)
         else {
             if was != nil { panel.hide(animated: false) }
+            noteOpenChanged(was)
             return
         }
         var placed = anchor
@@ -339,6 +324,7 @@ final class BarPeek {
             shelf: shelf,
             fades: fades
         )
+        noteOpenChanged(was)
         noteOpenChanged(placed)
     }
 }

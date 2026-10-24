@@ -235,7 +235,8 @@ struct BarPeekSeamTests {
     func glyphClickRouting() throws {
         // A glyph's click: a one-window glyph's pick closes the peek
         // ahead of its focus; a list opens it — told apart by the
-        // one list predicate, as VoiceOver's press is.
+        // one click predicate (#2571), VoiceOver's press by the list
+        // predicate.
         let click = try #require(
             SourceScan.declarationBody(
                 after: "func pickFromSpaceBar(",
@@ -247,7 +248,7 @@ struct BarPeekSeamTests {
         #expect(closes.upperBound <= focus.lowerBound)
         #expect(click.contains("showPeek(pick)"))
         #expect(!click.contains("SpaceBarWindowMenu.make("))
-        #expect(click.contains("pick.peekSource.isList"))
+        #expect(click.contains("pick.peekSource.opensOnClick"))
         let press = try #require(
             SourceScan.declarationBody(
                 after: "func pressSpaceBarGlyph(",

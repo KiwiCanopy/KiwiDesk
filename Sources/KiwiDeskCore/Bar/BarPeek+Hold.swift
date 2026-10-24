@@ -76,14 +76,14 @@ extension BarPeek {
     }
 
     /// Whether a left press on `hit` leaves the peek to its release:
-    /// a Space Bar glyph's, or an App Bar group's, whose views it
-    /// may land on.
+    /// the nearest list anchor at or above it answers
+    /// (`BarPeekListAnchor.sparesLeftPress`), since a press may land
+    /// on one of an item's own views.
     static func releaseDecides(_ hit: NSView?) -> Bool {
-        if hit is SpaceBarGlyphTarget { return true }
         var view = hit
         while let current = view {
-            if let item = current as? AppBarItemView {
-                return item.peekSource?.opensOnClick == true
+            if let anchor = current as? any BarPeekListAnchor {
+                return anchor.sparesLeftPress
             }
             view = current.superview
         }

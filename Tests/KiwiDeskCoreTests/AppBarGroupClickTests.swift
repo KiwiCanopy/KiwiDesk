@@ -11,8 +11,11 @@ import Testing
 @Suite("App Bar group click", .serialized)
 @MainActor
 struct AppBarGroupClickTests {
+    /// The pointer pinned off every window, so the lit state reads
+    /// the open list alone, never the host's resting pointer.
     init() {
         LiquidGlassGate.override = { false }
+        BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
     }
 
     /// The active Mail item first, then a Finder item of `members`
@@ -22,7 +25,8 @@ struct AppBarGroupClickTests {
         _ core: KiwiCore,
         _ rig: BarPeekRig,
         _ actions: AppBarItemActions,
-        members: [UInt32]
+        members: [UInt32],
+        titleCut: Bool = false
     ) throws -> AppBarItemView {
         core.appBars.sync([
             paintedAppBar(
@@ -37,7 +41,8 @@ struct AppBarGroupClickTests {
                         text: "Finder",
                         icon: nil,
                         count: members.count,
-                        members: members.map(WindowID.init)
+                        members: members.map(WindowID.init),
+                        titleCut: titleCut
                     ),
                 ]
             )
@@ -91,6 +96,8 @@ struct AppBarGroupClickTests {
         #expect(!group.isHovered, "unlit as it closes")
     }
 
+    /// A single item that cuts its title has a peek source — a label
+    /// — which the click must still read as a select.
     @Test("A single item's click still selects its window")
     func singleClickSelects() throws {
         let core = makeBarCore()
@@ -98,7 +105,14 @@ struct AppBarGroupClickTests {
         defer { rig.close() }
         let actions = AppBarItemActions()
         defer { withExtendedLifetime(actions) {} }
-        let single = try finder(core, rig, actions, members: [1])
+        let single = try finder(
+            core,
+            rig,
+            actions,
+            members: [1],
+            titleCut: true
+        )
+        try #require(single.peekSource != nil)
         var selected: [WindowID] = []
         single.onSelect = { selected.append($0) }
         try click(single)
@@ -119,7 +133,14 @@ struct AppBarGroupClickTests {
         let group = try finder(core, rig, actions, members: [1, 2])
         #expect(BarPeek.releaseDecides(group))
         #expect(BarPeek.releaseDecides(group.subviews.first))
-        let single = try finder(core, rig, actions, members: [1])
+        let single = try finder(
+            core,
+            rig,
+            actions,
+            members: [1],
+            titleCut: true
+        )
+        try #require(single.peekSource != nil)
         #expect(!BarPeek.releaseDecides(single))
         #expect(!BarPeek.releaseDecides(nil))
     }

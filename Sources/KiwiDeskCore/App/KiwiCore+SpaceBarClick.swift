@@ -29,7 +29,7 @@ extension KiwiCore {
     }
 
     func pickFromSpaceBar(_ pick: SpaceBarGlyphPick) {
-        guard pick.peekSource.isList else {
+        guard pick.peekSource.opensOnClick else {
             shelves.peek.dismiss()
             focusFromSpaceBar(pick.windows[0], on: pick.space)
             return

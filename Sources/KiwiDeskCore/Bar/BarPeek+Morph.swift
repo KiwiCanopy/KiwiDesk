@@ -1,10 +1,14 @@
 import AppKit
 
-/// A bar item whose list a click holds open (#2571): it draws its
-/// open state while the list shows, re-reading it as the list opens
-/// and closes.
+/// A bar item that may anchor a list a click holds open (#2571): it
+/// says whether a left press on it is its release's to decide, and
+/// draws its open state while the list shows, re-reading it as the
+/// list opens and closes. A new list item type conforms, so the
+/// press point and the open state name one protocol.
 @MainActor
 protocol BarPeekListAnchor: NSView {
+    /// Whether a left press leaves the peek to this item's release.
+    var sparesLeftPress: Bool { get }
     func listOpenChanged()
 }
 
@@ -19,12 +23,29 @@ extension BarPeek {
     }
 
     /// Whether `view` anchors the click-held list showing — what its
-    /// open-state highlight reads (#2571).
+    /// open-state highlight reads (#2571). The phase alone answers,
+    /// since `noteOpenChanged` fires on its changes alone.
     func holdsOpen(_ view: NSView) -> Bool {
-        guard let shown, shown.view === view, panel.drawn != nil else {
-            return false
-        }
+        guard let shown, shown.view === view else { return false }
         return shown.source.opensOnClick
+    }
+
+    /// Re-reads the shown peek's content, redrawn in place where it
+    /// changed, its phase kept: a focus moved while it stays open.
+    func reread() {
+        guard let anchor = shown, let frame = anchor.frame,
+            let window = anchor.view?.window,
+            let content = content(anchor.source, anchor.space),
+            !content.groups.isEmpty, content != panel.drawn,
+            let shelf = shelf(window)
+        else { return }
+        showPanel(
+            content,
+            at: anchor,
+            frame: frame,
+            shelf: shelf,
+            fades: false
+        )
     }
 
     /// A click on a click-held list's item (#2571): opens its list,
