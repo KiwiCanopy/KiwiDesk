@@ -10,6 +10,9 @@ paths:
   # private window-server rules bind their file. `InstructionPinTests`
   # fails if the pin stops resolving.
   - "Sources/KiwiDeskCore/AX/AXHelper.swift"
+  # The one private AppKit method KiwiDesk answers (#2569): its
+  # home sits in Bar/, so the bullet below must arrive there.
+  - "Sources/KiwiDeskCore/Bar/GlassActiveAppearance.swift"
 ---
 
 # OS layer — private SkyLight/CGS APIs
@@ -283,11 +286,11 @@ Every one of the following binds whoever touches them:
   the primordial Desktop. Never write it.
 - **A private AppKit method KiwiDesk answers is spelled once, as a
   `privateSelector`, added at runtime to the panels its home lists,
-  never to `NSPanel` itself** — the glass's key-window look on the
-  shelf, the overflow marks, the peek and the plates' one
-  `ActiveGlassPanel`, whose answer is its own `wearsActiveLook`,
-  read on every ask (`GlassActiveAppearance`, measured on macOS 27,
-  2026-10-23/24; `GlassActiveAppearanceTests`). Its fallback is that a macOS
+  never to `NSPanel` itself** — the glass's key-window look, on
+  the panel classes `GlassActiveAppearance.classes` lists, where
+  an `ActiveGlassPanel` answers its own `wearsActiveLook` on every
+  ask (measured on macOS 27, 2026-10-23/24;
+  `GlassActiveAppearanceTests`). Its fallback is that a macOS
   no longer asking leaves the added method uncalled, so the glass
   draws as it would anyway; it owes a `self_test` row like a
   symbol (`PrivatePathCensusTests` reads the spelling).

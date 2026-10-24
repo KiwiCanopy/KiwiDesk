@@ -607,6 +607,23 @@ tooltip names the followed row by that row's own label, and the
 picker opens on that colour — the split shape would promise
 light/dark following it does not do.
 
+:::unreleased
+**A well whose value may hold no colour offers "No Color" on its
+row menu** (#2569, the KiwiShelf Fill). A `HexColorField` opts in
+with `clearable`. The item writes the hex at zero opacity with its
+hue kept (`KiwiShelf.cleared(_:)`), so raising the opacity brings
+the same colour back, and it is checked while the well holds no
+colour. The swatch then draws the clear checkerboard, and
+VoiceOver adds "No Color" to the well's name. Whether a value has
+a colour is the one `KiwiShelf.hasColour`, so empty, unparseable
+and zero-alpha values are one state, and whatever paints it goes
+through `NSColor(kiwiFill:)` — never the generic hex parser,
+whose fallback is the accent colour, the trap the Automatic
+paragraph above names. It sits on the same row-menu routes as
+Automatic. A well may carry both flags, and their items then
+share the menu.
+:::
+
 ## Row layout & alignment
 
 **Row order within a section is fixed-tier, not

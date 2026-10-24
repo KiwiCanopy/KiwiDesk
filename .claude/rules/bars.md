@@ -1485,9 +1485,8 @@ Obligations:
   measured in by `GlassTint.pinnedAppearance`'s docstring, never
   restated here. SwiftUI glass can pin light, so a SwiftUI
   surface takes both verdicts of the one `GlassTint.pin` through
-  `GlassPaint.pin` — KiwiHub and the cue plates under the toggle
-  (#2569; `GlassPaintTests`) — and never derives a scheme of its
-  own.
+  `GlassPaint.pin` (#2569; `GlassPaintTests`) and never derives a
+  scheme of its own.
   The threshold is `wantsLightInk`'s — one copy with the mark
   glyphs — and `GlassTintPinTests` holds the consumer,
   including that a light Fill LIFTS a pin the previous Fill left.
@@ -1502,9 +1501,10 @@ Obligations:
   one-home scan exempts the home file and cannot see who calls it.
   **A surface with no Fill that follows the Appearance pick pins
   through `GlassTint.followPick`**, handed its window's effective
-  appearance — the Space-switch plates with the toggle off (#2539,
-  `SpaceSlidePlateAppearanceTests`; tinted, they pin from the Fill
-  through `GlassTint.apply`) — and a new caller joins
+  appearance — the Space-switch plates while they wear no Fill or
+  a light one (#2539, `SpaceSlidePlateAppearanceTests`; a dark
+  Fill pins them through `GlassTint.apply`) — and a new caller
+  joins
   `GlassTintPinDarkCallerTests`' `followPick` register, for the
   reason `pinDark`'s has one.
 - **A `Sources/KiwiDesk` surface that tints glass takes a
@@ -1514,12 +1514,8 @@ Obligations:
   and building its own gradient beside it is not covered, since
   `GlassTintSeamTests` scans Core alone — that half is review's
   until someone widens the roots. Which SwiftUI surfaces wear the
-  Fill is a ruling, not an inheritance: KiwiHub and the cue plates
-  under *Tint KiwiHub and plates* (#2569, `docs/design-decisions.md`
-  ▸ the shortcuts panel), drawn through `panelGlassChrome`
-  ([gui.md](gui.md) ▸ This tree draws glass through one modifier;
-  `PanelGlassTests`). A further surface argues its own entry
-  first.
+  Fill, and through what, is [gui.md](gui.md)'s — ▸ This tree
+  draws glass through one modifier.
 - **Reduce transparency stands the glass down at the one
   render-time read, and never by moving the stored value**
   (#1374). `NSGlassEffectView` ignores the setting — measured

@@ -2615,10 +2615,8 @@ focused window (#2569). How far the fill fades is
 the overflow mark's list fade from the shelf's edge too, but
 never so far that their text stops reading.
 
-A fill with no color draws plain clear glass with nothing
-pinned, and no plate where the glass is off or stood down, so the
-items sit on the wallpaper even under Reduce transparency
-([KiwiShelf colours](#kiwishelf-colours)).
+A fill with no color is covered under
+[KiwiShelf colours](#kiwishelf-colours).
 :::
 
 Stood down, live, while macOS's Reduce transparency is on: the
@@ -2673,8 +2671,9 @@ out-of-range values clamp.
 [`fill_color`](#kiwishelf-colours) fades across Liquid Glass
 (#2569). `100` fades to an eighth of the fill's strength at the
 far end. `0` draws one even color. The glass is never fully clear
-at the far end. It sets the fill of the bars, the overflow marks
-and their list, the hover peek, and the panels
+at the far end. It sets the fill of the bars, a hidden shelf's
+handle, the overflow marks and their list, the hover peek, and the
+panels
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 tints. The drag visuals and the sticky mark keep their own fade.
 The hover peek, the overflow mark's list, KiwiHub and the Space,
@@ -2712,7 +2711,9 @@ black or white text, whichever reads on it, and a hovered row
 takes `hover_fill_color` and `hover_item_color`. A light fill
 keeps the glass of KiwiHub and those plates light, and a dark
 fill keeps it dark, whatever Settings' Appearance says.
-While the fill has no color, they draw as with `false`.
+They draw as with `false` while the fill has no color, while
+their glass is off or stood down by Reduce transparency, and
+below macOS 26.
 `false` draws them in frosted, untinted glass that follows
 Settings' Appearance, with KiwiHub's kiwi-green selection. The
 glass itself turns on and off with
@@ -3026,9 +3027,11 @@ which follows the focused window's colour until you set it.
 
 :::unreleased
 A `fill_color` with no color — 0% opacity, an empty string or a
-value that does not parse — draws no plate on the solid path and
-plain clear glass under [Liquid Glass](#kiwishelfset_liquid_glass),
-never a fallback color, and leaves KiwiHub and the plates
+value that does not parse — draws no plate on the solid path,
+so the items sit on the wallpaper even under Reduce
+transparency, and plain clear glass with nothing pinned under
+[Liquid Glass](#kiwishelfset_liquid_glass), never a fallback
+color, and leaves KiwiHub and the plates
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 tints untinted. Settings' **No Color**, on the Fill well's menu,
 sets the fill's opacity to 0 and keeps its hue.

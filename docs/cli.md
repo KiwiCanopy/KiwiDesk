@@ -410,6 +410,14 @@ verdict, and a `probes` array of `name`, `kind` (`symbol` or
 `bridge_class`), `home`, `verdict` and `detail`. CLI only — Lua
 cannot call it.
 
+:::unreleased
+`kind` may also be `objc_method`: a private AppKit method
+KiwiDesk answers on its own panels — `_hasActiveAppearance`,
+which gives KiwiDesk's glass the bright edge of a focused window
+(#2569). Its row reads `answered` while macOS still asks it and
+`absent` once it stops, when that glass draws its plain look.
+:::
+
 The exit code is 2 when any path `failed`, and 0 otherwise —
 `absent`, `resolved` and `inconclusive` are findings, not
 failures. 1 still means the command itself did not get through.

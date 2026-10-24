@@ -283,7 +283,7 @@ These apply everywhere, whatever you touch:
 | [profiles](.claude/rules/profiles.md) | `Config`, `Profiles`, `Commands` | Profiles, Desktop bindings, keymap seeds, migrations, sync |
 | [config-vocabulary](.claude/rules/config-vocabulary.md) | setting names, `CodingKeys` | Lua name first, one noun per concept |
 | [accessibility](.claude/rules/accessibility.md) | `AX`, the boot scan and reconcile `Events` files | Slow AX, adoption, removal distrust |
-| [os-private-apis](.claude/rules/os-private-apis.md) | `OS`, `SkyLight*.swift`, `AXHelper.swift` | `dlsym`, fallbacks, WindowServer reads |
+| [os-private-apis](.claude/rules/os-private-apis.md) | `OS`, `SkyLight*.swift`, `AXHelper.swift`, `GlassActiveAppearance.swift` | `dlsym`, fallbacks, WindowServer reads, a private AppKit method |
 | [lua](.claude/rules/lua.md) | `Lua` | Watchdog, registry refs |
 | [input-and-animation](.claude/rules/input-and-animation.md) | `Keys`, `Events`, `Animation`, frame applier, Space slide | Hotkeys, gestures, focus reports, springs |
 | [bars](.claude/rules/bars.md) | `Bar`, bar drivers, shelf layouts, glass hosts | KiwiShelf, App Bar, Space Bar, glass |

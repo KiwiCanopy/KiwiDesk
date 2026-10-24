@@ -3739,10 +3739,10 @@ a second needs no switch of its own, and one leaf fewer is one
 fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
-A tinted plate's variant is pinned from its Fill as a bar's is
-(▸ Liquid Glass): dark for a dark Fill, the pick for a light one,
-since the plates are AppKit glass. An untinted plate
-follows the Appearance pick as KiwiHub does: each plate's
+A tinted plate's variant is pinned dark by a dark Fill, as a
+bar's is (▸ Liquid Glass). Under a light Fill, and untinted, a
+plate follows the Appearance pick as KiwiHub does, since AppKit
+glass pins only dark: each plate's
 glass and pile container is pinned dark where the panel's
 effective appearance resolves dark, through `GlassTint.followPick`
 (#2539), rather than left to inherit it. An unpinned glass view
@@ -7072,9 +7072,7 @@ KiwiHub (▸ the shortcuts panel entry). The contrast check per
 look that plain glass avoided is now computed for every Fill
 instead of skipped: the reading floor stops the fade where the
 plate's worst ink still reads (▸ Liquid Glass, *Reading surfaces
-fade above a floor*). The
-plate also follows KiwiHub's leaf of the Liquid Glass switch
-rather than drawing glass always. With the toggle off it is the
+fade above a floor*). Where it does not wear the Fill it is the
 plain system glass above. The layout plate (#2144) and the Space
 plate (#2524) are this plate's panel and follow the same rule.
 :::
@@ -12424,18 +12422,25 @@ therefore a fresh device sitting rather than an inherited choice.
 `.clear` and tune the tint until it reads" is a dead end.
 
 :::unreleased
-**Amended: under *Tint KiwiHub and plates* the panel wears the
-Fill on `.clear` glass** (#2569, owner rulings 2026-10-24). Lua
-`kiwishelf.set_tint_hub_and_plates`, JSON
-`kiwishelf.tint_hub_and_plates`, on by default. While it is on,
-KiwiHub, the cue plates (Space, Desktop, layout) and the
-Space-switch slide plates wear KiwiShelf's Fill on `.clear` glass,
-fading top to bottom. The plates also wear the key-window rim (▸
-Liquid Glass). Off is exactly the look this entry ruled: frosted,
-untinted, following Appearance, with no rim and KiwiHub's kiwi
-green. That keeps the system-chrome panel one switch away. The
-untinted ruling is overturned for these surfaces while the toggle
-is on, and its three reasons are answered one by one:
+**Amended: under *Tint KiwiHub and plates* the panel
+wears the Fill on `.clear` glass** (#2569, owner rulings
+2026-10-24; the setting is
+[`kiwishelf.set_tint_hub_and_plates`](lua-reference.md#kiwishelfset_tint_hub_and_plates)).
+While KiwiHub, the cue plates (Space, Desktop, layout) and the
+Space-switch slide plates wear the Fill, they wear KiwiShelf's
+Fill on `.clear` glass, fading top to bottom. One Core answer,
+`TilingSettings.panelsWearFill`, decides that for all of them —
+the glass, the inks, the highlight and the rim: the toggle on, a
+Fill with a colour, KiwiHub's Liquid Glass leaf on and glass
+drawn. With KiwiHub's glass off, under Reduce transparency or
+below macOS 26 they draw the untinted look, since a Fill-matched
+ink on the fallback material is a pairing nobody measured. The
+plates also wear the key-window rim (▸ Liquid Glass). Off is
+exactly the look this entry ruled: frosted, untinted, following
+Appearance, with no rim and KiwiHub's kiwi green. That keeps the
+system-chrome panel one switch away. The untinted ruling is
+overturned for these surfaces while the toggle is on, and its
+three reasons are answered one by one:
 
 1. *A tint darkens.* That is `Glass.tint(_:)`, a dimmer, and it is
    not used. The Fill is drawn on the material as a colour,
@@ -12470,26 +12475,26 @@ most of the see-through away and the reading floor covers the
 fade's faint end. The variant paragraph above was measured on
 macOS 26.5.2. On macOS 27 AppKit and SwiftUI `.clear` are
 pixel-identical, and `.regular` is the frosted one in both, so
-every KiwiDesk glass now shares one finish. That holds with the
-toggle on. With it off, KiwiHub and the plates keep `.regular`.
+the variant is a real choice in both toolkits. KiwiHub and the
+plates take `.clear` while they wear the Fill and keep `.regular`
+otherwise. The boot notice is outside the toggle's reach: it
+reads KiwiHub's leaf for whether it draws glass, never the tint,
+and stays `.regular` and untinted (#1715).
 
 **A light Fill pins the panel light** (▸ Liquid Glass, *The
 light limit is AppKit's*).
 
-**The cue plates follow KiwiHub's Liquid Glass leaf**
-(`shortcutPanelLiquidGlass`), the leaf the slide plates already
-read (`PanelGlassTests`).
-
-**A Fill with no colour leaves the panel untinted** (owner
-ruling 2026-10-24). While the Fill has no colour, KiwiHub, the cue
-plates and the slide plates fall back to their untinted,
-Appearance-following look, exactly as with the toggle off.
-Settings greys the toggle with that reason. The look's inks were
-chosen to read on the Fill. Without one, the panel would put them
-on plain `.clear` glass under KiwiHub's dense text, which is
-`.clear` without a Fill, the case this entry found unreadable. The
-fallback replaces the re-measure of that case that the earlier
-ruling asked for (`PanelGlassTests`, `SpaceSlideSwitchTests`).
+**A Fill with no colour leaves the panel untinted** (owner ruling
+2026-10-24). While the Fill has no colour, KiwiHub, the cue plates
+and the slide plates fall back to their untinted,
+Appearance-following look, exactly as with the toggle off
+(`panelsWearFill`). Settings greys the toggle with that reason.
+The look's inks were chosen to read on the Fill. Without one, the
+panel would put them on plain `.clear` glass under KiwiHub's dense
+text, which is `.clear` without a Fill, the case this entry found
+unreadable. The fallback replaces the re-measure of that case that
+the earlier ruling asked for (`PanelGlassTests`,
+`SpaceSlideSwitchTests`, `PanelsWearFillTests`).
 :::
 
 **The chip stays at 0.2 on glass, and that is a decision rather
@@ -17003,9 +17008,8 @@ So do the plates a Space switch slides (#2524).
 
 :::unreleased
 So do the cue plates — the Space, Desktop and layout plates
-(#2569, owner ruling 2026-10-24). Until then they drew glass
-whatever the switch said, so one Liquid Glass switch did not
-govern every glass KiwiDesk draws.
+(#2569, owner ruling 2026-10-24) — so the one switch governs
+every glass KiwiDesk draws (`PanelGlassTests`).
 :::
 
 **Profile-scoped, and the alternative was not merely riskier but
@@ -17311,7 +17315,8 @@ under the rim, and dropping the rim to keep it there loses the
 look this amendment exists for. `GlassFillOnTopTests` holds the
 order.
 
-**Every KiwiDesk glass wears the key-window rim.** macOS draws
+**The bars, the overflow marks and their list, the hover peek
+and the plates wear the key-window rim.** macOS draws
 glass in the key window with a bright top and bottom edge, which
 reads as more three-dimensional. The bars, the overflow marks
 and the hover peek never take the keyboard, so they drew the
@@ -17329,8 +17334,12 @@ the added method uncalled, so the glass falls back to the
 inactive look and nothing breaks (`os-private-apis.md` owns the
 door). The bars, the marks, their list and the peek always wear
 the rim, since they are KiwiShelf's look. The plates wear it
-only under *Tint KiwiHub and plates* (▸ the shortcuts panel
-entry), whose off state is today's look.
+only while they wear the Fill (▸ the shortcuts panel entry),
+whose off state is today's look. The panels that answer are
+`GlassActiveAppearance.classes`, so the sticky mark, the drag
+ghost and drop zone, the hidden shelf's handle and the boot
+notice keep the inactive look: a surface joins only with its own
+argument here.
 :::
 
 **On glass the Fill FADES: its capped alpha at the shelf's screen
@@ -17361,10 +17370,10 @@ not a meaning moved under a key (#1354) or a default flipped
 
 :::unreleased
 **Amended: the fade is a setting, Fill fade** (#2569, owner
-rulings 2026-10-24). Lua `kiwishelf.set_fill_fade`, JSON
-`kiwishelf.fill_fade`, 0–100. The default of 100 is the fade
-above, with the far end at `floorShare` of the Fill. 0 is one
-even colour. This explicitly overturns the sentence above that a
+rulings 2026-10-24;
+[`kiwishelf.set_fill_fade`](lua-reference.md#kiwishelfset_fill_fade)).
+Its default is the fade above; its other end is one even
+colour. This explicitly overturns the sentence above that a
 fade-or-even choice "would be a setting whose only job is to
 undo the glass". That held while the Fill sat behind the glass,
 where an even Fill at the cap was the coloured plate #1297
@@ -17512,7 +17521,8 @@ concurred. `GlassTint.pin` decides both variants at the one
 `wantsLightInk` threshold, and `GlassPaint` carries the verdict
 to SwiftUI (`GlassPaintTests`). The bars, the peek and the slide
 plates are AppKit glass, so they keep following the pick for a
-light Fill. An empty Fill, and the toggle off, follow the pick
+light Fill, the slide plates while they wear it included. A
+Fill with no colour, and the toggle off, follow the pick
 everywhere.
 :::
 
