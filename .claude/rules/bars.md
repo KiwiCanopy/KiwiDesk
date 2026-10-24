@@ -1799,4 +1799,6 @@ reaches.
 - **A bar click, menu row or drop is user motion (#804)** and
   opens `withUserMotion`; a held layout pass still refreshes the
   bars at once — state-and-layout.md ▸ Window motion says whose
-  it is.
+  it is. A bar pick that can switch Spaces also opens
+  `fromSpaceBar`, so it pays no Space cue (#2591,
+  input-and-animation.md ▸ the Space switch bullet).

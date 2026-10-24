@@ -1181,7 +1181,9 @@ switched:
 - `"show"`: the screen changes at once, and a plate in its middle
   shows the Space's name or number and its layout's symbol, whether
   or not that screen draws a Space Bar, and never over a
-  full-screen app or a presentation. It takes no focus or click
+  full-screen app or a presentation. A switch picked on the Space
+  Bar — a Space, a glyph or a list row — shows no plate; `"slide"`
+  still slides there (#2591). It takes no focus or click
   and fades after about a second; with Reduce Motion on it appears
   and leaves without the fade.
 - `"none"`: the screen changes at once.

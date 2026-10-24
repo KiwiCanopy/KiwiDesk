@@ -11,11 +11,11 @@ import Testing
 /// An extension of this suite, not a second one: every case holds
 /// the process-global `currentSpaceIsUserOverride`.
 extension FullscreenStandDownTests {
-    private final class SpaceCueBox { var cues: [SpaceSwitchCue] = [] }
+    final class SpaceCueBox { var cues: [SpaceSwitchCue] = [] }
 
     /// Two Spaces on the primary screen, "1" shown, the Space Bar
     /// on or off. Nil where the host has no screen.
-    private func makeSpaceCueCore(
+    func makeSpaceCueCore(
         transition: SpaceTransition = .show,
         spaceBar: Bool = false,
         isUser: Bool = true
