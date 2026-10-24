@@ -45,11 +45,12 @@ struct GlassPaintTests {
         )
         #expect(paint.start == CGPoint(x: 0.5, y: 0))
         #expect(paint.end == CGPoint(x: 0.5, y: 1))
-        #expect(paint.pinsDark)
+        #expect(paint.pin == .dark)
+        // A light Fill pins SwiftUI glass light (#2569 ▸ Ruling).
         let light = try #require(
             GlassTint.paint(GlassFill(hex: "#F2F2F7B3"), edge: .top)
         )
-        #expect(!light.pinsDark)
+        #expect(light.pin == .light)
     }
 
     @Test("No colour, no paint")
@@ -60,6 +61,17 @@ struct GlassPaintTests {
         #expect(
             GlassTint.paint(GlassFill(hex: "#14201CB3"), edge: .top) == nil
         )
+    }
+
+    /// The panels' inks follow the pin, whatever the pick: a light
+    /// Fill reads dark labels, a dark Fill white ones.
+    @Test("The panel inks follow the pin", arguments: [false, true])
+    func panelInksFollowThePin(darkPick: Bool) {
+        var shelf = KiwiShelf()
+        shelf.fillColor = "#F2F2F7B3"
+        #expect(shelf.panelInks(darkPick: darkPick).first?.ink == "#000000D9")
+        shelf.fillColor = "#14201CB3"
+        #expect(shelf.panelInks(darkPick: darkPick).first?.ink == "#FFFFFFD9")
     }
 
     /// KiwiHub's and the cues' inks — the system labels and

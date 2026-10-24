@@ -55,11 +55,7 @@ extension View {
             // beneath it and the content above it (#2569).
             background { tint.map { shape.fill($0.gradient) } }
                 .glassEffect(variant.glass, in: shape)
-                .environment(
-                    \.colorScheme,
-                    tint?.pinsDark == true
-                        ? .dark : colorScheme
-                )
+                .environment(\.colorScheme, tint?.scheme ?? colorScheme)
         } else {
             background(fallback)
         }
@@ -116,6 +112,15 @@ enum GlassChromeVariant {
 }
 
 extension GlassPaint {
+    /// The scheme the Fill pins, nil where it pins none.
+    var scheme: ColorScheme? {
+        switch pin {
+        case .dark?: .dark
+        case .light?: .light
+        case nil: nil
+        }
+    }
+
     /// The Fill's fade as SwiftUI draws it.
     var gradient: LinearGradient {
         LinearGradient(

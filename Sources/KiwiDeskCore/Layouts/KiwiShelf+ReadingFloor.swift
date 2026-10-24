@@ -43,18 +43,17 @@ extension KiwiShelf {
     }
 
     /// KiwiHub's and the cue plates' inks: the labels for the
-    /// variant the glass wears — dark where the Fill pins it or the
-    /// Appearance pick is dark — and KiwiHub's selection on its
-    /// hover fill.
+    /// scheme the Fill pins — the Appearance pick where it pins
+    /// none — and KiwiHub's selection on its hover fill.
+    @MainActor
     func panelInks(darkPick: Bool) -> [(ink: String, layer: String?)] {
-        let fill = NSColor(kiwiHex: fillColor)
-        let pinned = fill.alphaComponent > 0 && fill.wantsLightInk
-        return Self.labelInks(dark: pinned || darkPick)
-            + [(hoverItemColor, hoverFillColor)]
+        let dark = GlassTint.pin(fillColor).map { $0 == .dark } ?? darkPick
+        return Self.labelInks(dark: dark) + [(hoverItemColor, hoverFillColor)]
     }
 
     /// KiwiHub's and the cue plates' Fill under "Tint KiwiHub and
     /// plates": the shelf's fade, floored for their inks.
+    @MainActor
     public func panelGlassFill(
         darkPick: Bool,
         increaseContrast: Bool

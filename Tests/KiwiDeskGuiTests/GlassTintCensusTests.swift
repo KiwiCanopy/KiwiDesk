@@ -23,9 +23,11 @@ struct GlassTintCensusTests {
         "farShare": ["floorShare"],
         // Pure direction: reaches no colour, so it names none.
         "fade": [],
-        "pinnedAppearance": ["drawsGlass", "wantsLightInk"],
+        // The one lightness verdict both pins read (#2569).
+        "pin": ["drawsGlass", "wantsLightInk"],
+        "pinnedAppearance": ["pin("],
         // SwiftUI's mint: the same ends and pin (#2569).
-        "paint": ["rendered(", "fade(", "pinnedAppearance("],
+        "paint": ["rendered(", "fade(", "pin("],
         // KiwiVision's plate: no Fill, a black dim (#2103).
         "pinDark": ["darkAqua"],
         // The Space-switch plates: no Fill, the Appearance pick.

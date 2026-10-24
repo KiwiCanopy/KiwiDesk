@@ -118,18 +118,25 @@ public enum GlassTint {
     private static func pinnedAppearance(
         _ hex: String
     ) -> NSAppearance? {
+        pin(hex) == .dark ? NSAppearance(named: .darkAqua) : nil
+    }
+
+    /// The variant a Fill decides: dark for a dark Fill, light
+    /// otherwise, nil where the Fill is empty, transparent or no
+    /// glass draws. AppKit can pin only dark; SwiftUI takes both
+    /// (#2569 ▸ Ruling). `wantsLightInk` is the one threshold.
+    @MainActor
+    public static func pin(_ hex: String) -> GlassPaint.Pin? {
         guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
             return nil
         }
         let fill = NSColor(kiwiHex: hex)
-        guard fill.alphaComponent > 0, fill.wantsLightInk else {
-            return nil
-        }
-        return NSAppearance(named: .darkAqua)
+        guard fill.alphaComponent > 0 else { return nil }
+        return fill.wantsLightInk ? .dark : .light
     }
 
     /// The Fill as SwiftUI glass paints it (#2569): the AppKit
-    /// painter's capped ends and dark pin, the fade's points in
+    /// painter's capped ends, the Fill's pin, the fade's points in
     /// SwiftUI's y-down unit space; nil where `apply` paints none.
     @MainActor
     public static func paint(
@@ -148,7 +155,7 @@ public enum GlassTint {
             farAlpha: ends.floor.alphaComponent,
             start: CGPoint(x: direction.start.x, y: 1 - direction.start.y),
             end: CGPoint(x: direction.end.x, y: 1 - direction.end.y),
-            pinsDark: pinnedAppearance(fill.hex) != nil
+            pin: pin(fill.hex)
         )
     }
 
