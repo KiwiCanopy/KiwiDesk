@@ -71,6 +71,8 @@ enum ConfigIssueText {
             )
         case .unknownShortcutSymbol(let layer, let chord, let symbol):
             return unknownSymbol(layer: layer, chord: chord, symbol: symbol)
+        case .deadShortcut(let layer, let chord, let reason):
+            return deadShortcut(layer: layer, chord: chord, reason: reason)
         }
     }
 
