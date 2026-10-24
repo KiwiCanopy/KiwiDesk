@@ -201,6 +201,42 @@ public enum GlassTint {
             followPick(glass, host: host)
         }
         GlassPlate.setBackdrop(glass, backdrop)
+        colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
+    }
+
+    /// `apply`'s Fill BEHIND the glass, the backdrop its sibling
+    /// directly beneath: the hidden shelf's handles alone (#2569 ▸
+    /// owner). Their panel never wears the key-window look that
+    /// washes a Fill behind out, and glass over a Fill on top draws
+    /// its edge as a border around the pill.
+    @MainActor
+    static func applyBehind(
+        _ backdrop: GlassBackdrop,
+        below glass: NSView,
+        cornerRadius: CGFloat,
+        fill: GlassFill,
+        edge: AppBarEdge
+    ) {
+        glass.appearance = pinnedAppearance(fill.hex)
+        if let parent = glass.superview,
+            parent.subviews.firstIndex(of: backdrop).map({ $0 + 1 })
+                != parent.subviews.firstIndex(of: glass)
+        {
+            parent.addSubview(backdrop, positioned: .below, relativeTo: glass)
+        }
+        backdrop.frame = glass.frame
+        colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
+    }
+
+    /// The backdrop's gradient: the capped ends fading from `edge`,
+    /// clear where the Fill reaches no colour.
+    @MainActor
+    private static func colour(
+        _ backdrop: GlassBackdrop,
+        cornerRadius: CGFloat,
+        fill: GlassFill,
+        edge: AppBarEdge
+    ) {
         guard let gradient = backdrop.gradient else { return }
         gradient.cornerRadius = cornerRadius
         guard let ends = rendered(fill) else {

@@ -92,6 +92,9 @@ final class ShelfHandleView: NSView {
                         edge: spec.edge,
                         visible: true,
                         animated: glides,
+                        // Behind: the glass's edge over a Fill on
+                        // top reads as a border (#2569 ▸ owner).
+                        behind: true,
                         // The mark's own hover group carries the
                         // motion (`BarMotion.placeHoverPlate`).
                         move: { host, frame, _ in host.frame = frame }

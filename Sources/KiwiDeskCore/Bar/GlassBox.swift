@@ -101,7 +101,7 @@ enum GlassBox {
     /// (`GlassBoxHost.setFrameSize`). A fresh host lands rather
     /// than gliding from nowhere. `visible` false hides the whole
     /// box, which still takes its slot; `fill` is the Fill its tint
-    /// paints.
+    /// paints, on the glass or, `behind`, beneath it.
     static func place(
         _ glass: NSView,
         tint: GlassBackdrop,
@@ -111,6 +111,7 @@ enum GlassBox {
         edge: AppBarEdge,
         visible: Bool,
         animated: Bool,
+        behind: Bool = false,
         move: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     ) {
         guard let host = host(of: glass) else { return }
@@ -124,13 +125,23 @@ enum GlassBox {
                 ? glass.frame : bounds,
             cornerRadius: cornerRadius
         )
-        GlassTint.apply(
-            tint,
-            in: glass,
-            cornerRadius: cornerRadius,
-            fill: fill,
-            edge: edge
-        )
+        if behind {
+            GlassTint.applyBehind(
+                tint,
+                below: glass,
+                cornerRadius: cornerRadius,
+                fill: fill,
+                edge: edge
+            )
+        } else {
+            GlassTint.apply(
+                tint,
+                in: glass,
+                cornerRadius: cornerRadius,
+                fill: fill,
+                edge: edge
+            )
+        }
         let travels = animated && host.frame != .zero
         move(host, frame, travels)
         // Auto Layout can leave a growing glass at its old size

@@ -33,9 +33,11 @@ struct GlassTintCensusTests {
         // The Space-switch plates: no Fill, the Appearance pick.
         "followPick": ["darkAqua", "bestMatch"],
         // The one painter (#1946's uniform tint retired, #2569).
-        "apply": [
-            "rendered(", "fade(", "pinnedAppearance(", "setBackdrop(",
-        ],
+        "apply": ["pinnedAppearance(", "setBackdrop(", "colour("],
+        // The handles' Fill beneath their glass (#2569 ▸ owner).
+        "applyBehind": ["pinnedAppearance(", ".below", "colour("],
+        // Both doors' one gradient, through the mint.
+        "colour": ["rendered(", "fade("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body

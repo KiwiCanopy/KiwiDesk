@@ -17317,6 +17317,19 @@ under the rim, and dropping the rim to keep it there loses the
 look this amendment exists for. `GlassFillOnTopTests` holds the
 order.
 
+*The hidden shelf's handles are the one exception: their Fill
+stays behind the glass* (owner, 2026-10-24, device). With the
+Fill on top, the glass's own edge — a dark line and a light lens
+band at the pill's rounded ends, which the material draws itself
+— read as a border around the darker Fill (measured on the
+owner's desk: screen 45, line 20, band 51–53, Fill 40, red
+channel). A handle's panel never wears the key-window look, so
+the reason the Fill moved does not apply there, and behind the
+glass the band takes the Fill's tint. Hovering still grows the
+pill and shows its highlight rim. `GlassTint.applyBehind` is
+that door and the handles its only caller
+(`ShelfHandleFillBehindTests`).
+
 **The bars, the overflow marks and their list, the hover peek
 and the plates wear the key-window rim.** macOS draws
 glass in the key window with a bright top and bottom edge, which

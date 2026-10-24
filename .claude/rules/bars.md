@@ -1332,7 +1332,12 @@ Obligations:
   look through it, and `GlassTint.apply` takes the glass, never a
   frame, so the gradient is the glass's bounds. A clear Fill
   clears the gradient and never hides the backdrop, which carries
-  the content (`GlassFillOnTopTests`).
+  the content (`GlassFillOnTopTests`). The hidden shelf's handles
+  alone paint it BEHIND their glass through
+  `GlassTint.applyBehind` (owner, #2569): their panel never wears
+  the key-window look, and the glass's edge over a Fill on top
+  reads as a border (`ShelfHandleFillBehindTests`). A new caller
+  of that door argues its own ruling.
 - **A steady-state bar render reparents nothing into a glass
   subtree.** A view moves only on a host CHANGE, and the arm that
   changes the host is the one that names it — the Space Bar's
