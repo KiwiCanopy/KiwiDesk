@@ -1,6 +1,6 @@
 import AppKit
 
-/// The view an handle draws (#761), and VoiceOver's way to the
+/// The view a handle draws (#761), and VoiceOver's way to the
 /// show/hide action: its press runs the action and its value says
 /// whether the shelf is shown. The plate is a view of its own, so
 /// the hover grows its frame while the dots stay where they are.
@@ -219,7 +219,7 @@ final class ShelfHandleRim: NSView {
     }
 }
 
-/// The Space dots on an handle's plate, drawn over the mark's
+/// The Space dots on a handle's plate, drawn over the mark's
 /// resting frame: a hover widens the current one into the label's
 /// pill about the row's middle, the others moving out by half the
 /// widening each side.
