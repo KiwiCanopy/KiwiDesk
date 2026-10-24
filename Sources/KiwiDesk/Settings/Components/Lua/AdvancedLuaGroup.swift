@@ -14,6 +14,8 @@ struct AdvancedLuaGroup: View {
     @Environment(\.keybindingLayerName)
     var layerName
     @State var editing: LuaEditRequest?
+    @State var verdicts: [UUID: LuaVerdict] = [:]
+    @FocusState var focusedLua: UUID?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -31,6 +33,14 @@ struct AdvancedLuaGroup: View {
                 )
             }
             .settingsActionButton()
+        }
+        // An edit is judged once committed, never per keystroke
+        // (#2574 ▸ Ruling): its field losing focus, its editor closing.
+        .onChange(of: focusedLua) { left, _ in
+            if let left { judge(left) }
+        }
+        .onChange(of: editing) { closed, _ in
+            if let closed { judge(closed.id) }
         }
     }
 

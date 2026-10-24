@@ -67,6 +67,20 @@ extension KiwiCore {
                 "chord": .string(chord),
                 "symbol": .string(symbol),
             ]
+        case .deadShortcut(let layer, let chord, let reason):
+            var fields: [String: JSONValue] = [
+                "kind": .string("dead_shortcut"),
+                "layer": .string(layer),
+                "chord": .string(chord),
+            ]
+            switch reason {
+            case .invalidChord:
+                fields["reason"] = .string("invalid_chord")
+            case .luaError(let message):
+                fields["reason"] = .string("lua_error")
+                fields["message"] = .string(message)
+            }
+            return fields
         }
     }
 

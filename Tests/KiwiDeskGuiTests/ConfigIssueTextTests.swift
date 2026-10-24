@@ -84,6 +84,26 @@ struct ConfigIssueTextTests {
                 chord: "cmd+alt+k",
                 symbol: "not.a.symbol"
             ),
+            .deadShortcut(
+                layer: KeyLayer.defaultName,
+                chord: "cmd+alt+j",
+                reason: .luaError("syntax error near 'end'")
+            ),
+            .deadShortcut(
+                layer: "resize",
+                chord: "cmd+alt+j",
+                reason: .luaError("syntax error near 'end'")
+            ),
+            .deadShortcut(
+                layer: KeyLayer.defaultName,
+                chord: "cmd+nosuchkey",
+                reason: .invalidChord
+            ),
+            .deadShortcut(
+                layer: "resize",
+                chord: "cmd+nosuchkey",
+                reason: .invalidChord
+            ),
         ]
     }
 
@@ -92,12 +112,12 @@ struct ConfigIssueTextTests {
         pinEnglish()
         defer { reset() }
         // Eight cases; the fixture count is the causes plus the
-        // eleven hand-listed entries (`unknownCall` and
+        // fifteen hand-listed entries (`unknownCall` and
         // `retiredCall` twice each). The cause half derives, so
-        // only the hand-listed half is pinned — bump the 11
+        // only the hand-listed half is pinned — bump the 15
         // deliberately when a `Kind` is added, which is the
         // reminder the compiler cannot give.
-        #expect(kinds.count == ProfileBrokenCause.allCases.count + 11)
+        #expect(kinds.count == ProfileBrokenCause.allCases.count + 15)
         var seen: Set<String> = []
         for kind in kinds {
             let text = ConfigIssueText.message(for: kind)
@@ -114,6 +134,14 @@ struct ConfigIssueTextTests {
                 layer != KeyLayer.defaultName
             {
                 #expect(text.contains(layer))
+            }
+            if case .deadShortcut(let layer, _, let reason) = kind {
+                if layer != KeyLayer.defaultName {
+                    #expect(text.contains(layer))
+                }
+                if case .luaError(let message) = reason {
+                    #expect(text.contains(message))
+                }
             }
         }
     }

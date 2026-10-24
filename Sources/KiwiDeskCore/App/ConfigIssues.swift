@@ -38,6 +38,13 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
             chord: String,
             symbol: String
         )
+        /// A shortcut in layer `layer` the install skipped, so its
+        /// key does nothing (#2574): a warning.
+        case deadShortcut(
+            layer: String,
+            chord: String,
+            reason: DeadShortcutReason
+        )
     }
 
     /// Source filename (`init.lua`, `gui.json`, or `<profile>.json`).
@@ -67,7 +74,7 @@ extension KiwiCore {
     func setConfigIssues(_ issues: [ConfigIssue]) {
         let issues =
             issues.filter { !$0.kind.isDerived } + fontIssues()
-            + shortcutSymbolIssues()
+            + shortcutSymbolIssues() + deadShortcutIssues()
         guard issues != configIssues else { return }
         configIssues = issues
         onConfigIssuesChange(issues)
@@ -124,11 +131,12 @@ extension KiwiCore {
 }
 
 extension ConfigIssue.Kind {
-    /// The live-derived issues — the font's and the shortcut
-    /// symbols' — which `setConfigIssues` owns.
+    /// The live-derived issues — the font's and the shortcuts' —
+    /// which `setConfigIssues` owns.
     var isDerived: Bool {
         switch self {
-        case .missingFontFamily, .unknownShortcutSymbol: true
+        case .missingFontFamily, .unknownShortcutSymbol, .deadShortcut:
+            true
         default: false
         }
     }
@@ -153,12 +161,29 @@ extension KiwiCore {
             }
     }
 
+    /// One issue per row the last structured install skipped
+    /// (#2574), sourced like the symbol issue.
+    func deadShortcutIssues() -> [ConfigIssue] {
+        guard case .structured(_, _, let skipped)? = installedKeybindings
+        else { return [] }
+        return skipped.map {
+            ConfigIssue(
+                source: shortcutSource(layer: $0.layer, chord: $0.chord),
+                kind: .deadShortcut(
+                    layer: $0.layer,
+                    chord: $0.chord,
+                    reason: $0.reason
+                )
+            )
+        }
+    }
+
     /// The file an installed row came from: the profile the install
     /// resolved over, where its override holds the chord — named by
     /// the install, never `currentName`, which an apply moves after
     /// it — else the sidecar or `init.lua`.
     private func shortcutSource(layer: String, chord: String) -> String {
-        guard case .structured(_, let profile)? = installedKeybindings
+        guard case .structured(_, let profile, _)? = installedKeybindings
         else { return "init.lua" }
         guard let profile,
             profile.layers?.layers.contains(where: { held in
@@ -167,6 +192,22 @@ extension KiwiCore {
             }) == true
         else { return "gui.json" }
         return "\(profile.name).json"
+    }
+}
+
+/// Why a shortcut could not be installed (#2574). The message is
+/// the interpreter's and stays English, as `luaError`'s does.
+public enum DeadShortcutReason: Sendable, Equatable {
+    case invalidChord
+    case luaError(String)
+}
+
+extension KiwiCore {
+    /// The interpreter's message where `lua` would not compile as a
+    /// shortcut's body, else nil — nil too without a VM. Runs
+    /// nothing (#2574): Settings asks it when an edit is committed.
+    public func shortcutLuaProblem(_ lua: String) -> String? {
+        keys.lua?.compileError(body: lua)
     }
 }
 

@@ -5,6 +5,14 @@ public enum LuaError: Error, Equatable {
     case initializationFailed
     /// Syntax or runtime failure, including sandbox timeouts.
     case runtime(String)
+
+    /// The interpreter's own text, English by rule (#2574).
+    public var message: String {
+        switch self {
+        case .initializationFailed: "Lua VM unavailable"
+        case .runtime(let text): text
+        }
+    }
 }
 
 /// Boxed Swift closure callable from Lua.
@@ -128,6 +136,20 @@ public final class LuaInterpreter {
         }
         let ref = luaL_ref(state, SHIM_LUA_REGISTRYINDEX)
         return .success(ref)
+    }
+
+    /// The interpreter's message where `body` does not compile as
+    /// `makeFunction` wraps it, else nil. Compiles only and runs
+    /// nothing, so a body escaping the wrapper executes no code
+    /// (#2574).
+    public func compileError(body: String) -> String? {
+        guard let state else { return nil }
+        let src = "return function()\n\(body)\nend"
+        guard luaL_loadstring(state, src) == SHIM_LUA_OK else {
+            return popError(state)
+        }
+        shim_lua_pop(state, 1)
+        return nil
     }
 
     /// Calls a Lua function previously captured as a registry reference

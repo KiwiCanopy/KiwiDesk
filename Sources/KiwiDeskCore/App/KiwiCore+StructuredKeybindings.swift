@@ -8,6 +8,7 @@ struct PreparedKeybindings {
     var refs: [String: [KeyCombo: Int32]]
     var icons: [String: String]
     var registeredLayers: [KeyLayer]
+    var skipped: [InstalledKeybindings.Skipped]
 }
 
 extension KiwiCore {
@@ -40,14 +41,16 @@ extension KiwiCore {
             prepared.registeredLayers,
             profile: profile.map {
                 .init(name: $0.name, layers: $0.layers)
-            }
+            },
+            skipped: prepared.skipped
         )
         syncDerivedIssues()
     }
 
     /// Compiles every representable, assigned binding without
     /// touching the running table. Invalid combos and compile
-    /// errors are logged and skipped per binding.
+    /// errors are logged and skipped per binding, and each skip is
+    /// kept for its Config Issue (#2574).
     private func prepareKeybindings(
         _ layers: [KeyLayer],
         lua: LuaInterpreter
@@ -55,10 +58,12 @@ extension KiwiCore {
         var refs: [String: [KeyCombo: Int32]] = [:]
         var icons: [String: String] = [:]
         var registeredLayers: [KeyLayer] = []
+        var skipped: [InstalledKeybindings.Skipped] = []
 
         for layer in layers {
             let prepared = prepare(layer: layer, lua: lua)
             refs[layer.name] = prepared.refs
+            skipped += prepared.skipped
             if let icon = layer.icon, !icon.isEmpty {
                 icons[layer.name] = icon
             }
@@ -73,7 +78,8 @@ extension KiwiCore {
         return PreparedKeybindings(
             refs: refs,
             icons: icons,
-            registeredLayers: registeredLayers
+            registeredLayers: registeredLayers,
+            skipped: skipped
         )
     }
 
@@ -82,10 +88,17 @@ extension KiwiCore {
         lua: LuaInterpreter
     ) -> (
         refs: [KeyCombo: Int32],
-        bindings: [KeyBinding]
+        bindings: [KeyBinding],
+        skipped: [InstalledKeybindings.Skipped]
     ) {
         var entries:
             [KeyCombo: (index: Int, binding: KeyBinding, ref: Int32)] = [:]
+        var skipped: [InstalledKeybindings.Skipped] = []
+        func skip(_ binding: KeyBinding, _ reason: DeadShortcutReason) {
+            skipped.append(
+                .init(layer: layer.name, chord: binding.combo, reason: reason)
+            )
+        }
 
         for (index, binding) in layer.bindings.enumerated()
         where !binding.combo.isEmpty {
@@ -95,6 +108,7 @@ extension KiwiCore {
                     "structured: invalid combo "
                         + "'\(binding.combo)'"
                 )
+                skip(binding, .invalidChord)
                 continue
             }
             switch lua.makeFunction(body: binding.lua) {
@@ -112,6 +126,7 @@ extension KiwiCore {
                     "structured: bind skipped "
                         + "[\(binding.combo)]: \(error)"
                 )
+                skip(binding, .luaError(error.message))
             }
         }
 
@@ -124,7 +139,8 @@ extension KiwiCore {
                     ($0.key, $0.value.ref)
                 }
             ),
-            bindings: ordered.map(\.value.binding)
+            bindings: ordered.map(\.value.binding),
+            skipped: skipped
         )
     }
 }
