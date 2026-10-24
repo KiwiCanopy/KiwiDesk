@@ -58,8 +58,7 @@ struct GlassTintFadeTests {
         let backdrop = GlassBackdrop()
         GlassTint.apply(
             backdrop,
-            below: glass,
-            frame: Self.frame,
+            in: glass,
             cornerRadius: 4,
             hex: "#14201CB3",
             edge: edge
@@ -116,7 +115,10 @@ struct GlassTintFadeTests {
             shelves.overlayForTesting(barTitleDisplay)
         )
         let tint = try #require(overlay.glassTint)
-        try #require(!tint.isHidden, "the shelf's tint was not painted")
+        try #require(
+            !tint.isHiddenOrHasHiddenAncestor,
+            "the shelf's tint was not painted"
+        )
         #expect(tint.gradient?.startPoint == Self.anchor(edge))
     }
 
@@ -140,7 +142,9 @@ struct GlassTintFadeTests {
         let manager = SpaceBarManager()
         manager.sync([bar])
         let overlay = try #require(manager.shownOverlay(on: barTitleDisplay))
-        let tints = overlay.boxTints.filter { !$0.isHidden }
+        let tints = overlay.boxTints.filter {
+            !$0.isHiddenOrHasHiddenAncestor
+        }
         try #require(!tints.isEmpty, "no box was tinted")
         for tint in tints {
             #expect(tint.gradient?.startPoint == Self.anchor(edge))
@@ -175,7 +179,9 @@ struct GlassTintFadeTests {
         let manager = AppBarManager()
         manager.sync([bar])
         let overlay = try #require(manager.shownOverlay(on: barTitleDisplay))
-        let tints = overlay.boxTints.filter { !$0.isHidden }
+        let tints = overlay.boxTints.filter {
+            !$0.isHiddenOrHasHiddenAncestor
+        }
         try #require(!tints.isEmpty, "no box was tinted")
         for tint in tints {
             #expect(tint.gradient?.startPoint == Self.anchor(edge))
@@ -183,6 +189,16 @@ struct GlassTintFadeTests {
     }
 
     // MARK: - The uniform exception (#1946)
+
+    /// The first tint under `view`, at any depth: a glass carries
+    /// its tint as its content (#2569).
+    private static func backdrop(in view: NSView) -> GlassBackdrop? {
+        for sub in view.subviews {
+            if let tint = sub as? GlassBackdrop { return tint }
+            if let tint = backdrop(in: sub) { return tint }
+        }
+        return nil
+    }
 
     /// Both ends' alphas of a painted backdrop.
     private static func alphas(_ tint: GlassBackdrop) -> [CGFloat] {
@@ -200,12 +216,14 @@ struct GlassTintFadeTests {
         let backdrop = GlassBackdrop()
         GlassTint.applyUniform(
             backdrop,
-            below: glass,
-            frame: Self.frame,
+            in: glass,
             cornerRadius: 4,
             hex: "#14201CB3"
         )
-        try #require(!backdrop.isHidden, "the tint was not painted")
+        try #require(
+            backdrop.gradient?.colors != nil,
+            "the tint was not painted"
+        )
         let alphas = Self.alphas(backdrop)
         try #require(alphas.count == 2, "\(alphas)")
         #expect(alphas[0] == alphas[1], "\(alphas)")
@@ -245,10 +263,13 @@ struct GlassTintFadeTests {
         )
         // The panel draws on its stage, a grown list's clip (#2563).
         let tint = try #require(
-            peek.stage.subviews.compactMap { $0 as? GlassBackdrop }.first,
+            Self.backdrop(in: peek.stage),
             "the peek has no tint"
         )
-        try #require(!tint.isHidden, "the peek's tint was not painted")
+        try #require(
+            !tint.isHiddenOrHasHiddenAncestor,
+            "the peek's tint was not painted"
+        )
         let alphas = Self.alphas(tint)
         try #require(alphas.count == 2, "\(alphas)")
         #expect(alphas[0] == alphas[1], "\(alphas)")

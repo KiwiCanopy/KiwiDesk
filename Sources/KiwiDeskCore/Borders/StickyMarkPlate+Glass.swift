@@ -23,7 +23,6 @@ extension StickyMarkPlate {
         } else {
             if let glass { GlassPlate.release(glass) }
             glass?.isHidden = true
-            tint.isHidden = true
             hud.isHidden = false
             content.frame = bounds
             addSubview(content, positioned: .above, relativeTo: hud)
@@ -45,8 +44,7 @@ extension StickyMarkPlate {
         GlassPlate.update(glass, frame: bounds, cornerRadius: 0)
         GlassTint.apply(
             tint,
-            below: glass,
-            frame: bounds,
+            in: glass,
             cornerRadius: 0,
             hex: markHex,
             edge: .top

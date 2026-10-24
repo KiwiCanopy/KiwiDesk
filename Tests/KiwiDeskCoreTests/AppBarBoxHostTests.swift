@@ -92,7 +92,7 @@ struct AppBarBoxHostTests {
         #expect(hostWrites.contains { $0.travels })
         for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
             let host = try #require(GlassBox.host(of: glass))
-            #expect(tint.superview === host)
+            #expect(tint.isDescendant(of: glass))
             #expect(glass.frame == host.bounds)
         }
     }

@@ -248,8 +248,7 @@ final class BarPeekPanel {
             // A reading panel: one tint over its whole height.
             GlassTint.applyUniform(
                 tint,
-                below: glass,
-                frame: bounds,
+                in: glass,
                 cornerRadius: radius,
                 hex: shelf.fillColor
             )
@@ -259,7 +258,6 @@ final class BarPeekPanel {
             GlassPlate.release(glass)
         }
         glass?.isHidden = true
-        tint.isHidden = true
         solid.isHidden = false
         solid.frame = bounds
         solid.layer?.cornerRadius = radius

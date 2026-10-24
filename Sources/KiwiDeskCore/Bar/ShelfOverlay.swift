@@ -113,9 +113,6 @@ final class ShelfOverlay {
     /// The plate's border (#1679), above whichever plate draws
     /// and below the strip; hidden with the plates.
     let plateBorder = ShelfBorder.make()
-    /// The glass shows through behind the sections rather than
-    /// hosting them, so nothing is ever reparented into it.
-    let glassFiller = NSView()
     let divider = NSView()
     /// The divider's grip, live only while the shelf is full.
     let handle = ShelfDividerHandle()

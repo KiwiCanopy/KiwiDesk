@@ -60,7 +60,6 @@ extension SpaceBarOverlay {
     ) {
         guard let rect else {
             frontGlass?.isHidden = true
-            frontTint?.isHidden = true
             return
         }
         guard let glass = frontGlass ?? GlassPlate.make() else {
@@ -74,7 +73,6 @@ extension SpaceBarOverlay {
                 positioned: .below,
                 relativeTo: frontBorder
             )
-            GlassPlate.setContent(glass, NSView())
         }
         glass.isHidden = false
         GlassPlate.update(
@@ -86,8 +84,7 @@ extension SpaceBarOverlay {
         frontTint = tint
         GlassTint.apply(
             tint,
-            below: glass,
-            frame: rect,
+            in: glass,
             cornerRadius: radius,
             hex: style.fillColor,
             edge: style.edge
@@ -97,7 +94,6 @@ extension SpaceBarOverlay {
     /// Restores hosted items to itemRun and tears down glass boxes.
     func teardownBoxGlasses() {
         frontGlass?.isHidden = true
-        frontTint?.isHidden = true
         guard !boxGlasses.isEmpty else { return }
         for (glass, tint) in zip(boxGlasses, boxTints) {
             for item in itemViews where GlassPlate.holds(glass, item) {

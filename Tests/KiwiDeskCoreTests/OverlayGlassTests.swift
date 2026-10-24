@@ -71,7 +71,10 @@ struct OverlayGlassTests {
             let marker = try #require(marker)
             let glass = try #require(marker.glass, "no glass hosted")
             #expect(!glass.isHidden)
-            #expect(!marker.tint.isHidden, "the fill drew no tint")
+            #expect(
+                marker.tint.gradient?.colors != nil,
+                "the fill drew no tint"
+            )
             #expect(marker.tint.gradient?.startPoint == Self.top)
             // The border stays on the container, above the glass.
             let layer = try #require(marker.panel.contentView?.layer)
@@ -108,7 +111,7 @@ struct OverlayGlassTests {
         )
         let marker = try #require(overlay.ghost)
         #expect(marker.glass?.isHidden == true)
-        #expect(marker.tint.isHidden)
+        #expect(marker.tint.isHiddenOrHasHiddenAncestor)
         let fill = try #require(DragVisual.parseHex(style.fillColor))
         let alpha = marker.panel.contentView?.layer?.backgroundColor?.alpha
         #expect(abs((alpha ?? -1) - fill.alpha) < 0.01)
@@ -237,12 +240,12 @@ struct OverlayGlassTests {
             "glyphs not in glass"
         )
         #expect(plate.roundel.isHidden, "the disc stayed on glass")
-        #expect(!plate.tint.isHidden)
+        #expect(!plate.tint.isHiddenOrHasHiddenAncestor)
         #expect(plate.tint.gradient?.startPoint == Self.top)
         plate.setGlass(false)
         #expect(!plate.hud.isHidden)
         #expect(glass.isHidden)
-        #expect(plate.tint.isHidden)
+        #expect(plate.tint.isHiddenOrHasHiddenAncestor)
         #expect(plate.content.superview === plate)
         #expect(!plate.roundel.isHidden, "the disc did not come back")
     }
@@ -255,7 +258,7 @@ struct OverlayGlassTests {
         plate.setMarkColor("")
         plate.setGlass(true)
         #expect(plate.glass?.isHidden == false)
-        #expect(plate.tint.isHidden)
+        #expect(plate.tint.gradient?.colors == nil)
     }
 
     @Test("Reduce transparency stands the overlays' glass down")

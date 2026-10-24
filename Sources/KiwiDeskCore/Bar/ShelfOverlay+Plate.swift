@@ -29,7 +29,6 @@ extension ShelfOverlay {
             let tint = glassTint
         {
             solidPlateView().isHidden = true
-            GlassPlate.setContent(glass, glassFiller)
             GlassBox.place(
                 glass,
                 tint: tint,

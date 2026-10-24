@@ -79,7 +79,6 @@ enum GlassBox {
         }
         let tint = GlassBackdrop()
         glass.autoresizingMask = [.width, .height]
-        tint.autoresizingMask = [.width, .height]
         host.addSubview(glass)
         return (glass, tint)
     }
@@ -127,8 +126,7 @@ enum GlassBox {
         )
         GlassTint.apply(
             tint,
-            below: glass,
-            frame: bounds,
+            in: glass,
             cornerRadius: cornerRadius,
             hex: hex,
             edge: edge

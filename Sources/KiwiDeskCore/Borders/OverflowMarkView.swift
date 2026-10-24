@@ -125,8 +125,7 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
             GlassPlate.update(glass, frame: bounds, cornerRadius: radius)
             GlassTint.apply(
                 tint,
-                below: glass,
-                frame: bounds,
+                in: glass,
                 cornerRadius: radius,
                 hex: shelfLook.fillColor,
                 edge: .top
@@ -137,7 +136,6 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
             GlassPlate.release(glass)
         }
         glass?.isHidden = true
-        tint.isHidden = true
         solid.isHidden = false
         solid.frame = bounds
         solid.layer?.cornerRadius = radius

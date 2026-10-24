@@ -43,8 +43,7 @@ struct GlassTintPinTests {
     ) -> NSAppearance.Name? {
         GlassTint.apply(
             backdrop,
-            below: glass,
-            frame: frame,
+            in: glass,
             cornerRadius: 4,
             hex: hex,
             edge: .top

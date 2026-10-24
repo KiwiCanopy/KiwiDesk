@@ -580,8 +580,8 @@ render content into it (#1517). Obligations:
   panel is keyed by its edge, so a moved shelf arrives. Whether a plate
   draws at all is the one `KiwiShelf.drawsPlate`: Boxed paints a
   box per item — glass per item where Liquid Glass is on — and no
-  plate beneath, solid or glass. The glass plate is a backdrop
-  BEHIND the section strip and never hosts a view, so the
+  plate beneath, solid or glass. The glass plate sits BEHIND the
+  section strip and hosts no view but its tint, so the
   no-reparent obligation below holds for it by construction.
   `ShelfOverlayTests` holds the joined plate, ▸ `plateModes` Full
   and Boxed, and ▸ `dividerInTheDrawnGap` the divider; no suite
@@ -1315,20 +1315,16 @@ Obligations:
   from the one that was being closed. A surface that genuinely
   needs a non-Fill colour on glass earns a second mint inside
   `GlassTint`, never a colour parameter.
-- **An arm that moves a glass among its siblings ends by calling
-  `GlassTint.apply` and never re-orders the backdrop beside it.**
-  `apply` repairs the order only where it is wrong: a sibling
-  move of the glass — the Space Bar's `spanBackdrop` arm — left a
-  backdrop inserted once above it for the rest of the process
-  (#1314), and a per-render reparent would be the churn #1315
-  names. `GlassTintOrderTests` holds the order through the real
-  arm via `SpaceBarManager.sync`, requiring the arm rather than
-  trusting the fixture's arithmetic, and holds the no-reparent
-  half on a counting parent — AppKit fires no view-level callback
-  for a re-add, so only a parent can see one. Residue, stated
-  because it fails OPEN: an arm that inserts its own sibling
-  DIRECTLY beneath its glass makes the repair fire every render,
-  silently; the no-reparent clause is not through the arm.
+- **The Fill draws on the glass, beneath its content: the
+  backdrop is the glass's `contentView` and what the glass hosts
+  rides inside it** (#2569). Behind the glass, the key window's
+  denser material covered the colour (#2569 ▸ Ruling). Only
+  `GlassPlate` and `GlassTint` place the backdrop or reach
+  through it — `setContent`, `holds`, `release` and `fitContent`
+  look through it, and `GlassTint.apply` takes the glass, never a
+  frame, so the gradient is the glass's bounds. A clear Fill
+  clears the gradient and never hides the backdrop, which carries
+  the content (`GlassFillOnTopTests`).
 - **A steady-state bar render reparents nothing into a glass
   subtree.** A view moves only on a host CHANGE, and the arm that
   changes the host is the one that names it — the Space Bar's
@@ -1342,9 +1338,8 @@ Obligations:
   stray). A same-parent re-add fires no AppKit hook and is a
   reorder, so a guard against one counts inserts at the PARENT or
   pins subview identity, never a view-side callback (#1314 too).
-  The pinned arm's plate move is order-guarded the same way, and
-  its ORDER half is `GlassTintOrderTests`' index pin; its
-  no-reparent half has no counting clause — stated, fails OPEN.
+  The tint wraps once and is never re-wrapped on a render
+  (`GlassFillOnTopTests` ▸ `settledTintStays`).
 - **A view a glass hosted leaves it only through
   `GlassPlate.release`, and a bar tears its per-item glass down
   BEFORE the frame pass that places the items it hosted** (#1730).

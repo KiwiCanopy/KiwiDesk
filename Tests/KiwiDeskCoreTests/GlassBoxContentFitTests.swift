@@ -119,7 +119,9 @@ struct GlassBoxContentFitTests {
         GlassBox.settle(box.glass)
         let host = try #require(GlassBox.host(of: box.glass))
         #expect(box.glass.frame == host.bounds)
-        #expect(box.content.frame == box.glass.bounds)
+        // The content rides in the tint, which Auto Layout rounds
+        // to the backing (#2569).
+        #expect(GlassPlate.fills(box.content.frame, box.glass.bounds))
     }
 
     /// A box whose host glides settles itself once the glide has
