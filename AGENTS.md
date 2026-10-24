@@ -162,7 +162,12 @@ traced at directory altitude — see **`docs/architecture.md`**.
 
 Branch from `main` as `<type>/<kebab-description>`, the type a
 Conventional Commit type (`feat/scrolling-snap-mode`). One focused
-change per branch; separate refactors from features.
+change per branch; separate refactors from features. The one
+exception is a polish bundle (owner, 2026-10-25): small, Low-effort
+cosmetic items may share one `fix/polish-…` branch and PR, one
+commit per item, each item its own issue closed by that PR; an item
+of Medium or High effort, one carrying a migration or one with an
+open ruling keeps its own branch.
 
 **Every PR body is the [PR template](.github/pull_request_template.md),
 rendered in full** — `gh pr create --body-file` starts blank, so an
