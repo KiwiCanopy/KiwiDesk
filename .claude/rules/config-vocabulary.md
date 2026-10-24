@@ -78,11 +78,12 @@ synonym:
   state glyph's. Retired as its name: *bubble*, the issue's working
   name; never a *badge*, which sits on a bar item, nor an
   *indicator*.
-- **peek** — the bars' hover peek, the label or list a bar item
-  shows over itself, and the overflow mark's list, which is the
-  same peek grown out of its mark (#1946, #2563;
-  `animations.on_peek`). It names that surface alone: prose saying
-  a parked window "peeks" past an edge uses the verb, never a
+- **peek** — the label or list a bar item shows beside itself — a
+  label on hover, a list on a click, grown out of its item — and
+  the overflow mark's list, the same peek grown out of its mark
+  (#1946, #2563, #2571; `animations.on_peek`). It names that
+  surface alone: prose saying a parked window "peeks" past an edge
+  uses the verb, never a
   setting or label. Never a *tooltip*, which the peek replaced, nor
   a *popover* or *preview*.
 - **shortcut group** — the band a KiwiHub row is listed in: a

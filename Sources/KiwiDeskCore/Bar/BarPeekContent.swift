@@ -39,23 +39,32 @@ enum BarPeekSource: Equatable {
         }
     }
 
-    /// Whether the peek grows out of its anchor and is held open by
-    /// a click alone (#2563): an overflow mark's list. Its hover
-    /// opens nothing, and it holds until a close, never on the
-    /// pointer leaving. Three behaviours on one flag: a source that
-    /// wants only one of them splits it first.
-    var morphsFromAnchor: Bool {
-        if case .run = self { return true }
-        return false
+    /// How a list held open by a click grows (#2563, #2571).
+    enum Growth: Equatable {
+        /// Out of the overflow mark's pill, which becomes its header.
+        case fromPill
+        /// Out of a bar item, across the gap to where the list rests.
+        case outOfItem
     }
 
-    /// Whether every group wears its app's icon: an overflow mark
-    /// draws no glyph beside its peek, so its rows name their apps
-    /// even when they are one app (#2235, owner on device).
-    var iconsEveryGroup: Bool {
-        if case .run = self { return true }
-        return false
+    /// How a click-held list grows, nil for a peek the hover opens
+    /// (#2571 ▸ Ruling): every list but a collapsed Space's chip,
+    /// whose click is its switch (#1945). A click-held list opens on
+    /// no hover, holds until a close — never on the pointer leaving —
+    /// and takes the keyboard. Its readers ask this or
+    /// `opensOnClick`, never the source's case.
+    var clickGrowth: Growth? {
+        switch self {
+        case .run: .fromPill
+        case .overflow: .outOfItem
+        case .glyph, .appItem: isList ? .outOfItem : nil
+        case .space: nil
+        }
     }
+
+    /// Whether a click alone opens and holds this source's list.
+    var opensOnClick: Bool { clickGrowth != nil }
+
 }
 
 /// What a peek shows (#1946, the owner's ruling): one group per
@@ -73,7 +82,7 @@ struct BarPeekContent: Equatable {
 
     struct Group: Equatable {
         let app: String
-        /// The app's icon, only where the rows mix apps (`+n`).
+        /// The app's icon, on every group, a one-app list's too.
         let icon: NSImage?
         /// One per window shown, in row order.
         let rows: [Row]
@@ -89,8 +98,7 @@ struct BarPeekContent: Equatable {
     /// row, checked or not, so no title moves with focus (#2063).
     let checks: Bool
 
-    /// The windows shown, top to bottom — the order a glyph's
-    /// click cycles in (#2063).
+    /// The windows shown, top to bottom: the rows' order.
     var order: [WindowID] { groups.flatMap { $0.rows.map(\.window) } }
 
     /// Every window the peek stands for.
@@ -131,16 +139,14 @@ struct BarPeekContent: Equatable {
     /// Groups `rows` per app NAME in first-seen order, every row
     /// kept — a lone window titled as its app included (owner,
     /// #1946) — on the key the bars group by, so a glyph standing
-    /// for sibling processes of one app (#1785) is one group. Icons
-    /// mark the groups only where the rows mix apps, or always
-    /// with `icons` (`BarPeekSource.iconsEveryGroup`). A list
-    /// (`checks`) checks the row of `focus` (#2063).
+    /// for sibling processes of one app (#1785) is one group. Every
+    /// group wears its app's icon, a one-app list's too (#2571). A
+    /// list (`checks`) checks the row of `focus` (#2063).
     @MainActor
     init(
         rows: [BarWindowRow],
         checks: Bool = false,
-        focus: WindowID? = nil,
-        icons: Bool = false
+        focus: WindowID? = nil
     ) {
         self.checks = checks
         var order: [BarWindowRow] = []
@@ -155,12 +161,11 @@ struct BarPeekContent: Equatable {
                 )
             )
         }
-        let iconed = icons || order.count > 1
         groups = order.map { first in
             let all = grouped[first.app] ?? []
             return Group(
                 app: first.app,
-                icon: iconed ? first.icon : nil,
+                icon: first.icon,
                 rows: all,
                 windowCount: all.count
             )

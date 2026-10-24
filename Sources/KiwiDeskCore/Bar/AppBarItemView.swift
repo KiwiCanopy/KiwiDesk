@@ -139,9 +139,26 @@ final class AppBarItemView: NSView {
         if isDragging {
             isDragging = false
             onDragEnded(self)
+        } else if let source = peekSource, source.opensOnClick {
+            // A group's click opens its list and selects nothing
+            // until a row is picked (#2571); a release off it — a
+            // float group never drags — cancels, as a button (#2044).
+            guard releasesInside(event) else { return }
+            itemActions?.peek?.clicked(
+                self,
+                source: source,
+                space: nil,
+                edge: edge,
+                clickCount: event.clickCount
+            )
         } else if !isInert {
             onSelect(windowID)
         }
+    }
+
+    private func releasesInside(_ event: NSEvent) -> Bool {
+        guard event.window != nil else { return true }
+        return bounds.contains(convert(event.locationInWindow, from: nil))
     }
 
     override func updateTrackingAreas() {
@@ -184,7 +201,9 @@ final class AppBarItemView: NSView {
     private func applyHover(_ ownsPointer: Bool) {
         // The peek reads an inert item too: it may hide its title.
         reportPeek(ownsPointer: ownsPointer)
-        let hovered = !isInert && ownsPointer
+        // An item whose list is open stays lit until it closes (#2571).
+        let open = itemActions?.peek?.holdsOpen(self) == true
+        let hovered = !isInert && (ownsPointer || open)
         guard hovered != isHovered else { return }
         isHovered = hovered
         applyColors()

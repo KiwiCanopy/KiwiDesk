@@ -16,14 +16,14 @@ struct BarPeekMenuTrackingTests {
         LiquidGlassGate.override = { false }
     }
 
-    /// The item's hover reading on `+n` — the relayout's re-read
-    /// too.
+    /// The item's hover reading on a collapsed chip, the one list a
+    /// hover opens (#2571) — the relayout's re-read too.
     private func read(_ rig: BarPeekRig, _ anchor: NSView?) {
         rig.peek.pointer(
             in: rig.item,
             on: anchor,
             source: anchor.map { _ in
-                .overflow([WindowID(5), WindowID(6)])
+                .space([WindowID(5), WindowID(6)])
             },
             edge: .top
         )

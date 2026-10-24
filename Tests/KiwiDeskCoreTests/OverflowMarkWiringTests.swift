@@ -173,26 +173,14 @@ struct OverflowMarkWiringTests {
         }
         let run = BarPeekSource.run(rows.map(\.window))
         #expect(run.isList)
-        let iconed = BarPeekContent(
-            rows: rows,
-            checks: run.isList,
-            icons: run.iconsEveryGroup
-        )
+        let iconed = BarPeekContent(rows: rows, checks: run.isList)
         #expect(iconed.groups.first?.icon != nil)
-        // A Space Bar list of one app keeps the mixed-only rule.
-        let overflow = BarPeekSource.overflow(rows.map(\.window))
-        let bare = BarPeekContent(
-            rows: rows,
-            checks: overflow.isList,
-            icons: overflow.iconsEveryGroup
-        )
-        #expect(bare.groups.first?.icon == nil)
     }
 
     /// The test process's own pid carries an icon a fixture pid
     /// lacks; the window is only filed, never laid out, so no
     /// frame or attach reaches the process (tests.md, #2289).
-    @Test("Core hands the run source's icon rule to the peek")
+    @Test("Core hands every source's peek its app's icon")
     func coreAsksForIcons() throws {
         let core = makeCore()
         let own = ProcessInfo.processInfo.processIdentifier
@@ -206,7 +194,7 @@ struct OverflowMarkWiringTests {
         let glyph = try #require(
             core.barPeekContent(.overflow([id]), on: nil)
         )
-        #expect(glyph.groups.first?.icon == nil)
+        #expect(glyph.groups.first?.icon != nil)
     }
 
     @Test("A left press on a mark leaves its peek to the click")

@@ -576,8 +576,13 @@ its card has no on/off row.
 The KiwiShelf card's **App Bar in Monocle** and **App Bar in
 Scrolling** switches are its visibility.
 
-Drag an item to reorder the windows; a grouped item expands into
-its members on click. Styling it differently per layout is
+Drag an item to reorder the windows.
+
+:::unreleased
+Click a grouped item to list its windows; a row picks one.
+:::
+
+Styling it differently per layout is
 Lua-only: an `app_bar.*` field has a `monocle.set_app_bar_*` /
 `scroll.set_app_bar_*` twin ([Per-layout App Bar
 overrides](lua-reference.md#per-layout-app-bar-overrides)),
@@ -618,20 +623,27 @@ order. Click a Space to switch to it.
 
 Click an app glyph to switch to its Space and focus that window.
 
-Resting the pointer on a glyph, a `+n` badge, an App Bar group of
-two or more windows, or an App Bar item that cuts its title shows
-its windows beside the bar. Where that is a list — a glyph with a
-count badge, a `+n` badge or an App Bar group — move the pointer
-onto it and click a row to switch to that window. A check marks
-the window that has the focus.
+:::unreleased
+Resting the pointer on a one-window glyph, or on an App Bar item
+that cuts its title, shows that window's name beside the bar.
 
-Clicking a glyph with a count badge focuses its first window and
-shows the list at once; each further click focuses the next one,
-from the checked window, and wraps at the end. Clicking a `+n`
-badge shows its list and switches nothing until you pick. An open list stays until you
-pick a row, click elsewhere or move the pointer away. A list too long for the screen
-ends in **More windows**, which opens a menu of every window.
-With VoiceOver, pressing the glyph opens that menu.
+A glyph with a count badge, a `+n` badge and an App Bar group of
+two or more windows are lists: click one to open its list beside
+the bar, then click a row to switch to that window. The click on
+the item switches nothing. A check marks the window that has the
+focus.
+
+An open list stays until you pick a row, click its item again,
+press Escape or click elsewhere. The arrow keys walk its rows and
+Return picks one.
+
+A Space shown as its window count lists its windows when you rest
+the pointer on it, since clicking it switches to that Space.
+:::
+
+A list too long for the screen ends in **More windows**, which
+opens a menu of every window. With VoiceOver, pressing the glyph
+opens that menu.
 
 A Space holding more apps than fit keeps its focused app in the
 middle, with a `+n` on each side for the rest — at either end of

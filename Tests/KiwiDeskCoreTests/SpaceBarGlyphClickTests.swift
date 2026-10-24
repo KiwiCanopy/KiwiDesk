@@ -163,8 +163,8 @@ struct SpaceBarGlyphClickTests {
         #expect(core.state.workspaces[one]?.focused == WindowID(5))
     }
 
-    /// A click on a group glyph focuses one of its windows
-    /// (`BarGlyphCycleTests`, #2063) and opens no menu, while
+    /// A click on a group glyph opens its list and focuses nothing
+    /// (`BarGlyphClickTests`, #2571) and opens no menu, while
     /// VoiceOver's press opens the native menu, the peek's
     /// accessible twin (#1946).
     @Test("A group glyph's click opens no menu; VoiceOver's press does")

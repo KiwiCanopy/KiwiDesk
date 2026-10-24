@@ -18,8 +18,8 @@ final class BarPeekRig {
         defer: false
     )
     let item = NSView(frame: CGRect(x: 0, y: 0, width: 200, height: 40))
-    let first = NSView(frame: CGRect(x: 10, y: 10, width: 20, height: 20))
-    let second = NSView(frame: CGRect(x: 40, y: 10, width: 20, height: 20))
+    let first = RigItem(frame: CGRect(x: 10, y: 10, width: 20, height: 20))
+    let second = RigItem(frame: CGRect(x: 40, y: 10, width: 20, height: 20))
     var steps: [@MainActor () -> Void] = []
     var dwells: [TimeInterval] = []
     var clock: TimeInterval = 100
@@ -65,12 +65,16 @@ final class BarPeekRig {
         }
     }
 
+    /// One window is a glyph's label; several are a collapsed chip's
+    /// list, the one list a hover opens (#2571).
     func hover(_ anchor: NSView?, _ ids: UInt32...) {
         let windows = (ids.isEmpty ? [1] : ids).map(WindowID.init)
         peek.pointer(
             in: item,
             on: anchor,
-            source: anchor.map { _ in .glyph(windows) },
+            source: anchor.map { _ in
+                windows.count > 1 ? .space(windows) : .glyph(windows)
+            },
             space: SpaceID("1"),
             edge: .top
         )
@@ -105,4 +109,12 @@ final class BarPeekRig {
         peek.panel.panel?.orderOut(nil)
         window.orderOut(nil)
     }
+}
+
+/// A bar item as far as the peek asks of one: a list anchor whose
+/// release decides its press, its open state drawn nowhere.
+@MainActor
+final class RigItem: NSView, BarPeekListAnchor {
+    var sparesLeftPress: Bool { true }
+    func listOpenChanged() {}
 }

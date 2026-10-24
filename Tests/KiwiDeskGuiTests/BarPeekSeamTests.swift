@@ -235,7 +235,8 @@ struct BarPeekSeamTests {
     func glyphClickRouting() throws {
         // A glyph's click: a one-window glyph's pick closes the peek
         // ahead of its focus; a list opens it — told apart by the
-        // one list predicate, as VoiceOver's press is.
+        // one click predicate (#2571), VoiceOver's press by the list
+        // predicate.
         let click = try #require(
             SourceScan.declarationBody(
                 after: "func pickFromSpaceBar(",
@@ -247,7 +248,7 @@ struct BarPeekSeamTests {
         #expect(closes.upperBound <= focus.lowerBound)
         #expect(click.contains("showPeek(pick)"))
         #expect(!click.contains("SpaceBarWindowMenu.make("))
-        #expect(click.contains("pick.peekSource.isList"))
+        #expect(click.contains("pick.peekSource.opensOnClick"))
         let press = try #require(
             SourceScan.declarationBody(
                 after: "func pressSpaceBarGlyph(",
@@ -301,8 +302,8 @@ struct BarPeekSeamTests {
             )
         )
         #expect(picked.contains("pick(window, shown.space)"))
-        // Sources-wide: one menu builder, three focus call sites —
-        // the row door and the glyph click's two arms — and
+        // Sources-wide: one menu builder, two focus call sites —
+        // the row door and the one-window glyph's click — and
         // `focus_window`, which takes the same pick (#2492).
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
@@ -319,16 +320,18 @@ struct BarPeekSeamTests {
         #expect(builders == 1)
         #expect(
             focuses == [
-                "KiwiCore+SpaceBarClick.swift": 3,
+                "KiwiCore+SpaceBarClick.swift": 2,
                 "KiwiCore+FocusWindowCommand.swift": 1,
             ]
         )
+        // A list's click focuses nothing (#2571): the one-window
+        // glyph's arm is the click's only focus.
         let glyphClick = try #require(
             SourceScan.declarationBody(
                 after: "func pickFromSpaceBar(",
                 in: click
             )
         )
-        #expect(glyphClick.occurrences(of: "focusFromSpaceBar(") == 2)
+        #expect(glyphClick.occurrences(of: "focusFromSpaceBar(") == 1)
     }
 }

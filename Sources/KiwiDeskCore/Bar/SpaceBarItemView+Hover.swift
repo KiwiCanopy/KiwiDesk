@@ -65,12 +65,17 @@ extension SpaceBarItemView {
             reportPeek(peeked, source: peeked?.peekSource)
         }
         setPointerInside(ownsPointer)
-        let hovered = !isActive && space != nil && ownsPointer
-        guard hovered != isHovered || target !== hoveredTarget else {
+        // A target whose list is open stays lit until it closes
+        // (#2571), over a neighbour the pointer rests on.
+        let open = openListTarget
+        let lit = open ?? (ownsPointer ? target : nil)
+        let hovered =
+            !isActive && space != nil && (ownsPointer || open != nil)
+        guard hovered != isHovered || lit !== hoveredTarget else {
             return
         }
         isHovered = hovered
-        hoveredTarget = target
+        hoveredTarget = lit
         restyle()
     }
 

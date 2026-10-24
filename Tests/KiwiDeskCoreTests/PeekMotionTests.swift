@@ -113,4 +113,45 @@ struct PeekMotionTests {
         #expect(!core.tiler.settings.animations.onPeek)
         #expect(!BarMotion.peekMotion)
     }
+
+    /// A bar item's list fades out as it shrinks to its seed, so no
+    /// plate rests while the spring settles (#2571, device); the
+    /// overflow mark's shrinks back into its pill whole.
+    @Test("A bar list's close fades its stage; the pill's does not")
+    @MainActor
+    func barListCloseFades() {
+        let was = (BarMotion.peekMotion, BarMotion.reducedOverride)
+        defer {
+            BarMotion.peekMotion = was.0
+            BarMotion.reducedOverride = was.1
+        }
+        BarMotion.peekMotion = true
+        BarMotion.reducedOverride = false
+        for fadesOut in [true, false] {
+            let parts = BarPeekMorphParts(
+                stage: CALayer(),
+                rows: CALayer(),
+                markInk: CALayer(),
+                listInk: CALayer()
+            )
+            parts.stage.bounds = CGRect(x: 0, y: 0, width: 180, height: 120)
+            BarMotion.playMorph(
+                parts,
+                panel: NSPanel(),
+                anchor: nil,
+                pill: CGRect(x: 80, y: 102, width: 24, height: 18),
+                pillRadius: 9,
+                listRadius: 11,
+                opening: false,
+                fadesOut: fadesOut
+            )
+            let keys = parts.stage.animationKeys() ?? []
+            #expect(
+                keys.contains(BarMotion.morphFadeKey) == fadesOut,
+                "fadesOut \(fadesOut)"
+            )
+            BarMotion.endMorph(parts)
+            #expect(parts.stage.animationKeys() == nil)
+        }
+    }
 }

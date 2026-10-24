@@ -4222,14 +4222,14 @@ far onto the window, over a scroll bar or a sidebar.
 peek lists the end's windows nearest the edge first — the order
 one focus step at a time brings them in — and opens into the
 run. Hovering the mark lights it and opens nothing; a click opens
-the list and holds it, a click on its header closes it. Every
-other bar peek opens on hover, and this one does not, because of
-where it sits: on the title bar of the window the pointer is on
-its way to drag or click, so a hover peek covered the very window
-the user was reaching for. The Space Bar's `+n` keeps its hover,
-since a bar is crossed only on the way to the bar. A click still
-opens rather than steps, as a click on `+n` does: one meaning for
-`+n` in both places beats a cleverer "step to the next" here. The
+the list and holds it, a click on its header closes it. Every bar
+list opens on its click the same way (#2571, below); the mark has
+a reason of its own besides: it sits on the title bar of the
+window the pointer is on its way to drag or click, so a hover peek
+covered the very window the user was reaching for. A click opens
+rather than steps, as a click on the Space Bar's `+n` does: one
+meaning for `+n` in both places beats a cleverer "step to the
+next" here. The
 second click of a double-click is not a close, so a double-click
 leaves the list open (#2063: a double-click stays harmless). The
 list stays open when the pointer leaves it, because a held list
@@ -4237,8 +4237,8 @@ that closes on leave is hover again; it closes on a click outside
 it, a pick, Escape, and anything that makes it stale. It takes the
 keyboard while open, for Escape and the arrow keys over its rows,
 without activating KiwiDesk. Every group wears its app's icon, even when
-every row is one app: a Space Bar glyph shows its app beside the
-peek, and the mark shows nothing but the count (owner, device).
+every row is one app: the mark shows nothing but the count (owner,
+device).
 VoiceOver reads it as a button naming its direction and count,
 and its press opens the window menu.
 
@@ -15903,9 +15903,9 @@ now, so no stored file, built-in layout or `init.lua` changes.
 
 **Both bars group adjacent windows by default.** (Owner ruling
 2026-10-07, #1946.) Grouping costs a window only if the group
-hides it, and the hover peek hides nothing: a group of two or
-more windows always peeks, holds while the pointer crosses to
-it, and every row in it picks its window. So grouping keeps the
+hides it, and the peek hides nothing: a group of two or more
+windows always lists them, and every row in that list picks its
+window. So grouping keeps the
 row short — the overview a bar exists for — and no window falls
 out of reach. Ungrouping stays the App Bar's option, for a user
 who wants every title drawn in the row itself, and one default
@@ -15916,43 +15916,40 @@ switches by itself.** (#1528, owner rulings 2026-09-20 and
 2026-09-27; #2063, 2026-10-08.) On every Space, a glyph standing
 for one window switches to that Space and focuses the window; the
 rest of the item — identifier, divider, padding — switches and
-lands on the Space's last-focused window. A glyph standing for
-several windows focuses them in its peek's order: the one after
-the window holding the focus, wrapping, or the first where the
-focus is none of them — with the peek shown at once, its check on
-the window landed. `+n` lists its windows — the hover peek, shown
-at once and held — and switches nothing until a row is picked. A
-peek row is that pick, as a menu row is: one focus path,
-whichever list the user picked from.
+lands on the Space's last-focused window.
 
 The glyph is the only thing on screen naming a window on a Space
 you are not looking at, so it is where a click can say which
 window it means; one target per item left an overview the user
-could read and not act on. Every glyph click on another Space
-still switches, because a window on another Space cannot take
-the focus while its Space stays hidden — the glyph refines only
-which window the switch lands on. A target standing for several
-windows may choose only where the user can SEE the choice: a
-glyph's click that only opened its list read on the device as a
-click that did nothing, and a guess the user cannot see (the most
-recent) teaches distrust of the click. The peek makes the choice
-visible — its check marks the window holding the focus, its order
-says which one the next click takes — so the click is a walk the
-user can predict and correct with one more click. The position is
-read from the focus rather than stored, so it survives the peek
-closing and starts over once the focus leaves the app's windows,
-and no ledger has to be retired. `+n` stays a list: its windows
-are several apps', so there is no "next" a hand could predict. The hover peek reads its windows
-when it shows rather than being drawn into the render, so it is
-current without the bar re-rendering on every title change. A
-setting to turn glyph clicks off waits for misclicks measured on
-a device (#1514).
+could read and not act on. The peek reads its windows when it
+shows rather than being drawn into the render, so it is current
+without the bar re-rendering on every title change. A setting to
+turn glyph clicks off waits for misclicks measured on a device
+(#1514).
+
+:::unreleased
+A glyph standing for several windows, like `+n`, opens its list
+and switches nothing until a row is picked (#2571, owner
+2026-10-24, retiring #2063's click cycle). A peek row is that
+pick, as a menu row is: one focus path, whichever list the user
+picked from. A one-window glyph's click on another Space switches,
+because a window on another Space cannot take the focus while its
+Space stays hidden — the glyph refines only which window the
+switch lands on. A target standing for several windows may choose
+only where the user can see the choice. #2063 made the choice a
+walk the peek showed, because a click on a list the hover had
+already opened re-read it and read on the device as a click that
+did nothing. A list that opens on its click alone is the click's
+answer, so the click chooses nothing and the user picks the row: a
+walk would move the focus beneath the list being read, and a
+second click closes the list.
+:::
 
 **[Trade-off] A bar item's hover peek.** (#1946, owner rulings
-2026-10-07 from an HTML preview and two device eyeballs.)
-Hovering a Space Bar glyph, a `+n` disc or an App Bar item that
-hides its text shows the windows it stands for in the bar's own
-look, in place of the system tooltip. The tooltip could not be
+2026-10-07 from an HTML preview and two device eyeballs.) A Space
+Bar glyph, a `+n` disc or an App Bar item that hides its text
+shows the windows it stands for in the bar's own look, in place
+of the system tooltip. The tooltip could not be
 restyled, waited the tooltip delay, and listed the same windows
 the click menu lists in another face, so two surfaces fought
 over one list. The peek centres on its item, opening away from
@@ -15967,21 +15964,45 @@ window underneath and focus another app, a misclick with a side
 effect on a surface built to look pickable. macOS shows no such
 list: Stage Manager and Mission Control act on the surface you
 previewed, and the Dock's hover label is one word that promises
-nothing. So a left click on a list OPENS its peek and never
-closes it (#2063, amending a toggle): where none shows, at once,
-without the dwell or the cool-down, held as any list's is; where
-one already shows, the hover's or a click's, the click changes
-nothing. A toggle was argued from the disclosure idiom, but a
-disclosure does not also open on hover, and this list does: the
-common path is a hover then a click, and a toggle closed the list
-the hand was reaching for — a click that read as doing nothing.
-Open-only also keeps an accidental double click harmless, and the
-peek still closes the way every list's does: the pointer leaving
-its hold, a press elsewhere, or a pick. A multi-window glyph's
-click focuses its next window first (the principle above), so its
-peek is re-read with the check on the window landed; `+n` focuses
-nothing. A one-window glyph still picks on the click; two lists
-for one set of windows is the fight the tooltip lost.
+nothing.
+
+:::unreleased
+**A label peeks on hover; a list opens on click** (#2571, owner
+ruling 2026-10-23, amending #1946 and #2063). A one-window glyph
+and an App Bar item that hides its text keep the hover label.
+Every list — a `+n` disc, a multi-window glyph, an App Bar group
+— opens on its click alone, on the release inside the item, and
+its hover opens nothing. A list that popped up while the pointer
+merely crossed the bar was noise, and the one thing a `+n`
+invites, clicking it, did nothing: the click only re-read the
+list the hover had opened. The Dock draws the same line — a hover
+shows a label, a click opens a stack — and the overflow mark's
+`+n` opens on click (#2563), so one `+n` behaves one way. The
+price is the hover label on a multi-window glyph and an App Bar
+group, which name their app only once clicked; bringing
+that label back is a ruling, not a regression fix. A one-window
+glyph still picks on the click; two lists for one set of windows
+is the fight the tooltip lost.
+
+A click-held list grows out of its item on the overflow mark's
+spring, from a plate the item's size at the gap's near edge —
+the list's panel sits above the bar and would cover an item it
+grew from — and fades as it shrinks back to that plate, so no
+plate rests while the spring settles (owner, device); Reduce
+Motion cross-fades it in place. It holds
+until a close: a second click on its item, a press elsewhere, a
+pick, any key, a Desktop switch; never the pointer leaving, and
+another item's hover neither swaps nor closes it. The second
+press of the double-click that opened it keeps it, so a double
+click stays harmless (#2063). While it shows, its item stays lit,
+the one sign of it open: a `+n` keeps its number, which a window
+symbol in its place would only repeat with less to say (owner,
+device, 2026-10-24).
+
+A Space collapsed to its window count is the one list a hover
+opens: its click is its Space switch (#1945), which a click-only
+list would take away.
+:::
 
 A list's row for the window holding the system focus — read only
 on the active Space, the one that carries it — ends in a
@@ -15996,7 +16017,7 @@ beside the first line of a wrapped title, centred on its capitals
 — the name the user recognises, and a band a tall face cannot
 drift — in the row's own ink, the checked row's hover fill
 reaching over it. It is persistent rather than a flash: a mark
-that faded would leave the next click unpredictable, and a fact
+that faded would leave the focus unreadable, and a fact
 that only snaps needs no Reduce Motion gate. The window menu, the
 peek's twin, marks the same window with its native leading check.
 A pick does what clicking that
@@ -16015,10 +16036,10 @@ row leaves the app the user is in frontmost until the pick moves
 the focus; it is never key, so Escape is not one of its exits.
 
 :::unreleased
-The overflow mark's list is the one exception (#2563): held open by
-a click and standing over a window rather than a bar, it takes the
-keyboard without activating KiwiDesk, so Escape closes it and the
-arrow keys walk its rows.
+A list a click holds open is the exception (#2563, #2571): the
+overflow mark's and every bar list but a collapsed chip's take the
+keyboard without activating KiwiDesk, so Escape closes them and
+the arrow keys walk their rows.
 :::
 
 The native menu stays as the peek's twin where the peek cannot
@@ -16045,6 +16066,11 @@ label that lingered over the bar would cover the neighbours the
 pointer is moving to. Whether a peek is a list is asked once of
 what it stands for, so a click, VoiceOver's press and the hold
 cannot disagree about the same disc.
+
+:::unreleased
+The hull holds the one list a hover opens, a collapsed Space's; a
+list a click holds open ignores the pointer leaving (#2571, above).
+:::
 
 It still never opens a menu on hover. A hover-opened menu runs a
 modal tracking loop that eats the next click, and no macOS
@@ -16076,11 +16102,17 @@ whole, since the peek exists to show what the bar cuts. `+n`
 mixes apps, so its groups carry their icons.
 The face is the bar's, at one fixed reading size: the strip-depth
 ladders would shrink it with a thin bar, which is where the peek
-is most needed. An App Bar GROUP always peeks every window it
+is most needed. An App Bar GROUP always lists every window it
 stands for, as a multi-window glyph does, since its name hides
 the windows whether or not it is drawn whole — where #1514's
 tooltip named the app alone; a single App Bar item still peeks
 only where it hides its title (#1514).
+
+:::unreleased
+Every group carries its app's icon, a one-app list's too (owner,
+2026-10-24, #2571): a collapsed chip draws no glyph beside its
+list, and one look for every peek beats a rule per source.
+:::
 
 The peek's glass takes ONE tint over its whole height, the ruled
 exception to the fade a detached surface takes (#1620): the bars'
@@ -16129,8 +16161,9 @@ drops only the fade.
 
 A Space collapsed to its window count (#1683) peeks too, always
 (#1945; owner 2026-10-04, and 2026-10-18 for no setting): resting
-on the chip lists every window its Space holds, as `+n` lists its
-own, and the chip anchors the peek itself since it draws no glyph.
+on the chip lists every window its Space holds, the list `+n`
+gives for its own, and the chip anchors the peek itself since it
+draws no glyph.
 The peek is the answer because it is a panel beside the bar: the
 run does not change, so nothing moves under a resting pointer and
 the shelf's plan is untouched. Growing the chip in place to draw

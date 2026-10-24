@@ -170,15 +170,16 @@ struct ShelfWiringSeamTests {
                 Comment(rawValue: file)
             )
             // The gate itself: an active Space chip and an inert
-            // App Bar item never hover, whichever path asks.
+            // App Bar item never hover, whichever path asks; an item
+            // whose list a click holds open stays lit (#2571).
             let gate = Self.squash(
                 try Self.body(of: "func applyHover(", in: file)
             )
             #expect(
                 gate.contains(
                     file.hasPrefix("Bar/SpaceBar")
-                        ? "!isActive&&space!=nil&&ownsPointer"
-                        : "!isInert&&ownsPointer"
+                        ? "!isActive&&space!=nil&&(ownsPointer||open!=nil)"
+                        : "!isInert&&(ownsPointer||open)"
                 ),
                 Comment(rawValue: file)
             )

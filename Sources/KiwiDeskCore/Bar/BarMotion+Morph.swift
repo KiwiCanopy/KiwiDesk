@@ -31,11 +31,17 @@ extension BarMotion {
         return reduceMotion ? .crossFade : .grow
     }
 
+    /// The stage's fade-out on a close that `fadesOut` (#2571).
+    static let morphFadeKey = "kiwidesk.peekMorph.fade"
+
     /// Plays the open (`opening`) or the close of the list `parts`
     /// draw in `panel`, the `anchor`'s panel hiding as it opens, the
     /// stage between `pill` and its own bounds, both in the stage
     /// layer's own coordinates; returns how long until it lands.
-    /// Continues from where a morph in flight stands.
+    /// A close that `fadesOut` — a bar item's list, whose seed is no
+    /// pill coming back — fades the stage over the shrink, so no
+    /// plate rests while the spring settles. Continues from where a
+    /// morph in flight stands.
     @MainActor
     @discardableResult
     static func playMorph(
@@ -45,7 +51,8 @@ extension BarMotion {
         pill: CGRect,
         pillRadius: CGFloat,
         listRadius: CGFloat,
-        opening: Bool
+        opening: Bool,
+        fadesOut: Bool = false
     ) -> TimeInterval {
         let alpha: CGFloat = opening ? 1 : 0
         switch morphPlay(onPeek: peekMotion, reduceMotion: isReduced) {
@@ -95,6 +102,14 @@ extension BarMotion {
         )
         clipLayer.masksToBounds = true
         clipLayer.add(clip, forKey: morphKey)
+        // An ancestor of the glass fades, never the glass (bars.md).
+        clipLayer.removeAnimation(forKey: morphFadeKey)
+        if fadesOut, !opening {
+            clipLayer.add(
+                morphFade(from: 1, to: 0, begin: 0, span: span),
+                forKey: morphFadeKey
+            )
+        }
         let half = span / 2
         // A fade in flight continues from where it stands.
         let shown = { (layer: CALayer, rest: Float) -> Float in
@@ -139,6 +154,7 @@ extension BarMotion {
         [parts.stage, parts.rows, parts.markInk, parts.listInk].forEach {
             $0.removeAnimation(forKey: morphKey)
         }
+        parts.stage.removeAnimation(forKey: morphFadeKey)
     }
 
     /// The stage's clip on one critically damped spring: bounds,

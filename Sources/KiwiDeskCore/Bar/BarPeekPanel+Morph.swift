@@ -9,10 +9,27 @@ import AppKit
 extension BarPeekPanel {
     /// A list grown out of its anchor, shown or closing back.
     struct Morph {
+        /// How it grew: the one answer every reader switches on, the
+        /// weak references below being payload only (#2571).
+        let growth: BarPeekSource.Growth
+        /// The overflow mark's pill, for `.fromPill`.
         weak var anchor: (any BarPeekMorphAnchor)?
+        /// The bar item it grew out of, for `.outOfItem`.
+        weak var item: NSView?
         let edge: AppBarEdge
-        /// When it opened, for the header's double-click guard.
-        let openedAt: TimeInterval
+        /// When it opened, for the double-click guard (#2063).
+        var openedAt: TimeInterval = 0
+
+        /// Whether `next` is this same list shown again: the one
+        /// answer to "redraw or replace", its growth first and only
+        /// then the anchor it grew from.
+        func continues(_ next: Morph) -> Bool {
+            guard growth == next.growth else { return false }
+            switch growth {
+            case .fromPill: return anchor != nil && anchor === next.anchor
+            case .outOfItem: return item != nil && item === next.item
+            }
+        }
     }
 
     /// What a grown list is shown from: its anchor, the pill's
@@ -33,6 +50,12 @@ extension BarPeekPanel {
         visible: CGRect
     ) {
         let shelf = LiquidGlassGate.rendered(stored)
+        let next = Morph(
+            growth: .fromPill,
+            anchor: request.anchor,
+            edge: request.edge
+        )
+        endUnlessContinued(by: next)
         let room = request.anchor.morphRoom.intersection(visible)
         let area = room.isNull ? visible : room
         let atTop = BarPeekMorph.headerAtTop(request.edge)
@@ -82,30 +105,64 @@ extension BarPeekPanel {
                 height: strip.height
             )
         )
-        let opens = morph == nil || leaving != nil || !panel.isVisible
+        guard adopt(content, next, panel: panel) else { return }
+        // The pill hides in the same pass the list orders in.
+        request.anchor.setMorphed(true, pointer: pointer())
+        playOpen(
+            panel,
+            from: request.pill,
+            in: list,
+            anchor: request.anchor.window
+        )
+    }
+
+    /// Ends a list `next` does not continue at once — another kind's,
+    /// another item's, or another mark's, whose pill comes back as
+    /// the next grows (a run has a mark at each end). Called first,
+    /// before the next list lays out its panel.
+    func endUnlessContinued(by next: Morph) {
+        guard let morph, !morph.continues(next) else { return }
+        dropMorph()
+    }
+
+    /// Takes `content` as the list shown, under `next`; answers
+    /// whether it opens — false where `next` continues the list
+    /// shown, whose open time it keeps for the double-click guard.
+    func adopt(
+        _ content: BarPeekContent,
+        _ next: Morph,
+        panel: BarPeekWindow
+    ) -> Bool {
+        let redraws = morph?.continues(next) == true
+        let opens = !redraws || leaving != nil || !panel.isVisible
         leaving = nil
         drawn = content
         panel.ignoresMouseEvents = false
-        morph = Morph(
-            anchor: request.anchor,
-            edge: request.edge,
-            openedAt: opens ? now() : morph?.openedAt ?? now()
-        )
-        guard opens else {
-            panel.invalidateShadow()
-            return
-        }
-        // The pill hides in the same pass the list orders in.
-        request.anchor.setMorphed(true, pointer: pointer())
+        var shown = next
+        shown.openedAt = opens ? now() : morph?.openedAt ?? now()
+        morph = shown
+        if !opens { panel.invalidateShadow() }
+        return opens
+    }
+
+    /// Orders `panel` in and grows its list out of `seed` inside
+    /// `list`, both on screen, `anchor`'s panel hiding as it opens;
+    /// the shadow comes back as it lands.
+    func playOpen(
+        _ panel: BarPeekWindow,
+        from seed: CGRect,
+        in list: CGRect,
+        anchor: NSWindow?
+    ) {
         panel.hasShadow = false
         panel.orderFrontRegardless()
         guard let parts = morphParts() else { return }
         let span = BarMotion.playMorph(
             parts,
             panel: panel,
-            anchor: request.anchor.window,
-            pill: local(request.pill, in: list),
-            pillRadius: min(request.pill.width, request.pill.height) / 2,
+            anchor: anchor,
+            pill: local(seed, in: list),
+            pillRadius: min(seed.width, seed.height) / 2,
             listRadius: BarPeekBody.Metrics.cornerRadius,
             opening: true
         )
@@ -138,8 +195,7 @@ extension BarPeekPanel {
             self.endMorph()
             morph.anchor?.setMorphed(false, pointer: pointer())
         }
-        guard let anchor = morph.anchor,
-            let target = BarPeek.screenFrame(of: anchor),
+        guard let target = closingTarget(morph, list: panel.frame),
             panel.frame.insetBy(dx: -1, dy: -1).contains(target),
             let parts = morphParts()
         else {
@@ -149,11 +205,12 @@ extension BarPeekPanel {
         let span = BarMotion.playMorph(
             parts,
             panel: panel,
-            anchor: anchor.window,
+            anchor: morph.anchor?.window,
             pill: local(target, in: panel.frame),
             pillRadius: min(target.width, target.height) / 2,
             listRadius: BarPeekBody.Metrics.cornerRadius,
-            opening: false
+            opening: false,
+            fadesOut: morph.growth == .outOfItem
         )
         self.land(span, land)
     }
@@ -169,15 +226,37 @@ extension BarPeekPanel {
         morph.anchor?.setMorphed(false, pointer: pointer())
     }
 
+    /// Where a closing list shrinks to on screen: the pill's current
+    /// frame, or the seed off the item's (#2571); nil where neither
+    /// is on screen.
+    private func closingTarget(_ morph: Morph, list: CGRect) -> CGRect? {
+        switch morph.growth {
+        case .fromPill:
+            return morph.anchor.flatMap { BarPeek.screenFrame(of: $0) }
+        case .outOfItem:
+            guard let item = morph.item,
+                let frame = BarPeek.screenFrame(of: item)
+            else { return nil }
+            return BarPeekMorph.seed(item: frame, list: list, edge: morph.edge)
+        }
+    }
+
+    /// Whether a press on a held list's header or item closes it:
+    /// never the second press of the double-click that opened it
+    /// (#2063).
+    func pressCloses(_ clickCount: Int) -> Bool {
+        guard let morph else { return true }
+        return BarPeekMorph.headerCloses(
+            clickCount: clickCount,
+            sinceOpen: now() - morph.openedAt,
+            doubleClick: NSEvent.doubleClickInterval
+        )
+    }
+
     /// A press on the header strip closes the list, save the second
     /// press of the double-click that opened it (#2063).
     func headerPressed(_ clickCount: Int) {
-        guard let morph, drawn != nil,
-            BarPeekMorph.headerCloses(
-                clickCount: clickCount,
-                sinceOpen: now() - morph.openedAt,
-                doubleClick: NSEvent.doubleClickInterval
-            )
+        guard morph != nil, drawn != nil, pressCloses(clickCount)
         else { return }
         onClose()
     }
@@ -211,7 +290,7 @@ extension BarPeekPanel {
         panel?.alphaValue = 1
     }
 
-    private func morphParts() -> BarPeekMorphParts? {
+    func morphParts() -> BarPeekMorphParts? {
         guard let stage = stage.layer, let rows = body.layer,
             let markInk = header.markInk.layer,
             let listInk = header.listInk.layer
@@ -226,7 +305,7 @@ extension BarPeekPanel {
 
     /// `rect` on screen in the coordinates of a panel framed
     /// `panel`.
-    private func local(_ rect: CGRect, in panel: CGRect) -> CGRect {
+    func local(_ rect: CGRect, in panel: CGRect) -> CGRect {
         rect.offsetBy(dx: -panel.minX, dy: -panel.minY)
     }
 }

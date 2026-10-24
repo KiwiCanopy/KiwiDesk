@@ -44,8 +44,7 @@ extension KiwiCore {
         return BarPeekContent(
             rows: rows,
             checks: source.isList,
-            focus: barFocus(on: space),
-            icons: source.iconsEveryGroup
+            focus: barFocus(on: space)
         )
     }
 
@@ -56,26 +55,6 @@ extension KiwiCore {
     func barFocus(on space: SpaceID?) -> WindowID? {
         guard space == nil || space == activeSpace?.id else { return nil }
         return state.workspaces.lastFocused
-    }
-
-    /// The window a click on a multi-window glyph focuses (#2063):
-    /// the one after `barFocus` in its peek's order, wrapping, or
-    /// the first where the focus is none of them — derived from
-    /// focus, so no cycle position is stored. A window the focus
-    /// door refuses (#1345) is stepped over, or the walk would stall
-    /// on it; where it refuses every one, the first, whose refusal
-    /// takes the glyph's plain switch.
-    func glyphCycleTarget(_ pick: SpaceBarGlyphPick) -> WindowID? {
-        let order =
-            barPeekContent(pick.peekSource, on: pick.space)?.order ?? []
-        guard let first = order.first else { return nil }
-        let start =
-            barFocus(on: pick.space).flatMap(order.firstIndex(of:))
-            .map { $0 + 1 } ?? 0
-        let walk = (0..<order.count).map {
-            order[(start + $0) % order.count]
-        }
-        return walk.first { !raiseCrossesDesktops($0) } ?? first
     }
 }
 

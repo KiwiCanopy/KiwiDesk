@@ -54,7 +54,6 @@ struct BarFocusSeamTests {
         #expect(items.occurrences(of: "barFocus(on: space.id)") == 2)
         for (name, file) in [
             ("func barPeekContent(", "KiwiCore+BarPeek.swift"),
-            ("func glyphCycleTarget(", "KiwiCore+BarPeek.swift"),
             ("func spaceBarMenuRows(", "KiwiCore+SpaceBarClick.swift"),
         ] {
             #expect(
