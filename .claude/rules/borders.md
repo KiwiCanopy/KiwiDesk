@@ -260,7 +260,7 @@ these:
   room-sized panel spans its screen, so a reader of the front
   windows leaves KiwiDesk's chrome out — every own window but a
   tiled one (`FloatDetection.normalFrames`,
-  `BorderMovingRoomTests` ▸ `ownWindowsLeaveFrontFrames`).
+  `BorderMovingRoomTests` ▸ `ownChromeLeavesFrontFrames`).
 
 The WindowServer `.hide` arm still orders a ring out. A
 KiwiDesk Space switch parks windows by moving them, so it raises
@@ -480,8 +480,9 @@ Obligations:
   window the cached `VisionManager.listWindows` read — the one
   front-to-back read, `KiwiCore.liveFrontWindows`, its readers held
   by `ScreenCoveringCallerCensusTests` ▸
-  `frontWindowSeamHasOneReader` — and a window tracked at the read
-  never re-enters it as another app's (`KiwiVisionClearWallpaperTests`
+  `frontWindowSeamReadersAreRuled` — and a window tracked at the
+  read never re-enters it as another app's
+  (`KiwiVisionClearWallpaperTests`
   ▸ `departedTrackedWindowStaysOut`). A pass reads the cache; a new
   read is owed by a settle pass, an empty cache or an event that
   adds or removes a window, through the coalesced `oweVisionReshape`

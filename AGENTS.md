@@ -124,37 +124,62 @@ traced at directory altitude — see **`docs/architecture.md`**.
 
 ## 3. Workflow
 
-1. **Refine and plan:** read the relevant code and the owning rule
-   file first; clarify ambiguities. For features and major fixes,
-   write a short plan (files, API surface, tests) before
-   implementing.
-2. **Act:** implement step by step; keep commits focused.
-3. **Verify:** run the **`verify-gate` skill**
-   ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md)).
-   It owns which gate a change earns and what to run.
-4. **Document:** a user-visible behavior change updates the
-   matching doc in the same change set, and a new setting gains a
-   guide section only when the owner asks (#1395). Which doc owns
-   what: [`.claude/rules/docs.md`](.claude/rules/docs.md) and
+1. **Refine:** read the relevant code, the owning rule file and the
+   issue's `### Ruling` before proposing changes; clarify
+   ambiguities first.
+2. **Plan:** for features and major fixes, write a short plan
+   (files to change, API surface, tests) before implementing.
+3. **Act:** implement step by step; keep commits focused.
+4. **Verify:** run the **`verify-gate` skill**
+   ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md))
+   — `swift build`, the tests the change earns, `scripts/lint.sh`,
+   the warning ratchet, and the release build when the change
+   touches concurrency or `Sendable`. That skill owns which gate a
+   change earns, what to run, in what order, and when CI's full
+   suite substitutes for a local run.
+5. **Document:** a user-visible behavior change updates the
+   matching doc in the same change set — code and docs never
+   describe different behavior — and unshipped behavior carries
+   `:::unreleased`. A user-facing page states only what the GUI
+   cannot, once, and a new setting gains a guide section only when
+   the owner asks (#1395). Which doc owns what:
+   [`.claude/rules/docs.md`](.claude/rules/docs.md) and
    [`.claude/rules/site.md`](.claude/rules/site.md).
-5. **Review:** once a substantial change is verified and
-   committed, run the **`review-change` skill**
+6. **Review:** once a change is verified and committed, run the
+   **`review-change` skill**
    ([`.claude/skills/review-change`](.claude/skills/review-change/SKILL.md))
+   — `code-reviewer` and `architect-reviewer` on the diff since the
+   last review point, plus the specialist lanes the diff opens —
    and address or consciously dismiss every finding before opening
-   a PR.
+   the PR. That skill owns the sequencing (parallel first round,
+   which lanes a diff earns, re-review of a fix batch) and agent
+   reuse. **Every change touching `Sources/` or `Tests/` runs it,
+   however mechanical** — a rename's prose is exactly what the
+   compiler and the suites cannot see. A change skipping review
+   says so, and why, in the PR's *Notes for Reviewer*.
 
 ### Branching & Pull Requests
 
 Branch from `main` as `<type>/<kebab-description>`, the type a
 Conventional Commit type (`feat/scrolling-snap-mode`). One focused
-change per branch; separate refactors from features. Use the
-[PR template](.github/pull_request_template.md) and reference
-issues with `fixes #123`. A first PR from an account signs the
-[CLA](CLA.md).
+change per branch; separate refactors from features.
 
-**Merge only from an up-to-date branch:** bring the branch onto
-current `main`, let CI go green on that head, then squash-merge
-(`gh pr merge <n> --squash`, or `--auto`). Never merge directly.
+**Every PR body is the [PR template](.github/pull_request_template.md),
+rendered in full** — `gh pr create --body-file` starts blank, so an
+agent fills each section itself: *Related Issue(s)* names the issue
+(`Closes #123`, never inside backticks, or `Related to #123`) or
+says why there is none; the checklist is ticked honestly, an
+unticked box carrying its reason; *How I verified* says what ran.
+A first PR from an account signs the [CLA](CLA.md) — the bot asks,
+CONTRIBUTING.md ▸ *Licensing Your Contribution* says how, and
+`scripts/protect-main.sh` requires the check on `main` (#1521).
+
+**Merge only from an up-to-date branch** (owner ruling 2026-09-14,
+retiring the 2026-08-30 merge queue): bring the branch onto current
+`main` (`git rebase origin/main` or a merge from it), let CI go
+green on that head, then squash-merge (`gh pr merge <n> --squash`,
+or `--auto` to land it the moment CI reports). Never merge
+directly.
 
 **File issues through the `file-issue` skill**
 ([.claude/skills/file-issue](.claude/skills/file-issue/SKILL.md)).
@@ -174,6 +199,8 @@ period. Optional body explains the why, wrapped at 72 columns.
 - Scope is the touched area (`animation`, `tiling`, `layout`,
   `commands`, `lua`, `ax`, `profiles`, `docs`); omit when the
   change is repo-wide.
+- Examples: `feat(layout): add track.set_wrap_focus`,
+  `fix(tiling): defer z-order restore until animations settle`.
 
 ## 4. Tooling
 
@@ -184,28 +211,43 @@ Shared automation lives in `/scripts/`, never in dot-folders.
   commit while HEAD is `main` (override with
   `KIWIDESK_ALLOW_MAIN_COMMIT=1`, never `--no-verify`).
 - `scripts/gate-lock <cmd…>` runs a heavy gate step in the one
-  machine-wide gate slot; `scripts/gate-hook` applies it to every
-  agent's `swift build` / `swift test`. A human types the prefix.
-- `./scripts/build-app.sh` packages and signs the `.app`;
-  `./scripts/release.sh <version>` cuts a release in two runs.
-  Both, and CI's `changes` gating, are
+  machine-wide gate slot, at low priority; `scripts/gate-hook` is
+  the `PreToolUse` hook that applies it to every agent's
+  `swift build` / `swift test`. A human types the prefix.
+- `./scripts/build-app.sh` packages, signs and optionally
+  notarizes the `.app` (#89).
+- `./scripts/release.sh <version>` runs **twice**: first it stamps
+  the version, runs the gate and opens a `chore/stamp-<version>`
+  PR; then, on a synced `main` after that PR merges, it cuts and
+  pushes the tag, which fires `.github/workflows/release.yml`.
+  Both scripts are
   [packaging-and-release.md](.claude/rules/packaging-and-release.md)'s.
+- CI (`.github/workflows/ci.yml`) builds, lints and tests every PR
+  and push to `main` or a release branch; a red build blocks the
+  merge. A change confined to `.github/ci-ignore.txt`'s list skips
+  the macOS jobs, and adding to that list needs
+  packaging-and-release.md, since the suite is not the only reader
+  of a path.
 - `scripts/mutate <spec.json>` proves guards red: commit first,
   it refuses a tree that differs from HEAD and restores every
   mutated file from its own bytes ([tests.md](.claude/rules/tests.md)).
 - `./scripts/sync-agents.sh` regenerates the Codex mirror of
-  `.claude/agents/` ([subagents.md](.claude/rules/subagents.md)).
+  `.claude/agents/` (`--check` fails when it is stale;
+  [subagents.md](.claude/rules/subagents.md)).
 - Optional per developer: Node `>= 18`, which only
   `scripts/sparkle-public-key.js` needs, and skill installs, which
   land in the ignored `.agents/skills/`.
 
 ### Subagent delegation (AI agents)
 
-Delegate only work that needs no conversation context: broad
-searches where only the conclusion matters, independent review of
-a finished change, proving a new guard reds (`guard-prover`).
-Stay inline for small, sequential or context-dependent work,
-including implementation: a cold agent re-deriving what the
+Spin subagents off proactively where the payoff is clear — no need
+to wait to be asked. A subagent starts with no conversation
+context, so delegate work that needs none: the review round a
+finished change owes (`code-reviewer`, `architect-reviewer` and the
+lanes `review-change` opens), proving a new guard reds
+(`guard-prover`), and broad searches where only the conclusion
+matters. Stay inline for small, sequential or context-dependent
+work, including implementation: a cold agent re-deriving what the
 session already knows costs more than it saves. The roster is in
 [subagents.md](.claude/rules/subagents.md).
 
