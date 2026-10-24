@@ -1992,7 +1992,9 @@ being a static state it draws either way.
   in that census's exemptions. A reader of the draft that a value
   still being typed must reach — a Save, the quit and close gates,
   the discard gate, a copy to the sync folder — asks for the commit
-  first, once per turn, and ⌘S lives on the Settings root, mounted
+  first, and the request goes out once per chain of calls, so a gate
+  and the leave it calls may both ask (`CommitsOnSaveOnceTests`).
+  ⌘S lives on the Settings root, mounted
   and enabled whatever the draft, since a typed value can be the
   one edit (`CommitsOnSaveCensusTests`, `SaveCommitsFocusedFieldTests`).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view

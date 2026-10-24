@@ -73,14 +73,32 @@ struct KeyboardSaveButton: View {
     }
 }
 
+/// The models whose request already went out in the running chain
+/// of calls, cleared on the run loop's next pass.
+@MainActor private var committedThisTurn: Set<ObjectIdentifier> = []
+
 extension SettingsModel {
     /// Lands a value still being typed in the draft, so what reads
-    /// the draft next reads it too (#2584).
+    /// the draft next reads it too (#2584). Every reader asks, so a
+    /// gate and the leave it calls both do: the request goes out once
+    /// per chain, since a second commit in one turn re-commits a
+    /// renamed Space against its old name.
     func commitFocusedField() {
+        let id = ObjectIdentifier(self)
+        guard committedThisTurn.insert(id).inserted else { return }
         NotificationCenter.default.post(
             name: .settingsCommitField,
             object: self
         )
+        // A run-loop block, not a Task or the main queue: both wait
+        // for the job running now to end.
+        CFRunLoopPerformBlock(
+            CFRunLoopGetMain(),
+            CFRunLoopMode.commonModes.rawValue
+        ) {
+            MainActor.assumeIsolated { _ = committedThisTurn.remove(id) }
+        }
+        CFRunLoopWakeUp(CFRunLoopGetMain())
     }
 
     /// ⌘S: commits the field being typed in, then saves when that
@@ -88,6 +106,6 @@ extension SettingsModel {
     func saveFromKeyboard() {
         commitFocusedField()
         guard primarySaveEnabled else { return }
-        saveCommitted()
+        performPrimarySave()
     }
 }

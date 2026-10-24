@@ -87,13 +87,6 @@ extension SettingsModel {
     /// footer for its naming prompt (`newProfileNamingRequested`).
     func performPrimarySave() {
         commitFocusedField()
-        saveCommitted()
-    }
-
-    /// The primary Save for a caller that already asked for the
-    /// commit: a second request in one turn re-commits a renamed
-    /// Space against its old name (#2584).
-    func saveCommitted() {
         // Read again here: a newer file may have landed since the
         // last refresh, and the refusal must precede every write.
         if primarySaveAction != .saveLua {
