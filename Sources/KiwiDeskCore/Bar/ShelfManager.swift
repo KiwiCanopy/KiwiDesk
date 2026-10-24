@@ -43,9 +43,9 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
-    /// Each hiding shelf's reveal and its indicator (#761).
+    /// Each hiding shelf's reveal and its handle (#761).
     let reveal = ShelfRevealer()
-    let indicators = ShelfIndicators()
+    let handles = ShelfHandles()
 
     /// Whether a surface `key`'s shelf opened is up: the peek
     /// anchored on its panel, or a menu a press on it opened — what

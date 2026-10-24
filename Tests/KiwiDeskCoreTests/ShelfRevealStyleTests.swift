@@ -135,7 +135,7 @@ struct ShelfRevealStyleTests {
             bar: .space
         )
         #expect(
-            core.shelves.indicators.indicatorForTesting(key)?.view.spec?
+            core.shelves.handles.handleForTesting(key)?.view.spec?
                 .reveal == .grow
         )
     }

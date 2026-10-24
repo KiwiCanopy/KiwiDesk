@@ -115,7 +115,7 @@ struct OverlayGlassGateTests {
         "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
         "Vision/VisionPlate.swift": "OverlayGlassGateTests",
-        "Bar/ShelfIndicatorView.swift": "OverlayGlassGateTests",
+        "Bar/ShelfHandleView.swift": "OverlayGlassGateTests",
     ]
 
     @Test("every glass host in Core names the gate that covers it")

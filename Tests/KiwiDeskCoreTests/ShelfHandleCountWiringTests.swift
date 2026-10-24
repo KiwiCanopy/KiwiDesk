@@ -95,7 +95,7 @@ struct ShelfHandleCountWiringTests {
         core.updateBars()
         let key = ShelfManager.Key(display: display.id, edge: .top)
         let view = try #require(
-            core.shelves.indicators.indicatorForTesting(
+            core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .app)
             )?.view
         )
@@ -137,7 +137,7 @@ struct ShelfHandleCountWiringTests {
         core.updateBars()
         let key = ShelfManager.Key(display: display.id, edge: .top)
         #expect(
-            core.shelves.indicators.indicatorForTesting(
+            core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .app)
             ) == nil
         )
@@ -148,7 +148,7 @@ struct ShelfHandleCountWiringTests {
     @Test("A reveal grows out of the handle's own grown plate")
     func revealStartsFromTheGrownPlate() throws {
         let mark = CGRect(x: 100, y: 0, width: 36, height: 8)
-        let growth = ShelfIndicatorSpec.Growth(widen: 10, across: 0)
+        let growth = ShelfHandleSpec.Growth(widen: 10, across: 0)
         var path = BarMotion.RevealPath(kind: .grow)
         path.origin = mark
         path.growth = growth
@@ -210,7 +210,7 @@ struct ShelfHandleCountWiringTests {
         core.updateBars()
         let key = ShelfManager.Key(display: display.id, edge: .top)
         let spec = try #require(
-            core.shelves.indicators.indicatorForTesting(
+            core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .app)
             )?.view.spec
         )

@@ -39,7 +39,7 @@ extension BarMotion {
     /// two never part on the way to the reveal.
     struct RevealMark: Equatable {
         var frame: CGRect
-        var growth: ShelfIndicatorSpec.Growth = .none
+        var growth: ShelfHandleSpec.Growth = .none
     }
 
     /// A reveal's inputs, whichever kind plays it: the slide's
@@ -51,7 +51,7 @@ extension BarMotion {
         var offset: CGVector = .zero
         var origin: CGRect = .zero
         /// How the origin mark grows past the plain hover (#2567).
-        var growth: ShelfIndicatorSpec.Growth = .none
+        var growth: ShelfHandleSpec.Growth = .none
         var plate: CGRect?
         var plateRadius: CGFloat = 0
         var edge: AppBarEdge = .top

@@ -6,7 +6,7 @@ import AppKit
 /// monogram, as the Space Bar draws it (`spaceIdentifier`), never
 /// its layout symbol. At rest no dot carries it: an 8 pt mark
 /// holds no legible glyph.
-extension ShelfIndicatorSpec {
+extension ShelfHandleSpec {
     struct Label: Equatable {
         let glyph: SpaceGlyph
         let font: NSFont
