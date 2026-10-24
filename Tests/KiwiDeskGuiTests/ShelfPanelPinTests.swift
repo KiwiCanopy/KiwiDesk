@@ -25,10 +25,10 @@ struct ShelfPanelPinTests {
                     && source.contains(
                         "core.overflowMarks.ordersPanels = false"
                     )
-                    // A hidden shelf's indicator is a panel too
+                    // A hidden shelf's handle is a panel too
                     // (#761).
                     && source.contains(
-                        "core.shelves.indicators.ordersIndicatorPanels"
+                        "core.shelves.handles.ordersHandlePanels"
                             + " = false"
                     ),
                 .init(rawValue: "\(target) misses the pin")

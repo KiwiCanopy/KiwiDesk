@@ -14,11 +14,11 @@ struct ShelfHandleDrawnTests {
     init() { LiquidGlassGate.override = { false } }
 
     private func spec(
-        mark: ShelfIndicatorSpec.Mark = .line,
+        mark: ShelfHandleSpec.Mark = .line,
         edge: AppBarEdge = .top,
         rim: CGFloat = 3
-    ) -> ShelfIndicatorSpec {
-        ShelfIndicatorSpec(
+    ) -> ShelfHandleSpec {
+        ShelfHandleSpec(
             mark: mark,
             frame: edge.isHorizontal
                 ? CGRect(x: 100, y: 0, width: 36, height: 8)
@@ -36,15 +36,15 @@ struct ShelfHandleDrawnTests {
         )
     }
 
-    /// `spec` rendered as `ShelfIndicator.show` sizes it, and the
+    /// `spec` rendered as `ShelfHandle.show` sizes it, and the
     /// plate's frame in the view — which the panel's room holds.
     private func render(
-        _ spec: ShelfIndicatorSpec
+        _ spec: ShelfHandleSpec
     ) -> (rep: NSBitmapImageRep, plate: CGRect)? {
-        let view = ShelfIndicatorView()
+        let view = ShelfHandleView()
         view.frame = CGRect(
             origin: .zero,
-            size: ShelfIndicator.room(of: spec).size
+            size: ShelfHandle.room(of: spec).size
         )
         view.render(spec, animated: false)
         #expect(
@@ -111,7 +111,7 @@ struct ShelfHandleDrawnTests {
     func countPillAsDrawn() throws {
         for windows in [7, 128] {
             var top = spec()
-            top.count = ShelfIndicatorSpec.count(
+            top.count = ShelfHandleSpec.count(
                 windows,
                 font: NSFont.systemFont(ofSize: 12),
                 edge: .top,
@@ -122,10 +122,10 @@ struct ShelfHandleDrawnTests {
                 blackSpan(rep, row: true, at: plate.midY)
             )
             #expect(
-                along.lowerBound - plate.minX >= ShelfIndicatorSpec.fillRun - 1
+                along.lowerBound - plate.minX >= ShelfHandleSpec.fillRun - 1
             )
             #expect(
-                plate.maxX - along.upperBound >= ShelfIndicatorSpec.fillRun - 1
+                plate.maxX - along.upperBound >= ShelfHandleSpec.fillRun - 1
             )
             // Through the pill's straight run, past its rounded end.
             let across = try #require(
@@ -143,7 +143,7 @@ struct ShelfHandleDrawnTests {
     @Test("A side edge's count pill stands inside the widened rim")
     func sidePillAsDrawn() throws {
         var side = spec(edge: .left)
-        side.count = ShelfIndicatorSpec.count(
+        side.count = ShelfHandleSpec.count(
             42,
             font: NSFont.systemFont(ofSize: 12),
             edge: .left,
@@ -152,10 +152,10 @@ struct ShelfHandleDrawnTests {
         let (rep, plate) = try #require(render(side))
         let along = try #require(blackSpan(rep, row: false, at: plate.midX))
         #expect(
-            along.lowerBound - plate.minY >= ShelfIndicatorSpec.fillRun - 1
+            along.lowerBound - plate.minY >= ShelfHandleSpec.fillRun - 1
         )
         #expect(
-            plate.maxY - along.upperBound >= ShelfIndicatorSpec.fillRun - 1
+            plate.maxY - along.upperBound >= ShelfHandleSpec.fillRun - 1
         )
         let pill = side.pill(of: try #require(side.count))
         let across = try #require(
@@ -179,7 +179,7 @@ struct ShelfHandleDrawnTests {
             mark: .dots([.init(current: true, occupied: true)]),
             rim: 1
         )
-        dots.label = ShelfIndicatorSpec.label(
+        dots.label = ShelfHandleSpec.label(
             .text("1", tinted: true),
             font: NSFont.systemFont(ofSize: 12)
         )

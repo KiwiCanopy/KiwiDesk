@@ -6,7 +6,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A hiding shelf through the real drivers (#761): `updateBars()`
-/// draws its indicator and no bar until the shelf is revealed,
+/// draws its handle and no bar until the shelf is revealed,
 /// the show/hide action reveals it without touching the layout,
 /// and setting the mode is the one change that moves the bounds.
 @Suite("Shelf auto-hide through the drivers (#761)", .serialized)
@@ -53,18 +53,18 @@ struct ShelfAutoHideCoreTests {
         "A hidden shelf draws its Space dots and no bar",
         .enabled(if: NSScreen.main != nil)
     )
-    func hiddenDrawsTheIndicator() throws {
+    func hiddenDrawsTheHandle() throws {
         let (core, display) = try #require(makeCore(.auto))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let key = ShelfManager.Key(display: display, edge: .top)
         #expect(core.spaceBars.shownStrips.isEmpty)
         #expect(core.shelves.reveal.hasTarget(on: key))
-        let indicator = try #require(
-            core.shelves.indicators.indicatorForTesting(
+        let handle = try #require(
+            core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .space)
             )
         )
-        let spec = try #require(indicator.view.spec)
+        let spec = try #require(handle.view.spec)
         guard case .dots(let dots) = spec.mark else {
             Issue.record("a Space Bar shelf draws Space dots")
             return
@@ -96,7 +96,7 @@ struct ShelfAutoHideCoreTests {
         #expect(counts.retiles + counts.passesHeld == 0)
         #expect(counts.barRenders > 0)
         let spec = try #require(
-            core.shelves.indicators.indicatorForTesting(
+            core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .space)
             )?.view.spec
         )
@@ -215,15 +215,15 @@ struct ShelfAutoHideCoreTests {
     }
 
     @Test(
-        "The indicator lets the mouse through",
+        "The handle lets the mouse through",
         .enabled(if: NSScreen.main != nil)
     )
-    func indicatorIgnoresTheMouse() throws {
+    func handleIgnoresTheMouse() throws {
         let (core, display) = try #require(makeCore(.auto))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let key = ShelfManager.Key(display: display, edge: .top)
         let panel = try #require(
-            core.shelves.indicators.indicatorForTesting(
+            core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .space)
             )?.panel
         )

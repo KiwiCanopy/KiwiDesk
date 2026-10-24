@@ -11,9 +11,9 @@ extension KiwiCore.HidingShelves {
         key: ShelfRevealer.Key,
         settings: TilingSettings
     ) -> (
-        mark: ShelfIndicatorSpec.Mark,
-        label: ShelfIndicatorSpec.Label?,
-        position: ShelfIndicatorSpec.Position?
+        mark: ShelfHandleSpec.Mark,
+        label: ShelfHandleSpec.Label?,
+        position: ShelfHandleSpec.Position?
     )? {
         let spaces = (items ?? []).filter { $0.space != nil }
         guard !spaces.isEmpty else { return nil }
@@ -37,14 +37,14 @@ extension KiwiCore.HidingShelves {
             let ends =
                 (index == shown.range.lowerBound && shown.before)
                 || (index == shown.range.upperBound - 1 && shown.after)
-            return ShelfIndicatorSpec.Dot(
+            return ShelfHandleSpec.Dot(
                 current: spaces[index].active,
                 occupied: spaces[index].windowCount > 0,
                 small: ends && !spaces[index].active
             )
         }
         let label = current.map {
-            ShelfIndicatorSpec.label(
+            ShelfHandleSpec.label(
                 spaces[$0].spaceGlyph,
                 font: Self.markNameFont(settings)
             )
@@ -64,7 +64,7 @@ extension KiwiCore.HidingShelves {
         let look = settings.spaceBarLook
         return min(
             look.identifierFontSize(forDepth: look.shelf.thickness),
-            ShelfIndicatorSpec.labelDepth - 4
+            ShelfHandleSpec.labelDepth - 4
         )
     }
 

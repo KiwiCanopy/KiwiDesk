@@ -283,7 +283,7 @@ func makeTestCore(
     // outlives its test (#1894): placed, never ordered in.
     core.shelves.ordersPanels = false
     core.overflowMarks.ordersPanels = false
-    core.shelves.indicators.ordersIndicatorPanels = false
+    core.shelves.handles.ordersHandlePanels = false
     // The drawn-menu-bar read (#1386) lists the host's real
     // WindowServer windows; a test's displays are fake.
     core.eventLoop.displayWatch.readDrawnMenuBars = { [] }

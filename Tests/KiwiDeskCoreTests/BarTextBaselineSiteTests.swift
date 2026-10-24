@@ -182,7 +182,7 @@ struct BarTextBaselineSiteTests {
             "no installed face separates the line box from the figures"
         )
         let font = font(family)
-        var spec = ShelfIndicatorSpec(
+        var spec = ShelfHandleSpec(
             mark: .line,
             frame: CGRect(x: 0, y: 0, width: 36, height: 8),
             edge: .top,
@@ -196,14 +196,14 @@ struct BarTextBaselineSiteTests {
             reveal: .slide,
             rimWidth: 1
         )
-        let count = ShelfIndicatorSpec.count(
+        let count = ShelfHandleSpec.count(
             11,
             font: font,
             edge: .top,
             pillDepth: spec.pillDepth
         )
         spec.count = count
-        let dots = ShelfIndicatorDots(
+        let dots = ShelfHandleDots(
             frame: CGRect(x: 0, y: 0, width: 300, height: 120)
         )
         dots.mark = CGRect(x: 0, y: 0, width: 300, height: 120)

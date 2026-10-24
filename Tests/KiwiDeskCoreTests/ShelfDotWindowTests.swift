@@ -44,7 +44,7 @@ struct ShelfDotWindowTests {
                     return
                 }
                 #expect(
-                    ShelfIndicatorSpec.length(of: mark)
+                    ShelfHandleSpec.length(of: mark)
                         <= ShelfMarkPlacement.bandLength
                 )
             }
@@ -98,15 +98,15 @@ struct ShelfDotWindowTests {
 
     @Test("the hovered pill takes the label's room; the plate widens")
     func pillTakesTheLabel() {
-        let label = ShelfIndicatorSpec.label(
+        let label = ShelfHandleSpec.label(
             .text("MA", tinted: true),
             font: NSFont.systemFont(ofSize: 8)
         )
         #expect(label.width > 0)
         let mark = CGRect(x: 10, y: 0, width: 40, height: 8)
         let extra =
-            label.width + 2 * ShelfIndicatorSpec.labelPad
-            - ShelfIndicatorSpec.currentDot
+            label.width + 2 * ShelfHandleSpec.labelPad
+            - ShelfHandleSpec.currentDot
         let plate = BarMotion.hoverPlate(
             mark: mark,
             growth: .init(widen: extra),
@@ -115,7 +115,7 @@ struct ShelfDotWindowTests {
         )
         #expect(
             plate.width == mark.width + extra + 2
-                * ShelfIndicatorSpec.hoverGrowth
+                * ShelfHandleSpec.hoverGrowth
         )
     }
 }
@@ -128,9 +128,9 @@ struct ShelfDotSpokenTests {
     @Test("the value names the Space and the count")
     func valueNamesThePlace() {
         LocalizationManager.shared.select("en")
-        let view = ShelfIndicatorView()
+        let view = ShelfHandleView()
         view.render(
-            ShelfIndicatorSpec(
+            ShelfHandleSpec(
                 mark: .dots([.init(current: true, occupied: true)]),
                 frame: CGRect(x: 0, y: 0, width: 20, height: 8),
                 edge: .top,

@@ -3,7 +3,7 @@ import AppKit
 /// What a hiding bar draws while hidden (#761): Space dots for the
 /// Space Bar, a short line for the App Bar — one mark per bar, two
 /// on an edge both bars hide on.
-struct ShelfIndicatorSpec: Equatable {
+struct ShelfHandleSpec: Equatable {
     enum Mark: Equatable {
         /// One per Space on the screen, in bar order.
         case dots([Dot])
@@ -23,7 +23,7 @@ struct ShelfIndicatorSpec: Equatable {
     }
 
     let mark: Mark
-    /// The indicator's frame, AX coordinates.
+    /// The handle's frame, AX coordinates.
     let frame: CGRect
     /// The edge its shelf hides on.
     let edge: AppBarEdge
@@ -35,7 +35,7 @@ struct ShelfIndicatorSpec: Equatable {
     let emptyInk: String
     /// The bars' indicator colour, the hover's border.
     let highlight: String
-    /// Whether its bar is shown over it: the indicator then
+    /// Whether its bar is shown over it: the handle then
     /// draws nothing but stays for VoiceOver, its value "shown".
     let shown: Bool
     /// The pointer rests in the band, the reveal delay running:
@@ -54,13 +54,13 @@ struct ShelfIndicatorSpec: Equatable {
     var yields = false
 
     /// The current Space's name, drawn in its dot while the mark
-    /// is hovered (`label`, `ShelfIndicatorSpec+Label`).
+    /// is hovered (`label`, `ShelfHandleSpec+Label`).
     var label: Label?
     /// Where the current Space sits, for VoiceOver: its place
     /// from 1 and the Space count, which the dots may not all show.
     var position: Position?
     /// The App Bar mark's window count, drawn while hovered and
-    /// spoken always (`ShelfIndicatorSpec+Count`, #2567).
+    /// spoken always (`ShelfHandleSpec+Count`, #2567).
     var count: Count?
     /// The plate draws as tinted glass, as its bar does
     /// (`LiquidGlassGate.rendered`, #2567).
@@ -78,7 +78,7 @@ struct ShelfIndicatorSpec: Equatable {
         return dot.occupied ? ink : emptyInk
     }
 
-    /// The indicator's depth across its edge (pt).
+    /// The handle's depth across its edge (pt).
     static let depth = KiwiShelf.hiddenDepth
     static let dot: CGFloat = 4
     static let smallDot: CGFloat = 2
@@ -100,7 +100,7 @@ struct ShelfIndicatorSpec: Equatable {
     /// Its distance from the shelf's screen side, inside the band.
     static let inset: CGFloat = 0
 
-    /// The indicator's length along its edge.
+    /// The handle's length along its edge.
     static func length(of mark: Mark) -> CGFloat {
         switch mark {
         case .line:
@@ -114,7 +114,7 @@ struct ShelfIndicatorSpec: Equatable {
         }
     }
 
-    /// Where the indicator sits on `strip` (AX, y down): centred
+    /// Where the handle sits on `strip` (AX, y down): centred
     /// on `centre` — an offset along `edge` from the strip's start,
     /// its band's middle — else on the strip, against its screen
     /// side.
@@ -164,15 +164,15 @@ struct ShelfIndicatorSpec: Equatable {
     }
 }
 
-/// One hiding shelf's indicator panel (#761). It ignores the mouse
+/// One hiding shelf's handle panel (#761). It ignores the mouse
 /// — the hover band is judged from the pointer, and a click on it
 /// pins nothing — so the windows below it keep their clicks.
 @MainActor
-final class ShelfIndicator {
-    let view = ShelfIndicatorView()
+final class ShelfHandle {
+    let view = ShelfHandleView()
     private(set) var panel: NSPanel?
     #if DEBUG
-        /// Set by `ShelfIndicators.ordersIndicatorPanels` (#1894).
+        /// Set by `ShelfHandles.ordersHandlePanels` (#1894).
         var ordersPanel = true
     #endif
 
@@ -180,8 +180,8 @@ final class ShelfIndicator {
         panel?.orderOut(nil)
     }
 
-    func show(_ spec: ShelfIndicatorSpec) {
-        // A shown indicator asked again for what it draws moves
+    func show(_ spec: ShelfHandleSpec) {
+        // A shown handle asked again for what it draws moves
         // nothing (#1901).
         if panel?.isVisible == true, view.spec == spec { return }
         let panel = self.panel ?? makePanel()
@@ -212,7 +212,7 @@ final class ShelfIndicator {
     /// The panel's frame for `spec`, AX coordinates: its hovered
     /// plate with the label's room, which never crosses the
     /// screen side.
-    static func room(of spec: ShelfIndicatorSpec) -> CGRect {
+    static func room(of spec: ShelfHandleSpec) -> CGRect {
         BarMotion.hoverPlate(
             mark: spec.frame,
             growth: spec.growth,
@@ -224,7 +224,7 @@ final class ShelfIndicator {
     /// The mark's resting frame inside a view `bounds` sized by
     /// `room(of:)`.
     static func mark(
-        of spec: ShelfIndicatorSpec,
+        of spec: ShelfHandleSpec,
         in bounds: CGRect
     ) -> CGRect {
         let room = room(of: spec)
@@ -244,44 +244,44 @@ final class ShelfIndicator {
     }
 }
 
-/// Every hiding bar's indicator, keyed like its reveal.
+/// Every hiding bar's handle, keyed like its reveal.
 @MainActor
-final class ShelfIndicators {
+final class ShelfHandles {
     typealias Key = ShelfRevealer.Key
 
-    private var indicators: [Key: ShelfIndicator] = [:]
+    private var handles: [Key: ShelfHandle] = [:]
     /// Each Space mark's first dot shown last pass
     /// (`ShelfDotWindow`), handed to the next; kept only beside a
     /// mark still drawn.
     var dotStarts: [Key: Int] = [:]
-    /// The indicator's press: the show/hide action on its bar.
+    /// The handle's press: the show/hide action on its bar.
     var onPress: @MainActor (Key) -> Void = { _ in }
     #if DEBUG
         /// Off in both `makeTestCore` twins (#1894).
-        var ordersIndicatorPanels = true
+        var ordersHandlePanels = true
     #endif
 
-    /// Shows `specs`, dropping every indicator absent from them.
-    func sync(_ specs: [Key: ShelfIndicatorSpec]) {
-        for key in indicators.keys where specs[key] == nil {
-            indicators.removeValue(forKey: key)?.hide()
+    /// Shows `specs`, dropping every handle absent from them.
+    func sync(_ specs: [Key: ShelfHandleSpec]) {
+        for key in handles.keys where specs[key] == nil {
+            handles.removeValue(forKey: key)?.hide()
         }
         dotStarts = dotStarts.filter { specs[$0.key] != nil }
         for (key, spec) in specs {
-            let indicator = indicators[key] ?? ShelfIndicator()
-            indicators[key] = indicator
+            let handle = handles[key] ?? ShelfHandle()
+            handles[key] = handle
             #if DEBUG
-                indicator.ordersPanel = ordersIndicatorPanels
+                handle.ordersPanel = ordersHandlePanels
             #endif
-            indicator.view.carriesSpaceBar = key.bar == .space
-            indicator.view.onPress = { [weak self] in self?.onPress(key) }
-            indicator.show(spec)
+            handle.view.carriesSpaceBar = key.bar == .space
+            handle.view.onPress = { [weak self] in self?.onPress(key) }
+            handle.show(spec)
         }
     }
 
     #if DEBUG
-        func indicatorForTesting(_ key: Key) -> ShelfIndicator? {
-            indicators[key]
+        func handleForTesting(_ key: Key) -> ShelfHandle? {
+            handles[key]
         }
     #endif
 }

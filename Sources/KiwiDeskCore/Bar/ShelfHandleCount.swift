@@ -6,8 +6,8 @@ import AppKit
 /// window draws no mark, so the count is never 0 — with the number
 /// on its figures band and the glyph tinted against the pill, laid
 /// out as one unit.
-extension ShelfIndicatorDots {
-    func drawCount(_ spec: ShelfIndicatorSpec) {
+extension ShelfHandleDots {
+    func drawCount(_ spec: ShelfHandleSpec) {
         guard spec.hovered, let count = spec.count else { return }
         let size = spec.pill(of: count)
         let pill =
@@ -41,7 +41,7 @@ extension ShelfIndicatorDots {
             drawNumber(count, centredOn: middle, ink: ink)
             lead +=
                 (spec.horizontal ? count.number.width : count.number.height)
-                + ShelfIndicatorSpec.countGap
+                + ShelfHandleSpec.countGap
         }
         let origin =
             spec.horizontal
@@ -53,7 +53,7 @@ extension ShelfIndicatorDots {
     /// The number's ink centred on `middle`, its baseline the
     /// figures band's (`BarTextGlyph`).
     private func drawNumber(
-        _ count: ShelfIndicatorSpec.Count,
+        _ count: ShelfHandleSpec.Count,
         centredOn middle: CGPoint,
         ink: NSColor
     ) {
@@ -77,12 +77,12 @@ extension ShelfIndicatorDots {
 
     /// The count's glyph at its measured size, tinted `ink`.
     private func drawGlyph(
-        _ count: ShelfIndicatorSpec.Count,
+        _ count: ShelfHandleSpec.Count,
         at origin: CGPoint,
         ink: NSColor
     ) {
         guard
-            let image = ShelfIndicatorSpec.countSymbol(
+            let image = ShelfHandleSpec.countSymbol(
                 count.glyphName,
                 size: count.glyphPoint
             )
