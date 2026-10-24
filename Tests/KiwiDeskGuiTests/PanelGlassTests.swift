@@ -187,6 +187,34 @@ struct PanelGlassTests {
         #expect(paint.rowInk(selected: false, lifted: false) == nil)
     }
 
+    /// KiwiHub's scope switch is Settings' segmented picker; its
+    /// selection and inks come from the paint, whose untinted
+    /// defaults are the picker's own tokens (#2569).
+    @Test("The scope switch paints through KiwiHub's paint")
+    func scopeSwitchReadsThePaint() throws {
+        let picker = try Self.source(
+            "Settings/Components/Common/SegmentedPicker.swift"
+        )
+        #expect(picker.contains("@Environment(\\.kiwiHubPaint)"))
+        #expect(picker.contains(".fill(paint.selection)"))
+        #expect(picker.contains("paint.selectionInk"))
+        #expect(picker.contains("paint.selectionInkSecondary"))
+        #expect(picker.contains("? paint.rowHover : .clear"))
+        for token in [
+            "SettingsTheme.accent)", "SettingsTheme.accentInk",
+            "SettingsTheme.chipRest",
+        ] {
+            #expect(!picker.contains(token), "\(token)")
+        }
+        let paint = KiwiHubPaint()
+        #expect(paint.selection == SettingsTheme.accent)
+        #expect(paint.selectionInk == SettingsTheme.accentInk)
+        #expect(
+            paint.selectionInkSecondary == SettingsTheme.accentInkSecondary
+        )
+        #expect(paint.rowHover == SettingsTheme.chipRest)
+    }
+
     @Test("Rows, chips and tiles paint through KiwiHub's paint")
     func rowsReadThePaint() throws {
         for path in [

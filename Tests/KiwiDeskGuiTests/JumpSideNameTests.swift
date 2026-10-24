@@ -142,8 +142,10 @@ struct JumpSideNameTests {
         let hintBody = rest[..<end.upperBound]
         #expect(hintBody.contains(".accessibilityHidden(true)"))
         // The inks the contrast suite measures, drawn here — the
-        // pairing reads the token and cannot see the site.
-        #expect(hintBody.contains("SettingsTheme.accentInkSecondary"))
+        // pairing reads the token and cannot see the site. The
+        // selected ink is KiwiHub's paint, whose default is the token
+        // (`PanelGlassTests` ▸ `scopeSwitchReadsThePaint`).
+        #expect(hintBody.contains("paint.selectionInkSecondary"))
         #expect(hintBody.contains(": SettingsTheme.ink2"))
     }
 

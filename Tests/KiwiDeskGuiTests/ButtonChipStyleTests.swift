@@ -74,6 +74,12 @@ struct ButtonChipStyleTests {
                     + "SegmentedPicker.swift"
             )
         )
+        let style = try SourceScan.blankedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "SegmentPressStyle.swift"
+            )
+        )
         let squashed = picker.split(whereSeparator: \.isWhitespace)
             .joined()
         #expect(
@@ -82,7 +88,7 @@ struct ButtonChipStyleTests {
             )
         )
         #expect(
-            squashed.contains(
+            style.split(whereSeparator: \.isWhitespace).joined().contains(
                 "presses&&configuration.isPressed?SettingsTheme.chipHover"
             )
         )

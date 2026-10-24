@@ -38,6 +38,9 @@ struct SegmentedPicker<Value: Hashable>: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
+    /// KiwiHub's selection inside it (#2569); elsewhere its defaults
+    /// are this picker's own Settings tokens.
+    @Environment(\.kiwiHubPaint) private var paint
 
     init(
         _ label: String? = nil,
@@ -234,8 +237,7 @@ struct SegmentedPicker<Value: Hashable>: View {
             labelText(title, selected: selected)
                 .foregroundStyle(
                     selected
-                        ? SettingsTheme.accentInk
-                        : SettingsTheme.ink
+                        ? AnyShapeStyle(paint.selectionInk) : restInk(index)
                 )
             if let hint {
                 hintText(
@@ -252,7 +254,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         .background(
             Capsule().fill(
                 isEnabled && !selected && hoveredIndex == index
-                    ? SettingsTheme.chipRest : .clear
+                    ? paint.rowHover : .clear
             )
         )
         .animation(
@@ -274,8 +276,14 @@ struct SegmentedPicker<Value: Hashable>: View {
             .font(.callout)
             .foregroundStyle(
                 selected
-                    ? SettingsTheme.accentInkSecondary
-                    : hovered ? SettingsTheme.ink : SettingsTheme.ink2
+                    ? AnyShapeStyle(paint.selectionInkSecondary)
+                    : paint.tinted
+                        ? hovered
+                            ? AnyShapeStyle(paint.hoverInk ?? .primary)
+                            : AnyShapeStyle(.secondary)
+                        : AnyShapeStyle(
+                            hovered ? SettingsTheme.ink : SettingsTheme.ink2
+                        )
             )
             .accessibilityHidden(true)
     }
@@ -314,23 +322,16 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     private var pill: some View {
         Capsule()
-            .fill(SettingsTheme.accent)
+            .fill(paint.selection)
     }
-}
 
-/// A segment's button: `.plain` faded its label while pressed, which
-/// read lighter than the hover; an unselected segment presses one
-/// step darker than its hover lift instead, the chip ladder's
-/// order (#2377).
-private struct SegmentPressStyle: ButtonStyle {
-    let presses: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label.background(
-            Capsule().fill(
-                presses && configuration.isPressed
-                    ? SettingsTheme.chipHover : .clear
-            )
-        )
+    /// An unselected label's ink: the theme's, or on KiwiHub's Fill
+    /// the panel's own hierarchy and its hover ink (gui.md).
+    private func restInk(_ index: Int) -> AnyShapeStyle {
+        guard paint.tinted else { return AnyShapeStyle(SettingsTheme.ink) }
+        if hoveredIndex == index, let ink = paint.hoverInk {
+            return AnyShapeStyle(ink)
+        }
+        return AnyShapeStyle(.primary)
     }
 }
