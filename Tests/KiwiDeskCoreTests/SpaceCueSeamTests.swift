@@ -52,4 +52,40 @@ struct SpaceCueSeamTests {
         }.map(\.0)
         #expect(readers == ["KiwiCore+SpaceSlide.swift"])
     }
+
+    /// A Space Bar pick pays no cue (#2591): each bar door that can
+    /// switch opens the scope, and only the payer reads its bit.
+    /// The window menu presents modally, so no fixture drives its
+    /// rows and this count is their one net.
+    @Test("the bar doors open the scope the payer alone reads")
+    func barDoorsOpenTheScope() throws {
+        let files = try Self.sources()
+        func count(_ needle: String) -> [String: Int] {
+            files.reduce(into: [:]) { out, file in
+                let n = file.1.components(separatedBy: needle).count - 1
+                if n > 0 { out[file.0] = n }
+            }
+        }
+        #expect(
+            count("fromSpaceBar {") == [
+                "KiwiCore+Bootstrap.swift": 1,
+                "KiwiCore+SpaceBarClick.swift": 2,
+                "KiwiCore+BarPeek.swift": 1,
+            ]
+        )
+        let row = "self?.fromSpaceBar { self?.pickBarRow(id, on: space) }"
+        #expect(
+            count(row) == [
+                "KiwiCore+SpaceBarClick.swift": 1,
+                "KiwiCore+BarPeek.swift": 1,
+            ]
+        )
+        // The declaration, the scope's three writes and the payer.
+        #expect(
+            count("spaceBarPicking") == [
+                "CueHooks.swift": 1,
+                "SpaceSwitchCue.swift": 4,
+            ]
+        )
+    }
 }
