@@ -85,7 +85,9 @@ extension KiwiCore {
         }
         spaceBars.onSelectSpace = { [weak self] id in
             self?.withUserMotion {
-                _ = self?.focusSpace([.string(id.raw)])
+                self?.fromSpaceBar {
+                    _ = self?.focusSpace([.string(id.raw)])
+                }
             }
         }
         wireSpaceBarGlyphs()

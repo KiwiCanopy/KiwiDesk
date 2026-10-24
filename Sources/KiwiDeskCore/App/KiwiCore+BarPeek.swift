@@ -19,7 +19,7 @@ extension KiwiCore {
             self?.barPeekContent(source, on: space)
         }
         peek.pick = { [weak self] id, space in
-            self?.pickBarRow(id, on: space)
+            self?.fromSpaceBar { self?.pickBarRow(id, on: space) }
         }
         peek.openMenu = { [weak self] source, space, anchor in
             self?.presentBarWindowMenu(

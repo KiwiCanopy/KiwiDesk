@@ -3683,6 +3683,14 @@ Standing it down there made the setting look dead to anyone whose
 Space Bar is on every screen, and the plate says the Space once,
 for a moment, where the bar says it all the time.
 
+*Except where the Space Bar picked the switch (#2591).* A chip, a
+glyph or a list row clicked on the Space Bar names the Space the
+user chose, so a plate naming it again is noise. `paySpaceCue`
+stands down inside the one `fromSpaceBar` scope, which the bar's
+own pick doors open. The slide still plays there: it answers
+which way the switch went, and the click does not answer that.
+A Space reached by any other door keeps the plate.
+
 *Neither cue plays over a full-screen app or a presentation.* The
 plate and the slide both stand down where the shelf does
 (`shelfStandsDown`), and the switch there is instant with no

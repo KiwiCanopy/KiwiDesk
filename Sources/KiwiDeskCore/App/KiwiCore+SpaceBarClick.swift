@@ -11,7 +11,9 @@ import AppKit
 extension KiwiCore {
     func wireSpaceBarGlyphs() {
         spaceBars.glyphActions.pick = { [weak self] pick in
-            self?.withUserMotion { self?.pickFromSpaceBar(pick) }
+            self?.withUserMotion {
+                self?.fromSpaceBar { self?.pickFromSpaceBar(pick) }
+            }
         }
         spaceBars.glyphActions.accessibilityPress = { [weak self] pick in
             self?.pressSpaceBarGlyph(pick)
@@ -74,7 +76,7 @@ extension KiwiCore {
         guard !rows.isEmpty else { return }
         let menu = SpaceBarWindowMenu.make(rows, kind: kind) {
             [weak self] id in
-            self?.pickBarRow(id, on: space)
+            self?.fromSpaceBar { self?.pickBarRow(id, on: space) }
         }
         spaceBars.glyphActions.present(menu, anchor)
     }

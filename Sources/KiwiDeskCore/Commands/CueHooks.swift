@@ -9,4 +9,6 @@ import Foundation
 final class CueHooks {
     var onModeCue: @MainActor (ModeCycleCue) -> Void = { _ in }
     var onSpaceCue: @MainActor (SpaceSwitchCue) -> Void = { _ in }
+    /// Set while a Space Bar pick runs (`fromSpaceBar`).
+    var spaceBarPicking = false
 }

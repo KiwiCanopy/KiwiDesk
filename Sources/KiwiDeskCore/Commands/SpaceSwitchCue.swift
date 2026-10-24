@@ -28,9 +28,11 @@ extension KiwiCore {
     /// Called by `spaceSwitchRetile` alone, after an explicit
     /// switch the slide did not play on, while the drawn transition
     /// is Show the Space (#2524) — on every screen, a Space Bar or
-    /// not, save where the shelf stands down (#1787).
+    /// not, save where the shelf stands down (#1787) and a switch
+    /// the Space Bar picked, whose chip already named the Space.
     func paySpaceCue(on display: DisplayID) {
         guard drawnSpaceTransition == .show,
+            !cueHooks.spaceBarPicking,
             let space = state.workspaces.activeSpace(on: display),
             let mode = state.workspaces[space]?.mode,
             !shelfStandsDown(on: display)
@@ -38,6 +40,15 @@ extension KiwiCore {
         cueHooks.onSpaceCue(
             SpaceSwitchCue(display: display, space: space, mode: mode)
         )
+    }
+
+    /// Runs a Space Bar pick — a chip, a glyph, a list row — whose
+    /// switch pays no Space cue; the slide still plays.
+    func fromSpaceBar(_ body: () -> Void) {
+        let outer = cueHooks.spaceBarPicking
+        cueHooks.spaceBarPicking = true
+        defer { cueHooks.spaceBarPicking = outer }
+        body()
     }
 
     /// `KiwiDesk.set_space_transition(name)` (#2524): `slide`,
