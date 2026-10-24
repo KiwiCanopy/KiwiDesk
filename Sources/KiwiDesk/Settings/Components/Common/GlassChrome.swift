@@ -90,7 +90,8 @@ private struct GlassChrome<S: Shape>: ViewModifier {
 }
 
 /// The glass finish, a legibility decision per surface (gui.md):
-/// `.regular` under dense text, `.clear` where nothing is read.
+/// `.regular` under dense text, `.clear` where nothing is read or
+/// a Fill carries the text (#2569).
 enum GlassChromeVariant {
     case regular
     case clear
