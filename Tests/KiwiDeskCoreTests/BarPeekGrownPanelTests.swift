@@ -82,6 +82,36 @@ struct BarPeekGrownPanelTests {
         #expect(rig.peek.panel.header.isHidden)
     }
 
+    /// A list re-read in place — a focus moved while it shows —
+    /// continues: it keeps its open time, so a click past the
+    /// double-click interval still closes it.
+    @Test("A list redrawn in place keeps its open time")
+    func redrawKeepsItsOpenTime() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        clickList(rig)
+        rig.clock += 1
+        let read = rig.peek.content
+        rig.peek.content = { source, space in
+            guard let shown = read(source, space) else { return nil }
+            return BarPeekContent(
+                rows: shown.order.map {
+                    BarWindowRow(
+                        window: $0,
+                        pid: 1,
+                        app: "App",
+                        title: "Moved \($0.raw)",
+                        icon: nil
+                    )
+                }
+            )
+        }
+        rig.peek.reread()
+        #expect(rig.shownTitles == ["Moved 1", "Moved 2"])
+        clickList(rig)
+        #expect(rig.peek.panel.drawn == nil, "past the interval: closes")
+    }
+
     /// A bar list opened over another item's opens afresh, its open
     /// time its own: a click straight after it is the double-click
     /// guard's, never a close (#2063).
