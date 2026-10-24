@@ -17403,6 +17403,17 @@ the drop zone and the sticky mark have colours of their own and
 keep #1622's fade. No crossing is owed, because an absent key
 decodes 100, which is the look every file already had.
 
+Fill fade is a look key, so a bundled look sets its own (owner,
+2026-10-24, on `ui-designer`'s advice). Pill sets 0: its reference
+is an even dark capsule, and a boxed capsule that fades reads as
+unevenly lit. Sakura sets 50: its reference is an even frosted
+dock, and its 44 pt bar leaves room for a gentle gradient. Glass,
+the starter look, keeps the default 100. Taskbar, Classic and Tiler
+draw no glass, so a fade there would change nothing and they set
+none. A lower fade only raises the far end's alpha toward the Fill
+the inks were chosen against, so the contrast suites' fade-100 case
+stays the worst one.
+
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two
 "unmeasured" clear-end sentences above. With the Fill on top and
