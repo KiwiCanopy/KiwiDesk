@@ -52,10 +52,12 @@ extension AdvancedLuaGroup {
                     rowName: name
                 )
             }
+            deadWarning(binding.wrappedValue)
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(name)
         .id(binding.wrappedValue.id.uuidString)
+        .onAppear { judge(binding.wrappedValue.id) }
     }
 
     /// The name KiwiHub lists the row under: its description, else
@@ -116,6 +118,8 @@ extension AdvancedLuaGroup {
                 TextField(luaPlaceholder, text: binding.lua)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(.body, design: .monospaced))
+                    .focused($focusedLua, equals: id)
+                    .onSubmit { judge(id) }
                     .accessibilityLabel(spoken)
             }
         }

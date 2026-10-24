@@ -5,14 +5,26 @@ import Foundation
 /// on disk without a reload (#2482).
 /// A structured install keeps the profile tier it resolved over —
 /// its name and its override, nothing else — so an issue about one
-/// of its rows names the file that holds it (#2544).
+/// of its rows names the file that holds it (#2544), and the rows
+/// it could not install, so each is a Config Issue (#2574).
 enum InstalledKeybindings {
     struct ProfileTier: Sendable {
         var name: String
         let layers: KeyLayerOverride?
     }
 
-    case structured([KeyLayer], profile: ProfileTier?)
+    /// A row the install skipped: its layer, chord and why.
+    struct Skipped: Sendable, Equatable {
+        let layer: String
+        let chord: String
+        let reason: DeadShortcutReason
+    }
+
+    case structured(
+        [KeyLayer],
+        profile: ProfileTier?,
+        skipped: [Skipped]
+    )
     case lua(layers: [KeyLayer], unread: [String: [UnreadChord]])
 }
 
@@ -61,7 +73,7 @@ extension KiwiCore {
         guard keys.lua != nil, let installed = installedKeybindings
         else { return nil }
         switch installed {
-        case .structured(let layers, _):
+        case .structured(let layers, _, _):
             return LiveKeybindingSnapshot(
                 layers: layers,
                 activeLayer: keys.currentLayer,
@@ -106,11 +118,17 @@ extension KiwiCore {
     /// Follows a rename of the profile the structured install
     /// resolved over, so an issue names the file by its new name.
     func renameInstalledProfile(_ old: String, to new: String) {
-        guard case .structured(let layers, var tier?) = installedKeybindings,
+        guard
+            case .structured(let layers, var tier?, let skipped) =
+                installedKeybindings,
             tier.name == old
         else { return }
         tier.name = new
-        installedKeybindings = .structured(layers, profile: tier)
+        installedKeybindings = .structured(
+            layers,
+            profile: tier,
+            skipped: skipped
+        )
         syncDerivedIssues()
     }
 
