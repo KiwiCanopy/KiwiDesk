@@ -233,6 +233,7 @@ struct SettingsSlider: View {
                 in: Capsule(),
                 enabled: dragging,
                 variant: .clear,
+                tint: nil,
                 fallback: AnyShapeStyle(.white)
             )
             .overlay(

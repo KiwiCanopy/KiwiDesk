@@ -59,6 +59,7 @@ struct BootNoticeView: View {
             // `.regular` carries text, as the key panel does.
             enabled: model.liquidGlass,
             variant: .regular,
+            tint: nil,
             fallback: AnyShapeStyle(.regularMaterial)
         )
     }

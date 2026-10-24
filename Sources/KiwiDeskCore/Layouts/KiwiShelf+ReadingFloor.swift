@@ -1,9 +1,10 @@
-import CoreGraphics
+import AppKit
 
 /// The floor a READING surface's fade keeps (#2569 ▸ Ruling): the
-/// hover peek and the overflow mark's list fade like the bar, but
-/// their far end never drops below the share that holds their worst
-/// ink at `readingInkFloor` over a white or a black wallpaper.
+/// hover peek, the overflow mark's list, KiwiHub and the cue plates
+/// fade like the bar, but their far end never drops below the share
+/// that holds their worst ink at `readingInkFloor` over a white or a
+/// black wallpaper.
 extension KiwiShelf {
     /// Contrast a reading surface's worst ink holds at the fade's
     /// far end. Below `idleInkFloor` on purpose: that floor is for
@@ -29,23 +30,66 @@ extension KiwiShelf {
     /// holds `readingInkFloor`, or `idleInkFloor` under Increase
     /// Contrast.
     public func readingGlassFill(increaseContrast: Bool) -> GlassFill {
+        readingGlassFill(inks: readingInks, increaseContrast: increaseContrast)
+    }
+
+    /// The system label inks a SwiftUI surface draws on glass, as
+    /// macOS 26/27 resolves `.primary` and `.secondary`: white or
+    /// black at their own alphas, by the variant the glass wears.
+    static func labelInks(dark: Bool) -> [(ink: String, layer: String?)] {
+        dark
+            ? [("#FFFFFFD9", nil), ("#FFFFFF8C", nil)]
+            : [("#000000D9", nil), ("#00000080", nil)]
+    }
+
+    /// KiwiHub's and the cue plates' inks: the labels for the
+    /// variant the glass wears — dark where the Fill pins it or the
+    /// Appearance pick is dark — and KiwiHub's selection on its
+    /// hover fill.
+    func panelInks(darkPick: Bool) -> [(ink: String, layer: String?)] {
+        let fill = NSColor(kiwiHex: fillColor)
+        let pinned = fill.alphaComponent > 0 && fill.wantsLightInk
+        return Self.labelInks(dark: pinned || darkPick)
+            + [(hoverItemColor, hoverFillColor)]
+    }
+
+    /// KiwiHub's and the cue plates' Fill under "Tint KiwiHub and
+    /// plates": the shelf's fade, floored for their inks.
+    public func panelGlassFill(
+        darkPick: Bool,
+        increaseContrast: Bool
+    ) -> GlassFill {
+        readingGlassFill(
+            inks: panelInks(darkPick: darkPick),
+            increaseContrast: increaseContrast
+        )
+    }
+
+    /// The shelf's Fill and fade, floored where `inks` need it.
+    func readingGlassFill(
+        inks: [(ink: String, layer: String?)],
+        increaseContrast: Bool
+    ) -> GlassFill {
         let floor = increaseContrast ? Self.idleInkFloor : Self.readingInkFloor
         return GlassFill(
             hex: fillColor,
             fade: fillFade,
-            minShare: readingShare(holding: floor)
+            minShare: readingShare(holding: floor, inks: inks)
         )
     }
 
     /// The least share of the capped anchor at which every reading
     /// ink holds `floor`: 1 where the anchor itself cannot, 0 where
     /// the Fill does not parse.
-    func readingShare(holding floor: Double) -> CGFloat {
+    func readingShare(
+        holding floor: Double,
+        inks: [(ink: String, layer: String?)]
+    ) -> CGFloat {
         guard let rgba = DragVisual.parseHex(fillColor) else { return 0 }
         let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
         func holds(_ share: CGFloat) -> Bool {
             let ground = fill(cappedAt: anchor * share)
-            return readingInks.allSatisfy { pair in
+            return inks.allSatisfy { pair in
                 (worstContrast(pair.ink, nil, on: ground, beneath: pair.layer)
                     ?? 0) >= floor
             }

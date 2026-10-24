@@ -10,13 +10,21 @@ extension AppDelegate {
             guard let self,
                 let screen = self.core.screen(for: cue.display)
             else { return }
-            self.cuePlate.show(.desktop(cue), on: screen)
+            self.cuePlate.show(
+                .desktop(cue),
+                glass: PanelGlass(settings: self.core.tiler.settings),
+                on: screen
+            )
         }
         core.onModeCue = { [weak self] cue in
             guard let self,
                 let screen = self.core.screen(for: cue.display)
             else { return }
-            self.cuePlate.show(.mode(cue), on: screen)
+            self.cuePlate.show(
+                .mode(cue),
+                glass: PanelGlass(settings: self.core.tiler.settings),
+                on: screen
+            )
         }
         // Paid mid-switch; the plate orders in on a later main turn
         // so the switch's own focus and raise go first (#2143).
@@ -25,7 +33,11 @@ extension AppDelegate {
                 guard let self,
                     let screen = self.core.screen(for: cue.display)
                 else { return }
-                self.cuePlate.show(.space(cue), on: screen)
+                self.cuePlate.show(
+                    .space(cue),
+                    glass: PanelGlass(settings: self.core.tiler.settings),
+                    on: screen
+                )
             }
         }
     }

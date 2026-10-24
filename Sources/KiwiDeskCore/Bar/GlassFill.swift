@@ -22,3 +22,18 @@ public struct GlassFill: Sendable, Equatable {
         self.minShare = min(max(minShare, 0), 1)
     }
 }
+
+/// A Fill as SwiftUI glass draws it (`GlassTint.paint`, #2569): one
+/// sRGB colour at two alphas along a fade, and whether the glass is
+/// pinned dark. Made only by the mint, so the cap holds here too.
+public struct GlassPaint: Sendable, Equatable {
+    public let red: CGFloat
+    public let green: CGFloat
+    public let blue: CGFloat
+    public let anchorAlpha: CGFloat
+    public let farAlpha: CGFloat
+    /// The fade's ends in SwiftUI's unit space (y grows down).
+    public let start: CGPoint
+    public let end: CGPoint
+    public let pinsDark: Bool
+}

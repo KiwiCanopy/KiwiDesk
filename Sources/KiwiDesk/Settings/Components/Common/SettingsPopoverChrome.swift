@@ -10,6 +10,7 @@ extension View {
                 in: Rectangle(),
                 enabled: true,
                 variant: .regular,
+                tint: nil,
                 fallback: AnyShapeStyle(.regularMaterial)
             )
         }

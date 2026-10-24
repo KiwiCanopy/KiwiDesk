@@ -15,6 +15,8 @@ final class CuePlateModel: ObservableObject {
 
     @Published private(set) var content: Content?
     @Published var visible = false
+    /// The plate's glass, read at each show (#2569).
+    @Published var glass = PanelGlass(enabled: true, shelf: nil)
 
     static let hold: TimeInterval = 0.6
     static let fade: TimeInterval = 0.25
@@ -144,9 +146,9 @@ struct CuePlateView: View {
 
     @ViewBuilder private var plate: some View {
         switch model.content {
-        case .desktop(let cue)?: DesktopCueView(cue: cue)
-        case .mode(let cue)?: ModeCueView(cue: cue)
-        case .space(let cue)?: SpaceCueView(cue: cue)
+        case .desktop(let cue)?: DesktopCueView(cue: cue, glass: model.glass)
+        case .mode(let cue)?: ModeCueView(cue: cue, glass: model.glass)
+        case .space(let cue)?: SpaceCueView(cue: cue, glass: model.glass)
         case nil: EmptyView()
         }
     }

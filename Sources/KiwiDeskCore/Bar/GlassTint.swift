@@ -7,7 +7,7 @@ import AppKit
 /// shelf's screen edge toward the windows (#1622), or downward on a
 /// surface on no edge (#1620, #1621). The bar hover peek fades like
 /// the bar (#2569, overturning #1946's uniform tint).
-enum GlassTint {
+public enum GlassTint {
     /// Ceiling on the backdrop's alpha at the fade's ANCHOR edge
     /// — a floor on how much refraction survives, not a legibility
     /// budget. A Fill at or below it renders exactly as picked
@@ -126,6 +126,30 @@ enum GlassTint {
             return nil
         }
         return NSAppearance(named: .darkAqua)
+    }
+
+    /// The Fill as SwiftUI glass paints it (#2569): the AppKit
+    /// painter's capped ends and dark pin, the fade's points in
+    /// SwiftUI's y-down unit space; nil where `apply` paints none.
+    @MainActor
+    public static func paint(
+        _ fill: GlassFill,
+        edge: AppBarEdge
+    ) -> GlassPaint? {
+        guard let ends = rendered(fill),
+            let anchor = ends.anchor.usingColorSpace(.sRGB)
+        else { return nil }
+        let direction = fade(from: edge)
+        return GlassPaint(
+            red: anchor.redComponent,
+            green: anchor.greenComponent,
+            blue: anchor.blueComponent,
+            anchorAlpha: anchor.alphaComponent,
+            farAlpha: ends.floor.alphaComponent,
+            start: CGPoint(x: direction.start.x, y: 1 - direction.start.y),
+            end: CGPoint(x: direction.end.x, y: 1 - direction.end.y),
+            pinsDark: pinnedAppearance(fill.hex) != nil
+        )
     }
 
     /// Pins `glass` dark where there is no Fill to decide it:

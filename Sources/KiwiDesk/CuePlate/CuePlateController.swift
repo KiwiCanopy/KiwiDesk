@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 final class CuePlateController {
     private let model = CuePlateModel()
-    private var panel: NSPanel?
+    private var panel: ActiveGlassPanel?
     private var hideWork: DispatchWorkItem?
     private var orderOutWork: DispatchWorkItem?
 
@@ -23,9 +23,15 @@ final class CuePlateController {
     }
 
     /// `screen` is the one the cue's display names, resolved by
-    /// Core; whether to show at all is Core's too.
-    func show(_ content: CuePlateModel.Content, on screen: NSScreen) {
+    /// Core; whether to show at all is Core's too. `glass` is
+    /// KiwiHub's, read at the show (#2569).
+    func show(
+        _ content: CuePlateModel.Content,
+        glass: PanelGlass,
+        on screen: NSScreen
+    ) {
         orderOutWork?.cancel()
+        model.glass = glass
         model.present(
             content,
             reduceMotion: NSWorkspace.shared
@@ -33,6 +39,7 @@ final class CuePlateController {
         )
         let panel = self.panel ?? makePanel()
         self.panel = panel
+        panel.wearsActiveLook = glass.enabled && glass.wearsActiveLook
         let room = CuePlateModel.room
         panel.setFrame(
             CGRect(
@@ -68,8 +75,8 @@ final class CuePlateController {
         }
     }
 
-    private func makePanel() -> NSPanel {
-        let panel = NSPanel(
+    private func makePanel() -> ActiveGlassPanel {
+        let panel = ActiveGlassPanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,

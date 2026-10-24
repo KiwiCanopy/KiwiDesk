@@ -48,13 +48,19 @@ struct JumpPanelView: View {
             .panelContentFade(presence)
             .frame(width: width)
             .tint(SettingsTheme.accent)
-            .glassChrome(
+            .panelGlassChrome(
                 in: KeyPanelStyle.shape,
-                enabled: liquidGlass,
-                variant: .regular,
+                glass: panelGlass,
                 fallback: AnyShapeStyle(.regularMaterial)
             )
             .panelEntrance(presence)
+    }
+
+    /// The settings' panel glass, on the leaf the controller read.
+    private var panelGlass: PanelGlass {
+        var glass = PanelGlass(settings: settings)
+        glass.enabled = liquidGlass
+        return glass
     }
 
     private var side: some View {
