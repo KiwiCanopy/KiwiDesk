@@ -75,16 +75,6 @@ extension SpaceBarItemView {
             appFocused: before.holdsFocus,
             lit: leadingTarget.map { $0 === hoveredTarget } ?? false
         )
-        // A `+n` whose list is open reads as a window (#2571).
-        let open = openListTarget
-        for (badge, target) in [
-            (overflowBadge, overflowTarget), (leadingBadge, leadingTarget),
-        ] {
-            Self.showWindowSymbol(
-                on: badge,
-                open: target != nil && target === open && collapse == nil
-            )
-        }
         styleStateBadges()
     }
 

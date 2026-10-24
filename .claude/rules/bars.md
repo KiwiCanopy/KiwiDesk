@@ -953,9 +953,8 @@ Obligations:
   the panel's one point through `BarPeek.releaseDecides`
   (`AppBarGroupClickTests` ▸ `pressOnAGroupIsSpared`). Its item
   draws the open state through `BarPeek.holdsOpen`, re-read as the
-  list opens and closes (`BarPeekListAnchor`): it stays lit, and
-  only a `+n` disc swaps its count for the window symbol, a group
-  count badge keeping its number (`SpaceBarOpenListTests`,
+  list opens and closes (`BarPeekListAnchor`): it stays lit, every
+  count keeping its number (`SpaceBarOpenListTests`,
   `AppBarGroupClickTests` ▸ `groupClickOpensTheList`). The overflow
   mark reports no hover to the peek and only lights itself. Its list
   closes on the peek's own closes plus its

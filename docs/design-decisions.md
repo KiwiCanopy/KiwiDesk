@@ -15991,10 +15991,10 @@ until a close: a second click on its item, a press elsewhere, a
 pick, any key, a Desktop switch; never the pointer leaving, and
 another item's hover neither swaps nor closes it. The second
 press of the double-click that opened it keeps it, so a double
-click stays harmless (#2063). While it shows, its item stays lit
-and a `+n` disc reads as a window; a group count badge keeps its
-number, since it counts the windows rather than standing in for
-hidden ones. It takes the keyboard as the overflow list does: the
+click stays harmless (#2063). While it shows, its item stays lit,
+the one sign of it open: a `+n` keeps its number, which a window
+symbol in its place would only repeat with less to say (owner,
+device, 2026-10-24). It takes the keyboard as the overflow list does: the
 arrows walk its rows, Return picks, Escape and any other key
 close it.
 
