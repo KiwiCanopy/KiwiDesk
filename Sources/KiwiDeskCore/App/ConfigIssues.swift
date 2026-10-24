@@ -205,7 +205,9 @@ public enum DeadShortcutReason: Sendable, Equatable {
 extension KiwiCore {
     /// The interpreter's message where `lua` would not compile as a
     /// shortcut's body, else nil — nil too without a VM. Runs
-    /// nothing (#2574): Settings asks it when an edit is committed.
+    /// nothing (#2574): Settings asks it when an edit is committed,
+    /// so an error raised by a body escaping its wrapper reaches the
+    /// install's issue alone. Never run the body here to see it.
     public func shortcutLuaProblem(_ lua: String) -> String? {
         keys.lua?.compileError(body: lua)
     }

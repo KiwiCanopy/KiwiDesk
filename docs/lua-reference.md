@@ -7551,9 +7551,10 @@ sync folder's status. Each issue carries its `source` file, a
 :::unreleased
 A shortcut whose `symbol` is no SF Symbol is
 `unknown_shortcut_symbol`, with its `layer`, `chord` and `symbol`.
-A shortcut KiwiDesk could not install, so its key does nothing, is
-`dead_shortcut`, with its `layer`, `chord` and a `reason`:
-`lua_error` with the interpreter's `message`, or `invalid_chord`.
+A saved shortcut KiwiDesk could not install, so its key does
+nothing, is `dead_shortcut`, with its `layer`, `chord` and a
+`reason`: `lua_error` with the interpreter's `message`, or
+`invalid_chord`.
 :::
 
 `sync` carries the followed `folder` (`nil` when none) and a

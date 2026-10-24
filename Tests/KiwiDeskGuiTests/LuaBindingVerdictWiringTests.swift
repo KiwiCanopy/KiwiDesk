@@ -32,6 +32,13 @@ struct LuaBindingVerdictWiringTests {
                     + "ifletclosed{judge(closed.id)}}"
             ) == 1
         )
+        // A keyboard Save leaves the field focused.
+        #expect(
+            group.occurrences(
+                of: ".onChange(of:model.isDirty){wasDirty,dirtyin"
+                    + "ifwasDirty,!dirty,letid=focusedLua{judge(id)}}"
+            ) == 1
+        )
         let row = try flat("AdvancedLuaGroup+Row.swift")
         #expect(
             row.occurrences(of: ".onAppear{judge(binding.wrappedValue.id)}")
@@ -66,7 +73,7 @@ struct LuaBindingVerdictWiringTests {
 
     /// The call sites above plus the declaration.
     private let expectedJudges = [
-        "AdvancedLuaGroup.swift": 2,
+        "AdvancedLuaGroup.swift": 3,
         "AdvancedLuaGroup+Row.swift": 2,
         "AdvancedLuaGroup+Verdict.swift": 1,
     ]

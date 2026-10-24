@@ -42,6 +42,10 @@ struct AdvancedLuaGroup: View {
         .onChange(of: editing) { closed, _ in
             if let closed { judge(closed.id) }
         }
+        // A Save from the keyboard leaves the field focused.
+        .onChange(of: model.isDirty) { wasDirty, dirty in
+            if wasDirty, !dirty, let id = focusedLua { judge(id) }
+        }
     }
 
     func record(

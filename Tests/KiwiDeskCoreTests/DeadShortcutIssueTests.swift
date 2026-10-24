@@ -95,6 +95,26 @@ struct DeadShortcutIssueTests {
         #expect(dead(core).isEmpty)
     }
 
+    /// A chord another row of the layer installs still fires, and a
+    /// chord two failing rows share is one issue.
+    @Test("Only a chord nothing installed is dead, once")
+    func duplicateChords() throws {
+        let core = try core()
+        let bad = KeyBinding(combo: "alt+h", lua: "test ")
+        var config = GuiConfig()
+        config.layers = [layer(bad, Self.good)]
+        try core.saveGuiConfig(config)
+        #expect(dead(core).isEmpty)
+        config.layers = [layer(Self.good, bad)]
+        try core.saveGuiConfig(config)
+        #expect(dead(core).isEmpty)
+        config.layers = [
+            layer(bad, KeyBinding(combo: "alt+h", lua: "also bad "))
+        ]
+        try core.saveGuiConfig(config)
+        #expect(dead(core).count == 1)
+    }
+
     /// The issue is derived, so a republish that hands in only the
     /// load's own issues keeps it.
     @Test("The issue survives a derived-issue republish")
@@ -103,6 +123,8 @@ struct DeadShortcutIssueTests {
         var config = GuiConfig()
         config.layers = [layer(KeyBinding(combo: "alt+j", lua: "test "))]
         try core.saveGuiConfig(config)
+        core.syncDerivedIssues()
+        #expect(dead(core).count == 1)
         core.setConfigIssues([])
         #expect(dead(core).count == 1)
     }

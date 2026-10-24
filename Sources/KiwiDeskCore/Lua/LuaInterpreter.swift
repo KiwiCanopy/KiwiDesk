@@ -6,13 +6,6 @@ public enum LuaError: Error, Equatable {
     /// Syntax or runtime failure, including sandbox timeouts.
     case runtime(String)
 
-    /// The interpreter's own text, English by rule (#2574).
-    public var message: String {
-        switch self {
-        case .initializationFailed: "Lua VM unavailable"
-        case .runtime(let text): text
-        }
-    }
 }
 
 /// Boxed Swift closure callable from Lua.
@@ -117,8 +110,8 @@ public final class LuaInterpreter {
         guard let state else {
             return .failure(.initializationFailed)
         }
-        let src = "return function()\n\(body)\nend"
-        guard luaL_loadstring(state, src) == SHIM_LUA_OK else {
+        guard luaL_loadstring(state, Self.wrapped(body)) == SHIM_LUA_OK
+        else {
             return .failure(.runtime(popError(state)))
         }
         // A crafted body can ESCAPE the wrapper
@@ -141,15 +134,21 @@ public final class LuaInterpreter {
     /// The interpreter's message where `body` does not compile as
     /// `makeFunction` wraps it, else nil. Compiles only and runs
     /// nothing, so a body escaping the wrapper executes no code
-    /// (#2574).
+    /// (#2574) — and so cannot see an error that escape raises.
     public func compileError(body: String) -> String? {
         guard let state else { return nil }
-        let src = "return function()\n\(body)\nend"
-        guard luaL_loadstring(state, src) == SHIM_LUA_OK else {
+        guard luaL_loadstring(state, Self.wrapped(body)) == SHIM_LUA_OK
+        else {
             return popError(state)
         }
         shim_lua_pop(state, 1)
         return nil
+    }
+
+    /// A binding body as one chunk returning its function — the one
+    /// shape `makeFunction` and `compileError` both load.
+    private static func wrapped(_ body: String) -> String {
+        "return function()\n\(body)\nend"
     }
 
     /// Calls a Lua function previously captured as a registry reference

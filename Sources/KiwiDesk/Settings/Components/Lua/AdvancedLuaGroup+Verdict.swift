@@ -35,8 +35,8 @@ extension AdvancedLuaGroup {
                 Text(
                     L(
                         "shortcuts.lua.dead",
-                        "This shortcut does nothing: its Lua doesn't "
-                            + "compile. %1$@",
+                        "This shortcut does nothing: its Lua has an "
+                            + "error. %1$@",
                         problem
                     )
                 )

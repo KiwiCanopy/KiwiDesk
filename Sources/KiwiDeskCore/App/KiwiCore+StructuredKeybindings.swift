@@ -93,12 +93,10 @@ extension KiwiCore {
     ) {
         var entries:
             [KeyCombo: (index: Int, binding: KeyBinding, ref: Int32)] = [:]
-        var skipped: [InstalledKeybindings.Skipped] = []
-        func skip(_ binding: KeyBinding, _ reason: DeadShortcutReason) {
-            skipped.append(
-                .init(layer: layer.name, chord: binding.combo, reason: reason)
-            )
-        }
+        // Keyed by chord, so a chord skipped twice is one issue and
+        // the last row wins, as it does in `entries`.
+        var skipped: [String: (combo: KeyCombo?, reason: DeadShortcutReason)] =
+            [:]
 
         for (index, binding) in layer.bindings.enumerated()
         where !binding.combo.isEmpty {
@@ -108,7 +106,7 @@ extension KiwiCore {
                     "structured: invalid combo "
                         + "'\(binding.combo)'"
                 )
-                skip(binding, .invalidChord)
+                skipped[binding.combo] = (nil, .invalidChord)
                 continue
             }
             switch lua.makeFunction(body: binding.lua) {
@@ -126,7 +124,10 @@ extension KiwiCore {
                     "structured: bind skipped "
                         + "[\(binding.combo)]: \(error)"
                 )
-                skip(binding, .luaError(error.message))
+                // A VM that never started is `luaVMUnavailable`'s.
+                if case .runtime(let message) = error {
+                    skipped[binding.combo] = (combo, .luaError(message))
+                }
             }
         }
 
@@ -140,7 +141,18 @@ extension KiwiCore {
                 }
             ),
             bindings: ordered.map(\.value.binding),
-            skipped: skipped
+            // A chord another row installed still fires (#2574).
+            skipped: skipped.filter {
+                $0.value.combo.flatMap { entries[$0] } == nil
+            }
+            .map {
+                .init(
+                    layer: layer.name,
+                    chord: $0.key,
+                    reason: $0.value.reason
+                )
+            }
+            .sorted { $0.chord < $1.chord }
         )
     }
 }

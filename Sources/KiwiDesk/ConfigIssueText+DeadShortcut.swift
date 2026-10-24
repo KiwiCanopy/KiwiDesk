@@ -17,7 +17,7 @@ extension ConfigIssueText {
                 return L(
                     "config_issues.dead_shortcut.lua_layer",
                     "The shortcut %1$@ in the “%3$@” layer does nothing: "
-                        + "its Lua doesn't compile. %2$@",
+                        + "its Lua has an error. %2$@",
                     keys,
                     message,
                     layer
@@ -25,8 +25,8 @@ extension ConfigIssueText {
             }
             return L(
                 "config_issues.dead_shortcut.lua",
-                "The shortcut %1$@ does nothing: its Lua doesn't "
-                    + "compile. %2$@",
+                "The shortcut %1$@ does nothing: its Lua has an error. "
+                    + "%2$@",
                 keys,
                 message
             )
