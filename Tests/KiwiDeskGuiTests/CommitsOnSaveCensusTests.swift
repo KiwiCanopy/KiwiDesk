@@ -10,6 +10,15 @@ struct CommitsOnSaveCensusTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
     private static let home = "CommitsOnSave.swift"
 
+    /// Files with a focusable text field that commit through their
+    /// own confirm, never on blur: searches and add rows.
+    private static let exempt: [String: String] = [
+        "JumpPanelView.swift": "KiwiHub's search, no draft",
+        "FontFamilyPicker.swift": "a searchable picker; Return picks",
+        "AppPickerButton.swift": "an app search; Return adds",
+        "LayerStripEditor.swift": "the add-layer field; Return adds",
+    ]
+
     private func flat(_ path: String) throws -> String {
         try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(path)
@@ -34,20 +43,39 @@ struct CommitsOnSaveCensusTests {
         return files
     }
 
-    /// A blur commit spelled by hand is a field the request misses.
+    /// The subject is the field, not a spelling: a file with a
+    /// focus state and a text field joins the modifier or names
+    /// why not.
+    @Test("Every focusable text field joins or is exempt")
+    func everyFieldJoins() throws {
+        let files = try guiFiles()
+        let fields = files.filter {
+            $0.text.contains("@FocusState") && $0.text.contains("TextField(")
+        }
+        let joined = fields.filter { $0.text.contains(".commitsOnSave($") }
+        #expect(joined.count >= 6)
+        for field in fields where !field.text.contains(".commitsOnSave($") {
+            #expect(
+                Self.exempt[field.name] != nil,
+                "\(field.name) has a text field outside commitsOnSave"
+            )
+        }
+        for name in Self.exempt.keys {
+            #expect(
+                fields.contains { $0.name == name },
+                "\(name) is exempt but has no focusable text field"
+            )
+        }
+    }
+
+    /// A blur commit spelled by hand beside the modifier.
     @Test("No field commits on blur beside the one modifier")
     func noHandBlurCommit() throws {
-        let files = try guiFiles()
-        let joined = files.filter { $0.text.contains(".commitsOnSave($") }
-        #expect(joined.count >= 6)
-        for file in files where file.name != Self.home {
+        for file in try guiFiles() where file.name != Self.home {
             #expect(
                 file.text.occurrences(of: ".onSubmit(commit)") == 0,
                 "\(file.name) commits on Return beside commitsOnSave"
             )
-            // A blur commit: `if !<flag> { commit() }`. A key
-            // handler calling `commit()` (a picker's Return) is no
-            // blur commit and stays out.
             #expect(
                 Self.blurCommits(in: file.text) == 0,
                 "\(file.name) commits on blur beside commitsOnSave"
@@ -74,19 +102,32 @@ struct CommitsOnSaveCensusTests {
 
     @Test("Each draft reader asks for the commit first")
     func readersAskFirst() throws {
-        let dir = "Sources/KiwiDesk/Settings/"
+        let dir = "Sources/KiwiDesk/"
         for (file, head) in [
             (
-                "SettingsModel+SaveAction.swift",
-                "funcperformPrimarySave(){commitFocusedField()"
+                "Settings/SettingsModel+SaveAction.swift",
+                "funcperformPrimarySave(){commitFocusedField()saveCommitted()}"
             ),
             (
-                "SettingsModel+Leave.swift",
+                "Settings/SettingsModel+Leave.swift",
                 "commitFocusedField()guardisDirtyelse{returnproceed()}"
             ),
             (
-                "SettingsModel+Sync.swift",
+                "Settings/SettingsModel+Sync.swift",
                 "->SyncRefusal?{commitFocusedField()ifisDirty{"
+            ),
+            (
+                "Settings/SettingsModel+Discard.swift",
+                "commitFocusedField()guardisDirtyelse{returnaction()}"
+            ),
+            (
+                "Settings/SettingsWindowController.swift",
+                "model.commitFocusedField()guardmodel.isDirtyelse{returntrue}"
+            ),
+            (
+                "AppDelegate+Quit.swift",
+                "dashboard.commitFocusedField()"
+                    + "guarddashboard.quitAsksAboutDraftelse{"
             ),
         ] {
             #expect(
@@ -94,13 +135,23 @@ struct CommitsOnSaveCensusTests {
                 "\(file) reads the draft before the commit"
             )
         }
-        let footer = try flat(dir + "SettingsFooter+Slots.swift")
+    }
+
+    /// ⌘S rides the root, which is mounted whatever the draft, and
+    /// nowhere else.
+    @Test("⌘S is the root's, once")
+    func keyboardSaveOnTheRoot() throws {
+        let view = try flat("Sources/KiwiDesk/Settings/SettingsView.swift")
         #expect(
-            footer.occurrences(
-                of: "Button(\"\"){model.saveFromKeyboard()}"
-                    + ".keyboardShortcut(\"s\")"
-            ) == 1
+            view.occurrences(
+                of: ".background(KeyboardSaveButton(model:model))"
+            )
+                == 1
         )
-        #expect(footer.occurrences(of: ".keyboardShortcut(\"s\")") == 1)
+        let all = try guiFiles()
+        let shortcuts = all.map {
+            $0.text.occurrences(of: ".keyboardShortcut(\"s\")")
+        }
+        #expect(shortcuts.reduce(0, +) == 1)
     }
 }

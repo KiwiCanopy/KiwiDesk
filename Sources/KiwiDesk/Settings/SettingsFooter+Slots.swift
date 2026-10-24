@@ -73,18 +73,6 @@ extension SettingsFooter {
             .kiwiProminentButton()
             .disabled(!model.primarySaveEnabled)
             .help(model.primarySaveBlockedReason ?? "")
-            .background(keyboardSave)
-    }
-
-    /// ⌘S lives on a button that is never greyed: a value still
-    /// being typed can be the one edit, and a disabled button does
-    /// not hear its shortcut (#2584).
-    private var keyboardSave: some View {
-        Button("") { model.saveFromKeyboard() }
-            .keyboardShortcut("s")
-            .opacity(0)
-            .frame(width: 0, height: 0)
-            .accessibilityHidden(true)
     }
 
     /// Pre-fills unique name in new profile sheet using `isProfileNameFree`.

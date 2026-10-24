@@ -25,6 +25,7 @@ extension AppDelegate: QuitQuestionHost {
             return .terminateNow
         }
         if dashboard.takeQuitAnswer() { return .terminateNow }
+        dashboard.commitFocusedField()
         guard dashboard.quitAsksAboutDraft else { return .terminateNow }
         dashboard.askBeforeQuit {
             DispatchQueue.main.async { NSApp.terminate(nil) }

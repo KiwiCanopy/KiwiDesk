@@ -25,14 +25,19 @@ struct SaveCommitsFocusedFieldTests {
 
     private func typed() throws -> Typed {
         let model = makeTestModel()
-        let row = StepperRow(
-            label: "Delay",
-            value: Binding(
-                get: { model.config.settings.mouse.hoverFocusDelayMS },
-                set: { model.config.settings.mouse.hoverFocusDelayMS = $0 }
-            ),
-            in: 0...5000
-        )
+        // The field and ⌘S as the Settings root mounts them.
+        let row = VStack {
+            StepperRow(
+                label: "Delay",
+                value: Binding(
+                    get: { model.config.settings.mouse.hoverFocusDelayMS },
+                    set: { model.config.settings.mouse.hoverFocusDelayMS = $0 }
+                ),
+                in: 0...5000
+            )
+            KeyboardSaveButton(model: model)
+        }
+        .environment(\.settingsCommitScope, ObjectIdentifier(model))
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 400, height: 80),
             styleMask: [.titled],
@@ -76,31 +81,50 @@ struct SaveCommitsFocusedFieldTests {
         #expect(typed.model.config.settings.mouse.hoverFocusDelayMS == 1234)
     }
 
-    /// A typed value alone is an unsaved edit, so a quit asks.
-    @Test("A leave with only a typed value asks first")
-    func leaveAsks() throws {
+    /// A typed value alone is an unsaved edit, so closing asks —
+    /// through the window's own gate, ahead of its dirty read.
+    @Test("Closing with only a typed value asks first")
+    func closeAsks() throws {
         let typed = try typed()
         defer { typed.window.orderOut(nil) }
-        var proceeded = false
-        typed.model.leavingDraft(
-            .quit,
-            proceed: { proceeded = true },
-            cancel: {}
-        )
-        #expect(!proceeded)
+        let controller = SettingsWindowController(model: typed.model)
+        #expect(!controller.windowShouldClose(typed.window))
         #expect(typed.model.isDirty)
     }
 
-    /// ⌘S commits first, then runs the Save the commit made due:
-    /// with no profile live that is Save as New's naming prompt.
+    /// ⌘S reaches the root's button as a key event, commits, then
+    /// runs the Save: with no profile live, Save as New's prompt.
     @Test("⌘S commits the typed value, then saves")
     func keyboardSaveCommitsAndSaves() throws {
         let typed = try typed()
         defer { typed.window.orderOut(nil) }
-        #expect(typed.model.primarySaveAction == .saveAsNewProfile)
-        typed.model.saveFromKeyboard()
+        let event = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: .command,
+                timestamp: 0,
+                windowNumber: typed.window.windowNumber,
+                context: nil,
+                characters: "s",
+                charactersIgnoringModifiers: "s",
+                isARepeat: false,
+                keyCode: 1
+            )
+        )
+        #expect(typed.window.performKeyEquivalent(with: event))
         #expect(typed.model.config.settings.mouse.hoverFocusDelayMS == 1234)
         #expect(typed.model.newProfileNamingRequested)
+    }
+
+    /// Another model's request commits nothing here: a field
+    /// answers its own window's Save.
+    @Test("A request from another model is ignored")
+    func scopedToItsModel() throws {
+        let typed = try typed()
+        defer { typed.window.orderOut(nil) }
+        makeTestModel().commitFocusedField()
+        #expect(typed.model.config.settings.mouse.hoverFocusDelayMS != 1234)
     }
 
     @Test("The commit leaves the caret where it was")

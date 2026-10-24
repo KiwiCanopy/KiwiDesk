@@ -87,7 +87,7 @@ extension SettingsModel {
         commitFocusedField()
         if isDirty {
             guard syncSaveBlockedReason == nil else { return nil }
-            performPrimarySave()
+            saveCommitted()
             guard !isDirty else { return nil }
         }
         do {

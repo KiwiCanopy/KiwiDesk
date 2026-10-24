@@ -56,6 +56,10 @@ struct SettingsView: View {
         // ruled full kiwi, 2026-08-04); above the `editingLua`
         // branch so both arms carry it.
         .tint(SettingsTheme.accent)
+        // ⌘S and the fields' commit scope, on the root so they
+        // hold with the footer gone (#2584).
+        .background(KeyboardSaveButton(model: model))
+        .environment(\.settingsCommitScope, ObjectIdentifier(model))
         // About (#1536) is hosted by the shell, whose identity
         // outlives Home's reflow (`SheetPresentationSeamTests`).
         .environment(\.openAbout) { aboutRequest = AboutRequest() }

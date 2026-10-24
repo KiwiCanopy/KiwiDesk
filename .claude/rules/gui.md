@@ -1987,11 +1987,14 @@ being a static state it draws either way.
 - **A field that keeps its typing local commits through the one
   `commitsOnSave`** (#2584) — Return, losing focus, and a commit
   request, which `commitFocusedField()` posts and the focused field
-  answers before the post returns. A reader of the draft that a
-  value still being typed must reach — a Save, a leave, a copy to
-  the sync folder — asks for the commit first, and ⌘S lives on a
-  button never greyed, since a typed value can be the one edit
-  (`CommitsOnSaveCensusTests`, `SaveCommitsFocusedFieldTests`).
+  answers before the post returns; a field with a focus state and
+  a text field that commits only through its own confirm is named
+  in that census's exemptions. A reader of the draft that a value
+  still being typed must reach — a Save, the quit and close gates,
+  the discard gate, a copy to the sync folder — asks for the commit
+  first, once per turn, and ⌘S lives on the Settings root, mounted
+  and enabled whatever the draft, since a typed value can be the
+  one edit (`CommitsOnSaveCensusTests`, `SaveCommitsFocusedFieldTests`).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view
   removed under the pointer (a link that deletes itself, a row
   rebuilt by rename) never delivers the balancing
