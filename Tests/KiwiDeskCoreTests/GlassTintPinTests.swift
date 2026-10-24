@@ -45,7 +45,7 @@ struct GlassTintPinTests {
             backdrop,
             in: glass,
             cornerRadius: 4,
-            hex: hex,
+            fill: GlassFill(hex: hex),
             edge: .top
         )
         return glass.appearance?.name

@@ -31,7 +31,7 @@ extension AppBarOverlay {
                 tint: boxTints[i],
                 at: frames[i],
                 cornerRadius: radius,
-                hex: style.fillColor,
+                fill: style.glassFill,
                 edge: style.edge,
                 visible: !itemViews[i].isHidden && !gliding,
                 animated: animated,

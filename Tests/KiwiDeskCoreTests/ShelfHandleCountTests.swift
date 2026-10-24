@@ -29,7 +29,7 @@ struct ShelfHandleCountTests {
             mark: .line,
             frame: edge.isHorizontal ? Self.mark : Self.side,
             edge: edge,
-            fill: "#336699",
+            fill: GlassFill(hex: "#336699"),
             currentInk: "#000000",
             ink: "#AAAAAA",
             emptyInk: "#555555",

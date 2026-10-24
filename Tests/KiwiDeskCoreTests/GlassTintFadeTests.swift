@@ -60,7 +60,7 @@ struct GlassTintFadeTests {
             backdrop,
             in: glass,
             cornerRadius: 4,
-            hex: "#14201CB3",
+            fill: GlassFill(hex: "#14201CB3"),
             edge: edge
         )
         let gradient = try #require(backdrop.gradient)
@@ -218,7 +218,7 @@ struct GlassTintFadeTests {
             backdrop,
             in: glass,
             cornerRadius: 4,
-            hex: "#14201CB3"
+            fill: GlassFill(hex: "#14201CB3")
         )
         try #require(
             backdrop.gradient?.colors != nil,

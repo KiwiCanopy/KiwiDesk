@@ -150,6 +150,7 @@ struct ShelfLookApplyTests {
         source.kiwishelf.fontWeight = 700
         source.kiwishelf.iconSource = .appFont
         source.kiwishelf.dimFactor = 0.7
+        source.kiwishelf.fillFade = 40
         source.spaceBarStyle.activeIndicator = .edgeMark
         source.spaceBarStyle.glyphGap = 2
         source.spaceBarStyle.activeDimFactor = 0.5

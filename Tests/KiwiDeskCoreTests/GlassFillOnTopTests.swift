@@ -36,7 +36,7 @@ struct GlassFillOnTopTests {
             backdrop,
             in: glass,
             cornerRadius: 4,
-            hex: hex,
+            fill: GlassFill(hex: hex),
             edge: .top
         )
     }

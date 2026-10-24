@@ -127,7 +127,7 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
                 tint,
                 in: glass,
                 cornerRadius: radius,
-                hex: shelfLook.fillColor,
+                fill: shelfLook.glassFill,
                 edge: .top
             )
             return

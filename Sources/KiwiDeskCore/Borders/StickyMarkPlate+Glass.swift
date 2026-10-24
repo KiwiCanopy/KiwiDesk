@@ -46,7 +46,7 @@ extension StickyMarkPlate {
             tint,
             in: glass,
             cornerRadius: 0,
-            hex: markHex,
+            fill: GlassFill(hex: markHex),
             edge: .top
         )
     }

@@ -48,13 +48,22 @@ enum GlassTint {
     /// alpha, keeps a dark Fill's glass dark behind the ink.
     static let maxAlpha: CGFloat = 0.65
 
-    /// The fade's far end as a share of the anchor's alpha: a hint
-    /// of the Fill across the whole surface, never fully clear
-    /// (owner ruling 2026-09-24, #1622).
+    /// The fade's far end as a share of the anchor's alpha at the
+    /// strongest fade: a hint of the Fill across the whole surface,
+    /// never fully clear (owner ruling 2026-09-24, #1622).
     static let floorShare: CGFloat = 1.0 / 8
 
+    /// The far end's share of the anchor at `fade` percent: 100 is
+    /// `floorShare`, 0 the anchor itself (#2569).
+    nonisolated static func farShare(fade: CGFloat) -> CGFloat {
+        let strength =
+            KiwiShelf.clampFillFade(fade)
+            / KiwiShelf.fillFadeRange.upperBound
+        return 1 - strength * (1 - floorShare)
+    }
+
     /// The two ends a stored Fill renders as on glass — the anchor
-    /// clamped to `maxAlpha`, the floor `floorShare` of it — `nil`
+    /// clamped to `maxAlpha`, the floor `farShare` of it — `nil`
     /// where the Fill is transparent or the OS draws no glass.
     ///
     /// **Private, and that is the guard.** Every surface reaches a
@@ -64,20 +73,21 @@ enum GlassTint {
     /// set `tintColor` that way.
     @MainActor
     private static func rendered(
-        _ hex: String
+        _ fill: GlassFill
     ) -> (anchor: NSColor, floor: NSColor)? {
+        let hex = fill.hex
         // The one drawing authority, not a second `#available`
         // beside it: nothing here touches a macOS 26 API, so the
         // check is policy rather than the compiler's (#1374).
         guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
             return nil
         }
-        let fill = NSColor(kiwiHex: hex)
-        guard fill.alphaComponent > 0 else { return nil }
-        let anchor = min(fill.alphaComponent, maxAlpha)
+        let color = NSColor(kiwiHex: hex)
+        guard color.alphaComponent > 0 else { return nil }
+        let anchor = min(color.alphaComponent, maxAlpha)
         return (
-            fill.withAlphaComponent(anchor),
-            fill.withAlphaComponent(anchor * floorShare)
+            color.withAlphaComponent(anchor),
+            color.withAlphaComponent(anchor * farShare(fade: fill.fade))
         )
     }
 
@@ -142,7 +152,7 @@ enum GlassTint {
     /// (#1622), clear where the Fill reaches no colour, and pins
     /// the glass's variant from the same Fill (#1308). It takes the
     /// Fill rather than a colour so the cap cannot be walked around
-    /// at a call site (#1297).
+    /// at a call site (#1297); `fill.fade` sets how far it fades.
     /// An EMPTY Fill is no colour — clear glass, nothing pinned —
     /// while any other string resolves through `NSColor(kiwiHex:)`.
     @MainActor
@@ -150,14 +160,14 @@ enum GlassTint {
         _ backdrop: GlassBackdrop,
         in glass: NSView,
         cornerRadius: CGFloat,
-        hex: String,
+        fill: GlassFill,
         edge: AppBarEdge
     ) {
         paint(
             backdrop,
             in: glass,
             cornerRadius: cornerRadius,
-            hex: hex,
+            fill: fill,
             fadeFrom: edge
         )
     }
@@ -172,13 +182,13 @@ enum GlassTint {
         _ backdrop: GlassBackdrop,
         in glass: NSView,
         cornerRadius: CGFloat,
-        hex: String
+        fill: GlassFill
     ) {
         paint(
             backdrop,
             in: glass,
             cornerRadius: cornerRadius,
-            hex: hex,
+            fill: fill,
             fadeFrom: nil
         )
     }
@@ -192,14 +202,14 @@ enum GlassTint {
         _ backdrop: GlassBackdrop,
         in glass: NSView,
         cornerRadius: CGFloat,
-        hex: String,
+        fill: GlassFill,
         fadeFrom edge: AppBarEdge?
     ) {
-        glass.appearance = pinnedAppearance(hex)
+        glass.appearance = pinnedAppearance(fill.hex)
         GlassPlate.setBackdrop(glass, backdrop)
         guard let gradient = backdrop.gradient else { return }
         gradient.cornerRadius = cornerRadius
-        guard let ends = rendered(hex) else {
+        guard let ends = rendered(fill) else {
             gradient.colors = nil
             return
         }

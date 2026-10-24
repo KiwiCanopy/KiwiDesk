@@ -186,7 +186,7 @@ struct ReduceTransparencyTests {
                 backdrop,
                 in: glass,
                 cornerRadius: 4,
-                hex: "#000000B3",
+                fill: GlassFill(hex: "#000000B3"),
                 edge: .top
             )
             #expect(backdrop.gradient?.colors == nil)
@@ -197,7 +197,7 @@ struct ReduceTransparencyTests {
                 backdrop,
                 in: glass,
                 cornerRadius: 4,
-                hex: "#000000B3",
+                fill: GlassFill(hex: "#000000B3"),
                 edge: .top
             )
             #expect(backdrop.gradient?.colors != nil)

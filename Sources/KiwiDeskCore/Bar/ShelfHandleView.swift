@@ -53,7 +53,7 @@ final class ShelfHandleView: NSView {
         )
         dots.mark = mark.offsetBy(dx: -dotsRest.minX, dy: -dotsRest.minY)
         dots.spec = spec
-        plate.layer?.backgroundColor = NSColor(kiwiHex: spec.fill).cgColor
+        plate.layer?.backgroundColor = NSColor(kiwiHex: spec.fill.hex).cgColor
         rim.ink = .init(
             hex: spec.highlight,
             width: spec.rimWidth,
@@ -88,7 +88,7 @@ final class ShelfHandleView: NSView {
                         tint: box.tint,
                         at: frame,
                         cornerRadius: capsule,
-                        hex: spec.fill,
+                        fill: spec.fill,
                         edge: spec.edge,
                         visible: true,
                         animated: glides,

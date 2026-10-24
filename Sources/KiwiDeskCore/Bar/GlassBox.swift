@@ -100,14 +100,14 @@ enum GlassBox {
     /// and writes the pair to each size it takes
     /// (`GlassBoxHost.setFrameSize`). A fresh host lands rather
     /// than gliding from nowhere. `visible` false hides the whole
-    /// box, which still takes its slot; `hex` is the Fill its tint
+    /// box, which still takes its slot; `fill` is the Fill its tint
     /// paints.
     static func place(
         _ glass: NSView,
         tint: GlassBackdrop,
         at frame: CGRect,
         cornerRadius: CGFloat,
-        hex: String,
+        fill: GlassFill,
         edge: AppBarEdge,
         visible: Bool,
         animated: Bool,
@@ -128,7 +128,7 @@ enum GlassBox {
             tint,
             in: glass,
             cornerRadius: cornerRadius,
-            hex: hex,
+            fill: fill,
             edge: edge
         )
         let travels = animated && host.frame != .zero

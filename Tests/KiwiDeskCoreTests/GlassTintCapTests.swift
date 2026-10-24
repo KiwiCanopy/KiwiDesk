@@ -51,7 +51,7 @@ struct GlassTintCapTests {
             backdrop,
             in: glass,
             cornerRadius: 4,
-            hex: hex,
+            fill: GlassFill(hex: hex),
             edge: .top
         )
         guard let colors = backdrop.gradient?.colors as? [CGColor],

@@ -30,7 +30,7 @@ extension SpaceBarOverlay {
                 tint: boxTints[i],
                 at: frames[i],
                 cornerRadius: radius,
-                hex: style.fillColor,
+                fill: style.glassFill,
                 edge: style.edge,
                 visible: !itemViews[i].isHidden,
                 animated: animated,
@@ -86,7 +86,7 @@ extension SpaceBarOverlay {
             tint,
             in: glass,
             cornerRadius: radius,
-            hex: style.fillColor,
+            fill: style.glassFill,
             edge: style.edge
         )
     }

@@ -34,7 +34,7 @@ extension ShelfOverlay {
                 tint: tint,
                 at: frame,
                 cornerRadius: radius,
-                hex: shelf.fillColor,
+                fill: shelf.glassFill,
                 edge: edge,
                 visible: true,
                 animated: animated,

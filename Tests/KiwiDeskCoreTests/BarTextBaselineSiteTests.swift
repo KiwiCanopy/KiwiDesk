@@ -186,7 +186,7 @@ struct BarTextBaselineSiteTests {
             mark: .line,
             frame: CGRect(x: 0, y: 0, width: 36, height: 8),
             edge: .top,
-            fill: "#336699",
+            fill: GlassFill(hex: "#336699"),
             currentInk: "#000000",
             ink: "#AAAAAA",
             emptyInk: "#555555",

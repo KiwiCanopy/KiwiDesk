@@ -27,6 +27,7 @@ enum KiwiShelfCommandSetting {
     case dimFactor(CGFloat)
     case revealTimeout(Double)
     case revealStyle(KiwiShelf.RevealStyle)
+    case fillFade(CGFloat)
     case color(WritableKeyPath<KiwiShelf, String>, String)
 
     /// Parses a setter's field (the verb minus `set_`) and args.
@@ -112,6 +113,11 @@ enum KiwiShelfCommandSetting {
                 return .failure("expected boolean")
             }
             return .success(.border(flag))
+        case "fill_fade":
+            guard let value = args.first?.numberValue,
+                value.isFinite
+            else { return .failure("expected a percentage") }
+            return .success(.fillFade(value))
         case "reveal_timeout":
             guard let value = args.first?.numberValue,
                 value.isFinite
@@ -209,6 +215,8 @@ enum KiwiShelfCommandSetting {
             shelf.dimFactor = AppBarStyle.clampDim(value)
         case .revealTimeout(let value):
             shelf.revealTimeout = KiwiShelf.clampRevealTimeout(value)
+        case .fillFade(let value):
+            shelf.fillFade = KiwiShelf.clampFillFade(value)
         case .color(let path, let hex): shelf[keyPath: path] = hex
         }
     }

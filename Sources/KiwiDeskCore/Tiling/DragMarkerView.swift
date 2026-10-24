@@ -141,7 +141,7 @@ public final class DragMarkerView: NSView {
                 tint,
                 in: plate,
                 cornerRadius: radius,
-                hex: style.fill ? style.fillColor : "",
+                fill: GlassFill(hex: style.fill ? style.fillColor : ""),
                 edge: .top
             )
             return

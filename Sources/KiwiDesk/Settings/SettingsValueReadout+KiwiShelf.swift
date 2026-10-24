@@ -171,6 +171,12 @@ extension SettingsValueReadout {
                 spaceBarSeconds(Int(o.revealTimeout * 1000)),
                 spaceBarSeconds(Int(n.revealTimeout * 1000))
             )
+        case .fillFade:
+            return spaceBarRow(
+                census,
+                percent(Double(o.fillFade) / 100),
+                percent(Double(n.fillFade) / 100)
+            )
         case .fillColor, .borderColor, .itemColor, .activeItemColor,
             .highlightColor, .hoverFillColor, .hoverItemColor,
             .groupBadgeColor, .groupBadgeTextColor:

@@ -250,7 +250,7 @@ final class BarPeekPanel {
                 tint,
                 in: glass,
                 cornerRadius: radius,
-                hex: shelf.fillColor
+                fill: shelf.glassFill
             )
             return
         }

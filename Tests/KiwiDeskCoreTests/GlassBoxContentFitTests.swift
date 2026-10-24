@@ -34,7 +34,7 @@ struct GlassBoxContentFitTests {
             tint: tint,
             at: frame,
             cornerRadius: 8,
-            hex: "#202020B3",
+            fill: GlassFill(hex: "#202020B3"),
             edge: .top,
             visible: true,
             animated: true,

@@ -27,7 +27,8 @@ struct ShelfHandleSpec: Equatable {
     let frame: CGRect
     /// The edge its shelf hides on.
     let edge: AppBarEdge
-    let fill: String
+    /// The shelf's Fill, its fade with it (#2569).
+    let fill: GlassFill
     /// The bar's own state inks (`SpaceBarItemView.stateColor`):
     /// the current Space's, an idle one's, an empty one's.
     let currentInk: String
