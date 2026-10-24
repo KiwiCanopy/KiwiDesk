@@ -171,5 +171,18 @@ struct CommitsOnSaveCensusTests {
             $0.text.occurrences(of: ".keyboardShortcut(\"s\")")
         }
         #expect(shortcuts.reduce(0, +) == 1)
+        // A hidden chord button is never a Tab stop: ⌘S and ⌘K.
+        let save = try flat("Sources/KiwiDesk/Settings/" + Self.home)
+        #expect(
+            save.occurrences(of: ".keyboardShortcut(\"s\").focusable(false)")
+                == 1
+        )
+        let search = try flat("Sources/KiwiDesk/Settings/HeaderSearch.swift")
+        #expect(
+            search.occurrences(
+                of: ".keyboardShortcut(\"k\",modifiers:.command)"
+                    + ".focusable(false)"
+            ) == 1
+        )
     }
 }

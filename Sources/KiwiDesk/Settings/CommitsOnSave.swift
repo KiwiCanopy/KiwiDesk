@@ -67,6 +67,8 @@ struct KeyboardSaveButton: View {
     var body: some View {
         Button("") { model.saveFromKeyboard() }
             .keyboardShortcut("s")
+            // Reached by its chord, never Tab.
+            .focusable(false)
             .opacity(0)
             .frame(width: 0, height: 0)
             .accessibilityHidden(true)
