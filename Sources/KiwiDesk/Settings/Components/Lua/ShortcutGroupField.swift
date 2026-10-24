@@ -23,8 +23,7 @@ struct ShortcutGroupField: View {
         HStack(spacing: 4) {
             TextField(customTitle, text: $text)
                 .textFieldStyle(.roundedBorder)
-                .focused($editing)
-                .onSubmit(commit)
+                .commitsOnSave($editing, commit)
                 .onExitCommand(perform: revert)
                 .accessibilityLabel(axLabel)
             NativePullDown(header: builtInHeader, items: menuItems) {
@@ -39,9 +38,6 @@ struct ShortcutGroupField: View {
         .onAppear(perform: revert)
         .onChange(of: group) { _, _ in
             if !editing { revert() }
-        }
-        .onChange(of: editing) { _, isEditing in
-            if !isEditing { commit() }
         }
     }
 

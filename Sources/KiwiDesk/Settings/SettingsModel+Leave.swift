@@ -25,6 +25,7 @@ extension SettingsModel {
         proceed: @escaping @MainActor () -> Void,
         cancel: @escaping @MainActor () -> Void
     ) {
+        commitFocusedField()
         guard isDirty else { return proceed() }
         finishLeave(proceeding: false)
         draftLeave = DraftLeave(

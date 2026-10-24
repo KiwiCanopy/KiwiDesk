@@ -1984,6 +1984,14 @@ being a static state it draws either way.
 
 ## SwiftUI traps
 
+- **A field that keeps its typing local commits through the one
+  `commitsOnSave`** (#2584) — Return, losing focus, and a commit
+  request, which `commitFocusedField()` posts and the focused field
+  answers before the post returns. A reader of the draft that a
+  value still being typed must reach — a Save, a leave, a copy to
+  the sync folder — asks for the commit first, and ⌘S lives on a
+  button never greyed, since a typed value can be the one edit
+  (`CommitsOnSaveCensusTests`, `SaveCommitsFocusedFieldTests`).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view
   removed under the pointer (a link that deletes itself, a row
   rebuilt by rename) never delivers the balancing

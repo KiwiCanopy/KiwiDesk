@@ -103,11 +103,7 @@ struct SlotCountRow: View {
         .multilineTextAlignment(.trailing)
         .monospacedDigit()
         .textFieldStyle(.roundedBorder)
-        .focused($focused)
-        .onSubmit(commit)
-        .onChange(of: focused) { _, now in
-            if !now { commit() }
-        }
+        .commitsOnSave($focused, commit)
     }
 
     private var spokenValue: String {
