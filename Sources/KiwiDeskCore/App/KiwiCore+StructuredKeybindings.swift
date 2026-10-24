@@ -93,10 +93,11 @@ extension KiwiCore {
     ) {
         var entries:
             [KeyCombo: (index: Int, binding: KeyBinding, ref: Int32)] = [:]
-        // Keyed by chord, so a chord skipped twice is one issue and
-        // the last row wins, as it does in `entries`.
-        var skipped: [String: (combo: KeyCombo?, reason: DeadShortcutReason)] =
+        // One issue per key, the last row winning as it does in
+        // `entries`; a chord that does not parse is keyed as typed.
+        var failed: [KeyCombo: (chord: String, reason: DeadShortcutReason)] =
             [:]
+        var unparsed: [String: DeadShortcutReason] = [:]
 
         for (index, binding) in layer.bindings.enumerated()
         where !binding.combo.isEmpty {
@@ -106,7 +107,7 @@ extension KiwiCore {
                     "structured: invalid combo "
                         + "'\(binding.combo)'"
                 )
-                skipped[binding.combo] = (nil, .invalidChord)
+                unparsed[binding.combo] = .invalidChord
                 continue
             }
             switch lua.makeFunction(body: binding.lua) {
@@ -126,7 +127,7 @@ extension KiwiCore {
                 )
                 // A VM that never started is `luaVMUnavailable`'s.
                 if case .runtime(let message) = error {
-                    skipped[binding.combo] = (combo, .luaError(message))
+                    failed[combo] = (binding.combo, .luaError(message))
                 }
             }
         }
@@ -141,18 +142,15 @@ extension KiwiCore {
                 }
             ),
             bindings: ordered.map(\.value.binding),
-            // A chord another row installed still fires (#2574).
-            skipped: skipped.filter {
-                $0.value.combo.flatMap { entries[$0] } == nil
-            }
-            .map {
-                .init(
-                    layer: layer.name,
-                    chord: $0.key,
-                    reason: $0.value.reason
-                )
-            }
-            .sorted { $0.chord < $1.chord }
+            // A key another row installed still fires (#2574).
+            skipped:
+                (failed.filter { entries[$0.key] == nil }.values
+                .map { ($0.chord, $0.reason) }
+                + unparsed.map { ($0.key, $0.value) })
+                .map {
+                    .init(layer: layer.name, chord: $0.0, reason: $0.1)
+                }
+                .sorted { $0.chord < $1.chord }
         )
     }
 }

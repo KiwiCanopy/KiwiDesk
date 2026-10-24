@@ -32,11 +32,18 @@ struct LuaBindingVerdictWiringTests {
                     + "ifletclosed{judge(closed.id)}}"
             ) == 1
         )
-        // A keyboard Save leaves the field focused.
+        // ⌘S ends the field's edit before the Save, so the
+        // focus-leave judge above covers a keyboard Save.
+        let footer = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/SettingsFooter+Slots.swift"
+            )
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
         #expect(
-            group.occurrences(
-                of: ".onChange(of:model.isDirty){wasDirty,dirtyin"
-                    + "ifwasDirty,!dirty,letid=focusedLua{judge(id)}}"
+            footer.occurrences(
+                of: "NSApp.keyWindow?.makeFirstResponder(nil)"
+                    + "model.performPrimarySave()"
             ) == 1
         )
         let row = try flat("AdvancedLuaGroup+Row.swift")
@@ -89,7 +96,7 @@ struct LuaBindingVerdictWiringTests {
 
     /// The call sites above plus the declaration.
     private let expectedJudges = [
-        "AdvancedLuaGroup.swift": 3,
+        "AdvancedLuaGroup.swift": 2,
         "AdvancedLuaGroup+Row.swift": 2,
         "AdvancedLuaGroup+Verdict.swift": 1,
     ]

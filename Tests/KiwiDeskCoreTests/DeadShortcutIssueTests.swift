@@ -165,6 +165,12 @@ struct DeadShortcutIssueTests {
         ]
         try core.saveGuiConfig(config)
         #expect(dead(core).count == 1)
+        // One key spelled two ways is still one issue.
+        config.layers = [
+            layer(bad, KeyBinding(combo: "option+h", lua: "also bad "))
+        ]
+        try core.saveGuiConfig(config)
+        #expect(dead(core).count == 1)
     }
 
     /// The issue is derived, so a republish that hands in only the
