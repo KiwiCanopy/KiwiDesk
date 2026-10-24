@@ -70,7 +70,6 @@ extension SettingsFooter {
     /// (#1198, gui.md).
     var primarySlot: some View {
         Button(model.primarySaveLabel) { model.performPrimarySave() }
-            .keyboardShortcut("s")
             .kiwiProminentButton()
             .disabled(!model.primarySaveEnabled)
             .help(model.primarySaveBlockedReason ?? "")

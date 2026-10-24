@@ -97,11 +97,7 @@ struct ColorSwatch: View {
                 .frame(width: SettingsMetrics.colorHexColumn)
                 .font(.system(.caption, design: .monospaced))
                 .textFieldStyle(.roundedBorder)
-                .focused($focused)
-                .onSubmit(commit)
-                .onChange(of: focused) { _, now in
-                    if !now { commit() }
-                }
+                .commitsOnSave($focused, commit)
                 .help(
                     L(
                         "color_field.hex.help",

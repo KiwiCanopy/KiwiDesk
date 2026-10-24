@@ -85,11 +85,7 @@ struct StepperRow: View {
                 .multilineTextAlignment(.trailing)
                 .monospacedDigit()
                 .textFieldStyle(.roundedBorder)
-                .focused($focused)
-                .onSubmit(commit)
-                .onChange(of: focused) { _, now in
-                    if !now { commit() }
-                }
+                .commitsOnSave($focused, commit)
                 .onChange(of: text) { _, now in
                     guard liveCommit, let parsed = Int(now)
                     else { return }
