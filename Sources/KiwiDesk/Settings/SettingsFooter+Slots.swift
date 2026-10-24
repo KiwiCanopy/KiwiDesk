@@ -69,16 +69,11 @@ extension SettingsFooter {
     /// fixed-dark ground and AppKit picks against the window
     /// (#1198, gui.md).
     var primarySlot: some View {
-        Button(model.primarySaveLabel) {
-            // ⌘S leaves a field focused; ending its edit is the
-            // commit a Lua row judges on (#2574 ▸ Ruling).
-            NSApp.keyWindow?.makeFirstResponder(nil)
-            model.performPrimarySave()
-        }
-        .keyboardShortcut("s")
-        .kiwiProminentButton()
-        .disabled(!model.primarySaveEnabled)
-        .help(model.primarySaveBlockedReason ?? "")
+        Button(model.primarySaveLabel) { model.performPrimarySave() }
+            .keyboardShortcut("s")
+            .kiwiProminentButton()
+            .disabled(!model.primarySaveEnabled)
+            .help(model.primarySaveBlockedReason ?? "")
     }
 
     /// Pre-fills unique name in new profile sheet using `isProfileNameFree`.

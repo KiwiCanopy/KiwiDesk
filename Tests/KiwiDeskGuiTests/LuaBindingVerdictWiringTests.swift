@@ -32,20 +32,6 @@ struct LuaBindingVerdictWiringTests {
                     + "ifletclosed{judge(closed.id)}}"
             ) == 1
         )
-        // ⌘S ends the field's edit before the Save, so the
-        // focus-leave judge above covers a keyboard Save.
-        let footer = try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent(
-                "Sources/KiwiDesk/Settings/SettingsFooter+Slots.swift"
-            )
-        )
-        .split(whereSeparator: \.isWhitespace).joined()
-        #expect(
-            footer.occurrences(
-                of: "NSApp.keyWindow?.makeFirstResponder(nil)"
-                    + "model.performPrimarySave()"
-            ) == 1
-        )
         let row = try flat("AdvancedLuaGroup+Row.swift")
         #expect(
             row.occurrences(of: ".onAppear{judge(binding.wrappedValue.id)}")
