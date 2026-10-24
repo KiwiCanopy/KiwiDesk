@@ -24,23 +24,30 @@ struct JumpLayoutTile: View {
     let onActivate: () -> Void
     let onHover: () -> Void
     let onHoverEnd: () -> Void
+    @Environment(\.kiwiHubPaint) private var paint
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
     var body: some View {
-        Button(action: onActivate) { content }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .accessibilityLabel(
-                LayoutPickText.spoken(mode, current: isCurrent)
+        Button(action: onActivate) {
+            content.kiwiHubRowInk(
+                paint,
+                selected: isSelected,
+                lifted: isLifted
             )
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-            // Spoken whether or not ⌘ is held: a VoiceOver user
-            // explores without holding it.
-            .accessibilityHint(chordHint)
-            .onContinuousHover { phase in
-                if case .active = phase { onHover() } else { onHoverEnd() }
-            }
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .accessibilityLabel(
+            LayoutPickText.spoken(mode, current: isCurrent)
+        )
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        // Spoken whether or not ⌘ is held: a VoiceOver user
+        // explores without holding it.
+        .accessibilityHint(chordHint)
+        .onContinuousHover { phase in
+            if case .active = phase { onHover() } else { onHoverEnd() }
+        }
     }
 
     /// The tile proper on its selection fill, then the chord line
@@ -69,8 +76,10 @@ struct JumpLayoutTile: View {
             .font(.caption)
             .foregroundStyle(
                 isSelected
-                    ? AnyShapeStyle(SettingsTheme.accentInk)
-                    : AnyShapeStyle(.primary)
+                    ? AnyShapeStyle(paint.selectionInk)
+                    : isLifted && paint.hoverInk != nil
+                        ? AnyShapeStyle(paint.hoverInk ?? .primary)
+                        : AnyShapeStyle(.primary)
             )
         }
         .padding(.vertical, 7)
@@ -102,9 +111,9 @@ struct JumpLayoutTile: View {
     /// The schematic's inks on the accent fill.
     private var onFill: SchematicPalette {
         SchematicPalette(
-            accent: SettingsTheme.accentInk,
-            ink: SettingsTheme.accentInk,
-            base: SettingsTheme.accent
+            accent: paint.selectionInk,
+            ink: paint.selectionInk,
+            base: paint.selection
         )
     }
 
@@ -114,13 +123,13 @@ struct JumpLayoutTile: View {
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
-            .fill(SettingsTheme.accent)
+            .fill(paint.selection)
         } else if isLifted {
             RoundedRectangle(
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
-            .fill(SettingsTheme.chipRest)
+            .fill(paint.rowHover)
         }
     }
 

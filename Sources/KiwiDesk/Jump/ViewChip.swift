@@ -7,6 +7,7 @@ import SwiftUI
 /// chip reserves, so holding ⌘ never reflows the line; at rest the
 /// name sits centred in the same width (ruling 5).
 struct ViewChip: View {
+    @Environment(\.kiwiHubPaint) private var paint
     let item: ViewPickList.Item
     let line: ViewPickList.Line
     let number: Int?
@@ -27,17 +28,23 @@ struct ViewChip: View {
     static let font = Font.system(size: 12)
 
     var body: some View {
-        Button(action: onActivate) { content }
-            .buttonStyle(.plain)
-            .focusable(false)
-            .accessibilityLabel(
-                ViewPickText.spoken(item, on: line, visionOff: visionOff)
+        Button(action: onActivate) {
+            content.kiwiHubRowInk(
+                paint,
+                selected: isSelected,
+                lifted: isLifted
             )
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-            .accessibilityHint(hint)
-            .onContinuousHover { phase in
-                if case .active = phase { onHover() } else { onHoverEnd() }
-            }
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .accessibilityLabel(
+            ViewPickText.spoken(item, on: line, visionOff: visionOff)
+        )
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityHint(hint)
+        .onContinuousHover { phase in
+            if case .active = phase { onHover() } else { onHoverEnd() }
+        }
     }
 
     private var hint: String { ViewPickText.hint(for: item, number: number) }
@@ -97,23 +104,26 @@ struct ViewChip: View {
     }
 
     private var ink: AnyShapeStyle {
-        if isSelected { return AnyShapeStyle(SettingsTheme.accentInk) }
+        if isSelected { return AnyShapeStyle(paint.selectionInk) }
+        if isLifted, item.isApplicable, let ink = paint.hoverInk {
+            return AnyShapeStyle(ink)
+        }
         return item.isApplicable
             ? AnyShapeStyle(.primary) : AnyShapeStyle(.tertiary)
     }
 
     private var secondaryInk: AnyShapeStyle {
         isSelected
-            ? AnyShapeStyle(SettingsTheme.accentInk.opacity(0.75))
+            ? AnyShapeStyle(paint.selectionInkSecondary)
             : AnyShapeStyle(.secondary)
     }
 
     @ViewBuilder private var ground: some View {
         if isSelected {
-            Capsule().fill(SettingsTheme.accent)
+            Capsule().fill(paint.selection)
         } else {
             Capsule()
-                .fill(isLifted ? SettingsTheme.chipHover : .clear)
+                .fill(isLifted ? paint.chipHover : .clear)
                 .overlay(Capsule().strokeBorder(.separator))
         }
     }

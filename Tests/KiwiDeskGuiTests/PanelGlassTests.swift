@@ -81,4 +81,46 @@ struct PanelGlassTests {
             ).count - 1 == 3
         )
     }
+
+    /// KiwiHub's selection and hover take the shelf's colours under
+    /// the toggle and keep kiwi green off it (#2569 ▸ Ruling).
+    @Test("KiwiHub's selection follows the toggle", arguments: [true, false])
+    func selectionFollowsTheToggle(tinted: Bool) {
+        var settings = TilingSettings()
+        settings.kiwishelf.tintHubAndPlates = tinted
+        let paint = KiwiHubPaint.of(settings)
+        #expect(paint.tinted == tinted)
+        // A selected item's every level takes its own ink only
+        // under the toggle (#2569).
+        #expect((paint.rowInk(selected: true, lifted: false) != nil) == tinted)
+        #expect(paint.rowInk(selected: false, lifted: false) == nil)
+    }
+
+    @Test("Rows, chips and tiles paint through KiwiHub's paint")
+    func rowsReadThePaint() throws {
+        for path in [
+            "Jump/JumpRowView.swift", "Jump/ViewChip.swift",
+            "Jump/JumpLayoutTile.swift",
+        ] {
+            let body = try Self.source(path)
+            #expect(body.contains("@Environment(\\.kiwiHubPaint)"), "\(path)")
+            #expect(body.contains("paint.selection)"), "\(path)")
+            // Squashed: the call wraps across lines.
+            #expect(
+                body.filter { !$0.isWhitespace }.contains(
+                    "kiwiHubRowInk(paint,selected:isSelected,lifted:isLifted)"
+                ),
+                "\(path)"
+            )
+            for token in ["SettingsTheme.accent", "SettingsTheme.chip"] {
+                #expect(!body.contains(token), "\(path): \(token)")
+            }
+        }
+        let panel = try Self.source("Jump/JumpPanelView.swift")
+        #expect(
+            panel.contains(
+                ".environment(\\.kiwiHubPaint, KiwiHubPaint.of(settings))"
+            )
+        )
+    }
 }

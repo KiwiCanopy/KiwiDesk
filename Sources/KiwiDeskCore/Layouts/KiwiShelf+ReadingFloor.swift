@@ -33,33 +33,23 @@ extension KiwiShelf {
         readingGlassFill(inks: readingInks, increaseContrast: increaseContrast)
     }
 
-    /// The system label inks a SwiftUI surface draws on glass, as
-    /// macOS 26/27 resolves `.primary` and `.secondary`: white or
-    /// black at their own alphas, by the variant the glass wears.
-    static func labelInks(dark: Bool) -> [(ink: String, layer: String?)] {
-        dark
-            ? [("#FFFFFFD9", nil), ("#FFFFFF8C", nil)]
-            : [("#000000D9", nil), ("#00000080", nil)]
-    }
-
-    /// KiwiHub's and the cue plates' inks: the labels for the
-    /// scheme the Fill pins — the Appearance pick where it pins
-    /// none — and KiwiHub's selection on its hover fill.
-    @MainActor
-    func panelInks(darkPick: Bool) -> [(ink: String, layer: String?)] {
-        let dark = GlassTint.pin(fillColor).map { $0 == .dark } ?? darkPick
-        return Self.labelInks(dark: dark) + [(hoverItemColor, hoverFillColor)]
+    /// KiwiHub's and the cue plates' inks: the look's three
+    /// (`panelInk`) and KiwiHub's hover row on its fill.
+    func panelInks(
+        increaseContrast: Bool
+    ) -> [(ink: String, layer: String?)] {
+        let ink = panelInk(increaseContrast: increaseContrast)
+        return [
+            (ink.primary, nil), (ink.secondary, nil), (ink.tertiary, nil),
+            (hoverItemColor, hoverFillColor),
+        ]
     }
 
     /// KiwiHub's and the cue plates' Fill under "Tint KiwiHub and
     /// plates": the shelf's fade, floored for their inks.
-    @MainActor
-    public func panelGlassFill(
-        darkPick: Bool,
-        increaseContrast: Bool
-    ) -> GlassFill {
+    public func panelGlassFill(increaseContrast: Bool) -> GlassFill {
         readingGlassFill(
-            inks: panelInks(darkPick: darkPick),
+            inks: panelInks(increaseContrast: increaseContrast),
             increaseContrast: increaseContrast
         )
     }

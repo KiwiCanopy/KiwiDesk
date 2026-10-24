@@ -33,7 +33,8 @@ struct PanelGlass: Equatable {
 extension View {
     /// `glassChrome(in:)` as KiwiHub and the cue plates draw it:
     /// the Fill faded top to bottom, floored for their inks under
-    /// the Appearance pick and Increase Contrast read here.
+    /// Increase Contrast read here, and the look's three inks as the
+    /// hierarchical styles beneath it.
     func panelGlassChrome(
         in shape: some Shape,
         glass: PanelGlass,
@@ -46,28 +47,52 @@ extension View {
 }
 
 private struct PanelGlassChrome<S: Shape>: ViewModifier {
-    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.colorSchemeContrast) private var contrast
 
     let shape: S
     let glass: PanelGlass
     let fallback: AnyShapeStyle
 
+    private var increased: Bool { contrast == .increased }
+
     func body(content: Content) -> some View {
-        content.glassChrome(
-            in: shape,
-            enabled: glass.enabled,
-            variant: glass.variant,
-            tint: glass.shelf.flatMap {
-                GlassTint.paint(
-                    $0.panelGlassFill(
-                        darkPick: colorScheme == .dark,
-                        increaseContrast: contrast == .increased
-                    ),
-                    edge: .top
-                )
-            },
-            fallback: fallback
-        )
+        content
+            .foregroundStyle(
+                glass.shelf.map {
+                    Color(
+                        kiwiHex: $0.panelInk(increaseContrast: increased)
+                            .primary
+                    )
+                }
+                    ?? Color.primary,
+                glass.shelf.map {
+                    Color(
+                        kiwiHex: $0.panelInk(increaseContrast: increased)
+                            .secondary
+                    )
+                }
+                    ?? Color.secondary,
+                glass.shelf.map {
+                    Color(
+                        kiwiHex: $0.panelInk(increaseContrast: increased)
+                            .tertiary
+                    )
+                }
+                    ?? Color(nsColor: .tertiaryLabelColor)
+            )
+            .glassChrome(
+                in: shape,
+                enabled: glass.enabled,
+                variant: glass.variant,
+                tint: glass.shelf.flatMap {
+                    GlassTint.paint(
+                        $0.panelGlassFill(
+                            increaseContrast: contrast == .increased
+                        ),
+                        edge: .top
+                    )
+                },
+                fallback: fallback
+            )
     }
 }

@@ -24,6 +24,7 @@ struct JumpRowView: View {
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.kiwiHubPaint) private var paint
 
     /// The key panels' row (#2229 ▸ shared panel style): a
     /// `.body` line with room above and below.
@@ -34,15 +35,15 @@ struct JumpRowView: View {
     static let spacing: CGFloat = 10
 
     private var showsNumber: Bool { commandHeld && number != nil }
-    /// The accent fill is fixed in both modes, so its inks are.
+    /// The selection's fill is fixed in both modes, so its inks are.
     private var titleInk: AnyShapeStyle {
-        isSelected
-            ? AnyShapeStyle(SettingsTheme.accentInk)
-            : AnyShapeStyle(.primary)
+        if isSelected { return AnyShapeStyle(paint.selectionInk) }
+        if isLifted, let ink = paint.hoverInk { return AnyShapeStyle(ink) }
+        return AnyShapeStyle(.primary)
     }
     private var secondaryInk: AnyShapeStyle {
         isSelected
-            ? AnyShapeStyle(SettingsTheme.accentInkSecondary)
+            ? AnyShapeStyle(paint.selectionInkSecondary)
             : AnyShapeStyle(.secondary)
     }
     /// ⇧ alone moves the selected row (⇧↩); ⇧⌘ reaches every
@@ -56,7 +57,11 @@ struct JumpRowView: View {
         Button {
             onActivate(NSEvent.modifierFlags.contains(.shift))
         } label: {
-            content
+            content.kiwiHubRowInk(
+                paint,
+                selected: isSelected,
+                lifted: isLifted
+            )
         }
         .buttonStyle(.plain)
         // The panel's keys move the list and the field keeps the
@@ -135,13 +140,13 @@ struct JumpRowView: View {
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
-            .fill(SettingsTheme.accent)
+            .fill(paint.selection)
         } else if isLifted {
             RoundedRectangle(
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
-            .fill(SettingsTheme.chipRest)
+            .fill(paint.rowHover)
         }
     }
 }

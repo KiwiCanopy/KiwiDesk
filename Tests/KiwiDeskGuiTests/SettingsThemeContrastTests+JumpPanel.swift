@@ -102,13 +102,27 @@ extension SettingsThemeContrastTests {
                 encoding: .utf8
             )
         )
-        // The selection's accent, and the hover lift (#2365).
+        // The selection's fill, and the hover lift (#2365), both
+        // through KiwiHub's paint (#2569), whose defaults are the
+        // measured tokens.
         #expect(source.occurrences(of: ".fill(") == 2)
-        #expect(
-            source.occurrences(of: ".fill(SettingsTheme.accent)") == 1
-        )
-        #expect(
-            source.occurrences(of: ".fill(SettingsTheme.chipRest)") == 1
+        #expect(source.occurrences(of: ".fill(paint.selection)") == 1)
+        #expect(source.occurrences(of: ".fill(paint.rowHover)") == 1)
+        let paint = try Self.hubPaint()
+        #expect(paint.contains("var selection = SettingsTheme.accent\n"))
+        #expect(paint.contains("var rowHover = SettingsTheme.chipRest\n"))
+    }
+
+    /// `KiwiHubPaint`'s source, comments stripped.
+    private static func hubPaint() throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/KiwiHubPaint.swift"
+                    ),
+                encoding: .utf8
+            )
         )
     }
 
@@ -125,7 +139,14 @@ extension SettingsThemeContrastTests {
                 encoding: .utf8
             )
         )
-        #expect(source.contains("SettingsTheme.accentInk)"))
-        #expect(source.contains("SettingsTheme.accentInkSecondary)"))
+        #expect(source.contains("paint.selectionInk)"))
+        #expect(source.contains("paint.selectionInkSecondary)"))
+        let paint = try Self.hubPaint()
+        #expect(paint.contains("var selectionInk = SettingsTheme.accentInk\n"))
+        #expect(
+            paint.contains(
+                "var selectionInkSecondary = SettingsTheme.accentInkSecondary"
+            )
+        )
     }
 }

@@ -63,37 +63,44 @@ struct GlassPaintTests {
         )
     }
 
-    /// The panels' inks follow the pin, whatever the pick: a light
-    /// Fill reads dark labels, a dark Fill white ones.
-    @Test("The panel inks follow the pin", arguments: [false, true])
-    func panelInksFollowThePin(darkPick: Bool) {
+    /// KiwiHub and the cue plates draw the look's own inks on its
+    /// Fill (#2569 ▸ Ruling), whatever the Appearance pick.
+    @Test("The panel inks are the look's")
+    func panelInksAreTheLooks() {
         var shelf = KiwiShelf()
-        shelf.fillColor = "#F2F2F7B3"
-        #expect(shelf.panelInks(darkPick: darkPick).first?.ink == "#000000D9")
-        shelf.fillColor = "#14201CB3"
-        #expect(shelf.panelInks(darkPick: darkPick).first?.ink == "#FFFFFFD9")
+        shelf.itemColor = "#FF9F43"
+        let ink = shelf.panelInk(increaseContrast: false)
+        #expect(ink.primary == "#FF9F43")
+        #expect(ink.secondary == shelf.peekHeaderColor)
+        #expect(ink.tertiary == shelf.idleItemColor)
+        #expect(
+            shelf.panelInks(increaseContrast: false).map(\.ink).prefix(3)
+                == [ink.primary, ink.secondary, ink.tertiary]
+        )
+        // Increase Contrast lifts the dim level to the secondary ink.
+        #expect(
+            shelf.panelInk(increaseContrast: true).tertiary
+                == shelf.peekHeaderColor
+        )
     }
 
-    /// KiwiHub's and the cues' inks — the system labels and
-    /// KiwiHub's selection on the hover fill — hold the reading
-    /// floor at the strongest fade (#2569 ▸ Ruling).
-    @Test("KiwiHub's inks hold the reading floor", arguments: [false, true])
-    func hubInksHoldTheFloor(darkPick: Bool) throws {
+    /// KiwiHub's and the cues' inks — the look's three and its
+    /// hover pair — hold the reading floor at the strongest fade
+    /// (#2569 ▸ Ruling).
+    @Test("KiwiHub's inks hold the reading floor")
+    func hubInksHoldTheFloor() throws {
         for palette in PaletteCatalog.bundled() {
             var settings = TilingSettings()
             palette.apply(to: &settings)
             var shelf = settings.kiwishelf
             shelf.fillFade = 100
-            let fill = shelf.panelGlassFill(
-                darkPick: darkPick,
-                increaseContrast: false
-            )
+            let fill = shelf.panelGlassFill(increaseContrast: false)
             let rgba = try #require(DragVisual.parseHex(shelf.fillColor))
             let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
             let share = max(GlassTint.farShare(fade: 100), fill.minShare)
             let ground = shelf.fill(cappedAt: anchor * share)
-            let inks = shelf.panelInks(darkPick: darkPick)
-            try #require(inks.count == 3)
+            let inks = shelf.panelInks(increaseContrast: false)
+            try #require(inks.count == 4)
             for (ink, layer) in inks {
                 let value = try #require(
                     shelf.worstContrast(ink, nil, on: ground, beneath: layer)
